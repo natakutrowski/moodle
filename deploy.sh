@@ -6,9 +6,9 @@ REMOTE_USER="zvgrfmv"
 REMOTE_HOST="ssh.cluster100.hosting.ovh.net"
 REMOTE_DIR="/home/zvgrfmv/www/moodle"
 REMOTE_MOODLEDATA_DIR="/home/zvgrfmv/www/moodledata"
-LOG_DIR="/home/zvgrfmv/www/logs"
+LOG_DIR="/Applications/MAMP/logs"
 LOCAL_MOODLEDATA_DIR="/Applications/MAMP/moodledata"
-BRANCH="main"
+BRANCH="campusFR"
 
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 LOG_FILE="${LOG_DIR}/deploy_${TIMESTAMP}.log"
@@ -29,7 +29,7 @@ git commit -m "$1" 2>&1 | tee -a $LOG_FILE
 git push origin $BRANCH 2>&1 | tee -a $LOG_FILE
 
 # 2. Vérification de la connexion SSH
-if ssh -q -o BatchMode=yes ${REMOTE_USER}@${REMOTE_HOST} exit; then
+if ssh -q -o BatchMode=yes ${REMOTE_USER}@${REMOTE_HOST} -p 22 exit; then
   echo "Connexion SSH réussie." | tee -a $LOG_FILE
 else
   echo "Erreur : Impossible de se connecter au serveur OVH via SSH." | tee -a $LOG_FILE
