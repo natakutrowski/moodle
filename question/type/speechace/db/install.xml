@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="question/type/speechace/db" VERSION="20171223" COMMENT="XMLDB file for Moodle question/type/speechace"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="qtype_speechace_opts" COMMENT="Extra options for speechace questions.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="questionid"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Foreign key linking to the question table." PREVIOUS="id" NEXT="responseformat"/>
+        <FIELD NAME="scoringinfo" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" COMMENT="Information used by software to automatically grade the question" PREVIOUS="questionid"/>
+        <FIELD NAME="showanswer" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="always" SEQUENCE="false" COMMENT="When to show answer" PREVIOUS="scoringinfo" NEXT="showresult"/>
+        <FIELD NAME="showresult" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="immediately" SEQUENCE="false" COMMENT="When to show result" PREVIOUS="showanswer" NEXT="dialect"/>
+        <FIELD NAME="dialect" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="Default Dialect can be changed from admin settings" PREVIOUS="showresult" NEXT="showexpertaudio"/>
+        <FIELD NAME="showexpertaudio" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="When to show the expert audio reference" PREVIOUS="dialect" NEXT=""/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="questionid"/>
+        <KEY NAME="questionid" TYPE="foreign-unique" FIELDS="questionid" REFTABLE="question" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

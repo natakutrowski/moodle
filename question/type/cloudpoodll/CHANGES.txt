@@ -1,0 +1,79 @@
+Change List
+=========
+Version 1.0.23 (Build 2024100700)
+Fixes for PHP 8.2 and 8.3
+
+Version 1.0.22 (Build 2024092500)
+Added Vietnamese
+
+Version 1.0.21 (Build 2024052200)
+Fix for issue when giving a comment/grade if grader info has been set in question settings (fails on M4.4)
+
+Version 1.0.20 (Build 2024032400)
+- Added more transcription languages
+
+Version 1.0.19 (Build 2024030300)
+- Added a recording log and an indication that upload has been completed
+
+Version 1.0.18 (Build 2024013102)
+- Added the ability to show or hide a transcript from teacher or student
+
+Version 1.0.17 (Build 2023081500)
+- Added a default setting for SafeSave
+
+Version 1.0.16 (Build 2023041500)
+- Added support for RTL in Hebrew / Arabic and Farsi transcripts
+
+Version 1.0.15 (Build 2023022600)
+- fixed oversized video recorder
+
+Version 1.0.14 (Build 2022100700)
+- removed unneeded lang strings
+
+Version 1.0.13 (Build 2022060500)
+- Changed AMD build steps
+- Change free trial jump link
+
+Version 1.0.12 (Build 2022033000)
+- Added premature leaving check (for quizzes with time limits) to safe save
+
+Version 1.0.11 (Build 2022030100)
+- forced video rec on iOS to get new code from cloudpoodll
+
+Version 1.0.10 (Build 2021122200)
+- added credential fetching
+
+Version 1.0.9 (Build 2021062700)
+- Added Screen Recording
+
+Version 1.0.8 (Build 2021052000)
+- Added Bahrain and Capetown
+
+Version 1.0.7(Build 2021022700)
+-CSS tweaks for responsive recorders on old browsers
+
+Version 1.0.5(Build 2020110401)
+-show grader info on the grade page
+-implement safesave - disable submit button if not uploaded yet
+
+Version 1.0.4(Build 2020101700)
+-removed unneeded "empty" message if no transcript
+-added event for external js to listen to (for use in safequizsave block)
+
+ Version 1.0.3(Build 2020061600)
+ -settings tweaks
+
+Version 1.0.2(Build 2020021100)
+-added languages(arabic, chinese, portuguese, japanese, tamil, Telugu, dutch, farsi, wales english, ireland english, scotland english, russian, turkish, malay, indonesian,hebrew, swiss german)
+-added user tagging
+
+Version 1.0.1(Build 2019112100)
+-Added more time options
+-Better API cred error reporting
+-Fixed broken en-GB transcription setting
+-fixed styles in transcript container
+
+
+Version 1.0.0(Build 2019050700)
+-First release
+

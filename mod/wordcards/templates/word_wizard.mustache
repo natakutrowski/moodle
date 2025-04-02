@@ -1,0 +1,48 @@
+
+<div class="mod_wordcards_ww_cont" >
+    <label for="ww_langdef">{{#str}}ww_langdef, mod_wordcards {{/str}}</label>
+    <select id="{{uniqid}}_ww_langdef" name="ww_langdef">
+        {{#langdefs}}
+            <option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+        {{/langdefs}}
+    </select><br>
+    <textarea id="{{uniqid}}_ww_words" placeholder="{{#str}}ww_words, mod_wordcards {{/str}}" name="ww_words" rows="4" cols="50"></textarea><br>
+    <a class="btn btn-primary ww_words_fetch_btn" id="{{uniqid}}_fetchbtn">{{#str}}ww_words_fetch, mod_wordcards{{/str}}</a>
+    <div id="{{uniqid}}_resultscont" class="mod_wordcards_ww_results"></div>
+</div>
+
+{{^element.frozen}}
+    {{#js}}
+        require(['jquery','core/log','core/templates','mod_wordcards/dictlookup'],function($,log,templates,  dictlookup) {
+
+            //get words from text area and fetch definitions
+            var resultscont = $("#{{uniqid}}_resultscont");
+            dictlookup.init('{{cmid}}','{{modid}}',resultscont);
+
+            $("#{{uniqid}}_fetchbtn").on("click", async function() {
+
+                //clear any old results
+                resultscont.empty();
+
+
+                var langs = ['ar','id','zh','zh_tw','ja','ko','pt','es','th','vi','fr','rus'];
+                var langdef = $("#{{uniqid}}_ww_langdef").val();
+                var allwords = $("#{{uniqid}}_ww_words").val();
+                if (allwords.trim() === '') {
+                    return;
+                }
+                //if the langdef is other then we can not fetch definitions then we can not get definitions
+                if (langdef.trim() === 'zz') {
+                    return;
+                }
+
+                //replace any new lines with commas
+                var allsearchwords = allwords.replace(/[\n]/g,',');
+                dictlookup.getwords(allsearchwords,'{{langterm}}',langdef);
+
+            });
+
+
+        });//end of require
+    {{/js}}
+{{/element.frozen}}

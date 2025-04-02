@@ -1,0 +1,1072 @@
+.que.speechace h1 {
+    font-size: 27px;
+    line-height: 38px;
+    color: #3c3c3c;
+    font-weight: 300;
+    margin: 0 0 50px 0
+}
+.que.speechace h1.player {
+    font-size: 32px;
+    text-align: center;
+    font-weight: 500;
+    margin: 0 0 0 0
+}
+.que.speechace h2 {
+    font-size: 20px;
+    color: #3c3c3c;
+    font-weight: 500;
+    margin: 0 0 25px 0;
+    line-height: 26px;
+    cursor: default
+}
+.que.speechace svg {
+    display: inline;
+}
+.que.speechace h2.player {
+    font-size: 22px;
+    text-align: center;
+    margin: -20px 0 50px 0
+}
+.que.speechace .icon {
+    background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjEwMDBweCIKICAgICBoZWlnaHQ9IjEwMDBweCIgdmlld0JveD0iMCAwIDEwMDAgMTAwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTAwMCAxMDAwIiB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHN0eWxlPSJmaWxsLXJ1bGU6ZXZlbm9kZDtjbGlwLXJ1bGU6ZXZlbm9kZDtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MS40MTQyMTsiPjxnIGlkPSJMYXllcjEiPjxnPjxwYXRoIGQ9Ik02NS40NzUsNjQuNDM4bDIuNzc5LDUuNTYybC05LjUyNywwbDIuNjkzLC01LjM4OWMtMi4xMjMsMS44ODMgLTQuNzM5LDEuMzUgLTYuMjU2LC0wLjU4NGMtMi4wOTUsLTIuNjcgLTMuNTgyLC05Ljg4MSAwLC0xMy4zNDhjMi41NjgsLTIuNDg4IDYuOTEyLC02LjczIDguMzc3LC0xMC42NzljMS41MTUsNC4zMDIgNS44MTUsNy43NzcgOC4zNzcsMTAuNjc5YzMuMzg0LDMuODMzIDIuMDk0LDEwLjY3OCAwLDEzLjM0OGMtMS41NjIsMS45OTEgLTQuMjg5LDIuNDk3IC02LjQ0MywwLjQxMVoiIHN0eWxlPSJmaWxsOiM4YmJiMDA7Ii8+PHRleHQgeD0iNTkuMjA1cHgiIHk9IjU5Ljk2cHgiIHN0eWxlPSJmb250LWZhbWlseTpBcmlhbCBCbGFjaztmb250LXNpemU6MTEuNDQxcHg7Zm9udC13ZWlnaHQ6OTAwO2ZpbGw6I2ZkZjVmNTsiPkE8L3RleHQ+PC9nPjxjaXJjbGUgY3g9IjI0IiBjeT0iODAiIHI9IjEwIiBzdHlsZT0iZmlsbDojOGNiYjAwOyIvPjxwYXRoIGQ9Ik0yOS41OTYsNzYuNzk3YzAsMC40MzIgLTAuMjA0LDAuODUzIC0wLjYxMiwxLjI2M2wtMC4wNjMsMC4wNjFsLTMuNTY2LDMuNjA0Yy0wLjc1OCwwLjc2NCAtMS40MDMsMS4zNTUgLTEuOTM2LDEuNzcyYy0wLjUzMywwLjQxNyAtMC45MDksMC42MjYgLTEuMTI4LDAuNjI2Yy0wLjIzMSwwIC0wLjUxOCwtMC4xMDQgLTAuODYsLTAuMzEzYy0wLjM0MiwtMC4yMDggLTAuNTY0LC0wLjQyNCAtMC42NjQsLTAuNjQ1Yy0wLjA4NCwtMC4xODUgLTAuMTY0LC0wLjU3NiAtMC4yMzksLTEuMTc0Yy0wLjA3NSwtMC41OTggLTAuMTEzLC0xLjI0NiAtMC4xMTMsLTEuOTQzYzAsLTAuMzgxIDAuMTY2LC0wLjczMiAwLjQ5NywtMS4wNTVjMC4zMzEsLTAuMzIzIDAuNjk2LC0wLjQ4NSAxLjA5NiwtMC40ODVjMC4zODEsMCAwLjYwOCwwLjMzNCAwLjY4MSwxLjAwM2MwLjAwOCwwLjA3NyAwLjAxMywwLjEzNCAwLjAxNywwLjE3MWMwLjA2MiwwLjUxMyAwLjEzMywwLjg3MSAwLjIxNCwxLjA3NGMwLjA4MSwwLjIwMyAwLjE5LDAuMzA1IDAuMzI5LDAuMzA1YzAuMDU3LDAgMC4xNjUsLTAuMDYgMC4zMjMsLTAuMThjMC4xNTgsLTAuMTIgMC4zNDYsLTAuMjgzIDAuNTY1LC0wLjQ5bDMuNjY1LC0zLjQ4M2MwLjMwNywtMC4yOTUgMC41ODIsLTAuNTE5IDAuODI1LC0wLjY3YzAuMjQyLC0wLjE1MSAwLjQ0OCwtMC4yMjcgMC42MTcsLTAuMjI3YzAuMTI3LDAgMC4yMTcsMC4wNDYgMC4yNzEsMC4xMzljMC4wNTQsMC4wOTIgMC4wODEsMC4yNDcgMC4wODEsMC40NjVsMCwwLjE4MloiIHN0eWxlPSJmaWxsOiNmZmY7ZmlsbC1ydWxlOm5vbnplcm87Ii8+PHBhdGggZD0iTTIwNC44LDkxLjZjLTIuMSwtMi4xIC01LjYsLTIuMSAtNy43LDBsLTE2LjgsMTUuN2wtNSwtNWMtMi4xLC0yLjEgLTUuNiwtMi4xIC03LjcsMGMtMi4xLDIuMSAtMi4xLDUuNiAwLDcuN2w4LjUsOC41YzAuNSwwLjUgMS4xLDAuOSAxLjgsMS4yYzIsMSA0LjUsMC43IDYuMiwtMWwyMC43LC0xOS4zYzIuMSwtMi4zIDIuMSwtNS43IDAsLTcuOGwwLDBaIiBzdHlsZT0iZmlsbDojOGRiYzAwO2ZpbGwtcnVsZTpub256ZXJvOyIvPjxwYXRoIGQ9Ik0yNjkuMiw3NS41TDI3MS40LDczLjNDMjcyLjEsNzIuNiAyNzIuMSw3MS40IDI3MS40LDcwLjZDMjcwLjcsNjkuOSAyNjkuNSw2OS45IDI2OC43LDcwLjZMMjY2LjUsNzIuOEwyNjQuMyw3MC42QzI2My42LDY5LjkgMjYyLjQsNjkuOSAyNjEuNiw3MC42QzI2MC45LDcxLjMgMjYwLjksNzIuNSAyNjEuNiw3My4zTDI2My44LDc1LjVMMjYxLjYsNzcuN0MyNjAuOSw3OC40IDI2MC45LDc5LjYgMjYxLjYsODAuNEMyNjIuMyw4MS4xIDI2My41LDgxLjEgMjY0LjMsODAuNEwyNjYuNSw3OC4yTDI2OC43LDgwLjRDMjY5LjQsODEuMSAyNzAuNiw4MS4xIDI3MS40LDgwLjRDMjcyLjEsNzkuNyAyNzIuMSw3OC41IDI3MS40LDc3LjdMMjY5LjIsNzUuNVoiIHN0eWxlPSJmaWxsOndoaXRlO2ZpbGwtcnVsZTpub256ZXJvOyIvPjwvZz48L3N2Zz4=);
+    display: inline-block;
+    vertical-align: middle
+}
+.que.speechace .badge-correct-big,
+.que.speechace .badge-wrong-big {
+    width: 81px;
+    height: 81px;
+    display: inline-block;
+    background: #fff;
+    position: relative;
+    -webkit-border-radius: 200px;
+    -moz-border-radius: 200px;
+    border-radius: 200px;
+    margin: 0 0 0 -100px
+}
+html[dir=rtl] .que.speechace .badge-correct-big,
+html[dir=rtl] .que.speechace .badge-wrong-big {
+    margin: 0 0 0 -100px;
+    margin: 0 -100px 0 0
+}
+.que.speechace .badge-correct-big .icon {
+    position: absolute;
+    left: 20px;
+    top: 27px
+}
+html[dir=rtl] .que.speechace .badge-correct-big .icon {
+    right: 20px;
+    left: auto
+}
+.que.speechace .badge-wrong-big .icon {
+    position: absolute;
+    left: 25px;
+    top: 26px
+}
+html[dir=rtl] .que.speechace .badge-wrong-big .icon {
+    right: 25px;
+    left: auto
+}
+.que.speechace .icon-correct-big {
+    height: 31px;
+    width: 41px;
+    background-position: -166px -90px
+}
+.que.speechace .icon-correct-small {
+    height: 13px;
+    width: 10px;
+    background-position: -52px -45px;
+    background-size: 315px 315px
+}
+.que.speechace .icon-correct-micro {
+    height: 9px;
+    width: 12px;
+    background-position: -50px -27px;
+    background-size: 300px 300px
+}
+.que.speechace .icon-wrong-big {
+    height: 31px;
+    width: 31px;
+    background-position: -208px -90px
+}
+.que.speechace .icon-wrong-small {
+    height: 16px;
+    width: 16px;
+    background-position: -104px -45px;
+    background-size: 500px 500px
+}
+.que.speechace .icon-wrong-micro {
+    height: 10px;
+    width: 10px;
+    background-position: -62px -27px;
+    background-size: 300px 300px
+}
+.que.speechace .left {
+     float: left
+ }
+html[dir=rtl] .que.speechace .left {
+    float: left;
+    float: right
+}
+.que.speechace .right {
+    float: right
+}
+html[dir=rtl] .que.speechace .right {
+    float: right;
+    float: left
+}
+.que.speechace .relative {
+    position: relative
+}
+.que.speechace .player .hint-popover {
+    margin-top: 0
+}
+.que.speechace .hint-popover {
+    font-weight: 500;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    text-align: left;
+    margin-top: 15px
+}
+.que.speechace .hint-popover .inner:before,
+.que.speechace .hint-popover .inner:after {
+    position: absolute;
+    z-index: 100;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    display: block;
+    margin: 0 0 0 -10px;
+    left: 50%;
+    top: -8px;
+    content: ''
+}
+.que.speechace .hint-popover .pointer-1:before,
+.que.speechace .hint-popover .pointer-1:after {
+    left: 1%;
+}
+.que.speechace .hint-popover .pointer-2:before,
+.que.speechace .hint-popover .pointer-2:after {
+    left: 2%;
+}
+.que.speechace .hint-popover .pointer-3:before,
+.que.speechace .hint-popover .pointer-3:after {
+    left: 3%;
+}
+.que.speechace .hint-popover .pointer-4:before,
+.que.speechace .hint-popover .pointer-4:after {
+    left: 4%;
+}
+.que.speechace .hint-popover .pointer-5:before,
+.que.speechace .hint-popover .pointer-5:after {
+    left: 5%;
+}
+.que.speechace .hint-popover .pointer-6:before,
+.que.speechace .hint-popover .pointer-6:after {
+    left: 6%;
+}
+.que.speechace .hint-popover .pointer-7:before,
+.que.speechace .hint-popover .pointer-7:after {
+    left: 7%;
+}
+.que.speechace .hint-popover .pointer-8:before,
+.que.speechace .hint-popover .pointer-8:after {
+    left: 8%;
+}
+.que.speechace .hint-popover .pointer-9:before,
+.que.speechace .hint-popover .pointer-9:after {
+    left: 9%;
+}
+.que.speechace .hint-popover .pointer-10:before,
+.que.speechace .hint-popover .pointer-10:after {
+    left: 10%;
+}
+.que.speechace .hint-popover .pointer-11:before,
+.que.speechace .hint-popover .pointer-11:after {
+    left: 11%;
+}
+.que.speechace .hint-popover .pointer-12:before,
+.que.speechace .hint-popover .pointer-12:after {
+    left: 12%;
+}
+.que.speechace .hint-popover .pointer-13:before,
+.que.speechace .hint-popover .pointer-13:after {
+    left: 13%;
+}
+.que.speechace .hint-popover .pointer-14:before,
+.que.speechace .hint-popover .pointer-14:after {
+    left: 14%;
+}
+.que.speechace .hint-popover .pointer-15:before,
+.que.speechace .hint-popover .pointer-15:after {
+    left: 15%;
+}
+.que.speechace .hint-popover .pointer-16:before,
+.que.speechace .hint-popover .pointer-16:after {
+    left: 16%;
+}
+.que.speechace .hint-popover .pointer-17:before,
+.que.speechace .hint-popover .pointer-17:after {
+    left: 17%;
+}
+.que.speechace .hint-popover .pointer-18:before,
+.que.speechace .hint-popover .pointer-18:after {
+    left: 18%;
+}
+.que.speechace .hint-popover .pointer-19:before,
+.que.speechace .hint-popover .pointer-19:after {
+    left: 19%;
+}
+.que.speechace .hint-popover .pointer-20:before,
+.que.speechace .hint-popover .pointer-20:after {
+    left: 20%;
+}
+.que.speechace .hint-popover .pointer-21:before,
+.que.speechace .hint-popover .pointer-21:after {
+    left: 21%;
+}
+.que.speechace .hint-popover .pointer-22:before,
+.que.speechace .hint-popover .pointer-22:after {
+    left: 22%;
+}
+.que.speechace .hint-popover .pointer-23:before,
+.que.speechace .hint-popover .pointer-23:after {
+    left: 23%;
+}
+.que.speechace .hint-popover .pointer-24:before,
+.que.speechace .hint-popover .pointer-24:after {
+    left: 24%;
+}
+.que.speechace .hint-popover .pointer-25:before,
+.que.speechace .hint-popover .pointer-25:after {
+    left: 25%;
+}
+.que.speechace .hint-popover .pointer-26:before,
+.que.speechace .hint-popover .pointer-26:after {
+    left: 26%;
+}
+.que.speechace .hint-popover .pointer-27:before,
+.que.speechace .hint-popover .pointer-27:after {
+    left: 27%;
+}
+.que.speechace .hint-popover .pointer-28:before,
+.que.speechace .hint-popover .pointer-28:after {
+    left: 28%;
+}
+.que.speechace .hint-popover .pointer-29:before,
+.que.speechace .hint-popover .pointer-29:after {
+    left: 29%;
+}
+.que.speechace .hint-popover .pointer-30:before,
+.que.speechace .hint-popover .pointer-30:after {
+    left: 30%;
+}
+.que.speechace .hint-popover .pointer-31:before,
+.que.speechace .hint-popover .pointer-31:after {
+    left: 31%;
+}
+.que.speechace .hint-popover .pointer-32:before,
+.que.speechace .hint-popover .pointer-32:after {
+    left: 32%;
+}
+.que.speechace .hint-popover .pointer-33:before,
+.que.speechace .hint-popover .pointer-33:after {
+    left: 33%;
+}
+.que.speechace .hint-popover .pointer-34:before,
+.que.speechace .hint-popover .pointer-34:after {
+    left: 34%;
+}
+.que.speechace .hint-popover .pointer-35:before,
+.que.speechace .hint-popover .pointer-35:after {
+    left: 35%;
+}
+.que.speechace .hint-popover .pointer-36:before,
+.que.speechace .hint-popover .pointer-36:after {
+    left: 36%;
+}
+.que.speechace .hint-popover .pointer-37:before,
+.que.speechace .hint-popover .pointer-37:after {
+    left: 37%;
+}
+.que.speechace .hint-popover .pointer-38:before,
+.que.speechace .hint-popover .pointer-38:after {
+    left: 38%;
+}
+.que.speechace .hint-popover .pointer-39:before,
+.que.speechace .hint-popover .pointer-39:after {
+    left: 39%;
+}
+.que.speechace .hint-popover .pointer-40:before,
+.que.speechace .hint-popover .pointer-40:after {
+    left: 40%;
+}
+.que.speechace .hint-popover .pointer-41:before,
+.que.speechace .hint-popover .pointer-41:after {
+    left: 41%;
+}
+.que.speechace .hint-popover .pointer-42:before,
+.que.speechace .hint-popover .pointer-42:after {
+    left: 42%;
+}
+.que.speechace .hint-popover .pointer-43:before,
+.que.speechace .hint-popover .pointer-43:after {
+    left: 43%;
+}
+.que.speechace .hint-popover .pointer-44:before,
+.que.speechace .hint-popover .pointer-44:after {
+    left: 44%;
+}
+.que.speechace .hint-popover .pointer-45:before,
+.que.speechace .hint-popover .pointer-45:after {
+    left: 45%;
+}
+.que.speechace .hint-popover .pointer-46:before,
+.que.speechace .hint-popover .pointer-46:after {
+    left: 46%;
+}
+.que.speechace .hint-popover .pointer-47:before,
+.que.speechace .hint-popover .pointer-47:after {
+    left: 47%;
+}
+.que.speechace .hint-popover .pointer-48:before,
+.que.speechace .hint-popover .pointer-48:after {
+    left: 48%;
+}
+.que.speechace .hint-popover .pointer-49:before,
+.que.speechace .hint-popover .pointer-49:after {
+    left: 49%;
+}
+.que.speechace .hint-popover .pointer-50:before,
+.que.speechace .hint-popover .pointer-50:after {
+    left: 50%;
+}
+.que.speechace .hint-popover .pointer-51:before,
+.que.speechace .hint-popover .pointer-51:after {
+    left: 51%;
+}
+.que.speechace .hint-popover .pointer-52:before,
+.que.speechace .hint-popover .pointer-52:after {
+    left: 52%;
+}
+.que.speechace .hint-popover .pointer-53:before,
+.que.speechace .hint-popover .pointer-53:after {
+    left: 53%;
+}
+.que.speechace .hint-popover .pointer-54:before,
+.que.speechace .hint-popover .pointer-54:after {
+    left: 54%;
+}
+.que.speechace .hint-popover .pointer-55:before,
+.que.speechace .hint-popover .pointer-55:after {
+    left: 55%;
+}
+.que.speechace .hint-popover .pointer-56:before,
+.que.speechace .hint-popover .pointer-56:after {
+    left: 56%;
+}
+.que.speechace .hint-popover .pointer-57:before,
+.que.speechace .hint-popover .pointer-57:after {
+    left: 57%;
+}
+.que.speechace .hint-popover .pointer-58:before,
+.que.speechace .hint-popover .pointer-58:after {
+    left: 58%;
+}
+.que.speechace .hint-popover .pointer-59:before,
+.que.speechace .hint-popover .pointer-59:after {
+    left: 59%;
+}
+.que.speechace .hint-popover .pointer-60:before,
+.que.speechace .hint-popover .pointer-60:after {
+    left: 60%;
+}
+.que.speechace .hint-popover .pointer-61:before,
+.que.speechace .hint-popover .pointer-61:after {
+    left: 61%;
+}
+.que.speechace .hint-popover .pointer-62:before,
+.que.speechace .hint-popover .pointer-62:after {
+    left: 62%;
+}
+.que.speechace .hint-popover .pointer-63:before,
+.que.speechace .hint-popover .pointer-63:after {
+    left: 63%;
+}
+.que.speechace .hint-popover .pointer-64:before,
+.que.speechace .hint-popover .pointer-64:after {
+    left: 64%;
+}
+.que.speechace .hint-popover .pointer-65:before,
+.que.speechace .hint-popover .pointer-65:after {
+    left: 65%;
+}
+.que.speechace .hint-popover .pointer-66:before,
+.que.speechace .hint-popover .pointer-66:after {
+    left: 66%;
+}
+.que.speechace .hint-popover .pointer-67:before,
+.que.speechace .hint-popover .pointer-67:after {
+    left: 67%;
+}
+.que.speechace .hint-popover .pointer-68:before,
+.que.speechace .hint-popover .pointer-68:after {
+    left: 68%;
+}
+.que.speechace .hint-popover .pointer-69:before,
+.que.speechace .hint-popover .pointer-69:after {
+    left: 69%;
+}
+.que.speechace .hint-popover .pointer-70:before,
+.que.speechace .hint-popover .pointer-70:after {
+    left: 70%;
+}
+.que.speechace .hint-popover .pointer-71:before,
+.que.speechace .hint-popover .pointer-71:after {
+    left: 71%;
+}
+.que.speechace .hint-popover .pointer-72:before,
+.que.speechace .hint-popover .pointer-72:after {
+    left: 72%;
+}
+.que.speechace .hint-popover .pointer-73:before,
+.que.speechace .hint-popover .pointer-73:after {
+    left: 73%;
+}
+.que.speechace .hint-popover .pointer-74:before,
+.que.speechace .hint-popover .pointer-74:after {
+    left: 74%;
+}
+.que.speechace .hint-popover .pointer-75:before,
+.que.speechace .hint-popover .pointer-75:after {
+    left: 75%;
+}
+.que.speechace .hint-popover .pointer-76:before,
+.que.speechace .hint-popover .pointer-76:after {
+    left: 76%;
+}
+.que.speechace .hint-popover .pointer-77:before,
+.que.speechace .hint-popover .pointer-77:after {
+    left: 77%;
+}
+.que.speechace .hint-popover .pointer-78:before,
+.que.speechace .hint-popover .pointer-78:after {
+    left: 78%;
+}
+.que.speechace .hint-popover .pointer-79:before,
+.que.speechace .hint-popover .pointer-79:after {
+    left: 79%;
+}
+.que.speechace .hint-popover .pointer-80:before,
+.que.speechace .hint-popover .pointer-80:after {
+    left: 80%;
+}
+.que.speechace .hint-popover .pointer-81:before,
+.que.speechace .hint-popover .pointer-81:after {
+    left: 81%;
+}
+.que.speechace .hint-popover .pointer-82:before,
+.que.speechace .hint-popover .pointer-82:after {
+    left: 82%;
+}
+.que.speechace .hint-popover .pointer-83:before,
+.que.speechace .hint-popover .pointer-83:after {
+    left: 83%;
+}
+.que.speechace .hint-popover .pointer-84:before,
+.que.speechace .hint-popover .pointer-84:after {
+    left: 84%;
+}
+.que.speechace .hint-popover .pointer-85:before,
+.que.speechace .hint-popover .pointer-85:after {
+    left: 85%;
+}
+.que.speechace .hint-popover .pointer-86:before,
+.que.speechace .hint-popover .pointer-86:after {
+    left: 86%;
+}
+.que.speechace .hint-popover .pointer-87:before,
+.que.speechace .hint-popover .pointer-87:after {
+    left: 87%;
+}
+.que.speechace .hint-popover .pointer-88:before,
+.que.speechace .hint-popover .pointer-88:after {
+    left: 88%;
+}
+.que.speechace .hint-popover .pointer-89:before,
+.que.speechace .hint-popover .pointer-89:after {
+    left: 89%;
+}
+.que.speechace .hint-popover .pointer-90:before,
+.que.speechace .hint-popover .pointer-90:after {
+    left: 90%;
+}
+.que.speechace .hint-popover .pointer-91:before,
+.que.speechace .hint-popover .pointer-91:after {
+    left: 91%;
+}
+.que.speechace .hint-popover .pointer-92:before,
+.que.speechace .hint-popover .pointer-92:after {
+    left: 92%;
+}
+.que.speechace .hint-popover .pointer-93:before,
+.que.speechace .hint-popover .pointer-93:after {
+    left: 93%;
+}
+.que.speechace .hint-popover .pointer-94:before,
+.que.speechace .hint-popover .pointer-94:after {
+    left: 94%;
+}
+.que.speechace .hint-popover .pointer-95:before,
+.que.speechace .hint-popover .pointer-95:after {
+    left: 95%;
+}
+.que.speechace .hint-popover .pointer-96:before,
+.que.speechace .hint-popover .pointer-96:after {
+    left: 96%;
+}
+.que.speechace .hint-popover .pointer-97:before,
+.que.speechace .hint-popover .pointer-97:after {
+    left: 97%;
+}
+.que.speechace .hint-popover .pointer-98:before,
+.que.speechace .hint-popover .pointer-98:after {
+    left: 98%;
+}
+.que.speechace .hint-popover .pointer-99:before,
+.que.speechace .hint-popover .pointer-99:after {
+    left: 99%;
+}
+.que.speechace .hint-popover .inner:before {
+    z-index: -1;
+    -webkit-box-shadow: -2px -2px 15px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: -2px -2px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: -2px -2px 15px rgba(0, 0, 0, 0.15)
+}
+.que.speechace .hint-popover .inner {
+    background-color: #fff;
+    background-clip: padding-box;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    white-space: normal;
+    position: relative;
+    -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    padding: 3px 20px 0 20px
+}
+.que.speechace .player-container {
+    background: #fff;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    padding: 0;
+    *zoom: 1;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    position: relative;
+    -webkit-box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
+    -moz-box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
+}
+.que.speechace .player-container:before,
+.que.speechace .player-container:after {
+    display: table;
+    content: "";
+    line-height: 0
+}
+.que.speechace .player-container:after {
+    clear: both
+}
+.que.speechace .player-container:before,
+.que.speechace .player-container:after {
+    display: table;
+    content: "";
+    line-height: 0
+}
+.que.speechace .player-container:after {
+    clear: both
+}
+.que.speechace .player-main {
+    font-size: 18px;
+    position: relative;
+    padding: 20px 20px;
+}
+.que.speechace.speechace-edit .player-main {
+    padding: 0;
+}
+.que.speechace .incorrect.speak .player-footer .col-left {
+    padding-left: 0;
+}
+.que.speechace .incorrect.speak .player-footer .col-left.retry {
+    padding-left: 80px;
+}
+.que.speechace .player-footer {
+    background: #dbdbdb;
+    margin: 0;
+    -webkit-border-radius: 0 0 10px 10px;
+    -moz-border-radius: 0 0 10px 10px;
+    border-radius: 0 0 10px 10px;
+    padding: 20px 40px;
+    *zoom: 1;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+}
+.que.speechace .player-footer:before,
+.que.speechace .player-footer:after {
+    display: table;
+    content: "";
+    line-height: 0
+}
+.que.speechace .player-footer:after {
+    clear: both
+}
+.que.speechace .player-footer:before,
+.que.speechace .player-footer:after {
+    display: table;
+    content: "";
+    line-height: 0
+}
+.que.speechace .player-footer:after {
+    clear: both
+}
+.que.speechace .player-footer button {
+    min-width: 150px
+}
+.que.speechace .player-footer .col-left {
+    *zoom: 1;
+    padding: 0 80px 0 80px
+}
+.que.speechace .player-footer .col-left:before,
+.que.speechace .player-footer .col-left:after {
+    display: table;
+    content: "";
+    line-height: 0
+}
+.que.speechace .player-footer .col-left:after {
+    clear: both
+}
+.que.speechace .player-footer .col-left:before,
+.que.speechace .player-footer .col-left:after {
+    display: table;
+    content: "";
+    line-height: 0
+}
+.que.speechace .player-footer .col-left:after {
+    clear: both
+}
+.que.speechace .player-footer .col-right {
+    float: right;
+    *zoom: 1;
+    text-align: right;
+    padding-left: 20px
+}
+html[dir=rtl] .que.speechace .player-footer .col-right {
+    float: right;
+    float: left
+}
+.que.speechace .player-footer .col-right:before,
+.que.speechace .player-footer .col-right:after {
+    display: table;
+    content: "";
+    line-height: 0
+}
+.que.speechace .player-footer .col-right:after {
+    clear: both
+}
+.que.speechace .player-footer .col-right:before,
+.que.speechace .player-footer .col-right:after {
+    display: table;
+    content: "";
+    line-height: 0
+}
+.que.speechace .player-footer .col-right:after {
+    clear: both
+}
+html[dir=rtl] .que.speechace .player-footer .col-right {
+    text-align: right;
+    text-align: left
+}
+html[dir=rtl] .que.speechace .player-footer .col-right {
+    padding-right: 20px;
+    padding-left: auto
+}
+.que.speechace .player-footer h1 {
+    font-weight: 700;
+    font-size: 22px;
+    margin: 0 0 12px 0;
+    line-height: 30px
+}
+.que.speechace .player-footer h2 {
+    background: #fff;
+    color: #3c3c3c !important;
+    border-radius: 5px;
+    padding: 2px 10px;
+    font-size: 13px;
+    margin: -5px 0 15px 0;
+    min-width: 320px;
+    max-width: 400px;
+    display: inline-block
+}
+.que.speechace .correct .player-footer {
+    border-top: none;
+    background: #def0a5;
+    color: #7eb530
+}
+.que.speechace .correct .player-footer h1,
+.que.speechace .correct .player-footer h2 {
+    color: #769c00
+}
+.que.speechace .incorrect .player-footer {
+    border-top: none;
+    background: #ffd4cc;
+    color: #dd381d
+}
+.que.speechace .incorrect .player-footer h1,
+.que.speechace .incorrect .player-footer h2 {
+    color: #dd381d
+}
+.que.speechace .fair .player-footer {
+    border-top: none;
+    background: #ffead1;
+    color: #dd8f2c
+}
+.que.speechace .fair .player-footer h1,
+.que.speechace .fair .player-footer h2 {
+    color: #dd8f2c
+}
+.que.speechace .session-element-container {
+    position: relative;
+    width: 100%
+}
+.que.speechace .challenge-row {
+    width: 100%
+}
+.que.speechace .challenge-cell {
+    text-align: center;
+    vertical-align: top;
+    padding: 0 30px;
+    position: relative
+}
+.que.speechace .speechace-audio-view-bottom {
+    padding-bottom: 10px;
+}
+.que.speechace .chrome-speech-new-ui h2.player {
+    margin: 20px 0 0 0
+}
+.que.speechace .highlighted-correct-word {
+    color: #7ac70c;
+    cursor: pointer;
+}
+.que.speechace .highlighted-wrong-word {
+    color: #dd381d;
+    cursor: pointer;
+}
+.que.speechace .hints-sentence .non-space.token,
+.hover {
+    padding: 0 0 5px 0;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAI0lEQVQIW2NkwAIYYWJr1679HxwcDOaDCZAATBIkgVslurEAdDoMBsNekvMAAAAASUVORK5CYII=) repeat-x bottom left
+}
+.que.speechace .hints-sentence .non-space.token.highlighted-new-word,
+.que.speechace .hover.highlighted-new-word {
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAI0lEQVQIW2NkwAIYYWL/Oxj+M1YwgPlgAiQAkwRJ4FaJbiwA3isJBulCmoIAAAAASUVORK5CYII=) repeat-x bottom left
+}
+.que.speechace .hint-table {
+    line-height: 15px
+}
+.que.speechace .hint-table table {
+    white-space: nowrap;
+    margin: 0;
+    width: 100%;
+    text-align: center
+}
+.que.speechace .hint-table table tr td {
+    padding: 15px 10px;
+    border-top: 1px solid #ededed;
+    border-left: 1px solid #ededed
+}
+.que.speechace .hint-table table tr td i {
+    color: #999;
+    font-style: normal
+}
+.que.speechace .hint-table table tr th {
+    padding: 15px 10px;
+    border-bottom: 1px solid #ededed
+}
+.que.speechace .hint-table table tr td:first-child {
+    border-left: none
+}
+.que.speechace .hint-table table tr:first-child td {
+    border-top: none
+}
+.que.speechace .hint-table table tr:first-child td,
+.que.speechace .hint-table table tr:first-child th {
+    border-top: none
+}
+.que.speechace .speechace-mic-img-row {
+    width: 100%;
+}
+.que.speechace .speechace-question-image-wrapper {
+    padding: 0 10px;
+}
+.que.speechace .speechace-question-image {
+    display: block;
+    margin: 0 auto 30px auto;
+    max-height: 30vh;
+    max-width: 100%;
+    border-radius: 10px;
+}
+.que.speechace .speechace-user-audio-container {
+    position: absolute;
+    height: 75px;
+    margin: 60px 0 0 -188px;
+}
+.que.speechace .speechace-expert-audio-container {
+    position: absolute;
+    height: 75px;
+    margin: 60px 0 0 -223px;
+}
+.que.speechace .speechace-playback-30 {
+    width: 30px;
+    height: 30px;
+}
+.que.speechace .speechace-swf-setting-button-container {
+    position: absolute;;
+    height: 75px;
+    margin: 60px 0 0 -62px;
+}
+.que.speechace .speechace-question-view-controller-score-dot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 20pt;
+}
+.que.speechace .speechace-question-review-student {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    justify-content: center;
+}
+
+.que.speechace audio { max-width: 220px; }
+
+.que.speechace table.snptable a:link {
+    text-decoration: underline;
+}
+
+.que.speechace .speechace-player-large {
+    font-size: 32px;
+    text-align: center;
+    line-height: 38px;
+    color: #3c3c3c;
+    font-weight: 500;
+}
+
+.speechace-app-spinner-view {
+    -webkit-animation: speechace-app-spinner-view-rotator 1.4s linear infinite;
+    animation: speechace-app-spinner-view-rotator 1.4s linear infinite;
+}
+@-webkit-keyframes speechace-app-spinner-view-rotator {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(270deg);
+        transform: rotate(270deg);
+    }
+}
+
+@keyframes speechace-app-spinner-view-rotator {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(270deg);
+        transform: rotate(270deg);
+    }
+}
+.speechace-app-spinner-view-path {
+    stroke-dasharray: 187;
+    stroke-dashoffset: 0;
+    -webkit-transform-origin: center;
+    -ms-transform-origin: center;
+    transform-origin: center;
+    -webkit-animation: speechace-app-spinner-view-dash 1.4s ease-in-out infinite, speechace-app-spinner-view-colors 5.6s ease-in-out infinite;
+    animation: speechace-app-spinner-view-dash 1.4s ease-in-out infinite, speechace-app-spinner-view-colors 5.6s ease-in-out infinite;
+}
+
+@-webkit-keyframes speechace-app-spinner-view-colors {
+    0% {
+        stroke: #4285F4;
+    }
+    25% {
+        stroke: #DE3E35;
+    }
+    50% {
+        stroke: #F7C223;
+    }
+    75% {
+        stroke: #1B9A59;
+    }
+    100% {
+        stroke: #4285F4;
+    }
+}
+
+@keyframes speechace-app-spinner-view-colors {
+    0% {
+        stroke: #4285F4;
+    }
+    25% {
+        stroke: #DE3E35;
+    }
+    50% {
+        stroke: #F7C223;
+    }
+    75% {
+        stroke: #1B9A59;
+    }
+    100% {
+        stroke: #4285F4;
+    }
+}
+@-webkit-keyframes speechace-app-spinner-view-dash {
+    0% {
+        stroke-dashoffset: 187;
+    }
+    50% {
+        stroke-dashoffset: 46.75;
+        -webkit-transform: rotate(135deg);
+        transform: rotate(135deg);
+    }
+    100% {
+        stroke-dashoffset: 187;
+        -webkit-transform: rotate(450deg);
+        transform: rotate(450deg);
+    }
+}
+@keyframes speechace-app-spinner-view-dash {
+    0% {
+        stroke-dashoffset: 187;
+    }
+    50% {
+        stroke-dashoffset: 46.75;
+        -webkit-transform: rotate(135deg);
+        transform: rotate(135deg);
+    }
+    100% {
+        stroke-dashoffset: 187;
+        -webkit-transform: rotate(450deg);
+        transform: rotate(450deg);
+    }
+}
+
+@media screen and (max-width: 700px), screen and (max-height: 700px) {
+
+    .que.speechace .compact-enabled .player .player-inner {
+        margin: 0;
+        top: 0;
+        padding: 0;
+        width: 100%;
+        min-width: 0
+    }
+    .que.speechace .compact-enabled .player .player-inner .player-container {
+        -webkit-border-radius: 0;
+        -moz-border-radius: 0;
+        border-radius: 0;
+        padding: 0
+    }
+    .que.speechace .compact-enabled .player .player-inner .player-container .player-main {
+        height: auto;
+        padding: 0;
+        min-height: 0;
+        padding: 0 0 0 0
+    }
+    .que.speechace .compact-enabled .player .session-element-container {
+        position: static;
+    }
+    .que.speechace .compact-enabled .player .session-element-container h1.player {
+        margin: 0 15px;
+        font-size: 20px;
+        line-height: 29px
+    }
+    .que.speechace .compact-enabled .player .session-element-container .speechace-player-large {
+        font-size: 20px;
+        line-height: 29px;
+    }
+    .que.speechace .compact-enabled .player .session-element-container .challenge-cell {
+        display: block;
+        width: 100%;
+        margin: 15px 0 0 0;
+        padding: 0 10px 10px 10px
+    }
+    .que.speechace .compact-enabled .player .player-footer {
+        z-index: 2;
+        -webkit-border-radius: 0;
+        -moz-border-radius: 0;
+        border-radius: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    .que.speechace .compact-enabled .player .grade {
+        height: auto
+    }
+    .que.speechace .compact-enabled .player .grade h1 {
+        font-size: 16px;
+        line-height: 20px;
+        margin-bottom: 0
+    }
+    .que.speechace .compact-enabled .player .grade h2 {
+        padding: 3px 10px;
+        margin: 10px 0 0 0;
+        max-width: 100%;
+        min-width: 90%
+    }
+    @media (max-width: 450px) {
+        .que.speechace .compact-enabled .player .player-footer .speechace-has-score .additional-msg {
+            display: none;
+        }
+    }
+    .que.speechace .compact-enabled .player .player-footer .col-left.speechace-has-score {
+        padding: 10px 0 10px 110px;
+        height: 100%
+    }
+    .que.speechace .compact-enabled .player .player-footer .col-left {
+        padding: 10px 0 0 10px;
+    }
+    .que.speechace .compact-enabled .player .player-footer .col-right {
+        padding: 10px 10px 0 0
+    }
+    @media (min-width: 450px) and (max-height: 500px) {
+        .que.speechace .compact-enabled .speechace-mic-img-row .challenge-row {
+        }
+        .que.speechace .compact-enabled .speechace-mic-img-row .challenge-row .challenge-cell {
+            display: inherit;
+        }
+        .que.speechace .compact-enabled .speechace-mic-img-row .speechace-question-image-wrapper {
+        }
+        .que.speechace .compact-enabled .speechace-mic-img-row .speechace-question-image-wrapper .speechace-question-image {
+            margin: 10px 10px 0 0;
+            max-height: none;
+        }
+    }
+}
