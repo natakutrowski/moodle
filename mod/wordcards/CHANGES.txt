@@ -1,0 +1,308 @@
+1.3.73 (Build 2025012500)
+- added word preview mode
+
+1.3.72 (Build 2024120700)
+- added support for Moodle Mobile app
+- randomized cards on definitions page
+- fixed issue with langchooser in free mode
+
+1.3.71 (Build 2024111203)
+- added a language chooser for students to select their preferred (native) language - this only works if words were added with word wizard
+- added a push page to push settings from one WordCards activities to others with same name, or in same course, or site wide.
+
+1.3.70 (Build 2024111200)
+- added completion option for all words learned and completion fixes
+- added word learned event
+- added option to use the model sentence on speechcards instead of the term/word
+- added a language chooser for students to select their preferred (native) language - this only works if words were added with word wizard
+- added a push page to mush settings from one WordCards activities to others with same name, in same course, or site wide.
+
+1.3.69 (Build 2024101501)
+- Fix for code warning about session_mode
+
+1.3.68 (Build 2024101500)
+- Added ability to set the practice types available in free mode
+- Added foundations of new "sessions" mode - not yet Enabled
+- Improvements to Privacy API implementation
+
+1.3.67 (Build 2024100700)
+- Fixes for PHP 8.2 and 8.3
+
+1.3.66 (Build 2024092500)
+- Added support for Vietnamese
+
+1.3.65 (Build 2024082600)
+- Fix for layout(display of introduction) issue on Adaptable theme
+
+1.3.64 (Build 2024071000)
+- fixed wrong trim function
+- added a bit more robustness to prevent superclickers from breaking the audio recorder
+- fixed wrong dialect labels for Arabic voices:  Arabic (modern standard) / Arabic (gulf)
+- made review pool only use current language terms
+
+1.3.63 (Build 2024052600)
+- Fixed broken wordwizard (from last release)
+
+1.3.62 (Build 2024051600)
+- Fixes for external APIS calls in pre M40
+
+1.3.61 (Build 2024051200)
+- Tweaks to format functions for PHP8.2
+- Changes to way external apis are called
+
+1.3.60 (Build 2024042700)
+- Added missing lang string for export capability
+- Fixed incorrect param for activity page (state instead of nextstep)
+- Added options for using term or definition as the prompt/distractor in space-game and match-select
+
+1.3.59 (Build 2024031400)
+- Fixed broken import from glossary after confirmation
+- Fixed issue where words added to activity after attempts were made, could prevent students re-attempting
+- Added some new en-US TTS voices (Tiffany, Ed, Ricky and Tammy)
+
+1.3.58 (Build 2024031100)
+- Better import from Glossary
+
+1.3.57 (Build 2024030500)
+- Export to CSV for terms/defs from import page
+- Import from glossary feature
+- Better dictionary lookups for word wizard
+
+1.3.56 (Build 2024022500)
+- Update to CP usage logging
+- Implemented Privacy API
+- Better text display on match select and match type activities
+
+1.3.55 (Build 2024020100)
+- Fixed issue where audio button click flipped the card
+- Added remote logging
+
+1.3.54 (Build 2024011800)
+- added course reset for mywords
+- fixed JS loading issue on view page
+- added expected completion data API support
+
+1.3.53 (Build 2023111800)
+- Added better planet for space game
+- Added better captions and text for some areas
+
+1.3.52 (Build 2023110400)
+ -Fix for broken audio in some locations
+ -Better graphics for SpaceGame
+ -Added a tiny speaker icon to the speech cards
+
+1.3.51 (Build 2023101900)
+ - Fixed incorrect language label for zh_tw
+ - fix for broken audio on flip cards
+
+1.3.50 (Build 2023101000)
+- Added more languages incl. Maori
+- Better behaviour for languages with no dictionary support
+- Better behaviour for languages with no TTS support
+- Bulk delete for words admin page
+- Enabled more features for YouGlish player
+
+1.3.49 (Build 2023092600)
+- fix for incorrect language-locale for Norwegian
+
+1.3.48 (Build 2023090900)
+- Fixed an issue with SpaceGame and the number of items in the practice pool
+- Added Learned reports to the reports page
+
+1.3.47 (Build 2023090300)
+- added SpaceGame
+- added VideoExamples
+
+1.3.46 (Build 2023072400)
+- added attempt submitted and step submitted events
+
+1.3.44 (Build 2023051201)
+- fixed incorrect not null setting on def language
+- changes to support M4.2
+
+1.3.44 (Build 2023042301)
+- better dictionary support for word wizard
+
+1.3.43 (Build 2023033000)
+- fixed issue with broken animation on speechcards
+
+1.3.42 (Build 2022123100)
+ - added support for multilang filter in definitions
+
+1.3.41 (Build 2022112700)
+- added Dutch Belgian and other voices
+
+1.3.40 (Build 2022100700)
+ - removed unneeded lang strings
+- fixed web service optional value = > default value
+
+1.3.39 (Build 2022060500)
+- added better free trial link and rebuilt js for Moodle versions prior to M3.8
+- adda default to viewstart and viewend
+
+1.3.38(Build 2022050200)
+- Removed JQuery UI which was breaking Moodle 4.0 dock
+- Fixed issue with activity being closed if open date set, but close data not set
+
+1.3.36 (Build 2022041300)
+- Fixed logging issue
+- Added some TTS voices
+
+1.3.35 (Build 2022032800)
+- Fixed issue with review wordpool in Free mode pulling too many words
+- Fixed issue with word wizard not showing
+
+1.3.34 (2022031300)
+- tweaked appearance of cards
+- fixed issue with review mode
+- added selection of term/definition for listen-and-choose
+- added Norwegian, Romanian, Polish and Swedish
+
+1.3.33 (2022022700)
+- fixed issue in get_course_moduleinfo that could kill backup and restore
+- tweaked polly stuff
+- added freemode and mywords
+
+1.3.22 (Build 2022022300)
+- Fixed issue which prevented more than 40 results showing in the reports
+
+1.3.21 (Build 2022021500)
+- Added Journey mode (setting only)
+
+1.3.20 (Build 2022020800)
+- Added open and close dates (Kuldeep Banga)
+
+1.3.19 (Build 2022020500)
+- Added (beta) word wizard
+
+1.3.18 (Build 2022012000)
+- Fixed issue with incorrect name/id for Korean Polly voice Seoyeon
+- Stopped review mode from pulling items from current mod
+
+1.3.17 (Build 2021122200)
+- added credential fetching
+
+1.3.16 (Build 2021120200)
+- Improved navigation between steps
+- Added Cancel attempt ability (fails on the very first attempt)
+- Added a button to add terms to first view of activity with no terms
+- Added a score to the finished attempt page
+- Added highest-scoring-attempt and latest-attempt options to grading
+- Added datatables to reports page so that its easier to work with when have large numbers of students
+
+1.3.15 (Build 2021112100)
+- Fixed browser speech recognition on Safari
+
+1.3.14 (Build 2021110500)
+- Fixed grading bug where steps with none specified as activity type could be counted in grade
+- Added ability to use Poodll STT exclusively
+- Added a re push grades button to reports page
+
+1.3.13 (Build 2021090700)
+- Fixed bug "too few arguments" in speech cards introduced in 1.3.12
+
+1.3.12 (Build 2021083100)
+- Added ability to hide image on flip cards screen
+- Added ability to set front and back face of flip cards
+
+1.3.11 (Build 2021081600)
+- issue with php 8 and array key exists
+
+1.3.10 (Build 2021053100)
+- Intername flag for iframe
+
+1.3.9 (Build 2021052900)
+- Added lang models for FR and ES
+
+1.3.8 (Build 2021052500)
+- Added ability to view reports by group
+
+1.3.7 Build (2021052000)
+- Added Bahrain and Capetown regions
+
+1.3.6 (Build 2021040100)
+-tab and form changes
+-added better lang string for import
+
+1.3.5 (Build 2021030100)
+-Added mecab based comparison for Japanese text
+-Added setup tab
+
+1.3.4 (Build 2021013100)
+ -Improved differencing
+ -Standardized audio recorder
+ -Better support for languages with non Latin alphabet
+
+1.3.3 (Build 2021012400)
+- Better support for non English languages in speech cards
+
+1.3.2 (Build 2020122500)
+- Fixed bug which prevented students "check"ing a definition
+
+1.3.1 (Build 2020121900)
+- Improved import form so that TTS voice and model sentence can be imported
+- Made widths of form fields better
+
+1.3.0 (Build 2020121100)
+-Added a proper flashcards mode
+
+1.2.9 (Build 2020112500)
+-Added an ajax fragmentable form constructor
+-Fixed bug affecting keyboard on mobile devices
+
+1.2.8 (Build 2020111700)
+-Added new speech servers
+
+1.2.7 (Build 2020111000)
+-Adding in TT Recorder
+-Fixed faulty NOT NULL setting on model sentence install.xml
+
+1.2.6 (Build 2020110900)
+-Adding in model sentence and model sentence audio
+
+1.2.5 (Build 2020100200)
+-Adding in missing DB updates not applied in July
+
+1.2.4 (Build 2020091300)
+-Added white text outline on card fronts
+-Fixed issue with images and audio uploads not beong removed
+-Fixed issue with caching of playback audio
+-fixed issue with TTS being used when uploaded audio was available
+
+1.2.3 (Build 2020073100)
+-Added support for non alphabet distractors on keyboard
+-Fixed Postgresql support issue in grading
+-Added new practice type Listen-Choose
+
+1.2.2 (Build 2020071700)
+- fixed some poor ID and CSS declarations that were not scoped
+- added clearer instructions and help icons to form fields
+
+1.2.1 (Build 2020071500)
+-Fixed an issue with upgrades from previous attempts
+-Added a Readme and thirdpartylibs.xml
+-Fixed an issue with an unnecessary dependency on mod_readaloud
+
+1.2.0 Build( 2020070500)
+-Added attempts layer, so user can re-attempt, and grades taken from latest attempt
+-Added support for groups
+-Capabilities tidy up
+
+1.1.9 (Build 2020050200)
+-fixed up version number trouble
+-set proper defaults on fields
+
+1.1.7 (Build 20200425000)
+-Added grading
+
+1.1.5 (Build 20200419100)
+-Added languages and user tagging
+
+1.1.4 (Build 20200201100)
+-Added languages and user tagging
+
+1.1.1 (Build 2019091402)
+-TTS improvements
+
+1.1.0 (Build 2019091400)
+-First release of Wordcards with Apps 4 EFL integrated

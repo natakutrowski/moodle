@@ -76,6 +76,10 @@ final class custom_fields_test extends core_reportbuilder_testcase {
             ['categoryid' => $category->get('id'), 'type' => 'number', 'name' => 'Number', 'shortname' => 'number',
                 'configdata' => ['defaultvalue' => 1]]);
 
+        $generator->create_field(
+            ['categoryid' => $category->get('id'), 'type' => 'number', 'name' => 'Number', 'shortname' => 'number',
+                'configdata' => ['defaultvalue' => 1]]);
+
         $courseentity = new course();
         $coursealias = $courseentity->get_table_alias('course');
 

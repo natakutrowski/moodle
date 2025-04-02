@@ -38,5 +38,8 @@ function xmldb_message_sms_install(): bool {
     $class = \core_plugin_manager::resolve_plugininfo_class('message');
     $class::enable_plugin($provider->name, 0);
 
+    // Automatically generated Moodle v4.5.0 release upgrade line.
+    // Put any upgrade step following this.
+
     return true;
 }

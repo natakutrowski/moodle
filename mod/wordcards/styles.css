@@ -1,0 +1,2163 @@
+/* The flip card container */
+.flip-card {
+    background-color: transparent;
+    width: 260px;
+    height: 480px;
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+@media screen and (min-width:400px) {
+    .flip-card {
+        width: 280px;
+    }
+}
+
+@media screen and (min-width:600px) {
+    .flip-card {
+        width: 380px;
+        height: 500px;
+    }
+}
+
+  .show-back-side {
+    transform: rotateY(180deg);
+  }
+
+  /* This container is needed to position the front and back side */
+  .flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+  }
+  
+/* CSS flashcards animations */
+
+    .next-button-slide-is-leaving {
+        animation-name: nextButtonSlideIsLeavingAnimation;
+        animation-duration: .5s;
+        animation-timing-function: ease-in-out;
+    }
+
+    @keyframes nextButtonSlideIsLeavingAnimation {
+        from {
+            transform: translate(100px);
+            opacity: 1;
+        }
+        to {
+            transform: translate(-200px);
+            opacity: 0;
+        }
+    }
+
+    .next-button-slide-is-coming {
+        animation-name: nextButtonSlideIsComingAnimation;
+        animation-duration: .5s;
+        animation-timing-function: ease-in-out;
+    }
+
+    @keyframes nextButtonSlideIsComingAnimation {
+        0% {
+            transform: translate(200px);
+            opacity: 0;
+        }
+        50% {
+            transform: translate(200px);
+            opacity: 0;
+        }
+        100% {
+            transform: translate(-100px);
+            opacity: 1;
+        }
+    }
+
+
+    .prev-button-slide-is-leaving {
+        animation-name: prevButtonSlideIsLeavingAnimation;
+        animation-duration: .5s;
+        animation-timing-function: ease-in-out;
+    }
+
+    @keyframes prevButtonSlideIsLeavingAnimation {
+        from {
+            transform: translate(0px);
+            opacity: 1;
+        }
+        to {
+            transform: translate(200px);
+            opacity: 0;
+        }
+    }
+
+    .prev-button-slide-is-coming {
+        animation-name: prevButtonSlideIsComingAnimation;
+        animation-duration: .5s;
+        animation-timing-function: ease-in-out;
+    }
+
+    @keyframes prevButtonSlideIsComingAnimation {
+        0% {
+            transform: translate(-200px);
+            opacity: 0;
+        }
+        50% {
+            transform: translate(-200px);
+            opacity: 0;
+        }
+        100% {
+            transform: translate(100px);
+            opacity: 1;
+        }
+    }
+
+    .slide-is-hidden {
+        display: none;
+    }
+
+    .slide-is-visible {
+        display: block;
+    }
+
+/* /End CSS flashcards animations */
+
+#card-audio {
+    content: " ";
+    height: 42px;
+    width: 42px;
+    border-radius: 100%;
+    background: linear-gradient(157deg, #9582F2 0%, #6F58DE 100%);
+    box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.15);
+    position: relative;
+    margin-top: 18px;
+    margin-bottom: 18px;
+}
+
+#card-audio:hover {
+    box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0);
+}
+
+#card-audio:active {
+    background: linear-gradient(157deg, #7c69da 0%, #624ec6 100%);
+}
+
+#card-audio.fa-volume-up:after {
+    content: "";
+    display: block;
+    height: 16px;
+    width: 18px;
+    background-image: url([[pix:mod_wordcards|audio-icon]]);
+    background-size: 16px 18px;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 13px;
+    left: 12px;
+}
+
+#card-audio.fa-volume-up:before {
+    display: none;
+}
+
+
+  /* Position the front and back side */
+  .flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden;
+  }
+  
+  /* Style the front side (fallback if image is missing) */
+  .flip-card-front {
+    border-radius: 4px;
+    background: #FFF;
+    box-shadow: 0px 1.3px 9px 0px rgba(14, 18, 61, 0.22);
+    color: #362A6C;
+    font-size: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-around;
+  }
+
+  @media screen and (min-width:480px) {
+    .flip-card-front {
+        font-size: 26px;
+    }
+  }
+  
+  /* Style the back side */
+  .flip-card-back {
+    transform: rotateY(180deg);
+    border-radius: 4px;
+    background: #FFF;
+    box-shadow: 0px 1.3px 9px 0px rgba(14, 18, 61, 0.22);
+    color: #362A6C;
+    font-size: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media screen and (min-width:480px) {
+    .flip-card-back {
+        font-size: 26px;
+    }
+  }
+
+
+/* Definitions container subsection */
+
+h3.list-of-words {
+    font-size: 19px;
+    margin-bottom: 36px;
+    color: #2D225D;
+    margin-top: 64px;
+}
+
+@media screen and (min-width:600px) {
+    h3.list-of-words {
+        font-size: 24px;
+        margin-bottom: 64px;
+        color: #2D225D;
+        margin-top: 96px;
+    }
+}
+
+/* Global div encapsulating all the terms. */
+
+.path-mod-wordcards .terms {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* Each term is defined by a .term-wrapper. */
+
+.path-mod-wordcards .definitions-container {
+    margin-top: 36px;
+}
+
+@media screen and (min-width:600px) {
+    .path-mod-wordcards .definitions-container {
+        margin-top: 48px;
+    }
+}
+
+.path-mod-wordcards .definitions-container a.wordcards-my-words-action {
+    position: absolute;  
+    top: -8px;
+    left: 11px;
+    align-self: flex-end;
+}
+
+@media screen and (min-width:600px) {
+    .path-mod-wordcards .definitions-container a.wordcards-my-words-action {
+        right: auto;
+        left: -5px;
+        align-self: flex-start;
+    }
+}
+
+.path-mod-wordcards .definitions-container .term-title {
+    color: #281D5B;
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    margin-top: 48px;
+    margin-left: 12px;
+}
+
+@media screen and (min-width:600px) {
+    .path-mod-wordcards .definitions-container .term-title {
+        margin-top: 0; 
+        margin-left: 36px;
+    }
+}
+
+#audio-small {
+    height: 28px;
+    width: 28px;
+    border-radius: 100%;
+    position: relative;
+    border: 1px solid #BABFE7;
+    background-color: #fff;
+    margin-left: 12px;
+}
+
+#audio-small:hover {
+    background-color: #eff1fd;
+}
+
+#audio-small:active {
+    background-color: #c7cbf0;
+}
+
+#audio-small.fa-volume-up:after {
+    content: "";
+    display: block;
+    height: 16px;
+    width: 18px;
+    background-image: url([[pix:mod_wordcards|audio-icon-mini]]);
+    background-size: 16px 18px;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+}
+
+#audio-small.fa-volume-up:before {
+    display: none;
+}
+
+.path-mod-wordcards .definitions-container .text_to_html {
+    color: #281D5B;
+    font-size: 18px;
+    font-style: italic;
+    margin-top: 18px;
+}
+
+@media screen and (min-width:600px) {
+    .path-mod-wordcards .definitions-container .text_to_html {
+        border-left: 1px solid #D7D9FF;
+        padding-left: 12px;
+        margin-left: 12px;
+        margin-top: 0;
+    }
+}
+
+
+.path-mod-wordcards .definitions-container .terms {
+    width: 100%;
+    box-shadow: 0px 2px 14px 0px rgba(14, 18, 61, 0.22);
+    margin-bottom: 64px;
+}
+
+@media screen and (min-width:600px) {
+    .path-mod-wordcards .definitions-container .terms {
+        margin-bottom: 72px;
+    }
+}
+
+
+.path-mod-wordcards .definitions-container .term {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 80px;
+}
+
+@media screen and (min-width:600px) {
+    .path-mod-wordcards .definitions-container .term {
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+}
+
+.path-mod-wordcards .term-wrapper {
+    width: 100%;
+    padding: 6px;
+    border-bottom: 1px solid #D7D9FF;
+}
+
+.path-mod-wordcards .definitions-container .term-image {
+    height: 80px;
+    width: 140px;
+    margin-top: 18px;
+}
+
+@media screen and (min-width:600px) {
+    .path-mod-wordcards .definitions-container .term-image {
+        margin-top: 0;
+        padding-left: 24px;
+    }
+}
+
+.path-mod-wordcards .term-wrapper:last-of-type {
+    width: 100%;
+    padding: 6px;
+    border-bottom: none;
+}
+
+.learned-status {
+    color: #5560F3;
+    font-size: 12px;
+    font-style: italic;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-end;
+    justify-content: center;
+    align-self: flex-end;
+    margin-top: 18px;
+    margin-bottom: 18px;
+    margin-right: 19px;
+}
+
+@media screen and (min-width:600px) {
+    .learned-status {
+        display: flex;
+        flex-direction: column;
+        align-self: auto;
+        max-width: 46px;
+        text-align: center;
+        align-items: center;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-right: 12px;
+        margin-left: auto;
+        line-height: 1.2;
+        padding-left: 5px
+    }
+}
+
+.learned-status-icon {
+    height: 18px;
+    width: 18px;
+    background-size: 18px 18px;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-left: 6px;
+}
+
+@media screen and (min-width:600px) {
+    .learned-status-icon {
+        margin-left: 0;
+    }
+}
+
+.learned-status.learned .learned-status-icon {
+    background-image: url([[pix:mod_wordcards|learned-icon]]);
+}
+
+.learned-status.not-learned .learned-status-icon {
+    background-image: url([[pix:mod_wordcards|not-learned-icon]]);
+}
+
+.learned-status .learned-status-text::before {
+    margin-top: 6px;
+    display: block;
+}
+
+/* Remove the margin at the end of each 'row'. */
+
+.path-mod-wordcards .term-wrapper:nth-of-type(3n) {
+    margin-right: 0;
+}
+
+.dir-rtl.path-mod-wordcards .term-wrapper {
+    margin-left: 1%;
+    margin-right: 0;
+}
+
+/* Another term div, in case the wrapper wasn't enough. */
+
+.path-mod-wordcards .flip-card-back .term {
+    display: block;
+    height: 388px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* The term header, where the title and tick will be. */
+
+.path-mod-wordcards .term-header {
+    position: relative;
+}
+
+/* Term title. Where a right padding is kept to leave room for the tick. */
+
+.path-mod-wordcards .term-header  {
+    font-weight: bold;
+    border-bottom: 1px solid #ccc;
+    /* Separator between title and body. */
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.dir-rtl.path-mod-wordcards .term-header .term-title {
+    padding-right: 0;
+    padding-left: 25px;
+}
+
+
+
+/*
+.path-mod-wordcards .flip-card .flip-card-back .term-title {
+    margin-bottom: 18px;
+}
+*/
+/*
+.youglish-placeholder {
+    height: 42px;
+    width: 42px;
+    border-radius: 100%;
+    background: linear-gradient(157deg, #9582F2 0%, #6F58DE 100%);
+    box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.15);
+    position: relative;
+    margin-bottom: 18px;
+}
+
+.youglish-placeholder:hover {
+    box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0);
+}
+
+.youglish-placeholder:active {
+    background: linear-gradient(157deg, #7c69da 0%, #624ec6 100%);
+}
+
+.youglish-placeholder:after {
+    content: "";
+    display: block;
+    height: 12px;
+    width: 20px;
+    background-image: url([[pix:mod_wordcards|video-icon]]);
+    background-size: 20px 12px;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 15px;
+    left: 12px;
+}
+
+ */
+
+.path-mod-wordcards .definition_flashcards .flip-card .term-image {
+    padding: 12px;
+    height: 180px;
+    width: 100%;
+}
+
+@media screen and (min-width:600px) {
+    .path-mod-wordcards .definition_flashcards .flip-card .term-image {
+        height: 250px;
+    }
+}
+
+/* The term tick, absolutely positioned to the right. */
+
+.path-mod-wordcards .term-header .term-tick {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.dir-rtl.path-mod-wordcards .term-header .term-tick {
+    left: 0;
+    right: auto;
+}
+
+/* The term body, where the definition will be displayed. */
+
+.path-mod-wordcards .term-body {
+}
+
+/* Various classes for the appearance of the tick. */
+
+.path-mod-wordcards .term-seen-action {
+    display: block;
+}
+
+.path-mod-wordcards .term-seen-state {
+    display: none;
+}
+
+.path-mod-wordcards .term-seen .term-seen-action {
+    display: none;
+}
+
+.path-mod-wordcards .term-seen .term-seen-state {
+    display: block;
+}
+
+.path-mod-wordcards .term-seen-loading {
+    display: none;
+}
+
+.path-mod-wordcards .term-loading .term-tick > * {
+    /* Hide all the children. */
+    display: none;
+}
+
+.path-mod-wordcards .term-loading .term-seen-loading {
+    display: block;
+}
+
+.path-mod-wordcards .page-footer {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.path-mod-wordcards .nextactionbtncontainer {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.path-mod-wordcards .page-footer p {
+    text-align: right;
+}
+
+.dirt-rtl.path-mod-wordcards .page-footer p {
+    text-align: left;
+}
+
+.path-mod-wordcards .wordcards {
+    position: relative;
+}
+
+.path-mod-wordcards .wordcards .wordcard {
+    position: absolute;
+    display: table;
+    box-sizing: border-box;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.path-mod-wordcards .wordcards .wordcard .wordcard-wrapper {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.path-mod-wordcards .wordcards .wordcard .wordcard-content {
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 5px;
+}
+
+.path-mod-wordcards .wordcards .wordcard.selected,
+.path-mod-wordcards .wordcards .wordcard.found {
+    background-color: green;
+    color: white;
+    cursor: initial;
+}
+
+.path-mod-wordcards .wordcards .wordcard.mismatch {
+    background-color: red;
+    color: white;
+}
+
+.path-mod-wordcards .wordcards .congrats {
+    width: 300px;
+    height: 100px;
+    padding: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -70px 0 0 -170px;
+    display: none;
+    text-align: center;
+    z-index: 1;
+}
+
+.path-mod-wordcards .wordcards .congrats div {
+    padding-bottom: 10px;
+}
+
+.path-mod-wordcards .wordcards_timer {
+    position: absolute;
+    z-index: 1;
+    background-color: #ececec;
+    display: none;
+}
+
+.path-mod-wordcards .wordcards_timer_time {
+}
+
+/**
+ * Students navigate through tabs which look like arrows.
+ *
+ * Arrows need some ::before and ::after to work. A common CSS trick with borders.
+ */
+
+.path-mod-wordcards .student-navigation .student-tab {
+    text-decoration: none;
+    display: block;
+    float: left;
+    height: 40px;
+    background: #ccc;
+    /* Color for disabled tab. */
+    text-align: center;
+    padding: 10px 4px 0 20px;
+    position: relative;
+    margin: 0 10px 10px 0;
+    text-decoration: none;
+    color: #fff;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.dir-rtl.path-mod-wordcards .student-navigation .student-tab {
+    float: right;
+    padding: 10px 20px 0 4px;
+    margin: 0 0 10px 10px;
+}
+
+.path-mod-wordcards .student-navigation .student-tab::after {
+    content: "";
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
+    border-left: 12px solid #ccc;
+    /* Color for disabled tab. */
+    position: absolute;
+    right: -12px;
+    top: 0;
+    z-index: 1;
+}
+
+.dir-rtl.path-mod-wordcards .student-navigation .student-tab::after {
+    border-left: 0;
+    border-right: 12px solid #ccc;
+    /* Color for disabled tab. */
+    left: -12px;
+    right: auto;
+}
+
+.path-mod-wordcards .student-navigation .student-tab::before {
+    content: "";
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
+    border-left: 12px solid white;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.dir-rtl.path-mod-wordcards .student-navigation .student-tab::before {
+    border-left: 0;
+    border-right: 12px solid white;
+    right: 0;
+    left: auto;
+}
+
+.path-mod-wordcards .student-navigation .student-tab.active {
+    background: #3498db;
+    /* The arrow colour for clickable tab. */
+}
+
+.path-mod-wordcards .student-navigation .student-tab.active::after {
+    border-left-color: #3498db;
+    /* The arrow colour for clickable tab. */
+}
+
+.dir-rtl.path-mod-wordcards .student-navigation .student-tab.active::after {
+    border-right-color: #3498db;
+    /* The arrow colour for clickable tab. */
+}
+
+.path-mod-wordcards .student-navigation a.student-tab.current,
+.path-mod-wordcards .student-navigation a.student-tab:hover {
+    background: #0070a8;
+    /* The arrow colour for current tab and on hover effect. */
+}
+
+.path-mod-wordcards .student-navigation a.student-tab.current::after,
+.path-mod-wordcards .student-navigation a.student-tab:hover::after {
+    border-left-color: #0070a8;
+    /* The arrow colour for current tab and on hover effect. */
+}
+
+.dir-rtl.path-mod-wordcards .student-navigation a.student-tab.current::after,
+.dir-rtl.path-mod-wordcards .student-navigation a.student-tab:hover::after {
+    border-right-color: #0070a8;
+    /* The arrow colour for current tab and on hover effect. */
+}
+
+/* The step is the number within the arrows. */
+
+.path-mod-wordcards .student-navigation .student-tab .step {
+    border-radius: 50%;
+    background: #fff;
+    color: #ccc;
+    /* Color for disabled tab. */
+    width: 20px;
+    display: inline-block;
+    height: 20px;
+    font-size: 14px;
+}
+
+.path-mod-wordcards .student-navigation .student-tab.active .step {
+    color: #3498db;
+    /* The arrow colour for clickable tab. */
+}
+
+.path-mod-wordcards .student-navigation a.student-tab.current .step,
+.path-mod-wordcards .student-navigation a.student-tab:hover .step {
+    color: #0070a8;
+    /* The arrow colour for current tab and on hover effect. */
+}
+
+.path-mod-wordcards .student-navigation .student-tab .text {
+    display: inline-block;
+}
+
+/* Simple media query to reduce the number of terms to two on the width. */
+/*
+@media (max-width: 767px) {
+    .path-mod-wordcards .term-wrapper {
+        width: 49%;
+    }
+
+    .path-mod-wordcards .term-wrapper:nth-of-type(3n) {
+        margin-right: 1%;
+    }
+
+    .path-mod-wordcards .term-wrapper:nth-of-type(2n) {
+        margin-right: 0;
+    }
+
+    .dir-rtl.path-mod-wordcards .term-wrapper:nth-of-type(3n) {
+        margin-right: 0;
+        margin-left: 1%;
+    }
+
+    .dir-rtl.path-mod-wordcards .term-wrapper:nth-of-type(2n) {
+        margin-left: 0;
+    }
+}
+*/
+/* Simple media query for terms to go full width. */
+/*
+@media (max-width: 500px) {
+    .path-mod-wordcards .term-wrapper {
+        width: 100%;
+        margin-right: 0;
+        margin-left: 0;
+    }
+}
+*/
+
+/* ACTIVITY CSS */
+
+#wordcards-gameboard {
+    margin-top: 20px;
+    display: none;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#wordcards-results {
+    display: none;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.mod_wordcards_cancelattempt_cont {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.mod_wordcards_cancelattempt_cont .cancel_attempt_button {
+    max-width: 250px;
+    /* float: right; */
+}
+
+#wordcards-answer-input {
+    width: 100%;
+    border-radius: 5px;
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#wordcards-quit-button {
+    display: none;
+}
+
+#wordcards-counter {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+    font-size: 28px;
+    background-color: black;
+    color: lawngreen;
+    border: 5px solid lightgray;
+    height: 50px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#wordcards-question {
+    border: 3px solid #6780ca;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+    font-size: 35px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    height: 100px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: content-box;
+}
+#wordcards-vocab-list {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.a4e-flashcard-img {
+    width: 64px;
+    height: auto;
+    display: block;
+}
+
+.a4e-prompt-img {
+   /* position: absolute; */
+    left: 10px;
+    top: 10px;
+    bottom: 0;
+    height: 100px;
+    width: auto;
+    border: 1px solid black;
+}
+
+.a4e-distractors {
+    text-align: center;
+    font-size: 20px;
+}
+
+.a4e-distractor:hover {
+    background-color: #f7f7f7;
+}
+
+.a4e-distractor {
+    cursor: pointer;
+}
+
+.a4e-correct-glyph {
+    color: green;
+}
+
+.a4e-incorrect-glyph {
+    color: red;
+}
+
+.a4e-click-disabled {
+    pointer-events: none;
+}
+
+/* FLASHCARDS */
+
+.a4e-flashcards-container {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 2px solid darkgray;
+    padding: 5px;
+}
+
+.a4e-card {
+    cursor: pointer;
+    display: inline-block;
+    margin: 5px;
+    width: 250px;
+    height: 100px;
+}
+
+.a4e-card .wordcards_defcard {
+    position: relative;
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    width: 250px;
+    height: 100px;
+    text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+.a4e-card .wordcards_termcard {
+    position: relative;
+    background-color: #F7E7E7;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    width: 250px;
+    height: 100px;
+}
+
+.play-tts {
+    position: absolute;
+    left: 0;
+    top: -12px;
+    border-right: 1px solid darkgray !important;
+    border-bottom: 1px solid darkgray !important;
+}
+
+/* FEEDBACK */
+
+.a4e-correct {
+    background-color: rgba(0, 255, 0, .5) !important;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 1px;
+}
+
+.a4e-incorrect {
+    background-color: rgba(255, 0, 0, .5) !important;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 1px;
+}
+
+.a4e-basic_feedback {
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid darkgray;
+}
+
+.a4e-detailed_feedback_div {
+    text-align: left;
+    padding: 10px;
+    font-size: 20px;
+    border-radius: 5px;
+    margin: 5px;
+    display: inline-block;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    vertical-align: top;
+}
+
+#wordcards-submitted {
+    height: 64px;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border: 1px solid black;
+    text-align: center;
+    font-size: 30px;
+}
+
+/* KEYBOARD */
+
+.chunk-key {
+    width: 50px;
+    height: 50px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    border: 1px solid black;
+    margin: 5px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.chunk-key-inner {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 36px;
+}
+
+#chunk-input {
+    width: 100%;
+    text-align: center;
+    border: 1px solid black;
+    vertical-align: top;
+    padding-top: 50px;
+    padding-bottom: 60px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+#chunk-typed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 40px;
+    border-bottom: 1px solid black;
+    box-sizing: border-box;
+}
+
+#chunk-typed-inner {
+    height: 40px;
+    font-size: 26px;
+    width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid black;
+}
+
+#chunk-input-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    border-top: 1px solid black;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.chunk-input-control {
+    height: 49px;
+    width: 50%;
+    float: left;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.chunk-input-disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.a4e-key-pressed {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.a4e-key-disabled {
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+/* SPEECH CARDS */
+
+#speech-container {
+    border: 1px solid darkgray;
+    margin-bottom: 5px;
+    padding: 10px;
+}
+
+#wordcards-speechcards_pushrecorder {
+    text-align: center;
+    background-image: url([[pix:mod_wordcards|spinner]]);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.wordcards-speechcards_toprow {
+    margin: 15px auto;
+    display: flex;
+    justify-content: center;
+}
+
+.wordcards-speechcards_whatheard {
+    width: 400px;
+    border: dotted 1px;
+    border-color: green;
+    text-align: center;
+    margin: 1px;
+}
+
+.wordcards-speechcards_gotit {
+    color: white;
+    background-color: green;
+}
+
+.wordcards-speechcards_button {
+}
+
+.wordcards_loading {
+    text-align: center;
+    margin: 20px;
+    padding: 10px;
+}
+
+.wordcards_loadingtext {
+    margin: 10px;
+}
+
+
+
+.mod_wordcards_activity_header {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    color: #281D5B;
+}
+
+@media screen and (min-width:600px) {
+    .mod_wordcards_activity_header {
+        margin-top: 48px;
+        margin-bottom: 48px;
+    }
+}
+
+.mod_wordcards_activity_header h3 {
+    font-size: 19px;
+    margin-bottom: 24px;
+    color: #2D225D;
+}
+
+@media screen and (min-width:600px) {
+    .mod_wordcards_activity_header h3 {
+        font-size: 22px;
+        margin-bottom: 36px;
+    }
+}
+
+/* PROGRESS DOTS */
+
+#wordcards-progress-dots {
+    font-size: 40px;
+    text-align: center;
+    letter-spacing: 10px;
+    border: 1px solid darkgray;
+    margin-bottom: 5px;
+}
+
+#wordcards-star-rating {
+    letter-spacing: 20px;
+    text-align: center;
+    font-size: 30px;
+}
+/*
+#container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+*/
+
+#try-again-or-next {
+    height: 48px;
+    margin-bottom: 50px;
+}
+
+.mod_wordcards_actionbuttons {
+    text-align: right;
+}
+
+.mod_wordcards_listbuttons {
+    margin: 10px;
+    display: grid;
+}
+
+/*TT Recorder Styles */
+.mod_wordcards_ttrec_waveButtonContainer {
+    position: relative;
+    margin: auto;
+    border: 2px solid darkgray;
+    border-radius: 10px;
+    width: 200px;
+}
+
+.mod_wordcards_ttrec_waveForm {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: white;
+    border-radius: 10px;
+}
+
+.mod_wordcards_ttrec_waveButton {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow: inset 0px 1px 3px #ffccbd, inset 0px -1px 3px #9c282e;
+    color: #000;
+    font-size: 26px;
+    text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.3);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    margin: auto;
+    color: white;
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: red;
+}
+
+.path-mod-wordcards .term-header .term-modelsentence {
+    font-weight: normal;
+    margin-top: 2px;
+}
+
+.wordcards-poodllspeechcards_box {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid black;
+    font-size: 32px;
+    width: 75%;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.75);
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+ /* flashcards_mode style start */
+ 
+.ProgressBar {
+  margin: 0 auto;
+  padding: 2em 0 3em;
+  list-style: none;
+  position: relative;
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-pack: justify;
+          justify-content: space-between;
+	width: 37%;	  
+}
+
+.ProgressBar-step {
+  text-align: center;
+  position: relative;
+  width: 100%;
+  margin-left:3%;
+}
+.ProgressBar-step:before, .ProgressBar-step:after {
+  content: "";
+  height: 0.5em;
+  /*background-color: #9F9FA3;*/
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  left: -50%;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  -webkit-transition: all .25s ease-out;
+  transition: all .25s ease-out;
+}
+.ProgressBar-step:first-child:before, .ProgressBar-step:first-child:after {
+  display: none;
+}
+.ProgressBar-step:after {
+ /* background-color: #00637C;*/
+  width: 0%;
+}
+.ProgressBar-step.is-complete + .ProgressBar-step.is-current:after, .ProgressBar-step.is-complete + .ProgressBar-step.is-complete:after {
+  width: 100%;
+}
+
+.ProgressBar-icon {
+    width: 1.5em;
+    height: 1.5em;
+    /* background-color: #9F9FA3; */
+    /* fill: #9F9FA3; */
+	cursor: pointer;
+    border-radius: 50%;
+    border: 1px solid;
+    padding: 0.5em;
+    max-width: 100%;
+    z-index: 10;
+    position: relative;
+    -webkit-transition: all .25s ease-out;
+    transition: all .25s ease-out;
+}
+.is-current .ProgressBar-icon {
+    fill: #4f544f;
+    background-color: #4f544f;
+}
+.is-complete .ProgressBar-icon {
+ fill: #008000;
+  background-color: #008000;
+}
+
+.ProgressBar-stepLabel {
+  display: block;
+  text-transform: uppercase;
+  color: #9F9FA3;
+  position: absolute;
+  padding-top: 0.5em;
+  width: 100%;
+  -webkit-transition: all .25s ease-out;
+  transition: all .25s ease-out;
+}
+.is-current > .ProgressBar-stepLabel, .is-complete > .ProgressBar-stepLabel {
+  color: #00637C;
+}
+
+.wrapper_pr {
+  max-width: 100%;
+  /* margin: 4em auto; */
+  font-size: 16px;
+}
+ 
+.definition_flashcards_ul li {
+   list-style: none;
+}
+   
+.df_fl_control {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 42%;
+}
+
+@media screen and (min-width:480px) {
+    .df_fl_control{
+        top: 50%;
+    }
+}
+   
+.df_fl_control a {
+    font-size: 35px;
+    color: #e2510c;
+    cursor: pointer;
+}
+
+
+.df_fl_control button#Prev {
+    height: 32px;
+    width: 32px;
+    background-image: url([[pix:mod_wordcards|arrow-left]]);
+    background-color: #fff;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: 1px solid #DADBEC;
+    border-radius: 100%;
+    display: flex;
+    align-content: center;
+    justify-items: center;
+}
+
+@media screen and (min-width:480px) {
+    .df_fl_control button#Prev {
+        height: 48px;
+        width: 48px;
+        margin-left: 32px;
+        background-size: 22px 18px;
+    }
+}
+
+.df_fl_control button#Next {
+    height: 32px;
+    width: 32px;
+    background-image: url([[pix:mod_wordcards|arrow-right]]);
+    background-color: #fff;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: 1px solid #DADBEC;
+    border-radius: 100%;
+    display: flex;
+    align-content: center;
+    justify-items: center;
+}
+
+.df_fl_control button#Prev.isFirst {
+    visibility: hidden;
+}
+
+.df_fl_control button#Next.isLast {
+    background-image: url([[pix:mod_wordcards|restart-carousel-icon]]);
+    background-color: transparent;
+    border-color: transparent;
+    border-radius: 8px;
+    background-size: 16px;
+}
+
+@media screen and (min-width:480px) {
+    .df_fl_control button#Next.isLast {
+        background-size: 22px;
+    }
+}
+
+@media screen and (min-width:480px) {
+    .df_fl_control button#Next {
+        height: 48px;
+        width: 48px;
+        margin-right: 32px;
+        background-size: 22px 18px;
+    }
+}
+
+.df_fl_control button#Prev:hover,
+.df_fl_control button#Next:hover {
+    background-color: #f7f8fe;
+}
+
+.wc_cardsprogress {
+    width: 48px;
+    height: 24px;
+    border-radius: 3px;
+    border: 1px solid #D8DCFA;
+    color: #494B6D;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 12px;
+}
+
+@media screen and (min-width:480px) {
+    .wc_cardsprogress {
+        width: 78px;
+        height: 40px;
+        font-size: 14px;
+        border-radius: 6px;
+        margin-top: 18px;
+    }
+}
+
+ul.definition_flashcards_ul {
+    display: flex;
+    align-content: center;
+    justify-items: center;
+    margin-top: -48px;
+    padding: 0;
+}
+.df_fl_control button:focus {
+    outline: unset !important;
+}
+.mb_nav {
+    text-align: center;
+}
+.add_opacity_level{
+	opacity: 0.6;
+}
+
+.add_wraper_handle_im{
+	margin-top: 5%;
+	width: 100% !important;
+}
+.add_wraper_handle{
+	width: 100% !important;
+}
+
+
+.df_fl {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-image: url([[pix:mod_wordcards|slider-bckg]]);
+    background-repeat: no-repeat;
+    background-size: cover;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 36px;
+    margin-top: 72px;
+}
+
+@media screen and (min-width:480px) {
+    .df_fl {
+        border-radius: 30px;
+    }
+}
+
+.flash_img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.wordcards_importintro {
+    max-width: 1200px;
+    margin: 10px;
+
+}
+.mod_wordcards_center {
+    text-align: center;
+}
+.mod_wordcards_ww_label {
+    display: inline-block;
+    /* width: 50px;*/
+    /* text-align: right; */
+}
+.mod_wordcards_ww_onesense {
+    border: 1px solid grey;
+    border-radius: 3px;
+    margin: 20px;
+    padding: 20px;
+}
+
+.mod_wordcards_ww_sourcedef {
+    font-style: italic;
+}
+
+.mod_wordcards_ww_def {
+    width: 100%;
+    max-width: 400px;
+}
+.mod_wordcards_ww_modelsentence {
+    width: 100%;
+    max-width: 600px;
+}
+.mod_wordcards_ww_fieldset {
+    margin: 20px;
+    padding: 10px;
+}
+
+.definition_flashcards a.wordcards-my-words-action {
+    position: absolute;  
+    top: -2px;  
+}
+
+.flip-card-front a.wordcards-my-words-action {
+    right: 5px;
+}
+
+.flip-card-back a.wordcards-my-words-action {
+    left: 5px;
+}
+
+a.wordcards-my-words-action.btn-outline-primary i.fa-check,
+a.wordcards-my-words-action.disabled i.fa-check {
+    /*If the btn-outline-primary class is applied so the button is in the "Add" state (show plus icon only). */
+    display: none;
+}
+a.wordcards-my-words-action.btn-primary i.fa-plus,
+a.wordcards-my-words-action.disabled i.fa-plus {
+    /*In this case the btn-outline-primary class is applied so the button is in the "Remove" state (show check icon only). */
+    display: none;
+}
+
+
+#my-words .fa-plus {
+    position: relative;
+}
+
+#my-words .fa-plus::before {
+    content: "";
+    height: 27px;
+    width: 19px;
+    display: block;
+    background-image: url([[pix:mod_wordcards|bookmark-empty]]);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+@media screen and (min-width:600px) {
+    .definition_flashcards #my-words .fa-plus::before {
+        height: 34px;
+        width: 24px;
+    }
+}
+
+
+#my-words .fa-plus::after {
+    content: "";
+    height: 10px;
+    width: 9px;
+    display: block;
+    background-image: url([[pix:mod_wordcards|add-word-plus]]);
+    background-size: contain;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 7px;
+    left: 5px;
+}
+
+@media screen and (min-width:600px) {
+    .definition_flashcards #my-words .fa-plus::after {
+        height: 12px;
+        width: 11px;
+        top: 9px;
+        left: 6px;
+    }
+}
+
+#my-words:hover .fa-plus::after {
+    transform: scale(1.2);
+}
+
+#my-words .fa-check::before {
+    content: "";
+    height: 27px;
+    width: 19px;
+    display: block;
+    background-image: url([[pix:mod_wordcards|bookmark-filled]]);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+@media screen and (min-width:600px) {
+    .definition_flashcards #my-words .fa-check::before {
+        height: 34px;
+        width: 24px;
+    }
+}
+
+#my-words.btn-primary,
+#my-words.btn-outline-primary {
+    color: transparent;
+    border-color: transparent;
+    background-color: transparent;
+}
+
+#my-words.btn-outline-primary:focus, 
+#my-words.btn-outline-primary.focus,
+#my-words.btn-primary:focus, 
+#my-words.btn-primary.focus {
+    outline: 0.2rem solid transparent;
+    box-shadow: inset 0 0 0 2px transparent;
+}
+
+#my-words.btn-outline-primary:not(:disabled):not(.disabled):active, 
+#my-words.btn-outline-primary:not(:disabled):not(.disabled).active, 
+.show>#my-words.btn-outline-primary.dropdown-toggle {
+    background-color: transparent;
+}
+
+
+a.wordcards-my-words-action i.fa-spinner {
+    display: none;
+}
+a.wordcards-my-words-action.disabled i.fa-spinner{
+    display: inline-block;
+}
+.btn.wordcards-my-words-action {
+    font-weight: normal;
+    font-size: 0.7em;
+    padding: 0 5px 0 5px;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+.mod_wordcards_freemode #results-inner .wordcards-my-words-action.btn.btn-primary,
+.mod_wordcards_freemode #results-inner .wordcards-my-words-action.btn.btn-outline-primary {
+    margin-top: 3px;
+}
+.mod_wordcards_item_rating {
+
+    margin-top:12px;
+}
+
+.wordcards_actionbutton a.btn {
+    min-width: 150px;
+    margin-top:8px;
+}
+
+@media screen and (max-width:480px) {
+    .mod_wordcards_step_rating img {
+        max-width: 100%;
+    }
+}
+@media screen and (max-width:922px){
+    .mod_wordcards_step_rating img {
+        max-width: 16px;
+    }
+}
+
+.mod_wordcards_skeleton_box {
+    background-color: #DDDBDD;
+    color: grey;
+    -webkit-mask: linear-gradient(-60deg,#000 30%,#0005,#000 70%) right/300% 100%;
+    background-repeat: no-repeat;
+    animation: wordcardsshimmer 2.5s infinite;
+    width: 100%;
+    height: 100px;
+
+}
+@keyframes wordcardsshimmer {
+    100% {-webkit-mask-position:left}
+}
+
+.mod_wordcards_activity_header .pull-right, .term-wrapper .pull-right {
+    float: right;
+}
+
+/* Limit page width following Moodle4 default heading sizes */
+
+#page-mod-wordcards-view #page-content /*, 
+ #page-mod-solo-view #page-content,  */
+/* #page-mod-solo-reports .mod_solo_report_card */ {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+button.definitions-next.btn {
+    font-weight: 500;
+    font-size: 16px;
+    color: #FFF;
+    background: #6F58DE;
+    box-shadow: 0 4px 14px rgba(0,0,0,.15);
+    border-radius: 6px;
+    padding: 14px 36px;
+}
+
+
+button.definitions-next.btn .fa-arrow-right:after {
+    content: "";
+    display: block;
+    height: 16px;
+    width: 18px;
+    background-image: url([[pix:mod_wordcards|next-page-arrow]]);
+    background-size: 16px 18px;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    top: 3px;
+    left: 4px;
+}
+
+button.definitions-next.btn .fa-arrow-right:before {
+    display: none;
+}
+
+.retrieval-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 232px;
+    margin-bottom: 12px;
+    margin-top: 6px;
+}
+
+@media screen and (min-width:600px) {
+    .retrieval-buttons {
+        width: 356px;   
+    }
+}
+
+.retrieve-video {
+    height: 30px;
+    width: 38px;
+    background-image: url([[pix:mod_wordcards|retrieve-video-icon]]);
+    background-size: 38px 30px;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.retrieve-video.isselected {
+    background-color: #CCCCCC;
+}
+.retrieve-video.isselected.video-selected {
+    background-color: unset;
+    background-image: url([[pix:mod_wordcards|retrieve-image-icon]]);
+}
+
+.retrieve-video.btn {
+    border-radius: 0;
+}
+
+
+/* Model sentence for flashcards section*/
+
+.definition_flashcards .term-modelsentence {
+    background-color: #F7F5FE;
+    font-size: 16px;
+    padding: 24px;
+    line-height: 1.4;
+    margin-top: 48px;
+    margin-left: 18px;
+    margin-right: 18px;
+    border-radius: 8px;
+    position: relative;
+}
+
+@media screen and (min-width:600px) {
+    .definition_flashcards .term-modelsentence {
+        font-size: 18px;
+        padding: 36px;
+    }
+}
+
+.definition_flashcards .term-modelsentence h5 {
+    color: #745EE3;
+    text-transform: uppercase;
+    font-size: 9px;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.54px;
+    margin-bottom: 18px;
+    margin-top: -4px;
+}
+
+@media screen and (min-width:600px) {
+    .definition_flashcards .term-modelsentence h5 {
+        font-size: 10px;
+        margin-bottom: 24px;
+        margin-top: -10px;
+    }
+}
+
+.definition_flashcards .term-modelsentence-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.definition_flashcards .term-modelsentence-small {
+    height: 32px;
+    width: 32px;
+    border-radius: 100%;
+    border: 1px solid #6F58DE;
+    margin-top: 12px;
+    background-image: url([[pix:mod_wordcards|audio-icon-negative]]);
+    background-size: 14px 10px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.definition_flashcards .term-modelsentence-small:hover {
+    background-color: #eae8f7;
+}
+
+.definition_flashcards .term-modelsentence-small:active {
+    background-color: #eae8f7;
+}
+
+/* Model sentence for definitions section*/
+
+.definitions-container .term-modelsentence {
+    font-size: 16px;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 18px;
+    max-width: 80%;
+    text-align: center;
+    color: #8388b8;
+}
+
+@media screen and (min-width:600px) {
+    .definitions-container .term-modelsentence {
+        margin-left: 18px;
+        flex-direction: row;
+        margin-top: 0;
+        max-width: none;
+        text-align: left;
+    }
+}
+
+.definitions-container .term-modelsentence::before {
+    content: '';
+    display: block;
+    height: 28px;
+    width: 18px;
+    border-left: 1px solid #D7D9FF;
+    flex-shrink: 0;
+    display: none;
+}
+
+@media screen and (min-width:600px) {
+    .definitions-container .term-modelsentence::before {
+        display: block;
+    }
+}
+
+
+.definitions-container .term-modelsentence-small {
+    height: 28px;
+    width: 28px;
+    border-radius: 100%;
+    position: relative;
+    border: 1px solid #BABFE7;
+    background-color: #fff;
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 6px;
+    background-image: url([[pix:mod_wordcards|audio-icon-mini]]);
+    background-size: 16px 18px;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+@media screen and (min-width:600px) {
+    .definitions-container .term-modelsentence-small {
+        margin-top: 0;
+    }
+}
+
+.definitions-container .term-modelsentence-small:hover {
+    background-color: #eff1fd;
+}
+
+.definitions-container .term-modelsentence-small:active {
+    background-color: #c7cbf0;
+}
+/*space game */
+.path-mod-wordcards div.fontloader {
+    visibility: hidden;
+    font-family: 'Audiowide', Sans;
+}
+.path-mod-wordcards #mod_wordcards_spacegame {
+    background-color: #000;
+    width: 100%;
+    height: 100%;
+}
+.quizgame-scores {
+    text-align: center;
+}
+.floating-button-container {
+    background: #fff;
+    border: 0.5rem solid #fff;
+}
+.floating-game-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999999;
+}
+#page-mod-wordcards-view div[role="main"] {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+@media (min-width: 768px) {
+    /* on ipad air 75% would cause main area to wrap .. 74% seems to work */
+    .col-md-9.wordcards-freemode-mainstage {
+        max-width: 74%;
+    }
+}
+
+.learned-progress-bar {
+    width: 35px;
+    height: 7px;
+    background-color: #F7F5FE;
+    position: relative;
+    margin-top: 3px;
+}
+
+.learned-progress-fill {
+    width: 0;
+    height: 100%;
+    background-color: #5560F3; /* Set the color of the progress */
+    transition: width 0.3s ease; /* Add a smooth transition effect */
+}
+
+.definition_as_header {
+    font-weight: bolder;
+    z-index: 1;
+}
+
+.wordcards_reportsmenu_box {
+    text-align: center;
+    display: flex;
+}
+
+.wordcards_reportsmenu_item {
+    width: 150px;
+    margin: 10px;
+}
+
+.wordcards_reportsmenu_itembutton button{
+    height: 80px;
+    width: 150px;
+}
+
+.wordcards-speechcards-speaker-icon {
+    text-align: center;
+}
+.definition-as-header {
+    flex: 1;
+}
+#wordcards-export-delim {
+    margin-top: 10px;
+    max-width: 150px;
+}
+.wordcards_selectedpoolnowords {
+    max-width: 500px;
+    margin-top: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+    border: 1px, grey, solid;
+}
+.wordcards_deflang_chooser {
+    float: right;
+    padding: 5px;
+}
+.mod_wordcards_manybuttonsmenu_item {
+    max-width: 800px;
+}
+/* Words Preview Self Selector Switch */
+.wc_selfselector {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 20px;
+}
+
+.wc_selfselector input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.wc_selfselector .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.wc_selfselector .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.wc_selfselector input[data-learned="true"]:checked + .slider {
+    background-color: #2196F3;
+}
+
+.wc_selfselector input:checked + .slider {
+    background-color: #0b9f5f;
+}
+
+.wc_selfselector input:checked + .slider:before {
+    transform: translateX(14px);
+}
+
+.wc_selfselector  {
+    display: flex;
+    flex-direction: column;
+    align-self: auto;
+    max-width: 46px;
+    text-align: center;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: 12px;
+    margin-left: auto;
+    line-height: 1.2;
+    padding-left: 5px;
+}

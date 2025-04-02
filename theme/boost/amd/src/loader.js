@@ -89,6 +89,12 @@ const enablePopovers = () => {
         if (!popover._isShown()) {
             popover.show();
         }
+        if (e.key === 'Enter' && e.target.closest('[data-toggle="popover"]')) {
+            $(e.target).popover('show');
+        }
+    });
+    document.addEventListener('click', e => {
+        $(e.target).closest('[data-toggle="popover"]').popover('show');
     });
 };
 

@@ -28,6 +28,19 @@ use core_question\local\bank\view;
  */
 class bulk_delete_action extends \core_question\local\bank\bulk_action_base {
 
+    /**
+     * @var view Question bank view object
+     */
+    protected $qbank;
+
+    /**
+     * Construct the deletequestion plugin feature object
+     * @param view $qbank
+     */
+    public function __construct(view $qbank) {
+        $this->qbank = $qbank;
+    }
+
     public function get_bulk_action_title(): string {
         return get_string('delete');
     }

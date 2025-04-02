@@ -18,6 +18,7 @@ namespace qbank_history;
 
 use core_question\local\bank\filter_condition_manager;
 use core_question\local\bank\question_action_base;
+use core_question\local\bank\filter_condition_manager;
 
 /**
  * Question bank column for the history action icon.

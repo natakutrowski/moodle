@@ -1,0 +1,27 @@
+SpeechAce Question Type
+========================================
+Thanks for downloading SpeechAce Question Type.
+
+The files in the  archive are in the necessary directory structure.
+Upload the directory into the root of your Moodle installation.
+No core Moodle files will be overriden or removed when doing this.
+
+-question
+
+Then login to your site as admin and go to your Moodle site notifications page(under Site Admin).
+Moodle should then guide you through the installation or upgrade of the four modules. 
+
+
+Setting up the SpeechAce Question Type
+=======================================
+It will finally show you the SpeechAce Question Type settings page.
+You need to specify the key obtained from SpeechAce.
+
+
+More instructions, documentation and video tutorials are available at
+https://app.speechace.co/speechace-for-moodle
+
+Good luck.
+
+http://www.speechace.com
+support@speechace.com
