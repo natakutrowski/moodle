@@ -38,7 +38,7 @@ fi
 
 # 3. Mise à jour du code sur OVH
 echo "Pulling latest changes from GitHub on OVH..." | tee -a $LOG_FILE
-ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR} && git pull origin ${BRANCH}" 2>&1 | tee -a $LOG_FILE
+ssh ${REMOTE_USER}@${REMOTE_HOST} -p 22 "cd ${REMOTE_DIR} && git pull origin ${BRANCH}" 2>&1 | tee -a $LOG_FILE
 
 # 4. Synchronisation des fichiers moodledata avec rsync
 echo "Synchronisation de moodledata..." | tee -a $LOG_FILE
