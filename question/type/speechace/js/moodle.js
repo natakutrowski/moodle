@@ -31084,7 +31084,7 @@
                                         !this.state.recordingStream && !c && !this.props.readOnly && this._useFlashRecording())
                                     ) {
                                         
-                                        console.log("" + Say);
+                                        console.log("" + (M.util.get_string('moodlejs_Say', 'qtype_speechace') || "Say"));
                                         var M1 = !0;
                                         (this._onSWFLoaded && !this.state.SWFSettingOpened) || (M1 = !1),
                                             (T = l.default.createElement(
