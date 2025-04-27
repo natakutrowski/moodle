@@ -51,6 +51,7 @@ class awsremote {
     const REGION_SAE1 = 'sa-east-1'; //South America (São Paulo)
     const REGION_AFS1 = 'af-south-1'; //South Africa
     const REGION_MES1 = 'me-south-1'; //Middle East (Bahrain)
+    const REGION_CNNW1 = 'cn-northwest-1'; //China (Ningxia)
 
 
 
@@ -107,6 +108,9 @@ class awsremote {
             case 'bahrain':
                 $ret = self::REGION_MES1;
                 break;
+            case 'ningxia':
+                $ret = self::REGION_CNNW1;
+                break;
             default:
                 //the region might already be good
                 $ret = $region;
@@ -127,7 +131,7 @@ class awsremote {
             }else{
                 return false;
             }
-            $url = constants::CLOUDPOODLL . "/webservice/rest/server.php";
+            $url = \filter_poodll\poodlltools::get_cloud_poodll_server() . "/webservice/rest/server.php";
             $params["wstoken"]=$token;
             $params["wsfunction"]=$functionname;
             $params["moodlewsrestformat"]='json';

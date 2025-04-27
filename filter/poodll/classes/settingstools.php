@@ -99,6 +99,12 @@ class settingstools {
         $items[] = new \admin_setting_configtext('filter_poodll/cpapisecret', get_string('cpapisecret', 'filter_poodll'),
             $show_below_apisecret, '');
 
+        // Cloud Poodll Server.
+        $items[] = new \admin_setting_configtext(constants::M_COMPONENT .  '/cloudpoodllserver',
+            get_string('cloudpoodllserver', constants::M_COMPONENT),
+            get_string('cloudpoodllserver_details', constants::M_COMPONENT),
+            constants::M_DEFAULT_CLOUDPOODLL, PARAM_URL);
+
         //Adding Amazon AWS regions
         $options = self::fetch_awsregion_options();
         $items[] = new \admin_setting_configselect('filter_poodll_aws_region', get_string('awsregion', 'filter_poodll'),
@@ -414,7 +420,8 @@ class settingstools {
                 awsremote::REGION_CAC1 => get_string('REGION_CAC1', 'filter_poodll'),
                 awsremote::REGION_SAE1 => get_string('REGION_SAE1', 'filter_poodll'),
                 awsremote::REGION_AFS1 => get_string('REGION_AFS1', 'filter_poodll'),
-                awsremote::REGION_MES1 => get_string('REGION_MES1', 'filter_poodll')
+                awsremote::REGION_MES1 => get_string('REGION_MES1', 'filter_poodll'),
+                awsremote::REGION_CNNW1 => get_string('REGION_CNNW1', 'filter_poodll'),
 
         );
         return $options;

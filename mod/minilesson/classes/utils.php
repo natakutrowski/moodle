@@ -36,10 +36,15 @@ use mod_minilesson\constants;
  */
 class utils {
 
-     // const CLOUDPOODLL = 'http://localhost:8044';
-     // const CLOUDPOODLL = 'http://localhost/moodle';
-    // const CLOUDPOODLL = 'https://vbox.poodll.com/cphost';
-    const CLOUDPOODLL = 'https://cloud.poodll.com';
+
+    public static function get_cloud_poodll_server() {
+        $conf = get_config(constants::M_COMPONENT);
+        if (isset($conf->cloudpoodllserver) && !empty($conf->cloudpoodllserver)) {
+            return 'https://' . $conf->cloudpoodllserver;
+        } else {
+            return 'https://' . constants::M_DEFAULT_CLOUDPOODLL;
+        }
+    }
 
     // we need to consider legacy client side URLs and cloud hosted ones
     public static function make_audio_url($filename, $contextid, $component, $filearea, $itemid) {
@@ -186,7 +191,7 @@ class utils {
             if(empty($token)){
                 return false;
             }
-            $url = self::CLOUDPOODLL . "/webservice/rest/server.php";
+            $url = self::get_cloud_poodll_server() . "/webservice/rest/server.php";
             $params["wstoken"] = $token;
             $params["wsfunction"] = 'local_cpapi_generate_lang_model';
             $params["moodlewsrestformat"] = 'json';
@@ -532,7 +537,7 @@ class utils {
         }
 
         // Send the request & save response to $resp
-        $tokenurl = self::CLOUDPOODLL . "/local/cpapi/poodlltoken.php";
+        $tokenurl = self::get_cloud_poodll_server() . "/local/cpapi/poodlltoken.php";
         $postdata = [
             'username' => $apiuser,
             'password' => $apisecret,
@@ -674,7 +679,7 @@ class utils {
         $params['notificationurl'] = 'none';
         $params['sourcemimetype'] = 'unknown';
 
-        $serverurl = self::CLOUDPOODLL . '/webservice/rest/server.php';
+        $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
         $response = self::curl_fetch($serverurl, $params);
         if (!self::is_json($response)) {
             return false;
@@ -723,11 +728,11 @@ class utils {
          $params['region'] = $region;
          // $params['language'] = $language;
 
-         $serverurl = self::CLOUDPOODLL . '/webservice/rest/server.php';
+         $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
          $response = self::curl_fetch($serverurl, $params);
-         if (!self::is_json($response)) {
-             return false;
-         } else {
+        if (!self::is_json($response)) {
+            return false;
+        } else {
             $payloadobject = json_decode($response);
             if ($payloadobject->returnCode == 0 && isset($payloadobject->returnMessage)) {
                 $assemblyaitoken = $payloadobject->returnMessage;
@@ -740,7 +745,80 @@ class utils {
             } else {
                 return false;
             }
-         }
+        }
+    }
+    // Fetch the appropriate azure region for the given poodll region
+    public static function fetch_ms_region($poodllregion) {
+
+        switch($poodllregion){
+            case 'capetown':
+            case 'bahrain':
+            case 'dublin':
+            case 'frankfurt':
+            case 'london':
+            case 'ningxia':
+                return 'westeurope';
+            case 'tokyo':
+            case 'useast1':
+            case 'ottawa':
+            case 'saopaulo':
+            case 'singapore':
+            case 'mumbai':
+            case 'sydney':
+            default:
+                return 'eastus';
+        }
+    }
+
+     // Fetch the streaming token for the region and language
+    public static function fetch_msspeech_token($poodllregion) {
+
+        // if we already have a token just use that
+        $now = time();
+        $msregion = self::fetch_ms_region($poodllregion);
+        $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
+        $tokenobject = $cache->get('msspeechtoken' . '_' . $msregion);
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
+            return $tokenobject->token;
+        }
+
+        $cloudpoodlltoken = false;
+        $conf = get_config(constants::M_COMPONENT);
+        if (!empty($conf->apiuser) && !empty($conf->apisecret)) {
+            $cloudpoodlltoken = self::fetch_token($conf->apiuser, $conf->apisecret);
+        }
+        if (!$cloudpoodlltoken || empty($cloudpoodlltoken)) {
+            return false;
+        }
+
+        // The REST API we are calling.
+        $functionname = 'local_cpapi_fetch_msspeech_token';
+
+        // log.debug(params);
+        $params = [];
+        $params['wstoken'] = $cloudpoodlltoken;
+        $params['wsfunction'] = $functionname;
+        $params['moodlewsrestformat'] = 'json';
+        $params['region'] = self::fetch_ms_region($poodllregion);
+
+        $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
+        $response = self::curl_fetch($serverurl, $params);
+        if (!self::is_json($response)) {
+            return false;
+        } else {
+            $payloadobject = json_decode($response);
+            if ($payloadobject->returnCode == 0 && isset($payloadobject->returnMessage)) {
+                $msspeechtoken = $payloadobject->returnMessage;
+                // cache the token
+                $tokenobject = new \stdClass();
+                $tokenobject->token = $msspeechtoken;
+                $tokenobject->validuntil = $now + (30 * MINSECS);
+                $cache->set('msspeechtoken'. '_' . $msregion, $tokenobject);
+                return $msspeechtoken;
+            } else {
+                return false;
+            }
+        }
     }
 
     public static function evaluate_transcript($transcript, $itemid, $cmid) {
@@ -758,15 +836,15 @@ class utils {
         $moduleinstance = $DB->get_record(constants::M_MODNAME, ['id' => $cm->instance], '*', MUST_EXIST);
         $item = $DB->get_record(constants::M_QTABLE, ['id' => $itemid, 'minilesson' => $moduleinstance->id], '*', MUST_EXIST);
 
-        //Feedback language for AI instructions
-        //its awful but we hijack the wordcards student native language setting
+        // Feedback language for AI instructions
+        // its awful but we hijack the wordcards student native language setting
         $feedbacklanguage = $item->{constants::AIGRADE_FEEDBACK_LANGUAGE};
         if ($conf->setnativelanguage) {
             $userprefdeflanguage = get_user_preferences('wordcards_deflang');
             if (!empty($userprefdeflanguage)) {
-                //the WC language is 2 char but Poodll AI expects a locale code
+                // the WC language is 2 char but Poodll AI expects a locale code
                 $wclanguage = self::lang_to_locale($userprefdeflanguage);
-                //if we did get a locale code lets use that.
+                // if we did get a locale code lets use that.
                 if ($wclanguage !== $userprefdeflanguage && $wclanguage !== $feedbacklanguage) {
                     $feedbacklanguage = $wclanguage;
                 }
@@ -775,6 +853,14 @@ class utils {
 
         // AI Grade
         $maxmarks = $item->{constants::TOTALMARKS};
+        switch($item->type){
+            case constants::TYPE_FREEWRITING:
+                $isspeech = false;
+                break;
+            case constants::TYPE_FREESPEAKING:
+            default:
+                $isspeech = true;
+        }
         $instructions = new \stdClass();
         $instructions->feedbackscheme = $item->{constants::AIGRADE_FEEDBACK};
         $instructions->feedbacklanguage = $feedbacklanguage;
@@ -783,7 +869,7 @@ class utils {
         $instructions->questiontext = strip_tags($item->itemtext);
         $instructions->modeltext = $item->{constants::AIGRADE_MODELANSWER};
         $aigraderesults = self::fetch_ai_grade($token, $moduleinstance->region,
-            $moduleinstance->ttslanguage, $transcript, $instructions);
+            $moduleinstance->ttslanguage, $isspeech, $transcript, $instructions);
 
          // Mark up AI Grade corrections
         if ($aigraderesults && isset($aigraderesults->correctedtext)) {
@@ -818,7 +904,7 @@ class utils {
         return $aigraderesults;
 
     }
-    public static function is_rtl($language){
+    public static function is_rtl($language) {
         switch($language){
             case constants::M_LANG_ARAE:
             case constants::M_LANG_ARSA:
@@ -830,9 +916,8 @@ class utils {
         }
     }
 
-    //This function takes the 2-character language code ($lang) as input and returns the corresponding locale code.
-    public static function lang_to_locale($lang)
-    {
+    // This function takes the 2-character language code ($lang) as input and returns the corresponding locale code.
+    public static function lang_to_locale($lang) {
         switch ($lang) {
             case 'ar':
                 return 'ar-AE'; // Assuming Arabic (Modern Standard) is the default
@@ -947,7 +1032,7 @@ class utils {
         // this is because if we show the pre-text (eg student typed text) we can not highlight corrections .. they are not there
         // if we show post-text (eg corrections) we can not highlight mistakes .. they are not there
         // the diffs tell us where the diffs are with relation to text A
-        //NB this is not a language direction thing(arabic hebrew etc), its a markup direction thing
+        // NB this is not a language direction thing(arabic hebrew etc), its a markup direction thing
         if($direction == 'l2r') {
             $passagebits = diff::fetchWordArray($selftranscript);
             $transcriptbits = diff::fetchWordArray($correction);
@@ -1027,17 +1112,20 @@ class utils {
     }
 
       // fetch the AI Grade
-    public static function fetch_ai_grade($token, $region, $ttslanguage, $studentresponse, $instructions) {
+    public static function fetch_ai_grade($token, $region, $ttslanguage, $isspeech, $studentresponse, $instructions) {
         global $USER;
         $instructionsjson = json_encode($instructions);
         // The REST API we are calling
         $functionname = 'local_cpapi_call_ai';
 
+        // The processing is slightly different for speech and text.
+        $action = $isspeech ? 'autograde_speech' : 'autograde_text';
+
         $params = [];
         $params['wstoken'] = $token;
         $params['wsfunction'] = $functionname;
         $params['moodlewsrestformat'] = 'json';
-        $params['action'] = 'autograde_text';
+        $params['action'] = $action;
         $params['appid'] = 'mod_solo';
         $params['prompt'] = $instructionsjson;
         $params['language'] = $ttslanguage;
@@ -1047,7 +1135,7 @@ class utils {
 
         // log.debug(params);
 
-        $serverurl = self::CLOUDPOODLL . '/webservice/rest/server.php';
+        $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
         $response = self::curl_fetch($serverurl, $params);
         if (!self::is_json($response)) {
             return false;
@@ -1146,6 +1234,7 @@ class utils {
            "saopaulo" => get_string("saopaulo", constants::M_COMPONENT),
            "singapore" => get_string("singapore", constants::M_COMPONENT),
             "mumbai" => get_string("mumbai", constants::M_COMPONENT),
+            "ningxia" => get_string("ningxia", constants::M_COMPONENT),
         ];
     }
 
@@ -1936,7 +2025,7 @@ class utils {
         $params['owner'] = hash('md5', $USER->username);
         $params['region'] = $region;
         $params['engine'] = self::can_speak_neural($voice, $region) ? 'neural' : 'standard';
-        $serverurl = self::CLOUDPOODLL . '/webservice/rest/server.php';
+        $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
         $response = self::curl_fetch($serverurl, $params);
         if (!self::is_json($response)) {
             return false;
