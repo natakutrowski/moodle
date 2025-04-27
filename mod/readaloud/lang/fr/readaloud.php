@@ -659,3 +659,7 @@ $string['passagepicture_descr'] = "*L'image du passage n'est pas encore utilisé
 $string['stdashboardid'] = 'ID du Tableau de Bord Étudiant';
 $string['stdashboardid_details'] = "Si le bloc de tableau de bord étudiant est installé, mettez ici l'ID du bloc.";
 $string['eventreadaloudattemptsubmitted'] = 'Tentative ReadAloud soumise';
+
+$string['cloudpoodllserver'] = 'Serveur Cloud Poodll';
+$string['cloudpoodllserver_details'] = 'Le serveur à utiliser pour Cloud Poodll. Ne le modifiez que si Poodll vous en a fourni un autre.';
+$string['ningxia'] = 'Ningxia, Chine';

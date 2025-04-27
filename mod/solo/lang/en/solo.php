@@ -154,6 +154,8 @@ $string['singapore'] = 'Singapore';
 $string['mumbai'] = 'Mumbai, India';
 $string['capetown'] = 'Capetown, South Africa';
 $string['bahrain'] = 'Bahrain';
+$string['ningxia'] = 'Ningxia, China';
+
 
 $string['forever'] = 'Never expire';
 
@@ -873,3 +875,5 @@ $string['stats_genericlevel'] = 'Language Level';
 $string['enablenativelanguage'] = "Enable Native Language";
 $string['enablenativelanguage_details'] = 'If set, the student can choose their native language, this will override the default language of the feedback language that AI returns with the results. The language must currently be <a href="https://support.poodll.com/en/support/solutions/articles/19000163890-definitions-in-user-s-native-language">set in Poodll WordCards</a>, and it is picked up here.';
 $string['teacherfeedback'] = 'Teacher Feedback';
+$string['cloudpoodllserver'] = 'Cloud Poodll Server';
+$string['cloudpoodllserver_details'] = 'The server to use for Cloud Poodll. Only change this if Poodll has provided a different one.';

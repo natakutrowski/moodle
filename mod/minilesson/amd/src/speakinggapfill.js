@@ -3,12 +3,11 @@ define(['jquery',
     'core/ajax',
     'mod_minilesson/definitions',
     'mod_minilesson/pollyhelper',
-    'mod_minilesson/cloudpoodllloader',
     'mod_minilesson/ttrecorder',
     'mod_minilesson/animatecss',
     'mod_minilesson/progresstimer',
     'core/templates'
-], function($, log, ajax, def, polly, cloudpoodll, ttrecorder, anim, progresstimer, templates) {
+], function($, log, ajax, def, polly, ttrecorder, anim, progresstimer, templates) {
     "use strict"; // jshint ;_;
 
     log.debug('MiniLesson speaking gap fill: initialising');
@@ -54,18 +53,14 @@ define(['jquery',
 
             };
 
-            if (quizhelper.use_ttrecorder()) {
-                var opts = {};
-                opts.uniqueid = itemdata.uniqueid;
-                opts.callback = theCallback;
-                opts.stt_guided = quizhelper.is_stt_guided();
-                opts.wwwroot = quizhelper.is_stt_guided();
-                self.ttrec = ttrecorder.clone();
-                self.ttrec.init(opts);
-            } else {
-                // Init cloudpoodll push recorder
-                cloudpoodll.init('minilesson-recorder-listenrepeat-' + itemdata.id, theCallback);
-            }
+            // Init the TT Recorder
+            var opts = {};
+            opts.uniqueid = itemdata.uniqueid;
+            opts.callback = theCallback;
+            opts.stt_guided = quizhelper.is_stt_guided();
+            opts.wwwroot = quizhelper.is_stt_guided();
+            self.ttrec = ttrecorder.clone();
+            self.ttrec.init(opts);
 
             self.itemdata = itemdata;
             log.debug("itemdata");
@@ -193,7 +188,7 @@ define(['jquery',
                 if (self.game.pointer < self.items.length - 1) {
                     // Move on after short time to next prompt
                     setTimeout(function() {
-                        $(".sgapfill_reply_" + self.game.pointer).hide();
+                        $("#" + self.itemdata.uniqueid + "_container .sgapfill_reply_" + self.game.pointer).hide();
                         self.game.pointer++;
                         self.nextPrompt();
                     }, 2000);
@@ -313,7 +308,7 @@ define(['jquery',
                     countdownStarted = true;
                     log.debug('moving to next prompt B');
                     setTimeout(function() {
-                        $(".sgapfill_reply_" + self.game.pointer).hide();
+                        $("#" + self.itemdata.uniqueid + "_container .sgapfill_reply_" + self.game.pointer).hide();
                         self.game.pointer++;
                         self.nextPrompt();
                     }, 2000);
@@ -378,7 +373,7 @@ define(['jquery',
                             log.debug('moving to next prompt A');
                             countdownStarted = true;
                             setTimeout(function () {
-                                $(".sgapfill_reply_" + self.game.pointer).hide();
+                                $("#" + self.itemdata.uniqueid + "_container .sgapfill_reply_" + self.game.pointer).hide();
                                 self.game.pointer++;
                                 self.nextPrompt();
                             }, 2000);
@@ -465,9 +460,9 @@ define(['jquery',
 
         nextPrompt: function() {
             var self = this;
-            $(".sgapfill_ctrl-btn").prop("disabled", false);
+            $("#" + self.itemdata.uniqueid + "_container .sgapfill_ctrl-btn").prop("disabled", false);
             self.updateProgressDots();
-            var newprompt = $(".sgapfill_prompt_" + self.game.pointer);
+            var newprompt = $("#" + self.itemdata.uniqueid + "_container .sgapfill_prompt_" + self.game.pointer);
             anim.do_animate(newprompt, 'zoomIn animate__faster', 'in').then(
                 function() {
                 }
@@ -501,7 +496,7 @@ define(['jquery',
 
 
             $("#" + self.itemdata.uniqueid + "_container .question").append(code);
-            var newreply = $(".sgapfill_reply_" + self.game.pointer);
+            var newreply = $("#" + self.itemdata.uniqueid + "_container .sgapfill_reply_" + self.game.pointer);
             anim.do_animate(newreply, 'zoomIn animate__faster', 'in').then(
                 function() {
                 }

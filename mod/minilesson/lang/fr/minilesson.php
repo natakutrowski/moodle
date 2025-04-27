@@ -843,3 +843,14 @@ $string['nopasting_desc'] = "Désactiver le copier/coller dans la zone de texte.
 $string['attemptfor'] = 'Tentative : {$a}';
 $string['alternatestreaming'] = 'Activer le streaming alternatif';
 $string['alternatestreaming_details'] = 'Diffuse l\'audio enregistré pour une transcription ouverte. Légèrement plus lent que la transcription par défaut du navigateur et ne fonctionne qu\'en anglais. Activé par défaut dans l\'application mobile.';
+
+
+$string['cloudpoodllserver'] = 'Serveur Cloud Poodll';
+$string['cloudpoodllserver_details'] = 'Le serveur à utiliser pour Cloud Poodll. Ne le modifiez que si Poodll vous en a fourni un autre.';
+$string['fluency_instructions1'] = 'Lisez les phrases à voix haute. Cliquez sur l’icône du micro pour commencer l’enregistrement.';
+$string['fluencyresults'] = 'Résultats de fluidité';
+$string['lg_instructions1'] = 'Écoutez et complétez les lacunes';
+$string['ningxia'] = 'Ningxia, Chine';
+$string['sg_instructions1'] = 'Utilisez le microphone et dites la phrase complète en incluant les mots manquants';
+$string['tg_instructions1'] = 'Complétez les mots ou lettres manquants';
+

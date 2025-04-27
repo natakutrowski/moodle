@@ -232,3 +232,7 @@ $string['questionnotanswered'] = 'Вы ЕЩЁ НЕ ответили на это�
 $string['questionanswered'] = 'Вы ответили на этот вопрос.';
 $string['rec_details_log'] = "Журнал записи попытки";
 $string['rec_details_log_toggle'] = "Журнал записи попытки (показать/скрыть)";
+
+$string['cloudpoodllserver'] = 'Сервер Cloud Poodll';
+$string['cloudpoodllserver_details'] = 'Сервер для использования Cloud Poodll. Изменяйте его только в случае, если Poodll предоставил другой.';
+$string['ningxia'] = 'Нинся, Китай';

@@ -610,3 +610,20 @@ $string['errorexporting'] = 'Ошибка при экспорте. Пожалу�
 $string['reportdownload'] = 'Скачать отчёт';
 
 
+$string['ningxia'] = 'Нинся, Китай';
+$string['freemodeintropara1'] = "Выберите слова и тип тренировки в меню. Практикуйтесь столько, сколько захотите. Ваши результаты не записываются. Нажмите на кнопку +, чтобы добавить слово в ваш набор 'мои слова'.";
+$string['imagegen'] = 'Создать изображение';
+$string['imageprompt_label'] = 'Опишите изображение, которое вы хотите создать с помощью ИИ';
+$string['imageprompt_placeholder'] = 'Попробуйте \'Горный пейзаж\'';
+$string['imagequality'] = 'Качество изображения';
+$string['imagestyle'] = 'Стиль изображения';
+$string['aspectlandscape'] = 'Альбомная ориентация';
+$string['aspectportrait'] = 'Портретная ориентация';
+$string['aspectratio'] = 'Форма изображения';
+$string['aspectsquare'] = 'Квадрат';
+$string['back'] = 'Назад';
+$string['buttontitle'] = 'тест';
+$string['definitionhigh'] = 'Высокое';
+$string['definitionstandard'] = 'Стандартное';
+$string['cloudpoodllserver'] = 'Сервер Cloud Poodll';
+$string['cloudpoodllserver_details'] = 'Сервер для использования Cloud Poodll. Изменяйте его только в случае, если Poodll предоставил другой.';

@@ -231,3 +231,7 @@ $string['questionnotanswered']='Vous n\'avez PAS répondu à cette question.';
 $string['questionanswered']='Vous avez répondu à cette question.';
 $string['rec_details_log']= "Journal d'enregistrement de la tentative";
 $string['rec_details_log_toggle']= "Journal d'enregistrement de la tentative (afficher/masquer)";
+
+$string['cloudpoodllserver'] = 'Serveur Cloud Poodll';
+$string['cloudpoodllserver_details'] = 'Le serveur à utiliser pour Cloud Poodll. Ne le modifiez que si Poodll vous en a fourni un autre.';
+$string['ningxia'] = 'Ningxia, Chine';

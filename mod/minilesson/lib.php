@@ -387,7 +387,7 @@ function minilesson_get_editornames() {
  * @param mod_minilesson_mod_form $mform
  * @return int The id of the newly inserted minilesson record
  */
-function minilesson_add_instance(stdClass $minilesson, mod_minilesson_mod_form $mform = null) {
+function minilesson_add_instance(stdClass $minilesson,?mod_minilesson_mod_form $mform = null) {
     global $DB;
 
     $minilesson->timecreated = time();
@@ -409,7 +409,7 @@ function minilesson_add_instance(stdClass $minilesson, mod_minilesson_mod_form $
 }
 
 
-function minilesson_process_files(stdClass $minilesson, mod_minilesson_mod_form $mform = null) {
+function minilesson_process_files(stdClass $minilesson,?mod_minilesson_mod_form $mform = null) {
     global $DB;
     $cmid = $minilesson->coursemodule;
     $context = context_module::instance($cmid);
@@ -434,7 +434,7 @@ function minilesson_process_files(stdClass $minilesson, mod_minilesson_mod_form 
  * @param mod_minilesson_mod_form $mform
  * @return boolean Success/Fail
  */
-function minilesson_update_instance(stdClass $minilesson, mod_minilesson_mod_form $mform = null) {
+function minilesson_update_instance(stdClass $minilesson,?mod_minilesson_mod_form $mform = null) {
 
     global $DB;
 
@@ -743,6 +743,16 @@ function minilesson_pluginfile($course, $cm, $context, $filearea, array $args, $
 
 }
 
+/**
+ * Whether the activity is branded.
+ * This information is used, for instance, to decide if a filter should be applied to the icon or not.
+ *
+ * @return bool True if the activity is branded, false otherwise.
+ */
+function minilesson_is_branded(){
+    return true;
+}
+
 function minilesson_output_fragment_preview($args) {
     global $DB, $PAGE;
     $args = (object) $args;
@@ -917,7 +927,7 @@ function minilesson_extend_navigation(navigation_node $navref, stdclass $course,
  * @param settings_navigation $settingsnav {@link settings_navigation}
  * @param navigation_node $minilessonnode {@link navigation_node}
  */
-function minilesson_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $minilessonnode=null) {
+function minilesson_extend_settings_navigation(settings_navigation $settingsnav, ?navigation_node $minilessonnode = null) {
 }
 
 function mod_minilesson_get_fontawesome_icon_map() {

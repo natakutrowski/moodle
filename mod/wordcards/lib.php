@@ -49,7 +49,7 @@ function wordcards_supports($feature) {
     }
 }
 
-function wordcards_add_instance(stdClass $module, mod_wordcards_mod_form $mform = null) {
+function wordcards_add_instance(stdClass $module,?mod_wordcards_mod_form $mform = null) {
     global $DB;
 
     $module->timecreated = time();
@@ -78,7 +78,7 @@ function wordcards_add_instance(stdClass $module, mod_wordcards_mod_form $mform 
     return $module->id;
 }
 
-function wordcards_update_instance(stdClass $module, mod_wordcards_mod_form $mform = null) {
+function wordcards_update_instance(stdClass $module,?mod_wordcards_mod_form $mform = null) {
     global $DB;
 
     $module->timemodified = time();
@@ -362,7 +362,7 @@ function wordcards_extend_navigation(navigation_node $navref, stdclass $course, 
  * @param settings_navigation $settingsnav {@link settings_navigation}
  * @param navigation_node $wordcardsnode {@link navigation_node}
  */
-function wordcards_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $wordcardsnode=null) {
+function wordcards_extend_settings_navigation(settings_navigation $settingsnav, ?navigation_node $wordcardsnode = null) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -519,6 +519,16 @@ function wordcards_get_user_grades($moduleinstance, $userid=0) {
 }
 
 /**
+ * Whether the activity is branded.
+ * This information is used, for instance, to decide if a filter should be applied to the icon or not.
+ *
+ * @return bool True if the activity is branded, false otherwise.
+ */
+function wordcards_is_branded(){
+    return true;
+}
+
+/**
  * Is a given scale used by the instance of wordcards?
  *
  * This function returns if a scale is being used by one wordcards
@@ -564,7 +574,7 @@ function wordcards_output_fragment_mform($args) {
 
     $args = (object) $args;
     $context = $args->context;
-    $formname = $args->formname;
+    $type = $args->type;
     $mform = null;
     $o = '';
 
@@ -592,8 +602,45 @@ function wordcards_output_fragment_mform($args) {
     file_prepare_standard_filemanager($term, 'image', $imageoptions, $context, constants::M_COMPONENT, 'image', $term->id);
     file_prepare_standard_filemanager($term, 'model_sentence_audio', $audiooptions, $context, constants::M_COMPONENT, 'model_sentence_audio', $term->id);
 
-    $theform = new mod_wordcards_form_term(null, ['termid' => $term ? $term->id : 0,'ttslanguage' => $moduleinstance->ttslanguage], null, null, array('class'=>'mod_wordcards_form_term'));
-    $theform->set_data($term);
+    switch($type){
+        case 'add':
+        case 'edit':
+            $theform = new mod_wordcards_form_term(null, ['termid' => $term ? $term->id : 0,'ttslanguage' => $moduleinstance->ttslanguage], null, null, array('class'=>'mod_wordcards_form_term'));
+            $theform->set_data($term);
+            break;
+        case 'imagegen':
+            $renderer = $renderer = $PAGE->get_renderer('mod_wordcards');
+            $params = ['contextid' => $context->id, 'termid' => 0, 'image' => 0, 'model_sentence' => '', 'term' => '', 'definition' => ''];
+            if ($term) {
+                $options = (array)$imageoptions;
+                if (!isset($options['subdirs'])) {
+                    $options['subdirs'] = false;
+                }
+                if (is_null($term) || is_null($context)) {
+                    $itemid = null;
+                    $contextid = null;
+                } else {
+                    $contextid = $context->id;
+                }
+
+                if ($term->image) {
+                    $cachebuster = '?cb=' . \html_writer::random_id();
+                    $params['imageurl'] = "$CFG->wwwroot/pluginfile.php/$contextid/mod_wordcards/image/$term->id" . $cachebuster;
+                } else {
+                    $params['imageurl'] = false;
+                }
+                $params['termid'] = $term->id;
+                $params['model_sentence'] = $term->model_sentence;
+                $params['term'] = $term->term;
+                $params['definition'] = $term->definition;
+            }
+            $imagemaker = $renderer->render_from_template('mod_wordcards/imagemaker', $params);
+            $theform = new mod_wordcards_form_imagegen(null,
+            ['termid' => $params['termid'], 'imagemaker' => $imagemaker], 
+            null, null, array('class' => 'mod_wordcards_form_imagegen'));
+            $theform->set_data($term);
+            break;
+    }
 
     if (!empty($theform)) {
         ob_start();

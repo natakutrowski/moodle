@@ -608,3 +608,20 @@ $string['errorexporting'] = 'Erreur lors de l\'exportation. Veuillez réessayer.
 $string['reportdownload'] = 'Télécharger le rapport';
 
 
+$string['ningxia'] = 'Ningxia, Chine';
+$string['freemodeintropara1'] = "Choisissez les mots et le type d’entraînement dans le menu. Pratiquez autant que vous le souhaitez. Vos scores ne sont pas enregistrés. Appuyez sur le bouton + pour ajouter un mot à votre liste 'mes mots'.";
+$string['imagegen'] = 'Créer une image';
+$string['imageprompt_label'] = 'Décrivez l’image que vous souhaitez que l’IA crée';
+$string['imageprompt_placeholder'] = 'Essayez \'Paysage de montagne\'';
+$string['imagequality'] = 'Qualité d’image';
+$string['imagestyle'] = 'Style d’image';
+$string['aspectlandscape'] = 'Paysage';
+$string['aspectportrait'] = 'Portrait';
+$string['aspectratio'] = 'Format de l’image';
+$string['aspectsquare'] = 'Carré';
+$string['back'] = 'Retourner';
+$string['buttontitle'] = 'tester';
+$string['definitionhigh'] = 'Élevé';
+$string['definitionstandard'] = 'Standard';
+$string['cloudpoodllserver'] = 'Serveur Cloud Poodll';
+$string['cloudpoodllserver_details'] = 'Le serveur à utiliser pour Cloud Poodll. Ne le modifiez que si Poodll vous en a fourni un autre.';

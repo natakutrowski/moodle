@@ -864,3 +864,8 @@ $string['stats_genericlevel'] = 'Niveau de langue';
 $string['enablenativelanguage'] = "Activer la langue maternelle";
 $string['enablenativelanguage_details'] = 'Si activé, l\'étudiant peut choisir sa langue maternelle, ce qui remplacera la langue par défaut du feedback fourni par l\'IA. La langue doit actuellement être <a href="https://support.poodll.com/en/support/solutions/articles/19000163890-definitions-in-user-s-native-language">définie dans Poodll WordCards</a>, et elle est détectée ici.';
 $string['teacherfeedback'] = 'Feedback de l\'enseignant';
+
+
+$string['cloudpoodllserver'] = 'Serveur Cloud Poodll';
+$string['cloudpoodllserver_details'] = 'Le serveur à utiliser pour Cloud Poodll. Ne le modifiez que si Poodll vous en a fourni un autre.';
+$string['ningxia'] = 'Ningxia, Chine';

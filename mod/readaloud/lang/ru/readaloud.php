@@ -658,3 +658,7 @@ $string['passagepicture_descr'] = '*Изображение текста еще �
 $string['stdashboardid'] = 'ID панели управления учащегося';
 $string['stdashboardid_details'] = 'Если установлен блок панели управления учащегося, укажите здесь его ID.';
 $string['eventreadaloudattemptsubmitted'] = 'Попытка ReadAloud отправлена';
+
+$string['cloudpoodllserver'] = 'Сервер Cloud Poodll';
+$string['cloudpoodllserver_details'] = 'Сервер для использования Cloud Poodll. Изменяйте его только в случае, если Poodll предоставил другой.';
+$string['ningxia'] = 'Нинся, Китай';

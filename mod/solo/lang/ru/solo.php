@@ -769,3 +769,7 @@ $string['stats_genericlevel'] = 'Уровень языка';
 $string['enablenativelanguage'] = "Включить Родной Язык";
 $string['enablenativelanguage_details'] = 'Если включено, студент может выбрать свой родной язык. Это переопределит язык обратной связи, который ИИ возвращает с результатами. Язык должен быть установлен в <a href="https://support.poodll.com/en/support/solutions/articles/19000163890-definitions-in-user-s-native-language">Poodll WordCards</a>, и он будет применяться здесь.';
 $string['teacherfeedback'] = 'Обратная связь учителя';
+
+$string['cloudpoodllserver'] = 'Сервер Cloud Poodll';
+$string['cloudpoodllserver_details'] = 'Сервер для использования Cloud Poodll. Изменяйте его только в случае, если Poodll предоставил другой.';
+$string['ningxia'] = 'Нинся, Китай';
