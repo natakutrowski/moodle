@@ -1,0 +1,5 @@
+{
+    "moodle-availability_gearup-form": {
+        "requires": ["base", "node", "event", "handlebars", "moodle-core_availability-form"]
+    }
+}
