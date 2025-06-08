@@ -1,0 +1,161 @@
+{{! Terms are organised as follows:
+<div class="term-wrapper">
+   <div class="term">
+      <div class="term-header">
+         <div class="term-title"></div>
+         <div class="term-tick"></div>
+      </div>
+      <div class="term-body"></div>
+   </div>
+</div>
+}}
+{{{optshtml}}}
+<div class="mod_wordcards_activity_header">
+    {{#freemodeavailable}}
+        {{^isfreemode}}
+            <a href="{{config.wwwroot}}/mod/wordcards/freemode.php?id={{cmid}}&embed={{embed}}" class="btn btn-outline-primary pull-right">
+                <i class='fa fa-random mr-1'></i>
+                {{#str}}freemode, mod_wordcards{{/str}}
+            </a>
+        {{/isfreemode}}
+    {{/freemodeavailable}}
+    {{#stepsmodeavailable}}
+        {{^isstepsmode}}
+            <a href="{{config.wwwroot}}/mod/wordcards/view.php?id={{cmid}}&embed={{embed}}" class="btn btn-outline-primary pull-right">
+            <i class='fa fa-random mr-1'></i>
+            {{#str}}stepsmode, mod_wordcards{{/str}}
+            </a>
+        {{/isstepsmode}}
+    {{/stepsmodeavailable}}
+    <h3>{{{introheading}}}</h3>
+    <div class="mod_wordcards_instructions">
+        {{#introstrings}}
+            <p>{{.}}</p>
+        {{/introstrings}}
+    </div>
+</div>
+
+
+    <div class="terms clearfix definition_flashcards">
+      <!--start --->
+      <div class="df_fl">
+         <div class="df_fl_control" style="text-align: center;">
+             <button id="Prev" class="isFirst" style="float: left;" title="{{#str}}previous, mod_wordcards{{/str}}"></button>
+             <button id="Next" style="float: right;" title="{{#str}}next, mod_wordcards{{/str}}"></button>
+         </div>
+         <ul class="definition_flashcards_ul">
+            {{#definitions}}
+            <li class="flip-card {{#isfirstcard}}is-current slide-is-visible{{/isfirstcard}} {{^isfirstcard}}slide-is-hidden{{/isfirstcard}}">
+               <div class="wc-faces flip-card-inner">
+                  <!-- front face -->
+                  <div class="flip-card-front" data-face="term">
+                     {{>mod_wordcards/my_words_button}}
+                     <div class="term" data-termid="{{id}}">
+                        <div class="term-title">{{term}}</div>
+                        <i id="card-audio" style="cursor:pointer;" data-modelaudio="{{audio}}" data-tts="{{term}}" data-ttsvoice="{{ttsvoice}}"  tabindex="0" class="fa fa-volume-up definition-play-tts"></i>
+                        {{#model_sentence}}
+                           <div class="term-modelsentence">
+                              <h5>{{#str}}model_sentence, mod_wordcards{{/str}}</h5>
+                              <div class="term-modelsentence-container">
+                                 <span>{{model_sentence}}</span>
+                                 <span data-modelaudio="{{model_sentence_audio}}" data-tts="{{model_sentence}}" data-ttsvoice="{{ttsvoice}}"  tabindex="0" class="model-sentence-play-tts term-modelsentence-small"  style="cursor:pointer;"></span>
+                              </div>
+                           </div>
+
+
+
+                        {{/model_sentence}}
+                     </div>
+                  </div>
+                  <!-- back face -->
+                  <div class="flip-card-back" data-face="details">
+                     {{>mod_wordcards/my_words_button}}
+                     <div class="term {{#seen}}term-seen{{/seen}}" data-termid="{{id}}">
+                        <div class="term-title">
+                           {{{definition}}}
+                        </div>
+                        <div class="retrieval-buttons">
+                            {{#youglish.lang}} <button class="retrieve-video btn" data-termid="{{id}}"> {{/youglish.lang}}
+                        </div>
+                         {{#youglish.lang}}
+                        <div class="term-video term-video-{{id}}" tabindex="0">
+                           {{>mod_wordcards/youglish}}
+                        </div>
+                         {{/youglish.lang}}
+                     {{#image}}
+                        <div class="term-image  term-image-{{id}}">
+                           <img src="{{image}}" class="flash_img" alt=""/>
+                        </div>
+                     {{/image}}
+                     </div>
+                  </div>
+               </div>
+            </li>
+            {{/definitions}}
+         </ul>
+         <div class="wc_cardsprogress"> -- / -- </div>
+         </div>
+
+          <!--end --->
+       </div>
+
+        {{#isstepsmode}}
+            {{#nexturl}}
+            <div class="nextactionbtncontainer">
+                <button data-href="{{{nexturl}}}" data-action="{{nextaction}}" class="definitions-next btn">
+                    {{nextbuttontext}}  <i class="fa fa-arrow-right"></i>
+                </button>
+            </div>
+            {{/nexturl}}
+        {{/isstepsmode}}
+
+      <h3 class="list-of-words">{{#str}}listofwords, mod_wordcards{{/str}}</h3>
+      {{{langchooser}}}
+      <div id="definitions-page-{{uniqid}}" class="definitions-container">
+      <div class="terms clearfix definition_grid">
+         {{#definitions}}
+         <div class="term-wrapper">
+            <div class="term {{#seen}}term-seen{{/seen}}" data-termid="{{id}}">
+                  {{>mod_wordcards/my_words_button}}
+                  <div class="term-title">
+                     {{term}}
+                     <i id="audio-small" style="cursor:pointer;" data-modelaudio="{{audio}}" data-tts="{{term}}" data-ttsvoice="{{ttsvoice}}"  tabindex="0" class="fa fa-volume-up definition-play-tts"></i>
+                  </div>
+                  {{{definition}}}
+                  {{#model_sentence}}
+                  <div class="term-modelsentence">
+                     <span>{{model_sentence}}</span>
+                     <span data-modelaudio="{{model_sentence_audio}}" data-tts="{{model_sentence}}" data-ttsvoice="{{ttsvoice}}"  tabindex="0" class="model-sentence-play-tts term-modelsentence-small" style="cursor:pointer;">
+                     </span>
+                  </div>
+                  {{/model_sentence}}
+                  {{#image}}
+                     <div class="term-image">
+                        <img src="{{image}}" class="flash_img" alt=""/>
+                     </div>
+                  {{/image}}
+                  <div class="learned-status {{#learned}}learned{{/learned}} {{^learned}}not-learned{{/learned}}">
+                     <div class="learned-status-icon"></div>
+                     <div class="learned-status-text">{{#learned}}{{#str}}learned, mod_wordcards{{/str}}{{/learned}}
+                         {{^learned}}
+                             <div class="learned-progress-bar" data-progress="{{learned_progress}}" title="{{#str}}notlearned, mod_wordcards{{/str}} ({{learned_progress}}%)">
+                                <div class="learned-progress-fill" style="width: {{learned_progress}}%"></div>
+                            </div>
+                         {{/learned}}
+                     </div>
+                  </div>
+            </div>
+         </div>
+         {{/definitions}}
+      </div>
+      <div class="page-footer">
+      {{#isstepsmode}}
+         {{#nexturl}}
+            <button data-href="{{{nexturl}}}" data-action="{{nextaction}}" class="definitions-next btn">
+                  {{nextbuttontext}}  <i class="fa fa-arrow-right"></i>
+            </button>
+         {{/nexturl}}
+      {{/isstepsmode}}
+         <audio id="poodll_vocabplayer"></audio>
+      </div>
+</div>
