@@ -100,6 +100,15 @@ class qtype_shortanswer_question extends question_graded_by_strategy
         // Normalise any non-canonical UTF-8 characters before we start.
         $pattern = self::safe_normalize($pattern);
         $string = self::safe_normalize($string);
+        
+        // Edit NK : replace french apostrophe by quote
+        $pattern = str_replace("’","'",$pattern);
+        $string = str_replace("’","'",$string);
+        // Edit NK : remove punctuation signs
+        $pattern = preg_replace('/[!"#¡¿$%&\'()。「」、*+,-.\/:;<=>?@[\]^_`{|}~]/','',$pattern);
+        $string = preg_replace('/[!"#¡¿$%&\'()。「」、*+,-.\/:;<=>?@[\]^_`{|}~]/','',$string);
+        $pattern = preg_replace('/\s+/g',' ',$pattern);
+        $string = preg_replace('/\s+/g',' ',$string);        
 
         // Break the string on non-escaped runs of asterisks.
         // ** is equivalent to *, but people were doing that, and with many *s it breaks preg.
