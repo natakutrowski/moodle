@@ -1,0 +1,13 @@
+<div aria-live="polite" data-region="shortable">
+    {{#hasshortened}}
+    <div data-region="short">{{ shortened }} <a href="#more" role="button" data-action="expand">{{#str}}
+            readmore, block_gearup {{/str}}</a></div>
+    {{/hasshortened}}
+    <div data-region="full" style="{{#hasshortened}}display: none{{/hasshortened}}">{{{ text }}}
+    </div>
+</div>
+{{#js}}
+require(['block_gearup/shortable'], function(Shortable) {
+Shortable.register();
+});
+{{/js}}

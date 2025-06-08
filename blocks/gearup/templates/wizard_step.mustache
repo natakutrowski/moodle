@@ -1,0 +1,37 @@
+<li>
+    {{# iscomplete }}
+    <a {{#url}}href="{{ url }}" {{/url}} class="gu-no-underline {{# url }}gu-group{{/ url }}">
+        <span class="gu-flex gu-items-start">
+            <span class="gu-shrink-0 gu-relative gu-h-5 gu-w-5 gu-flex gu-items-center gu-justify-center">
+                <svg class="gu-h-full gu-w-full gu-text-indigo-600 group-hover:gu-text-indigo-800"
+                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd" />
+                </svg>
+            </span>
+            <span class="gu-ml-3 gu-text-sm gu-font-medium gu-text-gray-500 group-hover:gu-text-current">{{ name }}</span>
+        </span>
+    </a>
+    {{/ iscomplete }}
+    {{# iscurrent }}
+    <a {{#url}}href="{{ url }}" {{/url}} class="gu-no-underline gu-flex gu-items-start" aria-current="step">
+        <span class="gu-shrink-0 gu-h-5 gu-w-5 gu-relative gu-flex gu-items-center gu-justify-center" aria-hidden="true">
+            <span class="gu-absolute gu-h-4 gu-w-4 gu-rounded-full gu-bg-indigo-200"></span>
+            <span class="gu-relative gu-block gu-w-2 gu-h-2 gu-bg-indigo-600 gu-rounded-full"></span>
+        </span>
+        <span class="gu-ml-3 gu-text-sm gu-font-medium gu-text-indigo-600">{{ name }}</span>
+    </a>
+    {{/ iscurrent }}
+    {{# isupcoming }}
+    <div class="">
+        <div class="gu-flex gu-items-start">
+            <div class="gu-shrink-0 gu-h-5 gu-w-5 gu-relative gu-flex gu-items-center gu-justify-center" aria-hidden="true">
+                <div class="gu-h-2 gu-w-2 gu-bg-gray-300 gu-rounded-full "></div>
+            </div>
+            <p class="gu-m-0 gu-ml-3 gu-text-sm gu-font-medium gu-text-gray-500 ">{{ name }}
+            </p>
+        </div>
+    </div>
+    {{/ isupcoming }}
+</li>

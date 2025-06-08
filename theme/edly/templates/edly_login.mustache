@@ -1,0 +1,93 @@
+{{> theme_boost/head }}
+
+<body {{{ bodyattributes }}}>
+{{> core/local/toast/wrapper}}
+
+{{#preloader}}
+<div class="preloader">
+    <div class="d-table">
+        <div class="d-table-cell">
+            <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+        </div>
+    </div>
+</div>
+{{/preloader}}
+
+<div id="wrapper" class="edly-page-wrapper">
+
+    {{> theme_boost/navbar }}
+
+    {{{ output.standard_top_of_body_html }}}
+
+    {{^ output.if_home_pages}}
+        <div class="page-banner-area">
+            <div class="container">
+                <div class="page-banner-content" data-aos="fade-up" data-aos-delay="50" data-aos-duration="500" data-aos-once="true">
+                    <h2>{{{ pageheading }}}</h2>
+                    {{{ output.navbar }}}
+                </div>
+            </div>
+
+            <div class="page-banner-ellipse">
+                <img src="{{{ config.wwwroot }}}/theme/edly/pix/page-banner/ellipse.png" alt="{{sitename}}">
+            </div>
+
+            {{#banner_shape_image}}
+                <div class="page-banner-shape-1">
+                    <img src="{{banner_shape_image}}" alt="{{sitename}}">
+                </div>
+            {{/banner_shape_image}}
+            
+            {{#banner_shape_image2}}
+            <div class="page-banner-shape-2">
+                <img src="{{banner_shape_image2}}" alt="{{sitename}}">
+            </div>
+            {{/banner_shape_image2}}
+
+            <div class="page-banner-dot-1">
+                <img src="{{{ config.wwwroot }}}/theme/edly/pix/page-banner/dot1.png" alt="{{sitename}}">
+            </div>
+            <div class="page-banner-dot-2">
+                <img src="{{{ config.wwwroot }}}/theme/edly/pix/page-banner/dot2.png" alt="{{sitename}}">
+            </div>
+            <div class="page-banner-dot-3">
+                <img src="{{{ config.wwwroot }}}/theme/edly/pix/page-banner/dot3.png" alt="{{sitename}}">
+            </div>
+            <div class="page-banner-dot-4">
+                <img src="{{{ config.wwwroot }}}/theme/edly/pix/page-banner/dot4.png" alt="{{sitename}}">
+            </div>
+        </div>
+    {{/output.if_home_pages}}
+
+    <div class="login-area">
+        <div class="container">
+            <div id="page-content" class="row">
+                <div id="region-main-box" class="col-12">
+                    <section id="region-main" class="col-12 h-100" aria-label="{{#str}}content{{/str}}">
+                    <div class="login-wrapper pt-100 pb-75">
+                        <div class="login-container">
+                        {{{ output.main_content }}}
+                        </div>
+                    </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{> theme_boost/footer }}
+</div>
+
+</body>
+</html>
+{{#js}}
+  M.util.js_pending('theme_boost/loader');
+  require(['theme_boost/loader'], function() {
+  M.util.js_complete('theme_boost/loader');
+  });
+  M.util.js_pending('theme_boost/drawer');
+  require(['theme_boost/drawer'], function(mod) {
+  mod.init();
+  M.util.js_complete('theme_boost/drawer');
+  });
+{{/js}}

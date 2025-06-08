@@ -1,0 +1,36 @@
+<div class="gu-flex gu-gap-2">
+    <div class="gu-h-12 gu-w-11 gu-flex gu-items-center">
+        <a class="gu-h-11 gu-w-11 gu-transition-colors gu-text-inherit gu-flex gu-justify-center gu-items-center gu-rounded-full gu-bg-gray-100 hover:gu-bg-gray-200" href="{{ listurl }}"
+            title={{#quote}}{{#str}}back, core{{/str}}{{/quote}}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gu-h-7 gu-w-7">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            <span class="gu-sr-only">{{#str}} backtolist, block_gearup {{/str}}</span>
+        </a>
+    </div>
+    <div class="gu-flex gu-gap-2 gu-items-center">
+        <div class="gu-h-12 gu-w-12 gu-shrink-0">
+            {{#isquest}}
+                    {{> block_gearup/quests/narrator_thumbnail }}
+            {{/isquest}}
+            {{#isachievement}}
+                {{> block_gearup/achievements/badge_thumbnail}}
+            {{/isachievement}}
+            {{#ischallenge}}
+                {{> block_gearup/icons/challenge}}
+            {{/ischallenge}}
+            {{#isstreak}}
+                {{> block_gearup/icons/streak}}
+            {{/isstreak}}
+        </div>
+        <h2 class="gu-m-0 gu-leading-none">
+            <div>{{ name }}
+
+            </div>
+            <div class="gu-text-xs gu-text-gray-500">{{type}}</div>
+        </h2>
+    </div>
+    <div>
+        {{# isarchived }}<span class="badge gu-badge-secondary">{{#str}} archived, block_gearup {{/str}}</span>{{/ isarchived }}
+    </div>
+</div>

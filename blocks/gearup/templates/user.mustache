@@ -1,0 +1,105 @@
+<div>
+    <div class="gu-border-b gu-border-gray-200 gu-mb-6 gu-pb-3">
+        <div class="gu-flex gu-gap-3">
+            <div class="gu-h-11 gu-w-11">
+                <a class="gu-h-11 gu-w-11 gu-transition-colors gu-text-inherit gu-flex gu-justify-center gu-items-center gu-rounded-full gu-bg-gray-100 hover:gu-bg-gray-200" href="{{ listurl }}"
+                    title={{#quote}}{{#str}} viewotherrecruits, block_gearup {{/str}}{{/quote}}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gu-h-7 gu-w-7">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                    <span class="gu-sr-only">{{#str}} viewotherrecruits, block_gearup {{/str}}</span>
+                </a>
+            </div>
+            <div>
+                {{#subject}}
+                    {{> block_gearup/recruit_header }}
+                {{/subject}}
+            </div>
+        </div>
+    </div>
+
+    {{# hasstreaks }}
+    <h3 class="gu-text-lg gu-font-medium gu-my-4">{{# str }} streaks, block_gearup {{/ str }}</h3>
+    <div class="gu-grid gu-grid-cols-[50px_1fr] gu-gap-y-2">
+    {{# streaks}}
+            <div>
+                {{ counter }}
+            </div>
+            <div class="gu-grow gu-flex gu-gap-2 gu-items-center">
+                <div class="gu-w-6 gu-h-6 gu-shrink-0">
+                    {{> block_gearup/icons/streak }}
+                </div>
+                <a href="{{ manageurl }}">{{ mission.title }}</a>
+            </div>
+    {{/ streaks}}
+    </div>
+    {{/ hasstreaks }}
+
+    {{# hasquests }}
+    <h3 class="gu-text-lg gu-font-medium gu-my-4">{{# str }} quests, block_gearup {{/ str }}</h3>
+    <div class="gu-grid gu-grid-cols-[50px_1fr] gu-gap-y-2">
+    {{# quests}}
+            <div>
+                {{^ hascompleted }}
+                    {{ completionratiopc }}%
+                {{/ hascompleted }}
+                {{# hascompleted }}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gu-w-5 gu-h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                {{/ hascompleted }}
+            </div>
+            <div class="gu-grow gu-flex gu-gap-2 gu-items-center">
+                {{# mission }}
+                <div class="gu-w-6 gu-h-6 gu-shrink-0">
+                    {{> block_gearup/quests/narrator_thumbnail }}
+                </div>
+                {{/ mission }}
+                <a href="{{ manageurl }}">{{ mission.title }}</a>
+            </div>
+    {{/ quests}}
+    </div>
+    {{/ hasquests }}
+
+    {{# hasachievements }}
+    <h3 class="gu-text-lg gu-font-medium gu-my-4">{{# str }} achievements, block_gearup {{/ str }}</h3>
+    <div class="gu-grid gu-grid-cols-[50px_1fr] gu-gap-y-2">
+    {{# achievements}}
+            <div>
+                {{^ hascompleted }}
+                    {{ completionratiopc }}%
+                {{/ hascompleted }}
+                {{# hascompleted }}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gu-w-5 gu-h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                 {{/ hascompleted }}
+            </div>
+            <div class="gu-grow gu-flex gu-gap-2 gu-items-center">
+                {{# mission }}
+                <div class="gu-w-6 gu-h-6 gu-shrink-0">
+                    {{> block_gearup/achievements/badge_thumbnail }}
+                </div>
+                {{/ mission }}
+                <a href="{{ manageurl }}">{{ mission.title }}</a>
+            </div>
+    {{/ achievements}}
+    </div>
+    {{/ hasachievements }}
+
+    {{# haschallenges }}
+    <h3 class="gu-text-lg gu-font-medium gu-my-4">{{# str }} challenges, block_gearup {{/ str }}</h3>
+    <div class="gu-grid gu-grid-cols-1 gu-gap-y-2">
+    {{# challenges }}
+            <div class="gu-grow gu-flex gu-gap-2 gu-items-center">
+                {{# mission }}
+                <div class="gu-w-6 gu-h-6 gu-shrink-0">
+                    {{> block_gearup/icons/challenge }}
+                </div>
+                {{/ mission }}
+                <a href="{{ manageurl }}">{{ title }}</a>
+            </div>
+    {{/ challenges }}
+    </div>
+    {{/ haschallenges }}
+</div>

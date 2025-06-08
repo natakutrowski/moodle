@@ -1,0 +1,112 @@
+{{#hasany}}
+<div id="gu-quests-{{uniqid}}" class="gu-space-y-6">
+
+    {{#hasavailablequests}}
+    <div>
+    <h5 class="gu-heading-xs gu-flex gu-items-center">
+        <div class="gu-flex-1">
+            {{#context.iscourse}}
+            {{#str}} availablequestscourse, block_gearup {{/str}}
+            {{/context.iscourse}}
+            {{#context.issystem}}
+            {{#str}} availablequestssystem, block_gearup {{/str}}
+            {{/context.issystem}}
+            {{#context.anywhere}}
+            {{#str}} availablequests, block_gearup {{/str}}
+            {{/context.anywhere}}
+        </div>
+    </h5>
+
+    <div class="">
+        {{#availablequests}}
+        <div data-gu-type="missioninst" data-id="{{id}}" id="quest-{{id}}-{{uniqid}}"
+                class="gu-border-0 gu-border-t gu-border-dashed gu-border-gray-200 first:gu-border-none">
+            <a class="[.no-overflow_&]:gu-mx-0 gu--mx-1 gu-p-1 gu-block gu-no-underline gu-text-current hover:gu-bg-gray-100 gu-bg-opacity-0 hover:gu-bg-opacity-100 gu-transition-colors gu-rounded focus:gu-ring-inset focus:gu-ring focus:gu-ring-blue-500"
+                role="button" href="#" onclick="return false" data-action="accept">
+                <div class="gu-flex gu-gap-2 gu-items-center">
+                    <div class="gu-relative gu-shrink-0">
+                        <div class="gu-h-12 gu-w-12">
+                            {{#mission}}{{> block_gearup/quests/narrator_thumbnail}}{{/mission}}
+                        </div>
+                        {{#needsattention}}
+                            <div data-attention="hide" class="gu-animate-ping gu-w-4 gu-h-4 gu-absolute gu--top-1 gu--left-1 gu-bg-yellow-300"></div>
+                        {{/needsattention}}
+                        <div class="gu-w-4 gu-h-4 gu-absolute gu--top-1 gu--left-1 gu-font-bold gu-text-center gu-bg-yellow-300 gu-text-white gu-text-xs gu-flex gu-items-center gu-justify-center">!</div>
+                    </div>
+                    <div class="gu-grow gu-overflow-hidden">
+                        <h3 class="gu-font-bold gu-text-base gu-leading-snug gu-m-0 gu-mb-1 gu-truncate" title="{{ mission.title }}">
+                            {{ mission.title }}
+                        </h3>
+                        <div class="gu-truncate gu-text-sm gu-italic gu-text-gray-700">
+                            {{ storylineexcerpt }}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{/availablequests}}
+    </div>
+
+    </div>
+    {{/hasavailablequests}}
+
+    {{#showongoing}}
+    <div>
+    <h5 class="gu-heading-xs gu-flex gu-items-center">
+        <div class="gu-flex-1">
+            {{#context.iscourse}}
+            {{#str}} ongoingquestscourse, block_gearup {{/str}}
+            {{/context.iscourse}}
+            {{#context.issystem}}
+            {{#str}} ongoingquestssystem, block_gearup {{/str}}
+            {{/context.issystem}}
+            {{#context.anywhere}}
+            {{#str}} ongoingquests, block_gearup {{/str}}
+            {{/context.anywhere}}
+        </div>
+    </h5>
+
+    {{^hasongoingquests}}
+        <div>✨ {{#str}} youcompletedallquests, block_gearup {{/str}}</div>
+        {{#hasmore}}
+        <div class="gu-uppercase gu-text-2xs gu-mt-4">
+            <a href="{{ moreurl }}">
+                {{#str}} viewall, block_gearup {{/str}}
+            </a>
+        </div>
+        {{/hasmore}}
+    {{/hasongoingquests}}
+    {{#hasongoingquests}}
+        <div>
+            {{#ongoingquests}}
+            <div class="gu-mb-2 last:gu-mb-0">
+                {{> block_gearup/quests/instance_inprogress}}
+            </div>
+            <div class="gu-h-px gu-bg-gray-100 gu-w-full gu-my-2 last:gu-hidden"></div>
+            {{/ongoingquests}}
+        </div>
+        {{#hasmore}}
+        <div class="gu-uppercase gu-text-2xs gu-my-2">
+            <div class="gu-h-px gu-bg-gray-100 gu-w-full gu-my-2 last:gu-hidden"></div>
+            <a href="{{ moreurl }}">
+                {{#str}} viewall, block_gearup {{/str}}
+            </a>
+        </div>
+        {{/hasmore}}
+    {{/hasongoingquests}}
+    </div>
+    {{/showongoing}}
+</div>
+
+{{#js}}
+require(['block_gearup/modal_quest_accept'], function(Modal) {
+    Modal.registerFromRoot('#gu-quests-{{uniqid}}');
+});
+require(['block_gearup/modal_quest_finish'], function(Modal) {
+    Modal.registerFromRoot('#gu-quests-{{uniqid}}');
+});
+require(['block_gearup/modal_quest_inprogress'], function(Modal) {
+    Modal.registerFromRoot('#gu-quests-{{uniqid}}');
+});
+{{/js}}
+{{/hasany}}

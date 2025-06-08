@@ -1,0 +1,103 @@
+{{#hasany}}
+<div id="gu-streaks-{{uniqid}}">
+    <h5 class="gu-heading-xs gu-flex gu-items-center">
+        <div class="gu-flex-1">
+            {{#context.iscourse}}
+            {{#str}} streakcourse, block_gearup {{/str}}
+            {{/context.iscourse}}
+            {{#context.issystem}}
+            {{#str}} streaksystem, block_gearup {{/str}}
+            {{/context.issystem}}
+            {{#context.anywhere}}
+            {{#str}} streak, block_gearup {{/str}}
+            {{/context.anywhere}}
+        </div>
+    </h5>
+
+    <div class="gu-space-y-2">
+        {{#streaks}}
+        <div>
+            <div class="gu-px-4 gu-py-2 gu-rounded gu-group gu-bg-[#fffae9] gu-relative">
+
+                <div class="gu-flex gu-gap-4 gu-items-center gu-pointer-events-none">
+                    <div class="gu-shrink-0 gu-grow-0 gu-size-12 gu-rounded-full gu-flex gu-items-center gu-justify-center gu-relative gu-bg-white">
+                        <div class="gu-inset-0 gu-absolute gu-overflow-hidden gu-rounded-full">
+                            <div class="gu-absolute gu-inset-x-0 gu-bottom-0
+                                {{# isincompletionrationonzero }}gu-bg-green-200{{/ isincompletionrationonzero }}
+                                {{^ isincompletionrationonzero }}gu-bg-green-100{{/ isincompletionrationonzero }}"
+                                style="height: {{ completionratiopc }}%"></div>
+                        </div>
+                        <div class="gu-absolute gu-rounded-full gu-inset-0 gu-border-2
+                            {{# isincompletionrationonzero }}gu-border-dashed gu-border-gray-300{{/ isincompletionrationonzero }}
+                            {{^ isincompletionrationonzero }}gu-border-solid  gu-border-[#2cbd01]{{/ isincompletionrationonzero }}"></div>
+                        <div class="gu-z-10
+                            {{# isincompletionrationonzero }}gu-text-gray-400 group-hover:gu-animate-stress{{/ isincompletionrationonzero}}
+                            {{^ isincompletionrationonzero }}gu-text-[#ffa200] group-hover:gu-animate-spinhero{{/ isincompletionrationonzero}}">
+                            {{# counter }}
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="gu-size-8" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z" clip-rule="evenodd" />
+                                </svg>
+                            {{/ counter }}
+                            {{^ counter }}
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="#fff" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gu-size-8" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                                </svg>
+                            {{/ counter }}
+                        </div>
+                    </div>
+                    <div class="gu-whitespace-nowrap">
+                        <span class="gu-text-4xl gu-font-bold">{{ counter }}</span>
+                        <span class="gu-text-gray-500">{{ counterunit }}</span>
+                    </div>
+                </div>
+
+                {{^ isincompletionrationonzero }}
+                <div class="gu-absolute gu-right-3 gu-top-2 gu-py-0.5 gu-pl-1 gu-pr-0.5 gu-rounded gu-border-amber-200 gu-border gu-bg-white" data-toggle="tooltip" data-bs-toggle="tooltip" title="{{#str}} comebacktokeepstreak, block_gearup {{/str}}">
+                    <div class="gu-flex gu-gap-0.5 gu-text-2xs gu-text-gray-600 gu-items-center">
+                        <div class="gu-truncate gu-max-w-[10ch] gu-text-right gu-leading-none">{{ nextstartrelativeref }}</div>
+                        <div>
+                            <svg class="gu-size-4" aria-hidden="true" fill="currentColor" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><path d="M 16.5156 49.5742 L 39.2734 49.5742 C 41.6640 49.5742 43.0937 48.2617 43.0937 45.7305 L 43.0937 45.1211 C 43.1172 38.6523 36.2266 33.4023 33.2031 30.5430 C 32.3593 29.7461 31.9140 29.0196 31.9140 27.9649 C 31.9140 26.9102 32.3593 26.2071 33.2031 25.3867 C 36.2031 22.4805 43.0937 17.5586 43.0937 10.8320 L 43.0937 10.2696 C 43.0937 7.7383 41.6640 6.4258 39.2734 6.4258 L 16.5156 6.4258 C 14.1718 6.4258 12.8828 7.7383 12.8828 10.0586 L 12.8828 10.8320 C 12.8828 17.5586 19.7734 22.4805 22.7969 25.3867 C 23.6406 26.2071 24.0859 26.9102 24.0859 27.9649 C 24.0859 29.0196 23.6406 29.7461 22.7969 30.5430 C 19.7734 33.4023 12.8828 38.6523 12.8828 45.1211 L 12.8828 45.9414 C 12.8828 48.2617 14.1718 49.5742 16.5156 49.5742 Z M 18.9531 46.3633 C 17.8281 46.3633 17.4766 45.1211 18.5781 44.3008 L 26.5937 38.3242 C 26.8515 38.1133 26.9922 37.9727 26.9922 37.6211 L 26.9922 26.3477 C 26.9922 25.0820 26.7344 24.4492 25.8437 23.6992 C 24.5078 22.5742 21.9766 20.7930 20.8281 19.1758 C 20.3593 18.5196 20.4062 17.9805 20.9922 17.9805 L 34.9844 17.9805 C 35.5703 17.9805 35.6172 18.5196 35.1484 19.1758 C 34.0000 20.7930 31.4922 22.5742 30.1328 23.6992 C 29.2422 24.4492 28.9844 25.0820 28.9844 26.3477 L 28.9844 37.6211 C 28.9844 37.9727 29.125 38.1133 29.3828 38.3242 L 37.4218 44.3008 C 38.5234 45.1211 38.1484 46.3633 37.0469 46.3633 Z"/></svg>
+                        </div>
+                    </div>
+                </div>
+                {{/ isincompletionrationonzero }}
+
+                <div class="gu-flex gu-gap-1 gu-border-t gu-border-t-amber-200 gu-mt-2 gu-pt-2">
+                    <div class="gu-flex-0 gu-flex gu-items-start">
+                        {{# isincompletionrationonzero }}
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="gu-size-4 gu-text-red-500" aria-hidden="true">
+                                <path d="M5.75 7.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM5 10.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0ZM10.25 7.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM7.25 8.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0ZM8 9.5A.75.75 0 1 0 8 11a.75.75 0 0 0 0-1.5Z" />
+                                <path fill-rule="evenodd" d="M4.75 1a.75.75 0 0 0-.75.75V3a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2V1.75a.75.75 0 0 0-1.5 0V3h-5V1.75A.75.75 0 0 0 4.75 1ZM3.5 7a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v4.5a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V7Z" clip-rule="evenodd" />
+                            </svg>
+                        {{/ isincompletionrationonzero }}
+                        {{^ isincompletionrationonzero }}
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="gu-size-4 gu-text-green-600" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z" clip-rule="evenodd" />
+                            </svg>
+                        {{/ isincompletionrationonzero }}
+                    </div>
+                    <div class="gu-grow">
+                        <div class="gu-text-xs gu-leading-tight gu-text-gray-700">
+                            {{ instructions }}
+                            {{#mission.objectives.0}}
+                                {{#supportingurl}}
+                                    <div class="gu-inline-block gu-leading-none gu-w-4 gu-relative">&nbsp;
+                                        <a href="{{ . }}" target="_blank" rel="noopener noreferer" class="gu-absolute gu--inset-1 gu-leading-none gu-block gu-size-5 gu-p-1 gu-text-inherit gu-no-underline" data-toggle="tooltip" data-bs-toggle="tooltip" title="{{#str}} opensupportinglink, block_gearup {{/str}}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="gu-size-4">
+                                                <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z" />
+                                                <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                {{/supportingurl}}
+                            {{/mission.objectives.0}}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {{/streaks}}
+    </div>
+</div>
+{{/hasany}}

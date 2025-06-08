@@ -1,0 +1,21 @@
+<ul class="edly-header-user-sec pull-right">
+    {{{ output.edit_switch }}}
+
+    {{{ output.navbar_plugin_output }}}
+    
+    {{#output.edly_is_siteadmin}}
+        {{#primarymoremenu}}
+            <li class="user_setting edly-settings-nav">
+                <div class="dropdown">
+                    <a class="notification-icon" href="{{{ config.wwwroot }}}/admin/search.php"><i class='icon bx bx-cog'></i></a>
+                </div>
+            </li>
+        {{/primarymoremenu}}
+    {{/output.edly_is_siteadmin}}
+
+    <li>
+        {{#usermenu}}
+            {{> core/user_menu }}
+        {{/usermenu}}
+    </li>
+</ul>

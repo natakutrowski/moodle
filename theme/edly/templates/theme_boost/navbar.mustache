@@ -1,0 +1,153 @@
+
+{{#top_header}}
+    <!-- Start Top Header Area -->
+    <div class="top-header-area bg-color-0f6c76">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="header-left-content">
+                        <p>{{{top_header_content}}}</p>
+                    </div>
+                </div>
+
+                {{#top_header_right_content}}
+                    <div class="col-lg-4">
+                        <ul class="header-right-content">
+                            {{{top_header_right_content}}}
+                        </ul>
+                    </div>
+                {{/top_header_right_content}}
+            </div>
+        </div>
+    </div>
+    <!-- End Top Header Area -->
+ {{/top_header}}
+
+<!-- Start Navbar Area --> 
+<div class="navbar-area {{output.edly_is_siteadmin}}">
+
+    <div class="main-responsive-nav">
+        <div class="container">
+            <div class="main-responsive-menu">
+                {{#logo_visibility}}
+                    <div class="logo">
+                        <a href="{{{ config.wwwroot }}}/">
+                            {{#mobile_logo}}
+                                <img src="{{mobile_logo}}" alt="{{sitename}}"  {{#mobile_logo_styles}} style="{{{mobile_logo_styles}}}" {{/mobile_logo_styles}}>
+                            {{/mobile_logo}}
+
+                            {{^ mobile_logo }}
+                                <h2 {{#mobile_logo_styles}} style="{{{mobile_logo_styles}}}" {{/mobile_logo_styles}}>{{sitename}}</h2>
+                            {{/mobile_logo}}
+                        </a>
+                    </div>
+                {{/logo_visibility}}
+            </div>
+        </div>
+    </div>
+
+    <div class="main-navbar">
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-md navbar-light">
+                {{#logo_visibility}}
+                    <a class="navbar-brand" href="{{{ config.wwwroot }}}/">
+                        {{#main_logo}}
+                            <img src="{{main_logo}}" alt="{{sitename}}"  {{#logo_styles}} style="{{{logo_styles}}}" {{/logo_styles}}>
+                        {{/main_logo}}
+
+                        {{^ main_logo }}
+                            <h2  {{#logo_styles}} style="{{{logo_styles}}}" {{/logo_styles}}>{{sitename}}</h2>
+                        {{/main_logo}}
+                    </a>
+                {{/logo_visibility}}
+                
+                <div class="collapse navbar-collapse mean-menu" id="navbarSupportedContent">
+                    {{#header_search_bar}}
+                        {{{edly_globalsearch_navbar}}}
+                    {{/header_search_bar}}
+
+                    <ul id="menu-primary-menu" class="navbar-nav ms-auto">
+                        <!-- custom_menu -->
+                        {{{ output.custom_menu }}}
+                    </ul>
+
+                    {{output.if_edly_guest_user}}
+                    {{^ isloggedin}}
+                        <div class="others-options d-flex align-items-center">
+                            {{#header_left_btn_text}}
+                                <div class="option-item">
+                                    {{#header_left_btn_url}} <a href="{{header_left_btn_url}}" class="default-btn"> {{/header_left_btn_url}}
+                                    {{^ header_left_btn_url }} <a href="{{ signup_url }}" class="default-btn"> {{/header_left_btn_url}}
+                                        {{{header_left_btn_text}}}
+                                    </a>
+                                </div>
+                            {{/header_left_btn_text}}
+
+                            <div class="option-item">
+                                {{#header_btn_url}} <a href="{{header_btn_url}}" class="user-btn"> {{/header_btn_url}}
+                                {{^ header_btn_url }} <a href="{{ login_url }}" class="user-btn"> {{/header_btn_url}}
+                                    <i class="{{header_btn_icon}}"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {{/isloggedin}}
+                    
+                    {{#isloggedin}}
+                        {{> theme_edly/edly_navbar_user }}
+                    {{/isloggedin}}
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div class="others-option-for-responsive">
+        <div class="container">
+            <div class="dot-menu">
+                <div class="inner">
+                    <div class="circle circle-one"></div>
+                    <div class="circle circle-two"></div>
+                    <div class="circle circle-three"></div>
+                </div>
+            </div>
+            
+            <div class="container">
+                <div class="option-inner">
+                    <div class="others-options d-flex align-items-center">
+                        {{^ isloggedin}}
+                            {{#header_left_btn_text}}
+                                <div class="option-item">
+                                    {{#header_left_btn_url}} <a href="{{header_left_btn_url}}" class="default-btn"> {{/header_left_btn_url}}
+                                    {{^ header_left_btn_url }} <a href="{{ signup_url }}" class="default-btn"> {{/header_left_btn_url}}
+                                        {{{header_left_btn_text}}}
+                                    </a>
+                                </div>
+                            {{/header_left_btn_text}}
+
+                            <div class="option-item">
+                                {{#header_btn_url}} <a href="{{header_btn_url}}" class="user-btn"> {{/header_btn_url}}
+                                {{^ header_btn_url }} <a href="{{ login_url }}" class="user-btn"> {{/header_btn_url}}
+                                    <i class="{{header_btn_icon}}"></i>
+                                </a>
+                            </div>
+                        {{/isloggedin}}
+
+                        {{#header_search_bar}}
+                            <div class="option-item">
+                                {{{edly_globalsearch_navbar}}}
+                            </div>
+                        {{/header_search_bar}}
+
+                        {{#isloggedin}}
+                            {{> theme_edly/edly_navbar_user }}
+                        {{/isloggedin}}
+
+                        {{output.if_edly_guest_user}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Navbar Area -->
+
+{{> theme_boost/primary-drawer-mobile }}

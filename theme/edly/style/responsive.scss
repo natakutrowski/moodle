@@ -1,0 +1,3093 @@
+// Responsive CSS
+@media only screen and (max-width: 767px) {
+
+    // Default CSS
+    body {
+        font-size: 15px;
+    }
+    p {
+        font-size: 15px;
+    }
+    .ptb-100 {
+        padding-top: 50px;
+        padding-bottom: 50px;
+    }
+    .pt-100 {
+        padding-top: 50px;
+    }
+    .pb-100 {
+        padding-bottom: 50px;
+    }
+    .pb-75 {
+        padding-bottom: 25px;
+    }
+    .default-btn {
+        padding: 11px 20px;
+        font-size: 16px;
+    }
+    .overview-image .wrap-shape-2 {
+        display: none;
+    }
+    .section-title {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        .sub {
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+        h2 {
+            font-size: 24px;
+        }
+        h2 span::before {
+            display: none;
+        }
+    }
+    
+    // Home One Responsive
+    .main-banner-area {
+        padding: {
+            top: 55px;
+            bottom: 100px;
+            left: 10px;
+            right: 10px;
+        };
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 540px;
+        }
+        &::before {
+            display: none;
+        }
+    }
+    .main-banner-content {
+        top: 0;
+
+        h1 {
+            font-size: 30px;
+            margin-bottom: 15px;
+
+            &::before {
+                display: none;
+            }
+        }
+        p {
+            font-size: 15px;
+        }
+        .banner-search {
+            padding-right: 0;
+
+            button {
+                position: relative;
+                margin-top: 12px;
+            } 
+        }
+    }
+    .main-banner-image {
+        margin-top: 35px;
+    } 
+    .main-banner-shape-1, .main-banner-shape-2, .main-banner-shape-3 {
+        display: none;
+    }
+    .main-banner-bottom-content {
+        padding: 10px;
+        border-radius: 50px;
+        left: 15px;
+        right: 15px;
+        margin: auto;
+        bottom: 30px;
+        text-align: center;
+        max-width: 500px;
+
+        h3 {
+            font-size: 14px;
+
+            span {
+                font-size: 12px;
+            }
+        }
+    }
+
+    .features-card {
+        h3 {
+            font-size: 20px;
+        }
+    }
+
+    .courses-card {
+        .courses-content {
+            padding: 0 15px 20px 15px;
+
+            .top-content {
+                h3 {
+                    font-size: 20px;
+                }
+                .price {
+                    width: 55px;
+                    height: 55px;
+                    line-height: 55px;
+                    font-size: 20px;
+                }
+            }
+            .middle-content {
+                .rating {
+                    li {
+                        i {
+                            font-size: 14px;
+                        }
+                    }
+                }
+                p {
+                    font-size: 15px;
+                }
+            }
+            .bottom-list {
+                li {
+                    padding-left: 18px;
+                    font-size: 12px;
+
+                    i {
+                        font-size: 15px;
+                        top: 0px;
+                    }
+                }
+            }
+        }
+    }
+    .courses-pot-shape {
+        display: none;
+    }
+
+    .opportunities-content {
+        h3 {
+            font-size: 24px;
+            
+            span {
+                &::before {
+                    display: none;
+                }
+            }
+        }
+    }
+    .opportunities-right-content {
+        padding-left: 0;
+
+        .opportunities-shape-1 {
+            display: none;
+        }
+        .opportunities-shape-2 {
+            display: none;
+        }
+        .col-lg-6 {
+            &:nth-child(2) {
+                .opportunities-card {
+                    margin-top: 25px;
+                }
+            }
+        }
+    }
+    .opportunities-card {
+        margin-top: 25px;
+        padding: 25px 20px;
+
+        h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+    }
+
+    .categories-card {
+        padding: 20px 15px;
+
+        .content {
+            padding: 5px 0 5px 45px;
+
+            .icon {
+                max-width: 30px;
+
+                &::before {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .success-area {
+        overflow: hidden;
+    }
+    .success-funfacts-card {
+        margin-bottom: 25px;
+
+        .content {
+            padding-left: 78px;
+
+            .icon {
+                i {
+                    width: 65px;
+                    height: 112px;
+                    line-height: 112px;
+                }
+            }
+            h3 {
+                font-size: 22px;
+            }
+        }
+    }
+    .success-image {
+        padding-left: 0;
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    .courses-box {
+        .courses-content {
+            padding: 20px 15px;
+
+            .list {
+                li {
+                    font-size: 14px;
+                    padding-left: 20px;
+
+                    i {
+                        font-size: 14px;
+                        top: 2px;
+                    }
+                }
+            }
+            h3 {
+                font-size: 20px;
+            }
+            .bottom-list {
+                span {
+                    font-size: 14px;
+                    padding-left: 22px;
+
+                    i {
+                        font-size: 15px;
+                        top: 2px;
+                    }
+                }
+            }
+        }
+    }
+
+    .overview-inner-area {
+        padding: 50px 20px;
+    }
+    .overview-image {
+        max-width: 100%;
+        text-align: center;
+        margin-bottom: 35px;
+    }
+    .overview-content {
+        padding-left: 0;
+        top: 0;
+
+        h3 {
+            font-size: 24px;
+
+            span {
+                &::before {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .improving-card {
+        h3 {
+            font-size: 20px;
+        }
+    }
+
+    .find-events-area {
+        overflow: hidden;
+    }
+    .find-events-content {
+        h3 {
+            font-size: 24px;
+
+            span {
+                &::before {
+                    display: none;
+                }
+            }
+        }
+        .find-events-btn {
+            margin-top: 20px;
+        }
+    }
+    .find-events-card {
+        margin-top: 25px;
+
+        .events-content {
+            h3 {
+                font-size: 20px;
+            }
+        }
+    }
+
+    .subscribe-inner-area {
+        padding: 50px 20px;
+    }
+    .subscribe-image {
+        margin-top: 30px;
+        max-width: 100%;
+        text-align: center;
+    }
+    .subscribe-content {
+        h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        .newsletter-form {
+            padding-right: 0;
+
+            button {
+                position: relative;
+                margin-top: 10px;
+                height: auto;
+            }
+        }
+    }
+
+    // Home Two Responsive
+    .main-banner-wrap-area {
+        padding: {
+            top: 50px;
+            bottom: 50px;
+            left: 15px;
+            right: 15px;
+        };
+        &::before {
+            width: 100%;
+        }
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 540px;
+        }
+    }
+    .main-banner-wrap-content {
+        h1 {
+            font-size: 30px;
+            margin-bottom: 15px;
+
+            &::before {
+                display: none;
+            }
+        }
+        p {
+            font-size: 15px;
+        }
+        .banner-btn {
+            margin-top: 22px;
+
+            li {
+                margin-right: 5px;
+                margin-top: 10px;
+            }
+            .default-btn {
+                padding: 10px 15px;
+                font-size: 16px;
+            }
+        }
+    }
+    .main-banner-wrap-image {
+        margin: {
+            top: 30px;
+            bottom: 0;
+        };
+        text-align: center;
+
+        .banner-box {
+            max-width: 100%;
+            position: relative;
+            right: 0;
+            top: 0;
+            text-align: start;
+            margin-top: 25px;
+        }
+        .banner-congratulations {
+            max-width: 100%;
+            position: relative;
+            right: 0;
+            bottom: 0;
+            text-align: start;
+            margin-top: 25px;
+        }
+        .banner-reviews {
+            max-width: 100%;
+            position: relative;
+            right: 0;
+            bottom: 0;
+            text-align: start;
+            margin-top: 25px;
+        }
+    }
+
+    .single-funfacts-card {
+        .content {
+            padding-left: 75px;
+
+            .icon {
+                i {
+                    width: 60px;
+                    font-size: 30px;
+                }
+            }
+        }
+    }
+
+    .courses-item {
+        .courses-image {
+            .price {
+                width: 60px;
+                height: 60px;
+                line-height: 60px;
+                right: 10px;
+                bottom: -10px;
+                font-size: 20px;
+            }
+        }
+        .courses-content {
+            h3 {
+                font-size: 20px;
+            }
+            .rating {
+                li {
+                    i {
+                        font-size: 14px;
+                    }
+                }
+            }
+            .bottom-list {
+                li {
+                    padding-left: 18px;
+                    font-size: 12px;
+
+                    i {
+                        font-size: 15px;
+                        top: 0px;
+                    }
+                }
+            }
+        }
+    }
+
+    .categories-shape {
+        display: none;
+    }
+
+    .affordable-area {
+        overflow: hidden;
+    }
+    .affordable-content {
+        padding-left: 0;
+        margin-top: 30px;
+
+        h3 {
+            font-size: 24px;
+        }
+    }
+
+    // Home Three Responsive
+    .main-banner-with-large-area {
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 540px;
+        }
+    }
+    .main-banner-large-content {
+        position: relative;
+        top: 0;
+        padding: {
+            top: 55px;
+            bottom: 30px;
+            right: 0;
+            left: 15px;
+            
+        };
+        h1 {
+            font-size: 30px;
+            margin-bottom: 15px;
+            &::before {
+                display: none;
+            }
+        }
+        p {
+            font-size: 15px;
+        }
+        .banner-btn {
+            margin-top: 22px;
+
+            li {
+                margin-right: 5px;
+                margin-top: 10px;
+            }
+        }
+    }
+    .main-banner-large-image {
+        height: 450px;
+    }
+    .review-area {
+        padding: {
+            left: 15px;
+            right: 15px;
+        }
+    }
+    .banner-large-shape-1, .banner-large-shape-2 {
+        display: none;
+    }
+
+    .partner-inner-area {
+        padding: {
+            top: 50px;
+            bottom: 50px;
+            left: 20px;
+            right: 30px;
+        };
+        margin-top: 50px;
+    }
+
+    .affordable-wrap-image {
+        margin-bottom: 0;
+
+        .affordable-reviews {
+            padding: 15px;
+            position: relative;
+            right: 0;
+            top: 0;
+            max-width: 100%;
+            margin-top: 25px;
+        }
+        .affordable-essential {
+            padding: 15px;
+            position: relative;
+            left: 0;
+            bottom: 0;
+            max-width: 100%;
+            margin-top: 25px;
+        }
+    }
+
+    .categories-box {
+        padding: 20px 15px;
+    }
+
+    .career-content {
+        margin-bottom: 30px;
+
+        h3 {
+            font-size: 24px;
+
+            span {
+                &::before {
+                    display: none;
+                }
+            }
+        }
+    }
+    .career-shape {
+        display: none;
+    }
+
+    .career-funfacts-card {
+        padding: 20px;
+
+        .content {
+            padding-left: 78px;
+
+            h3 {
+                font-size: 24px;
+            }
+            .icon {
+                i {
+                    width: 62px;
+                    height: 62px;
+                    line-height: 60px;
+                    font-size: 30px;
+                }
+            }
+        }
+    }
+
+    .career-bottom-content {
+        padding: 10px 15px;
+
+        h3 {
+            font-size: 20px;
+
+            span {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .review-area {
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 540px;
+        }
+    }
+    .review-card {
+        padding: 20px;
+
+        h3 {
+            font-size: 20px;
+        }
+    }
+    .review-shape-1, .review-shape-2 {
+        display: none;
+    }
+
+    .overview-inner-area {
+        &.with-wrap-color {
+            .overview-content {
+                padding-left: 0;
+            }
+            .overview-image {
+                .wrap-shape-2 {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .blog-card {
+        .blog-content {
+            h3 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+            .meta {
+                li {
+                    font-size: 14px;
+                    padding-left: 22px;
+                    margin-right: 15px;
+
+                    i {
+                        font-size: 15px;
+                    }
+                }
+            }
+        }
+    }
+
+    // Inner Pages Responsive
+    .page-banner-area {
+        padding: {
+            top: 65px;
+            bottom: 65px;
+        };
+    }
+    .page-banner-content {
+        h2 {
+            font-size: 32px;
+        }
+        .breadcrumb {
+            display: block !important;
+            li {
+                font-size: 15px;
+            }
+        }
+    }
+    .page-banner-shape-1, .page-banner-shape-2, .page-banner-dot-1, .page-banner-dot-2, .page-banner-dot-3, .page-banner-dot-4 {
+        display: none;
+    }
+    
+    .instructors-details-inner-area {
+        padding: 20px;
+    }
+    .instructors-details-content {
+        padding-left: 0;
+        margin-top: 25px;
+
+        h3 {
+            font-size: 22px;
+        }
+        .info-list {
+            margin: {
+                top: 15px;
+                bottom: 15px;
+            };
+        }
+    }
+
+    .pagination-area {
+        margin-top: 10px;
+
+        .page-numbers {
+            width: 40px;
+            margin: 0 2px;
+            font-size: 15px;
+            
+            &.next {
+                width: 50px;
+            }
+        }
+    }
+
+    .products-grid-sorting {
+        text-align: center;
+
+        .ordering {
+            text-align: center;
+            margin-top: 15px;
+        }
+    }
+    .single-products-card {
+        .products-content {
+            h3 {
+                font-size: 20px;
+            }
+        }
+    }
+
+    .cart-table {
+        table {
+            thead {
+                tr {
+                    th {
+                        padding: 0 25px 25px 75px;
+                        font-size: var(--font-size);
+                    }
+                }
+            }
+            tbody {
+                tr {
+                    td {
+                        font-size: 14px;
+
+                        &.product-name {
+                            a {
+                                font-size: 14px;
+                            }
+                        }
+                        &.product-price {
+                            .unit-amount {
+                                font-size: 14px;
+                            }
+                        }
+                        &.product-subtotal {
+                            .subtotal-amount {
+                                font-size: 14px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .cart-buttons {
+        text-align: center;
+
+        .shopping-coupon-code {
+            button {
+                padding: 18px 10px;
+                margin-top: 0;
+            }
+            .form-control {
+                font-size: 14px;
+            }
+        }
+        .default-btn {
+            margin-top: 10px;
+        }
+    }
+    .cart-totals {
+        h3 {
+            font-size: 20px;
+        }
+        ul {
+            li {
+                font-size: 14px;
+
+                &:last-child {
+                    span {
+                        font-size: var(--font-size);
+                    }
+                }
+            }
+        }
+    }
+
+    .user-actions {
+        span {
+            font-size: 12px;
+        }
+    }
+    .billing-details {
+        .title {
+            font-size: 18px;
+        }
+        .form-group {
+            label {
+                font-size: 14px;
+            }
+            .form-control {
+                height: 45px;
+            }
+            .nice-select {
+                font-size: 14px;
+            }
+        }
+    }
+    .order-details {
+        margin-top: 25px;
+
+        .title {
+            font-size: 18px;
+        }
+        .order-table {
+            table {
+                thead {
+                    tr {
+                        th {
+                            font-size: 15px;
+                        }
+                    }
+                }
+                tbody {
+                    tr {
+                        td {
+                            font-size: 14px;
+                            
+                            &.product-name {
+                                a {
+                                    font-size: 14px;
+                                }
+                            }
+                            &.order-subtotal, &.order-shipping , &.total-price {
+                                span {
+                                    font-size: 14px;
+                                }
+                            }
+                            &.shipping-price, &.order-subtotal-price, &.product-subtotal {
+                                font-size: 14px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .payment-box {
+            padding: 20px;
+
+            p {
+                font-size: 14px;
+            }
+            .payment-method p [type="radio"]:checked + label, .order-details .payment-box .payment-method p [type="radio"]:not(:checked) + label {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .purchase-guide-content {
+        h3 {
+            font-size: 18px;
+        }
+    }
+
+    .terms-of-service-content {
+        h3 {
+            font-size: 18px;
+        }
+    }
+
+    .privacy-policy-content {
+        h3 {
+            font-size: 18px;
+        }
+    }
+
+    .error-content {
+        h3 {
+            font-size: 20px;
+        }
+    }
+
+    .coming-soon-area {
+        padding-top: 100px;
+        padding-bottom: 100px;
+    }
+    .coming-soon-content {
+        padding: 30px 25px;
+
+        #timer {
+            margin-top: 20px;
+
+            div {
+                width: 100px;
+                height: 105px;
+                margin-left: 5px;
+                margin-right: 5px;
+                font-size: 20px;
+                margin-top: 10px;
+            }
+        }
+        h2 {
+            font-size: 22px;
+        }
+    }
+
+    .login-form {
+        padding: 20px;
+
+        h2 {
+            font-size: 20px;
+        }
+        form {
+            .lost-your-password {
+                text-align: start;
+                margin-top: 10px;
+            }
+        }
+    }
+    .register-form {
+        padding: 20px;
+        margin-top: 30px;
+
+        h2 {
+            font-size: 20px;
+        }
+    }
+
+    .success-story-play {
+        .video-btn {
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            font-size: 35px;
+        }
+    }
+
+    .straight-quotes-content {
+        .quotes-content {
+            p {
+                font-size: 15px;
+            }
+            .quotes-image {
+                margin-bottom: 12px;
+            }
+        }
+    }
+
+    .success-overview-content {
+        .heading-content {
+            h3 {
+                font-size: 20px;
+            }
+        }
+        .paragraph-content {
+            padding-left: 0;
+            margin-top: 20px;
+        }
+    }
+
+    .faq-accordion-tab {
+        .tabs {
+            margin-bottom: 20px;
+
+            li {
+                margin-bottom: 20px;
+
+                a {
+                    padding: 15px;
+                    font-size: 14px;
+
+                    i {
+                        font-size: 25px;
+                    }
+                }
+            }
+        }
+    }
+
+    .faq-accordion {
+        .accordion {
+            .accordion-title {
+                padding: 25px 25px 25px 60px;
+                font-size: var(--font-size);
+            }
+        }
+    }
+
+    .contact-info-card {
+        padding: 30px 20px;
+
+        h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        span {
+            font-size: 13.5px;
+        }
+    }
+    .contact-inner-area {
+        padding: {
+            left: 20px;
+            right: 20px;
+        };
+        .form-group {
+            .icon {
+                top: 52px;
+            }
+        }
+    }
+
+    .widget-area {
+        margin-top: 30px;
+
+        &.with-left {
+            margin: {
+                top: 0;
+                bottom: 30px;
+            };
+        }
+        .widget {
+            .widget-title {
+                font-size: 18px;
+            }
+        }
+        .widget_categories {
+            padding: 25px 20px;
+        }
+        .widget_posts {
+            padding: 25px 20px;
+
+            .item {
+                .thumb {
+                    float: unset;
+                    margin-right: 0;
+                }
+                .info {
+                    top: 0;
+                    margin-top: 15px;
+                }
+            }
+        }
+        .widget_courses {
+            padding: 25px 20px;
+
+            .item {
+                .thumb {
+                    float: unset;
+                    margin-right: 0;
+                }
+                .info {
+                    top: 0;
+                    margin-top: 15px;
+                }
+            }
+        }
+        .widget_tag_cloud {
+            padding: 25px 20px;
+        }
+    }
+
+    .become-instructor-inner-area {
+        padding: {
+            left: 20px;
+            right: 20px;
+        };
+    }
+    .become-instructor-form {
+        .form-group {
+            .icon {
+                top: 52px;
+            }
+        }
+    }
+
+    .zoom-meeting-card {
+        .zoom-content {
+            padding: 20px;
+
+            h3 {
+                font-size: 22px;
+            }
+            .list {
+                li {
+                    font-size: 14px;
+                    padding-left: 20.8px;
+                    i {
+                        font-size: 15px;
+                        top: 0px;
+                    }
+                }
+            }
+        }
+    }
+    .copyright-area {
+        margin-top: 25px;
+    }
+    .blog-details-desc {
+        .meta-list {
+            li {
+                margin-bottom: 10px;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
+        h2 {
+            font-size: 22px;
+            margin-top: 15px;
+        }
+        h3 {
+            font-size: 20px;
+        }
+        .quote-box {
+            padding: 20px;
+
+            .inner {
+                padding-left: 55px;
+                .icon {
+                    top: 5px;
+                    left: 0;
+                }
+                p {
+                    margin-bottom: 10px;
+                }
+                span {
+                    font-size: 15px;
+                }
+            }
+        }
+        .article-footer {
+            text-align: center;
+
+            .article-tags {
+                li {
+                    margin-right: 2px;
+
+                    a {
+                        padding: 5px;
+                        font-size: 14px;
+                    }
+                }
+            }
+            .article-share {
+                justify-content: center;
+                margin-top: 15px;
+            }
+        }
+        .leave-comment-form {
+            margin-top: 35px;
+            padding-top: 35px;
+
+            .form-group {
+                .icon {
+                    top: 52px;
+                }
+            }
+        }
+    }
+
+    .course-details-desc {
+        padding: 25px;
+
+        h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        .meta-list {
+            margin-top: 15px;
+
+            li {
+                margin-bottom: 10px;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
+        .price {
+            right: 0;
+            top: -20px;
+        }
+    }
+    .courses-details-tabs {
+        .nav {
+            .nav-item {
+                .nav-link {
+                    padding: 25px 30px;
+                    font-size: 15.5px;
+                }
+            }
+        }
+        .tab-content {
+            .courses-overview {
+                h3 {
+                    margin-bottom: 12px;
+                    font-size: 20px;
+                }
+            }
+            .courses-curriculum {
+                .courses-list {
+                    li {
+                        a {
+                            &.d-flex {
+                                display: block !important;
+                            }
+                        }
+                        .courses-meta {
+                            margin-top: 12px;
+                        }
+                    }
+                }
+            }
+            .instructors-card {
+                .instructors-content {
+                    padding: 20px 0 0 0;
+                }
+            }
+            .courses-reviews {
+                .title {
+                    h3 {
+                        font-size: 22px;
+                    }
+                }
+                .total-box {
+                    h3 {
+                        font-size: 30px;
+                        margin-bottom: 5px;
+                    }
+                    span {
+                        font-size: 15px;
+                        margin-bottom: 10px;
+                    }
+                }
+                .reviews-progress {
+                    margin: {
+                        left: 0;
+                        top: 20px;
+                    };
+                    .reviews-rating {
+                        margin-top: 12px;
+                    }
+                }
+            }
+            .review-comment-form {
+                .content {
+                    h3 {
+                        font-size: 20px;
+                    }
+                }
+                .form-group {
+                    .icon {
+                        top: 52px;
+                    }
+                }
+            }
+        }
+    }
+    .courses-details-info {
+        margin-top: 30px;
+    }
+
+     /* Header Style */
+     .top-header-area {
+        .container-fluid {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+    }
+    .header-left-content {
+        text-align: center;
+        p {
+            font-size: 14px;
+        }
+    }
+    .header-right-content {
+        text-align: center;
+        li {
+            font-size: 14px;
+            margin-right: 10px;
+            padding-right: 10px;
+            .form-select {
+                font-size: 13px;
+            }
+        }
+    }
+
+    .breadcrumb:not(:empty) .breadcrumb-item {
+        overflow: visible !important;
+    }
+    .breadcrumb:not(:empty) .breadcrumb-item a, .breadcrumb:not(:empty) .breadcrumb-item span {
+        white-space: unset;
+    }
+    .page-banner-content .breadcrumb {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .subscribe-content h3 span::before {
+        display: none;
+    }
+    .pagelayout-mydashboard .footer-area {
+        padding-left: 0 !important;
+    }
+    .activity-navigation #prev-activity, .activity-navigation #next-activity {
+        justify-content: center;
+    }
+    .activity-navigation .mdl-align {
+        margin: 20px 0;
+    }
+}
+
+@media only screen and (min-width: 576px) and (max-width: 767px) {
+
+    /* Top Header */
+    .top-header-area {
+        .container-fluid {
+            max-width: 540px;
+        }
+    }
+    
+    // Home One Responsive
+    .main-banner-content {
+        .banner-search {
+            button {
+                position: absolute;
+                margin-top: 0;
+            }
+        }
+    }
+
+    .subscribe-content {
+        .newsletter-form {
+            button {
+                position: absolute;
+                margin-top: 0;
+            }
+        }
+    }
+
+    .review-card {
+        padding: 35px;
+    }
+
+    .cart-buttons {
+        .default-btn {
+            margin-top: 0;
+        }
+    }
+
+    .login-form form {
+        .lost-your-password {
+            text-align: end;
+            margin-top: 0;
+        }
+    }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+    // Default CSS
+    .ptb-100 {
+        padding-top: 80px;
+        padding-bottom: 80px;
+    }
+    .pt-100 {
+        padding-top: 80px;
+    }
+    .pb-100 {
+        padding-bottom: 80px;
+    }
+    .pb-75 {
+        padding-bottom: 45px;
+    }
+
+    .section-title {
+        h2 {
+            font-size: 30px;
+        }
+    }
+    
+    // Home One Responsive
+    .main-banner-area {
+        padding: {
+            top: 80px;
+            bottom: 100px;
+        };
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 720px;
+        }
+        &::before {
+            display: none;
+        }
+    }
+    .main-banner-content {
+        top: 0;
+
+        h1 {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+    }
+    .main-banner-image {
+        margin-top: 35px;
+    } 
+    .main-banner-bottom-content {
+        padding: 10px;
+        border-radius: 50px;
+        left: 15px;
+        right: 15px;
+        margin: auto;
+        bottom: 30px;
+        text-align: center;
+        max-width: 690px;
+
+        h3 {
+            font-size: 20px;
+
+            span {
+                font-size: 15px;
+            }
+        }
+    }
+
+    .features-card {
+        padding: 30px 20px;
+
+        h3 {
+            font-size: 20px;
+        }
+        .features-btn {
+            font-size: 15px;
+        }
+    }
+
+    .courses-card {
+        .courses-content {
+            padding: 0 15px 20px 15px;
+
+            .top-content {
+                h3 {
+                    font-size: 22px;
+                }
+            }
+            .bottom-list {
+                li {
+                    padding-left: 18px;
+                    font-size: 12px;
+
+                    i {
+                        font-size: 15px;
+                        top: 0px;
+                    }
+                }
+            }
+        }
+    }
+    .courses-pot-shape {
+        display: none;
+    }
+
+    .opportunities-content {
+        h3 {
+            font-size: 30px;
+        }
+    }
+    .opportunities-right-content {
+        padding-left: 0;
+
+        .opportunities-shape-1 {
+            display: none;
+        }
+        .opportunities-shape-2 {
+            display: none;
+        }
+        .col-lg-6 {
+            &:nth-child(2) {
+                .opportunities-card {
+                    margin-top: 25px;
+                }
+            }
+        }
+    }
+    .opportunities-card {
+        margin-top: 25px;
+        padding: 25px 20px;
+
+        h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+    }
+
+    .categories-card {
+        padding: 20px 15px;
+
+        .content {
+            padding: 5px 0 5px 45px;
+
+            .icon {
+                max-width: 30px;
+
+                &::before {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .success-area {
+        overflow: hidden;
+    }
+    .success-funfacts-card {
+        margin-bottom: 25px;
+
+        .content {
+            padding-left: 78px;
+
+            .icon {
+                i {
+                    width: 65px;
+                    height: 112px;
+                    line-height: 112px;
+                }
+            }
+            h3 {
+                font-size: 22px;
+            }
+        }
+    }
+    .success-image {
+        padding-left: 0;
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    .courses-box {
+        .courses-content {
+            padding: 20px 15px;
+
+            .list {
+                li {
+                    font-size: 14px;
+                    padding-left: 20px;
+
+                    i {
+                        font-size: 14px;
+                        top: 2px;
+                    }
+                }
+            }
+            h3 {
+                font-size: 22px;
+            }
+            .bottom-list {
+                span {
+                    font-size: 14px;
+                    padding-left: 22px;
+
+                    i {
+                        font-size: 15px;
+                        top: 2px;
+                    }
+                }
+            }
+        }
+    }
+
+    .overview-inner-area {
+        padding: 80px 30px;
+    }
+    .overview-image {
+        max-width: 100%;
+        text-align: center;
+        margin-bottom: 35px;
+    }
+    .overview-content {
+        padding-left: 0;
+        top: 0;
+
+        h3 {
+            font-size: 30px;
+
+            span {
+                &::before {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .improving-card {
+        h3 {
+            font-size: 22px;
+        }
+    }
+
+    .find-events-area {
+        overflow: hidden;
+    }
+    .find-events-content {
+        h3 {
+            font-size: 30px;
+        }
+    }
+    .find-events-card {
+        margin-top: 25px;
+
+        .events-content {
+            h3 {
+                font-size: 22px;
+            }
+        }
+    }
+
+    .subscribe-inner-area {
+        padding: 80px 30px;
+    }
+    .subscribe-image {
+        margin-top: 30px;
+        max-width: 100%;
+        text-align: center;
+    }
+    .subscribe-content {
+        h3 {
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+    }
+
+    // Home Two Responsive
+    .main-banner-wrap-area {
+        padding: {
+            top: 80px;
+            bottom: 80px;
+        };
+        &::before {
+            width: 100%;
+        }
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 720px;
+        }
+    }
+    .main-banner-wrap-content {
+        margin-bottom: 35px;
+
+        h1 {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+    }
+    .main-banner-wrap-image {
+        text-align: center;
+
+        .banner-box {
+            text-align: start;
+        }
+        .banner-congratulations {
+            text-align: start;
+        }
+        .banner-reviews {
+            text-align: start;
+        }
+    }
+
+    .courses-item {
+        .courses-image {
+            .price {
+                width: 60px;
+                height: 60px;
+                line-height: 60px;
+                right: 10px;
+                bottom: -10px;
+                font-size: 20px;
+            }
+        }
+        .courses-content {
+            h3 {
+                font-size: 22px;
+            }
+            .rating {
+                li {
+                    i {
+                        font-size: 14px;
+                    }
+                }
+            }
+            .bottom-list {
+                li {
+                    padding-left: 18px;
+                    font-size: 14px;
+
+                    i {
+                        font-size: 15px;
+                        top: 2px;
+                    }
+                }
+            }
+        }
+    }
+
+    .categories-shape {
+        display: none;
+    }
+
+    .affordable-area {
+        overflow: hidden;
+    }
+    .affordable-content {
+        padding-left: 0;
+        margin-top: 30px;
+
+        h3 {
+            font-size: 30px;
+        }
+    }
+
+    // Home Three Responsive
+    .main-banner-with-large-area {
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 720px;
+        }
+    }
+    .main-banner-large-content {
+        position: relative;
+        top: 0;
+        padding: {
+            top: 80px;
+            bottom: 40px;
+            right: 0;
+        };
+        h1 {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+    }
+    .main-banner-large-image {
+        height: 650px;
+    }
+    .banner-large-shape-1, .banner-large-shape-2 {
+        display: none;
+    }
+
+    .partner-inner-area {
+        padding: {
+            top: 50px;
+            bottom: 50px;
+            left: 20px;
+            right: 30px;
+        };
+        margin-top: 80px;
+    }
+
+    .affordable-wrap-image {
+        margin-right: 55px;
+    }
+
+    .career-content {
+        margin-bottom: 30px;
+
+        h3 {
+            font-size: 30px;
+
+            span {
+                &::before {
+                    display: none;
+                }
+            }
+        }
+    }
+    .career-shape {
+        display: none;
+    }
+
+    .career-funfacts-card {
+        padding: 20px;
+
+        .content {
+            padding-left: 78px;
+
+            h3 {
+                font-size: 24px;
+            }
+            .icon {
+                i {
+                    width: 62px;
+                    height: 62px;
+                    line-height: 60px;
+                    font-size: 30px;
+                }
+            }
+        }
+    }
+
+    .career-bottom-content {
+        padding: 15px 35px;
+
+        h3 {
+            font-size: 25px;
+
+            span {
+                font-size: 15px;
+            }
+        }
+    }
+
+    .review-area {
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 720px;
+        }
+    }
+    .review-card {
+        padding: 25px;
+
+        h3 {
+            font-size: 20px;
+        }
+    }
+    .review-shape-1, .review-shape-2 {
+        display: none;
+    }
+
+    .overview-inner-area {
+        &.with-wrap-color {
+            .overview-content {
+                padding-left: 0;
+            }
+            .overview-image {
+                .wrap-shape-2 {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .blog-card {
+        .blog-content {
+            h3 {
+                font-size: 22px;
+                margin-bottom: 15px;
+            }
+            .meta {
+                li {
+                    font-size: 14px;
+                    padding-left: 22px;
+                    margin-right: 15px;
+
+                    i {
+                        font-size: 15px;
+                    }
+                }
+            }
+        }
+    }
+
+    // Inner Pages Responsive
+    .page-banner-area {
+        padding: {
+            top: 100px;
+            bottom: 100px;
+        };
+    }
+    .page-banner-content {
+        h2 {
+            font-size: 45px;
+        }
+    }
+    .page-banner-shape-1, .page-banner-shape-2, .page-banner-dot-1, .page-banner-dot-2, .page-banner-dot-3, .page-banner-dot-4 {
+        display: none;
+    }
+
+    .instructors-details-inner-area {
+        padding: 30px;
+    }
+    .instructors-details-content {
+        padding-left: 0;
+        margin-top: 25px;
+        
+        .info-list {
+            margin: {
+                top: 15px;
+                bottom: 15px;
+            };
+        }
+    }
+
+    .cart-table {
+        table {
+            thead {
+                tr {
+                    th {
+                        padding: 0 25px 25px 75px;
+                        font-size: var(--font-size);
+                    }
+                }
+            }
+        }
+    }
+
+    .success-overview-content {
+        .paragraph-content {
+            padding-left: 0;
+            margin-top: 20px;
+        }
+    }
+
+    .faq-accordion-tab {
+        .tabs {
+            li {
+                a {
+                    padding: 20px 20px;
+                    font-size: 15px;
+                }
+            }
+        }
+    }
+
+    .register-form {
+        margin-top: 30px;
+    }
+
+    .contact-inner-area {
+        padding: {
+            left: 70px;
+            right: 70px;
+        };
+    }
+
+    .widget-area {
+        margin-top: 30px;
+
+        &.with-left {
+            margin: {
+                top: 0;
+                bottom: 30px;
+            };
+        }
+        .widget_posts {
+            .item {
+                display: flex;
+                align-items: center;
+
+                .info {
+                    top: 0;
+                }
+            }
+        }
+        .widget_courses {
+            .item {
+                display: flex;
+                align-items: center;
+
+                .info {
+                    top: 0;
+                }
+            }
+        }
+    }
+
+    .become-instructor-inner-area {
+        padding: {
+            left: 70px;
+            right: 70px;
+        };
+    }
+
+    .zoom-meeting-card {
+        .zoom-content {
+            padding: 20px;
+
+            h3 {
+                font-size: 22px;
+            }
+        }
+    }
+    .blog-details-desc {
+        .meta-list {
+            li {
+                margin-right: 30px;
+            }
+        }
+        .article-footer {
+            .article-tags {
+                li {
+                    margin-right: 2px;
+
+                    a {
+                        padding: 5px 10px;
+                        font-size: 15px;
+                    }
+                }
+            }
+        }
+    }
+    .copyright-area {
+        margin-top: 45px;
+    }
+    .course-details-desc {
+        h3 {
+            max-width: 550px;
+        }
+        .meta-list {
+            li {
+                margin-right: 20px;
+            }
+        }
+    }
+    .courses-details-tabs {
+        .nav {
+            .nav-item {
+                .nav-link {
+                    padding: 25px 45px;
+                }
+            }
+        }
+        .tab-content {
+            .courses-reviews {
+                .reviews-progress {
+                    margin-left: 0;
+                }
+            }
+        }
+    }
+    .courses-details-info {
+        margin-top: 30px;
+    }
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+
+    // Home One Responsive
+    .main-banner-area {
+        padding-bottom: 140px;
+
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 960px;
+        }
+    }
+    .main-banner-content {
+        top: 0;
+        
+        h1 {
+            font-size: 50px;
+        }
+        p {
+            font-size: 17px;
+        }
+    }
+    .main-banner-shape-1 {
+        max-width: 110px;
+    }
+    .main-banner-shape-2 {
+        max-width: 45px;
+    }
+
+    .features-card {
+        padding: 30px 20px;
+
+        h3 {
+            font-size: 22px;
+        }
+    }
+
+    .opportunities-right-content {
+        padding-left: 30px;
+    }
+
+    .categories-card {
+        padding: 20px 15px;
+
+        .content {
+            padding: 5px 0 5px 45px;
+
+            .icon {
+                max-width: 30px;
+
+                &::before {
+                    width: 40px;
+                }
+            }
+            h3 {
+                font-size: 15px;
+                font-weight: 800;
+            }
+        }
+    }
+
+    .success-funfacts-card {
+        padding: 20px 10px;
+
+        .content {
+            padding-left: 75px;
+
+            .icon {
+                i {
+                    width: 60px;
+                    font-size: 30px;
+                }
+            }
+        }
+    }
+
+    .overview-inner-area {
+        padding: 50px 30px;
+    }
+
+    .find-events-area {
+        overflow: hidden;
+    }
+    .find-events-card {
+        margin-top: 30px;
+    }
+
+    .subscribe-inner-area {
+        padding: 50px 30px;
+    }
+
+    // Home Two Responsive
+    .main-banner-wrap-area {
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 960px;
+        }
+    }
+    .main-banner-wrap-content {
+        h1 {
+            font-size: 50px;
+        }
+    }
+    .main-banner-wrap-image {
+        .banner-box {
+            padding: 15px;
+            top: 2px;
+            right: 28px;
+        }
+        .banner-congratulations {
+            padding: 15px;
+            right: 0;
+            bottom: 118px;
+        }
+        .banner-reviews {
+            padding: 15px;
+            right: 15px;
+        }
+    }
+
+    .affordable-content {
+        padding-left: 0;
+
+        .list {
+            li {
+                span {
+                    font-size: 15px;
+                }
+            }
+        }
+    }
+
+    // Home Three Responsive
+    .main-banner-with-large-area {
+        .container-fluid {
+            padding-right: calc(var(--bs-gutter-x) * .5);
+            padding-left: calc(var(--bs-gutter-x) * .5);
+            max-width: 960px;
+        }
+    }
+    .main-banner-large-content {
+        top: 0;
+        padding: {
+            top: 100px;
+            bottom: 100px;
+            right: 0;
+        };
+        h1 {
+            font-size: 50px;
+        }
+    }
+    .banner-large-shape-1 {
+        top: 15px;
+    }
+
+    .partner-inner-area {
+        margin-top: 100px;
+    }
+
+    .affordable-wrap-image {
+        margin-right: 55px;
+
+        .affordable-reviews {
+            right: -45px;
+        }
+    }
+
+    .categories-box {
+        padding: 20px 5px;
+
+        h3 {
+            font-size: 15px;
+        }
+    }
+
+    .career-funfacts-card {
+        padding: 12px;
+
+        .content {
+            padding-left: 65px;
+            
+            .icon {
+                i {
+                    width: 50px;
+                    height: 50px;
+                    line-height: 50px;
+                    font-size: 25px;
+                }
+            }
+            h3 {
+                font-size: 25px;
+            }
+            p {
+                font-size: 15px;
+            }
+        }
+    }
+    .career-shape {
+        top: 25px;
+    }
+
+    .blog-card {
+        .blog-content {
+            h3 {
+                font-size: 22px;
+                margin-bottom: 15px;
+            }
+            .meta {
+                li {
+                    font-size: 14px;
+                    padding-left: 22px;
+                    margin-right: 15px;
+
+                    i {
+                        font-size: 15px;
+                    }
+                }
+            }
+        }
+    }
+
+    // Inner Pages Responsive
+    .instructors-details-inner-area {
+        padding: 30px;
+    }
+    
+    .widget-area {
+        .widget_categories {
+            padding: 30px 15px;
+        }
+        .widget_posts {
+            padding: 30px 15px;
+
+            .item {
+                .thumb {
+                    width: 70px;
+                    height: 85px;
+                    margin-right: 15px;
+
+                    .fullimage {
+                        width: 70px;
+                        height: 85px;
+                    }
+                }
+                .info {
+                    top: 0;
+                }
+            }
+        }
+        .widget_courses {
+            padding: 30px 15px;
+
+            .item {
+                display: flex;
+                align-items: center;
+                .thumb {
+                    width: 70px;
+                    height: 85px;
+                    margin-right: 15px;
+
+                    .fullimage {
+                        width: 70px;
+                        height: 85px;
+                    }
+                }
+                .info {
+                    top: 0;
+                }
+            }
+        }
+        .widget_tag_cloud {
+            padding: 30px 15px;
+        }
+    }
+
+    .courses-area-without-bg-color {
+        .widget-area {
+            margin-top: 30px;
+    
+            &.with-left {
+                margin: {
+                    top: 0;
+                    bottom: 30px;
+                };
+            }
+        }
+    }
+    .blog-details-desc {
+        .meta-list {
+            li {
+                margin-right: 22px;
+            }
+        }
+        .article-footer {
+            .article-tags {
+                li {
+                    margin-right: 2px;
+
+                    a {
+                        padding: 5px;
+                        font-size: 14px;
+                    }
+                }
+            }
+        }
+    }
+    .course-details-desc {
+        padding: 30px 20px 30px 20px;
+
+        h3 {
+            max-width: 470px;
+        }
+        .meta-list {
+            li {
+                margin-right: 10px;
+
+                img {
+                    max-width: 30px;
+                }
+                &:last-child {
+                    i {
+                        font-size: 14.5px;
+                    }
+                }
+            }
+        }
+        .price {
+            right: 20px;
+            top: 30px;
+        }
+    }
+    .courses-details-tabs {
+        .nav {
+            .nav-item {
+                .nav-link {
+                    padding: 25px 35px;
+                }
+            }
+        }
+        .tab-content {
+            .instructors-card {
+                .instructors-content {
+                    padding: 0 0 0 25px;
+                }
+            }
+            .courses-reviews {
+                .total-box {
+                    padding: 15px;
+
+                    h3 {
+                        font-size: 30px;
+                        margin-bottom: 10px;
+                    }
+                    span {
+                        font-size: 15px;
+                        margin-bottom: 12px;
+                    }
+                    ul {
+                        li {
+                            i {
+                                font-size: 14px;
+                            }
+                        }
+                    }
+                }
+                .reviews-progress {
+                    margin-left: 0;
+
+                    .reviews-rating {
+                        li {
+                            margin-right: 1px;
+
+                            i {
+                                font-size: 12px;
+                            }
+                            span {
+                                font-size: 14px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .mean-container {
+        .mean-bar {
+            padding-top: 0;
+        }
+    }
+}
+
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {
+
+    // Home One Responsive
+    .main-banner-content {
+        h1 {
+            font-size: 55px;
+        }
+    }
+    .main-banner-shape-1 {
+        max-width: 130px;
+    }
+    .main-banner-shape-2 {
+        left: 55%;
+        transform: translateX(-52%);
+        max-width: 50px;
+    }
+
+    .features-card {
+        h3 {
+            font-size: 22px;
+        }
+    }
+
+    .courses-card {
+        .courses-content {
+            .top-content {
+                h3 {
+                    font-size: 22px;
+                }
+            }
+            .bottom-list {
+                li {
+                    font-size: 14px;
+                    padding-left: 22px;
+
+                    i {
+                        font-size: 15.5px;
+                        top: 2px;
+                    }
+                }
+            }
+        }
+    }
+
+    .opportunities-right-content {
+        padding-left: 50px;
+    }
+
+    .categories-card {
+        padding: 20px;
+
+        .content {
+            padding: 15px 0 15px 58px;
+           .icon {
+                max-width: 40px;
+
+                &::before {
+                    right: -5.8px;
+                    width: 55px;
+                }
+            }
+        }
+    }
+
+    .success-funfacts-card {
+        padding: 20px 10px;
+
+        .content {
+            padding-left: 82px;
+
+            .icon {
+                i {
+                    width: 65px;
+                    font-size: 30px;
+                }
+            }
+        }
+    }
+
+    .courses-box {
+        .courses-content {
+            h3 {
+                font-size: 20px;
+            }
+            .list {
+                li {
+                    font-size: 14px;
+                    margin-right: 8px;
+                }
+            }
+        }
+    }
+
+    .overview-inner-area {
+        padding: {
+            top: 10px;
+            bottom: 10px;
+            right: 55px;
+        };
+    }
+
+    .find-events-card {
+        .events-content {
+            h3 {
+                font-size: 22px;
+            }
+        }
+    }
+
+    // Home Two Responsive
+    .main-banner-wrap-content {
+        h1 {
+            font-size: 50px;
+        }
+    }
+    .main-banner-wrap-image {
+        .banner-box {
+            padding: 15px;
+            top: 2px;
+            right: 28px;
+        }
+        .banner-congratulations {
+            padding: 15px;
+            right: 0;
+            bottom: 150px;
+        }
+        .banner-reviews {
+            padding: 15px;
+            right: 15px;
+        }
+    }
+
+    .affordable-content {
+        padding-left: 20px;
+    }
+
+    .single-funfacts-card {
+        padding: 20px 10px;
+        .content {
+            padding-left: 90px;
+            .icon {
+                i {
+                    width: 70px;
+                }
+            }
+        }
+    }
+
+    .courses-item {
+        .courses-content {
+            h3 {
+                font-size: 22px;
+            }
+            .bottom-list {
+                li {
+                    font-size: 14px;
+                    padding-left: 22px;
+
+                    i {
+                        font-size: 15.5px;
+                        top: 2px;
+                    }
+                }
+            }
+        }
+    }
+
+    // Home Three Responsive
+    .main-banner-large-content {
+        top: 0;
+        padding: {
+            top: 170px;
+            right: 0;
+        };
+        h1 {
+            font-size: 50px;
+        }
+    }
+    .banner-large-shape-1 {
+        top: 15px;
+    }
+
+    .affordable-wrap-image {
+        margin-right: 55px;
+
+        .affordable-reviews {
+            right: -45px;
+        }
+    }
+
+    .categories-box {
+        padding: 20px 10px;
+    }
+
+    .career-funfacts-card {
+        padding: 12px;
+
+        .content {
+            padding-left: 65px;
+            
+            .icon {
+                i {
+                    width: 50px;
+                    height: 50px;
+                    line-height: 50px;
+                    font-size: 25px;
+                }
+            }
+            h3 {
+                font-size: 25px;
+            }
+            p {
+                font-size: 15px;
+            }
+        }
+    }
+    .career-shape {
+        top: 25px;
+    }
+
+    .blog-card {
+        .blog-content {
+            h3 {
+                font-size: 22px;
+                margin-bottom: 15px;
+            }
+            .meta {
+                li {
+                    font-size: 14px;
+                    padding-left: 22px;
+                    margin-right: 15px;
+
+                    i {
+                        font-size: 15px;
+                    }
+                }
+            }
+        }
+    }
+
+    // Inner Pages Responsive
+    .contact-info-card {
+        padding: 30px 15px;
+
+        span {
+            font-size: 14.5px;
+        }
+    }
+
+    .widget-area {
+        .widget_posts {
+            .item {
+                .info {
+                    top: 0;
+                }
+            }
+        }
+        .widget_courses {
+            .item {
+                .info {
+                    top: 0;
+                }
+            }
+        }
+    }
+    .blog-details-desc {
+        .article-footer {
+            .article-tags {
+                li {
+                    margin-right: 4px;
+                }
+            }
+        }
+    }
+    .single-footer-widget {
+        .info-list {
+            li {
+                font-size: 15px;
+            }
+        }
+    }
+    .course-details-desc {
+        padding: 30px 20px 30px 20px;
+
+        h3 {
+            max-width: 610px;
+        }
+        .meta-list {
+            li {
+                margin-right: 10px;
+
+                img {
+                    max-width: 30px;
+                }
+                &:last-child {
+                    i {
+                        font-size: 14.5px;
+                    }
+                }
+            }
+        }
+        .price {
+            right: 20px;
+            top: 30px;
+        }
+    }
+    .courses-details-tabs {
+        .nav {
+            .nav-item {
+                .nav-link {
+                    padding: 25px 35px;
+                }
+            }
+        }
+        .tab-content {
+            .instructors-card {
+                .instructors-content {
+                    padding: 0 0 0 25px;
+                }
+            }
+            .courses-reviews {
+                .total-box {
+                    padding: 15px;
+
+                    h3 {
+                        font-size: 30px;
+                        margin-bottom: 10px;
+                    }
+                    span {
+                        font-size: 15px;
+                        margin-bottom: 12px;
+                    }
+                    ul {
+                        li {
+                            i {
+                                font-size: 14px;
+                            }
+                        }
+                    }
+                }
+                .reviews-progress {
+                    margin-left: 0;
+
+                    .reviews-rating {
+                        li {
+                            margin-right: 1px;
+
+                            i {
+                                font-size: 12px;
+                            }
+                            span {
+                                font-size: 14px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .main-navbar {
+        .navbar {
+            .search-box {
+                margin: {
+                    left: 10px;
+                    right: 10px;
+                };
+                .input-search {
+                    padding: 15px 15px;
+                }
+                button {
+                    right: 10px;
+                }
+            }
+            .navbar-nav {
+                .nav-item {
+                    margin: {
+                        left: 10px;
+                        right: 10px;
+                    };
+                }
+            }
+            .others-options {
+                margin-left: 20px;
+
+                .option-item {
+                    margin-right: 5px;
+
+                    .default-btn {
+                        padding: 12px 20px;
+                        font-size: 15px;
+                    }
+                    .cart-btn {
+                        a {
+                            i {
+                                font-size: 20px;
+                            }
+                        }
+                    }
+                    .user-btn {
+                        i {
+                            height: 30px;
+                            width: 30px;
+                            line-height: 30px;
+                            font-size: 15px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 1550px) {
+    .main-banner-area {
+        .container-fluid {
+            max-width: 1900px;
+            padding: {
+                left: 100px;
+                right: 100px;
+            };
+        }
+    }
+    .main-banner-bottom-content {
+        padding: 15px 100px 15px 300px;
+    }
+
+    .main-banner-wrap-area {
+        .container-fluid {
+            max-width: 1900px;
+            padding: {
+                left: 100px;
+                right: 100px;
+            };
+        }
+        &::before {
+            width: 1382px;
+        }
+    }
+    .main-banner-wrap-image {
+        .banner-box {
+            position: absolute;
+            right: 80px;
+            top: 62px;
+        }
+        .banner-congratulations {
+            position: absolute;
+            right: 0;
+            bottom: 215px;
+        }
+        .banner-reviews {
+            position: absolute;
+            right: 205px;
+            bottom: -30px;
+        }
+    }
+
+    .main-banner-with-large-area {
+        max-width: 1900px;
+        padding: {
+            left: 100px;
+            right: 0;
+        };
+    }
+
+    .review-area {
+        .container-fluid {
+            padding: {
+                left: 65px;
+                right: 65px;
+            };
+        }
+    }
+
+    .coming-soon-area {
+        padding: {
+            top: 230px;
+            bottom: 230px;
+        };
+    }
+    .main-navbar {
+        .container-fluid {
+            max-width: 1900px;
+            padding: {
+                left: 10px;
+                right: 10px;
+            };
+        }
+        .navbar {
+            .search-box {
+                width: 365px;
+                margin: {
+                    left: 55px;
+                    right: 35px;
+                };
+            }
+            .navbar-nav {
+                .nav-item {
+                    margin: {
+                        left: 20px;
+                        right: 20px;
+                    };
+                }
+            }
+        }
+    }
+}
+
+// Mobile and iPad Navbar Responsive
+@media only screen and (max-width: 1199px) {
+    .main-responsive-nav {
+        display: block; 
+
+        .main-responsive-menu {
+            position: relative;
+            
+            &.mean-container {
+                .mean-nav {
+                    ul {
+                        font-size: 15px;
+
+                        li {
+                            a {
+                                &.active {
+                                    color: var(--main-color);
+                                }
+                                i {
+                                    display: none;
+                                }
+                            }
+                            li {
+                                a {
+                                    font-size: 14px;
+                                }
+                            }
+                        }
+                    }
+                }
+                .others-options {
+                    display: none !important;
+                }
+                .navbar-nav {
+                    overflow-y: scroll;
+                    height: 280px;
+                    box-shadow: 0 7px 13px 0 rgba(0, 0, 0, .1);
+                    background-color: var(--white-color);
+                }
+            }
+        }
+        .mean-container {
+            a {
+                &.meanmenu-reveal {
+                    padding: 8px 0 0 0;
+                    color: var(--black-color);
+    
+                    span {
+                        display: block;
+                        background: var(--black-color);
+                        height: 2px;
+                        margin-top: -5px;
+                        border-radius: 5px;
+                        position: relative;
+                        top: 8px;
+                    }
+                }
+            }
+            .mean-bar {
+                background-color: unset;
+                border-bottom: none;
+            }
+            .mean-nav {
+                margin-top: 57px;
+            }
+        }
+        .logo {
+            position: relative;
+            z-index: 999;
+            max-width: 110px;
+        }
+        .search-box {
+            display: none;
+        }
+    }
+    .navbar-area {
+        background-color: var(--white-color);
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+    .main-navbar {
+        display: none;
+    }
+    .others-option-for-responsive {
+        display: block;
+    }
+    .d-none-mobile {
+        display: none;
+    }
+}
+
+@media only screen and (min-width: 1300px) and (max-width: 1590px) {
+    .main-navbar .navbar .search-box {
+        width: 265px;
+    }
+}
+
+@media only screen and (min-width: 1200px) and (max-width: 1320px) {
+    .edly-header-user-sec .edly-settings-nav {
+        margin-left: 2px;
+    }
+    .edly-header-user-sec li .dropdown .notification-icon {
+        height: 35px;
+        line-height: 35px;
+        width: 35px;
+    }
+    .edly-settings-nav .notification-icon>.icon {
+        font-size: 16px;
+        line-height: 38px;
+        margin-left: -1px;
+    }
+    .site-admin-active li.user_setting.edly-settings-nav {
+        display: inline-block;
+        margin-left: -3px;
+    }
+    .main-navbar .navbar .search-box {
+        width: 190px;
+    }
+    .main-navbar .navbar .navbar-nav .nav-item a {
+        font-size: 16px;
+    }
+}
+
+@media only screen and (min-width: 1400px) and (max-width: 1450px) {
+    .edly-header-user-sec .edly-settings-nav {
+        margin-left: 3px;
+    }
+}

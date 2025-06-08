@@ -1,0 +1,23 @@
+<div class="block_gearup">
+    <div class="gu-grid gu-grid-cols-3 md:gu-grid-cols-4 gu-gap-2 gu-gap-y-4">
+    {{#missioninsts}}
+        <div class="gu-overflow-hidden">
+            <div class="gu-w-full">
+                {{#hascompleted}}
+                    {{#mission}}
+                        {{> block_gearup/achievements/badge_thumbnail }}
+                    {{/mission}}
+                {{/hascompleted}}
+                {{^hascompleted}}
+                    {{> block_gearup/achievements/badge_thumbnail_locked }}
+                {{/hascompleted}}
+            </div>
+            <div class="gu-mt-1">
+                <div class="gu-text-xs gu-text-center">
+                    {{ mission.title }}
+                </div>
+            </div>
+        </div>
+    {{/missioninsts}}
+    </div>
+</div>

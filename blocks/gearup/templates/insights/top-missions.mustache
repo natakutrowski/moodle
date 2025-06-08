@@ -1,0 +1,68 @@
+{{!
+    This file is part of Level Up Quest.
+
+    Level Up Quest is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Level Up Quest is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
+
+    https://levelup.plus
+}}
+{{!
+    @template block_gearup/insights/top-missions
+
+    TODO describe template top-items
+
+    Example context (json):
+    {
+    }
+}}
+<div class="gu-bg-gray-50 gu-rounded gu-px-4 gu-py-2">
+    <h3 class="gu-m-0 gu-mb-2 gu-text-lg gu-grow-0 gu-shrink-0">{{$ heading }}Unknown title{{/ heading}}</h3>
+    {{#hasitems}}
+    {{#items}}
+    <div class="gu-flex gu-gap-2 gu-items-start gu-w-full gu-mb-1 last:gu-mb-0">
+        {{#mission}}
+        <a class="gu-grow gu-no-underline gu-text-inherit" href="{{ manageurl }}">
+            <div class="gu-gap-2 gu-flex gu-items-start">
+                <div class="gu-h-6 gu-w-6 gu-shrink-0">
+                    {{#type.isquest}}
+                        {{> block_gearup/quests/narrator_thumbnail }}
+                    {{/type.isquest}}
+                    {{#type.isachievement}}
+                        {{> block_gearup/achievements/badge_thumbnail}}
+                    {{/type.isachievement}}
+                    {{#type.ischallenge}}
+                        {{> block_gearup/icons/challenge}}
+                    {{/type.ischallenge}}
+                </div>
+                <div>{{ title }}</div>
+            </div>
+        </a>
+        {{/mission}}
+        <div class="gu-shrink-0">{{ value }}</div>
+    </div>
+    {{/items}}
+    {{/hasitems}}
+    {{^hasitems}}
+        <div class="gu-grow gu-flex">
+        {{< block_gearup/zero_state_block }}
+            {{$ icon }}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gu-size-16">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 1.5v-1.5m0 0c0-.621.504-1.125 1.125-1.125m0 0h7.5" />
+                </svg>
+            {{/ icon }}
+            {{$ title }}{{/ title }}
+            {{$ subtitle }}{{#str}}notenoughdatatoshow, block_gearup{{/str}}{{/ subtitle }}
+        {{/ block_gearup/zero_state_block }}
+        </div>
+    {{/hasitems}}
+</div>
