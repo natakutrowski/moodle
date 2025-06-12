@@ -3,6 +3,8 @@ require_once(__DIR__ . '/../../config.php');
 require_login();
 require_capability('moodle/site:config', context_system::instance());
 
+use local_subscriptions\subscription_config;
+
 $userid = required_param('userid', PARAM_INT);
 $courseid = required_param('courseid', PARAM_INT);
 $returnurl = optional_param('returnurl', '', PARAM_LOCALURL);
@@ -20,4 +22,4 @@ foreach ($instances as $instance) {
     }
 }
 
-redirect(new moodle_url($returnurl ?: '/local/subscriptions/manage.php'));
+redirect(new moodle_url($returnurl ?: subscription_config::manage_subscription_page()));

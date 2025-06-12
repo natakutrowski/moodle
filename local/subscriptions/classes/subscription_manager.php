@@ -1,10 +1,14 @@
 <?php
 namespace local_subscriptions;
+use local_subscriptions\subscription_config;
 
 defined('MOODLE_INTERNAL') || die();
 
+
 class subscription_manager {
 
+
+/* 
 	public static function create_subscription($userid, $plan, $provider, $subid, $start, $end, $accessscope = null): void {
 		global $DB;
 	
@@ -41,16 +45,7 @@ class subscription_manager {
 		}
 		self::enrol_user_to_courses($userid, $accessscope);
 	}
-
-
-    public static function get_active_subscription($userid) {
-        global $DB;
-        $now = time();
-
-        return $DB->get_record_select('user_subscription',
-            'userid = :userid AND status = :status AND end_date > :now',
-            ['userid' => $userid, 'status' => 'active', 'now' => $now]);
-    }
+ */
 
     public static function expire_subscription_if_needed() {
         global $DB;
@@ -77,24 +72,18 @@ class subscription_manager {
 				return strtotime('+1 year', $start);
 			case '3years':
 				return strtotime('+3 years', $start);
+			case 'lifetime':
+				return strtotime('+100 years', $start);
 			default:
 				return strtotime('+1 year', $start);
 		}
 	}
-  
 	
 	public static function enrol_user_to_courses(int $userid, string $accessscope): void {
 		global $DB;
-	
-		$mapping = [
-			'full'     => [2, 5],
-			'test'     => [3],
-			'a0_only'  => [2],
-			'a2_only'  => [5],
-		];
-	
-		if (array_key_exists($accessscope, $mapping)) {
-			$courseids = $mapping[$accessscope];
+		
+		if (array_key_exists($accessscope, subscription_config::SUBSCRIPTION_MAPPING)) {
+			$courseids = subscription_config::SUBSCRIPTION_MAPPING[$accessscope];
 		} elseif (preg_match('/^custom_([\d,]+)$/', $accessscope, $matches)) {
 			$courseids = array_map('intval', explode(',', $matches[1]));
 		} else {
@@ -120,56 +109,81 @@ class subscription_manager {
 			}
 		}
 	}
-
 	
-	public static function unenrol_user_from_all_courses(int $userid): void {
+	public static function create_or_extend_subscription(
+		int $userid,
+		string $plan,
+		string $provider,
+		string $subid,
+		int $startdate,
+		int $enddate,
+		string $accessscope,
+		int $creationdate,
+		bool $allowupdate = false
+	): string {
 		global $DB;
 	
-		$enrolled = enrol_get_users_courses($userid, true);
-		foreach ($enrolled as $course) {
-			$instances = enrol_get_instances($course->id, true);
+		$existing = $DB->get_record('user_subscription', [
+			'userid' => $userid,
+			'access_scope' => $accessscope,
+			'status' => 'active'
+		]);
+	
+		if ($existing) {
+			if ($allowupdate) {
+				$existing->plan = $plan;
+				$existing->payment_provider = $provider;
+				$existing->subscription_id = $subid;
+				$existing->start_date = $startdate;
+				$existing->end_date = $enddate;
+				$existing->last_update = time();
+	
+				$DB->update_record('user_subscription', $existing);
+				return 'updated';
+			} else {
+				return 'exists';
+			}
+		}
+	
+		$record = (object)[
+			'userid' => $userid,
+			'plan' => $plan,
+			'payment_provider' => $provider,
+			'subscription_id' => $subid,
+			'start_date' => $startdate,
+			'end_date' => $enddate,
+			'status' => 'active',
+			'last_update' => time(),
+			'access_scope' => $accessscope, 
+			'creation_date' => $creationdate
+		];
+	
+		$DB->insert_record('user_subscription', $record);
+		return 'created';
+	}
+
+	public static function unenrol_user_from_scope(int $userid, string $accessscope): void {
+
+		if (!array_key_exists($accessscope, subscription_config::SUBSCRIPTION_MAPPING)) {
+			return;
+		}
+	
+		$courseids = subscription_config::SUBSCRIPTION_MAPPING[$accessscope];
+	
+		foreach ($courseids as $courseid) {
+			$instances = enrol_get_instances($courseid, true);
 			foreach ($instances as $instance) {
 				if ($instance->enrol === 'manual') {
 					$plugin = enrol_get_plugin('manual');
 					if ($plugin) {
-						// Optionnel : vérifier l’inscription dans l’instance
-						$context = context_course::instance($course->id);
-						if (is_enrolled($context, $userid)) {
-							$plugin->unenrol_user($instance, $userid);
-						}
+						$plugin->unenrol_user($instance, $userid);
 					}
 				}
 			}
 		}
 	}
 
-	
-	public static function enrol_user_to_test_course(int $userid): void {
-		$testcourseid = 3; 
-		$instances = enrol_get_instances($testcourseid, true);
-	
-		foreach ($instances as $instance) {
-			if ($instance->enrol === 'manual') {
-				$plugin = enrol_get_plugin('manual');
-				if ($plugin) {
-					$plugin->enrol_user($instance, $userid, 5); // 5 = rôle étudiant
-				}
-			}
-		}
-	}
-	
-	public static function get_all_manual_courses_for_user(int $userid): array {
-		global $DB;
-	
-		$sql = "SELECT c.id, c.fullname
-				FROM {user_enrolments} ue
-				JOIN {enrol} e ON ue.enrolid = e.id
-				JOIN {course} c ON e.courseid = c.id
-				WHERE ue.userid = :userid AND e.enrol = 'manual'";
-	
-		return $DB->get_records_sql($sql, ['userid' => $userid]);
-	}
-	
+/* LEGACY : might be used later	
 	public static function get_duration_from_plan(string $plan): ?int {
 		switch ($plan) {
 			case '1month':
@@ -182,7 +196,7 @@ class subscription_manager {
 				return 365 * 24 * 60 * 60;
 			case '3years':
 				return 3 * 365 * 24 * 60 * 60;
-			case 'unlimited':
+			case 'lifetime':
 				return 100 * 365 * 24 * 60 * 60; // 100 ans = illimité
 			default:
 				return null;
@@ -213,39 +227,5 @@ class subscription_manager {
 	
 		return $DB->update_record('user_subscription', $subscription);
 	}
-	
-	public static function create_or_extend_subscription(int $userid, string $plan, string $provider, string $subid, int $startdate, int $enddate, string $accessscope): string {
-		global $DB;
-	
-		$current = $DB->get_record_select('user_subscription', 'userid = :userid AND status = :status AND end_date > :now', [
-			'userid' => $userid,
-			'status' => 'active',
-			'now' => time()
-		]);
-	
-		if ($current) {
-			$duration = self::get_duration_from_plan($plan);
-			$current->end_date += $duration;
-			$current->last_update = time();
-			$DB->update_record('user_subscription', $current);
-			return 'extended';
-		} else {
-			$record = new \stdClass();
-			$record->userid = $userid;
-			$record->plan = $plan;
-			$record->payment_provider = $provider;
-			$record->subscription_id = $subid;
-			$record->start_date = $startdate;
-			$record->end_date = $enddate;
-			$record->status = 'active';
-			$record->last_update = time();
-			$record->access_scope = $accessscope;
-			$DB->insert_record('user_subscription', $record);
-			return 'created';
-		}
-	}
-
-	
-	
-    
+ */
 }

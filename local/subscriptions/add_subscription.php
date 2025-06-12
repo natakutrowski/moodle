@@ -4,19 +4,19 @@ require_login();
 require_capability('moodle/site:config', context_system::instance());
 
 use local_subscriptions\subscription_manager;
+use local_subscriptions\subscription_config;
 
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/subscriptions/manual_enrol.php'));
-$PAGE->set_title(get_string('manual_enrol', 'local_subscriptions'));
-$PAGE->set_heading(get_string('manual_enrol', 'local_subscriptions'));
+$PAGE->set_url(new moodle_url(subscription_config::add_subscription_page()));
+$PAGE->set_title(get_string('add_subscription', 'local_subscriptions'));
+$PAGE->set_heading(get_string('add_subscription', 'local_subscriptions'));
 
-$PAGE->requires->js('/local/subscriptions/select2.min.js');
+$PAGE->requires->js('/local/subscriptions/js/select2.min.js');
 $PAGE->requires->css('/local/subscriptions/select2.min.css');
-$PAGE->requires->js('/local/subscriptions/init_select2.js');
+$PAGE->requires->js('/local/subscriptions/js/init_select2.js');
 $PAGE->requires->css('/local/subscriptions/styles.css');
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('manual_enrol', 'local_subscriptions'));
 
 // Load data
 $users = [];
@@ -25,21 +25,8 @@ foreach ($allusers as $user) {
     $users[$user->id] = fullname($user) . " ({$user->email})";
 }
 
-$plans = [
-    '1month' => get_string('plan_1month', 'local_subscriptions'),
-    '3months' => get_string('plan_3months', 'local_subscriptions'),
-    '6months' => get_string('plan_6months', 'local_subscriptions'),
-    '1year' => get_string('plan_1year', 'local_subscriptions'),
-    '3years' => get_string('plan_3years', 'local_subscriptions'),
-    'unlimited' => get_string('plan_unlimited', 'local_subscriptions'),
-];
-
-$scopes = [
-    'full' => get_string('access_full', 'local_subscriptions'),
-    'a0_only' => get_string('access_a0', 'local_subscriptions'),
-    'a1_only' => get_string('access_a1', 'local_subscriptions'),
-    'a2_only' => get_string('access_a2', 'local_subscriptions'),
-];
+$plans = subscription_config::get_plans();
+$scopes = subscription_config::get_scopes();
 
 // Handle form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -53,9 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $start = optional_param('start_date', time(), PARAM_INT);
         $end = subscription_manager::get_end_date_from_plan($plan, $start);
 
-        $status = subscription_manager::create_or_extend_subscription($userid, $plan, $provider, $subid, $start, $end, $accessscope);
-        subscription_manager::enrol_user_to_courses($userid, $accessscope);
-
+        $status = subscription_manager::create_or_extend_subscription($userid, $plan, $provider, $subid, $start, $end, $accessscope, time());
+        
         $a = (object)[
             'user' => $users[$userid] ?? get_string('unknown_user', 'local_subscriptions'),
             'plan' => $plans[$plan] ?? $plan,
@@ -63,51 +49,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         if ($status === 'created') {
+        	subscription_manager::enrol_user_to_courses($userid, $accessscope);
             echo html_writer::div(
-                html_writer::span('✅', 'icon') . get_string('enrol_success', 'local_subscriptions', $a),
+                html_writer::span('✅', 'icon') . get_string('sub_created', 'local_subscriptions', $a),
                 'subscription-message success'
             );
-        } else {
+        } elseif ($status === 'exists') {
             echo html_writer::div(
-                html_writer::span('🔁', 'icon') . get_string('enrol_extended', 'local_subscriptions', $a),
+                html_writer::span('ℹ️', 'icon') . get_string('sub_exists', 'local_subscriptions', $a),
                 'subscription-message info'
             );
         }
     }
 
     if (optional_param('action', '', PARAM_TEXT) === 'enrol_test_only') {
-        $plan = required_param('plan', PARAM_TEXT);
+        $plan = 'lifetime';
         $provider = 'manual';
         $subid = uniqid('manual_');
-        $start = optional_param('start_date', time(), PARAM_INT);
+        $start = time();
         $end = subscription_manager::get_end_date_from_plan($plan, $start);
 
-        subscription_manager::create_or_extend_subscription($userid, $plan, $provider, $subid, $start, $end, 'test');
+        subscription_manager::create_or_extend_subscription($userid, $plan, $provider, $subid, $start, $end, 'test', time());
         subscription_manager::enrol_user_to_courses($userid, 'test');
 
         $a = $users[$userid] ?? get_string('unknown_user', 'local_subscriptions');
 
         echo html_writer::div(
-            html_writer::span('📘', 'icon') . get_string('enrol_test_done', 'local_subscriptions', $a),
-            'subscription-message success'
-        );
-    }
-
-    if (optional_param('action', '', PARAM_TEXT) === 'unenrol_all') {
-        subscription_manager::unenrol_user_from_all_courses($userid);
-        $a = $users[$userid] ?? get_string('unknown_user', 'local_subscriptions');
-
-        echo html_writer::div(
-            html_writer::span('🗑️', 'icon') . get_string('unenrol_success', 'local_subscriptions', $a),
+            html_writer::span('📘', 'icon') . get_string('sub_test_done', 'local_subscriptions', $a),
             'subscription-message success'
         );
     }
 }
 
 // Form
+echo html_writer::start_div('subscription-card');
+
 echo html_writer::start_tag('form', ['method' => 'post', 'class' => 'mform']);
-echo html_writer::start_tag('fieldset', ['style' => 'max-width: 650px; padding: 20px; background: #f9f9f9; border-radius: 8px;']);
-echo html_writer::tag('legend', get_string('manual_enrol', 'local_subscriptions'));
 
 // User
 echo html_writer::div(
@@ -144,13 +121,26 @@ echo html_writer::div(
 
 // Buttons
 echo html_writer::div(
-    html_writer::tag('button', get_string('submit_enrol', 'local_subscriptions'), ['type' => 'submit', 'name' => 'action', 'value' => 'enrol', 'class' => 'btn btn-primary']) . ' ' .
-    html_writer::tag('button', get_string('submit_enrol_test', 'local_subscriptions'), ['type' => 'submit', 'name' => 'action', 'value' => 'enrol_test_only', 'class' => 'btn btn-secondary']) . ' ' .
-    html_writer::tag('button', get_string('submit_unenrol_all', 'local_subscriptions'), ['type' => 'submit', 'name' => 'action', 'value' => 'unenrol_all', 'class' => 'btn btn-danger']),
-    'form-group', ['style' => 'margin-top: 25px;']
+    html_writer::tag('button', '📘 '.get_string('submit_sub', 'local_subscriptions'), [
+        'type' => 'submit',
+        'name' => 'action',
+        'value' => 'enrol',
+        'class' => 'btn btn-primary me-2'
+    ]) .
+    html_writer::tag('button', '🧪 '.get_string('submit_sub_test', 'local_subscriptions'), [
+        'type' => 'submit',
+        'name' => 'action',
+        'value' => 'enrol_test_only',
+        'class' => 'btn btn-outline-primary me-4'
+    ]) .    
+    subscription_config::button_manage_subscription() .
+    subscription_config::button_import_csv(),
+    'form-group d-flex flex-wrap align-items-center',
+    ['style' => 'margin-top: 30px; gap: 10px;']
 );
 
-echo html_writer::end_tag('fieldset');
 echo html_writer::end_tag('form');
+
+echo html_writer::end_div(); // Fin du card
 
 echo $OUTPUT->footer();
