@@ -122,8 +122,8 @@ define(['jquery',
         $("#"+itemdata.uniqueid+"_container .dictationplayer_"+index+"_chars").html(typed.length);
                 
         // Edit NK : replace french apostrophe by quote
-        correct = correct.replace("’","'");
-        typed   = typed.replace("’","'");        
+        correct = correct.replaceAll("’","'");
+        typed   = typed.replaceAll("’","'");        
         
         //trim punctuation before comparing, if ignore punctuation is set
         if(itemdata.ignorepunctuation){

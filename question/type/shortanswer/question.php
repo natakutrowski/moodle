@@ -107,8 +107,8 @@ class qtype_shortanswer_question extends question_graded_by_strategy
         // Edit NK : remove punctuation signs
         $pattern = preg_replace('/[!"#¡¿$%&\'()。「」、*+,-.\/:;<=>?@[\]^_`{|}~]/','',$pattern);
         $string = preg_replace('/[!"#¡¿$%&\'()。「」、*+,-.\/:;<=>?@[\]^_`{|}~]/','',$string);
-        $pattern = preg_replace('/\s+/g',' ',$pattern);
-        $string = preg_replace('/\s+/g',' ',$string);        
+        $pattern = preg_replace('/\s+/',' ',$pattern);
+        $string = preg_replace('/\s+/',' ',$string);        
 
         // Break the string on non-escaped runs of asterisks.
         // ** is equivalent to *, but people were doing that, and with many *s it breaks preg.
