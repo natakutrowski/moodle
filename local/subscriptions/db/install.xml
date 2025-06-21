@@ -23,5 +23,91 @@
                 <INDEX NAME="status_idx" UNIQUE="false" FIELDS="status"/>
             </INDEXES>
         </TABLE>
+        
+        <TABLE NAME="subscription_access_scope" COMMENT="Defines access scopes, i.e. sets of courses">
+		  <FIELDS>
+			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+			<FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" />
+			<FIELD NAME="course_ids" TYPE="text" NOTNULL="true" />
+			<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+			<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+		  </FIELDS>
+		  <KEYS>
+			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			<KEY NAME="name_unique" TYPE="unique" FIELDS="name"/>
+		  </KEYS>
+		</TABLE>
+	
+		<TABLE NAME="subscription_plan" COMMENT="Defines plans for subscribing to access scopes">
+		  <FIELDS>
+			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+			<FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" />
+			<FIELD NAME="access_scope_id" TYPE="int" LENGTH="10" NOTNULL="true" />
+			<FIELD NAME="duration_key" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="1month" />
+			<FIELD NAME="is_active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
+			<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+			<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+		  </FIELDS>
+		  <KEYS>
+			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			<KEY NAME="access_scope_fk" TYPE="foreign" FIELDS="access_scope_id" REFTABLE="subscription_access_scope" REFFIELDS="id"/>
+		  </KEYS>
+			<INDEXES>
+				<INDEX NAME="uniq_plan_name" UNIQUE="true" FIELDS="name"/>
+			</INDEXES>
+		</TABLE>
+	
+		<TABLE NAME="subscription_plan_price" COMMENT="Price for each plan in multiple currencies">
+		  <FIELDS>
+			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+			<FIELD NAME="plan_id" TYPE="int" LENGTH="10" NOTNULL="true" />
+			<FIELD NAME="currency" TYPE="char" LENGTH="10" NOTNULL="true" />
+			<FIELD NAME="price" TYPE="number" LENGTH="10" DECIMALS="2" NOTNULL="true" />
+		  </FIELDS>
+		  <KEYS>
+			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			<KEY NAME="plan_fk" TYPE="foreign" FIELDS="plan_id" REFTABLE="subscription_plan" REFFIELDS="id"/>
+			<KEY NAME="plan_currency_unique" TYPE="unique" FIELDS="plan_id,currency"/>
+		  </KEYS>
+		</TABLE>
+        
+		<TABLE NAME="subscription_access_scope_translation" COMMENT="Traductions des noms et descriptions des scopes">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="scope_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="name" TYPE="text" NOTNULL="true"/>
+				<FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+				<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="scopefk" TYPE="foreign" FIELDS="scope_id" REFTABLE="subscription_access_scope" REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="lang_scope_unique" UNIQUE="true" FIELDS="scope_id, lang"/>
+			</INDEXES>
+		</TABLE>
+		
+		<TABLE NAME="subscription_plan_translation" COMMENT="Stores translations for subscription plans.">
+			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+			<FIELD NAME="plan_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+			<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
+			<FIELD NAME="name" TYPE="text" NOTNULL="true"/>
+			<FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+			<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="false"/>
+			<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="false"/>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="plan_id_fk" TYPE="foreign" FIELDS="plan_id" REFTABLE="subscription_plan" REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="lang_plan_unique" UNIQUE="true" FIELDS="plan_id, lang"/>
+			</INDEXES>
+		</TABLE>
+
+   
+        
     </TABLES>
 </XMLDB>

@@ -1,0 +1,151 @@
+<?php
+
+require_once(__DIR__ . '/../../../config.php');
+require_once($CFG->libdir . '/formslib.php');
+
+require_once($CFG->dirroot . '/local/subscriptions/forms/plan_form.php');
+require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
+require_once($CFG->dirroot . '/local/subscriptions/renderer/plans_renderer.php');
+require_once($CFG->dirroot . '/local/subscriptions/classes/subscription_config.php');
+
+use local_subscriptions\subscription_config;
+
+global $DB, $OUTPUT, $PAGE;
+
+$currentlang = current_language();
+$id     = optional_param('id', 0, PARAM_INT);
+$edit   = optional_param('edit', 0, PARAM_INT);
+$add    = optional_param('add', 0, PARAM_BOOL);
+$delete = optional_param('delete', 0, PARAM_INT);
+$toggleid = optional_param('toggle', 0, PARAM_INT);
+
+
+$plan = null;
+$scope_id = null;
+
+if ($edit) {
+    list($plan, $scope_id, $duration_key) = local_subscriptions_get_plan_for_edit($edit);
+}
+
+if ($delete) {
+    local_subscriptions_delete_plan($delete);
+}
+
+if ($toggleid && confirm_sesskey()) {
+    $plantoggle = $DB->get_record('subscription_plan', ['id' => $toggleid], '*', MUST_EXIST);
+    $DB->set_field('subscription_plan', 'is_active', $plantoggle->is_active ? 0 : 1, ['id' => $plantoggle->id]);
+
+    redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']),
+        get_string('planstatusupdated', 'local_subscriptions'),
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
+}
+
+$mform = new plan_form(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']), [
+    'scope_id' => $scopeid, 'duration_key' => $duration_key
+]);
+
+if ($mform->is_cancelled()) {
+    redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']));
+} elseif ($data = $mform->get_data()) {
+
+	$record = (object)[
+		'name'         		=> $data->name,
+		'access_scope_id'	=> $data->scope_id,
+		'duration_key'		=> $data->duration_key,
+		'is_active'			=> 0,
+		'last_update'  		=> time()
+	];
+
+	if ($data->id) {
+		$record->id = $data->id;
+		$DB->update_record('subscription_plan', $record);
+	} else {
+		$record->creation_date = time();
+		$newid = $DB->insert_record('subscription_plan', $record);
+
+		if ($newid) {
+			redirect(
+				new moodle_url(subscription_config::plans_translations_page(), [
+					'planid' => $newid,
+					'add' => $newid,
+					'sesskey' => sesskey()
+				]),
+				get_string('plancreated', 'local_subscriptions'),
+				null,
+				\core\output\notification::NOTIFY_SUCCESS
+			);
+		} else {
+			redirect(
+				new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']),
+				get_string('plancreateerror', 'local_subscriptions'),
+				null,
+				\core\output\notification::NOTIFY_ERROR
+			);
+		}
+	}
+
+	redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']));
+
+} else {
+	if (!$edit && !$add) {
+		if (($_SERVER['REQUEST_METHOD'] === 'POST') && (!isset($data) || empty($data) || is_null($data))) {
+			if (!empty($_POST['name'])) {
+				echo $OUTPUT->notification(get_string('error_plan_name_exists', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
+			} else {
+				echo $OUTPUT->notification(get_string('plancreateerror', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
+			}
+		}		
+	}
+}
+
+// 🔘 Bouton ajouter
+if (!$edit && !$add) {
+    echo local_subscriptions_plans_renderer::render_add_button(
+        new moodle_url(subscription_config::manage_plans_page(),['tab' => 'plans', 'add' => 1])
+    );
+
+    echo $OUTPUT->heading(get_string('planlist', 'local_subscriptions'));
+
+	$order = optional_param('order', 'name', PARAM_ALPHA);
+	$dir = optional_param('dir', 'asc', PARAM_ALPHA);
+	
+	$validorders = ['name'];
+	$validdirs = ['asc', 'desc'];
+	
+	if (!in_array($order, $validorders)) {
+		$order = 'name';
+	}
+	if (!in_array($dir, $validdirs)) {
+		$dir = 'asc';
+	}
+	
+	$dir = strtolower($dir);
+	if ($dir !== 'asc' && $dir !== 'desc') {
+		$dir = 'asc';
+	}
+	
+	$orderdir = strtoupper($dir); // 'ASC' ou 'DESC' sécurisé
+
+    $plans = local_subscriptions_get_all_plans_with_translations($currentlang, $orderdir);
+    echo local_subscriptions_plans_renderer::render_plans_table($plans, $currentlang, $order, $dir);
+}
+
+// 📋 Formulaire
+if ($edit || $add) {
+    echo html_writer::start_div('scope-form-container', ['style' => 'margin-top: 2em;']);
+    echo $OUTPUT->heading($edit ? get_string('editplan', 'local_subscriptions') : get_string('addplan', 'local_subscriptions'), 3);
+    	
+	$mform->set_data((object)[
+        'id' => $plan->id ?? null,
+        'name' => $plan->name ?? '',
+        'scope_id' => $plan->access_scope_id ?? '',
+        'duration_key' => $plan->duration_key ?? ''
+    ]);
+    $mform->display();
+    echo html_writer::end_div();
+}
+
+$PAGE->requires->js_call_amd('local_subscriptions/toggleplan', 'init');
+$PAGE->requires->js_call_amd('local_subscriptions/deleteplan', 'init');

@@ -6,7 +6,7 @@ defined('MOODLE_INTERNAL') || die();
 class subscription_config {
 
 	// -- Arrays of constants --
-    public const PLAN_KEYS = [
+    public const PLAN_DURATION_KEYS = [
         '1month',
         '3months',
         '6months',
@@ -31,9 +31,26 @@ class subscription_config {
         'a2'        => [5],
     ];
 
+    public const AVAILABLE_CURRENCIES = [
+        'EUR' => '€',
+        'USD' => '$',
+        'RUB' => '₽',
+        'GBP' => '£',
+        'CHF' => 'CHF',
+    ];
+
+    public const AVAILABLE_LANGUAGES = [
+        'fr' => 'Français',
+        'en' => 'English',
+        'es' => 'Español',
+        'de' => 'Deutsch',
+        'it' => 'Italiano',
+        'ru' => 'Русский',
+    ];
+
     public static function get_plans(): array {
         $plans = [];
-        foreach (self::PLAN_KEYS as $key) {
+        foreach (self::PLAN_DURATION_KEYS as $key) {
             $plans[$key] = get_string('plan_' . $key, 'local_subscriptions');
         }
         return $plans;
@@ -46,6 +63,29 @@ class subscription_config {
         }
         return $scopes;
     }
+    public static function get_currency_options(): array {
+        $currencies = [];
+        foreach (self::AVAILABLE_CURRENCIES as $code => $symbol) {
+            $currencies[$code] = "{$code} ({$symbol})";
+        }
+        return $currencies;
+    }
+
+    public static function get_currency_symbol(string $currency): ?string {
+        $map = [
+            'USD' => '$',
+            'EUR' => '€',
+            'RUB' => '₽',
+            'GBP' => '£',
+        ];
+        return $map[$currency] ?? null;
+    }
+
+
+    public static function get_translation_languages(): array {
+        return self::AVAILABLE_LANGUAGES;
+    }
+
 
     // -- Plugin path --
     public static function plugin_path(): string {
@@ -56,17 +96,27 @@ class subscription_config {
     public static function add_subscription_page(): string {
         return self::plugin_path() . 'add_subscription.php';
     }
-
     public static function manage_subscription_page(): string {
         return self::plugin_path() . 'manage_subscription.php';
     }
-
     public static function import_csv_page(): string {
         return self::plugin_path() . 'import_csv.php';
     }
-
     public static function process_csv_page(): string {
         return self::plugin_path() . 'process_csv.php';
+    }
+    public static function manage_plans_page(): string {
+        return self::plugin_path() . 'manage_plans.php';
+    }
+    public static function scopes_translations_page(): string {
+        return self::plugin_path() . 'scopes_translations.php';
+    }
+    public static function plans_translations_page(): string {
+        return self::plugin_path() . 'plans_translations.php';
+    }
+
+    public static function plans_prices_page(): string {
+        return self::plugin_path() . 'plans_prices.php';
     }
     
     // -- Buttons --

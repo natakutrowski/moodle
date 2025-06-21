@@ -32,5 +32,13 @@ if ($hassiteconfig) {
 		new moodle_url(subscription_config::import_csv_page()),
 		'moodle/site:config'
 	));
+	
+	$ADMIN->add('subscriptions_category', new admin_externalpage(
+		'local_subscriptions_manage_plans',
+		//get_string('import_subscriptions_csv', 'local_subscriptions'),
+		'Manage plans',
+		new moodle_url('/local/subscriptions/manage_plans.php'),
+		'moodle/site:config'
+	));
 
 }
