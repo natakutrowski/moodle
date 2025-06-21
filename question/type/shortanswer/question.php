@@ -101,14 +101,9 @@ class qtype_shortanswer_question extends question_graded_by_strategy
         $pattern = self::safe_normalize($pattern);
         $string = self::safe_normalize($string);
         
-        // Edit NK : replace french apostrophe by quote
-        $pattern = str_replace("’","'",$pattern);
-        $string = str_replace("’","'",$string);
-        // Edit NK : remove punctuation signs
-        $pattern = preg_replace('/[!"#¡¿$%&\'()。「」、*+,-.\/:;<=>?@[\]^_`{|}~]/','',$pattern);
-        $string = preg_replace('/[!"#¡¿$%&\'()。「」、*+,-.\/:;<=>?@[\]^_`{|}~]/','',$string);
-        $pattern = preg_replace('/\s+/',' ',$pattern);
-        $string = preg_replace('/\s+/',' ',$string);        
+        // Edit NK
+        $pattern = self::normalize_for_comparison($pattern);
+        $string = self::normalize_for_comparison($string);  
 
         // Break the string on non-escaped runs of asterisks.
         // ** is equivalent to *, but people were doing that, and with many *s it breaks preg.
@@ -129,6 +124,85 @@ class qtype_shortanswer_question extends question_graded_by_strategy
 
         return preg_match($regexp, trim($string));
     }
+    
+    // Improvment NK
+    protected static function normalize_for_comparison($text) {
+		// Apostrophes → '
+		$text = str_replace(
+			['’', '‘', 'ʼ', 'ʹ', '′', '´', '‛'],
+			"'",
+			$text
+		);
+	
+		// Tirets → -
+		$text = str_replace(
+			['–', '—', '‐', '‑', '‒', '﹘', '﹣', '－', 'ー'],
+			"-",
+			$text
+		);
+	
+		// Guillemets → " ou '
+		$text = str_replace(
+			['“', '”', '„', '‟', '«', '»'],
+			'"',
+			$text
+		);
+		$text = str_replace(
+			['‚', '‘', '’'],
+			"'",
+			$text
+		);
+		
+		// Majuscules accentuées
+		$text = self::remove_uppercase_accents($text);
+	
+		// Espaces insécables → espace standard
+		$text = str_replace(
+			["\u{00A0}", "\u{202F}", "\u{2007}"],
+			" ",
+			$text
+		);
+	
+		// Supprimer caractères invisibles (zero-width, etc.)
+		$text = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $text);
+	
+		// Réduire les espaces multiples à un seul
+		$text = preg_replace('/\s+/u', ' ', $text);
+	
+		// Supprimer ponctuation ambigüe inutile (facultatif)
+		$text = str_replace(['…'], '...', $text); // points de suspension
+		// tu peux en ajouter ici si besoin
+		
+		// Remove punctuation signs
+		$text = preg_replace('/[!"#¡¿$%&\'()。「」、*+,-.\/:;<=>?@[\]^_`{|}~]/','',$text);
+	
+		return trim($text);
+	}
+	
+	// Improvment NK
+	protected static function remove_uppercase_accents(string $str) {
+		$replacements = [
+			'À' => 'A',
+			'Â' => 'A',
+			'Ä' => 'A',
+			'Æ' => 'AE',
+			'Ç' => 'C',
+			'É' => 'E',
+			'È' => 'E',
+			'Ê' => 'E',
+			'Ë' => 'E',
+			'Î' => 'I',
+			'Ï' => 'I',
+			'Ô' => 'O',
+			'Œ' => 'OE',
+			'Ù' => 'U',
+			'Û' => 'U',
+			'Ü' => 'U',
+			'Ÿ' => 'Y',
+		];
+	
+		return strtr($str, $replacements);
+	}
 
     /**
      * Normalise a UTf-8 string to FORM_C, avoiding the pitfalls in PHP's
