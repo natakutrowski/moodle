@@ -27,7 +27,7 @@ function local_subscriptions_delete_plan(int $id): void {
         throw new moodle_exception(
 			'plannotfound',
 			'local_subscriptions',
-			new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans'])
+			new moodle_url(subscription_config::manage_page(), ['tab' => 'plans'])
 		);
     }
     
@@ -39,7 +39,7 @@ function local_subscriptions_delete_plan(int $id): void {
         $DB->delete_records('subscription_plan_price', ['plan_id' => $id]);
         $DB->delete_records('subscription_plan', ['id' => $id]);
         $transaction->allow_commit();
-        redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']),
+        redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
                 get_string('plandeleted', 'local_subscriptions'),
                 null,
                 \core\output\notification::NOTIFY_SUCCESS);

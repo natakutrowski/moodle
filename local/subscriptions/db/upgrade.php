@@ -196,6 +196,36 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2025061904, 'local', 'subscriptions');
 	}
 
+	if ($oldversion < 2025062100) {
+
+		$dbman = $DB->get_manager();
+		$table = new xmldb_table('user_subscription');
+
+		$fields = [
+			new xmldb_field('planid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0),
+			new xmldb_field('pricepaid', XMLDB_TYPE_NUMBER, '10,2'),
+			new xmldb_field('currency', XMLDB_TYPE_CHAR, '10'),
+			new xmldb_field('transaction_id', XMLDB_TYPE_CHAR, '255')
+		];
+
+		foreach ($fields as $field) {
+			if (!$dbman->field_exists($table, $field)) {
+				$dbman->add_field($table, $field);
+			}
+		}
+
+		$oldfields = ['plan', 'subscription_id', 'access_scope'];
+		foreach ($oldfields as $oldfieldname) {
+			$oldfield = new xmldb_field($oldfieldname);
+			if ($dbman->field_exists($table, $oldfield)) {
+				$dbman->drop_field($table, $oldfield);
+			}
+		}
+
+		upgrade_plugin_savepoint(true, 2025062100, 'local', 'subscriptions');
+	}
+
+
 
     return true;
 }

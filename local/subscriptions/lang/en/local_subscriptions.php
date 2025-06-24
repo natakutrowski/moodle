@@ -37,12 +37,18 @@ $string['status'] = 'Status';
 $string['creation_date'] = 'Creation date';
 $string['save_modifications'] = 'Save modifications';
 $string['delete_selected'] = 'Delete selected subscriptions';
+$string['popover_description'] = 'Description';
+$string['popover_duration'] = 'Duration';
+$string['popover_scope'] = 'Access scope';
+$string['popover_courses'] = 'Courses';
+$string['popover_no_courses'] = 'No courses defined';
+
 
 // -- Add subscription
 $string['add_subscription'] = 'Add subscription';
 $string['unknown_user'] = 'Unknown user';
-$string['sub_created'] = '{$a->user} has been subscribed to the {$a->plan} plan with {$a->scope} access.';
-$string['sub_exists'] = '{$a->user} subscription already exists ({$a->plan}, {$a->scope}).';
+$string['sub_created'] = '{$a->user} has been subscribed to the <strong>{$a->plan}</strong> plan.';
+$string['sub_exists'] = '{$a->user} subscription already exists ({$a->plan}).';
 $string['sub_test_done'] = '{$a} has been subscribed to the test course.';
 $string['select_user'] = 'Select a user';
 $string['submit_sub'] = 'Subscribe to selected scope';
@@ -65,12 +71,14 @@ $string['missing_param'] = 'Missing parameter';
 $string['no_valid_rows'] = 'No valid rows to import';
 $string['import_success_count'] = 'Successfully imported {$a} subscriptions.';
 $string['import_skipped'] = 'Skipped entries (missing or invalid data)';
+$string['invalid_or_missing_fields'] = 'Invalid or missing fields';
+$string['user_not_found'] = 'User not found';
 
 // -- Manage plans
 $string['managesubscriptions'] = 'Manage subscriptions';
 $string['scopes'] = '🎓 Access scope';
 $string['plans'] = '📝 Plans';
-$string['prices'] = '💰 Prices';
+$string['user_subscriptions'] = '👨‍🎓 / 👩‍🎓 User subscriptions';
 
 // Scopes
 $string['scopename'] = 'Scope name';
@@ -180,3 +188,17 @@ $string['confirmdeleteplanmessage'] = '⚠️ This action is irreversible.<br><b
 $string['delete'] = 'Delete';
 
 
+///////
+$string['paymentprovider_stripe'] = 'Stripe';
+$string['paymentprovider_paypal'] = 'PayPal';
+$string['paymentprovider_manual'] = 'Manual entry';
+$string['paymentprovider_csv'] = 'CSV import';
+$string['paymentprovider_offline'] = 'Offline payment';
+$string['paymentprovider_giftcode'] = 'Gift code';
+$string['paymentprovider_dev'] = 'Technical/dev import';
+
+
+$string['description'] = 'Description';
+$string['scope_and_duration'] = 'Scope and duration';
+$string['courses_included'] = 'Courses included';
+$string['select_price'] = 'Select price and currency';

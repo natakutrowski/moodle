@@ -5,7 +5,7 @@ require_once(__DIR__ . '/../lib/lib.php');
 
 use local_subscriptions\subscription_config;
 
-class local_subscriptions_scopes_renderer {
+class local_subscriptions_scopes_renderer extends plugin_renderer_base {
 
     /**
      * Affiche le bouton "Ajouter un scope".
@@ -26,12 +26,12 @@ class local_subscriptions_scopes_renderer {
         $upstyle = ($order === 'name' && $dir === 'asc') ? 'font-weight:bold;' : '';
         $downstyle = ($order === 'name' && $dir === 'desc') ? 'font-weight:bold;' : '';
         $sorticons = html_writer::link(
-            new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'scopes', 'order' => 'name', 'dir' => 'asc']),
+            new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes', 'order' => 'name', 'dir' => 'asc']),
             '🔼',
             ['style' => "text-decoration:none; $upstyle", 'title' => get_string('sortaz', 'local_subscriptions')]
         ) . ' ' .
         html_writer::link(
-            new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'scopes', 'order' => 'name', 'dir' => 'desc']),
+            new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes', 'order' => 'name', 'dir' => 'desc']),
             '🔽',
             ['style' => "text-decoration:none; $downstyle", 'title' => get_string('sortza', 'local_subscriptions')]
         );
@@ -69,12 +69,12 @@ class local_subscriptions_scopes_renderer {
                 }
             }
 
-            $editurl = new moodle_url(subscription_config::manage_plans_page(), [
+            $editurl = new moodle_url(subscription_config::manage_page(), [
                 'tab' => 'scopes',
                 'edit' => $s->id,
                 'sesskey' => sesskey()
             ]);
-            $deleteurl = new moodle_url(subscription_config::manage_plans_page(), [
+            $deleteurl = new moodle_url(subscription_config::manage_page(), [
                 'tab' => 'scopes',
                 'delete' => $s->id,
                 'sesskey' => sesskey()

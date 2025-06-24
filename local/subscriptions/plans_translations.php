@@ -41,7 +41,7 @@ if ($deleteid && confirm_sesskey()) {
 echo local_subscriptions_plans_renderer::local_subscriptions_render_plans_translations_table($plans, $translations, $planid, $adding, $editing);
 
 // Boutons retour + "Afficher tout"
-$returnurl = new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']);
+$returnurl = new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']);
 $clearurl = new moodle_url(subscription_config::plans_translations_page());
 $buttons = html_writer::link($returnurl, '← ' . get_string('backtoplanlist', 'local_subscriptions'), ['class' => 'btn btn-link']);
 if ($planid) {

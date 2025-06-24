@@ -35,19 +35,19 @@ if ($toggleid && confirm_sesskey()) {
     $plantoggle = $DB->get_record('subscription_plan', ['id' => $toggleid], '*', MUST_EXIST);
     $DB->set_field('subscription_plan', 'is_active', $plantoggle->is_active ? 0 : 1, ['id' => $plantoggle->id]);
 
-    redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']),
+    redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
         get_string('planstatusupdated', 'local_subscriptions'),
         null,
         \core\output\notification::NOTIFY_SUCCESS
     );
 }
 
-$mform = new plan_form(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']), [
+$mform = new plan_form(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']), [
     'scope_id' => $scopeid, 'duration_key' => $duration_key
 ]);
 
 if ($mform->is_cancelled()) {
-    redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']));
+    redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']));
 } elseif ($data = $mform->get_data()) {
 
 	$record = (object)[
@@ -78,7 +78,7 @@ if ($mform->is_cancelled()) {
 			);
 		} else {
 			redirect(
-				new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']),
+				new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
 				get_string('plancreateerror', 'local_subscriptions'),
 				null,
 				\core\output\notification::NOTIFY_ERROR
@@ -86,7 +86,7 @@ if ($mform->is_cancelled()) {
 		}
 	}
 
-	redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']));
+	redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']));
 
 } else {
 	if (!$edit && !$add) {
@@ -103,7 +103,7 @@ if ($mform->is_cancelled()) {
 // 🔘 Bouton ajouter
 if (!$edit && !$add) {
     echo local_subscriptions_plans_renderer::render_add_button(
-        new moodle_url(subscription_config::manage_plans_page(),['tab' => 'plans', 'add' => 1])
+        new moodle_url(subscription_config::manage_page(),['tab' => 'plans', 'add' => 1])
     );
 
     echo $OUTPUT->heading(get_string('planlist', 'local_subscriptions'));

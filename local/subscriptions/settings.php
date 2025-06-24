@@ -15,14 +15,14 @@ if ($hassiteconfig) {
     $ADMIN->add('subscriptions_category', new admin_externalpage(
         'local_subscriptions_manage_subscription',
         get_string('manage_subscriptions', 'local_subscriptions'),
-        new moodle_url(subscription_config::manage_subscription_page()),
+        new moodle_url(subscription_config::user_page()),
 		'moodle/site:config'
     ));
 
 	$ADMIN->add('subscriptions_category', new admin_externalpage(
 		'local_subscriptions_add_subscription',
 		get_string('add_subscription', 'local_subscriptions'),
-		new moodle_url(subscription_config::add_subscription_page()),
+		new moodle_url(subscription_config::add_manual_subscription_page()),
 		'moodle/site:config'
 	));
 	
@@ -37,7 +37,7 @@ if ($hassiteconfig) {
 		'local_subscriptions_manage_plans',
 		//get_string('import_subscriptions_csv', 'local_subscriptions'),
 		'Manage plans',
-		new moodle_url('/local/subscriptions/manage_plans.php'),
+		new moodle_url(subscription_config::manage_page()),
 		'moodle/site:config'
 	));
 

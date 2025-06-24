@@ -5,7 +5,7 @@ require_once(__DIR__ . '/../lib/lib.php');
 
 use local_subscriptions\subscription_config;
 
-class local_subscriptions_plans_renderer {
+class local_subscriptions_plans_renderer extends plugin_renderer_base {
 
     /**
      * Affiche le bouton "Ajouter un plan".
@@ -26,12 +26,12 @@ class local_subscriptions_plans_renderer {
         $upstyle = ($order === 'name' && $dir === 'asc') ? 'font-weight:bold;' : '';
         $downstyle = ($order === 'name' && $dir === 'desc') ? 'font-weight:bold;' : '';
         $sorticons = html_writer::link(
-            new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans', 'order' => 'name', 'dir' => 'asc']),
+            new moodle_url(subscription_config::manage_page(), ['tab' => 'plans', 'order' => 'name', 'dir' => 'asc']),
             '🔼',
             ['style' => "text-decoration:none; $upstyle", 'title' => get_string('sortaz', 'local_subscriptions')]
         ) . ' ' .
         html_writer::link(
-            new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans', 'order' => 'name', 'dir' => 'desc']),
+            new moodle_url(subscription_config::manage_page(), ['tab' => 'plans', 'order' => 'name', 'dir' => 'desc']),
             '🔽',
             ['style' => "text-decoration:none; $downstyle", 'title' => get_string('sortza', 'local_subscriptions')]
         );
@@ -78,7 +78,7 @@ class local_subscriptions_plans_renderer {
             
             $scopelink = '';
             if ($scope = $DB->get_record('subscription_access_scope', ['id' => $p->access_scope_id], 'name', IGNORE_MISSING)) {
-                $url = new moodle_url(subscription_config::manage_plans_page(), [
+                $url = new moodle_url(subscription_config::manage_page(), [
                     'tab' => 'scopes',
                     'edit' => $p->access_scope_id,
                     'sesskey' => sesskey()
@@ -86,12 +86,12 @@ class local_subscriptions_plans_renderer {
                 $scopelink = html_writer::link($url, $scope->name, ['target' => '_blank']);
             }
 
-            $editurl = new moodle_url(subscription_config::manage_plans_page(), [
+            $editurl = new moodle_url(subscription_config::manage_page(), [
                 'tab' => 'plans',
                 'edit' => $p->id,
                 'sesskey' => sesskey()
             ]);
-            $deleteurl = new moodle_url(subscription_config::manage_plans_page(), [
+            $deleteurl = new moodle_url(subscription_config::manage_page(), [
                 'tab' => 'plans',
                 'delete' => $p->id,
                 'sesskey' => sesskey()
@@ -140,26 +140,23 @@ class local_subscriptions_plans_renderer {
             );
 
             // 👁️ Actif / Inactif avec icône <i> et spinner
-           // if (!empty($availablelangs) && !empty($availablecurrencies)) {
-                // 👁️ Actif / Inactif avec icône <i> et spinner
-                $iconclass = $p->is_active ? 'fa-eye' : 'fa-eye-slash';
-                $label = $p->is_active
-                    ? get_string('deactivateplan', 'local_subscriptions')
-                    : get_string('activateplan', 'local_subscriptions');
+            $iconclass = $p->is_active ? 'fa-eye' : 'fa-eye-slash';
+            $label = $p->is_active
+                ? get_string('deactivateplan', 'local_subscriptions')
+                : get_string('activateplan', 'local_subscriptions');
 
-                $iconhtml = html_writer::tag('i', '', [
-                    'class' => "fa {$iconclass}",
-                    'aria-hidden' => 'true',
-                    'title' => $label,
-                    'data-state' => $p->is_active ? 'active' : 'inactive',
-                ]);
+            $iconhtml = html_writer::tag('i', '', [
+                'class' => "fa {$iconclass}",
+                'aria-hidden' => 'true',
+                'title' => $label,
+                'data-state' => $p->is_active ? 'active' : 'inactive',
+            ]);
 
-                $icons[] = html_writer::link('#', $iconhtml, [
-                    'class' => 'toggleplan me-2 action-icon',
-                    'data-id' => $p->id,
-                    'title' => $label,
-                ]);
-            //} 
+            $icons[] = html_writer::link('#', $iconhtml, [
+                'class' => 'toggleplan me-2 action-icon',
+                'data-id' => $p->id,
+                'title' => $label,
+            ]);
 
             // 🚨 Icône d’alerte si problème
             $alerts = [];

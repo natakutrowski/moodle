@@ -41,7 +41,7 @@ if ($deleteid && confirm_sesskey()) {
 echo local_subscriptions_scopes_renderer::local_subscriptions_render_scopes_translations_table($scopes, $translations, $scopeid, $adding, $editing);
 
 // Boutons retour + "Afficher tout"
-$returnurl = new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'scopes']);
+$returnurl = new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']);
 $clearurl = new moodle_url(subscription_config::scopes_translations_page());
 $buttons = html_writer::link($returnurl, '← ' . get_string('backtoscopelist', 'local_subscriptions'), ['class' => 'btn btn-link']);
 if ($scopeid) {

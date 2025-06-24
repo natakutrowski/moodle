@@ -27,7 +27,7 @@ function local_subscriptions_delete_scope(int $id): void {
         throw new moodle_exception(
 			'scopenotfound',
 			'local_subscriptions',
-			new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'scopes'])
+			new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes'])
 		);
     }
 
@@ -36,7 +36,7 @@ function local_subscriptions_delete_scope(int $id): void {
         throw new moodle_exception(
 			'scopedeleteinuse',
 			'local_subscriptions',
-			new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'scopes'])
+			new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes'])
 		);
     }
 
@@ -45,7 +45,7 @@ function local_subscriptions_delete_scope(int $id): void {
         $DB->delete_records('subscription_access_scope_translation', ['scope_id' => $id]);
         $DB->delete_records('subscription_access_scope', ['id' => $id]);
         $transaction->allow_commit();
-        redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'scopes']),
+        redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']),
                 get_string('scopedeleted', 'local_subscriptions'),
                 null,
                 \core\output\notification::NOTIFY_SUCCESS);

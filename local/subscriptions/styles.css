@@ -223,3 +223,66 @@ tr.plan-inactive {
     opacity: 0.8;
 }
 
+#plan-details-box {
+    border: 1px solid #ccc;
+    padding: 1em;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+#plan-details-box table {
+    width: 100%;
+    border-collapse: collapse;
+}
+#plan-details-box th,
+#plan-details-box td {
+    padding: 0.4em 0.6em;
+    text-align: left;
+}
+
+.popover {
+    max-width: 700px;
+    min-width: 400px;
+    width: auto !important; /* largeur auto dans une plage définie */
+}
+
+.popover .popover-body {
+    max-width: 700px;
+    min-width: 400px;
+    width: auto !important; /* largeur auto dans une plage définie */
+}
+
+
+.popover .popover-plan-content {
+    width: 100%; /* prend toute la largeur du popover */
+}
+
+
+.popover .popover-plan-content table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* important pour répartir proprement */
+}
+
+.popover .popover-plan-content td {
+    padding: 6px 8px;
+    vertical-align: top;
+}
+
+.popover .popover-plan-content td:first-child {
+    font-weight: bold;
+    width: 150px; /* réduit la largeur de la colonne gauche */
+    white-space: nowrap;
+}
+
+.popover .popover-plan-content td:last-child {
+    width: auto !important; /* plus d’espace à droite */
+    word-wrap: break-word;
+}
+
+.popover .popover-plan-content ul {
+    padding-left: 18px;
+    margin: 4px 0;
+}
+
+
+

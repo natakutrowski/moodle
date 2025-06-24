@@ -10,7 +10,7 @@ global $DB;
 
 $planid = optional_param('planid', 0, PARAM_INT);
 if (!$planid) {
-    redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']));
+    redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']));
 }
 $add = optional_param('add', 0, PARAM_BOOL);
 $edit   = optional_param('edit', 0, PARAM_INT);
@@ -78,7 +78,7 @@ if ($mform->is_cancelled()) {
 }
 
 // Boutons retour
-$returnurl = new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'plans']);
+$returnurl = new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']);
 $buttons = html_writer::link($returnurl, '← ' . get_string('backtoplanlist', 'local_subscriptions'), ['class' => 'btn btn-link']);
 echo html_writer::div($buttons, 'd-flex justify-content-start align-items-center', ['style' => 'margin-top: 30px; gap: 10px;']);
 

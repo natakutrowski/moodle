@@ -31,7 +31,7 @@ if ($delete) {
 
 $mform = new access_scope_form(null, ['course_ids' => implode(',', $course_ids)]);
 if ($mform->is_cancelled()) {
-    redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'scopes']));
+    redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']));
 } elseif ($data = $mform->get_data()) {
     $record = (object)[
         'name'         => $data->name,
@@ -59,7 +59,7 @@ if ($mform->is_cancelled()) {
             );
         } else {
             redirect(
-                new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'scopes']),
+                new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']),
                 get_string('scopecreateerror', 'local_subscriptions'),
                 null,
                 \core\output\notification::NOTIFY_ERROR
@@ -67,7 +67,7 @@ if ($mform->is_cancelled()) {
         }
     }
 
-    redirect(new moodle_url(subscription_config::manage_plans_page(), ['tab' => 'scopes']));
+    redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']));
 
 } else {
 	if (!$edit && !$add) {
@@ -84,7 +84,7 @@ if ($mform->is_cancelled()) {
 // 🔘 Bouton ajouter
 if (!$edit && !$add) {
     echo local_subscriptions_scopes_renderer::render_add_button(
-        new moodle_url(subscription_config::manage_plans_page(),['tab' => 'scopes', 'add' => 1])
+        new moodle_url(subscription_config::manage_page(),['tab' => 'scopes', 'add' => 1])
     );
 
     echo $OUTPUT->heading(get_string('scopelist', 'local_subscriptions'));

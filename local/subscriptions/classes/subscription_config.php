@@ -87,16 +87,38 @@ class subscription_config {
     }
 
 
+    public const PAYMENT_PROVIDER_STRIPE    = 'stripe';
+    public const PAYMENT_PROVIDER_PAYPAL    = 'paypal';
+    public const PAYMENT_PROVIDER_MANUAL    = 'manual';
+    public const PAYMENT_PROVIDER_CSV       = 'csv';
+    public const PAYMENT_PROVIDER_OFFLINE   = 'offline';
+    public const PAYMENT_PROVIDER_GIFTCODE  = 'giftcode';
+    public const PAYMENT_PROVIDER_DEV       = 'dev';
+    
+    public static function get_payment_providers(): array {
+        return [
+            self::PAYMENT_PROVIDER_STRIPE    => get_string('paymentprovider_stripe', 'local_subscriptions'),
+            self::PAYMENT_PROVIDER_PAYPAL    => get_string('paymentprovider_paypal', 'local_subscriptions'),
+            self::PAYMENT_PROVIDER_MANUAL    => get_string('paymentprovider_manual', 'local_subscriptions'),
+            self::PAYMENT_PROVIDER_CSV       => get_string('paymentprovider_csv', 'local_subscriptions'),
+            self::PAYMENT_PROVIDER_OFFLINE   => get_string('paymentprovider_offline', 'local_subscriptions'),
+            self::PAYMENT_PROVIDER_GIFTCODE  => get_string('paymentprovider_giftcode', 'local_subscriptions'),
+            self::PAYMENT_PROVIDER_DEV       => get_string('paymentprovider_dev', 'local_subscriptions'),
+        ];
+    }
+
+
+
     // -- Plugin path --
     public static function plugin_path(): string {
         return '/local/subscriptions/';
     }
     
     // -- Plugin pages --
-    public static function add_subscription_page(): string {
-        return self::plugin_path() . 'add_subscription.php';
+    public static function add_manual_subscription_page(): string {
+        return self::plugin_path() . 'add_manual_subscription.php';
     }
-    public static function manage_subscription_page(): string {
+    public static function user_page(): string {
         return self::plugin_path() . 'manage_subscription.php';
     }
     public static function import_csv_page(): string {
@@ -105,8 +127,8 @@ class subscription_config {
     public static function process_csv_page(): string {
         return self::plugin_path() . 'process_csv.php';
     }
-    public static function manage_plans_page(): string {
-        return self::plugin_path() . 'manage_plans.php';
+    public static function manage_page(): string {
+        return self::plugin_path() . 'manage.php';
     }
     public static function scopes_translations_page(): string {
         return self::plugin_path() . 'scopes_translations.php';
@@ -123,7 +145,7 @@ class subscription_config {
     // Add subscription
 	public static function button_add_subscription(): string {
 		$button = \html_writer::link(
-			new \moodle_url(self::add_subscription_page()),
+			new \moodle_url(self::add_manual_subscription_page()),
 			\html_writer::tag('i', '', ['class' => 'fa fa-plus-circle', 'style' => 'margin-right: 5px;']) .
 			get_string('btn_add_subscription', 'local_subscriptions'),
 			['class' => 'btn btn-secondary me-2']
@@ -134,7 +156,7 @@ class subscription_config {
 	// Manage subscription
 	public static function button_manage_subscription(): string {
 		$button = \html_writer::link(
-			new \moodle_url(self::manage_subscription_page()),
+			new \moodle_url(self::manage_page(), ['tab' => 'user_subscriptions']),
 			'📋 ' . get_string('btn_manage_subscriptions', 'local_subscriptions'),
 			['class' => 'btn btn-secondary me-2']
 		);
@@ -150,4 +172,68 @@ class subscription_config {
 		);	
 		return $button;
 	}    
+
+    public static function get_plan_info(string $planid): array {
+        $plans = self::get_plans_full(); // nom + description + scope
+        return $plans[$planid] ?? [];
+    }
+
+    public static function get_plans_full(): array {
+        global $DB;
+
+        $records = $DB->get_records('subscription_plan');
+        $result = [];
+
+        foreach ($records as $plan) {
+            $name = self::get_plan_translation($plan->id, 'name');
+            $description = self::get_plan_translation($plan->id, 'description');
+
+            $result[$plan->id] = [
+                'id' => $plan->id,
+                'name' => $name,
+                'description' => $description,
+                'access_scope_id' => $plan->access_scope_id,
+                'duration_key' => $plan->duration_key,
+                'is_active' => $plan->is_active,
+                'creation_date' => $plan->creation_date,
+                'last_update' => $plan->last_update,
+            ];
+
+        }
+
+        return $result;
+    }
+
+    public static function get_plan_translation(int $planid, string $field, ?string $lang = null): string {
+        global $DB;
+
+        if (!$lang) {
+            $lang = current_language();
+        }
+
+        $record = $DB->get_record('subscription_plan_translation', [
+            'plan_id' => $planid,
+            'lang' => $lang,
+        ]);
+
+        if ($record && isset($record->{$field})) {
+            return $record->{$field};
+        }
+
+        // Fallback : retourne le champ en anglais
+        if ($lang !== 'en') {
+            $record = $DB->get_record('subscription_plan_translation', [
+                'plan_id' => $planid,
+                'lang' => 'en',
+            ]);
+
+            if ($record && isset($record->{$field})) {
+                return $record->{$field};
+            }
+        }
+
+        return '';
+    }
+
+
 }
