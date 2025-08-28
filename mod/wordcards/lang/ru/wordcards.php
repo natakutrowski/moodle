@@ -627,3 +627,13 @@ $string['definitionhigh'] = 'Высокое';
 $string['definitionstandard'] = 'Стандартное';
 $string['cloudpoodllserver'] = 'Сервер Cloud Poodll';
 $string['cloudpoodllserver_details'] = 'Сервер для использования Cloud Poodll. Изменяйте его только в случае, если Poodll предоставил другой.';
+
+$string['courselearnedheading'] = 'Выученные термины в курсе: {$a}';
+$string['courselearnedreport'] = 'Отчёт о выученных терминах';
+$string['courseuserlearned'] = 'Термины, выученные пользователем в курсе';
+$string['courseuserlearnedheading'] = 'Термины, выученные пользователем {$a->username} в курсе: {$a->coursename}:';
+$string['courselearnedreport_explanation'] = 'Список с количеством терминов, выученных каждым пользователем в этом курсе.';
+$string['selfclaim'] = 'Самостоятельное подтверждение';
+$string['selfclaimed'] = 'Подтверждено самостоятельно';
+$string['termstolearn'] = 'Термины для изучения';
+$string['totalterms'] = 'Общее количество терминов';

@@ -625,3 +625,13 @@ $string['definitionhigh'] = 'Élevé';
 $string['definitionstandard'] = 'Standard';
 $string['cloudpoodllserver'] = 'Serveur Cloud Poodll';
 $string['cloudpoodllserver_details'] = 'Le serveur à utiliser pour Cloud Poodll. Ne le modifiez que si Poodll vous en a fourni un autre.';
+
+$string['courselearnedheading'] = 'Termes appris dans le cours : {$a}';
+$string['courselearnedreport'] = 'Termes appris dans le cours';
+$string['courseuserlearned'] = 'Termes appris par l’utilisateur dans le cours';
+$string['courseuserlearnedheading'] = 'Termes appris par {$a->username} dans le cours : {$a->coursename} :';
+$string['courselearnedreport_explanation'] = 'Liste du nombre de termes appris par chaque utilisateur dans ce cours.';
+$string['selfclaim'] = 'Réclamation manuelle';
+$string['selfclaimed'] = 'Réclamé manuellement';
+$string['termstolearn'] = 'Termes à apprendre';
+$string['totalterms'] = 'Nombre total de termes';
