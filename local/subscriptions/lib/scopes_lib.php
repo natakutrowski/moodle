@@ -10,10 +10,10 @@ function local_subscriptions_get_scope_for_edit(int $id): array {
     global $DB;
     require_sesskey();
 
-    $scope = $DB->get_record('subscription_access_scope', ['id' => $id], '*', MUST_EXIST);
-    $course_ids = explode(',', $scope->course_ids);
+    $accessscope = $DB->get_record('subscription_access_scope', ['id' => $id], '*', MUST_EXIST);
+    $course_ids = explode(',', $accessscope->course_ids);
 
-    return [$scope, $course_ids];
+    return [$accessscope, $course_ids];
 }
 
 /**
@@ -31,7 +31,7 @@ function local_subscriptions_delete_scope(int $id): void {
 		);
     }
 
-    $plans = $DB->count_records('subscription_plan', ['access_scope_id' => $id]);
+    $plans = $DB->count_records('subscription_plan', ['accessscopeid' => $id]);
     if ($plans > 0) {
         throw new moodle_exception(
 			'scopedeleteinuse',
@@ -42,7 +42,7 @@ function local_subscriptions_delete_scope(int $id): void {
 
     $transaction = $DB->start_delegated_transaction();
     try {
-        $DB->delete_records('subscription_access_scope_translation', ['scope_id' => $id]);
+        $DB->delete_records('subscription_access_scope_translation', ['accessscopeid' => $id]);
         $DB->delete_records('subscription_access_scope', ['id' => $id]);
         $transaction->allow_commit();
         redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']),
@@ -64,15 +64,15 @@ function local_subscriptions_get_all_scopes_with_translations(string $lang, stri
         SELECT s.*, t.name AS translated_name, t.description AS translated_description
         FROM {subscription_access_scope} s
         LEFT JOIN {subscription_access_scope_translation} t
-            ON s.id = t.scope_id AND t.lang = ?
+            ON s.id = t.accessscopeid AND t.lang = ?
         ORDER BY s.name " . $orderdir, [$lang]);
 }
 
-function local_subscriptions_get_scope_translations(int $scopeid = 0): array {
+function local_subscriptions_get_scope_translations(int $accessscopeid = 0): array {
     global $DB;
 
-    return $scopeid
-        ? $DB->get_records('subscription_access_scope_translation', ['scope_id' => $scopeid])
+    return $accessscopeid
+        ? $DB->get_records('subscription_access_scope_translation', ['accessscopeid' => $accessscopeid])
         : $DB->get_records('subscription_access_scope_translation');
 }
 
@@ -88,7 +88,7 @@ function local_subscriptions_save_scope_translation(): void {
 
     $id = optional_param('id', 0, PARAM_INT);
     $record = (object)[
-        'scope_id' => required_param('scope_id', PARAM_INT),
+        'accessscopeid' => required_param('accessscopeid', PARAM_INT),
         'lang' => required_param('lang', PARAM_LANG),
         'name' => required_param('name', PARAM_TEXT),
         'description' => required_param('description', PARAM_TEXT),
@@ -100,13 +100,13 @@ function local_subscriptions_save_scope_translation(): void {
         $DB->update_record('subscription_access_scope_translation', $record);
     } else {
         $exists = $DB->record_exists('subscription_access_scope_translation', [
-            'scope_id' => $record->scope_id,
+            'accessscopeid' => $record->accessscopeid,
             'lang' => $record->lang
         ]);
 
         if ($exists) {
             redirect(new moodle_url(subscription_config::scopes_translations_page(), [
-                'add' => $record->scope_id, 'sesskey' => sesskey()
+                'add' => $record->accessscopeid, 'sesskey' => sesskey()
             ]), get_string('errorduplicatetranslation', 'local_subscriptions'), null, \core\output\notification::NOTIFY_ERROR);
         }
 

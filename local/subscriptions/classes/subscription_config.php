@@ -192,7 +192,7 @@ class subscription_config {
                 'id' => $plan->id,
                 'name' => $name,
                 'description' => $description,
-                'access_scope_id' => $plan->access_scope_id,
+                'accessscopeid' => $plan->accessscopeid,
                 'duration_key' => $plan->duration_key,
                 'is_active' => $plan->is_active,
                 'creation_date' => $plan->creation_date,
@@ -212,7 +212,7 @@ class subscription_config {
         }
 
         $record = $DB->get_record('subscription_plan_translation', [
-            'plan_id' => $planid,
+            'planid' => $planid,
             'lang' => $lang,
         ]);
 
@@ -223,7 +223,7 @@ class subscription_config {
         // Fallback : retourne le champ en anglais
         if ($lang !== 'en') {
             $record = $DB->get_record('subscription_plan_translation', [
-                'plan_id' => $planid,
+                'planid' => $planid,
                 'lang' => 'en',
             ]);
 

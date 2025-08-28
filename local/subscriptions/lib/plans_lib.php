@@ -11,9 +11,9 @@ function local_subscriptions_get_plan_for_edit(int $id): array {
     require_sesskey();
 
     $plan = $DB->get_record('subscription_plan', ['id' => $id], '*', MUST_EXIST);
-    $scope_id = $plan->access_scope_id;
+    $accessscopeid = $plan->accessscopeid;
     $duration_key = $plan->duration_key;
-    return [$plan, $scope_id, $duration_key];
+    return [$plan, $accessscopeid, $duration_key];
 }
 
 /**
@@ -35,8 +35,8 @@ function local_subscriptions_delete_plan(int $id): void {
 
     $transaction = $DB->start_delegated_transaction();
     try {
-        $DB->delete_records('subscription_plan_translation', ['plan_id' => $id]);
-        $DB->delete_records('subscription_plan_price', ['plan_id' => $id]);
+        $DB->delete_records('subscription_plan_translation', ['planid' => $id]);
+        $DB->delete_records('subscription_plan_price', ['planid' => $id]);
         $DB->delete_records('subscription_plan', ['id' => $id]);
         $transaction->allow_commit();
         redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
@@ -58,7 +58,7 @@ function local_subscriptions_get_all_plans_with_translations(string $lang, strin
         SELECT s.*, t.name AS translated_name, t.description AS translated_description
         FROM {subscription_plan} s
         LEFT JOIN {subscription_plan_translation} t
-            ON s.id = t.plan_id AND t.lang = ?
+            ON s.id = t.planid AND t.lang = ?
         ORDER BY s.name " . $orderdir, [$lang]);
 }
 
@@ -66,7 +66,7 @@ function local_subscriptions_get_plan_translations(int $planid = 0): array {
     global $DB;
 
     return $planid
-        ? $DB->get_records('subscription_plan_translation', ['plan_id' => $planid])
+        ? $DB->get_records('subscription_plan_translation', ['planid' => $planid])
         : $DB->get_records('subscription_plan_translation');
 }
 
@@ -82,7 +82,7 @@ function local_subscriptions_save_plan_translation(): void {
 
     $id = optional_param('id', 0, PARAM_INT);
     $record = (object)[
-        'plan_id' => required_param('plan_id', PARAM_INT),
+        'planid' => required_param('planid', PARAM_INT),
         'lang' => required_param('lang', PARAM_LANG),
         'name' => required_param('name', PARAM_TEXT),
         'description' => required_param('description', PARAM_TEXT),
@@ -94,7 +94,7 @@ function local_subscriptions_save_plan_translation(): void {
         $DB->update_record('subscription_plan_translation', $record);
     } else {
         $exists = $DB->record_exists('subscription_plan_translation', [
-            'plan_id' => $record->plan_id,
+            'planid' => $record->planid,
             'lang' => $record->lang
         ]);
 
@@ -116,7 +116,7 @@ function local_subscriptions_save_plan_translation(): void {
  */
 function local_subscriptions_get_plan_prices(int $planid): array {
     global $DB;
-    return $DB->get_records('subscription_plan_price', ['plan_id' => $planid], 'currency ASC');
+    return $DB->get_records('subscription_plan_price', ['planid' => $planid], 'currency ASC');
 }
 
 /**
@@ -137,15 +137,15 @@ function local_subscriptions_delete_price(int $id): void {
 
 function local_subscriptions_get_used_currencies_for_plan(int $planid): array {
     global $DB;
-    return $DB->get_fieldset_select('subscription_plan_price', 'currency', 'plan_id = ?', [$planid]);
+    return $DB->get_fieldset_select('subscription_plan_price', 'currency', 'planid = ?', [$planid]);
 }
 
 function local_subscriptions_plan_has_translation(int $planid): bool {
     global $DB;
-    return $DB->record_exists('subscription_plan_translation', ['plan_id' => $planid]);
+    return $DB->record_exists('subscription_plan_translation', ['planid' => $planid]);
 }
 
 function local_subscriptions_plan_has_price(int $planid): bool {
     global $DB;
-    return $DB->record_exists('subscription_plan_price', ['plan_id' => $planid]);
+    return $DB->record_exists('subscription_plan_price', ['planid' => $planid]);
 }

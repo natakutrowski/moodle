@@ -1,7 +1,7 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/../lib/lib.php');
+require_once(__DIR__ . '/../lib.php');
 
 use local_subscriptions\subscription_config;
 
@@ -42,6 +42,7 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
             get_string('description', 'local_subscriptions'),
             get_string('scope', 'local_subscriptions'),
             get_string('duration', 'local_subscriptions'),
+            get_string('plan_highlight', 'local_subscriptions'),
             get_string('dates', 'local_subscriptions'),
             get_string('actions', 'local_subscriptions')
         ];
@@ -77,10 +78,10 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
             }
             
             $scopelink = '';
-            if ($scope = $DB->get_record('subscription_access_scope', ['id' => $p->access_scope_id], 'name', IGNORE_MISSING)) {
+            if ($scope = $DB->get_record('subscription_access_scope', ['id' => $p->accessscopeid], 'name', IGNORE_MISSING)) {
                 $url = new moodle_url(subscription_config::manage_page(), [
                     'tab' => 'scopes',
-                    'edit' => $p->access_scope_id,
+                    'edit' => $p->accessscopeid,
                     'sesskey' => sesskey()
                 ]);
                 $scopelink = html_writer::link($url, $scope->name, ['target' => '_blank']);
@@ -195,11 +196,21 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
                 $namecell = "-<br><small><i>(" . $p->name . ")</i></small>";
             }
 
+            // 🔆 Highlight select (None / Popular / Premium)
+            $hlvalue = $p->highlight_type ?? '';
+            $highlightlabel = match ($hlvalue) {
+                'popular' => html_writer::span(get_string('highlight_popular', 'local_subscriptions'), 'badge bg-warning text-dark'),
+                'premium' => html_writer::span(get_string('highlight_premium', 'local_subscriptions'), 'badge bg-primary'),
+                default   => html_writer::span(get_string('highlight_none', 'local_subscriptions'), 'text-muted')
+            };
+
+
             $table->data[] = [
                 $namecell,
                 $p->translated_description ?? '-',
                 $scopelink,
                 subscription_config::get_plans()[$p->duration_key] ?? $p->duration_key,
+                $highlightlabel,
                 $datescell,
                 $actions_container
             ];
@@ -229,12 +240,12 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
 
             if ($editing) {
                 $translation = $DB->get_record('subscription_plan_translation', ['id' => $editing], '*', MUST_EXIST);
-                if ($plan->id != $translation->plan_id) {
+                if ($plan->id != $translation->planid) {
                     continue;
                 }
             }
 
-            $rows = array_filter($translations, fn($t) => $t->plan_id == $plan->id);
+            $rows = array_filter($translations, fn($t) => $t->planid == $plan->id);
             $rows = array_values($rows);
 
             $langues = [];
@@ -290,8 +301,8 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
 
         $rows = [];
         foreach ($prices as $price) {
-            $editurl = new moodle_url(subscription_config::plans_prices_page(), ['edit' => $price->id, 'planid' => $price->plan_id]);
-            $deleteurl = new moodle_url(subscription_config::plans_prices_page(), ['delete' => $price->id, 'planid' => $price->plan_id, 'sesskey' => sesskey()]);
+            $editurl = new moodle_url(subscription_config::plans_prices_page(), ['edit' => $price->id, 'planid' => $price->planid]);
+            $deleteurl = new moodle_url(subscription_config::plans_prices_page(), ['delete' => $price->id, 'planid' => $price->planid, 'sesskey' => sesskey()]);
             
             $icons = [];
 

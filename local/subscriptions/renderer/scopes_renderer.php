@@ -1,7 +1,7 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/../lib/lib.php');
+require_once(__DIR__ . '/../lib.php');
 
 use local_subscriptions\subscription_config;
 
@@ -162,12 +162,12 @@ class local_subscriptions_scopes_renderer extends plugin_renderer_base {
 
             if ($editing) {
                 $translation = $DB->get_record('subscription_access_scope_translation', ['id' => $editing], '*', MUST_EXIST);
-                if ($scope->id != $translation->scope_id) {
+                if ($scope->id != $translation->accessscopeid) {
                     continue;
                 }
             }
 
-            $rows = array_filter($translations, fn($t) => $t->scope_id == $scope->id);
+            $rows = array_filter($translations, fn($t) => $t->accessscopeid == $scope->id);
             $rows = array_values($rows);
 
             $langues = [];

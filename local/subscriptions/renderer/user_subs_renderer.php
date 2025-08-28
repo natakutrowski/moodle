@@ -387,6 +387,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                             });
 
                             // Prix
+                            priceSelect.innerHTML = '';
                             (data.prices || []).forEach(priceStr => {
                                 const opt = document.createElement('option');
                                 const [price, currency] = priceStr.trim().split(' ');
@@ -409,7 +410,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
 
     public function render_plan_popover(int $planid, int $subscriptionid): string {
         global $DB;
-        
+
         $planinfo = subscription_config::get_plan_info($planid);
         $planname = $planinfo['name'] ?? '-';
         $description = $planinfo['description'] ?? '-';
@@ -507,7 +508,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         $table->data = [];
 
         foreach ($subscriptions as $sub) {
-            $user = $DB->get_record('user', ['id' => $sub->userid], 'id, firstname, lastname, email');
+            $user = $DB->get_record('user', ['id' => $sub->userid], 'id, firstname, lastname, email, firstnamephonetic, lastnamephonetic, middlename, alternatename');
             $username = fullname($user) . " ({$user->email})";
 
             $row = [];
@@ -592,4 +593,10 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
 
         return $output;
     }
+
+
+
+
+
+
 }

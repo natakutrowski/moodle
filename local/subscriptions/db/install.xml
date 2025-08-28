@@ -48,6 +48,7 @@
 			<FIELD NAME="is_active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
 			<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
 			<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+			<FIELD NAME="highlight_type" TYPE="char" LENGTH="20" NOTNULL="false" />
 		  </FIELDS>
 		  <KEYS>
 			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -108,7 +109,45 @@
 			</INDEXES>
 		</TABLE>
 
-   
+		<TABLE NAME="subscription_payment_request">
+			<FIELD NAME="id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true" DEFAULT="auto_increment"/>
+			<FIELD NAME="planid"         TYPE="int"    LENGTH="10" NOTNULL="false" />
+        	<FIELD NAME="userid"         TYPE="int"    LENGTH="10" NOTNULL="false" />
+        	<FIELD NAME="email"          TYPE="char"   LENGTH="255" NOTNULL="false" />
+        	<FIELD NAME="firstname"      TYPE="char"   LENGTH="100" NOTNULL="false" />
+        	<FIELD NAME="lastname"       TYPE="char"   LENGTH="100" NOTNULL="false" />
+			<FIELD NAME="subscriptionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+			<FIELD NAME="currency" TYPE="char" LENGTH="10" UNSIGNED="false" NOTNULL="true"/>
+			<FIELD NAME="price" TYPE="number" LENGTH="10,2" UNSIGNED="false" NOTNULL="true"/>
+			<FIELD NAME="payment_provider" TYPE="char" LENGTH="50" UNSIGNED="false" NOTNULL="true"/>
+			<FIELD NAME="sessionid"      TYPE="char"   LENGTH="255" NOTNULL="false" />
+			<FIELD NAME="status" TYPE="char" LENGTH="20" UNSIGNED="false" NOTNULL="true" DEFAULT="pending"/>
+			<FIELD NAME="transactionid" TYPE="char" LENGTH="255" UNSIGNED="false" NOTNULL="false"/>
+			<FIELD NAME="payment_link" TYPE="text" LENGTH="" UNSIGNED="false" NOTNULL="false"/>
+			<FIELD NAME="response_json" TYPE="text" LENGTH="" UNSIGNED="false" NOTNULL="false"/>
+			<FIELD NAME="creation_date" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+			<FIELD NAME="payment_date" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="false"/>
+			<FIELD NAME="expiration_date" TYPE="int" LENGTH="10" NOTNULL="false"/>
+			<FIELD NAME="emailsent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
+			<FIELD NAME="attempts" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" />
+			<FIELD NAME="last_attempt" TYPE="int" LENGTH="10" NOTNULL="false" />
+			<FIELD NAME="last_error" TYPE="text" LENGTH="" NOTNULL="false" />
+			<FIELD NAME="retry_token" TYPE="char" LENGTH="64" NOTNULL="false" />
+			<FIELD NAME="retry_expires" TYPE="int" LENGTH="10" NOTNULL="false" />
+			<FIELD NAME="reminder_stage" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
+			<FIELD NAME="reminder1_at" TYPE="int" LENGTH="10" NOTNULL="false" />
+			<FIELD NAME="reminder2_at" TYPE="int" LENGTH="10" NOTNULL="false" />
+			<KEYS>
+				<KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscriptionid" REFTABLE="user_subscription" REFFIELDS="id"/>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="idx_spr_sessionid" UNIQUE="false" FIELDS="sessionid"/>
+				<INDEX NAME="idx_spr_planid"    UNIQUE="false" FIELDS="planid"/>
+				<INDEX NAME="idx_spr_userid"    UNIQUE="false" FIELDS="userid"/>
+				<INDEX NAME="idx_spr_status"    UNIQUE="false" FIELDS="status"/>
+			</INDEXES>
+		</TABLE>  
         
     </TABLES>
 </XMLDB>

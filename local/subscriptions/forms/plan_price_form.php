@@ -31,11 +31,11 @@ class plan_price_form extends moodleform {
             }
         }
         $mform->addElement('select', 'currency', get_string('currency', 'local_subscriptions'), $options);
-        $mform->setType('currency', PARAM_ALPHANUM);
+        $mform->setType('currency', PARAM_ALPHANUMEXT);     // ex: EUR
         $mform->addRule('currency', null, 'required');
 
         $mform->addElement('text', 'price', get_string('price', 'local_subscriptions'));
-        $mform->setType('price', PARAM_FLOAT);
+        $mform->setType('price', PARAM_RAW_TRIMMED);        // on cast en float dans le save
         $mform->addRule('price', null, 'required');
         $mform->addRule('price', get_string('err_numeric', 'form'), 'numeric');
 
@@ -53,7 +53,7 @@ class plan_price_form extends moodleform {
             // Nouvelle entrée : vérifier si la devise est déjà utilisée pour ce plan.
             global $DB;
             $exists = $DB->record_exists('subscription_plan_price', [
-                'plan_id' => $data['planid'],
+                'planid' => $data['planid'],
                 'currency' => strtoupper(trim($data['currency']))
             ]);
 

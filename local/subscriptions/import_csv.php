@@ -26,7 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csvfile'])) {
 
     $importid = time();
     $tempfile = make_request_directory() . "/csv_import_$importid.csv";
-    file_put_contents($tempfile, $content);
+    //file_put_contents($tempfile, $content);
+
+
+
+    // Sécurité + copie
+    if (!is_uploaded_file($tmp)) {
+        throw new moodle_exception('invalidcsvupload', 'local_subscriptions');
+    }
+    if (!@copy($tmp, $tempfile)) { // (ou move_uploaded_file($tmp, $tempfile))
+        throw new moodle_exception('csvwritefail', 'local_subscriptions');
+    }
 
     // Formulaire de confirmation
 	echo $renderer->render_import_confirmation_form($validrows, $importid);

@@ -29,7 +29,7 @@ function parse_csv_file(string $tmpfile, string $separator = ','): array {
     foreach ($lines as $index => $line) {
         if (trim($line) === '') continue;
 
-        $record = str_getcsv($line, $separator);
+        $record = str_getcsv($line, $separator, '"', '\\');
 
         if ($index === 0) {
             $headers = array_map(function ($h) {
@@ -126,12 +126,12 @@ function process_csv_rows(array $validrows): array {
 
     foreach ($validrows as $assoc) {
         $email = trim($assoc['email']);
-        $startdate = parse_date($assoc['start_date']);
+        $start_date = parse_date($assoc['start_date']);
         $planname = trim($assoc['plan'] ?? '');
         $pricedata = floatval($assoc['price'] ?? 0);
         $currency = trim($assoc['currency'] ?? '');
 
-        if (!$email || !$startdate || !$planname || !$pricedata || !$currency) {
+        if (!$email || !$start_date || !$planname || !$pricedata || !$currency) {
             $skipped[] = ['data' => $assoc, 'reason' => get_string('invalid_or_missing_fields', 'local_subscriptions')];
             continue;
         }
@@ -146,20 +146,20 @@ function process_csv_rows(array $validrows): array {
         $planid = $planrecord->id ?? null;
         $durationkey = $planrecord->duration_key ?? null;
 
-        $enddate = subscription_manager::get_end_date_from_duration_key($durationkey, $startdate);
+        $end_date = subscription_manager::get_end_date_from_duration_key($durationkey, $start_date);
         
         subscription_manager::create_or_extend_subscription($user->id, 
             planid: $planid, 
             payment_provider: subscription_config::PAYMENT_PROVIDER_CSV, 
-            transaction_id: uniqid('csv_'), 
-            startdate: $startdate, 
-            enddate: $enddate, 
+            transactionid: uniqid('csv_'), 
+            start_date: $start_date, 
+            end_date: $end_date, 
             pricepaid: $pricedata, 
             currency: $currency, 
-            creationdate: time()
+            creation_date: time()
         );
         
-        subscription_manager::enrol_user_to_courses($user->id, $planid, $startdate, $enddate);
+        subscription_manager::enrol_user_to_courses($user->id, $planid, $start_date, $end_date);
         $imported++;
     }
 

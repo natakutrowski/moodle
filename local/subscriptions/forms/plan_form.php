@@ -10,7 +10,7 @@ class plan_form extends moodleform {
         global $DB;
 
         $mform = $this->_form;
-        $default_scope = $this->_customdata['scope_id'] ?? '';
+        $default_scope = $this->_customdata['accessscopeid'] ?? '';
         $default_duration_key = $this->_customdata['duration_key'] ?? '';
 
         $mform->addElement('hidden', 'id');
@@ -21,13 +21,13 @@ class plan_form extends moodleform {
         $mform->addRule('name', null, 'required');
 
         $scopes = $DB->get_records_menu('subscription_access_scope', null, 'name ASC', 'id, name');
-        $mform->addElement('select', 'scope_id', get_string('scopes', 'local_subscriptions'), $scopes, [
+        $mform->addElement('select', 'accessscopeid', get_string('scopes', 'local_subscriptions'), $scopes, [
             'size' => 1,
             'class' => 'select2'
         ]);
 
-        $mform->setDefault('scope_id', $default_scope);
-        $mform->addRule('scope_id', null, 'required');
+        $mform->setDefault('accessscopeid', $default_scope);
+        $mform->addRule('accessscopeid', null, 'required');
 
         $plan_keys = subscription_config::get_plans();
         $mform->addElement('select', 'duration_key', get_string('planduration', 'local_subscriptions'), $plan_keys, [
@@ -38,12 +38,30 @@ class plan_form extends moodleform {
         $mform->setType('duration_key', PARAM_TEXT);
         $mform->addRule('duration_key', null, 'required');
 
+        // == Mise en avant (highlight_type) ==
+        $options = [
+            ''         => get_string('highlight_none', 'local_subscriptions'),
+            'popular'  => get_string('highlight_popular', 'local_subscriptions'),
+            'premium'  => get_string('highlight_premium', 'local_subscriptions'),
+        ];
+        $mform->addElement('select', 'highlight_type',
+            get_string('plan_highlight', 'local_subscriptions'),
+            $options
+        );
+        $mform->setType('highlight_type', PARAM_ALPHA);
+        $mform->addHelpButton('highlight_type', 'plan_highlight', 'local_subscriptions'); // si tu ajoutes un help string
+
         $this->add_action_buttons(true, get_string('saveplan', 'local_subscriptions'));
     }
 
     public function validation($data, $files) {
         global $DB;
         $errors = parent::validation($data, $files);
+
+        $allowed = ['', 'popular', 'premium'];
+        if (!in_array($data['highlight_type'] ?? '', $allowed, true)) {
+            $errors['highlight_type'] = get_string('invaliddata', 'error');
+        }
 
         $name = trim($data['name']);
         $id = (int)($data['id'] ?? 0);

@@ -13,23 +13,13 @@ global $DB;
 require_login();
 require_capability('moodle/site:config', context_system::instance());
 
-$PAGE->set_url(new moodle_url(subscription_config::scopes_translations_page()));
-$PAGE->set_context(context_system::instance());
-$PAGE->set_title(get_string('translationspagetitle', 'local_subscriptions'));
-$PAGE->set_heading(get_string('translationspagetitle', 'local_subscriptions'));
-$PAGE->requires->js_call_amd('local_subscriptions/deletetranslation', 'init');
-
-echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('translationspagetitle', 'local_subscriptions'));
-
-
-$scopeid = optional_param('scopeid', 0, PARAM_INT);
+$accessscopeid = optional_param('accessscopeid', 0, PARAM_INT);
 $editing = optional_param('edit', 0, PARAM_INT);
 $adding = optional_param('add', 0, PARAM_INT);
 $deleteid = optional_param('del', 0, PARAM_INT);
 
 $scopes = $DB->get_records('subscription_access_scope', null, 'name ASC');
-$translations = local_subscriptions_get_scope_translations($scopeid);
+$translations = local_subscriptions_get_scope_translations(accessscopeid: $accessscopeid);
 
 // Suppression
 if ($deleteid && confirm_sesskey()) {
@@ -37,14 +27,28 @@ if ($deleteid && confirm_sesskey()) {
     redirect(new moodle_url(subscription_config::scopes_translations_page()));
 }
 
+// Traitement du formulaire (après affichage)
+if (optional_param('submittranslation', false, PARAM_RAW)) {
+    local_subscriptions_save_scope_translation();
+}
+
+$PAGE->set_url(new moodle_url(subscription_config::scopes_translations_page()));
+$PAGE->set_context(context_system::instance());
+$PAGE->set_title(get_string('translationspagetitle', 'local_subscriptions'));
+$PAGE->set_heading(get_string('translationspagetitle', 'local_subscriptions'));
+$PAGE->requires->js_call_amd('local_subscriptions/deletescopetranslation', 'init');
+
+echo $OUTPUT->header();
+echo $OUTPUT->heading(get_string('translationspagetitle', 'local_subscriptions'));
+
 // Table
-echo local_subscriptions_scopes_renderer::local_subscriptions_render_scopes_translations_table($scopes, $translations, $scopeid, $adding, $editing);
+echo local_subscriptions_scopes_renderer::local_subscriptions_render_scopes_translations_table($scopes, $translations, $accessscopeid, $adding, $editing);
 
 // Boutons retour + "Afficher tout"
 $returnurl = new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']);
 $clearurl = new moodle_url(subscription_config::scopes_translations_page());
 $buttons = html_writer::link($returnurl, '← ' . get_string('backtoscopelist', 'local_subscriptions'), ['class' => 'btn btn-link']);
-if ($scopeid) {
+if ($accessscopeid) {
     $buttons .= html_writer::link($clearurl, get_string('showalltranslations', 'local_subscriptions'), [
         'class' => 'btn btn-secondary', 'style' => 'margin-left: 10px;'
     ]);
@@ -57,7 +61,7 @@ if ($editing || $adding) {
 
     $translation = null;
     $scope = $editing
-        ? $DB->get_record('subscription_access_scope', ['id' => $DB->get_field('subscription_access_scope_translation', 'scope_id', ['id' => $editing])], '*', MUST_EXIST)
+        ? $DB->get_record('subscription_access_scope', ['id' => $DB->get_field('subscription_access_scope_translation', 'accessscopeid', ['id' => $editing])], '*', MUST_EXIST)
         : $DB->get_record('subscription_access_scope', ['id' => $adding], '*', MUST_EXIST);
 
     if ($editing) {
@@ -72,11 +76,6 @@ if ($editing || $adding) {
         'editing' => $editing
     ]);
     $form->display();
-}
-
-// Traitement du formulaire (après affichage)
-if (optional_param('submittranslation', false, PARAM_RAW)) {
-    local_subscriptions_save_scope_translation();
 }
 
 echo $OUTPUT->footer();

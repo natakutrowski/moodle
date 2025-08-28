@@ -1,0 +1,15 @@
+{
+  "name": "campusfr/moodle-subscriptions",
+  "description": "Gestion des abonnements pour Moodle avec Stripe",
+  "type": "project",
+  "require": {
+    "stripe/stripe-php": "^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "local_subscriptions\\": "classes/"
+    }
+  },
+  "minimum-stability": "stable",
+  "license": "MIT"
+}

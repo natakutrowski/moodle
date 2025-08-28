@@ -1,0 +1,56 @@
+{{#subscriptions}}
+  <div class="subscription-card border-start border-4 py-3 px-3 rounded shadow-sm {{statusclass}} bg-light mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0 text-dark">
+        <i class="fa-solid fa-graduation-cap me-2"></i>
+        {{planname}}
+        {{#expired}}
+          <span class="text-muted small">({{#str}}expired, local_subscriptions{{/str}})</span>
+        {{/expired}}
+      </h5>
+      {{#expired}}
+        <span class="badge bg-danger text-white px-3 py-1">
+          {{#str}}expired, local_subscriptions{{/str}}
+        </span>
+      {{/expired}}
+
+      {{^expired}}
+        <span class="badge bg-success text-white px-3 py-1">
+          {{#str}}active, local_subscriptions{{/str}}
+        </span>
+      {{/expired}}
+    </div>
+
+    <ul class="list-unstyled ms-1 mb-0">
+      <li class="mb-1">
+        <i class="fa-solid fa-fw fa-calendar me-2 text-secondary"></i>
+        <strong>{{#str}}startdate, local_subscriptions{{/str}}:</strong> {{startdate}}
+      </li>
+      <li class="mb-1">
+        <i class="fa-solid fa-fw fa-calendar-check me-2 text-secondary"></i>
+        <strong>{{#str}}enddate, local_subscriptions{{/str}}:</strong> {{enddate}}
+      </li>
+      <li class="mb-1">
+        <i class="fa-solid fa-fw fa-book me-2 text-secondary"></i>
+        <strong>{{#str}}courselist, local_subscriptions{{/str}}:</strong>
+        {{#coursenames.0}}
+          <i class="fa-solid fa-circle-info text-muted ms-2"
+            tabindex="0"
+            data-bs-toggle="popover"
+            data-bs-trigger="focus"
+            data-bs-placement="top"
+            data-bs-html="true"
+            data-bs-title="{{#str}}coursesincluded, local_subscriptions{{/str}}"
+            data-bs-content="{{{popovercontent}}}"
+            style="cursor: pointer;"></i>
+
+        {{/coursenames.0}}
+      </li>
+      <li class="mb-1">
+        <i class="fa-solid fa-fw fa-money-bill-wave me-2 text-secondary"></i>
+        <strong>{{#str}}pricepaid, local_subscriptions{{/str}}:</strong> {{pricepaid}} {{currency}}
+      </li>
+    </ul>
+
+  </div>
+{{/subscriptions}}

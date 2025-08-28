@@ -13,16 +13,6 @@ global $DB;
 require_login();
 require_capability('moodle/site:config', context_system::instance());
 
-$PAGE->set_url(new moodle_url(subscription_config::plans_translations_page()));
-$PAGE->set_context(context_system::instance());
-$PAGE->set_title(get_string('translationspagetitle', 'local_subscriptions'));
-$PAGE->set_heading(get_string('translationspagetitle', 'local_subscriptions'));
-$PAGE->requires->js_call_amd('local_subscriptions/deletetranslation', 'init');
-
-echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('translationspagetitle', 'local_subscriptions'));
-
-
 $planid = optional_param('planid', 0, PARAM_INT);
 $editing = optional_param('edit', 0, PARAM_INT);
 $adding = optional_param('add', 0, PARAM_INT);
@@ -36,6 +26,20 @@ if ($deleteid && confirm_sesskey()) {
     local_subscriptions_delete_plan_translation($deleteid);
     redirect(new moodle_url(subscription_config::plans_translations_page()));
 }
+
+// Traitement du formulaire (après affichage)
+if (optional_param('submittranslation', false, PARAM_RAW)) {
+    local_subscriptions_save_plan_translation();
+}
+
+$PAGE->set_url(new moodle_url(subscription_config::plans_translations_page()));
+$PAGE->set_context(context_system::instance());
+$PAGE->set_title(get_string('translationspagetitle', 'local_subscriptions'));
+$PAGE->set_heading(get_string('translationspagetitle', 'local_subscriptions'));
+$PAGE->requires->js_call_amd('local_subscriptions/deleteplantranslation', 'init');
+
+echo $OUTPUT->header();
+echo $OUTPUT->heading(get_string('translationspagetitle', 'local_subscriptions'));
 
 // Table
 echo local_subscriptions_plans_renderer::local_subscriptions_render_plans_translations_table($plans, $translations, $planid, $adding, $editing);
@@ -57,7 +61,7 @@ if ($editing || $adding) {
 
     $translation = null;
     $plan = $editing
-        ? $DB->get_record('subscription_plan', ['id' => $DB->get_field('subscription_plan_translation', 'plan_id', ['id' => $editing])], '*', MUST_EXIST)
+        ? $DB->get_record('subscription_plan', ['id' => $DB->get_field('subscription_plan_translation', 'planid', ['id' => $editing])], '*', MUST_EXIST)
         : $DB->get_record('subscription_plan', ['id' => $adding], '*', MUST_EXIST);
 
     if ($editing) {
@@ -72,11 +76,6 @@ if ($editing || $adding) {
         'editing' => $editing
     ]);
     $form->display();
-}
-
-// Traitement du formulaire (après affichage)
-if (optional_param('submittranslation', false, PARAM_RAW)) {
-    local_subscriptions_save_plan_translation();
 }
 
 echo $OUTPUT->footer();

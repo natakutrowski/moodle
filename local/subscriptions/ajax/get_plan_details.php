@@ -1,4 +1,5 @@
 <?php
+define('AJAX_SCRIPT', true);
 require_once(__DIR__ . '/../../../config.php');
 require_login();
 require_capability('moodle/site:config', context_system::instance());
@@ -7,20 +8,23 @@ use local_subscriptions\subscription_manager;
 use local_subscriptions\subscription_config;
 
 // En-têtes JSON
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 // Paramètres
 $planid = required_param('planid', PARAM_INT);
 
+$context = context_system::instance();
+$PAGE->set_context($context);
+
 // Récupération du plan
-global $DB, $USER;
+global $DB;
 
 $planrecord = $DB->get_record('subscription_plan', ['id' => $planid], '*', MUST_EXIST);
 $lang = current_language();
 
 // Traduction du nom et de la description
-$translatedname = $DB->get_field('subscription_plan_translation', 'name', ['plan_id' => $planid, 'lang' => $lang]);
-$translateddesc = $DB->get_field('subscription_plan_translation', 'description', ['plan_id' => $planid, 'lang' => $lang]);
+$translatedname = $DB->get_field('subscription_plan_translation', 'name', ['planid' => $planid, 'lang' => $lang]);
+$translateddesc = $DB->get_field('subscription_plan_translation', 'description', ['planid' => $planid, 'lang' => $lang]);
 
 // Scope
 $scoperecord = subscription_manager::get_access_scope_from_planid($planid);
@@ -45,18 +49,25 @@ if (!empty($scoperecord->course_ids)) {
 
 
 // Prix
-$prices = $DB->get_records('subscription_plan_price', ['plan_id' => $planid], '', 'price, currency');
+$prices = $DB->get_records('subscription_plan_price', ['planid' => $planid], '', 'price, currency');
 $formattedprices = [];
 foreach ($prices as $p) {
-    $formattedprices[] = sprintf('%s %s', number_format($p->price, 2), $p->currency);
+    $formattedprices[] = sprintf('%s %s', number_format($p->price, 2, "."), $p->currency);
 }
 
 // Réponse
-echo json_encode([
-    'name' => $translatedname ?: $planrecord->name,
-    'description' => $translateddesc ?: '',
-    'duration' => subscription_config::get_plans()[$planrecord->duration_key],
-    'accessscope' => $scoperecord ? $scoperecord->name : null,
-    'courses' => $coursenames,
-    'prices' => $formattedprices,
-]);
+
+try {
+    echo json_encode([
+        'name' => $translatedname ?: $planrecord->name,
+        'description' => $translateddesc ?: '',
+        'duration' => subscription_config::get_plans()[$planrecord->duration_key],
+        'accessscope' => $scoperecord ? $scoperecord->name : null,
+        'courses' => $coursenames,
+        'prices' => $formattedprices,
+    ], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+}
+exit;

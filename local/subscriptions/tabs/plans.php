@@ -16,19 +16,15 @@ $currentlang = current_language();
 $id     = optional_param('id', 0, PARAM_INT);
 $edit   = optional_param('edit', 0, PARAM_INT);
 $add    = optional_param('add', 0, PARAM_BOOL);
-$delete = optional_param('delete', 0, PARAM_INT);
 $toggleid = optional_param('toggle', 0, PARAM_INT);
 
 
 $plan = null;
-$scope_id = null;
+$accessscopeid = null;
+$duration_key = null;
 
 if ($edit) {
-    list($plan, $scope_id, $duration_key) = local_subscriptions_get_plan_for_edit($edit);
-}
-
-if ($delete) {
-    local_subscriptions_delete_plan($delete);
+    list($plan, $accessscopeid, $duration_key) = local_subscriptions_get_plan_for_edit($edit);
 }
 
 if ($toggleid && confirm_sesskey()) {
@@ -43,61 +39,17 @@ if ($toggleid && confirm_sesskey()) {
 }
 
 $mform = new plan_form(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']), [
-    'scope_id' => $scopeid, 'duration_key' => $duration_key
+    'accessscopeid' => $accessscopeid, 'duration_key' => $duration_key
 ]);
 
-if ($mform->is_cancelled()) {
-    redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']));
-} elseif ($data = $mform->get_data()) {
-
-	$record = (object)[
-		'name'         		=> $data->name,
-		'access_scope_id'	=> $data->scope_id,
-		'duration_key'		=> $data->duration_key,
-		'is_active'			=> 0,
-		'last_update'  		=> time()
-	];
-
-	if ($data->id) {
-		$record->id = $data->id;
-		$DB->update_record('subscription_plan', $record);
-	} else {
-		$record->creation_date = time();
-		$newid = $DB->insert_record('subscription_plan', $record);
-
-		if ($newid) {
-			redirect(
-				new moodle_url(subscription_config::plans_translations_page(), [
-					'planid' => $newid,
-					'add' => $newid,
-					'sesskey' => sesskey()
-				]),
-				get_string('plancreated', 'local_subscriptions'),
-				null,
-				\core\output\notification::NOTIFY_SUCCESS
-			);
-		} else {
-			redirect(
-				new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
-				get_string('plancreateerror', 'local_subscriptions'),
-				null,
-				\core\output\notification::NOTIFY_ERROR
-			);
-		}
-	}
-
-	redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']));
-
-} else {
-	if (!$edit && !$add) {
-		if (($_SERVER['REQUEST_METHOD'] === 'POST') && (!isset($data) || empty($data) || is_null($data))) {
-			if (!empty($_POST['name'])) {
-				echo $OUTPUT->notification(get_string('error_plan_name_exists', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
-			} else {
-				echo $OUTPUT->notification(get_string('plancreateerror', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
-			}
-		}		
-	}
+if (!$edit && !$add) {
+    if (($_SERVER['REQUEST_METHOD'] === 'POST') && (!isset($data) || empty($data) || is_null($data))) {
+        if (!empty($_POST['name'])) {
+            echo $OUTPUT->notification(get_string('error_plan_name_exists', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
+        } else {
+            echo $OUTPUT->notification(get_string('plancreateerror', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
+        }
+    }		
 }
 
 // 🔘 Bouton ajouter
@@ -140,7 +92,7 @@ if ($edit || $add) {
 	$mform->set_data((object)[
         'id' => $plan->id ?? null,
         'name' => $plan->name ?? '',
-        'scope_id' => $plan->access_scope_id ?? '',
+        'accessscopeid' => $plan->accessscopeid ?? '',
         'duration_key' => $plan->duration_key ?? ''
     ]);
     $mform->display();

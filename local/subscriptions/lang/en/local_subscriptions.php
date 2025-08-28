@@ -79,6 +79,8 @@ $string['managesubscriptions'] = 'Manage subscriptions';
 $string['scopes'] = '🎓 Access scope';
 $string['plans'] = '📝 Plans';
 $string['user_subscriptions'] = '👨‍🎓 / 👩‍🎓 User subscriptions';
+$string['translatetooltip'] = 'Translation tooltip'; // to be checked
+$string['pricestooltip'] = 'Prices tooltip'; // to be checked
 
 // Scopes
 $string['scopename'] = 'Scope name';
@@ -177,6 +179,7 @@ $string['priceupdated'] = 'Price updated.';
 $string['pricedeleted'] = 'Price deleted.';
 $string['confirmdeleteprice'] = 'Are you sure you want to delete this price?';
 $string['error_currency_already_exists'] = 'This currency is already defined for this plan.';
+$string['noprices'] = 'No price';
 
 
 // JS delete...
@@ -202,3 +205,135 @@ $string['description'] = 'Description';
 $string['scope_and_duration'] = 'Scope and duration';
 $string['courses_included'] = 'Courses included';
 $string['select_price'] = 'Select price and currency';
+
+
+/////
+$string['subscriptions'] = 'Subscriptions';
+$string['active_until'] = 'Actif jusqu’au';
+$string['no_subscriptions_found'] = 'No active subscriptions for this user.';
+
+$string['your_subscriptions'] = 'Your subscriptions';
+$string['start_date'] = 'Start date';
+$string['end_date'] = 'End date';
+$string['access_scope'] = 'Access scope';
+$string['price_paid'] = 'Price paid';
+$string['status_active'] = 'Active';
+$string['no_active_subscriptions'] = 'You have no active subscriptions.';
+
+$string['startdate'] = 'Start date';
+$string['enddate'] = 'End date';
+$string['accessscope'] = 'Access scope';
+$string['pricepaid'] = 'Price paid';
+$string['coursesincluded'] = 'Included courses';
+
+$string['courselist'] = 'Liste des cours';
+$string['show'] = 'afficher';
+
+
+$string['active'] = 'Active';
+$string['expired'] = 'Expired';
+$string['close'] = 'Close';
+
+$string['subscribe'] = 'Subscribe';
+$string['duration'] = 'Duration';
+$string['price'] = 'Price';
+$string['choosecurrency'] = 'Choisissez une devise :';
+$string['showcoursedescription'] = 'Afficher la description';
+$string['change_currency'] = 'Changer la devise';
+
+// Stripe
+$string['pluginname'] = 'Subscriptions (abonnements)';
+$string['stripe_heading'] = 'Stripe';
+$string['stripe_heading_desc'] = 'Renseignez vos clés Stripe en mode test ou live. Pour commencer, la clé secrète suffit. Le secret de webhook est requis quand vous activez le webhook.';
+$string['stripe_publishable'] = 'Clé publique (publishable key)';
+$string['stripe_publishable_desc'] = 'Optionnel pour le Checkout simple ; utile si vous utilisez Stripe Elements côté client.';
+$string['stripe_secret'] = 'Clé secrète (Secret key)';
+$string['stripe_secret_desc'] = 'Ex. sk_test_xxx. Utilisée côté serveur pour créer des sessions de paiement.';
+$string['stripe_webhook_secret'] = 'Secret du webhook';
+$string['stripe_webhook_secret_desc'] = 'Ex. whsec_xxx. Nécessaire pour vérifier la signature des événements Stripe.';
+$string['stripe_sessioncreationfailed'] = 'Unable to create the Stripe Checkout session';
+$string['stripe_invalidsession'] = 'Invalid or missing Stripe session ID';
+$string['payment_success_title'] = 'Payment successful';
+$string['payment_success_thanks'] = 'Thank you! Your payment has been processed successfully.';
+$string['payment_success_details'] = 'Your subscription is now active. You can access your courses from your profile page.';
+$string['payment_already_processed'] = 'Good news! This payment was already processed earlier and your subscription is active. Head over to your profile to explore your courses!';
+$string['goto_my_profile'] = 'Go to my profile';
+$string['stripe_paymentsucceededrequired'] = 'Payment confirmation required from Stripe.';
+$string['stripe_noemail'] = 'We could not retrieve your email address from Stripe.';
+$string['stripe_invalidsession'] = 'Invalid or missing Stripe session ID';
+$string['payment_canceled_title'] = 'Payment canceled';
+$string['payment_canceled_msg'] = 'Your payment has been canceled. No subscription has been created.';
+$string['back_to_plans'] = 'Back to available plans';
+
+$string['checkout_title'] = 'Checkout';
+$string['checkout_duration'] = 'Duration:';
+$string['price_label'] = 'Price';
+$string['checkout_consent_label'] = 'I agree to the Terms of Service and the Privacy Policy.';
+$string['checkout_subscribe'] = 'Subscribe';
+$string['checkout_go_to_payment'] = 'Go to payment';
+$string['checkout_courses_included'] = 'Courses included';
+
+
+$string['welcome_subject'] = 'Welcome to {$a}';
+$string['welcome_hello'] = 'Hello {$a},';
+$string['welcome_body_intro'] = 'Your account has been created and your subscription is now active.';
+$string['welcome_username'] = 'Your username: {$a}';
+$string['welcome_temp_password'] = 'Your temporary password: {$a} (you will be asked to set a new one on your first login).';
+$string['welcome_loginlink'] = 'Sign in from this page: {$a}';
+$string['welcome_plan_summary'] = 'Plan: {$a}';
+$string['welcome_amount_summary'] = 'Amount: {$a}';
+
+$string['receipt_subject'] = 'Your payment receipt';
+$string['receipt_title'] = 'Payment receipt';
+$string['receipt_plan'] = 'Plan: {$a}';
+$string['receipt_amount'] = 'Amount: {$a}';
+$string['receipt_tx'] = 'Transaction ID: {$a}';
+$string['receipt_period'] = 'Access period: {$a}';
+
+$string['subupdate_subject'] = 'Your subscription is active';
+$string['subupdate_hello'] = 'Hello {$a},';
+$string['subupdate_body'] = 'Your subscription for the plan « {$a} » is now active.';
+$string['changepw_hint'] = 'To change your password, enter the temporary password we just emailed you in the “Current password” field, then choose a new one. If you didn’t receive the email, use “Forgotten your username or password?” on the login page.';
+$string['welcome_temp_password_label'] = 'Temporary password';
+$string['welcome_security_hint'] = 'For your security, you will be asked to set a new password on your first login.';
+$string['welcome_button_login'] = 'Sign in';
+$string['receipt_intro'] = 'Here is a copy of your purchase details:';
+$string['receipt_button_open'] = 'Open my courses';
+// Retry / follow-up
+$string['retry_invalid_status'] = 'This payment request cannot be retried.';
+$string['retry_link_expired'] = 'This retry link has expired. Please start a new checkout.';
+
+// Emails – failure/abandoned/reminder
+$string['email_failed_subject'] = 'Your payment could not be completed';
+$string['email_failed_intro'] = 'Unfortunately, your payment attempt didn’t succeed.';
+$string['email_failed_help'] = 'You can try again in a few seconds using the button below. If the issue persists, try another card or contact your bank.';
+$string['email_button_retry'] = 'Try payment again';
+
+$string['email_abandoned_subject'] = 'Finish your purchase';
+$string['email_abandoned_intro'] = 'You didn’t complete your purchase. Pick up where you left off:';
+
+$string['email_reminder_subject'] = 'Still interested? Complete your subscription';
+$string['email_reminder_intro'] = 'You can finalize your subscription in one click:';
+
+// Scheduled task
+$string['task_followup'] = 'Subscriptions – follow-up emails';
+
+$string['payment_error_title'] = 'Payment error';
+$string['payment_error_intro'] = 'Something went wrong while preparing your payment. Please try again in a moment.';
+$string['email_reminder2_subject'] = 'Last reminder: complete your subscription';
+$string['email_reminder2_intro'] = 'This is a gentle reminder to complete your purchase. You can finalize in one click:';
+
+
+$string['popular_badge'] = 'Popular';
+$string['premium_badge'] = 'Premium';
+
+$string['plan_highlight'] = 'Highlight';
+$string['highlight_none'] = 'None';
+$string['highlight_popular'] = 'Popular';
+$string['highlight_premium'] = 'Premium';
+$string['plan_highlight_help'] = 'Choose how this plan is highlighted on the public page:
+<ul>
+  <li><b>None</b>: standard card</li>
+  <li><b>Popular</b>: yellow badge and accent styling</li>
+  <li><b>Premium</b>: premium styling with a standout call-to-action</li>
+</ul>';

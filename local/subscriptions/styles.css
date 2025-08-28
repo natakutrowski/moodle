@@ -177,7 +177,7 @@ input[type="file"] {
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     max-width: 100%;
-    margin: 30px 0 30px 0; /* haut-bas 30px, gauche-droite 0 */
+    margin: 10px 0 10px 0; /* haut-bas 30px, gauche-droite 0 */
 }
 
 /* Sur les petits écrans, on centre le bloc */
@@ -285,4 +285,249 @@ tr.plan-inactive {
 }
 
 
+.user-subscriptions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 
+.subscription-card {
+  border-left: 4px solid #6f42c1;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  background-color: #f9f9fb;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.subscription-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #442673;
+  margin-bottom: 0.5rem;
+}
+
+.plan-icon {
+  margin-right: 0.5rem;
+}
+
+.status-badge {
+  padding: 0.2em 0.6em;
+  border-radius: 0.5em;
+  font-size: 0.75rem;
+  color: white;
+}
+
+.status-badge.active {
+  background-color: #198754;
+}
+.status-badge.inactive {
+  background-color: #dc3545;
+}
+
+.subscription-details div {
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.scope-label {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+.subscription-card.border-success {
+  border-color: #198754 !important; /* vert */
+}
+.subscription-card.border-danger {
+  border-color: #dc3545 !important; /* rouge */
+}
+.badge.bg-success-color {
+  background-color: #198754;
+}
+.badge.bg-danger-color {
+  background-color: #dc3545;
+}
+
+.subscription-card {
+  background: rgb(240, 236, 236);
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.08);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.plan-title-neutral {
+  background-color: #ddeaff;
+  color: #003366;
+  padding: 12px;
+  font-size: 1.1rem;
+  width: 100%;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.courselist {
+  padding-left: 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.8rem;
+}
+
+.courselist li {
+  list-style-type: "📘 ";
+  margin-bottom: 0.3rem;
+  color: #2e2350;
+}
+
+.course-desc p {
+    font-size: 0.7rem !important;
+    color: #555;
+    line-height: 1.6;
+    border-left: 3px solid #ccc;
+    padding-left: 12px;
+    margin-top: 6px;
+}
+
+.course-desc.d-none {
+    display: none;
+}
+
+.plan-price-block {
+  font-weight: bold;
+  font-size: 1.35rem;
+  color: #000;
+}
+
+.change-currency-link {
+  font-size: 0.7rem;
+  margin-left: 0.6rem;
+}
+
+.subscribe-button {
+  background-color: #005f73;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 1.1rem;
+  width: 100%;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.subscribe-button:hover {
+  background-color: #003f52;
+  color: white;
+}
+
+.subscribe-button:active:hover {
+  background-color: #013140;
+  color: white;
+}
+
+/* états existants gardés */
+.subscribe-button:disabled,
+.subscribe-button[disabled] {
+  background-color: #4b6b75; /* proche de ta palette, un peu grisé/atténué */
+  color: #ffffff;
+  border: none;
+  opacity: 0.85;
+  cursor: not-allowed;
+}
+
+.form-label .text-danger { margin-left: 4px; font-weight: 700; }
+
+/* Discret, cohérent avec ta liste plans */
+.courselist .coursename { display:inline-block; }
+.courselist .course-desc { border-left: 3px solid #e6e6e6; padding-left: .75rem; }
+
+/* Badges */
+.ls-badge-popular, .ls-badge-premium {
+  position: absolute; top: -10px; right: -10px;
+  padding: .5rem .75rem; border-radius: 999px;
+  font-weight: 700; z-index: 2; box-shadow: 0 4px 12px rgba(0,0,0,.12);
+  border: 1px solid rgba(0,0,0,.06);
+}
+.ls-badge-popular { 
+  background: linear-gradient(135deg,#faf2db,#ffc107);
+  color:#111; }
+.ls-badge-premium {
+  background: linear-gradient(135deg,#b993ff,#7b2fff);
+  color:#fff;
+}
+
+/* Titres */
+.ls-title-popular {
+  background:linear-gradient(135deg, rgba(255, 242, 174, 0.18), rgba(255, 226, 79, 0.18));
+  border:1px solid #ffe58f;
+  color:#875300;
+}
+.ls-title-premium {
+  background:linear-gradient(135deg, rgba(185,147,255,.18), rgba(123,47,255,.18));
+  border:1px solid rgba(123,47,255,.35);
+  color:#2b1b5e;
+}
+
+/* Cards */
+.ls-card-popular {
+  box-shadow: 0 8px 28px rgba(251, 238, 173, 0.18);
+}
+.ls-card-premium {
+  box-shadow: 0 8px 28px rgba(123,47,255,.18);
+}
+
+/* Boutons */
+.subscribe-button {
+  background-color:#005f73; color:#fff; border:none;
+  padding:12px; font-size:1.1rem; border-radius:8px; font-weight:700;
+  transition: background-color .2s ease-in-out;
+}
+.subscribe-button:hover  { background-color:#003f52; }
+.subscribe-button:active:hover { background-color:#013140; }
+
+/* Bouton "Popular" (or) */
+.ls-btn-popular {
+  background: linear-gradient(135deg,#faf2db,#ffc107) !important;
+  color: #111 !important;
+  border: none !important;
+  padding: 12px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 6px 20px rgba(251, 238, 173, 0.25);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.ls-btn-popular:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 10px 28px rgba(251, 238, 173, 0.35);
+}
+.ls-btn-popular:active:hover {
+  transform: translateY(1px);
+  box-shadow: 0 6px 18px rgba(251, 238, 173, 0.28);
+}
+
+/* Bouton premium (violet harmonisé) */
+.ls-btn-premium {
+  background: linear-gradient(135deg, #b993ff, #7b2fff) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 12px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 6px 20px rgba(123, 47, 255, .25);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.ls-btn-premium:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 10px 28px rgba(123, 47, 255, .35);
+}
+.ls-btn-premium:active:hover {
+  transform: translateY(1px);
+  box-shadow: 0 6px 18px rgba(123, 47, 255, .28);
+}

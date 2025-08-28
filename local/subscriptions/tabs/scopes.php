@@ -25,60 +25,16 @@ if ($edit) {
     list($scope, $course_ids) = local_subscriptions_get_scope_for_edit($edit);
 }
 
-if ($delete) {
-    local_subscriptions_delete_scope($delete);
-}
-
 $mform = new access_scope_form(null, ['course_ids' => implode(',', $course_ids)]);
-if ($mform->is_cancelled()) {
-    redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']));
-} elseif ($data = $mform->get_data()) {
-    $record = (object)[
-        'name'         => $data->name,
-        'course_ids'   => is_array($data->course_ids) ? implode(',', $data->course_ids) : '',
-        'last_update'  => time()
-    ];
 
-    if ($data->id) {
-        $record->id = $data->id;
-        $DB->update_record('subscription_access_scope', $record);
-    } else {
-        $record->creation_date = time();
-        $newid = $DB->insert_record('subscription_access_scope', $record);
-
-        if ($newid) {
-            redirect(
-                new moodle_url(subscription_config::scopes_translations_page(), [
-                    'scopeid' => $newid,
-                    'add' => $newid,
-                    'sesskey' => sesskey()
-                ]),
-                get_string('scopecreated', 'local_subscriptions'),
-                null,
-                \core\output\notification::NOTIFY_SUCCESS
-            );
+if (!$edit && !$add) {
+    if (($_SERVER['REQUEST_METHOD'] === 'POST') && (!isset($data) || empty($data) || is_null($data))) {
+        if (!empty($_POST['name'])) {
+            echo $OUTPUT->notification(get_string('error_scope_name_exists', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
         } else {
-            redirect(
-                new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']),
-                get_string('scopecreateerror', 'local_subscriptions'),
-                null,
-                \core\output\notification::NOTIFY_ERROR
-            );
+            echo $OUTPUT->notification(get_string('scopecreateerror', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
         }
-    }
-
-    redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']));
-
-} else {
-	if (!$edit && !$add) {
-		if (($_SERVER['REQUEST_METHOD'] === 'POST') && (!isset($data) || empty($data) || is_null($data))) {
-			if (!empty($_POST['name'])) {
-				echo $OUTPUT->notification(get_string('error_scope_name_exists', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
-			} else {
-				echo $OUTPUT->notification(get_string('scopecreateerror', 'local_subscriptions'), \core\output\notification::NOTIFY_ERROR);
-			}
-		}		
-	}
+    }		
 }
 
 // 🔘 Bouton ajouter

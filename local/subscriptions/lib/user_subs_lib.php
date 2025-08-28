@@ -22,12 +22,12 @@ function local_subscriptions_enrol_user_manual(int $userid, int $planid, string 
     $start = $startdate ? strtotime($startdate) : time();
     $end = subscription_manager::get_end_date_from_duration_key($plan->duration_key, $start);
 
-    if (!preg_match('/^([\d\.]+)\|([A-Z]{3})$/', $pricecurrency, $matches)) {
+    if (!preg_match('/^\s*([0-9]+(?:[.,][0-9]+)?)\s*\|\s*([A-Za-z]{3})\s*$/', $pricecurrency, $matches)) {
         throw new \moodle_exception('invalidpricecurrency', 'local_subscriptions', '', null, 'Malformed price|currency format.');
     }
 
-    $pricepaid = (float) $matches[1];
-    $currency = $matches[2];
+    $pricepaid = (float) str_replace(',', '.', $matches[1]); // 19,99 -> 19.99
+    $currency = strtoupper($matches[2]);                    // eur -> EUR
 
     $status = subscription_manager::create_or_extend_subscription(
         $userid,
@@ -66,23 +66,23 @@ function local_subscriptions_enrol_user_test(int $userid): string {
     }
 
     $plan = $DB->get_record('subscription_plan', ['id' => $planid], '*', MUST_EXIST);
-    $start = time();
-    $end = subscription_manager::get_end_date_from_duration_key($plan->duration_key, $start);
+    $start_date = time();
+    $end_date = subscription_manager::get_end_date_from_duration_key($plan->duration_key, $start_date);
 
     $status = subscription_manager::create_or_extend_subscription(
         $userid,
         $planid,
         subscription_config::PAYMENT_PROVIDER_DEV,
         uniqid('manual_'),
-        $start,
-        $end,
+        $start_date,
+        $end_date,
         0.00,
         'EUR',
         time()
     );
 
     if ($status === 'created') {
-        subscription_manager::enrol_user_to_courses($userid, $planid, $start, $end);
+        subscription_manager::enrol_user_to_courses($userid, $planid, $start_date, $end_date);
     }
 
     return $status;
@@ -135,3 +135,71 @@ function handle_post_actions(): array {
 
     return [$updated, $deleted];
 }
+
+function get_user_subscriptions(int $userid): array {
+    global $DB;
+
+    $sql = "
+        SELECT 
+            us.id,
+            us.userid,
+            us.planid,
+            us.payment_provider,
+            us.start_date,
+            us.end_date,
+            us.status,
+            us.creation_date,
+            us.pricepaid,
+            us.currency,
+            us.transactionid,
+            sp.name AS planname,
+            sp.duration_key,
+            sp.accessscopeid
+        FROM {user_subscription} us
+        JOIN {subscription_plan} sp ON sp.id = us.planid
+        WHERE us.userid = :userid
+        ORDER BY us.start_date DESC
+    ";
+
+    return $DB->get_records_sql($sql, ['userid' => $userid]);
+}
+
+function local_subscriptions_get_courses_by_plan(int $planid): array {
+    global $DB;
+
+    // On récupère le scope lié à ce plan
+    $scope = subscription_manager::get_access_scope_from_planid($planid);
+
+    if (!$scope || empty($scope->course_ids)) {
+        return [];
+    }
+
+    // On transforme la chaîne d'IDs en tableau d'entiers
+    $course_ids = array_map('intval', explode(',', $scope->course_ids));
+
+    // Récupère tous les cours correspondants
+    list($sqlin, $params) = $DB->get_in_or_equal($course_ids, SQL_PARAMS_NAMED);
+
+    return $DB->get_records_select('course', "id $sqlin", $params, 'fullname ASC');
+}
+
+
+
+function get_user_country_code(): string {
+    $ip = getremoteaddr(); // ou une autre méthode fiable
+    $url = "https://ipwho.is/{$ip}";
+
+    $response = @file_get_contents($url);
+    if ($response === false) {
+        return ''; // fallback
+    }
+
+    $data = json_decode($response, true);
+    if (!empty($data['success']) && $data['success'] === true && !empty($data['country_code'])) {
+        return $data['country_code'];
+    }
+
+    return '';
+}
+
+
