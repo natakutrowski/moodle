@@ -30,9 +30,9 @@ use renderable;
  */
 class item_fluency extends item {
 
-    //the item type
+    // the item type
     public const ITEMTYPE = constants::TYPE_FLUENCY;
-    
+
     public function __construct($itemrecord, $moduleinstance=false, $context = false) {
         parent::__construct($itemrecord, $moduleinstance, $context);
         $this->needs_speechrec = true;
@@ -52,9 +52,15 @@ class item_fluency extends item {
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
 
+        // Is rtl
+        $testitem->rtl = utils::is_rtl($this->language);
+
         $testitem->readsentence = $this->itemrecord->{constants::READSENTENCE} == 1;
         $testitem->allowretry = $this->itemrecord->{constants::GAPFILLALLOWRETRY} == 1;
         $testitem->hidestartpage = $this->itemrecord->{constants::GAPFILLHIDESTARTPAGE} == 1;
+
+        // Correct threshold.
+        $testitem->correctthreshold = (int) $this->itemrecord->{constants::FLUENCYCORRECTTHRESHOLD};
 
         // Cloud Poodll.
         $maxtime = 0;
@@ -66,8 +72,6 @@ class item_fluency extends item {
         // We overwrite our regular poodll region with the MS region, eg useast1 becomes eastus, frankfurt becomes westeurope.
         $testitem->region = utils::fetch_ms_region($this->moduleinstance->region);
 
-
-
         // Build sentence objects.
         /* We do this right now so we get character level arrays. So  we can match mspeech per char results
         ultimately we want to do this in a way that suits fluency rather than piggy back on sgapfill. */
@@ -76,7 +80,7 @@ class item_fluency extends item {
             $sentences = explode(PHP_EOL, $testitem->customtext1);
         }
 
-        $testitem->sentences = $this->process_speakinggapfill_sentences($sentences);
+        $testitem->sentences = $this->process_spoken_sentences($sentences, []);
         return $testitem;
     }
 
@@ -103,11 +107,36 @@ class item_fluency extends item {
         $keycols = parent::get_keycolumns();
         $keycols['int4'] = ['jsonname' => 'promptvoiceopt', 'type' => 'voiceopts', 'optional' => true, 'default' => null, 'dbname' => constants::POLLYOPTION];
         $keycols['text5'] = ['jsonname' => 'promptvoice', 'type' => 'voice', 'optional' => true, 'default' => null, 'dbname' => constants::POLLYVOICE];
-        $keycols['int3'] = ['jsonname' => 'allowretry', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::GAPFILLALLOWRETRY];
-        $keycols['int2'] = ['jsonname' => 'dictationstyle', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::READSENTENCE];
+        $keycols['int3'] = ['jsonname' => 'correctthreshold', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::FLUENCYCORRECTTHRESHOLD];
         $keycols['text1'] = ['jsonname' => 'sentences', 'type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => 'customtext1'];
         $keycols['int5'] = ['jsonname' => 'hidestartpage', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::GAPFILLHIDESTARTPAGE];
+        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER.'1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER.'1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
         return $keycols;
+    }
+
+     /*
+    This function return the prompt that the generate method requires. 
+    */
+    public static function aigen_fetch_prompt($itemtemplate, $generatemethod) {
+        switch($generatemethod) {
+
+            case 'extract':
+                $prompt = "Extract a 1 dimensional array of 4 sentences from the following {language} text: [{text}]. ";
+                break;
+
+            case 'reuse':
+                // This is a special case where we reuse the existing data, so we do not need a prompt.
+                // We don't call AI. So will just return an empty string.
+                $prompt = "";
+                break;
+
+            case 'generate':
+            default:
+                $prompt = "Generate a 1 dimensional array of 4 sentences in {language} suitable for {level} level learners on the topic of: [{topic}] ";
+                break;
+        }
+        return $prompt;
     }
 
 }

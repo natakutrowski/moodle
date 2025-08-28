@@ -26,7 +26,7 @@ define(['jquery',
       self.quizhelper = quizhelper;
       self.index = index;
 
-      self.prepare_audio(itemdata, polly);
+      self.prepare_audio(itemdata);
       self.register_events(index, itemdata, quizhelper);
       self.getItems();
     },
@@ -42,6 +42,8 @@ define(['jquery',
           }),
           target: target.sentence,
           audio: {},
+          audiourl: target.audiourl ? target.audiourl : "",
+          imageurl: target.imageurl,
           correct: false,
         };
       }).filter(function(e) {
@@ -53,11 +55,9 @@ define(['jquery',
       //do something
     },
 
-    prepare_audio: function(itemdata, polly) {
+    prepare_audio: function(itemdata) {
       $.each(itemdata.sentences, function(index, sentence) {
-        polly.fetch_polly_url(sentence.prompt, itemdata.voiceoption, itemdata.usevoice).then(function(audiourl) {
-          $("#" + itemdata.uniqueid + "_container .dictationplayer_" + index + " .dictationtrigger").attr("data-src", audiourl);
-        });
+          $("#" + itemdata.uniqueid + "_container .dictationplayer_" + index + " .dictationtrigger").attr("data-src", sentence.audiourl);
       });
     },
 
@@ -117,19 +117,19 @@ define(['jquery',
         var index = $(this).data("index");
         var correct = itemdata.sentences[index].sentence.trim().toLowerCase();
         var typed = $(this).val().trim().toLowerCase();
-        
+
         //update char count
         $("#"+itemdata.uniqueid+"_container .dictationplayer_"+index+"_chars").html(typed.length);
-                
+
         // Edit NK
         correct = normalizeForComparison(correct);      
-        typed = normalizeForComparison(typed);                                  
-        
+        typed = normalizeForComparison(typed);    
+
         //trim punctuation before comparing, if ignore punctuation is set
-        if(itemdata.ignorepunctuation){
+        //if(itemdata.ignorepunctuation){
             correct = quizhelper.cleanText(correct);
             typed = quizhelper.cleanText(typed);
-        }
+        //}
 
         if (correct == typed) {
           $("#"+itemdata.uniqueid+"_container .dictate-feedback[data-index='" + index + "']").removeClass("fa-times").addClass("fa-check").css("color","green").show();

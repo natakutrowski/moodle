@@ -16,9 +16,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions', 'mod_minilesson/poll
      },
 
     init: function(index, itemdata, quizhelper) {
-      if(itemdata.hasOwnProperty('audiocontent')) {
-          this.prepare_audio(itemdata);
-      }
+
       this.itemdata = itemdata;
       this.register_events(index, itemdata, quizhelper);
 
@@ -93,7 +91,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions', 'mod_minilesson/poll
               $("#" + itemdata.uniqueid + "_option" + itemdata.correctanswer + " .minilesson_mc_right").show();
 
               //if answers were dots for audio content, show them
-              if(itemdata.hasOwnProperty('audiocontent')) {
+              if(itemdata.hasOwnProperty('audiocontent') && itemdata.audiocontent===true) {
                   for (var i = 0; i < itemdata.sentences.length; i++) {
                       var theline = $("#" + itemdata.uniqueid + "_option" + (i + 1));
                       $("#" + itemdata.uniqueid + "_option" + (i + 1) + ' .minilesson_sentence').text(itemdata.sentences[i].sentence);
@@ -185,21 +183,27 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions', 'mod_minilesson/poll
                 self.playing = false;
             }
         });
-      
+
+
+        $("#" + itemdata.uniqueid + "_container").on('showElement', () => {
+            if (itemdata.timelimit > 0) {
+                $("#" + itemdata.uniqueid + "_container .progress-container").show();
+                $("#" + itemdata.uniqueid + "_container .progress-container i").show();
+                $("#" + itemdata.uniqueid + "_container .progress-container #progresstimer").progressTimer({
+                    height: '5px',
+                    timeLimit: itemdata.timelimit,
+                    onFinish: function() {
+                        nextbutton.trigger('click');
+                    }
+                });
+            }
+        });
+
     },
 
       showConfirmButton: function(itemdata) {
           var confirmbutton =$("#" + itemdata.uniqueid + "_container .minilesson_mc_confirmchoice");
           anim.do_animate(confirmbutton,'zoomIn animate__faster','in');
       },
-
-      prepare_audio: function(itemdata) {
-          // debugger;
-          $.each(itemdata.sentences, function(index, sentence) {
-              polly.fetch_polly_url(sentence.sentence, itemdata.voiceoption, itemdata.usevoice).then(function(audiourl) {
-                  $("#" + itemdata.uniqueid + "_audioplayer" + (index+1)).attr("data-src", audiourl);
-              });
-          });
-      }
   };
 });

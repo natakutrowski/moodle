@@ -90,7 +90,35 @@ class  item_listeninggapfill extends item {
         $keycols['int3'] = ['jsonname' => 'allowretry', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::GAPFILLALLOWRETRY];
         $keycols['text1'] = ['jsonname' => 'sentences', 'type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => 'customtext1'];
         $keycols['int5'] = ['jsonname' => 'hidestartpage', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::GAPFILLHIDESTARTPAGE];
+        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER.'1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER.'1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
         return $keycols;
+    }
+
+    /*
+    * This function return the prompt that the generate method requires for listening gap fill items.
+    */
+    public static function aigen_fetch_prompt ($itemtemplate, $generatemethod) {
+        switch($generatemethod) {
+
+            case 'extract':
+                $prompt = "Extract a 1 dimensional array of 4 sentences from the following {language} text: [{text}]. ";
+                $prompt .= "In each sentence surround one keyword with square brackets, e.g [word]. ";
+                    break;
+
+            case 'reuse':
+                // This is a special case where we reuse the existing data, so we do not need a prompt.
+                // We don't call AI. So will just return an empty string.
+                $prompt = "";
+                break;
+
+            case 'generate':
+            default:
+                $prompt = "Generate a 1 dimensional array of 4 sentences in {language} suitable for {level} level learners on the topic of: [{topic}] ";
+                $prompt .= "In each sentence surround one keyword with square brackets, e.g [word]. ";
+                break;
+        }
+        return $prompt;
     }
 
 

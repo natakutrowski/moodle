@@ -15,12 +15,7 @@
         </div>
     </div>
 
-    <div class="progress-container d-flex" style="display:none;">
-        <div id="progresstimer" class="flex-grow-1"></div>
-        <div>
-            <i style="display:none;" class="fa fa-clock-o" aria-hidden="true"></i>
-        </div>
-    </div>
+    {{> mod_minilesson/progresstimer }}
 
     <div style="display:none;" class="sgapfill_listen_cont">
         <button class="btn btn-secondary sgapfill_listen_btn">
@@ -35,7 +30,7 @@
             {{> mod_minilesson/ttrecorder}}
         </div>
         <button class="btn btn-danger sgapfill_ctrl-btn sgapfill_skip_btn">
-            {{#str}}skip, mod_minilesson{{/str}} <i class="fa fa-arrow-right"></i>
+            <span class="mobileaccesshide">{{#str}}skip, mod_minilesson{{/str}}</span> <i class="fa fa-arrow-right"></i>
         </button>
     </div>
 

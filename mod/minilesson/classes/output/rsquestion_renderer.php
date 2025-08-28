@@ -37,7 +37,7 @@ class rsquestion_renderer extends \plugin_renderer_base {
   * @param int $tableid
  * @return string
  */
- public function add_edit_page_links($context, $tableid) {
+ public function add_edit_page_links($context, $tableid, $region) {
 		global $CFG;
         $itemid = 0;
         $config = get_config(constants::M_COMPONENT);
@@ -45,7 +45,7 @@ class rsquestion_renderer extends \plugin_renderer_base {
         $output = $this->output->heading(get_string("whatdonow", "minilesson"), 3);
         $links = array();
 
-        $qtypes = [constants::TYPE_PAGE,constants::TYPE_MULTICHOICE, constants::TYPE_DICTATIONCHAT,
+        $qtypes = [constants::TYPE_PAGE,constants::TYPE_MULTICHOICE, 
                 constants::TYPE_DICTATION,constants::TYPE_SPEECHCARDS, constants::TYPE_LISTENREPEAT];
         $qtypes[]= constants::TYPE_MULTIAUDIO;
         $qtypes[]=constants::TYPE_SHORTANSWER;
@@ -56,19 +56,27 @@ class rsquestion_renderer extends \plugin_renderer_base {
         $qtypes[]=constants::TYPE_FREESPEAKING;
         $qtypes[]=constants::TYPE_FREEWRITING;
         $qtypes[]=constants::TYPE_PASSAGEREADING;
+        $qtypes[]=constants::TYPE_PGAPFILL;
+        $qtypes[]=constants::TYPE_H5P;
+        if($region != "ningxia") {
+            $qtypes[] = constants::TYPE_FLUENCY;
+        }
         if (isset($CFG->minilesson_experimental) && $CFG->minilesson_experimental) {
-            $qtypes[]=constants::TYPE_SMARTFRAME;
-            $qtypes[]=constants::TYPE_COMPQUIZ;
-            $qtypes[]=constants::TYPE_BUTTONQUIZ;
-            $qtypes[]=constants::TYPE_FLUENCY;
-            $qtypes[]=constants::TYPE_CONVERSATION;
+            $qtypes[] = constants::TYPE_SMARTFRAME;
+            $qtypes[] = constants::TYPE_COMPQUIZ;
+            $qtypes[] = constants::TYPE_CONVERSATION;
+            $qtypes[] = constants::TYPE_DICTATIONCHAT;
+            $qtypes[] = constants::TYPE_AUDIOCHAT;
+            $qtypes[] = constants::TYPE_WORDSHUFFLE;
+            $qtypes[] = constants::TYPE_SCATTER;
         }
         //If modaleditform is true adding and editing item types is done in a popup modal. Thats good ...
         // but when there is a lot to be edited , a standalone page is better. The modaleditform flag is acted on on additemlink template and rsquestionmanager js
         $modaleditform=$config->modaleditform=="1";
         foreach($qtypes as $qtype){
             $data=['wwwroot' => $CFG->wwwroot, 'type'=>$qtype,'itemid'=>$itemid,'cmid'=>$this->page->cm->id,
-                    'label'=>get_string('add' . $qtype . 'item', constants::M_COMPONENT),'modaleditform'=>$modaleditform];
+                    'label'=>get_string('add' . $qtype . 'item', constants::M_COMPONENT),'modaleditform'=>$modaleditform,
+                    'imgrev' => '?ver=' . $CFG->themerev];
             $links[]= $this->render_from_template('mod_minilesson/additemlink', $data);
         }
 

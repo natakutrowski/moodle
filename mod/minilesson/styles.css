@@ -1097,7 +1097,11 @@ div.mod_minilesson_feedback_cont.mod_minilesson_postattempt {
   text-align: center;
   letter-spacing: 10px;
   border: 1px solid darkgray;
-  margin-bottom: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 0;
 }
 
 .minilesson_star_rating {
@@ -1141,6 +1145,7 @@ div.mod_minilesson_feedback_cont.mod_minilesson_postattempt {
   padding: 0;
   padding-top: 5px;
   padding-bottom: 5px;
+  display: flex;
 }
 
 .dictationrow {
@@ -1149,6 +1154,8 @@ div.mod_minilesson_feedback_cont.mod_minilesson_postattempt {
   border: 2px solid darkgray;
   padding-top: 5px;
   padding-bottom: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .dictate-feedback {
@@ -1262,10 +1269,12 @@ div.mod_minilesson_feedback_cont.mod_minilesson_postattempt {
 
 .minilesson_dictate_player_box .dictate_title {
   border: 2px solid darkgray;
-  height: 53px;
+  height: auto;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 0;
   font-size: 24px;
   font-weight: bold;
 }
@@ -1324,11 +1333,77 @@ div.mod_minilesson_feedback_cont.mod_minilesson_postattempt {
   border: 1px solid darkgray;
   position: relative;
   margin: auto;
+  padding-bottom: 15px;
 }
 
-.minilesson_landr_player_box .landr_prompt {
-  position: relative;
-  margin-top: 10px;
+.minilesson_landr_player_box .landr_prompt_container {
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background-color: #f9f9f9; /* subtle background */
+  max-width: 600px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.minilesson_landr_player_box .landr_reply_container {
+  margin: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0.75rem;
+  max-width: 600px;
+  background-color: #f9f9f9;
+}
+
+.landr_icon {
+  font-size: 1.5rem;
+  color: #4a90e2;
+}
+
+.landr_speech_text {
+  font-size: 1.3rem;
+  color: #333;
+}
+
+
+.landr_speech_inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  background-color: #f0f0f0;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-grow: 1;
+  font-size: 1rem;
+  color: #333;
+}
+
+.landr_word_input {
+  padding: 0.3rem 0.5rem;
+  font-size: 1rem;
+  width: auto;
+  min-width: 40px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.landr_word_input:disabled {
+  background-color: #f9f9f9;
+  color: #555;
+}
+
+.landr_feedback_icon {
+  font-size: 0.9rem;
+  color: #999;
+}
+.minilesson_landr_player_box .minilesson_sentence_image {
+  margin-bottom: 8px;
 }
 
 .minilesson_landr_player_box .landr_reply {
@@ -1341,9 +1416,6 @@ div.mod_minilesson_feedback_cont.mod_minilesson_postattempt {
 .minilesson_landr_player_box .landr_game {
   min-height: 250px;
   padding: 10px;
-  border-top: 1px solid darkgray;
-  border-bottom: 1px solid darkgray;
-  background-color: rgba(98, 135, 182, 1);
 }
 
 .minilesson_landr_player_box .landr_speech {
@@ -1417,38 +1489,29 @@ div.mod_minilesson_feedback_cont.mod_minilesson_postattempt {
 
 .minilesson_landr_player_box .landr_title {
   border: 2px solid darkgray;
-  height: 53px;
+  height: auto;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 0;
   font-size: 24px;
   font-weight: bold;
 }
 
 .minilesson_landr_player_box .landr_controls {
-  /* position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 75px;
-  */
+
   height: 35px;
   background-color: white;
 }
 
-.minilesson_landr_player_box .landr_controls .landr_ctrl-btn {
-  width: 50%;
-  float: left;
+.minilesson_landr_player_box .landr_skip_btn {
+    position: absolute;
+    right: 10px;
 }
 
 .minilesson_landr_player_box .landr_speakbtncontainer {
-  /*
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  */
   height: 75px;
-  background-color: rgba(98, 135, 182, 1);
   text-align: center;
   display: none;
 }
@@ -1463,7 +1526,6 @@ div.mod_minilesson_feedback_cont.mod_minilesson_postattempt {
   align-items: center;
   justify-content: center;
   font-size: 75px;
-  background-color: rgba(98, 135, 182, 1);
   font-weight: bold;
   color: white;
   text-align: center;
@@ -1482,6 +1544,11 @@ div.mod_minilesson_feedback_cont.mod_minilesson_postattempt {
   padding: 3px;
   border-radius: 5px;
   margin: 5px;
+}
+
+.landr_listen_cont {
+  text-align: center;
+  margin-top: 5px;
 }
 
 
@@ -2076,6 +2143,7 @@ span.mod_minilesson_finishedanswer {
   /* font-weight: bold; */
 }
 
+.mform [data-root="elementwrapper"] [data-fieldtype="ttsaudio"] button.roundmini-audio-player,
 .ttsaudio.container button.roundmini-audio-player{
   border: solid 1px green;
   border-radius: 50%;
@@ -2089,11 +2157,29 @@ span.mod_minilesson_finishedanswer {
   margin-bottom: 3px;
   margin-top: 3px;
 }
+.mform [data-root="elementwrapper"] .felement[data-fieldtype="ttsaudio"] .col-form-label {
+    padding-left: 0;
+}
+.mform [data-root="elementwrapper"] [data-fieldtype="ttsaudio"] .samplettsaudio {
+    margin-left: 10px;
+    margin-top: auto;
+}
+.mform [data-root="elementwrapper"] [data-fieldtype="ttsaudio"] button.roundmini-audio-player {
+    height: auto;
+    width: auto;
+    padding: 0.375rem 0.675rem;
+}
+.mform [data-root="elementwrapper"] [data-fieldtype="ttsaudio"] .form-group {
+    flex-direction: column;
+    align-items: start;
+}
+
 .gapfill-container input.single-character,
 .gapfill-container input.single-character-mtext {
     width: 26px;
     margin-left: 2px;
     text-align: center;
+    padding: 1px 2px;
 }
 .gapfill-container .form-container input:first-child {
     margin-left: 10px;
@@ -2124,14 +2210,6 @@ span.mod_minilesson_finishedanswer {
     background-color: white;
     border-radius: 10px;
     padding: 6px;
-    font-style: italic;
-}
-.gapfill-container .progress-container {
-    padding: 5px 8px;
-}
-.gapfill-container .progress.active {
-  margin-top: 8px;
-  margin-right: 3px;
 }
 
 /* Listening Gapfill */
@@ -2233,21 +2311,18 @@ span.mod_minilesson_finishedanswer {
 
 .minilesson_lgapfill_player_box .lgapfill_title {
   border: 2px solid darkgray;
-  height: 53px;
+  height: auto;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 0;
   font-size: 24px;
   font-weight: bold;
 }
 
 .minilesson_lgapfill_player_box .lgapfill_controls {
-  /*
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  */
+  margin-top: 5px;
   height: 35px;
   background-color: white;
   text-align: center;
@@ -2397,21 +2472,18 @@ span.mod_minilesson_finishedanswer {
 
 .minilesson_tgapfill_player_box .tgapfill_title {
   border: 2px solid darkgray;
-  height: 53px;
+  height: auto;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 0;
   font-size: 24px;
   font-weight: bold;
 }
 
 .minilesson_tgapfill_player_box .tgapfill_controls {
-  /*
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  */
+  margin-top: 5px;
   height: 35px;
   background-color: white;
   text-align: center;
@@ -2561,10 +2633,12 @@ span.mod_minilesson_finishedanswer {
 
 .minilesson_sgapfill_player_box .sgapfill_title {
   border: 2px solid darkgray;
-  height: 53px;
+  height: auto;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 0;
   font-size: 24px;
   font-weight: bold;
 }
@@ -2575,6 +2649,7 @@ span.mod_minilesson_finishedanswer {
   right: 0;
   bottom: 75px;
   */
+  margin-top: 5px;
   height: 35px;
   background-color: white;
 }
@@ -2647,7 +2722,7 @@ body.poodll-minilesson-embed #page {
   margin-bottom: 5px;
 }
 
-/* Button Quiz */
+/* H5P */
 .minilesson_bq_resultbox {
   float: right;
   padding-left: 8px;
@@ -2943,6 +3018,7 @@ overflow: auto;
   justify-content: space-between;
 }
 .ml_listitem_result .ml_li_resultitem {
+  display: flex;
   flex-grow: 1;
   margin-left: 3px;
   margin-right: 3px;
@@ -2987,17 +3063,6 @@ textarea.ml_freewriting_textarea {
   max-width: 80%;
   margin: auto;
 }
-/*
-.minilesson_mc_image {
-  max-width: 100%;
-  margin: auto;
-}
-.minilesson_mc_image img{
-  max-width: 100%;
-  margin: auto;
-  display: block;
-}
-  */
 
 .minilesson_mc_image {
   position: relative; /* Needed for padding trick */
@@ -3019,16 +3084,34 @@ textarea.ml_freewriting_textarea {
 }
 
 /* Fluency */
-
-.minilesson_fluency_box .item-results-container {
+.minilesson_fluency_box .item-feedback-container  {
   display: flex;
   background-color: #eee;
-  height: 100px;
-  margin-bottom: 50px;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 1.1rem;
+  padding: 2px;
+  margin-bottom: 50px
 }
+
+.minilesson_fluency_box .item-results-container {
+  margin-bottom: 5px;
+  display: flex;
+  height: 25px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 1.1rem;
+  padding: 2px;
+  margin-bottom: 5px
+}
+
+
 .minilesson_fluency_box .form-container {
   margin: 20px auto 22px;
-  min-height: 100px;
+  min-height: 50px;
 }
 .minilesson_fluency_box .item-results {
   align-self: center;
@@ -3039,13 +3122,6 @@ textarea.ml_freewriting_textarea {
   border-radius: 10px;
   padding: 6px;
   font-style: italic;
-}
-.minilesson_fluency_box .progress-container {
-  padding: 5px 8px;
-}
-.minilesson_fluency_box .progress.active {
-margin-top: 8px;
-margin-right: 3px;
 }
 
 .fluency_listen_cont {
@@ -3062,6 +3138,7 @@ margin-right: 3px;
 .minilesson_fluency_box .fluency_prompt {
   position: relative;
   margin-top: 10px;
+  font-size: 1.3em;
 }
 
 .minilesson_fluency_box .fluency_reply {
@@ -3148,21 +3225,24 @@ margin-right: 3px;
 
 .minilesson_fluency_box .fluency_title {
   border: 2px solid darkgray;
-  height: 53px;
+  height: auto;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 0;
   font-size: 24px;
   font-weight: bold;
 }
 
 .minilesson_fluency_box .fluency_controls {
-  height: 35px; 
+  margin-top: 5px;
+  height: 35px;
   background-color: white;
 }
 
 .minilesson_fluency_box .fluency_speakbtncontainer {
- 
+
   height: 75px;
   /* background-color: rgba(98, 135, 182, 1); */
   text-align: center;
@@ -3203,7 +3283,385 @@ margin-right: 3px;
   position: absolute;
   right: 10px;
 }
+
+.minilesson_fluency_box .item-results-container .fa-star {
+  color: gold;
+  font-size: 1.5em;
+}
+
+.minilesson_fluency_box .item-results-container .fa-star-o {
+  color: gray;
+  font-size: 1.5em;
+}
+
+div.fluencywordresult {
+ /* display: flex; */
+  flex-wrap: nowrap;
+  gap: 3px;
+ /* margin-top: 10px; */
+  margin-right: 10px;
+}
+span.fluencyletterresult {
+    /* padding: 2px 4px; */
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background-color: #f9f9f9;
+    cursor: default;
+}
+
+span.fluencyletterresult.letter_missing {
+  color: gray;
+}
+span.fluencyletterresult.letter_fair {
+  color: orange;
+}
+span.fluencyletterresult.letter_good {
+  color: green;
+}
+span.fluencyletterresult.letter_wrong {
+  color: red;
+}
+.btn.ml_li_resultaudioself,
+.btn.fluency_listen_btn.audioself {
+  color: deeppink;
+}
+.minilesson_sentence_image {
+  max-width:400px;
+  width: 75%;
+  margin: auto;
+}
+.minilesson_padded_image {
+  position: relative; /* Needed for padding trick */
+  width: 100%;
+  padding-bottom: 75%; /* Example aspect ratio (4:3). Adjust as needed */
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.minilesson_padded_image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: scale-down; /* or contain */
+}
+
+
+.element-sentenceprompt-container {
+  display: flex;
+  border: 1px solid rgb(203, 213, 225);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  max-height: 32rem;
+}
+
+.element-sentenceprompt-container .sentenceprompt__textarea {
+  border: none;
+  outline: none;
+  padding: 0.5rem;
+  width: 100%;
+}
+.element-sentenceprompt-container .sentenceprompt__lines {
+  border-right: 1px solid rgb(203, 213, 225);
+  padding: 0.5rem;
+  text-align: right;
+  overflow: hidden;
+}
+.element-sentenceprompt-container .sentenceprompt__textarea:focus {
+  box-shadow: none;
+}
+div.mcaudiotranscript {
+  flex-grow: 1;
+}
 div.mcaudioplayer,
 div.poodlldictationplayer {
   position: relative;
+  min-width: 50px;
+}
+
+.poodlldictationinput {
+  flex-grow:  1;
+}
+.poodlldictationstatus {
+  text-align: center;
+  position: relative;
+  min-width: 50px;
+}
+
+.pgapfill_gap_wrapper {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.pgapfill_passage {
+  line-height: 2.0;
+}
+
+.pgapfull_monospace {
+  font-family: "Roboto Mono", monospace;
+  font-size: 1.2rem;
+}
+
+.pgapfull_monospace .fa {
+  font-size: 1rem;
+}
+
+.pgapfill_gap_wrapper .character-input {
+    display: inline-block;
+    border: 1px inset #767676;
+    /* vertical-align: middle; */
+    line-height: initial !important;
+    height: auto;
+    padding: 6px 4px;
+    border: 1px inset rgb(118, 118, 118);
+}
+.pgapfill_gap_wrapper .character-input:placeholder-shown {
+  /*
+    letter-spacing: 0.25rem;
+    */
+}
+.pgapfill_gap_wrapper.pgapfill_gap_reviewing .pgapfill_gap_input,
+.pgapfill_gap_wrapper.psg_gapfill_correct .pgapfill_gap_input {
+  background-color: lightgreen;
+}
+.pgapfill_gap_wrapper.psg_gapfill_correct .correctIcon {
+  color: green;
+}
+.pgapfill_gap_wrapper.psg_gapfill_wrong .wrongIcon {
+  color: red;
+}
+.pgapfill_gap_wrapper:not(.psg_gapfill_wrong) .wrongIcon,
+.pgapfill_gap_wrapper:not(.psg_gapfill_correct) .correctIcon {
+  display: none;
+}
+.minilesson_pgapfill_box .pgapfill_controls {
+  position: relative;
+  margin-top: 10px;;
+  height: 35px;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.minilesson_pgapfill_box  .pgapfill_hint_btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.audiostoryplayer {
+   margin: 0;
+    padding: 20px;
+    background: #111;
+    font-family: sans-serif;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.mod_minilesson_audiostory_cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .audiostory_audio {
+    /* width: 80%; */
+    max-width: 600px;
+  }
+
+  .audiostory_slideshow_container {
+    width: 100%;
+    /* max-width: 600px; */         /* Keeps it nice on larger screens */
+    aspect-ratio: 3 / 2; 
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+  }
+
+  .audiostory_image_container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: 110%;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: scale(1.3) translate(0, 0);
+    transition: opacity 1s ease-in-out; /* 👈 Crossfade transition */
+  }
+  .audiostory_image_container img {
+  height: auto;
+  object-fit: cover;
+  width: 120%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.audiostory_overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.audiostory_play_button {
+  font-size: 2rem;
+  background: white;
+  border: none;
+  padding: 1em 2em;
+  border-radius: 1em;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.audiostory_caption {
+  min-height: 45px;
+}
+
+.progress-container {
+  padding: 5px 8px;
+}
+.progress-container .progress.active {
+  margin-top: 8px;
+  margin-right: 3px;
+}
+/* Speedy Audio Player */
+.ml_speedyplayer_row {
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      width: auto; /* Or define a specific width for desktop */
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      max-width: 600px;
+      margin: 5px auto;
+    }
+
+  .ml_speedyplayer_row audio {
+      flex: none; /* Prevent shrinking/growing */
+      margin-right: 10px; /* Space to the right of the audio player */
+      margin-bottom: 0; /* Ensure no bottom margin from small screen styles */
+      display: block; /* Ensure it behaves like a block element */
+    }
+
+    div.ml_speedyplayer_row_buttons {
+      display: flex; /* Button container is always a flex container */
+      flex-direction: row; /* Buttons are always in a row */
+      width: auto; /* Or define a specific width for desktop */
+      justify-content: space-around; /* Example: Distribute space among buttons */
+      align-items: center; /* Vertically center buttons within their container */
+      padding: 0; /* Adjust padding as needed */
+      margin: 0; /* Ensure no margin if spacing is handled by button margins */
+    }
+
+ .ml_speedyplayer_row .speedy_btn {
+      flex: 1; /* Make buttons grow to fill container space equally */
+      margin: 0 5px; /* Add horizontal margin between buttons */
+      width: auto; /* Let flex control width, remove fixed width */
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+  .ml_speedyplayer_row .speedy_btn:hover {
+      background: #357ab8;
+    }
+
+  .ml_speedyplayer_row .speedy_btn {
+      gap: 6px;
+    }
+
+   .ml_speedyplayer_label {
+    line-height: 1;
+    vertical-align: middle;
+    display: inline-block;
+   } 
+
+    @media (max-width: 480px) { /* Adjust breakpoint as needed */
+      div.ml_speedyplayer_row {
+        width: 100%; /* Full width on small screens */
+        /* flex-direction is already column, keep it */
+        align-items: center; /* Center content horizontally */
+        padding: 10px; /* Or adjust padding as needed */
+        margin: 5px auto; /* Center the container itself */
+      }
+
+      div.ml_speedyplayer_row audio {
+        width: 100%; /* Audio player takes full width */
+        flex: none;
+        margin-bottom: 10px; /* Space below audio */
+        /* Ensure display is block if needed, but flex: none with width 100% is usually sufficient */
+        display: block;
+      }
+
+      div.ml_speedyplayer_row_buttons {
+        display: flex; /* Make this a flex container for buttons */
+        flex-direction: row; /* Arrange buttons horizontally */
+        width: 100%; /* Button container takes full width */
+        justify-content: space-around; /* Example: Even space around buttons */
+        align-items: center; /* Vertically center buttons */
+        padding: 0; /* Adjust padding as needed */
+        margin-top: 0; /* Remove top margin if any */
+      }
+
+      div.ml_speedyplayer_row_buttons > button {
+        flex: 1; /* Make buttons grow to fill container space equally */
+        margin: 0 5px; /* Horizontal margin between buttons */
+        /* Remove any fixed width if using flex: 1 */
+        width: auto;
+      }
+    }
+
+    .mod_minilesson_aigenpageexplanation {
+      margin: 10px auto;
+    }
+
+@media (max-width: 480px) {
+  .landr_skip_btn .mobileaccesshide,
+  .fluency_skip_btn .mobileaccesshide,
+  .sgapfill_skip_btn .mobileaccesshide {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+.form-input-phrase-online {
+  text-wrap: nowrap;
+}
+
+#page-mod-minilesson-aigen .table-dynamic[data-table-handler="usages"][data-table-total-rows="0"] {
+  display: none;
 }

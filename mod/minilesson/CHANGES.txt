@@ -1,3 +1,59 @@
+Version 1.0.98 (Build 2025073000)
+ - Beta version of Audio Chat
+ - Better failure handling for AIGEN
+ - Parallel AIGEN image generation so its faster
+ - Better update code for multichoice and multiaudio
+ - New AIGEN template for Keywords to Fluency / GapFills
+
+Version 1.0.97 (Build 2025071305)
+ - New audio story AIGEN template
+ - Fixes to responsiveness on gap fill questions
+ - Better AIGEN progress tracking
+ - Multichoice and Multiaudio item updates
+ - Ability to push files (images and audio) when pushing items to other instances
+
+Version 1.0.96 (Build 2025071303)
+- Added versioning feature to AIGEN templates
+- Various AIGEN tweaks
+- New YouTube Finale Lesson AIGEN template
+
+Version 1.0.95 (Build 2025071300)
+- AI Item Generation -- default templates
+- Fix for fluency item bug when hide start page enabled
+
+Version 1.0.94 (Build 2025062901)
+- AI Item Generation
+
+Version 1.0.93 (Build 2025062300)
+- tweaks to continue btn for fluency item
+- fixed bug where audio would play on item if hidestart page was set
+- allowed hide start page on listen and speak item type
+- added timelimit feature to most item types
+- removed dictation chat item type (from new item menu)
+- added push items feature to push page
+
+Version 1.0.92 (Build 2025062001)
+- Rebuilt compatibile JS for old Moodles
+
+Version 1.0.91 (Build 2025062000)
+- Fix for hints penalty when the student already got the gap wrong
+- Added H5P item type
+- Fixed broken responsiveness on multichoice and dictation item types
+
+Version 1.0.90 (Build 2025061501)
+- Fix for animation issue on Audio Story
+
+Version 1.0.89 (Build 2025061500)
+- Added new item type: Passage Gap Fill
+- A fix for default language in voice selector
+- A new media prompt option: Audio Story
+
+Version 1.0.88 (Build 2025060900)
+- Added new voice selector
+- Added new item type "Fluency" (not available in Ningxia region yet)
+- Added sentenceimage and sentenceaudio fields to item types with "sentences"
+- Redesign of listen and speak item type
+
 Version 1.0.87 (Build 2025051300)
 - Added Somali and Pashto languages
 

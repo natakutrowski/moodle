@@ -374,12 +374,17 @@ class utils {
         });
         $correctitems = 0;
         $totalitems = 0;
+        $penalty = 0;
         foreach($results as $result){
             $correctitems += $result->correctitems;
             $totalitems += $result->totalitems;
+            if (isset($result->penalty)) {
+                $penalty += $result->penalty;
+            }
         }
         $totalpercent = round(($correctitems / $totalitems) * 100, 0);
-        return $totalpercent;
+        $totalpercent -= $penalty;
+        return max(0, $totalpercent);
     }
 
 
@@ -456,6 +461,36 @@ class utils {
             $result = $curl->post($url, $postdata);
         }
         return $result;
+    }
+
+    // We forward an OpenAI RTC offer to the OpenAI API.
+    // This is called from: openairtc.php 
+    // Which is called from the OpenAI RTC client side code in audiochat. 
+    // (in which we dont want to expose our openai key)
+    // It expects an SDP offer in the request body and returns an SDP answer.
+    public static function openai_forward_offer()
+    {
+        global $CFG;
+
+        // Get the secret from config.
+        $apikey = get_config(constants::M_COMPONENT, 'openaikey');
+        if (empty($apikey)) {
+            return false;
+        }
+
+        $offer = file_get_contents("php://input");
+        $model = "gpt-4o-mini-realtime-preview";
+         $serverurl = "https://api.openai.com/v1/realtime?model=" . $model;
+
+        require_once($CFG->libdir . '/filelib.php');
+
+        $curl = new \curl();
+        $curl->setHeader('Authorization: Bearer ' . $apikey);
+        $curl->setHeader(['Content-type: application/sdp']);
+        $result = $curl->post($serverurl, $offer);
+        header("Content-Type: application/sdp");
+        echo $result;
+        die;
     }
 
     // This is called from the settings page and we do not want to make calls out to cloud.poodll.com on settings
@@ -747,6 +782,40 @@ class utils {
             }
         }
     }
+
+    // Fetch the streaming token for the region and language
+    public static function fetch_openai_token($region) {
+
+
+         // The REST API we are calling.
+         $functionname = 'local_cpapi_fetch_assemblyai_token';
+
+         // log.debug(params);
+         $params = [];
+
+         $apikey = get_config(constants::M_COMPONENT, 'openaikey');
+         $model = "gpt-4o-mini-realtime-preview";
+         $serverurl = "https://api.openai.com/v1/realtime?model=" . $model;
+         $response = self::curl_fetch($serverurl, $params);
+
+        if (!self::is_json($response)) {
+            return false;
+        } else {
+            $payloadobject = json_decode($response);
+            if ($payloadobject->returnCode == 0 && isset($payloadobject->returnMessage)) {
+                $assemblyaitoken = $payloadobject->returnMessage;
+                // cache the token
+                $tokenobject = new \stdClass();
+                $tokenobject->token = $assemblyaitoken;
+                $tokenobject->validuntil = $now + (30 * MINSECS);
+                $cache->set('assemblyaitoken', $tokenobject);
+                return $assemblyaitoken;
+            } else {
+                return false;
+            }
+        }
+    }   
+
     // Fetch the appropriate azure region for the given poodll region
     public static function fetch_ms_region($poodllregion) {
 
@@ -812,7 +881,10 @@ class utils {
                 // cache the token
                 $tokenobject = new \stdClass();
                 $tokenobject->token = $msspeechtoken;
-                $tokenobject->validuntil = $now + (30 * MINSECS);
+                //ms speech tokens are only valid for 10 minutes
+                //And each user could come in at a different time meaning they get a token that might have only 1 min left
+                //so we just cache for 2 mins - maybe should cache per user ...
+                $tokenobject->validuntil = $now + (2 * MINSECS);
                 $cache->set('msspeechtoken'. '_' . $msregion, $tokenobject);
                 return $msspeechtoken;
             } else {
@@ -1485,7 +1557,8 @@ class utils {
 
     public static function fetch_pagelayout_options() {
         $options = [
-                'standard' => 'incourse',
+                'incourse' => 'incourse',
+                'standard' => 'standard',
                 'embedded' => 'embedded',
                 'popup' => 'popup',
         ];
@@ -1659,7 +1732,7 @@ class utils {
             default:
                 $alllang = constants::ALL_VOICES;
         }
-        
+
 
         if(array_key_exists($langcode, $alllang) && !$showall) {
             return $alllang[$langcode];
@@ -1688,6 +1761,24 @@ class utils {
         }
     }
 
+    public static function get_nice_voices($ttslanguage, $region) {
+        // Get all the best voices (neural/whisper/azure)
+        $langvoices = self::get_tts_voices($ttslanguage, false, $region);
+        $nicevoices = [];
+        foreach ($langvoices as $voicekey => $voice) {
+            if (strpos($voicekey, 'Whisper') !== false ||
+                strpos($voicekey, 'Azure') !== false ||
+                in_array($voicekey, constants::M_NEURALVOICES)) {
+                $nicevoices[$voicekey] = $voice;
+            }
+        }
+        if (count($nicevoices) == 0) {
+            // If we have no nice voices, all the voices are nice voices.
+            $nicevoices = $langvoices;
+        }
+        return $nicevoices;
+    }
+
     public static function get_lang_options() {
         return [
                constants::M_LANG_ARAE => get_string('ar-ae', constants::M_COMPONENT),
@@ -1709,7 +1800,6 @@ class utils {
                constants::M_LANG_ENIE => get_string('en-ie', constants::M_COMPONENT),
                constants::M_LANG_ENWL => get_string('en-wl', constants::M_COMPONENT),
                constants::M_LANG_ENAB => get_string('en-ab', constants::M_COMPONENT),
-               constants::M_LANG_FAIR => get_string('fa-ir', constants::M_COMPONENT),
                constants::M_LANG_FILPH => get_string('fil-ph', constants::M_COMPONENT),
                 constants::M_LANG_FIFI => get_string('fi-fi', constants::M_COMPONENT),
                constants::M_LANG_FRCA => get_string('fr-ca', constants::M_COMPONENT),
@@ -1734,6 +1824,7 @@ class utils {
                 constants::M_LANG_NONO => get_string('no-no', constants::M_COMPONENT),
                 constants::M_LANG_PSAF => get_string('ps-af', constants::M_COMPONENT),
                 constants::M_LANG_PLPL => get_string('pl-pl', constants::M_COMPONENT),
+                constants::M_LANG_FAIR => get_string('fa-ir', constants::M_COMPONENT),
                constants::M_LANG_PTBR => get_string('pt-br', constants::M_COMPONENT),
                constants::M_LANG_PTPT => get_string('pt-pt', constants::M_COMPONENT),
                 constants::M_LANG_RORO => get_string('ro-ro', constants::M_COMPONENT),
@@ -1811,7 +1902,7 @@ class utils {
         // page layout options
         $layoutoptions = self::fetch_pagelayout_options();
         $mform->addElement('select', 'pagelayout', get_string('pagelayout', constants::M_COMPONENT), $layoutoptions);
-        $mform->setDefault('pagelayout', 'standard');
+        $mform->setDefault('pagelayout', 'incourse');
 
         // time target
         $mform->addElement('hidden', 'timelimit', 0);
@@ -1993,6 +2084,11 @@ class utils {
     public static function fetch_polly_url($token, $region, $speaktext, $voiceoption, $voice) {
         global $USER;
 
+        //Do a little sanity check
+        if(empty($speaktext) || empty($voice) || empty($token)){
+            return false;
+        }
+
         switch($region){
             case 'ningxia':
                 $useregion = 'ningxia';
@@ -2107,10 +2203,12 @@ class utils {
                 return new local\itemtype\item_listeninggapfill($itemrecord, $moduleinstance, $context);
             case constants::TYPE_TGAPFILL:
                 return new local\itemtype\item_typinggapfill($itemrecord, $moduleinstance, $context);
+            case constants::TYPE_PGAPFILL:
+                return new local\itemtype\item_passagegapfill($itemrecord, $moduleinstance, $context);
             case constants::TYPE_COMPQUIZ:
                 return new local\itemtype\item_compquiz($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_BUTTONQUIZ:
-                return new local\itemtype\item_buttonquiz($itemrecord, $moduleinstance, $context);
+            case constants::TYPE_H5P:
+                return new local\itemtype\item_h5p($itemrecord, $moduleinstance, $context);
             case constants::TYPE_SPACEGAME:
                 return new local\itemtype\item_spacegame($itemrecord, $moduleinstance, $context);
             case constants::TYPE_FREEWRITING:
@@ -2123,6 +2221,12 @@ class utils {
                 return new local\itemtype\item_passagereading($itemrecord, $moduleinstance, $context);
             case constants::TYPE_CONVERSATION:
                 return new local\itemtype\item_conversation($itemrecord, $moduleinstance, $context);
+            case constants::TYPE_AUDIOCHAT:
+                return new local\itemtype\item_audiochat($itemrecord, $moduleinstance, $context);
+            case constants::TYPE_WORDSHUFFLE:
+                return new local\itemtype\item_wordshuffle($itemrecord, $moduleinstance, $context);
+            case constants::TYPE_SCATTER:
+                return new local\itemtype\item_scatter($itemrecord, $moduleinstance, $context);
             default:
         }
     }
@@ -2155,10 +2259,12 @@ class utils {
                 return '\\'. constants::M_COMPONENT . '\local\itemform\listeninggapfillform';
             case constants::TYPE_TGAPFILL:
                 return '\\'. constants::M_COMPONENT . '\local\itemform\typinggapfillform';
+            case constants::TYPE_PGAPFILL:
+                return '\\'. constants::M_COMPONENT . '\local\itemform\passagegapfillform';
             case constants::TYPE_COMPQUIZ:
                 return '\\'. constants::M_COMPONENT . '\local\itemform\compquizform';
-            case constants::TYPE_BUTTONQUIZ:
-                return '\\'. constants::M_COMPONENT . '\local\itemform\buttonquizform';
+            case constants::TYPE_H5P:
+                return '\\'. constants::M_COMPONENT . '\local\itemform\h5pform';
             case constants::TYPE_SPACEGAME:
                 return '\\'. constants::M_COMPONENT . '\local\itemform\spacegameform';
             case constants::TYPE_FREEWRITING:
@@ -2171,6 +2277,12 @@ class utils {
                 return '\\'. constants::M_COMPONENT . '\local\itemform\passagereadingform';
             case constants::TYPE_CONVERSATION:
                 return '\\'. constants::M_COMPONENT . '\local\itemform\conversationform';
+            case constants::TYPE_AUDIOCHAT:
+                return '\\'. constants::M_COMPONENT . '\local\itemform\audiochatform';
+            case constants::TYPE_WORDSHUFFLE:
+                return '\\'. constants::M_COMPONENT . '\local\itemform\wordshuffleform';
+            case constants::TYPE_SCATTER:
+                return '\\'. constants::M_COMPONENT . '\local\itemform\scatterform';
             default:
                 return false;
         }
@@ -2276,4 +2388,44 @@ class utils {
         $moduledata = add_moduleinfo($moduledata, $course);
         return $moduledata->coursemodule;
     }//end of function
+
+    // Extracts fields from a string that are enclosed in curly braces.
+    public static function extract_curly_fields(string $input): array {
+        preg_match_all('/\{(\w+)\}/', $input, $matches);
+        return array_unique($matches[1]); // Remove duplicates
+    }
+
+    /**
+     * array_key_last polyfill
+     *
+     * @param mixed $arr
+     * @return int|string|null
+     */
+    public static function array_key_last($arr) {
+        if (function_exists('array_key_last')) {
+            return array_key_last($arr);
+        }
+        if (!empty($arr)) {
+            return key(array_slice($arr, -1, 1, true));
+        }
+        return null;
+    }
+
+    /**
+     * Add ordinal suffix like below listed
+     *  1 => 1st
+     *  2 => 2nd
+     *  3 => 3rd
+     * @param int $number
+     * @return string
+     */
+    public static function ordinalsuffix($number): string {
+        $ends = ['th', 'st', 'nd', 'rd'];
+        if ((($number % 100) >= 11) && (($number % 100) <= 13)) {
+            return $number . 'th';
+        } else {
+            return $number . ($ends[$number % 10] ?? $ends[0]);
+        }
+    }
+
 }

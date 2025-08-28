@@ -30,7 +30,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use mod_minilesson\aigen_contextform;
 use mod_minilesson\constants;
+use mod_minilesson\local\formelement\ttsaudio;
 use mod_minilesson\utils;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -765,7 +767,7 @@ function minilesson_output_fragment_preview($args) {
     $renderer = $PAGE->get_renderer('mod_minilesson');
     $comptest = new \mod_minilesson\comprehensiontest($cm);
     $ret = $renderer->show_quiz_preview($comptest, $args->itemid);
-    $ret .= $renderer->fetch_activity_amd($cm, $moduleinstance, $args->itemid);
+    $ret .= $renderer->fetch_activity_amd($comptest, $cm, $moduleinstance, $args->itemid);
     return $ret;
 }
 
@@ -964,4 +966,44 @@ function minilesson_get_coursemodule_info($coursemodule) {
         $result->customdata['duedate'] = $moduleinstance->viewend;
         $result->customdata['allowsubmissionsfromdate'] = $moduleinstance->viewstart;
         return $result;
+}
+
+function minilesson_output_fragment_ttsaudioelement($args) {
+    $formdata = [];
+    $args = (object) $args;
+    parse_str($args->formdata, $formdata);
+    $options = json_decode($args->options, true);
+
+    ttsaudio::register();
+    $form = new MoodleQuickForm('dummy', 'POST', '');
+    $formelement = $form->addElement(ttsaudio::ELNAME, $args->groupname, $options['label'], $options);
+
+    $formrenderer = $form->defaultRenderer();
+    $form->updateSubmission($formdata, []);
+    $formelement->accept($formrenderer);
+
+    return $formrenderer->toHtml();
+}
+
+function minilesson_output_fragment_aigen_contextform($args) {
+    global $CFG;
+    require_once($CFG->libdir . '/externallib.php');
+
+    $formdata = [];
+    $args = (object) $args;
+    parse_str($args->params, $formdata);
+
+    require_capability('mod/minilesson:canuseaigen', $args->context);
+
+    $formurl = new moodle_url($args->url, [
+        'id' => $formdata['id'],
+        'action' => $formdata['action'],
+        'templateid' => $formdata['templateid']
+    ]);
+
+    $form = new aigen_contextform($formurl, null, 'post', '', null, true, $formdata);
+    if ($response = $form->process_dynamic_submission()) {
+        return $response;
+    }
+    return $form->render();
 }

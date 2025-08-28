@@ -43,6 +43,11 @@ define(['jquery',
       stepdata.totalitems=self.items.length;
       stepdata.correctitems=self.items.filter(function(e) {return e.correct;}).length;
       stepdata.grade = Math.round((stepdata.correctitems/stepdata.totalitems)*100);
+
+      //stop audio
+      self.stop_audio();
+
+      //move to next question
       self.quizhelper.do_next(stepdata);
     },
 
@@ -209,16 +214,17 @@ define(['jquery',
           typed: "",
           answered: false,
           correct: false,
-          audio: null
+          audio: null,
+          audiourl: target.audiourl ? target.audiourl : "",
+          imageurl: target.imageurl,
         };
       }).filter(function(e) {
         return e.target !== "";
       });
 
       $.each(self.items, function(index, item) {
-        polly.fetch_polly_url(item.prompt,  self.voiceoption, self.usevoice).then(function(audiourl) {
           item.audio = new Audio();
-          item.audio.src = audiourl;
+          item.audio.src = item.audiourl;
           if (self.items.filter(function(e) {
               return e.audio == null;
             }).length == 0) {
@@ -226,8 +232,6 @@ define(['jquery',
           } else {
             console.log(self.items);
           }
-        });
-
       });
 
     },
@@ -455,6 +459,16 @@ define(['jquery',
         $(".dictate_targetWord").first().focus();
         $("#" + self.itemdata.uniqueid + "_container .dictate_listen_btn").trigger('click');
       }, 500);
+    },
+
+    // Stop audio .. usually when leaving the item or sentence
+    stop_audio: function(){
+      var self =this;
+      //pause audio if its playing
+      var theaudio = self.items[self.game.pointer].audio;
+      if(theaudio && !theaudio.paused) {
+        theaudio.pause();
+      }
     }
 
   };

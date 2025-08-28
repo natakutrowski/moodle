@@ -35,6 +35,9 @@ namespace mod_minilesson\local\itemform;
 require_once($CFG->libdir . '/formslib.php');
 
 use \mod_minilesson\constants;
+use mod_minilesson\local\formelement\sentenceprompt;
+use mod_minilesson\local\formelement\ttsaudio;
+use mod_minilesson\local\itemtype\item;
 use \mod_minilesson\utils;
 
 /**
@@ -60,7 +63,7 @@ abstract class baseform extends \moodleform {
      */
     public $typestring;
 
-	
+
     /**
      * An array of options used in the htmleditor
      * @var array
@@ -86,6 +89,8 @@ abstract class baseform extends \moodleform {
      * @var bool
      */
     protected $standard = true;
+
+    public const ITEMCLASS = item::class;
 
     /**
      * Each item type can and should override this to add any custom elements to
@@ -116,7 +121,7 @@ abstract class baseform extends \moodleform {
 		$this->filemanageroptions = $this->_customdata['filemanageroptions'];
         $this->moduleinstance = $this->_customdata['moduleinstance'];
 
-	
+
         $mform->addElement('header', 'typeheading', get_string('createaitem', constants::M_COMPONENT, get_string($this->type, constants::M_COMPONENT)));
 
         $mform->addElement('hidden', 'id');
@@ -128,7 +133,7 @@ abstract class baseform extends \moodleform {
         if ($this->standard === true) {
             $mform->addElement('hidden', 'type');
             $mform->setType('type', PARAM_TEXT);
-			
+
 			$mform->addElement('hidden', 'itemorder');
             $mform->setType('itemorder', PARAM_INT);
 
@@ -200,68 +205,90 @@ abstract class baseform extends \moodleform {
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('smartframe_instructions1', constants::M_COMPONENT));
                         break;
-                    //listening gapfill
+                    // Listening gapfill.
                     case constants::TYPE_LGAPFILL:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('lg_instructions1', constants::M_COMPONENT));
                         break;
-                    //typing gapfill
+                    // Typing gapfill.
                     case constants::TYPE_TGAPFILL:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('tg_instructions1', constants::M_COMPONENT));
                         break;
-                    //speaking gapfill
+                    // Speaking gapfill.
                     case constants::TYPE_SGAPFILL:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('sg_instructions1', constants::M_COMPONENT));
                         break;
-
-                    //comprehension quiz
+                    // Passage gapfill.
+                    case constants::TYPE_PGAPFILL:
+                        $mform->setDefault(constants::TEXTINSTRUCTIONS,
+                            get_string('pg_instructions1', constants::M_COMPONENT));
+                        break;
+                    // Comprehension quiz.
                     case constants::TYPE_COMPQUIZ:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('listeningquiz_instructions1', constants::M_COMPONENT));
                         break;
 
-                    //button quiz
-                    case constants::TYPE_BUTTONQUIZ:
+                    // H5P.
+                    case constants::TYPE_H5P:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
-                            get_string('buttonquiz_instructions1', constants::M_COMPONENT));
+                            get_string('h5p_instructions1', constants::M_COMPONENT));
                         break;
 
-                    //button quiz
+                    // Space Game.
                     case constants::TYPE_SPACEGAME:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('spacegame_instructions1', constants::M_COMPONENT));
                         break;
 
-                    //button quiz
+                    // FreeWriting.
                     case constants::TYPE_FREEWRITING:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('freewriting_instructions1', constants::M_COMPONENT));
                         break;
 
-                    //button quiz
+                    // Free Speaking.
                     case constants::TYPE_FREESPEAKING:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('freespeaking_instructions1', constants::M_COMPONENT));
                         break;
 
-                    //button quiz
+                    // Fluency.
                     case constants::TYPE_FLUENCY:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('fluency_instructions1', constants::M_COMPONENT));
                         break;
 
-                    //button quiz
+                    // Passage Reading.
                     case constants::TYPE_PASSAGEREADING:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('passagereading_instructions1', constants::M_COMPONENT));
                         break;
 
-                    //button quiz
+                    // Conversation.
                     case constants::TYPE_CONVERSATION:
                         $mform->setDefault(constants::TEXTINSTRUCTIONS,
                             get_string('conversations_instructions1', constants::M_COMPONENT));
+                        break;
+
+                    // AudioChat.
+                    case constants::TYPE_AUDIOCHAT:
+                        $mform->setDefault(constants::TEXTINSTRUCTIONS,
+                            get_string('audiochat_instructions1', constants::M_COMPONENT));
+                        break;
+
+                    // Word Shuffle.
+                    case constants::TYPE_WORDSHUFFLE:
+                        $mform->setDefault(constants::TEXTINSTRUCTIONS,
+                            get_string('wordshuffle_instructions1', constants::M_COMPONENT));
+                        break;
+
+                    // Scatter.
+                    case constants::TYPE_SCATTER:
+                        $mform->setDefault(constants::TEXTINSTRUCTIONS,
+                            get_string('scatter_instructions1', constants::M_COMPONENT));
                         break;
                 }
 
@@ -278,13 +305,13 @@ abstract class baseform extends \moodleform {
         $mform->setType('visible', PARAM_INT);
 
         $this->custom_definition();
-		
+
 		//add the action buttons
         $mform->closeHeaderBefore('cancel');
         $this->add_action_buttons(get_string('cancel'), get_string('saveitem', constants::M_COMPONENT));
 
     }
-        
+
     protected function add_itemsettings_heading(){
         //add the heading
         $this->_form->addElement('header', 'itemsettingsheading', get_string('itemsettingsheadings', constants::M_COMPONENT));
@@ -356,14 +383,15 @@ abstract class baseform extends \moodleform {
         $m35=true;
 
         //cut down on the code by using media item types array to pre-prepare fieldsets and media prompt selector
-        $mediaprompts =['addmedia','addiframe','addttsaudio','addtextarea','addyoutubeclip','addttsdialog','addttspassage'];
+        $mediaprompts =['addmedia','addiframe','addttsaudio','addtextarea','addyoutubeclip','addttsdialog','addttspassage','addaudiostory'];
         $keyfields =['addmedia'=>constants::MEDIAQUESTION,
             'addiframe'=>constants::MEDIAIFRAME,
             'addttsaudio'=>constants::TTSQUESTION,
             'addtextarea'=>constants::QUESTIONTEXTAREA,
             'addyoutubeclip'=>constants::YTVIDEOID,
             'addttsdialog'=>constants::TTSDIALOG,
-            'addttspassage'=>constants::TTSPASSAGE];
+            'addttspassage'=>constants::TTSPASSAGE,
+            'addaudiostory'=>constants::AUDIOSTORY];
         $fulloptions=[];
         $fieldsettops=[];
         $fieldsetbottom="</fieldset>";
@@ -388,7 +416,7 @@ abstract class baseform extends \moodleform {
 
         //Question media upload
         $mform->addElement('html',$fieldsettops['addmedia'],[]);
-        $this->add_media_upload(constants::MEDIAQUESTION,get_string('itemmedia',constants::M_COMPONENT));   
+        $this->add_media_upload(constants::MEDIAQUESTION,get_string('itemmedia',constants::M_COMPONENT));
         $mform->addElement('html',$fieldsetbottom,[]);
 
 
@@ -404,7 +432,7 @@ abstract class baseform extends \moodleform {
         $mform->addElement('html',$fieldsettops['addttsaudio'],[]);
         $mform->addElement('textarea', constants::TTSQUESTION, get_string('itemttsquestion', constants::M_COMPONENT), array('wrap'=>'virtual','style'=>'width: 100%;'));
         $mform->setType(constants::TTSQUESTION, PARAM_RAW);
-        $this->add_voiceselect(constants::TTSQUESTIONVOICE,get_string('itemttsquestionvoice',constants::M_COMPONENT));
+        $this->add_ttsaudioselect(constants::TTSQUESTIONVOICE,get_string('itemttsquestionvoice',constants::M_COMPONENT));
         $this->add_voiceoptions(constants::TTSQUESTIONOPTION,get_string('choosevoiceoption',constants::M_COMPONENT));
         $mform->addElement('advcheckbox',constants::TTSAUTOPLAY,get_string('autoplay',constants::M_COMPONENT),'');
         $mform->addElement('html',$fieldsetbottom,[]);
@@ -447,9 +475,9 @@ abstract class baseform extends \moodleform {
         //Moodle cant hide static text elements with hideif (why?) , so we wrap it in a group
         //$this->add_static_text('ttsdialog_instructions',null,get_string('ttsdialoginstructions', constants::M_COMPONENT));
 
-        $this->add_voiceselect(constants::TTSDIALOGVOICEA,get_string('ttsdialogvoicea',constants::M_COMPONENT));
-        $this->add_voiceselect(constants::TTSDIALOGVOICEB,get_string('ttsdialogvoiceb',constants::M_COMPONENT));
-        $this->add_voiceselect(constants::TTSDIALOGVOICEC,get_string('ttsdialogvoicec',constants::M_COMPONENT));
+        $this->add_ttsaudioselect(constants::TTSDIALOGVOICEA,get_string('ttsdialogvoicea',constants::M_COMPONENT));
+        $this->add_ttsaudioselect(constants::TTSDIALOGVOICEB,get_string('ttsdialogvoiceb',constants::M_COMPONENT));
+        $this->add_ttsaudioselect(constants::TTSDIALOGVOICEC,get_string('ttsdialogvoicec',constants::M_COMPONENT));
         $mform->addElement('textarea', constants::TTSDIALOG, get_string('ttsdialog', constants::M_COMPONENT), array('wrap'=>'virtual','style'=>'width: 100%;','placeholder'=>'A) Hello&#10;B) Goodbye'));
         $mform->setType(constants::TTSDIALOG, PARAM_RAW);
         $mform->addElement('advcheckbox',constants::TTSDIALOGVISIBLE,get_string('ttsdialogvisible',constants::M_COMPONENT),get_string('ttsdialogvisible_desc', constants::M_COMPONENT));
@@ -464,20 +492,39 @@ abstract class baseform extends \moodleform {
         //Moodle cant hide static text elements with hideif (why?) , so we wrap it in a group
         //$this->add_static_text('ttspassage_instructions',null,get_string('ttspassageinstructions', constants::M_COMPONENT));
 
-        $this->add_voiceselect(constants::TTSPASSAGEVOICE,get_string('ttspassagevoice',constants::M_COMPONENT));
+        $this->add_ttsaudioselect(constants::TTSPASSAGEVOICE,get_string('ttspassagevoice',constants::M_COMPONENT));
         $this->add_voiceoptions(constants::TTSPASSAGESPEED,get_string('ttspassagespeed',constants::M_COMPONENT));
         $mform->addElement('textarea', constants::TTSPASSAGE, get_string('ttspassage', constants::M_COMPONENT), array('wrap'=>'virtual','style'=>'width: 100%;','placeholder'=>''));
         $mform->setType(constants::TTSPASSAGE, PARAM_RAW);
         $mform->addElement('html',$fieldsetbottom,[]);
 
+        //Question Audio Story
+        $mform->addElement('html',$fieldsettops['addaudiostory'],[]);
+        $mform->addElement('static', 'audiostory_instructions', null,'');
+        sentenceprompt::register();
+         $this->add_media_upload(constants::AUDIOSTORY,get_string('audiostoryfiles',constants::M_COMPONENT),false,'*', -1);
+        $mform->addElement(sentenceprompt::ELNAME, constants::AUDIOSTORYMETA, get_string('audiostorytimes', constants::M_COMPONENT),
+            array('rows'=>'4', 'columns'=>'140', 'style'=>'width: 600px'));
+        $mform->setType(constants::AUDIOSTORYMETA, PARAM_TEXT);
+        $mform->setDefault(constants::AUDIOSTORYMETA, '00:00:00');
 
-        
+        $mform->addElement('html',$fieldsetbottom,[]);
+
+
+
     }
 
-    protected final function add_media_upload($name, $label, $required = false, $accept = '') {
+    protected final function add_media_upload($name, $label, $required = false, $accept = '', $maxfiles = 0) {
+        global $CFG;
+
+        // If accept is set, add it to the filemanager options
 		$filemanageroptions = $this->filemanageroptions;
         if(!empty($accept)){
             $filemanageroptions['accepted_types'] = $accept;
+        }
+        // If maxfiles is set, add it to the filemanager options
+        if($maxfiles !== 0){
+            $filemanageroptions['maxfiles'] = $maxfiles;
         }
 		$this->_form->addElement('filemanager',
                            $name,
@@ -485,7 +532,7 @@ abstract class baseform extends \moodleform {
                            null,
 						   $filemanageroptions
                            );
-		
+
 	}
 
 	protected final function add_media_prompt_upload($label = null, $required = false) {
@@ -516,7 +563,7 @@ abstract class baseform extends \moodleform {
     /**
      * Convenience function: Adds a text area response
      *
-     * @param $name_or_count The name or count of the element to add
+     * @param int $name_or_count The name or count of the element to add
      * @param string $label, null means default
      * @param bool $required
      * @return void
@@ -534,6 +581,69 @@ abstract class baseform extends \moodleform {
         }
 
         $this->_form->addElement('textarea', $element , $label,array('rows'=>'4', 'columns'=>'140', 'style'=>'width: 600px'));
+        if ($required) {
+            $this->_form->addRule($element, get_string('required'), 'required', null, 'client');
+        }
+    }
+
+    protected final function add_sentenceprompt($name_or_count, $label = null, $required = false) {
+        if ($label === null) {
+            $label = get_string('response', constants::M_COMPONENT);
+        }
+
+        // Set the form element name
+        if(is_number($name_or_count) || empty($name_or_count)){
+            $element = constants::TEXTANSWER . $name_or_count;
+        }else{
+            $element = $name_or_count;
+        }
+
+        sentenceprompt::register();
+        $this->_form->addElement(sentenceprompt::ELNAME, $element , $label,array('rows'=>'4', 'columns'=>'140', 'style'=>'width: 600px'));
+        if ($required) {
+            $this->_form->addRule($element, get_string('required'), 'required', null, 'client');
+        }
+    }
+
+    protected final function add_sentenceimage($name_or_count, $label = null, $required = false) {
+        if ($label === null) {
+            $label = get_string('sentenceimage', constants::M_COMPONENT);
+        }
+
+        // Set the form element name
+        if(is_number($name_or_count) || empty($name_or_count)){
+            $element = constants::FILEANSWER . $name_or_count;
+        }else{
+            $element = $name_or_count;
+        }
+
+        $filemanageroptions = $this->filemanageroptions;
+        $filemanageroptions['accepted_types'] = 'image';
+        $filemanageroptions['maxfiles'] = -1;
+        $this->_form->addElement('filemanager', "{$element}_image" , $label, [], $filemanageroptions);
+        $this->_form->addHelpButton("{$element}_image", 'sentenceimage', constants::M_COMPONENT);
+        if ($required) {
+            $this->_form->addRule($element, get_string('required'), 'required', null, 'client');
+        }
+    }
+
+    protected final function add_sentenceaudio($name_or_count, $label = null, $required = false) {
+        if ($label === null) {
+            $label = get_string('sentenceaudio', constants::M_COMPONENT);
+        }
+
+        // Set the form element name
+        if(is_number($name_or_count) || empty($name_or_count)){
+            $element = constants::FILEANSWER . $name_or_count;
+        }else{
+            $element = $name_or_count;
+        }
+
+        $filemanageroptions = $this->filemanageroptions;
+        $filemanageroptions['accepted_types'] = 'audio';
+        $filemanageroptions['maxfiles'] = -1;
+        $this->_form->addElement('filemanager', "{$element}_audio" , $label, [], $filemanageroptions);
+        $this->_form->addHelpButton("{$element}_audio", 'sentenceaudio', constants::M_COMPONENT);
         if ($required) {
             $this->_form->addRule($element, get_string('required'), 'required', null, 'client');
         }
@@ -691,6 +801,36 @@ abstract class baseform extends \moodleform {
     }
 
     /**
+     * Convenience function: Adds a dropdown list of voices
+     *
+     * @param string $label, null means default
+     * @return void
+     */
+    protected final function add_ttsaudioselect($name, $label = null, $hideif_field=false,$hideif_values=[]) {
+        global $CFG;
+
+        ttsaudio::register();
+        $this->_form->addElement(ttsaudio::ELNAME, $name, $label, [
+            'region' => $this->moduleinstance->region,
+            'langcode' => $this->moduleinstance->ttslanguage,
+        ]);
+      
+        if($hideif_field !== false && !empty($hideif_values)) {
+            $m35 = $CFG->version >= 2018051700;
+            if(!is_array($hideif_values)){
+                $hideif_values = [$hideif_values];
+            }
+            foreach($hideif_values as $hideif_value){
+                if ($m35) {
+                    $this->_form->hideIf($name, $hideif_field, 'eq', $hideif_value);
+                } else {
+                    $this->_form->disabledIf($name, $hideif_field, 'eq', $hideif_value);
+                }
+            }
+        }
+    }
+
+    /**
      * Convenience function: Adds a dropdown list of voice options
      *
      * @param string $label, null means default
@@ -774,6 +914,23 @@ abstract class baseform extends \moodleform {
     }
 
     /**
+     * Add checkbox element
+     *
+     * @param string $name
+     * @param string $label
+     * @param bool|int $default
+     * @return void
+     */
+    protected final function add_checkbox($name, $label, $detailslabel = null,  $default=0) {
+        $this->_form->addElement('advcheckbox',$name,
+            $label,
+            $detailslabel,[],[0,1]);
+            if ($default !== 0) {
+                $this->_form->setDefault($name, 1);
+            }
+    }
+
+    /**
      * Allow retry element
      *
      * @param string $name
@@ -824,6 +981,7 @@ abstract class baseform extends \moodleform {
             }
     }
 
+
     protected final function add_aliencount($name,$label,$default) {
         $alienoptions = [
             2=>2,
@@ -836,4 +994,5 @@ abstract class baseform extends \moodleform {
         ];
         $this->add_dropdown($name, $label,$alienoptions,$default);
     }
+
 }

@@ -103,7 +103,7 @@ $capabilities = array(
 			),
 			'clonepermissionsfrom' => 'moodle/course:manageactivities'
 	),
-	
+
 	'mod/minilesson:itemedit' => array(
 			'riskbitmask' => RISK_XSS,
 			'captype' => 'write',
@@ -114,7 +114,7 @@ $capabilities = array(
 			),
 			'clonepermissionsfrom' => 'moodle/course:manageactivities'
 	),
-	
+
 	'mod/minilesson:itemview' => array(
 			'riskbitmask' => RISK_XSS,
 			'captype' => 'write',
@@ -169,6 +169,17 @@ $capabilities = array(
             'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
+    'mod/minilesson:canuseaigen' => array(
+            'riskbitmask' => RISK_SPAM | RISK_XSS,
+            'captype' => 'write',
+            'contextlevel' => CONTEXT_MODULE,
+            'archetypes' => array(
+                    'editingteacher' => CAP_ALLOW,
+                    'manager' => CAP_ALLOW,
+            ),
+            'clonepermissionsfrom' => 'moodle/course:manageactivities'
+    ),
+
     'mod/minilesson:export' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -180,6 +191,16 @@ $capabilities = array(
     ),
 
     'mod/minilesson:push' => [
+        'riskbitmask' => RISK_XSS,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+        'clonepermissionsfrom' => 'moodle/course:manageactivities'
+    ],
+
+    'mod/minilesson:managetemplate' => [
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,

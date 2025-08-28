@@ -21,7 +21,7 @@ class speakinggapfillform extends baseform {
             get_string('readsentences', constants::M_COMPONENT),
             get_string('readsentences_desc', constants::M_COMPONENT), [], [0, 1]);
 
-        $this->add_voiceselect(constants::POLLYVOICE, get_string('choosevoice', constants::M_COMPONENT),
+        $this->add_ttsaudioselect(constants::POLLYVOICE, get_string('choosevoice', constants::M_COMPONENT),
         constants::READSENTENCE, 0);
 
         $nossml = true;
@@ -29,7 +29,9 @@ class speakinggapfillform extends baseform {
         constants::READSENTENCE, 0, $nossml);
 
         $this->add_static_text('instructions', '', get_string('gapfillitemsdesc', constants::M_COMPONENT));
-        $this->add_textarearesponse(1, get_string('sentenceprompts', constants::M_COMPONENT), true);
+        $this->add_sentenceprompt(1,get_string('sentenceprompts',constants::M_COMPONENT),true);
+        $this->add_sentenceimage(1, null, false);
+        $this->add_sentenceaudio(1, null, false);
         $this->add_timelimit(constants::TIMELIMIT, get_string(constants::TIMELIMIT, constants::M_COMPONENT));
         $this->add_allowretry(constants::GAPFILLALLOWRETRY, get_string('allowretry_desc', constants::M_COMPONENT));
         $this->add_hidestartpage(constants::GAPFILLHIDESTARTPAGE, get_string('hidestartpage_desc', constants::M_COMPONENT));

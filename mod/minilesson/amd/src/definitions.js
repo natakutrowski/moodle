@@ -76,9 +76,13 @@ This file contains class and ID definitions.
         qtype_freespeaking: 'freespeaking',
         qtype_freewriting: 'freewriting',
         qtype_passagereading: 'passagereading',
-        qtype_buttonquiz: 'buttonquiz',
+        qtype_h5p: 'h5p',
         qtype_conversation: 'conversation',
         qtype_compquiz: 'compquiz',
+        qtype_passagegapfill: 'passagegapfill',
+        qtype_audiochat: 'audiochat',
+        qtype_wordshuffle: 'wordshuffle',
+        qtype_scatter: 'scatter',
 
         //running records features
         maybeselfcorrectedwordclass: 'mod_minilesson_grading_maybeselfcorrectedword',
