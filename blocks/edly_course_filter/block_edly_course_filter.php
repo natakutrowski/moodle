@@ -175,17 +175,48 @@ class block_edly_course_filter extends block_base {
                                     $edlyCourseHandler = new edlyCourseHandler();
                                     $edlyCourse = $edlyCourseHandler->edlyGetCourseDetails($course->id);
 
-                                    // Get Teacher Name
+                                    // // Get Teacher Name
+                                    // $teacher = '';
+                                    // foreach($edlyCourse->teachers as $teacher):
+                                    //     $teacher = $teacher->name;
+                                    // endforeach;
+
+                                    // $edlyCourseDescription = strip_tags($edlyCourseHandler->edlyGetCourseDescription($course->id, 99999999999999));
+                                    // $edlyWords = explode(' ', $edlyCourseDescription);
+                                    // $wordLimit = get_config('theme_edly', 'cdwl') ?: 15;
+                                    // $edlyCourseDescription = implode(' ', array_slice($edlyWords, 0, $wordLimit));
+                                    
+                                    
+                                    // Get Teacher Name (prend le premier si présent).
                                     $teacher = '';
-                                    foreach($edlyCourse->teachers as $teacher):
-                                        $teacher = $teacher->name;
-                                    endforeach;
+                                    if (!empty($edlyCourse->teachers) && is_array($edlyCourse->teachers)) {
+                                        $first = reset($edlyCourse->teachers);
+                                        if (is_object($first) && isset($first->name)) {
+                                            $teacher = (string)$first->name;
+                                        }
+                                    }
 
-                                    $edlyCourseDescription = strip_tags($edlyCourseHandler->edlyGetCourseDescription($course->id, 99999999999999));
-                                    $edlyWords = explode(' ', $edlyCourseDescription);
-                                    $wordLimit = get_config('theme_edly', 'cdwl') ?: 15;
-                                    $edlyCourseDescription = implode(' ', array_slice($edlyWords, 0, $wordLimit));
+                                    // Description (peut être null) -> forcer string avant strip_tags().
+                                    $desc = $edlyCourseHandler->edlyGetCourseDescription($course->id, 99999999999999);
+                                    $desc = (string)($desc ?? '');
+                                    $edlyCourseDescription = strip_tags($desc);
 
+                                    // Limite de mots, avec garde‑fous.
+                                    $wordLimit = (int)get_config('theme_edly', 'cdwl');
+                                    if ($wordLimit <= 0) {
+                                        $wordLimit = 15;
+                                    }
+
+                                    // Découpe proprement (évite explode sur string vide / espaces multiples).
+                                    $edyWords = $edlyCourseDescription === '' ? [] : preg_split('/\s+/', trim($edlyCourseDescription));
+                                    if (!is_array($edyWords)) {
+                                        $edyWords = [];
+                                    }
+
+                                    $edlyCourseDescription = implode(' ', array_slice($edyWords, 0, $wordLimit));
+                                                                    
+                                    
+                                    
                                     $text .= '
                                     <div class="col-xl-4 col-md-6" data-aos="fade-up" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">
                                         <div class="courses-card">

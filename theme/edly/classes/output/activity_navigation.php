@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use renderable;
-use templatable;
-use url_select;
+//use renderable;
+//use templatable;
+//use url_select;
 
 /**
  * The class activity navigation renderable.
@@ -75,7 +75,7 @@ class activity_navigation extends \core_course\output\activity_navigation {
 
         // Render the activity list dropdown menu if available.
         if (!empty($activitylist)) {
-            $select = new url_select($activitylist, '', ['' => get_string('jumpto')]);
+            $select = new \url_select($activitylist, '', ['' => get_string('jumpto')]);
             $select->set_label(get_string('jumpto'), ['class' => 'sr-only']);
             $select->attributes = ['id' => 'jump-to-activity'];
             $this->activitylist = $select;

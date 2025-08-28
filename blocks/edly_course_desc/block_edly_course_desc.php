@@ -36,7 +36,7 @@ class block_edly_course_desc extends block_base {
 
         $edlyCourseHandler = new edlyCourseHandler();
         $edlyCourse = $edlyCourseHandler->edlyGetCourseDetails($COURSE->id);
-        $edlyCourseDescription = $edlyCourseHandler->edlyGetCourseDescription($COURSE->id, 99999999999999999999999);
+        $edlyCourseDescription = $edlyCourseHandler->edlyGetCourseDescription($COURSE->id, 99999999999999);
 
 
         $edlyCourseShortDescription = strip_tags($edlyCourseHandler->edlyGetCourseDescription($COURSE->id, 99999999999999));
