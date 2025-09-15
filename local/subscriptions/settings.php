@@ -54,7 +54,7 @@ if ($hassiteconfig) {
 
         // Secret key (test/live) — champ masqué.
         $settings->add(new admin_setting_configpasswordunmask(
-            'local_subscriptions/stripe_secret',
+            'local_subscriptions/stripe_secret_key',
             get_string('stripe_secret', 'local_subscriptions'),
             get_string('stripe_secret_desc', 'local_subscriptions'),
             ''
@@ -129,6 +129,12 @@ if ($hassiteconfig) {
             '', PARAM_INT
         ));
 
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/stripe_portal_configuration_id',
+            get_string('stripe_portal_configuration_id', 'local_subscriptions'),
+            get_string('stripe_portal_configuration_id_desc', 'local_subscriptions'),
+            '', PARAM_RAW_TRIMMED
+        ));
 
     }
 

@@ -93,7 +93,9 @@ if ($edit || $add) {
         'id' => $plan->id ?? null,
         'name' => $plan->name ?? '',
         'accessscopeid' => $plan->accessscopeid ?? '',
-        'duration_key' => $plan->duration_key ?? ''
+        'duration_key' => $plan->duration_key ?? '',
+        'highlight_type' => $plan->highlight_type ?? '',
+        'is_recurring' => isset($plan->is_recurring) ? (int)$plan->is_recurring : 0
     ]);
     $mform->display();
     echo html_writer::end_div();

@@ -22,10 +22,7 @@ if ($paymentreq && $paymentreq->status === 'pending') {
     if (!empty($paymentreq->email) || !empty($paymentreq->userid)) {
         mailer::send_abandoned($paymentreq);
     }
-
 }
-
-
 
 echo $OUTPUT->header();
 echo $OUTPUT->notification(get_string('payment_canceled_msg', 'local_subscriptions'), \core\output\notification::NOTIFY_WARNING);

@@ -498,7 +498,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         // Tableau HTML
         $table = new \html_table();
         $table->head = [
-            ' ', get_string('user', 'local_subscriptions'), get_string('plan', 'local_subscriptions'),
+            ' ',' ', get_string('user', 'local_subscriptions'), get_string('plan', 'local_subscriptions'),
             get_string('price', 'local_subscriptions'), get_string('start_date', 'local_subscriptions'),
             get_string('end_date', 'local_subscriptions'), get_string('status', 'local_subscriptions'),
             get_string('creation_date', 'local_subscriptions'),
@@ -511,7 +511,76 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
             $user = $DB->get_record('user', ['id' => $sub->userid], 'id, firstname, lastname, email, firstnamephonetic, lastnamephonetic, middlename, alternatename');
             $username = fullname($user) . " ({$user->email})";
 
+
+            $modalid = 'subModal'.$sub->id;
+
+            // Modal
+            $rows = [
+            ['ID', $sub->id],
+            ['User ID', $sub->userid],
+            ['Plan ID', $sub->planid],
+            ['Provider', s($sub->payment_provider ?? '')],
+            ['Provider subscription', s($sub->provider_subscription_id ?? '')],
+            ['Provider customer', s($sub->provider_customer_id ?? '')],
+            ['Status', s($sub->status)],
+            ['Start', userdate($sub->start_date)],
+            ['End', userdate($sub->end_date)],
+            ['Price paid', format_float((float)($sub->pricepaid ?? 0), 2).' '.strtoupper($sub->currency ?? '')],
+            ['Transaction', s($sub->transactionid ?? '')],
+            ['Last invoice', s($sub->last_invoice_id ?? '')],
+            ['Payment failed', !empty($sub->payment_failed) ? get_string('yes') : get_string('no')],
+            ['Last failed at', !empty($sub->last_payment_failed_at) ? userdate($sub->last_payment_failed_at) : '-'],
+            ['Fail reason', s($sub->last_payment_failed_reason ?? '')],
+            ['Created', userdate($sub->creation_date)],
+            ['Updated', userdate($sub->last_update)],
+            ];
+
+            // Table HTML
+            $tableModal = \html_writer::start_tag('table', ['class'=>'table table-sm mb-0']);
+            foreach ($rows as [$k,$v]) {
+                $tableModal .= '<tr>'
+                    .  '<th class="text-muted" style="width:28%;white-space:nowrap;">'.s($k).'</th>'
+                    .  '<td class="fw-semibold">'.(is_string($v) ? $v : s($v)).'</td>'
+                    .  '</tr>';
+            }
+            $tableModal .= \html_writer::end_tag('table');
+
+            // Modal markup Bootstrap 5
+            echo \html_writer::start_div('modal fade', ['id'=>$modalid, 'tabindex'=>'-1', 'aria-hidden'=>'true']);
+            echo \html_writer::start_div('modal-dialog modal-lg modal-dialog-scrollable');
+                echo \html_writer::start_div('modal-content');
+                echo \html_writer::div(
+                        \html_writer::tag('h5', get_string('subscription_details', 'local_subscriptions').' #'.$sub->id, ['class'=>'modal-title'])
+                    . \html_writer::tag('button','', ['type'=>'button','class'=>'btn-close','data-bs-dismiss'=>'modal','aria-label'=>'Close']),
+                    'modal-header d-flex align-items-center justify-content-between'
+                );
+                echo \html_writer::div($tableModal, 'modal-body bg-light');
+                echo \html_writer::div(
+                        \html_writer::link(
+                            new \moodle_url('/local/subscriptions/portal.php', ['subid'=>$sub->id]),
+                            get_string('manage_payment', 'local_subscriptions'),
+                            ['class'=>'btn btn-outline-primary']
+                        )
+                    . \html_writer::tag('button', 'Close', ['class'=>'btn btn-secondary','data-bs-dismiss'=>'modal']),
+                    'modal-footer'
+                );
+                echo \html_writer::end_div(); // content
+            echo \html_writer::end_div();   // dialog
+            echo \html_writer::end_div();     // modal
+
+
+
+
             $row = [];
+
+
+
+            // Bouton icône qui ouvre la modal
+            $row[] = html_writer::link(
+                '#'.$modalid,
+                $OUTPUT->pix_icon('i/info', get_string('details'), 'moodle'),
+                ['data-bs-toggle' => 'modal', 'class' => 'btn btn-link p-0']
+            );
 
             $row[] = html_writer::empty_tag('input', [
                 'type' => 'checkbox', 'name' => 'selected[]', 'value' => $sub->id,
@@ -527,6 +596,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                     $translation = subscription_manager::get_translated_plan_name($plan->id, current_language());
                     $label = $translation ?: '<i>' . format_string($plan->name) . '</i>';
                     $plans[$plan->id] = $label;
+                    $is_recurring[$plan->id] = $plan->is_recurring;
                 }
 
                 // --- Génère le <select> ---
@@ -536,12 +606,22 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                     $selectoptions[] = '<option value="' . $pid . '"' . $selected . '>' . $label . '</option>';
                 }
 
+                if (!empty($is_recurring[$sub->planid])) {
+                    // petite icône + libellé discret
+                    $icon_recurring = ' ' . \html_writer::span(
+                        $OUTPUT->pix_icon('i/reload', get_string('badge_recurring', 'local_subscriptions'), 'moodle'),
+                        'align-middle text-info'
+                    );
+                } else {
+                    $icon_recurring = '';
+                }
+
                 $row[] = html_writer::div(
                     html_writer::tag('select', implode("\n", $selectoptions), [
                         'name' => "plan[{$sub->id}]",
                         'class' => 'form-select edit-input d-none'
                     ]) .
-                    html_writer::div($this->render_plan_popover($sub->planid, $sub->id), 'edit-display'),
+                    html_writer::div($this->render_plan_popover($sub->planid, $sub->id) . $icon_recurring, 'edit-display'),
                     'plan-cell-wrapper'
                 );
             } else {

@@ -149,3 +149,56 @@ function local_subscriptions_plan_has_price(int $planid): bool {
     global $DB;
     return $DB->record_exists('subscription_plan_price', ['planid' => $planid]);
 }
+
+// --- ADD: normalise une clé de durée en nb de jours (approx pour mois/ans) ---
+function parse_duration_key_days(?string $key): int {
+    $k = trim(mb_strtolower((string)$key));
+    if ($k === '' || $k === 'lifetime' || $k === 'illimite' || $k === 'unlimited') {
+        return PHP_INT_MAX; // passe en fin de liste
+    }
+    if (preg_match('/^(\d+)\s*(day|week|month|year)s?$/', $k, $m)) {
+        $n = (int)$m[1];
+        return match ($m[2]) {
+            'day'   => max(1, $n),
+            'week'  => max(1, 7  * $n),
+            'month' => max(1, 30 * $n),  // approx
+            'year'  => max(1, 365* $n),  // approx
+        };
+    }
+    // anciens formats simples (back-compat)
+    return match ($k) {
+        '1month'  => 30,
+        '3months' => 90,
+        '6months' => 180,
+        '1year'   => 365,
+        '2years'  => 730,
+        '3years'  => 1095,
+        default   => 999999, // inconnu -> bas de liste
+    };
+}
+
+// --- ADD: comparator pour usort (durée, puis récurrent d'abord, puis nom) ---
+function compare_plans_by_duration(object $a, object $b): int {
+    $da = parse_duration_key_days($a->duration_key ?? '');
+    $db = parse_duration_key_days($b->duration_key ?? '');
+    if ($da !== $db) {
+        return $da <=> $db;
+    }
+    $ra = (int)($a->is_recurring ?? 0);
+    $rb = (int)($b->is_recurring ?? 0);
+    if ($ra !== $rb) {
+        return $rb <=> $ra; // récurrents avant non-récurrents
+    }
+    return strcasecmp((string)($a->name ?? ''), (string)($b->name ?? ''));
+}
+
+// --- ADD: utilitaire pratique qui renvoie un nouvel array trié ---
+function sort_plans_by_duration(array $plans, bool $preservekeys=false): array {
+    if ($preservekeys) {
+        uasort($plans, __NAMESPACE__ . '\compare_plans_by_duration');
+        return $plans;
+    }
+    $list = array_values($plans);
+    usort($list, __NAMESPACE__ . '\compare_plans_by_duration');
+    return $list;
+}

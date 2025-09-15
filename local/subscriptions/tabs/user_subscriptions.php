@@ -16,7 +16,7 @@ $renderer = new local_subscriptions_user_subs_renderer($PAGE, $OUTPUT);
 [$updated, $deleted] = handle_post_actions();
 
 // Affichage
-$subscriptions = $DB->get_records('user_subscription', ['status' => 'active'], 'start_date DESC');
+$subscriptions = $DB->get_records('user_subscription', null, 'start_date DESC');
 
 echo $renderer->render_user_subscriptions_page($subscriptions);
 

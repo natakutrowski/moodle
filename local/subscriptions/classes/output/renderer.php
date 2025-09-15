@@ -12,7 +12,11 @@ class renderer extends plugin_renderer_base {
 
         $plans = [];
         $accessscopes = [];
-        $data = ['subscriptions' => []];
+        $data = [
+            'subscriptions' => [],
+            'mysubs_url'    => (new \moodle_url('/user/my_subscriptions.php'))->out(false),
+            'subscribe_url' => (new \moodle_url('/subscribe.php'))->out(false),
+        ];
 
         foreach ($subscriptions as $sub) {
             // Récupération du plan
@@ -89,7 +93,13 @@ class renderer extends plugin_renderer_base {
                 foreach ($plan->courses as $course) {
                     $descid = 'desc-' . $plan->id . '-' . $course->id;
                     $courselist .= \html_writer::start_tag('li', ['class' => 'course-item mb-1']);
-                    $courselist .= \html_writer::tag('a', $course->fullname, [
+                    // Après (évite le doublon):
+                    $label = $course->fullname;
+                    $hasicon = preg_match('/^\x{1F4D8}/u', $label); // 📘 en UTF-8
+                    if (!$hasicon) {
+                        $label = '&#x1F4D8; ' . $label; // entité => pas de mojibake
+                    }
+                    $courselist .= \html_writer::tag('a', $label, [
                         'href' => '#',
                         'class' => 'coursename',
                         'data-toggle' => 'desc-toggle',
@@ -191,6 +201,11 @@ class renderer extends plugin_renderer_base {
                 }
                 $output .= "<select id='currency-selector-{$plan->id}' class='form-select form-select-sm currency-selector mt-2' data-planid='{$plan->id}' style='display:none; max-width: 150px'>{$options}</select>";
             }
+
+            if (!empty($plan->is_recurring)) {
+                $output .= \html_writer::span(get_string('badge_recurring', 'local_subscriptions'), 'badge bg-info ms-2');
+            }
+
             $output .= \html_writer::end_div(); // fin plan-price-block
  
             // Bouton Subscribe

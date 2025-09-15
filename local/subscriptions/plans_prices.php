@@ -54,7 +54,8 @@ if ($mform->is_cancelled()) {
     $record = (object)[
         'planid' => $planid,
         'currency' => strtoupper(trim($data->currency)),
-        'price' => (float)$price
+        'price' => (float)unformat_float($price, true),
+        'stripe_price_id' => trim($data->stripe_price_id ?? '')
     ];
 
     if (!empty($data->id)) {

@@ -461,6 +461,260 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2025082602, 'local', 'subscriptions');
 	}
 
+    if ($oldversion < 2025082800) {
+    	$dbman = $DB->get_manager();
+
+        // A) subscription_plan.is_recurring
+        $table = new xmldb_table('subscription_plan');
+        $field = new xmldb_field('is_recurring', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'is_active');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // B) subscription_plan_price.stripe_price_id
+        $table = new xmldb_table('subscription_plan_price');
+        $field = new xmldb_field('stripe_price_id', XMLDB_TYPE_CHAR, '191', null, null, null, null, 'price'); // ou 'currency'
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // C) subscription_payment_request.last_update
+        $table = new xmldb_table('subscription_payment_request');
+        $field = new xmldb_field('subscription_payment_request', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2025082800, 'local', 'subscriptions');
+    }
+
+
+
+    // … tes upgrades précédents …
+
+    if ($oldversion < 2025082802) {
+    	$dbman = $DB->get_manager();
+        // Ajout des champs de jeton dans subscription_payment_request
+        $table = new xmldb_table('subscription_payment_request');
+
+        $field = new xmldb_field('login_token', XMLDB_TYPE_CHAR, '64', null, null, null, null, 'reminder2_at');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('login_token_expires', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'login_token');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2025082802, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2025082904) {
+    	$dbman = $DB->get_manager();
+        $table = new xmldb_table('subscription_payment_request');
+
+        // operation
+        $field = new xmldb_field('operation', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'login_token_expires');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // reference_subscription_id
+        $field = new xmldb_field('reference_subscription_id', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'operation');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+
+        // index operation
+        $index = new xmldb_index('idx_spr_operation', XMLDB_INDEX_NOTUNIQUE, ['operation']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        // index ref sub id
+        $index = new xmldb_index('idx_spr_refsubid', XMLDB_INDEX_NOTUNIQUE, ['reference_subscription_id']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(true, 2025082904, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2025083000) {
+    	$dbman = $DB->get_manager();
+
+        // C) user_subscription.provider_*
+        $table = new xmldb_table('user_subscription');
+        $field = new xmldb_field('provider_name', XMLDB_TYPE_CHAR, '32', null, null, null, null, 'status');
+        if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+        $field = new xmldb_field('provider_subscription_id', XMLDB_TYPE_CHAR, '191', null, null, null, null, 'provider_name');
+        if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+        $field = new xmldb_field('provider_customer_id', XMLDB_TYPE_CHAR, '191', null, null, null, null, 'provider_subscription_id');
+        if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+        // Index
+        $index = new xmldb_index('idx_us_provider_sub', XMLDB_INDEX_NOTUNIQUE, ['provider_subscription_id']);
+        if (!$dbman->index_exists($table, $index)) { $dbman->add_index($table, $index); }
+
+        upgrade_plugin_savepoint(true, 2025083000, 'local', 'subscriptions');
+    }
+
+
+	if ($oldversion < 2025083005) {
+    	$dbman = $DB->get_manager();
+		$table = new xmldb_table('user_subscription');
+		$field = new xmldb_field('provider_name');
+
+		// 1) Migration (si les deux colonnes coexistent)
+		if ($DB->get_manager()->field_exists($table, $field)) {
+			// Copie provider_name -> payment_provider lorsqu'il est vide
+			// NB: moodle DML n'a pas de "update ... where ... is null" en batch simple pour concat,
+			// on passe par une requête SQL directe.
+			$sql = "UPDATE {user_subscription}
+					SET payment_provider = provider_name
+					WHERE (payment_provider IS NULL OR payment_provider = '')
+					AND provider_name IS NOT NULL";
+			$DB->execute($sql);
+		}
+
+		// 2) Suppression de la colonne
+		if ($DB->get_manager()->field_exists($table, $field)) {
+			$DB->get_manager()->drop_field($table, $field);
+		}
+
+		upgrade_plugin_savepoint(true, 2025083005, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2025083009) {
+    	$dbman = $DB->get_manager();
+		$table = new xmldb_table('subscription_plan_price');
+
+		// 1) Changer la précision à 10,2
+		$field = new xmldb_field('price', XMLDB_TYPE_NUMBER, '10, 2', null, XMLDB_NOTNULL, null, '0.00', 'currency');
+		if ($dbman->field_exists($table, $field)) {
+			$dbman->change_field_precision($table, $field);
+			$dbman->change_field_default($table, $field);
+		}
+
+		upgrade_plugin_savepoint(true, 2025083009, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2025083012) {
+    	$dbman = $DB->get_manager();
+		$table = new xmldb_table('user_subscription');
+
+		$field = new xmldb_field('last_invoice_id', XMLDB_TYPE_CHAR, '191', null, null, null, null, 'provider_customer_id');
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		$index = new xmldb_index('idx_us_last_invoice', XMLDB_INDEX_NOTUNIQUE, ['last_invoice_id']);
+		if (!$dbman->index_exists($table, $index)) { $dbman->add_index($table, $index); }
+
+		upgrade_plugin_savepoint(true, 2025083012, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2025083015) {
+    	$dbman = $DB->get_manager();
+		$table = new xmldb_table('user_subscription');
+
+		$field = new xmldb_field('payment_failed', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'provider_customer_id');
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		$field = new xmldb_field('last_payment_failed_at', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'payment_failed');
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		$field = new xmldb_field('last_payment_failed_reason', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'last_payment_failed_at');
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		upgrade_plugin_savepoint(true, 2025083015, 'local', 'subscriptions');
+	}
+
+    if ($oldversion < 2025090500) {
+    	$dbman = $DB->get_manager();
+        // Étendre la longueur du champ operation à 64.
+        $table = new xmldb_table('subscription_payment_request');
+
+        // Index NON unique sur la colonne 'operation'.
+        $index = new xmldb_index('operation', XMLDB_INDEX_NOTUNIQUE, ['operation']);
+
+		$DB->execute("UPDATE {subscription_payment_request} SET operation = 'manual' WHERE operation IS NULL OR operation = ''");
+
+        // 1) Drop l'index pour lever la dépendance.
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+
+        $field = new xmldb_field('operation', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+
+        // change_field_precision = change la LENGTH d'un champ CHAR/VARCHAR.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_precision($table, $field);
+            $dbman->change_field_default($table, $field);
+			$dbman->change_field_notnull($table, $field); 
+        }
+
+        // 3) Recréer l'index.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Sauvegarde du point d'arrêt.
+        upgrade_plugin_savepoint(true, 2025090500, 'local', 'subscriptions');
+    }
+
+	if ($oldversion < 2025090600) {
+    	$dbman = $DB->get_manager();
+		$table = new xmldb_table('subscription_reminder_log');
+		if (!$dbman->table_exists($table)) {
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('subscriptionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('remind_key', XMLDB_TYPE_CHAR, '8', null, XMLDB_NOTNULL);
+			$table->add_field('sent_at', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+			$table->add_key('uniq_sub_key', XMLDB_KEY_UNIQUE, ['subscriptionid','remind_key']);
+
+			$dbman->create_table($table);
+		}
+		upgrade_plugin_savepoint(true, 2025090600, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2025091300) {
+    	$dbman = $DB->get_manager();
+		$table = new xmldb_table('subscription_event');
+
+		if (!$dbman->table_exists($table)) {
+			// Champs
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('subscriptionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('eventtype', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+			$table->add_field('provider_event_id', XMLDB_TYPE_CHAR, '64', null, null, null);
+			$table->add_field('occurred_at', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('payload_json', XMLDB_TYPE_TEXT, 'big', null, null, null);
+
+			// Keys
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+			// Create table
+			$dbman->create_table($table);
+
+			// Indexes (après création)
+			$index = new xmldb_index('subscriptionid_idx', XMLDB_INDEX_NOTUNIQUE, ['subscriptionid']);
+			$dbman->add_index($table, $index);
+
+			$index = new xmldb_index('eventtype_idx', XMLDB_INDEX_NOTUNIQUE, ['eventtype']);
+			$dbman->add_index($table, $index);
+
+			$index = new xmldb_index('provider_event_id_idx', XMLDB_INDEX_NOTUNIQUE, ['provider_event_id']);
+			$dbman->add_index($table, $index);
+		}
+
+		upgrade_plugin_savepoint(true, 2025091300, 'local', 'subscriptions');
+	}
 
     return true;
 }

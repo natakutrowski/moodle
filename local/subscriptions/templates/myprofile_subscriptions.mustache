@@ -1,24 +1,16 @@
+{{! Affichage des souscriptions ACTIVES uniquement (filtrées côté renderer) }}
+
 {{#subscriptions}}
   <div class="subscription-card border-start border-4 py-3 px-3 rounded shadow-sm {{statusclass}} bg-light mb-3">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h5 class="mb-0 text-dark">
         <i class="fa-solid fa-graduation-cap me-2"></i>
         {{planname}}
-        {{#expired}}
-          <span class="text-muted small">({{#str}}expired, local_subscriptions{{/str}})</span>
-        {{/expired}}
       </h5>
-      {{#expired}}
-        <span class="badge bg-danger text-white px-3 py-1">
-          {{#str}}expired, local_subscriptions{{/str}}
-        </span>
-      {{/expired}}
 
-      {{^expired}}
-        <span class="badge bg-success text-white px-3 py-1">
-          {{#str}}active, local_subscriptions{{/str}}
-        </span>
-      {{/expired}}
+      <span class="badge bg-success text-white px-3 py-1">
+        {{#str}}active, local_subscriptions{{/str}}
+      </span>
     </div>
 
     <ul class="list-unstyled ms-1 mb-0">
@@ -35,15 +27,14 @@
         <strong>{{#str}}courselist, local_subscriptions{{/str}}:</strong>
         {{#coursenames.0}}
           <i class="fa-solid fa-circle-info text-muted ms-2"
-            tabindex="0"
-            data-bs-toggle="popover"
-            data-bs-trigger="focus"
-            data-bs-placement="top"
-            data-bs-html="true"
-            data-bs-title="{{#str}}coursesincluded, local_subscriptions{{/str}}"
-            data-bs-content="{{{popovercontent}}}"
-            style="cursor: pointer;"></i>
-
+             tabindex="0"
+             data-bs-toggle="popover"
+             data-bs-trigger="focus"
+             data-bs-placement="top"
+             data-bs-html="true"
+             data-bs-title="{{#str}}coursesincluded, local_subscriptions{{/str}}"
+             data-bs-content="{{{popovercontent}}}"
+             style="cursor: pointer;"></i>
         {{/coursenames.0}}
       </li>
       <li class="mb-1">
@@ -51,6 +42,26 @@
         <strong>{{#str}}pricepaid, local_subscriptions{{/str}}:</strong> {{pricepaid}} {{currency}}
       </li>
     </ul>
-
   </div>
 {{/subscriptions}}
+
+{{^subscriptions}}
+  <div class="alert alert-info d-flex align-items-center justify-content-between" role="alert">
+    <div>
+      <i class="fa-regular fa-face-smile me-2"></i>
+      {{#str}}mysubs_empty, local_subscriptions{{/str}}
+    </div>
+    <div class="ms-3">
+      <a class="btn btn-primary btn-sm" href="{{subscribe_url}}">
+        {{#str}}subscribe_now, local_subscriptions{{/str}}
+      </a>
+    </div>
+  </div>
+{{/subscriptions}}
+
+
+<div class="mt-3">
+  <a class="btn btn-outline-primary btn-sm" href="{{mysubs_url}}">
+    {{#str}}view_my_subscriptions, local_subscriptions{{/str}}
+  </a>
+</div>

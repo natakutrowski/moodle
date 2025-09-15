@@ -39,6 +39,11 @@ class plan_price_form extends moodleform {
         $mform->addRule('price', null, 'required');
         $mform->addRule('price', get_string('err_numeric', 'form'), 'numeric');
 
+        $mform->addElement('text', 'stripe_price_id', get_string('stripe_price_id', 'local_subscriptions'));
+        $mform->setType('stripe_price_id', PARAM_RAW_TRIMMED);
+        $mform->addHelpButton('stripe_price_id', 'stripe_price_id', 'local_subscriptions');
+
+
         $this->add_action_buttons(true, get_string('saveprice', 'local_subscriptions'));
     }
 

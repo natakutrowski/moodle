@@ -38,6 +38,12 @@ class plan_form extends moodleform {
         $mform->setType('duration_key', PARAM_TEXT);
         $mform->addRule('duration_key', null, 'required');
 
+        $mform->addElement('select', 'is_recurring', get_string('is_recurring', 'local_subscriptions'),
+            [0 => get_string('no'), 1 => get_string('yes')]);
+        $mform->setType('is_recurring', PARAM_INT);
+        $mform->setDefault('is_recurring', 0);
+        $mform->addHelpButton('is_recurring', 'is_recurring', 'local_subscriptions');
+
         // == Mise en avant (highlight_type) ==
         $options = [
             ''         => get_string('highlight_none', 'local_subscriptions'),
@@ -49,6 +55,7 @@ class plan_form extends moodleform {
             $options
         );
         $mform->setType('highlight_type', PARAM_ALPHA);
+        $mform->setDefault('highlight_type', ''); // par défaut rien
         $mform->addHelpButton('highlight_type', 'plan_highlight', 'local_subscriptions'); // si tu ajoutes un help string
 
         $this->add_action_buttons(true, get_string('saveplan', 'local_subscriptions'));

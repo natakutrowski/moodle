@@ -78,13 +78,13 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
     $renderer = $PAGE->get_renderer('local_subscriptions');
 
     // Charge les abonnements
-    $subscriptions = get_user_subscriptions($user->id);
+    $subscriptions = get_user_active_subscriptions($user->id);
 
     $content = $renderer->render_user_subscriptions_block($subscriptions);
 
-    if (empty($subscriptions)) {
-        $content = get_string('no_subscriptions_found', 'local_subscriptions');
-    }
+    // if (empty($subscriptions)) {
+    //     $content = get_string('no_subscriptions_found', 'local_subscriptions');
+    // }
 
     $category = new category(
         'local_subscriptions', 

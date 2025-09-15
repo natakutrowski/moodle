@@ -60,79 +60,81 @@ class subscription_manager {
 
 
     public static function enrol_user_to_courses(int $userid, int $planid, int $startdate, int $enddate): void {
-        global $DB;
+		global $DB;
 
-        // Récupère le scope (doit contenir course_ids "1,2,3").
-        $scope = self::get_access_scope_from_planid($planid);
-        if (!$scope || empty($scope->course_ids)) {
-            return;
-        }
+		// 1) Récupérer le scope -> course_ids "1,2,3"
+		$scope = self::get_access_scope_from_planid($planid);
+		if (!$scope || empty($scope->course_ids)) {
+			return;
+		}
 
-        // Rôle "student" (fallback 5).
-        $roleid = 5;
-        if ($role = $DB->get_record('role', ['shortname' => 'student'], 'id', IGNORE_MISSING)) {
-            $roleid = (int)$role->id;
-        }
+		// 2) Rôle "student" (fallback 5)
+		$roleid = 5;
+		if ($role = $DB->get_record('role', ['shortname' => 'student'], 'id', IGNORE_MISSING)) {
+			$roleid = (int)$role->id;
+		}
 
-        // Si date > 2100 -> inscription illimitée (timeend = 0).
-        if ($enddate > strtotime('2100-01-01')) {
-            $enddate = 0;
-        }
+		// 3) enddate illimitée si > 2100-01-01
+		if ($enddate > strtotime('2100-01-01')) {
+			$enddate = 0;
+		}
 
-        $courseids = array_map('intval', explode(',', (string)$scope->course_ids));
-        if (empty($courseids)) {
-            return;
-        }
+		// 4) Parser course_ids (tolère virgule/point-virgule/espaces)
+		$courseids = preg_split('/[,\;\s]+/', (string)$scope->course_ids, -1, PREG_SPLIT_NO_EMPTY);
+		$courseids = array_values(array_unique(array_map('intval', $courseids)));
+		if (empty($courseids)) {
+			return;
+		}
 
-        $manual = enrol_get_plugin('manual');
-        if (!$manual) {
-            // Pas d’inscription manuelle disponible sur la plateforme.
-            return;
-        }
+		// 5) Plugin manual
+		$manual = enrol_get_plugin('manual');
+		if (!$manual) {
+			return; // pas d’inscription manuelle disponible
+		}
 
-        foreach ($courseids as $courseid) {
-            if ($courseid <= 0) { continue; }
+		foreach ($courseids as $courseid) {
+			if ($courseid <= 0) { continue; }
 
-            // Idempotence : ne rien faire si déjà inscrit.
-            $context = \context_course::instance($courseid, IGNORE_MISSING);
-            if ($context && is_enrolled($context, $userid)) {
-                continue;
-            }
+			// 6) Trouver (ou créer) une instance 'manual' activée sur ce cours
+			$instances = enrol_get_instances($courseid, /* enabled only */ true);
+			$instance  = null;
+			foreach ($instances as $inst) {
+				if ($inst->enrol === 'manual') { $instance = $inst; break; }
+			}
+			if (!$instance) {
+				// Créer une instance manual activée
+				$course = $DB->get_record('course', ['id' => $courseid], '*', IGNORE_MISSING);
+				if (!$course) { continue; }
+				$instanceid = $manual->add_instance($course, ['status' => ENROL_INSTANCE_ENABLED]);
+				if (!$instanceid) { continue; }
+				$instance = $DB->get_record('enrol', ['id' => $instanceid], '*', IGNORE_MISSING);
+				if (!$instance) { continue; }
+			}
 
-            // Trouver une instance 'manual' activée sur ce cours.
-            $instances = enrol_get_instances($courseid, /*enabled only*/ true);
-            $instance  = null;
-            foreach ($instances as $inst) {
-                if ($inst->enrol === 'manual') {
-                    $instance = $inst;
-                    break;
-                }
-            }
+			// 7) Idempotence CORRECTE :
+			//    - si déjà une ligne user_enrolments -> UPDATE (status + dates)
+			//    - sinon -> ENROL (création)
+			try {
+				$ue = $DB->get_record('user_enrolments', [
+					'enrolid' => $instance->id,
+					'userid'  => $userid
+				], '*', IGNORE_MISSING);
 
-            // Si aucune instance manual activée -> la créer proprement.
-            if (!$instance) {
-                // add_instance attend un record de cours complet.
-                $course = $DB->get_record('course', ['id' => $courseid], '*', IGNORE_MISSING);
-                if (!$course) { continue; }
+				if ($ue) {
+					// Mettre à jour (même si déjà actif) pour pousser les nouvelles dates
+					// update_user_enrol($instance, $userid, $status=null|0|1, $timestart=null, $timeend=null)
+					$manual->update_user_enrol($instance, $userid, ENROL_USER_ACTIVE, (int)$startdate, (int)$enddate);
+				} else {
+					// Inscription initiale
+					$manual->enrol_user($instance, $userid, $roleid, (int)$startdate, (int)$enddate, ENROL_USER_ACTIVE);
+				}
+			} catch (\Throwable $e) {
+				// error_log('[subs][enrol] course '.$courseid.' user '.$userid.' : '.$e->getMessage());
+				continue;
+			}
+		}
+	}
 
-                // Crée une instance manual activée.
-                $instanceid = $manual->add_instance($course, ['status' => ENROL_INSTANCE_ENABLED]);
-                if (!$instanceid) { continue; }
-
-                $instance = $DB->get_record('enrol', ['id' => $instanceid], '*', IGNORE_MISSING);
-                if (!$instance) { continue; }
-            }
-
-            // Inscrire l’utilisateur.
-            try {
-                $manual->enrol_user($instance, $userid, $roleid, $startdate, $enddate, ENROL_USER_ACTIVE);
-            } catch (\Throwable $e) {
-                // Optionnel : log discret si besoin
-                // error_log('[subs][enrol] fail course '.$courseid.' user '.$userid.' : '.$e->getMessage());
-                continue;
-            }
-        }
-    }
 	
 	public static function create_or_extend_subscription(
 		int $userid,

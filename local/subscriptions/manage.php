@@ -112,6 +112,7 @@ elseif ($currenttab === 'plans') {
         $rec->highlight_type = in_array($data->highlight_type ?? '', ['popular','premium'], true) ? $data->highlight_type : null;
         $rec->last_update    = time();
         $rec->is_active      = 0;
+        $rec->is_recurring   = (int)$data->is_recurring;
 
         if ($rec->id) {
             $DB->update_record('subscription_plan', $rec);

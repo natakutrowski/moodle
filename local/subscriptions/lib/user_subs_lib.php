@@ -136,7 +136,7 @@ function handle_post_actions(): array {
     return [$updated, $deleted];
 }
 
-function get_user_subscriptions(int $userid): array {
+function get_user_active_subscriptions(int $userid): array {
     global $DB;
 
     $sql = "
@@ -157,7 +157,7 @@ function get_user_subscriptions(int $userid): array {
             sp.accessscopeid
         FROM {user_subscription} us
         JOIN {subscription_plan} sp ON sp.id = us.planid
-        WHERE us.userid = :userid
+        WHERE us.userid = :userid AND us.status = 'active'
         ORDER BY us.start_date DESC
     ";
 

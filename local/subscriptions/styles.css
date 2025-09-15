@@ -379,7 +379,6 @@ tr.plan-inactive {
 }
 
 .courselist li {
-  list-style-type: "📘 ";
   margin-bottom: 0.3rem;
   color: #2e2350;
 }

@@ -195,6 +195,9 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
             } else {                
                 $namecell = "-<br><small><i>(" . $p->name . ")</i></small>";
             }
+            if (!empty($p->is_recurring)) {
+                $namecell .= ' ' . \html_writer::span(get_string('badge_recurring', 'local_subscriptions'), 'badge bg-info ms-2');
+            }
 
             // 🔆 Highlight select (None / Popular / Premium)
             $hlvalue = $p->highlight_type ?? '';
@@ -293,7 +296,7 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
      * Affiche le tableau des prix pour un plan.
      */
     public static function render_prices_table(array $prices): string {
-        global $OUTPUT;
+        global $OUTPUT, $DB;
 
         if (empty($prices)) {
             return $OUTPUT->notification(get_string('noprices', 'local_subscriptions'), 'info');
@@ -341,10 +344,21 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
 
             $currency = $currencyicon . ' ' . $price->currency;
 
+            $plan = $DB->get_record('subscription_plan', ['id' => $price->planid], 'id,is_recurring', MUST_EXIST);
+
+            $pricecontent = format_float($price->price, 2) . ($symbol ? " $symbol" : " ".$price->currency);
+
+            if (!empty($plan->is_recurring) && !empty($price->stripe_price_id)) {
+                // Ajoute l’ID Stripe en petit à droite du prix
+                $pricecontent .= \html_writer::span(
+                    ' (Stripe: ' . s($price->stripe_price_id).')',
+                    'text-muted small ms-2'
+                );
+            }
 
             $rows[] = html_writer::tag('tr',
                 html_writer::tag('td', strtoupper($currency)) .
-                html_writer::tag('td', format_float($price->price, 2) . ($symbol ? " $symbol" : " ".$price->currency)) .
+                html_writer::tag('td', $pricecontent) .
                 html_writer::tag('td', $actions_container)
             );
         }
