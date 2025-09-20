@@ -103,7 +103,7 @@ foreach ($subs as $sub) {
 
         if ($sub->status === 'active') {
             // PROLONGER (start = end_date existante)
-            $extendurl = new moodle_url('/local/subscriptions/stripe/create_session.php', [
+            $extendurl = new moodle_url('/local/subscriptions/checkout.php', [
                 'planid'           => $sub->planid,
                 'currency'         => $cur,
                 'operation'        => 'queue_future',

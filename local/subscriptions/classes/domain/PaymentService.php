@@ -125,6 +125,7 @@ class PaymentService {
             // start/end: pour un plan récurrent, end = +1 cycle (duration_key du plan)
 
             $subid = $DB->insert_record('user_subscription', $sub);
+            $sub->id = $subid;
 
             // 7) Enrol dans les cours du plan
             require_once($GLOBALS['CFG']->dirroot . '/local/subscriptions/classes/subscription_manager.php');
@@ -170,63 +171,113 @@ class PaymentService {
         if ($operation === '') { $operation = 'purchase_new'; }
 
         // Si queue_future, vérifie bien que ref_subid appartient à l’utilisateur et au même plan
+        // if ($operation === 'queue_future' && $refsubid) {
+        //     $ref = $DB->get_record('user_subscription', ['id'=>$refsubid, 'userid'=>$user->id], '*', IGNORE_MISSING);
+        //     if (!$ref || (int)$ref->planid !== (int)$plan->id) {
+        //         // refuse silencieusement ou bascule en purchase_new
+        //         $operation = 'purchase_new';
+        //         $refsubid  = 0;
+        //     }
+        // }
+
+        // Si queue_future et ref_subid fourni, vérifier simplement qu'il appartient à l'utilisateur.
+        // On ancre de toute façon AU NIVEAU DU SCOPE (pas « même plan »).
         if ($operation === 'queue_future' && $refsubid) {
             $ref = $DB->get_record('user_subscription', ['id'=>$refsubid, 'userid'=>$user->id], '*', IGNORE_MISSING);
-            if (!$ref || (int)$ref->planid !== (int)$plan->id) {
-                // refuse silencieusement ou bascule en purchase_new
-                $operation = 'purchase_new';
-                $refsubid  = 0;
+            if (!$ref) {
+                $refsubid = 0; // on continuera avec l’ancre scope
             }
         }
+
+        $isupgrade = false;
+        $sub = null; // la sub créée dans le case (pour les emails/receipt)
+
 
         switch ($operation) {
 
             case 'queue_future': {
-                // 1) Base de référence = fin de la souscription passée en ref_subid
-                $anchorEnd = time(); // fallback
-                if ($refsubid) {
-                    $ref = $DB->get_record('user_subscription', ['id'=>$refsubid, 'userid'=>$user->id], '*', IGNORE_MISSING);
-                    if ($ref && (int)$ref->planid === (int)$plan->id) {
-                        $anchorEnd = max($anchorEnd, (int)$ref->end_date);
-                    }
+                // // 1) Base de référence = fin de la souscription passée en ref_subid
+                // $anchorEnd = time(); // fallback
+                // if ($refsubid) {
+                //     $ref = $DB->get_record('user_subscription', ['id'=>$refsubid, 'userid'=>$user->id], '*', IGNORE_MISSING);
+                //     if ($ref && (int)$ref->planid === (int)$plan->id) {
+                //         $anchorEnd = max($anchorEnd, (int)$ref->end_date);
+                //     }
+                // }
+
+                // // 2) Cherche la dernière prolongation déjà enchaînée pour CE user/plan
+                // //    On prend la date de fin maximum des souscriptions "queued" du même plan
+                // //    (et, par sécurité, de l'active si son end est > now).
+                // $maxend = $DB->get_field_sql("
+                //     SELECT MAX(end_date)
+                //     FROM {user_subscription}
+                //     WHERE userid = :u
+                //     AND planid = :p
+                //     AND status IN ('queued', 'active')
+                // ", ['u'=>$user->id, 'p'=>$plan->id]);
+
+                // if (!empty($maxend)) {
+                //     $anchorEnd = max($anchorEnd, (int)$maxend);
+                // }
+
+                // 1) Base de référence : scope du plan cible
+                $targetscopeid = (int)$DB->get_field('subscription_plan', 'accessscopeid', ['id' => $plan->id], MUST_EXIST);
+
+                // 2) ANCRE = MAX(end_date) de toute la chaîne (active + queued) du MÊME SCOPE
+                $anchorEnd = (int)time(); // fallback
+                $maxendByScope = $DB->get_field_sql("
+                    SELECT MAX(s.end_date)
+                    FROM {user_subscription} s
+                    JOIN {subscription_plan} p ON p.id = s.planid
+                    WHERE s.userid = :u
+                    AND p.accessscopeid = :scope
+                    AND s.status IN ('active','queued')
+                ", ['u'=>$user->id, 'scope'=>$targetscopeid]);
+
+                if (!empty($maxendByScope)) {
+                    $anchorEnd = max($anchorEnd, (int)$maxendByScope);
                 }
 
-                // 2) Cherche la dernière prolongation déjà enchaînée pour CE user/plan
-                //    On prend la date de fin maximum des souscriptions "queued" du même plan
-                //    (et, par sécurité, de l'active si son end est > now).
-                $maxend = $DB->get_field_sql("
-                    SELECT MAX(end_date)
-                    FROM {user_subscription}
-                    WHERE userid = :u
-                    AND planid = :p
-                    AND status IN ('queued', 'active')
-                ", ['u'=>$user->id, 'p'=>$plan->id]);
-
-                if (!empty($maxend)) {
-                    $anchorEnd = max($anchorEnd, (int)$maxend);
-                }
-
-                // 3) Le nouveau START est le lendemain (ou la seconde suivante) de l'anchor
-                //    et ne doit jamais être dans le passé.
+                // 3) Démarrage = seconde suivante après l’ancre (et jamais dans le passé)
                 $start = max($anchorEnd + 1, time());
-                // 4) END = START + durée du plan
+                // 4) Fin = START + durée du plan
                 $end   = $add($start, $plan->duration_key);
 
-                // 5) Idempotence "chaînage" : si on a déjà créé une queued pour CE start, on sort
+                // 5) Idempotence “chaînage”
                 $existsQueued = $DB->record_exists('user_subscription', [
                     'userid'     => $user->id,
                     'planid'     => $plan->id,
                     'start_date' => $start,
                     'status'     => 'queued',
                 ]);
+                if ($existsQueued) { $transaction->allow_commit(); return; }
 
-                error_log('[subs][svc][checkout_completed] existsQueued='.(string)$existsQueued.', start='.(string)$start.', end='.(string)$end);
-
-
-
-                if ($existsQueued) { $transaction->allow_commit(); return; }    
+                // 6) Créer la brique (évidemment queued si start > now)
                 $sub = $create_and_link($user->id, $plan->id, $start, $end, ($start > time() ? 'queued' : 'active'));
                 break;
+
+
+                // // 3) Le nouveau START est le lendemain (ou la seconde suivante) de l'anchor
+                // //    et ne doit jamais être dans le passé.
+                // $start = max($anchorEnd + 1, time());
+                // // 4) END = START + durée du plan
+                // $end   = $add($start, $plan->duration_key);
+
+                // // 5) Idempotence "chaînage" : si on a déjà créé une queued pour CE start, on sort
+                // $existsQueued = $DB->record_exists('user_subscription', [
+                //     'userid'     => $user->id,
+                //     'planid'     => $plan->id,
+                //     'start_date' => $start,
+                //     'status'     => 'queued',
+                // ]);
+
+                // error_log('[subs][svc][checkout_completed] existsQueued='.(string)$existsQueued.', start='.(string)$start.', end='.(string)$end);
+
+
+
+                // if ($existsQueued) { $transaction->allow_commit(); return; }    
+                // $sub = $create_and_link($user->id, $plan->id, $start, $end, ($start > time() ? 'queued' : 'active'));
+                // break;
             }
 
             case 'upgrade_prorata': {
@@ -246,69 +297,173 @@ class PaymentService {
                 break;
             }
 
+            // case 'upgrade_now_replace_chain': {
+            //     // 0) Scope du plan cible
+            //     $scopeid = (int)$DB->get_field('subscription_plan', 'accessscopeid', ['id' => $plan->id], MUST_EXIST);
+
+            //     // 1) Retrouver l'ancienne ACTIVE par SCOPE (pas par plan)
+            //     $old = $DB->get_record_sql(
+            //         "SELECT s.*
+            //         FROM {user_subscription} s
+            //         JOIN {subscription_plan} p ON p.id = s.planid
+            //         WHERE s.userid = :u
+            //             AND p.accessscopeid = :scope
+            //             AND s.status = 'active'
+            //     ORDER BY s.start_date DESC
+            //         LIMIT 1",
+            //         ['u' => $user->id, 'scope' => $scopeid],
+            //         IGNORE_MISSING
+            //     );
+
+            //     // Base de rétrodatation = début de l'ancienne active, sinon fallback now
+            //     $baseStart = $old ? (int)$old->start_date : time();
+
+            //     // 2) Remplacer toutes les queued du SCOPE (file) → status=replaced
+            //     $queued = $DB->get_records_sql(
+            //         "SELECT s.*
+            //         FROM {user_subscription} s
+            //         JOIN {subscription_plan} p ON p.id = s.planid
+            //         WHERE s.userid = :u
+            //             AND p.accessscopeid = :scope
+            //             AND s.status = 'queued'
+            //     ORDER BY s.end_date ASC",
+            //         ['u' => $user->id, 'scope' => $scopeid]
+            //     );
+            //     foreach ($queued as $q) {
+            //         $q->status = 'replaced';
+            //         $q->last_update = time();
+            //         $DB->update_record('user_subscription', $q);
+            //     }
+
+            //     // 3) Mettre l'ancienne ACTIVE en replaced (si trouvée)
+            //     if ($old) {
+            //         $old->end_date   = time();      // stop maintenant
+            //         $old->status     = 'replaced';
+            //         $old->last_update= time();
+            //         $DB->update_record('user_subscription', $old);
+            //     }
+
+            //     // 4) Créer la nouvelle sub 3 ANS rétrodatée au début de l'ancienne
+            //     $start = $baseStart;
+            //     $end   = $add($start, $plan->duration_key); // ex. '3years'
+
+            //     // Idempotence : si une active au même start existe déjà, on sort proprement
+            //     $existsSameStart = $DB->record_exists('user_subscription', [
+            //         'userid'     => $user->id,
+            //         'planid'     => $plan->id,
+            //         'start_date' => $start,
+            //         'status'     => 'active',
+            //     ]);
+            //     if ($existsSameStart) { $transaction->allow_commit(); return; }
+
+            //     // 5) Créer + enrol + lier PR
+            //     $sub = $create_and_link($user->id, $plan->id, $start, $end, 'active');
+
+            //     $transaction->allow_commit();
+            //     break;
+            // }
+
             case 'upgrade_now_replace_chain': {
-                // 0) Scope du plan cible
+                // ---- 0) LIRE LES META DE LA PR (fenêtre & liste) ----
+                $meta  = json_decode($pr->response_json ?? '{}', true) ?: [];
+                $extra = $meta['extra'] ?? $meta; // suivant comment tu as stocké
+                $win   = $extra['upgrade_window'] ?? null; // ['start'=>ts,'end'=>ts]
+                $ids   = $extra['replace_ids']    ?? [];
+
+                // ---- 1) FENÊTRE CIBLE [newstart ; newend) ----
                 $scopeid = (int)$DB->get_field('subscription_plan', 'accessscopeid', ['id' => $plan->id], MUST_EXIST);
 
-                // 1) Retrouver l'ancienne ACTIVE par SCOPE (pas par plan)
-                $old = $DB->get_record_sql(
-                    "SELECT s.*
+                // ancienne ACTIVE (fallback pour newstart si win absent)
+                $old = $DB->get_record_sql("
+                    SELECT s.*
                     FROM {user_subscription} s
                     JOIN {subscription_plan} p ON p.id = s.planid
                     WHERE s.userid = :u
-                        AND p.accessscopeid = :scope
-                        AND s.status = 'active'
+                    AND p.accessscopeid = :scope
+                    AND s.status = 'active'
                 ORDER BY s.start_date DESC
-                    LIMIT 1",
-                    ['u' => $user->id, 'scope' => $scopeid],
-                    IGNORE_MISSING
-                );
+                    LIMIT 1
+                ", ['u' => $user->id, 'scope' => $scopeid], IGNORE_MISSING);
 
-                // Base de rétrodatation = début de l'ancienne active, sinon fallback now
-                $baseStart = $old ? (int)$old->start_date : time();
+                $baseStart = $old ? (int)$old->start_date : (int)time();
 
-                // 2) Remplacer toutes les queued du SCOPE (file) → status=replaced
-                $queued = $DB->get_records_sql(
-                    "SELECT s.*
-                    FROM {user_subscription} s
-                    JOIN {subscription_plan} p ON p.id = s.planid
-                    WHERE s.userid = :u
-                        AND p.accessscopeid = :scope
-                        AND s.status = 'queued'
-                ORDER BY s.end_date ASC",
-                    ['u' => $user->id, 'scope' => $scopeid]
-                );
-                foreach ($queued as $q) {
-                    $q->status = 'replaced';
-                    $q->last_update = time();
-                    $DB->update_record('user_subscription', $q);
-                }
+                $durSec   = \local_subscriptions\domain\SubscriptionAdvisor::duration_to_seconds($plan->duration_key ?? '1year');
+                $newstart = isset($win['start']) ? (int)$win['start'] : $baseStart;
+                $newend   = isset($win['end'])   ? (int)$win['end']   : ($newstart + $durSec);
 
-                // 3) Mettre l'ancienne ACTIVE en replaced (si trouvée)
-                if ($old) {
-                    $old->end_date   = time();      // stop maintenant
-                    $old->status     = 'replaced';
-                    $old->last_update= time();
-                    $DB->update_record('user_subscription', $old);
-                }
-
-                // 4) Créer la nouvelle sub 3 ANS rétrodatée au début de l'ancienne
-                $start = $baseStart;
-                $end   = $add($start, $plan->duration_key); // ex. '3years'
-
-                // Idempotence : si une active au même start existe déjà, on sort proprement
+                // ---- 2) CRÉER LA NOUVELLE SUB (active) RÉTRODATÉE SUR LA FENÊTRE ----
+                // (idempotence si une active existe déjà au même start)
                 $existsSameStart = $DB->record_exists('user_subscription', [
                     'userid'     => $user->id,
                     'planid'     => $plan->id,
-                    'start_date' => $start,
+                    'start_date' => $newstart,
                     'status'     => 'active',
                 ]);
                 if ($existsSameStart) { $transaction->allow_commit(); return; }
 
-                // 5) Créer + enrol + lier PR
-                $sub = $create_and_link($user->id, $plan->id, $start, $end, 'active');
+                // CRÉER la nouvelle sub (active, rétrodatée) via TA FONCTION : pricepaid/currency/lien PR OK !
+                $sub = $create_and_link($user->id, $plan->id, $newstart, $newend, 'active');
 
-                $transaction->allow_commit();
+                // ---- 3) QUELS ÉLÉMENTS REMPLACER ? ----
+
+                // Liste à remplacer (ACTIVE + QUEUED chevauchant la fenêtre) : soit PR -> replace_ids, soit on recalcule
+                $toReplace = [];
+
+                if (!empty($ids)) {
+                    // a) L’Advisor a fourni une liste -> on la charge
+                    $ids = array_filter(array_map('intval', (array)$ids), fn($x) => $x > 0);
+                    if (!empty($ids)) {
+                        list($inSql, $inParams) = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'rid');
+                        $toReplace = $DB->get_records_select('user_subscription', "id $inSql", $inParams);
+                    }
+                }
+
+                if (empty($toReplace)) {
+                    // b) Filet : recalcule sur le MÊME scope
+                    $toReplace = \local_subscriptions\domain\SubscriptionAdvisor::list_scope_overlaps(
+                        (int)$user->id, (int)$scopeid, (int)$newstart, (int)$newend, ['active','queued']
+                    );
+                }
+
+                // >>> NORMALISATION robuste (id obligatoire)
+                $norm = [];
+                foreach ($toReplace as $row) {
+                    if (!is_object($row) || !isset($row->id)) { continue; }
+                    $norm[(int)$row->id] = $row;
+                }
+                $toReplace = $norm;
+
+                // Inclure la vieille ACTIVE si elle manque (ex. 1 mois actif)
+                if ($old && isset($old->id) && !isset($toReplace[(int)$old->id])) {
+                    $toReplace[(int)$old->id] = $old;
+                }
+
+                // Remplacer toute la pile (sauf la sub qu’on vient de créer)
+                foreach ($toReplace as $row) {
+                    if (!isset($row->id)) { continue; }              // <<< évite Undefined property:id
+                    if ((int)$row->id === (int)$sub->id) { continue; }
+                    $row->status      = 'replaced';
+                    $row->last_update = time();
+                    $DB->update_record('user_subscription', $row);
+                }
+
+                // (Ré)inscrire idempotent
+                \local_subscriptions\subscription_manager::enrol_user_to_courses(
+                    (int)$sub->userid, (int)$sub->planid, (int)$sub->start_date, (int)$sub->end_date
+                );
+
+                // Flag pour emails
+                $isupgrade = true;  
+
+                // ---- 6) LOG (facultatif) ----
+                if (method_exists(__CLASS__, 'log_subscription_event')) {
+                    self::log_subscription_event((int)$sub->id, 'upgrade_replace_chain', $pr->id ?? null, [
+                        'window'   => ['start'=>$newstart,'end'=>$newend],
+                        'replaced' => array_map(fn($x)=> (int)$x->id, $toReplace),
+                    ]);
+                }
+
+                //$transaction->allow_commit();
                 break;
             }
 
@@ -342,30 +497,41 @@ class PaymentService {
 
         $transaction->allow_commit();
 
-        // 9) Emails (une seule fois pour l’idempotence)
+        // 9) Emails (idempotent + robustes)
         if (empty($pr->emailsent) && class_exists('\local_subscriptions\mailer')) {
-            $recipient = clone $user; // sécu HTML
-            $recipient->mailformat = 1;
+            try {
+                $recipient = \core_user::get_user($user->id, '*', MUST_EXIST); // user COMPLET
+                $recipient->mailformat = 1;
 
-            // envoi
-            if ($isnew) {
-                \local_subscriptions\mailer::send_welcome($recipient, (string)$tmpPassword, $plan, $pr);
-            } else {
-                \local_subscriptions\mailer::send_subscription_update($recipient, $plan, $pr, $sub);
-            }
+                if (!empty($isupgrade)) {
+                    // Mail dédié à l’upgrade si dispo, sinon update “générique”
+                    if (method_exists('\local_subscriptions\mailer', 'send_upgrade_confirmation')) {
+                        \local_subscriptions\mailer::send_upgrade_confirmation($recipient, $plan, $pr, $sub);
+                    } else {
+                        \local_subscriptions\mailer::send_subscription_update($recipient, $plan, $pr, $sub);
+                    }
+                } else if (!empty($isnew)) {
+                    \local_subscriptions\mailer::send_welcome($recipient, (string)$tmpPassword, $plan, $pr);
+                } else {
+                    \local_subscriptions\mailer::send_subscription_update($recipient, $plan, $pr, $sub);
+                }
 
-            if (!empty($e->provider_subscription_id)) {
-                \local_subscriptions\mailer::send_recurring_started($recipient, $plan, $pr);
-            }
+                if (!empty($e->provider_subscription_id)) {
+                    \local_subscriptions\mailer::send_recurring_started($recipient, $plan, $pr);
+                }
 
-            \local_subscriptions\mailer::send_receipt($recipient, $plan, $pr, $sub);
+                \local_subscriptions\mailer::send_receipt($recipient, $plan, $pr, $sub);
 
-            // marquer envoyé si la colonne existe
-            if (self::db_field_exists('subscription_payment_request', 'emailsent')) {
-                $pr->emailsent = 1;
-                $DB->update_record('subscription_payment_request', $pr);
+                if (self::db_field_exists('subscription_payment_request', 'emailsent')) {
+                    $pr->emailsent = 1;
+                    $DB->update_record('subscription_payment_request', $pr);
+                }
+            } catch (\Throwable $ex) {
+                error_log('[subs][mail] '.$ex->getMessage());
+                // on continue sans casser le flux
             }
         }
+
     }
 
     public static function on_checkout_expired(InternalEvent $e): void {

@@ -473,6 +473,50 @@ class mailer {
         email_to_user($recipient, $support, $title, $text, $html);
     }
 
+    public static function send_upgrade_confirmation(\stdClass $user, \stdClass $plan, \stdClass $pr, \stdClass $sub): void {
+        $user = self::ensure_full_user($user);
+        $title = get_string('upgrade_confirmed_subject', 'local_subscriptions', format_string($plan->name));
+        $period = userdate((int)$sub->start_date).' → '.userdate((int)$sub->end_date);
+
+        // Montant payé : préférer la sub, sinon PR (et ne diviser par 100 que si besoin)
+        $paid = '';
+        $amt  = null;
+        $cur  = null;
+
+        if (!empty($sub->pricepaid)) {
+            $amt = (float)$sub->pricepaid;
+            $cur = $sub->currency ?? ($pr->currency ?? null);
+        } elseif (!empty($pr->price)) {
+            $raw = (float)$pr->price;
+            // Si c'est du minor (cents) on divise, sinon on garde tel quel.
+            $amt = ($raw >= 100) ? round($raw/100, 2) : round($raw, 2);
+            $cur = $pr->currency ?? null;
+        }
+
+        if ($amt !== null && $cur) {
+            $paid = format_float($amt, 2).' '.strtoupper($cur);
+        }
+
+        $body  = \html_writer::tag('p', get_string('subupdate_hello', 'local_subscriptions', fullname($user)));
+        $body .= \html_writer::tag('p', get_string('upgrade_confirmed_body', 'local_subscriptions', format_string($plan->name)));
+        $body .= \html_writer::start_tag('table', ['role'=>'presentation','cellspacing'=>'0','cellpadding'=>'0','border'=>'0','style'=>'margin:12px 0;font-size:14px;']);
+        $body .= '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions').'</td><td style="padding:4px 8px;">'.format_string($plan->name).'</td></tr>';
+        $body .= '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_period','local_subscriptions').'</td><td style="padding:4px 8px;"><code style="background:#f3f4f6;padding:2px 6px;border-radius:6px;">'.$period.'</code></td></tr>';
+        if ($paid !== '') {
+            $body .= '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_total','local_subscriptions').'</td><td style="padding:4px 8px;">'.$paid.'</td></tr>';
+        }
+        $body .= \html_writer::end_tag('table');
+
+        $buttonurl  = (new \moodle_url('/local/subscriptions/profile.php'))->out(false);
+        $buttontext = get_string('view_my_subscriptions', 'local_subscriptions');
+
+        [$html, $text] = self::render_email_layout($title, $body, $buttontext, $buttonurl);
+
+        $recipient = clone $user; $recipient->mailformat = 1;
+        email_to_user($recipient, \core_user::get_support_user(), $title, $text, $html);
+    }
+
+
     public static function send_renewal_ok(
         \stdClass $user,
         \stdClass $plan,

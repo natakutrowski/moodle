@@ -464,3 +464,18 @@ $string['last_payment_failed_reason'] = 'Failure reason';
 $string['mysubs_empty']   = 'No active subscriptions for this user.'; // tu l'as peut-être déjà
 $string['subscribe_now']  = 'Subscribe now';
 $string['view_my_subscriptions'] = 'Your subscriptions'; // déjà présent chez toi
+
+$string['upgrade_details_title'] = 'How is this price calculated?';
+$string['upgrade_window_label']  = 'Calculation window: {$a}';
+$string['upgrade_tariffs']       = 'Reference prices: current = {$a->p1}, target = {$a->p2}';
+$string['upgrade_consumed_since_t0'] = 'Elapsed time since window start: {$a}';
+$string['upgrade_equation_past']  = 'Past part (current rate): {$a->p1} × t/{$a->d1} = {$a->val}';
+$string['upgrade_equation_future']= 'Future part (target rate): {$a->p2} × (D2−t)/{$a->d2} = {$a->val}';
+$string['upgrade_spent_window']   = 'Already paid within this window: {$a}';
+$string['upgrade_base_cap']       = 'Base = {$a->base}; Degressive cap = {$a->cap}';
+$string['upgrade_final_amount']   = 'Proposed amount: <strong>{$a}</strong>';
+$string['upgrade_details_summary'] = 'How is this price calculated?';
+
+$string['upgrade_confirmed_subject'] = 'Votre passage à « {$a} » est confirmé';
+$string['upgrade_confirmed_body']    = 'Bonne nouvelle ! Votre abonnement a été mis à niveau. Voici le récapitulatif :';
+$string['receipt_total']             = 'Montant réglé';

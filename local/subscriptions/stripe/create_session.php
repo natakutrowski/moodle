@@ -65,7 +65,11 @@ if ($userid && (
         if (!empty($opt['key']) && $opt['key'] === $operation) {
             $finalAmount = (float)$opt['amount'];
             if (!$refsubid && !empty($opt['ref_subid'])) { $refsubid = (int)$opt['ref_subid']; }
-            // si l’Advisor fournit extra, on le poussera via extra_json (facultatif)
+
+            // +++ NEW : si l’Advisor fournit "extra", injecte-le dans extra_json (qui sera stocké dans PR.meta)
+            if (empty($extra_json) && !empty($opt['extra']) && is_array($opt['extra'])) {
+                $extra_json = json_encode($opt['extra']);
+            }            
             break;
         }
     }

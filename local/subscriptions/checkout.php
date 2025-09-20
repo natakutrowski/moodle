@@ -16,6 +16,24 @@ global $DB, $USER, $SITE;
 // Récup plan actif.
 $plan = $DB->get_record('subscription_plan', ['id' => $planid, 'is_active' => 1], '*', MUST_EXIST);
 
+// Sub active la plus récente dans le MÊME scope que le plan cible (pour la popover d’upgrade).
+$currsub  = null;
+$currplan = null;
+if (!empty($userid)) {
+    $currsub = $DB->get_record_sql("
+        SELECT s.*
+          FROM {user_subscription} s
+          JOIN {subscription_plan} p ON p.id = s.planid
+         WHERE s.userid = :u AND s.status = 'active' AND p.accessscopeid = :scope
+      ORDER BY s.end_date DESC, s.id DESC
+         LIMIT 1
+    ", ['u' => $userid, 'scope' => (int)$plan->accessscopeid]);
+    if ($currsub) {
+        $currplan = $DB->get_record('subscription_plan', ['id' => $currsub->planid], '*', MUST_EXIST);
+    }
+}
+
+
 // Devise choisie (ou première dispo).
 if ($currency === '') {
     $priceobj = $DB->get_record('subscription_plan_price', ['planid' => $planid], '*', MUST_EXIST);
@@ -238,7 +256,8 @@ foreach ($options as $i => $opt) {
 
 
     // prix dans l’étiquette (barré + vert si upgrade moins cher)
-    $isupgrade = ($opt['key'] === 'upgrade_prorata');
+    $isupgrade = (strpos($opt['key'], 'upgrade_') === 0);
+
     if ($isupgrade && $amt < $base) {
         $pricehtml =
             html_writer::span(format_float($base, 2).' '.strtoupper($opt['currency']), 'text-muted text-decoration-line-through me-2')
@@ -262,12 +281,25 @@ foreach ($options as $i => $opt) {
         'data-base'     => $base,
         'data-extra' => $dataExtra,
     ]);
-    echo html_writer::label(
-        $opt['label'].' — '.$pricehtml,
-        $id,
-        false,
-        ['class'=>'form-check-label d-flex align-items-center gap-2']
-    );
+
+    // Label texte (sans popover à l'intérieur)
+    $labelHtml = $opt['label'] . ' — ' . $pricehtml;
+    echo html_writer::label($labelHtml, $id, false, ['class' => 'form-check-label']);
+
+    $isupgrade = (strpos($opt['key'], 'upgrade_') === 0);
+    if ($isupgrade && $currsub && $currplan) {
+        $body = local_subs_upgrade_calc_body($opt, $currplan, $plan, $currsub, $currency); // HTML BRUT
+
+        echo html_writer::tag(
+            'details',
+            html_writer::tag('summary', get_string('upgrade_details_summary','local_subscriptions'), [
+                'class' => 'small text-muted cursor-pointer'
+            ]) .
+            html_writer::div($body, 'mt-2 p-2 border rounded bg-light small'),
+            ['class' => 'mt-2 upg-details']
+        );
+    }
+
 
     if (!empty($opt['ref_subid'])) {
         echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'ref_subid','value'=>$opt['ref_subid']]);
@@ -310,7 +342,9 @@ echo html_writer::end_div();
 echo html_writer::end_tag('form');
 echo html_writer::end_div(); // .card p-3
 
-$PAGE->requires->js_call_amd('local_subscriptions/guest_email_hint', 'init');
 
+
+
+$PAGE->requires->js_call_amd('local_subscriptions/guest_email_hint', 'init');
 
 echo $OUTPUT->footer();
