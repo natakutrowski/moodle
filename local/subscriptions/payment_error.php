@@ -1,10 +1,12 @@
 <?php
 require_once(__DIR__.'/../../config.php');
 
+use local_subscriptions\url\UrlFactory;
+
 $code = optional_param('code', '', PARAM_ALPHANUMEXT);
 $msg  = optional_param('msg', '', PARAM_RAW_TRIMMED);
 
-$PAGE->set_url(new moodle_url('/local/subscriptions/payment_error.php', ['code'=>$code]));
+$PAGE->set_url(UrlFactory::payment_error(['code'=>$code]));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('payment_error_title', 'local_subscriptions'));
@@ -18,7 +20,7 @@ if ($msg) {
 }
 
 echo html_writer::div(
-    html_writer::link(new moodle_url('/local/subscriptions/subscribe.php'), get_string('back_to_plans', 'local_subscriptions'), ['class'=>'btn btn-secondary']),
+    html_writer::link(UrlFactory::subscribe(), get_string('back_to_plans', 'local_subscriptions'), ['class'=>'btn btn-secondary']),
     'mt-3'
 );
 echo $OUTPUT->footer();

@@ -16,7 +16,7 @@ class toggle_plan extends external_api {
 
     public static function execute_parameters() {
         return new external_function_parameters([
-            'id' => new external_value(PARAM_INT, 'Plan ID')
+            'id' => new external_value(PARAM_INT, get_string('subfield_planid','local_subcriptions'))
         ]);
     }
 
@@ -61,7 +61,7 @@ class toggle_plan extends external_api {
             'success' => new external_value(PARAM_BOOL),
             'is_active' => new external_value(PARAM_BOOL),
             'label' => new external_value(PARAM_TEXT),
-            'message' => new external_value(PARAM_TEXT, 'Optional error message', VALUE_OPTIONAL),
+            'message' => new external_value(PARAM_TEXT, get_string('optional_error_msg','local_subscriptions'), VALUE_OPTIONAL),
         ]);
     }
 }

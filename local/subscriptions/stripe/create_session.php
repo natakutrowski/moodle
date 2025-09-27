@@ -1,17 +1,19 @@
 <?php
-// local/subscriptions/create_session.php
+
 require_once(__DIR__ . '/../../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\domain\SubscriptionAdvisor;
+use local_subscriptions\constants\Operation;
+use local_subscriptions\constants\Status;
+use local_subscriptions\url\UrlFactory;
+use local_subscriptions\payment\Provider;
 
 // Pas d’output, pas de renderer : script d’action pur.
 $PAGE->set_context(\context_system::instance());
-$PAGE->set_url(new \moodle_url('/local/subscriptions/stripe/create_session.php'));
+$PAGE->set_url(new moodle_url('/local/subscriptions/stripe/create_session.php'));
 $PAGE->set_pagelayout('base');
-
-// use local_subscriptions\payment\stripe_helper;
 
 global $DB, $USER;
 
@@ -25,7 +27,7 @@ $email     = optional_param('email', '', PARAM_RAW_TRIMMED);
 $firstname = optional_param('firstname', '', PARAM_NOTAGS);
 $lastname  = optional_param('lastname', '', PARAM_NOTAGS);
 
-$operation = optional_param('operation', 'purchase_new', PARAM_ALPHANUMEXT);
+$operation = optional_param('operation', Operation::PURCHASE_NEW, PARAM_ALPHANUMEXT);
 $refsubid  = optional_param('ref_subid', 0, PARAM_INT);
 
 // Nouveau : montants forcés (pour Renouveler / Prolonger depuis my_subscriptions)
@@ -56,10 +58,7 @@ $price = (float)$DB->get_field('subscription_plan_price',
 $finalAmount = (float)$price;
 
 // Si connecté et operation ≠ purchase_new : recalcul via Advisor (inclure toutes les variantes upgrade_*)
-if ($userid && (
-        in_array($operation, ['queue_future','upgrade_prorata'], true)
-        || strpos($operation, 'upgrade_') === 0  // ← NEW : couvre upgrade_now_replace_chain (et future variantes)
-    )) {
+if ($userid && in_array($operation, [Operation::QUEUE_FUTURE,Operation::UPGRADE_NOW_REPLACE_CHAIN], true)) {
     $advised = SubscriptionAdvisor::advise_options($userid, $planid, $currency);
     foreach ($advised as $opt) {
         if (!empty($opt['key']) && $opt['key'] === $operation) {
@@ -92,7 +91,7 @@ $paymentreq->firstname       = $firstname ?: ($USER->firstname ?? '');
 $paymentreq->lastname        = $lastname ?: ($USER->lastname ?? '');
 $paymentreq->currency        = $currency;
 $paymentreq->price           = (float)$finalAmount; // <= montant final
-$paymentreq->status          = 'pending';
+$paymentreq->status          = Status::PENDING;
 $paymentreq->creation_date   = time();
 $paymentreq->last_update     = time();
 $paymentreq->operation       = $operation;
@@ -134,14 +133,14 @@ $DB->update_record('subscription_payment_request', (object)[
     'response_json' => json_encode($meta, JSON_UNESCAPED_UNICODE),
 ]);
 
-$provider = 'stripe'; // pour l’instant on force Stripe
+$provider = Provider::STRIPE; // pour l’instant on force Stripe
 $gateway  = \local_subscriptions\payment\PaymentGatewayFactory::for($provider);
 
-$success = new \moodle_url('/local/subscriptions/payment_success.php', [
+$success = UrlFactory::payment_success([
     'pid' => $paymentreq->id,
     't'  => $paymentreq->login_token,
 ]);
-$cancel  = new \moodle_url('/local/subscriptions/payment_cancel.php', [
+$cancel  = UrlFactory::payment_cancel([
     'pid' => $paymentreq->id,
 ]);
 
@@ -169,9 +168,12 @@ if ($recurrent) {
         debugging('[subs][create_session][error] Missing stripe_price_id for plan '.$planid.' currency '.$currency, DEBUG_DEVELOPER);
 
         // Redirige sur une page d’erreur utilisateur
-        $err = new \moodle_url('/local/subscriptions/payment_error.php', [
+        $msg = get_string('recurplan_currency_not_configured', 'local_subscriptions', strtoupper($currency));
+
+        // Si UrlFactory::payment_error attend déjà du texte encodé pour l’URL :
+        $err = UrlFactory::payment_error([
             'code' => 'missing_stripe_price_id',
-            'msg'  => rawurlencode('Ce plan récurrent n’est pas configuré pour la devise '.$currency.'.')
+            'msg'  => rawurlencode($msg),
         ]);
         redirect($err);
         exit;
@@ -195,13 +197,13 @@ try {
 
 } catch (\Throwable $e) {
     // Gestion d’erreur (identique à ta logique actuelle)
-    $paymentreq->status = 'error';
+    $paymentreq->status = Status::ERROR;
     $paymentreq->response_json = json_encode(['error' => $e->getMessage()]);
     $paymentreq->last_update = time();
     $DB->update_record('subscription_payment_request', $paymentreq);
 
     debugging('[subs][create_session][error] '.$e->getMessage(), DEBUG_DEVELOPER);
-    $err = new \moodle_url('/local/subscriptions/payment_error.php', [
+    $err = UrlFactory::payment_error([
         'code' => 'session_create',
         'msg'  => rawurlencode($e->getMessage())
     ]);

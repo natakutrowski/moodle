@@ -3,46 +3,33 @@ $string['pluginname'] = 'Subscriptions';
 
 // -- Subscription config
 // Plans
-$string['plan_1month'] = '1 month';
-$string['plan_3months'] = '3 months';
-$string['plan_6months'] = '6 months';
-$string['plan_1year'] = '1 year';
-$string['plan_3years'] = '3 years';
-$string['plan_lifetime'] = 'Lifetime';
-
-// Access scopes
-$string['access_full'] = 'All courses';
-$string['access_a0'] = 'Course A0';
-$string['access_a1'] = 'Course A1';
-$string['access_a2'] = 'Course A2';
-$string['access_test'] = 'Test course';
+$string['plan_1month'] = '1 month'; // do not delete
+$string['plan_3months'] = '3 months'; // do not delete
+$string['plan_6months'] = '6 months'; // do not delete
+$string['plan_1year'] = '1 year'; // do not delete
+$string['plan_3years'] = '3 years'; // do not delete
+$string['plan_lifetime'] = 'Lifetime'; // do not delete
 
 // Buttons
-$string['btn_add_subscription'] = 'Add subscription';
-$string['btn_manage_subscriptions'] = 'Manage subscriptions';
 $string['btn_import_csv'] = 'Import subscriptions from CSV';
 
 // -- Manage subscriptions
 $string['manage_subscriptions'] = 'Manage subscriptions';
 $string['updated_subscriptions'] = 'Updated {$a} subscription(s).';
 $string['delete_subscriptions'] = '{$a} subscription(s) have been deleted.';
-$string['no_active_subscriptions'] = 'No active subscriptions found';
 $string['edit_subscriptions'] = 'Edit subscriptions';
 $string['user'] = 'User';
 $string['plan'] = 'Plan';
-$string['access_scope'] = 'Access scope';
 $string['start_date'] = 'Start date';
 $string['end_date'] = 'End date';
 $string['status'] = 'Status';
 $string['creation_date'] = 'Creation date';
 $string['save_modifications'] = 'Save modifications';
 $string['delete_selected'] = 'Delete selected subscriptions';
-$string['popover_description'] = 'Description';
 $string['popover_duration'] = 'Duration';
 $string['popover_scope'] = 'Access scope';
 $string['popover_courses'] = 'Courses';
 $string['popover_no_courses'] = 'No courses defined';
-
 
 // -- Add subscription
 $string['add_subscription'] = 'Add subscription';
@@ -60,7 +47,6 @@ $string['import_subscriptions_csv'] = 'Import subscriptions from CSV file';
 $string['email'] = 'Email';
 $string['already_exists'] = 'Already exists';
 $string['import_preview'] = 'Preview of subscriptions to import';
-$string['confirm_import'] = 'Import subscriptions';
 $string['select_csv_file'] = 'Select CSV file';
 $string['submit_csv_file'] = 'Upload CSV file';
 $string['import_count_valid'] = 'line(s) will be imported.';
@@ -75,7 +61,6 @@ $string['invalid_or_missing_fields'] = 'Invalid or missing fields';
 $string['user_not_found'] = 'User not found';
 
 // -- Manage plans
-$string['managesubscriptions'] = 'Manage subscriptions';
 $string['scopes'] = '🎓 Access scope';
 $string['plans'] = '📝 Plans';
 $string['user_subscriptions'] = '👨‍🎓 / 👩‍🎓 User subscriptions';
@@ -85,7 +70,6 @@ $string['pricestooltip'] = 'Prices tooltip'; // to be checked
 // Scopes
 $string['scopename'] = 'Scope name';
 $string['includedcourses'] = 'Included courses';
-$string['savescope'] = 'Save';
 $string['addscope'] = '➕ Add a new scope';
 $string['scopelist'] = 'List of scopes';
 $string['sortaz'] = 'Sort A to Z';
@@ -96,18 +80,15 @@ $string['courses'] = '📖 Courses';
 $string['dates'] = '📅 Dates';
 $string['actions'] = '🛠️ Actions';
 $string['createdon'] = 'Created on:';
-$string['modifiedon'] = 'Last updated:';
+$string['modifiedon'] = 'Modified on:';
 $string['editscope'] = '✏️ Edit this scope';
 $string['deletescope'] = '🗑️ Delete this scope';
-$string['viewtranslations'] = '🌐 View translations';
 $string['edit'] = 'Edit scope';
 $string['add'] = 'Add scope';
 $string['scopecreated'] = 'Scope created. Now add a translation.';
 $string['scopecreateerror'] = 'Error while creating the scope.';
 $string['scopedeleted'] = 'The scope and its translations have been deleted.';
 $string['scopedeleteerror'] = 'Error while deleting the scope.';
-$string['scopenotfound'] = 'Scope not found.';
-$string['scopedeleteinuse'] = 'Cannot delete this scope: it is used by one or more plans.';
 $string['error_scope_name_exists'] = 'A scope with this name already exists.';
 
 // Translations scopes
@@ -116,8 +97,6 @@ $string['scopedefaultname'] = 'Default scope name';
 $string['translatedlanguages'] = 'Translated languages';
 $string['addtranslation'] = 'Add a translation';
 $string['backtoscopelist'] = 'Back to the scope list';
-$string['edittranslation'] = 'Edit the translation';
-$string['newtranslation'] = 'Add a new translation';
 $string['language'] = 'Language';
 $string['alreadyused'] = 'Already used';
 $string['defaultscopename'] = 'Default name of the scope';
@@ -125,16 +104,13 @@ $string['translatedname'] = 'Translated name';
 $string['translateddescription'] = 'Translated description';
 $string['save'] = 'Save';
 $string['deletetranslation'] = 'Delete this translation';
-$string['confirmdeletetranslation'] = 'Are you sure you want to delete this translation?';
 $string['errorduplicatetranslation'] = 'A translation already exists in the selected language.';
-$string['modifiedon'] = 'Modified on';
 $string['showalltranslations'] = 'Show all translations';
 $string['cancel'] = 'Cancel';
 $string['confirmdeletetranslation'] = 'Are you sure you want to permanently delete this translation?';
 
 // Plans
 $string['delete'] = 'Delete';
-$string['cancel'] = 'Cancel';
 $string['deactivateplan'] = 'Deactivate this plan';
 $string['activateplan'] = 'Activate this plan';
 $string['planname'] = 'Plan name';
@@ -145,7 +121,6 @@ $string['plancreateerror'] = 'An error occurred while creating the plan.';
 $string['error_plan_name_exists'] = 'A plan with this name already exists.';
 $string['planstatusupdated'] = 'The plan status has been updated.';
 $string['planlist'] = 'List of plans';
-$string['viewtranslations'] = 'View translations';
 $string['deleteplan'] = 'Delete this plan';
 $string['editplan'] = 'Edit this plan';
 $string['thisplan'] = 'this plan';
@@ -154,8 +129,6 @@ $string['plandeleted'] = 'The plan and all its translations and prices have been
 $string['plandeleteerror'] = 'Error while deleting the plan.';
 $string['backtoplanlist'] = 'Back to the plan list';
 $string['addplan'] = 'Add a new plan';
-$string['editplan'] = 'Edit plan';
-$string['scope'] = '🎓 Access scope';
 $string['duration'] = '⌛ Duration';
 $string['availabletranslations'] = 'Available translations';
 $string['notranslation'] = 'No translation available';
@@ -163,9 +136,8 @@ $string['availablecurrencies'] = 'Available currencies';
 $string['nocurrency'] = 'No currency available';
 $string['planincomplete'] = 'Cannot activate: plan requires at least one translation and one price.';
 $string['cannotactivateplan'] = 'You must define at least one translation and one price before activating this plan.';
-$string['is_recurring'] = 'Abonnement récurrent (auto-renouvellement)';
-$string['is_recurring_help'] = 'Si activé, le plan sera vendu via Stripe Subscriptions. Assurez-vous d’avoir saisi stripe_price_id pour chaque devise.';
-
+$string['is_recurring'] = 'Recurring subscription (auto-renew)';
+$string['is_recurring_help'] = 'If enabled, the plan will be sold via Stripe Subscriptions. Make sure you have set a stripe_price_id for each currency.'; // do not delete
 
 // Prices
 $string['currency'] = 'Currency';
@@ -185,126 +157,67 @@ $string['error_currency_already_exists'] = 'This currency is already defined for
 $string['noprices'] = 'No price';
 
 $string['stripe_price_id'] = 'Stripe Price ID';
-$string['stripe_price_id_help'] = 'Identifiant du prix récurrent côté Stripe (ex.: price_123…). Requis pour les plans récurrents.';
-$string['err_stripe_price_required'] = 'Requis pour les plans récurrents.';
-$string['badge_recurring'] = 'Auto-renouvellement';
-
-
+$string['stripe_price_id_help'] = 'Recurring price identifier on Stripe (e.g. price_123…). Required for recurring plans.'; // do not delete
+$string['badge_recurring'] = 'Auto-renew';
 
 // JS delete...
 $string['thisscope'] = 'this scope';
-$string['thisplan'] = 'this plan';
 $string['confirmdeletetitle'] = 'Confirm deletion';
 $string['confirmdeletemessage'] = '⚠️ This action is irreversible.<br><br>Do you really want to delete <strong>{$a}</strong>?<br><br>All associated translations will also be deleted.';
 $string['confirmdeleteplanmessage'] = '⚠️ This action is irreversible.<br><br>Do you really want to delete <strong>{$a}</strong>?<br><br>All associated translations and prices will also be deleted.';
-$string['delete'] = 'Delete';
 
-
-///////
-$string['paymentprovider_stripe'] = 'Stripe';
-$string['paymentprovider_paypal'] = 'PayPal';
-$string['paymentprovider_manual'] = 'Manual entry';
-$string['paymentprovider_csv'] = 'CSV import';
-$string['paymentprovider_offline'] = 'Offline payment';
-$string['paymentprovider_giftcode'] = 'Gift code';
-$string['paymentprovider_dev'] = 'Technical/dev import';
-
-
-$string['description'] = 'Description';
 $string['scope_and_duration'] = 'Scope and duration';
 $string['courses_included'] = 'Courses included';
 $string['select_price'] = 'Select price and currency';
 
-
-/////
-$string['subscriptions'] = 'Subscriptions';
-$string['active_until'] = 'Actif jusqu’au';
-$string['no_subscriptions_found'] = 'No active subscriptions for this user.';
-
 $string['your_subscriptions'] = 'Your subscriptions';
-$string['start_date'] = 'Start date';
-$string['end_date'] = 'End date';
-$string['access_scope'] = 'Access scope';
-$string['price_paid'] = 'Price paid';
-$string['status_active'] = 'Active';
 $string['no_active_subscriptions'] = 'You have no active subscriptions.';
 
-$string['startdate'] = 'Start date';
-$string['enddate'] = 'End date';
-$string['accessscope'] = 'Access scope';
 $string['pricepaid'] = 'Price paid';
-$string['coursesincluded'] = 'Included courses';
 
-$string['courselist'] = 'Liste des cours';
-$string['show'] = 'afficher';
+$string['courselist'] = 'Course list';
 
-
-$string['active'] = 'Active';
-$string['expired'] = 'Expired';
 $string['close'] = 'Close';
 
 $string['subscribe'] = 'Subscribe';
-$string['duration'] = 'Duration';
-$string['price'] = 'Price';
-$string['choosecurrency'] = 'Choisissez une devise :';
-$string['showcoursedescription'] = 'Afficher la description';
-$string['change_currency'] = 'Changer la devise';
+$string['change_currency'] = 'Change currency';
 
 // Stripe
-$string['pluginname'] = 'Subscriptions (abonnements)';
 $string['stripe_heading'] = 'Stripe';
-$string['stripe_heading_desc'] = 'Renseignez vos clés Stripe en mode test ou live. Pour commencer, la clé secrète suffit. Le secret de webhook est requis quand vous activez le webhook.';
-$string['stripe_publishable'] = 'Clé publique (publishable key)';
-$string['stripe_publishable_desc'] = 'Optionnel pour le Checkout simple ; utile si vous utilisez Stripe Elements côté client.';
-$string['stripe_secret'] = 'Clé secrète (Secret key)';
-$string['stripe_secret_desc'] = 'Ex. sk_test_xxx. Utilisée côté serveur pour créer des sessions de paiement.';
-$string['stripe_webhook_secret'] = 'Secret du webhook';
-$string['stripe_webhook_secret_desc'] = 'Ex. whsec_xxx. Nécessaire pour vérifier la signature des événements Stripe.';
-$string['stripe_sessioncreationfailed'] = 'Unable to create the Stripe Checkout session';
-$string['stripe_invalidsession'] = 'Invalid or missing Stripe session ID';
+$string['stripe_heading_desc'] = 'Enter your Stripe keys in test or live mode. To start, the secret key is enough. The webhook secret is required when you enable the webhook.';
+$string['stripe_publishable'] = 'Publishable key';
+$string['stripe_publishable_desc'] = 'Optional for simple Checkout; useful if you use Stripe Elements on the client side.';
+$string['stripe_secret'] = 'Secret key';
+$string['stripe_secret_desc'] = 'e.g. sk_test_xxx. Used server-side to create checkout sessions.';
+$string['payment_success_check_email'] = 'Please check your email: a message is waiting to finish signing in and set your password.';
+$string['payment_pending_msg'] = 'Your payment is being validated. This usually takes a few seconds.';
+$string['stripe_webhook_secret'] = 'Webhook secret';
+$string['stripe_webhook_secret_desc'] = 'e.g. whsec_xxx. Required to verify the signature of Stripe events.';
+
 $string['payment_success_title'] = 'Payment successful';
 $string['payment_success_thanks'] = 'Thank you! Your payment has been processed successfully.';
-$string['payment_success_details'] = 'Your subscription is now active. You can access your courses from your profile page.';
-$string['payment_already_processed'] = 'Good news! This payment was already processed earlier and your subscription is active. Head over to your profile to explore your courses!';
-$string['goto_my_profile'] = 'Go to my profile';
-$string['stripe_paymentsucceededrequired'] = 'Payment confirmation required from Stripe.';
-$string['stripe_noemail'] = 'We could not retrieve your email address from Stripe.';
-$string['stripe_invalidsession'] = 'Invalid or missing Stripe session ID';
 $string['payment_canceled_title'] = 'Payment canceled';
 $string['payment_canceled_msg'] = 'Your payment has been canceled. No subscription has been created.';
 $string['back_to_plans'] = 'Back to available plans';
-$string['payment_success_check_email'] = 'Veuillez vérifier votre email : un message vous attend pour finaliser la connexion et définir votre mot de passe.';
-$string['payment_pending_msg'] = 'Votre paiement est en cours de validation. Cela prend généralement quelques secondes.';
+
 
 $string['checkout_title'] = 'Checkout';
 $string['checkout_duration'] = 'Duration:';
-$string['price_label'] = 'Price';
 $string['checkout_consent_label'] = 'I agree to the Terms of Service and the Privacy Policy.';
-$string['checkout_subscribe'] = 'Subscribe';
 $string['checkout_go_to_payment'] = 'Go to payment';
-$string['checkout_courses_included'] = 'Courses included';
-
 
 $string['welcome_subject'] = 'Welcome to {$a}';
-$string['welcome_hello'] = 'Hello {$a},';
 $string['welcome_body_intro'] = 'Your account has been created and your subscription is now active.';
 $string['welcome_username'] = 'Your username: {$a}';
-$string['welcome_temp_password'] = 'Your temporary password: {$a} (you will be asked to set a new one on your first login).';
-$string['welcome_loginlink'] = 'Sign in from this page: {$a}';
 $string['welcome_plan_summary'] = 'Plan: {$a}';
 $string['welcome_amount_summary'] = 'Amount: {$a}';
 
-$string['receipt_subject'] = 'Your payment receipt';
 $string['receipt_title'] = 'Payment receipt';
-$string['receipt_plan'] = 'Plan: {$a}';
-$string['receipt_amount'] = 'Amount: {$a}';
-$string['receipt_tx'] = 'Transaction ID: {$a}';
-$string['receipt_period'] = 'Access period: {$a}';
+$string['receipt_plan'] = 'Plan: ';
+$string['receipt_amount'] = 'Amount: ';
+$string['receipt_tx'] = 'Transaction ID: ';
+$string['receipt_period'] = 'Access period: ';
 
-$string['subupdate_subject'] = 'Your subscription is active';
-$string['subupdate_hello'] = 'Hello {$a},';
-$string['subupdate_body'] = 'Your subscription for the plan « {$a} » is now active.';
-$string['changepw_hint'] = 'To change your password, enter the temporary password we just emailed you in the “Current password” field, then choose a new one. If you didn’t receive the email, use “Forgotten your username or password?” on the login page.';
 $string['welcome_temp_password_label'] = 'Temporary password';
 $string['welcome_security_hint'] = 'For your security, you will be asked to set a new password on your first login.';
 $string['welcome_button_login'] = 'Sign in';
@@ -334,12 +247,9 @@ $string['payment_error_intro'] = 'Something went wrong while preparing your paym
 $string['email_reminder2_subject'] = 'Last reminder: complete your subscription';
 $string['email_reminder2_intro'] = 'This is a gentle reminder to complete your purchase. You can finalize in one click:';
 
-$string['mail_recurring_started_subject'] = 'Votre abonnement récurrent à « {$a} » est actif';
-$string['mail_recurring_started_body'] = 'Merci ! Votre abonnement récurrent pour « {$a->plan} » a démarré le {$a->start}.';
-$string['view_my_subscriptions'] = 'Voir mes abonnements';
-
-$string['popular_badge'] = 'Popular';
-$string['premium_badge'] = 'Premium';
+$string['mail_recurring_started_subject'] = 'Your recurring subscription to « {$a} » is active';
+$string['mail_recurring_started_body'] = 'Thank you! Your recurring subscription for « {$a->plan} » started on {$a->start}.';
+$string['view_my_subscriptions'] = 'View my subscriptions';
 
 $string['plan_highlight'] = 'Highlight';
 $string['highlight_none'] = 'None';
@@ -350,97 +260,58 @@ $string['plan_highlight_help'] = 'Choose how this plan is highlighted on the pub
   <li><b>None</b>: standard card</li>
   <li><b>Popular</b>: yellow badge and accent styling</li>
   <li><b>Premium</b>: premium styling with a standout call-to-action</li>
-</ul>';
+</ul>'; // do not delete
 
 $string['task_cleanup_login_tokens'] = 'Clean up expired login tokens';
 
-$string['option_queue_future'] = 'Prolonger (activation le {$a})';
-$string['option_upgrade_now']  = 'Upgrade immédiat (prix ajusté)';
-$string['option_purchase_new'] = 'Nouvel abonnement';
-$string['choose_option'] = 'Choisissez une option';
-$string['have_account_login_to_see_options'] = 'J’ai déjà un compte — me connecter pour voir les options d’upgrade';
+$string['option_queue_future'] = 'Extend (activates on {$a})';
+$string['option_purchase_new'] = 'New subscription';
+$string['choose_option'] = 'Choose an option';
+$string['have_account_login_to_see_options'] = 'I already have an account — sign in to see upgrade options';
 
-// au-dessus des options
-$string['choose_option']          = 'Choisissez une option';
-$string['advisor_help_upgrade']   = 'Vous pouvez soit prolonger votre abonnement actuel à la suite, soit passer à une offre plus longue. Le prix d’upgrade est ajusté en fonction de votre ancienneté.';
-$string['advisor_help_standard']  = 'Choisissez comment vous souhaitez activer cet abonnement.';
-$string['advisor_help_guest']     = 'Connectez-vous pour voir les options d’upgrade. Sinon, vous pouvez souscrire un nouvel abonnement en renseignant vos coordonnées.';
+// Above the options
+$string['advisor_help_upgrade']  = 'You can either extend your current subscription in sequence or switch to a longer plan. The upgrade price is adjusted based on your elapsed time.';
+$string['advisor_help_standard'] = 'Choose how you want to activate this subscription.';
+$string['advisor_help_guest']    = 'Sign in to see upgrade options. Otherwise, you can start a new subscription by entering your details.';
 
-// résumé prix
-$string['summary_price_title']    = 'Prix total';
-$string['summary_price_wait']     = 'Sélectionnez une option pour voir le prix total.';
+// Price summary
+$string['summary_price_title'] = 'Total price';
 
-$string['personal_info_title']    = 'Informations personnelles';
-$string['personal_info_help']     = 'Ces informations seront utilisées pour créer votre compte et vous envoyer la confirmation.';
+$string['personal_info_title'] = 'Personal information';
+$string['personal_info_help']  = 'This information will be used to create your account and send you the confirmation.';
 
-// lien invité
-$string['have_account_login_to_see_options'] = 'J’ai déjà un compte — me connecter pour voir les options d’upgrade';
+$string['mail_hello'] = 'Hello {$a},';
+$string['mail_button_manage'] = 'Manage my subscriptions';
 
+$string['subupdate_subject'] = 'Your subscription to « {$a} » is active';
+$string['subupdate_body']    = 'Here are the updated details of your subscription to « {$a} »:';
+$string['renewal_subject']   = 'Renewal confirmed – {$a}';
+$string['renewal_body']      = 'Your subscription to « {$a} » has been renewed. Here are the details:';
+$string['recurring_failed_subject'] = 'Payment failed – {$a}';
+$string['recurring_failed_body']    = 'The payment for your subscription « {$a} » failed. Please update your payment information.';
+$string['recurring_failed_button']  = 'Update my payment method';
 
-$string['subupdate_subject'] = 'Mise à jour de votre abonnement « {$a} »';
-$string['subupdate_hello']   = 'Bonjour {$a},';
-$string['subupdate_body']    = 'Voici les informations mises à jour pour votre abonnement à « {$a} » :';
-$string['subupdate_button_manage'] = 'Gérer mes abonnements';
-$string['receipt_amount']    = 'Montant payé';
-$string['receipt_tx']        = 'Transaction';
-$string['receipt_period']    = 'Période';
-$string['renewal_subject'] = 'Renouvellement confirmé – {$a}';
-$string['renewal_hello'] = 'Bonjour {$a},';
-$string['renewal_body'] = 'Votre abonnement à « {$a} » a été renouvelé. Voici les détails :';
-$string['renewal_button_manage'] = 'Gérer mes abonnements';
-$string['receipt_invoice'] = 'Facture';
-$string['recurring_failed_subject'] = 'Échec du prélèvement – {$a}';
-$string['recurring_failed_hello'] = 'Bonjour {$a},';
-$string['recurring_failed_body'] = 'Le prélèvement pour votre abonnement « {$a} » a échoué. Merci de mettre à jour vos informations de paiement.';
-$string['recurring_failed_button'] = 'Mettre à jour mon moyen de paiement';
+$string['recurring_canceled_subject'] = 'Your subscription has been canceled – {$a}';
+$string['recurring_canceled_body']    = 'Your subscription to « {$a} » has been canceled. You will keep access until the end of the current period.';
+$string['recurring_canceled_button']  = 'Subscribe again';
 
-$string['recurring_canceled_subject'] = 'Votre abonnement a été annulé – {$a}';
-$string['recurring_canceled_hello'] = 'Bonjour {$a},';
-$string['recurring_canceled_body'] = 'Votre abonnement à « {$a} » a été annulé. Vous conserverez l’accès jusqu’à la fin de la période en cours.';
-$string['recurring_canceled_button'] = 'Se réabonner';
+$string['details'] = 'Details';
+$string['subscription_details'] = 'Subscription details';
 
-$string['portal_no_customer'] = 'Nous n’avons pas trouvé de compte Stripe associé à votre profil. Si le problème persiste, contactez le support.';
+$string['mysubs_title'] = 'My subscriptions';
+$string['mysubs_empty'] = 'You don’t have any subscription yet.';
+$string['period'] = 'Period';
 
-$string['badge_recurring'] = 'Renouvellement automatique';
-$string['details'] = 'Détails';
-$string['subscription_details'] = 'Détails de la souscription';
-$string['manage_payment'] = 'Gérer mon paiement';
-
-$string['mysubs_title'] = 'Mes abonnements';
-$string['mysubs_empty'] = 'Vous n’avez pas encore d’abonnement.';
-$string['go_subscribe'] = 'S’abonner';
-$string['period'] = 'Période';
-$string['pricepaid'] = 'Montant payé';
-$string['details'] = 'Détails';
-$string['subscription_details'] = 'Détails de la souscription';
-$string['manage_payment'] = 'Gérer mon paiement';
-$string['badge_recurring'] = 'Auto-renouvellement';
-
-$string['status_active']   = 'Active';
-$string['status_queued']   = 'En attente';
-$string['status_replaced'] = 'Remplacée';
-$string['status_canceled']  = 'Annulée';
-$string['status_expired']  = 'Expirée';
-
-$string['portal_error_config'] = 'Le portail de paiement n’est pas encore configuré. Merci de réessayer plus tard ou de contacter le support.';
-$string['manage_payment'] = 'Gérer mon paiement';
 $string['stripe_portal_configuration_id'] = 'Stripe Portal configuration ID';
-$string['stripe_portal_configuration_id_desc'] = 'Optionnel : ID de configuration du Customer Portal (ex. pc_xxx). Si vide, la configuration par défaut Stripe sera utilisée.';
-$string['btn_renew_now'] = 'Renouveler maintenant';
-$string['btn_extend']    = 'Prolonger';
+$string['stripe_portal_configuration_id_desc'] = 'Optional: Customer Portal configuration ID (e.g. pc_xxx). If empty, Stripe’s default configuration will be used.';
+$string['btn_renew_now'] = 'Renew now';
+$string['btn_extend']    = 'Extend';
 
-$string['view_my_subscriptions'] = 'Voir tous mes abonnements';
-$string['mysubs_empty']     = 'Vous n’avez aucune souscription active.';
-
-$string['option_queue_future']           = 'Prolonger (activation le {$a})';
-$string['option_upgrade_now_replace']    = 'Passer à 3 ans maintenant (remplace la file)';
-
+$string['option_upgrade_now_replace'] = 'Upgrade now to the selected duration (replace the queue)';
 
 $string['task_send_expiry_reminders'] = 'Send expiry reminders for non-recurring subscriptions';
-$string['task_expire_and_activate'] = 'Activate queued and expire overdue subscriptions';
 $string['expiry_reminder_subject'] = 'Your access ends in {$a} day(s)';
 $string['expiry_reminder_body']    = 'Your subscription to "{$a->plan}" will end on {$a->date}. You can renew now to keep your access without interruption.';
-$string['expiry_button_renew']     = 'Renew now';
 
 $string['subscription_activated_subject'] = 'Your subscription to {$a} is now active';
 $string['subscription_activated_body']    = 'Great news! Your queued subscription for "{$a}" is now active.';
@@ -451,21 +322,11 @@ $string['expired_button_renew']         = 'Renew / Subscribe';
 $string['task_expire_enrolments'] = 'Expire subscriptions and update enrolments';
 $string['task_repair_paid_pr']        = 'Repair paid PRs: recreate missing subscriptions';
 
-$string['receipt_plan']   = 'Plan';    // ou 'Plan :'
-$string['receipt_period'] = 'Period';  // ou 'Période :'
-
 // Flags & statuses
-$string['payment_failed_flag'] = 'Payment failed';
-$string['payment_failed_flag_help'] = 'The last renewal attempt failed. Please update your payment method to avoid losing access.';
-$string['next_retry_at'] = 'Next retry';
-$string['last_failed_invoice_id'] = 'Last failed invoice';
-$string['last_payment_failed_reason'] = 'Failure reason';
+$string['payment_failed'] = 'Payment failed';
 
-$string['mysubs_empty']   = 'No active subscriptions for this user.'; // tu l'as peut-être déjà
 $string['subscribe_now']  = 'Subscribe now';
-$string['view_my_subscriptions'] = 'Your subscriptions'; // déjà présent chez toi
 
-$string['upgrade_details_title'] = 'How is this price calculated?';
 $string['upgrade_window_label']  = 'Calculation window: {$a}';
 $string['upgrade_tariffs']       = 'Reference prices: current = {$a->p1}, target = {$a->p2}';
 $string['upgrade_consumed_since_t0'] = 'Elapsed time since window start: {$a}';
@@ -476,6 +337,86 @@ $string['upgrade_base_cap']       = 'Base = {$a->base}; Degressive cap = {$a->ca
 $string['upgrade_final_amount']   = 'Proposed amount: <strong>{$a}</strong>';
 $string['upgrade_details_summary'] = 'How is this price calculated?';
 
-$string['upgrade_confirmed_subject'] = 'Votre passage à « {$a} » est confirmé';
-$string['upgrade_confirmed_body']    = 'Bonne nouvelle ! Votre abonnement a été mis à niveau. Voici le récapitulatif :';
-$string['receipt_total']             = 'Montant réglé';
+$string['upgrade_confirmed_subject']  = 'Your upgrade to « {$a} » is confirmed';
+$string['upgrade_confirmed_body']     = 'Good news! Your subscription has been upgraded. Here is the summary:';
+
+$string['unknown_plan']             = 'Unknown plan';
+
+$string['manage_billing'] = 'Manage billing';
+$string['provider_portal_not_supported'] = 'Billing portal not available';
+$string['provider_portal_not_supported_desc'] = 'The provider « {$a} » does not offer a customer portal yet. You can manage your subscription from your profile.';
+
+$string['subfield_id']                 = 'ID';
+$string['subfield_userid']             = 'User ID';
+$string['subfield_planid']             = 'Plan ID';
+$string['subfield_start']              = 'Start';
+$string['subfield_end']                = 'End';
+$string['subfield_amount']             = 'Amount paid';
+$string['subfield_txn']                = 'Transaction';
+$string['subfield_provider']           = 'Provider';
+$string['subfield_provider_sub']       = 'Provider subscription';
+$string['subfield_provider_customer']  = 'Provider customer';
+$string['subfield_last_invoice']       = 'Last invoice';
+$string['subfield_last_failed_at']     = 'Last failed at';
+$string['subfield_fail_reason']        = 'Failure reason';
+$string['subfield_created']            = 'Created';
+$string['subfield_updated']            = 'Updated';
+$string['subfield_unlimited']          = 'Unlimited';
+$string['subfield_payment_status']  = 'Payment status';
+$string['subpayment_ok']            = 'Up to date';
+$string['subpayment_action']        = 'Action required';
+
+// (optionnel) labels traduits pour tes statuts
+$string['substatus_active']            = 'Active'; // do not delete
+$string['substatus_queued']            = 'Queued'; // do not delete
+$string['substatus_replaced']          = 'Replaced'; // do not delete
+$string['substatus_expired']           = 'Expired'; // do not delete
+$string['substatus_canceled']          = 'Canceled';
+
+$string['optional_error_msg'] = 'Optional error message';
+
+$string['summary_price_wait'] = 'Select an option to see the total price.';
+$string['existing_account_hint_html'] = 'An account already exists with this email. <a class="link-primary fw-semibold" href="{$a->url}">Sign in</a>.';
+
+$string['email_footer_copyright'] = '© {$a->year} {$a->brand}. All rights reserved.';
+$string['email_footer_unexpected'] = 'If you didn’t expect this email, you can safely ignore it.';
+$string['receipt_total']  = 'Total paid';
+$string['receipt_invoice']= 'Invoice';
+
+$string['email_show_pr_ref'] = 'Show PR reference in emails';
+$string['email_show_pr_ref_desc'] = 'Add a small technical reference (PR # and date) at the bottom of emails. Disabled by default.';
+$string['unknown_payment_event'] = 'Unknown payment event: {$a}';
+
+$string['stripe:missingamount'] = 'Missing amount on payment request.';
+$string['stripe:productname'] = '{$a} plan';
+$string['stripe:missingpriceidforsubscription'] = 'Missing stripe_price_id for subscription.';
+$string['stripe:missingpriceid'] = 'Missing price_id.';
+$string['stripe:sdkautoloadnotfound'] = 'Stripe SDK autoload not found at {$a}.';
+$string['sessiondisplay'] = 'Session: {$a}';
+$string['recurplan_currency_not_configured'] = 'This recurring plan is not configured for currency {$a}.';
+
+// Headings
+$string['emails_links_heading'] = 'Emails & links';
+$string['emails_links_heading_desc'] = 'Settings for follow-up emails and resume links.';
+$string['followups_heading'] = 'Follow-ups & expiration';
+$string['followups_heading_desc'] = 'Delays (in minutes) to expire and send reminders.';
+
+// Brand logo (general/email)
+$string['brand_logo_url_label'] = 'Brand logo URL';
+$string['brand_logo_url_desc'] = 'Absolute URL to a small logo (PNG/SVG, height ~32px) used in emails.';
+
+// Email link secret
+$string['email_link_secret_label'] = 'Secret for resume links';
+$string['email_link_secret_desc'] = 'String used to sign resume links (fallback: $CFG->passwordsaltmain).';
+
+// Expiration & reminders
+$string['expire_pending_after_minutes_label'] = 'Expire pending payments';
+$string['expire_pending_after_minutes_desc'] = 'Switch pending → expired after N minutes without a payment.';
+$string['reminder1_after_minutes_label'] = 'Reminder #1';
+$string['reminder1_after_minutes_desc'] = 'Send a first reminder if status ∈ (pending, expired, failed) and age ≥ N minutes.';
+$string['reminder2_after_minutes_label'] = 'Reminder #2';
+$string['reminder2_after_minutes_desc'] = 'Send a second reminder if still unpaid and age ≥ N minutes (since creation).';
+
+// Featured plan
+$string['featured_planid_label'] = 'Featured plan';
+$string['featured_planid_desc'] = 'ID of the plan highlighted on the offers page.';

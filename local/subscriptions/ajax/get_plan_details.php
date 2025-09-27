@@ -6,6 +6,7 @@ require_capability('moodle/site:config', context_system::instance());
 
 use local_subscriptions\subscription_manager;
 use local_subscriptions\subscription_config;
+use local_subscriptions\constants\Status;
 
 // En-têtes JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -68,6 +69,6 @@ try {
     ], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    echo json_encode(['status' => Status::ERROR, 'message' => $e->getMessage()]);
 }
 exit;

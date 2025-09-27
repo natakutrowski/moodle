@@ -9,18 +9,18 @@
       </h5>
 
       <span class="badge bg-success text-white px-3 py-1">
-        {{#str}}active, local_subscriptions{{/str}}
+        {{#str}}substatus_active, local_subscriptions{{/str}}
       </span>
     </div>
 
     <ul class="list-unstyled ms-1 mb-0">
       <li class="mb-1">
         <i class="fa-solid fa-fw fa-calendar me-2 text-secondary"></i>
-        <strong>{{#str}}startdate, local_subscriptions{{/str}}:</strong> {{startdate}}
+        <strong>{{#str}}start_date, local_subscriptions{{/str}}:</strong> {{startdate}}
       </li>
       <li class="mb-1">
         <i class="fa-solid fa-fw fa-calendar-check me-2 text-secondary"></i>
-        <strong>{{#str}}enddate, local_subscriptions{{/str}}:</strong> {{enddate}}
+        <strong>{{#str}}end_date, local_subscriptions{{/str}}:</strong> {{enddate}}
       </li>
       <li class="mb-1">
         <i class="fa-solid fa-fw fa-book me-2 text-secondary"></i>
@@ -32,7 +32,7 @@
              data-bs-trigger="focus"
              data-bs-placement="top"
              data-bs-html="true"
-             data-bs-title="{{#str}}coursesincluded, local_subscriptions{{/str}}"
+             data-bs-title="{{#str}}includedcourses, local_subscriptions{{/str}}"
              data-bs-content="{{{popovercontent}}}"
              style="cursor: pointer;"></i>
         {{/coursenames.0}}

@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-define([], function() {
+define(['core/str'], function(str) {
   function debounce(fn, ms){ let t; return function(){ clearTimeout(t); t = setTimeout(()=>fn.apply(this, arguments), ms); }; }
 
   function init() {
@@ -16,12 +16,9 @@ define([], function() {
         .then(r => r.json())
         .then(j => {
           if (j && j.exists) {
-            hint.innerHTML =
-              (document.documentElement.lang || '').startsWith('fr')
-              ? 'Un compte existe déjà avec cet email. ' +
-                '<a class="link-primary fw-semibold" href="'+ M.cfg.wwwroot +'/login/index.php?returnurl='+ encodeURIComponent(location.href) +'">Se connecter</a>.'
-              : 'An account already exists with this email. ' +
-                '<a class="link-primary fw-semibold" href="'+ M.cfg.wwwroot +'/login/index.php?returnurl='+ encodeURIComponent(location.href) +'">Sign in</a>.';
+            str.get_string('existing_account_hint_html', 'local_subscriptions', {url: M.cfg.wwwroot +'/login/index.php?returnurl='+ encodeURIComponent(location.href)})
+              .done(function(s) { hint.innerHTML = s; })    // on contrôle la string (HTML autorisé)
+              .fail(function()  { hint.textContent = ''; });
           } else { hint.textContent = ''; }
         })
         .catch(()=>{ /* no-op */ });

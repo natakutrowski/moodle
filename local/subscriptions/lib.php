@@ -82,18 +82,11 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
 
     $content = $renderer->render_user_subscriptions_block($subscriptions);
 
-    // if (empty($subscriptions)) {
-    //     $content = get_string('no_subscriptions_found', 'local_subscriptions');
-    // }
-
     $category = new category(
         'local_subscriptions', 
-        get_string('subscriptions','local_subscriptions'),
+        get_string('pluginname','local_subscriptions'),
         'contact');
     $tree->add_category($category);
-
-    // Génère le lien vers la page de détails
-    $url = new \moodle_url('/local/subscriptions/user_subscriptions.php', ['id' => $user->id]);
 
     // Crée un nœud dans la catégorie
     $node = new node(
@@ -284,7 +277,7 @@ function local_subs_render_upgrade_popover(array $opt, \stdClass $currplan, \std
     $elapsedTxt = local_subs_human_duration($tcons ?: $t);
 
     $tt  = '<div style="max-width:360px">';
-    $tt .= '<div class="fw-semibold mb-1">'.get_string('upgrade_details_title','local_subscriptions').'</div>';
+    $tt .= '<div class="fw-semibold mb-1">'.get_string('upgrade_details_summary','local_subscriptions').'</div>';
     $tt .= '<div class="text-muted small mb-2">'.get_string('upgrade_window_label','local_subscriptions', $start.' → '.$end).'</div>';
     $tt .= '<ul class="small ps-3">';
     $tt .= '<li>'.get_string('upgrade_tariffs','local_subscriptions',

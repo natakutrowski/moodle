@@ -70,62 +70,55 @@ if ($hassiteconfig) {
 
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/brand_logo_url',
-            'Brand logo URL',
-            'Absolute URL to a small logo (PNG/SVG, height ~32px) used in emails.',
+        get_string('brand_logo_url_label', 'local_subscriptions'),
+        get_string('brand_logo_url_desc', 'local_subscriptions'),
             '', PARAM_URL
         ));
 
         $settings->add(new admin_setting_heading(
             'local_subs_email_heading',
-            'Emails & liens',
-            'Réglages pour les emails de suivi et les liens de reprise.'
+        get_string('emails_links_heading', 'local_subscriptions'),
+        get_string('emails_links_heading_desc', 'local_subscriptions')
         ));
 
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/email_link_secret',
-            'Secret pour les liens de reprise',
-            'Chaîne utilisée pour signer les liens de relance (fallback : $CFG->passwordsaltmain).',
+        get_string('email_link_secret_label', 'local_subscriptions'),
+        get_string('email_link_secret_desc', 'local_subscriptions'),
             '', PARAM_RAW_TRIMMED
-        ));
-
-        $settings->add(new admin_setting_configtext(
-            'local_subscriptions/brand_logo_url',
-            'Brand logo URL (emails)',
-            'URL absolue d’un petit logo (PNG/SVG ~32px) affiché dans les e-mails.',
-            '', PARAM_URL
         ));
 
         $settings->add(new admin_setting_heading(
             'local_subscriptions/followups_heading',
-            'Relances & expiration',
-            'Délais (en minutes) pour expirer et relancer.'
+        get_string('followups_heading', 'local_subscriptions'),
+        get_string('followups_heading_desc', 'local_subscriptions')
         ));
 
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/expire_pending_after_minutes',
-            'Expiration des paiements en attente',
-            'Passer de pending → expired après N minutes sans paiement.',
+        get_string('expire_pending_after_minutes_label', 'local_subscriptions'),
+        get_string('expire_pending_after_minutes_desc', 'local_subscriptions'),
             60, PARAM_INT
         ));
 
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/reminder1_after_minutes',
-            'Relance n°1',
-            'Envoyer une première relance si status ∈ (pending, expired, failed) et ancienneté ≥ N minutes.',
+        get_string('reminder1_after_minutes_label', 'local_subscriptions'),
+        get_string('reminder1_after_minutes_desc', 'local_subscriptions'),
             1440, PARAM_INT // 24 h
         ));
 
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/reminder2_after_minutes',
-            'Relance n°2',
-            'Envoyer une seconde relance si toujours non payé et ancienneté ≥ N minutes (depuis la création).',
+        get_string('reminder2_after_minutes_label', 'local_subscriptions'),
+        get_string('reminder2_after_minutes_desc', 'local_subscriptions'),
             4320, PARAM_INT // 72 h
         ));
 
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/featured_planid',
-            'Plan mis en avant',
-            'ID du plan à mettre en avant sur la page des offres.',
+        get_string('featured_planid_label', 'local_subscriptions'),
+        get_string('featured_planid_desc', 'local_subscriptions'),
             '', PARAM_INT
         ));
 
@@ -134,6 +127,13 @@ if ($hassiteconfig) {
             get_string('stripe_portal_configuration_id', 'local_subscriptions'),
             get_string('stripe_portal_configuration_id_desc', 'local_subscriptions'),
             '', PARAM_RAW_TRIMMED
+        ));
+
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/email_show_pr_ref',
+            get_string('email_show_pr_ref', 'local_subscriptions'),
+            get_string('email_show_pr_ref_desc', 'local_subscriptions'),
+            0
         ));
 
     }

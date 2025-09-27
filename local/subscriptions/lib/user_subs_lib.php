@@ -3,6 +3,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\subscription_manager;
 use local_subscriptions\subscription_config;
+use local_subscriptions\constants\Status;
 
 /**
  * Enrol a user manually into a plan with payment and duration handling.
@@ -157,7 +158,7 @@ function get_user_active_subscriptions(int $userid): array {
             sp.accessscopeid
         FROM {user_subscription} us
         JOIN {subscription_plan} sp ON sp.id = us.planid
-        WHERE us.userid = :userid AND us.status = 'active'
+        WHERE us.userid = :userid AND us.status = '".Status::ACTIVE."'
         ORDER BY us.start_date DESC
     ";
 

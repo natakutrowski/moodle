@@ -27,7 +27,7 @@ class access_scope_form extends moodleform {
         $mform->setDefault('course_ids', $default_courses);
         $mform->addRule('course_ids', null, 'required');
 
-        $this->add_action_buttons(true, get_string('savescope', 'local_subscriptions'));
+        $this->add_action_buttons(true, get_string('save', 'local_subscriptions'));
     }
 
     public function validation($data, $files) {

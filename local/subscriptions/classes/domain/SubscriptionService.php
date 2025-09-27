@@ -2,6 +2,10 @@
 namespace local_subscriptions\domain;
 
 use local_subscriptions\payment\dto\InternalEvent;
+use local_subscriptions\log\EventLogger;
+use local_subscriptions\constants\Status;
+use local_subscriptions\support\Duration;
+use local_subscriptions\payment\ProviderSelector;
 
 class SubscriptionService {
 
@@ -32,20 +36,6 @@ class SubscriptionService {
         $plan = $DB->get_record('subscription_plan', ['id' => $sub->planid], '*', IGNORE_MISSING);
         if (!$plan) return;
 
-        $add = function(int $ts, string $duration_key): int {
-            $dt = new \DateTime('@'.$ts); $dt->setTimezone(new \DateTimeZone('UTC'));
-            switch ($duration_key) {
-                case '1month':  $dt->modify('+1 month'); break;
-                case '3months': $dt->modify('+3 months'); break;
-                case '6months': $dt->modify('+6 months'); break;
-                case '1year':   $dt->modify('+1 year'); break;
-                case '2years':  $dt->modify('+2 years'); break;
-                case '3years':  $dt->modify('+3 years'); break;
-                default:        $dt->modify('+1 month');  break; // fallback
-            }
-            return $dt->getTimestamp();
-        };
-
         // prolonge à partir de end_date s'il est futur, sinon à partir de maintenant
         $oldend = (int)$sub->end_date;
 
@@ -58,7 +48,7 @@ class SubscriptionService {
         } else {
             // Fallback si jamais l'event n'a pas la période (rare)
             $base = ($sub->end_date && $sub->end_date > time()) ? (int)$sub->end_date : time();
-            $sub->end_date = $add($base, $plan->duration_key);
+            $sub->end_date = Duration::add_duration_utc($base, $plan->duration_key);
         }
 
         error_log("[paid] oldend={$oldend} periodend={$periodend} newend={$sub->end_date}");
@@ -74,12 +64,12 @@ class SubscriptionService {
         }
 
         // --- LOG: facture payée (renouvellement OK) ---
-        self::log_subscription_event(
+        EventLogger::log(
             (int)$sub->id,
             'invoice_paid',
             $e->meta['invoice'] ?? null,
             [
-                'provider'           => 'stripe',
+                'provider'           => ProviderSelector::resolve_provider($pr ?? null, $e->meta ?? null, $sub ?? null),
                 'provider_sub'       => $e->provider_subscription_id ?? null,
                 'billing_reason'     => $e->meta['billing_reason'] ?? null,
                 'current_period_end' => $e->meta['current_period_end'] ?? null,
@@ -90,21 +80,16 @@ class SubscriptionService {
 
         // Envoi du mail de confirmation renouvellement
         try {
-            if (class_exists('\local_subscriptions\mailer')) {
-                // Un user COMPLET (tous les champs attendus par fullname())
-                $user    = \core_user::get_user($sub->userid, '*', MUST_EXIST);
-                $planrec = $DB->get_record('subscription_plan', ['id' => $sub->planid], '*', MUST_EXIST);
+            // Un user COMPLET (tous les champs attendus par fullname())
+            $user    = \core_user::get_user($sub->userid, '*', MUST_EXIST);
+            $planrec = $DB->get_record('subscription_plan', ['id' => $sub->planid], '*', MUST_EXIST);
 
-                $amount   = isset($e->amount_minor) ? ((float)$e->amount_minor / 100.0) : null;
-                $currency = isset($e->currency) ? strtoupper($e->currency) : null;
-                $invoice  = $e->meta['invoice'] ?? null;
+            $amount   = isset($e->amount_minor) ? ((float)$e->amount_minor / 100.0) : null;
+            $currency = isset($e->currency) ? strtoupper($e->currency) : null;
+            $invoice  = $e->meta['invoice'] ?? null;
 
-                if (method_exists('\local_subscriptions\mailer', 'send_renewal_ok')) {
-                    \local_subscriptions\mailer::send_renewal_ok($user, $planrec, $sub, $amount, $currency, $invoice, $oldend);
-                } else {
-                    error_log('[subs][svc][invoice_paid] no mailer method for renewal');
-                }
-            }
+            \local_subscriptions\mailer::send_renewal_ok($user, $planrec, $sub, $amount, $currency, $invoice, $oldend);
+            
         } catch (\Throwable $ex) {
             error_log('[subs][mail][renewal] '.$ex->getMessage());
             // on poursuit le flux pour étendre l’accès aux cours quoi qu’il arrive
@@ -196,12 +181,12 @@ class SubscriptionService {
 
         // --- 5) (Optionnel) Journaliser l’événement si ta table existe
         // --- LOG: facture échouée ---
-        self::log_subscription_event(
+        EventLogger::log(
             (int)$sub->id,
             'invoice_failed',
             $e->meta['invoice'] ?? null,
             [
-                'provider'             => 'stripe',
+                'provider'             => ProviderSelector::resolve_provider($pr ?? null, $e->meta ?? null, $sub ?? null),
                 'provider_sub'         => $e->provider_subscription_id ?? null,
                 'last_payment_error'   => $e->meta['last_payment_error'] ?? ($e->meta['failure_reason'] ?? null),
                 'next_payment_attempt' => $e->meta['next_payment_attempt'] ?? null,
@@ -212,19 +197,14 @@ class SubscriptionService {
 
         // --- 6) E-mail "paiement échoué" — robuste, ne doit JAMAIS casser le webhook
         try {
-            if (class_exists('\local_subscriptions\mailer')) {
-                $user    = \core_user::get_user($sub->userid, '*', MUST_EXIST); // user COMPLET
-                $planrec = $DB->get_record('subscription_plan', ['id' => $sub->planid], '*', MUST_EXIST);
+            $user    = \core_user::get_user($sub->userid, '*', MUST_EXIST); // user COMPLET
+            $planrec = $DB->get_record('subscription_plan', ['id' => $sub->planid], '*', MUST_EXIST);
 
-                // Deux noms possibles, suivant ton mailer
-                if (method_exists('\local_subscriptions\mailer', 'send_failed_recurring')) {
-                    \local_subscriptions\mailer::send_failed_recurring(
-                        $user, $planrec, $sub, $amount, $currency, $invoiceid, $failcode, $nexttry
-                    );
-                } else {
-                    error_log('[subs][failed] no mailer send_failed_recurring');
-                }
-            }
+            // Deux noms possibles, suivant ton mailer
+            \local_subscriptions\mailer::send_failed_recurring(
+                $user, $planrec, $sub, $amount, $currency, $invoiceid, $failcode, $nexttry
+            );
+        
         } catch (\Throwable $ex) {
             error_log('[subs][mail][failed] '.$ex->getMessage());
             // On avale l’erreur : le webhook doit répondre 200 quoi qu’il arrive
@@ -245,26 +225,24 @@ class SubscriptionService {
         if (!$sub) return;
 
         // On garde l'accès jusqu'à end_date, mais on marque status "canceled"
-        $sub->status      = 'canceled';
+        $sub->status      = Status::CANCELED;
         $sub->last_update = time();
         $DB->update_record('user_subscription', $sub);
 
         // (option) mail d'information
         // --- Mail "cancellation" ROBUSTE (ne doit jamais casser le webhook) ---
         try {
-            if (class_exists('\local_subscriptions\mailer') && method_exists('\local_subscriptions\mailer', 'send_cancellation_info')) {
-                // user COMPLET (tous les champs attendus par fullname())
-                $user    = \core_user::get_user($sub->userid, '*', MUST_EXIST);
-                $planrec = $DB->get_record('subscription_plan', ['id' => $sub->planid], '*', MUST_EXIST);
+            // user COMPLET (tous les champs attendus par fullname())
+            $user    = \core_user::get_user($sub->userid, '*', MUST_EXIST);
+            $planrec = $DB->get_record('subscription_plan', ['id' => $sub->planid], '*', MUST_EXIST);
 
-                // Optionnel : passer l’info "à la fin de période" si tu l’as dans l’évènement
-                $atperiodend = null;
-                if (!empty($e->meta['cancel_at_period_end'])) {
-                    $atperiodend = (int)(bool)$e->meta['cancel_at_period_end'];
-                }
-
-                \local_subscriptions\mailer::send_cancellation_info($user, $planrec, $sub, $atperiodend);
+            // Optionnel : passer l’info "à la fin de période" si tu l’as dans l’évènement
+            $atperiodend = null;
+            if (!empty($e->meta['cancel_at_period_end'])) {
+                $atperiodend = (int)(bool)$e->meta['cancel_at_period_end'];
             }
+
+            \local_subscriptions\mailer::send_cancellation_info($user, $planrec, $sub, $atperiodend);
         } catch (\Throwable $ex) {
             error_log('[subs][mail][cancellation] '.$ex->getMessage());
             // On n'arrête jamais le flux webhook
@@ -280,12 +258,12 @@ class SubscriptionService {
         // Sinon, on laisse actif jusqu’à end_date ; la tâche expire_user_enrolments_task suspendra à l’échéance.
 
         // --- LOG: abonnement annulé ---
-        self::log_subscription_event(
+        EventLogger::log(
             (int)$sub->id,
             'subscription_canceled',
             $e->meta['event_id'] ?? null,  // souvent null pour une annulation ; pas grave
             [
-                'provider'             => 'stripe',
+                'provider'             => ProviderSelector::resolve_provider($pr ?? null, $e->meta ?? null, $sub ?? null),
                 'provider_sub'         => $e->provider_subscription_id ?? null,
                 'cancel_at_period_end' => $e->meta['cancel_at_period_end'] ?? null,
                 'current_period_end'   => $e->meta['current_period_end'] ?? null,
@@ -324,8 +302,8 @@ class SubscriptionService {
         if ($cpe > 0 && ((int)$rec->end_date) < $cpe) {
             $rec->end_date   = $cpe;
             $rec->last_update = time();
-            // On s'assure de rester 'active'
-            if ($rec->status !== 'active') { $rec->status = 'active'; }
+            // On s'assure de rester actif
+            if ($rec->status !== Status::ACTIVE) { $rec->status = Status::ACTIVE; }
             $DB->update_record('user_subscription', $rec);
             $updated = true;
 
@@ -358,18 +336,16 @@ class SubscriptionService {
         // 3) Email d’information si CAPE vient d’être activé (0→1)
         if ($shouldnotifycape) {
             try {
-                if (class_exists('\local_subscriptions\mailer') && method_exists('\local_subscriptions\mailer', 'send_cancellation_info')) {
-                    $user    = \core_user::get_user($rec->userid, '*', MUST_EXIST); // user complet
-                    $planrec = $DB->get_record('subscription_plan', ['id' => $rec->planid], '*', MUST_EXIST);
+                $user    = \core_user::get_user($rec->userid, '*', MUST_EXIST); // user complet
+                $planrec = $DB->get_record('subscription_plan', ['id' => $rec->planid], '*', MUST_EXIST);
 
-                    // On passe atperiodend=1 et un hint de fin (cpe) si dispo pour remplir la "Période"
-                    \local_subscriptions\mailer::send_cancellation_info(
-                        $user,
-                        $planrec,
-                        $rec,
-                        1,          // atperiodend
-                    );
-                }
+                // On passe atperiodend=1 et un hint de fin (cpe) si dispo pour remplir la "Période"
+                \local_subscriptions\mailer::send_cancellation_info(
+                    $user,
+                    $planrec,
+                    $rec,
+                    1,          // atperiodend
+                );
             } catch (\Throwable $ex) {
                 error_log('[subs][mail][cape_notice] '.$ex->getMessage());
                 // On ne casse jamais le flux
@@ -377,12 +353,12 @@ class SubscriptionService {
         }
 
         // 4) Journaliser l’update (même s’il n’y a pas eu de modif locale, pour audit)
-        self::log_subscription_event(
+        EventLogger::log(
             (int)$rec->id,
             'subscription_updated',
             $e->meta['event_id'] ?? null,   // <= on logge l'id de l'event Stripe
             [
-                'provider'               => 'stripe',
+                'provider'               => ProviderSelector::resolve_provider($pr ?? null, $e->meta ?? null, $rec ?? null),
                 'provider_sub'           => $providersub,
                 'status'                 => $stat,
                 'current_period_start'   => $cps ?: null,
@@ -393,24 +369,5 @@ class SubscriptionService {
         );
     
     }
-
-
-    // --- ADD: logger centralisé pour subscription_event ---
-    private static function log_subscription_event(int $subscriptionid, string $eventtype, ?string $providerid, array $meta = []): void {
-        global $DB;
-        // Par sécurité (dev / upgrade en cours)
-        if (!$DB->get_manager()->table_exists('subscription_event')) {
-            return;
-        }
-        $rec = (object)[
-            'subscriptionid'    => $subscriptionid,
-            'eventtype'         => $eventtype,          // ex: invoice_paid, invoice_failed, subscription_canceled
-            'provider_event_id' => $providerid,         // ex: invoice id (in_...), sinon null
-            'occurred_at'       => time(),
-            'payload_json'      => json_encode($meta ?? [], JSON_UNESCAPED_UNICODE),
-        ];
-        $DB->insert_record('subscription_event', $rec);
-    }
-
 
 }

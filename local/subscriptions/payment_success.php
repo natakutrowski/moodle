@@ -1,12 +1,15 @@
 <?php
-// local/subscriptions/payment_success.php
+
 require_once(__DIR__ . '/../../config.php');
+
+use local_subscriptions\url\UrlFactory;
+use local_subscriptions\constants\Status;
 
 $prid       = required_param('pid', PARAM_INT);
 $session_id = optional_param('session_id', '', PARAM_RAW_TRIMMED); // Stripe remplit ce placeholder
 $token      = optional_param('t', '', PARAM_ALPHANUMEXT);          // jeton à usage unique
 
-$PAGE->set_url(new moodle_url('/local/subscriptions/payment_success.php', ['pid' => $prid]));
+$PAGE->set_url(UrlFactory::payment_success(['pid' => $prid]));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('payment_success_title', 'local_subscriptions'));
@@ -17,7 +20,7 @@ global $DB, $CFG, $SITE;
 $pr = $DB->get_record('subscription_payment_request', ['id' => $prid], '*', IGNORE_MISSING);
 
 // Si la PR est payée et qu'on a un jeton valide, et que l'utilisateur n'est pas loggé → auto-login sécurisé
-if ($pr && in_array($pr->status ?? '', ['paid','completed'], true) && (!isloggedin() || isguestuser())) {
+if ($pr && in_array($pr->status ?? '', [Status::PAID,Status::COMPLETED], true) && (!isloggedin() || isguestuser())) {
     $tokvalid = !empty($token) && !empty($pr->login_token)
         && hash_equals((string)$pr->login_token, (string)$token)
         && !empty($pr->login_token_expires) && (int)$pr->login_token_expires >= time();
@@ -56,14 +59,14 @@ if ($pr && in_array($pr->status ?? '', ['paid','completed'], true) && (!islogged
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($SITE->fullname));
 
-if ($pr && in_array($pr->status ?? '', ['paid','completed'], true)) {
+if ($pr && in_array($pr->status ?? '', [Status::PAID,Status::COMPLETED], true)) {
     // Paiement validé (webhook passé)
     echo $OUTPUT->notification(get_string('payment_success_thanks', 'local_subscriptions'), \core\output\notification::NOTIFY_SUCCESS);
 
     // Si l'utilisateur est déjà connecté (compte existant), lien rapide vers tableau de bord
     if (isloggedin() && !isguestuser()) {
         echo html_writer::div(
-            html_writer::link(new moodle_url('/user/my_subscriptions.php'), get_string('view_my_subscriptions', 'local_subscriptions')),
+            html_writer::link(UrlFactory::my_subscriptions(), get_string('view_my_subscriptions', 'local_subscriptions')),
             'my-4'
         );
     } else {
@@ -79,13 +82,16 @@ if ($pr && in_array($pr->status ?? '', ['paid','completed'], true)) {
     echo $OUTPUT->notification(get_string('payment_pending_msg', 'local_subscriptions'), \core\output\notification::NOTIFY_INFO);
 
     echo html_writer::div(
-        html_writer::link(new moodle_url('/subscribe.php'), get_string('back_to_plans', 'local_subscriptions')),
+        html_writer::link(UrlFactory::subscribe(), get_string('back_to_plans', 'local_subscriptions')),
         'my-4'
     );
 
     // Indication utile au support
-    if ($session_id) {
-        echo html_writer::div('Session: '.s($session_id), 'text-muted small');
+    if (!empty($session_id)) {
+        echo html_writer::div(
+            get_string('sessiondisplay', 'local_subscriptions', $session_id),
+            'text-muted small'
+        );
     }
 }
 

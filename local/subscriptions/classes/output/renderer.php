@@ -4,6 +4,8 @@ namespace local_subscriptions\output;
 defined('MOODLE_INTERNAL') || die();
 
 use plugin_renderer_base;
+use local_subscriptions\url\UrlFactory;
+use local_subscriptions\constants\Status;
 
 class renderer extends plugin_renderer_base {
 
@@ -14,8 +16,8 @@ class renderer extends plugin_renderer_base {
         $accessscopes = [];
         $data = [
             'subscriptions' => [],
-            'mysubs_url'    => (new \moodle_url('/user/my_subscriptions.php'))->out(false),
-            'subscribe_url' => (new \moodle_url('/subscribe.php'))->out(false),
+            'mysubs_url'    => (UrlFactory::my_subscriptions())->out(false),
+            'subscribe_url' => (UrlFactory::subscribe())->out(false),
         ];
 
         foreach ($subscriptions as $sub) {
@@ -43,7 +45,7 @@ class renderer extends plugin_renderer_base {
             }
 
             $expired = $sub->end_date < time();
-            $statuskey = $expired ? 'expired' : 'active';
+            $statuskey = $expired ? Status::EXPIRED : Status::ACTIVE;
 
             $popovercontent = \html_writer::div(
                 \html_writer::alist($coursenames) .
@@ -137,9 +139,9 @@ class renderer extends plugin_renderer_base {
 
             // Badge
             if ($isPopular) {
-                $output .= \html_writer::div(get_string('popular_badge', 'local_subscriptions'), 'ls-badge-popular');
+                $output .= \html_writer::div(get_string('highlight_popular', 'local_subscriptions'), 'ls-badge-popular');
             } else if ($isPremium) {
-                $output .= \html_writer::div(get_string('premium_badge', 'local_subscriptions'), 'ls-badge-premium');
+                $output .= \html_writer::div(get_string('highlight_premium', 'local_subscriptions'), 'ls-badge-premium');
             }
 
             $titleclass = 'plan-title-neutral p-2 rounded mb-2 text-center';
@@ -152,7 +154,7 @@ class renderer extends plugin_renderer_base {
             }
             $output .= \html_writer::tag('p', get_string('duration', 'local_subscriptions') . ' : ' . $durationtext, ['class' => 'mb-1']);
      
-            $output .= \html_writer::tag('p', 'Liste des cours : ', ['class' => 'mb-1']);
+            $output .= \html_writer::tag('p', get_string('courselist','local_subscriptions').' : ', ['class' => 'mb-1']);
             $output .= \html_writer::div($courselist, 'plan-courselist mb-3');
 
 
@@ -219,10 +221,7 @@ class renderer extends plugin_renderer_base {
             }
 
             $output .= \html_writer::link(
-                new \moodle_url('/local/subscriptions/checkout.php', [
-                    'planid' => $plan->id,
-                    'currency' => $defaultcurrency
-                ]),
+                UrlFactory::checkout($plan->id, $defaultcurrency),
                 get_string('subscribe', 'local_subscriptions'),
                 [
                     'class' => $btnclass,

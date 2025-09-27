@@ -1,6 +1,8 @@
 <?php
 namespace local_subscriptions\task;
 
+use local_subscriptions\constants\Status;
+
 defined('MOODLE_INTERNAL') || die();
 
 class followup_task extends \core\task\scheduled_task {
@@ -25,11 +27,11 @@ class followup_task extends \core\task\scheduled_task {
 
         // A) Expirer les pending trop anciens (aucun email ici).
         $prsA = $DB->get_records_select('subscription_payment_request',
-            "status='pending' AND :now - creation_date >= :age",
+            "status='".Status::PENDING."' AND :now - creation_date >= :age",
             ['now' => $now, 'age' => $ageToExpire]
         );
         foreach ($prsA as $pr) {
-            $pr->status = 'expired';
+            $pr->status = Status::EXPIRED;
             $pr->last_attempt = $now;
             $DB->update_record('subscription_payment_request', $pr);
             // Pas d’email ici → R1 s’en chargera selon l’âge.
@@ -38,7 +40,7 @@ class followup_task extends \core\task\scheduled_task {
         // B) Rappels selon âge + étape.
         // On cible tous les statuts à relancer.
         $prs = $DB->get_records_select('subscription_payment_request',
-            "status IN ('pending','failed','expired')", []);
+            "status IN ('".Status::PENDING."','".Status::FAILED."','".Status::EXPIRED."')", []);
 
         foreach ($prs as $pr) {
             $age = $now - (int)$pr->creation_date;
@@ -56,8 +58,8 @@ class followup_task extends \core\task\scheduled_task {
                     $pr->reminder_stage = 2;
                     $pr->reminder2_at   = $now;
                     // Optionnel: si encore pending à ce stade, force expired
-                    if ($pr->status === 'pending') {
-                        $pr->status = 'expired';
+                    if ($pr->status === Status::PENDING) {
+                        $pr->status = Status::EXPIRED;
                     }
                     $DB->update_record('subscription_payment_request', $pr);
                     continue;
@@ -80,8 +82,8 @@ class followup_task extends \core\task\scheduled_task {
                     \local_subscriptions\mailer::send_reminder_second($pr); // R2
                     $pr->reminder_stage = 2;
                     $pr->reminder2_at   = $now;
-                    if ($pr->status === 'pending') {
-                        $pr->status = 'expired';
+                    if ($pr->status === Status::PENDING) {
+                        $pr->status = Status::EXPIRED;
                     }
                     $DB->update_record('subscription_payment_request', $pr);
                 }

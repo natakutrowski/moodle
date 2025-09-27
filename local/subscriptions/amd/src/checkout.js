@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-define([], function() {
+define(['core/str'], function(str) {
     function qs(sel, ctx) { return (ctx || document).querySelector(sel); }
     function qsa(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
 
@@ -52,10 +52,9 @@ define([], function() {
         if (!summary) return;
 
         if (!chosen) {
-            // string côté PHP : summary_price_wait
-            summary.textContent = (document.documentElement.lang || '').startsWith('fr')
-                ? 'Sélectionnez une option pour voir le prix total.'
-                : 'Select an option to see the total price.';
+            str.get_string('summary_price_wait', 'local_subscriptions')
+                .done(function(s) { summary.textContent = s; })
+                .fail(function()  { summary.textContent = '...'; });
             return;
         }
         const amount   = parseFloat(chosen.getAttribute('data-amount') || '0');

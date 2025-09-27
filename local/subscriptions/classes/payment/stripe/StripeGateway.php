@@ -2,18 +2,21 @@
 namespace local_subscriptions\payment\stripe;
 
 use local_subscriptions\payment\PaymentGatewayInterface;
+use local_subscriptions\payment\PortalGatewayInterface;
 use local_subscriptions\payment\dto\{CheckoutInitResult, InternalEvent, ProviderActionResult, ProviderCapabilities};
+use local_subscriptions\url\UrlFactory;
+use local_subscriptions\payment\Provider;
 use stdClass;
 
-final class StripeGateway implements PaymentGatewayInterface {
+final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInterface {
 
     private function cfg(): array {
         return [
-            'secret_key'     => get_config('local_subscriptions', 'stripe_secret_key') ?? '',
-            'webhook_secret' => get_config('local_subscriptions', 'stripe_webhook_secret') ?? '',
-            'success_url' => (new \moodle_url('/local/subscriptions/payment_success.php'))->out(false),
-            'cancel_url'  => (new \moodle_url('/local/subscriptions/payment_cancel.php'))->out(false),
-            'portal_return'  => (new \moodle_url('/local/subscriptions/profile.php'))->out(false),
+            'secret_key'        => get_config('local_subscriptions', 'stripe_secret_key') ?? '',
+            'webhook_secret'    => get_config('local_subscriptions', 'stripe_webhook_secret') ?? '',
+            'success_url'       => (UrlFactory::payment_success())->out(false),
+            'cancel_url'        => (UrlFactory::payment_cancel())->out(false),
+            'portal_return'     => (UrlFactory::my_subscriptions())->out(false),
         ];
     }
 
@@ -24,7 +27,6 @@ final class StripeGateway implements PaymentGatewayInterface {
 
         $cfg = $this->cfg();
         \Stripe\Stripe::setApiKey($cfg['secret_key']);
-
 
         $params = [
             'mode' => $mode,
@@ -38,11 +40,11 @@ final class StripeGateway implements PaymentGatewayInterface {
 
         if ($mode === 'payment') {
             $amountMinor = isset($payment_request->price) ? (int)round(((float)$payment_request->price) * 100) : null;
-            if ($amountMinor === null) { throw new \coding_exception('Missing amount on payment_request'); }
+            if ($amountMinor === null) { throw new \coding_exception(get_string('stripe:missingamount', 'local_subscriptions')); }
             $params['line_items'] = [[
                 'price_data' => [
                     'currency' => $payment_request->currency,
-                    'product_data' => ['name' => $options['product_name'] ?? 'CampusFR plan'],
+                    'product_data' => ['name' => $options['product_name'] ?? get_string('stripe:productname', 'local_subscriptions', 'CampusFR')],
                     'unit_amount' => $amountMinor,
                 ],
                 'quantity' => 1,
@@ -52,7 +54,7 @@ final class StripeGateway implements PaymentGatewayInterface {
             ];
         } else {
             if (!$priceId) {
-                throw new \coding_exception('Missing stripe_price_id for subscription');
+                throw new \coding_exception(get_string('stripe:missingpriceidforsubscription', 'local_subscriptions'));
             }
             $params['line_items'] = [[ 'price' => $priceId, 'quantity' => 1 ]];  
             $params['subscription_data'] = [
@@ -94,7 +96,7 @@ final class StripeGateway implements PaymentGatewayInterface {
                     'provider_customer_id'     => $obj->customer ?? null,
                     'provider_subscription_id' => $obj->subscription ?? null,
                     'meta' => [
-                        'provider'       => 'stripe',
+                        'provider'       => Provider::STRIPE,
                         'session'        => $obj->id,
                         'customer_email' => $customerEmail, // utile côté service
                     ],
@@ -103,7 +105,7 @@ final class StripeGateway implements PaymentGatewayInterface {
 
             case 'checkout.session.expired': {
                 return new InternalEvent('checkout_expired', [
-                    'meta' => ['provider' => 'stripe', 'session' => $obj->id],
+                    'meta' => ['provider' => Provider::STRIPE, 'session' => $obj->id],
                 ]);
             }
 
@@ -128,7 +130,7 @@ final class StripeGateway implements PaymentGatewayInterface {
                     'amount_minor'             => $amount,
                     'currency'                 => $currency,
                     'meta' => [
-                        'provider'           => 'stripe',
+                        'provider'           => Provider::STRIPE,
                         'event_id'           => $evtId,   // evt_...
                         'invoice'            => $invoice, // in_...
                         'billing_reason'     => $obj->billing_reason ?? null,
@@ -159,7 +161,7 @@ final class StripeGateway implements PaymentGatewayInterface {
                     'amount_minor'             => $amount,
                     'currency'                 => $currency,
                     'meta' => [
-                        'provider'             => 'stripe',
+                        'provider'             => Provider::STRIPE,
                         'event_id'             => $evtId,
                         'invoice'              => $invoice,
                         'billing_reason'       => $obj->billing_reason ?? null,
@@ -174,7 +176,7 @@ final class StripeGateway implements PaymentGatewayInterface {
                 return new InternalEvent('subscription_canceled', [
                     'provider_subscription_id' => $obj->id ?? null,
                     'meta' => [
-                        'provider' => 'stripe',
+                        'provider' => Provider::STRIPE,
                         // optionnel: si tu veux passer un hint d’échéance
                         'event_id'             => $event->id,              // <-- AJOUT
                         'current_period_end'   => $obj->current_period_end ?? null,
@@ -196,7 +198,7 @@ final class StripeGateway implements PaymentGatewayInterface {
                 return new InternalEvent('subscription_updated', [
                     'provider_subscription_id' => $subid,
                     'meta' => [
-                        'provider'             => 'stripe',
+                        'provider'             => Provider::STRIPE,
                         'event_id'             => $evtId,
                         'status'               => $stat,
                         'current_period_start' => $cps,
@@ -208,7 +210,7 @@ final class StripeGateway implements PaymentGatewayInterface {
 
             default:
                 return new InternalEvent('subscription_updated', [
-                    'meta' => ['provider' => 'stripe', 'raw' => $type],
+                    'meta' => ['provider' => Provider::STRIPE, 'raw' => $type],
                 ]);
         }
     }
@@ -233,7 +235,7 @@ final class StripeGateway implements PaymentGatewayInterface {
         $this->ensure_sdk();
         \Stripe\Stripe::setApiKey($this->cfg()['secret_key']);
         $newPrice = $opts['price_id'] ?? null;
-        if (!$newPrice) { return new ProviderActionResult(false, 'Missing price_id'); }
+        if (!$newPrice) { return new ProviderActionResult(false, get_string('stripe:missingpriceid', 'local_subscriptions')); }
         $sub = \Stripe\Subscription::retrieve($provider_subscription_id);
         $itemId = $sub->items->data[0]->id ?? null;
         \Stripe\Subscription::update($provider_subscription_id, [
@@ -279,8 +281,31 @@ final class StripeGateway implements PaymentGatewayInterface {
             require_once($path);
             $done = true;
         } else {
-            throw new \coding_exception('Stripe SDK autoload not found at '.$path);
+            throw new \coding_exception(get_string('stripe:sdkautoloadnotfound', 'local_subscriptions', $path));
         }
     }
+
+    public function create_portal_session(array $ctx) {
+        // Expects: provider_customer_id (cus_xxx), return_url
+        $customer = $ctx['provider_customer_id'] ?? null;
+        $return   = $ctx['return_url'] ?? (UrlFactory::my_subscriptions())->out(false);
+
+        if (!$customer) {
+            // Si tu peux le retrouver depuis la sub.provider_subscription_id -> lookup Stripe sub -> customer
+            // ou renvoyer une erreur propre
+            throw new \moodle_exception('missing_customer_id', 'local_subscriptions');
+        }
+
+        $this->ensure_sdk(); // si tu as déjà ce helper
+        \Stripe\Stripe::setApiKey($this->cfg()['secret_key']);
+
+        $session = \Stripe\BillingPortal\Session::create([
+            'customer'   => $customer,
+            'return_url' => $return,
+        ]);
+        // Retourne un DTO ou un array simple – à toi de voir selon ton interface existante
+        return ['url' => $session->url];
+    }
+
 
 }

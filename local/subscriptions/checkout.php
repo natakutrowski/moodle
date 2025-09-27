@@ -1,9 +1,12 @@
 <?php
-// local/subscriptions/checkout.php
+
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/local/subscriptions/lib.php');
 
+use local_subscriptions\url\UrlFactory;
 use local_subscriptions\domain\SubscriptionAdvisor;
+use local_subscriptions\constants\Operation;
+use local_subscriptions\constants\Status;
 
 $planid   = required_param('planid', PARAM_INT);
 $currency = optional_param('currency', '', PARAM_ALPHANUMEXT); // ex: 'eur'
@@ -24,15 +27,14 @@ if (!empty($userid)) {
         SELECT s.*
           FROM {user_subscription} s
           JOIN {subscription_plan} p ON p.id = s.planid
-         WHERE s.userid = :u AND s.status = 'active' AND p.accessscopeid = :scope
-      ORDER BY s.end_date DESC, s.id DESC
-         LIMIT 1
+          WHERE s.userid = :u AND s.status = '".Status::ACTIVE."' AND p.accessscopeid = :scope
+          ORDER BY s.end_date DESC, s.id DESC
+          LIMIT 1
     ", ['u' => $userid, 'scope' => (int)$plan->accessscopeid]);
     if ($currsub) {
         $currplan = $DB->get_record('subscription_plan', ['id' => $currsub->planid], '*', MUST_EXIST);
     }
 }
-
 
 // Devise choisie (ou première dispo).
 if ($currency === '') {
@@ -46,7 +48,7 @@ $price = (float)$priceobj->price;
 // Si pas connecté (achat invité), ne propose pas upgrade -> achat standard :
 if (!$userid || empty($options)) {
     $options = [[
-        'key'       => 'purchase_new',
+        'key'       => Operation::PURCHASE_NEW,
         'label'     => get_string('option_purchase_new', 'local_subscriptions'),
         'amount'    => $price, // ton prix déjà calculé pour le plan
         'currency'  => $currency,
@@ -55,7 +57,7 @@ if (!$userid || empty($options)) {
 }
 
 // Texte d’aide au-dessus des options (selon le contexte)
-$hasupgrade = array_reduce($options, fn($c,$o)=>$c || ($o['key']==='upgrade_prorata'), false);
+$hasupgrade = array_reduce($options, fn($c,$o)=>$c || ($o['key']===Operation::UPGRADE_NOW_REPLACE_CHAIN), false);
 if ($userid) {
     $helptext = $hasupgrade
         ? get_string('advisor_help_upgrade', 'local_subscriptions')
@@ -64,25 +66,29 @@ if ($userid) {
     $helptext = get_string('advisor_help_guest', 'local_subscriptions');
 }
 
-// Texte durée (à partir de duration_key).
-$durationkey = $plan->duration_key ?? '1year';
-$durationmap = [
-    '1month' => '1 month',
-    '3months'=> '3 months',
-    '6months'=> '6 months',
-    '1year'  => '1 year',
-    '2years' => '2 years',
-    '3years' => '3 years',
-];
-$durationtext = $durationmap[$durationkey] ?? '1 year';
+// Texte durée (à partir de duration_key) — i18n + centralisé.
+$durationkey = trim(mb_strtolower($plan->duration_key ?? '1year'));
+
+// Récupère le mapping clé → libellé depuis la config (plan_… dans lang)
+$labels = \local_subscriptions\subscription_config::get_plans();
+
+// libellé connu ou fallback sur 1 an
+$durationtext = $labels[$durationkey] ?? ($labels['1year'] ?? get_string('plan_1year','local_subscriptions'));
+
 
 // Page bootstrap.
-$PAGE->set_url(new moodle_url('/local/subscriptions/checkout.php', ['planid' => $planid, 'currency' => $currency]));
+$PAGE->set_url(UrlFactory::checkout($planid, $currency));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('checkout_title', 'local_subscriptions'));
 $PAGE->set_heading(format_string($SITE->fullname));
 $PAGE->requires->css('/local/subscriptions/styles.css');
+
+$PAGE->requires->strings_for_js(
+    ['summary_price_wait', 'existing_account_hint_html'],
+    'local_subscriptions'
+);
+$PAGE->requires->js_call_amd('local_subscriptions/guest_email_hint', 'init');
 $PAGE->requires->js_call_amd('local_subscriptions/checkout', 'init');
 
 // Rendu.
@@ -90,10 +96,9 @@ echo $OUTPUT->header();
 
 // Fil d’ariane simple.
 echo html_writer::div(
-    html_writer::link(new moodle_url('/local/subscriptions/subscribe.php'), get_string('back_to_plans', 'local_subscriptions')),
+    html_writer::link(UrlFactory::subscribe(), get_string('back_to_plans', 'local_subscriptions')),
     'mb-3'
 );
-
 
 // Carte récap plan.
 echo html_writer::start_div('card shadow-sm mb-4');
@@ -143,7 +148,7 @@ if (!empty($plan->courses)) {
     $courselist .= \html_writer::end_tag('ul');
 }
 // Injecte le rendu dans le corps de carte :
-$body .= \html_writer::tag('p', 'Liste des cours : ', ['class' => 'mb-1']);
+$body .= \html_writer::tag('p', get_string('courselist','local_subscriptions').' : ', ['class' => 'mb-1']);
 $body .= html_writer::div($courselist, 'plan-courselist mb-3');
 
 // Ajout du JS pour toggler la description
@@ -167,7 +172,7 @@ echo html_writer::div($body, 'card-body');
 echo html_writer::start_div('card p-3 bg-light-subtle');
 
 $formattrs = [
-    'action' => (new moodle_url('/local/subscriptions/stripe/create_session.php'))->out(false),
+    'action' => (UrlFactory::create_session())->out(false),
     'method' => 'post',
     'class'  => 'ls-checkout-form',
 ];
@@ -256,7 +261,7 @@ foreach ($options as $i => $opt) {
 
 
     // prix dans l’étiquette (barré + vert si upgrade moins cher)
-    $isupgrade = (strpos($opt['key'], 'upgrade_') === 0);
+    $isupgrade = (strpos($opt['key'], Operation::UPGRADE_NOW_REPLACE_CHAIN) === 0);
 
     if ($isupgrade && $amt < $base) {
         $pricehtml =
@@ -286,7 +291,6 @@ foreach ($options as $i => $opt) {
     $labelHtml = $opt['label'] . ' — ' . $pricehtml;
     echo html_writer::label($labelHtml, $id, false, ['class' => 'form-check-label']);
 
-    $isupgrade = (strpos($opt['key'], 'upgrade_') === 0);
     if ($isupgrade && $currsub && $currplan) {
         $body = local_subs_upgrade_calc_body($opt, $currplan, $plan, $currsub, $currency); // HTML BRUT
 
@@ -329,7 +333,7 @@ echo html_writer::label(get_string('checkout_consent_label', 'local_subscription
 echo html_writer::end_div();
 
 // Bouton principal (désactivé tant qu’aucune option & terms non cochés)
-$btntext = $isguest ? get_string('checkout_subscribe', 'local_subscriptions') : get_string('checkout_go_to_payment', 'local_subscriptions');
+$btntext = $isguest ? get_string('subscribe', 'local_subscriptions') : get_string('checkout_go_to_payment', 'local_subscriptions');
 echo html_writer::tag('button', $btntext, [
     'type' => 'submit',
     'class' => 'btn btn-outline-primary subscribe-button w-100 fs-5',
@@ -341,10 +345,5 @@ echo html_writer::end_div();
 
 echo html_writer::end_tag('form');
 echo html_writer::end_div(); // .card p-3
-
-
-
-
-$PAGE->requires->js_call_amd('local_subscriptions/guest_email_hint', 'init');
 
 echo $OUTPUT->footer();

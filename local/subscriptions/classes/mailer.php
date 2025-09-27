@@ -1,72 +1,127 @@
 <?php
 namespace local_subscriptions;
 
+use local_subscriptions\url\UrlFactory;
+
 defined('MOODLE_INTERNAL') || die();
 
 class mailer {
 
-    private static function render_email_layout(string $title, string $bodyhtml, ?string $buttonlabel = null, ?string $buttonurl = null): array {
-        global $SITE;
-        // Couleurs & logo (tu peux plus tard lire ça depuis des settings du plugin).
-        $brandname = $SITE->fullname;
-        $brandcolor = '#005f73'; // ta teinte
-        $brandcolorDark = '#013140';
-        $logo = get_config('local_subscriptions', 'brand_logo_url') ?: ''; // optionnel
+    /** Mode preview (dry-run) pour les CLIs: n’envoie pas les emails mais capture le rendu. */
+    private static bool $preview = false;
+    /** Dernier rendu capturé: ['subject'=>..., 'html'=>..., 'text'=>...] */
+    private static ?array $last = null;
 
+    /** Active le mode preview (désactive l’envoi réel). */
+    public static function enable_preview(): void {
+        self::$preview = true;
+        self::$last = null;
+    }
+
+    /** Récupère le dernier rendu capturé (ou null). */
+    public static function get_last_render(): ?array {
+        return self::$last;
+    }
+
+
+    public static function render_email_layout(string $title, string $bodyhtml, ?string $buttonlabel = null, ?string $buttonurl = null): array {
+        global $SITE;
+
+        // ── Branding configurable (fallbacks sûrs) ──────────────────────────────────
+        $brandname  = $SITE->fullname;
+        $brandcolor = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
+        $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
+        $logo      = get_config('local_subscriptions', 'brand_logo_url') ?: '';
+
+        // ── Bouton (HTML) ───────────────────────────────────────────────────────────
         $btn = '';
         if ($buttonlabel && $buttonurl) {
             $btn = '
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;">
             <tr>
-                <td bgcolor="'.$brandcolor.'" style="border-radius:8px;">
-                <a href="'.s($buttonurl).'" style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;">'
-                    . s($buttonlabel) .
-                '</a>
+                <td bgcolor="'.s($brandcolor).'" style="border-radius:8px;">
+                <a href="'.s($buttonurl).'"
+                    style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;background:'.s($brandcolor).';"
+                    onmouseover="this.style.background=\''.s($brandcolorDark).'\';"
+                    onmouseout="this.style.background=\''.s($brandcolor).'\';"
+                >'.s($buttonlabel).'</a>
                 </td>
             </tr>
             </table>';
         }
 
-        $logoHtml = $logo ? '<img src="'.s($logo).'" height="32" style="display:block;border:0;outline:none;text-decoration:none;">' : '<strong style="font-size:16px;color:#111;">'.s($brandname).'</strong>';
+        // ── En-tête logo / marque ───────────────────────────────────────────────────
+        $logoHtml = $logo
+            ? '<img src="'.s($logo).'" height="32" alt="'.s($brandname).'" style="display:block;border:0;outline:none;text-decoration:none;">'
+            : '<strong style="font-size:16px;color:#111;">'.s($brandname).'</strong>';
 
-        $html = '<!doctype html><html><head><meta charset="utf-8"><meta name="x-apple-disable-message-reformatting"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"></head>
+        // ── i18n: pied de page et disclaimer ────────────────────────────────────────
+        $year = (int)date('Y');
+        $copyright = get_string('email_footer_copyright', 'local_subscriptions',
+            (object)['year'=>$year, 'brand'=>$brandname]);
+        $unexpected = get_string('email_footer_unexpected', 'local_subscriptions');
+
+        // (optionnel) note personnalisée admin
+        $footernote = (string)(get_config('local_subscriptions', 'email_footer_note') ?: '');
+
+        // ── HTML (avec dark-mode) ───────────────────────────────────────────────────
+        $html = '<!doctype html><html><head><meta charset="utf-8">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
+    <style>
+    @media (prefers-color-scheme: dark) {
+    body { background:#0b1220 !important; }
+    .ls-card { background:#111827 !important; box-shadow:none !important; }
+    .ls-border { border-color:#1f2937 !important; }
+    .ls-text { color:#e5e7eb !important; }
+    .ls-muted { color:#9ca3af !important; }
+    }
+    </style>
+    </head>
     <body style="margin:0;padding:0;background:#f6f9fc;">
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-        <tr><td align="center" style="padding:24px 12px;">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="620" style="max-width:620px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-            <tr>
-            <td style="padding:16px 20px;background:#ffffff;border-bottom:1px solid #eee;">
-                <table width="100%" role="presentation"><tr>
+    <tr><td align="center" style="padding:24px 12px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="620"
+            class="ls-card"
+            style="max-width:620px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+        <tr>
+            <td style="padding:16px 20px;background:#ffffff;border-bottom:1px solid #eee;" class="ls-border">
+            <table width="100%" role="presentation"><tr>
                 <td>'.$logoHtml.'</td>
-                <td align="right" style="font-size:12px;color:#6b7280;">'.date('Y-m-d').'</td>
-                </tr></table>
+                <td align="right" style="font-size:12px;color:#6b7280;" class="ls-muted">'.userdate(time(), get_string('strftimedate', 'langconfig')).'</td>
+            </tr></table>
             </td>
-            </tr>
-            <tr>
+        </tr>
+        <tr>
             <td style="padding:24px 24px 8px 24px;">
-                <h1 style="margin:0 0 12px 0;font-size:20px;line-height:1.4;color:#111111;">'.s($title).'</h1>
-                <div style="font-size:14px;line-height:1.7;color:#374151;">'.$bodyhtml.'</div>
-                '.$btn.'
+            <h1 style="margin:0 0 12px 0;font-size:20px;line-height:1.4;color:#111111;" class="ls-text">'.s($title).'</h1>
+            <div style="font-size:14px;line-height:1.7;color:#374151;" class="ls-text">'.$bodyhtml.'</div>
+            '.$btn.'
             </td>
-            </tr>
-            <tr>
-            <td style="padding:16px 24px 20px 24px;border-top:1px solid #eee;">
-                <div style="font-size:12px;color:#6b7280;">
-                © '.date('Y').' '.s($brandname).'. All rights reserved.
-                </div>
+        </tr>
+        <tr>
+            <td style="padding:16px 24px 20px 24px;border-top:1px solid #eee;" class="ls-border">
+            <div style="font-size:12px;color:#6b7280;" class="ls-muted">'
+                . s($copyright)
+                . ($footernote ? '<div style="margin-top:4px">'.format_text($footernote, FORMAT_HTML).'</div>' : '')
+            . '</div>
             </td>
-            </tr>
+        </tr>
         </table>
-        <div style="font-size:11px;color:#94a3b8;margin-top:10px;">If you didn’t expect this email, you can safely ignore it.</div>
-        </td></tr>
+        <div style="font-size:11px;color:#94a3b8;margin-top:10px;" class="ls-muted">'.s($unexpected).'</div>
+    </td></tr>
     </table>
     </body></html>';
 
-        // Version texte (fallback) – on strippe les balises.
-        $text = trim(html_entity_decode(strip_tags($title."\n\n".preg_replace('/<br\s*\/?>/i', "\n", $bodyhtml)."\n\n".($buttonurl ?: '')), ENT_QUOTES, 'UTF-8'));
+        // ── TEXTE (fallback) ────────────────────────────────────────────────────────
+        $btnline = ($buttonlabel && $buttonurl) ? ("\n\n".$buttonlabel.": ".$buttonurl) : '';
+        $text = $title."\n\n"
+            . html_entity_decode(strip_tags(preg_replace('/<(br|\/p|\/li)\s*\/?>/i', "\n", $bodyhtml)), ENT_QUOTES, 'UTF-8')
+            . $btnline."\n\n".$copyright."\n".$unexpected;
 
-        return [$html, $text];
+        return [$html, trim($text)];
     }
+
 
     private static function resolve_user_for_pr(\stdClass $pr): ?\stdClass {
         global $DB;
@@ -107,8 +162,8 @@ class mailer {
      */
     public static function send_welcome(\stdClass $user, string $tmpPassword, \stdClass $plan, \stdClass $paymentreq): void {
         global $SITE;
-        $support = \core_user::get_support_user();
-
+        $user = self::ensure_full_user($user);
+    
         $title = get_string('welcome_subject', 'local_subscriptions', $SITE->fullname);
         $loginurl = (new \moodle_url('/login/index.php'))->out(false);
 
@@ -116,7 +171,7 @@ class mailer {
         $planname = s($plan->name ?? '');
 
         $body = ''
-        . \html_writer::tag('p', get_string('welcome_hello', 'local_subscriptions', fullname($user)))
+        . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
         . \html_writer::tag('p', get_string('welcome_body_intro', 'local_subscriptions', $SITE->fullname))
         . \html_writer::start_tag('table', ['role'=>'presentation','cellspacing'=>'0','cellpadding'=>'0','border'=>'0','style'=>'margin:16px 0;font-size:14px;'])
         . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('welcome_username','local_subscriptions','').'</td><td style="padding:4px 8px;"><code style="background:#f3f4f6;padding:2px 6px;border-radius:6px;">'.s($user->username).'</code></td></tr>'
@@ -130,7 +185,7 @@ class mailer {
         $body .= self::pr_ref_badge($paymentreq);
         [$html, $text] = self::render_email_layout($title, $body, get_string('welcome_button_login','local_subscriptions'), $loginurl);
 
-        email_to_user($user, $support, $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
 
@@ -138,7 +193,7 @@ class mailer {
      * Envoie un reçu d'achat (branding Moodle). Le reçu Stripe continue d’être envoyé par Stripe.
      */
     public static function send_receipt(\stdClass $user, \stdClass $plan, \stdClass $paymentreq, \stdClass $sub): void {
-        $support = \core_user::get_support_user();
+        $user = self::ensure_full_user($user);
 
         $title   = get_string('receipt_title', 'local_subscriptions');
         $price   = format_float((float)($paymentreq->price ?? 0), 2).' '.strtoupper($paymentreq->currency ?? '');
@@ -148,19 +203,19 @@ class mailer {
 
         $coursesurl = (new \moodle_url('/'))->out(false); // ou vers une page “Mes cours”
         $body = ''
-        . \html_writer::tag('p', get_string('subupdate_hello', 'local_subscriptions', fullname($user)))
+        . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
         . \html_writer::tag('p', get_string('receipt_intro', 'local_subscriptions'))
         . \html_writer::start_tag('table', ['role'=>'presentation','cellspacing'=>'0','cellpadding'=>'0','border'=>'0','style'=>'margin:12px 0;font-size:14px;'])
-            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions','').'</td><td style="padding:4px 8px;">'.$planname.'</td></tr>'
-            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_amount','local_subscriptions','').'</td><td style="padding:4px 8px;">'.$price.'</td></tr>'
-            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_period','local_subscriptions','').'</td><td style="padding:4px 8px;">'.$period.'</td></tr>'
-            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_tx','local_subscriptions','').'</td><td style="padding:4px 8px;">'.$tx.'</td></tr>'
+            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions').'</td><td style="padding:4px 8px;">'.$planname.'</td></tr>'
+            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_amount','local_subscriptions').'</td><td style="padding:4px 8px;">'.$price.'</td></tr>'
+            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_period','local_subscriptions').'</td><td style="padding:4px 8px;">'.$period.'</td></tr>'
+            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_tx','local_subscriptions').'</td><td style="padding:4px 8px;">'.$tx.'</td></tr>'
         . \html_writer::end_tag('table');
 
         $body .= self::pr_ref_badge($paymentreq);
         [$html, $text] = self::render_email_layout($title, $body, get_string('receipt_button_open','local_subscriptions'), $coursesurl);
 
-        email_to_user($user, $support, $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
 
@@ -173,8 +228,7 @@ class mailer {
         \stdClass $paymentreq,
         \stdClass $sub
     ): void {
-        global $SITE;
-        $support = \core_user::get_support_user();
+        $user = self::ensure_full_user($user);
 
         // Sujet
         $title = get_string('subupdate_subject', 'local_subscriptions', format_string($plan->name ?? ''));
@@ -190,7 +244,7 @@ class mailer {
 
         // Corps
         $body = ''
-            . \html_writer::tag('p', get_string('subupdate_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
             . \html_writer::tag('p', get_string('subupdate_body', 'local_subscriptions', $planname))
             . \html_writer::start_tag('table', [
                 'role' => 'presentation',
@@ -214,15 +268,15 @@ class mailer {
         $body .= self::pr_ref_badge($paymentreq);
 
         // Bouton → page des abonnements
-        $url = (new \moodle_url('/local/subscriptions/profile.php'))->out(false);
+        $url = (UrlFactory::my_subscriptions())->out(false);
         [$html, $text] = self::render_email_layout(
             $title,
             $body,
-            get_string('subupdate_button_manage','local_subscriptions'),
+            get_string('mail_button_manage','local_subscriptions'),
             $url
         );
 
-        email_to_user($user, $support, $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
     public static function send_abandoned(\stdClass $pr): void {
@@ -233,6 +287,7 @@ class mailer {
             error_log('[subs][mailer] skip abandoned: no recipient for PR #'.$pr->id);
             return;
         }
+        $user = self::ensure_full_user($user);
 
         $plan = $DB->get_record('subscription_plan', ['id'=>$pr->planid], 'id,name', IGNORE_MISSING);
         $title = get_string('email_abandoned_subject', 'local_subscriptions');
@@ -242,13 +297,14 @@ class mailer {
 
         $body = \html_writer::tag('p', get_string('email_abandoned_intro', 'local_subscriptions'))
             . \html_writer::start_tag('table', ['role'=>'presentation','cellspacing'=>'0','cellpadding'=>'0','border'=>'0','style'=>'margin:12px 0;font-size:14px;'])
-            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions','').'</td><td style="padding:4px 8px;">'.$planname.'</td></tr>'
-            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_amount','local_subscriptions','').'</td><td style="padding:4px 8px;">'.$price.'</td></tr>'
+            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions').'</td><td style="padding:4px 8px;">'.$planname.'</td></tr>'
+            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_amount','local_subscriptions').'</td><td style="padding:4px 8px;">'.$price.'</td></tr>'
             . \html_writer::end_tag('table');
 
         $body .= self::pr_ref_badge($pr);
         [$html, $text] = self::render_email_layout($title, $body, get_string('email_button_retry', 'local_subscriptions'), $retryurl);
-        email_to_user($user, \core_user::get_support_user(), $title, $text, $html);
+        
+        self::deliver($user, $title, $html, $text);
     }
 
 
@@ -256,6 +312,7 @@ class mailer {
         global $DB;
         $user = self::resolve_user_for_pr($pr);
         if (!$user) { return; }
+        $user = self::ensure_full_user($user);
 
         $plan = $DB->get_record('subscription_plan', ['id'=>$pr->planid], 'id,name', IGNORE_MISSING);
         $title = get_string('email_failed_subject', 'local_subscriptions');
@@ -263,33 +320,38 @@ class mailer {
         $planname = s($plan->name ?? '');
         $retryurl = self::build_retry_url($pr);
 
-        $body = \html_writer::tag('p', get_string('subupdate_hello', 'local_subscriptions', s(trim(($user->firstname ?? '').' '.($user->lastname ?? '')))))
+        $body = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', s(trim(($user->firstname ?? '').' '.($user->lastname ?? '')))))
             . \html_writer::tag('p', get_string('email_failed_intro', 'local_subscriptions'))
             . \html_writer::start_tag('table', ['role'=>'presentation','cellspacing'=>'0','cellpadding'=>'0','border'=>'0','style'=>'margin:12px 0;font-size:14px;'])
-            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions','').'</td><td style="padding:4px 8px;">'.$planname.'</td></tr>'
-            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_amount','local_subscriptions','').'</td><td style="padding:4px 8px;">'.$price.'</td></tr>'
+            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions').'</td><td style="padding:4px 8px;">'.$planname.'</td></tr>'
+            . '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_amount','local_subscriptions').'</td><td style="padding:4px 8px;">'.$price.'</td></tr>'
             . \html_writer::end_tag('table')
             . \html_writer::tag('p', get_string('email_failed_help', 'local_subscriptions'));
 
         $body .= self::pr_ref_badge($pr);
         [$html, $text] = self::render_email_layout($title, $body, get_string('email_button_retry', 'local_subscriptions'), $retryurl);
-        email_to_user($user, \core_user::get_support_user(), $title, $text, $html);
+        
+        self::deliver($user, $title, $html, $text);
     }
 
     public static function send_reminder(\stdClass $pr): void {
         $user = self::resolve_user_for_pr($pr);
         if (!$user) { return; }
+        $user = self::ensure_full_user($user);
+
         $title = get_string('email_reminder_subject', 'local_subscriptions');
         $retryurl = self::build_retry_url($pr);
         $body = \html_writer::tag('p', get_string('email_reminder_intro', 'local_subscriptions'));
         $body .= self::pr_ref_badge($pr);
         [$html, $text] = self::render_email_layout($title, $body, get_string('email_button_retry', 'local_subscriptions'), $retryurl);
-        email_to_user($user, \core_user::get_support_user(), $title, $text, $html);
+        
+        self::deliver($user, $title, $html, $text);
     }
     
     public static function send_reminder_second(\stdClass $pr): void {
         $user = self::resolve_user_for_pr($pr);
         if (!$user || empty($user->email)) { error_log('[subs][mailer] skip R2: no recipient PR#'.$pr->id); return; }
+        $user = self::ensure_full_user($user);
 
         $title   = get_string('email_reminder2_subject', 'local_subscriptions'); // + strings EN ci-dessous
         $retryurl= self::build_retry_url($pr);
@@ -297,12 +359,13 @@ class mailer {
 
         $body .= self::pr_ref_badge($pr);
         [$html, $text] = self::render_email_layout($title, $body, get_string('email_button_retry', 'local_subscriptions'), $retryurl);
-        email_to_user($user, \core_user::get_support_user(), $title, $text, $html);
+        
+        self::deliver($user, $title, $html, $text);
     }
 
     public static function send_recurring_started(\stdClass $user, \stdClass $plan, \stdClass $pr): void {
-        global $SITE;
-
+        $user = self::ensure_full_user($user);
+        
         // Titre du mail (header du template)
         $title = get_string(
             'mail_recurring_started_subject',
@@ -313,7 +376,7 @@ class mailer {
         // Corps (sera injecté dans ton layout)
         $body  = \html_writer::tag(
             'p',
-            get_string('subupdate_hello', 'local_subscriptions', fullname($user))
+            get_string('mail_hello', 'local_subscriptions', fullname($user))
         );
         $body .= \html_writer::tag(
             'p',
@@ -330,16 +393,12 @@ class mailer {
 
         // Bouton → page des abonnements
         $buttontext = get_string('view_my_subscriptions', 'local_subscriptions');
-        $buttonurl  = (new \moodle_url('/local/subscriptions/profile.php'))->out(false);
+        $buttonurl  = (UrlFactory::my_subscriptions())->out(false);
 
         // Utilise TON layout (HTML + texte)
         [$html, $text] = self::render_email_layout($title, $body, $buttontext, $buttonurl);
 
-        // Forcer HTML sur le destinataire
-        $recipient = clone $user;
-        $recipient->mailformat = 1;
-
-        email_to_user($recipient, \core_user::get_support_user(), $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
     /**
@@ -348,7 +407,6 @@ class mailer {
      */
     public static function send_subscription_expiry_reminder(\stdClass $user, \stdClass $plan, \stdClass $sub, string $remindkey): void {
         $user = self::ensure_full_user($user);
-        $support = \core_user::get_support_user();
 
         $daysleft = [
             'd30' => 30,
@@ -364,7 +422,7 @@ class mailer {
         $title = get_string('expiry_reminder_subject', 'local_subscriptions', $daysleft);
 
         $body = ''
-            . \html_writer::tag('p', get_string('subupdate_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
             . \html_writer::tag('p', get_string('expiry_reminder_body', 'local_subscriptions', [
                 'plan' => $planname,
                 'date' => $enddate,
@@ -383,14 +441,12 @@ class mailer {
             . \html_writer::end_tag('table');
 
         // Bouton → page d’abonnement pour ce plan (prolonger/renouveler)
-        $buttonurl  = (new \moodle_url('/local/subscriptions/subscribe.php', ['planid' => (int)$sub->planid]))->out(false);
-        $buttontext = get_string('expiry_button_renew', 'local_subscriptions');
+        $buttonurl  = (UrlFactory::subscribe((int)$sub->planid))->out(false);
+        $buttontext = get_string('btn_renew_now', 'local_subscriptions');
 
         [$html, $text] = self::render_email_layout($title, $body, $buttontext, $buttonurl);
 
-        $recipient = clone $user;
-        $recipient->mailformat = 1;
-        email_to_user($recipient, $support, $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
     /**
@@ -398,14 +454,14 @@ class mailer {
      */
     public static function send_subscription_activated(\stdClass $user, \stdClass $plan, \stdClass $sub): void {
         $user = self::ensure_full_user($user);
-        $support  = \core_user::get_support_user();
+        
         $planname = format_string($plan->name ?? '');
         $period   = userdate((int)$sub->start_date) . ' → ' . userdate((int)$sub->end_date);
 
         $title = get_string('subscription_activated_subject', 'local_subscriptions', $planname);
 
         $body = ''
-            . \html_writer::tag('p', get_string('subupdate_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
             . \html_writer::tag('p', get_string('subscription_activated_body', 'local_subscriptions', $planname))
             . \html_writer::start_tag('table', [
                 'role' => 'presentation',
@@ -421,14 +477,12 @@ class mailer {
             . \html_writer::end_tag('table');
 
         // Bouton → "Voir mes abonnements"
-        $buttonurl  = (new \moodle_url('/local/subscriptions/profile.php'))->out(false);
+        $buttonurl  = (UrlFactory::my_subscriptions())->out(false);
         $buttontext = get_string('view_my_subscriptions', 'local_subscriptions');
 
         [$html, $text] = self::render_email_layout($title, $body, $buttontext, $buttonurl);
 
-        $recipient = clone $user;
-        $recipient->mailformat = 1;
-        email_to_user($recipient, $support, $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
     /**
@@ -436,7 +490,7 @@ class mailer {
      */
     public static function send_subscription_expired(\stdClass $user, \stdClass $plan, \stdClass $sub): void {
         $user = self::ensure_full_user($user);
-        $support  = \core_user::get_support_user();
+        
         $planname = format_string($plan->name ?? '');
         $period   = userdate((int)$sub->start_date) . ' → ' . userdate((int)$sub->end_date);
         $enddate  = userdate((int)$sub->end_date);
@@ -444,7 +498,7 @@ class mailer {
         $title = get_string('subscription_expired_subject', 'local_subscriptions', $planname);
 
         $body = ''
-            . \html_writer::tag('p', get_string('subupdate_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
             . \html_writer::tag('p', get_string('subscription_expired_body', 'local_subscriptions', [
                 'plan' => $planname,
                 'date' => $enddate,
@@ -463,18 +517,17 @@ class mailer {
             . \html_writer::end_tag('table');
 
         // Bouton → s’abonner de nouveau / prolonger
-        $buttonurl  = (new \moodle_url('/local/subscriptions/subscribe.php', ['planid' => (int)$sub->planid]))->out(false);
+        $buttonurl  = (UrlFactory::subscribe((int)$sub->planid))->out(false);
         $buttontext = get_string('expired_button_renew', 'local_subscriptions');
 
         [$html, $text] = self::render_email_layout($title, $body, $buttontext, $buttonurl);
 
-        $recipient = clone $user;
-        $recipient->mailformat = 1;
-        email_to_user($recipient, $support, $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
     public static function send_upgrade_confirmation(\stdClass $user, \stdClass $plan, \stdClass $pr, \stdClass $sub): void {
         $user = self::ensure_full_user($user);
+
         $title = get_string('upgrade_confirmed_subject', 'local_subscriptions', format_string($plan->name));
         $period = userdate((int)$sub->start_date).' → '.userdate((int)$sub->end_date);
 
@@ -497,7 +550,7 @@ class mailer {
             $paid = format_float($amt, 2).' '.strtoupper($cur);
         }
 
-        $body  = \html_writer::tag('p', get_string('subupdate_hello', 'local_subscriptions', fullname($user)));
+        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
         $body .= \html_writer::tag('p', get_string('upgrade_confirmed_body', 'local_subscriptions', format_string($plan->name)));
         $body .= \html_writer::start_tag('table', ['role'=>'presentation','cellspacing'=>'0','cellpadding'=>'0','border'=>'0','style'=>'margin:12px 0;font-size:14px;']);
         $body .= '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions').'</td><td style="padding:4px 8px;">'.format_string($plan->name).'</td></tr>';
@@ -507,13 +560,12 @@ class mailer {
         }
         $body .= \html_writer::end_tag('table');
 
-        $buttonurl  = (new \moodle_url('/local/subscriptions/profile.php'))->out(false);
+        $buttonurl  = (UrlFactory::my_subscriptions())->out(false);
         $buttontext = get_string('view_my_subscriptions', 'local_subscriptions');
 
         [$html, $text] = self::render_email_layout($title, $body, $buttontext, $buttonurl);
 
-        $recipient = clone $user; $recipient->mailformat = 1;
-        email_to_user($recipient, \core_user::get_support_user(), $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
 
@@ -526,11 +578,8 @@ class mailer {
         ?string $invoiceid = null,          // id de facture Stripe (optionnel)
         ?int $oldend = null                 // ancienne date de fin, pour afficher la nouvelle période
     ): void {
-        global $SITE;
 
         $user = self::ensure_full_user($user);
-
-        $support = \core_user::get_support_user();
 
         // Sujet : “Renouvellement confirmé – {Nom du plan}”
         $title = get_string('renewal_subject', 'local_subscriptions', format_string($plan->name ?? ''));
@@ -549,7 +598,7 @@ class mailer {
 
         // Corps HTML
         $body = ''
-            . \html_writer::tag('p', get_string('renewal_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
             . \html_writer::tag('p', get_string('renewal_body', 'local_subscriptions', format_string($plan->name ?? '')))
 
             . \html_writer::start_tag('table', [
@@ -579,19 +628,15 @@ class mailer {
         $body .= \html_writer::end_tag('table');
 
         // Bouton : aller vers “Mes abonnements”
-        $url = (new \moodle_url('/user/my_subscriptions.php'))->out(false);
+        $url = (UrlFactory::my_subscriptions())->out(false);
         [$html, $text] = self::render_email_layout(
             $title,
             $body,
-            get_string('renewal_button_manage', 'local_subscriptions'),
+            get_string('mail_button_manage', 'local_subscriptions'),
             $url
         );
 
-        // Forcer HTML
-        $recipient = clone $user;
-        $recipient->mailformat = 1;
-
-        email_to_user($recipient, $support, $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
     public static function send_failed_recurring($userOrSub, $plan = null, $sub = null,
@@ -611,15 +656,14 @@ class mailer {
 
         $user = self::ensure_full_user($user);
 
-        $support = \core_user::get_support_user();
         $title = get_string('recurring_failed_subject', 'local_subscriptions', format_string($plan->name ?? ''));
 
         $body = ''
-            . \html_writer::tag('p', get_string('recurring_failed_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
             . \html_writer::tag('p', get_string('recurring_failed_body', 'local_subscriptions', format_string($plan->name ?? '')));
 
         // Bouton → Customer Portal (Stripe)
-        $url = (new \moodle_url('/local/subscriptions/portal.php'))->out(false);
+        $url = (UrlFactory::portal())->out(false);
         [$html, $text] = self::render_email_layout(
             $title,
             $body,
@@ -627,9 +671,7 @@ class mailer {
             $url
         );
 
-        $recipient = clone $user;
-        $recipient->mailformat = 1;
-        email_to_user($recipient, $support, $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
     public static function send_cancellation_info($userOrSub, $plan = null, $sub = null, ?int $atperiodend = null): void {
@@ -653,7 +695,7 @@ class mailer {
         $period = userdate((int)$sub->start_date) . ' → ' . userdate((int)$sub->end_date);
 
         $body = ''
-            . \html_writer::tag('p', get_string('recurring_canceled_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
             . \html_writer::tag('p', get_string('recurring_canceled_body', 'local_subscriptions', format_string($plan->name ?? '')))
 
             . \html_writer::start_tag('table', [
@@ -673,9 +715,7 @@ class mailer {
             (new \moodle_url('/subscribe.php'))->out(false) // bouton "se réabonner"
         );
 
-        $recipient = clone $user;
-        $recipient->mailformat = 1;
-        email_to_user($recipient, $support, $title, $text, $html);
+        self::deliver($user, $title, $html, $text);
     }
 
     /** Helpers internes **/
@@ -701,14 +741,28 @@ class mailer {
         return (new \moodle_url('/local/subscriptions/retry_payment.php', ['pid'=>$pr->id,'t'=>$pr->retry_token]))->out(false);
     }
 
-    private static function pr_ref_badge(\stdClass $pr): string {
-        $ref = 'PR #'.(int)$pr->id;
-        if (!empty($pr->creation_date)) {
-            $ref .= ' · '.userdate((int)$pr->creation_date);
+    private static function pr_ref_badge(?\stdClass $pr): string {
+        // Masqué pour les clients; affiché seulement en preview/param admin
+        if (!self::show_tech_footers()) {
+            return '';
         }
-        return '<div style="margin-top:12px;font-size:11px;color:#94a3b8;">'.$ref.'</div>';
-    }
+        if (!$pr) { return ''; }
 
+        $parts = [];
+        if (isset($pr->id) && $pr->id) {
+            $parts[] = 'PR #'.(int)$pr->id; // (tu peux i18n si tu veux)
+        } else {
+            $parts[] = 'Preview';
+        }
+        if (!empty($pr->creation_date)) {
+            $parts[] = userdate((int)$pr->creation_date);
+        }
+        if (!$parts) { return ''; }
+
+        return '<div style="margin-top:12px;font-size:11px;color:#94a3b8;">'
+            . s(implode(' · ', $parts))
+            . '</div>';
+    }
 
     private static function ensure_full_user(\stdClass $user): \stdClass {
         // Si les champs problématiques sont déjà là, on ne refait pas de requête.
@@ -719,6 +773,42 @@ class mailer {
             return $user;
         }
         return \core_user::get_user($user->id, '*', MUST_EXIST);
+    }
+
+    /** Raccourci get_string avec composant. */
+    private static function t(string $key, $a = null): string {
+        return get_string($key, 'local_subscriptions', $a);
+    }    
+
+    /** Format monétaire major units (EUR, etc.). */
+    private static function money(float $amount, ?string $cur): string {
+        $cur = $cur ? strtoupper($cur) : '';
+        return format_float($amount, 2).' '.s($cur);
+    }
+
+    /** Envoi robuste (support user, try/catch). */
+    private static function deliver(\stdClass $user, string $subject, string $html, string $text): void {
+
+        // Mode preview: ne pas appeler email_to_user (évite le debugging() de noemailever)
+        if (self::$preview) {
+            self::$last = ['subject' => $subject, 'html' => $html, 'text' => $text];
+            return;
+        }
+
+        $recipient = self::ensure_full_user($user);
+        $recipient->mailformat = 1;
+        @email_to_user($recipient, \core_user::get_support_user(), $subject, $text, $html);
+    }    
+
+    /** Afficher les infos techniques (ex: PR#) ? Preview CLI ou setting admin. */
+    private static function show_tech_footers(): bool {
+        // Affiche en mode preview (CLI de prévisualisation)
+        if (property_exists(self::class, 'preview') && self::$preview === true) {
+            return true;
+        }
+        // Ou si activé explicitement par un setting admin (désactivé par défaut)
+        $cfg = (string)(get_config('local_subscriptions', 'email_show_pr_ref') ?? '0');
+        return $cfg === '1';
     }
 
 

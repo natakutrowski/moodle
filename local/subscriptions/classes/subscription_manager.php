@@ -1,6 +1,7 @@
 <?php
 namespace local_subscriptions;
 use local_subscriptions\subscription_config;
+use local_subscriptions\constants\Status;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -12,8 +13,8 @@ class subscription_manager {
 
         $now = time();
         $sql = "UPDATE {user_subscription}
-                SET status = 'expired'
-                WHERE status = 'active' AND end_date < :now";
+                SET status = '".Status::EXPIRED."'
+                WHERE status = '".Status::ACTIVE."' AND end_date < :now";
 
         $DB->execute($sql, ['now' => $now]);
     }
@@ -153,7 +154,7 @@ class subscription_manager {
 		$existing = $DB->get_record('user_subscription', [
 			'userid' => $userid,
 			'planid' => $planid,
-			'status' => 'active'
+			'status' => Status::ACTIVE
 		]);
 
 		if ($existing) {
@@ -182,7 +183,7 @@ class subscription_manager {
 			'end_date' => $end_date,
 			'pricepaid' => $pricepaid,
 			'currency' => $currency,
-			'status' => 'active',
+			'status' => Status::ACTIVE,
 			'creation_date' => $creation_date,
 			'last_update' => time()
 		];
@@ -219,7 +220,7 @@ class subscription_manager {
 
 		if (empty($data->id)) {
 			$data->creation_date = $data->creation_date ?? $now;
-			$data->status = $data->status ?? 'active';
+			$data->status = $data->status ?? Status::ACTIVE;
 			return $DB->insert_record('user_subscription', $data);
 		} else {
 			$data->last_update = $now;

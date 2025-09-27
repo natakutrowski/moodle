@@ -1,88 +1,107 @@
 <?php
-// local/subscriptions/portal.php
+
 require_once(__DIR__ . '/../../config.php');
+require_login();
 
-require_login(); // page protégée
+use local_subscriptions\payment\PaymentGatewayFactory;
+use local_subscriptions\url\UrlFactory;
+use local_subscriptions\payment\ProviderSelector;
+use local_subscriptions\payment\PortalGatewayInterface;
 
-$subid   = optional_param('subid', 0, PARAM_INT); // id user_subscription (optionnel)
-$return  = optional_param('returnurl', '', PARAM_RAW_TRIMMED); // optionnel
 
-$systemctx = context_system::instance();
-$PAGE->set_context($systemctx);
-$PAGE->set_url(new moodle_url('/local/subscriptions/portal.php', ['subid' => $subid]));
-$PAGE->set_pagelayout('base');
+$subid   = optional_param('subid', 0, PARAM_INT);
+$return  = optional_param('return', '', PARAM_LOCALURL); // optionnel: forcer un return url
 
-global $DB, $USER, $CFG;
+global $DB, $USER;
 
-// 1) Retrouver une souscription de l'utilisateur pour extraire le customer Stripe
-$params = ['userid' => $USER->id, 'provider' => 'stripe'];
-
-// a) Privilégier celle passée en ?subid=
+// 1) Résoudre la souscription cible
 $sub = null;
 if ($subid) {
-    $sub = $DB->get_record('user_subscription', ['id' => $subid, 'userid' => $USER->id], '*', IGNORE_MISSING);
+    $sub = $DB->get_record('user_subscription', ['id'=>$subid, 'userid'=>$USER->id], '*', IGNORE_MISSING);
 }
-// b) Sinon, prendre une souscription Stripe "active" la plus récente
 if (!$sub) {
-    $sub = $DB->get_record_sql(
-        "SELECT *
-           FROM {user_subscription}
-          WHERE userid = :userid
-            AND payment_provider = :provider
-            AND provider_customer_id IS NOT NULL
-       ORDER BY last_update DESC
-          LIMIT 1",
-        $params,
-        IGNORE_MISSING
-    );
+    // fallback: dernière active (ou la plus récente) pour cet utilisateur
+    $sub = $DB->get_record_sql("
+        SELECT *
+          FROM {user_subscription}
+         WHERE userid = :u
+      ORDER BY (status='active') DESC, end_date DESC, id DESC
+         LIMIT 1
+    ", ['u'=>$USER->id]);
+}
+if (!$sub) {
+    // rien à gérer -> profil
+    redirect(UrlFactory::my_subscriptions());
 }
 
-if (!$sub || empty($sub->provider_customer_id)) {
-    // Pas de customer_id connu → message doux et sortie
-    echo $OUTPUT->header();
-    echo $OUTPUT->notification(get_string('portal_no_customer', 'local_subscriptions'), \core\output\notification::NOTIFY_WARNING);
-    echo html_writer::div(html_writer::link(new moodle_url('/local/subscriptions/profile.php'),
-        get_string('view_my_subscriptions', 'local_subscriptions')), 'mt-3');
-    echo $OUTPUT->footer();
-    exit;
+// 2) Trouver le provider
+$provider = '';
+if (!empty($sub->payment_provider)) {
+    $provider = strtolower($sub->payment_provider);
+} else {
+    // fallback par la devise ou le plan (simple: EUR -> stripe; RUB -> alfa)
+    $plan = $DB->get_record('subscription_plan', ['id'=>$sub->planid], '*', MUST_EXIST);
+    $cur  = $sub->currency ?: $DB->get_field('subscription_payment_request','currency',['subscriptionid'=>$sub->id]) ?: 'EUR';
+    $provider = ProviderSelector::chooseForPlan(null, $cur, null);
 }
 
-// 2) Créer une session Customer Portal
-require_once($CFG->dirroot . '/local/subscriptions/vendor/autoload.php'); // ou /vendor/autoload.php si global
-$stripe_secret = get_config('local_subscriptions', 'stripe_secret_key') ?? get_config('local_subscriptions', 'stripe_secret');
-if (empty($stripe_secret)) {
-    throw new moodle_exception('configmissing', 'local_subscriptions', '', 'stripe_secret_key');
-}
-\Stripe\Stripe::setApiKey($stripe_secret);
-
-$returnurl = !empty($return) ? $return : (new moodle_url('/user/my_subscriptions.php'))->out(false);
-
-// Option: configuration du portail (pc_...) lue depuis la config plugin
-$portalconfig = get_config('local_subscriptions', 'stripe_portal_configuration_id'); // ex. pc_123...
-$params = [
-    'customer'   => $sub->provider_customer_id, // cus_...
-    'return_url' => $returnurl,
+// 3) Construire le contexte pour le gateway
+$ctx = [
+    'user_id'              => (int)$USER->id,
+    'subscription_id'      => $sub->provider_subscription_id ?? null, // ex: sub_xxx (Stripe)
+    'provider_customer_id' => $sub->provider_customer_id     ?? null, // ex: cus_xxx (Stripe)
+    'return_url'           => $return ?: UrlFactory::my_subscriptions()->out(false),
 ];
-if (!empty($portalconfig)) {
-    $params['configuration'] = $portalconfig;  // si configurée, on la force
+
+// 4) Récupérer le gateway & ses capacités
+$gw = PaymentGatewayFactory::for($provider);
+$supportsPortal = false;
+if (method_exists($gw, 'get_capabilities')) {
+    try {
+        $caps = $gw->get_capabilities(); // instance de ProviderCapabilities
+        if (is_object($caps) && property_exists($caps, 'supportsPortal')) {
+            $supportsPortal = (bool)$caps->supportsPortal;
+        }
+    } catch (\Throwable $e) {
+        // ignore, on tombe sur method_exists plus bas
+    }
 }
 
-try {
-    $session = \Stripe\BillingPortal\Session::create($params);
-    redirect($session->url);
-} catch (\Stripe\Exception\InvalidRequestException $ex) {
-    // Message propre pour l'utilisateur + consigne admin en log
-    debugging('[portal] Stripe portal error: '.$ex->getMessage(), DEBUG_DEVELOPER);
-    echo $OUTPUT->header();
-    echo $OUTPUT->notification(
-        get_string('portal_error_config', 'local_subscriptions'),
-        \core\output\notification::NOTIFY_ERROR
-    );
-    echo html_writer::div(
-        html_writer::link(new moodle_url('/user/my_subscriptions.php'), get_string('view_my_subscriptions', 'local_subscriptions')),
-        'mt-3'
-    );
-    echo $OUTPUT->footer();
-    exit;
+// 5) Si le gateway expose create_portal_session(), on l'utilise
+$portalUrl = '';
+
+if ($gw instanceof PortalGatewayInterface) {
+    try {
+        // $ctx contient: provider_customer_id, subscription_id (si utile), return_url
+        $res = $gw->create_portal_session($ctx);
+
+        // Compat: DTO avec getUrl() OU array['url']
+        $portalUrl = is_object($res) && method_exists($res, 'getUrl')
+            ? $res->getUrl()
+            : (is_array($res) ? ($res['url'] ?? '') : '');
+    } catch (\Throwable $ex) {
+        debugging('[portal] create_portal_session error: '.$ex->getMessage(), DEBUG_DEVELOPER);
+    }
 }
 
+// 6) Rediriger vers le portail si on a une URL
+if (!empty($portalUrl)) {
+    redirect(new \moodle_url($portalUrl));
+}
+
+// 7) Fallback : pas de portail -> afficher une page locale "Gérer mon paiement"
+$PAGE->set_url(UrlFactory::portal(['subid'=>$subid]));
+$PAGE->set_title(get_string('manage_billing', 'local_subscriptions'));
+$PAGE->set_heading(get_string('manage_billing', 'local_subscriptions'));
+echo $OUTPUT->header();
+
+echo $OUTPUT->notification(get_string('provider_portal_not_supported', 'local_subscriptions'), 'info');
+echo html_writer::tag('p', get_string('provider_portal_not_supported_desc', 'local_subscriptions', format_string($provider)));
+
+$profile = UrlFactory::my_subscriptions()->out(false);
+echo html_writer::div(
+    html_writer::link($profile, get_string('view_my_subscriptions', 'local_subscriptions'), ['class'=>'btn btn-primary']),
+    'mt-3'
+);
+
+echo $OUTPUT->footer();

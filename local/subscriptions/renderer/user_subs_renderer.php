@@ -3,6 +3,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\subscription_manager;
 use local_subscriptions\subscription_config;
+use local_subscriptions\url\UrlFactory;
+use local_subscriptions\support\SubsPresenter;
 
 class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
 
@@ -104,7 +106,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         // Bouton d'import
         $html .= html_writer::empty_tag('input', [
             'type' => 'submit',
-            'value' => get_string('confirm_import', 'local_subscriptions'),
+            'value' => get_string('import_subscriptions', 'local_subscriptions'),
             'class' => 'btn btn-primary',
             'id' => 'import-button',
             'disabled' => 'disabled'
@@ -446,7 +448,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
             $popovercontent .= '</tr>';
         };
 
-        $add_row(get_string('popover_description', 'local_subscriptions'), s($description));
+        $add_row(get_string('description', 'local_subscriptions'), s($description));
         $add_row(get_string('popover_duration', 'local_subscriptions'), s(subscription_config::get_plans()[$durationkey]));
         $add_row(get_string('popover_scope', 'local_subscriptions'), s($scopename));
 
@@ -507,33 +509,38 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         $table->id = 'subscriptions-table';
         $table->data = [];
 
+        // Cache simple des plans
+        $planCache = [];
+
         foreach ($subscriptions as $sub) {
             $user = $DB->get_record('user', ['id' => $sub->userid], 'id, firstname, lastname, email, firstnamephonetic, lastnamephonetic, middlename, alternatename');
             $username = fullname($user) . " ({$user->email})";
-
-
             $modalid = 'subModal'.$sub->id;
 
+            // Assure le plan
+            if (!isset($planCache[$sub->planid])) {
+                $planCache[$sub->planid] = $DB->get_record(
+                    'subscription_plan',
+                    ['id' => $sub->planid],
+                    'id,name,duration_key,accessscopeid',
+                    IGNORE_MISSING
+                ) ?: (object)[
+                    'id' => $sub->planid,
+                    'name' => get_string('unknown_plan', 'local_subscriptions'),
+                    'duration_key' => ''
+                ];
+            }
+            $plan = $planCache[$sub->planid];
+
             // Modal
-            $rows = [
-            ['ID', $sub->id],
-            ['User ID', $sub->userid],
-            ['Plan ID', $sub->planid],
-            ['Provider', s($sub->payment_provider ?? '')],
-            ['Provider subscription', s($sub->provider_subscription_id ?? '')],
-            ['Provider customer', s($sub->provider_customer_id ?? '')],
-            ['Status', s($sub->status)],
-            ['Start', userdate($sub->start_date)],
-            ['End', userdate($sub->end_date)],
-            ['Price paid', format_float((float)($sub->pricepaid ?? 0), 2).' '.strtoupper($sub->currency ?? '')],
-            ['Transaction', s($sub->transactionid ?? '')],
-            ['Last invoice', s($sub->last_invoice_id ?? '')],
-            ['Payment failed', !empty($sub->payment_failed) ? get_string('yes') : get_string('no')],
-            ['Last failed at', !empty($sub->last_payment_failed_at) ? userdate($sub->last_payment_failed_at) : '-'],
-            ['Fail reason', s($sub->last_payment_failed_reason ?? '')],
-            ['Created', userdate($sub->creation_date)],
-            ['Updated', userdate($sub->last_update)],
-            ];
+            $rows = SubsPresenter::rows(
+                $sub,
+                $plan,
+                function (float $amount, string $cur): string {
+                    return format_float($amount, 2).' '.strtoupper($cur);
+                },
+                'admin'
+            );
 
             // Table HTML
             $tableModal = \html_writer::start_tag('table', ['class'=>'table table-sm mb-0']);
@@ -556,12 +563,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                 );
                 echo \html_writer::div($tableModal, 'modal-body bg-light');
                 echo \html_writer::div(
-                        \html_writer::link(
-                            new \moodle_url('/local/subscriptions/portal.php', ['subid'=>$sub->id]),
-                            get_string('manage_payment', 'local_subscriptions'),
-                            ['class'=>'btn btn-outline-primary']
-                        )
-                    . \html_writer::tag('button', 'Close', ['class'=>'btn btn-secondary','data-bs-dismiss'=>'modal']),
+                        \html_writer::tag('button', 'Close', ['class'=>'btn btn-secondary','data-bs-dismiss'=>'modal']),
                     'modal-footer'
                 );
                 echo \html_writer::end_div(); // content

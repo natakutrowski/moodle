@@ -28,7 +28,7 @@ final class EventRouter {
                 \local_subscriptions\domain\SubscriptionService::on_subscription_updated($e);
                 break;
             default:
-                \core\notification::add("Unknown payment event: {$e->type}", \core\output\notification::NOTIFY_INFO);
+                \core\notification::add(get_string('unknown_payment_event', 'local_subscriptions', $e->type), \core\output\notification::NOTIFY_INFO);
         }
     }
 }

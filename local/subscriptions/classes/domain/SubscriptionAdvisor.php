@@ -1,23 +1,12 @@
 <?php
 namespace local_subscriptions\domain;
 
+use local_subscriptions\constants\Operation;
+use local_subscriptions\constants\Status;
+
 defined('MOODLE_INTERNAL') || die();
 
 class SubscriptionAdvisor {
-
-    /** Nombre de prolongations d’1 an en file (queued) dans le même scope. */    
-    private static function count_scope_queued_one_year(int $userid, int $scopeid): int {
-        global $DB;
-        return (int)$DB->get_field_sql("
-            SELECT COUNT(1)
-            FROM {user_subscription} s
-            JOIN {subscription_plan} p ON p.id = s.planid
-            WHERE s.userid = :u
-            AND p.accessscopeid = :scope
-            AND p.duration_key = '1year'
-            AND s.status = 'queued'
-        ", ['u'=>$userid, 'scope'=>$scopeid]);
-    }
 
     /** Fin la plus tardive (active+queued) dans le même scope. */    
     public static function max_scope_end(int $userid, int $scopeid): int {
@@ -28,10 +17,9 @@ class SubscriptionAdvisor {
             JOIN {subscription_plan} p ON p.id = s.planid
             WHERE s.userid = :u
             AND p.accessscopeid = :scope
-            AND s.status IN ('active','queued')
+            AND s.status IN ('".Status::ACTIVE."','".Status::QUEUED."')
         ", ['u'=>$userid, 'scope'=>$scopeid]);
     }
-
 
     public static function advise_options(int $userid, int $targetplanid, string $currency): array {
         global $DB;
@@ -45,13 +33,13 @@ class SubscriptionAdvisor {
 
         $activesubs = $DB->get_records_sql("
             SELECT s.*
-              FROM {user_subscription} s
-              JOIN {subscription_plan} p ON p.id = s.planid
-             WHERE s.userid = :u
-               AND s.status = :active
-               AND s.end_date >= :now
-          ORDER BY s.end_date DESC
-        ", ['u' => $userid, 'active' => 'active', 'now' => $now]);
+            FROM {user_subscription} s
+            JOIN {subscription_plan} p ON p.id = s.planid
+            WHERE s.userid = :u
+            AND s.status = :status
+            AND s.end_date >= :now
+            ORDER BY s.end_date DESC
+        ", ['u' => $userid, 'status' => Status::ACTIVE, 'now' => $now]);
 
         $samePlanActive  = null;
         $sameScopeActive = null;
@@ -76,13 +64,13 @@ class SubscriptionAdvisor {
                 FROM {user_subscription}
                 WHERE userid = :u
                 AND planid = :p
-                AND status IN ('active','queued')
+                AND status IN ('".Status::ACTIVE."','".Status::QUEUED."')
             ", ['u'=>$userid, 'p'=> (int)$targetplanid]);
 
             $activation = $lastend ? userdate(((int)$lastend) + 1) : userdate(time());
 
             $opts[] = [
-                'key'       => 'queue_future',
+                'key'       => Operation::QUEUE_FUTURE,
                 'label'     => get_string('option_queue_future', 'local_subscriptions', $activation),
                 'amount'    => (float)$targetprice->price,
                 'currency'  => $currency,
@@ -107,7 +95,7 @@ class SubscriptionAdvisor {
             // 1) Prolonger (dans le plan cible) : activation au-delà de la dernière brique scope
             $activation = $scope_max_end ? userdate($scope_max_end + 1) : userdate(time());
             $opts[] = [
-                'key'       => 'queue_future',
+                'key'       => Operation::QUEUE_FUTURE,
                 'label'     => get_string('option_queue_future', 'local_subscriptions', $activation),
                 'amount'    => (float)$targetprice->price,
                 'currency'  => $currency,
@@ -145,11 +133,11 @@ class SubscriptionAdvisor {
 
                         // Bricks à remplacer : uniquement active/queued chevauchant la fenêtre
                         $toReplace = self::list_scope_overlaps((int)$sameScopeActive->userid, (int)$scopeid,
-                                                            $t0sec, $t0sec + $D2, ['active','queued']);
+                                                            $t0sec, $t0sec + $D2, [Status::ACTIVE,Status::QUEUED]);
                         $replaceIds = array_map(fn($s)=> (int)$s->id, $toReplace);
 
                         $opts[] = [
-                            'key'       => 'upgrade_now_replace_chain',
+                            'key'       => Operation::UPGRADE_NOW_REPLACE_CHAIN,
                             'label'     => get_string('option_upgrade_now_replace', 'local_subscriptions'),
                             'amount'    => (float)$upgradeAmount,
                             'currency'  => $currency,
@@ -173,10 +161,9 @@ class SubscriptionAdvisor {
 
         }
 
-
         // C) Aucun abonnement actif -> achat standard
         $opts[] = [
-            'key'       => 'purchase_new',
+            'key'       => Operation::PURCHASE_NEW,
             'label'     => get_string('option_purchase_new', 'local_subscriptions'),
             'amount'    => (float)$targetprice->price,
             'currency'  => $currency,
@@ -197,31 +184,6 @@ class SubscriptionAdvisor {
         if (!$subs) return null;
         $first = reset($subs);
         return (int)$first->start_date;
-    }
-
-    public static function find_scope_duration_price(int $scopeid, string $duration_key, string $currency): ?float {
-        global $DB;
-        $plan = $DB->get_record('subscription_plan', [
-            'accessscopeid' => $scopeid,
-            'duration_key'  => $duration_key,
-            'is_active'     => 1
-        ], '*', IGNORE_MISSING);
-        if (!$plan) return null;
-        $price = $DB->get_record('subscription_plan_price', [
-            'planid'   => $plan->id,
-            'currency' => $currency
-        ], '*', IGNORE_MISSING);
-        return $price ? (float)$price->price : null;
-    }
-
-    public static function compute_upgrade_amount_equitable(
-        float $P1, float $P2, int $t0, int $now, int $D1, int $D2
-    ): float {
-        $t = max(0, min($D2, $now - $t0));
-        $part2 = $P2 * (($D2 - $t) / $D2);
-        $part1 = $P1 * ($t / $D1);
-        $amount = $part2 - $part1;
-        return max(0.0, round($amount, 2));
     }
 
     public static function duration_to_seconds(string $key): int {
@@ -277,7 +239,7 @@ class SubscriptionAdvisor {
      *  On prend d’abord user_subscription.pricepaid si la devise matche ; sinon prix du plan. */
     private static function sum_window_spent_in_currency(int $userid, int $accessscopeid, int $start, int $end, string $currency): float {
         $subs = self::list_scope_overlaps($userid, $accessscopeid, $start, $end,
-            ['active','queued','expired','replaced']); // inclure expirés/replaced dans la fenêtre
+            [Status::ACTIVE,Status::QUEUED,Status::EXPIRED,Status::REPLACED]); // inclure expirés/replaced dans la fenêtre
         $sum = 0.0; $cache = [];
         foreach ($subs as $s) {
             $okcur = !empty($s->currency) && \core_text::strtolower($s->currency) === \core_text::strtolower($currency);
@@ -292,13 +254,6 @@ class SubscriptionAdvisor {
             }
         }
         return round($sum, 2);
-    }
-
-    /** Simple garde “+long que le courant” (en secondes), réutilise ta duration_to_seconds existante. */
-    public static function can_upgrade(object $currplan, object $targetplan): bool {
-        $sc = self::duration_to_seconds($currplan->duration_key ?? '1year');
-        $st = self::duration_to_seconds($targetplan->duration_key ?? '1year');
-        return $st > $sc;
     }
 
     /**
@@ -368,7 +323,7 @@ class SubscriptionAdvisor {
         }
 
         // Bricks à remplacer : seules les active/queued qui chevauchent la fenêtre
-        $toReplace = $scopeid ? self::list_scope_overlaps((int)$currsub->userid, (int)$scopeid, $winStart, $winEnd, ['active','queued']) : [];
+        $toReplace = $scopeid ? self::list_scope_overlaps((int)$currsub->userid, (int)$scopeid, $winStart, $winEnd, [Status::ACTIVE,Status::QUEUED]) : [];
         $replaceIds = array_map(fn($s)=> (int)$s->id, $toReplace);
 
         return [

@@ -1,6 +1,10 @@
 <?php
 namespace local_subscriptions\task;
 
+use local_subscriptions\constants\Operation;
+use local_subscriptions\constants\Status;
+use local_subscriptions\payment\ProviderSelector;
+use local_subscriptions\support\Duration;
 class repair_paid_pr_task extends \core\task\scheduled_task {
     public function get_name() {
         return get_string('task_repair_paid_pr', 'local_subscriptions');
@@ -10,7 +14,7 @@ class repair_paid_pr_task extends \core\task\scheduled_task {
 
         // PR payées, sans sub liée, depuis > 60s (pour laisser passer le webhook)
         $prs = $DB->get_records_select('subscription_payment_request',
-            "status = 'paid' AND (subscriptionid IS NULL OR subscriptionid = 0) AND payment_date <= :t",
+            "status = '".Status::PAID."' AND (subscriptionid IS NULL OR subscriptionid = 0) AND payment_date <= :t",
             ['t' => time() - 60], 'payment_date ASC',
             'id, planid, userid, email, firstname, lastname, currency, price, operation, reference_subscription_id, payment_provider');
 
@@ -29,31 +33,15 @@ class repair_paid_pr_task extends \core\task\scheduled_task {
                 $plan = $DB->get_record('subscription_plan', ['id'=>$pr->planid, 'is_active'=>1], '*', IGNORE_MISSING);
                 if (!$plan) { continue; }
 
-                // helper durée
-                $add = function(int $ts, string $duration_key): int {
-                    $dt = new \DateTime('@'.$ts);
-                    $dt->setTimezone(new \DateTimeZone('UTC'));
-                    switch ($duration_key) {
-                        case '1month':  $dt->modify('+1 month'); break;
-                        case '3months': $dt->modify('+3 months'); break;
-                        case '6months': $dt->modify('+6 months'); break;
-                        case '1year':   $dt->modify('+1 year'); break;
-                        case '2years':  $dt->modify('+2 years'); break;
-                        case '3years':  $dt->modify('+3 years'); break;
-                        default:        $dt->modify('+1 year');
-                    }
-                    return $dt->getTimestamp();
-                };
-
                 // reconstruit selon operation
-                $op   = $pr->operation ?? 'purchase_new';
+                $op   = $pr->operation ?? Operation::PURCHASE_NEW;
                 $ref  = (int)($pr->reference_subscription_id ?? 0);
 
-                if ($op === 'queue_future') {
+                if ($op === Operation::QUEUE_FUTURE) {
                     // ancre = max(end des active/queued)
                     $anchor = (int)$DB->get_field_sql(
                         "SELECT COALESCE(MAX(end_date), 0) FROM {user_subscription}
-                          WHERE userid = :u AND planid = :p AND status IN ('active','queued')",
+                          WHERE userid = :u AND planid = :p AND status IN ('".Status::ACTIVE."','".Status::QUEUED."')",
                         ['u'=>$user->id, 'p'=>$plan->id]
                     );
                     // si ref fournie → anchor = max(anchor, end(ref))
@@ -64,11 +52,11 @@ class repair_paid_pr_task extends \core\task\scheduled_task {
                         }
                     }
                     $start = max($anchor + 1, time());
-                    $end   = $add($start, $plan->duration_key);
+                    $end   = Duration::add_duration_utc($start, $plan->duration_key);
 
                     // idempotence
                     if ($DB->record_exists('user_subscription', [
-                        'userid'=>$user->id,'planid'=>$plan->id,'start_date'=>$start,'status'=>'queued'
+                        'userid'=>$user->id,'planid'=>$plan->id,'start_date'=>$start,'status'=>Status::QUEUED
                     ])) {
                         continue;
                     }
@@ -76,9 +64,9 @@ class repair_paid_pr_task extends \core\task\scheduled_task {
                     // création
                     $sub = (object)[
                         'userid'=>$user->id, 'planid'=>$plan->id,
-                        'payment_provider'=>$pr->payment_provider ?? 'stripe',
+                        'payment_provider'=>ProviderSelector::resolve_provider($pr ?? null, $e->meta ?? null, $existingsub ?? null),
                         'start_date'=>$start, 'end_date'=>$end,
-                        'status'=> ($start > time() ? 'queued':'active'),
+                        'status'=> ($start > time() ? Status::QUEUED:Status::ACTIVE),
                         'creation_date'=>time(), 'last_update'=>time(),
                         'pricepaid'=>(float)($pr->price ?? 0),
                         'currency'=>$pr->currency ?? '',
@@ -92,18 +80,18 @@ class repair_paid_pr_task extends \core\task\scheduled_task {
                 } else {
                     // purchase_new
                     $start = time();
-                    $end   = $add($start, $plan->duration_key);
+                    $end   = Duration::add_duration_utc($start, $plan->duration_key);
 
                     if ($DB->record_exists('user_subscription', [
-                        'userid'=>$user->id,'planid'=>$plan->id,'start_date'=>$start,'status'=>'active'
+                        'userid'=>$user->id,'planid'=>$plan->id,'start_date'=>$start,'status'=>Status::ACTIVE
                     ])) {
                         continue;
                     }
 
                     $sub = (object)[
                         'userid'=>$user->id,'planid'=>$plan->id,
-                        'payment_provider'=>$pr->payment_provider ?? 'stripe',
-                        'start_date'=>$start,'end_date'=>$end,'status'=>'active',
+                        'payment_provider'=>ProviderSelector::resolve_provider($pr ?? null, $e->meta ?? null, $existingsub ?? null),
+                        'start_date'=>$start,'end_date'=>$end,'status'=>Status::ACTIVE,
                         'creation_date'=>time(),'last_update'=>time(),
                         'pricepaid'=>(float)($pr->price ?? 0),'currency'=>$pr->currency ?? '',
                         'transactionid'=>$pr->transactionid ?? null

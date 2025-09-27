@@ -16,8 +16,8 @@ $PAGE->requires->js(new moodle_url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3
 
 $PAGE->set_url(new moodle_url(subscription_config::manage_page()));
 $PAGE->set_context(context_system::instance());
-$PAGE->set_title(get_string('managesubscriptions', 'local_subscriptions'));
-$PAGE->set_heading(get_string('managesubscriptions', 'local_subscriptions'));
+$PAGE->set_title(get_string('manage_subscriptions', 'local_subscriptions'));
+$PAGE->set_heading(get_string('manage_subscriptions', 'local_subscriptions'));
 
 
 // Tabs

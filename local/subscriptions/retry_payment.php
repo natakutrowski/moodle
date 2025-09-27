@@ -1,8 +1,11 @@
 <?php
-// local/subscriptions/retry_payment.php
+
 require_once(__DIR__.'/../../config.php');
 require_once($CFG->dirroot.'/local/subscriptions/vendor/autoload.php');
 require_once($CFG->dirroot.'/local/subscriptions/lib.php');
+
+use local_subscriptions\url\UrlFactory;
+use local_subscriptions\constants\Status;
 
 global $DB, $CFG;
 
@@ -16,13 +19,13 @@ $PAGE->set_pagelayout('base'); // pas de rendu, on redirige
 $pr = $DB->get_record('subscription_payment_request', ['id'=>$pid], '*', MUST_EXIST);
 
 // Validate status
-if (!in_array($pr->status, ['pending','failed','canceled','expired','error'])) {
-    redirect(new moodle_url('/local/subscriptions/subscribe.php'), get_string('retry_invalid_status', 'local_subscriptions'), 5, \core\output\notification::NOTIFY_ERROR);
+if (!in_array($pr->status, [Status::PENDING,Status::FAILED,Status::CANCELED,Status::EXPIRED,Status::ERROR])) {
+    redirect(UrlFactory::subscribe(), get_string('retry_invalid_status', 'local_subscriptions'), 5, \core\output\notification::NOTIFY_ERROR);
 }
 
 // Validate token & expiry
 if (empty($pr->retry_token) || $pr->retry_token !== $token || ($pr->retry_expires && time() > $pr->retry_expires)) {
-    redirect(new moodle_url('/local/subscriptions/subscribe.php'), get_string('retry_link_expired', 'local_subscriptions'), 5, \core\output\notification::NOTIFY_ERROR);
+    redirect(UrlFactory::subscribe(), get_string('retry_link_expired', 'local_subscriptions'), 5, \core\output\notification::NOTIFY_ERROR);
 }
 
 // Rebuild session
@@ -32,8 +35,8 @@ $plan   = $DB->get_record('subscription_plan', ['id'=>$pr->planid], '*', MUST_EX
 $priceD = (float)$pr->price;
 $unit   = (int)round($priceD*100);
 
-$success = $CFG->wwwroot . '/local/subscriptions/payment_success.php?session_id={CHECKOUT_SESSION_ID}';
-$cancel  = (new moodle_url('/local/subscriptions/payment_cancel.php', ['pid'=>$pid]))->out(false);
+$success = (UrlFactory::payment_success())->out(false) . '&session_id={CHECKOUT_SESSION_ID}';
+$cancel  = (UrlFactory::payment_cancel(['pid'=>$pid]))->out(false);
 
 $session = \Stripe\Checkout\Session::create([
     'mode' => 'payment',
@@ -74,7 +77,7 @@ $session = \Stripe\Checkout\Session::create([
 // Update PR
 $pr->sessionid   = $session->id;
 $pr->payment_link= $session->url;
-$pr->status      = 'pending';
+$pr->status      = Status::PENDING;
 $pr->attempts    = (int)$pr->attempts + 1;
 $pr->last_attempt= time();
 $DB->update_record('subscription_payment_request', $pr);

@@ -4,7 +4,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../lib.php');
 
 use local_subscriptions\subscription_config;
-
+use local_subscriptions\constants\Status;
 class local_subscriptions_plans_renderer extends plugin_renderer_base {
 
     /**
@@ -40,7 +40,7 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
         $table->head = [
             get_string('name', 'local_subscriptions') . ' ' . $sorticons,
             get_string('description', 'local_subscriptions'),
-            get_string('scope', 'local_subscriptions'),
+            get_string('scopes', 'local_subscriptions'),
             get_string('duration', 'local_subscriptions'),
             get_string('plan_highlight', 'local_subscriptions'),
             get_string('dates', 'local_subscriptions'),
@@ -150,7 +150,7 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
                 'class' => "fa {$iconclass}",
                 'aria-hidden' => 'true',
                 'title' => $label,
-                'data-state' => $p->is_active ? 'active' : 'inactive',
+                'data-state' => $p->is_active ? Status::ACTIVE : Status::INACTIVE,
             ]);
 
             $icons[] = html_writer::link('#', $iconhtml, [

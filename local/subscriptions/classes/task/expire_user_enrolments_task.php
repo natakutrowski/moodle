@@ -1,6 +1,8 @@
 <?php
 namespace local_subscriptions\task;
 
+use local_subscriptions\constants\Status;
+
 defined('MOODLE_INTERNAL') || die();
 
 class expire_user_enrolments_task extends \core\task\scheduled_task {
@@ -15,11 +17,11 @@ class expire_user_enrolments_task extends \core\task\scheduled_task {
 
         // 1) ACTIVER les queued arrivées à start_date
         $queued = $DB->get_records_select('user_subscription',
-            "status = 'queued' AND start_date IS NOT NULL AND start_date <= :now",
+            "status = '".Status::QUEUED."' AND start_date IS NOT NULL AND start_date <= :now",
             ['now' => $now]
         );
         foreach ($queued as $q) {
-            $q->status      = 'active';
+            $q->status      = Status::ACTIVE;
             $q->last_update = $now;
             $DB->update_record('user_subscription', $q);
 
@@ -38,7 +40,7 @@ class expire_user_enrolments_task extends \core\task\scheduled_task {
 
         // 2) EXPIRER les actives dépassées + SUSPENDRE les cours
         $expired = $DB->get_records_select('user_subscription',
-            "status = 'active' AND end_date IS NOT NULL AND end_date < :now",
+            "status = '".Status::ACTIVE."' AND end_date IS NOT NULL AND end_date < :now",
             ['now' => $now]
         );
         foreach ($expired as $sub) {
@@ -48,13 +50,13 @@ class expire_user_enrolments_task extends \core\task\scheduled_task {
             );
 
             // Marquer comme expirée
-            $sub->status      = 'expired';
+            $sub->status      = Status::EXPIRED;
             $sub->last_update = $now;
             $DB->update_record('user_subscription', $sub);
 
             // Mail d’expiration UNIQUEMENT s’il n’y a PAS de brique suivante déjà en file
             $hasnext = $DB->record_exists_select('user_subscription',
-                "userid = :u AND planid = :p AND status = 'queued' AND start_date > :now",
+                "userid = :u AND planid = :p AND status = '".Status::QUEUED."' AND start_date > :now",
                 ['u'=>$sub->userid, 'p'=>$sub->planid, 'now'=>$now]
             );
             if (!$hasnext && class_exists('\local_subscriptions\mailer')) {

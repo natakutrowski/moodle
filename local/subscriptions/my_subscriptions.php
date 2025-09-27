@@ -2,11 +2,17 @@
 // local/subscriptions/my_subscriptions.php
 require_once(__DIR__.'/../../config.php');
 
+use local_subscriptions\constants\Operation;
+use local_subscriptions\constants\Status;
+use local_subscriptions\payment\Provider;
+use local_subscriptions\url\UrlFactory;
+use local_subscriptions\support\SubsPresenter;
+
 require_login(); // page utilisateur
 
 $context = context_user::instance($USER->id);
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/subscriptions/my_subscriptions.php'));
+$PAGE->set_url(UrlFactory::my_subscriptions());
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('mysubs_title', 'local_subscriptions'));
 $PAGE->set_heading(fullname($USER));
@@ -24,12 +30,12 @@ $plans = $planids ? $DB->get_records_list('subscription_plan', 'id', $planids, '
 // Petits helpers
 $statusbadge = function(string $status): string {
     switch ($status) {
-        case 'active':   return html_writer::span(get_string('status_active', 'local_subscriptions'),   'badge bg-success');
-        case 'queued':   return html_writer::span(get_string('status_queued', 'local_subscriptions'),   'badge bg-secondary');
-        case 'replaced': return html_writer::span(get_string('status_replaced', 'local_subscriptions'), 'badge bg-warning text-dark');
-        case 'canceled': return html_writer::span(get_string('status_canceled', 'local_subscriptions'), 'badge bg-danger');
-        case 'expired':
-        default:         return html_writer::span(get_string('status_expired', 'local_subscriptions'),  'badge bg-danger');
+        case Status::ACTIVE:   return html_writer::span(get_string('substatus_active', 'local_subscriptions'),   'badge bg-success');
+        case Status::QUEUED:   return html_writer::span(get_string('substatus_queued', 'local_subscriptions'),   'badge bg-secondary');
+        case Status::REPLACED: return html_writer::span(get_string('substatus_replaced', 'local_subscriptions'), 'badge bg-warning text-dark');
+        case Status::CANCELED: return html_writer::span(get_string('substatus_canceled', 'local_subscriptions'), 'badge bg-danger');
+        case Status::EXPIRED:
+        default:         return html_writer::span(get_string('substatus_expired', 'local_subscriptions'),  'badge bg-danger');
     }
 };
 $fmtmoney = fn($amt, $cur) => format_float((float)$amt, 2).' '.strtoupper((string)$cur);
@@ -43,7 +49,7 @@ echo html_writer::tag('h3', get_string('mysubs_title', 'local_subscriptions'), [
 if (!$subs) {
     echo $OUTPUT->notification(get_string('mysubs_empty', 'local_subscriptions'), \core\output\notification::NOTIFY_INFO);
     echo html_writer::div(
-        html_writer::link(new moodle_url('/local/subscriptions/subscribe.php'), get_string('go_subscribe', 'local_subscriptions'), ['class'=>'btn btn-primary']),
+        html_writer::link(UrlFactory::subscribe(), get_string('subscribe', 'local_subscriptions'), ['class'=>'btn btn-primary']),
         'mt-3'
     );
     echo $OUTPUT->footer(); exit;
@@ -53,7 +59,7 @@ if (!$subs) {
 foreach ($subs as $sub) {
     $plan = $plans[$sub->planid] ?? (object)['name'=>get_string('unknown_plan','local_subscriptions'), 'is_recurring'=>0];
     
-    $isactive = ($sub->status === 'active');
+    $isactive = ($sub->status === Status::ACTIVE);
     $cardclasses = 'card shadow-sm mb-3'.($isactive ? '' : ' border-0 bg-light'); // ← fond gris pour ≠ active
 
     $head = html_writer::start_div('d-flex align-items-center justify-content-between');
@@ -66,12 +72,10 @@ foreach ($subs as $sub) {
     $list = html_writer::start_tag('ul', ['class'=>'list-unstyled mb-2 small']);
     $list .= html_writer::tag('li', html_writer::tag('span', get_string('period','local_subscriptions').': ', ['class'=>'text-muted']). userdate($sub->start_date).' &rarr; '.userdate($sub->end_date));
     $list .= html_writer::tag('li', html_writer::tag('span', get_string('pricepaid','local_subscriptions').': ', ['class'=>'text-muted']). $fmtmoney($sub->pricepaid ?? 0, $sub->currency ?? ''));
-    if (!empty($sub->payment_provider)) {
-        $list .= html_writer::tag('li', html_writer::tag('span', 'Provider: ', ['class'=>'text-muted']). s($sub->payment_provider));
-    }
+
     if (!empty($sub->payment_failed)) {
         $list .= html_writer::tag('li',
-            html_writer::span(get_string('payment_failed_flag','local_subscriptions'), 'badge bg-warning text-dark')
+            html_writer::span(get_string('payment_failed','local_subscriptions'), 'badge bg-warning text-dark')
             . (!empty($sub->last_payment_failed_at) ? html_writer::span(' — '.userdate($sub->last_payment_failed_at), 'text-muted ms-1') : ''),
             ['class'=>'mt-1']
         );
@@ -88,12 +92,12 @@ foreach ($subs as $sub) {
         $cur = strtoupper($sub->currency ?? 'EUR');
         $amt = format_float((float)($sub->pricepaid ?? 0), 2); // on réutilise exactement ce qui a été payé
 
-        if ($sub->status === 'expired') {
+        if ($sub->status === Status::EXPIRED) {
             // RENOUVELER (start = now)
-            $renewurl = new moodle_url('/local/subscriptions/stripe/create_session.php', [
+            $renewurl = UrlFactory::create_session([
                 'planid'           => $sub->planid,
                 'currency'         => $cur,
-                'operation'        => 'purchase_new',
+                'operation'        => Operation::PURCHASE_NEW,
                 'override_amount'  => $amt,
                 'override_currency'=> $cur,
             ]);
@@ -101,12 +105,10 @@ foreach ($subs as $sub) {
                 ['class'=>'btn btn-primary btn-sm']);
         }
 
-        if ($sub->status === 'active') {
+        if ($sub->status === Status::ACTIVE) {
             // PROLONGER (start = end_date existante)
-            $extendurl = new moodle_url('/local/subscriptions/checkout.php', [
-                'planid'           => $sub->planid,
-                'currency'         => $cur,
-                'operation'        => 'queue_future',
+            $extendurl = UrlFactory::checkout($sub->planid, $cur, [
+                'operation'        => Operation::QUEUE_FUTURE,
                 'ref_subid'        => $sub->id,       // pour démarrer à la fin de celle-ci
                 'override_amount'  => $amt,           // on fige le prix au montant payé
                 'override_currency'=> $cur,
@@ -116,10 +118,10 @@ foreach ($subs as $sub) {
         }
     }
 
-    if (!empty($plan->is_recurring) && $sub->payment_provider === 'stripe' && !empty($sub->provider_customer_id)) {
+    if (!empty($plan->is_recurring) && $sub->payment_provider === Provider::STRIPE && !empty($sub->provider_customer_id)) { // Provider::ALFA not yet supported
         $btns[] = html_writer::link(
-            new moodle_url('/local/subscriptions/portal.php', ['subid'=>$sub->id]),
-            get_string('manage_payment','local_subscriptions'),
+            UrlFactory::portal(['subid'=>$sub->id]),
+            get_string('manage_billing','local_subscriptions'),
             ['class'=>'btn btn-outline-primary btn-sm']
         );
         // petit badge auto-renouvellement
@@ -143,25 +145,13 @@ foreach ($subs as $sub) {
     echo html_writer::end_div();
 
     // Modal Détails
-    $rows = [
-        ['ID', $sub->id],
-        ['Plan', format_string($plan->name)],
-        ['Statut', s($sub->status)],
-        ['Début', userdate($sub->start_date)],
-        ['Fin', userdate($sub->end_date)],
-        ['Montant', $fmtmoney($sub->pricepaid ?? 0, $sub->currency ?? '')],
-        ['Devise', strtoupper($sub->currency ?? '')],
-        ['Transaction', s($sub->transactionid ?? '')],
-        ['Provider', s($sub->payment_provider ?? '')],
-        ['Stripe sub', s($sub->provider_subscription_id ?? '')],
-        ['Stripe customer', s($sub->provider_customer_id ?? '')],
-        ['Dernière facture', s($sub->last_invoice_id ?? '')],
-        ['Échec prélèvement', !empty($sub->payment_failed) ? get_string('yes') : get_string('no')],
-        ['Dernier échec', !empty($sub->last_payment_failed_at) ? userdate($sub->last_payment_failed_at) : '-'],
-        ['Raison échec', s($sub->last_payment_failed_reason ?? '')],
-        ['Créée', userdate($sub->creation_date)],
-        ['MàJ', userdate($sub->last_update)],
-    ];
+    $rows = SubsPresenter::rows(
+        $sub,
+        $plan,
+        function (float $amount, string $cur) use ($fmtmoney): string { return $fmtmoney($amount, $cur); },
+        'user' // <- important
+    );
+    
     $table = html_writer::start_tag('table', ['class'=>'table table-sm mb-0']);
     foreach ($rows as [$k,$v]) {
         $table .= '<tr><th class="text-muted" style="width:28%;white-space:nowrap;">'.s($k).'</th><td class="fw-semibold">'.(is_string($v)?$v:s($v)).'</td></tr>';
@@ -177,8 +167,16 @@ foreach ($subs as $sub) {
             'modal-header d-flex align-items-center justify-content-between'
           );
           echo html_writer::div($table, 'modal-body bg-light');
+
+            if (!empty($sub->payment_failed)) {
+                $portal = UrlFactory::portal(['subid' => $sub->id]);
+                echo html_writer::div(
+                    html_writer::link($portal, get_string('manage_billing','local_subscriptions'), ['class'=>'btn btn-warning btn-sm']),
+                    'mt-2'
+                );
+            }
           echo html_writer::div(
-              html_writer::tag('button', 'Close', ['class'=>'btn btn-secondary','data-bs-dismiss'=>'modal']),
+              html_writer::tag('button', get_string('close','local_subscriptions'), ['class'=>'btn btn-secondary','data-bs-dismiss'=>'modal']),
             'modal-footer'
           );
         echo html_writer::end_div();
@@ -188,7 +186,7 @@ foreach ($subs as $sub) {
 
 // Lien pour s’abonner (CTA)
 echo html_writer::div(
-    html_writer::link(new moodle_url('/local/subscriptions/subscribe.php'), get_string('go_subscribe', 'local_subscriptions'), ['class'=>'btn btn-primary']),
+    html_writer::link(UrlFactory::subscribe(), get_string('subscribe', 'local_subscriptions'), ['class'=>'btn btn-primary']),
     'mt-4'
 );
 
