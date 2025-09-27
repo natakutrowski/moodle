@@ -420,3 +420,15 @@ $string['reminder2_after_minutes_desc'] = 'Send a second reminder if still unpai
 // Featured plan
 $string['featured_planid_label'] = 'Featured plan';
 $string['featured_planid_desc'] = 'ID of the plan highlighted on the offers page.';
+
+
+$string['alfa_settings_header'] = 'Alfa Bank (internet acquiring)';
+$string['alfa_api_base'] = 'API base URL';
+$string['alfa_api_base_desc'] = 'E.g. https://alfa.rbsuat.com (test). Production URL is provided by the bank.';
+$string['alfa_mode'] = 'Mode';
+$string['alfa_mode_desc'] = 'Choose Test or Live. Make sure credentials match.';
+$string['alfa_username'] = 'Alfa userName';
+$string['alfa_password'] = 'Alfa password';
+$string['alfa_token'] = 'Alfa API token (optional)';
+$string['alfa_token_desc'] = 'Use if your merchant is configured for token-based auth; leave empty otherwise.';
+$string['alfa_webhook_secret'] = 'Webhook secret (optional)';

@@ -136,6 +136,60 @@ if ($hassiteconfig) {
             0
         ));
 
+        // === Alfa Bank ===
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_alfa_hdr',
+            get_string('alfa_settings_header', 'local_subscriptions'),
+            ''
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_api_base',
+            get_string('alfa_api_base', 'local_subscriptions'),
+            get_string('alfa_api_base_desc', 'local_subscriptions'),
+            'https://alfa.rbsuat.com',
+            PARAM_URL
+        ));
+
+        $settings->add(new admin_setting_configselect(
+            'local_subscriptions/alfa_mode',
+            get_string('alfa_mode', 'local_subscriptions'),
+            get_string('alfa_mode_desc', 'local_subscriptions'),
+            'test',
+            ['test' => 'Test', 'live' => 'Live']
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_username',
+            get_string('alfa_username', 'local_subscriptions'),
+            '',
+            '',
+            PARAM_RAW_TRIMMED
+        ));
+
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_password',
+            get_string('alfa_password', 'local_subscriptions'),
+            '',
+            ''
+        ));
+
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_token',
+            get_string('alfa_token', 'local_subscriptions'),
+            get_string('alfa_token_desc', 'local_subscriptions'),
+            ''
+        ));
+
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_webhook_secret',
+            get_string('alfa_webhook_secret', 'local_subscriptions'),
+            '',
+            ''
+        ));
+
+
+
     }
 
     $ADMIN->add('localplugins', $settings);
