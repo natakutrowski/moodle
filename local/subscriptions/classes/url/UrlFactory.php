@@ -49,6 +49,20 @@ final class UrlFactory {
             return new moodle_url('/local/subscriptions/payment/create_session.php');
         }
     }
+    public static function return(array $params=[]): moodle_url {
+        if ($params){
+            return new moodle_url('/local/subscriptions/payment/return.php',$params);
+        } else {
+            return new moodle_url('/local/subscriptions/payment/return.php');
+        }
+    }
+    public static function retry(array $params=[]): moodle_url {
+        if ($params){
+            return new moodle_url('/local/subscriptions/payment/retry_payment.php',$params);
+        } else {
+            return new moodle_url('/local/subscriptions/payment/retry_payment.php');
+        }
+    }
     public static function portal(array $params=[]): moodle_url {
         if ($params){
             return new moodle_url('/local/subscriptions/portal.php',$params);

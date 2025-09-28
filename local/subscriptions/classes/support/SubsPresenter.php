@@ -2,6 +2,8 @@
 namespace local_subscriptions\support;
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\payment\Provider;
+
 final class SubsPresenter {
 
     private static function format_end(?int $ts): string {
@@ -25,6 +27,8 @@ final class SubsPresenter {
 
     /** Construit les lignes (label, value) d'une souscription. */
     public static function rows(\stdClass $sub, \stdClass $plan, callable $fmtmoney, string $view='user'): array {
+        global $DB;
+
         $rows = [];
         $isadmin = ($view === 'admin');
 
@@ -56,7 +60,7 @@ final class SubsPresenter {
             }
 
             if (!empty($sub->payment_provider)) {
-                $rows[] = [get_string('subfield_provider', 'local_subscriptions'), s($sub->payment_provider)];
+                $rows[] = [get_string('subfield_provider', 'local_subscriptions'), Provider::label_with_icon($sub->payment_provider)];
             }
 
             // Dernière mise à jour (facultatif, utile UX)
@@ -82,7 +86,7 @@ final class SubsPresenter {
             $rows[] = [get_string('subfield_txn', 'local_subscriptions'), s($sub->transactionid)];
         }
         if (!empty($sub->payment_provider)) {
-            $rows[] = [get_string('subfield_provider', 'local_subscriptions'), s($sub->payment_provider)];
+            $rows[] = [get_string('subfield_provider', 'local_subscriptions'), Provider::label_with_icon_env($sub->payment_provider)];
         }
         if (!empty($sub->provider_subscription_id)) {
             $rows[] = [get_string('subfield_provider_sub', 'local_subscriptions'), s($sub->provider_subscription_id)];
@@ -104,6 +108,64 @@ final class SubsPresenter {
         $rows[] = [get_string('subfield_created', 'local_subscriptions'), userdate((int)$sub->creation_date)];
         $rows[] = [get_string('subfield_updated', 'local_subscriptions'), userdate((int)$sub->last_update)];
 
+        // --- Bloc Payment Request (PR) lié ------------------------------------
+        // 1) PR liée directement à cette sub
+        $pr = $DB->get_record('subscription_payment_request',
+            ['subscriptionid' => $sub->id],
+            '*',
+            IGNORE_MISSING
+        );
+
+        // 2) Sinon, dernière PR "paid/completed" pour le même user/plan
+        if (!$pr) {
+            $sql = "SELECT pr.*
+                    FROM {subscription_payment_request} pr
+                    WHERE pr.userid = :uid
+                    AND pr.planid = :planid
+                    AND pr.status IN ('paid','completed')
+                ORDER BY pr.payment_date DESC, pr.id DESC";
+            $pr = $DB->get_record_sql($sql, ['uid' => $sub->userid, 'planid' => $sub->planid]);
+        }
+
+        if ($pr) {
+
+            // 1 ou 2 espaces insécables (U+00A0). Mets 1 ou 2 selon l’effet souhaité.
+            $prindent = str_repeat("\u{00A0}", 3); // ou: $prindent = "\xC2\xA0\xC2\xA0";
+
+
+            $rows[] = [get_string('subfield_pr_id', 'local_subscriptions'), (string)$pr->id];
+            $rows[] = [$prindent . get_string('subfield_pr_status', 'local_subscriptions'), s($pr->status)];
+            if (!empty($pr->payment_provider)) {
+                $rows[] = [$prindent . get_string('subfield_pr_provider', 'local_subscriptions'), Provider::label_with_icon_env($pr->payment_provider)];
+            }
+            // Montant PR
+            $prccy = strtoupper((string)($pr->currency ?? ''));
+            $pramt = $fmtmoney((float)$pr->price, $prccy);
+            $rows[] = [$prindent . get_string('subfield_pr_amount', 'local_subscriptions'), $pramt];
+
+            if (!empty($pr->sessionid)) {
+                $rows[] = [$prindent . get_string('subfield_pr_orderid', 'local_subscriptions'), s($pr->sessionid)];
+            }
+            if (!empty($pr->transactionid)) {
+                $rows[] = [$prindent . get_string('subfield_pr_txnid', 'local_subscriptions'), s($pr->transactionid)];
+            }
+            $rows[] = [
+                $prindent . get_string('subfield_pr_paidat', 'local_subscriptions'),
+                !empty($pr->payment_date) ? userdate((int)$pr->payment_date) : '-'
+            ];
+            if (!empty($pr->payment_link)) {
+                $rows[] = [$prindent . get_string('subfield_pr_link', 'local_subscriptions'), s($pr->payment_link)];
+            }
+            if (!empty($pr->last_error)) {
+                $rows[] = [$prindent . get_string('subfield_pr_lasterror', 'local_subscriptions'), s($pr->last_error)];
+            }
+        } else {
+            // Pas de PR retrouvée (info utile en debug)
+            $rows[] = [get_string('subfield_pr_id', 'local_subscriptions'), get_string('notavailable', 'local_subscriptions')];
+        }
+
         return $rows;
     }
+
+
 }

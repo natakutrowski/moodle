@@ -167,6 +167,60 @@ foreach ($rii as $fileinfo) {
                 $usedAll[] = $key;
             }
         }
+
+        // --- PHP: moodle_exception('key','component') ---
+        if ($ext === 'php') {
+            // throw new moodle_exception('key', 'comp', ...)
+            if (preg_match_all(
+                '/new\s+\\\\?moodle_exception\s*\(\s*([\'"])([A-Za-z0-9_.:-]+)\1\s*(?:,\s*([\'"])([A-Za-z0-9_]+)\3)?/i',
+                $src, $mx, PREG_OFFSET_CAPTURE
+            )) {
+                foreach ($mx[2] as $idx => $mkey) {
+                    $key = $mkey[0];
+                    $off = $mkey[1];
+
+                    // composant si fourni (sinon Moodle utilisera 'error')
+                    $cmp = isset($mx[4][$idx][0]) ? $mx[4][$idx][0] : null;
+                    if ($cmp === null || strtolower($cmp) === 'error') {
+                        // on ignore les exceptions "core/error" pour cet audit
+                        continue;
+                    }
+                    if ($cmp !== $comp) {
+                        // garde-fou: on ne suit que les exceptions de TON composant
+                        continue;
+                    }
+
+                    $line = substr_count(substr($src, 0, $off), "\n") + 1;
+                    $usageByKey[$key][] = ['file' => $path, 'line' => $line, 'type' => 'php:moodle_exception'];
+                    $usedAll[] = $key;
+                }
+            }
+
+            // --- PHP: print_error('key','component') ---
+            if (preg_match_all(
+                '/\bprint_error\s*\(\s*([\'"])([A-Za-z0-9_.:-]+)\1\s*(?:,\s*([\'"])([A-Za-z0-9_]+)\3)?/i',
+                $src, $pm, PREG_OFFSET_CAPTURE
+            )) {
+                foreach ($pm[2] as $idx => $mkey) {
+                    $key = $mkey[0];
+                    $off = $mkey[1];
+
+                    $cmp = isset($pm[4][$idx][0]) ? $pm[4][$idx][0] : null;
+                    if ($cmp === null || strtolower($cmp) === 'error') {
+                        continue;
+                    }
+                    if ($cmp !== $comp) {
+                        continue;
+                    }
+
+                    $line = substr_count(substr($src, 0, $off), "\n") + 1;
+                    $usageByKey[$key][] = ['file' => $path, 'line' => $line, 'type' => 'php:print_error'];
+                    $usedAll[] = $key;
+                }
+            }
+        }
+
+
         // Mustache: {{#str}} key, component {{/str}}
         if ($ext === 'mustache') {
             if (preg_match_all('/\{\{#str\}\}\s*([A-Za-z0-9_.:-]+)\s*,\s*'.$compRx.'\s*\{\{\/str\}\}/', $src, $m, PREG_OFFSET_CAPTURE)) {

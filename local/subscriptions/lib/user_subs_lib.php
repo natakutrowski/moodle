@@ -184,8 +184,6 @@ function local_subscriptions_get_courses_by_plan(int $planid): array {
     return $DB->get_records_select('course', "id $sqlin", $params, 'fullname ASC');
 }
 
-
-
 function get_user_country_code(): string {
     $ip = getremoteaddr(); // ou une autre méthode fiable
     $url = "https://ipwho.is/{$ip}";
@@ -202,5 +200,3 @@ function get_user_country_code(): string {
 
     return '';
 }
-
-

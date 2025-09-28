@@ -10,14 +10,32 @@ use stdClass;
 
 final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInterface {
 
-    private function cfg(): array {
-        return [
-            'secret_key'        => get_config('local_subscriptions', 'stripe_secret_key') ?? '',
-            'webhook_secret'    => get_config('local_subscriptions', 'stripe_webhook_secret') ?? '',
-            'success_url'       => (UrlFactory::payment_success())->out(false),
-            'cancel_url'        => (UrlFactory::payment_cancel())->out(false),
-            'portal_return'     => (UrlFactory::my_subscriptions())->out(false),
+    private function cfg(array $overrides = []): array {
+
+        $env = get_config('local_subscriptions', 'stripe_env') ?: 'test';
+        $env = ($env === 'live') ? 'live' : 'test';
+
+        // Nouvelles clés (test/live)
+        $secret   = get_config('local_subscriptions', "stripe_{$env}_secret") ?: '';
+        $pub      = get_config('local_subscriptions', "stripe_{$env}_publishable") ?: '';
+        $whsecret = get_config('local_subscriptions', "stripe_{$env}_webhook_secret") ?: '';
+        $portalid = get_config('local_subscriptions', "stripe_{$env}_portal_configuration_id") ?: '';
+
+
+        // URLs par défaut (peuvent être écrasées par $overrides)
+        $defaults = [
+            'mode'                    => $env, // 'test' | 'live' — utile pour tes logs
+            'secret_key'              => (string)$secret,
+            'publishable_key'         => $pub ?: null,
+            'webhook_secret'          => $whsecret ?: null,
+            'portal_configuration_id' => $portalid ?: null,
+            'success_url'             => UrlFactory::payment_success()->out(false),
+            'cancel_url'              => UrlFactory::payment_cancel()->out(false),
+            'portal_return'           => UrlFactory::my_subscriptions()->out(false),
         ];
+
+        // Merge (les overrides priment)
+        return array_replace($defaults, $overrides);   
     }
 
     public function create_checkout_session(stdClass $payment_request, array $options = []): CheckoutInitResult {
@@ -25,7 +43,14 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
         $mode = $options['mode'] ?? 'payment';
         $priceId = $options['price_map']['stripe_price_id'] ?? null;
 
-        $cfg = $this->cfg();
+        $cfg = $this->cfg([
+            'success_url' => $options['success_url'] ?? null,
+            'cancel_url'  => $options['cancel_url']  ?? null,
+        ]);
+        // Nettoie si nulls
+        $cfg['success_url'] = $cfg['success_url'] ?: UrlFactory::payment_success()->out(false);
+        $cfg['cancel_url']  = $cfg['cancel_url']  ?: UrlFactory::payment_cancel()->out(false);
+
         \Stripe\Stripe::setApiKey($cfg['secret_key']);
 
         $params = [

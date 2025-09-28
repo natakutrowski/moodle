@@ -182,24 +182,13 @@ $string['close'] = 'Close';
 $string['subscribe'] = 'Subscribe';
 $string['change_currency'] = 'Change currency';
 
-// Stripe
-$string['stripe_heading'] = 'Stripe';
-$string['stripe_heading_desc'] = 'Enter your Stripe keys in test or live mode. To start, the secret key is enough. The webhook secret is required when you enable the webhook.';
-$string['stripe_publishable'] = 'Publishable key';
-$string['stripe_publishable_desc'] = 'Optional for simple Checkout; useful if you use Stripe Elements on the client side.';
-$string['stripe_secret'] = 'Secret key';
-$string['stripe_secret_desc'] = 'e.g. sk_test_xxx. Used server-side to create checkout sessions.';
 $string['payment_success_check_email'] = 'Please check your email: a message is waiting to finish signing in and set your password.';
 $string['payment_pending_msg'] = 'Your payment is being validated. This usually takes a few seconds.';
-$string['stripe_webhook_secret'] = 'Webhook secret';
-$string['stripe_webhook_secret_desc'] = 'e.g. whsec_xxx. Required to verify the signature of Stripe events.';
-
 $string['payment_success_title'] = 'Payment successful';
 $string['payment_success_thanks'] = 'Thank you! Your payment has been processed successfully.';
 $string['payment_canceled_title'] = 'Payment canceled';
 $string['payment_canceled_msg'] = 'Your payment has been canceled. No subscription has been created.';
 $string['back_to_plans'] = 'Back to available plans';
-
 
 $string['checkout_title'] = 'Checkout';
 $string['checkout_duration'] = 'Duration:';
@@ -220,12 +209,8 @@ $string['receipt_period'] = 'Access period: ';
 
 $string['welcome_temp_password_label'] = 'Temporary password';
 $string['welcome_security_hint'] = 'For your security, you will be asked to set a new password on your first login.';
-$string['welcome_button_login'] = 'Sign in';
 $string['receipt_intro'] = 'Here is a copy of your purchase details:';
 $string['receipt_button_open'] = 'Open my courses';
-// Retry / follow-up
-$string['retry_invalid_status'] = 'This payment request cannot be retried.';
-$string['retry_link_expired'] = 'This retry link has expired. Please start a new checkout.';
 
 // Emails – failure/abandoned/reminder
 $string['email_failed_subject'] = 'Your payment could not be completed';
@@ -302,8 +287,6 @@ $string['mysubs_title'] = 'My subscriptions';
 $string['mysubs_empty'] = 'You don’t have any subscription yet.';
 $string['period'] = 'Period';
 
-$string['stripe_portal_configuration_id'] = 'Stripe Portal configuration ID';
-$string['stripe_portal_configuration_id_desc'] = 'Optional: Customer Portal configuration ID (e.g. pc_xxx). If empty, Stripe’s default configuration will be used.';
 $string['btn_renew_now'] = 'Renew now';
 $string['btn_extend']    = 'Extend';
 
@@ -393,7 +376,6 @@ $string['stripe:missingpriceidforsubscription'] = 'Missing stripe_price_id for s
 $string['stripe:missingpriceid'] = 'Missing price_id.';
 $string['stripe:sdkautoloadnotfound'] = 'Stripe SDK autoload not found at {$a}.';
 $string['sessiondisplay'] = 'Session: {$a}';
-$string['recurplan_currency_not_configured'] = 'This recurring plan is not configured for currency {$a}.';
 
 // Headings
 $string['emails_links_heading'] = 'Emails & links';
@@ -421,14 +403,78 @@ $string['reminder2_after_minutes_desc'] = 'Send a second reminder if still unpai
 $string['featured_planid_label'] = 'Featured plan';
 $string['featured_planid_desc'] = 'ID of the plan highlighted on the offers page.';
 
+$string['alfa_missing_api_base'] = 'Alfa API base URL is missing.';
+$string['alfa_rub_only'] = 'Alfa (token) is configured for RUB currency only.';
+$string['alfa_register_error'] = 'Payment initialization failed: {$a}';
+$string['alfa_missing_formurl'] = 'Payment initialized but the bank did not return a payment URL.';
+$string['alfa_not_paid'] = 'Payment not completed';
 
-$string['alfa_settings_header'] = 'Alfa Bank (internet acquiring)';
-$string['alfa_api_base'] = 'API base URL';
-$string['alfa_api_base_desc'] = 'E.g. https://alfa.rbsuat.com (test). Production URL is provided by the bank.';
-$string['alfa_mode'] = 'Mode';
-$string['alfa_mode_desc'] = 'Choose Test or Live. Make sure credentials match.';
-$string['alfa_username'] = 'Alfa userName';
-$string['alfa_password'] = 'Alfa password';
-$string['alfa_token'] = 'Alfa API token (optional)';
-$string['alfa_token_desc'] = 'Use if your merchant is configured for token-based auth; leave empty otherwise.';
-$string['alfa_webhook_secret'] = 'Webhook secret (optional)';
+$string['subfield_pr_id'] = 'Payment Request #';
+$string['subfield_pr_status'] = 'PR status';
+$string['subfield_pr_provider'] = 'PR provider';
+$string['subfield_pr_amount'] = 'PR amount';
+$string['subfield_pr_orderid'] = 'PR orderId';
+$string['subfield_pr_txnid'] = 'PR transactionId';
+$string['subfield_pr_paidat'] = 'PR paid at';
+$string['subfield_pr_link'] = 'PR payment link';
+$string['subfield_pr_lasterror'] = 'PR last error';
+$string['notavailable'] = 'N/A';
+
+$string['err_cannot_determine_price'] = 'Cannot determine price to create payment request.';
+$string['err_no_redirect_url'] = 'Checkout init returned no redirect URL.';
+
+$string['btn_signin'] = 'Sign in';
+
+$string['provider_alfa'] = 'AlfaBank';
+$string['provider_stripe'] = 'Stripe';
+
+$string['configmissing'] = 'Missing configuration: {$a}.';
+$string['missing_customer_id'] = 'Stripe customer ID is missing.';
+$string['invalidcsvupload'] = 'The uploaded CSV file is invalid.';
+$string['csvwritefail'] = 'Failed to write CSV file.';
+$string['invalidpricecurrency'] = 'Invalid price/currency combination.';
+$string['plan_not_found'] = 'Subscription plan not found.';
+$string['scopenotfound'] = 'Access scope not found.';
+$string['scopedeleteinuse'] = 'Cannot delete this scope because it is in use.';
+$string['plannotfound'] = 'Plan not found.';
+$string['paymentgatewayerror'] = 'Payment gateway error: {$a}';
+
+$string['retry_invalid_status'] = 'This payment request cannot be retried in its current state.';
+$string['retry_link_expired'] = 'This retry link is invalid or has expired. Please start a new checkout.';
+
+// Sections
+$string['providers_header'] = 'Payment providers';
+$string['provider_default'] = 'Default provider';
+$string['provider_default_desc'] = 'Which provider to use when no routing rule applies.';
+
+// Common env
+$string['env_mode'] = 'Environment';
+$string['env_mode_desc'] = 'Choose which credentials to use.';
+$string['env_test'] = 'Test';
+$string['env_live'] = 'Live';
+
+// Stripe
+$string['stripe_secret_test'] = 'Secret key (TEST)';
+$string['stripe_publishable_test'] = 'Publishable key (TEST)';
+$string['stripe_webhook_secret_test'] = 'Stripe Webhook secret (TEST)';
+$string['stripe_portal_configuration_id_test'] = 'Stripe Portal configuration ID (TEST)';
+$string['stripe_portal_configuration_id_desc'] = 'Optional: Customer Portal configuration ID (e.g. pc_xxx). If empty, Stripe’s default configuration will be used.';
+
+$string['stripe_secret_live'] = 'Secret key (LIVE)';
+$string['stripe_publishable_live'] = 'Publishable key (LIVE)';
+$string['stripe_webhook_secret_live'] = 'Stripe Webhook secret (LIVE)';
+$string['stripe_portal_configuration_id_live'] = 'Stripe Portal configuration ID (LIVE)';
+
+
+// Alfa
+$string['alfa_settings_header'] = 'Alfa Bank';
+$string['alfa_api_base_test'] = 'API base URL (TEST)';
+$string['alfa_username_test'] = 'Login (TEST)';
+$string['alfa_password_test'] = 'Password (TEST)';
+$string['alfa_token_test'] = 'API token (TEST)';
+$string['alfa_webhook_secret_test'] = 'Alfa Webhook secret (TEST)';
+$string['alfa_api_base_live'] = 'API base URL (LIVE)';
+$string['alfa_username_live'] = 'Login (LIVE)';
+$string['alfa_password_live'] = 'Password (LIVE)';
+$string['alfa_token_live'] = 'API token (LIVE)';
+$string['alfa_webhook_secret_live'] = 'Alfa Webhook secret (LIVE)';

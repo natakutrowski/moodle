@@ -2,9 +2,7 @@
 namespace local_subscriptions\payment\alfa;
 
 use local_subscriptions\payment\PaymentGatewayInterface;
-use local_subscriptions\payment\PortalGatewayInterface;
 use local_subscriptions\payment\dto\{CheckoutInitResult, InternalEvent, ProviderActionResult, ProviderCapabilities};
-use local_subscriptions\url\UrlFactory;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\constants\Status;
 use stdClass;
@@ -30,10 +28,14 @@ final class AlfaGateway implements PaymentGatewayInterface {
     private $token;
 
     public function __construct() {
-        $this->base     = rtrim(get_config('local_subscriptions', 'alfa_api_base') ?: '', '/');
-        $this->username = get_config('local_subscriptions', 'alfa_username') ?: null;
-        $this->password = get_config('local_subscriptions', 'alfa_password') ?: null;
-        $this->token    = get_config('local_subscriptions', 'alfa_token') ?: null;
+        $env = get_config('local_subscriptions', 'alfa_env') ?: 'test';
+        $env = ($env === 'live') ? 'live' : 'test';
+
+        // Clés par environnement
+        $this->base     = rtrim(get_config('local_subscriptions', "alfa_{$env}_api_base") ?: '', '/');
+        $this->username = get_config('local_subscriptions', "alfa_{$env}_username") ?: null;
+        $this->password = get_config('local_subscriptions', "alfa_{$env}_password") ?: null;
+        $this->token    = get_config('local_subscriptions', "alfa_{$env}_token")    ?: null;
     }
 
     /**
@@ -46,12 +48,12 @@ final class AlfaGateway implements PaymentGatewayInterface {
         global $CFG, $DB;
 
         if (empty($this->base)) {
-            throw new \moodle_exception('configmissing', 'local_subscriptions', '', 'alfa_api_base');
+            throw new \moodle_exception('alfa_missing_api_base', 'local_subscriptions');
         }
 
         $currency = strtoupper($payment_request->currency ?? '');
         if ($currency !== 'RUB') {
-            throw new \moodle_exception('invalidrequest', 'local_subscriptions', '', 'Alfa est configuré pour RUB uniquement.');
+            throw new \moodle_exception('alfa_rub_only', 'local_subscriptions');
         }
 
         // --- orderNumber unique -------------------------------------------
@@ -60,68 +62,82 @@ final class AlfaGateway implements PaymentGatewayInterface {
             'id' => $payment_request->id,
             'attempts' => $attempt,
             'last_attempt' => time(),
-            'payment_provider' => 'alfa',
-            'status' => 'pending',
+            'payment_provider' => Provider::ALFA,
+            'status' => Status::PENDING,
         ]);
         $orderNumber = $payment_request->id . '-' . $attempt;
 
         // Conversion major -> minor (kopecks).
         $amountMinor = $this->major_to_minor($payment_request->price);
         // URLs de retour (peuvent être passées via $options).
-        $returnUrl = $options['returnurl'] ?? ($CFG->wwwroot . '/local/subscriptions/payment/alfa_return.php?prid=' . $payment_request->id);
+        $returnUrl = $options['returnurl'] ?? ($CFG->wwwroot . '/local/subscriptions/payment/alfa_return.php?pid=' . $payment_request->id);
         // Important : on met fail=1 pour router vers payment_cancel.php
-        $failUrl   = $options['failurl']   ?? ($CFG->wwwroot . '/local/subscriptions/payment/alfa_return.php?prid=' . $payment_request->id . '&fail=1');
+        $failUrl   = $options['failurl']   ?? ($returnUrl . '&fail=1');
+
+        $planname = '';
+        if (!empty($payment_request->planid)) {
+            $planname = (string)($DB->get_field('subscription_plan', 'name', ['id' => (int)$payment_request->planid], IGNORE_MISSING) ?? '');
+        }
+        $desc = 'CampusFR — '.($planname ?: 'Abonnement')." — ".number_format((float)$payment_request->price, 2, '.', '').' '.$payment_request->currency;
 
         $payload = [
             'orderNumber' => $orderNumber,
             'amount'      => $amountMinor,
-            'currency'    => 643, // RUB
             'returnUrl'   => $returnUrl,
             'failUrl'     => $failUrl,
-            'description' => $payment_request->description ?? 'Subscription payment',
-            'language'    => $options['language'] ?? 'ru', // 'ru' ou 'en'
-            // Infos client utiles (anti-fraude / UI banque)
-            'jsonParams'  => json_encode([
-                'email' => $options['email'] ?? $payment_request->email ?? null,
-                'phone' => $options['phone'] ?? null,
-            ]),
+            'description' => $desc,
+            'language'    => $options['language'] ?? 'ru',
         ];
 
+        // Infos client : encodage déjà RFC3986 dans post() → OK
+        $customer = [];
+        if (!empty($payment_request->userid))   { $customer['clientId']  = (string)$payment_request->userid; }
+        if (!empty($options['email'] ?? $payment_request->email ?? null)) {
+            $customer['email'] = $options['email'] ?? $payment_request->email;
+        }
+        if (!empty($options['firstname'] ?? $payment_request->firstname ?? null)) {
+            $customer['firstName'] = $options['firstname'] ?? $payment_request->firstname;
+        }
+        if (!empty($options['lastname'] ?? $payment_request->lastname ?? null)) {
+            $customer['lastName']  = $options['lastname'] ?? $payment_request->lastname;
+        }
+        if ($customer) {
+            $payload['jsonParams'] = json_encode($customer, JSON_UNESCAPED_UNICODE);
+        }
+     
+
+        // ---- Appel unique : mode token → PAS de currency (le gagnant) --------------
         $response = $this->post('/payment/rest/register.do', $payload);
 
         if (!empty($response['errorCode']) && $response['errorCode'] !== '0') {
             $msg = 'Alfa register.do error '.$response['errorCode'].' : '.($response['errorMessage'] ?? $response['actionCodeDescription'] ?? 'unknown');
-            // Journalise pour debug
             $DB->update_record('subscription_payment_request', (object)[
                 'id'            => $payment_request->id,
-                'response_json' => json_encode($response, JSON_UNESCAPED_UNICODE),
+                'response_json' => json_encode(['register' => $response, 'payload' => $payload], JSON_UNESCAPED_UNICODE),
                 'last_error'    => $msg,
             ]);
-            throw new \moodle_exception('paymentgatewayerror', 'local_subscriptions', '', $msg);
+            throw new \moodle_exception('alfa_register_error', 'local_subscriptions', '', $msg);
         }
 
         $formUrl = $response['formUrl'] ?? null;
         $orderId = $response['orderId'] ?? null;
         if (!$formUrl || !$orderId) {
-            $raw = json_encode($response, JSON_UNESCAPED_UNICODE);
+            $raw = json_encode(['register' => $response, 'payload' => $payload], JSON_UNESCAPED_UNICODE);
             $DB->update_record('subscription_payment_request', (object)[
                 'id'            => $payment_request->id,
-                'payment_provider' => Provider::ALFA,
-                'status'        => Status::PENDING,
                 'response_json' => $raw,
                 'last_error'    => 'Missing formUrl/orderId from Alfa',
             ]);
-            throw new \moodle_exception('paymentgatewayerror', 'local_subscriptions', '', 'Missing formUrl/orderId from Alfa');
+            throw new \moodle_exception('alfa_missing_formurl', 'local_subscriptions');
         }
 
-        // Persist formUrl + orderId dans ta table PR
+        // Persist : orderId & formUrl
         $DB->update_record('subscription_payment_request', (object)[
-            'id'                => $payment_request->id,
-            'payment_provider'  => Provider::ALFA,
-            'sessionid'         => $orderId, // identifiant Alfa
-            'payment_link'      => $formUrl,
-            'response_json'     => json_encode(['register' => $response, 'payload' => $payload], JSON_UNESCAPED_UNICODE),
-            'status'            => Status::PENDING,
+            'id'               => $payment_request->id,
+            'sessionid'        => $orderId,         // Alfa orderId
+            'payment_link'     => $formUrl,
+            'response_json'    => json_encode(['register' => $response, 'payload' => $payload], JSON_UNESCAPED_UNICODE),
+            'status'           => Status::PENDING,
         ]);
 
         return new CheckoutInitResult($formUrl);
@@ -186,12 +202,17 @@ final class AlfaGateway implements PaymentGatewayInterface {
             $payload = array_merge($auth, $payload);
         }
 
+
+        // Encodage strict RFC3986 (évite pertes de champs côté passerelle)
+        $encoded = http_build_query($payload, '', '&', PHP_QUERY_RFC3986);
+
         curl_setopt_array($ch, [
             CURLOPT_POST           => true,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POSTFIELDS     => http_build_query($payload),
+            CURLOPT_POSTFIELDS     => $encoded,
             CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_TIMEOUT        => 30,
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
         ]);
 
         $raw = curl_exec($ch);
@@ -216,44 +237,80 @@ final class AlfaGateway implements PaymentGatewayInterface {
 
 
     private function get_status(?string $orderNumber, ?string $orderId): array {
-        $fields = [];
-        if ($orderId)     { $fields['orderId'] = $orderId; }
-        if ($orderNumber) { $fields['orderNumber'] = $orderNumber; }
-        return $this->post('/payment/rest/getOrderStatusExtended.do', $fields);
+        // En mode token, Alfa exige UNIQUEMENT orderId.
+        if (!empty($this->token) && !empty($orderId)) {
+            return $this->post('/payment/rest/getOrderStatusExtended.do', [
+                'orderId' => $orderId,
+            ]);
+        }
+
+        // Sinon, on fait au mieux avec ce qu'on a.
+        if (!empty($orderId)) {
+            // user/pass : orderId suffit déjà
+            return $this->post('/payment/rest/getOrderStatusExtended.do', [
+                'orderId' => $orderId,
+            ]);
+        }
+
+        // En dernier recours : orderNumber seul.
+        if (!empty($orderNumber)) {
+            return $this->post('/payment/rest/getOrderStatusExtended.do', [
+                'orderNumber' => $orderNumber,
+            ]);
+        }
+
+        // Rien à interroger : renvoyer une "erreur" structurée
+        return ['errorCode' => '4', 'errorMessage' => 'orderId/orderNumber missing'];
     }
 
+
     private function map_status_to_event(array $status, ?string $orderNumber, ?string $orderId): InternalEvent {
+        global $DB;
+
         $orderStatus = isset($status['orderStatus']) ? (int)$status['orderStatus'] : null;
-        $amountMinor = isset($status['amount']) ? (int)$status['amount'] : null; // Alfa renvoie souvent le montant en minor
-        
+        $amountMinor = isset($status['amount']) ? (int)$status['amount'] : null;
+
+        // Résoudre l'ID du Payment Request
+        $prid = null;
+        if (!empty($orderNumber)) {
+            // Si on a "123-1", prendre la partie avant le tiret ; sinon c'est déjà l'id
+            $prid = (string)explode('-', (string)$orderNumber)[0];
+        }
+        if (!$prid && !empty($orderId)) {
+            $row = $DB->get_record('subscription_payment_request', ['sessionid' => $orderId], 'id', IGNORE_MISSING);
+            if ($row) { $prid = (string)$row->id; }
+        }
+
         $base = [
-            'payment_request_id' => $orderNumber ? (string)$orderNumber : null,
-            'currency'           => 'RUB',
+            'payment_request_id' => $prid,
+            'currency'           => 'RUB', // ta logique métier utilise la monnaie de la PR
             'amount_minor'       => $amountMinor,
             'meta'               => [
-                'provider'    => Provider::ALFA,
-                'orderId'     => $orderId ?? ($status['orderId'] ?? null),
-                'orderStatus' => $orderStatus,
-                'errorMessage'=> $status['actionCodeDescription'] ?? ($status['errorMessage'] ?? null),
-                'raw'         => $status,
+                'provider'          => Provider::ALFA,
+                'session'           => $orderId, // <-- filet de secours attendu par PaymentService
+                'orderId'           => $orderId,
+                'orderStatus'       => $orderStatus,
+                'provider_currency' => $status['currency'] ?? null, // souvent "810" en UAT
+                'errorMessage'      => $status['actionCodeDescription'] ?? ($status['errorMessage'] ?? null),
+                'raw'               => $status,
             ],
         ];
 
-        // Mapping minimal viable :
-        // 2 = payé, 0 = enregistré (non payé), 6 = refusé
         if ($orderStatus === 2) {
-            // Payé : on peut copier orderId en transactionid côté DB si tu veux (dans PaymentService).
             return new InternalEvent('checkout_completed', $base);
         }
         if ($orderStatus === 0) {
-            return new InternalEvent('payment_failed', $base + ['meta' => $base['meta'] + ['reason' => 'registered_not_paid']]);
+            $base['meta']['reason'] = 'registered_not_paid';
+            return new InternalEvent('payment_failed', $base);
         }
         if ($orderStatus === 6) {
-            return new InternalEvent('payment_failed', $base + ['meta' => $base['meta'] + ['reason' => 'authorization_declined']]);
+            $base['meta']['reason'] = 'authorization_declined';
+            return new InternalEvent('payment_failed', $base);
         }
-        // 1(preauth),3(cancel),4(refund),5(3DS pending) -> pour l’UI on renvoie payment_error.
-        return new InternalEvent('payment_failed', $base + ['meta' => $base['meta'] + ['reason' => 'not_paid']]);
+        $base['meta']['reason'] = 'not_paid';
+        return new InternalEvent('payment_failed', $base);
     }
+
 
     public function cancel_subscription(string $provider_subscription_id, array $opts = []): ProviderActionResult {
         return new ProviderActionResult(false, 'Not implemented for Alfa yet');

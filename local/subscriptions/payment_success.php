@@ -38,19 +38,22 @@ if ($pr && in_array($pr->status ?? '', [Status::PAID,Status::COMPLETED], true) &
             $pr->last_update = time();
             $DB->update_record('subscription_payment_request', $pr);
 
+            // Retenir l'état avant login
+            $needchangepw = !empty($user->forcepasswordchange);
+
             // Connexion
             \core\session\manager::login_user($user);
 
-            // Forcer le changement de mot de passe si pas déjà activé
-            if (empty($user->forcepasswordchange)) {
-                $user->forcepasswordchange = 1;
-                $DB->update_record('user', $user);
+            // NE PAS réécrire forcepasswordchange ici !
+            // Rediriger en fonction du flag réel
+            if ($needchangepw) {
+                $return  = UrlFactory::my_subscriptions();
+                $changepw = new \moodle_url('/login/change_password.php', ['returnurl' => $return->out(false)]);
+                redirect($changepw);
+            } else {
+                // Aller directement vers l’espace de l’utilisateur
+                redirect(UrlFactory::my_subscriptions());
             }
-
-            // Redirection : page "changer le mot de passe" puis retour à l'accueil
-            $return  = new \moodle_url('/');
-            $changepw = new \moodle_url('/login/change_password.php', ['returnurl' => $return->out(false)]);
-            redirect($changepw);
         }
     }
 }
@@ -70,10 +73,43 @@ if ($pr && in_array($pr->status ?? '', [Status::PAID,Status::COMPLETED], true)) 
             'my-4'
         );
     } else {
-        // Sinon, on indique de vérifier l'email (au cas où le jeton/auto-login n'a pas été possible)
+        // Sinon (guest), proposer l'étape suivante : se connecter ou définir le mot de passe.
+        $email = $pr->email ?? '';
+
+        // 1) Trouver un username fiable
+        $username = '';
+        // a) si la PR est déjà liée à un user
+        if (!empty($pr->userid)) {
+            $u = $DB->get_record('user', ['id' => $pr->userid, 'deleted' => 0], 'id,username', IGNORE_MISSING);
+            if ($u) { $username = (string)$u->username; }
+        }
+        // b) sinon, essayer par email
+        if ($username === '' && $email !== '') {
+            $u = $DB->get_record('user', ['email' => core_text::strtolower($email), 'deleted' => 0], 'id,username', IGNORE_MISSING);
+            if ($u) { $username = (string)$u->username; }
+        }
+        // c) dernier recours : ta fonction helper si elle existe, sinon fallback local
+        if ($username === '') {
+            // Génère username unique (reprend ta fonction utilitaire existante)
+            if (!function_exists('local_subscriptions_generate_unique_username')) {
+                // fallback très simple si jamais la fonction n'existe pas
+                $base = \core_text::substr(preg_replace('~[^a-z0-9]+~i', '', $pr->firstname.$pr->lastname), 0, 20);
+                if ($base === '') { $base = 'user'; }
+                $username = self::unique_username_from_base($base);
+            } else {
+                $username = local_subscriptions_generate_unique_username($pr->firstname ?? '', $pr->lastname ?? '', $email ?? '');
+            }
+        }     
+
+        $loginurl = new moodle_url('/login/index.php', ['username' => $username]);
+
         echo html_writer::div(
-            get_string('payment_success_check_email', 'local_subscriptions'),
-            'my-3 text-muted'
+            html_writer::tag('p', get_string('payment_success_check_email', 'local_subscriptions')) .
+            html_writer::div(
+                html_writer::link($loginurl, get_string('btn_signin', 'local_subscriptions'), ['class' => 'btn btn-primary me-2']) ,
+                'mt-2'
+            ),
+            'alert alert-info my-3'
         );
     }
 

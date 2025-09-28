@@ -183,7 +183,7 @@ class mailer {
         . \html_writer::tag('p', get_string('welcome_amount_summary', 'local_subscriptions', $price));
 
         $body .= self::pr_ref_badge($paymentreq);
-        [$html, $text] = self::render_email_layout($title, $body, get_string('welcome_button_login','local_subscriptions'), $loginurl);
+        [$html, $text] = self::render_email_layout($title, $body, get_string('btn_signin','local_subscriptions'), $loginurl);
 
         self::deliver($user, $title, $html, $text);
     }
@@ -738,7 +738,7 @@ class mailer {
             $pr->retry_expires = time() + 3*24*3600;
             $DB->update_record('subscription_payment_request', $pr);
         }
-        return (new \moodle_url('/local/subscriptions/retry_payment.php', ['pid'=>$pr->id,'t'=>$pr->retry_token]))->out(false);
+        return (UrlFactory::retry(['pid'=>$pr->id,'t'=>$pr->retry_token]))->out(false);
     }
 
     private static function pr_ref_badge(?\stdClass $pr): string {

@@ -37,44 +37,164 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_subscriptions_settings', get_string('pluginname', 'local_subscriptions'));
 
     if ($ADMIN->fulltree) {
-        // Section Stripe.
+
+
+        // === Providers (global) ====================================================
         $settings->add(new admin_setting_heading(
-            'local_subscriptions/stripeheading',
-            get_string('stripe_heading', 'local_subscriptions'),
-            get_string('stripe_heading_desc', 'local_subscriptions')
+            'local_subscriptions_providers_hdr',
+            get_string('providers_header', 'local_subscriptions'),
+            ''
         ));
 
-        // Publishable key (utile côté front si un jour tu utilises Elements).
+        // Provider par défaut (quand rien ne force Stripe/Alfa)
+        $settings->add(new admin_setting_configselect(
+            'local_subscriptions/provider_default',
+            get_string('provider_default', 'local_subscriptions'),
+            get_string('provider_default_desc', 'local_subscriptions'),
+            'stripe',
+            [
+                'stripe' => get_string('provider_stripe', 'local_subscriptions'),
+                'alfa'   => get_string('provider_alfa',   'local_subscriptions'),
+            ]
+        ));
+
+        // === Stripe ================================================================
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_stripe_hdr',
+            get_string('provider_stripe', 'local_subscriptions'),
+            ''
+        ));
+
+        // Environnement Stripe: test/live
+        $settings->add(new admin_setting_configselect(
+            'local_subscriptions/stripe_env',
+            get_string('env_mode', 'local_subscriptions'),
+            get_string('env_mode_desc', 'local_subscriptions'),
+            'test',
+            ['test' => get_string('env_test', 'local_subscriptions'),
+            'live' => get_string('env_live', 'local_subscriptions')]
+        ));
+
+        // TEST keys
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/stripe_test_secret',
+            get_string('stripe_secret_test', 'local_subscriptions'),
+            '', ''
+        ));
         $settings->add(new admin_setting_configtext(
-            'local_subscriptions/stripe_publishable',
-            get_string('stripe_publishable', 'local_subscriptions'),
-            get_string('stripe_publishable_desc', 'local_subscriptions'),
+            'local_subscriptions/stripe_test_publishable',
+            get_string('stripe_publishable_test', 'local_subscriptions'),
+            '', '', PARAM_RAW_TRIMMED
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/stripe_test_webhook_secret',
+            get_string('stripe_webhook_secret_test', 'local_subscriptions'),
+            '', ''
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/stripe_test_portal_configuration_id',
+            get_string('stripe_portal_configuration_id_test', 'local_subscriptions'),
+            get_string('stripe_portal_configuration_id_desc', 'local_subscriptions'),
             '', PARAM_RAW_TRIMMED
         ));
 
-        // Secret key (test/live) — champ masqué.
+        // LIVE keys
         $settings->add(new admin_setting_configpasswordunmask(
-            'local_subscriptions/stripe_secret_key',
-            get_string('stripe_secret', 'local_subscriptions'),
-            get_string('stripe_secret_desc', 'local_subscriptions'),
-            ''
+            'local_subscriptions/stripe_live_secret',
+            get_string('stripe_secret_live', 'local_subscriptions'),
+            '', ''
         ));
-
-        // Webhook secret — champ masqué (optionnel au début).
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/stripe_live_publishable',
+            get_string('stripe_publishable_live', 'local_subscriptions'),
+            '', '', PARAM_RAW_TRIMMED
+        ));
         $settings->add(new admin_setting_configpasswordunmask(
-            'local_subscriptions/stripe_webhook_secret',
-            get_string('stripe_webhook_secret', 'local_subscriptions'),
-            get_string('stripe_webhook_secret_desc', 'local_subscriptions'),
-            ''
+            'local_subscriptions/stripe_live_webhook_secret',
+            get_string('stripe_webhook_secret_live', 'local_subscriptions'),
+            '', ''
         ));
 
         $settings->add(new admin_setting_configtext(
-            'local_subscriptions/brand_logo_url',
-        get_string('brand_logo_url_label', 'local_subscriptions'),
-        get_string('brand_logo_url_desc', 'local_subscriptions'),
-            '', PARAM_URL
+            'local_subscriptions/stripe_live_portal_configuration_id',
+            get_string('stripe_portal_configuration_id_live', 'local_subscriptions'),
+            get_string('stripe_portal_configuration_id_desc', 'local_subscriptions'),
+            '', PARAM_RAW_TRIMMED
         ));
 
+        // === Alfa Bank =============================================================
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_alfa_hdr',
+            get_string('alfa_settings_header', 'local_subscriptions'),
+            ''
+        ));
+
+        // Environnement Alfa: test/live
+        $settings->add(new admin_setting_configselect(
+            'local_subscriptions/alfa_env',
+            get_string('env_mode', 'local_subscriptions'),
+            get_string('env_mode_desc', 'local_subscriptions'),
+            'test',
+            ['test' => get_string('env_test', 'local_subscriptions'),
+            'live' => get_string('env_live', 'local_subscriptions')]
+        ));
+
+        // TEST creds
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_test_api_base',
+            get_string('alfa_api_base_test', 'local_subscriptions'),
+            'https://alfa.rbsuat.com', 'https://alfa.rbsuat.com', PARAM_URL
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_test_username',
+            get_string('alfa_username_test', 'local_subscriptions'),
+            '', '', PARAM_RAW_TRIMMED
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_test_password',
+            get_string('alfa_password_test', 'local_subscriptions'),
+            '', ''
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_test_token',
+            get_string('alfa_token_test', 'local_subscriptions'),
+            '', ''
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_test_webhook_secret',
+            get_string('alfa_webhook_secret_test', 'local_subscriptions'),
+            '', ''
+        ));
+
+        // LIVE creds
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_live_api_base',
+            get_string('alfa_api_base_live', 'local_subscriptions'),
+            '', '', PARAM_URL
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_live_username',
+            get_string('alfa_username_live', 'local_subscriptions'),
+            '', '', PARAM_RAW_TRIMMED
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_live_password',
+            get_string('alfa_password_live', 'local_subscriptions'),
+            '', ''
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_live_token',
+            get_string('alfa_token_live', 'local_subscriptions'),
+            '', ''
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_live_webhook_secret',
+            get_string('alfa_webhook_secret_live', 'local_subscriptions'),
+            '', ''
+        ));
+
+        // === Misc. =============================================================
         $settings->add(new admin_setting_heading(
             'local_subs_email_heading',
         get_string('emails_links_heading', 'local_subscriptions'),
@@ -86,6 +206,13 @@ if ($hassiteconfig) {
         get_string('email_link_secret_label', 'local_subscriptions'),
         get_string('email_link_secret_desc', 'local_subscriptions'),
             '', PARAM_RAW_TRIMMED
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/brand_logo_url',
+        get_string('brand_logo_url_label', 'local_subscriptions'),
+        get_string('brand_logo_url_desc', 'local_subscriptions'),
+            '', PARAM_URL
         ));
 
         $settings->add(new admin_setting_heading(
@@ -122,74 +249,12 @@ if ($hassiteconfig) {
             '', PARAM_INT
         ));
 
-        $settings->add(new admin_setting_configtext(
-            'local_subscriptions/stripe_portal_configuration_id',
-            get_string('stripe_portal_configuration_id', 'local_subscriptions'),
-            get_string('stripe_portal_configuration_id_desc', 'local_subscriptions'),
-            '', PARAM_RAW_TRIMMED
-        ));
-
         $settings->add(new admin_setting_configcheckbox(
             'local_subscriptions/email_show_pr_ref',
             get_string('email_show_pr_ref', 'local_subscriptions'),
             get_string('email_show_pr_ref_desc', 'local_subscriptions'),
             0
         ));
-
-        // === Alfa Bank ===
-        $settings->add(new admin_setting_heading(
-            'local_subscriptions_alfa_hdr',
-            get_string('alfa_settings_header', 'local_subscriptions'),
-            ''
-        ));
-
-        $settings->add(new admin_setting_configtext(
-            'local_subscriptions/alfa_api_base',
-            get_string('alfa_api_base', 'local_subscriptions'),
-            get_string('alfa_api_base_desc', 'local_subscriptions'),
-            'https://alfa.rbsuat.com',
-            PARAM_URL
-        ));
-
-        $settings->add(new admin_setting_configselect(
-            'local_subscriptions/alfa_mode',
-            get_string('alfa_mode', 'local_subscriptions'),
-            get_string('alfa_mode_desc', 'local_subscriptions'),
-            'test',
-            ['test' => 'Test', 'live' => 'Live']
-        ));
-
-        $settings->add(new admin_setting_configtext(
-            'local_subscriptions/alfa_username',
-            get_string('alfa_username', 'local_subscriptions'),
-            '',
-            '',
-            PARAM_RAW_TRIMMED
-        ));
-
-        $settings->add(new admin_setting_configpasswordunmask(
-            'local_subscriptions/alfa_password',
-            get_string('alfa_password', 'local_subscriptions'),
-            '',
-            ''
-        ));
-
-        $settings->add(new admin_setting_configpasswordunmask(
-            'local_subscriptions/alfa_token',
-            get_string('alfa_token', 'local_subscriptions'),
-            get_string('alfa_token_desc', 'local_subscriptions'),
-            ''
-        ));
-
-        $settings->add(new admin_setting_configpasswordunmask(
-            'local_subscriptions/alfa_webhook_secret',
-            get_string('alfa_webhook_secret', 'local_subscriptions'),
-            '',
-            ''
-        ));
-
-
-
     }
 
     $ADMIN->add('localplugins', $settings);

@@ -530,3 +530,49 @@ tr.plan-inactive {
   transform: translateY(1px);
   box-shadow: 0 6px 18px rgba(123, 47, 255, .28);
 }
+/* Conteneur global (icône + nom + badge) */
+.ls-provider-with-env{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;              /* espace entre nom et badge */
+  vertical-align:middle;  /* s'aligne bien dans une cellule */
+  white-space:nowrap;     /* évite les retours à la ligne */
+  line-height:1.2;
+}
+
+/* Icône + nom */
+.ls-provider-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.375rem;            /* espace icône/nom */
+}
+
+/* Icône : élimine l’espace baseline des <img> */
+.ls-provider-icon{
+  width:18px;
+  height:18px;
+  display:block;          /* important : pas inline, sinon décalage vertical */
+}
+
+/* Nom : pas besoin d’une hauteur fixe, on laisse le flex centrer */
+.ls-provider-name{
+  line-height:1;
+}
+
+/* Badge d’environnement aligné et “pill” */
+.ls-env-badge{
+  display:inline-flex;
+  align-items:center;
+  height:18px;            /* même hauteur visuelle que l’icône */
+  padding:0 .5rem;
+  border-radius:9999px;
+  font-size:.75rem;
+  line-height:1;          /* évite le décalage vertical */
+}
+
+/* Couleurs (garde ce que tu avais) */
+.ls-env-test{ background:#eef2ff; color:#3f51b5; }
+.ls-env-live{ background:#e8f5e9; color:#2e7d32; }
+
+/* Au cas où ta table force vertical-align: top; */
+table.generaltable td { vertical-align: middle; }
