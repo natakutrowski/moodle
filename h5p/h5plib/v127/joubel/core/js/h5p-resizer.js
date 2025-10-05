@@ -55,7 +55,7 @@
         data.scrollHeight !== data.clientHeight) {
 
       // Reset iframe height, in case content has shrinked.
-      iframe.style.height = data.clientHeight + 'px';
+      iframe.style.height = (data.clientHeight + 75) + 'px';
       respond('resizePrepared');
     }
   };
@@ -70,7 +70,7 @@
    */
   actionHandlers.resize = function (iframe, data) {
     // Resize iframe so all content is visible. Use scrollHeight to make sure we get everything
-    iframe.style.height = data.scrollHeight + 'px';
+    iframe.style.height = (data.scrollHeight + 75) + 'px';
   };
 
   /**
