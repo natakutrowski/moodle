@@ -526,7 +526,7 @@ class core_renderer extends \core_renderer {
         global $DB;
         global $course;
         $result = $DB->get_field("course", "summary", array("id"=>$course->id));
-        $html .= $result;
+        $html = $result;
 
         return $html;
     }
@@ -820,7 +820,12 @@ class core_renderer extends \core_renderer {
      * @return string the HTML to output.
      */
     public function heading($text, $level = 2, $classes = 'main page-section-title-hide', $id = null) {
-        return "<h3 id='$id' class='$classes'>$text</h3>";
+        //return "<h3 id='$id' class='$classes'>$text</h3>";
+        // Normalise + ajoute tes classes de thème.
+        $classes = array_merge(['main', 'page-section-title-hide'], (array)$classes);
+        // Laisse le parent produire le HTML correct (gère array|string, échappements, etc.).
+        return parent::heading($text, $level, $classes, $id);
+
     }
     /**
      * Returns standard main content placeholder.

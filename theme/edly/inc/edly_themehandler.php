@@ -38,7 +38,7 @@ $header = $PAGE->activityheader;
 $headercontent = $header->export_for_template($renderer);
 
 $login_url  = get_login_url();
-$signup_url = "{$CFG->wwwroot}/login/signup.php";
+$signup_url = "{$CFG->wwwroot}/subscribe.php";
 $isloggedin = isloggedin();
 
 
