@@ -38,11 +38,13 @@
         {{^accessvisible}}dimmed{{/accessvisible}}
         d-flex
         {{#indent}} indented {{/indent}}
-        {{#hasdelegatedsection}}py-0{{/hasdelegatedsection}}"
+        {{#hasdelegatedsection}}py-0{{/hasdelegatedsection}}
+        {{#modname}}{{plugin}}_item{{/modname}}"
     id="course-index-cm-{{id}}"
     data-for="cm"
     data-id="{{id}}"
     role="treeitem"
+    {{#modname}}data-modname="{{plugin}}"{{/modname}}
 >
     {{^hasdelegatedsection}}
         <span class="completioninfo" data-for="cm_completion" data-value="NaN"></span>
