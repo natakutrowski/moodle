@@ -59,22 +59,44 @@ class plan_translation_form extends moodleform {
 
         $mform->addElement($select);
         $mform->addElement('text', 'name', get_string('translatedname', 'local_subscriptions'));
-        $mform->addElement('textarea', 'description', get_string('translateddescription', 'local_subscriptions'), 'rows="3" cols="60"');
-
         $mform->setType('name', PARAM_TEXT); // ← IMPORTANT
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
 
-        $mform->setType('description', PARAM_TEXT); // ← IMPORTANT
+        // --- Description (éditeur riche avec fichiers) ----------------------------
+        global $CFG;
+        $context = \context_system::instance();
+        $editoroptions = [
+            'maxfiles'  => 50,
+            'maxbytes'  => $CFG->maxbytes,
+            'trusttext' => false,
+            'subdirs'   => 0,
+            'context'   => $context,
+        ];
 
+        $mform->addElement('editor', 'description_editor', get_string('description'), null, $editoroptions);
+        $mform->setType('description_editor', PARAM_RAW);
 
-        if ($translation) {
-            $mform->setDefaults([
-                'lang' => $translation->lang,
-                'name' => $translation->name,
-                'description' => $translation->description
-            ]);
+        // --- Préremplissage -------------------------------------------------------
+        // NB : on aime bien préremplir dans le contrôleur, mais si tu préfères ici, fais :
+        if (!empty($translation)) {
+            // On prépare l'objet comme attendu par file_prepare_standard_editor
+            $seed = (object)[
+                'id'                => (int)$translation->id,
+                'lang'              => (string)$translation->lang,
+                'name'              => (string)$translation->name,
+                'description'       => (string)($translation->description ?? ''),
+                'descriptionformat' => (int)($translation->descriptionformat ?? FORMAT_HTML),
+            ];
+
+            // Injecte draft itemid + réécriture URLs pluginfile dans $seed->description_editor
+            $seed = file_prepare_standard_editor(
+                $seed, 'description', $editoroptions, $context,
+                'local_subscriptions', 'plan_desc', $seed->id
+            );
+
+            $this->set_data($seed); // moodleform::set_data()
         }
-        
+
         // --- Boutons d'action (submit / cancel / delete) ---
 
         $buttonarray = [];

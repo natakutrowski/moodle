@@ -28,16 +28,6 @@ $plans = $planids ? $DB->get_records_list('subscription_plan', 'id', $planids, '
     'id,name,is_recurring') : [];
 
 // Petits helpers
-$statusbadge = function(string $status): string {
-    switch ($status) {
-        case Status::ACTIVE:   return html_writer::span(get_string('substatus_active', 'local_subscriptions'),   'badge bg-success');
-        case Status::QUEUED:   return html_writer::span(get_string('substatus_queued', 'local_subscriptions'),   'badge bg-secondary');
-        case Status::REPLACED: return html_writer::span(get_string('substatus_replaced', 'local_subscriptions'), 'badge bg-warning text-dark');
-        case Status::CANCELED: return html_writer::span(get_string('substatus_canceled', 'local_subscriptions'), 'badge bg-danger');
-        case Status::EXPIRED:
-        default:         return html_writer::span(get_string('substatus_expired', 'local_subscriptions'),  'badge bg-danger');
-    }
-};
 $fmtmoney = fn($amt, $cur) => format_float((float)$amt, 2).' '.strtoupper((string)$cur);
 
 // 3) Render
@@ -64,7 +54,7 @@ foreach ($subs as $sub) {
 
     $head = html_writer::start_div('d-flex align-items-center justify-content-between');
     $title = html_writer::tag('span', format_string($plan->name), ['class'=>'h5 m-0']);
-    $badges = $statusbadge($sub->status);
+    $badges = SubsPresenter::render_status_badge($sub->status);
     $head .= $title . $badges;
     $head .= html_writer::end_div();
 

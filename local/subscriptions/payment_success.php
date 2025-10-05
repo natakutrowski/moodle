@@ -5,6 +5,8 @@ require_once(__DIR__ . '/../../config.php');
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Status;
 
+\local_subscriptions\subscription_config::guard_public_access();
+
 $prid       = required_param('pid', PARAM_INT);
 $session_id = optional_param('session_id', '', PARAM_RAW_TRIMMED); // Stripe remplit ce placeholder
 $token      = optional_param('t', '', PARAM_ALPHANUMEXT);          // jeton à usage unique

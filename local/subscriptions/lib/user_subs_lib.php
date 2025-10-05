@@ -137,33 +137,60 @@ function handle_post_actions(): array {
     return [$updated, $deleted];
 }
 
-function get_user_active_subscriptions(int $userid): array {
+/**
+ * Renvoie toutes les souscriptions ACTIVES d'un user + la QUEUED la plus proche (si elle existe).
+ * - Active: us.status = 'active'
+ * - Nearest queued: us.status = 'queued' avec start_date >= now ORDER BY start_date ASC LIMIT 1
+ *
+ * @param int $userid
+ * @return stdClass[] liste indexée numériquement (Active(s) puis éventuelle Queued)
+ */
+function get_user_active_and_nearest_queued(int $userid): array {
     global $DB;
 
-    $sql = "
+    $now = time();
+
+    // 1) ACTIVES
+    $sqlact = "
         SELECT 
-            us.id,
-            us.userid,
-            us.planid,
-            us.payment_provider,
-            us.start_date,
-            us.end_date,
-            us.status,
-            us.creation_date,
-            us.pricepaid,
-            us.currency,
-            us.transactionid,
-            sp.name AS planname,
-            sp.duration_key,
-            sp.accessscopeid
+            us.id, us.userid, us.planid, us.payment_provider,
+            us.start_date, us.end_date, us.status, us.creation_date,
+            us.pricepaid, us.currency, us.transactionid,
+            sp.name AS planname, sp.duration_key, sp.accessscopeid
         FROM {user_subscription} us
         JOIN {subscription_plan} sp ON sp.id = us.planid
-        WHERE us.userid = :userid AND us.status = '".Status::ACTIVE."'
+        WHERE us.userid = :userid AND us.status = 'active'
         ORDER BY us.start_date DESC
     ";
+    $actives = array_values($DB->get_records_sql($sqlact, ['userid' => $userid]));
 
-    return $DB->get_records_sql($sql, ['userid' => $userid]);
+    // 2) NEAREST QUEUED (future)
+    $sqlq = "
+        SELECT 
+            us.id, us.userid, us.planid, us.payment_provider,
+            us.start_date, us.end_date, us.status, us.creation_date,
+            us.pricepaid, us.currency, us.transactionid,
+            sp.name AS planname, sp.duration_key, sp.accessscopeid
+        FROM {user_subscription} us
+        JOIN {subscription_plan} sp ON sp.id = us.planid
+        WHERE us.userid = :userid
+          AND us.status = 'queued'
+          AND us.start_date >= :now
+        ORDER BY us.start_date ASC
+    ";
+    $queued = $DB->get_records_sql($sqlq, ['userid' => $userid, 'now' => $now], 0, 1);
+    $queued = $queued ? array_values($queued)[0] : null;
+
+    // Fusion (évite doublon si la queued n'existe pas)
+    $out = $actives;
+    if ($queued) {
+        // on marque cet enregistrement pour aider le presenter (cas D)
+        $queued->is_nearest_queued = true;
+        $out[] = $queued;
+    }
+    return $out;
 }
+
 
 function local_subscriptions_get_courses_by_plan(int $planid): array {
     global $DB;

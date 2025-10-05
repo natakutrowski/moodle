@@ -90,6 +90,7 @@
 				<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
 				<FIELD NAME="name" TYPE="text" NOTNULL="true"/>
 				<FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Format of description; 1=FORMAT_HTML"/>
 				<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
 				<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
 			</FIELDS>
@@ -108,6 +109,7 @@
 			<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
 			<FIELD NAME="name" TYPE="text" NOTNULL="true"/>
 			<FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+			<FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Format of description; 1=FORMAT_HTML"/>
 			<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="false"/>
 			<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="false"/>
 			<KEYS>

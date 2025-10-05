@@ -38,6 +38,17 @@ if ($hassiteconfig) {
 
     if ($ADMIN->fulltree) {
 
+        $settings->add(new admin_setting_configselect(
+            'local_subscriptions/availability_mode',
+            get_string('availability_mode', 'local_subscriptions'),
+            get_string('availability_mode_desc', 'local_subscriptions'),
+            'enabled',
+            [
+                'enabled'   => get_string('availability_enabled', 'local_subscriptions'),
+                'adminonly' => get_string('availability_adminonly', 'local_subscriptions'),
+                'disabled'  => get_string('availability_disabled', 'local_subscriptions'),
+            ]
+        ));
 
         // === Providers (global) ====================================================
         $settings->add(new admin_setting_heading(
@@ -255,6 +266,30 @@ if ($hassiteconfig) {
             get_string('email_show_pr_ref_desc', 'local_subscriptions'),
             0
         ));
+
+        // Pages politiques/CGU (RU vs ROW)
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/policy_url_ru',
+            get_string('policy_url_ru', 'local_subscriptions'),
+            '', '', PARAM_URL
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/policy_url_row',
+            get_string('policy_url_row', 'local_subscriptions'),
+            '', '', PARAM_URL
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/terms_url_ru',
+            get_string('terms_url_ru', 'local_subscriptions'),
+            '', '', PARAM_URL
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/terms_url_row',
+            get_string('terms_url_row', 'local_subscriptions'),
+            '', '', PARAM_URL
+        ));
+
+
     }
 
     $ADMIN->add('localplugins', $settings);

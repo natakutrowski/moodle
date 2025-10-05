@@ -182,7 +182,9 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
             'enctype' => 'multipart/form-data',
             'class' => 'csv-upload-form'
         ]);
-
+        
+        $output .= html_writer::empty_tag('input', ['type'=>'hidden','name'=>'sesskey','value'=>sesskey()]);
+        
         $output .= html_writer::start_div('form-group');
 
         $output .= html_writer::start_tag('label', [
@@ -243,6 +245,8 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
             'action' => new moodle_url(subscription_config::process_csv_page())
         ]);
 
+        $output .= html_writer::empty_tag('input', ['type'=>'hidden','name'=>'sesskey','value'=>sesskey()]);
+
         $output .= html_writer::empty_tag('input', [
             'type' => 'hidden',
             'name' => 'importid',
@@ -281,6 +285,12 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         // Form
         $output .= html_writer::start_div('subscription-card');
         $output .= html_writer::start_tag('form', ['method' => 'post', 'class' => 'mform']);
+
+        $output .= html_writer::empty_tag('input', [
+            'type'  => 'hidden',
+            'name'  => 'sesskey',
+            'value' => sesskey(),
+        ]);
 
         // User
         $output .= html_writer::div(
@@ -570,12 +580,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
             echo \html_writer::end_div();   // dialog
             echo \html_writer::end_div();     // modal
 
-
-
-
             $row = [];
-
-
 
             // Bouton icône qui ouvre la modal
             $row[] = html_writer::link(
@@ -645,7 +650,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                 'class' => 'form-control edit-input d-none'
             ]) . html_writer::tag('span', date('Y-m-d', $sub->end_date), ['class' => 'edit-display']);
 
-            $row[] = html_writer::tag('span', $sub->status);
+            $row[] = html_writer::tag('span', SubsPresenter::render_status_badge($sub->status));
             $row[] = html_writer::tag('span', date('Y-m-d H:i:s', $sub->creation_date));
 
             $table->data[] = $row;
@@ -675,10 +680,5 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
 
         return $output;
     }
-
-
-
-
-
 
 }

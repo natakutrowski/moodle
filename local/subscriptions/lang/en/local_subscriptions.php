@@ -354,7 +354,13 @@ $string['substatus_active']            = 'Active'; // do not delete
 $string['substatus_queued']            = 'Queued'; // do not delete
 $string['substatus_replaced']          = 'Replaced'; // do not delete
 $string['substatus_expired']           = 'Expired'; // do not delete
-$string['substatus_canceled']          = 'Canceled';
+$string['substatus_canceled']          = 'Canceled'; // do not delete
+$string['substatus_pending']           = 'Pending'; // do not delete
+$string['substatus_error']             = 'Error'; // do not delete
+$string['substatus_suspended']         = 'Suspended'; // do not delete
+$string['substatus_paid']              = 'Paid'; // do not delete
+$string['substatus_failed']            = 'Failed'; // do not delete
+$string['substatus_unknown']           = 'Unknown'; // do not delete
 
 $string['optional_error_msg'] = 'Optional error message';
 
@@ -478,3 +484,34 @@ $string['alfa_username_live'] = 'Login (LIVE)';
 $string['alfa_password_live'] = 'Password (LIVE)';
 $string['alfa_token_live'] = 'API token (LIVE)';
 $string['alfa_webhook_secret_live'] = 'Alfa Webhook secret (LIVE)';
+
+
+$string['policy_url_ru'] = 'Privacy policy URL (Russia)';
+$string['policy_url_row'] = 'Privacy policy URL (Rest of world)';
+$string['terms_url_ru'] = 'Terms (CGU/CGV) URL (Russia)';
+$string['terms_url_row'] = 'Terms (CGU/CGV) URL (Rest of world)';
+$string['privacy_policy'] = 'Privacy policy';
+$string['terms_cgu'] = 'Terms & Conditions';
+$string['i_accept_policy'] = 'I agree to the {$a}.';
+$string['i_accept_terms']  = 'I agree to the {$a}.';
+
+$string['availability_mode'] = 'Plugin visibility';
+$string['availability_mode_desc'] = 'Temporarily restrict all public pages of the Subscriptions plugin.';
+$string['availability_enabled'] = 'Enabled (public)';
+$string['availability_adminonly'] = 'Admin only';
+$string['availability_disabled'] = 'Disabled';
+
+$string['subs_unavailable'] = 'Subscriptions are temporarily unavailable.';
+$string['subs_unavailable_adminonly'] = 'Subscriptions pages are currently restricted to administrators.';
+
+$string['label_inactive'] = '(inactive)';
+
+
+$string['edittranslation'] = 'Edit translation';
+$string['newtranslation'] = 'New translation';
+
+$string['task_subscription_rollover'] = 'Activate queued subscriptions and expire finished ones';
+$string['renew_now'] = 'Renew now';
+$string['renew_soon_msg'] = 'Your access ends in {$a} day(s). Renew now to avoid interruption.';
+$string['queued_starts_in'] = 'Starts in {$a} day(s)';
+$string['none'] = 'None';

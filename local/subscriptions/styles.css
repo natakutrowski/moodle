@@ -576,3 +576,19 @@ tr.plan-inactive {
 
 /* Au cas où ta table force vertical-align: top; */
 table.generaltable td { vertical-align: middle; }
+
+.ls-policy { line-height:1.6; }
+.ls-policy h2 { margin-top:1.25rem; }
+.ls-policy h3 { margin-top:1rem; }
+
+/* Colonne description (HTML riche) */
+.plan-desc img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.scope-desc img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}

@@ -7,6 +7,9 @@ use local_subscriptions\url\UrlFactory;
 use local_subscriptions\domain\SubscriptionAdvisor;
 use local_subscriptions\constants\Operation;
 use local_subscriptions\constants\Status;
+use local_subscriptions\support\Region;
+
+\local_subscriptions\subscription_config::guard_public_access();
 
 $planid   = required_param('planid', PARAM_INT);
 $currency = optional_param('currency', '', PARAM_ALPHANUMEXT); // ex: 'eur'
@@ -323,14 +326,55 @@ echo html_writer::end_div();
 // Bloc Terms + bouton, bien décollé et lié visuellement
 echo html_writer::start_div('mt-4 pt-3 border-top');
 
-// Terms
+// URLs policy/terms (RU/BY vs reste du monde)
+$urls = Region::policyUrls();
+
+// Privacy
 echo html_writer::start_div('form-check mb-3');
 echo html_writer::empty_tag('input', [
-    'type' => 'checkbox', 'class'=>'form-check-input', 'id'=>'agree_terms',
-    'name' => 'agree_terms'
+    'type'     => 'checkbox',
+    'class'    => 'form-check-input',
+    'id'       => 'accept_privacy',
+    'name'     => 'accept_privacy',
+    'value'    => '1',
+    'required' => 'required',
 ]);
-echo html_writer::label(get_string('checkout_consent_label', 'local_subscriptions'), 'agree_terms', false, ['class'=>'form-check-label small']);
+echo html_writer::label(
+    get_string('i_accept_policy', 'local_subscriptions',
+        html_writer::link($urls['policy'], get_string('privacy_policy', 'local_subscriptions'), [
+            'target' => '_blank', 'rel' => 'noopener'
+        ])
+    ),
+    'accept_privacy',
+    false,
+    ['class' => 'form-check-label small']
+);
 echo html_writer::end_div();
+
+// Terms / CGU-CGV
+echo html_writer::start_div('form-check mb-3');
+echo html_writer::empty_tag('input', [
+    'type'     => 'checkbox',
+    'class'    => 'form-check-input',
+    'id'       => 'agree_terms',     // garde cet id pour compat avec ton JS actuel
+    'name'     => 'accept_terms',    // côté serveur: required_param('accept_terms', PARAM_BOOL)
+    'value'    => '1',
+    'required' => 'required',
+]);
+echo html_writer::label(
+    get_string('i_accept_terms', 'local_subscriptions',
+        html_writer::link($urls['terms'], get_string('terms_cgu', 'local_subscriptions'), [
+            'target' => '_blank', 'rel' => 'noopener'
+        ])
+    ),
+    'agree_terms',
+    false,
+    ['class' => 'form-check-label small']
+);
+echo html_writer::end_div();
+
+echo html_writer::end_div(); // fin du bloc border-top
+
 
 // Bouton principal (désactivé tant qu’aucune option & terms non cochés)
 $btntext = $isguest ? get_string('subscribe', 'local_subscriptions') : get_string('checkout_go_to_payment', 'local_subscriptions');

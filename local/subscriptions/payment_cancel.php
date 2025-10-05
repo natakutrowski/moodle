@@ -7,6 +7,8 @@ use local_subscriptions\mailer;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Status;
 
+\local_subscriptions\subscription_config::guard_public_access();
+
 $pid = required_param('pid', PARAM_INT); // payment_request_id
 global $DB, $SITE;
 

@@ -3,6 +3,7 @@ namespace local_subscriptions\support;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\payment\Provider;
+use local_subscriptions\constants\Status;
 
 final class SubsPresenter {
 
@@ -37,7 +38,7 @@ final class SubsPresenter {
             // Plan
             $rows[] = [get_string('plan', 'local_subscriptions'), format_string($plan->name ?? '')];
             // Statut (traduit)
-            $rows[] = [get_string('status', 'local_subscriptions'), self::label_status($sub)];
+            $rows[] = [get_string('status', 'local_subscriptions'), self::render_status_badge(self::label_status($sub))];
             // Période (Start → End)
             $period = userdate((int)$sub->start_date).' → '.self::format_end($sub->end_date ?? null);
             $rows[] = [get_string('period', 'local_subscriptions'), $period];
@@ -74,7 +75,7 @@ final class SubsPresenter {
         $rows[] = [get_string('subfield_planid', 'local_subscriptions'), (string)$sub->planid];
 
         $rows[] = [get_string('plan', 'local_subscriptions'), format_string($plan->name ?? '')];
-        $rows[] = [get_string('status', 'local_subscriptions'), self::label_status($sub)];
+        $rows[] = [get_string('status', 'local_subscriptions'), self::render_status_badge(self::label_status($sub))];
         $rows[] = [get_string('subfield_start', 'local_subscriptions'), userdate((int)$sub->start_date)];
         $rows[] = [get_string('subfield_end', 'local_subscriptions'), self::format_end($sub->end_date ?? null)];
 
@@ -134,7 +135,7 @@ final class SubsPresenter {
 
 
             $rows[] = [get_string('subfield_pr_id', 'local_subscriptions'), (string)$pr->id];
-            $rows[] = [$prindent . get_string('subfield_pr_status', 'local_subscriptions'), s($pr->status)];
+            $rows[] = [$prindent . get_string('subfield_pr_status', 'local_subscriptions'), self::render_status_badge(s($pr->status))];
             if (!empty($pr->payment_provider)) {
                 $rows[] = [$prindent . get_string('subfield_pr_provider', 'local_subscriptions'), Provider::label_with_icon_env($pr->payment_provider)];
             }
@@ -167,5 +168,28 @@ final class SubsPresenter {
         return $rows;
     }
 
+    /** Rend un badge Bootstrap pour un statut de souscription. */
+    public static function render_status_badge(string $status): string {
+        $s = \core_text::strtolower(trim($status));
+
+        // mapping : statut → classes bootstrap et libellé i18n
+        $map = [
+            Status::ACTIVE   => ['cls' => 'badge bg-success',             'str' => 'status_active'],
+            Status::QUEUED   => ['cls' => 'badge bg-secondary',           'str' => 'status_queued'],
+            Status::EXPIRED  => ['cls' => 'badge bg-warning text-dark',   'str' => 'status_expired'],
+            Status::REPLACED => ['cls' => 'badge bg-warning text-dark',   'str' => 'status_replaced'],
+            // optionnels (au cas où tu les utilises déjà) :
+            Status::PENDING  => ['cls' => 'badge bg-info',                'str' => 'status_pending'],
+            Status::CANCELED => ['cls' => 'badge bg-dark',                'str' => 'status_canceled'],
+            Status::ERROR    => ['cls' => 'badge bg-danger',              'str' => 'status_error'],
+            Status::SUSPENDED => ['cls' => 'badge bg-light text-dark',    'str' => 'status_suspended'],
+            Status::PAID     => ['cls' => 'badge bg-success',             'str' => 'status_paid'],
+            Status::FAILED    => ['cls' => 'badge bg-danger',             'str' => 'status_failed'],
+        ];
+
+        $conf = $map[$s] ?? ['cls' => 'badge bg-light text-dark', 'str' => 'status_unknown'];
+        $label = get_string('sub'.$conf['str'], 'local_subscriptions');
+        return \html_writer::span($label, $conf['cls'].' ls-status-badge');
+    }
 
 }

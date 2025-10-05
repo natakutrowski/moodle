@@ -76,39 +76,115 @@ function local_subscriptions_delete_plan_translation(int $id): void {
 }
 
 function local_subscriptions_save_plan_translation(): void {
-    global $DB;
+    global $DB, $CFG;
 
     require_sesskey();
 
     $id = optional_param('id', 0, PARAM_INT);
-    $record = (object)[
-        'planid' => required_param('planid', PARAM_INT),
-        'lang' => required_param('lang', PARAM_LANG),
-        'name' => required_param('name', PARAM_TEXT),
-        'description' => required_param('description', PARAM_TEXT),
-        'last_update' => time()
-    ];
+    $planid = required_param('planid', PARAM_INT);
 
-    if ($id) {
-        $record->id = $id;
-        $DB->update_record('subscription_plan_translation', $record);
-    } else {
-        $exists = $DB->record_exists('subscription_plan_translation', [
-            'planid' => $record->planid,
-            'lang' => $record->lang
-        ]);
+    $lang = required_param('lang', PARAM_LANG);
+    $name = required_param('name', PARAM_TEXT);
 
-        if ($exists) {
-            redirect(new moodle_url(subscription_config::plans_translations_page(), [
-                'add' => $record->plan_id, 'sesskey' => sesskey()
-            ]), get_string('errorduplicatetranslation', 'local_subscriptions'), null, \core\output\notification::NOTIFY_ERROR);
-        }
+    // description depuis l’éditeur riche (HTML)
+    $editor = required_param_array('description_editor', PARAM_RAW); // attend ['text'=>..., 'format'=>...]
 
-        $record->creation_date = time();
-        $DB->insert_record('subscription_plan_translation', $record);
+    $texthtml   = '';
+    $textformat = FORMAT_HTML;
+    $draftid    = 0;
+
+    if (is_array($editor)) {
+        $texthtml   = (string)($editor['text'] ?? '');
+        $textformat = (int)($editor['format'] ?? FORMAT_HTML);
+        $draftid    = (int)($editor['itemid'] ?? 0);
     }
 
-    redirect(new moodle_url(subscription_config::plans_translations_page()));
+    $context = \context_system::instance();
+    $editoroptions = [
+        'maxfiles'  => 50,
+        'maxbytes'  => $CFG->maxbytes,
+        'trusttext' => false,
+        'subdirs'   => 0,
+        'context'   => $context,
+    ];
+
+    $now = time();
+
+    if ($id) {
+        // UPDATE existant : itemid = $id
+        $data = (object)[
+            'id'                   => $id,
+            'description'          => $texthtml,
+            'descriptionformat'    => $textformat,
+            'description_editor'   => [
+                'text'   => $texthtml,
+                'format' => $textformat,
+                'itemid' => $draftid,
+            ],
+        ];
+        // Sauvegarde draft -> filearea & réécrit @@PLUGINFILE@@
+        $data = file_postupdate_standard_editor(
+            $data, 'description', $editoroptions, $context,
+            'local_subscriptions', 'plan_desc', $id
+        );
+
+        $rec = (object)[
+            'id'              => $id,
+            'planid'          => $planid,
+            'lang'            => $lang,
+            'name'            => $name,
+            'description'     => $data->description,
+            'descriptionformat'=> $data->descriptionformat,
+            'last_update'     => $now,
+        ];
+        $DB->update_record('subscription_plan_translation', $rec);
+
+    } else {
+        // INSERT : on crée d'abord pour obtenir $newid (itemid file area)
+        $exists = $DB->record_exists('subscription_plan_translation', [
+            'planid' => $planid, 'lang' => $lang
+        ]);
+        if ($exists) {
+            redirect(new moodle_url(subscription_config::plans_translations_page(), [
+                'add' => $planid,
+            ]), get_string('errorduplicatetranslation', 'local_subscriptions'),
+               null, \core\output\notification::NOTIFY_ERROR);
+        }
+
+        $newid = $DB->insert_record('subscription_plan_translation', (object)[
+            'planid'          => $planid,
+            'lang'            => $lang,
+            'name'            => $name,
+            'description'     => '',             // sera rempli après rewrite
+            'descriptionformat'=> FORMAT_HTML,
+            'creation_date'   => $now,
+            'last_update'     => $now,
+        ]);
+
+        $data = (object)[
+            'id'                 => $newid,
+            'description'        => $texthtml,
+            'descriptionformat'  => $textformat,
+            'description_editor' => [
+                'text'   => $texthtml,
+                'format' => $textformat,
+                'itemid' => $draftid,
+            ],
+        ];
+        $data = file_postupdate_standard_editor(
+            $data, 'description', $editoroptions, $context,
+            'local_subscriptions', 'plan_desc', $newid
+        );
+
+        $DB->update_record('subscription_plan_translation', (object)[
+            'id'               => $newid,
+            'description'      => $data->description,
+            'descriptionformat'=> $data->descriptionformat,
+            'last_update'      => $now,
+        ]);
+    }
+
+    redirect(new moodle_url(subscription_config::plans_translations_page(), ['planid' => $planid]));
 }
 
 /**

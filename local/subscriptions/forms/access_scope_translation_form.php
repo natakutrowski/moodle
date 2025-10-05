@@ -63,19 +63,36 @@ class access_scope_translation_form extends moodleform {
 
         $mform->addElement($select);
         $mform->addElement('text', 'name', get_string('translatedname', 'local_subscriptions'));
-        $mform->addElement('textarea', 'description', get_string('translateddescription', 'local_subscriptions'), 'rows="3" cols="60"');
-
         $mform->setType('name', PARAM_TEXT); // ← IMPORTANT
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
 
-        $mform->setType('description', PARAM_TEXT); // ← IMPORTANT
+        // Éditeur riche (images autorisées)
+        global $CFG;
+        $context = \context_system::instance();
+        $editoroptions = [
+            'maxfiles'  => 50,
+            'maxbytes'  => $CFG->maxbytes,
+            'trusttext' => false,
+            'subdirs'   => 0,
+            'context'   => $context,
+        ];
+        $mform->addElement('editor', 'description_editor', get_string('description'), null, $editoroptions);
+        $mform->setType('description_editor', PARAM_RAW);
 
+        // Préremplissage éditeur
         if ($translation) {
-            $mform->setDefaults([
-                'lang' => $translation->lang,
-                'name' => $translation->name,
-                'description' => $translation->description
-            ]);
+            $seed = (object)[
+                'id'                  => (int)$translation->id,
+                'lang'                => (string)$translation->lang,
+                'name'                => (string)$translation->name,
+                'description'         => (string)($translation->description ?? ''),
+                'descriptionformat'   => (int)($translation->descriptionformat ?? FORMAT_HTML),
+            ];
+            $seed = file_prepare_standard_editor(
+                $seed, 'description', $editoroptions, $context,
+                'local_subscriptions', 'scope_desc', $seed->id
+            );
+            $this->set_data($seed);
         }
         
         // --- Boutons d'action (submit / cancel / delete) ---

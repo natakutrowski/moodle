@@ -27,16 +27,53 @@ final class AlfaGateway implements PaymentGatewayInterface {
     /** @var string|null */
     private $token;
 
-    public function __construct() {
+    public function __construct(array $overrides = []) {
+        $cfg = $this->cfg($overrides);
+
+        $this->base          = rtrim((string)$cfg['api_base'], '/');
+        $this->username      = $cfg['username'];
+        $this->password      = $cfg['password'];
+        $this->token         = $cfg['token'];
+        $this->webhooksecret = $cfg['webhook_secret'] ?? null; // ajoute la prop si tu veux l'utiliser
+    }
+
+    /**
+     * Récupère la config Alfa selon l'environnement (test|live),
+     * avec fallback sur les anciennes clés si besoin.
+     *
+     * @param array $overrides  ex: ['api_base' => 'https://override.example', 'token' => '...']
+     * @return array{
+     *   env:string,
+     *   api_base:string,
+     *   username:?string,
+     *   password:?string,
+     *   token:?string,
+     *   webhook_secret:?string
+     * }
+     */
+    private function cfg(array $overrides = []) : array {
         $env = get_config('local_subscriptions', 'alfa_env') ?: 'test';
         $env = ($env === 'live') ? 'live' : 'test';
 
-        // Clés par environnement
-        $this->base     = rtrim(get_config('local_subscriptions', "alfa_{$env}_api_base") ?: '', '/');
-        $this->username = get_config('local_subscriptions', "alfa_{$env}_username") ?: null;
-        $this->password = get_config('local_subscriptions', "alfa_{$env}_password") ?: null;
-        $this->token    = get_config('local_subscriptions', "alfa_{$env}_token")    ?: null;
+        // Nouvelles clés (TEST/LIVE)
+        $api = get_config('local_subscriptions', "alfa_{$env}_api_base") ?: '';
+        $un  = get_config('local_subscriptions', "alfa_{$env}_username") ?: '';
+        $pw  = get_config('local_subscriptions', "alfa_{$env}_password") ?: '';
+        $tk  = get_config('local_subscriptions', "alfa_{$env}_token")    ?: '';
+        $wh  = get_config('local_subscriptions', "alfa_{$env}_webhook_secret") ?: '';
+
+        $defaults = [
+            'env'            => $env,                       // 'test' | 'live' (utile pour logs)
+            'api_base'       => rtrim((string)$api, '/'),   // ex: https://alfa.rbsuat.com
+            'username'       => $un ?: null,
+            'password'       => $pw ?: null,
+            'token'          => $tk ?: null,                // en UAT: usage recommandé (param 'token')
+            'webhook_secret' => $wh ?: null,
+        ];
+
+        return array_replace($defaults, $overrides);
     }
+
 
     /**
      * Crée la session de paiement et renvoie l'URL de redirection de la page de paiement Alfa.

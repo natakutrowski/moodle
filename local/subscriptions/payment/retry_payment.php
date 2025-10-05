@@ -9,6 +9,8 @@ use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\PaymentReturn;
 
+\local_subscriptions\subscription_config::guard_public_access();
+
 global $DB, $CFG;
 
 // Page (pas d'output, on redirige)

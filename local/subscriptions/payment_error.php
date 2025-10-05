@@ -3,6 +3,8 @@ require_once(__DIR__.'/../../config.php');
 
 use local_subscriptions\url\UrlFactory;
 
+\local_subscriptions\subscription_config::guard_public_access();
+
 $code = optional_param('code', '', PARAM_ALPHANUMEXT);
 $msg  = optional_param('msg', '', PARAM_RAW_TRIMMED);
 

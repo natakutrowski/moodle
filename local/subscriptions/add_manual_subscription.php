@@ -8,6 +8,8 @@ require_capability('moodle/site:config', context_system::instance());
 use local_subscriptions\subscription_manager;
 use local_subscriptions\subscription_config;
 
+subscription_config::guard_public_access();
+
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url(subscription_config::add_manual_subscription_page()));
 $PAGE->set_title(get_string('add_subscription', 'local_subscriptions'));
@@ -29,14 +31,18 @@ foreach ($allusers as $user) {
 }
 
 $plans = [];
-foreach ($DB->get_records('subscription_plan', ['is_active' => 1], 'name ASC') as $plan) {
+foreach ($DB->get_records('subscription_plan', null, 'name ASC') as $plan) {
     $translation = subscription_manager::get_translated_plan_name($plan->id, current_language()); // à adapter
     $label = $translation ?: '<i>' . format_string($plan->name) . '</i>';
+    if (empty($plan->is_active)) {
+        $label .= ' ' . get_string('label_inactive', 'local_subscriptions'); // (inactif)
+    }
     $plans[$plan->id] = $label;
 }
 
 // Handle form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_sesskey();
     $userid = required_param('userid', PARAM_INT);
 
     if (optional_param('action', '', PARAM_TEXT) === 'enrol') {

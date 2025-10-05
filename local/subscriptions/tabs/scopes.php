@@ -10,6 +10,8 @@ require_once($CFG->dirroot . '/local/subscriptions/classes/subscription_config.p
 
 use local_subscriptions\subscription_config;
 
+subscription_config::guard_public_access();
+
 global $DB, $OUTPUT, $PAGE;
 
 $currentlang = current_language();

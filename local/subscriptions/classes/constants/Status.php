@@ -14,4 +14,5 @@ final class Status {
     public const ERROR = 'error';
     public const PAID = 'paid';
     public const COMPLETED = 'completed';
+    public const SUSPENDED = 'suspended';
 }

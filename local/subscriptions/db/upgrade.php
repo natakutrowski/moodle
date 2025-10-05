@@ -716,5 +716,31 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2025091300, 'local', 'subscriptions');
 	}
 
+    // === 2025100100 : add descriptionformat on translations =================
+    if ($oldversion < 2025100100) {
+    	$dbman = $DB->get_manager();
+
+        // Plan translations.
+        $table = new xmldb_table('subscription_plan_translation');
+        $field = new xmldb_field('descriptionformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'description');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Access scope translations.
+        $table2 = new xmldb_table('subscription_access_scope_translation');
+        $field2 = new xmldb_field('descriptionformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'description');
+        if (!$dbman->field_exists($table2, $field2)) {
+            $dbman->add_field($table2, $field2);
+        }
+
+        // Backfill (par sécurité, selon SGBD le DEFAULT ne remplit pas toujours l'existant).
+        $DB->execute("UPDATE {subscription_plan_translation} SET descriptionformat = 1 WHERE descriptionformat IS NULL");
+        $DB->execute("UPDATE {subscription_access_scope_translation} SET descriptionformat = 1 WHERE descriptionformat IS NULL");
+
+        // Savepoint.
+        upgrade_plugin_savepoint(true, 2025100100, 'local', 'subscriptions');
+    }	
+
     return true;
 }

@@ -5,8 +5,9 @@ require_once(__DIR__ . '/renderer/user_subs_renderer.php');
 require_login();
 require_capability('moodle/site:config', context_system::instance());
 
-use local_subscriptions\subscription_manager;
 use local_subscriptions\subscription_config;
+
+subscription_config::guard_public_access();
 
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url(subscription_config::import_csv_page()));
@@ -20,6 +21,7 @@ $renderer = new local_subscriptions_user_subs_renderer($PAGE, $OUTPUT);
 
 // Gestion du formulaire de téléchargement
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csvfile'])) {
+    require_sesskey();
     $tmp = $_FILES['csvfile']['tmp_name'];
 
 	[$rows, $validrows, $headers] = parse_csv_file($tmp);
@@ -27,8 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csvfile'])) {
     $importid = time();
     $tempfile = make_request_directory() . "/csv_import_$importid.csv";
     //file_put_contents($tempfile, $content);
-
-
 
     // Sécurité + copie
     if (!is_uploaded_file($tmp)) {

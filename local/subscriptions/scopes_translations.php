@@ -8,6 +8,8 @@ require_once($CFG->dirroot . '/local/subscriptions/renderer/scopes_renderer.php'
 
 use local_subscriptions\subscription_config;
 
+subscription_config::guard_public_access();
+
 global $DB;
 
 require_login();

@@ -12,6 +12,8 @@ use local_subscriptions\constants\Status;
 use local_subscriptions\constants\PaymentReturn;
 use local_subscriptions\url\UrlFactory;
 
+\local_subscriptions\subscription_config::guard_public_access();
+
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_url(UrlFactory::create_session());
 $PAGE->set_pagelayout('base');
@@ -24,6 +26,10 @@ $operation  = required_param('operation', PARAM_ALPHANUMEXT); // purchase_new|qu
 $currency   = required_param('currency',  PARAM_ALPHANUMEXT);
 $refsubid   = optional_param('ref_subid', 0, PARAM_INT);
 $extra_json = optional_param('extra_json','', PARAM_RAW_TRIMMED);
+
+$accept_privacy = required_param('accept_privacy', PARAM_BOOL);
+$accept_terms   = required_param('accept_terms',   PARAM_BOOL);
+
 
 // overrides éventuels
 $providerOverride   = optional_param('provider', '', PARAM_ALPHANUMEXT);

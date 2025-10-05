@@ -8,22 +8,32 @@
         {{planname}}
       </h5>
 
-      <span class="badge bg-success text-white px-3 py-1">
-        {{#str}}substatus_active, local_subscriptions{{/str}}
-      </span>
+      {{! Badge dynamique passé par le renderer (HTML non échappé) }}
+      {{{statusbadge}}}
     </div>
+    {{#queued_msg}}
+      <div class="alert alert-info py-1 px-2 small mb-2" role="status">{{queued_msg}}</div>
+    {{/queued_msg}}
+    {{#show_warning}}
+      <div class="alert alert-warning py-1 px-2 small d-flex justify-content-between align-items-center">
+        <span>{{{renew_msg}}}</span>
+        <a class="btn btn-sm btn-warning ms-2" href="{{renew_url}}">
+          {{#str}}renew_now, local_subscriptions{{/str}}
+        </a>
+      </div>
+    {{/show_warning}}
 
     <ul class="list-unstyled ms-1 mb-0">
       <li class="mb-1">
-        <i class="fa-solid fa-fw fa-calendar me-2 text-secondary"></i>
+        <i class="fa-solid fa-fw fa-calendar me-2 text-secondary" aria-hidden="true"></i>
         <strong>{{#str}}start_date, local_subscriptions{{/str}}:</strong> {{startdate}}
       </li>
       <li class="mb-1">
-        <i class="fa-solid fa-fw fa-calendar-check me-2 text-secondary"></i>
+        <i class="fa-solid fa-fw fa-calendar-check me-2 text-secondary" aria-hidden="true"></i>
         <strong>{{#str}}end_date, local_subscriptions{{/str}}:</strong> {{enddate}}
       </li>
       <li class="mb-1">
-        <i class="fa-solid fa-fw fa-book me-2 text-secondary"></i>
+        <i class="fa-solid fa-fw fa-book me-2 text-secondary" aria-hidden="true"></i>
         <strong>{{#str}}courselist, local_subscriptions{{/str}}:</strong>
         {{#coursenames.0}}
           <i class="fa-solid fa-circle-info text-muted ms-2"
@@ -34,11 +44,15 @@
              data-bs-html="true"
              data-bs-title="{{#str}}includedcourses, local_subscriptions{{/str}}"
              data-bs-content="{{{popovercontent}}}"
-             style="cursor: pointer;"></i>
+             style="cursor: pointer;"
+             aria-label="{{#str}}includedcourses, local_subscriptions{{/str}}"></i>
+        {{/coursenames.0}}
+        {{^coursenames.0}}
+          <span class="text-muted">{{#str}}none, local_subscriptions{{/str}}</span>
         {{/coursenames.0}}
       </li>
       <li class="mb-1">
-        <i class="fa-solid fa-fw fa-money-bill-wave me-2 text-secondary"></i>
+        <i class="fa-solid fa-fw fa-money-bill-wave me-2 text-secondary" aria-hidden="true"></i>
         <strong>{{#str}}pricepaid, local_subscriptions{{/str}}:</strong> {{pricepaid}} {{currency}}
       </li>
     </ul>
@@ -60,8 +74,15 @@
 {{/subscriptions}}
 
 
-<div class="mt-3">
+<div class="mt-3 d-flex gap-2">
+  {{#has_expired}}
+    <a class="btn btn-outline-secondary btn-sm" href="{{subscribe_url}}">
+      {{#str}}renew_now, local_subscriptions{{/str}}
+    </a>
+  {{/has_expired}}
+
   <a class="btn btn-outline-primary btn-sm" href="{{mysubs_url}}">
     {{#str}}view_my_subscriptions, local_subscriptions{{/str}}
   </a>
 </div>
+

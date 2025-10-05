@@ -74,11 +74,12 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
     if (!$isownprofile && !has_capability('moodle/user:viewdetails', $context, $USER)) {
         return;
     }
-
+    
+    /** @var \local_subscriptions\output\renderer $renderer */
     $renderer = $PAGE->get_renderer('local_subscriptions');
 
     // Charge les abonnements
-    $subscriptions = get_user_active_subscriptions($user->id);
+    $subscriptions = get_user_active_and_nearest_queued($user->id);
 
     $content = $renderer->render_user_subscriptions_block($subscriptions);
 
@@ -368,4 +369,31 @@ function local_subs_upgrade_calc_body(array $opt, \stdClass $currplan, \stdClass
     $html .= '<div class="mt-1">'.get_string('upgrade_final_amount','local_subscriptions', '<strong>'.$final.' '.$C.'</strong>').'</div>';
 
     return $html;
+}
+
+function local_subscriptions_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+    if ($context->contextlevel !== CONTEXT_SYSTEM) {
+        return false;
+    }
+
+    // Fileareas autorisées
+    $allowed = ['plan_desc', 'scope_desc'];
+    if (!in_array($filearea, $allowed, true)) {
+        return false;
+    }
+
+    // Protège l'accès si tu veux (comme c'est de l'admin tu peux exiger login)
+    // require_login();
+
+    // Path: /pluginfile.php/contextid/component/filearea/itemid/[subdirs]/filename
+    $itemid   = (int)array_shift($args);
+    $filename = array_pop($args);                         // <-- d'abord le nom
+    if (empty($filename)) { return false; }
+    $filepath = $args ? '/'.implode('/', $args).'/' : '/';// <-- puis le chemin
+
+    $fs = get_file_storage();
+    $file = $fs->get_file($context->id, 'local_subscriptions', $filearea, $itemid, $filepath, $filename);
+    if (!$file) { return false; }
+
+    send_stored_file($file, 0, 0, $forcedownload, $options);
 }

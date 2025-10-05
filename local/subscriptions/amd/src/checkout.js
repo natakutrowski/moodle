@@ -27,6 +27,10 @@ define(['core/str'], function(str) {
         return qs('#agree_terms', form) || qs('#consent', form);
     }
 
+    function getPolicy(form) {
+        return qs('#accept_privacy', form);
+    }
+
     function getExtraHidden(form) {
         return qs('#ls_extra_json', form) || qs('#ls_extra_json'); // hidden ajouté côté PHP
     }
@@ -76,14 +80,18 @@ define(['core/str'], function(str) {
         const btn = qs('button[type="submit"]', form);
         const mode = btn ? (btn.getAttribute('data-mode') || '') : '';
         const terms = getTerms(form);
+        const policy = getPolicy(form);
+
         const termsOk = terms ? !!terms.checked : true; // si pas de case, on n’en tient pas compte
+        const policyOk = policy ? !!policy.checked : true;
+
         const chosen = !!getChosenRadio(form);
 
         if (mode === 'user') {
-            return chosen && termsOk;
+            return chosen && termsOk && policyOk;
         } else {
             // invité : radios + terms + champs requis valides
-            return chosen && termsOk && fieldsOk(form);
+            return chosen && termsOk && policyOk && fieldsOk(form);
         }
     }
 
@@ -97,6 +105,7 @@ define(['core/str'], function(str) {
 
     function wire(form) {
         const terms = getTerms(form);
+        const policy = getPolicy(form);
         const radios = qsa('input[name="operation"]', form);
         const requiredInputs = qsa('.ls-fields input[required]', form);
 
@@ -116,6 +125,12 @@ define(['core/str'], function(str) {
 
         if (terms) {
             ['change','click'].forEach(e => terms.addEventListener(e, function() {
+                applyButtonState(form);
+            }));
+        }
+        
+        if (policy) {
+            ['change','click'].forEach(e => policy.addEventListener(e, function() {
                 applyButtonState(form);
             }));
         }

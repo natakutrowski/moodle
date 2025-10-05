@@ -1,19 +1,54 @@
 <?php
 namespace local_subscriptions\output;
 
+use local_subscriptions\support\SubsPresenter;
+
 defined('MOODLE_INTERNAL') || die();
 
 use plugin_renderer_base;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Status;
+use local_subscriptions\support\Region;
 
 class renderer extends plugin_renderer_base {
 
     public function render_user_subscriptions_block(array $subscriptions): string {
         global $DB;
 
+        $now   = time();
+        $week  = 7 * 24 * 3600;
+
         $plans = [];
         $accessscopes = [];
+
+        // Flags globaux
+        $hasActive = false;
+
+        // Index des QUEUED (<7 jours) par scope (empêche l’alerte “prolongez”)
+        $queuedSoonByScope = [];
+
+        // Repérage de la QUEUED la plus proche (même si > 7 jours), pour le cas D
+        $earliestQueued = null;
+
+        foreach ($subscriptions as $s) {
+            $stlc = \core_text::strtolower((string)($s->status ?? ''));
+            if ($stlc === 'queued') {
+                // Earliest queued (même si > 7j)
+                if ($earliestQueued === null || $s->start_date < $earliestQueued->start_date) {
+                    $earliestQueued = $s;
+                }
+                // queued < 7 jours => indexée par scope
+                if ($s->start_date >= $now && $s->start_date <= $now + $week) {
+                    if (!isset($plans[$s->planid])) {
+                        $plans[$s->planid] = $DB->get_record('subscription_plan', ['id' => $s->planid], 'id,accessscopeid,name,is_recurring');
+                    }
+                    $queuedSoonByScope[$plans[$s->planid]->accessscopeid] = true;
+                }
+            } else if ($stlc === 'active') {
+                $hasActive = true;
+            }
+        }
+
         $data = [
             'subscriptions' => [],
             'mysubs_url'    => (UrlFactory::my_subscriptions())->out(false),
@@ -21,6 +56,21 @@ class renderer extends plugin_renderer_base {
         ];
 
         foreach ($subscriptions as $sub) {
+            // Statut réel (privilégie la DB ; fallback = actif/expiré selon dates)
+            $status = isset($sub->status) && $sub->status !== ''
+                ? \core_text::strtolower((string)$sub->status)
+                : (($sub->end_date > 0 && $sub->end_date < $now) ? Status::EXPIRED : Status::ACTIVE);
+
+            // 1) n'afficher que ACTIVE
+            // 2) et QUEUED qui démarrent dans < 7 jours
+            $include = false;
+            if ($status === Status::ACTIVE) {
+                $include = true;
+            } else if ($status === Status::QUEUED && $sub->start_date >= $now && $sub->start_date <= $now + $week) {
+                $include = true;
+            }
+            if (!$include) { continue; }
+
             // Récupération du plan
             if (!isset($plans[$sub->planid])) {
                 $plans[$sub->planid] = $DB->get_record('subscription_plan', ['id' => $sub->planid]);
@@ -42,10 +92,42 @@ class renderer extends plugin_renderer_base {
                 foreach ($courses as $course) {
                     $coursenames[] = format_string($course->fullname);
                 }
+
+                // Tri alphabétique respectueux de la locale
+                \core_collator::asort($coursenames);
+                $coursenames = array_values($coursenames); // réindexe proprement
             }
 
-            $expired = $sub->end_date < time();
-            $statuskey = $expired ? Status::EXPIRED : Status::ACTIVE;
+            // Badge HTML (ta méthode dans SubsPresenter)
+            $statusbadge = SubsPresenter::render_status_badge($status);
+
+            // Classes de carte (par défaut)
+            $bordercls = match ($status) {
+                Status::ACTIVE   => 'border-success',
+                Status::QUEUED   => 'border-secondary',
+                default          => 'border-light text-dark'
+            };
+
+            // Alerte renouvellement (ACTIVE < 7j ET pas de queuedSoon pour le même scope)
+            $showwarning = false;
+            $renewmsg    = '';
+            if ($status === Status::ACTIVE && $sub->end_date > 0) {
+                $left = $sub->end_date - $now;
+                if ($left > 0 && $left <= $week && empty($queuedSoonByScope[$plan->accessscopeid])) {
+                    $showwarning = true;
+                    $daysleft = max(1, (int)ceil($left / 86400.0));
+                    $renewmsg  = get_string('renew_soon_msg', 'local_subscriptions', $daysleft);
+                    $bordercls = 'border-warning';
+                }
+            }
+
+            // Message “démarre dans X jours” pour les QUEUED visibles
+            $queuedMsg = '';
+            if ($status === Status::QUEUED) {
+                $delta = max(0, $sub->start_date - $now);
+                $days  = max(0, (int)ceil($delta / 86400.0));
+                $queuedMsg = get_string('queued_starts_in', 'local_subscriptions', $days);
+            }
 
             $popovercontent = \html_writer::div(
                 \html_writer::alist($coursenames) .
@@ -64,15 +146,80 @@ class renderer extends plugin_renderer_base {
                 'accessscope'        => format_string($scope->name ?? ''),
                 'coursenames'        => $coursenames,
                 'pricepaid'          => sprintf('%.2f %s', $sub->pricepaid ?? 0, $sub->currency ?? ''),
-                'statuskey'          => $statuskey,
-                'statusclass'        => $expired ? 'border-danger' : 'border-success',
-                'statusclassbadge'   => $expired ? 'danger' : 'success',
-                'expired'            => $expired,
+                'statusbadge'        => $statusbadge,          // <<< NOUVEAU : badge HTML prêt
+                'statusclass'        => $bordercls,            // compat avec ton CSS/markup existant
                 // Génération du contenu HTML du popover
                 'popovercontent' => htmlspecialchars($popovercontent, ENT_QUOTES, 'UTF-8'),
-
+                // Nouveau : alerte renouvellement
+                'show_warning'     => $showwarning,
+                'renew_msg'        => $renewmsg,
+                'renew_url'        => $data['subscribe_url'],
+                'queued_msg'       => $queuedMsg, // affiché si non vide
             ];
         }
+
+        // Cas D : aucune ACTIVE et aucune QUEUED < 7j ⇒ on affiche la QUEUED la plus proche (s’il y en a une)
+        if (empty($data['subscriptions']) && !$hasActive && $earliestQueued) {
+            // Plan & Scope
+            if (!isset($plans[$earliestQueued->planid])) {
+                $plans[$earliestQueued->planid] = $DB->get_record('subscription_plan',
+                    ['id' => $earliestQueued->planid], 'id,accessscopeid,name,is_recurring');
+            }
+            $plan  = $plans[$earliestQueued->planid];
+
+            if (!isset($accessscopes[$plan->accessscopeid])) {
+                $accessscopes[$plan->accessscopeid] = $DB->get_record('subscription_access_scope',
+                    ['id' => $plan->accessscopeid], 'id,name,course_ids');
+            }
+            $scope = $accessscopes[$plan->accessscopeid];
+
+            // Courses (pour popover)
+            $coursenames = [];
+            if (!empty($scope->course_ids)) {
+                $course_ids = explode(',', $scope->course_ids);
+                [$sql, $params] = $DB->get_in_or_equal($course_ids);
+                $courses = $DB->get_records_select('course', 'id '.$sql, $params);
+                foreach ($courses as $course) {
+                    $coursenames[] = format_string($course->fullname);
+                }
+
+                // Tri alphabétique respectueux de la locale
+                \core_collator::asort($coursenames);
+                $coursenames = array_values($coursenames); // réindexe proprement
+            }
+            $popovercontent = \html_writer::div(
+                \html_writer::alist($coursenames)
+            . \html_writer::empty_tag('hr')
+            . \html_writer::link('#', '❌ '.get_string('close', 'local_subscriptions'), [
+                    'class' => 'close-popover text-danger text-decoration-none d-block mt-2 text-end'
+                ]),
+                '',
+                ['style' => 'min-width: 200px;']
+            );
+
+            $days = max(0, (int)ceil(($earliestQueued->start_date - $now) / 86400.0));
+            $queuedMsg = get_string('queued_starts_in', 'local_subscriptions', $days);
+
+            $data['subscriptions'][] = [
+                'planname'         => format_string($plan->name),
+                'startdate'        => userdate($earliestQueued->start_date, get_string('strftimedate', 'langconfig')),
+                'enddate'          => userdate($earliestQueued->end_date,   get_string('strftimedate', 'langconfig')),
+                'accessscope'      => format_string($scope->name ?? ''),
+                'coursenames'      => $coursenames,
+                'pricepaid'        => sprintf('%.2f %s', $earliestQueued->pricepaid ?? 0, $earliestQueued->currency ?? ''),
+                'statusbadge'      => SubsPresenter::render_status_badge('queued'),
+                'statusclass'      => 'border-secondary',
+                'popovercontent'   => htmlspecialchars($popovercontent, ENT_QUOTES, 'UTF-8'),
+
+                'show_warning'     => false,
+                'renew_msg'        => '',
+                'renew_url'        => $data['subscribe_url'],
+
+                'queued_msg'       => $queuedMsg,
+            ];
+        }
+
+
 
         return $this->render_from_template('local_subscriptions/myprofile_subscriptions', $data);
     }
@@ -162,23 +309,31 @@ class renderer extends plugin_renderer_base {
             $prices = $DB->get_records('subscription_plan_price', ['planid' => $plan->id]);
             $prices = array_values($prices); // Réindexe avec 0, 1, 2, etc.
 
-            // Devise par défaut selon IP ou fallback sur la première.
-            $countrycode = get_user_country_code() ?? '';
+            // Devise par défaut selon pays (RU/BY -> RUB), sinon 1ère dispo.
+            $countrycode = Region::detect_country();
+
+            // Mapping “préférence forte”
             $currencybycountry = [
                 'RU' => 'RUB',
+                'BY' => 'RUB',
                 'FR' => 'EUR',
                 'CA' => 'CAD',
-                'US' => 'USD'
-                // Ajoute d'autres pays ici si besoin
+                'US' => 'USD',
             ];
-            $preferredcurrency = $currencybycountry[$countrycode] ?? $prices[0]->currency;
 
-            // Récupère le prix par devise préférée.
+            $preferredcurrency = $currencybycountry[$countrycode] ?? null;
+
+            // Indexe les prix par devise
             $pricebycurrency = [];
             foreach ($prices as $p) {
                 $pricebycurrency[$p->currency] = $p->price;
             }
-            $defaultcurrency = array_key_exists($preferredcurrency, $pricebycurrency) ? $preferredcurrency : array_key_first($pricebycurrency);
+
+            // Choix final : préférée si dispo, sinon première
+            $defaultcurrency = $preferredcurrency && array_key_exists($preferredcurrency, $pricebycurrency)
+                ? $preferredcurrency
+                : (array_key_first($pricebycurrency));
+
             $defaultprice = $pricebycurrency[$defaultcurrency];
 
             $output .= \html_writer::start_div('bottom-zone mt-auto');

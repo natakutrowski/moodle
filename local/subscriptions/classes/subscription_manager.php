@@ -280,25 +280,4 @@ class subscription_manager {
             $manual->update_user_enrol($byid[$ue->enrolid], $userid, ENROL_USER_SUSPENDED);
         }
     }
-
-/* LEGACY : might be used later	
-	public static function get_duration_from_plan(string $plan): ?int {
-		switch ($plan) {
-			case '1month':
-				return 30 * 24 * 60 * 60;
-			case '3months':
-				return 90 * 24 * 60 * 60;
-			case '6months':
-				return 180 * 24 * 60 * 60;
-			case '1year':
-				return 365 * 24 * 60 * 60;
-			case '3years':
-				return 3 * 365 * 24 * 60 * 60;
-			case 'lifetime':
-				return 100 * 365 * 24 * 60 * 60; // 100 ans = illimité
-			default:
-				return null;
-		}
-	}	
- */
 }

@@ -6,7 +6,8 @@ require_once(__DIR__ . '/../renderer/user_subs_renderer.php');
 require_once($CFG->libdir . '/formslib.php');
 
 use local_subscriptions\subscription_config;
-use local_subscriptions\subscription_manager;
+
+subscription_config::guard_public_access();
 
 global $DB, $OUTPUT;
 

@@ -189,5 +189,27 @@ class subscription_config {
         return '';
     }
 
+    public static function guard_public_access(): void {
+        $mode = get_config('local_subscriptions', 'availability_mode') ?: 'enabled';
+        if ($mode === 'enabled') { return; }
 
+        $sysctx = \context_system::instance();
+
+        if ($mode === 'adminonly') {
+            if (!isloggedin()) {
+                // Laisse Moodle rediriger vers login
+                require_login();
+            }
+            if (!has_capability('moodle/site:config', $sysctx)) {
+                redirect(new \moodle_url('/'), get_string('subs_unavailable_adminonly', 'local_subscriptions'), 5,
+                    \core\output\notification::NOTIFY_WARNING);
+            }
+            return;
+        }
+
+        // disabled => tout le monde dehors sauf admin
+        if (is_siteadmin()) { return; }
+        redirect(new \moodle_url('/'), get_string('subs_unavailable', 'local_subscriptions'), 5,
+            \core\output\notification::NOTIFY_INFO);
+    }
 }

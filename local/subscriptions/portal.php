@@ -8,6 +8,8 @@ use local_subscriptions\url\UrlFactory;
 use local_subscriptions\payment\ProviderSelector;
 use local_subscriptions\payment\PortalGatewayInterface;
 
+\local_subscriptions\subscription_config::guard_public_access();
+
 
 $subid   = optional_param('subid', 0, PARAM_INT);
 $return  = optional_param('return', '', PARAM_LOCALURL); // optionnel: forcer un return url

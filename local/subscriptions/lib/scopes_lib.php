@@ -82,37 +82,117 @@ function local_subscriptions_delete_scope_translation(int $id): void {
 }
 
 function local_subscriptions_save_scope_translation(): void {
-    global $DB;
+    global $DB, $CFG;
 
     require_sesskey();
 
     $id = optional_param('id', 0, PARAM_INT);
-    $record = (object)[
-        'accessscopeid' => required_param('accessscopeid', PARAM_INT),
-        'lang' => required_param('lang', PARAM_LANG),
-        'name' => required_param('name', PARAM_TEXT),
-        'description' => required_param('description', PARAM_TEXT),
-        'last_update' => time()
-    ];
+    $accessscopeid= required_param('accessscopeid', PARAM_INT);
+    $lang = required_param('lang', PARAM_LANG);
+    $name = required_param('name', PARAM_TEXT);
 
-    if ($id) {
-        $record->id = $id;
-        $DB->update_record('subscription_access_scope_translation', $record);
-    } else {
-        $exists = $DB->record_exists('subscription_access_scope_translation', [
-            'accessscopeid' => $record->accessscopeid,
-            'lang' => $record->lang
-        ]);
+    // description depuis l’éditeur riche (HTML)
+    $editor = required_param_array('description_editor', PARAM_RAW); // attend ['text'=>..., 'format'=>...]
 
-        if ($exists) {
-            redirect(new moodle_url(subscription_config::scopes_translations_page(), [
-                'add' => $record->accessscopeid, 'sesskey' => sesskey()
-            ]), get_string('errorduplicatetranslation', 'local_subscriptions'), null, \core\output\notification::NOTIFY_ERROR);
-        }
-
-        $record->creation_date = time();
-        $DB->insert_record('subscription_access_scope_translation', $record);
+    $texthtml   = '';
+    $textformat = FORMAT_HTML;
+    $draftitemid= 0;
+    if (is_array($editor)) {
+        $texthtml   = (string)($editor['text'] ?? '');
+        $textformat = (int)($editor['format'] ?? FORMAT_HTML);
+        $draftitemid= (int)($editor['itemid'] ?? 0);
     }
 
-    redirect(new moodle_url(subscription_config::scopes_translations_page()));
+    $context = \context_system::instance();
+    $editoroptions = [
+        'maxfiles'  => 50,
+        'maxbytes'  => $CFG->maxbytes,
+        'trusttext' => false,
+        'subdirs'   => 0,
+        'context'   => $context,
+    ];
+
+    $now = time();
+
+    if ($id) {
+        // UPDATE
+        $data = (object)[
+            'id'                 => $id,
+            'description'        => $texthtml,
+            'descriptionformat'  => $textformat,
+            'description_editor' => [
+                'text'   => $texthtml,
+                'format' => $textformat,
+                'itemid' => $draftitemid,
+            ],
+        ];
+        $data = file_postupdate_standard_editor(
+            $data, 'description', $editoroptions, $context,
+            'local_subscriptions', 'scope_desc', $id
+        );
+
+        $rec = (object)[
+            'id'                 => $id,
+            'accessscopeid'      => $accessscopeid,
+            'lang'               => $lang,
+            'name'               => $name,
+            'description'        => $data->description,
+            'descriptionformat'  => $data->descriptionformat,
+            'last_update'        => $now,
+        ];
+        $DB->update_record('subscription_access_scope_translation', $rec);
+
+    } else {
+        // INSERT
+        $exists = $DB->record_exists('subscription_access_scope_translation', [
+            'accessscopeid' => $accessscopeid,
+            'lang'          => $lang
+        ]);
+        if ($exists) {
+            redirect(
+                new moodle_url(subscription_config::scopes_translations_page(), [
+                    'add' => $accessscopeid,
+                ]),
+                get_string('errorduplicatetranslation', 'local_subscriptions'),
+                null,
+                \core\output\notification::NOTIFY_ERROR
+            );
+        }
+
+        $newid = $DB->insert_record('subscription_access_scope_translation', (object)[
+            'accessscopeid'     => $accessscopeid,
+            'lang'              => $lang,
+            'name'              => $name,
+            'description'       => '',
+            'descriptionformat' => FORMAT_HTML,
+            'creation_date'     => $now,
+            'last_update'       => $now,
+        ]);
+
+        $data = (object)[
+            'id'                 => $newid,
+            'description'        => $texthtml,
+            'descriptionformat'  => $textformat,
+            'description_editor' => [
+                'text'   => $texthtml,
+                'format' => $textformat,
+                'itemid' => $draftitemid,
+            ],
+        ];
+        $data = file_postupdate_standard_editor(
+            $data, 'description', $editoroptions, $context,
+            'local_subscriptions', 'scope_desc', $newid
+        );
+
+        $DB->update_record('subscription_access_scope_translation', (object)[
+            'id'                 => $newid,
+            'description'        => $data->description,
+            'descriptionformat'  => $data->descriptionformat,
+            'last_update'        => $now,
+        ]);
+    }
+
+    redirect(new moodle_url(subscription_config::scopes_translations_page(), [
+        'accessscopeid' => $accessscopeid
+    ]));
 }

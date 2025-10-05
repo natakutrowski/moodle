@@ -7,6 +7,8 @@ require_capability('moodle/site:config', context_system::instance());
 
 use local_subscriptions\subscription_config;
 
+subscription_config::guard_public_access();
+
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url(subscription_config::process_csv_page()));
 $PAGE->set_title(get_string('import_subscriptions', 'local_subscriptions'));
@@ -16,6 +18,8 @@ $PAGE->requires->css('/local/subscriptions/styles.css');
 echo $OUTPUT->header();
 
 $renderer = new local_subscriptions_user_subs_renderer($PAGE, $OUTPUT);
+
+require_sesskey();
 
 $source = optional_param('sourcefile', '', PARAM_RAW);
 if (!$source) {

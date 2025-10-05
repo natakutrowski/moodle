@@ -22,6 +22,8 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
      */
     public static function render_plans_table(array $plans, string $currentlang, string $order, string $dir): string {
         global $DB, $OUTPUT;
+
+        $context = \context_system::instance();
         
         $upstyle = ($order === 'name' && $dir === 'asc') ? 'font-weight:bold;' : '';
         $downstyle = ($order === 'name' && $dir === 'desc') ? 'font-weight:bold;' : '';
@@ -207,10 +209,50 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
                 default   => html_writer::span(get_string('highlight_none', 'local_subscriptions'), 'text-muted')
             };
 
+            // … avant $table->data[] …
+
+            // Récupérer la traduction courante pour obtenir l'itemid (id de la traduction)
+            $curtrans = $DB->get_record(
+                'subscription_plan_translation',
+                ['planid' => $p->id, 'lang' => $currentlang],
+                'id, description, descriptionformat',
+                IGNORE_MISSING
+            );
+
+            // Texte brut + format (avec fallback si tu as déjà joint ces champs côté $p)
+            $raw    = $curtrans->description ?? ($p->translated_description ?? '');
+            $format = $curtrans->descriptionformat ?? ($p->translated_descriptionformat ?? FORMAT_HTML);
+
+            $desccell = '-';
+            if ($raw !== '' && $raw !== null) {
+                // Si le texte contient encore @@PLUGINFILE@@ ou un draftfile, réécrire les URLs pluginfile.
+                if (strpos($raw, '@@PLUGINFILE@@') !== false || strpos($raw, '/draftfile.php') !== false) {
+                    $itemid = $curtrans->id ?? 0; // idéalement l'id de la TRADUCTION courante
+                    $raw = file_rewrite_pluginfile_urls(
+                        $raw,
+                        'pluginfile.php',
+                        $context->id,
+                        'local_subscriptions',
+                        'plan_desc',
+                        $itemid
+                    );
+                }
+
+                // Rendu HTML sécurisé (avec filtres si besoin)
+                $desccell = format_text($raw, $format, [
+                    'context'     => $context,
+                    'overflowdiv' => true,
+                    'filter'      => true,
+                ]);
+
+                // Option: classe pour rendre les images responsives
+                $desccell = html_writer::div($desccell, 'plan-desc');
+            }
+
 
             $table->data[] = [
                 $namecell,
-                $p->translated_description ?? '-',
+                $desccell ?? '-',
                 $scopelink,
                 subscription_config::get_plans()[$p->duration_key] ?? $p->duration_key,
                 $highlightlabel,
