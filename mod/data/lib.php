@@ -1827,11 +1827,10 @@ function data_print_preference_form($data, $perpage, $search, $sort='', $order='
     echo '<input type="submit" class="btn btn-secondary" value="' . get_string('savesettings', 'data') . '" />';
     echo '</div>';
     echo '</div>';
-    echo '<div>';
 
     echo '<br />';
     echo '<div class="' . $advancedsearchclass . '" id="data_adv_form">';
-    echo '<table class="boxaligncenter">';
+    echo '<table class="table-reboot">';
 
     // print ASC or DESC
     echo '<tr><td colspan="2">&nbsp;</td></tr>';

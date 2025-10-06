@@ -746,6 +746,8 @@ function course_delete_module($cmid, $async = false) {
             "Cannot delete this module as the file mod/$modulename/lib.php is missing.");
     }
 
+    // Warning! there is very similar code in remove_course_contents.
+    // If you are changing this code, you probably need to change that too.
     $deleteinstancefunction = $modulename . '_delete_instance';
 
     // Ensure the delete_instance function exists for this module.
@@ -774,6 +776,9 @@ function course_delete_module($cmid, $async = false) {
             "Cannot delete the module $modulename (instance).");
     }
 
+    // We delete the questions after the activity database is removed,
+    // because questions are referenced via question reference tables
+    // and cannot be deleted while the activities that use them still exist.
     question_delete_activity($cm);
 
     // Remove all module files in case modules forget to do that.
@@ -1375,7 +1380,7 @@ function moveto_module($mod, $section, $beforemod=NULL) {
 function course_get_cm_edit_actions(cm_info $mod, $indent = -1, $sr = null) {
     global $COURSE, $SITE, $CFG;
 
-    \core\deprecation::emit_deprecation_if_present(__FUNCTION__);
+    \core\deprecation::emit_deprecation(__FUNCTION__);
 
     static $str;
 
@@ -1767,7 +1772,7 @@ function course_format_uses_sections($format) {
  */
 #[\core\attribute\deprecated(since: '5.0', mdl: 'MDL-82351')]
 function course_format_ajax_support($format) {
-    \core\deprecation::emit_deprecation_if_present(__FUNCTION__);
+    \core\deprecation::emit_deprecation(__FUNCTION__);
     $course = new stdClass();
     $course->format = $format;
     return course_get_format($course)->supports_ajax();
@@ -3786,14 +3791,14 @@ function course_get_user_navigation_options($context, $course = null) {
  * This function also handles the frontpage settings.
  *
  * @param  stdClass $course  course object (for frontpage it should be a clone of $SITE)
- * @param  stdClass $context context object (course context)
+ * @param  context_course $context context object (course context)
  * @return stdClass          the administration options in a course and their availability status
  * @since  Moodle 3.2
  */
 function course_get_user_administration_options($course, $context) {
     global $CFG;
+
     $isfrontpage = $course->id == SITEID;
-    $completionenabled = $CFG->enablecompletion && $course->enablecompletion;
     $hascompletionoptions = count(core_completion\manager::get_available_completion_options($course->id)) > 0;
     $options = new stdClass;
     $options->update = has_capability('moodle/course:update', $context);
@@ -3808,7 +3813,7 @@ function course_get_user_administration_options($course, $context) {
     $options->files = ($course->legacyfiles == 2 && has_capability('moodle/course:managefiles', $context));
 
     if (!$isfrontpage) {
-        $options->tags = has_capability('moodle/course:tag', $context);
+        $options->tags = core_tag_tag::is_enabled('core', 'course') && has_capability('moodle/course:tag', $context);
         $options->gradebook = has_capability('moodle/grade:manage', $context);
         $options->outcomes = !empty($CFG->enableoutcomes) && has_capability('moodle/course:update', $context);
         $options->badges = !empty($CFG->enablebadges);
@@ -4835,6 +4840,8 @@ function course_output_fragment_new_base_form($args) {
  *
  * @param array $args the fragment arguments
  * @return string the course overview fragment
+ *
+ * @throws require_login_exception
  */
 function course_output_fragment_course_overview($args) {
     global $PAGE;
@@ -4844,7 +4851,10 @@ function course_output_fragment_course_overview($args) {
     $modname = $args['modname'];
     $course = get_course($args['courseid']);
     $context = context_course::instance($course->id, MUST_EXIST);
-    can_access_course($course);
+
+    if (!can_access_course($course, null, '', true)) {
+        throw new require_login_exception('Course is not available');
+    }
 
     // Some plugins may have a list view event.
     $eventclassname = 'mod_' . $modname . '\\event\\course_module_instance_list_viewed';

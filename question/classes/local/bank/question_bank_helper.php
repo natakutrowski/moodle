@@ -19,6 +19,7 @@ namespace core_question\local\bank;
 use cm_info;
 use context;
 use context_course;
+use core\context_helper;
 use core\task\manager;
 use moodle_url;
 use stdClass;
@@ -227,6 +228,16 @@ class question_bank_helper {
         $pluginssql = [];
         $params = [];
 
+        if ($getcategories || !empty($havingcap)) {
+            $contextselect = ', ' . context_helper::get_preload_record_columns_sql('c');
+            $contextsql = ' JOIN {context} c ON c.instanceid = cm.id AND c.contextlevel = ' . CONTEXT_MODULE . ' ';
+            $contextgroupby = ', ' . implode(', ', array_keys(context_helper::get_preload_record_columns('c')));
+        } else {
+            $contextselect = '';
+            $contextsql = '';
+            $contextgroupby = '';
+        }
+
         // Build the SELECT portion of the SQL and include question category joins as required.
         if ($getcategories) {
             $concat = $DB->sql_concat('qc.id',
@@ -237,8 +248,7 @@ class question_bank_helper {
             );
             $groupconcat = $DB->sql_group_concat($concat, self::CATEGORY_SEPARATOR);
             $select = "SELECT cm.id, cm.course, {$groupconcat} AS cats";
-            $catsql = ' JOIN {context} c ON c.instanceid = cm.id AND c.contextlevel = ' . CONTEXT_MODULE .
-                ' JOIN {question_categories} qc ON qc.contextid = c.id AND qc.parent <> 0';
+            $catsql = ' JOIN {question_categories} qc ON qc.contextid = c.id AND qc.parent <> 0';
         } else {
             $select = 'SELECT cm.id, cm.course';
             $catsql = '';
@@ -296,22 +306,27 @@ class question_bank_helper {
             $orderbysql = '';
         }
 
-        $sql = "{$select}
+        $sql = "{$select} {$contextselect}
                 FROM {course_modules} cm
                 JOIN {modules} m ON m.id = cm.module
                 {$pluginssql}
+                {$contextsql}
                 {$catsql}
                 WHERE 1=1 {$notincoursesql} {$incoursesql}
-                GROUP BY cm.id, cm.course
+                GROUP BY cm.id, cm.course {$contextgroupby}
                 {$orderbysql}";
 
-        $rs = $DB->get_recordset_sql($sql, $params, limitnum: $limit);
+        $limitforsql = $limit !== 0 && !empty($havingcap) ? 0 : $limit;
+        $rs = $DB->get_recordset_sql($sql, $params, limitnum: $limitforsql);
         $banks = [];
 
         foreach ($rs as $cm) {
             // If capabilities have been supplied as a method argument then ensure the viewing user has at least one of those
             // capabilities on the module itself.
             if (!empty($havingcap)) {
+                // We can preload because we made sure that in case of capabilities being passed we have the context joined in the
+                // SQL.
+                context_helper::preload_from_record($cm);
                 $context = \context_module::instance($cm->id);
                 if (!(new question_edit_contexts($context))->have_one_cap($havingcap)) {
                     continue;
@@ -319,6 +334,9 @@ class question_bank_helper {
             }
             // Populate the raw record.
             $banks[] = self::get_formatted_bank($cm, $currentbankid, filtercontext: $filtercontext);
+            if (!empty($limit) && count($banks) === $limit) {
+                break;
+            }
         }
         $rs->close();
 
@@ -339,6 +357,7 @@ class question_bank_helper {
         int $userid,
         int $notincourseid = 0,
         ?context $filtercontext = null,
+        array $havingcap = [],
     ): array {
         $prefs = get_user_preferences(self::RECENTLY_VIEWED, null, $userid);
         $contextids = !empty($prefs) ? explode(',', $prefs) : [];
@@ -358,6 +377,9 @@ class question_bank_helper {
             }
             [, $cm] = get_module_from_cmid($context->instanceid);
             if (!empty($notincourseid) && $notincourseid == $cm->course) {
+                continue;
+            }
+            if (!empty($havingcap) && !(new question_edit_contexts($context))->have_one_cap($havingcap)) {
                 continue;
             }
             $record = self::get_formatted_bank($cm, filtercontext: $filtercontext);
@@ -525,13 +547,16 @@ class question_bank_helper {
         $defaultyactivityname = self::get_default_question_bank_activity_name();
         $qbanks = $modinfo->get_instances_of($defaultyactivityname);
 
+        $whereclause = "AND m.name = '" . $defaultyactivityname . "'";
+
         if (!empty($qbanks)) {
             $sql = "SELECT cm.id
                       FROM {course_modules} cm
                       JOIN {modules} m ON m.id = cm.module
-                      JOIN {{$defaultyactivityname}} q ON q.id = cm.instance AND cm.module = m.id
+                      JOIN {{$defaultyactivityname}} q ON q.id = cm.instance
                      WHERE cm.course = :course
-                       AND q.type = :type";
+                       AND q.type = :type " .
+            $whereclause;
 
             return $DB->get_fieldset_sql($sql, ['type' => $subtype, 'course' => $course->id]);
         }
@@ -582,7 +607,7 @@ class question_bank_helper {
             }
         }
 
-        if (strlen($bankname) > self::BANK_NAME_MAX_LENGTH) {
+        if (\core_text::strlen($bankname) > self::BANK_NAME_MAX_LENGTH) {
             throw new \coding_exception(
                 'The provided bankname is too long for the database field.',
                 'Use question_bank_helper::get_bank_name_string to get a suitably truncated name.',
@@ -605,6 +630,9 @@ class question_bank_helper {
         $data->name = $bankname;
         $data->type = in_array($type, self::SHARED_TYPES) ? $type : self::TYPE_STANDARD;
         $data->showdescription = $type === self::TYPE_STANDARD ? 0 : 1;
+        // Don't create the default category if this is being created by the system as part of a migration or restore,
+        // existing categories will be migrated to the new context.
+        $data->skipdefaultcategory = $type === self::TYPE_SYSTEM;
 
         $mod = add_moduleinfo($data, $course);
 
@@ -641,7 +669,8 @@ class question_bank_helper {
     public static function has_bank_migration_task_completed_successfully(): bool {
         $defaultbank = self::get_default_question_bank_activity_name();
         $task = manager::get_adhoc_tasks("\\mod_{$defaultbank}\\task\\transfer_question_categories");
-        return empty($task);
+        $subtasks = manager::get_adhoc_tasks("\\mod_{$defaultbank}\\task\\transfer_questions");
+        return empty($task) && empty($subtasks);
     }
 
     /**

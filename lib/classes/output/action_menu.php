@@ -218,7 +218,8 @@ class action_menu implements renderable, templatable {
         }
         $label = $triggername ?? get_string('actions');
         $triggerclasses = self::DEFAULT_KEBAB_TRIGGER_CLASSES . ' ' . $extraclasses;
-        $icon = $output->pix_icon('i/menu', $label);
+        $icon = $output->pix_icon('i/menu', '') . html_writer::span($label, 'visually-hidden');
+        $this->triggerattributes += ['title' => $label];
         $this->set_menu_trigger($icon, $triggerclasses);
     }
 
@@ -390,7 +391,7 @@ class action_menu implements renderable, templatable {
      */
     #[\core\attribute\deprecated('action_menu::set_menu_left', since: '4.0', mdl: 'MDL-72466', final: true)]
     public function set_alignment(): void {
-        \core\deprecation::emit_deprecation_if_present([self::class, __FUNCTION__]);
+        \core\deprecation::emit_deprecation([self::class, __FUNCTION__]);
     }
 
     /**
@@ -427,7 +428,7 @@ class action_menu implements renderable, templatable {
      */
     #[\core\attribute\deprecated('action_menu::set_boundary', since: '4.3', mdl: 'MDL-77375', final: true)]
     public function set_constraint(): void {
-        \core\deprecation::emit_deprecation_if_present([self::class, __FUNCTION__]);
+        \core\deprecation::emit_deprecation([self::class, __FUNCTION__]);
     }
 
     /**
@@ -451,7 +452,7 @@ class action_menu implements renderable, templatable {
      */
     #[\core\attribute\deprecated('Use a list of action_icons instead', since: '3.2', mdl: 'MDL-55904', final: true)]
     public function do_not_enhance() {
-        \core\deprecation::emit_deprecation_if_present([self::class, __FUNCTION__]);
+        \core\deprecation::emit_deprecation([self::class, __FUNCTION__]);
     }
 
     /**

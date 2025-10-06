@@ -304,6 +304,8 @@ class renderer extends \plugin_renderer_base {
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         $t = new \html_table();
         $t->attributes['class'] = 'generaltable table table-striped table-bordered';
+        $t->caption = get_string('gradingsummary', 'assign');
+        $t->captionhide = true; // Hidden because it matches the title above.
 
         // Visibility Status.
         $cell1content = get_string('hiddenfromstudents');
@@ -410,6 +412,8 @@ class renderer extends \plugin_renderer_base {
         $o .= $this->output->heading(get_string('feedback', 'assign'), 3);
         $o .= $this->output->box_start('boxaligncenter feedbacktable');
         $t = new \html_table();
+        $t->caption = get_string('feedback', 'assign');
+        $t->captionhide = true; // Hidden because it matches the title above.
 
         // Grade.
         if (isset($status->gradefordisplay)) {
@@ -650,6 +654,8 @@ class renderer extends \plugin_renderer_base {
 
         $t = new \html_table();
         $t->attributes['class'] = 'generaltable table table-striped table-bordered';
+        $t->caption = get_string('submissionstatusheading', 'assign');
+        $t->captionhide = true; // Hidden because it matches the title above.
 
         $warningmsg = '';
         if ($status->teamsubmissionenabled) {
@@ -936,6 +942,8 @@ class renderer extends \plugin_renderer_base {
             $o .= $this->heading(get_string('attemptheading', 'assign', $attemptsummaryparams), 4);
 
             $t = new \html_table();
+            $t->caption = get_string('attemptheading', 'assign', $attemptsummaryparams);
+            $t->captionhide = true; // Hidden because it matches the title above.
 
             if ($submission) {
                 $cell1content = get_string('submissionstatus', 'assign');
@@ -1231,7 +1239,7 @@ class renderer extends \plugin_renderer_base {
         reason: 'The assign_course_index_summary class is not used anymore.',
     )]
     public function render_assign_course_index_summary(\assign_course_index_summary $indexsummary) {
-        \core\deprecation::emit_deprecation_if_present([$this, __FUNCTION__]);
+        \core\deprecation::emit_deprecation([$this, __FUNCTION__]);
 
         $o = '';
 
