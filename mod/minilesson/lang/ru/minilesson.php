@@ -73,8 +73,6 @@ $string['basicreport_explanation']='Основной отчет';
 $string['returntoreports']='Вернуться к отчетам';
 $string['returntogradinghome']='Вернуться к оценкам';
 $string['exportexcel']='Экспорт в CSV';
-$string['mingradedetails'] = 'Минимальная оценка, необходимая для завершения этой активности.';
-$string['mingrade'] = 'Минимальная оценка';
 $string['deletealluserdata'] = 'Удалить все пользовательские данные';
 $string['maxattempts'] ='Макс. количество попыток';
 $string['maxattempts_details'] ='Максимально допустимое количество попыток в этой активности.';
@@ -819,11 +817,6 @@ $string['pushpage_scopenone'] = 'Нет активностей Minilesson';
 $string['pushconfirm'] = 'Вы собираетесь отправить настройку: <b>{$a->pushthing}</b> в {$a->clonecount} других активностей. Вы уверены?';
 $string['scopeselector']  = 'Объём: ';
 
-$string['freespeaking_default_aigrade']  = 'Вычтите 1 балл за каждую грамматическую ошибку, но не штрафуйте за ошибки в орфографии или пунктуации.';
-$string['freespeaking_default_aigradefeedback']  = 'Просто объясните каждую грамматическую ошибку. Не комментируйте орфографию или пунктуацию.';
-$string['freewriting_default_aigrade'] = 'Вычтите 1 балл за каждую ошибку в грамматике, орфографии или пунктуации.';
-$string['freewriting_default_aigradefeedback']  = 'Просто объясните каждую ошибку.';
-
 $string['writehere']  = 'Пишите здесь ..';
 $string['submit']='Отправить';
 $string['feedback']='Обратная связь';
@@ -985,7 +978,6 @@ $string['mcimageresponses'] = '(необязательно) Загрузите �
 $string['mcaudioresponses'] = '(необязательно) Загрузите аудио вместо синтеза речи. Названия: 1.mp3, 2.mp3 и т. д.';
 $string['multiaudioaudioresponses'] = '(необязательно) Загрузите аудио вместо синтеза речи. Названия: 1.mp3, 2.mp3 и т. д.';
 $string['audiochat_instructions'] = 'Инструкции для ИИ';
-$string['audiochat_instructions_default'] = 'Вы — {ai role}. Вы преподаёте {target language}. Ученик — носитель {native language}. Тема: {topic}. Говорите медленно, понятно и кратко. Поощряйте ученика говорить. Объясняйте при необходимости на его родном языке.';
 $string['audiochat_instructions_instructions'] = 'Этот шаблон объединяет роль, язык, тему и родной язык ученика. Используйте переменные: {ai role}, {target language}, {native language}, {topic}.';
 $string['audiochat_role'] = 'Роль ИИ';
 $string['audiochat_voice'] = 'Голос ИИ';
@@ -1001,3 +993,32 @@ $string['openaikey'] = 'Ключ OpenAI';
 $string['openaikey_details'] = 'Ключ OpenAI используется для аудио-чата. Для других типов не требуется.';
 $string['textgenerationfailed'] = 'Не удалось сгенерировать текст для элемента {$a->itemindex} ({$a->itemtype})';
 $string['failed'] = 'Ошибка';
+
+
+$string['promptsettings'] = 'Настройки промпта';
+$string['addnewitem'] = 'Добавить новый элемент';
+$string['enterresponses'] = 'Введите ниже список правильных ответов и, при необходимости, список частично правильных ответов.';
+$string['addaudiostory_instructions'] = 'Чтобы создать аудиоисторию, добавьте аудиофайл, изображения с числовыми именами (например, 1.png, 2.jpg) и, при необходимости, файл субтитров (.vtt). Укажите моменты показа изображений (формат HH:MM:SS) в текстовом поле. Если аудиофайл отсутствует и задан медиа-промпт TTS, аудиоистория будет использовать его.';
+$string['audiochatretry_desc'] = 'Если включено, студенты могут сразу снова запустить чат после завершения.';
+$string['relevancetype_desc'] = 'ИИ может снижать балл за ответы с низкой релевантностью. Выберите тип релевантности.';
+
+$string['relevancetype_help'] = 'ИИ может снижать балл за нерелевантные ответы. Если выбрать «релевантность вопросу», ИИ проверит, соответствует ли ответ теме. Если выбрать «релевантность образцовому ответу», ИИ сравнит содержание ответа с предоставленным образцовым ответом.';
+$string['aigrade_instructions_desc'] = 'Инструкции объясняют ИИ, как получить «оценку» от 0 до максимума за этот элемент. Это шаблон, который объединяется с темой ИИ, данными ИИ 1 и 2. Можно использовать переменные: {topic}, {ai data1}, {ai data2}. Итоговая оценка ИИ будет умножена на количество слов, сказанных сверх целевого объёма, чтобы наказывать слишком краткие ответы. Установите целевой объём слов в 0, если это не требуется.';
+
+$string['aigrade_instructions_help'] = 'Инструкции сообщают ИИ, как вычислить «оценку» от 0 до максимума. Шаблон объединяется с темой ИИ и данными ИИ 1/2. Доступные переменные: {topic}, {ai data1}, {ai data2}. Итоговая оценка ИИ умножается на число слов сверх целевого объёма, чтобы штрафовать слишком краткие ответы. Установите целевой объём слов в 0, если это не требуется.';
+$string['aigrade_feedback_desc'] = 'Инструкции для обратной связи подсказывают ИИ, как комментировать ответ студента. Это шаблон, который объединяется с темой ИИ и данными ИИ 1/2. Переменные: {topic}, {ai data1}, {ai data2}.';
+$string['aigrade_instructions_preset'] = 'Выберите пресет из списка, чтобы загрузить готовые инструкции в поле ниже. Вы можете их изменить.';
+$string['aigrade_feedback_help'] = 'Инструкции для обратной связи описывают, как ИИ должен дать фидбек студенту. Шаблон объединяется с темой ИИ и данными ИИ 1/2. Переменные: {topic}, {ai data1}, {ai data2}.';
+
+$string['aigentemplatename:reading_aic_passagegen'] = 'Чтение + AI-чат (сгенерированный текст)';
+$string['aigentemplatename:reading_aic_passageupload'] = 'Чтение + AI-чат (загруженный текст)';
+$string['aigentemplatename:keywords_to_ws_sc'] = 'Ключевые слова → Word Shuffle и Scatter';
+$string['aigentemplatename:keywords_to_ws_sc_sg'] = 'Ключевые слова → Word Shuffle, Scatter и Space Game';
+
+$string['aigentemplatedescription:keywordstogapfillsfluency'] = 'Введите список слов (до 30), и Poodll создаст короткое упражнение для тренировки этих слов.';
+$string['aigentemplatedescription:reading_aic_passagegen'] = 'На основе темы и уровня ученика будет сгенерирован текст для чтения, который затем используется в чтении и аудио-чате.';
+$string['aigentemplatedescription:reading_aic_passageupload'] = 'Вставьте текст для чтения и 4 кратких вопроса. Они будут использованы в упражнении на чтение и последующем аудио-чате.';
+$string['aigentemplatedescription:keywords_to_ws_sc'] = 'Введите 4–10 ключевых слов. Они будут использованы для создания упражнений Word Shuffle и Scatter, а также для генерации картинки каждого слова на школьной доске с милым котом-учителем рядом.';
+$string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Введите 4–10 ключевых слов. Будут созданы упражнения Word Shuffle, Scatter и Space Game, а также картинки слов на доске с милым пуделем-учителем.';
+
+$string['audiochat_instructions_instructions'] = 'Это шаблон инструкций, который объединяется с ролью ИИ, голосом ИИ, темой, пользовательскими данными ИИ 1/2 и родным языком студента, чтобы сформировать подсказки для ИИ. Доступные переменные: {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {topic}. Обычно инструкции по умолчанию подходят, но вы можете их изменить под свой кейс.';

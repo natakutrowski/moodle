@@ -152,16 +152,16 @@ function wordcards_get_completion_state($course, $cm, $userid, $type) {
         switch($type){
             case COMPLETION_AND:
                 if ($onfinish && $onlearned) {
-                    return $mod->has_user_finished_an_attempt() && $mod->has_user_learned_all_terms();
+                    return $mod->has_user_finished_an_attempt($userid) && $mod->has_user_learned_all_terms($userid);
                 } else if ($onfinish) {
-                    return $mod->has_user_finished_an_attempt();
+                    return $mod->has_user_finished_an_attempt($userid);
                 } else if ($onlearned) {
-                    return $mod->has_user_learned_all_terms();
+                    return $mod->has_user_learned_all_terms($userid);
                 }
                 break;
             case COMPLETION_OR:
                 if ($onfinish || $onlearned ) {
-                    return $mod->has_user_finished_an_attempt() || $mod->has_user_learned_all_terms();
+                    return $mod->has_user_finished_an_attempt($userid) || $mod->has_user_learned_all_terms($userid);
                 }
         }
     }
@@ -582,6 +582,7 @@ function wordcards_output_fragment_mform($args) {
     $cm = get_coursemodule_from_id(constants::M_MODNAME, $context->instanceid, 0, false, MUST_EXIST);
     $course = $DB->get_record('course', array('id'=>$cm->course), '*', MUST_EXIST);
     $moduleinstance = $DB->get_record(constants::M_TABLE, array('id' => $cm->instance), '*', MUST_EXIST);
+    $mod = mod_wordcards_module::get_by_modid($moduleinstance->id);
 
     if ($args->itemid) {
         $term = $DB->get_record('wordcards_terms', ['modid' => $moduleinstance->id, 'id' => $args->itemid], '*');
@@ -595,7 +596,7 @@ function wordcards_output_fragment_mform($args) {
 
     list($ignored, $course) = get_context_info_array($context->id);
 
-    //get filechooser and html editor options
+    // Get filechooser and html editor options.
     $audiooptions = utils::fetch_filemanager_opts('audio');
     $imageoptions = utils::fetch_filemanager_opts('image');
     file_prepare_standard_filemanager($term, 'audio', $audiooptions, $context, constants::M_COMPONENT, 'audio', $term->id);
@@ -633,6 +634,10 @@ function wordcards_output_fragment_mform($args) {
                 $params['model_sentence'] = $term->model_sentence;
                 $params['term'] = $term->term;
                 $params['definition'] = $term->definition;
+
+                // Get default prompt.
+                $imagegen = new \mod_wordcards\imagegen($mod);
+                $params['defaultprompt'] = $imagegen->make_image_prompt($term);
             }
             $imagemaker = $renderer->render_from_template('mod_wordcards/imagemaker', $params);
             $theform = new mod_wordcards_form_imagegen(null,

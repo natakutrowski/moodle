@@ -81,8 +81,16 @@ class item_multiaudio extends item
         $alternatestreaming = get_config(constants::M_COMPONENT, 'alternatestreaming');
         $isenglish = strpos($this->moduleinstance->ttslanguage, 'en') === 0;
         if ($isenglish) {
-            $testitem->speechtoken = utils::fetch_streaming_token($this->moduleinstance->region);
-            $testitem->speechtokentype = 'assemblyai';
+            $tokenobject = utils::fetch_streaming_token($this->moduleinstance->region);
+            if ($tokenobject) {
+                $testitem->speechtoken = $tokenobject->token;
+                $testitem->speechtokenvalidseconds = $tokenobject->validseconds;
+                $testitem->speechtokentype = 'assemblyai';
+            } else {
+                $testitem->speechtoken = false;
+                $testitem->speechtokenvalidseconds = 0;
+                $testitem->speechtokentype = '';
+            }
             if ($alternatestreaming) {
                 $testitem->forcestreaming = true;
             }
@@ -96,7 +104,7 @@ class item_multiaudio extends item
 
     //overriding to get jp phonemes.
     // This is just zenkaku to hankaku for comparison of numbers
-    protected function process_japanese_phonetics($sentence)
+    protected function process_japanese_phonetics($sentence, $thephonetic = false)
     {
         $sentence = mb_convert_kana($sentence, "n");
         return $sentence;

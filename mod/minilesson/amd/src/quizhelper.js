@@ -269,6 +269,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions', 'core/templates', 'c
               case def.qtype_h5p:
               case def.qtype_conversation:
               case def.qtype_compquiz:
+              case def.qtype_audiochat:
               default:
           }//end of nextitem switch
 
@@ -282,10 +283,13 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions', 'core/templates', 'c
         } else {
           //just reload and re-fetch all the data to display
             $(".minilesson_nextbutton").prop("disabled", true);
+            window.location.href=dd.activityurl;
+            /*
             setTimeout(function () {
-               // log.debug("forwarding to finished page");
+                log.debug("forwarding to finished page");
                 window.location.href=dd.activityurl;
             }, 500);
+            */
 
           return;
 
@@ -330,14 +334,14 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions', 'core/templates', 'c
         this.stepresults.push(stepdata);
 
         //push results to server
+        var isasync = false;
         var ret = Ajax.call([{
           methodname: 'mod_minilesson_report_step_grade',
           args: {
             cmid: dd.cmid,
             step: JSON.stringify(stepdata),
           },
-          async: false
-        }])[0];
+        }],isasync)[0];
         log.debug("report_step_grade success: " + ret);
 
       },
@@ -480,7 +484,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions', 'core/templates', 'c
            }])[0];
        },
 
-      //this will return the promise, the result of which is an integer 100 being perfect match, 0 being no match
+      //this will return the promise, the result of which is an object containing marks, corrections and feedback
       evaluateTranscript: function(transcript, itemid) {
         return Ajax.call([{
             methodname: 'mod_minilesson_evaluate_transcript',

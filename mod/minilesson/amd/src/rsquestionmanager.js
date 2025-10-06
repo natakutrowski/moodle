@@ -1,8 +1,8 @@
 /* jshint ignore:start */
 define(['jquery', 'core/log','core/templates','mod_minilesson/definitions','mod_minilesson/modalformhelper',
         'mod_minilesson/modaldeletehelper','mod_minilesson/moveitemhelper','mod_minilesson/modalpreviewhelper',
-        'mod_minilesson/duplicateitemhelper','mod_minilesson/datatables'],
-    function($,  log, templates, def, mfh, mdh, mih, mph,dplh, datatables) {
+        'mod_minilesson/duplicateitemhelper','mod_minilesson/datatables', 'core/modal_factory', 'core/modal_events'],
+    function($,  log, templates, def, mfh, mdh, mih, mph,dplh, datatables, ModalFactory, ModalEvents) {
 
     "use strict"; // jshint ;_;
 
@@ -24,6 +24,12 @@ define(['jquery', 'core/log','core/templates','mod_minilesson/definitions','mod_
             dd.cmid = props.cmid;
             dd.wwwroot = props.wwwroot;
 
+            //fetch lesson items from hidden input
+            var datatag = $('#' + props.lessonitems);
+            dd.lessonitems = JSON.parse(datatag.val());
+            datatag.remove(); //we dont need it any more
+
+            dd.modalshow();
             dd.register_events();
             dd.process_html();
             dd.collate_rowids();
@@ -148,6 +154,7 @@ define(['jquery', 'core/log','core/templates','mod_minilesson/definitions','mod_
                 item.id = ret.newitemid;
                 item.name = decodeURIComponent(ret.newitemname);
                 item.type = ret.type;
+                item.icon = ret.icon;
                 item.typelabel = decodeURIComponent(ret.typelabel);
                 item.index = dd.controls.questionstable.data().length+1;
                 item.up = {'key': 't/up','component': 'moodle','title': 'up'};
@@ -207,7 +214,114 @@ define(['jquery', 'core/log','core/templates','mod_minilesson/definitions','mod_
             mph.init('.' + def.itemrow + '_previewlink', dd.contextid, after_questionpreview);
             //duplicate item helper
             dplh.init('.' + def.itemrow + '_duplicatelink', dd.contextid, after_questionduplicate);
-        }
+        },
+
+            modalshow: function() {
+                var dd = this;
+                var context = {
+                    lessonitems: dd.lessonitems,
+                };
+                $('#additembtn').on('click', function() {
+                    ModalFactory.create({
+                        type: ModalFactory.types.CANCEL,
+                        body: templates.render('mod_minilesson/lessonitem', context),
+                    }).then(function (modal) {
+                        dd.modal = modal;
+                        dd.modal.setLarge();
+                        dd.modal.show();
+                        dd.modal.getRoot().find('.modal-header, .modal-footer').hide();
+                        dd.modal.getRoot().addClass('lessonitem-modal');
+
+                        // on click of a lesson item link, show the relevant description panel, hide the others
+                        var modalRoot = dd.modal.getRoot();
+                        modalRoot.on('click', 'a.lessonitem-link', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (e.stopImmediatePropagation) { e.stopImmediatePropagation(); }
+
+                            const selector = this.getAttribute('data-toggletarget');
+                            const allpanels = modalRoot.find('.lessonitem-description');
+                            const alllinks = modalRoot.find('.lessonitem-link');
+                            if (!selector) {
+                                log.debug('No toggle target specified');
+                                return;
+                             }
+                            const target = modalRoot.find(selector);
+                            if (!target) {
+                                log.debug('No target found for selector ' + selector);
+                                return;
+                            }
+
+                            // Show the correct panel and hide the others.
+                            if (target.hasClass('show')) {
+                                log.debug('already visible do nothing ');
+                                // Already shown, do nothing.
+                                return;
+                            } else {
+                                log.debug('not visible, showing now');
+                                // Hide all others.
+                                allpanels.removeClass('show').trigger('lessonitem:hidden');
+                                // Not shown, show it.
+                                target.addClass('show').trigger('lessonitem:shown');
+                                
+                                // Set all other links to aria-expanded false
+                                alllinks.attr('aria-expanded', 'false');
+                                // Show this one.
+                                this.setAttribute('aria-expanded', 'true');
+                            }
+                        });
+
+                        // If they click the add button , lets turn it into a spinner
+                        modalRoot.on('click', 'a.addbtn', function (e) {
+
+                            const addbtn = $(this);
+                            if (addbtn.hasClass('ml_loading')) {
+                                // Already loading, do nothing.
+                                return;
+                            }
+                            addbtn.addClass('ml_loading');
+                            addbtn.html("<i class='icon fa fa-spinner fa-pulse fa-fw ' aria-hidden='true'></i> ");
+                        });
+
+                        dd.videocontroller(dd.modal.getRoot());
+
+                        dd.modal.getRoot().on(ModalEvents.hidden, function() {
+                            $(this).find('video').each(function() {
+                                this.pause();
+                                this.currentTime = 0;
+                                dd.modal.destroy();
+                            });
+                        });
+
+
+                        return dd.modal;
+                    });
+                });
+            },
+
+
+            videocontroller: function(rootel) {
+                $(rootel).on('shown.bs.collapse lessonitem:shown', '.lessonitem-description', function() {
+                    var video = $(this).find('video').get(0);
+                    if (video) {
+                        var source = $(video).find('source');
+                        if (source.length && source.attr('data-src') && !source.attr('src')) {
+                            source.attr('src', source.attr('data-src'));
+                            video.load();
+                        }
+                        video.play();
+                    }
+                });
+            
+
+                $(rootel).on('hide.bs.collapse lessonitem:hidden', '.lessonitem-description', function() {
+                    var video = $(this).find('video').get(0);
+                    if (video) {
+                        video.pause();
+                        video.currentTime = 0;
+                    }
+                });
+            }
 
     };//end of returned object
 });//total end

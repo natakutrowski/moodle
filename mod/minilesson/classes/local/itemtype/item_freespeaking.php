@@ -70,12 +70,30 @@ class item_freespeaking extends item {
         $alternatestreaming = get_config(constants::M_COMPONENT, 'alternatestreaming');
         $isenglish = strpos($this->moduleinstance->ttslanguage, 'en') === 0;
         if ($isenglish) {
-            $testitem->speechtoken = utils::fetch_streaming_token($this->moduleinstance->region);
-            $testitem->speechtokentype = 'assemblyai';
+            $tokenobject = utils::fetch_streaming_token($this->moduleinstance->region);
+            if ($tokenobject) {
+                $testitem->speechtoken = $tokenobject->token;
+                $testitem->speechtokenvalidseconds = $tokenobject->validseconds;
+                $testitem->speechtokentype = 'assemblyai';
+            } else {
+                $testitem->speechtoken = false;
+                $testitem->speechtokenvalidseconds = 0;
+                $testitem->speechtokentype = '';
+            }
             if ($alternatestreaming) {
                 $testitem->forcestreaming = true;
             }
         }
+
+        $testitem->reviewsettings['hidecorrections'] = !empty($this->itemrecord->{constants::FREESPEAKING_HIDECORRECTION});
+        $testitem->reviewsettings['showreviewdetailed'] = empty($this->itemrecord->{constants::FREESPEAKING_SHOWRESULT}) ||
+            $this->itemrecord->{constants::FREESPEAKING_SHOWRESULT} == 1;
+        $testitem->reviewsettings['showreviewbasic'] = !empty($this->itemrecord->{constants::FREESPEAKING_SHOWRESULT}) &&
+            $this->itemrecord->{constants::FREESPEAKING_SHOWRESULT} == 2;
+        $testitem->reviewsettings['showscorestarrating'] = empty($this->itemrecord->{constants::FREESPEAKING_SHOWGRADE}) ||
+            $this->itemrecord->{constants::FREESPEAKING_SHOWGRADE} == 1;
+        $testitem->reviewsettings['showscorepercentage'] = !empty($this->itemrecord->{constants::FREESPEAKING_SHOWGRADE}) &&
+            $this->itemrecord->{constants::FREESPEAKING_SHOWGRADE} == 2;
 
          // Cloudpoodll.
          $maxtime = $this->itemrecord->timelimit;
@@ -114,10 +132,18 @@ class item_freespeaking extends item {
         $keycols['int1'] = ['jsonname' => 'totalmarks', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::TOTALMARKS];
         $keycols['int2'] = ['jsonname' => 'relevance', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::RELEVANCE];
         $keycols['int3'] = ['jsonname' => 'targetwordcount', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::TARGETWORDCOUNT];
+        $keycols['int4'] = ['jsonname' => 'gradingselection', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::FREESPEAKING_GRADINGSELECTION];
+        $keycols['int5'] = ['jsonname' => 'feedbackselection', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::FREESPEAKING_FEEDBACKSELECTION];
+        $keycols['int6'] = ['jsonname' => 'hidecorrections', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::FREESPEAKING_HIDECORRECTION];
+        $keycols['int7'] = ['jsonname' => 'showgrade', 'type' => 'int', 'optional' => true, 'default' => 1, 'dbname' => constants::FREESPEAKING_SHOWGRADE];
+        $keycols['int8'] = ['jsonname' => 'showresult', 'type' => 'int', 'optional' => true, 'default' => 1, 'dbname' => constants::FREESPEAKING_SHOWRESULT];
         $keycols['text6'] = ['jsonname' => 'aigradeinstructions', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AIGRADE_INSTRUCTIONS];
         $keycols['text2'] = ['jsonname' => 'aigradefeedback', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AIGRADE_FEEDBACK];
         $keycols['text3'] = ['jsonname' => 'modelanswer', 'type' => 'string', 'optional' => true, 'default' => '', 'dbname' => constants::AIGRADE_MODELANSWER];
         $keycols['text4'] = ['jsonname' => 'aigradefeedbacklanguage', 'type' => 'string', 'optional' => true, 'default' => 'en-US', 'dbname' => constants::AIGRADE_FEEDBACK_LANGUAGE];
+        $keycols['text5'] = ['jsonname' => 'freespeakingtopic', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::FREESPEAKING_TOPIC];
+        $keycols['data1'] = ['jsonname' => 'freespeakingaidata1', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::FREESPEAKING_AIDATA1];
+        $keycols['data2'] = ['jsonname' => 'freespeakingaidata2', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::FREESPEAKING_AIDATA2];
         return $keycols;
     }
 

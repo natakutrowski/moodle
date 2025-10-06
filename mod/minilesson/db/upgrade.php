@@ -807,6 +807,66 @@ function xmldb_minilesson_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2025073000, 'minilesson');
     }
 
+    if ($oldversion < 2025080102) {
+
+        // Add more customint fields to minilesson question table
+        $table = new xmldb_table(constants::M_QTABLE);
+
+        // Define new custom fields
+        $fields = [];
+
+        $fields[] = new xmldb_field('customint6', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $fields[] = new xmldb_field('customint7', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $fields[] = new xmldb_field('customint8', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $fields[] = new xmldb_field('customint9', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $fields[] = new xmldb_field('customint10', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $fields[] = new xmldb_field('itemaudiostoryzoom', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '1');
+
+        // Add fields.
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2025080102, 'minilesson');
+    }
+
+    if ($oldversion < 2025080104) {
+
+        // Update default templates
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2025080104, 'minilesson');
+    }
+
+    if ($oldversion < 2025090100.01) {
+        $qtypes = constants::ITEMTYPES;
+        //remove dictation chat
+        $key = array_search('dictationchat', $qtypes);
+        if ($key !== false) {
+            unset($qtypes[$key]);
+        }
+        set_config('enableditems', implode(',', $qtypes), 'minilesson');
+        upgrade_mod_savepoint(true, 2025090100.01, 'minilesson');
+    }
+
+    if ($oldversion < 2025090100.02) {
+        $activitytable = new xmldb_table(constants::M_TABLE);
+        // Define field completionwhenfinished  to be added to minilesson.
+        $completionwhenfinished = new xmldb_field('completionwhenfinished', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+
+        // add completionwhenfinished field to minilesson table
+        if (!$dbman->field_exists($activitytable, $completionwhenfinished)) {
+            $dbman->add_field($activitytable, $completionwhenfinished);
+        }
+        upgrade_mod_savepoint(true, 2025090100.02, 'minilesson');
+    }
+
+
+
     // Final return of upgrade result (true, all went good) to Moodle.
     return true;
 }

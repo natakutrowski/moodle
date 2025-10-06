@@ -5,13 +5,17 @@ define(['jquery',
     'mod_minilesson/pollyhelper',
     'mod_minilesson/animatecss',
     'mod_minilesson/progresstimer',
-    'core/templates'
-], function($, log, ajax, def, polly, anim, progresstimer, templates) {
+    'core/templates',
+    'core/notification',
+    'core/str',
+], function($, log, ajax, def, polly, anim, progresstimer, templates, notification, str) {
     "use strict"; // jshint ;_;
 
     log.debug('MiniLesson wordshuffle: initialising');
 
     return {
+
+        strings: {},
 
         // For making multiple instances
         clone: function() {
@@ -20,9 +24,13 @@ define(['jquery',
 
         usevoice: 'Amy',
 
+        pointerdiv: null,
+
         init: function(index, itemdata, quizhelper) {
             var self = this;
             self.itemdata = itemdata;
+            // Default to true, we might implement a start page later.
+            self.itemdata.hidestartpage = true;
             self.quizhelper = quizhelper;
             self.index = index;
 
@@ -30,7 +38,7 @@ define(['jquery',
             var animopts = {};
             animopts.useanimatecss = quizhelper.useanimatecss;
             anim.init(animopts);
-
+            self.init_strings();
             self.init_controls();
             self.register_events();
             self.setvoice();
@@ -40,24 +48,42 @@ define(['jquery',
 
         init_controls: function() {
             var self = this;
+            var container = $("#" + self.itemdata.uniqueid + "_container");
             self.controls = {
-                container: $("#" + self.itemdata.uniqueid + "_container"),
-                listen_cont: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_listen_cont"),
-                nextbutton: $("#" + self.itemdata.uniqueid + "_container .minilesson_nextbutton"),
-                start_btn: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_start_btn"),
-                skip_btn: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_skip_btn"),
-                ctrl_btn: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_ctrl-btn"),
-                check_btn: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_check_btn"),
-                game: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_game"),
-                controlsbox: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_controls"),
-                resultscontainer: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_resultscontainer"),
-                mainmenu: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_mainmenu"),
-                title: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_title"),
-                progress_container: $("#" + self.itemdata.uniqueid + "_container .progress-container"),
-                progress_bar: $("#" + self.itemdata.uniqueid + "_container .progress-container .progress-bar"),
-                question: $("#" + self.itemdata.uniqueid + "_container .question"),
-                listen_btn: $("#" + self.itemdata.uniqueid + "_container .wordshuffle_listen_btn"),
+                container: container,
+                listen_cont: container.find(".wordshuffle_listen_cont"),
+                nextbutton: container.find(".minilesson_nextbutton"),
+                start_btn: container.find(".wordshuffle_start_btn"),
+                skip_btn: container.find(".wordshuffle_skip_btn"),
+                ctrl_btn: container.find(".wordshuffle_ctrl-btn"),
+                check_btn: container.find(".wordshuffle_check_btn"),
+                game: container.find(".wordshuffle_game"),
+                controlsbox: container.find(".wordshuffle_controls"),
+                resultscontainer: container.find(".wordshuffle_resultscontainer"),
+                mainmenu: container.find(".wordshuffle_mainmenu"),
+                title: container.find(".wordshuffle_title"),
+                progress_container: container.find(".progress-container"),
+                progress_bar: container.find(".progress-container .progress-bar"),
+                question: container.find(".question"),
+                listen_btn: container.find(".wordshuffle_listen_btn"),
+                retry_btn: container.find(".wordshuffle_retry_btn")
             };
+        },
+
+        init_strings: function() {
+            var self = this;
+            str.get_strings([
+                { "key": "nextlessonitem", "component": 'mod_minilesson'},
+                { "key": "confirm_desc", "component": 'mod_minilesson'},
+                { "key": "yes", "component": 'moodle'},
+                { "key": "no", "component": 'moodle'},
+            ]).done(function (s) {
+                var i = 0;
+                self.strings.nextlessonitem = s[i++];
+                self.strings.confirm_desc = s[i++];
+                self.strings.yes = s[i++];
+                self.strings.no = s[i++];
+            });
         },
 
         next_question: function() {
@@ -113,7 +139,18 @@ define(['jquery',
             var self = this;
 
             self.controls.nextbutton.on('click', function(e) {
-                self.next_question();
+                if (self.items.some(item => !item.answered)) {
+                    notification.confirm(self.strings.nextlessonitem,
+                        self.strings.confirm_desc,
+                        self.strings.yes,
+                        self.strings.no,
+                        function() {
+                            self.next_question();
+                        }
+                    );
+                } else {
+                    self.next_question();
+                }
             });
 
             self.controls.start_btn.on("click", function() {
@@ -150,14 +187,6 @@ define(['jquery',
                 theaudio.play();
             });
 
-            //toggle audio playback on spacekey press in input boxes
-            self.controls.container.on("keydown", ".single-character", function(e) {
-                if (e.which == 32) {
-                    e.preventDefault();
-                    audioplayerbtn.trigger("click");
-                }
-            });
-
             // On skip button click
             self.controls.skip_btn.on("click", function() {
                 // Disable buttons
@@ -191,7 +220,24 @@ define(['jquery',
 
 
             self.controls.check_btn.on("click", function() {
-                self.check_answer();
+                self.pointerdiv.find(".drop-slot .word").each(function () {
+                    self.placeInBank($(this));
+                });
+                self.clearPerSlotFeedback();
+                self.controls.retry_btn.hide();
+                self.items[self.game.pointer].answered = false;
+                self.items[self.game.pointer].correct = false;
+            });
+
+            self.controls.retry_btn.on("click", function() {
+                self.pointerdiv.find(".drop-slot .word").each(function () {
+                    self.placeInBank($(this));
+                });
+                self.clearPerSlotFeedback();
+                self.controls.retry_btn.hide();
+                self.controls.check_btn.show();
+                self.items[self.game.pointer].answered = false;
+                self.items[self.game.pointer].correct = false;
             });
         },
 
@@ -202,7 +248,13 @@ define(['jquery',
         check_answer: function() {
             var self = this;
 
-
+            // self.evaluateIfComplete();
+            if (self.itemdata.allowretry && !self.items[self.game.pointer].correct) {
+                self.controls.retry_btn.show();
+                self.controls.check_btn.hide();
+            } else {
+                setTimeout(() => self.gotComparison(true), 2000);
+            }
         },
 
         setvoice: function() {
@@ -218,7 +270,7 @@ define(['jquery',
 
             self.items = text_items.map(function(target) {
                 return {
-                    target: target.sentence,
+                    target: target.sentenceclean,
                     timer: [],
                     answered: false,
                     correct: false,
@@ -264,7 +316,7 @@ define(['jquery',
                 //if they cant retry OR the time limit is up, move on
             } else if(!self.itemdata.allowretry || timelimit_progressbar.hasClass('progress-bar-complete')) {
                 log.debug("incorrect");
-                
+
             } else {
                 //it was wrong but they can retry
                 log.debug("incorrect!! retry");
@@ -283,7 +335,6 @@ define(['jquery',
                 self.end();
             }
         },
-        
 
         end: function() {
             var self = this;
@@ -328,6 +379,9 @@ define(['jquery',
         nextPrompt: function() {
 
             var self = this;
+            self.pointerdiv = self.controls.question.find(`.wordshuffle_wordset_container[data-index="${self.game.pointer}"]`);
+            self.controls.retry_btn.hide();
+            self.controls.check_btn.show();
 
             self.controls.ctrl_btn.prop("disabled", false);
 
@@ -383,6 +437,199 @@ define(['jquery',
             self.controls.ctrl_btn.prop("disabled", false);
 
             self.startTimer();
+            self.makeDragZones();
+        },
+
+        getSlotWords: function() {
+            var self = this;
+            return self.pointerdiv.find(".drop-slot").map(function () {
+                const w = $(this).find(".word").first().text().trim();
+                return w || "";
+            }).get();
+        },
+
+        allFilled: function() {
+            var self = this;
+            return self.getSlotWords().every(Boolean);
+        },
+
+        clearPerSlotFeedback: function() {
+            var self = this;
+            self.pointerdiv.find(".drop-slot").removeClass("border-success border-danger")
+                .addClass("border-secondary-subtle");
+            self.pointerdiv.find("[id^='fb-']").each(function () {
+                $(this).removeClass("text-success text-danger").addClass("text-muted").html("&nbsp;");
+            });
+        },
+
+        setPerSlotFeedback: function() {
+            var self = this;
+            const words = self.getSlotWords();
+            const expectedAnswers = self.expectedAnswers();
+            const fullExpected = [...self.fixedWords(), ...expectedAnswers];
+            words.forEach((w, i) => {
+                const ok = w === expectedAnswers[i];
+                const $slot = self.pointerdiv.find(".drop-slot[data-index='" + i + "']");
+                const $fb = self.pointerdiv.find("#fb-" + i);
+
+                $slot.removeClass("border-secondary-subtle border-success border-danger")
+                    .addClass(ok ? "border-success" : "border-danger");
+
+                $fb.removeClass("text-muted text-success text-danger")
+                .addClass(ok ? "text-success" : "text-danger")
+                .text(ok ? "Correct" : "Wrong");
+            });
+            const attempt = [...self.fixedWords(), ...self.getSlotWords()];
+            self.items[self.game.pointer].answered = words.some(Boolean);
+            self.items[self.game.pointer].correct = attempt.join(" ") === fullExpected.join(" ");
+        },
+
+        evaluateIfComplete: function() {
+            var self = this;
+            if (self.allFilled()) {
+                self.controls.check_btn.hide();
+                self.controls.skip_btn.prop("disabled", true);
+                self.controls.retry_btn.prop("disabled", true);
+                self.setPerSlotFeedback();
+                self.check_answer();
+                self.items[self.game.pointer].answered = true;
+            } else {
+                self.controls.check_btn.show();
+                self.clearPerSlotFeedback();
+            }
+        },
+
+        moveToSlot: function($word, $slot) {
+            var self = this;
+            $word.detach()
+                .css({ top: 0, left: 0, position: "relative" })
+                .appendTo($slot);
+            self.evaluateIfComplete();
+        },
+
+        placeInBank: function($word) {
+            var self = this;
+            $word.detach()
+                .css({ top: 0, left: 0, position: "relative" })
+                .appendTo(self.pointerdiv.find(".word-bank"));
+            self.evaluateIfComplete();
+        },
+
+        gapWords: function() {
+            var self = this;
+            return self.itemdata.sentences[self.game.pointer].gapwords;
+        },
+
+        fixedWords: function() {
+            var self = this;
+            return self.gapWords().filter(w => w.isgap === false).map(w => w.word);
+        },
+
+        expectedAnswers: function() {
+            var self = this;
+            return self.gapWords().filter(w => w.isgap === true).map(w => w.word);
+        },
+
+        selectedWord: null,
+
+        makeDragZones: function() {
+            var self = this;
+
+            if (!self.pointerdiv.attr('data-initialized')) {
+                // Click event
+                self.pointerdiv.on('click', e => {
+                    const $target = $(e.target);
+                    if ($target.is('.word')) {
+                        if (!self.selectedWord || !self.selectedWord.is($target)) {
+                            self.selectedWord = $target;
+                        } else {
+                            self.selectedWord = null;
+                        }
+                    } else if ($target.is('.word-bank')) {
+                        if (self.selectedWord) {
+                            if (self.selectedWord.parent('.drop-slot')) {
+                                self.placeInBank(self.selectedWord);
+                            }
+                            self.selectedWord = null;
+                        }
+                    } else if ($target.is('.drop-slot')) {
+                        if (self.selectedWord) {
+                            self.moveToSlot(self.selectedWord, $target);
+                            self.selectedWord = null;
+                        }
+                    }
+                    self.highlightDropZones();
+                });
+
+                // Spacebar keydown event
+                self.pointerdiv.on('keydown', function(e) {
+                    if (e.key === ' ' || e.key === 'Spacebar') {
+                        const $focused = $(document.activeElement);
+                        if ($focused.is('.word')) {
+                            if (!self.selectedWord || !self.selectedWord.is($focused)) {
+                                self.selectedWord = $focused;
+                            } else {
+                                self.selectedWord = null;
+                            }
+                        } else if ($focused.is('.word-bank')) {
+                            if (self.selectedWord) {
+                                if (self.selectedWord.parent('.drop-slot')) {
+                                    self.placeInBank(self.selectedWord);
+                                }
+                                self.selectedWord = null;
+                            }
+                        } else if ($focused.is('.drop-slot')) {
+                            if (self.selectedWord) {
+                                self.moveToSlot(self.selectedWord, $focused);
+                                self.selectedWord = null;
+                            }
+                        }
+                        self.highlightDropZones();
+                        e.preventDefault();
+                    }
+                });
+
+                self.pointerdiv.attr('data-initialized', 1);
+            }
+        },
+
+        highlightDropZones: function() {
+            var self = this;
+
+            // Remove highlights and tabindex from drop slots, word bank, and words
+            var dropZones = self.pointerdiv.find('.drop-slot')
+                .removeClass('ml_ws_highlight')
+                .removeAttr('tabindex');
+            self.pointerdiv.find('.word').removeClass('ml_ws_highlight');
+            self.pointerdiv.find('.word-bank')
+                .removeClass('ml_ws_highlight')
+                .removeAttr('tabindex');
+
+            if (self.selectedWord) {
+                // If the selected word is not in the word bank,
+                // It has been selected from a drop slot.
+                // Highlight the word bank and set tabindex to 0.
+                if (!self.selectedWord.parent('.word-bank').length) {
+                    self.pointerdiv.find('.word-bank')
+                        .addClass('ml_ws_highlight')
+                        .attr('tabindex', 0);
+                }
+
+                // Highlight the drop zones that do not contain a word
+                dropZones.filter(function(_, slot) {
+                    // If the slot does not contain a .word element
+                    if (!slot.querySelector('.word')) {
+                        // Add highlight and set tabindex to 0
+                        $(slot).addClass('ml_ws_highlight');
+                        $(slot).attr('tabindex', 0);
+                        return true;
+                    }
+                    return false;
+                });
+
+                // Highlight the selected word
+                self.selectedWord.addClass('ml_ws_highlight');
+            }
         },
 
          startTimer: function(){

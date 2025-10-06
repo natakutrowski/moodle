@@ -231,6 +231,9 @@ class utils {
             case 'useast1':
                 $ret = 'https://useast.ls.poodll.com/';
                 break;
+            case 'ningxia':
+                $ret = 'https://ningxia.ls.poodll.cn/';
+                break;
             default:
                 $ret = 'https://' . $region . '.ls.poodll.com/';
         }
@@ -613,8 +616,7 @@ break;
                             'grammarcorrection' => $attempt->grammarcorrection]);
 
                     if(self::is_json($gcerrors)&& self::is_json($gcmatches)) {
-                        $stats = $DB->get_record(constants::M_STATSTABLE,
-                            ['solo' => $attempt->solo, 'attemptid' => $attempt->id, 'userid' => $attempt->userid]);
+                        $stats = $DB->get_record(constants::M_STATSTABLE, ['attemptid' => $attempt->id]);
                         if($stats) {
                             $DB->update_record(constants::M_STATSTABLE,
                                 ['id' => $stats->id,
@@ -1003,8 +1005,7 @@ break;
         $stats->userid = $attempt->userid;
         $stats->timemodified = time();
 
-        $oldstats = $DB->get_record(constants::M_STATSTABLE,
-                ['solo' => $attempt->solo, 'attemptid' => $attempt->id, 'userid' => $attempt->userid]);
+        $oldstats = $DB->get_record(constants::M_STATSTABLE, ['attemptid' => $attempt->id]);
         if($oldstats){
             $stats->id = $oldstats->id;
             $DB->update_record(constants::M_STATSTABLE, $stats);
@@ -1290,8 +1291,7 @@ break;
     public static function remove_stats($attempt) {
         global $DB;
 
-        $oldstats = $DB->get_record(constants::M_STATSTABLE,
-                ['solo' => $attempt->solo, 'attemptid' => $attempt->id, 'userid' => $attempt->userid]);
+        $oldstats = $DB->get_record(constants::M_STATSTABLE, ['attemptid' => $attempt->id]);
         if($oldstats) {
             $DB->delete_records(constants::M_STATSTABLE, ['id' => $oldstats->id]);
         }
@@ -3528,6 +3528,22 @@ break;
             return false;
         }
     }
+
+    public static function is_complete($rule, $moduleinstance, $cm, $userid) {
+        $attempthelper = new \mod_solo\attempthelper($cm);
+        switch($rule){
+            case constants::COMPLETION_ALLSTEPS:
+                $latestcompleteattempt = $attempthelper->fetch_latest_complete_attempt($userid);
+                if ($latestcompleteattempt){
+                    return true;
+                }else{
+                    return false;
+                }
+            default:
+                return false;
+        }
+    }
+
     /**
      * Creates an array that represents all the current grades that
      * can be chosen using the given grading type.

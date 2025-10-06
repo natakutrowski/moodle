@@ -6,8 +6,10 @@ define(['jquery',
     'mod_minilesson/ttrecorder',
     'mod_minilesson/animatecss',
     'mod_minilesson/progresstimer',
-    'core/templates'
-], function($, log, ajax, def, polly, ttrecorder, anim, progresstimer, templates) {
+    'core/templates',
+    'core/str',
+    'core/notification'
+], function($, log, ajax, def, polly, ttrecorder, anim, progresstimer, templates,str,notification) {
     "use strict"; // jshint ;_;
 
     log.debug('MiniLesson speaking gap fill: initialising');
@@ -25,6 +27,7 @@ define(['jquery',
 
         init: function(index, itemdata, quizhelper) {
             var self = this;
+            self.strings = {};
             var theCallback = function(message) {
 
                 switch (message.type) {
@@ -74,6 +77,7 @@ define(['jquery',
             animopts.useanimatecss = quizhelper.useanimatecss;
             anim.init(animopts);
             self.init_controls();
+            self.init_strings();
             self.register_events();
             self.setvoice();
             self.getItems();
@@ -99,6 +103,22 @@ define(['jquery',
                 question: $("#" + self.itemdata.uniqueid + "_container .question"),
                 listen_btn: $("#" + self.itemdata.uniqueid + "_container .sgapfill_listen_btn"),
             };
+        },
+
+        init_strings: function() {
+            var self = this;
+            str.get_strings([
+                { "key": "nextlessonitem", "component": 'mod_minilesson'},
+                { "key": "confirm_desc", "component": 'mod_minilesson'},
+                { "key": "yes", "component": 'moodle'},
+                { "key": "no", "component": 'moodle'},
+            ]).done(function (s) {
+                var i = 0;
+                self.strings.nextlessonitem = s[i++];
+                self.strings.confirm_desc = s[i++];
+                self.strings.yes = s[i++];
+                self.strings.no = s[i++];
+            });
         },
 
         next_question: function(percent) {
@@ -155,7 +175,18 @@ define(['jquery',
             var self = this;
             // On next button click
             self.controls.container.find('.minilesson_nextbutton').on('click', function(e) {
-                self.next_question();
+                if (self.items.some(item => !item.answered)) {
+                    notification.confirm(self.strings.nextlessonitem,
+                        self.strings.confirm_desc,
+                        self.strings.yes,
+                        self.strings.no,
+                        function() {
+                            self.next_question();
+                        }
+                    );
+                } else {
+                    self.next_question();
+                }
             });
             // On start button click
             self.controls.start_btn.on("click", function() {
@@ -213,8 +244,14 @@ define(['jquery',
                 self.items[self.game.pointer].correct = false;
 
                 if (self.game.pointer < self.items.length - 1) {
+                    self.controls.skip_btn.prop("disabled", true);
+                    self.controls.skip_btn.children('.fa').removeClass('fa-arrow-right');
+                    self.controls.skip_btn.children('.fa').addClass('fa-spinner fa-spin');
                     // Move on after short time to next prompt
                     setTimeout(function() {
+                        self.controls.skip_btn.children('.fa').removeClass('fa-spinner fa-spin');
+                        self.controls.skip_btn.children('.fa').addClass('fa-arrow-right');
+                        self.controls.skip_btn.prop("disabled", false);
                         self.controls.container.find('.sgapfill_reply_' + self.game.pointer).hide();
                         self.game.pointer++;
                         self.nextPrompt();
@@ -247,6 +284,7 @@ define(['jquery',
             self.items = text_items.map(function(target) {
                 return {
                     target: target.sentence,
+                    segmentedsentence: target.segmentedsentence,
                     prompt: target.prompt,
                     parsedstring: target.parsedstring,
                     displayprompt: target.displayprompt,
@@ -384,7 +422,7 @@ define(['jquery',
                     self.items[self.game.pointer].correct = false;
                     self.items[self.game.pointer].typed = typed;
 
-                    $self.controls.ctrl_btn.prop("disabled", true);
+                    self.controls.ctrl_btn.prop("disabled", true);
 
                     self.stopTimer(self.items[self.game.pointer].timer);
 
@@ -488,7 +526,7 @@ define(['jquery',
             );
             self.nextReply();
         },
-        
+
 
         nextReply: function() {
             var self = this;
@@ -521,13 +559,16 @@ define(['jquery',
             //correct or not
             code += " <i data-idx='" + self.game.pointer + "' class='dictate_feedback'></i></div>";
 
-            //hint - image
+            //hints
+            // We need to set a higher margin for the image if there is no hint, to stop it being overlapped by the recorder
+            var hasdefinition = self.items[self.game.pointer].definition && self.items[self.game.pointer].definition !== "";
+            var imagebottommargin  = hasdefinition ? "margin-bottom: 5px" : "margin-bottom: 50px";
             if( self.items[self.game.pointer].imageurl) {
-                code += "<div class='minilesson_sentence_image'><div class='minilesson_padded_image'><img src='"
+                code += "<div class='minilesson_sentence_image' style='"+imagebottommargin+"'><div class='minilesson_padded_image'><img src='"
                     + self.items[self.game.pointer].imageurl + "' alt='Image for gap fill' /></div></div>";
             }
             //hint - definition
-            if( self.items[self.game.pointer].definition) {
+            if(hasdefinition ) {
                 code += "<div class='definition-container'><div class='definition'>"
                     + self.items[self.game.pointer].definition + "</div>";
             }

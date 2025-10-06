@@ -635,3 +635,10 @@ $string['selfclaim'] = 'Réclamation manuelle';
 $string['selfclaimed'] = 'Réclamé manuellement';
 $string['termstolearn'] = 'Termes à apprendre';
 $string['totalterms'] = 'Nombre total de termes';
+
+$string['ww_images_fetch'] = 'Récupérer les images';
+$string['bulkimagewizard'] = 'Assistant d’images';
+$string['imagesgenerated'] = 'images ont été générées.';
+$string['generatingimages'] = 'Génération des images pour les termes… veuillez patienter';
+$string['noimagesgenerated'] = 'Aucune image n’a été générée pour les termes. Elles existent déjà ou l’IA n’a pas pu en créer.';
+$string['ww_bulk_images_instructions'] = 'Générer une image pour chaque terme qui n’a pas encore d’image';

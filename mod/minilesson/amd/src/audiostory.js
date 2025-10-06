@@ -12,6 +12,7 @@ define(['jquery','core/log'], function($,log) {
         pm: -5,//panfactor -, eg -5
         maxzoom: 1.1, // zoom will go from maxzoom to 1.0 and back again
         zoomIn: false, // If true, start zoomed out and zoom in. If false, start zoomed in and zoom out
+        zoomAndPan: true,
         entryTimes: [],
         controls: {},
         panOptions: null,
@@ -45,6 +46,34 @@ define(['jquery','core/log'], function($,log) {
             self.controls.playbutton = self.controls.overlay.find('.audiostory_play_button');
             self.controls.layers = [];
             self.controls.entryTimes = [];
+
+            // Set Zoom and Pan scale
+            var zoomandpan  = self.controls.slideshowcontainer.data('zoomandpan');
+            switch(zoomandpan){
+                case 1:
+                    self.zoomAndPan = true;
+                    self.maxzoom = 1.1; 
+                    self.pp = 5; //panfactor +
+                    self.pm = -5; //panfactor -
+                    break;    
+                case 2:
+                    self.zoomAndPan = true;
+                    self.maxzoom = 1.2; 
+                    self.pp = 7; //panfactor +
+                    self.pm = -7; //panfactor -
+                    break;
+                case 3:
+                    self.zoomAndPan = true;
+                    self.maxzoom = 1.3;
+                    self.pp = 10; //panfactor +
+                    self.pm = -10; //panfactor - 
+                    break;
+                case 0:
+                default:
+                    self.zoomAndPan = false;
+            }
+
+            // Set up the layers and entry times
             self.controls.images.each(function(index, element) {
                 var entrytime = element.dataset.entrytime;
                 if(entrytime==''){ return;} // 
@@ -52,6 +81,7 @@ define(['jquery','core/log'], function($,log) {
                 self.controls.layers.push({ element: element, pan });
                 self.controls.entryTimes.push(entrytime);
             });
+
             //add some more information to layers
             self.controls.layers.forEach(layer => {
                 layer.animation = {
@@ -174,6 +204,12 @@ define(['jquery','core/log'], function($,log) {
 
             const imageObj = layers[self.currentIndex];
             const { element, pan, animation } = imageObj;
+
+            if (!self.zoomAndPan) {
+                // If zoomAndPan is false, reset the transform and skip animation
+                element.style.transform = 'scale(1) translate(0, 0)';
+                return;
+            }
             
 
             if (animation.lastTimestamp != null) {

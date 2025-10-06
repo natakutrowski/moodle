@@ -83,7 +83,7 @@ class renderer extends \plugin_renderer_base
         $displaytext = '';
         // dont show the heading in an iframe, it will be outside this anyway
         if (!$moduleinstance->foriframe && $moduleinstance->pagelayout !== 'embedded') {
-            $thetitle = $this->output->heading($title, 3, 'main');
+            $thetitle = $this->output->heading($title, 3, 'main bold');
             $displaytext = \html_writer::div($thetitle, constants::M_CLASS . '_center');
         }
         return $displaytext;
@@ -441,7 +441,16 @@ class renderer extends \plugin_renderer_base
                         $result->hasanswerdetails = false;
                     }
                     break;
-                case constants::TYPE_AUDIOCHAT:  // TO DO how to handle this?
+                case constants::TYPE_AUDIOCHAT:
+                    $result->hascorrectanswer = false;
+                    $result->hasincorrectanswer = false;
+                    if (isset($result->resultsdata)) {
+                        $result->hasanswerdetails = true;
+                        $result->resultsdatajson = json_encode($result->resultsdata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                    } else {
+                        $result->hasanswerdetails = false;
+                    }
+                    break;
                 case constants::TYPE_WORDSHUFFLE:  // TO DO how to handle this?
                 case constants::TYPE_SCATTER:  // TO DO how to handle this?
                 case constants::TYPE_SPACEGAME: // TO DO how to handle this?
@@ -504,6 +513,7 @@ class renderer extends \plugin_renderer_base
 
         // depending on finish screen settings and if its a teacher report
         if ($teacherreport) {
+            $tdata->teacherreport = true;
             $tdata->showfullresults = true;
             $tdata->results = $useresults;
 

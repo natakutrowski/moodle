@@ -33,7 +33,11 @@ class aigen
         '6874e6ca1c71a' => 'wordpractice',
         '6874e6a65a0ff' => 'ayoutubelesson',
         '6874e6axxx999' => 'youtubefinalelesson',
-        '688244029b789' => 'keywordstogapfillsfluency'
+        '688244029b789' => 'keywordstogapfillsfluency',
+        '6899607f96fb7' => 'reading_aic_passagegen',
+        '68996c17d07f5' => 'reading_aic_passageupload',
+        '68a036971fe4b' => 'keywords_to_ws_sc',
+        '68a0422070f05' => 'keywords_to_ws_sc_sg',
         ];
     private $moduleinstance = null;
     private $course = null;
@@ -282,11 +286,6 @@ class aigen
                 continue;
             }
 
-            //update the progress bar
-            if ($this->progressbar) {
-                // $this->progressbar->start_progress(get_string('generatingimagedata', constants::M_COMPONENT, $filename));
-            }
-
             // Add the style and greate context
             $prompt = "Give me a simple cute cartoon image, with no text on it, depicting: " . $prompt;
             if ($overallimagecontext && !empty($overallimagecontext) && $overallimagecontext !== "--") {
@@ -303,11 +302,6 @@ class aigen
                 $filenametrack[utils::array_key_last($requests)] = $filename;
             }
 
-            //update the progress bar
-            if ($this->progressbar) {
-                // $this->progressbar->end_progress();
-            }
-
             // Increment file counter
             $imagecnt++;
         }
@@ -316,18 +310,40 @@ class aigen
         }
 
         $curl = new curl();
-        //update the progress bar
+        $curlopts = [];
+        $curlopts['CURLOPT_TIMEOUT'] = 120; // this might be unnecessary or even counter productive
+ 
+        // Update the progress bar.
         if ($this->progressbar) {
             $this->progressbar->start_progress("Generate images: {".count($requests)."} ");
         }
-        $responses = $curl->multirequest($requests);
-        foreach($responses as $i => $resp) {
+
+        $responses = $curl->multirequest($requests, $curlopts);
+        $secondattempt_requests = [];
+        $secondattempt_imagenumbers = [];
+        foreach ($responses as $i => $resp) {
             $processedimage = $this->process_generate_image_response($resp);
             if ($processedimage) {
                 $imageurls[$filenametrack[$i]] = $processedimage;
+            } else {
+                $secondattempt_requests[] =  $requests[$i];
+                $secondattempt_imagenumbers[] = $i;
             }
         }
-        //update the progress bar
+
+        // Second attempt responses
+        if(count($secondattempt_requests) > 0) {
+            $responses = $curl->multirequest($secondattempt_requests);
+            foreach ($responses as $i => $resp) {
+                $imagenumber = $secondattempt_imagenumbers[$i];
+                $processedimage = $this->process_generate_image_response($resp);
+                if ($processedimage) {
+                    $imageurls[$filenametrack[$imagenumber]] = $processedimage;
+                }
+            }
+        }
+
+        // Update the progress bar.
         if ($this->progressbar) {
             $this->progressbar->end_progress();
         }

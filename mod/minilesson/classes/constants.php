@@ -132,6 +132,11 @@ class constants
     const TYPE_SCATTER = 'scatter';
 
     const AUDIOSTORYMETA = 'itemaudiofname';
+    const AUDIOSTORYZOOMANDPAN = 'itemaudiostoryzoom';
+    const ZOOMANDPAN_NONE = 0;
+    const ZOOMANDPAN_LITE = 1;
+    const ZOOMANDPAN_MEDIUM = 2;
+    const ZOOMANDPAN_MORE = 3;
     const AUDIOPROMPT = 'audioitem';
     const AUDIOANSWER = 'audioanswer';
     const AUDIOMODEL = 'audiomodel';
@@ -179,11 +184,16 @@ class constants
     const AIGRADE_FEEDBACK_LANGUAGE = 'customtext4';
     const AIGRADE_MODELANSWER = 'customtext3';
     const AUDIOCHAT_INSTRUCTIONS = 'customtext6';
+    const AUDIOCHAT_FEEDBACKINSTRUCTIONS = 'customdata3';
     const AUDIOCHAT_ROLE = 'customtext2';
     const AUDIOCHAT_VOICE = 'customtext3';
     const AUDIOCHAT_NATIVE_LANGUAGE = 'customtext4';
-
     const AUDIOCHAT_TOPIC = 'customtext5';
+    const AUDIOCHAT_AIDATA1  = 'customdata1';
+    const AUDIOCHAT_AIDATA2  = 'customdata2';
+    const AUDIOCHAT_AUTORESPONSE = 'customint4';
+
+    const AUDIOCHAT_ALLOWRETRY  = 'customint5';
     const READINGPASSAGE = 'customtext1';
     const PASSAGEGAPFILL_PASSAGE = 'customtext1';
     const PASSAGEGAPFILL_HINTS = 'customint5';
@@ -198,6 +208,7 @@ class constants
     const TIMELIMIT = 'timelimit';
     const GAPFILLALLOWRETRY = 'customint3';
     const FLUENCYCORRECTTHRESHOLD = 'customint3';
+    const FLUENCY_HIDEWARNING = 'customint6';
     const NOPASTING = 'customint4';
     const GAPFILLHIDESTARTPAGE = 'customint5';
     const SG_INCLUDEMATCHING = 'customint3';
@@ -209,7 +220,7 @@ class constants
     const MAXANSWERS = 4;
     const MAXCUSTOMTEXT = 7;
     const MAXCUSTOMDATA = 5;
-    const MAXCUSTOMINT = 5;
+    const MAXCUSTOMINT = 9;
 
     const ITEMTEXTAREA_EDOPTIONS = array('trusttext' => 0, 'noclean' => 1, 'maxfiles' => 0);
     const READSENTENCE = 'customint2';
@@ -644,4 +655,82 @@ class constants
         constants::M_LANG_VIVN => 'Khi trời nắng, chúng ta hãy đi dạo trong công viên.',
     ];
 
+    const FREESPEAKING_TOPIC = 'customtext5';
+
+    const FREESPEAKING_AIDATA1 = 'customdata1';
+
+    const FREESPEAKING_AIDATA2 = 'customdata2';
+
+    const FREESPEAKING_GRADINGINSTRUCTIONS = 'customtext6';
+
+    const FREESPEAKING_FEEDBACKINSTRUCTIONS = 'customtext2';
+
+    const FREESPEAKING_GRADINGSELECTION = 'customint4';
+
+    const FREESPEAKING_FEEDBACKSELECTION = 'customint5';
+
+    const FREESPEAKING_HIDECORRECTION = 'customint6';
+
+    const FREESPEAKING_SHOWGRADE = 'customint7';
+
+    const FREESPEAKING_SHOWRESULT = 'customint8';
+
+    const FREEWRITING_TOPIC = 'customtext5';
+
+    const FREEWRITING_AIDATA1 = 'customdata1';
+
+    const FREEWRITING_AIDATA2 = 'customdata2';
+
+    const FREEWRITING_GRADINGSELECTION = 'customint5';
+
+    const FREEWRITING_FEEDBACKSELECTION = 'customint6';
+
+    const FREEWRITING_HIDECORRECTION = 'customint7';
+
+    const FREEWRITING_SHOWGRADE = 'customint8';
+
+    const FREEWRITING_SHOWRESULT = 'customint9';
+
+    const AUDIOCHAT_INSTRUCTIONSSELECTION = 'customint6';
+
+    const AUDIOCHAT_FEEDBACKSELECTION = 'customint7';
+
+    const MAX_AI_PROMPTS = 6;
+
+    const ITEMTYPES = [
+        constants::TYPE_PAGE,
+        constants::TYPE_MULTICHOICE,
+        constants::TYPE_DICTATION,
+        constants::TYPE_SPEECHCARDS,
+        constants::TYPE_LISTENREPEAT,
+        constants::TYPE_MULTIAUDIO,
+        constants::TYPE_SHORTANSWER,
+        constants::TYPE_LGAPFILL,
+        constants::TYPE_TGAPFILL,
+        constants::TYPE_SGAPFILL,
+        constants::TYPE_SPACEGAME,
+        constants::TYPE_FREESPEAKING,
+        constants::TYPE_FREEWRITING,
+        constants::TYPE_PASSAGEREADING,
+        constants::TYPE_PGAPFILL,
+        constants::TYPE_H5P,
+        constants::TYPE_WORDSHUFFLE,
+        constants::TYPE_SCATTER,
+        constants::TYPE_FLUENCY,
+        constants::TYPE_AUDIOCHAT,
+        constants::TYPE_DICTATIONCHAT,
+      // constants::TYPE_SMARTFRAME,
+      // constants::TYPE_COMPQUIZ,
+      // constants::TYPE_CONVERSATION,
+    ];
+
+    const SHORTANSWER_PARTIALLYRESPONSE = 'customtext3';
+    const SHORTANSWER_TOTALMARKS = 'customint1';
+    const SHORTANSWER_PARTIALLYMARKS = 'customint2';
+    const SHORTANSWER_RESPONSETYPE = 'customint3';
+
+    const RESPONSE_TYPE = [
+        'audiorecorder' => 1,
+        'text' => 2
+    ];
 }

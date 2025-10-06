@@ -480,6 +480,7 @@ $string['possiblespellingerrors'] = 'Возможные ошибки в прав
 $string['nospellingerrors'] = 'Ошибок в правописании не найдено.';
 $string['completedsteps'] = 'Завершённые шаги';
 $string['completionallsteps'] = 'Завершить, когда все шаги пройдены';
+$string['completiondetail:allsteps'] = 'Выполните все шаги в этой активности';
 $string['completionallsteps_help'] = 'Завершить, когда все шаги пройдены';
 $string['yes'] = 'Да';
 $string['no'] = 'Нет';

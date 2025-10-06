@@ -1,7 +1,7 @@
 define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/pollyhelper',
     'mod_minilesson/ttrecorder', 'mod_minilesson/animatecss',
-    'mod_minilesson/progresstimer', 'core/templates', 'core/chartjs'],
-    function($, log, def,polly, ttrecorder,anim, progresstimer, templates, chartjs) {
+    'mod_minilesson/progresstimer', 'core/templates', 'core/chartjs', 'core/str', 'core/notification'],
+    function($, log, def,polly, ttrecorder,anim, progresstimer, templates, chartjs, str, notification) {
   "use strict"; // jshint ;_;
 
   /*
@@ -11,18 +11,19 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
   log.debug('MiniLesson Fluency: initialising');
 
   var thefluencyitem = {
-    phonemeWarningThreshold: 90, // Threshold for phoneme error rate
-    phonemeErrorThreshold: 70, // Threshold for phoneme error rate
-
+    phonemeWarningThreshold: 90, // Upper threshold for phoneme warning rate
+    phonemeErrorThreshold: 70, // Upper threshold for phoneme error rate
+    hidewarning: false, // Whether to hide the orange and just show red
     speechConfig: null,
     //this is just a placeholder for the actual text which is from the sentences in items
     referencetext: 'I met my love by the gas works wall',
     game: {pointer: 0},
     usevoice: '',
     items: null,
+    strings: {},
 
     //for making multiple instances
-      clone: function () {
+    clone: function () {
           return $.extend(true, {}, this);
      },
 
@@ -31,12 +32,16 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
       this.quizhelper = quizhelper;
       this.index = index;
       this.init_components(quizhelper, itemdata);
+      this.init_strings();
 
       //correct threshold
       this.phonemeWarningThreshold = itemdata.correctthreshold || this.phonemeWarningThreshold;
       if(this.phonemeErrorThreshold >= this.phonemeWarningThreshold) {
           this.phonemeErrorThreshold = Math.max(this.phonemeWarningThreshold - 25, 1);
       }
+
+      //Hide warning
+      this.hidewarning = itemdata.hidewarning === 1;
 
       // Anim
       var animopts = {};
@@ -90,7 +95,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
             // self.do_evaluation_results(speechresults);
         } //end of switch message type
       };
- 
+
         //init tt recorder
         var opts = {};
         opts.uniqueid = itemdata.uniqueid;
@@ -129,6 +134,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
               audio: null,
               audiourl: target.audiourl ? target.audiourl : "",
               imageurl: target.imageurl,
+              hintdisplay: target.hintdisplay,
           };
       }).filter(function(e) {
           return e.target !== "";
@@ -156,6 +162,22 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
       }
   },
 
+  init_strings: function() {
+        var self = this;
+        str.get_strings([
+            { "key": "nextlessonitem", "component": 'mod_minilesson'},
+            { "key": "confirm_desc", "component": 'mod_minilesson'},
+            { "key": "yes", "component": 'moodle'},
+            { "key": "no", "component": 'moodle'},
+        ]).done(function (s) {
+            var i = 0;
+            self.strings.nextlessonitem = s[i++];
+            self.strings.confirm_desc = s[i++];
+            self.strings.yes = s[i++];
+            self.strings.no = s[i++];
+        });
+    },
+
     next_question: function() {
       var self = this;
       var stepdata = {};
@@ -181,11 +203,22 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
     },
 
     register_events: function(index, itemdata, quizhelper) {
-      
+
       var self = this;
       // On next button click
       self.smallnextbtn.on('click', function(e) {
-          self.next_question();
+            if (self.items.some(item => !item.answered)) {
+                notification.confirm(self.strings.nextlessonitem,
+                    self.strings.confirm_desc,
+                    self.strings.yes,
+                    self.strings.no,
+                    function() {
+                        self.next_question();
+                    }
+                );
+            } else {
+                self.next_question();
+            }
       });
 
       // On start button click
@@ -233,12 +266,24 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
           self.stopTimer(self.items[self.game.pointer].timer);
 
           if (self.game.pointer < self.items.length - 1) {
+              // Disable button and show spinner in place of text or arrow
+              self.skipbtn.prop("disabled", true);
+              self.skipbtn.children('.fa').removeClass('fa-arrow-right');
+              self.skipbtn.children('.fa').addClass('fa-spinner fa-spin');
+
+
               // Move on after short time to next prompt
               setTimeout(function() {
+                // Re enable button and reset icons and text.
+                  self.skipbtn.children('.fa').removeClass('fa-spinner fa-spin');
+                  self.skipbtn.children('.fa').addClass('fa-arrow-right'); 
+                  self.skipbtn.prop("disabled", false);
+                
+                  // Move to next item.
                   self.container.find(".fluency_reply_" + self.game.pointer).hide();
                   self.game.pointer++;
                   self.nextPrompt();
-              }, 2000);
+              }, 1500);
               // End question
           } else {
               self.end();
@@ -335,7 +380,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
       );
       self.nextReply();
   },
-  
+
 
   nextReply: function() {
       var self = this;
@@ -346,7 +391,10 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
       code += "<div class='fluency_prompt fluency_prompt_" + self.game.pointer + "'>";
       code += self.items[self.game.pointer].displayprompt || self.items[self.game.pointer].prompt;
       code += "</div>";
-     
+      if (self.items[self.game.pointer].hintdisplay) {
+        code += "<div class='fluency_prompt_hint'>" + self.items[self.game.pointer].target + "</div>";
+      }
+
       //correct or not
       code += " <i data-idx='" + self.game.pointer + "' class='fluency_feedback'></i></div>";
 
@@ -359,7 +407,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
       //feedback and results containers
       code += "<div class='item-results-container'></div>";
       code += "<div class='item-feedback-container'></div>";
-      
+
       $("#" + self.itemdata.uniqueid + "_container .question").append(code);
       var newreply = self.container.find(".fluency_reply_" + self.game.pointer);
       anim.do_animate(newreply, 'zoomIn animate__faster', 'in').then(
@@ -371,7 +419,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
       //reset skip/continue button to red
       self.skipbtn.removeClass('btn-success');
       self.skipbtn.addClass('btn-danger');
-    
+
       //Start timer if we have one
       self.startTimer();
 
@@ -395,10 +443,10 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
       }
 
       //target is the speech we expect
-      var target = self.items[self.game.pointer].target;
+      var prompt = self.items[self.game.pointer].prompt;
       //in some cases ttrecorder wants to know the target
       if(self.quizhelper.use_ttrecorder()) {
-        self.ttrec.update_currentprompt(target);
+        self.ttrec.update_currentprompt(prompt);
       }
     },
 
@@ -467,64 +515,119 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
         }else{
             var words = pronunciation_result.privPronJson.Words;
         }
-      
-      
+
+
         // Render pronunciation feedback for each word
-        var lineresulthtml="";
+        var wordresults= [];
         words.forEach(function (wordobject) {
+
+            // We are going to skip insertions, because MS Speech in Japanese especially seems to hallucinate them
+            if(wordobject.PronunciationAssessment?.ErrorType === "Insertion"){
+                log.debug("Skipping insertion word: ", wordobject.Word);
+                return; // Skip this word
+            }
+
+            //For the bar beneath the word we need an array of phoneme scores
+            // If we have syllables we use those, oddly syllables and phoneme scores are often different
+            // so if we always used phonemes, the text markup and bar markup would be visibly different
+            var word_phoneme_score_classes = [];
+
+
+            // For the word/character markup we need to map phonemes or syllables to characters
+            // we call this adata (alignment data)
             //MS Returns syllables, at least for English, and these have a grapheme so its the best data
             //for some words e.g "didn't" sometimes the grapheme is missing. duh
             //so we send it down the no grapheme path
             var have_graphemes = wordobject.Syllables && wordobject.Syllables.length > 0 && wordobject.Syllables[0].Grapheme;
             if(have_graphemes){
+                //build our phonemes bar data
+                wordobject.Syllables.forEach(function(syllable){
+                    //If errortype =omission there will be no score, we use null to flag that
+                    var thescore = syllable.PronunciationAssessment?.AccuracyScore || null;
+                    word_phoneme_score_classes.push(
+                        self.scoreToColorClass(thescore)
+                    );
+                });
+
+                //Build alignment data
                 var adata =[];
+                //If errortype =omission there will be no score, we use null to flag that
+                var thescore = wordobject.PronunciationAssessment?.AccuracyScore || null;
                 wordobject.Syllables.forEach(function(syllable){
                     adata.push({
                         letter: syllable.Grapheme,
                         phoneme: syllable.Syllable,
-                        score: syllable.PronunciationAssessment.AccuracyScore,
+                        score: thescore,
                     });
                 });
-            //If no syllable data we do our best to simulate it    
+            //If no syllable data we do our best to simulate it
             }else{
-                var adata = self.markuphelper.alignPhonemesToLetters(wordobject.Word, 
-                    wordobject.Phonemes, 
-                    twoletterlang);
+
+                //build our phonemes bar data
+                //No syllables so use phonemes for our phonemes bar
+                if(wordobject.Phonemes && wordobject.Phonemes.length > 0){
+                    wordobject.Phonemes.forEach(function(phoneme){
+                        //If errortype =omission there will be no score, we use null to flag that
+                        var thescore = phoneme.PronunciationAssessment?.AccuracyScore || null;
+                        word_phoneme_score_classes.push(
+                            self.scoreToColorClass(thescore)
+                        );
+                    });
+                }
+
+                //Build alignment data
+                // It turns out most msspeech langs will not have phoneme names which makes mapping hard(impossible)
+                // but if we have them we can try to map them to letters.
+                var have_phoneme_names = wordobject.Phonemes && wordobject.Phonemes.length > 0 && wordobject.Phonemes[0].Phoneme !== "";
+                if(have_phoneme_names) {
+                    var adata = self.markuphelper.alignPhonemesToLetters(wordobject.Word,
+                        wordobject.Phonemes,
+                        twoletterlang);
+                // if we have no phoneme names or graphemes we just show the word as is with its score. This is awful
+                // we just call the text 'phoneme' here but it means the word chunk and its score.
+                // And the word chunk is the whole word
+                }else{
+                    var adata = [];
+                    //If errortype =omission there will be no score, we use null to flag that
+                    var thescore = wordobject.PronunciationAssessment?.AccuracyScore || null;
+                    adata.push({
+                        letter: wordobject.Word,
+                        phoneme: wordobject.Word,
+                        score: thescore,
+                    })
+                }
             }
-            lineresulthtml += self.markuphelper.renderPronunciationFeedback(adata);
+
+            //assign css color classes to each item in alignment data based on its score and the item's warning threshold
+            adata.forEach(function(a){
+                a.scoreclass = self.scoreToColorClass(a.score);
+            });
+
+            // Store the results for this word
+            wordresults.push({alignmentdata: adata, wordphonemes: word_phoneme_score_classes});
+
         });
 
-        //Display result
-        itemfeedbackcontainer.html(lineresulthtml);
+        //Display result of all words, with phoneme bars per word if we have them
+        templates.render('mod_minilesson/fluencylineresult', {wordresults: wordresults}).then(
+            function(html, js) {
+                // Add result html to feedback container
+                itemfeedbackcontainer.html(html);
+                //store results for later use
+                self.items[self.game.pointer].pronunciation_result = pronunciation_result;
+                self.items[self.game.pointer].answered = true;
+                self.items[self.game.pointer].correct = pronunciation_result.privPronJson.PronunciationAssessment.AccuracyScore >= self.phonemeWarningThreshold;
+                self.items[self.game.pointer].audioself = new Audio();
+                self.items[self.game.pointer].audioself.src = URL.createObjectURL(self.ttrec.audio.blob);
+                self.items[self.game.pointer].lineresulthtml = html;
 
-        //store results for later use
-        self.items[self.game.pointer].pronunciation_result = pronunciation_result;
-        self.items[self.game.pointer].answered = true;
-        self.items[self.game.pointer].correct = pronunciation_result.privPronJson.PronunciationAssessment.AccuracyScore >= self.phonemeWarningThreshold;
-        self.items[self.game.pointer].audioself = new Audio();
-        self.items[self.game.pointer].audioself.src = URL.createObjectURL(self.ttrec.audio.blob);
-        self.items[self.game.pointer].lineresulthtml = lineresulthtml;
+                //since we now have audio, show the self audio player button
+                self.audioplayerbtn_audioself.show();
 
-        //since we now have audio, show the self audio player button
-        self.audioplayerbtn_audioself.show();
-
-        //update progress dots
-        self.updateProgressDots();
-        
-        //We no longer do this!!! left in for future ref.
-        // If we are correct move to next item
-        if(false && self.items[self.game.pointer].correct ){
-            if ((self.game.pointer < self.items.length - 1)) {
-                log.debug('moving to next prompt B');
-                setTimeout(function() {
-                    $("#" + self.itemdata.uniqueid + "_container .fluency_reply_" + self.game.pointer).hide();
-                    self.game.pointer++;
-                    self.nextReply();
-                }, 2000);
-            } else {
-                self.end();
+                //update progress dots
+                self.updateProgressDots();
             }
-        }
+        );
     },
 
     do_recolor_continue_button: function(pronunciation_result) {
@@ -559,10 +662,10 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
         // calculate starBandWidth // band 1 = 0-19 / band 2 = 20-39 etc.
         var correctBandwidth = 100 - self.phonemeWarningThreshold;
         var starBandWidth = (100 - correctBandwidth) / 4;
-        
+
         for (var i = 0; i < maxStars; i++) {
             var star = $("<i class='fa'>");
-            if (i <= accuracyScore / starBandWidth ) { 
+            if (i <= accuracyScore / starBandWidth ) {
                 star.addClass("fa-star");
             } else {
                 star.addClass("fa-star-o");
@@ -581,7 +684,7 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
         } else {
             message.text("Keep trying! Focus on the pronunciation of individual words.");
         }
-           
+
         itemstarscontainer.append(message);
          */
     },
@@ -669,6 +772,20 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
               };
           });
     },
+
+    scoreToColorClass: function(score)
+      {
+          if (score === null) return "letter_missing"; //grey
+          if (score >= this.phonemeWarningThreshold) return "letter_good"; //green
+          if (score >= this.phonemeErrorThreshold){
+              if(this.hidewarning) {
+                  return "letter_wrong"; // red
+              }else{
+                  return "letter_fair"; // orange
+              }
+          }
+          return "letter_wrong"; //red
+     },
 
     //Marking up graphemes letters and phonemes is a dark art, we do that in this object
     markuphelper: {
@@ -876,34 +993,6 @@ define(['jquery', 'core/log', 'mod_minilesson/definitions','mod_minilesson/polly
             return result;
         },
 
-        scoreToColorClass: function(score)
-        {
-            if (score === null) return "letter_missing"; //grey
-            if (score >= thefluencyitem.phonemeWarningThreshold) return "letter_good"; //green
-            if (score >= thefluencyitem.phonemeErrorThreshold) return "letter_fair"; //orange
-            return "letter_wrong"; //red
-        },
-
-        renderPronunciationFeedback: function( alignmentData) {
-            var mhelper = this;
-
-            const $wrapper = $("<div class='fluencywordresult'>");
-
-            alignmentData.forEach(({letter, phoneme, score}) => {
-                var resultcolorclass = mhelper.scoreToColorClass(score);
-                const $span = $("<span class='fluencyletterresult " + resultcolorclass + "'>")
-                    .text(letter);
-
-                // Tooltip
-                const tooltipText = score === null
-                    ? "No phoneme matched"
-                    : `Phoneme: ${phoneme}, Score: ${score}`;
-                $span.attr("title", tooltipText);
-                $wrapper.append($span);
-            });
-
-            return $wrapper.prop('outerHTML');
-        } //end of renderPronunciationFeedback
     }//end of markup helper
 
 

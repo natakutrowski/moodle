@@ -154,9 +154,9 @@ class mod_minilesson_external extends external_api {
         }
 
         // similar_percent calc'd by reference but multibyte is weird
-        if($language !== constants::M_LANG_JAJP) {
+        if ($language !== constants::M_LANG_JAJP) {
             similar_text($phonetic, $spokenphonetic, $similarpercent);
-        }else{
+        } else {
             $similarpercent = $phonetic == $spokenphonetic ? 100 : 0;
         }
         return round($similarpercent, 0);
@@ -232,21 +232,19 @@ class mod_minilesson_external extends external_api {
         // we also want to fetch the alternatives for the number_words in passage (though we expect number_digits there)
         $alternatives .= PHP_EOL . alphabetconverter::fetch_numerical_alternates($shortlang);  // "four|for|4";
 
-        // If this is Japanese, and the passage has been segmented, we want to segment it into "words"
-        /*
+        // If this is Japanese, we want to segment it into "words"
+        // Actually in most cases it will be, but speaking gap fill is an outlier, it sends just the words
+        // and they are not segmented because it is very hard to do that with the processing needed to make gaps
+        // and the phonetic will be the full sentence phonetic so here we get just the words phonetic
+        // So ... we need to segment here just in case its from speaking gap fill. To Do
+        //
         if($language == constants::M_LANG_JAJP) {
-            $transcript = utils::segment_japanese($transcript);
-            $passage = utils::segment_japanese($passage);
-            $segmented=true;
-            $transcript_phonetic = utils::convert_to_phonetic($transcript,constants::M_LANG_JAJP,$region,$segmented);
-        }else{
-            $transcript_phonetic ='';
+            list($phonetic, $passage) = utils::fetch_phones_and_segments($passage, $language, $region);
         }
-        */
+
 
         // turn the passage and transcript into an array of words
         $passagebits = diff::fetchWordArray($passage);
-
         $alternatives = diff::fetchAlternativesArray($alternatives);
         $transcriptbits = diff::fetchWordArray($transcript);
         $transcriptphoneticbits = diff::fetchWordArray($transcriptphonetic);
@@ -528,11 +526,12 @@ class mod_minilesson_external extends external_api {
         $cm = get_coursemodule_from_id('', $context->instanceid, 0, false, MUST_EXIST);
         $moduleinstance = $DB->get_record(constants::M_TABLE, ['id' => $cm->instance], '*', MUST_EXIST);
         list($newitemid, $newitemname, $type, $typelabel) = \mod_minilesson\local\itemform\helper::duplicate_item($moduleinstance, $context, $itemid);
-
+        $iconurl = new moodle_url('/mod/minilesson/pix/' . $type . '.png', ['ver' => $CFG->themerev]);
         $ret = new \stdClass();
         $ret->olditemid = $itemid;
         $ret->newitemid = $newitemid;
         $ret->newitemname = $newitemname;
+        $ret->icon = $iconurl->out();
         $ret->type = $type;
         $ret->typelabel = $typelabel;
         $ret->error = false;
@@ -597,27 +596,14 @@ class mod_minilesson_external extends external_api {
 
         // Do the token refresh.
         switch($type){
-            case 'cloudpoodll':
-                $siteconfig = get_config(constants::M_COMPONENT);
-                $region = $siteconfig->awsregion;
-                // We fetch the token (just the key) to update cache if needed.
-                $token = utils::fetch_token($siteconfig->apiuser, $siteconfig->apisecret);
-                // We fetch the full token from the cache, it will have "validuntil" set.
-                $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
-                $fulltoken = $cache->get('recentpoodlltoken');
-                break;
-
             case 'msspeech':
                 $fulltoken = utils::fetch_msspeech_token($region);
                 break;
 
-            case 'streaming':
+            case 'assemblyai':
                 $fulltoken = utils::fetch_streaming_token($region);
                 break;
 
-            case 'openai':
-                $fulltoken = utils::fetch_openai_token($region);
-                break;
             default:
                 throw new \moodle_exception('invalidtype', constants::M_COMPONENT);
         }

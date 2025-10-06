@@ -579,6 +579,7 @@ $string['possiblespellingerrors'] = 'Erreurs d\'orthographe possibles :';
 $string['nospellingerrors'] = 'Aucune erreur d\'orthographe.';
 $string['completedsteps'] = 'Étapes complétées';
 $string['completionallsteps'] = 'Terminer lorsque toutes les étapes sont complétées';
+$string['completiondetail:allsteps'] = 'Terminez toutes les étapes de l’activité';
 $string['completionallsteps_help'] = 'Terminer lorsque toutes les étapes sont complétées';
 $string['yes'] = 'Oui';
 $string['no'] = 'Non';

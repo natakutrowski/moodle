@@ -16,6 +16,7 @@
 
 namespace mod_minilesson\local\itemtype;
 
+use html_writer;
 use mod_minilesson\constants;
 
 /**
@@ -47,17 +48,20 @@ class item_scatter extends item
         $testitem = $this->get_text_answer_elements($testitem);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
-        $testitem->allowretry = $this->itemrecord->{constants::SCATTER_ALLOWRETRY};
+        $testitem->allowretry = !empty($this->itemrecord->{constants::SCATTER_ALLOWRETRY});
 
-        $testitem->scatteritems = [];
+        $testitem->scatteritems = $testitem->shuffleditems = [];
         $scatteritems = explode(PHP_EOL, $testitem->customtext1);
-        foreach ($scatteritems as $scatteritem) {
+        foreach ($scatteritems as $i => $scatteritem) {
             $scatteritem = explode("|", $scatteritem);
             $scatteritemobj = new \stdClass();
             $scatteritemobj->term = trim($scatteritem[0]);
             $scatteritemobj->definition = trim(str_replace("\r", "", $scatteritem[1]));
             $testitem->scatteritems[] = $scatteritemobj;
+            $testitem->shuffleditems[] = ['key' => $i, 'type' => 'term', 'value' => $scatteritemobj->term, 'htmlid' => html_writer::random_id()];
+            $testitem->shuffleditems[] = ['key' => $i, 'type' => 'definition', 'value' => $scatteritemobj->definition, 'htmlid' => html_writer::random_id()];
         }
+        shuffle($testitem->shuffleditems);
 
         return $testitem;
     }
@@ -85,6 +89,7 @@ class item_scatter extends item
         //get the basic key columns and customize a little for instances of this item type
         $keycols = parent::get_keycolumns();
         $keycols['text1'] = ['jsonname' => 'sentences', 'type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => 'customtext1'];
+        $keycols['int4'] = ['jsonname' => 'allowretry', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::SCATTER_ALLOWRETRY];
         return $keycols;
     }
 
@@ -96,7 +101,7 @@ class item_scatter extends item
         switch ($generatemethod) {
 
             case 'extract':
-                $prompt = "Select 5 keywords from the following text, and create a 1 dimensional array of 'sentences' of format 'short keyword_definition|keyword' in {language}: [{text}]. ";
+                $prompt = "Select 5 keywords from the following text, and create a 1 dimensional array of 'sentences' of format 'short_keyword_definition|keyword' in {language}: [{text}]. ";
                 break;
 
             case 'reuse':
@@ -107,7 +112,7 @@ class item_scatter extends item
 
             case 'generate':
             default:
-                $prompt = "Generate a 1 dimensional array of 5 'sentences' of format 'short keyword_definition|keyword' in {language} from the following keywords: [{keywords}]";
+                $prompt = "Generate a 1 dimensional array of 5 'sentences' of format 'short_keyword_definition|keyword' in {language} from the following keywords: [{keywords}]";
                 break;
         }
         return $prompt;

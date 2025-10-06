@@ -1,3 +1,42 @@
+Version 1.1.09 (Build 2025092700)
+- Fixed bug that saw no items available in the new item chooser (ouch)
+
+Version 1.1.08 (Build 2025092601)
+- tweaks to fluency results markup
+
+Version 1.1.07 (Build 2025092600)
+- Improvements to Short Answer item type
+- Improvements to navigation
+- More accurate feedback on fluency item type
+
+Version 1.1.06 (Build 2025092400)
+- Fixes for sometimes failing Japanese on speaking gapfill
+- Small changes for new item chooser
+
+Version 1.1.05 (Build 2025091900)
+- Fixes for token refresh (fluency item)
+- New item chooser
+
+Version 1.1.04 (Build 2025091000)
+- Fixes for activity completion
+- Admin controls for hide and show item types
+
+Version 1.1.03 (Build 2025090100)
+- Added prompt presets for Free Speaking, Free Writing and Audio Chat
+- Added settings for better control of free speaking and free writing results
+
+Version 1.1.02 (Build 2025080104)
+- Added better auto refresh for speech tokens, so long running sessions will still work
+- Added more image generation slots for keyword based templates
+
+Version 1.1.01 (Build 2025080103)
+ - Added item types Word Shuffle and Scatter
+ - Added AIGEN lesson templates for AI Chat and Word Shuffle and Scatter
+
+Version 1.0.99 (Build 2025080102)
+ - Added zoom and pan options to audio story
+ - Added AudioChat
+
 Version 1.0.98 (Build 2025073000)
  - Beta version of Audio Chat
  - Better failure handling for AIGEN

@@ -187,6 +187,7 @@ abstract class item implements templatable, renderable
         $keycolumns['ytstart'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'itemytstart'];
         $keycolumns['ytend'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'itemytend'];
         $keycolumns['audiofname'] = ['type' => 'string', 'optional' => true, 'default' => null, 'dbname' => 'itemaudiofname'];
+        $keycolumns['audiostoryzoom'] = ['type' => 'int', 'optional' => true, 'default' => 1, 'dbname' => 'itemaudiostoryzoom'];
         $keycolumns['ttsdialog'] = ['type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => 'itemttsdialog'];
         $keycolumns['ttsdialogopts'] = ['type' => 'stringjson', 'optional' => true, 'default' => null, 'dbname' => 'itemttsdialogopts'];
         $keycolumns['ttsdialogvoicea'] = ['type' => 'voice', 'optional' => true, 'default' => null, 'dbname' => constants::TTSDIALOGVOICEA];
@@ -218,6 +219,11 @@ abstract class item implements templatable, renderable
         $keycolumns['int3'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'customint3'];
         $keycolumns['int4'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'customint4'];
         $keycolumns['int5'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'customint5'];
+        $keycolumns['int6'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'customint6'];
+        $keycolumns['int7'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'customint7'];
+        $keycolumns['int8'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'customint8'];
+        $keycolumns['int9'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'customint9'];
+        $keycolumns['int10'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'customint10'];
         $keycolumns['timelimit'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'timelimit'];
         $keycolumns['layout'] = ['type' => 'layout', 'optional' => true, 'default' => 0, 'dbname' => 'layout'];
         $keycolumns['correctanswer'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'correctanswer'];
@@ -656,6 +662,9 @@ abstract class item implements templatable, renderable
 
             }
 
+            // Set the Zoom and Pan
+            $testitem->audiostoryzoomandpan = $itemrecord->{constants::AUDIOSTORYZOOMANDPAN};
+
             // If we have enough data to make an audio story, enable it
             if (
                 count($testitem->audiostoryimages) > 0
@@ -851,9 +860,16 @@ abstract class item implements templatable, renderable
      */
     protected function process_speakinggapfill_sentences($sentences)
     {
+
         $thesentences = $this->parse_gapfill_sentences($sentences);
+        $phoneticstring = $this->itemrecord->phonetic;
+        $phonetics = false;
+        if(!empty($phoneticstring)){
+            $phonetics = explode(PHP_EOL, $phoneticstring);
+        }
         $customsentenceaudio = $this->fetch_sentence_media('audio', 1);
-        foreach ($thesentences as $sentence) {
+        foreach ($thesentences as $i => $sentence) {
+            // Get audio url
             if (isset($customsentenceaudio[$sentence->indexplusone])) {
                 $sentence->audiourl = $customsentenceaudio[$sentence->indexplusone];
             } else {
@@ -866,7 +882,24 @@ abstract class item implements templatable, renderable
                     $this->itemrecord->{constants::POLLYVOICE}
                 );
             }
+
+            //get phonetics for each sentence
+            if($phonetics && array_key_exists($i, $phonetics)){
+                $ps = utils::super_trim($phonetics[$i]);
+                $psarray = explode('|#', $ps);
+                $sentence->phonetic = array_key_exists(0, $psarray) ? utils::super_trim($psarray[0]) : '';
+                $sentence->segmentedsentence = array_key_exists(1, $psarray) ? utils::super_trim($psarray[1]) : '';
+                if(empty($sentence->segmentedsentence)){
+                    list($phones, $segmentedsentence) = utils::fetch_phones_and_segments($sentence->sentence,
+                        $this->moduleinstance->ttslanguage,
+                        $this->moduleinstance->region);
+                    $sentence->segmentedsentence = $segmentedsentence;
+                }
+            }
         }
+
+
+
         return $thesentences;
     }
 
@@ -891,10 +924,25 @@ abstract class item implements templatable, renderable
             $parsedstring = [];
             $started = false;
             $words = explode(' ', $sentence);
-            $maskedwords = [];
+            $maskedwords = $gapwords = [];
+            $gaprunning = false;
+            $gapindex = 0;
             foreach ($words as $index => $word) {
                 if (strpos($word, '[') !== false) {
                     $maskedwords[$index] = str_replace(['[', ']', ',', '.'], ['', '', '', ''], $word);
+                }
+                if (strpos($word, '[') !== false || $gaprunning) {
+                    $gaprunning = strpos($word, ']') === false;
+                    $gapwords[] = [
+                        'index' => $gapindex++,
+                        'isgap' => true,
+                        'word' => str_replace(['[', ']', ',', '.'], ['', '', '', ''], $word)
+                    ];
+                } else {
+                    $gapwords[] = [
+                        'isgap' => false,
+                        'word' => $word
+                    ];
                 }
             }
             $enc = mb_detect_encoding($sentence);
@@ -940,6 +988,7 @@ abstract class item implements templatable, renderable
             $s->parsedstring = $parsedstring;
             $s->imageurl = isset($sentenceimages[$s->indexplusone]) ? $sentenceimages[$s->indexplusone] : false;
             $s->words = $maskedwords;
+            $s->gapwords = $gapwords;
 
             $sentenceobjects[] = $s;
         }
@@ -974,6 +1023,7 @@ abstract class item implements templatable, renderable
             // prompt = audio_prompt
             // sentence = target_sentence ie what the student should say (correct response)
             // displayprompt = the text_prompt that we show the student before they speak
+            $hintdisplay = false;
 
             //dottify = if we dont show the text and just show dots ..
             if ($dottify) {
@@ -985,6 +1035,7 @@ abstract class item implements templatable, renderable
                 //if we have a pipe prompt = array[0] and response = array[1]
                 $sentencebits = explode('|', $sentence);
                 if (count($sentencebits) > 1) {
+                    $hintdisplay = true;
                     $prompt = utils::super_trim($sentencebits[0]);
                     $sentence = utils::super_trim($sentencebits[1]);
                     if (count($sentencebits) > 2) {
@@ -1006,7 +1057,11 @@ abstract class item implements templatable, renderable
             }
 
             if ($this->language == constants::M_LANG_JAJP) {
-                $sentence = $this->process_japanese_phonetics($sentence);
+                $thephonetics = false;
+                if(isset($phonetics[$index]) && !empty($phonetics[$index])){
+                    $thephonetics = utils::super_trim($phonetics[$index]);
+                }
+                $sentence = $this->process_japanese_phonetics($sentence, $thephonetics);
             }
 
             // We prepare the audio url.
@@ -1033,10 +1088,13 @@ abstract class item implements templatable, renderable
             $s->length = \core_text::strlen($s->sentence);
             $s->imageurl = isset($sentenceimages[$sentenceindex]) ? $sentenceimages[$sentenceindex] : false;
             $s->audiourl = $theaudiourl;
+            $s->hintdisplay = $hintdisplay;
 
             // Add phonetics if we have them.
             if (isset($phonetics[$index]) && !empty($phonetics[$index])) {
-                $s->phonetic = $phonetics[$index];
+                $ps = utils::super_trim($phonetics[$index]);
+                $psarray = explode('|', $ps);
+                $s->phonetic = array_key_exists(0, $psarray) ? utils::super_trim($psarray[0]) : '';
             } else {
                 $s->phonetic = '';
             }
@@ -1048,7 +1106,7 @@ abstract class item implements templatable, renderable
     }
 
     //by default we do nothing, but for japanese listen_and_speak, dictation chat and shortanswer, this is overrridden
-    protected function process_japanese_phonetics($sentence)
+    protected function process_japanese_phonetics($sentence, $thephonetics = false)
     {
         return $sentence;
     }
@@ -1369,6 +1427,7 @@ abstract class item implements templatable, renderable
         // Audio Story.
         if (property_exists($data, constants::AUDIOSTORYMETA) && $data->{constants::AUDIOSTORYMETA} !== null) {
             $theitem->{constants::AUDIOSTORYMETA} = $data->{constants::AUDIOSTORYMETA};
+            $theitem->{constants::AUDIOSTORYZOOMANDPAN} = $data->{constants::AUDIOSTORYZOOMANDPAN};
         }
         if (property_exists($data, constants::AUDIOSTORY)) {
             //if this is from an import, it will be an array
@@ -1625,9 +1684,9 @@ abstract class item implements templatable, renderable
                 $sentences = explode(PHP_EOL, $newpassage);
                 $allphonetics = [];
                 foreach ($sentences as $sentence) {
-                    list($thephones) = utils::fetch_phones_and_segments($sentence, $this->language, 'tokyo', $segmented);
+                    list($thephones, $thesegments) = utils::fetch_phones_and_segments($sentence, $this->language, 'tokyo', $segmented);
                     if (!empty($thephones)) {
-                        $allphonetics[] = $thephones;
+                        $allphonetics[] = $thephones . '|#' . $thesegments;
                     }
                 }
 

@@ -55,13 +55,18 @@ class item_audiochat extends item {
         $testitem = $this->get_text_answer_elements($testitem);
         $testitem = $this->set_layout($testitem);
 
-        // Set up the audiochat instructions
-        $testitem->audiochatinstructions = $this->itemrecord->{constants::AUDIOCHAT_INSTRUCTIONS};
-        // If no topic was set, then we use the default topic.
-        if (empty($testitem->audiochatinstructions )) {
-            $testitem->audiochatinstructions = get_string('audiochat_instructions_default', constants::M_COMPONENT);
+        // Do we have an OpenAI key? (we need one).
+        $apikey = get_config(constants::M_COMPONENT, 'openaikey');
+        if (empty($apikey)) {
+            $testitem->canchat = false;
+        } else {
+            $testitem->canchat = true;
         }
-        // Replace the placeholders with what we know, first correcting missine placeholder data
+
+        //Allow retry
+        $testitem->allowretry = $this->itemrecord->{constants::AUDIOCHAT_ALLOWRETRY} == 1;
+
+        // Replace the placeholders with what we know, first correcting missing placeholder data
         if (empty($this->itemrecord->{constants::AUDIOCHAT_ROLE})) {
             $this->itemrecord->{constants::AUDIOCHAT_ROLE} = get_string('audiochat_role_default', constants::M_COMPONENT);
         }
@@ -71,18 +76,6 @@ class item_audiochat extends item {
         if (empty($this->itemrecord->{constants::AUDIOCHAT_TOPIC})) {
             $this->itemrecord->{constants::AUDIOCHAT_TOPIC} = 'student choice of topic';
         }
- 
-        $testitem->audiochatinstructions = str_replace(['{ai role}', '{native language}',
-            '{target language}', '{topic}'],
-            [$this->itemrecord->{constants::AUDIOCHAT_ROLE},
-            $this->itemrecord->{constants::AUDIOCHAT_NATIVE_LANGUAGE},
-            $this->language,
-            $this->itemrecord->{constants::AUDIOCHAT_TOPIC}],
-             $testitem->audiochatinstructions);
-  
-
-        // AI Voice 
-        $testitem->audiochat_voice = $this->itemrecord->{constants::AUDIOCHAT_VOICE};
 
         // Students native language - it is possible to use the one set in wordcards here also, so we check for that
         $testitem->audiochatnativelanguage = $this->itemrecord->{constants::AUDIOCHAT_NATIVE_LANGUAGE};
@@ -92,6 +85,47 @@ class item_audiochat extends item {
                 $testitem->audiochatnativelanguage = $userprefdeflanguage;
             }
         }
+
+        // Set up the audiochat instructions
+        $testitem->audiochatinstructions = $this->itemrecord->{constants::AUDIOCHAT_INSTRUCTIONS};
+        // If no topic was set, then we use the default topic.
+        if (empty($testitem->audiochatinstructions )) {
+            $testitem->audiochatinstructions = get_string('audiochat:gradingprompt_dec1', constants::M_COMPONENT);
+        }
+
+        // Replace the placeholders in the audiochat instructions with the actual data.
+        $testitem->audiochatinstructions = str_replace(['{ai role}', '{ai voice}', '{native language}',
+            '{target language}', '{topic}', '{ai data1}', '{ai data2}'],
+            [$this->itemrecord->{constants::AUDIOCHAT_ROLE},
+            $this->itemrecord->{constants::AUDIOCHAT_VOICE},
+            $testitem->audiochatnativelanguage,
+            $this->language,
+            $this->itemrecord->{constants::AUDIOCHAT_TOPIC},
+            $this->itemrecord->{constants::AUDIOCHAT_AIDATA1},
+            $this->itemrecord->{constants::AUDIOCHAT_AIDATA2}],
+             $testitem->audiochatinstructions);
+
+        // Set up the audiochat grade instructions
+        $testitem->audiochatgradeinstructions = $this->itemrecord->{constants::AUDIOCHAT_FEEDBACKINSTRUCTIONS};
+        if(!empty($testitem->audiochatgradeinstructions )) {
+            $testitem->audiochatgradeinstructions = str_replace(['{ai role}', '{ai voice}', '{native language}',
+                '{target language}', '{topic}', '{ai data1}', '{ai data2}'],
+                [$this->itemrecord->{constants::AUDIOCHAT_ROLE},
+                    $this->itemrecord->{constants::AUDIOCHAT_VOICE},
+                    $testitem->audiochatnativelanguage,
+                    $this->language,
+                    $this->itemrecord->{constants::AUDIOCHAT_TOPIC},
+                    $this->itemrecord->{constants::AUDIOCHAT_AIDATA1},
+                    $this->itemrecord->{constants::AUDIOCHAT_AIDATA2}],
+                $testitem->audiochatgradeinstructions);
+        }
+
+        //Set the Auto turn detection to on or off
+        $testitem->audiochat_autoresponse = $this->itemrecord->{constants::AUDIOCHAT_AUTORESPONSE} ? true : false;
+
+        // AI Voice 
+        $testitem->audiochat_voice = $this->itemrecord->{constants::AUDIOCHAT_VOICE};
+
 
         $testitem->totalmarks = $this->itemrecord->{constants::TOTALMARKS};
         if ($this->itemrecord->{constants::TARGETWORDCOUNT} > 0) {
@@ -143,7 +177,15 @@ class item_audiochat extends item {
         $keycols['int1'] = ['jsonname' => 'totalmarks', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::TOTALMARKS];
         $keycols['int2'] = ['jsonname' => 'relevance', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::RELEVANCE];
         $keycols['int3'] = ['jsonname' => 'targetwordcount', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::TARGETWORDCOUNT];
+        $keycols['int4'] = ['jsonname' => 'autoresponse', 'type' => 'int', 'optional' => true, 'default' => 1, 'dbname' => constants::AUDIOCHAT_AUTORESPONSE];
+        $keycols['int5'] = ['jsonname' => 'allowretry', 'type' => 'int', 'optional' => true, 'default' => 1, 'dbname' => constants::AUDIOCHAT_ALLOWRETRY];
+        $keycols['int6'] = ['jsonname' => 'gradingselection', 'type' => 'int', 'optional' => true, 'default' => 1, 'dbname' => constants::AUDIOCHAT_INSTRUCTIONSSELECTION];
+        $keycols['int7'] = ['jsonname' => 'feedbackselection', 'type' => 'int', 'optional' => true, 'default' => 1, 'dbname' => constants::AUDIOCHAT_FEEDBACKSELECTION];
+        $keycols['text5'] = ['jsonname' => 'audiochattopic', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AUDIOCHAT_TOPIC];
         $keycols['text6'] = ['jsonname' => 'audiochatinstructions', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AUDIOCHAT_INSTRUCTIONS];
+        $keycols['data3'] = ['jsonname' => 'audiochatgradeinstructions', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AUDIOCHAT_FEEDBACKINSTRUCTIONS];
+        $keycols['data1'] = ['jsonname' => 'audiochataidata1', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AUDIOCHAT_AIDATA1];
+        $keycols['data2'] = ['jsonname' => 'audiochataidata2', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AUDIOCHAT_AIDATA2];
         $keycols['text2'] = ['jsonname' => 'audiochatrole', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AUDIOCHAT_ROLE];
         $keycols['text3'] = ['jsonname' => 'audiochatvoice', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AUDIOCHAT_VOICE];
         $keycols['text4'] = ['jsonname' => 'audiochatnativelanguage', 'type' => 'string', 'optional' => true, 'default' => 'en-US', 'dbname' => constants::AUDIOCHAT_NATIVE_LANGUAGE];

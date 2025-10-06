@@ -73,8 +73,6 @@ $string['basicreport_explanation']='Un rapport de base';
 $string['returntoreports']='Retour aux rapports';
 $string['returntogradinghome']='Retour au tableau des notes';
 $string['exportexcel']='Exporter en CSV';
-$string['mingradedetails'] = 'La note minimale requise pour "terminer" cette activité.';
-$string['mingrade'] = 'Note minimale';
 $string['deletealluserdata'] = 'Supprimer toutes les données utilisateur';
 $string['maxattempts'] ='Nombre maximum de tentatives';
 $string['maxattempts_details'] ='Nombre maximum de tentatives autorisées pour cette activité.';
@@ -809,10 +807,7 @@ $string['pushpage_scopesite'] = 'Toutes les activités MiniLeçon sur le site';
 $string['pushpage_scopenone'] = 'Aucune activité MiniLeçon';
 $string['pushconfirm'] = 'Vous êtes sur le point de transférer le paramètre : <b>{$a->pushthing}</b> à {$a->clonecount} autres activités. Êtes-vous sûr ?';
 $string['scopeselector']  = 'Portée : ';
-$string['freespeaking_default_aigrade']  = 'Déduire 1 point pour chaque erreur de grammaire mais ne pas pénaliser les erreurs d\'orthographe ou de ponctuation.';
-$string['freespeaking_default_aigradefeedback']  = 'Expliquer chaque erreur de grammaire simplement. Ne pas commenter sur l\'orthographe ou la ponctuation.';
-$string['freewriting_default_aigrade'] = 'Déduire 1 point pour chaque erreur de grammaire, d\'orthographe ou de ponctuation.';
-$string['freewriting_default_aigradefeedback']  = 'Expliquer chaque erreur simplement.';
+
 $string['writehere']  = 'Écrivez ici ..';
 $string['submit']='Soumettre';
 $string['feedback']='Retour';
@@ -972,7 +967,6 @@ $string['mcimageresponses'] = '(optionnel) Téléversez des images pour les rép
 $string['mcaudioresponses'] = '(optionnel) Téléversez des audios pour les réponses. Nom = numéro (ex : 1.mp3). Remplace la voix de synthèse.';
 $string['multiaudioaudioresponses'] = '(optionnel) Téléversez des audios pour les réponses. Nom = numéro (ex : 1.mp3).';
 $string['audiochat_instructions'] = 'Instructions pour l’IA';
-$string['audiochat_instructions_default'] = 'Vous êtes {ai role}. Vous enseignez le {target language}. L’élève est natif en {native language}. Le sujet du jour est : {topic}. Parlez lentement et simplement. Donnez la priorité à la parole de l’élève.';
 $string['audiochat_instructions_instructions'] = 'Ce modèle combine le rôle, la langue cible, la langue de l’élève et le sujet. Vous pouvez utiliser : {ai role}, {target language}, {native language}, {topic}.';
 $string['audiochat_role'] = 'Rôle de l’IA';
 $string['audiochat_voice'] = 'Voix de l’IA';
@@ -988,3 +982,196 @@ $string['openaikey'] = 'Clé OpenAI';
 $string['openaikey_details'] = 'La clé OpenAI est utilisée pour le Chat Audio. Non requise pour les autres types.';
 $string['textgenerationfailed'] = 'Échec de génération pour l’élément {$a->itemindex} ({$a->itemtype})';
 $string['failed'] = 'Échec';
+
+
+
+$string['audiostoryzoomandpan'] = 'Zoom et panoramique';
+
+$string['zoomandpannone'] = 'aucun';
+$string['zoomandpanlite'] = 'lent';
+$string['zoomandpanmedium'] = 'moyen';
+$string['zoomandpanmore'] = 'rapide';
+
+$string['audiochatsessionactive'] = 'Le chat est actif !!';
+$string['audiochatsessionconnecting'] = 'Démarrage… La connexion peut prendre 15 secondes.';
+$string['audiochatsessionstart'] = "Démarrer";
+$string['audiochatsessionend'] = "Terminer";
+$string['audiochatsessiontryagain'] = "Réessayer";
+$string['audiochatsessionfinished'] = "Terminé";
+$string['audiochatcancelconnecting'] = "Annuler";
+
+$string['gradebywordcount'] = "Cette activité a été notée selon le nombre de mots prononcés dans la transcription.";
+
+$string['audiochat_gradeexplanation'] = 'Explication de la note';
+$string['audiochat_conversation'] = 'Conversation';
+$string['audiochat_gradeinstructions'] = 'Instructions de notation / de retour pour l’IA';
+
+$string['audiochat_gradeinstructions_instructions'] = 'Les instructions de notation doivent indiquer comment générer le retour et la note (0–100). Elles servent de modèle combiné avec le rôle de l’IA, sa voix, le sujet, les données personnalisées 1 et 2 et la langue maternelle de l’étudiant. Vous pouvez utiliser les variables : {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2} et {topic}. Si ce champ est vide, la note sera calculée selon le nombre total de mots prononcés par rapport au nombre de mots attendu.';
+
+$string['audiochat_aidata1'] = 'Donnée IA personnalisée 1';
+$string['audiochat_aidata2'] = 'Donnée IA personnalisée 2';
+
+$string['audiochat_autosend'] = 'Envoi automatique';
+$string['audiochat_autosend_desc'] = 'Si cette option est cochée, la détection de tour de parole est automatique : l’IA enverra automatiquement l’audio de l’étudiant lorsqu’elle détecte qu’il a fini de parler. Pour les jeunes ou les locuteurs plus lents, cela peut être frustrant. Si cette option n’est pas cochée, l’audio est envoyé quand l’étudiant appuie sur le bouton d’arrêt du micro. L’envoi automatique peut aussi être activé ou désactivé pendant l’activité.';
+
+$string['clicktosend'] = 'cliquer pour envoyer';
+$string['cantchat'] = 'Le chat n’est PAS disponible. Pour utiliser ce type d’élément, vous devez avoir défini une clé OpenAI valide dans les paramètres administrateur de l’activité MiniLesson. Le chat n’est pas disponible en Chine (région Ningxia).';
+
+$string['confirm_desc'] = 'Vous n’avez pas terminé cette étape. Êtes-vous sûr(e) de vouloir passer à la suivante ?';
+
+$string['ai_topic'] = 'Sujet';
+$string['ai_data1'] = 'Donnée IA 1';
+$string['ai_data2'] = 'Donnée IA 2';
+
+$string['ai_topic_help'] = 'Le sujet est un champ optionnel {topic} pouvant être combiné avec les instructions de notation ou de retour pour donner du contexte à l’IA.';
+$string['ai_data1_help'] = 'La donnée IA 1 est un champ optionnel {ai data1} pouvant être combiné avec les instructions de notation ou de retour pour donner du contexte à l’IA.';
+$string['ai_data2_help'] = 'La donnée IA 2 est un champ optionnel {ai data2} pouvant être combiné avec les instructions de notation ou de retour pour donner du contexte à l’IA.';
+
+$string['instructionprompt'] = 'Instruction';
+
+$string['freewriting:gradingprompt1'] = 'Par défaut';
+$string['freewriting:gradingprompt2'] = 'Réponse courte — nécessite la bonne réponse (ai data1)';
+$string['freewriting:gradingprompt3'] = 'Décrire l’image — nécessite la description d’une image (ai data1)';
+
+$string['freewriting:gradingprompt_dec1'] = 'Retirer 1 point pour chaque faute de grammaire, d’orthographe ou de ponctuation.';
+$string['freewriting:gradingprompt_dec2'] = 'La bonne réponse est « {ai data1} ». Donner 0 point pour une réponse incorrecte.  
+Donner 2 points pour une phrase complète ayant le sens correct ; donner 1 point pour une phrase incomplète mais au sens correct.';
+$string['freewriting:gradingprompt_dec3'] = 'L’étudiant décrit une image. L’image représente la scène suivante : [{topic}]  
+Donner 2 points pour chaque phrase grammaticalement correcte décrivant une partie de l’image. Donner 1 point si la phrase est presque correcte.';
+
+$string['freewriting:feedbackprompt1'] = 'Par défaut';
+$string['freewriting:feedbackprompt2'] = 'Décrire l’image';
+$string['freewriting:feedbackprompt_dec1'] = 'Expliquer chaque erreur simplement.';
+$string['freewriting:feedbackprompt_dec2'] = 'Expliquer simplement les principales erreurs de grammaire. Suggérer les éléments de la scène que l’étudiant n’a pas décrits.';
+
+$string['freespeaking:gradingprompt1'] = 'Par défaut';
+$string['freespeaking:gradingprompt2'] = 'Réponse courte — nécessite la bonne réponse (ai data1)';
+$string['freespeaking:gradingprompt3'] = 'Décrire l’image — nécessite la description d’une image (ai data1)';
+
+$string['freespeaking:gradingprompt_dec1'] = 'Retirer 1 point pour chaque faute de grammaire.';
+$string['freespeaking:gradingprompt_dec2'] = 'La bonne réponse est « {ai data1} ». Donner 0 point pour une réponse incorrecte.  
+Donner 2 points pour une phrase complète ayant le sens correct ; donner 1 point pour une phrase comportant des erreurs mais au sens correct.';
+$string['freespeaking:gradingprompt_dec3'] = 'L’étudiant décrit une image. L’image représente la scène suivante : [{topic}]  
+Donner 2 points pour chaque phrase grammaticalement correcte décrivant une partie de l’image. Donner 1 point si la phrase est presque correcte.';
+
+$string['freespeaking:feedbackprompt1'] = 'Par défaut';
+$string['freespeaking:feedbackprompt2'] = 'Décrire l’image';
+$string['freespeaking:feedbackprompt_dec1']  = 'Expliquer simplement chaque faute de grammaire. Ne pas commenter l’orthographe ni la ponctuation.';
+$string['freespeaking:feedbackprompt_dec2'] = 'Expliquer simplement les erreurs de grammaire non mineures. Ne pas commenter l’orthographe ni la ponctuation. Suggérer les éléments de la scène que l’étudiant n’a pas décrits.';
+
+$string['instructionsprompt_header'] = 'En-tête des instructions';
+$string['instructionsprompt'] = 'Instructions';
+$string['gradingprompt_header'] = 'En-tête des consignes de notation';
+$string['gradingprompt'] = 'Consignes de notation';
+$string['feedbackprompt_header'] = 'En-tête du retour';
+$string['feedbackprompt'] = 'Retour';
+
+$string['audiochat:instructionsprompt1'] = 'Discussion ouverte — nécessite un sujet';
+$string['audiochat:instructionsprompt2'] = 'Discussion sur une image — nécessite une description (topic) et des questions (ai data1)';
+$string['audiochat:instructionsprompt3'] = 'Discussion sur un texte — nécessite un texte (topic) et des questions (ai data1)';
+
+$string['audiochat:instructionsprompt_dec1'] = "Vous êtes {ai role}. Vous vous appelez {ai voice}. Vous enseignez {target language}. L’étudiant est locuteur natif de {native language}. Aujourd’hui, le sujet de discussion est : {topic}. Discutez-en avec votre étudiant. Parlez lentement et simplement. Vos réponses doivent être brèves. Votre objectif est de donner à l’étudiant l’occasion de parler. Expliquez les mots et les notions dans la langue maternelle de l’étudiant s’il ne comprend pas.";
+$string['audiochat:instructionsprompt_dec2'] = 'Vous êtes {ai role}. Vous vous appelez {ai voice}. Vous enseignez {target language}. L’étudiant est locuteur natif de {native language}. Il regarde une image représentant la scène suivante : « {topic} ».  
+
+Votre tâche est de poser les questions suivantes, une par une : {ai data1}  
+
+Parlez lentement et simplement. Vos réponses doivent être brèves. Ne commentez pas le contenu ou la justesse de la réponse. Aidez l’étudiant s’il ne comprend pas la question. Quand il a répondu à toutes, remerciez-le et dites-lui d’« appuyer sur le bouton Terminer ».';
+$string['audiochat:instructionsprompt_dec3'] = 'Vous êtes {ai role}. Vous vous appelez {ai voice}. Vous enseignez {target language}. L’étudiant est locuteur natif de {native language}. Il vient de lire le texte suivant : « {topic} ».  
+
+Votre tâche est de poser les questions suivantes, une par une : {ai data1}  
+
+Parlez lentement et simplement. Vos réponses doivent être brèves. Ne commentez pas le contenu ou la justesse de la réponse. Aidez l’étudiant s’il ne comprend pas la question. Quand il a répondu à toutes, remerciez-le et dites-lui d’« appuyer sur le bouton Terminer ».';
+
+$string['audiochat:feedbackprompt1'] = 'Discussion ouverte';
+$string['audiochat:feedbackprompt2'] = 'Discussion avec questions — nécessite des points et des questions (ai data1)';
+$string['audiochat:feedbackprompt_dec1'] = "Pour la note, tenez compte des critères suivants : pertinence par rapport au sujet « {topic} », fluidité et utilisation du vocabulaire. Le retour doit être simple et dans la langue maternelle de l’étudiant : {native language}.";
+$string['audiochat:feedbackprompt_dec2'] = "Attribuer 25 points pour chaque réponse correcte à une question posée à l’étudiant, 0 point sinon. Donner un retour sur l’usage de la langue et sur les réponses de l’étudiant, dans sa langue maternelle : {native language}. Voici les questions : {ai data1}";
+
+$string['hidecorrection'] = 'Masquer les corrections';
+$string['showgrade'] = "Afficher la note";
+$string['starrating'] = "Évaluation par étoiles — par défaut";
+$string['percentagescore'] = "Score en pourcentage";
+$string['detailedresults'] = 'Résultats détaillés — par défaut';
+$string['basciresult'] = 'Résultats simples';
+$string['showresult'] = 'Afficher le résultat';
+$string['aigradingandfeedback'] = 'Notation et retour IA';
+$string['resultsdisplay'] = 'Affichage des résultats';
+
+$string['manageminilessonitem'] = 'Gérer les éléments de leçon';
+$string['successfullyupdated'] = 'Mise à jour réussie';
+$string['manageminilessonitems_explanation'] = 'Vous pouvez ici définir la visibilité des éléments dans la boîte de dialogue « Ajouter un nouvel élément ». Le masquage ou l’affichage ici n’affecte pas les éléments déjà créés.';
+
+$string['completionwhenfinished'] = 'L’étudiant a terminé l’activité.';
+$string['completionwhenfinisheddesc'] = 'Terminer toutes les étapes de l’activité.';
+$string['completiondetail:finished'] = 'Terminer toutes les étapes de l’activité';
+$string['completiondetail:mingrade'] = 'Obtenir une note de {$a}% ou plus';
+$string['mingrade_help'] = 'La note minimale requise pour « terminer » cette activité.';
+$string['mingrade'] = 'Note minimale';
+
+$string['reorder'] = 'Réorganiser';
+$string['chooseitem'] = 'Choisir un élément';
+
+$string['item_page_desc'] = 'La page de contenu est le type d’élément le plus simple. Elle affiche simplement le texte ou le média défini par l’auteur de l’activité et un bouton « Suivant ». Utilisez ce type pour préparer les étudiants aux éléments suivants ou inclure un contenu explicatif.';
+$string['item_multichoice_desc'] = 'L’élément à choix multiple affiche une question à choix multiple comportant jusqu’à 4 réponses possibles, dont une seule correcte. Les options peuvent être du texte, de l’audio ou des images.';
+$string['item_dictation_desc'] = 'L’élément dictée affiche une série de paires lecteur audio + champ texte. L’étudiant doit écouter l’audio et taper ce qu’il entend.';
+$string['item_speechcards_desc'] = 'L’élément cartes de lecture à voix haute affiche une série de cartes contenant une phrase. L’étudiant doit lire chaque carte à voix haute.';
+$string['item_listenrepeat_desc'] = 'L’élément « Écouter et répéter » présente une série de consignes audio auxquelles l’étudiant doit répondre oralement. Utilisé surtout pour des activités d’écoute et répétition.';
+$string['item_multiaudio_desc'] = 'L’élément choix multiple audio propose une question à choix multiples où l’étudiant doit répondre oralement.';
+$string['item_shortanswer_desc'] = 'L’élément réponse courte est une question unique à laquelle l’étudiant doit répondre oralement. Les bonnes réponses sont définies par l’auteur.';
+$string['item_listeninggapfill_desc'] = 'L’élément texte à trous (écoute) affiche des phrases comportant un ou plusieurs mots manquants. L’étudiant écoute et complète les mots manquants.';
+$string['item_typinggapfill_desc'] = 'L’élément texte à trous (saisie) affiche des phrases avec des mots manquants. L’étudiant doit les saisir.';
+$string['item_speakinggapfill_desc'] = 'L’élément texte à trous (oral) affiche des phrases avec des mots manquants. L’étudiant doit dire la phrase complète à voix haute.';
+$string['item_spacegame_desc'] = 'Le jeu spatial est un mini-jeu de type arcade basé sur des paires de mots. L’étudiant doit « tirer » sur les bons mots.';
+$string['item_freespeaking_desc'] = 'L’élément expression orale libre permet à l’enseignant de proposer des tâches orales notées automatiquement avec un retour fourni à l’étudiant.';
+$string['item_freewriting_desc'] = 'L’élément expression écrite libre permet à l’enseignant de proposer des tâches écrites notées automatiquement avec un retour fourni à l’étudiant.';
+$string['item_passagereading_desc'] = 'L’élément lecture de texte affiche une question à choix multiples comportant jusqu’à 4 réponses possibles, dont une seule correcte. Les options peuvent être du texte, de l’audio ou des images.';
+$string['item_passagegapfill_desc'] = 'L’élément texte à trous (passage) fournit un texte avec plusieurs mots supprimés. L’étudiant écoute l’audio et remplit les blancs.';
+$string['item_h5p_desc'] = 'L’élément H5P permet d’insérer une activité H5P existante depuis la banque de contenus et de l’intégrer dans la MiniLesson.';
+$string['item_wordshuffle_desc'] = 'L’élément mélange de mots prend un ensemble de phrases dont les mots sont mélangés. L’étudiant doit les remettre dans le bon ordre.';
+$string['item_scatter_desc'] = 'L’élément association présente une grille de cartes formées de paires de mots. L’étudiant doit les associer pour vider la grille.';
+$string['item_fluency_desc'] = 'L’élément fluidité présente une série de phrases à dire à voix haute. Il indique les parties bien, moyennement ou mal prononcées.';
+$string['item_audiochat_desc'] = 'L’élément chat audio crée une conversation audio avec un partenaire IA. Il peut être utilisé pour discuter d’un sujet ou poser des questions sur une image. Les consignes données au bot sont libres et modifiables.';
+$string['item_smartframe_desc'] = 'L’élément SmartFrame est un espace réservé pour un type d’élément non encore développé.';
+$string['item_comprehensionquiz_desc'] = 'L’élément quiz de compréhension est un espace réservé pour un type d’élément non encore développé.';
+$string['item_conversation_desc'] = 'L’élément conversation est un espace réservé pour un type d’élément non encore développé.';
+$string['item_dictationchat_desc'] = 'L’élément dictée-chat présente une série de consignes audio auxquelles l’étudiant doit répondre par écrit. Utilisé surtout pour les dictées.';
+
+$string['noitemyet'] = "Aucun élément pour le moment";
+$string['addingcontent'] = "Cliquez sur « Ajouter un nouvel élément » pour commencer à ajouter du contenu.";
+$string['hidewarning'] = "Masquer les résultats intermédiaires";
+$string['hidewarning_details'] = "Afficher uniquement les bonnes (vert) et mauvaises (rouge) réponses ; ne pas afficher les réponses presque correctes (orange).";
+
+$string['responsetype'] = 'Type de réponse';
+$string['audiorecorder'] = 'Enregistreur audio';
+$string['textinput'] = 'Saisie texte';
+$string['partiallycorrectresponses'] = 'Réponses partiellement correctes';
+$string['partiallycorrectmarks'] = 'Points pour réponses partiellement correctes';
+
+
+$string['promptsettings'] = 'Paramètres du prompt';
+$string['addnewitem'] = 'Ajouter un nouvel élément';
+$string['enterresponses'] = 'Saisissez ci-dessous une liste de réponses correctes et, en option, une liste de réponses partiellement correctes.';
+$string['addaudiostory_instructions'] = 'Pour créer une histoire audio, ajoutez un fichier audio, des images nommées avec des numéros (ex. 1.png, 2.jpg) et, en option, une piste de sous-titres (.vtt). Indiquez les instants d’affichage des images (format HH:MM:SS) dans la zone de texte. S’il n’y a pas de fichier audio et qu’un prompt média TTS est défini, l’histoire audio l’utilisera.';
+$string['audiochatretry_desc'] = 'Si cette option est cochée, les étudiants peuvent relancer la session de chat immédiatement après l’avoir terminée.';
+$string['relevancetype_desc'] = 'L’IA peut pénaliser les réponses peu pertinentes. Choisissez le type de pertinence à utiliser.';
+
+$string['relevancetype_help'] = 'L’IA peut pénaliser les réponses peu pertinentes. Choisissez le type de pertinence à utiliser. Si vous choisissez la pertinence par rapport à la question, l’IA vérifiera si la réponse est bien sur le sujet. Si vous choisissez la pertinence par rapport à une réponse modèle, l’IA vérifiera si la réponse ressemble, par son contenu, à la réponse modèle fournie.';
+$string['aigrade_instructions_desc'] = 'Ces instructions indiquent à l’IA comment générer un « score » entre 0 et le total de points de cet item. Elles servent de modèle fusionné avec le sujet IA, les données IA 1 et IA 2 pour créer les consignes. Vous pouvez utiliser les variables suivantes : {topic}, {ai data1}, {ai data2}. La note IA résultante sera multipliée par le nombre total de mots prononcés au-delà du nombre de mots cible, afin de pénaliser les réponses trop brèves. Définissez le nombre de mots cible à 0 si ce n’est pas souhaité.';
+
+$string['aigrade_instructions_help'] = 'Ces instructions indiquent à l’IA comment générer un « score » entre 0 et le total de points de cet item. Elles servent de modèle fusionné avec le sujet IA, les données IA 1 et IA 2. Variables utilisables : {topic}, {ai data1}, {ai data2}. La note IA résultante sera multipliée par le nombre total de mots prononcés au-delà du nombre de mots cible, pour pénaliser les réponses trop brèves. Mettez le nombre de mots cible à 0 si ce n’est pas souhaité.';
+$string['aigrade_feedback_desc'] = 'Ces consignes indiquent à l’IA comment donner un retour à l’étudiant sur sa réponse. Modèle fusionné avec le sujet IA et les données IA 1/2. Variables possibles : {topic}, {ai data1}, {ai data2}.';
+$string['aigrade_instructions_preset'] = 'Choisissez un préréglage pour charger des instructions prêtes à l’emploi dans la zone de texte ci-dessous. Vous pouvez ensuite les modifier.';
+$string['aigrade_feedback_help'] = 'Ces consignes indiquent à l’IA comment fournir un feedback à l’étudiant. Modèle fusionné avec le sujet IA et les données IA 1/2. Variables possibles : {topic}, {ai data1}, {ai data2}.';
+
+$string['aigentemplatename:reading_aic_passagegen'] = 'Lecture + Chat IA (texte généré)';
+$string['aigentemplatename:reading_aic_passageupload'] = 'Lecture + Chat IA (texte importé)';
+$string['aigentemplatename:keywords_to_ws_sc'] = 'Mots-clés → Word Shuffle et Scatter';
+$string['aigentemplatename:keywords_to_ws_sc_sg'] = 'Mots-clés → Word Shuffle, Scatter et Space Game';
+
+$string['aigentemplatedescription:keywordstogapfillsfluency'] = 'Saisissez une liste de mots (maximum 30) et Poodll créera une courte activité pour que les étudiants s’exercent à ces mots.';
+$string['aigentemplatedescription:reading_aic_passagegen'] = 'À partir d’un sujet et d’un niveau, génère un texte de lecture qui sera utilisé pour une activité de lecture puis une session de chat audio.';
+$string['aigentemplatedescription:reading_aic_passageupload'] = 'Collez un texte de lecture et 4 questions à réponse courte. Ils seront utilisés pour une lecture puis une session de chat audio.';
+$string['aigentemplatedescription:keywords_to_ws_sc'] = 'Entrez 4 à 10 mots-clés. Ils serviront à générer une activité Word Shuffle et Scatter, ainsi qu’une image de chaque mot-clé sur un tableau noir avec un mignon professeur chat à côté.';
+$string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Entrez 4 à 10 mots-clés. Ils serviront à générer des activités Word Shuffle, Scatter et Space Game, ainsi qu’une image de chaque mot-clé sur un tableau noir avec un mignon professeur caniche.';
+
+$string['audiochat_instructions_instructions'] = 'Ces instructions sont un modèle combiné avec le rôle IA, la voix IA, le sujet, les données personnalisées IA 1/2 et la langue maternelle de l’étudiant pour former les consignes transmises à l’IA. Variables utilisables : {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {topic}. Les instructions par défaut conviennent généralement, mais vous pouvez les adapter à votre usage.';
