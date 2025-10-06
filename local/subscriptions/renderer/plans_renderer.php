@@ -206,7 +206,7 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
             $highlightlabel = match ($hlvalue) {
                 'popular' => html_writer::span(get_string('highlight_popular', 'local_subscriptions'), 'badge bg-warning text-dark'),
                 'premium' => html_writer::span(get_string('highlight_premium', 'local_subscriptions'), 'badge bg-primary'),
-                default   => html_writer::span(get_string('highlight_none', 'local_subscriptions'), 'text-muted')
+                default   => html_writer::span(get_string('none', 'local_subscriptions'), 'text-muted')
             };
 
             // … avant $table->data[] …

@@ -442,7 +442,7 @@ class mailer {
 
         // Bouton → page d’abonnement pour ce plan (prolonger/renouveler)
         $buttonurl  = (UrlFactory::subscribe((int)$sub->planid))->out(false);
-        $buttontext = get_string('btn_renew_now', 'local_subscriptions');
+        $buttontext = get_string('renew_now', 'local_subscriptions');
 
         [$html, $text] = self::render_email_layout($title, $body, $buttontext, $buttonurl);
 

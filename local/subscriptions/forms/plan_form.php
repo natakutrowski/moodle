@@ -46,7 +46,7 @@ class plan_form extends moodleform {
 
         // == Mise en avant (highlight_type) ==
         $options = [
-            ''         => get_string('highlight_none', 'local_subscriptions'),
+            ''         => get_string('none', 'local_subscriptions'),
             'popular'  => get_string('highlight_popular', 'local_subscriptions'),
             'premium'  => get_string('highlight_premium', 'local_subscriptions'),
         ];

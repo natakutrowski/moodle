@@ -58,7 +58,6 @@ $string['no_valid_rows'] = 'No valid rows to import';
 $string['import_success_count'] = 'Successfully imported {$a} subscriptions.';
 $string['import_skipped'] = 'Skipped entries (missing or invalid data)';
 $string['invalid_or_missing_fields'] = 'Invalid or missing fields';
-$string['user_not_found'] = 'User not found';
 
 // -- Manage plans
 $string['scopes'] = '🎓 Access scope';
@@ -101,7 +100,6 @@ $string['language'] = 'Language';
 $string['alreadyused'] = 'Already used';
 $string['defaultscopename'] = 'Default name of the scope';
 $string['translatedname'] = 'Translated name';
-$string['translateddescription'] = 'Translated description';
 $string['save'] = 'Save';
 $string['deletetranslation'] = 'Delete this translation';
 $string['errorduplicatetranslation'] = 'A translation already exists in the selected language.';
@@ -192,7 +190,6 @@ $string['back_to_plans'] = 'Back to available plans';
 
 $string['checkout_title'] = 'Checkout';
 $string['checkout_duration'] = 'Duration:';
-$string['checkout_consent_label'] = 'I agree to the Terms of Service and the Privacy Policy.';
 $string['checkout_go_to_payment'] = 'Go to payment';
 
 $string['welcome_subject'] = 'Welcome to {$a}';
@@ -237,7 +234,6 @@ $string['mail_recurring_started_body'] = 'Thank you! Your recurring subscription
 $string['view_my_subscriptions'] = 'View my subscriptions';
 
 $string['plan_highlight'] = 'Highlight';
-$string['highlight_none'] = 'None';
 $string['highlight_popular'] = 'Popular';
 $string['highlight_premium'] = 'Premium';
 $string['plan_highlight_help'] = 'Choose how this plan is highlighted on the public page:
@@ -287,7 +283,6 @@ $string['mysubs_title'] = 'My subscriptions';
 $string['mysubs_empty'] = 'You don’t have any subscription yet.';
 $string['period'] = 'Period';
 
-$string['btn_renew_now'] = 'Renew now';
 $string['btn_extend']    = 'Extend';
 
 $string['option_upgrade_now_replace'] = 'Upgrade now to the selected duration (replace the queue)';
@@ -346,7 +341,6 @@ $string['subfield_created']            = 'Created';
 $string['subfield_updated']            = 'Updated';
 $string['subfield_unlimited']          = 'Unlimited';
 $string['subfield_payment_status']  = 'Payment status';
-$string['subpayment_ok']            = 'Up to date';
 $string['subpayment_action']        = 'Action required';
 
 // (optionnel) labels traduits pour tes statuts
@@ -511,8 +505,8 @@ $string['subs_unavailable_adminonly'] = 'Subscriptions pages are currently restr
 $string['label_inactive'] = '(inactive)';
 
 
-$string['edittranslation'] = 'Edit translation';
-$string['newtranslation'] = 'New translation';
+$string['edittranslation'] = 'Edit translation'; //  do not delete
+$string['newtranslation'] = 'New translation'; //  do not delete
 
 $string['task_subscription_rollover'] = 'Activate queued subscriptions and expire finished ones';
 $string['renew_now'] = 'Renew now';

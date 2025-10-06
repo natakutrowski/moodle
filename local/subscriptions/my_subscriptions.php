@@ -98,7 +98,7 @@ foreach ($subs as $sub) {
                 'override_amount'  => $amt,
                 'override_currency'=> $cur,
             ]);
-            $btns[] = html_writer::link($renewurl, get_string('btn_renew_now','local_subscriptions'),
+            $btns[] = html_writer::link($renewurl, get_string('renew_now','local_subscriptions'),
                 ['class'=>'btn btn-primary btn-sm']);
         }
 

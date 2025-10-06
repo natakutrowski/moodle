@@ -306,16 +306,14 @@ class renderer extends plugin_renderer_base {
             $displayname = \local_subscriptions_plan_display_name($plan);
             $output .= \html_writer::tag('h4', format_string($displayname), ['class'=>$titleclass]);
 
-            // lien (ancre) aspect bouton
-            $output .= \html_writer::div($this->plan_description_link($plan), 'mb-1');
-            $output .= $this->plan_description_modal_once($plan);
-
-
             $output .= \html_writer::tag('p', get_string('duration', 'local_subscriptions') . ' : ' . $durationtext, ['class' => 'mb-1']);
      
             $output .= \html_writer::tag('p', get_string('courselist','local_subscriptions').' : ', ['class' => 'mb-1']);
             $output .= \html_writer::div($courselist, 'plan-courselist mb-3');
 
+            // lien (ancre) aspect bouton
+            $output .= \html_writer::div($this->plan_description_link($plan), 'mb-1');
+            $output .= $this->plan_description_modal_once($plan);
 
             // Récupérer les prix du plan
             $prices = $DB->get_records('subscription_plan_price', ['planid' => $plan->id]);
@@ -467,7 +465,7 @@ class renderer extends plugin_renderer_base {
 
 
     public function plan_description_button(\stdClass $plan, ?string $label=null, string $variant='outline-secondary', string $size='sm'): string {
-        $label = $label ?? get_string('plan_description_link', 'local_subscriptions'); // "Description"
+        $label = $label ?? get_string('plan_description_show', 'local_subscriptions'); // "Description"
         $id = (int)$plan->id;
         return \html_writer::tag('button', $label, [
             'type' => 'button',
