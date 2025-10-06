@@ -289,6 +289,12 @@ if ($hassiteconfig) {
             '', '', PARAM_URL
         ));
 
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/email_copy_to',
+            get_string('email_copy_to', 'local_subscriptions'),
+            get_string('email_copy_to_desc', 'local_subscriptions'),
+            'admin@campusfr.fr', PARAM_RAW_TRIMMED
+        ));
 
     }
 

@@ -148,7 +148,7 @@ class subscription_manager {
 		string $currency,
 		int $creation_date,
 		bool $allowupdate = false
-	): string {
+	): array {
 		global $DB;
 
 		$existing = $DB->get_record('user_subscription', [
@@ -168,9 +168,9 @@ class subscription_manager {
 				$existing->last_update = time();
 
 				$DB->update_record('user_subscription', $existing);
-				return 'updated';
+				return ['status' => 'updated', 'subscription' => $existing];;
 			} else {
-				return 'exists';
+				return ['status' => 'exists', 'subscription' => $existing];
 			}
 		}
 
@@ -189,7 +189,7 @@ class subscription_manager {
 		];
 
 		$DB->insert_record('user_subscription', $record);
-		return 'created';
+		return ['status' => 'created', 'subscription' => $record];
 	}
 
 	public static function unenrol_user_from_plan(int $userid, int $planid): void {
@@ -280,4 +280,14 @@ class subscription_manager {
             $manual->update_user_enrol($byid[$ue->enrolid], $userid, ENROL_USER_SUSPENDED);
         }
     }
+
+	public static function get_last_created_subscription(int $userid, int $planid): ?\stdClass {
+		global $DB;
+		return $DB->get_record('user_subscription', [
+			'userid' => $userid,
+			'planid' => $planid
+		], '*', IGNORE_MULTIPLE); // ou trié par timecreated desc si plusieurs
+	}
+
+
 }

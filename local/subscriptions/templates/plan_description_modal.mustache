@@ -1,0 +1,16 @@
+<div class="modal fade" id="plan-desc-{{id}}" tabindex="-1" aria-labelledby="plan-desc-label-{{id}}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="plan-desc-label-{{id}}">{{name}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{#str}}close, local_subscriptions{{/str}}"></button>
+      </div>
+      <div class="modal-body">
+        {{{descriptionhtml}}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{#str}}close, local_subscriptions{{/str}}</button>
+      </div>
+    </div>
+  </div>
+</div>

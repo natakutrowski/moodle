@@ -8,6 +8,8 @@ use local_subscriptions\constants\Status;
 use local_subscriptions\support\Duration;
 use local_subscriptions\payment\Provider;
 
+require_once(__DIR__ . '/../../lib/user_subs_lib.php');
+
 /**
  * Gère le premier paiement (Checkout terminé) :
  * - finalise subscription_payment_request
@@ -85,7 +87,7 @@ class PaymentService {
         if (!$email && !empty($e->meta['customer_email'])) { $email = $e->meta['customer_email']; }
         if (!$email) { $transaction->allow_commit(); return; }
 
-        [$user, $isnew, $tmpPassword] = self::ensure_user(
+        [$user, $isnew, $tmpPassword] = local_subscriptions_ensure_user(
             \core_text::strtolower($email),
             $pr->firstname ?? '',
             $pr->lastname ?? ''
@@ -331,13 +333,8 @@ class PaymentService {
                 $recipient = \core_user::get_user($user->id, '*', MUST_EXIST); // user COMPLET
                 $recipient->mailformat = 1;
 
-                if (!empty($isupgrade)) {
-                    \local_subscriptions\mailer::send_upgrade_confirmation($recipient, $plan, $pr, $sub);
-                } else if (!empty($isnew)) {
-                    \local_subscriptions\mailer::send_welcome($recipient, (string)$tmpPassword, $plan, $pr);
-                } else {
-                    \local_subscriptions\mailer::send_subscription_update($recipient, $plan, $pr, $sub);
-                }
+                \local_subscriptions\mailer::send_subscription_event($recipient, $plan, $pr, $sub, $tmpPassword ?? null, $isupgrade, $isnew);
+
                 if (!empty($e->provider_subscription_id)) {
                     \local_subscriptions\mailer::send_recurring_started($recipient, $plan, $pr);
                 }
@@ -423,49 +420,7 @@ class PaymentService {
         }
     }
 
-    /**
-     * Crée ou récupère un utilisateur à partir de l'email.
-     * Retourne [\stdClass $user, bool $isnew, ?string $tmpPassword]
-     */
-    private static function ensure_user(string $email, string $firstname = '', string $lastname = ''): array {
-        global $DB, $CFG;
-        require_once($CFG->dirroot . '/user/lib.php');
 
-        $user = $DB->get_record('user', ['email' => \core_text::strtolower($email), 'deleted' => 0], '*', IGNORE_MISSING);
-        if ($user) {
-            return [$user, false, null];
-        }
-
-        // Génère username unique (reprend ta fonction utilitaire existante)
-        if (!function_exists('local_subscriptions_generate_unique_username')) {
-            // fallback très simple si jamais la fonction n'existe pas
-            $base = \core_text::substr(preg_replace('~[^a-z0-9]+~i', '', $firstname.$lastname), 0, 20);
-            if ($base === '') { $base = 'user'; }
-            $username = self::unique_username_from_base($base);
-        } else {
-            $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $email ?? '');
-        }
-
-        $tmpPassword = random_string(16);
-
-        $u = (object)[
-            'auth'               => 'manual',
-            'confirmed'          => 1,
-            'mnethostid'         => $CFG->mnet_localhost_id,
-            'username'           => $username,
-            'password'           => hash_internal_user_password($tmpPassword),
-            'firstname'          => $firstname ?: 'User',
-            'lastname'           => $lastname ?: '',
-            'email'              => \core_text::strtolower($email),
-            'timecreated'        => time(),
-            'lang'               => current_language(),
-            'forcepasswordchange'=> 1,
-        ];
-        $userid = user_create_user($u, false, false);
-        $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
-
-        return [$user, true, $tmpPassword];
-    }
 
     /** Génère un username unique si la fonction utilitaire n'est pas dispo. */
     private static function unique_username_from_base(string $base): string {

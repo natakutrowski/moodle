@@ -278,3 +278,98 @@ function sort_plans_by_duration(array $plans, bool $preservekeys=false): array {
     usort($list, __NAMESPACE__ . '\compare_plans_by_duration');
     return $list;
 }
+
+/**
+ * Nom à afficher d’un PLAN avec fallback de traduction.
+ * - Utilise $plan->translated_name si déjà joint
+ * - Sinon va chercher dans subscription_plan_translation(lang)
+ * - Retourne un texte prêt à afficher (format_string)
+ */
+function local_subscriptions_plan_display_name(\stdClass $plan, ?string $lang = null): string {
+    global $DB;
+    $lang = $lang ?? current_language();
+
+    if (!empty($plan->translated_name)) {
+        return format_string($plan->translated_name);
+    }
+
+    static $cache = []; // [planid:lang] => name
+    $key = ((int)$plan->id).':'.$lang;
+    if (!isset($cache[$key])) {
+        $t = $DB->get_record('subscription_plan_translation',
+            ['planid' => $plan->id, 'lang' => $lang], 'name', IGNORE_MISSING);
+        $cache[$key] = format_string($t->name ?? ($plan->name ?? ''));
+    }
+    return $cache[$key];
+}
+
+/**
+ * Retourne la meilleure TRADUCTION de description de PLAN selon l’ordre :
+ * $lang → 'fr' → première dispo → null.
+ * Champs utiles : id, description, descriptionformat.
+ */
+function local_subscriptions_get_plan_translation_best_for_desc(int $planid, ?string $lang=null): ?\stdClass {
+    global $DB;
+    $lang = $lang ?? current_language();
+
+    // 1) langue courante
+    $t = $DB->get_record('subscription_plan_translation',
+        ['planid'=>$planid, 'lang'=>$lang],
+        'id,description,descriptionformat', IGNORE_MISSING);
+    if ($t) return $t;
+
+    // 2) fr (si ce n'est pas déjà fr)
+    if ($lang !== 'fr') {
+        $t = $DB->get_record('subscription_plan_translation',
+            ['planid'=>$planid, 'lang'=>'fr'],
+            'id,description,descriptionformat', IGNORE_MISSING);
+        if ($t) return $t;
+    }
+
+    // 3) toute autre existante
+    return $DB->get_record('subscription_plan_translation',
+        ['planid'=>$planid],
+        'id,description,descriptionformat', IGNORE_MISSING) ?: null;
+}
+
+/**
+ * HTML de la description d’un PLAN, avec rewrite pluginfile + format_text.
+ * - $empty rend '-' si aucune description trouvée.
+ * - filearea: 'plan_desc' ; itemid = translation.id (fallback sur planid si aucun fichier).
+ */
+function local_subscriptions_plan_description_html(
+    int $planid,
+    ?\context $context = null,
+    ?string $lang = null,
+    string $empty = '-'
+): string {
+    global $CFG, $DB;
+    $context = $context ?? \context_system::instance();
+    $lang    = $lang ?? current_language();
+
+    $t = local_subscriptions_get_plan_translation_best_for_desc($planid, $lang);
+    $desc   = (string)($t->description ?? '');
+    $format = (int)($t->descriptionformat ?? FORMAT_HTML);
+
+    if ($desc === '') {
+        return $empty;
+    }
+
+    if (strpos($desc, '@@PLUGINFILE@@') !== false) {
+        $fs = get_file_storage();
+        $preferred = !empty($t->id) ? (int)$t->id : 0;
+        $hasfiles = $preferred
+            ? $fs->get_area_files($context->id, 'local_subscriptions', 'plan_desc', $preferred, 'id', false)
+            : [];
+        $itemid = $hasfiles ? $preferred : $planid;
+
+        $desc = file_rewrite_pluginfile_urls($desc, 'pluginfile.php', $context->id,
+            'local_subscriptions', 'plan_desc', $itemid);
+    }
+
+    return format_text($desc, $format, [
+        'context'     => $context,
+        'noclean'     => false,
+        'overflowdiv' => true,
+    ]);
+}

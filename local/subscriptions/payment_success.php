@@ -93,14 +93,7 @@ if ($pr && in_array($pr->status ?? '', [Status::PAID,Status::COMPLETED], true)) 
         // c) dernier recours : ta fonction helper si elle existe, sinon fallback local
         if ($username === '') {
             // Génère username unique (reprend ta fonction utilitaire existante)
-            if (!function_exists('local_subscriptions_generate_unique_username')) {
-                // fallback très simple si jamais la fonction n'existe pas
-                $base = \core_text::substr(preg_replace('~[^a-z0-9]+~i', '', $pr->firstname.$pr->lastname), 0, 20);
-                if ($base === '') { $base = 'user'; }
-                $username = self::unique_username_from_base($base);
-            } else {
-                $username = local_subscriptions_generate_unique_username($pr->firstname ?? '', $pr->lastname ?? '', $email ?? '');
-            }
+            $username = local_subscriptions_generate_unique_username($pr->firstname ?? '', $pr->lastname ?? '', $email ?? '');
         }     
 
         $loginurl = new moodle_url('/login/index.php', ['username' => $username]);

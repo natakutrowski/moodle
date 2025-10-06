@@ -3,8 +3,11 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/csvlib.class.php');
 
+require_once(__DIR__ . '/user_subs_lib.php');
+
 use local_subscriptions\subscription_manager;
-use local_subscriptions\subscription_config;
+use local_subscriptions\payment\Provider;
+use local_subscriptions\mailer;
 
 /**
  * Lit un fichier CSV et retourne les lignes valides + doublons détectés.
@@ -39,6 +42,9 @@ function parse_csv_file(string $tmpfile, string $separator = ','): array {
             if (count($record) < 5) continue;
 
             $row = array_combine($headers, $record);
+
+            $row['firstname']  = trim($row['firstname'] ?? '');
+            $row['lastname']   = trim($row['lastname'] ?? '');
             $email = strtolower(trim($row['email'] ?? ''));
 			$row['email'] = $email;
 			$row['start_date'] = trim($row['start_date'] ?? '');
@@ -65,6 +71,10 @@ function parse_csv_file(string $tmpfile, string $separator = ','): array {
             }
         }
     }
+
+    // 🪄 Réimpose l’ordre dans les headers pour l’aperçu (si besoin)
+    $expectedorder = ['firstname', 'lastname', 'email', 'start_date', 'plan', 'price', 'currency'];
+    $headers = array_values(array_filter($expectedorder, fn($h) => in_array($h, $headers)));
 
     return [$rows, $validrows, $headers];
 }
@@ -125,6 +135,8 @@ function process_csv_rows(array $validrows): array {
     $skipped = [];
 
     foreach ($validrows as $assoc) {
+        $firstname = ucfirst(trim($assoc['firstname'] ?? ''));
+        $lastname  = ucfirst(trim($assoc['lastname'] ?? ''));
         $email = trim($assoc['email']);
         $start_date = parse_date($assoc['start_date']);
         $planname = trim($assoc['plan'] ?? '');
@@ -136,21 +148,28 @@ function process_csv_rows(array $validrows): array {
             continue;
         }
 
-        $user = $DB->get_record('user', ['email' => $email, 'deleted' => 0]);
-        if (!$user) {
-            $skipped[] = ['data' => $assoc, 'reason' => get_string('user_not_found', 'local_subscriptions')];
+        // ➕ Créer ou récupérer l’utilisateur (déplace ensure_user dans user_subs_lib.php)
+        [$user, $isnewuser, $tmpPassword] = local_subscriptions_ensure_user(
+            $email,
+            $firstname,
+            $lastname
+        );
+
+        // 🔐 Récupération du plan
+        $planrecord = $DB->get_record('subscription_plan', ['name' => $planname], 'id, duration_key', IGNORE_MULTIPLE);
+        if (!$planrecord) {
+            $skipped[] = ['data' => $assoc, 'reason' => get_string('plan_not_found', 'local_subscriptions')];
             continue;
         }
-        $planrecord = $DB->get_record('subscription_plan', ['name' => $planname], 'id, duration_key', IGNORE_MULTIPLE);
 
-        $planid = $planrecord->id ?? null;
-        $durationkey = $planrecord->duration_key ?? null;
+        $planid = $planrecord->id;
+        $durationkey = $planrecord->duration_key;
 
         $end_date = subscription_manager::get_end_date_from_duration_key($durationkey, $start_date);
         
-        subscription_manager::create_or_extend_subscription($user->id, 
+        $result = subscription_manager::create_or_extend_subscription($user->id, 
             planid: $planid, 
-            payment_provider: subscription_config::PAYMENT_PROVIDER_CSV, 
+            payment_provider: Provider::CSV, 
             transactionid: uniqid('csv_'), 
             start_date: $start_date, 
             end_date: $end_date, 
@@ -158,8 +177,29 @@ function process_csv_rows(array $validrows): array {
             currency: $currency, 
             creation_date: time()
         );
+
+        $sub = $result['subscription'];
         
         subscription_manager::enrol_user_to_courses($user->id, $planid, $start_date, $end_date);
+        
+        // Préparation du mail
+        $plan = $DB->get_record('subscription_plan', ['id' => $planid], '*', MUST_EXIST);
+        $paymentreq = (object)[
+            'price' => $pricedata,
+            'currency' => $currency,
+            'provider' => Provider::CSV,
+        ];
+
+        mailer::send_subscription_event(
+            $user,
+            $plan,
+            $paymentreq,
+            $sub,
+            $tmpPassword, // pas de mot de passe car user déjà existant
+            false,
+            $isnewuser
+        );        
+        
         $imported++;
     }
 

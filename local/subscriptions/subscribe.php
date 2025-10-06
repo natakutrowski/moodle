@@ -1,7 +1,7 @@
 <?php
 require('../../config.php');
 require_once(__DIR__ . '/lib/user_subs_lib.php');
-require_once(__DIR__ . '/lib/plans_lib.php');
+require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
 
 use local_subscriptions\url\UrlFactory;
 

@@ -62,10 +62,6 @@ class subscription_config {
     public static function get_translation_languages(): array {
         return self::AVAILABLE_LANGUAGES;
     }
-
-    public const PAYMENT_PROVIDER_MANUAL    = 'manual';
-    public const PAYMENT_PROVIDER_CSV       = 'csv';
-    public const PAYMENT_PROVIDER_DEV       = 'dev';
     
     // -- Plugin path --
     public static function plugin_path(): string {

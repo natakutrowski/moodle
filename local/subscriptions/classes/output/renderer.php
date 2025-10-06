@@ -1,14 +1,16 @@
 <?php
 namespace local_subscriptions\output;
 
-use local_subscriptions\support\SubsPresenter;
-
 defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . '/../../lib/plans_lib.php');
+require_once(__DIR__ . '/../../lib/scopes_lib.php');
 
 use plugin_renderer_base;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Status;
 use local_subscriptions\support\Region;
+use local_subscriptions\support\SubsPresenter;
 
 class renderer extends plugin_renderer_base {
 
@@ -32,7 +34,7 @@ class renderer extends plugin_renderer_base {
 
         foreach ($subscriptions as $s) {
             $stlc = \core_text::strtolower((string)($s->status ?? ''));
-            if ($stlc === 'queued') {
+            if ($stlc === Status::QUEUED) {
                 // Earliest queued (même si > 7j)
                 if ($earliestQueued === null || $s->start_date < $earliestQueued->start_date) {
                     $earliestQueued = $s;
@@ -44,7 +46,7 @@ class renderer extends plugin_renderer_base {
                     }
                     $queuedSoonByScope[$plans[$s->planid]->accessscopeid] = true;
                 }
-            } else if ($stlc === 'active') {
+            } else if ($stlc === Status::ACTIVE) {
                 $hasActive = true;
             }
         }
@@ -77,11 +79,15 @@ class renderer extends plugin_renderer_base {
             }
             $plan = $plans[$sub->planid];
 
+            $planname = local_subscriptions_plan_display_name($plan);
+
             // Récupération du scope
             if (!isset($accessscopes[$plan->accessscopeid])) {
                 $accessscopes[$plan->accessscopeid] = $DB->get_record('subscription_access_scope', ['id' => $plan->accessscopeid]);
             }
             $scope = $accessscopes[$plan->accessscopeid];
+
+            $scopename = local_subscriptions_scope_display_name($scope);
 
             // Récupération des noms de cours
             $coursenames = [];
@@ -140,10 +146,10 @@ class renderer extends plugin_renderer_base {
             );
 
             $data['subscriptions'][] = [
-                'planname'           => format_string($plan->name),
+                'planname'           => format_string($planname),
                 'startdate'          => userdate($sub->start_date, get_string('strftimedate', 'langconfig')),
                 'enddate'            => userdate($sub->end_date, get_string('strftimedate', 'langconfig')),
-                'accessscope'        => format_string($scope->name ?? ''),
+                'accessscope'        => format_string($scopename),
                 'coursenames'        => $coursenames,
                 'pricepaid'          => sprintf('%.2f %s', $sub->pricepaid ?? 0, $sub->currency ?? ''),
                 'statusbadge'        => $statusbadge,          // <<< NOUVEAU : badge HTML prêt
@@ -166,12 +172,14 @@ class renderer extends plugin_renderer_base {
                     ['id' => $earliestQueued->planid], 'id,accessscopeid,name,is_recurring');
             }
             $plan  = $plans[$earliestQueued->planid];
+            $planname = local_subscriptions_plan_display_name($plan);
 
             if (!isset($accessscopes[$plan->accessscopeid])) {
                 $accessscopes[$plan->accessscopeid] = $DB->get_record('subscription_access_scope',
                     ['id' => $plan->accessscopeid], 'id,name,course_ids');
             }
             $scope = $accessscopes[$plan->accessscopeid];
+            $scopename = local_subscriptions_scope_display_name($scope);
 
             // Courses (pour popover)
             $coursenames = [];
@@ -201,10 +209,10 @@ class renderer extends plugin_renderer_base {
             $queuedMsg = get_string('queued_starts_in', 'local_subscriptions', $days);
 
             $data['subscriptions'][] = [
-                'planname'         => format_string($plan->name),
+                'planname'         => format_string($planname),
                 'startdate'        => userdate($earliestQueued->start_date, get_string('strftimedate', 'langconfig')),
                 'enddate'          => userdate($earliestQueued->end_date,   get_string('strftimedate', 'langconfig')),
-                'accessscope'      => format_string($scope->name ?? ''),
+                'accessscope'      => format_string($scopename),
                 'coursenames'      => $coursenames,
                 'pricepaid'        => sprintf('%.2f %s', $earliestQueued->pricepaid ?? 0, $earliestQueued->currency ?? ''),
                 'statusbadge'      => SubsPresenter::render_status_badge('queued'),
@@ -294,11 +302,15 @@ class renderer extends plugin_renderer_base {
             $titleclass = 'plan-title-neutral p-2 rounded mb-2 text-center';
             if ($isPopular)  { $titleclass .= ' ls-title-popular'; }
             if ($isPremium)  { $titleclass .= ' ls-title-premium'; }
-            $output .= \html_writer::tag('h4', $plan->name, ['class'=>$titleclass]);
 
-            if (!empty($plan->description)) {
-                $output .= \html_writer::div($plan->description, 'plan-description text-muted mb-2', []);
-            }
+            $displayname = \local_subscriptions_plan_display_name($plan);
+            $output .= \html_writer::tag('h4', format_string($displayname), ['class'=>$titleclass]);
+
+            // lien (ancre) aspect bouton
+            $output .= \html_writer::div($this->plan_description_link($plan), 'mb-1');
+            $output .= $this->plan_description_modal_once($plan);
+
+
             $output .= \html_writer::tag('p', get_string('duration', 'local_subscriptions') . ' : ' . $durationtext, ['class' => 'mb-1']);
      
             $output .= \html_writer::tag('p', get_string('courselist','local_subscriptions').' : ', ['class' => 'mb-1']);
@@ -427,7 +439,66 @@ class renderer extends plugin_renderer_base {
         return $output;
     }
 
+    private array $descmodalsprinted = [];
+
+        // ---- liens/boutons ----
+    public function plan_description_link(\stdClass $plan, ?string $label=null, string $variant='outline-secondary', string $size='sm'): string {
+        // Par défaut: "Afficher la description"
+        $label = $label ?? get_string('plan_description_show', 'local_subscriptions');
+        $id = (int)$plan->id;
+
+        // Petite icône "info" avant le texte (FA4/Boost: fa-info-circle)
+        $icon = \html_writer::tag('i', '', [
+            'class' => 'icon fa fa-info-circle fa-fw me-1',
+            'aria-hidden' => 'true'
+        ]);
+
+        // Lien texte (pas de .btn), ouvre la modale Bootstrap
+        return \html_writer::link('#plan-desc-'.$id, $icon . s($label), [
+            'class'          => 'ls-plan-desc-link link-secondary',
+            'data-bs-toggle' => 'modal',
+            'data-bs-target' => '#plan-desc-'.$id,
+            'aria-haspopup'  => 'dialog',
+            'aria-controls'  => 'plan-desc-'.$id,
+            'title'          => $label,
+            'role'           => 'button' // hint d’accessibilité pour un lien qui déclenche une action
+        ]);
+    }
 
 
+    public function plan_description_button(\stdClass $plan, ?string $label=null, string $variant='outline-secondary', string $size='sm'): string {
+        $label = $label ?? get_string('plan_description_link', 'local_subscriptions'); // "Description"
+        $id = (int)$plan->id;
+        return \html_writer::tag('button', $label, [
+            'type' => 'button',
+            'class' => "btn btn-{$variant} btn-{$size} ls-plan-desc-btn",
+            'data-bs-toggle' => 'modal',
+            'data-bs-target' => '#plan-desc-'.$id,
+        ]);
+    }
+
+    // Modale (imprimée 1 seule fois par plan) – utilise les traductions + rewrite pluginfile.
+    public function plan_description_modal_once(\stdClass $plan): string {
+        $id = (int)$plan->id;
+        if (isset($this->descmodalsprinted[$id])) {
+            return '';
+        }
+        $this->descmodalsprinted[$id] = true;
+
+        // Nom d’affichage (ton helper de *name* existant, on ne change pas la stratégie ici).
+        $name = local_subscriptions_plan_display_name($plan);
+
+        // Description HTML avec fallback: lang courante → FR → autre → '-'
+        // + réécriture @@PLUGINFILE@@ sur filearea 'plan_desc' (legacy-safe).
+        $deschtml = local_subscriptions_plan_description_html(
+            $id,
+            \context_system::instance(),
+            current_language(),
+            '-' // texte si aucune description traduite
+        );
+
+        $data = ['id' => $id, 'name' => $name, 'descriptionhtml' => $deschtml];
+        return $this->render_from_template('local_subscriptions/plan_description_modal', $data);
+    }
     
 }

@@ -5,12 +5,6 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/lib/user_subs_lib.php');
 
-
-// function local_subscriptions_before_http_headers() {
-//     global $PAGE;
-//     $PAGE->requires->css('/local/subscriptions/styles.css');
-// }
-
 /**
  * Get the full label for a language (e.g. "Français 🇫🇷").
  *
@@ -103,6 +97,13 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
 
     // Charger le JS AMD de ton plugin
     $PAGE->requires->js_call_amd('local_subscriptions/user_popover', 'init');
+
+    // Lancer le tweak DOM : renommer le heading (fallback) + réécrire les liens
+    $PAGE->requires->js_call_amd('local_subscriptions/myprofile_courses', 'init', [
+        'label' => get_string('mycourses_profile_heading', 'local_subscriptions')
+    ]);
+
+
 }
 
 /**

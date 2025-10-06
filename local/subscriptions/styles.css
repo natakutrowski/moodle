@@ -592,3 +592,11 @@ table.generaltable td { vertical-align: middle; }
   height: auto;
   display: block;
 }
+/* local/subscriptions — liens “Description” en style texte */
+.ls-plan-desc-link {
+  text-decoration: none;
+}
+.ls-plan-desc-link:hover,
+.ls-plan-desc-link:focus {
+  text-decoration: underline;
+}

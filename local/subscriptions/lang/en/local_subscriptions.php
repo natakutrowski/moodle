@@ -360,6 +360,7 @@ $string['substatus_error']             = 'Error'; // do not delete
 $string['substatus_suspended']         = 'Suspended'; // do not delete
 $string['substatus_paid']              = 'Paid'; // do not delete
 $string['substatus_failed']            = 'Failed'; // do not delete
+$string['substatus_completed']         = 'Completed'; // do not delete
 $string['substatus_unknown']           = 'Unknown'; // do not delete
 
 $string['optional_error_msg'] = 'Optional error message';
@@ -433,6 +434,9 @@ $string['btn_signin'] = 'Sign in';
 
 $string['provider_alfa'] = 'AlfaBank';
 $string['provider_stripe'] = 'Stripe';
+$string['provider_manual'] = 'Manual';
+$string['provider_csv'] = 'CSV';
+$string['provider_dev'] = 'Dev';
 
 $string['configmissing'] = 'Missing configuration: {$a}.';
 $string['missing_customer_id'] = 'Stripe customer ID is missing.';
@@ -515,3 +519,11 @@ $string['renew_now'] = 'Renew now';
 $string['renew_soon_msg'] = 'Your access ends in {$a} day(s). Renew now to avoid interruption.';
 $string['queued_starts_in'] = 'Starts in {$a} day(s)';
 $string['none'] = 'None';
+$string['mycourses_profile_heading'] = 'Mes cours';
+
+$string['plan_inactive'] = 'This plan is not available anymore. Please choose an active plan.';
+$string['plan_inactive_redirect'] = 'This plan is no longer available. Please select a new plan.';
+$string['plan_description_show'] = 'Show description';
+
+$string['email_copy_to'] = 'Admin e-mail copy';
+$string['email_copy_to_desc'] = 'One or more addresses (comma-separated) will receive a copy of emails sent by the Subscriptions plugin.';

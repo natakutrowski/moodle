@@ -20,6 +20,8 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         $out = '';
 
         $headers_string = [
+            'firstname'  => get_string('firstname'),
+            'lastname'   => get_string('lastname'),
             'email' => get_string('email', 'local_subscriptions'),
             'start_date' => get_string('start_date', 'local_subscriptions'),
             'plan' => get_string('plan', 'local_subscriptions'),
@@ -74,6 +76,8 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                     $label = s($value);
                 } elseif ($head === 'currency') {
                     $label = strtoupper(s($value));
+                } elseif (in_array($head, ['firstname', 'lastname'])) {
+                    $label = s(ucfirst($value));
                 } else {
                     $label = s($value);
                 }

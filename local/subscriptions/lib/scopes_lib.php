@@ -196,3 +196,87 @@ function local_subscriptions_save_scope_translation(): void {
         'accessscopeid' => $accessscopeid
     ]));
 }
+
+/**
+ * Nom à afficher d’un ACCESS SCOPE avec fallback de traduction.
+ * - Utilise $scope->translated_name si présent
+ * - Sinon va chercher dans subscription_access_scope_translation(lang)
+ */
+function local_subscriptions_scope_display_name(\stdClass $scope, ?string $lang = null): string {
+    global $DB;
+    $lang = $lang ?? current_language();
+
+    if (!empty($scope->translated_name)) {
+        return format_string($scope->translated_name);
+    }
+
+    static $cache = []; // [scopeid:lang] => name
+    $key = ((int)$scope->id).':'.$lang;
+    if (!isset($cache[$key])) {
+        $t = $DB->get_record('subscription_access_scope_translation',
+            ['accessscopeid' => $scope->id, 'lang' => $lang], 'name', IGNORE_MISSING);
+        $cache[$key] = format_string($t->name ?? ($scope->name ?? ''));
+    }
+    return $cache[$key];
+}
+
+/**
+ * Idem pour SCOPE : fallback lang → fr → autre ; filearea = 'scope_desc'.
+ */
+function local_subscriptions_get_scope_translation_best_for_desc(int $scopeid, ?string $lang=null): ?\stdClass {
+    global $DB;
+    $lang = $lang ?? current_language();
+
+    $t = $DB->get_record('subscription_access_scope_translation',
+        ['scopeid'=>$scopeid, 'lang'=>$lang],
+        'id,description,descriptionformat', IGNORE_MISSING);
+    if ($t) return $t;
+
+    if ($lang !== 'fr') {
+        $t = $DB->get_record('subscription_access_scope_translation',
+            ['scopeid'=>$scopeid, 'lang'=>'fr'],
+            'id,description,descriptionformat', IGNORE_MISSING);
+        if ($t) return $t;
+    }
+
+    return $DB->get_record('subscription_access_scope_translation',
+        ['scopeid'=>$scopeid],
+        'id,description,descriptionformat', IGNORE_MISSING) ?: null;
+}
+
+function local_subscriptions_scope_description_html(
+    int $scopeid,
+    ?\context $context = null,
+    ?string $lang = null,
+    string $empty = '-'
+): string {
+    global $DB;
+    $context = $context ?? \context_system::instance();
+    $lang    = $lang ?? current_language();
+
+    $t = local_subscriptions_get_scope_translation_best_for_desc($scopeid, $lang);
+    $desc   = (string)($t->description ?? '');
+    $format = (int)($t->descriptionformat ?? FORMAT_HTML);
+
+    if ($desc === '') {
+        return $empty;
+    }
+
+    if (strpos($desc, '@@PLUGINFILE@@') !== false) {
+        $fs = get_file_storage();
+        $preferred = !empty($t->id) ? (int)$t->id : 0;
+        $hasfiles = $preferred
+            ? $fs->get_area_files($context->id, 'local_subscriptions', 'scope_desc', $preferred, 'id', false)
+            : [];
+        $itemid = $hasfiles ? $preferred : $scopeid;
+
+        $desc = file_rewrite_pluginfile_urls($desc, 'pluginfile.php', $context->id,
+            'local_subscriptions', 'scope_desc', $itemid);
+    }
+
+    return format_text($desc, $format, [
+        'context'     => $context,
+        'noclean'     => false,
+        'overflowdiv' => true,
+    ]);
+}

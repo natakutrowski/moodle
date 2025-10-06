@@ -25,9 +25,15 @@ class SubscriptionAdvisor {
         global $DB;
 
         $now        = time();
-        $targetplan = $DB->get_record('subscription_plan', ['id' => $targetplanid, 'is_active' => 1], '*', MUST_EXIST);
+        $targetplan = $DB->get_record('subscription_plan', ['id' => $targetplanid], '*', MUST_EXIST);
         $scopeid    = (int)$targetplan->accessscopeid;
 
+        // Si le plan est inactif, on ne propose pas d’options ici : on laisse subscribe.php
+        // afficher les plans actifs du même scope.
+        if (empty($targetplan->is_active)) {
+            throw new \moodle_exception('plan_inactive', 'local_subscriptions', '',
+                (object)['scopeid' => $scopeid, 'planid' => $targetplanid]);
+        }
         $targetprice = $DB->get_record('subscription_plan_price', ['planid' => $targetplanid, 'currency' => $currency], '*', IGNORE_MISSING);
         if (!$targetprice) { return []; }
 

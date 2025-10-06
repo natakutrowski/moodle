@@ -2,8 +2,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\subscription_manager;
-use local_subscriptions\subscription_config;
 use local_subscriptions\constants\Status;
+use local_subscriptions\payment\Provider;
+use local_subscriptions\mailer;
+
+require_once(__DIR__ . '/../lib.php');
 
 /**
  * Enrol a user manually into a plan with payment and duration handling.
@@ -15,7 +18,7 @@ use local_subscriptions\constants\Status;
  * @return string 'created' | 'exists'
  * @throws moodle_exception on format error
  */
-function local_subscriptions_enrol_user_manual(int $userid, int $planid, string $pricecurrency, ?string $startdate = null): string {
+function local_subscriptions_enrol_user_manual(int $userid, int $planid, string $pricecurrency, ?string $startdate = null, bool $sendemails = false): string {
     global $DB;
 
     $plan = $DB->get_record('subscription_plan', ['id' => $planid], '*', MUST_EXIST);
@@ -30,10 +33,10 @@ function local_subscriptions_enrol_user_manual(int $userid, int $planid, string 
     $pricepaid = (float) str_replace(',', '.', $matches[1]); // 19,99 -> 19.99
     $currency = strtoupper($matches[2]);                    // eur -> EUR
 
-    $status = subscription_manager::create_or_extend_subscription(
+    $result = subscription_manager::create_or_extend_subscription(
         $userid,
         $planid,
-        subscription_config::PAYMENT_PROVIDER_MANUAL,
+        Provider::MANUAL,
         uniqid('manual_'),
         $start,
         $end,
@@ -41,9 +44,37 @@ function local_subscriptions_enrol_user_manual(int $userid, int $planid, string 
         $currency,
         time()
     );
+    $status = $result['status'];
+    $sub = $result['subscription']; 
 
     if ($status === 'created') {
         subscription_manager::enrol_user_to_courses($userid, $planid, $start, $end);
+        if ($sendemails) {
+            $user = core_user::get_user($userid);
+            $plan = $DB->get_record('subscription_plan', ['id' => $planid], '*', MUST_EXIST);
+            $tmpPassword = generate_password(); // à toi de définir ou appeler ta logique ici
+            $paymentreq = (object)[
+                'price' => $pricepaid,
+                'currency' => $currency,
+                'provider' => Provider::MANUAL,
+            ];
+
+            // Set password si besoin
+            if (empty($user->password) || $user->auth === 'nologin') {
+                update_internal_user_password($user, $tmpPassword); // à faire une seule fois si tu veux
+            }
+
+            mailer::send_subscription_event(
+                $user,
+                $plan,
+                $paymentreq,
+                $sub,
+                $tmpPassword,
+                false,   // isupgrade
+                false     // user already exists
+            );
+
+        }
     }
 
     return $status;
@@ -70,10 +101,10 @@ function local_subscriptions_enrol_user_test(int $userid): string {
     $start_date = time();
     $end_date = subscription_manager::get_end_date_from_duration_key($plan->duration_key, $start_date);
 
-    $status = subscription_manager::create_or_extend_subscription(
+    $result = subscription_manager::create_or_extend_subscription(
         $userid,
         $planid,
-        subscription_config::PAYMENT_PROVIDER_DEV,
+        Provider::DEV,
         uniqid('manual_'),
         $start_date,
         $end_date,
@@ -82,11 +113,11 @@ function local_subscriptions_enrol_user_test(int $userid): string {
         time()
     );
 
-    if ($status === 'created') {
+    if ($result['status'] === 'created') {
         subscription_manager::enrol_user_to_courses($userid, $planid, $start_date, $end_date);
     }
 
-    return $status;
+    return $result['status'];
 }
 
 function handle_post_actions(): array {
@@ -159,7 +190,7 @@ function get_user_active_and_nearest_queued(int $userid): array {
             sp.name AS planname, sp.duration_key, sp.accessscopeid
         FROM {user_subscription} us
         JOIN {subscription_plan} sp ON sp.id = us.planid
-        WHERE us.userid = :userid AND us.status = 'active'
+        WHERE us.userid = :userid AND us.status = '".Status::ACTIVE."'
         ORDER BY us.start_date DESC
     ";
     $actives = array_values($DB->get_records_sql($sqlact, ['userid' => $userid]));
@@ -174,7 +205,7 @@ function get_user_active_and_nearest_queued(int $userid): array {
         FROM {user_subscription} us
         JOIN {subscription_plan} sp ON sp.id = us.planid
         WHERE us.userid = :userid
-          AND us.status = 'queued'
+          AND us.status = '".Status::QUEUED."'
           AND us.start_date >= :now
         ORDER BY us.start_date ASC
     ";
@@ -227,3 +258,44 @@ function get_user_country_code(): string {
 
     return '';
 }
+
+    /**
+     * Crée ou récupère un utilisateur à partir de l'email.
+     * Retourne [\stdClass $user, bool $isnew, ?string $tmpPassword]
+     */
+    function local_subscriptions_ensure_user(string $email, string $firstname = '', string $lastname = ''): array {
+        global $DB, $CFG;
+        require_once($CFG->dirroot . '/user/lib.php');
+
+        $user = $DB->get_record('user', ['email' => \core_text::strtolower($email), 'deleted' => 0], '*', IGNORE_MISSING);
+        if ($user) {
+            return [$user, false, null];
+        }
+
+        // Génère username unique (reprend ta fonction utilitaire existante)
+        $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $email ?? '');
+        
+        $tmpPassword = random_string(16);
+
+        $u = (object)[
+            'auth'               => 'manual',
+            'confirmed'          => 1,
+            'mnethostid'         => $CFG->mnet_localhost_id,
+            'username'           => $username,
+            'password'           => hash_internal_user_password($tmpPassword),
+            'firstname'          => $firstname ?: 'User',
+            'lastname'           => $lastname ?: '',
+            'email'              => \core_text::strtolower($email),
+            'timecreated'        => time(),
+            'lang'               => current_language(),
+            'forcepasswordchange'=> 1,
+        ];
+        $userid = user_create_user($u, false, false);
+        
+        // Force le changement de mot de passe sur Moodle 4.x+
+        set_user_preference('auth_forcepasswordchange', 1, $userid);
+        
+        $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
+
+        return [$user, true, $tmpPassword];
+    }

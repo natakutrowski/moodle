@@ -798,6 +798,47 @@ class mailer {
         $recipient = self::ensure_full_user($user);
         $recipient->mailformat = 1;
         @email_to_user($recipient, \core_user::get_support_user(), $subject, $text, $html);
+
+        // $user = destinataire principal ; $support = \core_user::get_support_user()
+        // $subject, $plain, $html : ton contenu déjà préparé.
+        $copy = trim(get_config('local_subscriptions', 'email_copy_to') ?? '');
+        if ($copy !== '') {
+            $list = preg_split('/[,;\s]+/', $copy, -1, PREG_SPLIT_NO_EMPTY);
+
+            $primaryemail = (string)($user->email ?? '');
+            $support = \core_user::get_support_user();              // user réel (id non vide)
+            $support = self::ensure_full_user($support);            // ta méthode, pour éviter les champs manquants
+
+            foreach ($list as $addr) {
+                $addr = trim($addr);
+                if (!filter_var($addr, FILTER_VALIDATE_EMAIL)) {
+                    continue;
+                }
+                if ($primaryemail !== '' && strcasecmp($addr, $primaryemail) === 0) {
+                    continue; // pas de doublon vers l'apprenant
+                }
+
+                // Clone “safe” depuis le support user, en overridant uniquement l'adresse
+                $recipient = clone $support;
+                $recipient->email      = $addr;
+                $recipient->mailformat = 1;           // texte+HTML
+                $recipient->emailstop  = 0;           // par prudence
+                $recipient->suspended  = 0;
+                $recipient->deleted    = 0;
+                $recipient->confirmed  = 1;
+
+                // Envoi de la copie (préfixe optionnel)
+                $copysubject = '[COPY] ' . $subject.' - '.$user->username;
+                $ok = @email_to_user($recipient, \core_user::get_support_user(), $copysubject, $text, $html);
+
+                // Option: petit log si besoin
+                if (!$ok) {
+                    debugging('local_subscriptions: admin copy failed to '.$addr, DEBUG_DEVELOPER);
+                }
+            }
+        }
+
+
     }    
 
     /** Afficher les infos techniques (ex: PR#) ? Preview CLI ou setting admin. */
@@ -809,6 +850,25 @@ class mailer {
         // Ou si activé explicitement par un setting admin (désactivé par défaut)
         $cfg = (string)(get_config('local_subscriptions', 'email_show_pr_ref') ?? '0');
         return $cfg === '1';
+    }
+
+
+    public static function send_subscription_event(
+        \stdClass $user,
+        \stdClass $plan,
+        \stdClass $paymentreq,
+        \stdClass $sub,
+        ?string $tmppassword = null,
+        bool $isupgrade = false,
+        bool $isnewuser = false
+    ): void {
+        if (!empty($isupgrade)) {
+            self::send_upgrade_confirmation($user, $plan, $paymentreq, $sub);
+        } else if (!empty($isnewuser)) {
+            self::send_welcome($user, $tmppassword ?? '', $plan, $paymentreq);
+        } else {
+            self::send_subscription_update($user, $plan, $paymentreq, $sub);
+        }
     }
 
 

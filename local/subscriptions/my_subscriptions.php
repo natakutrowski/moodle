@@ -1,6 +1,7 @@
 <?php
 // local/subscriptions/my_subscriptions.php
 require_once(__DIR__.'/../../config.php');
+require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
 
 use local_subscriptions\constants\Operation;
 use local_subscriptions\constants\Status;
@@ -33,6 +34,10 @@ $fmtmoney = fn($amt, $cur) => format_float((float)$amt, 2).' '.strtoupper((strin
 // 3) Render
 echo $OUTPUT->header();
 
+/** @var \local_subscriptions\output\renderer $lsrenderer */
+$lsrenderer = $PAGE->get_renderer('local_subscriptions');
+
+
 echo html_writer::tag('h3', get_string('mysubs_title', 'local_subscriptions'), ['class'=>'mb-3']);
 
 // Pas de souscriptions ?
@@ -49,11 +54,13 @@ if (!$subs) {
 foreach ($subs as $sub) {
     $plan = $plans[$sub->planid] ?? (object)['name'=>get_string('unknown_plan','local_subscriptions'), 'is_recurring'=>0];
     
+    $displayname = local_subscriptions_plan_display_name($plan);
+
     $isactive = ($sub->status === Status::ACTIVE);
     $cardclasses = 'card shadow-sm mb-3'.($isactive ? '' : ' border-0 bg-light'); // ← fond gris pour ≠ active
 
     $head = html_writer::start_div('d-flex align-items-center justify-content-between');
-    $title = html_writer::tag('span', format_string($plan->name), ['class'=>'h5 m-0']);
+    $title = html_writer::tag('span', format_string($displayname), ['class'=>'h5 m-0']);
     $badges = SubsPresenter::render_status_badge($sub->status);
     $head .= $title . $badges;
     $head .= html_writer::end_div();
@@ -120,6 +127,8 @@ foreach ($subs as $sub) {
             'mb-2'
         );
     }
+    $btns[] = $lsrenderer->plan_description_button($plan, null, 'outline-secondary', 'sm');
+
     $modalid = 'subModal'.$sub->id;
     $btns[] = html_writer::tag('button', get_string('details','local_subscriptions'),
         ['class'=>'btn btn-outline-secondary btn-sm', 'data-bs-toggle'=>'modal', 'data-bs-target'=>'#'.$modalid]);
@@ -172,6 +181,9 @@ foreach ($subs as $sub) {
         echo html_writer::end_div();
       echo html_writer::end_div();
     echo html_writer::end_div();
+
+    echo $lsrenderer->plan_description_modal_once($plan);
+
 }
 
 // Lien pour s’abonner (CTA)

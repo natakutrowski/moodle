@@ -2,6 +2,8 @@
 
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/local/subscriptions/lib.php');
+require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
+
 
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\domain\SubscriptionAdvisor;
@@ -15,7 +17,20 @@ $planid   = required_param('planid', PARAM_INT);
 $currency = optional_param('currency', '', PARAM_ALPHANUMEXT); // ex: 'eur'
 
 $userid = (isloggedin() && !isguestuser()) ? $USER->id : 0;
-$options = $userid ? SubscriptionAdvisor::advise_options($userid, $planid, $currency) : [];
+
+try {
+    $options = $userid ? SubscriptionAdvisor::advise_options($userid, $planid, $currency) : [];
+
+} catch (\moodle_exception $e) {
+    if ($e->errorcode === 'plan_inactive' && $e->module === 'local_subscriptions') {
+        // On pré-sélectionne le scope dans subscribe.php si tu gères ce paramètre
+        $scopeid = (int)$DB->get_field('subscription_plan', 'accessscopeid', ['id' => $planid]);
+        $url = new \moodle_url('/local/subscriptions/subscribe.php', ['scope' => $scopeid]);
+        redirect($url, get_string('plan_inactive_redirect', 'local_subscriptions'),
+            0, \core\output\notification::NOTIFY_WARNING);
+    }
+    throw $e; // autre cas : remonter
+}
 
 global $DB, $USER, $SITE;
 
@@ -104,17 +119,19 @@ echo html_writer::div(
 );
 
 // Carte récap plan.
+$displayname = local_subscriptions_plan_display_name($plan);
+$plandesc  = local_subscriptions_plan_description_html((int)$plan->id);
+
 echo html_writer::start_div('card shadow-sm mb-4');
 echo html_writer::div(
-    html_writer::tag('h2', format_string($plan->name), ['class' => 'h4 m-0']),
+    html_writer::tag('h2', format_string($displayname), ['class' => 'h4 m-0']),
     'card-header bg-light'
 );
 
 $body = '';
 // Description (si disponible).
-if (!empty($plan->description)) {
-    $body .= html_writer::div(format_text($plan->description), 'text-muted mb-2');
-}
+$body .= html_writer::div(format_text($plandesc), 'text-muted mb-2');
+
 
 // Durée.
 $body .= html_writer::div(get_string('checkout_duration', 'local_subscriptions') . ' ' .

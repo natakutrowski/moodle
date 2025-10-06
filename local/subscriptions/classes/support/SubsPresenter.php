@@ -47,18 +47,11 @@ final class SubsPresenter {
             $currency = strtoupper((string)($sub->currency ?? ''));
             $rows[] = [get_string('subfield_amount', 'local_subscriptions'), $fmtmoney($amount, $currency)];
 
-            // Statut paiement (simple)
-            if (!empty($sub->payment_failed)) {
-                $rows[] = [
-                    get_string('subfield_payment_status', 'local_subscriptions'),
-                    get_string('subpayment_action', 'local_subscriptions') // "Action requise"
-                ];
-            } else {
-                $rows[] = [
-                    get_string('subfield_payment_status', 'local_subscriptions'),
-                    get_string('subpayment_ok', 'local_subscriptions') // "À jour"
-                ];
-            }
+            // Statut de paiement (badge)
+            $rows[] = [
+                get_string('subfield_payment_status', 'local_subscriptions'),
+                self::render_payment_badge($sub)
+            ];
 
             if (!empty($sub->payment_provider)) {
                 $rows[] = [get_string('subfield_provider', 'local_subscriptions'), Provider::label_with_icon($sub->payment_provider)];
@@ -123,7 +116,7 @@ final class SubsPresenter {
                     FROM {subscription_payment_request} pr
                     WHERE pr.userid = :uid
                     AND pr.planid = :planid
-                    AND pr.status IN ('paid','completed')
+                    AND pr.status IN ('".Status::PAID."','".Status::COMPLETED."')
                 ORDER BY pr.payment_date DESC, pr.id DESC";
             $pr = $DB->get_record_sql($sql, ['uid' => $sub->userid, 'planid' => $sub->planid]);
         }
@@ -132,7 +125,6 @@ final class SubsPresenter {
 
             // 1 ou 2 espaces insécables (U+00A0). Mets 1 ou 2 selon l’effet souhaité.
             $prindent = str_repeat("\u{00A0}", 3); // ou: $prindent = "\xC2\xA0\xC2\xA0";
-
 
             $rows[] = [get_string('subfield_pr_id', 'local_subscriptions'), (string)$pr->id];
             $rows[] = [$prindent . get_string('subfield_pr_status', 'local_subscriptions'), self::render_status_badge(s($pr->status))];
@@ -184,6 +176,7 @@ final class SubsPresenter {
             Status::ERROR    => ['cls' => 'badge bg-danger',              'str' => 'status_error'],
             Status::SUSPENDED => ['cls' => 'badge bg-light text-dark',    'str' => 'status_suspended'],
             Status::PAID     => ['cls' => 'badge bg-success',             'str' => 'status_paid'],
+            Status::COMPLETED => ['cls' => 'badge bg-success',            'str' => 'status_completed'],
             Status::FAILED    => ['cls' => 'badge bg-danger',             'str' => 'status_failed'],
         ];
 
@@ -191,5 +184,26 @@ final class SubsPresenter {
         $label = get_string('sub'.$conf['str'], 'local_subscriptions');
         return \html_writer::span($label, $conf['cls'].' ls-status-badge');
     }
+
+    /** Rend le statut de paiement sous forme de badge (PAID/ERROR) + action si erreur. */
+    private static function render_payment_badge(\stdClass $sub): string {
+        $haserror = !empty($sub->payment_failed);
+
+        // Libellés i18n si présents, sinon fallback "PAID/ERROR".
+        $key = $haserror ? 'substatus_error' : 'substatus_paid';
+        $label = get_string($key, 'local_subscriptions');
+
+        $cls = $haserror ? 'badge bg-danger' : 'badge bg-success';
+        $html = \html_writer::span($label, $cls.' ls-status-badge');
+
+        // Cas erreur : ajouter la consigne d’action sous le badge.
+        if ($haserror) {
+            $action = get_string('subpayment_action', 'local_subscriptions');
+            $html .= \html_writer::div($action, 'text-danger small mt-1');
+        }
+
+        return $html;
+    }
+
 
 }

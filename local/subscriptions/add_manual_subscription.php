@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pricecurrency = required_param('price_currency', PARAM_RAW_TRIMMED); // Ex: "100|EUR"
         $start_raw = optional_param('start_date', '', PARAM_RAW_TRIMMED);
 
-        $status = local_subscriptions_enrol_user_manual($userid, $planid, $pricecurrency, $start_raw);
+        $status = local_subscriptions_enrol_user_manual($userid, $planid, $pricecurrency, $start_raw, true);
        
         $a = (object)[
             'user' => $users[$userid] ?? get_string('unknown_user', 'local_subscriptions'),
