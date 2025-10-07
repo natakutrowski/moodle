@@ -287,7 +287,7 @@ function get_user_country_code(): string {
             'lastname'           => $lastname ?: '',
             'email'              => \core_text::strtolower($email),
             'timecreated'        => time(),
-            'lang'               => current_language(),
+            'lang'               => !empty($CFG->lang) ? $CFG->lang : current_language(), // set to default language of the site
             'forcepasswordchange'=> 1,
         ];
         $userid = user_create_user($u, false, false);
