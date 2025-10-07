@@ -15,9 +15,14 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Lecture à haute voix Poodll';
 $string['modulenameplural'] = 'Lectures à haute voix Poodll';
-$string['modulename_help'] =
-        'La lecture à haute voix est une activité conçue pour aider les enseignants à évaluer la fluidité de lecture de leurs élèves. Les élèves lisent un passage, défini par l’enseignant, dans un microphone. Plus tard, l’enseignant peut marquer les mots incorrects et obtenir les scores MPM (Mots Corrects Par Minute) de l’élève.';
-$string['readaloudfieldset'] = 'Champ d’exemple personnalisé';
+$string['modulename_help'] = 'ReadAloud permet aux étudiants de s’entraîner à lire des textes à voix haute et de recevoir un retour automatique.  
+L’activité peut être entièrement notée automatiquement et aide les enseignants à évaluer et comprendre les compétences de lecture en langue étrangère de leurs étudiants.  
+Le déroulement est le suivant :
+
+1. Les étudiants ÉCOUTENT un texte défini par l’enseignant.  
+2. Les étudiants S’ENTRAÎNENT à lire, ligne par ligne, en utilisant leur microphone.  
+3. Les étudiants LISENT le texte entier à voix haute.  
+4. Les étudiants et les enseignants peuvent consulter les RÉSULTATS et les COMMENTAIRES.';$string['readaloudfieldset'] = 'Champ d’exemple personnalisé';
 $string['readaloudname'] = 'Lecture à haute voix Poodll';
 $string['readaloudname_help'] =
         'Ceci est le contenu de l’info-bulle d’aide associée au champ readaloudname. La syntaxe Markdown est prise en charge.';
@@ -224,7 +229,7 @@ $string['en-wl'] = "Anglais (Pays de Galles)";
 $string['en-ab'] = "Anglais (Écosse)";
 $string['en-nz'] = "Anglais (Nouvelle-Zélande)";
 $string['en-za'] = "Anglais (Afrique du Sud)";
-$string['fa-ir'] = "Farsi";
+$string['fa-ir'] = 'Persan';
 $string['he-il'] = "Hébreu";
 $string['id-id'] = "Indonésien";
 $string['ja-jp'] = "Japonais";
@@ -257,6 +262,8 @@ $string['is-is'] = "Islandais";
 $string['mk-mk'] = "Macédonien";
 $string['sr-rs'] = "Serbe";
 $string['vi-vn'] = "Vietnamien";
+$string['so-so'] = 'Somali';
+$string['ps-af'] = 'Pachto (Afghanistan)';
 
 $string['useast1'] = "États-Unis Est";
 $string['tokyo'] = "Tokyo, Japon";
@@ -663,3 +670,10 @@ $string['eventreadaloudattemptsubmitted'] = 'Tentative ReadAloud soumise';
 $string['cloudpoodllserver'] = 'Serveur Cloud Poodll';
 $string['cloudpoodllserver_details'] = 'Le serveur à utiliser pour Cloud Poodll. Ne le modifiez que si Poodll vous en a fourni un autre.';
 $string['ningxia'] = 'Ningxia, Chine';
+
+$string['completedsteps'] = 'Étapes terminées';
+$string['completionallsteps'] = 'Terminer lorsque toutes les étapes sont terminées';
+$string['completiondetail:allsteps'] = 'Terminez toutes les étapes de l’activité';
+$string['completionallsteps_help'] = 'L’activité est considérée comme terminée lorsque toutes les étapes sont complétées.';
+$string['completiondetail:mingrade'] = 'Terminer lorsque la note minimale est atteinte';
+$string['mingrade_help'] = 'L’activité est considérée comme terminée lorsque la note minimale requise est atteinte.';

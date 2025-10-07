@@ -1,6 +1,7 @@
 <?php
 namespace local_subscriptions\support;
 defined('MOODLE_INTERNAL') || die();
+require_once(__DIR__ . '/../../lib/plans_lib.php');
 
 use local_subscriptions\payment\Provider;
 use local_subscriptions\constants\Status;
@@ -33,10 +34,12 @@ final class SubsPresenter {
         $rows = [];
         $isadmin = ($view === 'admin');
 
+        $planname = local_subscriptions_plan_display_name($plan);
+
         // USER VIEW (publique)
         if (!$isadmin) {
             // Plan
-            $rows[] = [get_string('plan', 'local_subscriptions'), format_string($plan->name ?? '')];
+            $rows[] = [get_string('plan', 'local_subscriptions'), format_string($planname)];
             // Statut (traduit)
             $rows[] = [get_string('status', 'local_subscriptions'), self::render_status_badge(self::label_status($sub))];
             // Période (Start → End)
@@ -67,7 +70,7 @@ final class SubsPresenter {
         $rows[] = [get_string('subfield_userid', 'local_subscriptions'), (string)$sub->userid];
         $rows[] = [get_string('subfield_planid', 'local_subscriptions'), (string)$sub->planid];
 
-        $rows[] = [get_string('plan', 'local_subscriptions'), format_string($plan->name ?? '')];
+        $rows[] = [get_string('plan', 'local_subscriptions'), format_string($planname)];
         $rows[] = [get_string('status', 'local_subscriptions'), self::render_status_badge(self::label_status($sub))];
         $rows[] = [get_string('subfield_start', 'local_subscriptions'), userdate((int)$sub->start_date)];
         $rows[] = [get_string('subfield_end', 'local_subscriptions'), self::format_end($sub->end_date ?? null)];

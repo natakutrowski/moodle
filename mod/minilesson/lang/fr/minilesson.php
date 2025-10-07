@@ -14,10 +14,20 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Leçon Mini Poodll';
 $string['modulenameplural'] = 'Leçons Mini Poodll';
-$string['modulename_help'] = 'La Leçon Mini combine plusieurs activités d\'apprentissage de langue auto-évaluées en une leçon en ligne simple et guidée.';
-//$string['minilessonfieldset'] = 'Exemple de groupe de champs personnalisé';
-$string['minilessonname'] = 'Leçon Mini Poodll';
-$string['minilessonname_help'] = 'Ceci est le contenu de l\'info-bulle d\'aide associée au champ Nom de la Leçon Mini. La syntaxe Markdown est prise en charge.';
+$string['modulename_help'] = 'Poodll MiniLesson combine plusieurs activités d’apprentissage des langues dans une leçon en ligne simple et autonome.
+
+Une activité MiniLesson se compose d’une séquence d’éléments de leçon. Les types d’éléments incluent :
+
+* Choix multiple  
+* Écouter et parler  
+* Texte à trous (écrit/oral/écoute)  
+* Texte à trous sur un passage  
+* Discussion audio  
+* Expression orale ou écrite libre';
+
+$string['minilessonname'] = 'Poodll MiniLesson';
+
+$string['minilessonname_help'] = 'Nom de la MiniLesson';
 $string['minilesson'] = 'Leçon Mini Poodll';
 $string['activitylink'] = 'Lien vers l\'activité suivante';
 $string['activitylink_help'] = 'Pour fournir un lien après la tentative vers une autre activité du cours, sélectionnez l\'activité dans la liste déroulante.';

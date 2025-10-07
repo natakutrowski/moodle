@@ -29,8 +29,14 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Poodll Solo';
 $string['modulenameplural'] = 'Poodll Solo';
-$string['modulename_help'] = 'Poodll Solo — это активность, предназначенная для практики устной речи студентов. Студенты записывают свою речь на заданную тему, расшифровывают её и получают обратную связь по своей работе.';
-// $string['solofieldset'] = 'Пользовательский пример набора полей';
+$string['modulename_help'] = 'Poodll Solo — это задание на открытую устную (или письменную) речь. Студенты записывают себя, говоря на заданную тему, а Poodll Solo автоматически оценивает их ответ, исправляет грамматические ошибки и даёт обратную связь.
+
+Эту активность можно использовать для:
+
+* Подготовки студентов к устным экзаменам  
+* Тренировки устной речи с автоматической обратной связью  
+* Проведения устных тестов средней или низкой значимости (например, входных тестов)  
+* Коротких письменных заданий с мгновенными комментариями и исправлениями';
 $string['soloname'] = 'Poodll Solo';
 $string['soloname_help'] = 'Это содержимое всплывающей подсказки, связанной с полем soloname. Поддерживается синтаксис Markdown.';
 $string['solo'] = 'solo';
@@ -39,10 +45,6 @@ $string['activitylink_help'] = 'Чтобы предоставить ссылку
 $string['activitylinkname'] = 'Перейти к следующей активности: {$a}';
 $string['pluginadministration'] = 'Администрирование Poodll Solo';
 $string['pluginname'] = 'Poodll Solo';
-// $string['someadminsetting'] = 'Некоторые настройки администратора';
-// $string['someadminsetting_details'] = 'Дополнительная информация о настройках администратора';
-// $string['someinstancesetting'] = 'Некоторые настройки экземпляра';
-// $string['someinstancesetting_details'] = 'Дополнительная информация о настройках экземпляра';
 $string['solosettings'] = 'Настройки Solo';
 $string['solo:addinstance'] = 'Добавить новый Poodll Solo';
 $string['solo:view'] = 'Просмотреть Poodll Solo';
@@ -774,3 +776,8 @@ $string['teacherfeedback'] = 'Обратная связь учителя';
 $string['cloudpoodllserver'] = 'Сервер Cloud Poodll';
 $string['cloudpoodllserver_details'] = 'Сервер для использования Cloud Poodll. Изменяйте его только в случае, если Poodll предоставил другой.';
 $string['ningxia'] = 'Нинся, Китай';
+
+$string['eventsoloattemptautograded'] = 'Индивидуальная попытка оценена автоматически';
+$string['eventsoloattemptsubmitted'] = 'Индивидуальная попытка отправлена';
+$string['eventsolostepsubmitted'] = 'Индивидуальный шаг отправлен';
+$string['speakingtips_details'] = '';

@@ -96,7 +96,14 @@ $string['loading'] = 'Chargement';
 $string['learnactivity'] = 'Nouveaux mots';
 $string['markasseen'] = 'Marquer comme vu';
 $string['modulename'] = 'Poodll Wordcards';
-$string['modulename_help'] = 'Le module d\'activité Wordcards permet à un enseignant de créer des jeux de cartes personnalisés pour encourager les étudiants à apprendre de nouveaux mots.';
+$string['modulename_help'] = 'Poodll WordCards permet aux enseignants d’attribuer aux étudiants des listes de mots à apprendre. En utilisant les modes « étapes » ou « libre », les étudiants s’exercent jusqu’à ce que Poodll considère que les mots sont acquis.  
+Parmi les fonctionnalités de l’activité :
+
+* Dictionnaire assisté par IA (images et définitions)  
+* Suivi des mots appris par chaque étudiant  
+* Audio généré par IA ou téléchargé manuellement  
+* 6 activités d’entraînement lexical  
+* Révision intégrée du vocabulaire';
 $string['modulenameplural'] = 'Poodll Wordcards';
 $string['name'] = 'Nom';
 $string['nodefinitions'] = 'Aucun mot n\'a encore été ajouté.';

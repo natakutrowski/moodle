@@ -29,8 +29,14 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Poodll Solo';
 $string['modulenameplural'] = 'Poodll Solo';
-$string['modulename_help'] = 'Poodll Solo est une activité conçue pour offrir aux élèves une pratique de l\'expression orale. Les élèves s\'enregistrent en parlant d\'un sujet, transcrivent leur propre discours et reçoivent des retours sur leur travail.';
-// $string['solofieldset'] = 'Exemple de champ personnalisé';
+$string['modulename_help'] = 'Poodll Solo est une activité ouverte d’expression orale (ou écrite). Les étudiants s’enregistrent en train de parler sur un sujet, et Poodll Solo évalue automatiquement leur production, corrige la grammaire et fournit un retour détaillé.
+
+Cette activité peut être utilisée pour :
+
+* Aider les étudiants à se préparer aux examens oraux  
+* Offrir un entraînement à l’expression orale avec un retour automatique  
+* Réaliser des évaluations orales à faible ou moyenne importance (ex. tests de positionnement)  
+* Proposer de courts exercices d’expression écrite avec retour et corrections immédiats';
 $string['soloname'] = 'Poodll Solo';
 $string['soloname_help'] = 'Ceci est le contenu de l\'info-bulle d\'aide associée au champ nom de Poodll Solo. La syntaxe Markdown est prise en charge.';
 $string['solo'] = 'solo';
@@ -39,10 +45,6 @@ $string['activitylink_help'] = 'Pour fournir un lien après la tentative vers un
 $string['activitylinkname'] = 'Continuer vers l\'activité suivante : {$a}';
 $string['pluginadministration'] = 'Administration de Poodll Solo';
 $string['pluginname'] = 'Poodll Solo';
-// $string['someadminsetting'] = 'Paramètre administrateur';
-// $string['someadminsetting_details'] = 'Plus d\'informations sur le paramètre administrateur';
-// $string['someinstancesetting'] = 'Paramètre d\'instance';
-// $string['someinstancesetting_details'] = 'Plus d\'informations sur le paramètre d\'instance';
 $string['solosettings'] = 'Paramètres Solo';
 $string['solo:addinstance'] = 'Ajouter un nouveau Poodll Solo';
 $string['solo:view'] = 'Voir Poodll Solo';

@@ -160,10 +160,46 @@ $top_header             = get_config('theme_edly', 'top_header');
 $top_header_right_content = get_config('theme_edly', 'top_header_right_content');
 $top_header_content     = get_config('theme_edly', 'top_header_content');
 $header_search          = get_config('theme_edly', 'header_search');
-$header_btn_url         = get_config('theme_edly', 'header_btn_url');
-$header_left_btn_text   = get_config('theme_edly', 'header_left_btn_text');
-$header_left_btn_url    = get_config('theme_edly', 'header_left_btn_url');
-$header_btn_icon        = get_config('theme_edly', 'header_btn_icon_edly_icon_class');
+
+
+// URL de base du bouton (page d’abonnement).
+$header_btn_url       = get_config('theme_edly', 'header_btn_url'); // si Edly l’utilise ailleurs
+$header_left_btn_url  = $signup_url; // déjà défini plus haut : "{$CFG->wwwroot}/subscribe.php"
+$header_btn_icon      = get_config('theme_edly', 'header_btn_icon_edly_icon_class');
+
+// Libellé multilingue depuis local_subscriptions (suivant la langue de l’utilisateur).
+$header_left_btn_text = get_string('subscribe', 'local_subscriptions');
+
+// Appliquer le garde-fou d’accessibilité publique pour décider d’afficher le bouton.
+$mode   = get_config('local_subscriptions', 'availability_mode') ?: 'enabled';
+$sysctx = \context_system::instance();
+$cansee = true;
+
+if ($mode === 'adminonly') {
+    if (!isloggedin()) {
+        $cansee = false;
+    } else if (!has_capability('moodle/site:config', $sysctx)) {
+        $cansee = false;
+    }
+} else if ($mode === 'disabled') {
+    if (!is_siteadmin()) {
+        $cansee = false;
+    }
+}
+
+// (Optionnel) cacher pour les utilisateurs déjà connectés (si tu veux un CTA réservé aux invités).
+// if ($cansee && isloggedin() && !isguestuser()) { $cansee = false; }
+
+// Si on ne peut pas afficher, on vide le texte : le Mustache ne rendra pas le bouton.
+if (!$cansee) {
+    $header_left_btn_text = '';
+    // tu peux aussi vider l'URL pour être sûr : $header_left_btn_url = '';
+}
+
+
+
+
+
 
 $social_target = get_config('theme_edly', 'social_target');
 if($social_target == 1) {

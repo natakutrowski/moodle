@@ -4,6 +4,7 @@ namespace local_subscriptions;
 use local_subscriptions\url\UrlFactory;
 
 defined('MOODLE_INTERNAL') || die();
+require_once(__DIR__ . '/../lib/plans_lib.php');
 
 class mailer {
 
@@ -168,7 +169,7 @@ class mailer {
         $loginurl = (new \moodle_url('/login/index.php'))->out(false);
 
         $price   = format_float((float)($paymentreq->price ?? 0), 2).' '.strtoupper($paymentreq->currency ?? '');
-        $planname = s($plan->name ?? '');
+        $planname = local_subscriptions_plan_display_name($plan);
 
         $body = ''
         . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
@@ -198,7 +199,7 @@ class mailer {
         $title   = get_string('receipt_title', 'local_subscriptions');
         $price   = format_float((float)($paymentreq->price ?? 0), 2).' '.strtoupper($paymentreq->currency ?? '');
         $period  = userdate($sub->start_date).' → '.userdate($sub->end_date);
-        $planname= s($plan->name ?? '');
+        $planname = local_subscriptions_plan_display_name($plan);
         $tx      = s($paymentreq->transactionid ?? '');
 
         $coursesurl = (new \moodle_url('/'))->out(false); // ou vers une page “Mes cours”
@@ -231,7 +232,8 @@ class mailer {
         $user = self::ensure_full_user($user);
 
         // Sujet
-        $title = get_string('subupdate_subject', 'local_subscriptions', format_string($plan->name ?? ''));
+        $planname = local_subscriptions_plan_display_name($plan);
+        $title = get_string('subupdate_subject', 'local_subscriptions', format_string($planname));
 
         // Montant payé (price en priorité, sinon amount)
         $amount   = isset($paymentreq->price) ? (float)$paymentreq->price : (float)($paymentreq->amount ?? 0);
@@ -240,8 +242,7 @@ class mailer {
 
         // Période
         $period  = userdate((int)$sub->start_date) . ' → ' . userdate((int)$sub->end_date);
-        $planname = s($plan->name ?? '');
-
+        
         // Corps
         $body = ''
             . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
@@ -292,7 +293,7 @@ class mailer {
         $plan = $DB->get_record('subscription_plan', ['id'=>$pr->planid], 'id,name', IGNORE_MISSING);
         $title = get_string('email_abandoned_subject', 'local_subscriptions');
         $price = format_float((float)($pr->price ?? 0), 2).' '.strtoupper($pr->currency ?? '');
-        $planname = s($plan->name ?? '');
+        $planname = local_subscriptions_plan_display_name($plan);
         $retryurl = self::build_retry_url($pr);
 
         $body = \html_writer::tag('p', get_string('email_abandoned_intro', 'local_subscriptions'))
@@ -317,7 +318,7 @@ class mailer {
         $plan = $DB->get_record('subscription_plan', ['id'=>$pr->planid], 'id,name', IGNORE_MISSING);
         $title = get_string('email_failed_subject', 'local_subscriptions');
         $price = format_float((float)($pr->price ?? 0), 2).' '.strtoupper($pr->currency ?? '');
-        $planname = s($plan->name ?? '');
+        $planname = local_subscriptions_plan_display_name($plan);
         $retryurl = self::build_retry_url($pr);
 
         $body = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', s(trim(($user->firstname ?? '').' '.($user->lastname ?? '')))))
@@ -367,10 +368,11 @@ class mailer {
         $user = self::ensure_full_user($user);
         
         // Titre du mail (header du template)
+        $planname = local_subscriptions_plan_display_name($plan);
         $title = get_string(
             'mail_recurring_started_subject',
             'local_subscriptions',
-            format_string($plan->name)
+            format_string($planname)
         );
 
         // Corps (sera injecté dans ton layout)
@@ -381,7 +383,7 @@ class mailer {
         $body .= \html_writer::tag(
             'p',
             get_string('mail_recurring_started_body', 'local_subscriptions', [
-                'plan'  => format_string($plan->name),
+                'plan'  => format_string($planname),
                 'start' => userdate(time()),
             ])
         );
@@ -414,7 +416,7 @@ class mailer {
             'd1'  => 1,
         ][$remindkey] ?? 7;
 
-        $planname = format_string($plan->name ?? '');
+        $planname = local_subscriptions_plan_display_name($plan);
         $period   = userdate((int)$sub->start_date) . ' → ' . userdate((int)$sub->end_date);
         $enddate  = userdate((int)$sub->end_date);
 
@@ -455,7 +457,7 @@ class mailer {
     public static function send_subscription_activated(\stdClass $user, \stdClass $plan, \stdClass $sub): void {
         $user = self::ensure_full_user($user);
         
-        $planname = format_string($plan->name ?? '');
+        $planname = local_subscriptions_plan_display_name($plan);
         $period   = userdate((int)$sub->start_date) . ' → ' . userdate((int)$sub->end_date);
 
         $title = get_string('subscription_activated_subject', 'local_subscriptions', $planname);
@@ -491,7 +493,7 @@ class mailer {
     public static function send_subscription_expired(\stdClass $user, \stdClass $plan, \stdClass $sub): void {
         $user = self::ensure_full_user($user);
         
-        $planname = format_string($plan->name ?? '');
+        $planname = local_subscriptions_plan_display_name($plan);
         $period   = userdate((int)$sub->start_date) . ' → ' . userdate((int)$sub->end_date);
         $enddate  = userdate((int)$sub->end_date);
 
@@ -527,8 +529,8 @@ class mailer {
 
     public static function send_upgrade_confirmation(\stdClass $user, \stdClass $plan, \stdClass $pr, \stdClass $sub): void {
         $user = self::ensure_full_user($user);
-
-        $title = get_string('upgrade_confirmed_subject', 'local_subscriptions', format_string($plan->name));
+        $planname = local_subscriptions_plan_display_name($plan);
+        $title = get_string('upgrade_confirmed_subject', 'local_subscriptions', format_string($planname));
         $period = userdate((int)$sub->start_date).' → '.userdate((int)$sub->end_date);
 
         // Montant payé : préférer la sub, sinon PR (et ne diviser par 100 que si besoin)
@@ -551,9 +553,9 @@ class mailer {
         }
 
         $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
-        $body .= \html_writer::tag('p', get_string('upgrade_confirmed_body', 'local_subscriptions', format_string($plan->name)));
+        $body .= \html_writer::tag('p', get_string('upgrade_confirmed_body', 'local_subscriptions', format_string($planname)));
         $body .= \html_writer::start_tag('table', ['role'=>'presentation','cellspacing'=>'0','cellpadding'=>'0','border'=>'0','style'=>'margin:12px 0;font-size:14px;']);
-        $body .= '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions').'</td><td style="padding:4px 8px;">'.format_string($plan->name).'</td></tr>';
+        $body .= '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_plan','local_subscriptions').'</td><td style="padding:4px 8px;">'.format_string($planname).'</td></tr>';
         $body .= '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_period','local_subscriptions').'</td><td style="padding:4px 8px;"><code style="background:#f3f4f6;padding:2px 6px;border-radius:6px;">'.$period.'</code></td></tr>';
         if ($paid !== '') {
             $body .= '<tr><td style="padding:4px 8px;color:#6b7280;">'.get_string('receipt_total','local_subscriptions').'</td><td style="padding:4px 8px;">'.$paid.'</td></tr>';
@@ -580,9 +582,10 @@ class mailer {
     ): void {
 
         $user = self::ensure_full_user($user);
+        $planname = local_subscriptions_plan_display_name($plan);
 
         // Sujet : “Renouvellement confirmé – {Nom du plan}”
-        $title = get_string('renewal_subject', 'local_subscriptions', format_string($plan->name ?? ''));
+        $title = get_string('renewal_subject', 'local_subscriptions', format_string($planname));
 
         // Montant (si fourni par l’événement Stripe)
         $price = null;
@@ -599,7 +602,7 @@ class mailer {
         // Corps HTML
         $body = ''
             . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
-            . \html_writer::tag('p', get_string('renewal_body', 'local_subscriptions', format_string($plan->name ?? '')))
+            . \html_writer::tag('p', get_string('renewal_body', 'local_subscriptions', format_string($planname)))
 
             . \html_writer::start_tag('table', [
                 'role' => 'presentation', 'cellspacing' => '0', 'cellpadding' => '0', 'border' => '0',
@@ -644,6 +647,7 @@ class mailer {
         ?string $failcode = null, ?int $nextretry = null): void {
 
         global $DB;
+        $planname = local_subscriptions_plan_display_name($plan);
 
         // Compat : ancien appel -> seul $sub était fourni
         if (is_object($userOrSub) && $plan === null && $sub === null && isset($userOrSub->userid)) {
@@ -656,11 +660,11 @@ class mailer {
 
         $user = self::ensure_full_user($user);
 
-        $title = get_string('recurring_failed_subject', 'local_subscriptions', format_string($plan->name ?? ''));
+        $title = get_string('recurring_failed_subject', 'local_subscriptions', format_string( $planname));
 
         $body = ''
             . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
-            . \html_writer::tag('p', get_string('recurring_failed_body', 'local_subscriptions', format_string($plan->name ?? '')));
+            . \html_writer::tag('p', get_string('recurring_failed_body', 'local_subscriptions', format_string($planname)));
 
         // Bouton → Customer Portal (Stripe)
         $url = (UrlFactory::portal())->out(false);
@@ -676,6 +680,7 @@ class mailer {
 
     public static function send_cancellation_info($userOrSub, $plan = null, $sub = null, ?int $atperiodend = null): void {
         global $DB;
+        $planname = local_subscriptions_plan_display_name($plan);
 
         // Compat : ancien appel -> seul $sub était passé
         if (is_object($userOrSub) && $plan === null && $sub === null && isset($userOrSub->userid)) {
@@ -689,14 +694,13 @@ class mailer {
         // Sécurise fullname()/email_to_user()
         $user = self::ensure_full_user($user);
 
-        $support = \core_user::get_support_user();
-        $title = get_string('recurring_canceled_subject', 'local_subscriptions', format_string($plan->name ?? ''));
+        $title = get_string('recurring_canceled_subject', 'local_subscriptions', format_string($planname));
 
         $period = userdate((int)$sub->start_date) . ' → ' . userdate((int)$sub->end_date);
 
         $body = ''
             . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
-            . \html_writer::tag('p', get_string('recurring_canceled_body', 'local_subscriptions', format_string($plan->name ?? '')))
+            . \html_writer::tag('p', get_string('recurring_canceled_body', 'local_subscriptions', format_string($planname)))
 
             . \html_writer::start_tag('table', [
                 'role' => 'presentation', 'cellspacing' => '0', 'cellpadding' => '0', 'border' => '0',

@@ -344,18 +344,19 @@ $string['subfield_payment_status']    = 'Statut du paiement';
 $string['subpayment_action']          = 'Action requise';
 
 // (optionnel) libellés traduits pour tes statuts
-$string['substatus_active']    = 'Active';   // do not delete
-$string['substatus_queued']    = 'Queued';   // do not delete
-$string['substatus_replaced']  = 'Replaced'; // do not delete
-$string['substatus_expired']   = 'Expired';  // do not delete
-$string['substatus_canceled']  = 'Canceled'; // do not delete
-$string['substatus_pending']   = 'Pending';  // do not delete
-$string['substatus_error']     = 'Error';    // do not delete
-$string['substatus_suspended'] = 'Suspended';// do not delete
-$string['substatus_paid']      = 'Paid';     // do not delete
-$string['substatus_failed']    = 'Failed';   // do not delete
-$string['substatus_completed'] = 'Completed';// do not delete
-$string['substatus_unknown']   = 'Unknown';  // do not delete
+$string['substatus_active']    = 'Actif';            // do not delete
+$string['substatus_queued']    = 'En file d’attente'; // do not delete
+$string['substatus_replaced']  = 'Remplacé';         // do not delete
+$string['substatus_expired']   = 'Expiré';           // do not delete
+$string['substatus_canceled']  = 'Annulé';           // do not delete
+$string['substatus_pending']   = 'En attente';       // do not delete
+$string['substatus_error']     = 'Erreur';           // do not delete
+$string['substatus_suspended'] = 'Suspendu';         // do not delete
+$string['substatus_paid']      = 'Payé';             // do not delete
+$string['substatus_failed']    = 'Échec';            // do not delete
+$string['substatus_completed'] = 'Terminé';          // do not delete
+$string['substatus_unknown']   = 'Inconnu';          // do not delete
+
 
 $string['optional_error_msg'] = 'Message d’erreur optionnel';
 
