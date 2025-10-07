@@ -41,7 +41,7 @@ final class SubsPresenter {
             // Plan
             $rows[] = [get_string('plan', 'local_subscriptions'), format_string($planname)];
             // Statut (traduit)
-            $rows[] = [get_string('status', 'local_subscriptions'), self::render_status_badge(self::label_status($sub))];
+            $rows[] = [get_string('status', 'local_subscriptions'), self::render_status_badge($sub->status)];
             // Période (Start → End)
             $period = userdate((int)$sub->start_date).' → '.self::format_end($sub->end_date ?? null);
             $rows[] = [get_string('period', 'local_subscriptions'), $period];
@@ -71,7 +71,7 @@ final class SubsPresenter {
         $rows[] = [get_string('subfield_planid', 'local_subscriptions'), (string)$sub->planid];
 
         $rows[] = [get_string('plan', 'local_subscriptions'), format_string($planname)];
-        $rows[] = [get_string('status', 'local_subscriptions'), self::render_status_badge(self::label_status($sub))];
+        $rows[] = [get_string('status', 'local_subscriptions'), self::render_status_badge($sub->status)];
         $rows[] = [get_string('subfield_start', 'local_subscriptions'), userdate((int)$sub->start_date)];
         $rows[] = [get_string('subfield_end', 'local_subscriptions'), self::format_end($sub->end_date ?? null)];
 
