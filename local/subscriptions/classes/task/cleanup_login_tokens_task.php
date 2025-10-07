@@ -11,17 +11,23 @@ class cleanup_login_tokens_task extends \core\task\scheduled_task {
         global $DB;
 
         $now = time();
-        // Purge les jetons expirés
+
+        // (facultatif) comptage pour le log
+        $candidates = $DB->count_records_select(
+            'subscription_payment_request',
+            'login_token_expires IS NOT NULL AND login_token_expires < :now',
+            ['now' => $now]
+        );
+
+        // Nettoyage des jetons expirés
         $sql = "UPDATE {subscription_payment_request}
                    SET login_token = NULL,
-                       login_token_expires = NULL,
-                       last_update = :now
+                       login_token_expires = NULL
                  WHERE login_token_expires IS NOT NULL
                    AND login_token_expires < :now";
-        $params = ['now' => $now];
+        $ok = $DB->execute($sql, ['now' => $now]);
 
-        $count = $DB->execute($sql, $params);
-
-        mtrace('[local_subscriptions] cleanup_login_tokens_task executed');
+        mtrace('[local_subscriptions] cleanup_login_tokens_task — candidates=' .
+            $candidates . ', status=' . ($ok ? 'OK' : 'FAIL'));
     }
 }
