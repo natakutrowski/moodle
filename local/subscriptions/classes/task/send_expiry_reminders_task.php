@@ -2,6 +2,7 @@
 namespace local_subscriptions\task;
 
 use local_subscriptions\constants\Status;
+use local_subscriptions\mailer;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -89,12 +90,18 @@ class send_expiry_reminders_task extends \core\task\scheduled_task {
                     continue;
                 }
 
-                if (class_exists('\local_subscriptions\mailer')) {
-                    // On récupère juste le user et le plan pour alimenter le mailer
-                    $user = $DB->get_record('user', ['id'=>$s->userid, 'deleted'=>0], '*', MUST_EXIST);
-                    $plan = $DB->get_record('subscription_plan', ['id'=>$s->planid], '*', MUST_EXIST);
-                    \local_subscriptions\mailer::send_subscription_expiry_reminder($user, $plan, $s, $key);
-                }
+                // On récupère juste le user et le plan pour alimenter le mailer
+                $user = $DB->get_record('user', ['id'=>$s->userid, 'deleted'=>0], '*', MUST_EXIST);
+                $plan = $DB->get_record('subscription_plan', ['id'=>$s->planid], '*', MUST_EXIST);
+
+                mailer::dispatch(
+                    mailer::T_SUBSCRIPTION_EXPIRY_REM,[
+                        'user'          => $user,
+                        'plan'          => $plan,
+                        'sub'           => $s,
+                        'remindkey'     => $key
+                    ]
+                );
 
                 $DB->insert_record('subscription_reminder_log', (object)[
                     'subscriptionid' => $s->id,

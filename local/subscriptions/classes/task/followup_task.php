@@ -2,6 +2,7 @@
 namespace local_subscriptions\task;
 
 use local_subscriptions\constants\Status;
+use local_subscriptions\mailer;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -54,7 +55,12 @@ class followup_task extends \core\task\scheduled_task {
             if ((int)$pr->reminder_stage === 0) {
                 if ($age >= $ageToR2) {
                     // Envoie R2 uniquement (pas de double envoi avec R1).
-                    \local_subscriptions\mailer::send_reminder_second($pr);
+                    mailer::dispatch(
+                        mailer::T_REMINDER_SECOND,[
+                            'pr' => $pr
+                        ]
+                    );
+
                     $pr->reminder_stage = 2;
                     $pr->reminder2_at   = $now;
                     // Optionnel: si encore pending à ce stade, force expired
@@ -65,7 +71,12 @@ class followup_task extends \core\task\scheduled_task {
                     continue;
                 }
                 if ($age >= $ageToR1) {
-                    \local_subscriptions\mailer::send_reminder($pr); // R1
+                    mailer::dispatch(
+                        mailer::T_REMINDER_FIRST,[
+                            'pr' => $pr
+                        ]
+                    );
+
                     $pr->reminder_stage = 1;
                     $pr->reminder1_at   = $now;
                     $DB->update_record('subscription_payment_request', $pr);

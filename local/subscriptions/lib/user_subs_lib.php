@@ -5,6 +5,7 @@ use local_subscriptions\subscription_manager;
 use local_subscriptions\constants\Status;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\mailer;
+use local_subscriptions\security\TempPassword;
 
 require_once(__DIR__ . '/../lib.php');
 
@@ -52,7 +53,7 @@ function local_subscriptions_enrol_user_manual(int $userid, int $planid, string 
         if ($sendemails) {
             $user = core_user::get_user($userid);
             $plan = $DB->get_record('subscription_plan', ['id' => $planid], '*', MUST_EXIST);
-            $tmpPassword = generate_password(); // à toi de définir ou appeler ta logique ici
+            $tmpPassword = TempPassword::generate(12, 4);
             $paymentreq = (object)[
                 'price' => $pricepaid,
                 'currency' => $currency,
@@ -64,16 +65,17 @@ function local_subscriptions_enrol_user_manual(int $userid, int $planid, string 
                 update_internal_user_password($user, $tmpPassword); // à faire une seule fois si tu veux
             }
 
-            mailer::send_subscription_event(
-                $user,
-                $plan,
-                $paymentreq,
-                $sub,
-                $tmpPassword,
-                false,   // isupgrade
-                false     // user already exists
+            mailer::dispatch(
+                mailer::T_SUBSCRIPTION_EVENT,[
+                    'user'          => $user,
+                    'plan'          => $plan,
+                    'pr'            => $paymentreq,
+                    'sub'           => $sub,
+                    'tmpPassword'   => $tmpPassword,
+                    'isupgrade'     => false,
+                    'isnewuser'     => false    // user already exists
+                ]
             );
-
         }
     }
 
@@ -275,7 +277,9 @@ function get_user_country_code(): string {
         // Génère username unique (reprend ta fonction utilitaire existante)
         $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $email ?? '');
         
-        $tmpPassword = random_string(16);
+        $tmpPassword = TempPassword::generate(12, 4);
+
+        $defaultuserlang = get_config('local_subscriptions', 'defaultuserlang'); // '' = hériter du site
 
         $u = (object)[
             'auth'               => 'manual',
@@ -290,6 +294,12 @@ function get_user_country_code(): string {
             'lang'               => !empty($CFG->lang) ? $CFG->lang : current_language(), // set to default language of the site
             'forcepasswordchange'=> 1,
         ];
+
+        // Hériter de la langue du site si réglage vide, sinon forcer.
+        if (!empty($defaultuserlang)) {
+            $u->lang = $defaultuserlang;
+        }
+
         $userid = user_create_user($u, false, false);
         
         // Force le changement de mot de passe sur Moodle 4.x+

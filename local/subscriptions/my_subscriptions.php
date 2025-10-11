@@ -161,7 +161,7 @@ foreach ($subs as $sub) {
       echo html_writer::start_div('modal-dialog modal-lg modal-dialog-scrollable');
         echo html_writer::start_div('modal-content');
           echo html_writer::div(
-              html_writer::tag('h5', get_string('subscription_details','local_subscriptions').' #'.$sub->id, ['class'=>'modal-title'])
+              html_writer::tag('h5', get_string('subscription_details','local_subscriptions'), ['class'=>'modal-title'])
             . html_writer::tag('button','', ['type'=>'button','class'=>'btn-close','data-bs-dismiss'=>'modal','aria-label'=>'Close']),
             'modal-header d-flex align-items-center justify-content-between'
           );

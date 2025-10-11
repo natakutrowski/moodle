@@ -26,6 +26,8 @@ final class AlfaGateway implements PaymentGatewayInterface {
     private $password;
     /** @var string|null */
     private $token;
+    /** @var string|null */    
+    private $webhooksecret;
 
     public function __construct(array $overrides = []) {
         $cfg = $this->cfg($overrides);

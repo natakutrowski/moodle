@@ -74,8 +74,20 @@ final class Provider {
     }
 
     /** HTML: icône + nom (prêt à injecter dans un tableau) */
-    public static function label_with_icon(?string $code): string {
+    public static function label_with_icon(?string $code, string $mode = 'web'): string {
         $name = self::get($code);
+
+        if ($mode === 'email') {
+            if ($u = self::icon_email_url($code)) {
+                $img = \html_writer::empty_tag('img', [
+                    'src'=>$u->out(false), 'alt'=>$name, 'width'=>20, 'height'=>20,
+                    'style'=>'vertical-align:-3px;margin-right:6px',
+                ]);
+                return \html_writer::span($img.\html_writer::span($name, 'ls-provider-name'), 'ls-provider-badge');
+            }
+            return \html_writer::span($name, 'ls-provider-name');
+        }
+
         $url  = self::icon_url($code);
         if ($url) {
             $img = \html_writer::empty_tag('img', [
@@ -112,6 +124,15 @@ final class Provider {
     public static function is_local(?string $code): bool {
         return in_array(strtolower((string)$code), [self::MANUAL, self::CSV, self::DEV], true);
     }
+
+    public static function icon_email_url(string $code): ?\moodle_url {
+        global $CFG;
+        $code = strtolower($code);
+        $path = $CFG->wwwroot.'/local/subscriptions/pix/email/'.$code.'.png';
+        // Optionnel: vérifier l’existence du fichier côté FS si tu veux
+        return new \moodle_url($path);
+    }
+
 
 
 }

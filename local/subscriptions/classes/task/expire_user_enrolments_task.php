@@ -2,6 +2,7 @@
 namespace local_subscriptions\task;
 
 use local_subscriptions\constants\Status;
+use local_subscriptions\mailer;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -31,11 +32,17 @@ class expire_user_enrolments_task extends \core\task\scheduled_task {
             );
 
             // Mail d’activation (optionnel)
-            if (class_exists('\local_subscriptions\mailer')) {
-                $user = $DB->get_record('user', ['id'=>$q->userid, 'deleted'=>0], 'id,username,firstname,lastname,email', MUST_EXIST);
-                $plan = $DB->get_record('subscription_plan', ['id'=>$q->planid], '*', MUST_EXIST);
-                \local_subscriptions\mailer::send_subscription_activated($user, $plan, $q);
-            }
+            $user = $DB->get_record('user', ['id'=>$q->userid, 'deleted'=>0], 'id,username,firstname,lastname,email', MUST_EXIST);
+            $plan = $DB->get_record('subscription_plan', ['id'=>$q->planid], '*', MUST_EXIST);
+
+            mailer::dispatch(
+                mailer::T_SUBSCRIPTION_ACTIVATED,[
+                    'user'          => $user,
+                    'plan'          => $plan,
+                    'sub'           => $q
+                ]
+            );
+
         }
 
         // 2) EXPIRER les actives dépassées + SUSPENDRE les cours
@@ -59,10 +66,17 @@ class expire_user_enrolments_task extends \core\task\scheduled_task {
                 "userid = :u AND planid = :p AND status = '".Status::QUEUED."' AND start_date > :now",
                 ['u'=>$sub->userid, 'p'=>$sub->planid, 'now'=>$now]
             );
-            if (!$hasnext && class_exists('\local_subscriptions\mailer')) {
+            if (!$hasnext) {
                 $user = $DB->get_record('user', ['id'=>$sub->userid, 'deleted'=>0], '*', MUST_EXIST);
                 $plan = $DB->get_record('subscription_plan', ['id'=>$sub->planid], '*', MUST_EXIST);
-                \local_subscriptions\mailer::send_subscription_expired($user, $plan, $sub);
+
+                mailer::dispatch(
+                    mailer::T_SUBSCRIPTION_EXPIRED,[
+                        'user'          => $user,
+                        'plan'          => $plan,
+                        'sub'           => $sub
+                    ]
+                );
             }
         }
     }

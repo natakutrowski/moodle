@@ -48,6 +48,28 @@ if ($hassiteconfig) {
                 'adminonly' => get_string('availability_adminonly', 'local_subscriptions'),
                 'disabled'  => get_string('availability_disabled', 'local_subscriptions'),
             ]
+        ));    
+        
+        // Liste des langues installées.
+        $langs = get_string_manager()->get_list_of_translations(); // ['en'=>'English (en)', 'fr'=>'Français (fr)', ...]
+        $options = ['' => get_string('settings:sitedefault', 'local_subscriptions')] + $langs;
+
+        // 1) Langue par défaut pour les nouveaux comptes.
+        $settings->add(new admin_setting_configselect(
+            'local_subscriptions/defaultuserlang',
+            get_string('settings:defaultuserlang', 'local_subscriptions'),
+            get_string('settings:defaultuserlang_desc', 'local_subscriptions'),
+            '', // vide => hérite de la langue du site
+            $options
+        ));
+
+        // 2) Langue utilisée pour les e-mails du plugin.
+        $settings->add(new admin_setting_configselect(
+            'local_subscriptions/defaultemaillang',
+            get_string('settings:defaultemaillang', 'local_subscriptions'),
+            get_string('settings:defaultemaillang_desc', 'local_subscriptions'),
+            '', // vide => langue de l’utilisateur ou langue du site
+            $options
         ));
 
         // === Providers (global) ====================================================

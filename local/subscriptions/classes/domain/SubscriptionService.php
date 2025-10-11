@@ -6,6 +6,7 @@ use local_subscriptions\log\EventLogger;
 use local_subscriptions\constants\Status;
 use local_subscriptions\support\Duration;
 use local_subscriptions\payment\ProviderSelector;
+use local_subscriptions\mailer;
 
 class SubscriptionService {
 
@@ -88,8 +89,18 @@ class SubscriptionService {
             $currency = isset($e->currency) ? strtoupper($e->currency) : null;
             $invoice  = $e->meta['invoice'] ?? null;
 
-            \local_subscriptions\mailer::send_renewal_ok($user, $planrec, $sub, $amount, $currency, $invoice, $oldend);
-            
+            mailer::dispatch(
+                mailer::T_RENEWAL_OK,[
+                    'user'      => $user,
+                    'plan'      => $planrec,
+                    'sub'       => $sub,
+                    'amount'    => $amount,
+                    'currency'  => $currency,
+                    'invoiceid' => $invoice,
+                    'oldend'    => $oldend
+                ]
+            );            
+
         } catch (\Throwable $ex) {
             error_log('[subs][mail][renewal] '.$ex->getMessage());
             // on poursuit le flux pour étendre l’accès aux cours quoi qu’il arrive
@@ -201,8 +212,18 @@ class SubscriptionService {
             $planrec = $DB->get_record('subscription_plan', ['id' => $sub->planid], '*', MUST_EXIST);
 
             // Deux noms possibles, suivant ton mailer
-            \local_subscriptions\mailer::send_failed_recurring(
-                $user, $planrec, $sub, $amount, $currency, $invoiceid, $failcode, $nexttry
+            mailer::dispatch(
+                mailer::T_FAILED_RECURRING,[
+                    'user'          => $user,
+                    'plan'          => $planrec,
+                    'opts'          => [
+                        'amount'    => $amount,
+                        'currency'  => $currency,
+                        'invoiceid' => $invoiceid,
+                        'failcode'  => $failcode,    // ex. 'card_declined'
+                        'nextretry' => $nexttry,     // timestamp
+                    ]
+                ]
             );
         
         } catch (\Throwable $ex) {
@@ -242,7 +263,15 @@ class SubscriptionService {
                 $atperiodend = (int)(bool)$e->meta['cancel_at_period_end'];
             }
 
-            \local_subscriptions\mailer::send_cancellation_info($user, $planrec, $sub, $atperiodend);
+            mailer::dispatch(
+                mailer::T_CANCELLATION_INFO,[
+                    'user'          => $user,
+                    'plan'          => $planrec,
+                    'sub'           => $sub,
+                    'atperiodend'   => $atperiodend
+                ]
+            );
+
         } catch (\Throwable $ex) {
             error_log('[subs][mail][cancellation] '.$ex->getMessage());
             // On n'arrête jamais le flux webhook
@@ -340,12 +369,15 @@ class SubscriptionService {
                 $planrec = $DB->get_record('subscription_plan', ['id' => $rec->planid], '*', MUST_EXIST);
 
                 // On passe atperiodend=1 et un hint de fin (cpe) si dispo pour remplir la "Période"
-                \local_subscriptions\mailer::send_cancellation_info(
-                    $user,
-                    $planrec,
-                    $rec,
-                    1,          // atperiodend
+                mailer::dispatch(
+                    mailer::T_CANCELLATION_INFO,[
+                        'user'          => $user,
+                        'plan'          => $planrec,
+                        'sub'           => $rec,
+                        'atperiodend'   => true
+                    ]
                 );
+
             } catch (\Throwable $ex) {
                 error_log('[subs][mail][cape_notice] '.$ex->getMessage());
                 // On ne casse jamais le flux

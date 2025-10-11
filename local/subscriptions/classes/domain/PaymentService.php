@@ -5,8 +5,10 @@ use local_subscriptions\log\EventLogger;
 use local_subscriptions\payment\dto\InternalEvent;
 use local_subscriptions\constants\Operation;
 use local_subscriptions\constants\Status;
+use local_subscriptions\payment\TransactionIdResolver;
 use local_subscriptions\support\Duration;
 use local_subscriptions\payment\Provider;
+use local_subscriptions\mailer;
 
 require_once(__DIR__ . '/../../lib/user_subs_lib.php');
 
@@ -19,6 +21,15 @@ require_once(__DIR__ . '/../../lib/user_subs_lib.php');
  * - envoie les emails (idempotent)
  */
 class PaymentService {
+
+
+    private static function secretStripeKey(): string {
+
+        $env = get_config('local_subscriptions', 'stripe_env') ?: 'test';
+        $env = ($env === 'live') ? 'live' : 'test';
+
+        return get_config('local_subscriptions', "stripe_{$env}_secret") ?: '';
+    }
 
     /**
      * Événement interne : checkout complété (one-shot ou démarrage d’abonnement).
@@ -41,30 +52,14 @@ class PaymentService {
         // Idempotence : si déjà traité, on sort
         if (in_array($pr->status ?? '', [Status::PAID, Status::COMPLETED], true)) { return; }
 
-        // 2) Si provider Stripe et qu'on veut récupérer le PI id, on tente (optionnel)
-        $transactionid = null;
-        if (($e->meta['provider'] ?? '') === Provider::STRIPE && !empty($e->meta['session'])) {
-            // On essaye d'aller chercher le PaymentIntent lié à la session, sans faire planter le flux
-            try {
-                require_once($CFG->dirroot . '/local/subscriptions/vendor/autoload.php'); 
-                \Stripe\Stripe::setApiKey(get_config('local_subscriptions', 'stripe_secret_key') ?? get_config('local_subscriptions', 'stripe_secret'));
-                $session = \Stripe\Checkout\Session::retrieve($e->meta['session']);
-                if (!empty($session->payment_intent)) {
-                    $pi = \Stripe\PaymentIntent::retrieve($session->payment_intent);
-                    // Si besoin tu peux vérifier $pi->status === 'succeeded'
-                    $transactionid = $pi->id;
-                }
-            } catch (\Throwable $ex) {
-                // soft log uniquement
-                error_log('[subs][PaymentService] unable to fetch PI: '.$ex->getMessage());
-            }
-        }
+        // 3) Transaction ID via le resolver (agnostique Stripe/Alfa/…)
+        $transactionid = TransactionIdResolver::resolve_from_spr($pr, $e->meta ?? []);
 
-        // 3) Finaliser la demande + réponse json brute utile au debug
+        // 4) Finaliser la demande + réponse json brute utile au debug
         $transaction = $DB->start_delegated_transaction();
 
         $pr->status         = Status::PAID;
-        if ($transactionid) { $pr->transactionid = $transactionid; }
+        if (!empty($transactionid) && empty($pr->transactionid)) { $pr->transactionid = (string)$transactionid; }
         $pr->payment_date   = time();
         if (empty($pr->response_json)) {
             // on mémorise un résumé minimal de l’événement
@@ -333,13 +328,36 @@ class PaymentService {
                 $recipient = \core_user::get_user($user->id, '*', MUST_EXIST); // user COMPLET
                 $recipient->mailformat = 1;
 
-                \local_subscriptions\mailer::send_subscription_event($recipient, $plan, $pr, $sub, $tmpPassword ?? null, $isupgrade, $isnew);
+                mailer::dispatch(
+                    mailer::T_SUBSCRIPTION_EVENT,[
+                        'user'          => $recipient,
+                        'plan'          => $plan,
+                        'pr'            => $pr,
+                        'sub'           => $sub,
+                        'tmpPassword'   => $tmpPassword,
+                        'isupgrade'     => $isupgrade,
+                        'isnewuser'     => $isnew
+                    ]
+                );
 
                 if (!empty($e->provider_subscription_id)) {
-                    \local_subscriptions\mailer::send_recurring_started($recipient, $plan, $pr);
+                    mailer::dispatch(
+                        mailer::T_RECURRING_STARTED,[
+                            'user'  => $recipient,
+                            'plan'  => $plan,
+                            'pr'    => $pr
+                        ]
+                    );
                 }
 
-                \local_subscriptions\mailer::send_receipt($recipient, $plan, $pr, $sub);
+                mailer::dispatch(
+                    mailer::T_RECEIPT,[
+                        'user'   => $recipient,
+                        'plan'   => $plan,
+                        'pr'     => $pr,
+                        'sub'    => $sub
+                    ]
+                );
 
                 $pr->emailsent = 1;
                 $DB->update_record('subscription_payment_request', $pr);
@@ -365,12 +383,15 @@ class PaymentService {
         $pr->last_attempt = time();
         $DB->update_record('subscription_payment_request', $pr);
 
-        // ton mailer existant :
-        \local_subscriptions\mailer::send_abandoned($pr);
+        mailer::dispatch(
+            mailer::T_PAYMENT_ABANDONED,[
+                'pr' => $pr
+            ]
+        );
     }
 
     public static function on_payment_failed(InternalEvent $e): void {
-        global $DB, $CFG;
+        global $DB, $CFG;        
 
         // 1) retrouver la PR
         $pr = null;
@@ -382,7 +403,7 @@ class PaymentService {
         if (!$pr && $piid) {
             try {
                 require_once($CFG->dirroot.'/local/subscriptions/vendor/autoload.php');
-                \Stripe\Stripe::setApiKey(get_config('local_subscriptions','stripe_secret_key') ?? get_config('local_subscriptions','stripe_secret'));
+                \Stripe\Stripe::setApiKey(self::secretStripeKey());
                 $sessions = \Stripe\Checkout\Session::all(['payment_intent' => $piid, 'limit' => 1]);
                 if (!empty($sessions->data)) {
                     $sess = $sessions->data[0];
@@ -414,9 +435,11 @@ class PaymentService {
             }
             $DB->update_record('subscription_payment_request', $pr);
 
-            if (class_exists('\local_subscriptions\mailer')) {
-                \local_subscriptions\mailer::send_failed($pr);
-            }
+            mailer::dispatch(
+                mailer::T_PAYMENT_FAILED,[
+                    'pr' => $pr
+                ]
+            );
         }
     }
 

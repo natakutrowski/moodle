@@ -25,7 +25,11 @@ if ($paymentreq && $paymentreq->status === Status::PENDING) {
 
     // Envoi d’un mail de reprise (gentil) après Cancel
     if (!empty($paymentreq->email) || !empty($paymentreq->userid)) {
-        mailer::send_abandoned($paymentreq);
+        mailer::dispatch(
+            mailer::T_PAYMENT_ABANDONED,[
+                'pr' => $paymentreq
+            ]
+        );
     }
 }
 

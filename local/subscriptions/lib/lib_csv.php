@@ -190,15 +190,17 @@ function process_csv_rows(array $validrows): array {
             'provider' => Provider::CSV,
         ];
 
-        mailer::send_subscription_event(
-            $user,
-            $plan,
-            $paymentreq,
-            $sub,
-            $tmpPassword, // pas de mot de passe car user déjà existant
-            false,
-            $isnewuser
-        );        
+        mailer::dispatch(
+            mailer::T_SUBSCRIPTION_EVENT,[
+                'user'          => $user,
+                'plan'          => $plan,
+                'pr'            => $paymentreq,
+                'sub'           => $sub,
+                'tmpPassword'   => $tmpPassword, // pas de mot de passe car user déjà existant
+                'isupgrade'     => false,
+                'isnewuser'     => $isnewuser
+            ]
+        );
         
         $imported++;
     }

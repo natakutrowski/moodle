@@ -194,7 +194,7 @@ $string['checkout_go_to_payment'] = 'Go to payment';
 
 $string['welcome_subject'] = 'Welcome to {$a}';
 $string['welcome_body_intro'] = 'Your account has been created and your subscription is now active.';
-$string['welcome_username'] = 'Your username: {$a}';
+$string['welcome_username'] = 'Your username:';
 $string['welcome_plan_summary'] = 'Plan: {$a}';
 $string['welcome_amount_summary'] = 'Amount: {$a}';
 
@@ -204,7 +204,7 @@ $string['receipt_amount'] = 'Amount: ';
 $string['receipt_tx'] = 'Transaction ID: ';
 $string['receipt_period'] = 'Access period: ';
 
-$string['welcome_temp_password_label'] = 'Temporary password';
+$string['welcome_temp_password_label'] = 'Temporary password:';
 $string['welcome_security_hint'] = 'For your security, you will be asked to set a new password on your first login.';
 $string['receipt_intro'] = 'Here is a copy of your purchase details:';
 $string['receipt_button_open'] = 'Open my courses';
@@ -521,3 +521,14 @@ $string['plan_description_show'] = 'Show description';
 
 $string['email_copy_to'] = 'Admin e-mail copy';
 $string['email_copy_to_desc'] = 'One or more addresses (comma-separated) will receive a copy of emails sent by the Subscriptions plugin.';
+
+$string['settings:sitedefault'] = 'Site default language';
+$string['settings:defaultuserlang'] = 'Default language for new accounts';
+$string['settings:defaultuserlang_desc'] = 'If empty, new users inherit the site default language. Choose a language to force it on creation.';
+$string['settings:defaultemaillang'] = 'Language for emails sent by the plugin';
+$string['settings:defaultemaillang_desc'] = 'If empty, emails use the recipient’s preferred language (or the site default). Choose a language to force it.';
+
+$string['recurring_canceled_effect_now'] = 'Cancellation takes effect immediately. Your access is suspended.';
+$string['recurring_canceled_effect_on']  = 'Cancellation will take effect on {$a}. You keep access until then.';
+$string['payment_failcode'] = 'Reason';
+$string['payment_nextretry'] = 'Next attempt';

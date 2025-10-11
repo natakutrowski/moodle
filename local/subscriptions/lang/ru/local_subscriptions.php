@@ -194,7 +194,7 @@ $string['checkout_go_to_payment'] = 'Перейти к оплате';
 
 $string['welcome_subject'] = 'Добро пожаловать в {$a}';
 $string['welcome_body_intro'] = 'Ваша учётная запись создана, а подписка активирована.';
-$string['welcome_username'] = 'Ваш логин: {$a}';
+$string['welcome_username'] = 'Ваш логин:';
 $string['welcome_plan_summary'] = 'Тариф: {$a}';
 $string['welcome_amount_summary'] = 'Сумма: {$a}';
 
@@ -204,7 +204,7 @@ $string['receipt_amount'] = 'Сумма: ';
 $string['receipt_tx'] = 'ID транзакции: ';
 $string['receipt_period'] = 'Период доступа: ';
 
-$string['welcome_temp_password_label'] = 'Временный пароль';
+$string['welcome_temp_password_label'] = 'Временный пароль:';
 $string['welcome_security_hint'] = 'В целях безопасности при первом входе вам будет предложено задать новый пароль.';
 $string['receipt_intro'] = 'Вот копия сведений о вашей покупке:';
 $string['receipt_button_open'] = 'Открыть мои курсы';
@@ -520,3 +520,14 @@ $string['plan_description_show'] = 'Показать описание';
 
 $string['email_copy_to'] = 'Адрес для копии администратору';
 $string['email_copy_to_desc'] = 'Один или несколько адресов (через запятую) будут получать копии писем, отправляемых плагином Subscriptions.';
+
+$string['settings:sitedefault'] = 'Язык сайта по умолчанию';
+$string['settings:defaultuserlang'] = 'Язык по умолчанию для новых аккаунтов';
+$string['settings:defaultuserlang_desc'] = 'Если не указано, новые пользователи наследуют язык сайта по умолчанию. Выберите язык, чтобы принудительно установить его при создании.';
+$string['settings:defaultemaillang'] = 'Язык писем, отправляемых плагином';
+$string['settings:defaultemaillang_desc'] = 'Если не указано, письма будут отправляться на предпочитаемом языке получателя (или на языке сайта по умолчанию). Выберите язык, чтобы принудительно установить его.';
+
+$string['recurring_canceled_effect_now'] = 'Отмена вступает в силу немедленно. Ваш доступ приостановлен.';
+$string['recurring_canceled_effect_on']  = 'Отмена вступит в силу {$a}. До этого момента доступ сохраняется.';
+$string['payment_failcode'] = 'Причина';
+$string['payment_nextretry'] = 'Следующая попытка';

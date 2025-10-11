@@ -194,7 +194,7 @@ $string['checkout_go_to_payment']= 'Aller au paiement';
 
 $string['welcome_subject']        = 'Bienvenue sur {$a}';
 $string['welcome_body_intro']     = 'Votre compte a été créé et votre abonnement est maintenant actif.';
-$string['welcome_username']       = 'Votre identifiant : {$a}';
+$string['welcome_username']       = 'Votre identifiant :';
 $string['welcome_plan_summary']   = 'Plan : {$a}';
 $string['welcome_amount_summary'] = 'Montant : {$a}';
 
@@ -204,7 +204,7 @@ $string['receipt_amount']  = 'Montant : ';
 $string['receipt_tx']      = 'ID de transaction : ';
 $string['receipt_period']  = 'Période d’accès : ';
 
-$string['welcome_temp_password_label'] = 'Mot de passe temporaire';
+$string['welcome_temp_password_label'] = 'Mot de passe temporaire :';
 $string['welcome_security_hint']       = 'Pour votre sécurité, il vous sera demandé de définir un nouveau mot de passe lors de votre première connexion.';
 $string['receipt_intro']               = 'Voici un récapitulatif de votre achat :';
 $string['receipt_button_open']         = 'Ouvrir mes cours';
@@ -519,3 +519,14 @@ $string['plan_description_show']  = 'Afficher la description';
 
 $string['email_copy_to']      = 'Copie e-mail admin';
 $string['email_copy_to_desc'] = 'Une ou plusieurs adresses (séparées par des virgules) recevront une copie des e-mails envoyés par le plugin Abonnements.';
+
+$string['settings:sitedefault'] = 'Langue du site (par défaut)';
+$string['settings:defaultuserlang'] = 'Langue par défaut pour les nouveaux comptes';
+$string['settings:defaultuserlang_desc'] = 'Si vide, les nouveaux utilisateurs héritent de la langue par défaut du site. Choisissez une langue pour la forcer à la création.';
+$string['settings:defaultemaillang'] = 'Langue des e-mails envoyés par le plugin';
+$string['settings:defaultemaillang_desc'] = 'Si vide, les e-mails utilisent la langue préférée du destinataire (ou la langue du site). Choisissez une langue pour la forcer.';
+
+$string['recurring_canceled_effect_now'] = 'La résiliation prend effet immédiatement. Votre accès est suspendu.';
+$string['recurring_canceled_effect_on']  = 'La résiliation prendra effet le {$a}. Vous conservez l’accès jusqu’à cette date.';
+$string['payment_failcode'] = 'Raison';
+$string['payment_nextretry'] = 'Prochaine tentative';
