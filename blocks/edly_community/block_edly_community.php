@@ -4,7 +4,7 @@ defined('MOODLE_INTERNAL') || die();
 class block_edly_community extends block_base {
 
     public function init() {
-        $this->title = '';
+        $this->title = get_string('pluginname', 'block_edly_community');
     }
 
     public function specialization() {

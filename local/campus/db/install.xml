@@ -20,10 +20,12 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="email_ix" TYPE="index" FIELDS="email"/>
-        <KEY NAME="expires_ix" TYPE="index" FIELDS="expiresat"/>
-        <KEY NAME="status_ix" TYPE="index" FIELDS="status"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="email_ix"   UNIQUE="false" FIELDS="email"/>
+        <INDEX NAME="expires_ix" UNIQUE="false" FIELDS="expiresat"/>
+        <INDEX NAME="status_ix"  UNIQUE="false" FIELDS="status"/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>
