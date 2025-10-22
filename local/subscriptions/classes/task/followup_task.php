@@ -90,7 +90,11 @@ class followup_task extends \core\task\scheduled_task {
                 $sinceR1 = $pr->reminder1_at ? ($now - (int)$pr->reminder1_at) : PHP_INT_MAX;
 
                 if ($age >= $ageToR2 && $sinceR1 >= $gapR1R2) {
-                    \local_subscriptions\mailer::send_reminder_second($pr); // R2
+                    mailer::dispatch(
+                        mailer::T_REMINDER_SECOND,[
+                            'pr' => $pr
+                        ]
+                    );
                     $pr->reminder_stage = 2;
                     $pr->reminder2_at   = $now;
                     if ($pr->status === Status::PENDING) {

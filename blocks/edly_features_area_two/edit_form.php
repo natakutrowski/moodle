@@ -67,15 +67,21 @@ class block_edly_features_area_two_edit_form extends block_edit_form {
             // Icon
             $select = $mform->addElement('select', 'config_icon' . $i, get_string('config_icon', 'theme_edly'), $edlyFontList, array('class'=>'edly_icon_class'));
 
+            // Image (URL) – si vide, on garde l'icône
+            $mform->addElement('text', 'config_image' . $i,
+                get_string('image','theme_edly') . ' (URL) — ' . get_string('optional', 'moodle'));
+            $mform->setType('config_image' . $i, PARAM_RAW_TRIMMED); // URL/chemin; edly_block_image_process gère la suite
+            $mform->setDefault('config_image' . $i, '');
+
             // Title
             $mform->addElement('text', 'config_features_title' . $i, get_string('config_title', 'theme_edly', $i));
             $mform->setDefault('config_features_title' . $i, 'Unlimited access');
-            $mform->setType('config_features_title' . $i, PARAM_TEXT);
+            $mform->setType('config_features_title' . $i, PARAM_RAW);
 
             // Card Content
             $mform->addElement('text', 'config_features_content' . $i, get_string('config_content', 'theme_edly', $i));
             $mform->setDefault('config_features_content' . $i, 'Break into a new field like information technology or data science. No prior experience necessary to get started.');
-            $mform->setType('config_features_content' . $i, PARAM_TEXT);                
+            $mform->setType('config_features_content' . $i, PARAM_RAW);                
         }
     }
 }

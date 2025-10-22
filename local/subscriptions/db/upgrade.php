@@ -2,6 +2,7 @@
 
 function xmldb_local_subscriptions_upgrade($oldversion) {
     global $DB;
+	$dbman = $DB->get_manager();
 
     if ($oldversion < 2025061101) {
         $table = new xmldb_table('user_subscription');
@@ -198,7 +199,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 
 	if ($oldversion < 2025062100) {
 
-		$dbman = $DB->get_manager();
+		
 		$table = new xmldb_table('user_subscription');
 
 		$fields = [
@@ -229,7 +230,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
     // === Création de la table subscription_payment_request ===
     if ($oldversion < 2025062901) {
 
-		$dbman = $DB->get_manager();
+		
         $table = new xmldb_table('subscription_payment_request');
 
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
@@ -257,7 +258,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 
     // === Renommage des colonnes xxx_id -> xxxid pour cohérence ===
     if ($oldversion < 2025062902) {
-		$dbman = $DB->get_manager();
+		
 
         // 1. user_subscription: transaction_id -> transactionid
         $table = new xmldb_table('user_subscription');
@@ -298,7 +299,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
     }
 
 	if ($oldversion < 2025063002) {
-		$dbman = $DB->get_manager();
+		
 
 		// Supprimer les anciennes colonnes.
 		$table = new xmldb_table('subscription_payment_request');
@@ -337,7 +338,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2025063002, 'local', 'subscriptions');
 	}
     if ($oldversion < 2025082301) {
-		$dbman = $DB->get_manager();
+		
         $table = new xmldb_table('subscription_payment_request');
 
         // 1) subscriptionid -> nullable
@@ -398,7 +399,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
     }
 
 	if ($oldversion < 2025082401) {
-		$dbman = $DB->get_manager();
+		
 		$table = new xmldb_table('subscription_payment_request');
 		$field = new xmldb_field('emailsent', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
 
@@ -417,7 +418,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 
 
 	if ($oldversion < 2025082501) {
-		$dbman = $DB->get_manager();
+		
 		$table = new xmldb_table('subscription_payment_request');
 
 		foreach ([
@@ -434,7 +435,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 	}
 
 	if ($oldversion < 2025082601) {
-		$dbman = $DB->get_manager();
+		
 		$table = new xmldb_table('subscription_payment_request');
 
 		$fields = [
@@ -452,7 +453,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 	}
 
 	if ($oldversion < 2025082602) {
-		$dbman = $DB->get_manager();
+		
 		$table = new xmldb_table('subscription_plan');
 		$field = new xmldb_field('highlight_type', XMLDB_TYPE_CHAR, '20', null, null, null, null);
 		if (!$dbman->field_exists($table, $field)) {
@@ -462,7 +463,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 	}
 
     if ($oldversion < 2025082800) {
-    	$dbman = $DB->get_manager();
+    	
 
         // A) subscription_plan.is_recurring
         $table = new xmldb_table('subscription_plan');
@@ -493,7 +494,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
     // … tes upgrades précédents …
 
     if ($oldversion < 2025082802) {
-    	$dbman = $DB->get_manager();
+    	
         // Ajout des champs de jeton dans subscription_payment_request
         $table = new xmldb_table('subscription_payment_request');
 
@@ -511,7 +512,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025082904) {
-    	$dbman = $DB->get_manager();
+    	
         $table = new xmldb_table('subscription_payment_request');
 
         // operation
@@ -542,7 +543,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025083000) {
-    	$dbman = $DB->get_manager();
+    	
 
         // C) user_subscription.provider_*
         $table = new xmldb_table('user_subscription');
@@ -564,7 +565,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 
 
 	if ($oldversion < 2025083005) {
-    	$dbman = $DB->get_manager();
+    	
 		$table = new xmldb_table('user_subscription');
 		$field = new xmldb_field('provider_name');
 
@@ -589,7 +590,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 	}
 
 	if ($oldversion < 2025083009) {
-    	$dbman = $DB->get_manager();
+    	
 		$table = new xmldb_table('subscription_plan_price');
 
 		// 1) Changer la précision à 10,2
@@ -603,7 +604,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 	}
 
 	if ($oldversion < 2025083012) {
-    	$dbman = $DB->get_manager();
+    	
 		$table = new xmldb_table('user_subscription');
 
 		$field = new xmldb_field('last_invoice_id', XMLDB_TYPE_CHAR, '191', null, null, null, null, 'provider_customer_id');
@@ -616,7 +617,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 	}
 
 	if ($oldversion < 2025083015) {
-    	$dbman = $DB->get_manager();
+    	
 		$table = new xmldb_table('user_subscription');
 
 		$field = new xmldb_field('payment_failed', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'provider_customer_id');
@@ -632,7 +633,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 	}
 
     if ($oldversion < 2025090500) {
-    	$dbman = $DB->get_manager();
+    	
         // Étendre la longueur du champ operation à 64.
         $table = new xmldb_table('subscription_payment_request');
 
@@ -666,7 +667,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
     }
 
 	if ($oldversion < 2025090600) {
-    	$dbman = $DB->get_manager();
+    	
 		$table = new xmldb_table('subscription_reminder_log');
 		if (!$dbman->table_exists($table)) {
 			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
@@ -684,7 +685,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 	}
 
 	if ($oldversion < 2025091300) {
-    	$dbman = $DB->get_manager();
+    	
 		$table = new xmldb_table('subscription_event');
 
 		if (!$dbman->table_exists($table)) {
@@ -718,7 +719,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 
     // === 2025100100 : add descriptionformat on translations =================
     if ($oldversion < 2025100100) {
-    	$dbman = $DB->get_manager();
+    	
 
         // Plan translations.
         $table = new xmldb_table('subscription_plan_translation');
@@ -744,7 +745,7 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 
     // Bump ta version cible (adapte le numéro à ton plugin).
     if ($oldversion < 2025100601) {
-    	$dbman = $DB->get_manager();
+    	
         $table = new xmldb_table('subscription_plan');
 
         // Drop uniquement le champ 'description' (tu gardes tout le reste).
@@ -754,6 +755,35 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         }
 
         upgrade_plugin_savepoint(true, 2025100601, 'local', 'subscriptions');
+    }
+
+
+
+    if ($oldversion < 2025102000) {
+        // Table des réponses envoyées via quickreply.php
+        $table = new xmldb_table('local_subs_contact_reply');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id',          XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+            $table->add_field('adminid',     XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+            $table->add_field('messageid',   XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);   // id de block_edly_contact_msg (optionnel)
+            $table->add_field('toemail',     XMLDB_TYPE_CHAR,    '255', null, null, null, null);
+            $table->add_field('toname',      XMLDB_TYPE_CHAR,    '255', null, null, null, null);
+            $table->add_field('lang',        XMLDB_TYPE_CHAR,     '20', null, null, null, null);
+            $table->add_field('subject',     XMLDB_TYPE_CHAR,    '255', null, null, null, null);
+            $table->add_field('bodyhtml',    XMLDB_TYPE_TEXT,    null,  null, null, null, null);
+            $table->add_field('bodytext',    XMLDB_TYPE_TEXT,    null,  null, null, null, null);
+            $table->add_field('ip',          XMLDB_TYPE_CHAR,     '64', null, null, null, null);
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_index('idx_time',   XMLDB_INDEX_NOTUNIQUE, ['timecreated']);
+            $table->add_index('idx_admin',  XMLDB_INDEX_NOTUNIQUE, ['adminid']);
+            $table->add_index('idx_msgid',  XMLDB_INDEX_NOTUNIQUE, ['messageid']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2025102000, 'local', 'subscriptions');
     }
 
     return true;

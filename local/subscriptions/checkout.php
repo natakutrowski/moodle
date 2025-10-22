@@ -13,23 +13,38 @@ use local_subscriptions\support\Region;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
+$forceguest = optional_param('forceguest', 0, PARAM_BOOL);
+$istripossible = function_exists('local_campus_is_trial_user');
+if (!$istripossible) {
+    // tentative douce de charger la fonction depuis local_campus/lib.php ; sinon fallback (voir §3)
+    $comp = \core_component::get_component_directory('local_campus');
+    if ($comp && file_exists($comp.'/lib.php')) {
+        require_once($comp.'/lib.php');
+        $istripossible = function_exists('local_campus_is_trial_user');
+    }
+}
+$istrial  = $istripossible ? (bool) local_campus_is_trial_user() : false;
+
+$isguest    = (!isloggedin() || isguestuser());
+$isrestricted = $isguest || $istrial || $forceguest;   // ← la “philo” commune
+
+
 $planid   = required_param('planid', PARAM_INT);
 $currency = optional_param('currency', '', PARAM_ALPHANUMEXT); // ex: 'eur'
 
-$userid = (isloggedin() && !isguestuser()) ? $USER->id : 0;
+$userid   = (isloggedin() && !isguestuser()) ? (int)$USER->id : 0;
+$effUserid = $isrestricted ? 0 : $userid; // ← on traite trial comme invité
 
 try {
-    $options = $userid ? SubscriptionAdvisor::advise_options($userid, $planid, $currency) : [];
-
+    $options = $effUserid ? SubscriptionAdvisor::advise_options($effUserid, $planid, $currency) : [];
 } catch (\moodle_exception $e) {
     if ($e->errorcode === 'plan_inactive' && $e->module === 'local_subscriptions') {
-        // On pré-sélectionne le scope dans subscribe.php si tu gères ce paramètre
         $scopeid = (int)$DB->get_field('subscription_plan', 'accessscopeid', ['id' => $planid]);
         $url = new \moodle_url('/local/subscriptions/subscribe.php', ['scope' => $scopeid]);
         redirect($url, get_string('plan_inactive_redirect', 'local_subscriptions'),
             0, \core\output\notification::NOTIFY_WARNING);
     }
-    throw $e; // autre cas : remonter
+    throw $e;
 }
 
 global $DB, $USER, $SITE;
@@ -64,7 +79,7 @@ if ($currency === '') {
 $price = (float)$priceobj->price;
 
 // Si pas connecté (achat invité), ne propose pas upgrade -> achat standard :
-if (!$userid || empty($options)) {
+if (!$effUserid || empty($options)) {
     $options = [[
         'key'       => Operation::PURCHASE_NEW,
         'label'     => get_string('option_purchase_new', 'local_subscriptions'),
@@ -76,12 +91,12 @@ if (!$userid || empty($options)) {
 
 // Texte d’aide au-dessus des options (selon le contexte)
 $hasupgrade = array_reduce($options, fn($c,$o)=>$c || ($o['key']===Operation::UPGRADE_NOW_REPLACE_CHAIN), false);
-if ($userid) {
+if ($isrestricted) {
+    $helptext = get_string('advisor_help_guest', 'local_subscriptions');
+} else {
     $helptext = $hasupgrade
         ? get_string('advisor_help_upgrade', 'local_subscriptions')
         : get_string('advisor_help_standard', 'local_subscriptions');
-} else {
-    $helptext = get_string('advisor_help_guest', 'local_subscriptions');
 }
 
 // Texte durée (à partir de duration_key) — i18n + centralisé.
@@ -187,6 +202,13 @@ $body .= \html_writer::script("
 ");
 
 echo html_writer::div($body, 'card-body');
+// Bandeau compte d’essai (si triallimited)
+if ($istrial ?? false) {
+    echo html_writer::div(
+        get_string('trial_checkout_banner','local_subscriptions'),
+        'alert alert-warning mb-3'
+    );
+}
 
 // Formulaire (visiteur vs connecté).
 echo html_writer::start_div('card p-3 bg-light-subtle');
@@ -201,24 +223,22 @@ echo html_writer::start_tag('form', $formattrs);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'planid',   'value' => $planid]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'currency', 'value' => core_text::strtolower($currency)]);
 
-$isguest = (!isloggedin() || isguestuser());
-
 // Pré-remplissage si connecté.
-$prefillemail = $isguest ? '' : ($USER->email ?? '');
-$prefillfn    = $isguest ? '' : ($USER->firstname ?? '');
-$prefillln    = $isguest ? '' : ($USER->lastname ?? '');
+$prefillemail = $isrestricted ? '' : ($USER->email ?? '');
+$prefillfn    = $isrestricted ? '' : ($USER->firstname ?? '');
+$prefillln    = $isrestricted ? '' : ($USER->lastname ?? '');
 
 // Champs (si invité) — sinon on les masque mais on les envoie quand même.
-$fieldsstyle = $isguest ? '' : 'display:none';
+$fieldsstyle = $isrestricted ? '' : 'display:none';
 
-if ($isguest){
+if ($isrestricted){
     // En-tête et petite aide au-dessus du formulaire des coordonnées
     echo html_writer::tag('h5', get_string('personal_info_title', 'local_subscriptions'), ['class'=>'mt-0 mb-1']);
     echo html_writer::div(get_string('personal_info_help', 'local_subscriptions'), 'text-muted mb-2');
 }
 
 // (Invité) lien connexion plus visible
-if (!$userid) {
+if (!$effUserid) {
     echo html_writer::div(
         html_writer::link(
             new moodle_url('/login/index.php', ['returnurl' => qualified_me()]),
@@ -238,7 +258,7 @@ echo html_writer::tag('label',
 echo html_writer::empty_tag('input', [
     'type' => 'email', 'name' => 'email', 'id' => 'email',
     'class' => 'form-control mb-2', 'placeholder' => get_string('email'),
-    'required' => $isguest ? true : null, 'value' => s($prefillemail)
+    'required' => $isrestricted ? true : null, 'value' => s($prefillemail)
 ]);
 echo html_writer::div('', 'text-warning small', ['id'=>'ls_email_hint']);
 
@@ -250,7 +270,7 @@ echo html_writer::tag('label',
 echo html_writer::empty_tag('input', [
     'type' => 'text', 'name' => 'firstname', 'id' => 'firstname',
     'class' => 'form-control mb-2', 'placeholder' => get_string('firstname'),
-    'required' => $isguest ? true : null, 'value' => s($prefillfn)
+    'required' => $isrestricted ? true : null, 'value' => s($prefillfn)
 ]);
 
 echo html_writer::tag('label',
@@ -260,7 +280,7 @@ echo html_writer::tag('label',
 echo html_writer::empty_tag('input', [
     'type' => 'text', 'name' => 'lastname', 'id' => 'lastname',
     'class' => 'form-control mb-5', 'placeholder' => get_string('lastname'),
-    'required' => $isguest ? true : null, 'value' => s($prefillln)
+    'required' => $isrestricted ? true : null, 'value' => s($prefillln)
 ]);
 
 echo html_writer::end_div(); // .ls-fields
@@ -332,6 +352,8 @@ foreach ($options as $i => $opt) {
 }
 
 echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'extra_json','id'=>'ls_extra_json']);
+echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'force_guest','value'=> $isrestricted ? 1 : 0 ]);
+echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'from','value'=> $istrial ? 'trial' : '']);
 
 
 // Résumé prix SOUS les options (et donc sous le formulaire invité, car ce bloc est après)
@@ -394,7 +416,7 @@ echo html_writer::end_div(); // fin du bloc border-top
 
 
 // Bouton principal (désactivé tant qu’aucune option & terms non cochés)
-$btntext = $isguest ? get_string('subscribe', 'local_subscriptions') : get_string('checkout_go_to_payment', 'local_subscriptions');
+$btntext = $isrestricted ? get_string('subscribe', 'local_subscriptions') : get_string('checkout_go_to_payment', 'local_subscriptions');
 echo html_writer::tag('button', $btntext, [
     'type' => 'submit',
     'class' => 'btn btn-outline-primary subscribe-button w-100 fs-5',

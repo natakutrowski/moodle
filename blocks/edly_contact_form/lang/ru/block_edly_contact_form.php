@@ -1,0 +1,35 @@
+<?php
+$string['pluginname']   = 'Форма обратной связи (Edly)';
+$string['edly_contact_form'] = '[Edly] Контактная форма';
+$string['blocksettings'] = 'Настройки блока «[Edly] Контактная форма»';
+$string['edly_contact_form:addinstance'] = 'Добавить новый блок «[Edly] Контактная форма»';
+$string['edly_contact_form:myaddinstance'] = 'Добавить новый блок «[Edly] Контактная форма» на личную страницу';
+
+$string['title']        = 'Заголовок';
+$string['defaulttitle'] = 'Связаться с нами';
+$string['strap']        = 'Текст справа (подзаголовок)';
+$string['defaultstrap'] = 'Большая идея мало значит без замечательных людей. Давайте работать вместе.';
+$string['recipient']    = 'E-mail получателя (оставьте пустым — администратору сайта)';
+$string['fullname']     = 'Имя и фамилия';
+$string['email']        = 'E-mail';
+$string['message']      = 'Сообщение';
+$string['send']         = 'Отправить';
+$string['ph_fullname']  = 'Ваше имя и фамилия';
+$string['ph_email']     = 'Ваш e-mail';
+$string['ph_message']   = 'Ваше сообщение';
+$string['acceptpolicy'] = 'Я принимаю политику конфиденциальности';
+$string['invalidemail'] = 'Неверный адрес e-mail.';
+$string['mustaccept']   = 'Нужно принять политику конфиденциальности.';
+$string['sendsuccess']  = 'Спасибо! Ваше сообщение отправлено.';
+$string['sendfail']     = 'Не удалось отправить сообщение. Попробуйте позже.';
+$string['anonymous']    = 'Аноним';
+$string['mailsubject']  = 'Новое сообщение — {$a}';
+$string['defaultaddress'] = '';
+$string['left_side']           = 'Левая колонка';
+$string['imageurl']            = 'URL-адрес изображения (слева)';
+$string['imageurl_help']       = 'Прямая ссылка на изображение (JPG/PNG/SVG). Картинка будет показана слева.';
+$string['imagealt']             = 'Альтернативный текст изображения';
+$string['social_header']       = 'Социальные сети';
+$string['youtube']              = 'Ссылка на YouTube';
+$string['instagram']            = 'Ссылка на Instagram';
+$string['telegram']             = 'Ссылка на Telegram';

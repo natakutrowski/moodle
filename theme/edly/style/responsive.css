@@ -126,6 +126,9 @@
   .courses-pot-shape {
     display: none;
   }
+  .opportunities-area {
+    padding-top: 70px !important;
+  }
   .opportunities-content h3 {
     font-size: 24px;
   }
@@ -511,8 +514,8 @@
     font-size: 15px;
   }
   .page-banner-area {
-    padding-top: 65px;
-    padding-bottom: 65px;
+    padding-top: 20px;/*65px;*/
+    padding-bottom: 15px;/*65px;*/
   }
   .page-banner-content h2 {
     font-size: 32px;
@@ -523,6 +526,9 @@
   .page-banner-content .breadcrumb li {
     font-size: 15px;
   }
+  /* Page d'accueil du site : enlever le doublon "Accueil • Accueil" */
+  .path-site .breadcrumb { display: none; }
+
   .page-banner-shape-1, .page-banner-shape-2, .page-banner-dot-1, .page-banner-dot-2, .page-banner-dot-3, .page-banner-dot-4 {
     display: none;
   }

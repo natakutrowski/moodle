@@ -1,0 +1,226 @@
+/* ==========================================================================
+   block_edly_community — HERO + STRAP + SCROLLER
+   - Compat : ancien hero (.edly-community-banner / .edly-comm-*)
+              et nouveau hero (.ec-hero / .ec-*)
+   ========================================================================== */
+
+.block_edly_community .ec-community{
+  --ec-ink:   #1f1534;
+  --ec-muted: #5e5a6a;
+  --ec-pink2:  #F4197D;   --ec-pink:#FFADCF;
+  --ec-green2: #1EA69A;   --ec-green:#33a9a5;
+}
+
+/* ======================== HERO (base commun) ======================== */
+
+/* Nouveau hero */
+.block_edly_community .ec-hero,
+/* Ancien hero (back-compat) */
+.block_edly_community .edly-community-banner{
+  position: relative;
+  border-radius: 0;                 /* pas d'arrondis */
+  overflow: hidden;
+  width: 100%;
+  min-height: clamp(420px, 48vw, 560px); /* plus haut */
+  padding: clamp(18px, 2.8vw, 36px);
+
+  /* Image de fond couvrante (var nouvelle puis ancienne en fallback) */
+  background-image: var(--ec-hero-bg, var(--edly-comm-bg));
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center top;
+
+  /* Centrage vertical du texte (nouveau hero) – inoffensif pour l’ancien */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Voile foncé à gauche pour TEXTE BLANC lisible */
+.block_edly_community .ec-hero::after,
+.block_edly_community .edly-community-banner::after{
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,.60) 0%,
+    rgba(0,0,0,.45) 28%,
+    rgba(0,0,0,.25) 55%,
+    rgba(0,0,0,.12) 72%,
+    rgba(0,0,0,0) 88%
+  );
+}
+
+/* ===== Nouveau hero : bloc texte gauche ===== */
+.block_edly_community .ec-hero-left{
+  flex: 0 0 56%;
+  max-width: 56%;
+  padding-right: 12px;
+  z-index: 1;
+}
+.block_edly_community .ec-hero-righttext{
+  position: absolute;
+  right: 28px;
+  bottom: 72px;
+  max-width: 34%;
+  text-align: right;
+  z-index: 1;
+}
+.block_edly_community .ec-big{
+  color:rgba(255,255,255,.92) !important;                  /* 1) blanc pur */
+  font-weight: 800; line-height: 1.04;
+  font-size: clamp(48px,6.4vw, 80px);
+  margin: 0;
+  text-shadow: 0 2px 14px rgba(0,0,0,.5);
+}
+.block_edly_community .ec-small{
+  color: rgba(255,255,255,.92) !important;/* 2) visible en blanc */
+  font-size: clamp(24px, 3.2vw, 40px);
+  font-weight: 600; 
+  line-height: 1.05; margin: 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,.70);
+}
+
+/* ======================== STRAPLINE ======================== */
+.block_edly_community .ec-strap{
+  max-width: 1400px;                                /* 3) plus large */
+  padding: 16px clamp(16px, 4vw, 24px);
+  margin: 10px auto 0;
+  font-size: clamp(18px, 2.2vw, 30px);
+  line-height: 1.35;
+  color: var(--ec-ink);
+}
+.block_edly_community .ec-strap strong{ font-weight: 900; }
+
+/* ======================== SCROLLER ======================== */
+.block_edly_community .ec-scroller-wrap{
+  position: relative;
+  max-width: 1400px;                                /* 3) plus large */
+  margin: 8px auto 0;
+  padding: 0 clamp(16px, 4vw, 24px);
+}
+
+/* piste horizontale */
+.block_edly_community .ec-track{
+  display: grid;
+  grid-auto-flow: column;
+  gap: 24px;                                        /* un peu plus d’air */
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 2px 20px;
+  /* largeur des cartes : responsive (jusqu’à 3 visibles) */
+  grid-auto-columns: 85%;                           /* <576 : ~1 */
+}
+@media (min-width: 576px){
+  .block_edly_community .ec-track{ grid-auto-columns: calc((100% - 24px) / 2); }   /* ~2 */
+}
+@media (min-width: 1200px){
+  .block_edly_community .ec-track{ grid-auto-columns: calc((100% - 48px) / 3); }   /* ~3 */
+}
+.block_edly_community .ec-track::-webkit-scrollbar{ height: 8px; }
+.block_edly_community .ec-track::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.10); border-radius: 999px; }
+
+/* carte */
+.block_edly_community .ec-card{
+  position: relative;
+  border-radius: 26px;
+  padding: 22px 22px 24px;
+  min-height: 220px;
+  scroll-snap-align: start;
+  box-shadow: none !important;                      /* 6) pas d’ombre */
+  color:#fff;                                       /* 4) texte blanc dans les cartes */
+}
+.block_edly_community .ec-card *{ color:#fff; }     /* hérite pour titres/paragraphes */
+.block_edly_community .ec-card.pink  { background: linear-gradient(135deg, var(--ec-pink2),  var(--ec-pink));  }
+.block_edly_community .ec-card.green { background: linear-gradient(135deg, var(--ec-green2), var(--ec-green)); }
+
+.block_edly_community .ec-card-title{
+  font-size: clamp(18px, 2.4vw, 28px);
+  font-weight:900; line-height:1.15; margin: 56px 0 10px; /* + espace sous badge */
+}
+.block_edly_community .ec-card-text{
+  font-size: clamp(14px, 1.6vw, 18px);
+  line-height: 1.55;
+  opacity: .98;
+}
+
+/* badge icône – alternance rose/vert + icône plus grosse, sans ombre */
+.block_edly_community .ec-badge{
+  position:absolute; top:-18px; left:22px;
+  width:72px; height:72px; border-radius:999px; background:#fff;
+  display:grid; place-items:center;
+  box-shadow: none !important;                       /* 6) pas d’ombre */
+  outline: none !important;
+}
+
+/* 5) couleur d’icône alternée et taille plus grande */
+.block_edly_community .ec-card.pink  .ec-badge i{ color: var(--ec-pink2);  }
+.block_edly_community .ec-card.green .ec-badge i{ color: var(--ec-green2); }
+.block_edly_community .ec-badge i{ font-size: 48px !important; line-height: 1; }
+
+/* boutons de scroll – sans ombre */
+.block_edly_community .ec-scroll-btn{
+  position:absolute; top:-52px; right: clamp(16px, 4vw, 24px);
+  width:44px; height:44px; border-radius:999px; border:none;
+  background:#eef6f9; color:#223; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  box-shadow: none !important;                      /* 6) pas d’ombre */
+}
+.block_edly_community .ec-scroll-btn.prev{ right: calc(clamp(16px, 4vw, 24px) + 52px); }
+.block_edly_community .ec-scroll-btn i{ font-size:20px; }
+
+/* ========================= Responsive ========================= */
+
+/* Téléphone */
+@media (max-width: 768px){
+  /* photo : montrer la DROITE et réduire un peu */
+  .block_edly_community .ec-hero,
+  .block_edly_community .edly-community-banner{
+    background-size: cover !important;
+    background-position: center top !important;
+  }
+
+  .block_edly_community .ec-hero{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;        /* centre VERTICAL */
+    align-items: flex-start;        /* <- 'left' est invalide, on veut le bord gauche */
+    text-align: left;
+    background-size: cover !important;
+    background-position: center top !important;
+    min-height: 420px;
+    padding: 28px 20px;
+  }
+
+  /* Les deux blocs texte ont EXACTEMENT la même largeur et le même départ */
+  .block_edly_community .ec-hero-left,
+  .block_edly_community .ec-hero-righttext{
+    position: static;               /* pas d'absolu en mobile */
+    width: 100%;
+    max-width: 92%;
+    padding: 0;
+    margin: 0;                      /* pas de marge auto qui recentre */
+  }
+
+  /* spacing entre gros et petit texte */
+  .block_edly_community .ec-hero-righttext{ margin-top: 10px; }
+  .block_edly_community .ec-big{ 
+    font-size: clamp(40px, 10.0vw, 72px); 
+    line-height: 1.15; 
+  }
+  .block_edly_community .ec-small{
+    font-size: clamp(18px, 4.8vw, 32px);
+    line-height: 1.25; 
+  }
+  .block_edly_community .ec-scroll-btn{ top:-46px; }
+}
+
+/* Très petits écrans : couloir central plus large (ancien hero) */
+@media (max-width: 380px){
+  .block_edly_community .edly-comm-left { right: 55%; }
+  .block_edly_community .edly-comm-right{ left:  60%; }
+}

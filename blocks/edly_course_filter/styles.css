@@ -1,0 +1,77 @@
+/* ===== Block: Edly Course Filter — CSS clean ===== */
+
+/* Cartes en colonnes (deux styles supportés) */
+.block_edly_course_filter .courses-card,
+.block_edly_course_filter .courses-box {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Le contenu pousse le footer en bas */
+.block_edly_course_filter .courses-card .courses-content,
+.block_edly_course_filter .courses-box  .courses-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* On masque ce qu’on n’utilise plus (description, icône personne, bulle prix) */
+.block_edly_course_filter .courses-card .middle-content,
+.block_edly_course_filter .courses-box .middle-content,
+.block_edly_course_filter .courses-card .top-content .info .title i,
+.block_edly_course_filter .courses-box .top-content .info .title i,
+.block_edly_course_filter .courses-card .top-content .price,
+.block_edly_course_filter .courses-box .top-content .price {
+  display: none !important;
+}
+
+/* Badge rectangulaire en haut à droite de l’image */
+.block_edly_course_filter .courses-image { position: relative; }
+.block_edly_course_filter .cf-card-badge {
+  position: absolute;
+  top: 12px; right: 12px;
+  background: var(--optional-color);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 10px;
+  line-height: 1;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Footer (rangée des boutons) — décollé des bords */
+.block_edly_course_filter .cf-footer {
+  margin-top: auto;
+  padding: 0 14px 6px;          /* espace gauche/droite + bas */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Boutons compacts */
+.block_edly_course_filter .cf-footer .btn,
+.block_edly_course_filter .cf-footer .cf-cta,
+.block_edly_course_filter .default-btn.cf-cta {
+  padding: 10px 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  line-height: 1.2;
+}
+
+/* Le style visuel (dégradé) du bouton .default-btn vient du thème Edly.
+   Ici on ne fait qu'assurer la compacité dans le contexte du bloc. */
+.block_edly_course_filter .default-btn.cf-cta {}
+
+/* Colonnes de la grille étirées (hauteurs égales) dans le bloc seulement */
+.block_edly_course_filter .row { align-items: stretch !important; }
+
+/* Mobile : empile les deux boutons */
+@media (max-width: 767px){
+  .block_edly_course_filter .cf-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

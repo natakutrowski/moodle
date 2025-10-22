@@ -127,4 +127,17 @@ $templatecontext = [
     'footer_col_5_body' => format_text(get_config('theme_edly', 'footer_col_5_body'), FORMAT_HTML, array('filter' => true, 'noclean' => true)),
 
 ];
+
+$templatecontext += [
+    'show_subscribe_btn' => $showsub,
+    'subscribe_label'    => $subscribe_label,
+
+    'show_login_btn'     => $showlogin,
+    'login_label'        => $login_label,
+
+    'has_lang_menu'      => $has_lang_menu,
+    'lang_menu'          => $lang_menu_html,
+];
+
+
 $PAGE->requires->jquery();

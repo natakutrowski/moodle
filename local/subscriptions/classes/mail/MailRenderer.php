@@ -173,6 +173,35 @@ class MailRenderer {
         return [$html, trim($text)];
     }
 
+    public static function layout_with_extra_button(
+        string $title,
+        string $bodyhtml,
+        string $secondaryLabel, string $secondaryUrl,   // bouton 1 (dans le corps)
+        ?string $primaryLabel = null, ?string $primaryUrl = null // bouton principal (celui de layout)
+    ): array {
+        // Reprend la même couleur que layout() (fallback garanti)
+        $brandcolor = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
+
+        // Bouton secondaire “outline” inséré dans le corps avant l’appel à layout()
+        $btn2 = '
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:18px auto;">
+        <tr>
+            <td style="border-radius:8px;border:2px solid '.s($brandcolor).';">
+            <a href="'.s($secondaryUrl).'"
+                style="display:inline-block;padding:12px 20px;color:'.s($brandcolor).';text-decoration:none;font-weight:600;border-radius:8px;background:#ffffff;">
+                '.s($secondaryLabel).'
+            </a>
+            </td>
+        </tr>
+        </table>';
+
+        $bodyhtml2 = $bodyhtml . $btn2;
+
+        // On délègue tout le reste à layout() (CTA principal)
+        return self::layout($title, $bodyhtml2, $primaryLabel, $primaryUrl);
+    }
+
+
 }
 
 /** Builder fluide pour composer un tableau sans répéter du HTML. */

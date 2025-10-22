@@ -18,14 +18,17 @@ class block_edly_features_area_two extends block_base {
             $this->config->title        = 'Improving lives through <span>learning</span>';
 
             $this->config->icon1                    = 'ri-moon-clear-line';
+            $this->config->image1  = ''; // ← NEW
             $this->config->features_title1          = 'Earn certificates and degrees';
             $this->config->features_content1        = 'Break into a new field like format technology or data science get started.';
 
             $this->config->icon2                    = 'ri-stack-line';
+            $this->config->image2  = ''; // ← NEW
             $this->config->features_title2          = 'Learn anything together';
             $this->config->features_content2        = 'Break into a new field like format technology or data science get started.';
 
             $this->config->icon3                    = 'ri-star-line';
+            $this->config->image3  = ''; // ← NEW
             $this->config->features_title3          = 'Learn with experts';
             $this->config->features_content3        = 'Break into a new field like format technology or data science get started.';
         }
@@ -61,21 +64,37 @@ class block_edly_features_area_two extends block_base {
                 <div class="row justify-content-center">';
                     for($i = 1; $i <= $features_number; $i++) {
                         $icon                   = 'icon' . $i;
+                        $image                  = 'image' . $i;     // ← NEW
                         $features_title         = 'features_title' . $i;
                         $features_content       = 'features_content' . $i;
 
                         // Icon
                         if(isset($this->config->$icon)) { $icon = $this->config->$icon; }else{ $icon = ''; }
 
+                        // Image
+                        if(isset($this->config->$image)) { $image = $this->config->$image; }else{ $image = ''; }
+
                         // Title
                         if(isset($this->config->$features_title)) { $features_title = $this->config->$features_title; }else{ $features_title = ''; }
 
                         // Content
                         if(isset($this->config->$features_content)) { $features_content = $this->config->$features_content; }else{ $features_content = ''; }
+                        
+                        // Choose image if provided, else icon
+                        if ($image !== '') {
+                            $iconhtml = '<span class="improving-icon is-image">'
+                                    . '<img src="'.edly_block_image_process($image).'" alt="'.strip_tags($features_title).'"></span>';
+                        } else {
+                            // fallback icon class (RemixIcon / etc.)
+                            $cls = $icon !== '' ? $icon : 'ri-star-line';
+                            $iconhtml = '<i class="improving-icon '.$cls.'"></i>';
+                        }                        
+                        
+                        
                         $text .= '
                         <div class="col-lg-4 col-sm-6" data-aos="fade-up" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">
                             <div class="improving-card">
-                                <i class="'.$icon.'"></i>
+                                '.$iconhtml.'
                                 <h3>'.format_text($features_title, FORMAT_HTML, array('filter' => true)).'</h3>
                                 <p>'.format_text($features_content, FORMAT_HTML, array('filter' => true)).'</p>
                             </div>
@@ -87,6 +106,15 @@ class block_edly_features_area_two extends block_base {
         
         $this->content->footer = '';
         $this->content->text   = $text;
+
+        $brand = get_config('theme_edly', 'brandcolor') ?: '';
+        if ($brand) {
+            $this->content->text = '<div class="block_edly_features_area_two" style="--cf-brand: '.$brand.';">'
+                . $this->content->text . '</div>';
+        } else {
+            // fallback : wrapper simple (si tu n'as pas déjà .block_edly_features_area_two comme parent)
+            $this->content->text = '<div class="block_edly_features_area_two">'.$this->content->text.'</div>';
+        }
 
         return $this->content;
     }

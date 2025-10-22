@@ -1,0 +1,161 @@
+/* ==========================================================================
+   block_edly_about_me — styles
+   ========================================================================== */
+
+.block_edly_about_me .edly-about{
+  --ea-ink:   #1f1534;
+  --ea-muted: #5e5a6a;
+  --ea-accent:#ff7a59;                 /* couleur badge (vivide) */
+  color: var(--ea-ink);
+}
+
+/* ================= HERO ================= */
+
+.block_edly_about_me .ea-hero{
+  position: relative;
+  border-radius: 0;                     /* pas d'arrondis */
+  overflow: hidden;
+  padding: clamp(18px, 2.8vw, 36px);
+  min-height: clamp(420px, 48vw, 560px);/* plus haut, on voit le haut de la photo */
+
+  /* Image de fond couvrante */
+  background-image: var(--ea-hero-bg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center top;
+
+  /* Centrage vertical du texte */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Voile lisible côté gauche (du + au -) */
+.block_edly_about_me .ea-hero::after{
+  content:'';
+  position:absolute; inset:0;
+  background: linear-gradient(90deg,
+      rgba(255,255,255,0.95) 0%,
+      rgba(255,255,255,0.85) 32%,
+      rgba(255,255,255,0.55) 55%,
+      rgba(255,255,255,0.20) 75%,
+      rgba(255,255,255,0.00) 100%);
+  pointer-events:none;
+  z-index:0;
+}
+
+.block_edly_about_me .ea-hero-left{
+  position: relative; z-index: 1;
+  max-width: 56%;
+  padding-right: 12px;
+}
+.block_edly_about_me .ea-title{
+  font-weight: 900;
+  line-height: 1.05;
+  font-size: clamp(28px, 4.4vw, 56px);
+  margin: 0 0 12px;
+}
+.block_edly_about_me .ea-lead{
+  font-size: clamp(16px, 1.5vw, 22px);
+  line-height: 1.45;
+  margin: 0;
+  color: var(--ea-muted);
+}
+
+/* Badge @handle — incliné et contrasté, anneau blanc pour lisibilité */
+.block_edly_about_me .ea-badge{
+  position: absolute;
+  right: clamp(16px, 4vw, 36px);
+  bottom: clamp(16px, 3vw, 36px);
+  transform: rotate(-11deg);
+  background: linear-gradient(135deg,#ff4d6d,#ff7a59);
+  color:#fff;
+  border-radius: 14px;
+  padding: .6rem 1rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-decoration: none;
+  box-shadow:
+    0 12px 26px rgba(255,77,109,.35),
+    0 0 0 3px rgba(255,255,255,.96);
+  z-index: 1;
+}
+.block_edly_about_me .ea-badge .label{ color:#fff; }
+.block_edly_about_me .ea-badge:hover{ filter: brightness(1.05); }
+
+/* ============== CARDS (bas) ============== */
+
+.block_edly_about_me .ea-cards{
+  /* marges latérales pour ne pas coller aux bords */
+  padding: 0 clamp(16px, 4vw, 40px);
+  margin-top: clamp(14px, 2.2vw, 22px);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(12px, 2vw, 22px);
+}
+
+.block_edly_about_me .ea-card{
+  background: #fff;
+  border-radius: 24px;
+  padding: clamp(16px, 2vw, 26px);
+  box-shadow: 0 8px 26px rgba(0,0,0,.06);
+  margin-bottom: 20px;
+}
+
+/* Icône (RemixIcon) – 40x40 demandés */
+.block_edly_about_me .ea-card-icon{
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: rgba(255,122,89,.12);
+  color: var(--ea-accent);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
+.block_edly_about_me .ea-card-icon i{ font-size: 22px; line-height: 1; }
+
+.block_edly_about_me .ea-card-content{
+  color: var(--ea-muted);
+  line-height: 1.6;
+  font-size: clamp(14px, 1.6vw, 18px);
+}
+.block_edly_about_me .ea-card-content strong{
+  color: var(--ea-ink);
+  font-weight: 800;
+}
+
+/* ============== RESPONSIVE ============== */
+
+@media (max-width: 992px){
+  .block_edly_about_me .ea-hero-left{ max-width: 64%; }
+}
+
+@media (max-width: 768px){
+  /* On montre la DROITE de la photo et on réduit la taille (≈ 80–85%) */
+  .block_edly_about_me .ea-hero{
+    min-height: 420px;
+    background-size: 85% auto;            /* ~80–85% de la taille actuelle */
+    background-position: right top;
+    padding-top: 24px; padding-bottom: 24px;
+  }
+  .block_edly_about_me .ea-hero::after{
+    background: linear-gradient(90deg,
+      rgba(255,255,255,.95) 0%,
+      rgba(255,255,255,.78) 28%,
+      rgba(255,255,255,.38) 46%,
+      rgba(255,255,255,.12) 65%,
+      rgba(255,255,255,0) 80%);
+  }
+  .block_edly_about_me .ea-hero-left{ max-width: 84%; }
+
+  /* Badge incliné mais un peu moins en mobile */
+  .block_edly_about_me .ea-badge{ transform: rotate(-7deg); }
+
+  /* Cartes : une colonne */
+  .block_edly_about_me .ea-cards{
+    grid-template-columns: 1fr;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

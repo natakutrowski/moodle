@@ -298,3 +298,11 @@ $string['config_subtitle'] = 'Sous-titre';
 
 $string['favicon'] = 'Favicon';
 $string['favicon_desc'] = 'Favicon du site. Taille recommandée : 16 × 16 px.';
+
+$string['total_student_singular'] = 'Étudiant';
+$string['total_student_plural']   = 'Étudiants';
+
+$string['trial_courses'] = 'Cours avec lien “essai” (remplace Date/Étudiants)';
+$string['trial_access'] = 'Accéder au cours d’essai';
+$string['trial_only_guests'] = 'Afficher le lien d’essai uniquement pour les invités';
+$string['image'] = 'Image';

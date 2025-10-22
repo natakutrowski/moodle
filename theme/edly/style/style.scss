@@ -72,7 +72,8 @@ Default CSS
     --optional-color: [[setting:secondarycolor]];
     --gradient-color: linear-gradient(90deg, [[setting:gradientcolor1]] 0%, [[setting:gradientcolor2]] 100%);
     --footerBG: [[setting:footer_bg]];
-    --paragraph-color: #869199;
+    /*--paragraph-color: #869199;*/
+    --paragraph-color: #383c3f;
     --whiteColor: #ffffff;
     --white-color: #ffffff;
     --black-color: #3B2A56;
@@ -1104,7 +1105,7 @@ Main Banner Area CSS
             position: absolute;
             content: "";
             right: 55px;
-            bottom: 45px;
+            bottom: -15px;
             width: 137px;
             height: 17px;
             background-image: url([[pix:theme|border]]);
@@ -1284,12 +1285,12 @@ Main Banner Area CSS
         top: 0;
         height: 100%;
         width: 1270px;
-        background: #F5F6F9;
+        /*background: #F5F6F9;*/
         z-index: -1;
     }
 }
 .main-banner-wrap-content {
-    max-width: 700px;
+    max-width: 900px;
 
     h1 {
         font-size: 58px;
@@ -1385,7 +1386,7 @@ Main Banner Area CSS
         padding: 25px;
         max-width: 305px;
         position: absolute;
-        right: 0;
+        right: -50px;
         bottom: 180px;
 
         .content {
@@ -1463,12 +1464,22 @@ Main Banner Area CSS
         }
     }
 }
+/* Le background ellipse doit couvrir toute la largeur de la fenêtre */
 .banner-wrap-ellipse {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: -1;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100vw;           /* pleine largeur de viewport */
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;   /* clics passent au travers */
+}
+
+.banner-wrap-ellipse img {
+  display: block;
+  width: 100%;
+  height: auto;           /* garde les proportions */
+  max-width: none;        /* ne pas limiter par la largeur du parent */
 }
 .banner-wrap-shape {
     position: absolute;

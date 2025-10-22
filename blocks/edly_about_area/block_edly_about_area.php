@@ -73,7 +73,7 @@ class block_edly_about_area extends block_base {
         <div class="opportunities-area ptb-100">
             <div class="container">
                 <div class="row align-items-center">
-                    <div class="col-lg-5 col-md-12">
+                    <div class="col-lg-8 col-md-12">
                         <div class="opportunities-content" data-aos="fade-down" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">
                             <span class="sub">'.format_text($this->content->top_title, FORMAT_HTML, array('filter' => true)).'</span>
                             <h3>'.format_text($this->content->title, FORMAT_HTML, array('filter' => true)).'</h3>  
@@ -81,7 +81,7 @@ class block_edly_about_area extends block_base {
                         </div>
                     </div>
     
-                    <div class="col-lg-7 col-md-12">
+                    <div class="col-lg-4 col-md-12">
                         <div class="opportunities-right-content">
                             <div class="row justify-content-center">';
                             if ($data->items > 0) {

@@ -280,7 +280,7 @@ class renderer extends plugin_renderer_base {
             $isPremium = ($hl === 'premium');
 
             $classes = 'card plan-card p-3 flex-fill position-relative';
-            $style   = 'max-width:32%; min-width:300px; border-radius:12px;';
+            $style   = 'border-radius:12px;';
             if ($isPopular) {
                 $classes .= ' ls-card-popular border-2 shadow-xl';
                 $style   .= ' border:2px solid #ffc107;';
@@ -324,6 +324,7 @@ class renderer extends plugin_renderer_base {
 
             // Mapping “préférence forte”
             $currencybycountry = [
+                //'SE' => 'RUB',
                 'RU' => 'RUB',
                 'BY' => 'RUB',
                 'FR' => 'EUR',

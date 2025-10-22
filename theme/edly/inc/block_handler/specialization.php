@@ -16,6 +16,7 @@ $edlyCollectionFullwidthTop =  array(
     "edly_course_filter",
     "edly_categories",
     "edly_features_area",
+    "edly_features_area_campus",
     "edly_funfacts",
     "edly_features_area_two",
     "edly_about_area_two",

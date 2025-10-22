@@ -187,6 +187,29 @@ input[type="file"] {
     }
 }
 
+/* Centrage mobile des cards d'abonnement quand elles sont dans une grille Bootstrap */
+@media (max-width: 767.98px){
+  .row:has(.subscription-card){
+    justify-content: center !important;
+  }
+  .row:has(.subscription-card) > [class*="col-"]{
+    display:flex;
+    flex: 0 1 560px;
+    max-width:560px;
+  }
+  .row:has(.subscription-card) > [class*="col-"] > .subscription-card{
+    width:100%;
+    margin: 16px 0;  /* respiration verticale */
+  }
+}
+
+.ls-plans-page.container { max-width: 1200px; }
+@media (max-width: 767.98px){
+  .ls-plans-page .row { justify-content: center !important; }
+  .ls-plans-page .row > [class*="col-"]{ display:flex; flex:0 1 560px; max-width:560px; }
+}
+
+
 /* Styles généraux pour les icônes d'action */
 .action-icon {
     width: 20px;
@@ -599,4 +622,60 @@ table.generaltable td { vertical-align: middle; }
 .ls-plan-desc-link:hover,
 .ls-plan-desc-link:focus {
   text-decoration: underline;
+}
+
+/* ====== Plans – corrections mobile & badges ====== */
+
+/* 1) Mobile : une carte par ligne, centrée, sans "trou" à droite */
+@media (max-width: 767.98px){
+  /* Le conteneur rendu par le renderer */
+  .subscription-plan-grid{
+    justify-content: center !important;   /* au centre, pas start */
+    gap: 16px !important;                 /* gap régulier */
+  }
+  /* Les cards : pleine largeur (on écrase le style inline max-width:32%; min-width:300px) */
+  .subscription-plan-grid .plan-card{
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  /* Un peu moins haut : on compacte les espacements internes */
+  .subscription-plan-grid .plan-card{ padding: 14px !important; }
+  .subscription-plan-grid .plan-card .plan-title-neutral{
+    padding: 8px 10px !important;
+    margin-bottom: .5rem !important;
+  }
+  .subscription-plan-grid .plan-courselist{ margin-bottom: .75rem !important; }
+  .subscription-plan-grid .courselist li{ margin-bottom: .25rem !important; }
+  .subscription-plan-grid .bottom-zone{ margin-top: .5rem !important; }
+}
+
+/* 2) Badge "Populaire/Premium" : plus haut et un peu plus compact en mobile */
+@media (max-width: 767.98px){
+  .ls-badge-popular,
+  .ls-badge-premium{
+    top: -18px !important;       /* remonte le badge */
+    right: -6px !important;
+    padding: .35rem .6rem !important;
+    font-size: .9rem !important;
+  }
+}
+
+/* 3) Desktop : marges latérales "visuelles" pour ne pas prendre 100% */
+@media (min-width: 768px){
+  .subscription-plan-grid{
+    margin-left: -12px;
+    margin-right: -12px;
+  }
+  .subscription-plan-grid .plan-card{
+    margin-left: 12px;
+    margin-right: 12px;          /* ajoute un gutter par carte */
+  }
+}
+
+/* si le conteneur est aussi .subscription-plan-grid sur la page publique */
+@media (max-width: 767.98px){
+  .subscription-plan-grid{ justify-content:center!important; }
+  .subscription-plan-grid .plan-card{ flex:1 1 100%!important; max-width:100%!important; min-width:0!important; }
 }

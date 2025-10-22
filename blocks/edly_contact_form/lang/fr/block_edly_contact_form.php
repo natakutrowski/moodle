@@ -1,0 +1,34 @@
+<?php
+$string['pluginname']   = 'Formulaire de contact (Edly)';
+$string['edly_contact_form'] = '[Edly] Formulaire de contact';
+$string['blocksettings'] = 'Paramètres du bloc [Edly] Formulaire de contact';
+$string['edly_contact_form:addinstance'] = 'Ajouter un nouveau bloc « [Edly] Formulaire de contact »';
+$string['edly_contact_form:myaddinstance'] = 'Ajouter un nouveau bloc « [Edly] Formulaire de contact » à la page personnelle';
+
+$string['title']        = 'Titre';
+$string['defaulttitle'] = 'Nous contacter';
+$string['strap']        = 'Texte à droite (accroche)';
+$string['defaultstrap'] = "Une grande vision sans des gens formidables n'a pas d'importance. Travaillons ensemble.";
+$string['recipient']    = 'E-mail destinataire (laisser vide pour envoyer à l’administrateur du site)';
+$string['fullname']     = 'Nom et prénom';
+$string['email']        = 'E-mail';
+$string['message']      = 'Message';
+$string['send']         = 'Envoyer';
+$string['ph_fullname']  = 'Votre nom complet';
+$string['ph_email']     = 'Votre adresse e-mail';
+$string['ph_message']   = 'Votre message';
+$string['acceptpolicy'] = 'J’accepte la politique de confidentialité';
+$string['invalidemail'] = 'Adresse e-mail invalide.';
+$string['mustaccept']   = 'Vous devez accepter la politique de confidentialité.';
+$string['sendsuccess']  = 'Merci ! Votre message a bien été envoyé.';
+$string['sendfail']     = 'L’envoi a échoué. Réessayez plus tard.';
+$string['anonymous']    = 'Anonyme';
+$string['mailsubject']  = 'Nouveau message de contact — {$a}';
+$string['defaultaddress'] = '';
+$string['left_side']  = 'Colonne gauche';
+$string['imageurl']   = 'URL de l’image (gauche)';
+$string['imagealt']   = 'Texte alternatif de l’image';
+$string['social_header'] = 'Réseaux sociaux';
+$string['youtube']    = 'Lien YouTube';
+$string['instagram']  = 'Lien Instagram';
+$string['telegram']   = 'Lien Telegram';

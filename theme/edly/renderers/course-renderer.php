@@ -353,7 +353,8 @@ class theme_edly_core_course_renderer extends core_course_renderer {
                             </li>
                             <li>
                                 <i class="ri-user-2-line"></i>
-                                '.$edlyCourse->enrolments.' '.get_config('theme_edly', 'total_student') .'
+                                '.$edlyCourse->enrolments.' '. (($edlyCourse->enrolments == 1) ? 
+                                    get_string('total_student_singular', 'theme_edly') : get_string('total_student_plural', 'theme_edly')) .'
                             </li>
                         </ul>
                     </div>

@@ -47,6 +47,7 @@ class block_edly_about_area_edit_form extends block_edit_form {
         }
 
         $items_range = array(
+            0 => '0',
             1 => '1',
             2 => '2',
             3 => '3',

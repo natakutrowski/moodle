@@ -13,6 +13,7 @@ $addblockbutton = $OUTPUT->addblockbutton();
 
 $edlyPageHandler = new edlyPageHandler();
 $pageheading = $edlyPageHandler->edlyGetPageTitle();
+$pageheading = preg_replace('/CampusFR\b/', 'Campus<small><sup>FR</sup></small>', $pageheading);
 
 if (is_siteadmin()) {$user_status = 'role-supreme';} else {$user_status = 'role-standard';}
 $secondarynavigation = false;
@@ -40,6 +41,42 @@ $headercontent = $header->export_for_template($renderer);
 $login_url  = get_login_url();
 $signup_url = "{$CFG->wwwroot}/subscribe.php";
 $isloggedin = isloggedin();
+
+// Qui est qui ?
+$isguest     = isguestuser();
+$showlogin   = !$isloggedin;                         // bouton "Connexion" visible si pas connecté
+$showsub     = (!$isloggedin || $isguest);           // "S’abonner" visible aussi pour l'utilisateur invité
+
+// Libellés
+$subscribe_label = get_string('subscribe', 'local_subscriptions');
+$login_label     = get_string('login');
+
+// Lang menu (affiché même pour anonymes si activé côté admin)
+$lang_menu_html = $OUTPUT->lang_menu();      // renvoie '' si désactivé ou 1 seule langue
+$has_lang_menu  = !empty($lang_menu_html);
+
+$currenturl = clone($PAGE->url);
+$currenturl->remove_params(['lang', 'sesskey']);
+$lang_menu_html = preg_replace('/action="[^"]*"/', 'action="'.$currenturl->out(false).'"', $lang_menu_html, 1);
+
+if (strpos($lang_menu_html, 'onchange=') === false) {
+    $lang_menu_html = preg_replace('/<select\b(?![^>]*\bonchange=)/', '<select onchange="this.form.submit()"', $lang_menu_html, 1);
+}
+
+// Drapeaux devant les libellés du sélecteur de langue
+$flags = [
+    'fr' => '🇫🇷',
+    'en' => '🇬🇧', // ou '🇺🇸' si tu préfères
+    'ru' => '🇷🇺',
+];
+
+// Important : le fichier PHP doit être en UTF-8 (sans BOM), sinon les emojis peuvent mal passer.
+foreach ($flags as $code => $flag) {
+    $pattern = '~(<option[^>]*\bvalue=(["\'])' . preg_quote($code, '~') . '\2[^>]*>)(\s*)([^<]*)~iu';
+    // 1: balise <option ...>  3: espaces éventuels  4: texte existant
+    $lang_menu_html = preg_replace($pattern, '$1$3' . $flag . ' $4', $lang_menu_html);
+}
+
 
 
 $edlyUserBodyClass = 'edly_body_class';

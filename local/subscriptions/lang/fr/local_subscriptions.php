@@ -530,3 +530,24 @@ $string['recurring_canceled_effect_now'] = 'La résiliation prend effet immédia
 $string['recurring_canceled_effect_on']  = 'La résiliation prendra effet le {$a}. Vous conservez l’accès jusqu’à cette date.';
 $string['payment_failcode'] = 'Raison';
 $string['payment_nextretry'] = 'Prochaine tentative';
+$string['email_retry_expires'] = 'Lien valable jusqu’au';
+
+$string['contact_admin_subject'] = 'Nouveau message de contact';
+$string['contact_copy_subject']  = 'Nous avons bien reçu votre message';
+$string['contact_copy_intro']    = 'Merci pour votre message. Nous revenons vers vous très vite.';
+$string['contact_label_name']    = 'Nom';
+$string['contact_label_email']   = 'E-mail';
+$string['contact_label_msg']     = 'Message';
+$string['view_site']             = 'Ouvrir le site';
+$string['contact_label_ip'] = 'IP';
+$string['contact_label_ua'] = 'User-Agent';
+$string['reply_now']              = 'Répondre maintenant';
+$string['contact_reply_subject']  = 'Re : votre message à CampusFR';
+$string['contact_reply_greeting'] = 'Bonjour {$a}, nous avons bien reçu votre message.';
+$string['contact_reply_reminder'] = 'Rappel de votre message :';
+$string['contact_reply_marker']   = '— Réponse ci-dessous —';
+$string['reply_in_admin'] = 'Répondre depuis l’admin (éditeur HTML)';
+$string['reply_text']             = 'Votre réponse';
+$string['contact_reply_sent_hint']  = 'La réponse a été envoyée à l’adresse indiquée. Vous pouvez fermer cette page.';
+
+$string['trial_checkout_banner'] = 'Vous êtes connecté avec un compte d’essai. Merci d’indiquer vos coordonnées pour créer votre abonnement.';

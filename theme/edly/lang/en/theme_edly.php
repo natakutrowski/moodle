@@ -324,3 +324,11 @@ $string['config_subtitle'] = 'Top Title';
 
 $string['favicon'] = 'Favicon';
 $string['favicon_desc'] = 'The favicon for the website. Recommended size is 16 x 16px.';
+
+$string['total_student_singular'] = 'Student';
+$string['total_student_plural']   = 'Students';
+
+$string['trial_courses'] = 'Courses with “trial” link (replaces Date/Students)';
+$string['trial_only_guests'] = 'Show the trial link to guests only';
+$string['trial_access'] = 'Access the trial course';
+$string['image'] = 'Image';

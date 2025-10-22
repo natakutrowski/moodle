@@ -177,7 +177,7 @@ $string['courselist'] = 'Список курсов';
 
 $string['close'] = 'Закрыть';
 
-$string['subscribe'] = 'Оформить подписку';
+$string['subscribe'] = 'Купить подписку';
 $string['change_currency'] = 'Сменить валюту';
 
 $string['payment_success_check_email'] = 'Проверьте вашу почту: там есть письмо для завершения входа и установки пароля.';
@@ -531,3 +531,24 @@ $string['recurring_canceled_effect_now'] = 'Отмена вступает в с�
 $string['recurring_canceled_effect_on']  = 'Отмена вступит в силу {$a}. До этого момента доступ сохраняется.';
 $string['payment_failcode'] = 'Причина';
 $string['payment_nextretry'] = 'Следующая попытка';
+$string['email_retry_expires'] = 'Ссылка действительна до';
+
+$string['contact_admin_subject'] = 'Новое сообщение из формы контакта';
+$string['contact_copy_subject']  = 'Мы получили ваше сообщение';
+$string['contact_copy_intro']    = 'Спасибо за ваше сообщение. Мы свяжемся с вами в ближайшее время.';
+$string['contact_label_name']    = 'Имя';
+$string['contact_label_email']   = 'E-mail';
+$string['contact_label_msg']     = 'Сообщение';
+$string['view_site']             = 'Открыть сайт';
+$string['contact_label_ip'] = 'IP';
+$string['contact_label_ua'] = 'User-Agent';
+$string['reply_now']              = 'Ответить сейчас';
+$string['contact_reply_greeting'] = 'Здравствуйте, {$a}! Мы получили ваше сообщение.';
+$string['contact_reply_reminder'] = 'Напоминание вашего сообщения:';
+$string['contact_reply_marker']   = '— Напишите ответ ниже —';
+$string['contact_reply_subject']  = 'Re: ваше сообщение в CampusFR';
+$string['reply_in_admin'] = 'Ответить из админки (редактор HTML)';
+$string['reply_text']             = 'Ваш ответ';
+$string['contact_reply_sent_hint']  = 'Ответ отправлен получателю. Эту страницу можно закрыть.';
+
+$string['trial_checkout_banner'] = 'Вы вошли с пробной учётной записью. Укажите свои данные, чтобы оформить подписку.';

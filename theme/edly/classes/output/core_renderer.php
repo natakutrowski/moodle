@@ -385,6 +385,7 @@ class core_renderer extends \core_renderer {
         } else {
             $heading = $this->heading($contextheader->heading, $contextheader->headinglevel, 'h2');
         }
+        $heading = preg_replace('/CampusFR\b/', 'Campus<small><sup>FR</sup></small>', $heading);
 
         // All the html stuff goes here.
         $html = html_writer::start_div('page-context-header');

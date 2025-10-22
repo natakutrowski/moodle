@@ -48,10 +48,11 @@ class block_edly_banner_3 extends block_base {
         
         $text = '';
         $text .= '
+        <div class="edly-bleed">
         <div class="main-banner-with-large-area">
-            <div class="container-fluid">
-                <div class="row justify-content-center">
-                    <div class="col-lg-5 col-md-12">
+            <div class="container-fluid px-0">
+                <div class="row gx-0 justify-content-center">
+                    <div class="col-lg-5 col-md-12 ps-lg-0 pe-lg-4">
                         <div class="main-banner-large-content">
                             <h1 data-aos="fade-right" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">'.format_text($title, FORMAT_HTML, array('filter' => true)).'</h1>
                             <p data-aos="fade-right" data-aos-delay="80" data-aos-duration="800" data-aos-once="true">'.format_text($body, FORMAT_HTML, array('filter' => true)).'</p>
@@ -73,7 +74,7 @@ class block_edly_banner_3 extends block_base {
                             </ul>
                         </div>
                     </div>
-                    <div class="col-lg-7 col-md-12">';
+                    <div class="col-lg-7 col-md-12 pe-lg-0">';
                         if($banner_img):
                             $text .= '            
                             <div class="main-banner-large-image" data-aos="fade-left" data-aos-delay="80" data-aos-duration="800" data-aos-once="true" style="background-image:url('.edly_block_image_process($banner_img).');"></div>';
@@ -96,6 +97,7 @@ class block_edly_banner_3 extends block_base {
                 </div>';
             endif;
             $text .= '
+        </div>
         </div>';
         
         $this->content         =  new stdClass;

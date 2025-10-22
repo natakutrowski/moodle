@@ -2346,9 +2346,12 @@ function print_maintenance_message() {
 
     $PAGE->set_pagetype('maintenance-message');
     $PAGE->set_pagelayout('maintenance');
-    $PAGE->set_heading($SITE->fullname);
+
+    $heading = preg_replace('/CampusFR\b/', 'Campus<small><sup>FR</sup></small>', $SITE->fullname);
+
+    $PAGE->set_heading($heading, false, false);
     echo $OUTPUT->header();
-    echo $OUTPUT->heading(get_string('sitemaintenance', 'admin'));
+    //echo $OUTPUT->heading(get_string('sitemaintenance', 'admin'));
     if (isset($CFG->maintenance_message) and !html_is_blank($CFG->maintenance_message)) {
         echo $OUTPUT->box_start('maintenance_message generalbox boxwidthwide boxaligncenter');
         echo $CFG->maintenance_message;

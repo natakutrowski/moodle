@@ -11,6 +11,7 @@ use local_subscriptions\payment\PaymentGatewayFactory;
 use local_subscriptions\constants\Status;
 use local_subscriptions\constants\PaymentReturn;
 use local_subscriptions\url\UrlFactory;
+use local_subscriptions\constants\Operation;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -44,6 +45,33 @@ $lastname  = optional_param('lastname', '', PARAM_NOTAGS);
 // montant forcé en minor (depuis un formulaire interne) — optionnel
 $amountMinorOverride = optional_param('amount_minor', 0, PARAM_INT);
 
+// ──────────────────────────────────────────────────────────────────────────
+// 0bis) Mode invité forcé (triallimited / force_guest / non connecté)
+// ──────────────────────────────────────────────────────────────────────────
+$forceguest = optional_param('force_guest', 0, PARAM_BOOL);
+$istripossible = function_exists('local_campus_is_trial_user');
+if (!$istripossible) {
+    // tentative douce de charger la fonction depuis local_campus/lib.php ; sinon fallback (voir §3)
+    $comp = \core_component::get_component_directory('local_campus');
+    if ($comp && file_exists($comp.'/lib.php')) {
+        require_once($comp.'/lib.php');
+        $istripossible = function_exists('local_campus_is_trial_user');
+    }
+}
+$istrial  = $istripossible ? (bool) local_campus_is_trial_user() : false;
+$asguest  = $forceguest || $istrial || isguestuser() || !isloggedin();
+
+// Si invité forcé → champs requis depuis le formulaire
+if ($asguest) {
+    $email     = required_param('email', PARAM_EMAIL);
+    $firstname = required_param('firstname', PARAM_NOTAGS);
+    $lastname  = required_param('lastname', PARAM_NOTAGS);
+}
+
+if ($asguest && $operation !== Operation::PURCHASE_NEW) {
+    $operation = Operation::PURCHASE_NEW;
+}
+
 global $DB, $USER, $CFG;
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -54,14 +82,14 @@ $plan = $DB->get_record('subscription_plan', ['id' => $planid], '*', MUST_EXIST)
 $currency = strtoupper($overridecurrency !== '' ? $overridecurrency : $currency);
 
 $provider = $providerOverride ? strtolower($providerOverride)
-                              : ProviderSelector::chooseForPlan($plan, $currency, $USER->id ?? null);
+                              : ProviderSelector::chooseForPlan($plan, $currency, $asguest ? null : ($USER->id ?? null));
 if (!$provider) { $provider = Provider::defaultProvider(); }
 
 // ──────────────────────────────────────────────────────────────────────────
 /** Helper: calcule le prix "major" à payer pour cette PR (agnostique).
  *  Ordre: amount_minor override -> override_amount -> Advisor (si connecté et upgrade/queue) -> prix public.
  */
-$compute_price_major = function() use ($DB, $USER, $planid, $currency, $operation, $refsubid, $overrideamount, $amountMinorOverride) : float {
+$compute_price_major = function() use ($DB, $USER, $planid, $currency, $operation, $refsubid, $overrideamount, $amountMinorOverride, $asguest) : float {
     // 1) montant forcé en minor
     if (!empty($amountMinorOverride)) {
         return round(((int)$amountMinorOverride) / 100, 2);
@@ -71,7 +99,7 @@ $compute_price_major = function() use ($DB, $USER, $planid, $currency, $operatio
         return round((float)unformat_float($overrideamount, true), 2);
     }
     // 3) Advisor (si dispo) pour upgrade/queue
-    $loggedin = (isloggedin() && !isguestuser());
+    $loggedin = (!$asguest && isloggedin() && !isguestuser());
     if ($loggedin && in_array($operation, ['queue_future','upgrade_now_replace_chain'], true)) {
 
         $advised = \local_subscriptions\domain\SubscriptionAdvisor::advise_options($USER->id, $planid, $currency);
@@ -112,10 +140,10 @@ if (!$pr) {
 
     $pr = (object)[
         'planid'         => $planid,
-        'userid'         => (isloggedin() && !isguestuser()) ? (int)$USER->id : null,
-        'email'          => $email ?: ($USER->email ?? ''),
-        'firstname'      => $firstname ?: ($USER->firstname ?? ''),
-        'lastname'       => $lastname  ?: ($USER->lastname  ?? ''),
+        'userid'         => $asguest ? null : ((isloggedin() && !isguestuser()) ? (int)$USER->id : null),
+        'email'          => $asguest ? $email     : ($USER->email     ?? $email),
+        'firstname'      => $asguest ? $firstname : ($USER->firstname ?? $firstname),
+        'lastname'       => $asguest ? $lastname  : ($USER->lastname  ?? $lastname),
         'currency'       => $currency,
         'price'          => $priceMajor,          // major units
         'payment_provider' => $provider,

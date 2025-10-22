@@ -29,6 +29,13 @@ class mailer {
     public const T_REMINDER_FIRST              = 'reminder_first';
     public const T_REMINDER_SECOND             = 'reminder_second';
 
+    public const T_CONTACT_ADMIN               = 'contact_admin';  // envoi côté admin/destinataire
+    public const T_CONTACT_ACK                 = 'contact_ack';    // accusé réception côté émetteur
+    
+    public const T_TRIAL_STARTED  = 'T_TRIAL_STARTED';
+    public const T_TRIAL_REM3     = 'T_TRIAL_REM3';
+    public const T_TRIAL_EXPIRED  = 'T_TRIAL_EXPIRED';
+
     /** @var array<string, string[]> mapping type -> required args keys */
     private const REQUIREMENTS = [
         self::T_SUBSCRIPTION_EVENT     => ['user','plan','pr','sub','tmpPassword','isupgrade','isnewuser'],
@@ -46,6 +53,12 @@ class mailer {
         self::T_SUBSCRIPTION_EXPIRY_REM=> ['user','plan','sub','remindkey'],
         self::T_REMINDER_FIRST         => ['pr'],
         self::T_REMINDER_SECOND        => ['pr'],
+        self::T_CONTACT_ADMIN          => ['toemail','fullname','fromemail','message','meta'],
+        self::T_CONTACT_ACK            => ['toemail','fullname','message'],
+
+        self::T_TRIAL_STARTED => ['toemail','firstname','subscribe_url'], // subscribe_url optionnel
+        self::T_TRIAL_REM3    => ['toemail','firstname','continue_url','subscribe_url','course_fullname','daysleft'],
+        self::T_TRIAL_EXPIRED => ['toemail','firstname','subscribe_url','course_fullname'],
     ];
     /**
      * Point d’entrée unique : envoie l’e-mail correspondant au $type.
@@ -126,6 +139,21 @@ class mailer {
 
                 case self::T_REMINDER_SECOND:
                     return self::send_reminder_second($args['pr']);
+
+                case self::T_CONTACT_ADMIN:
+                    return self::send_contact_admin($args['toemail'], $args['fullname'], $args['fromemail'], $args['message'], $args['meta']);
+
+                case self::T_CONTACT_ACK:
+                    return self::send_contact_ack($args['toemail'], $args['fullname'], $args['message'],$args['fromsupport'] ?? null);    
+
+                case self::T_TRIAL_STARTED:
+                    self::send_trial_started($args); break;
+
+                case self::T_TRIAL_REM3:
+                    self::send_trial_rem3($args); break;
+
+                case self::T_TRIAL_EXPIRED:
+                    self::send_trial_expired($args); break;
 
                 default:
                     throw new \coding_exception("Unhandled mail type: {$type}");
@@ -404,13 +432,40 @@ class mailer {
     }
 
     public static function send_reminder(\stdClass $pr): void {
+        global $DB;
+
         $user = self::resolve_user_for_pr($pr);
         if (!$user) { return; }
         $user = self::ensure_full_user($user);
 
-        $title = get_string('email_reminder_subject', 'local_subscriptions');
+        // Récup plan (pour le nom affichable)
+        $plan   = $DB->get_record('subscription_plan', ['id' => $pr->planid], 'id,name', IGNORE_MISSING);
+        $planname = $plan ? local_subscriptions_plan_display_name($plan) : ('#'.$pr->planid);
+
+        // Montant depuis la PR (plus fiable pour un rappel)
+        $price   = '';
+        if (isset($pr->price) && isset($pr->currency)) {
+            $price = format_float((float)$pr->price, 2) . ' ' . strtoupper((string)$pr->currency);
+        }
+
+        // Lien de relance (crée aussi retry_token / retry_expires si manquants)
         $retryurl = self::build_retry_url($pr);
+        $expires  = !empty($pr->retry_expires) ? userdate((int)$pr->retry_expires) : '';
+
+        $title = get_string('email_reminder_subject', 'local_subscriptions');        
+
         $body = \html_writer::tag('p', get_string('email_reminder_intro', 'local_subscriptions'));
+        
+        // Tableau d’infos
+        $tbl = MailRenderer::table()
+            ->lined()
+            ->plan($planname)
+            ->amount($price);
+        if ($expires !== '') {
+            // libellé “valide jusqu’à”
+            $tbl->row('email_retry_expires', MailRenderer::code($expires));
+        }
+        $body .= $tbl->render();        
         $body .= self::pr_ref_badge($pr);
 
         [$html, $text] = MailRenderer::layout(
@@ -424,13 +479,38 @@ class mailer {
     }
     
     public static function send_reminder_second(\stdClass $pr): void {
+        global $DB;
+
         $user = self::resolve_user_for_pr($pr);
-        if (!$user || empty($user->email)) { error_log('[subs][mailer] skip R2: no recipient PR#'.$pr->id); return; }
+        if (!$user) { return; }
         $user = self::ensure_full_user($user);
 
-        $title   = get_string('email_reminder2_subject', 'local_subscriptions'); // + strings EN ci-dessous
-        $retryurl= self::build_retry_url($pr);
+        // Plan + prix
+        $plan   = $DB->get_record('subscription_plan', ['id' => $pr->planid], 'id,name', IGNORE_MISSING);
+        $planname = $plan ? local_subscriptions_plan_display_name($plan) : ('#'.$pr->planid);
+        $price   = '';
+        if (isset($pr->price) && isset($pr->currency)) {
+            $price = format_float((float)$pr->price, 2) . ' ' . strtoupper((string)$pr->currency);
+        }
+
+        // Lien + expiration
+        $retryurl = self::build_retry_url($pr);
+        $expires  = !empty($pr->retry_expires) ? userdate((int)$pr->retry_expires) : '';
+
+        $title = get_string('email_reminder2_subject', 'local_subscriptions');
+
         $body = \html_writer::tag('p', get_string('email_reminder2_intro', 'local_subscriptions'));
+
+        // Tableau d’infos
+        $tbl = MailRenderer::table()
+            ->lined()
+            ->plan($planname)
+            ->amount($price);
+        if ($expires !== '') {
+            // libellé “valide jusqu’à”
+            $tbl->row('email_retry_expires', MailRenderer::code($expires));
+        }
+        $body .= $tbl->render();        
         $body .= self::pr_ref_badge($pr);
 
         [$html, $text] = MailRenderer::layout(
@@ -747,6 +827,225 @@ class mailer {
         self::deliver($user, $title, $html, $text);
     }
 
+    private static function send_contact_admin(string $toemail, string $fullname, string $fromemail, string $message, array $meta = []): void {
+        global $CFG;
+
+        // destinataire "admin" (pseudo user complet pour éviter ensure_full_user() DB)
+        $rcpt = self::pseudo_user($toemail, 'CampusFR', 'support');
+        $fromOV = self::pseudo_from($toemail, 'CampusFR support');
+
+        $title = get_string('contact_admin_subject', 'local_subscriptions'); // i18n plus bas
+
+        $table = MailRenderer::table()
+            ->lined()
+            ->row('contact_label_name',  MailRenderer::code($fullname !== '' ? $fullname : '—'))
+            ->row('contact_label_email', MailRenderer::code($fromemail));
+
+        // META techniques (optionnelles)
+        if (!empty($meta['ip'])) {
+            $table->row('contact_label_ip', MailRenderer::code((string)$meta['ip']));
+        }
+        if (!empty($meta['useragent'])) {
+            $table->row('contact_label_ua', s((string)$meta['useragent']));
+        }
+
+        // Message
+        $table->row('contact_label_msg', nl2br(s($message)));
+
+        $body = $table->render();
+
+        // ===== Pré-réponse “mailto:” (texte brut) =====
+        $reSubject = get_string('contact_reply_subject', 'local_subscriptions'); // "Re : …"
+        $greet     = get_string('contact_reply_greeting', 'local_subscriptions',
+                        trim($fullname) ?: get_string('anonymous', 'block_edly_contact_form'));
+        $remind    = get_string('contact_reply_reminder', 'local_subscriptions'); // "Rappel de votre message :"
+        $marker    = get_string('contact_reply_marker',   'local_subscriptions'); // "— Réponse ci-dessous —"
+
+        // Citation à la TB : chaque ligne préfixée par "> "
+        $quoted = '> ' . preg_replace("/(\r\n|\r|\n)/", "$1> ", trim($message));
+
+        $mailtoBody =
+            $greet . "\r\n" .
+            "\r\n" .        // 1re ligne vide
+            "\r\n" .        // 2e ligne vide (l’admin écrit ici sa réponse)
+            $marker . "\r\n" .
+            "\r\n" .
+            $remind . "\r\n" .
+            $quoted . "\r\n";
+
+        $mailto = 'mailto:'.rawurlencode($fromemail)
+                . '?subject='.rawurlencode($reSubject)
+                . '&body='   .rawurlencode($mailtoBody);
+
+        // ===== Lien admin HTML (éditeur) avec HMAC =====
+        $buttonAdminHtml = '';
+        if (!empty($meta['replyurl'])) {
+            $buttonAdminHtml =
+                \html_writer::empty_tag('hr', ['style'=>'border:none;border-top:1px solid #eee;margin:12px 0;']) .
+                \html_writer::link(
+                    $meta['replyurl'],
+                    get_string('reply_in_admin', 'local_subscriptions'),
+                    ['style'=>'display:inline-block;padding:10px 14px;background:#0f6c76;color:#fff;border-radius:8px;text-decoration:none;']
+                );
+            $body .= $buttonAdminHtml; // on ajoute au corps avant layout
+        }
+
+        [$html, $text] = MailRenderer::layout(
+            $title,
+            $body,
+            get_string('reply_now', 'local_subscriptions'),
+            $mailto
+        );
+
+        // ✅ From = support@… ; Reply-To = utilisateur
+        self::deliver_from($rcpt, $fromOV, $title, $html, $text, $fromemail, $fullname);
+    }
+
+    private static function send_contact_ack(string $toemail, string $fullname, string $message, ?string $fromsupport = null): void {
+        global $CFG;
+        // accusé côté émetteur
+        $rcpt = self::pseudo_user($toemail, ($fullname ?: '—'), '');
+        $from = self::pseudo_from(
+            $fromsupport ?: ((string)($CFG->supportemail ?? $CFG->noreplyaddress)),
+            'CampusFR support'
+        );
+
+        $title = get_string('contact_copy_subject', 'local_subscriptions');
+
+        $siteurl = (new \moodle_url('/'))->out(false);
+        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', s(trim($fullname))));
+        $body .= \html_writer::tag('p', get_string('contact_copy_intro', 'local_subscriptions'));
+        $body .= \html_writer::tag('p', '<strong>'.get_string('contact_label_msg','local_subscriptions').'</strong><br>'.nl2br(s($message)));
+
+        [$html, $text] = MailRenderer::layout(
+            $title,
+            $body,
+            get_string('view_site','local_subscriptions'),
+            $siteurl
+        );
+
+        // ✅ From = support@… ; Reply-To = support@…
+        self::deliver_from($rcpt, $from, $title, $html, $text, $from->email, 'CampusFR support');
+    }
+
+
+    /** Essai démarré (site-wide) */
+    public static function send_trial_started(array $p): void {
+        $to      = (string)$p['toemail'];
+        $first   = (string)$p['firstname'];
+        $suburl  = (string)$p['subscribe_url'];
+
+        $subject  = get_string('mail_trial_started_subject', 'local_campus');
+        $bodyhtml = format_text(
+            get_string('mail_trial_started_body', 'local_campus', (object)['firstname'=>$first]),
+            FORMAT_HTML
+        );
+        [$html, $text] = MailRenderer::layout(
+            $subject, $bodyhtml,
+            get_string('mail_trial_cta_subscribe','local_campus'), $suburl
+        );
+        self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
+    }
+
+    public static function send_trial_rem3(array $p): void {
+        $to      = (string)$p['toemail'];
+        $first   = (string)$p['firstname'];
+        $conturl = (string)$p['continue_url'];   // bouton 1 (continuer essai)
+        $suburl  = (string)$p['subscribe_url'];  // bouton 2 (s’abonner)
+        $course  = (string)($p['course_fullname'] ?? '');
+        $days    = (int)($p['daysleft'] ?? 3);
+
+        $subject  = get_string('mail_trial_rem3_subject_generic','local_campus', $course);
+        $bodyhtml = format_text(
+            get_string('mail_trial_rem3_body','local_campus', (object)['firstname'=>$first,'daysleft'=>$days]),
+            FORMAT_HTML
+        );
+
+        // ➜ Nouvelle méthode du renderer qui ajoute un 2e bouton SANS casser layout()
+        [$html, $text] = MailRenderer::layout_with_extra_button(
+            $subject,
+            $bodyhtml,
+            get_string('mail_trial_cta_continue','local_campus'), $conturl,  // bouton secondaire (dans le corps)
+            get_string('mail_trial_cta_subscribe','local_campus'), $suburl   // bouton principal (celui de layout)
+        );
+
+        self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
+    }
+
+    public static function send_trial_expired(array $p): void {
+        $to      = (string)$p['toemail'];
+        $first   = (string)$p['firstname'];
+        $course  = (string)($p['course_fullname'] ?? '');
+        $suburl  = (string)$p['subscribe_url'];
+
+        $subject  = get_string('mail_trial_expired_subject_generic','local_campus', $course);
+        $bodyhtml = format_text(
+            get_string('mail_trial_expired_body','local_campus', (object)['firstname'=>$first]),
+            FORMAT_HTML
+        );
+        [$html, $text] = MailRenderer::layout(
+            $subject, $bodyhtml,
+            get_string('mail_trial_cta_subscribe','local_campus'), $suburl
+        );
+        self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
+    }
+
+
+    /** Crée un "user" complet in-memory pour email_to_user + ensure_full_user() */
+    public static function pseudo_user(string $email, string $firstname = '', string $lastname = ''): \stdClass {
+        $u = \core_user::get_support_user();      // a tous les champs étendus
+        $u = self::ensure_full_user($u);          // no-op ici, mais garde la forme “complète”
+        $clone = clone $u;
+
+        $clone->id        = -100;                 // ≠ 0 pour éviter "null user"
+        $clone->email     = $email;
+        $clone->firstname = $firstname !== '' ? $firstname : $u->firstname;
+        $clone->lastname  = $lastname;
+        $clone->mailformat = 1;
+        $clone->deleted    = 0;
+        $clone->suspended  = 0;
+        $clone->confirmed  = 1;
+
+        return $clone;
+    }
+
+    private static function safe_support_from(): \stdClass {
+        global $CFG;
+        try {
+            $sp = self::ensure_full_user(\core_user::get_support_user());
+            return $sp;
+        } catch (\Throwable $e) {
+            // Repli : construit un "from" complet avec l'adresse support/noreply
+            $email = (string)($CFG->supportemail ?? $CFG->noreplyaddress ?? 'noreply@example.com');
+            return self::pseudo_from($email, 'CampusFR support');
+        }
+    }
+    
+    /** Clone du user support avec une adresse FROM spécifique (complète pour email_to_user). */
+    public static function pseudo_from(string $email, string $name = 'CampusFR support'): \stdClass {
+        $base = self::ensure_full_user(\core_user::get_support_user());
+        $from = clone $base;
+        $from->id        = -200;        // ≠ 0
+        $from->email     = $email;
+        $from->firstname = $name;
+        $from->lastname  = '';
+        $from->mailformat= 1;
+        $from->deleted   = 0;
+        $from->suspended = 0;
+        $from->confirmed = 1;
+        return $from;
+    }
+
+    /** Envoi avec FROM override + Reply-To optionnels. */
+    public static function deliver_from(\stdClass $to, \stdClass $from, string $subject, string $html, string $text, ?string $replyto = null, ?string $replytoname = null): void {
+        if (self::$preview) { self::$last = ['subject'=>$subject,'html'=>$html,'text'=>$text]; return; }
+        $rcpt = self::ensure_full_user($to);
+        $from = self::ensure_full_user($from);
+        $rcpt->mailformat = 1;
+        @email_to_user($rcpt, $from, $subject, $text, $html, '', '', true, $replyto, $replytoname);
+    }
+
+
     /** Helpers internes **/
     private static function fake_user_from_pr(\stdClass $pr): \stdClass {
         // email_to_user() exige un "user" (id/email/firstname/lastname)
@@ -816,7 +1115,7 @@ class mailer {
     }
 
     /** Envoi robuste (support user, try/catch). */
-    private static function deliver(\stdClass $user, string $subject, string $html, string $text): void {
+    public static function deliver(\stdClass $user, string $subject, string $html, string $text): void {
 
         // Mode preview: ne pas appeler email_to_user (évite le debugging() de noemailever)
         if (self::$preview) {
@@ -826,7 +1125,11 @@ class mailer {
 
         $recipient = self::ensure_full_user($user);
         $recipient->mailformat = 1;
-        @email_to_user($recipient, \core_user::get_support_user(), $subject, $text, $html);
+
+        // FROM sûr (jamais d'exception même si user support supprimé)
+        $from = self::safe_support_from();
+
+        @email_to_user($recipient, $from, $subject, $text, $html);
 
         // $user = destinataire principal ; $support = \core_user::get_support_user()
         // $subject, $plain, $html : ton contenu déjà préparé.
@@ -858,7 +1161,7 @@ class mailer {
 
                 // Envoi de la copie (préfixe optionnel)
                 $copysubject = '[COPY] ' . $subject.' - '.$user->username;
-                $ok = @email_to_user($recipient, \core_user::get_support_user(), $copysubject, $text, $html);
+                $ok = @email_to_user($recipient, $from, $copysubject, $text, $html);
 
                 // Option: petit log si besoin
                 if (!$ok) {

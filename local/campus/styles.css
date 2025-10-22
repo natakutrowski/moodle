@@ -1,0 +1,233 @@
+/* ===== local_campus — Course page (CLEAN) ===== */
+
+
+
+/* ---- Layout 1 : Hero plein écran + carte ---- */
+.campus-course.layout-1 .course-hero{ margin-bottom: 24px; }
+
+.campus-course.layout-1 .hero-figure{
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  background: transparent;
+}
+.campus-course.layout-1 .hero-figure img{
+  width: 100%;
+  height: 420px;           /* ajuste la hauteur si besoin */
+  object-fit: cover;
+  display: block;
+}
+/* Zéro bandeau/voile */
+.campus-course.layout-1 .hero-figure::before,
+.campus-course.layout-1 .hero-figure::after{
+  content: none !important;
+  display: none !important;
+}
+/* Titre en overlay, sans plaque derrière */
+.campus-course.layout-1 .hero-title{
+  position: absolute;
+  left: 24px; right: 24px; bottom: 16px;
+  margin: 0; padding: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+.campus-course.layout-1 .hero-title h1{
+  margin: 0;
+  color: #fff;
+  text-shadow:
+    0 2px 14px rgba(0,0,0,.55),
+    0 1px  2px rgba(0,0,0,.40);
+}
+
+/* Carte blanche sous le hero */
+.campus-course.layout-1 .course-body.card-like{
+  background:#fff;
+  border-radius: 18px;
+  padding: 22px 22px 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.06);
+}
+.campus-course.layout-1 .course-summary{ margin-bottom: 12px; }
+.campus-course .course-ctas{ display:flex; flex-wrap:wrap; }
+
+/* ---- Layout 2 : Split 2 colonnes ---- */
+.campus-course.layout-2 .course-split .split-figure{
+  border-radius: 18px;
+  overflow:hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+}
+.campus-course.layout-2 .split-figure img{
+  width:100%;
+  height: 100%;
+  max-height: 520px;
+  object-fit: cover;
+  display:block;
+}
+.campus-course.layout-2 .split-title{
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight:800;
+  margin-bottom: 12px;
+}
+.campus-course.layout-2 .split-summary{ margin-bottom: 12px; }
+
+/* ---- Layout 3 : Carte élégante ---- */
+.campus-course.layout-3 .course-card{
+  border-radius:18px;
+  background:#fff;
+  overflow:hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,.06);
+}
+.campus-course.layout-3 .card-figure img{
+  width:100%;
+  height: 360px;
+  object-fit: cover;
+  display:block;
+}
+.campus-course.layout-3 .card-content{ padding: 22px; }
+.campus-course.layout-3 .card-title{
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight:800;
+  margin:0 0 10px;
+}
+.campus-course.layout-3 .card-summary{ margin-bottom: 12px; }
+
+/* ---- Responsive ---- */
+@media (max-width: 767px){
+  .campus-course.layout-1 .hero-figure img{ height: 280px; }
+  .campus-course.layout-3 .card-figure img{ height: 260px; }
+}
+
+/* ---- Dark mode : fonds + texte lisible ---- */
+.campus-course.dark{ background:#0f1117; }
+.campus-course.dark .card-like,
+.campus-course.dark .course-card{ background:#151823; }
+
+.campus-course.dark .split-title,
+.campus-course.dark .card-title,
+.campus-course.dark .hero-title h1{ color:#fff; }
+
+/* Texte de description : blanc franc + pas d'opacité */
+.campus-course.dark .course-summary,
+.campus-course.dark .split-summary,
+.campus-course.dark .card-summary{
+  color:#fff !important;
+  opacity:1 !important;
+}
+/* Tous les descendants héritent du blanc même si le thème force leur color */
+.campus-course.dark .course-summary *,
+.campus-course.dark .split-summary *,
+.campus-course.dark .card-summary *{
+  color:inherit !important;
+  opacity:1 !important;
+}
+/* Liens visibles en dark */
+.campus-course.dark .course-summary a,
+.campus-course.dark .split-summary a,
+.campus-course.dark .card-summary a{
+  color:#fff !important;
+  text-decoration-color: rgba(255,255,255,.55);
+}
+
+/* === CTA: mêmes dimensions + bon espacement === */
+
+/* Le conteneur de boutons */
+.campus-course .course-ctas{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;                /* espacement propre entre les boutons */
+  align-items: stretch;     /* mêmes hauteurs visuelles */
+}
+
+/* Base commune (les deux boutons) */
+.campus-course .course-ctas .cta{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: 12px;
+  text-decoration: none;
+  /* pas de marges ici : on laisse 'gap' gérer l'espacement */
+}
+
+/* Bouton dégradé (S’abonner / Accéder au cours connecté)
+   On écrase le padding du thème pour l’harmoniser */
+.campus-course .course-ctas .default-btn.cta{
+  padding: 12px 22px;       /* hauteur totale = 24px (12+12) */
+}
+
+/* Bouton outline rose (Accéder au cours d’essai – invité)
+   NB: border 2px -> on réduit le padding vertical à 10px
+   pour obtenir la même hauteur totale: 10+10+2+2 = 24px */
+.campus-course .course-ctas .btn-outline-main.cta{
+  padding: 10px 20px;
+  border: 2px solid var(--main-color);
+  color: var(--main-color);
+  background: #fff;
+}
+.campus-course .course-ctas .btn-outline-main.cta:hover{
+  background: var(--main-color);
+  color: #fff;
+}
+
+/* ===== Popup d'essai (Campus) — layout solide ===== */
+#campusTrialModal .modal-dialog{ max-width: 720px; margin: 1.75rem auto; }
+#campusTrialModal .modal-content{ border-radius:16px; }
+
+/* Footer: mêmes dimensions pour Annuler / Continuer, pas de bordure */
+#campusTrialModal .modal-footer{
+  display:flex; gap:10px; align-items:center;
+}
+#campusTrialModal .modal-footer .btn,
+#campusTrialModal .modal-footer .default-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:44px;                 /* même hauteur visuelle */
+  padding:0 18px;              /* même padding horizontal */
+  border:none; outline:none; box-shadow:none;
+  border-radius:12px;
+  line-height:1;               /* pas de décalage vertical */
+  font-weight:600;
+}
+#campusTrialModal .default-btn[disabled]{ opacity:.55; cursor:not-allowed; pointer-events:none; }
+
+/* Inputs plus doux */
+#campusTrialModal .form-control{ border-radius:10px; }
+
+/* CGU/Privacy : grille = checkbox 20px + texte qui wrappe naturellement */
+#campusTrialModal .form-check{
+  display:grid;
+  grid-template-columns: 20px 1fr;
+  align-items:center;
+  column-gap:10px;
+  width:100%;
+}
+#campusTrialModal .form-check-input{
+  width: 20px; height: 20px;
+  margin: 0;               /* aligne verticalement */
+}
+#campusTrialModal .form-check-label{
+  margin:0;
+  min-width:0;              /* ← autorise le wrap normal */
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:break-word;
+  writing-mode: horizontal-tb !important; /* neutralise un éventuel style global */
+  text-orientation: mixed !important;
+  padding-top: 1px;          /* joue à 0–2px selon ton rendu */
+  line-height: 1.35;         /* équilibre la hauteur de ligne */
+}
+#campusTrialModal .form-check-label a{ white-space:nowrap; }
+
+/* Marges propres dans le footer de la popup – exactement 4px autour */
+#campusTrialModal .modal-footer{ gap: 0; }                 /* pas de gap qui s'additionne */
+#campusTrialModal .modal-footer > *{ margin: 4px !important; }
+
+/* Hauteur / padding harmonisés (au cas où pas déjà posé) */
+#campusTrialModal .modal-footer .btn,
+#campusTrialModal .modal-footer .default-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:44px; padding:0 18px; line-height:1; border-radius:12px;
+  border:none; outline:none; box-shadow:none;
+}

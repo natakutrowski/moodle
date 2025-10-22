@@ -532,3 +532,24 @@ $string['recurring_canceled_effect_now'] = 'Cancellation takes effect immediatel
 $string['recurring_canceled_effect_on']  = 'Cancellation will take effect on {$a}. You keep access until then.';
 $string['payment_failcode'] = 'Reason';
 $string['payment_nextretry'] = 'Next attempt';
+$string['email_retry_expires'] = 'Link valid until';
+
+$string['contact_admin_subject'] = 'New contact message';
+$string['contact_copy_subject']  = 'We received your message';
+$string['contact_copy_intro']    = 'Thank you for your message. We’ll get back to you shortly.';
+$string['contact_label_name']    = 'Name';
+$string['contact_label_email']   = 'Email';
+$string['contact_label_msg']     = 'Message';
+$string['view_site']             = 'Open website';
+$string['contact_label_ip'] = 'IP';
+$string['contact_label_ua'] = 'User-Agent';
+$string['reply_now']              = 'Reply now';
+$string['contact_reply_greeting'] = 'Hello {$a}, we have received your message.';
+$string['contact_reply_reminder'] = 'Reminder of your message:';
+$string['contact_reply_marker']   = '— Write your reply below —';
+$string['contact_reply_subject']  = 'Re: your message to CampusFR';
+$string['reply_in_admin'] = 'Reply from admin (HTML editor)';
+$string['reply_text']             = 'Your reply';
+$string['contact_reply_sent_hint']  = 'Your reply has been sent to the recipient. You can close this page.';
+
+$string['trial_checkout_banner'] = 'You are signed in with a trial account. Please enter your details to purchase a subscription.';

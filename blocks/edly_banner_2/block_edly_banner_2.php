@@ -142,7 +142,7 @@ class block_edly_banner_2 extends block_base {
                                 <div class="banner-reviews" data-aos="fade-left" data-aos-delay="150" data-aos-duration="1500" data-aos-once="true">
                                     <span><i class="'.$info_card3_icon.'"></i> '.format_text($info_card3_content, FORMAT_HTML, array('filter' => true)).'</span>
                                     <h3>
-                                    '.format_text($info_card2_title, FORMAT_HTML, array('filter' => true)).'
+                                    '.format_text($info_card3_title, FORMAT_HTML, array('filter' => true)).'
                                     </h3>
                                 </div>';
                             endif; 

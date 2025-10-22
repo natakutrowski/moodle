@@ -1,0 +1,69 @@
+/* ===========================================
+   block_edly_subscribe — présentation
+   =========================================== */
+
+/* ===== Section limitée + en-tête ===== */
+.edly-plans-section .container{
+  max-width: 1200px;         /* 1) pas plein écran en desktop */
+  padding: 0 16px;
+}
+.edly-plans-section .section-title{
+  text-align:center; margin:0 0 28px;
+}
+.edly-plans-section .section-title .sub{
+  display:inline-block; font-weight:600; color:var(--optional-color,#e24); margin-bottom:6px;
+}
+.edly-plans-section .section-title h2{
+  font-size:clamp(24px,3.2vw,44px); font-weight:800; color:var(--heading-color,#2d2342); margin:0;
+}
+
+/* ===== Layout des cards sans toucher au renderer ===== */
+
+/* Cas #1 : ton renderer renvoie une .row Bootstrap */
+.edly-plans-container .row{
+  justify-content:center !important;       /* 2) centre en mobile */
+  margin-left:-12px; margin-right:-12px;   /* air à gauche/droite */
+}
+.edly-plans-container .row > [class*="col-"]{
+  padding-left:12px; padding-right:12px;   /* gutter par card */
+  display:flex;                             /* pour égaliser la hauteur des cards si besoin */
+}
+
+/* Cas #2 : si pas de .row (rare), fallback générique */
+.edly-plans-container:not(:has(.row)){
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap:24px;
+  align-items:stretch;
+}
+
+/* Mobile : une colonne, centrée, carte pas collée à gauche */
+@media (max-width: 767.98px){
+  .edly-plans-container .row > [class*="col-"]{
+    flex: 0 1 560px;           /* largeur max confortable */
+    max-width: 560px;
+  }
+  .edly-plans-container .row > [class*="col-"] > *{
+    width:100%;
+  }
+
+  .edly-plans-container:not(:has(.row)){
+    grid-template-columns: 1fr;
+    justify-items: center;     /* centre le seul item */
+  }
+  .edly-plans-container:not(:has(.row)) > *{
+    width:100%; max-width:560px;
+  }
+}
+
+/* Desktop : un peu de marge entre les cartes et les bords du conteneur */
+@media (min-width: 768px) {
+  .edly-plans-container .row {
+    margin-left: -12px;
+    margin-right: -12px;
+  }
+  .edly-plans-container [class*="col-"] {
+    padding-left: 12px;
+    padding-right: 12px;       /* “gutter” visuel par carte */
+  }
+}

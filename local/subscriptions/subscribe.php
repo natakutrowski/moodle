@@ -30,6 +30,9 @@ $plans = sort_plans_by_duration($plans, true);
 
 /** @var \local_subscriptions\output\renderer $renderer */
 $renderer = $PAGE->get_renderer('local_subscriptions');
+echo html_writer::start_div('ls-plans-page container my-4');
 echo $renderer->render_available_plans($plans);
+echo html_writer::end_div();
+
 
 echo $OUTPUT->footer();

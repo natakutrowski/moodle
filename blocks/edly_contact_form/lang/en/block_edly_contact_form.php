@@ -1,0 +1,35 @@
+<?php
+$string['pluginname']   = 'Contact form (Edly)';
+$string['edly_contact_form'] = '[Edly] Contact form';
+$string['blocksettings'] = '[Edly] Contact form Settings';
+$string['edly_contact_form:addinstance'] = 'Add a new [Edly] Contact form block';
+$string['edly_contact_form:myaddinstance'] = 'Add a new [Edly] Contact form block';
+
+$string['title']        = 'Title';
+$string['defaulttitle'] = 'Contact us';
+$string['strap']        = 'Right-side strapline';
+$string['defaultstrap'] = 'A big vision means little without great people. Let’s work together.';
+$string['recipient']    = 'Recipient email (leave empty to send to site admin)';
+$string['fullname']     = 'Full name';
+$string['email']        = 'Email';
+$string['message']      = 'Message';
+$string['send']         = 'Send';
+$string['ph_fullname']  = 'Your full name';
+$string['ph_email']     = 'Your email address';
+$string['ph_message']   = 'Your message';
+$string['acceptpolicy'] = 'I accept the privacy policy';
+$string['invalidemail'] = 'Invalid email address.';
+$string['mustaccept']   = 'You must accept the privacy policy.';
+$string['sendsuccess']  = 'Thanks! Your message has been sent.';
+$string['sendfail']     = 'Sending failed. Please try again later.';
+$string['anonymous']    = 'Anonymous';
+$string['mailsubject']  = 'New contact message — {$a}';
+$string['defaultaddress'] = '';
+$string['left_side']           = 'Left column';
+$string['imageurl']            = 'Image URL (left side)';
+$string['imageurl_help']       = 'Direct URL to an image (JPG/PNG/SVG). It will be displayed on the left side.';
+$string['imagealt']            = 'Image alt text';
+$string['social_header']       = 'Social links';
+$string['youtube']             = 'YouTube link';
+$string['instagram']           = 'Instagram link';
+$string['telegram']            = 'Telegram link';

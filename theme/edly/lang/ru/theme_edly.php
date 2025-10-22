@@ -323,3 +323,11 @@ $string['config_subtitle'] = 'Верхний заголовок';
 
 $string['favicon'] = 'Фавикон';
 $string['favicon_desc'] = 'Фавикон сайта. Рекомендуемый размер — 16×16 px.';
+
+$string['total_student_singular'] = 'Студент';
+$string['total_student_plural']   = 'Студентов';
+
+$string['trial_courses'] = 'Курсы с ссылкой «демо» (вместо даты и числа студентов)';
+$string['trial_only_guests'] = 'Показывать ссылку на демо-курс только гостям';
+$string['trial_access'] = 'Перейти к демо-курсу';
+$string['image'] = 'Картина';
