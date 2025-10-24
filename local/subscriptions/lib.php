@@ -137,61 +137,71 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
  * @return string username unique
  */
 function local_subscriptions_generate_unique_username(string $firstname = '', string $lastname = '', string $email = ''): string {
-    global $DB;
+    global $DB, $CFG;
 
-    // 1) Base = prénom+nom concaténés
+    // 1) Base = prénom+nom, sinon partie locale de l’email, sinon "user".
     $base = trim($firstname . $lastname);
-
-    // 2) Si vide → fallback = partie locale de l'email
-    if ($base === '' && !empty($email)) {
-        $local = explode('@', $email)[0];
-        $base = $local;
+    if ($base === '' && $email !== '') {
+        $base = preg_replace('/@.*/', '', $email); // local-part
     }
-
-    // 3) Si toujours vide → fallback "user"
-    if ($base === '') {
+    if ($base === '' || $base === null) {
         $base = 'user';
     }
 
-    // 4) Minuscule
+    // 2) Minuscules (gère l’UTF-8).
     $base = core_text::strtolower($base);
 
-    // 5) Translittération accents → ASCII
-    $base = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $base);
+    // 3) Laisser Moodle décider d’abord : nettoie selon PARAM_USERNAME
+    //    (prend en compte $CFG->extendedusernamechars).
+    $username = clean_param($base, PARAM_USERNAME); // validation officielle Moodle
+    // Réf : la validation des usernames vit dans lib/moodlelib.php → clean_param(PARAM_USERNAME).
+    // (Nous testons ensuite si tout a été "mangé".) 
 
-    // 6) Garder uniquement [a-z]
-    $base = preg_replace('/[^a-z]/', '', $base ?? '');
-
-    // 7) Fallback encore si vide après nettoyage
-    if ($base === '' || $base === false) {
-        $base = 'user';
+    // 4) Si le nettoyage aboutit à vide (ex: site sans "extended chars" + nom non latin),
+    //    translittérer vers ASCII de façon robuste (ICU si dispo, sinon iconv).
+    if ($username === '' || $username === false) {
+        if (class_exists('\\Transliterator')) {
+            // Any-Latin → Latin-ASCII ; supprime les diacritiques ; minuscules.
+            $tr = \Transliterator::create('Any-Latin; Latin-ASCII; NFKD; [:Nonspacing Mark:] Remove; NFC; Lower()');
+            if ($tr) {
+                $base = $tr->transliterate($base);
+            }
+        } else {
+            $base = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $base);
+        }
+        $base = core_text::strtolower((string)$base);
+        // Conserver exactement l’ensemble permis par Moodle quand "extended" est désactivé.
+        $username = preg_replace('/[^a-z0-9._@-]/', '', (string)$base);
     }
 
-    // 8) Tronquer à 100 chars max
-    $maxlen = 100;
-    $base   = mb_substr($base, 0, $maxlen);
-
-    // 9) Vérifier unicité
-    if (!$DB->record_exists('user', ['username' => $base])) {
-        return $base;
+    // 5) Fallback si encore vide.
+    if ($username === '' || $username === false) {
+        $username = 'user';
     }
 
-    // 10) Ajouter suffixes numériques si déjà pris
+    // 6) Tronquer à 100 caractères (limite du champ username).
+    $maxlen  = 100; // cf. modèle de données de Moodle
+    $username = core_text::substr($username, 0, $maxlen);
+
+    // 7) Unicité (on suffixe 2..9999 si nécessaire).
+    if (!$DB->record_exists('user', ['username' => $username])) {
+        return $username;
+    }
     for ($i = 2; $i < 10000; $i++) {
         $suffix = (string)$i;
-        $cut    = $maxlen - strlen($suffix);
-        $try    = mb_substr($base, 0, max(1, $cut)) . $suffix;
-
+        $cut    = $maxlen - core_text::strlen($suffix);
+        $try    = core_text::substr($username, 0, max(1, $cut)) . $suffix;
         if (!$DB->record_exists('user', ['username' => $try])) {
             return $try;
         }
     }
 
-    // 11) Dernier recours: timestamp
+    // 8) Dernier recours : timestamp.
     $rand = (string)time();
-    $cut  = $maxlen - strlen($rand);
-    return mb_substr($base, 0, max(1, $cut)) . $rand;
+    $cut  = $maxlen - core_text::strlen($rand);
+    return core_text::substr($username, 0, max(1, $cut)) . $rand;
 }
+
 
 /**
  * Formate une durée en secondes en texte humain (approx simple).
