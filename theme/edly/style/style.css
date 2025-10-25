@@ -7424,3 +7424,6 @@ Personnalization CSS
 @media (max-width:820px){
   .cf-maintenance__card{ grid-template-columns:1fr; }
 }
+
+.link-soft { color: var(--bs-body-color); }
+.link-soft:hover { color: var(--bs-primary); }

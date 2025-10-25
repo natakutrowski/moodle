@@ -248,7 +248,7 @@ $string['task_cleanup_login_tokens'] = 'Очистка просроченных 
 $string['option_queue_future'] = 'Продлить (активация {$a})';
 $string['option_purchase_new'] = 'Новая подписка';
 $string['choose_option'] = 'Выберите вариант';
-$string['have_account_login_to_see_options'] = 'У меня уже есть учётная запись — войдите, чтобы увидеть варианты апгрейда';
+$string['have_account_login_to_see_options'] = 'У вас уже есть аккаунт? — Войдите, чтобы увидеть варианты обновления, нажав здесь.';
 
 // Above the options
 $string['advisor_help_upgrade']  = 'Вы можете продлить текущую подписку по цепочке или перейти на более длительный тариф. Цена апгрейда скорректирована с учётом прошедшего времени.';

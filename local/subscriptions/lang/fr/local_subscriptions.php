@@ -248,7 +248,7 @@ $string['task_cleanup_login_tokens'] = 'Nettoyer les jetons de connexion expiré
 $string['option_queue_future']  = 'Prolonger (activation le {$a})';
 $string['option_purchase_new']  = 'Nouvel abonnement';
 $string['choose_option']        = 'Choisir une option';
-$string['have_account_login_to_see_options'] = 'J’ai déjà un compte — me connecter pour voir les options de mise à niveau';
+$string['have_account_login_to_see_options'] = 'Vous avez déjà un compte ? — Connectez-vous pour voir les options de mise à niveau en cliquant ici.';
 
 // Au-dessus des options
 $string['advisor_help_upgrade']  = 'Vous pouvez enchaîner sur votre abonnement actuel ou passer à un plan plus long. Le prix de la mise à niveau est ajusté selon le temps écoulé.';

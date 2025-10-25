@@ -243,7 +243,7 @@ if (!$effUserid) {
         html_writer::link(
             new moodle_url('/login/index.php', ['returnurl' => qualified_me()]),
             get_string('have_account_login_to_see_options', 'local_subscriptions'),
-            ['class'=>'link-primary fw-semibold']
+            ['class'=>'link-soft fw-normal']
         ),
         'mb-3'
     );

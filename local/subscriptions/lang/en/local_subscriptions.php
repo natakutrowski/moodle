@@ -248,7 +248,7 @@ $string['task_cleanup_login_tokens'] = 'Clean up expired login tokens';
 $string['option_queue_future'] = 'Extend (activates on {$a})';
 $string['option_purchase_new'] = 'New subscription';
 $string['choose_option'] = 'Choose an option';
-$string['have_account_login_to_see_options'] = 'I already have an account — sign in to see upgrade options';
+$string['have_account_login_to_see_options'] = 'Already have an account? — Log in to see upgrade options by clicking here.';
 
 // Above the options
 $string['advisor_help_upgrade']  = 'You can either extend your current subscription in sequence or switch to a longer plan. The upgrade price is adjusted based on your elapsed time.';
