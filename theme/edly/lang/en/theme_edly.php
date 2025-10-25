@@ -332,3 +332,7 @@ $string['trial_courses'] = 'Courses with “trial” link (replaces Date/Student
 $string['trial_only_guests'] = 'Show the trial link to guests only';
 $string['trial_access'] = 'Access the trial course';
 $string['image'] = 'Image';
+
+$string['locked_title'] = 'Subscribers only';
+$string['locked_desc'] = 'Subscribe to unlock this activity.';
+$string['locked_subscribe'] = 'Subscribe';

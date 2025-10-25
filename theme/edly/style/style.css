@@ -7427,3 +7427,56 @@ Personnalization CSS
 
 .link-soft { color: var(--bs-body-color); }
 .link-soft:hover { color: var(--bs-primary); }
+
+
+
+/* Ligne d’info (sans fond supplémentaire, on utilise le fond gris du wrapper) */
+.cf-locked-row{
+  display:flex; align-items:center; gap:0.9rem; width:100%;
+}
+
+/* Taille du cadenas dans la bannière verrouillée */
+.cf-locked-ico .icon,
+.cf-locked-ico img,
+.cf-locked-ico svg{
+  width: 28px;   /* 24–32px selon ton goût */
+  height: 28px;
+}
+/* Icône RemixIcon du cadenas */
+.cf-locked-ico i{
+  font-size: 28px;      /* ajuste 24–32px si tu veux */
+  line-height: 1;
+  display: inline-block;
+  color: #6c757d;       /* gris doux, hérite sinon */
+  transform: translateY(3px);
+}
+
+
+/* Texte */
+.cf-locked-title{ font-weight:700; margin-bottom:.1rem; }
+.cf-locked-desc{ font-size:.92rem; opacity:.85; }
+
+/* Actions */
+.cf-locked-actions{ margin-left:auto; display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+.cf-locked-actions .default-btn{ border-radius:999px; padding:.4rem .9rem; }
+
+/* Griser et désactiver le titre au-dessus */
+.cf-locked .activityname a,
+.cf-locked .instancename a,
+.cf-locked a.aalink,
+.cf-locked .activityname,
+.cf-locked .instancename{
+  color:#6c757d !important;
+}
+.cf-locked .activityname a,
+.cf-locked .instancename a,
+.cf-locked a.aalink{
+  pointer-events:none; cursor:default; text-decoration:none !important;
+}
+
+/* Icône d’activité (à gauche) en gris */
+.cf-locked .activityicon, 
+.cf-locked .activityiconcontainer, 
+.cf-locked .activityiconcontainer .icon{
+  filter:grayscale(100%); opacity:.55;
+}

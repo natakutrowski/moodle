@@ -306,3 +306,7 @@ $string['trial_courses'] = 'Cours avec lien “essai” (remplace Date/Étudiant
 $string['trial_access'] = 'Accéder au cours d’essai';
 $string['trial_only_guests'] = 'Afficher le lien d’essai uniquement pour les invités';
 $string['image'] = 'Image';
+
+$string['locked_title'] = 'Accès réservé aux abonnés';
+$string['locked_desc'] = 'Abonnez-vous pour débloquer cette activité.';
+$string['locked_subscribe'] = 'S’abonner';

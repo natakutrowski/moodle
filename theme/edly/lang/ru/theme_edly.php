@@ -331,3 +331,7 @@ $string['trial_courses'] = 'Курсы с ссылкой «демо» (вмес�
 $string['trial_only_guests'] = 'Показывать ссылку на демо-курс только гостям';
 $string['trial_access'] = 'Перейти к демо-курсу';
 $string['image'] = 'Картина';
+
+$string['locked_title'] = 'Доступно по подписке';
+$string['locked_desc'] = 'Оформите подписку, чтобы открыть эту активность.';
+$string['locked_subscribe'] = 'Оформить подписку';
