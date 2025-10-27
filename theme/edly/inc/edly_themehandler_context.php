@@ -139,5 +139,6 @@ $templatecontext += [
     'lang_menu'          => $lang_menu_html,
 ];
 
+$templatecontext['isguest']    = $isguest;
 
 $PAGE->requires->jquery();

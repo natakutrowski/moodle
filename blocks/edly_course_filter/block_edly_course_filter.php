@@ -26,213 +26,58 @@ class block_edly_course_filter extends block_base {
     }
 
     public function get_content() {
-        global $CFG, $DB, $COURSE, $USER, $PAGE;
+        global $DB, $PAGE;
 
         if ($this->content !== null) {
             return $this->content;
         }
+        $this->content = new \stdClass();
 
-        $this->content         =  new stdClass;
+        $isguest   = (!isloggedin() || isguestuser());
+        $istrial   = function_exists('local_campus_is_trial_user') && local_campus_is_trial_user();
+        $restricted = $isguest || $istrial;
 
-        $isguest = (!isloggedin() || isguestuser());
-
-        $istrial = function_exists('local_campus_is_trial_user') && local_campus_is_trial_user();
-        $isrestricted = $isguest || $istrial;  // ← invité OU compte d’essai
-
-
-        // Libellé du bouton (i18n/fo)
         $triallabel = get_string('trial_access', 'theme_edly');
 
-
-        if(!empty($this->config->title)){$this->content->title = $this->config->title;} else {$this->content->title = '';}
-
-        if(!empty($this->config->top_title)){$this->content->top_title = $this->config->top_title;} else {$this->content->top_title = '';} 
-
-        if(!empty($this->config->class)){$this->content->class = $this->config->class;} else {$this->content->class = '';} 
-
-        if(!empty($this->config->body)){$this->content->body = $this->config->body;} else {$this->content->body = '';} 
-
-        if(isset($this->config->shape_img ) && !empty($this->config->shape_img )){ $this->content->shape_img  = $this->config->shape_img ;
-        }else{ $this->content->shape_img  = ''; }
-
+        // Récupère les cours choisis dans la config du block
         $courses = [];
-        if (!empty($this->config->courses)) {
-            $ids = array_map('intval', (array)$this->config->courses);
-
-            // Récupère les cours sélectionnés, triés par nom (alpha)
+        $ids = !empty($this->config->courses) ? array_map('intval', (array)$this->config->courses) : [];
+        if ($ids) {
             list($insql, $inparams) = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
-            $recs = $DB->get_records_select('course', "id $insql", $inparams, 'fullname ASC', 'id, fullname, shortname, category');
-
-            foreach ($recs as $rec) {
-                $cat = core_course_category::get($rec->category);
-                $courses[] = (object)[
-                    'id'            => (int)$rec->id,
-                    'category'      => (int)$rec->category,
-                    'category_name' => $cat->get_formatted_name(),
-                ];
-            }
+            $courses = $DB->get_records_select('course', "id $insql", $inparams, 'fullname ASC', 'id');
         }
 
-        $style = 1;
-        if(isset($this->config->style)){
-            $style = $this->config->style;
-        }
-        $text = '';
-        
-        if($style == 2):
-            $text .= '
-            <div class="'.$this->content->class.'">
-                <div class="container">
-                    <div class="section-title" data-aos="fade-up" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">
-                        <span class="sub">'.format_text($this->content->top_title, FORMAT_HTML, array('filter' => true)).'</span>
-                        <h2>'.format_text($this->content->title, FORMAT_HTML, array('filter' => true)).'</h2>
-                    </div>
-
-                    <div class="row justify-content-center">';
-                        if(!empty($this->config->courses)){
-
-                            foreach ($courses as $course) {
-                                if ($DB->record_exists('course', array('id' => $course->id))) {
-
-                                    $edlyCourseHandler = new edlyCourseHandler();
-                                    $edlyCourse = $edlyCourseHandler->edlyGetCourseDetails($course->id);
-
-                                    $cardhref = $this->resolve_card_href((int)$course->id, $isrestricted);
-                                    $badge    = trim((string)($this->cf_value((int)$course->id, $this->config->label_field ?? 'cardlabel') ?? ''));
-
-                                    $text .= '
-                                    <div class="col-xl-3 col-md-6" data-aos="fade-up" data-aos-delay="80" data-aos-duration="800" data-aos-once="true">
-                                        <div class="courses-box">
-                                            <div class="courses-image">
-                                                <a href="'. $cardhref .'">
-                                                    '.$edlyCourse->edlyRender->coverImage.'
-                                                </a>
-                                                '.(!empty($badge) ? '<span class="cf-card-badge">'.s($badge).'</span>' : '');
-                                                if($edlyCourse->course_price) {
-                                                    $text .= '
-                                                    <div class="price">'.format_text(get_config('theme_edly', 'site_currency') .''.$edlyCourse->course_price, FORMAT_HTML, array('filter' => true)).'</div>';
-                                                }else{
-                                                    $text .= '
-                                                    <div class="price">'.format_text(get_config('theme_edly', 'free_course_price'), FORMAT_HTML, array('filter' => true) ).'</div>';
-                                                } $text .= '
-                                            </div>
-
-                                            <div class="courses-content">
-                                            <h3>
-                                                <a href="'.$cardhref.'">'.format_text($edlyCourse->fullName, FORMAT_HTML, array('filter' => true)).'</a>
-                                            </h3>
-
-
-                                            '.$this->card_footer((int)$course->id, $isrestricted, $triallabel).'
-                                            </div>
-
-                                        </div>
-                                    </div>';
-                                }
-                            }
-                        }
-                        $text .= '
-                    </div>
-                    <div class="courses-bottom-content">
-                        <p>'.format_text($this->content->body, FORMAT_HTML, array('filter' => true)).'</p>
-                    </div>
-                </div>';
-
-                if($this->content->shape_img):
-                    $shape_img = $this->content->shape_img;
-                    $text .= '
-                    <div class="courses-pot-shape">
-                        <img src="'.edly_block_image_process($shape_img).'" class="shape shape-1" alt="'. strip_tags($this->content->title).'">
-                    </div>';
-                endif;
-                $text .= '
-            </div>';
-        else:
-            $text .= '
-            <div class="'.$this->content->class.'">
-                <div class="container">
-                    <div class="section-title" data-aos="fade-up" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">
-                        <span class="sub">'.format_text($this->content->top_title, FORMAT_HTML, array('filter' => true)).'</span>
-                        <h2>'.format_text($this->content->title, FORMAT_HTML, array('filter' => true)).'</h2>
-                    </div>
-
-                    <div class="row justify-content-center">';
-                        if(!empty($this->config->courses)){
-
-                            foreach ($courses as $course) {
-                                if ($DB->record_exists('course', array('id' => $course->id))) {
-
-                                    $edlyCourseHandler = new edlyCourseHandler();
-                                    $edlyCourse = $edlyCourseHandler->edlyGetCourseDetails($course->id);
-
-                                    $cardhref = $this->resolve_card_href((int)$course->id, $isrestricted);
-                                    $badge    = trim((string)($this->cf_value((int)$course->id, $this->config->label_field ?? 'cardlabel') ?? ''));
-
-
-                                    $text .= '
-                                    <div class="col-xl-4 col-md-6" data-aos="fade-up" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">
-                                        <div class="courses-card">
-                                            <div class="courses-image">
-                                                <a href="'. $cardhref .'">
-                                                    '.$edlyCourse->edlyRender->coverImage.'
-                                                </a>
-                                                '.(!empty($badge) ? '<span class="cf-card-badge">'.s($badge).'</span>' : '').'
-                                            </div>
-                        
-                                            <div class="courses-content">
-                                                <div class="top-content">
-
-                                                
-                                                    <h3>
-                                                        <a href="'. $cardhref .'">'.format_text($edlyCourse->fullName, FORMAT_HTML, array('filter' => true)).'</a>
-                                                    </h3>';
-                                                    if($edlyCourse->course_price) {
-                                                        $text .= '
-                                                        <div class="price">'.format_text(get_config('theme_edly', 'site_currency') .''.$edlyCourse->course_price, FORMAT_HTML, array('filter' => true)).'</div>';
-                                                    }else{
-                                                        $text .= '
-                                                        <div class="price">'.format_text(get_config('theme_edly', 'free_course_price'), FORMAT_HTML, array('filter' => true) ).'</div>';
-                                                    } $text .= '
-                                                </div>
-                        
-                        
-                                                ' . $this->card_footer((int)$course->id, $isrestricted, $triallabel) . '
-
-                                            </div>
-                                        </div>
-                                    </div>';
-                                }
-                            }
-                        }
-                        $text .= '
-                    </div>
-                    <div class="courses-bottom-content">
-                        <p>'.format_text($this->content->body, FORMAT_HTML, array('filter' => true)).'</p>
-                    </div>
-                </div>';
-
-                if($this->content->shape_img):
-                    $shape_img = $this->content->shape_img;
-                    $text .= '
-                    <div class="courses-pot-shape">
-                        <img src="'.edly_block_image_process($shape_img).'" class="shape shape-1" alt="'. strip_tags($this->content->title).'">
-                    </div>';
-                endif;
-                $text .= '
-            </div>';
-        endif;
-
-        $this->content->footer = '';
-
+        // Injecte la popup/JS d’essai
         ob_start();
         local_campus_inject_trial_ui($PAGE);
         $modal = ob_get_clean();
-        $text .= $modal;
 
-        $this->content->text   = $text;
+        // Rend via le renderer partagé
+        /** @var \block_edly_course_filter\output\renderer $renderer */  
+        $renderer = $PAGE->get_renderer('block_edly_course_filter');
+        $html = $renderer->catalogue(array_values($courses), [
+            'style' => (int)($this->config->style ?? 1),
+            'class' => (string)('courses-area ptb-100'),
+            'title' => (string)($this->config->title ?? ''),
+            'top_title' => (string)($this->config->top_title ?? ''),
+            'body' => (string)($this->config->body ?? ''),
+            'label_field' => (string)($this->config->label_field ?? 'cardlabel'),
+            'trial_field' => (string)($this->config->trial_field ?? 'trialcourseid'),
+            'real_field'  => (string)($this->config->real_field ?? 'realcourseid'),
+            'force_direct_loggedin' => !empty($this->config->force_direct_loggedin) ? 1 : 0,
+            'desc_baseurl' => (string)($this->config->desc_baseurl ?? ''), // tu peux y mettre /local/campus/course.php?id={id}&checktrial=1
+            'desc_label' => (string)($this->config->desc_label ?? 'En savoir plus'),
+            'cta_guest' => (string)($this->config->cta_guest ?? $triallabel),
+            'cta_connected' => (string)($this->config->cta_connected ?? 'Accéder au cours'),
+            'restricted' => $restricted,
+            'shape_img' => (string)($this->config->shape_img ?? ''),
+        ]);
 
+        $this->content->text = $html . $modal;
+        $this->content->footer = '';
         return $this->content;
     }
+
 
     /**
      * The block can be used repeatedly in a page.

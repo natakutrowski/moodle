@@ -3,7 +3,6 @@
 require(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/theme/edly/inc/course_handler/edly_course_handler.php');
 require_once($CFG->dirroot.'/local/campus/lib.php');
-local_campus_inject_trial_ui($PAGE);
 
 $passedid = optional_param('id',0, PARAM_INT);        // ID reçu dans l'URL (souvent le cours RÉEL si tu suis le bloc)
 $layout   = optional_param('layout', 2, PARAM_INT); // 1, 2, 3
@@ -101,6 +100,12 @@ $PAGE->set_title(format_string($course->fullname));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->requires->css(new moodle_url('/local/campus/styles.css')); // ta CSS locale
 
+//$PAGE->navbar->ignore(true);
+$PAGE->navbar->add(get_string('courses'), new moodle_url('/local/campus/courses.php'));
+$PAGE->navbar->add(format_string($course->fullname), $PAGE->url);
+
+
+
 // 3) Image via le handler Edly
 $edlyCourseHandler = new edlyCourseHandler();
 $edlyCourse = $edlyCourseHandler->edlyGetCourseDetails($displayid);
@@ -120,25 +125,12 @@ $realurl  = (new moodle_url('/course/view.php', ['id' => $displayid]))->out(fals
 // 6) Layout
 $layout = in_array($layout, [1,2,3], true) ? $layout : 1;
 
-echo $OUTPUT->header();
-
+ob_start();
 local_campus_inject_trial_ui($PAGE);
+$campus_trial_modal = ob_get_clean();
 
-if ($isguest && $checktrial && $trialid > 0) {
-    echo html_writer::script("
-        window.addEventListener('load', function(){
-            var tryCall = function(){
-                if (window.campusTrialCheck) { window.campusTrialCheck($trialid); return true; }
-                return false;
-            };
-            if (!tryCall()){
-                var t = setInterval(function(){ if (tryCall()) clearInterval(t); }, 50);
-                setTimeout(function(){ clearInterval(t); }, 3000);
-            }
-        });
-    ");
-}
-
+echo $OUTPUT->header();
+echo $campus_trial_modal;
 
 ?>
 <div class="campus-course layout-<?= (int)$layout ?><?= $dark ? ' dark' : '' ?>">
@@ -196,6 +188,16 @@ if ($isguest && $checktrial && $trialid > 0) {
     <?php endif; ?>
 
   </div>
+  <?php
+    $backurl = new moodle_url('/local/campus/courses.php');
+    echo html_writer::div(
+      html_writer::link($backurl, get_string('back_to_all_courses', 'local_campus'), ['class' => 'btn btn-link p-0 mb-3']),
+      'campus-course-back'
+    );
+  ?>
+
+
 </div>
 <?php
 echo $OUTPUT->footer();
+?>

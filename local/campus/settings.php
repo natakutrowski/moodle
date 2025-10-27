@@ -18,6 +18,17 @@ if ($h = new admin_settingpage('local_campus', get_string('pluginname', 'local_c
         $options
     ));
 
+    // ... au même endroit que ton setting 'trialcourses'
+    $h->add(new admin_setting_configmultiselect(
+        'local_campus/subscribercourses',
+        get_string('set_subscribercourses', 'local_campus'),
+        get_string('set_subscribercourses_desc', 'local_campus'),
+        [],
+        // même $options de cours que pour trialcourses
+        $options
+    ));
+
+
     // 2) Durée en jours
     $h->add(new admin_setting_configtext(
         'local_campus/trialdays',
@@ -61,6 +72,34 @@ if ($h = new admin_settingpage('local_campus', get_string('pluginname', 'local_c
         get_string('set_deleteafterdays_desc', 'local_campus'),
         60, PARAM_INT
     ));
+
+    // Style du catalogue (1 ou 2).
+    $h->add(new admin_setting_configselect(
+        'local_campus/catalogue_style',
+        'Style du catalogue',
+        'Choisissez entre le style 1 (cards) ou 2 (box).',
+        1,
+        [1 => 'Style 1', 2 => 'Style 2']
+    ));
+
+    // Apparence & textes
+    $h->add(new admin_setting_configtext('local_campus/catalogue_class', 'Classe CSS container', '', 'courses-area ptb-100'));
+    $h->add(new admin_setting_configtext('local_campus/catalogue_top_title', 'Sous-titre', '', 'Parcourez nos formations'));
+    $h->add(new admin_setting_configtext('local_campus/catalogue_title', 'Titre', '', 'Cours de niveau'));
+    $h->add(new admin_setting_configtextarea('local_campus/catalogue_body', 'Texte sous les cartes (HTML)', '', ''));
+
+    // Champs perso & comportements
+    $h->add(new admin_setting_configtext('local_campus/catalogue_label_field', 'Champ perso — badge', '', 'cardlabel'));
+    $h->add(new admin_setting_configtext('local_campus/catalogue_trial_field', 'Champ perso — mapping cours d’essai', '', 'trialcourseid'));
+    $h->add(new admin_setting_configtext('local_campus/catalogue_real_field', 'Champ perso — mapping cours réel', '', 'realcourseid'));
+    $h->add(new admin_setting_configcheckbox('local_campus/catalogue_force_direct_loggedin', 'Connectés → lien direct vers le cours réel', '', 0));
+
+    // Fiche cours & libellés boutons
+    $h->add(new admin_setting_configtext('local_campus/catalogue_desc_baseurl', 'URL de la fiche cours (placeholders {id},{shortname},{categoryid})', '', '/local/campus/course.php?id={id}&checktrial=1'));
+    $h->add(new admin_setting_configtext('local_campus/catalogue_desc_label', 'Libellé bouton “En savoir plus”', '', 'En savoir plus'));
+    $h->add(new admin_setting_configtext('local_campus/catalogue_cta_guest', 'Libellé CTA invité/essai', '', 'Accéder au cours d’essai'));
+    $h->add(new admin_setting_configtext('local_campus/catalogue_cta_connected', 'Libellé CTA connecté', '', 'Accéder au cours'));
+
 
     $ADMIN->add('localplugins', $h);
 }

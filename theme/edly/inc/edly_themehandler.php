@@ -39,12 +39,13 @@ $header = $PAGE->activityheader;
 $headercontent = $header->export_for_template($renderer);
 
 $login_url  = get_login_url();
+
 $signup_url = "{$CFG->wwwroot}/subscribe.php";
 $isloggedin = isloggedin();
 
 // Qui est qui ?
-$isguest     = isguestuser();
-$showlogin   = !$isloggedin;                         // bouton "Connexion" visible si pas connecté
+$isguest     = $isloggedin && isguestuser();
+$showlogin   = !$isloggedin || $isguest;                         // bouton "Connexion" visible si pas connecté
 $showsub     = (!$isloggedin || $isguest);           // "S’abonner" visible aussi pour l'utilisateur invité
 
 // Libellés

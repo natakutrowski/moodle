@@ -231,3 +231,129 @@
   height:44px; padding:0 18px; line-height:1; border-radius:12px;
   border:none; outline:none; box-shadow:none;
 }
+
+/* ——— Plein écran (full-bleed) pour les sections type catalogue ——— */
+.campus-fullbleed{
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  background: transparent; /* important: pas de rose ici */
+}
+
+.campus-course-back a{ font-weight:600; text-decoration:none; }
+.campus-course-back a:hover{ text-decoration:underline; }
+
+/* Onglets (Mes cours / Catalogue) */
+.campus-tabs .campus-tab {
+  padding: 8px 14px; border-radius: 999px;
+}
+.campus-tabs .campus-tab.active,
+.campus-tabs .campus-tab:focus {
+  background: var(--optional-color); color: #fff; border-color: transparent;
+}
+
+/* Groupe d’onglets en haut à droite (à côté du bouton Admin) */
+.campus-header-tabs .btn {
+  border-radius: 999px;
+  padding: .5rem .9rem;
+  font-weight: 600;
+}
+.campus-header-tabs .btn.active {
+  background: var(--optional-color, #f9a);
+  color: #fff;
+  border-color: transparent;
+}
+
+.campus-tabs-inline{
+  display:flex; justify-content:flex-end; gap:8px; margin-bottom:10px;
+}
+.campus-tabs-inline .btn{ border-radius:999px; padding:.5rem .9rem; font-weight:600; }
+.campus-tabs-inline .btn.active{
+  background: var(--optional-color,#f9a); color:#fff; border-color:transparent;
+}
+
+/* Ligne d’onglets dans le bloc (gauche, un peu plus bas) */
+.campus-tabs-inline {
+  display: flex;
+  justify-content: flex-start;   /* à gauche */
+  margin: 12px 0 20px;           /* un peu plus bas */
+}
+
+/* Segment conteneur : pilule globale */
+.campus-segment {
+  display: inline-flex;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 9999px;
+  overflow: hidden;              /* demi-cercles collés */
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+}
+
+/* Liens */
+.campus-segment .seg {
+  padding: 8px 14px;
+  text-decoration: none;
+  color: inherit;
+  line-height: 1.2;
+  font-weight: 600;
+  border-right: 1px solid rgba(0,0,0,.08);
+}
+.campus-segment .seg:last-child { border-right: none; }
+
+/* Actif */
+.campus-segment .seg[aria-current="page"]{
+  background: var(--optional-color, #f27998);
+  color: #fff;
+}
+
+/* Hover discret */
+.campus-segment .seg:hover { background: rgba(0,0,0,.03); }
+.campus-segment .seg[aria-current="page"]:hover { filter: brightness(0.98); }
+
+/* ---------- Hint “abonnez-vous / connectez-vous ici” ---------- */
+/* ---------- Hint bulle ---------- */
+.campus-auth-hint{
+  position: absolute;       /* on l’ancre sous la barre via JS */
+  z-index: 1200;
+  display: none;            /* visible uniquement desktop avec cible */
+  pointer-events: none;
+}
+.campus-auth-hint .hint-inner{
+  position: relative;
+}
+.campus-auth-hint .hint-bubble{
+  display: inline-block;
+  max-width: min(60ch, 560px);   /* gère bien les langues longues */
+  white-space: nowrap;           /* pas de wrap → bulle s’élargit */
+  padding: 12px 18px;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(0,0,0,.12);
+  font-weight: 600;
+  font-size: 15px;
+  color: #222;
+}
+
+/* ---------- SVG overlay pour la flèche ---------- */
+.campus-auth-arrow{
+  position: fixed;          /* plein écran */
+  inset: 0;
+  z-index: 1199;
+  pointer-events: none;
+  display: none;
+}
+
+/* Masquer l’indication sur mobile (header replié) */
+@media (max-width: 991.98px){
+  .campus-auth-hint, .campus-auth-arrow{ display: none !important; }
+}
+
+
+
+.container .default-btn,
+.container .default-btn.second {
+  padding: 10px 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  line-height: 1.2;
+}

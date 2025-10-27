@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Ne PAS rediriger si on a déjà campus=pass
+  RewriteCond %{QUERY_STRING} !(^|&)campus=pass(&|$)
+
+  # Redirige l'URL /course/index.php vers l'URL du script
+  RewriteRule ^course/index\.php$ /local/campus/courseindex_redirect.php [R=302,L]
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Rediriger /my/courses.php vers la page Campus, sauf backdoor admin `?campus=pass`
+  RewriteCond %{QUERY_STRING} !(^|&)campus=pass(&|$)
+  RewriteRule ^my/courses\.php$ /local/campus/mycourses_redirect.php [R=302,L]
+</IfModule>

@@ -71,7 +71,7 @@
                         {{ ! output.custom_menu }}
                     </ul>
 
-                    <div class="nav-cta d-none d-lg-flex align-items-center ms-auto">
+                    <div class="nav-cta d-none d-lg-flex align-items-center ms-auto" id="campus-cta-anchor">
                         {{# show_subscribe_btn }}
 
                             <!-- Sélecteur de langue pour tout le monde si activé -->
@@ -101,11 +101,11 @@
                             </div>
                             {{/ show_login_btn }}
                         {{/ show_subscribe_btn }}
-                    </div>
-
-                    
+                    </div>                    
                     {{#isloggedin}}
-                        {{> theme_edly/edly_navbar_user }}
+                        {{^isguest}}
+                            {{> theme_edly/edly_navbar_user }}
+                        {{/isguest}}
                     {{/isloggedin}}
                 </div>
             </nav>
@@ -159,7 +159,9 @@
                     {{/header_search_bar}}
 
                     {{#isloggedin}}
-                        {{> theme_edly/edly_navbar_user }}
+                        {{^isguest}}
+                            {{> theme_edly/edly_navbar_user }}
+                        {{/isguest}}
                     {{/isloggedin}}
                     </div>
                 </div>

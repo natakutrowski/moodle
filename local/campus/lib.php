@@ -78,14 +78,6 @@ function local_campus_extend_navigation(global_navigation $nav) : void {
     if (!function_exists('local_campus_is_trial_user') || !local_campus_is_trial_user()) {
         return;
     }
-
-    // Supprimer des nœuds courants (selon thème/clé)
-    foreach (['myhome','mycourses','calendar','privatefiles','badges','messages','grades','competencies','profile'] as $key) {
-        if ($node = $nav->find($key, navigation_node::TYPE_ROOTNODE)) { $node->remove(); }
-        if ($node = $nav->find($key, navigation_node::TYPE_CUSTOM))    { $node->remove(); }
-        if ($node = $nav->find($key, navigation_node::TYPE_CONTAINER)) { $node->remove(); }
-        if ($node = $nav->find($key, navigation_node::TYPE_SETTING))   { $node->remove(); }
-    }
 }
 
 
@@ -126,6 +118,126 @@ function local_campus_myprofile_navigation($tree, $user, $iscurrentuser, $course
     // Intentionnellement vide pour compatibilité Moodle 5.x
     return;
 }
+
+function local_campus_subscriber_course_ids(): array {
+    $raw = get_config('local_campus','subscribercourses');
+    if (!is_string($raw) || $raw === '') { return []; }
+    $ids = array_values(array_unique(array_filter(array_map('intval',
+        preg_split('/\s*,\s*/', $raw, -1, PREG_SPLIT_NO_EMPTY)
+    ), function($i){ return $i > 1; })));
+    return $ids;
+}
+
+
+/**
+ * Onglets en haut de page (Mes cours / Catalogue).
+ */
+function local_campus_render_tabs(array $tabs): string {
+    global $OUTPUT;
+    $html = '<div class="campus-tabs container mt-3 mb-4"><div class="btn-group" role="group">';
+    foreach ($tabs as $t) {
+        $cls = 'btn btn-outline-secondary campus-tab';
+        if (!empty($t['active'])) $cls .= ' active';
+        $url = is_string($t['url']) ? new moodle_url($t['url']) : $t['url'];
+        $html .= html_writer::link($url, s($t['label']), ['class'=>$cls]);
+    }
+    $html .= '</div></div>';
+    return $html;
+}
+
+function local_campus_header_tabs_html(bool $activeMy): string {
+    $my  = new moodle_url('/local/campus/mycourses.php');
+    $cat = new moodle_url('/local/campus/courses.php');
+
+    $btnMy  = html_writer::link($my,  get_string('tab_mycourses','local_campus'),
+        ['class'=>'btn btn-outline-secondary me-2'.($activeMy?' active':'')]);
+    $btnCat = html_writer::link($cat, get_string('tab_catalogue','local_campus'),
+        ['class'=>'btn btn-outline-secondary'.(!$activeMy?' active':'')]);
+
+    return html_writer::div($btnMy.$btnCat, 'btn-group');
+}
+
+// Boutons inline « Mes cours | Catalogue » (pilules collées)
+function local_campus_tabs_inline_html(bool $activeMy): string {
+    $my  = new moodle_url('/local/campus/mycourses.php');
+    $cat = new moodle_url('/local/campus/courses.php');
+
+    $a1 = html_writer::link($my,  get_string('tab_mycourses','local_campus'),
+        ['class'=>'seg', 'aria-current'=> $activeMy ? 'page' : null]);
+    $a2 = html_writer::link($cat, get_string('tab_catalogue','local_campus'),
+        ['class'=>'seg', 'aria-current'=> !$activeMy ? 'page' : null]);
+
+    // Conteneur segmenté (overflow hidden + bord commun)
+    return html_writer::div(
+        html_writer::div($a1.$a2, 'campus-segment'),
+        'campus-tabs-inline'
+    );
+}
+
+/**
+ * Retourne true si l’utilisateur a déjà affiché la page du cours (événement core\event\course_viewed présent dans le log standard).
+ */
+function local_campus_user_has_visited_course(int $userid, int $courseid): bool {
+    global $DB;
+
+    // On vérifie que le log standard est dispo.
+    if (!$DB->get_manager()->table_exists('logstore_standard_log')) {
+        return false;
+    }
+    // Event ‘course viewed’ – nécessite le logstore standard actif.
+    $params = [
+        'uid'   => $userid,
+        'cid'   => $courseid,
+        'event' => '\core\event\course_viewed',
+    ];
+    return (bool)$DB->record_exists_select(
+        'logstore_standard_log',
+        'userid = :uid AND courseid = :cid AND eventname = :event',
+        $params
+    );
+}
+
+
+
+/**
+ * URL "reprendre" : première activité visible et non terminée ; sinon page du cours.
+ */
+function local_campus_resume_url(stdClass $course, int $userid): string {
+    $modinfo = get_fast_modinfo($course, $userid);
+    $ci = new completion_info($course);
+    foreach ($modinfo->get_cms() as $cm) {
+        if (!$cm->uservisible || empty($cm->url)) continue;
+        if (!$ci->is_enabled($cm)) continue;
+        $data = $ci->get_data($cm, false, $userid);
+        if ((int)$data->completionstate !== COMPLETION_COMPLETE) {
+            return $cm->url->out(false);
+        }
+    }
+    return (new moodle_url('/course/view.php', ['id'=>$course->id]))->out(false);
+}
+
+function local_campus_is_trial_user_byid(int $userid): bool {
+    global $DB;
+    $sysctx = context_system::instance();
+
+    // Récupère l'id du rôle 'triallimited'
+    static $trialroleid = null;
+    if ($trialroleid === null) {
+        $trialroleid = (int)$DB->get_field('role', 'id', ['shortname' => 'triallimited'], IGNORE_MISSING);
+    }
+    if (!$trialroleid) {
+        return false;
+    }
+
+    // L'utilisateur a-t-il ce rôle AU CONTEXTE SYSTÈME ?
+    return $DB->record_exists('role_assignments', [
+        'userid'    => $userid,
+        'contextid' => $sysctx->id,
+        'roleid'    => $trialroleid,
+    ]);
+}
+
+
 
 /**
  * Injecte la popup d'accès d’essai (même UI pour le bloc et la page vitrine).

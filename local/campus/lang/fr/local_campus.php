@@ -47,3 +47,49 @@ $string['mail_trial_cta_subscribe']   = 'S’abonner';
 $string['mail_trial_cta_continue']    = 'Continuer l’essai';
 $string['mail_trial_rem3_subject_generic']   = 'Rappel : votre essai est en cours';
 $string['mail_trial_expired_subject_generic']= 'Votre essai a expiré';
+
+$string['cataloguetitle'] = 'Catalogue';
+$string['catalogueheading'] = 'Cours de niveau';
+$string['cataloguesub'] = 'Parcourez nos formations';
+$string['moreinfo'] = 'En savoir plus';
+$string['trial_access_label'] = 'Accéder au cours d’essai';
+$string['cta_connected'] = 'Accéder au cours';
+$string['nocoursesconfigured'] = 'Aucun cours configuré à afficher.';
+$string['set_subscribercourses'] = 'Cours abonnés (IDs, séparés par des virgules)';
+$string['set_subscribercourses_desc'] = 'Cours visibles uniquement pour les abonnés. Les visiteurs et comptes d’essai ne les voient pas.';
+$string['back_to_all_courses'] = '← Revenir à tous les cours';
+
+$string['tab_catalogue'] = 'Catalogue';
+$string['tab_mycourses'] = 'Mes cours';
+$string['mycourses_title'] = 'Mes cours';
+$string['mycourses_sub'] = 'Vue d’ensemble des cours';
+$string['mycourses_empty'] = 'Vous n’êtes inscrit à aucun cours pour le moment.';
+$string['mycourses_browse'] = 'Parcourir le catalogue';
+$string['cta_connected'] = 'Continuer';
+$string['cta_connected_start'] = 'Commencer';
+$string['cta_connected_resume'] = 'Reprendre';
+$string['completed'] = 'terminé';
+$string['completed_badge'] = 'Terminé';
+$string['notenrolled'] = 'Non inscrit';
+$string['course_not_started'] = 'Vous n’avez pas encore commencé ce cours';
+$string['resume_here'] = 'Reprendre ici';
+$string['congrats_completed'] = 'Félicitations ! Vous avez terminé ce cours.';
+$string['browse_catalog'] = 'Parcourir le catalogue';
+$string['access_trial_courses'] = 'Accéder aux cours d’essai';
+$string['subscribe_now'] = 'S’abonner';
+$string['mycourses_empty'] = 'Connectez-vous pour retrouver vos cours. Vous pouvez aussi découvrir nos cours d’essai ou vous abonner.';
+$string['no_courses_banner_title'] = 'Aucun cours disponible pour le moment.';
+$string['no_courses_banner_text']  = 'Parcourez le catalogue, découvrez nos cours d’essai ou abonnez-vous pour commencer.';
+$string['login_now']               = 'Connexion';
+$string['mycourses_empty']         = 'Connectez-vous pour retrouver vos cours. Vous pouvez aussi découvrir nos cours d’essai ou vous abonner.';
+$string['browse_catalog']          = 'Parcourir le catalogue';
+$string['access_trial_courses']    = 'Accéder aux cours d’essai';
+$string['subscribe_now']           = 'S’abonner';
+$string['hint_go_to_header_cta'] = 'Abonnez-vous ou connectez-vous ici';
+
+// Admin (barre outils catalogue)
+$string['admin_native_page'] = 'Page native Moodle';
+$string['admin_show_hidden'] = 'Afficher aussi les cours cachés';
+$string['admin_hide_hidden'] = 'Masquer les cours cachés';
+
+
