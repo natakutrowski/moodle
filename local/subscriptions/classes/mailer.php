@@ -173,18 +173,28 @@ class mailer {
         }
     }
 
-    /** Langue effective pour un e-mail (réglage plugin > user->lang > $CFG->lang). */
+    /** Langue effective pour un e-mail (réglage plugin > user->lang > langue site). */
     private static function effective_emaillang(?\stdClass $user): string {
         global $CFG;
         $cfg = get_config('local_subscriptions');
-        if (!empty($cfg->defaultemaillang)) {
-            return $cfg->defaultemaillang;
+
+        // 1) Сlé supportée
+        if (!empty(get_config('local_subscriptions','defaultemaillang'))) { 
+            return strtolower(get_config('local_subscriptions','defaultemaillang')); 
         }
+
+        // 2) Langue du destinataire si connue
         if (!empty($user) && !empty($user->lang)) {
-            return $user->lang;
+            return strtolower($user->lang);
         }
-        return $CFG->lang ?? current_language();
+
+        // 3) Langue du site (cron retombe souvent ici)
+        if (!empty($CFG->lang)) { return strtolower($CFG->lang); }
+
+        // 4) Fallback stable
+        return 'ru';
     }
+
 
     /** Mode preview (dry-run) pour les CLIs: n’envoie pas les emails mais capture le rendu. */
     private static bool $preview = false;

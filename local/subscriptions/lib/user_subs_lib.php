@@ -297,7 +297,7 @@ function get_user_country_code(): string {
 
         // Hériter de la langue du site si réglage vide, sinon forcer.
         if (!empty($defaultuserlang)) {
-            $u->lang = $defaultuserlang;
+            $u->lang = strtolower($defaultuserlang);
         }
 
         $userid = user_create_user($u, false, false);

@@ -17,6 +17,9 @@ class trial_maint_task extends \core\task\scheduled_task {
         // si tu envoies des mails depuis la tâche
         require_once($CFG->dirroot . '/local/subscriptions/classes/mailer.php');
 
+        $langpref = get_config('local_subscriptions', 'defaultemaillang') ?: 'ru';
+        $langpref = strtolower($langpref);
+
 
         $now  = time();
         $days = (int)get_config('local_campus', 'trialdays') ?: 7;
@@ -70,6 +73,7 @@ class trial_maint_task extends \core\task\scheduled_task {
                 'subscribe_url'   => $subscribeurl,
                 'course_fullname' => $coursefullname,
                 'daysleft'        => $daysleft,
+                'lang'            => $langpref,
             ]);
 
             $t->reminder3_sent = $now;
@@ -107,6 +111,7 @@ class trial_maint_task extends \core\task\scheduled_task {
                 'firstname'       => $firstname,
                 'subscribe_url'   => (new \moodle_url('/subscribe.php'))->out(false),
                 'course_fullname' => $coursefullname,
+                'lang'            => $langpref,
             ]);
 
             // marquage expiré

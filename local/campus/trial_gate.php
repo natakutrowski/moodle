@@ -181,6 +181,9 @@ try {
     if ($domain === '') { $domain = 'invalid'; }
     $pseudoemail = $epref . substr(sha1($realemail), 0, 10) . '@' . $domain;
 
+
+    $defaultuserlang = get_config('local_subscriptions', 'defaultuserlang'); // '' = hériter du site
+
     // 1) Crée le compte d’essai (non suspendu)
     $nu = (object)[
         'username'   => $username,
@@ -192,7 +195,15 @@ try {
         'password'   => random_string(16),
         'mnethostid' => $CFG->mnet_localhost_id,
         'suspended'  => 0,
+        'lang'       => !empty($CFG->lang) ? $CFG->lang : current_language(), // set to default language of the site
     ];
+
+    // Hériter de la langue du site si réglage vide, sinon forcer.
+    if (!empty($defaultuserlang)) {
+        $nu->lang = strtolower($defaultuserlang);
+    }
+
+
     $userid = user_create_user($nu, false, false);
 
     $sysctx = \context_system::instance();
@@ -238,10 +249,13 @@ try {
     catch (\Throwable $e) { \core\session\manager::set_user($user); }
 
     // 6) Mail “trial démarré”
+    $langpref = get_config('local_subscriptions', 'defaultemaillang') ?: 'ru';
+
     \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_STARTED, [
         'toemail'      => $realemail,
         'firstname'    => $firstname ?? '',
         'subscribe_url'=> (new moodle_url('/subscribe.php'))->out(false),
+        'lang'         => strtolower($langpref),
     ]);
 
     // 7) Redirect JSON
