@@ -786,5 +786,36 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025102000, 'local', 'subscriptions');
     }
 
+	if ($oldversion < 2025102700) {
+		$table = new xmldb_table('subscription_payment_request');
+
+		// created_ip
+		$field = new xmldb_field('created_ip', XMLDB_TYPE_CHAR, '45', null, null, null, null, 'price');
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		// created_useragent
+		$field = new xmldb_field('created_useragent', XMLDB_TYPE_TEXT, null, null, null, null, null, 'created_ip');
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		// accept_language
+		$field = new xmldb_field('accept_language', XMLDB_TYPE_CHAR, '191', null, null, null, null, 'created_useragent');
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		// http_referer
+		$field = new xmldb_field('http_referer', XMLDB_TYPE_TEXT, null, null, null, null, null, 'accept_language');
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		upgrade_plugin_savepoint(true, 2025102700, 'local', 'subscriptions');
+	}
+
+
     return true;
 }

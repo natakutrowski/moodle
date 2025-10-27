@@ -551,3 +551,78 @@ $string['reply_text']             = 'Votre réponse';
 $string['contact_reply_sent_hint']  = 'La réponse a été envoyée à l’adresse indiquée. Vous pouvez fermer cette page.';
 
 $string['trial_checkout_banner'] = 'Vous êtes connecté avec un compte d’essai. Merci d’indiquer vos coordonnées pour créer votre abonnement.';
+
+// Générique / protections create_session
+$string['invalid_operation'] = 'Opération de paiement invalide.';
+$string['invalid_payment_request_status'] = 'Cette demande de paiement n’est plus utilisable.';
+$string['invalid_payment_request_owner'] = 'Vous n’avez pas accès à cette demande de paiement.';
+$string['invalid_currency_for_alfa'] = 'Devise invalide pour Alfa : seule la devise RUB est acceptée.';
+$string['err_no_redirect_url'] = 'Le prestataire de paiement n’a pas renvoyé d’URL de redirection.';
+$string['err_cannot_determine_price'] = 'Impossible de déterminer le prix du plan pour la devise sélectionnée.';
+
+// Passerelle Alfa
+$string['alfa_missing_api_base'] = 'Configuration Alfa incomplète : URL de base de l’API non définie.';
+$string['alfa_rub_only'] = 'Alfa : seule la devise RUB est prise en charge.';
+$string['alfa_register_error'] = 'Erreur lors de l’enregistrement Alfa : {$a}';
+$string['alfa_missing_formurl'] = 'Réponse Alfa invalide : formUrl ou orderId manquant.';
+$string['paymentgatewayerror'] = 'Erreur de passerelle de paiement : {$a}';
+
+// Renforcements supplémentaires (gardes optionnelles)
+$string['alfa_price_mismatch'] = 'Incohérence de prix détectée pour Alfa. Réessayez ou contactez le support. ({$a})';
+$string['alfa_amount_mismatch'] = 'Incohérence de montant détectée pour Alfa. Réessayez ou contactez le support. ({$a})';
+
+// Passerelle Stripe
+$string['stripe:missingamount'] = 'Stripe : montant manquant pour créer la session de paiement.';
+$string['stripe:productname'] = '{$a} — règlement';
+$string['stripe:missingpriceidforsubscription'] = 'Stripe : price_id manquant pour le mode abonnement.';
+$string['stripe:missingpriceid'] = 'Stripe : price_id manquant.';
+$string['stripe:sdkautoloadnotfound'] = 'Fichier d’autoload du SDK Stripe introuvable : {$a}';
+$string['missing_customer_id'] = 'Identifiant client manquant.';
+
+// Renforcements Stripe (optionnels)
+$string['stripe_invalid_currency'] = 'Stripe : devise invalide ou non prise en charge : {$a}.';
+$string['stripe_nonpositive_amount'] = 'Stripe : le montant doit être strictement supérieur à 0.';
+
+// UI — générique
+$string['payui_error_title'] = 'Le paiement n’a pas pu aboutir';
+$string['payui_error_subtitle'] = 'Un problème est survenu côté service de paiement ou de notre côté.';
+$string['payui_error_generic'] = 'Réessayez. Si le problème persiste, contactez-nous : nous finaliserons votre commande.';
+
+$string['payui_cta_retry'] = 'Réessayer';
+$string['payui_cta_back'] = 'Retour aux offres';
+$string['payui_cta_contact'] = 'Contacter le support';
+$string['payui_support_hint'] = 'Besoin d’aide ? Écrivez-nous : {$a}';
+
+$string['payui_order_ref'] = 'Référence de commande : {$a}';
+
+// UI — raisons (courtes et claires)
+$string['payui_reason_security'] = 'Votre session a expiré. Rechargez la page puis réessayez.';
+$string['payui_reason_link'] = 'Le lien vers la page de paiement est indisponible. Merci de réessayer.';
+$string['payui_reason_currency'] = 'La devise du paiement n’a pas pu être confirmée. Merci de réessayer.';
+$string['payui_reason_amount'] = 'Le montant n’a pas pu être confirmé. Merci de réessayer.';
+$string['payui_reason_gateway'] = 'Le service de paiement a renvoyé une erreur. Merci de réessayer.';
+$string['payui_reason_canceled'] = 'Le paiement a été annulé.';
+$string['payui_reason_declined'] = 'Le paiement a été refusé par votre banque.';
+$string['payui_reason_expired'] = 'La session de paiement a expiré. Merci de recommencer.';
+$string['payui_reason_owner'] = 'Ce lien de paiement n’appartient pas à votre compte.';
+$string['payui_reason_status'] = 'Ce lien de paiement n’est plus valide.';
+
+// Succès & en attente
+$string['payui_success_title'] = 'Paiement confirmé';
+$string['payui_success_subtitle'] = 'Merci ! Votre paiement a été validé.';
+$string['payui_success_thanks'] = 'Bienvenue ! Votre accès a été activé.';
+$string['payui_success_check_email'] = 'Nous vous avons envoyé un e-mail avec vos accès et les prochaines étapes. Connectez-vous pour commencer.';
+$string['payui_pending_title'] = 'C’est presque fini…';
+$string['payui_pending_msg'] = 'Votre paiement est en cours de confirmation. Cela peut prendre jusqu’à une minute. Vous pouvez fermer cette page : nous vous écrirons dès que tout est prêt.';
+
+// CTAs & libellés
+$string['payui_cta_my_subscriptions'] = 'Aller à mes abonnements';
+$string['payui_cta_signin'] = 'Se connecter';
+$string['payui_session_display'] = 'Session de paiement : {$a}';
+$string['payui_label_price'] = 'Prix';
+$string['payui_label_plan'] = 'Offre';
+$string['payui_cta_mycourses'] = 'Aller à mes cours';
+
+$string['settings_support_email'] = 'E-mail du support';
+$string['settings_support_email_desc'] = 'Affiché sur les pages de paiement (succès/erreur) comme lien de contact.';
+$string['stripe_price_mismatch'] = 'Stripe : incohérence de prix détectée. Réessayez ou contactez le support. ({$a})';

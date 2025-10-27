@@ -552,3 +552,78 @@ $string['reply_text']             = 'Ваш ответ';
 $string['contact_reply_sent_hint']  = 'Ответ отправлен получателю. Эту страницу можно закрыть.';
 
 $string['trial_checkout_banner'] = 'Вы вошли с пробной учётной записью. Укажите свои данные, чтобы оформить подписку.';
+
+// Общие / защита create_session
+$string['invalid_operation'] = 'Недопустимая операция оплаты.';
+$string['invalid_payment_request_status'] = 'Этот платёжный запрос больше нельзя использовать.';
+$string['invalid_payment_request_owner'] = 'У вас нет доступа к этому платёжному запросу.';
+$string['invalid_currency_for_alfa'] = 'Неверная валюта для Alfa: поддерживается только RUB.';
+$string['err_no_redirect_url'] = 'Платёжный провайдер не вернул URL для переадресации.';
+$string['err_cannot_determine_price'] = 'Не удалось определить цену плана для выбранной валюты.';
+
+// Шлюз Alfa
+$string['alfa_missing_api_base'] = 'Неполная конфигурация Alfa: не задан базовый адрес API.';
+$string['alfa_rub_only'] = 'Alfa: поддерживается только валюта RUB.';
+$string['alfa_register_error'] = 'Ошибка Alfa при инициализации платежа: {$a}';
+$string['alfa_missing_formurl'] = 'Некорректный ответ Alfa: отсутствует formUrl или orderId.';
+$string['paymentgatewayerror'] = 'Ошибка платёжного шлюза: {$a}';
+
+// Доп.усиление (необязательные проверки)
+$string['alfa_price_mismatch'] = 'Обнаружено несоответствие цены для Alfa. Повторите попытку или обратитесь в поддержку. ({$a})';
+$string['alfa_amount_mismatch'] = 'Обнаружено несоответствие суммы для Alfa. Повторите попытку или обратитесь в поддержку. ({$a})';
+
+// Шлюз Stripe
+$string['stripe:missingamount'] = 'Stripe: отсутствует сумма для создания сессии оплаты.';
+$string['stripe:productname'] = '{$a} — оплата';
+$string['stripe:missingpriceidforsubscription'] = 'Stripe: отсутствует price_id для режима подписки.';
+$string['stripe:missingpriceid'] = 'Stripe: отсутствует price_id.';
+$string['stripe:sdkautoloadnotfound'] = 'Не найден файл автозагрузки Stripe SDK: {$a}';
+$string['missing_customer_id'] = 'Отсутствует идентификатор клиента.';
+
+// Усиление Stripe (необязательно)
+$string['stripe_invalid_currency'] = 'Stripe: неверная или неподдерживаемая валюта: {$a}.';
+$string['stripe_nonpositive_amount'] = 'Stripe: сумма должна быть больше 0.';
+
+// UI — общее
+$string['payui_error_title'] = 'Не удалось завершить оплату';
+$string['payui_error_subtitle'] = 'Произошла ошибка на стороне платёжного сервиса или на нашей стороне.';
+$string['payui_error_generic'] = 'Попробуйте ещё раз. Если проблема повторится, свяжитесь с нами — мы поможем оформить заказ.';
+
+$string['payui_cta_retry'] = 'Повторить попытку';
+$string['payui_cta_back'] = 'Назад к тарифам';
+$string['payui_cta_contact'] = 'Связаться с поддержкой';
+$string['payui_support_hint'] = 'Нужна помощь? Напишите нам: {$a}';
+
+$string['payui_order_ref'] = 'Номер заказа: {$a}';
+
+// UI — причины (кратко и понятно)
+$string['payui_reason_security'] = 'Сессия истекла. Обновите страницу и попробуйте снова.';
+$string['payui_reason_link'] = 'Ссылка на платёжную страницу недоступна. Попробуйте ещё раз.';
+$string['payui_reason_currency'] = 'Не удалось подтвердить валюту платежа. Попробуйте ещё раз.';
+$string['payui_reason_amount'] = 'Не удалось подтвердить сумму. Попробуйте ещё раз.';
+$string['payui_reason_gateway'] = 'Платёжный сервис вернул ошибку. Попробуйте ещё раз.';
+$string['payui_reason_canceled'] = 'Оплата была отменена.';
+$string['payui_reason_declined'] = 'Банк отклонил платёж.';
+$string['payui_reason_expired'] = 'Сессия оплаты истекла. Начните заново.';
+$string['payui_reason_owner'] = 'Эта платёжная ссылка не принадлежит вашему аккаунту.';
+$string['payui_reason_status'] = 'Эта платёжная ссылка больше не действительна.';
+
+// Успех и ожидание
+$string['payui_success_title'] = 'Платёж подтверждён';
+$string['payui_success_subtitle'] = 'Спасибо! Ваш платёж прошёл успешно.';
+$string['payui_success_thanks'] = 'Добро пожаловать! Доступ активирован.';
+$string['payui_success_check_email'] = 'Мы отправили вам письмо с деталями доступа и следующими шагами. Войдите в аккаунт, чтобы начать обучение.';
+$string['payui_pending_title'] = 'Почти готово…';
+$string['payui_pending_msg'] = 'Платёж подтверждается. Это может занять до минуты. Можно закрыть страницу — мы напишем вам, когда всё будет готово.';
+
+// Кнопки и подписи
+$string['payui_cta_my_subscriptions'] = 'Мои подписки';
+$string['payui_cta_signin'] = 'Войти';
+$string['payui_session_display'] = 'Сессия оплаты: {$a}';
+$string['payui_label_price'] = 'Цена';
+$string['payui_label_plan'] = 'Тариф';
+$string['payui_cta_mycourses'] = 'Перейти к моим курсам';
+
+$string['settings_support_email'] = 'E-mail поддержки';
+$string['settings_support_email_desc'] = 'Используется на страницах оплаты (успех/ошибка) для ссылки на поддержку.';
+$string['stripe_price_mismatch'] = 'Stripe: обнаружено несоответствие цены. Повторите попытку или обратитесь в поддержку. ({$a})';

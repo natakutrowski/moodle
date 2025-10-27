@@ -203,6 +203,28 @@ function local_subscriptions_get_price(int $id) {
     return $DB->get_record('subscription_plan_price', ['id' => $id], '*', MUST_EXIST);
 }
 
+function local_subscriptions_get_config_price(int $planid, string $currency): float {
+    global $DB;
+    $rec = $DB->get_record('subscription_plan_price',
+        ['planid' => $planid, 'currency' => strtoupper($currency)],
+        'price', MUST_EXIST);
+    return round((float)$rec->price, 2);
+}
+
+function local_subs_money_to_minor_units(string $amountDec, string $currency): int {
+    $scaleMap = ['RUB'=>2,'EUR'=>2,'USD'=>2,'JPY'=>0];
+    $scale = $scaleMap[strtoupper($currency)] ?? 2;
+    // Normaliser pour éviter "24 900,00"
+    $norm = preg_replace('/[^\d,.\-]/', '', $amountDec);
+    $norm = str_replace(',', '.', $norm);
+    if (function_exists('bcmul') && function_exists('bcpow')) {
+        $minor = bcmul($norm, bcpow('10', (string)$scale, 0), 0);
+        return (int)$minor;
+    }
+    return (int) round((float)$norm * (10 ** $scale), 0);
+}
+
+
 /**
  * Supprime un prix.
  */

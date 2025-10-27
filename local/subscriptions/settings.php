@@ -242,6 +242,14 @@ if ($hassiteconfig) {
         ));
 
         $settings->add(new admin_setting_configtext(
+            'local_subscriptions/support_email',
+            get_string('settings_support_email', 'local_subscriptions'),
+            get_string('settings_support_email_desc', 'local_subscriptions'),
+            'support@campusfr.fr',
+            PARAM_EMAIL
+        ));
+
+        $settings->add(new admin_setting_configtext(
             'local_subscriptions/brand_logo_url',
         get_string('brand_logo_url_label', 'local_subscriptions'),
         get_string('brand_logo_url_desc', 'local_subscriptions'),

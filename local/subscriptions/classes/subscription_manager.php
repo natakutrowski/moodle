@@ -93,23 +93,42 @@ class subscription_manager {
 			return; // pas d’inscription manuelle disponible
 		}
 
+    	$now = time();
+
 		foreach ($courseids as $courseid) {
 			if ($courseid <= 0) { continue; }
 
 			// 6) Trouver (ou créer) une instance 'manual' activée sur ce cours
 			$instances = enrol_get_instances($courseid, /* enabled only */ true);
 			$instance  = null;
+        	$candidateEnabled = null;
+
 			foreach ($instances as $inst) {
-				if ($inst->enrol === 'manual') { $instance = $inst; break; }
+				if ($inst->enrol !== 'manual') { continue; }
+				// S'il y a déjà une UE sur cette instance, on la choisit
+				if ($DB->record_exists('user_enrolments', ['enrolid' => $inst->id, 'userid' => $userid])) {
+					$instance = $inst;
+					break;
+				}
+				// Sinon on mémorise une instance manual activée comme candidat
+				if ((int)$inst->status === ENROL_INSTANCE_ENABLED && !$candidateEnabled) {
+					$candidateEnabled = $inst;
+				}
 			}
+
 			if (!$instance) {
-				// Créer une instance manual activée
-				$course = $DB->get_record('course', ['id' => $courseid], '*', IGNORE_MISSING);
-				if (!$course) { continue; }
-				$instanceid = $manual->add_instance($course, ['status' => ENROL_INSTANCE_ENABLED]);
-				if (!$instanceid) { continue; }
-				$instance = $DB->get_record('enrol', ['id' => $instanceid], '*', IGNORE_MISSING);
-				if (!$instance) { continue; }
+				// Pas d'UE existante -> prendre une instance manual activée si dispo
+				if ($candidateEnabled) {
+					$instance = $candidateEnabled;
+				} else {
+					// Sinon on crée une instance activée
+					$course = $DB->get_record('course', ['id' => $courseid], '*', IGNORE_MISSING);
+					if (!$course) { continue; }
+					$instanceid = $manual->add_instance($course, ['status' => ENROL_INSTANCE_ENABLED]);
+					if (!$instanceid) { continue; }
+					$instance = $DB->get_record('enrol', ['id' => $instanceid], '*', IGNORE_MISSING);
+					if (!$instance) { continue; }
+				}
 			}
 
 			// 7) Idempotence CORRECTE :
@@ -122,13 +141,34 @@ class subscription_manager {
 				], '*', IGNORE_MISSING);
 
 				if ($ue) {
-					// Mettre à jour (même si déjà actif) pour pousser les nouvelles dates
-					// update_user_enrol($instance, $userid, $status=null|0|1, $timestart=null, $timeend=null)
-					$manual->update_user_enrol($instance, $userid, ENROL_USER_ACTIVE, (int)$startdate, (int)$enddate);
+					// --- Cas PROLONGATION / AJUSTEMENT ---
+					// Ne JAMAIS pousser le début dans le futur si l'UE existe déjà.
+					// On conserve le début le plus ancien (ou celui passé s'il est dans le passé).
+					$newStart = (int)($ue->timestart ?? 0);
+					if ($startdate <= $now) {
+						$newStart = $newStart ? min($newStart, (int)$startdate) : (int)$startdate;
+					}
+					// Étendre la fin (0 = illimité)
+					if ((int)$enddate === 0 || (int)$ue->timeend === 0) {
+						$newEnd = 0;
+					} else {
+						$newEnd = max((int)$ue->timeend, (int)$enddate);
+					}
+
+					// Réactiver au passage
+					$manual->update_user_enrol($instance, $userid, ENROL_USER_ACTIVE, $newStart, $newEnd);
+
 				} else {
-					// Inscription initiale
+					// --- Cas PREMIÈRE INSCRIPTION SUR CE COURS ---
+					// Ne PAS créer d'UE si elle commencerait dans le futur
+					// (pour éviter de "perdre" l'accès actuel en file d'attente).
+					if ($startdate > $now) {
+						continue;
+					}
+
 					$manual->enrol_user($instance, $userid, $roleid, (int)$startdate, (int)$enddate, ENROL_USER_ACTIVE);
 				}
+				
 			} catch (\Throwable $e) {
 				// error_log('[subs][enrol] course '.$courseid.' user '.$userid.' : '.$e->getMessage());
 				continue;

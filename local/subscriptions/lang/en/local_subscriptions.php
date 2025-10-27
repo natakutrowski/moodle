@@ -553,3 +553,79 @@ $string['reply_text']             = 'Your reply';
 $string['contact_reply_sent_hint']  = 'Your reply has been sent to the recipient. You can close this page.';
 
 $string['trial_checkout_banner'] = 'You are signed in with a trial account. Please enter your details to purchase a subscription.';
+
+// Generic / create_session safeguards
+$string['invalid_operation'] = 'Invalid payment operation.';
+$string['invalid_payment_request_status'] = 'This payment request can’t be used anymore.';
+$string['invalid_payment_request_owner'] = 'You do not have access to this payment request.';
+$string['invalid_currency_for_alfa'] = 'Invalid currency for Alfa: only RUB is supported.';
+$string['err_no_redirect_url'] = 'Payment provider did not return a redirect URL.';
+$string['err_cannot_determine_price'] = 'Could not determine the plan price for the selected currency.';
+
+// Alfa gateway
+$string['alfa_missing_api_base'] = 'Missing Alfa configuration: API base URL is not set.';
+$string['alfa_rub_only'] = 'Alfa: only RUB currency is supported.';
+$string['alfa_register_error'] = 'Alfa register error: {$a}';
+$string['alfa_missing_formurl'] = 'Invalid Alfa response: missing formUrl or orderId.';
+$string['paymentgatewayerror'] = 'Payment gateway error: {$a}';
+
+// Extra hardening (optional guards)
+$string['alfa_price_mismatch'] = 'Price mismatch detected for Alfa. Please try again or contact support. ({$a})';
+$string['alfa_amount_mismatch'] = 'Amount mismatch detected for Alfa. Please try again or contact support. ({$a})';
+
+// Stripe gateway
+$string['stripe:missingamount'] = 'Stripe: missing amount to create the checkout session.';
+$string['stripe:productname'] = '{$a} — payment';
+$string['stripe:missingpriceidforsubscription'] = 'Stripe: missing price_id for subscription mode.';
+$string['stripe:missingpriceid'] = 'Stripe: missing price_id.';
+$string['stripe:sdkautoloadnotfound'] = 'Stripe SDK autoload file not found: {$a}';
+$string['missing_customer_id'] = 'Missing customer ID.';
+
+// Stripe extra hardening (optional guards)
+$string['stripe_invalid_currency'] = 'Stripe: invalid or unsupported currency: {$a}.';
+$string['stripe_nonpositive_amount'] = 'Stripe: amount must be greater than 0.';
+
+// UI — generic
+$string['payui_error_title'] = 'We couldn’t complete your payment';
+$string['payui_error_subtitle'] = 'Something went wrong on our side or with the payment service.';
+$string['payui_error_generic'] = 'Please try again. If the problem persists, contact us and we’ll help you complete the order.';
+
+$string['payui_cta_retry'] = 'Try again';
+$string['payui_cta_back'] = 'Back to plans';
+$string['payui_cta_contact'] = 'Contact support';
+$string['payui_support_hint'] = 'Need help? Write to {$a}';
+
+$string['payui_order_ref'] = 'Order reference: {$a}';
+
+// UI — reasons (short, user-friendly)
+$string['payui_reason_security'] = 'Your session expired. Refresh the page and try again.';
+$string['payui_reason_link'] = 'The payment page link was not available. Please try again.';
+$string['payui_reason_currency'] = 'We couldn’t confirm the payment currency. Please try again.';
+$string['payui_reason_amount'] = 'We couldn’t confirm the amount. Please try again.';
+$string['payui_reason_gateway'] = 'The payment service returned an error. Please try again.';
+$string['payui_reason_canceled'] = 'The payment was canceled.';
+$string['payui_reason_declined'] = 'The payment was declined by your bank.';
+$string['payui_reason_expired'] = 'The payment session expired. Please start again.';
+$string['payui_reason_owner'] = 'This payment link does not belong to your account.';
+$string['payui_reason_status'] = 'This payment link is no longer valid.';
+
+// Success & pending UI
+$string['payui_success_title'] = 'Payment confirmed';
+$string['payui_success_subtitle'] = 'Thank you! Your payment was successful.';
+$string['payui_success_thanks'] = 'Welcome! Your access has been activated.';
+$string['payui_success_check_email'] = 'We’ve sent you an email with your access details and next steps. Please sign in to start learning.';
+$string['payui_pending_title'] = 'Almost there…';
+$string['payui_pending_msg'] = 'Your payment is being confirmed. This can take up to a minute. You can safely close this page; we’ll email you once it’s done.';
+
+// CTAs & labels
+$string['payui_cta_my_subscriptions'] = 'Go to My Subscriptions';
+$string['payui_cta_signin'] = 'Sign in';
+$string['payui_session_display'] = 'Checkout session: {$a}';
+$string['payui_label_price'] = 'Price';
+$string['payui_label_plan'] = 'Plan';
+$string['payui_cta_mycourses'] = 'Go to My Courses';
+
+
+$string['settings_support_email'] = 'Support email';
+$string['settings_support_email_desc'] = 'Used on payment pages (error/success) to show a contact link.';
+$string['stripe_price_mismatch'] = 'Stripe: price mismatch detected. Please try again or contact support. ({$a})';

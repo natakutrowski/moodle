@@ -223,6 +223,14 @@ echo html_writer::start_tag('form', $formattrs);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'planid',   'value' => $planid]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'currency', 'value' => core_text::strtolower($currency)]);
 
+// === CSRF: ajout du sesskey (à coller ici) ==============================
+echo html_writer::empty_tag('input', [
+    'type'  => 'hidden',
+    'name'  => 'sesskey',
+    'value' => sesskey()
+]);
+// =======================================================================
+
 // Pré-remplissage si connecté.
 $prefillemail = $isrestricted ? '' : ($USER->email ?? '');
 $prefillfn    = $isrestricted ? '' : ($USER->firstname ?? '');

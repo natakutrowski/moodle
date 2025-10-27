@@ -5,6 +5,7 @@ use local_subscriptions\payment\PaymentGatewayInterface;
 use local_subscriptions\payment\dto\{CheckoutInitResult, InternalEvent, ProviderActionResult, ProviderCapabilities};
 use local_subscriptions\payment\Provider;
 use local_subscriptions\constants\Status;
+use local_subscriptions\constants\Operation;
 use stdClass;
 
 /**
@@ -95,6 +96,44 @@ final class AlfaGateway implements PaymentGatewayInterface {
             throw new \moodle_exception('alfa_rub_only', 'local_subscriptions');
         }
 
+        // (OPTION) Vérifier la cohérence PR.price vs prix configuré RUB
+        $cfgRub = null;
+        if (!empty($payment_request->planid)) {
+            $cfgRub = $DB->get_field('subscription_plan_price', 'price',
+                ['planid' => (int)$payment_request->planid, 'currency' => 'RUB'], IGNORE_MISSING);
+        }
+        // --- Opération courante (depuis options ou PR)
+        $op = $options['operation'] ?? ($payment_request->operation ?? '');
+
+        // --- Prix catalogue RUB (si dispo)
+        $cfgRub = null;
+        if (!empty($payment_request->planid)) {
+            $cfgRub = $DB->get_field('subscription_plan_price', 'price',
+                ['planid' => (int)$payment_request->planid, 'currency' => 'RUB'], IGNORE_MISSING);
+        }
+
+        // --- Politique de cohérence prix
+        $prPrice = (float)$payment_request->price;
+
+        if ($op === Operation::PURCHASE_NEW || $op === Operation::QUEUE_FUTURE) {
+            // Achat standard → prix PR doit correspondre exactement au catalogue
+            if ($cfgRub !== null && abs($prPrice - (float)$cfgRub) > 0.01) {
+                throw new \moodle_exception('alfa_price_mismatch', 'local_subscriptions', '',
+                    'PR='.$prPrice.' / CFG='.$cfgRub);
+            }
+        } else {
+            // UPGRADE  → on laisse passer le prix Advisor
+            // Garde minimale: non-négatif
+            if ($prPrice <= 0) {
+                throw new \moodle_exception('alfa_price_mismatch', 'local_subscriptions', '',
+                    'non-positive: PR='.$prPrice.(($cfgRub!==null)?' / CFG='.$cfgRub:''));
+            }
+            // (Optionnel) journaliser si > catalogue (suspicious), sans bloquer
+            if ($cfgRub !== null && $prPrice > (float)$cfgRub * 1.25) {
+                error_log('[alfa][price_guard] upgrade/queue price unusually high: PR='.$prPrice.' CFG='.$cfgRub);
+            }
+        }
+
         // --- orderNumber unique -------------------------------------------
         $attempt = (int)($payment_request->attempts ?? 0) + 1;
         $DB->update_record('subscription_payment_request', (object)[
@@ -108,6 +147,17 @@ final class AlfaGateway implements PaymentGatewayInterface {
 
         // Conversion major -> minor (kopecks).
         $amountMinor = $this->major_to_minor($payment_request->price);
+
+        // (OPTION) Si create_session a passé un amount_minor, on le valide
+        if (!empty($options['amount_minor'])) {
+            $serverMinor = (int)$options['amount_minor'];
+            if ($serverMinor !== $amountMinor) {
+                throw new \moodle_exception('alfa_amount_mismatch', 'local_subscriptions',
+                    '', 'server='.$serverMinor.' / local='.$amountMinor);
+            }
+            // $amountMinor = $serverMinor; // possible, mais pas nécessaire si identiques
+        }
+
         // URLs de retour (peuvent être passées via $options).
         $returnUrl = $options['returnurl'] ?? ($CFG->wwwroot . '/local/subscriptions/payment/alfa_return.php?pid=' . $payment_request->id);
         // Important : on met fail=1 pour router vers payment_cancel.php

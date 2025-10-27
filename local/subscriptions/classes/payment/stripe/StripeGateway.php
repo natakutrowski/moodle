@@ -6,6 +6,7 @@ use local_subscriptions\payment\PortalGatewayInterface;
 use local_subscriptions\payment\dto\{CheckoutInitResult, InternalEvent, ProviderActionResult, ProviderCapabilities};
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\payment\Provider;
+use local_subscriptions\constants\Operation;
 use stdClass;
 
 final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInterface {
@@ -41,7 +42,53 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
     public function create_checkout_session(stdClass $payment_request, array $options = []): CheckoutInitResult {
         $this->ensure_sdk();
         $mode = $options['mode'] ?? 'payment';
+
+        // (OPTION) Devise autorisée
+        $allowed = ['EUR','USD','GBP','CHF'];
+        if (!in_array(strtoupper($payment_request->currency), $allowed, true)) {
+            throw new \moodle_exception('stripe_invalid_currency', 'local_subscriptions', '', $payment_request->currency);
+        }
+
         $priceId = $options['price_map']['stripe_price_id'] ?? null;
+
+        // === GUARD PRICING (Stripe) =============================================
+        global $DB;
+
+        // Opération courante (vient de create_session)
+        $op = $options['operation'] ?? ($payment_request->operation ?? '');
+
+        // Devise & prix PR
+        $prCurrency = strtoupper($payment_request->currency ?? '');
+        $prPrice    = isset($payment_request->price) ? (float)$payment_request->price : 0.0;
+
+        // Prix catalogue selon plan/devise (si connu)
+        $cfgPrice = null;
+        if (!empty($payment_request->planid) && $prCurrency !== '') {
+            $cfgPrice = $DB->get_field('subscription_plan_price', 'price', [
+                'planid'   => (int)$payment_request->planid,
+                'currency' => $prCurrency,
+            ], IGNORE_MISSING);
+            if ($cfgPrice !== false) { $cfgPrice = (float)$cfgPrice; } else { $cfgPrice = null; }
+        }
+
+        // Règle métier :
+        // - PURCHASE_NEW et QUEUE_FUTURE => prix PR == prix configuré
+        // - UPGRADE_NOW_REPLACE_CHAIN    => prix Advisor autorisé (>0), log si très élevé
+        if (in_array($op, [Operation::PURCHASE_NEW, Operation::QUEUE_FUTURE], true)) {
+            if ($cfgPrice !== null && abs($prPrice - $cfgPrice) > 0.01) {
+                throw new \moodle_exception('stripe_price_mismatch', 'local_subscriptions', '',
+                    'PR='.$prPrice.' / CFG='.$cfgPrice);
+            }
+        } elseif ($op === Operation::UPGRADE_NOW_REPLACE_CHAIN) {
+            if ($prPrice <= 0) {
+                throw new \moodle_exception('stripe_nonpositive_amount', 'local_subscriptions');
+            }
+            if ($cfgPrice !== null && $prPrice > ($cfgPrice * 1.25)) {
+                error_log('[stripe][price_guard] upgrade price unusually high: PR='.$prPrice.' CFG='.$cfgPrice);
+            }
+        }
+        // =======================================================================
+
 
         $cfg = $this->cfg([
             'success_url' => $options['success_url'] ?? null,
@@ -65,6 +112,10 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
 
         if ($mode === 'payment') {
             $amountMinor = isset($payment_request->price) ? (int)round(((float)$payment_request->price) * 100) : null;
+
+            if ($amountMinor <= 0) {
+                throw new \moodle_exception('stripe_nonpositive_amount', 'local_subscriptions');
+            }
             if ($amountMinor === null) { throw new \coding_exception(get_string('stripe:missingamount', 'local_subscriptions')); }
             $params['line_items'] = [[
                 'price_data' => [

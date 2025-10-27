@@ -1,7 +1,11 @@
 <?php
 // local/subscriptions/payment/create_session.php
 require_once(dirname(__DIR__, 3) . '/config.php');
+require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
 
+// === CSRF obligatoire (à coller ici) ====================================
+require_sesskey();
+// =======================================================================
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -72,7 +76,34 @@ if ($asguest && $operation !== Operation::PURCHASE_NEW) {
     $operation = Operation::PURCHASE_NEW;
 }
 
-global $DB, $USER, $CFG;
+
+// === Verrouillage overrides (à coller ici) ==============================
+// Uniquement l’admin peut utiliser provider/override_amount/amount_minor/etc.
+$isadmin = is_siteadmin();
+$hasoverride = ($providerOverride !== '' || $overrideamount !== '' ||
+                $overridecurrency !== '' || !empty($amountMinorOverride));
+
+if (!$isadmin && $hasoverride) {
+    // Public : on ignore tout override dangereux
+    $providerOverride    = '';
+    $overrideamount      = '';
+    $overridecurrency    = '';
+    $amountMinorOverride = 0;
+    $hasoverride         = false;
+}
+
+// Liste blanche des opérations
+if (!in_array($operation, [
+    Operation::PURCHASE_NEW,
+    Operation::QUEUE_FUTURE,
+    Operation::UPGRADE_NOW_REPLACE_CHAIN
+], true)) {
+    throw new \moodle_exception('invalid_operation', 'local_subscriptions');
+}
+// =======================================================================
+
+
+global $DB, $USER;
 
 // ──────────────────────────────────────────────────────────────────────────
 // 1) Contexte plan & provider
@@ -85,43 +116,39 @@ $provider = $providerOverride ? strtolower($providerOverride)
                               : ProviderSelector::chooseForPlan($plan, $currency, $asguest ? null : ($USER->id ?? null));
 if (!$provider) { $provider = Provider::defaultProvider(); }
 
-// ──────────────────────────────────────────────────────────────────────────
-/** Helper: calcule le prix "major" à payer pour cette PR (agnostique).
- *  Ordre: amount_minor override -> override_amount -> Advisor (si connecté et upgrade/queue) -> prix public.
- */
-$compute_price_major = function() use ($DB, $USER, $planid, $currency, $operation, $refsubid, $overrideamount, $amountMinorOverride, $asguest) : float {
-    // 1) montant forcé en minor
-    if (!empty($amountMinorOverride)) {
+// Si Alfa => devise **toujours** RUB côté PSP
+if ($provider === Provider::ALFA) {
+    $currency = 'RUB';
+}
+
+// === Calcul prix major (remplace ta closure) ============================
+$compute_price_major = function() use (
+    $DB, $USER, $planid, $currency, $operation,
+    $overrideamount, $amountMinorOverride, $asguest, $hasoverride
+): float {
+    // 1) montant forcé en minor (admin uniquement)
+    if ($hasoverride && !empty($amountMinorOverride)) {
         return round(((int)$amountMinorOverride) / 100, 2);
     }
-    // 2) override en major
-    if ($overrideamount !== '') {
+    // 2) override en major (admin uniquement)
+    if ($hasoverride && $overrideamount !== '') {
         return round((float)unformat_float($overrideamount, true), 2);
     }
-    // 3) Advisor (si dispo) pour upgrade/queue
+    // 3) Advisor (upgrade/queue pour utilisateur connecté)
     $loggedin = (!$asguest && isloggedin() && !isguestuser());
-    if ($loggedin && in_array($operation, ['queue_future','upgrade_now_replace_chain'], true)) {
-
+    if ($loggedin && in_array($operation, [Operation::QUEUE_FUTURE,Operation::UPGRADE_NOW_REPLACE_CHAIN], true)) {
         $advised = \local_subscriptions\domain\SubscriptionAdvisor::advise_options($USER->id, $planid, $currency);
         foreach ($advised as $opt) {
             if (!empty($opt['key']) && $opt['key'] === $operation) {
-                // amount attendu en major
-                $amount = (float)($opt['amount'] ?? 0);
-                return round($amount, 2);
+                return round((float)($opt['amount'] ?? 0), 2);
             }
         }
     }
-    // 4) prix public du plan (table subscription_plan_price)
-    $row = $DB->get_record('subscription_plan_price',
-        ['planid' => $planid, 'currency' => $currency],
-        'price',
-        IGNORE_MISSING
-    );
-    if ($row && isset($row->price)) {
-        return round((float)$row->price, 2);
-    }
-    throw new \moodle_exception('err_cannot_determine_price', 'local_subscriptions');
+    // 4) prix public configuré (obligatoire)
+    return local_subscriptions_get_config_price($planid, $currency);
 };
+// =======================================================================
+
 
 // ──────────────────────────────────────────────────────────────────────────
 // 2) Ensure Payment Request ($pr)
@@ -132,11 +159,57 @@ $pr = null;
 $pid = optional_param('pid', 0, PARAM_INT);
 if ($pid) {
     $pr = $DB->get_record('subscription_payment_request', ['id' => $pid], '*', MUST_EXIST);
+
+    // === Vérifs PR existante (à ajouter dans if ($pid)) =====================
+    if ($pr->status !== Status::PENDING) {
+        throw new \moodle_exception('invalid_payment_request_status', 'local_subscriptions');
+    }
+    if (!empty($pr->userid)) {
+        if (!isloggedin() || isguestuser() || (int)$pr->userid !== (int)$USER->id) {
+            throw new \moodle_exception('invalid_payment_request_owner', 'local_subscriptions');
+        }
+    }
+    // Aligner la devise avec la PR si définie
+    if (!empty($pr->currency)) {
+        $currency = strtoupper($pr->currency);
+    }
+    // =======================================================================
+
+
 }
 
 // (b) sinon créer la PR (PENDING)
 if (!$pr) {
     $priceMajor = $compute_price_major();
+
+    // Si Alfa => devise RUB et prix configuré RUB (aucun override)
+    if ($provider === Provider::ALFA) {
+        $currency   = 'RUB';
+        if ($operation === Operation::PURCHASE_NEW || $operation === Operation::QUEUE_FUTURE) {
+            $priceMajor = local_subscriptions_get_config_price($planid, $currency);
+        }
+    }
+
+    // Achat simple : revalider contre le prix configuré
+    if ($operation === Operation::PURCHASE_NEW || $operation === Operation::QUEUE_FUTURE) {
+        $cfgPrice = local_subscriptions_get_config_price($planid, $currency);
+        if (abs($priceMajor - $cfgPrice) > 0.01) {
+            $priceMajor = $cfgPrice;
+        }
+    }
+
+    // … juste avant la construction de $pr :
+    $ip = function_exists('getremoteaddr') ? getremoteaddr() : ($_SERVER['REMOTE_ADDR'] ?? '');
+    if ($ip === 'UNKNOWN') { $ip = ''; }
+
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $ua = $ua !== '' ? mb_substr($ua, 0, 65535) : null; // TEXT safe
+
+    $al = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
+    $al = $al !== '' ? mb_substr($al, 0, 191) : null;   // CHAR(191)
+
+    $ref = $_SERVER['HTTP_REFERER'] ?? '';
+    $ref = $ref !== '' ? mb_substr($ref, 0, 65535) : null; // TEXT    
 
     $pr = (object)[
         'planid'         => $planid,
@@ -153,8 +226,22 @@ if (!$pr) {
         'operation'      => $operation,
         'reference_subscription_id' => $refsubid ?: null,
         'response_json'  => $extra_json !== '' ? $extra_json : null,
+
+        // --- Nouveau : traçage visitor ---
+        'created_ip'         => $ip ?: null,
+        'created_useragent'  => $ua,              // TEXT (null si vide)
+        'accept_language'    => $al ?: null,      // CHAR(191)
+        'http_referer'       => $ref ?: null,     // TEXT
     ];
     $pr->id = $DB->insert_record('subscription_payment_request', $pr);
+
+    // Sanity check final avant d’aller chez le PSP
+    $configuredNow = local_subscriptions_get_config_price($planid, $currency);
+    if (($operation === Operation::PURCHASE_NEW || $operation === Operation::QUEUE_FUTURE)
+        && abs($pr->price - $configuredNow) > 0.01) {
+        $pr->price = $configuredNow;
+        $DB->update_record('subscription_payment_request', (object)['id'=>$pr->id, 'price'=>$configuredNow]);
+    }    
 
     // login token (auto-login sur payment_success.php, TTL 30 min)
     $token   = bin2hex(random_bytes(32));
@@ -248,6 +335,18 @@ if ($provider === Provider::ALFA) {
 $gateway = PaymentGatewayFactory::for($provider);
 
 try {
+
+    // === amount_minor sûr avant appel gateway (à coller juste avant l'appel) =
+    $major = (float)$pr->price;
+    $safeCurrency = ($provider === Provider::ALFA) ? 'RUB' : $currency;
+    $options['amount_minor'] = local_subs_money_to_minor_units(number_format($major, 2, '.', ''), $safeCurrency);
+
+    // Sanity Alfa : devise obligatoirement RUB
+    if ($provider === Provider::ALFA && $safeCurrency !== 'RUB') {
+        throw new \moodle_exception('invalid_currency_for_alfa', 'local_subscriptions');
+    }
+    // =======================================================================
+
     $result = $gateway->create_checkout_session($pr, $options);
 
     // Tenter de mémoriser une session provider si fournie par le DTO
