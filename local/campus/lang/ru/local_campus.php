@@ -37,6 +37,17 @@ $string['trial_btn_subscribe']= 'Оформить подписку';
 $string['trial_expired_msg'] = 'Ваш пробный период завершён. Оформите подписку, чтобы продолжить.';
 $string['trial_tos_html'] = 'Я принимаю <a href="{$a}" target="_blank" rel="noopener">Политику конфиденциальности</a>.';
 
+$string['mail_trial_started_subject'] = 'Ваш пробный период начался';
+$string['mail_trial_started_body']    = 'Здравствуйте, {$a->firstname}, ваш 7-дневный пробный период начался!';
+$string['mail_trial_rem3_subject']    = 'Напоминание: пробный период продолжается — {$a}';
+$string['mail_trial_rem3_body']       = 'Здравствуйте, {$a->firstname}, у вас ещё осталось несколько дней пробного периода.';
+$string['mail_trial_expired_subject'] = 'Ваш пробный период истёк — {$a}';
+$string['mail_trial_expired_body']    = 'Здравствуйте, {$a->firstname}, ваш 7-дневный пробный период завершился.';
+$string['mail_trial_cta_subscribe']   = 'Оформить подписку';
+$string['mail_trial_cta_continue']    = 'Продолжить пробный доступ';
+$string['mail_trial_rem3_subject_generic']    = 'Напоминание: ваш пробный период продолжается';
+$string['mail_trial_expired_subject_generic'] = 'Ваш пробный период истёк';
+
 $string['cataloguetitle'] = 'Каталог';
 $string['catalogueheading'] = 'Курсы по уровням';
 $string['cataloguesub'] = 'Просмотрите наши курсы';

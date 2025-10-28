@@ -60,6 +60,7 @@ class mailer {
         self::T_TRIAL_REM3    => ['toemail','firstname','continue_url','subscribe_url','course_fullname','daysleft'],
         self::T_TRIAL_EXPIRED => ['toemail','firstname','subscribe_url','course_fullname'],
     ];
+    
     /**
      * Point d’entrée unique : envoie l’e-mail correspondant au $type.
      * $args contient les paramètres attendus (voir REQUIREMENTS) + optionnellement 'lang'.
