@@ -1166,3 +1166,63 @@ $string['zoomandpanlite'] = 'медленно';
 $string['zoomandpanmedium'] = 'средне';
 $string['zoomandpanmore'] = 'быстрее';
 $string['zoomandpannone'] = 'без движения';
+
+$string['addslidesitem'] = 'Слайды';
+$string['slides'] = 'Слайды';
+$string['slides_instructions1'] = 'Нажимайте > или <, чтобы переходить вперёд или назад по слайдам.';
+$string['aigentemplatename:set_of_slides'] = 'Набор слайдов';
+$string['aigentemplatename:set_of_slides_nopics'] = 'Набор слайдов (без изображений)';
+$string['aigentemplatedescription:set_of_slides'] = 'Введите описание учебного материала, который вы хотите сгенерировать с помощью ИИ, — он создаст для вас набор слайдов с текстом и изображениями, готовыми к использованию.';
+$string['aigentemplatedescription:set_of_slides_nopics'] = 'Введите описание учебного материала, который вы хотите сгенерировать с помощью ИИ, — он создаст для вас набор слайдов, готовых к использованию.';
+$string['item_slides_desc'] = 'Элемент «Слайды» позволяет автору создать серию слайдов. Их можно использовать для показа учебной презентации. Слайды создаются с помощью синтаксиса Markdown, поэтому эта функция рассчитана на продвинутых пользователей.';
+$string['lessonbank'] = 'Банк уроков';
+$string['keyword'] = 'Ключевое слово';
+$string['keywordcolon'] = 'Ключевое слово:';
+$string['descriptioncolon'] = 'Описание:';
+$string['itemscolon'] = 'Элементы:';
+$string['showadvanced'] = 'Показать дополнительные параметры';
+$string['level'] = 'Уровень';
+$string['items'] = 'Элементы';
+$string['lessonitemcreate'] = 'Элемент урока успешно создан';
+$string['error:functionnotfound'] = 'Функция не найдена';
+$string['lessonbank:desc'] = 'Вы можете импортировать готовые элементы из банка уроков в свою активность MiniLesson. Найдите нужные элементы с помощью формы ниже и нажмите кнопку «Импорт» в результатах поиска, чтобы добавить их в урок.';
+$string['enablelessonbank'] = 'Включить банк уроков';
+$string['enablelessonbank_details'] = 'Включить банк уроков';
+$string['lessonbankurl'] = 'URL банка уроков';
+$string['lessonbankurl_details'] = 'URL банка уроков';
+$string['notconfigured'] = 'URL банка уроков не указана';
+$string['hideitemscores'] = 'Скрыть все результаты';
+$string['shuffleanswer'] = 'Перемешать ответы';
+$string['enterslidesmarkdown'] = 'Введите Markdown для слайдов. Markdown — это сокращённый синтаксис для создания HTML. Подробности см. в <a href="https://poodll.freshdesk.com/a/solutions/articles/19000169462" target="_blank">руководстве по Slides Markdown</a>.';
+$string['slidesmarkdown'] = 'Markdown слайдов';
+$string['slides:attachments'] = 'Вложения';
+$string['slides:theme'] = 'Тема';
+$string['slides:fontsize'] = 'Размер шрифта';
+$string['slides:fontsmall'] = 'Маленький';
+$string['slides:fontsmaller'] = 'Меньше';
+$string['slides:fontstandard'] = 'Стандартный';
+$string['slides:fontlarger'] = 'Больше';
+$string['slides:fontlarge'] = 'Большой';
+$string['slides:preview'] = 'Предпросмотр';
+$string['slides:previewmodaltitle'] = 'Предпросмотр';
+
+$string['wordshuffle_wordbank_label'] = 'Банк слов';
+$string['wordshuffle_drop_slot_label'] = 'Область размещения {$a}';
+$string['wordshuffle_a11y_returned_to_bank'] = '«{$a}» возвращено в банк слов';
+$string['wordshuffle_a11y_placed_in_slot'] = '«{$a}» помещено в область размещения';
+
+$string['aigentemplatename:dialog_multichoice'] = 'Прослушайте 4 диалога';
+$string['aigentemplatename:image_slides'] = 'Слайды с изображениями';
+$string['aigentemplatename:choose_best_reply'] = 'Выберите правильную реплику';
+
+$string['aigentemplatedescription:dialog_multichoice'] = 'Студенты выбирают картинку, которая лучше всего соответствует воспроизводимому диалогу. Для создания задания введите 4 диалога. На их основе будет создано 4 задания с выбором ответа, где варианты ответов — изображения, соответствующие текущему диалогу. Диалоги должны быть в формате TTS Dialog, например: A) I like toast. [new line] B) Me too.';
+$string['aigentemplatedescription:image_slides'] = 'Введите 5 описаний изображений и стиль изображения, чтобы получить 5 слайдов с картинками.';
+$string['aigentemplatedescription:choose_best_reply'] = 'Студент слушает 10 коротких диалогов и должен выбрать лучшую следующую реплику из 3 предложенных вариантов. Каждый вопрос сопровождается картинкой. Шаблон основан на разделе аудирования экзамена Eiken уровня 3 по английскому языку. Вам нужно указать место и ситуацию (обычно какую-то проблему) для каждого диалога, например: «two friends at the beach and one has lost their wallet.»';
+
+$string['templatetags'] = 'Теги шаблона';
+
+$string['hideanswertext'] = 'Скрыть текст ответа';
+$string['hideanswertext_detail'] = 'Если в качестве ответов используются изображения или аудио, отметьте этот параметр, чтобы скрыть текст ответа от студента. Текст ответа будет использоваться при отображении результатов.';
+
+$string['answerlayout'] = 'Расположение ответов';
+$string['twocolumn'] = '2 колонки';

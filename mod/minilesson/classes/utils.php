@@ -2438,6 +2438,8 @@ class utils
                 return new local\itemtype\item_wordshuffle($itemrecord, $moduleinstance, $context);
             case constants::TYPE_SCATTER:
                 return new local\itemtype\item_scatter($itemrecord, $moduleinstance, $context);
+            case constants::TYPE_SLIDES:
+                return new local\itemtype\item_slides($itemrecord, $moduleinstance, $context);
             default:
         }
     }
@@ -2495,6 +2497,8 @@ class utils
                 return '\\' . constants::M_COMPONENT . '\local\itemform\wordshuffleform';
             case constants::TYPE_SCATTER:
                 return '\\' . constants::M_COMPONENT . '\local\itemform\scatterform';
+            case constants::TYPE_SLIDES:
+                return '\\' . constants::M_COMPONENT . '\local\itemform\slidesform';
             default:
                 return false;
         }
@@ -2603,6 +2607,23 @@ class utils
         $moduledata = add_moduleinfo($moduledata, $course);
         return $moduledata->coursemodule;
     }//end of function
+
+    // Fetch user context fields for AIGEN processing
+    public static function fetch_usercontext_fields($ttslanguage='en-US'): array
+    {
+        $customdatacount = 10;
+        $contextdata = [
+            'target_language' => $ttslanguage,
+            'user_topic' => '',
+            'user_level' => '',
+            'user_text' => '',
+            'user_keywords' => '',
+        ];
+        for ($i = 1; $i <= $customdatacount; $i++) {
+            $contextdata["user_customdata{$i}"] = '';
+        }
+        return $contextdata;
+    }
 
     // Extracts fields from a string that are enclosed in curly braces.
     public static function extract_curly_fields(string $input): array

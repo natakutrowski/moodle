@@ -28,7 +28,8 @@ use mod_minilesson\local\exception\textgenerationfailed;
 class aigen
 {
 
-    public const DEFAULTTEMPLATES = ['6880824450555' => 'audiostory',
+    public const DEFAULTTEMPLATES = [
+        '6880824450555' => 'audiostory',
         '6874e6af39202' => 'passagereading',
         '6874e6ca1c71a' => 'wordpractice',
         '6874e6a65a0ff' => 'ayoutubelesson',
@@ -36,9 +37,14 @@ class aigen
         '688244029b789' => 'keywordstogapfillsfluency',
         '6899607f96fb7' => 'reading_aic_passagegen',
         '68996c17d07f5' => 'reading_aic_passageupload',
+        '69076f35b4c3b' => 'set_of_slides',
+        '69095a6426664' => 'set_of_slides_nopics',
         '68a036971fe4b' => 'keywords_to_ws_sc',
         '68a0422070f05' => 'keywords_to_ws_sc_sg',
-        ];
+        '690b33f83d02f' => 'dialog_multichoice',
+        '690b5e695b235' => 'image_slides',
+        '690eb6a91c972' => 'choose_best_reply',
+    ];
     private $moduleinstance = null;
     private $course = null;
     private $cm = null;
@@ -106,10 +112,9 @@ class aigen
                             $generateformat->{$generatefield->name} = $generatefield->name . '_data';
                         }
                     }
-
                     $generateformatjson = json_encode($generateformat);
 
-                    // Complete the prompt
+                    // Complete the prompt.
                     $useprompt = $useprompt . PHP_EOL . 'Generate the data in this JSON format: ' . $generateformatjson;
 
                     if ($this->progressbar) {
@@ -163,7 +168,7 @@ class aigen
                             // Image prompt data - usually mapped from other items (created) but possibly also from context data or dataitem.
                             $imagepromptdata = false;
                             if (isset($importitem->{$generatefilearea->mapping})) {
-                                 $imagepromptdata = $importitem->{$generatefilearea->mapping};
+                                $imagepromptdata = $importitem->{$generatefilearea->mapping};
                             } else if (isset($dataitem->{$generatefilearea->mapping})) {
                                 $imagepromptdata = $dataitem->{$generatefilearea->mapping};
                             } else if (isset($contextdata[$generatefilearea->mapping]) && !empty($contextdata[$generatefilearea->mapping])) {
@@ -286,8 +291,21 @@ class aigen
                 continue;
             }
 
-            // Add the style and greate context
-            $prompt = "Give me a simple cute cartoon image, with no text on it, depicting: " . $prompt;
+            // Add the style and create context
+            // If the style of the prompt is specified in the prompt then use it as is, if not add a little style instruction
+            // Does the prompt contain style keywords? - cartoon, illustration, photo, painting, sketch, drawing, realistic
+            $stylekeywords = ['flat vector illustration', 'cartoon', 'illustration', 'photorealistic', 'digital painting', 'sketch', 'line drawing', 'realistic', 'infographic', '3d render'];
+            $stylefound = false;
+            foreach ($stylekeywords as $stylekeyword) {
+                if (stripos(mb_strtolower($prompt), $stylekeyword) !== false) {
+                    $stylefound = true;
+                    break;
+                }
+            }
+            if (!$stylefound) {
+                $prompt = "Give me a simple cute cartoon image, with no text on it, depicting: " . $prompt;
+            }
+
             if ($overallimagecontext && !empty($overallimagecontext) && $overallimagecontext !== "--") {
                 $prompt .= PHP_EOL . " in the context of the following topic: " . $overallimagecontext;
             }
@@ -312,10 +330,10 @@ class aigen
         $curl = new curl();
         $curlopts = [];
         $curlopts['CURLOPT_TIMEOUT'] = 120; // this might be unnecessary or even counter productive
- 
+
         // Update the progress bar.
         if ($this->progressbar) {
-            $this->progressbar->start_progress("Generate images: {".count($requests)."} ");
+            $this->progressbar->start_progress("Generate images: {" . count($requests) . "} ");
         }
 
         $responses = $curl->multirequest($requests, $curlopts);
@@ -326,13 +344,13 @@ class aigen
             if ($processedimage) {
                 $imageurls[$filenametrack[$i]] = $processedimage;
             } else {
-                $secondattempt_requests[] =  $requests[$i];
+                $secondattempt_requests[] = $requests[$i];
                 $secondattempt_imagenumbers[] = $i;
             }
         }
 
         // Second attempt responses
-        if(count($secondattempt_requests) > 0) {
+        if (count($secondattempt_requests) > 0) {
             $responses = $curl->multirequest($secondattempt_requests);
             foreach ($responses as $i => $resp) {
                 $imagenumber = $secondattempt_imagenumbers[$i];
@@ -350,7 +368,8 @@ class aigen
         return $imageurls;
     }
 
-    public function make_image_smaller($imagedata) {
+    public function make_image_smaller($imagedata)
+    {
         global $CFG;
         require_once($CFG->libdir . '/gdlib.php');
 
@@ -364,7 +383,7 @@ class aigen
         file_put_contents($temporiginal, $imagedata);
 
         // Resize to reasonable dimensions
-        $resizedimagedata = \resize_image($temporiginal,  500, 500, true);
+        $resizedimagedata = \resize_image($temporiginal, 500, 500, true);
 
         if (!$resizedimagedata) {
             // If resizing fails, use the original image data
@@ -397,7 +416,8 @@ class aigen
         }
     }
 
-    public function prepare_generate_image_payload($prompt, $token = null) {
+    public function prepare_generate_image_payload($prompt, $token = null)
+    {
         global $USER;
 
         if (!empty($this->conf->apiuser) && !empty($this->conf->apisecret)) {
@@ -426,7 +446,8 @@ class aigen
         }
     }
 
-    public function process_generate_image_response($resp) {
+    public function process_generate_image_response($resp)
+    {
         $respobj = json_decode($resp);
         $ret = new \stdClass();
         if (isset($respobj->returnCode)) {
@@ -508,11 +529,31 @@ class aigen
      *
      * @return array An associative array of lesson templates, where the key is the template name and the value is an array containing 'config' and 'template' objects.
      */
-    public static function fetch_lesson_templates()
+    public static function fetch_lesson_templates($filtertags = [])
     {
         global $DB;
 
-        $templates = $DB->get_records('minilesson_templates');
+        $fields = 't.*';
+        $from = '{minilesson_templates} t';
+        $where = '1 = 1';
+        $groupby = 't.id';
+        $orderby = 't.id';
+        $params = [];
+
+        $predefined_tags = template_tag_manager::get_predefined_tags();
+        $singleormulti_tags = template_tag_manager::get_singleormulti_tags();
+        $itemtype_tags = template_tag_manager::get_itemtype_tags();
+        $tags = array_merge($predefined_tags, $singleormulti_tags, $itemtype_tags);
+        $filtertags = array_intersect($filtertags, $tags);
+        if ($filtertags) {
+            list($in, $inparams) = $DB->get_in_or_equal($filtertags, SQL_PARAMS_NAMED);
+            $from .= ' JOIN {' . template_tag_manager::DBTABLE . '} tt ON tt.templateid = t.id ';
+            $where .= " AND tt.tagname {$in}";
+            $params += $inparams;
+        }
+
+        $sql = "SELECT {$fields} FROM {$from} WHERE {$where} GROUP BY {$groupby} ORDER BY {$orderby}";
+        $templates = $DB->get_records_sql($sql, $params);
         foreach ($templates as $i => $template) {
             $template->config = json_decode($template->config);
             $template->template = json_decode($template->template);
@@ -542,8 +583,8 @@ class aigen
             // The configuration file should contain the lesson configuration in JSON format.
             // The template file should contain the lesson template in MiniLesson export/import JSON format.
             try {
-                $t->config = file_get_contents($CFG->dirroot . "/mod/minilesson/lessontemplates/" .$templateshortname . "_config.json");
-                $t->template = file_get_contents($CFG->dirroot . "/mod/minilesson/lessontemplates/" .$templateshortname . "_template.json");
+                $t->config = file_get_contents($CFG->dirroot . "/mod/minilesson/lessontemplates/" . $templateshortname . "_config.json");
+                $t->template = file_get_contents($CFG->dirroot . "/mod/minilesson/lessontemplates/" . $templateshortname . "_template.json");
                 aigen_uploadform::upsert_template($t);
             } catch (\Exception $e) {
                 // Handle the exception if the file cannot be read.

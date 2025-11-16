@@ -1185,3 +1185,64 @@ $string['aigentemplatedescription:keywords_to_ws_sc'] = 'Entrez 4 à 10 mots-cl�
 $string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Entrez 4 à 10 mots-clés. Ils serviront à générer des activités Word Shuffle, Scatter et Space Game, ainsi qu’une image de chaque mot-clé sur un tableau noir avec un mignon professeur caniche.';
 
 $string['audiochat_instructions_instructions'] = 'Ces instructions sont un modèle combiné avec le rôle IA, la voix IA, le sujet, les données personnalisées IA 1/2 et la langue maternelle de l’étudiant pour former les consignes transmises à l’IA. Variables utilisables : {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {topic}. Les instructions par défaut conviennent généralement, mais vous pouvez les adapter à votre usage.';
+
+
+$string['addslidesitem'] = 'Diapositives';
+$string['slides'] = 'Diapositives';
+$string['slides_instructions1'] = 'Cliquez sur > ou < pour avancer ou revenir en arrière dans les diapositives.';
+$string['aigentemplatename:set_of_slides'] = 'Ensemble de diapositives';
+$string['aigentemplatename:set_of_slides_nopics'] = 'Ensemble de diapositives (sans images)';
+$string['aigentemplatedescription:set_of_slides'] = 'Saisissez une description du tutoriel que vous souhaitez que l’IA génère ; elle créera pour vous un ensemble de diapositives avec du texte et des images prêtes à l’emploi.';
+$string['aigentemplatedescription:set_of_slides_nopics'] = 'Saisissez une description du tutoriel que vous souhaitez que l’IA génère ; elle créera pour vous un ensemble de diapositives prêtes à l’emploi.';
+$string['item_slides_desc'] = 'L’élément « Diapositives » permet à l’auteur de créer une série de diapositives. Celles-ci peuvent être utilisées pour présenter un contenu pédagogique. Les diapositives sont créées à l’aide de la syntaxe Markdown ; il s’agit donc d’une fonctionnalité destinée aux utilisateurs avancés.';
+$string['lessonbank'] = 'Banque de leçons';
+$string['keyword'] = 'Mot-clé';
+$string['keywordcolon'] = 'Mot-clé :';
+$string['descriptioncolon'] = 'Description :';
+$string['itemscolon'] = 'Éléments :';
+$string['showadvanced'] = 'Afficher les options avancées';
+$string['level'] = 'Niveau';
+$string['items'] = 'Éléments';
+$string['lessonitemcreate'] = 'Élément de leçon créé avec succès';
+$string['error:functionnotfound'] = 'Fonction introuvable';
+$string['lessonbank:desc'] = 'Vous pouvez importer des éléments prêts à l’emploi depuis la banque de leçons dans votre activité MiniLesson. Faites une recherche avec le formulaire ci-dessous, puis utilisez le bouton « Importer » dans les résultats pour importer les éléments de leçon.';
+$string['enablelessonbank'] = 'Activer la banque de leçons';
+$string['enablelessonbank_details'] = 'Activer la banque de leçons';
+$string['lessonbankurl'] = 'URL de la banque de leçons';
+$string['lessonbankurl_details'] = 'URL de la banque de leçons';
+$string['notconfigured'] = 'URL de la banque de leçons non configurée';
+$string['hideitemscores'] = 'Masquer tous les résultats';
+$string['shuffleanswer'] = 'Mélanger les réponses';
+$string['enterslidesmarkdown'] = 'Saisissez le Markdown des diapositives. Markdown est une sorte de syntaxe abrégée pour créer du HTML. Voir le <a href="https://poodll.freshdesk.com/a/solutions/articles/19000169462" target="_blank">guide Slides Markdown</a> pour plus de détails.';
+$string['slidesmarkdown'] = 'Markdown des diapositives';
+$string['slides:attachments'] = 'Pièces jointes';
+$string['slides:theme'] = 'Thème';
+$string['slides:fontsize'] = 'Taille de police';
+$string['slides:fontsmall'] = 'Petit';
+$string['slides:fontsmaller'] = 'Plus petit';
+$string['slides:fontstandard'] = 'Standard';
+$string['slides:fontlarger'] = 'Plus grand';
+$string['slides:fontlarge'] = 'Grand';
+$string['slides:preview'] = 'Aperçu';
+$string['slides:previewmodaltitle'] = 'Aperçu';
+
+$string['wordshuffle_wordbank_label'] = 'Banque de mots';
+$string['wordshuffle_drop_slot_label'] = 'Zone de dépôt {$a}';
+$string['wordshuffle_a11y_returned_to_bank'] = '« {$a} » remis dans la banque de mots';
+$string['wordshuffle_a11y_placed_in_slot'] = '« {$a} » placé dans la zone de dépôt';
+
+$string['aigentemplatename:dialog_multichoice'] = 'Écouter 4 dialogues';
+$string['aigentemplatename:image_slides'] = 'Diapositives illustrées';
+$string['aigentemplatename:choose_best_reply'] = 'Choisir la bonne réplique';
+
+$string['aigentemplatedescription:dialog_multichoice'] = 'Les étudiants choisissent l’image qui représente le mieux le dialogue en cours de lecture. Pour créer l’activité, saisissez 4 dialogues. Ils formeront 4 questions à choix multiples où chaque réponse est une image représentant le dialogue en cours. Les dialogues doivent être au format TTS Dialog, par ex. : A) I like toast. [new line] B) Me too.';
+$string['aigentemplatedescription:image_slides'] = 'Saisissez 5 descriptions d’images et un style d’image pour obtenir 5 diapositives illustrées.';
+$string['aigentemplatedescription:choose_best_reply'] = 'L’étudiant écoute 10 courtes conversations et doit choisir la meilleure réplique suivante parmi les 3 options proposées. Chaque question est accompagnée d’une image. Ce modèle est basé sur la partie compréhension orale du test Eiken niveau 3 en anglais. Vous devez saisir le lieu et la situation (généralement un problème) pour chaque conversation, par ex. « two friends at the beach and one has lost their wallet. »';
+
+$string['templatetags'] = 'Balises de modèle';
+
+$string['hideanswertext'] = 'Masquer le texte de la réponse';
+$string['hideanswertext_detail'] = 'Lorsque vous utilisez des images ou de l’audio comme réponses, cochez cette option pour masquer le texte de la réponse à l’étudiant. Le texte de la réponse sera utilisé lors de l’affichage des résultats.';
+
+$string['answerlayout'] = 'Disposition des réponses';
+$string['twocolumn'] = '2 colonnes';

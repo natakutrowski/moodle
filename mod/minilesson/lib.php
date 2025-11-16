@@ -1116,7 +1116,7 @@ function minilesson_output_fragment_aigen_contextform($args)
     $formurl = new moodle_url($args->url, [
         'id' => $formdata['id'],
         'action' => $formdata['action'],
-        'templateid' => $formdata['templateid']
+        'templateid' => $formdata['templateid'],
     ]);
 
     $form = new aigen_contextform($formurl, null, 'post', '', null, true, $formdata);
@@ -1136,3 +1136,56 @@ function mod_minilesson_output_fragment_ai_prompt($args)
     $configname = $itemtype . '_' . $prompttype . 'prompt_' . $promptid;
     return get_config(constants::M_COMPONENT, $configname);
 }
+
+function minilesson_output_fragment_preview_slides($args)
+{
+    global $CFG, $OUTPUT;
+    require_once($CFG->libdir . '/externallib.php');
+    $formdata = [];
+    $args = (object) $args;
+    parse_str($args->formdata, $formdata);
+
+    $imageserveurl = moodle_url::make_draftfile_url(
+        $formdata[constants::FILEANSWER . '1'],
+        '/',
+        '{filename}'
+    );
+
+    $testitem = new stdClass();
+    $testitem->inajax = AJAX_SCRIPT;
+    $testitem->slidesmarkdown = preg_replace_callback(
+        '/!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/',
+        function ($matches) use ($imageserveurl) {
+            $filename = trim($matches['filename']);
+
+            // Skip if it's already a full URL (http/https)
+            if (preg_match('/^https?:\/\//', $filename)) {
+                return $matches[0];
+            }
+
+            // Add base path (and escape spaces if needed)
+            $new_src = str_replace('{filename}', rawurlencode($filename), urldecode($imageserveurl));
+
+            // Replace only the filename part
+            return str_replace($filename, $new_src, $matches[0]);
+        },
+        $formdata[constants::SLIDES_MARKDOWN]
+    );
+
+    $testitem->selectedtheme = $formdata[constants::SLIDETHEME];
+    $testitem->selectedfontsize = $formdata[constants::SLIDEFONTSIZE];
+
+    return $OUTPUT->render_from_template(constants::M_COMPONENT . '/slidesinner', $testitem);
+}
+
+function minilesson_output_fragment_templates($args)
+{
+    global $DB, $OUTPUT;
+    $args = (object) $args;
+    require_capability('mod/minilesson:canuseaigen', $args->context);
+    $cm = $DB->get_record('course_modules', ['id' => $args->context->instanceid], '*', MUST_EXIST);
+    $filters = !empty($args->filters) ? json_decode($args->filters, true): [];
+    $renderable = new mod_minilesson\output\aigentemplates($cm, $filters);
+    return $OUTPUT->render($renderable);
+}
+

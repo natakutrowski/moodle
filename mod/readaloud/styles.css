@@ -128,6 +128,12 @@ span.mod_readaloud_debugsequence {
   margin-right: auto;
 }
 
+
+.mod_readaloud_passage_cont span{
+  font-size: 1.4em;
+  color:rgb(20, 20, 20) !important;
+}
+
 .mod_readaloud_grading_action_cont {
   border-style: double;
   padding: 3px;

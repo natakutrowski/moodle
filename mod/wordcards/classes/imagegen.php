@@ -30,7 +30,7 @@ use mod_wordcards\utils;
  */
 class imagegen {
 
-    protected const DEFAULT_IMAGE_PROMPT = "An image suitable for a word learning flashcard, with no text that illustrates the following [[ttslanguage]] word/phrase: [[term]] ([[[deflanguage]]] translation: [[definition]])";
+    protected const DEFAULT_IMAGE_PROMPT = "An image suitable for a word/phrase learning flashcard, with no text that illustrates the following [[ttslanguage]] word/phrase: [[term]] (with the same meaning as the [[[deflanguage]]] translation: [[definition]])";
     protected $progressbar = false;
     protected $mod = false;
     protected $moduleinstance = false;
@@ -120,7 +120,7 @@ class imagegen {
                     $fileurl = "$CFG->wwwroot/pluginfile.php/" . $this->context->id . "/mod_wordcards/image/" . $termid . $cachebuster;
                     $imageurls[] = ['termid' => $termid, 'url' => $fileurl];
                    // Update the database to indicate that this term has an image.
-                    $DB->update_record('wordcards_terms', ['id' => $termid, 'image' => 1]);
+                    $DB->update_record(constants::M_TERMSTABLE, ['id' => $termid, 'image' => 1, 'imageversion' => time()]);
                 }
             } else {
                 $secondattempt_requests[] =  $requests[$i];
@@ -141,7 +141,7 @@ class imagegen {
                         $fileurl = "$CFG->wwwroot/pluginfile.php/" . $this->context->id . "/mod_wordcards/image/" . $termid . $cachebuster;
                         $imageurls[] = ['termid' => $termid, 'url' => $fileurl];
                         // Update the database to indicate that this term has an image.
-                        $DB->update_record('wordcards_terms', ['id' => $termid, 'image' => 1]);
+                        $DB->update_record(constants::M_TERMSTABLE, ['id' => $termid, 'image' => 1, 'imageversion' => time()]);
                     }
                 }
             }

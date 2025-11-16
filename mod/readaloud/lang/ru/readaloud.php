@@ -676,3 +676,10 @@ $string['completiondetail:allsteps'] = 'Выполните все шаги ак�
 $string['completionallsteps_help'] = 'Активность считается завершённой, когда все шаги выполнены.';
 $string['completiondetail:mingrade'] = 'Завершить, когда достигнута минимальная оценка';
 $string['mingrade_help'] = 'Активность считается завершённой, когда достигнута минимальная требуемая оценка.';
+
+//$string['attemptsbyuserheading'] = 'Отчёт по попыткам пользователя';
+//$string['gradenowtitle'] = 'Оценивание: {$a}';
+//$string['mingradedetails'] = 'Минимальный процент оценки Read Aloud, необходимый для «завершения» этой активности.';
+//$string['dospotcheck'] = 'Выборочная проверка';
+//$string['doaigrade'] = 'Оценка ИИ';
+//$string['feedbackheader'] = 'Завершено';

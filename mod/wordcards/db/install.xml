@@ -51,6 +51,7 @@
         <FIELD NAME="learnpoint" TYPE="int" LENGTH="10" NOTNULL="true"  DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="freemodeoptions" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Free mode options"/>
         <FIELD NAME="showlangchooser" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="imageonfront" TYPE="int" LENGTH="2" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="show images on front of card"/>
         <FIELD NAME="masterinstance" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
@@ -77,6 +78,9 @@
         <FIELD NAME="deleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="phonetic" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Phonetic"/>
         <FIELD NAME="phoneticms" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Phonetic"/>
+        <FIELD NAME="imageversion" TYPE="int" LENGTH="10" NOTNULL="true"  DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="audioversion" TYPE="int" LENGTH="10" NOTNULL="true"  DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="modelaudioversion" TYPE="int" LENGTH="10" NOTNULL="true"  DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

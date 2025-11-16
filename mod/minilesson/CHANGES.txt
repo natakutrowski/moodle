@@ -1,3 +1,14 @@
+Version 1.1.13 (Build 2025110402)
+- Changes to WordShuffle and AI Generate templates
+
+Version 1.1.12 (Build 2025110401)
+- Small changes to AI generate template to remove stray cats and dogs
+
+Version 1.1.11 (Build 2025110302)
+- fix for broken refresh token link
+- increase memory limit during import
+- added slides item type
+
 Version 1.1.10 (Build 2025100500)
 - Fix for failing grade and feedback on AI Chat
 - Improvements for new activity chooser (Moodle 5.1)

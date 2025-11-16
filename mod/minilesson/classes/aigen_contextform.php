@@ -43,6 +43,13 @@ class aigen_contextform extends moodleform {
         if (!isset($thetemplate['config']) || !isset($thetemplate['config']->fieldmappings)) {
             throw new moodle_exception('Invalid template structure', constants::M_COMPONENT);
         }
+
+        // Add the template introduction.
+        if (!empty($thetemplate['description'])) {
+            $mform->addElement('static', 'template_intro', '', format_text($thetemplate['description']));
+        }
+
+        // Add fields based on template config.
         $mappings = $thetemplate['config']->fieldmappings;
         foreach($mappings as $fieldname => $fieldmapping) {
             if (!empty($fieldmapping->enabled)) {
@@ -85,17 +92,10 @@ class aigen_contextform extends moodleform {
             }
 
             if ($action == self::AIGEN_SUBMIT && !empty($moduleinstance)) {
-                // Sample Data -  will beoverwritten by form submission
-                $contextdata = [
-                    'target_language' => $moduleinstance->ttslanguage,
-                    'user_topic' => 'A dog and a cat',
-                    'user_level' => 'CEFR A2',
-                    'user_text' => 'On my way to school I met a dog. We became friends. But he met a cat and ran after it. Was he my friend?',
-                    'user_keywords' => 'dog' . PHP_EOL . 'cat' . PHP_EOL . ' school',
-                    'user_customdata1' => 'French',
-                    'user_customdata2' => '',
-                    'user_customdata3' => '',
-                ];
+                // User custom data.
+                // Fields like user_topic, user_level, user_text, user_keywords, user_customdata1...n
+                // These are the fields that the user will type into the form and later we include in the prompt
+                $contextdata = utils::fetch_usercontext_fields($moduleinstance->ttslanguage);
 
                 foreach (aigen_form::mappings() as $fieldname) {
                     if (isset($formdata->{$fieldname})) {

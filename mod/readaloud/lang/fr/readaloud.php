@@ -109,7 +109,6 @@ $string['timelimit'] = 'Limite de temps';
 $string['gotnosound'] = 'Nous ne vous entendons pas. Veuillez vérifier les permissions et les réglages du microphone et essayer à nouveau.';
 $string['done'] = 'Terminé';
 $string['processing'] = 'Traitement';
-//$string['feedbackheader'] = 'Terminé';
 $string['beginreading'] = 'Commencer la lecture';
 $string['errorheader'] = 'Erreur';
 $string['uploadconverterror'] = "Une erreur est survenue lors de l'envoi de votre fichier au serveur. Votre soumission n'a PAS été reçue. Veuillez rafraîchir la page et essayer à nouveau.";
@@ -677,3 +676,11 @@ $string['completiondetail:allsteps'] = 'Terminez toutes les étapes de l’activ
 $string['completionallsteps_help'] = 'L’activité est considérée comme terminée lorsque toutes les étapes sont complétées.';
 $string['completiondetail:mingrade'] = 'Terminer lorsque la note minimale est atteinte';
 $string['mingrade_help'] = 'L’activité est considérée comme terminée lorsque la note minimale requise est atteinte.';
+
+
+//$string['attemptsbyuserheading'] = 'Rapport des tentatives de l’utilisateur';
+//$string['gradenowtitle'] = 'Évaluation : {$a}';
+//$string['mingradedetails'] = 'La note minimale (%) pour Read Aloud requise pour « terminer » cette activité.';
+//$string['dospotcheck'] = 'Contrôle ponctuel';
+//$string['doaigrade'] = 'Évaluation par l’IA';
+//$string['feedbackheader'] = 'Terminé';

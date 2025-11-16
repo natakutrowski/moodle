@@ -289,6 +289,16 @@ class aigen_form extends \moodleform
             $mform->applyFilter('uniqueid', 'trim');
         }
 
+        $predefinedoptions = template_tag_manager::get_predefined_tags();
+        $predefinedoptions = array_combine($predefinedoptions, $predefinedoptions);
+        $mform->addElement(
+            'autocomplete',
+            'tags',
+            get_string('templatetags', constants::M_COMPONENT),
+            $predefinedoptions,
+            'multiple'
+        );
+
         $mform->addElement('text', 'version', get_string('version', constants::M_COMPONENT));
         $mform->setType('version', PARAM_INT);
         $mform->addRule('version',  get_string('required'), 'required');
@@ -301,6 +311,8 @@ class aigen_form extends \moodleform
     public function set_data_for_dynamic_submission()
     {
         global $DB, $USER;
+        $fs = get_file_storage();
+
         $formdata = [
             'id' => $this->optional_param('id', null, PARAM_INT),
             'templateid' => $this->optional_param('templateid', 0, PARAM_INT),
@@ -323,16 +335,16 @@ class aigen_form extends \moodleform
             if (empty($formdata['importjson'])) {
                 $draftitemid = file_get_unused_draft_itemid();
                 $usercontext = context_user::instance($USER->id);
-                $file_record = [
+                $filerecord = [
                     'contextid' => $usercontext->id,
                     'component' => 'user',
                     'filearea' => 'draft',
                     'itemid' => $draftitemid,
                     'filepath' => '/',
-                    'filename' => 'template.json'
+                    'filename' => 'template.json',
                 ];
-                $this->_customdata['jsonfile'] = get_file_storage()
-                    ->create_file_from_string($file_record, $template->template);
+                $jsonfile = $fs->create_file_from_string($filerecord, $template->template);
+                $this->_customdata['jsonfile'] = $jsonfile;
                 $formdata['importjson'] = $draftitemid;
             }
             $jsonconfig = json_decode($template->config);
@@ -348,6 +360,9 @@ class aigen_form extends \moodleform
                     ];
                 }
             }
+
+            $tabobjects = template_tag_manager::get_current_tags($template->id);
+            $formdata['tags'] = array_column($tabobjects, 'tagname');
         }
         $this->set_data($formdata);
     }
@@ -357,6 +372,7 @@ class aigen_form extends \moodleform
         global $DB;
         if (!$this->is_cancelled() && $this->is_submitted() && $this->is_validated()) {
             $formdata = $this->get_data();
+            $tags = !empty($formdata->tags) ? $formdata->tags: [];
 
             $template = $DB->get_record('minilesson_templates', ['id' => $formdata->templateid]);
             if (!$template) {
@@ -414,7 +430,7 @@ class aigen_form extends \moodleform
                         }
                     }
                 }
-                // Encod the template
+                // Encode the template.
                 $template->template = json_encode($jsontemplate, JSON_PRETTY_PRINT);
             }
 
@@ -424,6 +440,8 @@ class aigen_form extends \moodleform
             } else {
                 $template->id = $DB->insert_record('minilesson_templates', $template);
             }
+
+            template_tag_manager::store_template_tags($template, $tags);
 
             return $template;
         }
@@ -449,15 +467,9 @@ class aigen_form extends \moodleform
 
     public static function mappings()
     {
-        $availablecontext = [];
-        $availablecontext[] = 'target_language'; // Data from the activity settings, language is required
-        $availablecontext[] = 'user_topic'; // Sample data that the user might provide. eg "Your plan for the weekend"
-        $availablecontext[] = 'user_level'; // Sample data that the user might provide. eg "A1" or "Intermediate"
-        $availablecontext[] = 'user_text'; // Sample data that the user might provide. eg " One fine day I decided .."
-        $availablecontext[] = 'user_keywords'; // Sample data that the user might provide. eg "big dog, cat, mouse, eat a horse"
-        $availablecontext[] = 'user_customdata1'; // Sample data that the user might provide.
-        $availablecontext[] = 'user_customdata2'; // Sample data that the user might provide.
-        $availablecontext[] = 'user_customdata3'; // Sample data that the user might provide.
+        // This will return a 1D list of field names, eg 'user_topic', 'user_level', 'user_text', etc.
+        $contextdata = utils::fetch_usercontext_fields();
+        $availablecontext = array_keys($contextdata);
         return $availablecontext;
     }
 

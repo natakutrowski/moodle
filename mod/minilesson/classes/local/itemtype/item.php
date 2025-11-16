@@ -166,8 +166,8 @@ abstract class item implements templatable, renderable
         $keycolumns = [];
         $keycolumns['type'] = ['type' => 'string', 'optional' => false, 'default' => '', 'dbname' => 'type'];
 
-        //this is a special case. We don't store the media file(s) in the db or even the draft id. We just put it in the files area.
-        //there could be more than one. ie an audio, a video and a picture.
+        // This is a special case. We don't store the media file(s) in the db or even the draft id. We just put it in the files area.
+        // There could be more than one. ie an audio, a video and a picture.
         $keycolumns[constants::MEDIAQUESTION] = ['type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
         $keycolumns[constants::AUDIOSTORY] = ['type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
 
@@ -767,7 +767,7 @@ abstract class item implements templatable, renderable
     {
         global $DB;
         $mediaurls = [];
-        //file area to fetch from, eg "customfile2_image" or "fileanswer1_audio"
+        // File area to fetch from, eg "customfile2_image" or "fileanswer1_audio".
         $filearea = constants::FILEANSWER . $sentencefieldindex . '_' . $mediatype;
         if (isset($this->itemrecord->id) && !empty($this->itemrecord->id)) {
             $itemid = $this->itemrecord->id;
@@ -842,7 +842,7 @@ abstract class item implements templatable, renderable
             if (isset($customsentenceaudio[$sentence->indexplusone])) {
                 $sentence->audiourl = $customsentenceaudio[$sentence->indexplusone];
             } else {
-                //if we have no custom audio then we use the polly audio
+                // If we have no custom audio then we use the polly audio.
                 $sentence->audiourl = utils::fetch_polly_url(
                     $this->token,
                     $this->region,
@@ -917,6 +917,7 @@ abstract class item implements templatable, renderable
             $arr = explode('|', utils::super_trim($sentence));
             $sentence = utils::super_trim($arr[0] ?? '');
             $definition = utils::super_trim($arr[1] ?? '');
+            $extra = utils::super_trim($arr[2] ?? '');
             if (empty($sentence)) {
                 continue;
             }
@@ -924,7 +925,10 @@ abstract class item implements templatable, renderable
             $parsedstring = [];
             $started = false;
             $words = explode(' ', $sentence);
-            $maskedwords = $gapwords = [];
+            $maskedwords = $gapwords = $extrawords = [];
+            if (utils::super_trim($extra) !== '') {
+                $extrawords = explode(' ', $extra);
+            }
             $gaprunning = false;
             $gapindex = 0;
             foreach ($words as $index => $word) {
@@ -936,12 +940,12 @@ abstract class item implements templatable, renderable
                     $gapwords[] = [
                         'index' => $gapindex++,
                         'isgap' => true,
-                        'word' => str_replace(['[', ']', ',', '.'], ['', '', '', ''], $word)
+                        'word' => str_replace(['[', ']', ',', '.'], ['', '', '', ''], $word),
                     ];
                 } else {
                     $gapwords[] = [
                         'isgap' => false,
-                        'word' => $word
+                        'word' => $word,
                     ];
                 }
             }
@@ -989,6 +993,7 @@ abstract class item implements templatable, renderable
             $s->imageurl = isset($sentenceimages[$s->indexplusone]) ? $sentenceimages[$s->indexplusone] : false;
             $s->words = $maskedwords;
             $s->gapwords = $gapwords;
+            $s->extrawords = $extrawords;
 
             $sentenceobjects[] = $s;
         }

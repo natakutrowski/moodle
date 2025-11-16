@@ -4489,6 +4489,29 @@ div.poodlldictationplayer {
   cursor: pointer;
 }
 
+/* Subtle drag feedback for words being dragged */
+.wordshuffle_wordset_container .word[draggable="true"] {
+  cursor: grab;
+}
+.wordshuffle_wordset_container .word.ml_ws_dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transform: translateZ(0); /* promote layer for smoother dragging */
+}
+
+/* Keyboard focus outline for interactive areas */
+.wordshuffle_wordset_container .drop-slot:focus,
+.wordshuffle_wordset_container .bank:focus,
+.wordshuffle_wordset_container .word:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.wordshuffle_wordset_container .badge {
+    font-size: 100%;
+}
+
 @keyframes shake-horizontal {
     2% {
         transform: translate(8px, 0) rotate(0)
@@ -5067,6 +5090,62 @@ span.fluencyphoneme.letter_wrong {
   padding-right: 20px !important;
 }
 
+#page-mod-minilesson-lessonbank #fgroup_id_searchgroup {
+  background-color: #eee;
+  padding: 15px;
+  margin: 0;
+}
+#page-mod-minilesson-lessonbank #advancesearch {
+  padding: 15px;
+  background-color: #eee;
+}
+#page-mod-minilesson-lessonbank #advancesearch #fitem_id_level{
+  padding: 0 15px;
+}
+#page-mod-minilesson-lessonbank #fgroup_id_searchgroup .col-md-3,
+#page-mod-minilesson-lessonbank #advancesearch #fitem_id_level .col-md-3 {
+  max-width: 100px;
+}
+
+#page-mod-minilesson-lessonbank .searchbox .itemcontainer {
+  padding: 10px 0;
+  margin: 0;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  flex: 1;
+}
+
+#page-mod-minilesson-lessonbank [data-region="cards-container"] {
+  min-height: 100px;
+}
+
+#page-mod-minilesson-lessonbank [data-region="cards-container"] p {
+  margin-bottom: 0.2rem;
+}
+
+#page-mod-minilesson-lessonbank [data-region="cards-container"] [data-action="showtext"] {
+  background-color: transparent;
+  border: none;
+  color: #1177d1;
+  box-shadow: none;
+}
+
+#page-mod-minilesson-lessonbank .searchbox  [data-region="itemcard"] {
+  max-width: calc(50% - 2px);
+  margin-top: 2px;
+  margin-bottom: 2px;
+  display: flex;
+  flex-direction: column;
+}
+
+#page-mod-minilesson-lessonbank .searchbox  [data-region="itemcard"] [data-region="image"] {
+  gap: 3px;
+}
+
+#page-mod-minilesson-lessonbank [data-for="page-activity-header"] {
+  display: none;
+}
+
 @media only screen and (max-width: 768px) {
   .mod_minilesson_qpanel .mobileviewtype {
     display: block;
@@ -5075,4 +5154,64 @@ span.fluencyphoneme.letter_wrong {
   .mod_minilesson_qpanel .itemtypename {
     display: none;
   }
+}
+
+/* Container for the embedded slideshow */
+.minilesson-slides-container {
+  position: relative;
+  width: 80%;
+  max-width: 800px;
+  height: 450px;
+  margin: 30px auto;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.minilesson-slides-preview-modal .minilesson-slides-container {
+  width: 100%;
+  max-width: unset;
+  margin: 0;
+}
+
+.minilesson-slides-container .reveal {
+  /* font-size: 2em; */   /* increase from default 1em to 2em */
+  line-height: 1.4;   /* optional: increase line spacing for readability */
+  height: 100%;
+}
+
+/* Only capture pointer events on slides */
+.minilesson-slides-container .reveal .slides {
+  pointer-events: auto;
+}
+
+.minilesson-slides-container .reveal .slides img {
+  max-height: 60vh;
+}
+
+/* This prevents 2 short widthlists from being displayed in columns */
+.minilesson-slides-container .reveal section > ul,
+.minilesson-slides-container .reveal section > ol {
+  display: block;
+  width: 100%;
+}
+
+/* Interaction lock styling for wordshuffle: fade and disable pointer events */
+.wordshuffle_wordset_container.ml-ws-locked .word,
+.wordshuffle_wordset_container.ml-ws-locked .drop-slot,
+.wordshuffle_wordset_container.ml-ws-locked .word-bank {
+  pointer-events: none !important;
+  opacity: 0.6;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.mcchoiceswrapper.multichoice_twocolumnlayout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.multichoice_twocolumnlayout .mcplayrow {
+  margin-bottom: 0;
 }

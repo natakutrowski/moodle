@@ -23,6 +23,7 @@
 
 namespace mod_minilesson\output;
 
+use core_collator;
 use html_writer;
 use mod_minilesson\aigen_contextform;
 use mod_minilesson\constants;
@@ -347,18 +348,25 @@ class renderer extends \plugin_renderer_base
                     $correctanswers = [];
                     $incorrectanswers = [];
                     $correctindex = $quizdata[$result->index]->correctanswer;
-                    for ($i = 1; $i < 5; $i++) {
-                        if (!isset($quizdata[$result->index]->{"customtext" . $i})) {
-                            continue;
-                        }
-                        if ($i == $correctindex) {
-                            $correctanswers[] = ['sentence' => $quizdata[$result->index]->{"customtext" . $i}];
+
+                    foreach ($quizdata[$result->index]->sentences as $sentance) {
+                        if ($correctindex == $sentance->indexplusone) {
+                            $correctanswers[] = $sentance->sentence;
                         } else {
-                            $incorrectanswers[] = ['sentence' => $quizdata[$result->index]->{"customtext" . $i}];
+                            $incorrectanswers[] = $sentance->sentence;
                         }
                     }
-                    $result->correctans = $correctanswers;
-                    $result->incorrectans = $incorrectanswers;
+
+                    if (count($correctanswers) == 0) {
+                        $result->hascorrectanswer = false;
+                    }
+                    if (count($incorrectanswers) == 0) {
+                        $result->hasincorrectanswer = false;
+                    }
+
+
+                    $result->correctans = ['sentence' => join(' ', $correctanswers)];
+                    $result->incorrectans = ['sentence' => join( '<br> ', $incorrectanswers)];
                     break;
 
                 case constants::TYPE_PGAPFILL:
@@ -586,13 +594,13 @@ class renderer extends \plugin_renderer_base
             // $this->page->requires->js_call_amd(constants::M_COMPONENT . '/' . $item->type, 'init', array($item));
         }
 
-        $finisheddiv = \html_writer::div(
+        $finisheddiv = html_writer::div(
             "",
             constants::M_QUIZ_FINISHED,
             ['id' => constants::M_QUIZ_FINISHED]
         );
 
-        $placeholderdiv = \html_writer::div(
+        $placeholderdiv = html_writer::div(
             '',
             constants::M_QUIZ_PLACEHOLDER . ' ' . constants::M_QUIZ_SKELETONBOX,
             ['id' => constants::M_QUIZ_PLACEHOLDER]
@@ -603,7 +611,7 @@ class renderer extends \plugin_renderer_base
         if (!empty($moduleinstance->lessonfont)) {
             $quizattributes['style'] = "font-family: '$moduleinstance->lessonfont', serif;";
         }
-        $quizdiv = \html_writer::div($finisheddiv . implode('', $itemshtml), $quizclass, $quizattributes);
+        $quizdiv = html_writer::div($finisheddiv . implode('', $itemshtml), $quizclass, $quizattributes);
 
         $ret = $placeholderdiv . $quizdiv;
         return $ret;
@@ -624,7 +632,7 @@ class renderer extends \plugin_renderer_base
             }
         }
 
-        $quizdiv = \html_writer::div(
+        $quizdiv = html_writer::div(
             implode('', $itemshtml),
             constants::M_QUIZ_CONTAINER,
             ['id' => constants::M_QUIZ_CONTAINER]
@@ -639,10 +647,10 @@ class renderer extends \plugin_renderer_base
      */
     public function show_progress($minilesson, $cm)
     {
-        $hider = \html_writer::div('', constants::M_HIDER, ['id' => constants::M_HIDER]);
-        $message = \html_writer::tag('h4', get_string('processing', constants::M_COMPONENT), []);
-        $spinner = \html_writer::tag('i', '', ['class' => 'fa fa-spinner fa-5x fa-spin']);
-        $progressdiv = \html_writer::div(
+        $hider = html_writer::div('', constants::M_HIDER, ['id' => constants::M_HIDER]);
+        $message = html_writer::tag('h4', get_string('processing', constants::M_COMPONENT), []);
+        $spinner = html_writer::tag('i', '', ['class' => 'fa fa-spinner fa-5x fa-spin']);
+        $progressdiv = html_writer::div(
             $message . $spinner,
             constants::M_PROGRESS_CONTAINER,
             ['id' => constants::M_PROGRESS_CONTAINER]
@@ -824,7 +832,7 @@ class renderer extends \plugin_renderer_base
         global $DB;
         $cm = get_coursemodule_from_id(constants::M_MODNAME, $cmid, 0, false, MUST_EXIST);
         $moduleinstance = $DB->get_record(constants::M_TABLE, ['id' => $cm->instance], '*', MUST_EXIST);
-        $comptest = new \mod_minilesson\comprehensiontest($cm);
+        $comptest = new comprehensiontest($cm);
         $previewid = 0;
         $embed = 1;
         $canattempt = true;
@@ -858,44 +866,24 @@ class renderer extends \plugin_renderer_base
         return $ret;
     }
 
-    public function aigen_buttons_menu($cm, $lessontemplates, $tableuniqueid)
+    public function aigen_buttons_menu($cm, $tableuniqueid, $filtertags = [])
     {
 
-        // Generate and return menu
-        $buttondata = [];
-        foreach ($lessontemplates as $templateid => $lessontemplate) {
-            $templatecount = count($lessontemplate['template']->items);
-            // If we have lang strings we use them here
-            if(array_key_exists($lessontemplate['config']->uniqueid,\mod_minilesson\AIGEN::DEFAULTTEMPLATES)){
-                $templateshortname = \mod_minilesson\AIGEN::DEFAULTTEMPLATES[$lessontemplate['config']->uniqueid];
-                $templatetitle = get_string("aigentemplatename:" . $templateshortname, constants::M_COMPONENT);
-                $templatedescription = get_string("aigentemplatedescription:" . $templateshortname, constants::M_COMPONENT);
-            } else {
-                $templatetitle = $lessontemplate['config']->lessonTitle;
-                $templatedescription = $lessontemplate['config']->lessonDescription;
-            }
+        $withlabels = true;
+        $tags = aigentemplates::get_alltags($withlabels);
 
-            $thebutton = new \single_button(
-                new \moodle_url(
-                    constants::M_URL . '/aigen.php',
-                    ['id' => $cm->id, 'action' => aigen_contextform::AIGEN_SUBMIT, 'templateid' => $templateid]
-                ),
-                get_string('aigen', constants::M_COMPONENT)
-            );
-            $buttondata[] = [
-                'templateid' => $templateid,
-                'title' => $templatetitle,
-                'description' => $templatedescription,
-                'itemcount' => $templatecount,
-                'thebutton' => $this->render($thebutton)
-            ];
-        }
-        ;
+       // core_collator::asort($tags);
+       // $tags = array_values($tags);
 
+        $renderable = new aigentemplates($cm, $filtertags);
 
-        $ret = $this->output->render_from_template(constants::M_COMPONENT . '/aigenbuttonsmenu', [
-            'buttons' => $buttondata, 'tableuniqueid' => $tableuniqueid
-        ]);
+        $templatecontext = [
+            'tableuniqueid' => $tableuniqueid,
+            'tags' => $tags,
+            'aigentemplates' => $renderable->export_for_template($this),
+        ];
+
+        $ret = $this->output->render_from_template(constants::M_COMPONENT . '/aigenbuttonsmenu', $templatecontext);
 
         return $ret;
     }
@@ -974,7 +962,7 @@ class renderer extends \plugin_renderer_base
             $templateitems[] = [
                 'title' => get_string($pushthing, constants::M_COMPONENT),
                 'description' => get_string($pushthing . '_details', constants::M_COMPONENT),
-                'content' => $this->render($thepushbutton)
+                'content' => $this->render($thepushbutton),
             ];
         }
 

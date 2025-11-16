@@ -330,12 +330,12 @@ class mod_wordcards_module
         global $CFG;
         foreach ($terms as $term) {
             $contextid = false;
-            $cachebuster = '?cb=' . \html_writer::random_id();
             if ($term->image) {
                 if (!$contextid) {
                     $thecm = get_coursemodule_from_instance('wordcards', $term->modid, 0, false, MUST_EXIST);
                     $contextid = context_module::instance($thecm->id)->id;
                 }
+                $cachebuster = '?cb=' . $term->imageversion;
                 $term->image = "$CFG->wwwroot/pluginfile.php/$contextid/mod_wordcards/image/$term->id" . $cachebuster;
             }
             if ($term->audio) {
@@ -343,7 +343,8 @@ class mod_wordcards_module
                     $thecm = get_coursemodule_from_instance('wordcards', $term->modid, 0, false, MUST_EXIST);
                     $contextid = context_module::instance($thecm->id)->id;
                 }
-                $term->audio = "$CFG->wwwroot/pluginfile.php/$contextid/mod_wordcards/audio/$term->id  . $cachebuster";
+                $cachebuster = '?cb=' . $term->audioversion;
+                $term->audio = "$CFG->wwwroot/pluginfile.php/$contextid/mod_wordcards/audio/$term->id"  . $cachebuster;
             }
 
             if ($term->model_sentence_audio) {
@@ -351,8 +352,8 @@ class mod_wordcards_module
                     $thecm = get_coursemodule_from_instance('wordcards', $term->modid, 0, false, MUST_EXIST);
                     $contextid = context_module::instance($thecm->id)->id;
                 }
-
-                $term->model_sentence_audio = "$CFG->wwwroot/pluginfile.php/$contextid/mod_wordcards/model_sentence_audio/$term->id  . $cachebuster";
+                $cachebuster = '?cb=' . $term->modelaudioversion;
+                $term->model_sentence_audio = "$CFG->wwwroot/pluginfile.php/$contextid/mod_wordcards/model_sentence_audio/$term->id"  . $cachebuster;
             }
         }
         return $terms;
@@ -361,15 +362,18 @@ class mod_wordcards_module
     /*
      * If there is a need we can run format_string over the definition
      */
-
     public static function format_defs($terms)
     {
         global $CFG;
         foreach ($terms as $def) {
-            // lets not double up
+            // If it is not already formatted, format it.
             if (strpos($def->definition, '<div class="text_to_html">') !== 0) {
                 $def->definition = format_text($def->definition);
             }
+            // And then add a class for styling.
+            $def->definition = str_replace( '<div class="text_to_html">',
+                '<div class="term-definition text_to_html">',
+                $def->definition);
         }
         return $terms;
     }
@@ -471,6 +475,7 @@ class mod_wordcards_module
             }
             shuffle($records);
             $records = self::insert_media_urls($records);
+            $records = $this->update_userpref_defs($records);
             $records = self::format_defs($records);
             return $records;
         }
@@ -561,10 +566,12 @@ class mod_wordcards_module
         if ($maxterms > 0) {
             $selectedrecords = array_slice($records, 0, $maxterms);
             $selectedrecords = self::insert_media_urls($selectedrecords);
+            $selectedrecords = $this->update_userpref_defs($selectedrecords);
             $selectedrecords = self::format_defs($selectedrecords);
             return $selectedrecords;
         } else {
             $records = self::insert_media_urls($records);
+            $records = $this->update_userpref_defs($records);
             $records = self::format_defs($records);
             return $records;
         }
@@ -698,7 +705,7 @@ class mod_wordcards_module
         if (!$includedeleted) {
             $params['deleted'] = 0;
         }
-        $terms = $DB->get_records('wordcards_terms', $params, 'id ASC');
+        $terms = $DB->get_records(constants::M_TERMSTABLE, $params, 'id ASC');
         return $terms;
     }
     public function get_terms($includedeleted = false)
@@ -708,7 +715,7 @@ class mod_wordcards_module
         if (!$includedeleted) {
             $params['deleted'] = 0;
         }
-        $terms = $DB->get_records('wordcards_terms', $params, 'id ASC');
+        $terms = $DB->get_records(constants::M_TERMSTABLE, $params, 'id ASC');
         if ($terms) {
             $terms = self::insert_media_urls($terms);
             $terms = $this->update_userpref_defs($terms);
@@ -754,7 +761,7 @@ class mod_wordcards_module
         if (!$includedeleted) {
             $params['deleted'] = 0;
         }
-        $termcount = $DB->count_records('wordcards_terms', $params);
+        $termcount = $DB->count_records(constants::M_TERMSTABLE, $params);
         return $termcount;
     }
 
@@ -848,7 +855,7 @@ class mod_wordcards_module
     public function has_terms()
     {
         global $DB;
-        return $DB->record_exists('wordcards_terms', ['modid' => $this->get_id()]);
+        return $DB->record_exists(constants::M_TERMSTABLE, ['modid' => $this->get_id()]);
     }
 
     public function has_user_finished_latest_attempt()
@@ -891,7 +898,7 @@ class mod_wordcards_module
                     ON a.termid = t.id
                  WHERE a.userid = ?
                    AND t.modid = ?
-                   AND t.deleted = 0
+                   AND t.deleted = 0  
                    AND a.successcount >= ?";
 
         $learned = $DB->get_records_sql($sql, [$userid, $this->get_id(), $this->mod->learnpoint]);
@@ -1002,6 +1009,15 @@ class mod_wordcards_module
             $theevent = \mod_wordcards\event\word_learned::create_from_term($term, $this->context, $record);
             $theevent->trigger();
         }
+
+        // Notify the completion API. if completion on words learned is enabled
+        if ($this->is_completion_enabled()) {
+            $completion = new completion_info($this->get_course());
+            if ($completion->is_enabled($this->get_cm()) && !empty($this->mod->completionwhenlearned) && $this->has_user_learned_all_terms()) {
+                $completion->update_state($this->get_cm(), COMPLETION_COMPLETE);
+            }
+        }
+
     }
 
     public function resume_progress($currentstate)
@@ -1326,7 +1342,7 @@ class mod_wordcards_module
     {
         global $DB;
         // fetch terms to return as csv
-        $terms = $DB->get_records('wordcards_terms', ['modid' => $this->mod->id, 'deleted' => 0], 'id ASC');
+        $terms = $DB->get_records(constants::M_TERMSTABLE, ['modid' => $this->mod->id, 'deleted' => 0], 'id ASC');
         if (!$terms) {
             return '';
         }

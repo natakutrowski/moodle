@@ -130,6 +130,7 @@ class constants
     const TYPE_AUDIOCHAT = 'audiochat';
     const TYPE_WORDSHUFFLE = 'wordshuffle';
     const TYPE_SCATTER = 'scatter';
+    const TYPE_SLIDES = 'slides';
 
     const AUDIOSTORYMETA = 'itemaudiofname';
     const AUDIOSTORYZOOMANDPAN = 'itemaudiostoryzoom';
@@ -173,6 +174,7 @@ class constants
     const TEXTANSWER = 'customtext';
     const FILEANSWER = 'customfile';
     const H5PFILE = 'customfile1';
+    const SLIDESFILES = 'customfile1';
     const CUSTOMDATA = 'customdata';
     const CUSTOMINT = 'customint';
     const POLLYVOICE = 'customtext5';
@@ -193,6 +195,8 @@ class constants
     const AUDIOCHAT_AIDATA2  = 'customdata2';
     const AUDIOCHAT_AUTORESPONSE = 'customint4';
 
+    const SLIDES_MARKDOWN = 'customtext1';
+    const SLIDES_MARKDOWN_DEFAULT = "# Slide 1 Title\n\nYour content here. Use markdown syntax to format text and add images.\n\n---\n\n# Slide 2 Title\n\nMore content here. You can add as many slides as you need.\n";
     const AUDIOCHAT_ALLOWRETRY  = 'customint5';
     const READINGPASSAGE = 'customtext1';
     const PASSAGEGAPFILL_PASSAGE = 'customtext1';
@@ -719,6 +723,7 @@ class constants
         constants::TYPE_FLUENCY,
         constants::TYPE_AUDIOCHAT,
         constants::TYPE_DICTATIONCHAT,
+        constants::TYPE_SLIDES,
       // constants::TYPE_SMARTFRAME,
       // constants::TYPE_COMPQUIZ,
       // constants::TYPE_CONVERSATION,
@@ -733,4 +738,16 @@ class constants
         'audiorecorder' => 1,
         'text' => 2
     ];
+    const MULTICHOICE_SHUFFLEANSWER = 'customint5';
+
+    const SLIDETHEME = 'customtext2';
+    const SLIDEFONTSIZE = 'customtext3';
+
+    const MULTICHOICE_HIDEANSWERTEXT = 'customint6';
+
+    const MULTICHOICE_ANSWERLAYOUT = 'customint7';
+
+    const MULTICHOICE_ANSWERLAYOUT_DEFAULT = 1;
+
+    const MULTICHOICE_ANSWERLAYOUT_TWOCOLUMN = 2;
 }

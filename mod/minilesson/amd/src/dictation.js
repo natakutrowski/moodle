@@ -120,11 +120,16 @@ define(['jquery',
 
         //update char count
         $("#"+itemdata.uniqueid+"_container .dictationplayer_"+index+"_chars").html(typed.length);
+
+        // Edit NK
+        correct = normalizeForComparison(correct);      
+        typed = normalizeForComparison(typed); 
+
         //trim punctuation before comparing, if ignore punctuation is set
-        if(itemdata.ignorepunctuation){
+        //if(itemdata.ignorepunctuation){
             correct = quizhelper.cleanText(correct);
             typed = quizhelper.cleanText(typed);
-        }
+        //}
 
         if (correct == typed) {
           $("#"+itemdata.uniqueid+"_container .dictate-feedback[data-index='" + index + "']").removeClass("fa-times").addClass("fa-check").css("color","green").show();
@@ -160,4 +165,27 @@ define(['jquery',
       });
     }
   }; //end of return value
+
+  // Improvment NK
+  function normalizeForComparison(text) {
+      return text
+          // Apostrophes → '
+          .replace(/[’‘ʼʹ′´‛]/g, "'")
+          // Tirets → -
+          .replace(/[–—‐‑‒﹘﹣－ー]/g, "-")
+          // Guillemets doubles → "
+          .replace(/[“”„‟«»]/g, '"')
+          // Guillemets simples → '
+          .replace(/[‚‘’]/g, "'")
+          // Espaces insécables → espace normal
+          .replace(/[\u00A0\u202F\u2007]/g, " ")
+          // Supprimer caractères invisibles
+          .replace(/[\u200B-\u200D\uFEFF]/g, "")
+          // Points de suspension typographiques
+          .replace(/…/g, "...")
+          // Réduction des espaces multiples
+          .replace(/\s+/g, " ")
+          // Trim
+          .trim();
+  }
 });
