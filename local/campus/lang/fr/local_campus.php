@@ -267,3 +267,17 @@ $string['trial_discount_reminder_days_desc'] =
 
 $string['phone_country_group_popular'] = 'Pays les plus fréquents';
 $string['phone_country_group_all']     = 'Tous les pays';
+
+$string['trialreport_title'] = 'Rapport des abonnements d’essai';
+$string['trialreport_col_firstname'] = 'Prénom';
+$string['trialreport_col_lastname'] = 'Nom';
+$string['trialreport_col_email'] = 'E-mail';
+$string['trialreport_col_phone'] = 'Téléphone (avec indicatif)';
+$string['trialreport_col_country'] = 'Pays';
+$string['trialreport_col_date_48h'] = 'Date : début essai + 48h';
+$string['trialreport_col_date_72h'] = 'Date : début essai + 72h';
+$string['trialreport_col_date_7d'] = 'Date : début essai + 7 j';
+$string['trialreport_col_status'] = 'Statut';
+
+$string['trialreport_export_xls'] = 'Enregistrer en XLS';
+$string['trialreport_export_csv'] = 'Enregistrer en CSV';

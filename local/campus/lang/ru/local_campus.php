@@ -241,3 +241,17 @@ $string['trial_discount_reminder_days_desc'] =
 
 $string['phone_country_group_popular'] = 'Популярные страны';
 $string['phone_country_group_all']     = 'Все страны';
+
+$string['trialreport_title'] = 'Отчёт по пробным подпискам';
+$string['trialreport_col_firstname'] = 'Имя';
+$string['trialreport_col_lastname'] = 'Фамилия';
+$string['trialreport_col_email'] = 'E-mail';
+$string['trialreport_col_phone'] = 'Телефон (с кодом страны)';
+$string['trialreport_col_country'] = 'Страна';
+$string['trialreport_col_date_48h'] = 'Дата: старт trial + 48ч';
+$string['trialreport_col_date_72h'] = 'Дата: старт trial + 72ч';
+$string['trialreport_col_date_7d'] = 'Дата: старт trial + 7 дн.';
+$string['trialreport_col_status'] = 'Статус';
+
+$string['trialreport_export_xls'] = 'Сохранить в XLS';
+$string['trialreport_export_csv'] = 'Сохранить в CSV';
