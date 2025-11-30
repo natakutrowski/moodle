@@ -401,7 +401,7 @@ class block_base {
      */
     function applicable_formats() {
         // Default case: the block can be used in courses and site index, but not in activities
-        return array('all' => true, 'mod' => false, 'tag' => false);
+        return array('all' => true, 'mod' => false, 'tag' => false, 'local-campus-*'   => true);
     }
 
 
