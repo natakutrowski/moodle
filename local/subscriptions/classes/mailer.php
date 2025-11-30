@@ -325,11 +325,13 @@ class mailer {
 
         $planname = local_subscriptions_plan_display_name($plan);
 
-        // Montant (on garde le calcul simple, tu pourras le passer à final_price_from_pr_and_sub plus tard)
+        // Montant final payé (même logique que send_receipt)
+        [$amt, $cur] = self::final_price_from_pr_and_sub($pr, $sub);
         $price = '';
-        if (isset($pr->price) && isset($pr->currency)) {
-            $price = format_float((float)$pr->price, 2).' '.strtoupper($pr->currency ?? '');
+        if ($amt !== null && $cur) {
+            $price = self::money($amt, $cur); // même helper que dans send_receipt()
         }
+
 
         // Tableau : uniquement l'identifiant (email)
         $tbl = MailRenderer::table()
