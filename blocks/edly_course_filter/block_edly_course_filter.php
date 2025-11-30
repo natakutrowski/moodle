@@ -71,6 +71,7 @@ class block_edly_course_filter extends block_base {
             'cta_connected' => (string)($this->config->cta_connected ?? 'Accéder au cours'),
             'restricted' => $restricted,
             'shape_img' => (string)($this->config->shape_img ?? ''),
+            'hide_desc' => 1,
         ]);
 
         $this->content->text = $html . $modal;

@@ -34,7 +34,20 @@ class renderer extends \plugin_renderer_base {
             'cta_connected_free'   => get_string('cta_connected', 'local_campus'),
             'restricted' => false,                        // true = visiteur / compte d’essai
             'shape_img' => '',
+
+            // Options CampusFR supplémentaires (mycourses etc.)
+            'tabs_html'      => '',
+            'progress_map'   => [],
+            'completed_ids'  => [],
+            'disabled_ids'   => [],
+            'free_ids'       => [],
+            'progress_below' => 0,
+            'hide_header'    => 0,  // 1 = ne pas afficher le header (top_title + title)
+            'hide_desc'      => 0,  // 1 = cacher "En savoir plus"            
+            'progress_counts' => [],
+
         ], $opts);
+
 
         // S’assurer d’avoir les styles du block (sélecteurs préfixés par .block_edly_course_filter)
         //$this->page->requires->css('/blocks/edly_course_filter/styles.css');
@@ -45,14 +58,25 @@ class renderer extends \plugin_renderer_base {
         $html  = '<div class="block_edly_course_filter">';
         $html .= '<div class="'.s($d->class).'"><div class="container">';
 
-        $html .= '<div class="section-title" data-aos="fade-up" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">';
-        if ($d->top_title !== '') { $html .= '<span class="sub">'.format_text($d->top_title, FORMAT_HTML, ['filter'=>true]).'</span>'; }
-        if ($d->title !== '')     { $html .= '<h2>'.format_text($d->title, FORMAT_HTML, ['filter'=>true]).'</h2>'; }
-        $html .= '</div>';
+        $hideheader = !empty($d->hide_header);
 
+        // Header (top_title + title) optionnel
+        if (!$hideheader && ($d->top_title !== '' || $d->title !== '')) {
+            $html .= '<div class="section-title" data-aos="fade-up" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">';
+            if ($d->top_title !== '') {
+                $html .= '<span class="sub">'.format_text($d->top_title, FORMAT_HTML, ['filter'=>true]).'</span>';
+            }
+            if ($d->title !== '') {
+                $html .= '<h2>'.format_text($d->title, FORMAT_HTML, ['filter'=>true]).'</h2>';
+            }
+            $html .= '</div>';
+        }
+
+        // Onglets éventuels juste sous le header (ou directement en haut si header caché)
         if (!empty($d->tabs_html)) {
             $html .= $d->tabs_html;     // Les onglets apparaissent en haut du bloc, dans le container
         }
+
 
         $html .= '<div class="row justify-content-center gx-4 gy-4">';
 
@@ -138,7 +162,6 @@ class renderer extends \plugin_renderer_base {
     }
 
     /* ---------- Helpers partagés (copie fidèle de la logique du block) ---------- */
-
     private function card_footer(int $courseid, \stdClass $d, string $descurl): string {
         // Libellés
         $desclabel = trim($d->desc_label ?? get_string('moreinfo','local_campus'));
@@ -147,20 +170,47 @@ class renderer extends \plugin_renderer_base {
         $lblGuest  = trim($d->cta_guest            ?? get_string('trial_access','theme_edly'));
         $lblFree   = trim($d->cta_connected_free   ?? get_string('cta_connected','local_campus'));
 
+        $hidedesc  = !empty($d->hide_desc);
+
         // Progression fournie par mycourses.php
         $pct = null;
         if (!empty($d->progress_map) && array_key_exists($courseid, (array)$d->progress_map)) {
-            $pct = max(0, min(100, (int)$d->progress_map[$courseid]));
+            $pct = max(0.0, min(100.0, (float)$d->progress_map[$courseid]));
         }
+
+        // Compteur X / Y pour le tooltip
+        $countDone  = null;
+        $countTotal = null;
+        if (!empty($d->progress_counts)
+            && isset($d->progress_counts[$courseid])
+            && is_array($d->progress_counts[$courseid])) {
+
+            $countDone  = (int)($d->progress_counts[$courseid]['done']  ?? 0);
+            $countTotal = (int)($d->progress_counts[$courseid]['total'] ?? 0);
+        }
+
+        $maketooltip = function(?int $done, ?int $total): string {
+            if ($done === null || $total === null || $total <= 0) {
+                return '';
+            }
+            $a = (object)['done' => $done, 'total' => $total];
+            return get_string('course_progress_ratio', 'local_campus', $a);
+        };
 
         // Etats
         $disabled    = !empty($d->disabled_ids) && in_array($courseid, (array)$d->disabled_ids, true);
         $isrestricted= !empty($d->restricted);
         $isfree      = !empty($d->free_ids) && in_array($courseid, (array)$d->free_ids, true);
 
+        // ==== WRAPPER BAS : cf-bottom (contient footer + progression) ====
+        $html  = '<div class="cf-bottom">';
+
         // Ligne boutons (toujours présente pour garder l’alignement)
-        $html  = '<div class="cf-footer d-flex align-items-center justify-content-between flex-wrap">';
-        $html .= '  <a class="btn btn-outline-dark cf-desc" href="'. s($descurl) .'">'. s($desclabel) .'</a>';
+        $html .= '<div class="cf-footer d-flex align-items-center justify-content-between flex-wrap">';
+
+        if (!$hidedesc && $desclabel !== '') {
+            $html .= '  <a class="btn btn-outline-dark cf-desc" href="'. s($descurl) .'">'. s($desclabel) .'</a>';
+        }
 
         // CTA
         if ($isrestricted) {
@@ -178,35 +228,66 @@ class renderer extends \plugin_renderer_base {
             if ($isfree) { $label = $lblFree; }
             $html .= '<a class="default-btn cf-cta" href="'. s($target) .'">'. s($label) .'</a>';
         }
-        $html .= '</div>';
+        $html .= '</div>'; // .cf-footer
 
         // Barre / placeholder sous les boutons
         if (!empty($d->progress_below)) {
-            if ($pct !== null) {
-                if ($pct >= 100) {
-                    // Pas de barre : uniquement le message de félicitations
-                    $html .= '<div class="cf-progress cf-progress-below">'
-                        . ' <div class="cf-progress-bar"><span style="width:'.$pct.'%"></span></div>'
-                        . ' <div class="cf-progress-label" style="color:#16a34a;">'.s(get_string('congrats_completed','local_campus')).'</div>'
-                        . '</div>';
-                } else {
-                    // Barre + pourcentage
-                    $html .= '<div class="cf-progress cf-progress-below">'
-                        . ' <div class="cf-progress-bar"><span style="width:'.$pct.'%"></span></div>'
-                        . ' <div class="cf-progress-label">'.$pct.'% '.get_string('completed','local_campus').'</div>'
-                        . '</div>';
-                }
-            } else {
-                // Placeholder (garde l’alignement des cartes)
+            // Cas "non commencé" : soit pas de progression connue, soit 0 %
+            if ($pct === null || $pct <= 0) {
+                $tooltip = $maketooltip($countDone, $countTotal);
+
                 $html .= '<div class="cf-progress cf-progress-below">'
-                    . ' <div class="cf-progress-bar"><span style="width:0"></span></div>'
+                    . ' <div class="cf-progress-bar"'
+                    . ($tooltip ? ' title="'.s($tooltip).'"' : '')
+                    . '><span style="width:0"></span></div>'
                     . ' <div class="cf-progress-label">'. s(get_string('course_not_started','local_campus')) .'</div>'
+                    . '</div>';
+
+            // Cas "terminé"
+            } else if ($pct >= 100) {
+                $width   = 100;
+                $tooltip = $maketooltip($countDone, $countTotal);
+
+                $html .= '<div class="cf-progress cf-progress-below">'
+                    . ' <div class="cf-progress-bar"'
+                    . ($tooltip ? ' title="'.s($tooltip).'"' : '')
+                    . '><span style="width:'.$width.'%"></span></div>'
+                    . ' <div class="cf-progress-label" style="color:#16a34a;">'
+                    . s(get_string('congrats_completed','local_campus'))
+                    . '</div>'
+                    . '</div>';
+
+            // Cas "en cours" : 0 < pct < 100, affichage en xx.y %
+            } else {
+                $raw = (float)$pct;
+                $display = round($raw, 1);
+
+                // On évite d'afficher 0.0 % ou 100.0 % pour un cours en cours
+                if ($display <= 0.0) {
+                    $display = 0.1;
+                } else if ($display >= 100.0) {
+                    $display = 99.9;
+                }
+
+                $displaystr = format_float($display, 1);
+                $tooltip    = $maketooltip($countDone, $countTotal);
+
+                $html .= '<div class="cf-progress cf-progress-below">'
+                    . ' <div class="cf-progress-bar"'
+                    . ($tooltip ? ' title="'.s($tooltip).'"' : '')
+                    . '><span style="width:'.$raw.'%"></span></div>'
+                    . ' <div class="cf-progress-label">'.$displaystr.'% '.get_string('completed','local_campus').'</div>'
                     . '</div>';
             }
         }
 
+        $html .= '</div>'; // .cf-bottom
+
         return $html;
     }
+    
+
+
     private function resolve_card_href(int $courseid, \stdClass $d): string {
         // Invité / compte d’essai : on laisse la carte inerte (le CTA gère la popup essai)
         if (!empty($d->restricted)) {

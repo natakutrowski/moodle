@@ -1,37 +1,43 @@
-/* ===== Block: Edly Course Filter — CSS clean ===== */
+/* ===== CampusFR – Block Edly Course Filter ===== */
 
-/* Cartes en colonnes (deux styles supportés) */
+/* Cartes en colonnes (styles 1 et 2) */
 .block_edly_course_filter .courses-card,
 .block_edly_course_filter .courses-box {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100%;    /* toutes les cartes même hauteur dans la rangée */
 }
 
-/* Le contenu pousse le footer en bas */
+/* Contenu = pile verticale : [top-content] ... [cf-bottom]
+   Le space-between pousse le bloc bas tout en bas de la carte. */
 .block_edly_course_filter .courses-card .courses-content,
 .block_edly_course_filter .courses-box  .courses-content {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  justify-content: space-between;
 }
 
-/* On masque ce qu’on n’utilise plus (description, icône personne, bulle prix) */
+/* On masque ce qu’on n’utilise pas (hérité du thème Edly) */
 .block_edly_course_filter .courses-card .middle-content,
-.block_edly_course_filter .courses-box .middle-content,
+.block_edly_course_filter .courses-box  .middle-content,
 .block_edly_course_filter .courses-card .top-content .info .title i,
-.block_edly_course_filter .courses-box .top-content .info .title i,
+.block_edly_course_filter .courses-box  .top-content .info .title i,
 .block_edly_course_filter .courses-card .top-content .price,
-.block_edly_course_filter .courses-box .top-content .price {
+.block_edly_course_filter .courses-box  .top-content .price {
   display: none !important;
 }
 
-/* Badge rectangulaire en haut à droite de l’image */
-.block_edly_course_filter .courses-image { position: relative; }
+/* Image + badge */
+.block_edly_course_filter .courses-image {
+  position: relative;
+}
+
 .block_edly_course_filter .cf-card-badge {
   position: absolute;
-  top: 12px; right: 12px;
+  top: 12px;
+  right: 12px;
   background: var(--optional-color);
   color: #fff;
   padding: 6px 10px;
@@ -41,125 +47,141 @@
   font-size: 14px;
 }
 
-/* Footer (rangée des boutons) — décollé des bords */
+/* Toutes les colonnes étirées à la même hauteur */
+.block_edly_course_filter .row {
+  align-items: stretch !important;
+}
+
+/* Cartes désactivées */
+.block_edly_course_filter .cf-disabled {
+  filter: grayscale(1);
+  opacity: .6;
+}
+
+.block_edly_course_filter .cf-disabled .cf-cta,
+.block_edly_course_filter .cf-disabled .courses-image a {
+  pointer-events: none;
+}
+
+.block_edly_course_filter .cf-cta.is-disabled {
+  pointer-events: none;
+  opacity: .7;
+  cursor: default;
+}
+
+/* ----- Bloc bas : footer + progression ----- */
+
+/* cf-bottom = bloc [bouton + barre + texte]
+   Collé en bas grâce au space-between de courses-content */
+.block_edly_course_filter .cf-bottom {
+  width: 100%;
+  margin-top: 0.75rem;  /* petit espace sous le rectangle titre */
+}
+
+/* Footer (rangée des boutons) */
 .block_edly_course_filter .cf-footer {
-  margin-top: auto;
-  padding: 0 14px 6px;          /* espace gauche/droite + bas */
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px 4px;
+  margin-bottom: 0.2rem;
+}
+
+/* Placeholder à gauche quand "En savoir plus" est caché */
+.block_edly_course_filter .cf-desc-placeholder {
+  flex: 1 1 auto;
 }
 
 /* Boutons compacts */
 .block_edly_course_filter .cf-footer .btn,
 .block_edly_course_filter .cf-footer .cf-cta,
 .block_edly_course_filter .default-btn.cf-cta {
-  padding: 10px 12px;
-  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  height: 40px;
+  line-height: 1;
+  font-size: 15px;
   border-radius: 8px;
-  line-height: 1.2;
+  white-space: nowrap;
 }
 
-/* Le style visuel (dégradé) du bouton .default-btn vient du thème Edly.
-   Ici on ne fait qu'assurer la compacité dans le contexte du bloc. */
-.block_edly_course_filter .default-btn.cf-cta {}
-
-/* Colonnes de la grille étirées (hauteurs égales) dans le bloc seulement */
-.block_edly_course_filter .row { align-items: stretch !important; }
-
-/* Cartes désactivées (cours visibles mais non inscrits) */
-.block_edly_course_filter .cf-disabled {
-  filter: grayscale(1); opacity: .6;
-}
-.block_edly_course_filter .cf-disabled .cf-cta,
-.block_edly_course_filter .cf-disabled .courses-image a {
-  pointer-events: none;
-}
-.block_edly_course_filter .cf-cta.is-disabled {
-  pointer-events: none; opacity: .7; cursor: default;
+/* "En savoir plus" un peu plus petit */
+.block_edly_course_filter .cf-footer .cf-desc {
+  font-size: 14px;
 }
 
-/* Progression (sous les boutons) */
+/* CTA collé à droite */
+.block_edly_course_filter .cf-footer .cf-cta {
+  margin-left: auto;
+}
+
+/* Petits écrans : on réduit légèrement */
+@media (max-width: 520px) {
+  .block_edly_course_filter .cf-footer .cf-desc {
+    padding: 0 10px;
+    font-size: 13px;
+  }
+  .block_edly_course_filter .cf-footer .cf-cta {
+    padding: 0 12px;
+    font-size: 14px;
+  }
+}
+
+/* ----- Barre de progression sous les boutons ----- */
+
 .block_edly_course_filter .cf-progress-below {
-  padding: 8px 14px 10px 14px;
+  width: 100%;
+  padding: 0 14px 4px 14px; /* moins d’air en bas */
 }
+
 .block_edly_course_filter .cf-progress-bar {
-  position: relative; height: 8px; border-radius: 999px;
-  background: rgba(0,0,0,.1); overflow: hidden;
-}
-.block_edly_course_filter .cf-progress-bar span {
-  display: block; height: 100%; width: 0;
-  background: linear-gradient(90deg, var(--primary-color,#ff2b70), var(--optional-color,#ff7a90));
+  position: relative;
+  height: 8px;
   border-radius: 999px;
+  background: rgba(0, 0, 0, .1);
+  overflow: hidden;
 }
+
+.block_edly_course_filter .cf-progress-bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--primary-color, #ff2b70),
+    var(--optional-color, #ff7a90)
+  );
+}
+
 .block_edly_course_filter .cf-progress-label {
-  margin-top: 6px; font-size: 12px; opacity: .85;
+  margin-top: 6px;
+  margin-bottom: 0;   /* pas de marge inutile en bas */
+  font-size: 12px;
+  opacity: .85;
 }
 
-/* Harmoniser la hauteur de la rangée de boutons+progression */
-.block_edly_course_filter .cf-footer { width: 100%; margin-bottom: .35rem; }
-.block_edly_course_filter .cf-footer .cf-cta { margin-left: auto; }
-.cf-progress-below { width: 100%; padding: 0 14px 10px 14px; }
-.cf-residence-link { font-size: 12px; margin-left: 6px; }
-
-
-
+/* ----- Titre de section ----- */
 
 .block_edly_course_filter .section-title {
-  margin-bottom: 0px !important;
+  margin-bottom: 0 !important;
 }
-
 
 .path-site .block_edly_course_filter .section-title {
   margin-bottom: 30px !important;
 }
 
-/* Conserver la même hauteur de rangée boutons */
-.block_edly_course_filter .cf-footer{ width:100%; min-height:48px; margin-bottom:.25rem; }
-.block_edly_course_filter .cf-footer .cf-cta{ margin-left:auto; }
-
-/* Barre sous les boutons */
-.block_edly_course_filter .cf-progress-below{ width:100%; padding:0 14px 10px 14px; }
-.block_edly_course_filter .cf-progress-bar{ position:relative;height:8px;border-radius:999px;background:rgba(0,0,0,.1);overflow:hidden; }
-.block_edly_course_filter .cf-progress-bar span{ display:block;height:100%;background:linear-gradient(90deg,#ff7a90,#ff2b70);border-radius:999px; }
-.block_edly_course_filter .cf-progress-label{ margin-top:6px;font-size:12px;opacity:.85; }
-
-/* Forcer l'alignement sur une seule ligne, y compris en mobile */
-.block_edly_course_filter .cf-footer{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap: nowrap;   /* pas de retour à la ligne */
-  gap: 8px;
-  min-height:48px;     /* hauteur cohérente */
-  width:100%;
-}
-
-/* Les deux boutons restent côte à côte et non fluides */
-.block_edly_course_filter .cf-footer .cf-desc,
-.block_edly_course_filter .cf-footer .cf-cta{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  flex: 0 0 auto;      /* ne pas occuper toute la ligne */
-  white-space: nowrap; /* pas de retour à la ligne dans le bouton */
-  height: 40px;
-  line-height: 1;
-  padding: 0 14px;     /* padding propre et identique */
-}
-
-/* Petite taille pour "En savoir plus" pour économiser de la place */
-.block_edly_course_filter .cf-footer .cf-desc{ font-size:14px; }
-
-/* Le CTA reste collé à droite */
-.block_edly_course_filter .cf-footer .cf-cta{
-  margin-left:auto;
-  font-size:15px;
-}
-
-/* Petits écrans : on réduit encore légèrement les dimensions */
-@media (max-width: 520px){
-  .block_edly_course_filter .cf-footer .cf-desc{ padding:0 10px; font-size:13px; }
-  .block_edly_course_filter .cf-footer .cf-cta{  padding:0 12px; font-size:14px; }
+/* Aligner le début du texte de progression sur toutes les cartes :
+   on réserve la place pour jusqu'à ~2 lignes de texte. */
+.block_edly_course_filter .cf-progress-label {
+  min-height: 2.4em;       /* place pour 2 lignes environ */
+  line-height: 1.2;        /* tu peux ajuster si besoin */
+  display: flex;
+  align-items: flex-start; /* le texte reste collé en haut du bloc */
 }
