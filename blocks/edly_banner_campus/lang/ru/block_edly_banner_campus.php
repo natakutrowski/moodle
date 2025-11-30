@@ -10,3 +10,6 @@ $string['button_text'] = 'Оформить подписку';
 $string['right_button_text'] = 'Начать бесплатно прямо сейчас';
 $string['trial_note'] = '7 дней бесплатного доступа ко всем курсам 🥐';
 
+$string['hero_greeting'] = 'Bonjour {$a} 😊';
+$string['hero_cta_trial_continue'] = 'Продолжить пробный доступ';
+$string['hero_cta_subscribed_mycourses'] = 'Перейти к моим курсам';

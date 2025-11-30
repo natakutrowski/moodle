@@ -10,4 +10,7 @@ $string['button_text'] = 'Subscribe';
 $string['right_button_text'] = 'Start for free right now';
 $string['trial_note'] = '7 days of free access to all courses 🥐';
 
+$string['hero_greeting'] = 'Bonjour {$a} 😊';
+$string['hero_cta_trial_continue'] = 'Continue your trial';
+$string['hero_cta_subscribed_mycourses'] = 'Go to my courses';
 

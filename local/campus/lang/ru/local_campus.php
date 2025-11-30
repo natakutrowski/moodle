@@ -238,3 +238,6 @@ $string['trial_discount_reminder_days'] = 'Через сколько дней о
 $string['trial_discount_reminder_days_desc'] =
     'Количество дней после начала пробного доступа, через которое отправляется письмо со скидкой. '
   . 'По умолчанию: 2 дня.';
+
+$string['phone_country_group_popular'] = 'Популярные страны';
+$string['phone_country_group_all']     = 'Все страны';

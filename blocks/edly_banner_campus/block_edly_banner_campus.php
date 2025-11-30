@@ -43,6 +43,14 @@ class block_edly_banner_campus extends block_base {
         $isguest = (!isloggedin() || isguestuser());
         $istrial  = trial_manager::user_has_active_trial($USER->id);
 
+        $greeting = '';
+        if (!$isguest) {
+            $firstname = trim($USER->firstname ?? '');
+            if ($firstname !== '') {
+                $greeting = get_string('hero_greeting', 'block_edly_banner_campus', $firstname);
+            }
+        }
+
 
         // Labels / config
         $title = !empty($this->config->title) ? $this->config->title : get_string('title','block_edly_banner_campus');
@@ -105,12 +113,13 @@ class block_edly_banner_campus extends block_base {
         // URL "Mes cours" (hub utilisateur connecté)
         $mycourses = new moodle_url('/local/campus/mycourses.php');
         $mycoursesurl = $mycourses->out(false);
+        $mycourseslabel = get_string('mycourses_title','local_campus'); // "Mes cours" / "Мои курсы" / "My courses"
 
 
         // URLs login / logout / abonnement
         $signupurl = new moodle_url('/local/subscriptions/subscribe.php');
         $loginurl  = new moodle_url('/login/index.php', [
-            'returnurl' => $mycourses->out(false),  // après login → Mes cours
+            'returnurl' => $mycoursesurl,  // après login → Mes cours
         ]);
 
         $logouturl = new moodle_url('/login/logout.php', ['sesskey' => sesskey()]);
@@ -260,6 +269,17 @@ class block_edly_banner_campus extends block_base {
                                 <span class="hero-btn-label">'.s($subscribelabel).'</span>
                             </a>';
         }
+        
+        if (!$isguest) {
+            // CONNECTÉ (trial ou abo) : "Mes cours" (plein) + "Déconnexion" (compact)
+            $text .= '
+                      <a href="'. $mycoursesurl .'"
+                         class="hero-btn hero-btn-primary hero-compact"
+                         data-role="mycourses">
+                        <i class="ri-book-mark-line hero-btn-icon" aria-hidden="true"></i>
+                        <span class="hero-btn-label">'. s($mycourseslabel) .'</span>
+                      </a>';
+        }
 
         // Connexion ou Déconnexion
         if ($isguest) {
@@ -297,13 +317,23 @@ class block_edly_banner_campus extends block_base {
                         <h1 data-aos="fade-right" data-aos-delay="70" data-aos-duration="700" data-aos-once="true">'
                             .format_text($title, FORMAT_HTML, ['filter' => true]).'</h1>
                         <p class="banner-lead" data-aos="fade-right" data-aos-delay="80" data-aos-duration="800" data-aos-once="true">'
-                            .format_text($body, FORMAT_HTML, ['filter' => true]).'</p>
+                            .format_text($body, FORMAT_HTML, ['filter' => true]).'</p>';
+
+        if ($greeting !== '') {
+            $text .= '
+                        <p class="hero-greeting" data-aos="fade-right" data-aos-delay="85" data-aos-duration="800" data-aos-once="true">'
+                            .s($greeting).'</p>';
+        }
+
+        $text .= '
                         <ul class="banner-btn" data-aos="fade-right" data-aos-delay="90" data-aos-duration="900" data-aos-once="true">';
 
-        // Bouton "Commencer"
+        // Bouton principal ("Commencer")
         if ($right_button_text) {
             $text .= '<li>';
+
             if ($isguest && $trialredirect && function_exists('local_campus_inject_trial_ui')) {
+                // Invité + cours d’essai → popup trial
                 $text .= '
                     <a href="#"
                     class="default-btn cf-cta"
@@ -314,19 +344,33 @@ class block_edly_banner_campus extends block_base {
                     </a>';
 
             } else if ($isguest) {
+                // Invité sans trial → lien simple (catalogue/cours)
                 $target = $right_button_link !== '' ? $right_button_link : (new moodle_url('/local/campus/courses.php'))->out(false);
                 $text .= '
-                            <a href="'.$target.'" class="default-btn">'
-                                .format_text($right_button_text, FORMAT_HTML, ['filter' => true]).
-                            '</a>';
+                    <a href="'.$target.'" class="default-btn">
+                        <span class="hero-main-cta-label">'
+                            .format_text($right_button_text, FORMAT_HTML, ['filter' => true]).
+                        '</span>
+                    </a>';
+
             } else {
+                // Utilisateur connecté (trial ou abonné)
+                if ($istrial) {
+                    $mainctatext = get_string('hero_cta_trial_continue', 'block_edly_banner_campus');
+                } else {
+                    $mainctatext = get_string('hero_cta_subscribed_mycourses', 'block_edly_banner_campus');
+                }
+
                 $text .= '
-                            <a href="'.$mycoursesurl.'" class="default-btn">'
-                                .format_text($right_button_text, FORMAT_HTML, ['filter' => true]).
-                            '</a>';
+                    <a href="'.$mycoursesurl.'" class="default-btn">
+                        <i class="ri-book-mark-fill hero-main-cta-icon pr-2" aria-hidden="true"></i>
+                        <span class="hero-main-cta-label">'.s($mainctatext).'</span>
+                    </a>';
             }
+
             $text .= '</li>';
         }
+
 
         $text .= '
                         </ul>';

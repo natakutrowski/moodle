@@ -265,3 +265,5 @@ $string['trial_discount_reminder_days'] =
 $string['trial_discount_reminder_days_desc'] =
     'Nombre de jours après le début de l’essai avant d’envoyer l’e-mail de réduction. Par défaut : 2 jours.';
 
+$string['phone_country_group_popular'] = 'Pays les plus fréquents';
+$string['phone_country_group_all']     = 'Tous les pays';

@@ -243,6 +243,17 @@
     letter-spacing: .02em;
 }
 
+/* Ligne de salutation dans le hero */
+.block_edly_banner_campus .main-banner-large-content .hero-greeting {
+    margin-top: 1rem;
+    margin-bottom: -1.5rem; /* plus proche du bouton */
+    text-shadow: 2px 2px 2px rgba(0,0,0,0.9);
+    font-size: clamp(1.3rem, 1.4vw + 0.25rem, 1.8rem); /* ++ par rapport au lead */
+    font-weight: 700;
+}
+
+
+
 /* === RESPONSIVE MOBILE (<= 767px) === */
 /* Mobile PORTRAIT : on décale l’image vers la droite */
 @media (max-width: 767px) and (orientation: portrait) {
@@ -401,6 +412,11 @@
         font-size: 0.75rem !important;    /* plus petit */
         margin-top: 0.3rem;    /* un peu plus près du bouton */
     }    
+
+    /* Ligne de salutation dans le hero */
+    .block_edly_banner_campus .main-banner-large-content .hero-greeting {
+        font-size: 1.15rem !important;
+    }
 }
 
 

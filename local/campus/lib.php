@@ -636,32 +636,110 @@ function local_campus_phone_country_list(): array {
         ];
     }
 
-    // Tri par label pour un joli menu
-    uasort($out, function($a, $b) {
-        return strcmp($a['label'], $b['label']);
+    // Liste des pays à mettre en haut, dans cet ordre.
+    // Tu peux l'ajuster en fonction de ta cible.
+    $priorityIso = [
+        // Europe
+        'FR','BE','CH','LU','DE','AT','NL','IT','ES','PT','IE','GB','PT','PL','CZ','SK',
+        'HU','RO','BG','GR','FI','SE','NO','DK','IS','EE','LV','LT',
+        // Europe de l'Est / proches de ton audience
+        'RU','UA','BY','KZ','GE','AM','AZ',
+        // Autres très fréquents
+        'US','CA'
+    ];
+
+    // On sépare les pays en deux groupes : prioritaires vs le reste
+    $priority = [];
+    $others   = [];
+
+    foreach ($out as $iso => $info) {
+        if (in_array($iso, $priorityIso, true)) {
+            $priority[$iso] = $info;
+        } else {
+            $others[$iso] = $info;
+        }
+    }
+
+    // Tri alphabétique interne par nom (dans la langue de l'interface)
+    uasort($priority, function($a, $b) {
+        return strcmp($a['name'], $b['name']);
     });
 
-    return $out;
+    uasort($others, function($a, $b) {
+        return strcmp($a['name'], $b['name']);
+    });
+
+    // On remet les prioritaires en premier, puis le reste
+    return $priority + $others;
 }
+
 
 /**
  * Rend le <select> indicatif :
  * <option value="">Ind.</option>
- * <option value="+7">🇷🇺 +7 (Russie)</option> etc.
+ * puis un groupe "Populaires", puis un séparateur, puis les autres pays.
  */
 function local_campus_phone_country_select_html(string $name, string $id, ?string $current = null): string {
-    $countries   = local_campus_phone_country_list();
+    $countries   = local_campus_phone_country_list(); // [ISO => ['code','flag','name','label']]
+    if (!$countries) {
+        return '';
+    }
+
     $current     = $current ?: local_campus_default_phone_country_code();
     $placeholder = get_string('trial_phone_country_placeholder', 'local_campus');
 
+    // Liste des pays prioritaires (ISO2)
+    $priorityIso = [
+        // Europe "classique"
+        'FR','BE','CH','LU','DE','AT','NL','IT','ES','PT','IE','GB',
+        'PL','CZ','SK','HU','RO','BG','GR','FI','SE','NO','DK','IS',
+        'EE','LV','LT',
+        // Europe de l'Est et proches
+        'RU','UA','BY','KZ','GE','AM','AZ',
+        // Très fréquents hors Europe
+        'US','CA'
+    ];
+
+    $priority = [];
+    $others   = [];
+
+    // On sépare en deux groupes
+    foreach ($countries as $iso => $info) {
+        if (in_array($iso, $priorityIso, true)) {
+            $priority[$iso] = $info;
+        } else {
+            $others[$iso] = $info;
+        }
+    }
+
+    // Le select lui-même
     $out  = '<select name="'.s($name).'" id="'.s($id).'" class="form-select">';
     $out .= '<option value="">'.s($placeholder).'</option>';
 
-    foreach ($countries as $iso => $info) {
-        $code  = $info['code'];
-        $label = $info['label'];
-        $sel   = ($code === $current) ? ' selected' : '';
-        $out  .= '<option value="'.s($code).'"'.$sel.'>'.s($label).'</option>';
+    // Groupe "pays les plus fréquents"
+    if (!empty($priority)) {
+        $labelPopular = get_string('phone_country_group_popular', 'local_campus');
+        $out .= '<option value="" disabled>── '.s($labelPopular).' ──</option>';
+
+        foreach ($priority as $iso => $info) {
+            $code  = $info['code'];
+            $label = $info['label'];
+            $sel   = ($code === $current) ? ' selected' : '';
+            $out  .= '<option value="'.s($code).'"'.$sel.'>'.s($label).'</option>';
+        }
+    }
+
+    // Groupe "tous les pays"
+    if (!empty($others)) {
+        $labelAll = get_string('phone_country_group_all', 'local_campus');
+        $out .= '<option value="" disabled>── '.s($labelAll).' ──</option>';
+
+        foreach ($others as $iso => $info) {
+            $code  = $info['code'];
+            $label = $info['label'];
+            $sel   = ($code === $current) ? ' selected' : '';
+            $out  .= '<option value="'.s($code).'"'.$sel.'>'.s($label).'</option>';
+        }
     }
 
     $out .= '</select>';
