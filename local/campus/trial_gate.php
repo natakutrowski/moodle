@@ -5,6 +5,8 @@ require_once($CFG->libdir.'/enrollib.php');
 require_once($CFG->dirroot.'/user/lib.php');
 require_once(__DIR__.'/lib.php');
 require_once($CFG->dirroot.'/local/subscriptions/classes/mailer.php');
+require_once($CFG->dirroot.'/local/subscriptions/lib/user_subs_lib.php'); // ← pour local_subscriptions_generate_unique_username()
+
 
 global $PAGE;
 $PAGE->set_context(\context_system::instance());
@@ -51,6 +53,47 @@ try {
     $lastname   = required_param('lastname', PARAM_TEXT);
     $email      = required_param('email', PARAM_RAW_TRIMMED);
 
+    $password   = required_param('password', PARAM_RAW);
+
+    $phonecountry = optional_param('phonecountry', '', PARAM_RAW_TRIMMED);
+    $phonenumber  = optional_param('phonenumber', '', PARAM_RAW_TRIMMED);
+
+    // Nettoyage basique du numéro de téléphone
+    $rawphone = trim($phonenumber ?? '');
+    $rawphone = preg_replace('/\s+/', '', $rawphone);
+
+    $phonefull = '';
+    if ($rawphone !== '') {
+        if (strpos($rawphone, '+') === 0) {
+            // L'utilisateur a déjà mis un indicatif
+            $phonefull = $rawphone;
+        } else if (!empty($phonecountry)) {
+            $phonefull = $phonecountry . $rawphone;
+        } else {
+            $phonefull = $rawphone;
+        }
+    }
+
+    // Deviner le code pays ISO2 à partir de l'indicatif (ex: "+33" -> "FR")
+    $phoneiso = null;
+    if (!empty($phonecountry) && function_exists('local_campus_iso_from_phonecode')) {
+        $phoneiso = local_campus_iso_from_phonecode($phonecountry);
+    }
+
+
+    if (core_text::strlen($password) < 8) {
+        throw new moodle_exception('trial_password_min', 'local_campus');
+    }
+
+    require_once($CFG->libdir.'/moodlelib.php');
+    // Signature correcte : check_password_policy($password, $user = null, &$errmsg)
+    $errmsg = null;
+    if (!empty($CFG->passwordpolicy) && function_exists('check_password_policy')) {
+        if (!check_password_policy($password, $errmsg, null)) {
+            throw new moodle_exception('trial_password_policy_error', 'local_campus', '', (string)($errmsg ?? ''));
+        }
+    }
+
     if (!validate_email($email)) {
         throw new moodle_exception('invalidemail');
     }
@@ -68,85 +111,122 @@ try {
 
     $trial = $DB->get_record('local_campus_trial', ['email'=>$email]);
 
+
+    // --- Si l'email a déjà une souscription ACTIVE non-essai -> proposer la connexion ---
+    $uid = $DB->get_field('user', 'id', ['email' => $email, 'deleted' => 0], IGNORE_MISSING);
+    if ($uid) {
+        $trialplanid = (int)(get_config('local_subscriptions','trial_plan_id') ?? 0);
+
+        // On construit la clause dynamiquement pour éviter les placeholders dupliqués
+        $sql = "SELECT 1
+                FROM {user_subscription}
+                WHERE userid = :u
+                AND status = :active
+                AND end_date > :now";
+        $params = [
+            'u'      => (int)$uid,
+            'active' => \local_subscriptions\constants\Status::ACTIVE,
+            'now'    => time(),
+        ];
+        if ($trialplanid > 0) {
+            $sql .= " AND planid <> :trialplanid";
+            $params['trialplanid'] = $trialplanid;
+        }
+
+        $haspaid = $DB->record_exists_sql($sql, $params);
+
+        if ($haspaid) {
+            $loginurl = (new moodle_url('/login/index.php', [
+                'returnurl' => (new moodle_url('/course/view.php', ['id'=>$redirectid]))->out(false)
+            ]))->out(false);
+
+            echo json_encode([
+                'status'  => 'already_subscribed',
+                'message' => get_string('trial_already_subscribed', 'local_campus'),
+                'login'   => $loginurl
+            ]);
+            exit;
+        }
+    }
+
+
+
     /* ===========================
        1) ESSAI ACTIF (RECONNEXION)
        =========================== */
     if ($trial && (int)$trial->expiresat >= $now) {
+        $realemail = $email;
+
+        // 1) On essaie d'abord de retrouver l'utilisateur lié au trial,
+        //    sinon on retombe sur l'email. Mais on NE TOUCHE PAS au mot de passe.
         $user = null;
+
         if (!empty($trial->userid)) {
-            $user = $DB->get_record('user', ['id'=>$trial->userid], '*', IGNORE_MISSING);
-            if ($user && (int)$user->deleted) {
-                $user = null; // considéré manquant
-            } else if ($user && (int)$user->suspended) {
-                // essai actif → on réactive
-                $user->suspended = 0;
-                user_update_user($user, false);
-                $user = $DB->get_record('user', ['id'=>$trial->userid], '*', MUST_EXIST);
-            }
+            $user = $DB->get_record('user', ['id' => $trial->userid, 'deleted' => 0], '*', IGNORE_MISSING);
         }
-
         if (!$user) {
-            // Recréation du compte d’essai + réinscription
-            $realemail = $email;
-
-            $unamepref = (string)get_config('local_campus','trialusernameprefix') ?: 'trial_';
-            $epref     = (string)get_config('local_campus','trialemailprefix')   ?: 'trial+';
-            $forced    = trim((string)get_config('local_campus','trialemaildomain') ?: '');
-
-            $baseuname = $unamepref . preg_replace('~[^a-z0-9._-]+~', '', core_text::strtolower(core_user::clean_field($realemail,'username')));
-            if ($baseuname === $unamepref) { $baseuname .= 'user'; }
-            $username = $baseuname; $i=1;
-            while ($DB->record_exists('user', ['username'=>$username])) { $username = $baseuname.$i; $i++; }
-
-            [$local, $domain] = array_pad(explode('@', $realemail, 2), 2, '');
-            if ($forced !== '') { $domain = $forced; }
-            if ($domain === '') { $domain = 'invalid'; }
-            $pseudoemail = $epref . substr(sha1($realemail), 0, 10) . '@' . $domain;
-
-            $nu = (object)[
-                'username'   => $username,
-                'email'      => $pseudoemail,
-                'firstname'  => $firstname,
-                'lastname'   => $lastname,
-                'confirmed'  => 1,
-                'auth'       => 'nologin',
-                'password'   => random_string(16),
-                'mnethostid' => $CFG->mnet_localhost_id,
-                'suspended'  => 0,
-            ];
-            $newid = user_create_user($nu, false, false);
-
-            $sysctx = \context_system::instance();
-            $triallimited = $DB->get_record('role', ['shortname'=>'triallimited'], 'id', IGNORE_MISSING);
-            if ($triallimited && !user_has_role_assignment($newid, $triallimited->id, $sysctx->id)) {
-                role_assign($triallimited->id, $newid, $sysctx->id);
-            }
-
-            $user  = $DB->get_record('user', ['id'=>$newid], '*', MUST_EXIST);
-
-            // Met à jour le lien dans la table trial
-            $DB->set_field('local_campus_trial', 'userid', $user->id, ['id'=>$trial->id]);
-
-            // Réinscription à TOUS les cours d’essai
-            $manual = enrol_get_plugin('manual');
-            $role   = $DB->get_record('role', ['shortname'=>(string)get_config('local_campus','trialrole') ?: 'trialstudent'], '*', IGNORE_MISSING);
-            $roleid = $role ? (int)$role->id : 5;
-            foreach ($trialids as $cid) {
-                $inst = local_campus_ensure_manual_instance($cid);
-                if (!$DB->record_exists('user_enrolments', ['enrolid'=>$inst->id, 'userid'=>$user->id])) {
-                    $manual->enrol_user($inst, $user->id, $roleid, $now, 0);
-                }
-            }
+            $user = $DB->get_record('user', ['email' => $realemail, 'deleted' => 0], '*', IGNORE_MISSING);
         }
 
-        // Login + cookie + redirect
-        try { complete_user_login($user); }
-        catch (\Throwable $e) { \core\session\manager::set_user($user); }
+        if ($user) {
+            // On peut au besoin rafraîchir le nom/prénom, mais on ne change ni username ni password.
+            if ($user->auth !== 'manual') {
+                $user->auth = 'manual';
+            }
+            if (!empty($firstname)) {
+                $user->firstname = $firstname;
+            }
+            if (!empty($lastname)) {
+                $user->lastname  = $lastname;
+            }
+            $user->confirmed = 1;
+            $DB->update_record('user', $user);
+        } else {
+            // Cas filet (très rare) : le trial existe mais plus d'utilisateur,
+            // on recrée un compte avec les credentials fournis.
+            $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $realemail);
+            $user = create_user_record($username, $password, 'manual');
+            $user->firstname = $firstname;
+            $user->lastname  = $lastname;
+            $user->email     = $realemail;
+            $user->confirmed = 1;
+            $user->lang      = $USER->lang ?? $CFG->lang ?? 'en';
+
+            if (!empty($phonefull)) {
+                $user->phone2 = $phonefull;
+            }
+            if (!empty($phoneiso) && empty($user->country)) {
+                $user->country = $phoneiso;
+            }
+
+            $DB->update_record('user', $user);
+        }
+
+        // 2) Garantir l'essai via trial_manager (idempotent)
+        require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
+        if (!\local_subscriptions\trial_manager::user_has_active_trial((int)$user->id)) {
+            \local_subscriptions\trial_manager::start_trial((int)$user->id);
+        }
+
+        // 3) Mettre à jour la ligne local_campus_trial pour lier au bon user
+        if ((int)$trial->userid !== (int)$user->id) {
+            $DB->set_field('local_campus_trial', 'userid', $user->id, ['id' => $trial->id]);
+        }
+
+        // 4) Login + cookie + redirect vers Mes cours d'essai
+        try {
+            complete_user_login($user);
+        } catch (\Throwable $e) {
+            \core\session\manager::set_user($user);
+        }
         local_campus_set_cookie((int)$trial->id, (int)$trial->expiresat);
 
-        $url = (new moodle_url('/course/view.php', ['id'=>$redirectid]))->out(false);
-        echo json_encode(['status'=>'ok','redirect'=>$url]); exit;
+        $mycoursesurl = (new moodle_url('/local/campus/mycourses.php'))->out(false);
+        echo json_encode(['status' => 'ok', 'redirect' => $mycoursesurl]);
+        exit;
     }
+
+
 
     /* ============================
        2) ESSAI EXPIRÉ (PAS DE RÉOUVERTURE)
@@ -156,7 +236,7 @@ try {
         echo json_encode([
             'status'    => 'expired',
             'message'   => get_string('trial_expired_msg','local_campus'),
-            'subscribe' => (new moodle_url('/subscribe.php'))->out(false)
+            'subscribe' => (new moodle_url('/local/subscriptions/subscribe.php'))->out(false)
         ]); exit;
     }
 
@@ -165,102 +245,97 @@ try {
        ============================ */
     $realemail = $email;
 
-    $unamepref = (string)get_config('local_campus','trialusernameprefix') ?: 'trial_';
-    $epref     = (string)get_config('local_campus','trialemailprefix')   ?: 'trial+';
-    $forced    = trim((string)get_config('local_campus','trialemaildomain') ?: '');
-
-    // username unique
-    $baseuname = $unamepref . preg_replace('~[^a-z0-9._-]+~', '', core_text::strtolower(core_user::clean_field($realemail,'username')));
-    if ($baseuname === $unamepref) { $baseuname .= 'user'; }
-    $username = $baseuname; $i=1;
-    while ($DB->record_exists('user',['username'=>$username])) { $username = $baseuname.$i; $i++; }
-
-    // email pseudo non-collision
-    [$local, $domain] = array_pad(explode('@', $realemail, 2), 2, '');
-    if ($forced !== '') { $domain = $forced; }
-    if ($domain === '') { $domain = 'invalid'; }
-    $pseudoemail = $epref . substr(sha1($realemail), 0, 10) . '@' . $domain;
-
-
-    $defaultuserlang = get_config('local_subscriptions', 'defaultuserlang'); // '' = hériter du site
-
-    // 1) Crée le compte d’essai (non suspendu)
-    $nu = (object)[
-        'username'   => $username,
-        'email'      => $pseudoemail,
-        'firstname'  => $firstname,
-        'lastname'   => $lastname,
-        'confirmed'  => 1,
-        'auth'       => 'nologin',
-        'password'   => random_string(16),
-        'mnethostid' => $CFG->mnet_localhost_id,
-        'suspended'  => 0,
-        'lang'       => !empty($CFG->lang) ? $CFG->lang : current_language(), // set to default language of the site
-    ];
-
-    // Hériter de la langue du site si réglage vide, sinon forcer.
-    if (!empty($defaultuserlang)) {
-        $nu->lang = strtolower($defaultuserlang);
-    }
-
-
-    $userid = user_create_user($nu, false, false);
-
-    $sysctx = \context_system::instance();
-    $triallimited = $DB->get_record('role', ['shortname'=>'triallimited'], 'id', IGNORE_MISSING);
-    if ($triallimited && !user_has_role_assignment($userid, $triallimited->id, $sysctx->id)) {
-        role_assign($triallimited->id, $userid, $sysctx->id);
-    }
-
-    $user   = $DB->get_record('user',['id'=>$userid],'*',MUST_EXIST);
-
-    // 2) Inscrire à TOUS les cours d’essai
-    $manual = enrol_get_plugin('manual');
-    $role   = $DB->get_record('role', ['shortname'=>(string)get_config('local_campus','trialrole') ?: 'trialstudent'], '*', IGNORE_MISSING);
-    $roleid = $role ? (int)$role->id : 5;
-
-    foreach ($trialids as $cid) {
-        $inst = local_campus_ensure_manual_instance($cid);
-        if (!$DB->record_exists('user_enrolments', ['enrolid'=>$inst->id, 'userid'=>$userid])) {
-            $manual->enrol_user($inst, $userid, $roleid, $now, 0);
+    // a) Crée (ou convertit) un user manual sur l'email réel
+    $existing = $DB->get_record('user', ['email'=>$realemail, 'deleted'=>0], '*', IGNORE_MISSING);
+    if ($existing) {
+        $user = $existing;
+        if ($user->auth !== 'manual') {
+            $user->auth = 'manual';
         }
+        $user->firstname = $firstname;
+        $user->lastname  = $lastname;
+        $user->confirmed = 1;
+        user_update_user($user, false);
+        update_internal_user_password($user, $password);
+    } else {
+        $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $realemail);
+        $user = create_user_record($username, $password, 'manual'); // password hashé
+        $user->firstname = $firstname;
+        $user->lastname  = $lastname;
+        $user->email     = $realemail;
+        $user->confirmed = 1;
+        $user->lang      = $USER->lang ?? $CFG->lang ?? 'en';
+
+        if (!empty($phonefull)) {
+            $user->phone2 = $phonefull; // "Mobile phone" dans Moodle
+        }
+        if (!empty($phoneiso) && empty($user->country)) {
+            $user->country = $phoneiso;
+        }
+
+        $DB->update_record('user', $user);
     }
 
-    // 3) Insérer la ligne d’essai
-    $ip  = getremoteaddr();
-    $ua  = $_SERVER['HTTP_USER_AGENT'] ?? '';
-    $trialid = $DB->insert_record('local_campus_trial', (object)[
-        'email'      => $realemail,
-        'firstname'  => $firstname,
-        'lastname'   => $lastname,
-        'userid'     => $userid,
-        'timecreated'=> $now,
-        'expiresat'  => $expires,
-        'status'     => 1,
-        'ipaddress'  => $ip,
-        'useragent'  => $ua
-    ]);
+    // b) Démarre l'essai via trial_manager (inscriptions auto)
+    require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
+    \local_subscriptions\trial_manager::start_trial((int)$user->id);
 
-    // 4) Cookie
-    local_campus_set_cookie((int)$trialid, (int)$expires);
+    // c) Insère (ou met à jour) la ligne d’essai locale + cookie (UX)
+    $trialid = 0;
+    $prev = $DB->get_record('local_campus_trial', ['email'=>$realemail], '*', IGNORE_MISSING);
+    if ($prev) {
+        $prev->userid     = $user->id;
+        $prev->timecreated= $now;
+        $prev->expiresat  = $expires;
+        $prev->status     = 1;
+        $DB->update_record('local_campus_trial', $prev);
+        $trialid = (int)$prev->id;
+    } else {
+        $trialid = (int)$DB->insert_record('local_campus_trial', (object)[
+            'email'      => $realemail,
+            'firstname'  => $firstname,
+            'lastname'   => $lastname,
+            'userid'     => $user->id,
+            'timecreated'=> $now,
+            'expiresat'  => $expires,
+            'status'     => 1,
+            'ipaddress'  => getremoteaddr(),
+            'useragent'  => ($_SERVER['HTTP_USER_AGENT'] ?? '')
+        ]);
+    }
+    local_campus_set_cookie($trialid, (int)$expires);
 
-    // 5) Login “safe”
-    try { complete_user_login($user); }
-    catch (\Throwable $e) { \core\session\manager::set_user($user); }
+    // d) Login immédiat
+    try { complete_user_login($user); } catch (\Throwable $e) { \core\session\manager::set_user($user); }
 
-    // 6) Mail “trial démarré”
-    $langpref = get_config('local_subscriptions', 'defaultemaillang') ?: 'ru';
+    // e) Mail de bienvenue (avec identifiants)
+    $loginurl     = (new moodle_url('/login/index.php'))->out(false);
+    $changepwurl  = (new moodle_url('/login/change_password.php'))->out(false);
+    $subscribeurl = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+    $mycoursesurl = (new moodle_url('/local/campus/mycourses.php'))->out(false);
+    $reseturl     = (new moodle_url('/login/forgot_password.php'))->out(false);
 
     \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_STARTED, [
-        'toemail'      => $realemail,
-        'firstname'    => $firstname ?? '',
-        'subscribe_url'=> (new moodle_url('/subscribe.php'))->out(false),
-        'lang'         => strtolower($langpref),
+        'toemail'             => $realemail,
+        'firstname'           => $firstname ?? '',
+        'email'               => $realemail,
+        'username'            => (string)$user->username, // si jamais tu en as besoin ailleurs
+        'phone'               => $phonefull,
+        'login_url'           => $loginurl,
+        'change_password_url' => $changepwurl,
+        'reset_url'           => $reseturl,
+        'subscribe_url'       => $subscribeurl,
+        'mycourses_url'       => $mycoursesurl,
     ]);
 
-    // 7) Redirect JSON
-    $url = (new moodle_url('/course/view.php', ['id'=>$redirectid]))->out(false);
-    echo json_encode(['status'=>'ok','redirect'=>$url]);
+    // e bis) Marquer un message de bienvenue à afficher sur la page Mes cours
+    set_user_preference('local_campus_trial_welcome_pending', 1, $user);
+
+
+    // f) Redirect
+    $mycoursesurl = (new moodle_url('/local/campus/mycourses.php'))->out(false);
+    echo json_encode(['status' => 'ok', 'redirect' => $mycoursesurl]);
+    exit;
 
 } catch (Throwable $e) {
     http_response_code(400);

@@ -6,6 +6,7 @@ final class Provider {
     public const MANUAL = 'manual';
     public const CSV    = 'csv';
     public const DEV    = 'dev';
+    public const TRIAL    = 'trial';
 
     public const KNOWN = [
         self::STRIPE,
@@ -13,6 +14,7 @@ final class Provider {
         self::MANUAL,
         self::CSV,
         self::DEV,
+        self::TRIAL,
     ];
 
     /** Provider par défaut piloté par settings (fallback Stripe) */
@@ -31,6 +33,7 @@ final class Provider {
             self::MANUAL => get_string('provider_manual', 'local_subscriptions'),
             self::CSV    => get_string('provider_csv', 'local_subscriptions'),
             self::DEV    => get_string('provider_dev', 'local_subscriptions'),
+            self::TRIAL  => get_string('provider_trial', 'local_subscriptions'),
             default      => $code !== '' ? ucfirst($code) : get_string('notavailable', 'local_subscriptions'),
         };
     }

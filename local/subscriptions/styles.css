@@ -679,3 +679,236 @@ table.generaltable td { vertical-align: middle; }
   .subscription-plan-grid{ justify-content:center!important; }
   .subscription-plan-grid .plan-card{ flex:1 1 100%!important; max-width:100%!important; min-width:0!important; }
 }
+
+
+/* Badge near price */
+.price-badge{font-weight:600;font-size:.75rem}
+.plan-price-block .old{margin-right:.5rem}
+.plan-price-block .badge.bg-warning{font-weight:600}
+
+/* Segment conteneur : pilule globale */
+.ls-seg {
+  display: inline-flex;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 9999px;
+  overflow: hidden;              /* demi-cercles collés */
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+}
+
+/* Liens */
+.ls-seg .seg {
+  padding: 8px 14px;
+  text-decoration: none;
+  color: inherit;
+  line-height: 1.2;
+  font-weight: 600;
+  border-right: 1px solid rgba(0,0,0,.08);
+}
+.ls-seg .seg:last-child { border-right: none; }
+
+/* Actif */
+.ls-seg .seg.active{
+  background: var(--optional-color, #f27998);
+  color: #fff;
+}
+
+/* Hover discret */
+.ls-seg .seg:hover { background: rgba(30, 166, 154, 0.5); color:#1f2937 }
+.ls-seg .seg[aria-current="page"]:hover { filter: brightness(0.98); }
+
+/* Loader overlay dans la popup d'abonnement */
+#subsModal .subs-modal-loader {
+    position: absolute;
+    inset: 0;
+    background: #ffffff;     /* fond complètement opaque */
+    z-index: 9999;           /* très au-dessus de tout ce que le thème peut mettre */
+    display: none;           /* caché par défaut */
+}
+
+/* Quand le loader est actif */
+#subsModal .subs-modal-loader.is-visible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#subsModal .subs-modal-loader .spinner-border {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+/* POPUP ABONNEMENT (subsModal) — même style que la popup trial */
+
+#subsModal .modal-content {
+    border-radius: 18px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+#subsModal .modal-header {
+    background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
+    border-bottom: 1px solid #f0e1f3;
+}
+
+
+/* Payment success card */
+.payment-success-card {
+    border-radius: 14px;
+    border: none;
+}
+
+/* Giraffe image on success page */
+.payment-success-giraffe {
+    max-width: 260px;
+    height: auto;
+}
+
+/* Simple confetti / fireworks overlay */
+.payment-fireworks {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 9998;
+}
+
+.payment-fireworks .spark {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff2b70;
+    opacity: 0.9;
+    animation: payment-firework 800ms ease-out forwards;
+}
+
+.payment-fireworks .spark.alt {
+    background: #ffb347;
+}
+
+@keyframes payment-firework {
+    from {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: translate(var(--dx), var(--dy)) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* Cartes de paiement (succès / annulation / erreur) */
+.payment-status-card {
+    border-radius: 14px;
+    border: none;
+}
+
+/* Wrapper pour centrer l'image verticalement */
+.payment-status-illustration-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Image : hauteur max relative à la taille de la carte / viewport */
+.payment-status-illustration,
+.payment-success-giraffe {
+    max-height: min(320px, 40vh); /* ajuste ici : 40vh = 40% de la hauteur de viewport */
+    width: auto;
+}
+
+/* === Grille des plans === */
+.subscription-plan-grid {
+    /* déjà d-flex flex-wrap gap-3 depuis le renderer */
+}
+
+.subscription-plan-grid .plan-card {
+    flex: 0 0 280px;
+    max-width: 320px;
+    transition: transform .18s ease, box-shadow .18s ease;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+/* Espace central (au milieu de la card) */
+.subscription-plan-grid .plan-card .plan-middle-space {
+    min-height: 48px; /* ajuste ici pour plus ou moins de blanc */
+}
+
+/* Plans mis en avant : Populaire & Premium un peu plus grands */
+.subscription-plan-grid .plan-card.ls-card-popular,
+.subscription-plan-grid .plan-card.ls-card-premium {
+    transform: scale(1.08);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    border-radius: 14px;
+}
+
+/* Titre un peu plus gros pour ces cards */
+.subscription-plan-grid .plan-card.ls-card-popular .plan-title-neutral,
+.subscription-plan-grid .plan-card.ls-card-premium .plan-title-neutral {
+    font-size: 1.08rem;
+    font-weight: 600;
+}
+
+/* Effet hover légèrement plus fort sur ces deux-là */
+.subscription-plan-grid .plan-card.ls-card-popular:hover,
+.subscription-plan-grid .plan-card.ls-card-premium:hover {
+    transform: scale(1.11);
+}
+
+
+/* Au survol, un léger zoom sur toutes les cards (optionnel) */
+.subscription-plan-grid .plan-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* Badges "Populaire" / "Premium" plus compacts */
+.subscription-plan-grid .ls-badge-popular,
+.subscription-plan-grid .ls-badge-premium {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    font-size: 0.8rem;        /* plus petit */
+    padding: 4px 10px;        /* moins haut/large */
+    border-radius: 999px;
+    z-index: 2;
+}
+
+/* Fond jaune très léger pour le plan "Populaire" */
+.subscription-plan-grid .plan-card.ls-card-popular {
+    background: linear-gradient(135deg, #fffaee 0%, #fffffe 100%);
+}
+
+/* Ajustement fin du badge "Populaire" / "Premium" sur les cards */
+.subscription-plan-grid .ls-badge-popular,
+.subscription-plan-grid .ls-badge-premium {
+    position: absolute;
+    top: -14px;        /* remonte le badge au-dessus du titre */
+    right: -10px;       /* le décale un peu plus vers la droite */
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 999px;
+    z-index: 3;
+}
+.subscription-plan-grid .plan-card.ls-card-popular:hover,
+.subscription-plan-grid .plan-card.ls-card-premium:hover {
+    transform: scale(1.11);
+}
+
+.subscription-plan-grid {
+    row-gap: 5rem;  /* espace vertical entre les cards */
+}
+
+/* Lien "Retour aux plans disponibles" dans checkout */
+.ls-back-to-plans-link {
+    color: var(--primary-color, #ff2b70); /* ou une couleur que tu préfères */
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.ls-back-to-plans-link:hover {
+    text-decoration: underline;
+}

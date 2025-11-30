@@ -77,6 +77,19 @@ class PaymentService {
         // 4) Récup/Création user
         require_once($CFG->dirroot . '/user/lib.php');
 
+        // --- Infos supplémentaires passées via response_json (checkout invité) ---
+        $meta = json_decode($pr->response_json ?? '{}', true) ?: [];
+        $extra = is_array($meta['extra'] ?? null) ? $meta['extra'] : [];
+
+        // Données issues de checkout.php (téléphone, pays, mot de passe invité)
+        $checkoutUser = is_array($meta['checkout_user'] ?? null) ? $meta['checkout_user'] : [];
+        $phonecountry = trim((string)($checkoutUser['phonecountry']    ?? $checkoutUser['country'] ?? ''));
+        $phonenumber  = trim((string)($checkoutUser['phone']     ?? $checkoutUser['phonenumber']   ?? ''));
+        $passwordHash = isset($checkoutUser['password_hash']) ? (string)$checkoutUser['password_hash'] : '';
+        if ($passwordHash === '') {
+            $passwordHash = null;
+        }
+
         // email prioritaire : PR (saisi côté checkout.php) sinon métadonnées événement
         $email = $pr->email ?? null;
         if (!$email && !empty($e->meta['customer_email'])) { $email = $e->meta['customer_email']; }
@@ -85,11 +98,65 @@ class PaymentService {
         [$user, $isnew, $tmpPassword] = local_subscriptions_ensure_user(
             \core_text::strtolower($email),
             $pr->firstname ?? '',
-            $pr->lastname ?? ''
+            $pr->lastname ?? '',
+            $passwordHash
         );
+
 
         // 5) Calcul des dates à partir du plan
         $plan = $DB->get_record('subscription_plan', ['id' => $pr->planid, 'is_active' => 1], '*', MUST_EXIST);
+
+        // --- Mise à jour du profil utilisateur (téléphone + pays) ---
+        // On fait comme pour le Trial : phone -> phone2, country déduit via helper si présent.
+        $needsUpdate = false;
+        $dialcode = '';
+
+        // Téléphone -> phone2 (ou phone, selon ta convention)
+        if ($phonenumber !== '' && empty($user->phone2)) {
+            $user->phone2 = $phonenumber;
+            $needsUpdate  = true;
+        }
+
+        // Pays : on essaye de déduire l’ISO à partir de l’indicatif, sinon on garde la valeur brute.
+        if ($phonecountry !== '') {
+            $resolvedCountry = null;
+
+            // Normaliser le dial code : on s'attend à quelque chose du type "+33", "+7", etc.
+            $dialcode = trim($phonecountry);
+            if ($dialcode !== '' && $dialcode[0] !== '+') {
+                $dialcode = '+' . $dialcode;   // "33" -> "+33"
+            }
+
+            $campuslib = $CFG->dirroot . '/local/campus/lib.php';
+            if (is_readable($campuslib)) {
+                require_once($campuslib);
+                if (function_exists('local_campus_iso_from_phonecode')) {
+                    $iso = local_campus_iso_from_phonecode($dialcode); // ex: "+33" -> "FR"
+                    if (!empty($iso) && strlen($iso) === 2) {
+                        $resolvedCountry = strtoupper($iso);           // "FR", "RU", ...
+                    }
+                }
+            }
+
+            // On ne met à jour que si on a un code ISO valide (2 lettres)
+            if (!empty($resolvedCountry) && empty($user->country)) {
+                $user->country = $resolvedCountry;
+                $needsUpdate   = true;
+            }
+        }
+
+        // Téléphone -> phone2 (ou phone, selon ta convention)
+        if ($phonenumber !== '' && empty($user->phone2) && $dialcode !== '') {
+            $user->phone2 = $dialcode.$phonenumber;
+            $needsUpdate  = true;
+        }
+
+
+        if ($needsUpdate) {
+            user_update_user($user, false);
+        }
+
+
 
         // 6) Créer la souscription
 
@@ -105,6 +172,13 @@ class PaymentService {
 
         $meta  = json_decode($pr->response_json ?? '{}', true);
         $extra = is_array($meta['extra'] ?? null) ? $meta['extra'] : [];
+
+        // Infos utilisateur passées depuis checkout (téléphone, mot de passe invité)
+        $checkoutUser = is_array($meta['checkout_user'] ?? null) ? $meta['checkout_user'] : [];
+        $phonecountry = $checkoutUser['phonecountry']    ?? null;
+        $phonenumber  = $checkoutUser['phonenumber']     ?? null;
+        $plainPass    = $checkoutUser['plain_password']  ?? null;
+
 
         if ($operation === '' && $refsubid > 0) { $operation = Operation::QUEUE_FUTURE; }
         if ($operation === '') { $operation = Operation::PURCHASE_NEW; }
@@ -225,6 +299,9 @@ class PaymentService {
                     $transactionid ?? null
                 );
 
+                // Fermer toutes les souscriptions d’essai actives pour cet utilisateur
+                self::close_active_trials_for_user((int)$sub->userid);
+
                 // ---- 3) QUELS ÉLÉMENTS REMPLACER ? ----
 
                 // Liste à remplacer (ACTIVE + QUEUED chevauchant la fenêtre) : soit PR -> replace_ids, soit on recalcule
@@ -306,6 +383,7 @@ class PaymentService {
                 if ($existsSameStart) { $transaction->allow_commit(); return; }
 
                 $end = Duration::add_duration_utc($start, $plan->duration_key);
+
                 $sub = self::create_and_link_sub(
                     $user->id,
                     $plan->id,
@@ -317,6 +395,9 @@ class PaymentService {
                     $e->provider_customer_id ?? null,
                     $transactionid ?? null
                 );
+
+                // Fermer toutes les souscriptions d’essai actives pour cet utilisateur
+                self::close_active_trials_for_user((int)$sub->userid);
             }
         }
 
@@ -328,6 +409,15 @@ class PaymentService {
                 $recipient = \core_user::get_user($user->id, '*', MUST_EXIST); // user COMPLET
                 $recipient->mailformat = 1;
 
+                // Est-ce que l'utilisateur avait déjà un abonnement NON trial avant celui-ci ?
+                $hadNonTrial = self::user_had_nontrial_subscription_before((int)$user->id, isset($sub->id) ? (int)$sub->id : null);
+
+                // Pour l'email :
+                //  - nouvel utilisateur OU
+                //  - utilisateur qui n'avait que l'essai jusqu'ici
+                // => on envoie WELCOME plutôt que "subscription_updated"
+                $isnewForEmail = $isnew || !$hadNonTrial;
+
                 mailer::dispatch(
                     mailer::T_SUBSCRIPTION_EVENT,[
                         'user'          => $recipient,
@@ -336,7 +426,7 @@ class PaymentService {
                         'sub'           => $sub,
                         'tmpPassword'   => $tmpPassword,
                         'isupgrade'     => $isupgrade,
-                        'isnewuser'     => $isnew
+                        'isnewuser'     => $isnewForEmail
                     ]
                 );
 
@@ -472,10 +562,40 @@ class PaymentService {
      * Convention: PR.price est DÉJÀ en unités "major" (EUR), 2 décimales.
      */
     private static function money_from_pr(\stdClass $pr): array {
+        // Devise
         $cur = !empty($pr->currency) ? strtoupper((string)$pr->currency) : '';
+
+        // 1) Priorité au montant réellement facturé stocké en minor units
+        if (property_exists($pr, 'amount_minor') && is_numeric($pr->amount_minor) && (int)$pr->amount_minor > 0) {
+            $amt = round(((int)$pr->amount_minor) / 100, 2);
+            return [$amt, $cur];
+        }
+
+        // 2) Sinon, s'il y a un LOCK, on paie ce qui a été locké (vérrouillé)
+        if (property_exists($pr, 'locked_final_price') && is_numeric($pr->locked_final_price) && (float)$pr->locked_final_price > 0) {
+            return [round((float)$pr->locked_final_price, 2), $cur];
+        }
+
+        // 3) Sinon, tente de lire amount_minor/currency du JSON de réponse (webhook/return)
+        if (!empty($pr->response_json)) {
+            $meta = json_decode((string)$pr->response_json, true);
+            if (is_array($meta)) {
+                if (isset($meta['amount_minor']) && is_numeric($meta['amount_minor'])) {
+                    $amt = round(((int)$meta['amount_minor']) / 100, 2);
+                    if (empty($cur) && !empty($meta['currency'])) { $cur = strtoupper((string)$meta['currency']); }
+                    return [$amt, $cur];
+                }
+                if (isset($meta['currency']) && empty($cur)) {
+                    $cur = strtoupper((string)$meta['currency']);
+                }
+            }
+        }
+
+        // 4) Fallback : le prix PR saisi avant checkout
         $amt = (isset($pr->price) && is_numeric($pr->price)) ? round((float)$pr->price, 2) : 0.0;
         return [$amt, $cur];
     }
+
 
     /** Crée une souscription + enrole + lie PR — équivalent de ta closure $create_and_link, mais robuste et testable. */
     private static function create_and_link_sub(
@@ -489,34 +609,85 @@ class PaymentService {
         ?string $providerCusId,
         ?string $fallbackTxnId
     ): \stdClass {
-        global $DB;
+        global $DB, $CFG;
 
-        [$amountMajor, $currency] = self::money_from_pr($pr);
+        require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
 
+        // Sécurité : on n'achète pas un plan d’essai
+        if (\local_subscriptions\trial_manager::is_trial_planid($planid)) {
+            throw new \moodle_exception('cannot_purchase_trial_plan', 'local_subscriptions');
+        }
+
+        // Montant payé (major units) & devise issus du PSP / de la PR
+        [$paidAmount, $currency] = self::money_from_pr($pr);
+        $currency   = strtoupper(trim($currency ?: 'EUR'));
+        $paidAmount = round(max(0.0, (float)$paidAmount), 2);
+
+        // Tolerance et mode strict
+        $tolCents = (int)(get_config('local_subscriptions','payments_mismatch_tolerance_cents') ?? 2);
+        $tol      = max(0, $tolCents) / 100.0;
+        $strict   = !empty(get_config('local_subscriptions','payments_lock_strict'));
+
+        // Par défaut : valeurs tirées du lock PR s'il est présent
+        $haslock   = isset($pr->locked_final_price) && (float)$pr->locked_final_price > 0;
+        $listPrice = $haslock ? (float)$pr->locked_list_price       : $paidAmount;
+        $discPct   = $haslock ? (int)$pr->locked_discount_percent   : 0;
+        $discAmt   = $haslock ? (float)$pr->locked_discount_amount  : 0.0;
+        $discReas  = $haslock ? ($pr->locked_discount_reason ?? null) : null;
+        $expFinal  = $haslock ? (float)$pr->locked_final_price      : $paidAmount;
+
+        // Vérifier l’écart payé vs final attendu
+        if (abs($paidAmount - $expFinal) > $tol) {
+            if ($strict) {
+                throw new \moodle_exception('payment_mismatch_too_large', 'local_subscriptions');
+            } else {
+                // Ajuster la remise pour que (list - remise = paid)
+                if ($listPrice <= 0) { $listPrice = $paidAmount; }
+                $discAmt  = round(max(0.0, min($listPrice - $paidAmount, $listPrice)), 2);
+                $discPct  = $listPrice > 0 ? (int)round(($discAmt / $listPrice) * 100) : 0;
+                $discReas = $discReas ?: 'provider_adjusted';
+            }
+        }
+
+        // Enregistrement user_subscription
         $sub = (object)[
-            'userid'           => $userid,
-            'planid'           => $planid,
-            'payment_provider' => $pr->payment_provider ?? ($pr->provider ?? Provider::STRIPE),
-            'start_date'       => $start,
-            'end_date'         => $end,
-            'status'           => $status,
-            'last_update'      => time(),
-            'creation_date'    => time(),
-            'pricepaid'        => $amountMajor,
-            'currency'         => $currency,
-            'transactionid'    => $pr->transactionid ?? $fallbackTxnId,
+            'userid'                  => $userid,
+            'planid'                  => $planid,
+            'payment_provider'        => ($pr->payment_provider ?? ($pr->provider ?? 'unknown')),
+            'start_date'              => $start,
+            'end_date'                => $end,
+            'status'                  => $status,
+            'last_update'             => time(),
+            'creation_date'           => time(),
+            'pricepaid'               => $paidAmount,        // payé réellement
+            'currency'                => $currency,
+            'transactionid'           => ($pr->transactionid ?? $fallbackTxnId),
+            'discount_percent'        => $discPct,           // indicatif
+            'discount_amount'         => $discAmt,           // source de vérité
+            'discount_reason'         => $discReas,          // 'trial72h' / 'provider_adjusted' / null
         ];
+
         if (!empty($providerSubId)) { $sub->provider_subscription_id = $providerSubId; }
         if (!empty($providerCusId)) { $sub->provider_customer_id     = $providerCusId; }
 
         $sub->id = $DB->insert_record('user_subscription', $sub);
 
-        // Enrol (idempotent) — garde ton manager, mais évite require_once dans le hot path
+        // Inscriptions idempotentes et passage au rôle student
         \local_subscriptions\subscription_manager::enrol_user_to_courses(
             $userid, $planid, $sub->start_date, $sub->end_date
         );
+        \local_subscriptions\trial_manager::force_role_student($userid, $planid);
 
-        // Lier la PR à la sub (si colonne existante)
+        // Désuspension éventuelle du compte si la souscription est ACTIVE
+        require_once($CFG->dirroot.'/user/lib.php'); // user_update_user()
+
+        $user = $DB->get_record('user', ['id' => (int)$userid, 'deleted' => 0], 'id, suspended', IGNORE_MISSING);
+        if ($user && !empty($user->suspended)) {
+            $user->suspended = 0;
+            user_update_user($user, false);
+        }
+
+        // Lier la PR à la sub si colonne existante
         if (self::db_field_exists('subscription_payment_request', 'subscriptionid')) {
             $pr->subscriptionid = $sub->id;
             $DB->update_record('subscription_payment_request', $pr);
@@ -524,4 +695,94 @@ class PaymentService {
 
         return $sub;
     }
+
+
+    /**
+     * Marque comme REPLACED toutes les souscriptions "d’essai" actives pour cet utilisateur.
+     * On utilise à la fois :
+     *  - la config trial_plan_id (si définie),
+     *  - et tous les plans avec is_trial = 1.
+     */
+    private static function close_active_trials_for_user(int $userid): void {
+        global $DB;
+
+        $userid = (int)$userid;
+        if ($userid <= 0) {
+            return;
+        }
+
+        // 1) Récupérer les planids d’essai : config + flags is_trial
+        $trialPlanIds = [];
+
+        $trialConfigId = (int)(get_config('local_subscriptions','trial_plan_id') ?? 0);
+        if ($trialConfigId > 0) {
+            $trialPlanIds[] = $trialConfigId;
+        }
+
+        $trialPlans = $DB->get_records('subscription_plan', ['is_trial' => 1], '', 'id');
+        foreach ($trialPlans as $p) {
+            $trialPlanIds[] = (int)$p->id;
+        }
+
+        $trialPlanIds = array_values(array_unique(array_filter($trialPlanIds, fn($v) => $v > 0)));
+        if (!$trialPlanIds) {
+            return;
+        }
+
+        list($inSql, $inParams) = $DB->get_in_or_equal($trialPlanIds, SQL_PARAMS_NAMED, 'pid');
+
+        $now = time();
+
+        // On utilise UNIQUEMENT des paramètres nommés (pas de '?')
+        $params = $inParams + [
+            'uid'        => $userid,
+            'now'        => $now,
+            'newstatus'  => Status::REPLACED,
+            'lastupdate' => $now,
+            'oldstatus'  => Status::ACTIVE,
+        ];
+
+        $sql = "
+            UPDATE {user_subscription}
+            SET status = :newstatus,
+                last_update = :lastupdate
+            WHERE userid = :uid
+            AND planid $inSql
+            AND status = :oldstatus
+            AND end_date > :now
+        ";
+
+        $DB->execute($sql, $params);
+    }
+
+    /**
+     * Indique si l'utilisateur avait déjà au moins une souscription non-essai
+     * (plan is_trial = 0) avant la souscription courante.
+     */
+    private static function user_had_nontrial_subscription_before(int $userid, ?int $currentSubId = null): bool {
+        global $DB;
+
+        $userid = (int)$userid;
+        if ($userid <= 0) {
+            return false;
+        }
+
+        $params = ['u' => $userid];
+        $exclSql = '';
+        if (!empty($currentSubId)) {
+            $exclSql = ' AND s.id <> :curr';
+            $params['curr'] = (int)$currentSubId;
+        }
+
+        return $DB->record_exists_sql("
+            SELECT 1
+            FROM {user_subscription} s
+            JOIN {subscription_plan} p ON p.id = s.planid
+            WHERE s.userid = :u
+            $exclSql
+            AND (p.is_trial IS NULL OR p.is_trial = 0)
+        ", $params);
+    }
+
+
 }

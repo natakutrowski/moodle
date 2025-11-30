@@ -145,18 +145,26 @@ final class AlfaGateway implements PaymentGatewayInterface {
         ]);
         $orderNumber = $payment_request->id . '-' . $attempt;
 
-        // Conversion major -> minor (kopecks).
-        $amountMinor = $this->major_to_minor($payment_request->price);
-
-        // (OPTION) Si create_session a passé un amount_minor, on le valide
-        if (!empty($options['amount_minor'])) {
-            $serverMinor = (int)$options['amount_minor'];
-            if ($serverMinor !== $amountMinor) {
-                throw new \moodle_exception('alfa_amount_mismatch', 'local_subscriptions',
-                    '', 'server='.$serverMinor.' / local='.$amountMinor);
-            }
-            // $amountMinor = $serverMinor; // possible, mais pas nécessaire si identiques
+        // Conversion via LOCK (kopecks).
+        if (!isset($payment_request->locked_final_price) || (float)$payment_request->locked_final_price <= 0) {
+            throw new \moodle_exception('paylock_missing_lockdata', 'local_subscriptions');
         }
+
+        $lockedList     = (float)($payment_request->locked_list_price      ?? 0.0);
+        $lockedPct      = (int)  ($payment_request->locked_discount_percent ?? 0);
+        $lockedAmount   = (float)($payment_request->locked_discount_amount  ?? 0.0);
+        $lockedReason   =        ($payment_request->locked_discount_reason  ?? null);
+        $lockedFinal    = (float) $payment_request->locked_final_price;
+
+        // Si create_session a déjà mis amount_minor, on l’utilise tel quel (source de vérité)
+        $amountMinor = isset($payment_request->amount_minor)
+            ? (int)$payment_request->amount_minor
+            : $this->major_to_minor($lockedFinal);
+
+        if ($amountMinor <= 0) {
+            throw new \moodle_exception('alfa_nonpositive_amount', 'local_subscriptions');
+        }
+
 
         // URLs de retour (peuvent être passées via $options).
         $returnUrl = $options['returnurl'] ?? ($CFG->wwwroot . '/local/subscriptions/payment/alfa_return.php?pid=' . $payment_request->id);
@@ -167,7 +175,9 @@ final class AlfaGateway implements PaymentGatewayInterface {
         if (!empty($payment_request->planid)) {
             $planname = (string)($DB->get_field('subscription_plan', 'name', ['id' => (int)$payment_request->planid], IGNORE_MISSING) ?? '');
         }
-        $desc = 'CampusFR — '.($planname ?: 'Abonnement')." — ".number_format((float)$payment_request->price, 2, '.', '').' '.$payment_request->currency;
+
+        $desc = 'CampusFR — '.($planname ?: get_string('alfa:productname', 'local_subscriptions', 'Abonnement'))
+            .' — '.number_format((float)$payment_request->locked_final_price, 2, '.', '').' '.$payment_request->currency;
 
         $payload = [
             'orderNumber' => $orderNumber,
@@ -190,10 +200,17 @@ final class AlfaGateway implements PaymentGatewayInterface {
         if (!empty($options['lastname'] ?? $payment_request->lastname ?? null)) {
             $customer['lastName']  = $options['lastname'] ?? $payment_request->lastname;
         }
-        if ($customer) {
-            $payload['jsonParams'] = json_encode($customer, JSON_UNESCAPED_UNICODE);
-        }
-     
+        $meta = [
+            'pr_id'                   => (string)$payment_request->id,
+            'locked_list_price'       => (string)$lockedList,
+            'locked_discount_percent' => (string)$lockedPct,
+            'locked_discount_amount'  => (string)$lockedAmount,
+            'locked_discount_reason'  => (string)($lockedReason ?? ''),
+            'locked_final_price'      => (string)$lockedFinal,
+            'locked_currency'         => (string)$payment_request->currency,
+        ];
+        if ($customer) { $customer['meta'] = $meta; } else { $customer = ['meta' => $meta]; }
+        $payload['jsonParams'] = json_encode($customer, JSON_UNESCAPED_UNICODE);
 
         // ---- Appel unique : mode token → PAS de currency (le gagnant) --------------
         $response = $this->post('/payment/rest/register.do', $payload);

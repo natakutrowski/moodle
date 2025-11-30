@@ -72,6 +72,20 @@ if ($hassiteconfig) {
             $options
         ));
 
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/email_copy_verbose',
+            get_string('email_copy_verbose', 'local_subscriptions'),
+            get_string('email_copy_verbose_desc', 'local_subscriptions'),
+            1
+        ));
+
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/display_currency_symbols',
+            get_string('set_display_currency_symbols', 'local_subscriptions'),
+            get_string('set_display_currency_symbols_desc', 'local_subscriptions'),
+            1
+        ));
+
         // === Providers (global) ====================================================
         $settings->add(new admin_setting_heading(
             'local_subscriptions_providers_hdr',
@@ -297,7 +311,7 @@ if ($hassiteconfig) {
             0
         ));
 
-        // Pages politiques/CGU (RU vs ROW)
+        // Pages politiques/CGU/CGV (RU vs ROW)
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/policy_url_ru',
             get_string('policy_url_ru', 'local_subscriptions'),
@@ -318,12 +332,67 @@ if ($hassiteconfig) {
             get_string('terms_url_row', 'local_subscriptions'),
             '', '', PARAM_URL
         ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/offer_url_ru',
+            get_string('offer_url_ru', 'local_subscriptions'),
+            '', '', PARAM_URL
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/offer_url_row',
+            get_string('offer_url_row', 'local_subscriptions'),
+            '', '', PARAM_URL
+        ));
 
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/email_copy_to',
             get_string('email_copy_to', 'local_subscriptions'),
             get_string('email_copy_to_desc', 'local_subscriptions'),
             'admin@campusfr.fr', PARAM_RAW_TRIMMED
+        ));
+
+        // --- Section Essai 7 jours ---
+        $settings->add(new admin_setting_heading('ls_trial_heading',
+            get_string('settings_trial_section', 'local_subscriptions'), ''));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/trial_plan_id',
+            get_string('settings_trial_planid', 'local_subscriptions'),
+            get_string('settings_trial_planid_desc', 'local_subscriptions'),
+            0, PARAM_INT));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/trial_duration_days',
+            get_string('settings_trial_duration_days', 'local_subscriptions'),
+            get_string('settings_trial_duration_days_desc', 'local_subscriptions'),
+            7, PARAM_INT));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/trial_discount_percent',
+            get_string('settings_trial_discount_percent', 'local_subscriptions'),
+            get_string('settings_trial_discount_percent_desc', 'local_subscriptions'),
+            15, PARAM_INT));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/trial_discount_hours',
+            get_string('settings_trial_discount_hours', 'local_subscriptions'),
+            get_string('settings_trial_discount_hours_desc', 'local_subscriptions'),
+            72, PARAM_INT));
+
+        $settings->add(new admin_setting_heading('ls_paylock_heading',
+            get_string('settings_paylock_section', 'local_subscriptions'), ''));
+
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/payments_lock_strict',
+            get_string('settings_paylock_strict', 'local_subscriptions'),
+            get_string('settings_paylock_strict_desc', 'local_subscriptions'),
+            0
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/payments_mismatch_tolerance_cents',
+            get_string('settings_paylock_tolerance', 'local_subscriptions'),
+            get_string('settings_paylock_tolerance_desc', 'local_subscriptions'),
+            2, PARAM_INT
         ));
 
     }

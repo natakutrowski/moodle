@@ -59,3 +59,13 @@ $tasks[] = [
     'dayofweek' => '*',
     'month'     => '*',
 ];
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\enrol_scope_fill_task',
+    'blocking'  => 0,
+    'minute'    => 'R',
+    'hour'      => '3',
+    'day'       => '*',
+    'dayofweek' => '*',
+    'month'     => '*',
+];

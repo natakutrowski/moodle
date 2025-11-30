@@ -3,6 +3,7 @@ $string['pluginname'] = 'Subscriptions';
 
 // -- Subscription config
 // Plans
+$string['plan_1week'] = '1 week'; // do not delete
 $string['plan_1month'] = '1 month'; // do not delete
 $string['plan_3months'] = '3 months'; // do not delete
 $string['plan_6months'] = '6 months'; // do not delete
@@ -178,6 +179,7 @@ $string['courselist'] = 'Course list';
 $string['close'] = 'Close';
 
 $string['subscribe'] = 'Subscribe';
+$string['subscribe_to_campus'] = 'Subscribe to Campus<small><sup>FR</sup></small>';
 $string['change_currency'] = 'Change currency';
 
 $string['payment_success_check_email'] = 'Please check your email: a message is waiting to finish signing in and set your password.';
@@ -192,22 +194,59 @@ $string['checkout_title'] = 'Checkout';
 $string['checkout_duration'] = 'Duration:';
 $string['checkout_go_to_payment'] = 'Go to payment';
 
-$string['welcome_subject'] = 'Welcome to {$a}';
-$string['welcome_body_intro'] = 'Your account has been created and your subscription is now active.';
-$string['welcome_username'] = 'Your username:';
+$string['welcome_subject'] = 'Your CampusFR subscription is active ✅';
+
+$string['welcome_body_intro'] =
+    '<p>Hello {$a}!</p>' .
+    '<p>Your subscription to Campus<small><sup>FR</sup></small> is now active — you now have full access to the platform according to your selected plan.</p>' .
+    '<p>If you have already used Campus<small><sup>FR</sup></small> during the trial period, you simply continue with the same account — your completed exercises and croissant-points are all preserved. If you\'re joining us now, this account will be used for all future logins.</p>' .
+    '<p>Your login details:</p>';
+
+$string['welcome_username'] = 'E-mail:';
 $string['welcome_plan_summary'] = 'Plan: {$a}';
 $string['welcome_amount_summary'] = 'Amount: {$a}';
 
-$string['receipt_title'] = 'Payment receipt';
+$string['welcome_text_canal'] =
+    'Make sure to join the Campus<small><sup>FR</sup></small> channel: all important updates and announcements are posted there, and you can ask teachers your questions.';
+$string['welcome_button_canal'] = 'Campus<small><sup>FR</sup></small> Channel';
+
+$string['welcome_text_group'] =
+    'You can also join the community group to chat with others, ask for advice, support each other, and feel part of the family.';
+$string['welcome_button_group'] = 'Campus<small><sup>FR</sup></small> Group';
+
+$string['welcome_footer'] =
+    '<p>This e-mail was sent automatically.<br>
+If you have any questions, write to us at <a href="mailto:{$a}">{$a}</a> — we\'ll be happy to help.</p>
+<p>We wish you joyful learning, inspiring lessons and steady progress in French ❤️</p>
+<p>Nata and the Campus<small><sup>FR</sup></small> team</p>';
+
+$string['receipt_title'] = 'CampusFR subscription payment confirmed ✅';
 $string['receipt_plan'] = 'Plan: ';
 $string['receipt_amount'] = 'Amount: ';
 $string['receipt_tx'] = 'Transaction ID: ';
 $string['receipt_period'] = 'Access period: ';
 
 $string['welcome_temp_password_label'] = 'Temporary password:';
-$string['welcome_security_hint'] = 'For your security, you will be asked to set a new password on your first login.';
-$string['receipt_intro'] = 'Here is a copy of your purchase details:';
-$string['receipt_button_open'] = 'Open my courses';
+
+$string['welcome_security_hint'] =
+    '<p>You created your password during registration. If you ever forget it, you can easily reset it here:</p>' .
+    '👉 <a href="{$a->url}">Reset password</a></p>';
+
+$string['welcome_mycourses'] =
+    '<p>You can access your dashboard using the link below:</p>' .
+    '👉 <a href="{$a->url}">Enter the campus</a></p>' .
+    '<p>Your subscription information:</p>';
+
+$string['receipt_intro'] =
+    '<p>Your subscription to Campus<small><sup>FR</sup></small> has been successfully activated and your payment confirmed.</p>
+<p>Here is the key information regarding your order:</p>';
+
+$string['receipt_button_open'] = 'Open Campus<small><sup>FR</sup></small>';
+
+$string['receipt_footer'] =
+    '<p>See you soon on Campus<small><sup>FR</sup></small> 🇫🇷🥐</p>
+<p>Nata and the Campus<small><sup>FR</sup></small> team</p>';
+
 
 // Emails – failure/abandoned/reminder
 $string['email_failed_subject'] = 'Your payment could not be completed';
@@ -248,7 +287,7 @@ $string['task_cleanup_login_tokens'] = 'Clean up expired login tokens';
 $string['option_queue_future'] = 'Extend (activates on {$a})';
 $string['option_purchase_new'] = 'New subscription';
 $string['choose_option'] = 'Choose an option';
-$string['have_account_login_to_see_options'] = 'Already have an account? — Log in to see upgrade options by clicking here.';
+$string['have_account_login_to_see_options'] = 'Already have an account? Log in to renew your subscription.';
 
 // Above the options
 $string['advisor_help_upgrade']  = 'You can either extend your current subscription in sequence or switch to a longer plan. The upgrade price is adjusted based on your elapsed time.';
@@ -259,7 +298,7 @@ $string['advisor_help_guest']    = 'Sign in to see upgrade options. Otherwise, y
 $string['summary_price_title'] = 'Total price';
 
 $string['personal_info_title'] = 'Personal information';
-$string['personal_info_help']  = 'This information will be used to create your account and send you the confirmation.';
+$string['personal_info_help']  = 'This information is required to create your account and activate your subscription.';
 
 $string['mail_hello'] = 'Hello {$a},';
 $string['mail_button_manage'] = 'Manage my subscriptions';
@@ -431,6 +470,7 @@ $string['provider_stripe'] = 'Stripe';
 $string['provider_manual'] = 'Manual';
 $string['provider_csv'] = 'CSV';
 $string['provider_dev'] = 'Dev';
+$string['provider_trial']  = 'Trial';
 
 $string['configmissing'] = 'Missing configuration: {$a}.';
 $string['missing_customer_id'] = 'Stripe customer ID is missing.';
@@ -486,12 +526,17 @@ $string['alfa_webhook_secret_live'] = 'Alfa Webhook secret (LIVE)';
 
 $string['policy_url_ru'] = 'Privacy policy URL (Russia)';
 $string['policy_url_row'] = 'Privacy policy URL (Rest of world)';
-$string['terms_url_ru'] = 'Terms (CGU/CGV) URL (Russia)';
-$string['terms_url_row'] = 'Terms (CGU/CGV) URL (Rest of world)';
+$string['terms_url_ru'] = 'Terms of use URL (Russia)';
+$string['terms_url_row'] = 'Terms of use URL (Rest of world)';
+$string['offer_url_ru'] = 'Offer agreement URL (Russia)';
+$string['offer_url_row'] = 'Offer agreement URL (Rest of world)';
 $string['privacy_policy'] = 'Privacy policy';
 $string['terms_cgu'] = 'Terms & Conditions';
+$string['terms_cgv'] = 'Offer agreement';
 $string['i_accept_policy'] = 'I agree to the {$a}.';
 $string['i_accept_terms']  = 'I agree to the {$a}.';
+$string['i_accept_all_terms'] =
+    'I accept the {$a->policy}, the {$a->terms} and the {$a->offer}.';
 
 $string['availability_mode'] = 'Plugin visibility';
 $string['availability_mode_desc'] = 'Temporarily restrict all public pages of the Subscriptions plugin.';
@@ -629,3 +674,79 @@ $string['payui_cta_mycourses'] = 'Go to My Courses';
 $string['settings_support_email'] = 'Support email';
 $string['settings_support_email_desc'] = 'Used on payment pages (error/success) to show a contact link.';
 $string['stripe_price_mismatch'] = 'Stripe: price mismatch detected. Please try again or contact support. ({$a})';
+
+$string['settings_trial_section'] = '7-day Trial';
+$string['settings_trial_planid'] = 'Trial plan (ID)';
+$string['settings_trial_planid_desc'] = 'ID of the plan flagged as "is_trial".';
+$string['settings_trial_duration_days'] = 'Trial duration (days)';
+$string['settings_trial_duration_days_desc'] = 'Number of days for the free trial.';
+$string['settings_trial_discount_percent'] = 'Discount (%) during window';
+$string['settings_trial_discount_percent_desc'] = 'For tracing and PSP-agnostic application.';
+$string['settings_trial_discount_hours'] = 'Discount window (hours)';
+$string['settings_trial_discount_hours_desc'] = 'E.g., 72 hours after the trial starts.';
+$string['missing_trial_plan'] = 'No trial plan configured (trial_plan_id).';
+
+$string['pricing_missing_price'] = 'No price is defined for this plan and currency ({$a}).';
+$string['cannot_purchase_trial_plan'] = 'This plan is a trial plan and cannot be purchased.';
+$string['settings_paylock_section'] = 'Price lock (checkout)';
+$string['settings_paylock_strict'] = 'Strict mode on mismatch';
+$string['settings_paylock_strict_desc'] = 'If enabled, subscription creation fails when the paid amount differs from the locked amount.';
+$string['settings_paylock_tolerance'] = 'Mismatch tolerance (in cents)';
+$string['settings_paylock_tolerance_desc'] = 'Maximum allowed difference between locked and paid amounts (default: 2 cents).';
+
+$string['pricing_missing_price'] = 'No price is defined for this plan and currency ({$a}).';
+$string['cannot_purchase_trial_plan'] = 'This plan is a trial plan and cannot be purchased.';
+$string['payment_mismatch_too_large'] = 'Payment mismatch exceeds allowed tolerance.';
+$string['paylock_missing_lockdata'] = 'No price-lock (locked_*) data is available for this request.';
+$string['paylock_invalid_minor'] = 'Invalid locked amount.';
+$string['stripe_lock_requires_payment_mode'] = 'Price lock requires Checkout mode "payment" (fixed amount). Use one-time payment or re-enable coupons.';
+$string['alfa_nonpositive_amount'] = 'Non-positive Alfa amount after price lock.';
+$string['alfa:productname'] = 'Subscription';
+$string['paylock_missing_context'] = 'Cannot compute price: user or plan is not defined.';
+
+$string['currency_selector_label'] = 'Currency';
+$string['currency_eur'] = '€ EUR';
+$string['currency_rub'] = '₽ RUB';
+$string['set_display_currency_symbols'] = 'Show currency symbol';
+$string['set_display_currency_symbols_desc'] = 'If enabled, prices use the symbol (e.g., €49). Otherwise, the code is shown (e.g., 49 EUR).';
+$string['badge_limited_offer'] = 'Limited offer -{$a}%';
+$string['price_unavailable_in'] = 'Not available in {$a->curr} — showing {$a->fallback}.';
+$string['checkout_discount_note']        = 'Your intro offer is still active';
+$string['checkout_discount_note_prefix'] = '−{$a}% on the subscription. Discount available only';
+$string['days_short']                    = 'd';
+
+$string['cancel_price_title']  = 'Expected price';
+$string['error_price_title']   = 'Expected price';
+$string['success_price_title'] = 'Amount paid';
+$string['reason_trial72h']     = 'A -{$a}% discount was applied during your trial period.';
+$string['task_sub_expiry_reminders'] = 'Subscription expiry reminders';
+$string['expiry_reminder_subject_today'] = 'Your subscription expires today';
+
+$string['email_copy_verbose'] = 'Technical appendix in copies (log@...)';
+$string['email_copy_verbose_desc'] = 'If enabled, each copy appends a technical summary (PR/User/Plan/Sub, locked_*, etc.).';
+
+$string['existing_account_login_first'] = 'We found an existing account for this email. Please log in to continue so we can attach the purchase to your account.';
+$string['task_enrol_scope_fill'] = 'Subscriptions — fill enrolments from plan scope';
+
+$string['paymentsuccess_redirect_msg'] = 'You will be redirected to "My courses" in {$a} seconds…';
+$string['paymentsuccess_mascot_alt']   = 'Gustave the giraffe congratulates you on your successful payment.';
+$string['paymentcancel_mascot_alt'] = 'Illustration of a cancelled payment.';
+$string['paymenterror_mascot_alt'] = 'Illustration of a payment error.';
+$string['plan_price_per_month'] = '(equivalent to {$a}/month)';
+
+$string['upgrade_window_label']    = 'Calculation window: {$a->start} → {$a->end}';
+$string['upgrade_ref_prices']      = 'Reference prices: current = {$a->current}, target = {$a->target}';
+$string['upgrade_part_past']       = 'Part already used at the current rate: {$a}';
+$string['upgrade_part_future']     = 'Remaining part at the target plan rate: {$a}';
+$string['upgrade_base_total']      = 'Theoretical total for this window: {$a}';
+$string['upgrade_already_paid']    = 'Already paid in this window: {$a}';
+$string['upgrade_base_minus_paid'] = 'Upgrade amount before promotion: {$a->base} − {$a->paid} = {$a->diff}';
+$string['upgrade_discount_line']   = 'Promotion −{$a->pct}% applied to {$a->before} ⇒ {$a->after}';
+$string['upgrade_amount_proposed'] = 'Proposed amount: {$a}';
+
+$string['trial_subscribe_now'] = 'Subscribe now';
+$string['plan_label'] = 'Plan';
+$string['checkout_go_to_payment_discount'] = 'Subscribe with discount';
+$string['checkout_full_access_line'] = 'Subscription with full access to all courses.';
+$string['summary_price_title_single'] = 'Subscription for {$a}';
+

@@ -21,6 +21,9 @@
 				<FIELD NAME="payment_failed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
 				<FIELD NAME="last_payment_failed_at" TYPE="int" LENGTH="10" NOTNULL="false"/>
 				<FIELD NAME="last_payment_failed_reason" TYPE="char" LENGTH="255" NOTNULL="false"/>
+				<FIELD NAME="discount_percent" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" COMMENT="Réduction % appliquée au moment de l’achat"/>
+				<FIELD NAME="discount_reason" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Raison de la réduction (ex: trial72h)"/>
+				<FIELD NAME="discount_amount" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Montant de remise appliqué (dans la devise de la souscription)"/>
 			</FIELDS>
 			<KEYS>
 				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -58,6 +61,9 @@
 			<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
 			<FIELD NAME="highlight_type" TYPE="char" LENGTH="20" NOTNULL="false" />
 			<FIELD NAME="is_recurring" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1=abonnement (renouvellement auto), 0=paiement ponctuel"/>
+			<FIELD NAME="is_trial" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="1 = plan d’essai 7 jours"/>
+			<FIELD NAME="expiry_reminder_days" TYPE="char" LENGTH="64" NOTNULL="false" COMMENT="Liste J-X propre au plan, ex: 14,7,3,1"/>
+			<FIELD NAME="expiry_reminder_enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" COMMENT="1=actif, 0=désactivé pour ce plan"/>
 		  </FIELDS>
 		  <KEYS>
 			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -128,9 +134,12 @@
         	<FIELD NAME="email"          TYPE="char"   LENGTH="255" NOTNULL="false" />
         	<FIELD NAME="firstname"      TYPE="char"   LENGTH="100" NOTNULL="false" />
         	<FIELD NAME="lastname"       TYPE="char"   LENGTH="100" NOTNULL="false" />
+			<FIELD NAME="phone" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Guest/checkout phone number"/>
+			<FIELD NAME="phone_country" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ISO country code for phone"/>
 			<FIELD NAME="subscriptionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
 			<FIELD NAME="currency" TYPE="char" LENGTH="10" UNSIGNED="false" NOTNULL="true"/>
 			<FIELD NAME="price" TYPE="number" LENGTH="10,2" UNSIGNED="false" NOTNULL="true"/>
+			<FIELD NAME="amount_minor" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Montant final payé en unités minor (ex: cents)"/>
 			<FIELD NAME="created_ip" TYPE="char" LENGTH="45" NOTNULL="false" SEQUENCE="false" COMMENT="IPv4/IPv6 at creation"/>
 			<FIELD NAME="created_useragent" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" COMMENT="HTTP User-Agent at creation"/>
 			<FIELD NAME="accept_language" TYPE="char" LENGTH="191" NOTNULL="false" SEQUENCE="false" COMMENT="HTTP Accept-Language header"/>
@@ -158,8 +167,12 @@
 			<FIELD NAME="login_token_expires" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Expiration du jeton (timestamp Unix)"/>
 			<FIELD NAME="operation" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="purchase_new|extend_now|queue_future|upgrade_prorata"/>
 			<FIELD NAME="reference_subscription_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Souscription impactée (si pertinent)"/>
-
-
+			<FIELD NAME="locked_list_price" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Prix catalogue verrouillé (au checkout)"/>
+			<FIELD NAME="locked_discount_percent" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" COMMENT="Remise % verrouillée"/>
+			<FIELD NAME="locked_discount_amount" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Remise € verrouillée"/>
+			<FIELD NAME="locked_discount_reason" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Raison de la remise (ex: trial72h)"/>
+			<FIELD NAME="locked_final_price" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Montant final facturé (verrouillé)"/>
+			<FIELD NAME="locked_at" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Timestamp du verrouillage"/>
 			<KEYS>
 				<KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscriptionid" REFTABLE="user_subscription" REFFIELDS="id"/>
 				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>

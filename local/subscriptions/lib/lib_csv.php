@@ -175,7 +175,11 @@ function process_csv_rows(array $validrows): array {
             end_date: $end_date, 
             pricepaid: $pricedata, 
             currency: $currency, 
-            creation_date: time()
+            creation_date: time(),
+            allowupdate: false,
+            discount_percent: 0,
+            discount_reason: null,
+            discount_amount: 0.00
         );
 
         $sub = $result['subscription'];

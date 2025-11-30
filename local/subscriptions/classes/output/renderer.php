@@ -42,8 +42,10 @@ class renderer extends plugin_renderer_base {
                 // queued < 7 jours => indexée par scope
                 if ($s->start_date >= $now && $s->start_date <= $now + $week) {
                     if (!isset($plans[$s->planid])) {
-                        $plans[$s->planid] = $DB->get_record('subscription_plan', ['id' => $s->planid], 'id,accessscopeid,name,is_recurring');
+                        $plans[$s->planid] = $DB->get_record('subscription_plan', ['id' => $s->planid],
+                            'id,accessscopeid,name,is_recurring,is_trial');
                     }
+
                     $queuedSoonByScope[$plans[$s->planid]->accessscopeid] = true;
                 }
             } else if ($stlc === Status::ACTIVE) {
@@ -79,30 +81,15 @@ class renderer extends plugin_renderer_base {
             }
             $plan = $plans[$sub->planid];
 
-            $planname = local_subscriptions_plan_display_name($plan);
+            $planname    = local_subscriptions_plan_display_name($plan);
+            $isTrialPlan = !empty($plan->is_trial);
 
             // Récupération du scope
             if (!isset($accessscopes[$plan->accessscopeid])) {
                 $accessscopes[$plan->accessscopeid] = $DB->get_record('subscription_access_scope', ['id' => $plan->accessscopeid]);
             }
-            $scope = $accessscopes[$plan->accessscopeid];
-
+            $scope    = $accessscopes[$plan->accessscopeid];
             $scopename = local_subscriptions_scope_display_name($scope);
-
-            // Récupération des noms de cours
-            $coursenames = [];
-            if (!empty($scope->course_ids)) {
-                $course_ids = explode(',', $scope->course_ids);
-                list($sql, $params) = $DB->get_in_or_equal($course_ids);
-                $courses = $DB->get_records_select('course', 'id ' . $sql, $params);
-                foreach ($courses as $course) {
-                    $coursenames[] = format_string($course->fullname);
-                }
-
-                // Tri alphabétique respectueux de la locale
-                \core_collator::asort($coursenames);
-                $coursenames = array_values($coursenames); // réindexe proprement
-            }
 
             // Badge HTML (ta méthode dans SubsPresenter)
             $statusbadge = SubsPresenter::render_status_badge($status);
@@ -135,32 +122,31 @@ class renderer extends plugin_renderer_base {
                 $queuedMsg = get_string('queued_starts_in', 'local_subscriptions', $days);
             }
 
-            $popovercontent = \html_writer::div(
-                \html_writer::alist($coursenames) .
-                \html_writer::empty_tag('hr') .
-                \html_writer::link('#', '❌ '.get_string('close', 'local_subscriptions'), [
-                    'class' => 'close-popover text-danger text-decoration-none d-block mt-2 text-end'
-                ]),
-                '',
-                ['style' => 'min-width: 200px;']
-            );
+            // Prix : on le masque pour les plans d’essai
+            $showPrice   = !$isTrialPlan;
+            $priceString = '';
+
+            if ($showPrice) {
+                $amount = (float)($sub->pricepaid ?? 0);
+                $cur    = (string)($sub->currency ?? '');
+                $priceString = sprintf('%.2f %s', $amount, $cur);
+            }
+
 
             $data['subscriptions'][] = [
                 'planname'           => format_string($planname),
                 'startdate'          => userdate($sub->start_date, get_string('strftimedate', 'langconfig')),
                 'enddate'            => userdate($sub->end_date, get_string('strftimedate', 'langconfig')),
                 'accessscope'        => format_string($scopename),
-                'coursenames'        => $coursenames,
-                'pricepaid'          => sprintf('%.2f %s', $sub->pricepaid ?? 0, $sub->currency ?? ''),
+                'pricepaid'          => $priceString,
                 'statusbadge'        => $statusbadge,          // <<< NOUVEAU : badge HTML prêt
                 'statusclass'        => $bordercls,            // compat avec ton CSS/markup existant
-                // Génération du contenu HTML du popover
-                'popovercontent' => htmlspecialchars($popovercontent, ENT_QUOTES, 'UTF-8'),
                 // Nouveau : alerte renouvellement
                 'show_warning'     => $showwarning,
                 'renew_msg'        => $renewmsg,
                 'renew_url'        => $data['subscribe_url'],
                 'queued_msg'       => $queuedMsg, // affiché si non vide
+                'is_trial'     => $isTrialPlan ? true : false,  // bien un booléen
             ];
         }
 
@@ -169,10 +155,13 @@ class renderer extends plugin_renderer_base {
             // Plan & Scope
             if (!isset($plans[$earliestQueued->planid])) {
                 $plans[$earliestQueued->planid] = $DB->get_record('subscription_plan',
-                    ['id' => $earliestQueued->planid], 'id,accessscopeid,name,is_recurring');
+                    ['id' => $earliestQueued->planid], 'id,accessscopeid,name,is_recurring,is_trial');
+
             }
             $plan  = $plans[$earliestQueued->planid];
             $planname = local_subscriptions_plan_display_name($plan);
+
+            $isTrialPlan = !empty($plan->is_trial);
 
             if (!isset($accessscopes[$plan->accessscopeid])) {
                 $accessscopes[$plan->accessscopeid] = $DB->get_record('subscription_access_scope',
@@ -181,111 +170,105 @@ class renderer extends plugin_renderer_base {
             $scope = $accessscopes[$plan->accessscopeid];
             $scopename = local_subscriptions_scope_display_name($scope);
 
-            // Courses (pour popover)
-            $coursenames = [];
-            if (!empty($scope->course_ids)) {
-                $course_ids = explode(',', $scope->course_ids);
-                [$sql, $params] = $DB->get_in_or_equal($course_ids);
-                $courses = $DB->get_records_select('course', 'id '.$sql, $params);
-                foreach ($courses as $course) {
-                    $coursenames[] = format_string($course->fullname);
-                }
-
-                // Tri alphabétique respectueux de la locale
-                \core_collator::asort($coursenames);
-                $coursenames = array_values($coursenames); // réindexe proprement
-            }
-            $popovercontent = \html_writer::div(
-                \html_writer::alist($coursenames)
-            . \html_writer::empty_tag('hr')
-            . \html_writer::link('#', '❌ '.get_string('close', 'local_subscriptions'), [
-                    'class' => 'close-popover text-danger text-decoration-none d-block mt-2 text-end'
-                ]),
-                '',
-                ['style' => 'min-width: 200px;']
-            );
-
             $days = max(0, (int)ceil(($earliestQueued->start_date - $now) / 86400.0));
             $queuedMsg = get_string('queued_starts_in', 'local_subscriptions', $days);
+
+            $showPrice   = !$isTrialPlan;
+            $priceString = '';
+            if ($showPrice) {
+                $amount = (float)($earliestQueued->pricepaid ?? 0);
+                $cur    = (string)($earliestQueued->currency ?? '');
+                $priceString = sprintf('%.2f %s', $amount, $cur);
+            }
 
             $data['subscriptions'][] = [
                 'planname'         => format_string($planname),
                 'startdate'        => userdate($earliestQueued->start_date, get_string('strftimedate', 'langconfig')),
                 'enddate'          => userdate($earliestQueued->end_date,   get_string('strftimedate', 'langconfig')),
                 'accessscope'      => format_string($scopename),
-                'coursenames'      => $coursenames,
-                'pricepaid'        => sprintf('%.2f %s', $earliestQueued->pricepaid ?? 0, $earliestQueued->currency ?? ''),
+                'pricepaid'        => $priceString,
                 'statusbadge'      => SubsPresenter::render_status_badge('queued'),
                 'statusclass'      => 'border-secondary',
-                'popovercontent'   => htmlspecialchars($popovercontent, ENT_QUOTES, 'UTF-8'),
-
                 'show_warning'     => false,
                 'renew_msg'        => '',
                 'renew_url'        => $data['subscribe_url'],
-
                 'queued_msg'       => $queuedMsg,
+                'is_trial'     => $isTrialPlan ? true : false,
             ];
         }
-
-
 
         return $this->render_from_template('local_subscriptions/myprofile_subscriptions', $data);
     }
 
     public function render_available_plans($plans, $selectedcurrency = null): string {
+        global $DB, $USER, $CFG;
+        require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
 
-        global $DB;
+        $selectedcurrency = strtoupper((string)$selectedcurrency);
+        if (!in_array($selectedcurrency, ['EUR','RUB'], true)) {
+            $selectedcurrency = 'EUR';
+        }
+
+        // Si la page subscribe est en mode "embedded" (popup), on veut que les liens
+        // vers checkout restent aussi en embedded=1.
+        $embedded = (int)$this->page->url->param('embedded');
+
+        $discountOpen = (isloggedin() && !isguestuser())
+            ? \local_subscriptions\trial_manager::is_discount_window_open((int)$USER->id)
+            : false;
+        $discPct = (int)(get_config('local_subscriptions','trial_discount_percent') ?? 15);
 
         $featuredSetting = (int) get_config('local_subscriptions', 'featured_planid'); // fallback
 
-        $output = \html_writer::start_div('subscription-plan-grid d-flex flex-wrap justify-content-start gap-3');
+        // On travaille sur une liste indexée pour pouvoir repositionner le "popular"
+        $planlist = array_values($plans);
+        $popularIndex = null;
 
-        foreach ($plans as $plan) {
-            $durationtext = "<strong>".(\local_subscriptions\subscription_config::get_plans()[$plan->duration_key] ?? $plan->duration_key)."</strong>";
-            $plan->courses = local_subscriptions_get_courses_by_plan($plan->id);
-
-            $courselist = '';
-            if (!empty($plan->courses)) {
-                $courselist .= \html_writer::start_tag('ul', ['class' => 'list-unstyled courselist']);
-                foreach ($plan->courses as $course) {
-                    $descid = 'desc-' . $plan->id . '-' . $course->id;
-                    $courselist .= \html_writer::start_tag('li', ['class' => 'course-item mb-1']);
-                    // Après (évite le doublon):
-                    $label = $course->fullname;
-                    $hasicon = preg_match('/^\x{1F4D8}/u', $label); // 📘 en UTF-8
-                    if (!$hasicon) {
-                        $label = '&#x1F4D8; ' . $label; // entité => pas de mojibake
-                    }
-                    $courselist .= \html_writer::tag('a', $label, [
-                        'href' => '#',
-                        'class' => 'coursename',
-                        'data-toggle' => 'desc-toggle',
-                        'data-target' => '#' . $descid
-                    ]);
-                    $courselist .= \html_writer::tag('div', $course->summary, [
-                        'id' => $descid,
-                        'class' => 'course-desc mt-1 d-none',
-                    ]);
-                    $courselist .= \html_writer::end_tag('li');
-                }
-                $courselist .= \html_writer::end_tag('ul');
-            }
-
+        // Premier passage : déterminer highlight_type effectif et index du popular
+        foreach ($planlist as $idx => $plan) {
             $hl = isset($plan->highlight_type) ? trim((string)$plan->highlight_type) : '';
             if (!$hl && $featuredSetting && (int)$plan->id === $featuredSetting) {
                 $hl = 'popular'; // fallback rétro-compat.
             }
+            $plan->highlight_effective = $hl;
 
+            if ($hl === 'popular' && $popularIndex === null) {
+                $popularIndex = $idx;
+            }
+
+            $planlist[$idx] = $plan;
+        }
+
+        // Si on a un plan "popular" et au moins 3 plans, on le place au milieu
+        if ($popularIndex !== null && count($planlist) >= 3) {
+            $popular = $planlist[$popularIndex];
+            array_splice($planlist, $popularIndex, 1);           // retire de sa position
+            $middle = (int) floor(count($planlist) / 2);         // index milieu
+            array_splice($planlist, $middle, 0, [$popular]);     // réinsère au milieu
+        }
+
+        // Container principal (on passe en justify-content-center côté CSS)
+        $output = \html_writer::start_div(
+            'subscription-plan-grid d-flex flex-wrap justify-content-center gap-3'
+        );
+
+        foreach ($planlist as $plan) {
+            $durationtext = "<strong>".(\local_subscriptions\subscription_config::get_plans()[$plan->duration_key] ?? $plan->duration_key)."</strong>";
+
+            // Plus besoin de récupérer la liste des cours ici
+            // $plan->courses = local_subscriptions_get_courses_by_plan($plan->id);
+
+            $hl = $plan->highlight_effective ?? '';
             $isPopular = ($hl === 'popular');
             $isPremium = ($hl === 'premium');
 
             $classes = 'card plan-card p-3 flex-fill position-relative';
             $style   = 'border-radius:12px;';
             if ($isPopular) {
-                $classes .= ' ls-card-popular border-2 shadow-xl';
+                $classes .= ' ls-card-popular shadow-xl';
                 $style   .= ' border:2px solid #ffc107;';
             } else if ($isPremium) {
-                $classes .= ' ls-card-premium border-2 shadow-xl';
+                $classes .= ' ls-card-premium shadow-xl';
                 $style   .= ' border:2px solid #8a2be2;'; // violet électrique
             } else {
                 $style   .= ' border:1px solid #ccc;';
@@ -294,9 +277,15 @@ class renderer extends plugin_renderer_base {
 
             // Badge
             if ($isPopular) {
-                $output .= \html_writer::div(get_string('highlight_popular', 'local_subscriptions'), 'ls-badge-popular');
+                $output .= \html_writer::div(
+                    get_string('highlight_popular', 'local_subscriptions'),
+                    'ls-badge-popular'
+                );
             } else if ($isPremium) {
-                $output .= \html_writer::div(get_string('highlight_premium', 'local_subscriptions'), 'ls-badge-premium');
+                $output .= \html_writer::div(
+                    get_string('highlight_premium', 'local_subscriptions'),
+                    'ls-badge-premium'
+                );
             }
 
             $titleclass = 'plan-title-neutral p-2 rounded mb-2 text-center';
@@ -306,137 +295,155 @@ class renderer extends plugin_renderer_base {
             $displayname = \local_subscriptions_plan_display_name($plan);
             $output .= \html_writer::tag('h4', format_string($displayname), ['class'=>$titleclass]);
 
-            $output .= \html_writer::tag('p', get_string('duration', 'local_subscriptions') . ' : ' . $durationtext, ['class' => 'mb-1']);
-     
-            $output .= \html_writer::tag('p', get_string('courselist','local_subscriptions').' : ', ['class' => 'mb-1']);
-            $output .= \html_writer::div($courselist, 'plan-courselist mb-3');
+            // Durée
+            $output .= \html_writer::tag(
+                'p',
+                get_string('duration', 'local_subscriptions') . ' : ' . $durationtext,
+                ['class' => 'mb-3 text-muted']
+            );
 
-            // lien (ancre) aspect bouton
-            $output .= \html_writer::div($this->plan_description_link($plan), 'mb-1');
-            $output .= $this->plan_description_modal_once($plan);
+            // === Zone centrale épurée : on laisse un espace blanc réglable ===
+            $output .= \html_writer::div('', 'plan-middle-space mb-3');
 
-            // Récupérer les prix du plan
-            $prices = $DB->get_records('subscription_plan_price', ['planid' => $plan->id]);
-            $prices = array_values($prices); // Réindexe avec 0, 1, 2, etc.
+            // === Description/Modal supprimées ===
+            // $output .= \html_writer::div($this->plan_description_link($plan), 'mb-1');
+            // $output .= $this->plan_description_modal_once($plan);
 
-            // Devise par défaut selon pays (RU/BY -> RUB), sinon 1ère dispo.
-            $countrycode = Region::detect_country();
+            // --- PRIX PAR PLAN (devise globale) ---
+            $info = \local_subscriptions\pricing_manager::get_plan_price_or_fallback($plan->id, $selectedcurrency, $DB);
+            $usedCurrency = $info['currency'];
+            $basePrice    = (float)$info['price'];
+            $hasSelected  = (bool)$info['available'];
 
-            // Mapping “préférence forte”
-            $currencybycountry = [
-                //'SE' => 'RUB',
-                'RU' => 'RUB',
-                'BY' => 'RUB',
-                'FR' => 'EUR',
-                'CA' => 'CAD',
-                'US' => 'USD',
-            ];
+            // Trial plan ? pas de remise sur le plan d’essai
+            $isTrialPlan = isset($plan->is_trial)
+                ? (int)$plan->is_trial
+                : (int)$DB->get_field('subscription_plan', 'is_trial', ['id'=>$plan->id], IGNORE_MISSING);
 
-            $preferredcurrency = $currencybycountry[$countrycode] ?? null;
+            // Calcul remise (si fenêtre ouverte + pas plan d’essai)
+            $applyDiscount = ($discountOpen && !$isTrialPlan && $discPct > 0);
+            list($finalPrice, $discAmount) = $this->apply_discount($basePrice, $applyDiscount, $discPct);
 
-            // Indexe les prix par devise
-            $pricebycurrency = [];
-            foreach ($prices as $p) {
-                $pricebycurrency[$p->currency] = $p->price;
-            }
-
-            // Choix final : préférée si dispo, sinon première
-            $defaultcurrency = $preferredcurrency && array_key_exists($preferredcurrency, $pricebycurrency)
-                ? $preferredcurrency
-                : (array_key_first($pricebycurrency));
-
-            $defaultprice = $pricebycurrency[$defaultcurrency];
-
+            // Zone prix (avec badge près de “Prix”)
             $output .= \html_writer::start_div('bottom-zone mt-auto');
+            $output .= \html_writer::start_div('d-flex align-items-center justify-content-between mb-1');
+            $output .= \html_writer::div(get_string('price', 'local_subscriptions'), 'text-muted small');
 
-            $output .= \html_writer::div(get_string('price', 'local_subscriptions'), 'text-muted small mb-1'); // "Price" (ou ajoute ta string)
-            $output .= \html_writer::start_div('plan-price-block mb-2', ['id' => "plan-price-{$plan->id}"]);
-            $output .= \html_writer::span("<strong>{$defaultprice} {$defaultcurrency}</strong>", 'selected-price me-2', [
-                'data-planid' => $plan->id
+            if ($discAmount > 0) {
+                $output .= \html_writer::span(
+                    get_string('badge_limited_offer','local_subscriptions', $discPct),
+                    'badge bg-warning text-dark price-badge ms-2'
+                );
+            }
+            $output .= \html_writer::end_div();
+
+            // Bloc affichage prix
+            $output .= \html_writer::start_div('plan-price-block mb-2', [
+                'id' => "plan-price-{$plan->id}",
             ]);
 
-            if (count($prices) > 1) {
-                $output .= \html_writer::tag('a', get_string('change_currency', 'local_subscriptions'), [
-                    'href' => '#',
-                    'class' => 'change-currency-link small',
-                    'data-planid' => $plan->id
-                ]);
-
-                $options = '';
-                foreach ($prices as $p) {
-                    $selected = ($p->currency === $defaultcurrency) ? ' selected' : '';
-                    $options .= "<option value='{$p->currency}' data-price='{$p->price}'{$selected}>{$p->price} {$p->currency}</option>";
-                }
-                $output .= "<select id='currency-selector-{$plan->id}' class='form-select form-select-sm currency-selector mt-2' data-planid='{$plan->id}' style='display:none; max-width: 150px'>{$options}</select>";
-            }
-
-            if (!empty($plan->is_recurring)) {
-                $output .= \html_writer::span(get_string('badge_recurring', 'local_subscriptions'), 'badge bg-info ms-2');
-            }
-
-            $output .= \html_writer::end_div(); // fin plan-price-block
- 
-            // Bouton Subscribe
-            $btnclass = 'btn subscribe-button w-100 fs-5';
-            if ($isPopular) {
-                $btnclass .= ' ls-btn-popular';
-            } else if ($isPremium) {
-                $btnclass .= ' ls-btn-premium';
+            if ($discAmount > 0) {
+                $output .= \html_writer::span(
+                    $this->format_money($basePrice, $usedCurrency),
+                    'old text-muted text-decoration-line-through me-2'
+                );
+                $output .= \html_writer::span(
+                    '<strong class="new text-success">'.$this->format_money($finalPrice, $usedCurrency).'</strong>',
+                    'selected-price'
+                );
             } else {
-                $btnclass .= ' btn-outline-primary';
+                $output .= \html_writer::span(
+                    '<strong>'.$this->format_money($basePrice, $usedCurrency).'</strong>',
+                    'selected-price'
+                );
+            }
+
+            if (!$hasSelected) {
+                // Message d’indispo + fallback
+                $note = (object)['curr'=>$selectedcurrency, 'fallback'=>$usedCurrency];
+                $output .= \html_writer::div(
+                    get_string('price_unavailable_in','local_subscriptions', $note),
+                    'text-muted small mt-1'
+                );
+            }
+
+            $output .= \html_writer::end_div(); // plan-price-block
+
+            // Prix équivalent par mois : (soit xx €/mois)
+            $months = $this->months_for_plan($plan);
+            if ($months > 0 && $finalPrice > 0 && $hasSelected) {
+                $monthly = $finalPrice / $months;
+                // On réutilise le formatteur pour respecter l’option symbole / code
+                $monthlyStr = $this->format_money($monthly, $usedCurrency);
+                // String i18n du type "(soit xx €/mois)"
+                $perMonth = get_string('plan_price_per_month', 'local_subscriptions', $monthlyStr);
+                $output .= \html_writer::div($perMonth, 'text-muted small');
+            }
+
+
+            // Bouton Subscribe (checkout) – on passe la devise réellement utilisée
+            $btnclass = 'btn subscribe-button w-100 fs-5';
+            if ($isPopular)      { $btnclass .= ' ls-btn-popular'; }
+            else if ($isPremium) { $btnclass .= ' ls-btn-premium'; }
+            else                 { $btnclass .= ' btn-outline-primary'; }
+
+            // URL de checkout
+            $checkouturl = UrlFactory::checkout($plan->id, $usedCurrency);
+
+            // Si la page courante est embedded=1 (popup), on garde ce mode pour checkout
+            if (!empty($embedded)) {
+                $checkouturl = new \moodle_url($checkouturl->out(false), ['embedded' => 1]);
             }
 
             $output .= \html_writer::link(
-                UrlFactory::checkout($plan->id, $defaultcurrency),
+                $checkouturl,
                 get_string('subscribe', 'local_subscriptions'),
-                [
-                    'class' => $btnclass,
-                    'data-planid' => $plan->id
-                ]
+                ['class' => $btnclass, 'data-planid' => $plan->id]
             );
-         
 
-            $output .= \html_writer::end_div(); // fin bottom-zone
+            $output .= \html_writer::end_div(); // bottom-zone
             $output .= \html_writer::end_div(); // card
         }
 
         $output .= \html_writer::end_div(); // grid
 
-        // Ajout du JS pour toggler la description
-        $output .= \html_writer::script("
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('[data-toggle=\"desc-toggle\"]').forEach(function(trigger) {
-                    trigger.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        var target = document.querySelector(trigger.getAttribute('data-target'));
-                        if (target) {
-                            target.classList.toggle('d-none');
-                        }
-                    });
-                });
-            });
-        ");
-
-        $output .= \html_writer::script("
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.currency-selector').forEach(function(select) {
-                    select.addEventListener('change', function() {
-                        const planid = this.dataset.planid;
-                        const selectedCurrency = this.value;
-
-                        const button = document.querySelector('.subscribe-button[data-planid=\"' + planid + '\"]');
-                        if (button) {
-                            const baseUrl = new URL(button.href);
-                            baseUrl.searchParams.set('currency', selectedCurrency);
-                            button.href = baseUrl.toString();
-                        }
-                    });
-                });
-            });
-        ");
-
+        // Plus besoin du JS de toggle description, on l’enlève
         return $output;
     }
+
+
+    /** Retourne le symbole pour EUR/RUB, sinon le code. */
+    private function currency_symbol(string $cur): string {
+        $c = strtoupper($cur);
+        return ($c === 'EUR') ? '€' : (($c === 'RUB' || $c === 'RUR') ? '₽' : $c);
+    }
+
+    /** Formate un prix en tenant compte du réglage symboles. */
+    private function format_money(float $amount, string $currency): string {
+        $usesymbol = (bool) get_config('local_subscriptions','display_currency_symbols');
+        $cur = strtoupper($currency);
+        $amt = number_format($amount, 2, '.', '');
+        if ($usesymbol) {
+            $sym = $this->currency_symbol($cur);
+            // Convention EU: 49,00 € ; on reste simple: "49.00 €"
+            return $amt.' '.$sym;
+        } else {
+            return $amt.' '.$cur;
+        }
+    }
+
+    /** 
+     * Applique une remise en % sur un prix de base.
+     * @return array [finalPrice, discountAmount]
+     */
+    private function apply_discount(float $base, bool $allowed, int $pct): array {
+        if (!$allowed || $pct <= 0) {
+            return [round($base, 2), 0.0];
+        }
+        $disc = round($base * $pct / 100, 2);
+        return [round($base - $disc, 2), $disc];
+    }
+
 
     private array $descmodalsprinted = [];
 
@@ -499,5 +506,43 @@ class renderer extends plugin_renderer_base {
         $data = ['id' => $id, 'name' => $name, 'descriptionhtml' => $deschtml];
         return $this->render_from_template('local_subscriptions/plan_description_modal', $data);
     }
+
+    /**
+     * Essaie de déduire le nombre de mois de la durée d’un plan.
+     * On se base sur duration_key (ex: 1month, 6months, 1year) avec quelques fallbacks.
+     */
+    private function months_for_plan(\stdClass $plan): int {
+        $key = trim(mb_strtolower($plan->duration_key ?? ''));
+        if ($key === '') {
+            return 0;
+        }
+
+        // Mapping explicite des cas classiques
+        $map = [
+            '1month'   => 1,
+            '3months'  => 3,
+            '6months'  => 6,
+            '12months' => 12,
+            '1year'    => 12,
+            '3years'   => 36,
+        ];
+        if (isset($map[$key])) {
+            return $map[$key];
+        }
+
+        // Fallback générique : on extrait le nombre et on regarde s'il y a "year" ou "month"
+        if (preg_match('/(\d+)/', $key, $m)) {
+            $n = (int)$m[1];
+            if (strpos($key, 'year') !== false) {
+                return $n * 12;
+            }
+            if (strpos($key, 'month') !== false) {
+                return $n;
+            }
+        }
+
+        return 0;
+    }
+
     
 }

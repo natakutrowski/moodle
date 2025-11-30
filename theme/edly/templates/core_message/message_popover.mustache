@@ -26,6 +26,7 @@ Example context (json):
 "unreadcount": 3
 }
 }}
+{{#output.edly_is_siteadmin}}
 <li class="user-notif edly-settings-nav edly-settings-nav-msg">
     <div class="dropdown">
         <div class="float-right-d popover-region collapsed">
@@ -36,6 +37,7 @@ Example context (json):
         </div>
     </div>
 </li>
+{{/output.edly_is_siteadmin}}
 {{#js}}
     require(
     [

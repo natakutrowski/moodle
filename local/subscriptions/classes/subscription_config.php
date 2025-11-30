@@ -7,6 +7,7 @@ class subscription_config {
 
 	// -- Arrays of constants --
     public const PLAN_DURATION_KEYS = [
+        '1week',
         '1month',
         '3months',
         '6months',

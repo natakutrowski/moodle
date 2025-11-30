@@ -43,6 +43,15 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
         $this->ensure_sdk();
         $mode = $options['mode'] ?? 'payment';
 
+        // Utilisation du LOCK ?
+        $useLocked = !empty($options['use_locked_amount'])
+            || (isset($payment_request->locked_final_price) && (float)$payment_request->locked_final_price > 0);
+
+        // Si on doit utiliser le LOCK, on override le mode en 'payment' (montant fixe)
+        if ($useLocked && $mode !== 'payment') {
+            $mode = 'payment';
+        }
+
         // (OPTION) Devise autorisée
         $allowed = ['EUR','USD','GBP','CHF'];
         if (!in_array(strtoupper($payment_request->currency), $allowed, true)) {
@@ -51,44 +60,30 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
 
         $priceId = $options['price_map']['stripe_price_id'] ?? null;
 
-        // === GUARD PRICING (Stripe) =============================================
-        global $DB;
-
-        // Opération courante (vient de create_session)
-        $op = $options['operation'] ?? ($payment_request->operation ?? '');
-
-        // Devise & prix PR
-        $prCurrency = strtoupper($payment_request->currency ?? '');
-        $prPrice    = isset($payment_request->price) ? (float)$payment_request->price : 0.0;
-
-        // Prix catalogue selon plan/devise (si connu)
-        $cfgPrice = null;
-        if (!empty($payment_request->planid) && $prCurrency !== '') {
-            $cfgPrice = $DB->get_field('subscription_plan_price', 'price', [
-                'planid'   => (int)$payment_request->planid,
-                'currency' => $prCurrency,
-            ], IGNORE_MISSING);
-            if ($cfgPrice !== false) { $cfgPrice = (float)$cfgPrice; } else { $cfgPrice = null; }
-        }
-
-        // Règle métier :
-        // - PURCHASE_NEW et QUEUE_FUTURE => prix PR == prix configuré
-        // - UPGRADE_NOW_REPLACE_CHAIN    => prix Advisor autorisé (>0), log si très élevé
-        if (in_array($op, [Operation::PURCHASE_NEW, Operation::QUEUE_FUTURE], true)) {
-            if ($cfgPrice !== null && abs($prPrice - $cfgPrice) > 0.01) {
-                throw new \moodle_exception('stripe_price_mismatch', 'local_subscriptions', '',
-                    'PR='.$prPrice.' / CFG='.$cfgPrice);
+        // === LOCK PRICING (si activé) ===========================================
+        if ($useLocked) {
+            if (!isset($payment_request->locked_final_price) || (float)$payment_request->locked_final_price <= 0) {
+                throw new \moodle_exception('paylock_missing_lockdata', 'local_subscriptions');
             }
-        } elseif ($op === Operation::UPGRADE_NOW_REPLACE_CHAIN) {
-            if ($prPrice <= 0) {
-                throw new \moodle_exception('stripe_nonpositive_amount', 'local_subscriptions');
-            }
-            if ($cfgPrice !== null && $prPrice > ($cfgPrice * 1.25)) {
-                error_log('[stripe][price_guard] upgrade price unusually high: PR='.$prPrice.' CFG='.$cfgPrice);
+
+            $prCurrency   = strtoupper($payment_request->currency ?? '');
+            if ($prCurrency === '') { $prCurrency = 'EUR'; }
+
+            $lockedList   = (float)($payment_request->locked_list_price      ?? 0.0);
+            $lockedPct    = (int)  ($payment_request->locked_discount_percent ?? 0);
+            $lockedAmount = (float)($payment_request->locked_discount_amount  ?? 0.0);
+            $lockedReason =         ($payment_request->locked_discount_reason  ?? null);
+            $lockedFinal  = (float)  $payment_request->locked_final_price;
+
+            $amountMinor = isset($payment_request->amount_minor)
+                ? (int)$payment_request->amount_minor
+                : (int)round($lockedFinal * 100);
+
+            if ($amountMinor <= 0) {
+                throw new \moodle_exception('paylock_invalid_minor', 'local_subscriptions');
             }
         }
-        // =======================================================================
-
+        // =========================================================================
 
         $cfg = $this->cfg([
             'success_url' => $options['success_url'] ?? null,
@@ -111,31 +106,68 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
         if (!empty($options['cancel_url']))  { $params['cancel_url']  = $options['cancel_url']; }
 
         if ($mode === 'payment') {
-            $amountMinor = isset($payment_request->price) ? (int)round(((float)$payment_request->price) * 100) : null;
+            if ($useLocked) {
+                // Paiement au montant verrouillé (sans coupon, sans price_id)
+                $params['line_items'] = [[
+                    'price_data' => [
+                        'currency'     => strtolower($prCurrency),
+                        'product_data' => [
+                            'name' => $options['product_name'] ?? get_string('stripe:productname', 'local_subscriptions', 'CampusFR')
+                        ],
+                        'unit_amount'  => $amountMinor,
+                    ],
+                    'quantity' => 1,
+                ]];
 
-            if ($amountMinor <= 0) {
-                throw new \moodle_exception('stripe_nonpositive_amount', 'local_subscriptions');
+                // Double en metadata (utile support)
+                $params['metadata'] = array_merge($params['metadata'] ?? [], [
+                    'locked_list_price'        => (string)$lockedList,
+                    'locked_discount_percent'  => (string)$lockedPct,
+                    'locked_discount_amount'   => (string)$lockedAmount,
+                    'locked_discount_reason'   => (string)($lockedReason ?? ''),
+                    'locked_final_price'       => (string)$lockedFinal,
+                    'locked_currency'          => (string)$prCurrency,
+                ]);
+
+                $params['payment_intent_data'] = [
+                    'metadata' => ['payment_request_id' => (string)$payment_request->id]
+                ];
+            } else {
+                // Cas classique (pas de LOCK) — on garde ton code existant
+                $amountMinor = isset($payment_request->price) ? (int)round(((float)$payment_request->price) * 100) : null;
+                if ($amountMinor === null || $amountMinor <= 0) {
+                    throw new \moodle_exception('stripe_nonpositive_amount', 'local_subscriptions');
+                }
+                $params['line_items'] = [[
+                    'price_data' => [
+                        'currency'     => $payment_request->currency,
+                        'product_data' => ['name' => $options['product_name'] ?? get_string('stripe:productname', 'local_subscriptions', 'CampusFR')],
+                        'unit_amount'  => $amountMinor,
+                    ],
+                    'quantity' => 1,
+                ]];
+                $params['payment_intent_data'] = [
+                    'metadata' => ['payment_request_id' => (string)$payment_request->id]
+                ];
             }
-            if ($amountMinor === null) { throw new \coding_exception(get_string('stripe:missingamount', 'local_subscriptions')); }
-            $params['line_items'] = [[
-                'price_data' => [
-                    'currency' => $payment_request->currency,
-                    'product_data' => ['name' => $options['product_name'] ?? get_string('stripe:productname', 'local_subscriptions', 'CampusFR')],
-                    'unit_amount' => $amountMinor,
-                ],
-                'quantity' => 1,
-            ]];
-            $params['payment_intent_data'] = [
-                'metadata' => ['payment_request_id' => (string)$payment_request->id]
-            ];
         } else {
-            if (!$priceId) {
-                throw new \coding_exception(get_string('stripe:missingpriceidforsubscription', 'local_subscriptions'));
+            // Mode 'subscription' NE DOIT PAS être utilisé quand useLocked est vrai
+            if ($useLocked) {
+                // Par sécurité on bascule en payment (au cas où)
+                $mode = 'payment';
+                // … et on retombe sur la branche ci-dessus (tu peux retourner en haut si tu préfères)
+                // Pour rester simple : on relance la méthode en interne n'est pas nécessaire,
+                // le bloc ci-dessus a déjà préparé $params pour 'payment'.
+            } else {
+                // Cas abonnement récurrent standard : on garde ta logique price_id
+                if (!$priceId) {
+                    throw new \coding_exception(get_string('stripe:missingpriceidforsubscription', 'local_subscriptions'));
+                }
+                $params['line_items'] = [[ 'price' => $priceId, 'quantity' => 1 ]];  
+                $params['subscription_data'] = [
+                    'metadata' => ['payment_request_id' => (string)$payment_request->id]
+                ];
             }
-            $params['line_items'] = [[ 'price' => $priceId, 'quantity' => 1 ]];  
-            $params['subscription_data'] = [
-                'metadata' => ['payment_request_id' => (string)$payment_request->id]
-            ];
         }
 
         // Pré-remplir l'email si pas de customer existant
@@ -146,6 +178,22 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
                 $params['customer_creation'] = 'always';
             }
         }
+
+        $params['metadata'] = array_merge($params['metadata'] ?? [], [
+            'payment_request_id' => (string)$payment_request->id,
+        ]);
+
+        if (!empty($useLocked)) {
+            $params['metadata'] = array_merge($params['metadata'], [
+                'locked_list_price'        => (string)$lockedList,
+                'locked_discount_percent'  => (string)$lockedPct,
+                'locked_discount_amount'   => (string)$lockedAmount,
+                'locked_discount_reason'   => (string)($lockedReason ?? ''),
+                'locked_final_price'       => (string)$lockedFinal,
+                'locked_currency'          => (string)$prCurrency,
+            ]);
+        }
+
 
         error_log('[subs][stripe][create_session] PR#'.$payment_request->id.' amount='.$payment_request->price.' '.$payment_request->currency.' mode='.$mode);
 

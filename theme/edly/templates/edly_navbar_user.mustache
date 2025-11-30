@@ -1,5 +1,7 @@
 <ul class="edly-header-user-sec pull-right">
-    {{{ output.edit_switch }}}
+    {{#output.edly_is_siteadmin}}
+        {{{ output.edit_switch }}}
+    {{/output.edly_is_siteadmin}}
 
     {{{ output.navbar_plugin_output }}}
     

@@ -336,3 +336,8 @@ $string['image'] = 'Image';
 $string['locked_title'] = 'Subscribers only';
 $string['locked_desc'] = 'Subscribe to unlock this activity.';
 $string['locked_subscribe'] = 'Subscribe';
+
+$string['mobilemenu_button'] = 'Menu';
+$string['mobilemenu_open_aria'] = 'Open menu';
+$string['mobilemenu_title'] = 'Menu';
+$string['mobilemenu_close_aria'] = 'Close';

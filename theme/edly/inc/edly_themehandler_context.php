@@ -4,6 +4,9 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+require_once($CFG->dirroot.'/local/subscriptions/lib.php');
+require_once($CFG->dirroot.'/local/campus/lib.php');
+
 
 $templatecontext = [
     'sitename'                  => format_string($SITE->shortname, true, ['context' => context_course::instance(SITEID), "escape" => false]),
@@ -140,5 +143,13 @@ $templatecontext += [
 ];
 
 $templatecontext['isguest']    = $isguest;
+$templatecontext['istrial']    = $istrial;
+
+ob_start();
+local_subscriptions_inject_subscribe_modal($PAGE);
+$templatecontext['subsmodal'] = ob_get_clean();
+
+$templatecontext['campus_trial_banner'] = local_campus_get_trial_discount_banner_html();
+
 
 $PAGE->requires->jquery();

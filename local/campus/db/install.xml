@@ -13,6 +13,8 @@
         <FIELD NAME="lastseen" TYPE="int" LENGTH="10" NOTNULL="false" />
         <FIELD NAME="reminder3_sent" TYPE="int" LENGTH="10" NOTNULL="false" />
         <FIELD NAME="reminder7_sent" TYPE="int" LENGTH="10" NOTNULL="false" />
+        <FIELD NAME="reminder_presuspend_sent" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="Timestamp mail pré-suspension (ex : J+28 si suspendAfter=30)"/>
+        <FIELD NAME="reminder_suspend_sent" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="Timestamp mail de suspension (ex : J+30)"/>
         <FIELD NAME="status" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" COMMENT="1=active,2=expired,3=banned"/>
         <FIELD NAME="ipaddress" TYPE="char" LENGTH="45" NOTNULL="false" />
         <FIELD NAME="useragent" TYPE="text" NOTNULL="false" />

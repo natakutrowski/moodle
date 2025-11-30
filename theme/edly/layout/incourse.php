@@ -35,6 +35,5 @@ $bodyattributes = $OUTPUT->body_attributes($bodyclasses);
 $blockshtml = $OUTPUT->blocks('side-pre');
 $hasblocks = strpos($blockshtml, 'data-block=') !== false;
 
-include($CFG->dirroot . '/theme/edly/inc/edly_themehandler_context.php');
-
+include($CFG->dirroot . '/theme/edly/inc/edly_themehandler_context.php');   
 echo $OUTPUT->render_from_template('theme_boost/columns2', $templatecontext);

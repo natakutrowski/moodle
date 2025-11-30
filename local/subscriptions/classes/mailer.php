@@ -13,6 +13,10 @@ class mailer {
     /* =========
      * Événements (constantes)
      * ========= */
+    public const T_WELCOME               = 'welcome';
+    public const T_UPGRADE_CONFIRMED     = 'upgrade_confirmed';
+    public const T_SUBSCRIPTION_UPDATED  = 'subscription_updated';
+
     public const T_SUBSCRIPTION_EVENT          = 'subscription_event';
     public const T_RECURRING_STARTED           = 'recurring_started';
     public const T_RECEIPT                     = 'receipt';
@@ -34,10 +38,16 @@ class mailer {
     
     public const T_TRIAL_STARTED  = 'T_TRIAL_STARTED';
     public const T_TRIAL_REM3     = 'T_TRIAL_REM3';
+    public const T_TRIAL_PRE_SUSPEND = 'T_TRIAL_PRE_SUSPEND'; // J + suspend_after - 2
+    public const T_TRIAL_SUSPENDED   = 'T_TRIAL_SUSPENDED';   // J + suspend_after
     public const T_TRIAL_EXPIRED  = 'T_TRIAL_EXPIRED';
 
     /** @var array<string, string[]> mapping type -> required args keys */
     private const REQUIREMENTS = [
+        self::T_WELCOME               => ['user','plan','pr','sub','tmpPassword'],
+        self::T_UPGRADE_CONFIRMED     => ['user','plan','pr','sub'],
+        self::T_SUBSCRIPTION_UPDATED  => ['user','plan','pr','sub'],
+
         self::T_SUBSCRIPTION_EVENT     => ['user','plan','pr','sub','tmpPassword','isupgrade','isnewuser'],
         self::T_RECURRING_STARTED      => ['user','plan','pr'],
         self::T_RECEIPT                => ['user','plan','pr','sub'],
@@ -50,7 +60,7 @@ class mailer {
 
         self::T_SUBSCRIPTION_ACTIVATED => ['user','plan','sub'],
         self::T_SUBSCRIPTION_EXPIRED   => ['user','plan','sub'],
-        self::T_SUBSCRIPTION_EXPIRY_REM=> ['user','plan','sub','remindkey'],
+        self::T_SUBSCRIPTION_EXPIRY_REM=> ['user','plan','sub'],
         self::T_REMINDER_FIRST         => ['pr'],
         self::T_REMINDER_SECOND        => ['pr'],
         self::T_CONTACT_ADMIN          => ['toemail','fullname','fromemail','message','meta'],
@@ -58,6 +68,8 @@ class mailer {
 
         self::T_TRIAL_STARTED => ['toemail','firstname','subscribe_url'], // subscribe_url optionnel
         self::T_TRIAL_REM3    => ['toemail','firstname','continue_url','subscribe_url','course_fullname','daysleft'],
+        self::T_TRIAL_PRE_SUSPEND => ['toemail','firstname','suspend_date','subscribe_url'],
+        self::T_TRIAL_SUSPENDED   => ['toemail','firstname','suspend_date','delete_date','subscribe_url'],
         self::T_TRIAL_EXPIRED => ['toemail','firstname','subscribe_url','course_fullname'],
     ];
     
@@ -71,49 +83,72 @@ class mailer {
      * @throws \coding_exception si type inconnu ou paramètres manquants
      */
     public static function dispatch(string $type, array $args = []): bool {
-        if (!isset(self::REQUIREMENTS[$type])) {
+        if (!isset(self::REQUIREMENTS[$type]) && $type !== self::T_SUBSCRIPTION_EVENT) {
             throw new \coding_exception("Unknown mail type: {$type}");
         }
-        // Validation des paramètres obligatoires.
-        $missing = array_diff(self::REQUIREMENTS[$type], array_keys($args));
-        if (!empty($missing)) {
-            throw new \coding_exception('Missing mail args: '.implode(', ', $missing)." for type {$type}");
+        // Validation minimale (on validera fort après éventuelle conversion du type)
+        if ($type !== self::T_SUBSCRIPTION_EVENT) {
+            $missing = array_diff(self::REQUIREMENTS[$type], array_keys($args));
+            if (!empty($missing)) {
+                throw new \coding_exception('Missing mail args: '.implode(', ', $missing)." for type {$type}");
+            }
         }
 
-        // Résolution de la langue d’e-mail (réglage plugin > langue user > langue site),
-        // surchargeable via $args['lang'].
+        // Canonicaliser le type si on nous envoie l’agrégat T_SUBSCRIPTION_EVENT
+        if ($type === self::T_SUBSCRIPTION_EVENT) {
+            $isupgrade = !empty($args['isupgrade']);
+            $isnew     = !empty($args['isnewuser']);
+            if ($isupgrade) {
+                $type = self::T_UPGRADE_CONFIRMED;
+            } else if ($isnew) {
+                $type = self::T_WELCOME;
+            } else {
+                $type = self::T_SUBSCRIPTION_UPDATED;
+            }
+            // Validation forte une fois le type connu
+            $missing = array_diff(self::REQUIREMENTS[$type], array_keys($args));
+            if (!empty($missing)) {
+                throw new \coding_exception('Missing mail args: '.implode(', ', $missing)." for type {$type}");
+            }
+        }
+
+        // Langue
         $recipientoruser = $args['user'] ?? null;
         $lang = $args['lang'] ?? self::effective_emaillang($recipientoruser);
 
+        // Contexte pour la copie (type + args)
+        self::$ctx = ['type' => $type, 'args' => $args];
+
         $caller = function() use ($type, $args) {
             switch ($type) {
-                // Paiements / commandes
-                case self::T_SUBSCRIPTION_EVENT:
-                    // send_subscription_event($user, $plan, $pr, $sub, $tmppassword, $isupgrade, $isnew)
-                    return self::send_subscription_event(
-                        $args['user'], $args['plan'], $args['pr'], $args['sub'],
-                        $args['tmpPassword'], $args['isupgrade'], $args['isnewuser']
-                    );
+                case self::T_WELCOME:              
+                    return \local_subscriptions\mail\Catalog::welcome($args['user'], $args['tmpPassword'] ?? '', $args['plan'], $args['pr'], $args['sub']);
+                
+                case self::T_UPGRADE_CONFIRMED:    
+                    return \local_subscriptions\mail\Catalog::upgrade_confirmed($args['user'], $args['plan'], $args['pr'], $args['sub']);
+                
+                case self::T_SUBSCRIPTION_UPDATED: 
+                    return \local_subscriptions\mail\Catalog::subscription_updated($args['user'], $args['plan'], $args['pr'], $args['sub']);
 
                 case self::T_RECURRING_STARTED:
-                    return self::send_recurring_started($args['user'], $args['plan'], $args['pr']);
+                    return \local_subscriptions\mail\Catalog::recurring_started($args['user'], $args['plan'], $args['pr']);
 
                 case self::T_RECEIPT:
-                    return self::send_receipt($args['user'], $args['plan'], $args['pr'], $args['sub']);
+                    return \local_subscriptions\mail\Catalog::receipt($args['user'], $args['plan'], $args['pr'], $args['sub']);
 
                 case self::T_PAYMENT_FAILED:
-                    return self::send_failed($args['pr']);
+                    return \local_subscriptions\mail\Catalog::payment_failed($args['pr']);
 
                 case self::T_PAYMENT_ABANDONED:
-                    return self::send_abandoned($args['pr']);
+                    return \local_subscriptions\mail\Catalog::payment_abandoned($args['pr']);
 
                 // Cycle d’abonnement
                 case self::T_RENEWAL_OK:
-                    return self::send_renewal_ok($args['user'], $args['plan'], $args['sub'],
+                    return \local_subscriptions\mail\Catalog::renewal_ok($args['user'], $args['plan'], $args['sub'],
                                                  $args['amount'], $args['currency'], $args['invoiceid'], $args['oldend']);
 
                 case self::T_FAILED_RECURRING:
-                    return self::send_failed_recurring($args['user'], $args['plan'], 
+                    return \local_subscriptions\mail\Catalog::failed_recurring($args['user'], $args['plan'], 
                         [
                             'amount'    => $args['amount']    ?? null,
                             'currency'  => $args['currency']  ?? null,
@@ -123,54 +158,84 @@ class mailer {
                         ]);
 
                 case self::T_CANCELLATION_INFO:
-                    return self::send_cancellation_info($args['user'], $args['plan'], $args['sub'], $args['atperiodend']);
+                    return \local_subscriptions\mail\Catalog::cancellation_info($args['user'], $args['plan'], $args['sub'], $args['atperiodend']);
 
                 // Tâches planifiées / suivi
                 case self::T_SUBSCRIPTION_ACTIVATED:
-                    return self::send_subscription_activated($args['user'], $args['plan'], $args['sub']);
+                    return \local_subscriptions\mail\Catalog::subscription_activated($args['user'], $args['plan'], $args['sub']);
 
                 case self::T_SUBSCRIPTION_EXPIRED:
-                    return self::send_subscription_expired($args['user'], $args['plan'], $args['sub']);
+                    return \local_subscriptions\mail\Catalog::subscription_expired($args['user'], $args['plan'], $args['sub']);
 
-                case self::T_SUBSCRIPTION_EXPIRY_REM:
-                    return self::send_subscription_expiry_reminder($args['user'], $args['plan'], $args['sub'], $args['remindkey']);
+                case self::T_SUBSCRIPTION_EXPIRY_REM: {
+                    // Supporte soit 'days' (int), soit 'remindkey' (ex: 'd7', 'J-7')
+                    $daysleft = null;
+                    if (array_key_exists('days', $args)) {
+                        $daysleft = (int)$args['days'];
+                    } else if (!empty($args['remindkey'])) {
+                        $rk = strtolower((string)$args['remindkey']);
+                        // formats acceptés: 'd30', 'd7', 'd1', 'j-30', 'j-7', 'j-1', '30', '7', '1'
+                        if (preg_match('~^(?:d|j-)?(\d+)$~', $rk, $m)) {
+                            $daysleft = (int)$m[1];
+                        }
+                    }
+                    if ($daysleft === null) {
+                        throw new \coding_exception("Missing 'days' (or 'remindkey') for T_SUBSCRIPTION_EXPIRY_REM");
+                    }
+                    return \local_subscriptions\mail\Catalog::subscription_expiry_reminder($args['user'], $args['plan'], $args['sub'], $daysleft);
+                }
 
                 case self::T_REMINDER_FIRST:
-                    return self::send_reminder($args['pr']);
+                    return \local_subscriptions\mail\Catalog::send_reminder($args['pr']);
 
                 case self::T_REMINDER_SECOND:
-                    return self::send_reminder_second($args['pr']);
+                    return \local_subscriptions\mail\Catalog::send_reminder_second($args['pr']);
 
                 case self::T_CONTACT_ADMIN:
-                    return self::send_contact_admin($args['toemail'], $args['fullname'], $args['fromemail'], $args['message'], $args['meta']);
+                    return \local_subscriptions\mail\Catalog::contact_admin($args['toemail'], $args['fullname'], $args['fromemail'], $args['message'], $args['meta']);
 
                 case self::T_CONTACT_ACK:
-                    return self::send_contact_ack($args['toemail'], $args['fullname'], $args['message'],$args['fromsupport'] ?? null);    
+                    return \local_subscriptions\mail\Catalog::contact_ack($args['toemail'], $args['fullname'], $args['message'],$args['fromsupport'] ?? null);    
 
                 case self::T_TRIAL_STARTED:
-                    self::send_trial_started($args); break;
+                    \local_subscriptions\mail\Catalog::trial_started($args); break;
 
                 case self::T_TRIAL_REM3:
-                    self::send_trial_rem3($args); break;
+                    \local_subscriptions\mail\Catalog::trial_rem3($args); break;
+
+                case self::T_TRIAL_PRE_SUSPEND:
+                    \local_subscriptions\mail\Catalog::trial_pre_suspend($args); break;
+
+                case self::T_TRIAL_SUSPENDED:
+                    \local_subscriptions\mail\Catalog::trial_suspended($args); break;
 
                 case self::T_TRIAL_EXPIRED:
-                    self::send_trial_expired($args); break;
+                    \local_subscriptions\mail\Catalog::trial_expired($args); break;
 
                 default:
                     throw new \coding_exception("Unhandled mail type: {$type}");
             }
         };
 
-        // Exécuter dans la langue choisie (sans polluer le reste).
-        $old = current_language();
+        // Exécuter dans la langue choisie (sans polluer la session).
+        $prev = null;
         if (!empty($lang)) {
-            force_current_language($lang);
+            // force_current_language() renvoie l'ANCIEN forcelang ('' si rien n'était forcé)
+            $prev = force_current_language($lang);
         }
         try {
-            $caller(); // beaucoup de send_xxx sont void → pas d’exception = OK
+            // Contexte pour la copie (type + args)
+            self::$ctx = ['type' => $type, 'args' => $args];
+
+            $caller(); // envoi
             return true;
         } finally {
-            force_current_language($old);
+            if ($prev !== null) {
+                // restaurer EXACTEMENT l'état précédent (y compris “pas de forcelang”)
+                force_current_language($prev); // $prev peut être ''
+            }
+            // Nettoyage du contexte
+            self::$ctx = null;
         }
     }
 
@@ -249,56 +314,120 @@ class mailer {
      * Envoie l'email de bienvenue pour un NOUVEL utilisateur.
      * Contient username + mot de passe temporaire + lien de connexion.
      */
-    private static function send_welcome(\stdClass $user, string $tmpPassword, \stdClass $plan, \stdClass $pr): void {
-        global $SITE;
+    public static function send_welcome(\stdClass $user, string $tmpPassword, \stdClass $plan, \stdClass $pr, \stdClass $sub): void {
+        global $CFG;
         $user = self::ensure_full_user($user);
-    
-        $title = get_string('welcome_subject', 'local_subscriptions', $SITE->fullname);
-        $loginurl = (new \moodle_url('/login/index.php', [
-            'username' => (string)$user->username,   // pré-remplit le champ identifiant
-        ]))->out(false);
 
-        $price   = format_float((float)($pr->price ?? 0), 2).' '.strtoupper($pr->currency ?? '');
+        $title = get_string('welcome_subject', 'local_subscriptions');
+
+        // Identifiant de connexion : on utilise l'email comme "username"
+        $loginid = (string)($user->email ?: $user->username);
+
         $planname = local_subscriptions_plan_display_name($plan);
 
+        // Montant (on garde le calcul simple, tu pourras le passer à final_price_from_pr_and_sub plus tard)
+        $price = '';
+        if (isset($pr->price) && isset($pr->currency)) {
+            $price = format_float((float)$pr->price, 2).' '.strtoupper($pr->currency ?? '');
+        }
+
+        // Tableau : uniquement l'identifiant (email)
         $tbl = MailRenderer::table()
             ->lined()
-            ->row('welcome_username', MailRenderer::code((string)$user->username))
-            ->row('welcome_temp_password_label', MailRenderer::code((string)$tmpPassword))
+            ->row('welcome_username', MailRenderer::code($loginid))
             ->render();
 
-        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
-        $body .= \html_writer::tag('p', get_string('welcome_body_intro', 'local_subscriptions', $SITE->fullname));
+
+        $tbl2 = MailRenderer::table()
+            ->lined()
+            ->plan(format_string($planname))
+            ->period_ts_short_2l($sub->start_date, $sub->end_date)
+            ->amount($price)
+            ->render();
+
+        $body = \html_writer::tag('p', get_string('welcome_body_intro', 'local_subscriptions', $user->firstname));
         $body .= $tbl;
 
-        /* 👉 on conserve bien l’avertissement de sécurité */
+        // Avertissement de sécurité (garde ton texte générique)
         $body .= \html_writer::tag('p', get_string('welcome_security_hint', 'local_subscriptions'));
+        $body .= \html_writer::tag('p', get_string('welcome_mycourses', 'local_subscriptions'));
+        $body .= $tbl2;
 
-        $body .= \html_writer::empty_tag('hr', ['style'=>'border:none;border-top:1px solid #eee;margin:18px 0;']);
-        $body .= \html_writer::tag('p', get_string('welcome_plan_summary', 'local_subscriptions', $planname));
-        $body .= \html_writer::tag('p', get_string('welcome_amount_summary', 'local_subscriptions', $price));
         $body .= self::pr_ref_badge($pr);
+
+        $brandcolor = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
+        $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
+        $buttonurl1 = (new \moodle_url('https://t.me/+tXrnh5eHmzszNWNk'))->out(false);
+        $buttonlabel1 = get_string('welcome_button_canal','local_subscriptions');
+        $btn1 = '
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;">
+        <tr>
+            <td bgcolor="'.s($brandcolor).'" style="border-radius:8px;">
+            <a href="'.s($buttonurl1).'"
+                style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;background:'.s($brandcolor).';"
+                onmouseover="this.style.background=\''.s($brandcolorDark).'\';"
+                onmouseout="this.style.background=\''.s($brandcolor).'\';"
+            >'.$buttonlabel1.'</a>
+            </td>
+        </tr>
+        </table>';
+
+        $buttonurl2 = (new \moodle_url('https://t.me/+Ze_-_1hWxgJlYWZk'))->out(false);
+        $buttonlabel2 = get_string('welcome_button_group','local_subscriptions');
+        $btn2 = '
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;">
+        <tr>
+            <td bgcolor="'.s($brandcolor).'" style="border-radius:8px;">
+            <a href="'.s($buttonurl2).'"
+                style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;background:'.s($brandcolor).';"
+                onmouseover="this.style.background=\''.s($brandcolorDark).'\';"
+                onmouseout="this.style.background=\''.s($brandcolor).'\';"
+            >'.$buttonlabel2.'</a>
+            </td>
+        </tr>
+        </table>';
+
+        $body .= \html_writer::tag('p', get_string('welcome_text_canal', 'local_subscriptions'));
+        $body .= $btn1;
+        $body .= \html_writer::tag('p', get_string('welcome_text_group', 'local_subscriptions'));
+        $body .= $btn2;
+        $supportEmail = (string)(get_config('local_subscriptions', 'support_email') ?: '');
+        $body .= \html_writer::tag('p', get_string('welcome_footer', 'local_subscriptions', $supportEmail));
+        
+        $body .= 
+            '<img src="'.$CFG->wwwroot . '/local/subscriptions/pix/email/mailWelcomeFooter.png"
+                            style="display:block;width:100%;object-fit:cover;border:0;outline:none;text-decoration:none;">';
 
         [$html, $text] = MailRenderer::layout(
             $title,
             $body,
-            get_string('btn_signin','local_subscriptions'),
-            $loginurl
+            '',
+            ''
         );
 
         self::deliver($user, $title, $html, $text);
     }
 
 
+
+
     /**
      * Envoie un reçu d'achat (branding Moodle). Le reçu Stripe continue d’être envoyé par Stripe.
      */
     public static function send_receipt(\stdClass $user, \stdClass $plan, \stdClass $pr, \stdClass $sub): void {
+        global $CFG;
+        
         $user = self::ensure_full_user($user);
 
         $title    = get_string('receipt_title', 'local_subscriptions');
-        $price    = format_float((float)($pr->price ?? 0), 2) . ' ' . strtoupper($pr->currency ?? '');
-        $period   = userdate((int)$sub->start_date) . ' → ' . userdate((int)$sub->end_date);
+
+        // Montant final payé (sub/pr)
+        [$amt, $cur] = self::final_price_from_pr_and_sub($pr, $sub);
+        $price = '';
+        if ($amt !== null && $cur) {
+            $price = self::money($amt, $cur);
+        }
+
         $planname = local_subscriptions_plan_display_name($plan);
 
         $table = MailRenderer::table()
@@ -310,28 +439,54 @@ class mailer {
             ->txid($pr->transactionid ?? null)
             ->render();
 
-        // Tableau récap : lignes de base.
         $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
         $body .= \html_writer::tag('p', get_string('receipt_intro', 'local_subscriptions'));
         $body .= $table;
-    
-        // Badge référence SPR (si tu as déjà cette méthode).
         $body .= self::pr_ref_badge($pr);
+
+        $brandcolor = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
+        $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
+        $buttonurl = (new \moodle_url('/local/campus/mycourses.php'))->out(false);
+        $buttonurl  = self::login_redirect_for($buttonurl);
+        $buttonlabel = get_string('receipt_button_open','local_subscriptions');
+        $btn = '
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;">
+        <tr>
+            <td bgcolor="'.s($brandcolor).'" style="border-radius:8px;">
+            <a href="'.s($buttonurl).'"
+                style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;background:'.s($brandcolor).';"
+                onmouseover="this.style.background=\''.s($brandcolorDark).'\';"
+                onmouseout="this.style.background=\''.s($brandcolor).'\';"
+            >'.$buttonlabel.'</a>
+            </td>
+        </tr>
+        </table>';
+
+
+        $body .= $btn;
+
+
+        $body .= \html_writer::tag('p', get_string('receipt_footer', 'local_subscriptions'));
+        
+        $body .= 
+            '<img src="'.$CFG->wwwroot . '/local/subscriptions/pix/email/mailReceiptFooter.png"
+                            style="display:block;width:100%;object-fit:cover;border:0;outline:none;text-decoration:none;">';
 
         [$html, $text] = MailRenderer::layout(
             $title,
             $body,
-            get_string('receipt_button_open','local_subscriptions'),
-            (new \moodle_url('/'))->out(false)
+            '',
+            ''
         );
 
         self::deliver($user, $title, $html, $text);
     }
 
+
     /**
      * Envoie un email de confirmation d'abonnement pour un utilisateur EXISTANT (pas de mot de passe).
      */
-    private static function send_subscription_update(
+    public static function send_subscription_update(
         \stdClass $user,
         \stdClass $plan,
         \stdClass $pr,
@@ -343,11 +498,12 @@ class mailer {
         $planname = local_subscriptions_plan_display_name($plan);
         $title = get_string('subupdate_subject', 'local_subscriptions', format_string($planname));
 
-        // Montant payé (price en priorité, sinon amount)
-        $amount   = isset($pr->price) ? (float)$pr->price : (float)($pr->amount ?? 0);
-        $currency = strtoupper($pr->currency ?? '');
-        $price    = format_float($amount, 2) . ' ' . $currency;
-
+        // Montant final payé (sub/pr)
+        [$amt, $cur] = self::final_price_from_pr_and_sub($pr, $sub);
+        $price = '';
+        if ($amt !== null && $cur) {
+            $price = self::money($amt, $cur);
+        }
         $tbl = MailRenderer::table()
             ->lined()
             ->row_code('receipt_amount', $price)
@@ -361,11 +517,12 @@ class mailer {
         $body .= $tbl;
         $body .= self::pr_ref_badge($pr);
 
+        $manageUrl = self::login_redirect_for(UrlFactory::my_subscriptions());
         [$html, $text] = MailRenderer::layout(
             $title,
             $body,
             get_string('mail_button_manage','local_subscriptions'),
-            (UrlFactory::my_subscriptions())->out(false)
+            $manageUrl
         );
 
         self::deliver($user, $title, $html, $text);
@@ -383,7 +540,12 @@ class mailer {
 
         $plan = $DB->get_record('subscription_plan', ['id'=>$pr->planid], 'id,name', IGNORE_MISSING);
         $title = get_string('email_abandoned_subject', 'local_subscriptions');
-        $price = format_float((float)($pr->price ?? 0), 2).' '.strtoupper($pr->currency ?? '');
+        [$amt, $cur] = self::final_price_from_pr_and_sub($pr, null);
+        $price = '';
+        if ($amt !== null && $cur) {
+            $price = self::money($amt, $cur);
+        }
+
         $planname = local_subscriptions_plan_display_name($plan);
         $retryurl = self::build_retry_url($pr);
 
@@ -416,7 +578,12 @@ class mailer {
 
         $plan = $DB->get_record('subscription_plan', ['id'=>$pr->planid], 'id,name', IGNORE_MISSING);
         $title = get_string('email_failed_subject', 'local_subscriptions');
-        $price = format_float((float)($pr->price ?? 0), 2).' '.strtoupper($pr->currency ?? '');
+        [$amt, $cur] = self::final_price_from_pr_and_sub($pr, null);
+        $price = '';
+        if ($amt !== null && $cur) {
+            $price = self::money($amt, $cur);
+        }
+
         $planname = local_subscriptions_plan_display_name($plan);
         $retryurl = self::build_retry_url($pr);
 
@@ -455,9 +622,11 @@ class mailer {
 
         // Montant depuis la PR (plus fiable pour un rappel)
         $price   = '';
-        if (isset($pr->price) && isset($pr->currency)) {
-            $price = format_float((float)$pr->price, 2) . ' ' . strtoupper((string)$pr->currency);
+        [$amt, $cur] = self::final_price_from_pr_and_sub($pr, null);
+        if ($amt !== null && $cur) {
+            $price = self::money($amt, $cur);
         }
+
 
         // Lien de relance (crée aussi retry_token / retry_expires si manquants)
         $retryurl = self::build_retry_url($pr);
@@ -500,8 +669,9 @@ class mailer {
         $plan   = $DB->get_record('subscription_plan', ['id' => $pr->planid], 'id,name', IGNORE_MISSING);
         $planname = $plan ? local_subscriptions_plan_display_name($plan) : ('#'.$pr->planid);
         $price   = '';
-        if (isset($pr->price) && isset($pr->currency)) {
-            $price = format_float((float)$pr->price, 2) . ' ' . strtoupper((string)$pr->currency);
+        [$amt, $cur] = self::final_price_from_pr_and_sub($pr, null);
+        if ($amt !== null && $cur) {
+            $price = self::money($amt, $cur);
         }
 
         // Lien + expiration
@@ -559,34 +729,35 @@ class mailer {
         $body .= $tbl;
         $body .= self::pr_ref_badge($pr);
 
+        $manageUrl = self::login_redirect_for(UrlFactory::my_subscriptions());
         [$html, $text] = MailRenderer::layout(
             $title,
             $body,
             get_string('view_my_subscriptions', 'local_subscriptions'),
-            (UrlFactory::my_subscriptions())->out(false)
+            $manageUrl
         );
 
         self::deliver($user, $title, $html, $text);
     }
 
     /**
-     * Relance d’expiration J-30 / J-7 / J-1 pour une souscription non récurrente.
-     * $remindkey ∈ {'d30','d7','d1'}
+     * Relance d’expiration J–X (jours dynamiques) pour une souscription non récurrente.
      */
-    public static function send_subscription_expiry_reminder(\stdClass $user, \stdClass $plan, \stdClass $sub, string $remindkey): void {
+    public static function send_subscription_expiry_reminder(\stdClass $user, \stdClass $plan, \stdClass $sub, int $daysleft): void {
         $user = self::ensure_full_user($user);
 
-        $daysleft = [
-            'd30' => 30,
-            'd7'  => 7,
-            'd1'  => 1,
-        ][$remindkey] ?? 7;
-
+        $daysleft = max(0, $daysleft); // sécurité
         $planname = local_subscriptions_plan_display_name($plan);
         $enddate  = userdate((int)$sub->end_date);
 
-        // Titre & corps
+        // Sujet et corps
+        // Cas particulier J–0 si tu veux un texte différent (optionnel)
         $title = get_string('expiry_reminder_subject', 'local_subscriptions', $daysleft);
+
+        if ($daysleft === 0) {
+            $title = get_string('expiry_reminder_subject_today', 'local_subscriptions');
+            // et un body spécifique si tu veux
+        }
 
         $tbl = MailRenderer::table()
             ->lined()
@@ -601,15 +772,18 @@ class mailer {
         ]));
         $body .= $tbl;
 
+        $subUrl = UrlFactory::subscribe((int)$sub->planid);
+        $subUrl = self::login_redirect_for($subUrl);
         [$html, $text] = MailRenderer::layout(
-            $title, 
-            $body, 
-            get_string('renew_now', 'local_subscriptions'), 
-            (UrlFactory::subscribe((int)$sub->planid))->out(false)
+            $title,
+            $body,
+            get_string('renew_now', 'local_subscriptions'),
+            $subUrl
         );
 
         self::deliver($user, $title, $html, $text);
     }
+
 
     /**
      * Notification d’activation d’une brique "queued" -> "active".
@@ -629,11 +803,12 @@ class mailer {
                     ->period_ts_short_2l($sub->start_date, $sub->end_date)
                     ->render();
 
+        $manageUrl = self::login_redirect_for(UrlFactory::my_subscriptions());
         [$html, $text] = MailRenderer::layout(
             $title, 
             $body,  
             get_string('view_my_subscriptions', 'local_subscriptions'), 
-            (UrlFactory::my_subscriptions())->out(false)
+            $manageUrl
         );
 
         self::deliver($user, $title, $html, $text);
@@ -663,38 +838,29 @@ class mailer {
         ]));
         $body .= $tbl;
 
+        $subUrl = UrlFactory::subscribe((int)$sub->planid);
+        $subUrl = self::login_redirect_for($subUrl);
+
         [$html, $text] = MailRenderer::layout(
             $title, 
             $body, 
             get_string('expired_button_renew', 'local_subscriptions'), 
-            (UrlFactory::subscribe((int)$sub->planid))->out(false)
+            $subUrl
         );
 
         self::deliver($user, $title, $html, $text);
     }
 
-    private static function send_upgrade_confirmation(\stdClass $user, \stdClass $plan, \stdClass $pr, \stdClass $sub): void {
+    public static function send_upgrade_confirmation(\stdClass $user, \stdClass $plan, \stdClass $pr, \stdClass $sub): void {
         $user = self::ensure_full_user($user);
         $planname = local_subscriptions_plan_display_name($plan);
         $title = get_string('upgrade_confirmed_subject', 'local_subscriptions', format_string($planname));
 
-        // Montant payé : préférer la sub, sinon PR (et ne diviser par 100 que si besoin)
+        // Montant final payé (sub/pr)
+        [$amt, $cur] = self::final_price_from_pr_and_sub($pr, $sub);
         $paid = '';
-        $amt  = null;
-        $cur  = null;
-
-        if (!empty($sub->pricepaid)) {
-            $amt = (float)$sub->pricepaid;
-            $cur = $sub->currency ?? ($pr->currency ?? null);
-        } elseif (!empty($pr->price)) {
-            $raw = (float)$pr->price;
-            // Si c'est du minor (cents) on divise, sinon on garde tel quel.
-            $amt = ($raw >= 100) ? round($raw/100, 2) : round($raw, 2);
-            $cur = $pr->currency ?? null;
-        }
-
         if ($amt !== null && $cur) {
-            $paid = format_float($amt, 2).' '.strtoupper($cur);
+            $paid = self::money($amt, $cur);
         }
 
         $tbl = MailRenderer::table()
@@ -710,11 +876,12 @@ class mailer {
         $body .= \html_writer::tag('p', get_string('upgrade_confirmed_body', 'local_subscriptions', format_string($planname)));
         $body .= $tbl->render();
 
+        $manageUrl = self::login_redirect_for(UrlFactory::my_subscriptions());
         [$html, $text] = MailRenderer::layout(
             $title,
             $body,
             get_string('view_my_subscriptions', 'local_subscriptions'),
-            (UrlFactory::my_subscriptions())->out(false)
+            $manageUrl
         );
 
         self::deliver($user, $title, $html, $text);
@@ -758,11 +925,12 @@ class mailer {
             . \html_writer::tag('p', get_string('renewal_body', 'local_subscriptions', format_string($planname)));
         $body .= $table->render();
 
+        $manageUrl = self::login_redirect_for(UrlFactory::my_subscriptions());
         [$html, $text] = MailRenderer::layout(
             $title,
             $body,
             get_string('mail_button_manage', 'local_subscriptions'),
-            (UrlFactory::my_subscriptions())->out(false)
+            $manageUrl
         );
 
         self::deliver($user, $title, $html, $text);
@@ -791,11 +959,13 @@ class mailer {
 
         $body .= $tbl->render();
 
+        $portalUrl = self::login_redirect_for(UrlFactory::portal());
+
         [$html, $text] = MailRenderer::layout(
             $title,
             $body,
             get_string('recurring_failed_button', 'local_subscriptions'),
-            (UrlFactory::portal())->out(false)
+            $portalUrl
         );
 
         self::deliver($user, $title, $html, $text);
@@ -828,17 +998,18 @@ class mailer {
         $body .= \html_writer::tag('p', $effectline);
         $body .= $tbl;
 
+        $subUrl = self::login_redirect_for(new \moodle_url('/local/subscriptions/subscribe.php'));
         [$html, $text] = MailRenderer::layout(
             $title,
             $body,
             get_string('recurring_canceled_button', 'local_subscriptions'),
-            (new \moodle_url('/subscribe.php'))->out(false)
+            $subUrl
         );
 
         self::deliver($user, $title, $html, $text);
     }
 
-    private static function send_contact_admin(string $toemail, string $fullname, string $fromemail, string $message, array $meta = []): void {
+    public static function send_contact_admin(string $toemail, string $fullname, string $fromemail, string $message, array $meta = []): void {
         global $CFG;
 
         // destinataire "admin" (pseudo user complet pour éviter ensure_full_user() DB)
@@ -912,7 +1083,7 @@ class mailer {
         self::deliver_from($rcpt, $fromOV, $title, $html, $text, $fromemail, $fullname);
     }
 
-    private static function send_contact_ack(string $toemail, string $fullname, string $message, ?string $fromsupport = null): void {
+    public static function send_contact_ack(string $toemail, string $fullname, string $message, ?string $fromsupport = null): void {
         global $CFG;
         // accusé côté émetteur
         $rcpt = self::pseudo_user($toemail, ($fullname ?: '—'), '');
@@ -942,21 +1113,112 @@ class mailer {
 
     /** Essai démarré (site-wide) */
     public static function send_trial_started(array $p): void {
-        $to      = (string)$p['toemail'];
-        $first   = (string)$p['firstname'];
-        $suburl  = (string)$p['subscribe_url'];
+        global $SITE, $CFG;
+
+        $to        = (string)$p['toemail'];
+        $first     = (string)($p['firstname'] ?? '');
+        $loginurl  = (string)($p['login_url'] ?? '');
+        $mycourses = (string)($p['mycourses_url'] ?? $loginurl);
+
+        $email     = (string)($p['email'] ?? '');
+        $reseturl  = (string)($p['reset_url'] ?? '');
 
         $subject  = get_string('mail_trial_started_subject', 'local_campus');
-        $bodyhtml = format_text(
-            get_string('mail_trial_started_body', 'local_campus', (object)['firstname'=>$first]),
-            FORMAT_HTML
+
+        // Intro (ex: "Hi X, your 7-day trial has started!")
+        $vars = (object)['firstname' => $first];
+        $body = \html_writer::tag('p',
+            get_string('mail_trial_started_body', 'local_campus', $vars)
         );
+
+        // Tableau des infos de connexion (login = email, pas de mot de passe)
+        if ($email !== '') {
+            $labelUser  = get_string('trial_username_label', 'local_campus'); // "Email de connexion"
+
+            $tablehtml  = MailRenderer::open();
+            $tablehtml .= MailRenderer::tr(
+                $labelUser,
+                MailRenderer::code($email),
+                false
+            );
+            $tablehtml .= MailRenderer::close();
+
+            $body .= $tablehtml;
+
+            // Rappel sécurité + reset
+            if ($reseturl !== '') {
+                $body .= \html_writer::tag('p',
+                    get_string('mail_trial_reset_hint', 'local_campus', (object)['url' => $reseturl])
+                );
+            } else {
+                $body .= \html_writer::tag('p',
+                    get_string('mail_trial_security_hint', 'local_campus')
+                );
+            }
+        }
+
+        // Paragraphe "vous pouvez accéder à vos cours d’essai…"
+        if ($mycourses !== '') {
+            $mycoursesLogin = self::login_redirect_for($mycourses);
+            $body .= \html_writer::tag('p',
+                get_string('mail_trial_started_mycourses', 'local_campus', (object)['url' => $mycoursesLogin])
+            );
+        }
+
+        // Remise (facultative) : X % et deadline
+        $dpct = (string)(get_config('local_subscriptions', 'trial_discount_percent') ?: '');
+        $ddur = (int)get_config('local_subscriptions', 'trial_discount_hours') ?: '';
+
+        if ($dpct !== '' && $ddur > 0) {
+            $ddur = (string)($ddur / 24);
+            $body .= \html_writer::tag('p',
+                get_string('mail_trial_discount_line', 'local_campus',
+                    (object)['pct' => $dpct, 'duration' => $ddur]
+                )
+            );
+
+            $brandcolor = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
+            $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
+            $buttonurl = (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+            $buttonurl  = self::login_redirect_for($buttonurl);
+            $buttonlabel = get_string('mail_trial_discount_btn', 'local_campus',
+                    (object)['pct' => $dpct]);
+            $btn = '
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;">
+            <tr>
+                <td bgcolor="'.s($brandcolor).'" style="border-radius:8px;">
+                <a href="'.s($buttonurl).'"
+                    style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;background:'.s($brandcolor).';"
+                    onmouseover="this.style.background=\''.s($brandcolorDark).'\';"
+                    onmouseout="this.style.background=\''.s($brandcolor).'\';"
+                >'.s($buttonlabel).'</a>
+                </td>
+            </tr>
+            </table>';
+
+
+            $body .= $btn;
+        }
+
+        $supportEmail = (string)(get_config('local_subscriptions', 'support_email') ?: '');
+
+        $body .= \html_writer::tag('p',
+            get_string('mail_trial_started_support', 'local_campus', (object)['url' => $supportEmail])
+        );
+        $body .= 
+            '<img src="'.$CFG->wwwroot . '/local/subscriptions/pix/email/mailTrialFooter.png"
+                            style="display:block;width:100%;object-fit:cover;border:0;outline:none;text-decoration:none;">';
+
+
         [$html, $text] = MailRenderer::layout(
-            $subject, $bodyhtml,
-            get_string('mail_trial_cta_subscribe','local_campus'), $suburl
+            $subject,
+            $body,
+            '', '',
         );
+
         self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
     }
+
 
     public static function send_trial_rem3(array $p): void {
         $to      = (string)$p['toemail'];
@@ -973,34 +1235,89 @@ class mailer {
         );
 
         // ➜ Nouvelle méthode du renderer qui ajoute un 2e bouton SANS casser layout()
+        $conturlLogin = self::login_redirect_for($conturl);
+        $suburlLogin  = self::login_redirect_for($suburl);
+
         [$html, $text] = MailRenderer::layout_with_extra_button(
             $subject,
             $bodyhtml,
-            get_string('mail_trial_cta_continue','local_campus'), $conturl,  // bouton secondaire (dans le corps)
-            get_string('mail_trial_cta_subscribe','local_campus'), $suburl   // bouton principal (celui de layout)
+            get_string('mail_trial_cta_continue','local_campus'), $conturlLogin,  // bouton secondaire (dans le corps)
+            get_string('mail_trial_cta_subscribe','local_campus'), $suburlLogin   // bouton principal (celui de layout)
         );
 
         self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
     }
+    
+    public static function send_trial_pre_suspend(array $p): void {
+        $to    = (string)$p['toemail'];
+        $first = (string)$p['firstname'];
+        $sdate = userdate((int)$p['suspend_date']);
+        $suburl= (string)$p['subscribe_url'];
 
+        $subject = get_string('trial_presuspend_subject','local_campus');
+        $bodyhtml = format_text(
+            get_string('trial_presuspend_body','local_campus', (object)['firstname'=>$first,'date'=>$sdate]),
+            FORMAT_HTML
+        );
+
+        $suburlLogin = self::login_redirect_for($suburl);
+
+        [$html,$text] = MailRenderer::layout(
+            $subject, $bodyhtml,
+            get_string('mail_trial_cta_subscribe','local_campus'),
+            $suburlLogin
+        );
+        self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
+    }
+
+    public static function send_trial_suspended(array $p): void {
+        $to     = (string)$p['toemail'];
+        $first  = (string)$p['firstname'];
+        $sdate  = userdate((int)$p['suspend_date']);
+        $ddate  = userdate((int)$p['delete_date']);
+        $suburl = (string)$p['subscribe_url'];
+
+        $subject = get_string('trial_suspended_subject','local_campus');
+        $bodyhtml = format_text(
+            get_string('trial_suspended_body','local_campus', (object)[
+                'firstname'=>$first, 'sdate'=>$sdate, 'ddate'=>$ddate
+            ]),
+            FORMAT_HTML
+        );
+
+        $suburlLogin = self::login_redirect_for($suburl);
+
+        [$html,$text] = MailRenderer::layout(
+            $subject, $bodyhtml,
+            get_string('mail_trial_cta_subscribe','local_campus'),
+            $suburlLogin
+        );
+        self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
+    }
     public static function send_trial_expired(array $p): void {
         $to      = (string)$p['toemail'];
         $first   = (string)$p['firstname'];
         $course  = (string)($p['course_fullname'] ?? '');
         $suburl  = (string)$p['subscribe_url'];
+        $sdate   = !empty($p['suspend_date']) ? userdate((int)$p['suspend_date'], get_string('strftimedatefullshort')) : null;
 
         $subject  = get_string('mail_trial_expired_subject_generic','local_campus', $course);
-        $bodyhtml = format_text(
-            get_string('mail_trial_expired_body','local_campus', (object)['firstname'=>$first]),
-            FORMAT_HTML
-        );
+
+        $vars = (object)['firstname'=>$first];
+        $body = get_string('mail_trial_expired_body','local_campus', $vars);
+
+        if ($sdate) {
+            $body .= '<br>'.get_string('mail_trial_expired_hint_suspend','local_campus', $sdate);
+        }
+
+        $suburlLogin = self::login_redirect_for($suburl);
+
         [$html, $text] = MailRenderer::layout(
-            $subject, $bodyhtml,
-            get_string('mail_trial_cta_subscribe','local_campus'), $suburl
+            $subject, format_text($body, FORMAT_HTML),
+            get_string('mail_trial_cta_subscribe','local_campus'), $suburlLogin
         );
         self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
     }
-
 
     /** Crée un "user" complet in-memory pour email_to_user + ensure_full_user() */
     public static function pseudo_user(string $email, string $firstname = '', string $lastname = ''): \stdClass {
@@ -1054,8 +1371,39 @@ class mailer {
         $from = self::ensure_full_user($from);
         $rcpt->mailformat = 1;
         @email_to_user($rcpt, $from, $subject, $text, $html, '', '', true, $replyto, $replytoname);
-    }
 
+        // Copie admin enrichie (mêmes règles que deliver)
+        $copy = trim((string)(get_config('local_subscriptions','email_copy_to') ?? ''));
+        if ($copy !== '') {
+            $list = preg_split('/[,;\s]+/', $copy, -1, PREG_SPLIT_NO_EMPTY);
+
+            // Prépare FROM sûr
+            $fromOV = self::safe_support_from();
+
+            // Préfixe
+            $rawtype = (string)((self::$ctx)['type'] ?? '');
+            $label   = self::type_label($rawtype);
+            $prid    = (!empty(self::$ctx['args']['pr']->id)) ? (' PR#'.(int)self::$ctx['args']['pr']->id) : '';
+            $pref    = $label ? '['.$label.']'.$prid.' ' : '';
+
+            $appendHtml = ''; $appendTxt = '';
+            if (self::copy_verbose_enabled()) {
+                [$appendHtml, $appendTxt] = self::build_copy_appendix();
+            }
+
+            foreach ($list as $addr) {
+                $addr = trim($addr);
+                if (!filter_var($addr, FILTER_VALIDATE_EMAIL)) { continue; }
+
+                $admin = self::ensure_full_user(\core_user::get_support_user());
+                $admin->email      = $addr;
+                $admin->mailformat = 1;
+
+                $copysubject = $pref . '[COPY] ' . $subject;
+                @email_to_user($admin, $fromOV, $copysubject, $text.$appendTxt, $html.$appendHtml, '', '', true, $replyto, $replytoname);
+            }
+        }
+    }
 
     /** Helpers internes **/
     private static function fake_user_from_pr(\stdClass $pr): \stdClass {
@@ -1119,6 +1467,97 @@ class mailer {
         return get_string($key, 'local_subscriptions', $a);
     }    
 
+
+    /**
+     * Calcule le montant final payé et la devise à afficher à partir d'une
+     * payment request (PR) et éventuellement d'une souscription liée.
+     *
+     * Priorités :
+     *  1) $sub->pricepaid / $sub->currency (si dispo)
+     *  2) $pr->locked_final_price / $pr->currency
+     *  3) $pr->amount_minor (cents) / $pr->currency
+     *  4) $pr->price / $pr->currency
+     *
+     * @return array{0: ?float, 1: ?string} [montant, devise]
+     */
+    private static function final_price_from_pr_and_sub(?\stdClass $pr = null, ?\stdClass $sub = null): array {
+        $amount = null;
+        $cur    = null;
+
+        // 1) Souscription : source de vérité quand elle existe
+        if ($sub && isset($sub->pricepaid) && $sub->pricepaid !== null && $sub->pricepaid !== '') {
+            $amount = (float)$sub->pricepaid;
+            $cur    = $sub->currency ?? null;
+        }
+
+        // 2) Payment request
+        if ($pr instanceof \stdClass) {
+            if ($amount === null) {
+                if (isset($pr->locked_final_price) && is_numeric($pr->locked_final_price) && (float)$pr->locked_final_price > 0) {
+                    $amount = (float)$pr->locked_final_price;
+                } elseif (isset($pr->amount_minor) && is_numeric($pr->amount_minor) && (int)$pr->amount_minor > 0) {
+                    $amount = ((int)$pr->amount_minor) / 100.0;
+                } elseif (isset($pr->price) && is_numeric($pr->price)) {
+                    $amount = (float)$pr->price;
+                }
+            }
+            if ($cur === null && !empty($pr->currency)) {
+                $cur = (string)$pr->currency;
+            }
+        }
+
+        if ($amount === null) {
+            return [null, null];
+        }
+        if ($cur !== null) {
+            $cur = strtoupper($cur);
+        }
+        return [$amount, $cur];
+    }
+
+    /**
+     * Enveloppe une URL interne derrière la page de login,
+     * en ajoutant ?returnurl=... pour forcer la connexion avant d'y accéder.
+     *
+     * - Accepte une string ou un moodle_url.
+     * - Ne touche pas aux mailto:, javascript:, ni aux URLs externes.
+     * - Ne re-wrap pas /login/index.php ni /login/forgot_password.php.
+     */
+    private static function login_redirect_for($target): string {
+        global $CFG;
+
+        if ($target instanceof \moodle_url) {
+            $targeturl = $target->out(false);
+        } else {
+            $targeturl = (string)$target;
+        }
+
+        if ($targeturl === '') {
+            return $targeturl;
+        }
+
+        $lower = strtolower($targeturl);
+
+        // Ne jamais wrapper les mailto: ou javascript:
+        if (strpos($lower, 'mailto:') === 0 || strpos($lower, 'javascript:') === 0) {
+            return $targeturl;
+        }
+
+        // Ne pas toucher aux URLs externes (autre domaine que Moodle)
+        if (preg_match('~^https?://~i', $targeturl) && strpos($targeturl, $CFG->wwwroot) !== 0) {
+            return $targeturl;
+        }
+
+        // Ne pas re-wrapper la page de login ou la page de reset
+        $path = parse_url($targeturl, PHP_URL_PATH) ?? '';
+        if (preg_match('~^/login/(index\.php|forgot_password\.php)~', $path)) {
+            return $targeturl;
+        }
+
+        $login = new \moodle_url('/login/index.php', ['returnurl' => $targeturl]);
+        return $login->out(false);
+    }    
+
     /** Format monétaire major units (EUR, etc.). */
     private static function money(float $amount, ?string $cur): string {
         $cur = $cur ? strtoupper($cur) : '';
@@ -1127,6 +1566,8 @@ class mailer {
 
     /** Envoi robuste (support user, try/catch). */
     public static function deliver(\stdClass $user, string $subject, string $html, string $text): void {
+
+        $subject = self::local_subscriptions_plain_text($subject);
 
         // Mode preview: ne pas appeler email_to_user (évite le debugging() de noemailever)
         if (self::$preview) {
@@ -1142,45 +1583,37 @@ class mailer {
 
         @email_to_user($recipient, $from, $subject, $text, $html);
 
-        // $user = destinataire principal ; $support = \core_user::get_support_user()
-        // $subject, $plain, $html : ton contenu déjà préparé.
-        $copy = trim(get_config('local_subscriptions', 'email_copy_to') ?? '');
+        // --- Copie admin (log@...) enrichie ---
+        $copy = trim((string)(get_config('local_subscriptions', 'email_copy_to') ?? ''));
         if ($copy !== '') {
             $list = preg_split('/[,;\s]+/', $copy, -1, PREG_SPLIT_NO_EMPTY);
 
-            $primaryemail = (string)($user->email ?? '');
-            $support = \core_user::get_support_user();              // user réel (id non vide)
-            $support = self::ensure_full_user($support);            // ta méthode, pour éviter les champs manquants
+            $from = self::safe_support_from();
+
+            // Préfixe sujet : [T_xxx][PR#123] …
+            $rawtype = (string)((self::$ctx)['type'] ?? '');
+            $label   = self::type_label($rawtype);
+            $prid    = (!empty(self::$ctx['args']['pr']->id)) ? (' PR#'.(int)self::$ctx['args']['pr']->id) : '';
+            $pref    = $label ? '['.$label.']'.$prid.' ' : '';
+
+            // Appendice technique (HTML + TXT)
+            $appendHtml = ''; $appendTxt = '';
+            if (self::copy_verbose_enabled()) {
+                [$appendHtml, $appendTxt] = self::build_copy_appendix();
+            }
 
             foreach ($list as $addr) {
                 $addr = trim($addr);
-                if (!filter_var($addr, FILTER_VALIDATE_EMAIL)) {
-                    continue;
-                }
-                if ($primaryemail !== '' && strcasecmp($addr, $primaryemail) === 0) {
-                    continue; // pas de doublon vers l'apprenant
-                }
+                if (!filter_var($addr, FILTER_VALIDATE_EMAIL)) { continue; }
 
-                // Clone “safe” depuis le support user, en overridant uniquement l'adresse
-                $recipient = clone $support;
-                $recipient->email      = $addr;
-                $recipient->mailformat = 1;           // texte+HTML
-                $recipient->emailstop  = 0;           // par prudence
-                $recipient->suspended  = 0;
-                $recipient->deleted    = 0;
-                $recipient->confirmed  = 1;
+                $rcpt = self::ensure_full_user(\core_user::get_support_user());
+                $rcpt->email = $addr;
+                $rcpt->mailformat = 1;
 
-                // Envoi de la copie (préfixe optionnel)
-                $copysubject = '[COPY] ' . $subject.' - '.$user->username;
-                $ok = @email_to_user($recipient, $from, $copysubject, $text, $html);
-
-                // Option: petit log si besoin
-                if (!$ok) {
-                    debugging('local_subscriptions: admin copy failed to '.$addr, DEBUG_DEVELOPER);
-                }
+                $copysubject = $pref . $subject;
+                @email_to_user($rcpt, $from, $copysubject, $text.$appendTxt, $html.$appendHtml);
             }
         }
-
 
     }    
 
@@ -1208,11 +1641,183 @@ class mailer {
         if (!empty($isupgrade)) {
             self::send_upgrade_confirmation($user, $plan, $pr, $sub);
         } else if (!empty($isnewuser)) {
-            self::send_welcome($user, $tmppassword ?? '', $plan, $pr);
+            self::send_welcome($user, $tmppassword ?? '', $plan, $pr, $sub);
         } else {
             self::send_subscription_update($user, $plan, $pr, $sub);
         }
     }
+
+
+    /** Contexte courant du mail en cours (type + args bruts) pour la copie log. */
+    private static ?array $ctx = null;
+
+    /** Active/désactive l’appendice technique pour les copies (via setting). */
+    private static function copy_verbose_enabled(): bool {
+        return (string)(get_config('local_subscriptions','email_copy_verbose') ?? '1') === '1';
+    }
+
+    /** Label lisible pour un type (préfixe sujet des copies). */
+    private static function type_label(string $type): string {
+        static $labels = [
+            self::T_WELCOME               => 'T_WELCOME',
+            self::T_UPGRADE_CONFIRMED     => 'T_UPGRADE_CONFIRMED',
+            self::T_SUBSCRIPTION_UPDATED  => 'T_SUBSCRIPTION_UPDATED',
+            self::T_RECEIPT               => 'T_RECEIPT',
+            self::T_RECURRING_STARTED     => 'T_RECURRING_STARTED',
+            self::T_PAYMENT_FAILED        => 'T_PAYMENT_FAILED',
+            self::T_PAYMENT_ABANDONED     => 'T_PAYMENT_ABANDONED',
+            self::T_SUBSCRIPTION_ACTIVATED=> 'T_SUBSCRIPTION_ACTIVATED',
+            self::T_SUBSCRIPTION_EXPIRED  => 'T_SUBSCRIPTION_EXPIRED',
+            self::T_SUBSCRIPTION_EXPIRY_REM=> 'T_SUBSCRIPTION_EXPIRY_REM',
+            self::T_REMINDER_FIRST        => 'T_REMINDER_FIRST',
+            self::T_REMINDER_SECOND       => 'T_REMINDER_SECOND',
+            self::T_TRIAL_STARTED         => 'T_TRIAL_STARTED',
+            self::T_TRIAL_REM3            => 'T_TRIAL_REM3',
+            self::T_TRIAL_PRE_SUSPEND     => 'T_TRIAL_PRE_SUSPEND',
+            self::T_TRIAL_SUSPENDED       => 'T_TRIAL_SUSPENDED',
+            self::T_TRIAL_EXPIRED         => 'T_TRIAL_EXPIRED',
+            // autres si besoin…
+        ];
+        return $labels[$type] ?? strtoupper($type);
+    }
+
+    /** Formate un timestamp Unix en 'd/m/Y H:i:s' (timezone utilisateur). */
+    private static function fmtDebugTs($ts): ?string {
+        if (!is_numeric($ts) || (int)$ts <= 0) { return null; }
+        return userdate((int)$ts, '%d/%m/%Y %H:%M:%S');
+    }
+
+    /** Convertit certaines clés timestamp d'un tableau en dates lisibles. */
+    private static function fmtTsArray(array $arr, array $keys): array {
+        foreach ($keys as $k) {
+            if (array_key_exists($k, $arr)) {
+                $fmt = self::fmtDebugTs($arr[$k]);
+                if ($fmt !== null) { $arr[$k] = $fmt; }
+            }
+        }
+        return $arr;
+    }
+
+
+    /** Construit l’appendice technique HTML/TXT pour la copie log, à partir de self::$ctx. */
+    private static function build_copy_appendix(): array {
+        $ctx  = self::$ctx ?: [];
+        $type = (string)($ctx['type'] ?? 'UNKNOWN');     // ex: 'receipt'
+        $args = (array)($ctx['args'] ?? []);
+        $label = self::type_label($type);                // ex: 'T_RECEIPT'
+
+        $pick = function(array $src, array $keys): array {
+            $out = [];
+            foreach ($keys as $k) { if (array_key_exists($k, $src)) { $out[$k] = $src[$k]; } }
+            return $out;
+        };
+
+        $pr  = $args['pr']   ?? null;
+        $usr = $args['user'] ?? null;
+        $pln = $args['plan'] ?? null;
+        $sub = $args['sub']  ?? null;
+
+        // Pour les mails de trial (T_TRIAL_*), on construit un "user" synthétique
+        // à partir de toemail/email + firstname si aucun user n’a été passé.
+        if (!$usr && in_array($type, [
+                self::T_TRIAL_STARTED,
+                self::T_TRIAL_REM3,
+                self::T_TRIAL_PRE_SUSPEND,
+                self::T_TRIAL_SUSPENDED,
+                self::T_TRIAL_EXPIRED,
+            ], true)) {
+
+            $email = $args['email']   ?? $args['toemail']   ?? null;
+            $fname = $args['firstname'] ?? null;
+
+            if ($email || $fname) {
+                $usr = (object)[
+                    'id'        => null,
+                    'email'     => (string)$email,
+                    'firstname' => (string)$fname,
+                ];
+            }
+        }
+
+
+
+        // PR : champs utiles
+        $prinfo = is_object($pr) ? $pick((array)$pr, [
+            'id','payment_provider','price','currency','transactionid','sessionid','status',
+            'locked_list_price','locked_discount_percent','locked_discount_amount','locked_discount_reason','locked_final_price',
+            'amount_minor','creation_date','payment_date','locked_at','last_update','expires_at',
+            'email','firstname','lastname','accept_language','created_ip','created_useragent','http_referer'
+        ]) : [];
+
+        // USER
+        $uinfo = is_object($usr) ? $pick((array)$usr, [
+            'id','username','email','firstname','lastname','lang','suspended','deleted','lastip'
+        ]) : [];
+
+        // PLAN
+        $pinfo = is_object($pln) ? $pick((array)$pln, [
+            'id','name','is_trial','is_recurring','duration_key','accessscopeid'
+        ]) : [];
+
+        // SUB
+        $sinfo = is_object($sub) ? $pick((array)$sub, [
+            'id','status','payment_provider','pricepaid','currency','transactionid',
+            'start_date','end_date','creation_date','last_update','provider_subscription_id','provider_customer_id'
+        ]) : [];
+
+        // ➜ Formater les timestamps en clair
+        $prinfo  = self::fmtTsArray($prinfo,  ['creation_date','payment_date','locked_at','last_update','expires_at','retry_expires','login_token_expires']);
+        $sinfo   = self::fmtTsArray($sinfo,   ['start_date','end_date','creation_date','last_update']);
+
+        // Compact pour JSON
+        $data = [
+            'type' => $label,   // ← met le tag canonique 'T_RECEIPT' au lieu de 'receipt'
+            'user' => $uinfo,
+            'plan' => $pinfo,
+            'sub'  => $sinfo,
+            'pr'   => $prinfo,
+        ];
+
+        // Si tout est vide (cas simple comme T_TRIAL_STARTED où il n’y a pas de user/plan/sub/pr),
+        // on ajoute quand même les args bruts pour que le log soit utile.
+        if (empty($uinfo) && empty($pinfo) && empty($sinfo) && empty($prinfo) && !empty($args)) {
+            // On peut enlever 'lang' qui est pas très intéressant
+            $raw = $args;
+            unset($raw['lang']);
+            $data['args'] = $raw;
+        }
+
+
+        // ----- HTML -----
+        $html  = '<hr style="border:none;border-top:1px solid #eee;margin:16px 0;">';
+        $html .= '<div style="font:13px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#334155">';
+        $html .= '<div style="font-weight:600;margin-bottom:6px">['
+            .  htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+            .  '] ' . 'Journal technique</div>';
+        $html .= '<pre style="white-space:pre-wrap;word-break:break-word;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin:0">'
+            .  htmlspecialchars(json_encode($data, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8')
+            .  '</pre></div>';
+
+        // ----- TXT -----
+        $text  = "\n\n----- [" . $label . "] Journal technique -----\n";
+        $text .= json_encode($data, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) . "\n";
+
+        return [$html, $text];
+    }
+
+    /**
+     * Transforme un contenu HTML en texte brut lisible.
+     *
+     * @param string $html
+     * @return string
+     */
+    private static function local_subscriptions_plain_text(string $html): string {
+        $text = strip_tags($html);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('/\s+/u', ' ', $text);
+        return trim($text);
+    }
+
 
 
 }

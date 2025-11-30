@@ -1,4 +1,3 @@
-
 {{#top_header}}
     <!-- Start Top Header Area -->
     <div class="top-header-area bg-color-0f6c76">
@@ -21,49 +20,89 @@
         </div>
     </div>
     <!-- End Top Header Area -->
- {{/top_header}}
+{{/top_header}}
 
-<!-- Start Navbar Area --> 
+<!-- Start Navbar Area -->
 <div class="navbar-area {{output.edly_is_siteadmin}}">
 
+    <!-- MOBILE HEADER (logo + user nav si connecté, sinon bouton Menu) -->
     <div class="main-responsive-nav">
         <div class="container">
-            <div class="main-responsive-menu">
+            <div class="main-responsive-menu d-flex align-items-center">
                 {{#logo_visibility}}
                     <div class="logo">
                         <a href="{{{ config.wwwroot }}}/">
                             {{#mobile_logo}}
-                                <img src="{{mobile_logo}}" alt="{{sitename}}"  {{#mobile_logo_styles}} style="{{{mobile_logo_styles}}}" {{/mobile_logo_styles}}>
+                                <img src="{{mobile_logo}}" alt="{{sitename}}" {{#mobile_logo_styles}} style="{{{mobile_logo_styles}}}" {{/mobile_logo_styles}}>
                             {{/mobile_logo}}
-
-                            {{^ mobile_logo }}
+                            {{^mobile_logo}}
                                 <h2 {{#mobile_logo_styles}} style="{{{mobile_logo_styles}}}" {{/mobile_logo_styles}}>{{sitename}}</h2>
                             {{/mobile_logo}}
                         </a>
                     </div>
                 {{/logo_visibility}}
+
+                {{! -- CONNECTÉ (non-invité) : on affiche directement le menu utilisateur }}
+                {{#isloggedin}}
+                    {{^isguest}}
+                        <div class="ms-auto d-lg-none navbar-user-wrap">
+                            {{> theme_edly/edly_navbar_user }}
+                        </div>
+                    {{/isguest}}
+                {{/isloggedin}}
+
+                {{! -- VISITEUR ou INVITÉ : bouton Menu pour l'offcanvas }}
+                {{^isloggedin}}
+                    <div class="ms-auto d-lg-none">
+                        <button class="btn btn-outline-dark btn-sm rounded-pill px-3 campus-menu-toggle"
+                                type="button"
+                                data-bs-toggle="offcanvas"
+                                data-bs-target="#campusMobileMenu"
+                                aria-controls="campusMobileMenu"
+                                aria-label="{{#str}}mobilemenu_open_aria, theme_edly{{/str}}">
+                            <span aria-hidden="true">☰</span>
+                            <span class="ms-1">{{#str}}mobilemenu_button, theme_edly{{/str}}</span>
+                        </button>
+                    </div>
+                {{/isloggedin}}
+
+                {{#isloggedin}}
+                    {{#isguest}}
+                        <div class="ms-auto d-lg-none">
+                            <button class="btn btn-outline-dark btn-sm rounded-pill px-3 campus-menu-toggle"
+                                    type="button"
+                                    data-bs-toggle="offcanvas"
+                                    data-bs-target="#campusMobileMenu"
+                                    aria-controls="campusMobileMenu"
+                                    aria-label="{{#str}}mobilemenu_open_aria, theme_edly{{/str}}">
+                                <span aria-hidden="true">☰</span>
+                                <span class="ms-1">{{#str}}mobilemenu_button, theme_edly{{/str}}</span>
+                            </button>
+                        </div>
+                    {{/isguest}}
+                {{/isloggedin}}
             </div>
         </div>
     </div>
 
+    <!-- DESKTOP NAVBAR -->
     <div class="main-navbar">
         <div class="container-fluid">
             <nav class="navbar navbar-expand-md navbar-light">
                 {{#logo_visibility}}
                     <a class="navbar-brand" href="{{{ config.wwwroot }}}/">
                         {{#main_logo}}
-                            <img src="{{main_logo}}" alt="{{sitename}}"  {{#logo_styles}} style="{{{logo_styles}}}" {{/logo_styles}}>
+                            <img src="{{main_logo}}" alt="{{sitename}}" {{#logo_styles}} style="{{{logo_styles}}}" {{/logo_styles}}>
                         {{/main_logo}}
-
-                        {{^ main_logo }}
-                            <h2  {{#logo_styles}} style="{{{logo_styles}}}" {{/logo_styles}}>{{sitename}}</h2>
+                        {{^main_logo}}
+                            <h2 {{#logo_styles}} style="{{{logo_styles}}}" {{/logo_styles}}>{{sitename}}</h2>
                         {{/main_logo}}
                     </a>
                 {{/logo_visibility}}
-                
+
                 <div class="collapse navbar-collapse mean-menu flex-nowrap align-items-center" id="navbarSupportedContent">
                     {{#header_search_bar}}
-                        {{{edly_globalsearch_navbar}}}
+                        {{{ edly_globalsearch_navbar }}}
                     {{/header_search_bar}}
 
                     <ul id="menu-primary-menu" class="navbar-nav me-3">
@@ -71,37 +110,45 @@
                         {{ ! output.custom_menu }}
                     </ul>
 
+                    {{# istrial }}
+                    <div class="nav-cta d-none d-lg-flex align-items-center ms-auto" id="campus-cta-anchor" style="width:85%">
+                        <div class="option-item ms-auto">
+                            <a href="{{{ signup_url }}}" class="default-btn" data-subs-modal="1">
+                                {{ subscribe_label }}
+                            </a>
+                        </div>
+                    </div>
+                    {{/ istrial }}
+
+
+                    {{^istrial }}
                     <div class="nav-cta d-none d-lg-flex align-items-center ms-auto" id="campus-cta-anchor">
                         {{# show_subscribe_btn }}
-
-                            <!-- Sélecteur de langue pour tout le monde si activé -->
                             {{# has_lang_menu }}
-                            <div class="option-item langmenu me-2">
-                                {{{ lang_menu }}}
-                            </div>
+                                <div class="option-item langmenu me-2">
+                                    {{{ lang_menu }}}
+                                </div>
                             {{/ has_lang_menu }}
 
                             <!-- S’abonner : visible pour NON connectés ET invités -->
                             <div class="option-item me-2">
-                            <a href="{{{ signup_url }}}" class="default-btn">{{ subscribe_label }}</a>
+                                <a href="{{{ signup_url }}}" class="default-btn" data-subs-modal="1">{{ subscribe_label }}</a>
                             </div>
 
                             <!-- Connexion : seulement pour NON connectés (pas pour l’invité) -->
                             {{# show_login_btn }}
-                            <div class="option-item">
-                                <a href="{{{ login_url }}}"
-                                    class="default-btn second"
-                                    aria-label="{{ login_label }}"
-                                    title="{{ login_label }}"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="bottom"
-                                    data-bs-title="{{ login_label }}">
-                                    <i class="{{header_btn_icon}}"></i>
-                                </a>
-                            </div>
+                                <div class="option-item">
+                                    <a href="{{{ login_url }}}"
+                                       class="default-btn second"
+                                       aria-label="{{ login_label }}">
+                                       {{ login_label }}
+                                    </a>
+                                </div>
                             {{/ show_login_btn }}
                         {{/ show_subscribe_btn }}
-                    </div>                    
+                    </div>
+                    {{/ istrial }}
+
                     {{#isloggedin}}
                         {{^isguest}}
                             {{> theme_edly/edly_navbar_user }}
@@ -112,62 +159,51 @@
         </div>
     </div>
 
-    <div class="others-option-for-responsive">
-        <div class="container">
-            <div class="dot-menu d-lg-none">
-                <div class="inner">
-                    <div class="circle circle-one"></div>
-                    <div class="circle circle-two"></div>
-                    <div class="circle circle-three"></div>
+    <!-- Offcanvas Mobile Menu (utilisé seulement pour visiteurs/invités) -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="campusMobileMenu" aria-labelledby="campusMobileMenuLabel">
+        <div class="offcanvas-header">
+            <h5 class="mb-0" id="campusMobileMenuLabel">{{#str}}mobilemenu_title, theme_edly{{/str}}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                    aria-label="{{#str}}mobilemenu_close_aria, theme_edly{{/str}}"></button>
+        </div>
+
+        <div class="offcanvas-body">
+            {{# has_lang_menu }}
+                <div class="mb-3 langmenu d-flex justify-content-center">
+                    {{{ lang_menu }}}
                 </div>
-            </div>
-            
-            <div class="container">
-                <div class="option-inner">
-                    <div class="others-options d-flex d-lg-none align-items-center flex-wrap justify-content-center gap-3">
-                    {{# has_lang_menu }}
-                        <div class="option-item langmenu d-flex justify-content-center">
-                        {{{ lang_menu }}}
-                        </div>
-                    {{/ has_lang_menu }}
+            {{/ has_lang_menu }}
 
-                    {{# show_subscribe_btn }}
-                        <div class="option-item">
-                        <a href="{{{ signup_url }}}" class="default-btn">{{ subscribe_label }}</a>
-                        </div>
-                        {{# show_login_btn }}
-                        <div class="option-item">
-                            <a href="{{{ login_url }}}"
-                                class="default-btn second"
-                                aria-label="{{ login_label }}"
-                                title="{{ login_label }}"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="bottom"
-                                data-bs-title="{{ login_label }}">
-                                <i class="{{header_btn_icon}}"></i>
-                            </a>
-
-                        </div>
-                        {{/ show_login_btn }}
-                    {{/ show_subscribe_btn }}
-
-
-                    {{#header_search_bar}}
-                        <div class="option-item">
-                        {{{ edly_globalsearch_navbar }}}
-                        </div>
-                    {{/header_search_bar}}
-
-                    {{#isloggedin}}
-                        {{^isguest}}
-                            {{> theme_edly/edly_navbar_user }}
-                        {{/isguest}}
-                    {{/isloggedin}}
-                    </div>
+            {{# show_subscribe_btn }}
+                <!-- CTA compacts et centrés -->
+                <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+                    <a href="{{{ signup_url }}}" class="default-btn" data-subs-modal="1">{{ subscribe_label }}</a>
+                    {{^istrial }}
+                    {{# show_login_btn }}
+                        <a href="{{{ login_url }}}" class="default-btn second">{{ login_label }}</a>
+                    {{/ show_login_btn }}
+                    {{/ istrial }}
                 </div>
+            {{/ show_subscribe_btn }}
+
+            {{# header_search_bar }}
+                <div class="mb-3">
+                    {{{ edly_globalsearch_navbar }}}
+                </div>
+            {{/ header_search_bar }}
+
+            <!-- Le menu principal est cloné ici en JS si présent -->
+            <div id="mobilePrimaryMenuContainer" class="d-none">
+                <hr class="my-3">
+                <ul class="navbar-nav" id="mobilePrimaryMenu"></ul>
             </div>
         </div>
     </div>
+
+    {{#js}}
+        require(['theme_edly/mobile_menu'], function(M){ M.init(); });
+    {{/js}}
+
 </div>
 <!-- End Navbar Area -->
 

@@ -9,14 +9,20 @@ use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\support\SubsPresenter;
 
-require_login(); // page utilisateur
-
-$context = context_user::instance($USER->id);
-$PAGE->set_context($context);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(UrlFactory::my_subscriptions());
+
+require_login(); // force la connexion
+
+// Bloquer aussi l'utilisateur invité
+if (isguestuser()) {
+    redirect(new moodle_url('/login/index.php'));
+}
+
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('mysubs_title', 'local_subscriptions'));
-$PAGE->set_heading(fullname($USER));
+$PAGE->set_heading(get_string('mysubs_title', 'local_subscriptions'));
+
 
 global $DB, $OUTPUT;
 
@@ -27,6 +33,32 @@ $subs = $DB->get_records('user_subscription', ['userid' => $USER->id], 'end_date
 $planids = array_unique(array_map(static fn($s) => (int)$s->planid, $subs));
 $plans = $planids ? $DB->get_records_list('subscription_plan', 'id', $planids, '',
     'id,name,is_recurring') : [];
+
+// Plans d'essai à forcer par config (ex: "12,34") sinon chaîne vide.
+$trialids = array_filter(array_map('intval',
+    explode(',', (string)get_config('local_subscriptions','trial_planids'))
+));
+
+// Détection "essai 7 jours" (config > heuristique)
+$detect_trial = static function($plan, $sub) use ($trialids): bool {
+    if (!empty($trialids) && in_array((int)$plan->id, $trialids, true)) {
+        return true;
+    }
+    // Heuristique robuste si pas de config :
+    //  - nom du plan contient essai/trial/проб
+    //  - ET/OU durée ≈ 7 jours + prix payé = 0
+    $name = mb_strtolower((string)format_string($plan->name), 'UTF-8');
+    if (preg_match('/\b(essai|trial|проб)/u', $name)) {
+        return true;
+    }
+    $durationsec = (int)$sub->end_date - (int)$sub->start_date;
+    $days = (int)round($durationsec / DAYSECS);
+    $paid0 = (float)($sub->pricepaid ?? 0) == 0.0;
+    if ($paid0 && $days >= 6 && $days <= 8) { // ~7 jours
+        return true;
+    }
+    return false;
+};
 
 // Petits helpers
 $fmtmoney = fn($amt, $cur) => format_float((float)$amt, 2).' '.strtoupper((string)$cur);
@@ -54,6 +86,8 @@ if (!$subs) {
 foreach ($subs as $sub) {
     $plan = $plans[$sub->planid] ?? (object)['name'=>get_string('unknown_plan','local_subscriptions'), 'is_recurring'=>0];
     
+    $istrial = $detect_trial($plan, $sub);
+
     $displayname = local_subscriptions_plan_display_name($plan);
 
     $isactive = ($sub->status === Status::ACTIVE);
@@ -68,8 +102,13 @@ foreach ($subs as $sub) {
     // Corps : période, prix, provider
     $list = html_writer::start_tag('ul', ['class'=>'list-unstyled mb-2 small']);
     $list .= html_writer::tag('li', html_writer::tag('span', get_string('period','local_subscriptions').': ', ['class'=>'text-muted']). userdate($sub->start_date).' &rarr; '.userdate($sub->end_date));
-    $list .= html_writer::tag('li', html_writer::tag('span', get_string('pricepaid','local_subscriptions').': ', ['class'=>'text-muted']). $fmtmoney($sub->pricepaid ?? 0, $sub->currency ?? ''));
-
+    // Prix payé : on le masque pour les trials
+    if (!$istrial) {
+        $list .= html_writer::tag('li',
+            html_writer::tag('span', get_string('pricepaid','local_subscriptions').': ', ['class'=>'text-muted']) .
+            $fmtmoney($sub->pricepaid ?? 0, $sub->currency ?? '')
+        );
+    }
     if (!empty($sub->payment_failed)) {
         $list .= html_writer::tag('li',
             html_writer::span(get_string('payment_failed','local_subscriptions'), 'badge bg-warning text-dark')
@@ -89,30 +128,29 @@ foreach ($subs as $sub) {
         $cur = strtoupper($sub->currency ?? 'EUR');
         $amt = format_float((float)($sub->pricepaid ?? 0), 2); // on réutilise exactement ce qui a été payé
 
-        if ($sub->status === Status::EXPIRED) {
-            // RENOUVELER (start = now)
-            $renewurl = UrlFactory::create_session([
-                'planid'           => $sub->planid,
-                'currency'         => $cur,
-                'operation'        => Operation::PURCHASE_NEW,
-                'override_amount'  => $amt,
-                'override_currency'=> $cur,
-            ]);
-            $btns[] = html_writer::link($renewurl, get_string('renew_now','local_subscriptions'),
-                ['class'=>'btn btn-primary btn-sm']);
+        if (!$istrial) {
+            $subscribelink = UrlFactory::subscribe();
+
+            if ($sub->status === Status::EXPIRED) {
+                // RENOUVELER → simple CTA vers la page des plans
+                $btns[] = html_writer::link(
+                    $subscribelink,
+                    get_string('renew_now','local_subscriptions'),
+                    ['class'=>'btn btn-primary btn-sm']
+                );
+            }
+
+            if ($sub->status === Status::ACTIVE) {
+                // PROLONGER → même chose, mais texte spécifique
+                $btns[] = html_writer::link(
+                    $subscribelink,
+                    get_string('btn_extend','local_subscriptions'),
+                    ['class'=>'btn btn-outline-primary btn-sm']
+                );
+            }
         }
 
-        if ($sub->status === Status::ACTIVE) {
-            // PROLONGER (start = end_date existante)
-            $extendurl = UrlFactory::checkout($sub->planid, $cur, [
-                'operation'        => Operation::QUEUE_FUTURE,
-                'ref_subid'        => $sub->id,       // pour démarrer à la fin de celle-ci
-                'override_amount'  => $amt,           // on fige le prix au montant payé
-                'override_currency'=> $cur,
-            ]);
-            $btns[] = html_writer::link($extendurl, get_string('btn_extend','local_subscriptions'),
-                ['class'=>'btn btn-outline-primary btn-sm']);
-        }
+
     }
 
     if (!empty($plan->is_recurring) && $sub->payment_provider === Provider::STRIPE && !empty($sub->provider_customer_id)) { // Provider::ALFA not yet supported
@@ -127,7 +165,6 @@ foreach ($subs as $sub) {
             'mb-2'
         );
     }
-    $btns[] = $lsrenderer->plan_description_button($plan, null, 'outline-secondary', 'sm');
 
     $modalid = 'subModal'.$sub->id;
     $btns[] = html_writer::tag('button', get_string('details','local_subscriptions'),
@@ -182,14 +219,6 @@ foreach ($subs as $sub) {
       echo html_writer::end_div();
     echo html_writer::end_div();
 
-    echo $lsrenderer->plan_description_modal_once($plan);
-
 }
-
-// Lien pour s’abonner (CTA)
-echo html_writer::div(
-    html_writer::link(UrlFactory::subscribe(), get_string('subscribe', 'local_subscriptions'), ['class'=>'btn btn-primary']),
-    'mt-4'
-);
 
 echo $OUTPUT->footer();

@@ -2,20 +2,39 @@
 // /local/campus/mycourses.php
 require(__DIR__.'/../../config.php');
 require_once($CFG->dirroot.'/local/campus/lib.php');
+require_once($CFG->dirroot.'/local/subscriptions/lib.php');
 require_once($CFG->libdir.'/completionlib.php'); // fallback si core_completion n'est pas dispo
-
-require_login();
 
 $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/campus/mycourses.php'));
+
+require_login(); // force la connexion
+
+// Bloquer aussi l'utilisateur invité
+if (isguestuser()) {
+    redirect(new moodle_url('/login/index.php'));
+}
+
 $PAGE->set_pagelayout('standard'); // même header que le catalogue
 $PAGE->set_title(get_string('mycourses_title', 'local_campus'));
 $PAGE->set_heading(get_string('mycourses_title', 'local_campus'));
 $PAGE->navbar->add(get_string('mycourses_title', 'local_campus'), $PAGE->url);
 
+// --- Message de bienvenue une fois après inscription à l’essai ---
+$welcome_pending = get_user_preferences('local_campus_trial_welcome_pending', 0);
+if ($welcome_pending) {
+    $msg = get_string('trial_welcome_banner_html', 'local_campus');
+    \core\notification::add($msg, \core\output\notification::NOTIFY_SUCCESS);
+    unset_user_preference('local_campus_trial_welcome_pending');
+}
+
 // Styles (block + campus)
 $PAGE->requires->css(new moodle_url('/local/campus/styles.css'));
+
+ob_start();
+local_subscriptions_inject_subscribe_modal($PAGE);
+$subspopup = ob_get_clean();
 
 // Récupérer les cours de l'utilisateur (hors frontpage id=1)
 $cours = enrol_get_my_courses('*', 'fullname ASC');
@@ -23,8 +42,9 @@ unset($cours[SITEID]);
 
 require_once($CFG->libdir.'/completionlib.php'); // pour completion_info
 
-$progressMap   = [];
-$completed_ids = [];
+$progressMap     = [];
+$progressCounts  = []; // [courseid => ['done'=>X, 'total'=>Y]]
+$completed_ids   = [];
 
 foreach ($cours as $rec) { // ← très important : $cours
     $cid    = (int)$rec->id;
@@ -33,38 +53,53 @@ foreach ($cours as $rec) { // ← très important : $cours
     $modinfo = get_fast_modinfo($course);
 
 
-    // Y a-t-il au moins une activité "traçable" pour cet utilisateur ?
-    $hasTrackable = false;
+    $pct   = null;
+    $total = 0;
+    $done  = 0;
+
+    // Parcours des modules pour compter X / Y
     foreach ($modinfo->get_cms() as $cm) {
-        if (!$cm->uservisible) continue;
-        if ($cinfo->is_enabled($cm)) { $hasTrackable = true; break; }
+        if (!$cm->uservisible) {
+            continue;
+        }
+        if (!$cinfo->is_enabled($cm)) {
+            continue;
+        }
+        $total++;
+
+        // Données de complétion pour ce module
+        $data = $cinfo->get_data($cm, true, $USER->id);
+        $state = isset($data->completionstate) ? (int)$data->completionstate : 0;
+        // Tout état non nul = considéré comme complété (complete, pass, fail…)
+        if ($state !== 0) {
+            $done++;
+        }
     }
 
-    $pct = null;
-    if ($hasTrackable) {
-        // Vrai % de complétion quand c'est possible
-        if (class_exists('\core_completion\progress')) {
-            $p = \core_completion\progress::get_course_progress_percentage($course, $USER->id);
-        } else if (method_exists($cinfo, 'get_progress_percentage')) {
-            $p = $cinfo->get_progress_percentage($USER->id);
-        } else {
-            $p = null;
+    if ($total > 0) {
+        // % basé sur X/Y
+        $pct = 100.0 * ($done / $total);
+        $pct = max(0.0, min(100.0, $pct));
+
+        $progressMap[$cid] = $pct;
+        $progressCounts[$cid] = ['done' => $done, 'total' => $total];
+
+        if ($done > 0 && $done >= $total) {
+            $completed_ids[] = $cid;
         }
-        if ($p !== null) {
-            $pct = max(0.0, min(100.0, $p));
-        }
+
     } else {
         // Aucun suivi disponible → visite de la page du cours = 100 %
         if (function_exists('local_campus_user_has_visited_course')
             && local_campus_user_has_visited_course($USER->id, $cid)) {
+
             $pct = 100.0;
+            $progressMap[$cid] = $pct;
+            $completed_ids[] = $cid;
+            // pas de progressCounts ici (pas d'activités traçables)
         }
     }
 
-    if ($pct !== null) {
-        $progressMap[$cid] = $pct;
-        if ($pct >= 100.0) { $completed_ids[] = $cid; }
-    }
 }
 
 // Aucun cours à lister (visiteur ou utilisateur sans inscriptions)
@@ -122,7 +157,7 @@ if (empty($cours)) {
     $isguest = (!isloggedin() || isguestuser());
     if ($isguest) {
         $buttons[] = html_writer::link(
-            new moodle_url('/subscribe.php'),
+            new moodle_url('/local/subscriptions/subscribe.php'),
             get_string('subscribe_now', 'local_campus'),
             ['class' => 'default-btn me-2 d-lg-none'] // visible mobile uniquement
         );
@@ -254,14 +289,31 @@ if (empty($cours)) {
     // Popup essai (si injectée)
     echo $trialModal;
 
+    echo $subspopup;
+
     echo $OUTPUT->footer();
     exit;
 }
 
+// Prépare la liste pour le renderer, groupée par catégorie
+$bycat = [];
+foreach ($cours as $c) {
+    $catid = (int)$c->category;
+    if (!isset($bycat[$catid])) {
+        $bycat[$catid] = [];
+    }
+    $bycat[$catid][] = $c;
+}
 
-
-// Prépare la liste pour le renderer (il suffit d’id → le handler Edly retrouvera les visuels)
-$records = array_map(function($o){ return (object)['id' => (int)$o->id]; }, $cours);
+// Récupère les noms de catégories
+$catnames = [];
+if (!empty($bycat)) {
+    list($insql, $params) = $DB->get_in_or_equal(array_keys($bycat), SQL_PARAMS_NAMED);
+    $cats = $DB->get_records_select('course_categories', "id $insql", $params, '', 'id, name');
+    foreach ($cats as $cat) {
+        $catnames[(int)$cat->id] = format_string($cat->name);
+    }
+}
 
 // Options pour le renderer partagé du block
 /** @var \block_edly_course_filter\output\renderer $renderer */
@@ -269,9 +321,9 @@ $renderer = $PAGE->get_renderer('block_edly_course_filter');
 
 $style = (int)(get_config('local_campus','catalogue_style') ?? 1);
 
-// Onglets “Mes cours | Catalogue” (dans le bloc)
-$isMy = $PAGE->url->compare(new moodle_url('/local/campus/mycourses.php'), URL_MATCH_BASE);
-$tabsHtml = local_campus_tabs_inline_html($isMy);
+// Onglets “Mes cours | Catalogue” désactivés : mycourses devient la page centrale
+$tabsHtml = '';
+
 
 $opts = [
     'style'                  => $style,
@@ -292,15 +344,155 @@ $opts = [
     'progress_map'           => $progressMap,
     'completed_ids'          => $completed_ids,
     'progress_below'         => 1,  // barre (ou placeholder) SOUS les boutons
+    'progress_counts'        => $progressCounts,
 
     // libellés
     'cta_connected'          => get_string('cta_connected','local_campus'),
     'cta_connected_start'    => get_string('cta_connected_start','local_campus'),
     'cta_connected_resume'   => get_string('cta_connected_resume','local_campus'),
     'cta_connected_free'     => get_string('cta_connected','local_campus'),
+
+    // *** Nouveaux flags pour le renderer ***
+    'hide_header'            => 1, // pas de top_title/title sur mycourses
+    'hide_desc'              => 1, // pas de bouton "En savoir plus"
 ];
 
 echo $OUTPUT->header();
+local_campus_render_subscription_expiry_banner();
 
-echo $renderer->catalogue($records, $opts);
+// --- Bandeaux essai & flag "expired" ---
+require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
+
+$trialExpiredNoPaid = false;
+
+// A-t-il un abonnement actif (hors essai) ?
+$trialplanid = (int)(get_config('local_subscriptions','trial_plan_id') ?? 0);
+$hasPaid = $DB->record_exists_select(
+    'user_subscription',
+    "userid = :u AND status = 'ACTIVE' AND end_date > :now" . ($trialplanid ? " AND planid <> :t" : ""),
+    ['u' => (int)$USER->id, 'now' => time()] + ($trialplanid ? ['t' => $trialplanid] : [])
+);
+
+// État de l’essai
+$activeTrial = \local_subscriptions\trial_manager::user_has_active_trial((int)$USER->id);
+$winOpen     = \local_subscriptions\trial_manager::is_discount_window_open((int)$USER->id);
+
+// 1) Rappel de fin (essai encore actif MAIS promo plus active)
+if (!$hasPaid && $activeTrial && !$winOpen) {
+    $expDate = userdate((int)$activeTrial->end_date, '%e %B %Y, %H:%M');
+    $subUrl  = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+    $msg = html_writer::tag('strong', get_string('trial_banner_reminder_title','local_campus')) . ' ' .
+            get_string('trial_banner_reminder_body','local_campus', $expDate);
+
+    // Bandeau avec CTA « S’abonner » à droite
+    echo html_writer::div(
+        html_writer::div(
+            html_writer::div($msg, 'me-3') .
+            html_writer::link($subUrl, get_string('subscribe_now','local_campus'), ['class'=>'btn btn-sm btn-primary ms-auto',  'data-subs-modal'=>'1']),
+            'alert alert-info d-flex align-items-center justify-content-between'
+        ),
+        'container mt-3'
+    );
+
+}
+
+// 2) Essai expiré (pas d’essai actif et pas d’abonnement)
+if (!$hasPaid && !$activeTrial && $trialplanid) {
+    $latest = $DB->get_record_sql("
+        SELECT * FROM {user_subscription}
+         WHERE userid = :u AND planid = :p
+         ORDER BY end_date DESC
+         LIMIT 1",
+        ['u'=>(int)$USER->id,'p'=>$trialplanid]
+    );
+    if ($latest && (int)$latest->end_date > 0 && (int)$latest->end_date <= time()) {
+        $expDate = userdate((int)$latest->end_date, '%e %B %Y, %H:%M');
+        $subUrl  = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+        $msg     = get_string('trial_banner_expired_html','local_campus', (object)['date'=>$expDate,'url'=>$subUrl]);
+
+        // Bandeau avec CTA « S’abonner » à droite
+        echo html_writer::div(
+            html_writer::div(
+                html_writer::div($msg, 'me-3') .
+                html_writer::link($subUrl, get_string('subscribe_now','local_campus'), ['class'=>'btn btn-sm btn-primary ms-auto']),
+                'alert alert-warning d-flex align-items-center justify-content-between'
+            ),
+            'container mt-3'
+        );
+
+        $trialExpiredNoPaid = true;
+    }
+
+}
+
+if (!empty($trialExpiredNoPaid)) {
+    echo html_writer::start_div('trial-expired');
+}
+
+// Affichage groupé par catégorie
+foreach ($bycat as $catid => $courseobjs) {
+    $catTitle = $catnames[$catid] ?? '';
+
+    // Wrapper de catégorie
+    echo html_writer::start_div('campus-category-block container mt-4');
+
+    if ($catTitle !== '') {
+        echo html_writer::tag('h2', $catTitle, ['class' => 'campus-category-title mb-3']);
+    }
+
+    // Liste de cours pour cette catégorie (le renderer n'a besoin que des IDs)
+    $records = array_map(function($o){ return (object)['id' => (int)$o->id]; }, $courseobjs);
+
+    echo $renderer->catalogue($records, $opts);
+
+    echo html_writer::end_div();
+}
+
+if (!empty($trialExpiredNoPaid)) {
+    echo html_writer::end_div();
+}
+
+
+if (!empty($trialExpiredNoPaid)) {
+    echo html_writer::tag('style', <<<CSS
+/* Griser toutes les cartes Edly quand essai expiré et pas d'abonnement */
+.trial-expired .block_edly_course_filter .courses-card {
+  position: relative;
+  filter: grayscale(100%);
+  opacity: .6;
+}
+
+/* Désactiver tous les liens d'accès (image, titre, CTA) */
+.trial-expired .block_edly_course_filter .courses-card a {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+}
+
+/* (Optionnel) désactiver seulement les accès direct cours mais laisser "En savoir plus"
+.trial-expired .block_edly_course_filter .courses-card .cf-cta,
+.trial-expired .block_edly_course_filter .courses-card .courses-image a,
+.trial-expired .block_edly_course_filter .courses-card .top-content h3 a {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+}
+*/
+
+/* Petit ruban "Essai expiré" dans le coin (optionnel) */
+.trial-expired .block_edly_course_filter .courses-card::after {
+  content: 'Essai expiré';
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  background: rgba(17,24,39,.9);
+  color:#fff;
+  font-weight:600;
+  font-size:.85rem;
+  padding:.25rem .5rem;
+  border-radius:.5rem;
+}
+CSS
+    );
+}
+
+echo $subspopup;
 echo $OUTPUT->footer();

@@ -23,6 +23,8 @@ class subscription_manager {
 		$start = $startdate ?? time();
 	
 		switch ($duration_key) {
+			case '1week':
+				return strtotime('+1 week', $start);
 			case '1month':
 				return strtotime('+1 month', $start);
 			case '3months':
@@ -187,10 +189,20 @@ class subscription_manager {
 		float $pricepaid,
 		string $currency,
 		int $creation_date,
-		bool $allowupdate = false
+		bool $allowupdate = false,
+		int $discount_percent = 0,
+		?string $discount_reason = null,
+		float $discount_amount = 0.0
 	): array {
 		global $DB;
 
+		// Normalisation simple.
+		$currency = $currency !== '' ? strtoupper($currency) : 'EUR';
+		if (strlen($currency) > 10) {
+			$currency = substr($currency, 0, 10);
+		}
+
+		// Cherche une souscription ACTIVE sur le même plan.
 		$existing = $DB->get_record('user_subscription', [
 			'userid' => $userid,
 			'planid' => $planid,
@@ -199,38 +211,119 @@ class subscription_manager {
 
 		if ($existing) {
 			if ($allowupdate) {
-				$existing->payment_provider = $payment_provider;
-				$existing->transactionid = $transactionid;
-				$existing->start_date = $start_date;
-				$existing->end_date = $end_date;
-				$existing->pricepaid = $pricepaid;
-				$existing->currency = $currency;
-				$existing->last_update = time();
+				// Mise à jour (extension / correction).
+				$existing->payment_provider  = $payment_provider;
+				$existing->transactionid     = $transactionid;
+				$existing->start_date        = $start_date;
+				$existing->end_date          = $end_date;
+				$existing->pricepaid         = $pricepaid;
+				$existing->currency          = $currency;
+				$existing->discount_percent  = (int)$discount_percent;
+				$existing->discount_reason   = $discount_reason;   // NULL accepté
+				$existing->discount_amount   = (float)$discount_amount;
+				$existing->last_update       = time();
 
 				$DB->update_record('user_subscription', $existing);
-				return ['status' => 'updated', 'subscription' => $existing];;
+				return ['status' => 'updated', 'subscription' => $existing];
 			} else {
 				return ['status' => 'exists', 'subscription' => $existing];
 			}
 		}
 
+		// Création (nouvelle souscription).
 		$record = (object)[
-			'userid' => $userid,
-			'planid' => $planid,
-			'payment_provider' => $payment_provider,
-			'transactionid' => $transactionid,
-			'start_date' => $start_date,
-			'end_date' => $end_date,
-			'pricepaid' => $pricepaid,
-			'currency' => $currency,
-			'status' => Status::ACTIVE,
-			'creation_date' => $creation_date,
-			'last_update' => time()
+			'userid'           => $userid,
+			'planid'           => $planid,
+			'payment_provider' => $payment_provider,      // ex: 'trial', 'stripe', 'alfa'
+			'transactionid'    => $transactionid,         // ex: 'trial:{userid}:{ts}'
+			'start_date'       => $start_date,
+			'end_date'         => $end_date,
+			'pricepaid'        => $pricepaid,             // 0.00 pour essai
+			'currency'         => $currency,              // 'EUR' par défaut si inconnu
+			'status'           => Status::ACTIVE,
+			'creation_date'    => $creation_date,
+			'last_update'      => time(),
+			'discount_percent' => (int)$discount_percent,
+			'discount_reason'  => $discount_reason,       // NULL ok
+			'discount_amount'  => (float)$discount_amount
 		];
 
-		$DB->insert_record('user_subscription', $record);
+		$record->id = $DB->insert_record('user_subscription', $record);
+
 		return ['status' => 'created', 'subscription' => $record];
 	}
+
+
+	public static function create_paid_subscription(
+		int $userid,
+		int $planid,
+		string $payment_provider,
+		string $transactionid,
+		int $start_date,
+		int $end_date,
+		string $currency,
+		float $baseprice,
+		int $creation_date,
+		bool $allowupdate = false,
+		?array $discount_override = null
+	): array {
+		global $DB, $CFG;
+
+		require_once($CFG->dirroot.'/local/subscriptions/classes/pricing_manager.php');
+		require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
+
+		// Sécurité : on n'achète pas un plan d'essai
+		if (\local_subscriptions\trial_manager::is_trial_planid($planid)) {
+			throw new \moodle_exception('cannot_purchase_trial_plan', 'local_subscriptions');
+		}
+
+		$currency = strtoupper(trim($currency ?: 'EUR'));
+		$baseprice = round(max(0.0, $baseprice), 2);
+
+		// 1) Déterminer la remise
+		if ($discount_override && is_array($discount_override)) {
+			$dpct = isset($discount_override['percent']) ? (int)$discount_override['percent'] : 0;
+			$damt = isset($discount_override['amount'])  ? (float)$discount_override['amount']  : 0.0;
+			$reas = $discount_override['reason'] ?? null;
+
+			$dpct = max(0, min(100, $dpct));
+			$damt = round(max(0.0, min($damt, $baseprice)), 2);
+			$reason = $reas;
+		} else {
+			// Calcul "officiel"
+			$calc = \local_subscriptions\pricing_manager::compute_trial_discount($userid, $planid, $baseprice);
+			$dpct = (int)$calc['percent'];
+			$damt = (float)$calc['amount'];
+			$reason = $calc['reason'];
+		}
+
+		// 2) Prix payé = base - remise
+		$pricepaid = round(max(0.0, $baseprice - $damt), 2);
+
+		// 3) Persist
+		$res = self::create_or_extend_subscription(
+			$userid,
+			$planid,
+			$payment_provider,
+			$transactionid,
+			$start_date,
+			$end_date,
+			$pricepaid,
+			$currency,
+			$creation_date,
+			$allowupdate,
+			$dpct,
+			$reason,
+			$damt
+		);
+
+		// 4) Inscriptions + rôle student (et retrait de trialstudent si présent)
+		self::enrol_user_to_courses($userid, $planid, $start_date, $end_date);
+		\local_subscriptions\trial_manager::force_role_student($userid, $planid);
+
+		return $res;
+	}
+
 
 	public static function unenrol_user_from_plan(int $userid, int $planid): void {
 		$scope = self::get_access_scope_from_planid($planid);

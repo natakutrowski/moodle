@@ -9,4 +9,11 @@ $observers = [
         'internal'    => false,
         'priority'    => 999,
     ],
+    [
+        'eventname'   => '\core\event\user_login_failed',
+        'callback'    => '\local_campus\observers::user_login_failed',
+        'includefile' => '/local/campus/classes/observers.php',
+        'internal'    => false,
+        'priority'    => 9999,
+    ],
 ];

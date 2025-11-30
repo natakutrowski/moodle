@@ -3,6 +3,7 @@ $string['pluginname'] = 'Abonnements';
 
 // -- Configuration des abonnements
 // Plans
+$string['plan_1week'] = '1 semaine'; // do not delete
 $string['plan_1month']   = '1 mois'; // do not delete
 $string['plan_3months']  = '3 mois'; // do not delete
 $string['plan_6months']  = '6 mois'; // do not delete
@@ -177,7 +178,8 @@ $string['courselist'] = 'Liste des cours';
 
 $string['close'] = 'Fermer';
 
-$string['subscribe']       = 'S’abonner';
+$string['subscribe']       = 'S\'abonner';
+$string['subscribe_to_campus'] = 'S\'abonner à Campus<small><sup>FR</sup></small>';
 $string['change_currency'] = 'Changer de devise';
 
 $string['payment_success_check_email'] = 'Veuillez vérifier votre e-mail : un message vous attend pour finaliser la connexion et définir votre mot de passe.';
@@ -192,22 +194,59 @@ $string['checkout_title']        = 'Paiement';
 $string['checkout_duration']     = 'Durée :';
 $string['checkout_go_to_payment']= 'Aller au paiement';
 
-$string['welcome_subject']        = 'Bienvenue sur {$a}';
-$string['welcome_body_intro']     = 'Votre compte a été créé et votre abonnement est maintenant actif.';
-$string['welcome_username']       = 'Votre identifiant :';
-$string['welcome_plan_summary']   = 'Plan : {$a}';
+$string['welcome_subject'] = 'Votre abonnement à CampusFR est activé ✅';
+
+$string['welcome_body_intro'] =
+    '<p>Bonjour, {$a} !</p>' .
+    '<p>Votre abonnement à Campus<small><sup>FR</sup></small> est activé — vous avez maintenant un accès complet à la plateforme selon le plan choisi.</p>' .
+    '<p>Si vous aviez déjà utilisé Campus<small><sup>FR</sup></small> pendant la période d’essai, vous continuez simplement avec le même compte — vos exercices réalisés et vos points-croissants sont conservés. Si vous venez de nous rejoindre, ce compte sera utilisé pour toutes vos connexions.</p>' .
+    '<p>Voici vos identifiants :</p>';
+
+$string['welcome_username'] = 'E-mail :';
+$string['welcome_plan_summary'] = 'Plan : {$a}';
 $string['welcome_amount_summary'] = 'Montant : {$a}';
 
-$string['receipt_title']   = 'Reçu de paiement';
-$string['receipt_plan']    = 'Plan : ';
-$string['receipt_amount']  = 'Montant : ';
-$string['receipt_tx']      = 'ID de transaction : ';
-$string['receipt_period']  = 'Période d’accès : ';
+$string['welcome_text_canal'] =
+    'Ajoutez-vous au canal Campus<small><sup>FR</sup></small> : nous y publions toutes les actualités importantes, les mises à jour et vous pouvez y poser vos questions aux enseignants.';
+$string['welcome_button_canal'] = 'Canal Campus<small><sup>FR</sup></small>';
+
+$string['welcome_text_group'] =
+    'Vous pouvez également rejoindre le groupe pour échanger, demander des conseils, soutenir les autres et sentir que vous faites partie de la communauté.';
+$string['welcome_button_group'] = 'Groupe Campus<small><sup>FR</sup></small>';
+
+$string['welcome_footer'] =
+    '<p>Ce message a été envoyé automatiquement.<br>
+Si vous avez des questions, écrivez-nous à <a href="mailto:{$a}">{$a}</a> — nous serons ravis de vous aider.</p>
+<p>Nous vous souhaitons beaucoup de joie dans chaque petit progrès, des leçons passionnantes et une belle avancée en français ❤️</p>
+<p>Nata et l’équipe Campus<small><sup>FR</sup></small></p>';
+
+$string['receipt_title'] = 'Paiement de votre abonnement CampusFR confirmé ✅';
+$string['receipt_plan'] = 'Plan : ';
+$string['receipt_amount'] = 'Montant : ';
+$string['receipt_tx'] = 'ID de transaction : ';
+$string['receipt_period'] = 'Période d’accès : ';
 
 $string['welcome_temp_password_label'] = 'Mot de passe temporaire :';
-$string['welcome_security_hint']       = 'Pour votre sécurité, il vous sera demandé de définir un nouveau mot de passe lors de votre première connexion.';
-$string['receipt_intro']               = 'Voici un récapitulatif de votre achat :';
-$string['receipt_button_open']         = 'Ouvrir mes cours';
+
+$string['welcome_security_hint'] =
+    '<p>Vous avez créé votre mot de passe lors de l’inscription. Si vous l’oubliez, vous pouvez le réinitialiser ici :</p>' .
+    '👉 <a href="{$a->url}">Réinitialiser le mot de passe</a></p>';
+
+$string['welcome_mycourses'] =
+    '<p>Vous pouvez accéder à votre profil via le lien ci-dessous :</p>' .
+    '👉 <a href="{$a->url}">Entrer sur le campus</a></p>' .
+    '<p>Informations sur votre abonnement :</p>';
+
+$string['receipt_intro'] =
+    '<p>Votre abonnement à Campus<small><sup>FR</sup></small> a été activé avec succès, et le paiement a été confirmé.</p>
+<p>Voici les informations principales concernant votre achat :</p>';
+
+$string['receipt_button_open'] = 'Accéder à Campus<small><sup>FR</sup></small>';
+
+$string['receipt_footer'] =
+    '<p>À très bientôt sur Campus<small><sup>FR</sup></small> 🇫🇷🥐</p>
+<p>Nata et l’équipe Campus<small><sup>FR</sup></small></p>';
+
 
 // E-mails – échec / abandonné / relance
 $string['email_failed_subject'] = 'Votre paiement n’a pas pu aboutir';
@@ -248,7 +287,7 @@ $string['task_cleanup_login_tokens'] = 'Nettoyer les jetons de connexion expiré
 $string['option_queue_future']  = 'Prolonger (activation le {$a})';
 $string['option_purchase_new']  = 'Nouvel abonnement';
 $string['choose_option']        = 'Choisir une option';
-$string['have_account_login_to_see_options'] = 'Vous avez déjà un compte ? — Connectez-vous pour voir les options de mise à niveau en cliquant ici.';
+$string['have_account_login_to_see_options'] = 'Vous avez déjà un compte ? Connectez-vous pour renouveler votre abonnement.';
 
 // Au-dessus des options
 $string['advisor_help_upgrade']  = 'Vous pouvez enchaîner sur votre abonnement actuel ou passer à un plan plus long. Le prix de la mise à niveau est ajusté selon le temps écoulé.';
@@ -259,7 +298,7 @@ $string['advisor_help_guest']    = 'Connectez-vous pour voir les options de mise
 $string['summary_price_title'] = 'Prix total';
 
 $string['personal_info_title'] = 'Informations personnelles';
-$string['personal_info_help']  = 'Ces informations seront utilisées pour créer votre compte et vous envoyer la confirmation.';
+$string['personal_info_help']  = 'Ces informations sont nécessaires pour créer votre compte et activer votre abonnement.';
 
 $string['mail_hello']         = 'Bonjour {$a},';
 $string['mail_button_manage'] = 'Gérer mes abonnements';
@@ -432,6 +471,7 @@ $string['provider_stripe'] = 'Stripe';
 $string['provider_manual'] = 'Manuel';
 $string['provider_csv']    = 'CSV';
 $string['provider_dev']    = 'Dev';
+$string['provider_trial']  = 'Essai';
 
 $string['configmissing']        = 'Configuration manquante : {$a}.';
 $string['missing_customer_id']  = 'L’ID client Stripe est manquant.';
@@ -485,12 +525,17 @@ $string['alfa_webhook_secret_live'] = 'Secret du webhook Alfa (LIVE)';
 
 $string['policy_url_ru']  = 'URL de la politique de confidentialité (Russie)';
 $string['policy_url_row'] = 'URL de la politique de confidentialité (Reste du monde)';
-$string['terms_url_ru']   = 'URL des Conditions (CGU/CGV) (Russie)';
-$string['terms_url_row']  = 'URL des Conditions (CGU/CGV) (Reste du monde)';
+$string['terms_url_ru']   = 'URL des Conditions générales d\'utilisation (Russie)';
+$string['terms_url_row']  = 'URL des Conditions générales d\'utilisation (Reste du monde)';
+$string['offer_url_ru']   = 'URL des Conditions générales de vente (Russie)';
+$string['offer_url_row']  = 'URL des Conditions générales de vente (Reste du monde)';
 $string['privacy_policy'] = 'Politique de confidentialité';
-$string['terms_cgu']      = 'Conditions générales';
+$string['terms_cgu']      = 'Conditions générales d\'utilisation';
+$string['terms_cgv']      = 'Conditions générales de vente';
 $string['i_accept_policy']= 'J’accepte la {$a}.';
 $string['i_accept_terms'] = 'J’accepte les {$a}.';
+$string['i_accept_all_terms'] =
+    'J’accepte la {$a->policy}, les {$a->terms} et le {$a->offer}.';
 
 $string['availability_mode']       = 'Visibilité du plugin';
 $string['availability_mode_desc']  = 'Restreindre temporairement toutes les pages publiques du plugin Abonnements.';
@@ -626,3 +671,79 @@ $string['payui_cta_mycourses'] = 'Aller à mes cours';
 $string['settings_support_email'] = 'E-mail du support';
 $string['settings_support_email_desc'] = 'Affiché sur les pages de paiement (succès/erreur) comme lien de contact.';
 $string['stripe_price_mismatch'] = 'Stripe : incohérence de prix détectée. Réessayez ou contactez le support. ({$a})';
+
+$string['settings_trial_section'] = 'Essai 7 jours';
+$string['settings_trial_planid'] = 'Plan d’essai (ID)';
+$string['settings_trial_planid_desc'] = 'ID du plan marqué « is_trial ».';
+$string['settings_trial_duration_days'] = 'Durée de l’essai (jours)';
+$string['settings_trial_duration_days_desc'] = 'Nombre de jours de l’essai gratuit.';
+$string['settings_trial_discount_percent'] = 'Réduction (%) pendant la fenêtre';
+$string['settings_trial_discount_percent_desc'] = 'Pour traçage et application côté paiement (agnostique du PSP).';
+$string['settings_trial_discount_hours'] = 'Fenêtre de réduction (heures)';
+$string['settings_trial_discount_hours_desc'] = 'Ex. 72 heures après le début de l’essai.';
+$string['missing_trial_plan'] = 'Aucun plan d’essai configuré (trial_plan_id).';
+
+$string['pricing_missing_price'] = 'Aucun prix n’est défini pour ce plan et cette devise ({$a}).';
+$string['cannot_purchase_trial_plan'] = 'Ce plan est un plan d’essai et ne peut pas être acheté.';
+$string['settings_paylock_section'] = 'Verrouillage du prix (checkout)';
+$string['settings_paylock_strict'] = 'Mode strict en cas d’écart';
+$string['settings_paylock_strict_desc'] = 'Si coché, la création d’abonnement échoue si le montant payé ne correspond pas au montant verrouillé.';
+$string['settings_paylock_tolerance'] = 'Tolérance d’écart (en centimes)';
+$string['settings_paylock_tolerance_desc'] = 'Écart maximum autorisé entre le montant verrouillé et le montant payé (par défaut 2 centimes).';
+
+$string['pricing_missing_price'] = 'Aucun prix n’est défini pour ce plan et cette devise ({$a}).';
+$string['cannot_purchase_trial_plan'] = 'Ce plan est un plan d’essai et ne peut pas être acheté.';
+$string['payment_mismatch_too_large'] = 'Écart de paiement trop important par rapport au montant verrouillé.';
+$string['paylock_missing_lockdata'] = 'Aucune donnée de verrouillage du prix (locked_*) n’est disponible pour cette demande.';
+$string['paylock_invalid_minor'] = 'Montant verrouillé invalide.';
+$string['stripe_lock_requires_payment_mode'] = 'Le verrouillage de prix nécessite le mode « payment » (montant fixe). Utilisez un paiement unique ou réactivez les coupons.';
+$string['alfa_nonpositive_amount'] = 'Montant Alfa non positif après verrouillage.';
+$string['alfa:productname'] = 'Abonnement';
+$string['paylock_missing_context'] = 'Impossible de calculer le prix : utilisateur ou plan non défini.';
+
+$string['currency_selector_label'] = 'Devise';
+$string['currency_eur'] = '€ EUR';
+$string['currency_rub'] = '₽ RUB';
+$string['set_display_currency_symbols'] = 'Afficher le symbole monétaire';
+$string['set_display_currency_symbols_desc'] = 'Si activé, les prix sont affichés avec le symbole (ex. 49 €). Sinon, le code est utilisé (ex. 49 EUR).';
+$string['badge_limited_offer'] = 'Offre limitée -{$a}%';
+$string['price_unavailable_in'] = 'Non disponible en {$a->curr} — affichage en {$a->fallback}.';
+$string['checkout_discount_note']        = 'Votre offre de lancement est encore valable';
+$string['checkout_discount_note_prefix'] = '−{$a}% sur l’abonnement. Réduction disponible uniquement';
+$string['days_short']                    = 'j';
+
+$string['cancel_price_title']  = 'Prix prévu';
+$string['error_price_title']   = 'Prix prévu';
+$string['success_price_title'] = 'Montant payé';
+$string['error_price_title']   = 'Prix prévu';
+$string['reason_trial72h']     = 'Remise -{$a}% appliquée pendant votre période d’essai.';
+$string['task_sub_expiry_reminders'] = 'Rappels d’expiration d’abonnement';
+$string['expiry_reminder_subject_today'] = 'Votre abonnement expire aujourd’hui';
+
+$string['email_copy_verbose'] = 'Appendice technique dans les copies (log@...)';
+$string['email_copy_verbose_desc'] = 'Si activé, chaque copie contient un résumé technique (PR/User/Plan/Sub, locked_*, etc.).';
+
+$string['existing_account_login_first'] = 'Un compte existe déjà avec cet e-mail. Veuillez vous connecter pour poursuivre et rattacher l’achat à votre compte.';
+$string['task_enrol_scope_fill'] = 'Abonnements — compléter les inscriptions selon le scope du plan';
+
+$string['paymentsuccess_redirect_msg'] = 'Vous allez être redirigé vers « Mes cours » dans {$a} secondes…';
+$string['paymentsuccess_mascot_alt']   = 'Gustave, la girafe, vous félicite pour votre paiement réussi.';
+$string['paymentcancel_mascot_alt'] = 'Illustration d’un paiement annulé.';
+$string['paymenterror_mascot_alt'] = 'Illustration d’une erreur de paiement.';
+$string['plan_price_per_month'] = '(soit {$a}/mois)';
+
+$string['upgrade_window_label']    = 'Fenêtre de calcul : {$a->start} → {$a->end}';
+$string['upgrade_ref_prices']      = 'Tarifs de référence : actuel = {$a->current}, cible = {$a->target}';
+$string['upgrade_part_past']       = 'Part déjà consommée au tarif actuel : {$a}';
+$string['upgrade_part_future']     = 'Part à venir au tarif du plan cible : {$a}';
+$string['upgrade_base_total']      = 'Total théorique pour cette fenêtre : {$a}';
+$string['upgrade_already_paid']    = 'Déjà payé dans cette fenêtre : {$a}';
+$string['upgrade_base_minus_paid'] = 'Montant d’upgrade avant promotion : {$a->base} − {$a->paid} = {$a->diff}';
+$string['upgrade_discount_line']   = 'Promotion −{$a->pct}% appliquée sur {$a->before} ⇒ {$a->after}';
+$string['upgrade_amount_proposed'] = 'Montant proposé : {$a}';
+
+$string['trial_subscribe_now'] = 'S’abonner maintenant';
+$string['plan_label'] = 'Plan';
+$string['checkout_go_to_payment_discount'] = 'Souscrire avec la remise';
+$string['checkout_full_access_line'] = 'Abonnement avec accès complet à tous les cours.';
+$string['summary_price_title_single'] = 'Abonnement pour {$a}';

@@ -310,3 +310,8 @@ $string['image'] = 'Image';
 $string['locked_title'] = 'Accès réservé aux abonnés';
 $string['locked_desc'] = 'Abonnez-vous pour débloquer cette activité.';
 $string['locked_subscribe'] = 'S’abonner';
+
+$string['mobilemenu_button'] = 'Menu';
+$string['mobilemenu_open_aria'] = 'Ouvrir le menu';
+$string['mobilemenu_title'] = 'Menu';
+$string['mobilemenu_close_aria'] = 'Fermer';

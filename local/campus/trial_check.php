@@ -25,20 +25,25 @@ try {
     }
 
     $trial = $DB->get_record('local_campus_trial', ['id'=>$c['trialid']]);
+    // Cookie invalide ou expiré ?
     if (!$trial || (int)$trial->expiresat < time()) {
         local_campus_clear_cookie();
-        echo json_encode(['status'=>'expired']); exit;
+        echo json_encode([
+            'status'    => 'expired',
+            'subscribe' => (new moodle_url('/local/subscriptions/subscribe.php'))->out(false)
+        ]);
+        exit;
     }
 
-    // Auto-login sur le compte fantôme si présent
-    if (!empty($trial->userid)) {
-        $user = $DB->get_record('user', ['id'=>$trial->userid,'deleted'=>0], '*', MUST_EXIST);
-        complete_user_login($user);
+    // Si l'utilisateur est DEJA connecté et correspond au trial -> OK redirect
+    if (isloggedin() && !isguestuser() && !empty($trial->userid) && (int)$trial->userid === (int)$USER->id) {
+        $url = (new moodle_url('/course/view.php', ['id'=>$redirectid]))->out(false);
+        echo json_encode(['status'=>'ok','redirect'=>$url]); exit;
     }
 
-    // Redirection vers le cours demandé
-    $url = (new moodle_url('/course/view.php', ['id'=>$redirectid]))->out(false);
-    echo json_encode(['status'=>'ok','redirect'=>$url]);
+    // Sinon, pas d'auto-login -> on demande le formulaire
+    echo json_encode(['status'=>'needs_form']); exit;
+
 } catch (Throwable $e) {
     http_response_code(400);
     echo json_encode(['status'=>'error','message'=>$e->getMessage()]);

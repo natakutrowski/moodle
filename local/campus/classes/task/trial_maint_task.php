@@ -4,153 +4,247 @@ namespace local_campus\task;
 defined('MOODLE_INTERNAL') || die();
 
 class trial_maint_task extends \core\task\scheduled_task {
-    public function get_name() { return get_string('cron_trial_maint','local_campus'); }
+
+    public function get_name() {
+        return get_string('cron_trial_maint','local_campus');
+    }
 
     public function execute() {
         global $DB, $CFG;
-        // ✅ bon fichier core
+
         require_once($CFG->libdir . '/enrollib.php');
+        require_once($CFG->dirroot.'/enrol/manual/lib.php');
+        // ✅ chemin corrigé : la classe mailer est dans classes/
+        require_once($CFG->dirroot.'/local/subscriptions/classes/mailer.php');
+        require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
+        require_once($CFG->dirroot.'/user/lib.php');
 
-        // (facultatif mais recommandé si tu appelles des méthodes spécifiques du plugin "manual")
-        require_once($CFG->dirroot . '/enrol/manual/lib.php');
+        $now = time();
 
-        // si tu envoies des mails depuis la tâche
-        require_once($CFG->dirroot . '/local/subscriptions/classes/mailer.php');
-
+        // Langue préférée pour les mails (optionnelle)
         $langpref = get_config('local_subscriptions', 'defaultemaillang') ?: 'ru';
         $langpref = strtolower($langpref);
 
-
-        $now  = time();
-        $days = (int)get_config('local_campus', 'trialdays') ?: 7;
-        $deleteafter = (int)get_config('local_campus', 'deleteafterdays') ?: 60;
-        $trialids = self::trial_courses();
-
-        $threeago = $now - (3 * DAYSECS);
-
-        // J+3 : essai encore actif (expiresat > now), créé il y a ≥ 3 jours, reminder3 non envoyé
-        $sql3 = "SELECT *
-                FROM {local_campus_trial}
-                WHERE reminder3_sent IS NULL
-                    AND expiresat > :now
-                    AND timecreated <= :threeago";
-
-        $users3 = $DB->get_records_sql($sql3, [
-            'now'      => $now,
-            'threeago' => $threeago,
-        ]);
-
-        foreach ($users3 as $t) {
-            // destinataire (priorité au user lié s’il existe encore)
-            $user = null;
-            if (!empty($t->userid)) {
-                $user = $DB->get_record('user', ['id'=>$t->userid, 'deleted'=>0], '*', IGNORE_MISSING);
-            }
-            $firstname = $user->firstname ?? $t->firstname ?? '';
-            $toemail   = $t->email; // toujours depuis la table trial
-
-            // 1 cours d’essai pour le lien “Continuer”
-            $trialids = self::trial_courses();
-            $firsttrial = !empty($trialids) ? reset($trialids) : 0;
-
-            $continueurl = $firsttrial
-            ? (new \moodle_url('/local/campus/course.php', ['trial'=>$firsttrial, 'checktrial'=>1]))->out(false)
-            : (new \moodle_url('/'))->out(false);
-
-            $subscribeurl = (new \moodle_url('/subscribe.php'))->out(false);
-
-            $daysleft = max(0, (int)ceil(($t->expiresat - $now) / DAYSECS));
-            $coursefullname = '';
-            if (!empty($trialids)) {
-                $one = $DB->get_record('course', ['id'=>reset($trialids)], 'fullname', IGNORE_MISSING);
-                $coursefullname = $one->fullname ?? '';
-            }
-
-            \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_REM3, [
-                'toemail'         => $toemail,
-                'firstname'       => $firstname,
-                'continue_url'    => $continueurl,
-                'subscribe_url'   => $subscribeurl,
-                'course_fullname' => $coursefullname,
-                'daysleft'        => $daysleft,
-                'lang'            => $langpref,
-            ]);
-
-            $t->reminder3_sent = $now;
-            $DB->update_record('local_campus_trial', $t);
+        // Paramètres généraux
+        $trialdays    = (int) get_config('local_campus', 'trialdays') ?: 7;  // durée d'essai
+        $suspendAfter = (int) (get_config('local_campus','trial_suspend_after')
+                               ?? get_config('local_campus','trial_suspend_after_days'));
+        if ($suspendAfter <= 0) {
+            $suspendAfter = 30; // J+30 => suspension
         }
 
+        // Suppression J + deleteAfter : par défaut 31 jours après expiration
+        $deleteAfterCfg = get_config('local_campus', 'trial_delete_after_days');
+        if ($deleteAfterCfg === '' || $deleteAfterCfg === null) {
+            // fallback ancien paramètre, sinon 31
+            $legacy = get_config('local_campus', 'deleteafterdays');
+            $deleteAfterCfg = ($legacy !== '' && $legacy !== null) ? $legacy : 31;
+        }
+        $deleteAfter = (int)$deleteAfterCfg;   // -1 = jamais supprimer
 
-        // 2) Relance expiration J+7 (non envoyée)
-        // J+7 : expiré (now >= expiresat) et reminder7 non envoyé
-        $sql7 = "SELECT *
-                FROM {local_campus_trial}
-                WHERE reminder7_sent IS NULL
-                    AND expiresat <= :now";
-
-        $users7 = $DB->get_records_sql($sql7, ['now'=>$now]);
-
-        foreach ($users7 as $t) {
-            // tente d’avoir un prénom lisible
-            $user = null;
-            if (!empty($t->userid)) {
-                $user = $DB->get_record('user', ['id'=>$t->userid, 'deleted'=>0], '*', IGNORE_MISSING);
-            }
-            $firstname = $user->firstname ?? $t->firstname ?? '';
-            $toemail   = $t->email;
-
-            $trialids = self::trial_courses();
-            $coursefullname = '';
-            if (!empty($trialids)) {
-                $one = $DB->get_record('course', ['id'=>reset($trialids)], 'fullname', IGNORE_MISSING);
-                $coursefullname = $one->fullname ?? '';
-            }
-
-            \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_EXPIRED, [
-                'toemail'         => $toemail,
-                'firstname'       => $firstname,
-                'subscribe_url'   => (new \moodle_url('/subscribe.php'))->out(false),
-                'course_fullname' => $coursefullname,
-                'lang'            => $langpref,
-            ]);
-
-            // marquage expiré
-            $t->reminder7_sent = $now;
-            $t->status = 2; // expiré
-            $DB->update_record('local_campus_trial', $t);
-
-            // désinscrire et suspendre si besoin (optionnel)
-            if (!empty($t->userid) && enrol_is_enabled('manual')) {
-                self::unenrol_from_trial_courses($t->userid, $trialids);
-                $DB->set_field('user', 'suspended', 1, ['id'=>$t->userid]);
-            }
+        // Tous les essais connus
+        $trials = $DB->get_records('local_campus_trial', null, '', '*');
+        if (!$trials) {
+            return true;
         }
 
+        // Cours d’essai (désinscriptions à J)
+        $trialCourseIds = self::trial_courses();
+        $firstTrialId   = !empty($trialCourseIds) ? (int)reset($trialCourseIds) : 0;
+        $coursefullname = '';
+        if ($firstTrialId) {
+            $one = $DB->get_record('course', ['id'=>$firstTrialId], 'fullname', IGNORE_MISSING);
+            $coursefullname = $one->fullname ?? '';
+        }
 
-        // 3) Suppression (optionnelle) X jours après expiration
-        $deleteafter = (int)get_config('local_campus', 'deleteafterdays'); // -1 = jamais, 0 = immédiat
-        if ($deleteafter !== -1) {
-            $border = ($deleteafter === 0) ? $now : ($now - ($deleteafter * 86400));
-            $sqlDel = "SELECT * FROM {local_campus_trial}
-                    WHERE status = 2 AND expiresat < :border";
-            foreach ($DB->get_records_sql($sqlDel, ['border'=>$border]) as $t) {
-                if ($t->userid) {
-                    // Sécurité : ne supprime que si l’utilisateur n’a pas d’autres inscriptions “non-essai”
-                    $trialids = self::trial_courses();
-                    list($notin, $params) = $DB->get_in_or_equal($trialids ?: [0], SQL_PARAMS_NAMED, 'p', false);
-                    $params['uid'] = $t->userid;
-                    $hasother = $DB->record_exists_sql("
-                        SELECT 1
-                        FROM {user_enrolments} ue
-                        JOIN {enrol} e ON e.id = ue.enrolid
-                        WHERE ue.userid = :uid
-                        AND e.courseid $notin
-                    ", $params);
+        // ID plan d’essai (pour tests "a-t-il un abo payant actif ?")
+        $trialPlanId = (int) (get_config('local_subscriptions', 'trial_plan_id') ?? 0);
 
-                    if (!$hasother) {
-                        require_once($CFG->dirroot.'/user/lib.php');
-                        delete_user($DB->get_record('user', ['id'=>$t->userid]));
+        foreach ($trials as $t) {
+            $expiresAt      = (int)$t->expiresat;
+            $ageSinceExpire = $now - $expiresAt;              // >0 si expiré
+            $isExpired      = ($expiresAt > 0 && $now >= $expiresAt);
+
+            // Sécurité : si l'utilisateur a déjà un abonnement payant ACTIF (hors plan d’essai),
+            // on considère que le trial est "converti" et on ne lui envoie plus de mails / suspensions.
+            $hasPaidNonTrial = false;
+            if (!empty($t->userid)) {
+                $hasPaidNonTrial = $DB->record_exists_sql("
+                    SELECT 1
+                      FROM {user_subscription} s
+                      JOIN {subscription_plan} p ON p.id = s.planid
+                     WHERE s.userid = :uid
+                       AND s.status = '".\local_subscriptions\constants\Status::ACTIVE."'
+                       AND s.end_date > :now
+                       AND (p.is_trial IS NULL OR p.is_trial = 0)
+                ", ['uid'=>(int)$t->userid, 'now'=>$now]);
+            }
+            if ($hasPaidNonTrial) {
+                // On marque éventuellement ce trial comme "converti" (status = 3) et on passe au suivant.
+                if ((int)$t->status !== 3) {
+                    $t->status = 3;
+                    $DB->update_record('local_campus_trial', $t);
+                }
+                continue;
+            }
+
+            // ====== 0) Mail "fin de fenêtre remise" (basé sur une durée configurable) ======
+            if (empty($t->reminder3_sent) && !$isExpired) {
+
+                // Nombre de jours avant l'email de remise — config, sinon défaut = 2 jours
+                $remdays = (int)get_config('local_campus', 'trial_discount_reminder_days');
+                if ($remdays <= 0) {
+                    $remdays = 2; // défaut si non configuré
+                }
+
+                // Seuil "J + remdays"
+                $threshold = (int)$t->timecreated + $remdays * DAYSECS;
+
+                // Si la fenêtre de remise a une vraie deadline, on NE DÉPASSE PAS cette deadline
+                if (!empty($t->userid)) {
+                    $deadline = \local_subscriptions\trial_manager::discount_window_deadline((int)$t->userid);
+                    if (!empty($deadline) && (int)$deadline < $threshold) {
+                        $threshold = (int)$deadline;
                     }
+                }
+
+                if ($now >= $threshold && $now < $expiresAt) {
+                    $continueurl = $firstTrialId
+                        ? (new \moodle_url('/local/campus/course.php', ['trial'=>$firstTrialId, 'checktrial'=>1]))->out(false)
+                        : (new \moodle_url('/'))->out(false);
+
+                    \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_REM3, [
+                        'toemail'         => (string)$t->email,
+                        'firstname'       => (string)($t->firstname ?? ''),
+                        'continue_url'    => $continueurl,
+                        'subscribe_url'   => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
+                        'course_fullname' => $coursefullname,
+                        'daysleft'        => max(0, (int)ceil(($expiresAt - $now) / DAYSECS)),
+                        'lang'            => $langpref,
+                    ]);
+
+                    $t->reminder3_sent = $now;
+                    $DB->update_record('local_campus_trial', $t);
+                }
+            }
+
+
+            // ====== 1) Passage à EXPIRÉ à J (et mail "fin d’essai") ======
+            if ($isExpired && (int)$t->status !== 2) {
+                $t->status = 2; // Expiré
+                $DB->update_record('local_campus_trial', $t);
+
+                // 🧼 Supprimer le cookie d’essai (UX)
+                if (function_exists('local_campus_clear_cookie')) {
+                    local_campus_clear_cookie();
+                }
+
+                // Désinscrire des cours d’essai (NE PAS suspendre ici)
+                if (!empty($t->userid) && !empty($trialCourseIds) && enrol_is_enabled('manual')) {
+                    self::unenrol_from_trial_courses((int)$t->userid, $trialCourseIds);
+                }
+
+                // Mail "fin d’essai" (avec info “compte actif jusqu’à J+suspendAfter”)
+                $suspendTs = $expiresAt + $suspendAfter * DAYSECS;
+                \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_EXPIRED, [
+                    'toemail'         => (string)$t->email,
+                    'firstname'       => (string)($t->firstname ?? ''),
+                    'subscribe_url'   => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
+                    'course_fullname' => $coursefullname,
+                    'suspend_date'    => $suspendTs,
+                    'lang'            => $langpref,
+                ]);
+
+                // Tracer “rappel J” si tu veux (ex. reminder7_sent = J)
+                if (empty($t->reminder7_sent)) {
+                    $t->reminder7_sent = $now;
+                    $DB->update_record('local_campus_trial', $t);
+                }
+            }
+
+            // ====== 2) Pré-suspension (J + suspendAfter − 2 jours) ======
+            $pre = max(1, $suspendAfter - 2);
+            if ($isExpired
+                && empty($t->reminder_presuspend_sent)
+                && $now >= ($expiresAt + $pre * DAYSECS)
+                && $now <  ($expiresAt + $suspendAfter * DAYSECS)) {
+
+                \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_PRE_SUSPEND, [
+                    'toemail'       => (string)$t->email,
+                    'firstname'     => (string)($t->firstname ?? ''),
+                    'suspend_date'  => (int)$expiresAt + $suspendAfter*DAYSECS,
+                    'subscribe_url' => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
+                    'lang'          => $langpref,
+                ]);
+
+                $t->reminder_presuspend_sent = $now;
+                $DB->update_record('local_campus_trial', $t);
+            }
+
+            // ====== 3) Suspension (J + suspendAfter) + mail "compte suspendu" ======
+            if ($isExpired
+                && empty($t->reminder_suspend_sent)
+                && $now >= ($expiresAt + $suspendAfter * DAYSECS)) {
+
+                // Suspendre si aucun abonnement payant ACTIF (hors plan d’essai)
+                $hasPaid = (!empty($t->userid)) ? $DB->record_exists_sql("
+                    SELECT 1 FROM {user_subscription}
+                    WHERE userid = :uid
+                      AND status = '".\local_subscriptions\constants\Status::ACTIVE."'
+                      AND end_date > :now
+                      ".($trialPlanId ? "AND planid <> :tpid" : ''),
+                    ['uid'=>(int)$t->userid, 'now'=>$now, 'tpid'=>$trialPlanId]
+                ) : false;
+
+                if (!$hasPaid && !empty($t->userid)) {
+                    $u = $DB->get_record('user', ['id'=>$t->userid, 'deleted'=>0], '*', IGNORE_MISSING);
+                    if ($u && empty($u->suspended)) {
+                        $u->suspended = 1;
+                        user_update_user($u, false);
+
+                        // 🔒 On coupe toutes les sessions actives de cet utilisateur
+                        \core\session\manager::destroy_user_sessions($u->id);
+                    }
+                }
+
+                // Mail “compte suspendu” + info suppression J+deleteAfter
+                \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_SUSPENDED, [
+                    'toemail'       => (string)$t->email,
+                    'firstname'     => (string)($t->firstname ?? ''),
+                    'suspend_date'  => (int)$expiresAt + $suspendAfter*DAYSECS,
+                    'delete_date'   => (int)$expiresAt + $deleteAfter*DAYSECS,
+                    'subscribe_url' => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
+                    'lang'          => $langpref,
+                ]);
+
+                $t->reminder_suspend_sent = $now;
+                $DB->update_record('local_campus_trial', $t);
+            }
+
+            // ====== 4) Suppression J + deleteAfter (si jamais d’abo payant) ======
+            if ($deleteAfter >= 0 && $isExpired && $ageSinceExpire >= $deleteAfter * DAYSECS) {
+                $deletedUser = false;
+
+                if (!empty($t->userid)) {
+                    $hasPaid = $DB->record_exists_sql("
+                        SELECT 1 FROM {user_subscription}
+                        WHERE userid = :uid
+                          AND status = '".\local_subscriptions\constants\Status::ACTIVE."'
+                          AND end_date > :now
+                          ".($trialPlanId ? "AND planid <> :tpid" : ''),
+                        ['uid' => (int)$t->userid, 'now'=>$now, 'tpid'=>$trialPlanId]
+                    );
+
+                    if (!$hasPaid) {
+                        $deletedUser = $this->safe_delete_user_by_id((int)$t->userid);
+                    }
+                }
+
+                // On supprime l’entrée dans local_campus_trial pour permettre un nouveau trial
+                // quand on supprime le compte, ou si aucun userid n’était associé.
+                if ($deletedUser || empty($t->userid)) {
+                    $DB->delete_records('local_campus_trial', ['id' => $t->id]);
+                    mtrace("trial_maint_task: deleted trial row id={$t->id}");
                 }
             }
         }
@@ -163,13 +257,17 @@ class trial_maint_task extends \core\task\scheduled_task {
         $csv = (string)get_config('local_campus','trialcourses');
         $ids = array_filter(array_map('intval', preg_split('~[,\s]+~', $csv)), fn($v)=>$v>0);
         // Filtrer sur des cours existants
-        if (!$ids) return [];
+        if (!$ids) {
+            return [];
+        }
         list($in, $p) = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
         return array_keys($DB->get_records_select('course', "id $in", $p, '', 'id'));
     }
 
     private static function unenrol_from_trial_courses(int $userid, array $courseids): void {
-        if (!$courseids) return;
+        if (!$courseids) {
+            return;
+        }
         foreach ($courseids as $cid) {
             $instances = enrol_get_instances($cid, true);
             foreach ($instances as $inst) {
@@ -181,5 +279,36 @@ class trial_maint_task extends \core\task\scheduled_task {
                 }
             }
         }
+    }
+
+    /**
+     * Supprime l'utilisateur en toute sécurité.
+     * Retourne true si l'utilisateur a été réellement supprimé, false sinon.
+     */
+    private function safe_delete_user_by_id(int $userid): bool {
+        // Récupérer l'utilisateur; ignorer s'il n'existe pas.
+        $user = \core_user::get_user($userid, '*', IGNORE_MISSING);
+        if (!$user) {
+            mtrace("trial_maint_task: skip delete user={$userid} (not found)");
+            return false;
+        }
+
+        // Ne jamais toucher aux comptes sensibles.
+        if (in_array((int)$user->id, [1, 2])) { // 1 = admin, 2 = guest (selon site)
+            mtrace("trial_maint_task: skip protected user id={$user->id}");
+            return false;
+        }
+
+        // Déjà supprimé ? On saute.
+        if (!empty($user->deleted)) {
+            mtrace("trial_maint_task: skip user={$user->id} already deleted");
+            return false;
+        }
+
+        // Supprimer correctement (signature = stdClass $user).
+        delete_user($user);
+
+        mtrace("trial_maint_task: deleted user={$user->id}");
+        return true;
     }
 }

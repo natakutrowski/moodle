@@ -74,10 +74,11 @@ $mform = new local_subscriptions_quickreply_form(null, [
 $sent = false;
 if ($data = $mform->get_data()) {
     // Forcer la langue sélectionnée pour composer le message
-    $oldlang = current_language();
+    $prevforcelang = null;
     try {
         if (!empty($data->lang) && array_key_exists($data->lang, $supportedlangs)) {
-            force_current_language($data->lang);
+            // Renvoie l'ancien forcelang ('' si rien n'était forcé)
+            $prevforcelang = force_current_language($data->lang);
         }
 
         $subject = get_string('contact_reply_subject','local_subscriptions');
@@ -132,7 +133,10 @@ if ($data = $mform->get_data()) {
         $sent = true;
     } finally {
         // Toujours restaurer, même si deliver()/DB jettent une exception
-        force_current_language($oldlang);
+        if ($prevforcelang !== null) {
+            // Restaure exactement l'état précédent (y compris "pas de forcelang")
+            force_current_language($prevforcelang);
+        }
     }
 }
 
@@ -154,15 +158,22 @@ if ($sent) {
     echo $OUTPUT->box_end();
 
     // 1) Construire côté PHP les salutations dans chaque langue, en basculant temporairement la langue
-    $oldlang = current_language();
+    $prevforcelang = null;
     try {
         $gmap = [];
         foreach (['fr','en','ru'] as $lng) {
-            force_current_language($lng);
+            // On mémorise le forcelang d'origine UNE SEULE FOIS (à la 1re itération)
+            if ($prevforcelang === null) {
+                $prevforcelang = force_current_language($lng);
+            } else {
+                force_current_language($lng);
+            }
             $gmap[$lng] = get_string('contact_reply_greeting', 'local_subscriptions', ($name ?: ''));
         }
     } finally {
-        force_current_language($oldlang);
+        if ($prevforcelang !== null) {
+            force_current_language($prevforcelang);
+        }
     }
 
     // 2) Encodage sûr pour JS (UNICODE + échappes HTML)
@@ -192,14 +203,5 @@ if ($sent) {
     ");
 
 }
-
-// tout à la fin, avant $OUTPUT->footer();
-register_shutdown_function(function(){
-    global $SESSION;
-    if (!empty($SESSION->forcelang)) {
-        unset($SESSION->forcelang);
-    }
-});
-
 
 echo $OUTPUT->footer();

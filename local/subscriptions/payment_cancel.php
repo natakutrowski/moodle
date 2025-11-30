@@ -8,7 +8,25 @@ use local_subscriptions\constants\Status;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
+// --- Helper format prix (respecte l’option symbole) ---
+function ls_money_fmt(float $amount, string $cur): string {
+    $usesymbol = (bool) get_config('local_subscriptions','display_currency_symbols');
+    $amt = number_format($amount, 2, '.', '');
+    $cur = strtoupper($cur ?: 'EUR');
+    $sym = ($cur === 'EUR') ? '€' : (($cur === 'RUB' || $cur === 'RUR') ? '₽' : $cur);
+    return $usesymbol ? ($amt.' '.$sym) : ($amt.' '.$cur);
+}
+
+
 $pid = required_param('pid', PARAM_INT); // payment_request_id
+$lang = optional_param('lang','', PARAM_ALPHANUMEXT);
+if ($lang !== '') {
+    // Ne pas utiliser force_current_language() ici
+    $SESSION->lang = $lang;   // langue de session "normale", modifiable via le sélecteur
+    moodle_setlocale();       // réinitialise locale/strings pour cette requête
+}
+
+
 global $DB, $SITE, $OUTPUT;
 
 $PAGE->set_url(UrlFactory::payment_cancel(['pid' => $pid]));
@@ -39,6 +57,8 @@ $backLbl  = get_string('payui_cta_back',          'local_subscriptions');
 $retryLbl = get_string('payui_cta_retry',         'local_subscriptions');
 $contact  = get_string('payui_cta_contact',       'local_subscriptions');
 
+$statusimg = new moodle_url('/local/subscriptions/pix/payment_cancel.png');
+
 $retryUrl = null;
 if ($pr && !empty($pr->planid) && !empty($pr->currency)) {
     $retryUrl = UrlFactory::checkout((int)$pr->planid, core_text::strtolower($pr->currency));
@@ -47,21 +67,51 @@ if ($pr && !empty($pr->planid) && !empty($pr->currency)) {
 echo $OUTPUT->header();
 
 echo html_writer::start_div('container my-4');
-echo html_writer::start_div('card shadow-sm');
+echo html_writer::start_div('card shadow-sm payment-status-card');
 echo html_writer::div(html_writer::tag('h2', $reason, ['class'=>'h4 m-0']), 'card-header bg-light');
 
 echo html_writer::start_div('card-body');
+echo html_writer::start_div('row align-items-center');
+
+// Colonne texte
+echo html_writer::start_div('col-md-7 mb-3 mb-md-0');
+
 echo html_writer::tag('p', s($subtitle), ['class'=>'text-muted mb-2']);
 echo html_writer::tag('p', s($generic),  ['class'=>'mb-3']);
 echo html_writer::div(html_writer::span(s($orderref), 'small text-muted'), 'mb-3');
 
-if ($pr && isset($pr->price, $pr->currency)) {
-    echo html_writer::div(
-        html_writer::span(get_string('payui_label_price','local_subscriptions').': ', 'text-muted').
-        html_writer::span(format_float((float)$pr->price,2).' '.s(strtoupper($pr->currency)), 'fw-semibold'),
-        'mb-2'
-    );
+// --- Prix prévu (inchangé) ---
+if ($pr) {
+    $cur     = strtoupper($pr->currency ?? 'EUR');
+    $list    = isset($pr->locked_list_price) ? (float)$pr->locked_list_price : null;
+    $final   = (isset($pr->locked_final_price) && (float)$pr->locked_final_price > 0)
+                ? (float)$pr->locked_final_price
+                : (isset($pr->price) ? (float)$pr->price : null);
+    $discPct = (int)($pr->locked_discount_percent ?? 0);
+
+    if ($final !== null) {
+        echo html_writer::div(
+            get_string('payui_label_price','local_subscriptions').':',
+            'text-muted small mb-1'
+        );
+
+        if ($discPct > 0 && $list !== null && $final < $list) {
+            echo html_writer::start_div('fs-5');
+            echo html_writer::tag('span', ls_money_fmt($list, $cur), [
+                'class' => 'text-muted text-decoration-line-through me-2'
+            ]);
+            echo html_writer::tag('span',
+                ls_money_fmt($final, $cur) . ' ' .
+                html_writer::tag('small', '(-'.$discPct.'%)', ['class'=>'ms-1']),
+                ['class' => 'fw-semibold text-success']
+            );
+            echo html_writer::end_div();
+        } else {
+            echo html_writer::div(ls_money_fmt($final, $cur), 'fs-5 fw-semibold');
+        }
+    }
 }
+
 if ($pr && !empty($pr->planid)) {
     $planname = $DB->get_field('subscription_plan', 'name', ['id'=>(int)$pr->planid], IGNORE_MISSING) ?: '';
     if ($planname !== '') {
@@ -73,7 +123,7 @@ if ($pr && !empty($pr->planid)) {
     }
 }
 
-echo html_writer::start_div('d-flex gap-2 mt-2');
+echo html_writer::start_div('d-flex flex-wrap gap-2 mt-2');
 if ($retryUrl) {
     echo html_writer::link($retryUrl, $retryLbl, ['class'=>'btn btn-primary']);
 }
@@ -85,8 +135,23 @@ echo html_writer::link(
 );
 echo html_writer::end_div(); // ctas
 
+echo html_writer::end_div(); // col texte
+
+// Colonne image
+echo html_writer::start_div('col-md-5 text-center');
+echo html_writer::start_div('payment-status-illustration-wrapper');
+echo html_writer::empty_tag('img', [
+    'src'   => $statusimg->out(false),
+    'alt'   => get_string('paymentcancel_mascot_alt', 'local_subscriptions'),
+    'class' => 'img-fluid payment-status-illustration'
+]);
+echo html_writer::end_div(); // wrapper
+echo html_writer::end_div(); // col image
+
+echo html_writer::end_div(); // row
 echo html_writer::end_div(); // body
 echo html_writer::end_div(); // card
 echo html_writer::end_div(); // container
+
 
 echo $OUTPUT->footer();

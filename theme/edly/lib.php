@@ -204,3 +204,4 @@ function theme_edly_pluginfile($course, $cm, $context, $filearea, $args, $forced
         send_file_not_found();
     }
 }
+

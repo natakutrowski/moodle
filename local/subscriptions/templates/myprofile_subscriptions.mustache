@@ -11,17 +11,32 @@
       {{! Badge dynamique passé par le renderer (HTML non échappé) }}
       {{{statusbadge}}}
     </div>
+
     {{#queued_msg}}
-      <div class="alert alert-info py-1 px-2 small mb-2" role="status">{{queued_msg}}</div>
+      <div class="alert alert-info py-1 px-2 small mb-2" role="status">
+        {{queued_msg}}
+      </div>
     {{/queued_msg}}
+
     {{#show_warning}}
       <div class="alert alert-warning py-1 px-2 small d-flex justify-content-between align-items-center">
         <span>{{{renew_msg}}}</span>
-        <a class="btn btn-sm btn-warning ms-2" href="{{renew_url}}">
-          {{#str}}renew_now, local_subscriptions{{/str}}
+
+        <a class="btn btn-sm btn-warning ms-2"
+          href="{{renew_url}}"
+          {{#is_trial}}data-subs-modal="1"{{/is_trial}}>
+
+          {{#is_trial}}
+            {{#str}}trial_subscribe_now, local_subscriptions{{/str}}
+          {{/is_trial}}
+          {{^is_trial}}
+            {{#str}}renew_now, local_subscriptions{{/str}}
+          {{/is_trial}}
+
         </a>
       </div>
     {{/show_warning}}
+
 
     <ul class="list-unstyled ms-1 mb-0">
       <li class="mb-1">
@@ -32,29 +47,17 @@
         <i class="fa-solid fa-fw fa-calendar-check me-2 text-secondary" aria-hidden="true"></i>
         <strong>{{#str}}end_date, local_subscriptions{{/str}}:</strong> {{enddate}}
       </li>
-      <li class="mb-1">
-        <i class="fa-solid fa-fw fa-book me-2 text-secondary" aria-hidden="true"></i>
-        <strong>{{#str}}courselist, local_subscriptions{{/str}}:</strong>
-        {{#coursenames.0}}
-          <i class="fa-solid fa-circle-info text-muted ms-2"
-             tabindex="0"
-             data-bs-toggle="popover"
-             data-bs-trigger="focus"
-             data-bs-placement="top"
-             data-bs-html="true"
-             data-bs-title="{{#str}}includedcourses, local_subscriptions{{/str}}"
-             data-bs-content="{{{popovercontent}}}"
-             style="cursor: pointer;"
-             aria-label="{{#str}}includedcourses, local_subscriptions{{/str}}"></i>
-        {{/coursenames.0}}
-        {{^coursenames.0}}
-          <span class="text-muted">{{#str}}none, local_subscriptions{{/str}}</span>
-        {{/coursenames.0}}
-      </li>
+
+      {{! Ligne "Liste des cours" + popover SUPPRIMÉE pour tous les abonnements }}
+
+      {{^is_trial}}
       <li class="mb-1">
         <i class="fa-solid fa-fw fa-money-bill-wave me-2 text-secondary" aria-hidden="true"></i>
-        <strong>{{#str}}pricepaid, local_subscriptions{{/str}}:</strong> {{pricepaid}} {{currency}}
+        <strong>{{#str}}pricepaid, local_subscriptions{{/str}}:</strong> {{pricepaid}}
       </li>
+      {{/is_trial}}
+
+
     </ul>
   </div>
 {{/subscriptions}}
@@ -73,7 +76,6 @@
   </div>
 {{/subscriptions}}
 
-
 <div class="mt-3 d-flex gap-2">
   {{#has_expired}}
     <a class="btn btn-outline-secondary btn-sm" href="{{subscribe_url}}">
@@ -85,4 +87,3 @@
     {{#str}}view_my_subscriptions, local_subscriptions{{/str}}
   </a>
 </div>
-

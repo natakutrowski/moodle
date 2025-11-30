@@ -32,8 +32,9 @@ $currency   = required_param('currency',  PARAM_ALPHANUMEXT);
 $refsubid   = optional_param('ref_subid', 0, PARAM_INT);
 $extra_json = optional_param('extra_json','', PARAM_RAW_TRIMMED);
 
-$accept_privacy = required_param('accept_privacy', PARAM_BOOL);
 $accept_terms   = required_param('accept_terms',   PARAM_BOOL);
+
+$embedded = optional_param('embedded', 0, PARAM_BOOL);
 
 
 // overrides éventuels
@@ -45,9 +46,17 @@ $overridecurrency   = optional_param('override_currency', '', PARAM_ALPHANUMEXT)
 $email     = optional_param('email', '', PARAM_RAW_TRIMMED);
 $firstname = optional_param('firstname', '', PARAM_NOTAGS);
 $lastname  = optional_param('lastname', '', PARAM_NOTAGS);
+// champs téléphone / mot de passe (optionnels)
+$phone       = optional_param('phone', '', PARAM_RAW_TRIMMED);
+$phonecountry = optional_param('phonecountry', '', PARAM_ALPHANUMEXT);
+$password    = optional_param('password', '', PARAM_RAW);
+
+
 
 // montant forcé en minor (depuis un formulaire interne) — optionnel
 $amountMinorOverride = optional_param('amount_minor', 0, PARAM_INT);
+
+$enforceloginifknown = optional_param('enforce_login_if_known', 0, PARAM_BOOL);
 
 // ──────────────────────────────────────────────────────────────────────────
 // 0bis) Mode invité forcé (triallimited / force_guest / non connecté)
@@ -64,17 +73,60 @@ if (!$istripossible) {
 }
 $istrial  = $istripossible ? (bool) local_campus_is_trial_user() : false;
 $asguest  = $forceguest || $istrial || isguestuser() || !isloggedin();
+$isrealguest = $asguest && !$istrial && !$forceguest;
 
 // Si invité forcé → champs requis depuis le formulaire
 if ($asguest) {
     $email     = required_param('email', PARAM_EMAIL);
     $firstname = required_param('firstname', PARAM_NOTAGS);
     $lastname  = required_param('lastname', PARAM_NOTAGS);
+
+    // Pour les vrais invités (non trial, non forceguest), on exige un mot de passe
+    if ($isrealguest) {
+        global $CFG;
+
+        $password = required_param('password', PARAM_RAW);
+
+        if (core_text::strlen($password) < 8) {
+            throw new moodle_exception('trial_password_min', 'local_campus');
+        }
+
+        if (!empty($CFG->passwordpolicy) && function_exists('check_password_policy')) {
+            $errmsg = null;
+            if (!check_password_policy($password, $errmsg, null)) {
+                throw new moodle_exception('trial_password_policy_error', 'local_campus', '', (string)($errmsg ?? ''));
+            }
+        }
+    }
 }
+
 
 if ($asguest && $operation !== Operation::PURCHASE_NEW) {
     $operation = Operation::PURCHASE_NEW;
 }
+
+// --- Enforce login si l'email correspond à un compte existant -------------
+if ($asguest && $enforceloginifknown && !empty($email)) {
+    $norm = core_text::strtolower(trim($email));
+    $u = $DB->get_record_sql(
+        "SELECT id FROM {user} WHERE LOWER(email) = :e AND deleted = 0",
+        ['e' => $norm]
+    );
+    if ($u) {
+        // Retournera sur le même checkout une fois connecté.
+        $return = new moodle_url('/local/subscriptions/checkout.php', [
+            'planid'   => $planid,
+            'currency' => $currency,
+        ]);
+        redirect(
+            new moodle_url('/login/index.php', ['returnurl' => $return->out(false)]),
+            get_string('existing_account_login_first', 'local_subscriptions'),
+            0,
+            \core\output\notification::NOTIFY_WARNING
+        );
+    }
+}
+// --------------------------------------------------------------------------
 
 
 // === Verrouillage overrides (à coller ici) ==============================
@@ -175,6 +227,74 @@ if ($pid) {
     }
     // =======================================================================
 
+    // --- LOCK SNAPSHOT pour PR existante (si absent) ---
+    if (empty($pr->locked_final_price) || (float)$pr->locked_final_price <= 0) {
+        require_once($CFG->dirroot.'/local/subscriptions/classes/pricing_manager.php');
+        require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
+
+        $cur = strtoupper(trim($pr->currency ?? $currency ?? 'EUR'));
+        $op  = $pr->operation ?? $operation;
+
+        if (in_array($op, [Operation::UPGRADE_NOW_REPLACE_CHAIN, Operation::QUEUE_FUTURE], true)) {
+            // 🔒 UPGRADE/QUEUE : on locke le montant CONSEILLÉ (PR->price)
+            $final = round((float)($pr->price ?? 0), 2);
+
+            // Fallback si PR->price absent : on recalcule via Advisor
+            if ($final <= 0 && !empty($pr->userid)) {
+                $advised = \local_subscriptions\domain\SubscriptionAdvisor::advise_options((int)$pr->userid, (int)$pr->planid, $cur);
+                foreach ($advised as $opt) {
+                    if (!empty($opt['key']) && $opt['key'] === Operation::UPGRADE_NOW_REPLACE_CHAIN) {
+                        $final = round((float)($opt['amount'] ?? 0), 2);
+                        break;
+                    }
+                }
+            }
+            if ($final <= 0) {
+                // Dernier filet : tombe sur le prix public
+                $final = local_subscriptions_get_config_price((int)$pr->planid, $cur);
+            }
+
+            $list    = local_subscriptions_get_config_price((int)$pr->planid, $cur);
+            $discAmt = max(0.0, round($list - $final, 2));
+            $discPct = ($list > 0 && $discAmt > 0) ? (int)round(($discAmt / $list) * 100) : 0;
+            $reason  = $discAmt > 0 ? 'upgrade_diff' : null;
+
+            $payable = [
+                'list_price'       => $list,
+                'discount_percent' => $discPct,
+                'discount_amount'  => $discAmt,
+                'final_price'      => $final,
+                'discount_reason'  => $reason,
+            ];
+        } else {
+            // Achat standard : calcule via pricing_manager (gère la remise essai)
+            if (!empty($pr->userid)) {
+                $payable = \local_subscriptions\pricing_manager::compute_payable((int)$pr->userid, (int)$pr->planid, $cur);
+            } else {
+                // Visiteur : pas de remise essai
+                $list = local_subscriptions_get_config_price((int)$pr->planid, $cur);
+                $payable = [
+                    'list_price'       => $list,
+                    'discount_percent' => 0,
+                    'discount_amount'  => 0.0,
+                    'final_price'      => $list,
+                    'discount_reason'  => null,
+                ];
+            }
+        }
+
+        $pr->locked_list_price        = $payable['list_price'];
+        $pr->locked_discount_percent  = $payable['discount_percent'];
+        $pr->locked_discount_amount   = $payable['discount_amount'];
+        $pr->locked_discount_reason   = $payable['discount_reason'];
+        $pr->locked_final_price       = $payable['final_price'];
+        $pr->locked_at                = time();
+        $pr->currency                 = $cur;
+        $pr->amount_minor             = (int) round($pr->locked_final_price * 100);
+
+        $DB->update_record('subscription_payment_request', $pr);
+    }
+
 
 }
 
@@ -185,13 +305,13 @@ if (!$pr) {
     // Si Alfa => devise RUB et prix configuré RUB (aucun override)
     if ($provider === Provider::ALFA) {
         $currency   = 'RUB';
-        if ($operation === Operation::PURCHASE_NEW || $operation === Operation::QUEUE_FUTURE) {
+        if ($operation === Operation::PURCHASE_NEW) {
             $priceMajor = local_subscriptions_get_config_price($planid, $currency);
         }
     }
 
     // Achat simple : revalider contre le prix configuré
-    if ($operation === Operation::PURCHASE_NEW || $operation === Operation::QUEUE_FUTURE) {
+    if ($operation === Operation::PURCHASE_NEW) {
         $cfgPrice = local_subscriptions_get_config_price($planid, $currency);
         if (abs($priceMajor - $cfgPrice) > 0.01) {
             $priceMajor = $cfgPrice;
@@ -209,7 +329,37 @@ if (!$pr) {
     $al = $al !== '' ? mb_substr($al, 0, 191) : null;   // CHAR(191)
 
     $ref = $_SERVER['HTTP_REFERER'] ?? '';
-    $ref = $ref !== '' ? mb_substr($ref, 0, 65535) : null; // TEXT    
+    $ref = $ref !== '' ? mb_substr($ref, 0, 65535) : null; // TEXT    // Fusionne extra_json (upgrade, etc.) + infos utilisateur côté checkout
+    
+    $meta = [];
+    if ($extra_json !== '') {
+        $tmp = json_decode($extra_json, true);
+        if (is_array($tmp)) {
+            $meta = $tmp;
+        }
+    }
+
+    if ($asguest) {
+        $userExtra = [];
+
+        if ($phonecountry !== '') {
+            $userExtra['phonecountry'] = $phonecountry;
+        }
+        if ($phone !== '') {
+            $userExtra['phone'] = $phone;
+        }
+        if ($isrealguest && $password !== '') {
+            $userExtra['password_hash'] = hash_internal_user_password($password);
+        }
+
+        if ($userExtra) {
+            $meta['checkout_user'] = $userExtra;
+        }
+    }
+
+    $response_json = $meta ? json_encode($meta, JSON_UNESCAPED_UNICODE) : null;
+
+
 
     $pr = (object)[
         'planid'         => $planid,
@@ -225,19 +375,87 @@ if (!$pr) {
         'last_update'    => time(),
         'operation'      => $operation,
         'reference_subscription_id' => $refsubid ?: null,
-        'response_json'  => $extra_json !== '' ? $extra_json : null,
+        'response_json'  => $response_json,
 
         // --- Nouveau : traçage visitor ---
         'created_ip'         => $ip ?: null,
         'created_useragent'  => $ua,              // TEXT (null si vide)
         'accept_language'    => $al ?: null,      // CHAR(191)
         'http_referer'       => $ref ?: null,     // TEXT
+        'phone'          => $phone !== '' ? $phone : null,
+        'phone_country'  => $phonecountry !== '' ? $phonecountry : null,
     ];
+
     $pr->id = $DB->insert_record('subscription_payment_request', $pr);
+
+    // === LOCK SNAPSHOT (avant l'appel gateway) ==========================
+    require_once($CFG->dirroot.'/local/subscriptions/classes/pricing_manager.php');
+    require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
+
+    $cur = strtoupper(trim($pr->currency ?? $currency ?? 'EUR'));
+    $op  = $pr->operation ?? $operation;
+
+    if (in_array($op, [Operation::UPGRADE_NOW_REPLACE_CHAIN, Operation::QUEUE_FUTURE], true)) {
+        // 🔒 UPGRADE/QUEUE : on part du montant PR->price calculé plus haut ($priceMajor)
+        $final = round((float)($pr->price ?? 0), 2);
+        if ($final <= 0 && !empty($pr->userid)) {
+            $advised = \local_subscriptions\domain\SubscriptionAdvisor::advise_options((int)$pr->userid, (int)$pr->planid, $cur);
+            foreach ($advised as $opt) {
+                if (!empty($opt['key']) && $opt['key'] === Operation::UPGRADE_NOW_REPLACE_CHAIN) {
+                    $final = round((float)($opt['amount'] ?? 0), 2);
+                    break;
+                }
+            }
+        }
+        if ($final <= 0) {
+            $final = local_subscriptions_get_config_price((int)$pr->planid, $cur);
+        }
+
+        $list    = local_subscriptions_get_config_price((int)$pr->planid, $cur);
+        $discAmt = max(0.0, round($list - $final, 2));
+        $discPct = ($list > 0 && $discAmt > 0) ? (int)round(($discAmt / $list) * 100) : 0;
+        $reason  = $discAmt > 0 ? 'upgrade_diff' : null;
+
+        $payable = [
+            'list_price'       => $list,
+            'discount_percent' => $discPct,
+            'discount_amount'  => $discAmt,
+            'final_price'      => $final,
+            'discount_reason'  => $reason,
+        ];
+    } else {
+        // Achat standard (remise essai éventuelle)
+        if (!empty($pr->userid)) {
+            $payable = \local_subscriptions\pricing_manager::compute_payable((int)$pr->userid, (int)$pr->planid, $cur);
+        } else {
+            $list = local_subscriptions_get_config_price((int)$pr->planid, $cur);
+            $payable = [
+                'list_price'       => $list,
+                'discount_percent' => 0,
+                'discount_amount'  => 0.0,
+                'final_price'      => $list,
+                'discount_reason'  => null,
+            ];
+        }
+    }
+
+    // Alimente la PR avec le LOCK
+    $pr->locked_list_price        = $payable['list_price'];
+    $pr->locked_discount_percent  = $payable['discount_percent'];
+    $pr->locked_discount_amount   = $payable['discount_amount'];
+    $pr->locked_discount_reason   = $payable['discount_reason'];
+    $pr->locked_final_price       = $payable['final_price'];
+    $pr->locked_at                = time();
+    $pr->currency                 = $cur;
+    $pr->amount_minor             = (int) round($pr->locked_final_price * 100);
+
+    $DB->update_record('subscription_payment_request', $pr);
+    // ====================================================================
+
 
     // Sanity check final avant d’aller chez le PSP
     $configuredNow = local_subscriptions_get_config_price($planid, $currency);
-    if (($operation === Operation::PURCHASE_NEW || $operation === Operation::QUEUE_FUTURE)
+    if (($operation === Operation::PURCHASE_NEW)
         && abs($pr->price - $configuredNow) > 0.01) {
         $pr->price = $configuredNow;
         $DB->update_record('subscription_payment_request', (object)['id'=>$pr->id, 'price'=>$configuredNow]);
@@ -260,6 +478,8 @@ if (!$pr) {
     if (empty($pr->email)      && $email)     { $pr->email     = $upd->email     = $email;     $need = true; }
     if (empty($pr->firstname)  && $firstname) { $pr->firstname = $upd->firstname = $firstname; $need = true; }
     if (empty($pr->lastname)   && $lastname)  { $pr->lastname  = $upd->lastname  = $lastname;  $need = true; }
+    if (empty($pr->phone)      && $phone)        { $pr->phone        = $upd->phone         = $phone;        $need = true; }
+    if (empty($pr->phone_country) && $phonecountry) { $pr->phone_country = $upd->phone_country = $phonecountry; $need = true; }
     if ($need) { $DB->update_record('subscription_payment_request', $upd); }
 }
 
@@ -278,6 +498,12 @@ $options = [
     'product_name'  => format_string($plan->name, true, ['context' => \context_system::instance()]),
 ];
 
+$uilang = optional_param('uilang','', PARAM_ALPHANUMEXT);
+if ($uilang === '') {
+    $uilang = strtolower(substr((string)($SESSION->lang ?? $USER->lang ?? $CFG->lang ?? (get_config('defaultuserlang','local_subscriptions') ?? 'ru')), 0, 2));
+}
+if (!in_array($uilang, ['fr','en','ru'], true)) { $uilang = 'ru'; }
+
 // URLs de retour selon provider
 if ($provider === Provider::ALFA) {
 
@@ -285,18 +511,22 @@ if ($provider === Provider::ALFA) {
         'pid' => $pr->id,
         'provider' => Provider::ALFA,
         'result' => PaymentReturn::SUCCESS,
+        'uilang'     => $uilang,
+        'embedded' => $embedded ? 1 : 0,
     ]))->out(false);
 
     $failurl  = (UrlFactory::return([
         'pid' => $pr->id,
         'provider' => Provider::ALFA,
         'result' => PaymentReturn::CANCEL,
+        'uilang'     => $uilang,
+        'embedded' => $embedded ? 1 : 0,
     ]))->out(false);
 
     $options += [
         'returnurl' => $returnurl,
         'failurl'   => $failurl,
-        'language'  => current_language() === 'ru' ? 'ru' : 'en',
+        'language'  => ($uilang === 'ru') ? 'ru' : 'en', // UI Alfa
     ];
 } else if ($provider === Provider::STRIPE) {
     $success = (UrlFactory::return([
@@ -304,12 +534,16 @@ if ($provider === Provider::ALFA) {
         'provider' => Provider::STRIPE,
         'result' => PaymentReturn::SUCCESS,
         't' => $pr->login_token,
+        'uilang'     => $uilang,
+        'embedded' => $embedded ? 1 : 0,
     ]))->out(false) . '&session_id={CHECKOUT_SESSION_ID}';
 
     $cancel  = (UrlFactory::return([
         'pid' => $pr->id,
         'provider' => Provider::STRIPE,
         'result' => PaymentReturn::CANCEL,
+        'uilang'     => $uilang,
+        'embedded' => $embedded ? 1 : 0,
     ]))->out(false);
 
     $options += [
@@ -329,6 +563,25 @@ if ($provider === Provider::ALFA) {
     }
 }
 
+// --- Forcer le paiement au montant LOCK dans certains cas ---
+$uselock = (isset($pr->locked_final_price) && (float)$pr->locked_final_price > 0);
+
+// On force le mode 'payment' (montant fixe) si :
+// - UPGRADE_NOW_REPLACE_CHAIN (on encaisse la différence maintenant) OU
+// - QUEUE_FUTURE (on encaisse maintenant) OU
+// - il y a une remise verrouillée (ex. trial -15%).
+$needlockedpayment = $uselock && (
+    $op === Operation::UPGRADE_NOW_REPLACE_CHAIN
+    || $op === Operation::QUEUE_FUTURE
+    || ((int)($pr->locked_discount_percent ?? 0) > 0)
+);
+
+if ($needlockedpayment) {
+    $options['mode'] = 'payment';            // override du mode
+    $options['use_locked_amount'] = 1;       // signal au gateway
+}
+
+
 // ──────────────────────────────────────────────────────────────────────────
 // 4) Appel gateway & redirection
 // ──────────────────────────────────────────────────────────────────────────
@@ -336,16 +589,16 @@ $gateway = PaymentGatewayFactory::for($provider);
 
 try {
 
-    // === amount_minor sûr avant appel gateway (à coller juste avant l'appel) =
-    $major = (float)$pr->price;
-    $safeCurrency = ($provider === Provider::ALFA) ? 'RUB' : $currency;
-    $options['amount_minor'] = local_subs_money_to_minor_units(number_format($major, 2, '.', ''), $safeCurrency);
+    // === amount_minor sûr avant appel gateway ===========================
+    $major        = (float)($pr->locked_final_price ?? $pr->price);
+    $safeCurrency = strtoupper($pr->currency ?? $currency ?? (($provider === Provider::ALFA) ? 'RUB' : 'EUR'));
 
-    // Sanity Alfa : devise obligatoirement RUB
-    if ($provider === Provider::ALFA && $safeCurrency !== 'RUB') {
-        throw new \moodle_exception('invalid_currency_for_alfa', 'local_subscriptions');
-    }
-    // =======================================================================
+    $options['amount_minor'] = local_subs_money_to_minor_units(
+        number_format($major, 2, '.', ''),
+        $safeCurrency
+    );
+    // ====================================================================
+
 
     $result = $gateway->create_checkout_session($pr, $options);
 
@@ -376,7 +629,30 @@ try {
         throw new \moodle_exception('err_no_redirect_url', 'local_subscriptions');
     }
 
+    // Si on est en mode popup (embedded=1) et provider = STRIPE,
+    // on sort de l'iframe pour afficher Stripe Checkout au niveau top.
+    if ($embedded && $provider === Provider::STRIPE) {
+        while (ob_get_level()) { @ob_end_clean(); }
+        \core\session\manager::write_close();
+
+        $safeurl = (new moodle_url($url))->out(false);
+        echo '<!doctype html><html><head><meta charset="utf-8"><script>
+            try {
+                if (window.top && window.top !== window) {
+                    window.top.location.href = '.json_encode($safeurl).';
+                } else {
+                    window.location.href = '.json_encode($safeurl).';
+                }
+            } catch (e) {
+                window.location.href = '.json_encode($safeurl).';
+            }
+        </script></head><body></body></html>';
+        exit;
+    }
+
+    // Cas normal (Alfa, ou Stripe en plein écran)
     redirect(new moodle_url($url));
+
 
 } catch (\Throwable $e) {
     // Log & UX

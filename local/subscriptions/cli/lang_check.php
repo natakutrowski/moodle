@@ -66,6 +66,11 @@ foreach ($components as $comp) {
     // construire carte lang -> keys
     $keysByLang = [];
     foreach ($langs as $lg) {
+
+        if (strpos($comp, 'mod_') === 0) {
+            $comp = substr($comp, strlen('mod_'));
+        }
+
         $file = $dir . "/lang/$lg/{$comp}.php";
         $keysByLang[$lg] = parse_lang_file($file);
         mtrace("  [$lg] ".basename($file)." : ".count($keysByLang[$lg])." clés");

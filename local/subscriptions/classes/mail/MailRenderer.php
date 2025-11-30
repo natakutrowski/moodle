@@ -73,10 +73,13 @@ class MailRenderer {
         global $SITE;
 
         // ── Branding configurable (fallbacks sûrs) ──────────────────────────────────
-        $brandname  = $SITE->fullname;
-        $brandcolor = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
+        $brandname      = $SITE->fullname;
+        $brandnameHTML  = 'Campus<small><sup>FR</sup></small>';   // utilisé *uniquement* dans le HTML
+        $brandPlain     = strip_tags(html_entity_decode($brandnameHTML, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+
+        $brandcolor     = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
         $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
-        $logo      = get_config('local_subscriptions', 'brand_logo_url') ?: '';
+        $logo           = get_config('local_subscriptions', 'brand_logo_url') ?: '';
 
         // ── Bouton (HTML) ───────────────────────────────────────────────────────────
         $btn = '';
@@ -95,18 +98,30 @@ class MailRenderer {
             </table>';
         }
 
-        // ── En-tête logo / marque ───────────────────────────────────────────────────
-        $logoHtml = $logo
-            ? '<img src="'.s($logo).'" height="32" alt="'.s($brandname).'" style="display:block;border:0;outline:none;text-decoration:none;">'
-            : '<strong style="font-size:16px;color:#111;">'.s($brandname).'</strong>';
+        // ── En-tête bandeau / marque ────────────────────────────────────────────────
+        if ($logo) {
+            // Bandeau image pleine largeur (hauteur limitée)
+            $logoHtml = '<img src="'.s($logo).'"
+                            alt="'.s($brandPlain).'"
+                            style="display:block;width:100%;max-height:220px;object-fit:cover;border:0;outline:none;text-decoration:none;">';
+        } else {
+            // Fallback texte "CampusFR" avec FR en exposant
+            $logoHtml = '<div style="font-size:20px;font-weight:600;color:#111;">'.$brandnameHTML.'</div>';
+        }
+
+        // Date pour le footer (texte + HTML)
+        $datestr = userdate(time(), get_string('strftimedate', 'langconfig'));
 
         // ── i18n: pied de page et disclaimer ────────────────────────────────────────
         $year = (int)date('Y');
-        $copyright = get_string('email_footer_copyright', 'local_subscriptions',
-            (object)['year'=>$year, 'brand'=>$brandname]);
+        $copyright = get_string(
+            'email_footer_copyright',
+            'local_subscriptions',
+            (object)['year' => $year, 'brand' => $brandnameHTML]
+        );
         $unexpected = get_string('email_footer_unexpected', 'local_subscriptions');
 
-        // (optionnel) note personnalisée admin
+        // Note personnalisée admin éventuelle
         $footernote = (string)(get_config('local_subscriptions', 'email_footer_note') ?: '');
 
         // ── HTML (avec dark-mode) ───────────────────────────────────────────────────
@@ -115,11 +130,11 @@ class MailRenderer {
                     <meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
                     <style>
                     @media (prefers-color-scheme: dark) {
-                    body { background:#0b1220 !important; }
-                    .ls-card { background:#111827 !important; box-shadow:none !important; }
-                    .ls-border { border-color:#1f2937 !important; }
-                    .ls-text { color:#e5e7eb !important; }
-                    .ls-muted { color:#9ca3af !important; }
+                        body { background:#0b1220 !important; }
+                        .ls-card { background:#111827 !important; box-shadow:none !important; }
+                        .ls-border { border-color:#1f2937 !important; }
+                        .ls-text { color:#e5e7eb !important; }
+                        .ls-muted { color:#9ca3af !important; }
                     }
                     </style>
                     </head>
@@ -129,35 +144,39 @@ class MailRenderer {
                         <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="800"
                             class="ls-card"
                             style="max-width:800px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+
+                        <!-- En-tête : bandeau image ou texte de marque -->
                         <tr>
-                            <td style="padding:16px 20px;background:#ffffff;border-bottom:1px solid #eee;" class="ls-border">
+                            <td style="padding:0;background:#ffffff;border-bottom:1px solid #eee;" class="ls-border">
+                                '.$logoHtml.'
+                            </td>
+                        </tr>
+
+                        <!-- Corps -->
+                        <tr>
+                            <td style="padding:24px 24px 8px 24px;">
+                            <div style="font-size:14px;line-height:1.7;color:#374151;" class="ls-text">'.$bodyhtml.'</div>
+                            '.$btn.'
+                            </td>
+                        </tr>
+
+                        <!-- Footer : copyright + date à droite -->
+                        <tr>
+                            <td style="padding:16px 24px 20px 24px;border-top:1px solid #eee;" class="ls-border">
                                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                                     <tr>
-                                        <td style="width:80%;padding:0;vertical-align:middle;">'.$logoHtml.'</td>
-                                        <td style="width:20%;padding:0;vertical-align:middle;text-align:right;">
-                                        <div style="text-align:right;white-space:nowrap;font-size:12px;color:#6b7280;">'
-                                            . userdate(time(), get_string('strftimedate', 'langconfig')) .
-                                        '</div>
+                                        <td style="font-size:12px;color:#6b7280;vertical-align:top;" class="ls-muted">
+                                            '.$copyright.
+                                            ($footernote ? '<div style="margin-top:4px">'.format_text($footernote, FORMAT_HTML).'</div>' : '').
+                                        '</td>
+                                        <td style="font-size:12px;color:#6b7280;text-align:right;white-space:nowrap;vertical-align:top;" class="ls-muted">
+                                            '.s($datestr).'
                                         </td>
                                     </tr>
                                 </table>
                             </td>
                         </tr>
-                        <tr>
-                            <td style="padding:24px 24px 8px 24px;">
-                            <h1 style="margin:0 0 12px 0;font-size:20px;line-height:1.4;color:#111111;" class="ls-text">'.s($title).'</h1>
-                            <div style="font-size:14px;line-height:1.7;color:#374151;" class="ls-text">'.$bodyhtml.'</div>
-                            '.$btn.'
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding:16px 24px 20px 24px;border-top:1px solid #eee;" class="ls-border">
-                            <div style="font-size:12px;color:#6b7280;" class="ls-muted">'
-                                . s($copyright)
-                                . ($footernote ? '<div style="margin-top:4px">'.format_text($footernote, FORMAT_HTML).'</div>' : '')
-                            . '</div>
-                            </td>
-                        </tr>
+
                         </table>
                         <div style="font-size:11px;color:#94a3b8;margin-top:10px;" class="ls-muted">'.s($unexpected).'</div>
                     </td></tr>
@@ -166,12 +185,29 @@ class MailRenderer {
 
         // ── TEXTE (fallback) ────────────────────────────────────────────────────────
         $btnline = ($buttonlabel && $buttonurl) ? ("\n\n".$buttonlabel.": ".$buttonurl) : '';
-        $text = $title."\n\n"
-            . html_entity_decode(strip_tags(preg_replace('/<(br|\/p|\/li)\s*\/?>/i', "\n", $bodyhtml)), ENT_QUOTES, 'UTF-8')
-            . $btnline."\n\n".$copyright."\n".$unexpected;
+
+        // 1) Titre en texte brut
+        $plainTitle = strip_tags(html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+
+        // 2) Corps
+        $plainBody = html_entity_decode($bodyhtml, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $plainBody = preg_replace('/<(br|\/p|\/li)\s*\/?>/i', "\n", $plainBody);
+        $plainBody = strip_tags($plainBody);
+
+        // 3) Copyright / unexpected / date
+        $plainCopyright  = strip_tags(html_entity_decode($copyright, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $plainUnexpected = strip_tags(html_entity_decode($unexpected, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $plainDate       = strip_tags(html_entity_decode($datestr, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+
+        $text = $plainTitle . "\n\n"
+            . $plainBody
+            . $btnline . "\n\n"
+            . $plainCopyright . ' - ' . $plainDate . "\n"
+            . $plainUnexpected;
 
         return [$html, trim($text)];
     }
+
 
     public static function layout_with_extra_button(
         string $title,

@@ -40,13 +40,14 @@ $headercontent = $header->export_for_template($renderer);
 
 $login_url  = get_login_url();
 
-$signup_url = "{$CFG->wwwroot}/subscribe.php";
+$signup_url = "{$CFG->wwwroot}/local/subscriptions/subscribe.php";
 $isloggedin = isloggedin();
 
 // Qui est qui ?
+$istrial = \local_subscriptions\trial_manager::user_has_active_trial((int)$USER->id);
 $isguest     = $isloggedin && isguestuser();
 $showlogin   = !$isloggedin || $isguest;                         // bouton "Connexion" visible si pas connecté
-$showsub     = (!$isloggedin || $isguest);           // "S’abonner" visible aussi pour l'utilisateur invité
+$showsub     = (!$isloggedin || $isguest || $istrial);           // "S’abonner" visible aussi pour l'utilisateur invité
 
 // Libellés
 $subscribe_label = get_string('subscribe', 'local_subscriptions');
@@ -202,7 +203,7 @@ $header_search          = get_config('theme_edly', 'header_search');
 
 // URL de base du bouton (page d’abonnement).
 $header_btn_url       = get_config('theme_edly', 'header_btn_url'); // si Edly l’utilise ailleurs
-$header_left_btn_url  = $signup_url; // déjà défini plus haut : "{$CFG->wwwroot}/subscribe.php"
+$header_left_btn_url  = $signup_url; // déjà défini plus haut : "{$CFG->wwwroot}/local/subscriptions/subscribe.php"
 $header_btn_icon      = get_config('theme_edly', 'header_btn_icon_edly_icon_class');
 
 // Libellé multilingue depuis local_subscriptions (suivant la langue de l’utilisateur).

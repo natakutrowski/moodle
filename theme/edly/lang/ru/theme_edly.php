@@ -335,3 +335,8 @@ $string['image'] = 'Картина';
 $string['locked_title'] = 'Доступно по подписке';
 $string['locked_desc'] = 'Оформите подписку, чтобы открыть эту активность.';
 $string['locked_subscribe'] = 'Оформить подписку';
+
+$string['mobilemenu_button'] = 'Меню';
+$string['mobilemenu_open_aria'] = 'Открыть меню';
+$string['mobilemenu_title'] = 'Меню';
+$string['mobilemenu_close_aria'] = 'Закрыть';

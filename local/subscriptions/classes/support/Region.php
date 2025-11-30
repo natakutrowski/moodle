@@ -51,6 +51,7 @@ final class Region {
         $isru = self::is_ru_or_by($cc);
         $policy = get_config('local_subscriptions', $isru ? 'policy_url_ru' : 'policy_url_row') ?: ($CFG->wwwroot.'/privacy');
         $terms  = get_config('local_subscriptions', $isru ? 'terms_url_ru'  : 'terms_url_row')  ?: ($CFG->wwwroot.'/terms');
-        return ['policy' => $policy, 'terms' => $terms];
+        $offer  = get_config('local_subscriptions', $isru ? 'offer_url_ru'  : 'offer_url_row')  ?: ($CFG->wwwroot.'/offer');
+        return ['policy' => $policy, 'terms' => $terms, 'offer' => $offer];
     }
 }

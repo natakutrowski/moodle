@@ -168,7 +168,7 @@ Default Btn CSS
   top: 0;
   bottom: 0;
   left: 50%;
-  width: 550px;
+  width: 650px;
   height: 550px;
   margin: auto;
   background-color: var(--optional-color);
@@ -1432,8 +1432,8 @@ Main Banner Area CSS
   margin-right: 0;
 }
 .main-banner-large-content .banner-btn li:last-child .default-btn {
-  background: var(--black-color);
-  filter: unset;
+  /* background: var(--black-color);
+  filter: unset; */
 }
 
 .main-banner-large-image {
@@ -7247,7 +7247,7 @@ Personnalization CSS
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:48px; min-width:48px;
+  min-width:48px;
   height:48px;
   padding:0;
   line-height:1;
@@ -7267,6 +7267,11 @@ Personnalization CSS
 }
 
 .navbar-area .nav-cta .default-btn.second i{ font-size:18px; line-height:1; }
+
+.navbar-area .nav-cta .default-btn.second { 
+  padding:0 18px;
+}
+
 
 /* 2) Empêcher le wrap intempestif du contenu de la navbar */
 .navbar-area .navbar-collapse{ flex-wrap:nowrap; }
@@ -7337,9 +7342,8 @@ Personnalization CSS
 
 /* Connexion = carré icône */
 .others-option-for-responsive .others-options a.default-btn.second {
-  width: 52px !important;
   min-width: 52px !important;
-  padding: 0;
+  padding: 0 18px;
   flex-shrink: 0;
 }
 .others-option-for-responsive .others-options a.default-btn.second i {
@@ -7363,6 +7367,9 @@ Personnalization CSS
 }
 
 
+.edmo-full-header{
+  display: none !important;
+}
 
 /* Cache le h1 de l'en-tête Edly partout */
 .edmo-full-header header#page-header .page-header-headings,
@@ -7479,4 +7486,175 @@ Personnalization CSS
 .cf-locked .activityiconcontainer, 
 .cf-locked .activityiconcontainer .icon{
   filter:grayscale(100%); opacity:.55;
+}
+/* ========= 1) Bouton “Menu” (offcanvas) ========= */
+
+/* Base : cliquable, z-index normal */
+.main-responsive-nav .campus-menu-toggle{
+  position: relative;
+  pointer-events: auto;
+  z-index: auto;
+}
+
+/* Menu FERMÉ : on remonte le bouton pour garantir le clic */
+body:not(.campus-offcanvas-open) .main-responsive-nav .campus-menu-toggle{
+  z-index: 1060;
+}
+
+/* Menu OUVERT : on éteint le bouton et on ne capte plus les clics */
+body.campus-offcanvas-open .main-responsive-nav .campus-menu-toggle{
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  display: none;
+}
+
+/* Bonus progressif : si l’offcanvas/backdrop est visible, masque le bouton (navigateurs modernes) */
+@supports selector(:has(*)){
+  body:has(.offcanvas.show) .campus-menu-toggle,
+  body:has(.offcanvas-backdrop.show) .campus-menu-toggle{
+    display: none !important;
+  }
+}
+
+
+/* ========= 2) Burgers “meanmenu” / navbar-toggler ========= */
+
+/* Évite le flash à vide par défaut… */
+.meanmenu-reveal,
+.navbar-toggler{ display: none !important; }
+
+/* …et n’affiche que si un vrai menu principal existe */
+.has-primary-menu .meanmenu-reveal,
+.has-primary-menu .navbar-toggler{ display: block !important; }
+
+
+/* ========= 3) CTA dans l’offcanvas (taille du texte, centrés) ========= */
+
+#campusMobileMenu .default-btn,
+#campusMobileMenu .default-btn.second{
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: .6rem 1rem;
+  width: auto !important;
+  min-width: 0;
+}
+
+
+/* ========= 4) Mobile header : pas de clipping + stacking correct ========= */
+
+/* Le conteneur mobile ne doit PAS couper les dropdowns */
+.main-responsive-nav .main-responsive-menu{
+  overflow: visible !important;
+  position: relative;
+  z-index: 1040;
+}
+
+/* Le wrapper du menu utilisateur passe devant */
+.navbar-user-wrap{
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1060;
+}
+
+/* Le dropdown du user flotte par-dessus */
+.navbar-user-wrap .dropdown-menu{
+  position: absolute;
+  z-index: 1080;
+  right: 0;
+  left: auto;
+}
+
+/* Optionnel : le logo ne couvre pas toute la ligne en mobile */
+.main-responsive-nav .logo a{ display: inline-block; }
+
+
+/* ========= 5) Langue : pas de clipping (desktop) ========= */
+
+.navbar .nav-cta .langmenu{ position: relative; z-index: 1060; }
+.navbar .nav-cta .langmenu .dropdown-menu{
+  position: absolute;
+  z-index: 1080;
+}
+
+
+/* ========= 6) Drapeaux (mobile, si tu utilises la barre de drapeaux) ========= */
+
+.lang-flags .lang-flag{
+  width: 2rem; height: 2rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  line-height: 1; padding: 0; font-size: 1.1rem;
+}
+.lang-flags .lang-flag.active{
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+/* Dans le dropdown user, on s'assure que l'item actif est visible même si le JS core BS n'a pas pris */
+#user-action-menu .carousel .carousel-item { display: none; }
+#user-action-menu .carousel .carousel-item.active { display: block; }
+
+.edly-settings-nav { position: relative; z-index: 1060; }
+.edly-settings-nav .nav-link { display:flex; align-items:center; }
+
+
+/* Quiz : transformer les réponses courtes en zones multi-lignes confortables */
+.path-mod-quiz .que.shortanswer .answer textarea.quiz-longanswer {
+    width: 100%;
+    min-height: 2.6em;   /* environ une ligne */
+    height: 2.6em;
+    max-height: 14em;    /* hauteur max avant scroll */
+    resize: vertical;    /* l'élève peut agrandir à la main */
+    overflow-y: auto;    /* scroll vertical si ça déborde */
+    overflow-x: hidden;  /* pas de scroll horizontal */
+}
+
+/* Le label prend toute la ligne dans le bloc de réponse */
+.path-mod-quiz .que.shortanswer .ablock label {
+    width: 100%;
+}
+
+/* Le conteneur de la réponse devient un bloc sur toute la largeur */
+.path-mod-quiz .que.shortanswer .ablock .answer {
+    display: block;
+    margin-top: .25rem; /* petit espace sous "Réponse :" */
+}
+
+/* Champs "trou dans la phrase" dans le texte de la question */
+.path-mod-quiz .qtext input.form-control.d-inline.quiz-gap {
+    width: auto;         /* le JS mettra une largeur en ch */
+    display: inline-block;
+    text-align: left;
+}
+
+
+/* Page Mes cours Campus : réduire le titre des cartes de cours */
+#page-local-campus-mycourses .courses-card .courses-content .top-content h3 {
+    font-size: 1.1rem;   /* essaie 1rem ou 1.1rem selon ce que tu veux */
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+}
+
+/* Optionnel : s'assurer que le lien hérite bien de la taille */
+#page-local-campus-mycourses .courses-card .courses-content .top-content h3 a {
+    font-size: inherit;
+}
+
+
+.path-mod-wordcards .a4e-card .textFitted {
+    padding: 0 10%;  /* marges gauche/droite = 10% de la largeur de la carte */
+}
+
+body#page-site-index .top-header-area,
+body#page-site-index .navbar-area,
+body#page-site-index .page-banner-area{
+    display: none !important;
+}
+
+#page .bottom-region-main-box {
+  margin-top : 25px !important;
+  padding-top : 25px !important;
 }

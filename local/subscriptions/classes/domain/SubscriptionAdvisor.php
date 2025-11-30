@@ -21,6 +21,33 @@ class SubscriptionAdvisor {
         ", ['u'=>$userid, 'scope'=>$scopeid]);
     }
 
+    /**
+     * Fenêtre spéciale de remise pour les PROLONGATIONS :
+     * - on réutilise trial_discount_percent
+     * - ouverte si :
+     *   a) trial_manager::is_discount_window_open() est vrai
+     *   OU
+     *   b) on est dans les 7 jours suivant la fin de la souscription active.
+     */
+    private static function is_prolongation_discount_open(int $userid, \stdClass $activesub): bool {
+        $discPct = (int)(get_config('local_subscriptions', 'trial_discount_percent') ?? 0);
+        if ($discPct <= 0) {
+            return false;
+        }
+
+        // 1) Fenêtre classique (période d’essai, etc) : on la respecte.
+        if (\local_subscriptions\trial_manager::is_discount_window_open($userid)) {
+            return true;
+        }
+
+        // 2) Fenêtre « post-abonnement » pour prolonger:
+        $graceDays = (int)(get_config('local_subscriptions', 'prolong_discount_grace_days') ?? 7);
+        $limit     = ((int)$activesub->end_date) + $graceDays * DAYSECS;
+
+        return time() <= $limit;
+    }
+
+
     public static function advise_options(int $userid, int $targetplanid, string $currency): array {
         global $DB;
 
@@ -71,17 +98,27 @@ class SubscriptionAdvisor {
                 WHERE userid = :u
                 AND planid = :p
                 AND status IN ('".Status::ACTIVE."','".Status::QUEUED."')
-            ", ['u'=>$userid, 'p'=> (int)$targetplanid]);
+            ", ['u' => $userid, 'p' => (int)$targetplanid]);
 
-            $activation = $lastend ? userdate(((int)$lastend) + 1) : userdate(time());
+            $activation = $lastend ? userdate(((int)$lastend) + 1) : userdate($now);
+
+            $base = (float)$targetprice->price;
+
+            // Remise de renouvellement (fin d’abonnement + fenêtre)
+            $renew = self::compute_renew_discount($samePlanActive, $now, $base);
 
             $opts[] = [
                 'key'       => Operation::QUEUE_FUTURE,
                 'label'     => get_string('option_queue_future', 'local_subscriptions', $activation),
-                'amount'    => (float)$targetprice->price,
+                'amount'    => $renew['final'],          // prix remisé envoyé à Stripe/Alfa
                 'currency'  => $currency,
                 'ref_subid' => (int)$samePlanActive->id,
-                'extra'     => ['anchor_end' => (int)$lastend] // utile pour l’UI/PR
+                'extra'     => [
+                    'anchor_end'        => (int)$lastend,
+                    'discount_percent'  => $renew['percent'],
+                    'discount_amount'   => $renew['amount'],
+                    'list_price'        => $base,
+                ],
             ];
             return $opts;
         }
@@ -99,67 +136,66 @@ class SubscriptionAdvisor {
             $opts = [];
 
             // 1) Prolonger (dans le plan cible) : activation au-delà de la dernière brique scope
-            $activation = $scope_max_end ? userdate($scope_max_end + 1) : userdate(time());
+            $activation = $scope_max_end ? userdate($scope_max_end + 1) : userdate($now);
+            $base       = (float)$targetprice->price;
+
+            // même règle de remise que ci-dessus, basée sur la sub active du scope
+            $renew = self::compute_renew_discount($sameScopeActive, $now, $base);
+
             $opts[] = [
                 'key'       => Operation::QUEUE_FUTURE,
                 'label'     => get_string('option_queue_future', 'local_subscriptions', $activation),
-                'amount'    => (float)$targetprice->price,
+                'amount'    => $renew['final'],
                 'currency'  => $currency,
                 'ref_subid' => (int)$sameScopeActive->id,
-                'extra'     => ['anchor_end' => (int)$scope_max_end]
+                'extra'     => [
+                    'anchor_end'        => (int)$scope_max_end,
+                    'discount_percent'  => $renew['percent'],
+                    'discount_amount'   => $renew['amount'],
+                    'list_price'        => $base,
+                ],
             ];
 
-            // 2) Upgrade générique (fenêtre complète) :
-            // Montant = P2*(D2 - t)/D2 + P1*(t/D1) - sum_paid_in_window
+
+            // 2) Upgrade générique (fenêtre complète)
             if ($sameCurrency && $t0) {
                 $currplan = $DB->get_record('subscription_plan', ['id' => $sameScopeActive->planid], '*', MUST_EXIST);
 
-                $P1 = self::plan_price_in_currency((int)$currplan->id,   $currency);
-                $P2 = self::plan_price_in_currency((int)$targetplan->id,  $currency);
-                if ($P1 !== null && $P2 !== null) {
-                    $D1 = self::duration_to_seconds($currplan->duration_key  ?? '1year');
-                    $D2 = self::duration_to_seconds($targetplan->duration_key ?? '1year');
+                $quote = self::quote_upgrade($sameScopeActive, $currplan, $targetplan, $currency);
+                if (!empty($quote['allowed']) && $quote['amount'] > 0) {
 
-                    // Fenêtre de référence : [t0 ; t0 + D2)
-                    $t0sec   = (int)$t0; // tu le calcules déjà plus haut
-                    $tNow    = time();
-                    $t       = max(0, min($D2, $tNow - $t0sec)); // consommation depuis t0, bornée à D2
+                $upgradeBase = (float)$quote['amount']; // montant avant promo = base_total - déjà_payé
+                $upgradeFinal = $upgradeBase;
 
-                    $base = round( ($P2 * ($D2 - $t) / $D2) + ($P1 * ($t / $D1)), 2 );
+                $discPctCfg = (int)(get_config('local_subscriptions','trial_discount_percent') ?? 0);
+                $hasDisc    = $discPctCfg > 0 && \local_subscriptions\trial_manager::is_discount_window_open($userid);
+                if ($hasDisc) {
+                    $upgradeFinal = round($upgradeBase * (100 - $discPctCfg) / 100, 2);
+                }
 
-                    // Somme déjà payée dans la fenêtre (inclut expirés/replaced/active/queued)
-                    //$scopeid  = $scopeid; // déjà calculé plus haut
-                    $spentWin = self::sum_window_spent_in_currency((int)$sameScopeActive->userid, (int)$scopeid,
-                                                                $t0sec, $t0sec + $D2, $currency);
+                $opts[] = [
+                    'key'       => Operation::UPGRADE_NOW_REPLACE_CHAIN,
+                    'label'     => get_string('option_upgrade_now_replace', 'local_subscriptions'),
+                    'amount'    => $upgradeFinal,
+                    'currency'  => $currency,
+                    'ref_subid' => (int)$sameScopeActive->id,
+                    'extra'     => [
+                        'upgrade_window'  => $quote['window'],
+                        'replace_ids'     => $quote['replace_ids'],
+                        'spent_window'    => $quote['spent_window'],
+                        'target_price'    => $quote['target_price'],
 
-                    $upgradeAmount = round($base - $spentWin, 2);
+                        // nouveau breakdown plus clair
+                        'upgrade_breakdown'      => $quote['breakdown'],  // contient P1, P2, base_total, part_past, part_future…
+                        'upgrade_base_amount'    => $upgradeBase,         // avant promo
+                        'discount_percent'       => $hasDisc ? $discPctCfg : 0,
+                        'upgrade_final_amount'   => $upgradeFinal,        // montant proposé
+                    ],
+                ];
 
-                    // Règle dégressive stricte: ne pas proposer si déjà payé >= prix du plan cible
-                    if ($spentWin < $P2 && $upgradeAmount > 0) {
-
-                        // Bricks à remplacer : uniquement active/queued chevauchant la fenêtre
-                        $toReplace = self::list_scope_overlaps((int)$sameScopeActive->userid, (int)$scopeid,
-                                                            $t0sec, $t0sec + $D2, [Status::ACTIVE,Status::QUEUED]);
-                        $replaceIds = array_map(fn($s)=> (int)$s->id, $toReplace);
-
-                        $opts[] = [
-                            'key'       => Operation::UPGRADE_NOW_REPLACE_CHAIN,
-                            'label'     => get_string('option_upgrade_now_replace', 'local_subscriptions'),
-                            'amount'    => (float)$upgradeAmount,
-                            'currency'  => $currency,
-                            'ref_subid' => (int)$sameScopeActive->id,
-                            'extra'     => [
-                                'upgrade_window' => ['start' => $t0sec, 'end' => $t0sec + $D2],
-                                'replace_ids'    => $replaceIds,
-                                'spent_window'   => $spentWin,
-                                'target_price'   => $P2,
-                                't_consumed_sec' => $t,
-                                'base_formula'   => '(P2*(D2-t)/D2) + (P1*(t/D1)) - spent_window'
-                            ],
-                        ];
-                    }
                 }
             }
+
 
 
             // 3) Prolonger (dans le plan cible) : activation au-delà de la dernière brique scope
@@ -194,6 +230,7 @@ class SubscriptionAdvisor {
 
     public static function duration_to_seconds(string $key): int {
         switch ($key) {
+            case '1week':   return (int)round(7 * 86400);
             case '1month':  return (int)round(30.4375 * 86400);
             case '3months': return (int)round(91.3125 * 86400);
             case '6months': return (int)round(182.625 * 86400);
@@ -332,23 +369,70 @@ class SubscriptionAdvisor {
         $toReplace = $scopeid ? self::list_scope_overlaps((int)$currsub->userid, (int)$scopeid, $winStart, $winEnd, [Status::ACTIVE,Status::QUEUED]) : [];
         $replaceIds = array_map(fn($s)=> (int)$s->id, $toReplace);
 
+        $breakdown = [
+            'P1'              => $P1,   // prix plan actuel
+            'P2'              => $P2,   // prix plan cible
+            'used_sec'        => $t,
+            'remain_sec'      => max(0, $D2 - $t),
+            'part_past'       => round($partPast, 2),    // partie déjà consommée au tarif actuel
+            'part_future'     => round($partFuture, 2),  // partie restante au tarif du plan cible
+            'base_total'      => $base,                  // total théorique = part_past + part_future
+        ];
+
+
         return [
             'amount'  => $amount,
             'allowed' => true,
-            'breakdown' => [
-                'rate_current_per_s' => $D1 ? round($P1 / $D1, 10) : 0.0,
-                'rate_target_per_s'  => $D2 ? round($P2 / $D2, 10) : 0.0,
-                'used_sec'           => $t,
-                'remain_sec'         => max(0, $D2 - $t),
-                'part_remaining'     => round($partPast, 2),    // « passée »
-                'part_extension'     => round($partFuture, 2),  // « à venir »
-                'base'               => $base,
-            ],
+            'breakdown'    => $breakdown,
             'window'        => ['start'=>$winStart, 'end'=>$winEnd],
             'replace_ids'   => $replaceIds,
             'spent_window'  => $spentWin,
             'target_price'  => $P2,
         ];
     }
+
+    /**
+     * Calcule la remise de renouvellement pour une souscription donnée.
+     *
+     * - Utilise renew_discount_percent si défini, sinon trial_discount_percent.
+     * - Fenêtre par défaut : 7 jours après la fin de la souscription.
+     *
+     * @param \stdClass|null $sub   user_subscription active (ou la plus récente)
+     * @param int            $now   timestamp courant
+     * @param float          $base  prix catalogue (sans remise)
+     * @return array{percent:int, amount:float, final:float}
+     */
+    private static function compute_renew_discount(?\stdClass $sub, int $now, float $base): array {
+        $base = (float)$base;
+        if ($base <= 0 || !$sub) {
+            return ['percent' => 0, 'amount' => 0.0, 'final' => $base];
+        }
+
+        // % de remise : renew_discount_percent > sinon trial_discount_percent > sinon 0
+        $pct = get_config('local_subscriptions', 'renew_discount_percent');
+        if ($pct === false || $pct === null || $pct === '') {
+            $pct = get_config('local_subscriptions', 'trial_discount_percent');
+        }
+        $percent = (int)($pct ?: 0);
+        if ($percent <= 0) {
+            return ['percent' => 0, 'amount' => 0.0, 'final' => $base];
+        }
+
+        // Fenêtre de renouvellement (J + N jours). Par défaut 7.
+        $w = (int)(get_config('local_subscriptions', 'renew_discount_window_days') ?? 7);
+        if ($w <= 0) { $w = 7; }
+
+        $deadline = (int)$sub->end_date + $w * DAYSECS;
+        if ($now > $deadline) {
+            // Fenêtre dépassée → pas de remise
+            return ['percent' => 0, 'amount' => 0.0, 'final' => $base];
+        }
+
+        $final   = round($base * (100 - $percent) / 100, 2);
+        $discAmt = max(0.0, round($base - $final, 2));
+
+        return ['percent' => $percent, 'amount' => $discAmt, 'final' => $final];
+    }
+
 
 }

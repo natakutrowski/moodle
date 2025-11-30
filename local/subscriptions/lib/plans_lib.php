@@ -265,6 +265,7 @@ function parse_duration_key_days(?string $key): int {
     }
     // anciens formats simples (back-compat)
     return match ($k) {
+        '1week'  => 7,
         '1month'  => 30,
         '3months' => 90,
         '6months' => 180,

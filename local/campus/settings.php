@@ -65,13 +65,32 @@ if ($h = new admin_settingpage('local_campus', get_string('pluginname', 'local_c
         '', PARAM_RAW_TRIMMED
     ));
 
-    // 5) Suppression des comptes après expiration
     $h->add(new admin_setting_configtext(
-        'local_campus/deleteafterdays',
-        get_string('set_deleteafterdays', 'local_campus'),
-        get_string('set_deleteafterdays_desc', 'local_campus'),
-        60, PARAM_INT
+        'local_campus/trial_discount_reminder_days',
+        get_string('trial_discount_reminder_days', 'local_campus'),
+        get_string('trial_discount_reminder_days_desc', 'local_campus'),
+        2,            // valeur par défaut = 2 jours
+        PARAM_INT
     ));
+
+    // Jours après expiration (J + N) pour SUSPENDRE le compte
+    $h->add(new admin_setting_configtext(
+        'local_campus/trial_suspend_after_days',
+        get_string('set_trial_suspend_after_days', 'local_campus'),
+        get_string('set_trial_suspend_after_days_desc', 'local_campus'),
+        30, // valeur par défaut : J+30
+        PARAM_INT
+    ));
+
+    // Jours après expiration (J + N) pour SUPPRIMER le compte
+    $h->add(new admin_setting_configtext(
+        'local_campus/trial_delete_after_days',
+        get_string('set_trial_delete_after_days', 'local_campus'),
+        get_string('set_trial_delete_after_days_desc', 'local_campus'),
+        90, // valeur par défaut : J+90
+        PARAM_INT
+    ));
+
 
     // Style du catalogue (1 ou 2).
     $h->add(new admin_setting_configselect(

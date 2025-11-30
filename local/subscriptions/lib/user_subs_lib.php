@@ -43,7 +43,11 @@ function local_subscriptions_enrol_user_manual(int $userid, int $planid, string 
         $end,
         $pricepaid,
         $currency,
-        time()
+        time(),
+        allowupdate: false,
+        discount_percent: 0,
+        discount_reason: null,
+        discount_amount: 0.00
     );
     $status = $result['status'];
     $sub = $result['subscription']; 
@@ -112,7 +116,11 @@ function local_subscriptions_enrol_user_test(int $userid): string {
         $end_date,
         0.00,
         'EUR',
-        time()
+        time(),
+        allowupdate: false,
+        discount_percent: 0,
+        discount_reason: null,
+        discount_amount: 0.00
     );
 
     if ($result['status'] === 'created') {
@@ -265,19 +273,36 @@ function get_user_country_code(): string {
      * Crée ou récupère un utilisateur à partir de l'email.
      * Retourne [\stdClass $user, bool $isnew, ?string $tmpPassword]
      */
-    function local_subscriptions_ensure_user(string $email, string $firstname = '', string $lastname = ''): array {
+    function local_subscriptions_ensure_user(
+        string $email,
+        string $firstname = '',
+        string $lastname = '',
+        ?string $passwordHash = null
+    ): array {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/user/lib.php');
 
-        $user = $DB->get_record('user', ['email' => \core_text::strtolower($email), 'deleted' => 0], '*', IGNORE_MISSING);
+        $email = \core_text::strtolower($email);
+        $user  = $DB->get_record('user', ['email' => $email, 'deleted' => 0], '*', IGNORE_MISSING);
         if ($user) {
+            // Utilisateur existant, on ne touche pas à son mot de passe ici
             return [$user, false, null];
         }
 
-        // Génère username unique (reprend ta fonction utilitaire existante)
+        // Génère un username unique
         $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $email ?? '');
-        
-        $tmpPassword = TempPassword::generate(12, 4);
+
+        // Si un mot de passe explicite a été fourni (checkout), on l'utilise tel quel
+        if (!empty($passwordHash)) {
+            $passwordField  = $passwordHash;
+            $forcechangepw  = 0;
+            $tmpPassword    = null; // pas de mot de passe "temporaire"
+        } else {
+            // Cas "auto-généré" (ex: inscription par un admin via l'interface d'abonnement)
+            $tmpPassword    = TempPassword::generate(12, 4);
+            $passwordField  = hash_internal_user_password($tmpPassword);
+            $forcechangepw  = 1;
+        }
 
         $defaultuserlang = get_config('local_subscriptions', 'defaultuserlang'); // '' = hériter du site
 
@@ -286,25 +311,26 @@ function get_user_country_code(): string {
             'confirmed'          => 1,
             'mnethostid'         => $CFG->mnet_localhost_id,
             'username'           => $username,
-            'password'           => hash_internal_user_password($tmpPassword),
+            'password'           => $passwordField,
             'firstname'          => $firstname ?: 'User',
             'lastname'           => $lastname ?: '',
-            'email'              => \core_text::strtolower($email),
+            'email'              => $email,
             'timecreated'        => time(),
-            'lang'               => !empty($CFG->lang) ? $CFG->lang : current_language(), // set to default language of the site
-            'forcepasswordchange'=> 1,
+            'lang'               => !empty($CFG->lang) ? $CFG->lang : current_language(),
+            'forcepasswordchange'=> $forcechangepw,
         ];
 
-        // Hériter de la langue du site si réglage vide, sinon forcer.
         if (!empty($defaultuserlang)) {
             $u->lang = strtolower($defaultuserlang);
         }
 
         $userid = user_create_user($u, false, false);
-        
-        // Force le changement de mot de passe sur Moodle 4.x+
-        set_user_preference('auth_forcepasswordchange', 1, $userid);
-        
+
+        // Ne forcer le changement de mot de passe que dans le cas "password auto-généré"
+        if ($forcechangepw) {
+            set_user_preference('auth_forcepasswordchange', 1, $userid);
+        }
+
         $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
 
         return [$user, true, $tmpPassword];

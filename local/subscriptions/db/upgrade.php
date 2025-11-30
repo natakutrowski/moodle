@@ -816,6 +816,125 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2025102700, 'local', 'subscriptions');
 	}
 
+	if ($oldversion < 2025103001) {
+		global $DB;
+		$dbman = $DB->get_manager();
+
+		// 1) Champ is_trial dans subscription_plan
+		$table = new xmldb_table('subscription_plan');
+		$field = new xmldb_field('is_trial', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'is_recurring');
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		// 2) Champs discount_* dans user_subscription
+		$table = new xmldb_table('user_subscription');
+
+		$field = new xmldb_field('discount_percent', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'status');
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		// discount_reason : nullable, PAS de default '' (laisser NULL)
+		$field = new xmldb_field('discount_reason', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'discount_percent');
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+
+		// 3) Defaults de config pour l’essai
+		set_config('trial_duration_days', 7,  'local_subscriptions');
+		set_config('trial_discount_percent', 15, 'local_subscriptions');
+		set_config('trial_discount_hours',   72, 'local_subscriptions');
+		set_config('trial_plan_id', 0, 'local_subscriptions');
+
+		upgrade_plugin_savepoint(true, 2025103001, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2025103002) {
+		$dbman = $DB->get_manager();
+
+		// Champ discount_amount dans user_subscription
+		$table = new xmldb_table('user_subscription');
+		$field = new xmldb_field('discount_amount', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00', 'discount_percent');
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		upgrade_plugin_savepoint(true, 2025103002, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2025103004) {
+		$dbman = $DB->get_manager();
+		$table = new xmldb_table('subscription_payment_request');
+
+		$field = new xmldb_field('locked_list_price', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00', null);
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		$field = new xmldb_field('locked_discount_percent', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'locked_list_price');
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		$field = new xmldb_field('locked_discount_amount', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00', 'locked_discount_percent');
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		// nullable, pas de default
+		$field = new xmldb_field('locked_discount_reason', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'locked_discount_amount');
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		$field = new xmldb_field('locked_final_price', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00', 'locked_discount_reason');
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		$field = new xmldb_field('locked_at', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'locked_final_price');
+		if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+
+		upgrade_plugin_savepoint(true, 2025103004, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2025110101) {
+		$dbman = $DB->get_manager();
+		$table = new xmldb_table('subscription_payment_request');
+
+		$field = new xmldb_field('amount_minor', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'price');
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		upgrade_plugin_savepoint(true, 2025110101, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2025110502) {
+		$dbman = $DB->get_manager();
+		$table = new xmldb_table('subscription_plan');
+
+		$f1 = new xmldb_field('expiry_reminder_days', XMLDB_TYPE_CHAR, '64', null, null, null, null, 'is_trial');
+		if (!$dbman->field_exists($table, $f1)) {
+			$dbman->add_field($table, $f1);
+		}
+
+		$f2 = new xmldb_field('expiry_reminder_enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1', 'expiry_reminder_days');
+		if (!$dbman->field_exists($table, $f2)) {
+			$dbman->add_field($table, $f2);
+		}
+
+		upgrade_plugin_savepoint(true, 2025110502, 'local', 'subscriptions');
+	}
+
+
+    if ($oldversion < 2025112300) { // <-- use your own next plugin version here
+        $table = new xmldb_table('subscription_payment_request');
+
+        $field = new xmldb_field('phone', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'lastname');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('phone_country', XMLDB_TYPE_CHAR, '10', null, null, null, null, 'phone');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2025112300, 'local', 'subscriptions');
+    }
 
     return true;
 }

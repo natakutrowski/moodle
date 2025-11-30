@@ -18,7 +18,7 @@ $isrestricted = $isguest || $istrial;   // ← invité OU compte d’essai
 
 
 // URL de la page d’abonnement (ajuste le chemin si besoin)
-$subscribeurl = (new moodle_url('/subscribe.php'))->out(false);
+$subscribeurl = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
 // Si ta page est à la racine: new moodle_url('/subscribe.php')
 
 

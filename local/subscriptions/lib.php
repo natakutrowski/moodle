@@ -77,6 +77,14 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
 
     $content = $renderer->render_user_subscriptions_block($subscriptions);
 
+    // Injecter la popup d’abonnement réutilisable dans le bloc Profil
+    ob_start();
+    local_subscriptions_inject_subscribe_modal($PAGE);
+    $subspopup = ob_get_clean();
+
+    $content .= $subspopup;
+
+
     $category = new category(
         'local_subscriptions', 
         get_string('pluginname','local_subscriptions'),
@@ -94,9 +102,6 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
     );
 
     $tree->add_node($node);
-
-    // Charger le JS AMD de ton plugin
-    $PAGE->requires->js_call_amd('local_subscriptions/user_popover', 'init');
 
     // Lancer le tweak DOM : renommer le heading (fallback) + réécrire les liens
     $PAGE->requires->js_call_amd('local_subscriptions/myprofile_courses', 'init', [
@@ -311,76 +316,117 @@ function local_subs_render_upgrade_popover(array $opt, \stdClass $currplan, \std
 }
 
 /**
- * Corps HTML (BRUT) expliquant le calcul du prix d'upgrade.
- * À utiliser dans un <details> (ou ailleurs). Ne PAS échapper en sortie.
+ * Corps HTML explicatif pour le calcul d'une upgrade.
+ *
+ * @param array      $opt        Option d'upgrade (une entrée d'$options venant d'advise_options).
+ * @param \stdClass  $currplan   Plan actuel.
+ * @param \stdClass  $targetplan Plan cible.
+ * @param \stdClass  $currsub    Souscription actuelle.
+ * @param string     $currency   Devise (EUR/RUB).
+ * @return string    HTML
  */
 function local_subs_upgrade_calc_body(array $opt, \stdClass $currplan, \stdClass $targetplan, \stdClass $currsub, string $currency): string {
-    global $DB;
+    $e  = $opt['extra'] ?? [];
+    $bd = $e['upgrade_breakdown'] ?? [];
 
-    $C     = mb_strtoupper($currency);
-    $extra = $opt['extra'] ?? [];
-    $win   = $extra['upgrade_window'] ?? null;
+    $win    = $e['upgrade_window']       ?? ['start'=>0,'end'=>0];
+    $spent  = (float)($e['spent_window'] ?? 0.0);
+    $baseUp = (float)($e['upgrade_base_amount'] ?? 0.0);
+    $disc   = (int)  ($e['discount_percent']    ?? 0);
+    $final  = (float)($e['upgrade_final_amount'] ?? $opt['amount']);
 
-    // Prix des plans (dans la devise), fallback première ligne si devise absente.
-    $p1 = (float)($DB->get_field('subscription_plan_price','price',['planid'=>$currplan->id,'currency'=>$C]) ?: 0);
-    if ($p1 <= 0) { $any = $DB->get_records('subscription_plan_price',['planid'=>$currplan->id],'','price',0,1); if ($any) $p1 = (float)reset($any)->price; }
-    $p2 = (float)($extra['target_price'] ?? 0);
-    if ($p2 <= 0) { $p2 = (float)($DB->get_field('subscription_plan_price','price',['planid'=>$targetplan->id,'currency'=>$C]) ?: 0);
-        if ($p2 <= 0) { $any = $DB->get_records('subscription_plan_price',['planid'=>$targetplan->id],'','price',0,1); if ($any) $p2 = (float)reset($any)->price; }
+    $P1        = (float)($bd['P1'] ?? 0.0);
+    $P2        = (float)($bd['P2'] ?? 0.0);
+    $baseTotal = (float)($bd['base_total'] ?? 0.0);
+    $partPast  = (float)($bd['part_past']   ?? 0.0);
+    $partFut   = (float)($bd['part_future'] ?? 0.0);
+
+    $winStart = (int)($win['start'] ?? 0);
+    $winEnd   = (int)($win['end']   ?? 0);
+
+    $startStr = $winStart ? userdate($winStart) : '';
+    $endStr   = $winEnd   ? userdate($winEnd)   : '';
+
+    $out = '';
+
+    // 1) Fenêtre
+    if ($startStr && $endStr) {
+        $out .= html_writer::div(
+            get_string('upgrade_window_label', 'local_subscriptions', (object)['start'=>$startStr,'end'=>$endStr]),
+            'mb-2'
+        );
     }
 
-    // Durées & fenêtre (secondes).
-    $d1 = \local_subscriptions\domain\SubscriptionAdvisor::duration_to_seconds($currplan->duration_key ?? '1year');
-    $d2 = \local_subscriptions\domain\SubscriptionAdvisor::duration_to_seconds($targetplan->duration_key ?? '1year');
-    $t0 = !empty($win['start']) ? (int)$win['start'] : (int)$currsub->start_date;
-    $tEnd = !empty($win['end']) ? (int)$win['end'] : ($t0 + $d2);
-    $t  = max(0, min($d2, time() - $t0)); // consommation depuis t0 bornée à D2
+    // 2) Tarifs de référence
+    $out .= html_writer::start_tag('ul');
 
-    // Partie passée (tarif courant) et à venir (tarif cible), base de calcul.
-    $past   = $d1 > 0 ? $p1 * ($t / $d1) : 0.0;               // P1 * t/D1
-    $future = $d2 > 0 ? $p2 * (($d2 - $t) / $d2) : 0.0;       // P2 * (D2−t)/D2
-    $base   = round($past + $future, 2);
+    $out .= html_writer::tag('li',
+        get_string('upgrade_ref_prices', 'local_subscriptions', (object)[
+            'current' => ls_format_money($P1, $currency),
+            'target'  => ls_format_money($P2, $currency),
+        ])
+    );
 
-    // Déjà payé dans la fenêtre (si Advisor::quote_upgrade a fourni ça).
-    $spent = (float)($extra['spent_window'] ?? ($extra['spent_overlap'] ?? 0.0));
+    // 3) Part passée / future (optionnel, mais plus lisible que la formule)
+    if ($partPast > 0) {
+        $out .= html_writer::tag('li',
+            get_string('upgrade_part_past', 'local_subscriptions', ls_format_money($partPast, $currency))
+        );
+    }
+    if ($partFut > 0) {
+        $out .= html_writer::tag('li',
+            get_string('upgrade_part_future', 'local_subscriptions', ls_format_money($partFut, $currency))
+        );
+    }
 
-    // Montant final proposé (celui affiché à droite de la radio).
-    $final = number_format((float)($opt['amount'] ?? 0), 2);
+    if ($baseTotal > 0) {
+        $out .= html_writer::tag('li',
+            get_string('upgrade_base_total', 'local_subscriptions', ls_format_money($baseTotal, $currency))
+        );
+    }
 
-    // Utilitaires d'affichage.
-    $start = userdate($t0);
-    $end   = userdate($tEnd);
-    $fmtP1 = number_format($p1, 2).' '.$C;
-    $fmtP2 = number_format($p2, 2).' '.$C;
-    $fmtPast   = number_format($past,   2).' '.$C;
-    $fmtFuture = number_format($future, 2).' '.$C;
-    $fmtBase   = number_format($base,   2).' '.$C;
-    $fmtSpent  = number_format($spent,  2).' '.$C;
+    if ($spent > 0) {
+        $out .= html_writer::tag('li',
+            get_string('upgrade_already_paid', 'local_subscriptions', ls_format_money($spent, $currency))
+        );
+    }
 
-    // Durées "humaines" (simple).
-    $human = function(int $sec): string {
-        if ($sec < 60) return $sec.'s';
-        $m = intdiv($sec,60); if ($m < 60) return $m.' min';
-        $h = intdiv($m,60);   if ($h < 24) return $h.' h';
-        $d = intdiv($h,24);   if ($d < 30) return $d.' j';
-        $mo= intdiv($d,30);   if ($mo < 12) return $mo.' mois'.(($d-$mo*30)?' '.($d-$mo*30).' j':'');
-        $y = intdiv($mo,12);  $rm = $mo - $y*12; return $y.' an'.($y>1?'s':'').($rm?' '.$rm.' mois':'');
-    };
+    $out .= html_writer::end_tag('ul');
 
-    // HTML BRUT (ne pas échapper; on l'injecte tel quel sous la radio).
-    $html  = '<div class="text-muted small mb-2">'.get_string('upgrade_window_label','local_subscriptions', $start.' → '.$end).'</div>';
-    $html .= '<ul class="small ps-3">';
-    $html .= '<li>'.get_string('upgrade_tariffs','local_subscriptions', (object)['p1'=>$fmtP1,'p2'=>$fmtP2]).'</li>';
-    $html .= '<li>'.get_string('upgrade_consumed_since_t0','local_subscriptions', $human($t)).'</li>';
-    $html .= '<li>'.get_string('upgrade_equation_past','local_subscriptions', (object)['p1'=>$fmtP1,'t'=>'t','d1'=>$human($d1),'val'=>$fmtPast]).'</li>';
-    $html .= '<li>'.get_string('upgrade_equation_future','local_subscriptions', (object)['p2'=>$fmtP2,'d2'=>$human($d2),'t'=>'t','val'=>$fmtFuture]).'</li>';
-    $html .= '<li>'.get_string('upgrade_spent_window','local_subscriptions', $fmtSpent).'</li>';
-    $html .= '<li>'.get_string('upgrade_base_cap','local_subscriptions', (object)['base'=>$fmtBase,'cap'=>'—']).'</li>';
-    $html .= '</ul>';
-    $html .= '<div class="mt-1">'.get_string('upgrade_final_amount','local_subscriptions', '<strong>'.$final.' '.$C.'</strong>').'</div>';
+    // 4) Upgrade avant promo
+    if ($baseUp > 0) {
+        $out .= html_writer::div(
+            get_string('upgrade_base_minus_paid', 'local_subscriptions', (object)[
+                'base'  => ls_format_money($baseTotal, $currency),
+                'paid'  => ls_format_money($spent, $currency),
+                'diff'  => ls_format_money($baseUp, $currency),
+            ]),
+            'mt-2'
+        );
+    }
 
-    return $html;
+    // 5) Promo éventuelle
+    if ($disc > 0 && $final < $baseUp) {
+        $out .= html_writer::div(
+            get_string('upgrade_discount_line', 'local_subscriptions', (object)[
+                'pct'    => $disc,
+                'before' => ls_format_money($baseUp, $currency),
+                'after'  => ls_format_money($final, $currency),
+            ]),
+            'mt-1'
+        );
+    }
+
+    // 6) Montant proposé
+    $out .= html_writer::div(
+        get_string('upgrade_amount_proposed', 'local_subscriptions', ls_format_money($final, $currency)),
+        'mt-2 fw-semibold'
+    );
+
+    return $out;
 }
+
+
 
 function local_subscriptions_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     if ($context->contextlevel !== CONTEXT_SYSTEM) {
@@ -408,3 +454,65 @@ function local_subscriptions_pluginfile($course, $cm, $context, $filearea, $args
 
     send_stored_file($file, 0, 0, $forcedownload, $options);
 }
+
+/**
+ * Injecte la popup d’abonnement (HTML + JS AMD).
+ * À appeler sur toutes les pages où tu affiches un bouton "S’abonner".
+ *
+ * Usage: local_subscriptions_inject_subscribe_modal($PAGE);
+ */
+function local_subscriptions_inject_subscribe_modal(\moodle_page $PAGE): void {
+    global $USER;
+
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+
+    $isguest = (!isloggedin() || isguestuser());
+    $istrial = \local_subscriptions\trial_manager::user_has_active_trial((int)$USER->id);
+
+    // On n'affiche la modale que pour :
+    //  - invités
+    //  - comptes d'essai
+    if (!$isguest && !$istrial) {
+        return;
+    }
+
+    $title = get_string('subscribe_to_campus', 'local_subscriptions');
+    $btnClose = get_string('close','local_subscriptions');
+
+    // Appel AMD
+    $PAGE->requires->js_call_amd('local_subscriptions/subs_modal', 'init');
+
+    // HTML de la modale
+echo '
+<div class="modal fade" id="subsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">'.$title.'</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="'.s($btnClose).'"></button>
+      </div>
+      <div class="modal-body p-0 position-relative">
+
+        <div id="subsModalLoader"
+             class="subs-modal-loader align-items-center justify-content-center">
+          <div class="spinner-border" role="status" aria-hidden="true"></div>
+        </div>
+
+        <iframe id="subsModalFrame"
+                src=""
+                style="width:100%;height:70vh;border:0;"
+                loading="lazy"
+                title="'.s($title).'">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</div>';
+
+
+}
+

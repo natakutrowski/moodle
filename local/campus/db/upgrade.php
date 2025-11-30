@@ -65,6 +65,18 @@ function xmldb_local_campus_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025102102, 'local', 'campus');
     }
 
+    if ($oldversion < 2025110701) {
+        $dbman = $DB->get_manager();
+        $table = new xmldb_table('local_campus_trial');
+
+        $f1 = new xmldb_field('reminder_presuspend_sent', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'reminder7_sent');
+        if (!$dbman->field_exists($table, $f1)) { $dbman->add_field($table, $f1); }
+
+        $f2 = new xmldb_field('reminder_suspend_sent', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'reminder_presuspend_sent');
+        if (!$dbman->field_exists($table, $f2)) { $dbman->add_field($table, $f2); }
+
+        upgrade_plugin_savepoint(true, 2025110701, 'local', 'campus');
+    }
 
     return true;
 }

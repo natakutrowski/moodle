@@ -308,3 +308,124 @@ $(function () {
 		console.log(currentLangValue);
 	});
 });
+
+
+// ==== CAMPUS – Améliorations des champs de réponse dans les quiz ====
+document.addEventListener('DOMContentLoaded', function () {
+
+    // On ne fait tout ça que sur les pages de quiz
+    if (!document.body.classList.contains('path-mod-quiz')) {
+        return;
+    }
+
+    // --- 1. Grandes réponses : transformer l'input en textarea auto-height ---
+    (function enhanceLongShortAnswers() {
+        var inputs = document.querySelectorAll(
+            '.que.shortanswer .answer input[type="text"].form-control'
+        );
+
+        inputs.forEach(function (input) {
+            if (input.dataset.enhanced === '1') {
+                return;
+            }
+            input.dataset.enhanced = '1';
+
+            // Créer le textarea visible
+            var ta = document.createElement('textarea');
+            ta.className = 'form-control quiz-longanswer';
+            ta.id = input.id + '_visible';
+            ta.name = input.name + '_visible';
+            ta.rows = 1;
+            ta.value = input.value || '';
+
+            var init = input.getAttribute('data-initial-value');
+            if (init !== null && !ta.value) {
+                ta.value = init;
+            }
+
+            function autoResize() {
+                ta.style.height = 'auto';
+                ta.style.overflowY = 'hidden';
+                ta.style.height = ta.scrollHeight + 'px';
+            }
+
+            ta.addEventListener('input', function () {
+                input.value = ta.value; // on alimente l’input caché pour Moodle
+                autoResize();
+            });
+
+            // Insérer le textarea dans le DOM
+            input.parentNode.insertBefore(ta, input);
+
+            // Premier sizing
+            autoResize();
+
+            // Cacher l’input original mais le garder dans le formulaire
+            input.style.position = 'absolute';
+            input.style.left = '-9999px';
+            input.style.width = '0';
+            input.style.height = '0';
+            input.setAttribute('aria-hidden', 'true');
+            input.tabIndex = -1;
+
+            // Mettre à jour le label pour qu'il pointe vers le textarea
+            var label = input.closest('label');
+            if (label && label.getAttribute('for') === input.id) {
+                label.setAttribute('for', ta.id);
+            }
+        });
+    })();
+
+    // --- 2. Trous dans la phrase : input qui s'élargit/rétrécit horizontalement ---
+    (function enhanceGapInputs() {
+        var gaps = document.querySelectorAll(
+            '.qtext input[type="text"].form-control.d-inline'
+        );
+
+        gaps.forEach(function (input) {
+            // Classe pour pouvoir le styler
+            input.classList.add('quiz-gap');
+
+            // Base : l'attribut size si présent, sinon 10 caractères
+            var sizeAttr = parseInt(input.getAttribute('size') || '0', 10);
+            var minCh = sizeAttr > 0 ? sizeAttr : 10;  // plus large par défaut
+            var maxCh = 24;                            // limite max
+
+            function autoWidth() {
+                var len = input.value.length;
+                var widthCh = len + 1; // petite marge
+
+                if (widthCh < minCh) {
+                    widthCh = minCh;
+                } else if (widthCh > maxCh) {
+                    widthCh = maxCh;
+                }
+
+                input.style.width = widthCh + 'ch';
+            }
+
+            // Largeur initiale
+            autoWidth();
+
+            // Recalcul à chaque frappe (ajout ou suppression)
+            input.addEventListener('input', autoWidth);
+        });
+    })();
+
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    // On ne fait ça que s'il y a un menu utilisateur → user connecté
+    if (!document.querySelector('.usermenu')) {
+        return;
+    }
+
+    // Pour chaque fil d'Ariane dans la bannière, on supprime le premier <li>
+    document.querySelectorAll('.page-banner-area .breadcrumb').forEach(function (bc) {
+        var firstItem = bc.querySelector('.breadcrumb-item:first-child');
+        if (firstItem) {
+            firstItem.parentNode.removeChild(firstItem);
+        }
+    });
+});

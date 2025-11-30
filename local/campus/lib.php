@@ -237,6 +237,178 @@ function local_campus_is_trial_user_byid(int $userid): bool {
     ]);
 }
 
+function local_campus_render_trial_discount_banner(?bool $showcta = null): void {
+    global $USER, $CFG, $PAGE;
+
+    if (!isloggedin() || isguestuser()) {
+        return;
+    }
+
+    require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
+
+    $trial = \local_subscriptions\trial_manager::user_has_active_trial((int)$USER->id);
+    if (!$trial) {
+        return;
+    }
+    if (!\local_subscriptions\trial_manager::is_discount_window_open((int)$USER->id)) {
+        return;
+    }
+
+    $discPct   = (int)(get_config('local_subscriptions','trial_discount_percent') ?? 15);
+    $deadline  = (int)\local_subscriptions\trial_manager::discount_window_deadline((int)$USER->id);
+    $subscribe = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+
+    // Détection auto : pas de CTA sur subscribe.php
+    if ($showcta === null) {
+        $onSubscribe = (strpos($PAGE->url->out(false), '/local/subscriptions/subscribe.php') !== false);
+        $showcta = !$onSubscribe;
+    }
+
+    $daysLabel = get_string('trial_days_word','local_campus'); // 'jours' / 'days' / 'дн.'
+
+    // 🔁 On réutilise la même string que pour le checkout
+    // ex RU : "🎁 -20% на подписку. Скидка доступна только"
+    $prefix = get_string('checkout_discount_note_prefix', 'local_subscriptions', $discPct);
+
+    echo html_writer::start_div('campus-trial-15 banner');
+    echo html_writer::start_div('container d-flex align-items-center justify-content-between');
+
+    // Bloc texte + countdown
+    $text = html_writer::span(
+                s($prefix).' ',
+                'ttl'
+            ) .
+            html_writer::span(
+                '', 'deadline fw-semibold',
+                ['data-deadline' => $deadline, 'data-dayslabel' => $daysLabel]
+            );
+
+    echo html_writer::div($text, 'campus-trial-15-text me-3');
+
+    // CTA à droite, un peu décalé
+    if ($showcta) {
+        echo html_writer::link(
+            $subscribe,
+            get_string('trial_discount_banner_cta','local_campus'),
+            [
+                'class'          => 'default-btn campus-trial-15-cta ms-4',
+                'data-subs-modal'=> '1',
+            ]
+        );
+    }
+
+    echo html_writer::end_div();  // .container
+    echo html_writer::end_div();  // .campus-trial-15
+
+    // Compte à rebours X jours HH:mm:ss
+    echo html_writer::script("
+      (function(){
+        var el = document.querySelector('.campus-trial-15 .deadline'); if (!el) return;
+        var dl    = parseInt(el.getAttribute('data-deadline'), 10) * 1000;
+        var dword = el.getAttribute('data-dayslabel') || 'd';
+        function two(n){ return (n < 10 ? '0' : '') + n; }
+        function tick(){
+          var t = Math.max(0, Math.floor((dl - Date.now()) / 1000));
+          var d = Math.floor(t / 86400);
+          var h = Math.floor((t % 86400) / 3600);
+          var m = Math.floor((t % 3600) / 60);
+          var s = t % 60;
+          var head = d > 0 ? (d + ' ' + dword + ' ') : '';
+          el.textContent = head + two(h) + ':' + two(m) + ':' + two(s);
+        }
+        tick();
+        setInterval(tick, 1000);
+      })();
+    ");
+}
+
+/**
+ * Retourne le HTML du bandeau de remise trial (ou chaîne vide si non applicable),
+ * pour pouvoir l'injecter dans un template Mustache.
+ */
+function local_campus_get_trial_discount_banner_html(): string {
+    // On réutilise toute la logique existante de filtre (trial, fenêtre, etc.)
+    if (!function_exists('local_campus_render_trial_discount_banner')) {
+        return '';
+    }
+
+    // Filtrage supplémentaire par type de page (optionnel mais pratique)
+    global $PAGE;
+    $pagetype = $PAGE->pagetype; // ex : 'local-campus-mycourses', 'course-view-topics', 'user-profile'
+
+    // On ne veut que sur mycourses, toutes les vues de cours, et profil
+    if (
+        $pagetype !== 'local-campus-mycourses'
+        && strpos($pagetype, 'course-view-') !== 0
+        && $pagetype !== 'user-profile'
+    ) {
+        return '';
+    }
+
+    ob_start();
+    local_campus_render_trial_discount_banner();
+    return trim(ob_get_clean());
+}
+
+
+function local_campus_render_subscription_expiry_banner(): void {
+    global $USER, $DB, $CFG;
+
+    if (!isloggedin() || isguestuser()) return;
+
+    // Récupère la souscription payante active qui expire le plus tôt
+    $now = time();
+    $sub = $DB->get_record_sql("
+        SELECT us.*, sp.name AS planname, sp.expiry_reminder_days, sp.expiry_reminder_enabled
+          FROM {user_subscription} us
+          JOIN {subscription_plan} sp ON sp.id = us.planid
+         WHERE us.userid = :u
+           AND us.status = 'ACTIVE'
+           AND us.end_date > :now
+           AND (sp.is_trial IS NULL OR sp.is_trial = 0)
+         ORDER BY us.end_date ASC
+         LIMIT 1
+    ", ['u'=>(int)$USER->id,'now'=>$now]);
+
+    if (!$sub) return;
+    if (isset($sub->expiry_reminder_enabled) && (int)$sub->expiry_reminder_enabled === 0) {
+        return;
+    }
+
+    // Jours plan → fallback global
+    $planCsv = (string)($sub->expiry_reminder_days ?? '');
+    $planDays = array_values(array_unique(array_filter(array_map('intval', preg_split('/[,\s;]+/', trim($planCsv))))));
+    if (empty($planDays)) {
+        $globalcsv = (string)(get_config('local_subscriptions','expiry_reminder_days') ?? '7');
+        $planDays = array_values(array_unique(array_filter(array_map('intval', preg_split('/[,\s;]+/', trim($globalcsv))))));
+    }
+    if (empty($planDays)) return;
+
+    $daysleft = (int)ceil( ((int)$sub->end_date - $now) / DAYSECS );
+
+    // APRÈS : bandeau en continu dès le plus grand J configuré
+    $threshold = max($planDays);     // ex. avec 7,3,1 => 7
+    if ($daysleft > $threshold || $daysleft <= 0) return;
+ 
+    $date = userdate((int)$sub->end_date, '%e %B %Y, %H:%M');
+    $renew = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+
+    $txt = get_string('sub_expiry_banner','local_campus', (object)[
+        'plan' => format_string($sub->planname),
+        'date' => $date,
+        'days' => $daysleft
+    ]);
+
+    echo html_writer::div(
+        html_writer::div(
+            html_writer::div($txt, 'me-3') .
+            html_writer::link($renew, get_string('subscribe_now','local_campus'), ['class'=>'btn btn-sm btn-primary ms-auto']),
+            'alert alert-info d-flex align-items-center justify-content-between flex-wrap gap-2'
+        ),
+        'container mt-3'
+    );
+}
+
 
 
 /**
@@ -253,30 +425,45 @@ function local_campus_inject_trial_ui(\moodle_page $PAGE): void {
     $PAGE->requires->strings_for_js([
         'trial_popup_title','trial_popup_lead','trial_popup_tos','trial_popup_accept',
         'trial_btn_continue','trial_btn_subscribe','trial_expired_msg',
-        'trial_firstname','trial_lastname','trial_email'
+        'trial_firstname','trial_lastname','trial_email',
+        'trial_already_subscribed_html', 'trial_expired_html',
+        'trial_password_mismatch'
     ], 'local_campus');
 
-    // Liens CGU / Privacy (même logique que checkout.php)
+    // Pour le libellé "Login" utilisé côté JS
+    $PAGE->requires->strings_for_js(['login'], 'moodle');
+
+    // Liens Privacy + CGV (même logique que checkout.php)
     $policyurl = (new moodle_url('/local/subscriptions/privacy.php'))->out(false);
+    $termsurl  = (new moodle_url('/local/subscriptions/terms.php'))->out(false);
+
     if (class_exists('\local_subscriptions\support\Region')) {
         $urls = \local_subscriptions\support\Region::policyUrls(); // ['terms'=>..., 'policy'=>...]
         if (!empty($urls['policy'])) { $policyurl = (string)$urls['policy']; }
+        if (!empty($urls['terms']))  { $termsurl  = (string)$urls['terms'];  }
     }
 
     // Chaînes côté PHP
     $title     = get_string('trial_popup_title', 'local_campus');
     $lead      = get_string('trial_popup_lead',  'local_campus');
     $expired   = get_string('trial_expired_msg', 'local_campus');
-    $lblFirst  = get_string('trial_firstname',   'local_campus');
-    $lblLast   = get_string('trial_lastname',    'local_campus');
-    $lblEmail  = get_string('trial_email',       'local_campus');
-    // Label avec 2 liens (i18n avec placeholders)
-    $tosHtml   = get_string('trial_tos_html', 'local_campus', $policyurl);
+
+    $footnote  = get_string('trial_footer_note', 'local_campus');
+
+    // TOS avec 2 liens (policy + terms)
+    $tosHtml   = get_string('trial_tos_html', 'local_campus', (object)[
+        'policyurl' => $policyurl,
+        'termsurl'  => $termsurl,
+    ]);
     $btnCancel = get_string('cancel');
     $btnCont   = get_string('trial_btn_continue','local_campus');
     $btnSub    = get_string('trial_btn_subscribe','local_campus');
     $btnClose  = get_string('close','local_campus');
     $sesskey   = sesskey();
+
+    // ✅ Champs mutualisés (prenom/nom/email/tel/mot de passe)
+    // La fonction doit être définie dans local/campus/lib.php
+    $fieldsHtml = local_campus_render_signup_fields('trial');
 
     echo '
 <div class="modal fade" id="campusTrialModal" tabindex="-1" aria-hidden="true">
@@ -290,25 +477,12 @@ function local_campus_inject_trial_ui(\moodle_page $PAGE): void {
       <form id="campusTrialForm" class="modal-body p-4">
         <input type="hidden" name="sesskey" value="'.s($sesskey).'">
         <input type="hidden" name="redirectid" id="campusTrialRedirectId" value="">
-        <p class="lead mb-3"><strong>'.s($lead).'</strong></p>
+        <p class="lead mb-3"><strong>'.$lead.'</strong></p>
 
         <div id="campusTrialExpired" class="alert alert-warning d-none">'.$expired.'</div>
 
         <div id="campusTrialFormWrap">
-          <div class="row g-2">
-            <div class="col-sm-6">
-              <label class="form-label">'.s($lblFirst).'</label>
-              <input type="text" name="firstname" id="trialFirst" class="form-control" required>
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label">'.s($lblLast).'</label>
-              <input type="text" name="lastname" id="trialLast" class="form-control" required>
-            </div>
-            <div class="col-12">
-              <label class="form-label">'.s($lblEmail).'</label>
-              <input type="email" name="email" id="trialEmail" class="form-control" required>
-            </div>
-          </div>
+          '.$fieldsHtml.'
 
           <div class="form-check my-3">
             <input class="form-check-input" type="checkbox" id="trialAcceptTos" required>
@@ -319,178 +493,371 @@ function local_campus_inject_trial_ui(\moodle_page $PAGE): void {
         </div>
       </form>
 
-      <div class="modal-footer">
-        <a id="campusTrialSubscribe" href="/subscribe.php" class="default-btn d-none">
-        '.s($btnSub).'
-        </a>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">'.s($btnCancel).'</button>
-        <button type="submit" form="campusTrialForm" id="campusTrialContinue" class="default-btn" disabled>
-        '.s($btnCont).'
-        </button>
+      <div class="modal-footer trial-footer">
+        <div class="trial-footer-buttons">
+          <a id="campusTrialSubscribe" href="/local/subscriptions/subscribe.php" class="default-btn d-none">
+            '.s($btnSub).'
+          </a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">'.s($btnCancel).'</button>
+          <button type="submit" form="campusTrialForm" id="campusTrialContinue" class="default-btn" disabled>
+            '.s($btnCont).'
+          </button>
+        </div>
+        <div class="trial-footer-note small text-muted">
+          '.s($footnote).'
+        </div>
       </div>
+
     </div>
   </div>
-</div>
+</div>';
 
-<script>
-(function(){
-  function onReady(fn){ if(document.readyState!=="loading"){ fn(); } else { document.addEventListener("DOMContentLoaded", fn); } }
+    // Charger le module AMD qui gère la popup
+    $PAGE->requires->js_call_amd('local_campus/trial_popup', 'init');
+}
 
-  onReady(function(){
-    var modalEl   = document.getElementById("campusTrialModal");
-    if(!modalEl){ return; }
 
-    var formEl    = document.getElementById("campusTrialForm");
-    var errBox    = document.getElementById("campusTrialError");
-    var redirEl   = document.getElementById("campusTrialRedirectId");
-    var expiredEl = document.getElementById("campusTrialExpired");
-    var formWrap  = document.getElementById("campusTrialFormWrap");
-    var btnSub    = document.getElementById("campusTrialSubscribe");
-    var btnCont   = document.getElementById("campusTrialContinue");
-
-    var fFirst = document.getElementById("trialFirst");
-    var fLast  = document.getElementById("trialLast");
-    var fEmail = document.getElementById("trialEmail");
-    var fTos   = document.getElementById("trialAcceptTos");
-
-    // Bootstrap modal si dispo
-    var bsModal = null;
-    try{ if (window.bootstrap && window.bootstrap.Modal) { bsModal = new window.bootstrap.Modal(modalEl); } }catch(e){}
-
-    function showModal(){
-      if (bsModal) { bsModal.show(); return; }
-      modalEl.classList.add("show");
-      modalEl.style.display = "block";
-      modalEl.removeAttribute("aria-hidden");
-      modalEl.setAttribute("aria-modal","true");
-      document.body.classList.add("modal-open");
-      if (!document.querySelector(".modal-backdrop")) {
-        var bd = document.createElement("div");
-        bd.className = "modal-backdrop fade show";
-        document.body.appendChild(bd);
-      }
+/**
+ * Charge et met en cache la liste exhaustive des indicatifs depuis le JSON.
+ * Fichier attendu : local/campus/data/country_dial_codes.json
+ *
+ * Retourne un tableau [ISO2 => ['dial' => '+33', 'name_en' => 'France']].
+ */
+function local_campus_load_dial_codes(): array {
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
     }
-    function hideModal(){
-        // Déplacer le focus avant de cacher (évite le warning ARIA)
-        if (document.activeElement && modalEl.contains(document.activeElement)) {
-            document.activeElement.blur();
+
+    $file = __DIR__ . '/data/CountryCodes.json';
+    if (!is_readable($file)) {
+        $cache = [];
+        return $cache;
+    }
+
+    $raw = file_get_contents($file);
+    $items = json_decode($raw, true);
+    if (!is_array($items)) {
+        $cache = [];
+        return $cache;
+    }
+
+    $out = [];
+
+    foreach ($items as $item) {
+        if (empty($item['code']) || empty($item['dial_code'])) {
+            continue;
         }
-        if (bsModal) { bsModal.hide(); return; }
-        modalEl.classList.remove("show");
-        modalEl.style.display = "none";
-        modalEl.setAttribute("aria-hidden","true");
-        modalEl.removeAttribute("aria-modal");
-        document.body.classList.remove("modal-open");
-        var bd = document.querySelector(".modal-backdrop"); if (bd) bd.remove();
-    }
-    // Délégation pour tous les éléments qui ferment la modale (croix & Annuler)
-    document.addEventListener("click", function(e){
-        var closer = e.target.closest(\'[data-bs-dismiss="modal"]\');
-        if (closer && modalEl.contains(closer)) { e.preventDefault(); hideModal(); }
-    });
+        $iso  = strtoupper(trim($item['code']));
+        $dial = trim($item['dial_code']);
+        $name = trim($item['name'] ?? '');
 
-    // Validation dynamique : bouton "Continuer" activé uniquement si tout est OK
-    function valid(){
-      if (!formEl) return false;
-      var ok = true;
-      if (!fFirst.value.trim()) ok = false;
-      if (!fLast.value.trim())  ok = false;
-      if (!fEmail.value.trim()) ok = false;
-      if (fEmail.validity && !fEmail.validity.valid) ok = false;
-      if (fTos && !fTos.checked) ok = false;
-      btnCont.disabled = !ok;
-      return ok;
-    }
-    ["input","change","keyup"].forEach(function(ev){
-      [fFirst,fLast,fEmail,fTos].forEach(function(el){ if(el){ el.addEventListener(ev, valid); } });
-    });
+        // On ignore les cas bizarres type "International Networks", etc.
+        if ($iso === '' || $dial === '') {
+            continue;
+        }
 
-    window.campusTrialOpen = function(redirectid){
-      if (redirEl)   redirEl.value = redirectid || "";
-      if (expiredEl) expiredEl.classList.add("d-none");
-      if (formWrap)  formWrap.classList.remove("d-none");
-      if (btnSub)    btnSub.classList.add("d-none");
-      if (errBox){ errBox.classList.add("d-none"); errBox.textContent=""; }
-      if (btnSub)  btnSub.classList.add("d-none");    // par défaut on ne montre pas “S’abonner”
-      if (btnCont) btnCont.classList.remove("d-none"); // on garde “Continuer”
-      btnCont.disabled = true; // réinit validation
-
-      showModal();
-    };
-
-    function check(redirectid){
-      var url = M.cfg.wwwroot + "/local/campus/trial_check.php?redirectid=" + encodeURIComponent(redirectid);
-      fetch(url, {credentials:"same-origin", headers:{"X-Requested-With":"fetch"}})
-        .then(function(res){ return res.json(); })
-        .then(function(j){
-          if (j.status === "ok" && j.redirect) { window.location.href = j.redirect; return; }
-          if (j.status === "expired") {
-            if (redirEl)   redirEl.value = redirectid;
-            if (expiredEl) expiredEl.classList.remove("d-none");
-            if (formWrap)  formWrap.classList.add("d-none");
-            if (btnSub)    btnSub.classList.remove("d-none");
-            document.cookie = "campus_trial=; Max-Age=0; path=/";
-            btnCont.disabled = true;
-            if (btnCont) btnCont.classList.add("d-none");   // ← cache le bouton Continuer
-            if (btnSub)  btnSub.classList.remove("d-none"); // ← affiche S’abonner
-            showModal();
-            return;
-          }
-          campusTrialOpen(redirectid); // needs_form
-        })
-        .catch(function(){ campusTrialOpen(redirectid); });
-    }
-    window.campusTrialCheck = check;
-
-    document.addEventListener("click", function(e){
-      var a = e.target.closest("[data-campus-trial-redirect]");
-      if (!a) return;
-      e.preventDefault();
-      check(a.getAttribute("data-campus-trial-redirect"));
-    });
-
-    if (formEl){
-      formEl.addEventListener("submit", function(e){
-        e.preventDefault();
-        if (!valid()) return;
-        if (errBox){ errBox.classList.add("d-none"); errBox.textContent=""; }
-
-        var fd = new FormData(formEl);
-        fetch(M.cfg.wwwroot + "/local/campus/trial_gate.php", {
-          method: "POST", body: fd, credentials: "same-origin",
-          headers: {"X-Requested-With":"fetch"}
-        })
-        .then(function(res){ return res.json(); })
-        .then(function(j){
-          if (j.status === "ok" && j.redirect) { window.location.href = j.redirect; return; }
-          if (j.status === "expired") {
-            if (expiredEl) expiredEl.classList.remove("d-none");
-            if (formWrap)  formWrap.classList.add("d-none");
-            if (btnSub)    btnSub.classList.remove("d-none");
-            document.cookie = "campus_trial=; Max-Age=0; path=/";
-            btnCont.disabled = true;
-            if (btnCont) btnCont.classList.add("d-none");
-            if (btnSub)  btnSub.classList.remove("d-none");
-            showModal();
-            return;
-          }
-          throw new Error(j && j.message ? j.message : "Error");
-        })
-        .catch(function(err){
-          if (errBox){
-            errBox.textContent = (err && err.message) ? err.message : String(err);
-            errBox.classList.remove("d-none");
-          }
-        });
-      });
+        $out[$iso] = [
+            'dial'    => $dial,
+            'name_en' => $name,
+        ];
     }
 
-    document.addEventListener("click", function(e){
-      if (e.target.matches("#campusTrialModal .btn-close")) { hideModal(); }
+    $cache = $out;
+    return $cache;
+}
+
+/**
+ * Génère un emoji de drapeau à partir d'un code ISO à 2 lettres.
+ * Fonctionne pour tous les codes ISO standards : FR -> 🇫🇷, RU -> 🇷🇺, etc.
+ */
+function local_campus_country_flag_emoji(string $iso): string {
+    $iso = strtoupper(trim($iso));
+    if (!preg_match('/^[A-Z]{2}$/', $iso)) {
+        return '';
+    }
+
+    // Regional Indicator Symbols (A=U+1F1E6)
+    $base = 0x1F1E6;
+
+    $cp1 = $base + (ord($iso[0]) - ord('A'));
+    $cp2 = $base + (ord($iso[1]) - ord('A'));
+
+    // On construit les emojis via les entités HTML pour rester compatible.
+    $emoji1 = mb_convert_encoding('&#'.$cp1.';', 'UTF-8', 'HTML-ENTITIES');
+    $emoji2 = mb_convert_encoding('&#'.$cp2.';', 'UTF-8', 'HTML-ENTITIES');
+
+    return $emoji1 . $emoji2;
+}
+
+
+/**
+ * Devine un indicatif par défaut (toujours dial, pas iso).
+ */
+function local_campus_default_phone_country_code(): string {
+    $lang = current_language();
+
+    if (strpos($lang, 'ru') === 0) { return '+7'; }
+    if (strpos($lang, 'fr') === 0) { return '+33'; }
+    if (strpos($lang, 'en') === 0) { return '+1'; }
+
+    return '+7'; // fallback pour ton audience
+}
+
+/**
+ * Construit la liste utilisée dans le sélecteur :
+ * [ISO2 => ['code'=>'+33', 'flag'=>'🇫🇷', 'name'=>'France', 'label'=>'🇫🇷 +33 (France)']]
+ */
+function local_campus_phone_country_list(): array {
+    $dialcodes = local_campus_load_dial_codes();
+    if (!$dialcodes) {
+        return [];
+    }
+
+    $countries = get_string_manager()->get_list_of_countries(true); // noms traduits
+
+    $out = [];
+    foreach ($dialcodes as $iso => $info) {
+        // On ne garde que les pays connus de Moodle
+        if (!isset($countries[$iso])) {
+            continue;
+        }
+        $dial = $info['dial'];
+        $name = $countries[$iso];       // nom dans la langue de l’interface
+        $flag = local_campus_country_flag_emoji($iso);
+
+        $label = trim($flag.' '.$dial.' ('.$name.')');
+
+        $out[$iso] = [
+            'code'  => $dial,
+            'flag'  => $flag,
+            'name'  => $name,
+            'label' => $label,
+        ];
+    }
+
+    // Tri par label pour un joli menu
+    uasort($out, function($a, $b) {
+        return strcmp($a['label'], $b['label']);
     });
-  });
-})();
-</script>';
+
+    return $out;
+}
+
+/**
+ * Rend le <select> indicatif :
+ * <option value="">Ind.</option>
+ * <option value="+7">🇷🇺 +7 (Russie)</option> etc.
+ */
+function local_campus_phone_country_select_html(string $name, string $id, ?string $current = null): string {
+    $countries   = local_campus_phone_country_list();
+    $current     = $current ?: local_campus_default_phone_country_code();
+    $placeholder = get_string('trial_phone_country_placeholder', 'local_campus');
+
+    $out  = '<select name="'.s($name).'" id="'.s($id).'" class="form-select">';
+    $out .= '<option value="">'.s($placeholder).'</option>';
+
+    foreach ($countries as $iso => $info) {
+        $code  = $info['code'];
+        $label = $info['label'];
+        $sel   = ($code === $current) ? ' selected' : '';
+        $out  .= '<option value="'.s($code).'"'.$sel.'>'.s($label).'</option>';
+    }
+
+    $out .= '</select>';
+    return $out;
+}
+
+/**
+ * Renvoie un code ISO2 (ex: 'FR') à partir d'un indicatif (ex: '+33').
+ * On prend simplement le premier code qui correspond dans la liste JSON.
+ */
+function local_campus_iso_from_phonecode(string $code): ?string {
+    $code = trim($code);
+    if ($code === '') {
+        return null;
+    }
+
+    $dialcodes = local_campus_load_dial_codes(); // [ISO => ['dial'=>'+..', ...]]
+    if (!$dialcodes) {
+        return null;
+    }
+
+    foreach ($dialcodes as $iso => $info) {
+        if (!empty($info['dial']) && $info['dial'] === $code) {
+            return $iso;
+        }
+    }
+    return null;
+}
+
+/**
+ * Rend les champs d'inscription (nom, prénom, email, téléphone, mot de passe)
+ * pour :
+ *   - la popup d'essai (context = 'trial')
+ *   - le checkout invité (context = 'checkout')
+ *
+ * $defaults permet de préremplir (email/prénom/nom) côté checkout.
+ */
+function local_campus_render_signup_fields(string $context, ?\stdClass $defaults = null): string {
+    global $CFG;
+
+    $defaults = $defaults ?? (object)[];
+    $dfirst   = $defaults->firstname ?? '';
+    $dlast    = $defaults->lastname  ?? '';
+    $demail   = $defaults->email     ?? '';
+
+    // Strings communes (on reprend exactement celles de la popup Trial).
+    $lblFirst  = get_string('trial_firstname',   'local_campus');
+    $lblLast   = get_string('trial_lastname',    'local_campus');
+    $lblEmail  = get_string('trial_email',       'local_campus');
+    $lblPass   = get_string('trial_password',    'local_campus');
+    $phPass    = get_string('trial_password_ph', 'local_campus');
+    $helpPass  = get_string('trial_password_help', 'local_campus');
+
+    $phFirst   = get_string('trial_firstname_ph','local_campus');
+    $phLast    = get_string('trial_lastname_ph', 'local_campus');
+    $phEmail   = get_string('trial_email_ph',    'local_campus');
+
+    $lblPhone  = get_string('trial_phone',       'local_campus');
+    $phPhone   = get_string('trial_phone_ph',    'local_campus');
+    $helpPhone = get_string('trial_phone_help',  'local_campus');
+
+    $toggleShow = get_string('trial_password_toggle_show', 'local_campus');
+    $toggleHide = get_string('trial_password_toggle_hide', 'local_campus');
+
+    // Select indicatif (id différent selon contexte).
+    $phoneSelectId = ($context === 'checkout') ? 'checkoutPhoneCountry' : 'trialPhoneCountry';
+    $phoneSelect   = local_campus_phone_country_select_html('phonecountry', $phoneSelectId, null);
+
+    // IDs + names selon le contexte
+    if ($context === 'checkout') {
+        $idFirst  = 'firstname';
+        $idLast   = 'lastname';
+        $idEmail  = 'email';
+        $idPhone  = 'checkoutPhone';
+        $idPass   = 'checkoutPass';
+
+        $nameFirst = 'firstname';
+        $nameLast  = 'lastname';
+        $nameEmail = 'email';
+        $namePhone = 'phone';
+        $namePass  = 'password';
+
+        $emailHintDiv = '<div class="text-warning small" id="ls_email_hint"></div>';
+    } else { // 'trial'
+        $idFirst  = 'trialFirst';
+        $idLast   = 'trialLast';
+        $idEmail  = 'trialEmail';
+        $idPhone  = 'trialPhone';
+        $idPass   = 'trialPass';
+
+        $nameFirst = 'firstname';
+        $nameLast  = 'lastname';
+        $nameEmail = 'email';
+        $namePhone = 'phonenumber';
+        $namePass  = 'password';
+
+        $emailHintDiv = ''; // pas de hint spécial dans la popup
+    }
+
+    $html = '';
+
+    $html .= '<div class="row g-2">';
+
+    // Prénom
+    $html .= '
+        <div class="col-sm-6">
+          <label class="form-label">'.s($lblFirst).'</label>
+          <input type="text"
+                 name="'.s($nameFirst).'"
+                 id="'.s($idFirst).'"
+                 class="form-control"
+                 required
+                 placeholder="'.s($phFirst).'"
+                 value="'.s($dfirst).'">
+        </div>';
+
+    // Nom
+    $html .= '
+        <div class="col-sm-6">
+          <label class="form-label">'.s($lblLast).'</label>
+          <input type="text"
+                 name="'.s($nameLast).'"
+                 id="'.s($idLast).'"
+                 class="form-control"
+                 required
+                 placeholder="'.s($phLast).'"
+                 value="'.s($dlast).'">
+        </div>';
+
+    // Email
+    $html .= '
+        <div class="col-12">
+          <label class="form-label">'.s($lblEmail).'</label>
+          <input type="email"
+                 name="'.s($nameEmail).'"
+                 id="'.s($idEmail).'"
+                 class="form-control"
+                 required
+                 placeholder="'.s($phEmail).'"
+                 value="'.s($demail).'">
+          '.$emailHintDiv.'
+        </div>';
+
+    // Téléphone
+    $html .= '
+        <div class="col-12">
+          <label class="form-label">'.s($lblPhone).'</label>
+
+          <div class="campus-phone-wrapper">
+            <div class="campus-phone-country">
+              '.$phoneSelect.'
+            </div>
+            <input type="tel"
+                   name="'.s($namePhone).'"
+                   id="'.s($idPhone).'"
+                   class="form-control campus-phone-input"
+                   placeholder="'.s($phPhone).'"
+                   required>
+          </div>
+
+          <div class="form-text">'.$helpPhone.'</div>
+        </div>';
+
+    // Mot de passe
+    $html .= '
+        <div class="col-12">
+          <label class="form-label">'.s($lblPass).'</label>
+
+          <div class="campus-password-wrapper">
+            <input
+                type="text"
+                name="'.s($namePass).'"
+                id="'.s($idPass).'"
+                class="form-control"
+                minlength="8"
+                autocomplete="new-password"
+                required
+                placeholder="'.s($phPass).'">
+
+            <button class="campus-password-toggle password-toggle"
+                    type="button"
+                    data-target="#'.s($idPass).'"
+                    data-show-label="'.s($toggleShow).'"
+                    data-hide-label="'.s($toggleHide).'"
+                    aria-label="'.s($toggleHide).'"
+                    title="'.s($toggleHide).'">
+              <span class="password-toggle-icon" aria-hidden="true">🙈</span>
+            </button>
+          </div>
+
+          <div class="form-text">'.$helpPass.'</div>
+        </div>';
+
+    $html .= '</div>'; // .row g-2
+
+    return $html;
 }
 
 

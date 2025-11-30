@@ -3,6 +3,7 @@ $string['pluginname'] = 'Подписки';
 
 // -- Subscription config
 // Plans
+$string['plan_1week'] = '1 неделя'; // do not delete
 $string['plan_1month'] = '1 месяц'; // do not delete
 $string['plan_3months'] = '3 месяца'; // do not delete
 $string['plan_6months'] = '6 месяцев'; // do not delete
@@ -178,6 +179,7 @@ $string['courselist'] = 'Список курсов';
 $string['close'] = 'Закрыть';
 
 $string['subscribe'] = 'Купить подписку';
+$string['subscribe_to_campus'] = 'Купить подписку на Campus<small><sup>FR</sup></small>';
 $string['change_currency'] = 'Сменить валюту';
 
 $string['payment_success_check_email'] = 'Проверьте вашу почту: там есть письмо для завершения входа и установки пароля.';
@@ -192,22 +194,49 @@ $string['checkout_title'] = 'Оформление заказа';
 $string['checkout_duration'] = 'Длительность:';
 $string['checkout_go_to_payment'] = 'Перейти к оплате';
 
-$string['welcome_subject'] = 'Добро пожаловать в {$a}';
-$string['welcome_body_intro'] = 'Ваша учётная запись создана, а подписка активирована.';
-$string['welcome_username'] = 'Ваш логин:';
+$string['welcome_subject'] = 'Ваша подписка на CampusFR активирована ✅';
+$string['welcome_body_intro'] = 
+    '<p>Bonjour, {$a}!</p>' .
+    '<p>Ваша подписка на Campus<small><sup>FR</sup></small> активирована — теперь у вас полный доступ к платформе в рамках выбранного тарифа.</p>' .
+    '<p>Если вы уже были в Campus<small><sup>FR</sup></small> на пробном доступе, вы просто продолжаете с тем же аккаунтом — выполненные задания, и баллы-круассаны никуда не исчезнут. Если вы присоединились только сейчас, именно этот аккаунт будет использоваться для входа на платформу.</p>' .
+    '<p>Ваши данные для входа на платформу:</p>';
+$string['welcome_username'] = 'E-mail:';
 $string['welcome_plan_summary'] = 'Тариф: {$a}';
 $string['welcome_amount_summary'] = 'Сумма: {$a}';
 
-$string['receipt_title'] = 'Квитанция об оплате';
+$string['welcome_text_canal'] = 'Обязательно добавьтесь в канал Campus<small><sup>FR</sup></small>: там публикуются все важные новости и обновления, а также именно там можно задавать вопросы преподавателям.';
+$string['welcome_button_canal'] = 'Канал Campus<small><sup>FR</sup></small>';
+$string['welcome_text_group'] = 'Также вы можете добавиться в группу, где можно пообщаться друг с другом, спросить совета, поддержать других и просто чувствовать, что вы среди своих.';
+$string['welcome_button_group'] = 'Группа Campus<small><sup>FR</sup></small>';
+$string['welcome_footer'] = '<p>Это письмо отправлено автоматически.<br>
+Если у вас появятся вопросы, напишите нам на <a href="mailto:{$a}">{$a}</a> — мы будем рады помочь.</p>
+
+<p>Желаем вам радости от каждого маленького результата, интересных занятий и уверенного прогресса во французском ❤️</p>
+
+<p>Ната и команда Campus<small><sup>FR</sup></small></p>';
+
+
+$string['receipt_title'] = 'Оплата подписки на CampusFR подтверждена ✅';
 $string['receipt_plan'] = 'Тариф: ';
 $string['receipt_amount'] = 'Сумма: ';
 $string['receipt_tx'] = 'ID транзакции: ';
 $string['receipt_period'] = 'Период доступа: ';
 
 $string['welcome_temp_password_label'] = 'Временный пароль:';
-$string['welcome_security_hint'] = 'В целях безопасности при первом входе вам будет предложено задать новый пароль.';
-$string['receipt_intro'] = 'Вот копия сведений о вашей покупке:';
-$string['receipt_button_open'] = 'Открыть мои курсы';
+$string['welcome_security_hint'] = '<p>Пароль вы придумали при регистрации. Если вдруг вы его забудете — доступ всегда можно легко восстановить здесь:</p>' .
+'👉 <a href="{$a->url}">Восстановить пароль</a></p>';
+$string['welcome_mycourses'] =
+    '<p>Перейти в ваш профиль на платформе можно по ссылке ниже:</p>' .
+'👉 <a href="{$a->url}">Вход на кампус</a></p>' . 
+'<p>Информация о вашей подписке:</p>';
+
+$string['receipt_intro'] = '<p>Ваша подписка на Campus<small><sup>FR</sup></small> успешно оформлена, оплата прошла.</p>
+
+<p>Основная информация по вашей оплате:</p>';
+$string['receipt_button_open'] = 'Перейти в Campus<small><sup>FR</sup></small>';
+$string['receipt_footer'] = '<p>До встречи в Campus<small><sup>FR</sup></small> 🇫🇷🥐</p>
+
+<p>Ната и команда Campus<small><sup>FR</sup></small></p>';
 
 // Emails – failure/abandoned/reminder
 $string['email_failed_subject'] = 'Не удалось завершить оплату';
@@ -248,7 +277,7 @@ $string['task_cleanup_login_tokens'] = 'Очистка просроченных 
 $string['option_queue_future'] = 'Продлить (активация {$a})';
 $string['option_purchase_new'] = 'Новая подписка';
 $string['choose_option'] = 'Выберите вариант';
-$string['have_account_login_to_see_options'] = 'У вас уже есть аккаунт? — Войдите, чтобы увидеть варианты обновления, нажав здесь.';
+$string['have_account_login_to_see_options'] = 'У вас уже есть аккаунт? Войдите, чтобы продлить подписку.';
 
 // Above the options
 $string['advisor_help_upgrade']  = 'Вы можете продлить текущую подписку по цепочке или перейти на более длительный тариф. Цена апгрейда скорректирована с учётом прошедшего времени.';
@@ -259,9 +288,9 @@ $string['advisor_help_guest']    = 'Войдите, чтобы увидеть в
 $string['summary_price_title'] = 'Итоговая цена';
 
 $string['personal_info_title'] = 'Личная информация';
-$string['personal_info_help']  = 'Эти данные будут использованы для создания учётной записи и отправки подтверждения.';
+$string['personal_info_help']  = 'Эти данные нужны для создания аккаунта и активации подписки.';
 
-$string['mail_hello'] = 'Здравствуйте, {$a},';
+$string['mail_hello'] = 'Здравствуйте, {$a}!';
 $string['mail_button_manage'] = 'Управлять моими подписками';
 
 $string['subupdate_subject'] = 'Ваша подписка «{$a}» активна';
@@ -363,7 +392,7 @@ $string['summary_price_wait'] = 'Выберите вариант, чтобы у�
 $string['existing_account_hint_html'] = 'Учётная запись с этим email уже существует. <a class="link-primary fw-semibold" href="{$a->url}">Войдите</a>.';
 
 $string['email_footer_copyright'] = '© {$a->year} {$a->brand}. Все права защищены.';
-$string['email_footer_unexpected'] = 'Если вы не ожидали это письмо, просто проигнорируйте его.';
+$string['email_footer_unexpected'] = 'Если это письмо адресовано не вам, просто проигнорируйте его.';
 $string['receipt_total']  = 'Итого оплачено';
 $string['receipt_invoice']= 'Счёт';
 
@@ -431,6 +460,7 @@ $string['provider_stripe'] = 'Stripe';
 $string['provider_manual'] = 'Ручной';
 $string['provider_csv'] = 'CSV';
 $string['provider_dev'] = 'Разработка';
+$string['provider_trial']  = 'Пробный';
 
 $string['configmissing'] = 'Отсутствует настройка: {$a}.';
 $string['missing_customer_id'] = 'Отсутствует ID клиента Stripe.';
@@ -488,10 +518,15 @@ $string['policy_url_ru'] = 'URL политики конфиденциально�
 $string['policy_url_row'] = 'URL политики конфиденциальности (остальной мир)';
 $string['terms_url_ru'] = 'URL условий (Россия)';
 $string['terms_url_row'] = 'URL условий (остальной мир)';
+$string['offer_url_ru'] = 'URL договор оферты (Россия)';
+$string['offer_url_row'] = 'URL договор оферты (остальной мир)';
 $string['privacy_policy'] = 'Политика конфиденциальности';
 $string['terms_cgu'] = 'Условия и положения';
+$string['terms_cgv'] = 'Договор оферты';
 $string['i_accept_policy'] = 'Я согласен(на) с {$a}.';
 $string['i_accept_terms']  = 'Я согласен(на) с {$a}.';
+$string['i_accept_all_terms'] =
+    'Я принимаю {$a->policy}, {$a->terms} и {$a->offer}.';
 
 $string['availability_mode'] = 'Доступность плагина';
 $string['availability_mode_desc'] = 'Временно ограничить все публичные страницы плагина Subscriptions.';
@@ -627,3 +662,78 @@ $string['payui_cta_mycourses'] = 'Перейти к моим курсам';
 $string['settings_support_email'] = 'E-mail поддержки';
 $string['settings_support_email_desc'] = 'Используется на страницах оплаты (успех/ошибка) для ссылки на поддержку.';
 $string['stripe_price_mismatch'] = 'Stripe: обнаружено несоответствие цены. Повторите попытку или обратитесь в поддержку. ({$a})';
+
+$string['settings_trial_section'] = 'Пробный период 7 дней';
+$string['settings_trial_planid'] = 'План пробного периода (ID)';
+$string['settings_trial_planid_desc'] = 'ID плана с флагом « is_trial ».';
+$string['settings_trial_duration_days'] = 'Длительность пробного периода (дни)';
+$string['settings_trial_duration_days_desc'] = 'Количество дней бесплатного доступа.';
+$string['settings_trial_discount_percent'] = 'Скидка (%) в течение окна';
+$string['settings_trial_discount_percent_desc'] = 'Для учёта и применения, не зависящего от платёжного провайдера.';
+$string['settings_trial_discount_hours'] = 'Окно скидки (часы)';
+$string['settings_trial_discount_hours_desc'] = 'Например, 72 часа после начала пробного периода.';
+$string['missing_trial_plan'] = 'План пробного периода не настроен (trial_plan_id).';
+
+$string['pricing_missing_price'] = 'Для этого плана и валюты ({$a}) не установлена цена.';
+$string['cannot_purchase_trial_plan'] = 'Этот план является пробным и его нельзя купить.';
+$string['settings_paylock_section'] = 'Фиксация цены (checkout)';
+$string['settings_paylock_strict'] = 'Строгий режим при расхождении';
+$string['settings_paylock_strict_desc'] = 'Если включено, создание подписки будет отклонено при несоответствии оплаченной суммы зафиксированной сумме.';
+$string['settings_paylock_tolerance'] = 'Допустимое расхождение (в центах)';
+$string['settings_paylock_tolerance_desc'] = 'Максимально допустимая разница между зафиксированной и оплаченной суммой (по умолчанию 2 цента).';
+
+$string['pricing_missing_price'] = 'Для этого плана и валюты ({$a}) не указана цена.';
+$string['cannot_purchase_trial_plan'] = 'Этот план является пробным и не может быть куплен.';
+$string['payment_mismatch_too_large'] = 'Расхождение оплаты превышает допустимую толерантность.';
+$string['paylock_missing_lockdata'] = 'Для этого запроса отсутствуют данные фиксированной цены (locked_*).';
+$string['paylock_invalid_minor'] = 'Недопустимая зафиксированная сумма.';
+$string['stripe_lock_requires_payment_mode'] = 'Для фиксации цены требуется режим Checkout « payment » (фиксированная сумма). Используйте разовый платёж или включите купоны.';
+$string['alfa_nonpositive_amount'] = 'Неположительная сумма для Alfa после фиксации цены.';
+$string['alfa:productname'] = 'Подписка';
+$string['paylock_missing_context'] = 'Невозможно вычислить цену: не указан пользователь или план.';
+
+$string['currency_selector_label'] = 'Валюта';
+$string['currency_eur'] = '€ EUR';
+$string['currency_rub'] = '₽ RUB';
+$string['set_display_currency_symbols'] = 'Показывать символ валюты';
+$string['set_display_currency_symbols_desc'] = 'Если включено, цены показываются с символом (например, 49 €). Иначе используется код (49 EUR).';
+$string['badge_limited_offer'] = 'Скидка -{$a}%';
+$string['price_unavailable_in'] = 'Недоступно в {$a->curr} — показана {$a->fallback}.';
+$string['checkout_discount_note']        = 'Ваша акция ещё действует';
+$string['checkout_discount_note_prefix']        = '🎁 -{$a}% на подписку. Скидка доступна только';
+$string['days_short']                    = 'д';
+
+$string['cancel_price_title']  = 'Ожидаемая цена';
+$string['error_price_title']   = 'Ожидаемая цена';
+$string['success_price_title'] = 'Оплаченная сумма';
+$string['reason_trial72h']     = 'Скидка −{$a}% применена в период пробного доступа.';
+$string['task_sub_expiry_reminders'] = 'Напоминания об окончании подписки';
+$string['expiry_reminder_subject_today'] = 'Подписка истекает сегодня';
+
+$string['email_copy_verbose'] = 'Техническое приложение в копиях (log@...)';
+$string['email_copy_verbose_desc'] = 'Если включено, к каждой копии добавляется техническая сводка (PR/User/Plan/Sub, locked_*, и т.д.).';
+
+$string['existing_account_login_first'] = 'Учётная запись с этим e-mail уже существует. Пожалуйста, войдите, чтобы продолжить и привязать покупку к своему аккаунту.';
+$string['task_enrol_scope_fill'] = 'Подписки — дополнять зачисления по access scope тарифа';
+
+$string['paymentsuccess_redirect_msg'] = 'Через {$a} секунд вы будете перенаправлены на страницу «Mes cours».';
+$string['paymentsuccess_mascot_alt']   = 'Жираф Гюстав поздравляет вас с успешной оплатой.';
+$string['paymentcancel_mascot_alt'] = 'Иллюстрация отменённого платежа.';
+$string['paymenterror_mascot_alt'] = 'Иллюстрация ошибки при оплате.';
+$string['plan_price_per_month'] = '(примерно {$a} в месяц)';
+
+$string['upgrade_window_label']    = 'Период расчёта: {$a->start} → {$a->end}';
+$string['upgrade_ref_prices']      = 'Базовые тарифы: текущий = {$a->current}, целевой = {$a->target}';
+$string['upgrade_part_past']       = 'Часть уже использована по текущему тарифу: {$a}';
+$string['upgrade_part_future']     = 'Оставшаяся часть по тарифу целевого плана: {$a}';
+$string['upgrade_base_total']      = 'Теоретическая сумма за весь период: {$a}';
+$string['upgrade_already_paid']    = 'Уже оплачено за этот период: {$a}';
+$string['upgrade_base_minus_paid'] = 'Сумма доплаты до скидки: {$a->base} − {$a->paid} = {$a->diff}';
+$string['upgrade_discount_line']   = 'Скидка −{$a->pct}% на {$a->before} ⇒ {$a->after}';
+$string['upgrade_amount_proposed'] = 'Итого к доплате: {$a}';
+
+$string['trial_subscribe_now'] = 'Оформить подписку';
+$string['plan_label'] = 'Тариф';
+$string['checkout_go_to_payment_discount'] = 'Оформить подписку со скидкой';
+$string['checkout_full_access_line'] = 'Подписка с полным доступом ко всем курсам.';
+$string['summary_price_title_single'] = 'Подписка на {$a}';

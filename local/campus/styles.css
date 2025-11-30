@@ -174,7 +174,12 @@
 
 /* ===== Popup d'essai (Campus) — layout solide ===== */
 #campusTrialModal .modal-dialog{ max-width: 720px; margin: 1.75rem auto; }
-#campusTrialModal .modal-content{ border-radius:16px; }
+#campusTrialModal .modal-content{ 
+  max-height: 90vh;              /* pas plus de 90% de la hauteur écran */
+  display: flex;
+  flex-direction: column;
+  border-radius:16px; 
+}
 
 /* Footer: mêmes dimensions pour Annuler / Continuer, pas de bordure */
 #campusTrialModal .modal-footer{
@@ -307,7 +312,7 @@
 }
 
 /* Hover discret */
-.campus-segment .seg:hover { background: rgba(0,0,0,.03); }
+.campus-segment .seg:hover { background: rgba(30, 166, 154, 0.5); color:#1f2937 }
 .campus-segment .seg[aria-current="page"]:hover { filter: brightness(0.98); }
 
 /* ---------- Hint “abonnez-vous / connectez-vous ici” ---------- */
@@ -356,4 +361,642 @@
   font-size: 16px;
   border-radius: 8px;
   line-height: 1.2;
+}
+
+/* Alerte plus douce pour le cas "déjà abonné" */
+#campusTrialError.alert-warning {
+  background: #fff8e1;  /* jaune pâle */
+  border-color: #fde68a;
+  color: #7a5b00;
+}
+
+/* Bandeau de remise pour le trial */
+.campus-trial-15.banner {
+    margin: 0 auto;
+    padding: 0.75rem 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 20, 114, 0.10) 0%,
+        rgba(255, 111, 163, 0.06) 100%
+    );
+    border-radius: 10px;
+    border: 1px solid var(--main-color, #ff1472); /* fine bordure rose Edly */
+    color: var(--heading-color, #111827);
+}
+
+/* Ligne interne : texte + bouton */
+.campus-trial-15 .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+/* Texte principal */
+.campus-trial-15 .ttl {
+    font-weight: 700;
+    margin-right: 0.35rem;
+}
+
+/* Countdown */
+.campus-trial-15 .deadline {
+    font-weight: 600;
+}
+
+/* Bouton CTA : style Edly, mais plus compact */
+.campus-trial-15-cta {
+    padding: 0.4rem 1.4rem;
+    border-radius: 999px;
+    background: var(--main-color);
+    color: #fff;
+    border: none;
+    filter: none;
+    font-weight: 600;
+    white-space: nowrap; /* desktop : bouton sur une ligne */
+}
+
+.campus-trial-15-cta:hover {
+    background: #ff4f7b; /* un chouïa plus foncé, ajuste si besoin */
+    color: #fff;
+}
+
+/* Version mobile : tout un peu plus serré */
+@media (max-width: 576px) {
+    .campus-trial-15.banner {
+        padding: 0.6rem 0.6rem;
+        border-radius: 10px;
+    }
+    .campus-trial-15 .container {
+        gap: 0.5rem;
+    }
+    .campus-trial-15 .ttl,
+    .campus-trial-15 .deadline {
+        font-size: 0.9rem;
+    }
+
+    .campus-trial-15-cta {
+        padding: 0.3rem 0.9rem;
+        font-size: 0.85rem;
+        white-space: normal;   /* peut passer sur 2 lignes */
+        text-align: center;
+        max-width: 100%;
+        overflow: visible;     /* IMPORTANT : ne coupe plus le texte */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ❗ Désactive complètement le cercle ::before d'Edly */
+    .campus-trial-15-cta.default-btn::before {
+        content: none !important;
+    }
+}
+
+#campusTrialModal .modal-content {
+    max-height: 90vh;              /* pas plus de 90% de la hauteur écran */
+    display: flex;
+    flex-direction: column;
+}
+
+/* La zone qui scrolle est le body */
+#campusTrialModal .modal-body {
+    max-height: calc(90vh - 120px);   /* header + footer environ */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* On évite que le footer soit collé si peu de contenu */
+#campusTrialModal .modal-footer.trial-footer {
+    flex-shrink: 0;
+}
+
+/* ===========================
+   POPUP TRIAL — INPUTS & CHAMPS
+   =========================== */
+
+/* Hauteur homogène et arrondis doux */
+#campusTrialModal .form-control,
+#campusTrialModal .form-select,
+.ls-checkout-form .form-control,
+.ls-checkout-form .form-select {
+    min-height: 48px;
+    border-radius: 10px;
+}
+
+/* Focus rose Edly partout */
+#campusTrialModal .form-control:focus,
+#campusTrialModal .form-select:focus,
+.ls-checkout-form .form-control:focus,
+.ls-checkout-form .form-select:focus {
+    border-color: var(--campus-cta-pink, #ff1472);
+    box-shadow: 0 0 0 0.15rem rgba(255, 20, 114, 0.18);
+    outline: none;
+}
+
+/* Placeholders gris clair partout */
+#campusTrialModal ::placeholder,
+.ls-checkout-form ::placeholder {
+    color: #a0a0a0;
+    opacity: 1; /* Safari */
+}
+
+/* Labels plus présents */
+#campusTrialModal .form-label,
+.ls-checkout-form .form-label {
+    font-weight: 600;
+}
+
+
+#campusTrialModal .modal-body .lead .hero-emoji {
+    font-size: 0.8em;    /* 80% de la taille du texte */
+    vertical-align: baseline; /* ou middle si tu veux le remonter un peu */
+    margin-left: 0.1rem; /* petit espace avant l’icône */
+}
+
+/* ===========================
+   POPUP TRIAL — MOT DE PASSE
+   =========================== */
+
+/* Wrapper mot de passe */
+#campusTrialModal .campus-password-wrapper,
+.ls-checkout-form .campus-password-wrapper {
+    position: relative;
+}
+
+/* Champ avec place pour l’icône */
+#campusTrialModal .campus-password-wrapper .form-control,
+.ls-checkout-form .campus-password-wrapper .form-control {
+    padding-right: 3rem; /* place pour l’icône œil */
+}
+
+/* Bouton œil dans le champ */
+#campusTrialModal .campus-password-toggle,
+.ls-checkout-form .campus-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.9rem;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#campusTrialModal .campus-password-toggle .password-toggle-icon,
+.ls-checkout-form .campus-password-toggle .password-toggle-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+
+
+/* ===========================
+   POPUP TRIAL + CHECKOUT — TÉLÉPHONE
+   =========================== */
+
+/* Wrapper : select + input collés */
+#campusTrialModal .campus-phone-wrapper,
+.ls-checkout-form .campus-phone-wrapper {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+}
+
+/* Conteneur indicatif */
+#campusTrialModal .campus-phone-country,
+.ls-checkout-form .campus-phone-country {
+    flex: 0 0 30%;
+    max-width: 30%;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Le <select> doit prendre toute la largeur du conteneur */
+#campusTrialModal .campus-phone-country .form-select,
+.ls-checkout-form .campus-phone-country .form-select {
+    width: 100% !important;
+    display: block;
+    margin: 0 !important;
+    min-height: 48px;
+}
+
+/* Champ numéro : prend le reste */
+#campusTrialModal .campus-phone-input,
+.ls-checkout-form .campus-phone-input {
+    flex: 1 1 auto;
+    margin: 0 !important;
+    min-height: 48px;
+    margin-left: -1px !important; /* évite la double bordure */
+}
+
+/* Popup trial : continuité des arrondis avec le select */
+#campusTrialModal .campus-phone-country .form-select,
+.ls-checkout-form .campus-phone-country .form-select {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+#campusTrialModal .campus-phone-input,
+.ls-checkout-form .campus-phone-input {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+
+/* ===========================
+   POPUP TRIAL — HEADER & BODY
+   =========================== */
+
+#campusTrialModal .modal-content {
+    border-radius: 18px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+#campusTrialModal .modal-header {
+    background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
+    border-bottom: 1px solid #f0e1f3;
+}
+
+
+/* ===========================
+   POPUP TRIAL — FOOTER (BOUTONS + NOTE)
+   =========================== */
+
+#campusTrialModal .modal-footer.trial-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.05rem; /* moins d’espace vertical */
+    padding: 0.5rem 1.5rem 0.4rem; /* haut / côtés / bas plus serrés */
+    background: linear-gradient(180deg, #ffffff 0%, #fff5fb 100%);
+    border-top: 1px solid #f0e1f3;
+}
+
+/* Bloc des boutons */
+#campusTrialModal .trial-footer-buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;      /* ⬅ centre verticalement */
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* Note en dessous, alignée à droite */
+#campusTrialModal .trial-footer-note {
+    text-align: right;
+    font-size: 0.8rem;
+    color: #777;
+    padding: 0 1.5rem 0.4rem;  /* bas moins grand → texte un peu plus haut */
+    width: 100%;
+    box-sizing: border-box;    
+    margin-top: -0.1rem;
+}
+
+
+/* Même arrondi pour les deux boutons du footer */
+#campusTrialModal .trial-footer .btn,
+#campusTrialModal .trial-footer .default-btn {
+    border-radius: 14px;      /* ⇐ change ce chiffre si tu veux +/− arrondi */
+    min-height: 44px;         /* même hauteur pour les deux */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* "Annuler" soft */
+#campusTrialModal .trial-footer .btn.btn-secondary {
+    background-color: #f5f5f7;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 0.5rem 1.6rem;
+}
+
+/* Bouton principal plus large */
+#campusTrialContinue.default-btn {
+    padding: 0.6rem 3rem;
+    min-width: 220px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Titre et lead de la popup Trial (desktop) */
+#campusTrialModal .modal-title {
+    font-size: clamp(1.1rem, 1.3vw + 0.4rem, 1.5rem); /* ~18–24px */
+}
+
+#campusTrialModal .modal-body .lead {
+    font-size: clamp(0.95rem, 1vw + 0.3rem, 1.2rem);  /* ~15–19px */
+    margin-bottom: 0.8rem;
+}
+
+/* Texte d’aide et petite note */
+#campusTrialModal .form-text {
+    font-size: 0.85rem;
+}
+
+#campusTrialModal .trial-footer-note {
+    font-size: 0.8rem;
+}
+
+
+/* ===========================
+   POPUP TRIAL — VERSION MOBILE COMPACTE
+   =========================== */
+@media (max-width: 576px) {
+
+    #campusTrialForm {
+      padding-top : 16px;
+      padding-bottom : 16px;
+    }
+
+    /* Boîte de dialogue un peu plus serrée autour du contenu */
+    #campusTrialModal .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    /* HEADER plus fin, titre plus petit */
+    #campusTrialModal .modal-header {
+        padding: 0.6rem 1rem;
+    }
+
+    #campusTrialModal .modal-title {
+        font-size: 0.85rem;   /* plus petit */
+        line-height: 1.15;    /* un peu serré */
+    }
+
+    /* BODY : moins de padding, textes plus petits */
+    #campusTrialModal .modal-body {
+        padding: 1rem 1rem 0.8rem;
+    }
+
+    #campusTrialModal .modal-body .lead {
+        font-size: 0.85rem;
+        margin-bottom: 0.6rem;
+    }
+
+    #campusTrialModal .form-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.15rem;
+    }
+
+    #campusTrialModal .form-text {
+        font-size: 0.6rem;
+    }
+
+    /* 1) Prénom / Nom côte à côte sur mobile */
+    #campusTrialModal .row.g-2 > .col-sm-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    /* 2) Tous les champs plus bas, même hauteur */
+    /* Tous les champs exactement à la même hauteur */
+    #campusTrialModal .form-control,
+    #campusTrialModal .form-select {
+        height: 36px;
+        min-height: 36px;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.82rem;
+    }
+
+    /* Conteneur indicatif */
+    #campusTrialModal .campus-phone-country,
+    .ls-checkout-form .campus-phone-country {
+        flex: 0 0 40%;
+        max-width: 40%;
+    }
+
+    /* On force aussi pour le groupe téléphone */
+    #campusTrialModal .campus-phone-country .form-select,
+    #campusTrialModal .campus-phone-input {
+        height: 36px;
+        min-height: 36px;
+    }
+
+    /* Champ mot de passe : on réduit un peu aussi */
+    #campusTrialModal .campus-password-wrapper .form-control {
+        padding-right: 2.3rem;
+    }
+    #campusTrialModal .campus-password-toggle {
+        width: 26px;
+        height: 26px;
+        right: 0.55rem;
+    }
+
+    /* Checkbox + texte CGU plus compacts */
+    #campusTrialModal .form-check {
+        margin-bottom: 0.5rem;
+        padding-left: 0;
+    }
+
+    /* Case légèrement décalée vers la gauche, mais proche du texte */
+    #campusTrialModal .form-check-input {
+        position: relative;
+        margin-left: 0;
+        margin-right: 0.4rem;
+        margin-top: 0.15rem;          /* aligne avec la première ligne du texte */
+    }
+
+    #campusTrialModal .form-check-label {
+        font-size: 0.6rem;
+        line-height: 1.25;
+    }
+
+    /* 4) FOOTER : compact + bouton toujours devant (z-index) */
+    #campusTrialModal .modal-footer.trial-footer {
+        padding: 0.4rem 1.1rem 0.2rem;
+        gap: 0.2rem;
+        position: relative;      /* pas sticky pour éviter les bugs clavier */
+        z-index: 20;             /* au-dessus du body de la modale */
+    }
+
+    #campusTrialModal .trial-footer-buttons {
+        gap: 0.45rem;
+    }
+
+    /* Boutons plus plats et un peu plus petits */
+    #campusTrialModal .trial-footer .btn,
+    #campusTrialModal .trial-footer .default-btn {
+        min-height: 34px;
+        font-size: 0.88rem;
+        border-radius: 12px;  /* ⇐ pour toi : descends à 10px si tu veux encore moins rond */
+    }
+
+    #campusTrialModal .trial-footer .btn.btn-secondary {
+        padding: 0.35rem 1.3rem;
+    }
+
+    #campusTrialContinue.default-btn {
+        padding: 0.4rem 2.2rem;
+        min-width: 0; /* laisse la largeur se faire naturellement */
+    }
+
+    /* 3) Note footer encore un peu plus près */
+    #campusTrialModal .trial-footer-note {
+        font-size: 0.6rem;        /* plus petit */
+        padding: 0 0 0.1rem;
+        margin-top: -0.15rem;
+        white-space: nowrap;      /* force une seule ligne si possible */
+    }
+}
+
+/* ===========================
+   CHECKOUT — VERSION MOBILE COMPACTE
+   =========================== */
+@media (max-width: 576px) {
+
+    /* Réduire les marges autour du bloc */
+    body#page-local-subscriptions-checkout .card.p-3.bg-light-subtle,
+    body#page-local-subscriptions-checkout .p-3.bg-light-subtle {
+        padding: 0.75rem 0.9rem;
+    }
+
+    /* Titres et sous-titres plus petits */
+    .ls-plan-summary h2.h4 {
+        font-size: 1rem;
+    }
+
+    .ls-plan-summary .text-muted.small {
+        font-size: 0.8rem;
+    }
+
+    .ls-checkout-form .form-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .ls-checkout-form .form-text {
+        font-size: 0.75rem;
+    }
+
+    /* Champs plus bas et plus étroits */
+    .ls-checkout-form .form-control,
+    .ls-checkout-form .form-select {
+        height: 36px;
+        min-height: 36px;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    /* Groupe téléphone (déjà mutualisé avec Trial) */
+    .ls-checkout-form .campus-phone-country .form-select,
+    .ls-checkout-form .campus-phone-input {
+        height: 36px;
+        min-height: 36px;
+    }
+
+    /* Checkbox termes + bouton paiement plus compacts */
+    .ls-checkout-form .form-check-label.small {
+        font-size: 0.75rem;
+    }
+
+    .ls-checkout-form .subscribe-button {
+        font-size: 1rem;          /* было fs-5 → уменьшаем visuellement */
+        padding: 0.6rem 0.75rem;
+    }
+}
+
+/* Style de base du hint "vous avez déjà un compte ?" */
+.ls-have-account-hint {
+    font-size: 0.9rem;
+}
+
+.ls-have-account-icon {
+    font-size: 1rem;
+    margin-right: 0.35rem;
+    vertical-align: top;
+}
+
+.ls-have-account-link {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Mobile : texte encore plus petit */
+@media (max-width: 576px) {
+    .ls-have-account-hint {
+        font-size: 0.6rem;
+    }
+    .ls-have-account-icon {
+        font-size: 0.75rem;
+    }
+}
+
+/* Ligne du haut : retour à gauche, devise à droite */
+.ls-toprow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: nowrap;               /* ⚠️ une seule ligne */
+}
+
+/* Le lien occupe tout l'espace dispo, peut passer sur 2 lignes */
+.ls-toprow-back {
+    flex: 1 1 auto;
+    min-width: 0;                    /* autorise le texte à se casser */
+}
+
+/* La devise reste compacte à droite */
+.ls-toprow-currency {
+    flex: 0 0 auto;
+    white-space: nowrap;             /* les deux boutons restent sur une ligne */
+}
+
+/* Style du lien retour */
+.ls-back-to-plans-link {
+    font-size: 0.95rem;
+}
+
+/* Version mobile : on compresse un peu, mais on garde une seule ligne */
+@media (max-width: 576px) {
+    .ls-toprow {
+        gap: 0.5rem;
+    }
+
+    .ls-back-to-plans-link {
+        font-size: 0.85rem;
+    }
+
+    .ls-toprow-currency .ls-seg .seg {
+        font-size: 0.8rem;
+        padding-inline: 0.7rem;
+    }
+}
+
+
+
+
+/* ====== My Courses – sections par catégorie ====== */
+
+.campus-category-block {
+    margin-top: 2rem;              /* espace entre les blocs */
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.35); /* gris doux */
+}
+
+.campus-category-block:first-of-type {
+    margin-top: 1rem;
+    border-top: none;
+}
+
+/* Titre de catégorie */
+.campus-category-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    color: #4b255f; /* violet Campus-ish, à ajuster si besoin */
+}
+
+/* Réduire un peu le gros padding "courses-area" à l'intérieur des catégories */
+.campus-category-block .courses-area {
+    padding-top: 1.5rem !important;
+    padding-bottom: 2.5rem !important;
 }
