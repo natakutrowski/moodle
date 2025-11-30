@@ -1,0 +1,406 @@
+/* === BANNIÈRE CAMPUSFR FULL-WIDTH AVEC FOND BEIGE === */
+
+.block_edly_banner_campus .edly-bleed {
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    width: 100vw;
+    background-color: #fdf5ed; /* fond beige sur toute la largeur */
+}
+
+/* Pas de padding latéral dans la bannière */
+.block_edly_banner_campus .main-banner-with-large-area .container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Hero CampusFR : plein écran, centré */
+.block_edly_banner_campus .main-banner-with-large-area {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+
+    height: 100vh;
+    min-height: 420px;
+
+    padding: 40px 0;
+
+    max-width: none;
+    width: 100%;
+    margin: 0;
+}
+
+/* Image de fond */
+.block_edly_banner_campus .main-banner-large-image {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    filter: brightness(0.5);
+    transition: filter 0.4s ease;
+    z-index: 0;
+}
+
+/* Effet hover : image un peu plus claire */
+.block_edly_banner_campus .main-banner-with-large-area:hover .main-banner-large-image {
+    filter: brightness(0.7);
+}
+
+/* Shapes au-dessus de l'image, mais sous le texte */
+.block_edly_banner_campus .banner-large-shape-1,
+.block_edly_banner_campus .banner-large-shape-2 {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Croissant (shape-1) à droite du titre */
+.block_edly_banner_campus .banner-large-shape-1 {
+    top: 80px;
+    left: 60%;
+    transform: translateX(-50%);
+}
+
+/* Autre shape (shape-2) en bas à droite */
+.block_edly_banner_campus .banner-large-shape-2 {
+    bottom: 40px;
+    right: 10%;
+}
+
+/* CONTENU CENTRAL */
+
+.block_edly_banner_campus .main-banner-large-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1000px;
+    margin: 0 auto 8vh;
+    text-align: center;
+}
+
+/* Titre */
+.block_edly_banner_campus .main-banner-large-content h1 {
+    color: #fff;
+    margin-top: 0;
+    max-width: 28ch;      /* évite les lignes trop longues */
+    margin-left: auto;
+    margin-right: auto;
+    font-size: clamp(2.2rem, 3vw + 0.5rem, 4rem); /* ≈ 35–54px selon la taille d’écran */
+    text-shadow: 2px 2px 2px rgb(0 0 0 / 0.9);
+}
+
+/* Texte sous le titre (lead) */
+.block_edly_banner_campus .main-banner-large-content .banner-lead {
+    color: #fff;
+    font-size: clamp(1rem, 1.1vw + 0.6rem, 1.4rem); /* ≈ 16–22px */
+    text-shadow: 2px 2px 2px rgb(0 0 0 / 0.9);
+}
+
+/* Paragraphes par défaut */
+.block_edly_banner_campus .main-banner-large-content p {
+    color: #fff;
+    font-size: clamp(0.95rem, 1vw + 0.5rem, 1.2rem);
+    text-shadow: 2px 2px 2px rgb(0 0 0 / 0.9);
+}
+
+/* Note d’essai sous le bouton */
+.block_edly_banner_campus .banner-trial-note {
+    color: rgba(255, 255, 255, 1);
+}
+
+.block_edly_banner_campus .main-banner-large-content p.banner-trial-note {
+    font-size: clamp(0.9rem, 0.9vw + 0.4rem, 1.1rem);
+    text-shadow:2px 2px 2px rgb(0 0 0 / 0.9);
+}
+
+/* GROS BOUTON CENTRAL (avec icône Play) */
+.block_edly_banner_campus .banner-btn .default-btn {
+    font-size: 1.4em;
+    padding: 0.9rem 2.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Icône du gros bouton central */
+.block_edly_banner_campus .hero-main-cta-icon {
+    font-size: 1.4em;
+}
+
+.block_edly_banner_campus .hero-main-cta-label {
+    line-height: 1;
+}
+
+/* === NAVBAR "HERO" : LANG + BOUTONS EN HAUT À DROITE === */
+
+.block_edly_banner_campus .campus-hero-nav {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    left: auto;
+    width: auto;
+    z-index: 7; /* AU-DESSUS du logo */
+    display: flex;
+    justify-content: flex-end;
+    pointer-events: none; /* seuls les éléments internes reçoivent les clics */
+}
+
+.block_edly_banner_campus .campus-hero-nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    pointer-events: auto;
+}
+
+/* Lang menu : version desktop vs mobile */
+.block_edly_banner_campus form.langmenu-desktop {
+    display: inline-block !important;
+}
+.block_edly_banner_campus form.langmenu-mobile {
+    display: none !important;
+}
+
+/* Form du sélecteur de langue (les deux versions) */
+.block_edly_banner_campus .campus-hero-lang form {
+    margin: 0;
+}
+
+/* Boutons du hero (nav) */
+.block_edly_banner_campus .campus-hero-ctas {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Rose Edly (fallback si main_color absent) */
+:root {
+    --campus-cta-pink: var(--main-color, #ff1472);
+}
+
+/* Style commun aux deux boutons nav */
+.block_edly_banner_campus .hero-btn {
+    font-size: 0.9rem;
+    padding: 0.45rem 1.1rem;
+    border-radius: 8px;
+    border: 1px solid var(--campus-cta-pink);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    transition: all 0.2s ease-out;
+    background-color: rgba(0, 0, 0, 0.25);
+    color: #fff;
+}
+
+/* Hover nav buttons */
+.block_edly_banner_campus .hero-btn-primary:hover,
+.block_edly_banner_campus .hero-btn-secondary:hover {
+    background-color: rgba(0, 0, 0, 0.45);
+    box-shadow: 0 0 14px rgba(0, 0, 0, 0.35);
+}
+
+/* Icône dans les boutons nav */
+.block_edly_banner_campus .hero-btn-icon {
+    font-size: 1.1em;
+    margin-right: 0.35rem;
+}
+
+.block_edly_banner_campus .hero-btn-label {
+    line-height: 1;
+}
+
+/* === LOGO CAMPUS EN HAUT À GAUCHE === */
+
+.block_edly_banner_campus .campus-hero-logo {
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    z-index: 6; /* en-dessous de la nav */
+}
+
+.block_edly_banner_campus .hero-logo-desktop,
+.block_edly_banner_campus .hero-logo-mobile {
+    height: auto;
+    width: auto;
+}
+
+/* Par défaut : mobile caché, desktop visible */
+.block_edly_banner_campus .hero-logo-mobile {
+    display: none;
+}
+
+/* Fallback texte */
+.block_edly_banner_campus .campus-hero-logo-text {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: .02em;
+}
+
+/* === RESPONSIVE MOBILE (<= 767px) === */
+/* Mobile PORTRAIT : on décale l’image vers la droite */
+@media (max-width: 767px) and (orientation: portrait) {
+    .block_edly_banner_campus .main-banner-large-image {
+        background-position: calc(50% + 100px) center;
+    }
+}
+
+/* Mobile LANDSCAPE : cadrage centré classique */
+@media (max-width: 767px) and (orientation: landscape) {
+    .block_edly_banner_campus .main-banner-large-image {
+        background-position: center center;
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    /* Le bleed ne dépasse plus la largeur écran */
+    .block_edly_banner_campus .edly-bleed {
+        left: 0;
+        right: 0;
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+    }
+
+    /* On supprime les marges/paddings du conteneur de block/card sur la home */
+    body#page-site-index section.block_edly_banner_campus,
+    body#page-site-index section.block_edly_banner_campus.card {
+        margin: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    body#page-site-index section.block_edly_banner_campus .card-body {
+        padding: 0 !important;
+    }
+
+    .block_edly_banner_campus .main-banner-with-large-area {
+        height: 100vh;
+        min-height: 420px;
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    /* Gros bouton central un peu plus compact */
+    .block_edly_banner_campus .banner-btn .default-btn {
+        font-size: 1.1em;
+        padding: 0.75rem 2rem;
+    }
+
+    /* Nav en haut à droite : plus compacte, une seule ligne */
+    .block_edly_banner_campus .campus-hero-nav {
+        top: 10px;
+        right: 10px;
+        left: auto;
+        width: auto;
+    }
+
+    .block_edly_banner_campus .campus-hero-nav-inner {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: nowrap;
+    }
+
+    .block_edly_banner_campus .campus-hero-ctas {
+        gap: 0.3rem;
+    }
+
+    .block_edly_banner_campus .hero-btn {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.8rem;
+        min-width: 0;
+        height: 34px;
+        min-height: 34px;
+    }
+
+    /* Boutons compacts (icône seule) : centrer l'icône */
+    .block_edly_banner_campus .hero-btn.hero-compact {
+        justify-content: center;   /* centre le contenu */
+    }
+
+    .block_edly_banner_campus .hero-btn.hero-compact .hero-btn-icon {
+        margin-right: 0;          /* plus d'espace fantôme à droite */
+    }
+
+    /* Lang menu : on swap desktop/mobile + on réduit la largeur du select mobile */
+    .block_edly_banner_campus form.langmenu-desktop {
+        display: none !important;
+    }
+    .block_edly_banner_campus form.langmenu-mobile {
+        display: inline-block !important;
+    }
+
+    .block_edly_banner_campus form.langmenu-mobile .form-select {
+        height: 34px;
+        min-height: 34px;
+        padding: 0.2rem 1.2rem 0.2rem 0.4rem;
+        font-size: 0.78rem;
+
+        width: auto;            /* ne pas prendre toute la ligne */
+        min-width: 72px;        /* <<< joue sur cette valeur */
+        max-width: 100px;       /* pour éviter qu'il s'étale trop */
+    }
+
+    /* On réduit un peu la taille du drapeau pour que tout tienne */
+    .block_edly_banner_campus form.langmenu-mobile .form-select option {
+        font-size: 0.78rem;
+    }    
+
+    /* NAV MOBILE : un bouton "plein", l'autre icône seulement */
+    .block_edly_banner_campus .hero-btn .hero-btn-label {
+        display: none;
+    }
+    .block_edly_banner_campus .hero-btn.hero-expanded .hero-btn-label {
+        display: inline;
+        margin-left: 0.35rem;
+    }
+    .block_edly_banner_campus .hero-btn.hero-compact .hero-btn-label {
+        display: none;
+    }
+
+    /* Logo : version mobile + taille réduite */
+    .block_edly_banner_campus .campus-hero-logo {
+        top: 12px;
+        left: 16px;
+    }
+
+    .block_edly_banner_campus .hero-logo-desktop {
+        display: none;
+    }
+
+    .block_edly_banner_campus .hero-logo-mobile {
+        display: inline-block;
+    }
+
+    .block_edly_banner_campus .campus-hero-logo-text {
+        font-size: 1.5rem;
+    }
+
+    .block_edly_banner_campus .main-banner-large-content {
+        padding-left: 0px !important;
+    }
+
+    .block_edly_banner_campus .main-banner-large-content h1 {
+        font-size: 30px !important;
+    }
+
+    .block_edly_banner_campus .main-banner-large-content p {
+        font-size: 0.85rem !important;
+    }
+
+    .block_edly_banner_campus .main-banner-large-content p.banner-trial-note {
+        font-size: 0.75rem !important;    /* plus petit */
+        margin-top: 0.3rem;    /* un peu plus près du bouton */
+    }    
+}
+
+
