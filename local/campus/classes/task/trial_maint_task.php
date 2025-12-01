@@ -59,34 +59,57 @@ class trial_maint_task extends \core\task\scheduled_task {
 
         // ID plan d’essai (pour tests "a-t-il un abo payant actif ?")
         $trialPlanId = (int) (get_config('local_subscriptions', 'trial_plan_id') ?? 0);
-
+        
         foreach ($trials as $t) {
             $expiresAt      = (int)$t->expiresat;
             $ageSinceExpire = $now - $expiresAt;              // >0 si expiré
             $isExpired      = ($expiresAt > 0 && $now >= $expiresAt);
 
-            // Sécurité : si l'utilisateur a déjà un abonnement payant ACTIF (hors plan d’essai),
+
+            // Sécurité : si l'utilisateur a au moins UNE subscription non-trial (quel que soit le statut),
             // on considère que le trial est "converti" et on ne lui envoie plus de mails / suspensions.
-            $hasPaidNonTrial = false;
+            $hasNonTrialSub = false;
             if (!empty($t->userid)) {
-                $hasPaidNonTrial = $DB->record_exists_sql("
+                $hasNonTrialSub = $DB->record_exists_sql("
                     SELECT 1
-                      FROM {user_subscription} s
-                      JOIN {subscription_plan} p ON p.id = s.planid
-                     WHERE s.userid = :uid
-                       AND s.status = '".\local_subscriptions\constants\Status::ACTIVE."'
-                       AND s.end_date > :now
-                       AND (p.is_trial IS NULL OR p.is_trial = 0)
-                ", ['uid'=>(int)$t->userid, 'now'=>$now]);
+                    FROM {user_subscription} s
+                    JOIN {subscription_plan} p ON p.id = s.planid
+                    WHERE s.userid = :uid
+                    AND (p.is_trial IS NULL OR p.is_trial = 0)
+                ", ['uid' => (int)$t->userid]);
             }
-            if ($hasPaidNonTrial) {
+
+            if ($hasNonTrialSub) {
                 // On marque éventuellement ce trial comme "converti" (status = 3) et on passe au suivant.
                 if ((int)$t->status !== 3) {
                     $t->status = 3;
                     $DB->update_record('local_campus_trial', $t);
                 }
+                continue; // ⬅️ rien d'autre pour ce trial : pas de mails, pas de suspension, pas de suppression.
+            }
+
+            // 🔎 Nouveau : ne traiter QUE les utilisateurs qui ont une subscription trial dans user_subscription
+            $hasTrialSub = false;
+            if (!empty($t->userid) && $trialPlanId > 0) {
+                $hasTrialSub = $DB->record_exists_sql("
+                    SELECT 1
+                    FROM {user_subscription} s
+                    WHERE s.userid = :uid
+                    AND s.planid = :trialplanid
+                ", [
+                    'uid'         => (int)$t->userid,
+                    'trialplanid' => $trialPlanId,
+                ]);
+            }
+
+            // Si l'utilisateur n'a PAS de souscription trial dans le nouveau système,
+            // on considère que cette ligne local_campus_trial est "legacy" → on la laisse tranquille.
+            if (!$hasTrialSub) {
+                // Optionnel : tu peux logguer pour vérifier
+                // mtrace(\"trial_maint_task: skip trial id={$t->id} for userid={$t->userid} (no trial subscription)\");
                 continue;
             }
+
 
             // ====== 0) Mail "fin de fenêtre remise" (basé sur une durée configurable) ======
             if (empty($t->reminder3_sent) && !$isExpired) {
