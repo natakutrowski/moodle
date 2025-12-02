@@ -48,12 +48,26 @@ $string['trial_email_ph']     = 'Ваш e-mail';
 $string['mail_trial_started_subject'] = 'Ваш пробный период начался';
 $string['mail_trial_started_body']    = 'Здравствуйте, {$a->firstname}, ваш 7-дневный пробный период начался!';
 $string['mail_trial_rem3_subject']    = 'Напоминание: пробный период продолжается — {$a}';
-$string['mail_trial_rem3_body']       = 'Здравствуйте, {$a->firstname}, у вас ещё осталось несколько дней пробного периода.';
+$string['mail_trial_rem3_body']       = '<p>Bonjour, {$a->firstname} !</p> 
+<p>Надеемся, ваши первые дни в Campus<small><sup>FR</sup></small> проходят интересно и с пользой.</p> 
+
+<p>Если вы захотите продолжить обучение, скидка {$a->dpct}% на все подписки будет доступна для вас ещё 24 часа.</p>
+
+<p>Дальше будет действовать обычная цена.</p>
+
+<p>Оформить подписку по сниженной цене можно здесь:</p>';
+$string['mail_trial_rem3_body2']       = '<p>После активации подписки вы сразу получите полный доступ ко всем урокам и будущим обновлениям — всему, что помогает учить французский уверенно, системно и с удовольствием. </p>
+
+<p>Если появятся вопросы — просто напишите нам на <a href="mailto:{$a}">{$a}</a>. Мы всегда рядом.</p>
+
+<p>À très bientôt,<br>
+<p>Ната и команда Campus<small><sup>FR</sup></small></p>';
+$string['mail_trial_rem3_button']       = 'Оформить подписку со скидкой {$a}%';
 $string['mail_trial_expired_subject'] = 'Ваш пробный период истёк — {$a}';
 $string['mail_trial_expired_body']    = 'Здравствуйте, {$a->firstname}, ваш 7-дневный пробный период завершился.';
 $string['mail_trial_cta_subscribe']   = 'Оформить подписку';
 $string['mail_trial_cta_continue']    = 'Продолжить пробный доступ';
-$string['mail_trial_rem3_subject_generic']    = 'Напоминание: ваш пробный период продолжается';
+$string['mail_trial_rem3_subject_generic']    = '⏳ Ещё 24 часа на подписку со скидкой {$a}% 🇫🇷';
 $string['mail_trial_expired_subject_generic'] = 'Ваш пробный период истёк';
 
 $string['cataloguetitle'] = 'Каталог';

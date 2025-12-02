@@ -47,12 +47,32 @@ $string['trial_email_ph']     = 'Your e-mail';
 $string['mail_trial_started_subject'] = 'Your trial period has started';
 $string['mail_trial_started_body']    = 'Hello {$a->firstname}, your 7-day trial has just begun!';
 $string['mail_trial_rem3_subject']    = 'Reminder: your trial is still active — {$a}';
-$string['mail_trial_rem3_body']       = 'Hello {$a->firstname}, you still have a few days left in your trial.';
+$string['mail_trial_rem3_body'] = '<p>Bonjour, {$a->firstname} !</p>
+    <p>We hope your first days on Campus<small><sup>FR</sup></small> have been inspiring and enjoyable.</p>
+
+<p>If you’d like to continue learning, your {$a->dpct}% discount on all subscriptions will remain available for another 24 hours.</p>
+
+<p>After that, the regular price will apply.</p>
+
+<p>You can subscribe at the reduced price here:</p>';
+
+$string['mail_trial_rem3_body2'] =
+    '<p>Once your subscription is activated, you\'ll immediately get full access to all lessons and future updates — everything you need to learn French with confidence, structure, and enjoyment.</p>
+
+<p>If you have any questions, just write to us at <a href="mailto:{$a}">{$a}</a>. We’re always here for you.</p>
+
+<p>À très bientôt,<br>
+Nata and the Campus<small><sup>FR</sup></small> team</p>';
+$string['mail_trial_rem3_button'] = 'Subscribe with {$a}% discount';
+
 $string['mail_trial_expired_subject'] = 'Your trial has ended — {$a}';
 $string['mail_trial_expired_body']    = 'Hello {$a->firstname}, your 7-day trial period has ended.';
 $string['mail_trial_cta_subscribe']   = 'Subscribe';
 $string['mail_trial_cta_continue']    = 'Continue trial access';
-$string['mail_trial_rem3_subject_generic']    = 'Reminder: your trial is active';
+$string['mail_trial_rem3_subject_generic'] = '⏳ Last 24 hours to get −{$a}% 🇫🇷';
+
+
+
 $string['mail_trial_expired_subject_generic'] = 'Your trial has ended';
 
 

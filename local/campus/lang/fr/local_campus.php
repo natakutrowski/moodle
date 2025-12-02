@@ -47,12 +47,32 @@ $string['trial_email_ph']     = 'Votre e-mail';
 $string['mail_trial_started_subject'] = 'Votre période d’essai a commencé';
 $string['mail_trial_started_body']    = 'Bonjour {$a->firstname}, votre période d’essai de 7 jours vient de commencer !';
 $string['mail_trial_rem3_subject']    = 'Rappel : votre période d\'essai continue — {$a}';
-$string['mail_trial_rem3_body']       = 'Bonjour {$a->firstname}, il vous reste encore quelques jours de période d’essai.';
+$string['mail_trial_rem3_body'] = '<p>Bonjour, {$a->firstname} !</p> 
+    <p>Nous espérons que vos premiers jours sur Campus<small><sup>FR</sup></small> sont intéressants et motivants.</p>
+
+<p>Si vous souhaitez continuer votre apprentissage, votre réduction de {$a->dpct}% sur tous les abonnements reste valable encore pendant 24 heures.</p>
+
+<p>Ensuite, le tarif standard s’appliquera.</p>
+
+<p>Vous pouvez souscrire votre abonnement à prix réduit ici :</p>';
+
+$string['mail_trial_rem3_body2'] =
+    '<p>Après l\'activation de l’abonnement, vous obtiendrez immédiatement un accès complet à toutes les leçons, ainsi qu’aux futures mises à jour — tout ce qui vous aide à apprendre le français avec confiance, méthode et plaisir.</p>
+
+<p>Si vous avez des questions, écrivez-nous simplement à <a href="mailto:{$a}">{$a}</a>. Nous sommes toujours là pour vous.</p>
+
+<p>À très bientôt,<br>
+Nata et l’équipe Campus<small><sup>FR</sup></small></p>';
+$string['mail_trial_rem3_button'] = 'Souscrire un abonnement avec {$a}% de réduction';
+
 $string['mail_trial_expired_subject'] = 'Votre période d’essai est terminée — {$a}';
 $string['mail_trial_expired_body']    = 'Bonjour {$a->firstname}, votre période d’essai de 7 jours est arrivée à son terme.';
 $string['mail_trial_cta_subscribe']   = 'Souscrire un abonnement';
 $string['mail_trial_cta_continue']    = 'Continuer l’accès d’essai';
-$string['mail_trial_rem3_subject_generic']    = 'Rappel : votre période d’essai est en cours';
+$string['mail_trial_rem3_subject_generic'] = '⏳ Encore 24 heures pour profiter de −{$a}% 🇫🇷';
+
+
+
 $string['mail_trial_expired_subject_generic'] = 'Votre période d’essai est terminée';
 
 

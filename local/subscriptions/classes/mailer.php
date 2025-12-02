@@ -1223,6 +1223,8 @@ class mailer {
 
 
     public static function send_trial_rem3(array $p): void {
+        global $CFG;
+
         $to      = (string)$p['toemail'];
         $first   = (string)$p['firstname'];
         $conturl = (string)$p['continue_url'];   // bouton 1 (continuer essai)
@@ -1230,21 +1232,49 @@ class mailer {
         $course  = (string)($p['course_fullname'] ?? '');
         $days    = (int)($p['daysleft'] ?? 3);
 
+        $dpct = (string)(get_config('local_subscriptions', 'trial_discount_percent') ?: '');
+        $supportEmail = (string)(get_config('local_subscriptions', 'support_email') ?: '');
+
         $subject  = get_string('mail_trial_rem3_subject_generic','local_campus', $course);
-        $bodyhtml = format_text(
-            get_string('mail_trial_rem3_body','local_campus', (object)['firstname'=>$first,'daysleft'=>$days]),
+        $body = format_text(
+            get_string('mail_trial_rem3_body','local_campus', (object)['firstname'=>$first,'dpct'=>$dpct]),
             FORMAT_HTML
         );
 
-        // ➜ Nouvelle méthode du renderer qui ajoute un 2e bouton SANS casser layout()
-        $conturlLogin = self::login_redirect_for($conturl);
-        $suburlLogin  = self::login_redirect_for($suburl);
+            $brandcolor = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
+            $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
+            $buttonurl = (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+            $buttonurl  = self::login_redirect_for($buttonurl);
+            $buttonlabel = get_string('mail_trial_rem3_button', 'local_campus',
+                    $dpct);
+            $btn = '
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;">
+            <tr>
+                <td bgcolor="'.s($brandcolor).'" style="border-radius:8px;">
+                <a href="'.s($buttonurl).'"
+                    style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;background:'.s($brandcolor).';"
+                    onmouseover="this.style.background=\''.s($brandcolorDark).'\';"
+                    onmouseout="this.style.background=\''.s($brandcolor).'\';"
+                >'.s($buttonlabel).'</a>
+                </td>
+            </tr>
+            </table>';
 
-        [$html, $text] = MailRenderer::layout_with_extra_button(
+
+            $body .= $btn;
+
+        $body .= format_text(
+            get_string('mail_trial_rem3_body2','local_campus', $supportEmail),
+            FORMAT_HTML
+        );
+        $body .= 
+            '<img src="'.$CFG->wwwroot . '/local/subscriptions/pix/email/mailTrialRemFooter.png"
+                            style="display:block;width:100%;object-fit:cover;border:0;outline:none;text-decoration:none;">';
+
+        [$html, $text] = MailRenderer::layout(
             $subject,
-            $bodyhtml,
-            get_string('mail_trial_cta_continue','local_campus'), $conturlLogin,  // bouton secondaire (dans le corps)
-            get_string('mail_trial_cta_subscribe','local_campus'), $suburlLogin   // bouton principal (celui de layout)
+            $body,
+            '', '',
         );
 
         self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
