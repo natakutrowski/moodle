@@ -350,7 +350,7 @@ define(['core/config'], function(config) {
                                 btnCont.disabled = true;
                             }
                             if (btnSub) {
-                                btnSub.textContent = M.util.get_string('login');
+                                btnSub.textContent = M.util.get_string('login', 'moodle');
                                 btnSub.href = safeHref;
                                 btnSub.classList.remove('d-none');
                             }

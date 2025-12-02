@@ -1255,7 +1255,7 @@ class mailer {
                     style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;background:'.s($brandcolor).';"
                     onmouseover="this.style.background=\''.s($brandcolorDark).'\';"
                     onmouseout="this.style.background=\''.s($brandcolor).'\';"
-                >'.s($buttonlabel).'</a>
+                >'.$buttonlabel.'</a>
                 </td>
             </tr>
             </table>';

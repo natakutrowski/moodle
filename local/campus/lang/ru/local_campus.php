@@ -62,7 +62,7 @@ $string['mail_trial_rem3_body2']       = '<p>После активации по�
 
 <p>À très bientôt,<br>
 <p>Ната и команда Campus<small><sup>FR</sup></small></p>';
-$string['mail_trial_rem3_button']       = 'Оформить подписку со скидкой {$a}%';
+$string['mail_trial_rem3_button']       = 'Оформить подписку <br>со скидкой {$a}%';
 $string['mail_trial_expired_subject'] = 'Ваш пробный период истёк — {$a}';
 $string['mail_trial_expired_body']    = 'Здравствуйте, {$a->firstname}, ваш 7-дневный пробный период завершился.';
 $string['mail_trial_cta_subscribe']   = 'Оформить подписку';
