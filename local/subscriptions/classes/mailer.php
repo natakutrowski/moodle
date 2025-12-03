@@ -1241,27 +1241,15 @@ class mailer {
             FORMAT_HTML
         );
 
-            $brandcolor = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
-            $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
-            $buttonurl = (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
-            $buttonurl  = self::login_redirect_for($buttonurl);
-            $buttonlabel = get_string('mail_trial_rem3_button', 'local_campus',
-                    $dpct);
-            $btn = '
-            <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;">
-            <tr>
-                <td bgcolor="'.s($brandcolor).'" style="border-radius:8px;">
-                <a href="'.s($buttonurl).'"
-                    style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;background:'.s($brandcolor).';"
-                    onmouseover="this.style.background=\''.s($brandcolorDark).'\';"
-                    onmouseout="this.style.background=\''.s($brandcolor).'\';"
-                >'.$buttonlabel.'</a>
-                </td>
-            </tr>
-            </table>';
+
+        $buttonurl   = (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+        $buttonurl   = self::login_redirect_for($buttonurl);
+        $buttonlabel = get_string('mail_trial_rem3_button', 'local_campus', $dpct);
+
+        $btn = self::email_button($buttonurl, $buttonlabel);
 
 
-            $body .= $btn;
+        $body .= $btn;
 
         $body .= format_text(
             get_string('mail_trial_rem3_body2','local_campus', $supportEmail),
@@ -1848,6 +1836,51 @@ class mailer {
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = preg_replace('/\s+/u', ' ', $text);
         return trim($text);
+    }
+
+    /**
+     * Rend un bouton HTML compatible e-mail (table-based).
+     *
+     * @param string $url URL du bouton
+     * @param string $label Texte du bouton
+     * @return string HTML prêt pour l'email
+     */
+    public static function email_button(string $url, string $label): string {
+        $brandcolor     = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
+        $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
+
+        $url   = s($url);
+
+        return '
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;">
+        <tr>
+            <td align="center" style="padding:24px 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;max-width:420px;">
+                    <tr>
+                        <td align="center" bgcolor="' . $brandcolor . '" style="border-radius:8px;">
+                            <a href="' . $url . '"
+                            style="
+                                display:block;
+                                padding:12px 20px;
+                                color:#ffffff;
+                                text-decoration:none;
+                                font-weight:600;
+                                border-radius:8px;
+                                background:' . $brandcolor . ';
+                                font-size:16px;
+                                line-height:20px;
+                                text-align:center;
+                                mso-line-height-rule:exactly;
+                                word-wrap:break-word;
+                                white-space:normal;
+                            "
+                            >' . $label . '</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>';
     }
 
 

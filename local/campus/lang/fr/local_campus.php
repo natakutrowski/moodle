@@ -63,7 +63,7 @@ $string['mail_trial_rem3_body2'] =
 
 <p>À très bientôt,<br>
 Nata et l’équipe Campus<small><sup>FR</sup></small></p>';
-$string['mail_trial_rem3_button'] = 'Souscrire un abonnement <br>avec {$a}% de réduction';
+$string['mail_trial_rem3_button'] = 'Souscrire un abonnement avec {$a}% de réduction';
 
 $string['mail_trial_expired_subject'] = 'Votre période d’essai est terminée — {$a}';
 $string['mail_trial_expired_body']    = 'Bonjour {$a->firstname}, votre période d’essai de 7 jours est arrivée à son terme.';

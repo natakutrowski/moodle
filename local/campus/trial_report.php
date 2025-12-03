@@ -17,7 +17,7 @@ $sortfields = [
     'firstname'  => 'u.firstname',
     'lastname'   => 'u.lastname',
     'email'      => 'u.email',
-    'phone'      => 'u.phone1',
+    'phone'      => 'u.phone2',
     'country'    => 'u.country',
     'date48'     => '(us.start_date + 48 * 3600)',
     'date72'     => '(us.start_date + 72 * 3600)',
@@ -55,7 +55,7 @@ $sql = "SELECT
             u.firstname,
             u.lastname,
             u.email,
-            u.phone1 AS phone,
+            u.phone2 AS phone,
             u.country
         FROM {user_subscription} us
         JOIN {user} u ON u.id = us.userid
