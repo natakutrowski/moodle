@@ -441,7 +441,7 @@ class mailer {
             ->txid($pr->transactionid ?? null)
             ->render();
 
-        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
+        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname));
         $body .= \html_writer::tag('p', get_string('receipt_intro', 'local_subscriptions'));
         $body .= $table;
         $body .= self::pr_ref_badge($pr);
@@ -514,7 +514,7 @@ class mailer {
         
         // Corps
         $body = ''
-            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname))
             . \html_writer::tag('p', get_string('subupdate_body', 'local_subscriptions', $planname));
         $body .= $tbl;
         $body .= self::pr_ref_badge($pr);
@@ -723,7 +723,7 @@ class mailer {
             ->row('receipt_period', MailRenderer::code(userdate(time()))) // date de démarrage info
             ->render();
 
-        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
+        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname));
         $body .= \html_writer::tag('p', get_string('mail_recurring_started_body', 'local_subscriptions', [
             'plan'  => format_string($planname),
             'start' => userdate(time()),
@@ -767,7 +767,7 @@ class mailer {
             ->period_ts_short_2l($sub->start_date, $sub->end_date)
             ->render();
 
-        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
+        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname));
         $body .= \html_writer::tag('p', get_string('expiry_reminder_body', 'local_subscriptions', [
             'plan' => $planname,
             'date' => $enddate,
@@ -797,7 +797,7 @@ class mailer {
         $title = get_string('subscription_activated_subject', 'local_subscriptions', $planname);
 
         $body = ''
-            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname))
             . \html_writer::tag('p', get_string('subscription_activated_body', 'local_subscriptions', $planname));
         $body .= MailRenderer::table()
                     ->lined()
@@ -833,7 +833,7 @@ class mailer {
             ->period_ts_short_2l($sub->start_date, $sub->end_date)
             ->render();
 
-        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
+        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname));
         $body .= \html_writer::tag('p', get_string('subscription_expired_body', 'local_subscriptions', [
             'plan' => $planname,
             'date' => $enddate,
@@ -874,7 +874,7 @@ class mailer {
             $tbl->row('receipt_total', $paid);
         }        
 
-        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
+        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname));
         $body .= \html_writer::tag('p', get_string('upgrade_confirmed_body', 'local_subscriptions', format_string($planname)));
         $body .= $tbl->render();
 
@@ -923,7 +923,7 @@ class mailer {
 
         // Corps HTML
         $body = ''
-            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)))
+            . \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname))
             . \html_writer::tag('p', get_string('renewal_body', 'local_subscriptions', format_string($planname)));
         $body .= $table->render();
 
@@ -947,7 +947,7 @@ class mailer {
         $title = get_string('recurring_failed_subject', 'local_subscriptions', format_string($planname));
 
         // Message de base.
-        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
+        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname));
         $body .= \html_writer::tag('p', get_string('recurring_failed_body', 'local_subscriptions', format_string($planname)));
 
         $tbl = MailRenderer::table()
@@ -995,7 +995,7 @@ class mailer {
             ->period_ts_short_2l($sub->start_date, $sub->end_date)
             ->render();
 
-        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', fullname($user)));
+        $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname));
         $body .= \html_writer::tag('p', get_string('recurring_canceled_body', 'local_subscriptions', format_string($planname)));
         $body .= \html_writer::tag('p', $effectline);
         $body .= $tbl;

@@ -127,57 +127,65 @@ class qtype_shortanswer_question extends question_graded_by_strategy
     
     // Improvment NK
     protected static function normalize_for_comparison($text) {
-		// Apostrophes → '
-		$text = str_replace(
-			['’', '‘', 'ʼ', 'ʹ', '′', '´', '‛'],
-			"'",
-			$text
-		);
-	
-		// Tirets → -
-		$text = str_replace(
-			['–', '—', '‐', '‑', '‒', '﹘', '﹣', '－', 'ー'],
-			"-",
-			$text
-		);
-	
-		// Guillemets → " ou '
-		$text = str_replace(
-			['“', '”', '„', '‟', '«', '»'],
-			'"',
-			$text
-		);
-		$text = str_replace(
-			['‚', '‘', '’'],
-			"'",
-			$text
-		);
-		
-		// Majuscules accentuées
-		$text = self::remove_uppercase_accents($text);
-	
-		// Espaces insécables → espace standard
-		$text = str_replace(
-			["\u{00A0}", "\u{202F}", "\u{2007}"],
-			" ",
-			$text
-		);
-	
-		// Supprimer caractères invisibles (zero-width, etc.)
-		$text = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $text);
-	
-		// Réduire les espaces multiples à un seul
-		$text = preg_replace('/\s+/u', ' ', $text);
-	
-		// Supprimer ponctuation ambigüe inutile (facultatif)
-		$text = str_replace(['…'], '...', $text); // points de suspension
-		// tu peux en ajouter ici si besoin
-		
-		// Remove punctuation signs
-		$text = preg_replace('/[!"#¡¿$%&\'()。「」、*+,-.\/:;<=>?@[\]^_`{|}~]/','',$text);
-	
-		return trim($text);
-	}
+        // Apostrophes → '
+        $text = str_replace(
+            ['’', '‘', 'ʼ', 'ʹ', '′', '´', '‛'],
+            "'",
+            $text
+        );
+
+        // Tirets → -
+        $text = str_replace(
+            ['–', '—', '‐', '-', '‒', '﹘', '﹣', '－', 'ー'],
+            "-",
+            $text
+        );
+
+        // Guillemets → " ou '
+        $text = str_replace(
+            ['“', '”', '„', '‟', '«', '»'],
+            '"',
+            $text
+        );
+        $text = str_replace(
+            ['‚', '‘', '’'],
+            "'",
+            $text
+        );
+
+        // Majuscules accentuées
+        $text = self::remove_uppercase_accents($text);
+
+        // Espaces insécables → espace standard
+        $text = str_replace(
+            ["\u{00A0}", "\u{202F}", "\u{2007}"],
+            " ",
+            $text
+        );
+
+        // Supprimer caractères invisibles (zero-width, etc.)
+        $text = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $text);
+
+        // Réduire les espaces multiples à un seul
+        $text = preg_replace('/\s+/u', ' ', $text);
+
+        // Normaliser les points de suspension
+        $text = str_replace(['…'], '...', $text);
+
+        // 🔹 Coller l’espace avant la ponctuation (FR/EN) : "mot !" → "mot!"
+        // (à faire AVANT la suppression de la ponctuation)
+        $text = preg_replace('/(?<=\pL|\pN)\s+([!?;:,.…])/u', '$1', $text);
+
+        // Supprimer les signes de ponctuation
+        // (hyphens/dots échappés, ajout du flag 'u' pour Unicode)
+        $text = preg_replace('/[!"#¡¿$%&\'()。「」、*+,\-\.\/:;<=>?@\[\\\]\^_`{|}~]/u', '', $text);
+
+        // Re-compacte les espaces au cas où la suppression crée des doubles espaces
+        $text = preg_replace('/\s+/u', ' ', $text);
+
+        return trim($text);
+    }
+
 	
 	// Improvment NK
 	protected static function remove_uppercase_accents(string $str) {
