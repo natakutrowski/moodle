@@ -7658,3 +7658,23 @@ body#page-site-index .page-banner-area{
   margin-top : 25px !important;
   padding-top : 25px !important;
 }
+
+/* CampusFR – Sommaire : afficher seulement les sections / sous-sections */
+
+/* 1. Cacher toutes les activités (forum, page, h5p, quiz, etc.),
+      mais garder les wrappers de sous-sections (mod_subsection_item). */
+#courseindex .courseindex-sectioncontent
+    .courseindex-item[class*="mod_"]:not(.mod_subsection_item) {
+    display: none !important;
+}
+
+/* 2. Optionnel : rendre les sous-sections visuellement plus "section" */
+#courseindex .courseindex-item.mod_subsection_item {
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+}
+
+/* 3. (Optionnel) réduire un peu l’indent des sous-sections si tu veux */
+#courseindex .courseindex-item.mod_subsection_item .courseindex-section-title {
+    padding-left: 0.25rem;
+}

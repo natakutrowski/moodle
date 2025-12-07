@@ -176,9 +176,8 @@ class qtype_shortanswer_question extends question_graded_by_strategy
         // (à faire AVANT la suppression de la ponctuation)
         $text = preg_replace('/(?<=\pL|\pN)\s+([!?;:,.…])/u', '$1', $text);
 
-        // Supprimer les signes de ponctuation
-        // (hyphens/dots échappés, ajout du flag 'u' pour Unicode)
-        $text = preg_replace('/[!"#¡¿$%&\'()。「」、*+,\-\.\/:;<=>?@\[\\\]\^_`{|}~]/u', '', $text);
+        // ⬇️ CHANGEMENT CLEF : supprimer toute la ponctuation et les symboles
+        $text = preg_replace('/[\p{P}\p{S}]+/u', '', $text);
 
         // Re-compacte les espaces au cas où la suppression crée des doubles espaces
         $text = preg_replace('/\s+/u', ' ', $text);
