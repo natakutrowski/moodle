@@ -74,12 +74,27 @@ function local_campus_is_trial_user(): bool {
  * Appelé à chaque page pour permettre au plugin de modifier l'arbre de navigation global.
  */
 function local_campus_extend_navigation(global_navigation $nav) : void {
+
     // Optionnel : on ne filtre que pour les comptes d'essai
     if (!function_exists('local_campus_is_trial_user') || !local_campus_is_trial_user()) {
         return;
     }
 }
 
+/**
+ * Étend la navigation dans le contexte d'un cours.
+ * Appelé UNIQUEMENT sur les pages de cours / activités du cours.
+ *
+ * @param navigation_node $navigation
+ * @param stdClass        $course
+ * @param context_course  $context
+ */
+function local_campus_extend_navigation_course($navigation, $course, $context) {
+    global $PAGE;
+
+    // Ici, on est sûrs d'être dans un cours → on peut charger notre JS.
+    $PAGE->requires->js_call_amd('local_campus/courseindex_subsections', 'init');
+}
 
 /**
  * Appelé pour enrichir/adapter la navigation de réglages (colonne de droite).
