@@ -75,7 +75,7 @@
    Collé en bas grâce au space-between de courses-content */
 .block_edly_course_filter .cf-bottom {
   width: 100%;
-  margin-top: 0.25rem;  /* petit espace sous le rectangle titre */
+  margin-top: 0.5rem;  /* petit espace sous le rectangle titre */
 }
 
 /* Footer (rangée des boutons) */
