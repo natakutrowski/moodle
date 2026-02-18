@@ -1631,7 +1631,7 @@ Courses Area CSS
 .courses-card .courses-content .top-content {
   background-color: var(--white-color);
   box-shadow: 0px 4px 25px rgba(34, 86, 102, 0.07);
-  padding: 20px 15px;
+  padding: 10px 15px;
   position: relative;
   margin-top: -40px;
 }
@@ -1662,7 +1662,8 @@ Courses Area CSS
   font-size: 24px;
   margin-bottom: 0;
   font-weight: bold;
-  line-height: 1.4;
+  line-height: 1.2;
+  text-align: center;
 }
 .courses-card .courses-content .top-content h3 a {
   color: var(--black-color);
@@ -7745,3 +7746,4 @@ body#page-site-index .page-banner-area{
     border: 2px solid #b8b8b8;
     vertical-align: middle;
 }
+
