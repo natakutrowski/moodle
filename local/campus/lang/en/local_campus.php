@@ -304,3 +304,5 @@ $string['trialreport_col_status'] = 'Status';
 
 $string['trialreport_export_xls'] = 'Save as XLS';
 $string['trialreport_export_csv'] = 'Save as CSV';
+
+$string['task_cleanup_notifications'] = 'Cleanup of system notifications (Moodle updates / logins)';

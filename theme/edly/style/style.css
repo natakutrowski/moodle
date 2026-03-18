@@ -7747,3 +7747,241 @@ body#page-site-index .page-banner-area{
     vertical-align: middle;
 }
 
+/* ===============================
+   CAMPUS TOPBAR BASE
+   =============================== */
+
+.campus-topbar {
+    position: fixed;      /* ← important */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 2000;        /* au-dessus des blocs */
+    background: transparent;
+    transition:
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        opacity 0.25s ease;
+}
+
+body.pagelayout-frontpage {
+    padding-top: 0 !important;
+}
+
+.edly-page-wrapper {
+    margin-top: 0 !important;
+}
+
+.campus-topbar-inner {
+    width: 100%;
+    padding: 0.3rem 3rem; /* espace intérieur */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* LEFT / RIGHT */
+
+.campus-topbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.campus-topbar-logo img {
+    height: 60px;      /* ajuste entre 44 et 56 selon ton goût */
+    width: auto;
+    display: block;
+}
+
+.campus-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+/* CTA */
+
+.campus-topbar-ctas {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.campus-topbar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55em 1.4em;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.campus-topbar-btn-primary {
+    background: #3b2b63;
+    color: #fff;
+}
+
+.campus-topbar-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(59,43,99,0.35);
+}
+
+.campus-topbar-btn-secondary {
+    background: #fff;
+    color: #3b2b63;
+}
+
+.campus-topbar-btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+}
+
+/* ===============================
+   HERO MODE (default)
+   =============================== */
+
+.campus-topbar-left,
+.campus-topbar-ctas {
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+}
+
+/* HERO MODE */
+
+.campus-topbar:not(.is-solid) .campus-topbar-inner {
+    justify-content: flex-end;
+}
+
+.campus-topbar:not(.is-solid) .campus-topbar-right {
+    gap: 0;
+}
+
+/* ===============================
+   SOLID MODE
+   =============================== */
+
+.campus-topbar.is-solid {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    backdrop-filter: blur(8px);
+}
+
+.campus-topbar.is-solid .campus-topbar-left,
+.campus-topbar.is-solid .campus-topbar-ctas {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* ===============================
+   MOBILE
+   =============================== */
+
+@media (max-width: 767px) {
+
+    .campus-topbar-inner {
+        padding: 0.9rem 1rem;
+    }
+
+    .campus-topbar-btn {
+        font-size: 0.85rem;
+        padding: 0.45em 1.1em;
+    }
+}
+
+/* HERO MODE (bloc 1 visible) */
+.campus-topbar:not(.is-solid) .campus-topbar-left,
+.campus-topbar:not(.is-solid) .campus-topbar-ctas {
+    display: none;
+}
+
+/* En hero : tout à droite */
+.campus-topbar:not(.is-solid) .campus-topbar-inner {
+    justify-content: flex-end;
+}
+
+/* ===============================
+   CUSTOM LANGUAGE DROPDOWN
+   =============================== */
+
+.campus-lang-dropdown {
+    position: relative;
+}
+
+.campus-topbar:not(.is-solid) .campus-lang-dropdown {
+    transform: translateY(8px);
+}
+
+.campus-lang-trigger {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 999px;
+    padding: 0.45em 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.campus-lang-trigger:hover {
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+.campus-lang-trigger:focus {
+    outline: none;
+}
+
+.campus-lang-menu {
+    position: absolute;
+    right: 0;
+    top: 120%;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+    padding: 0.5rem;
+    min-width: 170px;
+    display: none;
+    flex-direction: column;
+    z-index: 3000;
+}
+
+.campus-lang-dropdown.open .campus-lang-menu {
+    display: flex;
+}
+
+.campus-lang-item {
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.campus-lang-item:hover {
+    background: rgba(59,43,99,0.08);
+}
+
+.campus-lang-item.active {
+    font-weight: 700;
+    color: #3b2b63;
+}
+
+/* Masquer footer Edly sur la frontpage uniquement
+body.pagelayout-frontpage .footer-area,
+body.pagelayout-frontpage footer,
+body.pagelayout-frontpage .edly-footer,
+body.pagelayout-frontpage .bottom-region-main-box {
+    display: none !important;
+} */

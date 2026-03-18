@@ -269,3 +269,5 @@ $string['trialreport_col_status'] = 'Статус';
 
 $string['trialreport_export_xls'] = 'Сохранить в XLS';
 $string['trialreport_export_csv'] = 'Сохранить в CSV';
+
+$string['task_cleanup_notifications'] = 'Очистка системных уведомлений (обновления Moodle и входы в аккаунт)';

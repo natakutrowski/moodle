@@ -15,6 +15,10 @@
 
 <div id="wrapper page-wrapper" class="edly-page-wrapper {{#output.if_edly_guest}}edly-guest-is-active-main{{/output.if_edly_guest}}  body-{{output.edly_is_siteadmin}}">
 
+    {{#campustopbar}}
+        {{{ campustopbar }}}
+    {{/campustopbar}}
+
     {{> theme_boost/navbar }}
     {{#courseindex}}
         {{< theme_boost/drawer }}

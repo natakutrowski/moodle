@@ -70,5 +70,17 @@ $templatecontext += [
     'forceblockdraweropen' => $forceblockdraweropen,
 ];
 
-echo $OUTPUT->render_from_template('theme_boost/drawers', $templatecontext);
+if ($PAGE->pagelayout === 'frontpage') {
 
+    ob_start();
+    require($CFG->dirroot . '/theme/edly/inc/campus_topbar.php');
+    $campustopbar = ob_get_clean();
+
+    $templatecontext['campustopbar'] = $campustopbar;
+
+    $PAGE->requires->js(
+        new moodle_url('/theme/edly/javascript/campus-topbar.js')
+    );
+}
+
+echo $OUTPUT->render_from_template('theme_boost/drawers', $templatecontext);

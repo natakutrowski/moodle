@@ -301,3 +301,5 @@ $string['trialreport_col_status'] = 'Statut';
 
 $string['trialreport_export_xls'] = 'Enregistrer en XLS';
 $string['trialreport_export_csv'] = 'Enregistrer en CSV';
+
+$string['task_cleanup_notifications'] = 'Nettoyage des notifications système (Moodle updates / connexions)';

@@ -1,0 +1,206 @@
+.campus-slider {
+
+    background: #F9F2EE;
+
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
+/* TRACK */
+
+.slider-track {
+
+    display: flex;
+    align-items: center;
+
+    overflow-x: auto;
+
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+
+    width: 100%;
+
+}
+
+.slider-track::-webkit-scrollbar {
+    display: none;
+}
+
+.slider-track {
+    scrollbar-width: none;
+}
+
+/* CARDS */
+
+.slider-card {
+
+    flex: 0 0 auto;
+
+    height: 80vh;              /* limite à 80% écran */
+    aspect-ratio: 1648 / 2528;       /* ratio stable */
+
+    margin: 0 2rem;
+
+    border-radius: 28px;
+
+    background-size: cover;
+    background-position: center;
+
+    scroll-snap-align: center;
+
+    position: relative;
+
+    /*cursor: pointer;*/
+
+    transform: scale(.9);
+    transition: transform .35s ease;/*, box-shadow .35s ease;*/
+
+}
+
+.slider-card.active {
+
+    transform: scale(1);
+    /*box-shadow: 0 20px 40px rgba(0,0,0,0.15);*/
+}
+
+/* BOUTON OVERLAY */
+
+.slider-overlay {
+
+    position: absolute;
+
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+
+    padding: 3rem;
+
+    display: flex;
+    justify-content: center;
+
+    /*background: linear-gradient(
+        to top,
+        rgba(255,255,255,.95),
+        rgba(255,255,255,0)
+    );*/
+
+}
+
+/* BUTTON */
+.campus-btn {
+
+    padding: 14px 32px;
+
+    border-radius: 40px;
+
+    background: #3b2b63;
+    color: #FFFFFF;
+
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: transform .2s ease, box-shadow .2s ease;
+
+}
+
+.campus-btn.highlight {
+    background: #F4197D;
+    color: #FFFFFF;
+}
+
+.campus-btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 10px 24px rgba(59,43,99,0.35);
+
+}
+
+.campus-btn:active {
+
+    transform: translateY(0);
+
+    box-shadow: 0 4px 12px rgba(59,43,99,0.25);
+
+}
+
+.campus-btn,
+.campus-btn:hover,
+.campus-btn:focus,
+.campus-btn:active {
+
+    color: #FFFFFF;
+
+}
+
+/* DOTS */
+
+.slider-dots {
+
+    display: flex;
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 20px;
+
+}
+
+.dot {
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #ccc;
+
+    cursor: pointer;
+
+}
+
+.dot.active {
+    background: #5C3D8E;
+}
+
+.block_campus_slider {
+
+    width: 100vw;
+    max-width: none;
+
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+
+    padding: 0;
+    border: none;
+    background: transparent;
+
+}
+
+.block_campus_slider .card-body {
+
+    padding: 0;
+
+}
+
+.campus-slider {
+
+    height: 90vh;
+
+}
+
+@media (max-width: 768px) {
+
+    .slider-card {
+
+        height: 65vh;
+
+    }
+
+}

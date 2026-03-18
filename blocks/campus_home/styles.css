@@ -1,0 +1,559 @@
+/* ===============================
+   BASE BLOCK RESET
+   =============================== */
+
+.block-campus-home {
+    position: relative;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0;
+    overflow: hidden;
+    color: #111;
+}
+
+/* Empilement sans blancs */
+.block-campus-home + .block-campus-home {
+    margin-top: 0 !important;
+}
+
+/* Neutraliser Moodle */
+.block-campus-home .block-content,
+.block-campus-home .card {
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+}
+
+
+/* ===============================
+   IMAGE (SOURCE DE HAUTEUR)
+   =============================== */
+
+.block-campus-home picture {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.block-campus-home picture img {
+    display: block;
+    width: 100%;
+    height: auto;        /* 🔑 ratio respecté */
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.block-campus-home picture,
+.block-campus-home picture img {
+    pointer-events: none;
+}
+
+/* ===============================
+   OVERLAY TEXTE
+   =============================== */
+
+.block-campus-home .campus-home-inner {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+}
+
+.block-campus-home .campus-home-content {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(2rem, 6vw, 5rem);
+}
+
+
+/* ===============================
+   TYPO RESPONSIVE
+   =============================== */
+
+.block-campus-home {
+    --title-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    --body-size: clamp(1.05rem, 1.6vw, 1.25rem);
+}
+
+.campus-home-title {
+    font-size: var(--title-size);
+    line-height: 1.15;
+    margin: 0 0 1rem;
+}
+
+.campus-home-body {
+    font-size: var(--body-size);
+    max-width: 42em;
+}
+
+
+/* ===============================
+   CTA
+   =============================== */
+
+.campus-home-ctas {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 20; /* au-dessus de l’overlay */
+}
+
+.campus-home-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85em 1.8em;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
+    cursor: pointer; /* 👈 indispensable */
+}
+
+.campus-home-btn:focus-visible {
+    outline: 3px solid rgba(59, 43, 99, 0.4);
+    outline-offset: 4px;
+}
+
+.campus-home-ctas,
+.campus-home-btn {
+    pointer-events: auto;
+}
+
+.campus-home-btn-primary {
+    background: var(--main-color, #3b5cff);
+    color: #fff;
+}
+
+.campus-home-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(59,43,99,0.35);
+}
+
+.campus-home-btn-secondary {
+    border: 2px solid currentColor;
+    color: inherit;
+}
+
+.campus-home-btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+}
+
+.block-campus-home picture {
+    position: relative;
+    z-index: 1;
+}
+
+.block-campus-home .campus-home-inner {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+}
+
+.block-campus-home .campus-home-content {
+    position: relative;
+    z-index: 10;
+}
+
+
+/* ===============================
+   VARIATIONS PAR BLOC
+   =============================== */
+
+/* BLOC 1 : hero centré */
+.bloc1, .bloc10 {
+    text-align: center;
+    color: #fff;
+}
+
+.bloc1 .campus-home-body {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ===============================
+   BLOC 1 – CTA DESIGN
+   =============================== */
+
+.bloc1 .campus-home-ctas {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.bloc1 .campus-home-btn {
+    width: clamp(240px, 30vw, 400px);
+    text-align: center;
+}
+
+/* Bouton principal */
+.bloc1 .campus-home-btn-primary {
+    background: #3b2b63;
+    color: #fff;
+    font-size: 1.2rem;
+    padding: 0.9em 3.2em;
+    /*box-shadow: 0 12px 30px rgba(59, 43, 99, 0.25);*/
+}
+
+/* Bouton secondaire */
+.bloc1 .campus-home-btn-secondary {
+    background: #fff;
+    color: #3b2b63;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.85em 3.0em;
+    /*box-shadow: 0 10px 25px rgba(0,0,0,0.12);*/
+}
+
+/* ===============================
+   BLOC 1 – CTA DESIGN
+   =============================== */
+
+.bloc1 .campus-home-ctas {
+    width: clamp(220px, 20vw, 340px);
+}
+
+.bloc1 .campus-home-btn {
+    width: 100%;
+
+    font-size: clamp(0.85rem, 1vw, 1.05rem);
+
+    padding:
+        clamp(0.5rem, 0.8vw, 0.85rem)
+        clamp(1.4rem, 2vw, 2.6rem);
+
+    white-space: nowrap;          /* 🔥 texte sur une seule ligne */
+    border-radius: 999px;
+
+    transition: all 0.25s ease;
+}
+
+/* Bouton principal */
+.bloc1 .campus-home-btn-primary {
+    background: #3b2b63;
+    color: #fff;
+    font-size: 1.2rem;
+    padding: 0.9em 3.2em;
+    /*box-shadow: 0 12px 30px rgba(59, 43, 99, 0.25);*/
+}
+
+/* Bouton secondaire */
+.bloc1 .campus-home-btn-secondary {
+    background: #fff;
+    color: #3b2b63;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.85em 3.0em;
+    /*box-shadow: 0 10px 25px rgba(0,0,0,0.12);*/
+}
+
+@media (min-width: 768px) {
+
+    .bloc1 .campus-home-ctas {
+        position: absolute;
+
+        left: 75%;
+        top: 65%;
+
+        transform: translate(-50%, -50%);
+        /* centre parfaitement le bloc autour du point */
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.2rem;
+    }
+}
+
+@media (max-width: 1100px) and (min-width: 768px) {
+
+    .bloc1 .campus-home-btn {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 767px) {
+
+    .bloc1 .campus-home-ctas {
+        position: absolute;
+        bottom: 2.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        align-items: center;
+    }
+
+    .bloc1 .campus-home-btn {
+        padding: 0.65em 2.2em;
+        font-size: 0.85rem;
+    }
+}
+
+
+.bloc1 .campus-home-content {
+    position: relative;
+    z-index: 3;
+}
+
+/* ===============================
+   BLOC 10 – CTA DESIGN
+   =============================== */
+
+.bloc10 .campus-home-ctas {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.bloc10 .campus-home-btn {
+    width: clamp(240px, 30vw, 400px);
+    text-align: center;
+}
+
+/* Bouton principal */
+.bloc10 .campus-home-btn-primary {
+    background: #3b2b63;
+    color: #fff;
+    font-size: 1.2rem;
+    padding: 0.9em 3.2em;
+    /*box-shadow: 0 12px 30px rgba(59, 43, 99, 0.25);*/
+}
+
+/* Bouton secondaire */
+.bloc10 .campus-home-btn-secondary {
+    background: #fff;
+    color: #3b2b63;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.85em 3.0em;
+    /*box-shadow: 0 10px 25px rgba(0,0,0,0.12);*/
+}
+
+/* ===============================
+   BLOC 10 – CTA DESIGN
+   =============================== */
+
+.bloc10 .campus-home-ctas {
+    width: clamp(220px, 20vw, 340px);
+}
+
+.bloc10 .campus-home-btn {
+    width: 100%;
+
+    font-size: clamp(0.85rem, 1vw, 1.05rem);
+
+    padding:
+        clamp(0.5rem, 0.8vw, 0.85rem)
+        clamp(1.4rem, 2vw, 2.6rem);
+
+    white-space: nowrap;          /* 🔥 texte sur une seule ligne */
+    border-radius: 999px;
+
+    transition: all 0.25s ease;
+}
+
+/* Bouton principal */
+.bloc10 .campus-home-btn-primary {
+    background: #3b2b63;
+    color: #fff;
+    font-size: 1.2rem;
+    padding: 0.9em 3.2em;
+    /*box-shadow: 0 12px 30px rgba(59, 43, 99, 0.25);*/
+}
+
+/* Bouton secondaire */
+.bloc10 .campus-home-btn-secondary {
+    background: #fff;
+    color: #3b2b63;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.85em 3.0em;
+    /*box-shadow: 0 10px 25px rgba(0,0,0,0.12);*/
+}
+
+@media (min-width: 768px) {
+
+    .bloc10 .campus-home-ctas {
+        position: absolute;
+
+        left: 75%;
+        top: 45%;
+
+        transform: translate(-50%, -50%);
+        /* centre parfaitement le bloc autour du point */
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.2rem;
+    }
+}
+
+@media (max-width: 1100px) and (min-width: 768px) {
+
+    .bloc10 .campus-home-btn {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 767px) {
+
+    .bloc10 .campus-home-ctas {
+        position: absolute;
+        bottom: 2.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        align-items: center;
+    }
+
+    .bloc10 .campus-home-btn {
+        padding: 0.65em 2.2em;
+        font-size: 0.85rem;
+    }
+}
+
+
+.bloc10 .campus-home-content {
+    position: relative;
+    z-index: 3;
+}
+
+
+/* ===============================
+   BLOC 12 – CTA DESIGN
+   =============================== */
+
+.bloc12 .campus-home-ctas {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.bloc12 .campus-home-btn {
+    width: clamp(240px, 30vw, 400px);
+    text-align: center;
+}
+
+/* Bouton principal */
+.bloc12 .campus-home-btn-primary {
+    background: #3b2b63;
+    color: #fff;
+    font-size: 1.2rem;
+    padding: 0.9em 3.2em;
+    /*box-shadow: 0 12px 30px rgba(59, 43, 99, 0.25);*/
+}
+
+/* Bouton secondaire */
+.bloc12 .campus-home-btn-secondary {
+    background: #fff;
+    color: #3b2b63;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.85em 3.0em;
+    /*box-shadow: 0 10px 25px rgba(0,0,0,0.12);*/
+}
+
+/* ===============================
+   BLOC 12 – CTA DESIGN
+   =============================== */
+
+.bloc12 .campus-home-ctas {
+    width: clamp(160px, 16vw, 220px);
+}
+
+.bloc12 .campus-home-btn {
+    width: 100%;
+
+    font-size: clamp(0.85rem, 1vw, 1.05rem);
+
+    padding:
+        clamp(0.5rem, 0.8vw, 0.85rem)
+        clamp(1.4rem, 2vw, 2.6rem);
+
+    white-space: nowrap;          /* 🔥 texte sur une seule ligne */
+    border-radius: 999px;
+
+    transition: all 0.25s ease;
+}
+
+/* Bouton principal */
+.bloc12 .campus-home-btn-primary {
+    background: #3b2b63;
+    color: #fff;
+    font-size: 1.3rem;
+    padding: 0.7em 2.2em;
+    /*box-shadow: 0 12px 30px rgba(59, 43, 99, 0.25);*/
+}
+
+/* Bouton secondaire */
+.bloc12 .campus-home-btn-secondary {
+    background: #fff;
+    color: #3b2b63;
+    border: none;
+    font-size: 1.3rem;
+    font-weight: 600;
+    padding: 0.65em 2.0em;
+    /*box-shadow: 0 10px 25px rgba(0,0,0,0.12);*/
+}
+
+@media (min-width: 768px) {
+
+    .bloc12 .campus-home-ctas {
+        position: absolute;
+
+        left: 50%;
+        top: 47%;
+
+        transform: translate(-50%, -50%);
+        /* centre parfaitement le bloc autour du point */
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.2rem;
+    }
+}
+
+@media (max-width: 1100px) and (min-width: 768px) {
+
+    .bloc12 .campus-home-btn {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 767px) {
+
+    .bloc12 .campus-home-ctas {
+        position: absolute;
+        bottom: 2.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        align-items: center;
+    }
+
+    .bloc12 .campus-home-btn {
+        padding: 0.65em 2.2em;
+        font-size: 0.85rem;
+    }
+}
+
+
+.bloc12 .campus-home-content {
+    position: relative;
+    z-index: 3;
+}
