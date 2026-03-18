@@ -1,0 +1,51 @@
+{{!
+    This file is part of Level Up Quest.
+
+    Level Up Quest is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Level Up Quest is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
+
+    https://levelup.plus
+}}
+{{!
+    @template block_gearup/admin/setting/recommended_plugins
+
+    Recommended plugins.
+
+    Example context (json):
+    {
+    }
+}}
+<div class="block_gearup">
+    <p>{{#str}}somefeaturesrequireotherplugins, block_gearup{{/str}}</p>
+    <div class="gu-space-y-4">
+        {{#plugins}}
+            <div>
+                <div class="gu-font-bold gu-mb-1">{{ name }}</div>
+                <div class="gu-text-sm gu-mb-1">{{ description }}</div>
+                <div class="gu-flex gu-space-x-4 gu-text-sm">
+                    <div>
+                        {{# isinstalled }}
+                            {{# pix }} i/valid, core {{/ pix }}{{# str }} installed, block_gearup {{/ str }}
+                        {{/ isinstalled }}
+                        {{^ isinstalled }}
+                            {{# pix }} i/invalid, core {{/ pix }}{{# str }} missing, block_gearup {{/ str }}
+                        {{/ isinstalled }}
+                    </div>
+                    <div>
+                        <a href="{{ url }}" target="_blank" re="noopener noreferer">{{# str }}learnmore, block_gearup{{/ str }}</a>
+                    </div>
+                </div>
+            </div>
+        {{/plugins}}
+    </div>
+</div>

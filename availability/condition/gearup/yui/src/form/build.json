@@ -1,0 +1,8 @@
+{
+    "name": "moodle-availability_gearup-form",
+    "builds": {
+        "moodle-availability_gearup-form": {
+            "jsfiles": ["form.js"]
+        }
+    }
+}

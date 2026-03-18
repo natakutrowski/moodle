@@ -1,0 +1,12 @@
+{{!
+    The context must contain 'visual'.
+    This should be wrapped in a div with the right dimensions.
+}}
+{{#visual}}
+    <img src="{{ url }}" alt="{{ alt }}" class="gu-h-full gu-w-full gu-max-h-full gu-pointer-events-none !gu-rounded-none" />
+{{/visual}}
+{{^visual}}
+    <div class="gu-flex gu-items-center gu-justify-center gu-h-full gu-w-full">
+        <svg class="gu-w-full gu-min-w-[1rem]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 528 528"><rect width="528" height="528" rx="64.54" style="fill:#333"/><path d="M463.46,28A36.58,36.58,0,0,1,500,64.54V463.46A36.58,36.58,0,0,1,463.46,500H64.54A36.58,36.58,0,0,1,28,463.46V64.54A36.58,36.58,0,0,1,64.54,28H463.46m0-28H64.54A64.53,64.53,0,0,0,0,64.54V463.46A64.53,64.53,0,0,0,64.54,528H463.46A64.53,64.53,0,0,0,528,463.46V64.54A64.53,64.53,0,0,0,463.46,0Z" style="fill:#666"/><polygon points="107.25 221.37 156.73 134.7 371.27 134.7 420.75 221.37 264 406.66 107.25 221.37" style="fill:gray"/><path d="M368.47,139.51l46.43,81.33L264,399.2,113.1,220.84l46.43-81.33H368.47m5.59-9.63H153.94l-52.55,92L264,414.12,426.61,221.91l-52.55-92Z" style="fill:#333"/><polygon points="327.12 221.91 264 407.12 202.21 221.91 327.12 221.91" style="fill:none;stroke:#333;stroke-linejoin:round;stroke-width:9.635276198387146px"/><polygon points="264 129.88 202.21 221.91 327.12 221.91 264 129.88" style="fill:none;stroke:#333;stroke-linejoin:round;stroke-width:9.635276198387146px"/><polygon points="374.06 129.88 372.63 129.88 327.12 221.91 426.61 221.91 374.06 129.88" style="fill:none;stroke:#333;stroke-linejoin:round;stroke-width:9.635276198387146px"/><polygon points="156.71 129.88 153.94 129.88 101.39 221.91 202.21 221.91 156.71 129.88" style="fill:none;stroke:#333;stroke-linejoin:round;stroke-width:9.635276198387146px"/></svg>
+    </div>
+{{/visual}}

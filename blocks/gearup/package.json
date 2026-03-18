@@ -1,0 +1,32 @@
+{
+    "name": "block_gearup",
+    "version": "1.0.0",
+    "description": "Level Up Quest plugin for Moodle",
+    "author": "Frédéric Massart <fred@branchup.tech>",
+    "license": "GPLv3",
+    "private": true,
+    "dependencies": {
+        "@types/react": "^17.0.17",
+        "@types/react-dom": "^17.0.9",
+        "autoprefixer": "^10.4.18",
+        "gulp": "^4.0.2",
+        "gulp-cli": "^2.3.0",
+        "gulp-postcss": "^9.0.0",
+        "js-confetti": "^0.11.0",
+        "postcss": "^8.4.37",
+        "postcss-color-rgba-fallback": "^4.0.0",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "tailwindcss": "^3.4.1",
+        "ts-loader": "^9.5.1",
+        "typescript": "^5.4.3",
+        "webpack": "^5.31.0",
+        "webpack-cli": "^5.1.4",
+        "webpack-merge": "^5.10.0"
+    },
+    "scripts": {
+        "dist": "NODE_ENV=production npx gulp dist",
+        "watch": "NODE_ENV=development npx gulp watch",
+        "watch:css": "NODE_ENV=development npx gulp watch:css"
+    }
+}

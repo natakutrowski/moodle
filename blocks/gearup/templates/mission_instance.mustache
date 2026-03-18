@@ -1,0 +1,267 @@
+{{!
+    This file is part of Level Up Quest.
+
+    Level Up Quest is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Level Up Quest is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
+
+    https://levelup.plus
+}}
+{{!
+    @template block_gearup/mission_instance
+
+    TODO describe template instance
+
+    Example context (json):
+    {
+    }
+}}
+<div id="mission-inst-{{ uniqid }}"
+        data-gu-refreshable
+        data-ws="block_gearup_get_mission_instance_page"
+        data-ws-args__missioninstid="{{ missioninst.id }}"
+        data-ws-args__returnto="{{ returnto }}"
+        data-ws-args__gupagectxid="{{ gupagectxid }}"
+        data-template="block_gearup/mission_instance">
+
+    {{> block_gearup/mission_instance_header }}
+
+    {{#missioninst}}
+    <div class="gu-border-t gu-border-gray-200 gu-py-5 sm:gu-p-0">
+        <dl class="gu-divide-y gu-divide-gray-200">
+            <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
+                <dt class="gu-font-medium gu-text-gray-500">
+                    {{#str}} assigned, block_gearup {{/str}}
+                    {{# mission.assignmentbehaviour.iscompulsory }}
+                    / {{#str}} started, block_gearup {{/str}}
+                    {{/ mission.assignmentbehaviour.iscompulsory }}
+                </dt>
+                <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
+                    <div class="gu-grow">{{{ timeassignedhtml }}}</div>
+                </dd>
+            </div>
+
+            {{^ mission.type.isachievement }}
+            {{^ mission.assignmentbehaviour.iscompulsory }}
+            <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
+                <dt class="gu-font-medium gu-text-gray-500">
+                    {{#str}} started, block_gearup {{/str}}
+                </dt>
+                <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
+                    <div class="gu-grow">
+                        {{#hasstarted}}
+                        {{{ timestartedhtml }}}
+                        {{/hasstarted}}
+                        {{^hasstarted}}
+                        -
+                        {{/hasstarted}}
+                    </div>
+                    {{^hasstarted}}
+                    <div>
+                        <button class="btn btn-secondary btn-sm gu-text-sm" type="button" data-action="confirm-url"
+                            data-url="{{ startmissionurl }}">{{#str}} markstarted, block_gearup {{/str}}</button>
+                    </div>
+                    {{/hasstarted}}
+                </dd>
+            </div>
+            {{/ mission.assignmentbehaviour.iscompulsory }}
+            {{/ mission.type.isachievement }}
+
+            <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
+                <dt class="gu-font-medium gu-text-gray-500">
+                    {{#str}} completed, block_gearup {{/str}}
+                </dt>
+                <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
+                    <div class="gu-grow gu-mr-4">
+                        {{#hascompleted}}
+                            {{#mission.type.ischallenge}}
+                                {{^isincomplete}}
+                                    {{{ timecompletedhtml }}}
+                                {{/isincomplete}}
+                                {{#isincomplete}}
+                                    {{ completionratiopc }}%
+                                {{/isincomplete}}
+                            {{/mission.type.ischallenge}}
+                            {{^mission.type.ischallenge}}
+                                {{{ timecompletedhtml }}}
+                            {{/mission.type.ischallenge}}
+                        {{/hascompleted}}
+                        {{^hascompleted}}
+
+                        <div class="gu-max-w-xs">
+                            {{< block_gearup/progress_bar }} {{$ ratiopc }}{{ completionratiopc }}{{/ ratiopc }} {{/
+                                block_gearup/progress_bar }} </div>
+
+                                {{/hascompleted}}
+                        </div>
+                        {{^hascompleted}}
+                        <div>
+                        <button
+                            class="btn btn-secondary btn-sm gu-text-sm"
+                            type="button"
+                            data-gu-action="open-form"
+                            data-form-class="block_gearup\form\complete_mission_instance_dynamic_form"
+                            data-form-args__missionid="{{ mission.id }}"
+                            data-form-args__missioninstid="{{ id }}"
+                            data-modal-buttons__save__label="{{# str }} markcomplete, core_completion {{/ str }}"
+                            data-modal-large="false"
+                            data-modal-title="{{# str }} markcomplete, core_completion {{/ str }}"
+                            >{{#str}} markcomplete, core_completion {{/str}}</button>
+                        </div>
+                        {{/hascompleted}}
+                </dd>
+            </div>
+
+            {{^ mission.type.isachievement }}
+            {{# hascompleted }}
+            <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
+                <dt class="gu-font-medium gu-text-gray-500">
+                    {{#str}} ended, block_gearup {{/str}}
+                </dt>
+                <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
+                    <div class="gu-grow gu-mr-4">
+                        {{# isended }}
+                        {{{ timeendedhtml }}}
+                        {{/ isended }}
+                        {{^ isended }}-{{/ isended }}
+                    </div>
+                    {{^isended}}
+                    <div>
+                        <button
+                            class="btn btn-secondary btn-sm gu-text-sm"
+                            type="button"
+                            data-gu-action="open-form"
+                            data-form-class="block_gearup\form\finish_mission_instance_dynamic_form"
+                            data-form-args__missionid="{{ mission.id }}"
+                            data-form-args__missioninstid="{{ id }}"
+                            data-modal-buttons__save__label="{{# str }} finalise, block_gearup {{/ str }}"
+                            data-modal-large="false"
+                            data-modal-title="{{# str }} finalisemission, block_gearup {{/ str }}"
+                            >{{#str}} finalise, block_gearup {{/str}}</button>
+                    </div>
+                    {{/isended}}
+                </dd>
+            </div>
+            {{/ hascompleted }}
+            {{/ mission.type.isachievement }}
+
+            {{# hasstarted }}
+            <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
+                <dt class="gu-font-medium gu-text-gray-500">
+                    {{#str}} objectives, block_gearup {{/str}}
+                </dt>
+                <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
+
+                    <div class="gu-grow gu-divide-y gu-divide-gray-200" id="objectives-list-{{ uniqid }}">
+                        {{#objinsts}}
+                        <div class="gu-flex gu-py-4 sm:gu-py-4 first:gu-pt-0 last:gu-pb-0">
+                            <div class="gu-grow">
+                                <div class="">
+                                    {{#iscompleted}}☑︎{{/iscompleted}}
+                                    {{^iscompleted}}☐{{/iscompleted}}
+                                    {{# mission.type.isachievement }}
+                                    {{ objective.type }}
+                                    {{/ mission.type.isachievement }}
+                                    {{^ mission.type.isachievement }}
+                                    {{ objective.label }}
+                                    {{/ mission.type.isachievement }}
+                                    {{# objective.iscountable }}
+                                    ({{ counter }}/{{ objective.countneeded }})
+                                    {{/ objective.iscountable }}
+                                </div>
+
+                                {{^ mission.type.isachievement }}
+                                <div class="gu-text-xs gu-text-gray-700">
+                                    {{ objective.type }}
+                                </div>
+                                {{/ mission.type.isachievement }}
+                            </div>
+
+                            {{^ hascompleted }}
+                            {{# hasstarted }}
+                            {{^ iscompleted }}
+                            <div class="gu-ml-2 gu-shrink-0">
+                                <button class="btn btn-secondary btn-sm gu-inline-flex gu-items-center"
+                                    data-gu-action="open-form"
+                                    data-form-class="block_gearup\form\objective_instance_increment_counter_dynamic_form"
+                                    data-form-args__missioninstid="{{ id }}"
+                                    data-form-args__objectiveid="{{ objective.id }}"
+                                    {{# objective.iscountable }}
+                                    data-modal-title="{{#str}} increment, block_gearup {{/str}}"
+                                    {{/ objective.iscountable }}
+                                    {{^ objective.iscountable }}
+                                    data-modal-large="false"
+                                    data-modal-title="{{#str}} confirm, core {{/str}}"
+                                    data-modal-buttons__save__label="{{#str}} confirm, core {{/str}}"
+                                    {{/ objective.iscountable }}
+                                    type="button">
+                                    <span class="gu-sr-only">{{#str}} increment, block_gearup {{/str}}</span>
+                                    {{#pix}} t/add {{/pix}}
+                                </button>
+                            </div>
+                            {{/ iscompleted }}
+                            {{/ hasstarted }}
+
+                            {{# counter }}
+                            <div class="gu-ml-2 gu-shrink-0">
+                                <button
+                                    class="btn btn-secondary btn-sm gu-inline-flex gu-items-center"
+                                    data-gu-action="open-form"
+                                    data-form-class="block_gearup\form\objective_instance_reset_dynamic_form"
+                                    data-form-args__missioninstid="{{ id }}"
+                                    data-form-args__objectiveid="{{ objective.id }}"
+                                    data-modal-buttons__save__label="{{# str }} reset, core {{/ str }}"
+                                    data-modal-large="false"
+                                    data-modal-title="{{# str }} resetobjective, block_gearup {{/ str }}"
+                                    type="button">
+                                    <span class="gu-sr-only">{{#str}} reset, core {{/str}}</span>
+                                    {{#pix}} t/reset {{/pix}}
+                                </button>
+                            </div>
+                            {{/ counter }}
+                            {{/ hascompleted }}
+
+                        </div>
+                        {{/objinsts}}
+                    </div>
+
+                </dd>
+            </div>
+            {{/ hasstarted }}
+        </dl>
+    </div>
+    {{/missioninst}}
+</div>
+{{#js}}
+require(['core/str', 'core/modal_factory', 'core/modal_events', 'block_gearup/role_button', 'block_gearup/modal_form',
+    'block_gearup/compat'], function(Str, ModalFactory, ModalEvents, RoleButton, ModalForm, Compact) {
+
+    RoleButton.delegateClick('#mission-inst-{{ uniqid }}', '[data-action=confirm-url]', function(node) {
+        var url = node.dataset.url;
+        if (!url) {
+            return;
+        }
+        ModalFactory.create(Compact.patchModalConfig({
+            type: ModalFactory.types.SAVE_CANCEL,
+            title: Str.get_string('confirm', 'core'),
+            body: Str.get_string('areyousure', 'core'),
+            removeOnClose: true,
+        })).then(function(modal) {
+                modal.setSaveButtonText(Str.get_string('confirm', 'core'));
+                modal.getRoot().on(ModalEvents.save, function() {
+                    document.location.href = url;
+                });
+            modal.show();
+        });
+    });
+});
+{{/js}}

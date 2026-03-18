@@ -1,0 +1,104 @@
+{{#hasany}}
+<div id="gu-achievements-{{uniqid}}">
+    <h5 class="gu-heading-xs gu-flex gu-items-center">
+        <div class="gu-flex-1">
+            {{#context.iscourse}}
+            {{#str}} achievementstrackercourse, block_gearup {{/str}}
+            {{/context.iscourse}}
+            {{#context.issystem}}
+            {{#str}} achievementstrackersystem, block_gearup {{/str}}
+            {{/context.issystem}}
+            {{#context.anywhere}}
+            {{#str}} achievementstracker, block_gearup {{/str}}
+            {{/context.anywhere}}
+        </div>
+        <div class="gu-ml-2">{{totalcompleted}}/{{total}}</div>
+    </h5>
+
+    <div class="gu-space-y-1">
+        {{#hasinstances}}
+        <div class="gu-space-y-1">
+        {{#instances}}
+        <div>
+            <a href="#" onclick="return false" data-element="trigger" data-id="{{ id }}"
+                {{# needsattention }}data-announce{{/ needsattention }}
+                class="[.no-overflow_&]:gu-mx-0 gu--m-1 gu-p-1 gu-no-underline gu-text-current gu-relative gu-flex gu-gap-2 gu-z-10 gu-group gu-cursor-pointer gu-bg-gray-100 gu-bg-opacity-0 hover:gu-bg-opacity-100 gu-transition-colors gu-rounded  focus:gu-ring-inset focus:gu-ring focus:gu-ring-blue-500">
+                <div class="gu-h-16 gu-w-16 gu-shrink-0">
+                    {{#hascompleted}}
+                        {{#mission}}{{> block_gearup/achievements/badge_thumbnail}}{{/mission}}
+                    {{/hascompleted}}
+                    {{^hascompleted}}
+                        {{> block_gearup/achievements/badge_thumbnail_locked}}
+                    {{/hascompleted}}
+                </div>
+                <div class="gu-flex gu-grow gu-self-stretch gu-leading-none gu-overflow-hidden gu-flex-col gu-py-1">
+                    <div class="gu-grow gu-flex gu-flex-col">
+                        <div class="gu-flex gu-gap-0.5">
+                            <h3 class="gu-grow gu-font-bold gu-text-base gu-leading-snug gu-m-0 gu-truncate" title="{{ mission.title }}">{{ mission.title }}</h3>
+                            {{^hascompleted}}<div class="gu-shrink-0 gu-text-xs">{{ completionratiopc }}%</div>{{/hascompleted}}
+                        </div>
+                        <div class="gu-grow gu-flex gu-items-center">
+                            <div class="gu-truncate gu-text-sm">{{ instructions }}</div>
+                        </div>
+                    </div>
+                    {{#hascompleted}}
+                    <!-- <div class="gu-text-gray-500 gu-text-2xs">{{{ timecompletedhtml }}}</div> -->
+                    {{/hascompleted}}
+                    {{^hascompleted}}
+                    <div class="gu-bg-gray-100 gu-h-px gu-w-full gu-relative gu-mt-1" style="height: 4px;">
+                        <div class="gu-bg-blue-600 gu-absolute gu-left-0 gu-inset-y-0 {{# iscompletionrationonzero }}gu-min-w-1{{/ iscompletionrationonzero }}"
+                            style="width: {{ completionratiopc }}%"></div>
+                    </div>
+                    {{/hascompleted}}
+                </div>
+            </a>
+        </div>
+        {{/instances}}
+        </div>
+        {{/hasinstances}}
+
+        {{#hasrecentlycompleted}}
+        <div class="[.no-overflow_&]:gu-mx-0 gu-flex gu-gap-2 gu-p-1 gu--m-1 gu-overflow-x-hidden">
+        {{#recentlycompleted}}
+        <div>
+            <a href="#" onclick="return false" data-element="trigger" data-id="{{ id }}"
+                    {{# needsattention }}data-announce{{/ needsattention }}
+                    class="gu-block gu-no-underline gu-text-current">
+                <div class="gu-h-16 gu-w-16">
+                    {{#hascompleted}}
+                        {{#mission}}{{> block_gearup/achievements/badge_thumbnail}}{{/mission}}
+                    {{/hascompleted}}
+                    {{^hascompleted}}
+                        {{> block_gearup/achievements/badge_thumbnail_locked}}
+                    {{/hascompleted}}
+                </div>
+            </a>
+        </div>
+        {{/recentlycompleted}}
+        </div>
+        {{/hasrecentlycompleted}}
+    </div>
+
+    {{#hasmore}}
+    <div class="gu-uppercase gu-text-2xs gu-my-2">
+        <a href="{{ moreurl }}">
+            {{#str}} viewall, block_gearup {{/str}}
+        </a>
+    </div>
+    {{/hasmore}}
+</div>
+{{#js}}
+require(['block_gearup/modal_achievement'], function(Modal) {
+    Modal.registerFromRoot('#gu-achievements-{{uniqid}}');
+});
+require(['block_gearup/achievement_toast'], function(Achievement) {
+    document.querySelectorAll('#gu-achievements-{{uniqid}} [data-announce][data-id]').forEach(function(node) {
+        const id = parseInt(node.dataset.id, 10);
+        if (!id) {
+            return;
+        }
+        Achievement.queueMissionInstanceIds([id]);
+    });
+});
+{{/js}}
+{{/hasany}}

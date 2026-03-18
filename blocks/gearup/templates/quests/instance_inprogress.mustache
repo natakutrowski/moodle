@@ -1,0 +1,32 @@
+<div data-gu-type="missioninst" data-id="{{id}}" id="quest-{{id}}-{{uniqid}}">
+    <a role="button" href="#" onclick="return false"
+            class="[.no-overflow_&]:gu-mx-0 gu--mx-1 gu-px-1 gu-py-1 gu-text-current gu-no-underline gu-flex gu-gap-2 gu-bg-gray-100 gu-bg-opacity-0 hover:gu-bg-opacity-100 gu-transition-colors gu-rounded focus:gu-ring-inset focus:gu-ring focus:gu-ring-blue-500"
+            data-gu-action="open-quest">
+        <div class="gu-relative gu-h-16 gu-w-16 gu-shrink-0">
+            <div class="gu-h-full gu-w-full">
+                {{#mission}}{{> block_gearup/quests/narrator_thumbnail}}{{/mission}}
+            </div>
+            {{#needsattention}}
+                <div data-attention="hide" class="gu-animate-ping gu-w-4 gu-h-4 gu-absolute gu-rounded-full gu--top-1 gu--left-1 gu-font-bold gu-text-center gu-bg-red-500"></div>
+                <div data-attention="hide" class="gu-w-4 gu-h-4 gu-absolute gu-rounded-full gu--top-1 gu--left-1 gu-font-bold gu-text-center gu-bg-red-500 gu-text-white gu-text-2xs gu-flex gu-items-center gu-justify-center">1</div>
+            {{/needsattention}}
+        </div>
+        <div class="gu-grow gu-h-16 gu-overflow-hidden">
+            <h3 class="gu-font-bold gu-text-base gu-leading-snug gu-m-0 gu-mb-1 gu-truncate" title="{{ mission.title }}">
+                {{ mission.title }}
+            </h3>
+            <div class="gu-line-clamp-2 gu-leading-5 gu-text-sm gu-italic gu-text-gray-700">
+                {{ storylineexcerpt }}
+            </div>
+        </div>
+    </a>
+    <div>
+        {{^hascompleted}}
+        <ul class="!gu-list-none gu-m-0 gu-p-0 gu-mt-2">
+            {{#objinsts}}
+            <li>{{> block_gearup/quests/objective_instance }}</li>
+            {{/objinsts}}
+        </ul>
+        {{/hascompleted}}
+    </div>
+</div>

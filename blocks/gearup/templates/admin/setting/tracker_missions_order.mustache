@@ -1,0 +1,44 @@
+{{!
+    This file is part of Level Up Quest.
+
+    Level Up Quest is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Level Up Quest is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
+
+    https://levelup.plus
+}}
+{{!
+    @template block_gearup/admin/setting/tracker_missions_order
+
+    TODO describe template tracker_missions_order
+
+    Example context (json):
+    {
+    }
+}}
+<div class="block_gearup">
+    <div class="gu-flex gu-flex-col gu-space-y-1">
+        {{# sections }}
+            <div>
+                {{^isfirst}}<label class="gu-m-0">{{/isfirst}}
+                <select id="{{ id }}{{n}}" name="{{ name }}[{{ type }}]" class="form-control form-select gu-inline-block gu-w-auto" {{#readonly}}disabled{{/readonly}}>
+                    {{# options }}
+                        <option value="{{ value }}" {{#selected}}selected{{/selected}}>{{ label }}</option>
+                    {{/ options }}
+                </select>
+                {{ label }}
+                {{^isfirst}}</label>{{/isfirst}}
+            </div>
+        {{/ sections }}
+    </div>
+</div>
+

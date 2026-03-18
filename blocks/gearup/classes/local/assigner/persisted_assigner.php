@@ -1,0 +1,76 @@
+<?php
+// This file is part of Level Up Quest.
+//
+// Level Up Quest is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Level Up Quest is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
+//
+// https://levelup.plus
+
+/**
+ * Persisted assigner.
+ *
+ * @package    block_gearup
+ * @copyright  2021 Frédéric Massart
+ * @author     Frédéric Massart <fred@branchup.tech>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace block_gearup\local\assigner;
+
+use block_gearup\local\model\assigner as assigner_persistent;
+use block_gearup\local\assigner\type\type;
+
+/**
+ * Persisted assigner.
+ *
+ * @package    block_gearup
+ * @copyright  2021 Frédéric Massart
+ * @author     Frédéric Massart <fred@branchup.tech>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class persisted_assigner implements assigner {
+
+    protected $persistent;
+    protected $typeresolver;
+
+    public function __construct(assigner_persistent $persistent, $typeresolver) {
+        $this->persistent = $persistent;
+        $this->typeresolver = $typeresolver;
+    }
+
+    public function get_id(): int {
+        return $this->persistent->get('id');
+    }
+
+    public function get_label(): string {
+        return $this->persistent->get('label');
+    }
+
+    public function get_persistent(): assigner_persistent {
+        return $this->persistent;
+    }
+
+    public function get_type(): type {
+        $type = $this->persistent->get('type');
+        return $this->typeresolver->get_type($type);
+    }
+
+    public function get_type_config() {
+        return $this->persistent->get('configdata');
+    }
+
+    public function is_enabled(): bool {
+        return (bool) $this->persistent->get('enabled');
+    }
+
+}

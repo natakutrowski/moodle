@@ -1,0 +1,37 @@
+{{< block_gearup/zero_state_block}}
+    {{$ iconarea }}{{/ iconarea }}
+    {{$ title }}{{#str}} nothinghereyet, block_gearup {{/str}}{{/ title }}
+    {{$ subtitle }}{{#str}} getstartednewitem, block_gearup {{/str}}{{/ subtitle }}
+    {{$ postarea }}
+        <div class="mt-4">
+            {{> block_gearup/missions_type_chooser }}
+        </div>
+    {{/ postarea }}
+{{/ block_gearup/zero_state_block}}
+
+{{#js}}
+require([], function() {
+    const purgeUrl = "{{{ purgeurl }}}"
+    const wantedForPurge = ["ArrowLeft", "ArrowLeft", "ArrowRight", "ArrowRight", "ArrowLeft", "ArrowRight", "p"];
+    let seq = [];
+    let t;
+
+    document.addEventListener('keydown', function(e) {
+        clearTimeout(t);
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "p"].includes(e.key)) {
+            return;
+        }
+        seq = seq.concat([e.key]).slice(-10);
+
+        if (seq.slice(-wantedForPurge.length).join(',') === wantedForPurge.join(',')) {
+            seq = [];
+            window.location.href = purgeUrl;
+            return;
+        }
+
+        t = setTimeout(function() {
+            seq = [];
+        }, 1200);
+    })
+})
+{{/js}}

@@ -1,0 +1,10 @@
+.availability_gearup_frontend > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.availability_gearup_frontend select {
+  display: inline;
+  width: auto;
+  max-width: 20rem;
+}

@@ -1,0 +1,42 @@
+<div class="gu-mb-4 gu-text-gray-500">{{#str}} shortcodetrackerintro, block_gearup {{/str}}</div>
+
+{{^isavailable}}
+    <div class="alert alert-warning gu-mb-0 last-of-type:[&_p]:gu-mb-0">{{{ pluginrequiredformatted }}}</div>
+{{/isavailable}}
+
+{{# isavailable }}
+<div id="gu-shortcode-{{uniqid}}" class="gu-flex gu-gap-2">
+    <pre class="gu-m-0" data-content="snippet">{{ snippet }}</pre>
+    <a href="#" onclick="return false" class="gu-group gu-text-current gu-relative gu--mt-1">
+        <div data-element="tooltip" class="gu-inline-block gu-absolute gu--top-6 gu-text-2xs gu-bg-black gu-text-white gu-px-1.5 gu-py-0.5 gu-left-2.5 gu--translate-x-1/2 gu-rounded gu-pointer-events-none gu-opacity-0 gu-duration-300 gu-transition">{{# str }}copied, block_gearup{{/str}}</div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gu-w-5 gu-h-5 gu-transition gu-text-gray-600 group-hover:gu-text-inherit">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+        </svg>
+        <span class="gu-sr-only">{{#str}}copy, core{{/str}}</span>
+    </a>
+</div>
+
+<div class="gu-mt-1 gu-text-sm gu-text-gray-500">
+    {{#str}} shortcodetrackerinsertnote, block_gearup {{/str}} {{{ helpformatted }}}
+</div>
+{{/ isavailable }}
+
+{{#js}}
+require(['block_gearup/role_button', 'block_gearup/utils'], function(RoleButton, Utils) {
+    var snippet = document.querySelector('#gu-shortcode-{{uniqid}} [data-content="snippet"]');
+    RoleButton.registerClick('#gu-shortcode-{{uniqid}} a', function(button) {
+        Utils.copyToClipboard(snippet.textContent, button);
+        var tooltip = button.querySelector('[data-element="tooltip"]');
+        var svg = button.querySelector('svg');
+        svg.classList.add('-gu-rotate-6', '!gu-text-blue-600');
+        tooltip.classList.add('gu--translate-y-0.5');
+        tooltip.classList.remove('gu-opacity-0');
+        setTimeout(function() {
+            tooltip.classList.add('gu-opacity-0');
+            tooltip.classList.remove('gu--translate-y-0.5');
+            svg.classList.remove('-gu-rotate-6', '!gu-text-blue-600');
+        }, 2000);
+    });
+})
+{{/js}}
+</div>

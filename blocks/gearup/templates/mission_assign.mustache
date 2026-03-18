@@ -1,0 +1,61 @@
+{{!
+    This file is part of Level Up Quest.
+
+    Level Up Quest is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Level Up Quest is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
+
+    https://levelup.plus
+}}
+{{!
+    @template block_gearup/mission_assign
+
+    TODO describe template mission_assign
+
+    Example context (json):
+    {
+    }
+}}
+<div id="mission-{{ uniqid }}" data-gu-refreshable data-ws='block_gearup_get_mission' data-ws-args-missionid="{{ id }}" data-template="{{$ templatename }}{{/ templatename }}">
+
+    {{! Emulate {{< block_gearup/page_intro because JS rendering fails with blocks and partials it seems. }}
+    <div class="gu-flex gu-gap-4 gu-mb-4 gu-flex-col sm:gu-flex-row">
+        <div class="gu-grow">
+            <p class="gu-m-0 gu-mt-1 gu-max-w-3xl gu-text-gray-500">
+                {{$ pageintrodesc }}{{/ pageintrodesc }}
+            </p>
+        </div>
+    </div>
+
+    {{$precontent}}{{/precontent}}
+
+    {{< block_gearup/section_intro }}
+        {{$ title }}{{#str}} assigners, block_gearup {{/str}}{{/ title }}
+        {{$ description }}
+            {{#str}} assignersexplaination, block_gearup {{/str}}
+        {{/ description }}
+    {{/ block_gearup/section_intro }}
+
+    <div class="gu-border-t gu-border-gray-200 gu-py-5 sm:gu-p-0">
+        <dl class="gu-divide-y gu-divide-gray-200">
+            <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
+                <dt class="gu-font-medium gu-text-gray-500">
+                    {{#str}} listofassigners, block_gearup {{/str}}
+                </dt>
+                <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2">
+                    {{> block_gearup/mission_assigners_list }}
+                </dd>
+            </div>
+        </dl>
+    </div>
+
+</div>

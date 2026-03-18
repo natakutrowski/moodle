@@ -1,0 +1,124 @@
+{{!
+    This file is part of Level Up Quest.
+
+    Level Up Quest is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Level Up Quest is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
+
+    https://levelup.plus
+}}
+{{!
+    @template block_gearup/achievement_details
+
+    TODO describe template achievement_details
+
+    Example context (json):
+    {
+    }
+}}
+<div id="mission-{{ uniqid }}"
+    data-gu-refreshable
+    data-ws="block_gearup_get_mission"
+    data-ws-args__missionid="{{ id }}"
+    data-template="block_gearup/achievement_details">
+
+    {{< block_gearup/page_intro }}
+        {{$ title }}{{#str}} achievement, block_gearup {{/str}}{{/title}}
+        {{$ description }}
+            {{#str}} achievementexplaination, block_gearup {{/str}}
+        {{/ description }}
+    {{/ block_gearup/page_intro }}
+
+    <div class="gu-border-t gu-border-gray-200 gu-py-5 sm:gu-p-0">
+        <dl class="gu-divide-y gu-divide-gray-200">
+            <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
+                <dt class="gu-font-medium gu-text-gray-500">
+                    {{#str}} missionidentity, block_gearup {{/str}}
+                </dt>
+                <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
+                    <div class="gu-grow gu-flex gu-gap-2 gu-items-center">
+                        <div class="gu-w-6 gu-h-6 gu-shrink-0">
+                            {{> block_gearup/achievements/badge_thumbnail }}
+                        </div>
+                        {{ title }}
+                    </div>
+                    <div class="gu-ml-2 gu-shrink-0">
+                        {{#iseditable}}
+                        <button class="btn btn-secondary btn-sm"
+                            data-gu-action="open-form"
+                            data-form-class="block_gearup\form\achievement_identity_dynamic_form"
+                            data-form-args__id="{{ id }}"
+                            data-modal-title="{{#str}}editachievement, block_gearup{{/str}}">
+                            <span class="gu-sr-only">{{#str}} edit {{/str}}</span>
+                            {{#pix}} i/edit {{/pix}}
+                        </button>
+                        {{/iseditable}}
+                    </div>
+                </dd>
+            </div>
+
+            <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
+                <dt class="gu-font-medium gu-text-gray-500">
+                    {{#str}} achievementinstructions, block_gearup {{/str}}
+                </dt>
+                <dd class="gu-flex gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2">
+                    <div class="gu-grow gu-relative">
+                        <svg class="gu-hidden sm:gu-block gu-absolute gu-top-0 gu-left-0 gu-transform gu--translate-x-3 gu--translate-y-1.5 gu-h-5 gu-w-5 gu-text-gray-300"
+                            fill="currentColor" viewBox="0 0 32 32" aria-gu-hidden="true">
+                            <path
+                                d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
+                        </svg>
+                        <div class="gu-overflow-hidden gu-max-w-lg">
+                            <div class="gu-relative gu-line-clamp-2">
+                                {{ instructions }}
+                            </div>
+                        </div>
+                    </div>
+                    {{#iseditable}}
+                    <div class="gu-ml-2 gu-shrink-0">
+                        <button class="btn btn-secondary btn-sm"
+                            data-gu-action="open-form"
+                            data-form-class="block_gearup\form\achievement_instructions_dynamic_form"
+                            data-form-args__id="{{ id }}"
+                            data-modal-title="{{#str}}editachievement, block_gearup{{/str}}">
+                            <span class="gu-sr-only">{{#str}} edit {{/str}}</span>
+                            {{#pix}} i/edit {{/pix}}
+                        </button>
+                    </div>
+                    {{/iseditable}}
+                </dd>
+            </div>
+
+        </dl>
+    </div>
+
+    {{< block_gearup/section_intro }}
+        {{$ title }}{{#str}} objectives, block_gearup {{/str}}{{/ title }}
+        {{$ description }}
+            {{#str}} objectivesareexplainationachievement, block_gearup {{/str}}
+        {{/ description }}
+    {{/ block_gearup/section_intro }}
+
+    <div class="gu-border-t gu-border-gray-200 gu-py-5 sm:gu-p-0">
+        <dl class="gu-divide-y gu-divide-gray-200">
+            <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
+                <dt class="gu-font-medium gu-text-gray-500">
+                    {{#str}} listofobjectives, block_gearup {{/str}}
+                </dt>
+                <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2">
+                    {{> block_gearup/quest_objectives_list}}
+                </dd>
+            </div>
+        </dl>
+    </div>
+
+</div>
