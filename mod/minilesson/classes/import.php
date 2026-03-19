@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -22,7 +23,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 namespace mod_minilesson;
 
 /**
@@ -33,7 +33,6 @@ namespace mod_minilesson;
  */
 class import
 {
-
     private $itemsfromjson = false;
     private $cir;
     private $isjson = false;
@@ -70,7 +69,6 @@ class import
         // Keep timestamp consistent.
         $today = time();
         $today = make_timestamp(date('Y', $today), date('m', $today), date('d', $today), 0, 0, 0);
-
     }
 
     public function set_reader($reader, $isjson = false)
@@ -91,7 +89,6 @@ class import
         $this->upt->start(); // Start table.
 
         if ($this->isjson) {
-
             $linenum = 0;
             foreach ($this->itemsfromjson as $item) {
                 $linenum++;
@@ -127,7 +124,20 @@ class import
         foreach ($keycolumns as $colname => $coldef) {
             if (isset($itemdata->{$coldef['jsonname']})) {
                 if ($coldef['type'] == 'stringarray') {
-                    $line[] = join(PHP_EOL, $itemdata->{$coldef['jsonname']});
+                    if (!is_array($itemdata->{$coldef['jsonname']})) {
+                        // If generation failed for some reason, fall back (so we dont lose it all).
+                        // First lets see if its array-like string (eg "line1,line2,line3") because it happens.
+                        $commacount = substr_count($itemdata->{$coldef['jsonname']}, ',');
+                        if ($commacount > 2) {
+                            $line[] = str_replace(',', PHP_EOL, $itemdata->{$coldef['jsonname']});
+                        } else {
+                            // If its hopeless just put the string in one line and hope the teacher can fix it up.
+                            $line[] = $itemdata->{$coldef['jsonname']};
+                        }
+                    } else {
+                        // This is the normal case. Just join the array into lines. That is how we store stringarrays in CSV.
+                        $line[] = join(PHP_EOL, $itemdata->{$coldef['jsonname']});
+                    }
                 } else {
                     $line[] = $itemdata->{$coldef['jsonname']};
                 }
@@ -258,7 +268,6 @@ class import
 
         return true;
         // Do what we have to do
-
     }
 
     public function perform_import_validation($newrecord, $cm)
@@ -282,7 +291,6 @@ class import
         $newrecord = [];
 
         foreach ($line as $keynum => $value) {
-
             // CSV files have the field name in the top line of the file = current header
             // but JSON files its in the json per item (which we stripped away to make CSV like data duh ..)
             // so we need to get the field name from the keycolumns array
@@ -322,7 +330,7 @@ class import
                     } else {
                         if (array_key_exists(strtolower($value), $this->allvoices)) {
                             $value = $this->allvoices[strtolower($value)];
-                        } else if (in_array(strtolower($value) . '_g', $this->allvoices)) {
+                        } elseif (in_array(strtolower($value) . '_g', $this->allvoices)) {
                             $value = $this->allvoices[strtolower($value) . '_g'];
                         } else {
                             // not sure how to get this to user
@@ -405,7 +413,56 @@ class import
         return $newrecord;
     }
 
-    public function export_items()
+    public function call_translate($itemsjson, $fromlang, $tolang)
+    {
+        $aigen = new aigen($this->cm);
+        $prompt = "Translate any instances of language: $fromlang , into language: $tolang in the JSON string that follows." . PHP_EOL;
+        $prompt .= "Return results in the format: {translatedjson: thetranslatedjson}" . PHP_EOL;
+        // Markdown generation throws off the AI and it adds line breaks, but these break JSON..
+        $prompt .= 'CRITICAL: The output must be valid, minified JSON. Do NOT render Markdown formatting. All newlines inside strings MUST be escaped as \n. Do not use physical line breaks. ' . PHP_EOL;
+        $prompt .= $itemsjson;
+
+        $ret = $aigen->generate_data($prompt);
+        if ($ret->success) {
+            // The JSON should have been decoded into items in the transferall process.
+            // And no need to decode again ... but markdown and JSON seem to throw it off
+            // So we check and attampt to decode if needed.
+
+            // If its not an object, try to decode it.
+            if (!is_object($ret->payload->translatedjson) && !is_array($ret->payload->translatedjson)) {
+                if (utils::is_json($ret->payload->translatedjson)) {
+                    $ret->payload->translatedjson = json_decode($ret->payload->translatedjson);
+                }
+            }
+
+            return $ret->payload->translatedjson;
+        } else {
+            return false;
+        }
+    }
+
+    public function translate_and_export_items($fromlang, $tolang)
+    {
+        $jsonformat = false;
+        $exportobj = $this->export_items($jsonformat);
+        $itemsjson = json_encode($exportobj->items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $translateditems = $this->call_translate($itemsjson, $fromlang, $tolang);
+
+        // AI sometimes returns from AI here as json and sometimes it arrives already decoded as array.
+        // So we make sure its an array as best we can
+        if ($translateditems && !is_array($translateditems) && utils::is_json($translateditems)) {
+            $translateditems = json_decode($translateditems);
+        }
+
+        if ($translateditems && is_array($translateditems)) {
+            $exportobj->items = $translateditems;
+            return json_encode($exportobj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } else {
+            return false;
+        }
+    }
+
+    public function export_items($jsonformat = true)
     {
         global $DB;
         $allitems = $DB->get_records(constants::M_QTABLE, ['minilesson' => $this->moduleinstance->id], 'itemorder ASC');
@@ -418,19 +475,25 @@ class import
                 $i++;
                 $itemobj = $this->export_item_as_jsonobj($theitem);
                 if ($itemobj) {
-                    // Do a files check .. if so move them to the final files obj at end of json file and set an id in the item
+                    // Do a files check .. if so move them to the final files obj at end of json file and set an id in the item.
                     if (count($itemobj->files) > 0) {
                         $itemobj->filesid = $i;
                         // add the files to the export obj
                         $exportobj->files[$i] = $itemobj->files;
                     }
                     unset($itemobj->files);
-                    // add the item to the items array
+                    // Add the item to the items array.
                     $exportobj->items[] = $itemobj;
                 }
             }
         }
-        return json_encode($exportobj);
+
+        // Depending on export format return JSON or an object. (Translate prefers an object).
+        if ($jsonformat) {
+            return json_encode($exportobj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } else {
+            return $exportobj;
+        }
     }
 
     public function export_item_as_jsonobj($itemrecord)
@@ -496,10 +559,9 @@ class import
                     break;
 
                 case 'voice':
-
                     if (array_key_exists(strtolower($fieldvalue), $this->allvoices)) {
                         $jsonvalue = $this->allvoices[strtolower($fieldvalue)];
-                    } else if (in_array(strtolower($fieldvalue) . '_g', $this->allvoices)) {
+                    } elseif (in_array(strtolower($fieldvalue) . '_g', $this->allvoices)) {
                         $jsonvalue = $this->allvoices[strtolower($fieldvalue) . '_g'];
                     } else {
                         $jsonvalue = 'auto';
@@ -609,5 +671,4 @@ class import
 
         return $itemobj;
     }//end of export item function
-
 }

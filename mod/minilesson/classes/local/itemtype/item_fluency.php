@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -18,8 +19,6 @@ namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
 use mod_minilesson\utils;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a page item in a minilesson activity.
@@ -28,12 +27,13 @@ use renderable;
  * @copyright  2023 Justin Hunt <justin@poodll.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class item_fluency extends item {
-
+class item_fluency extends item
+{
     // the item type
     public const ITEMTYPE = constants::TYPE_FLUENCY;
 
-    public function __construct($itemrecord, $moduleinstance=false, $context = false) {
+    public function __construct($itemrecord, $moduleinstance = false, $context = false)
+    {
         parent::__construct($itemrecord, $moduleinstance, $context);
         $this->needs_speechrec = true;
     }
@@ -44,11 +44,10 @@ class item_fluency extends item {
      * @param \renderer_base $output renderer to be used to render the action bar elements.
      * @return array
      */
-    public function export_for_template(\renderer_base $output) {
+    public function export_for_template(\renderer_base $output)
+    {
 
-        $testitem = new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
 
@@ -68,6 +67,15 @@ class item_fluency extends item {
         // Cloud Poodll.
         $maxtime = 0;
         $testitem = $this->set_cloudpoodll_details($testitem, $maxtime);
+        // In the case of Norwegian, we set the language to Norwegian Bokmal for speech recognition.
+        if ($testitem->language == 'no-NO') {
+            $testitem->language= 'nb-NO';
+        }
+
+        //add a few things to enable the saving of uploaded audio (on S3)
+        $testitem->savemedia = 1;
+        $testitem->transcode = 1;
+        $testitem->expiredays = 365;
 
         // MS token and region.
         $tokenobject = utils::fetch_msspeech_token($this->moduleinstance->region);
@@ -82,7 +90,9 @@ class item_fluency extends item {
         }
 
         // We overwrite our regular poodll region with the MS region, eg useast1 becomes eastus, frankfurt becomes westeurope.
-        $testitem->region = utils::fetch_ms_region($this->moduleinstance->region);
+        $testitem->region = $tokenobject->region;
+        $testitem->speechtokenregion = $tokenobject->region;
+        $testitem->savemediaregion = $this->moduleinstance->region;
 
         // Build sentence objects.
         /* We do this right now so we get character level arrays. So  we can match mspeech per char results
@@ -93,10 +103,12 @@ class item_fluency extends item {
         }
 
         $testitem->sentences = $this->process_spoken_sentences($sentences, []);
+        $testitem->newui = true;
         return $testitem;
     }
 
-    public static function validate_import($newrecord, $cm) {
+    public static function validate_import($newrecord, $cm)
+    {
         $error = new \stdClass();
         $error->col = '';
         $error->message = '';
@@ -114,7 +126,8 @@ class item_fluency extends item {
     /*
     * This is for use with importing, telling import class each column's is, db col name, minilesson specific data type
     */
-    public static function get_keycolumns() {
+    public static function get_keycolumns()
+    {
         // Get the basic key columns and customize a little for instances of this item type
         $keycols = parent::get_keycolumns();
         $keycols['int4'] = ['jsonname' => 'promptvoiceopt', 'type' => 'voiceopts', 'optional' => true, 'default' => null, 'dbname' => constants::POLLYOPTION];
@@ -123,17 +136,17 @@ class item_fluency extends item {
         $keycols['text1'] = ['jsonname' => 'sentences', 'type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => 'customtext1'];
         $keycols['int5'] = ['jsonname' => 'hidestartpage', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::GAPFILLHIDESTARTPAGE];
         $keycols['int6'] = ['jsonname' => 'hidewarning', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::FLUENCY_HIDEWARNING];
-        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER.'1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
-        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER.'1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER . '1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER . '1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
         return $keycols;
     }
 
      /*
-    This function return the prompt that the generate method requires. 
+    This function return the prompt that the generate method requires.
     */
-    public static function aigen_fetch_prompt($itemtemplate, $generatemethod) {
-        switch($generatemethod) {
-
+    public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
+    {
+        switch ($generatemethod) {
             case 'extract':
                 $prompt = "Extract a 1 dimensional array of 4 sentences from the following {language} text: [{text}]. ";
                 break;
@@ -151,5 +164,4 @@ class item_fluency extends item {
         }
         return $prompt;
     }
-
 }

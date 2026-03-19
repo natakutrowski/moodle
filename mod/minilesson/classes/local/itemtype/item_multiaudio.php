@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -18,8 +19,6 @@ namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
 use mod_minilesson\utils;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a multiaudio item in a minilesson activity.
@@ -30,7 +29,6 @@ use renderable;
  */
 class item_multiaudio extends item
 {
-
     //the item type
     public const ITEMTYPE = constants::TYPE_MULTIAUDIO;
 
@@ -54,9 +52,7 @@ class item_multiaudio extends item
     public function export_for_template(\renderer_base $output)
     {
 
-        $testitem = new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
 
@@ -80,14 +76,16 @@ class item_multiaudio extends item
         // Do we need a streaming token?
         $alternatestreaming = get_config(constants::M_COMPONENT, 'alternatestreaming');
         $isenglish = strpos($this->moduleinstance->ttslanguage, 'en') === 0;
-        if ($isenglish) {
+        if ($isenglish || true) {
             $tokenobject = utils::fetch_streaming_token($this->moduleinstance->region);
             if ($tokenobject) {
                 $testitem->speechtoken = $tokenobject->token;
+                $testitem->speechtokenregion = $tokenobject->region;
                 $testitem->speechtokenvalidseconds = $tokenobject->validseconds;
-                $testitem->speechtokentype = 'assemblyai';
+                 $testitem->speechtokentype = $tokenobject->tokentype;
             } else {
                 $testitem->speechtoken = false;
+                $testitem->speechtokenregion = '';
                 $testitem->speechtokenvalidseconds = 0;
                 $testitem->speechtokentype = '';
             }
@@ -132,7 +130,6 @@ class item_multiaudio extends item
             if ($newpassagehash) {
                 //check if it has changed, if its a brand new one, if so register a langmodel
                 if (!$olditemrecord || $olditemrecord->passagehash != ($this->region . '|' . $newpassagehash)) {
-
                     //build a lang model
                     $ret = utils::fetch_lang_model($passage, $this->language, $this->region);
 
@@ -205,7 +202,6 @@ class item_multiaudio extends item
     public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
     {
         switch ($generatemethod) {
-
             case 'extract':
                 $prompt = "Create a multichoice question(text) and a one dimensional array of 4 answers (answers) in {language} suitable for {level} level learners to test the learner's understanding of the following passage: [{text}] ";
                 $prompt .= "Also specify the correct answer as a number 1-4 in 'correctanswer'. ";
@@ -232,7 +228,6 @@ class item_multiaudio extends item
 
         $success = true;
         if ($oldversion < 2025071305) {
-
             // The original multiadio stored each answer in a separate field.
             // We need to convert that to the new format which is a single field with answers separated
             // by a newline character.
@@ -248,7 +243,6 @@ class item_multiaudio extends item
                         $this->itemrecord->{constants::TEXTANSWER . $anumber} = '';
                     }
                 }
-
             }
             if (count($sentences) < 2) {
                 // If we have no sentences from the old fields lets not update the record.
@@ -261,5 +255,4 @@ class item_multiaudio extends item
 
         return $success;
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -18,8 +19,6 @@ namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
 use mod_minilesson\utils;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a wordshuffle item in a minilesson activity.
@@ -30,7 +29,6 @@ use renderable;
  */
 class item_wordshuffle extends item
 {
-
     //the item type
     public const ITEMTYPE = constants::TYPE_WORDSHUFFLE;
 
@@ -43,9 +41,7 @@ class item_wordshuffle extends item
     public function export_for_template(\renderer_base $output)
     {
         $itemrecord = $this->itemrecord;
-        $testitem = new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
         //Do we need audio
@@ -135,29 +131,30 @@ class item_wordshuffle extends item
             }
         }
 
-        $processedsentences = $this->parse_gapfill_sentences($sentences);
+        $processedsentences = $this->parse_gapfill_sentences($sentences, true);
         foreach ($processedsentences as $processedsentence) {
             if (isset($testitem->sentences[$processedsentence->index])) {
                 $testitem->sentences[$processedsentence->index]->gapwords = $processedsentence->gapwords;
                 $testitem->sentences[$processedsentence->index]->hint = $processedsentence->definition;
-                $gaps = array_filter($processedsentence->gapwords,
-                function($gap) {
-                    return !empty($gap['isgap']);
-                });
+                $gaps = array_filter(
+                    $processedsentence->gapwords,
+                    function ($gap) {
+                        return !empty($gap['isgap']);
+                    }
+                );
                 $gapsanddistractors = $gaps;
                 foreach ($processedsentence->extrawords as $extraword) {
                     $gapsanddistractors[] = ['word' => $extraword, 'isgap' => true, 'gapindex' => 9999];
                 }
-                shuffle($gapsanddistractors );
+                shuffle($gapsanddistractors);
                 $testitem->sentences[$processedsentence->index]->randomgaps = $gapsanddistractors;
             }
         }
 
-        // WordShuffle also has a confirm choice option we need to include.
-        $testitem->confirmchoice = $itemrecord->{constants::CONFIRMCHOICE};
-        //$testitem->hidestartpage = $itemrecord->{constants::GAPFILLHIDESTARTPAGE} == 1;
+        // WordShuffle also has hide startpage and allow retry
+        $testitem->hidestartpage = $itemrecord->{constants::WORDSHUFFLEHIDESTARTPAGE} == 1;
         $testitem->allowretry = $itemrecord->{constants::GAPFILLALLOWRETRY} == 1;
-
+        $testitem->newui = true;
         return $testitem;
     }
 
@@ -198,13 +195,13 @@ class item_wordshuffle extends item
         $keycols = parent::get_keycolumns();
         $keycols['text5'] = ['jsonname' => 'promptvoice', 'type' => 'voice', 'optional' => true, 'default' => null, 'dbname' => constants::POLLYVOICE];
         $keycols['int4'] = ['jsonname' => 'promptvoiceopt', 'type' => 'voiceopts', 'optional' => true, 'default' => null, 'dbname' => constants::POLLYOPTION];
-        $keycols['int3'] = ['jsonname' => 'confirmchoice', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::CONFIRMCHOICE];
+        $keycols['int3'] = ['jsonname' => 'allowretry', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::GAPFILLALLOWRETRY];
         $keycols['int2'] = ['jsonname' => 'readsentence', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::READSENTENCE]; //not boolean ..
         $keycols['text1'] = ['jsonname' => 'sentences', 'type' => 'stringarray', 'optional' => false, 'default' => [], 'dbname' => 'customtext1'];
-        //$keycols['int5'] = ['jsonname' => 'hidestartpage', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::GAPFILLHIDESTARTPAGE];
-        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER.'1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
-        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER.'1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
- 
+        $keycols['int5'] = ['jsonname' => 'hidestartpage', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::WORDSHUFFLEHIDESTARTPAGE];
+        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER . '1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER . '1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+
         return $keycols;
     }
 
@@ -214,7 +211,6 @@ class item_wordshuffle extends item
     public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
     {
         switch ($generatemethod) {
-
             case 'extract':
                 $prompt = "Extract a one dimensional array of 4 short sentences (sentences) in {language} suitable for {level} level learners from the following passage: [{text}] ";
                 $prompt .= "In each sentence surround all but the first two words with square brackets, e.g [word]. ";

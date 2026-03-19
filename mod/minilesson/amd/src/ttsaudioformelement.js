@@ -23,9 +23,9 @@ export const registerElement = ({component, fragmentcallback, elementid}) => {
                 }
             });
             params.formdata = new URLSearchParams([...formdata.entries()]).toString();
-            if (loaderElement) {
-                loaderElement.classList.remove('hidden');
-            }
+        if (loaderElement) {
+            loaderElement.classList.remove('hidden');
+        }
             Fragment.loadFragment(component, fragmentcallback, Config.contextid, params)
             .then((html, js) => {
                 Templates.replaceNode(rootelement, html, js);

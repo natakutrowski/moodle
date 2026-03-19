@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -33,35 +34,51 @@ require_once($CFG->libdir . '/externallib.php');
  * @copyright  2025 YOUR NAME <your@email.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class update_progressbars extends external_api {
-
-    public static function execute_parameters() {
+class update_progressbars extends external_api
+{
+    public static function execute_parameters()
+    {
         return new external_function_parameters([
             'contextid' => new external_value(PARAM_INT, 'contextid'),
-            'ids' => new external_multiple_structure(new external_value( PARAM_INT, 'id'))
+            'ids' => new external_multiple_structure(new external_value(PARAM_INT, 'id'))
         ]);
     }
 
-    public static function execute($contextid, $ids) {
+    public static function execute($contextid, $ids)
+    {
         $params = self::validate_parameters(self::execute_parameters(), ['contextid' => $contextid, 'ids' => $ids]);
-
         $context = context::instance_by_id($params['contextid']);
         self::validate_context($context);
 
         require_capability('mod/minilesson:managetemplate', $context);
 
+        // Default return.
+        $responserows = [];
+
+        // Check for bad ids.
+        if (!$ids || count($ids) == 0) {
+            return $responserows;
+        }
+
+        // Remove any null ids, probably from a failed cron or something
+        $goodids = array_filter($ids, function ($v) {
+            return $v !== null;
+        });
+        $goodids = array_values($goodids);
+
+
         $table = new usages();
         $filterset = usages::get_filterset_object()
             ->upsert_filter('cmid', (int) $context->instanceid)
-            ->upsert_filter('ids', $params['ids']);
+            ->upsert_filter('ids', $goodids);
         $table->set_filterset($filterset);
         $table->setup();
         $table->query_db(0);
-        $responserows = [];
-        foreach($table->rawdata as $row) {
+
+        foreach ($table->rawdata as $row) {
             $formattedrow = $table->format_row($row);
             $responserow = [];
-            foreach($formattedrow as $col => $data) {
+            foreach ($formattedrow as $col => $data) {
                 $responserow[] = [
                     'column' => $col,
                     'data' => $data,
@@ -76,7 +93,8 @@ class update_progressbars extends external_api {
         return $responserows;
     }
 
-    public static function execute_returns() {
+    public static function execute_returns()
+    {
         return new external_multiple_structure(
             new external_single_structure([
                 'id' => new external_value(PARAM_INT, 'id'),
@@ -90,5 +108,4 @@ class update_progressbars extends external_api {
             ])
         );
     }
-
 }

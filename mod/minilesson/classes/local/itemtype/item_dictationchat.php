@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -18,8 +19,6 @@ namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
 use mod_minilesson\utils;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a dication chat item in a minilesson activity.
@@ -28,8 +27,8 @@ use renderable;
  * @copyright  2023 Justin Hunt <justin@poodll.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class item_dictationchat extends item {
-
+class item_dictationchat extends item
+{
     //the item type
     public const ITEMTYPE = constants::TYPE_DICTATIONCHAT;
 
@@ -39,33 +38,32 @@ class item_dictationchat extends item {
      * @param \renderer_base $output renderer to be used to render the action bar elements.
      * @return array
      */
-    public function export_for_template(\renderer_base $output){
+    public function export_for_template(\renderer_base $output)
+    {
 
-        $testitem= new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
 
         //sentences
         $sentences = [];
-        if(isset($testitem->customtext1)) {
+        if (isset($testitem->customtext1)) {
             $sentences = explode(PHP_EOL, $testitem->customtext1);
         }
         //build sentence objects containing display and phonetic text
-        $testitem->phonetic=$this->itemrecord->phonetic;
-        if(!empty($testitem->phonetic)) {
+        $testitem->phonetic = $this->itemrecord->phonetic;
+        if (!empty($testitem->phonetic)) {
             $phonetics = explode(PHP_EOL, $testitem->phonetic);
-        }else{
-            $phonetics=[];
+        } else {
+            $phonetics = [];
         }
-        $is_ssml=$testitem->voiceoption==constants::TTS_SSML;
-        $dottify=false;
-        $testitem->sentences = $this->process_spoken_sentences($sentences,$phonetics,$dottify, $is_ssml);
+        $is_ssml = $testitem->voiceoption == constants::TTS_SSML;
+        $dottify = false;
+        $testitem->sentences = $this->process_spoken_sentences($sentences, $phonetics, $dottify, $is_ssml);
 
         //cloudpoodll
         $testitem = $this->set_cloudpoodll_details($testitem);
-
+        $testitem->newui = true;
         return $testitem;
     }
 
@@ -76,13 +74,14 @@ class item_dictationchat extends item {
      * We store the segmented sentence in the phonetic field, separated by || from the phonetic text. But previously
      * we fetched it at runtime so we look out for data that has not been updated to store the segmented text
      */
-    protected function process_japanese_phonetics($sentence, $thephonetics = false) {
+    protected function process_japanese_phonetics($sentence, $thephonetics = false)
+    {
         // We have a local segmentation algorythm utils:segment_japanese but
         // sadly this segmentation algorithm mismatches with server based one we need for phonetics
         // so we are not using it. It looks like this
         // 初めまして =>(1) はじめまし て　＆　(2) はじめま　して
         // はなしてください=>(1)はな　して　く　だ　さい & (2)はな　して　ください
-        if($thephonetics) {
+        if ($thephonetics) {
             $psarray = explode('|#', $thephonetics);
             $segmentedsentence = array_key_exists(1, $psarray) ? utils::super_trim($psarray[1]) : '';
             if (!empty($segmentedsentence)) {
@@ -93,17 +92,17 @@ class item_dictationchat extends item {
         // Oh well, lets just fetch the segments now since we could not get the saved ones
         list($phones, $sentence) = utils::fetch_phones_and_segments($sentence, $this->moduleinstance->ttslanguage, $this->moduleinstance->region);
         return $sentence;
-
     }
 
-    public static function validate_import($newrecord,$cm){
+    public static function validate_import($newrecord, $cm)
+    {
         $error = new \stdClass();
-        $error->col='';
-        $error->message='';
+        $error->col = '';
+        $error->message = '';
 
-        if($newrecord->customtext1==''){
-            $error->col='customtext1';
-            $error->message=get_string('error:emptyfield',constants::M_COMPONENT);
+        if ($newrecord->customtext1 == '') {
+            $error->col = 'customtext1';
+            $error->message = get_string('error:emptyfield', constants::M_COMPONENT);
             return $error;
         }
 
@@ -114,27 +113,28 @@ class item_dictationchat extends item {
     /*
  * This is for use with importing, telling import class each column's is, db col name, minilesson specific data type
  */
-    public static function get_keycolumns(){
+    public static function get_keycolumns()
+    {
         //get the basic key columns and customize a little for instances of this item type
         $keycols = parent::get_keycolumns();
-        $keycols['int4']=['jsonname'=>'promptvoiceopt','type'=>'voiceopts','optional'=>true,'default'=>null,'dbname'=>constants::POLLYOPTION];
-        $keycols['text5']=['jsonname'=>'promptvoice','type'=>'voice','optional'=>true,'default'=>null,'dbname'=>constants::POLLYVOICE];
-        $keycols['text1']=['jsonname'=>'sentences','type'=>'stringarray','optional'=>true,'default'=>[],'dbname'=>'customtext1'];
-        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER.'1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
-        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER.'1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+        $keycols['int4'] = ['jsonname' => 'promptvoiceopt','type' => 'voiceopts','optional' => true,'default' => null,'dbname' => constants::POLLYOPTION];
+        $keycols['text5'] = ['jsonname' => 'promptvoice','type' => 'voice','optional' => true,'default' => null,'dbname' => constants::POLLYVOICE];
+        $keycols['text1'] = ['jsonname' => 'sentences','type' => 'stringarray','optional' => true,'default' => [],'dbname' => 'customtext1'];
+        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER . '1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER . '1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
         return $keycols;
     }
 
     /*
     * This function return the prompt that the generate method requires for listening gap fill items.
     */
-    public static function aigen_fetch_prompt ($itemtemplate, $generatemethod) {
-        switch($generatemethod) {
-
+    public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
+    {
+        switch ($generatemethod) {
             case 'extract':
                 $prompt = "Extract a 1 dimensional array of 4 sentences from the following {language} text: [{text}]. ";
                 $prompt .= "In each sentence surround one keyword with square brackets, e.g [word]. ";
-                    break;
+                break;
 
             case 'reuse':
                 // This is a special case where we reuse the existing data, so we do not need a prompt.
@@ -146,10 +146,8 @@ class item_dictationchat extends item {
             default:
                 $prompt = "Generate a 1 dimensional array of 4 sentences in {language} suitable for {level} level learners on the topic of: [{topic}] ";
                 $prompt .= "In each sentence surround one keyword with square brackets, e.g [word]. ";
-                    break;
+                break;
         }
         return $prompt;
     }
-
-
 }

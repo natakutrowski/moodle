@@ -75,8 +75,10 @@ export const registerElement = ({elementid}) => {
 
         const displayLineNumbers = () => {
             const lineNumbers = calculateLineNumbers();
-            lineNumbersEle.innerHTML = Array.from({length: lineNumbers.length},
-                (_, i) => `<div>${lineNumbers[i] || '&nbsp;'}</div>`).join('');
+            lineNumbersEle.innerHTML = Array.from(
+                {length: lineNumbers.length},
+                (_, i) => `<div> ${lineNumbers[i] || '&nbsp;'} </div>`
+            ).join('');
         };
 
         textarea.addEventListener('input', () => {

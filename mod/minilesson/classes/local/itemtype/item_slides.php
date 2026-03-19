@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -17,10 +18,7 @@
 namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
-use mod_minilesson\utils;
 use moodle_url;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a slides item in a minilesson activity.
@@ -29,17 +27,18 @@ use renderable;
  * @copyright  2023 Your Name <your@email.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class item_slides extends item {
-
+class item_slides extends item
+{
     //the item type
     public const ITEMTYPE = constants::TYPE_SLIDES;
 
-    public function from_record($itemrecord, $moduleinstance = false, $context = false) {
+    public function from_record($itemrecord, $moduleinstance = false, $context = false)
+    {
         parent::from_record($itemrecord, $moduleinstance, $context);
         $this->filemanageroptions['maxfiles'] = -1;
     }
 
-     /**
+    /**
      * Export the data for the mustache template.
      *
      * @param \renderer_base $output renderer to be used to render the action bar elements.
@@ -48,9 +47,7 @@ class item_slides extends item {
     public function export_for_template(\renderer_base $output)
     {
 
-        $testitem = new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
         $testitem->region = $this->region;
@@ -68,12 +65,14 @@ class item_slides extends item {
         $fs = get_file_storage();
 
         // Get all files in that file area.
-        $files = $fs->get_area_files($this->context->id, 
-        constants::M_COMPONENT,
-        constants::SLIDESFILES,
-        $this->itemrecord->id,
-        'filepath, filename',
-        false);
+        $files = $fs->get_area_files(
+            $this->context->id,
+            constants::M_COMPONENT,
+            constants::SLIDESFILES,
+            $this->itemrecord->id,
+            'filepath, filename',
+            false
+        );
 
         // Extract the filenames into an array.
         $filenames = [];
@@ -81,7 +80,8 @@ class item_slides extends item {
             $filenames[] = $file->get_filename();
         }
 
-        $testitem->slidesmarkdown = preg_replace_callback(
+        // Process markdown for files in files area.
+        $slidesmarkdown = preg_replace_callback(
             '/!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/',
             function ($matches) use ($imageserveurl, $filenames) {
                 $filename = trim($matches['filename']);
@@ -105,10 +105,31 @@ class item_slides extends item {
             $this->itemrecord->{constants::SLIDES_MARKDOWN}
         );
 
+        // Weird characters can break things like tables, so clean it a bit.
+        $slidesmarkdown = $this->sanitize_markdown($slidesmarkdown);
+
+        // Set it to output.
+        $testitem->slidesmarkdown = $slidesmarkdown;
+
         $testitem->selectedtheme = $this->itemrecord->{constants::SLIDETHEME};
         $testitem->selectedfontsize = $this->itemrecord->{constants::SLIDEFONTSIZE};
 
         return $testitem;
+    }
+
+    public function sanitize_markdown($md)
+    {
+
+        // Remove zero-width chars.
+        $md = preg_replace('/[\x{200B}\x{200C}\x{200D}\x{FEFF}]/u', '', $md);
+
+        // Replace NBSP with normal space.
+        $md = str_replace(["\xC2\xA0", "\xE2\x80\xAF"], " ", $md);
+
+        // Trim weird whitespace.
+        $md = preg_replace('/\s+$/m', '', $md);
+
+        return $md;
     }
 
     public static function validate_import($newrecord, $cm)
@@ -123,7 +144,7 @@ class item_slides extends item {
             return $error;
         }
 
-        //return false to indicate no error
+        // Return false to indicate no error.
         return false;
     }
     /*
@@ -131,7 +152,7 @@ class item_slides extends item {
      */
     public static function get_keycolumns()
     {
-        //get the basic key columns and customize a little for instances of this item type
+        // Get the basic key columns and customize a little for instances of this item type.
         $keycols = parent::get_keycolumns();
         $keycols['text1'] = ['jsonname' => 'slidesmarkdown', 'type' => 'string', 'optional' => false, 'default' => [], 'dbname' => constants::SLIDES_MARKDOWN];
         $keycols['text2'] = ['jsonname' => 'slidestheme', 'type' => 'string', 'optional' => false, 'default' => 'black', 'dbname' => constants::SLIDETHEME];
@@ -142,12 +163,11 @@ class item_slides extends item {
     }
 
     /*
-  This function return the prompt that the generate method requires. 
+  This function return the prompt that the generate method requires.
   */
     public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
     {
         switch ($generatemethod) {
-
             case 'extract':
                 $prompt = "Create a reveal.js presentation in markdown format to summarize and explain the following topic: [{text}]";
                 break;
@@ -165,6 +185,4 @@ class item_slides extends item {
         }
         return $prompt;
     }
-
-
 }

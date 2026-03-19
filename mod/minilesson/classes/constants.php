@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: ishineguy
@@ -112,6 +113,10 @@ class constants
     const TYPE_DICTATIONCHAT = 'dictationchat';
     const TYPE_LGAPFILL = 'listeninggapfill';
     const TYPE_TGAPFILL = 'typinggapfill';
+    const LGAPFILL_ENABLEVKEYBOARD = 'customtext6';
+    const LGAPFILL_CUSTOMKEYS = 'customtext7';
+    const TGAPFILL_ENABLEVKEYBOARD = 'customtext6';
+    const TGAPFILL_CUSTOMKEYS = 'customtext7';
     const TYPE_SGAPFILL = 'speakinggapfill';
     const TYPE_PGAPFILL = 'passagegapfill';
     const TYPE_COMPQUIZ = 'comprehensionquiz';
@@ -131,7 +136,7 @@ class constants
     const TYPE_WORDSHUFFLE = 'wordshuffle';
     const TYPE_SCATTER = 'scatter';
     const TYPE_SLIDES = 'slides';
-
+    const TYPE_FICTION = 'fiction';
     const AUDIOSTORYMETA = 'itemaudiofname';
     const AUDIOSTORYZOOMANDPAN = 'itemaudiostoryzoom';
     const ZOOMANDPAN_NONE = 0;
@@ -153,6 +158,7 @@ class constants
     const TTSAUTOPLAY = 'itemttsautoplay';
     const TTSDIALOG = 'itemttsdialog';
     const TTSPASSAGE = 'itemttspassage';
+    const NATIVELANGCHOOSER = 'itemnativelangchooser';
     const AUDIOSTORY = 'itemaudiostory';
     const AUDIOSTORYTIMES = 'itemaudiostorytimes';
     const TTSDIALOGOPTS = 'itemttsdialogopts';
@@ -175,6 +181,7 @@ class constants
     const FILEANSWER = 'customfile';
     const H5PFILE = 'customfile1';
     const SLIDESFILES = 'customfile1';
+    const FICTIONFILES = 'customfile1';
     const CUSTOMDATA = 'customdata';
     const CUSTOMINT = 'customint';
     const POLLYVOICE = 'customtext5';
@@ -197,6 +204,11 @@ class constants
 
     const SLIDES_MARKDOWN = 'customtext1';
     const SLIDES_MARKDOWN_DEFAULT = "# Slide 1 Title\n\nYour content here. Use markdown syntax to format text and add images.\n\n---\n\n# Slide 2 Title\n\nMore content here. You can add as many slides as you need.\n";
+    const FICTION_YARN = 'customtext1';
+    const FICTION_YARN_DEFAULT = "title: Start\n---\nNarrator: We're going to go on an adventure!\n\n<<jump Cave>>\n===\n\ntitle: Cave\n---\nNarrator: Let's look inside the spooky cave...\n<<jump theend>>\n===\n\ntitle: theend\n---\nNarrator: The end...\n===";
+    const FICTION_PRESENTATION_MODE = 'customint1';
+    const FICTION_FLOWTHROUGH_MESSAGES = 'customint2';
+    const FICTION_SHOW_NONOPTIONS = 'customint3';
     const AUDIOCHAT_ALLOWRETRY  = 'customint5';
     const READINGPASSAGE = 'customtext1';
     const PASSAGEGAPFILL_PASSAGE = 'customtext1';
@@ -215,6 +227,7 @@ class constants
     const FLUENCY_HIDEWARNING = 'customint6';
     const NOPASTING = 'customint4';
     const GAPFILLHIDESTARTPAGE = 'customint5';
+    const WORDSHUFFLEHIDESTARTPAGE = 'customint5';
     const SG_INCLUDEMATCHING = 'customint3';
     const SG_ALIENCOUNT_MULTICHOICE = 'customint1';
     const SG_ALIENCOUNT_MATCHING = 'customint2';
@@ -249,6 +262,7 @@ class constants
     const TTS_SLOW = 1;
     const TTS_VERYSLOW = 2;
     const TTS_SSML = 3;
+    const TTS_NOTTS = 4;
 
     const ALL_VOICES_NINGXIA = array(
         constants::M_LANG_ARAE => ['Hala' => 'Hala', 'Zayd' => 'Zayd'],
@@ -578,6 +592,7 @@ class constants
     const M_PUSH_CSSKEY = 9;
     const M_PUSH_CONTAINERWIDTH = 10;
     const M_PUSH_ITEMS = 11;
+    const M_PUSH_ALLOWCONTINUEATTEMPTS = 12;
 
     /**
      * No push mode selected.
@@ -695,6 +710,9 @@ class constants
 
     const FREEWRITING_SHOWRESULT = 'customint9';
 
+    const FREEWRITING_ENABLEVKEYBOARD = 'customtext1';
+    const FREEWRITING_CUSTOMKEYS = 'customtext7';
+
     const AUDIOCHAT_INSTRUCTIONSSELECTION = 'customint6';
 
     const AUDIOCHAT_FEEDBACKSELECTION = 'customint7';
@@ -724,6 +742,7 @@ class constants
         constants::TYPE_AUDIOCHAT,
         constants::TYPE_DICTATIONCHAT,
         constants::TYPE_SLIDES,
+        constants::TYPE_FICTION,
       // constants::TYPE_SMARTFRAME,
       // constants::TYPE_COMPQUIZ,
       // constants::TYPE_CONVERSATION,
@@ -743,6 +762,7 @@ class constants
     const SLIDETHEME = 'customtext2';
     const SLIDEFONTSIZE = 'customtext3';
 
+    const MULTICHOICE_CORRECTFEEDBACK = 'customtext6';
     const MULTICHOICE_HIDEANSWERTEXT = 'customint6';
 
     const MULTICHOICE_ANSWERLAYOUT = 'customint7';
@@ -750,4 +770,33 @@ class constants
     const MULTICHOICE_ANSWERLAYOUT_DEFAULT = 1;
 
     const MULTICHOICE_ANSWERLAYOUT_TWOCOLUMN = 2;
+
+    const AUDIOCHAT_STUDENT_SUBMISSION = 'customint8';
+
+    const AUDIOCHAT_AUDIOAVATAR = 'customtext7';
+
+    const NATIVELANG_PREF = "poodll_nativelang";
+
+    const KEYBOARD_LAYOUT_COMPACT = [
+        self::M_LANG_FRFR => 'à â æ ç é è ê ë î ï ô œ ù û ü ÿ',
+        self::M_LANG_FRCA => 'à â æ ç é è ê ë î ï ô œ ù û ü ÿ',
+        self::M_LANG_DEDE => 'ä ö ü ß',
+        self::M_LANG_DEAT => 'ä ö ü ß',
+        self::M_LANG_DECH => 'ä ö ü ß',
+        self::M_LANG_ESES => 'á é í ó ú ü ñ ¿ ¡',
+        self::M_LANG_ESUS => 'á é í ó ú ü ñ ¿ ¡',
+        self::M_LANG_ITIT => 'à è é ì ò ù',
+        self::M_LANG_PTPT => 'á â ã à ç é ê í ó ô õ ú',
+        self::M_LANG_PTBR => 'á â ã à ç é ê í ó ô õ ú',
+        self::M_LANG_DADK => 'æ ø å',
+        self::M_LANG_NONO => 'æ ø å',
+        self::M_LANG_SVSE => 'å ä ö',
+        self::M_LANG_FIFI => 'ä ö',
+        self::M_LANG_ISIS => 'á ð é í ó ú ý þ æ ö',
+        self::M_LANG_PLPL => 'ą ć ę ł ń ó ś ź ż',
+        self::M_LANG_CSCZ => 'á č ď é ě í ň ó ř š ť ú ů ý ž',
+        self::M_LANG_HUHU => 'á é í ó ö ő ú ü ű',
+        self::M_LANG_RORO => 'ă â î ș ț',
+        self::M_LANG_TRTR => 'ç ğ ı İ ö ş ü'
+    ];
 }

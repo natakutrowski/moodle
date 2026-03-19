@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Defines the version of minilesson
  *
@@ -26,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2025110402;
-$plugin->requires  = 2016052300;      // Requires Moodle 3.1
+$plugin->version   = 2026031000;
+$plugin->requires  = 2016052300;      // Requires Moodle 3.1.
 $plugin->component = 'mod_minilesson';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = 'Version 1.1.13 (Build 2025110402)';
+$plugin->release = 'Version 1.1.29 (Build 2026031000)';

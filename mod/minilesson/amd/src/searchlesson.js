@@ -23,6 +23,10 @@
 import Ajax from 'core/ajax';
 import * as Notification from 'core/notification';
 import Templates from 'core/templates';
+import ModalFactory from 'core/modal_factory';
+import ModalEvents from 'core/modal_events';
+import * as Str from 'core/str';
+import Fragment from 'core/fragment';
 
 
 const component = 'mod_minilesson';
@@ -30,6 +34,27 @@ const component = 'mod_minilesson';
 export const registerFilter = () => {
     const form = document.querySelector('#lessonbank_filters');
     const cardsContainer = document.querySelector('[data-region="cards-container"]');
+    const gridlayoutbtn = document.querySelector('.gridlayoutbtn');
+    const listlayoutbtn = document.querySelector('.listlayoutbtn');
+    const countcontainer = document.querySelector('.countcontainer');
+    const pagination = document.querySelector('[name="perpageselection"]');
+
+    gridlayoutbtn?.addEventListener('click', e => {
+        e.preventDefault();
+        cardsContainer.classList.remove('listlayout');
+        gridlayoutbtn.classList.add('active');
+        listlayoutbtn.classList.remove('active');
+        searchFilter(form);
+    });
+
+    listlayoutbtn?.addEventListener('click', e => {
+        e.preventDefault();
+        cardsContainer.classList.add('listlayout');
+        listlayoutbtn.classList.add('active');
+        gridlayoutbtn.classList.remove('active');
+        searchFilter(form);
+    });
+
     const searchFilter = form => {
 
         const functionname = 'local_lessonbank_list_minilessons';
@@ -46,8 +71,14 @@ export const registerFilter = () => {
                 params.append(`level[${index}]`, option.value);
             });
         }
+        if (form.elements.page) {
+            params.append('page', form.elements.page.value);
+        }
+        if (form.elements.perpage) {
+            params.append('perpage', form.elements.perpage.value);
+        }
         const args = {
-            function: functionname,
+            function : functionname,
             args: params.toString(),
         };
         Ajax.call([{
@@ -55,7 +86,13 @@ export const registerFilter = () => {
             args: args,
         }])[0].then(items => {
             items = JSON.parse(items.data);
-            Templates.render(`${component}/lessonbankitems`, {items})
+            items.islistlayot = cardsContainer.classList.contains('listlayout') ? true : false;
+            if (countcontainer) {
+                Str.get_string('foundlessons', 'mod_minilesson', items.totalitems).then((langstr) => {
+                    countcontainer.textContent = langstr;
+                });
+            }
+            Templates.render(`${component}/lessonbankitems`, items)
             .then((html, js) => {
                 return Templates.replaceNodeContents(cardsContainer, html, js);
             }).then(() => {
@@ -73,11 +110,27 @@ export const registerFilter = () => {
             return;
         }
         e.preventDefault();
+        const dirbtn = e.target.closest('[data-action="previousbtn"],[data-action="nextbtn"]');
+        if (dirbtn) {
+            const pageno = dirbtn.getAttribute('data-page');
+            const perpage = dirbtn.getAttribute('data-perpage');
+            const pagevalue = parseInt(pageno, 10) + (dirbtn.dataset.action === 'previousbtn' ? -1 : 1);
+            if (form) {
+                form.elements.page.value = pagevalue;
+                form.elements.perpage.value = perpage;
+                searchFilter(form);
+            }
+        }
         const downloadbtn = e.target.closest('[data-action="download"]');
         if (downloadbtn) {
             if (!downloadbtn.dataset.id) {
                 return;
             }
+            if (downloadbtn.classList.contains('ml_loading')) {
+                return;
+            }
+            downloadbtn.classList.add('ml_loading');
+            downloadbtn.innerHTML = "<i class='icon fa fa-spinner fa-pulse fa-fw ' aria-hidden='true'></i> ";
             const id = Number(downloadbtn.dataset.id);
             const url = new URL(window.location.href);
             url.searchParams.set('restore', id);
@@ -91,11 +144,73 @@ export const registerFilter = () => {
             wrapper.innerHTML = titlehtml + wrapper.dataset.text;
         }
     });
+    cardsContainer.addEventListener('click', e => {
+        if (e.target.href) {
+            return;
+        }
+        e.preventDefault();
+        const translatebtn = e.target.closest('[data-action="translate"]');
+        if (translatebtn) {
+            const callFragment = data => {
+                return Fragment.loadFragment(component, 'translatetoimport', M.cfg.contextid, {
+                    params: data
+                })
+                .then((response, js) => new Promise(resolve => {
+                    response = JSON.parse(response);
+                    return resolve(
+                        response,
+                        js
+                    );
+                }));
+            };
+            ModalFactory.create({
+                type: ModalFactory.types.DEFAULT,
+                large: false,
+                removeOnClose: true,
+                title: Str.get_string('translatetoimport', component),
+                body: callFragment(
+                    new URLSearchParams([...Object.entries(translatebtn.dataset)]).toString()
+                ).then((response, js) => new Promise(resolve => resolve(
+                    response.html,
+                    js
+                )))
+            }).then(function (modal) {
+                modal.hideFooter();
+                modal.getRoot().on('submit ' + ModalEvents.save, function (e) {
+                    e.preventDefault();
+                    var form = this.querySelector('form');
+                    modal.setBody(
+                        callFragment(new URLSearchParams(new FormData(form)).toString())
+                        .then((response, js) => new Promise(resolve => {
+                            if (response.redirecturl) {
+                                location.href = response.redirecturl;
+                                resolve('', js);
+                                return;
+                            }
+                            resolve(response.html, js);
+                        }))
+                    );
+                });
+                modal.show();
+            });
+        }
+    });
+if (pagination) {
+    pagination.addEventListener('change', e => {
+        const perpagevalue = e.target.value;
+        if (form) {
+            form.elements.page.value = 1;
+            form.elements.perpage.value = perpagevalue;
+            searchFilter(form);
+        }
+        });
+}
     form?.addEventListener('submit', e => {
         e.preventDefault();
+        form.querySelector('[name="page"]').value = 1;
         searchFilter(form);
     });
-    if (form) {
-        searchFilter(form);
-    }
+if (form) {
+    searchFilter(form);
+}
 };

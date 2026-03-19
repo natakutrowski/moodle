@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -17,9 +18,6 @@
 namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
-use mod_minilesson\utils;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a typing gap fill item in a minilesson activity.
@@ -28,8 +26,8 @@ use renderable;
  * @copyright  2023 Justin Hunt <justin@poodll.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class  item_typinggapfill extends item {
-
+class item_typinggapfill extends item
+{
     //the item type
     public const ITEMTYPE = constants::TYPE_TGAPFILL;
 
@@ -40,30 +38,45 @@ class  item_typinggapfill extends item {
      * @param \renderer_base $output renderer to be used to render the action bar elements.
      * @return array
      */
-    public function export_for_template(\renderer_base $output){
+    public function export_for_template(\renderer_base $output)
+    {
 
-        $testitem = new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->set_layout($testitem);
 
         // Sentences.
         $sentences = [];
-        if(isset($testitem->customtext1)) {
+        if (isset($testitem->customtext1)) {
             $sentences = explode(PHP_EOL, $testitem->customtext1);
         }
 
         $testitem->sentences = $this->process_typinggapfill_sentences($sentences);
         $testitem->allowretry = $this->itemrecord->{constants::GAPFILLALLOWRETRY} == 1;
         $testitem->hidestartpage = $this->itemrecord->{constants::GAPFILLHIDESTARTPAGE} == 1;
+        $enablevkeyboard = $this->itemrecord->{constants::TGAPFILL_ENABLEVKEYBOARD};
+        $customkeys = $this->itemrecord->{constants::TGAPFILL_CUSTOMKEYS};
+
+        // If compact layout selected (2), we fetch the keys and set to custom layout (2) for JS
+        if ($enablevkeyboard == 2) {
+            $testitem->enablevkeyboard = 2;
+            $testitem->customkeys = \mod_minilesson\utils::get_compact_keys($this->moduleinstance->ttslanguage);
+        } elseif ($enablevkeyboard == 3) {
+            // If custom layout selected (3), we set to custom layout (2) for JS
+            $testitem->enablevkeyboard = 2;
+            $testitem->customkeys = $customkeys;
+        } else {
+            $testitem->enablevkeyboard = $enablevkeyboard;
+            $testitem->customkeys = $customkeys;
+        }
 
         // cloudpoodll
         $testitem = $this->set_cloudpoodll_details($testitem);
-
+        $testitem->newui = true;
         return $testitem;
     }
 
-    public static function validate_import($newrecord, $cm) {
+    public static function validate_import($newrecord, $cm)
+    {
         $error = new \stdClass();
         $error->col = '';
         $error->message = '';
@@ -81,27 +94,30 @@ class  item_typinggapfill extends item {
     /*
     * This is for use with importing, telling import class each column's is, db col name, minilesson specific data type
     */
-    public static function get_keycolumns() {
+    public static function get_keycolumns()
+    {
         //get the basic key columns and customize a little for instances of this item type
         $keycols = parent::get_keycolumns();
         $keycols['int3'] = ['jsonname' => 'allowretry', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::GAPFILLALLOWRETRY];
         $keycols['text1'] = ['jsonname' => 'sentences', 'type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => 'customtext1'];
+        $keycols['text6'] = ['jsonname' => 'enablevkeyboard', 'type' => 'string', 'optional' => true, 'default' => 0, 'dbname' => constants::TGAPFILL_ENABLEVKEYBOARD];
+        $keycols['text7'] = ['jsonname' => 'customkeys', 'type' => 'string', 'optional' => true, 'default' => '', 'dbname' => constants::TGAPFILL_CUSTOMKEYS];
         $keycols['int5'] = ['jsonname' => 'hidestartpage', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::GAPFILLHIDESTARTPAGE];
-        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER.'1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
-        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER.'1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER . '1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+        $keycols['fileanswer_image'] = ['jsonname' => constants::FILEANSWER . '1_image', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
         return $keycols;
     }
 
     /*
     * This function return the prompt that the generate method requires for listening gap fill items.
     */
-    public static function aigen_fetch_prompt ($itemtemplate, $generatemethod) {
-        switch($generatemethod) {
-
+    public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
+    {
+        switch ($generatemethod) {
             case 'extract':
                 $prompt = "Extract a 1 dimensional array of 4 sentences from the following {language} text: [{text}]. ";
                 $prompt .= "In each sentence surround one keyword with square brackets, e.g [word]. ";
-                    break;
+                break;
 
             case 'reuse':
                 // This is a special case where we reuse the existing data, so we do not need a prompt.
@@ -113,9 +129,8 @@ class  item_typinggapfill extends item {
             default:
                 $prompt = "Generate a 1 dimensional array of 4 sentences in {language} suitable for {level} level learners on the topic of: [{topic}] ";
                 $prompt .= "In each sentence surround one keyword with square brackets, e.g [word]. ";
-                    break;
+                break;
         }
         return $prompt;
     }
-
 }

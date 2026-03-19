@@ -22,16 +22,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log', 'core/templates','mod_minilesson/animatecss', 'core/ajax', 'core/str', 'mod_minilesson/spacegame'],
-    function($, notification, def, log, templates, anim,  Ajax, str, spacegame) {
+define(
+    ['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log', 'core/templates',
+    'mod_minilesson/animatecss', 'core/ajax', 'core/str', 'mod_minilesson/spacegame', 'core/url'],
+    function ($, notification, def, log, templates, anim, Ajax, str, spacegame, Url) {
 
-  "use strict"; // jshint ;_;
+        "use strict"; // jshint ;_;
 
-  /*
-  This file is to manage the Space Game item type.
-   */
+        /*
+        This file is to manage the Space Game item type.
+         */
 
-  log.debug('MiniLesson Scatter: initialising');
+        log.debug('MiniLesson Scatter: initialising');
 
         return {
 
@@ -85,6 +87,8 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
                 self.controls.result_container = self.controls.container.find(".ml_scatter_resultscontainer");
                 self.controls.actionbutton = self.controls.container.find(".minilesson_actionbutton");
                 self.controls.retrybutton = self.controls.container.find(".minilesson-try-again");
+                self.controls.questionheader_contents = self.controls.container.find(".minilesson_questionheader_contents");
+                self.controls.itemtext  = self.controls.container.find(".mod_minilesson_itemtext ");
 
                 const $listItems = self.controls.stage.children('.ml_scatter_listitem');
                 $listItems.each((i, listitem) => {
@@ -92,7 +96,7 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
                 });
             },
 
-            shuffleItems: function() {
+            shuffleItems: function () {
                 var self = this;
                 let array = Array.from(self.itemdata.shuffleditems);
                 let currentIndex = array.length, randomIndex;
@@ -101,25 +105,23 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
                     randomIndex = Math.floor(Math.random() * currentIndex);
                     currentIndex--;
                     [array[currentIndex], array[randomIndex]] = [
-                    array[randomIndex], array[currentIndex]];
+                        array[randomIndex], array[currentIndex]];
                 }
                 self.itemdata.shuffleditems = array;
                 self.itemdata.shuffleditems.forEach(shuffleitem => {
-                    shuffleitem.item.classList.remove('borderblue','border', 'border-success',
-                        'border-warning','shake-constant','invisible');
+                    shuffleitem.item.classList.remove('selected','matched','shake');
                     self.controls.stage.append(shuffleitem.item);
                 });
             },
 
-            check_crosscard: function(e) {
+            check_crosscard: function (e) {
                 var self = this;
                 const $target = $(e.target);
                 const $listItems = self.controls.stage.children('.ml_scatter_listitem');
                 if (!$listItems.is($target)) {
                     return;
                 }
-                $listItems.filter((_, i) => !i.classList.contains('border-success'))
-                    .removeClass('borderblue border border-warning shake-constant');
+                $listItems.filter((_, i) => !i.classList.contains('matched')).removeClass('shake');
                 const currentIndex = $target.index();
                 if (self.markedIndex.length == 0) {
                     self.markedIndex.push(currentIndex);
@@ -132,30 +134,33 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
                     const lastIndex = self.markedIndex[0];
                     const lastItem = self.itemdata.shuffleditems[lastIndex];
                     const currentItem = self.itemdata.shuffleditems[currentIndex];
+                    self.markedIndex.push(currentIndex);
                     if (lastItem.key === currentItem.key) {
                         //Correct Choice
                         self.itemdata.scatteritems[currentItem.key].correct = true;
-                        $listItems.eq(lastIndex).addClass('border border-success');
-                        $listItems.eq(currentIndex).addClass('border border-success');
-                        // setTimeout(function() {
-                            $listItems.eq(lastIndex).addClass('invisible');
-                            $listItems.eq(currentIndex).addClass('invisible');
-                        // }, 300);
+                        setTimeout(function () {
+                            $listItems.eq(lastIndex).addClass('matched');
+                            $listItems.eq(currentIndex).addClass('matched');
+                            if (!$listItems.filter(':not(.matched)').length) {
+                                self.end();
+                            }
+                            self.markedIndex = [];
+                        }, 200);
                     } else {
                         self.itemdata.scatteritems[currentItem.key].correct = false;
-                        $listItems.eq(lastIndex).addClass('border border-warning shake-constant');
-                        $listItems.eq(currentIndex).addClass('border border-warning shake-constant');
-                        // setTimeout(function() {
-                            $listItems.eq(lastIndex).removeClass('border border-warning');
-                            $listItems.eq(currentIndex).removeClass('border border-warning');
-                        // }, 300);
+                        $listItems.eq(lastIndex).addClass('shake');
+                        $listItems.eq(currentIndex).addClass('shake');
+                        setTimeout(function () {
+                            $listItems.eq(lastIndex).removeClass('selected shake');
+                            $listItems.eq(currentIndex).removeClass('selected shake');
+                            self.markedIndex = [];
+                        }, 300);
                     }
-                    self.markedIndex = [];
                 }
                 self.markedIndex.forEach(i => {
-                    $listItems.eq(i).addClass('borderblue');
+                    $listItems.eq(i).addClass('selected');
                 });
-                if (!$listItems.filter(':not(.invisible)').length) {
+                if (!$listItems.filter(':not(.matched)').length) {
                     self.end();
                 }
             },
@@ -177,7 +182,7 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
 
                 // Click and space key for scatter stage
                 self.controls.stage.on('click', self.check_crosscard.bind(self));
-                self.controls.stage.on('keydown', function(e) {
+                self.controls.stage.on('keydown', function (e) {
                     if (e.key === ' ' || e.key === 'Spacebar') {
                         // Only respond if focused on a list item
                         var $focused = $(document.activeElement);
@@ -199,7 +204,7 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
                         self.progressTimer = self.controls.progress_container.find('#progresstimer').progressTimer({
                             height: '5px',
                             timeLimit: self.itemdata.timelimit,
-                            onFinish: function() {
+                            onFinish: function () {
                                 self.end();
                             }
                         }).attr('timer');
@@ -216,9 +221,12 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
                     self.controls.result_container.hide();
                     self.controls.stage.show();
                     self.controls.progress_container.find('#progresstimer,i').show();
+                    self.itemdata.scatteritems.forEach(scatteritem => {
+                       scatteritem.correct = false;
+                    });
                     self.controls.actionbutton.show();
                 });
-                self.controls.container.on('keydown', '#minilesson-try-again', function(e) {
+                self.controls.container.on('keydown', '#minilesson-try-again', function (e) {
                     if (e.key === ' ' || e.key === 'Spacebar') {
                         $(this).trigger('click');
                         e.preventDefault();
@@ -229,7 +237,7 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
                 self.controls.next_button.on('click', function () {
                     self.next_question();
                 });
-                self.controls.next_button.on('keydown', function(e) {
+                self.controls.next_button.on('keydown', function (e) {
                     if (e.key === ' ' || e.key === 'Spacebar') {
                         $(this).trigger('click');
                         e.preventDefault();
@@ -237,11 +245,11 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
                 });
             },
 
-            start: function() {
+            start: function () {
 
             },
 
-            end: function() {
+            end: function () {
                 var self = this;
                 var tdata = {
                     prettytime: '00:00',
@@ -267,20 +275,50 @@ define(['jquery', 'core/notification', 'mod_minilesson/definitions', 'core/log',
                 });
                 self.controls.result_container.show();
                 self.controls.stage.hide();
-                self.controls.progress_container.find('#progresstimer,i').hide();
+                self.controls.progress_container.hide();
                 self.controls.actionbutton.hide();
                 if (self.progressTimer) {
                     clearInterval(self.progressTimer);
                     self.progressTimer = null;
                 }
+                tdata.yellow_starImgurl = Url.imageUrl('yellow_star', 'mod_minilesson');
+                tdata.timerImgurl = Url.imageUrl('timer', 'mod_minilesson');
+                self.controls.questionheader_contents.hide();
+                self.controls.itemtext.hide();
                 templates.render('mod_minilesson/scatter_feedback', tdata).then(
-                    function(html, js) {
+                    function (html, js) {
                         self.controls.result_container.html(html);
                         templates.runTemplateJS(js || '');
+                        try {
+                            const rc = self.controls.result_container;
+                            const scatterbtn = rc.find('.ml-scatter-btn');
+                            const collapse = rc.find('#ml-scatter-fb-container');
+                            if (collapse.length && scatterbtn.length) {
+                                function updateBtn(expanded) {
+                                    if (expanded) {
+                                        scatterbtn.find('.ml-scatter-show-text').addClass('d-none');
+                                        scatterbtn.find('.ml-scatter-hide-text').removeClass('d-none');
+                                    } else {
+                                        scatterbtn.find('.ml-scatter-show-text').removeClass('d-none');
+                                        scatterbtn.find('.ml-scatter-hide-text').addClass('d-none');
+                                    }
+                                }
+                                updateBtn(collapse.hasClass('show'));
+                                collapse.on('shown.bs.collapse', function () { updateBtn(true); });
+                                collapse.on('hidden.bs.collapse', function () { updateBtn(false); });
+                                // Fallback: toggle after click (in case non-bootstrap toggling is used)
+                                scatterbtn.on('click', function () {
+                                    updateBtn(collapse.hasClass('show'));
+                                });
+                            }
+                        } catch (e) {
+                            log.debug('Error attaching collapse toggle handlers: ' + e);
+                        }
                     }
                 );
             },
 
 
         }; //end of return
-});
+    }
+);

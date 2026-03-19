@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -30,6 +31,8 @@ use renderable;
  */
 abstract class item implements templatable, renderable
 {
+    //the item type
+    public const ITEMTYPE = '';
 
     /** @var boolean force titles */
     protected $forcetitles;
@@ -87,18 +90,15 @@ abstract class item implements templatable, renderable
      * @param \stdClass $itemrecord The db record for the item.
      */
     /*
-    public static function from_id($itemid,$moduleinstance=false, $context=false) {
-        global $DB;
-
-        $itemrecord = $DB->get_record(constants::M_QTABLE,['id'=>$itemid],'*', MUST_EXIST);
-        $instance=self::from_record($itemrecord,$moduleinstance,$context);
-        return $instance;
-    }
-    */
+     public static function from_id($itemid,$moduleinstance=false, $context=false) {
+     global $DB;
+     $itemrecord = $DB->get_record(constants::M_QTABLE,['id'=>$itemid],'*', MUST_EXIST);
+     $instance=self::from_record($itemrecord,$moduleinstance,$context);
+     return $instance;
+     }
+     */
 
     /**
-
-
      * The class constructor.
      *
      * @param int $currentnumber The current number in the lesson
@@ -111,14 +111,16 @@ abstract class item implements templatable, renderable
         $this->itemrecord = $itemrecord;
         if (!$moduleinstance) {
             $this->moduleinstance = $DB->get_record(constants::M_TABLE, ['id' => $this->itemrecord->minilesson], '*', MUST_EXIST);
-        } else {
+        }
+        else {
             $this->moduleinstance = $moduleinstance;
         }
         $this->course = get_course($this->moduleinstance->course);
         if (!$context) {
             $cm = get_coursemodule_from_instance('minilesson', $this->moduleinstance->id, $this->course->id, false, MUST_EXIST);
             $this->context = \context_module::instance($cm->id);
-        } else {
+        }
+        else {
             $this->context = $context;
         }
         if (!empty($token)) {
@@ -140,12 +142,14 @@ abstract class item implements templatable, renderable
         $classname = '\\mod_minilesson\\local\\itemtype\\item_' . $itemtype;
         if (class_exists($classname)) {
             return $classname;
-        } else {
+        }
+        else {
             return false;
         }
     }
 
-    public function upgrade_item($oldversion){
+    public function upgrade_item($oldversion)
+    {
         // This is a placeholder for any upgrade logic that might be needed.
         // Each item will implement its own upgrade logic if needed.
         return true;
@@ -227,6 +231,7 @@ abstract class item implements templatable, renderable
         $keycolumns['timelimit'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'timelimit'];
         $keycolumns['layout'] = ['type' => 'layout', 'optional' => true, 'default' => 0, 'dbname' => 'layout'];
         $keycolumns['correctanswer'] = ['type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => 'correctanswer'];
+        $keycolumns['nativelangchooser'] = ['type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::NATIVELANGCHOOSER];
 
         foreach ($keycolumns as $key => $keycol) {
             $keycolumns[$key]['jsonname'] = $key;
@@ -264,18 +269,17 @@ abstract class item implements templatable, renderable
     public function export_for_template(\renderer_base $output)
     {
         $testitem = new \stdClass();
+        $testitem->itemimageurl = (string)$output->image_url(static::ITEMTYPE, constants::M_COMPONENT);
         $testitem = $this->get_common_elements($testitem);
         $testitem = $this->get_text_answer_elements($testitem);
-        $testitem = $this->get_polly_options($testitem);
-        $testitem = $this->set_layout($testitem);
 
         return $testitem;
     }
 
 
     /*
-    This function return the fileareas that the generate method will put files into
-    */
+     This function return the fileareas that the generate method will put files into
+     */
     public static function aigen_fetch_fileareas($itemtemplate, $thefiles)
     {
         $fileareas = [];
@@ -291,8 +295,8 @@ abstract class item implements templatable, renderable
     }
 
     /*
-     This function return the fields that the generate method will generate 
-    */
+     This function return the fields that the generate method will generate
+     */
     public static function aigen_fetch_placeholders($itemtemplate)
     {
         $allfields = static::get_keycolumns();
@@ -335,7 +339,7 @@ abstract class item implements templatable, renderable
                         break;
 
                     default:
-                    // Other types can be added as needed.
+                // Other types can be added as needed.
                 }
             }
             if ($isset) {
@@ -346,53 +350,50 @@ abstract class item implements templatable, renderable
         // At this point we have all the fields that are not the default value.
         // But most of these are not going to be generated.
         /*
-        foreach($placeholderfields as $index =>$thefield) {
-            switch($thefield) {
-                case 'ttspassage':
-                case 'ttspassageopts':
-                case 'ttspassagevoice':
-                case 'ttspassagespeed':
-                    break;
-
-                case 'audiofname':     
-                    break;
-
-                case 'type':
-                case 'name':
-                case 'visible':
-                case 'instructions':
-                case 'text':
-                case 'textformat':
-                case 'tts':
-                case 'ttsvoice':
-                case 'ttsoption':
-                case 'ttsautoplay':
-                case 'textarea':
-                case 'iframe':
-                case 'ytid':
-                case 'ytstart':
-                case 'ytend':
-                case 'ttsdialog':
-                case 'ttsdialogopts':
-                case 'ttsdialogvoicea':
-                case 'ttsdialogvoiceb':
-                case 'ttsdialogvoicec':
-                case 'ttsdialogvisible':
-                default:
-                    unset($placeholderfields[$index]);
-            }
-        }
-            */
+         foreach($placeholderfields as $index =>$thefield) {
+         switch($thefield) {
+         case 'ttspassage':
+         case 'ttspassageopts':
+         case 'ttspassagevoice':
+         case 'ttspassagespeed':
+         break;
+         case 'audiofname':
+         break;
+         case 'type':
+         case 'name':
+         case 'visible':
+         case 'instructions':
+         case 'text':
+         case 'textformat':
+         case 'tts':
+         case 'ttsvoice':
+         case 'ttsoption':
+         case 'ttsautoplay':
+         case 'textarea':
+         case 'iframe':
+         case 'ytid':
+         case 'ytstart':
+         case 'ytend':
+         case 'ttsdialog':
+         case 'ttsdialogopts':
+         case 'ttsdialogvoicea':
+         case 'ttsdialogvoiceb':
+         case 'ttsdialogvoicec':
+         case 'ttsdialogvisible':
+         default:
+         unset($placeholderfields[$index]);
+         }
+         }
+         */
         return $placeholderfields;
     }
 
     /*
-    This function return the prompt that the generate method requires. 
-    */
+     This function return the prompt that the generate method requires.
+     */
     public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
     {
         switch ($generatemethod) {
-
             case 'extract':
                 $prompt = "Extract 4 sentences from the following {language} text: [{text}]. " . PHP_EOL .
                     "The sentences should be suitable for {level} level learners. ";
@@ -439,13 +440,13 @@ abstract class item implements templatable, renderable
         $testitem->uniqueid = $this->itemrecord->type . $testitem->number;
 
         //Question instructions
-        if (!empty($itemrecord->{constants::TEXTINSTRUCTIONS})) {
-            $testitem->iteminstructions = $itemrecord->{constants::TEXTINSTRUCTIONS};
+        if (!empty($itemrecord->{ constants::TEXTINSTRUCTIONS})) {
+            $testitem->iteminstructions = $itemrecord->{ constants::TEXTINSTRUCTIONS};
         }
 
         //Question Text
         $itemtext = file_rewrite_pluginfile_urls(
-            $itemrecord->{constants::TEXTQUESTION},
+            $itemrecord->{ constants::TEXTQUESTION},
             'pluginfile.php',
             $this->context->id,
             constants::M_COMPONENT,
@@ -458,8 +459,8 @@ abstract class item implements templatable, renderable
         }
 
         //Question media embed
-        if (!empty($itemrecord->{constants::MEDIAIFRAME}) && !empty(trim($itemrecord->{constants::MEDIAIFRAME}))) {
-            $testitem->itemiframe = $itemrecord->{constants::MEDIAIFRAME};
+        if (!empty($itemrecord->{ constants::MEDIAIFRAME}) && !empty(trim($itemrecord->{ constants::MEDIAIFRAME}))) {
+            $testitem->itemiframe = $itemrecord->{ constants::MEDIAIFRAME};
         }
 
         //Question media items (upload)
@@ -492,22 +493,22 @@ abstract class item implements templatable, renderable
                         break;
 
                     default:
-                    //do nothing
-                }//end of extension switch
-            }//end of for each
-        }//end of if mediaurls
+                //do nothing
+                } //end of extension switch
+            } //end of for each
+        } //end of if mediaurls
 
         //TTS Question
-        if (!empty($itemrecord->{constants::TTSQUESTION}) && !empty(trim($itemrecord->{constants::TTSQUESTION}))) {
-            $testitem->itemttsaudio = $itemrecord->{constants::TTSQUESTION};
-            $testitem->itemttsaudiovoice = $itemrecord->{constants::TTSQUESTIONVOICE};
-            $testitem->itemttsoption = $itemrecord->{constants::TTSQUESTIONOPTION};
-            $testitem->itemttsautoplay = $itemrecord->{constants::TTSAUTOPLAY};
+        if (!empty($itemrecord->{ constants::TTSQUESTION}) && !empty(trim($itemrecord->{ constants::TTSQUESTION}))) {
+            $testitem->itemttsaudio = $itemrecord->{ constants::TTSQUESTION};
+            $testitem->itemttsaudiovoice = $itemrecord->{ constants::TTSQUESTIONVOICE};
+            $testitem->itemttsoption = $itemrecord->{ constants::TTSQUESTIONOPTION};
+            $testitem->itemttsautoplay = $itemrecord->{ constants::TTSAUTOPLAY};
         }
- 
+
         //YT Clip
-        if (!empty($itemrecord->{constants::YTVIDEOID}) && !empty(trim($itemrecord->{constants::YTVIDEOID}))) {
-            $ytvideoid = utils::super_trim($itemrecord->{constants::YTVIDEOID});
+        if (!empty($itemrecord->{ constants::YTVIDEOID}) && !empty(trim($itemrecord->{ constants::YTVIDEOID}))) {
+            $ytvideoid = utils::super_trim($itemrecord->{ constants::YTVIDEOID});
             //if its a YT URL we want to parse the id from it
             if (\core_text::strlen($ytvideoid) > 11) {
                 $urlbits = [];
@@ -518,15 +519,15 @@ abstract class item implements templatable, renderable
             }
             //
             $testitem->itemytvideoid = $ytvideoid;
-            $testitem->itemytvideostart = $itemrecord->{constants::YTVIDEOSTART};
-            $testitem->itemytvideoend = $itemrecord->{constants::YTVIDEOEND};
+            $testitem->itemytvideostart = $itemrecord->{ constants::YTVIDEOSTART};
+            $testitem->itemytvideoend = $itemrecord->{ constants::YTVIDEOEND};
         }
         //TTS Dialog
-        if (!empty($itemrecord->{constants::TTSDIALOG}) && !empty(trim($itemrecord->{constants::TTSDIALOG}))) {
+        if (!empty($itemrecord->{ constants::TTSDIALOG}) && !empty(trim($itemrecord->{ constants::TTSDIALOG}))) {
             $itemrecord = utils::unpack_ttsdialogopts($itemrecord);
             $testitem->itemttsdialog = true;
-            $testitem->itemttsdialogvisible = $itemrecord->{constants::TTSDIALOGVISIBLE};
-            $dialoglines = explode(PHP_EOL, $itemrecord->{constants::TTSDIALOG});
+            $testitem->itemttsdialogvisible = $itemrecord->{ constants::TTSDIALOGVISIBLE};
+            $dialoglines = explode(PHP_EOL, $itemrecord->{ constants::TTSDIALOG});
             $linesdata = [];
             foreach ($dialoglines as $theline) {
                 if (\core_text::strlen($theline) > 1) {
@@ -534,17 +535,17 @@ abstract class item implements templatable, renderable
                     switch ($startchars) {
                         case 'A)':
                             $speaker = "a";
-                            $voice = $itemrecord->{constants::TTSDIALOGVOICEA};
+                            $voice = $itemrecord->{ constants::TTSDIALOGVOICEA};
                             $thetext = \core_text::substr($theline, 2);
                             break;
                         case 'B)':
                             $speaker = "b";
-                            $voice = $itemrecord->{constants::TTSDIALOGVOICEB};
+                            $voice = $itemrecord->{ constants::TTSDIALOGVOICEB};
                             $thetext = \core_text::substr($theline, 2);
                             break;
                         case 'C)':
                             $speaker = "c";
-                            $voice = $itemrecord->{constants::TTSDIALOGVOICEC};
+                            $voice = $itemrecord->{ constants::TTSDIALOGVOICEC};
                             $thetext = \core_text::substr($theline, 2);
                             break;
                         case '>>':
@@ -557,13 +558,13 @@ abstract class item implements templatable, renderable
                             if (count($linesdata) > 0) {
                                 $voice = $linesdata[count($linesdata) - 1]->voice;
                                 $speaker = $linesdata[count($linesdata) - 1]->actor;
-                                //if they never entered A) B) or C)
-                            } else {
-                                $voice = $itemrecord->{constants::TTSDIALOGVOICEA};
+                            //if they never entered A) B) or C)
+                            }
+                            else {
+                                $voice = $itemrecord->{ constants::TTSDIALOGVOICEA};
                                 $speaker = "a";
                             }
                             $thetext = $theline;
-
                     }
                     if (empty(trim($thetext))) {
                         continue;
@@ -575,36 +576,70 @@ abstract class item implements templatable, renderable
                     $voiceoptions = constants::TTS_NORMAL;
                     if ($lineset->voice == "soundeffect") {
                         $lineset->audiourl = $CFG->wwwroot . '/' . constants::M_PATH . '/sounds/' . utils::super_trim($thetext) . '.mp3';
-                    } else {
+                    }
+                    else {
                         $lineset->audiourl = utils::fetch_polly_url($this->token, $this->region, $thetext, $voiceoptions, $voice);
                     }
                     $linesdata[] = $lineset;
-
                 }
-
             }
             $testitem->ttsdialoglines = $linesdata;
+        } // end of tts dialog
 
-        }// end of tts dialog
+        // Native Language Chooser.
+        if (!empty($itemrecord->{ constants::NATIVELANGCHOOSER})) {
+            $testitem->{ constants::NATIVELANGCHOOSER} = true;
+            $testitem->activitynativelang = $this->moduleinstance->nativelang;
+            $userprefnativelanguage = get_user_preferences(constants::NATIVELANG_PREF);
+            if (empty($userprefnativelanguage)) {
+                $usenativelanguage = $testitem->activitynativelang;
+            }
+            else {
+                $usenativelanguage = $userprefnativelanguage;
+            }
+            $langoptions = [0 => '--'] + utils::get_lang_options();
+            $nativelanglist = [];
+            foreach ($langoptions as $value => $label) {
+                $selected = ($value == $usenativelanguage);
+                $nativelanglist[] = (object)['value' => $value, 'label' => $label, 'selected' => $selected];
+            }
+            $testitem->nativelanglist = $nativelanglist;
+
+        }
+        else {
+            $testitem->{ constants::NATIVELANGCHOOSER} = false;
+            $testitem->nativelanglist = [];
+        }
 
         //TTS Passage
-        if (!empty($itemrecord->{constants::TTSPASSAGE}) && !empty(trim($itemrecord->{constants::TTSPASSAGE}))) {
+        if (!empty($itemrecord->{ constants::TTSPASSAGE}) && !empty(trim($itemrecord->{ constants::TTSPASSAGE}))) {
             $itemrecord = utils::unpack_ttspassageopts($itemrecord);
             $testitem->itemttspassage = true;
-            $textlines = utils::split_into_sentences($itemrecord->{constants::TTSPASSAGE});
-            $voice = $itemrecord->{constants::TTSPASSAGEVOICE};
-            $voiceoptions = $itemrecord->{constants::TTSPASSAGESPEED};
+            $withlinebreaks = true;
+            $textlines = utils::split_into_sentences($itemrecord->{ constants::TTSPASSAGE}, $withlinebreaks);
+            $voice = $itemrecord->{ constants::TTSPASSAGEVOICE};
+            $voiceoptions = $itemrecord->{ constants::TTSPASSAGESPEED};
             $linedatas = [];
             foreach ($textlines as $theline) {
                 if (!empty(utils::super_trim($theline))) {
                     $linedata = new \stdClass();
+                    $linedata->linebreak = false;
                     $linedata->sentence = $theline;
                     $linedata->audiourl = utils::fetch_polly_url($this->token, $this->region, $theline, $voiceoptions, $voice);
                     $linedatas[] = $linedata;
                 }
+                else {
+                    // If it is not a sentence it is a line break. We add an empty line with no audio.
+                    // In mustache we will and line break
+                    $linedata = new \stdClass();
+                    $linedata->linebreak = true;
+                    $linedata->sentence = "";
+                    $linedata->audiourl = false;
+                    $linedatas[] = $linedata;
+                }
             }
             $testitem->ttspassagelines = $linedatas;
-        }// end of tts passage
+        } // end of tts passage
 
         //Audio story files media items (upload)
         $testitem->audiostory = false;
@@ -612,8 +647,8 @@ abstract class item implements templatable, renderable
         $testitem->audiostorysubtitles = false;
         $testitem->audiostoryimages = [];
         $testitem->audiostorymeta = [];
-        if (!empty($itemrecord->{constants::AUDIOSTORYMETA})) {
-            $audiostorymeta = explode(PHP_EOL, $itemrecord->{constants::AUDIOSTORYMETA});
+        if (!empty($itemrecord->{ constants::AUDIOSTORYMETA})) {
+            $audiostorymeta = explode(PHP_EOL, $itemrecord->{ constants::AUDIOSTORYMETA});
             foreach ($audiostorymeta as $timestamp) {
                 $seconds = $this->time_to_seconds($timestamp);
                 if ($seconds !== false) {
@@ -648,41 +683,45 @@ abstract class item implements templatable, renderable
                         break;
 
                     default:
-                    //do nothing
-                }//end of extension switch
-            }//end of for each
+                //do nothing
+                } //end of extension switch
+            } //end of for each
 
             // If we do not have an audio file, we will not have an audio story.
             // Its hacky but lets allow users to use the TTS audio file as this.
-            if (empty($testitem->audiostoryaudio) && !empty($itemrecord->{constants::TTSQUESTION}) && !empty(trim($itemrecord->{constants::TTSQUESTION}))) {
-                $testitem->audiostoryaudio = utils::fetch_polly_url($this->token, $this->region, $testitem->itemttsaudio, 
-                        $testitem->itemttsoption, $testitem->itemttsaudiovoice);
+            if (empty($testitem->audiostoryaudio) && !empty($itemrecord->{ constants::TTSQUESTION}) && !empty(trim($itemrecord->{ constants::TTSQUESTION}))) {
+                $testitem->audiostoryaudio = utils::fetch_polly_url(
+                    $this->token,
+                    $this->region,
+                    $testitem->itemttsaudio,
+                    $testitem->itemttsoption,
+                    $testitem->itemttsaudiovoice
+                );
                 // Unset the TTS audio as we are using the audio story audio.
                 unset($testitem->itemttsaudio);
-
             }
 
             // Set the Zoom and Pan
-            $testitem->audiostoryzoomandpan = $itemrecord->{constants::AUDIOSTORYZOOMANDPAN};
+            $testitem->audiostoryzoomandpan = $itemrecord->{ constants::AUDIOSTORYZOOMANDPAN};
 
             // If we have enough data to make an audio story, enable it
             if (
-                count($testitem->audiostoryimages) > 0
-                && !empty($testitem->audiostoryaudio)
-                && count($testitem->audiostorymeta) > 0
+            count($testitem->audiostoryimages) > 0
+            && !empty($testitem->audiostoryaudio)
+            && count($testitem->audiostorymeta) > 0
             ) {
                 $testitem->audiostory = true;
             }
-        }//end of if audio story
+        } //end of if audio story
 
         //Question TextArea
-        if (!empty($itemrecord->{constants::QUESTIONTEXTAREA}) && !empty(trim($itemrecord->{constants::QUESTIONTEXTAREA}))) {
-            $testitem->itemtextarea = nl2br($itemrecord->{constants::QUESTIONTEXTAREA});
+        if (!empty($itemrecord->{ constants::QUESTIONTEXTAREA}) && !empty(trim($itemrecord->{ constants::QUESTIONTEXTAREA}))) {
+            $testitem->itemtextarea = nl2br($itemrecord->{ constants::QUESTIONTEXTAREA});
             $testitem->itemtextarea = format_text($testitem->itemtextarea, FORMAT_MOODLE, $editoroptions);
         }
 
         //show text prompt or dots, for listen and repeat really
-        $testitem->show_text = $itemrecord->{constants::SHOWTEXTPROMPT};
+        $testitem->show_text = $itemrecord->{ constants::SHOWTEXTPROMPT};
 
         //For right to left languages we want to add the RTL direction and right justify.
         switch ($this->moduleinstance->ttslanguage) {
@@ -705,8 +744,8 @@ abstract class item implements templatable, renderable
         $itemrecord = $this->itemrecord;
         //Text answer fields
         for ($anumber = 1; $anumber <= constants::MAXANSWERS; $anumber++) {
-            if (!empty($itemrecord->{constants::TEXTANSWER . $anumber}) && !empty(trim($itemrecord->{constants::TEXTANSWER . $anumber}))) {
-                $testitem->{'customtext' . $anumber} = $itemrecord->{constants::TEXTANSWER . $anumber};
+            if (!empty($itemrecord->{ constants::TEXTANSWER . $anumber}) && !empty(trim($itemrecord->{ constants::TEXTANSWER . $anumber}))) {
+                $testitem->{ 'customtext' . $anumber} = $itemrecord->{ constants::TEXTANSWER . $anumber};
             }
         }
         return $testitem;
@@ -716,8 +755,8 @@ abstract class item implements templatable, renderable
     {
 
         //if we need polly then lets do that
-        $testitem->usevoice = $this->itemrecord->{constants::POLLYVOICE};
-        $testitem->voiceoption = $this->itemrecord->{constants::POLLYOPTION};
+        $testitem->usevoice = $this->itemrecord->{ constants::POLLYVOICE};
+        $testitem->voiceoption = $this->itemrecord->{ constants::POLLYOPTION};
         return $testitem;
     }
 
@@ -732,7 +771,7 @@ abstract class item implements templatable, renderable
         $ytclipset = isset($testitem->itemytvideoid) && !empty($testitem->itemytvideoid);
 
         //layout
-        $testitem->layout = $this->itemrecord->{constants::LAYOUT};
+        $testitem->layout = $this->itemrecord->{ constants::LAYOUT};
         if ($testitem->layout == constants::LAYOUT_AUTO) {
             //if its not a page or shortanswer, any big content item will make it horizontal layout
             if ($testitem->type !== constants::TYPE_PAGE && $testitem->type !== constants::TYPE_SHORTANSWER) {
@@ -740,7 +779,8 @@ abstract class item implements templatable, renderable
                     $testitem->horizontal = true;
                 }
             }
-        } else {
+        }
+        else {
             switch ($testitem->layout) {
                 case constants::LAYOUT_HORIZONTAL:
                     $testitem->horizontal = true;
@@ -790,7 +830,7 @@ abstract class item implements templatable, renderable
                 );
                 $mediaurls[$filenamenoextension] = $mediaurl->__toString();
             }
-        }//end if item id
+        } //end if item id
         return $mediaurls;
     }
 
@@ -841,14 +881,15 @@ abstract class item implements templatable, renderable
         foreach ($thesentences as $sentence) {
             if (isset($customsentenceaudio[$sentence->indexplusone])) {
                 $sentence->audiourl = $customsentenceaudio[$sentence->indexplusone];
-            } else {
+            }
+            else {
                 // If we have no custom audio then we use the polly audio.
                 $sentence->audiourl = utils::fetch_polly_url(
                     $this->token,
                     $this->region,
                     $sentence->prompt,
-                    $this->itemrecord->{constants::POLLYOPTION},
-                    $this->itemrecord->{constants::POLLYVOICE}
+                    $this->itemrecord->{ constants::POLLYOPTION},
+                    $this->itemrecord->{ constants::POLLYVOICE}
                 );
             }
         }
@@ -864,7 +905,7 @@ abstract class item implements templatable, renderable
         $thesentences = $this->parse_gapfill_sentences($sentences);
         $phoneticstring = $this->itemrecord->phonetic;
         $phonetics = false;
-        if(!empty($phoneticstring)){
+        if (!empty($phoneticstring)) {
             $phonetics = explode(PHP_EOL, $phoneticstring);
         }
         $customsentenceaudio = $this->fetch_sentence_media('audio', 1);
@@ -872,27 +913,30 @@ abstract class item implements templatable, renderable
             // Get audio url
             if (isset($customsentenceaudio[$sentence->indexplusone])) {
                 $sentence->audiourl = $customsentenceaudio[$sentence->indexplusone];
-            } else {
+            }
+            else {
                 // If we have no custom audio then we use the polly audio.
                 $sentence->audiourl = utils::fetch_polly_url(
                     $this->token,
                     $this->region,
                     $sentence->prompt,
-                    $this->itemrecord->{constants::POLLYOPTION},
-                    $this->itemrecord->{constants::POLLYVOICE}
+                    $this->itemrecord->{ constants::POLLYOPTION},
+                    $this->itemrecord->{ constants::POLLYVOICE}
                 );
             }
 
             //get phonetics for each sentence
-            if($phonetics && array_key_exists($i, $phonetics)){
+            if ($phonetics && array_key_exists($i, $phonetics)) {
                 $ps = utils::super_trim($phonetics[$i]);
                 $psarray = explode('|#', $ps);
-                $sentence->phonetic = array_key_exists(0, $psarray) ? utils::super_trim($psarray[0]) : '';
-                $sentence->segmentedsentence = array_key_exists(1, $psarray) ? utils::super_trim($psarray[1]) : '';
-                if(empty($sentence->segmentedsentence)){
-                    list($phones, $segmentedsentence) = utils::fetch_phones_and_segments($sentence->sentence,
+                $sentence->phonetic = array_key_exists(0, $psarray) ?utils::super_trim($psarray[0]) : '';
+                $sentence->segmentedsentence = array_key_exists(1, $psarray) ?utils::super_trim($psarray[1]) : '';
+                if (empty($sentence->segmentedsentence)) {
+                    list($phones, $segmentedsentence) = utils::fetch_phones_and_segments(
+                        $sentence->sentence,
                         $this->moduleinstance->ttslanguage,
-                        $this->moduleinstance->region);
+                        $this->moduleinstance->region
+                    );
                     $sentence->segmentedsentence = $segmentedsentence;
                 }
             }
@@ -906,7 +950,7 @@ abstract class item implements templatable, renderable
     /*
      * Processes listening gap fill sentences
      */
-    public function parse_gapfill_sentences($sentences)
+    public function parse_gapfill_sentences($sentences, $allowmultiwordgaps = false)
     {
 
         $sentenceobjects = [];
@@ -924,60 +968,132 @@ abstract class item implements templatable, renderable
 
             $parsedstring = [];
             $started = false;
-            $words = explode(' ', $sentence);
-            $maskedwords = $gapwords = $extrawords = [];
+            // Arrays to hold the masked words, gap words, and extra words.
+            // Masked words gap words (isgap = true) that include the gap markers []. 
+            // We use this for char level entry, partic. masking partial gap words like en[courage]ment
+            $maskedwords = [];
+            // Gap words array holds the words flagging them as gaps or non-gaps and other metadata.
+            $gapwords = [];
+            // Extra words are distractors probably just for wordshuffle
+            $extrawords = [];
             if (utils::super_trim($extra) !== '') {
-                $extrawords = explode(' ', $extra);
+                // If extra contains a comma, split on commas, otherwise split on spaces.
+                $extrawordsseperator = (strpos($extra, ',') !== false) ? ',' : ' ';
+                $extrawords = explode($extrawordsseperator, $extra);
             }
-            $gaprunning = false;
+
+            // Split tokens while preserving bracketed gaps. We are not separating gapwords yet
+            // This will turn "The [quick brown] fox" into ["The", "[quick brown]", "fox"].
+            // NB it will separate the part after ] as a separate word. [fath]er => ["[fath]", "er"]
+            // if that is a problem, its probably better to fix the sentence.
+            //if (preg_match_all('/\[[^\]]+\]|[^\s]+/', $sentence, $matches)) {
+            if (preg_match_all('/\[[^\]]+\][^\s]*|[^\s]+/', $sentence, $matches)) {
+                $words = $matches[0];
+            }
+            else {
+                $words = [];
+            }
+
+            // If allowmultiwordgaps is false, we need to further split any gaps that contain spaces into multiple gaps.
+            // This will turn ["The", "[quick brown]", "fox"] into ["The", "[quick]", "[brown]", "fox"].
+            if (!$allowmultiwordgaps) {
+                $expandedwords = [];
+                foreach ($words as $word) {
+                    if (preg_match('/^\[.*\]$/', $word)) {
+                        $cleanedword = str_replace(['[', ']'], '', $word);
+                        $subwords = explode(' ', $cleanedword);
+                        foreach ($subwords as $subword) {
+                            $expandedwords[] = '[' . $subword . ']';
+                        }
+                    }
+                    else {
+                        $expandedwords[] = $word;
+                    }
+                }
+                $words = $expandedwords;
+            }
+
+            // Remove the brackets from gap words and build maskedwords and gapwords arrays.
+            // $gapindex is used to index gap words (isgap = true) only.
             $gapindex = 0;
             foreach ($words as $index => $word) {
-                if (strpos($word, '[') !== false) {
-                    $maskedwords[$index] = str_replace(['[', ']', ',', '.'], ['', '', '', ''], $word);
-                }
-                if (strpos($word, '[') !== false || $gaprunning) {
-                    $gaprunning = strpos($word, ']') === false;
+                // Check if the word is a gap (enclosed in square brackets).
+                if (preg_match('/^\[.*\]$/', $word)) {
+                    $cleanedword = str_replace(['[', ']'], '', $word);
+                    $maskedwords[$index] = $word;
                     $gapwords[] = [
-                        'index' => $gapindex++,
+                        'index' => $gapindex,
                         'isgap' => true,
-                        'word' => str_replace(['[', ']', ',', '.'], ['', '', '', ''], $word),
+                        'word' => $cleanedword,
                     ];
-                } else {
-                    $gapwords[] = [
-                        'isgap' => false,
-                        'word' => $word,
-                    ];
+                    $gapindex++;
                 }
-            }
-            $enc = mb_detect_encoding($sentence);
-            $characters = utils::do_mb_str_split($sentence, 1, $enc);
-            //encoding parameter is required for < PHP 8.0
-            //    $characters=str_split($sentence); //DEBUG ONLY - fails on multibyte characters
-            //     $characters=mb_str_split($sentence); //DEBUG ONLY - - only exists on 7.4 and greater .. ie NOT for 7.3
-
-            $wordindex = 0;
-            foreach ($characters as $character) {
-                if ($character === ' ') {
-                    $wordindex++;
-                }
-                if ($character === '[') {
-                    $started = true;
-                    continue;
-                }
-                if ($character === ']') {
-                    $started = false;
-                    continue;
-                }
-                if (array_key_exists($wordindex, $maskedwords) && $character !== " " && $character !== ".") {
-                    if ($started) {
-                        $parsedstring[] = ['index' => $wordindex, 'character' => $character, 'type' => 'input'];
-                    } else {
-                        $parsedstring[] = ['index' => $wordindex, 'character' => $character, 'type' => 'mtext'];
+                else {
+                    // Check if the word contains bracketed portions (e.g., "pre[fix]post").
+                    if (preg_match('/\[[^\]]+\]/', $word, $m)) {
+                        // This will capture the bracketed portion. eg d[oubl]e => [oubl].
+                        $truncatedword = $m[0];
+                        $cleanedword = str_replace(['[', ']'], '', $truncatedword);
+                        $maskedwords[$index] = $word;
+                        $gapwords[] = [
+                            'index' => $gapindex,
+                            'isgap' => true,
+                            'word' => $cleanedword,
+                        ];
+                        $gapindex++;
                     }
-                } else {
-                    $parsedstring[] = ['index' => $wordindex, 'character' => $character, 'type' => 'text'];
+                    else {
+                        // Otherwise, it's a normal word and not a gap.
+                        $gapwords[] = [
+                            'isgap' => false,
+                            'word' => $word,
+                        ];
+                    }
                 }
             }
+
+            // Now we build the parsedstring array at character level.
+            $enc = mb_detect_encoding($sentence);
+            foreach ($gapwords as $gindex => $gapword) {
+                // Get the word and add a trailing space to separate words.
+                $ismasked = $gapword['isgap'] && array_key_exists($gindex, $maskedwords);
+                if ($ismasked) {
+                    $theword = $maskedwords[$gindex] . ' ';
+                }
+                else {
+                    $theword = $gapword['word'] . ' ';
+                }
+                $characters = utils::do_mb_str_split($theword, 1, $enc);
+                // Encoding parameter is required for < PHP 8.0.
+                // $characters=str_split($sentence); //DEBUG ONLY - fails on multibyte characters.
+                // $characters=mb_str_split($sentence); //DEBUG ONLY - - only exists on 7.4 and greater .. ie NOT for 7.3.
+
+                foreach ($characters as $character) {
+                    if ($character === '[') {
+                        $started = true;
+                        continue;
+                    }
+                    if ($character === ']') {
+                        $started = false;
+                        continue;
+                    }
+                    if ($ismasked &&
+                    $character !== " " && $character !== "." && $character !== "," &&
+                    $character !== "!" && $character !== "?" && $character !== ";" && $character !== ":"
+                    ) {
+                        if ($started) {
+                            $parsedstring[] = ['index' => $gindex, 'character' => $character, 'type' => 'input'];
+                        }
+                        else {
+                            $parsedstring[] = ['index' => $gindex, 'character' => $character, 'type' => 'mtext'];
+                        }
+                    }
+                    else {
+                        $parsedstring[] = ['index' => $gindex, 'character' => $character, 'type' => 'text'];
+                    }
+                }
+            }
+
             $sentence = str_replace(['[', ']', ',', '.'], ['', '', '', ''], $sentence);
             $prompt = $sentence;
 
@@ -1034,9 +1150,8 @@ abstract class item implements templatable, renderable
             if ($dottify) {
                 $prompt = $this->dottify_text($sentence);
                 $displayprompt = $prompt;
-
-            } else {
-
+            }
+            else {
                 //if we have a pipe prompt = array[0] and response = array[1]
                 $sentencebits = explode('|', $sentence);
                 if (count($sentencebits) > 1) {
@@ -1045,10 +1160,12 @@ abstract class item implements templatable, renderable
                     $sentence = utils::super_trim($sentencebits[1]);
                     if (count($sentencebits) > 2) {
                         $displayprompt = utils::super_trim($sentencebits[2]);
-                    } else {
+                    }
+                    else {
                         $displayprompt = $prompt;
                     }
-                } else {
+                }
+                else {
                     $prompt = $sentence;
                     $displayprompt = $sentence;
                 }
@@ -1063,7 +1180,7 @@ abstract class item implements templatable, renderable
 
             if ($this->language == constants::M_LANG_JAJP) {
                 $thephonetics = false;
-                if(isset($phonetics[$index]) && !empty($phonetics[$index])){
+                if (isset($phonetics[$index]) && !empty($phonetics[$index])) {
                     $thephonetics = utils::super_trim($phonetics[$index]);
                 }
                 $sentence = $this->process_japanese_phonetics($sentence, $thephonetics);
@@ -1072,14 +1189,15 @@ abstract class item implements templatable, renderable
             // We prepare the audio url.
             if (isset($sentenceaudio[$sentenceindex])) {
                 $theaudiourl = $sentenceaudio[$sentenceindex];
-            } else {
+            }
+            else {
                 // If we have no custom audio then we use the polly audio.
                 $theaudiourl = utils::fetch_polly_url(
                     $this->token,
                     $this->region,
                     $prompt,
-                    $this->itemrecord->{constants::POLLYOPTION},
-                    $this->itemrecord->{constants::POLLYVOICE}
+                    $this->itemrecord->{ constants::POLLYOPTION},
+                    $this->itemrecord->{ constants::POLLYVOICE}
                 );
             }
 
@@ -1099,8 +1217,9 @@ abstract class item implements templatable, renderable
             if (isset($phonetics[$index]) && !empty($phonetics[$index])) {
                 $ps = utils::super_trim($phonetics[$index]);
                 $psarray = explode('|', $ps);
-                $s->phonetic = array_key_exists(0, $psarray) ? utils::super_trim($psarray[0]) : '';
-            } else {
+                $s->phonetic = array_key_exists(0, $psarray) ?utils::super_trim($psarray[0]) : '';
+            }
+            else {
                 $s->phonetic = '';
             }
 
@@ -1126,9 +1245,11 @@ abstract class item implements templatable, renderable
         $testitem->wwwroot = $CFG->wwwroot;
         $testitem->language = $this->language;
         $testitem->hints = '';
+        $testitem->appid = constants::M_COMPONENT;
         $testitem->owner = hash('md5', $USER->username);
-        $testitem->usevoice = $itemrecord->{constants::POLLYVOICE};
-        $testitem->voiceoption = $itemrecord->{constants::POLLYOPTION};
+        $testitem->usevoice = $itemrecord->{ constants::POLLYVOICE};
+        $testitem->voiceoption = $itemrecord->{ constants::POLLYOPTION};
+        $testitem->cloudpoodllurl = utils::get_cloud_poodll_server();
 
         //TT Recorder stuff
         $testitem->waveheight = 75;
@@ -1182,7 +1303,6 @@ abstract class item implements templatable, renderable
                 $filename
             );
             $urls[] = $mediaurl->__toString();
-
         }
         return $urls;
     }
@@ -1191,13 +1311,13 @@ abstract class item implements templatable, renderable
     {
         global $DB, $USER;
 
-        $ret = new \stdClass;
+        $ret = new \stdClass();
         $ret->error = false;
         $ret->message = '';
         $ret->payload = null;
         $data = $this->itemrecord;
 
-        $theitem = new \stdClass;
+        $theitem = new \stdClass();
         $theitem->minilesson = $this->moduleinstance->id;
         if (!isset($theitem->id) && isset($data->itemid)) {
             $theitem->id = $data->itemid;
@@ -1214,8 +1334,7 @@ abstract class item implements templatable, renderable
         //first insert a new item if we need to
         //that will give us a itemid, we need that for saving files
         if (empty($data->itemid)) {
-
-            $theitem->{constants::TEXTQUESTION} = '';
+            $theitem->{ constants::TEXTQUESTION} = '';
             $theitem->timecreated = time();
             $theitem->createdby = $USER->id;
 
@@ -1231,7 +1350,7 @@ abstract class item implements templatable, renderable
                 $ret->message = "Could not insert minilesson item!";
                 return $ret;
             }
-        }//end of if empty($data->itemid)
+        } //end of if empty($data->itemid)
 
         //handle all the text questions
         //if its an editor field, do this
@@ -1245,11 +1364,12 @@ abstract class item implements templatable, renderable
                 constants::TEXTQUESTION_FILEAREA,
                 $theitem->id
             );
-            $theitem->{constants::TEXTQUESTION} = $data->{constants::TEXTQUESTION};
-            $theitem->{constants::TEXTQUESTION_FORMAT} = $data->{constants::TEXTQUESTION_FORMAT};
-            //if its a text area field, do this
-        } else if (property_exists($data, constants::TEXTQUESTION)) {
-            $theitem->{constants::TEXTQUESTION} = $data->{constants::TEXTQUESTION};
+            $theitem->{ constants::TEXTQUESTION} = $data->{ constants::TEXTQUESTION};
+            $theitem->{ constants::TEXTQUESTION_FORMAT} = $data->{ constants::TEXTQUESTION_FORMAT};
+        //if its a text area field, do this
+        }
+        elseif (property_exists($data, constants::TEXTQUESTION)) {
+            $theitem->{ constants::TEXTQUESTION} = $data->{ constants::TEXTQUESTION};
         }
 
         //Files (audio or images) for answer options
@@ -1258,8 +1378,8 @@ abstract class item implements templatable, renderable
             foreach ($fileareas as $thefilearea) {
                 if (property_exists($data, $thefilearea)) {
                     //if this is from an import, it will be an array
-                    if (is_array($data->{$thefilearea})) {
-                        foreach ($data->{$thefilearea} as $filename => $filecontent) {
+                    if (is_array($data->{ $thefilearea})) {
+                        foreach ($data->{ $thefilearea} as $filename => $filecontent) {
                             $filerecord = array(
                                 'contextid' => $this->context->id,
                                 'component' => constants::M_COMPONENT,
@@ -1272,13 +1392,14 @@ abstract class item implements templatable, renderable
                             $fs = get_file_storage();
                             $fs->create_file_from_string($filerecord, base64_decode($filecontent));
                         }
-                    } else {
+                    }
+                    else {
                         //if this is from a form submission, this will involve draft files
                         switch ($thefilearea) {
                             case constants::FILEANSWER . $i:
                                 //save multichoice question answer images or audios
                                 file_save_draft_area_files(
-                                    $data->{$thefilearea},
+                                    $data->{ $thefilearea},
                                     $this->context->id,
                                     constants::M_COMPONENT,
                                     $thefilearea,
@@ -1289,59 +1410,60 @@ abstract class item implements templatable, renderable
                             case constants::FILEANSWER . $i . '_audio':
                                 //save sentence audio
                                 file_save_draft_area_files(
-                                    $this->itemrecord->{$thefilearea},
+                                    $this->itemrecord->{ $thefilearea},
                                     $this->context->id,
                                     constants::M_COMPONENT,
                                     $thefilearea,
                                     $theitem->id,
                                     array_merge(
-                                        $this->filemanageroptions,
-                                        ['accepted_types' => 'audio', 'maxfiles' => -1]
-                                    )
+                                    $this->filemanageroptions,
+                                ['accepted_types' => 'audio', 'maxfiles' => -1]
+                                )
                                 );
                                 break;
                             case constants::FILEANSWER . $i . '_image':
                                 //save sentence image
                                 file_save_draft_area_files(
-                                    $this->itemrecord->{$thefilearea},
+                                    $this->itemrecord->{ $thefilearea},
                                     $this->context->id,
                                     constants::M_COMPONENT,
                                     $thefilearea,
                                     $theitem->id,
                                     array_merge(
-                                        $this->filemanageroptions,
-                                        ['accepted_types' => 'image', 'maxfiles' => -1]
-                                    )
+                                    $this->filemanageroptions,
+                                ['accepted_types' => 'image', 'maxfiles' => -1]
+                                )
                                 );
                                 break;
                         }
                     }
-                }//end of if property exists filearea
-            }//end of foreach file areas
-        }//end of max answers loop
+                } //end of if property exists filearea
+            } //end of foreach file areas
+        } //end of max answers loop
 
         //Question instructions
         if (property_exists($data, constants::TEXTINSTRUCTIONS)) {
-            $theitem->{constants::TEXTINSTRUCTIONS} = $data->iteminstructions;
+            $theitem->{ constants::TEXTINSTRUCTIONS} = $data->iteminstructions;
         }
 
         // Time limit.
         if (property_exists($data, constants::TIMELIMIT)) {
-            $theitem->{constants::TIMELIMIT} = $data->{constants::TIMELIMIT};
+            $theitem->{ constants::TIMELIMIT} = $data->{ constants::TIMELIMIT};
         }
 
         //layout
         if (property_exists($data, constants::LAYOUT)) {
-            $theitem->{constants::LAYOUT} = $data->{constants::LAYOUT};
-        } else {
-            $theitem->{constants::LAYOUT} = constants::LAYOUT_AUTO;
+            $theitem->{ constants::LAYOUT} = $data->{ constants::LAYOUT};
+        }
+        else {
+            $theitem->{ constants::LAYOUT} = constants::LAYOUT_AUTO;
         }
 
         //Item media
         if (property_exists($data, constants::MEDIAQUESTION)) {
             //if this is from an import, it will be an array
-            if (is_array($data->{constants::MEDIAQUESTION})) {
-                foreach ($data->{constants::MEDIAQUESTION} as $filename => $filecontent) {
+            if (is_array($data->{ constants::MEDIAQUESTION})) {
+                foreach ($data->{ constants::MEDIAQUESTION} as $filename => $filecontent) {
                     $filerecord = array(
                         'contextid' => $this->context->id,
                         'component' => constants::M_COMPONENT,
@@ -1354,10 +1476,11 @@ abstract class item implements templatable, renderable
                     $fs = get_file_storage();
                     $fs->create_file_from_string($filerecord, base64_decode($filecontent));
                 }
-            } else {
+            }
+            else {
                 //if this is from a form submission, this will involve draft files
                 file_save_draft_area_files(
-                    $data->{constants::MEDIAQUESTION},
+                    $data->{ constants::MEDIAQUESTION},
                     $this->context->id,
                     constants::M_COMPONENT,
                     constants::MEDIAQUESTION,
@@ -1369,21 +1492,24 @@ abstract class item implements templatable, renderable
 
         // Item TTS.
         if (property_exists($data, constants::TTSQUESTION)) {
-            $theitem->{constants::TTSQUESTION} = $data->{constants::TTSQUESTION};
+            $theitem->{ constants::TTSQUESTION} = $data->{ constants::TTSQUESTION};
             if (property_exists($data, constants::TTSQUESTIONVOICE)) {
-                $theitem->{constants::TTSQUESTIONVOICE} = $data->{constants::TTSQUESTIONVOICE};
-            } else {
-                $theitem->{constants::TTSQUESTIONVOICE} = 'Amy';
+                $theitem->{ constants::TTSQUESTIONVOICE} = $data->{ constants::TTSQUESTIONVOICE};
+            }
+            else {
+                $theitem->{ constants::TTSQUESTIONVOICE} = 'Amy';
             }
             if (property_exists($data, constants::TTSQUESTIONOPTION)) {
-                $theitem->{constants::TTSQUESTIONOPTION} = $data->{constants::TTSQUESTIONOPTION};
-            } else {
-                $theitem->{constants::TTSQUESTIONOPTION} = constants::TTS_NORMAL;
+                $theitem->{ constants::TTSQUESTIONOPTION} = $data->{ constants::TTSQUESTIONOPTION};
+            }
+            else {
+                $theitem->{ constants::TTSQUESTIONOPTION} = constants::TTS_NORMAL;
             }
             if (property_exists($data, constants::TTSAUTOPLAY)) {
-                $theitem->{constants::TTSAUTOPLAY} = $data->{constants::TTSAUTOPLAY};
-            } else {
-                $theitem->{constants::TTSAUTOPLAY} = 0;
+                $theitem->{ constants::TTSAUTOPLAY} = $data->{ constants::TTSAUTOPLAY};
+            }
+            else {
+                $theitem->{ constants::TTSAUTOPLAY} = 0;
             }
         }
 
@@ -1391,7 +1517,7 @@ abstract class item implements templatable, renderable
         $edoptions = constants::ITEMTEXTAREA_EDOPTIONS;
         $edoptions['context'] = $this->context;
         if (property_exists($data, constants::QUESTIONTEXTAREA . '_editor')) {
-            $data->{constants::QUESTIONTEXTAREA . 'format'} = FORMAT_HTML;
+            $data->{ constants::QUESTIONTEXTAREA . 'format'} = FORMAT_HTML;
             $data = file_postupdate_standard_editor(
                 $data,
                 constants::QUESTIONTEXTAREA,
@@ -1401,43 +1527,44 @@ abstract class item implements templatable, renderable
                 constants::TEXTQUESTION_FILEAREA,
                 $theitem->id
             );
-            $theitem->{constants::QUESTIONTEXTAREA} = utils::super_trim($data->{constants::QUESTIONTEXTAREA});
-        } else {
-            $theitem->{constants::QUESTIONTEXTAREA} = utils::super_trim($data->{constants::QUESTIONTEXTAREA});
+            $theitem->{ constants::QUESTIONTEXTAREA} = utils::super_trim($data->{ constants::QUESTIONTEXTAREA});
+        }
+        else {
+            $theitem->{ constants::QUESTIONTEXTAREA} = utils::super_trim($data->{ constants::QUESTIONTEXTAREA});
         }
 
         // Item YT Clip.
         if (property_exists($data, constants::YTVIDEOID)) {
-            $theitem->{constants::YTVIDEOID} = $data->{constants::YTVIDEOID};
+            $theitem->{ constants::YTVIDEOID} = $data->{ constants::YTVIDEOID};
             if (property_exists($data, constants::YTVIDEOSTART)) {
-                $theitem->{constants::YTVIDEOSTART} = $data->{constants::YTVIDEOSTART};
+                $theitem->{ constants::YTVIDEOSTART} = $data->{ constants::YTVIDEOSTART};
             }
             if (property_exists($data, constants::YTVIDEOEND)) {
-                $theitem->{constants::YTVIDEOEND} = $data->{constants::YTVIDEOEND};
+                $theitem->{ constants::YTVIDEOEND} = $data->{ constants::YTVIDEOEND};
             }
         }
 
         // TTS Dialog.
-        if (property_exists($data, constants::TTSDIALOG) && $data->{constants::TTSDIALOG} !== null) {
-            $theitem->{constants::TTSDIALOG} = $data->{constants::TTSDIALOG};
-            $theitem->{constants::TTSDIALOGOPTS} = utils::pack_ttsdialogopts($data);
+        if (property_exists($data, constants::TTSDIALOG) && $data->{ constants::TTSDIALOG} !== null) {
+            $theitem->{ constants::TTSDIALOG} = $data->{ constants::TTSDIALOG};
+            $theitem->{ constants::TTSDIALOGOPTS} = utils::pack_ttsdialogopts($data);
         }
 
         // TTS Passage.
-        if (property_exists($data, constants::TTSPASSAGE) && $data->{constants::TTSPASSAGE} !== null) {
-            $theitem->{constants::TTSPASSAGE} = $data->{constants::TTSPASSAGE};
-            $theitem->{constants::TTSPASSAGEOPTS} = utils::pack_ttspassageopts($data);
+        if (property_exists($data, constants::TTSPASSAGE) && $data->{ constants::TTSPASSAGE} !== null) {
+            $theitem->{ constants::TTSPASSAGE} = $data->{ constants::TTSPASSAGE};
+            $theitem->{ constants::TTSPASSAGEOPTS} = utils::pack_ttspassageopts($data);
         }
 
         // Audio Story.
-        if (property_exists($data, constants::AUDIOSTORYMETA) && $data->{constants::AUDIOSTORYMETA} !== null) {
-            $theitem->{constants::AUDIOSTORYMETA} = $data->{constants::AUDIOSTORYMETA};
-            $theitem->{constants::AUDIOSTORYZOOMANDPAN} = $data->{constants::AUDIOSTORYZOOMANDPAN};
+        if (property_exists($data, constants::AUDIOSTORYMETA) && $data->{ constants::AUDIOSTORYMETA} !== null) {
+            $theitem->{ constants::AUDIOSTORYMETA} = $data->{ constants::AUDIOSTORYMETA};
+            $theitem->{ constants::AUDIOSTORYZOOMANDPAN} = $data->{ constants::AUDIOSTORYZOOMANDPAN};
         }
         if (property_exists($data, constants::AUDIOSTORY)) {
             //if this is from an import, it will be an array
-            if (is_array($data->{constants::AUDIOSTORY})) {
-                foreach ($data->{constants::AUDIOSTORY} as $filename => $filecontent) {
+            if (is_array($data->{ constants::AUDIOSTORY})) {
+                foreach ($data->{ constants::AUDIOSTORY} as $filename => $filecontent) {
                     $filerecord = [
                         'contextid' => $this->context->id,
                         'component' => constants::M_COMPONENT,
@@ -1450,12 +1577,13 @@ abstract class item implements templatable, renderable
                     $fs = get_file_storage();
                     $fs->create_file_from_string($filerecord, base64_decode($filecontent));
                 }
-            } else {
+            }
+            else {
                 // If this is from a form submission, this will involve draft files.
                 $asfilemanageroptions = self::fetch_filemanager_options($this->course, -1);
                 $asfilemanageroptions['accepted_types'] = '*';
                 file_save_draft_area_files(
-                    $data->{constants::AUDIOSTORY},
+                    $data->{ constants::AUDIOSTORY},
                     $this->context->id,
                     constants::M_COMPONENT,
                     constants::AUDIOSTORY,
@@ -1467,7 +1595,12 @@ abstract class item implements templatable, renderable
 
         // Save correct answer if we have one.
         if (property_exists($data, constants::CORRECTANSWER)) {
-            $theitem->{constants::CORRECTANSWER} = $data->{constants::CORRECTANSWER};
+            $theitem->{ constants::CORRECTANSWER} = $data->{ constants::CORRECTANSWER};
+        }
+
+        // Save Native Language Chooser.
+        if (property_exists($data, constants::NATIVELANGCHOOSER)) {
+            $theitem->{ constants::NATIVELANGCHOOSER} = $data->{ constants::NATIVELANGCHOOSER};
         }
 
         //save text answers and other data in custom text
@@ -1484,38 +1617,39 @@ abstract class item implements templatable, renderable
                     constants::TEXTANSWER_FILEAREA . $anumber,
                     $theitem->id
                 );
-                $theitem->{constants::TEXTANSWER . $anumber} = $data->{'customtext' . $anumber};
-                $theitem->{constants::TEXTANSWER . $anumber . 'format'} = $data->{constants::TEXTANSWER . $anumber . 'format'};
-                //if its a text field, do this
-            } else if (property_exists($data, constants::TEXTANSWER . $anumber)) {
-                $thetext = utils::super_trim($data->{constants::TEXTANSWER . $anumber});
+                $theitem->{ constants::TEXTANSWER . $anumber} = $data->{ 'customtext' . $anumber};
+                $theitem->{ constants::TEXTANSWER . $anumber . 'format'} = $data->{ constants::TEXTANSWER . $anumber . 'format'};
+            //if its a text field, do this
+            }
+            elseif (property_exists($data, constants::TEXTANSWER . $anumber)) {
+                $thetext = utils::super_trim($data->{ constants::TEXTANSWER . $anumber});
                 //segment the text if it is japanese and not already segmented
                 //TO DO: remove this
                 /*
-                if($minilesson->ttslanguage == constants::M_LANG_JAJP &&
-                    ($data->type==CONSTANTS::TYPE_LISTENREPEAT ||
-                        $data->type==CONSTANTS::TYPE_SPEECHCARDS ||
-                        $data->type==CONSTANTS::TYPE_SHORTANSWER )){
-                        if(strpos($thetext,' ')==false){
-                            //  $thetext = utils::segment_japanese($thetext);
-                        }
-                }
-                */
-                $theitem->{constants::TEXTANSWER . $anumber} = $thetext;
+                 if($minilesson->ttslanguage == constants::M_LANG_JAJP &&
+                 ($data->type==CONSTANTS::TYPE_LISTENREPEAT ||
+                 $data->type==CONSTANTS::TYPE_SPEECHCARDS ||
+                 $data->type==CONSTANTS::TYPE_SHORTANSWER )){
+                 if(strpos($thetext,' ')==false){
+                 //  $thetext = utils::segment_japanese($thetext);
+                 }
+                 }
+                 */
+                $theitem->{ constants::TEXTANSWER . $anumber} = $thetext;
             }
         }
 
         // We might have other customdata.
         for ($anumber = 1; $anumber <= constants::MAXCUSTOMDATA; $anumber++) {
             if (property_exists($data, constants::CUSTOMDATA . $anumber)) {
-                $theitem->{constants::CUSTOMDATA . $anumber} = $data->{constants::CUSTOMDATA . $anumber};
+                $theitem->{ constants::CUSTOMDATA . $anumber} = $data->{ constants::CUSTOMDATA . $anumber};
             }
         }
 
         // We might have custom int.
         for ($anumber = 1; $anumber <= constants::MAXCUSTOMINT; $anumber++) {
             if (property_exists($data, constants::CUSTOMINT . $anumber)) {
-                $theitem->{constants::CUSTOMINT . $anumber} = $data->{constants::CUSTOMINT . $anumber};
+                $theitem->{ constants::CUSTOMINT . $anumber} = $data->{ constants::CUSTOMINT . $anumber};
             }
         }
 
@@ -1525,11 +1659,12 @@ abstract class item implements templatable, renderable
             $ret->error = true;
             $ret->message = "Could not update minilesson item!";
             return $ret;
-        } else {
+        }
+        else {
             $ret->item = $theitem;
             return $ret;
         }
-    }// End of edit_insert_question.
+    } // End of edit_insert_question.
 
     public static function delete_item($itemid, $context)
     {
@@ -1589,7 +1724,8 @@ abstract class item implements templatable, renderable
         if ($allitems && count($allitems) > 0) {
             $lastitem = array_pop($allitems);
             $itemorder = $lastitem->itemorder + 1;
-        } else {
+        }
+        else {
             $itemorder = 1;
         }
         return $itemorder;
@@ -1611,8 +1747,8 @@ abstract class item implements templatable, renderable
     public function deaccent()
     {
         if (
-            $this->needs_speechrec && isset($this->itemrecord->customtext1)
-            && !empty($this->itemrecord->customtext1)
+        $this->needs_speechrec && isset($this->itemrecord->customtext1)
+        && !empty($this->itemrecord->customtext1)
         ) {
             $this->itemrecord->customtext1 = utils::remove_accents_and_poormatchchars($this->itemrecord->customtext1, $this->moduleinstance->ttslanguage);
         }
@@ -1626,12 +1762,12 @@ abstract class item implements templatable, renderable
         $newitem = $this->itemrecord;
         $passage = isset($newitem->customtext1) ? $newitem->customtext1 : '';
         if ($this->needs_speechrec && !empty($passage)) {
-
             if (utils::needs_lang_model($this->moduleinstance, $passage)) {
                 //lets assign a default passage hash
                 if ($olditemrecord) {
                     $this->itemrecord->passagehash = $olditemrecord->passagehash;
-                } else {
+                }
+                else {
                     $this->itemrecord->passagehash = "";
                 }
 
@@ -1640,7 +1776,6 @@ abstract class item implements templatable, renderable
                 if ($newpassagehash) {
                     //check if it has changed, if its a brand new one, if so register a langmodel
                     if (!$olditemrecord || $olditemrecord->passagehash != ($this->region . '|' . $newpassagehash)) {
-
                         //build a lang model
                         $ret = utils::fetch_lang_model($passage, $this->language, $this->region);
 
@@ -1654,10 +1789,12 @@ abstract class item implements templatable, renderable
                         }
                     }
                 }
-            } else {
+            }
+            else {
                 $this->itemrecord->passagehash = '';
             }
-        } else {
+        }
+        else {
             $this->itemrecord->passagehash = '';
         }
         return false;
@@ -1671,20 +1808,20 @@ abstract class item implements templatable, renderable
         $newitem = $this->itemrecord;
         if ($olditemrecord) {
             $thephonetics = $olditemrecord->phonetic;
-        } else {
+        }
+        else {
             $thephonetics = '';
         }
         $newpassage = isset($newitem->customtext1) ? $newitem->customtext1 : '';
         if ($this->needs_speechrec && !empty($newpassage)) {
-
             if ($olditemrecord !== false) {
                 $oldpassage = $olditemrecord->customtext1;
-            } else {
+            }
+            else {
                 $oldpassage = '';
             }
 
             if ($newpassage !== $oldpassage) {
-
                 $segmented = true;
                 $sentences = explode(PHP_EOL, $newpassage);
                 $allphonetics = [];
@@ -1700,7 +1837,6 @@ abstract class item implements templatable, renderable
                     $thephonetics = implode(PHP_EOL, $allphonetics);
                 }
             }
-
         }
         $this->itemrecord->phonetic = $thephonetics;
         return $thephonetics;
@@ -1710,9 +1846,9 @@ abstract class item implements templatable, renderable
     {
         $timestamp = utils::super_trim($timestamp);
         if (preg_match('/^(\d{2}):(\d{2}):(\d{2})$/', $timestamp, $matches)) {
-            $hours = (int) $matches[1];
-            $minutes = (int) $matches[2];
-            $seconds = (int) $matches[3];
+            $hours = (int)$matches[1];
+            $minutes = (int)$matches[2];
+            $seconds = (int)$matches[3];
 
             if ($minutes < 60 && $seconds < 60) {
                 return $hours * 3600 + $minutes * 60 + $seconds;
@@ -1720,5 +1856,4 @@ abstract class item implements templatable, renderable
         }
         return false; // Malformed string
     }
-
 }

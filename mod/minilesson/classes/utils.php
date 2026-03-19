@@ -21,9 +21,12 @@
  * @copyright  2020 Justin Hunt (poodllsupport@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace mod_minilesson;
+
 defined('MOODLE_INTERNAL') || die();
 
+use context_module;
 use mod_minilesson\constants;
 
 
@@ -34,12 +37,9 @@ use mod_minilesson\constants;
  * @copyright  2015 Justin Hunt (poodllsupport@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class utils
-{
+class utils {
 
-
-    public static function get_cloud_poodll_server()
-    {
+    public static function get_cloud_poodll_server() {
         $conf = get_config(constants::M_COMPONENT);
         if (isset($conf->cloudpoodllserver) && !empty($conf->cloudpoodllserver)) {
             return 'https://' . $conf->cloudpoodllserver;
@@ -49,8 +49,7 @@ class utils
     }
 
     // we need to consider legacy client side URLs and cloud hosted ones
-    public static function make_audio_url($filename, $contextid, $component, $filearea, $itemid)
-    {
+    public static function make_audio_url($filename, $contextid, $component, $filearea, $itemid) {
         // we need to consider legacy client side URLs and cloud hosted ones
         if (strpos($filename, 'http') === 0) {
             $ret = $filename;
@@ -72,10 +71,8 @@ class utils
      * Do we need to build a language model for this passage?
      *
      */
-    public static function needs_lang_model($moduleinstance, $passage)
-    {
+    public static function needs_lang_model($moduleinstance, $passage) {
         switch ($moduleinstance->region) {
-
             case 'capetown':
             case 'bahrain':
             case 'tokyo':
@@ -104,8 +101,7 @@ class utils
      * Hash the passage and compare
      *
      */
-    public static function fetch_passagehash($ttslanguage, $passage)
-    {
+    public static function fetch_passagehash($ttslanguage, $passage) {
 
         $cleanpassage = self::fetch_clean_passage($passage);
 
@@ -120,7 +116,6 @@ class utils
                 case 'de':
                     $cleanpassage = alphabetconverter::eszett_to_ss_convert($cleanpassage, $cleanpassage);
                     break;
-
             }
         }
 
@@ -131,8 +126,7 @@ class utils
         }
     }
 
-    public static function fetch_short_lang($longlang)
-    {
+    public static function fetch_short_lang($longlang) {
         if (\core_text::strlen($longlang) <= 2) {
             return $longlang;
         }
@@ -147,8 +141,7 @@ class utils
      * Hash the passage and compare
      *
      */
-    public static function fetch_clean_passage($passage)
-    {
+    public static function fetch_clean_passage($passage) {
         $sentences = explode(PHP_EOL, $passage);
         $usesentences = [];
         // look out for display text sep. by pipe chars in string
@@ -175,8 +168,7 @@ class utils
      * Build a language model for this text
      *
      */
-    public static function fetch_lang_model($passage, $language, $region)
-    {
+    public static function fetch_lang_model($passage, $language, $region) {
         $usepassage = self::fetch_clean_passage($passage);
         if ($usepassage === false) {
             return false;
@@ -190,12 +182,10 @@ class utils
 
         // other conversions
         switch ($shortlang) {
-
             case 'de':
                 // find eszetts in original passage, and convert ss words to eszetts in the target passage
                 $params["passage"] = alphabetconverter::eszett_to_ss_convert($usepassage, $usepassage);
                 break;
-
         }
 
         $conf = get_config(constants::M_COMPONENT);
@@ -230,9 +220,8 @@ class utils
         }
     }
 
-    // reset the item order for a minilesson
-    public static function reset_item_order($minilessonid)
-    {
+    // Reset the item order for a minilesson. (gaps may have appeared after deletions/insertions).
+    public static function reset_item_order($minilessonid) {
         global $DB;
 
         $allitems = $DB->get_records(constants::M_QTABLE, ['minilesson' => $minilessonid], 'itemorder ASC');
@@ -246,8 +235,7 @@ class utils
         }
     }
 
-    public static function xxx_update_final_grade($cmid, $stepresults, $attemptid)
-    {
+    public static function xxx_update_final_grade($cmid, $stepresults, $attemptid) {
 
         global $USER, $DB;
 
@@ -270,7 +258,6 @@ class utils
         $totalpercent = round($correctitems / $totalitems, 2) * 100;
 
         if ($attempt) {
-
             // grade quiz results
             // $useresults = json_decode($stepresults);
             // $answers = $useresults->answers;
@@ -293,8 +280,7 @@ class utils
         return [$result, $message, $returndata];
     }
 
-    public static function update_step_grade($cmid, $stepdata)
-    {
+    public static function update_step_grade($cmid, $stepdata) {
 
         global $CFG, $USER, $DB;
 
@@ -357,7 +343,6 @@ class utils
                 require_once($CFG->dirroot . constants::M_PATH . '/lib.php');
                 minilesson_update_grades($moduleinstance, $USER->id, false);
                 // tell JS about the grade situation
-
             }
         } else {
             $message = 'unable to update attempt record';
@@ -370,8 +355,7 @@ class utils
     // JSON stringify functions will make objects(not arrays) if keys are not sequential
     // sometimes we seem to miss a step. Remedying that with this function prevents an all out disaster.
     // But we should not miss steps
-    public static function remake_steps_as_array($stepsobject)
-    {
+    public static function remake_steps_as_array($stepsobject) {
         if (is_array($stepsobject)) {
             return $stepsobject;
         } else {
@@ -381,14 +365,12 @@ class utils
                     $key = intval($key);
                     $steps[$key] = $value;
                 }
-
             }
             return $steps;
         }
     }
 
-    public static function calculate_session_score($steps)
-    {
+    public static function calculate_session_score($steps) {
         $results = array_filter($steps, function ($step) {
             return $step->hasgrade;
         });
@@ -402,14 +384,17 @@ class utils
                 $penalty += $result->penalty;
             }
         }
-        $totalpercent = round(($correctitems / $totalitems) * 100, 0);
-        $totalpercent -= $penalty;
+        if ($totalitems == 0) {
+            $totalpercent = 0;
+        } else {
+            $totalpercent = round(($correctitems / $totalitems) * 100, 0);
+            $totalpercent -= $penalty;
+        }
         return max(0, $totalpercent);
     }
 
 
-    public static function create_new_attempt($courseid, $moduleid)
-    {
+    public static function create_new_attempt($courseid, $moduleid) {
         global $DB, $USER;
 
         $newattempt = new \stdClass();
@@ -422,12 +407,10 @@ class utils
 
         $newattempt->id = $DB->insert_record(constants::M_ATTEMPTSTABLE, $newattempt);
         return $newattempt;
-
     }
 
     // De accent and other processing so our auto transcript will match the passage
-    public static function remove_accents_and_poormatchchars($text, $language)
-    {
+    public static function remove_accents_and_poormatchchars($text, $language) {
         switch ($language) {
             case constants::M_LANG_UKUA:
                 $ret = str_replace(
@@ -444,8 +427,7 @@ class utils
 
 
     // are we willing and able to transcribe submissions?
-    public static function can_transcribe($instance)
-    {
+    public static function can_transcribe($instance) {
 
         // we default to true
         // but it only takes one no ....
@@ -461,12 +443,14 @@ class utils
     }
 
     // see if this is truly json or some error
-    public static function is_json($string)
-    {
+    public static function is_json($string) {
         if (!$string) {
             return false;
         }
         if (empty($string)) {
+            return false;
+        }
+        if (is_array($string) || is_object($string)) {
             return false;
         }
         json_decode($string);
@@ -475,12 +459,14 @@ class utils
 
     // we use curl to fetch transcripts from AWS and Tokens from cloudpoodll
     // this is our helper
-    public static function curl_fetch($url, $postdata = false, $method = 'get')
-    {
+    public static function curl_fetch($url, $postdata = false, $method = 'get', $timeout = false) {
         global $CFG;
 
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl();
+        if ($timeout) {
+            $curl->setopt(['CURLOPT_TIMEOUT' => $timeout]);
+        }
 
         if ($method == 'get') {
             $result = $curl->get($url, $postdata);
@@ -491,13 +477,13 @@ class utils
     }
 
     // We forward an OpenAI RTC offer to the OpenAI API.
-    // This is called from: openairtc.php 
-    // Which is called from the OpenAI RTC client side code in audiochat. 
+    // This is called from: openairtc.php
+    // Which is called from the OpenAI RTC client side code in audiochat.
     // (in which we dont want to expose our openai key)
     // It expects an SDP offer in the request body and returns an SDP answer.
-    public static function openai_forward_offer()
-    {
+    public static function openai_forward_offer() {
         global $CFG;
+            require_once($CFG->libdir . '/filelib.php');
 
         // Get the secret from config.
         $apikey = get_config(constants::M_COMPONENT, 'openaikey');
@@ -507,14 +493,18 @@ class utils
 
         $offer = file_get_contents("php://input");
         $model = "gpt-4o-mini-realtime-preview";
-        $serverurl = "https://api.openai.com/v1/realtime?model=" . $model;
-
-        require_once($CFG->libdir . '/filelib.php');
+        $serverurl = "https://api.openai.com/v1/realtime/calls";
 
         $curl = new \curl();
         $curl->setHeader('Authorization: Bearer ' . $apikey);
-        $curl->setHeader(['Content-type: application/sdp']);
-        $result = $curl->post($serverurl, $offer);
+        // $curl->setHeader(['Content-type: application/sdp']);
+        $result = $curl->post($serverurl, [
+            'sdp' => $offer,
+            'session' => json_encode([
+                'type' => 'realtime',
+                'model' => $model,
+            ]),
+        ]);
         header("Content-Type: application/sdp");
         echo $result;
         die;
@@ -523,8 +513,7 @@ class utils
     // This is called from the settings page and we do not want to make calls out to cloud.poodll.com on settings
     // page load, for performance and stability issues. So if the cache is empty and/or no token, we just show a
     // "refresh token" links
-    public static function fetch_token_for_display($apiuser, $apisecret)
-    {
+    public static function fetch_token_for_display($apiuser, $apisecret) {
         global $CFG;
 
         // First check that we have an API id and secret
@@ -579,12 +568,10 @@ class utils
         }
 
         return $refresh . $message;
-
     }
 
     // We need a Poodll token to make all this recording and transcripts happen
-    public static function fetch_token($apiuser, $apisecret, $force = false)
-    {
+    public static function fetch_token($apiuser, $apisecret, $force = false) {
 
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
         $tokenobject = $cache->get('recentpoodlltoken');
@@ -644,7 +631,6 @@ class utils
 
                 $cache->set('recentpoodlltoken', $tokenobject);
                 $cache->set('recentpoodlluser', $apiuser);
-
             } else {
                 $token = '';
                 if ($respobject && property_exists($respobject, 'error')) {
@@ -659,8 +645,7 @@ class utils
 
     // check token and tokenobject(from cache)
     // return error message or blank if its all ok
-    public static function fetch_token_error($token)
-    {
+    public static function fetch_token_error($token) {
         global $CFG;
 
         // check token authenticated
@@ -704,8 +689,7 @@ class utils
     }
 
     // stage remote processing job ..just logging really
-    public static function stage_remote_process_job($language, $cmid)
-    {
+    public static function stage_remote_process_job($language, $cmid) {
 
         global $CFG, $USER;
 
@@ -758,24 +742,148 @@ class utils
         $payloadobject = json_decode($response);
 
         // returnCode > 0  indicates an error
-        if ($payloadobject->returnCode > 0) {
+        if (isset($payloadobject->returnCode) && $payloadobject->returnCode > 0) {
             return false;
             // if all good, then lets just return true
-        } else if ($payloadobject->returnCode === 0) {
+        } else if (isset($payloadobject->returnCode) && $payloadobject->returnCode === 0) {
             return true;
         } else {
             return false;
         }
     }
 
-    // Fetch the streaming token for the region and language
-    public static function fetch_streaming_token($region)
-    {
+    public static function fetch_regions_azure() {
+        return [
+            'australiacentral' => 'Australia Central',
+            'australiaeast' => 'Australia East',
+            'australiasoutheast' => 'Australia Southeast',
+            'brazilsouth' => 'Brazil South',
+            'brazilsoutheast' => 'Brazil Southeast',
+            'canadacentral' => 'Canada Central',
+            'canadaeast' => 'Canada East',
+            'centralindia' => 'Central India',
+            'centralus' => 'Central US',
+            'chinaeast' => 'China East',
+            'chinaeast2' => 'China East 2',
+            'chinaeast3' => 'China East 3',
+            'chinanorth' => 'China North',
+            'chinanorth2' => 'China North 2',
+            'chinanorth3' => 'China North 3',
+            'eastasia' => 'East Asia',
+            'eastus' => 'East US',
+            'eastus2' => 'East US 2',
+            'francecentral' => 'France Central',
+            'germanywestcentral' => 'Germany West Central',
+            'israelcentral' => 'Israel Central',
+            'italynorth' => 'Italy North',
+            'japaneast' => 'Japan East',
+            'japanwest' => 'Japan West',
+            'koreacentral' => 'Korea Central',
+            'mexicocentral' => 'Mexico Central',
+            'newzealandnorth' => 'New Zealand North',
+            'northcentralus' => 'North Central US',
+            'northeurope' => 'North Europe',
+            'polandcentral' => 'Poland Central',
+            'qatarcentral' => 'Qatar Central',
+            'southafricanorth' => 'South Africa North',
+            'southcentralus' => 'South Central US',
+            'southeastasia' => 'Southeast Asia',
+            'southindia' => 'South India',
+            'spaincentral' => 'Spain Central',
+            'swedencentral' => 'Sweden Central',
+            'switzerlandnorth' => 'Switzerland North',
+            'uaenorth' => 'UAE North',
+            'uksouth' => 'UK South',
+            'ukwest' => 'UK West',
+            'westcentralus' => 'West Central US',
+            'westeurope' => 'West Europe',
+            'westus2' => 'West US 2',
+            'westus3' => 'West US 3',
+        ];
+    }
+
+    // Fetch the azure streaming token (locally .. not from cloudpoodll)
+    public static function fetch_azure_token() {
+        $conf = get_config(constants::M_COMPONENT);
+
+        $apikey = $conf->azureapikey;
+        $apiregion = $conf->azureapiregion;
+        if (empty($apikey) || empty($apiregion)) {
+            return false;
+        }
 
         // if we already have a token just use that
         $now = time();
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
-        $tokenobject = $cache->get('assemblyaitoken');
+        $tokenobject = $cache->get('azuretoken' . '_' . $apiregion);
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
+            // For js we set the valid number of seconds.
+            $tokenobject->validseconds = $tokenobject->validuntil - $now;
+            return $tokenobject;
+        }
+
+        // The REST API we are calling.
+        // We need to get the ms region from the poodll region.
+        $apidomain = 'microsoft.com';
+        if (strpos($apiregion, 'china') === 0) {
+            $apidomain = 'azure.cn';
+        } else if (strpos($apiregion, 'usgov') === 0) {
+            $apidomain = 'azure.us';
+        }
+        $fetchurl = 'https://' . $apiregion . '.api.cognitive.' . $apidomain . '/sts/v1.0/issueToken';
+        $c = new \curl();
+        $options = [
+            'CURLOPT_HTTPHEADER' => [
+                'Ocp-Apim-Subscription-Key: ' . $apikey,
+                'Content-Length: 0',
+            ],
+            'CURLOPT_POSTFIELDS' => '',
+            'CURLOPT_POST' => true,
+        ];
+
+        $response = $c->post($fetchurl, '', $options);
+
+        if (!$response) {
+            return false;
+        } else {
+            $azuretoken = $response;
+            // Cache the token.
+            $tokenobject = new \stdClass();
+            $tokenobject->token = $azuretoken;
+            $tokenobject->tokentype = 'azure';
+            $tokenobject->region = $apiregion;
+            // Azure tokens are valid for 10 minutes (600 seconds).
+            $tokenobject->validuntil = $now + (9 * MINSECS);
+            $cache->set('azuretoken' . '_' . $apiregion, $tokenobject);
+            // For js we set the valid number of seconds.
+            $tokenobject->validseconds = $tokenobject->validuntil - $now;
+            return $tokenobject;
+        }
+    }
+
+
+    // Fetch the streaming token for the region and language
+    public static function fetch_streaming_token($poodllregion) {
+        global $CFG;
+
+        // Where token can be fetched from cloudpoodll we do that.
+        // BYOT ala azure (bring your own tokens)have a separate implementation .
+
+        $token = false;
+        // try for an azure token
+        $token = self::fetch_azure_token();
+
+        // If the token was set, return it. Else lets fall back to assemblyai.
+        if ($token) {
+            return $token;
+        } else {
+            $tokentype = 'assemblyai';
+        }
+
+        // If we already have a token just use that.
+        $now = time();
+        $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
+        $tokenobject = $cache->get($tokentype . 'token' . '_' . $poodllregion);
         if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
             // For js we set the valid number of seconds
             $tokenobject->validseconds = $tokenobject->validuntil - $now;
@@ -792,29 +900,32 @@ class utils
         }
 
         // The REST API we are calling.
-        $functionname = 'local_cpapi_fetch_assemblyai_token';
+        $functionname = 'local_cpapi_fetch_some_token';
 
         // log.debug(params);
         $params = [];
         $params['wstoken'] = $cloudpoodlltoken;
         $params['wsfunction'] = $functionname;
         $params['moodlewsrestformat'] = 'json';
-        $params['region'] = $region;
-        // $params['language'] = $language;
+        $params['region'] = $poodllregion;
+        $params['tokentype'] = $tokentype;
 
         $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
         $response = self::curl_fetch($serverurl, $params);
+
         if (!self::is_json($response)) {
             return false;
         } else {
             $payloadobject = json_decode($response);
-            if ($payloadobject->returnCode == 0 && isset($payloadobject->returnMessage)) {
-                $assemblyaitoken = $payloadobject->returnMessage;
+            if (isset($payloadobject->returnCode) && $payloadobject->returnCode == 0 && isset($payloadobject->returnMessage)) {
+                $thetoken = $payloadobject->returnMessage;
                 // cache the token
                 $tokenobject = new \stdClass();
-                $tokenobject->token = $assemblyaitoken;
-                $tokenobject->validuntil = $now + (30 * MINSECS);
-                $cache->set('assemblyaitoken', $tokenobject);
+                $tokenobject->tokentype = $tokentype;
+                $tokenobject->token = $thetoken;
+                $tokenobject->region = $poodllregion;
+                $tokenobject->validuntil = $now + (10 * MINSECS);
+                $cache->set($tokentype . 'token' . '_' . $poodllregion, $tokenobject);
                 // For js we set the valid number of seconds
                 $tokenobject->validseconds = $tokenobject->validuntil - $now;
                 return $tokenobject;
@@ -825,18 +936,24 @@ class utils
     }
 
     // Fetch the appropriate azure region for the given poodll region
-    public static function fetch_ms_region($poodllregion)
-    {
+    public static function fetch_ms_region($poodllregion) {
 
         switch ($poodllregion) {
+            case 'ningxia':
+            case 'chinaeast2':
+                return 'chinaeast2';
+
             case 'capetown':
+            case 'southafricanorth':
+          //      return 'southafricanorth';
+
             case 'bahrain':
             case 'dublin':
             case 'frankfurt':
             case 'london':
-            case 'ningxia':
             case 'westeurope':
                 return 'westeurope';
+
             case 'tokyo':
             case 'useast1':
             case 'ottawa':
@@ -851,12 +968,33 @@ class utils
     }
 
     // Fetch the streaming token for the region and language
-    public static function fetch_msspeech_token($poodllregion)
-    {
+    // MSSpeech is just for fluency. It is an Azure Speech key but its for backwards compat.
+    // Notably it serves cloud hosted tokens which currently do not support ningxia/chinaeast2 region.
+    public static function fetch_msspeech_token($poodllregion) {
+        // If we have our own azure key use that. (otherwise we get it from cloudpoodll).
+        // It maye be safer from China to use cloudpoodll because the speech assessment SDK may not be in China.
+        $conf = get_config(constants::M_COMPONENT);
+        $apikey = $conf->azureapikey;
+        $apiregion = $conf->azureapiregion;
+        $tokenobject = false;
+        if (!empty($apikey) && !empty($apiregion)) {
+            $tokenobject = self::fetch_azure_token();
+        }
+        if ($tokenobject) {
+            return $tokenobject;
+        }
 
-        // if we already have a token just use that
+        // Users in China with no Azure key, should use the global endpoint though it might fail, because its better than nothing
+        // if we have a cached token just use that
         $now = time();
         $msregion = self::fetch_ms_region($poodllregion);
+        // fetch_msspeech_token does not have a ningxia region so it returns a global key.(24/12/2025)
+        // so we need to change the region from chinaeast2 to eastus here. Otherwise in js it will use the wrong endpoint for the token.
+        // later we will switch to the fetch_azure_key and do away with this.
+        if ($msregion == 'chinaeast2') {
+            $msregion = 'eastus';
+        }
+
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
         $tokenobject = $cache->get('msspeechtoken' . '_' . $msregion);
         if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
@@ -882,7 +1020,7 @@ class utils
         $params['wstoken'] = $cloudpoodlltoken;
         $params['wsfunction'] = $functionname;
         $params['moodlewsrestformat'] = 'json';
-        $params['region'] = self::fetch_ms_region($poodllregion);
+        $params['region'] = $msregion;
 
         $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
         $response = self::curl_fetch($serverurl, $params);
@@ -895,8 +1033,10 @@ class utils
                 // cache the token
                 $tokenobject = new \stdClass();
                 $tokenobject->token = $msspeechtoken;
-                //ms speech tokens are only valid for 10 minutes
-                //so we just cache for 9 mins
+                $tokenobject->tokentype = 'msspeech';
+                $tokenobject->region = $msregion;
+                // MS speech tokens are only valid for 10 minutes.
+                // So we just cache for 9 mins.
                 $tokenobject->validuntil = $now + (9 * MINSECS);
                 $cache->set('msspeechtoken' . '_' . $msregion, $tokenobject);
                 // For js we set the valid number of seconds
@@ -908,8 +1048,7 @@ class utils
         }
     }
 
-    public static function evaluate_transcript($transcript, $itemid, $cmid)
-    {
+    public static function evaluate_transcript($transcript, $itemid, $cmid) {
         global $CFG, $USER, $DB, $OUTPUT;
 
         $token = false;
@@ -925,10 +1064,9 @@ class utils
         $item = $DB->get_record(constants::M_QTABLE, ['id' => $itemid, 'minilesson' => $moduleinstance->id], '*', MUST_EXIST);
 
         // Feedback language for AI instructions
-        // its awful but we hijack the wordcards student native language setting
         $feedbacklanguage = $item->{constants::AIGRADE_FEEDBACK_LANGUAGE};
         if ($conf->setnativelanguage) {
-            $userprefdeflanguage = get_user_preferences('wordcards_deflang');
+            $userprefdeflanguage = get_user_preferences(constants::NATIVELANG_PREF);
             if (!empty($userprefdeflanguage)) {
                 // the WC language is 2 char but Poodll AI expects a locale code
                 $wclanguage = self::lang_to_locale($userprefdeflanguage);
@@ -963,30 +1101,38 @@ class utils
                 $replace = [
                     $item->{constants::FREEWRITING_TOPIC},
                     $item->{constants::FREEWRITING_AIDATA1},
-                    $item->{constants::FREEWRITING_AIDATA2}
+                    $item->{constants::FREEWRITING_AIDATA2},
                 ];
                 break;
             case constants::TYPE_FREESPEAKING:
                 $replace = [
                     $item->{constants::FREESPEAKING_TOPIC},
                     $item->{constants::FREESPEAKING_AIDATA1},
-                    $item->{constants::FREESPEAKING_AIDATA2}
+                    $item->{constants::FREESPEAKING_AIDATA2},
                 ];
                 break;
             case constants::TYPE_AUDIOCHAT:
+                // Audio Chat probably never arrives here. It works internally with the RTC streaming API.
+                // Leaving this code here, but probably dead.
+                $search[] = '{student submission}';
+                // Fetch item class instance from item db record.
+                $audiochatinstance = new local\itemtype\item_audiochat($item, $moduleinstance, $cm);
+                $studentsubmission = $audiochatinstance->fetch_student_submission();
                 $replace = [
                     $item->{constants::AUDIOCHAT_TOPIC},
                     $item->{constants::AUDIOCHAT_AIDATA1},
-                    $item->{constants::AUDIOCHAT_AIDATA2}
+                    $item->{constants::AUDIOCHAT_AIDATA2},
+                    $studentsubmission ? $studentsubmission : '',
                 ];
                 break;
         }
         if (!empty($replace)) {
-            $instructions->feedbackscheme = str_replace($search,$replace,(string)$instructions->feedbackscheme);
-            $instructions->markscheme = str_replace($search,$replace,(string)$instructions->markscheme);
+            $instructions->feedbackscheme = str_replace($search, $replace, (string) $instructions->feedbackscheme);
+            $instructions->markscheme = str_replace($search, $replace, (string) $instructions->markscheme);
         }
+        $cmcontext = context_module::instance($cm->id);
         $aigraderesults = self::fetch_ai_grade(
-            $token,
+            $cmcontext->id,
             $moduleinstance->region,
             $moduleinstance->ttslanguage,
             $isspeech,
@@ -1029,6 +1175,7 @@ class utils
             $targetembedding = $item->{constants::AIGRADE_MODELANSWER};
         }
         $textanalyser = new textanalyser(
+            $cmcontext->id,
             $token,
             $transcript,
             $moduleinstance->region,
@@ -1037,13 +1184,16 @@ class utils
             $userlanguage,
             $targettopic
         );
+        // If aigraderesults is null, make it an object so we can add stats to it.
+        // Maybe that is not the best way to go about it ...
+        if (!$aigraderesults) {
+            $aigraderesults = new \stdClass();
+        }
         $aigraderesults->stats = $textanalyser->process_some_stats($targetwords);
 
         return $aigraderesults;
-
     }
-    public static function is_rtl($language)
-    {
+    public static function is_rtl($language) {
         switch ($language) {
             case constants::M_LANG_ARAE:
             case constants::M_LANG_ARSA:
@@ -1057,8 +1207,7 @@ class utils
     }
 
     // This function takes the 2-character language code ($lang) as input and returns the corresponding locale code.
-    public static function lang_to_locale($lang)
-    {
+    public static function lang_to_locale($lang) {
         switch ($lang) {
             case 'ar':
                 return 'ar-AE'; // Assuming Arabic (Modern Standard) is the default
@@ -1163,8 +1312,7 @@ class utils
     }
 
 
-    public static function fetch_grammar_correction_diff($selftranscript, $correction, $direction = 'l2r')
-    {
+    public static function fetch_grammar_correction_diff($selftranscript, $correction, $direction = 'l2r') {
 
         // turn the passage and transcript into an array of words
         $alternatives = diff::fetchAlternativesArray('');
@@ -1231,9 +1379,8 @@ class utils
                     break;
 
                 default:
-                // do nothing
-                // should never get here
-
+                    // do nothing
+                    // should never get here
             }
         }
         $sessionendword = $lastunmodified;
@@ -1255,36 +1402,14 @@ class utils
     }
 
     // fetch the AI Grade
-    public static function fetch_ai_grade($token, $region, $ttslanguage, $isspeech, $studentresponse, $instructions)
-    {
-        global $USER;
-        $instructionsjson = json_encode($instructions);
-        // The REST API we are calling
-        $functionname = 'local_cpapi_call_ai';
-
-        // The processing is slightly different for speech and text.
-        $action = $isspeech ? 'autograde_speech' : 'autograde_text';
-
-        $params = [];
-        $params['wstoken'] = $token;
-        $params['wsfunction'] = $functionname;
-        $params['moodlewsrestformat'] = 'json';
-        $params['action'] = $action;
-        $params['appid'] = 'mod_solo';
-        $params['prompt'] = $instructionsjson;
-        $params['language'] = $ttslanguage;
-        $params['subject'] = $studentresponse;
-        $params['region'] = $region;
-        $params['owner'] = hash('md5', $USER->username);
-
-        // log.debug(params);
-
-        $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
-        $response = self::curl_fetch($serverurl, $params);
-        if (!self::is_json($response)) {
+    public static function fetch_ai_grade($contextid, $region, $ttslanguage, $isspeech, $studentresponse, $instructions) {
+        $aimanager = new aimanager($contextid, $region, $ttslanguage);
+        $payloadobject = $isspeech ?
+            $aimanager->autograde_speech($studentresponse, $instructions) :
+            $aimanager->autograde_text($studentresponse, $instructions);
+        if (!$payloadobject) {
             return false;
         }
-        $payloadobject = json_decode($response);
 
         // returnCode > 0  indicates an error
         if (!isset($payloadobject->returnCode) || $payloadobject->returnCode > 0) {
@@ -1318,8 +1443,7 @@ class utils
      * @param String An optional pad on each replacement (needed for processing when marking up words as spans in passage)
      * @return String The converted passage of text
      */
-    public static function lines_to_brs($passage, $seperator = '')
-    {
+    public static function lines_to_brs($passage, $seperator = '') {
         // see https://stackoverflow.com/questions/5946114/how-to-replace-newline-or-r-n-with-br
         return str_replace("\r\n", $seperator . '<br>' . $seperator, $passage);
         // this is better but we can not pad the replacement and we need that
@@ -1328,8 +1452,7 @@ class utils
 
 
     // take a json string of session errors/self-corrections, and count how many there are.
-    public static function count_objects($items)
-    {
+    public static function count_objects($items) {
         $objects = json_decode($items);
         if ($objects) {
             $thecount = count(get_object_vars($objects));
@@ -1343,8 +1466,7 @@ class utils
      * Returns the link for the related activity
      * @return stdClass
      */
-    public static function fetch_next_activity($activitylink)
-    {
+    public static function fetch_next_activity($activitylink) {
         global $DB;
         $ret = new \stdClass();
         $ret->url = false;
@@ -1367,8 +1489,7 @@ class utils
         return $ret;
     }
 
-    public static function get_region_options()
-    {
+    public static function get_region_options() {
         return [
             "useast1" => get_string("useast1", constants::M_COMPONENT),
             "tokyo" => get_string("tokyo", constants::M_COMPONENT),
@@ -1388,8 +1509,7 @@ class utils
 
 
 
-    public static function get_timelimit_options()
-    {
+    public static function get_timelimit_options() {
         return [
             0 => get_string("notimelimit", constants::M_COMPONENT),
             30 => get_string("xsecs", constants::M_COMPONENT, '30'),
@@ -1402,10 +1522,9 @@ class utils
         ];
     }
 
-    public static function get_aiprompt_options($promptfield)
-    {
+    public static function get_aiprompt_options($promptfield) {
         $maxprompts = constants::MAX_AI_PROMPTS;
-        switch($promptfield){
+        switch ($promptfield) {
             case 'FREESPEAKING_GRADINGSELECTION':
                 $configstring = 'freespeaking_gradingpromptheading_';
                 break;
@@ -1437,16 +1556,14 @@ class utils
     }
 
     // Insert spaces in between segments in order to create "words"
-    public static function segment_japanese($passage)
-    {
+    public static function segment_japanese($passage) {
         $segments = \mod_minilesson\jp\Analyzer::segment($passage);
         return implode(" ", $segments);
     }
 
     // convert a phrase or word to a series of phonetic characters that we can use to compare text/spoken
     // the segments will usually just return the phrase , but in japanese we want to segment into words
-    public static function fetch_phones_and_segments($phrase, $language, $region = 'tokyo', $segmented = true)
-    {
+    public static function fetch_phones_and_segments($phrase, $language, $region = 'tokyo', $segmented = true) {
         global $CFG;
 
         // first we check if the phrase is segmented with a pipe
@@ -1487,7 +1604,6 @@ class utils
                 // gdcl :    https://github.com/dohliam/gdcl
                 break;
             case constants::M_LANG_JAJP:
-
                 // fetch katakana/hiragana if the JP
                 $katakanifyurl = self::fetch_lang_server_url($region, 'katakanify');
 
@@ -1612,8 +1728,7 @@ class utils
     }
 
     // fetch lang server url, services incl. 'transcribe' , 'lm', 'lt', 'spellcheck', 'katakanify'
-    public static function fetch_lang_server_url($region, $service = 'transcribe')
-    {
+    public static function fetch_lang_server_url($region, $service = 'transcribe') {
         switch ($region) {
             case 'useast1':
                 $ret = 'https://useast.ls.poodll.com/';
@@ -1627,26 +1742,23 @@ class utils
         return $ret . $service;
     }
 
-    public static function fetch_options_reportstable()
-    {
+    public static function fetch_options_reportstable() {
         $options = [
             constants::M_USE_DATATABLES => get_string("reporttableajax", constants::M_COMPONENT),
-            constants::M_USE_PAGEDTABLES => get_string("reporttablepaged", constants::M_COMPONENT)
+            constants::M_USE_PAGEDTABLES => get_string("reporttablepaged", constants::M_COMPONENT),
         ];
         return $options;
     }
 
-    public static function fetch_options_transcribers()
-    {
+    public static function fetch_options_transcribers() {
         $options = [
             constants::TRANSCRIBER_AUTO => get_string("transcriber_auto", constants::M_COMPONENT),
-            constants::TRANSCRIBER_POODLL => get_string("transcriber_poodll", constants::M_COMPONENT)
+            constants::TRANSCRIBER_POODLL => get_string("transcriber_poodll", constants::M_COMPONENT),
         ];
         return $options;
     }
 
-    public static function fetch_options_finishscreen()
-    {
+    public static function fetch_options_finishscreen() {
         $options = [
             constants::FINISHSCREEN_SIMPLE => get_string("finishscreen_simple", constants::M_COMPONENT),
             constants::FINISHSCREEN_FULL => get_string("finishscreen_full", constants::M_COMPONENT),
@@ -1655,43 +1767,38 @@ class utils
         return $options;
     }
 
-    public static function fetch_options_animations()
-    {
+    public static function fetch_options_animations() {
         return [
             constants::M_ANIM_FANCY => get_string('anim_fancy', constants::M_COMPONENT),
-            constants::M_ANIM_PLAIN => get_string('anim_plain', constants::M_COMPONENT)
+            constants::M_ANIM_PLAIN => get_string('anim_plain', constants::M_COMPONENT),
         ];
     }
 
-    public static function fetch_options_textprompt()
-    {
+    public static function fetch_options_textprompt() {
         $options = [
             constants::TEXTPROMPT_DOTS => get_string("textprompt_dots", constants::M_COMPONENT),
-            constants::TEXTPROMPT_WORDS => get_string("textprompt_words", constants::M_COMPONENT)
+            constants::TEXTPROMPT_WORDS => get_string("textprompt_words", constants::M_COMPONENT),
         ];
         return $options;
     }
 
-    public static function fetch_options_yesno()
-    {
+    public static function fetch_options_yesno() {
         $yesnooptions = [1 => get_string('yes'), 0 => get_string('no')];
         return $yesnooptions;
     }
 
-    public static function fetch_options_listenorread()
-    {
+    public static function fetch_options_listenorread() {
         $options = [
             constants::LISTENORREAD_READ => get_string("listenorread_read", constants::M_COMPONENT),
             constants::LISTENORREAD_LISTEN => get_string("listenorread_listen", constants::M_COMPONENT),
             constants::LISTENORREAD_LISTENANDREAD => get_string("listenorread_listenandread", constants::M_COMPONENT),
-            constants::LISTENORREAD_IMAGE => get_string("listenorread_image", constants::M_COMPONENT)
+            constants::LISTENORREAD_IMAGE => get_string("listenorread_image", constants::M_COMPONENT),
         ];
         return $options;
     }
 
 
-    public static function fetch_pagelayout_options()
-    {
+    public static function fetch_pagelayout_options() {
         $options = [
             'incourse' => 'incourse',
             'standard' => 'standard',
@@ -1702,8 +1809,7 @@ class utils
     }
 
 
-    public static function pack_ttspassageopts($data)
-    {
+    public static function pack_ttspassageopts($data) {
         $opts = new \stdClass();
         // This is probably over caution, but just in case the data comes in wrong, we want to fall back on something
         if (isset($data->{constants::TTSPASSAGEVOICE})) {
@@ -1717,8 +1823,7 @@ class utils
         return $optsjson;
     }
 
-    public static function unpack_ttspassageopts($data)
-    {
+    public static function unpack_ttspassageopts($data) {
         if (!self::is_json($data->{constants::TTSPASSAGEOPTS})) {
             return $data;
         }
@@ -1738,8 +1843,7 @@ class utils
 
         return $data;
     }
-    public static function pack_ttsdialogopts($data)
-    {
+    public static function pack_ttsdialogopts($data) {
         $opts = new \stdClass();
         // more overcaution
         if (isset($opts->{constants::TTSDIALOGVISIBLE})) {
@@ -1760,8 +1864,7 @@ class utils
         $optsjson = json_encode($opts);
         return $optsjson;
     }
-    public static function unpack_ttsdialogopts($data)
-    {
+    public static function unpack_ttsdialogopts($data) {
         if (!self::is_json($data->{constants::TTSDIALOGOPTS})) {
             return $data;
         }
@@ -1786,8 +1889,7 @@ class utils
         return $data;
     }
 
-    public static function split_into_words($thetext)
-    {
+    public static function split_into_words($thetext) {
         $thetext = preg_replace('/\s+/', ' ', trim($thetext));
         if ($thetext == '') {
             return [];
@@ -1795,18 +1897,29 @@ class utils
         return explode(' ', $thetext);
     }
 
-    public static function split_into_sentences($thetext)
-    {
-        $thetext = preg_replace('/\s+/', ' ', self::super_trim($thetext));
-        if ($thetext == '') {
-            return [];
+    public static function split_into_sentences($thetext, $withlinebreaks = false) {
+
+        // In TTS passage and maybe other places we want to keep the line breaks.
+        if ($withlinebreaks) {
+            $thetext = preg_replace('/[^\S\r\n]+/', ' ', self::super_trim($thetext));
+            if ($thetext == '') {
+                return [];
+            }
+            preg_match_all('/([^\r\n\.!\?]+[\.!\?"\']+)|([^\r\n\.!\?"\']+$)|([\r\n]+)/', $thetext, $matches);
+            return $matches[0];
+        } else {
+            $thetext = preg_replace('/\s+/', ' ', self::super_trim($thetext));
+            if ($thetext == '') {
+                return [];
+            }
+            preg_match_all('/([^\.!\?]+[\.!\?"\']+)|([^\.!\?"\']+$)/', $thetext, $matches);
+            return array_filter($matches[0], function ($sentence) {
+                return trim($sentence) !== '';
+            });
         }
-        preg_match_all('/([^\.!\?]+[\.!\?"\']+)|([^\.!\?"\']+$)/', $thetext, $matches);
-        return $matches[0];
     }
 
-    public static function fetch_auto_voice($langcode)
-    {
+    public static function fetch_auto_voice($langcode) {
         $showall = false;
         $voices = self::get_tts_voices($langcode, $showall);
         $autoindex = array_rand($voices);
@@ -1814,8 +1927,7 @@ class utils
     }
 
     // can speak neural?
-    public static function can_speak_neural($voice, $region)
-    {
+    public static function can_speak_neural($voice, $region) {
         // check if the region is supported
         switch ($region) {
             case "useast1":
@@ -1842,8 +1954,7 @@ class utils
         }
     }
 
-    public static function get_relevance_options()
-    {
+    public static function get_relevance_options() {
         $ret = [
             constants::RELEVANCETYPE_NONE => get_string('relevancetype_none', constants::M_COMPONENT),
             constants::RELEVANCETYPE_QUESTION => get_string('relevancetype_question', constants::M_COMPONENT),
@@ -1852,21 +1963,22 @@ class utils
         return $ret;
     }
 
-    public static function get_tts_options($nossml = false)
-    {
+    public static function get_tts_options($nossml = false, $nottsoption = false) {
         $ret = [
             constants::TTS_NORMAL => get_string('ttsnormal', constants::M_COMPONENT),
             constants::TTS_SLOW => get_string('ttsslow', constants::M_COMPONENT),
-            constants::TTS_VERYSLOW => get_string('ttsveryslow', constants::M_COMPONENT)
+            constants::TTS_VERYSLOW => get_string('ttsveryslow', constants::M_COMPONENT),
         ];
         if (!$nossml) {
             $ret += [constants::TTS_SSML => get_string('ttsssml', constants::M_COMPONENT)];
         }
+        if ($nottsoption) {
+            $ret += [constants::TTS_NOTTS => get_string('tts_notts', constants::M_COMPONENT)];
+        }
         return $ret;
     }
 
-    public static function get_tts_voices($langcode, $showall, $region = 'useast1')
-    {
+    public static function get_tts_voices($langcode, $showall, $region = 'useast1') {
         switch ($region) {
             case "ningxia":
                 $alllang = constants::ALL_VOICES_NINGXIA;
@@ -1884,7 +1996,6 @@ class utils
             default:
                 $alllang = constants::ALL_VOICES;
         }
-
 
         if (array_key_exists($langcode, $alllang) && !$showall) {
             return $alllang[$langcode];
@@ -1914,8 +2025,7 @@ class utils
         }
     }
 
-    public static function get_nice_voices($ttslanguage, $region)
-    {
+    public static function get_nice_voices($ttslanguage, $region) {
         // Get all the best voices (neural/whisper/azure)
         $langvoices = self::get_tts_voices($ttslanguage, false, $region);
         $nicevoices = [];
@@ -1935,8 +2045,7 @@ class utils
         return $nicevoices;
     }
 
-    public static function get_lang_options()
-    {
+    public static function get_lang_options() {
         return [
             constants::M_LANG_ARAE => get_string('ar-ae', constants::M_COMPONENT),
             constants::M_LANG_ARSA => get_string('ar-sa', constants::M_COMPONENT),
@@ -2002,27 +2111,75 @@ class utils
         ];
     }
 
-    public static function get_prompttype_options()
-    {
+    public static function has_compact_layout($langcode) {
+        return array_key_exists($langcode, constants::KEYBOARD_LAYOUT_COMPACT);
+    }
+
+    public static function get_compact_keys($langcode) {
+        if (self::has_compact_layout($langcode)) {
+            return constants::KEYBOARD_LAYOUT_COMPACT[$langcode];
+        }
+        return '';
+    }
+
+    public static function get_shortlang_options() {
+        // return an array of short language codes and the most common 4 letter lang codes for each
+        // we need this mainly for matching moodle lang codes to minilesson lang codes
+        return [
+            'ar' => constants::M_LANG_ARAE,
+            'eu' => constants::M_LANG_EUES,
+            'bg' => constants::M_LANG_BGBG,
+            'hr' => constants::M_LANG_HRHR,
+            'zh' => constants::M_LANG_ZHCN,
+            'cs' => constants::M_LANG_CSCZ,
+            'da' => constants::M_LANG_DADK,
+            'nl' => constants::M_LANG_NLNL,
+            'en' => constants::M_LANG_ENUS,
+            'fi' => constants::M_LANG_FIFI,
+            'fr' => constants::M_LANG_FRFR,
+            'de' => constants::M_LANG_DEDE,
+            'hi' => constants::M_LANG_HIIN,
+            'el' => constants::M_LANG_ELGR,
+            'he' => constants::M_LANG_HEIL,
+            'hu' => constants::M_LANG_HUHU,
+            'id' => constants::M_LANG_IDID,
+            'is' => constants::M_LANG_ISIS,
+            'it' => constants::M_LANG_ITIT,
+            'ja' => constants::M_LANG_JAJP,
+            'ko' => constants::M_LANG_KOKR,
+            'lt' => constants::M_LANG_LTLT,
+            'lv' => constants::M_LANG_LVLV,
+            'ms' => constants::M_LANG_MSMY,
+            'mk' => constants::M_LANG_MKMK,
+            'no' => constants::M_LANG_NONO,
+            'pl' => constants::M_LANG_PLPL,
+            'pt' => constants::M_LANG_PTBR,
+            'ro' => constants::M_LANG_RORO,
+            'ru' => constants::M_LANG_RURU,
+            'es' => constants::M_LANG_ESES,
+            'sv' => constants::M_LANG_SVSE,
+            'tr' => constants::M_LANG_TRTR,
+            'vi' => constants::M_LANG_VIVN,
+            'uk' => constants::M_LANG_UKUA,
+        ];
+    }
+
+    public static function get_prompttype_options() {
         return [
             constants::M_PROMPT_SEPARATE => get_string('prompt-separate', constants::M_COMPONENT),
             constants::M_PROMPT_RICHTEXT => get_string('prompt-richtext', constants::M_COMPONENT),
         ];
-
     }
 
-    public static function get_containerwidth_options()
-    {
+    public static function get_containerwidth_options() {
         return [
             constants::M_CONTWIDTH_COMPACT => get_string('contwidth-compact', constants::M_COMPONENT),
             constants::M_CONTWIDTH_WIDE => get_string('contwidth-wide', constants::M_COMPONENT),
             constants::M_CONTWIDTH_FULL => get_string('contwidth-full', constants::M_COMPONENT),
         ];
-
     }
 
-    public static function add_mform_elements($mform, $context, $cmid, $setuptab = false)
-    {
+    public static function add_mform_elements($mform, $context, $cmid, $setuptab = false) {
         global $CFG, $COURSE;
         $dateoptions = ['optional' => true];
         $config = get_config(constants::M_COMPONENT);
@@ -2056,7 +2213,7 @@ class utils
                 'maxfiles' => EDITOR_UNLIMITED_FILES,
                 'noclean' => true,
                 'context' => $context,
-                'subdirs' => true
+                'subdirs' => true,
             ]);
             $mform->setType('introeditor', PARAM_RAW); // no XSS prevention here, users must be trusted
             $mform->addElement('advcheckbox', 'showdescription', get_string('showdescription'));
@@ -2123,7 +2280,7 @@ class utils
         $mform->addElement('select', 'ttslanguage', get_string('ttslanguage', constants::M_COMPONENT), $langoptions);
         $mform->setDefault('ttslanguage', $config->ttslanguage);
 
-        // transcriber
+        // Transcriber.
         $toptions = self::fetch_options_transcribers();
         $mform->addElement(
             'select',
@@ -2133,18 +2290,30 @@ class utils
             $config->transcriber
         );
 
-        // region
+        // Region.
         $regionoptions = self::get_region_options();
         $mform->addElement('select', 'region', get_string('awsregion', constants::M_COMPONENT), $regionoptions);
         $mform->setDefault('region', $config->awsregion);
 
-        // prompt types
+        // Prompt types.
         $prompttypes = self::get_prompttype_options();
         $mform->addElement('select', 'richtextprompt', get_string('prompttype', constants::M_COMPONENT), $prompttypes);
         $mform->addHelpButton('richtextprompt', 'prompttype', constants::M_COMPONENT);
         $mform->setDefault('richtextprompt', $config->prompttype);
 
-        // advanced
+        // Native lang options.
+        $langoptions = [0 => '--'] + self::get_lang_options();
+        $mform->addElement('select', 'nativelang', get_string('nativelang', constants::M_COMPONENT), $langoptions);
+        $mform->setType('nativelang', PARAM_TEXT);
+        $mform->setDefault('nativelang', $config->nativelang);
+
+        // Allow continue attempts.
+        $mform->addElement('selectyesno', 'allowcontinueattempts', get_string('allowcontinueattempts', constants::M_COMPONENT));
+        $mform->setType('allowcontinueattempts', PARAM_INT);
+        $mform->addHelpButton('allowcontinueattempts', 'allowcontinueattempts', constants::M_COMPONENT);
+        $mform->setDefault('allowcontinueattempts', $config->allowcontinueattempts);
+
+        // Advanced
         $name = 'advanced';
         $label = get_string($name, 'minilesson');
         $mform->addElement('header', $name, $label);
@@ -2207,7 +2376,6 @@ class utils
         // Get the modules.
         if (!$setuptab) {
             if ($mods = get_course_mods($COURSE->id)) {
-
                 $mform->addElement('header', 'postattemptheader', get_string('postattemptheader', constants::M_COMPONENT));
 
                 $modinstances = [];
@@ -2228,11 +2396,9 @@ class utils
                 $mform->setDefault('activitylink', 0);
             }
         }
-
     } //end of add_mform_elements
 
-    public static function prepare_file_and_json_stuff($moduleinstance, $modulecontext)
-    {
+    public static function prepare_file_and_json_stuff($moduleinstance, $modulecontext) {
 
         $ednofileoptions = minilesson_editor_no_files_options($modulecontext);
         $editors = minilesson_get_editornames();
@@ -2243,11 +2409,9 @@ class utils
         }
 
         return $moduleinstance;
-
     }//end of prepare_file_and_json_stuff
 
-    public static function clean_ssml_chars($speaktext)
-    {
+    public static function clean_ssml_chars($speaktext) {
         // deal with SSML reserved characters
         $speaktext = str_replace("&", "&amp;", $speaktext);
         $speaktext = str_replace("'", "&apos;", $speaktext);
@@ -2258,11 +2422,10 @@ class utils
     }
 
     // fetch the MP3 URL of the text we want read aloud
-    public static function fetch_polly_url($token, $region, $speaktext, $voiceoption, $voice)
-    {
+    public static function fetch_polly_url($token, $region, $speaktext, $voiceoption, $voice) {
         global $USER;
 
-        //Do a little sanity check
+        // Do a little sanity check
         if (empty($speaktext) || empty($voice) || empty($token)) {
             return false;
         }
@@ -2285,7 +2448,6 @@ class utils
         }
 
         switch ((int) ($voiceoption)) {
-
             // slow
             case 1:
                 // fetch slightly slower version of speech
@@ -2313,7 +2475,6 @@ class utils
                 $speaktext = self::clean_ssml_chars($speaktext);
                 $speaktext = '<speak><break time="1000ms"></break>' . $speaktext . '</speak>';
                 break;
-
         }
 
         // The REST API we are calling
@@ -2355,7 +2516,7 @@ class utils
         }
     }
 
-    public static function is_complete($rule, $moduleinstance, $userid){
+    public static function is_complete($rule, $moduleinstance, $userid) {
         global $DB;
         $status = false;
         switch ($rule) {
@@ -2386,8 +2547,7 @@ class utils
         return $status;
     }
 
-    public static function fetch_item_from_itemrecord($itemrecord, $moduleinstance, $context = false)
-    {
+    public static function fetch_item_from_itemrecord($itemrecord, $moduleinstance, $context = false) {
         // Set up the item type specific parts of the form data
         switch ($itemrecord->type) {
             case constants::TYPE_MULTICHOICE:
@@ -2440,13 +2600,14 @@ class utils
                 return new local\itemtype\item_scatter($itemrecord, $moduleinstance, $context);
             case constants::TYPE_SLIDES:
                 return new local\itemtype\item_slides($itemrecord, $moduleinstance, $context);
+            case constants::TYPE_FICTION:
+                return new local\itemtype\item_fiction($itemrecord, $moduleinstance, $context);
             default:
         }
     }
 
 
-    public static function fetch_itemform_classname($itemtype)
-    {
+    public static function fetch_itemform_classname($itemtype) {
         // Fetch the correct form
         switch ($itemtype) {
             case constants::TYPE_MULTICHOICE:
@@ -2499,13 +2660,14 @@ class utils
                 return '\\' . constants::M_COMPONENT . '\local\itemform\scatterform';
             case constants::TYPE_SLIDES:
                 return '\\' . constants::M_COMPONENT . '\local\itemform\slidesform';
+            case constants::TYPE_FICTION:
+                return '\\' . constants::M_COMPONENT . '\local\itemform\fictionform';
             default:
                 return false;
         }
     }
 
-    public static function do_mb_str_split($string, $splitlength = 1, $encoding = null)
-    {
+    public static function do_mb_str_split($string, $splitlength = 1, $encoding = null) {
         // for greater than PHP 7.4
         if (version_compare(PHP_VERSION, '7.4.0', '>=')) {
             // Code for PHP 7.4 and above
@@ -2559,8 +2721,7 @@ class utils
         return $result;
     }
 
-    public static function super_trim($str)
-    {
+    public static function super_trim($str) {
         if ($str == null) {
             return '';
         } else {
@@ -2578,8 +2739,7 @@ class utils
      * @throws \moodle_exception
      * @throws \require_login_exception
      */
-    public static function create_instance($moduledata, $course, $section = 1)
-    {
+    public static function create_instance($moduledata, $course, $section = 1) {
         global $CFG;
 
         require_once($CFG->dirroot . '/course/lib.php');
@@ -2609,8 +2769,7 @@ class utils
     }//end of function
 
     // Fetch user context fields for AIGEN processing
-    public static function fetch_usercontext_fields($ttslanguage='en-US'): array
-    {
+    public static function fetch_usercontext_fields($ttslanguage = 'en-US'): array {
         $customdatacount = 10;
         $contextdata = [
             'target_language' => $ttslanguage,
@@ -2626,8 +2785,7 @@ class utils
     }
 
     // Extracts fields from a string that are enclosed in curly braces.
-    public static function extract_curly_fields(string $input): array
-    {
+    public static function extract_curly_fields(string $input): array {
         preg_match_all('/\{(\w+)\}/', $input, $matches);
         return array_unique($matches[1]); // Remove duplicates
     }
@@ -2638,8 +2796,7 @@ class utils
      * @param mixed $arr
      * @return int|string|null
      */
-    public static function array_key_last($arr)
-    {
+    public static function array_key_last($arr) {
         if (function_exists('array_key_last')) {
             return array_key_last($arr);
         }
@@ -2657,8 +2814,7 @@ class utils
      * @param int $number
      * @return string
      */
-    public static function ordinalsuffix($number): string
-    {
+    public static function ordinalsuffix($number): string {
         $ends = ['th', 'st', 'nd', 'rd'];
         if ((($number % 100) >= 11) && (($number % 100) <= 13)) {
             return $number . 'th';
@@ -2667,4 +2823,191 @@ class utils
         }
     }
 
+    public static function get_lesson_items($lessonid, $itemid) {
+        global $DB;
+
+        if (empty($lessonid)) {
+            return [];
+        }
+
+        // If we are adding an item, itemid will be 0
+        if (empty($itemid)) {
+            $itemorder = $DB->get_field(constants::M_QTABLE, 'MAX(itemorder)', ['minilesson' => $lessonid]);
+            // The predicted itemid of this new item will be max+1
+            $itemorder++;
+        } else {
+            $itemorder = $DB->get_field(constants::M_QTABLE, 'itemorder', ['id' => $itemid]);
+        }
+
+        [$in, $params] = $DB->get_in_or_equal(
+            [constants::TYPE_FREEWRITING, constants::TYPE_FREESPEAKING],
+            SQL_PARAMS_NAMED
+        );
+        $params['minilessonid'] = $lessonid;
+        $params['itemorder'] = $itemorder > 0 ? $itemorder : 0;
+        $alllessonitems = $DB->get_records_select(
+            constants::M_QTABLE,
+            "minilesson = :minilessonid AND type {$in} AND itemorder < :itemorder",
+            $params
+        );
+
+        return $alllessonitems;
+    }
+
+    public static function latest_attempt($courseid, $lessonid) {
+        global $USER, $DB;
+
+        if (empty($lessonid) || empty($courseid)) {
+            return [];
+        }
+
+        $attemptrec = $DB->get_records(constants::M_ATTEMPTSTABLE, [
+            'courseid' => $courseid,
+            'moduleid' => $lessonid,
+            'userid' => $USER->id,
+        ], 'id DESC', '*', 0, 1);
+
+        return $attemptrec;
+    }
+
+    public static function get_lang_english_name($langcode) {
+        // default to the langcode
+        $ret = $langcode;
+
+        switch ($langcode) {
+            case  constants::M_LANG_ARAE:
+                $ret = "Arabic";
+                break; // => get_string('ar-ae', constants::M_COMPONENT),
+            case  constants::M_LANG_ARSA:
+                $ret = "Arabic";
+                break; // => get_string('ar-sa', constants::M_COMPONENT),
+            case  constants::M_LANG_DADK:
+                $ret = "Danish";
+                break; // => get_string('da-dk', constants::M_COMPONENT),
+            case  constants::M_LANG_DEDE:
+                $ret = "German";
+                break; // => get_string('de-de', constants::M_COMPONENT),
+            case  constants::M_LANG_DECH:
+                $ret = "German";
+                break; // => get_string('de-ch', constants::M_COMPONENT),
+            case  constants::M_LANG_ENUS:
+                $ret = "English";
+                break; // => get_string('en-us', constants::M_COMPONENT),
+            case  constants::M_LANG_ENGB:
+                $ret = "English";
+                break; // => get_string('en-gb', constants::M_COMPONENT),
+            case  constants::M_LANG_ENAU:
+                $ret = "English";
+                break; // => get_string('en-au', constants::M_COMPONENT),
+            case  constants::M_LANG_ENIN:
+                $ret = "English";
+                break; // => get_string('en-in', constants::M_COMPONENT),
+            case  constants::M_LANG_ENIE:
+                $ret = "English";
+                break; // => get_string('en-ie', constants::M_COMPONENT),
+            case  constants::M_LANG_ENWL:
+                $ret = "English";
+                break; // => get_string('en-wl', constants::M_COMPONENT),
+            case  constants::M_LANG_ENAB:
+                $ret = "English";
+                break; // => get_string('en-ab', constants::M_COMPONENT),
+            case  constants::M_LANG_ESUS:
+                $ret = "Spanish";
+                break; // => get_string('es-us', constants::M_COMPONENT),
+            case  constants::M_LANG_ESES:
+                $ret = "Spanish";
+                break; // => get_string('es-es', constants::M_COMPONENT),
+            case  constants::M_LANG_FAIR:
+                $ret = "Farsi";
+                break; // => get_string('fa-ir', constants::M_COMPONENT),
+            case  constants::M_LANG_FILPH:
+                $ret = "Tagalog";
+                break; // => get_string('fil-ph', constants::M_COMPONENT),
+            case  constants::M_LANG_FRCA:
+                $ret = "French";
+                break; // => get_string('fr-ca', constants::M_COMPONENT),
+            case   constants::M_LANG_FRFR:
+                $ret = "French";
+                break; // => get_string('fr-fr', constants::M_COMPONENT),
+            case  constants::M_LANG_HIIN:
+                $ret = "Hindi";
+                break; // => get_string('hi-in', constants::M_COMPONENT),
+            case   constants::M_LANG_HEIL:
+                $ret = "Hebrew";
+                break; // => get_string('he-il', constants::M_COMPONENT),
+            case  constants::M_LANG_IDID:
+                $ret = "Indonesian";
+                break; // => get_string('id-id', constants::M_COMPONENT),
+            case  constants::M_LANG_ITIT:
+                $ret = "Italian";
+                break; // => get_string('it-it', constants::M_COMPONENT),
+            case  constants::M_LANG_JAJP:
+                $ret = "Japanese";
+                break; // => get_string('ja-jp', constants::M_COMPONENT),
+            case  constants::M_LANG_KOKR:
+                $ret = "Korean";
+                break; // => get_string('ko-kr', constants::M_COMPONENT),
+            case  constants::M_LANG_MINZ:
+                $ret = "Maori";
+                break; // => get_string('ms-my', constants::M_COMPONENT),
+            case  constants::M_LANG_MSMY:
+                $ret = "Malaysian";
+                break; // => get_string('ms-my', constants::M_COMPONENT),
+            case  constants::M_LANG_NLNL:
+                $ret = "Dutch";
+                break; // => get_string('nl-nl', constants::M_COMPONENT),
+            case  constants::M_LANG_PTBR:
+                $ret = "Portuguese";
+                break; // => get_string('pt-br', constants::M_COMPONENT),
+            case  constants::M_LANG_PTPT:
+                $ret = "Portuguese";
+                break; // => get_string('pt-pt', constants::M_COMPONENT),
+            case  constants::M_LANG_RURU:
+                $ret = "Russian";
+                break; // => get_string('ru-ru', constants::M_COMPONENT),
+            case  constants::M_LANG_TAIN:
+                $ret = "Tamil";
+                break; // => get_string('ta-in', constants::M_COMPONENT),
+            case  constants::M_LANG_TEIN:
+                $ret = "Telugu";
+                break; // => get_string('te-in', constants::M_COMPONENT),
+            case  constants::M_LANG_TRTR:
+                $ret = "Turkish";
+                break; // => get_string('tr-tr', constants::M_COMPONENT),
+            case  constants::M_LANG_ZHCN:
+                $ret = "Chinese";
+                break; // => get_string('zh-cn', constants::M_COMPONENT)
+            case  constants::M_LANG_NONO:
+                $ret = "Norwegian";
+                break; // => get_string('nb-no', constants::M_COMPONENT),
+            case  constants::M_LANG_NBNO:
+                $ret = "Norwegian";
+                break; // => get_string('nb-no', constants::M_COMPONENT),
+            case  constants::M_LANG_PLPL:
+                $ret = "Polish";
+                break; // => get_string('pl-pl', constants::M_COMPONENT),
+            case  constants::M_LANG_RORO:
+                $ret = "Romanian";
+                break; // => get_string('ro-ro', constants::M_COMPONENT),
+            case  constants::M_LANG_SVSE:
+                $ret = "Swedish";
+                break; // => get_string('sv-se', constants::M_COMPONENT),
+            case  constants::M_LANG_UKUA:
+                $ret = "Ukranian";
+                break; // => get_string('uk-ua', constants::M_COMPONENT),
+            case  constants::M_LANG_EUES:
+                $ret = "Basque";
+                break; // => get_string('eu-es',constants::M_COMPONENT),
+            case  constants::M_LANG_FIFI:
+                $ret = "Finnish";
+                break; // => get_string('fi-fi',constants::M_COMPONENT),
+            case  constants::M_LANG_HUHU:
+                $ret = "Hungarian";
+                break; // => get_string('hu-hu',constants::M_COMPONENT)
+            case  constants::M_LANG_VIVN:
+                $ret = "Vietnamese";
+                break; // => get_string('vi-vn',constants::M_COMPONENT)
+        }
+        return $ret;
+    }
 }

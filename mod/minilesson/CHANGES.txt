@@ -1,3 +1,79 @@
+Version 1.1.29 (Build 2026031000)
+- Improved UI
+- Better accessibility for Fiction item type
+- Added ability to continue previous attempts
+- Fixed broken "select all" on add/edit items page
+- Added a default layout to the admin settings, it defaults to "vertical"
+- Removed not necessary "hours" field from free speaking timer
+- Added a code editor for fiction item type
+
+Version 1.1.28 (Build 2026022400)
+- Added semantic similarity to AI Manager (fix free speaking bug)
+
+Version 1.1.27 (Build 2026022300)
+- Fixed virtual keboard issue on gapfill items
+
+Version 1.1.26 (Build 2026022100)
+- Added virtual keyboard feature to free writing , typing and listening gapfill items
+- Extended AI manager for better routing and caching of AI requests
+- Added full screen mode for Fiction item type.
+
+Version 1.1.25 (Build 2026020601)
+- Fixed bug affecting Norwegian in Fluency item
+- Added AI manager allowing users to specify AI service providers
+- Added more Yarn support in fiction item, including browser translation
+- Added native language preference chooser Media type in item options
+
+Version 1.1.24 (Build 2026013004)
+- Fixed bug in WordShuffle/Fiction (video)
+- New Audio Chat API
+
+Version 1.1.23 (Build 2026013003)
+- Improvements to Fiction item types and AIGEN
+- JS code tidy up
+- More fixes to gapfill parsing
+
+Version 1.1.22 (Build 2026013002)
+- More tweaks to make gapfill parsing work with different scenarios
+- Added courseformat/overview page
+- Fixes for refresh tokens for streaming transcription under certain scenarios
+
+Version 1.1.21 (Build 2026013001)
+- Added better support for long running AIGEN
+- Added settings field and supporting code for Azure region
+
+Version 1.1.20 (Build 2026013000)
+- Fixed broken gaps in gap fill exercises (since v1.1.18)
+
+Version 1.1.19 (Build 2026010600)
+- Fixed broken images in MiniLesson (since v1.1.18)
+
+Version 1.1.18 (Build 2025123000)
+- Added support for multi-word words/distractors in Word Shuffle. 
+- Added list view options and paging to Lesson Bank results
+- Fixed case where imported stringarrays sometimes were not turned into arrays
+
+Version 1.1.17 (Build 2025122400)
+ - Added playback of audio recording to results on free speaking / passage reading / fluency
+ - Added support for bring-your-own-key for Azure speech in China
+ - Upgraded AssemblyAI to use newer universal streaming
+
+Version 1.1.16 (Build 2025121300)
+ - Added student submission feature to Audio Chat
+ - Fixed time limit behaviour on free writing and free speaking
+ - Added a learner native language admin and instance setting
+ - Added choice of avatar images for Audio Chat
+
+Version 1.1.15 (Build 2025112901)
+ - UI Update - quite a big one
+ - Partial correct feedback on gapfills
+ - Custom audio support for Passage Gap fill
+ - AIGEN updates
+ - Translate template feature (experimental)
+ 
+Version 1.1.14 (Build 2025111800)
+- More changes to WordShuffle and AI Generate templates
+
 Version 1.1.13 (Build 2025110402)
 - Changes to WordShuffle and AI Generate templates
 

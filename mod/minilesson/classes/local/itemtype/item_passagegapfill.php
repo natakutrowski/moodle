@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -18,8 +19,6 @@ namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
 use mod_minilesson\utils;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a listening gap fill item in a minilesson activity.
@@ -28,8 +27,8 @@ use renderable;
  * @copyright  2023 Justin Hunt <justin@poodll.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class  item_passagegapfill extends item {
-
+class item_passagegapfill extends item
+{
     //the item type
     public const ITEMTYPE = constants::TYPE_PGAPFILL;
 
@@ -40,11 +39,10 @@ class  item_passagegapfill extends item {
      * @param \renderer_base $output renderer to be used to render the action bar elements.
      * @return array
      */
-    public function export_for_template(\renderer_base $output){
+    public function export_for_template(\renderer_base $output)
+    {
 
-        $testitem = new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
 
@@ -65,10 +63,10 @@ class  item_passagegapfill extends item {
             if ($chunk === '[') {
                 $inside = true;
                 continue;
-            } else if ($chunk === ']') {
+            } elseif ($chunk === ']') {
                 $inside = false;
                 continue;
-            } else if ($inside) {
+            } elseif ($inside) {
                 // This is the bracketed word – create placeholder
                 $placeholder = \core_text::substr($chunk, 0, 1) . str_repeat('&#x2022;', mb_strlen($chunk) - 1);
                 $text = $chunk;
@@ -83,7 +81,7 @@ class  item_passagegapfill extends item {
                 $index++;
             }
 
-            switch($this->language){
+            switch ($this->language) {
                 case 'ar-SA':
                 case 'ar-AE':
                 case 'fa-IR':
@@ -107,9 +105,22 @@ class  item_passagegapfill extends item {
         $testitem->passagedata = $passagedata;
 
         //Item audio
-        $testitem->passageaudio = utils::fetch_polly_url($this->token, $this->region,
-            $plaintext, $this->itemrecord->{constants::POLLYOPTION},
-            $this->itemrecord->{constants::POLLYVOICE});
+        if ($this->itemrecord->{constants::POLLYOPTION} != constants::TTS_NOTTS) {
+            $testitem->passageaudio = utils::fetch_polly_url(
+                $this->token,
+                $this->region,
+                $plaintext,
+                $this->itemrecord->{constants::POLLYOPTION},
+                $this->itemrecord->{constants::POLLYVOICE}
+            );
+        } else {
+            $custompassageaudio = $this->fetch_sentence_media('audio', 1);
+            if ($custompassageaudio && count($custompassageaudio) > 0) {
+                $testitem->passageaudio = array_shift($custompassageaudio);
+            } else {
+                $testitem->passageaudio = false;
+            }
+        }
 
         // Cloudpoodll
         $testitem = $this->set_cloudpoodll_details($testitem);
@@ -120,14 +131,15 @@ class  item_passagegapfill extends item {
         return $testitem;
     }
 
-    public static function validate_import($newrecord,$cm){
+    public static function validate_import($newrecord, $cm)
+    {
         $error = new \stdClass();
-        $error->col='';
-        $error->message='';
+        $error->col = '';
+        $error->message = '';
 
-        if($newrecord->{constants::PASSAGEGAPFILL_PASSAGE}==''){
-            $error->col=constants::PASSAGEGAPFILL_PASSAGE;
-            $error->message=get_string('error:emptyfield',constants::M_COMPONENT);
+        if ($newrecord->{constants::PASSAGEGAPFILL_PASSAGE} == '') {
+            $error->col = constants::PASSAGEGAPFILL_PASSAGE;
+            $error->message = get_string('error:emptyfield', constants::M_COMPONENT);
             return $error;
         }
 
@@ -138,23 +150,25 @@ class  item_passagegapfill extends item {
     /*
  * This is for use with importing, telling import class each column's is, db col name, minilesson specific data type
  */
-    public static function get_keycolumns(){
+    public static function get_keycolumns()
+    {
         //get the basic key columns and customize a little for instances of this item type
         $keycols = parent::get_keycolumns();
         $keycols['int4'] = ['jsonname' => 'promptvoiceopt', 'type' => 'voiceopts', 'optional' => true, 'default' => null, 'dbname' => constants::POLLYOPTION];
         $keycols['text5'] = ['jsonname' => 'promptvoice', 'type' => 'voice', 'optional' => true, 'default' => null, 'dbname' => constants::POLLYVOICE];
         $keycols['text1'] = ['jsonname' => 'passage', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::PASSAGEGAPFILL_PASSAGE];
         $keycols['int5'] = ['jsonname' => 'hidestartpage', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::PASSAGEGAPFILL_HINTS];
-         $keycols['int2'] = ['jsonname' => 'penalizehints', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::PENALIZEHINTS];
+        $keycols['int2'] = ['jsonname' => 'penalizehints', 'type' => 'boolean', 'optional' => true, 'default' => 0, 'dbname' => constants::PENALIZEHINTS];
+        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER . '1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
         return $keycols;
     }
 
     /*
-    This function return the prompt that the generate method requires. 
+    This function return the prompt that the generate method requires.
     */
-    public static function aigen_fetch_prompt ($itemtemplate, $generatemethod) {
-        switch($generatemethod) {
-
+    public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
+    {
+        switch ($generatemethod) {
             case 'extract':
                 $prompt = "Choose 8 keywords from the following {language} text. ";
                 $prompt .= "Surround each instance of the keyword in the passage with square brackets, e.g [word].  " . PHP_EOL;
@@ -176,6 +190,4 @@ class  item_passagegapfill extends item {
         }
         return $prompt;
     }
-
-
 }

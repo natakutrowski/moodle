@@ -1,0 +1,143 @@
+{
+    "items": [
+        {
+            "type": "scatter",
+            "name": "Item: Scatter",
+            "instructions": "Choose the word pairs",
+            "ttsvoice": "Joey",
+            "audiofname": "00:00:00",
+            "ttsdialog": [
+                ""
+            ],
+            "sentences": [
+                "much|\u3042\u307e\u308a",
+                "many|\u305f\u304f\u3055\u3093",
+                "a lot of|\u305f\u304f\u3055\u3093\u306e"
+            ]
+        },
+        {
+            "type": "wordshuffle",
+            "name": "Item: WordShuffle",
+            "instructions": "Put the words in the correct order to form a sentence.",
+            "ttsvoice": "Joey",
+            "audiofname": "00:00:00",
+            "ttsdialog": [
+                ""
+            ],
+            "sentences": [
+                "I do not have [much] money.|\u79c1\u306f\u3042\u307e\u308a\u304a\u91d1\u3092\u6301\u3063\u3066\u3044\u307e\u305b\u3093\u3002|many lot\r",
+                "There are [many] apples in the box.|\u7bb1\u306e\u4e2d\u306b\u305f\u304f\u3055\u3093\u306e\u30ea\u30f3\u30b4\u304c\u3042\u308a\u307e\u3059\u3002|much lot\r",
+                "I have a [lot] of time to study this weekend.|\u4eca\u9031\u672b\u306f\u52c9\u5f37\u3059\u308b\u6642\u9593\u304c\u305f\u304f\u3055\u3093\u3042\u308a\u307e\u3059\u3002|much many.\r",
+                "I have a [lot] of friends.|\u79c1\u306f\u305f\u304f\u3055\u3093\u304a\u53cb\u9054\u304c\u3044\u308b\u3002| much many\r",
+                "She has [many] pencils.|\u5f7c\u5973\u306f\u305f\u304f\u3055\u3093\u925b\u7b46\u3092\u3082\u3063\u3066\u3044\u308b\u3002| much lot\r",
+                "There is [much] milk in the fridge.|\u51b7\u8535\u5eab\u306b\u725b\u4e73\u306f\u3044\u3063\u3071\u3044\u3042\u308a\u307e\u3059\u3002|many lot"
+            ],
+            "promptvoice": "Joey",
+            "allowretry": "yes",
+            "promptvoiceopt": "normal",
+            "filesid": 2
+        },
+        {
+            "type": "typinggapfill",
+            "name": "Item: Typing GapFill",
+            "instructions": "Fill in the missing words or letters",
+            "ttsvoice": "Joey",
+            "audiofname": "00:00:00",
+            "ttsdialog": [
+                ""
+            ],
+            "sentences": [
+                "I do not have [much] money.|\u79c1\u306f\u3042\u307e\u308a\u304a\u91d1\u3092\u6301\u3063\u3066\u3044\u307e\u305b\u3093\u3002|many lot\r",
+                "There are [many] apples in the box.|\u7bb1\u306e\u4e2d\u306b\u305f\u304f\u3055\u3093\u306e\u30ea\u30f3\u30b4\u304c\u3042\u308a\u307e\u3059\u3002|much lot\r",
+                "I have a [lot] of time to study this weekend.|\u4eca\u9031\u672b\u306f\u52c9\u5f37\u3059\u308b\u6642\u9593\u304c\u305f\u304f\u3055\u3093\u3042\u308a\u307e\u3059\u3002|much many.\r",
+                "I have a [lot] of friends.|\u79c1\u306f\u305f\u304f\u3055\u3093\u304a\u53cb\u9054\u304c\u3044\u308b\u3002| much many\r",
+                "She has [many] pencils.|\u5f7c\u5973\u306f\u305f\u304f\u3055\u3093\u925b\u7b46\u3092\u3082\u3063\u3066\u3044\u308b\u3002| much lot\r",
+                "There is much milk in the fridge.|\u51b7\u8535\u5eab\u306b\u725b\u4e73\u306f\u3044\u3063\u3071\u3044\u3042\u308a\u307e\u3059\u3002|many lot"
+            ],
+            "allowretry": "yes",
+            "filesid": 3
+        },
+        {
+            "type": "freewriting",
+            "name": "Item: Free Writing (1)",
+            "instructions": "Type your answer to the question in the text area below.",
+            "text": "Write one original example sentence that contains following word(s): <br \/>\r\n<b>{ai data1}<\/b>\r\n",
+            "ttsvoice": "Joey",
+            "audiofname": "00:00:00",
+            "ttsdialog": [
+                ""
+            ],
+            "aigradefeedback": "Explain each mistake simply.",
+            "aigradefeedbacklanguage": "ar-AE",
+            "freewritingtopic": "",
+            "aigradeinstructions": "The student should write one original example sentence in the target language ({target language}) for each of the target words\/phrases. Each correct sentence is worth three marks. Remove 2 marks if a sentence is exactly the same as a previously studied sentence.  Remove 1 mark for each spelling, or grammatical error. And give no marks for a sentence that does not contain one of the target words\/phrases . \r\nTarget word\/phrases: \r\n{ai data1}\r\n\r\nPreviously studied sentences:\r\n{ai data2}",
+            "freewritingaidata1": "much",
+            "freewritingaidata2": "I do not have much money.\r\nThere is much milk in the fridge.",
+            "totalmarks": "3"
+        },
+        {
+            "type": "freewriting",
+            "name": "Item: Free Writing (2)",
+            "instructions": "Type your answer to the question in the text area below.",
+            "text": "Write one original example sentence that contains following phrase: <br \/>\n<b>{ai data1}<\/b>",
+            "ttsvoice": "Joey",
+            "audiofname": "00:00:00",
+            "ttsdialog": [
+                ""
+            ],
+            "aigradefeedback": "Explain each mistake simply.",
+            "aigradefeedbacklanguage": "ja-JP",
+            "freewritingtopic": "",
+            "aigradeinstructions": "The student should write one original example sentence in the target language ({target language}) for each of the target words\/phrases. Each correct sentence is worth three marks. Remove 2 marks if a sentence is exactly the same as a previously studied sentence.  Remove 1 mark for each spelling, or grammatical error. And give no marks for a sentence that does not contain one of the target words\/phrases . \nTarget word\/phrases: \n{ai data1}\n\nPreviously studied sentences:\n{ai data2}",
+            "freewritingaidata1": "a lot of",
+            "freewritingaidata2": "I have a lot of time to study this weekend.\nI have a lot of friends.",
+            "totalmarks": "3"
+        },
+        {
+            "type": "freewriting",
+            "name": "Item: Free Writing (3)",
+            "instructions": "Type your answer to the question in the text area below.",
+            "text": "Write one original example sentence that contains following word(s): <br \/>\n<b>{ai data1}<\/b>",
+            "ttsvoice": "Joey",
+            "audiofname": "00:00:00",
+            "ttsdialog": [
+                ""
+            ],
+            "aigradefeedback": "Explain each mistake simply.",
+            "aigradefeedbacklanguage": "ja-JP",
+            "freewritingtopic": "",
+            "aigradeinstructions": "The student should write one original example sentence in the target language ({target language}) for each of the target words\/phrases. Each correct sentence is worth three marks. Remove 2 marks if a sentence is exactly the same as a previously studied sentence.  Remove 1 mark for each spelling, or grammatical error. And give no marks for a sentence that does not contain one of the target words\/phrases . \nTarget word\/phrases: \n{ai data1}\n\nPreviously studied sentences:\n{ai data2}",
+            "freewritingaidata1": "many",
+            "freewritingaidata2": "There are many apples in the box.\nShe has many pencils.",
+            "totalmarks": "3"
+        }
+    ],
+    "files": {
+        "2": {
+            "customfile1_image": {
+                "1.png": "QQQQ",
+                "2.png": "QQQQ",
+                "3.png": "QQQQ",
+                "4.png": "QQQQ",
+                "5.png": "QQQQ",
+                "6.png": "QQQQ",
+                "7.png": "QQQQ",
+                "8.png": "QQQQ",
+                "9.png": "QQQQ"
+            }
+        },
+        "3": {
+            "customfile1_image": {
+                "1.png": "QQQQ",
+                "2.png": "QQQQ",
+                "3.png": "QQQQ",
+                "4.png": "QQQQ",
+                "5.png": "QQQQ",
+                "6.png": "QQQQ",
+                "7.png": "QQQQ",
+                "8.png": "QQQQ",
+                "9.png": "QQQQ"
+            }
+        }
+    }
+}

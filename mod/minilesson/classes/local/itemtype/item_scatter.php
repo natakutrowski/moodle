@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -28,7 +29,6 @@ use mod_minilesson\constants;
  */
 class item_scatter extends item
 {
-
     /**
      * The item type constant.
      */
@@ -43,9 +43,7 @@ class item_scatter extends item
     public function export_for_template(\renderer_base $output)
     {
 
-        $testitem = new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
         $testitem->allowretry = !empty($this->itemrecord->{constants::SCATTER_ALLOWRETRY});
@@ -94,12 +92,11 @@ class item_scatter extends item
     }
 
     /*
-  This function return the prompt that the generate method requires. 
+  This function return the prompt that the generate method requires.
   */
     public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
     {
         switch ($generatemethod) {
-
             case 'extract':
                 $prompt = "Select 5 keywords from the following text, and create a 1 dimensional array of 'sentences' of format 'short_keyword_definition|keyword' in {language}: [{text}]. ";
                 break;
@@ -117,6 +114,4 @@ class item_scatter extends item
         }
         return $prompt;
     }
-
-
 }

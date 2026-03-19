@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -33,8 +34,8 @@ use templatable;
  * @copyright  2025 YOUR NAME <your@email.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class aigentemplates implements renderable,templatable {
-
+class aigentemplates implements renderable, templatable
+{
     /**
      * @var object $cm course module object
      */
@@ -45,12 +46,24 @@ class aigentemplates implements renderable,templatable {
      */
     protected $filters;
 
+    /**
+     * Constructor.
+     *
+     * @param object $cm course module object
+     * @param array $filters tag filters array
+     */
     public function __construct($cm, $filters)
     {
         $this->cm = $cm;
         $this->filters = $filters;
     }
 
+    /**
+     * Export data for template.
+     *
+     * @param renderer_base $output
+     * @return array
+     */
     public function export_for_template(renderer_base $output)
     {
         $tags = self::get_alltags();
@@ -62,8 +75,8 @@ class aigentemplates implements renderable,templatable {
         $buttondata = [];
         foreach ($lessontemplates as $templateid => $lessontemplate) {
             $templatecount = count($lessontemplate['template']->items);
-            // If we have lang strings we use them here
-            if(array_key_exists($lessontemplate['config']->uniqueid,aigen::DEFAULTTEMPLATES)){
+            // If we have lang strings we use them here.
+            if (array_key_exists($lessontemplate['config']->uniqueid, aigen::DEFAULTTEMPLATES)) {
                 $templateshortname = aigen::DEFAULTTEMPLATES[$lessontemplate['config']->uniqueid];
                 $templatetitle = get_string("aigentemplatename:" . $templateshortname, constants::M_COMPONENT);
                 $templatedescription = get_string("aigentemplatedescription:" . $templateshortname, constants::M_COMPONENT);
@@ -78,7 +91,7 @@ class aigentemplates implements renderable,templatable {
                     [
                         'id' => $this->cm->id,
                         'action' => aigen_contextform::AIGEN_SUBMIT,
-                        'templateid' => $templateid
+                        'templateid' => $templateid,
                     ]
                 ),
                 get_string('aigen', constants::M_COMPONENT)
@@ -88,54 +101,60 @@ class aigentemplates implements renderable,templatable {
                 'title' => $templatetitle,
                 'description' => $templatedescription,
                 'itemcount' => $templatecount,
-                'thebutton' => $thebutton->export_for_template($output)
+                'thebutton' => $thebutton->export_for_template($output),
             ];
         }
 
         return [
-            'buttons' => $buttondata
+            'buttons' => $buttondata,
         ];
     }
 
-    public static function get_alltags($withlabels = false) {
-        // Predefined tags
+    /**
+     * Get all available tags.
+     *
+     * @param bool $withlabels Whether to include labels with tags.
+     * @return array List of all tags, optionally with labels.
+     */
+    public static function get_alltags($withlabels = false)
+    {
+        // Predefined tags.
         if ($withlabels) {
-            $predefined_tags = [];
+            $predefinedtags = [];
             $tagsonly = template_tag_manager::get_predefined_tags();
-            foreach($tagsonly as $tag) {
-                $taglabel = $tag; //get_string($tag, constants::M_COMPONENT);
-                $predefined_tags[] = ['tag' => $tag, 'label' => $taglabel];
+            foreach ($tagsonly as $tag) {
+                $taglabel = $tag;
+                $predefinedtags[] = ['tag' => $tag, 'label' => $taglabel];
             }
         } else {
-            $predefined_tags = template_tag_manager::get_predefined_tags();
+            $predefinedtags = template_tag_manager::get_predefined_tags();
         }
 
-        // Single or multi item tags
+        // Single or multi item tags.
         if ($withlabels) {
-            $singleormulti_tags =[];
+            $singleormultitags = [];
             $tagsonly = template_tag_manager::get_singleormulti_tags();
-            foreach($tagsonly as $tag) {
-                $taglabel = $tag; //get_string($tag, constants::M_COMPONENT);
-                $singleormulti_tags[] =  ['tag' => $tag, 'label' => $taglabel];
+            foreach ($tagsonly as $tag) {
+                $taglabel = $tag;
+                $singleormultitags[] = ['tag' => $tag, 'label' => $taglabel];
             }
         } else {
-            $singleormulti_tags = template_tag_manager::get_singleormulti_tags();
+            $singleormultitags = template_tag_manager::get_singleormulti_tags();
         }
 
-        //Item type tags
+        // Item type tags.
         if ($withlabels) {
             $tagsonly = template_tag_manager::get_itemtype_tags();
-            $itemtype_tags = [];
-            foreach($tagsonly as $tag) {
+            $itemtypetags = [];
+            foreach ($tagsonly as $tag) {
                 $taglabel = get_string($tag, constants::M_COMPONENT);
-                $itemtype_tags[] =  ['tag' => $tag, 'label' => $taglabel];
+                $itemtypetags[] = ['tag' => $tag, 'label' => $taglabel];
             }
         } else {
-            $itemtype_tags = template_tag_manager::get_itemtype_tags();
+            $itemtypetags = template_tag_manager::get_itemtype_tags();
         }
 
-        $tags = array_merge($predefined_tags, $singleormulti_tags, $itemtype_tags);
+        $tags = array_merge($predefinedtags, $singleormultitags, $itemtypetags);
         return $tags;
     }
-
 }

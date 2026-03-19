@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -17,9 +18,6 @@
 namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
-use mod_minilesson\utils;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a page item in a minilesson activity.
@@ -28,8 +26,8 @@ use renderable;
  * @copyright  2023 Justin Hunt <justin@poodll.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class item_conversation extends item {
-
+class item_conversation extends item
+{
     //the item type
     public const ITEMTYPE = constants::TYPE_CONVERSATION;
 
@@ -40,15 +38,13 @@ class item_conversation extends item {
      * @param \renderer_base $output renderer to be used to render the action bar elements.
      * @return array
      */
-    public function export_for_template(\renderer_base $output) {
+    public function export_for_template(\renderer_base $output)
+    {
 
-        $testitem= new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
 
         return $testitem;
     }
-
 }

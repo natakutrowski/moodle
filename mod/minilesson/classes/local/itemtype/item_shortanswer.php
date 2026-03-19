@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -18,8 +19,6 @@ namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
 use mod_minilesson\utils;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a shortanswer item in a minilesson activity.
@@ -30,7 +29,6 @@ use renderable;
  */
 class item_shortanswer extends item
 {
-
     //the item type
     public const ITEMTYPE = constants::TYPE_SHORTANSWER;
 
@@ -54,9 +52,7 @@ class item_shortanswer extends item
     public function export_for_template(\renderer_base $output)
     {
 
-        $testitem = new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
         $testitem->alternates = $this->itemrecord->{constants::ALTERNATES};
@@ -84,20 +80,21 @@ class item_shortanswer extends item
         } else {
             $phonetics = [];
         }
-        $is_ssml = $testitem->voiceoption == constants::TTS_SSML;
+        $isssml = $testitem->voiceoption == constants::TTS_SSML;
         $dottify = false;
-        $testitem->sentences = $this->process_spoken_sentences($sentences, $phonetics, $dottify, $is_ssml);
-        $testitem->partialresponses = $this->process_spoken_sentences($partialresponses, [], $dottify, $is_ssml);
+        $testitem->sentences = $this->process_spoken_sentences($sentences, $phonetics, $dottify, $isssml);
+        $testitem->partialresponses = $this->process_spoken_sentences($partialresponses, [], $dottify, $isssml);
 
         // Do we need a streaming token?
         $alternatestreaming = get_config(constants::M_COMPONENT, 'alternatestreaming');
         $isenglish = strpos($this->moduleinstance->ttslanguage, 'en') === 0;
-        if ($isenglish) {
+        if ($isenglish || true) {
             $tokenobject = utils::fetch_streaming_token($this->moduleinstance->region);
             if ($tokenobject) {
                 $testitem->speechtoken = $tokenobject->token;
+                $testitem->speechtokenregion = '';
                 $testitem->speechtokenvalidseconds = $tokenobject->validseconds;
-                $testitem->speechtokentype = 'assemblyai';
+                 $testitem->speechtokentype = $tokenobject->tokentype;
             } else {
                 $testitem->speechtoken = false;
                 $testitem->speechtokenvalidseconds = 0;
@@ -108,7 +105,7 @@ class item_shortanswer extends item
             }
         }
 
-        //cloudpoodll
+        // Cloudpoodll.
         $testitem = $this->set_cloudpoodll_details($testitem);
         return $testitem;
     }
@@ -146,11 +143,11 @@ class item_shortanswer extends item
     }
 
     /*
-    This function return the prompt that the generate method requires. 
+    This function return the prompt that the generate method requires.
     */
-    public static function aigen_fetch_prompt ($itemtemplate, $generatemethod) {
-        switch($generatemethod) {
-
+    public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
+    {
+        switch ($generatemethod) {
             case 'extract':
                 $prompt = "Create a closed question (text) and a 1 dimensional array of  grammatically correct answers (sentences) to test the learners understanding of the following passage: [{text}] ";
                 $prompt .= "The question and answers should be in {language} and suitable for {level} level learners. ";
@@ -170,5 +167,4 @@ class item_shortanswer extends item
         }
         return $prompt;
     }
-
 }

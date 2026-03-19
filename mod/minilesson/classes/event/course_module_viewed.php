@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,9 +24,8 @@
  */
 
 namespace mod_minilesson\event;
-defined('MOODLE_INTERNAL') || die();
 
-use \mod_minilesson\constants;
+use mod_minilesson\constants;
 
 /**
  * The mod_minilesson course module viewed event class.
@@ -35,23 +35,32 @@ use \mod_minilesson\constants;
  * @copyright  2015 Justin Hunt (poodllsupport@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class course_module_viewed extends \core\event\course_module_viewed {
-
+class course_module_viewed extends \core\event\course_module_viewed
+{
     /**
      * Init method.
      */
-    protected function init() {
+    protected function init()
+    {
         $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
         $this->data['objecttable'] = constants::M_TABLE;
     }
-    public static function get_objectid_mapping() {
-        return array('db' => constants::M_TABLE, 'restore' => 'minilesson');
+    /**
+     * get objectid mapping
+     * @return array
+     */
+    public static function get_objectid_mapping()
+    {
+        return ['db' => constants::M_TABLE, 'restore' => 'minilesson'];
     }
-    public static function get_other_mapping() {
+    /**
+     * get other field mapping
+     * @return bool
+     */
+    public static function get_other_mapping()
+    {
         // Nothing to map.
         return false;
     }
-
 }
-

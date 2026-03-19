@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,8 +24,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+
+use mod_minilesson\attempt_continue_form;
 use mod_minilesson\constants;
 use mod_minilesson\utils;
 use mod_minilesson\mobile_auth;
@@ -34,6 +36,7 @@ $id = optional_param('id', 0, PARAM_INT); // course_module ID, or
 $retake = optional_param('retake', 0, PARAM_INT); // course_module ID, or
 $n = optional_param('n', 0, PARAM_INT);  // minilesson instance ID - it should be named as the first character of the module
 $embed = optional_param('embed', 0, PARAM_INT); // course_module ID, or
+$attemptid = optional_param('attemptid', 0, PARAM_INT);
 
 // Allow login through an authentication token.
 $userid = optional_param('user_id', null, PARAM_ALPHANUMEXT);
@@ -51,7 +54,7 @@ if ($id) {
     $cm = get_coursemodule_from_id('minilesson', $id, 0, false, MUST_EXIST);
     $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
     $moduleinstance = $DB->get_record('minilesson', ['id' => $cm->instance], '*', MUST_EXIST);
-} else if ($n) {
+} elseif ($n) {
     $moduleinstance = $DB->get_record('minilesson', ['id' => $n], '*', MUST_EXIST);
     $course = $DB->get_record('course', ['id' => $moduleinstance->course], '*', MUST_EXIST);
     $cm = get_coursemodule_from_instance('minilesson', $moduleinstance->id, $course->id, false, MUST_EXIST);
@@ -95,7 +98,7 @@ $config = get_config(constants::M_COMPONENT);
 // We want minilesson to embed nicely, or display according to layout settings.
 if ($moduleinstance->foriframe == 1 || $moduleinstance->pagelayout == 'embedded' || $embed == 1) {
     $PAGE->set_pagelayout('embedded');
-} else if ($config->enablesetuptab || $moduleinstance->pagelayout == 'popup' || $embed == 2) {
+} elseif ($config->enablesetuptab || $moduleinstance->pagelayout == 'popup' || $embed == 2) {
     $PAGE->set_pagelayout('popup');
     $PAGE->add_body_class('poodll-minilesson-embed');
 } else {
@@ -110,8 +113,26 @@ if ($moduleinstance->foriframe == 1 || $moduleinstance->pagelayout == 'embedded'
 // Get our renderers.
 $renderer = $PAGE->get_renderer('mod_minilesson');
 
+$continue_form_url = $PAGE->url; //new moodle_url('/mod/minilesson/view.php', ['id' => $cm->id, 'embed' => $embed]);
+$continue_form = new attempt_continue_form($continue_form_url);
+if ($formdata = $continue_form->get_data()) {
+    if (!empty($formdata->delete)) {
+        $attempts = $DB->get_records(constants::M_ATTEMPTSTABLE, ['moduleid' => $moduleinstance->id, 'userid' => $USER->id], 'timecreated DESC');
+        $DB->delete_records_list(constants::M_ATTEMPTSTABLE, 'id', array_keys($attempts));
+        redirect($continue_form_url);
+        die;
+    } else if (!empty($formdata->continue)) {
+        $continue_form_url->param('attemptid', $formdata->attemptid);
+        redirect($continue_form_url);
+        die;
+    }
+}
+
 // Get attempts.
 $attempts = $DB->get_records(constants::M_ATTEMPTSTABLE, ['moduleid' => $moduleinstance->id, 'userid' => $USER->id], 'timecreated DESC');
+if (isset($attempts[$attemptid])) {
+    $attempts = [$attemptid => $attempts[$attemptid]];
+}
 
 
 // Can make a new attempt ?.
@@ -124,10 +145,34 @@ if (!$canpreview && $moduleinstance->maxattempts > 0) {
 }
 
 // Create a new attempt or just fall through to no-items or finished modes.
+$newattempt = false;
 if (!$attempts || ($canattempt && $retake == 1)) {
     $latestattempt = utils::create_new_attempt($moduleinstance->course, $moduleinstance->id);
+    $newattempt = true;
 } else {
     $latestattempt = reset($attempts);
+}
+
+$completedlessonitems = 0;
+$totallessonitems = $DB->count_records(constants::M_QTABLE, ['minilesson' => $moduleinstance->id]);
+if (!empty($latestattempt->sessiondata)) {
+    $sessiondata = json_decode($latestattempt->sessiondata);
+    if (!empty($sessiondata->steps)) {
+        $completedlessonitems = count($sessiondata->steps);
+    }
+}
+if (empty($attemptid) && empty($newattempt) && !empty($attempts) && !empty($moduleinstance->allowcontinueattempts)
+        && $totallessonitems != $completedlessonitems && $completedlessonitems > 0) {
+    // If we have an attempt and it is both started and not complete and continuing is enabled, then we show the continue form.
+    $continue_form->set_data(['attemptid' => $latestattempt->id]);
+    if (has_capability('mod/minilesson:evaluate', $modulecontext) && $embed != 2) {
+        echo $renderer->header($moduleinstance, $cm, $mode, null, get_string('view', constants::M_COMPONENT));
+    } else {
+        echo $renderer->notabsheader($moduleinstance, $embed);
+    }
+    echo $continue_form->render();
+    echo $renderer->footer();
+    die;
 }
 
 // This library is licensed with the hippocratic license (https://github.com/EthicalSource/hippocratic-license/).
@@ -149,7 +194,7 @@ $itemcount = $comptest->fetch_item_count();
 
 // If we have slides, load the CSS
 if ($comptest->has_slides_items()) {
-    switch($moduleinstance->region) {
+    switch ($moduleinstance->region) {
         case 'ningxia':
             // If Ningxia region, load CSS from different CDN
             $PAGE->requires->css(new moodle_url('https://cdn.bootcdn.net/ajax/libs/reveal.js/5.2.1/reveal.min.css'));
@@ -182,7 +227,7 @@ if ($hasopenclosedates) {
     if ($currenttime > $moduleinstance->viewend && $moduleinstance->viewend > 0) {
         echo get_string('activityisclosed', constants::M_COMPONENT);
         $closed = true;
-    } else if ($currenttime < $moduleinstance->viewstart) {
+    } elseif ($currenttime < $moduleinstance->viewstart) {
         echo get_string('activityisnotopenyet', constants::M_COMPONENT);
         $closed = true;
     }
@@ -204,10 +249,10 @@ if ($CFG->version < 2022041900) {
 if ($latestattempt->status == constants::M_STATE_COMPLETE) {
     $teacherreport = false;
     echo $renderer->show_finished_results($comptest, $latestattempt, $cm, $canattempt, $embed, $teacherreport);
-} else if ($itemcount > 0) {
+} elseif ($itemcount > 0) {
     echo $renderer->show_quiz($comptest, $moduleinstance);
     $previewid = 0;
-    echo $renderer->fetch_activity_amd($comptest, $cm, $moduleinstance, $previewid, $canattempt, $embed);
+    echo $renderer->fetch_activity_amd($comptest, $cm, $moduleinstance, $previewid, $canattempt, $embed, $latestattempt);
 } else {
     $showadditemlinks = has_capability('mod/minilesson:evaluate', $modulecontext);
     echo $renderer->show_no_items($cm, $showadditemlinks);

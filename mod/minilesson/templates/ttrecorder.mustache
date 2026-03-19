@@ -1,9 +1,15 @@
-<div id="ttrec_container_{{uniqueid}}" tabindex="0" class="mod_minilesson_ttrec_waveButtonContainer" style="display: none; height: {{waveheight}}px; margin-bottom:10px">
+<div id="ttrec_container_{{uniqueid}}" tabindex="0" class="mod_minilesson_ttrec_waveButtonContainer" style="display: none; height: {{waveheight}}px; margin-bottom:24px">
 
     <canvas id="{{uniqueid}}_waveform" class="mod_minilesson_ttrec_waveForm" style="height:100%;width:100%"></canvas>
 
     <div id="{{uniqueid}}_recorderdiv" style="pointer-events: auto;" class="mod_minilesson_ttrec_waveButton ttrec_ready" data-passagehash="{{passagehash}}" data-waveheight="{{waveheight}}"
-         data-region="{{region}}" data-cloudpoodllurl="{{cloudpoodllurl}}" data-lang="{{language}}" data-asrurl="{{{asrurl}}}" data-speechtoken="{{speechtoken}}" data-speechtokenvalidseconds="{{speechtokenvalidseconds}}"  data-speechtokentype="{{speechtokentype}}" data-forcestreaming="{{forcestreaming}}" data-maxtime="{{{maxtime}}}">
+         data-region="{{region}}" data-cloudpoodllurl="{{cloudpoodllurl}}" data-lang="{{language}}"
+         data-asrurl="{{{asrurl}}}" data-speechtoken="{{speechtoken}}" data-speechtokenregion="{{speechtokenregion}}" data-speechtokenvalidseconds="{{speechtokenvalidseconds}}"
+         data-speechtokentype="{{speechtokentype}}" data-forcestreaming="{{forcestreaming}}" data-maxtime="{{{maxtime}}}"
+         data-owner="{{owner}}" data-wstoken="{{cloudpoodlltoken}}"  data-appid="{{appid}}"  data-mediatype="audio"
+         data-transcode="{{transcode}}" data-wwwroot="{{wwwroot}}"  data-transcoder="{{transcoder}}" data-transcribe="{{transcribe}}"
+         data-subtitle="{{subtitle}}" data-savemedia="{{savemedia}}" data-savemediaregion="{{savemediaregion}}" data-expiredays="{{expiredays}}"
+    >
         <i class="fa fa-microphone"></i>
     </div>
 

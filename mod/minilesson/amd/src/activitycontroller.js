@@ -1,5 +1,7 @@
 /* jshint ignore:start */
-define(['jquery', 'core/log','mod_minilesson/definitions','mod_minilesson/quizhelper','mod_minilesson/pollyhelper'], function($,  log, def,  quizhelper,polly) {
+define(['jquery', 'core/log','mod_minilesson/definitions','mod_minilesson/quizhelper','mod_minilesson/pollyhelper',
+    'core/modal_factory', 'core/modal_events', 'core/str'],
+    function ($,  log, def,  quizhelper,polly, ModalFactory, ModalEvents, Str) {
 
     "use strict"; // jshint ;_;
 
@@ -13,16 +15,16 @@ define(['jquery', 'core/log','mod_minilesson/definitions','mod_minilesson/quizhe
         controls: null,
 
         //pass in config, the jquery video/audio object, and a function to be called when conversion has finshed
-        init: function(props){
+        init: function (props) {
             var dd = this;
 
             //pick up opts from html
-            var theid='#amdopts_' + props.widgetid;
+            var theid = '#amdopts_' + props.widgetid;
             var configcontrol = $(theid).get(0);
-            if(configcontrol){
+            if (configcontrol) {
                 dd.activitydata = JSON.parse(configcontrol.value);
                 $(theid).remove();
-            }else{
+            } else {
                 //if there is no config we might as well give up
                 log.debug('MiniLesson activity Controller: No config found on page. Giving up.');
                 return;
@@ -32,10 +34,12 @@ define(['jquery', 'core/log','mod_minilesson/definitions','mod_minilesson/quizhe
             dd.attemptid = 1;
             dd.sorryboxid = props.widgetid + '_sorrybox';
 
-            polly.init(dd.activitydata.token,
+            polly.init(
+                dd.activitydata.token,
                 dd.activitydata.region,
                 dd.activitydata.owner,
-                dd.activitydata.cloudpoodllurl);
+                dd.activitydata.cloudpoodllurl
+            );
 
             dd.register_events();
             dd.process_html();
@@ -43,11 +47,11 @@ define(['jquery', 'core/log','mod_minilesson/definitions','mod_minilesson/quizhe
             dd.doquizlayout();
         },
 
-        process_html: function(){
+        process_html: function () {
             var opts = this.activitydata;
             //these css classes/ids are all passed in from php in
             //renderer.php::fetch_activity_amd
-            var controls ={
+            var controls = {
                 introbox: $('.' + 'mod_intro_box'),
                 quizcontainer: $('.' +  opts['quizcontainer']),
                 feedbackcontainer: $('.' +  opts['feedbackcontainer']),
@@ -59,22 +63,24 @@ define(['jquery', 'core/log','mod_minilesson/definitions','mod_minilesson/quizhe
             this.controls = controls;
         },
 
-        register_events: function() {
+        register_events: function () {
            //do something
 
         },
 
-        doquizlayout: function(){
+        doquizlayout: function () {
             var dd = this;
             dd.controls.instructionscontainer.hide();
 
             //set up the quiz
            // quizhelper.onSubmit = function(returndata){dd.dofinishedreadinglayout(returndata);};
-            quizhelper.init(dd.controls.quizcontainer,
+            quizhelper.init(
+                dd.controls.quizcontainer,
                 this.activitydata,
                 this.cmid,
                 this.attemptid,
-                polly);
+                polly
+            );
 
             //show the quiz
             dd.controls.placeholder.hide();
@@ -83,9 +89,49 @@ define(['jquery', 'core/log','mod_minilesson/definitions','mod_minilesson/quizhe
 
         },
 
-        doerrorlayout: function(){
+        doerrorlayout: function () {
             this.controls.errorcontainer.show();
             this.controls.wheretonextcontainer.show();
+        },
+
+        continueconfirmation: function(buttonselector) {
+            const deletebtn = document.querySelector(buttonselector);
+            if (!deletebtn) {
+                return;
+            }
+            deletebtn.addEventListener('click', e => {
+                e.preventDefault();
+                const form = deletebtn.form;
+                if (!form) {
+                    return;
+                }
+
+                Str.get_strings([
+                    {key: 'confirmation', component: 'core_admin'},
+                    {key: 'confirmactionmessage', component: 'mod_minilesson'},
+                    {key: 'ok', component: 'moodle'},
+                ]).then(strings => {
+                    ModalFactory.create({
+                        type: ModalFactory.types.SAVE_CANCEL,
+                        title: strings[0],
+                        body: strings[1],
+                        buttons: {
+                            save: strings[2]
+                        }
+                    }).then(modal => {
+                        modal.getRoot().on(ModalEvents.save, () => {
+                            const hidden = document.createElement('input');
+                            hidden.type = 'hidden';
+                            hidden.name = deletebtn.getAttribute('name');
+                            hidden.value = deletebtn.getAttribute('value');
+                            form.appendChild(hidden);
+                            form.submit();
+                        });
+                        modal.show();
+                    });
+                });
+                return;
+            });
         }
     };//end of returned object
 });//total end

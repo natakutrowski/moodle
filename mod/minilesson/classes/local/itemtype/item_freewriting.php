@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -17,9 +18,6 @@
 namespace mod_minilesson\local\itemtype;
 
 use mod_minilesson\constants;
-use mod_minilesson\utils;
-use templatable;
-use renderable;
 
 /**
  * Renderable class for a free writing item in a minilesson activity.
@@ -28,8 +26,8 @@ use renderable;
  * @copyright  2023 Justin Hunt <justin@poodll.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class item_freewriting extends item {
-
+class item_freewriting extends item
+{
     //the item type
     public const ITEMTYPE = constants::TYPE_FREEWRITING;
 
@@ -40,15 +38,34 @@ class item_freewriting extends item {
      * @param \renderer_base $output renderer to be used to render the action bar elements.
      * @return array
      */
-    public function export_for_template(\renderer_base $output) {
+    public function export_for_template(\renderer_base $output)
+    {
 
-        $testitem = new \stdClass();
-        $testitem = $this->get_common_elements($testitem);
-        $testitem = $this->get_text_answer_elements($testitem);
+        $testitem = parent::export_for_template($output);
         $testitem = $this->set_layout($testitem);
         $testitem->relevance = $this->itemrecord->{constants::RELEVANCE};
         $testitem->totalmarks = $this->itemrecord->{constants::TOTALMARKS};
         $testitem->nopasting = $this->itemrecord->{constants::NOPASTING};
+
+        $enablevkeyboard = $this->itemrecord->{constants::FREEWRITING_ENABLEVKEYBOARD};
+        $customkeys = $this->itemrecord->{constants::FREEWRITING_CUSTOMKEYS};
+
+        // If compact layout selected (2), we fetch the keys and set to custom layout (2) for JS
+        if ($enablevkeyboard == 2) {
+            $testitem->enablevkeyboard = 2;
+            $testitem->customkeys = \mod_minilesson\utils::get_compact_keys($this->moduleinstance->ttslanguage);
+        } elseif ($enablevkeyboard == 3) {
+            // If custom layout selected (3), we set to custom layout (2) for JS
+            $testitem->enablevkeyboard = 2;
+            $testitem->customkeys = $customkeys;
+        } else {
+            $testitem->enablevkeyboard = $enablevkeyboard;
+            $testitem->customkeys = $customkeys;
+        }
+
+        $testitem->language = $this->language;
+        $testitem->vkeyboardurl = $output->image_url('vkeyboard', constants::M_COMPONENT)->out();
+
         if ($this->itemrecord->{constants::TARGETWORDCOUNT} > 0) {
             $testitem->targetwordcount = $this->itemrecord->{constants::TARGETWORDCOUNT};
             $testitem->textarearows = round($this->itemrecord->{constants::TARGETWORDCOUNT} / 10, 0) + 1;
@@ -68,6 +85,16 @@ class item_freewriting extends item {
         $testitem->reviewsettings['showscorepercentage'] = !empty($this->itemrecord->{constants::FREEWRITING_SHOWGRADE}) &&
             $this->itemrecord->{constants::FREEWRITING_SHOWGRADE} == 2;
 
+        // Replace any template variables in the question text.
+        if (!empty($testitem->itemtext)) {
+            $search = ['{topic}', '{ai data1}', '{ai data2}'];
+            $replace = [
+                $this->itemrecord->{constants::FREEWRITING_TOPIC},
+                $this->itemrecord->{constants::FREEWRITING_AIDATA1},
+                $this->itemrecord->{constants::FREEWRITING_AIDATA2},
+            ];
+            $testitem->itemtext = str_replace($search, $replace, $testitem->itemtext);
+        }
         // Cloudpoodll.
         $maxtime = $this->itemrecord->timelimit;
         $testitem = $this->set_cloudpoodll_details($testitem, $maxtime);
@@ -75,7 +102,8 @@ class item_freewriting extends item {
         return $testitem;
     }
 
-    public static function validate_import($newrecord, $cm) {
+    public static function validate_import($newrecord, $cm)
+    {
         $error = new \stdClass();
         $error->col = '';
         $error->message = '';
@@ -97,9 +125,10 @@ class item_freewriting extends item {
     }
 
     /*
-    * This is for use with importing, telling import class each column's is, db col name, minilesson specific data type
-    */
-    public static function get_keycolumns() {
+     * This is for use with importing, telling import class each column's is, db col name, minilesson specific data type
+     */
+    public static function get_keycolumns()
+    {
         // get the basic key columns and customize a little for instances of this item type
         $keycols = parent::get_keycolumns();
         $keycols['int1'] = ['jsonname' => 'totalmarks', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::TOTALMARKS];
@@ -115,18 +144,20 @@ class item_freewriting extends item {
         $keycols['text2'] = ['jsonname' => 'aigradefeedback', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::AIGRADE_FEEDBACK];
         $keycols['text3'] = ['jsonname' => 'modelanswer', 'type' => 'string', 'optional' => true, 'default' => '', 'dbname' => constants::AIGRADE_MODELANSWER];
         $keycols['text4'] = ['jsonname' => 'aigradefeedbacklanguage', 'type' => 'string', 'optional' => true, 'default' => 'en-US', 'dbname' => constants::AIGRADE_FEEDBACK_LANGUAGE];
-        $keycols['text5'] = ['jsonname' => 'freewritingtopic', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::FREEWRITING_TOPIC];
-        $keycols['data1'] = ['jsonname' => 'freewritingaidata1', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::FREEWRITING_AIDATA1];
+        $keycols['text5'] = ['jsonname' => 'freewritingtopic', 'type' => 'string', 'optional' => true, 'default' => '', 'dbname' => constants::FREEWRITING_TOPIC];
+        $keycols['text1'] = ['jsonname' => 'enablevkeyboard', 'type' => 'string', 'optional' => true, 'default' => '', 'dbname' => constants::FREEWRITING_ENABLEVKEYBOARD];
+        $keycols['text7'] = ['jsonname' => 'customkeys', 'type' => 'string', 'optional' => true, 'default' => '', 'dbname' => constants::FREEWRITING_CUSTOMKEYS];
+        $keycols['data1'] = ['jsonname' => 'freewritingaidata1', 'type' => 'string', 'optional' => true, 'default' => '', 'dbname' => constants::FREEWRITING_AIDATA1];
         $keycols['data2'] = ['jsonname' => 'freewritingaidata2', 'type' => 'string', 'optional' => false, 'default' => '', 'dbname' => constants::FREEWRITING_AIDATA2];
         return $keycols;
     }
 
-       /*
-    This function return the prompt that the generate method requires. 
-    */
-    public static function aigen_fetch_prompt ($itemtemplate, $generatemethod) {
-        switch($generatemethod) {
-
+    /*
+ This function return the prompt that the generate method requires.
+ */
+    public static function aigen_fetch_prompt($itemtemplate, $generatemethod)
+    {
+        switch ($generatemethod) {
             case 'extract':
                 $prompt = "Create a writing question(text) suitable for {level} level learners of {language} as a follow up activity on the following reading: [{text}] ";
                 break;
@@ -144,5 +175,4 @@ class item_freewriting extends item {
         }
         return $prompt;
     }
-
 }

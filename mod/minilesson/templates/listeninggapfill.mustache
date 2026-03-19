@@ -1,13 +1,22 @@
 {{> mod_minilesson/questionheader}}
-<div class="minilesson_lgapfill_player_box gapfill-container">
+<div class="minilesson_lgapfill_player_box item-container">
     <div style="display:none;" class="lgapfill_results">{{#str}}dc_results, mod_minilesson{{/str}}</div>
 
-    <div class="lgapfill_title text-center">{{#str}}listeninggapfill, mod_minilesson{{/str}}</div>
+    <div class="maintitle lgapfill_maintitle" style="display: none">{{iteminstructions}}</div>
+    <div class="lgapfill_itemtext mod_minilesson_itemtext {{rtl}}" style="display: none">{{{itemtext}}}</div>
 
-    <div class="lgapfill_mainmenu">
+    <div class="startmodule_image_container lgapfill_image_container">
+        <img class="startmodule_image lgapfill_image" src="{{{itemimageurl}}}" alt="{{#str}}lgapfill, mod_minilesson{{/str}}">
+    </div>
+
+    <div class="startmodule_title lgapfill_title">{{#str}}listeninggapfill, mod_minilesson{{/str}}</div>
+
+    <div class="startmodule_description lgapfill_description">{{iteminstructions}}</div>
+
+    <div class="start_mainmenu lgapfill_mainmenu">
         <div class="lgapfill_loaded" style="display:none;">
-            <button disabled class='btn btn-block btn-primary lgapfill_start_btn'>
-                <i class='fa fa-play'></i> {{#str}}start, mod_minilesson{{/str}}
+            <button disabled class='btn startmodule_btn lgapfill_start_btn'>
+                {{#str}}start, mod_minilesson{{/str}} <i class='fa fa-play ml-1'></i>
             </button>
 
         </div>
@@ -16,28 +25,44 @@
         </div>
     </div>
 
+    {{#timelimit}}
     {{> mod_minilesson/progresstimer }}
+    {{/timelimit}}
 
     <div style="display:none;" class="lgapfill_listen_cont">
-        <button class="btn btn-secondary lgapfill_listen_btn">
-            <i class="fa fa-volume-up"></i>
+        <button class="btn animatesoundbtn position-relative lgapfill_listen_btn">
+            <div class='soundWave'>
+                <div class='bar'></div>
+                <div class='bar'></div>
+                <div class='bar'></div>
+                <div class='bar'></div>
+                <div class='bar'></div>
+            </div>
         </button>
     </div>
 
     <div style="display:none;" class="question"></div>
 
-    <div style="display:none;" class="lgapfill_controls">
+    <div class="simple-keyboard simple-keyboard-{{uniqueid}}" style="padding: 5px; display: none;" aria-hidden="true"></div>
 
-        <button class="btn btn-success lgapfill_ctrl-btn lgapfill_check_btn">
+    <div style="display:none;" class="lgapfill_controls pb-3">
+
+        <button class="btn btn-check-button-primary lgapfill_ctrl-btn lgapfill_check_btn">
             <i class="fa fa-check"></i> {{#str}}check, mod_minilesson{{/str}}
         </button>
 
-        <button class="btn btn-danger lgapfill_ctrl-btn lgapfill_skip_btn">
-            {{#str}}skip, mod_minilesson{{/str}} <i class="fa fa-arrow-right"></i>
+        <button class="btn btn-skip-button-secondary lgapfill_ctrl-btn lgapfill_skip_btn">
+            {{#str}}skip, mod_minilesson{{/str}}{{#pix}}skip-icon, mod_minilesson{{/pix}}
         </button>
+
+        {{#enablevkeyboard}}
+            <button class="btn lgapfill_ctrl-btn ml_simple_keyboard_toggle" type="button">
+                <i class="fa fa-keyboard-o"></i>
+            </button>
+        {{/enablevkeyboard}}
 
     </div>
 
-    <div class="lgapfill_resultscontainer"></div>
+    <div class="resultscontainer lgapfill_resultscontainer"></div>
 </div>
 {{> mod_minilesson/questionfooter}}
