@@ -1862,5 +1862,160 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2025041401.10);
     }
 
+    if ($oldversion < 2025041403.05) {
+        // Remove any orphaned competency evidence records (pointing to non-existing contexts).
+        $DB->delete_records_select('competency_evidence', 'NOT EXISTS (
+            SELECT ctx.id FROM {context} ctx WHERE ctx.id = {competency_evidence}.contextid
+        )');
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2025041403.05);
+    }
+
+    if ($oldversion < 2025041403.11) {
+        // Define index hashcode (not unique) to be added to question_response_analysis.
+        $table = new xmldb_table('question_response_analysis');
+        $index = new xmldb_index('hashcode', XMLDB_INDEX_NOTUNIQUE, ['hashcode']);
+
+        // Conditionally launch add index hashcode.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Define index hashcode (not unique) to be added to question_statistics.
+        $table = new xmldb_table('question_statistics');
+        $index = new xmldb_index('hashcode', XMLDB_INDEX_NOTUNIQUE, ['hashcode']);
+
+        // Conditionally launch add index hashcode.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2025041403.11);
+    }
+
+    if ($oldversion < 2025041404.02) {
+        // Fix Microsoft OAuth2 user field mappings to use OpenID Connect standard field names.
+        // This corrects the mappings introduced in MDL-84432 which used non-standard field names
+        // that only work with personal Microsoft accounts but not work/school (Entra ID) accounts.
+        $userfieldmappings = [
+            'firstname' => 'given_name',
+            'lastname' => 'family_name',
+        ];
+        $admin = get_admin();
+        $adminid = $admin ? $admin->id : '0';
+        $microsoftservices = $DB->get_records('oauth2_issuer', ['servicetype' => 'microsoft']);
+        foreach ($microsoftservices as $microsoftservice) {
+            $time = time();
+            // Update user field mappings to use OpenID Connect standard field names.
+            foreach ($userfieldmappings as $internalfieldname => $externalfieldname) {
+                $fieldmap = ['issuerid' => $microsoftservice->id, 'internalfield' => $internalfieldname];
+                $fieldmapid = $DB->get_field('oauth2_user_field_mapping', 'id', $fieldmap);
+                if ($fieldmapid) {
+                    $fieldmap = array_merge($fieldmap, [
+                        'id' => $fieldmapid,
+                        'externalfield' => $externalfieldname,
+                        'timemodified' => $time,
+                        'usermodified' => $adminid,
+                    ]);
+                    $DB->update_record('oauth2_user_field_mapping', $fieldmap);
+                }
+            }
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2025041404.02);
+    }
+
+    if ($oldversion < 2025041404.04) {
+        // Define field nextversion to be added to question_bank_entries.
+        $table = new xmldb_table('question_bank_entries');
+        $field = new xmldb_field('nextversion', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'ownerid');
+
+        // Conditionally launch add field nextversion.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2025041404.04);
+    }
+
+    if ($oldversion < 2025041404.06) {
+        // Changing the default of field showactivitydates on table course to 1.
+        $table = new xmldb_table('course');
+        $field = new xmldb_field('showactivitydates', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1', 'originalcourseid');
+
+        // Launch change of default for field showactivitydates.
+        $dbman->change_field_default($table, $field);
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2025041404.06);
+    }
+
+    if ($oldversion < 2025041404.08) {
+        // Define index nextruntime_classname (not unique) to be added to task_adhoc.
+        $table = new xmldb_table('task_adhoc');
+        $index = new xmldb_index('nextruntime_classname', XMLDB_INDEX_NOTUNIQUE, ['nextruntime', 'classname']);
+
+        // Conditionally launch add index nextruntime_classname.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2025041404.08);
+    }
+
+    if ($oldversion < 2025041404.09) {
+        // Define index lastruntime_nextruntime (not unique) to be added to task_scheduled.
+        $table = new xmldb_table('task_scheduled');
+        $index = new xmldb_index('lastruntime_nextruntime', XMLDB_INDEX_NOTUNIQUE, ['lastruntime', 'nextruntime']);
+
+        // Conditionally launch add index lastruntime_nextruntime.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2025041404.09);
+    }
+
+    if ($oldversion < 2025041404.10) {
+        \core_question\category_manager::fix_restored_category_parents();
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2025041404.10);
+    }
+
+    if ($oldversion < 2025041406.01) {
+        $table = new xmldb_table('customfield_data');
+
+        // Define index fieldid-decvalue (not unique) to be dropped form customfield_data.
+        $index = new xmldb_index('fieldid-decvalue', XMLDB_INDEX_NOTUNIQUE, ['fieldid', 'decvalue']);
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+        // Changing precision of field decvalue on table customfield_data to (15, 5).
+        $field = new xmldb_field('decvalue', XMLDB_TYPE_NUMBER, '15, 5', null, null, null, null, 'intvalue');
+        $dbman->change_field_precision($table, $field);
+
+        // Conditionally launch add index fieldid-decvalue.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2025041406.01);
+    }
+
+    if ($oldversion < 2025041406.05) {
+        $orphanedquestions = core_question\category_manager::cleanup_questions_without_categories();
+        if ($orphanedquestions > 0) {
+            upgrade_log(UPGRADE_LOG_NORMAL, null, "Cleaned up {$orphanedquestions} questions left over from restores.");
+        }
+
+        upgrade_main_savepoint(true, 2025041406.05);
+    }
+
     return true;
 }

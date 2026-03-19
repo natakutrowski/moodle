@@ -252,15 +252,18 @@ class renderer extends \plugin_renderer_base {
         $this->page->set_heading($this->page->course->fullname);
 
         $description = $header->preface;
-        if ($header->showintro || $header->activity) {
-            $description = $this->output->box_start('generalbox boxaligncenter');
-            if ($header->showintro) {
-                $description .= format_module_intro('assign', $header->assign, $header->coursemoduleid);
-            }
-            if ($header->activity) {
-                $description .= $this->format_activity_text($header->assign, $header->coursemoduleid);
-            }
-            $description .= $header->postfix;
+        $introcontent = '';
+        if ($header->showintro) {
+            $introcontent .= format_module_intro('assign', $header->assign, $header->coursemoduleid);
+        }
+        if ($header->activity) {
+            $introcontent .= $this->format_activity_text($header->assign, $header->coursemoduleid);
+        }
+        $introcontent .= $header->postfix ?? '';
+
+        if (trim($introcontent) !== '') {
+            $description .= $this->output->box_start('generalbox boxaligncenter');
+            $description .= $introcontent;
             $description .= $this->output->box_end();
         }
 
@@ -298,12 +301,12 @@ class renderer extends \plugin_renderer_base {
 
         if (isset($summary->cm)) {
             $currenturl = new \moodle_url('/mod/assign/view.php', array('id' => $summary->cm->id));
-            $o .= groups_print_activity_menu($summary->cm, $currenturl->out(), true);
+            $o .= groups_print_activity_menu($summary->cm, $currenturl->out(), true, participationonly: false);
         }
 
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         $t = new \html_table();
-        $t->attributes['class'] = 'generaltable table table-striped table-bordered';
+        $t->attributes['class'] = 'generaltable table table-striped table-bordered table-hover';
         $t->caption = get_string('gradingsummary', 'assign');
         $t->captionhide = true; // Hidden because it matches the title above.
 
@@ -653,7 +656,7 @@ class renderer extends \plugin_renderer_base {
         $o .= $this->output->box_start('boxaligncenter submissionsummarytable');
 
         $t = new \html_table();
-        $t->attributes['class'] = 'generaltable table table-striped table-bordered';
+        $t->attributes['class'] = 'generaltable table table-striped table-bordered table-hover';
         $t->caption = get_string('submissionstatusheading', 'assign');
         $t->captionhide = true; // Hidden because it matches the title above.
 
