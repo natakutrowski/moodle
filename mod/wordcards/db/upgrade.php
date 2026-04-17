@@ -674,27 +674,5 @@ function xmldb_wordcards_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2025102700, 'wordcards');
     }
 
-    if ($oldversion < 2025102701) {
-        $table = new xmldb_table(constants::M_TERMSTABLE);
-
-        // On décrit le champ exactement comme il est dans la base actuelle.
-        $field = new xmldb_field(
-            'model_sentence_audioversion',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            XMLDB_UNSIGNED,
-            XMLDB_NOTNULL,
-            null,
-            0
-        );
-
-        // Si l'ancien champ existe encore, on le renomme en modelaudioversion.
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->rename_field($table, $field, 'modelaudioversion');
-        }
-        upgrade_mod_savepoint(true, 2025102701, 'wordcards');
-    }
-
-
     return true;
 }

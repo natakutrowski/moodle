@@ -106,18 +106,23 @@ class item_slides extends item
         );
 
         // Weird characters can break things like tables, so clean it a bit.
-        $slidesmarkdown = $this->sanitize_markdown($slidesmarkdown);
+        $slidesmarkdown = self::sanitize_markdown($slidesmarkdown);
+
+        // Process markdown layouts (e.g. ::: 2cols -> <div class="ml_slides_2cols">)
+        $slidesmarkdown = self::process_layout_markdown($slidesmarkdown);
 
         // Set it to output.
         $testitem->slidesmarkdown = $slidesmarkdown;
 
         $testitem->selectedtheme = $this->itemrecord->{constants::SLIDETHEME};
         $testitem->selectedfontsize = $this->itemrecord->{constants::SLIDEFONTSIZE};
+        $testitem->fullscreen = $this->itemrecord->{constants::SLIDES_FULLSCREEN};
+
 
         return $testitem;
     }
 
-    public function sanitize_markdown($md)
+    public static function sanitize_markdown($md)
     {
 
         // Remove zero-width chars.
@@ -126,8 +131,24 @@ class item_slides extends item
         // Replace NBSP with normal space.
         $md = str_replace(["\xC2\xA0", "\xE2\x80\xAF"], " ", $md);
 
-        // Trim weird whitespace.
-        $md = preg_replace('/\s+$/m', '', $md);
+        // Trim trailing spaces and tabs but preserve newlines.
+        $md = preg_replace('/[ \t]+$/m', '', $md);
+
+        return $md;
+    }
+
+    /**
+     * Replaces ::: class syntax with divs to create grid layouts
+     */
+    public static function process_layout_markdown($md)
+    {
+        // Replace opening tags. Use [ \t]* so we don't accidentally consume newlines and merge previous slides together!
+        // Tolerate \r before end-of-line in case of Windows CRLF line endings.
+        // Inject \n\n around the block so that Marked.js isolates the HTML elements and resumes standard markdown-parsing inside them.
+        $md = preg_replace('/^:::[ \t]*([a-zA-Z0-9_\-]+)[ \t]*\r?$/m', "\n\n<div class=\"ml_slides_$1\">\n\n", $md);
+        
+        // Replace closing tags
+        $md = preg_replace('/^:::[ \t]*\r?$/m', "\n\n</div>\n\n", $md);
 
         return $md;
     }
@@ -157,7 +178,9 @@ class item_slides extends item
         $keycols['text1'] = ['jsonname' => 'slidesmarkdown', 'type' => 'string', 'optional' => false, 'default' => [], 'dbname' => constants::SLIDES_MARKDOWN];
         $keycols['text2'] = ['jsonname' => 'slidestheme', 'type' => 'string', 'optional' => false, 'default' => 'black', 'dbname' => constants::SLIDETHEME];
         $keycols['text3'] = ['jsonname' => 'slidesfontsize', 'type' => 'string', 'optional' => false, 'default' => '32', 'dbname' => constants::SLIDEFONTSIZE];
+        $keycols['int1'] = ['jsonname' => 'slidesfullscreen', 'type' => 'int', 'optional' => true, 'default' => 0, 'dbname' => constants::SLIDES_FULLSCREEN];
         $keycols[constants::SLIDESFILES] = ['jsonname' => constants::SLIDESFILES, 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
+
 
         return $keycols;
     }

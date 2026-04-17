@@ -18,7 +18,7 @@ namespace format_flexsections;
 
 use context_course;
 use core_external;
-use external_api;
+use core_external\external_api;
 use moodle_exception;
 use moodle_url;
 use testable_course_edit_form;
@@ -32,7 +32,6 @@ use testable_course_edit_form;
  * @covers     \format_flexsections
  */
 final class format_flexsections_test extends \advanced_testcase {
-
     /**
      * Shared setup for the testcase.
      */
@@ -52,8 +51,10 @@ final class format_flexsections_test extends \advanced_testcase {
         // Generate a course with 5 sections.
         $generator = $this->getDataGenerator();
         $numsections = 5;
-        $course = $generator->create_course(['numsections' => $numsections, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
 
         // Get section names for course.
         $coursesections = $DB->get_records('course_sections', ['course' => $course->id]);
@@ -78,8 +79,10 @@ final class format_flexsections_test extends \advanced_testcase {
         // Generate a course with 5 sections.
         $generator = $this->getDataGenerator();
         $numsections = 5;
-        $course = $generator->create_course(['numsections' => $numsections, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
 
         // Get section names for course.
         $coursesections = $DB->get_records('course_sections', ['course' => $course->id]);
@@ -112,8 +115,10 @@ final class format_flexsections_test extends \advanced_testcase {
         // Generate a course with 5 sections.
         $generator = $this->getDataGenerator();
         $numsections = 5;
-        $course = $generator->create_course(['numsections' => $numsections, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
 
         // Get section names for course.
         $coursesections = $DB->get_records('course_sections', ['course' => $course->id]);
@@ -134,7 +139,6 @@ final class format_flexsections_test extends \advanced_testcase {
     /**
      * Test web service updating section name.
      *
-     * @runInSeparateProcess
      * @return void
      */
     public function test_update_inplace_editable(): void {
@@ -144,8 +148,10 @@ final class format_flexsections_test extends \advanced_testcase {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
-        $course = $this->getDataGenerator()->create_course(['numsections' => 5, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $this->getDataGenerator()->create_course(
+            ['numsections' => 5, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
         $section = $DB->get_record('course_sections', ['course' => $course->id, 'section' => 2]);
 
         // Call webservice without necessary permissions.
@@ -153,8 +159,10 @@ final class format_flexsections_test extends \advanced_testcase {
             core_external::update_inplace_editable('format_flexsections', 'sectionname', $section->id, 'New section name');
             $this->fail('Exception expected');
         } catch (moodle_exception $e) {
-            $this->assertEquals('Course or activity not accessible. (Not enrolled)',
-                    $e->getMessage());
+            $this->assertEquals(
+                'Course or activity not accessible. (Not enrolled)',
+                $e->getMessage()
+            );
         }
 
         // Change to teacher and make sure that section name can be updated using web service update_inplace_editable().
@@ -170,7 +178,6 @@ final class format_flexsections_test extends \advanced_testcase {
     /**
      * Test callback updating section name.
      *
-     * @runInSeparateProcess
      * @return void
      */
     public function test_inplace_editable(): void {
@@ -178,8 +185,10 @@ final class format_flexsections_test extends \advanced_testcase {
 
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
-        $course = $this->getDataGenerator()->create_course(['numsections' => 5, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $this->getDataGenerator()->create_course(
+            ['numsections' => 5, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
         $teacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
         $this->getDataGenerator()->enrol_user($user->id, $course->id, $teacherrole->id);
         $this->setUser($user);
@@ -187,8 +196,11 @@ final class format_flexsections_test extends \advanced_testcase {
         $section = $DB->get_record('course_sections', ['course' => $course->id, 'section' => 2]);
 
         // Call callback format_flexsections_inplace_editable() directly.
-        $tmpl = component_callback('format_flexsections', 'inplace_editable',
-            ['sectionname', $section->id, 'Rename me again']);
+        $tmpl = component_callback(
+            'format_flexsections',
+            'inplace_editable',
+            ['sectionname', $section->id, 'Rename me again']
+        );
         $this->assertInstanceOf('core\output\inplace_editable', $tmpl);
         $res = $tmpl->export_for_template($PAGE->get_renderer('core'));
         $this->assertEquals('Rename me again', $res['value']);
@@ -239,7 +251,6 @@ final class format_flexsections_test extends \advanced_testcase {
 
         $format = course_get_format($course->id);
         $this->assertEquals($enddate, $format->get_default_course_enddate($courseform->get_quick_form()));
-
     }
 
     /**
@@ -267,6 +278,37 @@ final class format_flexsections_test extends \advanced_testcase {
     }
 
     /**
+     * Test get_view_url() with null section when section number is set.
+     *
+     * Regression test for https://github.com/marinaglancy/moodle-format_flexsections/issues/109
+     * When viewing a single section page and get_view_url is called with null,
+     * it should not produce a warning about reading property on null.
+     *
+     * @return void
+     */
+    public function test_get_view_url_with_section_number_set(): void {
+        $this->resetAfterTest();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['format' => 'flexsections']);
+        course_create_sections_if_missing($course, [0, 1]);
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+
+        // Simulate being on a single section page by setting the section number.
+        $format->set_sectionnum(1);
+
+        // This should not produce a PHP warning "Attempt to read property 'id' on null".
+        $url = $format->get_view_url(null);
+        $this->assertNotEmpty($url);
+
+        // Also test with navigation option.
+        $url = $format->get_view_url(null, ['navigation' => true]);
+        $this->assertTrue($url === null || $url instanceof moodle_url);
+    }
+
+    /**
      * Tests for format_flexsections::delete_section_with_children.
      */
     public function test_delete_section_with_children(): void {
@@ -276,8 +318,10 @@ final class format_flexsections_test extends \advanced_testcase {
         // Generate a course with 5 sections.
         $generator = $this->getDataGenerator();
         $numsections = 5;
-        $course = $generator->create_course(['numsections' => $numsections, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
 
         // Get last section.
         $courseformat = course_get_format($course);
@@ -303,5 +347,75 @@ final class format_flexsections_test extends \advanced_testcase {
         }
         // Sanity check, expect 5 sections in total (section 0-4).
         $this->assertCount(5, $courseformat->get_sections());
+    }
+
+    /**
+     * Test that hiding a section via stateactions also hides subsections recursively.
+     *
+     * Regression test for https://github.com/marinaglancy/moodle-format_flexsections/issues/107
+     * When a section containing subsections is hidden using the AJAX action (section_hide),
+     * activities in subsections must also become hidden from students.
+     */
+    public function test_section_hide_recursive(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(
+            ['numsections' => 3, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
+        $user = $generator->create_user();
+        $teacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
+        $generator->enrol_user($user->id, $course->id, $teacherrole->id);
+        $this->setUser($user);
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+
+        // Create subsection under section 1, and sub-subsection under that.
+        $subsectionnum = $format->create_new_section(1);
+        $subsubsectionnum = $format->create_new_section($subsectionnum);
+
+        // Add activities to each level.
+        $generator->create_module('assign', ['course' => $course->id, 'section' => 1]);
+        $generator->create_module('forum', ['course' => $course->id, 'section' => $subsectionnum]);
+        $generator->create_module('page', ['course' => $course->id, 'section' => $subsubsectionnum]);
+
+        // Get section info.
+        $modinfo = get_fast_modinfo($course);
+        $section1 = $modinfo->get_section_info(1);
+        $subsection = $modinfo->get_section_info($subsectionnum);
+        $subsubsection = $modinfo->get_section_info($subsubsectionnum);
+
+        // Verify parent hierarchy is correct.
+        $this->assertEquals(1, $subsection->parent, 'Subsection parent should be section 1');
+        $this->assertEquals($subsectionnum, $subsubsection->parent, 'Sub-subsection parent should be subsection');
+
+        // Verify all sections are visible initially.
+        $this->assertEquals(1, $section1->visible);
+        $this->assertEquals(1, $subsection->visible);
+        $this->assertEquals(1, $subsubsection->visible);
+
+        // Hide section 1 via stateactions (simulating the AJAX hide action).
+        $updates = new \core_courseformat\stateupdates($format);
+        $actions = $format->get_stateactions_instance();
+        $actions->section_hide($updates, $course, [$section1->id]);
+
+        // Verify that section 1 and all its subsections are now hidden.
+        $modinfo = get_fast_modinfo($course);
+        $this->assertEquals(0, $modinfo->get_section_info(1)->visible, 'Section 1 should be hidden');
+        $this->assertEquals(0, $modinfo->get_section_info($subsectionnum)->visible, 'Subsection should be hidden');
+        $this->assertEquals(0, $modinfo->get_section_info($subsubsectionnum)->visible, 'Sub-subsection should be hidden');
+
+        // Now show section 1 and verify subsections become visible again.
+        $updates = new \core_courseformat\stateupdates($format);
+        $actions = $format->get_stateactions_instance();
+        $actions->section_show($updates, $course, [$section1->id]);
+
+        $modinfo = get_fast_modinfo($course);
+        $this->assertEquals(1, $modinfo->get_section_info(1)->visible, 'Section 1 should be visible');
+        $this->assertEquals(1, $modinfo->get_section_info($subsectionnum)->visible, 'Subsection should be visible');
+        $this->assertEquals(1, $modinfo->get_section_info($subsubsectionnum)->visible, 'Sub-subsection should be visible');
     }
 }

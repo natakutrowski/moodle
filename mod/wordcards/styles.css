@@ -2547,11 +2547,3 @@ button.definitions-next.btn .fa-arrow-right:before {
 .wc-progressdash-grid .col-12:is(:nth-child(1), :nth-child(2)) .wc-progressdash-grid-item .wc-pg-lowerno {
     z-index: 2;
 }
-
-/* Wordcards Poodll : enlever l'image de fond au dos des cartes */
-.path-mod-wordcards .a4e-flashcards-container .wordcards_defcard.back {
-    background-image: none !important;
-    /* optionnel : couleur de fond douce pour le texte */
-    background-color: #fbe8ea; /* ou la couleur que tu veux */
-    background-size: auto;     /* pour être sûre qu’aucune image ne traîne */
-}

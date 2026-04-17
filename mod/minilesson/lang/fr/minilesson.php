@@ -1337,3 +1337,26 @@ $string['attemptquestioncountmessage'] = 'Vous avez complété {$a->completed} s
 $string['fullscreen_toggle'] = 'Mode plein écran';
 $string['hidedetailedresults'] = 'Masquer les résultats détaillés';
 $string['defaultitemlayout'] = 'Mise en page par défaut';
+
+
+$string['fluencyresponses'] = 'Saisissez une liste de phrases dans la zone de texte ci-dessous. Chaque élément doit être sur une nouvelle ligne. Vous pouvez ajouter une traduction ou un indice pour chaque phrase en utilisant le format : phrase | <i>indice</i> <br>ex. Hello|<i>Hola</i>';
+$string['hint'] = 'Indice';
+$string['hintrtl'] = 'Indice RTL';
+$string['hintrtl_desc'] = 'Si cette option est cochée, l’indice sera affiché de droite à gauche.';
+$string['scatterdefrtl'] = 'Définition RTL';
+$string['scatterdefrtl_desc'] = 'Si cette option est cochée, la définition sera affichée de droite à gauche.';
+$string['aigentemplatename:narrativefiction_withpics'] = 'Fiction interactive narrative (avec images)';
+$string['aigentemplatedescription:fiction_nopics'] = 'Saisissez un plan détaillé de l’histoire pour générer une activité de fiction interactive uniquement textuelle (avec une seule image principale).';
+$string['aigentemplatedescription:narrativefiction_withpics'] = 'Saisissez un plan détaillé de l’histoire pour générer une activité de fiction interactive avec moins de choix, plus de narration et des images.';
+$string['noitemyet'] = 'Il n’y a encore aucun élément dans cette mini-leçon. Cliquez sur le bouton « Ajouter un élément » et choisissez un type pour commencer.';
+$string['slides:fontsmallest'] = 'Le plus petit';
+$string['slides:fontlargest'] = 'Le plus grand';
+
+$string['addlessonitem_desc'] = 'Ajoutez manuellement des éléments pour construire votre leçon';
+$string['chooselessonitem_desc'] = 'Choisissez une leçon prête à l’emploi depuis la banque de leçons';
+$string['generatelessonitem_desc'] = 'Générez une leçon ou des éléments de leçon à l’aide de l’IA';
+$string['generate'] = 'Générer';
+
+$string['audiochatstudent'] = 'Étudiant';
+$string['audiochataiassistant'] = 'Assistant IA';
+

@@ -1,9 +1,10 @@
 define(
     [
     'jquery', 'core/log', 'mod_minilesson/definitions', './reveal',
-    'core/str', 'core/modal_factory', 'core/fragment'
+    'core/str', 'core/modal_factory', 'core/fragment', 'mod_minilesson/fullscreen_helper'
     ],
-    function ($, log, def, RevealImplement, Str, ModalFactory, Fragment) {
+    function ($, log, def, RevealImplement, Str, ModalFactory, Fragment, FullscreenHelper) {
+
         "use strict"; // jshint ;_;
 
         /*
@@ -49,6 +50,48 @@ define(
                         self.instance = await RevealImplement.init(e.target.querySelector('.reveal'), itemdata.region, itemdata.selectedtheme);
                         self.instance.initialize();
                     }
+
+                    if (itemdata.fullscreen) {
+                        const btn = document.getElementById('toggle-fs-' + itemdata.uniqueid);
+                        if (btn) {
+                            btn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                const isFS = !!document.fullscreenElement || !!document.webkitFullscreenElement;
+                                
+                                if (isFS) {
+                                    const exitMethod = document.exitFullscreen ||
+                                        document.webkitExitFullscreen ||
+                                        document.mozCancelFullScreen ||
+                                        document.msExitFullscreen;
+                                    if (exitMethod) {
+                                        exitMethod.apply(document);
+                                    }
+                                } else {
+                                    // Dispatch synthetic F key to trigger Reveal's native fullscreen
+                                    const event = new KeyboardEvent('keydown', {
+                                        key: 'f',
+                                        keyCode: 70,
+                                        which: 70,
+                                        bubbles: true,
+                                        cancelable: true
+                                    });
+                                    document.dispatchEvent(event);
+                                }
+                            });
+
+                            const updateButtonUI = () => {
+                                const isFS = !!document.fullscreenElement || !!document.webkitFullscreenElement;
+                                btn.classList.toggle('is-fullscreen', isFS);
+                                btn.innerHTML = isFS
+                                    ? '<i class="fa fa-compress"></i>'
+                                    : '<i class="fa fa-expand"></i>';
+                            };
+                            document.addEventListener('fullscreenchange', updateButtonUI);
+                            document.addEventListener('webkitfullscreenchange', updateButtonUI);
+                        }
+                    }
+
+
 
                     if (itemdata.timelimit > 0) {
                         $("#" + itemdata.uniqueid + "_container .progress-container").show();

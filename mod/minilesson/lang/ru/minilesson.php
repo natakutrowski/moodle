@@ -1316,3 +1316,24 @@ $string['attemptquestioncountmessage'] = 'Вы завершили {$a->completed
 $string['fullscreen_toggle'] = 'Полноэкранный режим';
 $string['hidedetailedresults'] = 'Скрыть подробные результаты';
 $string['defaultitemlayout'] = 'Макет по умолчанию';
+
+$string['fluencyresponses'] = 'Введите список фраз или предложений в текстовое поле ниже. Каждый элемент должен быть с новой строки. При желании добавьте перевод или подсказку для каждой фразы в формате: фраза | <i>подсказка</i> <br>например Hello|<i>Hola</i>';
+$string['hint'] = 'Подсказка';
+$string['hintrtl'] = 'Подсказка RTL';
+$string['hintrtl_desc'] = 'Если отмечено, подсказка будет отображаться справа налево.';
+$string['scatterdefrtl'] = 'Определение RTL';
+$string['scatterdefrtl_desc'] = 'Если отмечено, определение будет отображаться справа налево.';
+$string['aigentemplatename:narrativefiction_withpics'] = 'Интерактивная художественная история (с изображениями)';
+$string['aigentemplatedescription:fiction_nopics'] = 'Введите подробный план истории, чтобы создать текстовую интерактивную историю (с одним постерным изображением).';
+$string['aigentemplatedescription:narrativefiction_withpics'] = 'Введите подробный план истории, чтобы создать интерактивную историю с меньшим количеством выборов, большим количеством повествования и изображениями.';
+$string['noitemyet'] = 'В этом мини-уроке пока нет элементов. Нажмите кнопку «Добавить элемент» и выберите тип, чтобы начать.';
+$string['slides:fontsmallest'] = 'Самый маленький';
+$string['slides:fontlargest'] = 'Самый большой';
+
+$string['addlessonitem_desc'] = 'Добавляйте элементы урока вручную, чтобы создать свой урок';
+$string['chooselessonitem_desc'] = 'Выберите готовый урок из банка уроков';
+$string['generatelessonitem_desc'] = 'Создайте урок или элементы урока с помощью ИИ';
+$string['generate'] = 'Создать';
+
+$string['audiochatstudent'] = 'Студент';
+$string['audiochataiassistant'] = 'ИИ-ассистент';
