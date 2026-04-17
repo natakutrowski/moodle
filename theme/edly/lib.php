@@ -32,6 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 function theme_edly_page_init(moodle_page $page) {
     $page->requires->jquery();
+    $page->requires->js('/theme/edly/javascript/h5p-fix.js');
 }
 
 function theme_edly_get_main_scss_content($theme) {
@@ -204,4 +205,3 @@ function theme_edly_pluginfile($course, $cm, $context, $filearea, $args, $forced
         send_file_not_found();
     }
 }
-
