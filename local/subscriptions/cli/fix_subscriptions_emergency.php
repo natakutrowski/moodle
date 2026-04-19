@@ -61,7 +61,7 @@ foreach ($trials as $t) {
     if (!$dryrun) {
         $rec = new stdClass();
         $rec->id = $t->id;
-        $rec->end_date = 0;
+        $rec->end_date = $t->start_date + (100 * 365 * 24 * 60 * 60);
         $rec->last_update = $now;
 
         $DB->update_record('user_subscription', $rec);
