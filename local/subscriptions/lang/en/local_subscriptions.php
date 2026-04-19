@@ -1,5 +1,5 @@
 <?php
-$string['pluginname'] = 'Subscriptions';
+$string['pluginname'] = 'Purchases';
 
 // -- Subscription config
 // Plans
@@ -169,8 +169,8 @@ $string['scope_and_duration'] = 'Scope and duration';
 $string['courses_included'] = 'Courses included';
 $string['select_price'] = 'Select price and currency';
 
-$string['your_subscriptions'] = 'Your subscriptions';
-$string['no_active_subscriptions'] = 'You have no active subscriptions.';
+$string['your_subscriptions'] = 'Your purchases';
+$string['no_active_subscriptions'] = 'You don’t have any active purchases.';
 
 $string['pricepaid'] = 'Price paid';
 
@@ -178,8 +178,8 @@ $string['courselist'] = 'Course list';
 
 $string['close'] = 'Close';
 
-$string['subscribe'] = 'Subscribe';
-$string['subscribe_to_campus'] = 'Subscribe to Campus<small><sup>FR</sup></small>';
+$string['subscribe'] = 'Buy';
+$string['subscribe_to_campus'] = 'Buy on Campus<small><sup>FR</sup></small>';
 $string['change_currency'] = 'Change currency';
 
 $string['payment_success_check_email'] = 'Please check your email: a message is waiting to finish signing in and set your password.';
@@ -187,23 +187,23 @@ $string['payment_pending_msg'] = 'Your payment is being validated. This usually 
 $string['payment_success_title'] = 'Payment successful';
 $string['payment_success_thanks'] = 'Thank you! Your payment has been processed successfully.';
 $string['payment_canceled_title'] = 'Payment canceled';
-$string['payment_canceled_msg'] = 'Your payment has been canceled. No subscription has been created.';
-$string['back_to_plans'] = 'Back to available plans';
+$string['payment_canceled_msg']        = 'Your payment was canceled. Try again to access the course.';
+$string['back_to_plans']               = 'Back to available courses';
 
 $string['checkout_title'] = 'Checkout';
 $string['checkout_duration'] = 'Duration:';
 $string['checkout_go_to_payment'] = 'Go to payment';
 
-$string['welcome_subject'] = 'Your CampusFR subscription is active ✅';
+$string['welcome_subject'] = 'Your access to CampusFR is activated ✅';
 
 $string['welcome_body_intro'] =
-    '<p>Hello {$a}!</p>' .
-    '<p>Your subscription to Campus<small><sup>FR</sup></small> is now active — you now have full access to the platform according to your selected plan.</p>' .
-    '<p>If you have already used Campus<small><sup>FR</sup></small> during the trial period, you simply continue with the same account — your completed exercises and croissant-points are all preserved. If you\'re joining us now, this account will be used for all future logins.</p>' .
-    '<p>Your login details:</p>';
+    '<p>Hello, {$a}!</p>' .
+    '<p>Your access to Campus<small><sup>FR</sup></small> is now active — you have full access to the A1 course.</p>' .
+    '<p>If you have already used Campus<small><sup>FR</sup></small> during the trial period, you can simply continue with the same account — your completed exercises and croissant points are محفوظ. If you are new here, this account will be used for all your logins.</p>' .
+    '<p>Here are your login details:</p>';
 
-$string['welcome_username'] = 'E-mail:';
-$string['welcome_plan_summary'] = 'Plan: {$a}';
+$string['welcome_username'] = 'Email:';
+$string['welcome_plan_summary'] = 'Course: {$a}';
 $string['welcome_amount_summary'] = 'Amount: {$a}';
 
 $string['welcome_text_canal'] =
@@ -220,8 +220,8 @@ If you have any questions, write to us at <a href="mailto:{$a}">{$a}</a> — we\
 <p>We wish you joyful learning, inspiring lessons and steady progress in French ❤️</p>
 <p>Nata and the Campus<small><sup>FR</sup></small> team</p>';
 
-$string['receipt_title'] = 'CampusFR subscription payment confirmed ✅';
-$string['receipt_plan'] = 'Plan: ';
+$string['receipt_title'] = 'Your CampusFR course purchase is confirmed ✅';
+$string['receipt_plan'] = 'Course: ';
 $string['receipt_amount'] = 'Amount: ';
 $string['receipt_tx'] = 'Transaction ID: ';
 $string['receipt_period'] = 'Access period: ';
@@ -238,14 +238,14 @@ $string['welcome_mycourses'] =
     '<p>Your subscription information:</p>';
 
 $string['receipt_intro'] =
-    '<p>Your subscription to Campus<small><sup>FR</sup></small> has been successfully activated and your payment confirmed.</p>
-<p>Here is the key information regarding your order:</p>';
+    '<p>Your access to your course on Campus<small><sup>FR</sup></small> has been successfully activated, and your payment has been confirmed.</p>
+<p>Here are the main details of your purchase:</p>';
 
-$string['receipt_button_open'] = 'Open Campus<small><sup>FR</sup></small>';
+$string['receipt_button_open'] = 'Access Campus<small><sup>FR</sup></small>';
 
 $string['receipt_footer'] =
     '<p>See you soon on Campus<small><sup>FR</sup></small> 🇫🇷🥐</p>
-<p>Nata and the Campus<small><sup>FR</sup></small> team</p>';
+<p>The Campus<small><sup>FR</sup></small> team</p>';
 
 
 // Emails – failure/abandoned/reminder
@@ -257,20 +257,20 @@ $string['email_button_retry'] = 'Try payment again';
 $string['email_abandoned_subject'] = 'Finish your purchase';
 $string['email_abandoned_intro'] = 'You didn’t complete your purchase. Pick up where you left off:';
 
-$string['email_reminder_subject'] = 'Still interested? Complete your subscription';
-$string['email_reminder_intro'] = 'You can finalize your subscription in one click:';
+$string['email_reminder_subject'] = 'Still interested? Complete your purchase';
+$string['email_reminder_intro']   = 'You can complete your purchase in one click:';
 
 // Scheduled task
 $string['task_followup'] = 'Subscriptions – follow-up emails';
 
 $string['payment_error_title'] = 'Payment error';
 $string['payment_error_intro'] = 'Something went wrong while preparing your payment. Please try again in a moment.';
-$string['email_reminder2_subject'] = 'Last reminder: complete your subscription';
+$string['email_reminder2_subject'] = 'Last reminder: complete your purchase';
 $string['email_reminder2_intro'] = 'This is a gentle reminder to complete your purchase. You can finalize in one click:';
 
 $string['mail_recurring_started_subject'] = 'Your recurring subscription to « {$a} » is active';
 $string['mail_recurring_started_body'] = 'Thank you! Your recurring subscription for « {$a->plan} » started on {$a->start}.';
-$string['view_my_subscriptions'] = 'View my subscriptions';
+$string['view_my_subscriptions'] = 'View my purchases';
 
 $string['plan_highlight'] = 'Highlight';
 $string['highlight_popular'] = 'Popular';
@@ -298,15 +298,15 @@ $string['advisor_help_guest']    = 'Sign in to see upgrade options. Otherwise, y
 $string['summary_price_title'] = 'Total price';
 
 $string['personal_info_title'] = 'Personal information';
-$string['personal_info_help']  = 'This information is required to create your account and activate your subscription.';
+$string['personal_info_help']  = 'This information is required to create your account and activate your access.';
 
-$string['mail_hello'] = 'Hello {$a},';
-$string['mail_button_manage'] = 'Manage my subscriptions';
+$string['mail_hello']         = 'Hi {$a},';
+$string['mail_button_manage'] = 'Manage my purchases';
 
-$string['subupdate_subject'] = 'Your subscription to « {$a} » is active';
-$string['subupdate_body']    = 'Here are the updated details of your subscription to « {$a} »:';
+$string['subupdate_subject'] = 'Your access to "{$a}" is active';
+$string['subupdate_body']    = 'Here are the updated details of your access to "{$a}":';
 $string['renewal_subject']   = 'Renewal confirmed – {$a}';
-$string['renewal_body']      = 'Your subscription to « {$a} » has been renewed. Here are the details:';
+$string['renewal_body']      = 'Your access to "{$a}" has been renewed. Details:';
 $string['recurring_failed_subject'] = 'Payment failed – {$a}';
 $string['recurring_failed_body']    = 'The payment for your subscription « {$a} » failed. Please update your payment information.';
 $string['recurring_failed_button']  = 'Update my payment method';
@@ -316,10 +316,10 @@ $string['recurring_canceled_body']    = 'Your subscription to « {$a} » has bee
 $string['recurring_canceled_button']  = 'Subscribe again';
 
 $string['details'] = 'Details';
-$string['subscription_details'] = 'Subscription details';
+$string['subscription_details'] = 'Purchase details';
 
-$string['mysubs_title'] = 'My subscriptions';
-$string['mysubs_empty'] = 'You don’t have any subscription yet.';
+$string['mysubs_title'] = 'My purchases';
+$string['mysubs_empty'] = 'You don’t have any purchases yet.';
 $string['period'] = 'Period';
 
 $string['btn_extend']    = 'Extend';
@@ -330,8 +330,8 @@ $string['task_send_expiry_reminders'] = 'Send expiry reminders for non-recurring
 $string['expiry_reminder_subject'] = 'Your access ends in {$a} day(s)';
 $string['expiry_reminder_body']    = 'Your subscription to "{$a->plan}" will end on {$a->date}. You can renew now to keep your access without interruption.';
 
-$string['subscription_activated_subject'] = 'Your subscription to {$a} is now active';
-$string['subscription_activated_body']    = 'Great news! Your queued subscription for "{$a}" is now active.';
+$string['subscription_activated_subject'] = 'Your access to {$a} is now active';
+$string['subscription_activated_body']    = 'Good news! Your access to "{$a}" is now active.';
 
 $string['subscription_expired_subject'] = 'Your subscription to {$a} has ended';
 $string['subscription_expired_body']    = 'Your subscription to "{$a->plan}" ended on {$a->date}. Renew now to regain access.';
@@ -342,7 +342,7 @@ $string['task_repair_paid_pr']        = 'Repair paid PRs: recreate missing subsc
 // Flags & statuses
 $string['payment_failed'] = 'Payment failed';
 
-$string['subscribe_now']  = 'Subscribe now';
+$string['subscribe_now']  = 'Buy now';
 
 $string['upgrade_window_label']  = 'Calculation window: {$a}';
 $string['upgrade_tariffs']       = 'Reference prices: current = {$a->p1}, target = {$a->p2}';
@@ -663,7 +663,7 @@ $string['payui_pending_title'] = 'Almost there…';
 $string['payui_pending_msg'] = 'Your payment is being confirmed. This can take up to a minute. You can safely close this page; we’ll email you once it’s done.';
 
 // CTAs & labels
-$string['payui_cta_my_subscriptions'] = 'Go to My Subscriptions';
+$string['payui_cta_my_subscriptions'] = 'Go to my purchases';
 $string['payui_cta_signin'] = 'Sign in';
 $string['payui_session_display'] = 'Checkout session: {$a}';
 $string['payui_label_price'] = 'Price';
@@ -744,9 +744,9 @@ $string['upgrade_base_minus_paid'] = 'Upgrade amount before promotion: {$a->base
 $string['upgrade_discount_line']   = 'Promotion −{$a->pct}% applied to {$a->before} ⇒ {$a->after}';
 $string['upgrade_amount_proposed'] = 'Proposed amount: {$a}';
 
-$string['trial_subscribe_now'] = 'Subscribe now';
+$string['trial_subscribe_now'] = 'Buy now';
 $string['plan_label'] = 'Plan';
-$string['checkout_go_to_payment_discount'] = 'Subscribe with discount';
-$string['checkout_full_access_line'] = 'Subscription with full access to all courses.';
+$string['checkout_go_to_payment_discount'] = 'Buy with discount';
+$string['checkout_full_access_line'] = 'Unlimited access to all lessons in the course.';
 $string['summary_price_title_single'] = 'Subscription for {$a}';
 

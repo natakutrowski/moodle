@@ -29,18 +29,24 @@ class trial_maint_task extends \core\task\scheduled_task {
         $trialdays    = (int) get_config('local_campus', 'trialdays') ?: 7;  // durée d'essai
         $suspendAfter = (int) (get_config('local_campus','trial_suspend_after')
                                ?? get_config('local_campus','trial_suspend_after_days'));
-        if ($suspendAfter <= 0) {
+        if ($suspendAfter < 0) {
             $suspendAfter = 30; // J+30 => suspension
+        } elseif ($suspendAfter == 0) {
+            $suspendAfter = 100 * 365.25; // never
         }
 
         // Suppression J + deleteAfter : par défaut 31 jours après expiration
         $deleteAfterCfg = get_config('local_campus', 'trial_delete_after_days');
-        if ($deleteAfterCfg === '' || $deleteAfterCfg === null) {
-            // fallback ancien paramètre, sinon 31
-            $legacy = get_config('local_campus', 'deleteafterdays');
-            $deleteAfterCfg = ($legacy !== '' && $legacy !== null) ? $legacy : 31;
+        if ($deleteAfterCfg) {
+            $deleteAfter = 100 * 365.25; // never
+        } else {
+            if ($deleteAfterCfg === '' || $deleteAfterCfg === null) {
+                // fallback ancien paramètre, sinon 31
+                $legacy = get_config('local_campus', 'deleteafterdays');
+                $deleteAfterCfg = ($legacy !== '' && $legacy !== null) ? $legacy : 31;
+            }
+            $deleteAfter = (int)$deleteAfterCfg;   // -1 = jamais supprimer
         }
-        $deleteAfter = (int)$deleteAfterCfg;   // -1 = jamais supprimer
 
         // Tous les essais connus
         $trials = $DB->get_records('local_campus_trial', null, '', '*');
@@ -116,7 +122,9 @@ class trial_maint_task extends \core\task\scheduled_task {
 
                 // Nombre de jours avant l'email de remise — config, sinon défaut = 2 jours
                 $remdays = (int)get_config('local_campus', 'trial_discount_reminder_days');
-                if ($remdays <= 0) {
+                if ($remdays == 0) {
+                    $remdays = 100 * 365.25; // never
+                } elseif ($remdays <= 0) {
                     $remdays = 2; // défaut si non configuré
                 }
 

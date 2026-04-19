@@ -2,25 +2,23 @@
 
 <div class="slider-track">
 
-{{#cards}}
+    <div class="slider-spacer"></div>
 
-<div class="slider-card"
-     style="background-image:url('{{image}}')">
+    {{#cards}}
+    <div class="slider-card"
+         style="background-image:url('{{image}}')">
 
-    <div class="slider-overlay">
-
-        <a href="{{button_url}}"
-           class="campus-btn {{#highlight}}highlight{{/highlight}}">
-
-           {{button_text}}
-
-        </a>
+        <div class="slider-overlay">
+            <a href="{{button_url}}"
+               class="campus-btn {{#highlight}}highlight{{/highlight}}">
+               {{button_text}}
+            </a>
+        </div>
 
     </div>
+    {{/cards}}
 
-</div>
-
-{{/cards}}
+    <div class="slider-spacer"></div>
 
 </div>
 

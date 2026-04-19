@@ -358,7 +358,7 @@ $opts = [
 ];
 
 echo $OUTPUT->header();
-local_campus_render_subscription_expiry_banner();
+// local_campus_render_subscription_expiry_banner(); // disable banner
 
 // --- Bandeaux essai & flag "expired" ---
 require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
@@ -378,7 +378,7 @@ $activeTrial = \local_subscriptions\trial_manager::user_has_active_trial((int)$U
 $winOpen     = \local_subscriptions\trial_manager::is_discount_window_open((int)$USER->id);
 
 // 1) Rappel de fin (essai encore actif MAIS promo plus active)
-if (!$hasPaid && $activeTrial && !$winOpen) {
+/* if (!$hasPaid && $activeTrial && !$winOpen) {
     $expDate = userdate((int)$activeTrial->end_date, '%e %B %Y, %H:%M');
     $subUrl  = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
     $msg = html_writer::tag('strong', get_string('trial_banner_reminder_title','local_campus')) . ' ' .
@@ -394,7 +394,7 @@ if (!$hasPaid && $activeTrial && !$winOpen) {
         'container mt-3'
     );
 
-}
+} */
 
 // 2) Essai expiré (pas d’essai actif et pas d’abonnement)
 if (!$hasPaid && !$activeTrial && $trialplanid) {

@@ -42,7 +42,7 @@
     flex: 0 0 auto;
 
     height: 80vh;              /* limite à 80% écran */
-    aspect-ratio: 1648 / 2528;       /* ratio stable */
+    aspect-ratio: 1648 / 2612;       /* ratio stable */
 
     margin: 0 2rem;
 
@@ -89,6 +89,12 @@
         rgba(255,255,255,.95),
         rgba(255,255,255,0)
     );*/
+
+}
+
+.slider-spacer {
+
+    flex: 0 0 calc(50vw - 40vh);
 
 }
 
@@ -199,7 +205,21 @@
 
     .slider-card {
 
-        height: 65vh;
+        height: 70vh;
+
+    }
+
+    .slider-overlay {
+
+        padding: 1.0rem;
+        bottom: 10px; 
+
+    }
+
+    .campus-btn {
+
+        padding: 10px 20px;
+        font-size: 14px;
 
     }
 

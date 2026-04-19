@@ -105,9 +105,9 @@ echo \html_writer::end_div();
 
 echo \html_writer::end_div();
 
-
-local_campus_render_trial_discount_banner(false);
-local_campus_render_subscription_expiry_banner();
+// disable banners
+/* local_campus_render_trial_discount_banner(false);
+local_campus_render_subscription_expiry_banner(); */
 
 global $DB;
 

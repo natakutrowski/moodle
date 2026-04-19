@@ -107,7 +107,11 @@ try {
     $now   = time();
     $days  = (int)get_config('local_campus','trialdays'); // -1=jamais, 0=immédiat, >0 = jours
     if ($days < 0) { $days = 7; } // fallback
-    $expires = $now + ($days * DAYSECS);
+    if ($days == 0) { 
+        $expires = $now + (100 * 365.25 * DAYSECS);
+    } else {
+        $expires = $now + ($days * DAYSECS);
+    }
 
     $trial = $DB->get_record('local_campus_trial', ['email'=>$email]);
 

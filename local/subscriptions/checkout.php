@@ -295,8 +295,12 @@ $fullaccessline = get_string('checkout_full_access_line', 'local_subscriptions')
 
 // Petit bloc résumé du plan, directement au-dessus du formulaire
 echo html_writer::start_div('ls-plan-summary mb-3');
-echo html_writer::tag('h2',
+/* echo html_writer::tag('h2',
     s($planlabel).' '.format_string($displayname),
+    ['class' => 'h4 m-0']
+); */
+echo html_writer::tag('h2',
+    format_string($displayname),
     ['class' => 'h4 m-0']
 );
 echo html_writer::div(
@@ -623,8 +627,8 @@ echo html_writer::empty_tag('input', [
 echo html_writer::start_div('mt-3 pt-3 border-top');
 
 // Titre : "Подписка на {durée}" si 1 option, sinon titre standard
-$summaryTitle = get_string('summary_price_title_single', 'local_subscriptions', $durationtext);
-echo html_writer::tag('div', $summaryTitle, ['class'=>'text-muted small mb-1']);
+/* $summaryTitle = get_string('summary_price_title_single', 'local_subscriptions', $durationtext);
+echo html_writer::tag('div', $summaryTitle, ['class'=>'text-muted small mb-1']); */
 
 $summaryContent = html_writer::span(
     get_string('summary_price_wait', 'local_subscriptions'),

@@ -43,14 +43,14 @@
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
-    filter: brightness(0.5);
+    filter: brightness(0.8);
     transition: filter 0.4s ease;
     z-index: 0;
 }
 
 /* Effet hover : image un peu plus claire */
 .block_edly_banner_campus .main-banner-with-large-area:hover .main-banner-large-image {
-    filter: brightness(0.7);
+    filter: brightness(0.85);
 }
 
 /* Shapes au-dessus de l'image, mais sous le texte */
@@ -79,9 +79,19 @@
 .block_edly_banner_campus .main-banner-large-content {
     position: relative;
     z-index: 2;
-    max-width: 1000px;
+    max-width: 900px;
     margin: 0 auto 8vh;
     text-align: center;
+    padding-right: 0px;
+}
+
+
+@media (min-width: 768px) {
+    .block_edly_banner_campus .main-banner-large-content {
+        margin: 0 0 8vh auto;
+        left: 100px;
+    }
+
 }
 
 /* Titre */
@@ -258,7 +268,7 @@
 /* Mobile PORTRAIT : on décale l’image vers la droite */
 @media (max-width: 767px) and (orientation: portrait) {
     .block_edly_banner_campus .main-banner-large-image {
-        background-position: calc(50% + 100px) center;
+        background-position: calc(50% + 230px) center;
     }
 }
 

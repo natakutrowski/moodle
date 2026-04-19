@@ -1167,7 +1167,7 @@ class mailer {
             );
         }
 
-        // Remise (facultative) : X % et deadline
+        /* // Remise (facultative) : X % et deadline
         $dpct = (string)(get_config('local_subscriptions', 'trial_discount_percent') ?: '');
         $ddur = (int)get_config('local_subscriptions', 'trial_discount_hours') ?: '';
 
@@ -1206,7 +1206,13 @@ class mailer {
 
         $body .= \html_writer::tag('p',
             get_string('mail_trial_started_support', 'local_campus', (object)['url' => $supportEmail])
+        ); */
+
+        $body .= \html_writer::tag('p',
+            get_string('mail_trial_desc', 'local_campus')
         );
+
+
         $body .= 
             '<img src="'.$CFG->wwwroot . '/local/subscriptions/pix/email/mailTrialFooter.png"
                             style="display:block;width:100%;object-fit:cover;border:0;outline:none;text-decoration:none;">';

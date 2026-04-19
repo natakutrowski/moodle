@@ -307,9 +307,9 @@ $string['trial_access'] = 'Accéder au cours d’essai';
 $string['trial_only_guests'] = 'Afficher le lien d’essai uniquement pour les invités';
 $string['image'] = 'Image';
 
-$string['locked_title'] = 'Accès réservé aux abonnés';
-$string['locked_desc'] = 'Abonnez-vous pour débloquer cette activité.';
-$string['locked_subscribe'] = 'S’abonner';
+$string['locked_title'] = 'Accès réservé';
+$string['locked_desc'] = 'Acheter le cours pour débloquer cette activité.';
+$string['locked_subscribe'] = 'Acheter';
 
 $string['mobilemenu_button'] = 'Menu';
 $string['mobilemenu_open_aria'] = 'Ouvrir le menu';

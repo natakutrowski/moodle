@@ -81,7 +81,12 @@ class block_campus_home extends block_base {
                 $text .= '<source media="(max-width: 767px)" srcset="'.s($bgmobile).'">';
             }
             if ($bgdesktop) {
-                $text .= '<img src="'.s($bgdesktop).'" alt="" loading="lazy">';
+                if ($title) {
+                    $text .= '<img src="'.s($bgdesktop).'" alt="'. format_text($title, FORMAT_HTML, ['filter' => true]) .'" loading="lazy">';
+                }
+                else {
+                    $text .= '<img src="'.s($bgdesktop).'" alt="" loading="lazy">';
+                }
             }
             $text .= '</picture>';
         }
@@ -91,18 +96,21 @@ class block_campus_home extends block_base {
             <div class="campus-home-inner">
                 <div class="campus-home-content">';
 
+        // SEO content (invisible)
         if ($title) {
-            $text .= '
-                    <h1 class="campus-home-title">'
-                        .format_text($title, FORMAT_HTML, ['filter' => true]).
-                    '</h1>';
+            $tag = ($cssclass === 'bloc1') ? 'h1' : 'h2';
+
+            $text .= "
+                <$tag class='campus-seo-hidden'>"
+                    . format_text($title, FORMAT_HTML, ['filter' => true]) .
+                "</$tag>";
         }
 
         if ($body) {
-            $text .= '
-                    <div class="campus-home-body">'
-                        .format_text($body, FORMAT_HTML, ['filter' => true]).
-                    '</div>';
+            $text .= "
+                <div class='campus-seo-hidden'>"
+                    . format_text($body, FORMAT_HTML, ['filter' => true]) .
+                "</div>";
         }
 
         // if ($greeting) {

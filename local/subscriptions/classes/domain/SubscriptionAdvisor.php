@@ -89,7 +89,7 @@ class SubscriptionAdvisor {
 
         $opts = [];
 
-        // A) Même plan -> UNIQUEMENT "prolonger à la suite"
+/*         // A) Même plan -> UNIQUEMENT "prolonger à la suite"
         if ($samePlanActive) {
             // Date d’activation = fin la plus lointaine (active OU déjà queued)
             $lastend = $DB->get_field_sql("
@@ -202,7 +202,7 @@ class SubscriptionAdvisor {
             return $opts;
 
         }
-
+ */
         // C) Aucun abonnement actif -> achat standard
         $opts[] = [
             'key'       => Operation::PURCHASE_NEW,

@@ -70,6 +70,11 @@
     padding: clamp(2rem, 6vw, 5rem);
 }
 
+.campus-seo-hidden {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
 
 /* ===============================
    TYPO RESPONSIVE
@@ -222,7 +227,7 @@
    =============================== */
 
 .bloc1 .campus-home-ctas {
-    width: clamp(220px, 20vw, 340px);
+    width: clamp(180px, 20vw, 340px);
 }
 
 .bloc1 .campus-home-btn {
@@ -266,7 +271,7 @@
         position: absolute;
 
         left: 75%;
-        top: 65%;
+        top: clamp(72%,75%,78%);
 
         transform: translate(-50%, -50%);
         /* centre parfaitement le bloc autour du point */
@@ -289,15 +294,17 @@
 
     .bloc1 .campus-home-ctas {
         position: absolute;
-        bottom: 2.5rem;
+        bottom: 1.5rem;
         left: 50%;
-        transform: translateX(-50%);
+        /*top: 75%;*/
+        top: clamp(74%,76%,78%);
+        transform: translate(-50%, -50%);
         align-items: center;
     }
 
     .bloc1 .campus-home-btn {
-        padding: 0.65em 2.2em;
-        font-size: 0.85rem;
+        padding: 0.5em 1.8em;
+        font-size: 0.8rem;
     }
 }
 
@@ -415,13 +422,16 @@
     .bloc10 .campus-home-ctas {
         position: absolute;
         bottom: 2.5rem;
+
         left: 50%;
-        transform: translateX(-50%);
+        top: 38%;
+
+        transform: translate(-50%, -50%);
         align-items: center;
     }
 
     .bloc10 .campus-home-btn {
-        padding: 0.65em 2.2em;
+        padding: 0.65em 1.2em;
         font-size: 0.85rem;
     }
 }
@@ -541,13 +551,17 @@
     .bloc12 .campus-home-ctas {
         position: absolute;
         bottom: 2.5rem;
+
         left: 50%;
-        transform: translateX(-50%);
+        top: 65%;
+
+        transform: translate(-50%, -50%);
         align-items: center;
+        width: clamp(80px, 10vw, 120px);
     }
 
     .bloc12 .campus-home-btn {
-        padding: 0.65em 2.2em;
+        padding: 0.65em 1.2em;
         font-size: 0.85rem;
     }
 }

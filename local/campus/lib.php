@@ -360,9 +360,12 @@ function local_campus_get_trial_discount_banner_html(): string {
         return '';
     }
 
-    ob_start();
+    // disable banner
+/*     ob_start();
     local_campus_render_trial_discount_banner();
-    return trim(ob_get_clean());
+    return trim(ob_get_clean()); */
+
+    return '';
 }
 
 

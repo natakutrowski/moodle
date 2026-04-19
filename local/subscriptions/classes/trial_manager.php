@@ -47,7 +47,12 @@ class trial_manager {
         $cfg = self::get_trial_settings();
 
         $start = $now;
-        $end   = $now + max(1, $cfg['days']) * DAYSECS;
+        if ($cfg['days'] == 0) {
+            $end   = $now + 100 * 365.25 * DAYSECS;
+        } else {
+            $end   = $now + max(1, $cfg['days']) * DAYSECS;
+        }
+        
 
         // Devise par défaut : première devise du plan, sinon 'EUR'.
         $currency = self::get_plan_default_currency($planid);
@@ -131,6 +136,7 @@ class trial_manager {
     public static function is_discount_window_open(int $userid): bool {
         $trial = self::user_has_active_trial($userid);
         if (!$trial) { return false; }
+        if (get_config('local_subscriptions','trial_discount_hours') == 0) { return false; }
         $hours = max(1, (int)(get_config('local_subscriptions','trial_discount_hours') ?? 72));
         return (time() - (int)$trial->start_date) <= ($hours * HOURSECS);
     }
@@ -139,6 +145,7 @@ class trial_manager {
     public static function discount_window_deadline(int $userid): int {
         $trial = self::user_has_active_trial($userid);
         if (!$trial) { return 0; }
+        if (get_config('local_subscriptions','trial_discount_hours') == 0) { return 0; }
         $hours = max(1, (int)(get_config('local_subscriptions','trial_discount_hours') ?? 72));
         return ((int)$trial->start_date) + ($hours * HOURSECS);
     }

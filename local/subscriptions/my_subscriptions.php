@@ -101,7 +101,15 @@ foreach ($subs as $sub) {
 
     // Corps : période, prix, provider
     $list = html_writer::start_tag('ul', ['class'=>'list-unstyled mb-2 small']);
-    $list .= html_writer::tag('li', html_writer::tag('span', get_string('period','local_subscriptions').': ', ['class'=>'text-muted']). userdate($sub->start_date).' &rarr; '.userdate($sub->end_date));
+
+    if (empty($sub->end_date ?? null)) {
+        $enddate = get_string('subfield_unlimited', 'local_subscriptions'); // 'Sans fin'
+    } else {
+        $enddate = userdate($sub->end_date);
+    }
+    
+
+    $list .= html_writer::tag('li', html_writer::tag('span', get_string('period','local_subscriptions').': ', ['class'=>'text-muted']). userdate($sub->start_date).' &rarr; '.$enddate);
     // Prix payé : on le masque pour les trials
     if (!$istrial) {
         $list .= html_writer::tag('li',
@@ -131,7 +139,7 @@ foreach ($subs as $sub) {
         if (!$istrial) {
             $subscribelink = UrlFactory::subscribe();
 
-            if ($sub->status === Status::EXPIRED) {
+/*             if ($sub->status === Status::EXPIRED) {
                 // RENOUVELER → simple CTA vers la page des plans
                 $btns[] = html_writer::link(
                     $subscribelink,
@@ -147,7 +155,7 @@ foreach ($subs as $sub) {
                     get_string('btn_extend','local_subscriptions'),
                     ['class'=>'btn btn-outline-primary btn-sm']
                 );
-            }
+            } */
         }
 
 

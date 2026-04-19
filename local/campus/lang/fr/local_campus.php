@@ -4,7 +4,7 @@ $string['view_trial'] = 'Accéder au cours d’essai';
 $string['view_real']  = 'Accéder au cours';
 $string['course_hidden'] = 'Ce cours n’est pas visible pour vous.';
 $string['course_notfound'] = 'Cours introuvable.';
-$string['subscribe_now'] = 'S’abonner';
+$string['subscribe_now'] = 'Acheter maintenant';
 $string['close'] = 'Fermer';
 
 $string['set_trialcourses'] = 'Cours d’essai (IDs, séparés par des virgules)';
@@ -25,21 +25,21 @@ $string['rolename_trialstudent'] = 'Étudiant (essai)';
 $string['roledesc_trialstudent'] = 'Rôle lecture-seule pour l’accès d’essai.';
 $string['cron_trial_maint'] = 'Campus — Relances & ménage essais';
 
-$string['trial_popup_title'] = 'Accès gratuit à tous les cours pendant 7 jours';
-$string['trial_popup_lead']  = 'Accès immédiat à l\'ensemble des cours.<br>Aucune carte bancaire requise.<span class="hero-emoji">🛡</span>';
+$string['trial_popup_title'] = 'Essayez gratuitement votre première leçon !';
+$string['trial_popup_lead']  = 'Aucune limite de temps.<br>Aucune carte bancaire requise.<span class="hero-emoji">🛡</span>';
 $string['trial_popup_tos']   = 'J\'accepte les Conditions d\'utilisation et la Politique de confidentialité.';
 $string['trial_popup_accept']= 'Veuillez confirmer votre accord avec les conditions.';
 $string['trial_firstname']   = 'Prénom';
 $string['trial_lastname']    = 'Nom';
 $string['trial_email']       = 'E-mail';
 $string['trial_btn_continue']= 'Commencer l\'apprentissage';
-$string['trial_btn_subscribe']= 'Souscrire un abonnement';
-$string['trial_expired_msg'] = 'Votre période d’essai est terminée. Souscrivez un abonnement pour continuer.';
+$string['trial_btn_subscribe']= 'Acheter un cours';
+$string['trial_expired_msg'] = 'Votre période d’essai est terminée. Acheter un cours pour continuer.';
 $string['trial_tos_html'] =
     'En créant un compte, vous acceptez la <a href="{$a->policyurl}" target="_blank" rel="noopener">Politique de confidentialité</a> '
     .'et les <a href="{$a->termsurl}" target="_blank" rel="noopener">Conditions d’utilisation</a>.';
 $string['trial_footer_note'] =
-    "À l’issue des 7 jours, l’accès s’arrête automatiquement — aucun prélèvement.";
+    "L'essai gratuit vous donne un accès illimité à la première leçon de chaque cours.";
 $string['trial_firstname_ph'] = 'Votre prénom';
 $string['trial_lastname_ph']  = 'Votre nom';
 $string['trial_email_ph']     = 'Votre e-mail';
@@ -105,16 +105,15 @@ $string['resume_here'] = 'Reprendre ici';
 $string['congrats_completed'] = 'Félicitations ! Vous avez terminé ce cours.';
 $string['browse_catalog'] = 'Parcourir le catalogue';
 $string['access_trial_courses'] = 'Accéder aux cours d’essai';
-$string['subscribe_now'] = 'S’abonner';
-$string['mycourses_empty'] = 'Connectez-vous pour retrouver vos cours. Vous pouvez aussi découvrir nos cours d’essai ou vous abonner.';
+$string['subscribe_now'] = 'Acheter maintenant';
+$string['mycourses_empty'] = 'Connectez-vous pour retrouver vos cours. Vous pouvez aussi acheter de nouveaux cours.';
 $string['no_courses_banner_title'] = 'Aucun cours disponible pour le moment.';
-$string['no_courses_banner_text']  = 'Parcourez le catalogue, découvrez nos cours d’essai ou abonnez-vous pour commencer.';
+$string['no_courses_banner_text']  = 'Parcourez le catalogue et découvrez nos cours.';
 $string['login_now']               = 'Connexion';
-$string['mycourses_empty']         = 'Connectez-vous pour retrouver vos cours. Vous pouvez aussi découvrir nos cours d’essai ou vous abonner.';
 $string['browse_catalog']          = 'Parcourir le catalogue';
 $string['access_trial_courses']    = 'Accéder aux cours d’essai';
-$string['subscribe_now']           = 'S’abonner';
-$string['hint_go_to_header_cta'] = 'Abonnez-vous ou connectez-vous ici';
+$string['subscribe_now']           = 'Acheter maintenant';
+$string['hint_go_to_header_cta'] = 'Achetez ou connectez-vous ici';
 
 // Admin (barre outils catalogue)
 $string['admin_native_page'] = 'Page native Moodle';
@@ -219,25 +218,34 @@ $string['trial_phone_ph']   = 'Votre numéro de téléphone';
 $string['trial_phone_help'] = 'Le téléphone nous permet de répondre rapidement à vos questions et de vous aider à démarrer.';
 $string['trial_phone_label'] = 'Téléphone';
 
-$string['mail_trial_reset_hint'] =
-    '<p>Vous avez créé votre mot de passe lors de l’inscription. Si vous l’oubliez, vous pouvez toujours le réinitialiser ici :</p>' .
-    '👉 <a href="{$a->url}">Réinitialiser le mot de passe</a></p>';
+$string['mail_trial_reset_hint'] = '<p>Si vous avez oublié votre mot de passe, cliquez sur ce lien pour le réinitialiser.</p>' .
+'👉 <a href="{$a->url}">Réinitialiser le mot de passe</a></p>';
 
-// Sujet de l’e-mail
-$string['mail_trial_started_subject'] =
-    'Votre accès d’essai à Campus<small><sup>FR</sup></small> est activé 🎉';
+// Sujet
+$string['mail_trial_started_subject'] = 'Votre compte Campus<small><sup>FR</sup></small> a été créé 🎉';
 
-// Corps principal
+// Corps
 $string['mail_trial_started_body'] =
-    '<p>Bonjour, {$a->firstname} !</p>' .
-    '<p>Votre accès d’essai de 7 jours à Campus<small><sup>FR</sup></small> est maintenant actif.</p>' .
-    '<p>Vous avez le temps de découvrir la plateforme, d’essayer le format, de faire quelques exercices et de gagner vos premiers croissants 🥐 — pour sentir si ce mode d’apprentissage vous convient.</p>' .
-    '<p>Voici vos identifiants :</p>';
+    '<p>Salut, {$a->firstname} !</p>' .
+    '<p>Bienvenue à l’école de français Campus<small><sup>FR</sup></small> — votre compte a bien été créé.</p>';
 
-// Bloc “Mes cours”
+// Bloc "Mes cours"
 $string['mail_trial_started_mycourses'] =
-    '<p>Vous pouvez accéder à votre espace sur la plateforme via le lien ci-dessous :</p>' .
-    '👉 <a href="{$a->url}">Accéder au campus</a></p>';
+    '<p>Nous avons déjà débloqué votre première leçon gratuite — suivez-la dès aujourd’hui et faites un premier pas vers vos objectifs !</p>' .
+'👉 <a href="{$a->url}">Commencer</a></p>';
+
+$string['mail_trial_desc'] =
+    '<p>Sur Campus<small><sup>FR</sup></small>, vous trouverez :</p>' .
+    '<ul><li>des vidéos de grammaire claires</li>' .
+    '    <li>de la pratique avec un locuteur natif</li>' .
+    '    <li>des exercices avec correction instantanée</li>' .
+    '</ul>' .
+    '<p>Le français paraît difficile au premier abord.<br/>' .
+    'Avec les cours de Nata Kutrowski, vous en comprendrez rapidement la logique et prendrez plaisir à apprendre.</p>' .
+    '<p>Consacrez seulement 20 minutes par jour — les progrès seront rapides.</p>' .
+    '<p>À très bientôt en cours !</p>' .
+    '<p>Cordialement,<br/>' .
+    'l’équipe Campus<small><sup>FR</sup></small>.</p>';
 
 // Ligne de réduction
 $string['mail_trial_discount_line'] =
@@ -257,7 +265,7 @@ $string['trial_phone_label']    = 'Téléphone';
 
 // Indice de sécurité (fallback)
 $string['mail_trial_security_hint'] =
-    'Pour plus de sécurité, utilisez un mot de passe unique pour Campus<small><sup>FR</sup></small> et changez-le au besoin.';
+    'Pour la sécurité de votre compte, utilisez un mot de passe unique pour Campus<small><sup>FR</sup></small> et pensez à le modifier régulièrement.';
 
 // Autres champs
 $string['trial_phone_country_placeholder'] = 'Code';
@@ -265,8 +273,8 @@ $string['trial_password_toggle_show'] = 'Afficher le mot de passe';
 $string['trial_password_toggle_hide'] = 'Masquer le mot de passe';
 
 $string['trial_welcome_banner_html'] =
-    'Bienvenue sur Campus<small><sup>FR</sup></small> ! Votre accès d’essai de 7 jours est activé. ' .
-    'Commencez par le niveau qui vous convient (A0, A1, A2 ou B1). ' .
+    'Bienvenue sur Campus<small><sup>FR</sup></small> ! Votre compte d’essai est activé. ' .
+    'Commencez par le niveau qui vous convient (A1, A2 [à venir] ou B1 [à venir]), la première leçon est offerte. ' .
     'Vous pouvez retrouver vos cours à tout moment via la page « Mes cours ».';
 
 $string['mail_trial_started_support'] =

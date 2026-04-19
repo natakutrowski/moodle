@@ -1,5 +1,5 @@
 <?php
-$string['pluginname'] = 'Подписки';
+$string['pluginname'] = 'Покупки';
 
 // -- Subscription config
 // Plans
@@ -169,8 +169,8 @@ $string['scope_and_duration'] = 'Область и длительность';
 $string['courses_included'] = 'Включённые курсы';
 $string['select_price'] = 'Выберите цену и валюту';
 
-$string['your_subscriptions'] = 'Ваши подписки';
-$string['no_active_subscriptions'] = 'У вас нет активных подписок.';
+$string['your_subscriptions'] = 'Ваши покупки';
+$string['no_active_subscriptions'] = 'У вас нет активных покупок.';
 
 $string['pricepaid'] = 'Оплаченная сумма';
 
@@ -178,8 +178,8 @@ $string['courselist'] = 'Список курсов';
 
 $string['close'] = 'Закрыть';
 
-$string['subscribe'] = 'Купить подписку';
-$string['subscribe_to_campus'] = 'Купить подписку на Campus<small><sup>FR</sup></small>';
+$string['subscribe'] = 'Купить';
+$string['subscribe_to_campus'] = 'Купить на Campus<small><sup>FR</sup></small>';
 $string['change_currency'] = 'Сменить валюту';
 
 $string['payment_success_check_email'] = 'Проверьте вашу почту: там есть письмо для завершения входа и установки пароля.';
@@ -187,21 +187,23 @@ $string['payment_pending_msg'] = 'Ваш платёж обрабатываетс
 $string['payment_success_title'] = 'Платёж успешен';
 $string['payment_success_thanks'] = 'Спасибо! Ваш платёж успешно обработан.';
 $string['payment_canceled_title'] = 'Платёж отменён';
-$string['payment_canceled_msg'] = 'Ваш платёж был отменён. Подписка не создана.';
-$string['back_to_plans'] = 'Назад к доступным тарифам';
+$string['payment_canceled_msg']        = 'Ваш платёж был отменён. Попробуйте снова, чтобы получить доступ к курсу.';
+$string['back_to_plans']               = 'Вернуться к доступным курсам';
 
 $string['checkout_title'] = 'Оформление заказа';
 $string['checkout_duration'] = 'Длительность:';
 $string['checkout_go_to_payment'] = 'Перейти к оплате';
 
-$string['welcome_subject'] = 'Ваша подписка на CampusFR активирована ✅';
-$string['welcome_body_intro'] = 
-    '<p>Bonjour, {$a}!</p>' .
-    '<p>Ваша подписка на Campus<small><sup>FR</sup></small> активирована — теперь у вас полный доступ к платформе в рамках выбранного тарифа.</p>' .
-    '<p>Если вы уже были в Campus<small><sup>FR</sup></small> на пробном доступе, вы просто продолжаете с тем же аккаунтом — выполненные задания, и баллы-круассаны никуда не исчезнут. Если вы присоединились только сейчас, именно этот аккаунт будет использоваться для входа на платформу.</p>' .
-    '<p>Ваши данные для входа на платформу:</p>';
+$string['welcome_subject'] = 'Ваш доступ к CampusFR активирован ✅';
+
+$string['welcome_body_intro'] =
+    '<p>Здравствуйте, {$a}!</p>' .
+    '<p>Ваш доступ к Campus<small><sup>FR</sup></small> активирован — у вас есть полный доступ к курсу A1.</p>' .
+    '<p>Если вы уже пользовались Campus<small><sup>FR</sup></small> в пробный период, просто продолжайте с тем же аккаунтом — ваши выполненные упражнения и баллы-круассаны сохраняются. Если вы только что присоединились, этот аккаунт будет использоваться для всех входов.</p>' .
+    '<p>Вот ваши данные для входа:</p>';
+
 $string['welcome_username'] = 'E-mail:';
-$string['welcome_plan_summary'] = 'Тариф: {$a}';
+$string['welcome_plan_summary'] = 'Курс: {$a}';
 $string['welcome_amount_summary'] = 'Сумма: {$a}';
 
 $string['welcome_text_canal'] = 'Обязательно добавьтесь в канал Campus<small><sup>FR</sup></small>: там публикуются все важные новости и обновления, а также именно там можно задавать вопросы преподавателям.';
@@ -216,8 +218,8 @@ $string['welcome_footer'] = '<p>Это письмо отправлено авт�
 <p>Ната и команда Campus<small><sup>FR</sup></small></p>';
 
 
-$string['receipt_title'] = 'Оплата подписки на CampusFR подтверждена ✅';
-$string['receipt_plan'] = 'Тариф: ';
+$string['receipt_title'] = 'Покупка курса на CampusFR подтверждена ✅';
+$string['receipt_plan'] = 'Курс: ';
 $string['receipt_amount'] = 'Сумма: ';
 $string['receipt_tx'] = 'ID транзакции: ';
 $string['receipt_period'] = 'Период доступа: ';
@@ -230,13 +232,15 @@ $string['welcome_mycourses'] =
 '👉 <a href="{$a->url}">Вход на кампус</a></p>' . 
 '<p>Информация о вашей подписке:</p>';
 
-$string['receipt_intro'] = '<p>Ваша подписка на Campus<small><sup>FR</sup></small> успешно оформлена, оплата прошла.</p>
+$string['receipt_intro'] =
+    '<p>Доступ к вашему курсу на Campus<small><sup>FR</sup></small> успешно активирован, и платёж подтверждён.</p>
+<p>Вот основная информация о вашей покупке:</p>';
 
-<p>Основная информация по вашей оплате:</p>';
 $string['receipt_button_open'] = 'Перейти в Campus<small><sup>FR</sup></small>';
-$string['receipt_footer'] = '<p>До встречи в Campus<small><sup>FR</sup></small> 🇫🇷🥐</p>
 
-<p>Ната и команда Campus<small><sup>FR</sup></small></p>';
+$string['receipt_footer'] =
+    '<p>До скорой встречи на Campus<small><sup>FR</sup></small> 🇫🇷🥐</p>
+<p>Команда Campus<small><sup>FR</sup></small></p>';
 
 // Emails – failure/abandoned/reminder
 $string['email_failed_subject'] = 'Не удалось завершить оплату';
@@ -247,20 +251,20 @@ $string['email_button_retry'] = 'Повторить оплату';
 $string['email_abandoned_subject'] = 'Завершите покупку';
 $string['email_abandoned_intro'] = 'Вы не завершили покупку. Продолжайте с того места, где остановились:';
 
-$string['email_reminder_subject'] = 'Всё ещё интересно? Завершите оформление подписки';
-$string['email_reminder_intro'] = 'Вы можете завершить оформление подписки в один клик:';
+$string['email_reminder_subject'] = 'Всё ещё интересно? Завершите покупку';
+$string['email_reminder_intro']   = 'Вы можете завершить покупку в один клик:';
 
 // Scheduled task
 $string['task_followup'] = 'Подписки — последующие письма';
 
 $string['payment_error_title'] = 'Ошибка оплаты';
 $string['payment_error_intro'] = 'Возникла ошибка при подготовке платежа. Пожалуйста, попробуйте ещё раз позже.';
-$string['email_reminder2_subject'] = 'Последнее напоминание: завершите подписку';
+$string['email_reminder2_subject'] = 'Последнее напоминание: завершите покупку';
 $string['email_reminder2_intro'] = 'Мягкое напоминание завершить покупку. Можно оформить в один клик:';
 
 $string['mail_recurring_started_subject'] = 'Ваша периодическая подписка «{$a}» активна';
 $string['mail_recurring_started_body'] = 'Спасибо! Ваша периодическая подписка «{$a->plan}» началась {$a->start}.';
-$string['view_my_subscriptions'] = 'Посмотреть мои подписки';
+$string['view_my_subscriptions'] = 'Мои покупки';
 
 $string['plan_highlight'] = 'Выделение';
 $string['highlight_popular'] = 'Популярный';
@@ -288,15 +292,15 @@ $string['advisor_help_guest']    = 'Войдите, чтобы увидеть в
 $string['summary_price_title'] = 'Итоговая цена';
 
 $string['personal_info_title'] = 'Личная информация';
-$string['personal_info_help']  = 'Эти данные нужны для создания аккаунта и активации подписки.';
+$string['personal_info_help']  = 'Эта информация необходима для создания аккаунта и активации доступа.';
 
-$string['mail_hello'] = 'Здравствуйте, {$a}!';
-$string['mail_button_manage'] = 'Управлять моими подписками';
+$string['mail_hello']         = 'Здравствуйте, {$a},';
+$string['mail_button_manage'] = 'Управлять покупками';
 
-$string['subupdate_subject'] = 'Ваша подписка «{$a}» активна';
-$string['subupdate_body']    = 'Вот обновлённые сведения о вашей подписке «{$a}»:';
+$string['subupdate_subject'] = 'Ваш доступ к «{$a}» активен';
+$string['subupdate_body']    = 'Вот обновлённая информация о вашем доступе к «{$a}»:';
 $string['renewal_subject']   = 'Продление подтверждено — {$a}';
-$string['renewal_body']      = 'Ваша подписка «{$a}» продлена. Подробности:';
+$string['renewal_body']      = 'Ваш доступ к «{$a}» был продлён. Детали:';
 $string['recurring_failed_subject'] = 'Неудачный платёж — {$a}';
 $string['recurring_failed_body']    = 'Платёж по подписке «{$a}» не прошёл. Пожалуйста, обновите платёжные данные.';
 $string['recurring_failed_button']  = 'Обновить способ оплаты';
@@ -306,10 +310,10 @@ $string['recurring_canceled_body']    = 'Ваша подписка «{$a}» от
 $string['recurring_canceled_button']  = 'Оформить снова';
 
 $string['details'] = 'Детали';
-$string['subscription_details'] = 'Детали подписки';
+$string['subscription_details'] = 'Детали покупки';
 
-$string['mysubs_title'] = 'Мои подписки';
-$string['mysubs_empty'] = 'У вас ещё нет подписок.';
+$string['mysubs_title'] = 'Мои покупки';
+$string['mysubs_empty'] = 'У вас пока нет покупок.';
 $string['period'] = 'Период';
 
 $string['btn_extend']    = 'Продлить';
@@ -320,8 +324,8 @@ $string['task_send_expiry_reminders'] = 'Отправлять напоминан
 $string['expiry_reminder_subject'] = 'Ваш доступ заканчивается через {$a} дн.';
 $string['expiry_reminder_body']    = 'Ваша подписка «{$a->plan}» закончится {$a->date}. Продлите сейчас, чтобы избежать перерыва.';
 
-$string['subscription_activated_subject'] = 'Ваша подписка на {$a} активирована';
-$string['subscription_activated_body']    = 'Отличные новости! Ваша отложенная подписка «{$a}» теперь активна.';
+$string['subscription_activated_subject'] = 'Ваш доступ к {$a} теперь активен';
+$string['subscription_activated_body']    = 'Хорошие новости! Ваш доступ к «{$a}» теперь активен.';
 
 $string['subscription_expired_subject'] = 'Ваша подписка на {$a} закончилась';
 $string['subscription_expired_body']    = 'Ваша подписка «{$a->plan}» завершилась {$a->date}. Оформите продление, чтобы вернуть доступ.';
@@ -332,7 +336,7 @@ $string['task_repair_paid_pr']        = 'Починка оплаченных PR:
 // Flags & statuses
 $string['payment_failed'] = 'Платёж не прошёл';
 
-$string['subscribe_now']  = 'Подписаться сейчас';
+$string['subscribe_now']  = 'Купить сейчас';
 
 $string['upgrade_window_label']  = 'Окно расчёта: {$a}';
 $string['upgrade_tariffs']       = 'Базовые цены: текущая = {$a->p1}, целевая = {$a->p2}';
@@ -652,7 +656,7 @@ $string['payui_pending_title'] = 'Почти готово…';
 $string['payui_pending_msg'] = 'Платёж подтверждается. Это может занять до минуты. Можно закрыть страницу — мы напишем вам, когда всё будет готово.';
 
 // Кнопки и подписи
-$string['payui_cta_my_subscriptions'] = 'Мои подписки';
+$string['payui_cta_my_subscriptions'] = 'Перейти к покупкам';
 $string['payui_cta_signin'] = 'Войти';
 $string['payui_session_display'] = 'Сессия оплаты: {$a}';
 $string['payui_label_price'] = 'Цена';
@@ -732,8 +736,8 @@ $string['upgrade_base_minus_paid'] = 'Сумма доплаты до скидк�
 $string['upgrade_discount_line']   = 'Скидка −{$a->pct}% на {$a->before} ⇒ {$a->after}';
 $string['upgrade_amount_proposed'] = 'Итого к доплате: {$a}';
 
-$string['trial_subscribe_now'] = 'Оформить подписку';
+$string['trial_subscribe_now'] = 'Купить подписку';
 $string['plan_label'] = 'Тариф';
-$string['checkout_go_to_payment_discount'] = 'Оформить подписку со скидкой';
-$string['checkout_full_access_line'] = 'Подписка с полным доступом ко всем курсам.';
+$string['checkout_go_to_payment_discount'] = 'Купить со скидкой';
+$string['checkout_full_access_line'] = 'Безлимитный доступ ко всем урокам курса.';
 $string['summary_price_title_single'] = 'Подписка на {$a}';

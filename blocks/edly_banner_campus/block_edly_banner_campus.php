@@ -233,7 +233,7 @@ class block_edly_banner_campus extends block_base {
 
 
         // Image de fond pleine largeur
-        if ($banner_img) {
+/*         if ($banner_img) {
             $text .= '
                 <div class="main-banner-large-image"
                     data-aos="fade-left"
@@ -241,7 +241,7 @@ class block_edly_banner_campus extends block_base {
                     data-aos-duration="800"
                     data-aos-once="true"
                     style="background-image:url('.edly_block_image_process($banner_img).');"></div>';
-        }
+        } */
 
         // === MINI "NAVBAR" DANS LE HERO (en haut à droite) ===
         $text .= '
@@ -376,10 +376,10 @@ class block_edly_banner_campus extends block_base {
                         </ul>';
 
         // Texte sous le bouton : "7 jours/7 days/7 дней..."
-        if ($trialredirect) {
+/*         if ($trialredirect) {
             $text .= '
                         <p class="banner-trial-note mt-1" data-aos="fade-right" data-aos-delay="70" data-aos-duration="1000" >'.s($trial_note).'</p>';
-        }
+        } */
 
         $text .= '
                     </div>

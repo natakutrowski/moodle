@@ -332,9 +332,9 @@ $string['trial_only_guests'] = 'Показывать ссылку на демо-
 $string['trial_access'] = 'Перейти к демо-курсу';
 $string['image'] = 'Картина';
 
-$string['locked_title'] = 'Доступно по подписке';
-$string['locked_desc'] = 'Оформите подписку, чтобы открыть эту активность.';
-$string['locked_subscribe'] = 'Оформить подписку';
+$string['locked_title'] = 'Доступ ограничен';
+$string['locked_desc'] = 'Купите курс, чтобы открыть это задание.';
+$string['locked_subscribe'] = 'Купить';
 
 $string['mobilemenu_button'] = 'Меню';
 $string['mobilemenu_open_aria'] = 'Открыть меню';

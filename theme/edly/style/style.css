@@ -7833,11 +7833,20 @@ body.pagelayout-frontpage {
 .campus-topbar-btn-secondary {
     background: #fff;
     color: #3b2b63;
+
+    border: 1px solid rgba(59, 43, 99, 0.5);  /* 👈 contour léger */
+
+    transition: all 0.2s ease;
 }
 
 .campus-topbar-btn-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    background: #3b2b63;
+    color: #fff;
+
+    border-color: #3b2b63;
+
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 43, 99, 0.25);
 }
 
 /* ===============================
@@ -7867,9 +7876,8 @@ body.pagelayout-frontpage {
 
 .campus-topbar.is-solid {
     background: rgba(255,255,255,0.75);
-    backdrop-filter: blur(6px);
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
 }
 
 .campus-topbar.is-solid .campus-topbar-left,
@@ -7879,21 +7887,6 @@ body.pagelayout-frontpage {
     pointer-events: auto;
 }
 
-/* ===============================
-   MOBILE
-   =============================== */
-
-@media (max-width: 767px) {
-
-    .campus-topbar-inner {
-        padding: 0.9rem 1rem;
-    }
-
-    .campus-topbar-btn {
-        font-size: 0.85rem;
-        padding: 0.45em 1.1em;
-    }
-}
 
 /* HERO MODE (bloc 1 visible) */
 .campus-topbar:not(.is-solid) .campus-topbar-left,
@@ -7978,10 +7971,96 @@ body.pagelayout-frontpage {
     color: #3b2b63;
 }
 
-/* Masquer footer Edly sur la frontpage uniquement
+/* ===============================
+   MOBILE
+   =============================== */
+
+@media (max-width: 767px) {
+
+
+    .campus-topbar {
+        height: 64px;                /* un peu plus que 60 → plus respirant */
+        display: flex;
+        align-items: center;         /* 🔥 centrage vertical réel */
+    }
+
+    .campus-topbar-inner {
+        height: 100%;
+        display: flex;
+        align-items: center;         /* 🔥 centre tout */
+        justify-content: space-between;
+        padding: 0 1rem;
+    }
+
+    .campus-topbar-logo img {
+        height: 34px;
+        display: block;
+    }  
+
+    .campus-lang-code {
+        display: none;
+    }
+
+    .campus-lang-trigger {
+        padding: 0.4em 0.7em;
+        line-height: 1;
+    }
+
+    .campus-topbar-btn {
+        font-size: 0.82rem;
+
+        padding: 0.45em 1em;   /* 👈 légèrement augmenté verticalement */
+
+        line-height: 1;        /* 🔥 évite décalage vertical */
+    }
+
+    .campus-topbar-ctas {
+        gap: 0.4rem;
+    }
+
+    .campus-topbar-btn {
+        font-size: 0.8rem;
+        padding: 0.4em 1em;
+        border-radius: 999px;
+    }
+
+    .campus-topbar-ctas {
+        gap: 0.4rem;
+    }    
+}
+/*Masquer footer Edly sur la frontpage uniquement*/
 body.pagelayout-frontpage .footer-area,
 body.pagelayout-frontpage footer,
 body.pagelayout-frontpage .edly-footer,
 body.pagelayout-frontpage .bottom-region-main-box {
     display: none !important;
-} */
+}
+
+body.pagelayout-frontpage {
+    background-color: #f9f2ee;
+}
+
+#theme_boost-drawers-courseindex {
+    overflow-y: auto;
+}
+
+/* Desktop */
+#block-region-above-content .block_xp {
+    display: none;
+}
+
+#block-region-side-pre .block_xp {
+    display: block;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+
+    #block-region-above-content .block_xp {
+        display: block;
+    }
+
+    #block-region-side-pre .block_xp {
+        display: none;
+    }
+}

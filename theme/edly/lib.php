@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
 function theme_edly_page_init(moodle_page $page) {
     $page->requires->jquery();
     $page->requires->js('/theme/edly/javascript/h5p-fix.js');
+    $page->requires->js('/theme/edly/javascript/drawer-fix.js');
 }
 
 function theme_edly_get_main_scss_content($theme) {

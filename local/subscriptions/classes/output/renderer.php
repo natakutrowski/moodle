@@ -14,6 +14,13 @@ use local_subscriptions\support\SubsPresenter;
 
 class renderer extends plugin_renderer_base {
 
+    private static function format_end(?int $ts): string {
+        if (empty($ts)) {
+            return get_string('subfield_unlimited', 'local_subscriptions'); // 'Sans fin'
+        }
+        return userdate((int)$ts, get_string('strftimedate', 'langconfig'));
+    }
+
     public function render_user_subscriptions_block(array $subscriptions): string {
         global $DB;
 
@@ -136,7 +143,7 @@ class renderer extends plugin_renderer_base {
             $data['subscriptions'][] = [
                 'planname'           => format_string($planname),
                 'startdate'          => userdate($sub->start_date, get_string('strftimedate', 'langconfig')),
-                'enddate'            => userdate($sub->end_date, get_string('strftimedate', 'langconfig')),
+                'enddate'            => self::format_end($sub->end_date ?? null),
                 'accessscope'        => format_string($scopename),
                 'pricepaid'          => $priceString,
                 'statusbadge'        => $statusbadge,          // <<< NOUVEAU : badge HTML prêt
@@ -184,7 +191,7 @@ class renderer extends plugin_renderer_base {
             $data['subscriptions'][] = [
                 'planname'         => format_string($planname),
                 'startdate'        => userdate($earliestQueued->start_date, get_string('strftimedate', 'langconfig')),
-                'enddate'          => userdate($earliestQueued->end_date,   get_string('strftimedate', 'langconfig')),
+                'enddate'          => self::format_end($earliestQueued->end_date ?? null),
                 'accessscope'      => format_string($scopename),
                 'pricepaid'        => $priceString,
                 'statusbadge'      => SubsPresenter::render_status_badge('queued'),

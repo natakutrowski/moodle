@@ -4,7 +4,7 @@ $string['view_trial'] = 'Access the trial course';
 $string['view_real']  = 'Go to the course';
 $string['course_hidden'] = 'This course is not visible to you.';
 $string['course_notfound'] = 'Course not found.';
-$string['subscribe_now'] = 'Subscribe';
+$string['subscribe_now'] = 'Buy now';
 $string['close'] = 'Close';
 
 $string['set_trialcourses'] = 'Trial courses (IDs, comma-separated)';
@@ -25,21 +25,21 @@ $string['rolename_trialstudent'] = 'Student (trial)';
 $string['roledesc_trialstudent'] = 'Read-only role for trial access.';
 $string['cron_trial_maint'] = 'Campus — Trial reminders & cleanup';
 
-$string['trial_popup_title'] = 'Free access to all courses for 7 days';
-$string['trial_popup_lead']  = 'Instant access to all courses.<br>No credit card required.<span class="hero-emoji">🛡</span>';
+$string['trial_popup_title'] = 'Try your first lesson for free!';
+$string['trial_popup_lead']  = 'No time limit.<br>No credit card required.<span class="hero-emoji">🛡</span>';
 $string['trial_popup_tos']   = 'I accept the Terms of Use and the Privacy Policy.';
 $string['trial_popup_accept']= 'Please confirm your acceptance of the terms.';
 $string['trial_firstname']   = 'First name';
 $string['trial_lastname']    = 'Last name';
 $string['trial_email']       = 'E-mail';
 $string['trial_btn_continue']= 'Start learning';
-$string['trial_btn_subscribe']= 'Subscribe';
-$string['trial_expired_msg'] = 'Your trial period has ended. Subscribe to continue.';
+$string['trial_btn_subscribe']= 'Buy a course';
+$string['trial_expired_msg'] = 'Your trial period has ended. Buy a course to continue.';
 $string['trial_tos_html'] =
     'By creating an account, you agree to the <a href="{$a->policyurl}" target="_blank" rel="noopener">Privacy Policy</a> '
     .'and the <a href="{$a->termsurl}" target="_blank" rel="noopener">Terms of Use</a>.';
 $string['trial_footer_note'] =
-    'After 7 days, access ends automatically — no charges.';
+    "The free trial gives you unlimited access to the first lesson of each course.";
 $string['trial_firstname_ph'] = 'Your first name';
 $string['trial_lastname_ph']  = 'Your last name';
 $string['trial_email_ph']     = 'Your e-mail';
@@ -114,16 +114,15 @@ $string['resume_here'] = 'Resume where you left off';
 $string['congrats_completed'] = 'Congratulations! You have completed this course.';
 $string['browse_catalog'] = 'Browse the catalog';
 $string['access_trial_courses'] = 'Access trial courses';
-$string['subscribe_now'] = 'Subscribe';
-$string['mycourses_empty'] = 'Log in to see your courses. You can also try our trial courses or subscribe.';
-$string['no_courses_banner_title'] = 'No courses available yet.';
-$string['no_courses_banner_text']  = 'Browse the catalog, try our trial courses, or subscribe to get started.';
+$string['subscribe_now'] = 'Buy now';
+$string['mycourses_empty'] = 'Log in to access your courses. You can also buy new ones.';
+$string['no_courses_banner_title'] = 'No courses available at the moment.';
+$string['no_courses_banner_text']  = 'Browse the catalog and discover our courses.';
 $string['login_now']               = 'Log in';
-$string['mycourses_empty']         = 'Log in to see your courses. You can also try our trial courses or subscribe.';
 $string['browse_catalog']          = 'Browse the catalog';
 $string['access_trial_courses']    = 'Access trial courses';
-$string['subscribe_now']           = 'Subscribe';
-$string['hint_go_to_header_cta'] = 'Subscribe or sign in here';
+$string['subscribe_now']           = 'Buy now';
+$string['hint_go_to_header_cta']   = 'Buy or log in here';
 
 $string['admin_native_page'] = 'Moodle native page';
 $string['admin_show_hidden'] = 'Also show hidden courses';
@@ -222,30 +221,40 @@ $string['trial_phone_ph']   = 'Your phone number';
 $string['trial_phone_help'] = 'Your phone number helps us answer your questions quickly and guide you as you start learning.';
 $string['trial_phone_label'] = 'Phone';
 
-$string['mail_trial_reset_hint'] =
-    '<p>You created your password during registration. If you ever forget it, you can reset it here:</p>' .
-    '👉 <a href="{$a->url}">Reset password</a></p>';
+$string['mail_trial_reset_hint'] = '<p>If you forgot your password, click this link to reset it.</p>' .
+'👉 <a href="{$a->url}">Reset password</a></p>';
 
-// E-mail subject
-$string['mail_trial_started_subject'] =
-    'Your Campus<small><sup>FR</sup></small> trial access is activated 🎉';
+// Subject
+$string['mail_trial_started_subject'] = 'Your Campus<small><sup>FR</sup></small> account has been created 🎉';
 
-// Main body
+// Body
 $string['mail_trial_started_body'] =
-    '<p>Hello {$a->firstname},</p>' .
-    '<p>Your 7-day trial access to Campus<small><sup>FR</sup></small> is now active.</p>' .
-    '<p>You can explore the platform, try the learning format, complete a few exercises and earn your first croissants 🥐 — and see whether this learning style feels right for you.</p>' .
-    '<p>Your login details:</p>';
+    '<p>Hi, {$a->firstname}!</p>' .
+    '<p>Welcome to the Campus<small><sup>FR</sup></small> French school — your account has been successfully created.</p>';
 
-// “My courses” section
+// "My courses" section
 $string['mail_trial_started_mycourses'] =
-    '<p>You can access your dashboard using the link below:</p>' .
-    '👉 <a href="{$a->url}">Enter the campus</a></p>';
+    '<p>Your first free lesson is already unlocked — take it today and move one step closer to your goals!</p>' .
+'👉 <a href="{$a->url}">Start learning</a></p>';
+
+$string['mail_trial_desc'] =
+    '<p>On Campus<small><sup>FR</sup></small>, you will find:</p>' .
+    '<ul><li>clear grammar video lessons</li>' .
+    '    <li>practice with a native French speaker</li>' .
+    '    <li>exercises with instant feedback</li>' .
+    '</ul>' .
+    '<p>French may seem difficult at first.<br/>' .
+    'With Nata Kutrowski’s lessons, you will quickly understand its logic and start enjoying the process.</p>' .
+    '<p>Just 20 minutes a day — and you will see real progress.</p>' .
+    '<p>See you in class!</p>' .
+    '<p>Best regards,<br/>' .
+    'Campus<small><sup>FR</sup></small> team.</p>';
+
 
 // Discount line
 $string['mail_trial_discount_line'] =
-    '<p>Subscribe within the first {$a->duration} days after activating your trial and get {$a->pct}% off your full Campus<small><sup>FR</sup></small> subscription.</p>
-<p>This discount is available for these three days only — afterwards the standard price applies.</p>';
+    '<p>Subscribe within the first {$a->duration} days after activating your trial and get {$a->pct}% off your full Campus<small><sup>FR</sup></small> subscription.</p>' .
+'<p>This discount is available for these three days only — afterwards the standard price applies.</p>';
 
 $string['mail_trial_discount_btn'] =
     'Buy the full CampusFR subscription with {$a->pct}% off';
@@ -260,7 +269,7 @@ $string['trial_phone_label']    = 'Phone';
 
 // Security hint (fallback)
 $string['mail_trial_security_hint'] =
-    'For better security, use a unique password for Campus<small><sup>FR</sup></small> and update it occasionally if needed.';
+    'For better security, use a unique password for Campus<small><sup>FR</sup></small> and update it from time to time.';
 
 // Other fields
 $string['trial_phone_country_placeholder'] = 'Code';
@@ -268,9 +277,9 @@ $string['trial_password_toggle_show'] = 'Show password';
 $string['trial_password_toggle_hide'] = 'Hide password';
 
 $string['trial_welcome_banner_html'] =
-    'Welcome to Campus<small><sup>FR</sup></small>! Your 7-day trial is activated. ' .
-    'Start with the level that suits you (A0, A1, A2 or B1). ' .
-    'You can always return to your courses via the “My courses” page.';
+    'Welcome to Campus<small><sup>FR</sup></small>! Your trial account is activated. ' .
+    'Start with the level that suits you (A1, A2 [coming soon], or B1 [coming soon]); the first lesson is free. ' .
+    'You can access your courses at any time via the "My courses" page.';
 
 $string['mail_trial_started_support'] =
     '<p>All your progress (completed tasks, croissant-points earned) is saved. When you subscribe, you simply continue from where you left off.</p>

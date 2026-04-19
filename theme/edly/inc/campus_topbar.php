@@ -33,9 +33,13 @@
                 ?>
 
                 <div class="campus-lang-dropdown">
-                    <button class="campus-lang-trigger">
-                        <?php echo $languages[$currentlang]['flag'] ?? ''; ?>
-                        <?php echo strtoupper($currentlang); ?>
+                    <button class="campus-lang-trigger" type="button">
+                        <span class="campus-lang-flag">
+                            <?php echo $languages[$currentlang]['flag'] ?? ''; ?>
+                        </span>
+                        <span class="campus-lang-code">
+                            <?php echo strtoupper($currentlang); ?>
+                        </span>
                         <span class="campus-lang-arrow">▾</span>
                     </button>
 
