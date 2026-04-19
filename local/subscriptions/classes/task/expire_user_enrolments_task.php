@@ -47,7 +47,7 @@ class expire_user_enrolments_task extends \core\task\scheduled_task {
         
         // 2) EXPIRER les actives dépassées + SUSPENDRE les cours
         $expired = $DB->get_records_select('user_subscription',
-            "status = '".Status::ACTIVE."' AND end_date IS NOT NULL AND end_date < :now",
+            "status = '".Status::ACTIVE."' AND end_date IS NOT NULL AND end_date > 0 AND end_date < :now",
             ['now' => $now]
         );
         foreach ($expired as $sub) {
