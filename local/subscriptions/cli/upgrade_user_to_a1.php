@@ -120,8 +120,6 @@ if (!$hasA1) {
         $start = $now;
         $end = 0;
 
-        $currency = subscription_manager::get_plan_default_currency($planid);
-
         subscription_manager::create_or_extend_subscription(
             $userid,
             $planid,
@@ -130,7 +128,7 @@ if (!$hasA1) {
             $start,
             $end,
             14900.00,
-            $currency ?? 'RUB',
+            'RUB',
             $now,
             false,
             0,
