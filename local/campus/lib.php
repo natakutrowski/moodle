@@ -270,9 +270,9 @@ function local_campus_render_trial_discount_banner(?bool $showcta = null): void 
     }
 
     $discPct   = (int)(get_config('local_subscriptions','trial_discount_percent') ?? 15);
-    $dt = new DateTime('2026-04-26 00:00:00', new DateTimeZone('Europe/Paris'));
-    $deadline  = (int)$dt->getTimestamp();
-    //$deadline  = (int)\local_subscriptions\trial_manager::discount_window_deadline((int)$USER->id);
+    //$dt = new DateTime('2026-04-26 00:00:00', new DateTimeZone('Europe/Paris'));
+    //$deadline  = (int)$dt->getTimestamp();
+    $deadline  = (int)\local_subscriptions\trial_manager::discount_window_deadline((int)$USER->id);
     $subscribe = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
 
     // Détection auto : pas de CTA sur subscribe.php

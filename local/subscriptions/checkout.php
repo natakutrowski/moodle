@@ -452,9 +452,9 @@ $discountOpen = (isloggedin() && !isguestuser())
     : false;
 
 $discPct    = (int)(get_config('local_subscriptions','trial_discount_percent') ?? 15);
-//$deadlineTs = $discountOpen ? (int)\local_subscriptions\trial_manager::discount_window_deadline((int)$USER->id) : 0;
-$dt = new DateTime('2026-04-26 00:00:00', new DateTimeZone('Europe/Paris'));
-$deadlineTs  = (int)$dt->getTimestamp();
+$deadlineTs = $discountOpen ? (int)\local_subscriptions\trial_manager::discount_window_deadline((int)$USER->id) : 0;
+//$dt = new DateTime('2026-04-26 00:00:00', new DateTimeZone('Europe/Paris'));
+//$deadlineTs  = (int)$dt->getTimestamp();
 
 if ($discountOpen && $discPct > 0 && $deadlineTs > time()) {
     echo \html_writer::div(
