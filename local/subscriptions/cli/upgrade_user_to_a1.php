@@ -157,7 +157,7 @@ if (!$dryrun) {
 if ($trial) {
 
     if (!$dryrun) {
-        $trial->status = Status::REPLACED;
+        $trial->status = \local_subscriptions\constants\Status::REPLACED;
         $trial->last_update = $now;
 
         $DB->update_record('user_subscription', $trial);
