@@ -2069,7 +2069,7 @@ function xmldb_main_upgrade($oldversion) {
         // If h5plib_v127 is no longer present, remove it.
         if (!file_exists($CFG->dirroot . '/h5p/h5plib/v127/version.php')) {
             // Clean config.
-            uninstall_plugin('h5plib', 'v127');
+            //uninstall_plugin('h5plib', 'v127');
         }
 
         // If h5plib_v128 is present, set it as the default one.
