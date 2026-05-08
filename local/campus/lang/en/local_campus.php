@@ -315,3 +315,9 @@ $string['trialreport_export_xls'] = 'Save as XLS';
 $string['trialreport_export_csv'] = 'Save as CSV';
 
 $string['task_cleanup_notifications'] = 'Cleanup of system notifications (Moodle updates / logins)';
+
+$string['audio_not_found_title'] = 'Audio not found';
+$string['audio_not_found_message'] = 'This audio file cannot be found or is no longer available.';
+$string['audio_back_to_home'] = 'Back to home';
+$string['audio_player_instruction'] = 'Click play to listen to the audio.';
+$string['audio_browser_not_supported'] = 'Your browser does not support audio playback.';

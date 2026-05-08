@@ -311,3 +311,10 @@ $string['trialreport_export_xls'] = 'Enregistrer en XLS';
 $string['trialreport_export_csv'] = 'Enregistrer en CSV';
 
 $string['task_cleanup_notifications'] = 'Nettoyage des notifications système (Moodle updates / connexions)';
+
+
+$string['audio_not_found_title'] = 'Audio introuvable';
+$string['audio_not_found_message'] = 'Cet audio est introuvable ou n’est plus disponible.';
+$string['audio_back_to_home'] = 'Retour à l’accueil';
+$string['audio_player_instruction'] = 'Cliquez sur lecture pour écouter l’audio.';
+$string['audio_browser_not_supported'] = 'Votre navigateur ne supporte pas l’audio.';
