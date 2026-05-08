@@ -280,3 +280,9 @@ $string['trialreport_export_xls'] = 'Сохранить в XLS';
 $string['trialreport_export_csv'] = 'Сохранить в CSV';
 
 $string['task_cleanup_notifications'] = 'Очистка системных уведомлений (обновления Moodle и входы в аккаунт)';
+
+$string['audio_not_found_title'] = 'Аудио не найдено';
+$string['audio_not_found_message'] = 'Это аудио не найдено или больше недоступно.';
+$string['audio_back_to_home'] = 'Вернуться на главную';
+$string['audio_player_instruction'] = 'Нажмите на кнопку воспроизведения, чтобы прослушать аудио.';
+$string['audio_browser_not_supported'] = 'Ваш браузер не поддерживает воспроизведение аудио.';
