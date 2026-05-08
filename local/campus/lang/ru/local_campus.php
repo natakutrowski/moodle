@@ -272,9 +272,8 @@ $string['trialreport_col_lastname'] = 'Фамилия';
 $string['trialreport_col_email'] = 'E-mail';
 $string['trialreport_col_phone'] = 'Телефон (с кодом страны)';
 $string['trialreport_col_country'] = 'Страна';
-$string['trialreport_col_date_48h'] = 'Дата: старт trial + 48ч';
-$string['trialreport_col_date_72h'] = 'Дата: старт trial + 72ч';
-$string['trialreport_col_date_7d'] = 'Дата: старт trial + 7 дн.';
+$string['trialreport_col_start_date'] = 'Дата начала';
+$string['trialreport_col_end_date'] = 'Дата окончания';
 $string['trialreport_col_status'] = 'Статус';
 
 $string['trialreport_export_xls'] = 'Сохранить в XLS';

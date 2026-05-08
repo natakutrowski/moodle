@@ -19,11 +19,9 @@ $sortfields = [
     'email'      => 'u.email',
     'phone'      => 'u.phone2',
     'country'    => 'u.country',
-    'date48'     => '(us.start_date + 48 * 3600)',
-    'date72'     => '(us.start_date + 72 * 3600)',
-    'date7d'     => '(us.start_date + 7 * 24 * 3600)',
     'status'     => 'us.status',
     'start_date' => 'us.start_date',
+    'end_date'   => 'us.end_date',
 ];
 
 // Validation du tri.
@@ -51,6 +49,7 @@ $sql = "SELECT
             us.id AS subid,
             us.userid,
             us.start_date,
+            us.end_date,
             us.status,
             u.firstname,
             u.lastname,
@@ -72,14 +71,10 @@ $records = $DB->get_records_sql($sql, $params);
 
 // Préparation des données.
 $data = [];
-$dateformat = '%a %d %b %H:%M'; // ex : lun 02 déc 14:30 (selon la locale Moodle)
+$dateformat = '%a %d %b %Y %H:%M'; // ex : lun 02 déc 2026 14:30 (selon la locale Moodle)
 
 foreach ($records as $r) {
     $start = (int)$r->start_date;
-
-    $date48 = $start ? $start + 48 * 3600 : 0;
-    $date72 = $start ? $start + 72 * 3600 : 0;
-    $date7d = $start ? $start + 7 * 24 * 3600 : 0;
 
     // Pays lisible (si code ISO connu).
     $countryname = '';
@@ -107,9 +102,8 @@ foreach ($records as $r) {
         'email'     => $r->email,
         'phone'     => $phone,
         'country'   => $countryname,
-        'date48'    => $date48 ? userdate($date48, $dateformat) : '',
-        'date72'    => $date72 ? userdate($date72, $dateformat) : '',
-        'date7d'    => $date7d ? userdate($date7d, $dateformat) : '',
+        'start_date'=> $r->start_date ? userdate($r->start_date, $dateformat) : '',
+        'end_date'  => $r->end_date ? userdate($r->end_date, $dateformat) : '',
         'status'    => $r->status,
     ];
 }
@@ -121,9 +115,8 @@ $headers = [
     'email'     => get_string('trialreport_col_email',     'local_campus'),
     'phone'     => get_string('trialreport_col_phone',     'local_campus'),
     'country'   => get_string('trialreport_col_country',   'local_campus'),
-    'date48'    => get_string('trialreport_col_date_48h',  'local_campus'),
-    'date72'    => get_string('trialreport_col_date_72h',  'local_campus'),
-    'date7d'    => get_string('trialreport_col_date_7d',   'local_campus'),
+    'start_date'=> get_string('trialreport_col_start_date','local_campus'),
+    'end_date'  => get_string('trialreport_col_end_date',  'local_campus'),
     'status'    => get_string('trialreport_col_status',    'local_campus'),
 ];
 
@@ -143,9 +136,8 @@ if ($download === 'csv') {
             $row->email,
             $row->phone,
             $row->country,
-            $row->date48,
-            $row->date72,
-            $row->date7d,
+            $row->start_date,
+            $row->end_date,
             $row->status,
         ]);
     }
@@ -178,9 +170,8 @@ if ($download === 'xls') {
         $worksheet->write_string($rowno, $colno++, $row->email);
         $worksheet->write_string($rowno, $colno++, $row->phone);
         $worksheet->write_string($rowno, $colno++, $row->country);
-        $worksheet->write_string($rowno, $colno++, $row->date48);
-        $worksheet->write_string($rowno, $colno++, $row->date72);
-        $worksheet->write_string($rowno, $colno++, $row->date7d);
+        $worksheet->write_string($rowno, $colno++, $row->start_date);
+        $worksheet->write_string($rowno, $colno++, $row->end_date);
         $worksheet->write_string($rowno, $colno++, $row->status);
         $rowno++;
     }
@@ -311,9 +302,8 @@ foreach ($data as $row) {
         s($row->email),
         s($row->phone),
         s($row->country),
-        s($row->date48),
-        s($row->date72),
-        s($row->date7d),
+        s($row->start_date),
+        s($row->end_date),
         s($row->status),
     ];
 }

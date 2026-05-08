@@ -306,9 +306,8 @@ $string['trialreport_col_lastname'] = 'Last name';
 $string['trialreport_col_email'] = 'E-mail';
 $string['trialreport_col_phone'] = 'Phone (with country code)';
 $string['trialreport_col_country'] = 'Country';
-$string['trialreport_col_date_48h'] = 'Date: trial start + 48h';
-$string['trialreport_col_date_72h'] = 'Date: trial start + 72h';
-$string['trialreport_col_date_7d'] = 'Date: trial start + 7 days';
+$string['trialreport_col_start_date'] = 'Start date';
+$string['trialreport_col_end_date'] = 'End date';
 $string['trialreport_col_status'] = 'Status';
 
 $string['trialreport_export_xls'] = 'Save as XLS';
