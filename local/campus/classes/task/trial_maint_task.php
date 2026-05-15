@@ -144,7 +144,7 @@ class trial_maint_task extends \core\task\scheduled_task {
                         ? (new \moodle_url('/local/campus/course.php', ['trial'=>$firstTrialId, 'checktrial'=>1]))->out(false)
                         : (new \moodle_url('/'))->out(false);
 
-                    \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_REM3, [
+/*                     \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_REM3, [
                         'toemail'         => (string)$t->email,
                         'firstname'       => (string)($t->firstname ?? ''),
                         'continue_url'    => $continueurl,
@@ -152,7 +152,7 @@ class trial_maint_task extends \core\task\scheduled_task {
                         'course_fullname' => $coursefullname,
                         'daysleft'        => max(0, (int)ceil(($expiresAt - $now) / DAYSECS)),
                         'lang'            => $langpref,
-                    ]);
+                    ]); */
 
                     $t->reminder3_sent = $now;
                     $DB->update_record('local_campus_trial', $t);
@@ -177,14 +177,14 @@ class trial_maint_task extends \core\task\scheduled_task {
 
                 // Mail "fin d’essai" (avec info “compte actif jusqu’à J+suspendAfter”)
                 $suspendTs = $expiresAt + $suspendAfter * DAYSECS;
-                \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_EXPIRED, [
+/*                 \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_EXPIRED, [
                     'toemail'         => (string)$t->email,
                     'firstname'       => (string)($t->firstname ?? ''),
                     'subscribe_url'   => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
                     'course_fullname' => $coursefullname,
                     'suspend_date'    => $suspendTs,
                     'lang'            => $langpref,
-                ]);
+                ]); */
 
                 // Tracer “rappel J” si tu veux (ex. reminder7_sent = J)
                 if (empty($t->reminder7_sent)) {
@@ -200,13 +200,13 @@ class trial_maint_task extends \core\task\scheduled_task {
                 && $now >= ($expiresAt + $pre * DAYSECS)
                 && $now <  ($expiresAt + $suspendAfter * DAYSECS)) {
 
-                \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_PRE_SUSPEND, [
+/*                 \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_PRE_SUSPEND, [
                     'toemail'       => (string)$t->email,
                     'firstname'     => (string)($t->firstname ?? ''),
                     'suspend_date'  => (int)$expiresAt + $suspendAfter*DAYSECS,
                     'subscribe_url' => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
                     'lang'          => $langpref,
-                ]);
+                ]); */
 
                 $t->reminder_presuspend_sent = $now;
                 $DB->update_record('local_campus_trial', $t);
@@ -239,14 +239,14 @@ class trial_maint_task extends \core\task\scheduled_task {
                 }
 
                 // Mail “compte suspendu” + info suppression J+deleteAfter
-                \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_SUSPENDED, [
+/*                 \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_SUSPENDED, [
                     'toemail'       => (string)$t->email,
                     'firstname'     => (string)($t->firstname ?? ''),
                     'suspend_date'  => (int)$expiresAt + $suspendAfter*DAYSECS,
                     'delete_date'   => (int)$expiresAt + $deleteAfter*DAYSECS,
                     'subscribe_url' => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
                     'lang'          => $langpref,
-                ]);
+                ]); */
 
                 $t->reminder_suspend_sent = $now;
                 $DB->update_record('local_campus_trial', $t);
