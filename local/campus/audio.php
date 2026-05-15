@@ -163,6 +163,9 @@ if (count($parts) > 1) {
 // Titre affiché.
 $display = $titlemap[$lastpart] ?? str_replace('-', ' ', $lastpart);
 
+// special case replace B1P by B1+
+$prefix = str_replace('B1P', 'B1+', $prefix);
+
 $title = $prefix . mb_strtoupper($display, 'UTF-8');
 
 $streamurl = new moodle_url('/local/campus/stream.php', ['v' => $v]);

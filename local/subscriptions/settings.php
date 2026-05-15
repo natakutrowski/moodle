@@ -32,7 +32,14 @@ if ($hassiteconfig) {
 		new moodle_url(subscription_config::import_csv_page()),
 		'moodle/site:config'
 	));
-	
+
+    $ADMIN->add('localplugins', new admin_externalpage(
+        'local_subscriptions_export',
+        'Export des souscriptions',
+        new moodle_url('/local/subscriptions/admin/subscriptions_export.php'),
+        'moodle/site:config'
+    ));
+        
     // Le nœud "Local plugins" existe déjà. On ajoute une page réglages pour ton plugin.
     $settings = new admin_settingpage('local_subscriptions_settings', get_string('pluginname', 'local_subscriptions'));
 
