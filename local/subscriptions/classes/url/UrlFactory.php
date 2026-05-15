@@ -70,4 +70,25 @@ final class UrlFactory {
             return new moodle_url('/local/subscriptions/portal.php');
         }
     }
+
+    public static function digital_product(string $slug): moodle_url {
+        return new moodle_url('/digital/' . $slug);
+    }
+
+    public static function digital_checkout(array $params = []): moodle_url {
+        return new moodle_url('/local/subscriptions/payment/digital_create_session.php', $params);
+    }
+
+    public static function digital_success(array $params = []): moodle_url {
+        return new moodle_url('/local/subscriptions/digital_success.php', $params);
+    }
+
+    public static function digital_cancel(array $params = []): moodle_url {
+        return new moodle_url('/local/subscriptions/digital_cancel.php', $params);
+    }
+
+    public static function digital_download(array $params = []): moodle_url {
+        return new moodle_url('/local/subscriptions/download_pdf.php', $params);
+    }
+
 }

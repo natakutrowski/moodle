@@ -750,3 +750,77 @@ $string['checkout_go_to_payment_discount'] = 'Buy with discount';
 $string['checkout_full_access_line'] = 'Unlimited access to all lessons in the course.';
 $string['summary_price_title_single'] = 'Subscription for {$a}';
 
+$string['digital_pdf_badge'] = 'CampusFR PDF';
+$string['digital_pdf_intro'] = 'A practical guide to understand, memorize and review French third-group verbs without getting lost in endless tables.';
+$string['digital_pdf_item_1'] = 'The main families of third-group verbs.';
+$string['digital_pdf_item_2'] = 'The most useful conjugation patterns.';
+$string['digital_pdf_item_3'] = 'Clear explanations to help you spot regular patterns.';
+$string['digital_pdf_item_4'] = 'A PDF support you can keep and review at your own pace.';
+$string['digital_pdf_price_eur'] = 'EUR price';
+$string['digital_pdf_price_rub'] = 'RUB price';
+$string['digital_pdf_buy_title'] = 'Buy the PDF';
+$string['digital_pdf_firstname'] = 'First name';
+$string['digital_pdf_lastname'] = 'Last name';
+$string['digital_pdf_email'] = 'Email';
+$string['digital_pdf_email_help'] = 'The download link will be sent to this address.';
+$string['digital_pdf_buy_eur'] = 'Buy in EUR: {$a->price} €';
+$string['digital_pdf_buy_rub'] = 'Buy in RUB: {$a->price} ₽';
+$string['digital_payment_created'] = 'PDF payment request created. PSP connection will be added in the next step.';
+$string['digital_success_title'] = 'CampusFR PDF purchase';
+$string['digital_success_preview'] = 'Preview mode: the payment request has been created, but Stripe/Alfa payment is not connected yet.';
+$string['digital_success_request_created'] = 'Request created';
+$string['digital_success_product'] = 'Product';
+$string['digital_success_email'] = 'Email';
+$string['digital_success_amount'] = 'Amount';
+$string['digital_success_provider'] = 'Provider';
+$string['digital_success_status'] = 'Status';
+$string['digital_cancel_title'] = 'Payment cancelled';
+$string['digital_cancel_message'] = 'The payment was not completed. You can try again if you wish.';
+$string['digital_cancel_retry'] = 'Try payment again';
+$string['digital_success_download'] = 'Download the PDF';
+$string['digital_success_payment_pending'] = 'Your payment is being validated. If you have just paid, refresh this page in a few seconds.';
+$string['digital_download_not_paid'] = 'This download is not available because the payment has not been validated.';
+$string['digital_download_expired'] = 'This download link has expired.';
+$string['digital_download_file_missing'] = 'The PDF file could not be found.';
+$string['digital_success_payment_confirmed'] = 'Your payment has been confirmed. You can now download your PDF.';
+$string['digital_mail_access_subject'] = 'Your CampusFR PDF is ready 📘';
+$string['digital_mail_access_intro'] = 'Thank you for your purchase! Your PDF is now available.';
+$string['digital_mail_access_hint'] = 'You can download your PDF using the button below. We recommend saving it on your device for easy access anytime.';
+$string['digital_mail_download_button'] = 'Download the PDF';
+
+$string['digital_mail_receipt_subject'] = 'Your CampusFR purchase receipt';
+$string['digital_mail_receipt_intro'] = 'This email confirms your purchase on CampusFR. You will find your order summary below.';
+
+$string['digital_mail_product'] = 'Product';
+$string['digital_mail_amount'] = 'Amount';
+$string['digital_mail_payment_date'] = 'Payment date';
+
+$string['digital_success_paid_heading'] = 'Thank you for your purchase!';
+$string['digital_success_paid_intro'] = 'Your payment has been confirmed. Your PDF is ready to download.';
+$string['digital_success_pending_heading'] = 'Payment is being validated';
+$string['digital_success_summary_title'] = 'Purchase summary';
+$string['digital_success_email_sent_hint'] = 'We have also sent you the download link and receipt by email.';
+$string['digital_success_pending_hint'] = 'If you have just paid, refresh this page in a few seconds.';
+
+$string['digital_sales_hero_intro'] = 'A practical and easy-to-follow guide to understand French third-group verbs, recognize patterns and stop learning them “randomly”.';
+
+$string['digital_sales_lifetime_access'] = '✔ Lifetime access to the PDF after purchase';
+
+$string['digital_sales_content_title'] = 'What you will find inside this PDF';
+$string['digital_sales_content_item_1'] = 'The main families of third-group verbs.';
+$string['digital_sales_content_item_2'] = 'The most useful conjugation patterns.';
+$string['digital_sales_content_item_3'] = 'Simple and visual explanations.';
+$string['digital_sales_content_item_4'] = 'Tables designed for quick review.';
+$string['digital_sales_content_item_5'] = 'Logical groupings to help memorization.';
+$string['digital_sales_content_item_6'] = 'A practical support to keep during your revision sessions.';
+
+$string['digital_sales_forwho_title'] = 'This PDF is ideal if…';
+$string['digital_sales_forwho_item_1'] = 'you often confuse third-group verbs.';
+$string['digital_sales_forwho_item_2'] = 'you want to finally recognize patterns.';
+$string['digital_sales_forwho_item_3'] = 'you are learning French independently.';
+$string['digital_sales_forwho_item_4'] = 'you are preparing for an exam or certification.';
+$string['digital_sales_forwho_item_5'] = 'you want a practical support to keep close at hand.';
+
+$string['digital_sales_secure_payment'] = '🔒 Secure payment via Stripe or Alfa.';
+$string['digital_sales_instant_access'] = '⚡ Instant access after payment + download link sent by email.';
+$string['digital_cover_zoom_hint'] = 'Click the image to enlarge it.';

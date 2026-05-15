@@ -87,6 +87,8 @@ final class AlfaGateway implements PaymentGatewayInterface {
     public function create_checkout_session(stdClass $payment_request, array $options = []): CheckoutInitResult {
         global $CFG, $DB;
 
+        $paymentrequesttable = $options['payment_request_table'] ?? 'subscription_payment_request';
+
         if (empty($this->base)) {
             throw new \moodle_exception('alfa_missing_api_base', 'local_subscriptions');
         }
@@ -136,7 +138,7 @@ final class AlfaGateway implements PaymentGatewayInterface {
 
         // --- orderNumber unique -------------------------------------------
         $attempt = (int)($payment_request->attempts ?? 0) + 1;
-        $DB->update_record('subscription_payment_request', (object)[
+        $DB->update_record($paymentrequesttable, (object)[
             'id' => $payment_request->id,
             'attempts' => $attempt,
             'last_attempt' => time(),
@@ -217,7 +219,7 @@ final class AlfaGateway implements PaymentGatewayInterface {
 
         if (!empty($response['errorCode']) && $response['errorCode'] !== '0') {
             $msg = 'Alfa register.do error '.$response['errorCode'].' : '.($response['errorMessage'] ?? $response['actionCodeDescription'] ?? 'unknown');
-            $DB->update_record('subscription_payment_request', (object)[
+            $DB->update_record($paymentrequesttable, (object)[
                 'id'            => $payment_request->id,
                 'response_json' => json_encode(['register' => $response, 'payload' => $payload], JSON_UNESCAPED_UNICODE),
                 'last_error'    => $msg,
@@ -229,7 +231,7 @@ final class AlfaGateway implements PaymentGatewayInterface {
         $orderId = $response['orderId'] ?? null;
         if (!$formUrl || !$orderId) {
             $raw = json_encode(['register' => $response, 'payload' => $payload], JSON_UNESCAPED_UNICODE);
-            $DB->update_record('subscription_payment_request', (object)[
+            $DB->update_record($paymentrequesttable, (object)[
                 'id'            => $payment_request->id,
                 'response_json' => $raw,
                 'last_error'    => 'Missing formUrl/orderId from Alfa',
@@ -238,7 +240,7 @@ final class AlfaGateway implements PaymentGatewayInterface {
         }
 
         // Persist : orderId & formUrl
-        $DB->update_record('subscription_payment_request', (object)[
+        $DB->update_record($paymentrequesttable, (object)[
             'id'               => $payment_request->id,
             'sessionid'        => $orderId,         // Alfa orderId
             'payment_link'     => $formUrl,

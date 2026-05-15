@@ -747,3 +747,78 @@ $string['plan_label'] = 'Plan';
 $string['checkout_go_to_payment_discount'] = 'Acheter avec la remise';
 $string['checkout_full_access_line'] = 'Accès illimité à toutes les leçons du cours.';
 $string['summary_price_title_single'] = 'Abonnement pour {$a}';
+
+$string['digital_pdf_badge'] = 'PDF CampusFR';
+$string['digital_pdf_intro'] = 'Un guide pratique pour comprendre, mémoriser et réviser les verbes du 3e groupe sans se perdre dans des tableaux interminables.';
+$string['digital_pdf_item_1'] = 'Les familles principales des verbes du 3e groupe.';
+$string['digital_pdf_item_2'] = 'Les modèles de conjugaison les plus utiles.';
+$string['digital_pdf_item_3'] = 'Des explications claires pour repérer les régularités.';
+$string['digital_pdf_item_4'] = 'Un support PDF à garder et à réviser à votre rythme.';
+$string['digital_pdf_price_eur'] = 'Prix EUR';
+$string['digital_pdf_price_rub'] = 'Prix RUB';
+$string['digital_pdf_buy_title'] = 'Acheter le PDF';
+$string['digital_pdf_firstname'] = 'Prénom';
+$string['digital_pdf_lastname'] = 'Nom';
+$string['digital_pdf_email'] = 'Email';
+$string['digital_pdf_email_help'] = 'Le lien de téléchargement sera envoyé à cette adresse.';
+$string['digital_pdf_buy_eur'] = 'Acheter en EUR : {$a->price} €';
+$string['digital_pdf_buy_rub'] = 'Acheter en RUB : {$a->price} ₽';
+$string['digital_payment_created'] = 'Demande de paiement PDF créée. Connexion au PSP à l’étape suivante.';
+$string['digital_success_title'] = 'Achat PDF CampusFR';
+$string['digital_success_preview'] = 'Mode provisoire : la demande de paiement est bien créée, mais le paiement Stripe/Alfa n’est pas encore branché.';
+$string['digital_success_request_created'] = 'Demande créée';
+$string['digital_success_product'] = 'Produit';
+$string['digital_success_email'] = 'Email';
+$string['digital_success_amount'] = 'Montant';
+$string['digital_success_provider'] = 'Provider';
+$string['digital_success_status'] = 'Statut';
+$string['digital_cancel_title'] = 'Paiement annulé';
+$string['digital_cancel_message'] = 'Le paiement n’a pas été finalisé. Vous pouvez réessayer si vous le souhaitez.';
+$string['digital_cancel_retry'] = 'Réessayer le paiement';
+$string['digital_success_download'] = 'Télécharger le PDF';
+$string['digital_success_payment_pending'] = 'Votre paiement est en cours de validation. Si vous venez de payer, actualisez cette page dans quelques secondes.';
+$string['digital_download_not_paid'] = 'Ce téléchargement n’est pas disponible car le paiement n’est pas validé.';
+$string['digital_download_expired'] = 'Ce lien de téléchargement a expiré.';
+$string['digital_download_file_missing'] = 'Le fichier PDF est introuvable.';
+$string['digital_success_payment_confirmed'] = 'Votre paiement est confirmé. Vous pouvez maintenant télécharger votre PDF.';
+$string['digital_mail_access_subject'] = 'Votre PDF CampusFR est prêt 📘';
+$string['digital_mail_access_intro'] = 'Merci pour votre achat ! Votre PDF est maintenant disponible.';
+$string['digital_mail_access_hint'] = 'Vous pouvez télécharger votre PDF avec le bouton ci-dessous. Pensez à le sauvegarder sur votre appareil pour y accéder facilement à tout moment.';
+$string['digital_mail_download_button'] = 'Télécharger le PDF';
+
+$string['digital_mail_receipt_subject'] = 'Reçu de votre achat CampusFR';
+$string['digital_mail_receipt_intro'] = 'Ce message confirme votre achat sur CampusFR. Vous trouverez ci-dessous le récapitulatif de votre commande.';
+
+$string['digital_mail_product'] = 'Produit';
+$string['digital_mail_amount'] = 'Montant';
+$string['digital_mail_payment_date'] = 'Date de paiement';
+
+$string['digital_success_paid_heading'] = 'Merci pour votre achat !';
+$string['digital_success_paid_intro'] = 'Votre paiement est confirmé. Votre PDF est prêt à être téléchargé.';
+$string['digital_success_pending_heading'] = 'Paiement en cours de validation';
+$string['digital_success_summary_title'] = 'Résumé de votre achat';
+$string['digital_success_email_sent_hint'] = 'Nous vous avons également envoyé le lien de téléchargement et le reçu par email.';
+$string['digital_success_pending_hint'] = 'Si vous venez de payer, actualisez cette page dans quelques secondes.';
+
+$string['digital_sales_hero_intro'] = 'Un guide pratique et clair pour comprendre les verbes du 3e groupe, repérer les régularités et arrêter de les apprendre “au hasard”.';
+
+$string['digital_sales_lifetime_access'] = '✔ Accès à vie au PDF après achat';
+
+$string['digital_sales_content_title'] = 'Ce que vous allez trouver dans ce PDF';
+$string['digital_sales_content_item_1'] = 'Les principales familles de verbes du 3e groupe.';
+$string['digital_sales_content_item_2'] = 'Les modèles de conjugaison les plus utiles.';
+$string['digital_sales_content_item_3'] = 'Des explications simples et visuelles.';
+$string['digital_sales_content_item_4'] = 'Des tableaux faciles à relire rapidement.';
+$string['digital_sales_content_item_5'] = 'Des regroupements logiques pour mieux mémoriser.';
+$string['digital_sales_content_item_6'] = 'Un support pratique à garder pendant vos révisions.';
+
+$string['digital_sales_forwho_title'] = 'Ce PDF est idéal si…';
+$string['digital_sales_forwho_item_1'] = 'vous mélangez souvent les verbes du 3e groupe.';
+$string['digital_sales_forwho_item_2'] = 'vous voulez enfin voir des régularités.';
+$string['digital_sales_forwho_item_3'] = 'vous apprenez le français de manière autonome.';
+$string['digital_sales_forwho_item_4'] = 'vous préparez un examen ou une certification.';
+$string['digital_sales_forwho_item_5'] = 'vous voulez un support pratique à garder sous la main.';
+
+$string['digital_sales_secure_payment'] = '🔒 Paiement sécurisé via Stripe ou Alfa.';
+$string['digital_sales_instant_access'] = '⚡ Accès immédiat après paiement + lien envoyé par email.';
+$string['digital_cover_zoom_hint'] = 'Cliquez sur l’image pour l’agrandir.';

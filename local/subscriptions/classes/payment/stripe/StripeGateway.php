@@ -130,7 +130,10 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
                 ]);
 
                 $params['payment_intent_data'] = [
-                    'metadata' => ['payment_request_id' => (string)$payment_request->id]
+                    'metadata' => array_merge(
+                        ['payment_request_id' => (string)$payment_request->id],
+                        $options['metadata'] ?? []
+                    ),
                 ];
             } else {
                 // Cas classique (pas de LOCK) — on garde ton code existant
@@ -215,15 +218,23 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
             case 'checkout.session.completed': {
                 $pid = $obj->metadata->payment_request_id ?? $obj->client_reference_id ?? null;
                 $customerEmail = $obj->customer_details->email ?? ($obj->customer_email ?? null);
+                $metadata = [];
+                if (!empty($obj->metadata)) {
+                    foreach ($obj->metadata as $key => $value) {
+                        $metadata[$key] = $value;
+                    }
+                }
+
                 return new InternalEvent('checkout_completed', [
                     'payment_request_id'       => $pid,
                     'provider_customer_id'     => $obj->customer ?? null,
                     'provider_subscription_id' => $obj->subscription ?? null,
-                    'meta' => [
+                    'meta' => array_merge($metadata, [
                         'provider'       => Provider::STRIPE,
                         'session'        => $obj->id,
-                        'customer_email' => $customerEmail, // utile côté service
-                    ],
+                        'payment_intent' => $obj->payment_intent ?? null,
+                        'customer_email' => $customerEmail,
+                    ]),
                 ]);
             }
 

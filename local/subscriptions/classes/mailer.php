@@ -42,6 +42,9 @@ class mailer {
     public const T_TRIAL_SUSPENDED   = 'T_TRIAL_SUSPENDED';   // J + suspend_after
     public const T_TRIAL_EXPIRED  = 'T_TRIAL_EXPIRED';
 
+    public const T_DIGITAL_ACCESS  = 'digital_access';
+    public const T_DIGITAL_RECEIPT = 'digital_receipt';
+
     /** @var array<string, string[]> mapping type -> required args keys */
     private const REQUIREMENTS = [
         self::T_WELCOME               => ['user','plan','pr','sub','tmpPassword'],
@@ -71,6 +74,9 @@ class mailer {
         self::T_TRIAL_PRE_SUSPEND => ['toemail','firstname','suspend_date','subscribe_url'],
         self::T_TRIAL_SUSPENDED   => ['toemail','firstname','suspend_date','delete_date','subscribe_url'],
         self::T_TRIAL_EXPIRED => ['toemail','firstname','subscribe_url','course_fullname'],
+
+        self::T_DIGITAL_ACCESS  => ['pr', 'product', 'downloadurl'],
+        self::T_DIGITAL_RECEIPT => ['pr', 'product'],
     ];
     
     /**
@@ -211,6 +217,12 @@ class mailer {
 
                 case self::T_TRIAL_EXPIRED:
                     \local_subscriptions\mail\Catalog::trial_expired($args); break;
+
+                case self::T_DIGITAL_ACCESS:
+                    return self::send_digital_access($args['pr'], $args['product'], $args['downloadurl']);
+
+                case self::T_DIGITAL_RECEIPT:
+                    return self::send_digital_receipt($args['pr'], $args['product']);
 
                 default:
                     throw new \coding_exception("Unhandled mail type: {$type}");
@@ -1344,6 +1356,117 @@ class mailer {
         );
         self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
     }
+
+public static function send_digital_access(\stdClass $pr, \stdClass $product, string $downloadurl): void {
+    global $CFG;
+
+    $user = self::digital_recipient_from_pr($pr);
+
+    $title = get_string('digital_mail_access_subject', 'local_subscriptions');
+
+    $price = self::money((float)$pr->price, $pr->currency ?? '');
+    $productname = format_string($product->localized_title ?? $product->name);
+
+    $coverhtml = '';
+
+/*     if (!empty($product->coverimage)) {
+
+        $coverpath = $CFG->dirroot . '/local/subscriptions/pix/email/' . $product->coverimage;
+
+        if (file_exists($coverpath)) {
+
+            $coverurl = $CFG->wwwroot . '/local/subscriptions/pix/email/' .
+                rawurlencode($product->coverimage);
+
+            $coverhtml = '<img src="' . $coverurl . '"
+                alt=""
+                style="display:block;width:100%;max-width:380px;margin:24px auto;border-radius:16px;border:0;outline:none;text-decoration:none;box-shadow:0 8px 30px rgba(0,0,0,0.12);">';
+        }
+    } */
+
+    $table = MailRenderer::table()
+        ->lined()
+        ->row('digital_mail_product', s($productname))
+        ->row('digital_mail_amount', s($price))
+        ->render();
+
+    $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname));
+    $body .= \html_writer::tag('p', get_string('digital_mail_access_intro', 'local_subscriptions'));
+
+    $body .= $coverhtml;
+    
+    $body .= $table;
+
+    $body .= \html_writer::tag('p', get_string('digital_mail_access_hint', 'local_subscriptions'));
+
+    [$html, $text] = MailRenderer::layout(
+        $title,
+        $body,
+        get_string('digital_mail_download_button', 'local_subscriptions'),
+        $downloadurl
+    );
+
+    self::deliver($user, $title, $html, $text);
+}
+
+public static function send_digital_receipt(\stdClass $pr, \stdClass $product): void {
+    global $CFG;
+
+    $user = self::digital_recipient_from_pr($pr);
+
+    $title = get_string('digital_mail_receipt_subject', 'local_subscriptions');
+
+    $price = self::money((float)$pr->price, $pr->currency ?? '');
+
+    $table = MailRenderer::table()
+        ->lined()
+        ->row('digital_mail_product', s(format_string($product->localized_title ?? $product->name)))
+        ->row('digital_mail_amount', s($price))
+        ->provider($pr->payment_provider ?? '')
+        ->txid($pr->transactionid ?? null)
+        ->row('digital_mail_payment_date', !empty($pr->payment_date) ? s(userdate((int)$pr->payment_date)) : '—')
+        ->render();
+
+    $body  = \html_writer::tag('p', get_string('mail_hello', 'local_subscriptions', $user->firstname));
+    $body .= \html_writer::tag('p', get_string('digital_mail_receipt_intro', 'local_subscriptions'));
+    $body .= $table;
+    $body .= self::pr_ref_badge($pr);
+
+    $body .= '<img src="'.$CFG->wwwroot . '/local/subscriptions/pix/email/mailReceiptFooter.png"
+        style="display:block;width:100%;object-fit:cover;border:0;outline:none;text-decoration:none;">';
+
+    [$html, $text] = MailRenderer::layout(
+        $title,
+        $body,
+        '',
+        ''
+    );
+
+    self::deliver($user, $title, $html, $text);
+}
+
+private static function digital_recipient_from_pr(\stdClass $pr): \stdClass {
+    $u = new \stdClass();
+    $u->id = -1;
+    $u->email = $pr->email;
+    $u->username = $pr->email;
+    $u->firstname = $pr->firstname ?? '';
+    $u->lastname = $pr->lastname ?? '';
+
+    $u->firstnamephonetic = '';
+    $u->lastnamephonetic = '';
+    $u->middlename = '';
+    $u->alternatename = '';
+
+    $u->mailformat = 1;
+    $u->deleted = 0;
+    $u->suspended = 0;
+    $u->confirmed = 1;
+    $u->auth = 'manual';
+
+    return $u;
+}
+
 
     /** Crée un "user" complet in-memory pour email_to_user + ensure_full_user() */
     public static function pseudo_user(string $email, string $firstname = '', string $lastname = ''): \stdClass {

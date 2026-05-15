@@ -5,6 +5,19 @@ use local_subscriptions\payment\dto\InternalEvent;
 
 final class EventRouter {
     public static function handle(InternalEvent $e): void {
+        if (($e->meta['payment_context'] ?? '') === 'digital_product') {
+            switch ($e->type) {
+                case 'checkout_completed':
+                    \local_subscriptions\digital\digital_payment_service::on_checkout_completed($e);
+                    return;
+
+                case 'payment_failed':
+                case 'checkout_expired':
+                    \local_subscriptions\digital\digital_payment_service::on_payment_failed($e);
+                    return;
+            }
+        }
+
         switch ($e->type) {
             case 'checkout_completed':
                 \local_subscriptions\domain\PaymentService::on_checkout_completed($e);

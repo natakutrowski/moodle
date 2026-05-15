@@ -936,5 +936,187 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025112300, 'local', 'subscriptions');
     }
 
+	if ($oldversion < 2026051000) {
+		$dbman = $DB->get_manager();
+
+		// Table: subscription_digital_product.
+		$table = new xmldb_table('subscription_digital_product');
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('slug', XMLDB_TYPE_CHAR, '191', null, XMLDB_NOTNULL);
+			$table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+			$table->add_field('description', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('descriptionformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
+			$table->add_field('filename', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+			$table->add_field('price_eur', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00');
+			$table->add_field('price_rub', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00');
+			$table->add_field('enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+			$table->add_field('creation_date', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+			$table->add_field('last_update', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+			$table->add_index('slug_unique', XMLDB_INDEX_UNIQUE, ['slug']);
+			$table->add_index('enabled_idx', XMLDB_INDEX_NOTUNIQUE, ['enabled']);
+
+			$dbman->create_table($table);
+		}
+
+		// Table: subscription_digital_payment_request.
+		$table = new xmldb_table('subscription_digital_payment_request');
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('productid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('email', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+			$table->add_field('firstname', XMLDB_TYPE_CHAR, '100', null, null);
+			$table->add_field('lastname', XMLDB_TYPE_CHAR, '100', null, null);
+			$table->add_field('currency', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL);
+			$table->add_field('price', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00');
+			$table->add_field('amount_minor', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+			$table->add_field('payment_provider', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL);
+			$table->add_field('sessionid', XMLDB_TYPE_CHAR, '255', null, null);
+			$table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'pending');
+			$table->add_field('transactionid', XMLDB_TYPE_CHAR, '255', null, null);
+			$table->add_field('payment_link', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('response_json', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('created_ip', XMLDB_TYPE_CHAR, '45', null, null);
+			$table->add_field('created_useragent', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('accept_language', XMLDB_TYPE_CHAR, '191', null, null);
+			$table->add_field('http_referer', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('download_token', XMLDB_TYPE_CHAR, '64', null, null);
+			$table->add_field('download_token_expires', XMLDB_TYPE_INTEGER, '10', null, null);
+			$table->add_field('emailsent', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+			$table->add_field('receipt_sent', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+			$table->add_field('creation_date', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+			$table->add_field('last_update', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+			$table->add_field('payment_date', XMLDB_TYPE_INTEGER, '10', null, null);
+			$table->add_field('expiration_date', XMLDB_TYPE_INTEGER, '10', null, null);
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+			$table->add_key('productid_fk', XMLDB_KEY_FOREIGN, ['productid'], 'subscription_digital_product', ['id']);
+
+			$table->add_index('idx_sdpr_email', XMLDB_INDEX_NOTUNIQUE, ['email']);
+			$table->add_index('idx_sdpr_sessionid', XMLDB_INDEX_NOTUNIQUE, ['sessionid']);
+			$table->add_index('idx_sdpr_status', XMLDB_INDEX_NOTUNIQUE, ['status']);
+			$table->add_index('idx_sdpr_token', XMLDB_INDEX_UNIQUE, ['download_token']);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(true, 2026051000, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2026051002) {
+        $dbman = $DB->get_manager();
+
+        $table = new xmldb_table('subscription_digital_payment_request');
+
+        $fields = [
+            new xmldb_field('attempts', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, '0'),
+            new xmldb_field('last_attempt', XMLDB_TYPE_INTEGER, '10', null, null),
+            new xmldb_field('last_error', XMLDB_TYPE_TEXT, null, null, null),
+            new xmldb_field('locked_list_price', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00'),
+            new xmldb_field('locked_discount_percent', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0'),
+            new xmldb_field('locked_discount_amount', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00'),
+            new xmldb_field('locked_discount_reason', XMLDB_TYPE_CHAR, '255', null, null),
+            new xmldb_field('locked_final_price', XMLDB_TYPE_NUMBER, '12, 2', null, XMLDB_NOTNULL, null, '0.00'),
+            new xmldb_field('locked_at', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'),
+        ];
+
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2026051002, 'local', 'subscriptions');
+    }
+
+	if ($oldversion < 2026051003) {
+
+		$dbman = $DB->get_manager();
+
+		$table = new xmldb_table('subscription_digital_product');
+
+		$fields = [
+			new xmldb_field('coverimage', XMLDB_TYPE_CHAR, '255', null, null),
+			new xmldb_field('sales_intro', XMLDB_TYPE_TEXT, null, null, null),
+			new xmldb_field('content_items', XMLDB_TYPE_TEXT, null, null, null),
+			new xmldb_field('forwho_items', XMLDB_TYPE_TEXT, null, null, null),
+			new xmldb_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'),
+		];
+
+		foreach ($fields as $field) {
+			if (!$dbman->field_exists($table, $field)) {
+				$dbman->add_field($table, $field);
+			}
+		}
+
+		upgrade_plugin_savepoint(true, 2026051003, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2026051004) {
+
+		$dbman = $DB->get_manager();
+
+		$table = new xmldb_table('subscription_digital_product_lang');
+
+		if (!$dbman->table_exists($table)) {
+
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+
+			$table->add_field('productid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+
+			$table->add_field('lang', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL);
+
+			$table->add_field('title', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+
+			$table->add_field('sales_intro', XMLDB_TYPE_TEXT);
+
+			$table->add_field('content_items', XMLDB_TYPE_TEXT);
+
+			$table->add_field('forwho_items', XMLDB_TYPE_TEXT);
+
+			$table->add_field('creation_date', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+			$table->add_field('last_update', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+			$table->add_key(
+				'productid_fk',
+				XMLDB_KEY_FOREIGN,
+				['productid'],
+				'subscription_digital_product',
+				['id']
+			);
+
+			$table->add_index(
+				'product_lang_uix',
+				XMLDB_INDEX_UNIQUE,
+				['productid', 'lang']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(true, 2026051004, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2026051005) {
+		$dbman = $DB->get_manager();
+
+		$table = new xmldb_table('subscription_digital_payment_request');
+		$field = new xmldb_field('buyer_lang', XMLDB_TYPE_CHAR, '10', null, null);
+
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		upgrade_plugin_savepoint(true, 2026051005, 'local', 'subscriptions');
+	}
+
     return true;
 }

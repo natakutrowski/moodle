@@ -240,6 +240,129 @@
 		</INDEXES>
 		</TABLE>
 
+
+		<TABLE NAME="subscription_digital_product" COMMENT="Digital products sold without Moodle account, such as PDF files">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="slug" TYPE="char" LENGTH="191" NOTNULL="true"/>
+				<FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+				<FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1"/>
+				<FIELD NAME="filename" TYPE="char" LENGTH="255" NOTNULL="true"/>
+				<FIELD NAME="price_eur" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00"/>
+				<FIELD NAME="price_rub" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00"/>
+				<FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+				<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="coverimage" TYPE="char" LENGTH="255" NOTNULL="false"/>
+				<FIELD NAME="sales_intro" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="content_items" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="forwho_items" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="slug_unique" UNIQUE="true" FIELDS="slug"/>
+				<INDEX NAME="enabled_idx" UNIQUE="false" FIELDS="enabled"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="subscription_digital_payment_request" COMMENT="Payment requests for digital products sold without Moodle account">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="true"/>
+				<FIELD NAME="firstname" TYPE="char" LENGTH="100" NOTNULL="false"/>
+				<FIELD NAME="lastname" TYPE="char" LENGTH="100" NOTNULL="false"/>
+				<FIELD NAME="currency" TYPE="char" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="price" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00"/>
+				<FIELD NAME="amount_minor" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="payment_provider" TYPE="char" LENGTH="50" NOTNULL="true"/>
+				<FIELD NAME="sessionid" TYPE="char" LENGTH="255" NOTNULL="false"/>
+				<FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending"/>
+				<FIELD NAME="transactionid" TYPE="char" LENGTH="255" NOTNULL="false"/>
+				<FIELD NAME="payment_link" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="response_json" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="created_ip" TYPE="char" LENGTH="45" NOTNULL="false"/>
+				<FIELD NAME="created_useragent" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="accept_language" TYPE="char" LENGTH="191" NOTNULL="false"/>
+				<FIELD NAME="http_referer" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="download_token" TYPE="char" LENGTH="64" NOTNULL="false"/>
+				<FIELD NAME="download_token_expires" TYPE="int" LENGTH="10" NOTNULL="false"/>
+				<FIELD NAME="emailsent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="receipt_sent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="payment_date" TYPE="int" LENGTH="10" NOTNULL="false"/>
+				<FIELD NAME="expiration_date" TYPE="int" LENGTH="10" NOTNULL="false"/>
+				<FIELD NAME="attempts" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="last_attempt" TYPE="int" LENGTH="10" NOTNULL="false"/>
+				<FIELD NAME="last_error" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="locked_list_price" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00"/>
+				<FIELD NAME="locked_discount_percent" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="locked_discount_amount" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00"/>
+				<FIELD NAME="locked_discount_reason" TYPE="char" LENGTH="255" NOTNULL="false"/>
+				<FIELD NAME="locked_final_price" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00"/>
+				<FIELD NAME="locked_at" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="buyer_lang" TYPE="char" LENGTH="10" NOTNULL="false"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="productid_fk" TYPE="foreign" FIELDS="productid" REFTABLE="subscription_digital_product" REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="idx_sdpr_email" UNIQUE="false" FIELDS="email"/>
+				<INDEX NAME="idx_sdpr_sessionid" UNIQUE="false" FIELDS="sessionid"/>
+				<INDEX NAME="idx_sdpr_status" UNIQUE="false" FIELDS="status"/>
+				<INDEX NAME="idx_sdpr_token" UNIQUE="true" FIELDS="download_token"/>
+			</INDEXES>
+		</TABLE>
         
+		<TABLE NAME="subscription_digital_product_lang" COMMENT="Localized digital product texts">
+			<FIELDS>
+
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+
+				<FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+
+				<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
+
+				<FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true"/>
+
+				<FIELD NAME="sales_intro" TYPE="text" NOTNULL="false"/>
+
+				<FIELD NAME="content_items" TYPE="text" NOTNULL="false"/>
+
+				<FIELD NAME="forwho_items" TYPE="text" NOTNULL="false"/>
+
+				<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+
+				<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+
+			</FIELDS>
+
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+
+				<KEY NAME="productid_fk"
+					TYPE="foreign"
+					FIELDS="productid"
+					REFTABLE="subscription_digital_product"
+					REFFIELDS="id"/>
+			</KEYS>
+
+			<INDEXES>
+
+				<INDEX NAME="product_lang_uix"
+					UNIQUE="true"
+					FIELDS="productid, lang"/>
+
+			</INDEXES>
+		</TABLE>
+
+
+
     </TABLES>
 </XMLDB>

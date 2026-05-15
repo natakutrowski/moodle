@@ -741,3 +741,81 @@ $string['plan_label'] = 'Тариф';
 $string['checkout_go_to_payment_discount'] = 'Купить со скидкой';
 $string['checkout_full_access_line'] = 'Безлимитный доступ ко всем урокам курса.';
 $string['summary_price_title_single'] = 'Подписка на {$a}';
+
+$string['digital_pdf_badge'] = 'PDF Campus<small><sup>FR</sup></small>';
+$string['digital_pdf_intro'] = 'Практический PDF-гайд, который поможет понять, запомнить и повторить глаголы 3-й группы без бесконечных таблиц.';
+$string['digital_pdf_item_1'] = 'Основные семьи глаголов 3-й группы.';
+$string['digital_pdf_item_2'] = 'Самые полезные модели спряжения.';
+$string['digital_pdf_item_3'] = 'Понятные объяснения, чтобы видеть закономерности.';
+$string['digital_pdf_item_4'] = 'PDF-файл, который можно сохранить и повторять в своём темпе.';
+$string['digital_pdf_price_eur'] = 'Цена в EUR';
+$string['digital_pdf_price_rub'] = 'Цена в RUB';
+$string['digital_pdf_buy_title'] = 'Купить карточки';
+$string['digital_pdf_firstname'] = 'Имя';
+$string['digital_pdf_lastname'] = 'Фамилия';
+$string['digital_pdf_email'] = 'Email';
+$string['digital_pdf_email_help'] = 'Ссылка для скачивания будет отправлена на этот адрес.';
+$string['digital_pdf_buy_eur'] = 'Купить в EUR: {$a->price} €';
+$string['digital_pdf_buy_rub'] = 'Купить в RUB: {$a->price} ₽';
+$string['digital_payment_created'] = 'Запрос на оплату PDF создан. Подключение к платёжной системе будет добавлено на следующем этапе.';
+$string['digital_success_title'] = 'Покупка на CampusFR';
+$string['digital_success_preview'] = 'Тестовый режим: запрос на оплату создан, но оплата Stripe/Alfa пока не подключена.';
+$string['digital_success_request_created'] = 'Запрос создан';
+$string['digital_success_product'] = 'Продукт';
+$string['digital_success_email'] = 'Email';
+$string['digital_success_amount'] = 'Сумма';
+$string['digital_success_provider'] = 'Платёжная система';
+$string['digital_success_status'] = 'Статус';
+$string['digital_cancel_title'] = 'Оплата отменена';
+$string['digital_cancel_message'] = 'Оплата не была завершена. Вы можете попробовать ещё раз.';
+$string['digital_cancel_retry'] = 'Попробовать оплатить ещё раз';
+$string['digital_success_download'] = 'Скачать карточки';
+$string['digital_success_payment_pending'] = 'Ваш платёж проверяется. Если вы только что оплатили, обновите страницу через несколько секунд.';
+$string['digital_download_not_paid'] = 'Скачивание недоступно, так как оплата ещё не подтверждена.';
+$string['digital_download_expired'] = 'Срок действия ссылки для скачивания истёк.';
+$string['digital_download_file_missing'] = 'PDF-файл не найден.';
+$string['digital_success_payment_confirmed'] = 'Ваш платёж подтверждён. Теперь вы можете скачать PDF.';
+
+
+$string['digital_mail_access_subject'] = 'Ваши карточки по глаголам 3 группы уже ждут вас 📘';
+$string['digital_mail_access_intro'] = 'Спасибо за покупку ❤️ Ваш PDF-файл с карточками глаголов третьей группы уже доступен к скачиванию.';
+$string['digital_mail_access_hint'] = 'Вы можете скачать PDF-файл с карточками по кнопке ниже. <br>Рекомендуем сохранить файл на устройстве, чтобы в любой момент легко к нему вернуться.';
+$string['digital_mail_download_button'] = 'Скачать карточки';
+
+$string['digital_mail_receipt_subject'] = 'Квитанция о покупке CampusFR';
+$string['digital_mail_receipt_intro'] = 'Это письмо подтверждает вашу покупку на CampusFR. Ниже вы найдёте информацию о заказе.';
+
+$string['digital_mail_product'] = 'Продукт';
+$string['digital_mail_amount'] = 'Сумма';
+$string['digital_mail_payment_date'] = 'Дата оплаты';
+
+$string['digital_success_paid_heading'] = 'Спасибо за покупку!';
+$string['digital_success_paid_intro'] = 'Ваш платёж подтверждён. PDF-файл готов к скачиванию.';
+$string['digital_success_pending_heading'] = 'Платёж проверяется';
+$string['digital_success_summary_title'] = 'Информация о покупке';
+$string['digital_success_email_sent_hint'] = 'Мы также отправили ссылку для скачивания и квитанцию на ваш email.';
+$string['digital_success_pending_hint'] = 'Если вы только что оплатили, обновите страницу через несколько секунд.';
+
+$string['digital_sales_hero_intro'] = 'Практичный и понятный гайд, который поможет разобраться с глаголами 3-й группы, увидеть закономерности и перестать учить их “наугад”.';
+
+$string['digital_sales_lifetime_access'] = '✔ Неограниченный доступ к карточкам после покупки';
+
+$string['digital_sales_content_title'] = 'Эти глаголы все равно придется выучить 🤗<br>
+Так пусть это будет наконец удобно и понятно!';
+$string['digital_sales_content_item_1'] = 'Основные семьи глаголов 3-й группы.';
+$string['digital_sales_content_item_2'] = 'Самые полезные модели спряжения.';
+$string['digital_sales_content_item_3'] = 'Простые и наглядные объяснения.';
+$string['digital_sales_content_item_4'] = 'Таблицы, удобные для быстрого повторения.';
+$string['digital_sales_content_item_5'] = 'Логичные группы для лучшего запоминания.';
+$string['digital_sales_content_item_6'] = 'Практичный материал, который удобно держать под рукой во время повторения.';
+
+$string['digital_sales_forwho_title'] = 'Эти карточки идеально подойдут, если…';
+$string['digital_sales_forwho_item_1'] = 'вы часто путаете глаголы 3-й группы.';
+$string['digital_sales_forwho_item_2'] = 'вы хотите наконец увидеть закономерности.';
+$string['digital_sales_forwho_item_3'] = 'вы изучаете французский самостоятельно.';
+$string['digital_sales_forwho_item_4'] = 'вы готовитесь к экзамену или сертификату.';
+$string['digital_sales_forwho_item_5'] = 'вы хотите иметь практичный материал под рукой.';
+
+$string['digital_sales_secure_payment'] = '🔒 Безопасная оплата через Stripe или Alfa.';
+$string['digital_sales_instant_access'] = '⚡ Мгновенный доступ после оплаты + ссылка для скачивания на email.';
+$string['digital_cover_zoom_hint'] = 'Нажмите на изображение, чтобы увеличить его.';
