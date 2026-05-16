@@ -832,3 +832,10 @@ $string['digital_purchases_payment_date'] = 'Payment date';
 $string['digital_purchases_emails'] = 'Emails';
 $string['digital_purchases_access_email_short'] = 'PDF';
 $string['digital_purchases_receipt_email_short'] = 'Receipt';
+
+$string['digital_download_mobile_missing'] = 'The mobile version of this file is not available.';
+$string['digital_success_download_main'] = 'Download standard version';
+$string['digital_success_download_mobile'] = 'Download mobile version';
+$string['digital_mail_download_main_button'] = 'Download standard version';
+$string['digital_mail_download_mobile_button'] = 'Download mobile version';
+

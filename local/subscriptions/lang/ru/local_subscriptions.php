@@ -827,3 +827,10 @@ $string['digital_purchases_payment_date'] = 'Дата оплаты';
 $string['digital_purchases_emails'] = 'Письма';
 $string['digital_purchases_access_email_short'] = 'PDF';
 $string['digital_purchases_receipt_email_short'] = 'Квитанция';
+
+$string['digital_download_mobile_missing'] = 'Мобильная версия этого файла недоступна.';
+$string['digital_success_download_main'] = 'Скачать классическую версию';
+$string['digital_success_download_mobile'] = 'Скачать мобильную версию';
+$string['digital_mail_download_main_button'] = 'Скачать классическую версию';
+$string['digital_mail_download_mobile_button'] = 'Скачать мобильную версию';
+

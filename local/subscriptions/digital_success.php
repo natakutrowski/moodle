@@ -193,11 +193,25 @@ echo html_writer::tag(
 echo html_writer::end_div();
 
 if ($ispaid && !empty($pr->download_token)) {
+    echo html_writer::start_div('d-flex flex-column flex-md-row gap-2 justify-content-center mb-3');
+
     echo html_writer::link(
         new moodle_url('/download/pdf/' . $pr->download_token),
-        get_string('digital_success_download', 'local_subscriptions'),
-        ['class' => 'btn btn-primary btn-lg px-5 mb-3']
+        get_string('digital_success_download_main', 'local_subscriptions'),
+        ['class' => 'btn btn-primary btn-lg px-4']
     );
+
+    if (!empty($product->mobile_filename)) {
+        echo html_writer::link(
+            new moodle_url('/download/pdf/' . $pr->download_token, [
+                'version' => 'mobile',
+            ]),
+            get_string('digital_success_download_mobile', 'local_subscriptions'),
+            ['class' => 'btn btn-outline-primary btn-lg px-4']
+        );
+    }
+
+    echo html_writer::end_div();
 
     echo html_writer::tag('p', get_string('digital_success_email_sent_hint', 'local_subscriptions'), [
         'class' => 'text-muted small mt-3 mb-0',

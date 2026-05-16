@@ -15,6 +15,7 @@ $data = [
     'description' => 'Un PDF pratique pour comprendre, apprendre et réviser les verbes du 3e groupe en français.',
     'descriptionformat' => FORMAT_HTML,
     'filename' => 'campusfr-verbes-3e-groupe.pdf',
+    'mobile_filename' => 'campusfr-verbes-3e-groupe-mobile.pdf',
     'coverimage' => 'pdf_3e_groupe_cover.png',
     'price_eur' => 4.90,
     'price_rub' => 470.00,

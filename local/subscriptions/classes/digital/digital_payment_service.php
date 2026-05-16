@@ -82,6 +82,13 @@ final class digital_payment_service {
 
         $downloadurl = (new \moodle_url('/download/pdf/' . $pr->download_token))->out(false);
 
+        $downloadurlmobile = '';
+        if (!empty($product->mobile_filename)) {
+            $downloadurlmobile = (new \moodle_url('/download/pdf/' . $pr->download_token, [
+                'version' => 'mobile',
+            ]))->out(false);
+        }
+
         // Mini-lock pour éviter double envoi email accès.
         $prfresh = $DB->get_record(product_manager::TABLE_PAYMENT_REQUEST, ['id' => $pr->id], '*', MUST_EXIST);
 
@@ -93,6 +100,7 @@ final class digital_payment_service {
                     'pr' => $prfresh,
                     'product' => $product,
                     'downloadurl' => $downloadurl,
+                    'downloadurlmobile' => $downloadurlmobile,
                 ]);
 
                 $DB->update_record(product_manager::TABLE_PAYMENT_REQUEST, (object)[

@@ -1118,5 +1118,20 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2026051005, 'local', 'subscriptions');
 	}
 
+	if ($oldversion < 2026051006) {
+
+		$dbman = $DB->get_manager();
+
+		$table = new xmldb_table('subscription_digital_product');
+
+		$field = new xmldb_field('mobile_filename', XMLDB_TYPE_CHAR, '255', null, null);
+
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		upgrade_plugin_savepoint(true, 2026051006, 'local', 'subscriptions');
+	}	
+
     return true;
 }
