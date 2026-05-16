@@ -819,3 +819,9 @@ $string['digital_sales_forwho_item_5'] = 'вы хотите иметь прак�
 $string['digital_sales_secure_payment'] = '🔒 Безопасная оплата через Stripe или Alfa.';
 $string['digital_sales_instant_access'] = '⚡ Мгновенный доступ после оплаты + ссылка для скачивания на email.';
 $string['digital_cover_zoom_hint'] = 'Нажмите на изображение, чтобы увеличить его.';
+
+$string['digital_download_mobile_missing'] = 'Мобильная версия этого файла недоступна.';
+$string['digital_success_download_main'] = 'Скачать классическую версию';
+$string['digital_success_download_mobile'] = 'Скачать мобильную версию';
+$string['digital_mail_download_main_button'] = 'Скачать классическую версию';
+$string['digital_mail_download_mobile_button'] = 'Скачать мобильную версию';

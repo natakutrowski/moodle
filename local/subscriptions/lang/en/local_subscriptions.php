@@ -824,3 +824,9 @@ $string['digital_sales_forwho_item_5'] = 'you want a practical support to keep c
 $string['digital_sales_secure_payment'] = '🔒 Secure payment via Stripe or Alfa.';
 $string['digital_sales_instant_access'] = '⚡ Instant access after payment + download link sent by email.';
 $string['digital_cover_zoom_hint'] = 'Click the image to enlarge it.';
+
+$string['digital_download_mobile_missing'] = 'The mobile version of this file is not available.';
+$string['digital_success_download_main'] = 'Download standard version';
+$string['digital_success_download_mobile'] = 'Download mobile version';
+$string['digital_mail_download_main_button'] = 'Download standard version';
+$string['digital_mail_download_mobile_button'] = 'Download mobile version';

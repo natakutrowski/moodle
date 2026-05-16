@@ -10,6 +10,13 @@ use local_subscriptions\digital\product_manager;
 \local_subscriptions\subscription_config::guard_public_access();
 
 $token = required_param('token', PARAM_ALPHANUMEXT);
+$version = optional_param('version', 'main', PARAM_ALPHANUMEXT);
+
+$version = strtolower($version);
+
+if (!in_array($version, ['main', 'mobile'], true)) {
+    $version = 'main';
+}
 
 $pr = $DB->get_record(product_manager::TABLE_PAYMENT_REQUEST, [
     'download_token' => $token,
@@ -28,10 +35,28 @@ if (!$product) {
     throw new moodle_exception('invalidrecord', 'error');
 }
 
-$filepath = $CFG->dataroot . '/local_subscriptions/private_pdfs/' . $product->filename;
+$filename = $product->filename;
+
+if ($version === 'mobile') {
+    if (empty($product->mobile_filename)) {
+        throw new moodle_exception('digital_download_mobile_missing', 'local_subscriptions');
+    }
+
+    $filename = $product->mobile_filename;
+}
+
+$filepath = $CFG->dataroot . '/local_subscriptions/private_pdfs/' . $filename;
 
 if (!is_readable($filepath)) {
     throw new moodle_exception('digital_download_file_missing', 'local_subscriptions');
 }
 
-send_file($filepath, $product->filename, 0, 0, false, true, 'application/pdf');
+send_file(
+    $filepath,
+    $filename,
+    0,
+    0,
+    false,
+    true,
+    'application/pdf'
+);

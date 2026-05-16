@@ -219,7 +219,12 @@ class mailer {
                     \local_subscriptions\mail\Catalog::trial_expired($args); break;
 
                 case self::T_DIGITAL_ACCESS:
-                    return self::send_digital_access($args['pr'], $args['product'], $args['downloadurl']);
+                    return self::send_digital_access(
+                        $args['pr'],
+                        $args['product'],
+                        $args['downloadurl'],
+                        $args['downloadurlmobile'] ?? ''
+                    );
 
                 case self::T_DIGITAL_RECEIPT:
                     return self::send_digital_receipt($args['pr'], $args['product']);
@@ -1357,7 +1362,12 @@ class mailer {
         self::deliver(self::pseudo_user($to, $first, ''), $subject, $html, $text);
     }
 
-public static function send_digital_access(\stdClass $pr, \stdClass $product, string $downloadurl): void {
+public static function send_digital_access(
+    \stdClass $pr,
+    \stdClass $product,
+    string $downloadurl,
+    string $downloadurlmobile = ''
+): void {
     global $CFG;
 
     $user = self::digital_recipient_from_pr($pr);
@@ -1399,11 +1409,54 @@ public static function send_digital_access(\stdClass $pr, \stdClass $product, st
 
     $body .= \html_writer::tag('p', get_string('digital_mail_access_hint', 'local_subscriptions'));
 
+    $body .= \html_writer::start_div('', [
+        'style' => 'margin:24px 0;text-align:center;',
+    ]);
+
+    $body .= \html_writer::link(
+        $downloadurl,
+        get_string('digital_mail_download_main_button', 'local_subscriptions'),
+        [
+            'style' => '
+                display:inline-block;
+                margin:6px;
+                padding:14px 22px;
+                background:#006d77;
+                color:#ffffff;
+                text-decoration:none;
+                border-radius:10px;
+                font-weight:700;
+            ',
+        ]
+    );
+
+    if (!empty($downloadurlmobile)) {
+        $body .= \html_writer::link(
+            $downloadurlmobile,
+            get_string('digital_mail_download_mobile_button', 'local_subscriptions'),
+            [
+                'style' => '
+                    display:inline-block;
+                    margin:6px;
+                    padding:14px 22px;
+                    background:#ffffff;
+                    color:#006d77;
+                    text-decoration:none;
+                    border-radius:10px;
+                    font-weight:700;
+                    border:1px solid #006d77;
+                ',
+            ]
+        );
+    }
+
+    $body .= \html_writer::end_div();
+
     [$html, $text] = MailRenderer::layout(
         $title,
         $body,
-        get_string('digital_mail_download_button', 'local_subscriptions'),
-        $downloadurl
+        '',
+        ''
     );
 
     self::deliver($user, $title, $html, $text);

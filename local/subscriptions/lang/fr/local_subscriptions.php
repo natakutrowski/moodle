@@ -822,3 +822,9 @@ $string['digital_sales_forwho_item_5'] = 'vous voulez un support pratique à gar
 $string['digital_sales_secure_payment'] = '🔒 Paiement sécurisé via Stripe ou Alfa.';
 $string['digital_sales_instant_access'] = '⚡ Accès immédiat après paiement + lien envoyé par email.';
 $string['digital_cover_zoom_hint'] = 'Cliquez sur l’image pour l’agrandir.';
+
+$string['digital_download_mobile_missing'] = 'La version mobile de ce fichier n’est pas disponible.';
+$string['digital_success_download_main'] = 'Télécharger la version classique';
+$string['digital_success_download_mobile'] = 'Télécharger la version mobile';
+$string['digital_mail_download_main_button'] = 'Télécharger la version classique';
+$string['digital_mail_download_mobile_button'] = 'Télécharger la version mobile';
