@@ -824,3 +824,11 @@ $string['digital_sales_forwho_item_5'] = 'you want a practical support to keep c
 $string['digital_sales_secure_payment'] = '🔒 Secure payment via Stripe or Alfa.';
 $string['digital_sales_instant_access'] = '⚡ Instant access after payment + download link sent by email.';
 $string['digital_cover_zoom_hint'] = 'Click the image to enlarge it.';
+
+$string['digital_purchases_title'] = 'Digital product purchases';
+$string['digital_purchases_export_xlsx'] = 'Export to XLSX';
+$string['digital_purchases_count'] = '{$a} purchase(s) found.';
+$string['digital_purchases_payment_date'] = 'Payment date';
+$string['digital_purchases_emails'] = 'Emails';
+$string['digital_purchases_access_email_short'] = 'PDF';
+$string['digital_purchases_receipt_email_short'] = 'Receipt';

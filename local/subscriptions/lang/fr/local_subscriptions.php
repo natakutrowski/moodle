@@ -822,3 +822,11 @@ $string['digital_sales_forwho_item_5'] = 'vous voulez un support pratique à gar
 $string['digital_sales_secure_payment'] = '🔒 Paiement sécurisé via Stripe ou Alfa.';
 $string['digital_sales_instant_access'] = '⚡ Accès immédiat après paiement + lien envoyé par email.';
 $string['digital_cover_zoom_hint'] = 'Cliquez sur l’image pour l’agrandir.';
+
+$string['digital_purchases_title'] = 'Achats de produits digitaux';
+$string['digital_purchases_export_xlsx'] = 'Exporter en XLSX';
+$string['digital_purchases_count'] = '{$a} achat(s) trouvé(s).';
+$string['digital_purchases_payment_date'] = 'Date de paiement';
+$string['digital_purchases_emails'] = 'Emails';
+$string['digital_purchases_access_email_short'] = 'PDF';
+$string['digital_purchases_receipt_email_short'] = 'Reçu';

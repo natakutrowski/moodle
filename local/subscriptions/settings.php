@@ -39,6 +39,13 @@ if ($hassiteconfig) {
         new moodle_url('/local/subscriptions/admin/subscriptions_export.php'),
         'moodle/site:config'
     ));
+
+    $ADMIN->add('subscriptions_category', new admin_externalpage(
+        'local_subscriptions_digital_purchases',
+        get_string('digital_purchases_title', 'local_subscriptions'),
+        new moodle_url('/local/subscriptions/admin/digital_purchases.php'),
+        'moodle/site:config'
+    ));
         
     // Le nœud "Local plugins" existe déjà. On ajoute une page réglages pour ton plugin.
     $settings = new admin_settingpage('local_subscriptions_settings', get_string('pluginname', 'local_subscriptions'));

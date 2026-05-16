@@ -819,3 +819,11 @@ $string['digital_sales_forwho_item_5'] = 'вы хотите иметь прак�
 $string['digital_sales_secure_payment'] = '🔒 Безопасная оплата через Stripe или Alfa.';
 $string['digital_sales_instant_access'] = '⚡ Мгновенный доступ после оплаты + ссылка для скачивания на email.';
 $string['digital_cover_zoom_hint'] = 'Нажмите на изображение, чтобы увеличить его.';
+
+$string['digital_purchases_title'] = 'Покупки цифровых продуктов';
+$string['digital_purchases_export_xlsx'] = 'Экспорт в XLSX';
+$string['digital_purchases_count'] = 'Найдено покупок: {$a}.';
+$string['digital_purchases_payment_date'] = 'Дата оплаты';
+$string['digital_purchases_emails'] = 'Письма';
+$string['digital_purchases_access_email_short'] = 'PDF';
+$string['digital_purchases_receipt_email_short'] = 'Квитанция';
