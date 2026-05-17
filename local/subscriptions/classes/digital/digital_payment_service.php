@@ -12,6 +12,10 @@ final class digital_payment_service {
     public static function on_checkout_completed(InternalEvent $e): void {
         global $DB;
 
+        if (($e->meta['payment_context'] ?? '') !== 'digital_product') {
+            return;
+        }
+
         $pr = null;
 
         if (!empty($e->payment_request_id)) {

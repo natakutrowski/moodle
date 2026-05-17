@@ -88,7 +88,12 @@ if (
     $event = $gateway->parse_webhook(json_encode([
         'orderId' => $orderid,
         'orderNumber' => (string)$pid,
+        'payment_context' => 'digital_product',
     ], JSON_UNESCAPED_UNICODE), []);
+
+    $event->meta['payment_context'] = 'digital_product';
+    $event->meta['provider'] = \local_subscriptions\payment\Provider::ALFA;
+    $event->meta['orderId'] = $orderid;
 
     \local_subscriptions\digital\digital_payment_service::on_checkout_completed($event);
 

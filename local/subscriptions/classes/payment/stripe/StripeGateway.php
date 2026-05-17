@@ -97,7 +97,12 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
 
         $params = [
             'mode' => $mode,
-            'metadata'    => ['payment_request_id' => (string)$payment_request->id],
+            'metadata' => array_merge(
+                [
+                    'payment_request_id' => (string)$payment_request->id,
+                ],
+                $options['metadata'] ?? []
+            ),
             'client_reference_id' => (string)$payment_request->id,
         ];
 
@@ -216,24 +221,29 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
         switch ($type) {
 
             case 'checkout.session.completed': {
-                $pid = $obj->metadata->payment_request_id ?? $obj->client_reference_id ?? null;
-                $customerEmail = $obj->customer_details->email ?? ($obj->customer_email ?? null);
                 $metadata = [];
+
                 if (!empty($obj->metadata)) {
                     foreach ($obj->metadata as $key => $value) {
                         $metadata[$key] = $value;
                     }
                 }
 
+                $pid = isset($metadata['payment_request_id'])
+                    ? (int)$metadata['payment_request_id']
+                    : 0;
+
                 return new InternalEvent('checkout_completed', [
-                    'payment_request_id'       => $pid,
-                    'provider_customer_id'     => $obj->customer ?? null,
+                    'payment_request_id' => $pid,
+                    'provider_customer_id' => $obj->customer ?? null,
                     'provider_subscription_id' => $obj->subscription ?? null,
+                    'currency' => strtoupper($obj->currency ?? ''),
+                    'amount_minor' => (int)($obj->amount_total ?? 0),
                     'meta' => array_merge($metadata, [
-                        'provider'       => Provider::STRIPE,
-                        'session'        => $obj->id,
+                        'provider' => Provider::STRIPE,
+                        'session' => $obj->id,
                         'payment_intent' => $obj->payment_intent ?? null,
-                        'customer_email' => $customerEmail,
+                        'customer_email' => $obj->customer_details->email ?? $obj->customer_email ?? null,
                     ]),
                 ]);
             }

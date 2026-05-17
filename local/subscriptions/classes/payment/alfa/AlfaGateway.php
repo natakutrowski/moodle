@@ -262,6 +262,8 @@ final class AlfaGateway implements PaymentGatewayInterface {
         if (!is_array($data)) {
             parse_str($payload, $data);
         }
+        $paymentcontext = $data['payment_context'] ?? null;
+        $paymentrequesttable = $data['payment_request_table'] ?? 'subscription_payment_request';
         $orderNumber = $data['orderNumber'] ?? null;
         $orderId     = $data['orderId']     ?? null;
 
@@ -279,10 +281,17 @@ final class AlfaGateway implements PaymentGatewayInterface {
 
         // On peut enrichir le PR (journalisation « last status »)
         if ($orderNumber) {
-            $DB->set_field('subscription_payment_request', 'response_json', json_encode(['last_status' => $status], JSON_UNESCAPED_UNICODE), ['id' => (int)$orderNumber]);
+            $prid = (int)explode('-', (string)$orderNumber)[0];
+
+            $DB->set_field(
+                $paymentrequesttable,
+                'response_json',
+                json_encode(['last_status' => $status], JSON_UNESCAPED_UNICODE),
+                ['id' => $prid]
+            );
         }
 
-        return $this->map_status_to_event($status, $orderNumber, $orderId);
+        return $this->map_status_to_event($status, $orderNumber, $orderId, $paymentcontext, $paymentrequesttable);
     }
 
     // ========== Internals ==========
@@ -372,7 +381,13 @@ final class AlfaGateway implements PaymentGatewayInterface {
     }
 
 
-    private function map_status_to_event(array $status, ?string $orderNumber, ?string $orderId): InternalEvent {
+    private function map_status_to_event(
+        array $status,
+        ?string $orderNumber,
+        ?string $orderId,
+        ?string $paymentcontext = null,
+        string $paymentrequesttable = 'subscription_payment_request'
+    ): InternalEvent {
         global $DB;
 
         $orderStatus = isset($status['orderStatus']) ? (int)$status['orderStatus'] : null;
@@ -385,7 +400,7 @@ final class AlfaGateway implements PaymentGatewayInterface {
             $prid = (string)explode('-', (string)$orderNumber)[0];
         }
         if (!$prid && !empty($orderId)) {
-            $row = $DB->get_record('subscription_payment_request', ['sessionid' => $orderId], 'id', IGNORE_MISSING);
+            $row = $DB->get_record($paymentrequesttable, ['sessionid' => $orderId], 'id', IGNORE_MISSING);
             if ($row) { $prid = (string)$row->id; }
         }
 
@@ -395,6 +410,7 @@ final class AlfaGateway implements PaymentGatewayInterface {
             'amount_minor'       => $amountMinor,
             'meta'               => [
                 'provider'          => Provider::ALFA,
+                'payment_context'   => $paymentcontext,
                 'session'           => $orderId, // <-- filet de secours attendu par PaymentService
                 'orderId'           => $orderId,
                 'orderStatus'       => $orderStatus,

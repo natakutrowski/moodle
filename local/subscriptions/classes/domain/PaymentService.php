@@ -38,6 +38,10 @@ class PaymentService {
     public static function on_checkout_completed(InternalEvent $e): void {
         global $DB, $CFG;
 
+        if (($e->meta['payment_context'] ?? '') === 'digital_product') {
+            return;
+        }
+
         // 1) Retrouver la payment_request (id direct de préférence)
         $pr = null;
         if (!empty($e->payment_request_id)) {
