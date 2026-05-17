@@ -69,3 +69,13 @@ $tasks[] = [
     'dayofweek' => '*',
     'month'     => '*',
 ];
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\reconcile_digital_payments_task',
+    'blocking' => 0,
+    'minute' => '*/15',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];

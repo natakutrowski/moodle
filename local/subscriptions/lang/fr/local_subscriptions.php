@@ -837,3 +837,35 @@ $string['digital_success_download_mobile'] = 'Télécharger la version mobile';
 $string['digital_mail_download_main_button'] = 'Télécharger la version classique';
 $string['digital_mail_download_mobile_button'] = 'Télécharger la version mobile';
 
+$string['task_reconcile_digital_payments'] = 'Réconcilier les paiements digitaux en attente';
+$string['digital_purchases_emails_status'] = 'PDF / Reçu';
+$string['digital_purchases_payment_or_creation_date'] = 'Date paiement / création';
+$string['digital_purchases_db_status'] = 'Statut DB';
+$string['digital_purchases_provider_status'] = 'Statut provider';
+$string['digital_purchases_provider_reason'] = 'Raison / détail provider';
+
+$string['digital_sales_stats_button'] = 'Statistiques ventes';
+
+$string['digital_sales_stats_days'] = '{$a} jour';
+$string['digital_sales_stats_days_plural'] = '{$a} jours';
+
+$string['digital_purchases_show_paid'] = 'Voir les PAID';
+$string['digital_purchases_show_pending'] = 'Afficher les pending';
+$string['digital_purchases_show_pending_paid_provider'] = 'Pending / PAID provider';
+$string['digital_purchases_show_all'] = 'Afficher tout';
+$string['digital_purchases_reconcile_pending'] = 'Réconcilier les pending payés';
+$string['digital_purchases_hide_provider_status'] = 'Masquer les statuts provider live';
+$string['digital_purchases_check_provider_status'] = 'Vérifier les statuts provider live';
+$string['digital_purchases_provider_status_info'] = 'Les statuts provider live sont vérifiés en lecture seule. Aucune modification en base et aucun email ne sont envoyés.';
+$string['digital_purchases_reconcile_confirm'] = 'Confirmer la réconciliation des pending payés côté provider ?';
+
+$string['digital_download_classic'] = 'Classique';
+$string['digital_download_mobile'] = 'Mobile';
+
+$string['digital_sales_stats_title'] = 'Statistiques ventes digitales';
+$string['digital_sales_stats_back_to_purchases'] = 'Retour aux achats';
+$string['digital_sales_stats_sales_found'] = 'Ventes payées trouvées : {$a}';
+$string['digital_sales_stats_no_sales'] = 'Aucune vente payée sur cette période.';
+$string['digital_sales_stats_histogram'] = 'Nombre de ventes par période';
+$string['digital_sales_stats_cumulative'] = 'Ventes cumulées';
+$string['digital_sales_stats_show_from'] = 'Afficher depuis';

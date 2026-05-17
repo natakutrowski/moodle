@@ -834,3 +834,35 @@ $string['digital_success_download_mobile'] = 'Скачать мобильную 
 $string['digital_mail_download_main_button'] = 'Скачать классическую версию';
 $string['digital_mail_download_mobile_button'] = 'Скачать мобильную версию';
 
+$string['task_reconcile_digital_payments'] = 'Сверка ожидающих платежей за цифровые продукты';
+$string['digital_purchases_emails_status'] = 'PDF / Квитанция';
+$string['digital_purchases_payment_or_creation_date'] = 'Дата оплаты / создания';
+$string['digital_purchases_db_status'] = 'Статус БД';
+$string['digital_purchases_provider_status'] = 'Статус провайдера';
+$string['digital_purchases_provider_reason'] = 'Причина / детали провайдера';
+
+$string['digital_sales_stats_button'] = 'Статистика продаж';
+
+$string['digital_sales_stats_days'] = '{$a} день';
+$string['digital_sales_stats_days_plural'] = '{$a} дней';
+
+$string['digital_purchases_show_paid'] = 'Показать PAID';
+$string['digital_purchases_show_pending'] = 'Показать pending';
+$string['digital_purchases_show_pending_paid_provider'] = 'Pending / PAID provider';
+$string['digital_purchases_show_all'] = 'Показать всё';
+$string['digital_purchases_reconcile_pending'] = 'Сверить оплаченные pending';
+$string['digital_purchases_hide_provider_status'] = 'Скрыть live-статусы провайдера';
+$string['digital_purchases_check_provider_status'] = 'Проверить live-статусы провайдера';
+$string['digital_purchases_provider_status_info'] = 'Статусы провайдера проверяются только для чтения. Изменения в базе и отправка писем не выполняются.';
+$string['digital_purchases_reconcile_confirm'] = 'Подтвердить сверку pending-платежей, оплаченных у провайдера?';
+
+$string['digital_download_classic'] = 'Классическая';
+$string['digital_download_mobile'] = 'Мобильная';
+
+$string['digital_sales_stats_title'] = 'Статистика цифровых продаж';
+$string['digital_sales_stats_back_to_purchases'] = 'Назад к покупкам';
+$string['digital_sales_stats_sales_found'] = 'Найдено оплаченных продаж: {$a}';
+$string['digital_sales_stats_no_sales'] = 'За этот период оплаченных продаж нет.';
+$string['digital_sales_stats_histogram'] = 'Количество продаж по времени';
+$string['digital_sales_stats_cumulative'] = 'Накопительные продажи';
+$string['digital_sales_stats_show_from'] = 'Показать начиная с';

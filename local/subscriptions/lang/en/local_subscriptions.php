@@ -839,3 +839,35 @@ $string['digital_success_download_mobile'] = 'Download mobile version';
 $string['digital_mail_download_main_button'] = 'Download standard version';
 $string['digital_mail_download_mobile_button'] = 'Download mobile version';
 
+$string['task_reconcile_digital_payments'] = 'Reconcile pending digital product payments';
+$string['digital_purchases_emails_status'] = 'PDF / Receipt';
+$string['digital_purchases_payment_or_creation_date'] = 'Payment / creation date';
+$string['digital_purchases_db_status'] = 'DB status';
+$string['digital_purchases_provider_status'] = 'Provider status';
+$string['digital_purchases_provider_reason'] = 'Provider reason / details';
+
+$string['digital_sales_stats_button'] = 'Sales statistics';
+
+$string['digital_sales_stats_days'] = '{$a} day';
+$string['digital_sales_stats_days_plural'] = '{$a} days';
+
+$string['digital_purchases_show_paid'] = 'Show PAID';
+$string['digital_purchases_show_pending'] = 'Show pending';
+$string['digital_purchases_show_pending_paid_provider'] = 'Pending / PAID provider';
+$string['digital_purchases_show_all'] = 'Show all';
+$string['digital_purchases_reconcile_pending'] = 'Reconcile paid pending payments';
+$string['digital_purchases_hide_provider_status'] = 'Hide live provider statuses';
+$string['digital_purchases_check_provider_status'] = 'Check live provider statuses';
+$string['digital_purchases_provider_status_info'] = 'Provider statuses are checked in read-only mode. No database changes and no emails are sent.';
+$string['digital_purchases_reconcile_confirm'] = 'Confirm reconciliation of provider-paid pending payments?';
+
+$string['digital_download_classic'] = 'Classic';
+$string['digital_download_mobile'] = 'Mobile';
+
+$string['digital_sales_stats_title'] = 'Digital sales statistics';
+$string['digital_sales_stats_back_to_purchases'] = 'Back to purchases';
+$string['digital_sales_stats_sales_found'] = 'Paid sales found: {$a}';
+$string['digital_sales_stats_no_sales'] = 'No paid sales during this period.';
+$string['digital_sales_stats_histogram'] = 'Number of sales over time';
+$string['digital_sales_stats_cumulative'] = 'Cumulative sales';
+$string['digital_sales_stats_show_from'] = 'Show from';

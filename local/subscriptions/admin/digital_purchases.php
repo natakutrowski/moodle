@@ -11,6 +11,31 @@ require_capability('moodle/site:config', $context);
 $download = optional_param('download', 0, PARAM_BOOL);
 $checkprovider = optional_param('checkprovider', 0, PARAM_BOOL);
 
+$statusfilter = optional_param('status', '', PARAM_ALPHANUMEXT);
+$reconcilepending = optional_param('reconcile_pending', 0, PARAM_BOOL);
+$providerpaidonly = optional_param('providerpaidonly', 0, PARAM_BOOL);
+$dbpaidonly = optional_param('dbpaidonly', 0, PARAM_BOOL);
+
+if ($reconcilepending) {
+    require_sesskey();
+
+    $result = local_subscriptions_reconcile_pending_digital_payments();
+
+    redirect(
+        new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+            'status' => 'pending',
+            'checkprovider' => 1,
+        ]),
+        'Réconciliation terminée : ' .
+        $result['reconciled'] . ' paiement(s) corrigé(s), ' .
+        ($result['failed'] ?? 0) . ' paiement(s) passé(s) en failed, ' .
+        $result['skipped'] . ' ignoré(s), ' .
+        $result['errors'] . ' erreur(s).',
+        5,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
+}
+
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
     'checkprovider' => $checkprovider,
@@ -19,6 +44,19 @@ $PAGE->set_title(get_string('digital_purchases_title', 'local_subscriptions'));
 $PAGE->set_heading(get_string('digital_purchases_title', 'local_subscriptions'));
 
 $lang = strtolower(substr(current_language(), 0, 2));
+
+$params = ['lang' => $lang];
+$where = '1=1';
+
+$params = ['lang' => $lang];
+$where = '1=1';
+
+if ($dbpaidonly) {
+    $where .= " AND pr.status IN ('paid', 'completed')";
+} else if ($statusfilter !== '') {
+    $where .= ' AND pr.status = :statusfilter';
+    $params['statusfilter'] = $statusfilter;
+}
 
 $sql = "
     SELECT
@@ -59,14 +97,15 @@ $sql = "
     LEFT JOIN {subscription_digital_product_lang} tfr
         ON tfr.productid = p.id
         AND tfr.lang = 'fr'
+    WHERE {$where}
     ORDER BY pr.creation_date DESC, pr.id DESC
 ";
 
-$records = $DB->get_records_sql($sql, ['lang' => $lang]);
+$records = $DB->get_records_sql($sql, $params);
 
 $providerstatuses = [];
 
-if ($checkprovider) {
+if ($checkprovider || $download) {
     foreach ($records as $r) {
         try {
             $providerstatuses[$r->id] = local_subscriptions_check_digital_provider_status($r);
@@ -75,6 +114,17 @@ if ($checkprovider) {
                 'status' => 'ERROR',
                 'reason' => $e->getMessage(),
             ];
+        }
+    }
+}
+
+if ($providerpaidonly && $checkprovider) {
+    foreach ($records as $id => $r) {
+        $providerstatus = $providerstatuses[$id]['status'] ?? '';
+
+        if ($providerstatus !== 'PAID') {
+            unset($records[$id]);
+            unset($providerstatuses[$id]);
         }
     }
 }
@@ -212,16 +262,69 @@ echo html_writer::link(
     ['class' => 'btn btn-primary']
 );
 
+echo html_writer::link(
+    new moodle_url('/local/subscriptions/admin/digital_sales_stats.php'),
+    get_string('digital_sales_stats_button', 'local_subscriptions'),
+    ['class' => 'btn btn-outline-primary']
+);
+
+echo html_writer::link(
+    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+        'dbpaidonly' => 1,
+    ]),
+    get_string('digital_purchases_show_paid', 'local_subscriptions'),
+    ['class' => 'btn btn-outline-success']
+);
+
+echo html_writer::link(
+    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+        'status' => 'pending',
+        'checkprovider' => 1,
+    ]),
+    get_string('digital_purchases_show_pending', 'local_subscriptions'),
+    ['class' => 'btn btn-outline-warning']
+);
+
+echo html_writer::link(
+    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+        'status' => 'pending',
+        'checkprovider' => 1,
+        'providerpaidonly' => 1,
+    ]),
+    get_string('digital_purchases_show_pending_paid_provider', 'local_subscriptions'),
+    ['class' => 'btn btn-outline-danger']
+);
+
+echo html_writer::link(
+    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+        'checkprovider' => 1,
+    ]),
+    get_string('digital_purchases_show_all', 'local_subscriptions'),
+    ['class' => 'btn btn-outline-secondary']
+);
+
+echo html_writer::link(
+    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+        'reconcile_pending' => 1,
+        'sesskey' => sesskey(),
+    ]),
+    get_string('digital_purchases_reconcile_pending', 'local_subscriptions'),
+    [
+        'class' => 'btn btn-danger',
+        'onclick' => "return confirm('" . addslashes(get_string('digital_purchases_reconcile_confirm', 'local_subscriptions')) . "');",
+    ]
+);
+
 if ($checkprovider) {
     echo html_writer::link(
         new moodle_url('/local/subscriptions/admin/digital_purchases.php'),
-        'Masquer les statuts provider live',
+        get_string('digital_purchases_hide_provider_status', 'local_subscriptions'),
         ['class' => 'btn btn-outline-secondary']
     );
 } else {
     echo html_writer::link(
         new moodle_url('/local/subscriptions/admin/digital_purchases.php', ['checkprovider' => 1]),
-        'Vérifier les statuts provider live',
+        get_string('digital_purchases_check_provider_status', 'local_subscriptions'),
         ['class' => 'btn btn-outline-primary']
     );
 }
@@ -230,7 +333,7 @@ echo html_writer::end_div();
 
 if ($checkprovider) {
     echo $OUTPUT->notification(
-        'Les statuts provider live sont vérifiés en lecture seule. Aucune modification en base et aucun email ne sont envoyés.',
+        get_string('digital_purchases_provider_status_info', 'local_subscriptions'),
         'info'
     );
 }
@@ -247,15 +350,30 @@ $table->head = [
     get_string('digital_success_email', 'local_subscriptions'),
     get_string('digital_success_amount', 'local_subscriptions'),
     get_string('digital_success_provider', 'local_subscriptions'),
-    'Statut DB',
-    'Statut provider',
-    'Raison / détail provider',
-    get_string('digital_purchases_payment_date', 'local_subscriptions'),
-    get_string('digital_purchases_emails', 'local_subscriptions'),
+    get_string('digital_purchases_db_status', 'local_subscriptions'),
+    get_string('digital_purchases_provider_status', 'local_subscriptions'),
+    get_string('digital_purchases_provider_reason', 'local_subscriptions'),
+    get_string('digital_purchases_payment_or_creation_date', 'local_subscriptions'),
+    get_string('digital_purchases_emails_status', 'local_subscriptions'),
     get_string('digital_success_download', 'local_subscriptions'),
 ];
 
 $table->attributes['class'] = 'generaltable table table-striped';
+$table->attributes['style'] = 'table-layout:fixed;width:100%;';
+
+$table->colclasses = [
+    'col-id',
+    'col-product',
+    'col-email',
+    'col-amount',
+    'col-provider',
+    'col-status',
+    'col-provider-status',
+    'col-reason',
+    'col-date',
+    'col-emails',
+    'col-download',
+];
 
 foreach ($records as $r) {
     $downloadlink = '—';
@@ -265,14 +383,14 @@ foreach ($records as $r) {
 
         $links[] = html_writer::link(
             new moodle_url('/download/pdf/' . $r->download_token),
-            'Classique',
+            get_string('digital_download_classic', 'local_subscriptions'),
             ['target' => '_blank']
         );
 
         if (!empty($r->mobile_filename)) {
             $links[] = html_writer::link(
                 new moodle_url('/download/pdf/' . $r->download_token, ['version' => 'mobile']),
-                'Mobile',
+                get_string('digital_download_mobile', 'local_subscriptions'),
                 ['target' => '_blank']
             );
         }
@@ -281,8 +399,8 @@ foreach ($records as $r) {
     }
 
     $emails = [];
-    $emails[] = get_string('digital_purchases_access_email_short', 'local_subscriptions') . ': ' . (!empty($r->emailsent) ? '✅' : '—');
-    $emails[] = get_string('digital_purchases_receipt_email_short', 'local_subscriptions') . ': ' . (!empty($r->receipt_sent) ? '✅' : '—');
+    $emails[] = !empty($r->emailsent) ? '✅' : '❌';
+    $emails[] = !empty($r->receipt_sent) ? '✅' : '❌';
 
     $providerstatus = $providerstatuses[$r->id] ?? [
         'status' => $checkprovider ? 'UNKNOWN' : '—',
@@ -291,22 +409,63 @@ foreach ($records as $r) {
 
     $statusbadge = local_subscriptions_render_provider_status_badge($providerstatus['status']);
 
+    $dateformat = '%d/%m/%y %H:%M';
+
+    if (!empty($r->payment_date)) {
+        $datecell = userdate((int)$r->payment_date, $dateformat);
+    } else if (!empty($r->creation_date)) {
+        $datecell = '(' . userdate((int)$r->creation_date, $dateformat) . ')';
+    } else {
+        $datecell = '—';
+    }
+
     $table->data[] = [
         (int)$r->id,
-        s($r->productname ?? ''),
+        format_text($r->productname ?? '', FORMAT_HTML, [
+            'trusted' => true,
+            'noclean' => true,
+        ]),
         s(trim(($r->firstname ?? '') . ' ' . ($r->lastname ?? ''))) . html_writer::empty_tag('br') . s($r->email ?? ''),
         number_format((float)$r->price, 2, ',', ' ') . ' ' . s($r->currency ?? ''),
-        s($r->payment_provider ?? ''),
-        s($r->status ?? ''),
+        local_subscriptions_render_provider_icon($r->payment_provider ?? ''),
+        local_subscriptions_render_db_status_badge($r->status ?? ''),
         $statusbadge,
-        s($providerstatus['reason'] ?? ''),
-        !empty($r->payment_date) ? userdate((int)$r->payment_date, '%d/%m/%Y %H:%M') : '—',
+        html_writer::tag('span', s($providerstatus['reason'] ?? ''), [
+            'style' => 'font-size:12px;line-height:1.3;display:block;',
+        ]),
+        $datecell,
         implode(html_writer::empty_tag('br'), $emails),
         $downloadlink,
     ];
 }
 
-echo html_writer::table($table);
+echo html_writer::tag('style', '
+    .col-id { width: 55px; }
+    .col-product { width: 150px; }
+    .col-email { width: 230px; }
+    .col-amount { width: 90px; }
+    .col-provider { width: 70px; text-align: center; }
+    .col-status { width: 90px; }
+    .col-provider-status { width: 95px; }
+    .col-reason { width: 210px; word-break: break-word; }
+    .col-date { width: 115px; }
+    .col-emails { width: 65px; text-align:center; font-size:18px; }
+    .col-download { width: 100px; }
+
+    .generaltable td,
+    .generaltable th {
+        vertical-align: middle;
+    }
+
+    .generaltable .badge {
+        white-space: nowrap;
+    }
+');
+
+echo html_writer::div(
+    html_writer::table($table),
+    'table-responsive'
+);
 
 echo $OUTPUT->footer();
 
@@ -329,6 +488,32 @@ function local_subscriptions_render_provider_status_badge(string $status): strin
     return html_writer::tag('span', s($status), ['class' => $class]);
 }
 
+function local_subscriptions_render_db_status_badge(string $status): string {
+    $status = strtolower(trim($status));
+
+    $labels = [
+        'paid' => 'PAID',
+        'completed' => 'COMPLETED',
+        'pending' => 'PENDING',
+        'failed' => 'FAILED',
+        'cancelled' => 'CANCELLED',
+        'canceled' => 'CANCELED',
+    ];
+
+    $classes = [
+        'paid' => 'badge bg-success',
+        'completed' => 'badge bg-success',
+        'pending' => 'badge bg-warning text-dark',
+        'failed' => 'badge bg-danger',
+        'cancelled' => 'badge bg-secondary',
+        'canceled' => 'badge bg-secondary',
+    ];
+
+    $label = $labels[$status] ?? strtoupper($status ?: 'UNKNOWN');
+    $class = $classes[$status] ?? 'badge bg-secondary';
+
+    return html_writer::tag('span', s($label), ['class' => $class]);
+}
 
 function local_subscriptions_check_digital_provider_status(stdClass $pr): array {
     if (empty($pr->sessionid)) {
@@ -405,6 +590,111 @@ function local_subscriptions_check_stripe_provider_status(stdClass $pr): array {
     ];
 }
 
+function local_subscriptions_render_provider_icon(string $provider): string {
+    global $CFG;
+
+    $provider = strtolower(trim($provider));
+
+    $files = [
+        'stripe' => 'stripe.png',
+        'alfa' => 'alfa.png',
+    ];
+
+    if (empty($files[$provider])) {
+        return s($provider);
+    }
+
+    $path = $CFG->dirroot . '/local/subscriptions/pix/email/' . $files[$provider];
+
+    if (!file_exists($path)) {
+        return s($provider);
+    }
+
+    return html_writer::empty_tag('img', [
+        'src' => $CFG->wwwroot . '/local/subscriptions/pix/email/' . $files[$provider],
+        'alt' => s($provider),
+        'title' => s($provider),
+        'style' => 'height:28px;width:auto;',
+    ]);
+}
+
+function local_subscriptions_reconcile_pending_digital_payments(): array {
+    global $DB;
+
+    $records = $DB->get_records('subscription_digital_payment_request', [
+        'status' => 'pending',
+    ], 'creation_date DESC, id DESC');
+
+    $result = [
+        'reconciled' => 0,
+        'failed' => 0,
+        'skipped' => 0,
+        'errors' => 0,
+    ];
+
+    foreach ($records as $pr) {
+        try {
+            $providerstatus = local_subscriptions_check_digital_provider_status($pr);
+
+            $status = strtoupper($providerstatus['status'] ?? 'UNKNOWN');
+            $reason = $providerstatus['reason'] ?? '';
+
+            if (
+                $status === 'DECLINED'
+                || ($status === 'UNKNOWN' && stripos($reason, 'No sessionid') !== false)
+                || ($status === 'PENDING' && stripos($reason, 'payment_status: unpaid') !== false)
+            ) {
+                $DB->update_record('subscription_digital_payment_request', (object)[
+                    'id' => $pr->id,
+                    'status' => 'failed',
+                    'last_error' => '[manual_reconcile] Provider failed/unpaid: ' . $reason,
+                    'last_update' => time(),
+                ]);
+
+                $result['failed'] = ($result['failed'] ?? 0) + 1;
+                continue;
+            }
+
+            if ($status !== 'PAID') {
+                $DB->update_record('subscription_digital_payment_request', (object)[
+                    'id' => $pr->id,
+                    'last_error' => '[manual_reconcile] Provider status: ' . $status .
+                        ($reason !== '' ? ' - ' . $reason : ''),
+                    'last_update' => time(),
+                ]);
+
+                $result['skipped']++;
+                continue;
+            }
+
+            $event = new \local_subscriptions\payment\dto\InternalEvent('checkout_completed', [
+                'payment_request_id' => (string)$pr->id,
+                'currency' => $pr->currency,
+                'amount_minor' => (int)$pr->amount_minor,
+                'meta' => [
+                    'payment_context' => 'digital_product',
+                    'provider' => $pr->payment_provider,
+                    'session' => $pr->sessionid,
+                    'orderId' => $pr->sessionid,
+                ],
+            ]);
+
+            \local_subscriptions\digital\digital_payment_service::on_checkout_completed($event);
+
+            $result['reconciled']++;
+        } catch (\Throwable $e) {
+            $result['errors']++;
+
+            $DB->update_record('subscription_digital_payment_request', (object)[
+                'id' => $pr->id,
+                'last_error' => '[manual_reconcile] ' . $e->getMessage(),
+                'last_update' => time(),
+            ]);
+        }
+    }
+
+    return $result;
+}
 
 function local_subscriptions_check_alfa_provider_status(stdClass $pr): array {
     $env = get_config('local_subscriptions', 'alfa_env') ?: 'test';
