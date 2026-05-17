@@ -249,8 +249,24 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
             }
 
             case 'checkout.session.expired': {
+                $metadata = [];
+
+                if (!empty($obj->metadata)) {
+                    foreach ($obj->metadata as $key => $value) {
+                        $metadata[$key] = $value;
+                    }
+                }
+
+                $pid = isset($metadata['payment_request_id'])
+                    ? (int)$metadata['payment_request_id']
+                    : 0;
+
                 return new InternalEvent('checkout_expired', [
-                    'meta' => ['provider' => Provider::STRIPE, 'session' => $obj->id],
+                    'payment_request_id' => $pid,
+                    'meta' => array_merge($metadata, [
+                        'provider' => Provider::STRIPE,
+                        'session' => $obj->id,
+                    ]),
                 ]);
             }
 

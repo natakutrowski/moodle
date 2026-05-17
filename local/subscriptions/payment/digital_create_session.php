@@ -83,6 +83,8 @@ $options = [
     'returnurl' => $successurl,
     'failurl' => $cancelurl,
     'payment_request_table' => product_manager::TABLE_PAYMENT_REQUEST,
+    'order_number' => 'digital-' . $pr->id,
+    'order_number_prefix' => 'digital',
 
     'language' => ($uilang === 'ru') ? 'ru' : 'en',
 
@@ -90,6 +92,7 @@ $options = [
         'payment_context' => 'digital_product',
         'productid' => (string)$product->id,
         'slug' => (string)$product->slug,
+        'uilang' => $uilang,
     ],
 
     'email' => $pr->email,

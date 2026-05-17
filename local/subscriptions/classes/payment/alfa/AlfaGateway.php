@@ -145,7 +145,9 @@ final class AlfaGateway implements PaymentGatewayInterface {
             'payment_provider' => Provider::ALFA,
             'status' => Status::PENDING,
         ]);
-        $orderNumber = $payment_request->id . '-' . $attempt;
+        $prefix = $options['order_number_prefix'] ?? 'sub';
+
+        $orderNumber = $prefix . '-' . $payment_request->id . '-' . $attempt;
 
         // Conversion via LOCK (kopecks).
         if (!isset($payment_request->locked_final_price) || (float)$payment_request->locked_final_price <= 0) {
@@ -281,14 +283,24 @@ final class AlfaGateway implements PaymentGatewayInterface {
 
         // On peut enrichir le PR (journalisation « last status »)
         if ($orderNumber) {
-            $prid = (int)explode('-', (string)$orderNumber)[0];
+            $parts = explode('-', (string)$orderNumber);
 
-            $DB->set_field(
-                $paymentrequesttable,
-                'response_json',
-                json_encode(['last_status' => $status], JSON_UNESCAPED_UNICODE),
-                ['id' => $prid]
-            );
+            // Formats supportés :
+            // sub-123-1 / digital-123-1 => id = parts[1]
+            // 123-1 => id = parts[0]
+            // 123 => id = parts[0]
+            $prid = isset($parts[1]) && !is_numeric($parts[0])
+                ? (int)$parts[1]
+                : (int)$parts[0];
+
+            if ($prid > 0) {
+                $DB->set_field(
+                    $paymentrequesttable,
+                    'response_json',
+                    json_encode(['last_status' => $status], JSON_UNESCAPED_UNICODE),
+                    ['id' => $prid]
+                );
+            }
         }
 
         return $this->map_status_to_event($status, $orderNumber, $orderId, $paymentcontext, $paymentrequesttable);
@@ -395,13 +407,26 @@ final class AlfaGateway implements PaymentGatewayInterface {
 
         // Résoudre l'ID du Payment Request
         $prid = null;
+
         if (!empty($orderNumber)) {
-            // Si on a "123-1", prendre la partie avant le tiret ; sinon c'est déjà l'id
-            $prid = (string)explode('-', (string)$orderNumber)[0];
+            $parts = explode('-', (string)$orderNumber);
+
+            // Formats supportés :
+            // sub-123-1 / digital-123-1 => id = parts[1]
+            // 123-1 => id = parts[0]
+            // 123 => id = parts[0]
+            if (isset($parts[1]) && !is_numeric($parts[0])) {
+                $prid = (string)(int)$parts[1];
+            } else {
+                $prid = (string)(int)$parts[0];
+            }
         }
-        if (!$prid && !empty($orderId)) {
+
+        if ((!$prid || $prid === '0') && !empty($orderId)) {
             $row = $DB->get_record($paymentrequesttable, ['sessionid' => $orderId], 'id', IGNORE_MISSING);
-            if ($row) { $prid = (string)$row->id; }
+            if ($row) {
+                $prid = (string)$row->id;
+            }
         }
 
         $base = [
@@ -411,6 +436,7 @@ final class AlfaGateway implements PaymentGatewayInterface {
             'meta'               => [
                 'provider'          => Provider::ALFA,
                 'payment_context'   => $paymentcontext,
+                'payment_request_table' => $paymentrequesttable,
                 'session'           => $orderId, // <-- filet de secours attendu par PaymentService
                 'orderId'           => $orderId,
                 'orderStatus'       => $orderStatus,

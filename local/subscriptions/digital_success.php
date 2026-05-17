@@ -87,11 +87,13 @@ if (
 
     $event = $gateway->parse_webhook(json_encode([
         'orderId' => $orderid,
-        'orderNumber' => (string)$pid,
+        'orderNumber' => 'digital-' . $pid . '-1',
         'payment_context' => 'digital_product',
+        'payment_request_table' => product_manager::TABLE_PAYMENT_REQUEST,
     ], JSON_UNESCAPED_UNICODE), []);
 
     $event->meta['payment_context'] = 'digital_product';
+    $event->meta['payment_request_table'] = product_manager::TABLE_PAYMENT_REQUEST;
     $event->meta['provider'] = \local_subscriptions\payment\Provider::ALFA;
     $event->meta['orderId'] = $orderid;
 
