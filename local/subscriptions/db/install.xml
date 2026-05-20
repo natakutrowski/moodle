@@ -323,30 +323,23 @@
         
 		<TABLE NAME="subscription_digital_product_lang" COMMENT="Localized digital product texts">
 			<FIELDS>
-
 				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-
 				<FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-
 				<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
-
 				<FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true"/>
-
 				<FIELD NAME="sales_intro" TYPE="text" NOTNULL="false"/>
-
 				<FIELD NAME="content_items" TYPE="text" NOTNULL="false"/>
-
 				<FIELD NAME="forwho_items" TYPE="text" NOTNULL="false"/>
-
+				<FIELD NAME="access_note" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="content_title" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="forwho_title" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="buy_title" TYPE="text" NOTNULL="false"/>
 				<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-
 				<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-
 			</FIELDS>
 
 			<KEYS>
 				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-
 				<KEY NAME="productid_fk"
 					TYPE="foreign"
 					FIELDS="productid"

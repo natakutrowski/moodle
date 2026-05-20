@@ -11,8 +11,14 @@ use local_subscriptions\url\UrlFactory;
 $slug = required_param('p', PARAM_ALPHANUMEXT);
 
 $product = product_manager::get_localized_product_by_slug($slug, current_language(), true);
+
 if (!$product) {
-    throw new moodle_exception('invalidrecord', 'error');
+    redirect(
+        UrlFactory::digital_catalog(['missingproduct' => 1]),
+        get_string('digital_product_not_found_redirect', 'local_subscriptions'),
+        0,
+        \core\output\notification::NOTIFY_WARNING
+    );
 }
 
 $PAGE->set_context(context_system::instance());
@@ -105,7 +111,9 @@ echo html_writer::tag('p',
 
 
 echo html_writer::tag('p',
-    get_string('digital_sales_lifetime_access', 'local_subscriptions'),
+    !empty($product->access_note)
+    ? format_text($product->access_note, FORMAT_HTML, ['para' => false])
+    : get_string('digital_sales_lifetime_access', 'local_subscriptions'),
     ['class' => 'text-success fw-semibold mb-0']
 );
 
@@ -122,7 +130,9 @@ echo html_writer::start_div('row g-4');
 echo html_writer::start_div('col-lg-7');
 
 echo html_writer::tag('h4',
-    get_string('digital_sales_content_title', 'local_subscriptions'),
+    !empty($product->content_title)
+    ? format_text($product->content_title, FORMAT_HTML, ['para' => false])
+    : get_string('digital_sales_content_title', 'local_subscriptions'),
     ['class' => 'h5 mb-3']
 );
 
@@ -135,7 +145,9 @@ foreach (product_manager::lines_from_text($product->content_items) as $item) {
 echo html_writer::end_tag('ul');
 
 echo html_writer::tag('h4',
-    get_string('digital_sales_forwho_title', 'local_subscriptions'),
+    !empty($product->forwho_title)
+    ? format_text($product->forwho_title, FORMAT_HTML, ['para' => false])
+    : get_string('digital_sales_forwho_title', 'local_subscriptions'),
     ['class' => 'h5 mb-3']
 );
 
@@ -155,12 +167,15 @@ echo html_writer::start_div('col-lg-5');
 echo html_writer::start_div('border rounded-4 p-4 bg-light');
 
 echo html_writer::tag('h2',
-    get_string('digital_pdf_buy_title', 'local_subscriptions'),
+    !empty($product->buy_title)
+    ? format_text($product->buy_title, FORMAT_HTML, ['para' => false])
+    : get_string('digital_pdf_buy_title', 'local_subscriptions'),
     ['class' => 'h3 mb-4']
 );
 
 echo html_writer::start_tag('form', [
     'method' => 'post',
+    'id' => 'digital-product-checkout-form',
     'action' => UrlFactory::digital_checkout()->out(false),
 ]);
 
@@ -190,6 +205,7 @@ echo html_writer::tag('label',
 echo html_writer::empty_tag('input', [
     'type' => 'text',
     'name' => 'firstname',
+    'id' => 'digital-firstname',
     'class' => 'form-control mb-3',
     'required' => 'required',
 ]);
@@ -202,6 +218,7 @@ echo html_writer::tag('label',
 echo html_writer::empty_tag('input', [
     'type' => 'text',
     'name' => 'lastname',
+    'id' => 'digital-lastname',
     'class' => 'form-control mb-3',
     'required' => 'required',
 ]);
@@ -214,6 +231,7 @@ echo html_writer::tag('label',
 echo html_writer::empty_tag('input', [
     'type' => 'email',
     'name' => 'email',
+    'id' => 'digital-email',
     'class' => 'form-control mb-2',
     'required' => 'required',
 ]);
@@ -230,10 +248,14 @@ echo html_writer::tag('button',
     [
         'type' => 'submit',
         'name' => 'currency',
+        'id' => 'digital-buy-eur',
         'value' => 'EUR',
         'class' => 'btn btn-primary btn-lg w-100 mb-3',
+        'disabled' => 'disabled',
     ]
 );
+
+$rubconfirm = get_string('digital_rub_confirm_vpn', 'local_subscriptions');
 
 echo html_writer::tag('button',
     get_string('digital_pdf_buy_rub', 'local_subscriptions', [
@@ -243,7 +265,10 @@ echo html_writer::tag('button',
         'type' => 'submit',
         'name' => 'currency',
         'value' => 'RUB',
+        'id' => 'digital-buy-rub',
         'class' => 'btn btn-outline-primary btn-lg w-100',
+        'disabled' => 'disabled',
+        'onclick' => "return confirm(" . json_encode($rubconfirm, JSON_UNESCAPED_UNICODE) . ");",
     ]
 );
 
@@ -350,4 +375,37 @@ if (!empty($coverurl)) {
     echo html_writer::end_div();
 }
 
+echo html_writer::script("
+(function () {
+    var firstname = document.getElementById('digital-firstname');
+    var lastname = document.getElementById('digital-lastname');
+    var email = document.getElementById('digital-email');
+    var buyEur = document.getElementById('digital-buy-eur');
+    var buyRub = document.getElementById('digital-buy-rub');
+
+    if (!firstname || !lastname || !email || !buyEur || !buyRub) {
+        return;
+    }
+
+    function isValidEmail(value) {
+        return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value);
+    }
+
+    function updateButtons() {
+        var ok = firstname.value.trim() !== ''
+            && lastname.value.trim() !== ''
+            && isValidEmail(email.value.trim());
+
+        buyEur.disabled = !ok;
+        buyRub.disabled = !ok;
+    }
+
+    firstname.addEventListener('input', updateButtons);
+    lastname.addEventListener('input', updateButtons);
+    email.addEventListener('input', updateButtons);
+    email.addEventListener('change', updateButtons);
+
+    updateButtons();
+})();
+");
 echo $OUTPUT->footer();

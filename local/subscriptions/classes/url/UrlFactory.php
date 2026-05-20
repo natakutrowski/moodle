@@ -71,6 +71,10 @@ final class UrlFactory {
         }
     }
 
+    public static function digital_catalog(array $params = []): moodle_url {
+        return new moodle_url('/boutique', $params);
+    }    
+
     public static function digital_product(string $slug): moodle_url {
         return new moodle_url('/digital/' . $slug);
     }

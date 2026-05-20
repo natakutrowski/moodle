@@ -871,3 +871,70 @@ $string['digital_sales_stats_no_sales'] = 'No paid sales during this period.';
 $string['digital_sales_stats_histogram'] = 'Number of sales over time';
 $string['digital_sales_stats_cumulative'] = 'Cumulative sales';
 $string['digital_sales_stats_show_from'] = 'Show from';
+
+$string['digital_catalog_title'] = 'CampusFR Digital Store';
+$string['digital_catalog_intro'] = 'Discover our PDFs, guides and practical resources to improve your French at your own pace.';
+$string['digital_catalog_empty'] = 'No digital products are currently available.';
+$string['digital_catalog_view_product'] = 'View product';
+
+$string['digital_pdf_badge'] = 'Digital PDF';
+
+$string['digital_product_not_found_redirect'] = 'This product is not available. You have been redirected to the store.';
+$string['digital_product_not_found_catalog_notice'] = 'The requested product is not available or no longer exists. You can browse the available products below.';
+
+$string['digital_rub_confirm_title'] = 'Payment in roubles';
+$string['digital_rub_confirm_vpn'] = '💡 Before making the payment, it is recommended to temporarily disable your VPN — otherwise the payment page may sometimes open incorrectly or display an error 😊';
+$string['digital_rub_confirm_continue'] = 'Continue to payment';
+
+$string['digital_products_admin_title'] = 'Digital products';
+$string['digital_products_add'] = 'Add digital product';
+$string['digital_products_view_purchases'] = 'View purchases';
+$string['digital_products_view_catalog'] = 'View store';
+$string['digital_products_count'] = '{$a} digital product(s)';
+$string['digital_products_cover'] = 'Cover';
+$string['digital_products_slug'] = 'Slug';
+$string['digital_products_titles'] = 'Titles';
+$string['digital_products_prices'] = 'Prices';
+$string['digital_products_files'] = 'Files';
+$string['digital_products_status'] = 'Status';
+$string['digital_products_purchases'] = 'Purchases';
+$string['digital_products_sortorder'] = 'Order';
+$string['digital_products_actions'] = 'Actions';
+$string['digital_products_cover_missing'] = 'Missing image';
+$string['digital_products_file_main'] = 'Classic';
+$string['digital_products_file_mobile'] = 'Mobile';
+$string['digital_products_enabled'] = 'Enabled';
+$string['digital_products_disabled'] = 'Disabled';
+$string['digital_products_open_public'] = 'Open';
+$string['digital_products_delete_confirm'] = 'Delete this digital product?';
+$string['digital_product_edit_new_title'] = 'New digital product';
+$string['digital_product_edit_edit_title'] = 'Edit digital product';
+
+$string['digital_product_edit_main_info'] = 'Main information';
+$string['digital_product_edit_internal_name'] = 'Internal name';
+
+$string['digital_product_edit_price_eur'] = 'EUR price';
+$string['digital_product_edit_price_rub'] = 'RUB price';
+
+$string['digital_product_edit_files_hint'] = 'Files must be placed manually in the appropriate folders: PDFs in moodledata/local_subscriptions/private_pdfs, covers in local/subscriptions/pix/cover.';
+
+$string['digital_product_edit_translations'] = 'Translations';
+
+$string['digital_product_edit_title'] = 'Title';
+
+$string['digital_product_edit_saved'] = 'Digital product saved.';
+$string['digital_product_edit_slug_exists'] = 'This slug already exists.';
+$string['digital_product_edit_current_file'] = 'Current file';
+$string['digital_product_edit_no_file'] = 'No file currently selected.';
+$string['digital_product_edit_click_to_upload'] = 'Click here to choose or replace the file.';
+$string['digital_product_edit_access_note'] = 'Access note after purchase';
+$string['digital_product_edit_content_title'] = 'Content block title';
+$string['digital_product_edit_forwho_title'] = '“Who it is for” block title';
+$string['digital_product_edit_buy_title'] = 'Purchase block title';
+$string['digital_products_status_updated'] = 'Product status updated.';
+$string['digital_products_enable'] = 'Enable';
+$string['digital_products_disable'] = 'Disable';
+$string['digital_products_duplicate'] = 'Duplicate';
+$string['digital_products_duplicated'] = 'Product duplicated. You can now edit the copy.';
+$string['digital_products_deleted'] = 'Digital product deleted.';
+$string['digital_products_delete_has_purchases'] = 'This product cannot be deleted because it already has purchases.';

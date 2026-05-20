@@ -167,12 +167,20 @@ class product_manager {
             $product->content_items = $translation->content_items;
             $product->forwho_items = $translation->forwho_items;
             $product->translation_lang = $translation->lang;
+            $product->access_note = $translation->access_note ?? '';
+            $product->content_title = $translation->content_title ?? '';
+            $product->forwho_title = $translation->forwho_title ?? '';
+            $product->buy_title = $translation->buy_title ?? '';
         } else {
             $product->localized_title = $product->name;
             $product->sales_intro = '';
             $product->content_items = '';
             $product->forwho_items = '';
             $product->translation_lang = null;
+            $product->access_note = '';
+            $product->content_title = '';
+            $product->forwho_title = '';
+            $product->buy_title = '';
         }
 
         return $product;
@@ -189,5 +197,47 @@ class product_manager {
             return $line !== '';
         }));
     }
+
+    public static function get_available_products(?string $lang = null): array {
+        global $DB;
+
+        $records = $DB->get_records(
+            self::TABLE_PRODUCT,
+            ['enabled' => 1],
+            'sortorder ASC, id ASC'
+        );
+
+        $products = [];
+
+        foreach ($records as $product) {
+            $translation = self::get_product_translation((int)$product->id, $lang);
+
+            if ($translation) {
+                $product->localized_title = $translation->title;
+                $product->sales_intro = $translation->sales_intro;
+                $product->content_items = $translation->content_items;
+                $product->forwho_items = $translation->forwho_items;
+                $product->translation_lang = $translation->lang;
+                $product->access_note = $translation->access_note ?? '';
+                $product->content_title = $translation->content_title ?? '';
+                $product->forwho_title = $translation->forwho_title ?? '';
+                $product->buy_title = $translation->buy_title ?? '';
+            } else {
+                $product->localized_title = $product->name;
+                $product->sales_intro = '';
+                $product->content_items = '';
+                $product->forwho_items = '';
+                $product->translation_lang = null;
+                $product->access_note = '';
+                $product->content_title = '';
+                $product->forwho_title = '';
+                $product->buy_title = '';
+            }
+
+            $products[] = $product;
+        }
+
+        return $products;
+    }    
 
 }

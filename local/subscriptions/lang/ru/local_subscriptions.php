@@ -866,3 +866,73 @@ $string['digital_sales_stats_no_sales'] = 'За этот период оплач
 $string['digital_sales_stats_histogram'] = 'Количество продаж по времени';
 $string['digital_sales_stats_cumulative'] = 'Накопительные продажи';
 $string['digital_sales_stats_show_from'] = 'Показать начиная с';
+
+$string['digital_catalog_title'] = 'Цифровой магазин CampusFR';
+$string['digital_catalog_intro'] = 'Здесь вы найдёте наши PDF, гайды и практические материалы для изучения французского языка в удобном для вас темпе.';
+$string['digital_catalog_empty'] = 'Сейчас цифровые продукты недоступны.';
+$string['digital_catalog_view_product'] = 'Открыть продукт';
+
+$string['digital_pdf_badge'] = 'Цифровой PDF';
+
+$string['digital_product_not_found_redirect'] = 'Этот продукт недоступен. Мы перенаправили вас в магазин.';
+$string['digital_product_not_found_catalog_notice'] = 'Запрошенный продукт недоступен или больше не существует. Ниже вы можете посмотреть доступные продукты.';
+
+$string['digital_rub_confirm_title'] = 'Оплата в рублях';
+$string['digital_rub_confirm_vpn'] = '💡 Перед оплатой лучше временно отключить VPN — иногда из-за него платежная страница может открываться некорректно или выдавать ошибку 😊';
+$string['digital_rub_confirm_continue'] = 'Перейти к оплате';
+
+$string['digital_products_admin_title'] = 'Цифровые продукты';
+$string['digital_products_add'] = 'Добавить цифровой продукт';
+$string['digital_products_view_purchases'] = 'Посмотреть покупки';
+$string['digital_products_view_catalog'] = 'Открыть магазин';
+$string['digital_products_count'] = 'Цифровых продуктов: {$a}';
+$string['digital_products_cover'] = 'Обложка';
+$string['digital_products_slug'] = 'Slug';
+$string['digital_products_titles'] = 'Названия';
+$string['digital_products_prices'] = 'Цены';
+$string['digital_products_files'] = 'Файлы';
+$string['digital_products_status'] = 'Статус';
+$string['digital_products_purchases'] = 'Покупки';
+$string['digital_products_sortorder'] = 'Порядок';
+$string['digital_products_actions'] = 'Действия';
+$string['digital_products_cover_missing'] = 'Изображение отсутствует';
+$string['digital_products_file_main'] = 'Классическая';
+$string['digital_products_file_mobile'] = 'Мобильная';
+$string['digital_products_enabled'] = 'Активен';
+$string['digital_products_disabled'] = 'Неактивен';
+$string['digital_products_open_public'] = 'Открыть';
+$string['digital_products_delete_confirm'] = 'Удалить этот цифровой продукт?';
+$string['digital_product_edit_new_title'] = 'Новый цифровой продукт';
+$string['digital_product_edit_edit_title'] = 'Редактирование цифрового продукта';
+
+$string['digital_product_edit_main_info'] = 'Основная информация';
+$string['digital_product_edit_internal_name'] = 'Внутреннее название';
+
+$string['digital_product_edit_price_eur'] = 'Цена EUR';
+$string['digital_product_edit_price_rub'] = 'Цена RUB';
+
+$string['digital_product_edit_files_hint'] = 'Файлы нужно размещать вручную в соответствующих папках: PDF — в moodledata/local_subscriptions/private_pdfs, обложки — в local/subscriptions/pix/cover.';
+
+$string['digital_product_edit_translations'] = 'Переводы';
+
+$string['digital_product_edit_title'] = 'Название';
+
+$string['digital_product_edit_saved'] = 'Цифровой продукт сохранён.';
+$string['digital_product_edit_slug_exists'] = 'Этот slug уже существует.';
+$string['digital_product_edit_current_file'] = 'Текущий файл';
+$string['digital_product_edit_no_file'] = 'Файл пока не выбран.';
+$string['digital_product_edit_click_to_upload'] = 'Нажмите здесь, чтобы выбрать или заменить файл.';$string['digital_product_edit_access_note'] = 'Текст о доступе после покупки';
+$string['digital_product_edit_content_title'] = 'Заголовок блока с содержанием';
+$string['digital_product_edit_forwho_title'] = 'Заголовок блока “кому подойдёт”';
+$string['digital_product_edit_buy_title'] = 'Заголовок блока покупки';
+$string['digital_product_edit_access_note'] = 'Текст о доступе после покупки';
+$string['digital_product_edit_content_title'] = 'Заголовок блока с содержанием';
+$string['digital_product_edit_forwho_title'] = 'Заголовок блока “кому подойдёт”';
+$string['digital_product_edit_buy_title'] = 'Заголовок блока покупки';
+$string['digital_products_status_updated'] = 'Статус продукта обновлён.';
+$string['digital_products_enable'] = 'Активировать';
+$string['digital_products_disable'] = 'Отключить';
+$string['digital_products_duplicate'] = 'Дублировать';
+$string['digital_products_duplicated'] = 'Продукт дублирован. Теперь можно изменить копию.';
+$string['digital_products_deleted'] = 'Цифровой продукт удалён.';
+$string['digital_products_delete_has_purchases'] = 'Этот продукт нельзя удалить, потому что по нему уже есть покупки.';
