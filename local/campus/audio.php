@@ -207,6 +207,14 @@ $faviconurl = new moodle_url('/local/campus/pix/favicon.ico');
             box-sizing: border-box;
         }
 
+        .audio-page-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 12px;
+            transform: translateY(-48px);
+        }        
+
         .audio-page-logo {
             max-width: 180px;
             width: 100%;
@@ -233,6 +241,22 @@ $faviconurl = new moodle_url('/local/campus/pix/favicon.ico');
         audio {
             width: 100%;
         }
+
+        .audio-page-verbe-image-wrapper {
+            width: 100%;
+            max-width: 420px;
+            margin: 24px auto 0;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .audio-page-verbe-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            transform: scale(1.015);
+            transform-origin: center;
+        } 
     </style>
 </head>
 
@@ -261,6 +285,19 @@ $faviconurl = new moodle_url('/local/campus/pix/favicon.ico');
         <source src="<?php echo $streamurl->out(false); ?>" type="audio/mpeg">
         <?php echo get_string('audio_browser_not_supported', 'local_campus'); ?>
     </audio>
+
+    <?php
+    $imageurl = new moodle_url('/local/campus/audio_image.php', ['v' => $v]);
+    ?>
+
+    <div class="audio-page-verbe-image-wrapper">
+        <img
+            class="audio-page-verbe-image"
+            src="<?php echo $imageurl->out(false); ?>"
+            alt="<?php echo s($title); ?>"
+            loading="lazy"
+            onerror="this.parentElement.style.display='none';">
+    </div> 
 
 </div>
 
