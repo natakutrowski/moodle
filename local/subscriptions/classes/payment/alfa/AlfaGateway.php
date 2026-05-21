@@ -339,8 +339,8 @@ final class AlfaGateway implements PaymentGatewayInterface {
             CURLOPT_POST           => true,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POSTFIELDS     => $encoded,
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_CONNECTTIMEOUT => 15,
+            CURLOPT_TIMEOUT        => 45,
             CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
         ]);
 

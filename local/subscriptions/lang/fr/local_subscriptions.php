@@ -748,7 +748,7 @@ $string['checkout_go_to_payment_discount'] = 'Acheter avec la remise';
 $string['checkout_full_access_line'] = 'Accès illimité à toutes les leçons du cours.';
 $string['summary_price_title_single'] = 'Abonnement pour {$a}';
 
-$string['digital_pdf_badge'] = 'PDF CampusFR';
+$string['digital_pdf_badge'] = 'PDF Campus<small><sup>FR</sup></small>';
 $string['digital_pdf_intro'] = 'Un guide pratique pour comprendre, mémoriser et réviser les verbes du 3e groupe sans se perdre dans des tableaux interminables.';
 $string['digital_pdf_item_1'] = 'Les familles principales des verbes du 3e groupe.';
 $string['digital_pdf_item_2'] = 'Les modèles de conjugaison les plus utiles.';
@@ -764,7 +764,7 @@ $string['digital_pdf_email_help'] = 'Le lien de téléchargement sera envoyé à
 $string['digital_pdf_buy_eur'] = 'Acheter en EUR : {$a->price} €';
 $string['digital_pdf_buy_rub'] = 'Acheter en RUB : {$a->price} ₽';
 $string['digital_payment_created'] = 'Demande de paiement PDF créée. Connexion au PSP à l’étape suivante.';
-$string['digital_success_title'] = 'Achat PDF CampusFR';
+$string['digital_success_title'] = 'Achat PDF Campus<small><sup>FR</sup></small>';
 $string['digital_success_preview'] = 'Mode provisoire : la demande de paiement est bien créée, mais le paiement Stripe/Alfa n’est pas encore branché.';
 $string['digital_success_request_created'] = 'Demande créée';
 $string['digital_success_product'] = 'Produit';
@@ -781,7 +781,7 @@ $string['digital_download_not_paid'] = 'Ce téléchargement n’est pas disponib
 $string['digital_download_expired'] = 'Ce lien de téléchargement a expiré.';
 $string['digital_download_file_missing'] = 'Le fichier PDF est introuvable.';
 $string['digital_success_payment_confirmed'] = 'Votre paiement est confirmé. Vous pouvez maintenant télécharger votre PDF.';
-$string['digital_mail_access_subject'] = 'Votre PDF CampusFR est prêt 📘';
+$string['digital_mail_access_subject'] = 'Votre PDF Campus<small><sup>FR</sup></small> est prêt 📘';
 $string['digital_mail_access_intro'] = 'Merci pour votre achat ! Votre PDF est maintenant disponible.';
 $string['digital_mail_access_hint'] = 'Vous pouvez télécharger votre PDF avec le bouton ci-dessous. Pensez à le sauvegarder sur votre appareil pour y accéder facilement à tout moment.';
 $string['digital_mail_download_button'] = 'Télécharger le PDF';
@@ -870,7 +870,7 @@ $string['digital_sales_stats_histogram'] = 'Nombre de ventes par période';
 $string['digital_sales_stats_cumulative'] = 'Ventes cumulées';
 $string['digital_sales_stats_show_from'] = 'Afficher depuis';
 
-$string['digital_catalog_title'] = 'Boutique digitale CampusFR';
+$string['digital_catalog_title'] = 'Boutique digitale Campus<small><sup>FR</sup></small>';
 $string['digital_catalog_intro'] = 'Retrouvez ici nos PDF, guides et supports pratiques pour progresser en français à votre rythme.';
 $string['digital_catalog_empty'] = 'Aucun produit digital disponible pour le moment.';
 $string['digital_catalog_view_product'] = 'Voir le produit';
@@ -926,3 +926,32 @@ $string['digital_products_duplicate'] = 'Dupliquer';
 $string['digital_products_duplicated'] = 'Produit dupliqué. Vous pouvez maintenant modifier la copie.';
 $string['digital_products_deleted'] = 'Produit digital supprimé.';
 $string['digital_products_delete_has_purchases'] = 'Ce produit ne peut pas être supprimé car il possède déjà des achats.';
+
+$string['digital_reassurance_instant'] = 'Accès immédiat après le paiement';
+$string['digital_reassurance_versions'] = 'Versions classique + mobile incluses';
+$string['digital_reassurance_email'] = 'Liens envoyés automatiquement par email';
+$string['digital_reassurance_nocampus'] = 'Aucun compte CampusFR nécessaire';
+$string['digital_reassurance_secure'] = 'Paiement sécurisé via Stripe / Alfa Bank';
+$string['digital_redirecting_payment'] = 'Redirection vers la page de paiement…';
+
+$string['digital_redirecting_payment_desc'] =
+'Veuillez patienter quelques secondes. Ne fermez pas cette page.';
+
+$string['digital_success_thank_you'] = 'Merci pour votre achat !';
+$string['digital_success_confirmed_intro'] = 'Votre paiement est confirmé. Vos fichiers sont prêts à être téléchargés.';
+$string['digital_success_pending_title'] = 'Paiement en cours de validation';
+$string['digital_success_payment_pending_support'] = 'Votre paiement est en cours de validation. Si vous venez de payer, actualisez cette page dans quelques secondes. Si rien ne change, contactez-nous à support@campusfr.fr.';
+$string['digital_success_summary_title'] = 'Résumé de votre achat';
+$string['digital_success_main_version_hint'] = 'Version classique : idéale sur ordinateur, tablette ou pour impression.';
+$string['digital_success_mobile_version_hint'] = 'Version mobile : optimisée pour consulter le PDF sur téléphone.';
+$string['digital_success_email_sent_notice'] = 'Nous vous avons également envoyé les liens de téléchargement et le reçu par email.';
+$string['digital_success_support_title'] = 'Un problème avec votre téléchargement ?';
+$string['digital_success_support_text'] = 'Écrivez-nous à {$a}. Nous vous aiderons rapidement.';
+$string['digital_success_back_to_shop'] = 'Voir les autres produits';
+
+$string['digital_cancel_heading'] = 'Paiement non finalisé';
+$string['digital_cancel_intro'] = 'Votre achat n’a pas été confirmé. Si vous avez quitté la page de paiement avant la validation, aucun accès n’a encore été activé.';
+$string['digital_cancel_vpn_hint'] = '💡 Si vous payez en RUB, pensez à désactiver temporairement votre VPN : la page de paiement peut parfois s’ouvrir incorrectement ou afficher une erreur.';
+$string['digital_cancel_support_text'] = 'Si vous pensez avoir été débité ou si vous avez besoin d’aide, écrivez-nous à {$a}.';
+$string['digital_cancel_gateway_timeout'] =
+'La page de paiement n’a pas pu être ouverte pour le moment. Cela peut être temporaire. Réessayez dans quelques minutes.';

@@ -274,6 +274,7 @@
 			<FIELDS>
 				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
 				<FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
 				<FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="true"/>
 				<FIELD NAME="firstname" TYPE="char" LENGTH="100" NOTNULL="false"/>
 				<FIELD NAME="lastname" TYPE="char" LENGTH="100" NOTNULL="false"/>

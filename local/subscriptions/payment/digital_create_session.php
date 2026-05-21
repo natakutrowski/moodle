@@ -100,7 +100,22 @@ $options = [
     'lastname' => $pr->lastname,
 ];
 
-$result = $gateway->create_checkout_session($pr, $options);
+try {
+    $result = $gateway->create_checkout_session($pr, $options);
+} catch (\Throwable $e) {
+    $DB->update_record(product_manager::TABLE_PAYMENT_REQUEST, (object)[
+        'id' => $pr->id,
+        'status' => 'failed',
+        'last_error' => '[checkout_create_failed] ' . $e->getMessage(),
+        'last_update' => time(),
+    ]);
+
+    redirect(UrlFactory::digital_cancel([
+        'pid' => $pr->id,
+        'uilang' => $uilang,
+        'error' => 'gateway_timeout',
+    ]));
+}
 
 $update = new stdClass();
 $update->id = $pr->id;

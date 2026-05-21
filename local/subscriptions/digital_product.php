@@ -274,17 +274,58 @@ echo html_writer::tag('button',
 
 echo html_writer::end_tag('form');
 
-echo html_writer::tag('hr', '');
+echo html_writer::start_div('digital-checkout-reassurance mt-4');
 
-echo html_writer::tag('p',
-    get_string('digital_sales_secure_payment', 'local_subscriptions'),
+$checks = [
+    get_string('digital_reassurance_instant', 'local_subscriptions'),
+    get_string('digital_reassurance_versions', 'local_subscriptions'),
+    get_string('digital_reassurance_email', 'local_subscriptions'),
+    get_string('digital_reassurance_nocampus', 'local_subscriptions'),
+];
+
+foreach ($checks as $check) {
+    echo html_writer::tag('div', '✔ ' . s($check), [
+        'class' => 'small mb-2',
+        'style' => 'color:#198754;font-weight:500;',
+    ]);
+}
+
+echo html_writer::tag('hr', '', ['class' => 'my-3']);
+
+echo html_writer::tag(
+    'div',
+    get_string('digital_reassurance_secure', 'local_subscriptions'),
     ['class' => 'small text-muted mb-2']
 );
 
-echo html_writer::tag('p',
-    get_string('digital_sales_instant_access', 'local_subscriptions'),
-    ['class' => 'small text-muted mb-0']
-);
+echo html_writer::start_div('d-flex align-items-center gap-2 flex-wrap');
+
+$paymenticons = [
+    'stripe' => 'stripe.png',
+    'alfa' => 'alfa.png',
+    'visa' => 'visa.png',
+    'mastercard' => 'mastercard.png',
+];
+
+foreach ($paymenticons as $label => $file) {
+    $path = $CFG->dirroot . '/local/subscriptions/pix/email/' . $file;
+
+    if (file_exists($path)) {
+        echo html_writer::empty_tag('img', [
+            'src' => $CFG->wwwroot . '/local/subscriptions/pix/email/' . $file,
+            'alt' => $label,
+            'title' => $label,
+            'style' => 'height:26px;width:auto;object-fit:contain;',
+        ]);
+    } else {
+        echo html_writer::tag('span', strtoupper($label), [
+            'class' => 'badge bg-light text-muted border',
+        ]);
+    }
+}
+
+echo html_writer::end_div();
+echo html_writer::end_div();
 
 echo html_writer::end_div();
 
@@ -408,4 +449,89 @@ echo html_writer::script("
     updateButtons();
 })();
 ");
+
+echo html_writer::script("
+(function () {
+
+    const fields = [
+        'digital-firstname',
+        'digital-lastname',
+        'digital-email'
+    ];
+
+    fields.forEach(function(id) {
+
+        const el = document.getElementById(id);
+
+        if (!el) {
+            return;
+        }
+
+        const key = 'campusfr_' + id;
+
+        const saved = localStorage.getItem(key);
+
+        if (saved && el.value === '') {
+            el.value = saved;
+        }
+
+        el.addEventListener('input', function() {
+            localStorage.setItem(key, el.value);
+        });
+    });
+
+})();
+");
+
+echo html_writer::script("
+(function () {
+
+    const form = document.getElementById('digital-product-checkout-form');
+
+    if (!form) {
+        return;
+    }
+
+    form.addEventListener('submit', function() {
+
+        const overlay = document.createElement('div');
+
+        overlay.innerHTML = `
+            <div style=\"
+                position:fixed;
+                inset:0;
+                background:rgba(255,255,255,0.92);
+                z-index:99999;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                flex-direction:column;
+                font-family:inherit;
+            \">
+                <div class=\"spinner-border text-primary mb-4\"></div>
+
+                <div style=\"
+                    font-size:1.2rem;
+                    font-weight:600;
+                    margin-bottom:10px;
+                \">
+                    " . addslashes(get_string('digital_redirecting_payment', 'local_subscriptions')) . "
+                </div>
+
+                <div style=\"
+                    color:#666;
+                    text-align:center;
+                    max-width:420px;
+                \">
+                    " . addslashes(get_string('digital_redirecting_payment_desc', 'local_subscriptions')) . "
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+    });
+
+})();
+");
+
 echo $OUTPUT->footer();

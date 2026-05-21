@@ -867,7 +867,7 @@ $string['digital_sales_stats_histogram'] = 'Количество продаж п
 $string['digital_sales_stats_cumulative'] = 'Накопительные продажи';
 $string['digital_sales_stats_show_from'] = 'Показать начиная с';
 
-$string['digital_catalog_title'] = 'Цифровой магазин CampusFR';
+$string['digital_catalog_title'] = 'Цифровой магазин Campus<small><sup>FR</sup></small>';
 $string['digital_catalog_intro'] = 'Здесь вы найдёте наши PDF, гайды и практические материалы для изучения французского языка в удобном для вас темпе.';
 $string['digital_catalog_empty'] = 'Сейчас цифровые продукты недоступны.';
 $string['digital_catalog_view_product'] = 'Открыть продукт';
@@ -936,3 +936,33 @@ $string['digital_products_duplicate'] = 'Дублировать';
 $string['digital_products_duplicated'] = 'Продукт дублирован. Теперь можно изменить копию.';
 $string['digital_products_deleted'] = 'Цифровой продукт удалён.';
 $string['digital_products_delete_has_purchases'] = 'Этот продукт нельзя удалить, потому что по нему уже есть покупки.';
+
+$string['digital_reassurance_instant'] = 'Мгновенный доступ после оплаты';
+$string['digital_reassurance_versions'] = 'Включены классическая и мобильная версии';
+$string['digital_reassurance_email'] = 'Ссылки автоматически отправляются на email';
+$string['digital_reassurance_nocampus'] = 'Аккаунт CampusFR не требуется';
+$string['digital_reassurance_secure'] = 'Безопасная оплата через Stripe / Alfa Bank';
+
+$string['digital_redirecting_payment'] = 'Переход на страницу оплаты…';
+
+$string['digital_redirecting_payment_desc'] =
+'Пожалуйста, подождите несколько секунд. Не закрывайте эту страницу.';
+
+$string['digital_success_thank_you'] = 'Спасибо за покупку!';
+$string['digital_success_confirmed_intro'] = 'Ваш платёж подтверждён. Файлы готовы к скачиванию.';
+$string['digital_success_pending_title'] = 'Платёж проверяется';
+$string['digital_success_payment_pending_support'] = 'Ваш платёж сейчас проверяется. Если вы только что оплатили, обновите страницу через несколько секунд. Если ничего не изменится, напишите нам на support@campusfr.fr.';
+$string['digital_success_summary_title'] = 'Информация о покупке';
+$string['digital_success_main_version_hint'] = 'Классическая версия: удобно для компьютера, планшета или печати.';
+$string['digital_success_mobile_version_hint'] = 'Мобильная версия: оптимизирована для просмотра PDF на телефоне.';
+$string['digital_success_email_sent_notice'] = 'Мы также отправили ссылки для скачивания и квитанцию на email.';
+$string['digital_success_support_title'] = 'Проблема со скачиванием?';
+$string['digital_success_support_text'] = 'Напишите нам на {$a}. Мы постараемся быстро помочь.';
+$string['digital_success_back_to_shop'] = 'Посмотреть другие продукты';
+
+$string['digital_cancel_heading'] = 'Платёж не завершён';
+$string['digital_cancel_intro'] = 'Ваша покупка не была подтверждена. Если вы закрыли страницу оплаты до подтверждения, доступ пока не активирован.';
+$string['digital_cancel_vpn_hint'] = '💡 Если вы оплачиваете в рублях, временно отключите VPN: платёжная страница иногда может открываться некорректно или показывать ошибку.';
+$string['digital_cancel_support_text'] = 'Если вам кажется, что деньги списались, или вам нужна помощь, напишите нам на {$a}.';
+$string['digital_cancel_gateway_timeout'] =
+'Не удалось открыть страницу оплаты. Возможно, это временная проблема. Попробуйте ещё раз через несколько минут.';

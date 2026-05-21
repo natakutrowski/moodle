@@ -750,7 +750,7 @@ $string['checkout_go_to_payment_discount'] = 'Buy with discount';
 $string['checkout_full_access_line'] = 'Unlimited access to all lessons in the course.';
 $string['summary_price_title_single'] = 'Subscription for {$a}';
 
-$string['digital_pdf_badge'] = 'CampusFR PDF';
+$string['digital_pdf_badge'] = 'Campus<small><sup>FR</sup></small> PDF';
 $string['digital_pdf_intro'] = 'A practical guide to understand, memorize and review French third-group verbs without getting lost in endless tables.';
 $string['digital_pdf_item_1'] = 'The main families of third-group verbs.';
 $string['digital_pdf_item_2'] = 'The most useful conjugation patterns.';
@@ -766,7 +766,7 @@ $string['digital_pdf_email_help'] = 'The download link will be sent to this addr
 $string['digital_pdf_buy_eur'] = 'Buy in EUR: {$a->price} €';
 $string['digital_pdf_buy_rub'] = 'Buy in RUB: {$a->price} ₽';
 $string['digital_payment_created'] = 'PDF payment request created. PSP connection will be added in the next step.';
-$string['digital_success_title'] = 'CampusFR PDF purchase';
+$string['digital_success_title'] = 'Campus<small><sup>FR</sup></small> PDF purchase';
 $string['digital_success_preview'] = 'Preview mode: the payment request has been created, but Stripe/Alfa payment is not connected yet.';
 $string['digital_success_request_created'] = 'Request created';
 $string['digital_success_product'] = 'Product';
@@ -783,7 +783,7 @@ $string['digital_download_not_paid'] = 'This download is not available because t
 $string['digital_download_expired'] = 'This download link has expired.';
 $string['digital_download_file_missing'] = 'The PDF file could not be found.';
 $string['digital_success_payment_confirmed'] = 'Your payment has been confirmed. You can now download your PDF.';
-$string['digital_mail_access_subject'] = 'Your CampusFR PDF is ready 📘';
+$string['digital_mail_access_subject'] = 'Your Campus<small><sup>FR</sup></small> PDF is ready 📘';
 $string['digital_mail_access_intro'] = 'Thank you for your purchase! Your PDF is now available.';
 $string['digital_mail_access_hint'] = 'You can download your PDF using the button below. We recommend saving it on your device for easy access anytime.';
 $string['digital_mail_download_button'] = 'Download the PDF';
@@ -872,7 +872,7 @@ $string['digital_sales_stats_histogram'] = 'Number of sales over time';
 $string['digital_sales_stats_cumulative'] = 'Cumulative sales';
 $string['digital_sales_stats_show_from'] = 'Show from';
 
-$string['digital_catalog_title'] = 'CampusFR Digital Store';
+$string['digital_catalog_title'] = 'Campus<small><sup>FR</sup></small> Digital Store';
 $string['digital_catalog_intro'] = 'Discover our PDFs, guides and practical resources to improve your French at your own pace.';
 $string['digital_catalog_empty'] = 'No digital products are currently available.';
 $string['digital_catalog_view_product'] = 'View product';
@@ -938,3 +938,33 @@ $string['digital_products_duplicate'] = 'Duplicate';
 $string['digital_products_duplicated'] = 'Product duplicated. You can now edit the copy.';
 $string['digital_products_deleted'] = 'Digital product deleted.';
 $string['digital_products_delete_has_purchases'] = 'This product cannot be deleted because it already has purchases.';
+
+$string['digital_reassurance_instant'] = 'Instant access after payment';
+$string['digital_reassurance_versions'] = 'Classic + mobile versions included';
+$string['digital_reassurance_email'] = 'Download links automatically sent by email';
+$string['digital_reassurance_nocampus'] = 'No CampusFR account required';
+$string['digital_reassurance_secure'] = 'Secure payment via Stripe / Alfa Bank';
+
+$string['digital_redirecting_payment'] = 'Redirecting to the payment page…';
+
+$string['digital_redirecting_payment_desc'] =
+'Please wait a few seconds. Do not close this page.';
+
+$string['digital_success_thank_you'] = 'Thank you for your purchase!';
+$string['digital_success_confirmed_intro'] = 'Your payment is confirmed. Your files are ready to download.';
+$string['digital_success_pending_title'] = 'Payment confirmation in progress';
+$string['digital_success_payment_pending_support'] = 'Your payment is being confirmed. If you have just paid, refresh this page in a few seconds. If nothing changes, contact us at support@campusfr.fr.';
+$string['digital_success_summary_title'] = 'Purchase summary';
+$string['digital_success_main_version_hint'] = 'Standard version: ideal for computer, tablet or printing.';
+$string['digital_success_mobile_version_hint'] = 'Mobile version: optimized for reading the PDF on your phone.';
+$string['digital_success_email_sent_notice'] = 'We have also sent the download links and receipt by email.';
+$string['digital_success_support_title'] = 'Having trouble downloading?';
+$string['digital_success_support_text'] = 'Write to us at {$a}. We will help you as soon as possible.';
+$string['digital_success_back_to_shop'] = 'View other products';
+
+$string['digital_cancel_heading'] = 'Payment not completed';
+$string['digital_cancel_intro'] = 'Your purchase has not been confirmed. If you left the payment page before confirmation, access has not been activated yet.';
+$string['digital_cancel_vpn_hint'] = '💡 If you are paying in RUB, please temporarily disable your VPN: the payment page may sometimes open incorrectly or display an error.';
+$string['digital_cancel_support_text'] = 'If you think you have been charged or need help, write to us at {$a}.';
+$string['digital_cancel_gateway_timeout'] =
+'The payment page could not be opened at the moment. This may be temporary. Please try again in a few minutes.';

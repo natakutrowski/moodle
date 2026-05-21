@@ -173,13 +173,31 @@ foreach ($products as $p) {
     $files = [];
 
     $files[] = html_writer::tag('strong', get_string('digital_products_file_main', 'local_subscriptions') . ': ') .
-        local_subscriptions_render_file_status($p->filename ?? '', 'pdf');
+        local_subscriptions_render_file_status($p->filename ?? '', 'pdf') .
+        local_subscriptions_admin_file_preview_link(
+            (int)$p->id,
+            $p->filename ?? '',
+            'main',
+            get_string('preview')
+        );
 
     $files[] = html_writer::tag('strong', get_string('digital_products_file_mobile', 'local_subscriptions') . ': ') .
-        local_subscriptions_render_file_status($p->mobile_filename ?? '', 'pdf');
+        local_subscriptions_render_file_status($p->mobile_filename ?? '', 'pdf') .
+        local_subscriptions_admin_file_preview_link(
+            (int)$p->id,
+            $p->mobile_filename ?? '',
+            'mobile',
+            get_string('preview')
+        );
 
     $files[] = html_writer::tag('strong', get_string('digital_products_cover', 'local_subscriptions') . ': ') .
-        local_subscriptions_render_file_status($p->coverimage ?? '', 'cover');
+        local_subscriptions_render_file_status($p->coverimage ?? '', 'cover') .
+        local_subscriptions_admin_file_preview_link(
+            (int)$p->id,
+            $p->coverimage ?? '',
+            'cover',
+            get_string('preview')
+        );
 
     $status = !empty($p->enabled)
         ? html_writer::tag('span', get_string('digital_products_enabled', 'local_subscriptions'), ['class' => 'badge bg-success'])
@@ -299,4 +317,39 @@ function local_subscriptions_render_file_status(
     return html_writer::tag('span', '✅ ' . s($filename) . ' <span class="text-muted">(' . s($size) . ')</span>', [
         'class' => 'text-success',
     ]);
+}
+
+function local_subscriptions_admin_file_preview_link(
+    int $productid,
+    string $filename,
+    string $type,
+    string $label
+): string {
+    global $CFG;
+
+    if ($filename === '') {
+        return '';
+    }
+
+    if ($type === 'cover') {
+        $path = $CFG->dirroot . '/local/subscriptions/pix/cover/' . $filename;
+    } else {
+        $path = $CFG->dataroot . '/local_subscriptions/private_pdfs/' . $filename;
+    }
+
+    if (!is_readable($path)) {
+        return '';
+    }
+
+    return html_writer::link(
+        new moodle_url('/local/subscriptions/admin/digital_product_file_preview.php', [
+            'id' => $productid,
+            'type' => $type,
+        ]),
+        $label,
+        [
+            'class' => 'btn btn-xs btn-outline-secondary ms-1',
+            'target' => '_blank',
+        ]
+    );
 }

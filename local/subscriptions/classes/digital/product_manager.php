@@ -68,7 +68,7 @@ class product_manager {
         string $currency,
         string $buyerlang = ''
     ): stdClass {
-        global $DB;
+        global $DB, $USER;
 
         $currency = strtoupper($currency);
 
@@ -112,9 +112,32 @@ class product_manager {
         $record->expiration_date = $now + DAYSECS;
         $record->buyer_lang = $buyerlang;
 
+        $record->userid = self::resolve_buyer_userid($record->email);
         $record->id = $DB->insert_record(self::TABLE_PAYMENT_REQUEST, $record);
 
         return $DB->get_record(self::TABLE_PAYMENT_REQUEST, ['id' => $record->id], '*', MUST_EXIST);
+    }
+
+    private static function resolve_buyer_userid(string $email): ?int {
+        global $DB, $USER;
+
+        if (isloggedin() && !isguestuser()) {
+            return (int)$USER->id;
+        }
+
+        $email = \core_text::strtolower(trim($email));
+
+        if ($email === '') {
+            return null;
+        }
+
+        $user = $DB->get_record('user', [
+            'email' => $email,
+            'deleted' => 0,
+            'suspended' => 0,
+        ], 'id', IGNORE_MISSING);
+
+        return $user ? (int)$user->id : null;
     }
 
     public static function generate_download_token(): string {

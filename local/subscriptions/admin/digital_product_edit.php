@@ -50,50 +50,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $enabled = optional_param('enabled', 0, PARAM_BOOL);
     $sortorder = optional_param('sortorder', 0, PARAM_INT);
 
+    $pdfdir = $CFG->dataroot . '/local_subscriptions/private_pdfs';
+    $coverdir = $CFG->dirroot . '/local/subscriptions/pix/cover';
+
     // PDF classique.
-    if (!empty($_FILES['pdf_file']['name'])) {
-        $uploadedname = clean_param($_FILES['pdf_file']['name'], PARAM_FILE);
+    $uploaded = local_subscriptions_digital_move_uploaded_file(
+        'pdf_file',
+        $pdfdir,
+        $slug . '_main',
+        ['pdf']
+    );
 
-        $destination = $CFG->dataroot .
-            '/local_subscriptions/private_pdfs/' .
-            $uploadedname;
-
-        if (!@move_uploaded_file($_FILES['pdf_file']['tmp_name'], $destination)) {
-            throw new moodle_exception('uploaderror');
-        }
-
-        $filename = $uploadedname;
+    if ($uploaded !== '') {
+        $filename = $uploaded;
     }
 
     // PDF mobile.
-    if (!empty($_FILES['mobile_pdf_file']['name'])) {
-        $uploadedname = clean_param($_FILES['mobile_pdf_file']['name'], PARAM_FILE);
+    $uploaded = local_subscriptions_digital_move_uploaded_file(
+        'mobile_pdf_file',
+        $pdfdir,
+        $slug . '_mobile',
+        ['pdf']
+    );
 
-        $destination = $CFG->dataroot .
-            '/local_subscriptions/private_pdfs/' .
-            $uploadedname;
-
-        if (!@move_uploaded_file($_FILES['mobile_pdf_file']['tmp_name'], $destination)) {
-            throw new moodle_exception('uploaderror');
-        }
-
-        $mobilefilename = $uploadedname;
+    if ($uploaded !== '') {
+        $mobilefilename = $uploaded;
     }
 
     // Cover.
-    if (!empty($_FILES['cover_file']['name'])) {
-        $uploadedname = clean_param($_FILES['cover_file']['name'], PARAM_FILE);
+    $uploaded = local_subscriptions_digital_move_uploaded_file(
+        'cover_file',
+        $coverdir,
+        $slug . '_cover',
+        ['png', 'jpg', 'jpeg', 'webp']
+    );
 
-        $destination = $CFG->dirroot .
-            '/local/subscriptions/pix/cover/' .
-            $uploadedname;
-
-        if (!@move_uploaded_file($_FILES['cover_file']['tmp_name'], $destination)) {
-            throw new moodle_exception('uploaderror');
-        }
-
-        $coverimage = $uploadedname;
-    }    
+    if ($uploaded !== '') {
+        $coverimage = $uploaded;
+    }   
 
     $existing = $DB->get_record('subscription_digital_product', ['slug' => $slug], '*', IGNORE_MISSING);
 
@@ -589,4 +583,45 @@ function local_subscriptions_digital_file_input(
     echo html_writer::end_tag('label');
 
     echo html_writer::end_div();
+}
+
+function local_subscriptions_digital_uploaded_extension(string $filename, array $allowed): string {
+    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+    if (!in_array($ext, $allowed, true)) {
+        throw new moodle_exception('invalidfiletype', 'error');
+    }
+
+    return $ext;
+}
+
+function local_subscriptions_digital_move_uploaded_file(
+    string $inputname,
+    string $targetdir,
+    string $targetbasename,
+    array $allowedextensions
+): string {
+    if (empty($_FILES[$inputname]['name'])) {
+        return '';
+    }
+
+    if (!empty($_FILES[$inputname]['error'])) {
+        throw new moodle_exception('uploaderror');
+    }
+
+    $originalname = clean_param($_FILES[$inputname]['name'], PARAM_FILE);
+    $extension = local_subscriptions_digital_uploaded_extension($originalname, $allowedextensions);
+
+    if (!is_dir($targetdir)) {
+        make_writable_directory($targetdir);
+    }
+
+    $filename = $targetbasename . '.' . $extension;
+    $destination = rtrim($targetdir, '/') . '/' . $filename;
+
+    if (!@move_uploaded_file($_FILES[$inputname]['tmp_name'], $destination)) {
+        throw new moodle_exception('uploaderror');
+    }
+
+    return $filename;
 }
