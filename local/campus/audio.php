@@ -7,6 +7,94 @@ global $DB, $USER;
 
 $v = required_param('v', PARAM_RAW_TRIMMED);
 
+$audioimagebase = __DIR__ . '/privateaudioimages/';
+$levelsorder = ['a1', 'a2', 'b1p'];
+
+$parts = explode('/', $v);
+$level = count($parts) > 1 ? clean_param($parts[0], PARAM_ALPHANUMEXT) : '';
+$currentverb = end($parts);
+
+$previousurl = null;
+$nexturl = null;
+$previouslabel = null;
+$nextlabel = null;
+
+$allitems = [];
+
+foreach ($levelsorder as $levelname) {
+    $dir = $audioimagebase . $levelname . '/';
+
+    if (!is_dir($dir)) {
+        continue;
+    }
+
+    foreach (scandir($dir) as $file) {
+        if (preg_match('/^(\d+)\s*-\s*(.+)\.png$/u', $file, $matches)) {
+            $allitems[] = [
+                'level' => $levelname,
+                'number' => (int)$matches[1],
+                'verb' => $matches[2],
+            ];
+        }
+    }
+}
+
+usort($allitems, function($a, $b) use ($levelsorder) {
+    $levela = array_search($a['level'], $levelsorder);
+    $levelb = array_search($b['level'], $levelsorder);
+
+    if ($levela === $levelb) {
+        return $a['number'] <=> $b['number'];
+    }
+
+    return $levela <=> $levelb;
+});
+
+$titles = [];
+
+$titlesfile = __DIR__ . '/audio_titles.json';
+
+if (file_exists($titlesfile)) {
+    $json = file_get_contents($titlesfile);
+    $decoded = json_decode($json, true);
+
+    if (is_array($decoded)) {
+        $titles = $decoded;
+    }
+}
+
+$getaudiotitle = function(string $level, string $verb) use ($titles): string {
+    $keywithlevel = $level ? $level . '/' . $verb : $verb;
+
+    if (isset($titles[$keywithlevel])) {
+        return $titles[$keywithlevel];
+    }
+
+    if (isset($titles[$verb])) {
+        return $titles[$verb];
+    }
+
+    return str_replace('-', ' ', $verb);
+};
+
+foreach ($allitems as $index => $item) {
+    if ($item['level'] === $level && $item['verb'] === $currentverb) {
+        if ($index > 0) {
+            $prev = $allitems[$index - 1];
+            $previouslabel = $getaudiotitle($prev['level'], $prev['verb']);
+            $previousurl = '/audio/' . rawurlencode($prev['level']) . '/' . rawurlencode($prev['verb']);
+        }
+
+        if ($index < count($allitems) - 1) {
+            $next = $allitems[$index + 1];
+            $nextlabel = $getaudiotitle($next['level'], $next['verb']);
+            $nexturl = '/audio/' . rawurlencode($next['level']) . '/' . rawurlencode($next['verb']);
+        }
+
+        break;
+    }
+}
+
 // Fichier attendu.
 $basepath = __DIR__ . '/privateaudio/';
 $filepath = $basepath . $v . '.mp3';
@@ -211,8 +299,8 @@ $faviconurl = new moodle_url('/local/campus/pix/favicon.ico');
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-top: 12px;
-            transform: translateY(-48px);
+            padding-top: 10px;
+            transform: translateY(-52px);
         }        
 
         .audio-page-logo {
@@ -257,12 +345,118 @@ $faviconurl = new moodle_url('/local/campus/pix/favicon.ico');
             transform: scale(1.015);
             transform-origin: center;
         } 
+
+        .audio-page-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            width: 100%;
+            max-width: 420px;
+
+            margin: 18px auto 0;
+            gap: 10px;
+        }
+
+        .audio-page-navigation-side {
+            flex: 1;
+            display: flex;
+        }
+
+        .audio-page-navigation-left {
+            justify-content: flex-start;
+        }
+
+        .audio-page-navigation-right {
+            justify-content: flex-end;
+        }
+
+        .audio-page-nav-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 13px;
+
+            padding: 9px 14px;
+
+            border-radius: 999px;
+
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+
+            color: #374151;
+            text-decoration: none;
+
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1;
+
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.7),
+                0 1px 2px rgba(0,0,0,0.04);
+
+            transition:
+                background 0.15s ease,
+                border-color 0.15s ease,
+                transform 0.15s ease;
+        }
+
+        .audio-page-nav-link:hover {
+            background: #e5e7eb;
+            border-color: #c4c9d2;
+            color: #111827;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .audio-page-nav-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 20px;
+            line-height: 1;
+
+            transform: translateY(-1px);
+        }
+
+        .audio-page-nav-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 480px) {
+            .audio-page-navigation {
+                gap: 5px;
+            }
+
+            .audio-page-nav-link {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .audio-page-nav-arrow {
+                font-size: 18px;
+                transform: translateY(-3px);
+            }
+        }
+
+        .audio-page-card {
+            opacity: 0;
+            transition: opacity 0.18s ease;
+        }
+
+        .audio-page-card.audio-page-ready {
+            opacity: 1;
+        }
+
     </style>
 </head>
 
 <body>
 
-<div class="audio-page-card">
+<div class="audio-page-card" id="audio-page-card">
 
     <a href="<?php echo $homeurl->out(false); ?>" aria-label="CampusFR">
         <img
@@ -285,6 +479,28 @@ $faviconurl = new moodle_url('/local/campus/pix/favicon.ico');
         <source src="<?php echo $streamurl->out(false); ?>" type="audio/mpeg">
         <?php echo get_string('audio_browser_not_supported', 'local_campus'); ?>
     </audio>
+
+    <div class="audio-page-navigation">
+
+        <div class="audio-page-navigation-side audio-page-navigation-left">
+            <?php if ($previousurl): ?>
+                <a class="audio-page-nav-link" href="<?php echo s($previousurl); ?>">
+                    <span class="audio-page-nav-arrow">⟵</span>
+                    <span class="audio-page-nav-text"><?php echo s($previouslabel); ?></span>
+                </a>
+            <?php endif; ?>
+        </div>
+
+        <div class="audio-page-navigation-side audio-page-navigation-right">
+            <?php if ($nexturl): ?>
+                <a class="audio-page-nav-link" href="<?php echo s($nexturl); ?>">
+                    <span class="audio-page-nav-text"><?php echo s($nextlabel); ?></span>
+                    <span class="audio-page-nav-arrow">⟶</span>
+                </a>
+            <?php endif; ?>
+        </div>
+
+    </div>
 
     <?php
     $imageurl = new moodle_url('/local/campus/audio_image.php', ['v' => $v]);
@@ -334,7 +550,37 @@ if ('mediaSession' in navigator) {
     });
 }
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
+    const card = document.getElementById('audio-page-card');
+    const image = document.querySelector('.audio-page-verbe-image');
+
+    if (!card) {
+        return;
+    }
+
+    // Pas d'image -> on affiche directement.
+    if (!image) {
+        card.classList.add('audio-page-ready');
+        return;
+    }
+
+    // Image déjà en cache.
+    if (image.complete) {
+        card.classList.add('audio-page-ready');
+        return;
+    }
+
+    image.addEventListener('load', function () {
+        card.classList.add('audio-page-ready');
+    });
+
+    image.addEventListener('error', function () {
+        card.classList.add('audio-page-ready');
+    });
+});
+</script>
 </body>
 </html>
 <?php
