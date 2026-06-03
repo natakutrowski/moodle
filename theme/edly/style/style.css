@@ -8065,8 +8065,12 @@ body.pagelayout-frontpage {
     }
 }
 
-.course-section.section-summary .section-summary-activities {
+.course-section.section-summary .section-summary-activities > div:first-child {
     display: none !important;
+}
+
+.course-section.section-summary .section-summary-activities {
+    justify-content: flex-end;
 }
 
 .course-section.section-summary .content {
@@ -8082,4 +8086,8 @@ body.pagelayout-frontpage {
     width: 100%;
     height: auto;
     border-radius: 12px;
+}
+
+.campus-section-cover-link {
+    display: block;
 }
