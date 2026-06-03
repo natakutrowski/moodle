@@ -8064,3 +8064,22 @@ body.pagelayout-frontpage {
         display: none;
     }
 }
+
+.course-section.section-summary .section-summary-activities {
+    display: none !important;
+}
+
+.course-section.section-summary .content {
+    margin-bottom: 0 !important;
+}
+
+.campus-section-cover-wrapper {
+    margin: 10px 0 16px;
+}
+
+.campus-section-cover {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+}

@@ -161,6 +161,13 @@
         {{/headerdisplaymultipage}}
     {{/header}}
 </div>
+
+{{#sectioncover}}
+    <div class="campus-section-cover-wrapper">
+        <img src="{{sectioncover}}" class="campus-section-cover" alt="">
+    </div>
+{{/sectioncover}}
+
 <div id="coursecontentcollapseid{{id}}"
      class="content {{^iscoursedisplaymultipage}}{{^sitehome}}{{^displayonesection}}course-content-item-content collapse {{^contentcollapsed}}show{{/contentcollapsed}}{{/displayonesection}}{{/sitehome}}{{/iscoursedisplaymultipage}}">
     <div class="{{#hasavailability}}description{{/hasavailability}} my-3" data-for="sectioninfo">

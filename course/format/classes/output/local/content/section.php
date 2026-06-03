@@ -223,6 +223,7 @@ class section implements named_templatable, renderable {
         if ($showsummary) {
             $cmsummary = new $this->cmsummaryclass($format, $section);
             $data->cmsummary = $cmsummary->export_for_template($output);
+            $data->sectioncover = $this->get_section_cover_image_url();
             $data->onlysummary = true;
             $result = true;
 
@@ -346,6 +347,47 @@ class section implements named_templatable, renderable {
             );
         }
         return true;
+    }
+
+    /**
+     * Get the first image URL from the first label activity in the section.
+     *
+     * @return string|null
+     */
+    protected function get_section_cover_image_url(): ?string {
+        $course = $this->format->get_course();
+        $section = $this->section;
+
+        if (empty($section->section)) {
+            return null;
+        }
+
+        $modinfo = get_fast_modinfo($course);
+        $sections = $modinfo->get_sections();
+
+        if (empty($sections[$section->section])) {
+            return null;
+        }
+
+        foreach ($sections[$section->section] as $cmid) {
+            $cm = $modinfo->get_cm($cmid);
+
+            if ($cm->modname !== 'label') {
+                continue;
+            }
+
+            if (!$cm->uservisible) {
+                continue;
+            }
+
+            $content = $cm->get_formatted_content(['overflowdiv' => false]);
+
+            if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $content, $matches)) {
+                return $matches[1];
+            }
+        }
+
+        return null;
     }
 
     /**
