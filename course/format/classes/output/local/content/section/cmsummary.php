@@ -100,7 +100,7 @@ class cmsummary implements named_templatable, renderable {
         $total = 0;
         $complete = 0;
 
-        $cmids = $this->get_section_cmids_with_subsections($section->section);
+        $cmids = $this->get_section_cmids_with_subsections((int)$section->id);
 
         $cancomplete = isloggedin() && !isguestuser();
         $showcompletion = false;
@@ -133,30 +133,42 @@ class cmsummary implements named_templatable, renderable {
     /**
      * Get cmids from a section and from delegated subsection sections.
      *
-     * @param int $sectionnum
-     * @param array $visited
+     * @param int $sectionid The course_sections.id value.
+     * @param array $visited Already visited section ids.
      * @return array
      */
-    protected function get_section_cmids_with_subsections(int $sectionnum, array &$visited = []): array {
+    protected function get_section_cmids_with_subsections(int $sectionid, array &$visited = []): array {
         global $DB;
 
-        if (isset($visited[$sectionnum])) {
+        if (isset($visited[$sectionid])) {
             return [];
         }
 
-        $visited[$sectionnum] = true;
+        $visited[$sectionid] = true;
 
-        $format = $this->format;
-        $course = $format->get_course();
-        $modinfo = $format->get_modinfo();
+        $course = $this->format->get_course();
+        $modinfo = $this->format->get_modinfo();
 
-        $cmids = $modinfo->sections[$sectionnum] ?? [];
+        $sectionrecord = $DB->get_record('course_sections', [
+            'id' => $sectionid,
+            'course' => $course->id,
+        ]);
+
+        if (!$sectionrecord || empty($sectionrecord->sequence)) {
+            return [];
+        }
+
+        $cmids = array_filter(array_map('intval', explode(',', $sectionrecord->sequence)));
         $result = [];
 
         foreach ($cmids as $cmid) {
-            $cm = $modinfo->cms[$cmid] ?? null;
+            if (empty($modinfo->cms[$cmid])) {
+                continue;
+            }
 
-            if (!$cm || !$cm->uservisible) {
+            $cm = $modinfo->cms[$cmid];
+
+            if (!$cm->uservisible) {
                 continue;
             }
 
@@ -164,13 +176,13 @@ class cmsummary implements named_templatable, renderable {
                 $subsection = $DB->get_record('course_sections', [
                     'course' => $course->id,
                     'component' => 'mod_subsection',
-                    'itemid' => $cmid,
+                    'itemid' => $cm->instance,
                 ]);
 
                 if ($subsection) {
                     $result = array_merge(
                         $result,
-                        $this->get_section_cmids_with_subsections((int)$subsection->section, $visited)
+                        $this->get_section_cmids_with_subsections((int)$subsection->id, $visited)
                     );
                 }
 
@@ -182,5 +194,4 @@ class cmsummary implements named_templatable, renderable {
 
         return $result;
     }
-
 }
