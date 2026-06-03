@@ -100,7 +100,7 @@ class cmsummary implements named_templatable, renderable {
         $total = 0;
         $complete = 0;
 
-        $cmids = $modinfo->sections[$section->section] ?? [];
+        $cmids = $this->get_section_cmids_with_subsections($section->section);
 
         $cancomplete = isloggedin() && !isguestuser();
         $showcompletion = false;
@@ -129,4 +129,58 @@ class cmsummary implements named_templatable, renderable {
 
         return [$mods, $complete, $total, $showcompletion];
     }
+
+    /**
+     * Get cmids from a section and from delegated subsection sections.
+     *
+     * @param int $sectionnum
+     * @param array $visited
+     * @return array
+     */
+    protected function get_section_cmids_with_subsections(int $sectionnum, array &$visited = []): array {
+        global $DB;
+
+        if (isset($visited[$sectionnum])) {
+            return [];
+        }
+
+        $visited[$sectionnum] = true;
+
+        $format = $this->format;
+        $course = $format->get_course();
+        $modinfo = $format->get_modinfo();
+
+        $cmids = $modinfo->sections[$sectionnum] ?? [];
+        $result = [];
+
+        foreach ($cmids as $cmid) {
+            $cm = $modinfo->cms[$cmid] ?? null;
+
+            if (!$cm || !$cm->uservisible) {
+                continue;
+            }
+
+            if ($cm->modname === 'subsection') {
+                $subsection = $DB->get_record('course_sections', [
+                    'course' => $course->id,
+                    'component' => 'mod_subsection',
+                    'itemid' => $cmid,
+                ]);
+
+                if ($subsection) {
+                    $result = array_merge(
+                        $result,
+                        $this->get_section_cmids_with_subsections((int)$subsection->section, $visited)
+                    );
+                }
+
+                continue;
+            }
+
+            $result[] = $cmid;
+        }
+
+        return $result;
+    }
+
 }
