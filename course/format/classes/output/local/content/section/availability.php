@@ -278,38 +278,23 @@ class availability implements named_templatable, renderable {
             return;
         }
 
-        $sectionname = strtolower((string)($this->section->name ?? ''));
-
         $unlocktype = '';
 
-        // Priorité 1 : nom de section, si tu utilises des noms clairs.
-        if (str_contains($sectionname, 'full')) {
-            $unlocktype = 'full';
-
-        } else if (str_contains($sectionname, 'grammar') || str_contains($sectionname, 'grammaire')) {
+        // Cas Grammar : la section accepte grammarstudent.
+        // Exemple réel : grammarstudent OU student.
+        if (in_array('grammarstudent', $allowed, true)) {
             $unlocktype = 'grammar';
 
-        // Priorité 2 : restrictions négatives.
-        // Exemple : ne doit pas être trialstudent + ne doit pas être grammarstudent
-        // => activité réservée au Full.
-        } else if (
-            in_array('trialstudent', $forbidden, true)
-            && in_array('grammarstudent', $forbidden, true)
-        ) {
-            $unlocktype = 'full';
-
-        // Si grammarstudent est interdit, c'est forcément au-dessus de Grammar.
-        } else if (in_array('grammarstudent', $forbidden, true)) {
-            $unlocktype = 'full';
-
-        // Priorité 3 : restrictions positives.
-        // Si student est explicitement requis => Full.
+        // Cas Full : la section accepte uniquement student.
         } else if (in_array('student', $allowed, true)) {
             $unlocktype = 'full';
 
-        // Si grammarstudent est explicitement requis => Grammar.
-        } else if (in_array('grammarstudent', $allowed, true)) {
-            $unlocktype = 'grammar';
+        // Sécurité si une restriction négative est utilisée plus tard.
+        } else if (
+            in_array('trialstudent', $forbidden, true)
+            || in_array('grammarstudent', $forbidden, true)
+        ) {
+            $unlocktype = 'full';
         }
 
         if ($unlocktype === '') {
