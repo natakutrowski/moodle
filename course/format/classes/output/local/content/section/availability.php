@@ -391,21 +391,37 @@ class availability implements named_templatable, renderable {
     private function find_plan_checkout_url_by_accesslevel(string $accesslevel): string {
         global $DB;
 
-        $courseid = (int)$this->section->course;
+        $courseids = [];
+        $courseids[] = (int)$this->section->course;
+
+        // Si CampusFR utilise des champs custom pour mapper trial/réel,
+        // on tente aussi les cours liés.
+        foreach (['realcourseid', 'trialcourseid'] as $fieldshortname) {
+            $mappedid = $this->get_course_customfield_int((int)$this->section->course, $fieldshortname);
+            if ($mappedid > 0) {
+                $courseids[] = $mappedid;
+            }
+        }
+
+        $courseids = array_values(array_unique(array_filter($courseids)));
+
+        if (empty($courseids)) {
+            return (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+        }
+
+        [$insql, $params] = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'courseid');
+        $params['accesslevel'] = $accesslevel;
 
         $planid = $DB->get_field_sql("
             SELECT p.id
             FROM {subscription_plan_entitlement} e
             JOIN {subscription_plan} p ON p.id = e.planid
-            WHERE e.courseid = :courseid
+            WHERE e.courseid $insql
             AND e.accesslevel = :accesslevel
             AND p.is_active = 1
         ORDER BY e.priority DESC, p.id ASC
             LIMIT 1
-        ", [
-            'courseid' => $courseid,
-            'accesslevel' => $accesslevel,
-        ]);
+        ", $params);
 
         if (!$planid) {
             return (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
@@ -414,6 +430,27 @@ class availability implements named_templatable, renderable {
         return (new \moodle_url('/local/subscriptions/checkout.php', [
             'planid' => (int)$planid,
         ]))->out(false);
+    }
+
+    private function get_course_customfield_int(int $courseid, string $shortname): int {
+        global $DB;
+
+        $value = $DB->get_field_sql("
+            SELECT d.value
+            FROM {customfield_data} d
+            JOIN {customfield_field} f ON f.id = d.fieldid
+            JOIN {customfield_category} c ON c.id = f.categoryid
+            WHERE d.instanceid = :courseid
+            AND f.shortname = :shortname
+            AND c.component = 'core_course'
+            AND c.area = 'course'
+            LIMIT 1
+        ", [
+            'courseid' => $courseid,
+            'shortname' => $shortname,
+        ]);
+
+        return $value ? (int)$value : 0;
     }
 
     /**
