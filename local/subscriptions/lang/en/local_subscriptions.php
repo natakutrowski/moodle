@@ -1043,3 +1043,7 @@ $string['buy'] = 'Buy';
 $string['plan_already_covered'] = 'You already have equivalent or higher access to this content.';
 $string['all_courses_owned_title'] = 'You already have access to all available courses';
 $string['all_courses_owned_text'] = 'No new purchase is needed right now. You can continue learning from your course area.';
+
+$string['unlock_subscriber_title'] = 'Subscribers-only activity';
+$string['unlock_subscriber_text'] = 'This activity is not available with trial access. Choose a plan to continue.';
+$string['unlock_subscriber_button'] = 'View plans';

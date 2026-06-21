@@ -280,20 +280,25 @@ class availability implements named_templatable, renderable {
 
         $unlocktype = '';
 
+        // Cas : interdit aux visiteurs anonymes et aux trialstudent.
+        // => réservé aux abonnés, sans savoir si Grammar ou Full.
+        if (
+            in_array('guest', $forbidden, true)
+            && in_array('trialstudent', $forbidden, true)
+        ) {
+            $unlocktype = 'subscriber';
+
         // Cas Grammar : la section accepte grammarstudent.
-        // Exemple réel : grammarstudent OU student.
-        if (in_array('grammarstudent', $allowed, true)) {
+        // Exemple : grammarstudent OU student.
+        } else if (in_array('grammarstudent', $allowed, true)) {
             $unlocktype = 'grammar';
 
         // Cas Full : la section accepte uniquement student.
         } else if (in_array('student', $allowed, true)) {
             $unlocktype = 'full';
 
-        // Sécurité si une restriction négative est utilisée plus tard.
-        } else if (
-            in_array('trialstudent', $forbidden, true)
-            || in_array('grammarstudent', $forbidden, true)
-        ) {
+        // Sécurité : si grammarstudent est interdit, c’est au-dessus de Grammar.
+        } else if (in_array('grammarstudent', $forbidden, true)) {
             $unlocktype = 'full';
         }
 
