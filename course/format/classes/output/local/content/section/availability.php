@@ -269,9 +269,12 @@ class availability implements named_templatable, renderable {
             return;
         }
 
-        $roles = $this->extract_role_shortnames_from_availability($availability);
+        $rules = $this->extract_role_rules_from_availability($availability);
 
-        if (empty($roles)) {
+        $allowed = $rules['allowed'] ?? [];
+        $forbidden = $rules['forbidden'] ?? [];
+
+        if (empty($allowed) && empty($forbidden)) {
             return;
         }
 
@@ -279,13 +282,33 @@ class availability implements named_templatable, renderable {
 
         $unlocktype = '';
 
+        // Priorité 1 : nom de section, si tu utilises des noms clairs.
         if (str_contains($sectionname, 'full')) {
             $unlocktype = 'full';
+
         } else if (str_contains($sectionname, 'grammar') || str_contains($sectionname, 'grammaire')) {
             $unlocktype = 'grammar';
-        } else if (in_array('student', $roles, true)) {
+
+        // Priorité 2 : restrictions négatives.
+        // Exemple : ne doit pas être trialstudent + ne doit pas être grammarstudent
+        // => activité réservée au Full.
+        } else if (
+            in_array('trialstudent', $forbidden, true)
+            && in_array('grammarstudent', $forbidden, true)
+        ) {
             $unlocktype = 'full';
-        } else if (in_array('grammarstudent', $roles, true)) {
+
+        // Si grammarstudent est interdit, c'est forcément au-dessus de Grammar.
+        } else if (in_array('grammarstudent', $forbidden, true)) {
+            $unlocktype = 'full';
+
+        // Priorité 3 : restrictions positives.
+        // Si student est explicitement requis => Full.
+        } else if (in_array('student', $allowed, true)) {
+            $unlocktype = 'full';
+
+        // Si grammarstudent est explicitement requis => Grammar.
+        } else if (in_array('grammarstudent', $allowed, true)) {
             $unlocktype = 'grammar';
         }
 
@@ -328,10 +351,13 @@ class availability implements named_templatable, renderable {
      * @param mixed $node
      * @return array
      */
-    private function extract_role_shortnames_from_availability($node): array {
+    private function extract_role_rules_from_availability($node): array {
         global $DB;
 
-        $roles = [];
+        $rules = [
+            'allowed' => [],
+            'forbidden' => [],
+        ];
 
         if (is_object($node)) {
             if (($node->type ?? '') === 'role') {
@@ -347,22 +373,34 @@ class availability implements named_templatable, renderable {
                     $shortname = $DB->get_field('role', 'shortname', ['id' => $roleid], IGNORE_MISSING);
 
                     if ($shortname) {
-                        $roles[] = $shortname;
+                        // Dans availability Moodle, n = true signifie généralement "must NOT".
+                        if (!empty($node->n)) {
+                            $rules['forbidden'][] = $shortname;
+                        } else {
+                            $rules['allowed'][] = $shortname;
+                        }
                     }
                 }
             }
 
             foreach (get_object_vars($node) as $value) {
-                $roles = array_merge($roles, $this->extract_role_shortnames_from_availability($value));
+                $child = $this->extract_role_rules_from_availability($value);
+                $rules['allowed'] = array_merge($rules['allowed'], $child['allowed']);
+                $rules['forbidden'] = array_merge($rules['forbidden'], $child['forbidden']);
             }
 
         } else if (is_array($node)) {
             foreach ($node as $value) {
-                $roles = array_merge($roles, $this->extract_role_shortnames_from_availability($value));
+                $child = $this->extract_role_rules_from_availability($value);
+                $rules['allowed'] = array_merge($rules['allowed'], $child['allowed']);
+                $rules['forbidden'] = array_merge($rules['forbidden'], $child['forbidden']);
             }
         }
 
-        return array_values(array_unique($roles));
+        $rules['allowed'] = array_values(array_unique($rules['allowed']));
+        $rules['forbidden'] = array_values(array_unique($rules['forbidden']));
+
+        return $rules;
     }
 
     private function find_plan_checkout_url_by_accesslevel(string $accesslevel): string {
