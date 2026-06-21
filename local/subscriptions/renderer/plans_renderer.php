@@ -107,6 +107,10 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
                 'planid' => $p->id,
                 'sesskey' => sesskey()
             ]);
+            $entitlementsurl = new moodle_url(subscription_config::plan_entitlements_page(), [
+                'planid' => $p->id,
+                'sesskey' => sesskey()
+            ]);
 
             $icons = [];
             // ✏️ Éditer
@@ -140,6 +144,19 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
             $icons[] = html_writer::link($priceurl,
                 $OUTPUT->pix_icon('m/USD', get_string('pricestooltip', 'local_subscriptions'), '', ['title' => $currencytooltip]),
                 ['class' => 'me-2 action-icon']
+            );
+
+            // 🔐 Access rights / Entitlements
+            $icons[] = html_writer::link($entitlementsurl,
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-key',
+                    'aria-hidden' => 'true',
+                    'title' => get_string('planentitlements', 'local_subscriptions'),
+                ]),
+                [
+                    'class' => 'me-2 action-icon',
+                    'title' => get_string('planentitlements', 'local_subscriptions'),
+                ]
             );
 
             // 👁️ Actif / Inactif avec icône <i> et spinner

@@ -124,7 +124,7 @@ $string['trial_expired_html'] =
     'Пробный период завершён. <a href="{$a->subscribe}" class="link-primary" rel="noopener" data-subs-modal="1">Оформите подписку</a>, чтобы продолжить.';
 $string['trial_discount_banner_title'] = 'Скидка −{$a}% для пробного доступа.';
 $string['trial_discount_banner_body']  = 'Осталось: ';
-$string['trial_discount_banner_cta']   = 'Оформить подписку';
+$string['trial_discount_banner_cta']   = 'Купить курс';
 $string['trial_days_word']             = 'дн.';
 
 $string['trial_banner_reminder_title'] = 'Напоминание о пробном доступе.';
@@ -245,7 +245,7 @@ $string['trial_password_toggle_show'] = 'Показать пароль';
 $string['trial_password_toggle_hide'] = 'Скрыть пароль';
 $string['trial_welcome_banner_html'] =
     'Добро пожаловать в Campus<small><sup>FR</sup></small>! Ваш пробный доступ активирован. ' .
-    'Начните с уровня, который вам подходит (A1, A2 [скоро] или B1 [скоро]) — первый урок бесплатный. ' .
+    'Начните с уровня, который вам подходит (A1 или A2) — первый урок бесплатный. ' .
     'Вы можете в любой момент найти свои курсы на странице «Мои курсы».';
 
 $string['mail_trial_started_support'] =
@@ -286,3 +286,7 @@ $string['audio_not_found_message'] = 'Это аудио не найдено ил
 $string['audio_back_to_home'] = 'Вернуться на главную';
 $string['audio_player_instruction'] = 'Нажмите на кнопку воспроизведения, чтобы прослушать аудио.';
 $string['audio_browser_not_supported'] = 'Ваш браузер не поддерживает воспроизведение аудио.';
+
+$string['other_courses_available_title'] = 'Открыть другие курсы';
+$string['other_courses_available_text'] = 'Вы можете продолжить обучение и добавить другие доступные курсы CampusFR.';
+$string['trial_badge'] = 'Пробный доступ';

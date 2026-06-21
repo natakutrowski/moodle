@@ -108,10 +108,13 @@ class availability implements named_templatable, renderable {
 
         $data = (object) $this->get_info($output);
 
+        $this->add_campus_unlock_context($data);
+
         $attributename = $this->hasavailabilityname;
         $data->$attributename = !empty($data->info);
 
         $this->data = $data;
+
     }
 
     /**
@@ -248,6 +251,146 @@ class availability implements named_templatable, renderable {
         }
 
         return (object) $data;
+    }
+
+    /**
+     * Add CampusFR custom unlock context based on role restrictions.
+     *
+     * @param stdClass $data
+     * @return void
+     */
+    private function add_campus_unlock_context(stdClass $data): void {
+        if (empty($data->info) || empty($this->section->availability)) {
+            return;
+        }
+
+        $availability = json_decode($this->section->availability);
+        if (!$availability) {
+            return;
+        }
+
+        $roles = $this->extract_role_shortnames_from_availability($availability);
+
+        if (empty($roles)) {
+            return;
+        }
+
+        $sectionname = strtolower((string)($this->section->name ?? ''));
+
+        $unlocktype = '';
+
+        if (str_contains($sectionname, 'full')) {
+            $unlocktype = 'full';
+        } else if (str_contains($sectionname, 'grammar') || str_contains($sectionname, 'grammaire')) {
+            $unlocktype = 'grammar';
+        } else if (in_array('student', $roles, true)) {
+            $unlocktype = 'full';
+        } else if (in_array('grammarstudent', $roles, true)) {
+            $unlocktype = 'grammar';
+        }
+
+        if ($unlocktype === '') {
+            return;
+        }
+
+        $payload = [
+            'campusunlocktype' => $unlocktype,
+            'campusunlocktitle' => get_string('unlock_' . $unlocktype . '_title', 'local_subscriptions'),
+            'campusunlocktext' => get_string('unlock_' . $unlocktype . '_text', 'local_subscriptions'),
+            'campusunlockbutton' => get_string('unlock_' . $unlocktype . '_button', 'local_subscriptions'),
+            'campusunlockurl' => $this->find_plan_checkout_url_by_accesslevel($unlocktype),
+        ];
+
+        if ($unlocktype === 'grammar') {
+            $payload['iscampusgrammarunlock'] = true;
+        } else if ($unlocktype === 'full') {
+            $payload['iscampusfullunlock'] = true;
+        }
+
+        if (is_array($data->info)) {
+            foreach ($data->info as &$item) {
+                if (is_object($item)) {
+                    foreach ($payload as $key => $value) {
+                        $item->$key = $value;
+                    }
+                }
+            }
+            unset($item);
+        } else if (is_object($data->info)) {
+            foreach ($payload as $key => $value) {
+                $data->info->$key = $value;
+            }
+        }
+    }
+    /**
+     * Extract Moodle role shortnames from section availability JSON.
+     *
+     * @param mixed $node
+     * @return array
+     */
+    private function extract_role_shortnames_from_availability($node): array {
+        global $DB;
+
+        $roles = [];
+
+        if (is_object($node)) {
+            if (($node->type ?? '') === 'role') {
+                $roleid = 0;
+
+                if (!empty($node->id)) {
+                    $roleid = (int)$node->id;
+                } else if (!empty($node->roleid)) {
+                    $roleid = (int)$node->roleid;
+                }
+
+                if ($roleid > 0) {
+                    $shortname = $DB->get_field('role', 'shortname', ['id' => $roleid], IGNORE_MISSING);
+
+                    if ($shortname) {
+                        $roles[] = $shortname;
+                    }
+                }
+            }
+
+            foreach (get_object_vars($node) as $value) {
+                $roles = array_merge($roles, $this->extract_role_shortnames_from_availability($value));
+            }
+
+        } else if (is_array($node)) {
+            foreach ($node as $value) {
+                $roles = array_merge($roles, $this->extract_role_shortnames_from_availability($value));
+            }
+        }
+
+        return array_values(array_unique($roles));
+    }
+
+    private function find_plan_checkout_url_by_accesslevel(string $accesslevel): string {
+        global $DB;
+
+        $courseid = (int)$this->section->course;
+
+        $planid = $DB->get_field_sql("
+            SELECT p.id
+            FROM {subscription_plan_entitlement} e
+            JOIN {subscription_plan} p ON p.id = e.planid
+            WHERE e.courseid = :courseid
+            AND e.accesslevel = :accesslevel
+            AND p.is_active = 1
+        ORDER BY e.priority DESC, p.id ASC
+            LIMIT 1
+        ", [
+            'courseid' => $courseid,
+            'accesslevel' => $accesslevel,
+        ]);
+
+        if (!$planid) {
+            return (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+        }
+
+        return (new \moodle_url('/local/subscriptions/checkout.php', [
+            'planid' => (int)$planid,
+        ]))->out(false);
     }
 
     /**

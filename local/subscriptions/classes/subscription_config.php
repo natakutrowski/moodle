@@ -91,7 +91,15 @@ class subscription_config {
     public static function plans_prices_page(): string {
         return self::plugin_path() . 'plans_prices.php';
     }
+
+    public static function plan_entitlements_page(): string {
+        return self::plugin_path() . 'plan_entitlements.php';
+    }    
     
+    public static function plan_upgrades_page(): string {
+        return self::plugin_path() . 'plan_upgrades.php';
+    }
+
     // -- Buttons --
     // Add subscription
     public static function button_add_subscription(): string {

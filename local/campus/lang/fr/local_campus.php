@@ -137,7 +137,7 @@ $string['trial_expired_html'] =
 
 $string['trial_discount_banner_title'] = 'Réduction de −{$a}% pour la période d’essai.';
 $string['trial_discount_banner_body']  = 'Il reste : ';
-$string['trial_discount_banner_cta']   = 'Souscrire un abonnement';
+$string['trial_discount_banner_cta']   = 'Acheter un cours';
 $string['trial_days_word']             = 'j.';
 
 $string['trial_banner_reminder_title'] = 'Rappel concernant votre période d’essai';
@@ -274,7 +274,7 @@ $string['trial_password_toggle_hide'] = 'Masquer le mot de passe';
 
 $string['trial_welcome_banner_html'] =
     'Bienvenue sur Campus<small><sup>FR</sup></small> ! Votre compte d’essai est activé. ' .
-    'Commencez par le niveau qui vous convient (A1, A2 [à venir] ou B1 [à venir]), la première leçon est offerte. ' .
+    'Commencez par le niveau qui vous convient (A1 ou A2), la première leçon est offerte. ' .
     'Vous pouvez retrouver vos cours à tout moment via la page « Mes cours ».';
 
 $string['mail_trial_started_support'] =
@@ -317,3 +317,7 @@ $string['audio_not_found_message'] = 'Cet audio est introuvable ou n’est plus 
 $string['audio_back_to_home'] = 'Retour à l’accueil';
 $string['audio_player_instruction'] = 'Cliquez sur lecture pour écouter l’audio.';
 $string['audio_browser_not_supported'] = 'Votre navigateur ne supporte pas l’audio.';
+
+$string['other_courses_available_title'] = 'Découvrir d’autres cours';
+$string['other_courses_available_text'] = 'Vous pouvez compléter votre parcours avec les autres cours disponibles sur CampusFR.';
+$string['trial_badge'] = 'Essai';

@@ -60,6 +60,15 @@ if (!$edit && !$add) {
         new moodle_url(subscription_config::manage_page(),['tab' => 'plans', 'add' => 1])
     );
 
+    echo html_writer::link(
+        new moodle_url(subscription_config::plan_upgrades_page()),
+        '⬆️ ' . get_string('planupgrades', 'local_subscriptions'),
+        [
+            'class' => 'btn btn-secondary',
+            'style' => 'margin-bottom: 1em; margin-left: .5em; display: inline-block;',
+        ]
+    );    
+
     echo $OUTPUT->heading(get_string('planlist', 'local_subscriptions'));
 
 	$order = optional_param('order', 'name', PARAM_ALPHA);

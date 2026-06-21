@@ -1178,5 +1178,101 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2026051009, 'local', 'subscriptions');
 	}
 
+	if ($oldversion < 2026051010) {
+
+		$dbman = $DB->get_manager();
+
+		// Table: subscription_plan_entitlement.
+		$table = new xmldb_table('subscription_plan_entitlement');
+
+		if (!$dbman->table_exists($table)) {
+
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('planid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('accesslevel', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL, null, 'full');
+			$table->add_field('roleshortname', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, 'student');
+			$table->add_field('groupname', XMLDB_TYPE_CHAR, '255', null, null);
+			$table->add_field('priority', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 100);
+			$table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+			$table->add_field('lastupdate', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+			$table->add_key('planid_fk', XMLDB_KEY_FOREIGN, ['planid'], 'subscription_plan', ['id']);
+			$table->add_key('courseid_fk', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
+
+			$table->add_index('plan_course_level_uix', XMLDB_INDEX_UNIQUE, ['planid', 'courseid', 'accesslevel']);
+
+			$dbman->create_table($table);
+		}
+
+		// Table: subscription_plan_upgrade.
+		$table = new xmldb_table('subscription_plan_upgrade');
+
+		if (!$dbman->table_exists($table)) {
+
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('fromplanid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('toplanid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('pricingmode', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL, null, 'difference');
+			$table->add_field('isactive', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, 1);
+			$table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+			$table->add_field('lastupdate', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+			$table->add_key('fromplanid_fk', XMLDB_KEY_FOREIGN, ['fromplanid'], 'subscription_plan', ['id']);
+			$table->add_key('toplanid_fk', XMLDB_KEY_FOREIGN, ['toplanid'], 'subscription_plan', ['id']);
+
+			$table->add_index('upgrade_pair_uix', XMLDB_INDEX_UNIQUE, ['fromplanid', 'toplanid']);
+
+			$dbman->create_table($table);
+		}
+
+		// Migration douce : créer des entitlements "full" depuis les anciens scopes.
+		$sql = "SELECT p.id AS planid, s.course_ids
+				FROM {subscription_plan} p
+				JOIN {subscription_access_scope} s ON s.id = p.accessscopeid";
+
+		$plans = $DB->get_records_sql($sql);
+
+		foreach ($plans as $plan) {
+			if (empty($plan->course_ids)) {
+				continue;
+			}
+
+			$courseids = preg_split('/[,;\s]+/', (string)$plan->course_ids, -1, PREG_SPLIT_NO_EMPTY);
+			$courseids = array_unique(array_map('intval', $courseids));
+
+			foreach ($courseids as $courseid) {
+				if ($courseid <= 0) {
+					continue;
+				}
+
+				if ($DB->record_exists('subscription_plan_entitlement', [
+					'planid' => (int)$plan->planid,
+					'courseid' => $courseid,
+					'accesslevel' => 'full',
+				])) {
+					continue;
+				}
+
+				$now = time();
+
+				$DB->insert_record('subscription_plan_entitlement', (object)[
+					'planid' => (int)$plan->planid,
+					'courseid' => $courseid,
+					'accesslevel' => 'full',
+					'roleshortname' => 'student',
+					'groupname' => '',
+					'priority' => 100,
+					'timecreated' => $now,
+					'lastupdate' => $now,
+				]);
+			}
+		}
+
+		upgrade_plugin_savepoint(true, 2026051010, 'local', 'subscriptions');
+	}
+
     return true;
 }

@@ -3,7 +3,7 @@
 class block_campus_slider extends block_base {
 
     public function init() {
-        $this->title = 'Campus Slider';
+        $this->title = get_string('pluginname', 'block_campus_slider');
     }
 
     public function get_content() {

@@ -41,7 +41,33 @@
             <span class="badge rounded-pill bg-warning text-dark">{{{text}}}</span>
         {{/isrestricted}}
         {{#isrestricted}}
-            {{> core_courseformat/local/content/availability }}
+
+            {{#campusunlocktype}}
+                <div class="campus-availability-inline campus-availability-{{campusunlocktype}}">
+                    <div class="campus-availability-icon">
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                    </div>
+
+                    <div class="campus-availability-content">
+                        <div class="campus-availability-title">
+                            {{{campusunlocktitle}}}
+                        </div>
+                        <div class="campus-availability-text">
+                            {{{campusunlocktext}}}
+                        </div>
+                    </div>
+
+                    <a class="campus-availability-button"
+                    href="{{campusunlockurl}}">
+                        {{{campusunlockbutton}}}
+                    </a>
+                </div>
+            {{/campusunlocktype}}
+
+            {{^campusunlocktype}}
+                {{> core_courseformat/local/content/availability }}
+            {{/campusunlocktype}}
+
         {{/isrestricted}}
         </div>
     {{/info}}

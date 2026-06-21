@@ -712,7 +712,7 @@ $string['set_display_currency_symbols_desc'] = 'If enabled, prices use the symbo
 $string['badge_limited_offer'] = 'Limited offer -{$a}%';
 $string['price_unavailable_in'] = 'Not available in {$a->curr} — showing {$a->fallback}.';
 $string['checkout_discount_note']        = 'Your intro offer is still active';
-$string['checkout_discount_note_prefix'] = '−{$a}% on the subscription. Discount available only';
+$string['checkout_discount_note_prefix'] = '🎁 −{$a}% on all course purchases. Discount available only';
 $string['days_short']                    = 'd';
 
 $string['cancel_price_title']  = 'Expected price';
@@ -968,3 +968,78 @@ $string['digital_cancel_vpn_hint'] = '💡 If you are paying in RUB, please temp
 $string['digital_cancel_support_text'] = 'If you think you have been charged or need help, write to us at {$a}.';
 $string['digital_cancel_gateway_timeout'] =
 'The payment page could not be opened at the moment. This may be temporary. Please try again in a few minutes.';
+
+$string['planentitlements'] = 'Plan access rights';
+$string['planentitlementsfor'] = 'Access rights for plan: {$a}';
+$string['addentitlement'] = 'Add access right';
+$string['editentitlement'] = 'Edit access right';
+$string['deleteentitlement'] = 'Delete access right';
+$string['saveentitlement'] = 'Save access right';
+$string['noentitlements'] = 'No access rights have been configured for this plan yet.';
+$string['entitlementcreated'] = 'Access right created successfully.';
+$string['entitlementupdated'] = 'Access right updated successfully.';
+$string['entitlementdeleted'] = 'Access right deleted successfully.';
+$string['confirmdeleteentitlement'] = 'Do you really want to delete this access right?';
+
+$string['entitlement_course'] = 'Course';
+$string['entitlement_accesslevel'] = 'Access level';
+$string['entitlement_role'] = 'Role in the course';
+$string['entitlement_groupname'] = 'Group name';
+$string['entitlement_groupname_help'] = 'Optional. If filled, the user will be added to this Moodle group in the selected course.';
+$string['entitlement_priority'] = 'Priority';
+$string['entitlement_priority_help'] = 'Higher priority access can replace lower priority access. Suggested values: trial = 10, grammar = 50, full = 100.';
+$string['entitlement_already_exists'] = 'This plan already has this access level for this course.';
+
+$string['accesslevel_trial'] = 'Trial';
+$string['accesslevel_grammar'] = 'Grammar only';
+$string['accesslevel_full'] = 'Full access';
+$string['invalidplanid'] = 'Invalid or missing plan.';
+
+$string['planupgrades'] = 'Plan upgrades';
+$string['planupgradesintro'] = 'Define which plans can be upgraded to another plan. For example: A2 Grammar → A2 Full. With difference pricing, the upgrade price is calculated as the target plan price minus the current plan price in the same currency.';
+$string['addupgrade'] = 'Add upgrade';
+$string['editupgrade'] = 'Edit upgrade';
+$string['deleteupgrade'] = 'Delete upgrade';
+$string['saveupgrade'] = 'Save upgrade';
+$string['noupgrades'] = 'No plan upgrades have been configured yet.';
+$string['upgradecreated'] = 'Upgrade rule created successfully.';
+$string['upgradeupdated'] = 'Upgrade rule updated successfully.';
+$string['upgradedeleted'] = 'Upgrade rule deleted successfully.';
+$string['confirmdeleteupgrade'] = 'Do you really want to delete this upgrade rule?';
+
+$string['upgrade_fromplan'] = 'From plan';
+$string['upgrade_toplan'] = 'To plan';
+$string['upgrade_pricingmode'] = 'Pricing mode';
+$string['upgrade_pricingmode_help'] = 'For now, only difference pricing is supported: upgrade price = target plan price - current plan price, in the same currency.';
+$string['upgrade_pricing_difference'] = 'Difference between the two plan prices';
+$string['upgrade_isactive'] = 'Active';
+$string['upgrade_same_plan_error'] = 'The source plan and target plan must be different.';
+$string['upgrade_already_exists'] = 'This upgrade rule already exists.';
+$string['active'] = 'Active';
+$string['inactive'] = 'Inactive';
+$string['status'] = 'Status';
+
+$string['planentitlements'] = 'Plan access rights';
+$string['planupgrades'] = 'Plan upgrades';
+$string['option_upgrade_difference'] = 'Upgrade to the full version';
+$string['plan_already_owned'] = 'You already have access to this plan.';
+$string['upgrade_from_to_summary'] = 'You are upgrading from "{$a->from}" to "{$a->to}". You only pay the price difference.';
+$string['upgrade_badge'] = 'Upgrade';
+$string['upgrade_discount_applied'] = 'Your trial discount has been applied: {$a->discount}%.';
+$string['upgrade_cta'] = 'Upgrade now';
+
+$string['unlock_grammar_title'] = 'Activity included in the Grammar module';
+$string['unlock_grammar_text'] = 'This activity is part of the Grammar module. You can buy the Grammar module only or the full course.';
+$string['unlock_grammar_button'] = 'Buy Grammar';
+
+$string['unlock_full_title'] = 'Activity reserved for the full version';
+$string['unlock_full_text'] = 'This activity is not included in the Grammar module. Upgrade to the full version to access all course content.';
+$string['unlock_full_button'] = 'Upgrade to full access';
+
+$string['restricted_access_title'] = 'Restricted access';
+$string['restricted_access_text'] = 'Buy the course to unlock this activity.';
+$string['buy'] = 'Buy';
+
+$string['plan_already_covered'] = 'You already have equivalent or higher access to this content.';
+$string['all_courses_owned_title'] = 'You already have access to all available courses';
+$string['all_courses_owned_text'] = 'No new purchase is needed right now. You can continue learning from your course area.';

@@ -4,12 +4,25 @@ require(__DIR__.'/../../config.php');
 require_once($CFG->dirroot.'/local/campus/lib.php');
 require_once($CFG->dirroot.'/local/subscriptions/lib.php');
 require_once($CFG->libdir.'/completionlib.php'); // fallback si core_completion n'est pas dispo
+require_once($CFG->dirroot . '/local/subscriptions/classes/domain/SubscriptionAdvisor.php');
+
+use local_subscriptions\constants\Operation;
+use local_subscriptions\domain\SubscriptionAdvisor;
 
 $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/campus/mycourses.php'));
 
 require_login(); // force la connexion
+
+// Devise pour les prix affichés.
+$currency = optional_param('currency', '', PARAM_ALPHANUMEXT);
+$currency = strtoupper($currency);
+
+if (!in_array($currency, ['EUR', 'RUB'], true)) {
+    $cc = \local_subscriptions\support\Region::detect_country();
+    $currency = in_array($cc, ['RU', 'BY'], true) ? 'RUB' : 'EUR';
+}
 
 // Bloquer aussi l'utilisateur invité
 if (isguestuser()) {
@@ -45,6 +58,29 @@ require_once($CFG->libdir.'/completionlib.php'); // pour completion_info
 $progressMap     = [];
 $progressCounts  = []; // [courseid => ['done'=>X, 'total'=>Y]]
 $completed_ids   = [];
+
+$trial_course_ids = [];
+
+$trialroleid = (int)$DB->get_field('role', 'id', ['shortname' => 'trialstudent'], IGNORE_MISSING);
+
+if ($trialroleid) {
+    $trial_contexts = $DB->get_records_sql("
+        SELECT ctx.instanceid AS courseid
+          FROM {role_assignments} ra
+          JOIN {context} ctx ON ctx.id = ra.contextid
+         WHERE ra.userid = :userid
+           AND ra.roleid = :roleid
+           AND ctx.contextlevel = :courselevel
+    ", [
+        'userid' => (int)$USER->id,
+        'roleid' => $trialroleid,
+        'courselevel' => CONTEXT_COURSE,
+    ]);
+
+    foreach ($trial_contexts as $ctx) {
+        $trial_course_ids[(int)$ctx->courseid] = true;
+    }
+}
 
 foreach ($cours as $rec) { // ← très important : $cours
     $cid    = (int)$rec->id;
@@ -355,7 +391,90 @@ $opts = [
     // *** Nouveaux flags pour le renderer ***
     'hide_header'            => 1, // pas de top_title/title sur mycourses
     'hide_desc'              => 1, // pas de bouton "En savoir plus"
+
+    'trial_course_ids' => $trial_course_ids,
+    'trial_badge_label' => get_string('trial_badge', 'local_campus'),
 ];
+
+
+function local_campus_render_available_purchase_plans(array $plans, string $currency): string {
+    global $USER;
+
+    if (empty($plans)) {
+        return '';
+    }
+
+    $out = html_writer::start_div('campus-category-block container mt-5');
+    $out .= html_writer::tag('h2', get_string('other_courses_available_title', 'local_campus'), [
+        'class' => 'campus-category-title mb-2',
+    ]);
+    $out .= html_writer::tag('p', get_string('other_courses_available_text', 'local_campus'), [
+        'class' => 'text-muted mb-4',
+    ]);
+
+    $out .= html_writer::start_div('row g-4');
+
+    foreach ($plans as $plan) {
+        $options = SubscriptionAdvisor::advise_options((int)$USER->id, (int)$plan->id, $currency);
+        if (empty($options)) {
+            continue;
+        }
+
+        $best = reset($options);
+
+        $isupgrade = (($best['key'] ?? '') === Operation::UPGRADE_NOW_REPLACE_CHAIN);
+        $amount = (float)($best['amount'] ?? 0);
+        $displaycurrency = $best['currency'] ?? $currency;
+
+        $baseamount = $best['extra']['upgrade_base_amount']
+            ?? $best['extra']['base_amount']
+            ?? null;
+
+        $checkouturl = new moodle_url('/local/subscriptions/checkout.php', [
+            'planid' => (int)$plan->id,
+            'currency' => $displaycurrency,
+        ]);
+
+        $buttonlabel = $isupgrade
+            ? get_string('upgrade_cta', 'local_subscriptions')
+            : get_string('subscribe', 'local_subscriptions');
+
+        $pricehtml = '';
+        if (!empty($baseamount) && (float)$baseamount > $amount + 0.01) {
+            $pricehtml =
+                html_writer::span(format_float((float)$baseamount, 2) . ' ' . s($displaycurrency), 'text-muted text-decoration-line-through me-2') .
+                html_writer::span(format_float($amount, 2) . ' ' . s($displaycurrency), 'fw-bold text-success');
+        } else {
+            $pricehtml = html_writer::span(format_float($amount, 2) . ' ' . s($displaycurrency), 'fw-bold');
+        }
+
+        $badge = '';
+        if ($isupgrade) {
+            $badge = html_writer::div(
+                html_writer::span(get_string('upgrade_badge', 'local_subscriptions'), 'badge bg-primary me-2') .
+                s($best['summary'] ?? ''),
+                'small text-muted mb-2'
+            );
+        }
+
+        $card =
+            html_writer::start_div('card h-100 shadow-sm border-0') .
+                html_writer::start_div('card-body d-flex flex-column') .
+                    $badge .
+                    html_writer::tag('h3', format_string($plan->name), ['class' => 'h5 mb-3']) .
+                    html_writer::div($pricehtml, 'mb-3') .
+                    html_writer::link($checkouturl, $buttonlabel, ['class' => 'default-btn mt-auto']) .
+                html_writer::end_div() .
+            html_writer::end_div();
+
+        $out .= html_writer::div($card, 'col-md-4');
+    }
+
+    $out .= html_writer::end_div();
+    $out .= html_writer::end_div();
+
+    return $out;
+}
 
 echo $OUTPUT->header();
 // local_campus_render_subscription_expiry_banner(); // disable banner
@@ -447,6 +566,23 @@ foreach ($bycat as $catid => $courseobjs) {
 
     echo html_writer::end_div();
 }
+
+// Autres cours / plans disponibles à l'achat.
+$availableplans = $DB->get_records('subscription_plan', ['is_active' => 1], 'name ASC');
+
+$availableplans = SubscriptionAdvisor::filter_plans_for_subscribe(
+    (int)$USER->id,
+    $availableplans
+);
+
+// Ne pas proposer le plan Trial dans "autres cours".
+foreach ($availableplans as $id => $plan) {
+    if (!empty($plan->is_trial)) {
+        unset($availableplans[$id]);
+    }
+}
+
+echo local_campus_render_available_purchase_plans($availableplans, $currency);
 
 if (!empty($trialExpiredNoPaid)) {
     echo html_writer::end_div();

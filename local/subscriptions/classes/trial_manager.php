@@ -78,7 +78,8 @@ class trial_manager {
         subscription_manager::enrol_user_to_courses($userid, $planid, $start, $end);
 
         // Rôle trialstudent au niveau des cours du scope
-        self::force_role_trialstudent($userid, $planid);
+        // Rôles et groupes appliqués par subscription_manager::enrol_user_to_courses().
+        //self::force_role_trialstudent($userid, $planid);
 
         return !empty($result['subscription']->id) ? (int)$result['subscription']->id : null;
     }

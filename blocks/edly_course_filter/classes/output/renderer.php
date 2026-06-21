@@ -45,6 +45,8 @@ class renderer extends \plugin_renderer_base {
             'hide_header'    => 0,  // 1 = ne pas afficher le header (top_title + title)
             'hide_desc'      => 0,  // 1 = cacher "En savoir plus"            
             'progress_counts' => [],
+            'trial_course_ids' => [],
+            'trial_badge_label' => get_string('trial_badge', 'local_campus'),
 
         ], $opts);
 
@@ -96,6 +98,12 @@ class renderer extends \plugin_renderer_base {
             $cardhref = $this->resolve_card_href($courseid, $d);
             $descurl  = $this->resolve_desc_href($courseid, $d);
 
+            $trialCourseIds = (array)($d->trial_course_ids ?? []);
+            $isTrialCourse = !empty($trialCourseIds[$courseid]);
+            $trialBadgeHtml = $isTrialCourse
+                ? '<span class="campus-trial-badge">'.s($d->trial_badge_label).'</span>'
+                : '';
+
             $disabled = !empty($d->disabled_ids) && in_array($courseid, (array)$d->disabled_ids, true);
             $cardclass = $disabled ? ' cf-disabled' : '';
 
@@ -112,9 +120,10 @@ class renderer extends \plugin_renderer_base {
                     $html .= '<div class="price">'.format_text(get_config('theme_edly', 'free_course_price'), FORMAT_HTML, ['filter'=>true]).'</div>';
                 }
                 $html .= '</div>
-                        <div class="courses-content">
-                            <h3><a href="'. s($cardhref) .'">'.format_text($ec->fullName, FORMAT_HTML, ['filter'=>true]).'</a></h3>'.
-                            $this->card_footer($courseid, $d, $descurl).
+                        <div class="courses-content">';
+                $html .=         $trialBadgeHtml .
+                        '<h3><a href="'. s($cardhref) .'">'.format_text($ec->fullName, FORMAT_HTML, ['filter'=>true]).'</a></h3>'.
+                        $this->card_footer($courseid, $d, $descurl).
                         '</div>
                     </div>
                 </div>';
@@ -127,8 +136,9 @@ class renderer extends \plugin_renderer_base {
                             (!empty($badge) ? '<span class="cf-card-badge">'.s($badge).'</span>' : '').
                         '</div>
                         <div class="courses-content">
-                            <div class="top-content">
-                                <h3><a href="'. s($cardhref) .'">'.format_text($ec->fullName, FORMAT_HTML, ['filter'=>true]).'</a></h3>';
+                            <div class="top-content">';
+                $html .=                 $trialBadgeHtml .
+                                '<h3><a href="'. s($cardhref) .'">'.format_text($ec->fullName, FORMAT_HTML, ['filter'=>true]).'</a></h3>';
                 if (!empty($ec->course_price)) {
                     $html .= '<div class="price">'.format_text(get_config('theme_edly', 'site_currency').$ec->course_price, FORMAT_HTML, ['filter'=>true]).'</div>';
                 } else {

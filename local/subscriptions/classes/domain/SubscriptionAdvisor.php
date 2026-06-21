@@ -70,8 +70,8 @@ class SubscriptionAdvisor {
             JOIN {subscription_plan} p ON p.id = s.planid
             WHERE s.userid = :u
             AND s.status = :status
-            AND s.end_date >= :now
-            ORDER BY s.end_date DESC
+            AND (s.end_date = 0 OR s.end_date >= :now)
+        ORDER BY s.end_date DESC
         ", ['u' => $userid, 'status' => Status::ACTIVE, 'now' => $now]);
 
         $samePlanActive  = null;
@@ -89,128 +89,115 @@ class SubscriptionAdvisor {
 
         $opts = [];
 
-/*         // A) Même plan -> UNIQUEMENT "prolonger à la suite"
-        if ($samePlanActive) {
-            // Date d’activation = fin la plus lointaine (active OU déjà queued)
-            $lastend = $DB->get_field_sql("
-                SELECT MAX(end_date)
-                FROM {user_subscription}
-                WHERE userid = :u
-                AND planid = :p
-                AND status IN ('".Status::ACTIVE."','".Status::QUEUED."')
-            ", ['u' => $userid, 'p' => (int)$targetplanid]);
+        // B) Upgrade explicite configuré via subscription_plan_upgrade.
+        // Exemple : A2 Grammar -> A2 Full.
+        // Prix = prix du plan cible - prix du plan source, dans la même devise.
+        foreach ($activesubs as $s) {
+            $upgrade = $DB->get_record('subscription_plan_upgrade', [
+                'fromplanid' => (int)$s->planid,
+                'toplanid'   => $targetplanid,
+                'isactive'   => 1,
+            ], '*', IGNORE_MISSING);
 
-            $activation = $lastend ? userdate(((int)$lastend) + 1) : userdate($now);
+            $fromplan = $DB->get_record('subscription_plan', ['id' => (int)$s->planid], 'id, name', IGNORE_MISSING);
+            $toplan = $DB->get_record('subscription_plan', ['id' => $targetplanid], 'id, name', IGNORE_MISSING);
 
-            $base = (float)$targetprice->price;
-
-            // Remise de renouvellement (fin d’abonnement + fenêtre)
-            $renew = self::compute_renew_discount($samePlanActive, $now, $base);
-
-            $opts[] = [
-                'key'       => Operation::QUEUE_FUTURE,
-                'label'     => get_string('option_queue_future', 'local_subscriptions', $activation),
-                'amount'    => $renew['final'],          // prix remisé envoyé à Stripe/Alfa
-                'currency'  => $currency,
-                'ref_subid' => (int)$samePlanActive->id,
-                'extra'     => [
-                    'anchor_end'        => (int)$lastend,
-                    'discount_percent'  => $renew['percent'],
-                    'discount_amount'   => $renew['amount'],
-                    'list_price'        => $base,
-                ],
-            ];
-            return $opts;
-        }
-
-        // B) Plan différent mais même scope -> proposer UPGRADE(s) + PROLONGER (file)
-        if ($sameScopeActive) {
-            $sameCurrency = !empty($sameScopeActive->currency)
-                && \core_text::strtolower($sameScopeActive->currency) === \core_text::strtolower($currency);
-
-            $t0 = self::find_scope_first_start($userid, $scopeid);
-
-            // Fin la plus tardive dans TOUT le scope (active + queued), pas seulement le plan cible
-            $scope_max_end = self::max_scope_end($userid, $scopeid);
-
-            $opts = [];
-
-            // 1) Prolonger (dans le plan cible) : activation au-delà de la dernière brique scope
-            $activation = $scope_max_end ? userdate($scope_max_end + 1) : userdate($now);
-            $base       = (float)$targetprice->price;
-
-            // même règle de remise que ci-dessus, basée sur la sub active du scope
-            $renew = self::compute_renew_discount($sameScopeActive, $now, $base);
-
-            $opts[] = [
-                'key'       => Operation::QUEUE_FUTURE,
-                'label'     => get_string('option_queue_future', 'local_subscriptions', $activation),
-                'amount'    => $renew['final'],
-                'currency'  => $currency,
-                'ref_subid' => (int)$sameScopeActive->id,
-                'extra'     => [
-                    'anchor_end'        => (int)$scope_max_end,
-                    'discount_percent'  => $renew['percent'],
-                    'discount_amount'   => $renew['amount'],
-                    'list_price'        => $base,
-                ],
-            ];
-
-
-            // 2) Upgrade générique (fenêtre complète)
-            if ($sameCurrency && $t0) {
-                $currplan = $DB->get_record('subscription_plan', ['id' => $sameScopeActive->planid], '*', MUST_EXIST);
-
-                $quote = self::quote_upgrade($sameScopeActive, $currplan, $targetplan, $currency);
-                if (!empty($quote['allowed']) && $quote['amount'] > 0) {
-
-                $upgradeBase = (float)$quote['amount']; // montant avant promo = base_total - déjà_payé
-                $upgradeFinal = $upgradeBase;
-
-                $discPctCfg = (int)(get_config('local_subscriptions','trial_discount_percent') ?? 0);
-                $hasDisc    = $discPctCfg > 0 && \local_subscriptions\trial_manager::is_discount_window_open($userid);
-                if ($hasDisc) {
-                    $upgradeFinal = round($upgradeBase * (100 - $discPctCfg) / 100, 2);
-                }
-
-                $opts[] = [
-                    'key'       => Operation::UPGRADE_NOW_REPLACE_CHAIN,
-                    'label'     => get_string('option_upgrade_now_replace', 'local_subscriptions'),
-                    'amount'    => $upgradeFinal,
-                    'currency'  => $currency,
-                    'ref_subid' => (int)$sameScopeActive->id,
-                    'extra'     => [
-                        'upgrade_window'  => $quote['window'],
-                        'replace_ids'     => $quote['replace_ids'],
-                        'spent_window'    => $quote['spent_window'],
-                        'target_price'    => $quote['target_price'],
-
-                        // nouveau breakdown plus clair
-                        'upgrade_breakdown'      => $quote['breakdown'],  // contient P1, P2, base_total, part_past, part_future…
-                        'upgrade_base_amount'    => $upgradeBase,         // avant promo
-                        'discount_percent'       => $hasDisc ? $discPctCfg : 0,
-                        'upgrade_final_amount'   => $upgradeFinal,        // montant proposé
-                    ],
-                ];
-
-                }
+            if (!$upgrade) {
+                continue;
             }
 
+            if (($upgrade->pricingmode ?? '') !== 'difference') {
+                continue;
+            }
 
+            $sourceprice = self::plan_price_in_currency((int)$s->planid, $currency);
+            $targetpricevalue = self::plan_price_in_currency($targetplanid, $currency);
 
-            // 3) Prolonger (dans le plan cible) : activation au-delà de la dernière brique scope
-            return $opts;
+            if ($sourceprice === null || $targetpricevalue === null) {
+                continue;
+            }
 
+            $baseamount = max(0, round((float)$targetpricevalue - (float)$sourceprice, 2));
+
+            $discountpercent = self::get_trial_discount_percent($userid);
+            $amount = $baseamount;
+
+            if ($discountpercent > 0) {
+                $amount = round($baseamount * (1 - ($discountpercent / 100)), 2);
+            }
+
+            if ($amount <= 0) {
+                continue;
+            }
+
+            $opts[] = [
+                'key'       => Operation::UPGRADE_NOW_REPLACE_CHAIN,
+                'label'     => get_string('option_upgrade_difference', 'local_subscriptions'),
+                'summary'   => get_string('upgrade_from_to_summary', 'local_subscriptions', [
+                    'from' => $fromplan ? $fromplan->name : '',
+                    'to'   => $toplan ? $toplan->name : '',
+                ]),
+                'badge'     => get_string('upgrade_badge', 'local_subscriptions'),
+                'amount'    => $amount,
+                'currency'  => $currency,
+                'ref_subid' => (int)$s->id,
+                'extra'     => [
+                    'upgrade_type' => 'plan_difference',
+                    'from_planid'  => (int)$s->planid,
+                    'to_planid'    => $targetplanid,
+                    'replace_ids'  => [(int)$s->id],
+
+                    'source_price' => (float)$sourceprice,
+                    'target_price' => (float)$targetpricevalue,
+
+                    'upgrade_base_amount'  => $baseamount,
+                    'upgrade_final_amount' => $amount,
+                    'discount_percent'     => $discountpercent,
+
+                    'upgrade_window' => [
+                        'start' => (int)$s->start_date,
+                        'end'   => (int)$s->end_date,
+                    ],
+                ],
+            ];
+
+            break;
         }
- */
-        // C) Aucun abonnement actif -> achat standard
+
+        // Si un upgrade a été trouvé, on le retourne immédiatement.
+        // Ainsi on ne retombe pas sur l'achat standard.
+        if (!empty($opts)) {
+            return $opts;
+        }
+
+        // C) Aucun upgrade trouvé -> achat standard.
+        $baseamount = (float)$targetprice->price;
+        $amount = $baseamount;
+        $discountpercent = 0;
+
+        $isTrialPlan = !empty($targetplan->is_trial);
+
+        if (!$isTrialPlan && \local_subscriptions\trial_manager::is_discount_window_open($userid)) {
+            $discountpercent = (float)(get_config('local_subscriptions', 'trial_discount_percent') ?? 0);
+
+            if ($discountpercent > 0) {
+                $amount = round($baseamount * (1 - ($discountpercent / 100)), 2);
+            }
+        }
+
         $opts[] = [
             'key'       => Operation::PURCHASE_NEW,
             'label'     => get_string('option_purchase_new', 'local_subscriptions'),
-            'amount'    => (float)$targetprice->price,
+            'amount'    => $amount,
             'currency'  => $currency,
             'ref_subid' => null,
+            'extra'     => [
+                'base_amount' => $baseamount,
+                'final_amount' => $amount,
+                'discount_percent' => $discountpercent,
+            ],
         ];
+
         return $opts;
     }
 
@@ -434,5 +421,132 @@ class SubscriptionAdvisor {
         return ['percent' => $percent, 'amount' => $discAmt, 'final' => $final];
     }
 
+    public static function filter_plans_for_subscribe(int $userid, array $plans): array {
+        global $DB;
+
+        $now = time();
+        $result = [];
+
+        foreach ($plans as $plan) {
+            $active = $DB->record_exists_select('user_subscription',
+                'userid = :userid
+                AND planid = :planid
+                AND status = :status
+                AND (end_date = 0 OR end_date >= :now)',
+                [
+                    'userid' => $userid,
+                    'planid' => (int)$plan->id,
+                    'status' => Status::ACTIVE,
+                    'now' => $now,
+                ]
+            );
+
+            if ($active) {
+                continue;
+            }
+
+            if (self::user_has_higher_or_equal_access_for_plan($userid, (int)$plan->id)) {
+                continue;
+            }
+
+            $result[$plan->id] = $plan;
+        }
+
+        return $result;
+    }    
+
+    private static function get_trial_discount_percent(int $userid): float {
+        global $DB;
+
+        if ($userid <= 0) {
+            return 0;
+        }
+
+        // Exemple simple : discount global configuré.
+        // Remplace par ta vraie source si tu as déjà un setting spécifique.
+        $discount = (float)get_config('local_subscriptions', 'trial_discount_percent');
+
+        if ($discount <= 0) {
+            return 0;
+        }
+
+        // On applique seulement si l’utilisateur a/avait un trial actif ou utilisé.
+        $hastrial = $DB->record_exists_select('user_subscription',
+            'userid = :userid
+            AND status = :status
+            AND planid IN (
+                SELECT id FROM {subscription_plan} WHERE is_trial = 1
+            )',
+            [
+                'userid' => $userid,
+                'status' => Status::ACTIVE,
+            ]
+        );
+
+        return $hastrial ? $discount : 0;
+    }
+
+    public static function user_has_higher_or_equal_access_for_plan(int $userid, int $planid): bool {
+        global $DB;
+
+        if ($userid <= 0 || $planid <= 0) {
+            return false;
+        }
+
+        $targetentitlements = $DB->get_records(
+            'subscription_plan_entitlement',
+            ['planid' => $planid],
+            '',
+            'id, courseid, priority'
+        );
+
+        if (empty($targetentitlements)) {
+            return false;
+        }
+
+        $now = time();
+
+        $activesubs = $DB->get_records_sql("
+            SELECT s.*
+            FROM {user_subscription} s
+            WHERE s.userid = :userid
+            AND s.status = :status
+            AND (s.end_date = 0 OR s.end_date >= :now)
+        ", [
+            'userid' => $userid,
+            'status' => Status::ACTIVE,
+            'now' => $now,
+        ]);
+
+        if (empty($activesubs)) {
+            return false;
+        }
+
+        foreach ($targetentitlements as $target) {
+            $covered = false;
+
+            foreach ($activesubs as $sub) {
+                $activeentitlements = $DB->get_records(
+                    'subscription_plan_entitlement',
+                    ['planid' => (int)$sub->planid, 'courseid' => (int)$target->courseid],
+                    '',
+                    'id, courseid, priority'
+                );
+
+                foreach ($activeentitlements as $active) {
+                    if ((int)$active->priority >= (int)$target->priority) {
+                        $covered = true;
+                        break 2;
+                    }
+                }
+            }
+
+            if (!$covered) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
 }

@@ -72,7 +72,8 @@ if (!$istripossible) {
     }
 }
 $istrial  = $istripossible ? (bool) local_campus_is_trial_user() : false;
-$asguest  = $forceguest || $istrial || isguestuser() || !isloggedin();
+//$asguest  = $forceguest || $istrial || isguestuser() || !isloggedin();
+$asguest  = $forceguest || isguestuser() || !isloggedin();
 $isrealguest = $asguest && !$istrial && !$forceguest;
 
 // Si invité forcé → champs requis depuis le formulaire

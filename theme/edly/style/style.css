@@ -8091,3 +8091,63 @@ body.pagelayout-frontpage {
 .campus-section-cover-link {
     display: block;
 }
+
+.campus-availability-inline {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+}
+
+.campus-availability-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #6f7d8a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 17px;
+}
+
+.campus-availability-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.campus-availability-title {
+    font-weight: 700;
+    color: #2c174d;
+    font-size: 15px;
+    line-height: 1.25;
+}
+
+.campus-availability-text {
+    color: #4f4f5f;
+    font-size: 14px;
+    line-height: 1.45;
+    margin-top: 2px;
+}
+
+.campus-availability-button {
+    background: #ff2f72;
+    color: #ffffff !important;
+    border-radius: 9px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none !important;
+    white-space: nowrap;
+    line-height: 1.2;
+}
+
+.campus-availability-button:hover {
+    background: #e91f60;
+    color: #ffffff !important;
+}
+
+.course-section .availabilityinfo  {
+    padding: 12px;
+}

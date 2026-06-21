@@ -57,7 +57,9 @@ if (!in_array($currency, ['EUR','RUB'], true)) {
 
 
 $userid   = (isloggedin() && !isguestuser()) ? (int)$USER->id : 0;
-$effUserid = $isrestricted ? 0 : $userid; // ← on traite trial comme invité
+//$effUserid = $isrestricted ? 0 : $userid; // ← on traite trial comme invité
+$effUserid = (!$isguest && !$forceguest) ? $userid : 0;
+
 
 try {
     $options = $effUserid ? SubscriptionAdvisor::advise_options($effUserid, $planid, $currency) : [];
@@ -75,6 +77,18 @@ global $DB, $USER, $SITE;
 
 // Récup plan actif.
 $plan = $DB->get_record('subscription_plan', ['id' => $planid, 'is_active' => 1], '*', MUST_EXIST);
+
+// Double sécurité : empêcher l'achat d'un plan déjà couvert
+// par un accès équivalent ou supérieur.
+// Exemple : si l'utilisateur a A2 Full, il ne peut plus acheter A2 Grammar.
+if ($effUserid && SubscriptionAdvisor::user_has_higher_or_equal_access_for_plan($effUserid, $planid)) {
+    redirect(
+        new moodle_url('/local/subscriptions/subscribe.php', ['currency' => $currency]),
+        get_string('plan_already_covered', 'local_subscriptions'),
+        null,
+        \core\output\notification::NOTIFY_INFO
+    );
+}
 
 // Sub active la plus récente dans le MÊME scope que le plan cible (pour la popover d’upgrade).
 $currsub  = null;
@@ -119,7 +133,7 @@ if (!$effUserid || empty($options)) {
     $options = [[
         'key'       => Operation::PURCHASE_NEW,
         'label'     => get_string('option_purchase_new', 'local_subscriptions'),
-        'amount'    => $basePrice,     // ← prix remisé si applicable
+        'amount'    => $finalPriceNew,     // ← prix remisé si applicable
         'currency'  => $usedCurrency,
         'ref_subid' => null
     ]];
@@ -519,11 +533,28 @@ JS
 // Cas 1 OPTION UNIQUE : on ne montre pas les radios, mais on garde une valeur cachée.
 if (!$multipleOptions) {
     $only = $options[0];
+
     echo html_writer::empty_tag('input', [
         'type'  => 'hidden',
         'name'  => 'operation',
         'value' => $only['key'],
     ]);
+
+    if (!empty($only['ref_subid'])) {
+        echo html_writer::empty_tag('input', [
+            'type'  => 'hidden',
+            'name'  => 'ref_subid',
+            'value' => (int)$only['ref_subid'],
+        ]);
+    }
+
+    if (!empty($only['extra'])) {
+        echo html_writer::empty_tag('input', [
+            'type'  => 'hidden',
+            'name'  => 'extra_json',
+            'value' => json_encode($only['extra'], JSON_UNESCAPED_UNICODE),
+        ]);
+    }
 } else {
     // ----- RADIOS DES OPTIONS -----
     foreach ($options as $i => $opt) {
@@ -531,20 +562,22 @@ if (!$multipleOptions) {
         $isupgrade = (strpos($opt['key'], Operation::UPGRADE_NOW_REPLACE_CHAIN) === 0);
         $cur  = strtoupper($opt['currency'] ?? $usedCurrency);
 
-        // Prix de base catalogue pour ce plan (dans $usedCurrency)
-        $catalog = (float)$displayBase;
-
-        // Montant calculé pour cette option (Advisor / prolongation / upgrade)
+        // Montant final calculé par SubscriptionAdvisor.
         $finalForThis = (float)$opt['amount'];
 
-        // Pour l'achat simple (PURCHASE_NEW), on veut afficher la remise d'essai
-        if ($opt['key'] === Operation::PURCHASE_NEW) {
-            if ($discountOpen && $discPct > 0) {
-                // On utilise le même prix remisé que celui calculé en haut ($finalPriceNew)
-                $finalForThis = $finalPriceNew;
-            } else {
-                $finalForThis = $catalog;
-            }
+        if ($opt['key'] === Operation::PURCHASE_NEW && $discountOpen && $discPct > 0) {
+            $finalForThis = $finalPriceNew;
+        }
+
+        // Prix de référence à barrer.
+        $catalog = (float)$displayBase;
+
+        if ($opt['key'] === Operation::UPGRADE_NOW_REPLACE_CHAIN) {
+            $catalog = !empty($opt['extra']['upgrade_base_amount'])
+                ? (float)$opt['extra']['upgrade_base_amount']
+                : $finalForThis;
+        } else if ($opt['key'] === Operation::PURCHASE_NEW) {
+            $catalog = (float)$displayBase;
         }
 
         echo html_writer::start_div('form-check mb-2');
@@ -614,8 +647,9 @@ if (!$multipleOptions) {
     }
 }
 
-
-echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'extra_json','id'=>'ls_extra_json']);
+if ($multipleOptions) {
+    echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'extra_json','id'=>'ls_extra_json']);
+}
 echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'force_guest','value'=> $forceguest ]);
 echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'from','value'=> $istrial ? 'trial' : '']);
 echo html_writer::empty_tag('input', [
@@ -643,32 +677,48 @@ if (!$multipleOptions) {
     $cur     = strtoupper($only['currency'] ?? $usedCurrency);
     $catalog = (float)$displayBase;
 
-    // Calcule le prix final comme on le fait pour les radios
-    if ($only['key'] === Operation::PURCHASE_NEW) {
-        if ($discountOpen && $discPct > 0) {
-            $finalForThis = $finalPriceNew;   // prix remisé
-        } else {
-            $finalForThis = $catalog;         // prix catalogue
-        }
-    } else {
-        $finalForThis = (float)$only['amount']; // autre type d’opération (upgrade, etc.)
+    if ($only['key'] === Operation::UPGRADE_NOW_REPLACE_CHAIN) {
+        echo html_writer::div(
+            html_writer::span($only['badge'] ?? get_string('upgrade_badge', 'local_subscriptions'), 'badge bg-primary me-2')
+            . html_writer::span($only['summary'] ?? '', 'fw-semibold'),
+            'alert alert-info'
+        );
     }
 
-    if ($only['key'] === Operation::PURCHASE_NEW && $discountOpen && $discPct > 0) {
-        // Remise active : catalogue barré + prix remisé en vert
-        $catalogDisp = ls_format_money($catalog, $cur);
-        $finalDisp   = ls_format_money($finalForThis, $cur);
+    if (!empty($only['extra']['discount_percent'])) {
+        echo html_writer::div(
+            get_string('upgrade_discount_applied', 'local_subscriptions', [
+                'discount' => $only['extra']['discount_percent'],
+            ]),
+            'alert alert-success'
+        );
+    }   
 
+    $finalForThis = (float)$only['amount'];
+
+    // Prix de référence à barrer.
+    $baseForThis = $catalog;
+
+    if ($only['key'] === Operation::UPGRADE_NOW_REPLACE_CHAIN) {
+        $baseForThis = !empty($only['extra']['upgrade_base_amount'])
+            ? (float)$only['extra']['upgrade_base_amount']
+            : $finalForThis;
+    } else if ($only['key'] === Operation::PURCHASE_NEW) {
+        $baseForThis = $catalog;
+    }
+
+    $baseDisp  = ls_format_money($baseForThis, $cur);
+    $finalDisp = ls_format_money($finalForThis, $cur);
+
+    if ($baseForThis > $finalForThis + 0.01) {
         $summaryContent =
-            html_writer::span($catalogDisp, 'text-muted text-decoration-line-through me-2') .
-            html_writer::span($finalDisp,   'fw-semibold text-success');
-
-        $summaryContent = html_writer::span($summaryContent, null, ['id' => 'ls_price_summary']);
+            html_writer::span($baseDisp, 'text-muted text-decoration-line-through me-2') .
+            html_writer::span($finalDisp, 'fw-semibold text-success');
     } else {
-        // Pas de remise → affichage simple
-        $finalDisp     = ls_format_money($finalForThis, $cur);
-        $summaryContent = html_writer::span($finalDisp, 'fw-semibold', ['id' => 'ls_price_summary']);
+        $summaryContent = html_writer::span($finalDisp, 'fw-semibold');
     }
+
+    $summaryContent = html_writer::span($summaryContent, null, ['id' => 'ls_price_summary']);
 }
 
 

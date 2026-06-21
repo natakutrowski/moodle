@@ -145,7 +145,7 @@ $string['trial_expired_html'] =
 
 $string['trial_discount_banner_title'] = '−{$a}% discount for trial users.';
 $string['trial_discount_banner_body']  = 'Time left: ';
-$string['trial_discount_banner_cta']   = 'Subscribe';
+$string['trial_discount_banner_cta']   = 'Buy a course';
 $string['trial_days_word']             = 'd.';
 
 $string['trial_banner_reminder_title'] = 'Trial period reminder';
@@ -278,7 +278,7 @@ $string['trial_password_toggle_hide'] = 'Hide password';
 
 $string['trial_welcome_banner_html'] =
     'Welcome to Campus<small><sup>FR</sup></small>! Your trial account is activated. ' .
-    'Start with the level that suits you (A1, A2 [coming soon], or B1 [coming soon]); the first lesson is free. ' .
+    'Start with the level that suits you (A1 or A2); the first lesson is free. ' .
     'You can access your courses at any time via the "My courses" page.';
 
 $string['mail_trial_started_support'] =
@@ -320,3 +320,7 @@ $string['audio_not_found_message'] = 'This audio file cannot be found or is no l
 $string['audio_back_to_home'] = 'Back to home';
 $string['audio_player_instruction'] = 'Click play to listen to the audio.';
 $string['audio_browser_not_supported'] = 'Your browser does not support audio playback.';
+
+$string['other_courses_available_title'] = 'Discover more courses';
+$string['other_courses_available_text'] = 'You can continue your learning journey with other courses available on CampusFR.';
+$string['trial_badge'] = 'Trial';

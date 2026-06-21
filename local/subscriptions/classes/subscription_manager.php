@@ -62,123 +62,203 @@ class subscription_manager {
 	}
 
 
-    public static function enrol_user_to_courses(int $userid, int $planid, int $startdate, int $enddate): void {
+    // public static function enrol_user_to_courses(int $userid, int $planid, int $startdate, int $enddate): void {
+	// 	global $DB;
+
+	// 	// 1) Récupérer le scope -> course_ids "1,2,3"
+	// 	$scope = self::get_access_scope_from_planid($planid);
+	// 	if (!$scope || empty($scope->course_ids)) {
+	// 		return;
+	// 	}
+
+	// 	// 2) Rôle "student" (fallback 5)
+	// 	$roleid = 5;
+	// 	if ($role = $DB->get_record('role', ['shortname' => 'student'], 'id', IGNORE_MISSING)) {
+	// 		$roleid = (int)$role->id;
+	// 	}
+
+	// 	// 3) enddate illimitée si > 2100-01-01
+	// 	if ($enddate > strtotime('2100-01-01')) {
+	// 		$enddate = 0;
+	// 	}
+
+	// 	// 4) Parser course_ids (tolère virgule/point-virgule/espaces)
+	// 	$courseids = preg_split('/[,\;\s]+/', (string)$scope->course_ids, -1, PREG_SPLIT_NO_EMPTY);
+	// 	$courseids = array_values(array_unique(array_map('intval', $courseids)));
+	// 	if (empty($courseids)) {
+	// 		return;
+	// 	}
+
+	// 	// 5) Plugin manual
+	// 	$manual = enrol_get_plugin('manual');
+	// 	if (!$manual) {
+	// 		return; // pas d’inscription manuelle disponible
+	// 	}
+
+    // 	$now = time();
+
+	// 	foreach ($courseids as $courseid) {
+	// 		if ($courseid <= 0) { continue; }
+
+	// 		// 6) Trouver (ou créer) une instance 'manual' activée sur ce cours
+	// 		$instances = enrol_get_instances($courseid, /* enabled only */ true);
+	// 		$instance  = null;
+    //     	$candidateEnabled = null;
+
+	// 		foreach ($instances as $inst) {
+	// 			if ($inst->enrol !== 'manual') { continue; }
+	// 			// S'il y a déjà une UE sur cette instance, on la choisit
+	// 			if ($DB->record_exists('user_enrolments', ['enrolid' => $inst->id, 'userid' => $userid])) {
+	// 				$instance = $inst;
+	// 				break;
+	// 			}
+	// 			// Sinon on mémorise une instance manual activée comme candidat
+	// 			if ((int)$inst->status === ENROL_INSTANCE_ENABLED && !$candidateEnabled) {
+	// 				$candidateEnabled = $inst;
+	// 			}
+	// 		}
+
+	// 		if (!$instance) {
+	// 			// Pas d'UE existante -> prendre une instance manual activée si dispo
+	// 			if ($candidateEnabled) {
+	// 				$instance = $candidateEnabled;
+	// 			} else {
+	// 				// Sinon on crée une instance activée
+	// 				$course = $DB->get_record('course', ['id' => $courseid], '*', IGNORE_MISSING);
+	// 				if (!$course) { continue; }
+	// 				$instanceid = $manual->add_instance($course, ['status' => ENROL_INSTANCE_ENABLED]);
+	// 				if (!$instanceid) { continue; }
+	// 				$instance = $DB->get_record('enrol', ['id' => $instanceid], '*', IGNORE_MISSING);
+	// 				if (!$instance) { continue; }
+	// 			}
+	// 		}
+
+	// 		// 7) Idempotence CORRECTE :
+	// 		//    - si déjà une ligne user_enrolments -> UPDATE (status + dates)
+	// 		//    - sinon -> ENROL (création)
+	// 		try {
+	// 			$ue = $DB->get_record('user_enrolments', [
+	// 				'enrolid' => $instance->id,
+	// 				'userid'  => $userid
+	// 			], '*', IGNORE_MISSING);
+
+	// 			if ($ue) {
+	// 				// --- Cas PROLONGATION / AJUSTEMENT ---
+	// 				// Ne JAMAIS pousser le début dans le futur si l'UE existe déjà.
+	// 				// On conserve le début le plus ancien (ou celui passé s'il est dans le passé).
+	// 				$newStart = (int)($ue->timestart ?? 0);
+	// 				if ($startdate <= $now) {
+	// 					$newStart = $newStart ? min($newStart, (int)$startdate) : (int)$startdate;
+	// 				}
+	// 				// Étendre la fin (0 = illimité)
+	// 				if ((int)$enddate === 0 || (int)$ue->timeend === 0) {
+	// 					$newEnd = 0;
+	// 				} else {
+	// 					$newEnd = max((int)$ue->timeend, (int)$enddate);
+	// 				}
+
+	// 				// Réactiver au passage
+	// 				$manual->update_user_enrol($instance, $userid, ENROL_USER_ACTIVE, $newStart, $newEnd);
+
+	// 			} else {
+	// 				// --- Cas PREMIÈRE INSCRIPTION SUR CE COURS ---
+	// 				// Ne PAS créer d'UE si elle commencerait dans le futur
+	// 				// (pour éviter de "perdre" l'accès actuel en file d'attente).
+	// 				if ($startdate > $now) {
+	// 					continue;
+	// 				}
+
+	// 				$manual->enrol_user($instance, $userid, $roleid, (int)$startdate, (int)$enddate, ENROL_USER_ACTIVE);
+	// 			}
+				
+	// 		} catch (\Throwable $e) {
+	// 			// error_log('[subs][enrol] course '.$courseid.' user '.$userid.' : '.$e->getMessage());
+	// 			continue;
+	// 		}
+	// 	}
+	// }
+
+
+	public static function enrol_user_to_courses(int $userid, int $planid, int $startdate, int $enddate): void {
 		global $DB;
 
-		// 1) Récupérer le scope -> course_ids "1,2,3"
-		$scope = self::get_access_scope_from_planid($planid);
-		if (!$scope || empty($scope->course_ids)) {
+		$entitlements = self::get_plan_entitlements($planid);
+		if (empty($entitlements)) {
 			return;
 		}
 
-		// 2) Rôle "student" (fallback 5)
-		$roleid = 5;
-		if ($role = $DB->get_record('role', ['shortname' => 'student'], 'id', IGNORE_MISSING)) {
-			$roleid = (int)$role->id;
+		$manual = enrol_get_plugin('manual');
+		if (!$manual) {
+			return;
 		}
 
-		// 3) enddate illimitée si > 2100-01-01
+		$now = time();
+
 		if ($enddate > strtotime('2100-01-01')) {
 			$enddate = 0;
 		}
 
-		// 4) Parser course_ids (tolère virgule/point-virgule/espaces)
-		$courseids = preg_split('/[,\;\s]+/', (string)$scope->course_ids, -1, PREG_SPLIT_NO_EMPTY);
-		$courseids = array_values(array_unique(array_map('intval', $courseids)));
-		if (empty($courseids)) {
-			return;
-		}
+		foreach ($entitlements as $entitlement) {
+			$courseid = (int)$entitlement->courseid;
 
-		// 5) Plugin manual
-		$manual = enrol_get_plugin('manual');
-		if (!$manual) {
-			return; // pas d’inscription manuelle disponible
-		}
-
-    	$now = time();
-
-		foreach ($courseids as $courseid) {
-			if ($courseid <= 0) { continue; }
-
-			// 6) Trouver (ou créer) une instance 'manual' activée sur ce cours
-			$instances = enrol_get_instances($courseid, /* enabled only */ true);
-			$instance  = null;
-        	$candidateEnabled = null;
-
-			foreach ($instances as $inst) {
-				if ($inst->enrol !== 'manual') { continue; }
-				// S'il y a déjà une UE sur cette instance, on la choisit
-				if ($DB->record_exists('user_enrolments', ['enrolid' => $inst->id, 'userid' => $userid])) {
-					$instance = $inst;
-					break;
-				}
-				// Sinon on mémorise une instance manual activée comme candidat
-				if ((int)$inst->status === ENROL_INSTANCE_ENABLED && !$candidateEnabled) {
-					$candidateEnabled = $inst;
-				}
+			if ($courseid <= 0) {
+				continue;
 			}
 
+			$instance = self::get_manual_enrol_instance($courseid);
 			if (!$instance) {
-				// Pas d'UE existante -> prendre une instance manual activée si dispo
-				if ($candidateEnabled) {
-					$instance = $candidateEnabled;
-				} else {
-					// Sinon on crée une instance activée
-					$course = $DB->get_record('course', ['id' => $courseid], '*', IGNORE_MISSING);
-					if (!$course) { continue; }
-					$instanceid = $manual->add_instance($course, ['status' => ENROL_INSTANCE_ENABLED]);
-					if (!$instanceid) { continue; }
-					$instance = $DB->get_record('enrol', ['id' => $instanceid], '*', IGNORE_MISSING);
-					if (!$instance) { continue; }
-				}
+				continue;
 			}
 
-			// 7) Idempotence CORRECTE :
-			//    - si déjà une ligne user_enrolments -> UPDATE (status + dates)
-			//    - sinon -> ENROL (création)
 			try {
 				$ue = $DB->get_record('user_enrolments', [
 					'enrolid' => $instance->id,
-					'userid'  => $userid
+					'userid' => $userid,
 				], '*', IGNORE_MISSING);
 
 				if ($ue) {
-					// --- Cas PROLONGATION / AJUSTEMENT ---
-					// Ne JAMAIS pousser le début dans le futur si l'UE existe déjà.
-					// On conserve le début le plus ancien (ou celui passé s'il est dans le passé).
-					$newStart = (int)($ue->timestart ?? 0);
+					$newstart = (int)($ue->timestart ?? 0);
+
 					if ($startdate <= $now) {
-						$newStart = $newStart ? min($newStart, (int)$startdate) : (int)$startdate;
-					}
-					// Étendre la fin (0 = illimité)
-					if ((int)$enddate === 0 || (int)$ue->timeend === 0) {
-						$newEnd = 0;
-					} else {
-						$newEnd = max((int)$ue->timeend, (int)$enddate);
+						$newstart = $newstart ? min($newstart, (int)$startdate) : (int)$startdate;
 					}
 
-					// Réactiver au passage
-					$manual->update_user_enrol($instance, $userid, ENROL_USER_ACTIVE, $newStart, $newEnd);
+					if ((int)$enddate === 0 || (int)$ue->timeend === 0) {
+						$newend = 0;
+					} else {
+						$newend = max((int)$ue->timeend, (int)$enddate);
+					}
+
+					$manual->update_user_enrol($instance, $userid, ENROL_USER_ACTIVE, $newstart, $newend);
 
 				} else {
-					// --- Cas PREMIÈRE INSCRIPTION SUR CE COURS ---
-					// Ne PAS créer d'UE si elle commencerait dans le futur
-					// (pour éviter de "perdre" l'accès actuel en file d'attente).
 					if ($startdate > $now) {
 						continue;
 					}
 
+					// Le rôle exact est géré juste après par les entitlements.
+					$roleid = (int)$DB->get_field('role', 'id', [
+						'shortname' => $entitlement->roleshortname ?: 'student',
+					], IGNORE_MISSING);
+
+					if (!$roleid) {
+						$roleid = (int)$DB->get_field('role', 'id', ['shortname' => 'student'], IGNORE_MISSING);
+					}
+
 					$manual->enrol_user($instance, $userid, $roleid, (int)$startdate, (int)$enddate, ENROL_USER_ACTIVE);
 				}
-				
+
+				self::assign_entitlement_role($userid, $entitlement);
+				self::ensure_user_group($userid, $courseid, (string)($entitlement->groupname ?? ''));
+
 			} catch (\Throwable $e) {
-				// error_log('[subs][enrol] course '.$courseid.' user '.$userid.' : '.$e->getMessage());
+				debugging('[local_subscriptions] enrol entitlement failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
 				continue;
 			}
 		}
-	}
+		self::cleanup_trial_subscription_if_unused($userid);
+	}	
 
-	
 	public static function create_or_extend_subscription(
 		int $userid,
 		int $planid,
@@ -319,7 +399,9 @@ class subscription_manager {
 
 		// 4) Inscriptions + rôle student (et retrait de trialstudent si présent)
 		self::enrol_user_to_courses($userid, $planid, $start_date, $end_date);
-		\local_subscriptions\trial_manager::force_role_student($userid, $planid);
+
+		// Les rôles sont appliqués par les entitlements.
+		// \local_subscriptions\trial_manager::force_role_student($userid, $planid);
 
 		return $res;
 	}
@@ -422,5 +504,210 @@ class subscription_manager {
 		], '*', IGNORE_MULTIPLE); // ou trié par timecreated desc si plusieurs
 	}
 
+	public static function get_plan_entitlements(int $planid): array {
+		global $DB;
+
+		$records = $DB->get_records(
+			'subscription_plan_entitlement',
+			['planid' => $planid],
+			'priority DESC, courseid ASC, accesslevel ASC'
+		);
+
+		// Fallback ancien système si aucun entitlement n'est configuré.
+		if (!empty($records)) {
+			return array_values($records);
+		}
+
+		$scope = self::get_access_scope_from_planid($planid);
+		if (!$scope || empty($scope->course_ids)) {
+			return [];
+		}
+
+		$courseids = preg_split('/[,\;\s]+/', (string)$scope->course_ids, -1, PREG_SPLIT_NO_EMPTY);
+		$courseids = array_values(array_unique(array_map('intval', $courseids)));
+
+		$fallback = [];
+
+		foreach ($courseids as $courseid) {
+			if ($courseid <= 0) {
+				continue;
+			}
+
+			$fallback[] = (object)[
+				'planid' => $planid,
+				'courseid' => $courseid,
+				'accesslevel' => 'full',
+				'roleshortname' => 'student',
+				'groupname' => '',
+				'priority' => 100,
+			];
+		}
+
+		return $fallback;
+	}
+
+	private static function get_manual_enrol_instance(int $courseid): ?\stdClass {
+		global $DB;
+
+		$manual = enrol_get_plugin('manual');
+		if (!$manual) {
+			return null;
+		}
+
+		$instances = enrol_get_instances($courseid, true);
+
+		foreach ($instances as $instance) {
+			if ($instance->enrol === 'manual' && (int)$instance->status === ENROL_INSTANCE_ENABLED) {
+				return $instance;
+			}
+		}
+
+		$course = $DB->get_record('course', ['id' => $courseid], '*', IGNORE_MISSING);
+		if (!$course) {
+			return null;
+		}
+
+		$instanceid = $manual->add_instance($course, ['status' => ENROL_INSTANCE_ENABLED]);
+		if (!$instanceid) {
+			return null;
+		}
+
+		return $DB->get_record('enrol', ['id' => $instanceid], '*', IGNORE_MISSING) ?: null;
+	}
+
+	private static function ensure_user_group(int $userid, int $courseid, string $groupname): void {
+		global $DB, $CFG;
+
+		$groupname = trim($groupname);
+		if ($groupname === '') {
+			return;
+		}
+
+		require_once($CFG->dirroot . '/group/lib.php');
+
+		$group = $DB->get_record('groups', [
+			'courseid' => $courseid,
+			'name' => $groupname,
+		], '*', IGNORE_MISSING);
+
+		if (!$group) {
+			$group = (object)[
+				'courseid' => $courseid,
+				'name' => $groupname,
+				'description' => '',
+				'descriptionformat' => FORMAT_HTML,
+				'timecreated' => time(),
+				'timemodified' => time(),
+			];
+
+			$group->id = groups_create_group($group);
+		}
+
+		if (!groups_is_member((int)$group->id, $userid)) {
+			groups_add_member((int)$group->id, $userid);
+		}
+	}
+
+	private static function assign_entitlement_role(int $userid, \stdClass $entitlement): void {
+		global $DB, $CFG;
+
+		require_once($CFG->dirroot . '/lib/accesslib.php');
+
+		$courseid = (int)$entitlement->courseid;
+		$roleshortname = trim((string)$entitlement->roleshortname);
+
+		if ($courseid <= 0 || $roleshortname === '') {
+			return;
+		}
+
+		$roleid = (int)$DB->get_field('role', 'id', ['shortname' => $roleshortname], IGNORE_MISSING);
+		if (!$roleid) {
+			return;
+		}
+
+		$ctx = \context_course::instance($courseid);
+
+		// Si on donne un vrai accès étudiant, on retire le rôle trialstudent uniquement sur CE cours.
+		$rolesToRemove = [];
+
+		if ($roleshortname === 'grammarstudent') {
+			// Grammar remplace Trial sur ce cours.
+			$rolesToRemove = ['trialstudent'];
+
+		} else if ($roleshortname === 'student') {
+			// Full remplace Trial et Grammar sur ce cours.
+			$rolesToRemove = ['trialstudent', 'grammarstudent'];
+
+		} else if ($roleshortname !== 'trialstudent') {
+			// Sécurité pour d'autres rôles futurs.
+			$rolesToRemove = ['trialstudent'];
+		}
+
+		foreach ($rolesToRemove as $shortnameToRemove) {
+			$roleidToRemove = (int)$DB->get_field('role', 'id', ['shortname' => $shortnameToRemove], IGNORE_MISSING);
+
+			if ($roleidToRemove) {
+				role_unassign($roleidToRemove, $userid, $ctx->id);
+			}
+		}
+
+		if (!user_has_role_assignment($userid, $roleid, $ctx->id)) {
+			role_assign($roleid, $userid, $ctx->id);
+		}
+	}
+
+	public static function cleanup_trial_subscription_if_unused(int $userid): void {
+		global $DB;
+
+		$trialroleid = (int)$DB->get_field('role', 'id', ['shortname' => 'trialstudent'], IGNORE_MISSING);
+		if (!$trialroleid) {
+			return;
+		}
+
+		$now = time();
+
+		// Est-ce que l'utilisateur a encore trialstudent dans au moins un cours ?
+		$hastrialrole = $DB->record_exists_select('role_assignments',
+			'userid = :userid
+			AND roleid = :roleid',
+			[
+				'userid' => $userid,
+				'roleid' => $trialroleid,
+			]
+		);
+
+		if ($hastrialrole) {
+			return;
+		}
+
+		// Plus aucun rôle trialstudent : on remplace les subscriptions Trial actives.
+		$trialplanids = $DB->get_fieldset_select(
+			'subscription_plan',
+			'id',
+			'is_trial = 1'
+		);
+
+		if (empty($trialplanids)) {
+			return;
+		}
+
+		[$insql, $params] = $DB->get_in_or_equal($trialplanids, SQL_PARAMS_NAMED, 'trialplan');
+		$params['userid'] = $userid;
+		$params['status'] = \local_subscriptions\constants\Status::ACTIVE;
+		$params['now'] = $now;
+
+		$sql = "userid = :userid
+				AND status = :status
+				AND planid $insql
+				AND (end_date = 0 OR end_date >= :now)";
+
+		$trials = $DB->get_records_select('user_subscription', $sql, $params);
+
+		foreach ($trials as $trial) {
+			$trial->status = \local_subscriptions\constants\Status::REPLACED;
+			$trial->last_update = $now;
+			$DB->update_record('user_subscription', $trial);
+		}
+	}
 
 }

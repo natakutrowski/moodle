@@ -19,6 +19,13 @@ if ($hassiteconfig) {
 		'moodle/site:config'
     ));
 
+    $ADMIN->add('subscriptions_category', new admin_externalpage(
+        'local_subscriptions_plan_upgrades',
+        get_string('planupgrades', 'local_subscriptions'),
+        new moodle_url(subscription_config::plan_upgrades_page()),
+        'moodle/site:config'
+    )); 
+
 	$ADMIN->add('subscriptions_category', new admin_externalpage(
 		'local_subscriptions_add_subscription',
 		get_string('add_subscription', 'local_subscriptions'),

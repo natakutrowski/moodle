@@ -316,57 +316,98 @@ class renderer extends plugin_renderer_base {
             // $output .= \html_writer::div($this->plan_description_link($plan), 'mb-1');
             // $output .= $this->plan_description_modal_once($plan);
 
-            // --- PRIX PAR PLAN (devise globale) ---
+            // --- PRIX PAR PLAN / PRIX PERSONNALISÉ UTILISATEUR ---
             $info = \local_subscriptions\pricing_manager::get_plan_price_or_fallback($plan->id, $selectedcurrency, $DB);
             $usedCurrency = $info['currency'];
             $basePrice    = (float)$info['price'];
             $hasSelected  = (bool)$info['available'];
 
-            // Trial plan ? pas de remise sur le plan d’essai
-            $isTrialPlan = isset($plan->is_trial)
-                ? (int)$plan->is_trial
-                : (int)$DB->get_field('subscription_plan', 'is_trial', ['id'=>$plan->id], IGNORE_MISSING);
+            // Si subscribe.php a enrichi le plan via SubscriptionAdvisor,
+            // on utilise le vrai prix utilisateur : upgrade, remise trial, etc.
+            $hasPersonalizedPrice = property_exists($plan, 'display_amount');
 
-            // Calcul remise (si fenêtre ouverte + pas plan d’essai)
-            $applyDiscount = ($discountOpen && !$isTrialPlan && $discPct > 0);
-            list($finalPrice, $discAmount) = $this->apply_discount($basePrice, $applyDiscount, $discPct);
+            $isUpgrade = !empty($plan->display_is_upgrade);
+            $upgradeSummary = $plan->display_upgrade_summary ?? '';
+            $upgradeBadge = property_exists($plan, 'display_badge') && !empty($plan->display_badge)
+                ? $plan->display_badge
+                : get_string('upgrade_badge', 'local_subscriptions');
+            if ($hasPersonalizedPrice) {
+                $finalPrice = (float)$plan->display_amount;
+                $usedCurrency = $plan->display_currency ?? $usedCurrency;
 
-            // Zone prix (avec badge près de “Prix”)
+                $discountPercent = !empty($plan->display_discount_percent)
+                    ? (float)$plan->display_discount_percent
+                    : 0;
+
+                $discAmount = 0;
+                $applyDiscount = false;
+
+            } else {
+                // Ancienne logique pour visiteurs non connectés.
+                $isTrialPlan = isset($plan->is_trial)
+                    ? (int)$plan->is_trial
+                    : (int)$DB->get_field('subscription_plan', 'is_trial', ['id'=>$plan->id], IGNORE_MISSING);
+
+                $applyDiscount = ($discountOpen && !$isTrialPlan && $discPct > 0);
+                list($finalPrice, $discAmount) = $this->apply_discount($basePrice, $applyDiscount, $discPct);
+
+                $discountPercent = $discAmount > 0 ? $discPct : 0;
+            }
+
+            // Zone prix.
             $output .= \html_writer::start_div('bottom-zone mt-auto');
+
+            if ($isUpgrade) {
+                $output .= \html_writer::div(
+                    \html_writer::span($upgradeBadge, 'badge bg-primary me-2')
+                    . s($upgradeSummary),
+                    'alert alert-info py-2 px-3 mb-2 small'
+                );
+            }
+
             $output .= \html_writer::start_div('d-flex align-items-center justify-content-between mb-1');
             $output .= \html_writer::div(get_string('price', 'local_subscriptions'), 'text-muted small');
 
-            if ($discAmount > 0) {
+            if ($discountPercent > 0) {
                 $output .= \html_writer::span(
-                    get_string('badge_limited_offer','local_subscriptions', $discPct),
+                    get_string('badge_limited_offer','local_subscriptions', $discountPercent),
                     'badge bg-warning text-dark price-badge ms-2'
                 );
             }
+
             $output .= \html_writer::end_div();
 
-            // Bloc affichage prix
+            // Bloc affichage prix.
             $output .= \html_writer::start_div('plan-price-block mb-2', [
                 'id' => "plan-price-{$plan->id}",
             ]);
 
-            if ($discAmount > 0) {
+            $displayBasePrice = !empty($plan->display_base_amount)
+                ? (float)$plan->display_base_amount
+                : $basePrice;
+
+            $displayFinalPrice = property_exists($plan, 'display_amount')
+                ? (float)$plan->display_amount
+                : $finalPrice;
+
+            if ($displayBasePrice > $displayFinalPrice + 0.01) {
                 $output .= \html_writer::span(
-                    $this->format_money($basePrice, $usedCurrency),
+                    $this->format_money($displayBasePrice, $usedCurrency),
                     'old text-muted text-decoration-line-through me-2'
                 );
+
                 $output .= \html_writer::span(
-                    '<strong class="new text-success">'.$this->format_money($finalPrice, $usedCurrency).'</strong>',
+                    '<strong class="new text-success">' . $this->format_money($displayFinalPrice, $usedCurrency) . '</strong>',
                     'selected-price'
                 );
             } else {
                 $output .= \html_writer::span(
-                    '<strong>'.$this->format_money($basePrice, $usedCurrency).'</strong>',
+                    '<strong>' . $this->format_money($displayFinalPrice, $usedCurrency) . '</strong>',
                     'selected-price'
                 );
             }
 
             if (!$hasSelected) {
-                // Message d’indispo + fallback
                 $note = (object)['curr'=>$selectedcurrency, 'fallback'=>$usedCurrency];
                 $output .= \html_writer::div(
                     get_string('price_unavailable_in','local_subscriptions', $note),
@@ -376,17 +417,14 @@ class renderer extends plugin_renderer_base {
 
             $output .= \html_writer::end_div(); // plan-price-block
 
-            // Prix équivalent par mois : (soit xx €/mois)
+            // Prix équivalent par mois.
             $months = $this->months_for_plan($plan);
-            if ($months > 0 && $finalPrice > 0 && $hasSelected) {
-                $monthly = $finalPrice / $months;
-                // On réutilise le formatteur pour respecter l’option symbole / code
+            if (!$isUpgrade && $months > 0 && $displayFinalPrice > 0 && $hasSelected) {
+                $monthly = $displayFinalPrice / $months;
                 $monthlyStr = $this->format_money($monthly, $usedCurrency);
-                // String i18n du type "(soit xx €/mois)"
                 $perMonth = get_string('plan_price_per_month', 'local_subscriptions', $monthlyStr);
                 $output .= \html_writer::div($perMonth, 'text-muted small');
             }
-
 
             // Bouton Subscribe (checkout) – on passe la devise réellement utilisée
             $btnclass = 'btn subscribe-button w-100 fs-5';
@@ -402,9 +440,13 @@ class renderer extends plugin_renderer_base {
                 $checkouturl = new \moodle_url($checkouturl->out(false), ['embedded' => 1]);
             }
 
+            $buttonlabel = !empty($plan->display_cta)
+                ? $plan->display_cta
+                : get_string('subscribe', 'local_subscriptions');
+
             $output .= \html_writer::link(
                 $checkouturl,
-                get_string('subscribe', 'local_subscriptions'),
+                $buttonlabel,
                 ['class' => $btnclass, 'data-planid' => $plan->id]
             );
 

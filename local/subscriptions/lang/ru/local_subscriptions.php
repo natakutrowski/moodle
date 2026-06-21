@@ -704,7 +704,7 @@ $string['set_display_currency_symbols_desc'] = 'Если включено, це�
 $string['badge_limited_offer'] = 'Скидка -{$a}%';
 $string['price_unavailable_in'] = 'Недоступно в {$a->curr} — показана {$a->fallback}.';
 $string['checkout_discount_note']        = 'Ваша акция ещё действует';
-$string['checkout_discount_note_prefix']        = '🎁 -{$a}% на подписку. Скидка доступна только';
+$string['checkout_discount_note_prefix'] = '🎁 −{$a}% на все покупки курсов. Скидка доступна только';
 $string['days_short']                    = 'д';
 
 $string['cancel_price_title']  = 'Ожидаемая цена';
@@ -966,3 +966,78 @@ $string['digital_cancel_vpn_hint'] = '💡 Если вы оплачиваете 
 $string['digital_cancel_support_text'] = 'Если вам кажется, что деньги списались, или вам нужна помощь, напишите нам на {$a}.';
 $string['digital_cancel_gateway_timeout'] =
 'Не удалось открыть страницу оплаты. Возможно, это временная проблема. Попробуйте ещё раз через несколько минут.';
+
+$string['planentitlements'] = 'Права доступа тарифов';
+$string['planentitlementsfor'] = 'Права доступа для тарифа: {$a}';
+$string['addentitlement'] = 'Добавить право доступа';
+$string['editentitlement'] = 'Изменить право доступа';
+$string['deleteentitlement'] = 'Удалить право доступа';
+$string['saveentitlement'] = 'Сохранить право доступа';
+$string['noentitlements'] = 'Для этого тарифа пока не настроены права доступа.';
+$string['entitlementcreated'] = 'Право доступа успешно создано.';
+$string['entitlementupdated'] = 'Право доступа успешно обновлено.';
+$string['entitlementdeleted'] = 'Право доступа успешно удалено.';
+$string['confirmdeleteentitlement'] = 'Вы действительно хотите удалить это право доступа?';
+
+$string['entitlement_course'] = 'Курс';
+$string['entitlement_accesslevel'] = 'Уровень доступа';
+$string['entitlement_role'] = 'Роль в курсе';
+$string['entitlement_groupname'] = 'Название группы';
+$string['entitlement_groupname_help'] = 'Необязательно. Если поле заполнено, пользователь будет добавлен в эту группу Moodle в выбранном курсе.';
+$string['entitlement_priority'] = 'Приоритет';
+$string['entitlement_priority_help'] = 'Доступ с более высоким приоритетом может заменить доступ с более низким приоритетом. Рекомендуемые значения: пробный доступ = 10, грамматика = 50, полный доступ = 100.';
+$string['entitlement_already_exists'] = 'У этого тарифа уже есть такой уровень доступа для этого курса.';
+
+$string['accesslevel_trial'] = 'Пробный доступ';
+$string['accesslevel_grammar'] = 'Только грамматика';
+$string['accesslevel_full'] = 'Полный доступ';
+$string['invalidplanid'] = 'Тариф не найден или не указан.';
+
+$string['planupgrades'] = 'Апгрейды тарифов';
+$string['planupgradesintro'] = 'Здесь можно указать, с какого тарифа на какой можно перейти. Например: A2 Грамматика → A2 Полный доступ. При расчёте по разнице цена апгрейда считается так: цена целевого тарифа минус цена текущего тарифа, в той же валюте.';
+$string['addupgrade'] = 'Добавить апгрейд';
+$string['editupgrade'] = 'Изменить апгрейд';
+$string['deleteupgrade'] = 'Удалить апгрейд';
+$string['saveupgrade'] = 'Сохранить апгрейд';
+$string['noupgrades'] = 'Правила апгрейда тарифов пока не настроены.';
+$string['upgradecreated'] = 'Правило апгрейда успешно создано.';
+$string['upgradeupdated'] = 'Правило апгрейда успешно обновлено.';
+$string['upgradedeleted'] = 'Правило апгрейда успешно удалено.';
+$string['confirmdeleteupgrade'] = 'Вы действительно хотите удалить это правило апгрейда?';
+
+$string['upgrade_fromplan'] = 'Исходный тариф';
+$string['upgrade_toplan'] = 'Целевой тариф';
+$string['upgrade_pricingmode'] = 'Способ расчёта цены';
+$string['upgrade_pricingmode_help'] = 'Пока поддерживается только расчёт по разнице: цена апгрейда = цена целевого тарифа - цена текущего тарифа, в той же валюте.';
+$string['upgrade_pricing_difference'] = 'Разница между ценами двух тарифов';
+$string['upgrade_isactive'] = 'Активен';
+$string['upgrade_same_plan_error'] = 'Исходный и целевой тарифы должны быть разными.';
+$string['upgrade_already_exists'] = 'Такое правило апгрейда уже существует.';
+$string['active'] = 'Активен';
+$string['inactive'] = 'Неактивен';
+$string['status'] = 'Статус';
+
+$string['planentitlements'] = 'Права доступа тарифов';
+$string['planupgrades'] = 'Апгрейды тарифов';
+$string['option_upgrade_difference'] = 'Перейти на полную версию';
+$string['plan_already_owned'] = 'У вас уже есть доступ к этому тарифу.';
+$string['upgrade_from_to_summary'] = 'Вы переходите с тарифа « {$a->from} » на тариф « {$a->to} ». Вы оплачиваете только разницу.';
+$string['upgrade_badge'] = 'Апгрейд';
+$string['upgrade_discount_applied'] = 'Ваша скидка после пробного доступа применена: {$a->discount} %.';
+$string['upgrade_cta'] = 'Перейти на полную версию';
+
+$string['unlock_grammar_title'] = 'Задание входит в модуль грамматики';
+$string['unlock_grammar_text'] = 'Это задание входит в модуль грамматики. Вы можете купить только грамматику или полный курс.';
+$string['unlock_grammar_button'] = 'Купить грамматику';
+
+$string['unlock_full_title'] = 'Задание доступно только в полной версии';
+$string['unlock_full_text'] = 'Это задание не входит в модуль грамматики. Перейдите на полную версию, чтобы получить доступ ко всему курсу.';
+$string['unlock_full_button'] = 'Перейти на полную версию';
+
+$string['restricted_access_title'] = 'Ограниченный доступ';
+$string['restricted_access_text'] = 'Купите курс, чтобы открыть это задание.';
+$string['buy'] = 'Купить';
+
+$string['plan_already_covered'] = 'У вас уже есть такой же или более высокий доступ к этому содержимому.';
+$string['all_courses_owned_title'] = 'У вас уже есть доступ ко всем доступным курсам';
+$string['all_courses_owned_text'] = 'Сейчас ничего покупать не нужно. Вы можете продолжить обучение в своём разделе курсов.';

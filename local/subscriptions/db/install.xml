@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/subscriptions/db" VERSION="2025061100" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="local/subscriptions/db" VERSION="2026051010" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
 		<TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
 			<FIELDS>
@@ -357,7 +357,47 @@
 			</INDEXES>
 		</TABLE>
 
+		<TABLE NAME="subscription_plan_entitlement" COMMENT="Defines concrete access rights granted by a subscription plan">
+		<FIELDS>
+			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+			<FIELD NAME="planid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+			<FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+			<FIELD NAME="accesslevel" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="full"/>
+			<FIELD NAME="roleshortname" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="student"/>
+			<FIELD NAME="groupname" TYPE="char" LENGTH="255" NOTNULL="false"/>
+			<FIELD NAME="priority" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="100"/>
+			<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+			<FIELD NAME="lastupdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+		</FIELDS>
+		<KEYS>
+			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			<KEY NAME="planid_fk" TYPE="foreign" FIELDS="planid" REFTABLE="subscription_plan" REFFIELDS="id"/>
+			<KEY NAME="courseid_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+		</KEYS>
+		<INDEXES>
+			<INDEX NAME="plan_course_level_uix" UNIQUE="true" FIELDS="planid,courseid,accesslevel"/>
+		</INDEXES>
+		</TABLE>
 
+		<TABLE NAME="subscription_plan_upgrade" COMMENT="Defines allowed upgrades between subscription plans">
+		<FIELDS>
+			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+			<FIELD NAME="fromplanid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+			<FIELD NAME="toplanid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+			<FIELD NAME="pricingmode" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="difference"/>
+			<FIELD NAME="isactive" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+			<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+			<FIELD NAME="lastupdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+		</FIELDS>
+		<KEYS>
+			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			<KEY NAME="fromplanid_fk" TYPE="foreign" FIELDS="fromplanid" REFTABLE="subscription_plan" REFFIELDS="id"/>
+			<KEY NAME="toplanid_fk" TYPE="foreign" FIELDS="toplanid" REFTABLE="subscription_plan" REFFIELDS="id"/>
+		</KEYS>
+		<INDEXES>
+			<INDEX NAME="upgrade_pair_uix" UNIQUE="true" FIELDS="fromplanid,toplanid"/>
+		</INDEXES>
+		</TABLE>
 
     </TABLES>
 </XMLDB>

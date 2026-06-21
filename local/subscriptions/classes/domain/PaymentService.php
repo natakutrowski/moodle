@@ -304,7 +304,9 @@ class PaymentService {
                 );
 
                 // Fermer toutes les souscriptions d’essai actives pour cet utilisateur
-                self::close_active_trials_for_user((int)$sub->userid);
+                // Ne plus fermer tout le trial après un achat.
+                // Avec les entitlements, l'essai peut rester actif sur A1 pendant que A2 passe en full.
+                // self::close_active_trials_for_user((int)$sub->userid);
 
                 // ---- 3) QUELS ÉLÉMENTS REMPLACER ? ----
 
@@ -401,7 +403,9 @@ class PaymentService {
                 );
 
                 // Fermer toutes les souscriptions d’essai actives pour cet utilisateur
-                self::close_active_trials_for_user((int)$sub->userid);
+                // Ne plus fermer tout le trial après un achat.
+                // Avec les entitlements, l'essai peut rester actif sur A1 pendant que A2 passe en full.
+                // self::close_active_trials_for_user((int)$sub->userid);
             }
         }
 
@@ -678,9 +682,15 @@ class PaymentService {
 
         // Inscriptions idempotentes et passage au rôle student
         \local_subscriptions\subscription_manager::enrol_user_to_courses(
-            $userid, $planid, $sub->start_date, $sub->end_date
+            $userid,
+            $planid,
+            $sub->start_date,
+            $sub->end_date
         );
-        \local_subscriptions\trial_manager::force_role_student($userid, $planid);
+
+        // Les rôles et groupes sont maintenant appliqués par les entitlements.
+        // Ne pas appeler force_role_student(), sinon on risque de toucher trop large.
+        // \local_subscriptions\trial_manager::force_role_student($userid, $planid);
 
         // Désuspension éventuelle du compte si la souscription est ACTIVE
         require_once($CFG->dirroot.'/user/lib.php'); // user_update_user()
