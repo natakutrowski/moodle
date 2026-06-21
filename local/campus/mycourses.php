@@ -457,11 +457,21 @@ function local_campus_render_available_purchase_plans(array $plans, string $curr
             );
         }
 
+        $plantitle = \local_subscriptions\subscription_config::get_plan_translation(
+            (int)$plan->id,
+            'name',
+            current_language()
+        );
+
+        if ($plantitle === '') {
+            $plantitle = format_string($plan->name);
+        }        
+
         $card =
             html_writer::start_div('card h-100 shadow-sm border-0') .
                 html_writer::start_div('card-body d-flex flex-column') .
                     $badge .
-                    html_writer::tag('h3', format_string($plan->name), ['class' => 'h5 mb-3']) .
+                    html_writer::tag('h3', format_string($plantitle), ['class' => 'h5 mb-3']) .
                     html_writer::div($pricehtml, 'mb-3') .
                     html_writer::link($checkouturl, $buttonlabel, ['class' => 'default-btn mt-auto']) .
                 html_writer::end_div() .
