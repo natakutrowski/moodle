@@ -341,13 +341,21 @@ class availability implements named_templatable, renderable {
      * @param mixed $node
      * @return array
      */
-    private function extract_role_rules_from_availability($node): array {
+    private function extract_role_rules_from_availability($node, bool $parentnegation = false): array {
         global $DB;
 
         $rules = [
             'allowed' => [],
             'forbidden' => [],
         ];
+
+        $currentnegation = $parentnegation;
+
+        if (is_object($node) && !empty($node->op) && is_string($node->op)) {
+            if (str_starts_with($node->op, '!')) {
+                $currentnegation = !$currentnegation;
+            }
+        }
 
         if (is_object($node)) {
             if (($node->type ?? '') === 'role') {
@@ -363,8 +371,7 @@ class availability implements named_templatable, renderable {
                     $shortname = $DB->get_field('role', 'shortname', ['id' => $roleid], IGNORE_MISSING);
 
                     if ($shortname) {
-                        // Dans availability Moodle, n = true signifie généralement "must NOT".
-                        if (!empty($node->n)) {
+                        if (!empty($node->n) || $currentnegation) {
                             $rules['forbidden'][] = $shortname;
                         } else {
                             $rules['allowed'][] = $shortname;
@@ -374,14 +381,14 @@ class availability implements named_templatable, renderable {
             }
 
             foreach (get_object_vars($node) as $value) {
-                $child = $this->extract_role_rules_from_availability($value);
+                $child = $this->extract_role_rules_from_availability($value, $currentnegation);
                 $rules['allowed'] = array_merge($rules['allowed'], $child['allowed']);
                 $rules['forbidden'] = array_merge($rules['forbidden'], $child['forbidden']);
             }
 
         } else if (is_array($node)) {
             foreach ($node as $value) {
-                $child = $this->extract_role_rules_from_availability($value);
+                $child = $this->extract_role_rules_from_availability($value, $currentnegation);
                 $rules['allowed'] = array_merge($rules['allowed'], $child['allowed']);
                 $rules['forbidden'] = array_merge($rules['forbidden'], $child['forbidden']);
             }
