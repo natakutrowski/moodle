@@ -627,6 +627,20 @@ class subscription_manager {
 
 		$ctx = \context_course::instance($courseid);
 
+		// Ne jamais ajouter trialstudent si l'utilisateur a déjà un accès supérieur
+		// sur CE cours.
+		if ($roleshortname === 'trialstudent') {
+			$higherroles = ['student', 'grammarstudent'];
+
+			foreach ($higherroles as $higherrole) {
+				$higherroleid = (int)$DB->get_field('role', 'id', ['shortname' => $higherrole], IGNORE_MISSING);
+
+				if ($higherroleid && user_has_role_assignment($userid, $higherroleid, $ctx->id)) {
+					return;
+				}
+			}
+		}
+
 		// Si on donne un vrai accès étudiant, on retire le rôle trialstudent uniquement sur CE cours.
 		$rolesToRemove = [];
 
