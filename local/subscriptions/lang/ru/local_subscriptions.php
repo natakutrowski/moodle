@@ -198,7 +198,7 @@ $string['welcome_subject'] = 'Ваш доступ к CampusFR активиров
 
 $string['welcome_body_intro'] =
     '<p>Здравствуйте, {$a}!</p>' .
-    '<p>Ваш доступ к Campus<small><sup>FR</sup></small> активирован — у вас есть полный доступ к курсу A1.</p>' .
+    '<p>Ваш доступ к Campus<small><sup>FR</sup></small> активирован.</p>' .
     '<p>Если вы уже пользовались Campus<small><sup>FR</sup></small> в пробный период, просто продолжайте с тем же аккаунтом — ваши выполненные упражнения и баллы-круассаны сохраняются. Если вы только что присоединились, этот аккаунт будет использоваться для всех входов.</p>' .
     '<p>Вот ваши данные для входа:</p>';
 
@@ -783,7 +783,7 @@ $string['digital_mail_access_hint'] = 'Вы можете скачать PDF-фа
 $string['digital_mail_download_button'] = 'Скачать карточки';
 
 $string['digital_mail_receipt_subject'] = 'Квитанция о покупке CampusFR';
-$string['digital_mail_receipt_intro'] = 'Это письмо подтверждает вашу покупку на CampusFR. Ниже вы найдёте информацию о заказе.';
+$string['digital_mail_receipt_intro'] = 'Это письмо подтверждает вашу покупку на Campus<small><sup>FR</sup></small>. Ниже вы найдёте информацию о заказе.';
 
 $string['digital_mail_product'] = 'Продукт';
 $string['digital_mail_amount'] = 'Сумма';
@@ -940,7 +940,7 @@ $string['digital_products_delete_has_purchases'] = 'Этот продукт не
 $string['digital_reassurance_instant'] = 'Мгновенный доступ после оплаты';
 $string['digital_reassurance_versions'] = 'Включены классическая и мобильная версии';
 $string['digital_reassurance_email'] = 'Ссылки автоматически отправляются на email';
-$string['digital_reassurance_nocampus'] = 'Аккаунт CampusFR не требуется';
+$string['digital_reassurance_nocampus'] = 'Аккаунт Campus<small><sup>FR</sup></small> не требуется';
 $string['digital_reassurance_secure'] = 'Безопасная оплата через Stripe / Alfa Bank';
 
 $string['digital_redirecting_payment'] = 'Переход на страницу оплаты…';

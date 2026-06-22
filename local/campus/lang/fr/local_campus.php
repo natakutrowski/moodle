@@ -206,7 +206,7 @@ $string['mail_trial_started_mycourses'] =
 // Tableau des identifiants
 $string['trial_username_label'] = 'E-mail de connexion';
 $string['trial_password_label'] = 'Mot de passe';
-$string['mail_trial_security_hint'] = 'Merci de garder ces informations confidentielles. Pour votre sécurité, vous pouvez modifier votre mot de passe à tout moment dans les paramètres de votre compte CampusFR.';
+$string['mail_trial_security_hint'] = 'Merci de garder ces informations confidentielles. Pour votre sécurité, vous pouvez modifier votre mot de passe à tout moment dans les paramètres de votre compte Campus<small><sup>FR</sup></small>.';
 $string['mail_trial_started_mycourses'] =
     'Vous pouvez accéder à vos cours d’essai à tout moment depuis votre espace personnel sur Campus<small><sup>FR</sup></small>.';
 
@@ -319,5 +319,5 @@ $string['audio_player_instruction'] = 'Cliquez sur lecture pour écouter l’aud
 $string['audio_browser_not_supported'] = 'Votre navigateur ne supporte pas l’audio.';
 
 $string['other_courses_available_title'] = 'Découvrir d’autres cours';
-$string['other_courses_available_text'] = 'Vous pouvez compléter votre parcours avec les autres cours disponibles sur CampusFR.';
+$string['other_courses_available_text'] = 'Vous pouvez compléter votre parcours avec les autres cours disponibles sur Campus<small><sup>FR</sup></small>.';
 $string['trial_badge'] = 'Essai';

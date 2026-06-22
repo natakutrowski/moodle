@@ -179,7 +179,7 @@ $string['mail_trial_started_mycourses'] = 'Ко всем пробным курс
 // Таблица с данными для входа в пробный период
 $string['trial_username_label'] = 'E-mail для входа';
 $string['trial_password_label'] = 'Пароль';
-$string['mail_trial_security_hint'] = 'Пожалуйста, держите эти данные в секрете. Для безопасности вы можете в любой момент сменить пароль в настройках аккаунта CampusFR.';
+$string['mail_trial_security_hint'] = 'Пожалуйста, держите эти данные в секрете. Для безопасности вы можете в любой момент сменить пароль в настройках аккаунта Campus<small><sup>FR</sup></small>.';
 $string['mail_trial_started_mycourses'] = 'Вы можете в любое время открыть свои пробные курсы в личном кабинете Campus<small><sup>FR</sup></small>.';
 $string['course_progress_ratio'] = '{$a->done} / {$a->total} выполненных элементов';
 
@@ -288,5 +288,5 @@ $string['audio_player_instruction'] = 'Нажмите на кнопку восп
 $string['audio_browser_not_supported'] = 'Ваш браузер не поддерживает воспроизведение аудио.';
 
 $string['other_courses_available_title'] = 'Открыть другие курсы';
-$string['other_courses_available_text'] = 'Вы можете продолжить обучение и добавить другие доступные курсы CampusFR.';
+$string['other_courses_available_text'] = 'Вы можете продолжить обучение и добавить другие доступные курсы Campus<small><sup>FR</sup></small>.';
 $string['trial_badge'] = 'Пробный доступ';

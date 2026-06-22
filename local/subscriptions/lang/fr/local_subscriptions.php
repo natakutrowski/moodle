@@ -198,7 +198,7 @@ $string['welcome_subject'] = 'Votre accès à CampusFR est activé ✅';
 
 $string['welcome_body_intro'] =
     '<p>Bonjour, {$a} !</p>' .
-    '<p>Votre accès à Campus<small><sup>FR</sup></small> est activé — vous avez maintenant un accès complet au cours A1.</p>' .
+    '<p>Votre accès à Campus<small><sup>FR</sup></small> est activé.</p>' .
     '<p>Si vous aviez déjà utilisé Campus<small><sup>FR</sup></small> pendant la période d’essai, vous continuez simplement avec le même compte — vos exercices réalisés et vos points-croissants sont conservés. Si vous venez de nous rejoindre, ce compte sera utilisé pour toutes vos connexions.</p>' .
     '<p>Voici vos identifiants :</p>';
 
@@ -787,7 +787,7 @@ $string['digital_mail_access_hint'] = 'Vous pouvez télécharger votre PDF avec 
 $string['digital_mail_download_button'] = 'Télécharger le PDF';
 
 $string['digital_mail_receipt_subject'] = 'Reçu de votre achat CampusFR';
-$string['digital_mail_receipt_intro'] = 'Ce message confirme votre achat sur CampusFR. Vous trouverez ci-dessous le récapitulatif de votre commande.';
+$string['digital_mail_receipt_intro'] = 'Ce message confirme votre achat sur Campus<small><sup>FR</sup></small>. Vous trouverez ci-dessous le récapitulatif de votre commande.';
 
 $string['digital_mail_product'] = 'Produit';
 $string['digital_mail_amount'] = 'Montant';
@@ -930,7 +930,7 @@ $string['digital_products_delete_has_purchases'] = 'Ce produit ne peut pas être
 $string['digital_reassurance_instant'] = 'Accès immédiat après le paiement';
 $string['digital_reassurance_versions'] = 'Versions classique + mobile incluses';
 $string['digital_reassurance_email'] = 'Liens envoyés automatiquement par email';
-$string['digital_reassurance_nocampus'] = 'Aucun compte CampusFR nécessaire';
+$string['digital_reassurance_nocampus'] = 'Aucun compte Campus<small><sup>FR</sup></small> nécessaire';
 $string['digital_reassurance_secure'] = 'Paiement sécurisé via Stripe / Alfa Bank';
 $string['digital_redirecting_payment'] = 'Redirection vers la page de paiement…';
 

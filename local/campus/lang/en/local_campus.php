@@ -209,7 +209,7 @@ $string['mail_trial_started_mycourses'] =
 // Login table
 $string['trial_username_label'] = 'Login e-mail';
 $string['trial_password_label'] = 'Password';
-$string['mail_trial_security_hint'] = 'Please keep these details confidential. For security, you can change your password at any time in your CampusFR account settings.';
+$string['mail_trial_security_hint'] = 'Please keep these details confidential. For security, you can change your password at any time in your Campus<small><sup>FR</sup></small> account settings.';
 $string['mail_trial_started_mycourses'] =
     'You can open your trial courses anytime from your Campus<small><sup>FR</sup></small> dashboard.';
 
@@ -322,5 +322,5 @@ $string['audio_player_instruction'] = 'Click play to listen to the audio.';
 $string['audio_browser_not_supported'] = 'Your browser does not support audio playback.';
 
 $string['other_courses_available_title'] = 'Discover more courses';
-$string['other_courses_available_text'] = 'You can continue your learning journey with other courses available on CampusFR.';
+$string['other_courses_available_text'] = 'You can continue your learning journey with other courses available on Campus<small><sup>FR</sup></small>.';
 $string['trial_badge'] = 'Trial';
