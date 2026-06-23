@@ -90,7 +90,7 @@ try {
     $errmsg = null;
     if (!empty($CFG->passwordpolicy) && function_exists('check_password_policy')) {
         if (!check_password_policy($password, $errmsg, null)) {
-            throw new moodle_exception('trial_password_policy_error', 'local_campus', '', (string)($errmsg ?? ''));
+            throw new moodle_exception('trial_password_policy_error', 'local_campus', '', (string)(html_to_text($errmsg) ?? ''));
         }
     }
 
