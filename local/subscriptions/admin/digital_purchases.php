@@ -16,6 +16,12 @@ $reconcilepending = optional_param('reconcile_pending', 0, PARAM_BOOL);
 $providerpaidonly = optional_param('providerpaidonly', 0, PARAM_BOOL);
 $dbpaidonly = optional_param('dbpaidonly', 0, PARAM_BOOL);
 
+$campususerfilter = optional_param('campususer', 'all', PARAM_ALPHA);
+
+if (!in_array($campususerfilter, ['all', 'registered', 'guest'], true)) {
+    $campususerfilter = 'all';
+}
+
 if ($reconcilepending) {
     require_sesskey();
 
@@ -39,6 +45,7 @@ if ($reconcilepending) {
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
     'checkprovider' => $checkprovider,
+    'campususer' => $campususerfilter,
 ]));
 $PAGE->set_title(get_string('digital_purchases_title', 'local_subscriptions'));
 $PAGE->set_heading(get_string('digital_purchases_title', 'local_subscriptions'));
@@ -48,14 +55,37 @@ $lang = strtolower(substr(current_language(), 0, 2));
 $params = ['lang' => $lang];
 $where = '1=1';
 
-$params = ['lang' => $lang];
-$where = '1=1';
+$campususerexists = "
+    (
+        pr.userid IS NOT NULL
+        AND EXISTS (
+            SELECT 1
+              FROM {user} u1
+             WHERE u1.id = pr.userid
+               AND u1.deleted = 0
+               AND u1.suspended = 0
+        )
+    )
+    OR EXISTS (
+        SELECT 1
+          FROM {user} u2
+         WHERE " . $DB->sql_compare_text('u2.email') . " = " . $DB->sql_compare_text('pr.email') . "
+           AND u2.deleted = 0
+           AND u2.suspended = 0
+    )
+";
 
 if ($dbpaidonly) {
     $where .= " AND pr.status IN ('paid', 'completed')";
 } else if ($statusfilter !== '') {
     $where .= ' AND pr.status = :statusfilter';
     $params['statusfilter'] = $statusfilter;
+}
+
+if ($campususerfilter === 'registered') {
+    $where .= " AND ({$campususerexists})";
+} else if ($campususerfilter === 'guest') {
+    $where .= " AND NOT ({$campususerexists})";
 }
 
 $sql = "
@@ -71,6 +101,11 @@ $sql = "
         pr.lastname,
         pr.email,
         pr.buyer_lang,
+        pr.userid,
+        CASE
+            WHEN ({$campususerexists}) THEN 1
+            ELSE 0
+        END AS hascampususer,
 
         pr.price,
         pr.currency,
@@ -257,6 +292,9 @@ echo html_writer::link(
     new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
         'download' => 1,
         'checkprovider' => $checkprovider,
+        'campususer' => $campususerfilter,
+        'dbpaidonly' => $dbpaidonly,
+        'status' => $statusfilter,
     ]),
     get_string('digital_purchases_export_xlsx', 'local_subscriptions'),
     ['class' => 'btn btn-primary']
@@ -274,6 +312,28 @@ echo html_writer::link(
     ]),
     get_string('digital_purchases_show_paid', 'local_subscriptions'),
     ['class' => 'btn btn-outline-success']
+);
+
+echo html_writer::link(
+    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+        'campususer' => 'registered',
+        'dbpaidonly' => $dbpaidonly,
+        'status' => $statusfilter,
+        'checkprovider' => $checkprovider,
+    ]),
+    get_string('digital_purchases_filter_registered', 'local_subscriptions'),
+    ['class' => $campususerfilter === 'registered' ? 'btn btn-success' : 'btn btn-outline-success']
+);
+
+echo html_writer::link(
+    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+        'campususer' => 'guest',
+        'dbpaidonly' => $dbpaidonly,
+        'status' => $statusfilter,
+        'checkprovider' => $checkprovider,
+    ]),
+    get_string('digital_purchases_filter_guests', 'local_subscriptions'),
+    ['class' => $campususerfilter === 'guest' ? 'btn btn-warning' : 'btn btn-outline-warning']
 );
 
 echo html_writer::link(
@@ -348,6 +408,7 @@ $table->head = [
     'ID',
     get_string('digital_success_product', 'local_subscriptions'),
     get_string('digital_success_email', 'local_subscriptions'),
+    get_string('digital_purchases_campus_account', 'local_subscriptions'),
     get_string('digital_success_amount', 'local_subscriptions'),
     get_string('digital_success_provider', 'local_subscriptions'),
     get_string('digital_purchases_db_status', 'local_subscriptions'),
@@ -365,6 +426,7 @@ $table->colclasses = [
     'col-id',
     'col-product',
     'col-email',
+    'col-campus-user',
     'col-amount',
     'col-provider',
     'col-status',
@@ -426,6 +488,9 @@ foreach ($records as $r) {
             'noclean' => true,
         ]),
         s(trim(($r->firstname ?? '') . ' ' . ($r->lastname ?? ''))) . html_writer::empty_tag('br') . s($r->email ?? ''),
+        !empty($r->hascampususer)
+            ? html_writer::tag('span', get_string('yes'), ['class' => 'badge bg-success'])
+            : html_writer::tag('span', get_string('no'), ['class' => 'badge bg-warning text-dark']),
         number_format((float)$r->price, 2, ',', ' ') . ' ' . s($r->currency ?? ''),
         local_subscriptions_render_provider_icon($r->payment_provider ?? ''),
         local_subscriptions_render_db_status_badge($r->status ?? ''),
@@ -443,6 +508,7 @@ echo html_writer::tag('style', '
     .col-id { width: 55px; }
     .col-product { width: 150px; }
     .col-email { width: 230px; }
+    .col-campus-user { width: 95px; text-align: center; }
     .col-amount { width: 90px; }
     .col-provider { width: 70px; text-align: center; }
     .col-status { width: 90px; }

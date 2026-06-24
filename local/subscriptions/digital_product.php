@@ -284,7 +284,7 @@ $checks = [
 ];
 
 foreach ($checks as $check) {
-    echo html_writer::tag('div', '✔ ' . s($check), [
+    echo html_writer::tag('div', '✔ ' . $check, [
         'class' => 'small mb-2',
         'style' => 'color:#198754;font-weight:500;',
     ]);

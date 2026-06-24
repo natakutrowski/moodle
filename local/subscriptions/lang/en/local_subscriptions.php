@@ -319,7 +319,7 @@ $string['details'] = 'Details';
 $string['subscription_details'] = 'Purchase details';
 
 $string['mysubs_title'] = 'My purchases';
-$string['mysubs_empty'] = 'You don’t have any purchases yet.';
+$string['mysubs_empty'] = 'You have not purchased any courses yet.';
 $string['period'] = 'Period';
 
 $string['btn_extend']    = 'Extend';
@@ -1047,3 +1047,14 @@ $string['all_courses_owned_text'] = 'No new purchase is needed right now. You ca
 $string['unlock_subscriber_title'] = 'Subscribers-only activity';
 $string['unlock_subscriber_text'] = 'This activity is not available with trial access. Choose a plan to continue.';
 $string['unlock_subscriber_button'] = 'View plans';
+
+$string['digital_purchases_profile_title'] = 'Your digital purchases';
+$string['digital_purchase_date'] = 'Purchase date';
+$string['digital_purchases_filter_registered'] = 'Registered buyers';
+$string['digital_purchases_filter_guests'] = 'Unregistered buyers';
+$string['digital_purchases_campus_account'] = 'Campus account';
+
+$string['course_purchases_profile_title'] = 'Your course purchases';
+$string['purchase_date'] = 'Purchase date';
+$string['available_courses'] = 'Available courses';
+$string['digital_product_view_page'] = 'View product page';

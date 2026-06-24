@@ -74,8 +74,9 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
 
     // Charge les abonnements
     $subscriptions = get_user_active_and_nearest_queued($user->id);
+    $digitalpurchases = local_subscriptions_get_user_digital_purchases((int)$user->id);
 
-    $content = $renderer->render_user_subscriptions_block($subscriptions);
+    $content = $renderer->render_user_subscriptions_block($subscriptions, $digitalpurchases);
 
     // Injecter la popup d’abonnement réutilisable dans le bloc Profil
     ob_start();
@@ -95,7 +96,7 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
     $node = new node(
         'local_subscriptions', // $parentcat — catégorie parente
         'zzz_local_subscriptions', // $name — identifiant unique du nœud
-        get_string('your_subscriptions', 'local_subscriptions'), // $title
+        html_writer::span('', 'sr-only'), //get_string('your_subscriptions', 'local_subscriptions'), // $title
         null, // $after — tu peux mettre null ou un autre ID pour le placer après un nœud spécifique
         null, // $url — pas de lien, car on injecte du contenu directement
         $content // $content — ton bloc HTML
@@ -104,9 +105,9 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
     $tree->add_node($node);
 
     // Lancer le tweak DOM : renommer le heading (fallback) + réécrire les liens
-    $PAGE->requires->js_call_amd('local_subscriptions/myprofile_courses', 'init', [
-        'label' => get_string('mycourses_profile_heading', 'local_subscriptions')
-    ]);
+    // $PAGE->requires->js_call_amd('local_subscriptions/myprofile_courses', 'init', [
+    //     'label' => get_string('mycourses_profile_heading', 'local_subscriptions')
+    // ]);
 
 
 }

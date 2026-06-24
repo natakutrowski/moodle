@@ -313,7 +313,7 @@ $string['details'] = 'Детали';
 $string['subscription_details'] = 'Детали покупки';
 
 $string['mysubs_title'] = 'Мои покупки';
-$string['mysubs_empty'] = 'У вас пока нет покупок.';
+$string['mysubs_empty'] = 'Вы пока не покупали курсы.';
 $string['period'] = 'Период';
 
 $string['btn_extend']    = 'Продлить';
@@ -1045,3 +1045,14 @@ $string['all_courses_owned_text'] = 'Сейчас ничего покупать 
 $string['unlock_subscriber_title'] = 'Задание доступно только подписчикам';
 $string['unlock_subscriber_text'] = 'Это задание недоступно в пробном доступе. Выберите тариф, чтобы продолжить.';
 $string['unlock_subscriber_button'] = 'Посмотреть тарифы';
+
+$string['digital_purchases_profile_title'] = 'Ваши цифровые покупки';
+$string['digital_purchase_date'] = 'Дата покупки';
+$string['digital_purchases_filter_registered'] = 'Зарегистрированные покупатели';
+$string['digital_purchases_filter_guests'] = 'Незарегистрированные покупатели';
+$string['digital_purchases_campus_account'] = 'Аккаунт Campus';
+
+$string['course_purchases_profile_title'] = 'Ваши покупки курсов';
+$string['purchase_date'] = 'Дата покупки';
+$string['available_courses'] = 'Доступные курсы';
+$string['digital_product_view_page'] = 'Посмотреть страницу продукта';

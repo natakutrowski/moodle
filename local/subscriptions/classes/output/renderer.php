@@ -21,7 +21,7 @@ class renderer extends plugin_renderer_base {
         return userdate((int)$ts, get_string('strftimedate', 'langconfig'));
     }
 
-    public function render_user_subscriptions_block(array $subscriptions): string {
+    public function render_user_subscriptions_block(array $subscriptions, array $digitalpurchases = []): string {
         global $DB;
 
         $now   = time();
@@ -139,6 +139,23 @@ class renderer extends plugin_renderer_base {
                 $priceString = sprintf('%.2f %s', $amount, $cur);
             }
 
+            $isunlimited = self::is_unlimited_end_date($sub->end_date ?? null);
+            $showenddate = !$isunlimited;
+            $datelabel = (!$isTrialPlan && $isunlimited)
+                ? get_string('purchase_date', 'local_subscriptions')
+                : get_string('start_date', 'local_subscriptions');
+
+            $courses = [];
+            $rawcourses = array_values(local_subscriptions_get_courses_by_plan((int)$sub->planid));
+            $totalcourses = count($rawcourses);
+
+            foreach ($rawcourses as $index => $course) {
+                $courses[] = [
+                    'name' => format_string($course->fullname),
+                    'url'  => (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false),
+                    'last' => ($index === $totalcourses - 1),
+                ];
+            }
 
             $data['subscriptions'][] = [
                 'planname'           => format_string($planname),
@@ -154,6 +171,10 @@ class renderer extends plugin_renderer_base {
                 'renew_url'        => $data['subscribe_url'],
                 'queued_msg'       => $queuedMsg, // affiché si non vide
                 'is_trial'     => $isTrialPlan ? true : false,  // bien un booléen
+                'datelabel'           => $datelabel,
+                'showenddate'         => $showenddate,
+                'courses'             => $courses,
+                'hascourses'          => !empty($courses),
             ];
         }
 
@@ -188,6 +209,24 @@ class renderer extends plugin_renderer_base {
                 $priceString = sprintf('%.2f %s', $amount, $cur);
             }
 
+            $isunlimited = self::is_unlimited_end_date($sub->end_date ?? null);
+            $showenddate = !$isunlimited;
+            $datelabel = (!$isTrialPlan && $isunlimited)
+                ? get_string('purchase_date', 'local_subscriptions')
+                : get_string('start_date', 'local_subscriptions');
+
+            $courses = [];
+            $rawcourses = array_values(local_subscriptions_get_courses_by_plan((int)$sub->planid));
+            $totalcourses = count($rawcourses);
+
+            foreach ($rawcourses as $index => $course) {
+                $courses[] = [
+                    'name' => format_string($course->fullname),
+                    'url'  => (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false),
+                    'last' => ($index === $totalcourses - 1),
+                ];
+            }
+
             $data['subscriptions'][] = [
                 'planname'         => format_string($planname),
                 'startdate'        => userdate($earliestQueued->start_date, get_string('strftimedate', 'langconfig')),
@@ -201,7 +240,47 @@ class renderer extends plugin_renderer_base {
                 'renew_url'        => $data['subscribe_url'],
                 'queued_msg'       => $queuedMsg,
                 'is_trial'     => $isTrialPlan ? true : false,
+                'datelabel'           => $datelabel,
+                'showenddate'         => $showenddate,
+                'courses'             => $courses,
+                'hascourses'          => !empty($courses),
             ];
+        }
+
+        foreach ($digitalpurchases as $purchase) {
+            $downloadlinks = [];
+
+            if (!empty($purchase->download_token)) {
+                $downloadlinks[] = [
+                    'url' => (new \moodle_url('/download/pdf/' . $purchase->download_token))->out(false),
+                    'label' => get_string('digital_download_classic', 'local_subscriptions'),
+                ];
+
+                if (!empty($purchase->mobile_filename)) {
+                    $downloadlinks[] = [
+                        'url' => (new \moodle_url('/download/pdf/' . $purchase->download_token, ['version' => 'mobile']))->out(false),
+                        'label' => get_string('digital_download_mobile', 'local_subscriptions'),
+                    ];
+                }
+            }
+
+            $data['digitalpurchases'][] = [
+                'productname' => format_string($purchase->productname ?? ''),
+                'purchasedate' => !empty($purchase->payment_date)
+                    ? userdate((int)$purchase->payment_date, get_string('strftimedate', 'langconfig'))
+                    : userdate((int)$purchase->creation_date, get_string('strftimedate', 'langconfig')),
+                'pricepaid' => sprintf('%.2f %s', (float)$purchase->price, (string)$purchase->currency),
+                'downloadlinks' => $downloadlinks,
+                'producturl' => (new \moodle_url('/local/subscriptions/digital_product.php', [
+                    'p' => $purchase->slug,
+                ]))->out(false),
+            ];
+        }
+
+        $data['hasdigitalpurchases'] = !empty($data['digitalpurchases']);
+
+        foreach ($data['subscriptions'] as $i => $subscription) {
+            $data['subscriptions'][$i]['first'] = ($i === 0);
         }
 
         return $this->render_from_template('local_subscriptions/myprofile_subscriptions', $data);
@@ -593,5 +672,8 @@ class renderer extends plugin_renderer_base {
         return 0;
     }
 
+    private static function is_unlimited_end_date(?int $ts): bool {
+        return empty($ts) || (int)$ts >= 4102444800; // 0/null OR >= 2100-01-01.
+    }
     
 }

@@ -269,69 +269,111 @@ function get_user_country_code(): string {
     return '';
 }
 
-    /**
-     * Crée ou récupère un utilisateur à partir de l'email.
-     * Retourne [\stdClass $user, bool $isnew, ?string $tmpPassword]
-     */
-    function local_subscriptions_ensure_user(
-        string $email,
-        string $firstname = '',
-        string $lastname = '',
-        ?string $passwordHash = null
-    ): array {
-        global $DB, $CFG;
-        require_once($CFG->dirroot . '/user/lib.php');
+/**
+ * Crée ou récupère un utilisateur à partir de l'email.
+ * Retourne [\stdClass $user, bool $isnew, ?string $tmpPassword]
+ */
+function local_subscriptions_ensure_user(
+    string $email,
+    string $firstname = '',
+    string $lastname = '',
+    ?string $passwordHash = null
+): array {
+    global $DB, $CFG;
+    require_once($CFG->dirroot . '/user/lib.php');
 
-        $email = \core_text::strtolower($email);
-        $user  = $DB->get_record('user', ['email' => $email, 'deleted' => 0], '*', IGNORE_MISSING);
-        if ($user) {
-            // Utilisateur existant, on ne touche pas à son mot de passe ici
-            return [$user, false, null];
-        }
-
-        // Génère un username unique
-        $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $email ?? '');
-
-        // Si un mot de passe explicite a été fourni (checkout), on l'utilise tel quel
-        if (!empty($passwordHash)) {
-            $passwordField  = $passwordHash;
-            $forcechangepw  = 0;
-            $tmpPassword    = null; // pas de mot de passe "temporaire"
-        } else {
-            // Cas "auto-généré" (ex: inscription par un admin via l'interface d'abonnement)
-            $tmpPassword    = TempPassword::generate(12, 4);
-            $passwordField  = hash_internal_user_password($tmpPassword);
-            $forcechangepw  = 1;
-        }
-
-        $defaultuserlang = get_config('local_subscriptions', 'defaultuserlang'); // '' = hériter du site
-
-        $u = (object)[
-            'auth'               => 'manual',
-            'confirmed'          => 1,
-            'mnethostid'         => $CFG->mnet_localhost_id,
-            'username'           => $username,
-            'password'           => $passwordField,
-            'firstname'          => $firstname ?: 'User',
-            'lastname'           => $lastname ?: '',
-            'email'              => $email,
-            'timecreated'        => time(),
-            'lang'               => !empty($CFG->lang) ? $CFG->lang : current_language(),
-            'forcepasswordchange'=> $forcechangepw,
-        ];
-
-        if (!empty($defaultuserlang)) {
-            $u->lang = strtolower($defaultuserlang);
-        }
-
-        $userid = user_create_user($u, false, false);
-
-        // Ne forcer le changement de mot de passe que dans le cas "password auto-généré"
-        if ($forcechangepw) {
-            set_user_preference('auth_forcepasswordchange', 1, $userid);
-        }
-
-        $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
-
-        return [$user, true, $tmpPassword];
+    $email = \core_text::strtolower($email);
+    $user  = $DB->get_record('user', ['email' => $email, 'deleted' => 0], '*', IGNORE_MISSING);
+    if ($user) {
+        // Utilisateur existant, on ne touche pas à son mot de passe ici
+        return [$user, false, null];
     }
+
+    // Génère un username unique
+    $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $email ?? '');
+
+    // Si un mot de passe explicite a été fourni (checkout), on l'utilise tel quel
+    if (!empty($passwordHash)) {
+        $passwordField  = $passwordHash;
+        $forcechangepw  = 0;
+        $tmpPassword    = null; // pas de mot de passe "temporaire"
+    } else {
+        // Cas "auto-généré" (ex: inscription par un admin via l'interface d'abonnement)
+        $tmpPassword    = TempPassword::generate(12, 4);
+        $passwordField  = hash_internal_user_password($tmpPassword);
+        $forcechangepw  = 1;
+    }
+
+    $defaultuserlang = get_config('local_subscriptions', 'defaultuserlang'); // '' = hériter du site
+
+    $u = (object)[
+        'auth'               => 'manual',
+        'confirmed'          => 1,
+        'mnethostid'         => $CFG->mnet_localhost_id,
+        'username'           => $username,
+        'password'           => $passwordField,
+        'firstname'          => $firstname ?: 'User',
+        'lastname'           => $lastname ?: '',
+        'email'              => $email,
+        'timecreated'        => time(),
+        'lang'               => !empty($CFG->lang) ? $CFG->lang : current_language(),
+        'forcepasswordchange'=> $forcechangepw,
+    ];
+
+    if (!empty($defaultuserlang)) {
+        $u->lang = strtolower($defaultuserlang);
+    }
+
+    $userid = user_create_user($u, false, false);
+
+    // Ne forcer le changement de mot de passe que dans le cas "password auto-généré"
+    if ($forcechangepw) {
+        set_user_preference('auth_forcepasswordchange', 1, $userid);
+    }
+
+    $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
+
+    return [$user, true, $tmpPassword];
+}
+
+function local_subscriptions_get_user_digital_purchases(int $userid): array {
+    global $DB;
+
+    if ($userid <= 0) {
+        return [];
+    }
+
+    $lang = strtolower(substr(current_language(), 0, 2));
+
+    $sql = "
+        SELECT
+            pr.id,
+            pr.productid,
+            COALESCE(NULLIF(tcur.title, ''), NULLIF(tfr.title, ''), p.name) AS productname,
+            p.slug,
+            p.mobile_filename,
+            pr.email,
+            pr.price,
+            pr.currency,
+            pr.status,
+            pr.payment_date,
+            pr.creation_date,
+            pr.download_token
+        FROM {subscription_digital_payment_request} pr
+        JOIN {subscription_digital_product} p ON p.id = pr.productid
+        LEFT JOIN {subscription_digital_product_lang} tcur
+            ON tcur.productid = p.id
+            AND tcur.lang = :lang
+        LEFT JOIN {subscription_digital_product_lang} tfr
+            ON tfr.productid = p.id
+            AND tfr.lang = 'fr'
+        WHERE pr.userid = :userid
+          AND pr.status IN ('paid', 'completed')
+        ORDER BY COALESCE(pr.payment_date, pr.creation_date) DESC, pr.id DESC
+    ";
+
+    return array_values($DB->get_records_sql($sql, [
+        'userid' => $userid,
+        'lang' => $lang,
+    ]));
+}

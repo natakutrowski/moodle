@@ -319,7 +319,7 @@ $string['details']               = 'Détails';
 $string['subscription_details']  = 'Détails de l’achat';
 
 $string['mysubs_title']  = 'Mes achats';
-$string['mysubs_empty']  = 'Vous n’avez pas encore d’achat.';
+$string['mysubs_empty'] = 'Vous n’avez pas encore acheté de cours.';
 $string['period']        = 'Période';
 
 $string['btn_extend'] = 'Prolonger';
@@ -1034,3 +1034,14 @@ $string['all_courses_owned_text'] = 'Aucun nouvel achat n’est nécessaire pour
 $string['unlock_subscriber_title'] = 'Activité réservée aux abonnés';
 $string['unlock_subscriber_text'] = 'Cette activité n’est pas disponible avec l’accès d’essai. Choisissez une formule pour continuer.';
 $string['unlock_subscriber_button'] = 'Voir les formules';
+
+$string['digital_purchases_profile_title'] = 'Vos achats digitaux';
+$string['digital_purchase_date'] = 'Date d’achat';
+$string['digital_purchases_filter_registered'] = 'Acheteurs inscrits';
+$string['digital_purchases_filter_guests'] = 'Acheteurs non inscrits';
+$string['digital_purchases_campus_account'] = 'Compte Campus';
+
+$string['course_purchases_profile_title'] = 'Vos achats de cours';
+$string['purchase_date'] = 'Date d’achat';
+$string['available_courses'] = 'Cours disponibles';
+$string['digital_product_view_page'] = 'Voir la page du produit';

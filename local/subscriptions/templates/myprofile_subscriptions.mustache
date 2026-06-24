@@ -1,5 +1,8 @@
 {{! Affichage des souscriptions ACTIVES uniquement (filtrées côté renderer) }}
-
+<h5 class="mt-4 mb-3 text-dark">
+  <i class="fa-solid fa-graduation-cap me-2"></i>
+  {{#str}}course_purchases_profile_title, local_subscriptions{{/str}}
+</h5>
 {{#subscriptions}}
   <div class="subscription-card border-start border-4 py-3 px-3 rounded shadow-sm {{statusclass}} bg-light mb-3">
     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -41,12 +44,14 @@
     <ul class="list-unstyled ms-1 mb-0">
       <li class="mb-1">
         <i class="fa-solid fa-fw fa-calendar me-2 text-secondary" aria-hidden="true"></i>
-        <strong>{{#str}}start_date, local_subscriptions{{/str}}:</strong> {{startdate}}
+        <strong>{{datelabel}}:</strong> {{startdate}}
       </li>
+      {{#showenddate}}
       <li class="mb-1">
         <i class="fa-solid fa-fw fa-calendar-check me-2 text-secondary" aria-hidden="true"></i>
         <strong>{{#str}}end_date, local_subscriptions{{/str}}:</strong> {{enddate}}
       </li>
+      {{/showenddate}}
 
       {{! Ligne "Liste des cours" + popover SUPPRIMÉE pour tous les abonnements }}
 
@@ -57,6 +62,15 @@
       </li>
       {{/is_trial}}
 
+      {{#hascourses}}
+      <li class="mb-1">
+        <i class="fa-solid fa-fw fa-book-open me-2 text-secondary" aria-hidden="true"></i>
+        <strong>{{#str}}available_courses, local_subscriptions{{/str}}:</strong>
+        {{#courses}}
+          <a href="{{url}}">{{name}}</a>{{^last}}, {{/last}}
+        {{/courses}}
+      </li>
+      {{/hascourses}}
 
     </ul>
   </div>
@@ -75,6 +89,51 @@
     </div>
   </div>
 {{/subscriptions}}
+
+{{#hasdigitalpurchases}}
+  <h5 class="mt-4 mb-3 text-dark">
+    <i class="fa-solid fa-file-pdf me-2"></i>
+    {{#str}}digital_purchases_profile_title, local_subscriptions{{/str}}
+  </h5>
+
+  {{#digitalpurchases}}
+    <div class="subscription-card border-start border-4 py-3 px-3 rounded shadow-sm border-primary bg-light mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+      <div>
+        <h5 class="mb-0 text-dark">
+          <i class="fa-solid fa-file-arrow-down me-2"></i>
+          {{productname}}
+        </h5>
+
+        {{#producturl}}
+          <a href="{{producturl}}" class="small text-decoration-none">
+            {{#str}}digital_product_view_page, local_subscriptions{{/str}}
+          </a>
+        {{/producturl}}
+      </div>
+      </div>
+
+      <ul class="list-unstyled ms-1 mb-0">
+        <li class="mb-1">
+          <i class="fa-solid fa-fw fa-calendar-check me-2 text-secondary" aria-hidden="true"></i>
+          <strong>{{#str}}digital_purchase_date, local_subscriptions{{/str}}:</strong> {{purchasedate}}
+        </li>
+
+        <li class="mb-1">
+          <i class="fa-solid fa-fw fa-money-bill-wave me-2 text-secondary" aria-hidden="true"></i>
+          <strong>{{#str}}pricepaid, local_subscriptions{{/str}}:</strong> {{pricepaid}}
+        </li>
+
+        {{#downloadlinks}}
+          <li class="mb-1">
+            <i class="fa-solid fa-fw fa-download me-2 text-secondary" aria-hidden="true"></i>
+            <a href="{{url}}" target="_blank">{{label}}</a>
+          </li>
+        {{/downloadlinks}}
+      </ul>
+    </div>
+  {{/digitalpurchases}}
+{{/hasdigitalpurchases}}
 
 <div class="mt-3 d-flex gap-2">
   {{#has_expired}}
