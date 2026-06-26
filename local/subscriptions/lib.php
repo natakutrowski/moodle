@@ -76,7 +76,17 @@ function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
     $subscriptions = get_user_active_and_nearest_queued($user->id);
     $digitalpurchases = local_subscriptions_get_user_digital_purchases((int)$user->id);
 
-    $content = $renderer->render_user_subscriptions_block($subscriptions, $digitalpurchases);
+    $mypurchasesurl = ($USER->id == $user->id)
+        ? \local_subscriptions\url\UrlFactory::my_purchases()->out(false)
+        : \local_subscriptions\url\UrlFactory::my_purchases([
+            'userid' => $user->id,
+        ])->out(false);
+
+    $content = $renderer->render_user_subscriptions_block(
+        $subscriptions,
+        $digitalpurchases,
+        $mypurchasesurl
+    );
 
     // Injecter la popup d’abonnement réutilisable dans le bloc Profil
     ob_start();

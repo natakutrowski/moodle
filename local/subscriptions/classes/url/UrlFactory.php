@@ -21,6 +21,11 @@ final class UrlFactory {
     public static function my_subscriptions(): moodle_url {
         return new moodle_url('/user/my_subscriptions.php');
     }
+
+    public static function my_purchases(array $params = []): moodle_url {
+        return new moodle_url('/mes-achats', $params);
+    }
+
     public static function payment_success(array $params=[]): moodle_url {
         if ($params){
             return new moodle_url('/local/subscriptions/payment_success.php',$params);

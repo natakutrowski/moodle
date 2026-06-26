@@ -21,7 +21,11 @@ class renderer extends plugin_renderer_base {
         return userdate((int)$ts, get_string('strftimedate', 'langconfig'));
     }
 
-    public function render_user_subscriptions_block(array $subscriptions, array $digitalpurchases = []): string {
+    public function render_user_subscriptions_block(
+        array $subscriptions,
+        array $digitalpurchases = [],
+        string $mypurchasesurl = ''
+    ): string {
         global $DB;
 
         $now   = time();
@@ -62,7 +66,7 @@ class renderer extends plugin_renderer_base {
 
         $data = [
             'subscriptions' => [],
-            'mysubs_url'    => (UrlFactory::my_subscriptions())->out(false),
+            'mysubs_url' => $mypurchasesurl,
             'subscribe_url' => (UrlFactory::subscribe())->out(false),
         ];
 
