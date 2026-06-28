@@ -890,13 +890,30 @@ class core_renderer extends \core_renderer {
         $course = $this->page->cm->get_course();
         $courseformat = course_get_format($course);
 
-        // Get a list of all the activities in the course.
-        $modules = get_fast_modinfo($course->id)->get_cms();
+        // // Get a list of all the activities in the course.
+        // $modules = get_fast_modinfo($course->id)->get_cms();
+
+        // // Put the modules into an array in order by the position they are shown in the course.
+        // $mods = [];
+        // $activitylist = [];
+        // foreach ($modules as $module) {
+
+        // Get a list of all the activities in the course, ordered by course sections.
+        $modinfo = get_fast_modinfo($course->id);
+        $modules = [];
+
+        foreach ($modinfo->sections as $sectionnum => $cmids) {
+            foreach ($cmids as $cmid) {
+                if (!empty($modinfo->cms[$cmid])) {
+                    $modules[$cmid] = $modinfo->cms[$cmid];
+                }
+            }
+        }
 
         // Put the modules into an array in order by the position they are shown in the course.
         $mods = [];
         $activitylist = [];
-        foreach ($modules as $module) {
+        foreach ($modules as $module) {        
             // Only add activities the user can access, aren't in stealth mode and have a url (eg. mod_label does not).
             if (!$module->uservisible || $module->is_stealth() || empty($module->url)) {
                 continue;
