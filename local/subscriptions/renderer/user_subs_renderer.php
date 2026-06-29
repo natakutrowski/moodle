@@ -685,4 +685,569 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    public function render_user_subscriptions_admin_page(
+        array $subscriptions,
+        array $plans,
+        int $selectedplanid,
+        int $page,
+        int $perpage,
+        int $totalcount
+    ): string {
+        global $OUTPUT;
+
+        $output = '';
+
+        $baseurl = new moodle_url(\local_subscriptions\subscription_config::user_subscriptions_page(), [
+            'planid' => $selectedplanid,
+            'perpage' => $perpage,
+        ]);
+
+        $output .= html_writer::start_div('subscription-controls mb-3 d-flex flex-wrap align-items-end gap-2');
+
+        $output .= html_writer::start_tag('form', [
+            'method' => 'get',
+            'action' => new moodle_url(\local_subscriptions\subscription_config::user_subscriptions_page()),
+            'class' => 'd-flex flex-wrap align-items-end gap-2',
+        ]);
+
+        $planoptions = [0 => get_string('all_plans', 'local_subscriptions')] + $plans;
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('filter_by_plan', 'local_subscriptions'), 'planid', false, ['class' => 'form-label']) .
+            html_writer::select($planoptions, 'planid', $selectedplanid, false, ['class' => 'form-select']),
+            'form-group'
+        );
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('perpage', 'local_subscriptions'), 'perpage', false, ['class' => 'form-label']) .
+            html_writer::select([25 => 25, 50 => 50, 100 => 100, 200 => 200], 'perpage', $perpage, false, ['class' => 'form-select']),
+            'form-group'
+        );
+
+        $output .= html_writer::tag('button', get_string('filter', 'local_subscriptions'), [
+            'type' => 'submit',
+            'class' => 'btn btn-primary',
+        ]);
+
+        $output .= html_writer::end_tag('form');
+
+        $output .= \local_subscriptions\subscription_config::button_add_subscription();
+        $output .= \local_subscriptions\subscription_config::button_import_csv();
+
+        $output .= html_writer::end_div();
+
+        if (empty($subscriptions)) {
+            return $output . $OUTPUT->notification(get_string('no_subscriptions_found', 'local_subscriptions'), 'info');
+        }
+
+        $table = new html_table();
+        $table->id = 'user-subscriptions-admin-table';
+        $table->attributes['class'] = 'generaltable subscription-table';
+        $table->head = [
+            get_string('actions', 'local_subscriptions'),
+            get_string('user', 'local_subscriptions'),
+            get_string('plan', 'local_subscriptions'),
+            get_string('price', 'local_subscriptions'),
+            get_string('subscription_period', 'local_subscriptions'),
+            get_string('status', 'local_subscriptions'),
+            get_string('creation_date', 'local_subscriptions'),
+        ];
+
+        foreach ($subscriptions as $sub) {
+            $modalid = 'subModal' . $sub->id;
+            $deletemodalid = 'deleteSubModal' . $sub->id;
+
+            $plan = (object)[
+                'id' => $sub->planid,
+                'name' => $sub->planname ?? get_string('unknown_plan', 'local_subscriptions'),
+                'duration_key' => $sub->duration_key ?? '',
+                'accessscopeid' => $sub->accessscopeid ?? 0,
+            ];
+
+            $rows = \local_subscriptions\support\SubsPresenter::rows(
+                $sub,
+                $plan,
+                function (float $amount, string $cur): string {
+                    return format_float($amount, 2) . ' ' . strtoupper($cur);
+                },
+                'admin'
+            );
+
+            $details = html_writer::start_tag('table', ['class' => 'table table-sm mb-0']);
+            foreach ($rows as [$label, $value]) {
+                if (
+                    $label === get_string('subfield_end', 'local_subscriptions')
+                    && (empty($sub->end_date) || (int)$sub->end_date > strtotime('2100-01-01'))
+                ) {
+                    continue;
+                }
+                $details .= html_writer::tag('tr',
+                    html_writer::tag('th', s($label), [
+                        'class' => 'text-muted',
+                        'style' => 'width:28%;white-space:nowrap;',
+                    ]) .
+                    html_writer::tag('td', is_string($value) ? $value : s($value), ['class' => 'fw-semibold'])
+                );
+            }
+            $details .= html_writer::end_tag('table');
+
+            $output .= html_writer::start_div('modal fade', [
+                'id' => $modalid,
+                'tabindex' => '-1',
+                'aria-hidden' => 'true',
+            ]);
+            $output .= html_writer::start_div('modal-dialog modal-lg modal-dialog-scrollable');
+            $output .= html_writer::start_div('modal-content');
+            $output .= html_writer::div(
+                html_writer::tag('h5', get_string('subscription_details', 'local_subscriptions') . ' #' . $sub->id, ['class' => 'modal-title']) .
+                html_writer::tag('button', '', [
+                    'type' => 'button',
+                    'class' => 'btn-close',
+                    'data-bs-dismiss' => 'modal',
+                    'aria-label' => get_string('close', 'local_subscriptions'),
+                ]),
+                'modal-header d-flex align-items-center justify-content-between'
+            );
+            $output .= html_writer::div($details, 'modal-body bg-light');
+            $output .= html_writer::div(
+                html_writer::tag('button', get_string('close', 'local_subscriptions'), [
+                    'class' => 'btn btn-secondary',
+                    'data-bs-dismiss' => 'modal',
+                ]),
+                'modal-footer'
+            );
+            $output .= html_writer::end_div();
+            $output .= html_writer::end_div();
+            $output .= html_writer::end_div();
+
+            $deleteurl = new moodle_url(\local_subscriptions\subscription_config::user_subscription_delete_page(), [
+                'id' => $sub->id,
+                'sesskey' => sesskey(),
+            ]);
+
+            $output .= html_writer::start_div('modal fade', [
+                'id' => $deletemodalid,
+                'tabindex' => '-1',
+                'aria-hidden' => 'true',
+            ]);
+            $output .= html_writer::start_div('modal-dialog');
+            $output .= html_writer::start_div('modal-content');
+            $output .= html_writer::div(
+                html_writer::tag('h5', get_string('confirm_delete_subscription', 'local_subscriptions'), ['class' => 'modal-title']) .
+                html_writer::tag('button', '', [
+                    'type' => 'button',
+                    'class' => 'btn-close',
+                    'data-bs-dismiss' => 'modal',
+                    'aria-label' => get_string('close', 'local_subscriptions'),
+                ]),
+                'modal-header d-flex align-items-center justify-content-between'
+            );
+            $output .= html_writer::div(get_string('confirm_delete_subscription_body', 'local_subscriptions'), 'modal-body');
+            $output .= html_writer::div(
+                html_writer::tag('button', get_string('cancel'), [
+                    'type' => 'button',
+                    'class' => 'btn btn-secondary',
+                    'data-bs-dismiss' => 'modal',
+                ]) .
+                html_writer::link($deleteurl, get_string('delete', 'local_subscriptions'), [
+                    'class' => 'btn btn-danger ms-2',
+                ]),
+                'modal-footer'
+            );
+            $output .= html_writer::end_div();
+            $output .= html_writer::end_div();
+            $output .= html_writer::end_div();
+
+            $infobutton = html_writer::link(
+                '#' . $modalid,
+                $OUTPUT->pix_icon('i/info', get_string('details'), 'moodle'),
+                ['data-bs-toggle' => 'modal', 'class' => 'btn btn-link p-0 me-2']
+            );
+
+            $editbutton = html_writer::link(
+                new moodle_url(\local_subscriptions\subscription_config::user_subscription_edit_page(), ['id' => $sub->id]),
+                $OUTPUT->pix_icon('i/edit', get_string('edit'), 'moodle'),
+                ['class' => 'btn btn-link p-0 me-2']
+            );
+
+            $deletebutton = html_writer::link(
+                '#' . $deletemodalid,
+                $OUTPUT->pix_icon('i/delete', get_string('delete'), 'moodle'),
+                ['data-bs-toggle' => 'modal', 'class' => 'btn btn-link p-0 text-danger']
+            );
+
+            $userlink = html_writer::link(
+                new moodle_url('/user/profile.php', ['id' => $sub->userid]),
+                fullname($sub) . ' (' . s($sub->email) . ')'
+            );
+
+            $planname = $plans[$sub->planid] ?? ($sub->planname ?? '-');
+
+            if (!empty($sub->is_recurring)) {
+                $planname .= ' ' . html_writer::span(
+                    $OUTPUT->pix_icon('i/reload', get_string('badge_recurring', 'local_subscriptions'), 'moodle'),
+                    'align-middle text-info'
+                );
+            }
+
+            $priceamount = (float)($sub->pricepaid ?? 0);
+
+            $price = $priceamount > 0
+                ? format_float($priceamount, 2) . ' ' . strtoupper($sub->currency ?? '')
+                : '-';
+
+            $enddate = '-';
+            if (!empty($sub->end_date) && (int)$sub->end_date <= strtotime('2100-01-01')) {
+                $enddate = userdate((int)$sub->end_date, get_string('strftimedatefullshort'));
+            }
+
+            $shortdateformat = '%d/%m/%y';
+
+            $startdate = !empty($sub->start_date)
+                ? userdate((int)$sub->start_date, $shortdateformat)
+                : '-';
+
+            $enddate = '-';
+            if (!empty($sub->end_date) && (int)$sub->end_date <= strtotime('2100-01-01')) {
+                $enddate = userdate((int)$sub->end_date, $shortdateformat);
+            }
+
+            $period = html_writer::span($startdate, 'subscription-period-start');
+
+            if ($enddate === '-') {
+                $period .= html_writer::div(
+                    '♾️ ' . get_string('unlimited', 'local_subscriptions'),
+                    'badge bg-light text-dark border mt-1 subscription-period-unlimited'
+                );
+            } else {
+                $period .= html_writer::div(
+                    '→ ' . $enddate,
+                    'subscription-period-end text-muted mt-1'
+                );
+            }           
+
+            $table->data[] = [
+                html_writer::span($infobutton . $editbutton . $deletebutton, 'subscription-actions-nowrap'),
+                $userlink,
+                $planname,
+                $price,
+                $period,
+                \local_subscriptions\support\SubsPresenter::render_status_badge($sub->status),
+                !empty($sub->creation_date) ? userdate((int)$sub->creation_date, get_string('strftimedatetime')) : '-',
+            ];
+        }
+
+        $output .= html_writer::table($table);
+
+        $output .= $OUTPUT->paging_bar($totalcount, $page, $perpage, $baseurl);
+
+        return $output;
+    }
+
+    public function render_manual_subscription_form_v2(array $plans): string {
+        $output = '';
+
+        $existinglabel = get_string('existing_user', 'local_subscriptions');
+        $newlabel = get_string('new_user', 'local_subscriptions');
+        $searchplaceholder = get_string('search_user_placeholder', 'local_subscriptions');
+        $chooseprice = get_string('select_price', 'local_subscriptions');
+
+        $output .= html_writer::start_div('subscription-card');
+        $output .= html_writer::start_tag('form', ['method' => 'post', 'class' => 'mform']);
+
+        $output .= html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => 'sesskey',
+            'value' => sesskey(),
+        ]);
+
+        $output .= html_writer::tag('h4', get_string('manual_subscription_user_section', 'local_subscriptions'));
+
+        $output .= html_writer::start_div('form-group mb-3');
+
+        $output .= html_writer::tag('label',
+            html_writer::empty_tag('input', [
+                'type' => 'radio',
+                'name' => 'user_mode',
+                'value' => 'existing',
+                'checked' => 'checked',
+                'class' => 'me-1',
+            ]) . $existinglabel,
+            ['class' => 'me-4']
+        );
+
+        $output .= html_writer::tag('label',
+            html_writer::empty_tag('input', [
+                'type' => 'radio',
+                'name' => 'user_mode',
+                'value' => 'new',
+                'class' => 'me-1',
+            ]) . $newlabel
+        );
+
+        $output .= html_writer::end_div();
+
+        $output .= html_writer::start_div('', ['id' => 'existing-user-block']);
+
+        $output .= html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => 'userid',
+            'id' => 'manual-user-id',
+            'value' => '',
+        ]);
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('select_user', 'local_subscriptions'), 'manual-user-search') .
+            html_writer::empty_tag('input', [
+                'type' => 'text',
+                'id' => 'manual-user-search',
+                'class' => 'form-control',
+                'autocomplete' => 'off',
+                'placeholder' => get_string('search_user_placeholder', 'local_subscriptions'),
+            ]),
+            'form-group mb-3'
+        );
+
+        $output .= html_writer::end_div();
+
+        $output .= html_writer::start_div('', ['id' => 'new-user-block', 'style' => 'display:none;']);
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('firstname'), 'firstname') .
+            html_writer::empty_tag('input', [
+                'type' => 'text',
+                'name' => 'firstname',
+                'class' => 'form-control',
+            ]),
+            'form-group mb-3'
+        );
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('lastname'), 'lastname') .
+            html_writer::empty_tag('input', [
+                'type' => 'text',
+                'name' => 'lastname',
+                'class' => 'form-control',
+            ]),
+            'form-group mb-3'
+        );
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('email'), 'email') .
+            html_writer::empty_tag('input', [
+                'type' => 'email',
+                'name' => 'email',
+                'class' => 'form-control',
+            ]),
+            'form-group mb-3'
+        );
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('country'), 'country') .
+            html_writer::select([
+                '' => get_string('not_set', 'local_subscriptions'),
+                'FR' => 'France',
+                'RU' => 'Russie',
+                'BY' => 'Biélorussie',
+                'UA' => 'Ukraine',
+                'CH' => 'Suisse',
+                'BE' => 'Belgique',
+                'CA' => 'Canada',
+            ], 'country', '', false, [
+                'class' => 'form-control',
+                'id' => 'manual-new-user-country',
+            ]),
+            'form-group mb-3'
+        );
+
+        $output .= html_writer::end_div();
+
+        $output .= html_writer::tag('hr', '');
+
+        $output .= html_writer::tag('h4', get_string('manual_subscription_plan_section', 'local_subscriptions'));
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('plan', 'local_subscriptions'), 'plan') .
+            html_writer::select($plans, 'plan', '', ['' => '—'], [
+                'class' => 'form-control select2',
+                'id' => 'manual-plan-select',
+                'escape' => false,
+            ]),
+            'form-group mb-3'
+        );
+
+        $output .= html_writer::start_div('row');
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('price', 'local_subscriptions'), 'manual-price') .
+            html_writer::empty_tag('input', [
+                'type' => 'number',
+                'step' => '0.01',
+                'min' => '0',
+                'name' => 'price',
+                'id' => 'manual-price',
+                'class' => 'form-control',
+                'required' => 'required',
+            ]),
+            'form-group mb-3 col-md-6'
+        );
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('currency', 'local_subscriptions'), 'manual-currency') .
+            html_writer::select([
+                'EUR' => 'EUR',
+                'RUB' => 'RUB',
+            ], 'currency', 'EUR', false, [
+                'class' => 'form-control',
+                'id' => 'manual-currency',
+            ]),
+            'form-group mb-3 col-md-6'
+        );
+
+        $output .= html_writer::end_div();
+
+        $output .= html_writer::div(
+            html_writer::label(get_string('start_date', 'local_subscriptions'), 'start_date', false, ['class' => 'form-label']) .
+            html_writer::empty_tag('input', [
+                'type' => 'text',
+                'name' => 'start_date',
+                'id' => 'manual-start-date',
+                'class' => 'form-control',
+                'value' => date('d/m/Y'),
+                'placeholder' => get_string('date_format_placeholder', 'local_subscriptions'),
+                'autocomplete' => 'off',
+                'required' => 'required',
+            ]),
+            'form-group mb-4'
+        );
+
+        $output .= html_writer::div(
+            html_writer::tag('button', get_string('submit_sub', 'local_subscriptions'), [
+                'type' => 'submit',
+                'class' => 'btn btn-primary me-2',
+            ]) .
+            \local_subscriptions\subscription_config::button_manage_subscription() .
+            \local_subscriptions\subscription_config::button_import_csv(),
+            'form-group d-flex flex-wrap align-items-center',
+            ['style' => 'gap: 10px;']
+        );
+
+        $output .= html_writer::end_tag('form');
+        $output .= html_writer::end_div();
+
+        $output .= html_writer::script(<<<JS
+    document.addEventListener('DOMContentLoaded', function() {
+        var preferredCurrency = 'EUR';
+
+        var existingBlock = document.getElementById('existing-user-block');
+        var newBlock = document.getElementById('new-user-block');
+        var planSelect = document.getElementById('manual-plan-select');
+        var priceInput = document.getElementById('manual-price');
+        var currencySelect = document.getElementById('manual-currency');
+        var countrySelect = document.getElementById('manual-new-user-country');
+
+        function refreshUserMode() {
+            var selected = document.querySelector('input[name="user_mode"]:checked').value;
+
+            existingBlock.style.display = selected === 'existing' ? '' : 'none';
+            newBlock.style.display = selected === 'new' ? '' : 'none';
+
+            if (selected === 'new') {
+                preferredCurrency = 'EUR';
+                loadPrices();
+            }
+        }
+
+        function loadPrices() {
+            if (!planSelect.value) {
+                priceInput.value = '';
+                return;
+            }
+
+            fetch(M.cfg.wwwroot + '/local/subscriptions/ajax/get_plan_prices.php?planid=' + encodeURIComponent(planSelect.value) + '&currency=' + encodeURIComponent(preferredCurrency))
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (!data.prices || !data.prices.length) {
+                        priceInput.value = '';
+                        return;
+                    }
+
+                    var selected = data.prices.find(function(price) {
+                        return price.currency === preferredCurrency;
+                    }) || data.prices[0];
+
+                    var parts = selected.value.split('|');
+
+                    priceInput.value = parts[0] || '';
+                    currencySelect.value = parts[1] || 'EUR';
+                });
+        }
+
+        document.querySelectorAll('input[name="user_mode"]').forEach(function(input) {
+            input.addEventListener('change', refreshUserMode);
+        });
+
+        planSelect.addEventListener('change', loadPrices);
+
+        if (countrySelect) {
+            countrySelect.addEventListener('change', function() {
+                var country = countrySelect.value;
+
+                preferredCurrency = ['RU', 'BY'].includes(country) ? 'RUB' : 'EUR';
+                currencySelect.value = preferredCurrency;
+
+                loadPrices();
+            });
+        }
+
+        if (window.jQuery && jQuery.fn.autocomplete) {
+            jQuery('#manual-user-search').autocomplete({
+                minLength: 2,
+                source: function(request, response) {
+                    jQuery.getJSON(M.cfg.wwwroot + '/local/subscriptions/ajax/search_users.php', {
+                        q: request.term
+                    }, function(data) {
+                        response((data.results || []).map(function(item) {
+                            return {
+                                label: item.text,
+                                value: item.text,
+                                id: item.id,
+                                currency: item.currency || 'EUR'
+                            };
+                        }));
+                    });
+                },
+                select: function(event, ui) {
+                    document.getElementById('manual-user-id').value = ui.item.id;
+                    preferredCurrency = ui.item.currency || 'EUR';
+                    loadPrices();
+                },
+                change: function(event, ui) {
+                    if (!ui.item) {
+                        document.getElementById('manual-user-id').value = '';
+                    }
+                }
+            });
+        }
+
+        if (window.flatpickr) {
+            flatpickr('#manual-start-date', {
+                dateFormat: 'd/m/Y',
+                defaultDate: document.getElementById('manual-start-date').value || 'today',
+                allowInput: true,
+                locale: window.flatpickr.l10ns && window.flatpickr.l10ns.fr ? window.flatpickr.l10ns.fr : 'default'
+            });
+        }
+
+        refreshUserMode();
+    });
+    JS);
+
+        return $output;
+    }
+
+    private function json_string(string $value): string {
+        return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    }
+
 }

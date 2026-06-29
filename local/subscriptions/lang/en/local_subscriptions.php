@@ -1109,3 +1109,72 @@ $string['subfield_http_referer'] = 'HTTP referer';
 $string['subfield_payment_link'] = 'Payment link';
 $string['subfield_response_json'] = 'Provider JSON response';
 $string['subfield_created_useragent'] = 'Creation User-Agent';
+
+$string['manage_user_subscriptions'] = 'Manage user subscriptions';
+$string['all_plans'] = 'All plans';
+$string['filter_by_plan'] = 'Filter by plan';
+$string['perpage'] = 'Results per page';
+$string['filter'] = 'Filter';
+$string['actions'] = 'Actions';
+$string['no_subscriptions_found'] = 'No subscriptions found.';
+$string['confirm_delete_subscription'] = 'Confirm deletion';
+$string['confirm_delete_subscription_body'] = 'Do you really want to delete this subscription? This will also remove access to the courses linked to this plan.';
+$string['subscription_deleted_successfully'] = 'Subscription deleted successfully.';
+$string['close'] = 'Close';
+$string['delete'] = 'Delete';
+
+$string['edit_user_subscription'] = 'Edit user subscription';
+$string['subscription_summary'] = 'Subscription summary';
+$string['no_end_date'] = 'Subscription without end date';
+$string['end_date_before_start_date'] = 'The end date cannot be earlier than the start date.';
+$string['subscription_updated_successfully'] = 'Subscription updated successfully.';
+$string['invalid_subscription_status'] = 'Invalid subscription status.';
+
+$string['status_active'] = 'Active';
+$string['status_queued'] = 'Queued';
+$string['status_inactive'] = 'Inactive';
+$string['status_expired'] = 'Expired';
+$string['status_suspended'] = 'Suspended';
+$string['status_canceled'] = 'Canceled';
+$string['status_replaced'] = 'Replaced';
+$string['status_pending'] = 'Pending payment';
+$string['status_failed'] = 'Failed';
+$string['status_error'] = 'Error';
+$string['status_paid'] = 'Paid';
+$string['status_completed'] = 'Completed';
+
+$string['existing_user'] = 'Existing user';
+$string['new_user'] = 'New user';
+$string['search_user_placeholder'] = 'Search by first name, last name or email';
+$string['manual_subscription_user_section'] = 'User';
+$string['manual_subscription_plan_section'] = 'Subscription';
+$string['missing_user_for_manual_subscription'] = 'No valid user was selected or created.';
+$string['not_set'] = 'Not set';
+
+$string['admin_dashboard'] = 'Campus<small><sup>FR</sup></small> administration';
+$string['admin_dashboard_intro'] = 'Find the main tools for managing subscriptions, plans and digital products.';
+
+$string['admin_card_user_subscriptions_title'] = 'User subscriptions';
+$string['admin_card_user_subscriptions_desc'] = 'View, filter, edit or delete active and past subscriptions.';
+
+$string['admin_card_add_subscription_title'] = 'Add subscription';
+$string['admin_card_add_subscription_desc'] = 'Manually create a subscription for an existing or new user.';
+
+$string['admin_card_import_csv_title'] = 'CSV import';
+$string['admin_card_import_csv_desc'] = 'Import subscriptions in bulk from a CSV file.';
+
+$string['admin_card_plans_title'] = 'Plans and access';
+$string['admin_card_plans_desc'] = 'Manage plans, prices, translations, scopes, entitlements and upgrades.';
+
+$string['admin_card_digital_products_title'] = 'Digital products';
+$string['admin_card_digital_products_desc'] = 'Create and manage PDF files, guides and separately sold resources.';
+
+$string['admin_card_digital_purchases_title'] = 'Digital purchases';
+$string['admin_card_digital_purchases_desc'] = 'Review digital purchases and related payment information.';
+
+$string['admin_card_digital_stats_title'] = 'Digital statistics';
+$string['admin_card_digital_stats_desc'] = 'Track sales, revenue and digital product performance.';
+$string['date_format_placeholder'] = 'dd/mm/yyyy';
+$string['digital_invalid_email'] = 'Please enter a valid email address.';
+$string['subscription_period'] = 'Period';
+$string['unlimited'] = 'Unlimited';

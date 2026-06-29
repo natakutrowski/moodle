@@ -70,8 +70,11 @@ class subscription_config {
     }
     
     // -- Plugin pages --
+    public static function admin_dashboard_page(): string {
+        return self::plugin_path() . 'admin/dashboard.php';
+    }
     public static function add_manual_subscription_page(): string {
-        return self::plugin_path() . 'add_manual_subscription.php';
+        return self::plugin_path() . 'admin/add_manual_subscription.php';
     }
     public static function import_csv_page(): string {
         return self::plugin_path() . 'import_csv.php';
@@ -100,7 +103,26 @@ class subscription_config {
         return self::plugin_path() . 'plan_upgrades.php';
     }
 
+    public static function user_subscriptions_page(): string {
+        return self::plugin_path() . 'admin/user_subscriptions.php';
+    }
+
+    public static function user_subscription_edit_page(): string {
+        return self::plugin_path() . 'admin/user_subscription_edit.php';
+    }
+
+    public static function user_subscription_delete_page(): string {
+        return self::plugin_path() . 'admin/user_subscription_delete.php';
+    }
+
     // -- Buttons --
+    public static function button_admin_dashboard(): string {
+        return \html_writer::link(
+            new \moodle_url(self::admin_dashboard_page()),
+            '⚙️ ' . get_string('admin_dashboard', 'local_subscriptions'),
+            ['class' => 'btn btn-secondary me-2']
+        );
+    }
     // Add subscription
     public static function button_add_subscription(): string {
 		$button = \html_writer::link(
@@ -113,14 +135,13 @@ class subscription_config {
 	}
 	
 	// Manage subscription
-	public static function button_manage_subscription(): string {
-		$button = \html_writer::link(
-			new \moodle_url(self::manage_page(), ['tab' => 'user_subscriptions']),
-			'📋 ' . get_string('manage_subscriptions', 'local_subscriptions'),
-			['class' => 'btn btn-secondary me-2']
-		);
-		return $button;
-	}
+    public static function button_manage_subscription(): string {
+        return \html_writer::link(
+            new \moodle_url(self::user_subscriptions_page()),
+            '📋 ' . get_string('manage_user_subscriptions', 'local_subscriptions'),
+            ['class' => 'btn btn-secondary me-2']
+        );
+    }
 	
 	// Import CSV
 	public static function button_import_csv(): string {

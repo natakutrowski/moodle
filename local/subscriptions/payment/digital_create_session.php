@@ -17,7 +17,11 @@ $PAGE->set_url(UrlFactory::digital_checkout());
 $PAGE->set_pagelayout('base');
 
 $slug = required_param('slug', PARAM_ALPHANUMEXT);
-$email = required_param('email', PARAM_EMAIL);
+$email = trim(required_param('email', PARAM_RAW_TRIMMED));
+
+if ($email === '' || !validate_email($email)) {
+    throw new moodle_exception('digital_invalid_email', 'local_subscriptions');
+}
 $firstname = required_param('firstname', PARAM_NOTAGS);
 $lastname = required_param('lastname', PARAM_NOTAGS);
 $currency = strtoupper(required_param('currency', PARAM_ALPHANUMEXT));

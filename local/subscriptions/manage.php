@@ -162,7 +162,6 @@ echo $OUTPUT->header();
 $tabs = [
     new tabobject('scopes', new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']), get_string('scopes', 'local_subscriptions')),
     new tabobject('plans', new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']), get_string('plans', 'local_subscriptions')),
-    new tabobject('user_subscriptions', new moodle_url(subscription_config::manage_page(), ['tab' => 'user_subscriptions']), get_string('user_subscriptions', 'local_subscriptions')),
 ];
 
 print_tabs([$tabs], $currenttab);
@@ -171,9 +170,6 @@ print_tabs([$tabs], $currenttab);
 switch ($currenttab) {
     case 'plans':
         include_once(__DIR__ . '/tabs/plans.php');
-        break;
-    case 'user_subscriptions':
-        include_once(__DIR__ . '/tabs/user_subscriptions.php');
         break;
     case 'scopes':
     default:

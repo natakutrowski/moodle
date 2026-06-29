@@ -1107,3 +1107,72 @@ $string['subfield_http_referer'] = 'HTTP referer';
 $string['subfield_payment_link'] = 'Ссылка на оплату';
 $string['subfield_response_json'] = 'JSON-ответ провайдера';
 $string['subfield_created_useragent'] = 'User-Agent при создании';
+
+$string['manage_user_subscriptions'] = 'Управление подписками пользователей';
+$string['all_plans'] = 'Все планы';
+$string['filter_by_plan'] = 'Фильтр по плану';
+$string['perpage'] = 'Результатов на странице';
+$string['filter'] = 'Фильтровать';
+$string['actions'] = 'Действия';
+$string['no_subscriptions_found'] = 'Подписки не найдены.';
+$string['confirm_delete_subscription'] = 'Подтвердить удаление';
+$string['confirm_delete_subscription_body'] = 'Вы действительно хотите удалить эту подписку? Доступ к курсам, связанным с этим планом, тоже будет удалён.';
+$string['subscription_deleted_successfully'] = 'Подписка успешно удалена.';
+$string['close'] = 'Закрыть';
+$string['delete'] = 'Удалить';
+
+$string['edit_user_subscription'] = 'Редактировать подписку пользователя';
+$string['subscription_summary'] = 'Сводка по подписке';
+$string['no_end_date'] = 'Подписка без даты окончания';
+$string['end_date_before_start_date'] = 'Дата окончания не может быть раньше даты начала.';
+$string['subscription_updated_successfully'] = 'Подписка успешно обновлена.';
+$string['invalid_subscription_status'] = 'Недопустимый статус подписки.';
+
+$string['status_active'] = 'Активна';
+$string['status_queued'] = 'В очереди';
+$string['status_inactive'] = 'Неактивна';
+$string['status_expired'] = 'Истекла';
+$string['status_suspended'] = 'Приостановлена';
+$string['status_canceled'] = 'Отменена';
+$string['status_replaced'] = 'Заменена';
+$string['status_pending'] = 'Ожидает оплаты';
+$string['status_failed'] = 'Ошибка оплаты';
+$string['status_error'] = 'Ошибка';
+$string['status_paid'] = 'Оплачена';
+$string['status_completed'] = 'Завершена';
+
+$string['existing_user'] = 'Существующий пользователь';
+$string['new_user'] = 'Новый пользователь';
+$string['search_user_placeholder'] = 'Поиск по имени, фамилии или email';
+$string['manual_subscription_user_section'] = 'Пользователь';
+$string['manual_subscription_plan_section'] = 'Подписка';
+$string['missing_user_for_manual_subscription'] = 'Не выбран или не создан корректный пользователь.';
+$string['not_set'] = 'Не указано';
+
+$string['admin_dashboard'] = 'Администрирование Campus<small><sup>FR</sup></small>';
+$string['admin_dashboard_intro'] = 'Здесь собраны основные инструменты для управления подписками, планами и цифровыми продуктами.';
+
+$string['admin_card_user_subscriptions_title'] = 'Подписки пользователей';
+$string['admin_card_user_subscriptions_desc'] = 'Просмотр, фильтрация, редактирование и удаление активных и прошлых подписок.';
+
+$string['admin_card_add_subscription_title'] = 'Добавить подписку';
+$string['admin_card_add_subscription_desc'] = 'Создать подписку вручную для существующего или нового пользователя.';
+
+$string['admin_card_import_csv_title'] = 'Импорт CSV';
+$string['admin_card_import_csv_desc'] = 'Массовый импорт подписок из CSV-файла.';
+
+$string['admin_card_plans_title'] = 'Планы и доступы';
+$string['admin_card_plans_desc'] = 'Управление планами, ценами, переводами, scopes, entitlements и upgrades.';
+
+$string['admin_card_digital_products_title'] = 'Цифровые продукты';
+$string['admin_card_digital_products_desc'] = 'Создание и управление PDF-файлами, гайдами и отдельными цифровыми ресурсами.';
+
+$string['admin_card_digital_purchases_title'] = 'Цифровые покупки';
+$string['admin_card_digital_purchases_desc'] = 'Просмотр цифровых покупок и связанных платёжных данных.';
+
+$string['admin_card_digital_stats_title'] = 'Цифровая статистика';
+$string['admin_card_digital_stats_desc'] = 'Отслеживание продаж, доходов и эффективности цифровых продуктов.';
+$string['date_format_placeholder'] = 'дд/мм/гггг';
+$string['digital_invalid_email'] = 'Пожалуйста, введите корректный email.';
+$string['subscription_period'] = 'Период';
+$string['unlimited'] = 'Без ограничения';

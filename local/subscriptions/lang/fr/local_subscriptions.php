@@ -1096,3 +1096,72 @@ $string['subfield_http_referer'] = 'Référent HTTP';
 $string['subfield_payment_link'] = 'Lien de paiement';
 $string['subfield_response_json'] = 'Réponse JSON fournisseur';
 $string['subfield_created_useragent'] = 'User-Agent de création';
+
+$string['manage_user_subscriptions'] = 'Gérer les abonnements utilisateurs';
+$string['all_plans'] = 'Tous les plans';
+$string['filter_by_plan'] = 'Filtrer par plan';
+$string['perpage'] = 'Résultats par page';
+$string['filter'] = 'Filtrer';
+$string['actions'] = 'Actions';
+$string['no_subscriptions_found'] = 'Aucun abonnement trouvé.';
+$string['confirm_delete_subscription'] = 'Confirmer la suppression';
+$string['confirm_delete_subscription_body'] = 'Voulez-vous vraiment supprimer cet abonnement ? Cette action supprimera aussi les accès aux cours liés à ce plan.';
+$string['subscription_deleted_successfully'] = 'Abonnement supprimé avec succès.';
+$string['close'] = 'Fermer';
+$string['delete'] = 'Supprimer';
+
+$string['edit_user_subscription'] = 'Modifier l’abonnement utilisateur';
+$string['subscription_summary'] = 'Résumé de l’abonnement';
+$string['no_end_date'] = 'Abonnement sans date de fin';
+$string['end_date_before_start_date'] = 'La date de fin ne peut pas être antérieure à la date de début.';
+$string['subscription_updated_successfully'] = 'Abonnement mis à jour avec succès.';
+$string['invalid_subscription_status'] = 'Statut d’abonnement invalide.';
+
+$string['status_active'] = 'Actif';
+$string['status_queued'] = 'En attente';
+$string['status_inactive'] = 'Inactif';
+$string['status_expired'] = 'Expiré';
+$string['status_suspended'] = 'Suspendu';
+$string['status_canceled'] = 'Annulé';
+$string['status_replaced'] = 'Remplacé';
+$string['status_pending'] = 'Paiement en attente';
+$string['status_failed'] = 'Échec';
+$string['status_error'] = 'Erreur';
+$string['status_paid'] = 'Payé';
+$string['status_completed'] = 'Terminé';
+
+$string['existing_user'] = 'Utilisateur existant';
+$string['new_user'] = 'Nouvel utilisateur';
+$string['search_user_placeholder'] = 'Rechercher par nom, prénom ou email';
+$string['manual_subscription_user_section'] = 'Utilisateur';
+$string['manual_subscription_plan_section'] = 'Abonnement';
+$string['missing_user_for_manual_subscription'] = 'Aucun utilisateur valide n’a été sélectionné ou créé.';
+$string['not_set'] = 'Non renseigné';
+
+$string['admin_dashboard'] = 'Administration Campus<small><sup>FR</sup></small>';
+$string['admin_dashboard_intro'] = 'Retrouvez ici les principaux outils de gestion des abonnements, des plans et des produits digitaux.';
+
+$string['admin_card_user_subscriptions_title'] = 'Abonnements utilisateurs';
+$string['admin_card_user_subscriptions_desc'] = 'Consulter, filtrer, modifier ou supprimer les abonnements actifs et passés.';
+
+$string['admin_card_add_subscription_title'] = 'Ajouter un abonnement';
+$string['admin_card_add_subscription_desc'] = 'Créer manuellement un abonnement pour un utilisateur existant ou un nouvel utilisateur.';
+
+$string['admin_card_import_csv_title'] = 'Import CSV';
+$string['admin_card_import_csv_desc'] = 'Importer des abonnements en masse depuis un fichier CSV.';
+
+$string['admin_card_plans_title'] = 'Plans et accès';
+$string['admin_card_plans_desc'] = 'Gérer les plans, prix, traductions, scopes, entitlements et upgrades.';
+
+$string['admin_card_digital_products_title'] = 'Produits digitaux';
+$string['admin_card_digital_products_desc'] = 'Créer et gérer les fichiers PDF, guides et ressources vendues séparément.';
+
+$string['admin_card_digital_purchases_title'] = 'Achats digitaux';
+$string['admin_card_digital_purchases_desc'] = 'Consulter les achats digitaux et les informations de paiement associées.';
+
+$string['admin_card_digital_stats_title'] = 'Statistiques digitales';
+$string['admin_card_digital_stats_desc'] = 'Suivre les ventes, revenus et performances des produits digitaux.';
+$string['date_format_placeholder'] = 'jj/mm/aaaa';
+$string['digital_invalid_email'] = 'Veuillez saisir une adresse email valide.';
+$string['subscription_period'] = 'Période';
+$string['unlimited'] = 'Illimité';

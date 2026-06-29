@@ -912,3 +912,63 @@ table.generaltable td { vertical-align: middle; }
 .ls-back-to-plans-link:hover {
     text-decoration: underline;
 }
+
+.ui-autocomplete {
+    z-index: 3000;
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.local-subscriptions-admin-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    color: inherit;
+}
+
+.local-subscriptions-admin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    border-color: #cbd5e1;
+    color: inherit;
+}
+
+.local-subscriptions-admin-card-icon {
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 12px;
+}
+
+.local-subscriptions-admin-dashboard .lead {
+    max-width: 860px;
+}
+
+.subscription-actions-nowrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.subscription-actions-nowrap .btn {
+    flex: 0 0 auto;
+}
+
+.subscription-period-start,
+.subscription-period-end {
+    white-space: nowrap;
+}
+
+.subscription-period-unlimited {
+    display: inline-block;
+    font-weight: 500;
+}
+
+.flatpickr-calendar {
+    z-index: 4000;
+}
+
+#manual-start-date {
+    max-width: 220px;
+}

@@ -724,4 +724,131 @@ class subscription_manager {
 		}
 	}
 
+	public static function update_subscription_from_admin(
+		int $subscriptionid,
+		int $startdate,
+		int $enddate,
+		string $status
+	): \stdClass {
+		global $DB;
+
+		$allowedstatuses = [
+			Status::ACTIVE,
+			Status::QUEUED,
+			Status::INACTIVE,
+			Status::EXPIRED,
+			Status::SUSPENDED,
+			Status::CANCELED,
+			Status::REPLACED,
+			Status::PENDING,
+			Status::FAILED,
+			Status::ERROR,
+			Status::PAID,
+			Status::COMPLETED,
+		];
+
+		if (!in_array($status, $allowedstatuses, true)) {
+			throw new \moodle_exception('invalid_subscription_status', 'local_subscriptions');
+		}
+
+		$subscription = $DB->get_record('user_subscription', ['id' => $subscriptionid], '*', MUST_EXIST);
+
+		$subscription->start_date = $startdate;
+		$subscription->end_date = $enddate;
+		$subscription->status = $status;
+		$subscription->last_update = time();
+
+		$DB->update_record('user_subscription', $subscription);
+
+		self::sync_subscription_enrolments_from_admin($subscription);
+
+		return $subscription;
+	}
+
+	private static function sync_subscription_enrolments_from_admin(\stdClass $subscription): void {
+		global $DB;
+
+		$userid = (int)$subscription->userid;
+		$planid = (int)$subscription->planid;
+		$startdate = (int)$subscription->start_date;
+		$enddate = (int)$subscription->end_date;
+		$status = (string)$subscription->status;
+
+		$entitlements = self::get_plan_entitlements($planid);
+		if (empty($entitlements)) {
+			return;
+		}
+
+		$manual = enrol_get_plugin('manual');
+		if (!$manual) {
+			return;
+		}
+
+		if ($enddate > strtotime('2100-01-01')) {
+			$enddate = 0;
+		}
+
+		$shouldbeactive = ($status === Status::ACTIVE && $startdate <= time());
+
+		foreach ($entitlements as $entitlement) {
+			$courseid = (int)$entitlement->courseid;
+			if ($courseid <= 0) {
+				continue;
+			}
+
+			$instance = self::get_manual_enrol_instance($courseid);
+			if (!$instance) {
+				continue;
+			}
+
+			$ue = $DB->get_record('user_enrolments', [
+				'enrolid' => $instance->id,
+				'userid' => $userid,
+			], '*', IGNORE_MISSING);
+
+			if ($shouldbeactive) {
+				if ($ue) {
+					$manual->update_user_enrol(
+						$instance,
+						$userid,
+						ENROL_USER_ACTIVE,
+						$startdate,
+						$enddate
+					);
+				} else {
+					$roleid = (int)$DB->get_field('role', 'id', [
+						'shortname' => $entitlement->roleshortname ?: 'student',
+					], IGNORE_MISSING);
+
+					if (!$roleid) {
+						$roleid = (int)$DB->get_field('role', 'id', ['shortname' => 'student'], IGNORE_MISSING);
+					}
+
+					if ($roleid) {
+						$manual->enrol_user(
+							$instance,
+							$userid,
+							$roleid,
+							$startdate,
+							$enddate,
+							ENROL_USER_ACTIVE
+						);
+					}
+				}
+
+				self::assign_entitlement_role($userid, $entitlement);
+				self::ensure_user_group($userid, $courseid, (string)($entitlement->groupname ?? ''));
+
+			} else if ($ue) {
+				$manual->update_user_enrol(
+					$instance,
+					$userid,
+					ENROL_USER_SUSPENDED,
+					$startdate,
+					$enddate
+				);
+			}
+		}
+	}
+
 }

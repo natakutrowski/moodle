@@ -492,7 +492,14 @@ echo html_writer::script("
         return;
     }
 
-    form.addEventListener('submit', function() {
+    form.addEventListener('submit', function(e) {
+        const email = document.getElementById('digital-email');
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+            e.preventDefault();
+            alert('" . addslashes(get_string('digital_invalid_email', 'local_subscriptions')) . "');
+            return false;
+        }
 
         const overlay = document.createElement('div');
 
