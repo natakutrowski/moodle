@@ -4,11 +4,11 @@ require_once(__DIR__ . '/../../../config.php');
 
 use local_subscriptions\subscription_config;
 use local_subscriptions\subscription_manager;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
 
-require_login();
-require_capability('moodle/site:config', context_system::instance());
+AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 require_sesskey();
-subscription_config::guard_public_access();
 
 global $DB;
 

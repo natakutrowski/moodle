@@ -3,6 +3,15 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\subscription_config;
 
+if ($hassiteconfig || has_capability('local/subscriptions:view_dashboard', context_system::instance())) {
+    $ADMIN->add('localplugins', new admin_externalpage(
+        'local_subscriptions_backoffice',
+        get_string('admin_dashboard', 'local_subscriptions'),
+        new moodle_url(subscription_config::admin_dashboard_page()),
+        'local/subscriptions:view_dashboard'
+    ));
+}
+
 if ($hassiteconfig) {
 
 	// Crée une catégorie principale "Subscriptions"

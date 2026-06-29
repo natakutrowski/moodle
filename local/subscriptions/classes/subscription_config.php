@@ -70,6 +70,9 @@ class subscription_config {
     }
     
     // -- Plugin pages --
+    public static function backoffice_home(): \moodle_url {
+        return new \moodle_url(self::admin_dashboard_page());
+    }
     public static function admin_dashboard_page(): string {
         return self::plugin_path() . 'admin/dashboard.php';
     }
@@ -113,6 +116,14 @@ class subscription_config {
 
     public static function user_subscription_delete_page(): string {
         return self::plugin_path() . 'admin/user_subscription_delete.php';
+    }
+
+    public static function admin_users_page(): string {
+        return self::plugin_path() . 'admin/users/index.php';
+    }
+
+    public static function admin_user_view_page(): string {
+        return self::plugin_path() . 'admin/users/view.php';
     }
 
     // -- Buttons --

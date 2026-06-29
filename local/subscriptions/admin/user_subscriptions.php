@@ -5,14 +5,13 @@ require_once($CFG->dirroot . '/local/subscriptions/renderer/user_subs_renderer.p
 
 use local_subscriptions\subscription_config;
 use local_subscriptions\subscription_manager;
-
-require_login();
-require_capability('moodle/site:config', context_system::instance());
-subscription_config::guard_public_access();
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
 global $DB, $OUTPUT, $PAGE;
 
-$context = context_system::instance();
+$context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 
 $planid = optional_param('planid', 0, PARAM_INT);
 $page = optional_param('page', 0, PARAM_INT);
@@ -84,10 +83,7 @@ $renderer = new local_subscriptions_user_subs_renderer($PAGE, $OUTPUT);
 
 echo $OUTPUT->header();
 
-echo html_writer::div(
-    subscription_config::button_admin_dashboard(),
-    'mb-3'
-);
+echo AdminNavigation::back_button();
 
 echo $renderer->render_user_subscriptions_admin_page(
     $subscriptions,

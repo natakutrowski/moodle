@@ -972,3 +972,29 @@ table.generaltable td { vertical-align: middle; }
 #manual-start-date {
     max-width: 220px;
 }
+
+.local-subscriptions-admin-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.crm-user-header {
+    border-radius: 16px;
+}
+
+.crm-stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.crm-quick-actions {
+    border-radius: 16px;
+}
+
+.crm-quick-actions-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}

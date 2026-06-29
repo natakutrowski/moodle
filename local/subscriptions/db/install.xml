@@ -399,5 +399,46 @@
 		</INDEXES>
 		</TABLE>
 
+		<TABLE NAME="local_subscriptions_admin_log" COMMENT="CampusFR back-office admin activity log">
+		<FIELDS>
+			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+			<FIELD NAME="actorid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+			<FIELD NAME="targetuserid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+			<FIELD NAME="action" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+			<FIELD NAME="objecttype" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
+			<FIELD NAME="objectid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+			<FIELD NAME="details" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+			<FIELD NAME="ipaddress" TYPE="char" LENGTH="45" NOTNULL="false" SEQUENCE="false"/>
+			<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		</FIELDS>
+		<KEYS>
+			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		</KEYS>
+		<INDEXES>
+			<INDEX NAME="actor_idx" UNIQUE="false" FIELDS="actorid"/>
+			<INDEX NAME="targetuser_idx" UNIQUE="false" FIELDS="targetuserid"/>
+			<INDEX NAME="action_idx" UNIQUE="false" FIELDS="action"/>
+			<INDEX NAME="timecreated_idx" UNIQUE="false" FIELDS="timecreated"/>
+		</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_user_note" COMMENT="CampusFR CRM internal user notes">
+		<FIELDS>
+			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+			<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+			<FIELD NAME="authorid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+			<FIELD NAME="note" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+			<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+		</FIELDS>
+		<KEYS>
+			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+		</KEYS>
+		<INDEXES>
+			<INDEX NAME="userid_idx" UNIQUE="false" FIELDS="userid"/>
+			<INDEX NAME="authorid_idx" UNIQUE="false" FIELDS="authorid"/>
+			<INDEX NAME="timecreated_idx" UNIQUE="false" FIELDS="timecreated"/>
+		</INDEXES>
+		</TABLE>
+
     </TABLES>
 </XMLDB>

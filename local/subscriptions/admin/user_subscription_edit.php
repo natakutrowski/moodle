@@ -6,16 +6,15 @@ require_once($CFG->dirroot . '/local/subscriptions/classes/form/user_subscriptio
 use local_subscriptions\subscription_config;
 use local_subscriptions\subscription_manager;
 use local_subscriptions\form\user_subscription_edit_form;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
-require_login();
-require_capability('moodle/site:config', context_system::instance());
-subscription_config::guard_public_access();
+$context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 
 global $DB, $PAGE, $OUTPUT;
 
 $id = required_param('id', PARAM_INT);
-
-$context = context_system::instance();
 
 $subscription = $DB->get_record('user_subscription', ['id' => $id], '*', MUST_EXIST);
 $user = $DB->get_record('user', ['id' => $subscription->userid], '*', MUST_EXIST);
@@ -65,10 +64,7 @@ if ($data = $form->get_data()) {
 
 echo $OUTPUT->header();
 
-echo html_writer::div(
-    subscription_config::button_admin_dashboard(),
-    'mb-3'
-);
+echo AdminNavigation::back_button();
 
 echo html_writer::div(
     html_writer::tag('h3', get_string('subscription_summary', 'local_subscriptions'), ['class' => 'h5 mb-3']) .

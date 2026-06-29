@@ -1274,5 +1274,52 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2026051010, 'local', 'subscriptions');
 	}
 
+	if ($oldversion < 2026062903) {
+		$table = new xmldb_table('local_subscriptions_admin_log');
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('actorid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('targetuserid', XMLDB_TYPE_INTEGER, '10', null, null);
+			$table->add_field('action', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+			$table->add_field('objecttype', XMLDB_TYPE_CHAR, '50', null, null);
+			$table->add_field('objectid', XMLDB_TYPE_INTEGER, '10', null, null);
+			$table->add_field('details', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('ipaddress', XMLDB_TYPE_CHAR, '45', null, null);
+			$table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+			$table->add_index('actor_idx', XMLDB_INDEX_NOTUNIQUE, ['actorid']);
+			$table->add_index('targetuser_idx', XMLDB_INDEX_NOTUNIQUE, ['targetuserid']);
+			$table->add_index('action_idx', XMLDB_INDEX_NOTUNIQUE, ['action']);
+			$table->add_index('timecreated_idx', XMLDB_INDEX_NOTUNIQUE, ['timecreated']);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(true, 2026062903, 'local', 'subscriptions');
+	}
+
+	if ($oldversion < 2026062904) {
+		$table = new xmldb_table('local_subscriptions_user_note');
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('authorid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('note', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+			$table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+			$table->add_index('userid_idx', XMLDB_INDEX_NOTUNIQUE, ['userid']);
+			$table->add_index('authorid_idx', XMLDB_INDEX_NOTUNIQUE, ['authorid']);
+			$table->add_index('timecreated_idx', XMLDB_INDEX_NOTUNIQUE, ['timecreated']);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(true, 2026062904, 'local', 'subscriptions');
+	}
+
     return true;
 }

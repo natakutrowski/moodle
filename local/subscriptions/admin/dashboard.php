@@ -3,14 +3,13 @@
 require_once(__DIR__ . '/../../../config.php');
 
 use local_subscriptions\subscription_config;
-
-require_login();
-require_capability('moodle/site:config', context_system::instance());
-subscription_config::guard_public_access();
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
 global $PAGE, $OUTPUT;
 
-$context = context_system::instance();
+$context = AdminSecurity::require(Capabilities::VIEW_DASHBOARD);
 
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url(subscription_config::admin_dashboard_page()));
@@ -22,46 +21,60 @@ echo $OUTPUT->header();
 
 $cards = [
     [
+        'title' => get_string('admin_card_crm_users_title', 'local_subscriptions'),
+        'description' => get_string('admin_card_crm_users_desc', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::admin_users_page()),
+        'icon' => '👤',
+        'capability' => Capabilities::VIEW_USERS,
+    ],
+    [
         'title' => get_string('admin_card_user_subscriptions_title', 'local_subscriptions'),
         'description' => get_string('admin_card_user_subscriptions_desc', 'local_subscriptions'),
         'url' => new moodle_url(subscription_config::user_subscriptions_page()),
         'icon' => '📋',
+        'capability' => Capabilities::MANAGE_SUBSCRIPTIONS,
     ],
     [
         'title' => get_string('admin_card_add_subscription_title', 'local_subscriptions'),
         'description' => get_string('admin_card_add_subscription_desc', 'local_subscriptions'),
         'url' => new moodle_url(subscription_config::add_manual_subscription_page()),
         'icon' => '➕',
+        'capability' => Capabilities::MANAGE_SUBSCRIPTIONS,
     ],
     [
         'title' => get_string('admin_card_import_csv_title', 'local_subscriptions'),
         'description' => get_string('admin_card_import_csv_desc', 'local_subscriptions'),
         'url' => new moodle_url(subscription_config::import_csv_page()),
         'icon' => '📂',
+        'capability' => Capabilities::MANAGE_SUBSCRIPTIONS,
     ],
     [
         'title' => get_string('admin_card_plans_title', 'local_subscriptions'),
         'description' => get_string('admin_card_plans_desc', 'local_subscriptions'),
         'url' => new moodle_url(subscription_config::manage_page()),
         'icon' => '🧩',
+        'capability' => Capabilities::MANAGE_CONFIGURATION,
     ],
     [
         'title' => get_string('admin_card_digital_products_title', 'local_subscriptions'),
         'description' => get_string('admin_card_digital_products_desc', 'local_subscriptions'),
         'url' => new moodle_url('/local/subscriptions/admin/digital_products.php'),
         'icon' => '📦',
+        'capability' => Capabilities::MANAGE_DIGITAL,
     ],
     [
         'title' => get_string('admin_card_digital_purchases_title', 'local_subscriptions'),
         'description' => get_string('admin_card_digital_purchases_desc', 'local_subscriptions'),
         'url' => new moodle_url('/local/subscriptions/admin/digital_purchases.php'),
         'icon' => '🧾',
+        'capability' => Capabilities::VIEW_DIGITAL,
     ],
     [
         'title' => get_string('admin_card_digital_stats_title', 'local_subscriptions'),
         'description' => get_string('admin_card_digital_stats_desc', 'local_subscriptions'),
         'url' => new moodle_url('/local/subscriptions/admin/digital_sales_stats.php'),
         'icon' => '📊',
+        'capability' => Capabilities::VIEW_STATISTICS,
     ],
 ];
 
@@ -73,9 +86,16 @@ echo html_writer::tag(
     ['class' => 'lead text-muted mb-4']
 );
 
+echo AdminNavigation::quick_actions();
+
 echo html_writer::start_div('row');
 
 foreach ($cards as $card) {
+
+    if (!AdminSecurity::can($card['capability'])) {
+        continue;
+    }
+
     echo html_writer::start_div('col-md-6 col-xl-4 mb-4');
 
     echo html_writer::link(

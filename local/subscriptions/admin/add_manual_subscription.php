@@ -7,6 +7,9 @@ require_once($CFG->dirroot . '/user/lib.php');
 
 use local_subscriptions\subscription_config;
 use local_subscriptions\subscription_manager;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
 function local_subscriptions_generate_unique_username_from_email(string $email): string {
     global $DB;
@@ -29,13 +32,9 @@ function local_subscriptions_generate_unique_username_from_email(string $email):
     return $username;
 }
 
-require_login();
-require_capability('moodle/site:config', context_system::instance());
-subscription_config::guard_public_access();
-
 global $DB, $PAGE, $OUTPUT, $CFG;
 
-$context = context_system::instance();
+$context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url(subscription_config::add_manual_subscription_page()));
@@ -140,10 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 echo $OUTPUT->header();
 
-echo html_writer::div(
-    subscription_config::button_admin_dashboard(),
-    'mb-3'
-);
+echo AdminNavigation::back_button();
 
 echo $renderer->render_manual_subscription_form_v2($plans);
 
