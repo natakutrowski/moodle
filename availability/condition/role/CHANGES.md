@@ -4,6 +4,18 @@ moodle-availability_role
 Changes
 -------
 
+### v5.0-r5
+
+* 2026-06-23 - Bugfix: Avoid a dml_missing_record_exception when editing or evaluating activities on the front page, where the course has no course category, resolves #28
+
+### v5.0-r4
+
+* 2026-03-14 - Improvement: Mark nonsensically role restrictions in the edit restrictions form, resolves #17
+* 2026-03-14 - Bootstrap Update: Replace custom-select class with form-select
+* 2026-03-10 - Improvement: Align the plugin's setting names, re-writing existing settings with an upgrade step.
+* 2026-03-10 - Improvement: Add a capability to control who is allowed to add the condition, credits go to ByCS-LP
+* 2026-03-10 - Feature: Extend availability condition to support course category roles and global roles, credits go to Robert Schrenk and ByCS-LP
+
 ### v5.0-r3
 
 * 2025-10-15 - Make codechecker happy again
