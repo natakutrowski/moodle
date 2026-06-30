@@ -40,13 +40,16 @@ class enrol_scope_fill_task extends \core\task\scheduled_task {
 
         // 1) Récupérer toutes les souscriptions actives non expirées.
         $sql = "SELECT s.".self::COL_SUBS_ID."      AS subid,
-                       s.".self::COL_SUBS_USERID."  AS userid,
-                       s.".self::COL_SUBS_PLANID."  AS planid,
-                       s.".self::COL_SUBS_START."   AS startts,
-                       s.".self::COL_SUBS_END."     AS endts
-                  FROM {".self::TBL_SUBS."} s
-                 WHERE s.".self::COL_SUBS_STATUS." = :active
-                   AND s.".self::COL_SUBS_END." > :now";
+                    s.".self::COL_SUBS_USERID."  AS userid,
+                    s.".self::COL_SUBS_PLANID."  AS planid,
+                    s.".self::COL_SUBS_START."   AS startts,
+                    s.".self::COL_SUBS_END."     AS endts
+                FROM {".self::TBL_SUBS."} s
+                JOIN {user} u ON u.id = s.".self::COL_SUBS_USERID."
+                WHERE s.".self::COL_SUBS_STATUS." = :active
+                AND s.".self::COL_SUBS_END." > :now
+                AND u.deleted = 0
+                AND u.suspended = 0";
         $subs = $DB->get_records_sql($sql, ['active' => self::SUB_STATUS_ACTIVE, 'now' => $now]);
 
         if (!$subs) {
@@ -62,6 +65,12 @@ class enrol_scope_fill_task extends \core\task\scheduled_task {
             $countprocessed++;
 
             $userid = (int)$s->userid;
+
+            if (!$this->user_exists_and_active($userid)) {
+                mtrace("enrol_scope_fill: user {$userid} does not exist, deleted or suspended, skip.");
+                continue;
+            }
+
             $planid = (int)$s->planid;
             $start  = (int)$s->startts ?: $now;
             $end    = (int)$s->endts   ?: 0; // 0 = illimité
@@ -172,4 +181,15 @@ class enrol_scope_fill_task extends \core\task\scheduled_task {
         }
         $plugin->enrol_user($manual, $userid, $roleid, $timestart, $timeend);
     }
+
+    private function user_exists_and_active(int $userid): bool {
+        global $DB;
+
+        return $DB->record_exists('user', [
+            'id' => $userid,
+            'deleted' => 0,
+            'suspended' => 0,
+        ]);
+    }
+
 }
