@@ -725,3 +725,160 @@ $string['tinytimeolderyearformat'] = '%b %Y';
 $string['tinytimewithinayearformat'] = '%b %e';
 $string['unstableversioninstalledinfo'] = 'Cette version de Level Up XP (block_xp) est encore en développement et considérée instable ; utilisez une version officielle.';
 $string['wewillreplyat'] = 'Nous vous répondrons à : _{$a}_.';
+
+$string['actionrules'] = 'Règles d’action';
+$string['actionrules_help'] = "Les règles d’action permettent de créer des conditions déterminant quand et combien de points sont attribués aux étudiants.
+
+Pour chaque action, les conditions sont évaluées dans l’ordre dans lequel elles apparaissent à l’écran. Dès qu’une condition est satisfaite, ses points sont attribués et les autres conditions ne sont pas évaluées pour cette même action.
+
+Des limites peuvent être définies pour chaque condition. Lorsqu’une condition a atteint sa limite, aucun point n’est attribué et toute l’action est ignorée.
+
+[En savoir plus](https://docs.levelup.plus/xp/docs/action-rules?ref=blockxp_help)";
+$string['actionrulesintro'] = 'Attribue des points aux étudiants pour les actions qu’ils effectuent.';
+$string['addaction'] = 'Ajouter une action';
+$string['addanaction'] = 'Ajouter une action';
+$string['addcondition'] = 'Ajouter une condition';
+$string['admindefaultactionrulesintro'] = 'Les règles d’action suivantes seront utilisées par défaut.';
+$string['alreadyused'] = 'Déjà utilisé';
+$string['availabilityinfonotincourse'] = 'Nécessite d’être dans le contexte d’un cours.';
+$string['certificateobtained'] = 'Certificat obtenu';
+$string['conditions'] = 'Conditions';
+$string['defaultactionrules'] = 'Règles d’action par défaut';
+$string['editlimits'] = 'Modifier les limites';
+$string['eventsrulesintro'] = 'Observe les événements et attribue des points aux étudiants lorsqu’ils se produisent. Nous recommandons désormais d’utiliser les nouvelles règles « Action » et « Achèvement ».';
+$string['filterbyrule'] = 'Filtrer par règle';
+$string['intotal'] = 'Au total';
+$string['keeplogsdesc'] = 'Durée après laquelle les journaux sont supprimés de la base de données. Les journaux jouent un rôle important : ils permettent de suivre les points attribués, d’identifier l’activité récente et bien d’autres choses. La suppression des journaux peut affecter la distribution des points au fil du temps.';
+$string['limits'] = 'Limites';
+$string['navactionrules'] = 'Règles d’action';
+$string['noactionsyet'] = 'Aucune action pour le moment !';
+$string['noactionsyetintro'] = 'Commencez par ajouter une action à observer.';
+$string['nolimit'] = 'Aucune limite';
+$string['notyetused'] = 'Pas encore utilisé';
+$string['nperhoursmall'] = '{$a}/h';
+$string['nperdaysmall'] = '{$a}/jour';
+$string['nperweeksmall'] = '{$a}/sem.';
+$string['npermonthsmall'] = '{$a}/mois';
+$string['ntimes'] = '{$a} fois';
+$string['once'] = 'Une fois';
+$string['onceperactivity'] = 'Une fois par activité';
+$string['onceperassignment'] = 'Une fois par devoir';
+$string['onceperchapter'] = 'Une fois par chapitre';
+$string['oncepercontentpiece'] = 'Une fois par contenu';
+$string['oncepercourse'] = 'Une fois par cours';
+$string['onceperdiscussion'] = 'Une fois par discussion';
+$string['onceperforum'] = 'Une fois par forum';
+$string['onceperpage'] = 'Une fois par page';
+$string['onceperquiz'] = 'Une fois par quiz';
+$string['overalllimit'] = 'Limite globale';
+$string['overalllimitdesc'] = 'La limite globale définit combien de fois une condition peut attribuer des points.';
+$string['overalllimit_help'] = "La limite globale définit combien de fois une condition peut attribuer des points.
+
+Une fois la limite atteinte, aucun point ne sera attribué pour l’action. Utilisez la limite globale pour contrôler le nombre maximal de fois où des points peuvent être attribués pendant une période donnée.
+
+[En savoir plus](https://docs.levelup.plus/xp/docs/action-rules/limits)";
+$string['peractivity'] = 'Par activité';
+$string['perassignment'] = 'Par devoir';
+$string['perchapter'] = 'Par chapitre';
+$string['percontentpiece'] = 'Par contenu';
+$string['percourse'] = 'Par cours';
+$string['perday'] = 'Par jour';
+$string['perdiscussion'] = 'Par discussion';
+$string['perforum'] = 'Par forum';
+$string['perhour'] = 'Par heure';
+$string['permonth'] = 'Par mois';
+$string['perpage'] = 'Par page';
+$string['perquiz'] = 'Par quiz';
+$string['perweek'] = 'Par semaine';
+$string['pluginnotenabled'] = 'Le plugin « {$a->name} » ({$a->component}) n’est pas activé.';
+$string['pluginoutdated'] = 'Le plugin « {$a->name} » ({$a->component}) est obsolète, la version « {$a->release} » est requise.';
+$string['points'] = 'Points';
+$string['privacy:path:userflags'] = 'Indicateurs utilisateur';
+$string['privacy:metadata:logs'] = 'Stocke le journal des points';
+$string['privacy:metadata:log:reason'] = 'La raison';
+$string['privacy:metadata:log:subtype'] = 'Le sous-type de la raison.';
+$string['reason'] = 'Raison';
+$string['reasonactivityviewed'] = 'Activité consultée';
+$string['reasonassignfeedbackread'] = 'Feedback lu';
+$string['reasonassignsubmitted'] = 'Devoir remis';
+$string['reasonchapterread'] = 'Chapitre lu';
+$string['reasondatabaseentrycreated'] = 'Entrée de base de données créée';
+$string['reasondiscussioncreated'] = 'Discussion créée';
+$string['reasondiscussionread'] = 'Discussion lue';
+$string['reasondiscussionrepliedto'] = 'Réponse à une discussion';
+$string['reasonfeedbackanswered'] = 'Feedback répondu';
+$string['reasonglossaryentrypublished'] = 'Entrée de glossaire publiée';
+$string['reasonlessoncontentviewed'] = 'Contenu de leçon consulté';
+$string['reasonlessonendreached'] = 'Leçon terminée';
+$string['reasonlessonstarted'] = 'Leçon commencée';
+$string['reasonquizattemptfinished'] = 'Tentative de quiz terminée';
+$string['reasonquizattemptstarted'] = 'Tentative de quiz commencée';
+$string['repeatsallowed'] = 'Répétitions autorisées';
+$string['repetitionlimit'] = 'Limite de répétition';
+$string['repetitionlimitdesc'] = 'La limite de répétition détermine quand les utilisateurs peuvent répéter des actions similaires pour gagner à nouveau des points.';
+$string['repetitionlimit_help'] = "La limite de répétition détermine si les utilisateurs peuvent répéter des actions similaires et gagner à nouveau des points.
+
+L’objectif de cette limite est d’éviter les comportements abusifs et d’encourager une participation plus variée. Par exemple, dans un forum, vous pouvez limiter les répétitions à une fois par discussion.
+
+La limite globale et la limite de répétition s’appliquent toutes les deux. Lorsque l’une des deux limites est atteinte, aucun point n’est attribué.
+
+[En savoir plus](https://docs.levelup.plus/xp/docs/action-rules/limits)";
+$string['repetitionlimitset'] = 'Limite de répétition définie';
+$string['repetitiontimeframe'] = 'Période de répétition';
+$string['requiresplugin'] = 'Nécessite le plugin « {$a->name} » ({$a->component}).';
+$string['resultsfilteredforrulen'] = 'Résultats filtrés pour la règle « {$a} ».';
+$string['rulefilteryalreadyusedbyaction'] = 'Cette condition est déjà utilisée par cette action et ne peut pas être ajoutée plusieurs fois.';
+$string['rulefiltercmtag'] = 'Étiquette d’activité';
+$string['rulefiltercmtagdesc'] = 'Cette condition correspondra si l’activité possède une étiquette spécifique.';
+$string['rulefiltercmtagfield'] = 'Nom de l’étiquette';
+$string['rulefiltercmtaghelp'] = 'Saisissez le nom de l’étiquette exactement comme vous le feriez lors de l’étiquetage de l’activité.';
+$string['ruletypeanswerfeedback'] = 'Répondre aux questions de feedback';
+$string['ruletypeanswerfeedbackdesc'] = 'Lorsque l’utilisateur répond aux questions d’une activité feedback.';
+$string['ruletypecreatedatabaseentry'] = 'Créer une entrée de base de données';
+$string['ruletypecreatedatabaseentrydesc'] = 'Lorsqu’un utilisateur crée une nouvelle entrée dans une activité base de données.';
+$string['ruletypecreateforumdiscussion'] = 'Créer une discussion de forum';
+$string['ruletypecreateforumdiscussiondesc'] = 'Lorsque l’utilisateur crée une nouvelle discussion dans une activité forum.';
+$string['ruletypefinishquizattempt'] = 'Terminer une tentative de quiz';
+$string['ruletypefinishquizattemptdesc'] = 'Lorsque l’utilisateur termine une tentative de quiz.';
+$string['ruletypeobtaincertificate'] = 'Obtenir un certificat';
+$string['ruletypeobtaincertificatedesc'] = 'Lorsque l’utilisateur reçoit un certificat via l’activité « Certificat personnalisé ».';
+$string['ruletypepublishglossaryentry'] = 'Publier une entrée de glossaire';
+$string['ruletypepublishglossaryentrydesc'] = 'Lorsqu’une entrée de glossaire d’un utilisateur est publiée.';
+$string['ruletypereachlessonend'] = 'Atteindre la fin de la leçon';
+$string['ruletypereachlessonenddesc'] = 'Lorsque l’utilisateur atteint la fin d’une activité leçon.';
+$string['ruletypereadassignfeedback'] = 'Lire le feedback du devoir';
+$string['ruletypereadassignfeedbackdesc'] = 'Lorsque l’utilisateur lit le feedback fourni pour sa remise de devoir.';
+$string['ruletypereadchapter'] = 'Lire un chapitre';
+$string['ruletypereadchapterdesc'] = 'Lorsque l’utilisateur ouvre un chapitre d’une activité livre.';
+$string['ruletypereadforumdiscussion'] = 'Lire une discussion de forum';
+$string['ruletypereadforumdiscussiondesc'] = 'Lorsque l’utilisateur consulte une discussion dans une activité forum.';
+$string['ruletypereplyforumdiscussion'] = 'Répondre à une discussion de forum';
+$string['ruletypereplyforumdiscussiondesc'] = 'Lorsque l’utilisateur publie une réponse à une discussion de forum.';
+$string['ruletypesectioncompletiondesc'] = 'Lorsque toutes les activités d’une section de cours sont marquées comme terminées.';
+$string['ruletypestartlesson'] = 'Commencer une leçon';
+$string['ruletypestartlessondesc'] = 'Lorsque l’utilisateur commence une activité leçon.';
+$string['ruletypestartquizattempt'] = 'Commencer une tentative de quiz';
+$string['ruletypestartquizattemptdesc'] = 'Lorsque l’utilisateur commence une tentative dans un quiz.';
+$string['ruletypesubmitassignment'] = 'Remettre un devoir';
+$string['ruletypesubmitassignmentdesc'] = 'Lorsqu’un utilisateur remet un devoir.';
+$string['ruletypeviewactivity'] = 'Consulter une activité';
+$string['ruletypeviewactivitydesc'] = 'Lorsque l’utilisateur accède à une page dans une activité.';
+$string['ruletypeviewconsumecontent'] = 'Consulter du contenu';
+$string['ruletypeviewconsumecontentdesc'] = 'Lorsque l’utilisateur consulte tout type de contenu, au sens large.';
+$string['ruletypeviewcourse'] = 'Consulter la page du cours';
+$string['ruletypeviewcoursedesc'] = 'Lorsque l’utilisateur accède à la page du cours.';
+$string['ruletypeviewlessoncontent'] = 'Consulter le contenu de la leçon';
+$string['ruletypeviewlessoncontentdesc'] = 'Lorsque l’utilisateur consulte le contenu d’une page dans une activité leçon.';
+$string['ruletypeviewproducecontent'] = 'Rédiger du contenu';
+$string['ruletypeviewproducecontentdesc'] = 'Lorsque l’utilisateur crée tout type de contenu, au sens large.';
+$string['shortcodexpteamladderembedintro'] = 'Avec le shortcode suivant, le classement peut être intégré n’importe où sur ce site. Vous trouverez plus d’options et d’informations dans la [documentation](https://docs.levelup.plus/xp/docs/leaderboard-embed).';
+$string['shortcodexpladderembedintro'] = 'Avec le shortcode suivant, le classement peut être intégré n’importe où sur ce site. Vous trouverez plus d’options et d’informations dans la [documentation](https://docs.levelup.plus/xp/docs/leaderboard-embed).';
+$string['timeframe'] = 'Période';
+$string['timesallowed'] = 'Nombre de fois autorisé';
+$string['unavailablebecause'] = 'Indisponible pour la raison suivante :';
+$string['unknown'] = 'Inconnu';
+$string['unlimitedrepeats'] = 'Répétitions illimitées';
+$string['upgradetoaddmore'] = 'Passez à la version supérieure pour en ajouter davantage.';
+$string['visitpagetoeditdefaultactionrules'] = 'Les règles d’action sont désormais la méthode recommandée pour définir les règles. Consultez [cette page]({$a}) pour personnaliser leurs valeurs par défaut.';
+$string['usedefaultlimits'] = 'Utiliser les limites par défaut';
+$string['xppremiumrequired'] = 'XP+ Premium requis';

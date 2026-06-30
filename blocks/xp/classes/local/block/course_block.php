@@ -60,7 +60,7 @@ class course_block extends block_base {
     public function applicable_formats() {
         $mode = \block_xp\di::get('config')->get('context');
         if ($mode == CONTEXT_SYSTEM) {
-            return ['site' => true, 'course' => true, 'my' => true, 'local-campus-*'   => true,];
+            return ['site' => true, 'course' => true, 'my' => true];
         }
         return ['course' => true];
     }
@@ -169,9 +169,6 @@ class course_block extends block_base {
 
         $renderer = \block_xp\di::get('renderer');
         $state = $world->get_store()->get_state($USER->id);
-
-        // Migrate the old config if needed.
-        $this->migrate_config_data_if_needed($world);
 
         // Render the content.
         $widget = $this->get_widget($world, $state);
@@ -408,6 +405,7 @@ class course_block extends block_base {
      * to using the configuration object of the world.
      *
      * @param \block_xp\local\course_world $world The world.
+     * @deprecated Since v20.0, we should no longer need to be migrating old data.
      */
     protected function migrate_config_data_if_needed($world) {
         $migrateflag = 'block_configdata_migrated_' . $world->get_courseid();

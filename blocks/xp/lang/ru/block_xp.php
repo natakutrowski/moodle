@@ -765,3 +765,160 @@ $string['viewtheladder'] = 'Посмотреть таблицу лидеров';
 $string['xp'] = 'Очки опыта';
 $string['xprequired'] = 'Требуется XP';
 $string['xptogo'] = 'Осталось [[{$a}]]';
+
+$string['actionrules'] = 'Правила действий';
+$string['actionrules_help'] = "Правила действий позволяют создавать условия, определяющие, когда и сколько баллов начисляется учащимся.
+
+Для каждого действия условия проверяются в том порядке, в котором они отображаются на экране. Как только условие выполнено, баллы начисляются, а остальные условия для этого же действия больше не проверяются.
+
+Для отдельных условий можно задать лимиты. Когда условие достигает своего лимита, баллы начисляться не будут, а всё действие будет пропущено.
+
+[Подробнее](https://docs.levelup.plus/xp/docs/action-rules?ref=blockxp_help)";
+$string['actionrulesintro'] = 'Начисляет учащимся баллы за выполненные ими действия.';
+$string['addaction'] = 'Добавить действие';
+$string['addanaction'] = 'Добавить действие';
+$string['addcondition'] = 'Добавить условие';
+$string['admindefaultactionrulesintro'] = 'Следующие правила действий будут использоваться по умолчанию.';
+$string['alreadyused'] = 'Уже используется';
+$string['availabilityinfonotincourse'] = 'Требуется контекст курса.';
+$string['certificateobtained'] = 'Сертификат получен';
+$string['conditions'] = 'Условия';
+$string['defaultactionrules'] = 'Правила действий по умолчанию';
+$string['editlimits'] = 'Редактировать лимиты';
+$string['eventsrulesintro'] = 'Отслеживайте события и начисляйте баллы учащимся по мере их выполнения. Сейчас мы рекомендуем использовать более новые правила «Действие» и «Завершение».';
+$string['filterbyrule'] = 'Фильтр по правилу';
+$string['intotal'] = 'Всего';
+$string['keeplogsdesc'] = 'Период, после которого логи удаляются из базы данных. Логи играют важную роль: они используются для отслеживания начисленных баллов, определения недавней активности и многого другого. Удаление логов может повлиять на распределение баллов со временем.';
+$string['limits'] = 'Лимиты';
+$string['navactionrules'] = 'Правила действий';
+$string['noactionsyet'] = 'Действий пока нет!';
+$string['noactionsyetintro'] = 'Начните с добавления действия для отслеживания.';
+$string['nolimit'] = 'Без лимита';
+$string['notyetused'] = 'Ещё не использовалось';
+$string['nperhoursmall'] = '{$a}/ч';
+$string['nperdaysmall'] = '{$a}/день';
+$string['nperweeksmall'] = '{$a}/нед.';
+$string['npermonthsmall'] = '{$a}/мес.';
+$string['ntimes'] = '{$a} раз(а)';
+$string['once'] = 'Один раз';
+$string['onceperactivity'] = 'Один раз на активность';
+$string['onceperassignment'] = 'Один раз на задание';
+$string['onceperchapter'] = 'Один раз на главу';
+$string['oncepercontentpiece'] = 'Один раз на единицу контента';
+$string['oncepercourse'] = 'Один раз на курс';
+$string['onceperdiscussion'] = 'Один раз на обсуждение';
+$string['onceperforum'] = 'Один раз на форум';
+$string['onceperpage'] = 'Один раз на страницу';
+$string['onceperquiz'] = 'Один раз на тест';
+$string['overalllimit'] = 'Общий лимит';
+$string['overalllimitdesc'] = 'Общий лимит определяет, сколько раз условие может начислять баллы.';
+$string['overalllimit_help'] = "Общий лимит определяет, сколько раз условие может начислять баллы.
+
+После достижения лимита за это действие баллы больше начисляться не будут. Используйте общий лимит, чтобы ограничить максимальное количество начислений за определённый период времени.
+
+[Подробнее](https://docs.levelup.plus/xp/docs/action-rules/limits)";
+$string['peractivity'] = 'На активность';
+$string['perassignment'] = 'На задание';
+$string['perchapter'] = 'На главу';
+$string['percontentpiece'] = 'На единицу контента';
+$string['percourse'] = 'На курс';
+$string['perday'] = 'В день';
+$string['perdiscussion'] = 'На обсуждение';
+$string['perforum'] = 'На форум';
+$string['perhour'] = 'В час';
+$string['permonth'] = 'В месяц';
+$string['perpage'] = 'На страницу';
+$string['perquiz'] = 'На тест';
+$string['perweek'] = 'В неделю';
+$string['pluginnotenabled'] = 'Плагин «{$a->name}» ({$a->component}) не включён.';
+$string['pluginoutdated'] = 'Плагин «{$a->name}» ({$a->component}) устарел, требуется версия «{$a->release}».';
+$string['points'] = 'Баллы';
+$string['privacy:path:userflags'] = 'Флаги пользователя';
+$string['privacy:metadata:logs'] = 'Хранит лог начисления баллов';
+$string['privacy:metadata:log:reason'] = 'Причина';
+$string['privacy:metadata:log:subtype'] = 'Подтип причины.';
+$string['reason'] = 'Причина';
+$string['reasonactivityviewed'] = 'Активность просмотрена';
+$string['reasonassignfeedbackread'] = 'Отзыв прочитан';
+$string['reasonassignsubmitted'] = 'Задание отправлено';
+$string['reasonchapterread'] = 'Глава прочитана';
+$string['reasondatabaseentrycreated'] = 'Запись в базе данных создана';
+$string['reasondiscussioncreated'] = 'Обсуждение создано';
+$string['reasondiscussionread'] = 'Обсуждение прочитано';
+$string['reasondiscussionrepliedto'] = 'Ответ в обсуждении';
+$string['reasonfeedbackanswered'] = 'Обратная связь заполнена';
+$string['reasonglossaryentrypublished'] = 'Запись глоссария опубликована';
+$string['reasonlessoncontentviewed'] = 'Содержимое урока просмотрено';
+$string['reasonlessonendreached'] = 'Урок завершён';
+$string['reasonlessonstarted'] = 'Урок начат';
+$string['reasonquizattemptfinished'] = 'Попытка теста завершена';
+$string['reasonquizattemptstarted'] = 'Попытка теста начата';
+$string['repeatsallowed'] = 'Повторы разрешены';
+$string['repetitionlimit'] = 'Лимит повторений';
+$string['repetitionlimitdesc'] = 'Лимит повторений определяет, когда пользователи могут повторять похожие действия, чтобы снова получать баллы.';
+$string['repetitionlimit_help'] = "Лимит повторений определяет, могут ли пользователи повторять похожие действия и снова получать баллы.
+
+Цель лимита повторений — предотвращать злоупотребления и поощрять более широкую вовлечённость. Например, в форуме можно ограничить повторы до одного раза на обсуждение.
+
+Применяются и общий лимит, и лимит повторений. Когда достигается любой из них, баллы больше не начисляются.
+
+[Подробнее](https://docs.levelup.plus/xp/docs/action-rules/limits)";
+$string['repetitionlimitset'] = 'Лимит повторений задан';
+$string['repetitiontimeframe'] = 'Период повторений';
+$string['requiresplugin'] = 'Требуется плагин «{$a->name}» ({$a->component}).';
+$string['resultsfilteredforrulen'] = 'Результаты отфильтрованы по правилу «{$a}».';
+$string['rulefilteryalreadyusedbyaction'] = 'Это условие уже используется этим действием и не может быть добавлено несколько раз.';
+$string['rulefiltercmtag'] = 'Тег активности';
+$string['rulefiltercmtagdesc'] = 'Это условие сработает, если у активности есть определённый тег.';
+$string['rulefiltercmtagfield'] = 'Название тега';
+$string['rulefiltercmtaghelp'] = 'Введите название тега точно так же, как при добавлении тега к активности.';
+$string['ruletypeanswerfeedback'] = 'Ответить на вопросы обратной связи';
+$string['ruletypeanswerfeedbackdesc'] = 'Когда пользователь отвечает на вопросы в активности обратной связи.';
+$string['ruletypecreatedatabaseentry'] = 'Создать запись в базе данных';
+$string['ruletypecreatedatabaseentrydesc'] = "Когда пользователь создаёт новую запись в активности базы данных.";
+$string['ruletypecreateforumdiscussion'] = 'Создать обсуждение на форуме';
+$string['ruletypecreateforumdiscussiondesc'] = 'Когда пользователь создаёт новое обсуждение в активности форума.';
+$string['ruletypefinishquizattempt'] = 'Завершить попытку теста';
+$string['ruletypefinishquizattemptdesc'] = 'Когда пользователь завершает попытку теста.';
+$string['ruletypeobtaincertificate'] = 'Получить сертификат';
+$string['ruletypeobtaincertificatedesc'] = 'Когда пользователю выдан сертификат активностью «Custom certificate».';
+$string['ruletypepublishglossaryentry'] = 'Опубликовать запись глоссария';
+$string['ruletypepublishglossaryentrydesc'] = "Когда запись пользователя в глоссарии опубликована.";
+$string['ruletypereachlessonend'] = 'Достичь конца урока';
+$string['ruletypereachlessonenddesc'] = 'Когда пользователь доходит до конца активности «Урок».';
+$string['ruletypereadassignfeedback'] = 'Прочитать отзыв к заданию';
+$string['ruletypereadassignfeedbackdesc'] = 'Когда пользователь читает отзыв к своей отправленной работе.';
+$string['ruletypereadchapter'] = 'Прочитать главу';
+$string['ruletypereadchapterdesc'] = 'Когда пользователь открывает главу активности «Книга».';
+$string['ruletypereadforumdiscussion'] = 'Прочитать обсуждение на форуме';
+$string['ruletypereadforumdiscussiondesc'] = 'Когда пользователь просматривает обсуждение в активности форума.';
+$string['ruletypereplyforumdiscussion'] = 'Ответить в обсуждении форума';
+$string['ruletypereplyforumdiscussiondesc'] = 'Когда пользователь публикует ответ в обсуждении форума.';
+$string['ruletypesectioncompletiondesc'] = 'Когда все активности в разделе курса отмечены как завершённые.';
+$string['ruletypestartlesson'] = 'Начать урок';
+$string['ruletypestartlessondesc'] = 'Когда пользователь начинает активность «Урок».';
+$string['ruletypestartquizattempt'] = 'Начать попытку теста';
+$string['ruletypestartquizattemptdesc'] = 'Когда пользователь начинает попытку в тесте.';
+$string['ruletypesubmitassignment'] = 'Отправить задание';
+$string['ruletypesubmitassignmentdesc'] = 'Когда пользователь отправляет выполненное задание.';
+$string['ruletypeviewactivity'] = 'Просмотреть активность';
+$string['ruletypeviewactivitydesc'] = 'Когда пользователь открывает страницу активности.';
+$string['ruletypeviewconsumecontent'] = 'Просмотреть контент';
+$string['ruletypeviewconsumecontentdesc'] = 'Когда пользователь просматривает любой тип контента в широком смысле.';
+$string['ruletypeviewcourse'] = 'Просмотреть страницу курса';
+$string['ruletypeviewcoursedesc'] = 'Когда пользователь открывает страницу курса.';
+$string['ruletypeviewlessoncontent'] = 'Просмотреть содержимое урока';
+$string['ruletypeviewlessoncontentdesc'] = 'Когда пользователь просматривает содержимое страницы в активности «Урок».';
+$string['ruletypeviewproducecontent'] = 'Создать контент';
+$string['ruletypeviewproducecontentdesc'] = 'Когда пользователь создаёт любой тип контента в широком смысле.';
+$string['shortcodexpteamladderembedintro'] = 'С помощью следующего шорткода таблицу лидеров можно встроить в любое место на этом сайте. Дополнительные параметры и информацию можно найти в [документации](https://docs.levelup.plus/xp/docs/leaderboard-embed).';
+$string['shortcodexpladderembedintro'] = 'С помощью следующего шорткода таблицу лидеров можно встроить в любое место на этом сайте. Дополнительные параметры и информацию можно найти в [документации](https://docs.levelup.plus/xp/docs/leaderboard-embed).';
+$string['timeframe'] = 'Период времени';
+$string['timesallowed'] = 'Разрешённое количество раз';
+$string['unavailablebecause'] = 'Недоступно по следующей причине:';
+$string['unknown'] = 'Неизвестно';
+$string['unlimitedrepeats'] = 'Неограниченные повторы';
+$string['upgradetoaddmore'] = 'Обновите тариф, чтобы добавить больше.';
+$string['visitpagetoeditdefaultactionrules'] = 'Правила действий теперь являются рекомендуемым способом настройки правил. Перейдите на [эту страницу]({$a}), чтобы изменить их значения по умолчанию.';
+$string['usedefaultlimits'] = 'Использовать лимиты по умолчанию';
+$string['xppremiumrequired'] = 'Требуется XP+ Premium';
