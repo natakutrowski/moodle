@@ -10,9 +10,14 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
         token:  '',
         region: '',
         owner: '',
+        server: '',
 
         setCloudPoodllToken: function(token){
           this.token=token;
+        },
+
+        setCloudPoodllServer: function(server){
+          this.server=server;
         },
 
         countWords: function(sentence) {
@@ -167,7 +172,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
                 + '&owner=poodll'
                 + '&region=useast1';
 
-            var serverurl = 'https://cloud.poodll.com' + "/webservice/rest/server.php";
+            var serverurl = this.server + "/webservice/rest/server.php";
             xhr.open("POST", serverurl, true);
             xhr.setRequestHeader("Cache-Control", "no-cache");
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -226,6 +231,12 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
                 //fetch the Posturl. We need this.
                 //set up our ajax request
                 var xhr = new XMLHttpRequest();
+
+                //in the case we get a bad voice we just reject without calling the web service
+                if(voice == 'ttsnone'){
+                    reject('textutils fetch_polly_url: ttsnone is not a valid voice');
+                    log.debug('textutils fetch_polly_url: ttsnone is not a valid voice');
+                }
 
                 //set up our handler for the response
                 xhr.onreadystatechange = function (e) {

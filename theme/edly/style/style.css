@@ -8151,3 +8151,15 @@ body.pagelayout-frontpage {
 .course-section .availabilityinfo  {
     padding: 12px;
 }
+
+/* Fix conflit Edly / Poodll ReadAloud */
+body.path-mod-readaloud #mod_readaloud ol.main-nav {
+    background: transparent !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    width: auto !important;
+    z-index: auto !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
