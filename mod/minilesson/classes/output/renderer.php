@@ -308,9 +308,8 @@ class renderer extends \plugin_renderer_base
     public function show_finished_results($comptest, $latestattempt, $cm, $canattempt, $embed, $teacherreport = false)
     {
         global $CFG, $DB;
-        $ans = [];
         // Quiz data.
-        $quizdata = $comptest->fetch_test_data_for_js();
+        $quizdata = $comptest->fetch_test_data_for_js($this);
 
         // Config.
         $config = get_config(constants::M_COMPONENT);
@@ -336,7 +335,8 @@ class renderer extends \plugin_renderer_base
                 continue;
             }
 
-            $items = $DB->get_record(constants::M_QTABLE, ['id' => $quizdata[$result->index]->id]);
+            $itemquizdata = $quizdata[$result->index];
+            $items = $DB->get_record(constants::M_QTABLE, ['id' => $itemquizdata->id]);
             $result->title = $items->name;
 
             // Question Text.
@@ -348,218 +348,21 @@ class renderer extends \plugin_renderer_base
                 constants::TEXTQUESTION_FILEAREA,
                 $items->id
             );
-            $itemtext = format_text($itemtext, FORMAT_MOODLE, ['context' => $context]);
-
-            // We need to replace within itemtext for these items too.
-            $search = ['{topic}', '{ai data1}', '{ai data2}'];
-            $replace = [];
-            switch ($items->type) {
-                case constants::TYPE_FREEWRITING:
-                    $replace = [
-                        $items->{constants::FREEWRITING_TOPIC},
-                        $items->{constants::FREEWRITING_AIDATA1},
-                        $items->{constants::FREEWRITING_AIDATA2},
-                    ];
-                    break;
-                case constants::TYPE_FREESPEAKING:
-                    $replace = [
-                        $items->{constants::FREESPEAKING_TOPIC},
-                        $items->{constants::FREESPEAKING_AIDATA1},
-                        $items->{constants::FREESPEAKING_AIDATA2},
-                    ];
-                    break;
-                case constants::TYPE_AUDIOCHAT:
-                    $replace = [
-                        $items->{constants::AUDIOCHAT_TOPIC},
-                        $items->{constants::AUDIOCHAT_AIDATA1},
-                        $items->{constants::AUDIOCHAT_AIDATA2},
-                    ];
-                    break;
-            }
-            if (!empty($replace)) {
-                $itemtext = str_replace($search, $replace, $itemtext);
-            }
-            $result->questext = $itemtext;
-
-            $result->itemtype = $quizdata[$result->index]->type;
-            $result->resultstemplate = $result->itemtype . 'results';
-
-            // Correct answer.
-            switch ($result->itemtype) {
-                case constants::TYPE_DICTATION:
-                case constants::TYPE_DICTATIONCHAT:
-                case constants::TYPE_LISTENREPEAT:
-                case constants::TYPE_SPEECHCARDS:
-                case constants::TYPE_SHORTANSWER:
-                case constants::TYPE_LGAPFILL:
-                case constants::TYPE_TGAPFILL:
-                case constants::TYPE_SGAPFILL:
-                    $result->hascorrectanswer = true;
-                    $result->correctans = $quizdata[$result->index]->sentences;
-                    $result->hasanswerdetails = false;
-                    break;
-
-                case constants::TYPE_MULTIAUDIO:
-                case constants::TYPE_MULTICHOICE:
-                case constants::TYPE_COMPQUIZ:
-                    $result->hascorrectanswer = true;
-                    $result->hasincorrectanswer = true;
-                    if (!empty($quizdata[$result->index]->correctfeedback)) {
-                        $result->hasanswerdetails = true;
-                        $result->resultsdatajson = json_encode(['correctfeedback' => $quizdata[$result->index]->correctfeedback]);
-                        $result->resultstemplate = 'multichoiceresults';
-                    } else {
-                        $result->hasanswerdetails = false;
-                    }
-                    $correctanswers = [];
-                    $incorrectanswers = [];
-                    $correctindex = $quizdata[$result->index]->correctanswer;
-
-                    foreach ($quizdata[$result->index]->sentences as $sentance) {
-                        if ($correctindex == $sentance->indexplusone) {
-                            $correctanswers[] = $sentance->sentence;
-                        } else {
-                            $incorrectanswers[] = $sentance->sentence;
-                        }
-                    }
-
-                    if (count($correctanswers) == 0) {
-                        $result->hascorrectanswer = false;
-                    }
-                    if (count($incorrectanswers) == 0) {
-                        $result->hasincorrectanswer = false;
-                    }
-
-                    $result->correctans = ['sentence' => join(' ', $correctanswers)];
-                    $result->incorrectans = ['sentence' => join('<br> ', $incorrectanswers)];
-                    break;
-
-                case constants::TYPE_PGAPFILL:
-                    $resultsdata = isset($result->resultsdata) ? $result->resultsdata : null;
-                    $hasitems = $resultsdata && isset($resultsdata->items) && $resultsdata->items && $resultsdata->items > 0;
-                    if (!$hasitems || !$resultsdata) {
-                        $result->correctans = [];
-                        $result->incorrectans = [];
-                        break;
-                    }
-                    $result->hascorrectanswer = $hasitems;
-                    $result->hasincorrectanswer = $hasitems;
-                    $result->hasanswerdetails = false;
-                    $resultsdata = isset($result->resultsdata) ? $result->resultsdata : null;
-                    $correctanswers = [];
-                    $incorrectanswers = [];
-
-                    $items = $resultsdata->items;
-                    for ($i = 0; $i < count($items); $i++) {
-                        $theitem = $resultsdata->items[$i];
-                        if (!$theitem) {
-                            continue;
-                        }
-                        if ($theitem->correct) {
-                            $correctanswers[] = ['sentence' => $theitem->text];
-                        } else {
-                            $incorrectanswers[] = ['sentence' => $theitem->text];
-                        }
-                    }
-                    $result->correctans = $correctanswers;
-                    $result->incorrectans = $incorrectanswers;
-                    break;
-
-                case constants::TYPE_H5P:
-                    $result->hascorrectanswer = false;
-                    $result->hasincorrectanswer = false;
-                    $result->hasanswerdetails = false;
-                    break;
-
-                case constants::TYPE_PASSAGEREADING:
-                    $result->hascorrectanswer = false;
-                    $result->hasincorrectanswer = false;
-                    if (
-                        isset($result->resultsdata)
-                        && isset($result->resultsdata->read)
-                        && ($result->resultsdata->read + $result->resultsdata->unreached) > 0
-                    ) {
-                        $result->hasanswerdetails = true;
-                        $result->resultstemplate = 'passagereadingreviewresults';
-                        $result->resultsdata->passagehtml = \mod_minilesson\aitranscriptutils::render_passage(
-                            $items->{constants::READINGPASSAGE}
-                        );
-                        $result->resultsdatajson = json_encode(
-                            $result->resultsdata,
-                            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-                        );
-                    } else {
-                        $result->hasanswerdetails = false;
-                    }
-                    break;
-
-                case constants::TYPE_FLUENCY:
-                    $result->hascorrectanswer = true;
-                    $result->correctans = $quizdata[$result->index]->sentences;
-                    if (isset($result->resultsdata)) {
-                        $result->hasanswerdetails = true;
-                        $result->resultsdatajson = json_encode(
-                            $result->resultsdata,
-                            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-                        );
-                        // For now ...
-                        $result->resultstemplate = 'listitemresults';
-                    } else {
-                        $result->hasanswerdetails = false;
-                    }
-                    break;
-
-                case constants::TYPE_FREEWRITING:
-                case constants::TYPE_FREESPEAKING:
-                    $result->hascorrectanswer = false;
-                    $result->hasincorrectanswer = false;
-                    if (isset($result->resultsdata)) {
-                        $result->hasanswerdetails = true;
-                        // The free writing and reading both need to be told to show no reattempt button.
-                        $result->resultsdata->noreattempt = true;
-                        $result->resultsdatajson = json_encode(
-                            $result->resultsdata,
-                            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-                        );
-                    } else {
-                        $result->hasanswerdetails = false;
-                    }
-                    break;
-                case constants::TYPE_AUDIOCHAT:
-                    $result->hascorrectanswer = false;
-                    $result->hasincorrectanswer = false;
-                    if (isset($result->resultsdata)) {
-                        $result->hasanswerdetails = true;
-                        $result->resultsdatajson = json_encode(
-                            $result->resultsdata,
-                            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-                        );
-                    } else {
-                        $result->hasanswerdetails = false;
-                    }
-                    break;
-                case constants::TYPE_WORDSHUFFLE:  // TO DO how to handle this?
-                case constants::TYPE_SCATTER:  // TO DO how to handle this?
-                case constants::TYPE_SPACEGAME: // TO DO how to handle this?
-                default:
-                    $result->hascorrectanswer = false;
-                    $result->hasincorrectanswer = false;
-                    $result->hasanswerdetails = false;
-                    $result->correctans = [];
-                    $result->incorrectans = [];
-            }
-
+            $result->questext = format_text($itemtext, FORMAT_MOODLE, ['context' => $context]);
+            $result->itemtype = $itemquizdata->type;
+            $result->resultstemplate = utils::get_sub_component($result->itemtype) . "/{$result->itemtype}results";
             $result->index++;
+         
             // Every item stars.
             if ($result->grade == 0) {
                 $ystarcnt = 0;
-            } elseif ($result->grade < 19) {
+            } else if ($result->grade < 19) {
                 $ystarcnt = 1;
-            } elseif ($result->grade < 39) {
+            } else if ($result->grade < 39) {
                 $ystarcnt = 2;
-            } elseif ($result->grade < 59) {
+            } else if ($result->grade < 59) {
                 $ystarcnt = 3;
-            } elseif ($result->grade < 79) {
+            } else if ($result->grade < 79) {
                 $ystarcnt = 4;
             } else {
                 $ystarcnt = 5;
@@ -567,6 +370,9 @@ class renderer extends \plugin_renderer_base
             $result->yellowstars = array_fill(0, $ystarcnt, true);
             $gstarcnt = 5 - $ystarcnt;
             $result->graystars = array_fill(0, $gstarcnt, true);
+
+            $iteminstance = utils::fetch_item_from_itemrecord($items, $moduleinstance, $context);
+            $iteminstance->prepare_result($result, $itemquizdata);
 
             $useresults[] = $result;
         }
@@ -666,14 +472,11 @@ class renderer extends \plugin_renderer_base
     public function show_quiz($comptest, $moduleinstance)
     {
         // Quiz data.
-        $quizdata = $comptest->fetch_test_data_for_js();
+        $quizdata = $comptest->fetch_test_data_for_js($this);
 
         $itemshtml = [];
         foreach ($quizdata as $item) {
-            $itemshtml[] = $this->render_from_template(
-                constants::M_COMPONENT . '/' . $item->type,
-                $item
-            );
+            $itemshtml[] = $this->render_from_template($item->templatename, $item);
         }
 
         $finisheddiv = html_writer::div(
@@ -710,11 +513,11 @@ class renderer extends \plugin_renderer_base
     {
 
         // Quiz data.
-        $quizdata = $comptest->fetch_test_data_for_js();
+        $quizdata = $comptest->fetch_test_data_for_js($this);
         $itemshtml = [];
         foreach ($quizdata as $item) {
             if ($item->id == $qid) {
-                $itemshtml[] = $this->render_from_template(constants::M_COMPONENT . '/' . $item->type, $item);
+                $itemshtml[] = $this->render_from_template($item->templatename, $item);
             }
         }
 
@@ -1125,5 +928,214 @@ class renderer extends \plugin_renderer_base
         // Generate and return menu.
         $ret = $this->output->render_from_template(constants::M_COMPONENT . '/manybuttonsmenu', ['items' => $templateitems]);
         return $ret;
+    }
+
+    /**
+     * Takes data from the Cloud Poodll usage report web service and renders it on the page.
+     *
+     * @param object $usagedata JSON decoded response from local_cpapi_fetch_user_report
+     * @return void
+     */
+    public function display_usage_report($usagedata) {
+        $reportdata = [];
+
+        $mysubscriptions = [];
+
+        if ($usagedata->usersubs) {
+            foreach ($usagedata->usersubs as $subdata) {
+                $subscriptionname = ($subdata->subscriptionname == ' ') ? "na" : strtolower(trim($subdata->subscriptionname));
+                $mysubscriptions[] = ['name' => $subscriptionname,
+                        'start_date' => date("m-d-Y", $subdata->timemodified),
+                        'end_date' => date("m-d-Y", $subdata->expiredate)];
+            }
+        }
+
+        $reportdata['subscription_check'] = count($mysubscriptions) > 0;
+        $reportdata['subscriptions'] = $mysubscriptions;
+        $reportdata['pusers'] = [];
+        $reportdata['record'] = [];
+        $reportdata['recordmin'] = [];
+        $reportdata['recordtype'] = [];
+
+        $threesixtyfiverecordtypevideo = 0;
+        $oneeightyrecordtypevideo = 0;
+        $ninetyrecordtypevideo = 0;
+        $thirtyrecordtypevideo = 0;
+
+        $threesixtyfiverecordtypeaudio = 0;
+        $oneeightyrecordtypeaudio = 0;
+        $ninetyrecordtypeaudio = 0;
+        $thirtyrecordtypeaudio = 0;
+
+        $threesixtyfiverecordmin = 0;
+        $oneeightyrecordmin = 0;
+        $ninetyrecordmin = 0;
+        $thirtyrecordmin = 0;
+
+        $threesixtyfiverecord = 0;
+        $oneeightyrecord = 0;
+        $ninetyrecord = 0;
+        $thirtyrecord = 0;
+
+        $threesixtyfivepuser = '';
+        $oneeightypuser = '';
+        $ninetypuser = '';
+        $thirtypuser = '';
+
+        // Monthly totals (12 x 30 day buckets, most recent first).
+        $monthusertotals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        $monthpusers = ['', '', '', '', '', '', '', '', '', '', '', ''];
+        $monthminutetotals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        $monthrecordtotals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        $monthaudiototals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        $monthvideototals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        if ($usagedata->usersubs_details) {
+            foreach ($usagedata->usersubs_details as $subdatadetails) {
+                $timecreated = $subdatadetails->timecreated;
+
+                for ($x = 0; $x < 12; $x++) {
+                    $upperdays = -1 * $x * 30 . ' days';
+                    $lowerdays = -1 * ($x + 1) * 30 . ' days';
+                    if (($timecreated <= strtotime($upperdays)) && ($timecreated > strtotime($lowerdays))) {
+                        $monthminutetotals[$x] = $monthminutetotals[$x] + ($subdatadetails->audio_min + $subdatadetails->video_min);
+                        $monthaudiototals[$x] = $monthaudiototals[$x] + $subdatadetails->audio_file_count;
+                        $monthvideototals[$x] = $monthvideototals[$x] + $subdatadetails->video_file_count;
+                        $monthrecordtotals[$x] = $monthrecordtotals[$x] +
+                            $subdatadetails->video_file_count + $subdatadetails->audio_file_count;
+                        $monthvideototals[$x] = $monthvideototals[$x] + $subdatadetails->video_min;
+                        $monthpusers[$x] = $monthpusers[$x] .= $subdatadetails->pusers;
+                    }
+                }
+
+                if ($timecreated >= strtotime('-365 days')) {
+                    $threesixtyfiverecordtypevideo += $subdatadetails->video_file_count;
+                    $threesixtyfiverecordtypeaudio += $subdatadetails->audio_file_count;
+                    $threesixtyfiverecordmin += ($subdatadetails->audio_min + $subdatadetails->video_min);
+                    $threesixtyfiverecord += ($subdatadetails->video_file_count + $subdatadetails->audio_file_count);
+                    $threesixtyfivepuser .= $subdatadetails->pusers;
+                }
+
+                if ($timecreated >= strtotime('-180 days')) {
+                    $oneeightyrecordtypevideo += $subdatadetails->video_file_count;
+                    $oneeightyrecordtypeaudio += $subdatadetails->audio_file_count;
+                    $oneeightyrecordmin += ($subdatadetails->audio_min + $subdatadetails->video_min);
+                    $oneeightyrecord += ($subdatadetails->video_file_count + $subdatadetails->audio_file_count);
+                    $oneeightypuser .= $subdatadetails->pusers;
+                }
+
+                if ($timecreated >= strtotime('-90 days')) {
+                    $ninetyrecordtypevideo += $subdatadetails->video_file_count;
+                    $ninetyrecordtypeaudio += $subdatadetails->audio_file_count;
+                    $ninetyrecordmin += ($subdatadetails->audio_min + $subdatadetails->video_min);
+                    $ninetyrecord += ($subdatadetails->video_file_count + $subdatadetails->audio_file_count);
+                    $ninetypuser .= $subdatadetails->pusers;
+                }
+
+                if ($timecreated >= strtotime('-30 days')) {
+                    $thirtyrecordtypevideo += $subdatadetails->video_file_count;
+                    $thirtyrecordtypeaudio += $subdatadetails->audio_file_count;
+                    $thirtyrecordmin += ($subdatadetails->audio_min + $subdatadetails->video_min);
+                    $thirtyrecord += ($subdatadetails->video_file_count + $subdatadetails->audio_file_count);
+                    $thirtypuser .= $subdatadetails->pusers;
+                }
+            }
+        }
+
+        // Calc max month totals.
+        $maxmonthpusers = 0;
+        $maxmonthminutes = 0;
+        $maxmonthaudio = 0;
+        $maxmonthvideo = 0;
+        $maxmonthrecordings = 0;
+        for ($x = 0; $x < 12; $x++) {
+            $monthusertotals[$x] = $this->count_pusers($monthpusers[$x]);
+            if ($maxmonthpusers < $monthusertotals[$x]) {
+                $maxmonthpusers = $monthusertotals[$x];
+            }
+            if ($maxmonthminutes < $monthminutetotals[$x]) {
+                $maxmonthminutes = $monthminutetotals[$x];
+            }
+            if ($maxmonthaudio < $monthaudiototals[$x]) {
+                $maxmonthaudio = $monthaudiototals[$x];
+            }
+            if ($maxmonthvideo < $monthvideototals[$x]) {
+                $maxmonthvideo = $monthvideototals[$x];
+            }
+            if ($maxmonthrecordings < $monthrecordtotals[$x]) {
+                $maxmonthrecordings = $monthrecordtotals[$x];
+            }
+        }
+
+        // Calculate report summaries.
+        $reportdata['pusers'] = [
+                ['name' => '30', 'value' => $this->count_pusers($thirtypuser)],
+                ['name' => '90', 'value' => $this->count_pusers($ninetypuser)],
+                ['name' => '180', 'value' => $this->count_pusers($oneeightypuser)],
+                ['name' => '365', 'value' => $this->count_pusers($threesixtyfivepuser)],
+                ['name' => 'maxmonth', 'value' => $maxmonthpusers],
+        ];
+
+        $reportdata['record'] = [
+                ['name' => '30', 'value' => $thirtyrecord],
+                ['name' => '90', 'value' => $ninetyrecord],
+                ['name' => '180', 'value' => $oneeightyrecord],
+                ['name' => '365', 'value' => $threesixtyfiverecord],
+                ['name' => 'maxmonth', 'value' => $maxmonthrecordings],
+        ];
+
+        $reportdata['recordmin'] = [
+                ['name' => '30', 'value' => $thirtyrecordmin],
+                ['name' => '90', 'value' => $ninetyrecordmin],
+                ['name' => '180', 'value' => $oneeightyrecordmin],
+                ['name' => '365', 'value' => $threesixtyfiverecordmin],
+                ['name' => 'maxmonth', 'value' => $maxmonthminutes],
+        ];
+
+        $reportdata['recordtype'] = [
+                ['name' => '30', 'video' => $thirtyrecordtypevideo, 'audio' => $thirtyrecordtypeaudio],
+                ['name' => '90', 'video' => $ninetyrecordtypevideo, 'audio' => $ninetyrecordtypeaudio],
+                ['name' => '180', 'video' => $oneeightyrecordtypevideo, 'audio' => $oneeightyrecordtypeaudio],
+                ['name' => '365', 'video' => $threesixtyfiverecordtypevideo, 'audio' => $threesixtyfiverecordtypeaudio],
+                ['name' => 'maxmonth', 'video' => $maxmonthvideo, 'audio' => $maxmonthaudio],
+        ];
+
+        // Tally usage per plugin for the pie chart.
+        $plugintypes = [];
+        if ($usagedata->usersubs_details) {
+            foreach ($usagedata->usersubs_details as $subdatadetails) {
+                $jsonarr = json_decode($subdatadetails->file_by_app, true);
+                foreach ($jsonarr as $key => $val) {
+                    $val = $jsonarr[$key]['audio'] + $jsonarr[$key]['video'];
+                    if (isset($plugintypes[$key])) {
+                        $plugintypes[$key] += $val;
+                    } else {
+                        $plugintypes[$key] = $val;
+                    }
+                }
+            }
+        }
+
+        echo $this->output->render_from_template(constants::M_COMPONENT . '/mysubscriptionreport', $reportdata);
+
+        if ($reportdata['subscription_check'] == true) {
+            $pluginseries = new \core\chart_series('Plugin Usage', array_values($plugintypes));
+            $pchart = new \core\chart_pie();
+            $pchart->add_series($pluginseries);
+            $pchart->set_labels(array_keys($plugintypes));
+            echo $this->output->heading(get_string('per_plugin', constants::M_COMPONENT), 4);
+            echo $this->output->render($pchart);
+        }
+    }
+
+    /**
+     * Count the unique users from a CSV list of users. Used by display_usage_report.
+     *
+     * @param string $pusers CSV list of user identifiers
+     * @return int
+     */
+    public function count_pusers($pusers) {
+        $pusers = trim($pusers);
+        return count(array_unique(explode(',', $pusers)));
     }
 }

@@ -476,38 +476,28 @@ class utils {
         return $result;
     }
 
-    // We forward an OpenAI RTC offer to the OpenAI API.
-    // This is called from: openairtc.php
-    // Which is called from the OpenAI RTC client side code in audiochat.
-    // (in which we dont want to expose our openai key)
-    // It expects an SDP offer in the request body and returns an SDP answer.
-    public static function openai_forward_offer() {
-        global $CFG;
-            require_once($CFG->libdir . '/filelib.php');
-
-        // Get the secret from config.
-        $apikey = get_config(constants::M_COMPONENT, 'openaikey');
-        if (empty($apikey)) {
+    /**
+     * Call a Cloud Poodll web service function and return the JSON decoded response.
+     *
+     * @param string $functionname the web service function to call
+     * @param array $params parameters to pass to the web service function
+     * @return mixed JSON decoded response object, or false if credentials or token are unavailable
+     */
+    public static function call_cloudpoodll($functionname, $params = []) {
+        $conf = get_config(constants::M_COMPONENT);
+        if (empty($conf->apiuser) || empty($conf->apisecret)) {
             return false;
         }
-
-        $offer = file_get_contents("php://input");
-        $model = "gpt-4o-mini-realtime-preview";
-        $serverurl = "https://api.openai.com/v1/realtime/calls";
-
-        $curl = new \curl();
-        $curl->setHeader('Authorization: Bearer ' . $apikey);
-        // $curl->setHeader(['Content-type: application/sdp']);
-        $result = $curl->post($serverurl, [
-            'sdp' => $offer,
-            'session' => json_encode([
-                'type' => 'realtime',
-                'model' => $model,
-            ]),
-        ]);
-        header("Content-Type: application/sdp");
-        echo $result;
-        die;
+        $token = self::fetch_token($conf->apiuser, $conf->apisecret);
+        if (empty($token)) {
+            return false;
+        }
+        $url = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
+        $params['wstoken'] = $token;
+        $params['wsfunction'] = $functionname;
+        $params['moodlewsrestformat'] = 'json';
+        $resp = self::curl_fetch($url, $params);
+        return json_decode($resp);
     }
 
     // This is called from the settings page and we do not want to make calls out to cloud.poodll.com on settings
@@ -861,8 +851,55 @@ class utils {
         }
     }
 
+    public static function fetch_cloudpoodll_audiochat_token($contextid, $voice, $disablevad, $resumehandle = '') {
 
-    // Fetch the streaming token for the region and language
+        $cloudpoodlltoken = false;
+        $conf = get_config(constants::M_COMPONENT);
+        if (!empty($conf->apiuser) && !empty($conf->apisecret)) {
+            $cloudpoodlltoken = self::fetch_token($conf->apiuser, $conf->apisecret);
+        }
+        if (!$cloudpoodlltoken || empty($cloudpoodlltoken)) {
+            return false;
+        }
+
+        // Poodll region.
+        $poodllregion = $conf->awsregion;
+
+        // The REST API we are calling.
+        $functionname = 'local_cpapi_fetch_geminilive_token';
+
+        // log.debug(params);
+        $params = [];
+        $params['wstoken'] = $cloudpoodlltoken;
+        $params['wsfunction'] = $functionname;
+        $params['moodlewsrestformat'] = 'json';
+        $params['region'] = $poodllregion;
+        $params['voice'] = $voice;
+        $params['disablevad'] = $disablevad;
+        // Resume handle for session resumption; the cloud endpoint must bake this
+        // into the token's bidiGenerateContentSetup for the Constrained endpoint.
+        if ($resumehandle !== '') {
+            $params['resumehandle'] = $resumehandle;
+        }
+
+        $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
+        $response = self::curl_fetch($serverurl, $params);
+
+        if (!self::is_json($response)) {
+            return false;
+        } else {
+            $payloadobject = json_decode($response);
+            if (isset($payloadobject->returnCode) && $payloadobject->returnCode == 0 && isset($payloadobject->returnMessage)) {
+                $thetoken = $payloadobject->returnMessage;
+                return $thetoken;
+            } else {
+                return false;
+            }
+        }
+    }
+
+
+    // Fetch the streaming token for the region and language.
     public static function fetch_streaming_token($poodllregion) {
         global $CFG;
 
@@ -945,7 +982,7 @@ class utils {
 
             case 'capetown':
             case 'southafricanorth':
-          //      return 'southafricanorth';
+                // return 'southafricanorth';
 
             case 'bahrain':
             case 'dublin':
@@ -1065,6 +1102,12 @@ class utils {
 
         // Feedback language for AI instructions
         $feedbacklanguage = $item->{constants::AIGRADE_FEEDBACK_LANGUAGE};
+        if ($feedbacklanguage == constants::AIGRADE_FEEDBACK_TARGET_LANGUAGE) {
+            $feedbacklanguage = $moduleinstance->ttslanguage;
+        } else if ($feedbacklanguage == constants::AIGRADE_FEEDBACK_NATIVE_LANGUAGE) {
+            $feedbacklanguage = $moduleinstance->nativelang;
+        }
+
         if ($conf->setnativelanguage) {
             $userprefdeflanguage = get_user_preferences(constants::NATIVELANG_PREF);
             if (!empty($userprefdeflanguage)) {
@@ -1094,42 +1137,10 @@ class utils {
         $instructions->maxmarks = $maxmarks;
         $instructions->questiontext = strip_tags($item->itemtext);
         $instructions->modeltext = $item->{constants::AIGRADE_MODELANSWER};
-        $search = ['{topic}', '{ai data1}', '{ai data2}'];
-        $replace = [];
-        switch ($item->type) {
-            case constants::TYPE_FREEWRITING:
-                $replace = [
-                    $item->{constants::FREEWRITING_TOPIC},
-                    $item->{constants::FREEWRITING_AIDATA1},
-                    $item->{constants::FREEWRITING_AIDATA2},
-                ];
-                break;
-            case constants::TYPE_FREESPEAKING:
-                $replace = [
-                    $item->{constants::FREESPEAKING_TOPIC},
-                    $item->{constants::FREESPEAKING_AIDATA1},
-                    $item->{constants::FREESPEAKING_AIDATA2},
-                ];
-                break;
-            case constants::TYPE_AUDIOCHAT:
-                // Audio Chat probably never arrives here. It works internally with the RTC streaming API.
-                // Leaving this code here, but probably dead.
-                $search[] = '{student submission}';
-                // Fetch item class instance from item db record.
-                $audiochatinstance = new local\itemtype\item_audiochat($item, $moduleinstance, $cm);
-                $studentsubmission = $audiochatinstance->fetch_student_submission();
-                $replace = [
-                    $item->{constants::AUDIOCHAT_TOPIC},
-                    $item->{constants::AUDIOCHAT_AIDATA1},
-                    $item->{constants::AUDIOCHAT_AIDATA2},
-                    $studentsubmission ? $studentsubmission : '',
-                ];
-                break;
-        }
-        if (!empty($replace)) {
-            $instructions->feedbackscheme = str_replace($search, $replace, (string) $instructions->feedbackscheme);
-            $instructions->markscheme = str_replace($search, $replace, (string) $instructions->markscheme);
-        }
+
+        $instance = self::fetch_item_from_itemrecord($item, $moduleinstance);
+        $instance->prepare_instructions_for_ai_grade($instructions);
+
         $cmcontext = context_module::instance($cm->id);
         $aigraderesults = self::fetch_ai_grade(
             $cmcontext->id,
@@ -2422,8 +2433,8 @@ class utils {
     }
 
     // fetch the MP3 URL of the text we want read aloud
-    public static function fetch_polly_url($token, $region, $speaktext, $voiceoption, $voice) {
-        global $USER;
+    public static function fetch_polly_url($token, $region, $speaktext, $voiceoption, $voice, $minilessonid = 0) {
+        global $USER, $DB;
 
         // Do a little sanity check
         if (empty($speaktext) || empty($voice) || empty($token)) {
@@ -2445,6 +2456,13 @@ class utils {
         $pollyurl = $cache->get($key);
         if ($pollyurl && !empty($pollyurl)) {
             return $pollyurl;
+        }
+
+        // check minilesson_media_cache
+        $dbcache = $DB->get_record(constants::M_MEDIA_CACHE_TABLE, ['hashkey' => $key], '*', IGNORE_MULTIPLE);
+        if ($dbcache) {
+            $cache->set($key, $dbcache->url);
+            return $dbcache->url;
         }
 
         switch ((int) ($voiceoption)) {
@@ -2508,7 +2526,14 @@ class utils {
             $pollyurl = $payloadobject->returnMessage;
             // if its an S3 URL  then we cache it, yay
             if (\core_text::strpos($pollyurl, 'pollyfile') > 0) {
+                // First cache in Moodle Cache
                 $cache->set($key, $pollyurl);
+                // Then cache in minilesson db cache
+                $dbcache = new \stdClass();
+                $dbcache->hashkey = $key;
+                $dbcache->url = $pollyurl;
+                $dbcache->minilesson = $minilessonid;
+                $DB->insert_record(constants::M_MEDIA_CACHE_TABLE, $dbcache);
             }
             return $pollyurl;
         } else {
@@ -2547,124 +2572,37 @@ class utils {
         return $status;
     }
 
+    /**
+     * @return local\itemtype\item|null
+     */
     public static function fetch_item_from_itemrecord($itemrecord, $moduleinstance, $context = false) {
-        // Set up the item type specific parts of the form data
-        switch ($itemrecord->type) {
-            case constants::TYPE_MULTICHOICE:
-                return new local\itemtype\item_multichoice($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_MULTIAUDIO:
-                return new local\itemtype\item_multiaudio($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_DICTATIONCHAT:
-                return new local\itemtype\item_dictationchat($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_DICTATION:
-                return new local\itemtype\item_dictation($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_SPEECHCARDS:
-                return new local\itemtype\item_speechcards($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_LISTENREPEAT:
-                return new local\itemtype\item_listenrepeat($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_PAGE:
-                return new local\itemtype\item_page($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_SMARTFRAME:
-                return new local\itemtype\item_smartframe($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_SHORTANSWER:
-                return new local\itemtype\item_shortanswer($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_SGAPFILL:
-                return new local\itemtype\item_speakinggapfill($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_LGAPFILL:
-                return new local\itemtype\item_listeninggapfill($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_TGAPFILL:
-                return new local\itemtype\item_typinggapfill($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_PGAPFILL:
-                return new local\itemtype\item_passagegapfill($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_COMPQUIZ:
-                return new local\itemtype\item_compquiz($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_H5P:
-                return new local\itemtype\item_h5p($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_SPACEGAME:
-                return new local\itemtype\item_spacegame($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_FREEWRITING:
-                return new local\itemtype\item_freewriting($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_FREESPEAKING:
-                return new local\itemtype\item_freespeaking($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_FLUENCY:
-                return new local\itemtype\item_fluency($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_PASSAGEREADING:
-                return new local\itemtype\item_passagereading($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_CONVERSATION:
-                return new local\itemtype\item_conversation($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_AUDIOCHAT:
-                return new local\itemtype\item_audiochat($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_WORDSHUFFLE:
-                return new local\itemtype\item_wordshuffle($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_SCATTER:
-                return new local\itemtype\item_scatter($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_SLIDES:
-                return new local\itemtype\item_slides($itemrecord, $moduleinstance, $context);
-            case constants::TYPE_FICTION:
-                return new local\itemtype\item_fiction($itemrecord, $moduleinstance, $context);
-            default:
+        $itemtypeclass = static::fetch_itemtype_classname($itemrecord->type);
+        if (!class_exists($itemtypeclass)) {
+            return null;
         }
+        return new $itemtypeclass($itemrecord, $moduleinstance, $context);
     }
 
-
-    public static function fetch_itemform_classname($itemtype) {
-        // Fetch the correct form
-        switch ($itemtype) {
-            case constants::TYPE_MULTICHOICE:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\multichoiceform';
-            case constants::TYPE_MULTIAUDIO:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\multiaudioform';
-            case constants::TYPE_DICTATIONCHAT:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\dictationchatform';
-            case constants::TYPE_DICTATION:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\dictationform';
-            case constants::TYPE_SPEECHCARDS:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\speechcardsform';
-            case constants::TYPE_LISTENREPEAT:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\listenrepeatform';
-            case constants::TYPE_PAGE:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\pageform';
-            case constants::TYPE_SMARTFRAME:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\smartframe';
-            case constants::TYPE_SHORTANSWER:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\shortanswerform';
-            case constants::TYPE_SGAPFILL:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\speakinggapfillform';
-            case constants::TYPE_LGAPFILL:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\listeninggapfillform';
-            case constants::TYPE_TGAPFILL:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\typinggapfillform';
-            case constants::TYPE_PGAPFILL:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\passagegapfillform';
-            case constants::TYPE_COMPQUIZ:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\compquizform';
-            case constants::TYPE_H5P:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\h5pform';
-            case constants::TYPE_SPACEGAME:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\spacegameform';
-            case constants::TYPE_FREEWRITING:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\freewritingform';
-            case constants::TYPE_FREESPEAKING:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\freespeakingform';
-            case constants::TYPE_FLUENCY:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\fluencyform';
-            case constants::TYPE_PASSAGEREADING:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\passagereadingform';
-            case constants::TYPE_CONVERSATION:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\conversationform';
-            case constants::TYPE_AUDIOCHAT:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\audiochatform';
-            case constants::TYPE_WORDSHUFFLE:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\wordshuffleform';
-            case constants::TYPE_SCATTER:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\scatterform';
-            case constants::TYPE_SLIDES:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\slidesform';
-            case constants::TYPE_FICTION:
-                return '\\' . constants::M_COMPONENT . '\local\itemform\fictionform';
-            default:
-                return false;
+    /**
+     * @return string|local\itemtype\item|null
+     */
+    public static function fetch_itemtype_classname($itemtype) {
+        $itemtypeclass = sprintf("%s\\itemtype", self::get_sub_component($itemtype));
+        if (!class_exists($itemtypeclass)) {
+            return null;
         }
+        return $itemtypeclass;
+    }
+
+    /**
+     * @return local\itemform\baseform|null
+     */
+    public static function fetch_itemform_classname($itemtype) {
+        $itemformclass = sprintf("%s\\itemform", self::get_sub_component($itemtype));
+        if (!class_exists($itemformclass)) {
+            return null;
+        }
+        return $itemformclass;
     }
 
     public static function do_mb_str_split($string, $splitlength = 1, $encoding = null) {
@@ -3009,5 +2947,25 @@ class utils {
                 break; // => get_string('vi-vn',constants::M_COMPONENT)
         }
         return $ret;
+    }
+
+    public static function get_component($classname = null) {
+        if (empty($classname)) {
+            $classname = static::class;
+        }
+        $classparts = explode('\\', $classname);
+        return $classparts[0];
+    }
+
+    public static function get_sub_component($type = null, $subplugintype = constants::SUBPLUGINTYPES['item']) {
+        return rtrim(sprintf("%s_%s", $subplugintype, (string) $type), '_');
+    }
+
+    public static function get_subitem_name($type = null, $subplugintype = constants::SUBPLUGINTYPES['item']) {
+        $itemtypename = get_string('pluginname', self::get_sub_component($type, $subplugintype));
+        if (get_string_manager()->string_exists($type, constants::M_COMPONENT)) {
+            $itemtypename = get_string($type, constants::M_COMPONENT);
+        }
+        return $itemtypename;
     }
 }

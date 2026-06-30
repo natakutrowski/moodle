@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -20,62 +19,126 @@ namespace mod_minilesson;
 defined('MOODLE_INTERNAL') || die();
 
 use mod_minilesson_external;
-use moodleform;
-require_once($CFG->libdir . '/formslib.php');
+
 /**
- * Class lessonbank_form
+ * Lesson bank search form: prepares data and renders via mustache template.
  *
  * @package    mod_minilesson
  * @copyright  2025 Justin Hunt (poodllsupport@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class lessonbank_form extends moodleform
-{
-    /**
-     * Lessons per page
-     */
-    const PERPAGE = 10;
+class lessonbank_form {
+
+    /** @var string The selected language. */
+    private $selectedlanguage;
 
     /**
-     * Form definition
+     * Constructor.
+     *
+     * @param string $selectedlanguage The language to pre-select.
      */
-    protected function definition()
-    {
-        $form = $this->_form;
+    public function __construct(string $selectedlanguage = '') {
+        $this->selectedlanguage = $selectedlanguage;
+    }
 
-        $languages = ['' => get_string('choose')] + utils::get_lang_options();
+    /**
+     * Build the template context data.
+     *
+     * @return array
+     */
+    public function export_for_template(): array {
+        $data = [
+            'languages' => $this->get_languages(),
+            'haslevels' => false,
+            'hasskills' => false,
+            'hastopics' => false,
+            'levels' => [],
+            'skills' => [],
+            'topics' => [],
+            'levelname' => '',
+            'skillname' => '',
+            'topicname' => '',
+            'itemtypes' => $this->get_itemtypes(),
+        ];
 
-        $grouparray = [];
-        $grouparray[] = $form->createElement('select', 'language', get_string('language'), $languages);
-        $grouparray[] = $form->createElement('text', 'keyword', get_string('keyword', constants::M_COMPONENT), 'size="40"
-                placeholder="' . get_string('keyword', constants::M_COMPONENT) . '"');
-        $grouparray[] = $form->createElement('submit', 'search', get_string('search'));
-        $grouparray[] = $form->createElement(
-            'html',
-            '<a class="btn text-primary" href="#advancesearch" data-toggle="collapse" data-bs-toggle="collapse"
-            role="button" aria-expanded="false" aria-controls="advancesearch">' .
-            get_string('showadvanced', constants::M_COMPONENT) . '</a>'
-        );
+        $this->load_customfield_options($data);
 
-        $form->setType('searchgroup[keyword]', PARAM_RAW);
-        $form->addGroup($grouparray, 'searchgroup', get_string('language'), '', true);
+        return $data;
+    }
 
-        $t = mod_minilesson_external::lessonbank('local_lessonbank_fetch_langlevels');
-        if (!empty($t->data)) {
-            $jsonoptions = json_decode($t->data);
-            $levels = array_column($jsonoptions, 'text', 'value');
-            $form->addElement('html', '<div class="collapse w-100" id="advancesearch">');
-            $form->addElement('autocomplete', 'level', get_string('level', constants::M_COMPONENT), $levels, 'multiple');
-            $form->setType('level', PARAM_INT);
-            $form->addElement('html', '</div>');
+    /**
+     * Render the form HTML.
+     *
+     * @return string
+     */
+    public function render(): string {
+        global $OUTPUT;
+        return $OUTPUT->render_from_template('mod_minilesson/lessonbank_searchform', $this->export_for_template());
+    }
+
+    /**
+     * Build language options array.
+     *
+     * @return array
+     */
+    private function get_languages(): array {
+        $languages = [];
+        foreach (utils::get_lang_options() as $value => $label) {
+            $languages[] = [
+                'value' => $value,
+                'label' => $label,
+                'selected' => ($value === $this->selectedlanguage),
+            ];
+        }
+        return $languages;
+    }
+
+    /**
+     * Build item types array.
+     *
+     * @return array
+     */
+    private function get_itemtypes(): array {
+        $itemtypes = [];
+        foreach (constants::ITEMTYPES as $itemtype) {
+            $itemtypes[] = [
+                'value' => $itemtype,
+                'label' => get_string($itemtype, constants::M_COMPONENT),
+            ];
+        }
+        return $itemtypes;
+    }
+
+    /**
+     * Load custom field options (level, skills, topic) from the remote API.
+     *
+     * @param array $data Template data array, modified by reference.
+     */
+    private function load_customfield_options(array &$data): void {
+        $t = mod_minilesson_external::lessonbank('local_lessonbank_fetch_customfield_options');
+        if (empty($t->data)) {
+            return;
         }
 
-        $form->addElement('hidden', 'page');
-        $form->setType('page', PARAM_INT);
-        $form->setDefault('page', 1);
+        $jsonoptions = json_decode($t->data);
+        $fieldmap = [
+            'languagelevel' => ['key' => 'levels', 'has' => 'haslevels', 'name' => 'levelname'],
+            'skills' => ['key' => 'skills', 'has' => 'hasskills', 'name' => 'skillname'],
+            'topic' => ['key' => 'topics', 'has' => 'hastopics', 'name' => 'topicname'],
+        ];
 
-        $form->addElement('hidden', 'perpage');
-        $form->setType('perpage', PARAM_INT);
-        $form->setDefault('perpage', self::PERPAGE);
+        foreach ($jsonoptions as $field) {
+            if (!isset($fieldmap[$field->shortname])) {
+                continue;
+            }
+            $map = $fieldmap[$field->shortname];
+            $options = [];
+            foreach ($field->options as $opt) {
+                $options[] = ['value' => $opt->value, 'label' => $opt->text];
+            }
+            $data[$map['key']] = $options;
+            $data[$map['has']] = !empty($options);
+            $data[$map['name']] = $field->name;
+        }
     }
 }

@@ -14,7 +14,7 @@ $PAGE->set_heading($SITE->fullname);
 
 $enabledplugin = get_config('minilesson', 'enableditems');
 if (empty($enabledplugin)) {
-    $enableditems = array();
+    $enableditems = [];
 } else {
     $enableditems = explode(',', $enabledplugin);
 }
@@ -24,6 +24,7 @@ switch ($action) {
             $enableditems[] = $qtype;
             $enableditems = array_unique($enableditems);
             set_config('enableditems', implode(',', $enableditems), 'minilesson');
+            core_plugin_manager::reset_caches();
         }
         break;
     case 'disable':
@@ -31,6 +32,7 @@ switch ($action) {
         if ($key !== false) {
             unset($enableditems[$key]);
             set_config('enableditems', implode(',', $enableditems), 'minilesson');
+            core_plugin_manager::reset_caches();
         }
         break;
     default:

@@ -1,47 +1,10 @@
 define(
-    ['jquery', 'core/log', 'mod_minilesson/definitions', 'core/templates', 'core/ajax',
-        'mod_minilesson/dictation', 'mod_minilesson/dictationchat', 'mod_minilesson/multichoice', 'mod_minilesson/multiaudio',
-        'mod_minilesson/speechcards', 'mod_minilesson/listenrepeat',
-        'mod_minilesson/page', 'mod_minilesson/smartframe', 'mod_minilesson/shortanswer',
-        'mod_minilesson/listeninggapfill', 'mod_minilesson/typinggapfill', 'mod_minilesson/speakinggapfill',
-        'mod_minilesson/spacegame', 'mod_minilesson/fluency', 'mod_minilesson/freespeaking',
-        'mod_minilesson/freewriting', 'mod_minilesson/passagereading', 'mod_minilesson/h5p',
-        'mod_minilesson/conversation', 'mod_minilesson/compquiz', 'mod_minilesson/passagegapfill',
-        'mod_minilesson/audiochat', 'mod_minilesson/wordshuffle', 'mod_minilesson/scatter',
-        'mod_minilesson/slides', 'mod_minilesson/fiction', 'mod_minilesson/progresstimer'],
+    ['jquery', 'core/log', 'mod_minilesson/definitions', 'core/ajax',],
     function (
         $,
         log,
         def,
-        templates,
         Ajax,
-        dictation,
-        dictationchat,
-        multichoice,
-        multiaudio,
-        speechcards,
-        listenrepeat,
-        page,
-        smartframe,
-        shortanswer,
-        listeninggapfill,
-        typinggapfill,
-        speakinggapfill,
-        spacegame,
-        fluency,
-        freespeaking,
-        freewriting,
-        passagereading,
-        h5p,
-        conversation,
-        compquiz,
-        passagegapfill,
-        audiochat,
-        wordshuffle,
-        scatter,
-        slides,
-        fiction,
-        progresstimer
     ) {
         "use strict"; // jshint ;_;
 
@@ -65,6 +28,7 @@ define(
             controls: {},
             submitbuttonclass: 'mod_minilesson_quizsubmitbutton',
             stepresults: [],
+            loadpromises: [],
 
             init: function (quizcontainer, activitydata, cmid, attemptid, polly) {
                 this.quizdata = activitydata.quizdata;
@@ -99,115 +63,26 @@ define(
             init_questions: function (quizdata, polly) {
                 var dd = this;
                 $.each(quizdata, function (index, item) {
-                    switch (item.type) {
-                        case def.qtype_dictation:
-                            dictation.clone().init(index, item, dd, polly);
-                            break;
-                        case def.qtype_dictationchat:
-                            dictationchat.clone().init(index, item, dd, polly);
-                            break;
-                        case def.qtype_multichoice:
-                            multichoice.clone().init(index, item, dd);
-                            break;
-                        case def.qtype_multiaudio:
-                            multiaudio.clone().init(index, item, dd);
-                            break;
-                        case def.qtype_speechcards:
-                            //speechcards init needs to occur when it is visible. lame.
-                            // so we do that in do_next function, down below
-                            speechcards.clone().init(index, item, dd);
-                            break;
-                        case def.qtype_listenrepeat:
-                            listenrepeat.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_page:
-                            page.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_smartframe:
-                            smartframe.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_shortanswer:
-                            shortanswer.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_listeninggapfill:
-                            listeninggapfill.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_typinggapfill:
-                            typinggapfill.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_speakinggapfill:
-                            speakinggapfill.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_spacegame:
-                            spacegame.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_fluency:
-                            fluency.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_freespeaking:
-                            freespeaking.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_freewriting:
-                            freewriting.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_passagereading:
-                            passagereading.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_h5p:
-                            h5p.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_conversation:
-                            conversation.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_compquiz:
-                            compquiz.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_passagegapfill:
-                            passagegapfill.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_audiochat:
-                            audiochat.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_wordshuffle:
-                            wordshuffle.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_scatter:
-                            scatter.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_slides:
-                            slides.clone().init(index, item, dd);
-                            break;
-
-                        case def.qtype_fiction:
-                            fiction.clone().init(index, item, dd);
-                            break;
-                    }
-
+                    dd.loadpromises.push(new Promise(resolve => require(
+                            [`${def.get_sub_component(item.type)}/itemtype`],
+                            module => {
+                                resolve(module.clone().init(index, item, dd, polly));
+                            })
+                        )
+                    );
                 });
 
                 //TTS in question headers
                 $("audio.mod_minilesson_itemttsaudio").each(function () {
                     var that = this;
-                    polly.fetch_polly_url($(this).data('text'), $(this).data('ttsoption'), $(this).data('voice')).then(function (audiourl) {
+                    if (that.src !== '') {
+                        return;
+                    }
+                    polly.fetch_polly_url(
+                        $(this).data('text'),
+                        $(this).data('ttsoption'),
+                        $(this).data('voice')
+                    ).then(function (audiourl) {
                         $(that).attr("src", audiourl);
                     });
                 });
@@ -237,7 +112,8 @@ define(
                     var innerclass, innerhtml, html = "";
                     slice.forEach(function (i) {
                         innerclass = i < current ? "minilesson_quiz_progress_completed" : "minilesson_quiz_progress_incompleted";
-                        innerhtml = (i !== (slice.length - 1)) ? "<div class='" + innerclass + "' style='width: " + itemWidth + "%; '></div>" : "";
+                        innerhtml = (i !== (slice.length - 1)) ?
+                        "<div class='" + innerclass + "' style='width: " + itemWidth + "%; '></div>" : "";
                         if (i === current) {
                             html += "<div class='minilesson_quiz_progress_current'>";
                         }
@@ -264,8 +140,12 @@ define(
                         if (i === current) {
                             html += "<div class='minilesson_quiz_progress_current'>";
                         }
-                        html += "<div class='minilesson_quiz_progress_item " + (i === current ? 'minilesson_quiz_progress_item_current' : '') + " " + (i < current ? 'minilesson_quiz_progress_item_completed' : '') + "'>" + (i < current ? '<i class="fa fa-check"></i>' : i + 1) + "</div>";
-                        innerclass = (i === lastvalue && i < total - 2) ? "minilesson_quiz_progress_dashedline" : i < current ? "minilesson_quiz_progress_completed" : "minilesson_quiz_progress_incompleted";
+                        html += "<div class='minilesson_quiz_progress_item " +
+                        (i === current ? 'minilesson_quiz_progress_item_current' : '') + " " +
+                        (i < current ? 'minilesson_quiz_progress_item_completed' : '') + "'>" +
+                        (i < current ? '<i class="fa fa-check"></i>' : i + 1) + "</div>";
+                        innerclass = (i === lastvalue && i < total - 2) ? "minilesson_quiz_progress_dashedline" :
+                        i < current ? "minilesson_quiz_progress_completed" : "minilesson_quiz_progress_incompleted";
                         innerhtml = "<div class='" + innerclass + "' style='width: " + itemWidth + "%; '></div>";
                         if (i === current) {
                             html += "</div>";
@@ -307,31 +187,6 @@ define(
                     //show the question
 
                     dd.showStep($("#" + nextitem.uniqueid + "_container"), nextindex);
-                    //any per question type init that needs to occur can go here
-                    switch (nextitem.type) {
-                        case def.qtype_speechcards:
-                            //speechcards.init(nextindex, nextitem, dd);
-                            break;
-                        case def.qtype_dictation:
-                        case def.qtype_dictationchat:
-                        case def.qtype_multichoice:
-                        case def.qtype_multiaudio:
-                        case def.qtype_listenrepeat:
-                        case def.qtype_smartframe:
-                        case def.qtype_shortanswer:
-                        case def.qtype_spacegame:
-                        case def.qtype_fluency:
-                        case def.qtype_freespeaking:
-                        case def.qtype_freewriting:
-                        case def.qtype_passagereading:
-                        case def.qtype_h5p:
-                        case def.qtype_conversation:
-                        case def.qtype_compquiz:
-                        case def.qtype_audiochat:
-                        case def.qtype_slides:
-                        case def.qtype_fiction:
-                        default:
-                    }//end of nextitem switch
                 } else {
                     //just reload and re-fetch all the data to display
                     $(".minilesson_nextbutton").prop("disabled", true);
@@ -418,13 +273,21 @@ define(
                     $splashscreen.on('click', '[data-action="startmodule"]', () => $container.trigger("showElement"));
                     return;
                 }
-                $container.trigger("showElement");
+                Promise.allSettled(this.loadpromises).then(() => $container.trigger("showElement"));
             },
 
             start_quiz: function () {
-                const resumeindex = this.stepresults.length;
+                var resumeindex = this.stepresults.length;
+                const quizlength = this.quizdata.length;
+
+                // If an item had been removed shortening the lesson, we start from the beginning
+                if (resumeindex >= quizlength) {
+                    resumeindex = 0;
+                }
+
                 const $container = $("#" + this.quizdata[resumeindex].uniqueid + "_container");
                 this.showStep($container, resumeindex);
+
             },
 
             //this function is overridden by the calling class

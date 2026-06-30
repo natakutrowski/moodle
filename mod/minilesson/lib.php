@@ -32,7 +32,6 @@
 use mod_minilesson\aigen_contextform;
 use mod_minilesson\constants;
 use mod_minilesson\local\formelement\ttsaudio;
-use mod_minilesson\local\itemtype\item_audiochat;
 use mod_minilesson\translate_form;
 use mod_minilesson\utils;
 
@@ -74,8 +73,8 @@ function minilesson_supports($feature)
             } else {
                 return null;
             }
-            // FEATURE_MOD_OTHERPURPOSE  - wont be defined for < 5.1. so we hard code it.
-            // If it is defined then interactivecontent  and assessment will also be  defined.
+        // FEATURE_MOD_OTHERPURPOSE  - wont be defined for < 5.1. so we hard code it.
+        // If it is defined then interactivecontent  and assessment will also be  defined.
         case "mod_otherpurpose":
             return "assessment";
 
@@ -195,8 +194,11 @@ function minilesson_reset_userdata($data)
             minilesson_reset_gradebook($data->courseid);
         }
 
-        $status[] = ['component' => $componentstr,
-        'item' => get_string('deletealluserdata', constants::M_COMPONENT), 'error' => false];
+        $status[] = [
+            'component' => $componentstr,
+            'item' => get_string('deletealluserdata', constants::M_COMPONENT),
+            'error' => false
+        ];
     }
 
     // Updating dates - shift may be negative too.
@@ -599,6 +601,10 @@ function minilesson_delete_instance($id)
     }
 
     // Delete any dependent records here #.
+    $DB->delete_records(constants::M_ATTEMPTSTABLE, ['moduleid' => $minilesson->id]);
+    $DB->delete_records(constants::M_QTABLE, ['minilesson' => $minilesson->id]);
+    $DB->delete_records(constants::M_TEMPL_USAGES_TABLE, ['minilessonid' => $minilesson->id]);
+    $DB->delete_records(constants::M_MEDIA_CACHE_TABLE, ['minilesson' => $minilesson->id]);
 
     $DB->delete_records(constants::M_TABLE, ['id' => $minilesson->id]);
 
@@ -1123,12 +1129,28 @@ function mod_minilesson_get_fontawesome_icon_map()
  */
 function mod_minilesson_cm_info_dynamic(cm_info $cm)
 {
-    global $USER, $DB;
+    $starttime = 0;
+    if (mod_minilesson_perf_enabled()) {
+        $starttime = microtime(true);
+        mod_minilesson_perf_accumulate('cm_info_dynamic_calls', 1);
+    }
 
-    $moduleinstance = $DB->get_record('minilesson', ['id' => $cm->instance], '*', MUST_EXIST);
-    if (method_exists($cm, 'override_customdata')) {
-        $cm->override_customdata('duedate', $moduleinstance->viewend);
-        $cm->override_customdata('allowsubmissionsfromdate', $moduleinstance->viewstart);
+    if (!method_exists($cm, 'override_customdata')) {
+        if ($starttime) {
+            mod_minilesson_perf_accumulate('cm_info_dynamic_time_ms', (microtime(true) - $starttime) * 1000);
+        }
+        return;
+    }
+
+    if (isset($cm->customdata['duedate'])) {
+        $cm->override_customdata('duedate', (int)$cm->customdata['duedate']);
+    }
+    if (isset($cm->customdata['allowsubmissionsfromdate'])) {
+        $cm->override_customdata('allowsubmissionsfromdate', (int)$cm->customdata['allowsubmissionsfromdate']);
+    }
+
+    if ($starttime) {
+        mod_minilesson_perf_accumulate('cm_info_dynamic_time_ms', (microtime(true) - $starttime) * 1000);
     }
 }
 /**
@@ -1142,7 +1164,16 @@ function minilesson_get_coursemodule_info($coursemodule)
 {
     global $DB;
 
+    $starttime = 0;
+    if (mod_minilesson_perf_enabled()) {
+        $starttime = microtime(true);
+        mod_minilesson_perf_accumulate('get_coursemodule_info_calls', 1);
+    }
+
     if (!$moduleinstance = $DB->get_record('minilesson', ['id' => $coursemodule->instance], '*')) {
+        if ($starttime) {
+            mod_minilesson_perf_accumulate('get_coursemodule_info_time_ms', (microtime(true) - $starttime) * 1000);
+        }
         return false;
     }
     $result = new cached_cm_info();
@@ -1161,7 +1192,50 @@ function minilesson_get_coursemodule_info($coursemodule)
 
     $result->customdata['duedate'] = $moduleinstance->viewend;
     $result->customdata['allowsubmissionsfromdate'] = $moduleinstance->viewstart;
+
+    if ($starttime) {
+        mod_minilesson_perf_accumulate('get_coursemodule_info_time_ms', (microtime(true) - $starttime) * 1000);
+    }
+
     return $result;
+}
+
+function mod_minilesson_perf_enabled(): bool
+{
+    global $CFG;
+    return !empty($CFG->minilesson_perflog);
+}
+
+function mod_minilesson_perf_accumulate(string $key, float $value): void
+{
+    static $metrics = [];
+    static $registered = false;
+
+    $metrics[$key] = ($metrics[$key] ?? 0) + $value;
+
+    if ($registered) {
+        return;
+    }
+
+    $registered = true;
+
+    register_shutdown_function(function () use (&$metrics) {
+        if (empty($metrics)) {
+            return;
+        }
+
+        $summary = [
+            'request' => $_SERVER['REQUEST_METHOD'] . ' ' . ($_SERVER['REQUEST_URI'] ?? ''),
+            'script' => $_SERVER['SCRIPT_NAME'] ?? '',
+            'sapi' => PHP_SAPI,
+            'userid' => $GLOBALS['USER']->id ?? 0,
+            'metrics' => array_map(function ($v) {
+                return round($v, 3);
+            }, $metrics),
+        ];
+
+        error_log('mod_minilesson_perf ' . json_encode($summary));
+    });
 }
 
 /**
@@ -1257,33 +1331,60 @@ function minilesson_output_fragment_preview_slides($args)
 
     $testitem = new stdClass();
     $testitem->inajax = AJAX_SCRIPT;
-    $testitem->slidesmarkdown = preg_replace_callback(
-        '/!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/',
-        function ($matches) use ($imageserveurl) {
-            $filename = trim($matches['filename']);
+    $slidescontenttype = $formdata[\minilessonitem_slides\itemtype::CONTENTTYPE] ?? \minilessonitem_slides\itemtype::CONTENTTYPE_MARKDOWN;
+    $slidescontent = $formdata[\minilessonitem_slides\itemtype::MARKDOWN];
 
-            // Skip if it's already a full URL (http/https).
-            if (preg_match('/^https?:\/\//', $filename)) {
-                return $matches[0];
-            }
+    if ($slidescontenttype == \minilessonitem_slides\itemtype::CONTENTTYPE_MARKDOWN) {
+        $testitem->slidesmarkdown = preg_replace_callback(
+            '/!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/',
+            function ($matches) use ($imageserveurl) {
+                $filename = trim($matches['filename']);
 
-            // Add base path (and escape spaces if needed).
-            $newsrc = str_replace('{filename}', rawurlencode($filename), urldecode($imageserveurl));
+                // Skip if it's already a full URL (http/https).
+                if (preg_match('/^https?:\/\//', $filename)) {
+                    return $matches[0];
+                }
 
-            // Replace only the filename part.
-            return str_replace($filename, $newsrc, $matches[0]);
-        },
-        $formdata[constants::SLIDES_MARKDOWN]
-    );
+                // Add base path (and escape spaces if needed).
+                $newsrc = str_replace('{filename}', rawurlencode($filename), urldecode($imageserveurl));
 
-    $testitem->selectedtheme = $formdata[constants::SLIDETHEME];
-    $testitem->selectedfontsize = $formdata[constants::SLIDEFONTSIZE];
+                // Replace only the filename part.
+                return str_replace($filename, $newsrc, $matches[0]);
+            },
+            $slidescontent
+        );
 
-    // Standardize markdown output, applying layout formatting, before rendering the preview template.
-    $testitem->slidesmarkdown = \mod_minilesson\local\itemtype\item_slides::sanitize_markdown($testitem->slidesmarkdown);
-    $testitem->slidesmarkdown = \mod_minilesson\local\itemtype\item_slides::process_layout_markdown($testitem->slidesmarkdown);
+        // Standardize markdown output, applying layout formatting, before rendering the preview template.
+        $testitem->slidesmarkdown = \minilessonitem_slides\itemtype::sanitize_markdown($testitem->slidesmarkdown);
+        $testitem->slidesmarkdown = \minilessonitem_slides\itemtype::process_layout_markdown($testitem->slidesmarkdown);
+    } else {
+        // HTML mode.
+        $testitem->slidesmarkdown = preg_replace_callback(
+            '/(src|data-background-image)=\"(?<filename>.*?)\"/',
+            function ($matches) use ($imageserveurl) {
+                $filename = trim($matches['filename']);
 
-    return $OUTPUT->render_from_template(constants::M_COMPONENT . '/slidesinner', $testitem);
+                // Skip if it's already a full URL (http/https).
+                if (preg_match('/^https?:\/\//', $filename)) {
+                    return $matches[0];
+                }
+
+                // Add base path (and escape spaces if needed).
+                $newsrc = str_replace('{filename}', rawurlencode($filename), urldecode($imageserveurl));
+
+                // Replace only the filename part.
+                return str_replace($filename, $newsrc, $matches[0]);
+            },
+            $slidescontent
+        );
+    }
+
+    $testitem->slidescontenttype = $slidescontenttype;
+    $testitem->ishtml = $slidescontenttype == \minilessonitem_slides\itemtype::CONTENTTYPE_HTML;
+    $testitem->selectedtheme = $formdata[\minilessonitem_slides\itemtype::SLIDETHEME];
+    $testitem->selectedfontsize = $formdata[\minilessonitem_slides\itemtype::SLIDEFONTSIZE];
+
+    return $OUTPUT->render_from_template('minilessonitem_slides' . '/slidesinner', $testitem);
 }
 
 /**
@@ -1301,26 +1402,6 @@ function minilesson_output_fragment_templates($args)
     $filters = !empty($args->filters) ? json_decode($args->filters, true) : [];
     $renderable = new mod_minilesson\output\aigentemplates($cm, $filters);
     return $OUTPUT->render($renderable);
-}
-
-/**
- * Fetches a student's submission in a previous freeewriting or freespeaking in the current attempt
- * for passing into an audiochat session. This must be done via AJAX because its not available until
- * after the attempt has started.
- * @param array $args
- * @return stdClass|null
- */
-function minilesson_output_fragment_audiochat_fetchstudentsubmission($args)
-{
-    global $DB;
-    $args = (object) $args;
-    $cm = $DB->get_record('course_modules', ['id' => $args->context->instanceid], '*', MUST_EXIST);
-    $minilesson = $DB->get_record(constants::M_TABLE, ['id' => $cm->instance], '*', MUST_EXIST);
-    $itemrecord = $DB->get_record(constants::M_QTABLE, ['id' => $args->itemid]);
-
-    $theaudiochat = new item_audiochat($itemrecord, $minilesson, $args->context);
-    $studentsubmission = $theaudiochat->fetch_student_submission();
-    return $studentsubmission;
 }
 
 /**

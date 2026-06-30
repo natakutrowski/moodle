@@ -1326,7 +1326,7 @@ $string['scatterdefrtl_desc'] = 'Если отмечено, определени
 $string['aigentemplatename:narrativefiction_withpics'] = 'Интерактивная художественная история (с изображениями)';
 $string['aigentemplatedescription:fiction_nopics'] = 'Введите подробный план истории, чтобы создать текстовую интерактивную историю (с одним постерным изображением).';
 $string['aigentemplatedescription:narrativefiction_withpics'] = 'Введите подробный план истории, чтобы создать интерактивную историю с меньшим количеством выборов, большим количеством повествования и изображениями.';
-$string['noitemyet'] = 'В этом мини-уроке пока нет элементов. Нажмите кнопку «Добавить элемент» и выберите тип, чтобы начать.';
+
 $string['slides:fontsmallest'] = 'Самый маленький';
 $string['slides:fontlargest'] = 'Самый большой';
 
@@ -1337,3 +1337,229 @@ $string['generate'] = 'Создать';
 
 $string['audiochatstudent'] = 'Студент';
 $string['audiochataiassistant'] = 'ИИ-ассистент';
+
+$string['shadow'] = 'Теневое повторение видео';
+$string['cards'] = 'Карточки';
+$string['error:invalidyoutubeurl'] = 'URL-адрес YouTube или идентификатор видео недействителен.';
+$string['error:noyoutubetranscript'] = 'Для этого видео YouTube отсутствуют субтитры.';
+$string['error:youtubefetchfailed'] = 'Не удалось получить данные с YouTube. Пожалуйста, попробуйте позже.';
+$string['details'] = 'Подробности';
+$string['aigentemplate_itemtypes'] = 'Типы элементов';
+$string['aigentemplate_tags'] = 'Теги';
+$string['gapfill_shuffleorder'] = 'Перемешать порядок предложений';
+$string['gapfill_shuffleorder_desc'] = 'Если включено, предложения будут показываться ученику в случайном порядке. Каждое предложение сохранит соответствующие ему изображение и аудио.';
+$string['listeninggapfillitemsdesc'] = 'Введите список элементов в текстовое поле ниже. Каждый элемент должен быть с новой строки. Пропущенные буквы необходимо заключить в квадратные скобки: [ ]. Формат:<br>Текст | подсказка<br>Например: This is my d[og].| Обычное домашнее животное.';
+$string['aigrade_feedback_language_help'] = 'Определяет язык, на котором будет возвращаться обратная связь. По умолчанию используются родной язык и изучаемый язык, указанные в настройках этого мини-урока. Однако этот выбор может быть переопределён, если пользователь указал собственный родной язык.';
+$string['enablenativelanguage_details'] = 'Если включено, учащийся сможет выбрать свой родной язык. В этом случае он заменит язык обратной связи, который ИИ использует при выдаче результатов.';
+$string['generatingitemdata'] = 'Создание элемента: {$a}';
+$string['aigentemplatename:passagereading'] = 'Чтение и говорение (сгенерировать рассказ)';
+$string['aigentemplatename:youtubefinalelesson'] = 'Финал YouTube (прослушивание и говорение)';
+$string['aigentemplatename:wordpractice'] = 'Практика слов v1';
+$string['aigentemplatename:wordpractice2'] = 'Практика слов v2';
+$string['aigentemplatename:audiostory'] = 'Прослушивание истории (сгенерировать рассказ)';
+$string['aigentemplatename:reading_aic_passageupload'] = 'Чтение + ИИ-чат (загруженный текст)';
+$string['aigentemplatename:keywords_to_ws_sc_sg'] = 'Практика слов v3';
+$string['aigentemplatename:dialog_multichoice'] = 'Прослушайте 4 диалога';
+$string['aigentemplatename:image_slides'] = 'Слайды с изображениями (5)';
+$string['aigentemplatename:choose_best_reply'] = 'Выберите правильный ответ.';
+$string['aigentemplatename:fiction_withpics'] = 'Интерактивная история (с изображениями)';
+$string['aigentemplatename:fiction_nopics'] = 'Интерактивная история (без изображений)';
+$string['aigentemplatename:narrativefiction_withpics'] = 'Повествовательная история (с изображениями)';
+$string['aigentemplatename:vocabcards'] = 'Карточки слов';
+$string['aigentemplatedescription:youtubefinalelesson'] = 'Урок основан на сюжете видео YouTube. Создаётся связанная, но упрощённая история, на основе которой строятся задания на понимание и говорение. В конце ученик смотрит оригинальное видео, которое изучал.';
+$string['aigentemplatedescription:wordpractice'] = 'Введите список слов (5) и тему. Poodll создаст упражнение с карточками слов, заданиями на аудирование и ввод пропущенных слов, космической игрой и заданием на свободное письмо.';
+$string['aigentemplatedescription:set_of_slides'] = 'Этот шаблон создаст обучающие слайды на основе описания темы, которую вы хотите преподавать.';
+$string['aigentemplatedescription:reading_aic_passagegen'] = 'Введите тему и уровень учащихся. ИИ создаст текст для чтения, который будет использоваться в упражнении по чтению вслух, а затем в аудиочате по содержанию текста.';
+$string['aigentemplatedescription:reading_aic_passageupload'] = 'Вставьте текст для чтения и 4 вопроса с коротким ответом. Они будут использованы в упражнении по чтению, а затем в аудиочате по содержанию текста.';
+$string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Введите от 4 до 10 ключевых слов. Они будут использованы для создания набора карточек слов, упражнения Word Shuffle, упражнения Scatter и элементов для Space Game.';
+$string['aigentemplatedescription:dialog_multichoice'] = 'Введите 4 диалога. На их основе будут созданы 4 вопроса с выбором ответа, где варианты представлены изображениями, соответствующими текущему воспроизводимому диалогу. Диалоги должны быть в формате TTS Dialog. Например: A) I like toast. [новая строка] B) Me too.';
+$string['aigentemplatedescription:image_slides'] = 'Введите 5 описаний изображений и стиль изображений, чтобы получить 5 слайдов.';
+$string['aigentemplatedescription:choose_best_reply'] = 'Ученик прослушивает 10 коротких диалогов и должен выбрать лучший следующий ответ из трёх предложенных вариантов. Каждый вопрос сопровождается изображением. Упражнение основано на разделе аудирования экзамена Eiken Level 3. Для каждого диалога необходимо указать место действия и ситуацию (обычно проблему). Например: «два друга на пляже, один из них потерял кошелёк».';
+$string['aigentemplatedescription:fiction_withpics'] = 'Интерактивная история с изображениями.';
+$string['aigentemplatedescription:fiction_nopics'] = 'Интерактивная история без изображений, кроме вступительного экрана.';
+$string['aigentemplatedescription:narrativefiction_withpics'] = 'Интерактивная история с меньшим количеством вариантов выбора, более развёрнутым сюжетом и изображениями.';
+$string['aigentemplatedescription:vocabcards'] = 'Набор карточек словаря. Введите список слов или выражений, разделённых запятыми, и родной язык учащихся. Будут созданы карточки со словом/выражением, переводом, примером предложения и изображением.';
+$string['aigentemplatename:youtubefinale_freewrite'] = 'Финал YouTube (прослушивание и свободное письмо)';
+$string['aigentemplatedescription:youtubefinale_freewrite'] = 'Урок основан на сюжете видео YouTube. Создаётся связанная, но упрощённая история, на основе которой строятся задания на понимание и письмо.';
+$string['aigentemplatename:youtubefinale_freespeak'] = 'Финал YouTube (прослушивание и свободная речь)';
+$string['aigentemplatedescription:youtubefinale_freespeak'] = 'Урок основан на сюжете видео YouTube. Создаётся связанная, но упрощённая история, на основе которой строятся задания на понимание и говорение.';
+$string['aigentemplatename:passagegapfill_generate'] = 'Заполнение пропусков в тексте (сгенерировать текст)';
+$string['aigentemplatedescription:passagegapfill_generate'] = 'Введите список ключевых слов, уровень языка и тему. ИИ создаст текст и несколько пропусков, которые учащиеся должны будут заполнить.';
+$string['aigentemplatename:fluency_upload'] = 'Беглость речи (загрузить предложения)';
+$string['aigentemplatedescription:fluency_upload'] = 'Создайте упражнение на беглость речи, предоставив до 10 предложений, которые учащиеся будут произносить вслух. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:passagereading_generate'] = 'Чтение текста (сгенерировать текст)';
+$string['aigentemplatedescription:passagereading_generate'] = 'Введите список ключевых слов, уровень языка и тему. ИИ создаст текст для упражнения по чтению вслух.';
+$string['aigentemplatename:freespeaking'] = 'Свободная речь';
+$string['aigentemplatedescription:freespeaking'] = 'Упражнение на свободную речь по выбранной теме.';
+$string['aigentemplatename:wordshuffle_generate'] = 'Word Shuffle (сгенерировать предложения)';
+$string['aigentemplatedescription:wordshuffle_generate'] = 'Создайте упражнение Word Shuffle, введя от 4 до 10 ключевых слов. На их основе будут созданы предложения и изображения к каждому предложению.';
+$string['aigentemplatename:wordshuffle_keywords_generate'] = 'Выберите правильное слово (сгенерировать предложения)';
+$string['aigentemplatedescription:wordshuffle_keywords_generate'] = 'Создайте упражнение на выбор правильного слова с использованием Word Shuffle. Введите от 4 до 10 ключевых слов. Для каждого будет создано предложение с пропуском и четырьмя вариантами ответа, а также перевод на родной язык и изображение.';
+$string['aigentemplatename:scatter'] = 'Scatter';
+$string['aigentemplatedescription:scatter'] = 'Введите от 4 до 10 ключевых слов или выражений. На их основе будет создано упражнение Scatter с карточками и переводом на родной язык пользователя.';
+$string['aigentemplatename:spacegame'] = 'Космическая игра';
+$string['aigentemplatedescription:spacegame'] = 'Введите от 4 до 10 ключевых слов или выражений. На их основе будет создано упражнение Space Game с определениями на родном языке пользователя.';
+$string['aigentemplatename:multichoice_image'] = 'Множественный выбор (варианты с изображениями)';
+$string['aigentemplatedescription:multichoice_image'] = 'Вопрос с выбором ответа по изображениям, предназначенный для проверки понимания текста. Необходимо указать текст, уровень языка учащегося, краткое описание сцены/контекста и стиль изображения.';
+$string['aigentemplatename:freewriting'] = 'Свободное письмо';
+$string['aigentemplatedescription:freewriting'] = 'Упражнение на свободное письмо по указанной теме.';
+$string['aigentemplatename:listeninggapfill_generate'] = 'Заполнение пропусков на слух (сгенерировать предложения)';
+$string['aigentemplatedescription:listeninggapfill_generate'] = 'Создаёт упражнение Listening GapFill на основе списка ключевых слов (максимум 30).';
+$string['aigentemplatename:speakinggapfill_generate'] = 'Заполнение пропусков в речи (сгенерировать предложения)';
+$string['aigentemplatedescription:speakinggapfill_generate'] = 'Создаёт упражнение Speaking GapFill на основе списка ключевых слов (максимум 30).';
+$string['aigentemplatename:typinggapfill_generate'] = 'Заполнение пропусков при вводе текста (сгенерировать предложения)';
+$string['aigentemplatedescription:typinggapfill_generate'] = 'Создаёт упражнение Typing GapFill на основе списка ключевых слов (максимум 30).';
+$string['aigentemplatename:gapfill_set'] = 'Набор GapFill';
+$string['aigentemplatedescription:gapfill_set'] = 'Создаёт полный набор упражнений Listening, Speaking и Typing GapFill на основе списка слов (максимум 30).';
+$string['aigentemplatename:audiostory_generate'] = 'Аудиоистория (сгенерировать рассказ)';
+$string['aigentemplatedescription:audiostory_generate'] = 'Введите тему, уровень языка учащихся и тип истории. ИИ подготовит рассказ и изображения, которые будут представлены в виде короткого озвученного слайд-шоу с использованием синтеза речи.';
+$string['aigentemplatename:shadow'] = 'Shadow';
+$string['aigentemplatedescription:shadow'] = 'Введите URL или идентификатор видео YouTube, и оно будет преобразовано в интерактивное упражнение по технике Shadowing.';
+$string['aigentemplatename:listenandspeak_generate'] = 'Слушай и говори (сгенерировать предложения)';
+$string['aigentemplatedescription:listenandspeak_generate'] = 'Введите тему и уровень языка. Будет создано упражнение Listen and Speak из 5 предложений.';
+$string['aigentemplatename:dictation_generate'] = 'Диктант (сгенерировать предложения)';
+$string['aigentemplatedescription:dictation_generate'] = 'Введите тему и уровень языка. Будет создан диктант из 5 предложений.';
+$string['aigentemplatename:dictationchat_generate'] = 'Диктант-чат (сгенерировать предложения)';
+$string['aigentemplatedescription:dictationchat_generate'] = 'Введите тему и уровень языка. Будет создано упражнение Dictation Chat из 5 предложений.';
+$string['aigentemplatename:shortanswer'] = 'Краткий ответ';
+$string['aigentemplatedescription:shortanswer'] = 'Введите тему и уровень языка. Будет создан вопрос с кратким ответом.';
+$string['aigentemplatename:passagegapfill_upload'] = 'Заполнение пропусков в тексте (загрузить текст)';
+$string['aigentemplatedescription:passagegapfill_upload'] = 'Введите текст. ИИ автоматически добавит в него несколько пропусков для заполнения учащимися.';
+$string['aigentemplatename:passagegapfill_upload_keywords'] = 'Заполнение пропусков в тексте (загрузить текст и ключевые слова)';
+$string['aigentemplatedescription:passagegapfill_upload_keywords'] = 'Введите текст и список ключевых слов. ИИ автоматически добавит в текст несколько пропусков для заполнения учащимися.';
+$string['aigentemplatename:passagereading_upload'] = 'Чтение текста (загрузить текст)';
+$string['aigentemplatedescription:passagereading_upload'] = 'Загрузите текст. ИИ подготовит на его основе упражнение по чтению.';
+$string['aigentemplatename:wordshuffle_upload'] = 'Word Shuffle (загрузить предложения)';
+$string['aigentemplatedescription:wordshuffle_upload'] = 'Создайте упражнение Word Shuffle, предоставив от 4 до 10 предложений. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:listenandspeak_upload'] = 'Слушай и говори (загрузить предложения)';
+$string['aigentemplatedescription:listenandspeak_upload'] = 'Создайте упражнение Listen and Speak, предоставив до 5 предложений. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:dictation_upload'] = 'Диктант (загрузить предложения)';
+$string['aigentemplatedescription:dictation_upload'] = 'Создайте диктант, предоставив до 5 предложений.';
+$string['aigentemplatename:dictationchat_upload'] = 'Диктант-чат (загрузить предложения)';
+$string['aigentemplatedescription:dictationchat_upload'] = 'Создайте упражнение Dictation Chat, предоставив до 5 предложений. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:audiostory_upload'] = 'Аудиоистория (загрузить рассказ)';
+$string['aigentemplatedescription:audiostory_upload'] = 'Введите текст рассказа. ИИ подготовит короткое озвученное слайд-шоу с изображениями, используя синтез речи для озвучивания истории.';
+$string['aigentemplatename:fluency_generate'] = 'Беглость речи (сгенерировать предложения)';
+$string['aigentemplatedescription:fluency_generate'] = 'Создайте упражнение на беглость речи до 10 предложений, указав ключевые слова и уровень языка пользователя. Учащиеся будут тренироваться произносить предложения вслух. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:typinggapfill_upload'] = 'Typing GapFill (загрузить предложения)';
+$string['aigentemplatedescription:typinggapfill_upload'] = 'Создаёт упражнение Typing GapFill на основе до 30 предоставленных предложений. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:speakinggapfill_upload'] = 'Speaking GapFill (загрузить предложения)';
+$string['aigentemplatedescription:speakinggapfill_upload'] = 'Создаёт упражнение Speaking GapFill на основе до 30 предоставленных предложений. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:listeninggapfill_upload'] = 'Listening GapFill (загрузить предложения)';
+$string['aigentemplatedescription:listeninggapfill_upload'] = 'Создаёт упражнение Listening GapFill на основе до 30 предоставленных предложений. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:reading_speaking_upload'] = 'Чтение и говорение (загрузить рассказ и ключевые слова)';
+$string['aigentemplatedescription:reading_speaking_upload'] = 'Предоставьте короткий текст-рассказ и несколько ключевых слов из него. ИИ подготовит простую озвучку с помощью синтеза речи, а также задания на чтение и говорение по этой истории.';
+$string['aigentemplatename:listentothestory_upload'] = 'Прослушивание истории (загрузить рассказ)';
+$string['aigentemplatedescription:listentothestory_upload'] = 'Загрузите короткий рассказ и укажите уровень языка учащихся. ИИ подготовит озвученную аудиоисторию с изображениями, а также задания на аудирование и говорение.';
+$string['aigentemplatename:wordshuffle_upload_markup'] = 'Word Shuffle (загрузить с разметкой)';
+$string['aigentemplatedescription:wordshuffle_upload_markup'] = 'Создайте упражнение Word Shuffle, предоставив:
+ i) 4–10 предложений, уже размеченных словами для перемешивания, подсказками и отвлекающими вариантами.
+ii) Те же предложения без разметки, подсказок и отвлекающих вариантов.
+ Для каждого предложения в упражнении Word Shuffle будет создано изображение.';
+$string['aigentemplatename:listeninggapfill_upload_markup'] = 'Listening GapFill (загрузить предложения с разметкой)';
+$string['aigentemplatedescription:listeninggapfill_upload_markup'] = 'Создайте упражнение Listening GapFill, предоставив:
+ i) 1–30 предложений, уже размеченных словами-пропусками и подсказками (необязательно).
+ii) Те же предложения без разметки и подсказок.
+ Для каждого предложения в упражнении Listening GapFill будет создано изображение.';
+$string['aigentemplatename:speakinggapfill_upload_markup'] = 'Speaking GapFill (загрузить предложения с разметкой)';
+$string['aigentemplatedescription:speakinggapfill_upload_markup'] = 'Создайте упражнение Speaking GapFill, предоставив:
+ i) 1–30 предложений, уже размеченных словами-пропусками и подсказками (необязательно).
+ii) Те же предложения без разметки и подсказок.
+ Для каждого предложения в упражнении Speaking GapFill будет создано изображение.';
+$string['aigentemplatename:typinggapfill_upload_markup'] = 'Typing GapFill (загрузить предложения с разметкой)';
+$string['aigentemplatedescription:typinggapfill_upload_markup'] = 'Создайте упражнение Typing GapFill, предоставив:
+ i) 1–30 предложений, уже размеченных словами-пропусками и подсказками (необязательно).
+ii) Те же предложения без разметки и подсказок.
+ Для каждого предложения в упражнении Typing GapFill будет создано изображение.';
+$string['aigentemplatename:listenandspeak_upload_markup'] = 'Слушай и говори (загрузить предложения с разметкой)';
+$string['aigentemplatedescription:listenandspeak_upload_markup'] = 'Создайте упражнение Listen and Speak, предоставив до 5 предложений. При необходимости также можно указать «правильные ответы» и «отображаемые предложения» для случаев, когда аудиоподсказка для пользователя отличается от того, что он видит или должен произнести в ответ. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:spacegame_upload'] = 'Космическая игра (загрузить)';
+$string['aigentemplatedescription:spacegame_upload'] = 'Введите до десяти пар для сопоставления. Они будут использованы для создания упражнения Space Game, где учащиеся сопоставляют пары, стреляя по правильному пришельцу.';
+$string['aigentemplatename:scatter_upload'] = 'Scatter (загрузить)';
+$string['aigentemplatedescription:scatter_upload'] = 'Введите до десяти пар для сопоставления. Они будут использованы для создания упражнения Scatter, где учащиеся сопоставляют пары, нажимая на правильные карточки.';
+$string['aigentemplatename:vocabcards_upload_markup'] = 'Карточки слов (загрузить с разметкой)';
+$string['aigentemplatedescription:vocabcards_upload_markup'] = 'Набор карточек словаря. Каждая карточка может содержать до 3 строк текста: обычно ключевое слово | перевод ключевого слова | пример предложения с ключевым словом.
+Для каждой карточки будет создано изображение.';
+$string['aigentemplatename:fluency_upload_markup'] = 'Беглость речи (загрузить предложения с разметкой)';
+$string['aigentemplatedescription:fluency_upload_markup'] = 'Создайте упражнение на беглость речи, предоставив до 10 предложений, которые учащиеся будут тренироваться произносить вслух. Для каждого предложения будет создано изображение.';
+$string['aigentemplatename:freewriting_upload'] = 'Свободное письмо (загрузить вопрос)';
+$string['aigentemplatedescription:freewriting_upload'] = 'Введите вопрос или тему, по которой учащиеся будут писать.';
+$string['aigentemplatename:freespeaking_upload'] = 'Свободная речь (загрузить вопрос)';
+$string['aigentemplatedescription:freespeaking_upload'] = 'Введите вопрос или тему, по которой учащиеся будут говорить.';
+$string['aigentemplatename:audiochat_generate'] = 'Аудиочат (сгенерировать вопрос)';
+$string['aigentemplatedescription:audiochat_generate'] = 'Введите тему и уровень языка пользователя. ИИ сгенерирует вопрос для обсуждения, подходящий для беседы с учащимся.';
+$string['aigentemplatename:audiochat_upload'] = 'Аудиочат (загрузить вопрос для обсуждения)';
+$string['aigentemplatedescription:audiochat_upload'] = 'Введите вопрос для обсуждения, который будет использован в аудиочате между пользователем и ИИ.';
+$string['aigentemplatename:grammar_slides'] = 'Слайды с объяснением грамматики';
+$string['aigentemplatedescription:grammar_slides'] = 'Этот шаблон создаст набор слайдов для объяснения указанной грамматической темы. Изучаемый язык мини-урока будет использоваться для примеров, а выбранный вами язык инструкций — для объяснений.';
+$string['aigentemplatename:grammar_choosewords_v1'] = 'Урок грамматики (слайды + выбор слов V1)';
+$string['aigentemplatedescription:grammar_choosewords_v1'] = 'Укажите грамматическую тему, до 6 ключевых слов/выражений и язык инструкций. Будет создан урок со слайдами-объяснениями, упражнением на выбор слова и упражнением на ввод слова. Используйте этот шаблон для грамматических тем, где важен правильный выбор слова/выражения (например, «by» или «until»). В этом шаблоне варианты выбора слова должны быть одинаковыми для каждого предложения.';
+$string['aigentemplatename:grammar_shufflewords'] = 'Урок грамматики (слайды + перемешанные слова)';
+$string['aigentemplatedescription:grammar_shufflewords'] = 'Укажите грамматическую тему, ключевые слова и язык инструкций. Будет создан урок со слайдами-объяснениями, упражнением на расстановку слов в правильном порядке и упражнением на ввод слов. Используйте этот шаблон для грамматических тем, где важен порядок слов в предложении. Это также универсальный шаблон, который подходит для большинства наборов предложений.';
+$string['aigentemplatename:grammar_choosewords_v2'] = 'Урок грамматики (слайды + выбор слов V2)';
+$string['aigentemplatedescription:grammar_choosewords_v2'] = 'Укажите грамматическую тему, уровень языка и язык инструкций. Будет создан урок со слайдами-объяснениями, упражнением на выбор слова и упражнением на ввод слова (по 6 предложений в каждом). Используйте этот шаблон для грамматических тем, где важны состав выражения или форма слова (например, comparatives: “more X” vs “Xer”). В этом шаблоне варианты выбора слова должны отличаться для каждого предложения.';
+$string['processaigentask'] = 'Обработать задачу генерации AI-шаблона';
+$string['wordshuffle_shuffleorder'] = 'Перемешать порядок предложений';
+$string['wordshuffle_shuffleorder_desc'] = 'Если включено, наборы предложений будут показываться учащемуся в случайном порядке. Каждое предложение сохранит соответствующие ему изображение и аудио.';
+$string['cantchat'] = 'Чат НЕДОСТУПЕН. Чтобы использовать этот тип элемента, необходимо указать действительный ключ {$a} в административных настройках MiniLesson.';
+$string['freewriting:gradingprompt4'] = 'Пересказ истории — требуется краткое содержание истории (ai data1)';
+$string['freewriting:gradingprompt_dec4'] = 'Учащийся пересказывает историю. История: [{topic}]
+Давайте 2 балла за каждое грамматически правильное предложение, использованное учащимся в ответе. Давайте 1 балл, если предложение почти правильное.';
+$string['freewriting:feedbackprompt2'] = 'Описание изображения — требуется описание изображения (ai data1)';
+$string['freewriting:feedbackprompt3'] = 'Пересказ истории — требуется краткое содержание истории (ai data1)';
+$string['freewriting:feedbackprompt_dec3'] = 'Просто объясните основные грамматические ошибки. Предложите добавить элементы истории, которые учащийся не включил.';
+$string['freespeaking:gradingprompt3'] = 'Описание изображения — требуется описание изображения (topic)';
+$string['freespeaking:gradingprompt4'] = 'Пересказ истории — требуется краткое содержание истории (topic)';
+$string['freespeaking:gradingprompt_dec4'] = 'Учащийся пересказывает историю. История, которую он пересказывает: [{topic}]
+Давайте 2 балла за каждое грамматически правильное предложение, использованное учащимся в ответе. Давайте 1 балл, если предложение почти правильное.';
+$string['freespeaking:feedbackprompt2'] = 'Описание изображения — требуется описание изображения (topic)';
+$string['freespeaking:feedbackprompt3'] = 'Пересказ истории — требуется краткое содержание истории (topic)';
+$string['freespeaking:feedbackprompt_dec3'] = 'Просто объясните незначительные грамматические ошибки. Не комментируйте орфографию или пунктуацию. Предложите добавить элементы истории, которые учащийся не описал.';
+$string['defaulttargetlanguage'] = "Изучаемый язык по умолчанию";
+$string['defaultnativelanguage'] = "Родной язык по умолчанию";
+$string['templateagentonly'] = 'Только для агента (скрыто)';
+$string['templateagentonly_help'] = 'Если установлено значение «Да», этот шаблон будет скрыт на странице генерации ИИ, которую видят пользователи. Он останется доступным для агентов и для всех, кто использует его напрямую. Используйте это для шаблонов, предназначенных для автоматического/агентского использования или редко нужных пользователям.';
+$string['fiction:taptotranslate'] = 'Включить перевод по нажатию';
+$string['fiction:taptotranslate_desc'] = 'Если включено, в правом нижнем углу каждого текстового узла истории появляется значок перевода. При нажатии текст переводится на родной язык учащегося, и перевод показывается прямо под исходным текстом. Требуется браузер с поддержкой перевода на устройстве, например Chrome.';
+$string['fiction:taptranslatearia'] = 'Перевести этот текст';
+$string['targetwordcount_instructions'] = 'Если целевое количество слов больше 0, учащиеся будут терять баллы в той степени, в какой их
+общее количество слов меньше целевого количества слов';
+
+$string['geminiapikey_details'] = 'Ключ Gemini используется для AudioChat. В настоящее время он не требуется и не используется для других типов элементов.';
+$string['geminiapikey'] = 'API-ключ Gemini';
+$string['aihelper_modal_title'] = 'AI-помощник';
+$string['aihelper_modal_instruction'] = 'Создавайте или редактируйте контент в редакторе с помощью AI-помощника.';
+$string['aihelper_prompt_label'] = 'Чем я могу помочь?';
+$string['aihelper_prompt_placeholder'] = 'например: Создайте презентацию из 5 слайдов о круговороте воды...';
+$string['aihelper_placeholder_slides'] = 'например: Создайте презентацию из 5 слайдов о круговороте воды...';
+$string['aihelper_placeholder_fiction'] = 'например: Создайте историю из 15 узлов о дельфине, которого воспитали акулы, и который учится принимать свою непохожесть.';
+$string['aihelper_response_label'] = 'Ответ ИИ';
+$string['aihelper_generating'] = 'Создание контента...';
+$string['aihelper_generate_btn'] = 'Создать';
+$string['aihelper_apply_btn'] = 'Применить в редакторе';
+
+$string['completed'] = 'Завершено';
+$string['progress'] = 'Прогресс';
+$string['notfound'] = 'Не найдено';
+$string['jobnotfound'] = 'Задача с этим ID не найдена';
+$string['notaccess'] = 'У вас нет прав для просмотра статуса';
+
+// Account dashboard.
+$string['accountdashboard'] = 'Панель аккаунта';
+$string['audio'] = 'Аудио';
+$string['end'] = 'Окончание';
+$string['failedfetchsubreport'] = 'Не удалось получить отчёт по подписке';
+$string['maxmonth'] = 'Максимальный месяц';
+$string['ninety_days'] = '90 дней';
+$string['no_subscriptions'] = 'Нет подписок.';
+$string['oneeighty_days'] = '180 дней';
+$string['per_plugin'] = 'По плагинам (за последний год)';
+$string['per_recording_type'] = 'По типу записи';
+$string['poodll_users'] = 'Пользователи Poodll';
+$string['recording_min'] = 'Минуты записи';
+$string['recordings'] = 'Записи';
+$string['start'] = 'Начало';
+$string['subscription'] = 'Подписка';
+$string['thirty_days'] = '30 дней';
+$string['threehundredsixtyfive_days'] = '365 дней';
+$string['video'] = 'Видео';

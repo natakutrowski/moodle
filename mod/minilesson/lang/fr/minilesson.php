@@ -1360,3 +1360,262 @@ $string['generate'] = 'Générer';
 $string['audiochatstudent'] = 'Étudiant';
 $string['audiochataiassistant'] = 'Assistant IA';
 
+
+$string['shadow'] = 'Shadowing vidéo';
+$string['cards'] = 'Cartes';
+$string['error:invalidyoutubeurl'] = 'L’URL ou l’identifiant de la vidéo YouTube n’est pas valide.';
+$string['error:noyoutubetranscript'] = 'Aucun sous-titre n’est disponible pour cette vidéo YouTube.';
+$string['error:youtubefetchfailed'] = 'Impossible de récupérer les données depuis YouTube. Veuillez réessayer plus tard.';
+$string['details'] = 'Détails';
+$string['aigentemplate_itemtypes'] = 'Types d’activités';
+$string['aigentemplate_tags'] = 'Étiquettes';
+$string['gapfill_shuffleorder'] = 'Mélanger l’ordre des phrases';
+$string['gapfill_shuffleorder_desc'] = 'Si cette option est activée, l’ordre des phrases présenté à l’étudiant est aléatoire. Chaque phrase conserve son image et son audio associés.';
+$string['listeninggapfillitemsdesc'] = 'Saisissez la liste des éléments dans la zone de texte ci-dessous. Chaque élément doit être sur une nouvelle ligne. Les lettres manquantes doivent être entourées de crochets : [ ]. Le format est :<br>Texte | indice<br>Exemple : This is my d[og].| Un animal de compagnie courant.';
+$string['aigrade_feedback_language_help'] = 'Définit la langue dans laquelle les commentaires seront générés. Par défaut, la langue maternelle et la langue cible sont celles définies dans les paramètres de cette mini-leçon. Ce choix peut être remplacé si l’utilisateur a défini sa propre langue maternelle.';
+$string['enablenativelanguage_details'] = 'Si cette option est activée, l’étudiant peut choisir sa langue maternelle. Celle-ci remplacera la langue de retour par défaut utilisée par l’IA pour les commentaires.';
+$string['generatingitemdata'] = 'Génération de l’activité : {$a}';
+$string['aigentemplatename:passagereading'] = 'Lecture et expression orale (générer une histoire)';
+$string['aigentemplatename:youtubefinalelesson'] = 'Leçon finale YouTube (écouter et parler)';
+$string['aigentemplatename:wordpractice'] = 'Pratique du vocabulaire v1';
+$string['aigentemplatename:wordpractice2'] = 'Pratique du vocabulaire v2';
+$string['aigentemplatename:audiostory'] = 'Écouter une histoire (générer une histoire)';
+$string['aigentemplatename:reading_aic_passageupload'] = 'Lecture + Chat IA (texte importé)';
+$string['aigentemplatename:keywords_to_ws_sc_sg'] = 'Pratique du vocabulaire v3';
+$string['aigentemplatename:dialog_multichoice'] = 'Écouter 4 dialogues';
+$string['aigentemplatename:image_slides'] = 'Diaporama d’images (5)';
+$string['aigentemplatename:choose_best_reply'] = 'Choisir la bonne réponse';
+$string['aigentemplatename:fiction_withpics'] = 'Histoire interactive (avec images)';
+$string['aigentemplatename:fiction_nopics'] = 'Histoire interactive (sans images)';
+$string['aigentemplatename:narrativefiction_withpics'] = 'Histoire narrative (avec images)';
+$string['aigentemplatename:vocabcards'] = 'Cartes de vocabulaire';
+$string['aigentemplatedescription:youtubefinalelesson'] = 'Cette leçon est basée sur une vidéo YouTube. Une histoire simplifiée mais liée à la vidéo est générée, puis des activités de compréhension et d’expression orale sont créées. Enfin, l’étudiant visionne la vidéo originale étudiée.';
+$string['aigentemplatedescription:wordpractice'] = 'Saisissez une liste de 5 mots et un thème. Poodll créera une activité comprenant des cartes de vocabulaire, des exercices d’écoute avec saisie, un jeu spatial et une activité d’expression écrite libre.';
+$string['aigentemplatedescription:set_of_slides'] = 'Ce modèle crée un diaporama pédagogique à partir d’une description de ce que vous souhaitez enseigner.';
+$string['aigentemplatedescription:reading_aic_passagegen'] = 'Saisissez un thème et un niveau de langue. L’IA générera un texte de lecture qui sera utilisé pour une activité de lecture suivie d’une conversation audio basée sur ce texte.';
+$string['aigentemplatedescription:reading_aic_passageupload'] = 'Collez un texte de lecture ainsi que 4 questions à réponse courte. Ils seront utilisés pour une activité de lecture puis une conversation audio basée sur ce texte.';
+$string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Saisissez entre 4 et 10 mots-clés. Ils serviront à générer des cartes de vocabulaire, une activité de remise en ordre des mots, une activité Scatter et un jeu spatial.';
+$string['aigentemplatedescription:dialog_multichoice'] = 'Saisissez 4 dialogues. Ils seront transformés en 4 questions à choix multiples où chaque réponse est représentée par une image correspondant au dialogue en cours de lecture. Les dialogues doivent être au format TTS, par exemple : A) J’aime les tartines. [nouvelle ligne] B) Moi aussi.';
+$string['aigentemplatedescription:image_slides'] = 'Saisissez 5 descriptions d’images ainsi qu’un style graphique pour générer un diaporama de 5 images.';
+$string['aigentemplatedescription:choose_best_reply'] = 'L’étudiant écoute 10 courtes conversations et doit choisir la meilleure réplique parmi 3 propositions. Chaque question est accompagnée d’une image. L’activité est inspirée de la partie compréhension orale du test Eiken niveau 3. Vous devez indiquer le lieu et la situation (généralement un problème) de chaque conversation. Exemple : « deux amis à la plage et l’un d’eux a perdu son portefeuille ».';
+$string['aigentemplatedescription:fiction_withpics'] = 'Une histoire interactive avec des images.';
+$string['aigentemplatedescription:fiction_nopics'] = 'Une histoire interactive sans images, à l’exception de l’écran d’introduction.';
+$string['aigentemplatedescription:narrativefiction_withpics'] = 'Une histoire interactive avec moins de choix, davantage de narration et des illustrations.';
+$string['aigentemplatedescription:vocabcards'] = 'Un ensemble de cartes de vocabulaire. Saisissez une liste de mots ou d’expressions séparés par des virgules ainsi que la langue maternelle des étudiants. Des cartes contenant le mot ou l’expression, sa traduction, un exemple de phrase et une image seront créées.';
+$string['aigentemplatename:youtubefinale_freewrite'] = 'Leçon finale YouTube (écouter et écrire librement)';
+$string['aigentemplatedescription:youtubefinale_freewrite'] = 'Cette leçon est basée sur une vidéo YouTube. Une histoire simplifiée liée à la vidéo est générée, accompagnée d’activités de compréhension et d’expression écrite.';
+$string['aigentemplatename:youtubefinale_freespeak'] = 'Leçon finale YouTube (écouter et parler librement)';
+$string['aigentemplatedescription:youtubefinale_freespeak'] = 'Cette leçon est basée sur une vidéo YouTube. Une histoire simplifiée liée à la vidéo est générée, accompagnée d’activités de compréhension et d’expression orale.';
+$string['aigentemplatename:passagegapfill_generate'] = 'Texte à trous (générer un texte)';
+$string['aigentemplatedescription:passagegapfill_generate'] = 'Saisissez une liste de mots-clés, un niveau de langue et un thème. L’IA générera un texte ainsi que plusieurs trous à compléter.';
+$string['aigentemplatename:fluency_upload'] = 'Fluidité (importer des phrases)';
+$string['aigentemplatedescription:fluency_upload'] = 'Créez une activité de fluidité en fournissant jusqu’à 10 phrases que les étudiants s’entraîneront à prononcer à voix haute. Une image sera générée pour accompagner chaque phrase.';
+$string['aigentemplatename:passagereading_generate'] = 'Lecture de texte (générer un texte)';
+$string['aigentemplatedescription:passagereading_generate'] = 'Saisissez une liste de mots-clés, un niveau de langue et un thème. L’IA générera un texte de lecture pour une activité de lecture à voix haute.';
+$string['aigentemplatename:freespeaking'] = 'Expression orale libre';
+$string['aigentemplatedescription:freespeaking'] = 'Une activité d’expression orale libre sur le thème de votre choix.';
+$string['aigentemplatename:wordshuffle_generate'] = 'Remettre les mots en ordre (générer des phrases)';
+$string['aigentemplatedescription:wordshuffle_generate'] = 'Créez une activité de remise en ordre des mots en saisissant entre 4 et 10 mots-clés. Ils serviront également à générer des phrases ainsi qu’une image pour chacune.';
+$string['aigentemplatename:wordshuffle_keywords_generate'] = 'Choisir le bon mot (générer des phrases)';
+$string['aigentemplatedescription:wordshuffle_keywords_generate'] = 'Créez une activité « choisir le bon mot » basée sur une activité de remise en ordre des mots. Saisissez entre 4 et 10 mots-clés. Des phrases avec un mot manquant, 4 propositions, une traduction dans la langue maternelle et une image seront générées.';
+$string['aigentemplatename:scatter'] = 'Scatter';
+$string['aigentemplatedescription:scatter'] = 'Saisissez entre 4 et 10 mots ou expressions. Ils serviront à générer une activité Scatter avec des cartes associées traduites dans la langue maternelle de l’utilisateur.';
+$string['aigentemplatename:spacegame'] = 'Jeu spatial';
+$string['aigentemplatedescription:spacegame'] = 'Saisissez entre 4 et 10 mots ou expressions. Ils serviront à générer un jeu spatial avec les définitions dans la langue maternelle de l’utilisateur.';
+$string['aigentemplatename:multichoice_image'] = 'Question à choix multiples (avec images)';
+$string['aigentemplatedescription:multichoice_image'] = 'Une question à choix multiples illustrée, conçue pour vérifier la compréhension d’un texte. Vous devez fournir le texte, le niveau de langue, une courte description de la scène ou du contexte, ainsi qu’un style d’image.';
+$string['aigentemplatename:freewriting'] = 'Expression écrite libre';
+$string['aigentemplatedescription:freewriting'] = 'Une activité d’expression écrite libre sur le thème indiqué.';
+$string['aigentemplatename:listeninggapfill_generate'] = 'Texte à trous - Écoute (générer des phrases)';
+$string['aigentemplatedescription:listeninggapfill_generate'] = 'Crée une activité de texte à trous en compréhension orale à partir d’une liste de mots-clés (30 maximum).';
+$string['aigentemplatename:speakinggapfill_generate'] = 'Texte à trous - Expression orale (générer des phrases)';
+$string['aigentemplatedescription:speakinggapfill_generate'] = 'Crée une activité de texte à trous en expression orale à partir d’une liste de mots-clés (30 maximum).';
+$string['aigentemplatename:typinggapfill_generate'] = 'Texte à trous - Saisie (générer des phrases)';
+$string['aigentemplatedescription:typinggapfill_generate'] = 'Crée une activité de texte à trous à compléter au clavier à partir d’une liste de mots-clés (30 maximum).';
+$string['aigentemplatename:gapfill_set'] = 'Ensemble de textes à trous';
+$string['aigentemplatedescription:gapfill_set'] = 'Crée un ensemble complet d’activités de texte à trous (écoute, expression orale et saisie) à partir d’une liste de mots (30 maximum).';
+$string['aigentemplatename:audiostory_generate'] = 'Histoire audio (générer une histoire)';
+$string['aigentemplatedescription:audiostory_generate'] = 'Saisissez un thème, le niveau de langue des apprenants et un type d’histoire. L’IA préparera une histoire illustrée sous forme de diaporama narré grâce à la synthèse vocale.';
+$string['aigentemplatename:shadow'] = 'Shadowing';
+$string['aigentemplatedescription:shadow'] = 'Saisissez une URL ou un identifiant YouTube. Il sera transformé en exercice interactif de shadowing.';
+$string['aigentemplatename:listenandspeak_generate'] = 'Écouter et parler (générer des phrases)';
+$string['aigentemplatedescription:listenandspeak_generate'] = 'Saisissez un thème et un niveau de langue. Une activité « Écouter et parler » de 5 phrases sera créée.';
+$string['aigentemplatename:dictation_generate'] = 'Dictée (générer des phrases)';
+$string['aigentemplatedescription:dictation_generate'] = 'Saisissez un thème et un niveau de langue. Une dictée de 5 phrases sera créée.';
+$string['aigentemplatename:dictationchat_generate'] = 'Dictée avec chat (générer des phrases)';
+$string['aigentemplatedescription:dictationchat_generate'] = 'Saisissez un thème et un niveau de langue. Une activité de dictée avec chat de 5 phrases sera créée.';
+$string['aigentemplatename:shortanswer'] = 'Réponse courte';
+$string['aigentemplatedescription:shortanswer'] = 'Saisissez un thème et un niveau de langue. Une question à réponse courte sera créée.';
+$string['aigentemplatename:passagegapfill_upload'] = 'Texte à trous (importer un texte)';
+$string['aigentemplatedescription:passagegapfill_upload'] = 'Saisissez un texte. L’IA y ajoutera plusieurs trous à compléter.';
+$string['aigentemplatename:passagegapfill_upload_keywords'] = 'Texte à trous (importer un texte et des mots-clés)';
+$string['aigentemplatedescription:passagegapfill_upload_keywords'] = 'Saisissez un texte ainsi qu’une liste de mots-clés. L’IA ajoutera plusieurs trous à compléter.';
+$string['aigentemplatename:passagereading_upload'] = 'Lecture de texte (importer un texte)';
+$string['aigentemplatedescription:passagereading_upload'] = 'Importez un texte. L’IA préparera une activité de lecture à partir de celui-ci.';
+$string['aigentemplatename:wordshuffle_upload'] = 'Remettre les mots en ordre (importer des phrases)';
+$string['aigentemplatedescription:wordshuffle_upload'] = 'Créez une activité de remise en ordre des mots en fournissant entre 4 et 10 phrases. Une image sera générée pour accompagner chaque phrase.';
+$string['aigentemplatename:listenandspeak_upload'] = 'Écouter et parler (importer des phrases)';
+$string['aigentemplatedescription:listenandspeak_upload'] = 'Créez une activité « Écouter et parler » en fournissant jusqu’à 5 phrases. Une image sera générée pour accompagner chaque phrase.';
+$string['aigentemplatename:dictation_upload'] = 'Dictée (importer des phrases)';
+$string['aigentemplatedescription:dictation_upload'] = 'Créez une activité de dictée en fournissant jusqu’à 5 phrases.';
+$string['aigentemplatename:dictationchat_upload'] = 'Dictée avec chat (importer des phrases)';
+$string['aigentemplatedescription:dictationchat_upload'] = 'Créez une activité de dictée avec chat en fournissant jusqu’à 5 phrases. Une image sera générée pour accompagner chaque phrase.';
+$string['aigentemplatename:audiostory_upload'] = 'Histoire audio (importer une histoire)';
+$string['aigentemplatedescription:audiostory_upload'] = 'Saisissez un texte comme histoire. L’IA préparera un court diaporama narré avec des images, en utilisant la synthèse vocale pour raconter l’histoire.';
+
+$string['aigentemplatename:fluency_generate'] = 'Fluidité (générer des phrases)';
+$string['aigentemplatedescription:fluency_generate'] = 'Crée une activité de fluidité pouvant contenir jusqu’à 10 phrases à partir de mots-clés et du niveau de langue de l’utilisateur. Les étudiants s’entraîneront à prononcer les phrases à voix haute. Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:typinggapfill_upload'] = 'Texte à trous - Saisie (importer des phrases)';
+$string['aigentemplatedescription:typinggapfill_upload'] = 'Crée une activité de texte à trous à compléter au clavier à partir de 30 phrases maximum. Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:speakinggapfill_upload'] = 'Texte à trous - Expression orale (importer des phrases)';
+$string['aigentemplatedescription:speakinggapfill_upload'] = 'Crée une activité de texte à trous en expression orale à partir de 30 phrases maximum. Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:listeninggapfill_upload'] = 'Texte à trous - Écoute (importer des phrases)';
+$string['aigentemplatedescription:listeninggapfill_upload'] = 'Crée une activité de texte à trous en compréhension orale à partir de 30 phrases maximum. Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:reading_speaking_upload'] = 'Lecture et expression orale (importer une histoire et des mots-clés)';
+$string['aigentemplatedescription:reading_speaking_upload'] = 'Fournissez une courte histoire et quelques mots-clés tirés de cette histoire. L’IA préparera une narration simple en synthèse vocale, ainsi que des activités de lecture et d’expression orale basées sur l’histoire.';
+
+$string['aigentemplatename:listentothestory_upload'] = 'Écouter l’histoire (importer une histoire)';
+$string['aigentemplatedescription:listentothestory_upload'] = 'Importez une courte histoire et indiquez le niveau de langue des apprenants. L’IA préparera une histoire audio narrée avec des images, ainsi que des activités d’écoute et d’expression orale.';
+
+$string['aigentemplatename:wordshuffle_upload_markup'] = 'Remettre les mots en ordre (import avec balisage)';
+$string['aigentemplatedescription:wordshuffle_upload_markup'] = 'Crée une activité de remise en ordre des mots en fournissant :
+ i) 4 à 10 phrases déjà balisées avec les mots à remettre en ordre, les indices et les distracteurs.
+ii) Les mêmes phrases sans balisage, indices ni distracteurs.
+ Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:listeninggapfill_upload_markup'] = 'Texte à trous - Écoute (importer des phrases avec balisage)';
+$string['aigentemplatedescription:listeninggapfill_upload_markup'] = 'Crée une activité de texte à trous en compréhension orale en fournissant :
+ i) 1 à 30 phrases déjà balisées avec les mots à compléter et des indices facultatifs.
+ii) Les mêmes phrases sans balisage ni indices.
+ Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:speakinggapfill_upload_markup'] = 'Texte à trous - Expression orale (importer des phrases avec balisage)';
+$string['aigentemplatedescription:speakinggapfill_upload_markup'] = 'Crée une activité de texte à trous en expression orale en fournissant :
+ i) 1 à 30 phrases déjà balisées avec les mots à compléter et des indices facultatifs.
+ii) Les mêmes phrases sans balisage ni indices.
+ Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:typinggapfill_upload_markup'] = 'Texte à trous - Saisie (importer des phrases avec balisage)';
+$string['aigentemplatedescription:typinggapfill_upload_markup'] = 'Crée une activité de texte à trous à compléter au clavier en fournissant :
+ i) 1 à 30 phrases déjà balisées avec les mots à compléter et des indices facultatifs.
+ii) Les mêmes phrases sans balisage ni indices.
+ Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:listenandspeak_upload_markup'] = 'Écouter et parler (importer des phrases avec balisage)';
+$string['aigentemplatedescription:listenandspeak_upload_markup'] = 'Crée une activité « Écouter et parler » en fournissant jusqu’à 5 phrases. Vous pouvez également fournir des « réponses correctes » et des « phrases affichées » lorsque l’audio entendu par l’utilisateur diffère de ce qu’il voit ou de ce qu’il doit répondre. Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:spacegame_upload'] = 'Jeu spatial (import)';
+$string['aigentemplatedescription:spacegame_upload'] = 'Saisissez jusqu’à 10 paires à associer. Elles seront utilisées pour créer un jeu spatial dans lequel les étudiants associent les paires en tirant sur le bon extraterrestre.';
+
+$string['aigentemplatename:scatter_upload'] = 'Scatter (import)';
+$string['aigentemplatedescription:scatter_upload'] = 'Saisissez jusqu’à 10 paires à associer. Elles seront utilisées pour créer une activité Scatter dans laquelle les étudiants associent les paires en touchant les bonnes cartes.';
+
+$string['aigentemplatename:vocabcards_upload_markup'] = 'Cartes de vocabulaire (import avec balisage)';
+$string['aigentemplatedescription:vocabcards_upload_markup'] = 'Un ensemble de cartes de vocabulaire. Chaque carte peut contenir jusqu’à 3 lignes de texte : généralement mot-clé | traduction du mot-clé | phrase d’exemple avec le mot-clé.
+Une image sera générée pour chaque carte.';
+
+$string['aigentemplatename:fluency_upload_markup'] = 'Fluidité (importer des phrases avec balisage)';
+$string['aigentemplatedescription:fluency_upload_markup'] = 'Crée une activité de fluidité en fournissant jusqu’à 10 phrases que les étudiants s’entraîneront à prononcer à voix haute. Une image sera générée pour accompagner chaque phrase.';
+
+$string['aigentemplatename:freewriting_upload'] = 'Expression écrite libre (importer une question)';
+$string['aigentemplatedescription:freewriting_upload'] = 'Saisissez une question ou un thème sur lequel les étudiants devront écrire.';
+
+$string['aigentemplatename:freespeaking_upload'] = 'Expression orale libre (importer une question)';
+$string['aigentemplatedescription:freespeaking_upload'] = 'Saisissez une question ou un thème sur lequel les étudiants devront parler.';
+
+$string['aigentemplatename:audiochat_generate'] = 'Chat audio (générer une question)';
+$string['aigentemplatedescription:audiochat_generate'] = 'Saisissez un thème et le niveau de langue de l’utilisateur. L’IA générera une question de discussion adaptée à l’apprenant.';
+
+$string['aigentemplatename:audiochat_upload'] = 'Chat audio (importer une question de discussion)';
+$string['aigentemplatedescription:audiochat_upload'] = 'Saisissez une question de discussion qui sera utilisée dans un chat audio entre l’utilisateur et l’IA.';
+
+$string['aigentemplatename:grammar_slides'] = 'Diaporama d’explication grammaticale';
+$string['aigentemplatedescription:grammar_slides'] = 'Ce modèle crée un diaporama pour enseigner le point de grammaire indiqué. La langue cible de la MiniLesson sera utilisée pour les exemples, et la langue d’instruction choisie sera utilisée pour les explications.';
+
+$string['aigentemplatename:grammar_choosewords_v1'] = 'Leçon de grammaire (diaporama + choisir les mots V1)';
+$string['aigentemplatedescription:grammar_choosewords_v1'] = 'Fournissez le point de grammaire, jusqu’à 6 mots-clés ou expressions clés, ainsi que la langue d’instruction. Une leçon sera créée avec un diaporama explicatif, une activité « choisir le mot » et une activité « écrire le mot ». Utilisez ce modèle pour les points de grammaire où le choix du bon mot ou de la bonne expression est important (par exemple « by » ou « until »). Pour ce modèle, les choix proposés doivent être les mêmes pour chaque phrase.';
+
+$string['aigentemplatename:grammar_shufflewords'] = 'Leçon de grammaire (diaporama + remettre les mots en ordre)';
+$string['aigentemplatedescription:grammar_shufflewords'] = 'Fournissez le point de grammaire, les mots-clés et la langue d’instruction. Une leçon sera créée avec un diaporama explicatif, une activité de remise en ordre des mots et une activité « écrire le mot ». Utilisez ce modèle pour les points de grammaire où l’ordre des mots dans la phrase est important. C’est aussi un modèle généralement utile, car il peut être utilisé avec la plupart des séries de phrases.';
+
+$string['aigentemplatename:grammar_choosewords_v2'] = 'Leçon de grammaire (diaporama + choisir les mots V2)';
+$string['aigentemplatedescription:grammar_choosewords_v2'] = 'Fournissez le point de grammaire, le niveau de langue et la langue d’instruction. Une leçon sera créée avec un diaporama explicatif, une activité « choisir le mot » et une activité « écrire le mot » (6 phrases chacune). Utilisez ce modèle pour les points de grammaire où la composition de l’expression ou la forme du mot est importante (par exemple les comparatifs : « more X » ou « Xer »). Pour ce modèle, les choix proposés doivent être différents pour chaque phrase.';
+
+$string['processaigentask'] = 'Traiter la tâche de génération du modèle IA';
+
+$string['wordshuffle_shuffleorder'] = 'Mélanger l’ordre des phrases';
+$string['wordshuffle_shuffleorder_desc'] = 'Si cette option est activée, l’ordre des séries de phrases présenté à l’étudiant est aléatoire. Chaque phrase conserve son image et son audio associés.';
+
+$string['cantchat'] = 'Le chat n’est PAS disponible. Pour utiliser ce type d’activité, vous devez avoir défini une clé {$a} valide dans les paramètres d’administration de l’activité MiniLesson.';
+
+$string['freewriting:gradingprompt4'] = 'Raconter à nouveau l’histoire - nécessite un résumé de l’histoire (ai data1)';
+$string['freewriting:gradingprompt_dec4'] = 'L’étudiant raconte à nouveau une histoire. L’histoire est : [{topic}]
+Attribuez 2 points pour chaque phrase grammaticalement correcte utilisée par l’étudiant dans sa réponse. Attribuez 1 point si la phrase est presque correcte.';
+
+$string['freewriting:feedbackprompt2'] = 'Décrire l’image - nécessite une description de l’image (ai data1)';
+$string['freewriting:feedbackprompt3'] = 'Raconter à nouveau l’histoire - nécessite un résumé de l’histoire (ai data1)';
+$string['freewriting:feedbackprompt_dec3'] = 'Expliquez simplement les principales erreurs de grammaire. Suggérez les éléments de l’histoire que l’étudiant n’a pas inclus.';
+
+$string['freespeaking:gradingprompt3'] = 'Décrire l’image - nécessite une description de l’image (topic)';
+$string['freespeaking:gradingprompt4'] = 'Raconter à nouveau l’histoire - nécessite un résumé de l’histoire (topic)';
+$string['freespeaking:gradingprompt_dec4'] = 'L’étudiant raconte à nouveau une histoire. L’histoire qu’il raconte est : [{topic}]
+Attribuez 2 points pour chaque phrase grammaticalement correcte utilisée par l’étudiant dans sa réponse. Attribuez 1 point si la phrase est presque correcte.';
+
+$string['freespeaking:feedbackprompt2'] = 'Décrire l’image - nécessite une description de l’image (topic)';
+$string['freespeaking:feedbackprompt3'] = 'Raconter à nouveau l’histoire - nécessite un résumé de l’histoire (topic)';
+$string['freespeaking:feedbackprompt_dec3'] = 'Expliquez simplement les erreurs de grammaire importantes. Ne commentez pas l’orthographe ni la ponctuation. Suggérez les éléments de l’histoire que l’étudiant n’a pas décrits.';
+
+$string['defaulttargetlanguage'] = 'Langue cible par défaut';
+$string['defaultnativelanguage'] = 'Langue maternelle par défaut';
+
+$string['templateagentonly'] = 'Agent uniquement (masqué)';
+$string['templateagentonly_help'] = 'Si cette option est définie sur Oui, ce modèle est masqué sur la page de génération IA visible par les utilisateurs. Il reste disponible pour les agents et pour toute personne l’utilisant directement. Utilisez cette option pour les modèles destinés à un usage automatisé/par agent ou qui ne seraient généralement pas nécessaires.';
+
+$string['fiction:taptotranslate'] = 'Activer la traduction au toucher';
+$string['fiction:taptotranslate_desc'] = 'Si cette option est activée, une icône de traduction apparaît en bas à droite de chaque bloc de texte de l’histoire. En appuyant dessus, le texte est traduit dans la langue maternelle de l’apprenant et la traduction s’affiche directement sous le texte. Nécessite un navigateur prenant en charge la traduction sur l’appareil, par exemple Chrome.';
+$string['fiction:taptranslatearia'] = 'Traduire ce texte';
+
+$string['targetwordcount_instructions'] = 'Si le nombre cible de mots est supérieur à 0, les étudiants seront pénalisés dans la mesure où leur nombre total de mots est inférieur au nombre cible.';
+
+$string['geminiapikey_details'] = 'La clé Gemini est utilisée pour AudioChat. Elle n’est actuellement ni requise ni utilisée pour les autres types d’activités.';
+$string['geminiapikey'] = 'Clé API Gemini';
+
+$string['aihelper_modal_title'] = 'Assistant IA';
+$string['aihelper_modal_instruction'] = 'Créez ou modifiez du contenu dans l’éditeur en demandant à l’assistant IA.';
+$string['aihelper_prompt_label'] = 'Comment puis-je vous aider ?';
+$string['aihelper_prompt_placeholder'] = 'Ex. : Créer une présentation de 5 diapositives sur le cycle de l’eau...';
+$string['aihelper_placeholder_slides'] = 'Ex. : Créer une présentation de 5 diapositives sur le cycle de l’eau...';
+$string['aihelper_placeholder_fiction'] = 'Ex. : Créer une histoire de 15 nœuds sur un dauphin élevé par des requins, qui apprend à accepter sa différence.';
+$string['aihelper_response_label'] = 'Réponse de l’IA';
+$string['aihelper_generating'] = 'Génération du contenu...';
+$string['aihelper_generate_btn'] = 'Générer';
+$string['aihelper_apply_btn'] = 'Appliquer dans l’éditeur';
+$string['completed'] = 'Terminé';
+$string['progress'] = 'Progression';
+$string['notfound'] = 'Introuvable';
+$string['jobnotfound'] = 'La tâche avec cet identifiant est introuvable.';
+$string['notaccess'] = 'Vous n’avez pas l’autorisation de consulter ce statut.';
+
+// Tableau de bord du compte.
+$string['accountdashboard'] = 'Tableau de bord du compte';
+$string['audio'] = 'Audio';
+$string['end'] = 'Expiration';
+$string['failedfetchsubreport'] = 'Impossible de récupérer le rapport des abonnements.';
+$string['maxmonth'] = 'Meilleur mois';
+$string['ninety_days'] = '90 jours';
+$string['no_subscriptions'] = 'Aucun abonnement.';
+$string['oneeighty_days'] = '180 jours';
+$string['per_plugin'] = 'Par plugin (12 derniers mois)';
+$string['per_recording_type'] = 'Par type d’enregistrement';
+$string['poodll_users'] = 'Utilisateurs Poodll';
+$string['recording_min'] = 'Minutes d’enregistrement';
+$string['recordings'] = 'Enregistrements';
+$string['start'] = 'Début';
+$string['subscription'] = 'Abonnement';
+$string['thirty_days'] = '30 jours';
+$string['threehundredsixtyfive_days'] = '365 jours';
+$string['video'] = 'Vidéo';

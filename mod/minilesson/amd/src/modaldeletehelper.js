@@ -3,13 +3,12 @@
  *
  * @module     mod_minilesson/modaldeletehelper
  * @class      modaldeletehelper
- * @package    mod_minilesson
  * @copyright  2020 Justin Hunt <poodllsupport@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(
-    ['jquery', 'core/log', 'core/str', 'core/modal_factory', 'core/modal_events', 'core/ajax','core/notification'],
-    function ($, log, Str, ModalFactory, ModalEvents, Ajax, Notification) {
+    ['jquery', 'core/log', 'core/str', 'core/modal_save_cancel', 'core/modal_events', 'core/ajax','core/notification'],
+    function ($, log, Str, ModalSaveCancel, ModalEvents, Ajax, Notification) {
 
         /**
          * Constructor
@@ -74,7 +73,6 @@ define(
          * @return {Promise}
          */
         TheForm.prototype.preinit = function (selector) {
-            var triggers = $(selector);
             var dd = this;
             Str.get_string(this.formname , 'mod_minilesson').then(function (title) {
                 dd.formtitle = title;});
@@ -90,8 +88,7 @@ define(
                 var itemid = clickedLink.data('id');
                 dd.itemid = itemid;
                 var itemname = clickedLink.data('name');
-                ModalFactory.create({
-                    type: ModalFactory.types.SAVE_CANCEL,
+                ModalSaveCancel.create({
                     title: dd.formtitle,
                     body: dd.formmessage + '<i>' + itemname + '</i>',
                 })

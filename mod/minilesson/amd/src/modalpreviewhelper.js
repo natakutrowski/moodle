@@ -3,20 +3,18 @@
  *
  * @module     mod_minilesson/modalpreviewhelper
  * @class      modalpreviewhelper
- * @package    mod_minilesson
  * @copyright  2020 Justin Hunt <poodllsupport@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(
-    ['jquery', 'core/log','core/str', 'core/modal_factory', 'core/modal_events', 'core/fragment', 'core/ajax', 'core/yui'],
-    function ($, log,Str, ModalFactory, ModalEvents, Fragment, Ajax, Y) {
+    ['jquery', 'core/log','core/str', 'core/modal_cancel', 'core/modal_events', 'core/fragment'],
+    function ($, log,Str, ModalCancel, ModalEvents, Fragment) {
 
         /**
          * Constructor
          *
          * @param {String} selector used to find triggers for the new group modal.
          * @param {int} contextid
-         * @param {String} formname The key/name of the form for this instance
          * @param {Object} callback The function to call after successful deletion (for UI updates)
          *
          * Each call to init gets it's own instance of this class.
@@ -60,7 +58,6 @@ define(
          * @return {Promise}
          */
         TheForm.prototype.preinit = function (selector) {
-            var triggers = $(selector);
             var dd = this;
 
             $('body').on('click',selector,function (e) {
@@ -69,14 +66,12 @@ define(
 
                 dd.itemid = $(this).data('id');
 
-                ModalFactory.create({
-                    type: ModalFactory.types.CANCEL,
+                ModalCancel.create({
                  //   title: dd.questiontitle,
                     body: dd.getBody({})
                 }).then(function (modal) {
                     // Keep a reference to the modal.
                     dd.modal = modal;
-                    //Str.get_string(dd.formname , 'mod_minilesson').then(function(title){dd.formtitle=title;dd.modal.setTitle(dd.formtitle);});
 
 
                     //questions are big, we want a big modal.
