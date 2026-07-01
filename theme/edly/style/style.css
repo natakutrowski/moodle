@@ -8153,13 +8153,45 @@ body.pagelayout-frontpage {
 }
 
 /* Fix conflit Edly / Poodll ReadAloud */
-body.path-mod-readaloud #mod_readaloud ol.main-nav {
-    background: transparent !important;
+/* Fix mobile Edly / ReadAloud */
+body.path-mod-readaloud #mod_readaloud ol.main-nav,
+body.path-mod-readaloud #mod_readaloud .main-nav {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
     position: static !important;
-    top: auto !important;
-    left: auto !important;
-    width: auto !important;
-    z-index: auto !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    background: transparent !important;
+    width: 100% !important;
+}
+
+/* Menu principal mobile */
+body.path-mod-readaloud #mod_readaloud_home_cont > #mod_readaloud_menubuttons_cont ol.main-nav {
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+/* Footer mobile */
+body.path-mod-readaloud #mod_readaloud_footernav_cont ol.main-nav {
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+}
+
+/* Empêche MeanMenu de cacher les items */
+body.path-mod-readaloud #mod_readaloud ol.main-nav > li {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Boutons mobile footer plus petits */
+body.path-mod-readaloud #mod_readaloud_footernav_cont ol.main-nav > li .nav-link {
+    width: 54px !important;
+    min-height: 50px !important;
+    padding: 6px 4px !important;
+    font-size: 10px !important;
 }
