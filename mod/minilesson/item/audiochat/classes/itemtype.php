@@ -33,7 +33,8 @@ class itemtype extends item {
     public static $skills = [constants::SKILL_SPEAKING, constants::SKILL_LISTENING];
 
     /** Default image avatar */
-    public const DEFAULT_AVATAR = 'cutepoodll_small.png';
+    //public const DEFAULT_AVATAR = 'cutepoodll_small.png';
+    public const DEFAULT_AVATAR = 'gustave.png';
 
     public const INSTRUCTIONS = 'customtext6';
 
