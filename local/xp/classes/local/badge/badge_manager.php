@@ -26,6 +26,7 @@
 namespace local_xp\local\badge;
 
 use core_user;
+use local_xp\local\utils\badge_utils;
 
 /**
  * Badge manager.
@@ -36,6 +37,9 @@ use core_user;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class badge_manager extends \block_xp\local\badge\badge_manager {
+
+    /** @var array Compatible badges cache. */
+    protected $compatbadgescache = [];
 
     /**
      * Award a badge.
@@ -96,7 +100,7 @@ class badge_manager extends \block_xp\local\badge\badge_manager {
 
         // Award the badge by each role.
         foreach ($roleids as $roleid) {
-            process_manual_award($userid, $issuerid, $roleid, $badgeid);
+            badge_utils::process_manual_award($userid, $issuerid, $roleid, $badgeid);
         }
 
         // Finally, trigger an update.
@@ -115,10 +119,10 @@ class badge_manager extends \block_xp\local\badge\badge_manager {
      */
     public function get_compatible_badges(\context $context, $userid) {
         $cachekey = $context->id . '-' . $userid;
-        if (!isset($badgescache[$cachekey])) {
-            $badgescache[$cachekey] = $this->fetch_compatible_badges($context, $userid);
+        if (!isset($this->compatbadgescache[$cachekey])) {
+            $this->compatbadgescache[$cachekey] = $this->fetch_compatible_badges($context, $userid);
         }
-        return $badgescache[$cachekey];
+        return $this->compatbadgescache[$cachekey];
     }
 
     /**

@@ -370,5 +370,44 @@ function xmldb_local_xp_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025032802, 'local', 'xp');
     }
 
+    if ($oldversion < 2026031900) {
+
+        // Schedule the logs migrator task.
+        $task = new \block_xp\task\logs_migrator_adhoc();
+        $task->set_component('block_xp');
+        \core\task\manager::queue_adhoc_task($task, true);
+
+        // Xp savepoint reached.
+        upgrade_plugin_savepoint(true, 2026031900, 'local', 'xp');
+    }
+
+    if ($oldversion < 2026041100) {
+
+        // Define table local_xp_rule to be created.
+        $table = new xmldb_table('local_xp_rule');
+
+        // Adding fields to table local_xp_rule.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('ruleid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('limitmax', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('limitwindow', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('repeatwindow', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('repeatscope', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+
+        // Adding keys to table local_xp_rule.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Adding indexes to table local_xp_rule.
+        $table->add_index('ruleid', XMLDB_INDEX_UNIQUE, ['ruleid']);
+
+        // Conditionally launch create table for local_xp_rule.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Xp savepoint reached.
+        upgrade_plugin_savepoint(true, 2026041100, 'local', 'xp');
+    }
+
     return true;
 }

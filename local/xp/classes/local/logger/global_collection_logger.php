@@ -1,27 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Global collection logger.
- *
- * @package    local_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// https://levelup.plus
 
 namespace local_xp\local\logger;
 
@@ -49,14 +42,18 @@ class global_collection_logger implements collection_logger {
     protected $table = 'local_xp_log';
     /** @var moodle_database The DB. */
     protected $db;
+    /** @var collection_logger|null Parent logger. */
+    protected $parentlogger;
 
     /**
      * Constructor.
      *
      * @param moodle_database $db The DB.
+     * @param collection_logger|null $parentlogger The parent logger.
      */
-    public function __construct(moodle_database $db) {
+    public function __construct(moodle_database $db, ?collection_logger $parentlogger = null) {
         $this->db = $db;
+        $this->parentlogger = $parentlogger;
     }
 
     /**
@@ -66,13 +63,10 @@ class global_collection_logger implements collection_logger {
      * @return void
      */
     public function delete_older_than(DateTime $dt) {
-        $this->db->delete_records_select(
-            $this->table,
-            'time < :time',
-            [
-                'time' => $dt->getTimestamp(),
-            ]
-        );
+        $this->db->delete_records_select($this->table, 'time < ?', [$dt->getTimestamp()]);
+        if ($this->parentlogger) {
+            $this->parentlogger->delete_older_than($dt);
+        }
     }
 
     /**

@@ -14,19 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Reason with short description.
- *
- * @package    local_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 
 namespace local_xp\local\reason;
 
-use block_xp\local\reason\reason;
-
 /**
  * Reason with short description.
  *
@@ -34,14 +24,7 @@ use block_xp\local\reason\reason;
  * @copyright  2017 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated Since XP+ 20
  */
-interface reason_with_short_description extends reason {
-
-    /**
-     * Get a short description.
-     *
-     * @return string
-     */
-    public function get_short_description();
-
+interface reason_with_short_description extends \block_xp\local\reason\reason_with_short_description {
 }

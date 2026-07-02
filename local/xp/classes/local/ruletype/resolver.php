@@ -28,6 +28,7 @@
 namespace local_xp\local\ruletype;
 
 use block_xp\local\ruletype\ruletype;
+use core_component;
 
 /**
  * Resolver.
@@ -69,6 +70,18 @@ class resolver extends \block_xp\local\ruletype\default_resolver {
             return str_replace("local_xp\\local\\ruletype\\", '', get_class($type));
         }
         return parent::get_type_name($type);
+    }
+
+    /**
+     * Get class name list.
+     *
+     * @return string[]
+     */
+    protected function get_class_name_list() {
+        $parentlist = parent::get_class_name_list();
+        $list = array_keys(core_component::get_component_classes_in_namespace('local_xp', 'local\ruletype'));
+        $list = array_filter($list, [$this, 'is_valid_class']);
+        return array_unique(array_merge($parentlist, $list));
     }
 
 }

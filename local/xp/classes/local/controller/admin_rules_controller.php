@@ -125,6 +125,7 @@ class admin_rules_controller extends \block_xp\local\controller\admin_rules_cont
         );
 
         return new \block_xp\output\filters_widget_group([
+            $this->get_action_rules_widget_element(),
             new \block_xp\output\filters_widget_element(
                 $gradeswidget,
                 get_string('graderules', 'block_xp'),

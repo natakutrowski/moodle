@@ -47,6 +47,7 @@ use pix_icon;
  * @copyright  2017 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated Since XP 20, use logs_table instead.
  */
 class log_table extends table_sql {
 
@@ -210,7 +211,7 @@ class log_table extends table_sql {
         // Log fields.
         $cols = array_merge($cols, [
             'points' => get_string('reward', 'block_xp'),
-            'reason' => !$isdownloading ? '' : get_string('reason', 'local_xp'),
+            'reason' => !$isdownloading ? '' : get_string('reason', 'block_xp'),
             'location' => !$isdownloading ? '' : get_string('reasonlocation', 'local_xp'),
         ]);
         if ($isdownloading) {

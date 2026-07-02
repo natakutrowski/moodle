@@ -27,12 +27,12 @@ defined('MOODLE_INTERNAL') || die();
 
 $localxpdistro = 'Premium';
 
-$plugin->version      = 2025100500;
+$plugin->version      = 2026042001;
 $plugin->requires     = 2022112800;   // Moodle 4.1.0.
 $plugin->component    = 'local_xp';
 $plugin->maturity     = MATURITY_STABLE;
-$plugin->release      = "19.0 ($localxpdistro)";
-$plugin->supported    = [401, 501];
+$plugin->release      = "20.0 ($localxpdistro)";
+$plugin->supported    = [401, 502];
 $plugin->dependencies = [
-    'block_xp' => 2025100500,
+    'block_xp' => 2026042000,
 ];

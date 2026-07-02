@@ -90,7 +90,7 @@ class import_controller extends page_controller {
         return new \local_xp\local\provider\csv_user_state_store_points_provider($cir,
             new user_resolver(di::get('db')),
             $action,
-            $action === user_state_store_points::ACTION_INCREASE ? new manual_reason($USER->id) : null
+            $action === user_state_store_points::ACTION_INCREASE ? manual_reason::from_user($USER) : null
         );
     }
 

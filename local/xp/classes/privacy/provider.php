@@ -69,6 +69,15 @@ class provider implements
             'privacy:metadata:log'
         );
 
+        $collection->add_database_table('local_xp_user_flag',
+            [
+                'userid' => 'privacy:metadata:userflag:userid',
+                'ladderparticipation' => 'privacy:metadata:userflag:ladderparticipation',
+                'ladderparticipationlocked' => 'privacy:metadata:userflag:ladderparticipationlocked',
+            ],
+            'privacy:metadata:userflag'
+        );
+
         return $collection;
     }
 
@@ -85,6 +94,12 @@ class provider implements
              WHERE l.userid = :userid";
         $params = ['userid' => $userid];
         $contextlist->add_from_sql($sql, $params);
+
+        $sql = "
+            SELECT DISTINCT f.contextid
+              FROM {local_xp_user_flag} f
+             WHERE f.userid = :userid";
+        $contextlist->add_from_sql($sql, ['userid' => $userid]);
     }
 
     /**
@@ -95,6 +110,7 @@ class provider implements
     public static function add_addon_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
         $userlist->add_from_sql('userid', 'SELECT userid FROM {local_xp_log} WHERE contextid = ?', [$context->id]);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {local_xp_user_flag} WHERE contextid = ?', [$context->id]);
     }
 
     /**
@@ -174,6 +190,27 @@ class provider implements
         }
 
         $recordset->close();
+
+        $sql = "
+            SELECT f.userid, f.ladderparticipation, f.ladderparticipationlocked, f.contextid
+              FROM {local_xp_user_flag} f
+             WHERE f.contextid $insql
+               AND f.userid = :userid
+          ORDER BY f.contextid";
+        $params = ['userid' => $user->id] + $inparams;
+
+        $path = array_merge($rootpath, [get_string('privacy:path:userflags', 'block_xp')]);
+        $recordset = $db->get_recordset_sql($sql, $params);
+        foreach ($recordset as $record) {
+            $context = context::instance_by_id($record->contextid);
+            $locked = (int) $record->ladderparticipationlocked;
+            writer::with_context($context)->export_data($path, (object) [
+                'userid' => transform::user($record->userid),
+                'ladderparticipation' => $record->ladderparticipation,
+                'ladderparticipationlocked' => $locked > 0 ? transform::datetime($locked) : '',
+            ]);
+        }
+        $recordset->close();
     }
 
     /**
@@ -184,6 +221,7 @@ class provider implements
     public static function delete_addon_data_for_all_users_in_context(context $context) {
         $db = \block_xp\di::get('db');
         $db->delete_records('local_xp_log', ['contextid' => $context->id]);
+        $db->delete_records('local_xp_user_flag', ['contextid' => $context->id]);
     }
 
     /**
@@ -200,6 +238,7 @@ class provider implements
         $sql = "contextid $insql AND userid = :userid";
         $params = ['userid' => $userid] + $inparams;
         $db->delete_records_select('local_xp_log', $sql, $params);
+        $db->delete_records_select('local_xp_user_flag', $sql, $params);
     }
 
     /**
@@ -213,6 +252,7 @@ class provider implements
         $sql = "contextid = :contextid AND userid $insql";
         $params = ['contextid' => $userlist->get_context()->id] + $inparams;
         $db->delete_records_select('local_xp_log', $sql, $params);
+        $db->delete_records_select('local_xp_user_flag', $sql, $params);
     }
 
 }

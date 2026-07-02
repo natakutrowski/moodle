@@ -97,6 +97,15 @@ $functions = [
         'type' => 'write',
         'ajax' => true,
     ],
+
+    'local_xp_set_rule_limits' => [
+        'classname' => local_xp\external\set_rule_limits::class,
+        'methodname' => 'execute',
+        'description' => 'Set rule limits',
+        'type' => 'write',
+        'ajax' => true,
+    ],
+
     'local_xp_search_grade_items' => [
         'classname' => 'local_xp\external\search_grade_items',
         'methodname' => 'execute',

@@ -1,29 +1,24 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Container.
- *
- * @package    local_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// https://levelup.plus
 
 namespace local_xp\local;
+
+use block_xp\di;
 
 /**
  * Container.
@@ -37,7 +32,9 @@ class container implements \block_xp\local\container {
 
     /** @var array The objects supported by this container. */
     protected static $supports = [
+        'action_maker' => true,
         'addon' => true,
+        'admin_rule_manager' => true,
         'backup_content_manager' => true,
         'badge_manager' => true,
         'badge_url_resolver' => true,
@@ -49,6 +46,7 @@ class container implements \block_xp\local\container {
         'collection_strategy' => true,
         'config' => true,
         'config_locked' => true,
+        'context_collection_logger_factory' => true,
         'context_world_factory' => true,
         'course_collection_logger_factory' => true,
         'course_currency_factory' => true,
@@ -67,12 +65,16 @@ class container implements \block_xp\local\container {
         'leaderboard_form_class' => true,
         'levels_info_factory' => true,
         'levels_info_writer' => true,
+        'log_migrators' => true,
         'renderer' => true,
         'router' => true,
         'routes_config' => true,
+        'reason_resolver' => true,
+        'rule_descriptor' => true,
         'rule_dictator' => true,
         'rule_event_lister' => true,
         'rule_filter_handler' => true,
+        'rule_form_class' => true,
         'rule_type_resolver' => true,
         'serializer_factory' => true,
         'settings_maker' => true,
@@ -82,6 +84,7 @@ class container implements \block_xp\local\container {
         'theme_updater' => true,
         'url_resolver' => true,
         'usage_reporter' => true,
+        'world_rule_manager_factory' => true,
 
         leaderboard\participation\service_factory::class => 'leaderboard_participation_service_factory',
         userflag\deletion_service::class => 'userflag_deletion_service',
@@ -125,12 +128,30 @@ class container implements \block_xp\local\container {
     }
 
     /**
+     * Get the action maker.
+     *
+     * @return action\maker
+     */
+    protected function get_action_maker() {
+        return new action\event_action_maker();
+    }
+
+    /**
      * Get the addon.
      *
      * @return plugin\addon
      */
     protected function get_addon() {
         return new plugin\addon();
+    }
+
+    /**
+     * Get the admin rule manager.
+     *
+     * @return rule\admin_rule_manager
+     */
+    protected function get_admin_rule_manager() {
+        return new rule\admin_rule_manager($this->get('db'), $this->get('config'));
     }
 
     /**
@@ -208,10 +229,14 @@ class container implements \block_xp\local\container {
     /**
      * Get the global collection logger.
      *
-     * @return logger
+     * @return \block_xp\local\logger\collection_logger
      */
     protected function get_collection_logger() {
-        return new \local_xp\local\logger\global_collection_logger($this->get('db'));
+        $parentlogger = null;
+        if ($this->subcontainer->has('collection_logger')) {
+            $parentlogger = $this->subcontainer->get('collection_logger');
+        }
+        return new logger\global_collection_logger($this->get('db'), $parentlogger);
     }
 
     /**
@@ -224,7 +249,7 @@ class container implements \block_xp\local\container {
             $this->get('course_world_factory'),
             $this->get('config')->get('context'),
             $this->get_user_collection_target_resolver(),
-            new action\event_action_maker()
+            $this->get('action_maker'),
         );
         $st->set_context_world_factory($this->get('context_world_factory'));
         return $st;
@@ -266,6 +291,19 @@ class container implements \block_xp\local\container {
             ]),
             $this->subcontainer->get('config_locked'),
         ]);
+    }
+
+    /**
+     * Context collection logger factory.
+     *
+     * @return factory\context_collection_logger_factory
+     */
+    protected function get_context_collection_logger_factory() {
+        $factory = new factory\context_collection_logger_factory($this->get('db'));
+        $factory->set_reason_resolver(di::get('reason_resolver'));
+        $factory->set_reason_from_log_entry_factory(di::get('reason_from_log_entry_factory'));
+        $factory->set_rule_type_resolver(di::get('rule_type_resolver'));
+        return $factory;
     }
 
     /**
@@ -362,15 +400,17 @@ class container implements \block_xp\local\container {
     protected function get_course_world_factory() {
         $db = $this->get('db');
         $config = $this->get('config');
-        return new \local_xp\local\factory\course_world_factory(
+        $factory = new \local_xp\local\factory\course_world_factory(
             $config->get('context'),
             $db,
             $this->get_course_config_factory(),
             $this->get_user_collection_target_resolver(),
             $this->get('badge_url_resolver_course_world_factory'),
-            $this->get('course_collection_logger_factory'),
+            null, // We used to pass the course collection logger factory, it is superceded by the other logger.
             $this->get('levels_info_factory')
         );
+        $factory->set_context_collection_logger_factory(di::get('context_collection_logger_factory'));
+        return $factory;
     }
 
     /**
@@ -503,6 +543,16 @@ class container implements \block_xp\local\container {
     }
 
     /**
+     * Get the log migrators.
+     *
+     * @return array
+     */
+    protected function get_log_migrators() {
+        $migrators = $this->subcontainer->get('log_migrators');
+        return array_merge($migrators, [new \local_xp\local\logger\migration\migrate_local_xp_log_to_block_xp_logs()]);
+    }
+
+    /**
      * Get renderer.
      *
      * @return renderer_base
@@ -514,6 +564,15 @@ class container implements \block_xp\local\container {
         }
         $renderer = $PAGE->get_renderer('local_xp');
         return $renderer;
+    }
+
+    /**
+     * Get the reason resolver.
+     *
+     * @return \block_xp\local\reason\resolver
+     */
+    protected function get_reason_resolver() {
+        return new reason\resolver();
     }
 
     /**
@@ -539,12 +598,22 @@ class container implements \block_xp\local\container {
     }
 
     /**
+     * Get the rule descriptor.
+     *
+     * @return rule\rule_descriptor
+     */
+    protected function get_rule_descriptor() {
+        return new rule\rule_descriptor($this->get('rule_type_resolver'), $this->get('rule_filter_handler'));
+    }
+
+    /**
      * Get the rule dictator.
      *
      * @return \block_xp\local\rule\dictator
+     * @deprecated Since XP 20, use world_rule_manager instead.
      */
     protected function get_rule_dictator() {
-        return new \block_xp\local\rule\the_dictator($this->get('db'), $this->get('rule_filter_handler'));
+        return new rule\dictator($this->get('db'), $this->get('rule_filter_handler'));
     }
 
     /**
@@ -570,6 +639,15 @@ class container implements \block_xp\local\container {
      */
     protected function get_rule_filter_handler() {
         return new rulefilter\handler();
+    }
+
+    /**
+     * Get the action rule dynamic form class name.
+     *
+     * @return string
+     */
+    protected function get_rule_form_class() {
+        return \local_xp\form\rule::class;
     }
 
     /**
@@ -687,6 +765,15 @@ class container implements \block_xp\local\container {
      */
     protected function get_userflag_deletion_service() {
         return new userflag\deletion_service($this->get('db'));
+    }
+
+    /**
+     * Get the world rule manager factory.
+     *
+     * @return \block_xp\local\factory\world_rule_manager_factory
+     */
+    protected function get_world_rule_manager_factory() {
+        return new factory\world_rule_manager_factory($this->get('db'), $this->get('admin_rule_manager'));
     }
 
     /**

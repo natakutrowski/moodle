@@ -52,9 +52,16 @@ class observer {
 
         // Clean up the data that could be left behind.
         $conditions = ['courseid' => $courseid];
+        $ctxconditions = ['contextid' => $contextid];
         $DB->delete_records('local_xp_config', $conditions);
         $DB->delete_records('local_xp_drops', $conditions);
-        $DB->delete_records('local_xp_log', ['contextid' => $contextid]);
+        $DB->delete_records('local_xp_log', $ctxconditions);
+
+        // Delete logs that are associated with the course, or the orphan ones, in case the deletion order is not deterministic.
+        $DB->execute("DELETE FROM {local_xp_rule} WHERE ruleid IN (SELECT id FROM {block_xp_rule} WHERE contextid = :contextid)",
+            $ctxconditions
+        );
+        $DB->execute("DELETE FROM {local_xp_rule} WHERE ruleid NOT IN (SELECT id FROM {block_xp_rule})");
 
         // Delete the files.
         $fs = get_file_storage();

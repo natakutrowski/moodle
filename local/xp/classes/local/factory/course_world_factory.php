@@ -27,6 +27,7 @@ namespace local_xp\local\factory;
 
 use moodle_database;
 use block_xp\local\factory\badge_url_resolver_course_world_factory;
+use block_xp\local\factory\context_collection_logger_factory;
 use block_xp\local\factory\levels_info_factory;
 use local_xp\local\strategy\collection_target_resolver_from_event;
 
@@ -50,7 +51,7 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
     protected $worlds = [];
     /** @var collection_target_resolver_from_event The target resolver. */
     protected $usercolletiontargetresolver;
-    /** @var course_collection_logger_factory The course collection logger factory. */
+    /** @var course_collection_logger_factory|context_collection_logger_factory The collection logger factory. */
     protected $collectionloggerfactory;
     /** @var levels_info_factory The levels info factory. */
     protected $levelsinfofactory;
@@ -65,7 +66,7 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
      * @param course_config_factory $configfactory The factory.
      * @param collection_target_resolver_from_event $usercolletiontargetresolver The collection target resolver.
      * @param badge_url_resolver_course_world_factory $urlresolverfactory The badge URL resolver factory.
-     * @param course_collection_logger_factory $collectionloggerfactory Collection logger factory.
+     * @param course_collection_logger_factory $collectionloggerfactory Argument no longer expected, but kept for compatibility.
      * @param levels_info_factory $levelsinfofactory The levels info factory.
      */
     public function __construct(
@@ -74,7 +75,7 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
         course_config_factory $configfactory,
         collection_target_resolver_from_event $usercolletiontargetresolver,
         badge_url_resolver_course_world_factory $urlresolverfactory,
-        course_collection_logger_factory $collectionloggerfactory,
+        $collectionloggerfactory,
         levels_info_factory $levelsinfofactory
     ) {
 
@@ -115,10 +116,23 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
                 $this->urlresolverfactory,
                 $this->levelsinfofactory
             );
-            $world->set_collection_logger($this->collectionloggerfactory->get_collection_logger($courseid));
+            if ($this->collectionloggerfactory instanceof context_collection_logger_factory) {
+                $world->set_collection_logger($this->collectionloggerfactory->get_logger_from_context($world->get_context()));
+            } else if ($this->collectionloggerfactory instanceof course_collection_logger_factory) {
+                $world->set_collection_logger($this->collectionloggerfactory->get_collection_logger($courseid));
+            }
             $this->worlds[$courseid] = $world;
         }
         return $this->worlds[$courseid];
+    }
+
+    /**
+     * Set the collection logger factory.
+     *
+     * @param context_collection_logger_factory $factory The factory.
+     */
+    public function set_context_collection_logger_factory(context_collection_logger_factory $factory) {
+        $this->collectionloggerfactory = $factory;
     }
 
 }

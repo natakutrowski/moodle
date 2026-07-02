@@ -73,9 +73,6 @@ $string['errorunknowngradeitem'] = 'Error: unknown grade item';
 $string['event_section_completed'] = 'Section completed';
 $string['filtergradeitems'] = 'Filter grade items';
 $string['filtershortcodesrequiredfordrops'] = 'The plugin [Shortcodes]({$a->url}) needs to be installed and enabled to use drops, it is freely available from [moodle.org]({$a->url}). This plugin will also unlock [Level Up XP\'s shortcodes]({$a->shortcodesdocsurl}).';
-$string['keeplogsdesc'] = 'The logs are playing an important role in the plugin. They are used for
-the cheat guard, for finding the recent rewards, and for some other things. Reducing the time for
-which the logs are kept can affect how points are distributed over time and should be dealt with carefully.';
 $string['gradeitemselector'] = 'Grade item selector';
 $string['gradeitemtypeis'] = 'The grade is a {$a} grade';
 $string['gradereceived'] = 'Grade received';
@@ -161,6 +158,10 @@ $string['privacy:metadata:log:time'] = 'The date at which it happened';
 $string['privacy:metadata:log:type'] = 'The event type';
 $string['privacy:metadata:log:userid'] = 'The user who gained the points';
 $string['privacy:metadata:prefdataformat'] = 'Download format';
+$string['privacy:metadata:userflag'] = 'Stores per-user leaderboard participation preferences';
+$string['privacy:metadata:userflag:ladderparticipation'] = 'Whether the user participates in the leaderboard';
+$string['privacy:metadata:userflag:ladderparticipationlocked'] = 'When the participation preference can be changed again';
+$string['privacy:metadata:userflag:userid'] = 'The user';
 $string['progressbarmode'] = 'Display progress towards';
 $string['progressbarmode_help'] = '
 When set to _The next level_, the progress bar displays the progress of the user towards the next level.
@@ -171,7 +172,6 @@ In either case, the progress bar will remain full when the last level is attaine
 $string['progressbarmodelevel'] = 'The next level';
 $string['progressbarmodeoverall'] = 'The ultimate level';
 $string['reallyedeletedrop'] = 'Are you sure that you want to delete this drop? This action is not reversible.';
-$string['reason'] = 'Reason';
 $string['reasonlocation'] = 'Location';
 $string['reasonlocationurl'] = 'Location URL';
 $string['ruleactivitycompletion'] = 'Activity completion';
@@ -341,5 +341,9 @@ $string['visualsintro'] = 'Customise the appearance of the levels, and the point
 $string['unknownsectiona'] = 'Unknown section ({$a})';
 
 // Deprecated since v1.17.0
+$string['keeplogsdesc'] = 'The logs are playing an important role in the plugin. They are used for
+the cheat guard, for finding the recent rewards, and for some other things. Reducing the time for
+which the logs are kept can affect how points are distributed over time and should be dealt with carefully.';
 $string['groupladder'] = 'Team leaderboard';
+$string['reason'] = 'Reason';
 $string['teams'] = 'Teams';

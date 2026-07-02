@@ -14,16 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Reason maker from type and signature.
- *
- * @package    local_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 
 namespace local_xp\local\reason;
+
+use block_xp\local\reason\unknown_reason;
 
 /**
  * Reason maker from type and signature.

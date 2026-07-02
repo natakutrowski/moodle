@@ -29,11 +29,11 @@ namespace local_xp\local\controller;
 
 use block_xp\di;
 use block_xp\local\controller\page_controller;
+use block_xp\local\controller\rules_scope_trait;
 use block_xp\local\routing\url;
 use block_xp\local\rulefilter\rulefilter;
 use context;
 use help_icon;
-use moodle_url;
 
 /**
  * Rules controller class.
@@ -44,6 +44,7 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class completion_rules_controller extends page_controller {
+    use rules_scope_trait;
 
     /** @var string The nav name. */
     protected $navname = 'rules';
@@ -114,7 +115,6 @@ class completion_rules_controller extends page_controller {
 
         return $context;
     }
-
     protected function get_page_html_head_title() {
         return get_string('completionrules', 'block_xp');
     }
@@ -155,41 +155,12 @@ class completion_rules_controller extends page_controller {
             echo $output->notification_without_close(get_string('completionruleslegacyusednotice', 'block_xp'), 'warning');
         }
 
-        if ($this->can_have_child_context()) {
-            $childctxhelp = new help_icon('rulesscope', 'block_xp');
-
-            $scopeurl = null;
-            $sitewideurl = new url($this->pageurl);
-            $sitewideurl->remove_params(['childcontextid']);
-            $courseurltemplate = new url($this->pageurl);
-            $courseurltemplate->param('childcontextid', "CONTEXTID");
-
-            if ($childcontext) {
-                $scopeurl = new moodle_url('/course/view.php', ['id' => $childcontext->instanceid]);
-                $scopename = get_string('coursea', 'block_xp', $childcontext->get_context_name(false, true));
-            } else {
-                $scopename = get_string('sitewide', 'block_xp');
-            }
-
-            echo $output->render_from_template('block_xp/completion-rules-scope-switcher', [
-                'isincourse' => (bool) $childcontext,
-                'sitewideurl' => $sitewideurl->out(false),
-                'contexturl' => $courseurltemplate->out(false),
-                'courseurltemplate' => $courseurltemplate->out(false),
-                'scopename' => $scopename,
-                'scopeurl' => $scopeurl ? $scopeurl->out(false) : null,
-                'helpicon' => $childctxhelp->export_for_template($output),
-            ]);
-        }
+        $this->page_scope_switcher();
 
         $typeresolver = di::get('rule_type_resolver');
-        $ruletypes = array_values(array_map(function ($type) use ($typeresolver) {
-            return [
-                'name' => $typeresolver->get_type_name($type),
-                'label' => (string) $type->get_display_name(),
-                'description' => (string) $type->get_short_description(),
-                'filters' => $type->get_compatible_filters(),
-            ];
+        $typeserializer = di::get('serializer_factory')->get_ruletype_serializer();
+        $ruletypes = array_values(array_map(function ($type) use ($typeserializer) {
+            return $typeserializer->serialize($type);
         }, array_filter([
             $typeresolver->get_type('cm_completion'),
             $typeresolver->get_type('section_completion'),
@@ -197,14 +168,9 @@ class completion_rules_controller extends page_controller {
         ])));
 
         $filterhandler = di::get('rule_filter_handler');
-        $filters = array_values(array_map(function ($filter) use ($filterhandler) {
-            return [
-                'name' => $filterhandler->get_filter_name($filter),
-                'label' => (string) $filter->get_display_name(),
-                'description' => (string) $filter->get_short_description(),
-                'ismultipleallowed' => $filter->is_multiple_allowed(),
-                'weight' => $filterhandler->get_filter_priority($filter),
-            ];
+        $filterserializer = di::get('serializer_factory')->get_rulefilter_serializer();
+        $filters = array_values(array_map(function ($filter) use ($filterserializer) {
+            return $filterserializer->serialize($filter);
         }, array_filter($filterhandler->get_filters(), function (rulefilter $filter) use ($currentcontext) {
             return in_array((int) $currentcontext->contextlevel, $filter->get_compatible_context_levels());
         })));
@@ -219,20 +185,11 @@ class completion_rules_controller extends page_controller {
         }
 
         echo $output->react_module('block_xp/ui-completion-rules-lazy', [
-            'world' => [
-                'contextlevel' => (int) $this->world->get_context()->contextlevel,
-                'contextid' => (int) $this->world->get_context()->id,
-                'courseid' => $this->world->get_courseid(),
-            ],
             'childcontext' => $childcontextdata,
+            'ruleformclass' => di::get('rule_form_class'),
             'ruletypes' => $ruletypes,
             'rulefilters' => $filters,
-            'addon' => [
-                'activated' => di::get('addon')->is_activated(),
-                'enablepromo' => (bool) di::get('config')->get('enablepromoincourses'),
-                'promourl' => $this->urlresolver->reverse('promo', ['courseid' => $this->world->get_courseid()])->out(false),
-            ],
-        ]);
+        ], $this->world);
     }
 
 }

@@ -27,7 +27,7 @@
 
 namespace local_xp\local\rulefilter;
 
-use block_xp\local\rulefilter\action_tester;
+use block_xp\local\action\tester\action_tester;
 use block_xp\local\rulefilter\rulefilter;
 use context;
 use lang_string;

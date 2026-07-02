@@ -310,16 +310,3 @@ $string['unknowngradeitemtype'] = 'Type inconnu ({$a})';
 $string['unknownsectiona'] = 'Section inconnue ({$a})';
 $string['uptoleveln'] = 'Jusqu\'au niveau {$a}';
 $string['visualsintro'] = 'Personnaliser l\'apparence des niveaux, et des points.';
-
-$string['copypastedropsnippet'] = 'Copiez-collez l’extrait de code suivant dans un contenu.';
-$string['currencysignoverride_help'] = 'Téléversez une image pour choisir un autre symbole.
-
-Nous recommandons des images d’une hauteur de 18 pixels, aux formats JPEG, PNG ou SVG.';
-$string['increase'] = 'Augmenter';
-$string['leaderboardnotsetup'] = 'Le classement n’a pas encore été configuré.';
-$string['pointswithsymbol'] = 'Points avec symbole';
-$string['privacy:metadata:prefdataformat'] = 'Format de téléchargement';
-$string['setastotal'] = 'Définir comme total';
-$string['shortcode:xpdrop'] = 'Insérer un « drop » dans le contenu.';
-$string['teamladdersettingsmovednotice'] = 'Les paramètres du classement par équipes ont été déplacés vers la [page du classement par équipes]({$a->url}).';
-$string['xpparticipants'] = 'Participants XP';

@@ -1,6 +1,36 @@
 Changelog
 =========
 
+v20.0
+-----
+
+New features
+
+- Action rules: A simpler, easier, and flexible way to award points!
+- View logs and points given by a specific action or completion rule
+- Limit how many times and how often actions give points
+- Create rules targetting activities tagged with a specific tag
+- Award points when a certificate is issued by the "Custom certificate" plugin
+
+Quality of life
+
+- The logs display which rule the points originated from
+- The logs can be filtered for a specific rule
+
+Bug fixes
+
+- Improved accessibility of some dropdown menus
+- Privacy provider reports the leaderboard participation flag
+
+Technical changes
+
+- Compatibility with Moodle 5.2
+- Logs migration to a new table will take place after the upgrade
+- Default event rules could apply alongside default action rules
+- Please read the [upgrade notes](https://docs.levelup.plus/xp/docs/upgrade-notes/upgrading-to-v20) for technical details
+
+Read our [release blog post](https://www.levelup.plus/blog/xp-release-20/) to learn more.
+
 v19.0
 -----
 

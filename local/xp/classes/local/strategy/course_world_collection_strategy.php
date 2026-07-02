@@ -30,14 +30,15 @@ use context;
 use DateTime;
 use block_xp\local\config\config;
 use block_xp\local\logger\reason_collection_logger;
+use block_xp\local\logger\reason_occurrence_indicator;
 use block_xp\local\notification\course_level_up_notification_service;
 use block_xp\local\reason\reason;
 use block_xp\local\strategy\action_collection_strategy;
 use block_xp\local\strategy\event_collection_strategy;
 use block_xp\local\xp\state_store_with_reason;
 use local_xp\local\logger\collection_counts_indicator;
+use local_xp\local\logger\event_cheatguard_reader;
 use local_xp\local\logger\reason_collection_counts_indicator;
-use local_xp\local\logger\reason_occurance_indicator;
 use local_xp\local\rule\calculator;
 use local_xp\local\rule\event_subject;
 use local_xp\local\rule\result_calculator;
@@ -68,11 +69,13 @@ class course_world_collection_strategy implements action_collection_strategy, ev
 
     /** @var action_collection_strategy The action collection strategy. */
     protected $actioncollectionstrategy;
+    /** @var reason_occurrence_indicator|collection_counts_indicator The event cheatgard reader. */
+    protected $eventcheatguardreader;
 
     /** @var reason_collection_counts_indicator */
     protected $reasoncollectioncountsindicator;
-    /** @var reason_occurance_indicator */
-    protected $reasonoccuranceindicator;
+    /** @var reason_occurrence_indicator */
+    protected $reasonoccurrenceindicator;
     /** @var collection_counts_indicator */
     protected $collectioncountsindicator;
     /** @var reason_collection_logger */
@@ -86,7 +89,7 @@ class course_world_collection_strategy implements action_collection_strategy, ev
         state_store_with_reason $store,
         calculator $calculator,
         reason_collection_logger $logger,
-        reason_occurance_indicator $reasonoccuranceindicator,
+        reason_occurrence_indicator $reasonoccurrenceindicator,
         collection_counts_indicator $collectioncountsindicator,
         course_level_up_notification_service $levelupnotifificationservice,
         collection_target_resolver_from_event $targetresolver,
@@ -96,7 +99,7 @@ class course_world_collection_strategy implements action_collection_strategy, ev
         $this->config = $config;
         $this->store = $store;
         $this->calculator = $calculator;
-        $this->reasonoccuranceindicator = $reasonoccuranceindicator;
+        $this->reasonoccurrenceindicator = $reasonoccurrenceindicator;
         $this->collectioncountsindicator = $collectioncountsindicator;
         $this->reasoncollectioncountsindicator = $reasoncollectioncountsindicator;
         $this->levelupnotifificationservice = $levelupnotifificationservice;
@@ -195,13 +198,14 @@ class course_world_collection_strategy implements action_collection_strategy, ev
     }
 
     protected function can_capture($userid, reason $reason, config $config) {
+        $reasonoccurrenceindicator = $this->get_reason_occurrence_indicator_for_events();
 
         // There are some events we only want to see once! So they are not bound to the cheat guard.
         if ($reason instanceof \local_xp\local\reason\activity_completion_reason
                 || $reason instanceof \local_xp\local\reason\section_completion_reason
         ) {
 
-            if ($this->reasonoccuranceindicator->has_reason_happened_since($userid, $reason, new DateTime('@0'))) {
+            if ($reasonoccurrenceindicator->has_reason_happened_since($userid, $reason, new DateTime('@0'))) {
                 return false;
             }
         }
@@ -218,14 +222,15 @@ class course_world_collection_strategy implements action_collection_strategy, ev
         // Time between identical actions. Early skip if the reason never happened.
         if ($actiontime > 0) {
             $since = new DateTime('@' . (time() - $actiontime));
-            if ($this->reasonoccuranceindicator->has_reason_happened_since($userid, $reason, $since)) {
+            if ($reasonoccurrenceindicator->has_reason_happened_since($userid, $reason, $since)) {
                 return false;
             }
         }
 
         if ($maxtime > 0 && $maxactions > 0) {
             $since = new DateTime('@' . (time() - $maxtime));
-            if ($this->collectioncountsindicator->count_collections_since($userid, $since) >= $maxactions) {
+            $collectioncountsindicator = $this->get_collection_counts_indicator_for_events();
+            if ($collectioncountsindicator->count_collections_since($userid, $since) >= $maxactions) {
                 return false;
             }
         }
@@ -251,7 +256,8 @@ class course_world_collection_strategy implements action_collection_strategy, ev
         }
 
         $since = new DateTime('@' . (time() - $maxtime));
-        if ($this->collectioncountsindicator->get_collected_points_since($userid, $since) + $points > $maxpoints) {
+        $collectioncountsindicator = $this->get_collection_counts_indicator_for_events();
+        if ($collectioncountsindicator->get_collected_points_since($userid, $since) + $points > $maxpoints) {
             // Already earned more, skip.
             return false;
         }
@@ -269,7 +275,8 @@ class course_world_collection_strategy implements action_collection_strategy, ev
      */
     protected function cap_points($userid, $points, reason $reason) {
         if ($reason instanceof \local_xp\local\reason\graded_reason) {
-            $alreadyearned = $this->reasoncollectioncountsindicator->get_points_collected_with_reason_since(
+            $indicator = $this->get_reason_collection_counts_indicator_for_events();
+            $alreadyearned = $indicator->get_points_collected_with_reason_since(
                 $userid,
                 $reason,
                 new DateTime('@0')
@@ -277,6 +284,61 @@ class course_world_collection_strategy implements action_collection_strategy, ev
             return max(0, $points - $alreadyearned);
         }
         return $points;
+    }
+
+    /**
+     * Get the collection count indicator for the events.
+     *
+     * @return collection_counts_indicator
+     */
+    protected function get_collection_counts_indicator_for_events(): collection_counts_indicator {
+        $indicator = $this->collectioncountsindicator;
+        if ($this->get_event_cheatguard_reader() instanceof collection_counts_indicator) {
+            $indicator = $this->get_event_cheatguard_reader();
+        }
+        return $indicator;
+    }
+
+    /**
+     * Get the event cheatguard reader.
+     *
+     * @return event_cheatguard_reader|null
+     */
+    protected function get_event_cheatguard_reader(): ?event_cheatguard_reader {
+        if (!$this->eventcheatguardreader) {
+            static $debugged = false;
+            if (!$debugged) {
+                debugging('The event cheat guard reader should be set in course_world_collection_strategy.', DEBUG_DEVELOPER);
+                $debugged = true;
+            }
+        }
+        return $this->eventcheatguardreader;
+    }
+
+    /**
+     * Get the reason collection counts indicator for the events.
+     *
+     * @return reason_collection_counts_indicator
+     */
+    protected function get_reason_collection_counts_indicator_for_events(): reason_collection_counts_indicator {
+        $indicator = $this->reasoncollectioncountsindicator;
+        if ($this->get_event_cheatguard_reader() instanceof reason_collection_counts_indicator) {
+            $indicator = $this->get_event_cheatguard_reader();
+        }
+        return $indicator;
+    }
+
+    /**
+     * Get the reason occurrence indicator for the events.
+     *
+     * @return reason_occurrence_indicator
+     */
+    protected function get_reason_occurrence_indicator_for_events(): reason_occurrence_indicator {
+        $indicator = $this->reasonoccurrenceindicator;
+        if ($this->get_event_cheatguard_reader() instanceof reason_occurrence_indicator) {
+            $indicator = $this->get_event_cheatguard_reader();
+        }
+        return $indicator;
     }
 
     /**
@@ -334,4 +396,14 @@ class course_world_collection_strategy implements action_collection_strategy, ev
     public function set_action_collection_strategy(action_collection_strategy $strategy) {
         $this->actioncollectionstrategy = $strategy;
     }
+
+    /**
+     * Set the cheatguard reader.
+     *
+     * @param event_cheatguard_reader $cheatguardreader The cheatguard reader.
+     */
+    public function set_event_cheatguard_reader(event_cheatguard_reader $cheatguardreader) {
+        $this->eventcheatguardreader = $cheatguardreader;
+    }
+
 }

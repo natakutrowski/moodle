@@ -32,7 +32,7 @@ use block_xp\local\factory\badge_url_resolver_course_world_factory;
 use block_xp\local\factory\levels_info_factory;
 use block_xp\local\logger\collection_logger;
 use local_xp\local\config\default_course_world_config;
-use local_xp\local\logger\context_collection_logger;
+use local_xp\local\logger\context_collection_logger_extended;
 use local_xp\local\strategy\collection_target_resolver_from_event;
 use local_xp\local\strategy\world_action_collection_strategy;
 use local_xp\local\xp\user_global_state;
@@ -101,15 +101,25 @@ class course_world extends \block_xp\local\course_world {
                 $this->usercolletiontargetresolver,
                 $this->get_collection_logger()
             );
-            $this->strategy->set_action_collection_strategy(
-                new world_action_collection_strategy(
-                    $this,
-                    $this->get_collection_logger(),
-                    di::get('rule_dictator'),
-                    di::get('rule_type_resolver'),
-                    di::get('rule_filter_handler')
-                )
+            $actionstrategy = new world_action_collection_strategy(
+                $this,
+                $this->get_collection_logger(),
+                null,
+                di::get('rule_type_resolver'),
+                di::get('rule_filter_handler')
             );
+            $actionstrategy->set_world_rule_manager(di::get('world_rule_manager_factory')->get_rule_manager($this));
+            $actionstrategy->set_rule_sorter(di::get('rule_sorter'));
+            $this->strategy->set_action_collection_strategy($actionstrategy);
+
+            // The cheatguard for events needs to work slightly differently, as it needs to discard
+            // the logs we've collected from other sources, such as the action rules. The way we
+            // instantiate this isn't ideal as it is somewhat hardcoded but it should do for now.
+            $cheatguardreader = $this->get_collection_logger();
+            if ($cheatguardreader instanceof context_collection_logger_extended) {
+                $cheatguardreader = new logger\event_cheatguard_reader($cheatguardreader);
+                $this->strategy->set_event_cheatguard_reader($cheatguardreader);
+            }
         }
         return $this->strategy;
     }
@@ -163,22 +173,5 @@ class course_world extends \block_xp\local\course_world {
      */
     public function get_user_recent_activity_repository() {
         return $this->get_collection_logger();
-    }
-
-    /**
-     * Set the collection logger.
-     *
-     * @param collection_logger $logger The logger.
-     * @return object;
-     */
-    public function set_collection_logger(collection_logger $logger) {
-        if (!$logger instanceof context_collection_logger) {
-            // Why are we doing this? Well, this implementation knows that its logger should be implementing
-            // a ton of interfaces. So instead of making it overengineered and use a ton of factories for each
-            // of the possible interfaces we needed here, we simply hardcode that we're expecting this logger
-            // for now. Note the get_collection_strategy method and related class to identify all the interfaces needed.
-            throw new \coding_exception('Unexpected collection logger received.');
-        }
-        $this->logger = $logger;
     }
 }

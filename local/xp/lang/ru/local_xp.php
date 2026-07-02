@@ -48,7 +48,6 @@ $string['errorunknowngradeitem'] = 'Ошибка: неизвестный эле�
 $string['event_section_completed'] = 'Раздел завершён';
 $string['filtergradeitems'] = 'Фильтровать элементы оценивания';
 $string['filtershortcodesrequiredfordrops'] = 'Для использования дропов необходимо установить и включить плагин [Shortcodes]({$a->url}), он бесплатно доступен на [moodle.org]({$a->url}). Этот плагин также откроет доступ к [шорткодам Level Up XP]({$a->shortcodesdocsurl}).';
-$string['keeplogsdesc'] = 'Журналы играют важную роль в плагине: используются для защиты от накрутки, поиска недавних наград и прочего. Сокращение времени хранения журналов может повлиять на распределение баллов со временем, поэтому изменяйте его с осторожностью.';
 $string['gradeitemselector'] = 'Выбор элемента оценивания';
 $string['gradeitemtypeis'] = 'Оценка имеет тип {$a}';
 $string['gradereceived'] = 'Получена оценка';
@@ -141,7 +140,6 @@ $string['progressbarmode_help'] = '
 $string['progressbarmodelevel'] = 'Следующему уровню';
 $string['progressbarmodeoverall'] = 'Максимальному уровню';
 $string['reallyedeletedrop'] = 'Вы уверены, что хотите удалить этот дроп? Действие необратимо.';
-$string['reason'] = 'Причина';
 $string['reasonlocation'] = 'Место';
 $string['reasonlocationurl'] = 'URL места';
 $string['ruleactivitycompletion'] = 'Завершение активности';
@@ -309,3 +307,12 @@ $string['unknownsectiona'] = 'Неизвестный раздел ({$a})';
 // Устаревшее с v1.17.0
 $string['groupladder'] = 'Таблица лидеров команд';
 $string['teams'] = 'Команды';
+
+
+$string['privacy:metadata:userflag'] = 'Хранит индивидуальные настройки участия пользователя в таблице лидеров';
+$string['privacy:metadata:userflag:ladderparticipation'] = 'Участвует ли пользователь в таблице лидеров';
+$string['privacy:metadata:userflag:ladderparticipationlocked'] = 'Когда пользователь сможет снова изменить настройку участия';
+$string['privacy:metadata:userflag:userid'] = 'Пользователь';
+$string['keeplogsdesc'] = 'Логи играют важную роль в работе плагина. Они используются для защиты от мошенничества, определения последних полученных наград и других функций. Сокращение срока хранения логов может повлиять на распределение баллов со временем, поэтому изменять этот параметр следует с осторожностью.';
+$string['reason'] = 'Причина';
+

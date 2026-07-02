@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// https://levelup.plus
 
 /**
  * Shortcode handler.
@@ -26,11 +28,11 @@
 namespace local_xp\local\shortcode;
 
 use block_xp\di;
+use block_xp\local\logger\reason_occurrence_indicator;
 use block_xp\local\sql\limit;
 use block_xp\local\utils\user_utils;
 use block_xp\local\xp\state_store_with_reason;
 use local_xp\local\config\default_course_world_config;
-use local_xp\local\logger\reason_occurance_indicator;
 use local_xp\local\reason\drop_collected_reason;
 
 /**
@@ -131,14 +133,16 @@ class handler {
         $earnallowed = $config->get('enabled') && $drop->is_enabled();
         $canearn = user_utils::can_earn_points($world->get_context(), $USER->id);
         if ($earnallowed && $canearn) {
-            $loggerfactory = di::get('course_collection_logger_factory');
-            $logger = $loggerfactory->get_collection_logger($world->get_courseid());
-            $reason = new drop_collected_reason($drop->get_id());
+            $loggerfactory = di::get('context_collection_logger_factory');
+            $logger = $loggerfactory->get_logger_from_context($world->get_context());
+
+            $reason = new drop_collected_reason();
+            $reason->set_object_id($drop->get_id());
 
             // Check whether the logger supports what we need. We can remove this when we have
-            // a factory for getting the reason_occurance_indicator for a given course.
-            if (!$logger instanceof reason_occurance_indicator) {
-                debugging('Collection logger must implement reason_occurance_indicator to support drops.', DEBUG_DEVELOPER);
+            // a factory for getting the reason_occurrence_indicator for a given course.
+            if (!$logger instanceof reason_occurrence_indicator) {
+                debugging('Collection logger must implement reason_occurrence_indicator to support drops.', DEBUG_DEVELOPER);
                 return;
             }
 

@@ -36,7 +36,7 @@ use block_xp\local\action\static_action;
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class event_action_maker implements maker_from_event {
+class event_action_maker extends \block_xp\local\action\event_action_maker {
 
     /**
      * Make actions from event.
@@ -45,26 +45,55 @@ class event_action_maker implements maker_from_event {
      * @return action[]
      */
     public function make_from_event(\core\event\base $event): iterable {
-        $actions = [];
-        $context = $event->get_context();
+        $parentactions = parent::make_from_event($event);
 
-        // We cannot trust that the event gives us a context.
-        if (!$context) {
-            return $actions;
+        // We cannot trust that the event gives us a context, and we do not want restored ones.
+        $context = $event->get_context();
+        if (!$context || $event->is_restored()) {
+            return $parentactions;
         }
 
+        $actions = [];
         if ($event instanceof \core\event\course_module_completion_updated) {
             $data = $event->get_record_snapshot('course_modules_completion', $event->objectid);
             $state = $data->completionstate;
             if ($state == COMPLETION_COMPLETE || $state == COMPLETION_COMPLETE_PASS) {
-                return [new static_action('cm_completed', $context, $event->relateduserid, $context->instanceid)];
+                $actions[] = new static_action('cm_completed', $context, $event->relateduserid, $context->instanceid);
             }
 
         } else if ($event instanceof \core\event\course_completed) {
-            return [new static_action('course_completed', $context, $event->relateduserid, $event->courseid)];
+            $actions[] = new static_action('course_completed', $context, $event->relateduserid, $event->courseid);
+        } else if ($event instanceof \mod_customcert\event\issue_created) {
+            $actions[] = new certificate_issued($context, (int) $event->relateduserid, (int) $event->objectid);
         }
 
-        return $actions;
+        return $this->combine_actions($parentactions, $actions);
+    }
+
+    /**
+     * Combine actions.
+     *
+     * @param iterable $parentactions The parent actions.
+     * @param iterable $actions The local actions.
+     */
+    protected function combine_actions($parentactions, $actions) {
+
+        // Create a list of local types.
+        $localtypes = [];
+        foreach ($actions as $action) {
+            $localtypes[$action->get_type()] = true;
+        }
+
+        // Remove parent actions that share a local type.
+        $finalparentactions = [];
+        foreach ($parentactions as $parentaction) {
+            if (array_key_exists($parentaction->get_type(), $localtypes)) {
+                continue;
+            }
+            $finalparentactions[] = $parentaction;
+        }
+
+        return array_merge($finalparentactions, $actions);
     }
 
 }

@@ -28,7 +28,7 @@
 namespace local_xp\local\rulefilter;
 
 use block_xp\local\action\action;
-use block_xp\local\rulefilter\action_tester;
+use block_xp\local\action\tester\action_tester;
 
 /**
  * Tester.

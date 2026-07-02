@@ -28,7 +28,7 @@
 namespace local_xp\local\rulefilter;
 
 use block_xp\local\action\action;
-use block_xp\local\rulefilter\action_tester;
+use block_xp\local\action\tester\action_tester;
 use core_text;
 
 /**
@@ -44,7 +44,7 @@ class cmname_tester implements action_tester {
     /** Method equals. */
     const METHOD_EQUALS = cmname::METHOD_EQUALS;
     /** Method contains. */
-    const METHOD_COTNAINS = cmname::METHOD_CONTAINS;
+    const METHOD_CONTAINS = cmname::METHOD_CONTAINS;
 
     /** @var int The comparison method. */
     protected $method = 0;

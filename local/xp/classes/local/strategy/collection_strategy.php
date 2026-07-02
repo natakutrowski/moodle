@@ -105,8 +105,14 @@ class collection_strategy implements event_collection_strategy {
      * @param \core\event\base $event The event.
      */
     protected function internal_collect_event_for_actions(\core\event\base $event) {
-        // Skip all the events marked as anonymous.
         if ($event->anonymous) {
+            // Skip all the events marked as anonymous.
+            return;
+        } else if (!in_array($event->contextlevel, $this->allowedcontexts)) {
+            // Ignore events that are not in the right context.
+            return;
+        } else if ($event->is_restored()) {
+            // Ignore restored events.
             return;
         }
 

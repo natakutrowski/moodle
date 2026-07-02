@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Reason maker from event.
- *
- * @package    local_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 
 namespace local_xp\local\reason;
 
@@ -45,9 +37,9 @@ class maker_from_event {
      */
     public function make_from_event(\core\event\base $e) {
         if ($e instanceof \core\event\course_module_completion_updated) {
-            return activity_completion_reason::from_event($e);
+            return activity_completion_reason::from_context($e->get_context());
         } else if ($e instanceof \core\event\course_completed) {
-            return course_completed_reason::from_event($e);
+            return course_completed_reason::from_context($e->get_context());
         } else if ($e instanceof \core\event\user_graded) {
             return graded_reason::from_event($e);
         } else if ($e instanceof \local_xp\event\section_completed) {

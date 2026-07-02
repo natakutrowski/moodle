@@ -61,38 +61,10 @@ class handler extends \block_xp\local\rulefilter\default_handler {
     protected function load_filter($name) {
         $class = "local_xp\\local\\rulefilter\\$name";
         $instance = null;
-        if (class_exists($class)) {
+        if ($this->is_rulefilter_class($class)) {
             $instance = new $class();
-            if (!$instance instanceof rulefilter) {
-                $instance = null;
-            }
         }
         return $instance ?? parent::load_filter($name);
-    }
-
-    /**
-     * Make the filters list with priority.
-     *
-     * @return array
-     */
-    protected function make_filters_list_with_priority(): array {
-        $filters = parent::make_filters_list_with_priority();
-        return array_merge($filters, [
-            // Course modules.
-            'cm' => 9000,
-            'cmname' => 2000,
-
-            // Sections.
-            'section' => 1000,
-
-            // Course.
-            'thiscourse' => 100,
-
-            // Any.
-            'anycm' => 9,
-            'anysection' => 6,
-            'anycourse' => 3,
-        ]);
     }
 
 }

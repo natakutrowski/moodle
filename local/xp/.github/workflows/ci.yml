@@ -7,8 +7,10 @@ on:
       - multi-ci
 
 env:
-  BLOCK_XP_TAG: 'v19.0'
-  FILTER_SHORTCODES_TAG: 'v1.1.2'
+  BLOCK_XP_TAG: 'v20.0-rc1'
+  FILTER_SHORTCODES_TAG: 'v1.1.3'
+  TESTS_REPO_TAG: ''
+  BLOCK_XP_TESTS_REPO_TAG: 'master'
 
 jobs:
   test:
@@ -16,7 +18,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:16
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -39,7 +41,7 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4']
-        moodle-branch: ['MOODLE_405_STABLE', 'MOODLE_500_STABLE', 'MOODLE_501_STABLE']
+        moodle-branch: ['MOODLE_405_STABLE', 'MOODLE_500_STABLE', 'MOODLE_501_STABLE', 'MOODLE_502_STABLE']
         database: [pgsql]
         include:
           # PHP 7.4, with Moodle 4.1.
@@ -61,19 +63,43 @@ jobs:
           - moodle-branch: MOODLE_401_STABLE
             database: mariadb
             php: 7.4
-          - moodle-branch: MOODLE_501_STABLE
+          - moodle-branch: MOODLE_502_STABLE
             database: mariadb
             php: 8.4
 
         exclude:
           - moodle-branch: MOODLE_405_STABLE
             php: 8.4
+          - moodle-branch: MOODLE_502_STABLE
+            php: 8.2
 
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
           path: plugin
+
+      - name: Resolve tests repository branch
+        run: |
+          if [ -n "${TESTS_REPO_TAG:-}" ]; then
+            echo "TESTS_REPO_TAG=${TESTS_REPO_TAG}" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF_NAME}" == *multi* ]]; then
+            echo "TESTS_REPO_TAG=multi" >> $GITHUB_ENV
+          else
+            echo "TESTS_REPO_TAG=pro" >> $GITHUB_ENV
+          fi
+
+      - name: Delete plugin tests content
+        run: rm -rf plugin/tests/* plugin/tests/.[!.]* plugin/tests/..?*
+
+      - name: Check out private tests repository
+        uses: actions/checkout@v4
+        with:
+          repository: branchup/local_xp-tests
+          ref: ${{ env.TESTS_REPO_TAG }}
+          path: plugin/tests
+          token: '-'
+          ssh-key: ${{ secrets.TESTS_REPO_SSHKEY }}
 
       - name: Setup PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
@@ -101,6 +127,32 @@ jobs:
 
       - name: Add plugin block_xp ${{ env.BLOCK_XP_TAG }}
         run: moodle-plugin-ci add-plugin --branch ${{ env.BLOCK_XP_TAG }} --clone git@github.com:branchup/block_xp
+
+      - name: Delete queued block_xp tests content
+        run: |
+          rm -rf moodle-plugin-ci-plugins/block_xp/tests/* \
+            moodle-plugin-ci-plugins/block_xp/tests/.[!.]* \
+            moodle-plugin-ci-plugins/block_xp/tests/..?*
+
+      - name: Setup block_xp-tests SSH host
+        env:
+          BLOCK_XP_TESTS_REPO_SSHKEY: ${{ secrets.BLOCK_XP_TESTS_REPO_SSHKEY }}
+        run: |
+          printf '%s\n' "$BLOCK_XP_TESTS_REPO_SSHKEY" > ~/.ssh/block_xp_tests
+          chmod 600 ~/.ssh/block_xp_tests
+          cat >> ~/.ssh/config <<'EOF'
+          Host github-block_xp-tests
+            HostName github.com
+            User git
+            IdentityFile ~/.ssh/block_xp_tests
+            IdentitiesOnly yes
+          EOF
+
+      - name: Check out private block_xp tests repository
+        run: |
+          git clone --depth 1 --branch "${BLOCK_XP_TESTS_REPO_TAG}" \
+            git@github-block_xp-tests:branchup/block_xp-tests \
+            moodle-plugin-ci-plugins/block_xp/tests
 
       - name: Add plugin filter_shortcodes ${{ env.FILTER_SHORTCODES_TAG }}
         run: moodle-plugin-ci add-plugin --branch ${{ env.FILTER_SHORTCODES_TAG }} branchup/moodle-filter_shortcodes
@@ -140,7 +192,7 @@ jobs:
       - name: Behat features
         id: behat
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci behat --profile chrome --auto-rerun 0
+        run: moodle-plugin-ci behat --profile chrome --auto-rerun 1
 
       - name: Mark cancelled jobs as failed.
         if: ${{ cancelled() }}

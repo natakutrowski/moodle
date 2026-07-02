@@ -22,16 +22,10 @@
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-/**
- * Local XP backup.
- *
- * @package    local_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class restore_local_xp_plugin extends restore_local_plugin {
+
+    /** @var bool Preprocessed. */
+    private $xppreprocessed = false;
 
     /**
      * Define structure.
@@ -47,6 +41,7 @@ class restore_local_xp_plugin extends restore_local_plugin {
         // without the overwrite setting enabled, will not have their data deleted.
         $paths[] = new restore_path_element($this->get_namefor('config'), $this->get_pathfor('/xp_config'));
         $paths[] = new restore_path_element($this->get_namefor('drop'), $this->get_pathfor('/xp_drops/xp_drop'));
+        $paths[] = new restore_path_element($this->get_namefor('rule'), $this->get_pathfor('/xp_rules/xp_rule'));
 
         // This path is a legacy one to ensure that older backups still work. We had to change the name of the
         // key where the config was stored because Moodle requires keys to be unique across plugins, hence the
@@ -69,6 +64,12 @@ class restore_local_xp_plugin extends restore_local_plugin {
     private function pre_process_local_xp() {
         global $DB;
 
+        // Prevent multiple accidental calls.
+        if ($this->xppreprocessed) {
+            return;
+        }
+        $this->xppreprocessed = true;
+
         $target = $this->task->get_target();
         $courseid = $this->task->get_courseid();
 
@@ -82,6 +83,11 @@ class restore_local_xp_plugin extends restore_local_plugin {
             $DB->delete_records('local_xp_config', $conditions);
             $DB->delete_records('local_xp_drops', $conditions);
             $DB->delete_records('local_xp_log', ['contextid' => $this->task->get_contextid()]);
+            $DB->execute(
+                "DELETE FROM {local_xp_rule}
+                  WHERE ruleid IN (SELECT id FROM {block_xp_rule} WHERE contextid = :ctxid)",
+                ['ctxid' => $this->task->get_contextid()]
+            );
         }
     }
 
@@ -143,12 +149,65 @@ class restore_local_xp_plugin extends restore_local_plugin {
     }
 
     /**
+     * Process rule.
+     *
+     * @param array $data Data.
+     * @return void
+     */
+    public function process_local_xp_rule($data) {
+        // Save the rule to process it after the restore as we don't have the final rule ID, yet.
+        $restoreid = $this->get_restoreid();
+        $itemid = (int) $data['id'];
+        restore_dbops::set_backup_ids_record($restoreid, 'local_xp_rule_record', $itemid, 0, null, $data);
+    }
+
+    /**
      * After execute.
      *
      * @return void
      */
     public function after_execute_course() {
         $this->add_related_files('local_xp', 'currency', null, $this->task->get_old_contextid());
+    }
+
+    /**
+     * After restore.
+     *
+     * @return void
+     */
+    public function after_restore_course() {
+        $this->after_restore_local_xp_rule();
+    }
+
+    /**
+     * After restore for rule.
+     *
+     * @return void
+     */
+    protected function after_restore_local_xp_rule() {
+        global $DB;
+        $restoreid = $this->get_restoreid();
+
+        // Retrieve all the rules that we stored during the restore process, we have to wait to restore them
+        // because we need the block to restore first in order to retrieve the rule ID from it.
+        $conditions = ['backupid' => $restoreid, 'itemname' => 'local_xp_rule_record'];
+        $recordset = $DB->get_recordset('backup_ids_temp', $conditions, '', 'id, itemid, info');
+        foreach ($recordset as $record) {
+            $data = backup_controller_dbops::decode_backup_temp_info($record->info);
+            $oldruleid = $data['ruleid'];
+            $newruleid = $this->step->get_mappingid('block_xp_rule', $oldruleid, false);
+            if (!$newruleid) {
+                $this->task->log('local_xp: rule not restored, block rule not found', backup::LOG_DEBUG);
+                continue;
+            } else if ($DB->record_exists('local_xp_rule', ['ruleid' => $newruleid])) {
+                $this->task->log('local_xp: rule not restored, already exists', backup::LOG_DEBUG);
+                continue;
+            }
+            unset($data['id']);
+            $data['ruleid'] = $newruleid;
+            $DB->insert_record('local_xp_rule', $data);
+        }
+        $recordset->close();
     }
 
     /**

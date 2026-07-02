@@ -25,8 +25,10 @@
 
 namespace local_xp\local\factory;
 
+use block_xp\di;
 use block_xp\local\serializer\url_serializer;
 use local_xp\local\serializer\level_serializer;
+use local_xp\local\serializer\rule_serializer;
 
 /**
  * Serializer factory.
@@ -40,6 +42,12 @@ class serializer_factory extends \block_xp\local\factory\serializer_factory {
 
     public function get_level_serializer() {
         return new level_serializer(new url_serializer());
+    }
+
+    public function get_rule_serializer() {
+        $serializer = new rule_serializer(di::get('rule_filter_handler'));
+        $serializer->set_limit_spec_serializer($this->get_limit_spec_serializer());
+        return $serializer;
     }
 
 }

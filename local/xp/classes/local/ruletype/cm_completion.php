@@ -16,20 +16,15 @@
 //
 // https://levelup.plus
 
-/**
- * Type.
- *
- * @package    local_xp
- * @copyright  2024 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace local_xp\local\ruletype;
 
 use block_xp\local\action\action;
 use block_xp\local\reason\reason;
+use block_xp\local\ruletype\profile\cm_profile;
+use block_xp\local\ruletype\profile\profile;
 use block_xp\local\ruletype\ruletype;
+use block_xp\local\ruletype\ruletype_deprecation_filler_trait;
+use block_xp\local\ruletype\ruletype_with_profile;
 use lang_string;
 use local_xp\local\reason\activity_completion_reason;
 
@@ -41,18 +36,15 @@ use local_xp\local\reason\activity_completion_reason;
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class cm_completion implements ruletype {
-
-    public function get_compatible_filters(): array {
-        return ['cm', 'cmname', 'anycm'];
-    }
+class cm_completion implements ruletype, ruletype_with_profile {
+    use ruletype_deprecation_filler_trait;
 
     public function get_display_name(): lang_string {
         return new lang_string('ruletypecmcompletion', 'block_xp');
     }
 
-    public function get_repeat_window(): ?string {
-        return static::WINDOW_ONCE;
+    public function get_profile(): profile {
+        return (new cm_profile())->set_requires_completion_enabled(true);
     }
 
     public function get_short_description(): lang_string {
@@ -68,8 +60,7 @@ class cm_completion implements ruletype {
     }
 
     public function make_reason(action $action): reason {
-        $state = defined('COMPLETION_COMPLETE') ? COMPLETION_COMPLETE : 1;
-        return new activity_completion_reason($action->get_object_id(), $state);
+        return activity_completion_reason::from_context($action->get_context());
     }
 
 }

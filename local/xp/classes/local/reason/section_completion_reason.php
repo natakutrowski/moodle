@@ -14,19 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Section completion reason.
- *
- * @package    local_xp
- * @copyright  2022 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 
 namespace local_xp\local\reason;
 
 use block_xp\local\reason\reason;
+use block_xp\local\reason\reason_rule_trait;
+use block_xp\local\reason\reason_tracking_trait;
 use block_xp\local\reason\reason_with_rule;
+use block_xp\local\reason\reason_with_tracking;
+use context;
 use context_course;
 
 /**
@@ -37,25 +33,42 @@ use context_course;
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class section_completion_reason implements reason, reason_with_location, reason_with_rule, reason_with_short_description {
+class section_completion_reason implements
+    reason,
+    reason_with_location,
+    reason_with_rule,
+    reason_with_short_description,
+    reason_with_tracking {
     use reason_rule_trait;
+    use reason_tracking_trait;
 
-    /** @var int The course ID. */
-    protected $courseid;
-    /** @var \context The context. */
-    protected $context;
-    /** @var int The section num. */
-    protected $sectionnum;
+    /**
+     * @var int The course ID.
+     * @deprecated Since XP+ 20
+     */
+    protected $courseid = 0;
+    /**
+     * @var int The section num.
+     * @deprecated Since XP+ 20
+     */
+    protected $sectionnum = 0;
 
     /**
      * Constructor.
      *
-     * @param int $courseid The course ID.
-     * @param int $sectionnum The section.
+     * @param int $courseid The course ID. Deprecated.
+     * @param int|null $sectionnum The section. Deprecated.
      */
-    public function __construct($courseid, $sectionnum) {
-        $this->courseid = $courseid;
-        $this->sectionnum = $sectionnum;
+    public function __construct($courseid = 0, $sectionnum = null) {
+        if ($courseid) {
+            $ctx = context_course::instance($courseid, IGNORE_MISSING);
+            if ($ctx) {
+                $this->set_env_id((int) $ctx->id);
+            }
+        }
+        if ($sectionnum !== null) {
+            $this->set_object_id((int) $sectionnum);
+        }
     }
 
     /**
@@ -64,10 +77,17 @@ class section_completion_reason implements reason, reason_with_location, reason_
      * @return context|null
      */
     protected function get_context() {
-        if (!isset($this->context)) {
-            $this->context = context_course::instance($this->courseid, IGNORE_MISSING);
-        }
-        return !empty($this->context) ? $this->context : null;
+        return context::instance_by_id($this->get_env_id() ?? 0, IGNORE_MISSING) ?: null;
+    }
+
+    /**
+     * Get the course ID.
+     *
+     * @return int
+     */
+    protected function get_course_id(): int {
+        $ctx = $this->get_context();
+        return $ctx ? (int) $ctx->instanceid : 0;
     }
 
     /**
@@ -79,7 +99,8 @@ class section_completion_reason implements reason, reason_with_location, reason_
         global $CFG;
         require_once($CFG->dirroot . '/course/lib.php');
         try {
-            return get_fast_modinfo($this->courseid);
+
+            return get_fast_modinfo($this->get_course_id());
         } catch (\moodle_exception $e) {
             return null;
         }
@@ -92,8 +113,9 @@ class section_completion_reason implements reason, reason_with_location, reason_
      */
     public function get_location_name() {
         $modinfo = $this->get_modinfo();
-        $name = $modinfo ? get_section_name($modinfo->courseid, $this->sectionnum) : '';
-        return $name !== '' ? $name : get_string('unknownsection', 'local_xp', $this->sectionnum);
+        $section = $modinfo ? $modinfo->get_section_info($this->get_section_num()) : null;
+        $name = $section ? get_section_name($modinfo->courseid, $section) : '';
+        return $name !== '' ? $name : get_string('unknownsectiona', 'local_xp', $this->get_section_num());
     }
 
     /**
@@ -103,28 +125,47 @@ class section_completion_reason implements reason, reason_with_location, reason_
      */
     public function get_location_url() {
         $modinfo = $this->get_modinfo();
-        return $modinfo ? course_get_url($modinfo->courseid, $this->sectionnum) : null;
+        return $modinfo ? course_get_url($modinfo->courseid, $this->get_section_num()) : null;
+    }
+
+    /**
+     * Get the section number.
+     *
+     * @return int
+     */
+    protected function get_section_num(): int {
+        return $this->get_object_id() ?? 0;
     }
 
     public function get_signature() {
-        return $this->courseid . ':' . $this->sectionnum;
+        return $this->get_course_id() . ':' . $this->get_section_num();
     }
 
     public function get_short_description() {
         return get_string('sectioncompleted', 'local_xp');
     }
 
+    /**
+     * @deprecated Since XP+ 20
+     */
     public static function get_type() {
         return __CLASS__;
     }
 
+    /**
+     * @deprecated Since XP+ 20
+     */
     public static function from_signature($signature) {
         [$courseid, $sectionnum] = explode(':', $signature);
         return new static($courseid, $sectionnum);
     }
 
     public static function from_event(\local_xp\event\section_completed $e) {
-        return new static($e->courseid, $e->other['sectionnum']);
+        $context = context_course::instance($e->courseid, IGNORE_MISSING);
+        $reason = new static();
+        $reason->set_env_id($context ? (int) $context->id : 0);
+        $reason->set_object_id((int) $e->other['sectionnum']);
+        return $reason;
     }
 
 }

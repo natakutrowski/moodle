@@ -14,15 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Local XP backup.
- *
- * @package    local_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 use block_xp\di;
 use local_xp\local\xp\level_with_badge_award;
 
@@ -63,6 +54,22 @@ class backup_local_xp_plugin extends backup_local_plugin {
         $xpdrop->set_source_table('local_xp_drops', ['courseid' => backup::VAR_COURSEID]);
         $xpdrops->add_child($xpdrop);
         $pluginwrapper->add_child($xpdrops);
+
+        // Add rules.
+        $xprules = new backup_nested_element('xp_rules');
+        $xprule = new backup_nested_element('xp_rule',
+            ['id'],
+            ['ruleid', 'limitmax', 'limitwindow', 'repeatwindow', 'repeatscope']
+        );
+        $xprule->set_source_sql(
+            'SELECT lr.*
+               FROM {local_xp_rule} lr
+               JOIN {block_xp_rule} r ON r.id = lr.ruleid
+              WHERE r.contextid = :contextid',
+            ['contextid' => backup::VAR_CONTEXTID]
+        );
+        $xprules->add_child($xprule);
+        $pluginwrapper->add_child($xprules);
 
         // @codingStandardsIgnoreStart
         // Add logs. Note that those will not be useful for the cheat guard any more, as

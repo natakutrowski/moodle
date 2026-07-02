@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Reason rule trait.
- *
- * @package    local_xp
- * @copyright  2024 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 
 namespace local_xp\local\reason;
 
@@ -32,6 +24,7 @@ namespace local_xp\local\reason;
  * @copyright  2024 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated Since XP+ 20, use \block_xp\local\reason\reason_rule_trait instead.
  */
 trait reason_rule_trait {
 

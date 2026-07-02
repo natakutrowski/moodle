@@ -38,6 +38,7 @@ use moodle_database;
  * @copyright  2022 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated Since XP+ 20, use block_xp\local\factory\context_collection_logger_factory instead.
  */
 class course_collection_logger_factory {
     // No interface for now, maybe later...
@@ -88,7 +89,7 @@ class course_collection_logger_factory {
 
             // Note that at this moment, the course_world very much expects this class.
             // Swapping it for another one will raise exceptions.
-            $this->loggers[$courseid] = new \local_xp\local\logger\context_collection_logger(
+            $this->loggers[$courseid] = new \local_xp\local\logger\context_collection_logger_extended(
                 $this->db,
                 $context,
                 new \local_xp\local\reason\maker_from_type_and_signature()

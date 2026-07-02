@@ -34,6 +34,7 @@ use block_xp\local\reason\reason;
 use block_xp\local\logger\collection_logger_with_group_reset;
 use block_xp\local\logger\collection_logger_with_id_reset;
 use block_xp\local\logger\reason_collection_logger;
+use block_xp\local\logger\reason_occurrence_indicator;
 use block_xp\local\reason\reason_with_rule;
 use local_xp\local\reason\reason_with_short_description;
 use local_xp\local\reason\maker_from_type_and_signature;
@@ -48,6 +49,7 @@ use local_xp\local\reason\maker_from_type_and_signature;
  * @copyright  2017 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated Since XP+ 20, use context_collection_logger_extended instead.
  */
 class context_collection_logger implements
     collection_counts_indicator,
@@ -56,6 +58,7 @@ class context_collection_logger implements
     reason_collection_counts_indicator,
     reason_collection_logger,
     reason_occurance_indicator,
+    reason_occurrence_indicator,
     user_recent_activity_repository {
 
     /** @var moodle_database */
