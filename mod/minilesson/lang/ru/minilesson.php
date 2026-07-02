@@ -1336,7 +1336,8 @@ $string['generatelessonitem_desc'] = 'Создайте урок или элем�
 $string['generate'] = 'Создать';
 
 $string['audiochatstudent'] = 'Студент';
-$string['audiochataiassistant'] = 'ИИ-ассистент';
+//$string['audiochataiassistant'] = 'ИИ-ассистент';
+$string['audiochataiassistant'] = 'Gustave';
 
 $string['shadow'] = 'Теневое повторение видео';
 $string['cards'] = 'Карточки';

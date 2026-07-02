@@ -1445,7 +1445,8 @@ $string['generatelessonitem_desc'] = 'Generate a lesson or lesson items using AI
 $string['generate'] = 'Generate';
 
 $string['audiochatstudent'] = 'Student';
-$string['audiochataiassistant'] = 'AI Assistant';
+//$string['audiochataiassistant'] = 'AI Assistant';
+$string['audiochataiassistant'] = 'Gustave';
 $string['targetwordcount_instructions'] = 'If target word count is greater than 0 then students will be penalized to the extent that their
 total word count is less than the target word count';
 

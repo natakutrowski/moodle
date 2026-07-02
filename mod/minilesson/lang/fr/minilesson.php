@@ -1358,7 +1358,8 @@ $string['generatelessonitem_desc'] = 'Générez une leçon ou des éléments de 
 $string['generate'] = 'Générer';
 
 $string['audiochatstudent'] = 'Étudiant';
-$string['audiochataiassistant'] = 'Assistant IA';
+//$string['audiochataiassistant'] = 'Assistant IA';
+$string['audiochataiassistant'] = 'Gustave';
 
 
 $string['shadow'] = 'Shadowing vidéo';
