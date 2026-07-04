@@ -1,5 +1,6 @@
 <?php
-require_once(__DIR__ . '/../../../../config.php');
+
+require_once(__DIR__ . '/../../../../../config.php');
 require_once($CFG->libdir . '/excellib.class.php');
 require_once($CFG->libdir . '/clilib.php');
 
@@ -8,6 +9,8 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\admin\AdminFormatter;
+use local_subscriptions\admin\AdminEntityLinks;
+use local_subscriptions\support\DigitalPresenter;
 
 $context = AdminSecurity::require(Capabilities::VIEW_DIGITAL);
 
@@ -536,8 +539,8 @@ foreach ($records as $r) {
         'noclean' => true,
     ]);
 
-    $productcell = html_writer::link(
-        new moodle_url(subscription_config::digital_product_edit_admin_page(), ['id' => $r->productid]),
+    $productcell = AdminEntityLinks::digital_product(
+        (int)$r->productid,
         $productlabel
     );
 
@@ -549,25 +552,23 @@ foreach ($records as $r) {
 
     $userlabel .= html_writer::empty_tag('br') . html_writer::tag('small', s($r->email ?? ''));
 
-    if (!empty($r->crmuserid)) {
-        $usercell = html_writer::link(
-            new moodle_url(subscription_config::admin_user_view_page(), ['id' => $r->crmuserid]),
-            $userlabel,
-            ['class' => 'digital-purchase-user-link']
-        );
-    } else {
-        $usercell = $userlabel;
-    }    
+    $usercell = !empty($r->crmuserid)
+        ? AdminEntityLinks::user((int)$r->crmuserid, $userlabel)
+        : $userlabel; 
 
     $table->data[] = [
-        (int)$r->id,
+        html_writer::link(
+            new moodle_url(subscription_config::digital_purchase_view_admin_page(), ['id' => $r->id]),
+            '#' . $r->id,
+            ['class' => 'crm-entity-link']
+        ),
         $productcell,
         $usercell,
         !empty($r->hascampususer)
             ? html_writer::tag('span', get_string('yes'), ['class' => 'badge bg-success'])
             : html_writer::tag('span', get_string('no'), ['class' => 'badge bg-warning text-dark']),
         AdminFormatter::price($r->price ?? 0, $r->currency ?? ''),
-        local_subscriptions_render_provider_icon($r->payment_provider ?? ''),
+        DigitalPresenter::render_provider_icon($r->payment_provider ?? ''),
         local_subscriptions_render_db_status_badge($r->status ?? ''),
         $statusbadge,
         html_writer::tag('span', s($providerstatus['reason'] ?? ''), [
@@ -747,33 +748,6 @@ function local_subscriptions_check_stripe_provider_status(stdClass $pr): array {
     ];
 }
 
-function local_subscriptions_render_provider_icon(string $provider): string {
-    global $CFG;
-
-    $provider = strtolower(trim($provider));
-
-    $files = [
-        'stripe' => 'stripe.png',
-        'alfa' => 'alfa.png',
-    ];
-
-    if (empty($files[$provider])) {
-        return s($provider);
-    }
-
-    $path = $CFG->dirroot . '/local/subscriptions/pix/email/' . $files[$provider];
-
-    if (!file_exists($path)) {
-        return s($provider);
-    }
-
-    return html_writer::empty_tag('img', [
-        'src' => $CFG->wwwroot . '/local/subscriptions/pix/email/' . $files[$provider],
-        'alt' => s($provider),
-        'title' => s($provider),
-        'style' => 'height:28px;width:auto;',
-    ]);
-}
 
 function local_subscriptions_reconcile_pending_digital_payments(): array {
     global $DB;

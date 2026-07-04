@@ -105,7 +105,7 @@ class digital_payment_reconciler {
         return $result;
     }
 
-    private static function check_provider_status(\stdClass $pr): array {
+    public static function check_provider_status(\stdClass $pr): array {
         if ($pr->payment_provider === 'stripe') {
             return self::check_stripe($pr);
         }
@@ -275,4 +275,47 @@ class digital_payment_reconciler {
             'reason' => $reason ?: 'Alfa orderStatus: ' . var_export($orderstatus, true),
         ];
     }
+
+    public static function check_one(int $purchaseid): array {
+        global $DB;
+
+        $pr = $DB->get_record(product_manager::TABLE_PAYMENT_REQUEST, ['id' => $purchaseid], '*', MUST_EXIST);
+
+        $providerstatus = self::check_provider_status($pr);
+
+        $status = strtoupper($providerstatus['status'] ?? 'UNKNOWN');
+        $reason = $providerstatus['reason'] ?? '';
+
+        $update = (object)[
+            'id' => $pr->id,
+            'last_attempt' => time(),
+            'attempts' => ((int)($pr->attempts ?? 0)) + 1,
+            'last_update' => time(),
+            'last_error' => $reason !== '' ? '[manual_check] ' . $status . ' - ' . $reason : null,
+        ];
+
+        if ($status === 'PAID' && strtolower((string)$pr->status) !== 'paid') {
+            $event = new InternalEvent('checkout_completed', [
+                'payment_request_id' => (string)$pr->id,
+                'currency' => $pr->currency,
+                'amount_minor' => (int)$pr->amount_minor,
+                'meta' => [
+                    'payment_context' => 'digital_product',
+                    'provider' => $pr->payment_provider,
+                    'session' => $pr->sessionid,
+                    'orderId' => $pr->sessionid,
+                ],
+            ]);
+
+            digital_payment_service::on_checkout_completed($event);
+        } else {
+            $DB->update_record(product_manager::TABLE_PAYMENT_REQUEST, $update);
+        }
+
+        return [
+            'status' => $status,
+            'reason' => $reason,
+        ];
+    }
+
 }

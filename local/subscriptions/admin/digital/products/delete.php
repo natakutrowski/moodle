@@ -1,5 +1,6 @@
 <?php
-require_once(__DIR__ . '/../../../../config.php');
+
+require_once(__DIR__ . '/../../../../../config.php');
 
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;

@@ -10,6 +10,8 @@ final class UserTimelineService {
     public static function get_for_user(int $userid, int $limit = 40): array {
         global $DB;
 
+        $user = $DB->get_record('user', ['id' => $userid], 'id,email', MUST_EXIST);
+
         $items = [];
 
         $logs = $DB->get_records(
@@ -21,10 +23,14 @@ final class UserTimelineService {
             $limit
         );
 
+        $seenlogids = [];
+
         foreach ($logs as $log) {
             if ((string)$log->action === AdminEvents::USER_NOTE_ADDED) {
                 continue;
             }
+
+            $seenlogids[(int)$log->id] = true;
 
             $items[] = (object)[
                 'type' => 'admin_log',
@@ -35,6 +41,7 @@ final class UserTimelineService {
                 'body' => self::details_to_text($log->details ?? ''),
                 'objecttype' => $log->objecttype ?? null,
                 'detailsraw' => self::details_to_array($log->details ?? ''),
+                'action' => (string)$log->action,
                 'raw' => $log,
             ];
         }
@@ -59,6 +66,79 @@ final class UserTimelineService {
                 'raw' => $note,
             ];
         }
+
+        $digitalpayments = $DB->get_records_sql("
+            SELECT dpr.*, dp.name AS productname
+            FROM {subscription_digital_payment_request} dpr
+        LEFT JOIN {subscription_digital_product} dp ON dp.id = dpr.productid
+            WHERE dpr.userid = :userid OR dpr.email = :email
+        ORDER BY dpr.creation_date DESC, dpr.id DESC
+        ", [
+            'userid' => $userid,
+            'email' => $user->email,
+        ], 0, $limit);
+
+        $purchaseids = array_map(function($payment) {
+            return (int)$payment->id;
+        }, $digitalpayments);
+
+        if ($purchaseids) {
+            [$insql, $inparams] = $DB->get_in_or_equal($purchaseids, SQL_PARAMS_NAMED);
+
+            $digitallogs = $DB->get_records_select(
+                'local_subscriptions_admin_log',
+                "objecttype = :objecttype AND objectid $insql",
+                ['objecttype' => 'digital_purchase'] + $inparams,
+                'timecreated DESC, id DESC',
+                '*',
+                0,
+                $limit
+            );
+
+            foreach ($digitallogs as $log) {
+                $items[] = (object)[
+                    'type' => 'admin_log',
+                    'icon' => self::icon_for_action((string)$log->action),
+                    'timecreated' => (int)$log->timecreated,
+                    'actorid' => (int)$log->actorid,
+                    'title' => self::label_for_action((string)$log->action),
+                    'body' => self::details_to_text($log->details ?? ''),
+                    'objecttype' => $log->objecttype ?? null,
+                    'detailsraw' => self::details_to_array($log->details ?? ''),
+                    'action' => (string)$log->action,
+                    'raw' => $log,
+                ];
+
+                if (!empty($seenlogids[(int)$log->id])) {
+                    continue;
+                }
+                $seenlogids[(int)$log->id] = true;
+            }
+        }
+
+
+        foreach ($digitalpayments as $payment) {
+            $status = strtoupper((string)($payment->status ?? ''));
+
+            $items[] = (object)[
+                'type' => 'digital_purchase',
+                'icon' => $status === 'PAID' || $status === 'COMPLETED' ? '📦' : '🧾',
+                'timecreated' => !empty($payment->payment_date) ? (int)$payment->payment_date : (int)$payment->creation_date,
+                'actorid' => 0,
+                'title' => get_string('crm_timeline_digital_purchase', 'local_subscriptions'),
+                'body' => '',
+                'objecttype' => 'digital_purchase',
+                'detailsraw' => [
+                    'productid' => (int)$payment->productid,
+                    'product' => $payment->productname ?: '-',
+                    'status' => $status ?: '-',
+                    'price' => $payment->price ?? 0,
+                    'currency' => $payment->currency ?? '',
+                    'email' => $payment->email ?? '',
+                ],
+                'raw' => $payment,
+            ];
+        }        
 
         usort($items, function($a, $b) {
             if ($a->timecreated === $b->timecreated) {
@@ -87,6 +167,10 @@ final class UserTimelineService {
             return '💳';
         }
 
+        if (str_contains($action, 'digital')) {
+            return '📦';
+        }
+        
         return '⚙️';
     }
 

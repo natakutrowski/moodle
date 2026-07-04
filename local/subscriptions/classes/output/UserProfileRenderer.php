@@ -11,6 +11,7 @@ use local_subscriptions\subscription_config;
 use local_subscriptions\support\SubsPresenter;
 use local_subscriptions\support\DigitalPresenter;
 use local_subscriptions\admin\AdminFormatter;
+use local_subscriptions\admin\AdminEntityLinks;
 
 final class UserProfileRenderer {
 
@@ -85,7 +86,7 @@ final class UserProfileRenderer {
     private static function subscriptions(array $subscriptions): string {
         global $OUTPUT;
 
-        $out = html_writer::tag('h4', get_string('subscriptions', 'local_subscriptions'), ['class' => 'mb-3']);
+        $out = html_writer::tag('h4', get_string('subscriptions', 'local_subscriptions'), ['class' => 'mt-5 mb-3']);
 
         if (!$subscriptions) {
             return $out . $OUTPUT->notification(get_string('crm_no_subscriptions', 'local_subscriptions'), 'info');
@@ -119,8 +120,8 @@ final class UserProfileRenderer {
                 $period,
                 $price,
                 SubsPresenter::render_status_badge($sub->status),
-                html_writer::link(
-                    new moodle_url(subscription_config::user_subscription_edit_page(), ['id' => $sub->id]),
+                AdminEntityLinks::subscription(
+                    (int)$sub->id,
                     get_string('edit'),
                     ['class' => 'btn btn-sm btn-outline-primary']
                 ),
@@ -175,20 +176,20 @@ final class UserProfileRenderer {
         );
 
         $items[] = html_writer::link(
-            new moodle_url('/local/subscriptions/admin/users/email.php', ['id' => $user->id]),
+            new moodle_url(subscription_config::admin_user_email_page(), ['id' => $user->id]),
             '✉️ ' . get_string('crm_send_email', 'local_subscriptions'),
             ['class' => 'btn btn-sm btn-outline-primary']
         );
 
         $items[] = html_writer::link(
-            new moodle_url('/local/subscriptions/admin/users/reset_password.php', ['id' => $user->id]),
+            new moodle_url(subscription_config::admin_user_reset_password_page(), ['id' => $user->id]),
             '🔑 ' . get_string('crm_reset_password', 'local_subscriptions'),
             ['class' => 'btn btn-sm btn-outline-secondary']
         );
 
         $noteform = html_writer::start_tag('form', [
             'method' => 'post',
-            'action' => new moodle_url('/local/subscriptions/admin/users/add_note.php'),
+            'action' => new moodle_url(subscription_config::admin_user_add_note_page()),
             'class' => 'crm-quick-note-form mt-3',
         ]);
 
@@ -297,6 +298,14 @@ final class UserProfileRenderer {
             return self::render_subscription_timeline_body($details);
         }
 
+        if (($item->type ?? '') === 'admin_log' && ($item->objecttype ?? '') === 'digital_purchase') {
+            return self::render_digital_action_timeline_body($details);
+        }
+
+        if (($item->type ?? '') === 'digital_purchase') {
+            return self::render_digital_purchase_timeline_body($details);
+        }
+
         if (!empty($details['subject'])) {
             return html_writer::div(
                 html_writer::tag('span', get_string('subject', 'local_subscriptions') . ': ', ['class' => 'text-muted']) .
@@ -397,12 +406,16 @@ final class UserProfileRenderer {
     private static function courses(array $courses): string {
         global $OUTPUT;
 
-        $out = html_writer::tag('h4', get_string('crm_accessible_courses', 'local_subscriptions'), [
-            'class' => 'mt-4 mb-3',
+        $out = html_writer::start_div('crm-section crm-courses-section mt-5');
+        $out .= html_writer::tag('h4', get_string('crm_accessible_courses', 'local_subscriptions'), [
+            'class' => 'mt-5 mb-3',
         ]);
 
         if (!$courses) {
-            return $out . $OUTPUT->notification(get_string('crm_no_accessible_courses', 'local_subscriptions'), 'info');
+            $out .= $OUTPUT->notification(get_string('crm_no_accessible_courses', 'local_subscriptions'), 'info');
+            $out .= html_writer::end_div();
+
+            return $out;
         }
 
         $table = new html_table();
@@ -417,12 +430,12 @@ final class UserProfileRenderer {
 
             if (!empty($course->timeend)) {
                 $access .= ' · ' . get_string('until', 'local_subscriptions') . ' ' .
-                    \local_subscriptions\admin\AdminFormatter::date((int)$course->timeend);
+                    AdminFormatter::date((int)$course->timeend);
             }
 
             $table->data[] = [
-                html_writer::link(
-                    new moodle_url('/course/view.php', ['id' => $course->id]),
+                AdminEntityLinks::course(
+                    (int)$course->id,
                     format_string($course->fullname)
                 ),
                 s($course->shortname),
@@ -430,7 +443,87 @@ final class UserProfileRenderer {
             ];
         }
 
-        return $out . html_writer::table($table);
+        $out .= html_writer::table($table);
+        $out .= html_writer::end_div();
+
+        return $out;
+    }
+
+    private static function render_digital_purchase_timeline_body(array $details): string {
+        if (!$details) {
+            return '';
+        }
+
+        $product = !empty($details['productid'])
+            ? AdminEntityLinks::digital_product(
+                (int)$details['productid'],
+                s((string)($details['product'] ?? '-'))
+            )
+            : s((string)($details['product'] ?? '-'));
+
+        $status = DigitalPresenter::render_status_badge((string)($details['status'] ?? ''));
+
+        $price = AdminFormatter::price(
+            $details['price'] ?? 0,
+            $details['currency'] ?? ''
+        );
+
+        return html_writer::div(
+            html_writer::div(
+                html_writer::tag('strong', $product) . ' ' . $status
+            ) .
+            html_writer::div($price, 'small mt-1') .
+            html_writer::div(s((string)($details['email'] ?? '')), 'text-muted small mt-1'),
+            'crm-timeline-digital-card'
+        );
+    }
+
+    private static function render_digital_action_timeline_body(array $details): string {
+        $email = s((string)($details['email'] ?? ''));
+        $purchaseid = (int)($details['purchaseid'] ?? 0);
+        $productid = (int)($details['productid'] ?? 0);
+
+        $purchase = $purchaseid > 0
+            ? html_writer::link(
+                new moodle_url(subscription_config::digital_purchase_view_admin_page(), ['id' => $purchaseid]),
+                get_string('digital_purchase', 'local_subscriptions') . ' #' . $purchaseid,
+                ['class' => 'crm-entity-link']
+            )
+            : '';
+
+        $product = $productid > 0
+            ? AdminEntityLinks::digital_product(
+                $productid,
+                get_string('product', 'local_subscriptions') . ' #' . $productid
+            )
+            : '';
+
+        $expires = !empty($details['expires'])
+            ? html_writer::div(
+                get_string('digital_purchase_link_expires', 'local_subscriptions') . ': ' . s((string)$details['expires']),
+                'small text-muted mt-1'
+            )
+            : '';
+
+        $oldtoken = !empty($details['oldtoken'])
+            ? html_writer::div(
+                get_string('digital_purchase_old_token', 'local_subscriptions') . ': ' . s((string)$details['oldtoken']),
+                'small text-muted mt-1'
+            )
+            : '';
+
+        $lines = array_filter([$purchase, $product]);
+
+        if ($email !== '') {
+            $lines[] = html_writer::span($email, 'text-muted small');
+        }
+
+        return html_writer::div(
+            implode(html_writer::empty_tag('br'), $lines) .
+            $expires .
+            $oldtoken,
+            'crm-timeline-digital-action-card'
+        );
     }
 
 }

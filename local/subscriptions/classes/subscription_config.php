@@ -133,41 +133,73 @@ class subscription_config {
     }
 
     public static function digital_products_admin_page(): string {
-        return self::plugin_path() . 'admin/digital/products.php';
+        return self::plugin_path() . 'admin/digital/products/index.php';
     }
 
     public static function digital_product_edit_admin_page(): string {
-        return self::plugin_path() . 'admin/digital/product_edit.php';
+        return self::plugin_path() . 'admin/digital/products/edit.php';
     }
 
     public static function digital_product_delete_admin_page(): string {
-        return self::plugin_path() . 'admin/digital/product_delete.php';
+        return self::plugin_path() . 'admin/digital/products/delete.php';
     }
 
     public static function digital_product_duplicate_admin_page(): string {
-        return self::plugin_path() . 'admin/digital/product_duplicate.php';
+        return self::plugin_path() . 'admin/digital/products/duplicate.php';
     }
 
     public static function digital_product_toggle_admin_page(): string {
-        return self::plugin_path() . 'admin/digital/product_toggle.php';
+        return self::plugin_path() . 'admin/digital/products/toggle.php';
     }
 
     public static function digital_product_file_preview_admin_page(): string {
-        return self::plugin_path() . 'admin/digital/product_file_preview.php';
+        return self::plugin_path() . 'admin/digital/products/preview.php';
     }
 
     public static function digital_purchases_admin_page(): string {
-        return self::plugin_path() . 'admin/digital/purchases.php';
+        return self::plugin_path() . 'admin/digital/purchases/index.php';
     }
 
     public static function digital_sales_stats_admin_page(): string {
         return self::plugin_path() . 'admin/digital/stats.php';
     }
 
+    public static function digital_purchase_view_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/purchases/view.php';
+    }    
+
+    public static function digital_purchase_resend_email_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/purchases/resend_email.php';
+    }
+
+    public static function digital_purchase_regenerate_token_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/purchases/regenerate_token.php';
+    }
+
+    public static function digital_purchase_extend_token_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/purchases/extend_token.php';
+    }
+
+    public static function digital_purchase_check_provider_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/purchases/check_provider.php';
+    }
+
     public static function boutique_page(): string {
         return '/boutique';
     }
     
+    public static function admin_user_email_page(): string {
+        return self::plugin_path() . 'admin/users/email.php';
+    }
+
+    public static function admin_user_reset_password_page(): string {
+        return self::plugin_path() . 'admin/users/reset_password.php';
+    }
+
+    public static function admin_user_add_note_page(): string {
+        return self::plugin_path() . 'admin/users/add_note.php';
+    }
+
     // -- Buttons --
     public static function button_admin_dashboard(): string {
         return \html_writer::link(

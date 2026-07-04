@@ -29,6 +29,10 @@ final class AdminEvents {
     public const DIGITAL_PURCHASE_FAILED = 'digital.purchase.failed';
     public const DIGITAL_LINK_RESENT = 'digital.link.resent';
 
+    public const DIGITAL_TOKEN_REGENERATED = 'digital.token.regenerated';
+    public const DIGITAL_TOKEN_EXTENDED = 'digital.token.extended';
+    public const DIGITAL_PROVIDER_CHECKED = 'digital.provider.checked';
+
     // Payments.
     public const PAYMENT_REQUEST_CREATED = 'payment_request.created';
     public const PAYMENT_REQUEST_PAID = 'payment_request.paid';
@@ -59,6 +63,9 @@ final class AdminEvents {
             self::DIGITAL_PURCHASE_PAID,
             self::DIGITAL_PURCHASE_FAILED,
             self::DIGITAL_LINK_RESENT,
+            self::DIGITAL_TOKEN_REGENERATED,
+            self::DIGITAL_TOKEN_EXTENDED,
+            self::DIGITAL_PROVIDER_CHECKED,
 
             self::PAYMENT_REQUEST_CREATED,
             self::PAYMENT_REQUEST_PAID,

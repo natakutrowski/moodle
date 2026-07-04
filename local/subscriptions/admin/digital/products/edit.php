@@ -1,10 +1,14 @@
 <?php
-require_once(__DIR__ . '/../../../../config.php');
+
+require_once(__DIR__ . '/../../../../../config.php');
 
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\admin\AdminFormatter;
+use local_subscriptions\admin\AdminEntityLinks;
+use local_subscriptions\support\DigitalPresenter;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_DIGITAL);
 
@@ -26,6 +30,33 @@ if (!$isnew) {
         $translations[$record->lang] = $record;
     }
 }
+
+$stats = $DB->get_record_sql("
+    SELECT
+        COUNT(*) AS total_purchases,
+        SUM(CASE WHEN status IN ('paid', 'completed', 'PAID', 'COMPLETED') THEN 1 ELSE 0 END) AS paid_purchases,
+        SUM(CASE WHEN last_error IS NOT NULL AND last_error <> '' THEN 1 ELSE 0 END) AS error_count
+      FROM {subscription_digital_payment_request}
+     WHERE productid = :productid
+", ['productid' => $id]);
+
+$recentpurchases = $DB->get_records_sql("
+    SELECT pr.*
+      FROM {subscription_digital_payment_request} pr
+     WHERE pr.productid = :productid
+  ORDER BY pr.creation_date DESC, pr.id DESC
+", ['productid' => $id], 0, 10);
+
+$revenues = $DB->get_records_sql("
+    SELECT
+        currency,
+        SUM(price) AS total
+      FROM {subscription_digital_payment_request}
+     WHERE productid = :productid
+       AND status IN ('paid', 'completed', 'PAID', 'COMPLETED')
+  GROUP BY currency
+  ORDER BY currency ASC
+", ['productid' => $id]);
 
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url(subscription_config::digital_product_edit_admin_page(), ['id' => $id]));
@@ -192,6 +223,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 echo $OUTPUT->header();
 echo AdminNavigation::back_button();
+
+echo html_writer::start_div('row mb-4');
+
+$revenuetext = '-';
+
+if ($revenues) {
+    $parts = [];
+
+    foreach ($revenues as $revenue) {
+        $parts[] = AdminFormatter::price($revenue->total ?? 0, $revenue->currency ?? '');
+    }
+
+    $revenuetext = implode('<br>', $parts);
+}
+
+$cards = [
+    [
+        get_string('digital_product_total_purchases', 'local_subscriptions'),
+        (int)($stats->total_purchases ?? 0),
+    ],
+    [
+        get_string('digital_product_paid_purchases', 'local_subscriptions'),
+        (int)($stats->paid_purchases ?? 0),
+    ],
+    [
+        get_string('digital_product_total_revenue', 'local_subscriptions'),
+        $revenuetext,
+    ],
+    [
+        get_string('digital_product_error_count', 'local_subscriptions'),
+        (int)($stats->error_count ?? 0),
+    ],
+];
+
+foreach ($cards as [$label, $value]) {
+    echo html_writer::div(
+        html_writer::div(
+            html_writer::tag('div', $value, ['class' => 'crm-stat-number']) .
+            html_writer::tag('div', $label, ['class' => 'text-muted']),
+            'card card-body'
+        ),
+        'col-md-3 mb-3'
+    );
+}
+
+echo html_writer::end_div();
 
 echo html_writer::start_div('container-fluid my-4');
 
@@ -427,6 +504,56 @@ echo html_writer::tag('style', '
         cursor:pointer;
     }
 ');
+
+echo html_writer::tag('h4', get_string('digital_product_recent_purchases', 'local_subscriptions'), [
+    'class' => 'mt-5 mb-3',
+]);
+
+if ($recentpurchases) {
+    $table = new html_table();
+    $table->head = [
+        get_string('idnumber'),
+        get_string('user'),
+        get_string('email'),
+        get_string('price', 'local_subscriptions'),
+        get_string('status', 'local_subscriptions'),
+        get_string('creation_date', 'local_subscriptions'),
+    ];
+
+    foreach ($recentpurchases as $purchase) {
+        $buyername = trim(($purchase->firstname ?? '') . ' ' . ($purchase->lastname ?? ''));
+        $buyerlabel = $buyername !== '' ? s($buyername) : s($purchase->email ?? '-');
+
+        $crmuserid = !empty($purchase->userid) ? (int)$purchase->userid : 0;
+
+        if ($crmuserid <= 0 && !empty($purchase->email)) {
+            $crmuserid = (int)$DB->get_field_sql("
+                SELECT id
+                  FROM {user}
+                 WHERE deleted = 0
+                   AND " . $DB->sql_compare_text('email') . " = " . $DB->sql_compare_text(':email') . "
+              ORDER BY id DESC
+            ", ['email' => $purchase->email], IGNORE_MISSING);
+        }
+
+        $table->data[] = [
+            html_writer::link(
+                new moodle_url(subscription_config::digital_purchase_view_admin_page(), ['id' => $purchase->id]),
+                '#' . $purchase->id,
+                ['class' => 'crm-entity-link']
+            ),
+            $crmuserid > 0 ? AdminEntityLinks::user($crmuserid, $buyerlabel) : $buyerlabel,
+            s($purchase->email ?? '-'),
+            AdminFormatter::price($purchase->price ?? 0, $purchase->currency ?? ''),
+            DigitalPresenter::render_status_badge($purchase->status ?? ''),
+            AdminFormatter::datetime((int)($purchase->creation_date ?? 0)),
+        ];
+    }
+
+    echo html_writer::table($table);
+} else {
+    echo $OUTPUT->notification(get_string('digital_product_no_recent_purchases', 'local_subscriptions'), 'info');
+}
 
 echo $OUTPUT->footer();
 

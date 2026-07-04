@@ -1,5 +1,6 @@
 <?php
-require_once(__DIR__ . '/../../../../config.php');
+
+require_once(__DIR__ . '/../../../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
 
 use local_subscriptions\admin\AdminSecurity;
