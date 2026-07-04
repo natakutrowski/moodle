@@ -5,6 +5,8 @@ require_once(__DIR__ . '/../../../../config.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminFormatter;
+use local_subscriptions\admin\AdminNavigation;
 
 global $DB, $PAGE, $OUTPUT;
 
@@ -61,6 +63,9 @@ $users = $DB->get_records_sql("
 
 echo $OUTPUT->header();
 
+
+echo AdminNavigation::back_button();
+
 echo html_writer::start_tag('form', [
     'method' => 'get',
     'action' => new moodle_url(subscription_config::admin_users_page()),
@@ -116,7 +121,7 @@ foreach ($users as $user) {
         $user->country ?: '-',
         $subcount,
         $digitalcount,
-        !empty($user->lastaccess) ? userdate($user->lastaccess, '%d/%m/%y') : '-',
+        !empty($user->lastaccess) ? AdminFormatter::date((int)$user->lastaccess) : '-',
     ];
 }
 

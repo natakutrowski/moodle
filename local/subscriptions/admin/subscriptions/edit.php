@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/local/subscriptions/classes/form/user_subscription_edit_form.php');
 
 use local_subscriptions\subscription_config;
@@ -9,6 +9,8 @@ use local_subscriptions\form\user_subscription_edit_form;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\admin\AdminLog;
+use local_subscriptions\admin\AdminFormatter;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 
@@ -47,12 +49,39 @@ if ($data = $form->get_data()) {
     $startdate = (int)$data->start_date;
     $enddate = !empty($data->no_end_date) ? 0 : (int)$data->end_date;
 
-    subscription_manager::update_subscription_from_admin(
+    $oldsubscription = clone $subscription;
+
+    $updatedsubscription = subscription_manager::update_subscription_from_admin(
         (int)$data->id,
         $startdate,
         $enddate,
         (string)$data->status
     );
+
+    $changes = [];
+
+    if ((int)$oldsubscription->start_date !== $startdate) {
+        $changes['start_date'] = [
+            'from' => !empty($oldsubscription->start_date) ? AdminFormatter::date((int)$oldsubscription->start_date) : '-',
+            'to' => !empty($startdate) ? AdminFormatter::date($startdate) : '-',
+        ];
+    }
+
+    if ((int)$oldsubscription->end_date !== $enddate) {
+        $changes['end_date'] = [
+            'from' => AdminFormatter::subscription_end((int)$oldsubscription->end_date),
+            'to' => AdminFormatter::subscription_end((int)$enddate),
+        ];
+    }
+
+    if ((string)$oldsubscription->status !== (string)$data->status) {
+        $changes['status'] = [
+            'from' => (string)$oldsubscription->status,
+            'to' => (string)$data->status,
+        ];
+    }
+
+    AdminLog::subscriptionUpdated($updatedsubscription, $plan, $changes);
 
     redirect(
         new moodle_url(subscription_config::user_subscriptions_page()),

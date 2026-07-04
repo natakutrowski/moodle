@@ -9,6 +9,7 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\service\UserEmailService;
 use local_subscriptions\admin\AdminLog;
+use local_subscriptions\admin\AdminEvents;
 
 global $DB, $PAGE, $OUTPUT;
 
@@ -76,7 +77,7 @@ if ($data = $form->get_data()) {
     user_update_user($updated, false, false);
 
     AdminLog::log(
-    'user.password.updated',
+    AdminEvents::USER_PASSWORD_UPDATED,
         (int)$user->id,
         'user',
         (int)$user->id,

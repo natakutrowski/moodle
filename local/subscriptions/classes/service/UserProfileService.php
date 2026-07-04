@@ -4,8 +4,8 @@ namespace local_subscriptions\service;
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\admin\AdminLog;
 use local_subscriptions\service\UserNoteService;
+use local_subscriptions\service\UserTimelineService;
 
 final class UserProfileService {
 
@@ -43,9 +43,39 @@ final class UserProfileService {
             'digitalpayments' => count($profile->digitalpayments),
         ];
 
-        $profile->adminlogs = AdminLog::get_for_user($userid, 20);
         $profile->notes = UserNoteService::get_for_user($userid, 20);
+        $profile->timeline = UserTimelineService::get_for_user($userid, 40);
+        $profile->courses = self::get_accessible_courses($userid);
 
         return $profile;
     }
+
+    private static function get_accessible_courses(int $userid): array {
+        global $DB;
+
+        return $DB->get_records_sql("
+            SELECT DISTINCT
+                c.id,
+                c.fullname,
+                c.shortname,
+                ue.timestart,
+                ue.timeend,
+                ue.status AS enrolstatus,
+                e.enrol
+            FROM {user_enrolments} ue
+            JOIN {enrol} e ON e.id = ue.enrolid
+            JOIN {course} c ON c.id = e.courseid
+            WHERE ue.userid = :userid
+            AND c.id <> :siteid
+            AND ue.status = 0
+            AND e.status = 0
+            AND (ue.timeend = 0 OR ue.timeend > :now)
+        ORDER BY c.fullname ASC
+        ", [
+            'userid' => $userid,
+            'siteid' => SITEID,
+            'now' => time(),
+        ]);
+    }
+
 }

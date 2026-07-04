@@ -1,15 +1,15 @@
 <?php
-require('../../config.php');
 
+require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/local/subscriptions/forms/plan_entitlement_form.php');
 require_once($CFG->dirroot . '/local/subscriptions/classes/subscription_config.php');
 
 use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
-subscription_config::guard_public_access();
-
-require_login();
-require_capability('moodle/site:config', context_system::instance());
+$context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 
 global $DB, $OUTPUT, $PAGE;
 
@@ -30,7 +30,7 @@ if ($planid <= 0 || !$plan = $DB->get_record('subscription_plan', ['id' => $plan
 $pageurl = new moodle_url(subscription_config::plan_entitlements_page(), ['planid' => $planid]);
 
 $PAGE->set_url($pageurl);
-$PAGE->set_context(context_system::instance());
+$PAGE->set_context($context);
 $PAGE->set_title(get_string('planentitlements', 'local_subscriptions'));
 $PAGE->set_heading(get_string('planentitlementsfor', 'local_subscriptions', $plan->name));
 
@@ -95,6 +95,7 @@ if ($delete && confirm_sesskey()) {
 }
 
 echo $OUTPUT->header();
+echo AdminNavigation::back_button();
 
 echo $OUTPUT->heading(get_string('planentitlementsfor', 'local_subscriptions', $plan->name), 3);
 

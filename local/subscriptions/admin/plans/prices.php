@@ -1,26 +1,26 @@
 <?php
-require('../../config.php');
+
+require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/local/subscriptions/forms/plan_price_form.php');
 require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
 require_once($CFG->dirroot . '/local/subscriptions/renderer/plans_renderer.php');
 
 use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
-subscription_config::guard_public_access();
+$context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 
-global $DB;
-
-require_login();
-require_capability('moodle/site:config', context_system::instance());
+global $DB, $OUTPUT, $PAGE;
 
 $planid = optional_param('planid', 0, PARAM_INT);
 if (!$planid) {
     redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']));
 }
 
-
 $PAGE->set_url(new moodle_url(subscription_config::plans_prices_page(),['planid' => $planid]));
-$PAGE->set_context(context_system::instance());
+$PAGE->set_context($context);
 $PAGE->set_title(get_string('planprices', 'local_subscriptions'));
 $PAGE->set_heading(get_string('planprices', 'local_subscriptions'));
 $PAGE->requires->js_call_amd('local_subscriptions/deleteprice', 'init');
@@ -80,6 +80,7 @@ if ($delete && confirm_sesskey()) {
 
 
 echo $OUTPUT->header();
+echo AdminNavigation::back_button();
 
 // 🧾 Récupère les prix
 $prices = local_subscriptions_get_plan_prices($planid);

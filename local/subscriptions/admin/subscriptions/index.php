@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/local/subscriptions/renderer/user_subs_renderer.php');
 
 use local_subscriptions\subscription_config;

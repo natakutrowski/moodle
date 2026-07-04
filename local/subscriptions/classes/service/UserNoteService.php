@@ -5,6 +5,7 @@ namespace local_subscriptions\service;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\admin\AdminLog;
+use local_subscriptions\admin\AdminEvents;
 
 final class UserNoteService {
 
@@ -24,7 +25,7 @@ final class UserNoteService {
             'timecreated' => time(),
         ]);
 
-        AdminLog::log('user.note.added', $userid, 'user', $userid);
+        AdminLog::log(AdminEvents::USER_NOTE_ADDED, $userid, 'user', $userid);
     }
 
     public static function get_for_user(int $userid, int $limit = 20): array {

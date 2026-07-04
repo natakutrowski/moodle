@@ -1233,3 +1233,53 @@ $string['crm_no_notes'] = 'Для этого пользователя нет в�
 $string['crm_note_required'] = 'Заметка не может быть пустой.';
 $string['crm_note_added_successfully'] = 'Заметка успешно добавлена.';
 $string['adminlog_user_note_added'] = 'Добавлена внутренняя заметка';
+
+$string['crm_timeline'] = 'CRM-таймлайн';
+$string['crm_timeline_empty'] = 'Для этого пользователя пока нет событий.';
+$string['crm_timeline_note_added'] = 'Добавлена внутренняя заметка';
+$string['adminlog_subscription_created'] = 'Подписка создана';
+$string['adminlog_subscription_created_manual'] = 'Подписка создана вручную';
+$string['adminlog_subscription_updated'] = 'Подписка изменена';
+$string['adminlog_subscription_deleted'] = 'Подписка удалена';
+$string['adminlog_subscription_status_updated'] = 'Статус подписки изменён';
+$string['adminlog_subscription_dates_updated'] = 'Даты подписки изменены';
+
+$string['adminlog_digital_purchase_created'] = 'Цифровая покупка создана';
+$string['adminlog_digital_purchase_paid'] = 'Цифровая покупка оплачена';
+$string['adminlog_digital_purchase_failed'] = 'Цифровая покупка не удалась';
+$string['adminlog_digital_link_resent'] = 'Ссылка на цифровой продукт отправлена повторно';
+
+$string['adminlog_payment_request_created'] = 'Платёжный запрос создан';
+$string['adminlog_payment_request_paid'] = 'Платёжный запрос оплачен';
+$string['adminlog_payment_request_failed'] = 'Платёжный запрос не удался';
+$string['adminlog_payment_request_cancelled'] = 'Платёжный запрос отменён';
+
+$string['adminlog_trial_started'] = 'Пробный доступ начат';
+$string['adminlog_trial_expired'] = 'Пробный доступ истёк';
+
+$string['change_user'] = 'Изменить пользователя';
+$string['crm_accessible_courses'] = 'Доступные курсы';
+$string['crm_no_accessible_courses'] = 'Сейчас нет доступных курсов.';
+$string['access'] = 'Доступ';
+$string['active'] = 'Активен';
+$string['until'] = 'до';
+
+$string['digital_purchases_more_actions'] = 'Другие действия';
+$string['digital_purchases_reconcile_done'] = 'Сверка завершена: исправлено платежей — {$a->reconciled}, переведено в failed — {$a->failed}, пропущено — {$a->skipped}, ошибок — {$a->errors}.';
+
+$string['digital_purchases_export_filename'] = 'pokupki_pdf_campusfr';
+$string['digital_purchases_export_sheet'] = 'Покупки PDF';
+$string['digital_purchases_export_slug'] = 'Slug';
+$string['digital_purchases_export_file_classic'] = 'Обычный файл';
+$string['digital_purchases_export_file_mobile'] = 'Мобильный файл';
+$string['digital_purchases_export_transaction_id'] = 'ID транзакции';
+$string['digital_purchases_export_session_id'] = 'ID сессии';
+$string['digital_purchases_export_pdf_email_sent'] = 'Email с PDF отправлен';
+$string['digital_purchases_export_receipt_sent'] = 'Чек отправлен';
+$string['digital_purchases_export_payment_date'] = 'Дата оплаты';
+$string['digital_purchases_export_last_update'] = 'Последнее обновление';
+$string['digital_purchases_export_link_expiration'] = 'Срок действия ссылки';
+$string['digital_purchases_export_download_classic'] = 'Ссылка на обычную версию';
+$string['digital_purchases_export_download_mobile'] = 'Ссылка на мобильную версию';
+$string['digital_purchases_export_last_error'] = 'Последняя ошибка DB';
+$string['no_expiration'] = 'Без срока действия';

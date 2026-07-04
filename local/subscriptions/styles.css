@@ -998,3 +998,86 @@ table.generaltable td { vertical-align: middle; }
     flex-wrap: wrap;
     gap: 10px;
 }
+
+.crm-timeline {
+    border-radius: 16px;
+}
+
+.crm-timeline-list {
+    position: relative;
+}
+
+.crm-timeline-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.crm-timeline-item:last-child {
+    border-bottom: 0;
+}
+
+.crm-timeline-icon {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 999px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.crm-timeline-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.crm-timeline-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.crm-timeline-meta {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.crm-timeline-body {
+    margin-top: 4px;
+    color: #334155;
+}
+
+.crm-timeline-subscription-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-top: 6px;
+}
+
+.crm-change-old {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+
+.crm-change-new {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.crm-quick-note-form {
+    max-width: 720px;
+}
+
+.crm-timeline-email-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 8px 10px;
+    margin-top: 6px;
+}

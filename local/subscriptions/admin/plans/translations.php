@@ -1,19 +1,19 @@
 <?php
 
-require('../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/local/subscriptions/forms/plan_translation_form.php');
 require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
 require_once($CFG->dirroot . '/local/subscriptions/renderer/plans_renderer.php');
 
 use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
-subscription_config::guard_public_access();
+$context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 
 global $DB;
-
-require_login();
-require_capability('moodle/site:config', context_system::instance());
 
 $planid = optional_param('planid', 0, PARAM_INT);
 $editing = optional_param('edit', 0, PARAM_INT);
@@ -35,12 +35,16 @@ if (optional_param('submittranslation', false, PARAM_RAW)) {
 }
 
 $PAGE->set_url(new moodle_url(subscription_config::plans_translations_page()));
-$PAGE->set_context(context_system::instance());
+$PAGE->set_context($context);
 $PAGE->set_title(get_string('translationspagetitle', 'local_subscriptions'));
 $PAGE->set_heading(get_string('translationspagetitle', 'local_subscriptions'));
-$PAGE->requires->js_call_amd('local_subscriptions/deleteplantranslation', 'init');
+$PAGE->requires->js_call_amd('local_subscriptions/deleteplantranslation', 'init', [[
+    'deleteurl' => (new moodle_url(subscription_config::plans_translations_page()))->out(false),
+]]);
 
 echo $OUTPUT->header();
+echo AdminNavigation::back_button();
+
 echo $OUTPUT->heading(get_string('translationspagetitle', 'local_subscriptions'));
 
 // Table

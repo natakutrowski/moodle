@@ -2,7 +2,10 @@
 /* global M */
 define(['jquery', 'core/str', 'core/notification'], function($, str, notification) {
     return {
-        init: function() {
+        init: function(config) {
+            config = config || {};
+            const deleteBaseUrl = config.deleteurl || (M.cfg.wwwroot + '/local/subscriptions/admin/plans/translations.php');
+            
             $(document).on('click', '.deletetranslation', function(e) {
                 e.preventDefault();
 
@@ -22,7 +25,7 @@ define(['jquery', 'core/str', 'core/notification'], function($, str, notificatio
                 const planid = $('form').find('input[name="planid"]').val() || '';
 
                 // 2) Construire l’URL de delete (nettoyer les params 'edit', 'add', 'id')
-                const url = new URL(M.cfg.wwwroot + '/local/subscriptions/plans_translations.php');
+                const url = new URL(deleteBaseUrl, M.cfg.wwwroot);
                 if (planid) url.searchParams.set('planid', planid);
                 url.searchParams.set('del', id);
                 url.searchParams.set('sesskey', M.cfg.sesskey);

@@ -1,7 +1,7 @@
 <?php
 // This file is part of Moodle - https://moodle.org/
 
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/excellib.class.php');
 
 require_login();

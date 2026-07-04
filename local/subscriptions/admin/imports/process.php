@@ -1,21 +1,24 @@
 <?php
-require_once(__DIR__ . '/../../config.php');
-require_once(__DIR__ . '/lib/lib_csv.php');
-require_once(__DIR__ . '/renderer/user_subs_renderer.php');
-require_login();
-require_capability('moodle/site:config', context_system::instance());
+
+require_once(__DIR__ . '/../../../../config.php');
+require_once(__DIR__ . '/../../lib/lib_csv.php');
+require_once(__DIR__ . '/../../renderer/user_subs_renderer.php');
 
 use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
-subscription_config::guard_public_access();
+$context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 
-$PAGE->set_context(context_system::instance());
+$PAGE->set_context($context);
 $PAGE->set_url(new moodle_url(subscription_config::process_csv_page()));
 $PAGE->set_title(get_string('import_subscriptions', 'local_subscriptions'));
 $PAGE->set_heading(get_string('import_subscriptions', 'local_subscriptions'));
 $PAGE->requires->css('/local/subscriptions/styles.css');
 
 echo $OUTPUT->header();
+echo AdminNavigation::back_button();
 
 $renderer = new local_subscriptions_user_subs_renderer($PAGE, $OUTPUT);
 

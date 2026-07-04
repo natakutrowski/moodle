@@ -1,11 +1,13 @@
 <?php
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 
-require_login();
+use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+
 require_sesskey();
 
-$context = context_system::instance();
-require_capability('moodle/site:config', $context);
+$context = AdminSecurity::require(Capabilities::MANAGE_DIGITAL);
 
 $id = required_param('id', PARAM_INT);
 
@@ -18,7 +20,7 @@ $DB->update_record('subscription_digital_product', (object)[
 ]);
 
 redirect(
-    new moodle_url('/local/subscriptions/admin/digital_products.php'),
+    new moodle_url(subscription_config::digital_products_admin_page()),
     get_string('digital_products_status_updated', 'local_subscriptions'),
     1,
     \core\output\notification::NOTIFY_SUCCESS

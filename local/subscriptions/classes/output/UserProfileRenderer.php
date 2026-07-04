@@ -10,6 +10,7 @@ use moodle_url;
 use local_subscriptions\subscription_config;
 use local_subscriptions\support\SubsPresenter;
 use local_subscriptions\support\DigitalPresenter;
+use local_subscriptions\admin\AdminFormatter;
 
 final class UserProfileRenderer {
 
@@ -20,11 +21,11 @@ final class UserProfileRenderer {
 
         $out .= self::header($user);
         $out .= self::quick_actions($user);
-        $out .= self::notes($profile);
+        $out .= self::timeline($profile);
         $out .= self::stats($profile);
+        $out .= self::courses($profile->courses ?? []);
         $out .= self::subscriptions($profile->subscriptions);
         $out .= self::digital_purchases($profile->digitalpayments);
-        $out .= self::admin_history($profile->adminlogs ?? []);
 
         return $out;
     }
@@ -36,9 +37,9 @@ final class UserProfileRenderer {
                 html_writer::tag('strong', get_string('email') . ': ') . s($user->email) . '<br>' .
                 html_writer::tag('strong', get_string('country') . ': ') . s($user->country ?: '-') . '<br>' .
                 html_writer::tag('strong', get_string('timecreated') . ': ') .
-                    (!empty($user->timecreated) ? userdate($user->timecreated, '%d/%m/%Y') : '-') . '<br>' .
+                    (!empty($user->timecreated) ? AdminFormatter::date((int)$user->timecreated) : '-') . '<br>' .
                 html_writer::tag('strong', get_string('lastaccess') . ': ') .
-                    (!empty($user->lastaccess) ? userdate($user->lastaccess, '%d/%m/%Y %H:%M') : '-')
+                    (!empty($user->lastaccess) ? AdminFormatter::datetime((int)$user->lastaccess) : '-')
             ) .
             html_writer::div(
                 html_writer::link(
@@ -100,17 +101,17 @@ final class UserProfileRenderer {
         ];
 
         foreach ($subscriptions as $sub) {
-            $start = !empty($sub->start_date) ? userdate($sub->start_date, '%d/%m/%y') : '-';
+            $start = !empty($sub->start_date) ? AdminFormatter::date((int)$sub->start_date) : '-';
 
             if (empty($sub->end_date) || (int)$sub->end_date > strtotime('2100-01-01')) {
                 $period = $start . '<br><span class="badge bg-light text-dark border">♾️ ' .
                     get_string('unlimited', 'local_subscriptions') . '</span>';
             } else {
-                $period = $start . '<br><span class="text-muted">→ ' . userdate($sub->end_date, '%d/%m/%y') . '</span>';
+                $period = $start . '<br><span class="text-muted">→ ' . AdminFormatter::date((int)$sub->end_date) . '</span>';
             }
 
             $price = ((float)($sub->pricepaid ?? 0) > 0)
-                ? format_float((float)$sub->pricepaid, 2) . ' ' . strtoupper($sub->currency ?? '')
+                ? AdminFormatter::price($sub->pricepaid ?? 0, $sub->currency ?? '')
                 : '-';
 
             $table->data[] = [
@@ -149,7 +150,7 @@ final class UserProfileRenderer {
 
         foreach ($digitalpayments as $payment) {
             $price = ((float)($payment->price ?? 0) > 0)
-                ? format_float((float)$payment->price, 2) . ' ' . strtoupper($payment->currency ?? '')
+                ? AdminFormatter::price($payment->price ?? 0, $payment->currency ?? '')
                 : '-';
 
             $table->data[] = [
@@ -157,7 +158,7 @@ final class UserProfileRenderer {
                 s($payment->email),
                 $price,
                 DigitalPresenter::render_status_badge($payment->status),
-                !empty($payment->creation_date) ? userdate($payment->creation_date, '%d/%m/%y') : '-',
+                !empty($payment->creation_date) ? AdminFormatter::date((int)$payment->creation_date) : '-',
             ];
         }
 
@@ -185,27 +186,68 @@ final class UserProfileRenderer {
             ['class' => 'btn btn-sm btn-outline-secondary']
         );
 
-        return html_writer::div(
-            html_writer::tag('h4', get_string('crm_quick_actions', 'local_subscriptions'), ['class' => 'h5 mb-3']) .
-            html_writer::div(implode(' ', $items), 'crm-quick-actions-buttons'),
-            'crm-quick-actions card card-body mb-4'
-        );
-    }
-
-    private static function admin_history(array $logs): string {
-        global $DB, $OUTPUT;
-
-        $out = html_writer::tag('h4', get_string('crm_admin_history', 'local_subscriptions'), [
-            'class' => 'mt-5 mb-3',
+        $noteform = html_writer::start_tag('form', [
+            'method' => 'post',
+            'action' => new moodle_url('/local/subscriptions/admin/users/add_note.php'),
+            'class' => 'crm-quick-note-form mt-3',
         ]);
 
-        if (!$logs) {
-            return $out . $OUTPUT->notification(get_string('crm_no_admin_history', 'local_subscriptions'), 'info');
+        $noteform .= html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => 'sesskey',
+            'value' => sesskey(),
+        ]);
+
+        $noteform .= html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => 'id',
+            'value' => $user->id,
+        ]);
+
+        $noteform .= html_writer::tag('textarea', '', [
+            'name' => 'note',
+            'class' => 'form-control mb-2',
+            'rows' => 2,
+            'placeholder' => get_string('crm_note_placeholder', 'local_subscriptions'),
+            'required' => 'required',
+        ]);
+
+        $noteform .= html_writer::tag('button', '📝 ' . get_string('crm_add_note', 'local_subscriptions'), [
+            'type' => 'submit',
+            'class' => 'btn btn-sm btn-outline-primary',
+        ]);
+
+        $noteform .= html_writer::end_tag('form');
+
+        return html_writer::div(
+            html_writer::tag('h4', get_string('crm_quick_actions', 'local_subscriptions'), ['class' => 'h5 mb-3']) .
+            html_writer::div(implode(' ', $items), 'crm-quick-actions-buttons') .
+            $noteform,
+            'crm-quick-actions card card-body mb-4'
+        );
+
+    }
+
+
+    private static function timeline(\stdClass $profile): string {
+        global $DB, $OUTPUT;
+
+        $items = $profile->timeline ?? [];
+
+        $out = html_writer::start_div('crm-timeline card card-body mb-4');
+        $out .= html_writer::tag('h4', get_string('crm_timeline', 'local_subscriptions'), [
+            'class' => 'h5 mb-3',
+        ]);
+
+        if (!$items) {
+            $out .= html_writer::div(get_string('crm_timeline_empty', 'local_subscriptions'), 'text-muted');
+            $out .= html_writer::end_div();
+            return $out;
         }
 
-        $actorids = array_values(array_unique(array_filter(array_map(function($log) {
-            return (int)$log->actorid;
-        }, $logs))));
+        $actorids = array_values(array_unique(array_filter(array_map(function($item) {
+            return (int)$item->actorid;
+        }, $items))));
 
         $actors = [];
         if ($actorids) {
@@ -213,127 +255,182 @@ final class UserProfileRenderer {
             $actors = $DB->get_records_select('user', "id $insql", $params);
         }
 
-        $table = new html_table();
-        $table->head = [
-            get_string('date', 'local_subscriptions'),
-            get_string('admin_action', 'local_subscriptions'),
-            get_string('admin_actor', 'local_subscriptions'),
-            get_string('details', 'local_subscriptions'),
-        ];
+        $out .= html_writer::start_div('crm-timeline-list');
 
-        foreach ($logs as $log) {
-            $details = '-';
+        foreach ($items as $item) {
+            $actor = $actors[$item->actorid] ?? null;
 
-            if (!empty($log->details)) {
-                $decoded = json_decode($log->details, true);
-                if (is_array($decoded) && $decoded) {
-                    $parts = [];
-                    foreach ($decoded as $key => $value) {
-                        if (is_bool($value)) {
-                            $value = $value ? 'true' : 'false';
-                        } else if (is_array($value)) {
-                            $value = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                        }
+            $meta = AdminFormatter::datetime((int)$item->timecreated);
 
-                        $parts[] = s($key) . ': ' . s((string)$value);
-                    }
-                    $details = implode('<br>', $parts);
-                }
+            if ($actor) {
+                $meta .= ' · ' . fullname($actor);
             }
 
-            $actor = $actors[$log->actorid] ?? null;
-
-            $table->data[] = [
-                !empty($log->timecreated) ? userdate($log->timecreated, '%d/%m/%y %H:%M') : '-',
-                self::format_admin_action($log->action),
-                $actor ? fullname($actor) : '-',
-                $details,
-            ];
-        }
-
-        return $out . html_writer::table($table);
-    }
-
-    private static function format_admin_action(string $action): string {
-        $key = 'adminlog_' . str_replace('.', '_', $action);
-
-        if (get_string_manager()->string_exists($key, 'local_subscriptions')) {
-            return get_string($key, 'local_subscriptions');
-        }
-
-        return s($action);
-    }
-
-    private static function notes(\stdClass $profile): string {
-        global $DB;
-
-        $user = $profile->user;
-        $notes = $profile->notes ?? [];
-
-        $out = html_writer::start_div('crm-notes card card-body mb-4');
-        $out .= html_writer::tag('h4', get_string('crm_internal_notes', 'local_subscriptions'), ['class' => 'h5 mb-3']);
-
-        $out .= html_writer::start_tag('form', [
-            'method' => 'post',
-            'action' => new moodle_url('/local/subscriptions/admin/users/add_note.php'),
-            'class' => 'mb-4',
-        ]);
-
-        $out .= html_writer::empty_tag('input', [
-            'type' => 'hidden',
-            'name' => 'sesskey',
-            'value' => sesskey(),
-        ]);
-
-        $out .= html_writer::empty_tag('input', [
-            'type' => 'hidden',
-            'name' => 'id',
-            'value' => $user->id,
-        ]);
-
-        $out .= html_writer::tag('textarea', '', [
-            'name' => 'note',
-            'class' => 'form-control mb-2',
-            'rows' => 3,
-            'placeholder' => get_string('crm_note_placeholder', 'local_subscriptions'),
-            'required' => 'required',
-        ]);
-
-        $out .= html_writer::tag('button', get_string('crm_add_note', 'local_subscriptions'), [
-            'type' => 'submit',
-            'class' => 'btn btn-sm btn-primary',
-        ]);
-
-        $out .= html_writer::end_tag('form');
-
-        if (!$notes) {
-            $out .= html_writer::div(get_string('crm_no_notes', 'local_subscriptions'), 'text-muted');
-            $out .= html_writer::end_div();
-            return $out;
-        }
-
-        $authorids = array_values(array_unique(array_map(fn($note) => (int)$note->authorid, $notes)));
-        [$insql, $params] = $DB->get_in_or_equal($authorids, SQL_PARAMS_NAMED);
-        $authors = $DB->get_records_select('user', "id $insql", $params);
-
-        foreach ($notes as $note) {
-            $author = $authors[$note->authorid] ?? null;
+            $body = self::render_timeline_body($item);
 
             $out .= html_writer::div(
+                html_writer::div($item->icon, 'crm-timeline-icon') .
                 html_writer::div(
-                    ($author ? fullname($author) : '-') .
-                    ' · ' .
-                    userdate($note->timecreated, '%d/%m/%y %H:%M'),
-                    'small text-muted mb-1'
-                ) .
-                html_writer::div(format_text($note->note, FORMAT_PLAIN)),
-                'crm-note-item border rounded p-3 mb-2'
+                    html_writer::div(
+                        html_writer::tag('strong', s($item->title)) .
+                        html_writer::span($meta, 'crm-timeline-meta'),
+                        'crm-timeline-head'
+                    ) .
+                    ($body !== '' ? html_writer::div($body, 'crm-timeline-body') : ''),
+                    'crm-timeline-content'
+                ),
+                'crm-timeline-item'
             );
         }
 
         $out .= html_writer::end_div();
+        $out .= html_writer::end_div();
 
         return $out;
+    }
+
+    private static function render_timeline_body(\stdClass $item): string {
+        $details = $item->detailsraw ?? [];
+        $title = (string)($item->title ?? '');
+
+        if (($item->objecttype ?? '') === 'subscription') {
+            return self::render_subscription_timeline_body($details);
+        }
+
+        if (!empty($details['subject'])) {
+            return html_writer::div(
+                html_writer::tag('span', get_string('subject', 'local_subscriptions') . ': ', ['class' => 'text-muted']) .
+                html_writer::tag('strong', s((string)$details['subject'])),
+                'crm-timeline-email-card'
+            );
+        }
+
+        // On masque les détails purement techniques.
+        if (array_key_exists('notifyuser', $details)) {
+            return '';
+        }
+
+        $body = trim((string)($item->body ?? ''));
+
+        return $body !== '' ? format_text($body, FORMAT_PLAIN) : '';
+    }
+
+    private static function render_subscription_timeline_body(array $details): string {
+        if (!$details) {
+            return '';
+        }
+
+        $main = [];
+
+        if (!empty($details['plan'])) {
+            $main[] = html_writer::tag('strong', s((string)$details['plan']));
+        }
+
+        if (!empty($details['status'])) {
+            $main[] = html_writer::span(
+                s((string)$details['status']),
+                'badge bg-light text-dark border ms-2'
+            );
+        }
+
+        $period = '';
+
+        if (!empty($details['start']) || !empty($details['end'])) {
+            $period = html_writer::div(
+                s(
+                    self::normalize_crm_date((string)($details['start'] ?? '-')) .
+                    ' → ' .
+                    self::normalize_crm_date((string)($details['end'] ?? '-'))
+                ),
+                'text-muted small mt-1'
+            );
+        }
+
+        $price = '';
+
+        if (!empty($details['price']) && $details['price'] !== '-') {
+            $price = html_writer::div(
+                s((string)$details['price']),
+                'small mt-1'
+            );
+        }
+
+        $changes = '';
+
+        if (!empty($details['changes']) && is_array($details['changes'])) {
+            $changes .= html_writer::start_div('crm-timeline-changes mt-2');
+
+            foreach ($details['changes'] as $field => $change) {
+                if (!is_array($change)) {
+                    continue;
+                }
+
+                $changes .= html_writer::div(
+                    html_writer::tag('span', s($field), ['class' => 'text-muted me-1']) .
+                    html_writer::tag('span', s(self::normalize_crm_date((string)($change['from'] ?? '-'))), ['class' => 'crm-change-old']) .
+                    html_writer::tag('span', ' → ', ['class' => 'text-muted mx-1']) .
+                    html_writer::tag('span', s(self::normalize_crm_date((string)($change['to'] ?? '-'))), ['class' => 'crm-change-new']),
+                    'small'
+                );
+            }
+
+            $changes .= html_writer::end_div();
+        }
+
+        return html_writer::div(
+            html_writer::div(implode('', $main)) .
+            $period .
+            $price .
+            $changes,
+            'crm-timeline-subscription-card'
+        );
+    }
+
+    private static function normalize_crm_date(string $value): string {
+        if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/', $value, $m)) {
+            return sprintf('%02d/%02d/%02d', (int)$m[1], (int)$m[2], (int)$m[3]);
+        }
+
+        return $value;
+    }
+
+    private static function courses(array $courses): string {
+        global $OUTPUT;
+
+        $out = html_writer::tag('h4', get_string('crm_accessible_courses', 'local_subscriptions'), [
+            'class' => 'mt-4 mb-3',
+        ]);
+
+        if (!$courses) {
+            return $out . $OUTPUT->notification(get_string('crm_no_accessible_courses', 'local_subscriptions'), 'info');
+        }
+
+        $table = new html_table();
+        $table->head = [
+            get_string('course'),
+            get_string('shortnamecourse'),
+            get_string('access', 'local_subscriptions'),
+        ];
+
+        foreach ($courses as $course) {
+            $access = get_string('active', 'local_subscriptions');
+
+            if (!empty($course->timeend)) {
+                $access .= ' · ' . get_string('until', 'local_subscriptions') . ' ' .
+                    \local_subscriptions\admin\AdminFormatter::date((int)$course->timeend);
+            }
+
+            $table->data[] = [
+                html_writer::link(
+                    new moodle_url('/course/view.php', ['id' => $course->id]),
+                    format_string($course->fullname)
+                ),
+                s($course->shortname),
+                $access,
+            ];
+        }
+
+        return $out . html_writer::table($table);
     }
 
 }

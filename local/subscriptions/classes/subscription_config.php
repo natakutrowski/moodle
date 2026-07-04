@@ -76,46 +76,52 @@ class subscription_config {
     public static function admin_dashboard_page(): string {
         return self::plugin_path() . 'admin/dashboard.php';
     }
-    public static function add_manual_subscription_page(): string {
-        return self::plugin_path() . 'admin/add_manual_subscription.php';
-    }
+
     public static function import_csv_page(): string {
-        return self::plugin_path() . 'import_csv.php';
+        return self::plugin_path() . 'admin/imports/index.php';
     }
     public static function process_csv_page(): string {
-        return self::plugin_path() . 'process_csv.php';
+        return self::plugin_path() . 'admin/imports/process.php';
     }
     public static function manage_page(): string {
-        return self::plugin_path() . 'manage.php';
+        return self::plugin_path() . 'admin/manage.php';
     }
     public static function scopes_translations_page(): string {
-        return self::plugin_path() . 'scopes_translations.php';
+        return self::plugin_path() . 'admin/scopes/translations.php';
     }
     public static function plans_translations_page(): string {
-        return self::plugin_path() . 'plans_translations.php';
+        return self::plugin_path() . 'admin/plans/translations.php';
     }
     public static function plans_prices_page(): string {
-        return self::plugin_path() . 'plans_prices.php';
+        return self::plugin_path() . 'admin/plans/prices.php';
     }
 
     public static function plan_entitlements_page(): string {
-        return self::plugin_path() . 'plan_entitlements.php';
-    }    
-    
+        return self::plugin_path() . 'admin/plans/entitlements.php';
+    }
+
     public static function plan_upgrades_page(): string {
-        return self::plugin_path() . 'plan_upgrades.php';
+        return self::plugin_path() . 'admin/plans/upgrades.php';
     }
 
     public static function user_subscriptions_page(): string {
-        return self::plugin_path() . 'admin/user_subscriptions.php';
+        return self::plugin_path() . 'admin/subscriptions/index.php';
+    }
+
+    public static function add_manual_subscription_page(): string {
+        return self::plugin_path() . 'admin/subscriptions/add.php';
     }
 
     public static function user_subscription_edit_page(): string {
-        return self::plugin_path() . 'admin/user_subscription_edit.php';
+        return self::plugin_path() . 'admin/subscriptions/edit.php';
     }
 
     public static function user_subscription_delete_page(): string {
-        return self::plugin_path() . 'admin/user_subscription_delete.php';
+        return self::plugin_path() . 'admin/subscriptions/delete.php';
+    }
+
+    public static function subscriptions_export_page(): string {
+        return self::plugin_path() . 'admin/subscriptions/export.php';
     }
 
     public static function admin_users_page(): string {
@@ -126,6 +132,42 @@ class subscription_config {
         return self::plugin_path() . 'admin/users/view.php';
     }
 
+    public static function digital_products_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/products.php';
+    }
+
+    public static function digital_product_edit_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/product_edit.php';
+    }
+
+    public static function digital_product_delete_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/product_delete.php';
+    }
+
+    public static function digital_product_duplicate_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/product_duplicate.php';
+    }
+
+    public static function digital_product_toggle_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/product_toggle.php';
+    }
+
+    public static function digital_product_file_preview_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/product_file_preview.php';
+    }
+
+    public static function digital_purchases_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/purchases.php';
+    }
+
+    public static function digital_sales_stats_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/stats.php';
+    }
+
+    public static function boutique_page(): string {
+        return '/boutique';
+    }
+    
     // -- Buttons --
     public static function button_admin_dashboard(): string {
         return \html_writer::link(

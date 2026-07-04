@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\mail\CustomUserMail;
 use local_subscriptions\mail\PasswordResetMail;
 use local_subscriptions\admin\AdminLog;
+use local_subscriptions\admin\AdminEvents;
 
 final class UserEmailService {
 
@@ -33,7 +34,7 @@ final class UserEmailService {
         );
 
         AdminLog::log(
-            'email.custom.sent',
+            AdminEvents::EMAIL_CUSTOM_SENT,
             $userid,
             'user',
             $userid,
@@ -55,7 +56,7 @@ final class UserEmailService {
         PasswordResetMail::send($user, $newpassword);
 
         AdminLog::log(
-            'email.password_reset_notice.sent',
+            AdminEvents::EMAIL_PASSWORD_RESET_NOTICE_SENT,
             $userid,
             'user',
             $userid

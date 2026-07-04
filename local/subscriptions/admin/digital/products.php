@@ -1,13 +1,15 @@
 <?php
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 
-require_login();
+use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
-$context = context_system::instance();
-require_capability('moodle/site:config', $context);
+$context = AdminSecurity::require(Capabilities::MANAGE_DIGITAL);
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/subscriptions/admin/digital_products.php'));
+$PAGE->set_url(new moodle_url(subscription_config::digital_products_admin_page()));
 $PAGE->set_title(get_string('digital_products_admin_title', 'local_subscriptions'));
 $PAGE->set_heading(get_string('digital_products_admin_title', 'local_subscriptions'));
 
@@ -68,23 +70,24 @@ $sql = "
 $products = $DB->get_records_sql($sql);
 
 echo $OUTPUT->header();
+echo AdminNavigation::back_button();
 
 echo html_writer::start_div('mb-4 d-flex gap-2 flex-wrap');
 
 echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_product_edit.php'),
+    new moodle_url(subscription_config::digital_product_edit_admin_page()),
     get_string('digital_products_add', 'local_subscriptions'),
     ['class' => 'btn btn-primary']
 );
 
 echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php'),
+    new moodle_url(subscription_config::digital_purchases_admin_page()),
     get_string('digital_products_view_purchases', 'local_subscriptions'),
     ['class' => 'btn btn-outline-secondary']
 );
 
 echo html_writer::link(
-    new moodle_url('/boutique'),
+    new moodle_url(subscription_config::boutique_page()),
     get_string('digital_products_view_catalog', 'local_subscriptions'),
     ['class' => 'btn btn-outline-secondary', 'target' => '_blank']
 );
@@ -206,7 +209,7 @@ foreach ($products as $p) {
     $actions = [];
 
     $actions[] = html_writer::link(
-        new moodle_url('/local/subscriptions/admin/digital_product_edit.php', ['id' => $p->id]),
+        new moodle_url(subscription_config::digital_product_edit_admin_page(), ['id' => $p->id]),
         get_string('edit'),
         ['class' => 'btn btn-sm btn-outline-primary']
     );
@@ -218,7 +221,7 @@ foreach ($products as $p) {
     );
 
     $actions[] = html_writer::link(
-        new moodle_url('/local/subscriptions/admin/digital_product_toggle.php', [
+        new moodle_url(subscription_config::digital_product_toggle_admin_page(), [
             'id' => $p->id,
             'sesskey' => sesskey(),
         ]),
@@ -229,7 +232,7 @@ foreach ($products as $p) {
     );    
 
     $actions[] = html_writer::link(
-        new moodle_url('/local/subscriptions/admin/digital_product_duplicate.php', [
+        new moodle_url(subscription_config::digital_product_duplicate_admin_page(), [
             'id' => $p->id,
             'sesskey' => sesskey(),
         ]),
@@ -239,7 +242,7 @@ foreach ($products as $p) {
 
     if ((int)$p->purchasescount === 0) {
         $actions[] = html_writer::link(
-            new moodle_url('/local/subscriptions/admin/digital_product_delete.php', [
+            new moodle_url(subscription_config::digital_product_delete_admin_page(), [
                 'id' => $p->id,
                 'sesskey' => sesskey(),
             ]),
@@ -342,7 +345,7 @@ function local_subscriptions_admin_file_preview_link(
     }
 
     return html_writer::link(
-        new moodle_url('/local/subscriptions/admin/digital_product_file_preview.php', [
+        new moodle_url(subscription_config::digital_product_file_preview_admin_page(), [
             'id' => $productid,
             'type' => $type,
         ]),

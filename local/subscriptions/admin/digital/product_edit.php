@@ -1,10 +1,12 @@
 <?php
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 
-require_login();
+use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
-$context = context_system::instance();
-require_capability('moodle/site:config', $context);
+$context = AdminSecurity::require(Capabilities::MANAGE_DIGITAL);
 
 $id = optional_param('id', 0, PARAM_INT);
 
@@ -26,7 +28,7 @@ if (!$isnew) {
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/subscriptions/admin/digital_product_edit.php', ['id' => $id]));
+$PAGE->set_url(new moodle_url(subscription_config::digital_product_edit_admin_page(), ['id' => $id]));
 $PAGE->set_title($isnew
     ? get_string('digital_product_edit_new_title', 'local_subscriptions')
     : get_string('digital_product_edit_edit_title', 'local_subscriptions')
@@ -93,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($existing && ($isnew || (int)$existing->id !== (int)$id)) {
         redirect(
-            new moodle_url('/local/subscriptions/admin/digital_product_edit.php', ['id' => $id]),
+            new moodle_url(subscription_config::digital_product_edit_admin_page(), ['id' => $id]),
             get_string('digital_product_edit_slug_exists', 'local_subscriptions'),
             5,
             \core\output\notification::NOTIFY_ERROR
@@ -181,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     redirect(
-        new moodle_url('/local/subscriptions/admin/digital_products.php'),
+        new moodle_url(subscription_config::digital_products_admin_page()),
         get_string('digital_product_edit_saved', 'local_subscriptions'),
         2,
         \core\output\notification::NOTIFY_SUCCESS
@@ -189,12 +191,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 echo $OUTPUT->header();
+echo AdminNavigation::back_button();
 
 echo html_writer::start_div('container-fluid my-4');
 
 echo html_writer::div(
     html_writer::link(
-        new moodle_url('/local/subscriptions/admin/digital_products.php'),
+        new moodle_url(subscription_config::digital_products_admin_page()),
         '← ' . get_string('back'),
         ['class' => 'btn btn-outline-secondary']
     ),
@@ -402,7 +405,7 @@ echo html_writer::tag('button', get_string('savechanges'), [
 ]);
 
 echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_products.php'),
+    new moodle_url(subscription_config::digital_products_admin_page()),
     get_string('cancel'),
     ['class' => 'btn btn-outline-secondary']
 );

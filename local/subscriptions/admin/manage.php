@@ -1,12 +1,14 @@
 <?php
 
-require_once(__DIR__ . '/../../config.php');
-require_login();
-require_capability('moodle/site:config', context_system::instance());
+require_once(__DIR__ . '/../../../config.php');
 
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\subscription_config;
 
-subscription_config::guard_public_access();
+
+$context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 
 $PAGE->requires->css(new moodle_url('/local/subscriptions/select2.min.css'));
 $PAGE->requires->js(new moodle_url('/local/subscriptions/js/select2.min.js'), true);
@@ -16,7 +18,7 @@ $PAGE->requires->css(new moodle_url('/local/subscriptions/styles.css'));
 
 
 $PAGE->set_url(new moodle_url(subscription_config::manage_page()));
-$PAGE->set_context(context_system::instance());
+$PAGE->set_context($context);
 $PAGE->set_title(get_string('manage_subscriptions', 'local_subscriptions'));
 $PAGE->set_heading(get_string('manage_subscriptions', 'local_subscriptions'));
 
@@ -159,6 +161,8 @@ elseif ($currenttab === 'plans') {
 
 echo $OUTPUT->header();
 
+echo AdminNavigation::back_button();
+
 $tabs = [
     new tabobject('scopes', new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']), get_string('scopes', 'local_subscriptions')),
     new tabobject('plans', new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']), get_string('plans', 'local_subscriptions')),
@@ -169,11 +173,11 @@ print_tabs([$tabs], $currenttab);
 // Include selected tab
 switch ($currenttab) {
     case 'plans':
-        include_once(__DIR__ . '/tabs/plans.php');
+        include_once(__DIR__ . '/../tabs/plans.php');
         break;
     case 'scopes':
     default:
-        include_once(__DIR__ . '/tabs/scopes.php');
+        include_once(__DIR__ . '/../tabs/scopes.php');
         break;
 }
 

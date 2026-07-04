@@ -1222,3 +1222,53 @@ $string['crm_no_notes'] = 'Aucune note interne pour cet utilisateur.';
 $string['crm_note_required'] = 'La note ne peut pas être vide.';
 $string['crm_note_added_successfully'] = 'Note ajoutée avec succès.';
 $string['adminlog_user_note_added'] = 'Note interne ajoutée';
+
+$string['crm_timeline'] = 'Timeline CRM';
+$string['crm_timeline_empty'] = 'Aucun événement enregistré pour cet utilisateur.';
+$string['crm_timeline_note_added'] = 'Note interne ajoutée';
+$string['adminlog_subscription_created'] = 'Abonnement créé';
+$string['adminlog_subscription_created_manual'] = 'Abonnement créé manuellement';
+$string['adminlog_subscription_updated'] = 'Abonnement modifié';
+$string['adminlog_subscription_deleted'] = 'Abonnement supprimé';
+$string['adminlog_subscription_status_updated'] = 'Statut d’abonnement modifié';
+$string['adminlog_subscription_dates_updated'] = 'Dates d’abonnement modifiées';
+
+$string['adminlog_digital_purchase_created'] = 'Achat digital créé';
+$string['adminlog_digital_purchase_paid'] = 'Achat digital payé';
+$string['adminlog_digital_purchase_failed'] = 'Achat digital échoué';
+$string['adminlog_digital_link_resent'] = 'Lien digital renvoyé';
+
+$string['adminlog_payment_request_created'] = 'Demande de paiement créée';
+$string['adminlog_payment_request_paid'] = 'Demande de paiement payée';
+$string['adminlog_payment_request_failed'] = 'Demande de paiement échouée';
+$string['adminlog_payment_request_cancelled'] = 'Demande de paiement annulée';
+
+$string['adminlog_trial_started'] = 'Essai démarré';
+$string['adminlog_trial_expired'] = 'Essai expiré';
+
+$string['change_user'] = 'Changer d’utilisateur';
+$string['crm_accessible_courses'] = 'Cours accessibles';
+$string['crm_no_accessible_courses'] = 'Aucun cours accessible actuellement.';
+$string['access'] = 'Accès';
+$string['active'] = 'Actif';
+$string['until'] = 'jusqu’au';
+
+$string['digital_purchases_more_actions'] = 'Plus d’actions';
+$string['digital_purchases_reconcile_done'] = 'Réconciliation terminée : {$a->reconciled} paiement(s) corrigé(s), {$a->failed} paiement(s) passé(s) en failed, {$a->skipped} ignoré(s), {$a->errors} erreur(s).';
+
+$string['digital_purchases_export_filename'] = 'achats_pdf_campusfr';
+$string['digital_purchases_export_sheet'] = 'Achats PDF';
+$string['digital_purchases_export_slug'] = 'Slug';
+$string['digital_purchases_export_file_classic'] = 'Fichier classique';
+$string['digital_purchases_export_file_mobile'] = 'Fichier mobile';
+$string['digital_purchases_export_transaction_id'] = 'Transaction ID';
+$string['digital_purchases_export_session_id'] = 'Session ID';
+$string['digital_purchases_export_pdf_email_sent'] = 'Email PDF envoyé';
+$string['digital_purchases_export_receipt_sent'] = 'Reçu envoyé';
+$string['digital_purchases_export_payment_date'] = 'Date paiement';
+$string['digital_purchases_export_last_update'] = 'Dernière mise à jour';
+$string['digital_purchases_export_link_expiration'] = 'Expiration lien';
+$string['digital_purchases_export_download_classic'] = 'Lien téléchargement classique';
+$string['digital_purchases_export_download_mobile'] = 'Lien téléchargement mobile';
+$string['digital_purchases_export_last_error'] = 'Dernière erreur DB';
+$string['no_expiration'] = 'Sans expiration';

@@ -877,7 +877,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
             );
 
             $userlink = html_writer::link(
-                new moodle_url('/user/profile.php', ['id' => $sub->userid]),
+                new moodle_url(\local_subscriptions\subscription_config::admin_user_view_page(), ['id' => $sub->userid]),
                 fullname($sub) . ' (' . s($sub->email) . ')'
             );
 
@@ -944,7 +944,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         return $output;
     }
 
-    public function render_manual_subscription_form_v2(array $plans): string {
+    public function render_manual_subscription_form_v2(array $plans, ?stdClass $preselecteduser = null): string {
         $output = '';
 
         $existinglabel = get_string('existing_user', 'local_subscriptions');
@@ -963,104 +963,134 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
 
         $output .= html_writer::tag('h4', get_string('manual_subscription_user_section', 'local_subscriptions'));
 
-        $output .= html_writer::start_div('form-group mb-3');
+        if ($preselecteduser) {
+            $currency = in_array(strtoupper((string)$preselecteduser->country), ['RU', 'BY'], true) ? 'RUB' : 'EUR';
 
-        $output .= html_writer::tag('label',
-            html_writer::empty_tag('input', [
-                'type' => 'radio',
+            $output .= html_writer::empty_tag('input', [
+                'type' => 'hidden',
+                'name' => 'userid',
+                'id' => 'manual-user-id',
+                'value' => $preselecteduser->id,
+                'data-currency' => $currency,
+            ]);
+
+            $output .= html_writer::empty_tag('input', [
+                'type' => 'hidden',
                 'name' => 'user_mode',
                 'value' => 'existing',
-                'checked' => 'checked',
-                'class' => 'me-1',
-            ]) . $existinglabel,
-            ['class' => 'me-4']
-        );
+            ]);
 
-        $output .= html_writer::tag('label',
-            html_writer::empty_tag('input', [
-                'type' => 'radio',
-                'name' => 'user_mode',
-                'value' => 'new',
-                'class' => 'me-1',
-            ]) . $newlabel
-        );
+            $output .= html_writer::div(
+                html_writer::tag('strong', fullname($preselecteduser)) . '<br>' .
+                html_writer::span(s($preselecteduser->email), 'text-muted') . '<br>' .
+                html_writer::link(
+                    new moodle_url(\local_subscriptions\subscription_config::add_manual_subscription_page()),
+                    get_string('change_user', 'local_subscriptions'),
+                    ['class' => 'btn btn-sm btn-outline-secondary mt-2']
+                ),
+                'alert alert-light border'
+            );
 
-        $output .= html_writer::end_div();
+        } else {
+            $output .= html_writer::start_div('form-group mb-3');
 
-        $output .= html_writer::start_div('', ['id' => 'existing-user-block']);
+            $output .= html_writer::tag('label',
+                html_writer::empty_tag('input', [
+                    'type' => 'radio',
+                    'name' => 'user_mode',
+                    'value' => 'existing',
+                    'checked' => 'checked',
+                    'class' => 'me-1',
+                ]) . get_string('existing_user', 'local_subscriptions'),
+                ['class' => 'me-4']
+            );
 
-        $output .= html_writer::empty_tag('input', [
-            'type' => 'hidden',
-            'name' => 'userid',
-            'id' => 'manual-user-id',
-            'value' => '',
-        ]);
+            $output .= html_writer::tag('label',
+                html_writer::empty_tag('input', [
+                    'type' => 'radio',
+                    'name' => 'user_mode',
+                    'value' => 'new',
+                    'class' => 'me-1',
+                ]) . get_string('new_user', 'local_subscriptions')
+            );
 
-        $output .= html_writer::div(
-            html_writer::label(get_string('select_user', 'local_subscriptions'), 'manual-user-search') .
-            html_writer::empty_tag('input', [
-                'type' => 'text',
-                'id' => 'manual-user-search',
-                'class' => 'form-control',
-                'autocomplete' => 'off',
-                'placeholder' => get_string('search_user_placeholder', 'local_subscriptions'),
-            ]),
-            'form-group mb-3'
-        );
+            $output .= html_writer::end_div();
 
-        $output .= html_writer::end_div();
+            $output .= html_writer::start_div('', ['id' => 'existing-user-block']);
 
-        $output .= html_writer::start_div('', ['id' => 'new-user-block', 'style' => 'display:none;']);
+            $output .= html_writer::empty_tag('input', [
+                'type' => 'hidden',
+                'name' => 'userid',
+                'id' => 'manual-user-id',
+                'value' => '',
+            ]);
 
-        $output .= html_writer::div(
-            html_writer::label(get_string('firstname'), 'firstname') .
-            html_writer::empty_tag('input', [
-                'type' => 'text',
-                'name' => 'firstname',
-                'class' => 'form-control',
-            ]),
-            'form-group mb-3'
-        );
+            $output .= html_writer::div(
+                html_writer::label(get_string('select_user', 'local_subscriptions'), 'manual-user-search') .
+                html_writer::empty_tag('input', [
+                    'type' => 'text',
+                    'id' => 'manual-user-search',
+                    'class' => 'form-control',
+                    'autocomplete' => 'off',
+                    'placeholder' => get_string('search_user_placeholder', 'local_subscriptions'),
+                ]),
+                'form-group mb-3'
+            );
 
-        $output .= html_writer::div(
-            html_writer::label(get_string('lastname'), 'lastname') .
-            html_writer::empty_tag('input', [
-                'type' => 'text',
-                'name' => 'lastname',
-                'class' => 'form-control',
-            ]),
-            'form-group mb-3'
-        );
+            $output .= html_writer::end_div();
 
-        $output .= html_writer::div(
-            html_writer::label(get_string('email'), 'email') .
-            html_writer::empty_tag('input', [
-                'type' => 'email',
-                'name' => 'email',
-                'class' => 'form-control',
-            ]),
-            'form-group mb-3'
-        );
+            $output .= html_writer::start_div('', ['id' => 'new-user-block', 'style' => 'display:none;']);
 
-        $output .= html_writer::div(
-            html_writer::label(get_string('country'), 'country') .
-            html_writer::select([
-                '' => get_string('not_set', 'local_subscriptions'),
-                'FR' => 'France',
-                'RU' => 'Russie',
-                'BY' => 'Biélorussie',
-                'UA' => 'Ukraine',
-                'CH' => 'Suisse',
-                'BE' => 'Belgique',
-                'CA' => 'Canada',
-            ], 'country', '', false, [
-                'class' => 'form-control',
-                'id' => 'manual-new-user-country',
-            ]),
-            'form-group mb-3'
-        );
+            $output .= html_writer::div(
+                html_writer::label(get_string('firstname'), 'firstname') .
+                html_writer::empty_tag('input', [
+                    'type' => 'text',
+                    'name' => 'firstname',
+                    'class' => 'form-control',
+                ]),
+                'form-group mb-3'
+            );
 
-        $output .= html_writer::end_div();
+            $output .= html_writer::div(
+                html_writer::label(get_string('lastname'), 'lastname') .
+                html_writer::empty_tag('input', [
+                    'type' => 'text',
+                    'name' => 'lastname',
+                    'class' => 'form-control',
+                ]),
+                'form-group mb-3'
+            );
+
+            $output .= html_writer::div(
+                html_writer::label(get_string('email'), 'email') .
+                html_writer::empty_tag('input', [
+                    'type' => 'email',
+                    'name' => 'email',
+                    'class' => 'form-control',
+                ]),
+                'form-group mb-3'
+            );
+
+            $output .= html_writer::div(
+                html_writer::label(get_string('country'), 'country') .
+                html_writer::select([
+                    '' => get_string('not_set', 'local_subscriptions'),
+                    'FR' => 'France',
+                    'RU' => 'Russie',
+                    'BY' => 'Biélorussie',
+                    'UA' => 'Ukraine',
+                    'CH' => 'Suisse',
+                    'BE' => 'Belgique',
+                    'CA' => 'Canada',
+                ], 'country', '', false, [
+                    'class' => 'form-control',
+                    'id' => 'manual-new-user-country',
+                ]),
+                'form-group mb-3'
+            );
+
+            $output .= html_writer::end_div();
+        }
 
         $output .= html_writer::tag('hr', '');
 
@@ -1139,6 +1169,12 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
     document.addEventListener('DOMContentLoaded', function() {
         var preferredCurrency = 'EUR';
 
+        var fixedUserInput = document.getElementById('manual-user-id');
+
+        if (fixedUserInput && fixedUserInput.dataset.currency) {
+            preferredCurrency = fixedUserInput.dataset.currency;
+        }
+
         var existingBlock = document.getElementById('existing-user-block');
         var newBlock = document.getElementById('new-user-block');
         var planSelect = document.getElementById('manual-plan-select');
@@ -1147,10 +1183,16 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         var countrySelect = document.getElementById('manual-new-user-country');
 
         function refreshUserMode() {
-            var selected = document.querySelector('input[name="user_mode"]:checked').value;
+            var checkedMode = document.querySelector('input[name="user_mode"]:checked');
+            var selected = checkedMode ? checkedMode.value : 'existing';
 
-            existingBlock.style.display = selected === 'existing' ? '' : 'none';
-            newBlock.style.display = selected === 'new' ? '' : 'none';
+            if (existingBlock) {
+                existingBlock.style.display = selected === 'existing' ? '' : 'none';
+            }
+
+            if (newBlock) {
+                newBlock.style.display = selected === 'new' ? '' : 'none';
+            }
 
             if (selected === 'new') {
                 preferredCurrency = 'EUR';

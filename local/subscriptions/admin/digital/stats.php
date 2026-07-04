@@ -1,10 +1,12 @@
 <?php
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 
-require_login();
+use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
 
-$context = context_system::instance();
-require_capability('moodle/site:config', $context);
+$context = AdminSecurity::require(Capabilities::VIEW_DIGITAL);
 
 $days = optional_param('days', 30, PARAM_INT);
 $fromdate = optional_param('fromdate', '', PARAM_RAW_TRIMMED);
@@ -14,7 +16,7 @@ if ($days !== -1) {
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/subscriptions/admin/digital_sales_stats.php', ['days' => $days]));
+$PAGE->set_url(new moodle_url(subscription_config::digital_sales_stats_admin_page(), ['days' => $days]));
 $PAGE->set_title(get_string('digital_sales_stats_title', 'local_subscriptions'));
 $PAGE->set_heading(get_string('digital_sales_stats_title', 'local_subscriptions'));
 
@@ -78,6 +80,7 @@ if ($count > 0) {
 }
 
 echo $OUTPUT->header();
+echo AdminNavigation::back_button();
 
 echo html_writer::start_div('container my-4');
 
@@ -85,7 +88,7 @@ echo html_writer::start_div('mb-4 d-flex gap-2 flex-wrap');
 
 foreach ([1, 7, 30, 90, 365, -1] as $d) {
     echo html_writer::link(
-        new moodle_url('/local/subscriptions/admin/digital_sales_stats.php', ['days' => $d]),
+        new moodle_url(subscription_config::digital_sales_stats_admin_page(), ['days' => $d]),
         $d === -1
             ? get_string('always')
             : ($d > 1
@@ -96,7 +99,7 @@ foreach ([1, 7, 30, 90, 365, -1] as $d) {
 }
 
 echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php'),
+    new moodle_url(subscription_config::digital_purchases_admin_page()),
     get_string('digital_sales_stats_back_to_purchases', 'local_subscriptions'),
     ['class' => 'btn btn-outline-secondary']
 );

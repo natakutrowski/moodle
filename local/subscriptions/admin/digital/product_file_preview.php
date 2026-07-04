@@ -1,11 +1,11 @@
 <?php
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
 
-require_login();
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
 
-$context = context_system::instance();
-require_capability('moodle/site:config', $context);
+$context = AdminSecurity::require(Capabilities::MANAGE_DIGITAL);
 
 $id = required_param('id', PARAM_INT);
 $type = required_param('type', PARAM_ALPHANUMEXT);

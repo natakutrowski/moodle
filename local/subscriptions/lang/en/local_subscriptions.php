@@ -1235,3 +1235,53 @@ $string['crm_no_notes'] = 'No internal notes for this user.';
 $string['crm_note_required'] = 'The note cannot be empty.';
 $string['crm_note_added_successfully'] = 'Note added successfully.';
 $string['adminlog_user_note_added'] = 'Internal note added';
+
+$string['crm_timeline'] = 'CRM timeline';
+$string['crm_timeline_empty'] = 'No event recorded for this user.';
+$string['crm_timeline_note_added'] = 'Internal note added';
+$string['adminlog_subscription_created'] = 'Subscription created';
+$string['adminlog_subscription_created_manual'] = 'Subscription created manually';
+$string['adminlog_subscription_updated'] = 'Subscription updated';
+$string['adminlog_subscription_deleted'] = 'Subscription deleted';
+$string['adminlog_subscription_status_updated'] = 'Subscription status updated';
+$string['adminlog_subscription_dates_updated'] = 'Subscription dates updated';
+
+$string['adminlog_digital_purchase_created'] = 'Digital purchase created';
+$string['adminlog_digital_purchase_paid'] = 'Digital purchase paid';
+$string['adminlog_digital_purchase_failed'] = 'Digital purchase failed';
+$string['adminlog_digital_link_resent'] = 'Digital link resent';
+
+$string['adminlog_payment_request_created'] = 'Payment request created';
+$string['adminlog_payment_request_paid'] = 'Payment request paid';
+$string['adminlog_payment_request_failed'] = 'Payment request failed';
+$string['adminlog_payment_request_cancelled'] = 'Payment request cancelled';
+
+$string['adminlog_trial_started'] = 'Trial started';
+$string['adminlog_trial_expired'] = 'Trial expired';
+
+$string['change_user'] = 'Change user';
+$string['crm_accessible_courses'] = 'Accessible courses';
+$string['crm_no_accessible_courses'] = 'No course currently accessible.';
+$string['access'] = 'Access';
+$string['active'] = 'Active';
+$string['until'] = 'until';
+
+$string['digital_purchases_more_actions'] = 'More actions';
+$string['digital_purchases_reconcile_done'] = 'Reconciliation completed: {$a->reconciled} payment(s) fixed, {$a->failed} payment(s) marked as failed, {$a->skipped} skipped, {$a->errors} error(s).';
+
+$string['digital_purchases_export_filename'] = 'campusfr_pdf_purchases';
+$string['digital_purchases_export_sheet'] = 'PDF purchases';
+$string['digital_purchases_export_slug'] = 'Slug';
+$string['digital_purchases_export_file_classic'] = 'Classic file';
+$string['digital_purchases_export_file_mobile'] = 'Mobile file';
+$string['digital_purchases_export_transaction_id'] = 'Transaction ID';
+$string['digital_purchases_export_session_id'] = 'Session ID';
+$string['digital_purchases_export_pdf_email_sent'] = 'PDF email sent';
+$string['digital_purchases_export_receipt_sent'] = 'Receipt sent';
+$string['digital_purchases_export_payment_date'] = 'Payment date';
+$string['digital_purchases_export_last_update'] = 'Last update';
+$string['digital_purchases_export_link_expiration'] = 'Link expiration';
+$string['digital_purchases_export_download_classic'] = 'Classic download link';
+$string['digital_purchases_export_download_mobile'] = 'Mobile download link';
+$string['digital_purchases_export_last_error'] = 'Last DB error';
+$string['no_expiration'] = 'No expiration';

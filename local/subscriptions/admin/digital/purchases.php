@@ -1,15 +1,22 @@
 <?php
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/excellib.class.php');
 require_once($CFG->libdir . '/clilib.php');
 
-require_login();
+use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\admin\AdminFormatter;
 
-$context = context_system::instance();
-require_capability('moodle/site:config', $context);
+$context = AdminSecurity::require(Capabilities::VIEW_DIGITAL);
 
 $download = optional_param('download', 0, PARAM_BOOL);
 $checkprovider = optional_param('checkprovider', 0, PARAM_BOOL);
+
+$page = optional_param('page', 0, PARAM_INT);
+$perpage = optional_param('perpage', 50, PARAM_INT);
+$perpage = max(25, min(200, $perpage));
 
 $statusfilter = optional_param('status', '', PARAM_ALPHANUMEXT);
 $reconcilepending = optional_param('reconcile_pending', 0, PARAM_BOOL);
@@ -27,26 +34,35 @@ if ($reconcilepending) {
 
     $result = local_subscriptions_reconcile_pending_digital_payments();
 
+    $a = (object)[
+        'reconciled' => $result['reconciled'],
+        'failed' => $result['failed'] ?? 0,
+        'skipped' => $result['skipped'],
+        'errors' => $result['errors'],
+    ];
+
     redirect(
-        new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+        new moodle_url(subscription_config::digital_purchases_admin_page(), [
             'status' => 'pending',
             'checkprovider' => 1,
         ]),
-        'Réconciliation terminée : ' .
-        $result['reconciled'] . ' paiement(s) corrigé(s), ' .
-        ($result['failed'] ?? 0) . ' paiement(s) passé(s) en failed, ' .
-        $result['skipped'] . ' ignoré(s), ' .
-        $result['errors'] . ' erreur(s).',
+        get_string('digital_purchases_reconcile_done', 'local_subscriptions', $a),
         5,
         \core\output\notification::NOTIFY_SUCCESS
     );
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
+$baseurlparams = [
     'checkprovider' => $checkprovider,
     'campususer' => $campususerfilter,
-]));
+    'status' => $statusfilter,
+    'dbpaidonly' => $dbpaidonly,
+    'providerpaidonly' => $providerpaidonly,
+    'perpage' => $perpage,
+];
+
+$PAGE->set_url(new moodle_url(subscription_config::digital_purchases_admin_page(), $baseurlparams));
 $PAGE->set_title(get_string('digital_purchases_title', 'local_subscriptions'));
 $PAGE->set_heading(get_string('digital_purchases_title', 'local_subscriptions'));
 
@@ -102,6 +118,7 @@ $sql = "
         pr.email,
         pr.buyer_lang,
         pr.userid,
+        COALESCE(pr.userid, uemail.id) AS crmuserid,
         CASE
             WHEN ({$campususerexists}) THEN 1
             ELSE 0
@@ -126,6 +143,10 @@ $sql = "
         pr.last_error
     FROM {subscription_digital_payment_request} pr
     JOIN {subscription_digital_product} p ON p.id = pr.productid
+    LEFT JOIN {user} uemail
+        ON " . $DB->sql_compare_text('uemail.email') . " = " . $DB->sql_compare_text('pr.email') . "
+        AND uemail.deleted = 0
+        AND uemail.suspended = 0
     LEFT JOIN {subscription_digital_product_lang} tcur
         ON tcur.productid = p.id
         AND tcur.lang = :lang
@@ -136,7 +157,20 @@ $sql = "
     ORDER BY pr.creation_date DESC, pr.id DESC
 ";
 
-$records = $DB->get_records_sql($sql, $params);
+$countsql = "
+    SELECT COUNT(1)
+      FROM {subscription_digital_payment_request} pr
+      JOIN {subscription_digital_product} p ON p.id = pr.productid
+     WHERE {$where}
+";
+
+$totalcount = $DB->count_records_sql($countsql, $params);
+
+if ($download) {
+    $records = $DB->get_records_sql($sql, $params);
+} else {
+    $records = $DB->get_records_sql($sql, $params, $page * $perpage, $perpage);
+}
 
 $providerstatuses = [];
 
@@ -165,12 +199,12 @@ if ($providerpaidonly && $checkprovider) {
 }
 
 if ($download) {
-    $filename = 'achats_pdf_campusfr_' . date('Y-m-d_H-i') . '.xlsx';
+    $filename = get_string('digital_purchases_export_filename', 'local_subscriptions') . '_' . date('Y-m-d_H-i') . '.xlsx';
 
     $workbook = new MoodleExcelWorkbook('-');
     $workbook->send($filename);
 
-    $worksheet = $workbook->add_worksheet('Achats PDF');
+    $worksheet = $workbook->add_worksheet(get_string('digital_purchases_export_sheet', 'local_subscriptions'));
 
     $headerformat = $workbook->add_format([
         'bold' => 1,
@@ -182,32 +216,32 @@ if ($download) {
     ]);
 
     $headers = [
-        'ID',
-        'Produit',
-        'Slug',
-        'Fichier classique',
-        'Fichier mobile',
-        'Prénom',
-        'Nom',
-        'Email',
-        'Langue',
-        'Prix',
-        'Devise',
-        'Provider',
-        'Statut DB',
-        'Statut provider live',
-        'Raison provider',
-        'Transaction ID',
-        'Session ID',
-        'Email PDF envoyé',
-        'Reçu envoyé',
-        'Date création',
-        'Date paiement',
-        'Dernière mise à jour',
-        'Expiration lien',
-        'Lien téléchargement classique',
-        'Lien téléchargement mobile',
-        'Dernière erreur DB',
+        get_string('idnumber'),
+        get_string('product', 'local_subscriptions'),
+        get_string('digital_purchases_export_slug', 'local_subscriptions'),
+        get_string('digital_purchases_export_file_classic', 'local_subscriptions'),
+        get_string('digital_purchases_export_file_mobile', 'local_subscriptions'),
+        get_string('firstname'),
+        get_string('lastname'),
+        get_string('email'),
+        get_string('language'),
+        get_string('price', 'local_subscriptions'),
+        get_string('currency', 'local_subscriptions'),
+        get_string('digital_success_provider', 'local_subscriptions'),
+        get_string('digital_purchases_db_status', 'local_subscriptions'),
+        get_string('digital_purchases_provider_status', 'local_subscriptions'),
+        get_string('digital_purchases_provider_reason', 'local_subscriptions'),
+        get_string('digital_purchases_export_transaction_id', 'local_subscriptions'),
+        get_string('digital_purchases_export_session_id', 'local_subscriptions'),
+        get_string('digital_purchases_export_pdf_email_sent', 'local_subscriptions'),
+        get_string('digital_purchases_export_receipt_sent', 'local_subscriptions'),
+        get_string('creation_date', 'local_subscriptions'),
+        get_string('digital_purchases_export_payment_date', 'local_subscriptions'),
+        get_string('digital_purchases_export_last_update', 'local_subscriptions'),
+        get_string('digital_purchases_export_link_expiration', 'local_subscriptions'),
+        get_string('digital_purchases_export_download_classic', 'local_subscriptions'),
+        get_string('digital_purchases_export_download_mobile', 'local_subscriptions'),
+        get_string('digital_purchases_export_last_error', 'local_subscriptions'),
     ];
 
     foreach ($headers as $col => $header) {
@@ -258,12 +292,12 @@ if ($download) {
         $worksheet->write_string($row, 14, $providerstatus['reason'] ?? '');
         $worksheet->write_string($row, 15, $r->transactionid ?? '');
         $worksheet->write_string($row, 16, $r->sessionid ?? '');
-        $worksheet->write_string($row, 17, !empty($r->emailsent) ? 'Oui' : 'Non');
-        $worksheet->write_string($row, 18, !empty($r->receipt_sent) ? 'Oui' : 'Non');
+        $worksheet->write_string($row, 17, !empty($r->emailsent) ? get_string('yes') : get_string('no'));
+        $worksheet->write_string($row, 18, !empty($r->receipt_sent) ? get_string('yes') : get_string('no'));
         $worksheet->write_string($row, 19, !empty($r->creation_date) ? userdate((int)$r->creation_date, '%d/%m/%Y %H:%M') : '');
         $worksheet->write_string($row, 20, !empty($r->payment_date) ? userdate((int)$r->payment_date, '%d/%m/%Y %H:%M') : '');
         $worksheet->write_string($row, 21, !empty($r->last_update) ? userdate((int)$r->last_update, '%d/%m/%Y %H:%M') : '');
-        $worksheet->write_string($row, 22, !empty($r->download_token_expires) ? userdate((int)$r->download_token_expires, '%d/%m/%Y %H:%M') : 'Sans expiration');
+        $worksheet->write_string($row, 22, !empty($r->download_token_expires) ? userdate((int)$r->download_token_expires, '%d/%m/%Y %H:%M') : get_string('no_expiration', 'local_subscriptions'));
         $worksheet->write_string($row, 23, $downloadurl);
         $worksheet->write_string($row, 24, $downloadurlmobile);
         $worksheet->write_string($row, 25, $r->last_error ?? '');
@@ -285,111 +319,129 @@ if ($download) {
 }
 
 echo $OUTPUT->header();
+echo AdminNavigation::back_button();
 
-echo html_writer::start_div('mb-4 d-flex gap-2 flex-wrap');
+echo html_writer::start_div('card card-body mb-4');
 
-echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
-        'download' => 1,
-        'checkprovider' => $checkprovider,
-        'campususer' => $campususerfilter,
-        'dbpaidonly' => $dbpaidonly,
-        'status' => $statusfilter,
-    ]),
-    get_string('digital_purchases_export_xlsx', 'local_subscriptions'),
-    ['class' => 'btn btn-primary']
+echo html_writer::start_tag('form', [
+    'method' => 'get',
+    'action' => new moodle_url(subscription_config::digital_purchases_admin_page()),
+    'class' => 'row g-3 align-items-end',
+]);
+
+echo html_writer::div(
+    html_writer::label(get_string('status', 'local_subscriptions'), 'status', false, ['class' => 'form-label']) .
+    html_writer::select([
+        '' => get_string('all', 'moodle'),
+        'pending' => get_string('status_pending', 'local_subscriptions'),
+        'paid' => get_string('status_paid', 'local_subscriptions'),
+        'completed' => get_string('status_completed', 'local_subscriptions'),
+        'failed' => get_string('status_failed', 'local_subscriptions'),
+        'cancelled' => get_string('status_canceled', 'local_subscriptions'),
+    ], 'status', $statusfilter, false, ['class' => 'form-select']),
+    'col-md-3'
 );
 
+echo html_writer::div(
+    html_writer::label(get_string('digital_purchases_campus_account', 'local_subscriptions'), 'campususer', false, ['class' => 'form-label']) .
+    html_writer::select([
+        'all' => get_string('all', 'moodle'),
+        'registered' => get_string('digital_purchases_filter_registered', 'local_subscriptions'),
+        'guest' => get_string('digital_purchases_filter_guests', 'local_subscriptions'),
+    ], 'campususer', $campususerfilter, false, ['class' => 'form-select']),
+    'col-md-3'
+);
+
+echo html_writer::div(
+    html_writer::label(get_string('perpage', 'local_subscriptions'), 'perpage', false, ['class' => 'form-label']) .
+    html_writer::select([25 => 25, 50 => 50, 100 => 100, 200 => 200], 'perpage', $perpage, false, ['class' => 'form-select']),
+    'col-md-2'
+);
+
+echo html_writer::div(
+    html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'checkprovider',
+        'value' => $checkprovider ? 1 : 0,
+    ]) .
+    html_writer::tag('button', get_string('filter', 'local_subscriptions'), [
+        'type' => 'submit',
+        'class' => 'btn btn-primary',
+    ]),
+    'col-md-2'
+);
+
+echo html_writer::end_tag('form');
+
+echo html_writer::start_div('mt-3 d-flex flex-wrap gap-2');
+
 echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_sales_stats.php'),
-    get_string('digital_sales_stats_button', 'local_subscriptions'),
+    new moodle_url(subscription_config::digital_purchases_admin_page(), $baseurlparams + ['download' => 1]),
+    get_string('digital_purchases_export_xlsx', 'local_subscriptions'),
     ['class' => 'btn btn-outline-primary']
 );
 
 echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
-        'dbpaidonly' => 1,
-    ]),
-    get_string('digital_purchases_show_paid', 'local_subscriptions'),
-    ['class' => 'btn btn-outline-success']
-);
-
-echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
-        'campususer' => 'registered',
-        'dbpaidonly' => $dbpaidonly,
-        'status' => $statusfilter,
-        'checkprovider' => $checkprovider,
-    ]),
-    get_string('digital_purchases_filter_registered', 'local_subscriptions'),
-    ['class' => $campususerfilter === 'registered' ? 'btn btn-success' : 'btn btn-outline-success']
-);
-
-echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
-        'campususer' => 'guest',
-        'dbpaidonly' => $dbpaidonly,
-        'status' => $statusfilter,
-        'checkprovider' => $checkprovider,
-    ]),
-    get_string('digital_purchases_filter_guests', 'local_subscriptions'),
-    ['class' => $campususerfilter === 'guest' ? 'btn btn-warning' : 'btn btn-outline-warning']
-);
-
-echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
-        'status' => 'pending',
-        'checkprovider' => 1,
-    ]),
-    get_string('digital_purchases_show_pending', 'local_subscriptions'),
-    ['class' => 'btn btn-outline-warning']
-);
-
-echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
-        'status' => 'pending',
-        'checkprovider' => 1,
-        'providerpaidonly' => 1,
-    ]),
-    get_string('digital_purchases_show_pending_paid_provider', 'local_subscriptions'),
-    ['class' => 'btn btn-outline-danger']
-);
-
-echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
-        'checkprovider' => 1,
-    ]),
-    get_string('digital_purchases_show_all', 'local_subscriptions'),
+    new moodle_url(subscription_config::digital_sales_stats_admin_page()),
+    get_string('digital_sales_stats_button', 'local_subscriptions'),
     ['class' => 'btn btn-outline-secondary']
 );
 
-echo html_writer::link(
-    new moodle_url('/local/subscriptions/admin/digital_purchases.php', [
-        'reconcile_pending' => 1,
-        'sesskey' => sesskey(),
-    ]),
-    get_string('digital_purchases_reconcile_pending', 'local_subscriptions'),
-    [
-        'class' => 'btn btn-danger',
-        'onclick' => "return confirm('" . addslashes(get_string('digital_purchases_reconcile_confirm', 'local_subscriptions')) . "');",
-    ]
-);
+echo html_writer::start_tag('div', ['class' => 'dropdown']);
 
-if ($checkprovider) {
-    echo html_writer::link(
-        new moodle_url('/local/subscriptions/admin/digital_purchases.php'),
-        get_string('digital_purchases_hide_provider_status', 'local_subscriptions'),
-        ['class' => 'btn btn-outline-secondary']
-    );
-} else {
-    echo html_writer::link(
-        new moodle_url('/local/subscriptions/admin/digital_purchases.php', ['checkprovider' => 1]),
-        get_string('digital_purchases_check_provider_status', 'local_subscriptions'),
-        ['class' => 'btn btn-outline-primary']
-    );
+echo html_writer::tag('button', get_string('digital_purchases_more_actions', 'local_subscriptions'), [
+    'class' => 'btn btn-outline-secondary dropdown-toggle',
+    'type' => 'button',
+    'data-bs-toggle' => 'dropdown',
+    'aria-expanded' => 'false',
+]);
+
+echo html_writer::start_tag('ul', ['class' => 'dropdown-menu']);
+
+$actions = [
+    [
+        'label' => $checkprovider
+            ? get_string('digital_purchases_hide_provider_status', 'local_subscriptions')
+            : get_string('digital_purchases_check_provider_status', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::digital_purchases_admin_page(), array_merge($baseurlparams, [
+            'checkprovider' => $checkprovider ? 0 : 1,
+        ])),
+    ],
+    [
+        'label' => get_string('digital_purchases_show_pending_paid_provider', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::digital_purchases_admin_page(), [
+            'status' => 'pending',
+            'checkprovider' => 1,
+            'providerpaidonly' => 1,
+        ]),
+    ],
+    [
+        'label' => get_string('digital_purchases_reconcile_pending', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::digital_purchases_admin_page(), [
+            'reconcile_pending' => 1,
+            'sesskey' => sesskey(),
+        ]),
+        'danger' => true,
+        'confirm' => get_string('digital_purchases_reconcile_confirm', 'local_subscriptions'),
+    ],
+];
+
+foreach ($actions as $action) {
+    $attrs = ['class' => !empty($action['danger']) ? 'dropdown-item text-danger' : 'dropdown-item'];
+
+    if (!empty($action['confirm'])) {
+        $attrs['onclick'] = "return confirm('" . addslashes($action['confirm']) . "');";
+    }
+
+    echo html_writer::tag('li', html_writer::link($action['url'], $action['label'], $attrs));
 }
 
+echo html_writer::end_tag('ul');
+echo html_writer::end_tag('div');
+
 echo html_writer::end_div();
+echo html_writer::end_div();
+
 
 if ($checkprovider) {
     echo $OUTPUT->notification(
@@ -471,27 +523,50 @@ foreach ($records as $r) {
 
     $statusbadge = local_subscriptions_render_provider_status_badge($providerstatus['status']);
 
-    $dateformat = '%d/%m/%y %H:%M';
-
     if (!empty($r->payment_date)) {
-        $datecell = userdate((int)$r->payment_date, $dateformat);
+        $datecell = AdminFormatter::datetime((int)$r->payment_date);
     } else if (!empty($r->creation_date)) {
-        $datecell = '(' . userdate((int)$r->creation_date, $dateformat) . ')';
+        $datecell = '(' . AdminFormatter::datetime((int)$r->creation_date) . ')';
     } else {
         $datecell = '—';
     }
 
+    $productlabel = format_text($r->productname ?? '', FORMAT_HTML, [
+        'trusted' => true,
+        'noclean' => true,
+    ]);
+
+    $productcell = html_writer::link(
+        new moodle_url(subscription_config::digital_product_edit_admin_page(), ['id' => $r->productid]),
+        $productlabel
+    );
+
+    $userlabel = s(trim(($r->firstname ?? '') . ' ' . ($r->lastname ?? '')));
+
+    if ($userlabel === '') {
+        $userlabel = s($r->email ?? '');
+    }
+
+    $userlabel .= html_writer::empty_tag('br') . html_writer::tag('small', s($r->email ?? ''));
+
+    if (!empty($r->crmuserid)) {
+        $usercell = html_writer::link(
+            new moodle_url(subscription_config::admin_user_view_page(), ['id' => $r->crmuserid]),
+            $userlabel,
+            ['class' => 'digital-purchase-user-link']
+        );
+    } else {
+        $usercell = $userlabel;
+    }    
+
     $table->data[] = [
         (int)$r->id,
-        format_text($r->productname ?? '', FORMAT_HTML, [
-            'trusted' => true,
-            'noclean' => true,
-        ]),
-        s(trim(($r->firstname ?? '') . ' ' . ($r->lastname ?? ''))) . html_writer::empty_tag('br') . s($r->email ?? ''),
+        $productcell,
+        $usercell,
         !empty($r->hascampususer)
             ? html_writer::tag('span', get_string('yes'), ['class' => 'badge bg-success'])
             : html_writer::tag('span', get_string('no'), ['class' => 'badge bg-warning text-dark']),
-        number_format((float)$r->price, 2, ',', ' ') . ' ' . s($r->currency ?? ''),
+        AdminFormatter::price($r->price ?? 0, $r->currency ?? ''),
         local_subscriptions_render_provider_icon($r->payment_provider ?? ''),
         local_subscriptions_render_db_status_badge($r->status ?? ''),
         $statusbadge,
@@ -526,11 +601,27 @@ echo html_writer::tag('style', '
     .generaltable .badge {
         white-space: nowrap;
     }
+
+    .digital-purchase-user-link {
+        text-decoration: none;
+    }
+
+    .digital-purchase-user-link:hover {
+        text-decoration: underline;
+    }
+
 ');
 
 echo html_writer::div(
     html_writer::table($table),
     'table-responsive'
+);
+
+echo $OUTPUT->paging_bar(
+    $totalcount,
+    $page,
+    $perpage,
+    new moodle_url(subscription_config::digital_purchases_admin_page(), $baseurlparams)
 );
 
 echo $OUTPUT->footer();

@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->dirroot . '/local/subscriptions/lib/user_subs_lib.php');
 require_once($CFG->dirroot . '/local/subscriptions/renderer/user_subs_renderer.php');
 require_once($CFG->dirroot . '/user/lib.php');
@@ -10,6 +10,7 @@ use local_subscriptions\subscription_manager;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\admin\AdminLog;
 
 function local_subscriptions_generate_unique_username_from_email(string $email): string {
     global $DB;
@@ -52,6 +53,20 @@ $PAGE->requires->js(new moodle_url('/local/subscriptions/thirdparty/flatpickr/l1
 
 $renderer = new local_subscriptions_user_subs_renderer($PAGE, $OUTPUT);
 
+$preselecteduserid = optional_param('userid', 0, PARAM_INT);
+$preselecteduser = null;
+
+if ($preselecteduserid > 0) {
+    $preselecteduser = $DB->get_record('user', [
+        'id' => $preselecteduserid,
+        'deleted' => 0,
+    ], '*', MUST_EXIST);
+
+    $PAGE->set_url(new moodle_url(subscription_config::add_manual_subscription_page(), [
+        'userid' => $preselecteduserid,
+    ]));
+}
+
 $plans = [];
 foreach ($DB->get_records('subscription_plan', null, 'name ASC') as $plan) {
     $translation = subscription_manager::get_translated_plan_name($plan->id, current_language());
@@ -80,9 +95,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }  
 
     $userid = optional_param('userid', 0, PARAM_INT);
-    $usermode = required_param('user_mode', PARAM_ALPHA);
+    $usermode = optional_param('user_mode', 'existing', PARAM_ALPHA);
 
-    if ($usermode === 'new') {
+    if ($userid <= 0 && $usermode === 'new') {
         $firstname = required_param('firstname', PARAM_TEXT);
         $lastname = required_param('lastname', PARAM_TEXT);
         $email = required_param('email', PARAM_EMAIL);
@@ -120,6 +135,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $status = local_subscriptions_enrol_user_manual($userid, $planid, $pricecurrency, $startraw, true);
 
+    if ($status === 'created') {
+        $subscription = $DB->get_record_sql("
+            SELECT us.*, sp.name AS planname
+            FROM {user_subscription} us
+        LEFT JOIN {subscription_plan} sp ON sp.id = us.planid
+            WHERE us.userid = :userid
+            AND us.planid = :planid
+        ORDER BY us.id DESC
+        ", [
+            'userid' => $userid,
+            'planid' => $planid,
+        ], IGNORE_MISSING);
+
+        if ($subscription) {
+            AdminLog::subscriptionCreatedManual($subscription);
+        }
+    }
+
     $user = core_user::get_user($userid);
     $planlabel = $plans[$planid] ?? $planid;
 
@@ -134,6 +167,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         \core\notification::info(get_string('sub_exists', 'local_subscriptions', $a));
     }
 
+    if ($preselecteduserid > 0) {
+        redirect(new moodle_url(subscription_config::admin_user_view_page(), ['id' => $preselecteduserid]));
+    }
+
     redirect(new moodle_url(subscription_config::user_subscriptions_page(), ['planid' => $planid]));
 }
 
@@ -141,6 +178,6 @@ echo $OUTPUT->header();
 
 echo AdminNavigation::back_button();
 
-echo $renderer->render_manual_subscription_form_v2($plans);
+echo $renderer->render_manual_subscription_form_v2($plans, $preselecteduser);
 
 echo $OUTPUT->footer();
