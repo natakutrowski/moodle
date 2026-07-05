@@ -1470,3 +1470,41 @@ $string['crm_status_former_customer'] = 'Бывший клиент';
 $string['crm_status_suspended'] = 'Заблокирован';
 $string['crm_status_lead'] = 'Лид';
 $string['crm_status_unknown'] = 'Неизвестно';
+
+$string['command_center_type_user'] = 'Пользователь';
+$string['command_center_user_suspended'] = 'Аккаунт заблокирован';
+$string['command_center_open'] = 'Открыть Command Center';
+$string['command_center_placeholder'] = 'Найти пользователя, покупку, продукт…';
+$string['command_center_input_placeholder'] = 'Поиск… или введите > для действий';
+$string['command_center_hint'] = 'Enter — открыть · Esc — закрыть · ↑ ↓ — навигация';
+$string['command_center_close'] = 'Закрыть Command Center';
+$string['command_center_empty'] = 'Ничего не найдено';
+$string['command_center_error'] = 'Ошибка поиска';
+$string['command_center_loading'] = 'Поиск…';
+$string['command_center_type_digital_product'] = 'Цифровой продукт';
+$string['command_center_type_digital_purchase'] = 'Цифровая покупка';
+$string['command_center_type_subscription'] = 'Подписка';
+$string['command_center_disabled'] = 'Отключено';
+
+$string['command_center_product_subtitle'] = '{$a->slug} · {$a->eur} EUR · {$a->rub} RUB';
+$string['command_center_purchase_subtitle'] = '{$a->product} · {$a->status} · {$a->price} · {$a->date}';
+$string['command_center_subscription_subtitle'] = '{$a->plan} · {$a->status} · {$a->period}';
+$string['command_center_type_action'] = 'Действие';
+
+$string['command_action_dashboard_title'] = 'Открыть dashboard';
+$string['command_action_dashboard_subtitle'] = 'Вернуться на главную страницу CRM';
+
+$string['command_action_users_title'] = 'Посмотреть пользователей CRM';
+$string['command_action_users_subtitle'] = 'Открыть список пользователей и клиентов';
+
+$string['command_action_products_title'] = 'Посмотреть цифровые продукты';
+$string['command_action_products_subtitle'] = 'Управлять цифровыми продуктами CampusFR';
+
+$string['command_action_product_create_title'] = 'Создать цифровой продукт';
+$string['command_action_product_create_subtitle'] = 'Добавить новый цифровой продукт';
+
+$string['command_action_purchases_title'] = 'Посмотреть цифровые покупки';
+$string['command_action_purchases_subtitle'] = 'Открыть покупки и цифровые платежи';
+
+$string['command_action_subscriptions_title'] = 'Посмотреть подписки';
+$string['command_action_subscriptions_subtitle'] = 'Просматривать и управлять подписками пользователей';

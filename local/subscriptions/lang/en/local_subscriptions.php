@@ -1472,3 +1472,41 @@ $string['crm_status_former_customer'] = 'Former customer';
 $string['crm_status_suspended'] = 'Suspended';
 $string['crm_status_lead'] = 'Lead';
 $string['crm_status_unknown'] = 'Unknown';
+
+$string['command_center_type_user'] = 'User';
+$string['command_center_user_suspended'] = 'Suspended account';
+$string['command_center_open'] = 'Open Command Center';
+$string['command_center_placeholder'] = 'Search for a user, purchase, product…';
+$string['command_center_input_placeholder'] = 'Search… or type > for actions';
+$string['command_center_hint'] = 'Enter to open · Esc to close · ↑ ↓ to navigate';
+$string['command_center_close'] = 'Close Command Center';
+$string['command_center_empty'] = 'No results';
+$string['command_center_error'] = 'Search error';
+$string['command_center_loading'] = 'Searching…';
+$string['command_center_type_digital_product'] = 'Digital product';
+$string['command_center_type_digital_purchase'] = 'Digital purchase';
+$string['command_center_type_subscription'] = 'Subscription';
+$string['command_center_disabled'] = 'Disabled';
+
+$string['command_center_product_subtitle'] = '{$a->slug} · {$a->eur} EUR · {$a->rub} RUB';
+$string['command_center_purchase_subtitle'] = '{$a->product} · {$a->status} · {$a->price} · {$a->date}';
+$string['command_center_subscription_subtitle'] = '{$a->plan} · {$a->status} · {$a->period}';
+$string['command_center_type_action'] = 'Action';
+
+$string['command_action_dashboard_title'] = 'Open dashboard';
+$string['command_action_dashboard_subtitle'] = 'Go back to the main CRM view';
+
+$string['command_action_users_title'] = 'View CRM users';
+$string['command_action_users_subtitle'] = 'Open the user and customer list';
+
+$string['command_action_products_title'] = 'View digital products';
+$string['command_action_products_subtitle'] = 'Manage CampusFR digital products';
+
+$string['command_action_product_create_title'] = 'Create digital product';
+$string['command_action_product_create_subtitle'] = 'Add a new digital product';
+
+$string['command_action_purchases_title'] = 'View digital purchases';
+$string['command_action_purchases_subtitle'] = 'Review digital purchases and payments';
+
+$string['command_action_subscriptions_title'] = 'View subscriptions';
+$string['command_action_subscriptions_subtitle'] = 'Review and manage user subscriptions';

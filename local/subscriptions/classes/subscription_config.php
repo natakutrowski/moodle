@@ -216,6 +216,10 @@ class subscription_config {
         return self::plugin_path() . 'admin/users/subscription_quick_action.php';
     }
 
+    public static function command_center_search_ajax(): string {
+        return self::plugin_path() . 'ajax/command_center_search.php';
+    }
+
     // -- Buttons --
     public static function button_admin_dashboard(): string {
         return \html_writer::link(

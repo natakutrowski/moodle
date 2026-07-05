@@ -1459,3 +1459,41 @@ $string['crm_status_former_customer'] = 'Ancien client';
 $string['crm_status_suspended'] = 'Suspendu';
 $string['crm_status_lead'] = 'Prospect';
 $string['crm_status_unknown'] = 'Inconnu';
+
+$string['command_center_type_user'] = 'Utilisateur';
+$string['command_center_user_suspended'] = 'Compte suspendu';
+$string['command_center_open'] = 'Ouvrir le Command Center';
+$string['command_center_placeholder'] = 'Rechercher un utilisateur, un achat, un produit…';
+$string['command_center_input_placeholder'] = 'Rechercher… ou taper > pour les actions';
+$string['command_center_hint'] = 'Entrée pour ouvrir · Échap pour fermer · ↑ ↓ pour naviguer';
+$string['command_center_close'] = 'Fermer le Command Center';
+$string['command_center_empty'] = 'Aucun résultat';
+$string['command_center_error'] = 'Erreur pendant la recherche';
+$string['command_center_loading'] = 'Recherche en cours…';
+$string['command_center_type_digital_product'] = 'Produit digital';
+$string['command_center_type_digital_purchase'] = 'Achat digital';
+$string['command_center_type_subscription'] = 'Abonnement';
+$string['command_center_disabled'] = 'Désactivé';
+
+$string['command_center_product_subtitle'] = '{$a->slug} · {$a->eur} EUR · {$a->rub} RUB';
+$string['command_center_purchase_subtitle'] = '{$a->product} · {$a->status} · {$a->price} · {$a->date}';
+$string['command_center_subscription_subtitle'] = '{$a->plan} · {$a->status} · {$a->period}';
+$string['command_center_type_action'] = 'Action';
+
+$string['command_action_dashboard_title'] = 'Ouvrir le dashboard';
+$string['command_action_dashboard_subtitle'] = 'Retourner à la vue principale du CRM';
+
+$string['command_action_users_title'] = 'Voir les utilisateurs CRM';
+$string['command_action_users_subtitle'] = 'Ouvrir la liste des utilisateurs et clients';
+
+$string['command_action_products_title'] = 'Voir les produits digitaux';
+$string['command_action_products_subtitle'] = 'Gérer les produits digitaux CampusFR';
+
+$string['command_action_product_create_title'] = 'Créer un produit digital';
+$string['command_action_product_create_subtitle'] = 'Ajouter un nouveau produit digital';
+
+$string['command_action_purchases_title'] = 'Voir les achats digitaux';
+$string['command_action_purchases_subtitle'] = 'Consulter les achats et paiements digitaux';
+
+$string['command_action_subscriptions_title'] = 'Voir les abonnements';
+$string['command_action_subscriptions_subtitle'] = 'Consulter et gérer les abonnements utilisateurs';
