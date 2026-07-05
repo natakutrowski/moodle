@@ -9,6 +9,7 @@ use local_subscriptions\payment\TransactionIdResolver;
 use local_subscriptions\support\Duration;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\mailer;
+use local_subscriptions\admin\AdminLog;
 
 require_once(__DIR__ . '/../../lib/user_subs_lib.php');
 
@@ -706,6 +707,9 @@ class PaymentService {
             $pr->subscriptionid = $sub->id;
             $DB->update_record('subscription_payment_request', $pr);
         }
+
+        $plan = $DB->get_record('subscription_plan', ['id' => $planid], '*', IGNORE_MISSING);
+        AdminLog::subscriptionCreatedAuto($sub, $plan ?: null, $pr);
 
         return $sub;
     }

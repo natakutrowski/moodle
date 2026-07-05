@@ -84,6 +84,118 @@ final class AdminLog {
         );
     }
 
+    public static function subscriptionCreatedAuto(
+        \stdClass $subscription,
+        ?\stdClass $plan = null,
+        ?\stdClass $pr = null
+    ): void {
+        $details = self::subscription_details($subscription, $plan);
+
+        if ($pr) {
+            $details['paymentrequest'] = '#' . (int)$pr->id;
+            $details['provider'] = $pr->payment_provider ?? ($pr->provider ?? '-');
+            $details['transactionid'] = $pr->transactionid ?? '-';
+        }
+
+        self::log(
+            AdminEvents::SUBSCRIPTION_CREATED_AUTO,
+            (int)$subscription->userid,
+            'subscription',
+            (int)$subscription->id,
+            $details
+        );
+    }
+
+    public static function subscriptionExtended(
+        \stdClass $subscription,
+        ?\stdClass $plan = null,
+        array $changes = []
+    ): void {
+        $details = self::subscription_details($subscription, $plan);
+
+        if ($changes) {
+            $details['changes'] = $changes;
+        }
+
+        self::log(
+            AdminEvents::SUBSCRIPTION_EXTENDED,
+            (int)$subscription->userid,
+            'subscription',
+            (int)$subscription->id,
+            $details
+        );
+    }
+
+    public static function emailReceiptSent(
+        int $userid,
+        ?int $subscriptionid = null,
+        ?int $prid = null,
+        array $details = []
+    ): void {
+        self::log(
+            AdminEvents::EMAIL_RECEIPT_SENT,
+            $userid,
+            $subscriptionid ? 'subscription' : 'user',
+            $subscriptionid ?: $userid,
+            [
+                'subscriptionid' => $subscriptionid,
+                'paymentrequest' => $prid ? '#' . $prid : '-',
+            ] + $details
+        );
+    }
+
+    public static function emailSubscriptionAccessSent(
+        int $userid,
+        ?int $subscriptionid = null,
+        array $details = []
+    ): void {
+        self::log(
+            AdminEvents::EMAIL_SUBSCRIPTION_ACCESS_SENT,
+            $userid,
+            $subscriptionid ? 'subscription' : 'user',
+            $subscriptionid ?: $userid,
+            [
+                'subscriptionid' => $subscriptionid,
+            ] + $details
+        );
+    }
+
+    public static function emailWelcomeSent(
+        int $userid,
+        ?int $subscriptionid = null,
+        array $details = []
+    ): void {
+        self::log(
+            AdminEvents::EMAIL_WELCOME_SENT,
+            $userid,
+            $subscriptionid ? 'subscription' : 'user',
+            $subscriptionid ?: $userid,
+            [
+                'subscriptionid' => $subscriptionid,
+                'emailtype' => 'welcome',
+            ] + $details
+        );
+    }
+
+    public static function emailCustomSent(
+        int $userid,
+        string $subject,
+        string $body,
+        array $details = []
+    ): void {
+        self::log(
+            AdminEvents::EMAIL_CUSTOM_SENT,
+            $userid,
+            'email',
+            $userid,
+            [
+                'subject' => $subject,
+                'body' => $body,
+                'emailtype' => 'custom',
+            ] + $details
+        );
+    }
+
     private static function subscription_details(\stdClass $subscription, ?\stdClass $plan = null): array {
         return [
             'plan' => $plan->name ?? ($subscription->planname ?? $subscription->planid ?? '-'),

@@ -8,6 +8,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\AdminEntityLinks;
+use local_subscriptions\admin\AdminDetailRenderer;
 use local_subscriptions\support\DigitalPresenter;
 
 global $DB, $PAGE, $OUTPUT;
@@ -103,12 +104,6 @@ echo html_writer::link(
 
 echo html_writer::end_div();
 
-echo html_writer::start_div('card card-body mb-4');
-
-echo html_writer::tag('h3', get_string('digital_purchase_details', 'local_subscriptions') . ' #' . $purchase->id, [
-    'class' => 'mb-3',
-]);
-
 $product = AdminEntityLinks::digital_product(
     (int)$purchase->productid,
     format_string($purchase->productname)
@@ -123,21 +118,7 @@ if (!empty($purchase->crmuserid)) {
     $buyer = $buyerlabel;
 }
 
-$providerdata = '-';
-
-if (!empty($purchase->response_json)) {
-    $decoded = json_decode((string)$purchase->response_json, true);
-
-    if (is_array($decoded)) {
-        $providerdata = html_writer::tag(
-            'pre',
-            s(json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)),
-            ['class' => 'crm-json-preview']
-        );
-    } else {
-        $providerdata = html_writer::tag('pre', s((string)$purchase->response_json), ['class' => 'crm-json-preview']);
-    }
-}
+$providerdata = AdminDetailRenderer::json($purchase->response_json ?? '');
 
 $rows = [
     get_string('product', 'local_subscriptions') => $product,
@@ -174,19 +155,10 @@ $rows = [
     get_string('digital_response_json', 'local_subscriptions') => $providerdata,
 ];
 
-$table = new html_table();
-$table->attributes['class'] = 'generaltable crm-detail-table';
-
-foreach ($rows as $label => $value) {
-    $table->data[] = [
-        html_writer::tag('strong', $label),
-        $value,
-    ];
-}
-
-echo html_writer::table($table);
-
-echo html_writer::end_div();
+echo AdminDetailRenderer::card(
+    get_string('digital_purchase_details', 'local_subscriptions') . ' #' . $purchase->id,
+    $rows
+);
 
 echo html_writer::link(
     new moodle_url(subscription_config::digital_purchases_admin_page()),

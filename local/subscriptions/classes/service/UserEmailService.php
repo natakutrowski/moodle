@@ -33,13 +33,11 @@ final class UserEmailService {
             $buttonurl
         );
 
-        AdminLog::log(
-            AdminEvents::EMAIL_CUSTOM_SENT,
-            $userid,
-            'user',
-            $userid,
-            ['subject' => $subject]
-        );        
+        AdminLog::emailCustomSent($userid, $subject, $messagehtml, [
+            'to' => $user->email,
+            'buttonlabel' => $buttonlabel ?? '',
+            'buttonurl' => $buttonurl ?? '',
+        ]);      
     }
 
     public static function send_password_reset_notice(

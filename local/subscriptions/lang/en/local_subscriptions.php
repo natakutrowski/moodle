@@ -1350,3 +1350,125 @@ $string['dashboard_alert_email_errors'] = 'Purchases with email/internal error';
 $string['dashboard_alert_expired_tokens'] = 'Expired digital links';
 $string['dashboard_recent_activity'] = 'Recent activity';
 $string['dashboard_no_recent_activity'] = 'No recent activity.';
+
+$string['crm_resend_welcome_email'] = 'Resend welcome';
+$string['crm_resend_access_email'] = 'Resend access';
+$string['crm_resend_receipt'] = 'Resend receipt';
+
+$string['crm_welcome_email_resent_success'] = 'Welcome email resent.';
+$string['crm_access_email_resent_success'] = 'Access email resent.';
+$string['crm_receipt_resent_success'] = 'Receipt resent.';
+$string['crm_subscription_extended_success'] = 'Subscription extended by {$a} days.';
+
+$string['crm_receipt_not_available'] = 'No receipt is available for this subscription.';
+$string['crm_timeline_course_purchase_paid'] = 'Course purchase paid';
+$string['crm_timeline_payment_request'] = 'Payment request';
+$string['crm_timeline_subscription_created'] = 'Subscription created';
+$string['crm_timeline_trial_started'] = 'Trial started';
+$string['payment_provider'] = 'Payment provider';
+$string['transactionid'] = 'Transaction ID';
+$string['crm_timeline_email_receipt_sent'] = 'Receipt sent';
+$string['crm_timeline_email_access_sent'] = 'Access email sent';
+$string['crm_timeline_email_welcome_sent'] = 'Welcome email sent';
+
+$string['crm_email_type_receipt'] = 'Purchase receipt';
+$string['crm_email_type_access'] = 'Subscription access';
+$string['crm_email_type_welcome'] = 'Welcome';
+
+$string['crm_timeline_collapse_all'] = 'Collapse / expand details';
+$string['crm_timeline_view_details'] = 'View details';
+$string['payment_request'] = 'Payment request';
+$string['type'] = 'Type';
+$string['subscription_details'] = 'Subscription details';
+$string['crm_user_profile'] = 'User CRM profile';
+$string['crm_no_payment_request_for_subscription'] = 'No payment request is linked to this subscription.';
+$string['view_details'] = 'View details';
+$string['admin_section_discounts'] = 'Discounts';
+$string['admin_section_provider'] = 'Provider information';
+$string['admin_section_payment_failures'] = 'Payment failures';
+$string['admin_section_dates'] = 'Dates';
+
+$string['admin_section_payment_request_identity'] = 'Identity / Contact';
+$string['admin_section_payment_status'] = 'Status and operation';
+$string['admin_section_amounts'] = 'Locked amounts';
+$string['admin_section_links_tokens'] = 'Links and tokens';
+$string['admin_section_reminders_attempts'] = 'Reminders and attempts';
+$string['admin_section_request_context'] = 'Creation context';
+
+$string['discount_percent'] = 'Discount (%)';
+$string['discount_amount'] = 'Discount amount';
+$string['discount_reason'] = 'Discount reason';
+
+$string['phone'] = 'Phone';
+$string['phone_country'] = 'Phone country';
+$string['operation'] = 'Operation';
+$string['reference_subscription_id'] = 'Reference subscription';
+$string['amount_minor'] = 'Minor amount';
+
+$string['locked_list_price'] = 'Locked list price';
+$string['locked_discount_percent'] = 'Locked discount (%)';
+$string['locked_discount_amount'] = 'Locked discount amount';
+$string['locked_discount_reason'] = 'Locked discount reason';
+$string['locked_final_price'] = 'Locked final price';
+$string['locked_at'] = 'Locked on';
+
+$string['retry_token'] = 'Retry token';
+$string['retry_expires'] = 'Retry expiration';
+$string['login_token'] = 'Login token';
+$string['login_token_expires'] = 'Login token expiration';
+
+$string['emailsent'] = 'Email sent';
+$string['reminder_stage'] = 'Reminder stage';
+$string['reminder1_at'] = 'First reminder sent on';
+$string['reminder2_at'] = 'Second reminder sent on';
+
+$string['created_ip'] = 'Creation IP';
+$string['created_useragent'] = 'Creation User-Agent';
+$string['accept_language'] = 'Accepted language';
+$string['http_referer'] = 'HTTP referrer';
+$string['expiration_date'] = 'Expiration date';
+$string['subscription'] = 'Subscription';
+
+$string['crm_timeline_expand_all'] = 'Expand all';
+$string['crm_timeline_collapse_all'] = 'Collapse all';
+$string['crm_timeline_view_details'] = 'View details';
+
+$string['crm_timeline_recent'] = 'Recent history (last 30 days)';
+$string['crm_timeline_middle'] = 'History (31 to 90 days)';
+$string['crm_timeline_old'] = 'Older history (over 90 days)';
+
+$string['crm_filter_purchases'] = 'Purchases';
+$string['crm_filter_emails'] = 'Emails';
+$string['crm_filter_other'] = 'Other';
+$string['crm_timeline_by_actor'] = 'by {$a}';
+$string['crm_timeline_by_admin'] = 'by an administrator';
+$string['crm_email_preview'] = 'Email preview';
+$string['recipient'] = 'Recipient';
+
+$string['crm_timeline_title'] = 'Timeline';
+$string['crm_suspend_moodle_profile'] = 'Suspend Moodle profile';
+$string['crm_activate_moodle_profile'] = 'Activate Moodle profile';
+$string['crm_moodle_profile_suspended'] = 'Moodle profile suspended.';
+$string['crm_moodle_profile_activated'] = 'Moodle profile activated.';
+$string['adminlog_user_suspended'] = 'Moodle profile suspended';
+$string['adminlog_user_reactivated'] = 'Moodle profile reactivated';
+
+$string['crm_stats_title'] = 'CRM summary';
+$string['crm_accessible_courses'] = 'Accessible courses';
+$string['crm_total_spent'] = 'Total spent';
+$string['crm_last_activity'] = 'Last activity';
+
+$string['crm_stats_subscriptions_hint'] = 'Subscriptions linked to this profile';
+$string['crm_stats_digital_hint'] = 'Digital products purchased';
+$string['crm_stats_courses_hint'] = 'Courses currently accessible';
+$string['crm_stats_spent_hint'] = 'Total paid by currency';
+$string['crm_stats_activity_hint'] = 'Last known event';
+
+$string['crm_status'] = 'CRM status';
+$string['crm_stats_status_hint'] = 'Current profile situation';
+$string['crm_status_active_customer'] = 'Active customer';
+$string['crm_status_trial'] = 'Trial';
+$string['crm_status_former_customer'] = 'Former customer';
+$string['crm_status_suspended'] = 'Suspended';
+$string['crm_status_lead'] = 'Lead';
+$string['crm_status_unknown'] = 'Unknown';

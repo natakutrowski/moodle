@@ -11,9 +11,14 @@ final class AdminEvents {
     public const EMAIL_PASSWORD_RESET_NOTICE_SENT = 'email.password_reset_notice.sent';
     public const EMAIL_WELCOME_SENT = 'email.welcome.sent';
 
+    public const EMAIL_RECEIPT_SENT = 'email.receipt.sent';
+    public const EMAIL_SUBSCRIPTION_ACCESS_SENT = 'email.subscription_access.sent';
+
     // Users.
     public const USER_PASSWORD_UPDATED = 'user.password.updated';
     public const USER_NOTE_ADDED = 'user.note.added';
+    public const USER_SUSPENDED = 'user.suspended';
+    public const USER_REACTIVATED = 'user.reactivated';
 
     // Subscriptions.
     public const SUBSCRIPTION_CREATED = 'subscription.created';
@@ -22,6 +27,10 @@ final class AdminEvents {
     public const SUBSCRIPTION_DELETED = 'subscription.deleted';
     public const SUBSCRIPTION_STATUS_UPDATED = 'subscription.status_updated';
     public const SUBSCRIPTION_DATES_UPDATED = 'subscription.dates_updated';
+
+    public const SUBSCRIPTION_CREATED_AUTO = 'subscription.created_auto';
+    public const SUBSCRIPTION_EXTENDED = 'subscription.extended';
+    
 
     // Digital products.
     public const DIGITAL_PURCHASE_CREATED = 'digital.purchase.created';
@@ -48,9 +57,13 @@ final class AdminEvents {
             self::EMAIL_CUSTOM_SENT,
             self::EMAIL_PASSWORD_RESET_NOTICE_SENT,
             self::EMAIL_WELCOME_SENT,
+            self::EMAIL_RECEIPT_SENT,
+            self::EMAIL_SUBSCRIPTION_ACCESS_SENT,
 
             self::USER_PASSWORD_UPDATED,
             self::USER_NOTE_ADDED,
+            self::USER_SUSPENDED,
+            self::USER_REACTIVATED,
 
             self::SUBSCRIPTION_CREATED,
             self::SUBSCRIPTION_CREATED_MANUAL,
@@ -58,6 +71,8 @@ final class AdminEvents {
             self::SUBSCRIPTION_DELETED,
             self::SUBSCRIPTION_STATUS_UPDATED,
             self::SUBSCRIPTION_DATES_UPDATED,
+            self::SUBSCRIPTION_CREATED_AUTO,
+            self::SUBSCRIPTION_EXTENDED,
 
             self::DIGITAL_PURCHASE_CREATED,
             self::DIGITAL_PURCHASE_PAID,

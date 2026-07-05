@@ -6,6 +6,7 @@ require_once($CFG->libdir . '/formslib.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\admin\AdminLog;
 use local_subscriptions\service\UserEmailService;
 
 global $DB, $PAGE, $OUTPUT;
@@ -89,12 +90,18 @@ if ($form->is_cancelled()) {
 }
 
 if ($data = $form->get_data()) {
+    $userid = (int)$data->id;
+    $subject = (string)$data->subject;
+    $body = (string)$data->message['text'];
+    $buttonlabel = $data->buttonlabel ?? null;
+    $buttonurl = $data->buttonurl ?? null;
+
     UserEmailService::send_custom_email(
-        (int)$data->id,
-        (string)$data->subject,
-        (string)$data->message['text'],
-        $data->buttonlabel ?? null,
-        $data->buttonurl ?? null
+        $userid,
+        $subject,
+        $body,
+        $buttonlabel,
+        $buttonurl
     );
 
     redirect(

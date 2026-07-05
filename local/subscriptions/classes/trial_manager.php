@@ -5,6 +5,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\constants\Status;
 use local_subscriptions\payment\Provider;
+use local_subscriptions\admin\AdminLog;
+use local_subscriptions\admin\AdminEvents;
 
 /**
  * Gestion centralisée de l'essai (7 jours par défaut).
@@ -81,7 +83,22 @@ class trial_manager {
         // Rôles et groupes appliqués par subscription_manager::enrol_user_to_courses().
         //self::force_role_trialstudent($userid, $planid);
 
-        return !empty($result['subscription']->id) ? (int)$result['subscription']->id : null;
+        $subid = !empty($result['subscription']->id) ? (int)$result['subscription']->id : null;
+
+        if ($subid) {
+            AdminLog::log(
+                AdminEvents::TRIAL_STARTED,
+                $userid,
+                'subscription',
+                $subid,
+                [
+                    'start' => \local_subscriptions\admin\AdminFormatter::date($start),
+                    'end' => \local_subscriptions\admin\AdminFormatter::date($end),
+                ]
+            );
+        }
+
+        return $subid;
     }
 
     /** Lit une devise par défaut pour le plan, sinon 'EUR'. */

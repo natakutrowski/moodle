@@ -116,6 +116,10 @@ class subscription_config {
         return self::plugin_path() . 'admin/subscriptions/edit.php';
     }
 
+    public static function user_subscription_view_page(): string {
+        return self::plugin_path() . 'admin/subscriptions/view.php';
+    }
+
     public static function user_subscription_delete_page(): string {
         return self::plugin_path() . 'admin/subscriptions/delete.php';
     }
@@ -131,6 +135,14 @@ class subscription_config {
     public static function admin_user_view_page(): string {
         return self::plugin_path() . 'admin/users/view.php';
     }
+
+    public static function admin_user_email_preview_page(): string {
+        return self::plugin_path() . 'admin/users/email_preview.php';
+    }
+
+    public static function admin_user_toggle_suspension_page(): string {
+        return self::plugin_path() . 'admin/users/toggle_suspension.php';
+    }    
 
     public static function digital_products_admin_page(): string {
         return self::plugin_path() . 'admin/digital/products/index.php';
@@ -198,6 +210,10 @@ class subscription_config {
 
     public static function admin_user_add_note_page(): string {
         return self::plugin_path() . 'admin/users/add_note.php';
+    }
+
+    public static function admin_user_subscription_quick_action_page(): string {
+        return self::plugin_path() . 'admin/users/subscription_quick_action.php';
     }
 
     // -- Buttons --

@@ -3,12 +3,10 @@
 require_once(__DIR__ . '/../../../../config.php');
 
 use local_subscriptions\subscription_config;
-use local_subscriptions\subscription_manager;
 use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\support\SubsPresenter;
 use local_subscriptions\service\UserProfileService;
-use local_subscriptions\support\DigitalPresenter;
 use local_subscriptions\output\UserProfileRenderer;
 
 global $DB, $PAGE, $OUTPUT;
@@ -34,10 +32,12 @@ $digitalpayments = $profile->digitalpayments;
 
 echo $OUTPUT->header();
 
+echo AdminNavigation::back_button();
+
 echo html_writer::link(
     new moodle_url(subscription_config::admin_users_page()),
     '← ' . get_string('back'),
-    ['class' => 'btn btn-outline-secondary mb-3']
+    ['class' => 'btn btn-outline-secondary mb-3 ms-2']
 );
 
 echo UserProfileRenderer::render($profile);

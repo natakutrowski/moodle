@@ -1348,3 +1348,125 @@ $string['dashboard_alert_email_errors'] = 'Покупки с email/внутре�
 $string['dashboard_alert_expired_tokens'] = 'Истёкшие цифровые ссылки';
 $string['dashboard_recent_activity'] = 'Последняя активность';
 $string['dashboard_no_recent_activity'] = 'Пока нет недавней активности.';
+
+$string['crm_resend_welcome_email'] = 'Отправить приветствие';
+$string['crm_resend_access_email'] = 'Отправить доступ';
+$string['crm_resend_receipt'] = 'Отправить чек';
+
+$string['crm_welcome_email_resent_success'] = 'Приветственное письмо отправлено повторно.';
+$string['crm_access_email_resent_success'] = 'Письмо с доступом отправлено повторно.';
+$string['crm_receipt_resent_success'] = 'Чек отправлен повторно.';
+$string['crm_subscription_extended_success'] = 'Подписка продлена на {$a} дней.';
+
+$string['crm_receipt_not_available'] = 'Для этой подписки нет доступного чека.';
+$string['crm_timeline_course_purchase_paid'] = 'Покупка курса оплачена';
+$string['crm_timeline_payment_request'] = 'Запрос на оплату';
+$string['crm_timeline_subscription_created'] = 'Подписка создана';
+$string['crm_timeline_trial_started'] = 'Пробный доступ начат';
+$string['payment_provider'] = 'Платёжный провайдер';
+$string['transactionid'] = 'ID транзакции';
+$string['crm_timeline_email_receipt_sent'] = 'Чек отправлен';
+$string['crm_timeline_email_access_sent'] = 'Письмо с доступом отправлено';
+$string['crm_timeline_email_welcome_sent'] = 'Приветственное письмо отправлено';
+
+$string['crm_email_type_receipt'] = 'Чек покупки';
+$string['crm_email_type_access'] = 'Доступ к подписке';
+$string['crm_email_type_welcome'] = 'Приветствие';
+
+$string['crm_timeline_collapse_all'] = 'Свернуть / развернуть детали';
+$string['crm_timeline_view_details'] = 'Показать детали';
+$string['payment_request'] = 'Запрос на оплату';
+$string['type'] = 'Тип';
+$string['subscription_details'] = 'Детали подписки';
+$string['crm_user_profile'] = 'CRM-карточка пользователя';
+$string['crm_no_payment_request_for_subscription'] = 'К этой подписке не привязан запрос на оплату.';
+$string['view_details'] = 'Подробнее';
+$string['admin_section_discounts'] = 'Скидки';
+$string['admin_section_provider'] = 'Информация о платёжном провайдере';
+$string['admin_section_payment_failures'] = 'Ошибки оплаты';
+$string['admin_section_dates'] = 'Даты';
+
+$string['admin_section_payment_request_identity'] = 'Личные данные / контакты';
+$string['admin_section_payment_status'] = 'Статус и операция';
+$string['admin_section_amounts'] = 'Зафиксированные суммы';
+$string['admin_section_links_tokens'] = 'Ссылки и токены';
+$string['admin_section_reminders_attempts'] = 'Напоминания и попытки';
+$string['admin_section_request_context'] = 'Контекст создания';
+
+$string['discount_percent'] = 'Скидка (%)';
+$string['discount_amount'] = 'Сумма скидки';
+$string['discount_reason'] = 'Причина скидки';
+
+$string['phone'] = 'Телефон';
+$string['phone_country'] = 'Страна телефона';
+$string['operation'] = 'Операция';
+$string['reference_subscription_id'] = 'Исходная подписка';
+$string['amount_minor'] = 'Сумма в минимальных единицах';
+
+$string['locked_list_price'] = 'Зафиксированная цена по каталогу';
+$string['locked_discount_percent'] = 'Зафиксированная скидка (%)';
+$string['locked_discount_amount'] = 'Зафиксированная сумма скидки';
+$string['locked_discount_reason'] = 'Причина зафиксированной скидки';
+$string['locked_final_price'] = 'Зафиксированная итоговая цена';
+$string['locked_at'] = 'Зафиксировано';
+
+$string['retry_token'] = 'Токен повторной попытки';
+$string['retry_expires'] = 'Срок действия токена повторной попытки';
+$string['login_token'] = 'Токен входа';
+$string['login_token_expires'] = 'Срок действия токена входа';
+
+$string['emailsent'] = 'Письмо отправлено';
+$string['reminder_stage'] = 'Этап напоминания';
+$string['reminder1_at'] = 'Первое напоминание отправлено';
+$string['reminder2_at'] = 'Второе напоминание отправлено';
+
+$string['created_ip'] = 'IP-адрес при создании';
+$string['created_useragent'] = 'User-Agent при создании';
+$string['accept_language'] = 'Предпочитаемый язык';
+$string['http_referer'] = 'HTTP Referer';
+$string['expiration_date'] = 'Дата истечения';
+$string['subscription'] = 'Подписка';
+
+$string['crm_timeline_expand_all'] = 'Развернуть всё';
+$string['crm_timeline_collapse_all'] = 'Свернуть всё';
+$string['crm_timeline_view_details'] = 'Показать детали';
+
+$string['crm_timeline_recent'] = 'Недавняя история (последние 30 дней)';
+$string['crm_timeline_middle'] = 'История (31–90 дней)';
+$string['crm_timeline_old'] = 'Старая история (более 90 дней)';
+
+$string['crm_filter_purchases'] = 'Покупки';
+$string['crm_filter_emails'] = 'Письма';
+$string['crm_filter_other'] = 'Другое';
+$string['crm_timeline_by_actor'] = 'администратор: {$a}';
+$string['crm_timeline_by_admin'] = 'администратор';
+$string['crm_email_preview'] = 'Предпросмотр письма';
+$string['recipient'] = 'Получатель';
+
+$string['crm_timeline_title'] = 'Таймлайн';
+$string['crm_suspend_moodle_profile'] = 'Заблокировать профиль Moodle';
+$string['crm_activate_moodle_profile'] = 'Активировать профиль Moodle';
+$string['crm_moodle_profile_suspended'] = 'Профиль Moodle заблокирован.';
+$string['crm_moodle_profile_activated'] = 'Профиль Moodle активирован.';
+$string['adminlog_user_suspended'] = 'Профиль Moodle заблокирован';
+$string['adminlog_user_reactivated'] = 'Профиль Moodle активирован';
+
+$string['crm_stats_title'] = 'CRM-сводка';
+$string['crm_accessible_courses'] = 'Доступные курсы';
+$string['crm_total_spent'] = 'Всего потрачено';
+$string['crm_last_activity'] = 'Последняя активность';
+
+$string['crm_stats_subscriptions_hint'] = 'Подписки, связанные с профилем';
+$string['crm_stats_digital_hint'] = 'Купленные цифровые продукты';
+$string['crm_stats_courses_hint'] = 'Курсы, доступные сейчас';
+$string['crm_stats_spent_hint'] = 'Всего оплачено по валютам';
+$string['crm_stats_activity_hint'] = 'Последнее известное событие';
+
+$string['crm_status'] = 'CRM-статус';
+$string['crm_stats_status_hint'] = 'Текущее состояние профиля';
+$string['crm_status_active_customer'] = 'Активный клиент';
+$string['crm_status_trial'] = 'Пробный доступ';
+$string['crm_status_former_customer'] = 'Бывший клиент';
+$string['crm_status_suspended'] = 'Заблокирован';
+$string['crm_status_lead'] = 'Лид';
+$string['crm_status_unknown'] = 'Неизвестно';
