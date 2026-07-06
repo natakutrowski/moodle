@@ -1508,3 +1508,25 @@ $string['command_action_purchases_subtitle'] = 'Открыть покупки и
 
 $string['command_action_subscriptions_title'] = 'Посмотреть подписки';
 $string['command_action_subscriptions_subtitle'] = 'Просматривать и управлять подписками пользователей';
+
+$string['command_center_initial'] = 'Начните вводить, чтобы найти пользователя, продукт, покупку, подписку или действие.';
+
+$string['command_center_group_actions'] = 'Действия';
+$string['command_center_group_users'] = 'Пользователи';
+$string['command_center_group_products'] = 'Продукты';
+$string['command_center_group_purchases'] = 'Покупки';
+$string['command_center_group_subscriptions'] = 'Подписки';
+
+$string['command_center_action_open'] = 'Открыть';
+$string['command_center_action_view'] = 'Посмотреть';
+$string['command_center_action_edit'] = 'Изменить';
+$string['command_center_hint_navigate'] = 'навигация';
+$string['command_center_hint_open'] = 'открыть';
+$string['command_center_hint_close'] = 'закрыть';
+$string['command_center_best_match'] = 'Лучшее';
+$string['command_center_recent'] = 'Недавние';
+$string['command_center_key_enter'] = 'Enter';
+$string['command_center_key_escape'] = 'Esc';
+$string['command_center_favorites'] = 'Избранное';
+$string['command_center_favorite_toggle'] = 'Добавить или удалить из избранного';
+$string['command_center_clear_recent'] = 'Очистить';

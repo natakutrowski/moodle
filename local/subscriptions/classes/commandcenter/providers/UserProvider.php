@@ -69,6 +69,9 @@ final class UserProvider implements CommandProviderInterface {
             $results[] = CommandResult::create()
                 ->icon(CommandIcons::USER)
                 ->type(CommandTypes::user())
+                ->group('users', get_string('command_center_group_users', 'local_subscriptions'))
+                ->action_label(get_string('command_center_action_view', 'local_subscriptions'))
+                ->shortcut('user:' . (int)$user->id)
                 ->title($fullname)
                 ->subtitle(implode(' · ', $subtitleparts))
                 ->url((new moodle_url(subscription_config::admin_user_view_page(), [

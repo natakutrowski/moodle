@@ -67,6 +67,9 @@ final class DigitalProductProvider implements CommandProviderInterface {
             $results[] = CommandResult::create()
                 ->icon(CommandIcons::DIGITAL_PRODUCT)
                 ->type(CommandTypes::digital_product())
+                ->group('products', get_string('command_center_group_products', 'local_subscriptions'))
+                ->action_label(get_string('command_center_action_edit', 'local_subscriptions'))
+                ->shortcut('product:' . (int)$product->id)
                 ->title($product->name)
                 ->subtitle($subtitle)
                 ->url((new moodle_url(subscription_config::digital_product_edit_admin_page(), [

@@ -63,6 +63,9 @@ final class DigitalPurchaseProvider implements CommandProviderInterface {
             $results[] = CommandResult::create()
                 ->icon(CommandIcons::DIGITAL_PURCHASE)
                 ->type(CommandTypes::digital_purchase())
+                ->group('purchases', get_string('command_center_group_purchases', 'local_subscriptions'))
+                ->action_label(get_string('command_center_action_view', 'local_subscriptions'))
+                ->shortcut('purchase:' . (int)$purchase->id)
                 ->title($title)
                 ->subtitle($subtitle)
                 ->url((new moodle_url(subscription_config::digital_purchase_view_admin_page(), [

@@ -13,6 +13,10 @@ final class CommandResult implements \JsonSerializable {
     private string $url = '';
     private int $score = 0;
     private array $meta = [];
+    private string $group = '';
+    private string $groupLabel = '';
+    private string $shortcut = '';
+    private string $actionLabel = '';
 
     public static function create(): self {
         return new self();
@@ -89,6 +93,22 @@ final class CommandResult implements \JsonSerializable {
             'score' => $this->score,
         ];
 
+        if ($this->group !== '') {
+            $result['group'] = $this->group;
+        }
+
+        if ($this->groupLabel !== '') {
+            $result['groupLabel'] = $this->groupLabel;
+        }
+
+        if ($this->shortcut !== '') {
+            $result['shortcut'] = $this->shortcut;
+        }
+
+        if ($this->actionLabel !== '') {
+            $result['actionLabel'] = $this->actionLabel;
+        }
+
         if (!empty($this->meta)) {
             $result['meta'] = $this->meta;
         }
@@ -98,5 +118,21 @@ final class CommandResult implements \JsonSerializable {
 
     public function jsonSerialize(): array {
         return $this->to_array();
+    }
+
+    public function group(string $group, string $label = ''): self {
+        $this->group = $group;
+        $this->groupLabel = $label;
+        return $this;
+    }
+
+    public function shortcut(string $shortcut): self {
+        $this->shortcut = $shortcut;
+        return $this;
+    }
+
+    public function action_label(string $actionlabel): self {
+        $this->actionLabel = $actionlabel;
+        return $this;
     }
 }

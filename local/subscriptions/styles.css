@@ -1397,6 +1397,15 @@ table.generaltable td { vertical-align: middle; }
     text-decoration: none;
 }
 
+.campusfr-command-result.is-active {
+    outline: 2px solid rgba(15, 23, 42, 0.08);
+    box-shadow: inset 3px 0 0 #0f172a;
+}
+
+.campusfr-command-result:focus {
+    outline: none;
+}
+
 .campusfr-command-result-icon {
     width: 34px;
     height: 34px;
@@ -1429,11 +1438,9 @@ table.generaltable td { vertical-align: middle; }
 }
 
 .campusfr-command-result-type {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: #64748b;
-    background: #f1f5f9;
-    border-radius: 999px;
-    padding: 4px 8px;
+    white-space: nowrap;
 }
 
 .campusfr-command-empty {
@@ -1469,4 +1476,152 @@ table.generaltable td { vertical-align: middle; }
 .campusfr-command-close:hover {
     background: #e2e8f0;
     color: #0f172a;
+}
+
+.campusfr-command-empty {
+    padding: 1rem;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.campusfr-command-group {
+    padding: 0.65rem 0.85rem 0.3rem;
+}
+
+.campusfr-command-group:not(:first-child) {
+    border-top: 1px solid #eef2f7;
+    margin-top: 0.25rem;
+}
+
+.campusfr-command-group-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.campusfr-command-result-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.campusfr-command-result-action {
+    font-size: 0.72rem;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.campusfr-command-result-shortcut {
+    min-width: 2rem;
+    padding: 0.12rem 0.38rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.4rem;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.campusfr-command-result.is-active .campusfr-command-result-shortcut {
+    background: #fff;
+    border-color: #cbd5e1;
+    color: #334155;
+}
+
+.campusfr-command-input-hint {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    margin-top: 0.4rem;
+}
+
+.campusfr-command-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.45rem;
+    padding: 0.08rem 0.35rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.35rem;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.2;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.campusfr-command-best-match {
+    margin-left: 0.45rem;
+    padding: 0.08rem 0.32rem;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    vertical-align: middle;
+}
+
+.campusfr-command-favorite {
+
+    border: none;
+    background: transparent;
+    color: #cbd5e1;
+
+    font-size: 1rem;
+
+    cursor: pointer;
+
+    transition: .15s;
+}
+
+.campusfr-command-favorite:hover {
+    color: #f59e0b;
+}
+
+.campusfr-command-favorite:focus {
+    outline: none;
+}
+
+.campusfr-command-result.is-active .campusfr-command-favorite {
+    color: #eab308;
+}
+
+.campusfr-command-favorite.is-favorite {
+    color: #eab308;
+}
+
+.campusfr-command-group-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.campusfr-command-group-action {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    cursor: pointer;
+    padding: 0;
+}
+
+.campusfr-command-group-action:hover {
+    color: #334155;
+    text-decoration: underline;
 }

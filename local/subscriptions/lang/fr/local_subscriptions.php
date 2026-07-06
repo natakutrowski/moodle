@@ -1497,3 +1497,25 @@ $string['command_action_purchases_subtitle'] = 'Consulter les achats et paiement
 
 $string['command_action_subscriptions_title'] = 'Voir les abonnements';
 $string['command_action_subscriptions_subtitle'] = 'Consulter et gérer les abonnements utilisateurs';
+
+$string['command_center_initial'] = 'Tapez pour rechercher un utilisateur, un produit, un achat, un abonnement ou une action.';
+
+$string['command_center_group_actions'] = 'Actions';
+$string['command_center_group_users'] = 'Utilisateurs';
+$string['command_center_group_products'] = 'Produits';
+$string['command_center_group_purchases'] = 'Achats';
+$string['command_center_group_subscriptions'] = 'Abonnements';
+
+$string['command_center_action_open'] = 'Ouvrir';
+$string['command_center_action_view'] = 'Voir';
+$string['command_center_action_edit'] = 'Modifier';
+$string['command_center_hint_navigate'] = 'naviguer';
+$string['command_center_hint_open'] = 'ouvrir';
+$string['command_center_hint_close'] = 'fermer';
+$string['command_center_best_match'] = 'Meilleur';
+$string['command_center_recent'] = 'Récents';
+$string['command_center_key_enter'] = 'Entrée';
+$string['command_center_key_escape'] = 'Échap';
+$string['command_center_favorites'] = 'Favoris';
+$string['command_center_favorite_toggle'] = 'Ajouter ou retirer des favoris';
+$string['command_center_clear_recent'] = 'Vider';

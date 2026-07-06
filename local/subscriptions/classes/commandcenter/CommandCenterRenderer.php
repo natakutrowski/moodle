@@ -20,6 +20,11 @@ final class CommandCenterRenderer {
             'data-empty-label' => get_string('command_center_empty', 'local_subscriptions'),
             'data-error-label' => get_string('command_center_error', 'local_subscriptions'),
             'data-loading-label' => get_string('command_center_loading', 'local_subscriptions'),
+            'data-initial-label' => get_string('command_center_initial', 'local_subscriptions'),
+            'data-recent-label' => get_string('command_center_recent', 'local_subscriptions'),
+            'data-favorite-label' => get_string('command_center_favorites', 'local_subscriptions'),
+            'data-favorite-title' => get_string('command_center_favorite_toggle', 'local_subscriptions'),
+            'data-clear-recent-label' => get_string('command_center_clear_recent', 'local_subscriptions'),
         ]);
 
         $out .= html_writer::start_div('campusfr-command-trigger', [
@@ -53,9 +58,32 @@ final class CommandCenterRenderer {
             'class' => 'campusfr-command-input',
             'placeholder' => get_string('command_center_input_placeholder', 'local_subscriptions'),
             'autocomplete' => 'off',
+            'role' => 'combobox',
+            'aria-expanded' => 'true',
+            'aria-autocomplete' => 'list',
+            'aria-controls' => 'campusfr-command-results',
         ]);
 
-        $out .= html_writer::div('', 'campusfr-command-results');
+        $out .= html_writer::div(
+            html_writer::tag('span', '↑↓', ['class' => 'campusfr-command-kbd']) . ' ' .
+            get_string('command_center_hint_navigate', 'local_subscriptions') . ' ' .
+            html_writer::tag('span',
+                get_string('command_center_key_enter', 'local_subscriptions'),
+                ['class' => 'campusfr-command-kbd']
+            ) . ' ' .
+            get_string('command_center_hint_open', 'local_subscriptions') . ' ' .
+            html_writer::tag('span',
+                get_string('command_center_key_escape', 'local_subscriptions'),
+                ['class' => 'campusfr-command-kbd']
+            ) . ' ' .
+            get_string('command_center_hint_close', 'local_subscriptions'),
+            'campusfr-command-input-hint'
+        );
+
+        $out .= html_writer::div('', 'campusfr-command-results', [
+            'id' => 'campusfr-command-results',
+            'role' => 'listbox',
+        ]);
 
         $out .= html_writer::div(
             get_string('command_center_hint', 'local_subscriptions'),

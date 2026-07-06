@@ -1510,3 +1510,25 @@ $string['command_action_purchases_subtitle'] = 'Review digital purchases and pay
 
 $string['command_action_subscriptions_title'] = 'View subscriptions';
 $string['command_action_subscriptions_subtitle'] = 'Review and manage user subscriptions';
+
+$string['command_center_initial'] = 'Start typing to search for a user, product, purchase, subscription, or action.';
+
+$string['command_center_group_actions'] = 'Actions';
+$string['command_center_group_users'] = 'Users';
+$string['command_center_group_products'] = 'Products';
+$string['command_center_group_purchases'] = 'Purchases';
+$string['command_center_group_subscriptions'] = 'Subscriptions';
+
+$string['command_center_action_open'] = 'Open';
+$string['command_center_action_view'] = 'View';
+$string['command_center_action_edit'] = 'Edit';
+$string['command_center_hint_navigate'] = 'navigate';
+$string['command_center_hint_open'] = 'open';
+$string['command_center_hint_close'] = 'close';
+$string['command_center_best_match'] = 'Best';
+$string['command_center_recent'] = 'Recent';
+$string['command_center_key_enter'] = 'Enter';
+$string['command_center_key_escape'] = 'Esc';
+$string['command_center_favorites'] = 'Favorites';
+$string['command_center_favorite_toggle'] = 'Add or remove from favorites';
+$string['command_center_clear_recent'] = 'Clear';

@@ -64,6 +64,9 @@ final class SubscriptionProvider implements CommandProviderInterface {
             $results[] = CommandResult::create()
                 ->icon(CommandIcons::SUBSCRIPTION)
                 ->type(CommandTypes::subscription())
+                ->group('subscriptions', get_string('command_center_group_subscriptions', 'local_subscriptions'))
+                ->action_label(get_string('command_center_action_view', 'local_subscriptions'))
+                ->shortcut('subscription:' . (int)$subscription->id)
                 ->title($fullname)
                 ->subtitle($subtitle)
                 ->url((new moodle_url(subscription_config::user_subscription_view_page(), [
