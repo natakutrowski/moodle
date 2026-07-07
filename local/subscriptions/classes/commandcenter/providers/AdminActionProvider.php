@@ -9,9 +9,11 @@ use local_subscriptions\commandcenter\CommandQuery;
 use local_subscriptions\commandcenter\CommandResult;
 use local_subscriptions\commandcenter\CommandScorer;
 use local_subscriptions\commandcenter\CommandTypes;
+use local_subscriptions\commandcenter\CommandContext;
+use local_subscriptions\commandcenter\CommandContextAwareProviderInterface;
 use local_subscriptions\commandcenter\repositories\AdminActionRepository;
 
-final class AdminActionProvider implements CommandProviderInterface {
+final class AdminActionProvider implements CommandProviderInterface, CommandContextAwareProviderInterface {
 
     private AdminActionRepository $repository;
 
@@ -21,6 +23,10 @@ final class AdminActionProvider implements CommandProviderInterface {
 
     public function is_action_provider(): bool {
         return true;
+    }
+
+    public function search_with_context(CommandContext $context, int $limit = 10): array {
+        return $this->search($context->query(), $limit);
     }
 
     public function search(CommandQuery $query, int $limit = 10): array {
@@ -81,6 +87,7 @@ final class AdminActionProvider implements CommandProviderInterface {
             ->title($action['title'])
             ->subtitle($action['subtitle'])
             ->url($action['url'])
+            ->action($action['actionkey'] ?? 'open_url', $action['payload'] ?? ['url' => $action['url']])
             ->score($score)
             ->meta('provider', 'admin_actions')
             ->meta('entity', 'action')

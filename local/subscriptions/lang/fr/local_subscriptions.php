@@ -1519,3 +1519,72 @@ $string['command_center_key_escape'] = 'Échap';
 $string['command_center_favorites'] = 'Favoris';
 $string['command_center_favorite_toggle'] = 'Ajouter ou retirer des favoris';
 $string['command_center_clear_recent'] = 'Vider';
+
+$string['command_center_action_missing_url'] = 'Missing URL.';
+$string['command_center_action_unknown'] = 'Unknown command.';
+$string['command_center_action_error'] = 'The command could not be executed.';
+$string['command_center_action_failed'] = 'Action failed.';
+$string['command_center_action_missing_user'] = 'Utilisateur manquant.';
+$string['command_center_action_missing_product'] = 'Produit manquant.';
+$string['command_center_action_missing_purchase'] = 'Achat manquant.';
+$string['command_center_action_missing_subscription'] = 'Abonnement manquant.';
+$string['command_action_user_email_title'] = 'Envoyer un email à un utilisateur';
+$string['command_action_user_email_subtitle'] = 'Ouvrir la liste des utilisateurs pour choisir un contact.';
+
+$string['command_action_user_note_title'] = 'Ajouter une note utilisateur';
+$string['command_action_user_note_subtitle'] = 'Ouvrir la liste des utilisateurs avant d’ajouter une note CRM.';
+
+$string['command_action_purchase_resend_email_title'] = 'Renvoyer un email d’achat';
+$string['command_action_purchase_resend_email_subtitle'] = 'Ouvrir les achats digitaux pour choisir l’achat concerné.';
+$string['command_menu_user_email'] = 'Envoyer un email';
+$string['command_menu_user_note'] = 'Ajouter une note';
+$string['command_menu_user_reset_password'] = 'Réinitialiser le mot de passe';
+$string['command_menu_purchase_resend_email'] = 'Renvoyer l’email';
+$string['command_menu_purchase_regenerate_token'] = 'Régénérer le token';
+$string['command_menu_purchase_extend_token'] = 'Prolonger le token';
+
+$string['command_menu_product_edit'] = 'Modifier le produit';
+
+$string['command_menu_subscription_open'] = 'Ouvrir l’abonnement';
+$string['command_center_purchase_email_resent'] = 'L’email d’accès a été renvoyé.';
+$string['command_confirm_purchase_resend_email'] = 'Renvoyer l’email d’accès pour cet achat ?';
+$string['command_menu_purchase_check_provider'] = 'Vérifier le paiement';
+$string['command_confirm_purchase_regenerate_token'] = 'Régénérer le token d’accès pour cet achat ?';
+$string['command_confirm_purchase_extend_token'] = 'Prolonger le token d’accès pour cet achat ?';
+$string['command_confirm_user_reset_password'] = 'Réinitialiser le mot de passe de cet utilisateur ?';
+$string['command_action_users_title'] = 'Utilisateurs';
+$string['command_action_users_subtitle'] = 'Ouvrir la gestion des utilisateurs CRM.';
+$string['command_action_digital_purchases_title'] = 'Achats digitaux';
+$string['command_action_digital_purchases_subtitle'] = 'Ouvrir les achats et ventes digitales.';
+$string['command_action_digital_products_title'] = 'Produits digitaux';
+$string['command_action_digital_products_subtitle'] = 'Ouvrir la gestion des produits digitaux.';
+$string['command_action_subscriptions_title'] = 'Abonnements';
+$string['command_action_subscriptions_subtitle'] = 'Ouvrir la gestion des abonnements et accès.';
+$string['command_center_action_invalid_url'] = 'URL invalide.';
+$string['command_center_confirm'] = 'Confirmer';
+$string['command_center_cancel'] = 'Annuler';
+$string['command_center_danger_confirm'] = 'Action sensible';
+$string['command_intent_email_user'] = 'Envoyer un email à l’utilisateur';
+$string['command_intent_note_user'] = 'Ajouter une note à l’utilisateur';
+$string['command_intent_reset_user'] = 'Réinitialiser le mot de passe utilisateur';
+$string['command_intent_user_quick_action_subtitle'] = 'Action rapide utilisateur depuis le Command Center.';
+
+$string['command_intent_resend_purchase_email'] = 'Renvoyer l’email d’achat';
+$string['command_intent_check_purchase'] = 'Vérifier le paiement';
+$string['command_intent_purchase_quick_action_subtitle'] = 'Action rapide achat depuis le Command Center.';
+$string['command_center_action_suggestion'] = 'Suggestion';
+
+$string['command_suggestion_email_user_title'] = 'Envoyer un email utilisateur';
+$string['command_suggestion_email_user_subtitle'] = 'Exemple : > email 12';
+
+$string['command_suggestion_note_user_title'] = 'Ajouter une note utilisateur';
+$string['command_suggestion_note_user_subtitle'] = 'Exemple : > note 12';
+
+$string['command_suggestion_reset_user_title'] = 'Réinitialiser un mot de passe';
+$string['command_suggestion_reset_user_subtitle'] = 'Exemple : > reset 12';
+
+$string['command_suggestion_resend_purchase_title'] = 'Renvoyer un email d’achat';
+$string['command_suggestion_resend_purchase_subtitle'] = 'Exemple : > resend 7';
+
+$string['command_suggestion_check_purchase_title'] = 'Vérifier un paiement';
+$string['command_suggestion_check_purchase_subtitle'] = 'Exemple : > check 7';

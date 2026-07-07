@@ -1530,3 +1530,88 @@ $string['command_center_key_escape'] = 'Esc';
 $string['command_center_favorites'] = 'Избранное';
 $string['command_center_favorite_toggle'] = 'Добавить или удалить из избранного';
 $string['command_center_clear_recent'] = 'Очистить';
+
+$string['command_center_action_missing_url'] = 'URL отсутствует.';
+$string['command_center_action_unknown'] = 'Неизвестная команда.';
+$string['command_center_action_error'] = 'Не удалось выполнить команду.';
+$string['command_center_action_failed'] = 'Не удалось выполнить действие.';
+$string['command_center_action_missing_user'] = 'Пользователь отсутствует.';
+$string['command_center_action_missing_product'] = 'Продукт отсутствует.';
+$string['command_center_action_missing_purchase'] = 'Покупка отсутствует.';
+$string['command_center_action_missing_subscription'] = 'Подписка отсутствует.';
+$string['command_action_user_email_title'] = 'Отправить письмо пользователю';
+$string['command_action_user_email_subtitle'] = 'Открыть список пользователей, чтобы выбрать контакт.';
+
+$string['command_action_user_note_title'] = 'Добавить заметку пользователю';
+$string['command_action_user_note_subtitle'] = 'Открыть список пользователей перед добавлением CRM-заметки.';
+
+$string['command_action_purchase_resend_email_title'] = 'Повторно отправить письмо о покупке';
+$string['command_action_purchase_resend_email_subtitle'] = 'Открыть цифровые покупки, чтобы выбрать нужную покупку.';
+$string['command_menu_user_email'] = 'Отправить письмо';
+$string['command_menu_user_note'] = 'Добавить заметку';
+$string['command_menu_user_reset_password'] = 'Сбросить пароль';
+$string['command_menu_purchase_resend_email'] = 'Повторно отправить письмо';
+$string['command_menu_purchase_regenerate_token'] = 'Сгенерировать токен заново';
+$string['command_menu_purchase_extend_token'] = 'Продлить токен';
+
+$string['command_menu_product_edit'] = 'Изменить продукт';
+
+$string['command_menu_subscription_open'] = 'Открыть подписку';
+$string['command_center_purchase_email_resent'] = 'Письмо с доступом было отправлено повторно.';
+$string['command_confirm_purchase_resend_email'] = 'Повторно отправить письмо с доступом для этой покупки?';
+$string['command_menu_purchase_check_provider'] = 'Проверить оплату';
+$string['command_confirm_purchase_regenerate_token'] = 'Сгенерировать новый токен доступа для этой покупки?';
+$string['command_confirm_purchase_extend_token'] = 'Продлить токен доступа для этой покупки?';
+$string['command_confirm_user_reset_password'] = 'Сбросить пароль этого пользователя?';
+$string['command_action_users_title'] = 'Пользователи';
+$string['command_action_users_subtitle'] = 'Открыть управление пользователями CRM.';
+$string['command_action_digital_purchases_title'] = 'Цифровые покупки';
+$string['command_action_digital_purchases_subtitle'] = 'Открыть цифровые покупки и продажи.';
+$string['command_action_digital_products_title'] = 'Цифровые продукты';
+$string['command_action_digital_products_subtitle'] = 'Открыть управление цифровыми продуктами.';
+$string['command_action_subscriptions_title'] = 'Подписки';
+$string['command_action_subscriptions_subtitle'] = 'Открыть управление подписками и доступами.';
+$string['command_center_action_invalid_url'] = 'Недействительный URL.';
+$string['command_center_confirm'] = 'Подтвердить';
+$string['command_center_cancel'] = 'Отмена';
+$string['command_center_danger_confirm'] = 'Важное действие';
+$string['command_center_group_intents'] = 'Commandes';
+$string['command_center_action_execute'] = 'Exécuter';
+
+$string['command_intent_open_user'] = 'Ouvrir utilisateur';
+$string['command_intent_open_purchase'] = 'Ouvrir achat';
+$string['command_intent_open_product'] = 'Ouvrir produit';
+$string['command_intent_open_subscription'] = 'Ouvrir abonnement';
+$string['command_intent_direct_entity_subtitle'] = 'Commande directe depuis le Command Center.';
+$string['command_center_group_intents'] = 'Команды';
+$string['command_center_action_execute'] = 'Выполнить';
+
+$string['command_intent_open_user'] = 'Открыть пользователя';
+$string['command_intent_open_purchase'] = 'Открыть покупку';
+$string['command_intent_open_product'] = 'Открыть продукт';
+$string['command_intent_open_subscription'] = 'Открыть подписку';
+$string['command_intent_direct_entity_subtitle'] = 'Прямая команда из Command Center.';
+$string['command_intent_email_user'] = 'Отправить письмо пользователю';
+$string['command_intent_note_user'] = 'Добавить заметку пользователю';
+$string['command_intent_reset_user'] = 'Сбросить пароль пользователя';
+$string['command_intent_user_quick_action_subtitle'] = 'Быстрое действие с пользователем из Command Center.';
+
+$string['command_intent_resend_purchase_email'] = 'Повторно отправить письмо о покупке';
+$string['command_intent_check_purchase'] = 'Проверить оплату';
+$string['command_intent_purchase_quick_action_subtitle'] = 'Быстрое действие с покупкой из Command Center.';
+$string['command_center_action_suggestion'] = 'Подсказка';
+
+$string['command_suggestion_email_user_title'] = 'Отправить письмо пользователю';
+$string['command_suggestion_email_user_subtitle'] = 'Пример: > email 12';
+
+$string['command_suggestion_note_user_title'] = 'Добавить заметку пользователю';
+$string['command_suggestion_note_user_subtitle'] = 'Пример: > note 12';
+
+$string['command_suggestion_reset_user_title'] = 'Сбросить пароль';
+$string['command_suggestion_reset_user_subtitle'] = 'Пример: > reset 12';
+
+$string['command_suggestion_resend_purchase_title'] = 'Повторно отправить письмо о покупке';
+$string['command_suggestion_resend_purchase_subtitle'] = 'Пример: > resend 7';
+
+$string['command_suggestion_check_purchase_title'] = 'Проверить оплату';
+$string['command_suggestion_check_purchase_subtitle'] = 'Пример: > check 7';

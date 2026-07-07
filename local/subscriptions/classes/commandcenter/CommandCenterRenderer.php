@@ -17,6 +17,7 @@ final class CommandCenterRenderer {
 
         $out .= html_writer::start_div('campusfr-command-center mb-4', [
             'data-search-url' => $searchurl,
+            'data-execute-url' => (new moodle_url(subscription_config::command_center_execute_ajax()))->out(false),
             'data-empty-label' => get_string('command_center_empty', 'local_subscriptions'),
             'data-error-label' => get_string('command_center_error', 'local_subscriptions'),
             'data-loading-label' => get_string('command_center_loading', 'local_subscriptions'),
@@ -25,6 +26,11 @@ final class CommandCenterRenderer {
             'data-favorite-label' => get_string('command_center_favorites', 'local_subscriptions'),
             'data-favorite-title' => get_string('command_center_favorite_toggle', 'local_subscriptions'),
             'data-clear-recent-label' => get_string('command_center_clear_recent', 'local_subscriptions'),
+            'data-action-error-label' => get_string('command_center_action_error', 'local_subscriptions'),
+            'data-action-failed-label' => get_string('command_center_action_failed', 'local_subscriptions'),
+            'data-confirm-label' => get_string('command_center_confirm', 'local_subscriptions'),
+            'data-cancel-label' => get_string('command_center_cancel', 'local_subscriptions'),
+            'data-danger-confirm-label' => get_string('command_center_danger_confirm', 'local_subscriptions'),
         ]);
 
         $out .= html_writer::start_div('campusfr-command-trigger', [

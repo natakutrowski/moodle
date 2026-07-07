@@ -220,6 +220,10 @@ class subscription_config {
         return self::plugin_path() . 'ajax/command_center_search.php';
     }
 
+    public static function command_center_execute_ajax(): string {
+        return self::plugin_path() . 'ajax/command_center_execute.php';
+    }
+
     // -- Buttons --
     public static function button_admin_dashboard(): string {
         return \html_writer::link(

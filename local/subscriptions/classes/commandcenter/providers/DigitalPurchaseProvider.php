@@ -11,11 +11,15 @@ use local_subscriptions\commandcenter\CommandQuery;
 use local_subscriptions\commandcenter\CommandResult;
 use local_subscriptions\commandcenter\CommandTypes;
 use local_subscriptions\commandcenter\CommandScorer;
+use local_subscriptions\commandcenter\CommandMenuItem;
+use local_subscriptions\commandcenter\CommandContext;
+use local_subscriptions\commandcenter\CommandContextAwareProviderInterface;
 use local_subscriptions\commandcenter\repositories\DigitalPurchaseSearchRepository;
+use local_subscriptions\commandcenter\actions\CommandActionKeys;
 use local_subscriptions\subscription_config;
 use moodle_url;
 
-final class DigitalPurchaseProvider implements CommandProviderInterface {
+final class DigitalPurchaseProvider implements CommandProviderInterface, CommandContextAwareProviderInterface {
 
     private DigitalPurchaseSearchRepository $repository;
 
@@ -23,6 +27,10 @@ final class DigitalPurchaseProvider implements CommandProviderInterface {
         $this->repository = $repository ?? new DigitalPurchaseSearchRepository();
     }
 
+    public function search_with_context(CommandContext $context, int $limit = 10): array {
+        return $this->search($context->query(), $limit);
+    }
+    
     public function search(CommandQuery $query, int $limit = 10): array {
         if ($query->has_direct_entity() && !$query->is_direct_entity('purchase')) {
             return [];
@@ -71,6 +79,49 @@ final class DigitalPurchaseProvider implements CommandProviderInterface {
                 ->url((new moodle_url(subscription_config::digital_purchase_view_admin_page(), [
                     'id' => $purchase->id,
                 ]))->out(false))
+                ->action(CommandActionKeys::OPEN_PURCHASE, [
+                    'purchaseid' => (int)$purchase->id,
+                ])
+                ->menu_item(
+                    CommandMenuItem::create()
+                        ->icon('📩')
+                        ->label(get_string('command_menu_purchase_resend_email', 'local_subscriptions'))
+                        ->action(CommandActionKeys::PURCHASE_RESEND_EMAIL, [
+                            'purchaseid' => (int)$purchase->id,
+                        ])
+                        ->confirmation(get_string('command_confirm_purchase_resend_email', 'local_subscriptions'))
+                        ->shortcut('E')
+                )
+                ->menu_item(
+                    CommandMenuItem::create()
+                        ->icon('🔎')
+                        ->label(get_string('command_menu_purchase_check_provider', 'local_subscriptions'))
+                        ->action(CommandActionKeys::PURCHASE_CHECK_PROVIDER, [
+                            'purchaseid' => (int)$purchase->id,
+                        ])
+                        ->shortcut('C')
+                )
+                ->menu_item(
+                    CommandMenuItem::create()
+                        ->icon('🔁')
+                        ->label(get_string('command_menu_purchase_regenerate_token', 'local_subscriptions'))
+                        ->action(CommandActionKeys::PURCHASE_REGENERATE_TOKEN, [
+                            'purchaseid' => (int)$purchase->id,
+                        ])
+                        ->confirmation(get_string('command_confirm_purchase_regenerate_token', 'local_subscriptions'))
+                        ->danger()
+                        ->shortcut('T')
+                )
+                ->menu_item(
+                    CommandMenuItem::create()
+                        ->icon('⏳')
+                        ->label(get_string('command_menu_purchase_extend_token', 'local_subscriptions'))
+                        ->action(CommandActionKeys::PURCHASE_EXTEND_TOKEN, [
+                            'purchaseid' => (int)$purchase->id,
+                        ])
+                        ->confirmation(get_string('command_confirm_purchase_extend_token', 'local_subscriptions'))
+                        ->shortcut('X')
+                )
                 ->score($score)
                 ->meta('provider', 'digital_purchases')
                 ->meta('entity', 'digital_purchase')

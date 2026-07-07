@@ -17,6 +17,14 @@ final class CommandResult implements \JsonSerializable {
     private string $groupLabel = '';
     private string $shortcut = '';
     private string $actionLabel = '';
+    private string $actionKey = '';
+    private array $payload = [];
+    private bool $requiresConfirmation = false;
+    private string $confirmMessage = '';
+    /** @var CommandMenuItem[] */
+    private array $menuItems = [];
+    private string $fillQuery = '';
+    private bool $danger = false;
 
     public static function create(): self {
         return new self();
@@ -70,6 +78,18 @@ final class CommandResult implements \JsonSerializable {
         return $this;
     }
 
+    public function action(string $actionkey, array $payload = []): self {
+        $this->actionKey = $actionkey;
+        $this->payload = $payload;
+        return $this;
+    }
+
+    public function confirmation(string $message): self {
+        $this->requiresConfirmation = true;
+        $this->confirmMessage = $message;
+        return $this;
+    }
+
     public function meta(string $key, $value): self {
         $this->meta[$key] = $value;
         return $this;
@@ -82,6 +102,21 @@ final class CommandResult implements \JsonSerializable {
 
         return $this;
     }
+
+    public function menu_item(CommandMenuItem $item): self {
+        $this->menuItems[] = $item;
+        return $this;
+    }
+
+    public function fill_query(string $query): self {
+        $this->fillQuery = $query;
+        return $this;
+    }  
+    
+    public function danger(bool $danger = true): self {
+        $this->danger = $danger;
+        return $this;
+    }    
 
     public function to_array(): array {
         $result = [
@@ -111,6 +146,30 @@ final class CommandResult implements \JsonSerializable {
 
         if (!empty($this->meta)) {
             $result['meta'] = $this->meta;
+        }
+
+        if ($this->actionKey !== '') {
+            $result['actionKey'] = $this->actionKey;
+            $result['payload'] = $this->payload;
+        }
+
+        if ($this->requiresConfirmation) {
+            $result['requiresConfirmation'] = true;
+            $result['confirmMessage'] = $this->confirmMessage;
+        }
+
+        if (!empty($this->menuItems)) {
+            $result['menuItems'] = array_map(static function(CommandMenuItem $item): array {
+                return $item->jsonSerialize();
+            }, $this->menuItems);
+        }
+
+        if ($this->fillQuery !== '') {
+            $result['fillQuery'] = $this->fillQuery;
+        }
+
+        if ($this->danger) {
+            $result['danger'] = true;
         }
 
         return $result;

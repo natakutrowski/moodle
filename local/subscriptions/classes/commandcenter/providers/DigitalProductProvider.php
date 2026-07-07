@@ -10,16 +10,24 @@ use local_subscriptions\commandcenter\CommandQuery;
 use local_subscriptions\commandcenter\CommandResult;
 use local_subscriptions\commandcenter\CommandTypes;
 use local_subscriptions\commandcenter\CommandScorer;
+use local_subscriptions\commandcenter\CommandMenuItem;
+use local_subscriptions\commandcenter\CommandContext;
+use local_subscriptions\commandcenter\CommandContextAwareProviderInterface;
 use local_subscriptions\commandcenter\repositories\DigitalProductSearchRepository;
+use local_subscriptions\commandcenter\actions\CommandActionKeys;
 use local_subscriptions\subscription_config;
 use moodle_url;
 
-final class DigitalProductProvider implements CommandProviderInterface {
+final class DigitalProductProvider implements CommandProviderInterface, CommandContextAwareProviderInterface {
 
     private DigitalProductSearchRepository $repository;
 
     public function __construct(?DigitalProductSearchRepository $repository = null) {
         $this->repository = $repository ?? new DigitalProductSearchRepository();
+    }
+
+    public function search_with_context(CommandContext $context, int $limit = 10): array {
+        return $this->search($context->query(), $limit);
     }
 
     public function search(CommandQuery $query, int $limit = 10): array {
@@ -75,6 +83,18 @@ final class DigitalProductProvider implements CommandProviderInterface {
                 ->url((new moodle_url(subscription_config::digital_product_edit_admin_page(), [
                     'id' => $product->id,
                 ]))->out(false))
+                ->action(CommandActionKeys::OPEN_PRODUCT, [
+                    'productid' => (int)$product->id,
+                ])
+                ->menu_item(
+                    CommandMenuItem::create()
+                        ->icon('✏️')
+                        ->label(get_string('command_menu_product_edit', 'local_subscriptions'))
+                        ->action(CommandActionKeys::OPEN_PRODUCT, [
+                            'productid' => (int)$product->id,
+                        ])
+                        ->shortcut('E')
+                )
                 ->score($score)
                 ->meta('provider', 'digital_products')
                 ->meta('entity', 'digital_product')

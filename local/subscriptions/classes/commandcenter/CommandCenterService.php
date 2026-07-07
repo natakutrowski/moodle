@@ -9,6 +9,8 @@ use local_subscriptions\commandcenter\providers\DigitalProductProvider;
 use local_subscriptions\commandcenter\providers\DigitalPurchaseProvider;
 use local_subscriptions\commandcenter\providers\SubscriptionProvider;
 use local_subscriptions\commandcenter\providers\UserProvider;
+use local_subscriptions\commandcenter\CommandContext;
+use local_subscriptions\commandcenter\intents\CommandIntentRegistry;
 
 final class CommandCenterService {
 
@@ -34,6 +36,9 @@ final class CommandCenterService {
     public function search(string $rawquery, int $limit = 20): CommandCollection {
         $query = CommandQuery::parse($rawquery);
 
+        $context = CommandContext::from_command_query($query);
+        $intentmatches = CommandIntentRegistry::resolver()->resolve($context, 5);
+
         if (!$query->is_action_mode() && \core_text::strlen($query->raw()) < 2) {
             return new CommandCollection($rawquery, []);
         }
@@ -48,6 +53,10 @@ final class CommandCenterService {
 
         $results = [];
         $perproviderlimit = max(3, (int)ceil($limit / max(1, count($providers))));
+
+        foreach ($intentmatches as $match) {
+            $results[] = $match->result()->to_array();
+        }
 
         foreach ($providers as $provider) {
             foreach ($this->runner->run($provider, $query, $perproviderlimit) as $result) {

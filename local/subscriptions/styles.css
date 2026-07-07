@@ -1625,3 +1625,191 @@ table.generaltable td { vertical-align: middle; }
     color: #334155;
     text-decoration: underline;
 }
+
+.campusfr-command-result {
+    position: relative;
+}
+
+.campusfr-command-menu-toggle {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    opacity: .65;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.campusfr-command-menu-toggle:hover,
+.campusfr-command-menu-toggle:focus {
+    opacity: 1;
+    background: rgba(0, 0, 0, .06);
+}
+
+.campusfr-command-result-menu {
+    position: absolute;
+    right: 12px;
+    top: calc(100% - 4px);
+    z-index: 30;
+    min-width: 220px;
+    padding: 6px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 35px rgba(15, 23, 42, .18);
+    border: 1px solid rgba(15, 23, 42, .08);
+}
+
+.campusfr-command-menu-item {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.campusfr-command-menu-item:hover,
+.campusfr-command-menu-item:focus {
+    background: rgba(0, 0, 0, .06);
+}
+
+.campusfr-command-menu-icon {
+    width: 20px;
+    text-align: center;
+}
+
+.campusfr-command-menu-label {
+    flex: 1;
+}
+
+.campusfr-command-menu-shortcut {
+    opacity: .55;
+    font-size: .75rem;
+}
+
+.campusfr-command-menu-toggle {
+    font-weight: 700;
+    line-height: 1;
+}
+
+.campusfr-command-result.is-active .campusfr-command-menu-toggle {
+    opacity: 1;
+}
+
+.campusfr-command-menu-shortcut {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, .06);
+    font-size: .72rem;
+    font-weight: 600;
+}
+
+.campusfr-command-menu-item:disabled,
+.campusfr-command-menu-toggle:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.campusfr-command-modal.is-busy .campusfr-command-results {
+    opacity: .65;
+    pointer-events: none;
+}
+
+.campusfr-command-modal.is-busy .campusfr-command-input {
+    cursor: progress;
+}
+
+.campusfr-command-menu-item.is-danger {
+    color: #b42318;
+}
+
+.campusfr-command-menu-item.is-danger:hover,
+.campusfr-command-menu-item.is-danger:focus {
+    background: rgba(180, 35, 24, .08);
+}
+
+.campusfr-command-dialog {
+    position: absolute;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, .32);
+    backdrop-filter: blur(2px);
+}
+
+.campusfr-command-dialog[hidden] {
+    display: none;
+}
+
+.campusfr-command-dialog-panel {
+    width: min(420px, 100%);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .28);
+    border: 1px solid rgba(15, 23, 42, .08);
+    padding: 20px;
+}
+
+.campusfr-command-dialog-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.campusfr-command-dialog-message {
+    color: #475467;
+    line-height: 1.45;
+    margin-bottom: 18px;
+}
+
+.campusfr-command-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.campusfr-command-dialog.is-danger .campusfr-command-dialog-confirm {
+    background: #b42318;
+    border-color: #b42318;
+}
+
+.campusfr-command-notification {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: 20px;
+    z-index: 90;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-weight: 600;
+    box-shadow: 0 14px 40px rgba(15, 23, 42, .18);
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, .08);
+}
+
+.campusfr-command-notification[hidden] {
+    display: none;
+}
+
+.campusfr-command-notification.is-success {
+    color: #067647;
+    background: #ecfdf3;
+    border-color: #abefc6;
+}
+
+.campusfr-command-notification.is-error {
+    color: #b42318;
+    background: #fef3f2;
+    border-color: #fecdca;
+}
+
+.campusfr-command-result.is-danger .campusfr-command-result-title {
+    color: #b42318;
+}

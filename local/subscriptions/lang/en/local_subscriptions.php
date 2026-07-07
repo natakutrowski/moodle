@@ -1532,3 +1532,80 @@ $string['command_center_key_escape'] = 'Esc';
 $string['command_center_favorites'] = 'Favorites';
 $string['command_center_favorite_toggle'] = 'Add or remove from favorites';
 $string['command_center_clear_recent'] = 'Clear';
+
+$string['command_center_action_missing_url'] = 'URL manquante.';
+$string['command_center_action_unknown'] = 'Commande inconnue.';
+$string['command_center_action_error'] = 'La commande n’a pas pu être exécutée.';
+$string['command_center_action_failed'] = 'L’action a échoué.';
+$string['command_center_action_missing_user'] = 'Missing user.';
+$string['command_center_action_missing_product'] = 'Missing product.';
+$string['command_center_action_missing_purchase'] = 'Missing purchase.';
+$string['command_center_action_missing_subscription'] = 'Missing subscription.';
+$string['command_action_user_email_title'] = 'Send an email to a user';
+$string['command_action_user_email_subtitle'] = 'Open the users list to choose a contact.';
+
+$string['command_action_user_note_title'] = 'Add a user note';
+$string['command_action_user_note_subtitle'] = 'Open the users list before adding a CRM note.';
+
+$string['command_action_purchase_resend_email_title'] = 'Resend a purchase email';
+$string['command_action_purchase_resend_email_subtitle'] = 'Open digital purchases to choose the relevant purchase.';
+$string['command_menu_user_email'] = 'Send email';
+$string['command_menu_user_note'] = 'Add note';
+$string['command_menu_user_reset_password'] = 'Reset password';
+$string['command_menu_purchase_resend_email'] = 'Resend email';
+$string['command_menu_purchase_regenerate_token'] = 'Regenerate token';
+$string['command_menu_purchase_extend_token'] = 'Extend token';
+
+$string['command_menu_product_edit'] = 'Edit product';
+
+$string['command_menu_subscription_open'] = 'Open subscription';
+$string['command_center_purchase_email_resent'] = 'The access email has been resent.';
+$string['command_confirm_purchase_resend_email'] = 'Resend the access email for this purchase?';
+$string['command_menu_purchase_check_provider'] = 'Check payment';
+$string['command_confirm_purchase_regenerate_token'] = 'Regenerate the access token for this purchase?';
+$string['command_confirm_purchase_extend_token'] = 'Extend the access token for this purchase?';
+$string['command_confirm_user_reset_password'] = 'Reset this user’s password?';
+$string['command_action_users_title'] = 'Users';
+$string['command_action_users_subtitle'] = 'Open CRM user management.';
+$string['command_action_digital_purchases_title'] = 'Digital purchases';
+$string['command_action_digital_purchases_subtitle'] = 'Open digital purchases and sales.';
+$string['command_action_digital_products_title'] = 'Digital products';
+$string['command_action_digital_products_subtitle'] = 'Open digital product management.';
+$string['command_action_subscriptions_title'] = 'Subscriptions';
+$string['command_action_subscriptions_subtitle'] = 'Open subscriptions and access management.';
+$string['command_center_action_invalid_url'] = 'Invalid URL.';
+$string['command_center_confirm'] = 'Confirm';
+$string['command_center_cancel'] = 'Cancel';
+$string['command_center_danger_confirm'] = 'Sensitive action';
+$string['command_center_group_intents'] = 'Commands';
+$string['command_center_action_execute'] = 'Execute';
+
+$string['command_intent_open_user'] = 'Open user';
+$string['command_intent_open_purchase'] = 'Open purchase';
+$string['command_intent_open_product'] = 'Open product';
+$string['command_intent_open_subscription'] = 'Open subscription';
+$string['command_intent_direct_entity_subtitle'] = 'Direct command from the Command Center.';
+$string['command_intent_email_user'] = 'Send email to user';
+$string['command_intent_note_user'] = 'Add note to user';
+$string['command_intent_reset_user'] = 'Reset user password';
+$string['command_intent_user_quick_action_subtitle'] = 'Quick user action from the Command Center.';
+
+$string['command_intent_resend_purchase_email'] = 'Resend purchase email';
+$string['command_intent_check_purchase'] = 'Check payment';
+$string['command_intent_purchase_quick_action_subtitle'] = 'Quick purchase action from the Command Center.';
+$string['command_center_action_suggestion'] = 'Suggestion';
+
+$string['command_suggestion_email_user_title'] = 'Send user email';
+$string['command_suggestion_email_user_subtitle'] = 'Example: > email 12';
+
+$string['command_suggestion_note_user_title'] = 'Add user note';
+$string['command_suggestion_note_user_subtitle'] = 'Example: > note 12';
+
+$string['command_suggestion_reset_user_title'] = 'Reset password';
+$string['command_suggestion_reset_user_subtitle'] = 'Example: > reset 12';
+
+$string['command_suggestion_resend_purchase_title'] = 'Resend purchase email';
+$string['command_suggestion_resend_purchase_subtitle'] = 'Example: > resend 7';
+
+$string['command_suggestion_check_purchase_title'] = 'Check payment';
+$string['command_suggestion_check_purchase_subtitle'] = 'Example: > check 7';

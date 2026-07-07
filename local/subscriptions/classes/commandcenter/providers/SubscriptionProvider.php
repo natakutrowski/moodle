@@ -11,16 +11,24 @@ use local_subscriptions\commandcenter\CommandQuery;
 use local_subscriptions\commandcenter\CommandResult;
 use local_subscriptions\commandcenter\CommandTypes;
 use local_subscriptions\commandcenter\CommandScorer;
+use local_subscriptions\commandcenter\CommandMenuItem;
+use local_subscriptions\commandcenter\CommandContext;
+use local_subscriptions\commandcenter\CommandContextAwareProviderInterface;
 use local_subscriptions\commandcenter\repositories\SubscriptionSearchRepository;
+use local_subscriptions\commandcenter\actions\CommandActionKeys;
 use local_subscriptions\subscription_config;
 use moodle_url;
 
-final class SubscriptionProvider implements CommandProviderInterface {
+final class SubscriptionProvider implements CommandProviderInterface, CommandContextAwareProviderInterface {
 
     private SubscriptionSearchRepository $repository;
 
     public function __construct(?SubscriptionSearchRepository $repository = null) {
         $this->repository = $repository ?? new SubscriptionSearchRepository();
+    }
+
+    public function search_with_context(CommandContext $context, int $limit = 10): array {
+        return $this->search($context->query(), $limit);
     }
 
     public function search(CommandQuery $query, int $limit = 10): array {
@@ -72,6 +80,18 @@ final class SubscriptionProvider implements CommandProviderInterface {
                 ->url((new moodle_url(subscription_config::user_subscription_view_page(), [
                     'id' => $subscription->id,
                 ]))->out(false))
+                ->action(CommandActionKeys::OPEN_SUBSCRIPTION, [
+                    'subscriptionid' => (int)$subscription->id,
+                ])
+                ->menu_item(
+                    CommandMenuItem::create()
+                        ->icon('👁️')
+                        ->label(get_string('command_menu_subscription_open', 'local_subscriptions'))
+                        ->action(CommandActionKeys::OPEN_SUBSCRIPTION, [
+                            'subscriptionid' => (int)$subscription->id,
+                        ])
+                        ->shortcut('O')
+                )
                 ->score($score)
                 ->meta('provider', 'subscriptions')
                 ->meta('entity', 'subscription')
