@@ -41,6 +41,12 @@ final class AdminNavigation {
                 '🧩 ' . get_string('admin_card_plans_title', 'local_subscriptions'),
                 ['class' => 'btn btn-outline-secondary']
             );
+
+            $items[] = html_writer::link(
+                new moodle_url(subscription_config::automation_rules_admin_page()),
+                '🤖 ' . get_string('crm_automations', 'local_subscriptions'),
+                ['class' => 'btn btn-outline-secondary']
+            );
         }
 
         if (empty($items)) {

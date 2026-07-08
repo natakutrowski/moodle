@@ -353,4 +353,21 @@ final class UserProfileRepository {
         ]);
     }
 
+    public function get_automation_history_for_timeline(int $userid, int $limit): array {
+        global $DB;
+
+        if (!$DB->get_manager()->table_exists('local_subscriptions_automation_history')) {
+            return [];
+        }
+
+        return array_values($DB->get_records(
+            'local_subscriptions_automation_history',
+            ['userid' => $userid],
+            'timecreated DESC, id DESC',
+            '*',
+            0,
+            $limit
+        ));
+    }
+
 }

@@ -458,5 +458,58 @@
 			</INDEXES>
 		</TABLE>
 
+		<TABLE NAME="local_subscriptions_automation_rule" COMMENT="CampusFR CRM automation rules">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="rulekey" TYPE="char" LENGTH="100" NOTNULL="true"/>
+				<FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+				<FIELD NAME="triggerkey" TYPE="char" LENGTH="100" NOTNULL="true"/>
+				<FIELD NAME="triggerpayload" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="conditionsjson" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="actionsjson" TYPE="text" NOTNULL="true"/>
+				<FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+				<FIELD NAME="priority" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="100"/>
+				<FIELD NAME="metadatajson" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="rulekey_uix" TYPE="unique" FIELDS="rulekey"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="trigger_idx" UNIQUE="false" FIELDS="triggerkey"/>
+				<INDEX NAME="enabled_idx" UNIQUE="false" FIELDS="enabled"/>
+				<INDEX NAME="priority_idx" UNIQUE="false" FIELDS="priority"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_automation_history" COMMENT="CampusFR CRM automation execution history">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="ruleid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="rulekey" TYPE="char" LENGTH="100" NOTNULL="true"/>
+				<FIELD NAME="triggerkey" TYPE="char" LENGTH="100" NOTNULL="true"/>
+				<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+				<FIELD NAME="entitytype" TYPE="char" LENGTH="50" NOTNULL="false"/>
+				<FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+				<FIELD NAME="status" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="success"/>
+				<FIELD NAME="message" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="contextjson" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="resultjson" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="ruleid_fk" TYPE="foreign" FIELDS="ruleid" REFTABLE="local_subscriptions_automation_rule" REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="trigger_idx" UNIQUE="false" FIELDS="triggerkey"/>
+				<INDEX NAME="userid_idx" UNIQUE="false" FIELDS="userid"/>
+				<INDEX NAME="entity_idx" UNIQUE="false" FIELDS="entitytype, entityid"/>
+				<INDEX NAME="timecreated_idx" UNIQUE="false" FIELDS="timecreated"/>
+			</INDEXES>
+		</TABLE>
+
     </TABLES>
 </XMLDB>

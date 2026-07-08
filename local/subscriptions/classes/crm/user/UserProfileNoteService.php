@@ -5,6 +5,9 @@ namespace local_subscriptions\crm\user;
 defined('MOODLE_INTERNAL') || die();
 
 use core_text;
+use local_subscriptions\crm\automation\AutomationContext;
+use local_subscriptions\crm\automation\AutomationDispatcher;
+use local_subscriptions\crm\automation\AutomationTriggerKeys;
 
 final class UserProfileNoteService {
 
@@ -20,7 +23,7 @@ final class UserProfileNoteService {
         );
     }
 
-    public function add(int $userid, int $authorid, string $note, string $type = 'general'): int {
+    public function add(int $userid, int $authorid, string $note, string $type = 'general', bool $dispatchautomation = true): int {
         $note = trim($note);
 
         if ($note === '') {
@@ -31,6 +34,23 @@ final class UserProfileNoteService {
             throw new \moodle_exception('crm_note_too_long', 'local_subscriptions');
         }
 
-        return $this->repository->add_note($userid, $authorid, $note, $type);
+        $noteid = $this->repository->add_note($userid, $authorid, $note, $type);
+
+        if ($dispatchautomation) {
+            (new AutomationDispatcher())->dispatch(
+                AutomationContext::for_user_action(
+                    AutomationTriggerKeys::NOTE_ADDED,
+                    $userid,
+                    $authorid,
+                    [
+                        'noteid' => $noteid,
+                        'type' => $type,
+                        'source' => 'crm_note_service',
+                    ]
+                )
+            );
+        }
+
+        return $noteid;
     }
 }

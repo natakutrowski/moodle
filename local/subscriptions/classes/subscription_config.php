@@ -227,6 +227,18 @@ class subscription_config {
         return self::plugin_path() . 'ajax/command_center_execute.php';
     }
 
+    public static function automation_rules_admin_page(): string {
+        return self::plugin_path() . 'admin/automations/index.php';
+    }
+
+    public static function automation_history_admin_page(): string {
+        return self::plugin_path() . 'admin/automations/history.php';
+    }
+
+    public static function automation_toggle_admin_page(): string {
+        return self::plugin_path() . 'admin/automations/toggle.php';
+    }    
+
     // -- Buttons --
     public static function button_admin_dashboard(): string {
         return \html_writer::link(

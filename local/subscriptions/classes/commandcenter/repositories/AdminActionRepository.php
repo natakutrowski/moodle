@@ -155,6 +155,29 @@ final class AdminActionRepository {
                 ],
                 'keywords' => 'subscriptions abonnements accès access élèves étudiants plans cours subscription abonnement доступ подписка подписки курс курсы ученики студенты',
             ],
+            [
+                'icon' => CommandIcons::AUTOMATION,
+                'title' => get_string('command_action_automations_title', 'local_subscriptions'),
+                'subtitle' => get_string('command_action_automations_subtitle', 'local_subscriptions'),
+                'url' => (new moodle_url(subscription_config::automation_rules_admin_page()))->out(false),
+                'actionkey' => 'open_url',
+                'payload' => [
+                    'url' => (new moodle_url(subscription_config::automation_rules_admin_page()))->out(false),
+                ],
+                'keywords' => 'automation automations automatisation automatisations workflow workflows crm rules règles regles moteur автоматизация автоматизации правила workflow',
+            ],
+            [
+                'icon' => CommandIcons::AUTOMATION_HISTORY,
+                'title' => get_string('command_action_automation_history_title', 'local_subscriptions'),
+                'subtitle' => get_string('command_action_automation_history_subtitle', 'local_subscriptions'),
+                'url' => (new moodle_url(subscription_config::automation_history_admin_page()))->out(false),
+                'actionkey' => 'open_url',
+                'payload' => [
+                    'url' => (new moodle_url(subscription_config::automation_history_admin_page()))->out(false),
+                ],
+                'keywords' => 'automation history historique automatisations logs crm audit журнал история автоматизации',
+            ],
+
         ];
     }
 }

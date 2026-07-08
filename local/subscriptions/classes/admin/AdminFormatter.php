@@ -4,6 +4,8 @@ namespace local_subscriptions\admin;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\crm\automation\AutomationStatuses;
+
 final class AdminFormatter {
 
     public static function date(?int $timestamp): string {
@@ -43,4 +45,20 @@ final class AdminFormatter {
     public static function period(?int $start, ?int $end): string {
         return self::date($start) . ' → ' . self::subscription_end($end);
     }
+
+    public static function automation_status(string $status): string {
+        return match ($status) {
+            AutomationStatuses::SUCCESS =>
+                get_string('crm_automation_status_success', 'local_subscriptions'),
+
+            AutomationStatuses::FAILED =>
+                get_string('crm_automation_status_failed', 'local_subscriptions'),
+
+            AutomationStatuses::SKIPPED =>
+                get_string('crm_automation_status_skipped', 'local_subscriptions'),
+
+            default => s($status),
+        };
+    }
+
 }

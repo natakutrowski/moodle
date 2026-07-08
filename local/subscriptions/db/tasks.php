@@ -1,4 +1,7 @@
 <?php
+
+defined('MOODLE_INTERNAL') || die();
+
 $tasks = [
     [
         'classname' => '\local_subscriptions\task\followup_task',
@@ -78,4 +81,14 @@ $tasks[] = [
     'day' => '*',
     'month' => '*',
     'dayofweek' => '*',
+];
+
+$tasks[] = [
+        'classname' => 'local_subscriptions\task\run_crm_automations_task',
+        'blocking' => 0,
+        'minute' => '*/30',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
 ];

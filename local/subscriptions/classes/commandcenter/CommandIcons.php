@@ -22,4 +22,10 @@ final class CommandIcons {
     public const SUBSCRIPTIONS = '🎓';
     public const RESET_PASSWORD = '🔑';
     public const SEARCH = '🔎';
+    public const AUTOMATION = '🤖';
+    public const AUTOMATION_HISTORY = '🕘';
+    public const WORKFLOW = '🔀';
+    public const TRIGGER = '⚡';
+    public const RULE = '📋';
+    public const CRON = '⏱️';
 }

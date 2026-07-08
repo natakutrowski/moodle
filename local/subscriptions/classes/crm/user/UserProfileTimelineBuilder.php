@@ -6,6 +6,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\admin\AdminEvents;
 use local_subscriptions\admin\AdminFormatter;
+use local_subscriptions\crm\automation\AutomationTriggerKeys;
 
 final class UserProfileTimelineBuilder {
 
@@ -17,6 +18,10 @@ final class UserProfileTimelineBuilder {
 
         $this->add_admin_logs($events, $seenlogids, $repository->get_admin_logs((int)$user->id, $limit));
         $this->add_notes($events, $repository->get_user_notes((int)$user->id, $limit));
+        $this->add_automation_history(
+            $events,
+            $repository->get_automation_history_for_timeline((int)$user->id, $limit)
+        );
         $this->add_subscription_payments(
             $events,
             $repository->get_subscription_payments_for_timeline((int)$user->id, (string)$user->email, $limit)
@@ -390,4 +395,75 @@ final class UserProfileTimelineBuilder {
 
         return is_array($decoded) ? $decoded : [];
     }
+
+    private function add_automation_history(array &$events, array $history): void {
+        foreach ($history as $entry) {
+            $events[] = new UserProfileTimelineEvent(
+                'automation_' . (string)$entry->triggerkey,
+                (int)$entry->timecreated,
+                $this->automation_title((string)$entry->triggerkey),
+                (string)($entry->message ?? ''),
+                $this->automation_icon((string)$entry->triggerkey, (string)$entry->status),
+                $entry->status === 'failed' ? 'high' : 'normal',
+                null,
+                [
+                    'objecttype' => 'automation',
+                    'detailsraw' => [
+                        'rule' => (string)$entry->rulekey,
+                        'trigger' => (string)$entry->triggerkey,
+                        'status' => (string)$entry->status,
+                        'entitytype' => (string)($entry->entitytype ?? ''),
+                        'entityid' => (int)($entry->entityid ?? 0),
+                    ],
+                    'actorid' => 0,
+                    'rawtype' => 'automation_history',
+                ]
+            );
+        }
+    }
+
+    private function automation_icon(string $triggerkey, string $status): string {
+        if ($status === 'failed') {
+            return '⚠️';
+        }
+
+        return match ($triggerkey) {
+            'trial_expired' => '🎁',
+            'payment_failed' => '💳',
+            'digital_purchase_paid' => '📦',
+            'subscription_expired' => '📚',
+            'note_added' => '📝',
+            'tag_added', 'tag_removed' => '🏷️',
+            default => '⚙️',
+        };
+    }
+
+    private function automation_title(string $triggerkey): string {
+        return match ($triggerkey) {
+            AutomationTriggerKeys::TRIAL_EXPIRED =>
+                get_string('crm_automation_trial_expired', 'local_subscriptions'),
+
+            AutomationTriggerKeys::PAYMENT_FAILED =>
+                get_string('crm_automation_payment_failed', 'local_subscriptions'),
+
+            AutomationTriggerKeys::DIGITAL_PURCHASE_PAID =>
+                get_string('crm_automation_digital_purchase_paid', 'local_subscriptions'),
+
+            AutomationTriggerKeys::SUBSCRIPTION_EXPIRED =>
+                get_string('crm_automation_subscription_expired', 'local_subscriptions'),
+
+            AutomationTriggerKeys::NOTE_ADDED =>
+                get_string('crm_automation_note_added', 'local_subscriptions'),
+
+            AutomationTriggerKeys::TAG_ADDED =>
+                get_string('crm_automation_tag_added', 'local_subscriptions'),
+
+            AutomationTriggerKeys::TAG_REMOVED =>
+                get_string('crm_automation_tag_removed', 'local_subscriptions'),
+
+            default =>
+                get_string('crm_timeline_automation_executed', 'local_subscriptions'),
+        };
+    }
+
 }

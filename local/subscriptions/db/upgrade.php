@@ -1362,5 +1362,64 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2026062906, 'local', 'subscriptions');
 	}
 
+	if ($oldversion < 2026062908) {
+		$dbman = $DB->get_manager();
+
+		$table = new xmldb_table('local_subscriptions_automation_rule');
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('rulekey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+			$table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+			$table->add_field('triggerkey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+			$table->add_field('triggerpayload', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('conditionsjson', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('actionsjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+			$table->add_field('enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, 1);
+			$table->add_field('priority', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 100);
+			$table->add_field('metadatajson', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+			$table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+			$table->add_index('rulekey_uix', XMLDB_INDEX_UNIQUE, ['rulekey']);
+			$table->add_index('trigger_idx', XMLDB_INDEX_NOTUNIQUE, ['triggerkey']);
+			$table->add_index('enabled_idx', XMLDB_INDEX_NOTUNIQUE, ['enabled']);
+			$table->add_index('priority_idx', XMLDB_INDEX_NOTUNIQUE, ['priority']);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table('local_subscriptions_automation_history');
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('ruleid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('rulekey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+			$table->add_field('triggerkey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+			$table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, null);
+			$table->add_field('entitytype', XMLDB_TYPE_CHAR, '50', null, null);
+			$table->add_field('entityid', XMLDB_TYPE_INTEGER, '10', null, null);
+			$table->add_field('status', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, 'success');
+			$table->add_field('message', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('contextjson', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('resultjson', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+			$table->add_key('ruleid_fk', XMLDB_KEY_FOREIGN, ['ruleid'], 'local_subscriptions_automation_rule', ['id']);
+
+			$table->add_index('trigger_idx', XMLDB_INDEX_NOTUNIQUE, ['triggerkey']);
+			$table->add_index('userid_idx', XMLDB_INDEX_NOTUNIQUE, ['userid']);
+			$table->add_index('entity_idx', XMLDB_INDEX_NOTUNIQUE, ['entitytype', 'entityid']);
+			$table->add_index('timecreated_idx', XMLDB_INDEX_NOTUNIQUE, ['timecreated']);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(true, 2026062908, 'local', 'subscriptions');
+	}
+
     return true;
 }
