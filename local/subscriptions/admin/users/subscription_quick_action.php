@@ -9,7 +9,7 @@ use local_subscriptions\service\UserSubscriptionEmailService;
 
 global $DB, $PAGE;
 
-$context = AdminSecurity::require(Capabilities::VIEW_USERS);
+$context = AdminSecurity::require(Capabilities::MANAGE_USERS);
 require_sesskey();
 
 $userid = required_param('userid', PARAM_INT);

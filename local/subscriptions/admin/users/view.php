@@ -9,7 +9,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\service\UserProfileService;
 use local_subscriptions\output\UserProfileRenderer;
 
-global $DB, $PAGE, $OUTPUT;
+global $PAGE, $OUTPUT;
 
 $context = AdminSecurity::require(Capabilities::VIEW_USERS);
 
@@ -26,9 +26,6 @@ $PAGE->set_url($url);
 $PAGE->set_title(get_string('crm_user_profile', 'local_subscriptions') . ' - ' . fullname($user));
 $PAGE->set_heading(get_string('crm_user_profile', 'local_subscriptions'));
 $PAGE->requires->css(new moodle_url('/local/subscriptions/styles.css'));
-
-$subscriptions = $profile->subscriptions;
-$digitalpayments = $profile->digitalpayments;
 
 echo $OUTPUT->header();
 

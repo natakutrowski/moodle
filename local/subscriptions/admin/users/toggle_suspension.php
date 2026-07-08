@@ -11,7 +11,7 @@ use local_subscriptions\admin\AdminEvents;
 
 global $DB;
 
-AdminSecurity::require(Capabilities::VIEW_USERS);
+AdminSecurity::require(Capabilities::MANAGE_USERS);
 require_sesskey();
 
 $id = required_param('id', PARAM_INT);

@@ -428,6 +428,7 @@
 			<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
 			<FIELD NAME="authorid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
 			<FIELD NAME="note" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+			<FIELD NAME="type" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="general" SEQUENCE="false"/>
 			<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
 		</FIELDS>
 		<KEYS>
@@ -438,6 +439,23 @@
 			<INDEX NAME="authorid_idx" UNIQUE="false" FIELDS="authorid"/>
 			<INDEX NAME="timecreated_idx" UNIQUE="false" FIELDS="timecreated"/>
 		</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_user_tag" COMMENT="CampusFR CRM user tags">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+				<FIELD NAME="tag" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
+				<FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="userid_idx" UNIQUE="false" FIELDS="userid"/>
+				<INDEX NAME="userid_tag_uix" UNIQUE="true" FIELDS="userid, tag"/>
+			</INDEXES>
 		</TABLE>
 
     </TABLES>

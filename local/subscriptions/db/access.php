@@ -15,6 +15,12 @@ $capabilities = [
         'archetypes' => ['manager' => CAP_ALLOW],
     ],
 
+    'local/subscriptions:manage_users' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => ['manager' => CAP_ALLOW],
+    ],    
+
     'local/subscriptions:manage_subscriptions' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,

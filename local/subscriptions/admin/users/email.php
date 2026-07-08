@@ -11,7 +11,7 @@ use local_subscriptions\service\UserEmailService;
 
 global $DB, $PAGE, $OUTPUT;
 
-$context = AdminSecurity::require(Capabilities::VIEW_USERS);
+$context = AdminSecurity::require(Capabilities::MANAGE_USERS);
 
 $id = required_param('id', PARAM_INT);
 

@@ -1,0 +1,35 @@
+<?php
+
+namespace local_subscriptions\crm\user;
+
+defined('MOODLE_INTERNAL') || die();
+
+final class UserProfileViewModel {
+
+    public function __construct(
+        public readonly \stdClass $user,
+        public readonly array $subscriptions,
+        public readonly array $digitalpayments,
+        public readonly UserProfileStats $stats,
+        public readonly array $notes,
+        public readonly array $timeline,
+        public readonly array $courses,
+        public readonly array $tags = [],
+        public readonly array $actions = []
+    ) {
+    }
+
+    public function to_legacy_object(): \stdClass {
+        return (object)[
+            'user' => $this->user,
+            'subscriptions' => $this->subscriptions,
+            'digitalpayments' => $this->digitalpayments,
+            'stats' => $this->stats->to_object(),
+            'notes' => $this->notes,
+            'timeline' => $this->timeline,
+            'courses' => $this->courses,
+            'actions' => $this->actions,
+            'tags' => $this->tags,
+        ];
+    }
+}
