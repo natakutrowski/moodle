@@ -4,6 +4,8 @@ namespace local_subscriptions\crm\user;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\crm\intelligence\core\UserIntelligence;
+
 final class UserProfileViewModel {
 
     public function __construct(
@@ -15,7 +17,8 @@ final class UserProfileViewModel {
         public readonly array $timeline,
         public readonly array $courses,
         public readonly array $tags = [],
-        public readonly array $actions = []
+        public readonly array $actions = [],
+        public readonly ?UserIntelligence $intelligence = null
     ) {
     }
 
@@ -30,6 +33,7 @@ final class UserProfileViewModel {
             'courses' => $this->courses,
             'actions' => $this->actions,
             'tags' => $this->tags,
+            'intelligence' => $this->intelligence?->to_object(),
         ];
     }
 }

@@ -92,3 +92,13 @@ $tasks[] = [
         'month' => '*',
         'dayofweek' => '*',
 ];
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\run_crm_intelligence_snapshot_task',
+    'blocking' => 0,
+    'minute' => 'R',
+    'hour' => '2',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];

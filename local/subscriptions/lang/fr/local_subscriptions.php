@@ -1643,3 +1643,107 @@ $string['crm_automation_rules_count'] = '{$a} règle(s) configurée(s)';
 $string['crm_automation_status_success'] = 'Succès';
 $string['crm_automation_status_failed'] = 'Échec';
 $string['crm_automation_status_skipped'] = 'Ignorée';
+
+$string['crm_section_intelligence'] = 'Intelligence CRM';
+$string['crm_intelligence_commercial_score'] = 'Score commercial';
+$string['crm_intelligence_engagement_score'] = 'Engagement';
+$string['crm_intelligence_risk_score'] = 'Risque';
+$string['crm_intelligence_global_score'] = 'Score global';
+
+$string['crm_intelligence_reason_active_customer'] = 'Client actif';
+$string['crm_intelligence_reason_trial_user'] = 'Utilisateur en essai';
+$string['crm_intelligence_reason_paid_digital_purchase'] = 'Achat digital payé';
+$string['crm_intelligence_reason_high_value'] = 'Forte valeur';
+$string['crm_intelligence_reason_recent_activity'] = 'Activité récente';
+$string['crm_intelligence_reason_inactive'] = 'Inactif';
+$string['crm_intelligence_reason_expired_subscription'] = 'Abonnement expiré';
+$string['crm_intelligence_reason_suspended'] = 'Compte suspendu';
+$string['crm_intelligence_level_very_low'] = 'Très faible';
+$string['crm_intelligence_level_low'] = 'Faible';
+$string['crm_intelligence_level_medium'] = 'Moyen';
+$string['crm_intelligence_level_high'] = 'Élevé';
+$string['crm_intelligence_level_excellent'] = 'Excellent';
+
+$string['crm_intelligence_summary_very_low'] = 'Peu de signaux exploitables pour le moment.';
+$string['crm_intelligence_summary_low'] = 'Profil encore peu prioritaire, mais à surveiller.';
+$string['crm_intelligence_summary_medium'] = 'Profil intéressant avec plusieurs signaux utiles.';
+$string['crm_intelligence_summary_high'] = 'Profil prioritaire avec un bon potentiel commercial.';
+$string['crm_intelligence_summary_excellent'] = 'Profil très prioritaire avec une forte valeur CRM.';
+$string['crm_intelligence_segments'] = 'Segments';
+$string['crm_intelligence_opportunities'] = 'Opportunités';
+$string['crm_intelligence_recommendations'] = 'Recommandations';
+
+$string['crm_intelligence_segment_customer'] = 'Client';
+$string['crm_intelligence_segment_trial'] = 'Essai';
+$string['crm_intelligence_segment_hot_lead'] = 'Prospect chaud';
+$string['crm_intelligence_segment_at_risk'] = 'À risque';
+$string['crm_intelligence_segment_vip'] = 'VIP';
+$string['crm_intelligence_segment_cold_user'] = 'Utilisateur froid';
+
+$string['crm_intelligence_opportunity_trial_to_purchase'] = 'Conversion essai → achat';
+$string['crm_intelligence_opportunity_cross_sell_digital_product'] = 'Cross-sell produit digital';
+$string['crm_intelligence_opportunity_upgrade_subscription'] = 'Upgrade probable';
+$string['crm_intelligence_opportunity_winback_expired_customer'] = 'Réactivation client expiré';
+
+$string['crm_intelligence_recommendation_send_trial_conversion_email'] = 'Envoyer un email de conversion';
+$string['crm_intelligence_recommendation_propose_upgrade'] = 'Proposer un upgrade';
+$string['crm_intelligence_recommendation_send_winback_message'] = 'Envoyer un message de réactivation';
+$string['crm_intelligence_recommendation_suggest_digital_product'] = 'Suggérer un produit digital';
+$string['crm_intelligence_recommendation_review_user_manually'] = 'Analyser manuellement ce profil';
+$string['crm_intelligence_recommendation_create_first_crm_note'] = 'Créer une première note CRM';
+
+$string['crm_intelligence_dashboard_title'] = 'Intelligence CRM';
+$string['crm_intelligence_dashboard_analysed_users'] = 'Utilisateurs analysés';
+$string['crm_intelligence_dashboard_hot_leads'] = 'Prospects chauds';
+$string['crm_intelligence_dashboard_at_risk'] = 'Profils à risque';
+$string['crm_intelligence_dashboard_vip'] = 'VIP';
+$string['crm_intelligence_dashboard_trial_opportunities'] = 'Opportunités essai';
+$string['crm_intelligence_dashboard_upgrade_opportunities'] = 'Opportunités upgrade';
+$string['crm_intelligence_dashboard_priority_profiles'] = 'Profils prioritaires';
+$string['crm_intelligence_dashboard_no_priority_profiles'] = 'Aucun profil prioritaire détecté pour le moment.';
+$string['crm_intelligence_alerts_title'] = 'Alertes CRM intelligentes';
+$string['crm_intelligence_alerts_empty'] = 'Aucune alerte CRM importante pour le moment.';
+$string['crm_intelligence_alert_open_profile'] = 'Ouvrir la fiche utilisateur';
+
+$string['crm_intelligence_alert_high_risk_user'] = 'Utilisateur avec un risque CRM élevé';
+$string['crm_intelligence_alert_trial_without_purchase'] = 'Essai actif sans achat détecté';
+$string['crm_intelligence_alert_expired_without_reactivation'] = 'Abonnement expiré sans réactivation';
+$string['crm_intelligence_alert_inactive_user'] = 'Utilisateur inactif depuis longtemps';
+$string['crm_intelligence_alert_hot_opportunity'] = 'Opportunité commerciale chaude';
+$string['command_crm_intelligence_dashboard'] = 'Dashboard Intelligence CRM';
+$string['command_crm_intelligence_dashboard_desc'] = 'Voir les scores, alertes et recommandations CRM.';
+$string['command_crm_alert_desc'] = 'Alerte CRM intelligente détectée.';
+
+$string['crm_funnel_title'] = 'Funnel CRM';
+$string['crm_funnel_users'] = 'Utilisateurs';
+$string['crm_funnel_trials'] = 'Essais';
+$string['crm_funnel_customers'] = 'Clients';
+$string['crm_funnel_digital_customers'] = 'Clients digitaux';
+$string['crm_funnel_expired_customers'] = 'Clients expirés';
+$string['crm_funnel_trial_conversion_rate'] = 'Conversion essai → client';
+$string['task_run_crm_intelligence_snapshot'] = 'Créer les snapshots Intelligence CRM';
+$string['crm_trends_title'] = 'Tendances CRM';
+$string['crm_trends_empty'] = 'Pas encore assez d’historique CRM.';
+$string['crm_trend_label'] = 'Tendance';
+$string['crm_trend_direction_up'] = 'En hausse';
+$string['crm_trend_direction_down'] = 'En baisse';
+$string['crm_trend_direction_stable'] = 'Stable';
+
+$string['crm_explanation_active_customer'] = 'Client actif';
+$string['crm_explanation_trial_user'] = 'Utilisateur en essai';
+$string['crm_explanation_paid_digital_purchase'] = 'Achat digital payé';
+$string['crm_explanation_high_value'] = 'Forte valeur client';
+$string['crm_explanation_recent_activity'] = 'Activité récente';
+$string['crm_explanation_inactive'] = 'Inactivité détectée';
+$string['crm_explanation_expired_subscription'] = 'Abonnement expiré';
+$string['crm_explanation_suspended'] = 'Compte suspendu';
+$string['crm_explanation_no_crm_note'] = 'Aucune note CRM';
+$string['crm_explanations_title'] = 'Pourquoi ce score ?';
+
+$string['crm_daily_priorities_title'] = 'Priorités CRM du jour';
+$string['crm_daily_priorities_empty'] = 'Aucune priorité CRM importante pour le moment.';
+
+$string['command_crm_priority_desc'] = 'Priorité CRM du jour détectée.';
+$string['crm_recommendation_action_permission_denied'] = 'Permission insuffisante pour exécuter cette action.';
+$string['crm_recommendation_action_unsupported'] = 'Cette action recommandée n’est pas encore prise en charge.';
+$string['crm_recommendation_action_open_user_profile'] = 'Ouvrir la fiche utilisateur';

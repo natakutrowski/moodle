@@ -1670,3 +1670,108 @@ $string['crm_automation_rules_count'] = 'Настроено правил авт�
 $string['crm_automation_status_success'] = 'Успешно';
 $string['crm_automation_status_failed'] = 'Ошибка';
 $string['crm_automation_status_skipped'] = 'Пропущено';
+
+$string['crm_section_intelligence'] = 'CRM-аналитика';
+
+$string['crm_intelligence_commercial_score'] = 'Коммерческий потенциал';
+$string['crm_intelligence_engagement_score'] = 'Вовлечённость';
+$string['crm_intelligence_risk_score'] = 'Риск';
+$string['crm_intelligence_global_score'] = 'Общий рейтинг';
+
+$string['crm_intelligence_reason_active_customer'] = 'Активный клиент';
+$string['crm_intelligence_reason_trial_user'] = 'Пробный доступ';
+$string['crm_intelligence_reason_paid_digital_purchase'] = 'Оплаченная цифровая покупка';
+$string['crm_intelligence_reason_high_value'] = 'Высокая ценность клиента';
+$string['crm_intelligence_reason_recent_activity'] = 'Недавняя активность';
+$string['crm_intelligence_reason_inactive'] = 'Неактивный пользователь';
+$string['crm_intelligence_reason_expired_subscription'] = 'Подписка истекла';
+$string['crm_intelligence_reason_suspended'] = 'Учётная запись заблокирована';
+$string['crm_intelligence_level_very_low'] = 'Очень низкий';
+$string['crm_intelligence_level_low'] = 'Низкий';
+$string['crm_intelligence_level_medium'] = 'Средний';
+$string['crm_intelligence_level_high'] = 'Высокий';
+$string['crm_intelligence_level_excellent'] = 'Отличный';
+
+$string['crm_intelligence_summary_very_low'] = 'Пока недостаточно полезных сигналов.';
+$string['crm_intelligence_summary_low'] = 'Профиль пока не приоритетный, но его стоит отслеживать.';
+$string['crm_intelligence_summary_medium'] = 'Интересный профиль с несколькими полезными сигналами.';
+$string['crm_intelligence_summary_high'] = 'Приоритетный профиль с хорошим коммерческим потенциалом.';
+$string['crm_intelligence_summary_excellent'] = 'Очень приоритетный профиль с высокой CRM-ценностью.';
+$string['crm_intelligence_segments'] = 'Сегменты';
+$string['crm_intelligence_opportunities'] = 'Возможности';
+$string['crm_intelligence_recommendations'] = 'Рекомендации';
+
+$string['crm_intelligence_segment_customer'] = 'Клиент';
+$string['crm_intelligence_segment_trial'] = 'Пробный доступ';
+$string['crm_intelligence_segment_hot_lead'] = 'Горячий лид';
+$string['crm_intelligence_segment_at_risk'] = 'В зоне риска';
+$string['crm_intelligence_segment_vip'] = 'VIP';
+$string['crm_intelligence_segment_cold_user'] = 'Холодный пользователь';
+
+$string['crm_intelligence_opportunity_trial_to_purchase'] = 'Конверсия пробного доступа в покупку';
+$string['crm_intelligence_opportunity_cross_sell_digital_product'] = 'Кросс-продажа цифрового продукта';
+$string['crm_intelligence_opportunity_upgrade_subscription'] = 'Вероятный апгрейд';
+$string['crm_intelligence_opportunity_winback_expired_customer'] = 'Возврат клиента с истёкшей подпиской';
+
+$string['crm_intelligence_recommendation_send_trial_conversion_email'] = 'Отправить письмо для конверсии';
+$string['crm_intelligence_recommendation_propose_upgrade'] = 'Предложить апгрейд';
+$string['crm_intelligence_recommendation_send_winback_message'] = 'Отправить сообщение для возврата';
+$string['crm_intelligence_recommendation_suggest_digital_product'] = 'Предложить цифровой продукт';
+$string['crm_intelligence_recommendation_review_user_manually'] = 'Проверить профиль вручную';
+$string['crm_intelligence_recommendation_create_first_crm_note'] = 'Создать первую CRM-заметку';
+
+$string['crm_intelligence_dashboard_title'] = 'CRM-аналитика';
+$string['crm_intelligence_dashboard_analysed_users'] = 'Проанализированные пользователи';
+$string['crm_intelligence_dashboard_hot_leads'] = 'Горячие лиды';
+$string['crm_intelligence_dashboard_at_risk'] = 'Профили в зоне риска';
+$string['crm_intelligence_dashboard_vip'] = 'VIP';
+$string['crm_intelligence_dashboard_trial_opportunities'] = 'Возможности пробного доступа';
+$string['crm_intelligence_dashboard_upgrade_opportunities'] = 'Возможности апгрейда';
+$string['crm_intelligence_dashboard_priority_profiles'] = 'Приоритетные профили';
+$string['crm_intelligence_dashboard_no_priority_profiles'] = 'Приоритетные профили пока не обнаружены.';
+$string['crm_intelligence_alerts_title'] = 'Умные CRM-уведомления';
+$string['crm_intelligence_alerts_empty'] = 'Пока нет важных CRM-уведомлений.';
+$string['crm_intelligence_alert_open_profile'] = 'Открыть профиль пользователя';
+
+$string['crm_intelligence_alert_high_risk_user'] = 'Пользователь с высоким CRM-риском';
+$string['crm_intelligence_alert_trial_without_purchase'] = 'Активный пробный доступ без покупки';
+$string['crm_intelligence_alert_expired_without_reactivation'] = 'Подписка истекла без повторной активации';
+$string['crm_intelligence_alert_inactive_user'] = 'Пользователь давно неактивен';
+$string['crm_intelligence_alert_hot_opportunity'] = 'Горячая коммерческая возможность';
+$string['command_crm_intelligence_dashboard'] = 'Панель CRM-аналитики';
+$string['command_crm_intelligence_dashboard_desc'] = 'Посмотреть CRM-оценки, уведомления и рекомендации.';
+$string['command_crm_alert_desc'] = 'Обнаружено умное CRM-уведомление.';
+
+$string['crm_funnel_title'] = 'CRM-воронка';
+$string['crm_funnel_users'] = 'Пользователи';
+$string['crm_funnel_trials'] = 'Пробные доступы';
+$string['crm_funnel_customers'] = 'Клиенты';
+$string['crm_funnel_digital_customers'] = 'Цифровые клиенты';
+$string['crm_funnel_expired_customers'] = 'Клиенты с истёкшей подпиской';
+$string['crm_funnel_trial_conversion_rate'] = 'Конверсия пробного доступа в клиента';
+$string['task_run_crm_intelligence_snapshot'] = 'Создание снимков CRM-аналитики';
+$string['crm_trends_title'] = 'CRM-тенденции';
+$string['crm_trends_empty'] = 'Пока недостаточно CRM-истории.';
+$string['crm_trend_label'] = 'Тенденция';
+$string['crm_trend_direction_up'] = 'Растёт';
+$string['crm_trend_direction_down'] = 'Снижается';
+$string['crm_trend_direction_stable'] = 'Стабильно';
+
+$string['crm_explanation_active_customer'] = 'Активный клиент';
+$string['crm_explanation_trial_user'] = 'Пробный доступ';
+$string['crm_explanation_paid_digital_purchase'] = 'Оплаченная цифровая покупка';
+$string['crm_explanation_high_value'] = 'Высокая ценность клиента';
+$string['crm_explanation_recent_activity'] = 'Недавняя активность';
+$string['crm_explanation_inactive'] = 'Обнаружена неактивность';
+$string['crm_explanation_expired_subscription'] = 'Подписка истекла';
+$string['crm_explanation_suspended'] = 'Учётная запись заблокирована';
+$string['crm_explanation_no_crm_note'] = 'Нет CRM-заметки';
+$string['crm_explanations_title'] = 'Почему такой рейтинг?';
+
+$string['crm_daily_priorities_title'] = 'CRM-приоритеты на сегодня';
+$string['crm_daily_priorities_empty'] = 'Пока нет важных CRM-приоритетов.';
+
+$string['command_crm_priority_desc'] = 'Обнаружен CRM-приоритет на сегодня.';
+$string['crm_recommendation_action_permission_denied'] = 'Недостаточно прав для выполнения этого действия.';
+$string['crm_recommendation_action_unsupported'] = 'Это рекомендованное действие пока не поддерживается.';
+$string['crm_recommendation_action_open_user_profile'] = 'Открыть профиль пользователя';

@@ -370,4 +370,17 @@ final class UserProfileRepository {
         ));
     }
 
+    public function get_user_tags(int $userid, int $limit = 50): array {
+        global $DB;
+
+        return array_values($DB->get_records(
+            'local_subscriptions_user_tag',
+            ['userid' => $userid],
+            'timecreated DESC, id DESC',
+            '*',
+            0,
+            $limit
+        ));
+    }
+
 }

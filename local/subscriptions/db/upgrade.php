@@ -1421,5 +1421,35 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2026062908, 'local', 'subscriptions');
 	}
 
+	if ($oldversion < 2026062910) {
+		$table = new xmldb_table('local_subscriptions_crm_score');
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+			$table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+			$table->add_field('commercialscore', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+			$table->add_field('engagementscore', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+			$table->add_field('riskscore', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+			$table->add_field('globalscore', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+			$table->add_field('level', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL);
+			$table->add_field('segmentsjson', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('opportunitiesjson', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('recommendationsjson', XMLDB_TYPE_TEXT, null, null, null);
+			$table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+			$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+			$table->add_index('userid_idx', XMLDB_INDEX_NOTUNIQUE, ['userid']);
+			$table->add_index('timecreated_idx', XMLDB_INDEX_NOTUNIQUE, ['timecreated']);
+			$table->add_index('userid_time_idx', XMLDB_INDEX_NOTUNIQUE, ['userid', 'timecreated']);
+			$table->add_index('global_idx', XMLDB_INDEX_NOTUNIQUE, ['globalscore']);
+			$table->add_index('risk_idx', XMLDB_INDEX_NOTUNIQUE, ['riskscore']);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(true, 2026062910, 'local', 'subscriptions');
+	}
+
     return true;
 }

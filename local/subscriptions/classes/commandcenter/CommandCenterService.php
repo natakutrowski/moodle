@@ -9,6 +9,7 @@ use local_subscriptions\commandcenter\providers\DigitalProductProvider;
 use local_subscriptions\commandcenter\providers\DigitalPurchaseProvider;
 use local_subscriptions\commandcenter\providers\SubscriptionProvider;
 use local_subscriptions\commandcenter\providers\UserProvider;
+use local_subscriptions\commandcenter\providers\IntelligenceProvider;
 use local_subscriptions\commandcenter\CommandContext;
 use local_subscriptions\commandcenter\intents\CommandIntentRegistry;
 
@@ -24,6 +25,7 @@ final class CommandCenterService {
     public function __construct(?array $providers = null, ?CommandProviderRunner $runner = null) {
         $this->providers = $providers ?? [
             new AdminActionProvider(),
+            new IntelligenceProvider(),
             new UserProvider(),
             new DigitalProductProvider(),
             new DigitalPurchaseProvider(),

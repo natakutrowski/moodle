@@ -14,4 +14,16 @@ final class Capabilities {
     public const VIEW_PAYMENTS = 'local/subscriptions:view_payments';
     public const VIEW_STATISTICS = 'local/subscriptions:view_statistics';
     public const MANAGE_CONFIGURATION = 'local/subscriptions:manage_configuration';
+
+    public static function can_view_users(?\context $context = null): bool {
+        $context = $context ?? \context_system::instance();
+
+        return has_capability(self::VIEW_USERS, $context);
+    }
+
+    public static function can_manage_users(?\context $context = null): bool {
+        $context = $context ?? \context_system::instance();
+
+        return has_capability(self::MANAGE_USERS, $context);
+    }
 }

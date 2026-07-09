@@ -30,6 +30,8 @@ final class UserProfileRenderer {
 
         $out .= self::stats($profile);
 
+        $out .= self::intelligence($profile);
+
         $out .= self::section(
             get_string('crm_section_subscriptions', 'local_subscriptions'),
             self::subscriptions_content($profile->subscriptions),
@@ -1234,6 +1236,203 @@ final class UserProfileRenderer {
         $out .= html_writer::end_div();
 
         return $out;
+    }
+
+    private static function intelligence(\stdClass $profile): string {
+        if (empty($profile->intelligence) || empty($profile->intelligence->leadscore)) {
+            return '';
+        }
+
+        $score = $profile->intelligence->leadscore;
+        $levelkey = 'crm_intelligence_level_' . clean_param((string)($score->level ?? 'very_low'), PARAM_ALPHANUMEXT);
+        $level = get_string_manager()->string_exists($levelkey, 'local_subscriptions')
+            ? get_string($levelkey, 'local_subscriptions')
+            : get_string('crm_intelligence_level_very_low', 'local_subscriptions');
+
+        $summarykey = 'crm_intelligence_summary_' . clean_param((string)($score->level ?? 'very_low'), PARAM_ALPHANUMEXT);
+        $summary = get_string_manager()->string_exists($summarykey, 'local_subscriptions')
+            ? get_string($summarykey, 'local_subscriptions')
+            : '';
+        
+        $cards = [
+            [
+                'icon' => '💼',
+                'label' => get_string('crm_intelligence_commercial_score', 'local_subscriptions'),
+                'value' => (int)$score->commercial . '/100',
+            ],
+            [
+                'icon' => '⚡',
+                'label' => get_string('crm_intelligence_engagement_score', 'local_subscriptions'),
+                'value' => (int)$score->engagement . '/100',
+            ],
+            [
+                'icon' => '⚠️',
+                'label' => get_string('crm_intelligence_risk_score', 'local_subscriptions'),
+                'value' => (int)$score->risk . '/100',
+            ],
+            [
+                'icon' => '🎯',
+                'label' => get_string('crm_intelligence_global_score', 'local_subscriptions'),
+                'value' => (int)$score->global . '/100',
+            ],
+        ];
+
+        $out = html_writer::tag('h3', get_string('crm_section_intelligence', 'local_subscriptions'), [
+            'class' => 'crm-section-title mb-3',
+        ]);
+
+        $out .= html_writer::div(
+            html_writer::tag('div', s($level), ['class' => 'crm-intelligence-level']) .
+            html_writer::tag('div', s($summary), ['class' => 'crm-intelligence-summary text-muted']),
+            'crm-intelligence-header mb-3'
+        );
+
+        if (!empty($profile->intelligence->trend)) {
+            $out .= self::intelligence_trend($profile->intelligence->trend);
+        }
+
+        $out .= html_writer::start_div('row mb-3 crm-intelligence-grid');
+
+        foreach ($cards as $card) {
+            $out .= html_writer::div(
+                html_writer::div(
+                    html_writer::div(
+                        html_writer::span($card['icon'], 'crm-stat-icon') .
+                        html_writer::tag('div', s($card['value']), ['class' => 'crm-stat-number']) .
+                        html_writer::tag('div', s($card['label']), ['class' => 'crm-stat-label']),
+                        'card card-body crm-stat-card h-100'
+                    )
+                ),
+                'col-md-3 mb-3'
+            );
+        }
+
+        $out .= html_writer::end_div();
+
+        if (!empty($score->reasons)) {
+            $out .= html_writer::div(
+                self::intelligence_reasons($score->reasons),
+                'crm-intelligence-reasons mt-2'
+            );
+        }
+
+        if (!empty($profile->intelligence->explanations)) {
+            $out .= self::intelligence_explanations($profile->intelligence->explanations);
+        }        
+
+        $out .= self::intelligence_badges(
+            get_string('crm_intelligence_segments', 'local_subscriptions'),
+            $profile->intelligence->segments ?? [],
+            'crm_intelligence_segment_'
+        );
+
+        $out .= self::intelligence_badges(
+            get_string('crm_intelligence_opportunities', 'local_subscriptions'),
+            $profile->intelligence->opportunities ?? [],
+            'crm_intelligence_opportunity_'
+        );
+
+        $out .= self::intelligence_badges(
+            get_string('crm_intelligence_recommendations', 'local_subscriptions'),
+            $profile->intelligence->recommendations ?? [],
+            'crm_intelligence_recommendation_'
+        );        
+
+        return html_writer::div(
+            $out,
+            'crm-section card card-body mb-4 crm-section-intelligence'
+        );
+    }
+
+    private static function intelligence_reasons(array $reasons): string {
+        $out = '';
+
+        foreach ($reasons as $reason) {
+            $key = 'crm_intelligence_reason_' . clean_param((string)$reason, PARAM_ALPHANUMEXT);
+
+            $label = get_string_manager()->string_exists($key, 'local_subscriptions')
+                ? get_string($key, 'local_subscriptions')
+                : $reason;
+
+            $out .= html_writer::span(
+                s($label),
+                'badge bg-light text-dark border mr-1 mb-1'
+            );
+        }
+
+        return $out;
+    }
+
+    private static function intelligence_badges(string $title, array $items, string $prefix): string {
+        if (empty($items)) {
+            return '';
+        }
+
+        $out = html_writer::tag('h4', s($title), ['class' => 'h6 mt-3 mb-2']);
+
+        foreach ($items as $item) {
+            $key = $prefix . clean_param((string)($item->key ?? ''), PARAM_ALPHANUMEXT);
+
+            $label = get_string_manager()->string_exists($key, 'local_subscriptions')
+                ? get_string($key, 'local_subscriptions')
+                : ($item->key ?? '');
+
+            $out .= html_writer::span(
+                s($label),
+                'badge bg-light text-dark border mr-1 mb-1'
+            );
+        }
+
+        return html_writer::div($out, 'crm-intelligence-badge-group');
+    }
+
+    private static function intelligence_trend(\stdClass $trend): string {
+        $direction = (string)($trend->direction ?? 'stable');
+        $delta = (int)($trend->delta ?? 0);
+
+        $key = 'crm_trend_direction_' . clean_param($direction, PARAM_ALPHANUMEXT);
+
+        $label = get_string_manager()->string_exists($key, 'local_subscriptions')
+            ? get_string($key, 'local_subscriptions')
+            : $direction;
+
+        $value = $delta > 0 ? '+' . $delta : (string)$delta;
+
+        return html_writer::div(
+            html_writer::span(get_string('crm_trend_label', 'local_subscriptions'), 'text-muted mr-2') .
+            html_writer::span(s($label), 'badge bg-light text-dark border mr-1') .
+            html_writer::span(s($value), 'fw-bold'),
+            'crm-intelligence-trend mb-3'
+        );
+    }
+
+    private static function intelligence_explanations(array $explanations): string {
+        if (empty($explanations)) {
+            return '';
+        }
+
+        $out = html_writer::tag('h4', get_string('crm_explanations_title', 'local_subscriptions'), [
+            'class' => 'h6 mt-3 mb-2',
+        ]);
+
+        foreach ($explanations as $explanation) {
+            $key = 'crm_explanation_' . clean_param((string)($explanation->key ?? ''), PARAM_ALPHANUMEXT);
+
+            $label = get_string_manager()->string_exists($key, 'local_subscriptions')
+                ? get_string($key, 'local_subscriptions')
+                : ($explanation->key ?? '');
+
+            $impact = (int)($explanation->impact ?? 0);
+            $impactlabel = $impact > 0 ? '+' . $impact : (string)$impact;
+
+            $out .= html_writer::div(
+                html_writer::span(s($label), 'mr-2') .
+                html_writer::span(s($impactlabel), 'badge bg-light text-dark border'),
+                'd-flex justify-content-between border-bottom py-1'
+            );
+        }
+
+        return html_writer::div($out, 'crm-intelligence-explanations mt-3');
     }
 
 }

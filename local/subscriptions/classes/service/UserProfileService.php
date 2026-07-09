@@ -11,6 +11,7 @@ use local_subscriptions\crm\user\UserProfileActionBuilder;
 use local_subscriptions\crm\user\UserProfileTimelineBuilder;
 use local_subscriptions\crm\user\UserProfileNoteService;
 use local_subscriptions\crm\user\UserProfileTagService;
+use local_subscriptions\crm\intelligence\core\UserIntelligenceBuilder;
 
 final class UserProfileService {
 
@@ -51,6 +52,8 @@ final class UserProfileService {
             $this->repository->last_activity((int)$user->id)
         );
 
+        $intelligence = (new UserIntelligenceBuilder())->build_for_user($user);
+
         return new UserProfileViewModel(
             $user,
             $subscriptions,
@@ -63,7 +66,8 @@ final class UserProfileService {
             array_map(
                 static fn($action): \stdClass => $action->to_object(),
                 $actionbuilder->build_for_profile($user, $digitalpayments)
-            )
+            ),
+            $intelligence
         );
     }
 
