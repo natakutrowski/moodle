@@ -18,8 +18,8 @@ use local_subscriptions\dashboard\cards\CrmDailyPrioritiesCard;
 
 final class Dashboard {
 
-    public static function render(): string {
-        $out = '';
+    public static function render(string $period = \local_subscriptions\dashboard\services\DashboardPeriod::TODAY): string {
+        $out = html_writer::start_div('local-subscriptions-dashboard-workspace');
 
         $out .= html_writer::tag(
             'p',
@@ -30,29 +30,41 @@ final class Dashboard {
         $out .= html_writer::start_div('local-subscriptions-dashboard-grid');
 
         $out .= html_writer::start_div('local-subscriptions-dashboard-main');
-        $out .= DashboardSection::render([
-            StatsCard::class,
-        ], 'd-block');
+        $out .= StatsCard::render($period);
 
-        $out .= DashboardSection::render([
-            CrmIntelligenceCard::class,
-        ], 'd-block');
+        $out .= html_writer::start_div('crm-dashboard-panels-grid');
 
-        $out .= DashboardSection::render([
-            CrmDailyPrioritiesCard::class,
-        ], 'd-block');
+        $out .= html_writer::div(
+            CrmIntelligenceCard::render(),
+            'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
+        );
 
-        $out .= DashboardSection::render([
-            CrmIntelligenceAlertsCard::class,
-        ], 'd-block');
+        $out .= html_writer::div(
+            AlertsCard::render(),
+            'crm-dashboard-panel-slot'
+        );
 
-        $out .= DashboardSection::render([
-            CrmFunnelCard::class,
-        ], 'd-block');
+        $out .= html_writer::div(
+            CrmDailyPrioritiesCard::render(),
+            'crm-dashboard-panel-slot'
+        );
 
-        $out .= DashboardSection::render([
-            CrmTrendsCard::class,
-        ], 'd-block');
+        $out .= html_writer::div(
+            CrmFunnelCard::render(),
+            'crm-dashboard-panel-slot'
+        );
+
+        $out .= html_writer::div(
+            CrmTrendsCard::render(),
+            'crm-dashboard-panel-slot'
+        );
+
+        $out .= html_writer::div(
+            CrmIntelligenceAlertsCard::render(),
+            'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
+        );
+
+        $out .= html_writer::end_div();
 
         $out .= DashboardSection::render([
             NavigationCard::class,
@@ -66,12 +78,12 @@ final class Dashboard {
         $out .= html_writer::start_div('local-subscriptions-dashboard-side');
         $out .= DashboardSection::render([
             TeamCard::class,
-            AlertsCard::class,
         ], 'd-block');
         $out .= html_writer::end_div();
 
         $out .= html_writer::end_div();
 
+        $out .= html_writer::end_div();
         return $out;
     }
 }

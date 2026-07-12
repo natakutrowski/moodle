@@ -28,4 +28,5 @@ final class CommandIcons {
     public const TRIGGER = '⚡';
     public const RULE = '📋';
     public const CRON = '⏱️';
+    public const HELP = '💡';
 }

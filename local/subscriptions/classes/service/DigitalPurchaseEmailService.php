@@ -21,6 +21,8 @@ final class DigitalPurchaseEmailService {
             MUST_EXIST
         );
 
+        self::require_paid_purchase($pr);
+
         $product = product_manager::get_product_by_id((int)$pr->productid, false);
 
         if (!$product) {
@@ -100,6 +102,8 @@ final class DigitalPurchaseEmailService {
             MUST_EXIST
         );
 
+        self::require_paid_purchase($pr);
+
         $oldtoken = $pr->download_token ?? '';
 
         $newtoken = product_manager::generate_download_token();
@@ -132,6 +136,8 @@ final class DigitalPurchaseEmailService {
             '*',
             MUST_EXIST
         );
+
+        self::require_paid_purchase($pr);
 
         if (empty($pr->download_token)) {
             $pr->download_token = product_manager::generate_download_token();
@@ -188,5 +194,15 @@ final class DigitalPurchaseEmailService {
         );
     }
 
+    private static function require_paid_purchase(\stdClass $purchase): void {
+        $status = strtoupper(trim((string)($purchase->status ?? '')));
+
+        if (!in_array($status, ['PAID', 'COMPLETED'], true)) {
+            throw new \moodle_exception(
+                'digital_purchase_access_action_requires_paid_status',
+                'local_subscriptions'
+            );
+        }
+    }
 
 }

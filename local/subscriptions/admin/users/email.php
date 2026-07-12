@@ -6,26 +6,58 @@ require_once($CFG->libdir . '/formslib.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminLog;
 use local_subscriptions\service\UserEmailService;
+use local_subscriptions\crm\user\UserProfileRepository;
+use local_subscriptions\crm\user\email\UserEmailPresetBuilder;
+use local_subscriptions\digital\repositories\DigitalPurchaseAdminActionRepository;
 
-global $DB, $PAGE, $OUTPUT;
+global $PAGE, $OUTPUT;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_USERS);
 
 $id = required_param('id', PARAM_INT);
 
-$user = $DB->get_record('user', [
-    'id' => $id,
-    'deleted' => 0,
-], '*', MUST_EXIST);
+$preset = UserEmailPresetBuilder::normalize(
+    optional_param('preset', '', PARAM_ALPHANUMEXT)
+);
 
-$url = new moodle_url('/local/subscriptions/admin/users/email.php', ['id' => $id]);
+$purchaseid = optional_param('purchaseid', 0, PARAM_INT);
+$returnurl = optional_param('returnurl', '', PARAM_LOCALURL);
+
+$userrepository = new UserProfileRepository();
+$user = $userrepository->get_user($id);
+
+$urlparams = [
+    'id' => $id,
+];
+
+if ($preset !== '') {
+    $urlparams['preset'] = $preset;
+}
+
+if ($purchaseid > 0) {
+    $urlparams['purchaseid'] = $purchaseid;
+}
+
+if ($returnurl !== '') {
+    $urlparams['returnurl'] = $returnurl;
+}
+
+$url = new moodle_url(
+    subscription_config::admin_user_email_page(),
+    $urlparams
+);
 
 $PAGE->set_context($context);
 $PAGE->set_url($url);
-$PAGE->set_title(get_string('crm_send_email', 'local_subscriptions') . ' - ' . fullname($user));
-$PAGE->set_heading(get_string('crm_send_email', 'local_subscriptions'));
+$PAGE->set_title(
+    get_string('crm_send_email', 'local_subscriptions') .
+    ' - ' .
+    fullname($user)
+);
+$PAGE->set_heading(
+    get_string('crm_send_email', 'local_subscriptions')
+);
 
 class local_subscriptions_crm_email_form extends moodleform {
 
@@ -35,44 +67,101 @@ class local_subscriptions_crm_email_form extends moodleform {
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
 
-        $mform->addElement('text', 'subject', get_string('subject', 'local_subscriptions'));
+        $mform->addElement(
+            'text',
+            'subject',
+            get_string('subject', 'local_subscriptions')
+        );
         $mform->setType('subject', PARAM_TEXT);
-        $mform->addRule('subject', null, 'required', null, 'client');
+        $mform->addRule(
+            'subject',
+            null,
+            'required',
+            null,
+            'client'
+        );
 
-        $mform->addElement('editor', 'message', get_string('message', 'local_subscriptions'), [
-            'rows' => 12,
-        ], [
-            'trusttext' => false,
-            'subdirs' => false,
-            'maxfiles' => 0,
-            'context' => context_system::instance(),
-        ]);
+        $mform->addElement(
+            'editor',
+            'message',
+            get_string('message', 'local_subscriptions'),
+            [
+                'rows' => 12,
+            ],
+            [
+                'trusttext' => false,
+                'subdirs' => false,
+                'maxfiles' => 0,
+                'context' => context_system::instance(),
+            ]
+        );
         $mform->setType('message', PARAM_RAW);
-        $mform->addRule('message', null, 'required', null, 'client');
+        $mform->addRule(
+            'message',
+            null,
+            'required',
+            null,
+            'client'
+        );
 
-        $mform->addElement('header', 'ctaheader', get_string('crm_email_button_optional', 'local_subscriptions'));
+        $mform->addElement(
+            'header',
+            'ctaheader',
+            get_string(
+                'crm_email_button_optional',
+                'local_subscriptions'
+            )
+        );
 
-        $mform->addElement('text', 'buttonlabel', get_string('crm_email_button_label', 'local_subscriptions'));
+        $mform->addElement(
+            'text',
+            'buttonlabel',
+            get_string(
+                'crm_email_button_label',
+                'local_subscriptions'
+            )
+        );
         $mform->setType('buttonlabel', PARAM_TEXT);
 
-        $mform->addElement('text', 'buttonurl', get_string('crm_email_button_url', 'local_subscriptions'));
+        $mform->addElement(
+            'text',
+            'buttonurl',
+            get_string(
+                'crm_email_button_url',
+                'local_subscriptions'
+            )
+        );
         $mform->setType('buttonurl', PARAM_URL);
 
-        $this->add_action_buttons(true, get_string('send', 'local_subscriptions'));
+        $this->add_action_buttons(
+            true,
+            get_string('send', 'local_subscriptions')
+        );
     }
 
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
 
-        $buttonlabel = trim((string)($data['buttonlabel'] ?? ''));
-        $buttonurl = trim((string)($data['buttonurl'] ?? ''));
+        $buttonlabel = trim(
+            (string)($data['buttonlabel'] ?? '')
+        );
+
+        $buttonurl = trim(
+            (string)($data['buttonurl'] ?? '')
+        );
 
         if ($buttonlabel !== '' && $buttonurl === '') {
-            $errors['buttonurl'] = get_string('crm_email_button_url_required', 'local_subscriptions');
+            $errors['buttonurl'] = get_string(
+                'crm_email_button_url_required',
+                'local_subscriptions'
+            );
         }
 
         if ($buttonurl !== '' && $buttonlabel === '') {
-            $errors['buttonlabel'] = get_string('crm_email_button_label_required', 'local_subscriptions');
+            $errors['buttonlabel'] = get_string(
+                'crm_email_button_label_required',
+                'local_subscriptions'
+            );
         }
 
         return $errors;
@@ -81,32 +170,101 @@ class local_subscriptions_crm_email_form extends moodleform {
 
 $form = new local_subscriptions_crm_email_form($url);
 
-$form->set_data([
+$formdata = [
     'id' => $id,
-]);
+];
+
+if (
+    $preset === UserEmailPresetBuilder::DIGITAL_PAYMENT_HELP &&
+    $purchaseid > 0
+) {
+    $purchaserepository =
+        new DigitalPurchaseAdminActionRepository();
+
+    $purchase = $purchaserepository->get_by_id($purchaseid);
+
+    $purchaseuserid = !empty($purchase->userid)
+        ? (int)$purchase->userid
+        : 0;
+
+    $purchaseemail = core_text::strtolower(
+        trim((string)($purchase->email ?? ''))
+    );
+
+    $useremail = core_text::strtolower(
+        trim((string)$user->email)
+    );
+
+    /*
+     * Protection contre la manipulation des paramètres :
+     * l’achat doit appartenir à cet utilisateur, par ID ou email.
+     */
+    if (
+        $purchaseuserid !== $id &&
+        ($purchaseemail === '' || $purchaseemail !== $useremail)
+    ) {
+        throw new moodle_exception(
+            'digital_payment_help_purchase_user_mismatch',
+            'local_subscriptions'
+        );
+    }
+
+    $emailpreset = (new UserEmailPresetBuilder())->build(
+        $preset,
+        $user,
+        $purchase
+    );
+
+    if ($emailpreset !== null) {
+        $formdata = array_merge(
+            $formdata,
+            $emailpreset->to_form_data()
+        );
+    }
+}
+
+$form->set_data($formdata);
+
+$fallbackurl = new moodle_url(
+    subscription_config::admin_user_view_page(),
+    ['id' => $id]
+);
+
+$redirecturl = $returnurl !== ''
+    ? new moodle_url($returnurl)
+    : $fallbackurl;
 
 if ($form->is_cancelled()) {
-    redirect(new moodle_url(subscription_config::admin_user_view_page(), ['id' => $id]));
+    redirect($redirecturl);
 }
 
 if ($data = $form->get_data()) {
     $userid = (int)$data->id;
-    $subject = (string)$data->subject;
+    $subject = trim((string)$data->subject);
     $body = (string)$data->message['text'];
-    $buttonlabel = $data->buttonlabel ?? null;
-    $buttonurl = $data->buttonurl ?? null;
+
+    $buttonlabel = trim(
+        (string)($data->buttonlabel ?? '')
+    );
+
+    $buttonurl = trim(
+        (string)($data->buttonurl ?? '')
+    );
 
     UserEmailService::send_custom_email(
         $userid,
         $subject,
         $body,
-        $buttonlabel,
-        $buttonurl
+        $buttonlabel !== '' ? $buttonlabel : null,
+        $buttonurl !== '' ? $buttonurl : null
     );
 
     redirect(
-        new moodle_url(subscription_config::admin_user_view_page(), ['id' => $id]),
-        get_string('crm_email_sent_successfully', 'local_subscriptions'),
+        $redirecturl,
+        get_string(
+            'crm_email_sent_successfully',
+            'local_subscriptions'
+        ),
         null,
         \core\output\notification::NOTIFY_SUCCESS
     );
@@ -115,14 +273,43 @@ if ($data = $form->get_data()) {
 echo $OUTPUT->header();
 
 echo html_writer::link(
-    new moodle_url(subscription_config::admin_user_view_page(), ['id' => $id]),
+    $redirecturl,
     '← ' . get_string('back'),
-    ['class' => 'btn btn-outline-secondary mb-3']
+    [
+        'class' => 'btn btn-outline-secondary mb-3',
+    ]
 );
 
+if ($preset === UserEmailPresetBuilder::DIGITAL_PAYMENT_HELP) {
+    echo html_writer::div(
+        html_writer::tag(
+            'strong',
+            get_string(
+                'digital_payment_help_email_context_title',
+                'local_subscriptions'
+            )
+        ) .
+        html_writer::div(
+            get_string(
+                'digital_payment_help_email_context_description',
+                'local_subscriptions'
+            ),
+            'small text-muted mt-1'
+        ),
+        'alert alert-info mb-4'
+    );
+}
+
 echo html_writer::div(
-    html_writer::tag('h4', fullname($user), ['class' => 'mb-1']) .
-    html_writer::div(s($user->email), 'text-muted'),
+    html_writer::tag(
+        'h4',
+        fullname($user),
+        ['class' => 'mb-1']
+    ) .
+    html_writer::div(
+        s($user->email),
+        'text-muted'
+    ),
     'card card-body mb-4'
 );
 

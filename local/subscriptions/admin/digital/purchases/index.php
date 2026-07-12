@@ -11,8 +11,14 @@ use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\AdminEntityLinks;
 use local_subscriptions\support\DigitalPresenter;
+use local_subscriptions\digital\DigitalPurchaseAdminFilter;
+use local_subscriptions\digital\repositories\DigitalPurchaseAdminRepository;
+use local_subscriptions\crm\user\email\UserEmailPresetBuilder;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 
 $context = AdminSecurity::require(Capabilities::VIEW_DIGITAL);
+$canmanagedigital = has_capability(Capabilities::MANAGE_DIGITAL, $context);
 
 $download = optional_param('download', 0, PARAM_BOOL);
 $checkprovider = optional_param('checkprovider', 0, PARAM_BOOL);
@@ -21,7 +27,14 @@ $page = optional_param('page', 0, PARAM_INT);
 $perpage = optional_param('perpage', 50, PARAM_INT);
 $perpage = max(25, min(200, $perpage));
 
-$statusfilter = optional_param('status', '', PARAM_ALPHANUMEXT);
+$statusfilter = DigitalPurchaseAdminFilter::normalize_status(
+    optional_param('status', '', PARAM_ALPHANUMEXT)
+);
+
+$issuefilter = DigitalPurchaseAdminFilter::normalize_issue(
+    optional_param('issue', '', PARAM_ALPHANUMEXT)
+);
+
 $reconcilepending = optional_param('reconcile_pending', 0, PARAM_BOOL);
 $providerpaidonly = optional_param('providerpaidonly', 0, PARAM_BOOL);
 $dbpaidonly = optional_param('dbpaidonly', 0, PARAM_BOOL);
@@ -63,6 +76,7 @@ $baseurlparams = [
     'dbpaidonly' => $dbpaidonly,
     'providerpaidonly' => $providerpaidonly,
     'perpage' => $perpage,
+    'issue' => $issuefilter,
 ];
 
 $PAGE->set_url(new moodle_url(subscription_config::digital_purchases_admin_page(), $baseurlparams));
@@ -71,109 +85,25 @@ $PAGE->set_heading(get_string('digital_purchases_title', 'local_subscriptions'))
 
 $lang = strtolower(substr(current_language(), 0, 2));
 
-$params = ['lang' => $lang];
-$where = '1=1';
+$repository = new DigitalPurchaseAdminRepository();
 
-$campususerexists = "
-    (
-        pr.userid IS NOT NULL
-        AND EXISTS (
-            SELECT 1
-              FROM {user} u1
-             WHERE u1.id = pr.userid
-               AND u1.deleted = 0
-               AND u1.suspended = 0
-        )
-    )
-    OR EXISTS (
-        SELECT 1
-          FROM {user} u2
-         WHERE " . $DB->sql_compare_text('u2.email') . " = " . $DB->sql_compare_text('pr.email') . "
-           AND u2.deleted = 0
-           AND u2.suspended = 0
-    )
-";
+$totalcount = $repository->count(
+    $lang,
+    $statusfilter,
+    $issuefilter,
+    $campususerfilter,
+    (bool)$dbpaidonly
+);
 
-if ($dbpaidonly) {
-    $where .= " AND pr.status IN ('paid', 'completed')";
-} else if ($statusfilter !== '') {
-    $where .= ' AND pr.status = :statusfilter';
-    $params['statusfilter'] = $statusfilter;
-}
-
-if ($campususerfilter === 'registered') {
-    $where .= " AND ({$campususerexists})";
-} else if ($campususerfilter === 'guest') {
-    $where .= " AND NOT ({$campususerexists})";
-}
-
-$sql = "
-    SELECT
-        pr.id,
-        pr.productid,
-        COALESCE(NULLIF(tcur.title, ''), NULLIF(tfr.title, ''), p.name) AS productname,
-        p.slug,
-        p.filename,
-        p.mobile_filename,
-
-        pr.firstname,
-        pr.lastname,
-        pr.email,
-        pr.buyer_lang,
-        pr.userid,
-        COALESCE(pr.userid, uemail.id) AS crmuserid,
-        CASE
-            WHEN ({$campususerexists}) THEN 1
-            ELSE 0
-        END AS hascampususer,
-
-        pr.price,
-        pr.currency,
-        pr.payment_provider,
-        pr.status,
-        pr.transactionid,
-        pr.sessionid,
-
-        pr.emailsent,
-        pr.receipt_sent,
-
-        pr.creation_date,
-        pr.payment_date,
-        pr.last_update,
-
-        pr.download_token,
-        pr.download_token_expires,
-        pr.last_error
-    FROM {subscription_digital_payment_request} pr
-    JOIN {subscription_digital_product} p ON p.id = pr.productid
-    LEFT JOIN {user} uemail
-        ON " . $DB->sql_compare_text('uemail.email') . " = " . $DB->sql_compare_text('pr.email') . "
-        AND uemail.deleted = 0
-        AND uemail.suspended = 0
-    LEFT JOIN {subscription_digital_product_lang} tcur
-        ON tcur.productid = p.id
-        AND tcur.lang = :lang
-    LEFT JOIN {subscription_digital_product_lang} tfr
-        ON tfr.productid = p.id
-        AND tfr.lang = 'fr'
-    WHERE {$where}
-    ORDER BY pr.creation_date DESC, pr.id DESC
-";
-
-$countsql = "
-    SELECT COUNT(1)
-      FROM {subscription_digital_payment_request} pr
-      JOIN {subscription_digital_product} p ON p.id = pr.productid
-     WHERE {$where}
-";
-
-$totalcount = $DB->count_records_sql($countsql, $params);
-
-if ($download) {
-    $records = $DB->get_records_sql($sql, $params);
-} else {
-    $records = $DB->get_records_sql($sql, $params, $page * $perpage, $perpage);
-}
+$records = $repository->get_records(
+    $lang,
+    $statusfilter,
+    $issuefilter,
+    $campususerfilter,
+    (bool)$dbpaidonly,
+    $download ? 0 : $page * $perpage,
+    $download ? 0 : $perpage
+);
 
 $providerstatuses = [];
 
@@ -324,6 +254,18 @@ if ($download) {
 echo $OUTPUT->header();
 echo AdminNavigation::back_button();
 
+echo CrmPageHeader::render(
+    get_string(
+        'digital_purchases_title',
+        'local_subscriptions'
+    ),
+    get_string(
+        'digital_purchases_help_description',
+        'local_subscriptions'
+    ),
+    HelpContext::DIGITAL_PURCHASES
+);
+
 echo html_writer::start_div('card card-body mb-4');
 
 echo html_writer::start_tag('form', [
@@ -375,6 +317,39 @@ echo html_writer::div(
 );
 
 echo html_writer::end_tag('form');
+
+echo html_writer::start_div('crm-user-filter-pills mt-3');
+
+foreach (['email_error', 'expired_token'] as $issue) {
+    $classes = 'crm-user-filter-pill';
+
+    if ($issue === $issuefilter) {
+        $classes .= ' active';
+    }
+
+    echo html_writer::link(
+        new moodle_url(subscription_config::digital_purchases_admin_page(), array_merge($baseurlparams, [
+            'issue' => $issue,
+            'status' => '',
+            'page' => 0,
+        ])),
+        DigitalPurchaseAdminFilter::issue_label($issue),
+        ['class' => $classes]
+    );
+}
+
+if ($issuefilter !== '') {
+    echo html_writer::link(
+        new moodle_url(subscription_config::digital_purchases_admin_page(), array_merge($baseurlparams, [
+            'issue' => '',
+            'page' => 0,
+        ])),
+        get_string('digital_purchase_filter_clear_issue', 'local_subscriptions'),
+        ['class' => 'crm-user-filter-pill']
+    );
+}
+
+echo html_writer::end_div();
 
 echo html_writer::start_div('mt-3 d-flex flex-wrap gap-2');
 
@@ -472,6 +447,7 @@ $table->head = [
     get_string('digital_purchases_payment_or_creation_date', 'local_subscriptions'),
     get_string('digital_purchases_emails_status', 'local_subscriptions'),
     get_string('digital_success_download', 'local_subscriptions'),
+    get_string('digital_purchases_actions', 'local_subscriptions'),
 ];
 
 $table->attributes['class'] = 'generaltable table table-striped';
@@ -490,7 +466,17 @@ $table->colclasses = [
     'col-date',
     'col-emails',
     'col-download',
+    'col-actions',
 ];
+
+$currentlisturl = new moodle_url(
+    subscription_config::digital_purchases_admin_page(),
+    array_merge($baseurlparams, [
+        'page' => $page,
+    ])
+);
+
+$returnurl = $currentlisturl->out_as_local_url(false);
 
 foreach ($records as $r) {
     $downloadlink = '—';
@@ -556,6 +542,158 @@ foreach ($records as $r) {
         ? AdminEntityLinks::user((int)$r->crmuserid, $userlabel)
         : $userlabel; 
 
+    $status = strtolower(trim((string)($r->status ?? '')));
+
+    $ispaid = in_array($status, ['paid', 'completed'], true);
+    $ispaymentissue = in_array($status, ['pending', 'failed'], true);
+
+    $actionscell = '—';
+
+    if ($canmanagedigital) {
+        $actions = [];
+
+        /*
+        * Paiement non validé :
+        * aucune action d’accès n’est autorisée.
+        */
+        if ($ispaymentissue) {
+            if (!empty($r->crmuserid)) {
+                $actions[] = html_writer::link(
+                    new moodle_url(
+                        subscription_config::admin_user_email_page(),
+                        [
+                            'id' => (int)$r->crmuserid,
+                            'preset' => UserEmailPresetBuilder::DIGITAL_PAYMENT_HELP,
+                            'purchaseid' => (int)$r->id,
+                            'returnurl' => $returnurl,
+                        ]
+                    ),
+                    get_string(
+                        'digital_purchase_action_contact_buyer',
+                        'local_subscriptions'
+                    ),
+                    [
+                        'class' => 'btn btn-sm btn-outline-primary',
+                    ]
+                );
+            }
+
+            $actions[] = html_writer::link(
+                new moodle_url(
+                    subscription_config::digital_purchase_cancel_admin_page(),
+                    [
+                        'id' => (int)$r->id,
+                        'sesskey' => sesskey(),
+                        'returnurl' => $returnurl,
+                    ]
+                ),
+                get_string('digital_purchase_action_cancel', 'local_subscriptions'),
+                [
+                    'class' => 'btn btn-sm btn-outline-danger',
+                    'onclick' => "return confirm('" .
+                        addslashes(
+                            get_string(
+                                'digital_purchase_action_cancel_confirm',
+                                'local_subscriptions'
+                            )
+                        ) .
+                        "');",
+                ]
+            );
+        }
+
+        /*
+        * Paiement confirmé :
+        * les actions d’accès sont alors autorisées.
+        */
+        if ($ispaid) {
+            if (empty($r->emailsent) || !empty($r->last_error)) {
+                $actions[] = html_writer::link(
+                    new moodle_url(
+                        subscription_config::digital_purchase_resend_email_admin_page(),
+                        [
+                            'id' => (int)$r->id,
+                            'sesskey' => sesskey(),
+                            'returnurl' => $returnurl,
+                        ]
+                    ),
+                    get_string('digital_purchase_action_resend_email', 'local_subscriptions'),
+                    [
+                        'class' => 'btn btn-sm btn-outline-primary',
+                        'onclick' => "return confirm('" .
+                            addslashes(
+                                get_string(
+                                    'digital_purchase_action_resend_email_confirm',
+                                    'local_subscriptions'
+                                )
+                            ) .
+                            "');",
+                    ]
+                );
+            }
+
+            $tokenexpired = !empty($r->download_token_expires)
+                && (int)$r->download_token_expires < time();
+
+            if (empty($r->download_token) || $tokenexpired) {
+                $actions[] = html_writer::link(
+                    new moodle_url(
+                        subscription_config::digital_purchase_regenerate_token_admin_page(),
+                        [
+                            'id' => (int)$r->id,
+                            'sesskey' => sesskey(),
+                            'returnurl' => $returnurl,
+                        ]
+                    ),
+                    get_string('digital_purchase_action_regenerate_token', 'local_subscriptions'),
+                    [
+                        'class' => 'btn btn-sm btn-outline-secondary',
+                        'onclick' => "return confirm('" .
+                            addslashes(
+                                get_string(
+                                    'digital_purchase_action_regenerate_token_confirm',
+                                    'local_subscriptions'
+                                )
+                            ) .
+                            "');",
+                    ]
+                );
+            }
+
+            if (!empty($r->download_token) && !$tokenexpired) {
+                $actions[] = html_writer::link(
+                    new moodle_url(
+                        subscription_config::digital_purchase_extend_token_admin_page(),
+                        [
+                            'id' => (int)$r->id,
+                            'sesskey' => sesskey(),
+                            'returnurl' => $returnurl,
+                        ]
+                    ),
+                    get_string('digital_purchase_action_extend_token', 'local_subscriptions'),
+                    [
+                        'class' => 'btn btn-sm btn-outline-secondary',
+                        'onclick' => "return confirm('" .
+                            addslashes(
+                                get_string(
+                                    'digital_purchase_action_extend_token_confirm',
+                                    'local_subscriptions'
+                                )
+                            ) .
+                            "');",
+                    ]
+                );
+            }
+        }
+
+        if ($actions) {
+            $actionscell = html_writer::div(
+                implode('', $actions),
+                'digital-purchase-row-actions'
+            );
+        }
+    }
+        
     $table->data[] = [
         html_writer::link(
             new moodle_url(subscription_config::digital_purchase_view_admin_page(), ['id' => $r->id]),
@@ -577,6 +715,7 @@ foreach ($records as $r) {
         $datecell,
         implode(html_writer::empty_tag('br'), $emails),
         $downloadlink,
+        $actionscell,
     ];
 }
 
@@ -593,6 +732,22 @@ echo html_writer::tag('style', '
     .col-date { width: 115px; }
     .col-emails { width: 65px; text-align:center; font-size:18px; }
     .col-download { width: 100px; }
+    .col-actions {
+        width: 170px;
+    }
+
+    .digital-purchase-row-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.35rem;
+    }
+
+    .digital-purchase-row-actions .btn {
+        width: 100%;
+        white-space: normal;
+        line-height: 1.2;
+    }
 
     .generaltable td,
     .generaltable th {

@@ -21,31 +21,95 @@ final class AdminNavigation {
     public static function quick_actions(): string {
         $items = [];
 
-        if (AdminSecurity::can(Capabilities::MANAGE_SUBSCRIPTIONS)) {
+        if (
+            AdminSecurity::can(
+                Capabilities::MANAGE_SUBSCRIPTIONS
+            )
+        ) {
             $items[] = html_writer::link(
-                new moodle_url(subscription_config::user_subscriptions_page()),
-                '📋 ' . get_string('manage_user_subscriptions', 'local_subscriptions'),
-                ['class' => 'btn btn-outline-primary']
+                new moodle_url(
+                    subscription_config::user_subscriptions_page()
+                ),
+                '📋 ' . get_string(
+                    'manage_user_subscriptions',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-outline-primary',
+                ]
             );
 
             $items[] = html_writer::link(
-                new moodle_url(subscription_config::add_manual_subscription_page()),
-                '➕ ' . get_string('add_subscription', 'local_subscriptions'),
-                ['class' => 'btn btn-outline-primary']
+                new moodle_url(
+                    subscription_config::add_manual_subscription_page()
+                ),
+                '➕ ' . get_string(
+                    'add_subscription',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-outline-primary',
+                ]
             );
         }
 
-        if (AdminSecurity::can(Capabilities::MANAGE_CONFIGURATION)) {
+        if (
+            AdminSecurity::can(
+                Capabilities::MANAGE_CONFIGURATION
+            )
+        ) {
             $items[] = html_writer::link(
-                new moodle_url(subscription_config::manage_page()),
-                '🧩 ' . get_string('admin_card_plans_title', 'local_subscriptions'),
-                ['class' => 'btn btn-outline-secondary']
+                new moodle_url(
+                    subscription_config::manage_page()
+                ),
+                '🧩 ' . get_string(
+                    'admin_card_plans_title',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-outline-secondary',
+                ]
             );
 
             $items[] = html_writer::link(
-                new moodle_url(subscription_config::automation_rules_admin_page()),
-                '🤖 ' . get_string('crm_automations', 'local_subscriptions'),
-                ['class' => 'btn btn-outline-secondary']
+                new moodle_url(
+                    subscription_config::automation_rules_admin_page()
+                ),
+                '🤖 ' . get_string(
+                    'crm_automations',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-outline-secondary',
+                ]
+            );
+        }
+
+        /*
+        * The Help Center is available to any administrator who can
+        * access the CRM Dashboard.
+        */
+        if (
+            AdminSecurity::can(
+                Capabilities::VIEW_DASHBOARD
+            )
+        ) {
+            $items[] = html_writer::link(
+                new moodle_url(
+                    subscription_config::admin_help_page()
+                ),
+                '💡 ' . get_string(
+                    'crm_help_title',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-outline-secondary',
+                ]
             );
         }
 

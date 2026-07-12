@@ -36,6 +36,7 @@ final class AdminEvents {
     public const DIGITAL_PURCHASE_CREATED = 'digital.purchase.created';
     public const DIGITAL_PURCHASE_PAID = 'digital.purchase.paid';
     public const DIGITAL_PURCHASE_FAILED = 'digital.purchase.failed';
+    public const DIGITAL_PURCHASE_CANCELLED = 'digital.purchase.cancelled';
     public const DIGITAL_LINK_RESENT = 'digital.link.resent';
 
     public const DIGITAL_TOKEN_REGENERATED = 'digital.token.regenerated';
@@ -77,6 +78,7 @@ final class AdminEvents {
             self::DIGITAL_PURCHASE_CREATED,
             self::DIGITAL_PURCHASE_PAID,
             self::DIGITAL_PURCHASE_FAILED,
+            self::DIGITAL_PURCHASE_CANCELLED,
             self::DIGITAL_LINK_RESENT,
             self::DIGITAL_TOKEN_REGENERATED,
             self::DIGITAL_TOKEN_EXTENDED,

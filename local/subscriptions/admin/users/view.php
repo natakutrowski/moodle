@@ -8,6 +8,8 @@ use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\service\UserProfileService;
 use local_subscriptions\output\UserProfileRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 
 global $PAGE, $OUTPUT;
 
@@ -35,6 +37,18 @@ echo html_writer::link(
     new moodle_url(subscription_config::admin_users_page()),
     '← ' . get_string('back'),
     ['class' => 'btn btn-outline-secondary mb-3 ms-2']
+);
+
+echo CrmPageHeader::render(
+    get_string(
+        'crm_user_profile',
+        'local_subscriptions'
+    ),
+    get_string(
+        'crm_user_profile_help_description',
+        'local_subscriptions'
+    ),
+    HelpContext::USER_PROFILE
 );
 
 echo UserProfileRenderer::render($profile);

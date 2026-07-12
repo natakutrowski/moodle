@@ -1575,14 +1575,7 @@ $string['command_center_action_invalid_url'] = 'Недействительный
 $string['command_center_confirm'] = 'Подтвердить';
 $string['command_center_cancel'] = 'Отмена';
 $string['command_center_danger_confirm'] = 'Важное действие';
-$string['command_center_group_intents'] = 'Commandes';
-$string['command_center_action_execute'] = 'Exécuter';
 
-$string['command_intent_open_user'] = 'Ouvrir utilisateur';
-$string['command_intent_open_purchase'] = 'Ouvrir achat';
-$string['command_intent_open_product'] = 'Ouvrir produit';
-$string['command_intent_open_subscription'] = 'Ouvrir abonnement';
-$string['command_intent_direct_entity_subtitle'] = 'Commande directe depuis le Command Center.';
 $string['command_center_group_intents'] = 'Команды';
 $string['command_center_action_execute'] = 'Выполнить';
 
@@ -1775,3 +1768,703 @@ $string['command_crm_priority_desc'] = 'Обнаружен CRM-приорите�
 $string['crm_recommendation_action_permission_denied'] = 'Недостаточно прав для выполнения этого действия.';
 $string['crm_recommendation_action_unsupported'] = 'Это рекомендованное действие пока не поддерживается.';
 $string['crm_recommendation_action_open_user_profile'] = 'Открыть профиль пользователя';
+
+$string['dashboard_period_today'] = 'Сегодня';
+$string['dashboard_period_week'] = 'Эта неделя';
+$string['dashboard_period_month'] = 'Этот месяц';
+$string['dashboard_command_center_title'] = 'Центр управления';
+$string['crm_user_filter_all'] = 'Все пользователи';
+$string['crm_user_filter_hot_lead'] = 'Горячие лиды';
+$string['crm_user_filter_at_risk'] = 'Профили в зоне риска';
+$string['crm_user_filter_vip'] = 'VIP-клиенты';
+$string['crm_user_filter_cold_user'] = 'Неактивные пользователи';
+$string['crm_user_filter_trial_to_purchase'] = 'Пробные доступы для конверсии';
+$string['crm_user_filter_upgrade_subscription'] = 'Возможности апгрейда';
+$string['crm_user_active_filter'] = 'Активный фильтр: {$a}';
+
+$string['dashboard_issues_title'] = 'Требует внимания';
+$string['dashboard_issues_subtitle'] = 'Пункты, которые требуют проверки или действия администратора.';
+
+$string['dashboard_issue_pending_digital_title'] = 'Ожидающие цифровые платежи';
+$string['dashboard_issue_pending_digital_desc'] = 'Платёжные заявки созданы, но ещё не подтверждены.';
+$string['dashboard_issue_failed_digital_title'] = 'Неуспешные цифровые платежи';
+$string['dashboard_issue_failed_digital_desc'] = 'Отклонённые или прерванные платежи для проверки.';
+$string['dashboard_issue_email_error_title'] = 'Emails не отправлены';
+$string['dashboard_issue_email_error_desc'] = 'Цифровые покупки с ошибкой отправки email.';
+$string['dashboard_issue_expired_token_title'] = 'Истёкшие ссылки на скачивание';
+$string['dashboard_issue_expired_token_desc'] = 'Покупки с истёкшим токеном скачивания.';
+
+$string['dashboard_issue_open_queue'] = 'Открыть очередь';
+$string['dashboard_issue_review_failures'] = 'Проверить';
+$string['dashboard_issue_resend_emails'] = 'Отправить снова';
+$string['dashboard_issue_regenerate_tokens'] = 'Обновить';
+$string['digital_purchase_filter_no_issue'] = 'Без проблемы';
+$string['digital_purchase_filter_issue_email_error'] = 'Ошибка email';
+$string['digital_purchase_filter_issue_expired_token'] = 'Ссылка истекла';
+$string['digital_purchase_filter_clear_issue'] = 'Убрать фильтр проблемы';
+$string['digital_purchase_action_resend_email'] = 'Отправить email снова';
+$string['digital_purchase_action_regenerate_token'] = 'Обновить ссылку';
+$string['digital_purchase_action_extend_token'] = 'Продлить ссылку';
+$string['digital_purchase_action_email_resent'] = 'Email успешно отправлен повторно.';
+$string['digital_purchase_action_token_regenerated'] = 'Ссылка на скачивание обновлена.';
+$string['digital_purchase_action_failed'] = 'Действие невозможно: {$a}';
+$string['digital_purchases_actions'] = 'Действия';
+
+$string['digital_purchase_action_resend_email_confirm'] = 'Повторно отправить письмо с доступом к этой покупке?';
+$string['digital_purchase_action_regenerate_token_confirm'] = 'Создать новую ссылку для скачивания? Старая ссылка больше не будет работать.';
+$string['digital_purchase_action_extend_token_confirm'] = 'Продлить эту ссылку для скачивания на 30 дней?';
+$string['digital_purchase_access_action_requires_paid_status'] =
+    'Это действие доступно только для подтверждённых платежей.';
+$string['digital_payment_help_email_subject'] =
+    'Возникли трудности с оплатой?';
+
+$string['digital_payment_help_email_body'] =
+    '<p>Здравствуйте, {$a->firstname}!</p>
+    <p>Мы заметили, что попытка оплаты не была завершена.</p>
+    <p>Возникли ли у вас трудности или нужна помощь, чтобы завершить покупку?</p>
+    <p>Вы можете просто ответить на это письмо — наша команда с радостью поможет.</p>
+    <p>С уважением,<br>Команда CampusFR</p>';
+$string['digital_purchase_action_contact_buyer'] = 'Связаться с покупателем';
+$string['digital_purchase_action_cancel'] = 'Отменить';
+$string['digital_purchase_action_cancel_confirm'] =
+    'Отменить эту попытку оплаты? Она больше не будет отображаться в списке требующих внимания.';
+$string['digital_purchase_cancel_success'] =
+    'Попытка оплаты отменена.';
+
+$string['digital_purchase_cancel_invalid_status'] =
+    'Эту покупку нельзя отменить, поскольку её текущий статус — {$a}.';
+$string['digital_payment_help_email_context_title'] =
+    'Связаться по поводу незавершённой оплаты';
+
+$string['digital_payment_help_email_context_description'] =
+    'Тема и текст письма уже заполнены. Вы можете изменить их перед отправкой.';
+
+$string['digital_payment_help_purchase_user_mismatch'] =
+    'Эта цифровая покупка не соответствует выбранному пользователю.';
+
+$string['dashboard_issue_open_purchases'] = 'Открыть покупки';
+$string['dashboard_issue_review_queue'] = 'Проверить очередь';
+
+$string['dashboard_issues_empty_title'] = 'Всё под контролем';
+$string['dashboard_issues_empty_description'] =
+    'Нет платежей или цифровых доступов, требующих вашего внимания.';
+
+$string['dashboard_issue_email_error_title'] =
+    'Письма с доступом не отправлены';
+
+$string['dashboard_issue_email_error_desc'] =
+    'Оплаченные покупки, для которых не удалось отправить письмо с доступом.';
+
+$string['dashboard_issue_expired_token_title'] =
+    'Истёкшие ссылки для скачивания';
+
+$string['dashboard_issue_expired_token_desc'] =
+    'Оплаченные покупки, срок действия ссылки для скачивания которых истёк.';
+
+$string['admin_event_unknown'] =
+    'Административное событие';
+
+$string['admin_event_email_custom_sent'] =
+    'Персональное письмо отправлено';
+
+$string['admin_event_digital_purchase_created'] =
+    'Создана попытка цифровой оплаты';
+
+$string['admin_event_digital_purchase_paid'] =
+    'Цифровая оплата подтверждена';
+
+$string['admin_event_digital_purchase_failed'] =
+    'Ошибка цифровой оплаты';
+
+$string['admin_event_digital_purchase_cancelled'] =
+    'Попытка оплаты отменена';
+
+$string['admin_event_digital_link_resent'] =
+    'Письмо с цифровым доступом отправлено повторно';
+
+$string['admin_event_digital_token_regenerated'] =
+    'Ссылка для скачивания обновлена';
+
+$string['admin_event_digital_token_extended'] =
+    'Срок действия ссылки продлён';
+
+$string['admin_event_user_suspended'] =
+    'Профиль Moodle приостановлен';
+
+$string['admin_event_user_reactivated'] =
+    'Профиль Moodle восстановлен';
+
+$string['crm_help_title'] =
+    'Справочный центр CRM';
+
+$string['crm_help_subtitle'] =
+    'Познакомьтесь с возможностями CRM CampusFR и быстро находите ответы на свои вопросы.';
+
+$string['crm_help_search_placeholder'] =
+    'Поиск по документации…';
+
+$string['crm_help_search_results'] =
+    'Результаты поиска по запросу «{$a}»';
+
+$string['crm_help_no_results'] =
+    'По вашему запросу ничего не найдено.';
+
+$string['crm_help_article_count'] =
+    '{$a} статей';
+
+$string['crm_help_category_getting_started'] =
+    'Начало работы';
+
+$string['crm_help_category_getting_started_desc'] =
+    'Познакомьтесь с CRM и быстро начните эффективно работать.';
+
+$string['crm_help_category_daily_work'] =
+    'Ежедневная работа';
+
+$string['crm_help_category_daily_work_desc'] =
+    'Основные инструменты для ежедневной работы с CRM.';
+
+$string['crm_help_category_users'] =
+    'Пользователи CRM';
+
+$string['crm_help_category_users_desc'] =
+    'Поиск пользователей, профили, фильтры, сегменты, теги и действия.';
+
+$string['crm_help_category_digital'] =
+    'Цифровые покупки';
+
+$string['crm_help_category_digital_desc'] =
+    'Платежи, доступы, электронные письма, ссылки для скачивания и обработка проблем.';
+
+$string['crm_help_category_automation'] =
+    'Автоматизации';
+
+$string['crm_help_category_automation_desc'] =
+    'Создание и понимание правил автоматизации CRM.';
+
+$string['crm_help_category_intelligence'] =
+    'CRM Intelligence';
+
+$string['crm_help_category_intelligence_desc'] =
+    'Оценки, риски, возможности, рекомендации и приоритеты.';
+
+$string['crm_help_category_shortcuts'] =
+    'Горячие клавиши';
+
+$string['crm_help_category_shortcuts_desc'] =
+    'Экономьте время с помощью Command Center и сочетаний клавиш.';
+
+$string['crm_help_category_developer'] =
+    'Документация разработчика';
+
+$string['crm_help_category_developer_desc'] =
+    'Внутренняя архитектура, соглашения и расширение CRM.';
+
+$string['crm_help_article_overview_title'] =
+    'Знакомство с CRM CampusFR';
+
+$string['crm_help_article_overview_summary'] =
+    'Обзор Dashboard, Command Center и основных модулей CRM.';
+
+$string['crm_help_article_overview_content'] =
+    '<p>CRM CampusFR объединяет пользователей, подписки, цифровые покупки, автоматизации и инструменты интеллектуального анализа.</p>';
+
+$string['crm_help_article_dashboard_periods_title'] =
+    'Использование периодов Dashboard';
+
+$string['crm_help_article_dashboard_periods_summary'] =
+    'Переключайтесь между «Сегодня», «Эта неделя» и «Этот месяц».';
+
+$string['crm_help_article_dashboard_periods_content'] =
+    '<p>При смене периода все показатели Dashboard автоматически пересчитываются для выбранного интервала.</p>';
+
+$string['crm_help_article_user_filters_title'] =
+    'Фильтрация пользователей с помощью CRM Intelligence';
+
+$string['crm_help_article_user_filters_summary'] =
+    'Просматривайте горячих лидов, пользователей группы риска, VIP и возможности.';
+
+$string['crm_help_article_user_filters_content'] =
+    '<p>Интеллектуальные фильтры позволяют сразу открыть сегменты, обнаруженные движком CRM Intelligence.</p>';
+
+$string['crm_help_article_digital_issues_title'] =
+    'Обработка проблем с цифровыми платежами';
+
+$string['crm_help_article_digital_issues_summary'] =
+    'Разберитесь с платежами Pending, Failed, Cancelled и проблемами доступа.';
+
+$string['crm_help_article_digital_issues_content'] =
+    '<p>Неподтверждённый платёж никогда не должен предоставлять доступ. Администратор может связаться с клиентом или отменить попытку оплаты.</p>';
+
+$string['crm_help_article_shortcuts_title'] =
+    'Использование Command Center';
+
+$string['crm_help_article_shortcuts_summary'] =
+    'Быстро находите и запускайте основные действия CRM.';
+
+$string['crm_help_article_shortcuts_content'] =
+    '<p>Нажмите Ctrl или Cmd + K, чтобы мгновенно открыть Command Center.</p>';
+
+$string['crm_help_article_developer_architecture_title'] =
+    'Архитектура CRM';
+
+$string['crm_help_article_developer_architecture_summary'] =
+    'Понять устройство repositories, services, renderers и правила безопасности.';
+
+$string['crm_help_article_developer_architecture_content'] =
+    '<p>SQL находится только в repositories, бизнес-логика — в services, а отображение — в renderers.</p>';
+
+$string['crm_help_all_categories'] = 'Все категории';
+$string['crm_help_category_empty'] =
+    'В этой категории пока нет статей.';
+$string['crm_help_read_article'] = 'Читать статью';
+$string['crm_help_home'] = 'Справочный центр';
+$string['crm_help_article_navigation'] =
+    'Навигация по документации';
+
+$string['crm_help_article_not_found'] =
+    'Запрошенная статья не найдена.';
+$string['crm_help_article_read_error'] =
+    'Не удалось прочитать содержимое статьи.';
+$string['crm_help_article_content_missing'] =
+    'Не найдено содержимое статьи «{$a}».';
+$string['crm_help_content_directory_missing'] =
+    'Каталог документации CRM не найден.';
+
+$string['crm_context_help_trigger'] =
+    'Помощь по этой странице';
+
+$string['crm_context_help_title'] =
+    'Нужна помощь?';
+
+$string['crm_context_help_description'] =
+    'Эти статьи относятся к странице, которую вы сейчас просматриваете.';
+
+$string['crm_context_help_empty'] =
+    'Для этой страницы пока нет справочных статей.';
+
+$string['crm_context_help_open_center'] =
+    'Открыть справочный центр';
+
+$string['admin_dashboard_description'] =
+    'Управляйте CRM, отслеживайте показатели и обрабатывайте приоритетные задачи.';
+
+$string['crm_users_explorer_description'] =
+    'Ищите, фильтруйте и анализируйте пользователей CRM.';
+
+$string['digital_purchases_help_description'] =
+    'Просматривайте цифровые платежи, обрабатывайте проблемы и управляйте доступами.';
+
+$string['crm_user_profile_help_description'] =
+    'Просматривайте историю, подписки, покупки и рекомендации для этого пользователя.';
+
+$string['crm_onboarding_title'] =
+    'Начало работы с CRM';
+
+$string['crm_onboarding_description'] =
+    'Выполните эти шаги, чтобы познакомиться с основными инструментами и быстро освоить CRM.';
+
+$string['crm_onboarding_progress_label'] =
+    '{$a->completed} из {$a->total} этапов';
+
+$string['crm_onboarding_mark_complete'] =
+    'Отметить как выполненное';
+
+$string['crm_onboarding_mark_incomplete'] =
+    'Открыть снова';
+
+$string['crm_onboarding_complete_title'] =
+    'Знакомство с CRM завершено';
+
+$string['crm_onboarding_complete_desc'] =
+    'Вы познакомились с основными возможностями CRM CampusFR.';
+
+$string['crm_onboarding_restart'] =
+    'Начать checklist заново';
+
+$string['crm_onboarding_restart_confirm'] =
+    'Сбросить весь прогресс знакомства с CRM?';
+
+$string['crm_onboarding_reset_success'] =
+    'Прогресс знакомства с CRM сброшен.';
+
+$string['crm_onboarding_invalid_step'] =
+    'Неизвестный этап знакомства с CRM.';
+
+$string['crm_onboarding_invalid_action'] =
+    'Недопустимое действие onboarding.';
+
+$string['crm_onboarding_step_dashboard_title'] =
+    'Познакомиться с Dashboard';
+
+$string['crm_onboarding_step_dashboard_desc'] =
+    'Просмотреть показатели, приоритеты и задачи, требующие внимания.';
+
+$string['crm_onboarding_step_command_center_title'] =
+    'Попробовать Command Center';
+
+$string['crm_onboarding_step_command_center_desc'] =
+    'Быстро найти пользователя или административное действие.';
+
+$string['crm_onboarding_step_users_title'] =
+    'Изучить пользователей CRM';
+
+$string['crm_onboarding_step_users_desc'] =
+    'Использовать поиск и открыть полный профиль CRM.';
+
+$string['crm_onboarding_step_intelligence_title'] =
+    'Изучить фильтры Intelligence';
+
+$string['crm_onboarding_step_intelligence_desc'] =
+    'Просмотреть горячих лидов и профили группы риска.';
+
+$string['crm_onboarding_step_digital_title'] =
+    'Просмотреть цифровые покупки';
+
+$string['crm_onboarding_step_digital_desc'] =
+    'Разобраться со статусами платежей и доступными действиями.';
+
+$string['crm_onboarding_step_automations_title'] =
+    'Познакомиться с автоматизациями';
+
+$string['crm_onboarding_step_automations_desc'] =
+    'Просмотреть правила автоматизации и их историю.';
+
+$string['crm_onboarding_step_help_title'] =
+    'Открыть справочный центр';
+
+$string['crm_onboarding_step_help_desc'] =
+    'Найти функциональную документацию CRM.';
+
+$string['crm_onboarding_step_architecture_title'] =
+    'Изучить правила архитектуры';
+
+$string['crm_onboarding_step_architecture_desc'] =
+    'Понять технические соглашения плагина.';
+
+$string['crm_help_guides_title'] =
+    'Практические руководства';
+
+$string['crm_help_guides_description'] =
+    'Следуйте простым сценариям для выполнения основных задач CRM.';
+
+$string['crm_help_guide_step_count'] =
+    '{$a} этапов';
+
+$string['crm_help_guide_progress'] =
+    '{$a->completed} из {$a->total} этапов';
+
+$string['crm_help_guide_complete_step'] =
+    'Отметить этап как выполненный';
+
+$string['crm_help_guide_reopen_step'] =
+    'Открыть снова';
+
+$string['crm_help_guide_complete'] =
+    'Вы завершили это руководство.';
+
+$string['crm_help_guide_reset'] =
+    'Сбросить руководство';
+
+$string['crm_help_guide_reset_confirm'] =
+    'Сбросить прогресс этого руководства?';
+
+$string['crm_help_guide_reset_success'] =
+    'Прогресс руководства был сброшен.';
+
+$string['crm_help_guide_not_found'] =
+    'Запрошенное руководство не найдено.';
+
+$string['crm_help_guide_step_not_found'] =
+    'Этот этап руководства не найден.';
+
+$string['crm_help_guide_invalid_action'] =
+    'Недопустимое действие для руководства.';
+
+$string['crm_help_guide_dashboard_title'] =
+    'Начало работы с Dashboard';
+
+$string['crm_help_guide_dashboard_desc'] =
+    'Разберитесь с показателями, приоритетами и задачами, требующими внимания.';
+
+$string['crm_help_guide_dashboard_period_title'] =
+    'Выбрать период';
+
+$string['crm_help_guide_dashboard_period_desc'] =
+    'Переключайтесь между «Сегодня», «Эта неделя» и «Этот месяц».';
+
+$string['crm_help_guide_dashboard_kpis_title'] =
+    'Изучить показатели';
+
+$string['crm_help_guide_dashboard_kpis_desc'] =
+    'Проанализируйте новых пользователей, подписки, покупки и выручку.';
+
+$string['crm_help_guide_dashboard_issues_title'] =
+    'Проверить задачи, требующие внимания';
+
+$string['crm_help_guide_dashboard_issues_desc'] =
+    'Откройте очереди платежей или доступов, требующих действий администратора.';
+
+$string['crm_help_guide_dashboard_priority_title'] =
+    'Открыть приоритетный профиль';
+
+$string['crm_help_guide_dashboard_priority_desc'] =
+    'Изучите объяснение оценки и выберите подходящее действие.';
+
+$string['crm_help_guide_open_dashboard'] =
+    'Открыть Dashboard';
+
+$string['crm_help_guide_digital_title'] =
+    'Обработать цифровой платёж';
+
+$string['crm_help_guide_digital_desc'] =
+    'Проверить, связаться с покупателем или отменить попытку оплаты.';
+
+$string['crm_help_guide_digital_open_title'] =
+    'Открыть очередь платежей';
+
+$string['crm_help_guide_digital_open_desc'] =
+    'Начните с платежей со статусом pending или failed.';
+
+$string['crm_help_guide_digital_verify_title'] =
+    'Проверить фактический статус';
+
+$string['crm_help_guide_digital_verify_desc'] =
+    'Перед любым действием убедитесь, что платёж не был подтверждён.';
+
+$string['crm_help_guide_digital_contact_title'] =
+    'Связаться с покупателем';
+
+$string['crm_help_guide_digital_contact_desc'] =
+    'Используйте заранее заполненное сообщение, чтобы предложить помощь.';
+
+$string['crm_help_guide_digital_cancel_title'] =
+    'Отменить попытку оплаты';
+
+$string['crm_help_guide_digital_cancel_desc'] =
+    'Отменяйте только ненужные попытки со статусом pending или failed.';
+
+$string['crm_help_guide_open_pending'] =
+    'Показать платежи pending';
+
+$string['crm_help_guide_hot_lead_title'] =
+    'Проанализировать горячего лида';
+
+$string['crm_help_guide_hot_lead_desc'] =
+    'Разберитесь с оценкой и выберите лучшее следующее действие.';
+
+$string['crm_help_guide_hot_lead_open_title'] =
+    'Открыть сегмент';
+
+$string['crm_help_guide_hot_lead_open_desc'] =
+    'Показать список горячих лидов.';
+
+$string['crm_help_guide_hot_lead_score_title'] =
+    'Изучить оценку';
+
+$string['crm_help_guide_hot_lead_score_desc'] =
+    'Просмотрите факторы, которые повысили потенциал лида.';
+
+$string['crm_help_guide_hot_lead_history_title'] =
+    'Изучить timeline';
+
+$string['crm_help_guide_hot_lead_history_desc'] =
+    'Проверьте недавние покупки, подписки и взаимодействия.';
+
+$string['crm_help_guide_hot_lead_action_title'] =
+    'Выбрать действие';
+
+$string['crm_help_guide_hot_lead_action_desc'] =
+    'Связывайтесь с потенциальным клиентом только тогда, когда это оправдано контекстом.';
+
+$string['crm_help_guide_open_hot_leads'] =
+    'Показать горячих лидов';
+
+$string['crm_help_guide_command_title'] =
+    'Освоить Command Center';
+
+$string['crm_help_guide_command_desc'] =
+    'Быстро выполняйте поиск и навигацию по CRM.';
+
+$string['crm_help_guide_command_open_title'] =
+    'Открыть Command Center';
+
+$string['crm_help_guide_command_open_desc'] =
+    'Используйте Ctrl или Cmd + K.';
+
+$string['crm_help_guide_command_search_title'] =
+    'Найти объект';
+
+$string['crm_help_guide_command_search_desc'] =
+    'Найдите пользователя, покупку, подписку или продукт.';
+
+$string['crm_help_guide_command_keyboard_title'] =
+    'Навигация с клавиатуры';
+
+$string['crm_help_guide_command_keyboard_desc'] =
+    'Используйте стрелки, Enter и Escape.';
+
+$string['crm_help_guide_command_favorites_title'] =
+    'Использовать избранное и недавние команды';
+
+$string['crm_help_guide_command_favorites_desc'] =
+    'Быстро находите часто используемые команды.';
+
+$string['crm_help_guide_profile_title'] =
+    'Разобраться с профилем пользователя';
+
+$string['crm_help_guide_profile_desc'] =
+    'Изучите всю доступную информацию перед принятием решения.';
+
+$string['crm_help_guide_profile_identity_title'] =
+    'Проверить данные пользователя';
+
+$string['crm_help_guide_profile_identity_desc'] =
+    'Проверьте контактные данные и статус аккаунта.';
+
+$string['crm_help_guide_profile_timeline_title'] =
+    'Изучить timeline';
+
+$string['crm_help_guide_profile_timeline_desc'] =
+    'Восстановите важные события в хронологическом порядке.';
+
+$string['crm_help_guide_profile_intelligence_title'] =
+    'Разобраться с CRM Intelligence';
+
+$string['crm_help_guide_profile_intelligence_desc'] =
+    'Изучите оценку, сегмент и рекомендации.';
+
+$string['crm_help_guide_profile_action_title'] =
+    'Выполнить действие';
+
+$string['crm_help_guide_profile_action_desc'] =
+    'Выберите быстрое действие, подходящее текущему контексту.';
+$string['crm_context_help_articles_title'] =
+    'Рекомендуемые статьи';
+
+$string['crm_context_help_guides_title'] =
+    'Практические руководства';
+$string['command_help_center_title'] =
+    'Открыть справочный центр CRM';
+
+$string['command_help_center_subtitle'] =
+    'Документация, руководства и контекстная помощь';
+$string['crm_help_diagnostics_title'] =
+    'Диагностика справочного центра';
+
+$string['crm_help_diagnostics_description'] =
+    'Проверьте согласованность статей, переводов, Markdown-файлов, категорий и руководств CRM.';
+
+$string['crm_help_diagnostics_successes'] =
+    'Успешные проверки';
+
+$string['crm_help_diagnostics_warnings'] =
+    'Предупреждения';
+
+$string['crm_help_diagnostics_errors'] =
+    'Ошибки';
+
+$string['crm_help_diagnostics_valid'] =
+    'Справочный центр корректен и готов к использованию.';
+
+$string['crm_help_diagnostics_invalid'] =
+    'Справочный центр содержит ошибки, которые необходимо исправить.';
+
+$string['crm_help_open_diagnostics'] =
+    'Проверить документацию';
+
+$string['crm_user_sort_name_asc'] = 'Имя: от А до Я';
+$string['crm_user_sort_name_desc'] = 'Имя: от Я до А';
+$string['crm_user_sort_score_desc'] = 'Наивысшая оценка CRM';
+$string['crm_user_sort_risk_desc'] = 'Наивысший риск';
+$string['crm_user_sort_last_access_desc'] = 'Недавняя активность';
+$string['crm_user_sort_created_desc'] = 'Недавняя регистрация';
+
+$string['crm_user_account_status_all'] = 'Все аккаунты';
+$string['crm_user_account_status_active'] = 'Активные аккаунты';
+$string['crm_user_account_status_suspended'] = 'Приостановленные аккаунты';
+
+$string['crm_user_account_active'] = 'Активен';
+$string['crm_user_account_suspended'] = 'Приостановлен';
+$string['crm_user_account_status'] = 'Статус аккаунта';
+
+$string['crm_user_explorer_result_count'] = 'пользователей';
+$string['crm_user_explorer_active_filters'] = 'Активных фильтров: {$a}';
+$string['crm_user_explorer_clear_filters'] = 'Сбросить фильтры';
+$string['crm_user_explorer_search_label'] = 'Поиск';
+$string['crm_user_country_all'] = 'Все страны';
+$string['crm_user_tag_all'] = 'Все теги';
+$string['crm_user_sort_label'] = 'Сортировка';
+$string['crm_user_per_page'] = 'На странице';
+$string['crm_user_apply_filters'] = 'Применить фильтры';
+
+$string['crm_user_column_user'] = 'Пользователь';
+$string['crm_user_column_tags'] = 'Теги';
+$string['crm_user_column_score'] = 'Оценка CRM';
+$string['crm_user_column_risk'] = 'Риск';
+$string['crm_user_column_intelligence'] = 'Intelligence';
+
+$string['crm_user_explorer_empty_title'] = 'Пользователи не найдены';
+$string['crm_user_explorer_empty_description'] =
+    'Измените фильтры или поисковый запрос, чтобы увидеть другие профили.';
+
+$string['crm_user_score_level_unknown'] = 'Не проанализирован';
+$string['crm_user_score_level_very_low'] = 'Очень низкий';
+$string['crm_user_score_level_low'] = 'Низкий';
+$string['crm_user_score_level_medium'] = 'Средний';
+$string['crm_user_score_level_high'] = 'Высокий';
+$string['crm_user_score_level_excellent'] = 'Отличный';
+$string['country'] = 'Страна';
+$string['crm_user_tags'] = 'Теги';
+
+$string['crm_user_column_user'] = 'Пользователь';
+$string['crm_user_column_tags'] = 'Теги';
+$string['crm_user_column_score'] = 'Оценка CRM';
+$string['crm_user_column_risk'] = 'Риск';
+$string['crm_user_column_intelligence'] = 'Intelligence';
+$string['crm_user_column_subscriptions'] = 'Подписки';
+$string['crm_user_column_purchases'] = 'Цифровые покупки';
+$string['crm_user_column_country'] = 'Страна';
+$string['crm_user_column_registered'] = 'Регистрация';
+$string['crm_user_column_last_access'] = 'Последняя активность';
+
+$string['crm_user_configure_columns'] = 'Настроить столбцы';
+$string['crm_user_columns_saved'] = 'Настройки столбцов сохранены.';
+$string['crm_user_columns_reset'] = 'Столбцы по умолчанию восстановлены.';
+
+$string['crm_user_save_view'] = 'Сохранить представление';
+$string['crm_user_view_name_placeholder'] = 'Название представления';
+$string['crm_user_view_name_required'] =
+    'Необходимо указать название представления.';
+$string['crm_user_view_limit_reached'] =
+    'Нельзя сохранить более {$a} представлений.';
+$string['crm_user_view_saved'] = 'Представление сохранено.';
+$string['crm_user_view_deleted'] = 'Представление удалено.';
+$string['crm_user_view_delete'] = 'Удалить представление';
+$string['crm_user_view_delete_confirm'] =
+    'Навсегда удалить это сохранённое представление?';
+
+$string['crm_user_explorer_invalid_action'] =
+    'Недопустимое действие User Explorer.';
+
+$string['crm_user_advanced_filters'] = 'Расширенные фильтры';
+$string['crm_user_score_min'] = 'Минимальная оценка';
+$string['crm_user_score_max'] = 'Максимальная оценка';
+$string['crm_user_risk_min'] = 'Минимальный риск';
+$string['crm_user_risk_max'] = 'Максимальный риск';
+
+$string['crm_user_presence_all'] = 'Все';
+$string['crm_user_presence_yes'] = 'Да';
+$string['crm_user_presence_no'] = 'Нет';
+
+$string['crm_user_has_subscription'] = 'Есть подписка';
+$string['crm_user_has_purchase'] = 'Есть цифровая покупка';
+
+$string['crm_user_activity_filter'] = 'Последняя активность';
+$string['crm_user_activity_all'] = 'Любая активность';
+$string['crm_user_activity_7days'] = 'За последние 7 дней';
+$string['crm_user_activity_30days'] = 'За последние 30 дней';
+$string['crm_user_activity_90days'] = 'За последние 90 дней';
+$string['crm_user_activity_never'] = 'Никогда не входил';
+
+$string['crm_user_export_csv'] = 'Экспорт в CSV';

@@ -13,14 +13,26 @@ $context = AdminSecurity::require(Capabilities::MANAGE_DIGITAL);
 require_sesskey();
 
 $id = required_param('id', PARAM_INT);
+$returnurl = optional_param('returnurl', '', PARAM_LOCALURL);
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url(subscription_config::digital_purchase_extend_token_admin_page(), ['id' => $id]));
+$PAGE->set_url(new moodle_url(
+    subscription_config::digital_purchase_extend_token_admin_page(),
+    [
+        'id' => $id,
+        'returnurl' => $returnurl,
+    ]
+));
 
 DigitalPurchaseEmailService::extend_token($id, 30);
 
 redirect(
-    new moodle_url(subscription_config::digital_purchase_view_admin_page(), ['id' => $id]),
+    $returnurl !== ''
+        ? new moodle_url($returnurl)
+        : new moodle_url(
+            subscription_config::digital_purchase_view_admin_page(),
+            ['id' => $id]
+        ),
     get_string('digital_purchase_token_extended_success', 'local_subscriptions'),
     null,
     \core\output\notification::NOTIFY_SUCCESS

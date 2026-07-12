@@ -192,6 +192,10 @@ class subscription_config {
         return self::plugin_path() . 'admin/digital/purchases/extend_token.php';
     }
 
+    public static function digital_purchase_cancel_admin_page(): string {
+        return self::plugin_path() . 'admin/digital/purchases/cancel.php';
+    }
+
     public static function digital_purchase_check_provider_admin_page(): string {
         return self::plugin_path() . 'admin/digital/purchases/check_provider.php';
     }
@@ -238,6 +242,54 @@ class subscription_config {
     public static function automation_toggle_admin_page(): string {
         return self::plugin_path() . 'admin/automations/toggle.php';
     }    
+
+    public static function admin_help_page(): string {
+        return self::plugin_path() . 'admin/help/index.php';
+    }
+
+    public static function admin_help_article_page(): string {
+        return self::plugin_path() . 'admin/help/article.php';
+    }
+
+    public static function admin_help_onboarding_action_page(): string {
+        return self::plugin_path() .
+            'admin/help/onboarding_action.php';
+    }
+
+    public static function admin_help_guide_page(): string {
+        return self::plugin_path() .
+            'admin/help/guide.php';
+    }
+
+    public static function admin_help_guide_action_page(): string {
+        return self::plugin_path() .
+            'admin/help/guide_action.php';
+    }
+
+    public static function admin_help_diagnostics_page(): string {
+        return self::plugin_path() .
+            'admin/help/diagnostics.php';
+    }
+    
+    public static function admin_user_explorer_action_page(): string {
+        return self::plugin_path() .
+            'admin/users/explorer_action.php';
+    }
+
+    public static function admin_user_explorer_export_page(): string {
+        return self::plugin_path() .
+            'admin/users/export.php';
+    }
+
+    public static function plugin_dir(): string {
+        global $CFG;
+
+        return $CFG->dirroot . '/local/subscriptions/';
+    }
+
+    public static function help_content_dir(): string {
+        return self::plugin_dir() . 'help/';
+    }
 
     // -- Buttons --
     public static function button_admin_dashboard(): string {

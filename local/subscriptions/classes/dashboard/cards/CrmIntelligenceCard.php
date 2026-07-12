@@ -28,20 +28,57 @@ final class CrmIntelligenceCard implements DashboardCard {
         $out .= html_writer::start_div('row mb-3');
 
         $cards = [
-            [get_string('crm_intelligence_dashboard_analysed_users', 'local_subscriptions'), $overview->analysedUsers],
-            [get_string('crm_intelligence_dashboard_hot_leads', 'local_subscriptions'), $overview->hotLeads],
-            [get_string('crm_intelligence_dashboard_at_risk', 'local_subscriptions'), $overview->atRisk],
-            [get_string('crm_intelligence_dashboard_vip', 'local_subscriptions'), $overview->vip],
-            [get_string('crm_intelligence_dashboard_trial_opportunities', 'local_subscriptions'), $overview->trialOpportunities],
-            [get_string('crm_intelligence_dashboard_upgrade_opportunities', 'local_subscriptions'), $overview->upgradeOpportunities],
+            [
+                get_string('crm_intelligence_dashboard_analysed_users', 'local_subscriptions'),
+                $overview->analysedUsers,
+                '',
+            ],
+            [
+                get_string('crm_intelligence_dashboard_hot_leads', 'local_subscriptions'),
+                $overview->hotLeads,
+                'hot_lead',
+            ],
+            [
+                get_string('crm_intelligence_dashboard_at_risk', 'local_subscriptions'),
+                $overview->atRisk,
+                'at_risk',
+            ],
+            [
+                get_string('crm_intelligence_dashboard_vip', 'local_subscriptions'),
+                $overview->vip,
+                'vip',
+            ],
+            [
+                get_string('crm_intelligence_dashboard_trial_opportunities', 'local_subscriptions'),
+                $overview->trialOpportunities,
+                'trial_to_purchase',
+            ],
+            [
+                get_string('crm_intelligence_dashboard_upgrade_opportunities', 'local_subscriptions'),
+                $overview->upgradeOpportunities,
+                'upgrade_subscription',
+            ],
         ];
 
-        foreach ($cards as [$label, $value]) {
+        foreach ($cards as [$label, $value, $filter]) {
+            $content =
+                html_writer::div((string)$value, 'crm-stat-number') .
+                html_writer::div(s($label), 'text-muted small');
+
+            if ($filter !== '') {
+                $url = new moodle_url(subscription_config::admin_users_page(), [
+                    'intelligence' => $filter,
+                ]);
+
+                $content = html_writer::link($url, $content, [
+                    'class' => 'crm-intelligence-metric-link',
+                ]);
+            }
+
             $out .= html_writer::div(
                 html_writer::div(
-                    html_writer::div((string)$value, 'crm-stat-number') .
-                    html_writer::div(s($label), 'text-muted small'),
-                    'card card-body local-subscriptions-dashboard-card'
+                    $content,
+                    'card card-body local-subscriptions-dashboard-card crm-intelligence-metric-card'
                 ),
                 'col-md-6 col-xl-4 mb-3'
             );
