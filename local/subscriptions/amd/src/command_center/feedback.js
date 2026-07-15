@@ -13,6 +13,35 @@ define([], function() {
         state.dialog.setAttribute('role', 'dialog');
         state.dialog.setAttribute('aria-modal', 'true');
 
+        var dialogId =
+            'campusfr-command-dialog-' +
+            Math.random()
+                .toString(36)
+                .slice(2);
+
+        var titleId =
+            dialogId + '-title';
+
+        var messageId =
+            dialogId + '-message';
+
+        state.dialog.id = dialogId;
+
+        state.dialog.setAttribute(
+            'aria-label',
+            state.dialogLabel
+        );
+
+        state.dialog.setAttribute(
+            'aria-labelledby',
+            titleId
+        );
+
+        state.dialog.setAttribute(
+            'aria-describedby',
+            messageId
+        );
+
         state.dialog.innerHTML = '' +
             '<div class="campusfr-command-dialog-panel">' +
                 '<div class="campusfr-command-dialog-title"></div>' +
@@ -27,6 +56,8 @@ define([], function() {
 
         state.dialogTitle = state.dialog.querySelector('.campusfr-command-dialog-title');
         state.dialogMessage = state.dialog.querySelector('.campusfr-command-dialog-message');
+        state.dialogTitle.id = titleId;
+        state.dialogMessage.id = messageId;
         state.dialogConfirm = state.dialog.querySelector('.campusfr-command-dialog-confirm');
         state.dialogCancel = state.dialog.querySelector('.campusfr-command-dialog-cancel');
 
@@ -50,10 +81,13 @@ define([], function() {
                 closeDialog(state);
             }
 
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                confirmDialog(state);
+            if (e.key === 'Tab') {
+                trapDialogFocus(
+                    state,
+                    e
+                );
             }
+
         });
     }
 
@@ -63,8 +97,25 @@ define([], function() {
         }
 
         state.notification = document.createElement('div');
-        state.notification.className = 'campusfr-command-notification';
+        state.notification.className =
+            'campusfr-command-notification';
+
         state.notification.hidden = true;
+
+        state.notification.setAttribute(
+            'role',
+            'status'
+        );
+
+        state.notification.setAttribute(
+            'aria-live',
+            'polite'
+        );
+
+        state.notification.setAttribute(
+            'aria-atomic',
+            'true'
+        );
 
         state.modal.appendChild(state.notification);
     }
@@ -74,6 +125,7 @@ define([], function() {
 
         window.clearTimeout(state.notificationTimer);
 
+        state.notification.textContent = '';
         state.notification.textContent = message || '';
         state.notification.classList.remove('is-error', 'is-success');
         state.notification.classList.add(type === 'error' ? 'is-error' : 'is-success');
@@ -107,6 +159,53 @@ define([], function() {
         window.setTimeout(function() {
             state.dialogConfirm.focus();
         }, 0);
+    }
+
+    function trapDialogFocus(
+        state,
+        event
+    ) {
+        if (!state.dialog) {
+            return;
+        }
+
+        var focusable =
+            state.dialog.querySelectorAll(
+                'button:not([disabled]), ' +
+                '[href], ' +
+                'input:not([disabled]), ' +
+                'select:not([disabled]), ' +
+                'textarea:not([disabled]), ' +
+                '[tabindex]:not([tabindex="-1"])'
+            );
+
+        if (!focusable.length) {
+            return;
+        }
+
+        var first = focusable[0];
+        var last =
+            focusable[
+                focusable.length - 1
+            ];
+
+        if (
+            event.shiftKey &&
+            document.activeElement === first
+        ) {
+            event.preventDefault();
+            last.focus();
+
+            return;
+        }
+
+        if (
+            !event.shiftKey &&
+            document.activeElement === last
+        ) {
+            event.preventDefault();
+            first.focus();
+        }
     }
 
     function confirmDialog(state) {

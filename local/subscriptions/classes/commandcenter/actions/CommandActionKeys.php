@@ -19,4 +19,5 @@ final class CommandActionKeys {
     public const PURCHASE_REGENERATE_TOKEN = 'purchase_regenerate_token';
     public const PURCHASE_EXTEND_TOKEN = 'purchase_extend_token';
     public const PURCHASE_CHECK_PROVIDER = 'purchase_check_provider';
+    public const INBOX_SYNC = 'inbox_sync';
 }

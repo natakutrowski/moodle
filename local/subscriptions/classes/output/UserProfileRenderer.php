@@ -13,6 +13,7 @@ use local_subscriptions\support\DigitalPresenter;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\AdminEntityLinks;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\crm\inbox\rendering\InboxValuePresentation;
 
 final class UserProfileRenderer {
 
@@ -31,6 +32,8 @@ final class UserProfileRenderer {
         $out .= self::stats($profile);
 
         $out .= self::intelligence($profile);
+
+        $out .= self::inbox($profile);
 
         $out .= self::section(
             get_string('crm_section_subscriptions', 'local_subscriptions'),
@@ -80,8 +83,22 @@ final class UserProfileRenderer {
             'crm-hero-email text-muted'
         );
 
+        $badges = self::crm_status_badge(
+            $stats
+        );
+
+        if (
+            !empty($profile->inbox) &&
+            !empty($profile->inbox->available)
+        ) {
+            $badges .= ' ' .
+                self::inbox_hero_badge(
+                    $profile->inbox
+                );
+        }
+
         $identity .= html_writer::div(
-            self::crm_status_badge($stats),
+            $badges,
             'mt-3'
         );
 
@@ -295,6 +312,49 @@ final class UserProfileRenderer {
         );
     }
 
+    private static function inbox_hero_badge(
+        \stdClass $inbox
+    ): string {
+        $count = (int)(
+            $inbox->unreadcount
+            ?? 0
+        );
+
+        if ($count > 0) {
+            $label = get_string(
+                'crm_user_inbox_badge_unread',
+                'local_subscriptions',
+                $count
+            );
+
+            $class = 'bg-danger';
+        } else if (
+            !empty(
+                $inbox->conversationcount
+            )
+        ) {
+            $label = get_string(
+                'crm_user_inbox_badge',
+                'local_subscriptions'
+            );
+
+            $class = 'bg-primary';
+        } else {
+            $label = get_string(
+                'crm_user_inbox_badge_empty',
+                'local_subscriptions'
+            );
+
+            $class =
+                'bg-light text-dark border';
+        }
+
+        return html_writer::span(
+            '📥 ' . $label,
+            'badge ' . $class
+        );
+    }
+
     private static function stats_total_spent(\stdClass $stats): string {
         $parts = [];
 
@@ -307,6 +367,475 @@ final class UserProfileRenderer {
         }
 
         return $parts ? implode(' · ', $parts) : '-';
+    }
+
+    private static function inbox(
+        \stdClass $profile
+    ): string {
+        if (
+            !Capabilities::can_view_inbox() ||
+            empty($profile->inbox) ||
+            empty($profile->inbox->available)
+        ) {
+            return '';
+        }
+
+        $inbox = $profile->inbox;
+
+        $content =
+            self::inbox_summary_cards($inbox);
+
+        $content .=
+            self::inbox_last_message($inbox);
+
+        $content .=
+            self::inbox_recent_threads(
+                $inbox->recentthreads ?? []
+            );
+
+        $actions = html_writer::link(
+            new moodle_url(
+                subscription_config::
+                    admin_inbox_page(),
+                [
+                    'q' =>
+                        (string)$profile->user->email,
+                ]
+            ),
+            get_string(
+                'crm_user_inbox_open_all',
+                'local_subscriptions'
+            ),
+            [
+                'class' =>
+                    'btn btn-primary btn-sm',
+            ]
+        );
+
+        $content .= html_writer::div(
+            $actions,
+            'crm-user-inbox-actions mt-3'
+        );
+
+        return self::section(
+            get_string(
+                'crm_user_inbox_section',
+                'local_subscriptions'
+            ),
+            $content,
+            'crm-section-inbox'
+        );
+    }
+
+    private static function inbox_summary_cards(
+        \stdClass $inbox
+    ): string {
+        $cards = [
+            [
+                'icon' => '💬',
+                'label' => get_string(
+                    'crm_user_inbox_conversations',
+                    'local_subscriptions'
+                ),
+                'value' => (int)(
+                    $inbox->conversationcount
+                    ?? 0
+                ),
+            ],
+            [
+                'icon' => '📂',
+                'label' => get_string(
+                    'crm_user_inbox_open_conversations',
+                    'local_subscriptions'
+                ),
+                'value' => (int)(
+                    $inbox->openconversationcount
+                    ?? 0
+                ),
+            ],
+            [
+                'icon' => '📥',
+                'label' => get_string(
+                    'crm_user_inbox_unread',
+                    'local_subscriptions'
+                ),
+                'value' => (int)(
+                    $inbox->unreadcount
+                    ?? 0
+                ),
+            ],
+            [
+                'icon' => '💡',
+                'label' => get_string(
+                    'crm_user_inbox_ai_suggestions',
+                    'local_subscriptions'
+                ),
+                'value' => (int)(
+                    $inbox->aisuggestioncount
+                    ?? 0
+                ),
+            ],
+        ];
+
+        $out = html_writer::start_tag(
+            'div',
+            [
+                'class' =>
+                    'row crm-user-inbox-stats',
+
+                'role' => 'list',
+
+                'aria-label' =>
+                    get_string(
+                        'crm_user_inbox_statistics_label',
+                        'local_subscriptions'
+                    ),
+            ]
+        );
+
+        foreach ($cards as $card) {
+            $out .= html_writer::tag(
+                'div',
+                html_writer::div(
+                    html_writer::span(
+                        $card['icon'],
+                        'crm-user-inbox-stat-icon',
+                        [
+                            'aria-hidden' => 'true',
+                        ]
+                    ) .
+                    html_writer::div(
+                        (string)$card['value'],
+                        'crm-user-inbox-stat-value'
+                    ) .
+                    html_writer::div(
+                        $card['label'],
+                        'crm-user-inbox-stat-label'
+                    ),
+                    'crm-user-inbox-stat card h-100'
+                ),
+                [
+                    'class' =>
+                        'col-6 col-lg-3 mb-3',
+
+                    'role' => 'listitem',
+
+                    'aria-label' =>
+                        get_string(
+                            'crm_user_inbox_stat_aria',
+                            'local_subscriptions',
+                            (object)[
+                                'label' =>
+                                    $card['label'],
+
+                                'value' =>
+                                    $card['value'],
+                            ]
+                        ),
+                ]
+            );
+        }
+
+        $out .= html_writer::end_tag(
+            'div'
+        );
+
+        return $out;
+    }
+
+    private static function inbox_last_message(
+        \stdClass $inbox
+    ): string {
+        if (
+            empty($inbox->lastthreadid) ||
+            empty($inbox->lastmessageat)
+        ) {
+            return html_writer::div(
+                get_string(
+                    'crm_user_inbox_no_conversations',
+                    'local_subscriptions'
+                ),
+                'alert alert-light border mb-3'
+            );
+        }
+
+        $direction =
+            (string)(
+                $inbox->lastdirection
+                ?? ''
+            );
+
+        $directionlabel =
+            $direction === 'outbound'
+                ? get_string(
+                    'crm_user_inbox_last_sent',
+                    'local_subscriptions'
+                )
+                : get_string(
+                    'crm_user_inbox_last_received',
+                    'local_subscriptions'
+                );
+
+        $subject = trim(
+            (string)(
+                $inbox->lastsubject
+                ?? ''
+            )
+        );
+
+        if ($subject === '') {
+            $subject = get_string(
+                'crm_inbox_no_subject',
+                'local_subscriptions'
+            );
+        }
+
+        $url = new moodle_url(
+            subscription_config::
+                admin_inbox_thread_page(),
+            [
+                'id' =>
+                    (int)$inbox->lastthreadid,
+            ]
+        );
+
+        $content =
+            html_writer::div(
+                html_writer::span(
+                    $direction === 'outbound'
+                        ? '📤'
+                        : '📥',
+                    'mr-2',
+                    [
+                        'aria-hidden' => 'true',
+                    ]
+                ) .
+                html_writer::span(
+                    $directionlabel,
+                    'text-muted small'
+                ),
+                'mb-1'
+            );
+
+        $content .= html_writer::link(
+            $url,
+            format_string($subject),
+            [
+                'class' =>
+                    'crm-user-inbox-last-subject',
+            ]
+        );
+
+        $content .= html_writer::div(
+            AdminFormatter::datetime(
+                (int)$inbox->lastmessageat
+            ),
+            'text-muted small mt-1'
+        );
+
+        return html_writer::div(
+            html_writer::tag(
+                'h4',
+                get_string(
+                    'crm_user_inbox_last_email',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'h6 mb-3',
+                ]
+            ) .
+            $content,
+            'crm-user-inbox-last-message mb-4'
+        );
+    }
+
+    private static function inbox_recent_threads(
+        array $threads
+    ): string {
+        if (!$threads) {
+            return '';
+        }
+
+        $out = html_writer::tag(
+            'h4',
+            get_string(
+                'crm_user_inbox_recent_conversations',
+                'local_subscriptions'
+            ),
+            [
+                'class' => 'h6 mb-3',
+            ]
+        );
+
+        $out .= html_writer::start_div(
+            'crm-user-inbox-thread-list'
+        );
+
+        foreach ($threads as $thread) {
+            $subject = trim(
+                (string)(
+                    $thread->subject
+                    ?: $thread->lastmessagesubject
+                    ?: ''
+                )
+            );
+
+            if ($subject === '') {
+                $subject = get_string(
+                    'crm_inbox_no_subject',
+                    'local_subscriptions'
+                );
+            }
+
+            $url = new moodle_url(
+                subscription_config::
+                    admin_inbox_thread_page(),
+                [
+                    'id' => (int)$thread->id,
+                ]
+            );
+
+            $badges =
+                self::inbox_thread_status_badge(
+                    (string)$thread->status
+                );
+
+            $badges .= ' ' .
+                self::inbox_thread_priority_badge(
+                    (string)$thread->priority
+                );
+
+            if (
+                !empty($thread->unreadcount)
+            ) {
+                $badges .= ' ' .
+                    html_writer::span(
+                        get_string(
+                            'crm_user_inbox_unread_badge',
+                            'local_subscriptions',
+                            (int)$thread->unreadcount
+                        ),
+                        'badge bg-danger'
+                    );
+            }
+
+            $contact = trim(
+                (string)(
+                    $thread->contactname
+                    ?: $thread->contactemail
+                    ?: ''
+                )
+            );
+
+            $meta = [];
+
+            if ($contact !== '') {
+                $meta[] = s($contact);
+            }
+
+            if (!empty($thread->lastmessageat)) {
+                $meta[] =
+                    AdminFormatter::datetime(
+                        (int)$thread->lastmessageat
+                    );
+            }
+
+            $out .= html_writer::div(
+                html_writer::div(
+                    html_writer::div(
+                        html_writer::link(
+                            $url,
+                            format_string($subject),
+                            [
+                                'class' =>
+                                    'crm-user-inbox-thread-title',
+                            ]
+                        ) .
+                        html_writer::div(
+                            $badges,
+                            'crm-user-inbox-thread-badges mt-2'
+                        ),
+                        'crm-user-inbox-thread-main'
+                    ) .
+                    html_writer::div(
+                        implode(' · ', $meta),
+                        'crm-user-inbox-thread-meta text-muted small'
+                    ),
+                    'crm-user-inbox-thread-inner'
+                ),
+                'crm-user-inbox-thread'
+            );
+        }
+
+        $out .= html_writer::end_div();
+
+        return $out;
+    }
+
+    private static function
+        inbox_thread_status_badge(
+            string $status
+        ): string {
+        $class = match ($status) {
+            'open' =>
+                'bg-primary',
+
+            'pending' =>
+                'bg-warning text-dark',
+
+            'resolved' =>
+                'bg-success',
+
+            'closed' =>
+                'bg-secondary',
+
+            'spam' =>
+                'bg-danger',
+
+            default =>
+                'bg-light text-dark border',
+        };
+
+        return html_writer::span(
+            s(
+                InboxValuePresentation::
+                    status_label($status)
+            ),
+            'badge ' . $class
+        );
+    }
+
+    private static function
+        inbox_thread_priority_badge(
+            string $priority
+        ): string {
+        $class = match ($priority) {
+            'low' =>
+                'bg-light text-dark border',
+
+            'normal' =>
+                'bg-secondary',
+
+            'high' =>
+                'bg-warning text-dark',
+
+            'urgent' =>
+                'bg-danger',
+
+            default =>
+                'bg-light text-dark border',
+        };
+
+        return html_writer::span(
+            s(
+                InboxValuePresentation::
+                    priority_label(
+                        $priority
+                    )
+            ),
+            'badge ' . $class
+        );
     }
 
     private static function subscriptions_content(array $subscriptions): string {
@@ -1047,6 +1576,17 @@ final class UserProfileRenderer {
     }
 
     private static function timeline_category(\stdClass $item): string {
+
+        if (
+            str_starts_with(
+                (string)($item->type ?? ''),
+                'inbox_'
+            ) ||
+            (string)($item->rawtype ?? '') ===
+                'inbox_message'
+        ) {
+            return 'emails';
+        }
 
         $type = (string)($item->type ?? '');
 

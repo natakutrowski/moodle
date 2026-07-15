@@ -77,21 +77,68 @@ final class AdminActionProvider implements CommandProviderInterface, CommandCont
         return array_slice($results, 0, $limit);
     }
 
-    private function build_result(array $action, int $score): array {
-        return CommandResult::create()
+    private function build_result(
+        array $action,
+        int $score
+    ): array {
+        $result = CommandResult::create()
             ->icon($action['icon'])
             ->type(CommandTypes::action())
-            ->group('actions', get_string('command_center_group_actions', 'local_subscriptions'))
-            ->action_label(get_string('command_center_action_open', 'local_subscriptions'))
+            ->group(
+                'actions',
+                get_string(
+                    'command_center_group_actions',
+                    'local_subscriptions'
+                )
+            )
+            ->action_label(
+                $action['actionlabel']
+                    ?? get_string(
+                        'command_center_action_open',
+                        'local_subscriptions'
+                    )
+            )
             ->shortcut('>')
             ->title($action['title'])
             ->subtitle($action['subtitle'])
             ->url($action['url'])
-            ->action($action['actionkey'] ?? 'open_url', $action['payload'] ?? ['url' => $action['url']])
+            ->action(
+                $action['actionkey']
+                    ?? 'open_url',
+                $action['payload']
+                    ?? [
+                        'url' => $action['url'],
+                    ]
+            )
             ->score($score)
-            ->meta('provider', 'admin_actions')
-            ->meta('entity', 'action')
-            ->to_array();
+            ->meta(
+                'provider',
+                'admin_actions'
+            )
+            ->meta(
+                'entity',
+                'action'
+            );
+
+        if (
+            !empty(
+                $action['confirmation']
+            )
+        ) {
+            $result->confirmation(
+                (string)$action['confirmation']
+            );
+        }
+
+        if (
+            !empty(
+                $action['danger']
+            )
+        ) {
+            $result->danger();
+        }
+
+        return $result->to_array();
     }
 
     private function score(string $query, array $action): int {

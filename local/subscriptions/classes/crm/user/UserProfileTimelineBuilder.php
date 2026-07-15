@@ -4,19 +4,33 @@ namespace local_subscriptions\crm\user;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\admin\AdminEventPresentation;
 use local_subscriptions\admin\AdminEvents;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\crm\automation\AutomationTriggerKeys;
+use local_subscriptions\subscription_config;
 
 final class UserProfileTimelineBuilder {
 
-    public function build_for_user(\stdClass $user, int $limit = 40): array {
+    public function build_for_user(
+        \stdClass $user,
+        int $limit = 40,
+        bool $includeinbox = false
+    ): array {
         $repository = new UserProfileRepository();
 
         $events = [];
         $seenlogids = [];
 
-        $this->add_admin_logs($events, $seenlogids, $repository->get_admin_logs((int)$user->id, $limit));
+        $this->add_admin_logs(
+            $events,
+            $seenlogids,
+            $repository->get_admin_logs(
+                (int)$user->id,
+                $limit
+            ),
+            $includeinbox
+        );
         $this->add_notes($events, $repository->get_user_notes((int)$user->id, $limit));
         $this->add_automation_history(
             $events,
@@ -39,6 +53,17 @@ final class UserProfileTimelineBuilder {
 
         $this->add_digital_purchases($events, $digitalpurchases);
 
+        if ($includeinbox) {
+            $this->add_inbox_messages(
+                $events,
+                $repository
+                    ->get_inbox_messages_for_timeline(
+                        (int)$user->id,
+                        $limit
+                    )
+            );
+        }
+
         usort($events, static function(UserProfileTimelineEvent $a, UserProfileTimelineEvent $b): int {
             return $b->timecreated <=> $a->timecreated;
         });
@@ -52,28 +77,97 @@ final class UserProfileTimelineBuilder {
         }, $events);
     }
 
-    private function add_admin_logs(array &$events, array &$seenlogids, array $logs): void {
+    private function add_admin_logs(
+        array &$events,
+        array &$seenlogids,
+        array $logs,
+        bool $includeinbox
+    ): void {
         foreach ($logs as $log) {
-            if ((string)$log->action === AdminEvents::USER_NOTE_ADDED) {
+            $action =
+                (string)$log->action;
+
+            if (
+                $action ===
+                AdminEvents::USER_NOTE_ADDED
+            ) {
+                continue;
+            }
+
+            /*
+             * La véritable réponse sortante est affichée depuis
+             * la table des messages Inbox afin d’éviter un doublon.
+             */
+            if (
+                $action ===
+                AdminEvents::INBOX_REPLY_SENT
+            ) {
+                continue;
+            }
+
+            /*
+             * Sans VIEW_INBOX, aucun événement Inbox ne doit être
+             * chargé dans la timeline User 360°.
+             */
+            if (
+                !$includeinbox &&
+                str_starts_with(
+                    $action,
+                    'inbox.'
+                )
+            ) {
                 continue;
             }
 
             $seenlogids[(int)$log->id] = true;
 
-            $details = $this->details_to_array($log->details ?? '');
+            $details = $this->details_to_array(
+                $log->details ?? ''
+            );
 
             $events[] = new UserProfileTimelineEvent(
-                $this->type_for_admin_action((string)$log->action),
+                $this->type_for_admin_action(
+                    $action
+                ),
                 (int)$log->timecreated,
-                $this->label_for_action((string)$log->action),
-                '',
-                $this->icon_for_action((string)$log->action),
-                $this->importance_for_admin_action((string)$log->action),
-                null,
+                $this->label_for_action(
+                    $action
+                ),
+                $this->description_for_admin_log(
+                    $action,
+                    $details
+                ),
+                $this->icon_for_action(
+                    $action
+                ),
+                $this->importance_for_admin_action(
+                    $action
+                ),
+                $this->action_url_for_admin_log(
+                    $log
+                ),
                 [
-                    'objecttype' => $log->objecttype ?? null,
+                    'objecttype' =>
+                        $log->objecttype ?? null,
+
+                    'objectid' =>
+                        !empty($log->objectid)
+                            ? (int)$log->objectid
+                            : null,
+
+                    'threadid' =>
+                        (
+                            ($log->objecttype ?? '') ===
+                            'inbox_thread'
+                        )
+                            ? (int)($log->objectid ?? 0)
+                            : null,
+
                     'detailsraw' => $details,
-                    'action' => (string)$log->action,
+                    'action' => $action,
+                    'category' =>
+                        AdminEventPresentation::
+                            category($action),
                     'logid' => (int)$log->id,
                     'actorid' => (int)$log->actorid,
                     'rawtype' => 'admin_log',
@@ -82,28 +176,63 @@ final class UserProfileTimelineBuilder {
         }
     }
 
-    private function add_digital_logs(array &$events, array &$seenlogids, array $logs): void {
+    private function add_digital_logs(
+        array &$events,
+        array &$seenlogids,
+        array $logs
+    ): void {
         foreach ($logs as $log) {
-            if (!empty($seenlogids[(int)$log->id])) {
+            if (
+                !empty(
+                    $seenlogids[(int)$log->id]
+                )
+            ) {
                 continue;
             }
 
             $seenlogids[(int)$log->id] = true;
 
-            $details = $this->details_to_array($log->details ?? '');
+            $action = (string)$log->action;
+
+            $details = $this->details_to_array(
+                $log->details ?? ''
+            );
 
             $events[] = new UserProfileTimelineEvent(
-                $this->type_for_admin_action((string)$log->action),
+                $this->type_for_admin_action(
+                    $action
+                ),
                 (int)$log->timecreated,
-                $this->label_for_action((string)$log->action),
-                '',
-                $this->icon_for_action((string)$log->action),
-                $this->importance_for_admin_action((string)$log->action),
-                null,
+                $this->label_for_action(
+                    $action
+                ),
+                $this->description_for_admin_log(
+                    $action,
+                    $details
+                ),
+                $this->icon_for_action(
+                    $action
+                ),
+                $this->importance_for_admin_action(
+                    $action
+                ),
+                $this->action_url_for_admin_log(
+                    $log
+                ),
                 [
-                    'objecttype' => $log->objecttype ?? null,
+                    'objecttype' =>
+                        $log->objecttype ?? null,
+
+                    'objectid' =>
+                        !empty($log->objectid)
+                            ? (int)$log->objectid
+                            : null,
+
                     'detailsraw' => $details,
-                    'action' => (string)$log->action,
+                    'action' => $action,
+                    'category' =>
+                        AdminEventPresentation::
+                            category($action),
                     'logid' => (int)$log->id,
                     'actorid' => (int)$log->actorid,
                     'rawtype' => 'admin_log',
@@ -111,7 +240,6 @@ final class UserProfileTimelineBuilder {
             );
         }
     }
-
     private function add_notes(array &$events, array $notes): void {
         foreach ($notes as $note) {
             $events[] = new UserProfileTimelineEvent(
@@ -282,82 +410,264 @@ final class UserProfileTimelineBuilder {
             AdminEvents::TRIAL_STARTED => 'trial_started',
             AdminEvents::TRIAL_EXPIRED => 'trial_expired',
 
+            AdminEvents::INBOX_MESSAGE_RECEIVED =>
+                'inbox_message_received',
+
+            AdminEvents::INBOX_REPLY_SENT =>
+                'inbox_message_sent',
+
+            AdminEvents::INBOX_THREAD_ASSIGNED =>
+                'inbox_thread_assigned',
+
+            AdminEvents::INBOX_THREAD_UNASSIGNED =>
+                'inbox_thread_unassigned',
+
+            AdminEvents::INBOX_THREAD_STATUS_CHANGED =>
+                'inbox_thread_status_changed',
+
+            AdminEvents::INBOX_THREAD_PRIORITY_CHANGED =>
+                'inbox_thread_priority_changed',
+
+            AdminEvents::INBOX_AI_ANALYSIS_EXECUTED =>
+                'inbox_ai_analysis_executed',
+
+            AdminEvents::INBOX_AI_REPLY_SUGGESTED =>
+                'inbox_ai_reply_suggested',
+
             default => 'admin_log',
         };
     }
 
-    private function importance_for_admin_action(string $action): string {
+    private function importance_for_admin_action(
+        string $action
+    ): string {
         return match ($action) {
             AdminEvents::USER_SUSPENDED,
             AdminEvents::DIGITAL_PURCHASE_FAILED,
             AdminEvents::PAYMENT_REQUEST_FAILED,
-            AdminEvents::PAYMENT_REQUEST_CANCELLED => 'high',
+            AdminEvents::PAYMENT_REQUEST_CANCELLED,
+            AdminEvents::INBOX_THREAD_PRIORITY_CHANGED =>
+                'high',
 
             AdminEvents::DIGITAL_PURCHASE_PAID,
             AdminEvents::PAYMENT_REQUEST_PAID,
             AdminEvents::SUBSCRIPTION_CREATED,
             AdminEvents::SUBSCRIPTION_CREATED_MANUAL,
             AdminEvents::SUBSCRIPTION_CREATED_AUTO,
-            AdminEvents::TRIAL_STARTED => 'medium',
+            AdminEvents::TRIAL_STARTED,
+            AdminEvents::INBOX_THREAD_ASSIGNED,
+            AdminEvents::INBOX_AI_REPLY_SUGGESTED =>
+                'medium',
 
-            default => 'normal',
+            default =>
+                'normal',
         };
     }
 
-    private function icon_for_action(string $action): string {
-        if (str_starts_with($action, 'email.')) {
+    private function icon_for_action(
+        string $action
+    ): string {
+        if (
+            str_starts_with(
+                $action,
+                'inbox.'
+            )
+        ) {
+            return AdminEventPresentation::icon(
+                $action
+            );
+        }
+
+        if (
+            str_starts_with(
+                $action,
+                'email.'
+            )
+        ) {
             return '✉️';
         }
 
-        if (str_contains($action, 'password')) {
+        if (
+            str_contains(
+                $action,
+                'password'
+            )
+        ) {
             return '🔑';
         }
 
-        if (str_contains($action, 'trial')) {
+        if (
+            str_contains(
+                $action,
+                'trial'
+            )
+        ) {
             return '🎁';
         }
 
-        if (str_contains($action, 'subscription')) {
+        if (
+            str_contains(
+                $action,
+                'subscription'
+            )
+        ) {
             return '📚';
         }
 
-        if (str_contains($action, 'payment')) {
+        if (
+            str_contains(
+                $action,
+                'payment'
+            )
+        ) {
             return '💳';
         }
 
-        if (str_contains($action, 'digital')) {
+        if (
+            str_contains(
+                $action,
+                'digital'
+            )
+        ) {
             return '📦';
         }
 
-        if (str_contains($action, 'suspended')) {
+        if (
+            str_contains(
+                $action,
+                'suspended'
+            )
+        ) {
             return '⛔';
         }
 
-        if (str_contains($action, 'reactivated')) {
+        if (
+            str_contains(
+                $action,
+                'reactivated'
+            )
+        ) {
             return '✅';
         }
 
-        return '⚙️';
+        return AdminEventPresentation::icon(
+            $action
+        );
     }
 
-    private function label_for_action(string $action): string {
+    private function label_for_action(
+        string $action
+    ): string {
         $map = [
-            AdminEvents::EMAIL_RECEIPT_SENT => 'crm_timeline_email_receipt_sent',
-            AdminEvents::EMAIL_SUBSCRIPTION_ACCESS_SENT => 'crm_timeline_email_access_sent',
-            AdminEvents::EMAIL_WELCOME_SENT => 'crm_timeline_email_welcome_sent',
+            AdminEvents::EMAIL_RECEIPT_SENT =>
+                'crm_timeline_email_receipt_sent',
+
+            AdminEvents::EMAIL_SUBSCRIPTION_ACCESS_SENT =>
+                'crm_timeline_email_access_sent',
+
+            AdminEvents::EMAIL_WELCOME_SENT =>
+                'crm_timeline_email_welcome_sent',
         ];
 
-        if (!empty($map[$action])) {
-            return get_string($map[$action], 'local_subscriptions');
+        if (
+            !empty(
+                $map[$action]
+            )
+        ) {
+            return get_string(
+                $map[$action],
+                'local_subscriptions'
+            );
         }
 
-        $key = 'adminlog_' . str_replace('.', '_', $action);
-
-        if (get_string_manager()->string_exists($key, 'local_subscriptions')) {
-            return get_string($key, 'local_subscriptions');
+        if (
+            str_starts_with(
+                $action,
+                'inbox.'
+            )
+        ) {
+            return AdminEventPresentation::label(
+                $action
+            );
         }
 
-        return $action;
+        $key = 'adminlog_' .
+            str_replace(
+                '.',
+                '_',
+                $action
+            );
+
+        if (
+            get_string_manager()->string_exists(
+                $key,
+                'local_subscriptions'
+            )
+        ) {
+            return get_string(
+                $key,
+                'local_subscriptions'
+            );
+        }
+
+        return AdminEventPresentation::label(
+            $action
+        );
+    }
+
+    private function description_for_admin_log(
+        string $action,
+        array $details
+    ): string {
+        if (
+            !str_starts_with(
+                $action,
+                'inbox.'
+            )
+        ) {
+            return '';
+        }
+
+        $subject = trim(
+            (string)(
+                $details['subject'] ?? ''
+            )
+        );
+
+        if ($subject === '') {
+            return '';
+        }
+
+        return $subject;
+    }
+
+    private function action_url_for_admin_log(
+        \stdClass $log
+    ): ?string {
+        if (
+            (string)($log->objecttype ?? '') !==
+            'inbox_thread'
+        ) {
+            return null;
+        }
+
+        $threadid = (int)(
+            $log->objectid ?? 0
+        );
+
+        if ($threadid <= 0) {
+            return null;
+        }
+
+        return (
+            new \moodle_url(
+                subscription_config::
+                    admin_inbox_thread_page(),
+                [
+                    'id' => $threadid,
+                ]
+            )
+        )->out(false);
     }
 
     private function subscription_icon(\stdClass $subscription): string {
@@ -464,6 +774,139 @@ final class UserProfileTimelineBuilder {
             default =>
                 get_string('crm_timeline_automation_executed', 'local_subscriptions'),
         };
+    }
+
+    private function add_inbox_messages(
+        array &$events,
+        array $messages
+    ): void {
+        foreach ($messages as $message) {
+            $direction = strtolower(
+                trim(
+                    (string)$message->direction
+                )
+            );
+
+            $isoutbound =
+                $direction === 'outbound';
+
+            $action = $isoutbound
+                ? AdminEvents::INBOX_REPLY_SENT
+                : AdminEvents::INBOX_MESSAGE_RECEIVED;
+
+            $timecreated = (int)(
+                $message->receivedat
+                ?? $message->sentat
+                ?? $message->timecreated
+            );
+
+            $subject = trim(
+                (string)(
+                    $message->subject
+                    ?: $message->threadsubject
+                    ?: ''
+                )
+            );
+
+            if ($subject === '') {
+                $subject = get_string(
+                    'crm_inbox_no_subject',
+                    'local_subscriptions'
+                );
+            }
+
+            $body = trim(
+                strip_tags(
+                    (string)(
+                        $message->bodytext
+                        ?: $message->bodyhtml
+                        ?: ''
+                    )
+                )
+            );
+
+            $body = shorten_text(
+                $body,
+                300
+            );
+
+            $events[] =
+                new UserProfileTimelineEvent(
+                    $isoutbound
+                        ? 'inbox_message_sent'
+                        : 'inbox_message_received',
+
+                    $timecreated,
+
+                    AdminEventPresentation::label(
+                        $action
+                    ),
+
+                    $body,
+
+                    AdminEventPresentation::icon(
+                        $action
+                    ),
+
+                    'normal',
+
+                    (
+                        new \moodle_url(
+                            subscription_config::
+                                admin_inbox_thread_page(),
+                            [
+                                'id' =>
+                                    (int)$message->threadid,
+                            ]
+                        )
+                    )->out(false),
+
+                    [
+                        'objecttype' =>
+                            'inbox_message',
+
+                        'threadid' =>
+                            (int)$message->threadid,
+
+                        'messageid' =>
+                            (int)$message->id,
+
+                        'direction' =>
+                            $direction,
+
+                        'subject' =>
+                            $subject,
+
+                        'email' =>
+                            (string)(
+                                $message->contactemail
+                                ?? ''
+                            ),
+
+                        'contactname' =>
+                            (string)(
+                                $message->contactname
+                                ?? ''
+                            ),
+
+                        'actorid' =>
+                            (int)(
+                                $message->createdby
+                                ?? 0
+                            ),
+
+                        'action' =>
+                            $action,
+
+                        'category' =>
+                            AdminEventPresentation::
+                                category($action),
+
+                        'rawtype' =>
+                            'inbox_message',
+                    ]
+                );
+        }
     }
 
 }

@@ -29,4 +29,12 @@ final class CommandIcons {
     public const RULE = '📋';
     public const CRON = '⏱️';
     public const HELP = '💡';
+    public const INBOX = '📥';
+    public const INBOX_THREAD = '💬';
+    public const INBOX_CONTACT = '👤';
+    public const INBOX_SYNC = '🔄';
+    public const DIAGNOSTICS = '🩺';
+    public const AI = '✨';
+    public const UNASSIGNED = '👥';
+    public const URGENT = '🚩';
 }

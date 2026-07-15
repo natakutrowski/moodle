@@ -99,6 +99,24 @@ final class HelpOnboardingRegistry {
             ),
 
             new HelpOnboardingStep(
+                'discover_inbox',
+                get_string(
+                    'crm_onboarding_step_inbox_title',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_onboarding_step_inbox_desc',
+                    'local_subscriptions'
+                ),
+                '📥',
+                new moodle_url(
+                    subscription_config::
+                        admin_inbox_page()
+                ),
+                55
+            ),
+
+            new HelpOnboardingStep(
                 'discover_automations',
                 get_string(
                     'crm_onboarding_step_automations_title',

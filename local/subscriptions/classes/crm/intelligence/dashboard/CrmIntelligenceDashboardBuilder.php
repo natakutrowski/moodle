@@ -6,16 +6,22 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\crm\intelligence\core\CrmIntelligenceLimits;
 use local_subscriptions\crm\intelligence\core\UserIntelligenceBuilder;
+use local_subscriptions\crm\intelligence\inbox\CrmIntelligenceInboxRepository;
 
 final class CrmIntelligenceDashboardBuilder {
 
     public function __construct(
         private readonly CrmIntelligenceDashboardRepository $repository = new CrmIntelligenceDashboardRepository(),
-        private readonly UserIntelligenceBuilder $userIntelligenceBuilder = new UserIntelligenceBuilder()
+        private readonly UserIntelligenceBuilder $userIntelligenceBuilder = new UserIntelligenceBuilder(),
+        private readonly CrmIntelligenceInboxRepository $inboxRepository = new CrmIntelligenceInboxRepository()
     ) {
     }
 
-    public function build(int $limit = CrmIntelligenceLimits::DASHBOARD_USERS): CrmIntelligenceDashboardOverview {
+    public function build(
+        int $limit =
+            CrmIntelligenceLimits::DASHBOARD_USERS,
+        bool $includeinbox = false
+    ): CrmIntelligenceDashboardOverview {
         $users = $this->repository->get_candidate_users($limit);
 
         $hotleads = 0;
@@ -65,6 +71,52 @@ final class CrmIntelligenceDashboardBuilder {
             return $b->intelligence->leadScore->global() <=> $a->intelligence->leadScore->global();
         });
 
+        $priorityprofiles = array_slice(
+            $priorityprofiles,
+            0,
+            CrmIntelligenceLimits::DASHBOARD_PROFILES
+        );
+
+        if (
+            $includeinbox &&
+            $priorityprofiles
+        ) {
+            $inboxbyuser =
+                $this->inboxRepository
+                    ->get_by_userids(
+                        array_map(
+                            static fn(
+                                CrmIntelligenceDashboardProfile
+                                    $profile
+                            ): int =>
+                                (int)$profile->user->id,
+                            $priorityprofiles
+                        )
+                    );
+
+            $priorityprofiles =
+                array_map(
+                    static function(
+                        CrmIntelligenceDashboardProfile
+                            $profile
+                    ) use ($inboxbyuser):
+                        CrmIntelligenceDashboardProfile {
+                        $userid =
+                            (int)$profile->user->id;
+
+                        return new
+                            CrmIntelligenceDashboardProfile(
+                                $profile->user,
+                                $profile->intelligence,
+                                $inboxbyuser[
+                                    $userid
+                                ] ?? null
+                            );
+                    },
+                    $priorityprofiles
+                );
+        }
+        
         return new CrmIntelligenceDashboardOverview(
             count($users),
             $hotleads,
@@ -72,7 +124,7 @@ final class CrmIntelligenceDashboardBuilder {
             $vip,
             $trialopportunities,
             $upgradeopportunities,
-            array_slice($priorityprofiles, 0, CrmIntelligenceLimits::DASHBOARD_PROFILES)
+            $priorityprofiles
         );
     }
 }

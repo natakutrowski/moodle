@@ -15,6 +15,12 @@ final class HelpContext {
     public const INTELLIGENCE = 'intelligence';
     public const EMAIL = 'email';
     public const GENERAL = 'general';
+    public const INBOX = 'inbox';
+    public const INBOX_AI =
+        'inbox_ai';
+
+    public const INBOX_DIAGNOSTICS =
+        'inbox_diagnostics';
 
     public static function allowed(): array {
         return [
@@ -27,6 +33,9 @@ final class HelpContext {
             self::INTELLIGENCE,
             self::EMAIL,
             self::GENERAL,
+            self::INBOX,
+            self::INBOX_AI,
+            self::INBOX_DIAGNOSTICS,
         ];
     }
 

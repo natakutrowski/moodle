@@ -10,7 +10,8 @@ final class CrmIntelligenceDashboardProfile {
 
     public function __construct(
         public readonly \stdClass $user,
-        public readonly UserIntelligence $intelligence
+        public readonly UserIntelligence $intelligence,
+        public readonly ?\stdClass $inbox = null
     ) {
     }
 }

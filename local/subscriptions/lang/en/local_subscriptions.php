@@ -2465,3 +2465,931 @@ $string['crm_user_activity_90days'] = 'Within the last 90 days';
 $string['crm_user_activity_never'] = 'Never logged in';
 
 $string['crm_user_export_csv'] = 'Export CSV';
+
+$string['crm_inbox_navigation'] = 'CRM Inbox';
+$string['crm_inbox_title'] = 'CRM Inbox';
+$string['crm_inbox_foundation_ready'] =
+    'The CRM Inbox foundation is installed. No email account is connected yet.';
+$string['crm_inbox_no_account_configured'] =
+    'OVH configuration and IMAP synchronisation will be added during the next steps.';
+
+$string['privacy:metadata:inbox'] =
+    'The CRM Inbox stores support messages and their optional links to CampusFR users.';
+$string['privacy:metadata:inbox:email'] =
+    'Email address of the message participant.';
+$string['privacy:metadata:inbox:name'] =
+    'Displayed name of the message participant.';
+$string['privacy:metadata:inbox:message'] =
+    'Content of the received or sent message.';
+$string['privacy:metadata:inbox:userid'] =
+    'Moodle user optionally linked to the Inbox contact.';
+
+$string['crm_inbox_credential_missing'] =
+    'Inbox credentials “{$a}” are missing from the Moodle configuration.';
+$string['crm_inbox_credential_invalid'] =
+    'Inbox credentials “{$a}” have an invalid configuration.';
+$string['crm_inbox_credential_field_missing'] =
+    'Field “{$a->field}” is missing from Inbox credentials “{$a->key}”.';
+
+$string['crm_inbox_account_disabled'] =
+    'The CRM Inbox account is disabled.';
+$string['crm_inbox_account_no_credential'] =
+    'No credential reference is configured for this Inbox account.';
+$string['crm_inbox_account_not_found'] =
+    'The requested CRM Inbox account could not be found.';
+
+$string['crm_inbox_imap_configuration_missing'] =
+    'The Inbox account IMAP configuration is missing.';
+$string['crm_inbox_imap_field_missing'] =
+    'Required IMAP field “{$a}” is missing.';
+$string['crm_inbox_imap_extension_missing'] =
+    'The PHP IMAP extension is not installed or enabled on the server.';
+
+$string['task_sync_crm_inbox'] =
+    'Synchronise the CRM Inbox';
+$string['task_reconcile_crm_inbox_contacts'] =
+    'Match CRM Inbox contacts with users';
+
+$string['crm_inbox_empty'] =
+    'No conversation matches these criteria.';
+$string['crm_inbox_search'] = 'Search';
+$string['crm_inbox_status'] = 'Status';
+$string['crm_inbox_priority'] = 'Priority';
+$string['crm_inbox_assignment'] = 'Assignment';
+$string['crm_inbox_assignment_mine'] = 'My conversations';
+$string['crm_inbox_assignment_unassigned'] = 'Unassigned';
+$string['crm_inbox_assignment_team'] = 'Assigned to a team';
+
+$string['crm_inbox_status_open'] = 'Open';
+$string['crm_inbox_status_pending'] = 'Pending';
+$string['crm_inbox_status_resolved'] = 'Resolved';
+$string['crm_inbox_status_closed'] = 'Closed';
+$string['crm_inbox_status_spam'] = 'Spam';
+
+$string['crm_inbox_priority_low'] = 'Low';
+$string['crm_inbox_priority_normal'] = 'Normal';
+$string['crm_inbox_priority_high'] = 'High';
+$string['crm_inbox_priority_urgent'] = 'Urgent';
+
+$string['crm_inbox_unknown_contact'] = 'Unknown contact';
+$string['crm_inbox_no_subject'] = 'No subject';
+$string['crm_inbox_unread_count'] =
+    '{$a} unread message(s)';
+$string['crm_inbox_back'] = 'Back to Inbox';
+$string['crm_inbox_matched_user'] =
+    'CampusFR user: {$a}';
+$string['crm_inbox_external_contact'] =
+    'Unregistered external contact';
+
+$string['crm_inbox_reply'] = 'Reply';
+$string['crm_inbox_save_draft'] = 'Save draft';
+$string['crm_inbox_send'] = 'Send';
+$string['crm_inbox_draft_saved'] =
+    'The draft has been saved.';
+$string['crm_inbox_reply_sent'] =
+    'The reply has been sent.';
+$string['crm_inbox_send_failed'] =
+    'The reply could not be sent: {$a}';
+$string['crm_inbox_invalid_recipient'] =
+    'The recipient of this conversation is invalid.';
+
+$string['crm_inbox_direction_inbound'] = 'Received';
+$string['crm_inbox_direction_outbound'] = 'Sent';
+$string['crm_inbox_message_status_draft'] = 'Draft';
+
+$string['crm_inbox_thread_not_found'] =
+    'This Inbox conversation could not be found.';
+$string['crm_inbox_archive'] = 'Archive';
+$string['crm_inbox_move_to_trash'] = 'Move to trash';
+$string['crm_inbox_trash_confirm'] =
+    'Move this conversation to the provider trash folder?';
+$string['crm_inbox_moved_to_trash'] =
+    'The conversation was moved to trash.';
+$string['crm_inbox_deleted_locally'] =
+    'The conversation was deleted from the CRM.';
+$string['crm_inbox_folder_not_configured'] =
+    'Provider folder “{$a}” is not configured.';
+
+$string['crm_timeline_inbox_received'] =
+    'Email received in the CRM Inbox';
+$string['crm_timeline_inbox_sent'] =
+    'Reply sent from the CRM Inbox';
+
+$string['command_action_inbox_title'] =
+    'Open the CRM Inbox';
+$string['command_action_inbox_subtitle'] =
+    'Review and process CampusFR support conversations.';
+
+$string['task_download_crm_inbox_attachments'] =
+    'Download CRM Inbox attachments';
+
+$string['crm_inbox_diagnostics'] =
+    'CRM Inbox diagnostics';
+$string['crm_inbox_diagnostics_metrics'] =
+    'Inbox metrics';
+
+$string['crm_help_category_inbox'] =
+    'CRM Inbox';
+$string['crm_help_category_inbox_desc'] =
+    'Support emails, conversations, contacts and assignments.';
+
+$string['crm_help_article_inbox_title'] =
+    'Using the CRM Inbox';
+$string['crm_help_article_inbox_summary'] =
+    'Receive, match, assign and process CampusFR support emails.';
+
+$string['crm_help_guide_inbox_title'] =
+    'Process an Inbox conversation';
+$string['crm_help_guide_inbox_desc'] =
+    'Complete workflow for handling a support email.';
+$string['crm_help_guide_inbox_open_title'] =
+    'Open the Inbox';
+$string['crm_help_guide_inbox_open_desc'] =
+    'Review new and unassigned conversations.';
+$string['crm_help_guide_open_inbox'] =
+    'Open the CRM Inbox';
+$string['crm_help_guide_inbox_contact_title'] =
+    'Identify the contact';
+$string['crm_help_guide_inbox_contact_desc'] =
+    'Check whether the contact is external or matched to a CampusFR user.';
+$string['crm_help_guide_inbox_assign_title'] =
+    'Assign the conversation';
+$string['crm_help_guide_inbox_assign_desc'] =
+    'Assign the request to an administrator or a team.';
+$string['crm_help_guide_inbox_reply_title'] =
+    'Prepare and send the reply';
+$string['crm_help_guide_inbox_reply_desc'] =
+    'Save a draft or send directly from the CRM.';
+$string['crm_help_guide_inbox_close_title'] =
+    'Resolve and archive';
+$string['crm_help_guide_inbox_close_desc'] =
+    'Mark the conversation as resolved or archive it.';
+
+$string['crm_inbox_account_validation_failed'] =
+    'The Inbox account configuration is invalid: {$a}';
+
+$string['crm_inbox_validation_invalid_email'] =
+    'The Inbox account email address is missing or invalid.';
+$string['crm_inbox_validation_provider_missing'] =
+    'The Inbox account provider is missing.';
+$string['crm_inbox_validation_smtp_missing'] =
+    'The Inbox account SMTP configuration is missing.';
+$string['crm_inbox_validation_sync_missing'] =
+    'The Inbox synchronisation configuration is missing.';
+$string['crm_inbox_validation_host_missing'] =
+    'The {$a} host is missing.';
+$string['crm_inbox_validation_port_invalid'] =
+    'The {$a} port is invalid.';
+$string['crm_inbox_validation_encryption_invalid'] =
+    'The {$a} encryption setting is invalid.';
+$string['crm_inbox_validation_unencrypted'] =
+    'The {$a} connection is not encrypted.';
+$string['crm_inbox_validation_batchsize'] =
+    'The Inbox batch size must be between 1 and 200.';
+$string['crm_inbox_validation_interval'] =
+    'The synchronisation interval must be between 5 and 1440 minutes.';
+$string['crm_inbox_validation_inbox_folder_missing'] =
+    'The main IMAP folder is not configured; INBOX will be used by default.';
+$string['crm_inbox_validation_folders_missing'] =
+    'The Inbox folder configuration is missing.';
+$string['crm_inbox_validation_folder_missing'] =
+    'Inbox folder “{$a}” has not been resolved yet.';
+
+$string['crm_inbox_folder_discovery_success'] =
+    '{$a->count} folders detected. Inbox: {$a->inbox}; sent: {$a->sent}; trash: {$a->trash}; archive: {$a->archive}; drafts: {$a->drafts}.';
+$string['crm_inbox_folder_discovery_missing'] =
+    'Some required folders could not be found: {$a}.';
+
+$string['crm_inbox_remote_image_blocked'] =
+    'Remote image blocked to protect your privacy.';
+$string['privacy:metadata:inbox_contact'] =
+    'External or matched contacts used by the CRM Inbox.';
+$string['privacy:metadata:inbox_contact:displayname'] =
+    'The contact display name.';
+$string['privacy:metadata:inbox_contact:primaryemail'] =
+    'The contact primary email address.';
+$string['privacy:metadata:inbox_contact:normalizedemail'] =
+    'The normalised email address used for contact matching.';
+$string['privacy:metadata:inbox_contact:matcheduserid'] =
+    'The identifier of the matched Moodle user.';
+$string['privacy:metadata:inbox_contact:matchstatus'] =
+    'The current user matching status.';
+$string['privacy:metadata:inbox_contact:matchsource'] =
+    'The source used to match the contact.';
+$string['privacy:metadata:inbox_contact:matchconfidence'] =
+    'The confidence level of the contact match.';
+$string['privacy:metadata:inbox_contact:lastmatchedat'] =
+    'The date of the most recent matching operation.';
+
+$string['privacy:metadata:inbox_thread'] =
+    'Conversations managed in the CRM Inbox.';
+$string['privacy:metadata:inbox_thread:contactid'] =
+    'The primary contact of the conversation.';
+$string['privacy:metadata:inbox_thread:subject'] =
+    'The conversation subject.';
+$string['privacy:metadata:inbox_thread:assigneduserid'] =
+    'The administrator assigned to the conversation.';
+$string['privacy:metadata:inbox_thread:status'] =
+    'The conversation status.';
+$string['privacy:metadata:inbox_thread:priority'] =
+    'The conversation priority.';
+$string['privacy:metadata:inbox_thread:lastmessageat'] =
+    'The date of the most recent message.';
+
+$string['privacy:metadata:inbox_message'] =
+    'Messages received or sent through the CRM Inbox.';
+$string['privacy:metadata:inbox_message:threadid'] =
+    'The conversation containing the message.';
+$string['privacy:metadata:inbox_message:direction'] =
+    'The message direction.';
+$string['privacy:metadata:inbox_message:subject'] =
+    'The message subject.';
+$string['privacy:metadata:inbox_message:bodytext'] =
+    'The plain-text message body.';
+$string['privacy:metadata:inbox_message:bodyhtml'] =
+    'The HTML message body.';
+$string['privacy:metadata:inbox_message:receivedat'] =
+    'The date when the message was received.';
+$string['privacy:metadata:inbox_message:sentat'] =
+    'The date when the message was sent.';
+$string['privacy:metadata:inbox_message:createdby'] =
+    'The administrator who created the outgoing message.';
+
+$string['privacy:metadata:inbox_participant'] =
+    'Participants associated with CRM Inbox messages.';
+$string['privacy:metadata:inbox_participant:messageid'] =
+    'The related message.';
+$string['privacy:metadata:inbox_participant:contactid'] =
+    'The contact associated with the participant.';
+$string['privacy:metadata:inbox_participant:participanttype'] =
+    'The participant type, such as sender, recipient, carbon copy or reply-to.';
+$string['privacy:metadata:inbox_participant:email'] =
+    'The participant email address.';
+$string['privacy:metadata:inbox_participant:displayname'] =
+    'The participant display name.';
+
+$string['privacy:metadata:inbox_attachment'] =
+    'Attachments associated with CRM Inbox messages.';
+$string['privacy:metadata:inbox_attachment:messageid'] =
+    'The message containing the attachment.';
+$string['privacy:metadata:inbox_attachment:filename'] =
+    'The attachment filename.';
+$string['privacy:metadata:inbox_attachment:mimetype'] =
+    'The attachment MIME type.';
+$string['privacy:metadata:inbox_attachment:filesize'] =
+    'The attachment file size.';
+
+$string['privacy:path:inbox'] =
+    'CRM Inbox';
+$string['crm_inbox_match_status'] =
+    'User match';
+$string['crm_inbox_match_matched'] =
+    'Matched user';
+$string['crm_inbox_match_unmatched'] =
+    'External contact';
+$string['crm_inbox_match_ambiguous'] =
+    'Ambiguous match';
+$string['crm_inbox_team'] =
+    'Team';
+$string['crm_inbox_unread_only'] =
+    'Unread only';
+$string['crm_inbox_per_page'] =
+    'Per page';
+
+$string['task_cleanup_crm_inbox'] =
+    'Clean up old CRM Inbox data';
+
+$string['task_cleanup_crm_inbox_ai_results'] =
+    'Clean up expired CRM Inbox AI results';
+
+$string['crm_inbox_ai_empty_content'] =
+    'The content to analyse is empty.';
+
+$string['crm_inbox_ai_empty_conversation'] =
+    'This conversation contains no analysable messages.';
+
+$string['crm_inbox_ai_language_unknown'] =
+    'Unknown language';
+
+$string['crm_inbox_ai_urgency_low'] =
+    'Low urgency';
+$string['crm_inbox_ai_urgency_normal'] =
+    'Normal urgency';
+$string['crm_inbox_ai_urgency_high'] =
+    'High urgency';
+$string['crm_inbox_ai_urgency_critical'] =
+    'Critical urgency';
+
+$string['crm_inbox_ai_category_payment'] =
+    'Payment';
+$string['crm_inbox_ai_category_access'] =
+    'Access';
+$string['crm_inbox_ai_category_subscription'] =
+    'Subscription';
+$string['crm_inbox_ai_category_technical'] =
+    'Technical issue';
+$string['crm_inbox_ai_category_course_content'] =
+    'Course content';
+$string['crm_inbox_ai_category_account'] =
+    'User account';
+$string['crm_inbox_ai_category_refund'] =
+    'Refund';
+$string['crm_inbox_ai_category_billing'] =
+    'Billing';
+$string['crm_inbox_ai_category_commercial'] =
+    'Commercial request';
+$string['crm_inbox_ai_category_feedback'] =
+    'User feedback';
+$string['crm_inbox_ai_category_spam'] =
+    'Spam';
+$string['crm_inbox_ai_category_other'] =
+    'Other';
+
+$string['crm_inbox_ai_reply_requires_review'] =
+    'This suggestion must be reviewed and approved before sending.';
+
+$string['crm_inbox_ai_tone_professional'] =
+    'Professional';
+$string['crm_inbox_ai_tone_friendly'] =
+    'Friendly';
+$string['crm_inbox_ai_tone_empathetic'] =
+    'Empathetic';
+$string['crm_inbox_ai_tone_concise'] =
+    'Concise';
+
+$string['crm_inbox_ai_translation_failed'] =
+    'The translation could not be generated.';
+
+$string['crm_inbox_ai_reply_unavailable'] =
+    'Reply suggestions are not available with the current provider.';
+
+$string['crm_inbox_ai_context_partial'] =
+    'Some CRM data could not be added to the context.';
+
+$string['crm_inbox_ai_panel_title'] =
+    'AI assistance';
+$string['crm_inbox_ai_panel_description'] =
+    'Analysis and suggestions designed to assist administrators.';
+$string['crm_inbox_ai_human_review_badge'] =
+    'Human review required';
+$string['crm_inbox_ai_permission_required'] =
+    'You do not have permission to use AI assistance.';
+$string['crm_inbox_ai_no_analysis'] =
+    'No AI analysis has been requested for this conversation yet.';
+$string['crm_inbox_ai_analyse'] =
+    'Analyse conversation';
+$string['crm_inbox_ai_suggest_reply'] =
+    'Suggest a reply';
+$string['crm_inbox_ai_reply_language'] =
+    'Reply language';
+$string['crm_inbox_ai_reply_tone'] =
+    'Reply tone';
+$string['crm_inbox_ai_analysis_completed'] =
+    'The AI analysis is complete.';
+$string['crm_inbox_ai_detected_language'] =
+    'Detected language';
+$string['crm_inbox_ai_urgency'] =
+    'Urgency';
+$string['crm_inbox_ai_category'] =
+    'Category';
+$string['crm_inbox_ai_summary'] =
+    'Summary';
+$string['crm_inbox_ai_key_points'] =
+    'Key points';
+$string['crm_inbox_ai_pending_questions'] =
+    'Pending questions';
+$string['crm_inbox_ai_customer_requests'] =
+    'Customer requests';
+$string['crm_inbox_ai_suggested_reply'] =
+    'Suggested reply';
+$string['crm_inbox_ai_confidence'] =
+    'Confidence: {$a}%';
+
+$string['crm_inbox_ai_quota_exceeded'] =
+    'The daily AI assistance quota has been reached.';
+$string['task_analyse_crm_inbox'] =
+    'Analyse CRM Inbox conversations';
+$string['crm_inbox_ai_diagnostics'] =
+    'CRM Inbox AI diagnostics';
+$string['crm_inbox_ai_diagnostic_table_ok'] =
+    'The AI results table is available.';
+$string['crm_inbox_ai_diagnostic_table_missing'] =
+    'The AI results table is missing.';
+$string['crm_inbox_ai_diagnostic_fallback'] =
+    'The local fallback provider is available.';
+$string['crm_inbox_ai_diagnostic_orchestrator_ok'] =
+    'The AI orchestrator can be constructed.';
+$string['crm_inbox_ai_usage_today'] =
+    'Usage today';
+$string['crm_inbox_ai_usage_global'] =
+    'Global usage: {$a->used} / {$a->limit}';
+$string['crm_inbox_ai_usage_user'] =
+    'Your usage: {$a->used} / {$a->limit}';
+$string['crm_inbox_ai_failures_today'] =
+    'Failed analyses today: {$a}';
+
+$string['crm_help_article_inbox_ai_title'] =
+    'Using CRM Inbox AI assistance';
+$string['crm_help_article_inbox_ai_summary'] =
+    'Analyse, summarise, translate and draft replies while retaining human review.';
+
+$string['settings:inbox_ai_header'] =
+    'CRM Inbox AI assistance';
+
+$string['settings:inbox_ai_header_desc'] =
+    'Configure the AI provider used to analyse support conversations.';
+
+$string['settings:inbox_ai_openai_enabled'] =
+    'Enable OpenAI';
+
+$string['settings:inbox_ai_openai_enabled_desc'] =
+    'Email content may be transmitted to OpenAI when an analysis is requested.';
+
+$string['settings:inbox_ai_openai_model'] =
+    'OpenAI model';
+
+$string['settings:inbox_ai_openai_model_desc'] =
+    'Exact identifier of the OpenAI model authorised for the CRM Inbox.';
+
+$string['settings:inbox_ai_openai_endpoint'] =
+    'OpenAI endpoint';
+
+$string['settings:inbox_ai_openai_endpoint_desc'] =
+    'Endpoint used for the OpenAI Responses API.';
+
+$string['settings:inbox_ai_openai_timeout'] =
+    'OpenAI timeout';
+
+$string['settings:inbox_ai_openai_max_output_tokens'] =
+    'Maximum output tokens';
+
+$string['settings:inbox_ai_openai_store'] =
+    'Allow remote response storage';
+
+$string['settings:inbox_ai_openai_store_desc'] =
+    'Keep this disabled unless remote storage has been explicitly reviewed and approved.';
+
+$string['settings:inbox_ai_include_crm_context'] =
+    'Include verified CRM context';
+
+$string['settings:inbox_ai_include_contact_email'] =
+    'Include the contact email address';
+
+$string['settings:inbox_ai_include_contact_email_desc'] =
+    'Disabled by default to minimise personal data sent to the AI provider.';
+
+$string['settings:inbox_ai_global_daily_limit'] =
+    'Global daily quota';
+
+$string['settings:inbox_ai_user_daily_limit'] =
+    'Daily quota per administrator';
+
+$string['settings:inbox_ai_automatic_analysis'] =
+    'Enable automatic analysis';
+
+$string['settings:inbox_ai_automatic_analysis_desc'] =
+    'Enable only after costs, privacy rules and provider limits have been reviewed.';
+
+$string['crm_inbox_ai_openai_enabled'] =
+    'OpenAI is enabled.';
+
+$string['crm_inbox_ai_openai_disabled'] =
+    'OpenAI is disabled.';
+
+$string['crm_inbox_ai_openai_key_available'] =
+    'The OpenAI API key is available on the server.';
+
+$string['crm_inbox_ai_openai_key_missing'] =
+    'The OpenAI API key is missing.';
+
+$string['crm_inbox_ai_openai_model_configured'] =
+    'Configured OpenAI model: {$a}.';
+
+$string['crm_inbox_ai_openai_model_missing'] =
+    'No OpenAI model is configured.';
+
+$string['crm_inbox_ai_data_transmission_notice'] =
+    'Email content may be transmitted to the configured AI provider to generate analyses or suggestions.';
+
+$string['crm_inbox_ai_provider_label'] =
+    'Provider';
+
+$string['crm_inbox_ai_model_label'] =
+    'Model';
+
+$string['crm_inbox_ai_cache_hit'] =
+    'Cached result';
+
+$string['crm_inbox_ai_cache_miss'] =
+    'New provider analysis';
+
+$string['crm_inbox_ai_force_refresh'] =
+    'Refresh analysis';
+
+$string['crm_inbox_ai_request_tokens'] =
+    'Input tokens: {$a}';
+
+$string['crm_inbox_ai_response_tokens'] =
+    'Output tokens: {$a}';
+
+$string['crm_inbox_ai_total_tokens'] =
+    'Total tokens: {$a}';
+
+$string['crm_inbox_ai_latency'] =
+    'Processing time: {$a} ms';
+
+$string['crm_inbox_ai_validation_failed'] =
+    'The AI result failed local validation and was not presented as a successful analysis.';
+
+$string['crm_inbox_ai_provider_unavailable'] =
+    'The selected AI provider is unavailable.';
+
+$string['crm_inbox_ai_provider_error'] =
+    'The AI provider could not complete the analysis.';
+
+$string['crm_inbox_ai_rate_limit'] =
+    'The AI provider rate limit has been reached. Please try again later.';
+
+$string['crm_inbox_ai_authentication_error'] =
+    'The AI provider rejected the configured credentials.';
+
+$string['crm_inbox_ai_privacy_notice'] =
+    'AI results are suggestions only. Review all content before using or sending it.';
+
+// Phase 6.5F — CRM Inbox integration.
+$string['admin_event_inbox_message_received'] =
+    'Email received in the Inbox';
+
+$string['admin_event_inbox_reply_sent'] =
+    'Reply sent from the Inbox';
+
+$string['admin_event_inbox_thread_assigned'] =
+    'Inbox conversation assigned';
+
+$string['admin_event_inbox_thread_unassigned'] =
+    'Inbox conversation unassigned';
+
+$string['admin_event_inbox_thread_status_changed'] =
+    'Inbox conversation status changed';
+
+$string['admin_event_inbox_thread_priority_changed'] =
+    'Inbox conversation priority changed';
+
+$string['admin_event_inbox_ai_analysis_executed'] =
+    'AI analysis run in the Inbox';
+
+$string['admin_event_inbox_ai_reply_suggested'] =
+    'AI reply suggestion generated';
+
+// Phase 6.5F — Inbox on the user profile.
+$string['crm_user_inbox_section'] =
+    'CRM Inbox';
+
+$string['crm_user_inbox_badge'] =
+    'Inbox';
+
+$string['crm_user_inbox_badge_empty'] =
+    'No conversations';
+
+$string['crm_user_inbox_badge_unread'] =
+    '{$a} unread email(s)';
+
+$string['crm_user_inbox_conversations'] =
+    'Conversations';
+
+$string['crm_user_inbox_open_conversations'] =
+    'Open';
+
+$string['crm_user_inbox_unread'] =
+    'Unread emails';
+
+$string['crm_user_inbox_ai_suggestions'] =
+    'AI suggestions';
+
+$string['crm_user_inbox_last_email'] =
+    'Latest email';
+
+$string['crm_user_inbox_last_received'] =
+    'Latest email received';
+
+$string['crm_user_inbox_last_sent'] =
+    'Latest reply sent';
+
+$string['crm_user_inbox_recent_conversations'] =
+    'Recent conversations';
+
+$string['crm_user_inbox_no_conversations'] =
+    'No Inbox conversation is currently linked to this user.';
+
+$string['crm_user_inbox_open_all'] =
+    'Open conversations in the Inbox';
+
+$string['crm_user_inbox_unread_badge'] =
+    '{$a} unread';
+
+// Phase 6.5F — Command Center Inbox.
+$string['command_center_type_inbox_thread'] =
+    'Inbox conversation';
+
+$string['command_center_type_inbox_contact'] =
+    'Inbox contact';
+
+$string['command_center_group_inbox_threads'] =
+    'Inbox conversations';
+
+$string['command_center_group_inbox_contacts'] =
+    'Inbox contacts';
+
+$string['command_inbox_thread_status'] =
+    'Status: {$a}';
+
+$string['command_inbox_thread_priority'] =
+    'Priority: {$a}';
+
+$string['command_inbox_thread_unread'] =
+    '{$a} unread';
+
+$string['command_inbox_contact_conversations'] =
+    '{$a} conversation(s)';
+
+$string['command_inbox_contact_unread'] =
+    '{$a} unread';
+
+$string['command_inbox_unknown_contact'] =
+    'Unknown Inbox contact';
+
+$string['command_action_inbox_unassigned_title'] =
+    'Open unassigned conversations';
+
+$string['command_action_inbox_unassigned_subtitle'] =
+    'Show Inbox conversations without an assigned administrator or team.';
+
+$string['command_action_inbox_urgent_title'] =
+    'Open urgent conversations';
+
+$string['command_action_inbox_urgent_subtitle'] =
+    'Show Inbox conversations with urgent priority.';
+
+$string['command_action_inbox_diagnostics_title'] =
+    'Open Inbox diagnostics';
+
+$string['command_action_inbox_diagnostics_subtitle'] =
+    'Check Inbox accounts, connectors, synchronisations and errors.';
+
+$string['command_action_inbox_ai_diagnostics_title'] =
+    'Open Inbox AI diagnostics';
+
+$string['command_action_inbox_ai_diagnostics_subtitle'] =
+    'Check the AI provider, models, prompts, cache and configuration.';
+
+$string['command_action_inbox_sync_title'] =
+    'Synchronise Inbox';
+
+$string['command_action_inbox_sync_subtitle'] =
+    'Fetch one page of new emails for each configured folder now.';
+
+$string['command_confirm_inbox_sync'] =
+    'Run a manual synchronisation for all active Inbox accounts now?';
+
+$string['command_center_action_run'] =
+    'Run';
+
+$string['command_inbox_sync_no_accounts'] =
+    'No active Inbox account is configured.';
+
+$string['command_inbox_sync_success'] =
+    'Synchronisation completed: {$a->fetched} fetched, {$a->created} created, {$a->skipped} skipped, {$a->errors} error(s).';
+
+$string['command_inbox_sync_has_more'] =
+    'More messages are available and will be fetched during the next run.';
+
+$string['command_inbox_sync_failed'] =
+    'Manual Inbox synchronisation failed. Check the Inbox diagnostics.';
+
+// Phase 6.5F — User Explorer and Intelligence Inbox.
+$string['crm_user_column_inbox'] =
+    'Inbox';
+
+$string['crm_user_has_inbox'] =
+    'Has an Inbox conversation';
+
+$string['crm_user_has_inbox_unread'] =
+    'Has unread Inbox emails';
+
+$string['crm_user_inbox_none'] =
+    'No conversations';
+
+$string['crm_user_inbox_conversation_count'] =
+    '{$a} conversation(s)';
+
+$string['crm_user_inbox_open_count'] =
+    '{$a} open';
+
+$string['crm_user_inbox_unread_count'] =
+    '{$a} unread';
+
+$string['crm_user_inbox_urgent_count'] =
+    '{$a} urgent';
+
+$string['crm_intelligence_inbox_conversations'] =
+    '{$a} Inbox conversation(s)';
+
+$string['crm_intelligence_inbox_open'] =
+    '{$a} open';
+
+$string['crm_intelligence_inbox_unread'] =
+    '{$a} unread';
+
+$string['crm_intelligence_inbox_urgent'] =
+    '{$a} urgent';
+
+$string['crm_intelligence_inbox_open_link'] =
+    'Open conversations';
+
+// Phase 6.5F — Inbox Help Center.
+$string['crm_help_article_inbox_diagnostics_title'] =
+    'Diagnosing the CRM Inbox';
+
+$string['crm_help_article_inbox_diagnostics_summary'] =
+    'Check IMAP, SMTP, synchronisation, attachments, matching and AI assistance.';
+
+$string['crm_help_guide_inbox_ai_title'] =
+    'Use AI assistance';
+
+$string['crm_help_guide_inbox_ai_desc'] =
+    'Analyse the conversation, review language and urgency, and always check suggestions before using them.';
+
+$string['crm_help_guide_inbox_ai_action'] =
+    'Read the AI guide';
+
+$string['crm_help_guide_inbox_diagnostics_title'] =
+    'Review diagnostics';
+
+$string['crm_help_guide_inbox_diagnostics_desc'] =
+    'Check IMAP, SMTP, synchronisation, attachments, the AI provider and quotas.';
+
+$string['crm_help_guide_inbox_diagnostics_action'] =
+    'Read the diagnostics guide';
+
+$string['crm_onboarding_step_inbox_title'] =
+    'Discover the CRM Inbox';
+
+$string['crm_onboarding_step_inbox_desc'] =
+    'Review support conversations, identify contacts, check priorities and explore reply tools.';
+
+$string['crm_help_open_inbox_help'] =
+    'Inbox diagnostics guide';
+
+$string['crm_help_open_inbox_diagnostics'] =
+    'Inbox diagnostics';
+
+$string['crm_help_open_inbox_ai_diagnostics'] =
+    'Inbox AI diagnostics';
+
+$string['crm_inbox_help_subtitle'] =
+    'Centralise, assign and process CampusFR support conversations.';
+
+$string['crm_inbox_thread_help_subtitle'] =
+    'Review the complete history, CRM information and available AI suggestions.';
+
+$string['crm_inbox_diagnostics_help_subtitle'] =
+    'Check Inbox accounts, connections, synchronisation and technical errors.';
+
+$string['crm_inbox_ai_diagnostics_help_subtitle'] =
+    'Check the AI provider, models, quotas, cache and recent errors.';
+
+// Phase 6.5F — Inbox UX and accessibility.
+$string['crm_inbox_region_label'] =
+    'CRM Inbox';
+
+$string['crm_inbox_result_count'] =
+    '{$a} conversation(s) found';
+
+$string['crm_inbox_empty_title'] =
+    'No conversations found';
+
+$string['crm_inbox_thread_list_label'] =
+    'Inbox conversation list';
+
+$string['crm_inbox_filters_label'] =
+    'CRM Inbox filters';
+
+$string['crm_inbox_unread_count_accessible'] =
+    '{$a} unread message(s) in this conversation';
+
+$string['crm_inbox_thread_region_label'] =
+    'Inbox conversation';
+
+$string['crm_inbox_thread_actions_label'] =
+    'Conversation actions';
+
+$string['crm_inbox_action_processing'] =
+    'The action is being processed.';
+
+$string['crm_inbox_processing'] =
+    'Processing…';
+
+$string['crm_inbox_message_content_label'] =
+    'Message content';
+
+$string['crm_inbox_attachments_label'] =
+    'Message attachments';
+
+$string['crm_inbox_download_attachment'] =
+    'Download attachment {$a}';
+
+$string['crm_inbox_reply_form_label'] =
+    'Inbox reply form';
+
+$string['crm_inbox_reply_processing'] =
+    'The reply is being processed.';
+
+$string['crm_inbox_reply_help'] =
+    'Review the subject and message before sending. AI suggestions remain editable and must always be reviewed by a person.';
+
+$string['crm_inbox_reply_actions_label'] =
+    'Reply form actions';
+
+$string['crm_inbox_saving'] =
+    'Saving…';
+
+$string['crm_inbox_sending'] =
+    'Sending…';
+
+$string['dashboard_inbox_title'] =
+    'CRM Inbox';
+
+$string['dashboard_inbox_subtitle'] =
+    'Operational overview of conversations and requests requiring attention.';
+
+$string['dashboard_inbox_open'] =
+    'Open Inbox';
+
+$string['dashboard_inbox_open_conversations'] =
+    'Open conversations';
+
+$string['dashboard_inbox_unassigned'] =
+    'Unassigned';
+
+$string['dashboard_inbox_urgent'] =
+    'Urgent';
+
+$string['dashboard_inbox_pending'] =
+    'Replies pending';
+
+$string['dashboard_inbox_recent_activity'] =
+    'Recent activity';
+
+$string['dashboard_inbox_empty'] =
+    'No recent Inbox conversations.';
+
+$string['dashboard_inbox_metric_aria'] =
+    '{$a->label}: {$a->count}';
+
+$string['crm_inbox_status_unknown'] =
+    'Unknown status';
+
+$string['crm_inbox_priority_unknown'] =
+    'Unknown priority';
+
+$string['crm_user_view_delete_processing'] =
+    'Deleting the saved view.';
+
+$string['crm_user_view_delete_processing_short'] =
+    'Deleting…';
+
+$string['crm_inbox_ai_analysis_processing'] =
+    'Analyse IA de la conversation en cours.';
+
+$string['crm_inbox_ai_analysis_processing_short'] =
+    'Analyse…';
+
+$string['crm_inbox_ai_reply_processing'] =
+    'Génération de la suggestion de réponse en cours.';
+
+$string['crm_inbox_ai_reply_processing_short'] =
+    'Génération…';
+
+$string['crm_inbox_ai_actions_label'] =
+    'Actions d’assistance IA';
+
+$string['crm_inbox_messages_heading'] =
+    'Conversation messages';
+
+$string['crm_inbox_attachment_unavailable'] =
+    'unavailable';
+
+$string['crm_inbox_attachment_unavailable_aria'] =
+    'Attachment {$a}, currently unavailable';
+
+$string['crm_user_inbox_statistics_label'] =
+    'User Inbox statistics';
+
+$string['crm_user_inbox_stat_aria'] =
+    '{$a->label}: {$a->value}';
+
+$string['command_center_menu_actions'] =
+    'Result actions';
+
+$string['command_center_confirmation_dialog'] =
+    'Action confirmation';

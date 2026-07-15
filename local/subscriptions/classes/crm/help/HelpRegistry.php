@@ -37,6 +37,19 @@ final class HelpRegistry {
                 40
             ),
             new HelpCategory(
+                'inbox',
+                get_string(
+                    'crm_help_category_inbox',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_category_inbox_desc',
+                    'local_subscriptions'
+                ),
+                '📨',
+                45
+            ),
+            new HelpCategory(
                 'automation',
                 get_string('crm_help_category_automation', 'local_subscriptions'),
                 get_string('crm_help_category_automation_desc', 'local_subscriptions'),
@@ -235,6 +248,115 @@ final class HelpRegistry {
                 100,
                 true
             ),
+
+            new HelpArticle(
+                'crm_inbox',
+                'inbox',
+                get_string(
+                    'crm_help_article_inbox_title',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_article_inbox_summary',
+                    'local_subscriptions'
+                ),
+                'crm_inbox.md',
+                [
+                    'inbox',
+                    'email',
+                    'support',
+                    'conversation',
+                    'reply',
+                    'assignment',
+                    'imap',
+                    'smtp',
+                    'contact',
+                ],
+                [
+                    HelpContext::INBOX,
+                    HelpContext::INBOX_DIAGNOSTICS,
+                    HelpContext::USER_PROFILE,
+                    HelpContext::GENERAL,
+                ],
+                45
+            ),
+            
+            new HelpArticle(
+                'crm_inbox_ai',
+                'inbox',
+                get_string(
+                    'crm_help_article_inbox_ai_title',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_article_inbox_ai_summary',
+                    'local_subscriptions'
+                ),
+                'crm_inbox_ai.md',
+                [
+                    'inbox',
+                    'ai',
+                    'assistant',
+                    'summary',
+                    'translation',
+                    'reply',
+                    'urgence',
+                    'résumé',
+                    'traduction',
+                    'ответ',
+                    'перевод',
+                ],
+                [
+                    HelpContext::INBOX,
+                    HelpContext::INBOX_AI,
+                    HelpContext::GENERAL,
+                ],
+                46
+            ),
+
+            new HelpArticle(
+                'crm_inbox_diagnostics',
+                'inbox',
+                get_string(
+                    'crm_help_article_inbox_diagnostics_title',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_article_inbox_diagnostics_summary',
+                    'local_subscriptions'
+                ),
+                'crm_inbox_diagnostics.md',
+                [
+                    'inbox',
+                    'diagnostics',
+                    'diagnostic',
+                    'imap',
+                    'smtp',
+                    'connexion',
+                    'connection',
+                    'synchronisation',
+                    'sync',
+                    'attachments',
+                    'pièces jointes',
+                    'errors',
+                    'erreurs',
+                    'openai',
+                    'provider',
+                    'quota',
+                    'cache',
+                    'диагностика',
+                    'ошибки',
+                    'синхронизация',
+                ],
+                [
+                    HelpContext::INBOX,
+                    HelpContext::INBOX_DIAGNOSTICS,
+                    HelpContext::INBOX_AI,
+                    HelpContext::GENERAL,
+                ],
+                47
+            ),
+
         ];
 
         usort(

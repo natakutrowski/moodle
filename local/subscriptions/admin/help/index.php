@@ -105,7 +105,8 @@ echo $OUTPUT->header();
  */
 $helpactions = html_writer::link(
     new moodle_url(
-        subscription_config::admin_help_diagnostics_page()
+        subscription_config::
+            admin_help_diagnostics_page()
     ),
     get_string(
         'crm_help_open_diagnostics',
@@ -116,6 +117,70 @@ $helpactions = html_writer::link(
             'btn btn-sm btn-outline-secondary',
     ]
 );
+
+$helpactions .= ' ' .
+    html_writer::link(
+        new moodle_url(
+            subscription_config::
+                admin_help_article_page(),
+            [
+                'id' =>
+                    'crm_inbox_diagnostics',
+            ]
+        ),
+        get_string(
+            'crm_help_open_inbox_help',
+            'local_subscriptions'
+        ),
+        [
+            'class' =>
+                'btn btn-sm btn-outline-primary',
+        ]
+    );
+
+if (
+    AdminSecurity::can(
+        Capabilities::MANAGE_CONFIGURATION
+    )
+) {
+    $helpactions .= ' ' .
+        html_writer::link(
+            new moodle_url(
+                subscription_config::
+                    admin_inbox_diagnostics_page()
+            ),
+            get_string(
+                'crm_help_open_inbox_diagnostics',
+                'local_subscriptions'
+            ),
+            [
+                'class' =>
+                    'btn btn-sm btn-outline-secondary',
+            ]
+        );
+
+    if (
+        AdminSecurity::can(
+            Capabilities::USE_INBOX_AI
+        )
+    ) {
+        $helpactions .= ' ' .
+            html_writer::link(
+                new moodle_url(
+                    subscription_config::
+                        admin_inbox_ai_diagnostics_page()
+                ),
+                get_string(
+                    'crm_help_open_inbox_ai_diagnostics',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-sm btn-outline-secondary',
+                ]
+            );
+    }
+}
 
 echo html_writer::div(
     $helpactions,

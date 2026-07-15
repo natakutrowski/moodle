@@ -383,4 +383,78 @@ final class UserProfileRepository {
         ));
     }
 
+    public function get_inbox_messages_for_timeline(
+        int $userid,
+        int $limit
+    ): array {
+        global $DB;
+
+        $manager = $DB->get_manager();
+
+        $contacttable = new \xmldb_table(
+            'local_subscriptions_inbox_contact'
+        );
+
+        $threadtable = new \xmldb_table(
+            'local_subscriptions_inbox_thread'
+        );
+
+        $messagetable = new \xmldb_table(
+            'local_subscriptions_inbox_message'
+        );
+
+        if (
+            !$manager->table_exists($contacttable) ||
+            !$manager->table_exists($threadtable) ||
+            !$manager->table_exists($messagetable)
+        ) {
+            return [];
+        }
+
+        $sql = "
+            SELECT
+                m.id,
+                m.threadid,
+                m.direction,
+                m.status,
+                m.subject,
+                m.bodytext,
+                m.bodyhtml,
+                m.receivedat,
+                m.sentat,
+                m.timecreated,
+                m.createdby,
+                t.subject AS threadsubject,
+                c.primaryemail AS contactemail,
+                c.displayname AS contactname
+            FROM {local_subscriptions_inbox_message} m
+            JOIN {local_subscriptions_inbox_thread} t
+                ON t.id = m.threadid
+            JOIN {local_subscriptions_inbox_contact} c
+                ON c.id = t.contactid
+            WHERE c.matcheduserid = :userid
+            AND t.locallydeleted = 0
+            AND m.status <> :draftstatus
+        ORDER BY
+                COALESCE(
+                    m.receivedat,
+                    m.sentat,
+                    m.timecreated
+                ) DESC,
+                m.id DESC
+        ";
+
+        return array_values(
+            $DB->get_records_sql(
+                $sql,
+                [
+                    'userid' => $userid,
+                    'draftstatus' => 'draft',
+                ],
+                0,
+                max(1, $limit)
+            )
+        );
+    }
+
 }

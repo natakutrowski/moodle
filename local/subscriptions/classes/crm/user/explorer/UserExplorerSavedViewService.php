@@ -14,27 +14,52 @@ final class UserExplorerSavedViewService {
         ?UserExplorerPreferenceRepository $repository = null
     ) {
         $this->repository =
-            $repository ?? new UserExplorerPreferenceRepository();
+            $repository ??
+            new UserExplorerPreferenceRepository();
     }
 
-    public function get_views(int $userid): array {
+    public function get_views(
+        int $userid,
+        bool $includeinbox = true
+    ): array {
         $views = [];
 
         foreach (
-            $this->repository->get_saved_views($userid)
+            $this->repository
+                ->get_saved_views($userid)
             as $rawview
         ) {
             if (!is_array($rawview)) {
                 continue;
             }
 
-            $view = UserExplorerSavedView::from_array(
-                $rawview
-            );
+            $view =
+                UserExplorerSavedView::from_array(
+                    $rawview
+                );
 
-            if ($view !== null) {
-                $views[] = $view;
+            if ($view === null) {
+                continue;
             }
+
+            if (!$includeinbox) {
+                $criteria =
+                    UserExplorerCriteria::
+                        from_saved_params(
+                            $view->criteria
+                        )
+                        ->without_inbox();
+
+                $view =
+                    new UserExplorerSavedView(
+                        $view->id,
+                        $view->name,
+                        $criteria->saved_params(),
+                        $view->timecreated
+                    );
+            }
+
+            $views[] = $view;
         }
 
         usort(
@@ -42,7 +67,9 @@ final class UserExplorerSavedViewService {
             static fn(
                 UserExplorerSavedView $a,
                 UserExplorerSavedView $b
-            ): int => $b->timecreated <=> $a->timecreated
+            ): int =>
+                $b->timecreated <=>
+                $a->timecreated
         );
 
         return $views;
@@ -51,9 +78,15 @@ final class UserExplorerSavedViewService {
     public function save(
         int $userid,
         string $name,
-        UserExplorerCriteria $criteria
+        UserExplorerCriteria $criteria,
+        bool $includeinbox = true
     ): UserExplorerSavedView {
-        $name = trim(clean_param($name, PARAM_TEXT));
+        $name = trim(
+            clean_param(
+                $name,
+                PARAM_TEXT
+            )
+        );
 
         if ($name === '') {
             throw new \moodle_exception(
@@ -62,9 +95,20 @@ final class UserExplorerSavedViewService {
             );
         }
 
-        $views = $this->get_views($userid);
+        if (!$includeinbox) {
+            $criteria =
+                $criteria->without_inbox();
+        }
 
-        if (count($views) >= self::MAX_VIEWS) {
+        $views = $this->get_views(
+            $userid,
+            true
+        );
+
+        if (
+            count($views) >=
+            self::MAX_VIEWS
+        ) {
             throw new \moodle_exception(
                 'crm_user_view_limit_reached',
                 'local_subscriptions',
@@ -73,12 +117,16 @@ final class UserExplorerSavedViewService {
             );
         }
 
-        $view = new UserExplorerSavedView(
-            'view_' . bin2hex(random_bytes(6)),
-            $name,
-            $criteria->saved_params(),
-            time()
-        );
+        $view =
+            new UserExplorerSavedView(
+                'view_' .
+                bin2hex(
+                    random_bytes(6)
+                ),
+                $name,
+                $criteria->saved_params(),
+                time()
+            );
 
         $views[] = $view;
 
@@ -86,8 +134,10 @@ final class UserExplorerSavedViewService {
             $userid,
             array_map(
                 static fn(
-                    UserExplorerSavedView $savedview
-                ): array => $savedview->to_array(),
+                    UserExplorerSavedView
+                        $savedview
+                ): array =>
+                    $savedview->to_array(),
                 $views
             )
         );
@@ -99,19 +149,26 @@ final class UserExplorerSavedViewService {
         int $userid,
         string $viewid
     ): void {
-        $views = array_values(array_filter(
-            $this->get_views($userid),
-            static fn(
-                UserExplorerSavedView $view
-            ): bool => $view->id !== $viewid
-        ));
+        $views = array_values(
+            array_filter(
+                $this->get_views(
+                    $userid,
+                    true
+                ),
+                static fn(
+                    UserExplorerSavedView $view
+                ): bool =>
+                    $view->id !== $viewid
+            )
+        );
 
         $this->repository->save_views(
             $userid,
             array_map(
                 static fn(
                     UserExplorerSavedView $view
-                ): array => $view->to_array(),
+                ): array =>
+                    $view->to_array(),
                 $views
             )
         );

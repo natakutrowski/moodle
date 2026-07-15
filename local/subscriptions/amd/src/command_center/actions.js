@@ -119,11 +119,30 @@ define([
         }
 
         state.modal.classList.toggle('is-busy', busy);
+        state.modal.setAttribute(
+            'aria-busy',
+            busy ? 'true' : 'false'
+        );
         state.input.disabled = busy;
 
         state.results.querySelectorAll('button').forEach(function(button) {
             button.disabled = busy;
         });
+
+        state.results
+            .querySelectorAll(
+                '.campusfr-command-result-open'
+            )
+            .forEach(function(link) {
+                link.setAttribute(
+                    'aria-disabled',
+                    busy ? 'true' : 'false'
+                );
+
+                link.tabIndex =
+                    busy ? -1 : 0;
+            });
+
     }
 
     function openActive(state) {

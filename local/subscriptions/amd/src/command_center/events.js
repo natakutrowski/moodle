@@ -108,14 +108,64 @@ define([
             return;
         }
 
-        var favorite = e.target.closest(selectors.favorite);
+        var favorite = e.target.closest(
+            selectors.favorite
+        );
 
         if (favorite) {
-            handleFavoriteClick(state, selectors, e, favorite);
+            handleFavoriteClick(
+                state,
+                selectors,
+                e,
+                favorite
+            );
+
             return;
         }
 
-        Actions.openActive(state);
+        var openControl = e.target.closest(
+            '[data-command-open]'
+        );
+
+        if (state.isExecuting) {
+            e.preventDefault();
+
+            return;
+        }
+
+        if (!openControl) {
+            return;
+        }
+
+        var row = openControl.closest(
+            selectors.result
+        );
+
+        if (!row) {
+            return;
+        }
+
+        var index =
+            Utils.getItemIndexFromRow(row);
+
+        if (
+            index < 0 ||
+            !state.items[index]
+        ) {
+            return;
+        }
+
+        e.preventDefault();
+
+        Keyboard.setActive(
+            state,
+            index
+        );
+
+        Actions.executeItem(
+            state,
+            state.items[index]
+        );
     }
 
     function handleFavoriteClick(state, selectors, e, favorite) {

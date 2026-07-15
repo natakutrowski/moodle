@@ -32,7 +32,27 @@ final class CommandQuery {
             $text = trim(substr($raw, 1));
         }
 
-        if (!$actionmode && preg_match('/^#?(user|u|utilisateur|product|prod|produit|purchase|buy|achat|subscription|sub|abonnement|пользователь|юзер|продукт|товар|покупка|заказ|подписка|доступ)\s*:?\s*(\d+)$/iu', $raw, $matches)) {
+        if (
+            !$actionmode &&
+            preg_match(
+                '/^#?(' .
+                'user|u|utilisateur|' .
+                'product|prod|produit|' .
+                'purchase|buy|achat|' .
+                'subscription|sub|abonnement|' .
+                'thread|conversation|ticket|' .
+                'contact|' .
+                'пользователь|юзер|' .
+                'продукт|товар|' .
+                'покупка|заказ|' .
+                'подписка|доступ|' .
+                'диалог|обращение|тикет|' .
+                'контакт' .
+                ')\s*:?\s*(\d+)$/iu',
+                $raw,
+                $matches
+            )
+        ) {
             $entity = self::normalize_entity($matches[1]);
             $id = (int)$matches[2];
             $text = (string)$id;
@@ -86,6 +106,36 @@ final class CommandQuery {
 
         if (in_array($entity, ['sub', 'subscription', 'abonnement', 'подписка', 'доступ'], true)) {
             return 'subscription';
+        }
+
+        if (
+            in_array(
+                $entity,
+                [
+                    'thread',
+                    'conversation',
+                    'ticket',
+                    'диалог',
+                    'обращение',
+                    'тикет',
+                ],
+                true
+            )
+        ) {
+            return 'inbox_thread';
+        }
+
+        if (
+            in_array(
+                $entity,
+                [
+                    'contact',
+                    'контакт',
+                ],
+                true
+            )
+        ) {
+            return 'inbox_contact';
         }
 
         return $entity;

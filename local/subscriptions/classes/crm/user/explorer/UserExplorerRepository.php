@@ -14,6 +14,12 @@ final class UserExplorerRepository {
     private const TAG_TABLE =
         'local_subscriptions_user_tag';
 
+    private const INBOX_CONTACT_TABLE =
+        'local_subscriptions_inbox_contact';
+
+    private const INBOX_THREAD_TABLE =
+        'local_subscriptions_inbox_thread';
+
     public function count(
         UserExplorerCriteria $criteria
     ): int {
@@ -40,39 +46,88 @@ final class UserExplorerRepository {
     }
 
     public function get_records(
-        UserExplorerCriteria $criteria
+        UserExplorerCriteria $criteria,
+        bool $includeinbox = false
     ): array {
         return $this->fetch_records(
             $criteria,
             $criteria->offset(),
-            $criteria->perpage
+            $criteria->perpage,
+            $includeinbox
         );
     }
 
     public function get_records_for_export(
         UserExplorerCriteria $criteria,
-        int $limit = 5000
+        int $limit = 5000,
+        bool $includeinbox = false
     ): array {
         return $this->fetch_records(
             $criteria,
             0,
-            max(1, min(5000, $limit))
+            max(
+                1,
+                min(5000, $limit)
+            ),
+            $includeinbox
         );
     }
 
     private function fetch_records(
         UserExplorerCriteria $criteria,
         int $offset,
-        int $limit
+        int $limit,
+        bool $includeinbox
     ): array {
         global $DB;
 
+        if (!$includeinbox) {
+            $criteria =
+                $criteria->without_inbox();
+        }
+
         [$joins, $where, $params] =
-            $this->build_filter_parts($criteria);
+            $this->build_filter_parts(
+                $criteria
+            );
 
         $order = UserExplorerSort::sql(
             $criteria->sort
         );
+
+        $inboxselect = '';
+        $inboxjoin = '';
+
+        if ($includeinbox) {
+            $inboxselect = "
+                ,
+                COALESCE(
+                    inbox.conversationcount,
+                    0
+                ) AS inboxconversationcount,
+
+                COALESCE(
+                    inbox.openconversationcount,
+                    0
+                ) AS inboxopenconversationcount,
+
+                COALESCE(
+                    inbox.unreadcount,
+                    0
+                ) AS inboxunreadcount,
+
+                COALESCE(
+                    inbox.urgentcount,
+                    0
+                ) AS inboxurgentcount,
+
+                inbox.lastmessageat
+                    AS inboxlastmessageat
+            ";
+
+            $inboxjoin =
+                $this->inbox_summary_join();
+        }
 
         $sql = "
             SELECT
@@ -90,29 +145,44 @@ final class UserExplorerRepository {
                 u.lastaccess,
                 u.suspended,
 
-                COALESCE(score.commercialscore, 0)
-                    AS commercialscore,
+                COALESCE(
+                    score.commercialscore,
+                    0
+                ) AS commercialscore,
 
-                COALESCE(score.engagementscore, 0)
-                    AS engagementscore,
+                COALESCE(
+                    score.engagementscore,
+                    0
+                ) AS engagementscore,
 
-                COALESCE(score.riskscore, 0)
-                    AS riskscore,
+                COALESCE(
+                    score.riskscore,
+                    0
+                ) AS riskscore,
 
-                COALESCE(score.globalscore, 0)
-                    AS globalscore,
+                COALESCE(
+                    score.globalscore,
+                    0
+                ) AS globalscore,
 
                 score.level AS scorelevel,
                 score.segmentsjson,
                 score.opportunitiesjson,
                 score.recommendationsjson,
-                score.timecreated AS scoretimecreated,
+                score.timecreated
+                    AS scoretimecreated,
 
-                COALESCE(subscriptions.subscriptioncount, 0)
-                    AS subscriptioncount,
+                COALESCE(
+                    subscriptions.subscriptioncount,
+                    0
+                ) AS subscriptioncount,
 
-                COALESCE(purchases.purchasecount, 0)
-                    AS purchasecount
+                COALESCE(
+                    purchases.purchasecount,
+                    0
+                ) AS purchasecount
+
+                {$inboxselect}
 
             FROM {user} u
 
@@ -129,11 +199,13 @@ final class UserExplorerRepository {
 
             {$this->digital_purchase_count_join()}
 
+            {$inboxjoin}
+
             {$joins}
 
             WHERE {$where}
 
-        ORDER BY {$order}
+            ORDER BY {$order}
         ";
 
         return array_values(
@@ -426,6 +498,58 @@ final class UserExplorerRepository {
         }
 
         if (
+            $criteria->hasinbox !==
+            UserExplorerCriteria::PRESENCE_ALL
+        ) {
+            $inboxexists = "
+                EXISTS (
+                    SELECT 1
+                    FROM {" . self::INBOX_CONTACT_TABLE . "}
+                        filteredinboxcontact
+                    JOIN {" . self::INBOX_THREAD_TABLE . "}
+                        filteredinboxthread
+                        ON filteredinboxthread.contactid =
+                        filteredinboxcontact.id
+                    WHERE filteredinboxcontact.matcheduserid = u.id
+                    AND filteredinboxthread.locallydeleted = 0
+                )
+            ";
+
+            $conditions[] =
+                $criteria->hasinbox ===
+                UserExplorerCriteria::PRESENCE_YES
+                    ? $inboxexists
+                    : "NOT ({$inboxexists})";
+        }
+
+        if (
+            $criteria->hasinboxunread !==
+            UserExplorerCriteria::PRESENCE_ALL
+        ) {
+            $inboxunreadexists = "
+                EXISTS (
+                    SELECT 1
+                    FROM {" . self::INBOX_CONTACT_TABLE . "}
+                        filteredunreadcontact
+                    JOIN {" . self::INBOX_THREAD_TABLE . "}
+                        filteredunreadthread
+                        ON filteredunreadthread.contactid =
+                        filteredunreadcontact.id
+                    WHERE filteredunreadcontact.matcheduserid = u.id
+                    AND filteredunreadthread.locallydeleted = 0
+                    AND filteredunreadthread.unreadcount > 0
+                )
+            ";
+
+            $conditions[] =
+                $criteria->hasinboxunread ===
+                UserExplorerCriteria::PRESENCE_YES
+                    ? $inboxunreadexists
+                    : "NOT ({$inboxunreadexists})";
+        }
+
+
+        if (
             $criteria->activity ===
             UserExplorerCriteria::ACTIVITY_NEVER
         ) {
@@ -468,6 +592,63 @@ final class UserExplorerRepository {
                             )
                        )
              )
+        ";
+    }
+
+    private function inbox_summary_join(): string {
+        return "
+            LEFT JOIN (
+                SELECT
+                    contact.matcheduserid,
+
+                    COUNT(thread.id)
+                        AS conversationcount,
+
+                    COALESCE(
+                        SUM(
+                            CASE
+                                WHEN thread.status = 'open'
+                                THEN 1
+                                ELSE 0
+                            END
+                        ),
+                        0
+                    ) AS openconversationcount,
+
+                    COALESCE(
+                        SUM(thread.unreadcount),
+                        0
+                    ) AS unreadcount,
+
+                    COALESCE(
+                        SUM(
+                            CASE
+                                WHEN thread.priority = 'urgent'
+                                THEN 1
+                                ELSE 0
+                            END
+                        ),
+                        0
+                    ) AS urgentcount,
+
+                    MAX(thread.lastmessageat)
+                        AS lastmessageat
+
+                FROM {" .
+                    self::INBOX_CONTACT_TABLE .
+                "} contact
+
+                JOIN {" .
+                    self::INBOX_THREAD_TABLE .
+                "} thread
+                  ON thread.contactid = contact.id
+                 AND thread.locallydeleted = 0
+
+               WHERE contact.matcheduserid IS NOT NULL
+
+            GROUP BY contact.matcheduserid
+            ) inbox
+              ON inbox.matcheduserid = u.id
         ";
     }
 

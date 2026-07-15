@@ -55,7 +55,8 @@ define([
 
         if (state.notification) {
             state.notification.hidden = true;
-        }        
+            state.notification.textContent = '';
+        }      
     }
 
     function isOpen(state) {

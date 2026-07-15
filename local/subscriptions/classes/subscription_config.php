@@ -281,6 +281,41 @@ class subscription_config {
             'admin/users/export.php';
     }
 
+    public static function admin_inbox_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/index.php';
+    }
+
+    public static function admin_inbox_thread_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/thread.php';
+    }
+
+    public static function admin_inbox_reply_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/reply.php';
+    }
+
+    public static function admin_inbox_action_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/action.php';
+    }
+
+    public static function admin_inbox_diagnostics_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/diagnostics.php';
+    }
+
+    public static function admin_inbox_ai_action_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/ai_action.php';
+    }
+
+    public static function admin_inbox_ai_diagnostics_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/ai_diagnostics.php';
+    }
+
     public static function plugin_dir(): string {
         global $CFG;
 
@@ -414,4 +449,22 @@ class subscription_config {
         redirect(new \moodle_url('/'), get_string('subs_unavailable', 'local_subscriptions'), 5,
             \core\output\notification::NOTIFY_INFO);
     }
+
+    public static function inbox_attachment_url(
+        int $fileitemid,
+        string $filename
+    ): \moodle_url {
+        global $CFG;
+
+        return \moodle_url::make_pluginfile_url(
+            \context_system::instance()->id,
+            'local_subscriptions',
+            'inbox_attachment',
+            $fileitemid,
+            '/',
+            $filename,
+            true
+        );
+    }
+
 }

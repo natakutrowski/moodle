@@ -10,7 +10,7 @@ use local_subscriptions\crm\help\validation\HelpCenterValidator;
 global $PAGE, $OUTPUT;
 
 $context = AdminSecurity::require(
-    Capabilities::VIEW_DASHBOARD
+    Capabilities::MANAGE_CONFIGURATION
 );
 
 $url = new moodle_url(

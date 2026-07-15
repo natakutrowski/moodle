@@ -161,22 +161,91 @@ define([
         return item.group !== 'favorites' && item.group !== 'recent';
     }
 
-    function renderResult(item, index, isBestMatch, bestLabel, state) {
+    function renderResult(
+        item,
+        index,
+        isBestMatch,
+        bestLabel,
+        state
+    ) {
+        var resultClass =
+            'campusfr-command-result' +
+            (item.danger ? ' is-danger' : '');
+
         return '' +
-            '<a id="' + Utils.escapeHtml(item.id || '') + '" class="campusfr-command-result' + (item.danger ? ' is-danger' : '') + '" href="' + Utils.escapeHtml(item.url || '#') + '" data-index="' + index + '" role="option" aria-selected="false">' +
-                '<span class="campusfr-command-result-icon">' + Utils.escapeHtml(item.icon) + '</span>' +
-                '<span class="campusfr-command-result-body">' +
-                    '<span class="campusfr-command-result-title">' + Utils.escapeHtml(item.title) + renderBestMatch(isBestMatch, bestLabel) + '</span>' +
-                    '<span class="campusfr-command-result-subtitle">' + Utils.escapeHtml(item.subtitle) + '</span>' +
-                '</span>' +
+            '<div' +
+                ' id="' +
+                    Utils.escapeHtml(
+                        item.id || ''
+                    ) +
+                '"' +
+                ' class="' +
+                    resultClass +
+                '"' +
+                ' data-index="' +
+                    index +
+                '"' +
+                ' role="option"' +
+                ' aria-selected="false">' +
+
+                '<a' +
+                    ' class="campusfr-command-result-open"' +
+                    ' href="' +
+                        Utils.escapeHtml(
+                            item.url || '#'
+                        ) +
+                    '"' +
+                    ' data-command-open="1">' +
+
+                    '<span' +
+                        ' class="campusfr-command-result-icon"' +
+                        ' aria-hidden="true">' +
+                        Utils.escapeHtml(
+                            item.icon
+                        ) +
+                    '</span>' +
+
+                    '<span class="campusfr-command-result-body">' +
+                        '<span class="campusfr-command-result-title">' +
+                            Utils.escapeHtml(
+                                item.title
+                            ) +
+                            renderBestMatch(
+                                isBestMatch,
+                                bestLabel
+                            ) +
+                        '</span>' +
+
+                        '<span class="campusfr-command-result-subtitle">' +
+                            Utils.escapeHtml(
+                                item.subtitle
+                            ) +
+                        '</span>' +
+                    '</span>' +
+                '</a>' +
+
                 '<span class="campusfr-command-result-meta">' +
-                    renderFavorite(item, state) +
-                    renderResultAction(item) +
-                    renderResultShortcut(item) +
-                    renderMenuToggle(item) +
+                    renderFavorite(
+                        item,
+                        state
+                    ) +
+
+                    renderResultAction(
+                        item
+                    ) +
+
+                    renderResultShortcut(
+                        item
+                    ) +
+
+                    renderMenuToggle(
+                        item,
+                        state
+                    ) +
                 '</span>' +
+
                 renderMenu(item) +
-            '</a>';
+            '</div>';
     }
 
     function renderFavorite(item, state) {
@@ -189,7 +258,9 @@ define([
             ' title="' + Utils.escapeHtml(state.favoriteTitle) + '"' +
             ' aria-label="' + Utils.escapeHtml(state.favoriteTitle) + '"' +
             ' aria-pressed="' + (favorite ? 'true' : 'false') + '">' +
-            (favorite ? '★' : '☆') +
+            '<span aria-hidden="true">' +
+                (favorite ? '★' : '☆') +
+            '</span>' +
             '</button>';
     }
 
@@ -217,18 +288,29 @@ define([
         return '<span class="campusfr-command-result-shortcut">' + Utils.escapeHtml(item.shortcut) + '</span>';
     }
 
-    function renderMenuToggle(item) {
-        if (!item.menuItems || !item.menuItems.length) {
+    function renderMenuToggle(
+        item,
+        state
+    ) {
+        if (
+            !item.menuItems ||
+            !item.menuItems.length
+        ) {
             return '';
         }
 
         return '' +
-            '<button class="campusfr-command-menu-toggle" ' +
-                'type="button" ' +
-                'aria-label="Actions" ' +
-                'aria-haspopup="menu" ' +
-                'aria-expanded="false">' +
-                '⋯' +
+            '<button' +
+                ' class="campusfr-command-menu-toggle"' +
+                ' type="button"' +
+                ' aria-label="' +
+                    Utils.escapeHtml(
+                        state.menuActionsLabel
+                    ) +
+                '"' +
+                ' aria-haspopup="menu"' +
+                ' aria-expanded="false">' +
+                '<span aria-hidden="true">⋯</span>' +
             '</button>';
     }
 
@@ -237,11 +319,26 @@ define([
             return '';
         }
 
-        var html = '<div class="campusfr-command-result-menu" hidden>';
+        var html =
+            '<div' +
+                ' class="campusfr-command-result-menu"' +
+                ' role="menu"' +
+                ' hidden>';
 
         item.menuItems.forEach(function(menuItem, index) {
             html += '' +
-                '<button class="campusfr-command-menu-item' + (menuItem.danger ? ' is-danger' : '') + '" type="button" data-menu-index="' + index + '">' +
+                '<button class="campusfr-command-menu-item' +
+                    (
+                        menuItem.danger
+                            ? ' is-danger'
+                            : ''
+                    ) +
+                    '"' +
+                    ' type="button"' +
+                    ' role="menuitem"' +
+                    ' data-menu-index="' +
+                        index +
+                    '">' +
                     '<span class="campusfr-command-menu-icon">' + Utils.escapeHtml(menuItem.icon || '') + '</span>' +
                     '<span class="campusfr-command-menu-label">' + Utils.escapeHtml(menuItem.label || '') + '</span>' +
                     renderMenuShortcut(menuItem) +

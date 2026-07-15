@@ -18,7 +18,17 @@ $context = AdminSecurity::require(
     Capabilities::VIEW_USERS
 );
 
-$criteria = UserExplorerCriteria::from_request();
+$canviewinbox = AdminSecurity::can(
+    Capabilities::VIEW_INBOX
+);
+
+$criteria =
+    UserExplorerCriteria::from_request();
+
+if (!$canviewinbox) {
+    $criteria =
+        $criteria->without_inbox();
+}
 
 $url = new moodle_url(
     subscription_config::admin_users_page(),
@@ -53,8 +63,16 @@ $PAGE->requires->css(
     )
 );
 
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/inbox_ui',
+    'init'
+);
+
 $result = (new UserExplorerService())
-    ->explore($criteria);
+    ->explore(
+        $criteria,
+        $canviewinbox
+    );
 
 echo $OUTPUT->header();
 

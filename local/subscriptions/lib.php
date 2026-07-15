@@ -438,32 +438,135 @@ function local_subs_upgrade_calc_body(array $opt, \stdClass $currplan, \stdClass
 }
 
 
-
-function local_subscriptions_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+function local_subscriptions_pluginfile(
+    $course,
+    $cm,
+    $context,
+    $filearea,
+    $args,
+    $forcedownload,
+    array $options = []
+): bool {
     if ($context->contextlevel !== CONTEXT_SYSTEM) {
         return false;
     }
 
-    // Fileareas autorisées
-    $allowed = ['plan_desc', 'scope_desc'];
-    if (!in_array($filearea, $allowed, true)) {
+    $allowedareas = [
+        'plan_desc',
+        'scope_desc',
+        'inbox_attachment',
+    ];
+
+    if (!in_array($filearea, $allowedareas, true)) {
         return false;
     }
 
-    // Protège l'accès si tu veux (comme c'est de l'admin tu peux exiger login)
-    // require_login();
+    /*
+     * Les descriptions de plans et de scopes conservent
+     * leur comportement historique.
+     *
+     * Les pièces jointes Inbox nécessitent une authentification
+     * et la capacité de lecture de la CRM Inbox.
+     */
+    if ($filearea === 'inbox_attachment') {
+        require_login();
 
-    // Path: /pluginfile.php/contextid/component/filearea/itemid/[subdirs]/filename
-    $itemid   = (int)array_shift($args);
-    $filename = array_pop($args);                         // <-- d'abord le nom
-    if (empty($filename)) { return false; }
-    $filepath = $args ? '/'.implode('/', $args).'/' : '/';// <-- puis le chemin
+        require_capability(
+            \local_subscriptions\admin\Capabilities::VIEW_INBOX,
+            $context
+        );
 
-    $fs = get_file_storage();
-    $file = $fs->get_file($context->id, 'local_subscriptions', $filearea, $itemid, $filepath, $filename);
-    if (!$file) { return false; }
+        $forcedownload = true;
+    }
 
-    send_stored_file($file, 0, 0, $forcedownload, $options);
+    if (count($args) < 2) {
+        return false;
+    }
+
+    $itemid = (int)array_shift($args);
+    $filename = array_pop($args);
+
+    if (
+        $itemid <= 0 ||
+        $filename === null ||
+        trim((string)$filename) === ''
+    ) {
+        return false;
+    }
+
+    if ($filearea === 'inbox_attachment') {
+        global $DB;
+
+        $filename = clean_param(
+            (string)$filename,
+            PARAM_FILE
+        );
+
+        if ($filename === '') {
+            return false;
+        }
+
+        $sql = "
+            SELECT 1
+              FROM {local_subscriptions_inbox_attachment} a
+
+              JOIN {local_subscriptions_inbox_message} m
+                ON m.id = a.messageid
+
+              JOIN {local_subscriptions_inbox_thread} t
+                ON t.id = m.threadid
+
+             WHERE a.fileitemid = :fileitemid
+               AND a.filename = :filename
+               AND a.downloadstatus = :storedstatus
+               AND t.locallydeleted = 0
+        ";
+
+        $allowed = $DB->record_exists_sql(
+            $sql,
+            [
+                'fileitemid' =>
+                    $itemid,
+
+                'filename' =>
+                    $filename,
+
+                'storedstatus' =>
+                    \local_subscriptions\crm\inbox\domain\InboxAttachmentStatus::STORED,
+            ]
+        );
+
+        if (!$allowed) {
+            return false;
+        }
+    }
+    
+    $filepath = !empty($args)
+        ? '/' . implode('/', $args) . '/'
+        : '/';
+
+    $file = get_file_storage()->get_file(
+        $context->id,
+        'local_subscriptions',
+        $filearea,
+        $itemid,
+        $filepath,
+        $filename
+    );
+
+    if (!$file || $file->is_directory()) {
+        return false;
+    }
+
+    send_stored_file(
+        $file,
+        0,
+        0,
+        $forcedownload,
+        $options
+    );
+
+    return true;
 }
 
 /**
@@ -527,3 +630,15 @@ echo '
 
 }
 
+/**
+ * Serves CRM Inbox attachments.
+ *
+ * @param stdClass $course
+ * @param stdClass|null $cm
+ * @param context $context
+ * @param string $filearea
+ * @param array $args
+ * @param bool $forcedownload
+ * @param array $options
+ * @return bool
+ */

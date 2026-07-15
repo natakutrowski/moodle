@@ -143,22 +143,46 @@ define([
 
         event.preventDefault();
 
-        require(['local_subscriptions/command_center/actions'], function(Actions) {
-            Actions.executeMenuItem(state, item, menuItem);
-            closeMenus(state);
-        });
+        Actions.executeMenuItem(
+            state,
+            item,
+            menuItem
+        );
+
+        closeMenus(state);
 
         return true;
     }
 
     function closeMenus(state) {
-        var menus = state.results.querySelectorAll('.campusfr-command-result-menu');
+        var menus =
+            state.results.querySelectorAll(
+                '.campusfr-command-result-menu'
+            );
+
         var closed = false;
 
         menus.forEach(function(menu) {
             if (!menu.hidden) {
                 menu.hidden = true;
                 closed = true;
+            }
+
+            var row = menu.closest(
+                '.campusfr-command-result'
+            );
+
+            var toggle = row
+                ? row.querySelector(
+                    '.campusfr-command-menu-toggle'
+                )
+                : null;
+
+            if (toggle) {
+                toggle.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
             }
         });
 

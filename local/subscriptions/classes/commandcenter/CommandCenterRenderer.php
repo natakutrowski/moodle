@@ -31,6 +31,17 @@ final class CommandCenterRenderer {
             'data-confirm-label' => get_string('command_center_confirm', 'local_subscriptions'),
             'data-cancel-label' => get_string('command_center_cancel', 'local_subscriptions'),
             'data-danger-confirm-label' => get_string('command_center_danger_confirm', 'local_subscriptions'),
+            'data-menu-actions-label' =>
+                get_string(
+                    'command_center_menu_actions',
+                    'local_subscriptions'
+                ),
+
+            'data-dialog-label' =>
+                get_string(
+                    'command_center_confirmation_dialog',
+                    'local_subscriptions'
+                ),
         ]);
 
         $out .= html_writer::start_div('campusfr-command-trigger', [
@@ -44,20 +55,50 @@ final class CommandCenterRenderer {
 
         $out .= html_writer::end_div();
 
-        $out .= html_writer::start_div('campusfr-command-modal d-none', [
-            'aria-hidden' => 'true',
-        ]);
+        $out .= html_writer::start_div(
+            'campusfr-command-modal d-none',
+            [
+                'role' => 'dialog',
+
+                'aria-modal' => 'true',
+
+                'aria-hidden' => 'true',
+
+                'aria-label' =>
+                    get_string(
+                        'command_center_open',
+                        'local_subscriptions'
+                    ),
+            ]
+        );
 
         $out .= html_writer::start_div('campusfr-command-backdrop');
         $out .= html_writer::end_div();
 
         $out .= html_writer::start_div('campusfr-command-panel');
 
-        $out .= html_writer::tag('button', '×', [
-            'type' => 'button',
-            'class' => 'campusfr-command-close',
-            'aria-label' => get_string('command_center_close', 'local_subscriptions'),
-        ]);
+        $out .= html_writer::tag(
+            'button',
+            html_writer::span(
+                '×',
+                '',
+                [
+                    'aria-hidden' => 'true',
+                ]
+            ),
+            [
+                'type' => 'button',
+
+                'class' =>
+                    'campusfr-command-close',
+
+                'aria-label' =>
+                    get_string(
+                        'command_center_close',
+                        'local_subscriptions'
+                    ),
+            ]
+        );
 
         $out .= html_writer::tag('input', '', [
             'type' => 'text',

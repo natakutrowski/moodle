@@ -17,6 +17,7 @@ final class HelpGuideRegistry {
             $this->hot_lead_guide(),
             $this->command_center_guide(),
             $this->user_profile_guide(),
+            $this->inbox_guide(),
         ];
 
         usort(
@@ -443,4 +444,149 @@ final class HelpGuideRegistry {
             50
         );
     }
+
+    private function inbox_guide(): HelpGuide {
+        return new HelpGuide(
+            'handle_inbox_conversation',
+            get_string(
+                'crm_help_guide_inbox_title',
+                'local_subscriptions'
+            ),
+            get_string(
+                'crm_help_guide_inbox_desc',
+                'local_subscriptions'
+            ),
+            '📨',
+            [
+                new HelpGuideStep(
+                    'open_inbox',
+                    get_string(
+                        'crm_help_guide_inbox_open_title',
+                        'local_subscriptions'
+                    ),
+                    get_string(
+                        'crm_help_guide_inbox_open_desc',
+                        'local_subscriptions'
+                    ),
+                    '📥',
+                    new moodle_url(
+                        subscription_config::
+                            admin_inbox_page()
+                    ),
+                    get_string(
+                        'crm_help_guide_open_inbox',
+                        'local_subscriptions'
+                    )
+                ),
+
+                new HelpGuideStep(
+                    'identify_contact',
+                    get_string(
+                        'crm_help_guide_inbox_contact_title',
+                        'local_subscriptions'
+                    ),
+                    get_string(
+                        'crm_help_guide_inbox_contact_desc',
+                        'local_subscriptions'
+                    ),
+                    '👤'
+                ),
+
+                new HelpGuideStep(
+                    'assign_thread',
+                    get_string(
+                        'crm_help_guide_inbox_assign_title',
+                        'local_subscriptions'
+                    ),
+                    get_string(
+                        'crm_help_guide_inbox_assign_desc',
+                        'local_subscriptions'
+                    ),
+                    '🧭'
+                ),
+
+                new HelpGuideStep(
+                    'reply_thread',
+                    get_string(
+                        'crm_help_guide_inbox_reply_title',
+                        'local_subscriptions'
+                    ),
+                    get_string(
+                        'crm_help_guide_inbox_reply_desc',
+                        'local_subscriptions'
+                    ),
+                    '✉️'
+                ),
+
+                new HelpGuideStep(
+                    'use_ai_assistance',
+                    get_string(
+                        'crm_help_guide_inbox_ai_title',
+                        'local_subscriptions'
+                    ),
+                    get_string(
+                        'crm_help_guide_inbox_ai_desc',
+                        'local_subscriptions'
+                    ),
+                    '✨',
+                    new moodle_url(
+                        subscription_config::
+                            admin_help_article_page(),
+                        [
+                            'id' => 'crm_inbox_ai',
+                        ]
+                    ),
+                    get_string(
+                        'crm_help_guide_inbox_ai_action',
+                        'local_subscriptions'
+                    )
+                ),
+
+                new HelpGuideStep(
+                    'close_thread',
+                    get_string(
+                        'crm_help_guide_inbox_close_title',
+                        'local_subscriptions'
+                    ),
+                    get_string(
+                        'crm_help_guide_inbox_close_desc',
+                        'local_subscriptions'
+                    ),
+                    '✅'
+                ),
+
+                new HelpGuideStep(
+                    'diagnose_inbox',
+                    get_string(
+                        'crm_help_guide_inbox_diagnostics_title',
+                        'local_subscriptions'
+                    ),
+                    get_string(
+                        'crm_help_guide_inbox_diagnostics_desc',
+                        'local_subscriptions'
+                    ),
+                    '🩺',
+                    new moodle_url(
+                        subscription_config::
+                            admin_help_article_page(),
+                        [
+                            'id' =>
+                                'crm_inbox_diagnostics',
+                        ]
+                    ),
+                    get_string(
+                        'crm_help_guide_inbox_diagnostics_action',
+                        'local_subscriptions'
+                    )
+                ),
+
+            ],
+            [
+                HelpContext::INBOX,
+                HelpContext::GENERAL,
+            ],
+            45
+        );
+    }    
+
 }

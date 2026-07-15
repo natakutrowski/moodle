@@ -1,6 +1,7 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\admin\Capabilities;
 use local_subscriptions\subscription_config;
 
 if ($hassiteconfig || has_capability('local/subscriptions:view_dashboard', context_system::instance())) {
@@ -9,6 +10,23 @@ if ($hassiteconfig || has_capability('local/subscriptions:view_dashboard', conte
         get_string('admin_dashboard', 'local_subscriptions'),
         new moodle_url(subscription_config::admin_dashboard_page()),
         'local/subscriptions:view_dashboard'
+    ));
+}
+
+if (
+    $hassiteconfig ||
+    has_capability(
+        Capabilities::VIEW_INBOX,
+        context_system::instance()
+    )
+) {
+    $ADMIN->add('localplugins', new admin_externalpage(
+        'local_subscriptions_crm_inbox',
+        get_string('crm_inbox_navigation', 'local_subscriptions'),
+        new moodle_url(
+            subscription_config::admin_inbox_page()
+        ),
+        Capabilities::VIEW_INBOX
     ));
 }
 
@@ -67,6 +85,176 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_subscriptions_settings', get_string('pluginname', 'local_subscriptions'));
 
     if ($ADMIN->fulltree) {
+
+        $settings->add(
+            new admin_setting_heading(
+                'local_subscriptions_inbox_ai_header',
+                get_string(
+                    'settings:inbox_ai_header',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'settings:inbox_ai_header_desc',
+                    'local_subscriptions'
+                )
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'local_subscriptions/inbox_ai_openai_enabled',
+                get_string(
+                    'settings:inbox_ai_openai_enabled',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'settings:inbox_ai_openai_enabled_desc',
+                    'local_subscriptions'
+                ),
+                0
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configtext(
+                'local_subscriptions/inbox_ai_openai_model',
+                get_string(
+                    'settings:inbox_ai_openai_model',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'settings:inbox_ai_openai_model_desc',
+                    'local_subscriptions'
+                ),
+                'gpt-5.6-luna',
+                PARAM_RAW_TRIMMED
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configtext(
+                'local_subscriptions/inbox_ai_openai_endpoint',
+                get_string(
+                    'settings:inbox_ai_openai_endpoint',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'settings:inbox_ai_openai_endpoint_desc',
+                    'local_subscriptions'
+                ),
+                'https://api.openai.com/v1/responses',
+                PARAM_URL
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configtext(
+                'local_subscriptions/inbox_ai_openai_timeout',
+                get_string(
+                    'settings:inbox_ai_openai_timeout',
+                    'local_subscriptions'
+                ),
+                '',
+                45,
+                PARAM_INT
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configtext(
+                'local_subscriptions/inbox_ai_openai_max_output_tokens',
+                get_string(
+                    'settings:inbox_ai_openai_max_output_tokens',
+                    'local_subscriptions'
+                ),
+                '',
+                1500,
+                PARAM_INT
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'local_subscriptions/inbox_ai_openai_store',
+                get_string(
+                    'settings:inbox_ai_openai_store',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'settings:inbox_ai_openai_store_desc',
+                    'local_subscriptions'
+                ),
+                0
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'local_subscriptions/inbox_ai_include_crm_context',
+                get_string(
+                    'settings:inbox_ai_include_crm_context',
+                    'local_subscriptions'
+                ),
+                '',
+                1
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'local_subscriptions/inbox_ai_include_contact_email',
+                get_string(
+                    'settings:inbox_ai_include_contact_email',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'settings:inbox_ai_include_contact_email_desc',
+                    'local_subscriptions'
+                ),
+                0
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configtext(
+                'local_subscriptions/inbox_ai_global_daily_limit',
+                get_string(
+                    'settings:inbox_ai_global_daily_limit',
+                    'local_subscriptions'
+                ),
+                '',
+                500,
+                PARAM_INT
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configtext(
+                'local_subscriptions/inbox_ai_user_daily_limit',
+                get_string(
+                    'settings:inbox_ai_user_daily_limit',
+                    'local_subscriptions'
+                ),
+                '',
+                100,
+                PARAM_INT
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'local_subscriptions/inbox_ai_automatic_analysis',
+                get_string(
+                    'settings:inbox_ai_automatic_analysis',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'settings:inbox_ai_automatic_analysis_desc',
+                    'local_subscriptions'
+                ),
+                0
+            )
+        );
 
         $settings->add(new admin_setting_configselect(
             'local_subscriptions/availability_mode',

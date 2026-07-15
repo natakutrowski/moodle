@@ -1385,10 +1385,36 @@ table.generaltable td { vertical-align: middle; }
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 14px;
     border-radius: 14px;
     color: inherit;
     text-decoration: none;
+}
+
+.campusfr-command-result-open {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    padding: 12px 14px;
+    gap: 0.85rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.campusfr-command-result-open:hover,
+.campusfr-command-result-open:focus {
+    color: inherit;
+    text-decoration: none;
+}
+
+.campusfr-command-result-open:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.28);
+    outline-offset: -3px;
+    border-radius: inherit;
+}
+
+.campusfr-command-result-open[aria-disabled="true"] {
+    pointer-events: none;
 }
 
 .campusfr-command-result:hover,
@@ -1441,6 +1467,22 @@ table.generaltable td { vertical-align: middle; }
     font-size: 0.72rem;
     color: #64748b;
     white-space: nowrap;
+}
+
+.campusfr-command-result-meta {
+    flex: 0 0 auto;
+}
+
+.campusfr-command-result-menu {
+    z-index: 3;
+}
+
+.campusfr-command-modal[aria-busy="true"] {
+    cursor: wait;
+}
+
+.campusfr-command-dialog[aria-modal="true"] {
+    outline: none;
 }
 
 .campusfr-command-empty {
@@ -5048,4 +5090,794 @@ div#page.container.bottom-region-main-box {
     .crm-user-advanced-filter-grid {
         grid-template-columns: minmax(0, 1fr);
     }
+}
+
+.crm-inbox-message-html {
+    overflow-wrap: anywhere;
+}
+
+.crm-inbox-message-html img {
+    max-width: 100%;
+    height: auto;
+}
+
+.crm-inbox-remote-image-placeholder {
+    display: inline-block;
+    padding: 0.35rem 0.6rem;
+    margin: 0.25rem 0;
+    border: 1px dashed rgba(0, 0, 0, 0.25);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--bs-secondary-color, #6c757d);
+    background: var(--bs-light, #f8f9fa);
+}
+
+.crm-inbox-thread-card {
+    overflow: hidden;
+}
+
+.crm-inbox-thread-card-unread {
+    border-left: 4px solid currentColor;
+}
+
+.crm-inbox-thread-card .card-body {
+    min-width: 0;
+}
+
+.crm-inbox-thread-snippet,
+.crm-inbox-message-text,
+.crm-inbox-message-html {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.crm-inbox-message img {
+    max-width: 100%;
+    height: auto;
+}
+
+.crm-inbox-thread-actions {
+    align-items: center;
+}
+
+.crm-inbox-thread-actions form {
+    margin: 0;
+}
+
+.crm-inbox-thread-actions button:focus-visible,
+.crm-inbox a:focus-visible,
+.crm-inbox input:focus-visible,
+.crm-inbox select:focus-visible,
+.crm-inbox textarea:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+}
+
+@media (max-width: 767.98px) {
+    .crm-inbox-thread-card .d-flex {
+        flex-direction: column;
+    }
+
+    .crm-inbox-thread-card .text-end {
+        text-align: left !important;
+    }
+
+    .crm-inbox-thread-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .crm-inbox-thread-actions form,
+    .crm-inbox-thread-actions button {
+        width: 100%;
+    }
+}
+
+.crm-inbox-ai-panel {
+    overflow: hidden;
+}
+
+.crm-inbox-ai-actions form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.crm-inbox-ai-result {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding-top: 1rem;
+}
+
+.crm-inbox-ai-metric {
+    display: inline-flex;
+    flex-direction: column;
+    min-width: 10rem;
+    margin-right: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.crm-inbox-ai-summary {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.crm-inbox-ai-reply-text {
+    min-height: 14rem;
+}
+
+@media (max-width: 767.98px) {
+    .crm-inbox-ai-actions,
+    .crm-inbox-ai-actions form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .crm-inbox-ai-actions form,
+    .crm-inbox-ai-actions button,
+    .crm-inbox-ai-actions select {
+        width: 100% !important;
+    }
+}
+
+/* Phase 6.5F — User 360 Inbox integration. */
+
+.crm-section-inbox {
+    overflow: hidden;
+}
+
+.crm-user-inbox-stat {
+    padding: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0.75rem;
+    background: var(--bs-body-bg, #fff);
+}
+
+.crm-user-inbox-stat-icon {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.crm-user-inbox-stat-value {
+    margin-bottom: 0.15rem;
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.crm-user-inbox-stat-label {
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.82rem;
+}
+
+.crm-user-inbox-last-message {
+    padding: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0.75rem;
+    background: rgba(0, 0, 0, 0.015);
+}
+
+.crm-user-inbox-last-subject {
+    display: inline-block;
+    color: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.crm-user-inbox-last-subject:hover,
+.crm-user-inbox-last-subject:focus {
+    text-decoration: underline;
+}
+
+.crm-user-inbox-thread-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.crm-user-inbox-thread {
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0.75rem;
+    background: var(--bs-body-bg, #fff);
+}
+
+.crm-user-inbox-thread-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.crm-user-inbox-thread-main {
+    min-width: 0;
+}
+
+.crm-user-inbox-thread-title {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    color: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-user-inbox-thread-title:hover,
+.crm-user-inbox-thread-title:focus {
+    text-decoration: underline;
+}
+
+.crm-user-inbox-thread-meta {
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.crm-user-inbox-thread-badges .badge {
+    margin-right: 0.25rem;
+}
+
+@media (max-width: 767.98px) {
+    .crm-user-inbox-thread-inner {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .crm-user-inbox-thread-meta {
+        text-align: left;
+    }
+
+    .crm-user-inbox-thread-title {
+        white-space: normal;
+    }
+}
+
+/* ============================================================
+   Phase 6.5F — User Explorer and Intelligence Inbox
+   ============================================================ */
+
+.crm-user-explorer-inbox {
+    min-width: 150px;
+}
+
+.crm-user-explorer-inbox-link {
+    display: inline-block;
+    color: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.crm-user-explorer-inbox-link:hover,
+.crm-user-explorer-inbox-link:focus {
+    color: #4338ca;
+    text-decoration: underline;
+}
+
+.crm-user-explorer-inbox-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.35rem;
+}
+
+.crm-user-explorer-inbox-badges .badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+
+.crm-user-explorer-inbox-last {
+    margin-top: 0.35rem;
+}
+
+.crm-intelligence-profile-inbox {
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.crm-intelligence-profile-inbox-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.crm-intelligence-profile-inbox-badges .badge {
+    font-size: 0.68rem;
+}
+
+.crm-intelligence-profile-inbox-link {
+    display: inline-block;
+    margin-top: 0.45rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.crm-intelligence-profile-inbox-link:hover,
+.crm-intelligence-profile-inbox-link:focus {
+    text-decoration: underline;
+}
+
+/* ============================================================
+   Phase 6.5F — Inbox UX, accessibility and responsive polish
+   ============================================================ */
+
+.crm-inbox-result-summary {
+    margin-bottom: 0.75rem;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.crm-inbox-empty-state {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.crm-inbox-thread-card {
+    overflow: hidden;
+    border-color: rgba(148, 163, 184, 0.22);
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.15s ease;
+}
+
+.crm-inbox-thread-card:hover,
+.crm-inbox-thread-card:focus-within {
+    border-color: rgba(79, 70, 229, 0.28);
+    box-shadow:
+        0 10px 28px rgba(15, 23, 42, 0.06);
+    transform: translateY(-1px);
+}
+
+.crm-inbox-thread-card-unread {
+    border-left: 4px solid #2563eb;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(239, 246, 255, 0.9),
+            #ffffff 24%
+        );
+}
+
+.crm-inbox-thread-title {
+    color: #0f172a;
+    overflow-wrap: anywhere;
+}
+
+.crm-inbox-thread-title:focus-visible,
+.crm-inbox-attachment-link:focus-visible,
+.crm-inbox-thread-actions .btn:focus-visible,
+.crm-inbox-reply-actions .btn:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.32);
+    outline-offset: 3px;
+}
+
+.crm-inbox-thread-snippet {
+    display: -webkit-box;
+    overflow: hidden;
+    color: #475569;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.crm-inbox-priority-badge {
+    white-space: nowrap;
+}
+
+.crm-inbox-thread-actions {
+    align-items: center;
+}
+
+.crm-inbox-action-form {
+    margin: 0;
+}
+
+.crm-inbox-action-form[aria-busy="true"],
+.crm-inbox-reply-form[aria-busy="true"] {
+    cursor: wait;
+}
+
+.crm-inbox-action-form button:disabled,
+.crm-inbox-reply-form button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.crm-inbox-message {
+    overflow: hidden;
+    border-color: rgba(148, 163, 184, 0.22);
+}
+
+.crm-inbox-message-inbound {
+    border-left: 4px solid #64748b;
+}
+
+.crm-inbox-message-outbound {
+    border-left: 4px solid #2563eb;
+}
+
+.crm-inbox-message .card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    color: #475569;
+    font-size: 0.82rem;
+}
+
+.crm-inbox-message-html,
+.crm-inbox-message-text {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.crm-inbox-message-html {
+    overflow-x: auto;
+}
+
+.crm-inbox-message-html img {
+    max-width: 100%;
+    height: auto;
+}
+
+.crm-inbox-message-html table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+}
+
+.crm-inbox-message-html pre,
+.crm-inbox-message-html code {
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.crm-inbox-message-html blockquote {
+    margin-left: 0;
+    padding-left: 1rem;
+    border-left: 3px solid rgba(148, 163, 184, 0.4);
+    color: #64748b;
+}
+
+.crm-inbox-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.crm-inbox-attachment-link {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.crm-inbox-reply-form {
+    max-width: 960px;
+}
+
+.crm-inbox-reply-form textarea {
+    min-height: 260px;
+    resize: vertical;
+}
+
+.crm-inbox-reply-actions {
+    align-items: center;
+}
+
+@media (max-width: 767.98px) {
+    .crm-inbox-filters .row {
+        row-gap: 0.8rem;
+    }
+
+    .crm-inbox-thread-card
+    .d-flex.justify-content-between {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .crm-inbox-thread-card
+    .text-end.flex-shrink-0 {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        width: 100%;
+        text-align: left !important;
+    }
+
+    .crm-inbox-thread-card
+    .text-end.flex-shrink-0
+    .mt-2 {
+        width: 100%;
+        margin-top: 0.2rem !important;
+    }
+
+    .crm-inbox-thread-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .crm-inbox-action-form {
+        display: block !important;
+        width: 100%;
+    }
+
+    .crm-inbox-action-form .btn {
+        width: 100%;
+    }
+
+    .crm-inbox-attachments {
+        flex-direction: column;
+    }
+
+    .crm-inbox-attachment-link {
+        width: 100%;
+        margin-right: 0 !important;
+        text-align: left;
+    }
+
+    .crm-inbox-reply-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .crm-inbox-reply-actions .btn {
+        width: 100%;
+    }
+
+    .crm-inbox-ai-panel > .card-header {
+        align-items: flex-start !important;
+        flex-direction: column;
+    }
+
+    .crm-inbox-ai-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .crm-inbox-ai-action-form {
+        display: flex;
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .crm-inbox-ai-action-form button,
+    .crm-inbox-ai-action-form select {
+        width: 100% !important;
+        max-width: none;
+    }
+
+    .crm-inbox-message .card-body {
+        padding-right: 0.85rem;
+        padding-left: 0.85rem;
+    }
+
+}
+
+.crm-dashboard-inbox-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.crm-dashboard-inbox-metric {
+    display: flex;
+    min-width: 0;
+    min-height: 92px;
+    padding: 0.9rem;
+    flex-direction: column;
+    justify-content: center;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.85rem;
+    background: rgba(248, 250, 252, 0.78);
+    color: inherit;
+    text-decoration: none;
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        transform 160ms ease;
+}
+
+.crm-dashboard-inbox-metric:hover,
+.crm-dashboard-inbox-metric:focus {
+    border-color: rgba(99, 102, 241, 0.55);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    color: inherit;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.crm-dashboard-inbox-metric:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.28);
+    outline-offset: 2px;
+}
+
+.crm-dashboard-inbox-metric-value {
+    display: block;
+    color: #0f172a;
+    font-size: 1.55rem;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+}
+
+.crm-dashboard-inbox-metric-label {
+    display: block;
+    margin-top: 0.35rem;
+    color: #64748b;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+.crm-dashboard-inbox-activity {
+    border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.crm-dashboard-inbox-activity-item {
+    padding: 0.7rem 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.crm-dashboard-inbox-activity-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.crm-dashboard-inbox-activity-subject {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    color: #0f172a;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-dashboard-inbox-activity-subject:hover,
+.crm-dashboard-inbox-activity-subject:focus {
+    color: #4338ca;
+}
+
+@media (max-width: 991.98px) {
+    .crm-dashboard-inbox-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-dashboard-inbox-metrics {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .crm-dashboard-inbox-metric {
+        min-height: 78px;
+    }
+
+    .crm-dashboard-inbox-card
+    .crm-dashboard-panel-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .crm-dashboard-inbox-card
+    .crm-dashboard-panel-action {
+        width: 100%;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-inbox-thread-card,
+    .crm-inbox-message,
+    .crm-inbox-thread-header,
+    .crm-inbox-ai-panel,
+    .crm-user-inbox-stat,
+    .crm-user-inbox-thread,
+    .crm-dashboard-inbox-metric {
+        border: 1px solid CanvasText;
+    }
+
+    .crm-inbox-thread-card-unread,
+    .crm-inbox-message-inbound,
+    .crm-inbox-message-outbound {
+        border-left-width: 4px;
+        border-left-color: Highlight;
+    }
+
+    .crm-inbox-thread-title:focus-visible,
+    .crm-inbox-attachment-link:focus-visible,
+    .crm-inbox-thread-actions .btn:focus-visible,
+    .crm-inbox-reply-actions .btn:focus-visible,
+    .crm-inbox-ai-action-form button:focus-visible,
+    .crm-inbox-ai-action-form select:focus-visible {
+        outline: 2px solid Highlight;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-inbox-thread-card,
+    .crm-inbox-ai-panel *,
+    .crm-dashboard-inbox-metric,
+    .crm-dashboard-inbox-card *,
+    .crm-user-inbox-thread,
+    .crm-intelligence-profile-inbox * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .crm-inbox-thread-card:hover,
+    .crm-inbox-thread-card:focus-within {
+        transform: none;
+    }
+}
+
+.crm-user-saved-view-delete-form,
+.crm-user-explorer-export-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.crm-user-saved-view-delete-form button {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    line-height: inherit;
+    cursor: pointer;
+}
+
+.crm-user-saved-view-delete-form button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.28);
+    outline-offset: 2px;
+}
+
+.crm-inbox-ai-action-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.crm-inbox-ai-action-form[aria-busy="true"] {
+    cursor: wait;
+}
+
+.crm-inbox-ai-action-form button:disabled,
+.crm-inbox-ai-action-form select:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.crm-inbox-ai-action-form button:focus-visible,
+.crm-inbox-ai-action-form select:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.32);
+    outline-offset: 3px;
+}
+
+.crm-inbox-thread-header {
+    overflow: hidden;
+    border-color: rgba(148, 163, 184, 0.22);
+}
+
+.crm-inbox-message-list {
+    min-width: 0;
+}
+
+.crm-inbox-attachment-unavailable {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

@@ -133,32 +133,109 @@ final class UserExplorerRenderer {
                 ]
             );
 
-            $out .= html_writer::link(
-                new moodle_url(
-                    subscription_config::admin_user_explorer_action_page(),
+            $out .= html_writer::start_tag(
+                'form',
+                [
+                    'method' => 'post',
+                    'action' => new moodle_url(
+                        subscription_config::
+                            admin_user_explorer_action_page()
+                    ),
+                    'class' =>
+                        'crm-user-saved-view-delete-form',
+                        'data-inbox-confirm' =>
+                            get_string(
+                                'crm_user_view_delete_confirm',
+                                'local_subscriptions'
+                            ),
+
+                        'data-inbox-busy-form' => '1',
+
+                        'data-busy-announcement' =>
+                            get_string(
+                                'crm_user_view_delete_processing',
+                                'local_subscriptions'
+                            ),
+                ]
+            );
+
+            $out .= html_writer::empty_tag(
+                'input',
+                [
+                    'type' => 'hidden',
+                    'name' => 'action',
+                    'value' => 'delete_view',
+                ]
+            );
+
+            $out .= html_writer::empty_tag(
+                'input',
+                [
+                    'type' => 'hidden',
+                    'name' => 'view',
+                    'value' => $view->id,
+                ]
+            );
+
+            $out .= html_writer::empty_tag(
+                'input',
+                [
+                    'type' => 'hidden',
+                    'name' => 'sesskey',
+                    'value' => sesskey(),
+                ]
+            );
+
+            $out .= html_writer::empty_tag(
+                'input',
+                [
+                    'type' => 'hidden',
+                    'name' => 'returnurl',
+                    'value' =>
+                        $returnurl
+                            ->out_as_local_url(
+                                false
+                            ),
+                ]
+            );
+
+            $out .= html_writer::tag(
+                'button',
+                html_writer::span(
+                    '×',
+                    '',
                     [
-                        'action' => 'delete_view',
-                        'view' => $view->id,
-                        'sesskey' => sesskey(),
-                        'returnurl' =>
-                            $returnurl->out_as_local_url(false),
+                        'aria-hidden' => 'true',
                     ]
                 ),
-                '×',
                 [
-                    'class' => 'crm-user-saved-view-delete',
-                    'title' => get_string(
-                        'crm_user_view_delete',
-                        'local_subscriptions'
-                    ),
-                    'onclick' =>
-                        "return confirm('" .
-                        addslashes(get_string(
-                            'crm_user_view_delete_confirm',
+                    'type' => 'submit',
+
+                    'class' =>
+                        'crm-user-saved-view-delete',
+
+                    'title' =>
+                        get_string(
+                            'crm_user_view_delete',
                             'local_subscriptions'
-                        )) .
-                        "');",
+                        ),
+
+                    'aria-label' =>
+                        get_string(
+                            'crm_user_view_delete',
+                            'local_subscriptions'
+                        ),
+
+                    'data-loading-label' =>
+                        get_string(
+                            'crm_user_view_delete_processing_short',
+                            'local_subscriptions'
+                        ),
                 ]
+            );
+
+            $out .= html_writer::end_tag(
+                'form'
             );
 
             $out .= html_writer::end_div();
@@ -169,22 +246,57 @@ final class UserExplorerRenderer {
         /*
         * Export.
         */
-        $exportparams = $criteria->url_params(false);
-        $exportparams['sesskey'] = sesskey();
+        $out .= html_writer::start_tag(
+            'form',
+            [
+                'method' => 'post',
+                'action' => new moodle_url(
+                    subscription_config::
+                        admin_user_explorer_export_page()
+                ),
+                'class' =>
+                    'crm-user-explorer-export-form',
+            ]
+        );
 
-        $out .= html_writer::link(
-            new moodle_url(
-                subscription_config::admin_user_explorer_export_page(),
-                $exportparams
-            ),
+        $out .= html_writer::empty_tag(
+            'input',
+            [
+                'type' => 'hidden',
+                'name' => 'sesskey',
+                'value' => sesskey(),
+            ]
+        );
+
+        foreach (
+            $criteria->url_params(false)
+            as $key => $value
+        ) {
+            $out .= html_writer::empty_tag(
+                'input',
+                [
+                    'type' => 'hidden',
+                    'name' => $key,
+                    'value' => (string)$value,
+                ]
+            );
+        }
+
+        $out .= html_writer::tag(
+            'button',
             get_string(
                 'crm_user_export_csv',
                 'local_subscriptions'
             ),
             [
+                'type' => 'submit',
                 'class' =>
                     'btn btn-sm btn-outline-secondary',
             ]
+        );
+
+        $out .= html_writer::end_tag(
+            'form'
         );
 
         $out .= html_writer::end_div();
@@ -317,7 +429,12 @@ final class UserExplorerRenderer {
             'value' => $returnurl->out_as_local_url(false),
         ]);
 
-        foreach (UserExplorerColumn::allowed() as $column) {
+        foreach (
+            UserExplorerColumn::allowed(
+                $result->canviewinbox
+            )
+            as $column
+        ) {
             $id = 'crm-user-column-' . $column;
 
             $attributes = [
@@ -566,7 +683,9 @@ final class UserExplorerRenderer {
                     $criteria->riskmax !== null ||
                     $criteria->hassubscription !== '' ||
                     $criteria->haspurchase !== '' ||
-                    $criteria->activity !== ''
+                    $criteria->activity !== '' ||
+                    $criteria->hasinbox !== '' ||
+                    $criteria->hasinboxunread !== ''
                 ) ? 'open' : null,
             ]
         );
@@ -654,6 +773,43 @@ final class UserExplorerRenderer {
             )
         );
 
+        if ($result->canviewinbox) {
+            $out .= self::field(
+                get_string(
+                    'crm_user_has_inbox',
+                    'local_subscriptions'
+                ),
+                html_writer::select(
+                    $presenceoptions,
+                    'hasinbox',
+                    $criteria->hasinbox,
+                    false,
+                    [
+                        'class' =>
+                            'custom-select',
+                    ]
+                )
+            );
+
+            $out .= self::field(
+                get_string(
+                    'crm_user_has_inbox_unread',
+                    'local_subscriptions'
+                ),
+                html_writer::select(
+                    $presenceoptions,
+                    'hasinboxunread',
+                    $criteria
+                        ->hasinboxunread,
+                    false,
+                    [
+                        'class' =>
+                            'custom-select',
+                    ]
+                )
+            );
+        }
+        
         $activityoptions = [];
 
         foreach (
@@ -846,6 +1002,9 @@ final class UserExplorerRenderer {
                         'crm-user-explorer-count'
                     ),
 
+                UserExplorerColumn::INBOX =>
+                    self::render_inbox($viewmodel),
+
                 UserExplorerColumn::COUNTRY =>
                     !empty($user->country)
                         ? s((string)$user->country)
@@ -870,6 +1029,124 @@ final class UserExplorerRenderer {
         }
 
         return $cells;
+    }
+
+    private static function render_inbox(
+        UserExplorerUserViewModel $viewmodel
+    ): string {
+
+        $user = $viewmodel->user;
+
+        $conversationcount = (int)(
+            $user->inboxconversationcount
+            ?? 0
+        );
+
+        $opencount = (int)(
+            $user->inboxopenconversationcount
+            ?? 0
+        );
+
+        $unreadcount = (int)(
+            $user->inboxunreadcount
+            ?? 0
+        );
+
+        $urgentcount = (int)(
+            $user->inboxurgentcount
+            ?? 0
+        );
+
+        if ($conversationcount <= 0) {
+            return html_writer::span(
+                get_string(
+                    'crm_user_inbox_none',
+                    'local_subscriptions'
+                ),
+                'text-muted'
+            );
+        }
+
+        $url = new moodle_url(
+            subscription_config::
+                admin_inbox_page(),
+            [
+                'q' => (string)$user->email,
+            ]
+        );
+
+        $summary = html_writer::link(
+            $url,
+            get_string(
+                'crm_user_inbox_conversation_count',
+                'local_subscriptions',
+                $conversationcount
+            ),
+            [
+                'class' =>
+                    'crm-user-explorer-inbox-link',
+            ]
+        );
+
+        $badges = '';
+
+        if ($opencount > 0) {
+            $badges .= html_writer::span(
+                get_string(
+                    'crm_user_inbox_open_count',
+                    'local_subscriptions',
+                    $opencount
+                ),
+                'badge bg-primary'
+            );
+        }
+
+        if ($unreadcount > 0) {
+            $badges .= html_writer::span(
+                get_string(
+                    'crm_user_inbox_unread_count',
+                    'local_subscriptions',
+                    $unreadcount
+                ),
+                'badge bg-danger'
+            );
+        }
+
+        if ($urgentcount > 0) {
+            $badges .= html_writer::span(
+                get_string(
+                    'crm_user_inbox_urgent_count',
+                    'local_subscriptions',
+                    $urgentcount
+                ),
+                'badge bg-warning text-dark'
+            );
+        }
+
+        $lastmessage = '';
+
+        if (
+            !empty(
+                $user->inboxlastmessageat
+            )
+        ) {
+            $lastmessage = html_writer::div(
+                AdminFormatter::datetime(
+                    (int)$user->inboxlastmessageat
+                ),
+                'crm-user-explorer-inbox-last text-muted small'
+            );
+        }
+
+        return html_writer::div(
+            $summary .
+            html_writer::div(
+                $badges,
+                'crm-user-explorer-inbox-badges'
+            ) .
+            $lastmessage,
+            'crm-user-explorer-inbox'
+        );
     }
 
     private static function render_account_status(

@@ -13,7 +13,8 @@ final class UserExplorerResult {
         public readonly array $countries,
         public readonly array $tags,
         public readonly array $visiblecolumns,
-        public readonly array $savedviews
+        public readonly array $savedviews,
+        public readonly bool $canviewinbox
     ) {
     }
 
@@ -22,6 +23,7 @@ final class UserExplorerResult {
     }
 
     public function active_filter_count(): int {
-        return $this->criteria->active_filter_count();
+        return $this->criteria
+            ->active_filter_count();
     }
 }

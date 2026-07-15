@@ -1451,5 +1451,2039 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(true, 2026062910, 'local', 'subscriptions');
 	}
 
+	if ($oldversion < 2026071201) {
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_account'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'name',
+				XMLDB_TYPE_CHAR,
+				'255',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'email',
+				XMLDB_TYPE_CHAR,
+				'255',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'provider',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'imap'
+			);
+			$table->add_field(
+				'enabled',
+				XMLDB_TYPE_INTEGER,
+				'1',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'credentialkey',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'configurationjson',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'syncstatejson',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'lastsyncedat',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'lasterrorat',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'lasterror',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_index(
+				'email_uix',
+				XMLDB_INDEX_UNIQUE,
+				['email']
+			);
+			$table->add_index(
+				'provider_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['provider']
+			);
+			$table->add_index(
+				'enabled_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['enabled']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_contact'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'displayname',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'primaryemail',
+				XMLDB_TYPE_CHAR,
+				'255',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'normalizedemail',
+				XMLDB_TYPE_CHAR,
+				'255',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'matcheduserid',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'matchstatus',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'unmatched'
+			);
+			$table->add_field(
+				'matchsource',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'none'
+			);
+			$table->add_field(
+				'matchconfidence',
+				XMLDB_TYPE_NUMBER,
+				'5',
+				'2',
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'matchlocked',
+				XMLDB_TYPE_INTEGER,
+				'1',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'lastmatchedat',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$table->add_key(
+				'matcheduserid_fk',
+				XMLDB_KEY_FOREIGN,
+				['matcheduserid'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'normalizedemail_uix',
+				XMLDB_INDEX_UNIQUE,
+				['normalizedemail']
+			);
+			$table->add_index(
+				'matchstatus_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['matchstatus']
+			);
+			$table->add_index(
+				'reconcile_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['matchstatus', 'matchlocked']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_team'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'name',
+				XMLDB_TYPE_CHAR,
+				'255',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'description',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'enabled',
+				XMLDB_TYPE_INTEGER,
+				'1',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				1
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_index(
+				'name_uix',
+				XMLDB_INDEX_UNIQUE,
+				['name']
+			);
+			$table->add_index(
+				'enabled_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['enabled']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_team_member'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'teamid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'userid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$table->add_key(
+				'teamid_fk',
+				XMLDB_KEY_FOREIGN,
+				['teamid'],
+				'local_subscriptions_inbox_team',
+				['id']
+			);
+			$table->add_key(
+				'userid_fk',
+				XMLDB_KEY_FOREIGN,
+				['userid'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'team_user_uix',
+				XMLDB_INDEX_UNIQUE,
+				['teamid', 'userid']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_thread'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'accountid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'contactid',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'providerthreadid',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'subject',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'status',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'open'
+			);
+			$table->add_field(
+				'priority',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'normal'
+			);
+			$table->add_field(
+				'assigneduserid',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'assignedteamid',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'folder',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'unreadcount',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'messagecount',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'lastmessageat',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'locallydeleted',
+				XMLDB_TYPE_INTEGER,
+				'1',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$table->add_key(
+				'accountid_fk',
+				XMLDB_KEY_FOREIGN,
+				['accountid'],
+				'local_subscriptions_inbox_account',
+				['id']
+			);
+			$table->add_key(
+				'contactid_fk',
+				XMLDB_KEY_FOREIGN,
+				['contactid'],
+				'local_subscriptions_inbox_contact',
+				['id']
+			);
+			$table->add_key(
+				'assigneduserid_fk',
+				XMLDB_KEY_FOREIGN,
+				['assigneduserid'],
+				'user',
+				['id']
+			);
+			$table->add_key(
+				'assignedteamid_fk',
+				XMLDB_KEY_FOREIGN,
+				['assignedteamid'],
+				'local_subscriptions_inbox_team',
+				['id']
+			);
+
+			$table->add_index(
+				'account_providerthread_uix',
+				XMLDB_INDEX_UNIQUE,
+				['accountid', 'providerthreadid']
+			);
+			$table->add_index(
+				'status_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['status']
+			);
+			$table->add_index(
+				'priority_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['priority']
+			);
+			$table->add_index(
+				'lastmessage_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['lastmessageat']
+			);
+			$table->add_index(
+				'workqueue_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['locallydeleted', 'status', 'lastmessageat']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_message'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'threadid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'accountid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'providermessageid',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'providerparentid',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'folder',
+				XMLDB_TYPE_CHAR,
+				'191'
+			);
+			$table->add_field(
+				'uidvalidity',
+				XMLDB_TYPE_CHAR,
+				'64'
+			);
+			$table->add_field(
+				'provideruid',
+				XMLDB_TYPE_CHAR,
+				'64'
+			);
+			$table->add_field(
+				'direction',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'status',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'received'
+			);
+			$table->add_field(
+				'subject',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'bodytext',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'bodyhtml',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'headersjson',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'inreplyto',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'referencesjson',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'receivedat',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'sentat',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'isread',
+				XMLDB_TYPE_INTEGER,
+				'1',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'hasattachments',
+				XMLDB_TYPE_INTEGER,
+				'1',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'checksum',
+				XMLDB_TYPE_CHAR,
+				'64'
+			);
+			$table->add_field(
+				'createdby',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$table->add_key(
+				'threadid_fk',
+				XMLDB_KEY_FOREIGN,
+				['threadid'],
+				'local_subscriptions_inbox_thread',
+				['id']
+			);
+			$table->add_key(
+				'accountid_fk',
+				XMLDB_KEY_FOREIGN,
+				['accountid'],
+				'local_subscriptions_inbox_account',
+				['id']
+			);
+			$table->add_key(
+				'createdby_fk',
+				XMLDB_KEY_FOREIGN,
+				['createdby'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'provider_uid_uix',
+				XMLDB_INDEX_UNIQUE,
+				[
+					'accountid',
+					'folder',
+					'uidvalidity',
+					'provideruid',
+				]
+			);
+			$table->add_index(
+				'provider_message_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['accountid', 'providermessageid']
+			);
+			$table->add_index(
+				'direction_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['direction']
+			);
+			$table->add_index(
+				'status_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['status']
+			);
+			$table->add_index(
+				'receivedat_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['receivedat']
+			);
+			$table->add_index(
+				'sentat_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['sentat']
+			);
+			$table->add_index(
+				'checksum_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['checksum']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_participant'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'messageid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'contactid',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'participanttype',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'email',
+				XMLDB_TYPE_CHAR,
+				'255',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'normalizedemail',
+				XMLDB_TYPE_CHAR,
+				'255',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'displayname',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$table->add_key(
+				'messageid_fk',
+				XMLDB_KEY_FOREIGN,
+				['messageid'],
+				'local_subscriptions_inbox_message',
+				['id']
+			);
+			$table->add_key(
+				'contactid_fk',
+				XMLDB_KEY_FOREIGN,
+				['contactid'],
+				'local_subscriptions_inbox_contact',
+				['id']
+			);
+
+			$table->add_index(
+				'message_type_email_uix',
+				XMLDB_INDEX_UNIQUE,
+				[
+					'messageid',
+					'participanttype',
+					'normalizedemail',
+				]
+			);
+			$table->add_index(
+				'normalizedemail_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['normalizedemail']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_attachment'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'messageid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'providerattachmentid',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'filename',
+				XMLDB_TYPE_CHAR,
+				'255',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'mimetype',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'filesize',
+				XMLDB_TYPE_INTEGER,
+				'20',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'contenthash',
+				XMLDB_TYPE_CHAR,
+				'64'
+			);
+			$table->add_field(
+				'fileitemid',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'downloadstatus',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'pending'
+			);
+			$table->add_field(
+				'lasterror',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$table->add_key(
+				'messageid_fk',
+				XMLDB_KEY_FOREIGN,
+				['messageid'],
+				'local_subscriptions_inbox_message',
+				['id']
+			);
+
+			$table->add_index(
+				'message_provider_uix',
+				XMLDB_INDEX_UNIQUE,
+				['messageid', 'providerattachmentid']
+			);
+			$table->add_index(
+				'downloadstatus_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['downloadstatus']
+			);
+			$table->add_index(
+				'contenthash_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['contenthash']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_tag'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'name',
+				XMLDB_TYPE_CHAR,
+				'100',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'colour',
+				XMLDB_TYPE_CHAR,
+				'20'
+			);
+			$table->add_field(
+				'enabled',
+				XMLDB_TYPE_INTEGER,
+				'1',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				1
+			);
+			$table->add_field(
+				'createdby',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$table->add_key(
+				'createdby_fk',
+				XMLDB_KEY_FOREIGN,
+				['createdby'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'name_uix',
+				XMLDB_INDEX_UNIQUE,
+				['name']
+			);
+			$table->add_index(
+				'enabled_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['enabled']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_thread_tag'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'threadid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'tagid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'createdby',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$table->add_key(
+				'threadid_fk',
+				XMLDB_KEY_FOREIGN,
+				['threadid'],
+				'local_subscriptions_inbox_thread',
+				['id']
+			);
+			$table->add_key(
+				'tagid_fk',
+				XMLDB_KEY_FOREIGN,
+				['tagid'],
+				'local_subscriptions_inbox_tag',
+				['id']
+			);
+			$table->add_key(
+				'createdby_fk',
+				XMLDB_KEY_FOREIGN,
+				['createdby'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'thread_tag_uix',
+				XMLDB_INDEX_UNIQUE,
+				['threadid', 'tagid']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_sync_log'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$table->add_field(
+				'accountid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'synctype',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'status',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL
+			);
+			$table->add_field(
+				'folder',
+				XMLDB_TYPE_CHAR,
+				'255'
+			);
+			$table->add_field(
+				'cursorbefore',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'cursorafter',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'fetchedcount',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'createdcount',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'updatedcount',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'skippedcount',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'errorcount',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'message',
+				XMLDB_TYPE_TEXT
+			);
+			$table->add_field(
+				'startedat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$table->add_field(
+				'finishedat',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$table->add_key(
+				'accountid_fk',
+				XMLDB_KEY_FOREIGN,
+				['accountid'],
+				'local_subscriptions_inbox_account',
+				['id']
+			);
+			
+			$table->add_index(
+				'status_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['status']
+			);
+			$table->add_index(
+				'startedat_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['startedat']
+			);
+			$table->add_index(
+				'account_started_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['accountid', 'startedat']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071201,
+			'local',
+			'subscriptions'
+		);
+	}
+
+	if ($oldversion < 2026071203) {
+		$table = new xmldb_table('local_subscriptions_inbox_message');
+
+		// 1. Ajouter providerkey comme champ nullable pendant la migration.
+		$field = new xmldb_field(
+			'providerkey',
+			XMLDB_TYPE_CHAR,
+			'64',
+			null,
+			null,
+			null,
+			null,
+			'provideruid'
+		);
+
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field($table, $field);
+		}
+
+		// 2. Générer providerkey pour les messages déjà enregistrés.
+		$recordset = $DB->get_recordset(
+			'local_subscriptions_inbox_message',
+			[
+				'providerkey' => null,
+			],
+			'',
+			'id, folder, uidvalidity, provideruid'
+		);
+
+		foreach ($recordset as $record) {
+			$providerkey = hash(
+				'sha256',
+				(string)$record->folder
+					. "\0"
+					. (string)$record->uidvalidity
+					. "\0"
+					. (string)$record->provideruid
+			);
+
+			$DB->set_field(
+				'local_subscriptions_inbox_message',
+				'providerkey',
+				$providerkey,
+				['id' => $record->id]
+			);
+		}
+
+		$recordset->close();
+
+		// 3. Supprimer l'ancien index unique trop long.
+		$oldindex = new xmldb_index(
+			'provider_uid_uix',
+			XMLDB_INDEX_UNIQUE,
+			[
+				'accountid',
+				'folder',
+				'uidvalidity',
+				'provideruid',
+			]
+		);
+
+		if ($dbman->index_exists($table, $oldindex)) {
+			$dbman->drop_index($table, $oldindex);
+		}
+
+		// 4. Rendre providerkey obligatoire après le remplissage des anciennes lignes.
+		$field = new xmldb_field(
+			'providerkey',
+			XMLDB_TYPE_CHAR,
+			'64',
+			null,
+			XMLDB_NOTNULL,
+			null,
+			null,
+			'provideruid'
+		);
+
+		$dbman->change_field_notnull($table, $field);
+
+		// 5. Ajouter le nouvel index unique compact.
+		$newindex = new xmldb_index(
+			'provider_key_uix',
+			XMLDB_INDEX_UNIQUE,
+			[
+				'accountid',
+				'providerkey',
+			]
+		);
+
+		if (!$dbman->index_exists($table, $newindex)) {
+			$dbman->add_index($table, $newindex);
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071203,
+			'local',
+			'subscriptions'
+		);
+	}
+
+	if ($oldversion < 2026071207) {
+		upgrade_plugin_savepoint(
+			true,
+			2026071207,
+			'local',
+			'subscriptions'
+		);
+	}
+
+	if ($oldversion < 2026071208) {
+		$messagetable = new xmldb_table(
+			'local_subscriptions_inbox_message'
+		);
+
+		$identityfield = new xmldb_field(
+			'identitykey',
+			XMLDB_TYPE_CHAR,
+			'64',
+			null,
+			null,
+			null,
+			null,
+			'providerkey'
+		);
+
+		if (
+			$dbman->table_exists($messagetable) &&
+			!$dbman->field_exists(
+				$messagetable,
+				$identityfield
+			)
+		) {
+			$dbman->add_field(
+				$messagetable,
+				$identityfield
+			);
+		}
+
+		$identityindex = new xmldb_index(
+			'account_identity_uix',
+			XMLDB_INDEX_UNIQUE,
+			['accountid', 'identitykey']
+		);
+
+		if (
+			$dbman->table_exists($messagetable) &&
+			!$dbman->index_exists(
+				$messagetable,
+				$identityindex
+			)
+		) {
+			$dbman->add_index(
+				$messagetable,
+				$identityindex
+			);
+		}
+
+		$remotetable = new xmldb_table(
+			'local_subscriptions_inbox_remote'
+		);
+
+		if (!$dbman->table_exists($remotetable)) {
+			$remotetable->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+			$remotetable->add_field(
+				'messageid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$remotetable->add_field(
+				'accountid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+			$remotetable->add_field(
+				'folder',
+				XMLDB_TYPE_CHAR,
+				'191',
+				null,
+				XMLDB_NOTNULL
+			);
+			$remotetable->add_field(
+				'uidvalidity',
+				XMLDB_TYPE_CHAR,
+				'64',
+				null,
+				XMLDB_NOTNULL
+			);
+			$remotetable->add_field(
+				'provideruid',
+				XMLDB_TYPE_CHAR,
+				'64',
+				null,
+				XMLDB_NOTNULL
+			);
+			$remotetable->add_field(
+				'providerkey',
+				XMLDB_TYPE_CHAR,
+				'64',
+				null,
+				XMLDB_NOTNULL
+			);
+			$remotetable->add_field(
+				'active',
+				XMLDB_TYPE_INTEGER,
+				'1',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				1
+			);
+			$remotetable->add_field(
+				'firstseenat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$remotetable->add_field(
+				'lastseenat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$remotetable->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+			$remotetable->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$remotetable->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+			$remotetable->add_key(
+				'messageid_fk',
+				XMLDB_KEY_FOREIGN,
+				['messageid'],
+				'local_subscriptions_inbox_message',
+				['id']
+			);
+			$remotetable->add_key(
+				'accountid_fk',
+				XMLDB_KEY_FOREIGN,
+				['accountid'],
+				'local_subscriptions_inbox_account',
+				['id']
+			);
+
+			$remotetable->add_index(
+				'account_provider_uix',
+				XMLDB_INDEX_UNIQUE,
+				['accountid', 'providerkey']
+			);
+			$remotetable->add_index(
+				'active_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['active']
+			);
+			$remotetable->add_index(
+				'folder_active_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['accountid', 'folder', 'active']
+			);
+
+			$dbman->create_table($remotetable);
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071208,
+			'local',
+			'subscriptions'
+		);
+	}
+
+	if ($oldversion < 2026071209) {
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_thread'
+		);
+
+		$field = new xmldb_field(
+			'lastmessageid',
+			XMLDB_TYPE_INTEGER,
+			'10',
+			null,
+			null,
+			null,
+			null,
+			'lastmessageat'
+		);
+
+		if (
+			$dbman->table_exists($table) &&
+			!$dbman->field_exists($table, $field)
+		) {
+			$dbman->add_field(
+				$table,
+				$field
+			);
+		}
+
+		$index = new xmldb_index(
+			'lastmessageid_idx',
+			XMLDB_INDEX_NOTUNIQUE,
+			['lastmessageid']
+		);
+
+		if (
+			!$dbman->index_exists(
+				$table,
+				$index
+			)
+		) {
+			$dbman->add_index(
+				$table,
+				$index
+			);
+		}
+
+		/*
+		* Backfill avec le message le plus récent déjà présent.
+		*/
+		$sql = "
+			UPDATE {local_subscriptions_inbox_thread} t
+			SET lastmessageid = (
+				SELECT MAX(m.id)
+					FROM {local_subscriptions_inbox_message} m
+					WHERE m.threadid = t.id
+			)
+		";
+
+		$DB->execute($sql);
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071209,
+			'local',
+			'subscriptions'
+		);
+	}
+
+	if ($oldversion < 2026071212) {
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_ai_result'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+
+			$table->add_field(
+				'threadid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
+
+			$table->add_field(
+				'messageid',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+
+			$table->add_field(
+				'capability',
+				XMLDB_TYPE_CHAR,
+				'64',
+				null,
+				XMLDB_NOTNULL
+			);
+
+			$table->add_field(
+				'provider',
+				XMLDB_TYPE_CHAR,
+				'64',
+				null,
+				XMLDB_NOTNULL
+			);
+
+			$table->add_field(
+				'model',
+				XMLDB_TYPE_CHAR,
+				'128'
+			);
+
+			$table->add_field(
+				'promptversion',
+				XMLDB_TYPE_CHAR,
+				'64',
+				null,
+				XMLDB_NOTNULL
+			);
+
+			$table->add_field(
+				'inputhash',
+				XMLDB_TYPE_CHAR,
+				'64',
+				null,
+				XMLDB_NOTNULL
+			);
+
+			$table->add_field(
+				'cachekey',
+				XMLDB_TYPE_CHAR,
+				'64',
+				null,
+				XMLDB_NOTNULL
+			);
+
+			$table->add_field(
+				'status',
+				XMLDB_TYPE_CHAR,
+				'32',
+				null,
+				XMLDB_NOTNULL
+			);
+
+			$table->add_field(
+				'confidence',
+				XMLDB_TYPE_NUMBER,
+				'10',
+				'6',
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_field(
+				'datajson',
+				XMLDB_TYPE_TEXT
+			);
+
+			$table->add_field(
+				'warningsjson',
+				XMLDB_TYPE_TEXT
+			);
+
+			$table->add_field(
+				'metadatajson',
+				XMLDB_TYPE_TEXT
+			);
+
+			$table->add_field(
+				'errormessage',
+				XMLDB_TYPE_TEXT
+			);
+
+			$table->add_field(
+				'requestedby',
+				XMLDB_TYPE_INTEGER,
+				'10'
+			);
+
+			$table->add_field(
+				'generatedat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_field(
+				'expiresat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_key(
+				'threadid_fk',
+				XMLDB_KEY_FOREIGN,
+				['threadid'],
+				'local_subscriptions_inbox_thread',
+				['id']
+			);
+
+			$table->add_key(
+				'messageid_fk',
+				XMLDB_KEY_FOREIGN,
+				['messageid'],
+				'local_subscriptions_inbox_message',
+				['id']
+			);
+
+			$table->add_key(
+				'requestedby_fk',
+				XMLDB_KEY_FOREIGN,
+				['requestedby'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'cachekey_uix',
+				XMLDB_INDEX_UNIQUE,
+				['cachekey']
+			);
+
+			$table->add_index(
+				'thread_capability_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['threadid', 'capability']
+			);
+
+			$table->add_index(
+				'expiresat_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['expiresat']
+			);
+
+			$table->add_index(
+				'provider_status_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['provider', 'status']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071212,
+			'local',
+			'subscriptions'
+		);
+	}
+
+	if ($oldversion < 2026071216) {
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_ai_result'
+		);
+
+		$fields = [
+			new xmldb_field(
+				'inputtokens',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0,
+				'metadatajson'
+			),
+			new xmldb_field(
+				'outputtokens',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0,
+				'inputtokens'
+			),
+			new xmldb_field(
+				'totaltokens',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				0,
+				'outputtokens'
+			),
+			new xmldb_field(
+				'requestid',
+				XMLDB_TYPE_CHAR,
+				'191',
+				null,
+				null,
+				null,
+				null,
+				'totaltokens'
+			),
+		];
+
+		foreach ($fields as $field) {
+			if (!$dbman->field_exists(
+				$table,
+				$field
+			)) {
+				$dbman->add_field(
+					$table,
+					$field
+				);
+			}
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071216,
+			'local',
+			'subscriptions'
+		);
+	}
+
+    if ($oldversion < 2026071217) {
+        $table = new xmldb_table(
+            'local_subscriptions_inbox_ai_result'
+        );
+
+        if ($dbman->table_exists($table)) {
+            $uniqueindex = new xmldb_index(
+                'cachekey_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['cachekey']
+            );
+
+            if (
+                $dbman->index_exists(
+                    $table,
+                    $uniqueindex
+                )
+            ) {
+                $dbman->drop_index(
+                    $table,
+                    $uniqueindex
+                );
+            }
+
+            $historyindex = new xmldb_index(
+                'cachekey_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['cachekey']
+            );
+
+            if (
+                !$dbman->index_exists(
+                    $table,
+                    $historyindex
+                )
+            ) {
+                $dbman->add_index(
+                    $table,
+                    $historyindex
+                );
+            }
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026071217,
+            'local',
+            'subscriptions'
+        );
+    }
+
     return true;
 }

@@ -12,6 +12,9 @@ use local_subscriptions\crm\user\UserProfileTimelineBuilder;
 use local_subscriptions\crm\user\UserProfileNoteService;
 use local_subscriptions\crm\user\UserProfileTagService;
 use local_subscriptions\crm\intelligence\core\UserIntelligenceBuilder;
+use local_subscriptions\crm\user\inbox\UserInboxRepository;
+use local_subscriptions\crm\user\inbox\UserInboxService;
+use local_subscriptions\admin\Capabilities;
 
 final class UserProfileService {
 
@@ -29,6 +32,8 @@ final class UserProfileService {
     public function load_view_model(int $userid): UserProfileViewModel {
         $user = $this->repository->get_user($userid);
 
+        $canviewinbox = Capabilities::can_view_inbox();
+
         $subscriptions = $this->repository->get_subscriptions((int)$user->id);
         $digitalpayments = $this->repository->get_digital_payments((int)$user->id, (string)$user->email);
         $courses = $this->repository->get_accessible_courses((int)$user->id);
@@ -38,9 +43,16 @@ final class UserProfileService {
         $timelinebuilder = new UserProfileTimelineBuilder();
         $actionbuilder = new UserProfileActionBuilder();
 
-        $timeline = $timelinebuilder->to_legacy_objects(
-            $timelinebuilder->build_for_user($user, 40)
-        );
+        $timeline =
+            $timelinebuilder
+                ->to_legacy_objects(
+                    $timelinebuilder
+                        ->build_for_user(
+                            $user,
+                            40,
+                            $canviewinbox
+                        )
+                );
 
         $stats = new UserProfileStats(
             $this->crm_status((int)$user->id, !empty($user->suspended)),
@@ -53,6 +65,19 @@ final class UserProfileService {
         );
 
         $intelligence = (new UserIntelligenceBuilder())->build_for_user($user);
+
+        $inbox = null;
+
+        if ($canviewinbox) {
+            $inboxservice = new UserInboxService(
+                new UserInboxRepository()
+            );
+
+            $inbox = $inboxservice->get_for_user(
+                (int)$user->id,
+                5
+            );
+        }
 
         return new UserProfileViewModel(
             $user,
@@ -67,7 +92,8 @@ final class UserProfileService {
                 static fn($action): \stdClass => $action->to_object(),
                 $actionbuilder->build_for_profile($user, $digitalpayments)
             ),
-            $intelligence
+            $intelligence,
+            $inbox
         );
     }
 

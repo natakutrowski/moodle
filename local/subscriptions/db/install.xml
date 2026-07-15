@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/subscriptions/db" VERSION="2026062910" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="local/subscriptions/db" VERSION="2026071217" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
 		<TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
 			<FIELDS>
@@ -535,6 +535,741 @@
 				<INDEX NAME="userid_time_idx" UNIQUE="false" FIELDS="userid,timecreated"/>
 				<INDEX NAME="global_idx" UNIQUE="false" FIELDS="globalscore"/>
 				<INDEX NAME="risk_idx" UNIQUE="false" FIELDS="riskscore"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_account"
+			COMMENT="Configured CRM Inbox email accounts">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="name" TYPE="char" LENGTH="255"
+					NOTNULL="true"/>
+				<FIELD NAME="email" TYPE="char" LENGTH="255"
+					NOTNULL="true"/>
+				<FIELD NAME="provider" TYPE="char" LENGTH="30"
+					NOTNULL="true" DEFAULT="imap"/>
+				<FIELD NAME="enabled" TYPE="int" LENGTH="1"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="credentialkey" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="configurationjson" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="syncstatejson" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="lastsyncedat" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="lasterrorat" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="lasterror" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="email_uix" UNIQUE="true"
+					FIELDS="email"/>
+				<INDEX NAME="provider_idx" UNIQUE="false"
+					FIELDS="provider"/>
+				<INDEX NAME="enabled_idx" UNIQUE="false"
+					FIELDS="enabled"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_contact"
+			COMMENT="External and Moodle-linked CRM Inbox contacts">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="displayname" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="primaryemail" TYPE="char" LENGTH="255"
+					NOTNULL="true"/>
+				<FIELD NAME="normalizedemail" TYPE="char" LENGTH="255"
+					NOTNULL="true"/>
+				<FIELD NAME="matcheduserid" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="matchstatus" TYPE="char" LENGTH="30"
+					NOTNULL="true" DEFAULT="unmatched"/>
+				<FIELD NAME="matchsource" TYPE="char" LENGTH="30"
+					NOTNULL="true" DEFAULT="none"/>
+				<FIELD NAME="matchconfidence" TYPE="number"
+					LENGTH="5" DECIMALS="2"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="matchlocked" TYPE="int" LENGTH="1"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="lastmatchedat" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="matcheduserid_fk" TYPE="foreign"
+					FIELDS="matcheduserid"
+					REFTABLE="user" REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="normalizedemail_uix" UNIQUE="true"
+					FIELDS="normalizedemail"/>
+				<INDEX NAME="matchstatus_idx" UNIQUE="false"
+					FIELDS="matchstatus"/>
+				<INDEX NAME="reconcile_idx" UNIQUE="false"
+					FIELDS="matchstatus,matchlocked"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_team"
+			COMMENT="CRM Inbox assignment teams">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="name" TYPE="char" LENGTH="255"
+					NOTNULL="true"/>
+				<FIELD NAME="description" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="enabled" TYPE="int" LENGTH="1"
+					NOTNULL="true" DEFAULT="1"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="name_uix" UNIQUE="true"
+					FIELDS="name"/>
+				<INDEX NAME="enabled_idx" UNIQUE="false"
+					FIELDS="enabled"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_team_member"
+			COMMENT="Members of CRM Inbox assignment teams">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="teamid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="userid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="teamid_fk" TYPE="foreign"
+					FIELDS="teamid"
+					REFTABLE="local_subscriptions_inbox_team"
+					REFFIELDS="id"/>
+				<KEY NAME="userid_fk" TYPE="foreign"
+					FIELDS="userid"
+					REFTABLE="user" REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="team_user_uix" UNIQUE="true"
+					FIELDS="teamid,userid"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_thread"
+			COMMENT="CRM Inbox conversations">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="accountid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="contactid" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="providerthreadid" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="subject" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="status" TYPE="char" LENGTH="30"
+					NOTNULL="true" DEFAULT="open"/>
+				<FIELD NAME="priority" TYPE="char" LENGTH="20"
+					NOTNULL="true" DEFAULT="normal"/>
+				<FIELD NAME="assigneduserid" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="assignedteamid" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="folder" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="unreadcount" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="messagecount" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="lastmessageat" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="lastmessageid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="locallydeleted" TYPE="int" LENGTH="1"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="accountid_fk" TYPE="foreign"
+					FIELDS="accountid"
+					REFTABLE="local_subscriptions_inbox_account"
+					REFFIELDS="id"/>
+				<KEY NAME="contactid_fk" TYPE="foreign"
+					FIELDS="contactid"
+					REFTABLE="local_subscriptions_inbox_contact"
+					REFFIELDS="id"/>
+				<KEY NAME="assigneduserid_fk" TYPE="foreign"
+					FIELDS="assigneduserid"
+					REFTABLE="user" REFFIELDS="id"/>
+				<KEY NAME="assignedteamid_fk" TYPE="foreign"
+					FIELDS="assignedteamid"
+					REFTABLE="local_subscriptions_inbox_team"
+					REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="account_providerthread_uix"
+					UNIQUE="true"
+					FIELDS="accountid,providerthreadid"/>
+				<INDEX NAME="status_idx" UNIQUE="false"
+					FIELDS="status"/>
+				<INDEX NAME="priority_idx" UNIQUE="false"
+					FIELDS="priority"/>
+				<INDEX NAME="lastmessage_idx" UNIQUE="false"
+					FIELDS="lastmessageat"/>
+				<INDEX NAME="lastmessageid_idx"
+					UNIQUE="false"
+					FIELDS="lastmessageid"/>
+				<INDEX NAME="workqueue_idx" UNIQUE="false"
+					FIELDS="locallydeleted,status,lastmessageat"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_message"
+			COMMENT="Received, sent and draft CRM Inbox messages">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="threadid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="accountid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="providermessageid" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="providerparentid" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="folder" TYPE="char" LENGTH="191"
+					NOTNULL="false"/>
+				<FIELD NAME="uidvalidity" TYPE="char" LENGTH="64"
+					NOTNULL="false"/>
+				<FIELD NAME="provideruid" TYPE="char" LENGTH="64"
+					NOTNULL="false"/>
+				<FIELD NAME="providerkey" TYPE="char" LENGTH="64"
+       				NOTNULL="false"/>
+				<FIELD NAME="identitykey" TYPE="char" LENGTH="64"
+       				NOTNULL="false"/>
+				<FIELD NAME="direction" TYPE="char" LENGTH="20"
+					NOTNULL="true"/>
+				<FIELD NAME="status" TYPE="char" LENGTH="20"
+					NOTNULL="true" DEFAULT="received"/>
+				<FIELD NAME="subject" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="bodytext" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="bodyhtml" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="headersjson" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="inreplyto" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="referencesjson" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="receivedat" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="sentat" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="isread" TYPE="int" LENGTH="1"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="hasattachments" TYPE="int" LENGTH="1"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="checksum" TYPE="char" LENGTH="64"
+					NOTNULL="false"/>
+				<FIELD NAME="createdby" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="threadid_fk" TYPE="foreign"
+					FIELDS="threadid"
+					REFTABLE="local_subscriptions_inbox_thread"
+					REFFIELDS="id"/>
+				<KEY NAME="accountid_fk" TYPE="foreign"
+					FIELDS="accountid"
+					REFTABLE="local_subscriptions_inbox_account"
+					REFFIELDS="id"/>
+				<KEY NAME="createdby_fk" TYPE="foreign"
+					FIELDS="createdby"
+					REFTABLE="user" REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="provider_key_uix" UNIQUE="true"
+       				FIELDS="accountid,providerkey"/>
+				<INDEX NAME="account_identity_uix" UNIQUE="true"
+       				FIELDS="accountid,identitykey"/>
+				<INDEX NAME="provider_message_idx" UNIQUE="false"
+					FIELDS="accountid,providermessageid"/>
+				<INDEX NAME="direction_idx" UNIQUE="false"
+					FIELDS="direction"/>
+				<INDEX NAME="status_idx" UNIQUE="false"
+					FIELDS="status"/>
+				<INDEX NAME="receivedat_idx" UNIQUE="false"
+					FIELDS="receivedat"/>
+				<INDEX NAME="sentat_idx" UNIQUE="false"
+					FIELDS="sentat"/>
+				<INDEX NAME="checksum_idx" UNIQUE="false"
+					FIELDS="checksum"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_participant"
+			COMMENT="Participants of CRM Inbox messages">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="messageid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="contactid" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="participanttype" TYPE="char" LENGTH="20"
+					NOTNULL="true"/>
+				<FIELD NAME="email" TYPE="char" LENGTH="255"
+					NOTNULL="true"/>
+				<FIELD NAME="normalizedemail" TYPE="char" LENGTH="255"
+					NOTNULL="true"/>
+				<FIELD NAME="displayname" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="messageid_fk" TYPE="foreign"
+					FIELDS="messageid"
+					REFTABLE="local_subscriptions_inbox_message"
+					REFFIELDS="id"/>
+				<KEY NAME="contactid_fk" TYPE="foreign"
+					FIELDS="contactid"
+					REFTABLE="local_subscriptions_inbox_contact"
+					REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="message_type_email_uix"
+					UNIQUE="true"
+					FIELDS="messageid,participanttype,normalizedemail"/>
+				<INDEX NAME="normalizedemail_idx" UNIQUE="false"
+					FIELDS="normalizedemail"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_attachment"
+			COMMENT="CRM Inbox message attachments stored through Moodle File API">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="messageid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="providerattachmentid" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="filename" TYPE="char" LENGTH="255"
+					NOTNULL="true"/>
+				<FIELD NAME="mimetype" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="filesize" TYPE="int" LENGTH="20"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="contenthash" TYPE="char" LENGTH="64"
+					NOTNULL="false"/>
+				<FIELD NAME="fileitemid" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="downloadstatus" TYPE="char" LENGTH="20"
+					NOTNULL="true" DEFAULT="pending"/>
+				<FIELD NAME="lasterror" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="messageid_fk" TYPE="foreign"
+					FIELDS="messageid"
+					REFTABLE="local_subscriptions_inbox_message"
+					REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="message_provider_uix" UNIQUE="true"
+					FIELDS="messageid,providerattachmentid"/>
+				<INDEX NAME="downloadstatus_idx" UNIQUE="false"
+					FIELDS="downloadstatus"/>
+				<INDEX NAME="contenthash_idx" UNIQUE="false"
+					FIELDS="contenthash"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_tag"
+			COMMENT="Available CRM Inbox thread tags">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="name" TYPE="char" LENGTH="100"
+					NOTNULL="true"/>
+				<FIELD NAME="colour" TYPE="char" LENGTH="20"
+					NOTNULL="false"/>
+				<FIELD NAME="enabled" TYPE="int" LENGTH="1"
+					NOTNULL="true" DEFAULT="1"/>
+				<FIELD NAME="createdby" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="createdby_fk" TYPE="foreign"
+					FIELDS="createdby"
+					REFTABLE="user" REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="name_uix" UNIQUE="true"
+					FIELDS="name"/>
+				<INDEX NAME="enabled_idx" UNIQUE="false"
+					FIELDS="enabled"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_thread_tag"
+			COMMENT="Tags attached to CRM Inbox threads">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="threadid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="tagid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="createdby" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="threadid_fk" TYPE="foreign"
+					FIELDS="threadid"
+					REFTABLE="local_subscriptions_inbox_thread"
+					REFFIELDS="id"/>
+				<KEY NAME="tagid_fk" TYPE="foreign"
+					FIELDS="tagid"
+					REFTABLE="local_subscriptions_inbox_tag"
+					REFFIELDS="id"/>
+				<KEY NAME="createdby_fk" TYPE="foreign"
+					FIELDS="createdby"
+					REFTABLE="user" REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="thread_tag_uix" UNIQUE="true"
+					FIELDS="threadid,tagid"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_sync_log"
+			COMMENT="CRM Inbox synchronisation execution log">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="accountid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="synctype" TYPE="char" LENGTH="30"
+					NOTNULL="true"/>
+				<FIELD NAME="status" TYPE="char" LENGTH="20"
+					NOTNULL="true"/>
+				<FIELD NAME="folder" TYPE="char" LENGTH="255"
+					NOTNULL="false"/>
+				<FIELD NAME="cursorbefore" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="cursorafter" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="fetchedcount" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="createdcount" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="updatedcount" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="skippedcount" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="errorcount" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="message" TYPE="text"
+					NOTNULL="false"/>
+				<FIELD NAME="startedat" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="finishedat" TYPE="int" LENGTH="10"
+					NOTNULL="false"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="accountid_fk" TYPE="foreign"
+					FIELDS="accountid"
+					REFTABLE="local_subscriptions_inbox_account"
+					REFFIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="status_idx" UNIQUE="false"
+					FIELDS="status"/>
+				<INDEX NAME="startedat_idx" UNIQUE="false"
+					FIELDS="startedat"/>
+				<INDEX NAME="account_started_idx" UNIQUE="false"
+					FIELDS="accountid,startedat"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_remote"
+			COMMENT="Remote IMAP locations of CRM Inbox messages">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10"
+					NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="messageid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="accountid" TYPE="int" LENGTH="10"
+					NOTNULL="true"/>
+				<FIELD NAME="folder" TYPE="char" LENGTH="191"
+					NOTNULL="true"/>
+				<FIELD NAME="uidvalidity" TYPE="char" LENGTH="64"
+					NOTNULL="true"/>
+				<FIELD NAME="provideruid" TYPE="char" LENGTH="64"
+					NOTNULL="true"/>
+				<FIELD NAME="providerkey" TYPE="char" LENGTH="64"
+					NOTNULL="true"/>
+				<FIELD NAME="active" TYPE="int" LENGTH="1"
+					NOTNULL="true" DEFAULT="1"/>
+				<FIELD NAME="firstseenat" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="lastseenat" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+					NOTNULL="true" DEFAULT="0"/>
+			</FIELDS>
+
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+				<KEY NAME="messageid_fk" TYPE="foreign"
+					FIELDS="messageid"
+					REFTABLE="local_subscriptions_inbox_message"
+					REFFIELDS="id"/>
+				<KEY NAME="accountid_fk" TYPE="foreign"
+					FIELDS="accountid"
+					REFTABLE="local_subscriptions_inbox_account"
+					REFFIELDS="id"/>
+			</KEYS>
+
+			<INDEXES>
+				<INDEX NAME="account_provider_uix" UNIQUE="true"
+					FIELDS="accountid,providerkey"/>
+				<INDEX NAME="active_idx" UNIQUE="false"
+					FIELDS="active"/>
+				<INDEX NAME="folder_active_idx" UNIQUE="false"
+					FIELDS="accountid,folder,active"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_inbox_ai_result"
+			COMMENT="Cached and persisted CRM Inbox AI analysis results">
+			<FIELDS>
+				<FIELD NAME="id"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					SEQUENCE="true"/>
+
+				<FIELD NAME="threadid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"/>
+
+				<FIELD NAME="messageid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="false"/>
+
+				<FIELD NAME="capability"
+					TYPE="char"
+					LENGTH="64"
+					NOTNULL="true"/>
+
+				<FIELD NAME="provider"
+					TYPE="char"
+					LENGTH="64"
+					NOTNULL="true"/>
+
+				<FIELD NAME="model"
+					TYPE="char"
+					LENGTH="128"
+					NOTNULL="false"/>
+
+				<FIELD NAME="promptversion"
+					TYPE="char"
+					LENGTH="64"
+					NOTNULL="true"/>
+
+				<FIELD NAME="inputhash"
+					TYPE="char"
+					LENGTH="64"
+					NOTNULL="true"/>
+
+				<FIELD NAME="cachekey"
+					TYPE="char"
+					LENGTH="64"
+					NOTNULL="true"/>
+
+				<FIELD NAME="status"
+					TYPE="char"
+					LENGTH="32"
+					NOTNULL="true"/>
+
+				<FIELD NAME="confidence"
+					TYPE="number"
+					LENGTH="10"
+					DECIMALS="6"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="datajson"
+					TYPE="text"
+					NOTNULL="false"/>
+
+				<FIELD NAME="warningsjson"
+					TYPE="text"
+					NOTNULL="false"/>
+
+				<FIELD NAME="metadatajson"
+					TYPE="text"
+					NOTNULL="false"/>
+
+				<FIELD NAME="inputtokens"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="outputtokens"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="totaltokens"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="requestid"
+					TYPE="char"
+					LENGTH="191"
+					NOTNULL="false"/>
+
+				<FIELD NAME="errormessage"
+					TYPE="text"
+					NOTNULL="false"/>
+
+				<FIELD NAME="requestedby"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="false"/>
+
+				<FIELD NAME="generatedat"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="expiresat"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="timecreated"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="timemodified"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+			</FIELDS>
+
+			<KEYS>
+				<KEY NAME="primary"
+					TYPE="primary"
+					FIELDS="id"/>
+
+				<KEY NAME="threadid_fk"
+					TYPE="foreign"
+					FIELDS="threadid"
+					REFTABLE="local_subscriptions_inbox_thread"
+					REFFIELDS="id"/>
+
+				<KEY NAME="messageid_fk"
+					TYPE="foreign"
+					FIELDS="messageid"
+					REFTABLE="local_subscriptions_inbox_message"
+					REFFIELDS="id"/>
+
+				<KEY NAME="requestedby_fk"
+					TYPE="foreign"
+					FIELDS="requestedby"
+					REFTABLE="user"
+					REFFIELDS="id"/>
+			</KEYS>
+
+			<INDEXES>
+				<INDEX NAME="cachekey_idx"
+					UNIQUE="false"
+					FIELDS="cachekey"/>
+
+				<INDEX NAME="thread_capability_idx"
+					UNIQUE="false"
+					FIELDS="threadid,capability"/>
+
+				<INDEX NAME="expiresat_idx"
+					UNIQUE="false"
+					FIELDS="expiresat"/>
+
+				<INDEX NAME="provider_status_idx"
+					UNIQUE="false"
+					FIELDS="provider,status"/>
 			</INDEXES>
 		</TABLE>
 

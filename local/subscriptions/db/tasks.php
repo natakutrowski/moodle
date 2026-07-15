@@ -102,3 +102,69 @@ $tasks[] = [
     'month' => '*',
     'dayofweek' => '*',
 ];
+
+$tasks[] = [
+    'classname' =>
+        '\local_subscriptions\task\sync_crm_inbox_task',
+    'blocking' => 0,
+    'minute' => '*/15',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+$tasks[] = [
+    'classname' =>
+        '\local_subscriptions\task\reconcile_crm_inbox_contacts_task',
+    'blocking' => 0,
+    'minute' => 'R',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+$tasks[] = [
+    'classname' =>
+        '\local_subscriptions\task\download_crm_inbox_attachments_task',
+    'blocking' => 0,
+    'minute' => '5,20,35,50',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+$tasks[] = [
+    'classname' =>
+        '\local_subscriptions\task\cleanup_crm_inbox_task',
+    'blocking' => 0,
+    'minute' => 'R',
+    'hour' => '3',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+$tasks[] = [
+    'classname' =>
+        '\local_subscriptions\task\cleanup_crm_inbox_ai_results_task',
+    'blocking' => 0,
+    'minute' => 'R',
+    'hour' => '3',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+$tasks[] = [
+    'classname' =>
+        '\local_subscriptions\task\analyse_crm_inbox_task',
+    'blocking' => 0,
+    'minute' => '10,25,40,55',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];

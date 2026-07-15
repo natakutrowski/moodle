@@ -5,6 +5,7 @@ namespace local_subscriptions\crm\user;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\crm\intelligence\core\UserIntelligence;
+use local_subscriptions\crm\user\inbox\UserInboxSummary;
 
 final class UserProfileViewModel {
 
@@ -18,7 +19,8 @@ final class UserProfileViewModel {
         public readonly array $courses,
         public readonly array $tags = [],
         public readonly array $actions = [],
-        public readonly ?UserIntelligence $intelligence = null
+        public readonly ?UserIntelligence $intelligence = null,
+        public readonly ?UserInboxSummary $inbox = null
     ) {
     }
 
@@ -33,7 +35,11 @@ final class UserProfileViewModel {
             'courses' => $this->courses,
             'actions' => $this->actions,
             'tags' => $this->tags,
-            'intelligence' => $this->intelligence?->to_object(),
+            'intelligence' =>
+                $this->intelligence?->to_object(),
+
+            'inbox' =>
+                $this->inbox?->to_object(),
         ];
     }
 }

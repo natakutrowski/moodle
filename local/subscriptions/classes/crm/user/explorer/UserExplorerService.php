@@ -12,35 +12,56 @@ final class UserExplorerService {
         ?UserExplorerRepository $repository = null
     ) {
         $this->repository =
-            $repository ?? new UserExplorerRepository();
+            $repository ??
+            new UserExplorerRepository();
     }
 
     public function explore(
-        UserExplorerCriteria $criteria
+        UserExplorerCriteria $criteria,
+        bool $canviewinbox = false
     ): UserExplorerResult {
-
         global $USER;
 
-        $total = $this->repository->count($criteria);
+        if (!$canviewinbox) {
+            $criteria =
+                $criteria->without_inbox();
+        }
+
+        $total = $this->repository->count(
+            $criteria
+        );
+
         $lastpage = $total > 0
-            ? (int)floor(($total - 1) / $criteria->perpage)
+            ? (int)floor(
+                ($total - 1) /
+                $criteria->perpage
+            )
             : 0;
 
         if ($criteria->page > $lastpage) {
-            $criteria = $criteria->with_page($lastpage);
+            $criteria =
+                $criteria->with_page(
+                    $lastpage
+                );
         }
 
         $records = $this->repository
-            ->get_records($criteria);
+            ->get_records(
+                $criteria,
+                $canviewinbox
+            );
 
         $userids = array_map(
-            static fn(\stdClass $record): int =>
-                (int)$record->id,
+            static fn(
+                \stdClass $record
+            ): int => (int)$record->id,
             $records
         );
 
         $tagsbyuser = $this->repository
-            ->get_tags_by_userids($userids);
+            ->get_tags_by_userids(
+                $userids
+            );
 
         $users = [];
 
@@ -48,10 +69,13 @@ final class UserExplorerService {
             $userid = (int)$record->id;
 
             $users[] =
-                UserExplorerUserViewModel::from_record(
-                    $record,
-                    $tagsbyuser[$userid] ?? []
-                );
+                UserExplorerUserViewModel::
+                    from_record(
+                        $record,
+                        $tagsbyuser[
+                            $userid
+                        ] ?? []
+                    );
         }
 
         $preferencerepository =
@@ -61,16 +85,24 @@ final class UserExplorerService {
             $criteria,
             $users,
             $total,
-            $this->repository->get_available_countries(),
-            $this->repository->get_available_tags(),
-            $preferencerepository->get_columns(
-                (int)$USER->id
+            $this->repository
+                ->get_available_countries(),
+            $this->repository
+                ->get_available_tags(),
+            $preferencerepository
+                ->get_columns(
+                    (int)$USER->id,
+                    $canviewinbox
+                ),
+            (
+                new UserExplorerSavedViewService(
+                    $preferencerepository
+                )
+            )->get_views(
+                (int)$USER->id,
+                $canviewinbox
             ),
-            (new UserExplorerSavedViewService(
-                $preferencerepository
-            ))->get_views(
-                (int)$USER->id
-            )
+            $canviewinbox
         );
     }
 }

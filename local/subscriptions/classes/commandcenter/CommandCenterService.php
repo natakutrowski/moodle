@@ -10,6 +10,7 @@ use local_subscriptions\commandcenter\providers\DigitalPurchaseProvider;
 use local_subscriptions\commandcenter\providers\SubscriptionProvider;
 use local_subscriptions\commandcenter\providers\UserProvider;
 use local_subscriptions\commandcenter\providers\IntelligenceProvider;
+use local_subscriptions\commandcenter\providers\InboxProvider;
 use local_subscriptions\commandcenter\CommandContext;
 use local_subscriptions\commandcenter\intents\CommandIntentRegistry;
 
@@ -26,6 +27,7 @@ final class CommandCenterService {
         $this->providers = $providers ?? [
             new AdminActionProvider(),
             new IntelligenceProvider(),
+            new InboxProvider(),
             new UserProvider(),
             new DigitalProductProvider(),
             new DigitalPurchaseProvider(),

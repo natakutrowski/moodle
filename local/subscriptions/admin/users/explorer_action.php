@@ -15,7 +15,21 @@ $context = AdminSecurity::require(
     Capabilities::VIEW_USERS
 );
 
+if (
+    $_SERVER['REQUEST_METHOD'] !==
+    'POST'
+) {
+    throw new moodle_exception(
+        'invalidrequest',
+        'error'
+    );
+}
+
 require_sesskey();
+
+$canviewinbox = AdminSecurity::can(
+    Capabilities::VIEW_INBOX
+);
 
 $action = required_param(
     'action',
@@ -48,10 +62,12 @@ if ($action === 'save_columns') {
         PARAM_ALPHANUMEXT
     );
 
-    (new UserExplorerColumnService())->save_columns(
-        (int)$USER->id,
-        $columns
-    );
+    (new UserExplorerColumnService())
+        ->save_columns(
+            (int)$USER->id,
+            $columns,
+            $canviewinbox
+        );
 
     redirect(
         $redirecturl,
@@ -86,13 +102,21 @@ if ($action === 'save_view') {
         PARAM_TEXT
     );
 
-    $criteria = UserExplorerCriteria::from_request();
+    $criteria =
+        UserExplorerCriteria::from_request();
 
-    (new UserExplorerSavedViewService())->save(
-        (int)$USER->id,
-        $name,
-        $criteria
-    );
+    if (!$canviewinbox) {
+        $criteria =
+            $criteria->without_inbox();
+    }
+
+    (new UserExplorerSavedViewService())
+        ->save(
+            (int)$USER->id,
+            $name,
+            $criteria,
+            $canviewinbox
+        );
 
     redirect(
         $redirecturl,

@@ -13,12 +13,15 @@ final class UserExplorerColumn {
     public const INTELLIGENCE = 'intelligence';
     public const SUBSCRIPTIONS = 'subscriptions';
     public const PURCHASES = 'purchases';
+    public const INBOX = 'inbox';
     public const COUNTRY = 'country';
     public const REGISTERED = 'registered';
     public const LAST_ACCESS = 'last_access';
 
-    public static function allowed(): array {
-        return [
+    public static function allowed(
+        bool $includeinbox = true
+    ): array {
+        $columns = [
             self::USER,
             self::TAGS,
             self::SCORE,
@@ -26,14 +29,29 @@ final class UserExplorerColumn {
             self::INTELLIGENCE,
             self::SUBSCRIPTIONS,
             self::PURCHASES,
+            self::INBOX,
             self::COUNTRY,
             self::REGISTERED,
             self::LAST_ACCESS,
         ];
+
+        if (!$includeinbox) {
+            $columns = array_values(
+                array_filter(
+                    $columns,
+                    static fn(string $column): bool =>
+                        $column !== self::INBOX
+                )
+            );
+        }
+
+        return $columns;
     }
 
-    public static function defaults(): array {
-        return [
+    public static function defaults(
+        bool $includeinbox = true
+    ): array {
+        $columns = [
             self::USER,
             self::TAGS,
             self::SCORE,
@@ -41,8 +59,21 @@ final class UserExplorerColumn {
             self::INTELLIGENCE,
             self::SUBSCRIPTIONS,
             self::PURCHASES,
+            self::INBOX,
             self::LAST_ACCESS,
         ];
+
+        if (!$includeinbox) {
+            $columns = array_values(
+                array_filter(
+                    $columns,
+                    static fn(string $column): bool =>
+                        $column !== self::INBOX
+                )
+            );
+        }
+
+        return $columns;
     }
 
     public static function required(): array {
@@ -51,8 +82,13 @@ final class UserExplorerColumn {
         ];
     }
 
-    public static function normalize(array $columns): array {
-        $allowed = array_flip(self::allowed());
+    public static function normalize(
+        array $columns,
+        bool $includeinbox = true
+    ): array {
+        $allowed = array_flip(
+            self::allowed($includeinbox)
+        );
 
         $normalized = [];
 
@@ -60,25 +96,51 @@ final class UserExplorerColumn {
             if (
                 is_string($column) &&
                 isset($allowed[$column]) &&
-                !in_array($column, $normalized, true)
+                !in_array(
+                    $column,
+                    $normalized,
+                    true
+                )
             ) {
                 $normalized[] = $column;
             }
         }
 
-        foreach (self::required() as $requiredcolumn) {
-            if (!in_array($requiredcolumn, $normalized, true)) {
-                array_unshift($normalized, $requiredcolumn);
+        foreach (
+            self::required()
+            as $requiredcolumn
+        ) {
+            if (
+                !in_array(
+                    $requiredcolumn,
+                    $normalized,
+                    true
+                )
+            ) {
+                array_unshift(
+                    $normalized,
+                    $requiredcolumn
+                );
             }
         }
 
-        return $normalized ?: self::defaults();
+        return $normalized ?:
+            self::defaults($includeinbox);
     }
 
-    public static function label(string $column): string {
-        if (!in_array($column, self::allowed(), true)) {
+    public static function label(
+        string $column
+    ): string {
+        if (
+            !in_array(
+                $column,
+                self::allowed(),
+                true
+            )
+        ) {
             throw new \coding_exception(
-                'Unknown User Explorer column: ' . $column
+                'Unknown User Explorer column: ' .
+                $column
             );
         }
 

@@ -30,6 +30,21 @@ final class HelpContextResolver {
 
         'local-subscriptions-admin-help-article' =>
             HelpContext::GENERAL,
+
+        'local-subscriptions-admin-inbox-index' =>
+            HelpContext::INBOX,
+
+        'local-subscriptions-admin-inbox-thread' =>
+            HelpContext::INBOX,
+
+        'local-subscriptions-admin-inbox-reply' =>
+            HelpContext::INBOX,
+
+        'local-subscriptions-admin-inbox-diagnostics' =>
+            HelpContext::INBOX_DIAGNOSTICS,
+
+        'local-subscriptions-admin-inbox-ai-diagnostics' =>
+            HelpContext::INBOX_AI,
     ];
 
     public static function from_page_id(

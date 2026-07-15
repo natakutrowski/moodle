@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use html_writer;
 use local_subscriptions\dashboard\DashboardCard;
 use local_subscriptions\crm\intelligence\dashboard\CrmIntelligenceDashboardBuilder;
+use local_subscriptions\crm\intelligence\core\CrmIntelligenceLimits;
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\Capabilities;
 use moodle_url;
@@ -19,7 +20,18 @@ final class CrmIntelligenceCard implements DashboardCard {
             return '';
         }
 
-        $overview = (new CrmIntelligenceDashboardBuilder())->build();
+        $canviewinbox =
+            Capabilities::can_view_inbox();
+
+        $overview =
+            (
+                new
+                    CrmIntelligenceDashboardBuilder()
+            )->build(
+                CrmIntelligenceLimits::
+                    DASHBOARD_USERS,
+                $canviewinbox
+            );
 
         $out = html_writer::tag('h3', '🧠 ' . get_string('crm_intelligence_dashboard_title', 'local_subscriptions'), [
             'class' => 'h4 mb-3',
@@ -102,13 +114,44 @@ final class CrmIntelligenceCard implements DashboardCard {
 
                 $url = new moodle_url(subscription_config::admin_user_view_page(), ['id' => $user->id]);
 
+                $profilecontent =
+                    html_writer::link(
+                        $url,
+                        s(fullname($user)),
+                        [
+                            'class' => 'fw-bold',
+                        ]
+                    );
+
+                $profilecontent .= html_writer::div(
+                    s($user->email),
+                    'text-muted small'
+                );
+
+                $profilecontent .= html_writer::div(
+                    get_string(
+                        'crm_intelligence_global_score',
+                        'local_subscriptions'
+                    ) .
+                    ': ' .
+                    $score->global() .
+                    '/100',
+                    'small mt-1'
+                );
+
+                if (
+                    $canviewinbox &&
+                    !empty($profile->inbox)
+                ) {
+                    $profilecontent .=
+                        self::render_inbox_summary(
+                            $profile->user,
+                            $profile->inbox
+                        );
+                }
+
                 $out .= html_writer::div(
-                    html_writer::link($url, s(fullname($user)), ['class' => 'fw-bold']) .
-                    html_writer::div(s($user->email), 'text-muted small') .
-                    html_writer::div(
-                        get_string('crm_intelligence_global_score', 'local_subscriptions') . ': ' . $score->global() . '/100',
-                        'small mt-1'
-                    ),
+                    $profilecontent,
                     'border rounded p-2 mb-2'
                 );
             }
@@ -116,4 +159,103 @@ final class CrmIntelligenceCard implements DashboardCard {
 
         return html_writer::div($out, 'card card-body local-subscriptions-dashboard-card mb-4');
     }
+
+    private static function render_inbox_summary(
+        \stdClass $user,
+        \stdClass $inbox
+    ): string {
+        $conversationcount = (int)(
+            $inbox->conversationcount
+            ?? 0
+        );
+
+        if ($conversationcount <= 0) {
+            return '';
+        }
+
+        $opencount = (int)(
+            $inbox->openconversationcount
+            ?? 0
+        );
+
+        $unreadcount = (int)(
+            $inbox->unreadcount
+            ?? 0
+        );
+
+        $urgentcount = (int)(
+            $inbox->urgentcount
+            ?? 0
+        );
+
+        $badges = html_writer::span(
+            get_string(
+                'crm_intelligence_inbox_conversations',
+                'local_subscriptions',
+                $conversationcount
+            ),
+            'badge bg-light text-dark border'
+        );
+
+        if ($opencount > 0) {
+            $badges .= html_writer::span(
+                get_string(
+                    'crm_intelligence_inbox_open',
+                    'local_subscriptions',
+                    $opencount
+                ),
+                'badge bg-primary'
+            );
+        }
+
+        if ($unreadcount > 0) {
+            $badges .= html_writer::span(
+                get_string(
+                    'crm_intelligence_inbox_unread',
+                    'local_subscriptions',
+                    $unreadcount
+                ),
+                'badge bg-danger'
+            );
+        }
+
+        if ($urgentcount > 0) {
+            $badges .= html_writer::span(
+                get_string(
+                    'crm_intelligence_inbox_urgent',
+                    'local_subscriptions',
+                    $urgentcount
+                ),
+                'badge bg-warning text-dark'
+            );
+        }
+
+        $inboxurl = new moodle_url(
+            subscription_config::
+                admin_inbox_page(),
+            [
+                'q' => (string)$user->email,
+            ]
+        );
+
+        return html_writer::div(
+            html_writer::div(
+                $badges,
+                'crm-intelligence-profile-inbox-badges'
+            ) .
+            html_writer::link(
+                $inboxurl,
+                get_string(
+                    'crm_intelligence_inbox_open_link',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'crm-intelligence-profile-inbox-link',
+                ]
+            ),
+            'crm-intelligence-profile-inbox mt-2'
+        );
+    }
+
 }

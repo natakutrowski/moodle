@@ -3,6 +3,7 @@
 define('CLI_SCRIPT', true);
 
 require_once(__DIR__ . '/../../../config.php');
+require_once($CFG->libdir . '/clilib.php');
 
 use local_subscriptions\crm\help\validation\HelpCenterValidator;
 

@@ -37,7 +37,9 @@ final class UserExplorerCriteria {
         public readonly ?int $riskmax = null,
         public readonly string $hassubscription = '',
         public readonly string $haspurchase = '',
-        public readonly string $activity = ''
+        public readonly string $activity = '',
+        public readonly string $hasinbox = '',
+        public readonly string $hasinboxunread = ''
     ) {
     }
 
@@ -121,6 +123,20 @@ final class UserExplorerCriteria {
                     '',
                     PARAM_ALPHANUMEXT
                 )
+            ),
+            self::normalize_presence(
+                optional_param(
+                    'hasinbox',
+                    '',
+                    PARAM_ALPHANUMEXT
+                )
+            ),
+            self::normalize_presence(
+                optional_param(
+                    'hasinboxunread',
+                    '',
+                    PARAM_ALPHANUMEXT
+                )
             )
         );
     }
@@ -165,6 +181,12 @@ final class UserExplorerCriteria {
             ),
             self::normalize_activity(
                 (string)($params['activity'] ?? '')
+            ),
+            self::normalize_presence(
+                (string)($params['hasinbox'] ?? '')
+            ),
+            self::normalize_presence(
+                (string)($params['hasinboxunread'] ?? '')
             )
         );
     }
@@ -238,6 +260,35 @@ final class UserExplorerCriteria {
         return $this->page * $this->perpage;
     }
 
+    public function without_inbox(): self {
+        if (
+            $this->hasinbox === '' &&
+            $this->hasinboxunread === ''
+        ) {
+            return $this;
+        }
+
+        return new self(
+            $this->query,
+            $this->intelligence,
+            $this->country,
+            $this->tag,
+            $this->accountstatus,
+            $this->sort,
+            $this->page,
+            $this->perpage,
+            $this->scoremin,
+            $this->scoremax,
+            $this->riskmin,
+            $this->riskmax,
+            $this->hassubscription,
+            $this->haspurchase,
+            $this->activity,
+            self::PRESENCE_ALL,
+            self::PRESENCE_ALL
+        );
+    }
+
     public function with_page(int $page): self {
         return new self(
             $this->query,
@@ -254,7 +305,9 @@ final class UserExplorerCriteria {
             $this->riskmax,
             $this->hassubscription,
             $this->haspurchase,
-            $this->activity
+            $this->activity,
+            $this->hasinbox,
+            $this->hasinboxunread
         );
     }
     
@@ -285,6 +338,8 @@ final class UserExplorerCriteria {
             'hassubscription' => $this->hassubscription,
             'haspurchase' => $this->haspurchase,
             'activity' => $this->activity,
+            'hasinbox' => $this->hasinbox,
+            'hasinboxunread' => $this->hasinboxunread,
         ] as $key => $value) {
             if ($value !== '') {
                 $params[$key] = $value;
@@ -315,6 +370,8 @@ final class UserExplorerCriteria {
             $this->hassubscription,
             $this->haspurchase,
             $this->activity,
+            $this->hasinbox,
+            $this->hasinboxunread,
             $this->scoremin,
             $this->scoremax,
             $this->riskmin,

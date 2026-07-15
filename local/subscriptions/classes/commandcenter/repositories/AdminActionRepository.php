@@ -9,6 +9,7 @@ use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commandcenter\CommandIcons;
+use local_subscriptions\commandcenter\actions\CommandActionKeys;
 
 final class AdminActionRepository {
 
@@ -122,6 +123,100 @@ final class AdminActionRepository {
 
         if (
             AdminSecurity::can(
+                Capabilities::VIEW_INBOX
+            )
+        ) {
+            $actions[] = $this->action(
+                CommandIcons::INBOX,
+                'command_action_inbox_title',
+                'command_action_inbox_subtitle',
+                subscription_config::
+                    admin_inbox_page(),
+                'inbox email emails support messages conversations tickets ' .
+                'boite réception boîte réception assistance campusfr ' .
+                'ouvrir inbox ouvrir boite réception ' .
+                'почта входящие письма поддержка сообщения тикеты'
+            );
+
+            $actions[] = $this->action(
+                CommandIcons::UNASSIGNED,
+                'command_action_inbox_unassigned_title',
+                'command_action_inbox_unassigned_subtitle',
+                subscription_config::
+                    admin_inbox_page(),
+                'inbox unassigned non assigné non assignées sans responsable ' .
+                'conversation ticket support équipe ' .
+                'входящие без ответственного неназначенные диалоги',
+                [
+                    'assignment' => 'unassigned',
+                ]
+            );
+
+            $actions[] = $this->action(
+                CommandIcons::URGENT,
+                'command_action_inbox_urgent_title',
+                'command_action_inbox_urgent_subtitle',
+                subscription_config::
+                    admin_inbox_page(),
+                'inbox urgent urgentes priorité haute critique support ' .
+                'conversation ticket ' .
+                'срочные важные приоритетные диалоги',
+                [
+                    'priority' => 'urgent',
+                ]
+            );
+
+            $actions[] = $this->action(
+                CommandIcons::DIAGNOSTICS,
+                'command_action_inbox_diagnostics_title',
+                'command_action_inbox_diagnostics_subtitle',
+                subscription_config::
+                    admin_inbox_diagnostics_page(),
+                'inbox diagnostics diagnostic imap smtp connexion santé erreurs ' .
+                'диагностика входящие imap smtp ошибки соединение'
+            );
+
+            if (
+                AdminSecurity::can(
+                    Capabilities::USE_INBOX_AI
+                )
+            ) {
+                $actions[] = $this->action(
+                    CommandIcons::AI,
+                    'command_action_inbox_ai_diagnostics_title',
+                    'command_action_inbox_ai_diagnostics_subtitle',
+                    subscription_config::
+                        admin_inbox_ai_diagnostics_page(),
+                    'inbox ai ia intelligence artificielle openai diagnostics ' .
+                    'diagnostic provider prompts cache modèles ' .
+                    'ии openai диагностика провайдер кэш промпты'
+                );
+            }
+        }
+
+        if (
+            AdminSecurity::can(
+                Capabilities::MANAGE_INBOX
+            )
+        ) {
+            $actions[] = $this->command_action(
+                CommandIcons::INBOX_SYNC,
+                'command_action_inbox_sync_title',
+                'command_action_inbox_sync_subtitle',
+                subscription_config::
+                    admin_inbox_page(),
+                'inbox sync synchroniser synchronisation recevoir emails imap ' .
+                'mettre à jour actualiser boîte réception ' .
+                'синхронизация входящие получить письма обновить imap',
+                CommandActionKeys::INBOX_SYNC,
+                [],
+                'command_confirm_inbox_sync',
+                'command_center_action_run'
+            );
+        }
+
+        if (
+            AdminSecurity::can(
                 Capabilities::VIEW_DASHBOARD
             )
         ) {
@@ -144,27 +239,92 @@ final class AdminActionRepository {
         string $titlekey,
         string $subtitlekey,
         string $path,
-        string $keywords
+        string $keywords,
+        array $params = []
     ): array {
-        $url = new moodle_url($path);
+        $url = new moodle_url(
+            $path,
+            $params
+        );
+
         $urlstring = $url->out(false);
 
         return [
             'icon' => $icon,
+
             'title' => get_string(
                 $titlekey,
                 'local_subscriptions'
             ),
+
             'subtitle' => get_string(
                 $subtitlekey,
                 'local_subscriptions'
             ),
+
             'url' => $urlstring,
-            'actionkey' => 'open_url',
+
+            'actionkey' =>
+                CommandActionKeys::OPEN_URL,
+
             'payload' => [
                 'url' => $urlstring,
             ],
+
             'keywords' => $keywords,
         ];
     }
+
+    private function command_action(
+        string $icon,
+        string $titlekey,
+        string $subtitlekey,
+        string $path,
+        string $keywords,
+        string $actionkey,
+        array $payload = [],
+        ?string $confirmationkey = null,
+        ?string $actionlabelkey = null
+    ): array {
+        $url = new moodle_url($path);
+        $urlstring = $url->out(false);
+
+        $action = [
+            'icon' => $icon,
+
+            'title' => get_string(
+                $titlekey,
+                'local_subscriptions'
+            ),
+
+            'subtitle' => get_string(
+                $subtitlekey,
+                'local_subscriptions'
+            ),
+
+            'url' => $urlstring,
+            'actionkey' => $actionkey,
+            'payload' => $payload,
+            'keywords' => $keywords,
+        ];
+
+        if ($confirmationkey !== null) {
+            $action['confirmation'] =
+                get_string(
+                    $confirmationkey,
+                    'local_subscriptions'
+                );
+        }
+
+        if ($actionlabelkey !== null) {
+            $action['actionlabel'] =
+                get_string(
+                    $actionlabelkey,
+                    'local_subscriptions'
+                );
+        }
+
+        return $action;
+    }
+
 }

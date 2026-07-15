@@ -12,28 +12,42 @@ final class UserExplorerColumnService {
         ?UserExplorerPreferenceRepository $repository = null
     ) {
         $this->repository =
-            $repository ?? new UserExplorerPreferenceRepository();
+            $repository ??
+            new UserExplorerPreferenceRepository();
     }
 
-    public function get_columns(int $userid): array {
-        return $this->repository->get_columns($userid);
+    public function get_columns(
+        int $userid,
+        bool $includeinbox = true
+    ): array {
+        return $this->repository->get_columns(
+            $userid,
+            $includeinbox
+        );
     }
 
     public function save_columns(
         int $userid,
-        array $columns
+        array $columns,
+        bool $includeinbox = true
     ): array {
-        $columns = UserExplorerColumn::normalize($columns);
+        $columns = UserExplorerColumn::normalize(
+            $columns,
+            $includeinbox
+        );
 
         $this->repository->save_columns(
             $userid,
-            $columns
+            $columns,
+            $includeinbox
         );
 
         return $columns;
     }
 
     public function reset(int $userid): void {
-        $this->repository->reset_columns($userid);
+        $this->repository->reset_columns(
+            $userid
+        );
     }
 }

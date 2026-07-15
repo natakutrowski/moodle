@@ -49,6 +49,15 @@ define([], function() {
             notification: null,
             notificationTimer: null,
             dangerConfirmLabel: root.getAttribute('data-danger-confirm-label') || 'Confirm action',
+            menuActionsLabel:
+                root.getAttribute(
+                    'data-menu-actions-label'
+                ) || 'Result actions',
+
+            dialogLabel:
+                root.getAttribute(
+                    'data-dialog-label'
+                ) || 'Action confirmation'
         };
     }
 

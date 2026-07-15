@@ -15,6 +15,7 @@ use local_subscriptions\dashboard\cards\CrmIntelligenceAlertsCard;
 use local_subscriptions\dashboard\cards\CrmFunnelCard;
 use local_subscriptions\dashboard\cards\CrmTrendsCard;
 use local_subscriptions\dashboard\cards\CrmDailyPrioritiesCard;
+use local_subscriptions\dashboard\cards\InboxOverviewCard;
 
 final class Dashboard {
 
@@ -38,6 +39,15 @@ final class Dashboard {
             CrmIntelligenceCard::render(),
             'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
         );
+
+        $inboxcard = InboxOverviewCard::render();
+
+        if ($inboxcard !== '') {
+            $out .= html_writer::div(
+                $inboxcard,
+                'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
+            );
+        }
 
         $out .= html_writer::div(
             AlertsCard::render(),

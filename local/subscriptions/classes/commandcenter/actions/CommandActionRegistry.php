@@ -16,6 +16,7 @@ final class CommandActionRegistry {
             new OpenProductAction(),
             new OpenPurchaseAction(),
             new OpenSubscriptionAction(),
+            new InboxSyncAction(),
 
             new UserEmailAction(),
             new UserResetPasswordAction(),

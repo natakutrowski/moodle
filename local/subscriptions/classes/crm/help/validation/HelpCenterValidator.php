@@ -10,6 +10,9 @@ use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\help\HelpRegistry;
 use local_subscriptions\crm\help\guides\HelpGuide;
 use local_subscriptions\crm\help\guides\HelpGuideRegistry;
+use local_subscriptions\crm\help\onboarding\HelpOnboardingRegistry;
+use local_subscriptions\crm\help\onboarding\HelpOnboardingStep;
+use moodle_url;
 
 final class HelpCenterValidator {
 
@@ -20,8 +23,14 @@ final class HelpCenterValidator {
     ];
 
     public function __construct(
-        private readonly HelpRegistry $registry = new HelpRegistry(),
-        private readonly HelpGuideRegistry $guideregistry = new HelpGuideRegistry()
+        private readonly HelpRegistry $registry =
+            new HelpRegistry(),
+
+        private readonly HelpGuideRegistry $guideregistry =
+            new HelpGuideRegistry(),
+
+        private readonly HelpOnboardingRegistry $onboardingregistry =
+            new HelpOnboardingRegistry()
     ) {
     }
 
@@ -29,9 +38,11 @@ final class HelpCenterValidator {
         $result = new HelpValidationResult();
 
         $this->validate_help_directory($result);
+        $this->validate_language_files($result);
         $this->validate_categories($result);
         $this->validate_articles($result);
         $this->validate_guides($result);
+        $this->validate_onboarding($result);
 
         return $result;
     }
@@ -89,6 +100,156 @@ final class HelpCenterValidator {
                 $language
             );
         }
+    }
+
+    private function validate_language_files(
+        HelpValidationResult $result
+    ): void {
+        $languagestrings = [];
+
+        foreach (self::LANGUAGES as $language) {
+            $strings =
+                $this->load_language_strings(
+                    $language
+                );
+
+            if ($strings === null) {
+                $result->add_error(
+                    'Unable to load language file: ' .
+                    $language
+                );
+
+                continue;
+            }
+
+            $languagestrings[$language] =
+                $strings;
+
+            $result->add_success(
+                sprintf(
+                    '%d language strings loaded for %s.',
+                    count($strings),
+                    $language
+                )
+            );
+        }
+
+        if (
+            !isset(
+                $languagestrings['en']
+            )
+        ) {
+            return;
+        }
+
+        $referencekeys = array_keys(
+            $languagestrings['en']
+        );
+
+        sort($referencekeys);
+
+        foreach (
+            ['fr', 'ru']
+            as $language
+        ) {
+            if (
+                !isset(
+                    $languagestrings[$language]
+                )
+            ) {
+                continue;
+            }
+
+            $translatedkeys = array_keys(
+                $languagestrings[$language]
+            );
+
+            $missing = array_values(
+                array_diff(
+                    $referencekeys,
+                    $translatedkeys
+                )
+            );
+
+            $extra = array_values(
+                array_diff(
+                    $translatedkeys,
+                    $referencekeys
+                )
+            );
+
+            sort($missing);
+            sort($extra);
+
+            foreach ($missing as $key) {
+                $result->add_error(
+                    sprintf(
+                        'Missing language string in %s: %s',
+                        $language,
+                        $key
+                    )
+                );
+            }
+
+            foreach ($extra as $key) {
+                $result->add_warning(
+                    sprintf(
+                        'Language string exists in %s but not in en: %s',
+                        $language,
+                        $key
+                    )
+                );
+            }
+
+            if (!$missing && !$extra) {
+                $result->add_success(
+                    sprintf(
+                        'Language file %s matches the English key set.',
+                        $language
+                    )
+                );
+            }
+        }
+    }
+
+    private function load_language_strings(
+        string $language
+    ): ?array {
+        if (
+            !in_array(
+                $language,
+                self::LANGUAGES,
+                true
+            )
+        ) {
+            return null;
+        }
+
+        $filepath =
+            subscription_config::plugin_dir() .
+            'lang/' .
+            $language .
+            '/local_subscriptions.php';
+
+        if (
+            !is_file($filepath) ||
+            !is_readable($filepath)
+        ) {
+            return null;
+        }
+
+        $loader =
+            static function(
+                string $languagefile
+            ): array {
+                $string = [];
+
+                include($languagefile);
+
+                return $string;
+            };
+
+        return $loader($filepath);
     }
 
     private function validate_categories(
@@ -335,9 +496,112 @@ final class HelpCenterValidator {
                     $filepath
                 );
             }
+
+            $this->validate_markdown_links(
+                $article,
+                $language,
+                $content,
+                $result
+            );
+            
         }
     }
 
+    private function validate_markdown_links(
+        HelpArticle $article,
+        string $language,
+        string $content,
+        HelpValidationResult $result
+    ): void {
+        $matches = [];
+
+        preg_match_all(
+            '/\[[^\]]+\]\(([^)]+)\)/',
+            $content,
+            $matches
+        );
+
+        foreach (
+            $matches[1] ?? []
+            as $target
+        ) {
+            $target = trim(
+                (string)$target
+            );
+
+            if (
+                $target === '' ||
+                str_starts_with($target, '#') ||
+                preg_match(
+                    '/\A(?:https?:|mailto:|tel:)/i',
+                    $target
+                ) === 1
+            ) {
+                continue;
+            }
+
+            $targetpath = parse_url(
+                $target,
+                PHP_URL_PATH
+            );
+
+            if (
+                !is_string($targetpath) ||
+                $targetpath === ''
+            ) {
+                continue;
+            }
+
+            if (
+                str_ends_with(
+                    $targetpath,
+                    '.md'
+                )
+            ) {
+                $filename =
+                    basename($targetpath);
+
+                $filepath =
+                    subscription_config::
+                        help_content_dir() .
+                    $language .
+                    DIRECTORY_SEPARATOR .
+                    $filename;
+
+                if (!is_file($filepath)) {
+                    $result->add_error(
+                        sprintf(
+                            'Article "%s" in %s references missing Markdown file "%s".',
+                            $article->id,
+                            $language,
+                            $target
+                        )
+                    );
+                }
+
+                continue;
+            }
+
+            if (
+                str_starts_with(
+                    $targetpath,
+                    '/local/subscriptions/'
+                )
+            ) {
+                $this->validate_internal_url(
+                    new moodle_url(
+                        $targetpath
+                    ),
+                    sprintf(
+                        'Article %s (%s)',
+                        $article->id,
+                        $language
+                    ),
+                    $result
+                );
+            }
+        }
+    }
     private function validate_unregistered_markdown_files(
         array $articles,
         HelpValidationResult $result
@@ -517,6 +781,175 @@ final class HelpCenterValidator {
                     $step->id
                 );
             }
+
+            if ($step->url !== null) {
+                $this->validate_internal_url(
+                    $step->url,
+                    'Guide step ' .
+                        $guide->id .
+                        '/' .
+                        $step->id,
+                    $result
+                );
+            }
         }
     }
+
+    private function validate_onboarding(
+        HelpValidationResult $result
+    ): void {
+        $steps =
+            $this->onboardingregistry
+                ->steps();
+
+        if (!$steps) {
+            $result->add_warning(
+                'The Help Center contains no onboarding step.'
+            );
+
+            return;
+        }
+
+        $ids = [];
+
+        foreach ($steps as $step) {
+            if (
+                !$step instanceof
+                HelpOnboardingStep
+            ) {
+                $result->add_error(
+                    'Invalid onboarding step object.'
+                );
+
+                continue;
+            }
+
+            if ($step->id === '') {
+                $result->add_error(
+                    'An onboarding step has an empty identifier.'
+                );
+
+                continue;
+            }
+
+            if (isset($ids[$step->id])) {
+                $result->add_error(
+                    'Duplicate onboarding step identifier: ' .
+                    $step->id
+                );
+            }
+
+            $ids[$step->id] = true;
+
+            if ($step->title === '') {
+                $result->add_error(
+                    'Onboarding step has an empty title: ' .
+                    $step->id
+                );
+            }
+
+            if ($step->description === '') {
+                $result->add_warning(
+                    'Onboarding step has no description: ' .
+                    $step->id
+                );
+            }
+
+            $this->validate_internal_url(
+                $step->url,
+                'Onboarding step ' .
+                    $step->id,
+                $result
+            );
+        }
+
+        $result->add_success(
+            count($steps) .
+            ' onboarding steps validated.'
+        );
+    }
+
+    private function validate_internal_url(
+        moodle_url $url,
+        string $source,
+        HelpValidationResult $result
+    ): void {
+        global $CFG;
+
+        $path = $url->get_path();
+
+        if (
+            $path === '' ||
+            !str_starts_with(
+                $path,
+                '/local/subscriptions/'
+            )
+        ) {
+            return;
+        }
+
+        $relativepath = ltrim(
+            $path,
+            '/'
+        );
+
+        $filepath =
+            $CFG->dirroot .
+            DIRECTORY_SEPARATOR .
+            str_replace(
+                '/',
+                DIRECTORY_SEPARATOR,
+                $relativepath
+            );
+
+        if (!is_file($filepath)) {
+            $result->add_error(
+                $source .
+                ' references a missing page: ' .
+                $path
+            );
+
+            return;
+        }
+
+        $articlepath =
+            new moodle_url(
+                subscription_config::
+                    admin_help_article_page()
+            );
+
+        if (
+            $path ===
+            $articlepath->get_path()
+        ) {
+            $params = $url->params();
+
+            $articleid = clean_param(
+                (string)(
+                    $params['id']
+                    ?? ''
+                ),
+                PARAM_ALPHANUMEXT
+            );
+
+            if (
+                $articleid === '' ||
+                $this->registry
+                    ->get_article(
+                        $articleid
+                    ) === null
+            ) {
+                $result->add_error(
+                    $source .
+                    ' references an unknown Help Center article: ' .
+                    (
+                        $articleid !== ''
+                            ? $articleid
+                            : '[empty]'
+                    )
+                );
+            }
+        }
+    }
+
 }

@@ -18,7 +18,8 @@ final class UserExplorerExportService {
     public function export(
         UserExplorerCriteria $criteria,
         array $columns,
-        int $limit = 5000
+        int $limit = 5000,
+        bool $includeinbox = false
     ): void {
         global $CFG;
 
@@ -26,10 +27,16 @@ final class UserExplorerExportService {
             $CFG->libdir . '/csvlib.class.php'
         );
 
+        if (!$includeinbox) {
+            $criteria =
+                $criteria->without_inbox();
+        }
+
         $records = $this->repository
             ->get_records_for_export(
                 $criteria,
-                $limit
+                $limit,
+                $includeinbox
             );
 
         $userids = array_map(
@@ -42,7 +49,8 @@ final class UserExplorerExportService {
             ->get_tags_by_userids($userids);
 
         $columns = UserExplorerColumn::normalize(
-            $columns
+            $columns,
+            $includeinbox
         );
 
         $csv = new \csv_export_writer();
@@ -119,6 +127,11 @@ final class UserExplorerExportService {
             UserExplorerColumn::PURCHASES =>
                 (int)$user->purchasecount,
 
+            UserExplorerColumn::INBOX =>
+                $this->inbox_export_value(
+                    $viewmodel
+                ),
+
             UserExplorerColumn::COUNTRY =>
                 (string)$user->country,
 
@@ -141,4 +154,58 @@ final class UserExplorerExportService {
             default => '',
         };
     }
+    
+    private function inbox_export_value(
+        UserExplorerUserViewModel $viewmodel
+    ): string {
+        $user = $viewmodel->user;
+
+        $conversationcount = (int)(
+            $user->inboxconversationcount
+            ?? 0
+        );
+
+        if ($conversationcount <= 0) {
+            return '';
+        }
+
+        return implode(
+            ' | ',
+            [
+                get_string(
+                    'crm_user_inbox_conversation_count',
+                    'local_subscriptions',
+                    $conversationcount
+                ),
+
+                get_string(
+                    'crm_user_inbox_open_count',
+                    'local_subscriptions',
+                    (int)(
+                        $user->inboxopenconversationcount
+                        ?? 0
+                    )
+                ),
+
+                get_string(
+                    'crm_user_inbox_unread_count',
+                    'local_subscriptions',
+                    (int)(
+                        $user->inboxunreadcount
+                        ?? 0
+                    )
+                ),
+
+                get_string(
+                    'crm_user_inbox_urgent_count',
+                    'local_subscriptions',
+                    (int)(
+                        $user->inboxurgentcount
+                        ?? 0
+                    )
+                ),
+            ]
+        );
+    }
+
 }

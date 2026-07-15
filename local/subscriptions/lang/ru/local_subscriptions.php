@@ -2468,3 +2468,934 @@ $string['crm_user_activity_90days'] = 'За последние 90 дней';
 $string['crm_user_activity_never'] = 'Никогда не входил';
 
 $string['crm_user_export_csv'] = 'Экспорт в CSV';
+
+$string['crm_inbox_navigation'] = 'CRM Inbox';
+$string['crm_inbox_title'] = 'Входящие CRM';
+$string['crm_inbox_foundation_ready'] =
+    'Основа CRM Inbox установлена. Почтовый аккаунт пока не подключён.';
+$string['crm_inbox_no_account_configured'] =
+    'Настройка OVH и синхронизация IMAP будут добавлены на следующих этапах.';
+
+$string['privacy:metadata:inbox'] =
+    'CRM Inbox хранит сообщения службы поддержки и их возможные связи с пользователями CampusFR.';
+$string['privacy:metadata:inbox:email'] =
+    'Адрес электронной почты участника сообщения.';
+$string['privacy:metadata:inbox:name'] =
+    'Отображаемое имя участника сообщения.';
+$string['privacy:metadata:inbox:message'] =
+    'Содержимое полученного или отправленного сообщения.';
+$string['privacy:metadata:inbox:userid'] =
+    'Пользователь Moodle, при необходимости связанный с контактом Inbox.';
+
+$string['crm_inbox_credential_missing'] =
+    'Учётные данные Inbox «{$a}» отсутствуют в конфигурации Moodle.';
+$string['crm_inbox_credential_invalid'] =
+    'Конфигурация учётных данных Inbox «{$a}» недействительна.';
+$string['crm_inbox_credential_field_missing'] =
+    'Поле «{$a->field}» отсутствует в учётных данных Inbox «{$a->key}».';
+
+$string['crm_inbox_account_disabled'] =
+    'Аккаунт CRM Inbox отключён.';
+$string['crm_inbox_account_no_credential'] =
+    'Для этого аккаунта Inbox не указана ссылка на учётные данные.';
+$string['crm_inbox_account_not_found'] =
+    'Запрошенный аккаунт CRM Inbox не найден.';
+
+$string['crm_inbox_imap_configuration_missing'] =
+    'Конфигурация IMAP для аккаунта Inbox отсутствует.';
+$string['crm_inbox_imap_field_missing'] =
+    'Обязательное поле IMAP «{$a}» отсутствует.';
+$string['crm_inbox_imap_extension_missing'] =
+    'Расширение PHP IMAP не установлено или не активировано на сервере.';
+
+$string['task_sync_crm_inbox'] =
+    'Синхронизация CRM Inbox';
+$string['task_reconcile_crm_inbox_contacts'] =
+    'Связывание контактов CRM Inbox с пользователями';
+
+$string['crm_inbox_empty'] =
+    'Нет разговоров, соответствующих этим критериям.';
+$string['crm_inbox_search'] = 'Поиск';
+$string['crm_inbox_status'] = 'Статус';
+$string['crm_inbox_priority'] = 'Приоритет';
+$string['crm_inbox_assignment'] = 'Назначение';
+$string['crm_inbox_assignment_mine'] = 'Мои разговоры';
+$string['crm_inbox_assignment_unassigned'] = 'Не назначено';
+$string['crm_inbox_assignment_team'] = 'Назначено команде';
+
+$string['crm_inbox_status_open'] = 'Открыто';
+$string['crm_inbox_status_pending'] = 'В ожидании';
+$string['crm_inbox_status_resolved'] = 'Решено';
+$string['crm_inbox_status_closed'] = 'Закрыто';
+$string['crm_inbox_status_spam'] = 'Спам';
+
+$string['crm_inbox_priority_low'] = 'Низкий';
+$string['crm_inbox_priority_normal'] = 'Обычный';
+$string['crm_inbox_priority_high'] = 'Высокий';
+$string['crm_inbox_priority_urgent'] = 'Срочный';
+
+$string['crm_inbox_unknown_contact'] =
+    'Неизвестный контакт';
+$string['crm_inbox_no_subject'] = 'Без темы';
+$string['crm_inbox_unread_count'] =
+    'Непрочитанных сообщений: {$a}';
+$string['crm_inbox_back'] = 'Вернуться во входящие';
+$string['crm_inbox_matched_user'] =
+    'Пользователь CampusFR: {$a}';
+$string['crm_inbox_external_contact'] =
+    'Внешний незарегистрированный контакт';
+
+$string['crm_inbox_reply'] = 'Ответить';
+$string['crm_inbox_save_draft'] =
+    'Сохранить черновик';
+$string['crm_inbox_send'] = 'Отправить';
+$string['crm_inbox_draft_saved'] =
+    'Черновик сохранён.';
+$string['crm_inbox_reply_sent'] =
+    'Ответ отправлен.';
+$string['crm_inbox_send_failed'] =
+    'Не удалось отправить ответ: {$a}';
+$string['crm_inbox_invalid_recipient'] =
+    'Получатель этого разговора недействителен.';
+
+$string['crm_inbox_direction_inbound'] = 'Получено';
+$string['crm_inbox_direction_outbound'] = 'Отправлено';
+$string['crm_inbox_message_status_draft'] = 'Черновик';
+
+$string['crm_inbox_thread_not_found'] =
+    'Этот разговор Inbox не найден.';
+$string['crm_inbox_archive'] = 'Архивировать';
+$string['crm_inbox_move_to_trash'] =
+    'Переместить в корзину';
+$string['crm_inbox_trash_confirm'] =
+    'Переместить этот разговор в корзину почтового провайдера?';
+$string['crm_inbox_moved_to_trash'] =
+    'Разговор перемещён в корзину.';
+$string['crm_inbox_deleted_locally'] =
+    'Разговор удалён из CRM.';
+$string['crm_inbox_folder_not_configured'] =
+    'Папка провайдера «{$a}» не настроена.';
+
+$string['crm_timeline_inbox_received'] =
+    'Письмо получено в CRM Inbox';
+$string['crm_timeline_inbox_sent'] =
+    'Ответ отправлен из CRM Inbox';
+
+$string['command_action_inbox_title'] =
+    'Открыть CRM Inbox';
+$string['command_action_inbox_subtitle'] =
+    'Просмотр и обработка обращений службы поддержки CampusFR.';
+
+$string['task_download_crm_inbox_attachments'] =
+    'Загрузка вложений CRM Inbox';
+
+$string['crm_inbox_diagnostics'] =
+    'Диагностика CRM Inbox';
+$string['crm_inbox_diagnostics_metrics'] =
+    'Показатели Inbox';
+
+$string['crm_help_category_inbox'] =
+    'CRM Inbox';
+$string['crm_help_category_inbox_desc'] =
+    'Письма поддержки, разговоры, контакты и назначения.';
+
+$string['crm_help_article_inbox_title'] =
+    'Работа с CRM Inbox';
+$string['crm_help_article_inbox_summary'] =
+    'Получение, связывание, назначение и обработка писем поддержки CampusFR.';
+
+$string['crm_help_guide_inbox_title'] =
+    'Обработка разговора Inbox';
+$string['crm_help_guide_inbox_desc'] =
+    'Полный процесс обработки обращения в поддержку.';
+$string['crm_help_guide_inbox_open_title'] =
+    'Открыть входящие';
+$string['crm_help_guide_inbox_open_desc'] =
+    'Просмотрите новые и неназначенные разговоры.';
+$string['crm_help_guide_open_inbox'] =
+    'Открыть CRM Inbox';
+$string['crm_help_guide_inbox_contact_title'] =
+    'Определить контакт';
+$string['crm_help_guide_inbox_contact_desc'] =
+    'Проверьте, является ли контакт внешним или связанным с пользователем CampusFR.';
+$string['crm_help_guide_inbox_assign_title'] =
+    'Назначить разговор';
+$string['crm_help_guide_inbox_assign_desc'] =
+    'Назначьте обращение администратору или команде.';
+$string['crm_help_guide_inbox_reply_title'] =
+    'Подготовить и отправить ответ';
+$string['crm_help_guide_inbox_reply_desc'] =
+    'Сохраните черновик или отправьте ответ непосредственно из CRM.';
+$string['crm_help_guide_inbox_close_title'] =
+    'Решить и архивировать';
+$string['crm_help_guide_inbox_close_desc'] =
+    'Отметьте разговор как решённый или архивируйте его.';
+
+$string['crm_inbox_account_validation_failed'] =
+    'Конфигурация аккаунта Inbox недействительна: {$a}';
+
+$string['crm_inbox_validation_invalid_email'] =
+    'Адрес электронной почты аккаунта Inbox отсутствует или недействителен.';
+$string['crm_inbox_validation_provider_missing'] =
+    'Провайдер аккаунта Inbox не указан.';
+$string['crm_inbox_validation_smtp_missing'] =
+    'Конфигурация SMTP аккаунта Inbox отсутствует.';
+$string['crm_inbox_validation_sync_missing'] =
+    'Конфигурация синхронизации Inbox отсутствует.';
+$string['crm_inbox_validation_host_missing'] =
+    'Хост {$a} не указан.';
+$string['crm_inbox_validation_port_invalid'] =
+    'Порт {$a} недействителен.';
+$string['crm_inbox_validation_encryption_invalid'] =
+    'Настройка шифрования {$a} недействительна.';
+$string['crm_inbox_validation_unencrypted'] =
+    'Соединение {$a} не использует шифрование.';
+$string['crm_inbox_validation_batchsize'] =
+    'Размер пакета Inbox должен быть от 1 до 200.';
+$string['crm_inbox_validation_interval'] =
+    'Интервал синхронизации должен быть от 5 до 1440 минут.';
+$string['crm_inbox_validation_inbox_folder_missing'] =
+    'Основная папка IMAP не настроена; по умолчанию будет использована INBOX.';
+$string['crm_inbox_validation_folders_missing'] =
+    'Конфигурация папок Inbox отсутствует.';
+$string['crm_inbox_validation_folder_missing'] =
+    'Папка Inbox «{$a}» ещё не определена.';
+
+$string['crm_inbox_folder_discovery_success'] =
+    'Обнаружено папок: {$a->count}. Входящие: {$a->inbox}; отправленные: {$a->sent}; корзина: {$a->trash}; архив: {$a->archive}; черновики: {$a->drafts}.';
+$string['crm_inbox_folder_discovery_missing'] =
+    'Некоторые обязательные папки не найдены: {$a}.';
+
+$string['crm_inbox_remote_image_blocked'] =
+    'Удалённое изображение заблокировано для защиты конфиденциальности.';
+$string['privacy:metadata:inbox_contact'] =
+    'Внешние или связанные контакты, используемые в CRM Inbox.';
+$string['privacy:metadata:inbox_contact:displayname'] =
+    'Отображаемое имя контакта.';
+$string['privacy:metadata:inbox_contact:primaryemail'] =
+    'Основной адрес электронной почты контакта.';
+$string['privacy:metadata:inbox_contact:normalizedemail'] =
+    'Нормализованный адрес электронной почты для сопоставления контакта.';
+$string['privacy:metadata:inbox_contact:matcheduserid'] =
+    'Идентификатор связанного пользователя Moodle.';
+$string['privacy:metadata:inbox_contact:matchstatus'] =
+    'Текущий статус связи с пользователем.';
+$string['privacy:metadata:inbox_contact:matchsource'] =
+    'Источник, использованный для сопоставления контакта.';
+$string['privacy:metadata:inbox_contact:matchconfidence'] =
+    'Уровень достоверности сопоставления контакта.';
+$string['privacy:metadata:inbox_contact:lastmatchedat'] =
+    'Дата последней операции сопоставления.';
+
+$string['privacy:metadata:inbox_thread'] =
+    'Разговоры, обрабатываемые в CRM Inbox.';
+$string['privacy:metadata:inbox_thread:contactid'] =
+    'Основной контакт разговора.';
+$string['privacy:metadata:inbox_thread:subject'] =
+    'Тема разговора.';
+$string['privacy:metadata:inbox_thread:assigneduserid'] =
+    'Администратор, которому назначен разговор.';
+$string['privacy:metadata:inbox_thread:status'] =
+    'Статус разговора.';
+$string['privacy:metadata:inbox_thread:priority'] =
+    'Приоритет разговора.';
+$string['privacy:metadata:inbox_thread:lastmessageat'] =
+    'Дата последнего сообщения.';
+
+$string['privacy:metadata:inbox_message'] =
+    'Сообщения, полученные или отправленные через CRM Inbox.';
+$string['privacy:metadata:inbox_message:threadid'] =
+    'Разговор, к которому относится сообщение.';
+$string['privacy:metadata:inbox_message:direction'] =
+    'Направление сообщения.';
+$string['privacy:metadata:inbox_message:subject'] =
+    'Тема сообщения.';
+$string['privacy:metadata:inbox_message:bodytext'] =
+    'Текстовая версия сообщения.';
+$string['privacy:metadata:inbox_message:bodyhtml'] =
+    'HTML-версия сообщения.';
+$string['privacy:metadata:inbox_message:receivedat'] =
+    'Дата получения сообщения.';
+$string['privacy:metadata:inbox_message:sentat'] =
+    'Дата отправки сообщения.';
+$string['privacy:metadata:inbox_message:createdby'] =
+    'Администратор, создавший исходящее сообщение.';
+
+$string['privacy:metadata:inbox_participant'] =
+    'Участники сообщений CRM Inbox.';
+$string['privacy:metadata:inbox_participant:messageid'] =
+    'Связанное сообщение.';
+$string['privacy:metadata:inbox_participant:contactid'] =
+    'Контакт, связанный с участником.';
+$string['privacy:metadata:inbox_participant:participanttype'] =
+    'Тип участника: отправитель, получатель, копия или адрес для ответа.';
+$string['privacy:metadata:inbox_participant:email'] =
+    'Адрес электронной почты участника.';
+$string['privacy:metadata:inbox_participant:displayname'] =
+    'Отображаемое имя участника.';
+
+$string['privacy:metadata:inbox_attachment'] =
+    'Вложения сообщений CRM Inbox.';
+$string['privacy:metadata:inbox_attachment:messageid'] =
+    'Сообщение, содержащее вложение.';
+$string['privacy:metadata:inbox_attachment:filename'] =
+    'Имя файла вложения.';
+$string['privacy:metadata:inbox_attachment:mimetype'] =
+    'MIME-тип вложения.';
+$string['privacy:metadata:inbox_attachment:filesize'] =
+    'Размер файла вложения.';
+
+$string['privacy:path:inbox'] =
+    'CRM Inbox';
+$string['crm_inbox_match_status'] =
+    'Связь с пользователем';
+$string['crm_inbox_match_matched'] =
+    'Пользователь связан';
+$string['crm_inbox_match_unmatched'] =
+    'Внешний контакт';
+$string['crm_inbox_match_ambiguous'] =
+    'Неоднозначная связь';
+$string['crm_inbox_team'] =
+    'Команда';
+$string['crm_inbox_unread_only'] =
+    'Только непрочитанные';
+$string['crm_inbox_per_page'] =
+    'На странице';
+
+$string['task_cleanup_crm_inbox'] =
+    'Очистка устаревших данных CRM Inbox';
+
+$string['task_cleanup_crm_inbox_ai_results'] =
+    'Очистка устаревших результатов ИИ CRM Inbox';
+
+$string['crm_inbox_ai_empty_content'] =
+    'Содержимое для анализа отсутствует.';
+
+$string['crm_inbox_ai_empty_conversation'] =
+    'В этом разговоре нет сообщений, доступных для анализа.';
+
+$string['crm_inbox_ai_language_unknown'] =
+    'Язык не определён';
+
+$string['crm_inbox_ai_urgency_low'] =
+    'Низкая срочность';
+$string['crm_inbox_ai_urgency_normal'] =
+    'Обычная срочность';
+$string['crm_inbox_ai_urgency_high'] =
+    'Высокая срочность';
+$string['crm_inbox_ai_urgency_critical'] =
+    'Критическая срочность';
+
+$string['crm_inbox_ai_category_payment'] =
+    'Оплата';
+$string['crm_inbox_ai_category_access'] =
+    'Доступ';
+$string['crm_inbox_ai_category_subscription'] =
+    'Подписка';
+$string['crm_inbox_ai_category_technical'] =
+    'Техническая проблема';
+$string['crm_inbox_ai_category_course_content'] =
+    'Учебный контент';
+$string['crm_inbox_ai_category_account'] =
+    'Аккаунт пользователя';
+$string['crm_inbox_ai_category_refund'] =
+    'Возврат средств';
+$string['crm_inbox_ai_category_billing'] =
+    'Выставление счетов';
+$string['crm_inbox_ai_category_commercial'] =
+    'Коммерческий запрос';
+$string['crm_inbox_ai_category_feedback'] =
+    'Отзыв пользователя';
+$string['crm_inbox_ai_category_spam'] =
+    'Спам';
+$string['crm_inbox_ai_category_other'] =
+    'Другое';
+
+$string['crm_inbox_ai_reply_requires_review'] =
+    'Это предложение необходимо проверить и подтвердить перед отправкой.';
+
+$string['crm_inbox_ai_tone_professional'] =
+    'Профессиональный';
+$string['crm_inbox_ai_tone_friendly'] =
+    'Дружелюбный';
+$string['crm_inbox_ai_tone_empathetic'] =
+    'Эмпатичный';
+$string['crm_inbox_ai_tone_concise'] =
+    'Краткий';
+
+$string['crm_inbox_ai_translation_failed'] =
+    'Не удалось создать перевод.';
+
+$string['crm_inbox_ai_reply_unavailable'] =
+    'Предложение ответа недоступно у текущего провайдера.';
+
+$string['crm_inbox_ai_context_partial'] =
+    'Некоторые данные CRM не удалось добавить в контекст.';
+
+$string['crm_inbox_ai_panel_title'] =
+    'ИИ-помощник';
+$string['crm_inbox_ai_panel_description'] =
+    'Анализ и предложения для помощи администратору.';
+$string['crm_inbox_ai_human_review_badge'] =
+    'Обязательная проверка человеком';
+$string['crm_inbox_ai_permission_required'] =
+    'У вас нет права использовать ИИ-помощника.';
+$string['crm_inbox_ai_no_analysis'] =
+    'Для этого разговора ещё не выполнялся ИИ-анализ.';
+$string['crm_inbox_ai_analyse'] =
+    'Проанализировать разговор';
+$string['crm_inbox_ai_suggest_reply'] =
+    'Предложить ответ';
+$string['crm_inbox_ai_reply_language'] =
+    'Язык ответа';
+$string['crm_inbox_ai_reply_tone'] =
+    'Тон ответа';
+$string['crm_inbox_ai_analysis_completed'] =
+    'ИИ-анализ завершён.';
+$string['crm_inbox_ai_detected_language'] =
+    'Определённый язык';
+$string['crm_inbox_ai_urgency'] =
+    'Срочность';
+$string['crm_inbox_ai_category'] =
+    'Категория';
+$string['crm_inbox_ai_summary'] =
+    'Краткое содержание';
+$string['crm_inbox_ai_key_points'] =
+    'Ключевые моменты';
+$string['crm_inbox_ai_pending_questions'] =
+    'Нерешённые вопросы';
+$string['crm_inbox_ai_customer_requests'] =
+    'Запросы клиента';
+$string['crm_inbox_ai_suggested_reply'] =
+    'Предлагаемый ответ';
+$string['crm_inbox_ai_confidence'] =
+    'Уверенность: {$a}%';
+
+$string['crm_inbox_ai_quota_exceeded'] =
+    'Дневной лимит ИИ-помощника исчерпан.';
+$string['task_analyse_crm_inbox'] =
+    'Анализ разговоров CRM Inbox';
+$string['crm_inbox_ai_diagnostics'] =
+    'Диагностика ИИ CRM Inbox';
+$string['crm_inbox_ai_diagnostic_table_ok'] =
+    'Таблица результатов ИИ доступна.';
+$string['crm_inbox_ai_diagnostic_table_missing'] =
+    'Таблица результатов ИИ отсутствует.';
+$string['crm_inbox_ai_diagnostic_fallback'] =
+    'Локальный fallback-провайдер доступен.';
+$string['crm_inbox_ai_diagnostic_orchestrator_ok'] =
+    'Оркестратор ИИ успешно создаётся.';
+$string['crm_inbox_ai_usage_today'] =
+    'Использование сегодня';
+$string['crm_inbox_ai_usage_global'] =
+    'Общее использование: {$a->used} / {$a->limit}';
+$string['crm_inbox_ai_usage_user'] =
+    'Ваше использование: {$a->used} / {$a->limit}';
+$string['crm_inbox_ai_failures_today'] =
+    'Ошибок анализа сегодня: {$a}';
+
+$string['crm_help_article_inbox_ai_title'] =
+    'Работа с ИИ-помощником CRM Inbox';
+$string['crm_help_article_inbox_ai_summary'] =
+    'Анализ, резюме, перевод и подготовка ответов с обязательной проверкой человеком.';
+
+$string['settings:inbox_ai_header'] =
+    'ИИ-помощник CRM Inbox';
+
+$string['settings:inbox_ai_header_desc'] =
+    'Настройка ИИ-провайдера для анализа обращений службы поддержки.';
+
+$string['settings:inbox_ai_openai_enabled'] =
+    'Включить OpenAI';
+
+$string['settings:inbox_ai_openai_enabled_desc'] =
+    'При запросе анализа содержимое писем может передаваться в OpenAI.';
+
+$string['settings:inbox_ai_openai_model'] =
+    'Модель OpenAI';
+
+$string['settings:inbox_ai_openai_model_desc'] =
+    'Точный идентификатор модели OpenAI, разрешённой для CRM Inbox.';
+
+$string['settings:inbox_ai_openai_endpoint'] =
+    'Endpoint OpenAI';
+
+$string['settings:inbox_ai_openai_endpoint_desc'] =
+    'Endpoint, используемый для OpenAI Responses API.';
+
+$string['settings:inbox_ai_openai_timeout'] =
+    'Тайм-аут OpenAI';
+
+$string['settings:inbox_ai_openai_max_output_tokens'] =
+    'Максимальное количество выходных токенов';
+
+$string['settings:inbox_ai_openai_store'] =
+    'Разрешить удалённое хранение ответов';
+
+$string['settings:inbox_ai_openai_store_desc'] =
+    'Оставьте выключенным, если удалённое хранение не было отдельно проверено и одобрено.';
+
+$string['settings:inbox_ai_include_crm_context'] =
+    'Передавать проверенный контекст CRM';
+
+$string['settings:inbox_ai_include_contact_email'] =
+    'Передавать адрес электронной почты контакта';
+
+$string['settings:inbox_ai_include_contact_email_desc'] =
+    'По умолчанию отключено для минимизации персональных данных, передаваемых ИИ-провайдеру.';
+
+$string['settings:inbox_ai_global_daily_limit'] =
+    'Общий дневной лимит';
+
+$string['settings:inbox_ai_user_daily_limit'] =
+    'Дневной лимит на администратора';
+
+$string['settings:inbox_ai_automatic_analysis'] =
+    'Включить автоматический анализ';
+
+$string['settings:inbox_ai_automatic_analysis_desc'] =
+    'Включайте только после проверки стоимости, конфиденциальности и лимитов провайдера.';
+
+$string['crm_inbox_ai_openai_enabled'] =
+    'OpenAI включён.';
+
+$string['crm_inbox_ai_openai_disabled'] =
+    'OpenAI выключен.';
+
+$string['crm_inbox_ai_openai_key_available'] =
+    'Ключ OpenAI API доступен на сервере.';
+
+$string['crm_inbox_ai_openai_key_missing'] =
+    'Ключ OpenAI API отсутствует.';
+
+$string['crm_inbox_ai_openai_model_configured'] =
+    'Настроенная модель OpenAI: {$a}.';
+
+$string['crm_inbox_ai_openai_model_missing'] =
+    'Модель OpenAI не настроена.';
+
+$string['crm_inbox_ai_data_transmission_notice'] =
+    'Содержимое писем может передаваться настроенному ИИ-провайдеру для создания анализа или предложений.';
+
+$string['crm_inbox_ai_provider_label'] =
+    'Провайдер';
+
+$string['crm_inbox_ai_model_label'] =
+    'Модель';
+
+$string['crm_inbox_ai_cache_hit'] =
+    'Результат из кэша';
+
+$string['crm_inbox_ai_cache_miss'] =
+    'Новый анализ провайдера';
+
+$string['crm_inbox_ai_force_refresh'] =
+    'Обновить анализ';
+
+$string['crm_inbox_ai_request_tokens'] =
+    'Входные токены: {$a}';
+
+$string['crm_inbox_ai_response_tokens'] =
+    'Выходные токены: {$a}';
+
+$string['crm_inbox_ai_total_tokens'] =
+    'Всего токенов: {$a}';
+
+$string['crm_inbox_ai_latency'] =
+    'Время обработки: {$a} мс';
+
+$string['crm_inbox_ai_validation_failed'] =
+    'Результат ИИ не прошёл локальную проверку и не был показан как успешный анализ.';
+
+$string['crm_inbox_ai_provider_unavailable'] =
+    'Выбранный ИИ-провайдер недоступен.';
+
+$string['crm_inbox_ai_provider_error'] =
+    'ИИ-провайдер не смог выполнить анализ.';
+
+$string['crm_inbox_ai_rate_limit'] =
+    'Лимит запросов ИИ-провайдера исчерпан. Повторите попытку позже.';
+
+$string['crm_inbox_ai_authentication_error'] =
+    'ИИ-провайдер отклонил настроенные учётные данные.';
+
+$string['crm_inbox_ai_privacy_notice'] =
+    'Результаты ИИ являются только предложениями. Проверяйте весь текст перед использованием или отправкой.';
+
+// Phase 6.5F — интеграция CRM Inbox.
+$string['admin_event_inbox_message_received'] =
+    'Письмо получено во входящих CRM';
+
+$string['admin_event_inbox_reply_sent'] =
+    'Ответ отправлен из входящих CRM';
+
+$string['admin_event_inbox_thread_assigned'] =
+    'Диалог во входящих CRM назначен';
+
+$string['admin_event_inbox_thread_unassigned'] =
+    'Назначение диалога во входящих CRM снято';
+
+$string['admin_event_inbox_thread_status_changed'] =
+    'Статус диалога во входящих CRM изменён';
+
+$string['admin_event_inbox_thread_priority_changed'] =
+    'Приоритет диалога во входящих CRM изменён';
+
+$string['admin_event_inbox_ai_analysis_executed'] =
+    'Выполнен ИИ-анализ диалога';
+
+$string['admin_event_inbox_ai_reply_suggested'] =
+    'Создана ИИ-подсказка для ответа';
+
+// Phase 6.5F — Inbox в карточке пользователя.
+$string['crm_user_inbox_section'] =
+    'Входящие CRM';
+
+$string['crm_user_inbox_badge'] =
+    'Входящие';
+
+$string['crm_user_inbox_badge_empty'] =
+    'Нет диалогов';
+
+$string['crm_user_inbox_badge_unread'] =
+    'Непрочитанных писем: {$a}';
+
+$string['crm_user_inbox_conversations'] =
+    'Диалоги';
+
+$string['crm_user_inbox_open_conversations'] =
+    'Открытые';
+
+$string['crm_user_inbox_unread'] =
+    'Непрочитанные письма';
+
+$string['crm_user_inbox_ai_suggestions'] =
+    'ИИ-подсказки';
+
+$string['crm_user_inbox_last_email'] =
+    'Последнее письмо';
+
+$string['crm_user_inbox_last_received'] =
+    'Последнее полученное письмо';
+
+$string['crm_user_inbox_last_sent'] =
+    'Последний отправленный ответ';
+
+$string['crm_user_inbox_recent_conversations'] =
+    'Недавние диалоги';
+
+$string['crm_user_inbox_no_conversations'] =
+    'К этому пользователю пока не привязан ни один диалог Inbox.';
+
+$string['crm_user_inbox_open_all'] =
+    'Открыть диалоги во входящих';
+
+$string['crm_user_inbox_unread_badge'] =
+    'Непрочитанных: {$a}';
+
+// Phase 6.5F — Inbox в центре команд.
+$string['command_center_type_inbox_thread'] =
+    'Диалог Inbox';
+
+$string['command_center_type_inbox_contact'] =
+    'Контакт Inbox';
+
+$string['command_center_group_inbox_threads'] =
+    'Диалоги Inbox';
+
+$string['command_center_group_inbox_contacts'] =
+    'Контакты Inbox';
+
+$string['command_inbox_thread_status'] =
+    'Статус: {$a}';
+
+$string['command_inbox_thread_priority'] =
+    'Приоритет: {$a}';
+
+$string['command_inbox_thread_unread'] =
+    'Непрочитанных: {$a}';
+
+$string['command_inbox_contact_conversations'] =
+    'Диалогов: {$a}';
+
+$string['command_inbox_contact_unread'] =
+    'Непрочитанных: {$a}';
+
+$string['command_inbox_unknown_contact'] =
+    'Неизвестный контакт Inbox';
+
+$string['command_action_inbox_unassigned_title'] =
+    'Открыть диалоги без ответственного';
+
+$string['command_action_inbox_unassigned_subtitle'] =
+    'Показать диалоги Inbox без назначенного администратора или команды.';
+
+$string['command_action_inbox_urgent_title'] =
+    'Открыть срочные диалоги';
+
+$string['command_action_inbox_urgent_subtitle'] =
+    'Показать диалоги Inbox со срочным приоритетом.';
+
+$string['command_action_inbox_diagnostics_title'] =
+    'Открыть диагностику Inbox';
+
+$string['command_action_inbox_diagnostics_subtitle'] =
+    'Проверить аккаунты, подключения, синхронизацию и ошибки Inbox.';
+
+$string['command_action_inbox_ai_diagnostics_title'] =
+    'Открыть диагностику ИИ Inbox';
+
+$string['command_action_inbox_ai_diagnostics_subtitle'] =
+    'Проверить ИИ-провайдер, модели, промпты, кэш и конфигурацию.';
+
+$string['command_action_inbox_sync_title'] =
+    'Синхронизировать Inbox';
+
+$string['command_action_inbox_sync_subtitle'] =
+    'Получить одну страницу новых писем для каждой настроенной папки.';
+
+$string['command_confirm_inbox_sync'] =
+    'Запустить ручную синхронизацию всех активных аккаунтов Inbox?';
+
+$string['command_center_action_run'] =
+    'Выполнить';
+
+$string['command_inbox_sync_no_accounts'] =
+    'Нет настроенных активных аккаунтов Inbox.';
+
+$string['command_inbox_sync_success'] =
+    'Синхронизация завершена: получено {$a->fetched}, создано {$a->created}, пропущено {$a->skipped}, ошибок {$a->errors}.';
+
+$string['command_inbox_sync_has_more'] =
+    'Доступны дополнительные письма. Они будут получены при следующем запуске.';
+
+$string['command_inbox_sync_failed'] =
+    'Ручная синхронизация Inbox завершилась ошибкой. Проверьте диагностику Inbox.';
+
+// Phase 6.5F — Inbox в User Explorer и Intelligence.
+$string['crm_user_column_inbox'] =
+    'Входящие';
+
+$string['crm_user_has_inbox'] =
+    'Есть диалог Inbox';
+
+$string['crm_user_has_inbox_unread'] =
+    'Есть непрочитанные письма Inbox';
+
+$string['crm_user_inbox_none'] =
+    'Нет диалогов';
+
+$string['crm_user_inbox_conversation_count'] =
+    'Диалогов: {$a}';
+
+$string['crm_user_inbox_open_count'] =
+    'Открытых: {$a}';
+
+$string['crm_user_inbox_unread_count'] =
+    'Непрочитанных: {$a}';
+
+$string['crm_user_inbox_urgent_count'] =
+    'Срочных: {$a}';
+
+$string['crm_intelligence_inbox_conversations'] =
+    'Диалогов Inbox: {$a}';
+
+$string['crm_intelligence_inbox_open'] =
+    'Открытых: {$a}';
+
+$string['crm_intelligence_inbox_unread'] =
+    'Непрочитанных: {$a}';
+
+$string['crm_intelligence_inbox_urgent'] =
+    'Срочных: {$a}';
+
+$string['crm_intelligence_inbox_open_link'] =
+    'Открыть диалоги';
+
+// Phase 6.5F — Help Center для Inbox.
+$string['crm_help_article_inbox_diagnostics_title'] =
+    'Диагностика CRM Inbox';
+
+$string['crm_help_article_inbox_diagnostics_summary'] =
+    'Проверка IMAP, SMTP, синхронизации, вложений, сопоставления пользователей и ИИ.';
+
+$string['crm_help_guide_inbox_ai_title'] =
+    'Использовать ИИ-помощник';
+
+$string['crm_help_guide_inbox_ai_desc'] =
+    'Проанализируйте диалог, проверьте язык и срочность и обязательно перечитайте ИИ-подсказку.';
+
+$string['crm_help_guide_inbox_ai_action'] =
+    'Открыть справку по ИИ';
+
+$string['crm_help_guide_inbox_diagnostics_title'] =
+    'Проверить диагностику';
+
+$string['crm_help_guide_inbox_diagnostics_desc'] =
+    'Проверьте IMAP, SMTP, синхронизацию, вложения, ИИ-провайдера и квоты.';
+
+$string['crm_help_guide_inbox_diagnostics_action'] =
+    'Открыть руководство по диагностике';
+
+$string['crm_onboarding_step_inbox_title'] =
+    'Познакомиться с CRM Inbox';
+
+$string['crm_onboarding_step_inbox_desc'] =
+    'Просмотрите обращения поддержки, контакты, приоритеты и инструменты ответа.';
+
+$string['crm_help_open_inbox_help'] =
+    'Руководство по диагностике Inbox';
+
+$string['crm_help_open_inbox_diagnostics'] =
+    'Диагностика Inbox';
+
+$string['crm_help_open_inbox_ai_diagnostics'] =
+    'Диагностика ИИ Inbox';
+
+$string['crm_inbox_help_subtitle'] =
+    'Обрабатывайте, назначайте и контролируйте обращения поддержки CampusFR.';
+
+$string['crm_inbox_thread_help_subtitle'] =
+    'Просмотрите полную историю, данные CRM и доступные ИИ-подсказки.';
+
+$string['crm_inbox_diagnostics_help_subtitle'] =
+    'Проверьте аккаунты, подключения, синхронизацию и технические ошибки Inbox.';
+
+$string['crm_inbox_ai_diagnostics_help_subtitle'] =
+    'Проверьте ИИ-провайдера, модели, квоты, кэш и последние ошибки.';
+
+// Phase 6.5F — UX и доступность Inbox.
+$string['crm_inbox_region_label'] =
+    'Входящие CRM';
+
+$string['crm_inbox_result_count'] =
+    'Найдено диалогов: {$a}';
+
+$string['crm_inbox_empty_title'] =
+    'Диалоги не найдены';
+
+$string['crm_inbox_thread_list_label'] =
+    'Список диалогов Inbox';
+
+$string['crm_inbox_filters_label'] =
+    'Фильтры CRM Inbox';
+
+$string['crm_inbox_unread_count_accessible'] =
+    'Непрочитанных сообщений в этом диалоге: {$a}';
+
+$string['crm_inbox_thread_region_label'] =
+    'Диалог Inbox';
+
+$string['crm_inbox_thread_actions_label'] =
+    'Действия с диалогом';
+
+$string['crm_inbox_action_processing'] =
+    'Действие выполняется.';
+
+$string['crm_inbox_processing'] =
+    'Обработка…';
+
+$string['crm_inbox_message_content_label'] =
+    'Содержимое сообщения';
+
+$string['crm_inbox_attachments_label'] =
+    'Вложения сообщения';
+
+$string['crm_inbox_download_attachment'] =
+    'Скачать вложение {$a}';
+
+$string['crm_inbox_reply_form_label'] =
+    'Форма ответа Inbox';
+
+$string['crm_inbox_reply_processing'] =
+    'Ответ обрабатывается.';
+
+$string['crm_inbox_reply_help'] =
+    'Проверьте тему и текст перед отправкой. ИИ-подсказки можно редактировать, и они всегда требуют проверки человеком.';
+
+$string['crm_inbox_reply_actions_label'] =
+    'Действия формы ответа';
+
+$string['crm_inbox_saving'] =
+    'Сохранение…';
+
+$string['crm_inbox_sending'] =
+    'Отправка…';
+
+$string['dashboard_inbox_title'] =
+    'CRM Inbox';
+
+$string['dashboard_inbox_subtitle'] =
+    'Оперативный обзор диалогов и обращений, требующих внимания.';
+
+$string['dashboard_inbox_open'] =
+    'Открыть Inbox';
+
+$string['dashboard_inbox_open_conversations'] =
+    'Открытые диалоги';
+
+$string['dashboard_inbox_unassigned'] =
+    'Не назначено';
+
+$string['dashboard_inbox_urgent'] =
+    'Срочные';
+
+$string['dashboard_inbox_pending'] =
+    'Ожидают ответа';
+
+$string['dashboard_inbox_recent_activity'] =
+    'Недавняя активность';
+
+$string['dashboard_inbox_empty'] =
+    'Недавних диалогов Inbox нет.';
+
+$string['dashboard_inbox_metric_aria'] =
+    '{$a->label}: {$a->count}';
+
+$string['crm_inbox_status_unknown'] =
+    'Неизвестный статус';
+
+$string['crm_inbox_priority_unknown'] =
+    'Неизвестный приоритет';
+
+$string['crm_user_view_delete_processing'] =
+    'Сохранённый вид удаляется.';
+
+$string['crm_user_view_delete_processing_short'] =
+    'Удаление…';
+
+$string['crm_inbox_ai_analysis_processing'] =
+    'Выполняется анализ диалога.';
+
+$string['crm_inbox_ai_analysis_processing_short'] =
+    'Анализ…';
+
+$string['crm_inbox_ai_reply_processing'] =
+    'Создаётся предложение ответа.';
+
+$string['crm_inbox_ai_reply_processing_short'] =
+    'Создание…';
+
+$string['crm_inbox_ai_actions_label'] =
+    'Действия ИИ-помощника';
+
+$string['crm_inbox_messages_heading'] =
+    'Сообщения диалога';
+
+$string['crm_inbox_attachment_unavailable'] =
+    'недоступно';
+
+$string['crm_inbox_attachment_unavailable_aria'] =
+    'Вложение {$a} сейчас недоступно';
+
+$string['crm_user_inbox_statistics_label'] =
+    'Статистика Inbox пользователя';
+
+$string['crm_user_inbox_stat_aria'] =
+    '{$a->label}: {$a->value}';
+
+$string['command_center_menu_actions'] =
+    'Действия с результатом';
+
+$string['command_center_confirmation_dialog'] =
+    'Подтверждение действия';

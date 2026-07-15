@@ -51,9 +51,33 @@ $capabilities = [
         'archetypes' => ['manager' => CAP_ALLOW],
     ],
 
+    'local/subscriptions:view_inbox' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
+    'local/subscriptions:manage_inbox' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
     'local/subscriptions:manage_configuration' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => ['manager' => CAP_ALLOW],
     ],
+
+    'local/subscriptions:use_inbox_ai' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],    
 ];

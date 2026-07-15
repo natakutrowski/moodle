@@ -25,4 +25,19 @@ final class CommandTypes {
     public static function subscription(): string {
         return get_string('command_center_type_subscription', 'local_subscriptions');
     }
+
+    public static function inbox_thread(): string {
+        return get_string(
+            'command_center_type_inbox_thread',
+            'local_subscriptions'
+        );
+    }
+
+    public static function inbox_contact(): string {
+        return get_string(
+            'command_center_type_inbox_contact',
+            'local_subscriptions'
+        );
+    }
+
 }

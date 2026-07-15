@@ -12,7 +12,10 @@ final class UserExplorerPreferenceRepository {
     private const VIEWS_PREFERENCE =
         'local_subscriptions_user_explorer_views';
 
-    public function get_columns(int $userid): array {
+    public function get_columns(
+        int $userid,
+        bool $includeinbox = true
+    ): array {
         $raw = get_user_preferences(
             self::COLUMNS_PREFERENCE,
             '',
@@ -20,24 +23,38 @@ final class UserExplorerPreferenceRepository {
         );
 
         if (!is_string($raw) || $raw === '') {
-            return UserExplorerColumn::defaults();
+            return UserExplorerColumn::defaults(
+                $includeinbox
+            );
         }
 
-        $decoded = json_decode($raw, true);
+        $decoded = json_decode(
+            $raw,
+            true
+        );
 
         return is_array($decoded)
-            ? UserExplorerColumn::normalize($decoded)
-            : UserExplorerColumn::defaults();
+            ? UserExplorerColumn::normalize(
+                $decoded,
+                $includeinbox
+            )
+            : UserExplorerColumn::defaults(
+                $includeinbox
+            );
     }
 
     public function save_columns(
         int $userid,
-        array $columns
+        array $columns,
+        bool $includeinbox = true
     ): void {
         set_user_preference(
             self::COLUMNS_PREFERENCE,
             json_encode(
-                UserExplorerColumn::normalize($columns),
+                UserExplorerColumn::normalize(
+                    $columns,
+                    $includeinbox
+                ),
                 JSON_UNESCAPED_UNICODE |
                 JSON_UNESCAPED_SLASHES
             ),
