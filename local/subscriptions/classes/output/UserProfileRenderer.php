@@ -14,6 +14,7 @@ use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\AdminEntityLinks;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\inbox\rendering\InboxValuePresentation;
+use local_subscriptions\crm\work\rendering\UserWorkItemSection;
 
 final class UserProfileRenderer {
 
@@ -34,6 +35,15 @@ final class UserProfileRenderer {
         $out .= self::intelligence($profile);
 
         $out .= self::inbox($profile);
+
+        $workitems = UserWorkItemSection::render((int)$profile->user->id);
+        if ($workitems !== '') {
+            $out .= self::section(
+                get_string('crm_work_user_section', 'local_subscriptions'),
+                $workitems,
+                'crm-section-work-items'
+            );
+        }        
 
         $out .= self::section(
             get_string('crm_section_subscriptions', 'local_subscriptions'),

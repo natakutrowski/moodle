@@ -18,6 +18,11 @@ final class Capabilities {
     public const MANAGE_INBOX = 'local/subscriptions:manage_inbox';
     public const MANAGE_CONFIGURATION = 'local/subscriptions:manage_configuration';
     public const USE_INBOX_AI = 'local/subscriptions:use_inbox_ai';
+    public const VIEW_WORK_ITEMS = 'local/subscriptions:view_work_items';
+
+    public const MANAGE_WORK_ITEMS = 'local/subscriptions:manage_work_items';
+
+    public const MANAGE_WORK_CONFIGURATION = 'local/subscriptions:manage_work_configuration';
 
     public static function can_view_users(?\context $context = null): bool {
         $context = $context ?? \context_system::instance();
@@ -46,4 +51,39 @@ final class Capabilities {
 
         return has_capability(self::MANAGE_INBOX, $context);
     }    
+
+
+    public static function can_view_work_items(
+        ?\context $context = null
+    ): bool {
+        $context = $context ?? \context_system::instance();
+
+        return has_capability(
+            self::VIEW_WORK_ITEMS,
+            $context
+        );
+    }
+
+    public static function can_manage_work_items(
+        ?\context $context = null
+    ): bool {
+        $context = $context ?? \context_system::instance();
+
+        return has_capability(
+            self::MANAGE_WORK_ITEMS,
+            $context
+        );
+    }
+
+    public static function can_manage_work_configuration(
+        ?\context $context = null
+    ): bool {
+        $context = $context ?? \context_system::instance();
+
+        return has_capability(
+            self::MANAGE_WORK_CONFIGURATION,
+            $context
+        );
+    }
+
 }

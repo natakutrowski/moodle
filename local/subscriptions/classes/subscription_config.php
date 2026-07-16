@@ -326,6 +326,30 @@ class subscription_config {
         return self::plugin_dir() . 'help/';
     }
 
+    public static function admin_work_items_page(): string {
+        return self::plugin_path() . 'admin/work/index.php';
+    }
+
+    public static function admin_work_item_view_page(): string {
+        return self::plugin_path() . 'admin/work/view.php';
+    }
+
+    public static function admin_work_item_create_page(): string {
+        return self::plugin_path() . 'admin/work/create.php';
+    }
+
+    public static function admin_work_item_action_page(): string {
+        return self::plugin_path() . 'admin/work/action.php';
+    }
+
+    public static function admin_work_teams_page(): string {
+        return self::plugin_path() . 'admin/work/teams.php';
+    }
+
+    public static function admin_work_team_action_page(): string {
+        return self::plugin_path() . 'admin/work/team_action.php';
+    }
+    
     // -- Buttons --
     public static function button_admin_dashboard(): string {
         return \html_writer::link(

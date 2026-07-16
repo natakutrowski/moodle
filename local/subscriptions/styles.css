@@ -5881,3 +5881,55 @@ div#page.container.bottom-region-main-box {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.crm-work-card {
+    transition: box-shadow .15s ease, transform .15s ease;
+}
+
+.crm-work-card:hover {
+    box-shadow: 0 .4rem 1rem rgba(0, 0, 0, .08);
+    transform: translateY(-1px);
+}
+
+.crm-work-management,
+.crm-work-action-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    align-items: center;
+}
+
+.crm-work-action-form .custom-select {
+    min-width: 12rem;
+}
+
+@media (max-width: 767.98px) {
+    .crm-work-card > .d-flex,
+    .crm-work-management,
+    .crm-work-action-form {
+        display: block !important;
+    }
+
+    .crm-work-card-badges {
+        margin-top: .75rem;
+    }
+
+    .crm-work-action-form .custom-select,
+    .crm-work-action-form .btn {
+        width: 100%;
+        margin-bottom: .5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-work-card {
+        transition: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-work-card,
+    .crm-work-detail .card {
+        border: 1px solid CanvasText;
+    }
+}

@@ -11,6 +11,7 @@ use local_subscriptions\commandcenter\providers\SubscriptionProvider;
 use local_subscriptions\commandcenter\providers\UserProvider;
 use local_subscriptions\commandcenter\providers\IntelligenceProvider;
 use local_subscriptions\commandcenter\providers\InboxProvider;
+use local_subscriptions\commandcenter\providers\WorkItemProvider;
 use local_subscriptions\commandcenter\CommandContext;
 use local_subscriptions\commandcenter\intents\CommandIntentRegistry;
 
@@ -28,6 +29,7 @@ final class CommandCenterService {
             new AdminActionProvider(),
             new IntelligenceProvider(),
             new InboxProvider(),
+            new WorkItemProvider(),
             new UserProvider(),
             new DigitalProductProvider(),
             new DigitalPurchaseProvider(),

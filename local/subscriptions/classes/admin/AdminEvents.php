@@ -130,6 +130,25 @@ final class AdminEvents {
     public const INBOX_AI_REPLY_SUGGESTED =
         'inbox.ai.reply_suggested';
 
+    public const WORK_ITEM_CREATED =
+        'work_item.created';
+
+    public const WORK_ITEM_STATUS_CHANGED =
+        'work_item.status_changed';
+
+    public const WORK_ITEM_PRIORITY_CHANGED =
+        'work_item.priority_changed';
+
+    public const WORK_ITEM_ASSIGNED =
+        'work_item.assigned';
+
+    public const WORK_ITEM_COMMENT_ADDED =
+        'work_item.comment_added';
+
+    public const WORK_ITEM_LINKED =
+        'work_item.linked';
+
+
     public static function all(): array {
         return [
             self::EMAIL_CUSTOM_SENT,
@@ -177,6 +196,13 @@ final class AdminEvents {
             self::INBOX_THREAD_PRIORITY_CHANGED,
             self::INBOX_AI_ANALYSIS_EXECUTED,
             self::INBOX_AI_REPLY_SUGGESTED,
+
+            self::WORK_ITEM_CREATED,
+            self::WORK_ITEM_STATUS_CHANGED,
+            self::WORK_ITEM_PRIORITY_CHANGED,
+            self::WORK_ITEM_ASSIGNED,
+            self::WORK_ITEM_COMMENT_ADDED,
+            self::WORK_ITEM_LINKED,
         ];
     }
 

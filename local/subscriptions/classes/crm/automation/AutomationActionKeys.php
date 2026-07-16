@@ -13,4 +13,5 @@ final class AutomationActionKeys {
     public const CREATE_ADMIN_NOTIFICATION = 'create_admin_notification';
     public const CREATE_TASK = 'create_task';
     public const TRIGGER_WORKFLOW = 'trigger_workflow';
+    public const CREATE_WORK_ITEM = 'create_work_item';
 }

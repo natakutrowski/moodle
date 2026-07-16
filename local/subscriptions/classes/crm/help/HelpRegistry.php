@@ -49,6 +49,21 @@ final class HelpRegistry {
                 '📨',
                 45
             ),
+
+            new HelpCategory(
+                'work_management',
+                get_string(
+                    'crm_help_category_work_management',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_category_work_management_desc',
+                    'local_subscriptions'
+                ),
+                '✅',
+                47
+            ),
+
             new HelpCategory(
                 'automation',
                 get_string('crm_help_category_automation', 'local_subscriptions'),
@@ -355,6 +370,54 @@ final class HelpRegistry {
                     HelpContext::GENERAL,
                 ],
                 47
+            ),
+
+            new HelpArticle(
+                'crm_work_management',
+                'work_management',
+                get_string(
+                    'crm_help_article_work_management_title',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_article_work_management_summary',
+                    'local_subscriptions'
+                ),
+                'crm_work_management.md',
+                [
+                    'work item',
+                    'work items',
+                    'ticket',
+                    'task',
+                    'tasks',
+                    'team',
+                    'assignment',
+                    'priority',
+                    'status',
+                    'subtask',
+                    'comment',
+                    'workflow',
+                    'travail',
+                    'tâche',
+                    'ticket',
+                    'équipe',
+                    'assignation',
+                    'priorité',
+                    'статус',
+                    'задача',
+                    'тикет',
+                    'команда',
+                    'назначение',
+                ],
+                [
+                    HelpContext::WORK_ITEMS,
+                    HelpContext::INBOX,
+                    HelpContext::USER_PROFILE,
+                    HelpContext::DASHBOARD,
+                    HelpContext::AUTOMATIONS,
+                    HelpContext::GENERAL,
+                ],
+                48
             ),
 
         ];

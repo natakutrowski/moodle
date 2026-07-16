@@ -257,6 +257,42 @@ final class InboxThreadRenderer {
             )
         );
 
+        if (
+            \local_subscriptions\admin\AdminSecurity::can(
+                \local_subscriptions\admin\Capabilities::
+                    MANAGE_WORK_ITEMS
+            )
+        ) {
+            $params = [
+                'source' =>
+                    \local_subscriptions\crm\work\domain\WorkItemSource::INBOX,
+
+                'threadid' =>
+                    (int)$thread->id,
+            ];
+
+            if (!empty($thread->matcheduserid)) {
+                $params['targetuserid'] =
+                    (int)$thread->matcheduserid;
+            }
+
+            $out .= html_writer::link(
+                new moodle_url(
+                    subscription_config::
+                        admin_work_item_create_page(),
+                    $params
+                ),
+                get_string(
+                    'crm_work_create_from_thread',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-sm btn-outline-primary',
+                ]
+            );
+        }
+
         $out .= html_writer::end_tag(
             'div'
         );

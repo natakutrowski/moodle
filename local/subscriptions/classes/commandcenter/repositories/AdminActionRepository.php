@@ -196,6 +196,74 @@ final class AdminActionRepository {
 
         if (
             AdminSecurity::can(
+                Capabilities::VIEW_WORK_ITEMS
+            )
+        ) {
+            $actions[] = $this->action(
+                CommandIcons::ACTION,
+                'command_action_work_items_title',
+                'command_action_work_items_subtitle',
+                subscription_config::admin_work_items_page(),
+                'work items tâches tickets travaux demandes ' .
+                'gestion travail work management ' .
+                'задачи тикеты работа запросы управление'
+            );
+
+            $actions[] = $this->action(
+                CommandIcons::USER,
+                'command_action_work_items_mine_title',
+                'command_action_work_items_mine_subtitle',
+                subscription_config::admin_work_items_page(),
+                'mes tâches mes work items assigné à moi ' .
+                'my tasks my work items assigned to me ' .
+                'мои задачи назначено мне',
+                [
+                    'mineonly' => 1,
+                ]
+            );
+
+            $actions[] = $this->action(
+                CommandIcons::URGENT,
+                'command_action_work_items_urgent_title',
+                'command_action_work_items_urgent_subtitle',
+                subscription_config::admin_work_items_page(),
+                'tâches urgentes work items urgents priorité urgente ' .
+                'urgent tasks critical work ' .
+                'срочные задачи критические задачи',
+                [
+                    'priority' => 'urgent',
+                ]
+            );
+
+            $actions[] = $this->action(
+                CommandIcons::CRON,
+                'command_action_work_items_overdue_title',
+                'command_action_work_items_overdue_subtitle',
+                subscription_config::admin_work_items_page(),
+                'tâches en retard work items overdue échéance dépassée ' .
+                'late tasks delayed work ' .
+                'просроченные задачи задержанные задачи',
+                [
+                    'overdueonly' => 1,
+                ]
+            );
+
+            $actions[] = $this->action(
+                CommandIcons::UNASSIGNED,
+                'command_action_work_items_unassigned_title',
+                'command_action_work_items_unassigned_subtitle',
+                subscription_config::admin_work_items_page(),
+                'tâches non assignées work items sans responsable ' .
+                'unassigned tasks no assignee ' .
+                'неназначенные задачи без ответственного',
+                [
+                    'unassignedonly' => 1,
+                ]
+            );
+        }
+
+        if (
+            AdminSecurity::can(
                 Capabilities::MANAGE_INBOX
             )
         ) {

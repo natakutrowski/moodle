@@ -1273,5 +1273,246 @@
 			</INDEXES>
 		</TABLE>
 
+        <TABLE NAME="local_subscriptions_work_team"
+            COMMENT="CampusFR work management teams">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10"
+                    NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="191"
+                    NOTNULL="true"/>
+                <FIELD NAME="description" TYPE="text"
+                    NOTNULL="false"/>
+                <FIELD NAME="enabled" TYPE="int" LENGTH="1"
+                    NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="name_uix" UNIQUE="true"
+                    FIELDS="name"/>
+                <INDEX NAME="enabled_idx" UNIQUE="false"
+                    FIELDS="enabled"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subscriptions_work_team_member"
+            COMMENT="Members of CampusFR work management teams">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10"
+                    NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="teamid" TYPE="int" LENGTH="10"
+                    NOTNULL="true"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10"
+                    NOTNULL="true"/>
+                <FIELD NAME="role" TYPE="char" LENGTH="30"
+                    NOTNULL="true" DEFAULT="member"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="teamid_fk" TYPE="foreign"
+                    FIELDS="teamid"
+                    REFTABLE="local_subscriptions_work_team"
+                    REFFIELDS="id"/>
+                <KEY NAME="userid_fk" TYPE="foreign"
+                    FIELDS="userid"
+                    REFTABLE="user"
+                    REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="team_user_uix" UNIQUE="true"
+                    FIELDS="teamid,userid"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subscriptions_work_item"
+            COMMENT="CampusFR work items, tickets, tasks and incidents">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10"
+                    NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="reference" TYPE="char" LENGTH="30"
+                    NOTNULL="true"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="30"
+                    NOTNULL="true" DEFAULT="task"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="255"
+                    NOTNULL="true"/>
+                <FIELD NAME="description" TYPE="text"
+                    NOTNULL="false"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="30"
+                    NOTNULL="true" DEFAULT="open"/>
+                <FIELD NAME="priority" TYPE="char" LENGTH="20"
+                    NOTNULL="true" DEFAULT="normal"/>
+                <FIELD NAME="source" TYPE="char" LENGTH="30"
+                    NOTNULL="true" DEFAULT="manual"/>
+                <FIELD NAME="targetuserid" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+                <FIELD NAME="assigneduserid" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+                <FIELD NAME="assignedteamid" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+                <FIELD NAME="parentid" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10"
+                    NOTNULL="true"/>
+                <FIELD NAME="dueat" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+                <FIELD NAME="resolvedat" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+                <FIELD NAME="closedat" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="targetuserid_fk" TYPE="foreign"
+                    FIELDS="targetuserid"
+                    REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="assigneduserid_fk" TYPE="foreign"
+                    FIELDS="assigneduserid"
+                    REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="assignedteamid_fk" TYPE="foreign"
+                    FIELDS="assignedteamid"
+                    REFTABLE="local_subscriptions_work_team"
+                    REFFIELDS="id"/>
+                <KEY NAME="parentid_fk" TYPE="foreign"
+                    FIELDS="parentid"
+                    REFTABLE="local_subscriptions_work_item"
+                    REFFIELDS="id"/>
+                <KEY NAME="createdby_fk" TYPE="foreign"
+                    FIELDS="createdby"
+                    REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="reference_uix" UNIQUE="true"
+                    FIELDS="reference"/>
+                <INDEX NAME="status_priority_idx" UNIQUE="false"
+                    FIELDS="status,priority"/>
+                <INDEX NAME="assignee_status_idx" UNIQUE="false"
+                    FIELDS="assigneduserid,status"/>
+                <INDEX NAME="team_status_idx" UNIQUE="false"
+                    FIELDS="assignedteamid,status"/>
+                <INDEX NAME="target_status_idx" UNIQUE="false"
+                    FIELDS="targetuserid,status"/>
+                <INDEX NAME="due_status_idx" UNIQUE="false"
+                    FIELDS="dueat,status"/>
+                <INDEX NAME="parent_idx" UNIQUE="false"
+                    FIELDS="parentid"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subscriptions_work_comment"
+            COMMENT="Internal comments on CampusFR work items">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10"
+                    NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="itemid" TYPE="int" LENGTH="10"
+                    NOTNULL="true"/>
+                <FIELD NAME="authorid" TYPE="int" LENGTH="10"
+                    NOTNULL="true"/>
+                <FIELD NAME="body" TYPE="text"
+                    NOTNULL="true"/>
+                <FIELD NAME="visibility" TYPE="char" LENGTH="20"
+                    NOTNULL="true" DEFAULT="internal"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="itemid_fk" TYPE="foreign"
+                    FIELDS="itemid"
+                    REFTABLE="local_subscriptions_work_item"
+                    REFFIELDS="id"/>
+                <KEY NAME="authorid_fk" TYPE="foreign"
+                    FIELDS="authorid"
+                    REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="item_time_idx" UNIQUE="false"
+                    FIELDS="itemid,timecreated"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subscriptions_work_link"
+            COMMENT="Links between work items and CRM objects">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10"
+                    NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="itemid" TYPE="int" LENGTH="10"
+                    NOTNULL="true"/>
+                <FIELD NAME="objecttype" TYPE="char" LENGTH="50"
+                    NOTNULL="true"/>
+                <FIELD NAME="objectid" TYPE="int" LENGTH="10"
+                    NOTNULL="true"/>
+                <FIELD NAME="relation" TYPE="char" LENGTH="30"
+                    NOTNULL="true" DEFAULT="related"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="itemid_fk" TYPE="foreign"
+                    FIELDS="itemid"
+                    REFTABLE="local_subscriptions_work_item"
+                    REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="item_object_relation_uix"
+                    UNIQUE="true"
+                    FIELDS="itemid,objecttype,objectid,relation"/>
+                <INDEX NAME="object_idx" UNIQUE="false"
+                    FIELDS="objecttype,objectid"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subscriptions_work_history"
+            COMMENT="Immutable history of work item changes">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10"
+                    NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="itemid" TYPE="int" LENGTH="10"
+                    NOTNULL="true"/>
+                <FIELD NAME="actorid" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+                <FIELD NAME="action" TYPE="char" LENGTH="50"
+                    NOTNULL="true"/>
+                <FIELD NAME="oldvalue" TYPE="text"
+                    NOTNULL="false"/>
+                <FIELD NAME="newvalue" TYPE="text"
+                    NOTNULL="false"/>
+                <FIELD NAME="metadatajson" TYPE="text"
+                    NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="itemid_fk" TYPE="foreign"
+                    FIELDS="itemid"
+                    REFTABLE="local_subscriptions_work_item"
+                    REFFIELDS="id"/>
+                <KEY NAME="actorid_fk" TYPE="foreign"
+                    FIELDS="actorid"
+                    REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="item_time_idx" UNIQUE="false"
+                    FIELDS="itemid,timecreated"/>
+                <INDEX NAME="action_idx" UNIQUE="false"
+                    FIELDS="action"/>
+            </INDEXES>
+        </TABLE>
+
+
     </TABLES>
 </XMLDB>

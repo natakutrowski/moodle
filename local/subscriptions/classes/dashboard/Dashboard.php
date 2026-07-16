@@ -16,6 +16,7 @@ use local_subscriptions\dashboard\cards\CrmFunnelCard;
 use local_subscriptions\dashboard\cards\CrmTrendsCard;
 use local_subscriptions\dashboard\cards\CrmDailyPrioritiesCard;
 use local_subscriptions\dashboard\cards\InboxOverviewCard;
+use local_subscriptions\dashboard\cards\WorkItemOverviewCard;
 
 final class Dashboard {
 
@@ -45,6 +46,14 @@ final class Dashboard {
         if ($inboxcard !== '') {
             $out .= html_writer::div(
                 $inboxcard,
+                'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
+            );
+        }
+
+        $workcard = WorkItemOverviewCard::render();
+        if ($workcard !== '') {
+            $out .= html_writer::div(
+                $workcard,
                 'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
             );
         }

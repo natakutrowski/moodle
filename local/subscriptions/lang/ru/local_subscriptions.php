@@ -3399,3 +3399,242 @@ $string['command_center_menu_actions'] =
 
 $string['command_center_confirmation_dialog'] =
     'Подтверждение действия';
+
+$string['subscriptions:view_work_items'] =
+    'Просматривать рабочие элементы CRM';
+
+$string['subscriptions:manage_work_items'] =
+    'Создавать и управлять рабочими элементами CRM';
+
+$string['subscriptions:manage_work_configuration'] =
+    'Настраивать команды и рабочие процессы CRM';
+
+$string['crm_work_title'] = 'Рабочие элементы';
+
+$string['crm_work_subtitle'] =
+    'Управляйте задачами, тикетами, инцидентами и внутренними запросами CampusFR.';
+
+$string['crm_work_region_label'] =
+    'Список рабочих элементов';
+
+$string['crm_work_result_count'] =
+    'Рабочих элементов: {$a}';
+
+$string['crm_work_empty'] =
+    'Нет рабочих элементов, соответствующих выбранным критериям.';
+
+$string['crm_work_create'] =
+    'Создать рабочий элемент';
+
+$string['crm_work_created'] =
+    'Рабочий элемент создан.';
+
+$string['crm_work_back'] =
+    'Вернуться к рабочим элементам';
+
+$string['crm_work_status'] =
+    'Статус';
+
+$string['crm_work_priority'] =
+    'Приоритет';
+
+$string['crm_work_type'] =
+    'Тип';
+
+$string['crm_work_team'] =
+    'Команда';
+
+$string['crm_work_due'] =
+    'Срок выполнения';
+
+$string['crm_work_assigned_user'] =
+    'Назначено участнику команды';
+
+$string['crm_work_filter_mine'] =
+    'Мои задачи';
+
+$string['crm_work_filter_unassigned'] =
+    'Без ответственного';
+
+$string['crm_work_filter_overdue'] =
+    'Просроченные';
+
+$string['crm_work_comments'] =
+    'Внутренние комментарии';
+
+$string['crm_work_add_comment'] =
+    'Добавить комментарий';
+
+$string['crm_work_subtasks'] =
+    'Подзадачи';
+
+$string['crm_work_links'] =
+    'Связанные объекты';
+
+$string['crm_work_history'] =
+    'История';
+
+$string['crm_work_teams'] =
+    'Команды управления работой';
+
+$string['crm_work_team_name'] =
+    'Название команды';
+
+$string['crm_work_team_create'] =
+    'Создать команду';
+
+$string['crm_work_field_title'] =
+    'Название';
+
+$string['crm_work_field_description'] =
+    'Описание';
+
+$string['crm_work_create_from_thread'] =
+    'Создать рабочий элемент';
+
+$string['crm_work_user_section'] =
+    'Рабочие элементы';
+
+$string['crm_work_total'] =
+    'Всего';
+
+$string['crm_work_active'] =
+    'Активные';
+
+$string['crm_work_urgent'] =
+    'Срочные';
+
+$string['crm_work_overdue'] =
+    'Просроченные';
+
+$string['crm_work_unassigned'] =
+    'Без ответственного';
+
+$string['crm_work_my_items'] =
+    'Мои задачи';
+
+$string['crm_work_open_user_items'] =
+    'Посмотреть все рабочие элементы';
+
+$string['crm_work_create_for_user'] =
+    'Создать задачу';
+
+$string['crm_work_dashboard_title'] =
+    'Управление работой';
+
+$string['crm_work_status_open'] =
+    'Открыт';
+
+$string['crm_work_status_in_progress'] =
+    'В работе';
+
+$string['crm_work_status_blocked'] =
+    'Заблокирован';
+
+$string['crm_work_status_waiting'] =
+    'В ожидании';
+
+$string['crm_work_status_resolved'] =
+    'Решён';
+
+$string['crm_work_status_closed'] =
+    'Закрыт';
+
+$string['crm_work_status_cancelled'] =
+    'Отменён';
+
+$string['crm_work_priority_low'] =
+    'Низкий';
+
+$string['crm_work_priority_normal'] =
+    'Обычный';
+
+$string['crm_work_priority_high'] =
+    'Высокий';
+
+$string['crm_work_priority_urgent'] =
+    'Срочный';
+
+$string['crm_work_priority_critical'] =
+    'Критический';
+
+$string['crm_work_type_task'] =
+    'Задача';
+
+$string['crm_work_type_support'] =
+    'Поддержка';
+
+$string['crm_work_type_bug'] =
+    'Ошибка';
+
+$string['crm_work_type_incident'] =
+    'Инцидент';
+
+$string['crm_work_type_feature'] =
+    'Функциональность';
+
+$string['crm_work_type_content'] =
+    'Контент';
+
+$string['crm_work_type_marketing'] =
+    'Маркетинг';
+
+$string['crm_work_type_finance'] =
+    'Финансы';
+
+$string['crm_work_type_administration'] =
+    'Администрирование';
+
+$string['crm_work_type_follow_up'] =
+    'Последующее действие';
+
+$string['command_action_work_items_title'] =
+    'Открыть рабочие элементы';
+
+$string['command_action_work_items_subtitle'] =
+    'Посмотреть все задачи, тикеты и внутренние запросы.';
+
+$string['command_action_work_items_mine_title'] =
+    'Мои задачи';
+
+$string['command_action_work_items_mine_subtitle'] =
+    'Посмотреть рабочие элементы, назначенные вам.';
+
+$string['command_action_work_items_urgent_title'] =
+    'Срочные рабочие элементы';
+
+$string['command_action_work_items_urgent_subtitle'] =
+    'Посмотреть рабочие элементы со срочным приоритетом.';
+
+$string['command_action_work_items_overdue_title'] =
+    'Просроченные рабочие элементы';
+
+$string['command_action_work_items_overdue_subtitle'] =
+    'Посмотреть рабочие элементы с истёкшим сроком.';
+
+$string['command_action_work_items_unassigned_title'] =
+    'Рабочие элементы без ответственного';
+
+$string['command_action_work_items_unassigned_subtitle'] =
+    'Посмотреть активные рабочие элементы без назначенного ответственного.';
+
+$string['crm_work_team_role_member'] =
+    'Участник';
+
+$string['crm_work_team_role_lead'] =
+    'Руководитель';
+
+$string['crm_work_remove_member_confirm'] =
+    'Удалить этого участника из команды?';
+
+$string['crm_help_category_work_management'] =
+    'Управление работой';
+
+$string['crm_help_category_work_management_desc'] =
+    'Организуйте задачи, тикеты, инциденты и внутренние запросы CampusFR.';
+
+$string['crm_help_article_work_management_title'] =
+    'Управление рабочими элементами';
+
+$string['crm_help_article_work_management_summary'] =
+    'Статусы, приоритеты, команды, назначения, подзадачи и связи рабочих элементов с CRM.';

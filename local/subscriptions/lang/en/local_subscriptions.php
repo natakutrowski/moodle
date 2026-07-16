@@ -3393,3 +3393,241 @@ $string['command_center_menu_actions'] =
 
 $string['command_center_confirmation_dialog'] =
     'Action confirmation';
+
+$string['subscriptions:view_work_items'] =
+    'View CRM work items';
+
+$string['subscriptions:manage_work_items'] =
+    'Create and manage CRM work items';
+
+$string['subscriptions:manage_work_configuration'] =
+    'Configure CRM work teams and workflows';
+
+$string['crm_work_title'] = 'Work Items';
+$string['crm_work_subtitle'] =
+    'Manage CampusFR tasks, tickets, incidents and internal requests.';
+
+$string['crm_work_region_label'] =
+    'Work Items list';
+
+$string['crm_work_result_count'] =
+    '{$a} Work Item(s)';
+
+$string['crm_work_empty'] =
+    'No Work Items match these criteria.';
+
+$string['crm_work_create'] =
+    'Create a Work Item';
+
+$string['crm_work_created'] =
+    'The Work Item has been created.';
+
+$string['crm_work_back'] =
+    'Back to Work Items';
+
+$string['crm_work_status'] =
+    'Status';
+
+$string['crm_work_priority'] =
+    'Priority';
+
+$string['crm_work_type'] =
+    'Type';
+
+$string['crm_work_team'] =
+    'Team';
+
+$string['crm_work_due'] =
+    'Due date';
+
+$string['crm_work_assigned_user'] =
+    'Assigned to a team member';
+
+$string['crm_work_filter_mine'] =
+    'My tasks';
+
+$string['crm_work_filter_unassigned'] =
+    'Unassigned';
+
+$string['crm_work_filter_overdue'] =
+    'Overdue';
+
+$string['crm_work_comments'] =
+    'Internal comments';
+
+$string['crm_work_add_comment'] =
+    'Add comment';
+
+$string['crm_work_subtasks'] =
+    'Subtasks';
+
+$string['crm_work_links'] =
+    'Linked objects';
+
+$string['crm_work_history'] =
+    'History';
+
+$string['crm_work_teams'] =
+    'Work Management teams';
+
+$string['crm_work_team_name'] =
+    'Team name';
+
+$string['crm_work_team_create'] =
+    'Create team';
+
+$string['crm_work_field_title'] =
+    'Title';
+
+$string['crm_work_field_description'] =
+    'Description';
+
+$string['crm_work_create_from_thread'] =
+    'Create a Work Item';
+
+$string['crm_work_user_section'] =
+    'Work Items';
+
+$string['crm_work_total'] =
+    'Total';
+
+$string['crm_work_active'] =
+    'Active';
+
+$string['crm_work_urgent'] =
+    'Urgent';
+
+$string['crm_work_overdue'] =
+    'Overdue';
+
+$string['crm_work_unassigned'] =
+    'Unassigned';
+
+$string['crm_work_my_items'] =
+    'My tasks';
+
+$string['crm_work_open_user_items'] =
+    'View all Work Items';
+
+$string['crm_work_create_for_user'] =
+    'Create a task';
+
+$string['crm_work_dashboard_title'] =
+    'Work Management';
+
+$string['crm_work_status_open'] =
+    'Open';
+
+$string['crm_work_status_in_progress'] =
+    'In progress';
+
+$string['crm_work_status_blocked'] =
+    'Blocked';
+
+$string['crm_work_status_waiting'] =
+    'Waiting';
+
+$string['crm_work_status_resolved'] =
+    'Resolved';
+
+$string['crm_work_status_closed'] =
+    'Closed';
+
+$string['crm_work_status_cancelled'] =
+    'Cancelled';
+
+$string['crm_work_priority_low'] =
+    'Low';
+
+$string['crm_work_priority_normal'] =
+    'Normal';
+
+$string['crm_work_priority_high'] =
+    'High';
+
+$string['crm_work_priority_urgent'] =
+    'Urgent';
+
+$string['crm_work_priority_critical'] =
+    'Critical';
+
+$string['crm_work_type_task'] =
+    'Task';
+
+$string['crm_work_type_support'] =
+    'Support';
+
+$string['crm_work_type_bug'] =
+    'Bug';
+
+$string['crm_work_type_incident'] =
+    'Incident';
+
+$string['crm_work_type_feature'] =
+    'Feature';
+
+$string['crm_work_type_content'] =
+    'Content';
+
+$string['crm_work_type_marketing'] =
+    'Marketing';
+
+$string['crm_work_type_finance'] =
+    'Finance';
+
+$string['crm_work_type_administration'] =
+    'Administration';
+
+$string['crm_work_type_follow_up'] =
+    'Follow-up';
+
+$string['command_action_work_items_title'] =
+    'Open Work Items';
+
+$string['command_action_work_items_subtitle'] =
+    'View all tasks, tickets and internal requests.';
+
+$string['command_action_work_items_mine_title'] =
+    'My tasks';
+
+$string['command_action_work_items_mine_subtitle'] =
+    'View Work Items assigned to you.';
+
+$string['command_action_work_items_urgent_title'] =
+    'Urgent Work Items';
+
+$string['command_action_work_items_urgent_subtitle'] =
+    'View Work Items with urgent priority.';
+
+$string['command_action_work_items_overdue_title'] =
+    'Overdue Work Items';
+
+$string['command_action_work_items_overdue_subtitle'] =
+    'View Work Items whose due date has passed.';
+
+$string['command_action_work_items_unassigned_title'] =
+    'Unassigned Work Items';
+
+$string['command_action_work_items_unassigned_subtitle'] =
+    'View active Work Items without an assignee.';
+
+$string['crm_work_team_role_member'] =
+    'Member';
+
+$string['crm_work_team_role_lead'] =
+    'Lead';
+
+$string['crm_work_remove_member_confirm'] =
+    'Remove this member from the team?';
+
+$string['crm_help_category_work_management'] =
+    'Work Management';
+
+$string['crm_help_category_work_management_desc'] =
+    'Organize CampusFR tasks, tickets, incidents and internal requests.';
+
+$string['crm_help_article_work_management_title'] =
+    'Managing Work Items';
+
+$string['crm_help_article_work_management_summary'] =
+    'Understand Work Item statuses, priorities, teams, assignments, subtasks and CRM links.';

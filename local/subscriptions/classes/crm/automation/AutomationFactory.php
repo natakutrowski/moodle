@@ -5,6 +5,7 @@ namespace local_subscriptions\crm\automation;
 use local_subscriptions\crm\automation\actions\AddTagAction;
 use local_subscriptions\crm\automation\actions\CreateNoteAction;
 use local_subscriptions\crm\automation\actions\RemoveTagAction;
+use local_subscriptions\crm\automation\actions\CreateWorkItemAction;
 use local_subscriptions\crm\automation\conditions\HasTagCondition;
 use local_subscriptions\crm\automation\conditions\MissingTagCondition;
 use local_subscriptions\crm\automation\conditions\EventNoteTypeIsCondition;
@@ -42,6 +43,7 @@ final class AutomationFactory {
         return (new AutomationActionRegistry())
             ->register(new AddTagAction())
             ->register(new RemoveTagAction())
-            ->register(new CreateNoteAction());
+            ->register(new CreateNoteAction())
+            ->register(new CreateWorkItemAction());
     }
 }
