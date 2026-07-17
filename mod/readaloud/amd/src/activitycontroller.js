@@ -1069,6 +1069,7 @@ define([
 
 			// Update the progress bar when returning home
 			dd.updateProgressBar();
+			dd.controls.menubuttonscontainer.find("li.mode-chooser").removeClass("active");
 
 			dd.pushModeToUrl(null);
 		},
@@ -1082,6 +1083,48 @@ define([
 			} else {
 				dd.showHome();
 			}
+		},
+
+		getStepKeyForMode: function (mode) {
+			var modeStepMap = {
+				listen: "step_listen",
+				preview: "step_listen",
+				practice: "step_practice",
+				landr: "step_practice",
+				shadow: "step_shadow",
+				read: "step_read",
+				startnoshadow: "step_read",
+				readreport: "step_read",
+				readreportdummy: "step_read",
+				quiz: "step_quiz",
+				quizreport: "step_quiz",
+				report: "step_report",
+				fullreport: "step_report",
+			};
+
+			return modeStepMap[mode] || null;
+		},
+
+		updateActiveStepInMenu: function () {
+			var dd = this;
+			var $container = dd.controls.menubuttonscontainer;
+
+			if (!$container || !$container.length) {
+				return;
+			}
+
+			var activeStepKey = dd.getStepKeyForMode(dd.getModeFromUrl());
+			var stepsMapping = dd.activitydata.steps || {};
+
+			$container.find("li.mode-chooser").removeClass("active");
+
+			if (!activeStepKey || stepsMapping[activeStepKey] === undefined) {
+				return;
+			}
+
+			$container
+				.find('li.mode-chooser[data-step="' + stepsMapping[activeStepKey] + '"]')
+				.addClass("active");
 		},
 
 		// Helper for bigbuttonmenu.
@@ -1249,6 +1292,7 @@ define([
 					}
 				},
 			);
+			dd.updateActiveStepInMenu();
 		},
 
 		updateProgressBar: function () {

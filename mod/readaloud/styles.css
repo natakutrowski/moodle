@@ -310,11 +310,11 @@ body.path-mod-readaloud #page-content button.control.control--recordbutton[aria-
 #mod_readaloud_footernav_cont #mod_readaloud_menubuttons_cont ol.main-nav > li .nav-link .nav-status-icon {
   display: none;
 }
-#mod_readaloud_footernav_cont #mod_readaloud_menubuttons_cont ol.main-nav > li.current {
+#mod_readaloud_footernav_cont #mod_readaloud_menubuttons_cont ol.main-nav > li.active {
   border-color: #513DEB;
 }
-#mod_readaloud_footernav_cont #mod_readaloud_menubuttons_cont ol.main-nav > li.current .step-icon svg,
-#mod_readaloud_footernav_cont #mod_readaloud_menubuttons_cont ol.main-nav > li.current .nav-label {
+#mod_readaloud_footernav_cont #mod_readaloud_menubuttons_cont ol.main-nav > li.active .step-icon svg,
+#mod_readaloud_footernav_cont #mod_readaloud_menubuttons_cont ol.main-nav > li.active .nav-label {
   color: #513DEB;
 }
 #mod_readaloud_footernav_cont #mod_readaloud_menubuttons_cont ol.main-nav > li.mode-chooser.no-click a {
@@ -481,11 +481,12 @@ body.path-mod-readaloud #page-content button.control.control--recordbutton[aria-
 #mod_readaloud_home_cont #mod_readaloud_menubuttons_cont .main-nav li .nav-text-group .nav-label {
   font-weight: 600;
 }
-#mod_readaloud_home_cont #mod_readaloud_menubuttons_cont .main-nav li.current {
+#mod_readaloud_home_cont #mod_readaloud_menubuttons_cont .main-nav li.active {
   border-color: #513DEB;
 }
-#mod_readaloud_home_cont #mod_readaloud_menubuttons_cont .main-nav li.current .step-icon svg,
-#mod_readaloud_home_cont #mod_readaloud_menubuttons_cont .main-nav li.current .nav-label {
+
+#mod_readaloud_home_cont #mod_readaloud_menubuttons_cont .main-nav li.active .step-icon svg,
+#mod_readaloud_home_cont #mod_readaloud_menubuttons_cont .main-nav li.active .nav-label {
   color: #513DEB;
 }
 #mod_readaloud_home_cont #mod_readaloud_menubuttons_cont .main-nav li.mode-chooser.no-click a {
