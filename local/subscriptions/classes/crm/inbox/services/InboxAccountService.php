@@ -22,7 +22,7 @@ final class InboxAccountService {
         $this->validator =
             $validator ??
             new InboxAccountValidator($credentials);
-}
+    }
 
     public function configure_ovh_support_account(
         bool $enabled = false
@@ -47,10 +47,10 @@ final class InboxAccountService {
                 ],
                 'folders' => [
                     'inbox' => 'INBOX',
-                    'archive' => 'Archives',
-                    'trash' => 'Trash',
-                    'sent' => 'Sent',
-                    'drafts' => 'Drafts',
+                    'archive' => '',
+                    'trash' => 'INBOX.Trash',
+                    'sent' => 'INBOX.Sent',
+                    'drafts' => 'INBOX.Drafts',
                 ],
                 'sync' => [
                     'batchsize' => 50,
@@ -60,7 +60,6 @@ final class InboxAccountService {
                     'folders' => [
                         'inbox',
                         'sent',
-                        'archive',
                     ],
                 ],
                 'retention' => [
