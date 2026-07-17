@@ -171,7 +171,11 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('checkout_title', 'local_subscriptions'));
 $PAGE->set_heading(format_string($SITE->fullname));
-$PAGE->requires->css('/local/subscriptions/styles.css');
+$PAGE->requires->css(
+    new moodle_url(
+        \local_subscriptions\subscription_config::plugin_stylesheet_page()
+    )
+);
 
 if ($embedded) {
     $PAGE->add_body_class('subs-embedded');

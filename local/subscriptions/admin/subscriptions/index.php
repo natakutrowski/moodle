@@ -28,7 +28,11 @@ $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url(subscription_config::user_subscriptions_page(), $urlparams));
 $PAGE->set_title(get_string('manage_user_subscriptions', 'local_subscriptions'));
 $PAGE->set_heading(get_string('manage_user_subscriptions', 'local_subscriptions'));
-$PAGE->requires->css(new moodle_url('/local/subscriptions/styles.css'));
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
+);
 
 $where = [];
 $params = [];

@@ -14,6 +14,7 @@ final class UserExplorerColumn {
     public const SUBSCRIPTIONS = 'subscriptions';
     public const PURCHASES = 'purchases';
     public const INBOX = 'inbox';
+    public const CUSTOMER_SUCCESS_PLANS = 'customer_success_plans';
     public const COUNTRY = 'country';
     public const REGISTERED = 'registered';
     public const LAST_ACCESS = 'last_access';
@@ -30,6 +31,7 @@ final class UserExplorerColumn {
             self::SUBSCRIPTIONS,
             self::PURCHASES,
             self::INBOX,
+            self::CUSTOMER_SUCCESS_PLANS,
             self::COUNTRY,
             self::REGISTERED,
             self::LAST_ACCESS,
@@ -60,6 +62,7 @@ final class UserExplorerColumn {
             self::SUBSCRIPTIONS,
             self::PURCHASES,
             self::INBOX,
+            self::CUSTOMER_SUCCESS_PLANS,
             self::LAST_ACCESS,
         ];
 

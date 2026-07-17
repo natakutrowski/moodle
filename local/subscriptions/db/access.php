@@ -105,4 +105,13 @@ $capabilities = [
         ],
     ],
 
+    'local/subscriptions:use_crm_assistant_ai' => [
+        'riskbitmask' => RISK_PERSONAL,
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
 ];

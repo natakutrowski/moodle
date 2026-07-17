@@ -17,6 +17,8 @@ use local_subscriptions\dashboard\cards\CrmTrendsCard;
 use local_subscriptions\dashboard\cards\CrmDailyPrioritiesCard;
 use local_subscriptions\dashboard\cards\InboxOverviewCard;
 use local_subscriptions\dashboard\cards\WorkItemOverviewCard;
+use local_subscriptions\dashboard\cards\CrmAssistantCard;
+use local_subscriptions\crm\success\plans\rendering\CustomerSuccessPlanDashboardCard;
 
 final class Dashboard {
 
@@ -41,6 +43,16 @@ final class Dashboard {
             'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
         );
 
+        $assistantcard =
+            CrmAssistantCard::render();
+
+        if ($assistantcard !== '') {
+            $out .= html_writer::div(
+                $assistantcard,
+                'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
+            );
+        }
+
         $inboxcard = InboxOverviewCard::render();
 
         if ($inboxcard !== '') {
@@ -51,9 +63,21 @@ final class Dashboard {
         }
 
         $workcard = WorkItemOverviewCard::render();
+
         if ($workcard !== '') {
             $out .= html_writer::div(
                 $workcard,
+                'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
+            );
+        }
+
+        $successplancard =
+            (new CustomerSuccessPlanDashboardCard())
+                ->render();
+
+        if ($successplancard !== '') {
+            $out .= html_writer::div(
+                $successplancard,
                 'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
             );
         }

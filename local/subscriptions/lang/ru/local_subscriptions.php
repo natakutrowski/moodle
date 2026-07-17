@@ -23,7 +23,7 @@ $string['user'] = 'Пользователь';
 $string['plan'] = 'Тариф';
 $string['start_date'] = 'Дата начала';
 $string['end_date'] = 'Дата окончания';
-$string['status'] = 'Статус';
+
 $string['creation_date'] = 'Дата создания';
 $string['save_modifications'] = 'Сохранить изменения';
 $string['delete_selected'] = 'Удалить выбранные подписки';
@@ -78,7 +78,7 @@ $string['name'] = 'Название';
 $string['description'] = 'Описание';
 $string['courses'] = '📖 Курсы';
 $string['dates'] = '📅 Даты';
-$string['actions'] = '🛠️ Действия';
+
 $string['createdon'] = 'Создано:';
 $string['modifiedon'] = 'Изменено:';
 $string['editscope'] = '✏️ Редактировать область';
@@ -109,7 +109,7 @@ $string['cancel'] = 'Отмена';
 $string['confirmdeletetranslation'] = 'Вы уверены, что хотите безвозвратно удалить этот перевод?';
 
 // Plans
-$string['delete'] = 'Удалить';
+
 $string['deactivateplan'] = 'Деактивировать тариф';
 $string['activateplan'] = 'Активировать тариф';
 $string['planname'] = 'Название тарифа';
@@ -176,7 +176,6 @@ $string['pricepaid'] = 'Оплаченная сумма';
 
 $string['courselist'] = 'Список курсов';
 
-$string['close'] = 'Закрыть';
 
 $string['subscribe'] = 'Купить';
 $string['subscribe_to_campus'] = 'Купить на Campus<small><sup>FR</sup></small>';
@@ -309,8 +308,6 @@ $string['recurring_canceled_subject'] = 'Ваша подписка отмене�
 $string['recurring_canceled_body']    = 'Ваша подписка «{$a}» отменена. Доступ сохранится до конца текущего периода.';
 $string['recurring_canceled_button']  = 'Оформить снова';
 
-$string['details'] = 'Детали';
-$string['subscription_details'] = 'Детали покупки';
 
 $string['mysubs_title'] = 'Мои покупки';
 $string['mysubs_empty'] = 'Вы пока не покупали курсы.';
@@ -338,7 +335,7 @@ $string['payment_failed'] = 'Платёж не прошёл';
 
 $string['subscribe_now']  = 'Купить сейчас';
 
-$string['upgrade_window_label']  = 'Окно расчёта: {$a}';
+
 $string['upgrade_tariffs']       = 'Базовые цены: текущая = {$a->p1}, целевая = {$a->p2}';
 $string['upgrade_consumed_since_t0'] = 'Прошедшее время с начала окна: {$a}';
 $string['upgrade_equation_past']  = 'Прошедшая часть (текущая ставка): {$a->p1} × t/{$a->d1} = {$a->val}';
@@ -357,9 +354,7 @@ $string['manage_billing'] = 'Управление оплатой';
 $string['provider_portal_not_supported'] = 'Портал биллинга недоступен';
 $string['provider_portal_not_supported_desc'] = 'Провайдер «{$a}» пока не предлагает клиентский портал. Управляйте подпиской в профиле.';
 
-$string['subfield_id']                 = 'ID';
-$string['subfield_userid']             = 'ID пользователя';
-$string['subfield_planid']             = 'ID тарифа';
+
 $string['subfield_start']              = 'Начало';
 $string['subfield_end']                = 'Окончание';
 $string['subfield_amount']             = 'Оплаченная сумма';
@@ -404,11 +399,7 @@ $string['email_show_pr_ref'] = 'Показывать ссылку на PR в п�
 $string['email_show_pr_ref_desc'] = 'Добавлять небольшую техническую ссылку (PR # и дата) внизу писем. По умолчанию выключено.';
 $string['unknown_payment_event'] = 'Неизвестное событие оплаты: {$a}';
 
-$string['stripe:missingamount'] = 'В запросе оплаты отсутствует сумма.';
-$string['stripe:productname'] = 'Тариф {$a}';
-$string['stripe:missingpriceidforsubscription'] = 'Отсутствует stripe_price_id для подписки.';
-$string['stripe:missingpriceid'] = 'Отсутствует price_id.';
-$string['stripe:sdkautoloadnotfound'] = 'Не найден autoload Stripe SDK по пути {$a}.';
+
 $string['sessiondisplay'] = 'Сессия: {$a}';
 
 // Headings
@@ -437,10 +428,7 @@ $string['reminder2_after_minutes_desc'] = 'Отправить второе на�
 $string['featured_planid_label'] = 'Избранный тариф';
 $string['featured_planid_desc'] = 'ID тарифа, который выделяется на странице предложений.';
 
-$string['alfa_missing_api_base'] = 'Не задан базовый URL API Alfa.';
-$string['alfa_rub_only'] = 'Alfa (token) настроен только для валюты RUB.';
-$string['alfa_register_error'] = 'Не удалось инициализировать платёж: {$a}';
-$string['alfa_missing_formurl'] = 'Платёж инициализирован, но банк не вернул ссылку для оплаты.';
+
 $string['alfa_not_paid'] = 'Платёж не завершён';
 
 $string['subfield_pr_id'] = 'Заявка на оплату №';
@@ -454,8 +442,6 @@ $string['subfield_pr_link'] = 'Ссылка на оплату PR';
 $string['subfield_pr_lasterror'] = 'Последняя ошибка PR';
 $string['notavailable'] = 'Н/Д';
 
-$string['err_cannot_determine_price'] = 'Невозможно определить цену для создания платежного запроса.';
-$string['err_no_redirect_url'] = 'Инициализация оформления не вернула ссылку для перехода.';
 
 $string['btn_signin'] = 'Войти';
 
@@ -467,7 +453,7 @@ $string['provider_dev'] = 'Разработка';
 $string['provider_trial']  = 'Пробный';
 
 $string['configmissing'] = 'Отсутствует настройка: {$a}.';
-$string['missing_customer_id'] = 'Отсутствует ID клиента Stripe.';
+
 $string['invalidcsvupload'] = 'Загруженный CSV-файл некорректен.';
 $string['csvwritefail'] = 'Не удалось сохранить CSV-файл.';
 $string['invalidpricecurrency'] = 'Неверная комбинация цена/валюта.';
@@ -475,7 +461,7 @@ $string['plan_not_found'] = 'Тариф не найден.';
 $string['scopenotfound'] = 'Область доступа не найдена.';
 $string['scopedeleteinuse'] = 'Невозможно удалить эту область, так как она используется.';
 $string['plannotfound'] = 'Тариф не найден.';
-$string['paymentgatewayerror'] = 'Ошибка платёжного шлюза: {$a}';
+
 
 $string['retry_invalid_status'] = 'Этот платёжный запрос нельзя повторить в текущем состоянии.';
 $string['retry_link_expired'] = 'Ссылка для повтора недействительна или истекла. Начните новое оформление.';
@@ -678,8 +664,7 @@ $string['settings_trial_discount_hours'] = 'Окно скидки (часы)';
 $string['settings_trial_discount_hours_desc'] = 'Например, 72 часа после начала пробного периода.';
 $string['missing_trial_plan'] = 'План пробного периода не настроен (trial_plan_id).';
 
-$string['pricing_missing_price'] = 'Для этого плана и валюты ({$a}) не установлена цена.';
-$string['cannot_purchase_trial_plan'] = 'Этот план является пробным и его нельзя купить.';
+
 $string['settings_paylock_section'] = 'Фиксация цены (checkout)';
 $string['settings_paylock_strict'] = 'Строгий режим при расхождении';
 $string['settings_paylock_strict_desc'] = 'Если включено, создание подписки будет отклонено при несоответствии оплаченной суммы зафиксированной сумме.';
@@ -742,7 +727,7 @@ $string['checkout_go_to_payment_discount'] = 'Купить со скидкой';
 $string['checkout_full_access_line'] = 'Безлимитный доступ ко всем урокам курса.';
 $string['summary_price_title_single'] = 'Подписка на {$a}';
 
-$string['digital_pdf_badge'] = 'PDF Campus<small><sup>FR</sup></small>';
+
 $string['digital_pdf_intro'] = 'Практический PDF-гайд, который поможет понять, запомнить и повторить глаголы 3-й группы без бесконечных таблиц.';
 $string['digital_pdf_item_1'] = 'Основные семьи глаголов 3-й группы.';
 $string['digital_pdf_item_2'] = 'Самые полезные модели спряжения.';
@@ -792,7 +777,7 @@ $string['digital_mail_payment_date'] = 'Дата оплаты';
 $string['digital_success_paid_heading'] = 'Спасибо за покупку!';
 $string['digital_success_paid_intro'] = 'Ваш платёж подтверждён. PDF-файл готов к скачиванию.';
 $string['digital_success_pending_heading'] = 'Платёж проверяется';
-$string['digital_success_summary_title'] = 'Информация о покупке';
+
 $string['digital_success_email_sent_hint'] = 'Мы также отправили ссылку для скачивания и квитанцию на ваш email.';
 $string['digital_success_pending_hint'] = 'Если вы только что оплатили, обновите страницу через несколько секунд.';
 
@@ -921,10 +906,9 @@ $string['digital_product_edit_saved'] = 'Цифровой продукт сох�
 $string['digital_product_edit_slug_exists'] = 'Этот slug уже существует.';
 $string['digital_product_edit_current_file'] = 'Текущий файл';
 $string['digital_product_edit_no_file'] = 'Файл пока не выбран.';
-$string['digital_product_edit_click_to_upload'] = 'Нажмите здесь, чтобы выбрать или заменить файл.';$string['digital_product_edit_access_note'] = 'Текст о доступе после покупки';
-$string['digital_product_edit_content_title'] = 'Заголовок блока с содержанием';
-$string['digital_product_edit_forwho_title'] = 'Заголовок блока “кому подойдёт”';
-$string['digital_product_edit_buy_title'] = 'Заголовок блока покупки';
+$string['digital_product_edit_click_to_upload'] = 'Нажмите здесь, чтобы выбрать или заменить файл.';
+
+
 $string['digital_product_edit_access_note'] = 'Текст о доступе после покупки';
 $string['digital_product_edit_content_title'] = 'Заголовок блока с содержанием';
 $string['digital_product_edit_forwho_title'] = 'Заголовок блока “кому подойдёт”';
@@ -967,7 +951,7 @@ $string['digital_cancel_support_text'] = 'Если вам кажется, что
 $string['digital_cancel_gateway_timeout'] =
 'Не удалось открыть страницу оплаты. Возможно, это временная проблема. Попробуйте ещё раз через несколько минут.';
 
-$string['planentitlements'] = 'Права доступа тарифов';
+
 $string['planentitlementsfor'] = 'Права доступа для тарифа: {$a}';
 $string['addentitlement'] = 'Добавить право доступа';
 $string['editentitlement'] = 'Изменить право доступа';
@@ -993,7 +977,7 @@ $string['accesslevel_grammar'] = 'Только грамматика';
 $string['accesslevel_full'] = 'Полный доступ';
 $string['invalidplanid'] = 'Тариф не найден или не указан.';
 
-$string['planupgrades'] = 'Апгрейды тарифов';
+
 $string['planupgradesintro'] = 'Здесь можно указать, с какого тарифа на какой можно перейти. Например: A2 Грамматика → A2 Полный доступ. При расчёте по разнице цена апгрейда считается так: цена целевого тарифа минус цена текущего тарифа, в той же валюте.';
 $string['addupgrade'] = 'Добавить апгрейд';
 $string['editupgrade'] = 'Изменить апгрейд';
@@ -1013,7 +997,7 @@ $string['upgrade_pricing_difference'] = 'Разница между ценами 
 $string['upgrade_isactive'] = 'Активен';
 $string['upgrade_same_plan_error'] = 'Исходный и целевой тарифы должны быть разными.';
 $string['upgrade_already_exists'] = 'Такое правило апгрейда уже существует.';
-$string['active'] = 'Активен';
+
 $string['inactive'] = 'Неактивен';
 $string['status'] = 'Статус';
 
@@ -1058,7 +1042,7 @@ $string['available_courses'] = 'Доступные курсы';
 $string['digital_product_view_page'] = 'Посмотреть страницу продукта';
 
 $string['digital_purchases_empty'] = 'Вы пока не покупали цифровые продукты.';
-$string['digital_purchase_details'] = 'Детали цифровой покупки';
+
 $string['digital_purchase_downloads'] = 'Загрузки';
 $string['digital_product'] = 'Цифровой продукт';
 $string['user_purchases_title'] = 'Покупки пользователя {$a}';
@@ -1180,7 +1164,7 @@ $string['unlimited'] = 'Без ограничения';
 $string['back_to_admin_dashboard'] = 'Назад в back-office Campus<small><sup>FR</sup></small>';
 
 $string['crm_users'] = 'Пользователи CRM';
-$string['crm_user_profile'] = 'Карточка пользователя';
+
 $string['crm_search_user_placeholder'] = 'Поиск по имени, фамилии или email';
 $string['crm_no_users_found'] = 'Пользователи не найдены.';
 $string['crm_no_subscriptions'] = 'У этого пользователя нет подписок.';
@@ -1190,7 +1174,7 @@ $string['view_moodle_profile'] = 'Открыть профиль Moodle';
 $string['admin_card_crm_users_title'] = 'Пользователи CRM';
 $string['admin_card_crm_users_desc'] = 'Найти пользователя и открыть его полную карточку.';
 $string['subscriptions'] = 'Подписки';
-$string['digital_purchases'] = 'Цифровые покупки';
+
 $string['product'] = 'Продукт';
 $string['digital_purchases'] = 'Цифровые покупки';
 $string['crm_quick_actions'] = 'Быстрые действия';
@@ -1247,7 +1231,7 @@ $string['adminlog_subscription_dates_updated'] = 'Даты подписки из
 $string['adminlog_digital_purchase_created'] = 'Цифровая покупка создана';
 $string['adminlog_digital_purchase_paid'] = 'Цифровая покупка оплачена';
 $string['adminlog_digital_purchase_failed'] = 'Цифровая покупка не удалась';
-$string['adminlog_digital_link_resent'] = 'Ссылка на цифровой продукт отправлена повторно';
+
 
 $string['adminlog_payment_request_created'] = 'Платёжный запрос создан';
 $string['adminlog_payment_request_paid'] = 'Платёжный запрос оплачен';
@@ -1258,7 +1242,7 @@ $string['adminlog_trial_started'] = 'Пробный доступ начат';
 $string['adminlog_trial_expired'] = 'Пробный доступ истёк';
 
 $string['change_user'] = 'Изменить пользователя';
-$string['crm_accessible_courses'] = 'Доступные курсы';
+
 $string['crm_no_accessible_courses'] = 'Сейчас нет доступных курсов.';
 $string['access'] = 'Доступ';
 $string['active'] = 'Активен';
@@ -1373,8 +1357,7 @@ $string['crm_email_type_receipt'] = 'Чек покупки';
 $string['crm_email_type_access'] = 'Доступ к подписке';
 $string['crm_email_type_welcome'] = 'Приветствие';
 
-$string['crm_timeline_collapse_all'] = 'Свернуть / развернуть детали';
-$string['crm_timeline_view_details'] = 'Показать детали';
+
 $string['payment_request'] = 'Запрос на оплату';
 $string['type'] = 'Тип';
 $string['subscription_details'] = 'Детали подписки';
@@ -1494,8 +1477,6 @@ $string['command_center_type_action'] = 'Действие';
 $string['command_action_dashboard_title'] = 'Открыть dashboard';
 $string['command_action_dashboard_subtitle'] = 'Вернуться на главную страницу CRM';
 
-$string['command_action_users_title'] = 'Посмотреть пользователей CRM';
-$string['command_action_users_subtitle'] = 'Открыть список пользователей и клиентов';
 
 $string['command_action_products_title'] = 'Посмотреть цифровые продукты';
 $string['command_action_products_subtitle'] = 'Управлять цифровыми продуктами CampusFR';
@@ -1506,8 +1487,6 @@ $string['command_action_product_create_subtitle'] = 'Добавить новый
 $string['command_action_purchases_title'] = 'Посмотреть цифровые покупки';
 $string['command_action_purchases_subtitle'] = 'Открыть покупки и цифровые платежи';
 
-$string['command_action_subscriptions_title'] = 'Посмотреть подписки';
-$string['command_action_subscriptions_subtitle'] = 'Просматривать и управлять подписками пользователей';
 
 $string['command_center_initial'] = 'Начните вводить, чтобы найти пользователя, продукт, покупку, подписку или действие.';
 
@@ -1789,10 +1768,7 @@ $string['dashboard_issue_pending_digital_title'] = 'Ожидающие цифр�
 $string['dashboard_issue_pending_digital_desc'] = 'Платёжные заявки созданы, но ещё не подтверждены.';
 $string['dashboard_issue_failed_digital_title'] = 'Неуспешные цифровые платежи';
 $string['dashboard_issue_failed_digital_desc'] = 'Отклонённые или прерванные платежи для проверки.';
-$string['dashboard_issue_email_error_title'] = 'Emails не отправлены';
-$string['dashboard_issue_email_error_desc'] = 'Цифровые покупки с ошибкой отправки email.';
-$string['dashboard_issue_expired_token_title'] = 'Истёкшие ссылки на скачивание';
-$string['dashboard_issue_expired_token_desc'] = 'Покупки с истёкшим токеном скачивания.';
+
 
 $string['dashboard_issue_open_queue'] = 'Открыть очередь';
 $string['dashboard_issue_review_failures'] = 'Проверить';
@@ -2398,11 +2374,6 @@ $string['crm_user_sort_label'] = 'Сортировка';
 $string['crm_user_per_page'] = 'На странице';
 $string['crm_user_apply_filters'] = 'Применить фильтры';
 
-$string['crm_user_column_user'] = 'Пользователь';
-$string['crm_user_column_tags'] = 'Теги';
-$string['crm_user_column_score'] = 'Оценка CRM';
-$string['crm_user_column_risk'] = 'Риск';
-$string['crm_user_column_intelligence'] = 'Intelligence';
 
 $string['crm_user_explorer_empty_title'] = 'Пользователи не найдены';
 $string['crm_user_explorer_empty_description'] =
@@ -3638,3 +3609,463 @@ $string['crm_help_article_work_management_title'] =
 
 $string['crm_help_article_work_management_summary'] =
     'Статусы, приоритеты, команды, назначения, подзадачи и связи рабочих элементов с CRM.';
+
+$string['crm_assistant_title'] = 'CRM-помощник';
+$string['crm_assistant_navigation'] = 'CRM-помощник';
+$string['crm_assistant_description'] = 'Приоритетные ситуации, выявленные межмодульной аналитикой CRM. Помощник объясняет ситуацию и предлагает действия, но никогда не принимает автоматических решений.';
+$string['crm_assistant_open'] = 'Открыть CRM-помощник';
+$string['crm_assistant_empty'] = 'Сейчас нет рекомендаций, требующих вашего внимания.';
+$string['crm_assistant_user_section'] = 'CRM-помощник';
+
+$string['crm_assistant_metric_active'] = 'Активные';
+$string['crm_assistant_metric_critical'] = 'Критические';
+$string['crm_assistant_metric_urgent'] = 'Срочные';
+$string['crm_assistant_metric_accepted'] = 'Принятые';
+$string['crm_assistant_metric_crossdomain'] = 'Межмодульные';
+$string['crm_assistant_metric_users'] = 'Пользователи';
+
+$string['crm_assistant_filter_scope'] = 'Область';
+$string['crm_assistant_filter_priority'] = 'Приоритет';
+$string['crm_assistant_filter_status'] = 'Статус';
+$string['crm_assistant_filter_any'] = 'Все';
+$string['crm_assistant_scope_active'] = 'Активные рекомендации';
+$string['crm_assistant_scope_all'] = 'Вся история';
+
+$string['crm_assistant_priority_critical'] = 'Критический';
+$string['crm_assistant_priority_urgent'] = 'Срочный';
+$string['crm_assistant_priority_high'] = 'Высокий';
+$string['crm_assistant_priority_normal'] = 'Обычный';
+$string['crm_assistant_priority_low'] = 'Низкий';
+
+$string['crm_assistant_status_proposed'] = 'Предложена';
+$string['crm_assistant_status_accepted'] = 'Принята';
+$string['crm_assistant_status_dismissed'] = 'Отклонена';
+$string['crm_assistant_status_completed'] = 'Завершена';
+$string['crm_assistant_status_expired'] = 'Истекла';
+
+$string['crm_assistant_target'] = 'Пользователь';
+$string['crm_assistant_why'] = 'Почему появилась эта рекомендация?';
+$string['crm_assistant_priority_score'] = 'Оценка приоритета: {$a}';
+$string['crm_assistant_evidence_count'] = 'Фактов: {$a}';
+$string['crm_assistant_source_count'] = 'Источников: {$a}';
+$string['crm_assistant_last_detected'] = 'Последнее обнаружение: {$a}';
+
+$string['crm_assistant_action_accept'] = 'Принять';
+$string['crm_assistant_action_complete'] = 'Отметить выполненной';
+$string['crm_assistant_action_dismiss'] = 'Отклонить';
+$string['crm_assistant_accepted'] = 'Рекомендация принята.';
+$string['crm_assistant_completed'] = 'Рекомендация отмечена как выполненная.';
+$string['crm_assistant_dismissed'] = 'Рекомендация отклонена.';
+$string['crm_assistant_action_failed'] = 'Не удалось выполнить действие с рекомендацией.';
+
+$string['command_crm_assistant'] = 'Открыть CRM-помощник';
+$string['command_crm_assistant_desc'] = 'Показать рекомендации и приоритетные ситуации.';
+$string['command_crm_recommendation_desc'] = 'Активная рекомендация CRM.';
+
+$string['crm_assistant_recommendation_intervene_disengagement_spiral'] = 'Отреагировать на постепенную потерю вовлечённости';
+$string['crm_assistant_recommendation_intervene_disengagement_spiral_desc'] = 'Несколько сигналов указывают на устойчивое снижение активности и прогресса.';
+
+$string['crm_assistant_recommendation_coordinate_learning_support_response'] = 'Скоординировать учебную и техническую поддержку';
+$string['crm_assistant_recommendation_coordinate_learning_support_response_desc'] = 'Учебная трудность сопровождается активным обращением в поддержку.';
+
+$string['crm_assistant_recommendation_coordinate_payment_support_resolution'] = 'Совместно решить вопрос оплаты и поддержки';
+$string['crm_assistant_recommendation_coordinate_payment_support_resolution_desc'] = 'Проблема оплаты, вероятно, связана с обращением в поддержку.';
+
+$string['crm_assistant_recommendation_intervene_cross_domain_churn_risk'] = 'Отреагировать на высокий риск ухода';
+$string['crm_assistant_recommendation_intervene_cross_domain_churn_risk_desc'] = 'Доступ, активность и несколько проблем указывают на риск ухода пользователя.';
+
+$string['crm_assistant_recommendation_coordinate_operational_overload'] = 'Скоординировать нерешённые рабочие запросы';
+$string['crm_assistant_recommendation_coordinate_operational_overload_desc'] = 'Нагрузка Inbox и нерешённые Work Items требуют совместного вмешательства.';
+
+$string['crm_assistant_recommendation_review_customer_success_risk'] = 'Проверить риск Customer Success';
+$string['crm_assistant_recommendation_review_learning_difficulty'] = 'Проверить учебную трудность';
+$string['crm_assistant_recommendation_review_support_situation'] = 'Проверить ситуацию поддержки';
+$string['crm_assistant_recommendation_review_blocked_payment'] = 'Проверить заблокированный платёж';
+$string['crm_assistant_recommendation_review_active_work_items'] = 'Проверить активные Work Items';
+$string['crm_assistant_recommendation_recognise_positive_progress'] = 'Отметить прогресс учащегося';
+
+$string['crm_assistant_action_propose_work_item'] = 'Подготовить Work Item';
+
+$string['crm_work_suggestion_title'] = 'Предложение Work Item';
+$string['crm_work_suggestion_summary'] = 'Предложение CRM-помощника';
+$string['crm_work_suggestion_confidence'] = 'Уверенность предложения: {$a}%';
+$string['crm_work_suggestion_suggested_type'] = 'Предложенный тип: {$a}';
+$string['crm_work_suggestion_suggested_priority'] = 'Предложенный приоритет: {$a}';
+$string['crm_work_suggestion_suggested_due'] = 'Предложенный срок: {$a}';
+$string['crm_work_suggestion_duplicates'] = 'Похожие Work Items';
+$string['crm_work_suggestion_probable_duplicate_warning'] = 'Вероятно, уже существует аналогичный Work Item. Проверьте его перед созданием нового.';
+$string['crm_work_suggestion_similarity'] = 'Оценка сходства: {$a}%';
+$string['crm_work_suggestion_teams'] = 'Предложенные команды';
+$string['crm_work_suggestion_team_score'] = 'Соответствие: {$a->score}% · Активная нагрузка: {$a->workload}';
+$string['crm_work_suggestion_allow_duplicate'] = 'Всё равно создать Work Item, несмотря на вероятный дубль';
+$string['crm_work_suggestion_create'] = 'Создать Work Item';
+$string['crm_work_suggestion_created'] = 'Work Item создан на основе рекомендации.';
+$string['crm_work_suggestion_duplicate_blocked'] = 'Создание заблокировано, поскольку вероятный дубль уже существует.';
+
+$string['crm_work_suggestion_description_intro'] = 'Этот Work Item был подготовлен CRM-помощником. Администратор должен проверить и подтвердить его содержание.';
+$string['crm_work_suggestion_source_recommendation'] = 'Исходная рекомендация: {$a}';
+$string['crm_work_suggestion_priority_score'] = 'Оценка приоритета рекомендации: {$a}';
+$string['crm_work_suggestion_evidence_heading'] = 'Факты, послужившие основанием для рекомендации:';
+
+$string['crm_work_suggestion_title_intervene_disengagement_spiral'] = 'Связаться с учащимся из-за устойчивого снижения вовлечённости';
+$string['crm_work_suggestion_title_coordinate_learning_support_response'] = 'Скоординировать учебное сопровождение и поддержку';
+$string['crm_work_suggestion_title_coordinate_payment_support_resolution'] = 'Решить проблему оплаты и обращения в поддержку';
+$string['crm_work_suggestion_title_intervene_cross_domain_churn_risk'] = 'Организовать меры по предотвращению ухода пользователя';
+$string['crm_work_suggestion_title_coordinate_operational_overload'] = 'Скоординировать обращения и незавершённые Work Items';
+$string['crm_work_suggestion_title_review_customer_success_risk'] = 'Проверить ситуацию Customer Success';
+$string['crm_work_suggestion_title_review_learning_difficulty'] = 'Организовать учебное сопровождение';
+$string['crm_work_suggestion_title_review_support_situation'] = 'Обработать ситуацию поддержки';
+$string['crm_work_suggestion_title_review_blocked_payment'] = 'Обработать заблокированный платёж';
+$string['crm_work_suggestion_title_review_active_work_items'] = 'Проверить активные Work Items';
+
+$string['local/subscriptions:use_crm_assistant_ai'] = 'Использовать диалоговый CRM-помощник';
+
+$string['crm_assistant_ai_title'] = 'Задать вопрос CRM-помощнику';
+$string['crm_assistant_ai_description'] = 'Задайте вопрос о рекомендациях, пользователях и активных Work Items. Ответ основан только на данных, уже рассчитанных CRM.';
+$string['crm_assistant_ai_question'] = 'Ваш вопрос';
+$string['crm_assistant_ai_placeholder'] = 'Например: каким учащимся сегодня требуется вмешательство?';
+$string['crm_assistant_ai_ask'] = 'Спросить помощника';
+$string['crm_assistant_ai_thinking'] = 'Помощник анализирует доступную информацию…';
+$string['crm_assistant_ai_request_failed'] = 'CRM-помощник не смог ответить на вопрос.';
+$string['crm_assistant_ai_human_review'] = 'Ответы помощника являются предложениями и всегда должны проверяться администратором.';
+$string['crm_assistant_ai_keypoints'] = 'Основные моменты';
+$string['crm_assistant_ai_suggested_actions'] = 'Предложенные действия';
+$string['crm_assistant_ai_warnings'] = 'Предупреждения';
+$string['crm_assistant_ai_references'] = 'Связанные объекты CRM';
+$string['crm_assistant_ai_confidence'] = 'Оценка уверенности';
+
+$string['crm_assistant_ai_example_priorities'] = 'Какими пользователями нужно заняться в первую очередь сегодня?';
+$string['crm_assistant_ai_example_risks'] = 'Какие ситуации представляют наибольший риск?';
+$string['crm_assistant_ai_example_work'] = 'Какие Work Items выглядят срочными или заблокированными?';
+
+$string['crm_assistant_question_rejected'] = 'CRM-помощник не может обработать этот вопрос.';
+
+$string['task_run_crm_recommendations'] = 'Обновление рекомендаций CRM';
+
+$string['crm_recommendation_health_healthy'] = 'Механизм рекомендаций работает нормально.';
+$string['crm_recommendation_health_degraded'] = 'Механизм рекомендаций работает с предупреждениями.';
+$string['crm_recommendation_health_unhealthy'] = 'Механизм рекомендаций требует внимания.';
+$string['crm_recommendation_run_completed'] = 'Расчёт рекомендаций завершён';
+$string['crm_recommendation_run_partial'] = 'Расчёт рекомендаций завершён частично';
+$string['crm_recommendation_run_failed'] = 'Ошибка расчёта рекомендаций';
+$string['crm_recommendation_run_skipped'] = 'Расчёт рекомендаций пропущен';
+
+$string['csplanpage'] = 'План Customer Success';
+$string['csplanusersection'] = 'План Customer Success';
+$string['csplannoneforuser'] = 'Нет открытых планов Customer Success.';
+$string['csplanblocked'] = 'Заблокирован';
+
+$string['csplanstatus_draft'] = 'Черновик';
+$string['csplanstatus_active'] = 'Активен';
+$string['csplanstatus_paused'] = 'Приостановлен';
+$string['csplanstatus_completed'] = 'Завершён';
+$string['csplanstatus_cancelled'] = 'Отменён';
+
+$string['csplanstepstatus_pending'] = 'Ожидает';
+$string['csplanstepstatus_ready'] = 'Готов';
+$string['csplanstepstatus_blocked'] = 'Заблокирован';
+$string['csplanstepstatus_in_progress'] = 'В работе';
+$string['csplanstepstatus_completed'] = 'Завершён';
+$string['csplanstepstatus_skipped'] = 'Пропущен';
+
+$string['csplanpriority_low'] = 'Низкий';
+$string['csplanpriority_normal'] = 'Обычный';
+$string['csplanpriority_high'] = 'Высокий';
+$string['csplanpriority_urgent'] = 'Срочный';
+$string['csplanpriority_critical'] = 'Критический';
+
+$string['csplanprogressvalue'] = '{$a->completed}/{$a->total} этапов — {$a->percentage}%';
+$string['csplanprogresspercentage'] = 'Прогресс: {$a}%';
+$string['csplanstepdependency'] = 'Зависит от этапа №{$a}';
+
+$string['csplanaction_activate'] = 'Активировать';
+$string['csplanaction_pause'] = 'Приостановить';
+$string['csplanaction_cancel'] = 'Отменить';
+$string['csplanaction_startstep'] = 'Начать';
+$string['csplanaction_completestep'] = 'Завершить';
+$string['csplanaction_skipstep'] = 'Пропустить';
+$string['csplanaction_unblockstep'] = 'Разблокировать';
+$string['csplanactioncompleted'] = 'План Customer Success обновлён.';
+
+$string['csplantimelinecreated'] = 'План Customer Success создан';
+$string['csplantimelineactivated'] = 'План Customer Success активирован';
+$string['csplantimelinestepcompleted'] = 'Этап плана обработан';
+$string['csplantimelinecompleted'] = 'План Customer Success завершён';
+
+$string['csplandashboard_title'] = 'Планы Customer Success';
+$string['csplandashboard_open'] = 'Открытые планы';
+$string['csplandashboard_active'] = 'Активные планы';
+$string['csplandashboard_blocked'] = 'Заблокированные этапы';
+$string['csplandashboard_critical'] = 'Критические планы';
+$string['csplandashboard_completedtoday'] = 'Завершено сегодня';
+$string['csplandashboard_averageprogress'] = 'Средний прогресс: {$a}%';
+
+$string['csplancommand_open'] = 'Открыть план №{$a}';
+$string['csplancommand_open_desc'] = 'Открыть план Customer Success';
+
+$string['crm_user_has_customer_success_plan'] =
+    'Есть открытый план Customer Success';
+
+$string['crm_user_customer_success_plan_blocked'] =
+    'Есть заблокированный этап Customer Success';
+
+$string['crm_user_customer_success_plan_status'] =
+    'Статус плана Customer Success';
+
+$string['crm_user_customer_success_plan_status_all'] =
+    'Все статусы';
+
+$string['crm_user_column_customer_success_plans'] =
+    'Customer Success';
+
+$string['crm_user_customer_success_none'] =
+    'Нет открытого плана';
+
+$string['crm_user_customer_success_open_count'] =
+    'Открытых планов: {$a}';
+
+$string['crm_user_customer_success_blocked_count'] =
+    'Заблокировано: {$a}';
+
+$string['csplanobjective_reduce_churn_risk'] =
+    'Снизить риск оттока';
+
+$string['csplanobjective_resolve_payment_friction'] =
+    'Устранить трудности с оплатой';
+
+$string['csplanobjective_resolve_support_pressure'] =
+    'Решить обращения в службу поддержки';
+
+$string['csplanobjective_restore_learning_access'] =
+    'Восстановить доступ к обучению';
+
+$string['csplanobjective_restore_learning_engagement'] =
+    'Возобновить учебную активность';
+
+$string['csplanobjective_develop_customer_opportunity'] =
+    'Развить возможности работы с клиентом';
+
+$string['csplanobjective_coordinate_customer_success'] =
+    'Скоординировать сопровождение Customer Success';
+
+$string['csplandescription_recommendations'] =
+    'План Customer Success подготовлен на основе рекомендаций CRM: {$a}.';
+
+$string['csplanblockedreason_dependency_cycle'] =
+    'Этот этап заблокирован из-за циклической зависимости.';
+
+$string['csplanblockedreason_manual'] =
+    'Этот этап был заблокирован вручную.';
+
+$string['csplanblockedreason_unknown'] =
+    'Этот этап заблокирован. Техническая причина: {$a}';
+
+$string['csplansource_manual'] =
+    'Создан вручную';
+
+$string['csplansource_recommendation_engine'] =
+    'Механизм рекомендаций';
+
+$string['csplansource_correlation_engine'] =
+    'Механизм корреляций';
+
+$string['csplansource_crm_assistant'] =
+    'CRM-помощник';
+
+$string['csplansource_user_360'] =
+    'Профиль пользователя 360°';
+
+$string['csplanprogresslabel'] =
+    'Выполнение плана Customer Success';
+
+$string['csplanactionfailed'] =
+    'Не удалось выполнить действие с планом Customer Success.';
+
+$string['admin_event_customer_success_plan_created'] =
+    'План Customer Success создан';
+
+$string['admin_event_customer_success_plan_activated'] =
+    'План Customer Success активирован';
+
+$string['admin_event_customer_success_plan_paused'] =
+    'План Customer Success приостановлен';
+
+$string['admin_event_customer_success_plan_cancelled'] =
+    'План Customer Success отменён';
+
+$string['admin_event_customer_success_plan_completed'] =
+    'План Customer Success завершён';
+
+$string['admin_event_customer_success_plan_auto_completed'] =
+    'План Customer Success завершён автоматически';
+
+$string['admin_event_customer_success_step_started'] =
+    'Этап Customer Success начат';
+
+$string['admin_event_customer_success_step_completed'] =
+    'Этап Customer Success завершён';
+
+$string['admin_event_customer_success_step_skipped'] =
+    'Этап Customer Success пропущен';
+
+$string['admin_event_customer_success_step_blocked'] =
+    'Этап Customer Success заблокирован';
+
+$string['admin_event_customer_success_step_unblocked'] =
+    'Этап Customer Success разблокирован';
+
+$string['csplanconfirmtitle'] =
+    'Подтверждение действия';
+
+$string['csplanconfirmcancel'] =
+    'Вы действительно хотите отменить план «{$a}»? История плана не будет удалена.';
+
+$string['csplanconfirmskipstep'] =
+    'Вы действительно хотите пропустить этап «{$a}»? После этого зависимые этапы могут стать доступными.';
+
+$string['csplanblockreasonlabel'] =
+    'Причина блокировки';
+
+$string['csplanblockreasonplaceholder'] =
+    'Укажите, почему этот этап заблокирован';
+
+$string['csplanblockreasonhelp'] =
+    'Причина будет показана в плане и записана в административную историю.';
+
+$string['csplanblockreasonrequired'] =
+    'Необходимо указать причину блокировки.';
+
+$string['csplanblockreasontoolong'] =
+    'Причина блокировки не может превышать 500 символов.';
+
+$string['csplanaction_blockstep'] =
+    'Заблокировать этап';
+
+$string['crm_filter_customer_success'] =
+    'Customer Success';
+
+$string['crm_assistant_evidence_activity_inactive_30d'] =
+    'Нет активности уже не менее 30 дней';
+
+$string['crm_assistant_evidence_value_activity_inactive_30d'] =
+    '{$a} дн. с момента последней активности';
+
+$string['crm_assistant_evidence_loyalty_no_current_access'] =
+    'В настоящее время нет активного доступа';
+
+$string['crm_assistant_evidence_value_loyalty_no_current_access'] =
+    '{$a} завершённых или отменённых доступов';
+
+$string['crm_assistant_recommendation_send_trial_conversion_email'] =
+    'Помочь пользователю перейти от пробного доступа к покупке';
+
+$string['crm_assistant_recommendation_send_trial_conversion_email_desc'] =
+    'Пользователь попробовал платформу, но ещё не приобрёл платный доступ.';
+
+$string['crm_assistant_recommendation_propose_upgrade'] =
+    'Предложить более полную подписку';
+
+$string['crm_assistant_recommendation_propose_upgrade_desc'] =
+    'Текущий доступ клиента можно расширить с помощью более полной подписки.';
+
+$string['crm_assistant_recommendation_send_winback_message'] =
+    'Вернуть бывшего клиента';
+
+$string['crm_assistant_recommendation_send_winback_message_desc'] =
+    'У бывшего клиента больше нет активного доступа, и с ним стоит связаться повторно.';
+
+$string['crm_assistant_recommendation_suggest_digital_product'] =
+    'Предложить цифровой продукт';
+
+$string['crm_assistant_recommendation_suggest_digital_product_desc'] =
+    'Клиента может заинтересовать дополнительный цифровой продукт.';
+
+$string['crm_assistant_recommendation_create_first_crm_note'] =
+    'Создать первую CRM-заметку';
+
+$string['crm_assistant_recommendation_create_first_crm_note_desc'] =
+    'В CRM пока не добавлена качественная информация об этом клиенте.';
+
+$string['crm_assistant_evidence_crm_customer_without_notes'] =
+    'Для этого клиента ещё не добавлено ни одной CRM-заметки';
+
+$string['crm_assistant_evidence_opportunity_trial_to_purchase'] =
+    'Пробный доступ пока не привёл к покупке';
+
+$string['crm_assistant_evidence_opportunity_upgrade_subscription'] =
+    'Клиенту может подойти более полная подписка';
+
+$string['crm_assistant_evidence_opportunity_winback_expired_customer'] =
+    'У клиента больше нет активного доступа';
+
+$string['crm_assistant_evidence_opportunity_cross_sell_digital_product'] =
+    'Клиенту можно предложить дополнительный цифровой продукт';
+
+$string['crm_work_source_manual'] =
+    'Создано вручную';
+
+$string['crm_work_source_inbox'] =
+    'CRM Inbox';
+
+$string['crm_work_source_user_360'] =
+    'Карточка пользователя 360°';
+
+$string['crm_work_source_dashboard'] =
+    'Панель CRM';
+
+$string['crm_work_source_automation'] =
+    'Автоматизация CRM';
+
+$string['crm_work_source_intelligence'] =
+    'CRM Intelligence';
+
+$string['crm_work_source_assistant'] =
+    'CRM Assistant';
+
+$string['crm_work_source_command_center'] =
+    'Command Center';
+
+$string['crm_work_source_system'] =
+    'Система';
+
+$string['crm_work_suggestion_reason_generated_from_recommendation'] =
+    'Предложение создано на основе рекомендации CRM';
+
+$string['crm_work_suggestion_reason_priority_derived_from_recommendation'] =
+    'Приоритет рассчитан по срочности рекомендации';
+
+$string['crm_work_suggestion_reason_type_derived_from_scenario'] =
+    'Тип задачи определён по выявленной ситуации';
+
+$string['crm_work_suggestion_reason_team_suggested_from_domain_and_workload'] =
+    'Команда предложена с учётом её специализации и текущей нагрузки';
+
+$string['crm_work_suggestion_reason_duplicate_candidates_detected'] =
+    'Обнаружены похожие рабочие задачи';
+
+$string['crm_assistant_unknown_label'] =
+    'Информация недоступна';
+
+$string['crm_assistant_evidence_learning_low_progress'] =
+    'Недостаточный прогресс в обучении';
+
+$string['crm_assistant_evidence_recommendation_review_customer_success_risk'] =
+    'Необходимо проверить риск Customer Success';
+
+$string['crm_assistant_evidence_recommendation_review_learning_difficulty'] =
+    'Обнаружена возможная трудность в обучении';
+
+$string['crm_assistant_evidence_activity_inactive_14d'] =
+    'Отсутствие активности более 14 дней';
+
+$string['crm_assistant_evidence_learning_not_started'] =
+    'Обучение ещё не начато';
+
+$string['crm_assistant_evidence_activity_never_accessed'] =
+    'Учебные активности ещё не просматривались';
+
+$string['crm_assistant_evidence_value_learning_low_progress'] =
+    'Текущий прогресс: {$a}%';
+
+$string['crm_assistant_evidence_value_activity_inactive_14d'] =
+    '{$a} дн. с момента последней активности';

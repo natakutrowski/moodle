@@ -146,8 +146,80 @@ final class AdminEvents {
         'work_item.comment_added';
 
     public const WORK_ITEM_LINKED =
-        'work_item.linked';
+        'work_item.linked';  
+        
+    public const WORK_ITEM_SUGGESTION_OPENED =
+        'work_item.suggestion_opened';
 
+    public const WORK_ITEM_CREATED_FROM_RECOMMENDATION =
+        'work_item.created_from_recommendation';
+
+    public const WORK_ITEM_DUPLICATE_OVERRIDE =
+        'work_item.duplicate_override';
+
+    public const RECOMMENDATION_CREATED =
+        'recommendation.created';
+
+    public const RECOMMENDATION_REFRESHED =
+        'recommendation.refreshed';
+
+    public const RECOMMENDATION_ACCEPTED =
+        'recommendation.accepted';
+
+    public const RECOMMENDATION_DISMISSED =
+        'recommendation.dismissed';
+
+    public const RECOMMENDATION_COMPLETED =
+        'recommendation.completed';
+
+    public const RECOMMENDATION_EXPIRED =
+        'recommendation.expired';   
+
+    public const RECOMMENDATION_RUN_COMPLETED =
+        'recommendation.run_completed';
+
+    public const RECOMMENDATION_RUN_PARTIAL =
+        'recommendation.run_partial';
+
+    public const RECOMMENDATION_RUN_FAILED =
+        'recommendation.run_failed';
+
+    public const RECOMMENDATION_RUN_SKIPPED =
+        'recommendation.run_skipped';
+
+    // Customer Success plans.
+    public const CUSTOMER_SUCCESS_PLAN_CREATED =
+        'customer_success.plan.created';
+
+    public const CUSTOMER_SUCCESS_PLAN_ACTIVATED =
+        'customer_success.plan.activated';
+
+    public const CUSTOMER_SUCCESS_PLAN_PAUSED =
+        'customer_success.plan.paused';
+
+    public const CUSTOMER_SUCCESS_PLAN_CANCELLED =
+        'customer_success.plan.cancelled';
+
+    public const CUSTOMER_SUCCESS_PLAN_COMPLETED =
+        'customer_success.plan.completed';
+
+    public const CUSTOMER_SUCCESS_PLAN_AUTO_COMPLETED =
+        'customer_success.plan.auto_completed';
+
+    public const CUSTOMER_SUCCESS_STEP_STARTED =
+        'customer_success.step.started';
+
+    public const CUSTOMER_SUCCESS_STEP_COMPLETED =
+        'customer_success.step.completed';
+
+    public const CUSTOMER_SUCCESS_STEP_SKIPPED =
+        'customer_success.step.skipped';
+
+    public const CUSTOMER_SUCCESS_STEP_BLOCKED =
+        'customer_success.step.blocked';
+
+    public const CUSTOMER_SUCCESS_STEP_UNBLOCKED =
+        'customer_success.step.unblocked';        
 
     public static function all(): array {
         return [
@@ -203,6 +275,33 @@ final class AdminEvents {
             self::WORK_ITEM_ASSIGNED,
             self::WORK_ITEM_COMMENT_ADDED,
             self::WORK_ITEM_LINKED,
+            self::WORK_ITEM_SUGGESTION_OPENED,
+            self::WORK_ITEM_CREATED_FROM_RECOMMENDATION,
+            self::WORK_ITEM_DUPLICATE_OVERRIDE,
+
+            self::RECOMMENDATION_CREATED,
+            self::RECOMMENDATION_REFRESHED,
+            self::RECOMMENDATION_ACCEPTED,
+            self::RECOMMENDATION_DISMISSED,
+            self::RECOMMENDATION_COMPLETED,
+            self::RECOMMENDATION_EXPIRED,
+            self::RECOMMENDATION_RUN_COMPLETED,
+            self::RECOMMENDATION_RUN_PARTIAL,
+            self::RECOMMENDATION_RUN_FAILED,
+            self::RECOMMENDATION_RUN_SKIPPED,
+
+            self::CUSTOMER_SUCCESS_PLAN_CREATED,
+            self::CUSTOMER_SUCCESS_PLAN_ACTIVATED,
+            self::CUSTOMER_SUCCESS_PLAN_PAUSED,
+            self::CUSTOMER_SUCCESS_PLAN_CANCELLED,
+            self::CUSTOMER_SUCCESS_PLAN_COMPLETED,
+            self::CUSTOMER_SUCCESS_PLAN_AUTO_COMPLETED,
+
+            self::CUSTOMER_SUCCESS_STEP_STARTED,
+            self::CUSTOMER_SUCCESS_STEP_COMPLETED,
+            self::CUSTOMER_SUCCESS_STEP_SKIPPED,
+            self::CUSTOMER_SUCCESS_STEP_BLOCKED,
+            self::CUSTOMER_SUCCESS_STEP_UNBLOCKED,
         ];
     }
 

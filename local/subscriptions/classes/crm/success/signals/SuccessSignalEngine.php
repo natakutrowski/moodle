@@ -5,7 +5,6 @@ namespace local_subscriptions\crm\success\signals;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\crm\success\collection\SuccessMetricCollection;
-use local_subscriptions\crm\success\contracts\SuccessSignalRuleInterface;
 
 /**
  * Converts collected metrics into normalized explainable signals.

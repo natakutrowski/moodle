@@ -12,10 +12,23 @@ use local_subscriptions\commandcenter\CommandScorer;
 use local_subscriptions\commandcenter\CommandTypes;
 use local_subscriptions\crm\intelligence\alerts\CrmAlertBuilder;
 use local_subscriptions\crm\intelligence\priority\DailyPriorityBuilder;
+use local_subscriptions\crm\assistant\repositories\AssistantRecommendationRepository;
+use local_subscriptions\crm\success\plans\repositories\CustomerSuccessPlanOperationsRepository;
+use local_subscriptions\crm\success\plans\rendering\CustomerSuccessPlanPresentation;
 use local_subscriptions\subscription_config;
 use moodle_url;
 
 final class IntelligenceProvider implements CommandProviderInterface {
+
+    private CustomerSuccessPlanOperationsRepository $successplans;
+
+    public function __construct(
+        ?CustomerSuccessPlanOperationsRepository $successplans = null
+    ) {
+        $this->successplans =
+            $successplans ??
+            new CustomerSuccessPlanOperationsRepository();
+    }
 
     public function search(CommandQuery $query, int $limit = 10): array {
         if ($query->has_direct_entity()) {
@@ -31,8 +44,35 @@ final class IntelligenceProvider implements CommandProviderInterface {
         $results = [];
 
         $this->append_dashboard_result($results, $text);
-        $this->append_alert_results($results, $text, $limit);
-        $this->append_priority_results($results, $text, $limit);
+        $this->append_assistant_result(
+            $results,
+            $text
+        );
+
+        $this->append_recommendation_results(
+            $results,
+            $text,
+            $limit
+        );
+
+        $this->append_customer_success_plan_results(
+            $results,
+            $query,
+            $text,
+            $limit
+        );
+
+        $this->append_alert_results(
+            $results,
+            $text,
+            $limit
+        );
+
+        $this->append_priority_results(
+            $results,
+            $text,
+            $limit
+        );
 
         usort($results, static function(array $a, array $b): int {
             return ($b['score'] ?? 0) <=> ($a['score'] ?? 0);
@@ -78,6 +118,422 @@ final class IntelligenceProvider implements CommandProviderInterface {
             ->meta('provider', 'crm_intelligence')
             ->meta('entity', 'dashboard')
             ->to_array();
+    }
+
+    private function append_assistant_result(
+        array &$results,
+        string $text
+    ): void {
+        $score = CommandScorer::best(
+            CommandScorer::exact_or_prefix(
+                $text,
+                'crm assistant',
+                115,
+                100,
+                80
+            ),
+            CommandScorer::exact_or_prefix(
+                $text,
+                'assistant crm',
+                115,
+                100,
+                80
+            ),
+            CommandScorer::keywords(
+                $text,
+                'assistant',
+                95
+            ),
+            CommandScorer::keywords(
+                $text,
+                'recommandations',
+                90
+            ),
+            CommandScorer::keywords(
+                $text,
+                'recommendations',
+                90
+            ),
+            CommandScorer::keywords(
+                $text,
+                'рекомендации',
+                90
+            ),
+            CommandScorer::keywords(
+                $text,
+                'помощник',
+                85
+            )
+        );
+
+        if ($score <= 0) {
+            return;
+        }
+
+        $url = (
+            new moodle_url(
+                subscription_config::
+                    admin_crm_assistant_page()
+            )
+        )->out(false);
+
+        $results[] = CommandResult::create()
+            ->icon('🧭')
+            ->type(CommandTypes::action())
+            ->group(
+                'actions',
+                get_string(
+                    'command_center_group_actions',
+                    'local_subscriptions'
+                )
+            )
+            ->action_label(
+                get_string(
+                    'command_center_action_open',
+                    'local_subscriptions'
+                )
+            )
+            ->shortcut('assistant')
+            ->title(
+                get_string(
+                    'command_crm_assistant',
+                    'local_subscriptions'
+                )
+            )
+            ->subtitle(
+                get_string(
+                    'command_crm_assistant_desc',
+                    'local_subscriptions'
+                )
+            )
+            ->url($url)
+            ->action(
+                CommandActionKeys::OPEN_URL,
+                [
+                    'url' => $url,
+                ]
+            )
+            ->score($score)
+            ->meta(
+                'provider',
+                'crm_intelligence'
+            )
+            ->meta(
+                'entity',
+                'assistant'
+            )
+            ->to_array();
+    }
+
+    private function append_recommendation_results(
+        array &$results,
+        string $text,
+        int $limit
+    ): void {
+        $base = CommandScorer::best(
+            CommandScorer::keywords(
+                $text,
+                'recommandation',
+                90
+            ),
+            CommandScorer::keywords(
+                $text,
+                'recommendation',
+                90
+            ),
+            CommandScorer::keywords(
+                $text,
+                'priorité',
+                85
+            ),
+            CommandScorer::keywords(
+                $text,
+                'urgent',
+                85
+            ),
+            CommandScorer::keywords(
+                $text,
+                'critical',
+                85
+            ),
+            CommandScorer::keywords(
+                $text,
+                'критично',
+                85
+            ),
+            CommandScorer::keywords(
+                $text,
+                'срочно',
+                85
+            )
+        );
+
+        if ($base <= 0) {
+            return;
+        }
+
+        $records =
+            (new AssistantRecommendationRepository())
+                ->search(
+                    new \local_subscriptions\crm\assistant\dto\AssistantRecommendationCriteria(
+                        limit: min(20, $limit)
+                    )
+                );
+
+        foreach ($records as $recommendation) {
+            if (
+                !$recommendation->is_user_target()
+            ) {
+                continue;
+            }
+
+            $labelkey =
+                'crm_assistant_recommendation_' .
+                clean_param(
+                    $recommendation->key,
+                    PARAM_ALPHANUMEXT
+                );
+
+            $label =
+                get_string_manager()->string_exists(
+                    $labelkey,
+                    'local_subscriptions'
+                )
+                    ? get_string(
+                        $labelkey,
+                        'local_subscriptions'
+                    )
+                    : $recommendation->key;
+
+            $userid =
+                (int)$recommendation->targetid;
+
+            $results[] = CommandResult::create()
+                ->icon('🧭')
+                ->type(CommandTypes::user())
+                ->group(
+                    'users',
+                    get_string(
+                        'command_center_group_users',
+                        'local_subscriptions'
+                    )
+                )
+                ->action_label(
+                    get_string(
+                        'command_center_action_view',
+                        'local_subscriptions'
+                    )
+                )
+                ->shortcut(
+                    'user:' . $userid
+                )
+                ->title($label)
+                ->subtitle(
+                    $recommendation->targetname ??
+                    get_string(
+                        'command_crm_recommendation_desc',
+                        'local_subscriptions'
+                    )
+                )
+                ->url(
+                    (
+                        new moodle_url(
+                            subscription_config::
+                                admin_user_view_page(),
+                            [
+                                'id' => $userid,
+                            ]
+                        )
+                    )->out(false)
+                )
+                ->action(
+                    CommandActionKeys::OPEN_USER,
+                    [
+                        'userid' => $userid,
+                    ]
+                )
+                ->score(
+                    $base +
+                    min(
+                        20,
+                        (int)round(
+                            $recommendation->priority /
+                            10
+                        )
+                    )
+                )
+                ->meta(
+                    'provider',
+                    'crm_intelligence'
+                )
+                ->meta(
+                    'entity',
+                    'recommendation'
+                )
+                ->meta(
+                    'recommendationid',
+                    $recommendation->id
+                )
+                ->meta(
+                    'userid',
+                    $userid
+                )
+                ->to_array();
+        }
+    }
+
+    private function append_customer_success_plan_results(
+        array &$results,
+        CommandQuery $query,
+        string $text,
+        int $limit
+    ): void {
+
+        $raw = trim($query->raw());
+
+        if (
+            preg_match(
+                '/^plan:(\d+)$/i',
+                $raw,
+                $matches
+            )
+        ) {
+            $planid = (int)$matches[1];
+
+            $record =
+                $this->successplans->get_plan_summary(
+                    $planid
+                );
+
+            if ($record !== null) {
+                $results[] =
+                    $this->format_customer_success_plan(
+                        $record,
+                        150
+                    );
+            }
+
+            return;
+        }
+
+        $blockedscore = CommandScorer::best(
+            CommandScorer::exact_or_prefix(
+                $text,
+                'plans bloqués',
+                120,
+                105,
+                85
+            ),
+            CommandScorer::exact_or_prefix(
+                $text,
+                'blocked plans',
+                120,
+                105,
+                85
+            ),
+            CommandScorer::keywords(
+                $text,
+                'bloqués',
+                90
+            ),
+            CommandScorer::keywords(
+                $text,
+                'blocked',
+                90
+            )
+        );
+
+        $criticalscore = CommandScorer::best(
+            CommandScorer::exact_or_prefix(
+                $text,
+                'plans critiques',
+                120,
+                105,
+                85
+            ),
+            CommandScorer::exact_or_prefix(
+                $text,
+                'critical plans',
+                120,
+                105,
+                85
+            ),
+            CommandScorer::keywords(
+                $text,
+                'critique',
+                90
+            ),
+            CommandScorer::keywords(
+                $text,
+                'critical',
+                90
+            )
+        );
+
+        $planscore = CommandScorer::best(
+            CommandScorer::exact_or_prefix(
+                $text,
+                'plans customer success',
+                110,
+                95,
+                75
+            ),
+            CommandScorer::exact_or_prefix(
+                $text,
+                'customer success plans',
+                110,
+                95,
+                75
+            ),
+            CommandScorer::keywords(
+                $text,
+                'plans',
+                70
+            ),
+            CommandScorer::keywords(
+                $text,
+                'customer success',
+                85
+            )
+        );
+
+        if (
+            $blockedscore <= 0 &&
+            $criticalscore <= 0 &&
+            $planscore <= 0
+        ) {
+            return;
+        }
+
+        $records =
+            $this->successplans->search_open_plans(
+                priority:
+                    $criticalscore >=
+                    max($blockedscore, $planscore)
+                        ? 'critical'
+                        : null,
+
+                blockedonly:
+                    $blockedscore >
+                    max($criticalscore, $planscore),
+
+                limit:
+                    min(20, $limit)
+            );
+
+        $score = max(
+            $blockedscore,
+            $criticalscore,
+            $planscore
+        );
+
+        foreach ($records as $record) {
+            $results[] =
+                $this->format_customer_success_plan(
+                    $record,
+                    $score
+                );
+        }
     }
 
     private function append_alert_results(array &$results, string $text, int $limit): void {
@@ -180,6 +636,89 @@ final class IntelligenceProvider implements CommandProviderInterface {
                 ->meta('priority', (string)$priority->key)
                 ->to_array();
         }
+    }
+
+    private function format_customer_success_plan(
+        \stdClass $record,
+        int $score
+    ): array {
+        $url = new moodle_url(
+            subscription_config::
+                admin_customer_success_plan_page(),
+            [
+                'id' => (int)$record->id,
+            ]
+        )->out(false);
+
+        return CommandResult::create()
+            ->icon('🗺️')
+            ->type(CommandTypes::action())
+            ->group(
+                'actions',
+                get_string(
+                    'command_center_group_actions',
+                    'local_subscriptions'
+                )
+            )
+            ->action_label(
+                get_string(
+                    'command_center_action_open',
+                    'local_subscriptions'
+                )
+            )
+            ->shortcut(
+                'plan:' . (int)$record->id
+            )
+            ->title(
+                CustomerSuccessPlanPresentation::title(
+                    (string)$record->objectivekey,
+                    (string)$record->title
+                )
+            )
+            ->subtitle(
+                get_string(
+                    'csplancommandsubtitle',
+                    'local_subscriptions',
+                    (object)[
+                        'id' => (int)$record->id,
+                        'status' =>
+                            CustomerSuccessPlanPresentation::
+                                status_label(
+                                    (string)$record->status
+                                ),
+                        'priority' =>
+                            CustomerSuccessPlanPresentation::
+                                priority_label(
+                                    (string)$record->priority
+                                ),
+                    ]
+                )
+            )
+            ->url($url)
+            ->action(
+                CommandActionKeys::OPEN_URL,
+                [
+                    'url' => $url,
+                ]
+            )
+            ->score($score)
+            ->meta(
+                'provider',
+                'crm_intelligence'
+            )
+            ->meta(
+                'entity',
+                'customer_success_plan'
+            )
+            ->meta(
+                'planid',
+                (int)$record->id
+            )
+            ->meta(
+                'userid',
+                (int)$record->userid
+            )
+            ->to_array();
     }
 
     private static function alert_label(string $alertkey): string {

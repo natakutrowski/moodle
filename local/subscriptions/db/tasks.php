@@ -168,3 +168,14 @@ $tasks[] = [
     'month' => '*',
     'dayofweek' => '*',
 ];
+
+$tasks[] = [
+    'classname' =>
+        '\local_subscriptions\task\run_crm_recommendations_task',
+    'blocking' => 0,
+    'minute' => '5,35',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];

@@ -685,7 +685,10 @@ final class UserExplorerRenderer {
                     $criteria->haspurchase !== '' ||
                     $criteria->activity !== '' ||
                     $criteria->hasinbox !== '' ||
-                    $criteria->hasinboxunread !== ''
+                    $criteria->hasinboxunread !== '' ||
+                    $criteria->hascustomer_success_plan !== '' ||
+                    $criteria->customer_success_plan_blocked !== '' ||
+                    $criteria->customer_success_plan_status !== ''
                 ) ? 'open' : null,
             ]
         );
@@ -808,6 +811,109 @@ final class UserExplorerRenderer {
                     ]
                 )
             );
+
+            $out .= self::field(
+                get_string(
+                    'crm_user_has_customer_success_plan',
+                    'local_subscriptions'
+                ),
+                html_writer::select(
+                    array_combine(
+                        UserExplorerCriteria::presence_options(),
+                        array_map(
+                            [
+                                UserExplorerCriteria::class,
+                                'presence_label',
+                            ],
+                            UserExplorerCriteria::presence_options()
+                        )
+                    ),
+                    'hascustomer_success_plan',
+                    $criteria->hascustomer_success_plan,
+                    false,
+                    [
+                        'class' => 'form-control',
+                    ]
+                )
+            );
+
+            $out .= self::field(
+                get_string(
+                    'crm_user_customer_success_plan_blocked',
+                    'local_subscriptions'
+                ),
+                html_writer::select(
+                    array_combine(
+                        UserExplorerCriteria::presence_options(),
+                        array_map(
+                            [
+                                UserExplorerCriteria::class,
+                                'presence_label',
+                            ],
+                            UserExplorerCriteria::presence_options()
+                        )
+                    ),
+                    'customer_success_plan_blocked',
+                    $criteria->customer_success_plan_blocked,
+                    false,
+                    [
+                        'class' => 'form-control',
+                    ]
+                )
+            );
+
+            $out .= self::field(
+                get_string(
+                    'crm_user_customer_success_plan_status',
+                    'local_subscriptions'
+                ),
+                html_writer::select(
+                    [
+                        '' =>
+                            get_string(
+                                'crm_user_customer_success_plan_status_all',
+                                'local_subscriptions'
+                            ),
+
+                        'draft' =>
+                            get_string(
+                                'csplanstatus_draft',
+                                'local_subscriptions'
+                            ),
+
+                        'active' =>
+                            get_string(
+                                'csplanstatus_active',
+                                'local_subscriptions'
+                            ),
+
+                        'paused' =>
+                            get_string(
+                                'csplanstatus_paused',
+                                'local_subscriptions'
+                            ),
+
+                        'completed' =>
+                            get_string(
+                                'csplanstatus_completed',
+                                'local_subscriptions'
+                            ),
+
+                        'cancelled' =>
+                            get_string(
+                                'csplanstatus_cancelled',
+                                'local_subscriptions'
+                            ),
+                    ],
+                    'customer_success_plan_status',
+                    $criteria->customer_success_plan_status,
+                    false,
+                    [
+                        'class' => 'form-control',
+                    ]
+                )
+            );
+
         }
         
         $activityoptions = [];
@@ -1005,6 +1111,11 @@ final class UserExplorerRenderer {
                 UserExplorerColumn::INBOX =>
                     self::render_inbox($viewmodel),
 
+                UserExplorerColumn::CUSTOMER_SUCCESS_PLANS =>
+                    self::render_customer_success_plans(
+                        $viewmodel
+                    ),
+
                 UserExplorerColumn::COUNTRY =>
                     !empty($user->country)
                         ? s((string)$user->country)
@@ -1029,6 +1140,71 @@ final class UserExplorerRenderer {
         }
 
         return $cells;
+    }
+
+    private static function render_customer_success_plans(
+        UserExplorerUserViewModel $viewmodel
+    ): string {
+        $user = $viewmodel->user;
+
+        $opencount = (int)(
+            $user->customer_success_open_count
+            ?? 0
+        );
+
+        $blockedcount = (int)(
+            $user->customer_success_blocked_count
+            ?? 0
+        );
+
+        $priority = trim(
+            (string)(
+                $user->customer_success_highest_priority
+                ?? ''
+            )
+        );
+
+        if ($opencount <= 0) {
+            return html_writer::span(
+                get_string(
+                    'crm_user_customer_success_none',
+                    'local_subscriptions'
+                ),
+                'text-muted'
+            );
+        }
+
+        $out = html_writer::span(
+            get_string(
+                'crm_user_customer_success_open_count',
+                'local_subscriptions',
+                $opencount
+            ),
+            'crm-user-explorer-count'
+        );
+
+        if ($blockedcount > 0) {
+            $out .= html_writer::span(
+                get_string(
+                    'crm_user_customer_success_blocked_count',
+                    'local_subscriptions',
+                    $blockedcount
+                ),
+                'badge badge-warning ml-1'
+            );
+        }
+
+        if ($priority !== '') {
+            $out .= html_writer::span(
+                get_string(
+                    'csplanpriority_' . $priority,
+                    'local_subscriptions'
+                ),
+                'badge badge-secondary ml-1'
+            );
+        }
+
+        return $out;
     }
 
     private static function render_inbox(

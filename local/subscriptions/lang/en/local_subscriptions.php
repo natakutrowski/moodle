@@ -23,7 +23,7 @@ $string['user'] = 'User';
 $string['plan'] = 'Plan';
 $string['start_date'] = 'Start date';
 $string['end_date'] = 'End date';
-$string['status'] = 'Status';
+
 $string['creation_date'] = 'Creation date';
 $string['save_modifications'] = 'Save modifications';
 $string['delete_selected'] = 'Delete selected subscriptions';
@@ -78,7 +78,7 @@ $string['name'] = 'Name';
 $string['description'] = 'Description';
 $string['courses'] = '📖 Courses';
 $string['dates'] = '📅 Dates';
-$string['actions'] = '🛠️ Actions';
+
 $string['createdon'] = 'Created on:';
 $string['modifiedon'] = 'Modified on:';
 $string['editscope'] = '✏️ Edit this scope';
@@ -109,7 +109,7 @@ $string['cancel'] = 'Cancel';
 $string['confirmdeletetranslation'] = 'Are you sure you want to permanently delete this translation?';
 
 // Plans
-$string['delete'] = 'Delete';
+
 $string['deactivateplan'] = 'Deactivate this plan';
 $string['activateplan'] = 'Activate this plan';
 $string['planname'] = 'Plan name';
@@ -176,7 +176,6 @@ $string['pricepaid'] = 'Price paid';
 
 $string['courselist'] = 'Course list';
 
-$string['close'] = 'Close';
 
 $string['subscribe'] = 'Buy';
 $string['subscribe_to_campus'] = 'Buy on Campus<small><sup>FR</sup></small>';
@@ -315,8 +314,6 @@ $string['recurring_canceled_subject'] = 'Your subscription has been canceled –
 $string['recurring_canceled_body']    = 'Your subscription to « {$a} » has been canceled. You will keep access until the end of the current period.';
 $string['recurring_canceled_button']  = 'Subscribe again';
 
-$string['details'] = 'Details';
-$string['subscription_details'] = 'Purchase details';
 
 $string['mysubs_title'] = 'My purchases';
 $string['mysubs_empty'] = 'You have not purchased any courses yet.';
@@ -344,7 +341,7 @@ $string['payment_failed'] = 'Payment failed';
 
 $string['subscribe_now']  = 'Buy now';
 
-$string['upgrade_window_label']  = 'Calculation window: {$a}';
+
 $string['upgrade_tariffs']       = 'Reference prices: current = {$a->p1}, target = {$a->p2}';
 $string['upgrade_consumed_since_t0'] = 'Elapsed time since window start: {$a}';
 $string['upgrade_equation_past']  = 'Past part (current rate): {$a->p1} × t/{$a->d1} = {$a->val}';
@@ -363,9 +360,7 @@ $string['manage_billing'] = 'Manage billing';
 $string['provider_portal_not_supported'] = 'Billing portal not available';
 $string['provider_portal_not_supported_desc'] = 'The provider « {$a} » does not offer a customer portal yet. You can manage your subscription from your profile.';
 
-$string['subfield_id']                 = 'ID';
-$string['subfield_userid']             = 'User ID';
-$string['subfield_planid']             = 'Plan ID';
+
 $string['subfield_start']              = 'Start';
 $string['subfield_end']                = 'End';
 $string['subfield_amount']             = 'Amount paid';
@@ -410,11 +405,7 @@ $string['email_show_pr_ref'] = 'Show PR reference in emails';
 $string['email_show_pr_ref_desc'] = 'Add a small technical reference (PR # and date) at the bottom of emails. Disabled by default.';
 $string['unknown_payment_event'] = 'Unknown payment event: {$a}';
 
-$string['stripe:missingamount'] = 'Missing amount on payment request.';
-$string['stripe:productname'] = '{$a} plan';
-$string['stripe:missingpriceidforsubscription'] = 'Missing stripe_price_id for subscription.';
-$string['stripe:missingpriceid'] = 'Missing price_id.';
-$string['stripe:sdkautoloadnotfound'] = 'Stripe SDK autoload not found at {$a}.';
+
 $string['sessiondisplay'] = 'Session: {$a}';
 
 // Headings
@@ -443,10 +434,7 @@ $string['reminder2_after_minutes_desc'] = 'Send a second reminder if still unpai
 $string['featured_planid_label'] = 'Featured plan';
 $string['featured_planid_desc'] = 'ID of the plan highlighted on the offers page.';
 
-$string['alfa_missing_api_base'] = 'Alfa API base URL is missing.';
-$string['alfa_rub_only'] = 'Alfa (token) is configured for RUB currency only.';
-$string['alfa_register_error'] = 'Payment initialization failed: {$a}';
-$string['alfa_missing_formurl'] = 'Payment initialized but the bank did not return a payment URL.';
+
 $string['alfa_not_paid'] = 'Payment not completed';
 
 $string['subfield_pr_id'] = 'Payment Request #';
@@ -460,8 +448,6 @@ $string['subfield_pr_link'] = 'PR payment link';
 $string['subfield_pr_lasterror'] = 'PR last error';
 $string['notavailable'] = 'N/A';
 
-$string['err_cannot_determine_price'] = 'Cannot determine price to create payment request.';
-$string['err_no_redirect_url'] = 'Checkout init returned no redirect URL.';
 
 $string['btn_signin'] = 'Sign in';
 
@@ -473,7 +459,7 @@ $string['provider_dev'] = 'Dev';
 $string['provider_trial']  = 'Trial';
 
 $string['configmissing'] = 'Missing configuration: {$a}.';
-$string['missing_customer_id'] = 'Stripe customer ID is missing.';
+
 $string['invalidcsvupload'] = 'The uploaded CSV file is invalid.';
 $string['csvwritefail'] = 'Failed to write CSV file.';
 $string['invalidpricecurrency'] = 'Invalid price/currency combination.';
@@ -481,7 +467,7 @@ $string['plan_not_found'] = 'Subscription plan not found.';
 $string['scopenotfound'] = 'Access scope not found.';
 $string['scopedeleteinuse'] = 'Cannot delete this scope because it is in use.';
 $string['plannotfound'] = 'Plan not found.';
-$string['paymentgatewayerror'] = 'Payment gateway error: {$a}';
+
 
 $string['retry_invalid_status'] = 'This payment request cannot be retried in its current state.';
 $string['retry_link_expired'] = 'This retry link is invalid or has expired. Please start a new checkout.';
@@ -686,8 +672,7 @@ $string['settings_trial_discount_hours'] = 'Discount window (hours)';
 $string['settings_trial_discount_hours_desc'] = 'E.g., 72 hours after the trial starts.';
 $string['missing_trial_plan'] = 'No trial plan configured (trial_plan_id).';
 
-$string['pricing_missing_price'] = 'No price is defined for this plan and currency ({$a}).';
-$string['cannot_purchase_trial_plan'] = 'This plan is a trial plan and cannot be purchased.';
+
 $string['settings_paylock_section'] = 'Price lock (checkout)';
 $string['settings_paylock_strict'] = 'Strict mode on mismatch';
 $string['settings_paylock_strict_desc'] = 'If enabled, subscription creation fails when the paid amount differs from the locked amount.';
@@ -750,7 +735,7 @@ $string['checkout_go_to_payment_discount'] = 'Buy with discount';
 $string['checkout_full_access_line'] = 'Unlimited access to all lessons in the course.';
 $string['summary_price_title_single'] = 'Subscription for {$a}';
 
-$string['digital_pdf_badge'] = 'Campus<small><sup>FR</sup></small> PDF';
+
 $string['digital_pdf_intro'] = 'A practical guide to understand, memorize and review French third-group verbs without getting lost in endless tables.';
 $string['digital_pdf_item_1'] = 'The main families of third-group verbs.';
 $string['digital_pdf_item_2'] = 'The most useful conjugation patterns.';
@@ -798,7 +783,7 @@ $string['digital_mail_payment_date'] = 'Payment date';
 $string['digital_success_paid_heading'] = 'Thank you for your purchase!';
 $string['digital_success_paid_intro'] = 'Your payment has been confirmed. Your PDF is ready to download.';
 $string['digital_success_pending_heading'] = 'Payment is being validated';
-$string['digital_success_summary_title'] = 'Purchase summary';
+
 $string['digital_success_email_sent_hint'] = 'We have also sent you the download link and receipt by email.';
 $string['digital_success_pending_hint'] = 'If you have just paid, refresh this page in a few seconds.';
 
@@ -969,7 +954,7 @@ $string['digital_cancel_support_text'] = 'If you think you have been charged or 
 $string['digital_cancel_gateway_timeout'] =
 'The payment page could not be opened at the moment. This may be temporary. Please try again in a few minutes.';
 
-$string['planentitlements'] = 'Plan access rights';
+
 $string['planentitlementsfor'] = 'Access rights for plan: {$a}';
 $string['addentitlement'] = 'Add access right';
 $string['editentitlement'] = 'Edit access right';
@@ -995,7 +980,7 @@ $string['accesslevel_grammar'] = 'Grammar only';
 $string['accesslevel_full'] = 'Full access';
 $string['invalidplanid'] = 'Invalid or missing plan.';
 
-$string['planupgrades'] = 'Plan upgrades';
+
 $string['planupgradesintro'] = 'Define which plans can be upgraded to another plan. For example: A2 Grammar → A2 Full. With difference pricing, the upgrade price is calculated as the target plan price minus the current plan price in the same currency.';
 $string['addupgrade'] = 'Add upgrade';
 $string['editupgrade'] = 'Edit upgrade';
@@ -1015,7 +1000,7 @@ $string['upgrade_pricing_difference'] = 'Difference between the two plan prices'
 $string['upgrade_isactive'] = 'Active';
 $string['upgrade_same_plan_error'] = 'The source plan and target plan must be different.';
 $string['upgrade_already_exists'] = 'This upgrade rule already exists.';
-$string['active'] = 'Active';
+
 $string['inactive'] = 'Inactive';
 $string['status'] = 'Status';
 
@@ -1060,7 +1045,7 @@ $string['available_courses'] = 'Available courses';
 $string['digital_product_view_page'] = 'View product page';
 
 $string['digital_purchases_empty'] = 'You have not purchased any digital product yet.';
-$string['digital_purchase_details'] = 'Digital purchase details';
+
 $string['digital_purchase_downloads'] = 'Downloads';
 $string['digital_product'] = 'Digital product';
 $string['user_purchases_title'] = '{$a}’s purchases';
@@ -1182,7 +1167,7 @@ $string['unlimited'] = 'Unlimited';
 $string['back_to_admin_dashboard'] = 'Back to Campus<small><sup>FR</sup></small> back-office';
 
 $string['crm_users'] = 'CRM users';
-$string['crm_user_profile'] = 'User profile';
+
 $string['crm_search_user_placeholder'] = 'Search by first name, last name or email';
 $string['crm_no_users_found'] = 'No users found.';
 $string['crm_no_subscriptions'] = 'No subscriptions found for this user.';
@@ -1192,7 +1177,7 @@ $string['view_moodle_profile'] = 'View Moodle profile';
 $string['admin_card_crm_users_title'] = 'CRM users';
 $string['admin_card_crm_users_desc'] = 'Search for a user and view their complete profile.';
 $string['subscriptions'] = 'Subscriptions';
-$string['digital_purchases'] = 'Digital purchases';
+
 $string['product'] = 'Product';
 $string['digital_purchases'] = 'Digital purchases';
 $string['crm_quick_actions'] = 'Quick actions';
@@ -1249,7 +1234,7 @@ $string['adminlog_subscription_dates_updated'] = 'Subscription dates updated';
 $string['adminlog_digital_purchase_created'] = 'Digital purchase created';
 $string['adminlog_digital_purchase_paid'] = 'Digital purchase paid';
 $string['adminlog_digital_purchase_failed'] = 'Digital purchase failed';
-$string['adminlog_digital_link_resent'] = 'Digital link resent';
+
 
 $string['adminlog_payment_request_created'] = 'Payment request created';
 $string['adminlog_payment_request_paid'] = 'Payment request paid';
@@ -1260,7 +1245,7 @@ $string['adminlog_trial_started'] = 'Trial started';
 $string['adminlog_trial_expired'] = 'Trial expired';
 
 $string['change_user'] = 'Change user';
-$string['crm_accessible_courses'] = 'Accessible courses';
+
 $string['crm_no_accessible_courses'] = 'No course currently accessible.';
 $string['access'] = 'Access';
 $string['active'] = 'Active';
@@ -1375,8 +1360,7 @@ $string['crm_email_type_receipt'] = 'Purchase receipt';
 $string['crm_email_type_access'] = 'Subscription access';
 $string['crm_email_type_welcome'] = 'Welcome';
 
-$string['crm_timeline_collapse_all'] = 'Collapse / expand details';
-$string['crm_timeline_view_details'] = 'View details';
+
 $string['payment_request'] = 'Payment request';
 $string['type'] = 'Type';
 $string['subscription_details'] = 'Subscription details';
@@ -1496,8 +1480,6 @@ $string['command_center_type_action'] = 'Action';
 $string['command_action_dashboard_title'] = 'Open dashboard';
 $string['command_action_dashboard_subtitle'] = 'Go back to the main CRM view';
 
-$string['command_action_users_title'] = 'View CRM users';
-$string['command_action_users_subtitle'] = 'Open the user and customer list';
 
 $string['command_action_products_title'] = 'View digital products';
 $string['command_action_products_subtitle'] = 'Manage CampusFR digital products';
@@ -1508,8 +1490,6 @@ $string['command_action_product_create_subtitle'] = 'Add a new digital product';
 $string['command_action_purchases_title'] = 'View digital purchases';
 $string['command_action_purchases_subtitle'] = 'Review digital purchases and payments';
 
-$string['command_action_subscriptions_title'] = 'View subscriptions';
-$string['command_action_subscriptions_subtitle'] = 'Review and manage user subscriptions';
 
 $string['command_center_initial'] = 'Start typing to search for a user, product, purchase, subscription, or action.';
 
@@ -1790,10 +1770,7 @@ $string['dashboard_issue_pending_digital_title'] = 'Pending digital payments';
 $string['dashboard_issue_pending_digital_desc'] = 'Payment requests created but not confirmed yet.';
 $string['dashboard_issue_failed_digital_title'] = 'Failed digital payments';
 $string['dashboard_issue_failed_digital_desc'] = 'Rejected or interrupted payments to review.';
-$string['dashboard_issue_email_error_title'] = 'Emails not sent';
-$string['dashboard_issue_email_error_desc'] = 'Digital purchases with an email sending error.';
-$string['dashboard_issue_expired_token_title'] = 'Expired download links';
-$string['dashboard_issue_expired_token_desc'] = 'Purchases with an expired download token.';
+
 
 $string['dashboard_issue_open_queue'] = 'Open queue';
 $string['dashboard_issue_review_failures'] = 'Review';
@@ -2396,11 +2373,6 @@ $string['crm_user_sort_label'] = 'Sort by';
 $string['crm_user_per_page'] = 'Per page';
 $string['crm_user_apply_filters'] = 'Apply filters';
 
-$string['crm_user_column_user'] = 'User';
-$string['crm_user_column_tags'] = 'Tags';
-$string['crm_user_column_score'] = 'CRM score';
-$string['crm_user_column_risk'] = 'Risk';
-$string['crm_user_column_intelligence'] = 'Intelligence';
 
 $string['crm_user_explorer_empty_title'] = 'No user found';
 $string['crm_user_explorer_empty_description'] =
@@ -3631,3 +3603,463 @@ $string['crm_help_article_work_management_title'] =
 
 $string['crm_help_article_work_management_summary'] =
     'Understand Work Item statuses, priorities, teams, assignments, subtasks and CRM links.';
+
+$string['crm_assistant_title'] = 'CRM Assistant';
+$string['crm_assistant_navigation'] = 'CRM Assistant';
+$string['crm_assistant_description'] = 'Priority situations detected by the CRM cross-domain intelligence. The assistant explains and proposes actions but never makes automatic decisions.';
+$string['crm_assistant_open'] = 'Open CRM Assistant';
+$string['crm_assistant_empty'] = 'No recommendation currently requires your attention.';
+$string['crm_assistant_user_section'] = 'CRM Assistant';
+
+$string['crm_assistant_metric_active'] = 'Active';
+$string['crm_assistant_metric_critical'] = 'Critical';
+$string['crm_assistant_metric_urgent'] = 'Urgent';
+$string['crm_assistant_metric_accepted'] = 'Accepted';
+$string['crm_assistant_metric_crossdomain'] = 'Cross-domain';
+$string['crm_assistant_metric_users'] = 'Affected users';
+
+$string['crm_assistant_filter_scope'] = 'Scope';
+$string['crm_assistant_filter_priority'] = 'Priority';
+$string['crm_assistant_filter_status'] = 'Status';
+$string['crm_assistant_filter_any'] = 'All';
+$string['crm_assistant_scope_active'] = 'Active recommendations';
+$string['crm_assistant_scope_all'] = 'Full history';
+
+$string['crm_assistant_priority_critical'] = 'Critical';
+$string['crm_assistant_priority_urgent'] = 'Urgent';
+$string['crm_assistant_priority_high'] = 'High';
+$string['crm_assistant_priority_normal'] = 'Normal';
+$string['crm_assistant_priority_low'] = 'Low';
+
+$string['crm_assistant_status_proposed'] = 'Proposed';
+$string['crm_assistant_status_accepted'] = 'Accepted';
+$string['crm_assistant_status_dismissed'] = 'Dismissed';
+$string['crm_assistant_status_completed'] = 'Completed';
+$string['crm_assistant_status_expired'] = 'Expired';
+
+$string['crm_assistant_target'] = 'User';
+$string['crm_assistant_why'] = 'Why this recommendation?';
+$string['crm_assistant_priority_score'] = 'Priority score: {$a}';
+$string['crm_assistant_evidence_count'] = '{$a} evidence item(s)';
+$string['crm_assistant_source_count'] = '{$a} source(s)';
+$string['crm_assistant_last_detected'] = 'Last detected: {$a}';
+
+$string['crm_assistant_action_accept'] = 'Accept';
+$string['crm_assistant_action_complete'] = 'Mark completed';
+$string['crm_assistant_action_dismiss'] = 'Dismiss';
+$string['crm_assistant_accepted'] = 'The recommendation was accepted.';
+$string['crm_assistant_completed'] = 'The recommendation was marked as completed.';
+$string['crm_assistant_dismissed'] = 'The recommendation was dismissed.';
+$string['crm_assistant_action_failed'] = 'The recommendation action could not be completed.';
+
+$string['command_crm_assistant'] = 'Open CRM Assistant';
+$string['command_crm_assistant_desc'] = 'Display recommendations and priority situations.';
+$string['command_crm_recommendation_desc'] = 'Active CRM recommendation.';
+
+$string['crm_assistant_recommendation_intervene_disengagement_spiral'] = 'Intervene in progressive disengagement';
+$string['crm_assistant_recommendation_intervene_disengagement_spiral_desc'] = 'Several signals indicate a lasting decline in activity and progress.';
+
+$string['crm_assistant_recommendation_coordinate_learning_support_response'] = 'Coordinate learning and support follow-up';
+$string['crm_assistant_recommendation_coordinate_learning_support_response_desc'] = 'A learning difficulty is accompanied by an active support request.';
+
+$string['crm_assistant_recommendation_coordinate_payment_support_resolution'] = 'Resolve payment and support issues together';
+$string['crm_assistant_recommendation_coordinate_payment_support_resolution_desc'] = 'A payment issue and a support conversation appear to be related.';
+
+$string['crm_assistant_recommendation_intervene_cross_domain_churn_risk'] = 'Intervene in a high churn-risk situation';
+$string['crm_assistant_recommendation_intervene_cross_domain_churn_risk_desc'] = 'Access, activity and several friction points indicate a departure risk.';
+
+$string['crm_assistant_recommendation_coordinate_operational_overload'] = 'Coordinate unresolved operational requests';
+$string['crm_assistant_recommendation_coordinate_operational_overload_desc'] = 'Inbox pressure and unresolved Work Items require coordinated intervention.';
+
+$string['crm_assistant_recommendation_review_customer_success_risk'] = 'Review Customer Success risk';
+$string['crm_assistant_recommendation_review_learning_difficulty'] = 'Review learning difficulty';
+$string['crm_assistant_recommendation_review_support_situation'] = 'Review support situation';
+$string['crm_assistant_recommendation_review_blocked_payment'] = 'Review blocked payment';
+$string['crm_assistant_recommendation_review_active_work_items'] = 'Review active Work Items';
+$string['crm_assistant_recommendation_recognise_positive_progress'] = 'Recognise learner progress';
+
+$string['crm_assistant_action_propose_work_item'] = 'Prepare a Work Item';
+
+$string['crm_work_suggestion_title'] = 'Work Item suggestion';
+$string['crm_work_suggestion_summary'] = 'CRM Assistant proposal';
+$string['crm_work_suggestion_confidence'] = 'Suggestion confidence: {$a}%';
+$string['crm_work_suggestion_suggested_type'] = 'Suggested type: {$a}';
+$string['crm_work_suggestion_suggested_priority'] = 'Suggested priority: {$a}';
+$string['crm_work_suggestion_suggested_due'] = 'Suggested due date: {$a}';
+$string['crm_work_suggestion_duplicates'] = 'Similar Work Items';
+$string['crm_work_suggestion_probable_duplicate_warning'] = 'A probably equivalent Work Item already exists. Review it before creating another item.';
+$string['crm_work_suggestion_similarity'] = 'Estimated similarity: {$a}%';
+$string['crm_work_suggestion_teams'] = 'Suggested teams';
+$string['crm_work_suggestion_team_score'] = 'Relevance: {$a->score}% · Active workload: {$a->workload}';
+$string['crm_work_suggestion_allow_duplicate'] = 'Create this Work Item despite the probable duplicate';
+$string['crm_work_suggestion_create'] = 'Create Work Item';
+$string['crm_work_suggestion_created'] = 'The Work Item was created from the recommendation.';
+$string['crm_work_suggestion_duplicate_blocked'] = 'Creation was blocked because a probable duplicate already exists.';
+
+$string['crm_work_suggestion_description_intro'] = 'This Work Item was prepared by the CRM Assistant. Its content must be reviewed and validated by an administrator.';
+$string['crm_work_suggestion_source_recommendation'] = 'Source recommendation: {$a}';
+$string['crm_work_suggestion_priority_score'] = 'Recommendation priority score: {$a}';
+$string['crm_work_suggestion_evidence_heading'] = 'Evidence supporting the recommendation:';
+
+$string['crm_work_suggestion_title_intervene_disengagement_spiral'] = 'Follow up on sustained learner disengagement';
+$string['crm_work_suggestion_title_coordinate_learning_support_response'] = 'Coordinate learning and support follow-up';
+$string['crm_work_suggestion_title_coordinate_payment_support_resolution'] = 'Resolve the payment and support issue';
+$string['crm_work_suggestion_title_intervene_cross_domain_churn_risk'] = 'Set up a churn-prevention intervention';
+$string['crm_work_suggestion_title_coordinate_operational_overload'] = 'Coordinate pending support requests and Work Items';
+$string['crm_work_suggestion_title_review_customer_success_risk'] = 'Review the Customer Success situation';
+$string['crm_work_suggestion_title_review_learning_difficulty'] = 'Set up learning follow-up';
+$string['crm_work_suggestion_title_review_support_situation'] = 'Handle the support situation';
+$string['crm_work_suggestion_title_review_blocked_payment'] = 'Handle the blocked payment';
+$string['crm_work_suggestion_title_review_active_work_items'] = 'Review active Work Items';
+
+$string['local/subscriptions:use_crm_assistant_ai'] = 'Use the conversational CRM Assistant';
+
+$string['crm_assistant_ai_title'] = 'Ask the CRM Assistant';
+$string['crm_assistant_ai_description'] = 'Ask a question about recommendations, affected users and active Work Items. Answers are based only on information already calculated by the CRM.';
+$string['crm_assistant_ai_question'] = 'Your question';
+$string['crm_assistant_ai_placeholder'] = 'Example: which learners require intervention today?';
+$string['crm_assistant_ai_ask'] = 'Ask the Assistant';
+$string['crm_assistant_ai_thinking'] = 'The Assistant is analysing the available information…';
+$string['crm_assistant_ai_request_failed'] = 'The CRM Assistant could not answer this question.';
+$string['crm_assistant_ai_human_review'] = 'Assistant answers are suggestions and must always be reviewed by an administrator.';
+$string['crm_assistant_ai_keypoints'] = 'Key points';
+$string['crm_assistant_ai_suggested_actions'] = 'Suggested actions';
+$string['crm_assistant_ai_warnings'] = 'Warnings';
+$string['crm_assistant_ai_references'] = 'Related CRM records';
+$string['crm_assistant_ai_confidence'] = 'Estimated confidence';
+
+$string['crm_assistant_ai_example_priorities'] = 'Which users should I handle first today?';
+$string['crm_assistant_ai_example_risks'] = 'Which situations present the greatest risk?';
+$string['crm_assistant_ai_example_work'] = 'Which Work Items appear urgent or blocked?';
+
+$string['crm_assistant_question_rejected'] = 'This question cannot be processed by the CRM Assistant.';
+
+$string['task_run_crm_recommendations'] = 'Refresh CRM recommendations';
+
+$string['crm_recommendation_health_healthy'] = 'The Recommendation Engine is operating normally.';
+$string['crm_recommendation_health_degraded'] = 'The Recommendation Engine is operating with warnings.';
+$string['crm_recommendation_health_unhealthy'] = 'The Recommendation Engine requires attention.';
+$string['crm_recommendation_run_completed'] = 'Recommendation run completed';
+$string['crm_recommendation_run_partial'] = 'Recommendation run partially completed';
+$string['crm_recommendation_run_failed'] = 'Recommendation run failed';
+$string['crm_recommendation_run_skipped'] = 'Recommendation run skipped';
+
+$string['csplanpage'] = 'Customer Success plan';
+$string['csplanusersection'] = 'Customer Success plan';
+$string['csplannoneforuser'] = 'No open Customer Success plan.';
+$string['csplanblocked'] = 'Blocked';
+
+$string['csplanstatus_draft'] = 'Draft';
+$string['csplanstatus_active'] = 'Active';
+$string['csplanstatus_paused'] = 'Paused';
+$string['csplanstatus_completed'] = 'Completed';
+$string['csplanstatus_cancelled'] = 'Cancelled';
+
+$string['csplanstepstatus_pending'] = 'Pending';
+$string['csplanstepstatus_ready'] = 'Ready';
+$string['csplanstepstatus_blocked'] = 'Blocked';
+$string['csplanstepstatus_in_progress'] = 'In progress';
+$string['csplanstepstatus_completed'] = 'Completed';
+$string['csplanstepstatus_skipped'] = 'Skipped';
+
+$string['csplanpriority_low'] = 'Low';
+$string['csplanpriority_normal'] = 'Normal';
+$string['csplanpriority_high'] = 'High';
+$string['csplanpriority_urgent'] = 'Urgent';
+$string['csplanpriority_critical'] = 'Critical';
+
+$string['csplanprogressvalue'] = '{$a->completed}/{$a->total} steps — {$a->percentage}%';
+$string['csplanprogresspercentage'] = 'Progress: {$a}%';
+$string['csplanstepdependency'] = 'Depends on step #{$a}';
+
+$string['csplanaction_activate'] = 'Activate';
+$string['csplanaction_pause'] = 'Pause';
+$string['csplanaction_cancel'] = 'Cancel';
+$string['csplanaction_startstep'] = 'Start';
+$string['csplanaction_completestep'] = 'Complete';
+$string['csplanaction_skipstep'] = 'Skip';
+$string['csplanaction_unblockstep'] = 'Unblock';
+$string['csplanactioncompleted'] = 'The Customer Success plan was updated.';
+
+$string['csplantimelinecreated'] = 'Customer Success plan created';
+$string['csplantimelineactivated'] = 'Customer Success plan activated';
+$string['csplantimelinestepcompleted'] = 'Plan step processed';
+$string['csplantimelinecompleted'] = 'Customer Success plan completed';
+
+$string['csplandashboard_title'] = 'Customer Success plans';
+$string['csplandashboard_open'] = 'Open plans';
+$string['csplandashboard_active'] = 'Active plans';
+$string['csplandashboard_blocked'] = 'Blocked steps';
+$string['csplandashboard_critical'] = 'Critical plans';
+$string['csplandashboard_completedtoday'] = 'Completed today';
+$string['csplandashboard_averageprogress'] = 'Average progress: {$a}%';
+
+$string['csplancommand_open'] = 'Open plan #{$a}';
+$string['csplancommand_open_desc'] = 'Open the Customer Success plan';
+
+$string['crm_user_has_customer_success_plan'] =
+    'Has an open Customer Success plan';
+
+$string['crm_user_customer_success_plan_blocked'] =
+    'Has a blocked Customer Success step';
+
+$string['crm_user_customer_success_plan_status'] =
+    'Customer Success plan status';
+
+$string['crm_user_customer_success_plan_status_all'] =
+    'All statuses';
+
+$string['crm_user_column_customer_success_plans'] =
+    'Customer Success';
+
+$string['crm_user_customer_success_none'] =
+    'No open plan';
+
+$string['crm_user_customer_success_open_count'] =
+    '{$a} open plan(s)';
+
+$string['crm_user_customer_success_blocked_count'] =
+    '{$a} blocked';
+
+$string['csplanobjective_reduce_churn_risk'] =
+    'Reduce churn risk';
+
+$string['csplanobjective_resolve_payment_friction'] =
+    'Resolve payment difficulties';
+
+$string['csplanobjective_resolve_support_pressure'] =
+    'Resolve support requests';
+
+$string['csplanobjective_restore_learning_access'] =
+    'Restore learning access';
+
+$string['csplanobjective_restore_learning_engagement'] =
+    'Restore learning engagement';
+
+$string['csplanobjective_develop_customer_opportunity'] =
+    'Develop the customer opportunity';
+
+$string['csplanobjective_coordinate_customer_success'] =
+    'Coordinate Customer Success follow-up';
+
+$string['csplandescription_recommendations'] =
+    'Customer Success plan prepared from {$a} CRM recommendation(s).';
+
+$string['csplanblockedreason_dependency_cycle'] =
+    'This step is blocked by a dependency cycle.';
+
+$string['csplanblockedreason_manual'] =
+    'This step was blocked manually.';
+
+$string['csplanblockedreason_unknown'] =
+    'This step is blocked. Technical reason: {$a}';
+
+$string['csplansource_manual'] =
+    'Manual creation';
+
+$string['csplansource_recommendation_engine'] =
+    'Recommendation engine';
+
+$string['csplansource_correlation_engine'] =
+    'Correlation engine';
+
+$string['csplansource_crm_assistant'] =
+    'CRM Assistant';
+
+$string['csplansource_user_360'] =
+    'User 360° profile';
+
+$string['csplanprogresslabel'] =
+    'Customer Success plan progress';
+
+$string['csplanactionfailed'] =
+    'The Customer Success plan action could not be completed.';
+
+$string['admin_event_customer_success_plan_created'] =
+    'Customer Success plan created';
+
+$string['admin_event_customer_success_plan_activated'] =
+    'Customer Success plan activated';
+
+$string['admin_event_customer_success_plan_paused'] =
+    'Customer Success plan paused';
+
+$string['admin_event_customer_success_plan_cancelled'] =
+    'Customer Success plan cancelled';
+
+$string['admin_event_customer_success_plan_completed'] =
+    'Customer Success plan completed';
+
+$string['admin_event_customer_success_plan_auto_completed'] =
+    'Customer Success plan completed automatically';
+
+$string['admin_event_customer_success_step_started'] =
+    'Customer Success step started';
+
+$string['admin_event_customer_success_step_completed'] =
+    'Customer Success step completed';
+
+$string['admin_event_customer_success_step_skipped'] =
+    'Customer Success step skipped';
+
+$string['admin_event_customer_success_step_blocked'] =
+    'Customer Success step blocked';
+
+$string['admin_event_customer_success_step_unblocked'] =
+    'Customer Success step unblocked';
+
+$string['csplanconfirmtitle'] =
+    'Confirm action';
+
+$string['csplanconfirmcancel'] =
+    'Are you sure you want to cancel the “{$a}” plan? Its history will not be deleted.';
+
+$string['csplanconfirmskipstep'] =
+    'Are you sure you want to skip the “{$a}” step? Dependent steps may then become available.';
+
+$string['csplanblockreasonlabel'] =
+    'Blocking reason';
+
+$string['csplanblockreasonplaceholder'] =
+    'Explain why this step is blocked';
+
+$string['csplanblockreasonhelp'] =
+    'The reason will be displayed in the plan and recorded in the administrative history.';
+
+$string['csplanblockreasonrequired'] =
+    'You must provide a blocking reason.';
+
+$string['csplanblockreasontoolong'] =
+    'The blocking reason cannot exceed 500 characters.';
+
+$string['csplanaction_blockstep'] =
+    'Block step';
+
+$string['crm_filter_customer_success'] =
+    'Customer Success';
+
+$string['crm_assistant_evidence_activity_inactive_30d'] =
+    'No activity for at least 30 days';
+
+$string['crm_assistant_evidence_value_activity_inactive_30d'] =
+    '{$a} day(s) since the last activity';
+
+$string['crm_assistant_evidence_loyalty_no_current_access'] =
+    'No active access at present';
+
+$string['crm_assistant_evidence_value_loyalty_no_current_access'] =
+    '{$a} expired or cancelled access record(s)';
+
+$string['crm_assistant_recommendation_send_trial_conversion_email'] =
+    'Support conversion after the trial';
+
+$string['crm_assistant_recommendation_send_trial_conversion_email_desc'] =
+    'This user tried the platform but has not yet purchased paid access.';
+
+$string['crm_assistant_recommendation_propose_upgrade'] =
+    'Recommend a more complete plan';
+
+$string['crm_assistant_recommendation_propose_upgrade_desc'] =
+    'This customer’s current access could be expanded with a higher plan.';
+
+$string['crm_assistant_recommendation_send_winback_message'] =
+    'Reconnect with a former customer';
+
+$string['crm_assistant_recommendation_send_winback_message_desc'] =
+    'This former customer no longer has active access and may be worth contacting again.';
+
+$string['crm_assistant_recommendation_suggest_digital_product'] =
+    'Recommend a digital product';
+
+$string['crm_assistant_recommendation_suggest_digital_product_desc'] =
+    'This customer may be interested in a complementary digital product.';
+
+$string['crm_assistant_recommendation_create_first_crm_note'] =
+    'Create the first CRM note';
+
+$string['crm_assistant_recommendation_create_first_crm_note_desc'] =
+    'No qualitative information has yet been recorded in the CRM for this customer.';
+
+$string['crm_assistant_evidence_crm_customer_without_notes'] =
+    'No CRM note has yet been added for this customer';
+
+$string['crm_assistant_evidence_opportunity_trial_to_purchase'] =
+    'The free trial has not yet resulted in a purchase';
+
+$string['crm_assistant_evidence_opportunity_upgrade_subscription'] =
+    'A more complete plan may be relevant';
+
+$string['crm_assistant_evidence_opportunity_winback_expired_customer'] =
+    'The customer no longer has active access';
+
+$string['crm_assistant_evidence_opportunity_cross_sell_digital_product'] =
+    'A complementary digital product may be recommended';
+
+$string['crm_work_source_manual'] =
+    'Manual creation';
+
+$string['crm_work_source_inbox'] =
+    'CRM Inbox';
+
+$string['crm_work_source_user_360'] =
+    'User 360 profile';
+
+$string['crm_work_source_dashboard'] =
+    'CRM dashboard';
+
+$string['crm_work_source_automation'] =
+    'CRM automation';
+
+$string['crm_work_source_intelligence'] =
+    'CRM Intelligence';
+
+$string['crm_work_source_assistant'] =
+    'CRM Assistant';
+
+$string['crm_work_source_command_center'] =
+    'Command Center';
+
+$string['crm_work_source_system'] =
+    'System';
+
+$string['crm_work_suggestion_reason_generated_from_recommendation'] =
+    'Suggestion created from a CRM recommendation';
+
+$string['crm_work_suggestion_reason_priority_derived_from_recommendation'] =
+    'Priority calculated from the recommendation urgency';
+
+$string['crm_work_suggestion_reason_type_derived_from_scenario'] =
+    'Work type determined from the detected situation';
+
+$string['crm_work_suggestion_reason_team_suggested_from_domain_and_workload'] =
+    'Team suggested according to its domain and current workload';
+
+$string['crm_work_suggestion_reason_duplicate_candidates_detected'] =
+    'Similar Work Items were detected';
+
+$string['crm_assistant_unknown_label'] =
+    'Information unavailable';
+
+$string['crm_assistant_evidence_learning_low_progress'] =
+    'Insufficient learning progress';
+
+$string['crm_assistant_evidence_recommendation_review_customer_success_risk'] =
+    'A Customer Success risk review is required';
+
+$string['crm_assistant_evidence_recommendation_review_learning_difficulty'] =
+    'A potential learning difficulty was detected';
+
+$string['crm_assistant_evidence_activity_inactive_14d'] =
+    'Inactive for more than 14 days';
+
+$string['crm_assistant_evidence_learning_not_started'] =
+    'The learning journey has not started yet';
+
+$string['crm_assistant_evidence_activity_never_accessed'] =
+    'No learning activity has been accessed yet';
+
+$string['crm_assistant_evidence_value_learning_low_progress'] =
+    'Current progress: {$a}%';
+
+$string['crm_assistant_evidence_value_activity_inactive_14d'] =
+    '{$a} day(s) since the last activity';

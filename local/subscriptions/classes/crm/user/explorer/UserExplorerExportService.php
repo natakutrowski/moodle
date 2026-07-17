@@ -132,6 +132,11 @@ final class UserExplorerExportService {
                     $viewmodel
                 ),
 
+            UserExplorerColumn::CUSTOMER_SUCCESS_PLANS =>
+                $this->customer_success_export_value(
+                    $viewmodel
+                ),
+
             UserExplorerColumn::COUNTRY =>
                 (string)$user->country,
 
@@ -155,6 +160,58 @@ final class UserExplorerExportService {
         };
     }
     
+    private function customer_success_export_value(
+        UserExplorerUserViewModel $viewmodel
+    ): string {
+        $user = $viewmodel->user;
+
+        $opencount = (int)(
+            $user->customer_success_open_count
+            ?? 0
+        );
+
+        if ($opencount <= 0) {
+            return '';
+        }
+
+        $parts = [
+            get_string(
+                'crm_user_customer_success_open_count',
+                'local_subscriptions',
+                $opencount
+            ),
+        ];
+
+        $blockedcount = (int)(
+            $user->customer_success_blocked_count
+            ?? 0
+        );
+
+        if ($blockedcount > 0) {
+            $parts[] = get_string(
+                'crm_user_customer_success_blocked_count',
+                'local_subscriptions',
+                $blockedcount
+            );
+        }
+
+        $priority = trim(
+            (string)(
+                $user->customer_success_highest_priority
+                ?? ''
+            )
+        );
+
+        if ($priority !== '') {
+            $parts[] = get_string(
+                'csplanpriority_' . $priority,
+                'local_subscriptions'
+            );
+        }
+
+        return implode(' | ', $parts);
+    }
+
     private function inbox_export_value(
         UserExplorerUserViewModel $viewmodel
     ): string {

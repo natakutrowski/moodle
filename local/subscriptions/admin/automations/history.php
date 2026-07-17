@@ -17,7 +17,11 @@ $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url(subscription_config::automation_history_admin_page()));
 $PAGE->set_title(get_string('crm_automation_history', 'local_subscriptions'));
 $PAGE->set_heading(get_string('crm_automation_history', 'local_subscriptions'));
-$PAGE->requires->css(new moodle_url('/local/subscriptions/styles.css'));
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
+);
 
 $history = (new AutomationHistoryRepository())->get_recent(100);
 

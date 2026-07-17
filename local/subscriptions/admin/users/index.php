@@ -59,7 +59,7 @@ $PAGE->add_body_class(
 
 $PAGE->requires->css(
     new moodle_url(
-        '/local/subscriptions/styles.css'
+        subscription_config::plugin_stylesheet_page()
     )
 );
 

@@ -3485,821 +3485,2254 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         );
     }
 
-if ($oldversion < 2026071218) {
-    /*
-     * Phase 6.75E — Work Management Engine.
-     *
-     * Creates:
-     * - Work teams.
-     * - Work team members.
-     * - Work items.
-     * - Internal comments.
-     * - Links to CRM objects.
-     * - Immutable Work Item history.
-     */
+	if ($oldversion < 2026071218) {
+		/*
+		* Phase 6.75E — Work Management Engine.
+		*
+		* Creates:
+		* - Work teams.
+		* - Work team members.
+		* - Work items.
+		* - Internal comments.
+		* - Links to CRM objects.
+		* - Immutable Work Item history.
+		*/
 
-    /*
-     * Work teams.
-     */
-    $table = new xmldb_table(
-        'local_subscriptions_work_team'
-    );
+		/*
+		* Work teams.
+		*/
+		$table = new xmldb_table(
+			'local_subscriptions_work_team'
+		);
 
-    if (!$dbman->table_exists($table)) {
-        $table->add_field(
-            'id',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            XMLDB_SEQUENCE,
-            null
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE,
+				null
+			);
+
+			$table->add_field(
+				'name',
+				XMLDB_TYPE_CHAR,
+				'191',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'description',
+				XMLDB_TYPE_TEXT,
+				null,
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'enabled',
+				XMLDB_TYPE_INTEGER,
+				'1',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'1'
+			);
+
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_index(
+				'name_uix',
+				XMLDB_INDEX_UNIQUE,
+				['name']
+			);
+
+			$table->add_index(
+				'enabled_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['enabled']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		/*
+		* Work team members.
+		*/
+		$table = new xmldb_table(
+			'local_subscriptions_work_team_member'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE,
+				null
+			);
+
+			$table->add_field(
+				'teamid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'userid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'role',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'member'
+			);
+
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_key(
+				'teamid_fk',
+				XMLDB_KEY_FOREIGN,
+				['teamid'],
+				'local_subscriptions_work_team',
+				['id']
+			);
+
+			$table->add_key(
+				'userid_fk',
+				XMLDB_KEY_FOREIGN,
+				['userid'],
+				'user',
+				['id']
+			);
+
+			/*
+			* Do not add a separate index on userid:
+			* userid_fk already provides it.
+			*/
+			$table->add_index(
+				'team_user_uix',
+				XMLDB_INDEX_UNIQUE,
+				['teamid', 'userid']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		/*
+		* Work items.
+		*/
+		$table = new xmldb_table(
+			'local_subscriptions_work_item'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE,
+				null
+			);
+
+			$table->add_field(
+				'reference',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'type',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'task'
+			);
+
+			$table->add_field(
+				'title',
+				XMLDB_TYPE_CHAR,
+				'255',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'description',
+				XMLDB_TYPE_TEXT,
+				null,
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'status',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'open'
+			);
+
+			$table->add_field(
+				'priority',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'normal'
+			);
+
+			$table->add_field(
+				'source',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'manual'
+			);
+
+			$table->add_field(
+				'targetuserid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'assigneduserid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'assignedteamid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'parentid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'createdby',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'dueat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'resolvedat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'closedat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_key(
+				'targetuserid_fk',
+				XMLDB_KEY_FOREIGN,
+				['targetuserid'],
+				'user',
+				['id']
+			);
+
+			$table->add_key(
+				'assigneduserid_fk',
+				XMLDB_KEY_FOREIGN,
+				['assigneduserid'],
+				'user',
+				['id']
+			);
+
+			$table->add_key(
+				'assignedteamid_fk',
+				XMLDB_KEY_FOREIGN,
+				['assignedteamid'],
+				'local_subscriptions_work_team',
+				['id']
+			);
+
+			$table->add_key(
+				'parentid_fk',
+				XMLDB_KEY_FOREIGN,
+				['parentid'],
+				'local_subscriptions_work_item',
+				['id']
+			);
+
+			$table->add_key(
+				'createdby_fk',
+				XMLDB_KEY_FOREIGN,
+				['createdby'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'reference_uix',
+				XMLDB_INDEX_UNIQUE,
+				['reference']
+			);
+
+			$table->add_index(
+				'status_priority_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['status', 'priority']
+			);
+
+			$table->add_index(
+				'assignee_status_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['assigneduserid', 'status']
+			);
+
+			$table->add_index(
+				'team_status_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['assignedteamid', 'status']
+			);
+
+			$table->add_index(
+				'target_status_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['targetuserid', 'status']
+			);
+
+			$table->add_index(
+				'due_status_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['dueat', 'status']
+			);
+
+			/*
+			* Do not add a separate parentid index:
+			* parentid_fk already provides it.
+			*/
+			$dbman->create_table($table);
+		}
+
+		/*
+		* Internal Work Item comments.
+		*/
+		$table = new xmldb_table(
+			'local_subscriptions_work_comment'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE,
+				null
+			);
+
+			$table->add_field(
+				'itemid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'authorid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'body',
+				XMLDB_TYPE_TEXT,
+				null,
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'visibility',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'internal'
+			);
+
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_field(
+				'timemodified',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_key(
+				'itemid_fk',
+				XMLDB_KEY_FOREIGN,
+				['itemid'],
+				'local_subscriptions_work_item',
+				['id']
+			);
+
+			$table->add_key(
+				'authorid_fk',
+				XMLDB_KEY_FOREIGN,
+				['authorid'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'item_time_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['itemid', 'timecreated']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		/*
+		* Links between Work Items and CRM objects.
+		*/
+		$table = new xmldb_table(
+			'local_subscriptions_work_link'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE,
+				null
+			);
+
+			$table->add_field(
+				'itemid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'objecttype',
+				XMLDB_TYPE_CHAR,
+				'50',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'objectid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'relation',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'related'
+			);
+
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_key(
+				'itemid_fk',
+				XMLDB_KEY_FOREIGN,
+				['itemid'],
+				'local_subscriptions_work_item',
+				['id']
+			);
+
+			$table->add_index(
+				'item_object_relation_uix',
+				XMLDB_INDEX_UNIQUE,
+				[
+					'itemid',
+					'objecttype',
+					'objectid',
+					'relation',
+				]
+			);
+
+			$table->add_index(
+				'object_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['objecttype', 'objectid']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		/*
+		* Immutable Work Item history.
+		*/
+		$table = new xmldb_table(
+			'local_subscriptions_work_history'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE,
+				null
+			);
+
+			$table->add_field(
+				'itemid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'actorid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'action',
+				XMLDB_TYPE_CHAR,
+				'50',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'oldvalue',
+				XMLDB_TYPE_TEXT,
+				null,
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'newvalue',
+				XMLDB_TYPE_TEXT,
+				null,
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'metadatajson',
+				XMLDB_TYPE_TEXT,
+				null,
+				null,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_key(
+				'itemid_fk',
+				XMLDB_KEY_FOREIGN,
+				['itemid'],
+				'local_subscriptions_work_item',
+				['id']
+			);
+
+			$table->add_key(
+				'actorid_fk',
+				XMLDB_KEY_FOREIGN,
+				['actorid'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'item_time_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['itemid', 'timecreated']
+			);
+
+			$table->add_index(
+				'action_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				['action']
+			);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071218,
+			'local',
+			'subscriptions'
+		);
+	}
+
+    if ($oldversion < 2026071601) {
+        /*
+         * Persistent CRM recommendations.
+         */
+        $table = new xmldb_table(
+            'local_subscriptions_recommendation'
         );
 
-        $table->add_field(
-            'name',
-            XMLDB_TYPE_CHAR,
-            '191',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE,
+                null
+            );
 
-        $table->add_field(
-            'description',
-            XMLDB_TYPE_TEXT,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+            $table->add_field(
+                'fingerprint',
+                XMLDB_TYPE_CHAR,
+                '64',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null
+            );
 
-        $table->add_field(
-            'enabled',
-            XMLDB_TYPE_INTEGER,
-            '1',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '1'
-        );
+            $table->add_field(
+                'recommendationkey',
+                XMLDB_TYPE_CHAR,
+                '100',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null
+            );
 
-        $table->add_field(
-            'timecreated',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '0'
-        );
+            $table->add_field(
+                'recommendationtype',
+                XMLDB_TYPE_CHAR,
+                '50',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null
+            );
 
-        $table->add_field(
-            'timemodified',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '0'
-        );
+            $table->add_field(
+                'presentationtype',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'info'
+            );
 
-        $table->add_key(
-            'primary',
-            XMLDB_KEY_PRIMARY,
-            ['id']
-        );
+            $table->add_field(
+                'priority',
+                XMLDB_TYPE_INTEGER,
+                '3',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '50'
+            );
 
-        $table->add_index(
-            'name_uix',
-            XMLDB_INDEX_UNIQUE,
-            ['name']
-        );
+            $table->add_field(
+                'prioritylevel',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'normal'
+            );
 
-        $table->add_index(
-            'enabled_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['enabled']
-        );
+            $table->add_field(
+                'status',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'proposed'
+            );
 
-        $dbman->create_table($table);
-    }
+            $table->add_field(
+                'targettype',
+                XMLDB_TYPE_CHAR,
+                '50',
+                null,
+                null,
+                null,
+                null
+            );
 
-    /*
-     * Work team members.
-     */
-    $table = new xmldb_table(
-        'local_subscriptions_work_team_member'
-    );
+            $table->add_field(
+                'targetid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
 
-    if (!$dbman->table_exists($table)) {
-        $table->add_field(
-            'id',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            XMLDB_SEQUENCE,
-            null
-        );
+            $table->add_field(
+                'sourcesjson',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
 
-        $table->add_field(
-            'teamid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+            $table->add_field(
+                'evidencejson',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
 
-        $table->add_field(
-            'userid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+            $table->add_field(
+                'actionsjson',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
 
-        $table->add_field(
-            'role',
-            XMLDB_TYPE_CHAR,
-            '30',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            'member'
-        );
+            $table->add_field(
+                'generatedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
 
-        $table->add_field(
-            'timecreated',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '0'
-        );
+            $table->add_field(
+                'validuntil',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
 
-        $table->add_key(
-            'primary',
-            XMLDB_KEY_PRIMARY,
-            ['id']
-        );
+            $table->add_field(
+                'firstdetectedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
 
-        $table->add_key(
-            'teamid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['teamid'],
-            'local_subscriptions_work_team',
-            ['id']
-        );
+            $table->add_field(
+                'lastdetectedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
 
-        $table->add_key(
-            'userid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['userid'],
-            'user',
-            ['id']
-        );
+            $table->add_field(
+                'acceptedby',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'acceptedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'dismissedby',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'dismissedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'completedby',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'completedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'dismissalreason',
+                XMLDB_TYPE_CHAR,
+                '100',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+
+            $table->add_key(
+                'acceptedby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['acceptedby'],
+                'user',
+                ['id']
+            );
+
+            $table->add_key(
+                'dismissedby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['dismissedby'],
+                'user',
+                ['id']
+            );
+
+            $table->add_key(
+                'completedby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['completedby'],
+                'user',
+                ['id']
+            );
+
+            $table->add_index(
+                'fingerprint_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['fingerprint']
+            );
+
+            $table->add_index(
+                'status_priority_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['status', 'priority']
+            );
+
+            $table->add_index(
+                'target_status_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'targettype',
+                    'targetid',
+                    'status',
+                ]
+            );
+
+            $table->add_index(
+                'type_status_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'recommendationtype',
+                    'status',
+                ]
+            );
+
+            $table->add_index(
+                'validuntil_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['validuntil']
+            );
+
+            $table->add_index(
+                'lastdetected_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['lastdetectedat']
+            );
+
+            $dbman->create_table($table);
+        }
 
         /*
-         * Do not add a separate index on userid:
-         * userid_fk already provides it.
+         * Immutable recommendation lifecycle history.
          */
-        $table->add_index(
-            'team_user_uix',
-            XMLDB_INDEX_UNIQUE,
-            ['teamid', 'userid']
+        $table = new xmldb_table(
+            'local_subscriptions_recommendation_history'
         );
 
-        $dbman->create_table($table);
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE,
+                null
+            );
+
+            $table->add_field(
+                'recommendationid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'actorid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'action',
+                XMLDB_TYPE_CHAR,
+                '50',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'oldstatus',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'newstatus',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'metadatajson',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+
+            $table->add_key(
+                'recommendationid_fk',
+                XMLDB_KEY_FOREIGN,
+                ['recommendationid'],
+                'local_subscriptions_recommendation',
+                ['id']
+            );
+
+            $table->add_key(
+                'actorid_fk',
+                XMLDB_KEY_FOREIGN,
+                ['actorid'],
+                'user',
+                ['id']
+            );
+
+            $table->add_index(
+                'recommendation_time_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'recommendationid',
+                    'timecreated',
+                ]
+            );
+
+            $table->add_index(
+                'action_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['action']
+            );
+
+            $table->add_index(
+                'actor_time_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'actorid',
+                    'timecreated',
+                ]
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026071601,
+            'local',
+            'subscriptions'
+        );
     }
 
-    /*
-     * Work items.
-     */
-    $table = new xmldb_table(
-        'local_subscriptions_work_item'
-    );
-
-    if (!$dbman->table_exists($table)) {
-        $table->add_field(
-            'id',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            XMLDB_SEQUENCE,
-            null
-        );
-
-        $table->add_field(
-            'reference',
-            XMLDB_TYPE_CHAR,
-            '30',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'type',
-            XMLDB_TYPE_CHAR,
-            '30',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            'task'
-        );
-
-        $table->add_field(
-            'title',
-            XMLDB_TYPE_CHAR,
-            '255',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'description',
-            XMLDB_TYPE_TEXT,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'status',
-            XMLDB_TYPE_CHAR,
-            '30',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            'open'
-        );
-
-        $table->add_field(
-            'priority',
-            XMLDB_TYPE_CHAR,
-            '20',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            'normal'
-        );
-
-        $table->add_field(
-            'source',
-            XMLDB_TYPE_CHAR,
-            '30',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            'manual'
-        );
-
-        $table->add_field(
-            'targetuserid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            null,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'assigneduserid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            null,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'assignedteamid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            null,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'parentid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            null,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'createdby',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'dueat',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            null,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'resolvedat',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            null,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'closedat',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            null,
-            null,
-            null
-        );
-
-        $table->add_field(
-            'timecreated',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '0'
-        );
-
-        $table->add_field(
-            'timemodified',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '0'
-        );
-
-        $table->add_key(
-            'primary',
-            XMLDB_KEY_PRIMARY,
-            ['id']
-        );
-
-        $table->add_key(
-            'targetuserid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['targetuserid'],
-            'user',
-            ['id']
-        );
-
-        $table->add_key(
-            'assigneduserid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['assigneduserid'],
-            'user',
-            ['id']
-        );
-
-        $table->add_key(
-            'assignedteamid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['assignedteamid'],
-            'local_subscriptions_work_team',
-            ['id']
-        );
-
-        $table->add_key(
-            'parentid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['parentid'],
-            'local_subscriptions_work_item',
-            ['id']
-        );
-
-        $table->add_key(
-            'createdby_fk',
-            XMLDB_KEY_FOREIGN,
-            ['createdby'],
-            'user',
-            ['id']
-        );
-
-        $table->add_index(
-            'reference_uix',
-            XMLDB_INDEX_UNIQUE,
-            ['reference']
-        );
-
-        $table->add_index(
-            'status_priority_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['status', 'priority']
-        );
-
-        $table->add_index(
-            'assignee_status_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['assigneduserid', 'status']
-        );
-
-        $table->add_index(
-            'team_status_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['assignedteamid', 'status']
-        );
-
-        $table->add_index(
-            'target_status_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['targetuserid', 'status']
-        );
-
-        $table->add_index(
-            'due_status_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['dueat', 'status']
-        );
-
+    if ($oldversion < 2026071602) {
         /*
-         * Do not add a separate parentid index:
-         * parentid_fk already provides it.
+         * New capability:
+         * local/subscriptions:use_crm_assistant_ai
+         *
+         * No database structure change is required.
          */
-        $dbman->create_table($table);
+        upgrade_plugin_savepoint(
+            true,
+            2026071602,
+            'local',
+            'subscriptions'
+        );
     }
 
-    /*
-     * Internal Work Item comments.
-     */
-    $table = new xmldb_table(
-        'local_subscriptions_work_comment'
-    );
-
-    if (!$dbman->table_exists($table)) {
-        $table->add_field(
-            'id',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            XMLDB_SEQUENCE,
-            null
+    if ($oldversion < 2026071603) {
+        $table = new xmldb_table(
+            'local_subscriptions_recommendation_run'
         );
 
-        $table->add_field(
-            'itemid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE,
+                null
+            );
 
-        $table->add_field(
-            'authorid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+            $table->add_field(
+                'status',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'running'
+            );
 
-        $table->add_field(
-            'body',
-            XMLDB_TYPE_TEXT,
-            null,
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+            $table->add_field(
+                'source',
+                XMLDB_TYPE_CHAR,
+                '30',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'scheduled_task'
+            );
 
-        $table->add_field(
-            'visibility',
-            XMLDB_TYPE_CHAR,
-            '20',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            'internal'
-        );
+            $table->add_field(
+                'startcursor',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
 
-        $table->add_field(
-            'timecreated',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '0'
-        );
+            $table->add_field(
+                'endcursor',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
 
-        $table->add_field(
-            'timemodified',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '0'
-        );
+            $table->add_field(
+                'wrapped',
+                XMLDB_TYPE_INTEGER,
+                '1',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
 
-        $table->add_key(
-            'primary',
-            XMLDB_KEY_PRIMARY,
-            ['id']
-        );
+            $table->add_field(
+                'requestedlimit',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
 
-        $table->add_key(
-            'itemid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['itemid'],
-            'local_subscriptions_work_item',
-            ['id']
-        );
+            foreach ([
+                'processedcount',
+                'successcount',
+                'failedcount',
+                'generatedcount',
+                'persistedcount',
+                'duplicatecount',
+                'correlationcount',
+                'expiredcount',
+                'durationms',
+            ] as $fieldname) {
+                $table->add_field(
+                    $fieldname,
+                    XMLDB_TYPE_INTEGER,
+                    '10',
+                    null,
+                    XMLDB_NOTNULL,
+                    null,
+                    '0'
+                );
+            }
 
-        $table->add_key(
-            'authorid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['authorid'],
-            'user',
-            ['id']
-        );
+            $table->add_field(
+                'failurejson',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
 
-        $table->add_index(
-            'item_time_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['itemid', 'timecreated']
-        );
+            $table->add_field(
+                'startedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
 
-        $dbman->create_table($table);
+            $table->add_field(
+                'finishedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+
+            $table->add_index(
+                'status_started_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'status',
+                    'startedat',
+                ]
+            );
+
+            $table->add_index(
+                'source_started_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'source',
+                    'startedat',
+                ]
+            );
+
+            $table->add_index(
+                'finishedat_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['finishedat']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026071603,
+            'local',
+            'subscriptions'
+        );
     }
 
-    /*
-     * Links between Work Items and CRM objects.
-     */
-    $table = new xmldb_table(
-        'local_subscriptions_work_link'
-    );
-
-    if (!$dbman->table_exists($table)) {
-        $table->add_field(
-            'id',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            XMLDB_SEQUENCE,
-            null
+    if ($oldversion < 2026071700) {
+        $plantable = new xmldb_table(
+            'local_subscriptions_cs_plan'
         );
 
-        $table->add_field(
-            'itemid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
+        if (!$dbman->table_exists($plantable)) {
+            $plantable->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
+
+            $plantable->add_field(
+                'reference',
+                XMLDB_TYPE_CHAR,
+                '32',
+                null,
+                XMLDB_NOTNULL
+            );
+
+            $plantable->add_field(
+                'userid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+
+            $plantable->add_field(
+                'objectivekey',
+                XMLDB_TYPE_CHAR,
+                '100',
+                null,
+                XMLDB_NOTNULL
+            );
+
+            $plantable->add_field(
+                'title',
+                XMLDB_TYPE_CHAR,
+                '255',
+                null,
+                XMLDB_NOTNULL
+            );
+
+            $plantable->add_field(
+                'description',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null
+            );
+
+            $plantable->add_field(
+                'status',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'draft'
+            );
+
+            $plantable->add_field(
+                'source',
+                XMLDB_TYPE_CHAR,
+                '30',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'manual'
+            );
+
+            $plantable->add_field(
+                'priority',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'normal'
+            );
+
+            foreach ([
+                'assignedteamid',
+                'assigneduserid',
+                'targetdate',
+            ] as $fieldname) {
+                $plantable->add_field(
+                    $fieldname,
+                    XMLDB_TYPE_INTEGER,
+                    '10',
+                    null,
+                    null
+                );
+            }
+
+            $plantable->add_field(
+                'blockedreason',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null
+            );
+
+            $plantable->add_field(
+                'fingerprint',
+                XMLDB_TYPE_CHAR,
+                '64',
+                null,
+                null
+            );
+
+            foreach ([
+                'activatedat',
+                'completedat',
+            ] as $fieldname) {
+                $plantable->add_field(
+                    $fieldname,
+                    XMLDB_TYPE_INTEGER,
+                    '10',
+                    null,
+                    null
+                );
+            }
+
+            foreach ([
+                'createdby',
+                'modifiedby',
+                'timecreated',
+                'timemodified',
+            ] as $fieldname) {
+                $plantable->add_field(
+                    $fieldname,
+                    XMLDB_TYPE_INTEGER,
+                    '10',
+                    null,
+                    XMLDB_NOTNULL,
+                    null,
+                    '0'
+                );
+            }
+
+            $plantable->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+
+            $plantable->add_key(
+                'userid_fk',
+                XMLDB_KEY_FOREIGN,
+                ['userid'],
+                'user',
+                ['id']
+            );
+
+            $plantable->add_index(
+                'reference_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['reference']
+            );
+
+            $plantable->add_index(
+                'userid_status_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'userid',
+                    'status',
+                ]
+            );
+
+            $plantable->add_index(
+                'status_priority_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'status',
+                    'priority',
+                ]
+            );
+
+            $plantable->add_index(
+                'fingerprint_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['fingerprint']
+            );
+
+            $plantable->add_index(
+                'assignedteam_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'assignedteamid',
+                    'status',
+                ]
+            );
+
+            $plantable->add_index(
+                'assigneduser_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'assigneduserid',
+                    'status',
+                ]
+            );
+
+            $plantable->add_index(
+                'targetdate_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['targetdate']
+            );
+
+            $dbman->create_table(
+                $plantable
+            );
+        }
+
+        $steptable = new xmldb_table(
+            'local_subscriptions_cs_step'
         );
 
-        $table->add_field(
-            'objecttype',
-            XMLDB_TYPE_CHAR,
-            '50',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+        if (!$dbman->table_exists($steptable)) {
+            $steptable->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
 
-        $table->add_field(
-            'objectid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+            $steptable->add_field(
+                'planid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
 
-        $table->add_field(
-            'relation',
-            XMLDB_TYPE_CHAR,
-            '30',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            'related'
-        );
+            $steptable->add_field(
+                'position',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '1'
+            );
 
-        $table->add_field(
-            'timecreated',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '0'
-        );
+            $steptable->add_field(
+                'stepkey',
+                XMLDB_TYPE_CHAR,
+                '100',
+                null,
+                XMLDB_NOTNULL
+            );
 
-        $table->add_key(
-            'primary',
-            XMLDB_KEY_PRIMARY,
-            ['id']
-        );
+            $steptable->add_field(
+                'title',
+                XMLDB_TYPE_CHAR,
+                '255',
+                null,
+                XMLDB_NOTNULL
+            );
 
-        $table->add_key(
-            'itemid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['itemid'],
-            'local_subscriptions_work_item',
-            ['id']
-        );
+            $steptable->add_field(
+                'description',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null
+            );
 
-        $table->add_index(
-            'item_object_relation_uix',
-            XMLDB_INDEX_UNIQUE,
-            [
-                'itemid',
-                'objecttype',
-                'objectid',
-                'relation',
-            ]
-        );
+            $steptable->add_field(
+                'status',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'pending'
+            );
 
-        $table->add_index(
-            'object_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['objecttype', 'objectid']
-        );
+            $steptable->add_field(
+                'priority',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'normal'
+            );
 
-        $dbman->create_table($table);
+            $steptable->add_field(
+                'dependsonstepid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null
+            );
+
+            $steptable->add_field(
+                'blockedreason',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null
+            );
+
+            $steptable->add_field(
+                'relationtype',
+                XMLDB_TYPE_CHAR,
+                '30',
+                null,
+                null
+            );
+
+            $steptable->add_field(
+                'relationid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null
+            );
+
+            foreach ([
+                'assignedteamid',
+                'assigneduserid',
+                'dueat',
+                'startedat',
+                'completedat',
+            ] as $fieldname) {
+                $steptable->add_field(
+                    $fieldname,
+                    XMLDB_TYPE_INTEGER,
+                    '10',
+                    null,
+                    null
+                );
+            }
+
+            foreach ([
+                'createdby',
+                'modifiedby',
+                'timecreated',
+                'timemodified',
+            ] as $fieldname) {
+                $steptable->add_field(
+                    $fieldname,
+                    XMLDB_TYPE_INTEGER,
+                    '10',
+                    null,
+                    XMLDB_NOTNULL,
+                    null,
+                    '0'
+                );
+            }
+
+            $steptable->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+
+            $steptable->add_key(
+                'planid_fk',
+                XMLDB_KEY_FOREIGN,
+                ['planid'],
+                'local_subscriptions_cs_plan',
+                ['id']
+            );
+
+            $steptable->add_index(
+                'plan_position_uix',
+                XMLDB_INDEX_UNIQUE,
+                [
+                    'planid',
+                    'position',
+                ]
+            );
+
+            $steptable->add_index(
+                'plan_stepkey_uix',
+                XMLDB_INDEX_UNIQUE,
+                [
+                    'planid',
+                    'stepkey',
+                ]
+            );
+
+            $steptable->add_index(
+                'plan_status_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'planid',
+                    'status',
+                ]
+            );
+
+            $steptable->add_index(
+                'dependency_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['dependsonstepid']
+            );
+
+            $steptable->add_index(
+                'relation_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'relationtype',
+                    'relationid',
+                ]
+            );
+
+            $steptable->add_index(
+                'assignedteam_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'assignedteamid',
+                    'status',
+                ]
+            );
+
+            $steptable->add_index(
+                'assigneduser_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'assigneduserid',
+                    'status',
+                ]
+            );
+
+            $steptable->add_index(
+                'dueat_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['dueat']
+            );
+
+            $dbman->create_table(
+                $steptable
+            );
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026071700,
+            'local',
+            'subscriptions'
+        );
     }
 
-    /*
-     * Immutable Work Item history.
-     */
-    $table = new xmldb_table(
-        'local_subscriptions_work_history'
-    );
+	if ($oldversion < 2026071702) {
+		$table = new xmldb_table(
+			'local_subscriptions_cs_relation'
+		);
 
-    if (!$dbman->table_exists($table)) {
-        $table->add_field(
-            'id',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            XMLDB_SEQUENCE,
-            null
-        );
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
 
-        $table->add_field(
-            'itemid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+			$table->add_field(
+				'planid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
 
-        $table->add_field(
-            'actorid',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            null,
-            null,
-            null
-        );
+			$table->add_field(
+				'stepid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
 
-        $table->add_field(
-            'action',
-            XMLDB_TYPE_CHAR,
-            '50',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            null
-        );
+			$table->add_field(
+				'objecttype',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL
+			);
 
-        $table->add_field(
-            'oldvalue',
-            XMLDB_TYPE_TEXT,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+			$table->add_field(
+				'objectid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL
+			);
 
-        $table->add_field(
-            'newvalue',
-            XMLDB_TYPE_TEXT,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+			$table->add_field(
+				'relation',
+				XMLDB_TYPE_CHAR,
+				'30',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'related'
+			);
 
-        $table->add_field(
-            'metadatajson',
-            XMLDB_TYPE_TEXT,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+			$table->add_field(
+				'createdby',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
 
-        $table->add_field(
-            'timecreated',
-            XMLDB_TYPE_INTEGER,
-            '10',
-            null,
-            XMLDB_NOTNULL,
-            null,
-            '0'
-        );
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
 
-        $table->add_key(
-            'primary',
-            XMLDB_KEY_PRIMARY,
-            ['id']
-        );
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
 
-        $table->add_key(
-            'itemid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['itemid'],
-            'local_subscriptions_work_item',
-            ['id']
-        );
+			$table->add_key(
+				'planid_fk',
+				XMLDB_KEY_FOREIGN,
+				['planid'],
+				'local_subscriptions_cs_plan',
+				['id']
+			);
 
-        $table->add_key(
-            'actorid_fk',
-            XMLDB_KEY_FOREIGN,
-            ['actorid'],
-            'user',
-            ['id']
-        );
+			$table->add_key(
+				'stepid_fk',
+				XMLDB_KEY_FOREIGN,
+				['stepid'],
+				'local_subscriptions_cs_step',
+				['id']
+			);
 
-        $table->add_index(
-            'item_time_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['itemid', 'timecreated']
-        );
+			$table->add_index(
+				'step_object_relation_uix',
+				XMLDB_INDEX_UNIQUE,
+				[
+					'stepid',
+					'objecttype',
+					'objectid',
+					'relation',
+				]
+			);
 
-        $table->add_index(
-            'action_idx',
-            XMLDB_INDEX_NOTUNIQUE,
-            ['action']
-        );
+			$table->add_index(
+				'plan_object_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				[
+					'planid',
+					'objecttype',
+					'objectid',
+				]
+			);
 
-        $dbman->create_table($table);
-    }
+			$table->add_index(
+				'object_lookup_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				[
+					'objecttype',
+					'objectid',
+				]
+			);
 
-    upgrade_plugin_savepoint(
-        true,
-        2026071218,
-        'local',
-        'subscriptions'
-    );
-}	
+			$dbman->create_table($table);
+		}
+
+		/*
+		* Migrate the primary recommendation relations created by 7.8C.
+		*/
+		if (
+			$DB->get_manager()->table_exists(
+				new xmldb_table(
+					'local_subscriptions_cs_step'
+				)
+			)
+		) {
+			$sql = "
+				SELECT s.id,
+					s.planid,
+					s.relationtype,
+					s.relationid,
+					s.createdby,
+					s.timecreated
+				FROM {local_subscriptions_cs_step} s
+				WHERE s.relationtype IS NOT NULL
+				AND s.relationid IS NOT NULL
+			";
+
+			$records = $DB->get_recordset_sql($sql);
+
+			foreach ($records as $record) {
+				if (
+					!$DB->record_exists(
+						'local_subscriptions_cs_relation',
+						[
+							'stepid' =>
+								(int)$record->id,
+							'objecttype' =>
+								(string)$record->relationtype,
+							'objectid' =>
+								(int)$record->relationid,
+							'relation' =>
+								'created_from',
+						]
+					)
+				) {
+					$DB->insert_record(
+						'local_subscriptions_cs_relation',
+						(object)[
+							'planid' =>
+								(int)$record->planid,
+							'stepid' =>
+								(int)$record->id,
+							'objecttype' =>
+								(string)$record->relationtype,
+							'objectid' =>
+								(int)$record->relationid,
+							'relation' =>
+								'created_from',
+							'createdby' =>
+								(int)$record->createdby,
+							'timecreated' =>
+								(int)$record->timecreated,
+						]
+					);
+				}
+			}
+
+			$records->close();
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071702,
+			'local',
+			'subscriptions'
+		);
+	}	
+
+	if ($oldversion < 2026071703) {
+		$plantable =
+			'local_subscriptions_cs_plan';
+
+		if (
+			$dbman->table_exists(
+				new xmldb_table(
+					$plantable
+				)
+			)
+		) {
+			$plans =
+				$DB->get_records_select(
+					$plantable,
+					'source <> :manualsource',
+					[
+						'manualsource' => 'manual',
+					],
+					'',
+					'id, objectivekey'
+				);
+
+			$validobjectives = [
+				'reduce_churn_risk',
+				'resolve_payment_friction',
+				'resolve_support_pressure',
+				'restore_learning_access',
+				'restore_learning_engagement',
+				'develop_customer_opportunity',
+				'coordinate_customer_success',
+			];
+
+			foreach ($plans as $plan) {
+				$objectivekey =
+					in_array(
+						(string)$plan->objectivekey,
+						$validobjectives,
+						true
+					)
+						? (string)$plan->objectivekey
+						: 'coordinate_customer_success';
+
+				$recommendationcount =
+					$DB->count_records(
+						'local_subscriptions_cs_step',
+						[
+							'planid' =>
+								(int)$plan->id,
+						]
+					);
+
+				$DB->update_record(
+					$plantable,
+					(object)[
+						'id' =>
+							(int)$plan->id,
+
+						'title' =>
+							'[[csplan-objective:' .
+							$objectivekey .
+							']]',
+
+						'description' =>
+							'[[csplan-description:recommendations:' .
+							$recommendationcount .
+							']]',
+
+						'timemodified' =>
+							time(),
+					]
+				);
+			}
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071703,
+			'local',
+			'subscriptions'
+		);
+	}
 
     return true;
 }

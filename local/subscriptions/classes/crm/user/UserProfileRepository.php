@@ -200,6 +200,58 @@ final class UserProfileRepository {
         ));
     }
 
+    /**
+     * Loads timeline actors indexed by user ID.
+     *
+     * @param int[] $actorids
+     * @return array<int, \stdClass>
+     */
+    public function get_timeline_actors(
+        array $actorids
+    ): array {
+        global $DB;
+
+        $actorids = array_values(
+            array_unique(
+                array_filter(
+                    array_map(
+                        'intval',
+                        $actorids
+                    ),
+                    static fn(int $actorid): bool =>
+                        $actorid > 0
+                )
+            )
+        );
+
+        if ($actorids === []) {
+            return [];
+        }
+
+        [$insql, $params] =
+            $DB->get_in_or_equal(
+                $actorids,
+                SQL_PARAMS_NAMED,
+                'actor'
+            );
+
+        $records = $DB->get_records_select(
+            'user',
+            'id ' . $insql,
+            $params,
+            '',
+            'id, firstname, lastname, email'
+        );
+
+        $actors = [];
+
+        foreach ($records as $record) {
+            $actors[(int)$record->id] = $record;
+        }
+
+        return $actors;
+    }
+
     public function get_user_notes(int $userid, int $limit): array {
         global $DB;
 

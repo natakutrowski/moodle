@@ -45,7 +45,11 @@ $PAGE->set_heading(get_string('add_subscription', 'local_subscriptions'));
 $PAGE->requires->jquery();
 $PAGE->requires->jquery_plugin('ui');
 $PAGE->requires->jquery_plugin('ui-css');
-$PAGE->requires->css('/local/subscriptions/styles.css');
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
+);
 
 $PAGE->requires->css(new moodle_url('/local/subscriptions/thirdparty/flatpickr/flatpickr.min.css'));
 $PAGE->requires->js(new moodle_url('/local/subscriptions/thirdparty/flatpickr/flatpickr.min.js'), true);

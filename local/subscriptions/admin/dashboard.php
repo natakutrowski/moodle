@@ -25,7 +25,11 @@ $PAGE->set_title(get_string('admin_dashboard', 'local_subscriptions'));
 $PAGE->set_heading(get_string('admin_dashboard', 'local_subscriptions'));
 $PAGE->add_body_class('local-subscriptions-crm-workspace');
 $PAGE->add_body_class('local-subscriptions-dashboard-page');
-$PAGE->requires->css(new moodle_url('/local/subscriptions/styles.css'));
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
+);
 $PAGE->requires->js_call_amd('local_subscriptions/command_center', 'init');
 
 echo $OUTPUT->header();

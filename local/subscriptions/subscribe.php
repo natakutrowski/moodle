@@ -28,7 +28,11 @@ $PAGE->set_url(new moodle_url(UrlFactory::subscribe()->out(false), [
 ]));
 $PAGE->set_title(get_string('subscribe', 'local_subscriptions'));
 $PAGE->set_heading(get_string('subscribe', 'local_subscriptions'));
-$PAGE->requires->css('/local/subscriptions/styles.css');
+$PAGE->requires->css(
+    new moodle_url(
+        \local_subscriptions\subscription_config::plugin_stylesheet_page()
+    )
+);
 
 $PAGE->set_pagelayout('standard');
 

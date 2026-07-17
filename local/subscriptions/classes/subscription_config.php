@@ -350,6 +350,46 @@ class subscription_config {
         return self::plugin_path() . 'admin/work/team_action.php';
     }
     
+    public static function admin_crm_assistant_page(): string {
+        return self::plugin_path() .
+            'admin/assistant/index.php';
+    }
+
+    public static function admin_crm_assistant_action_page(): string {
+        return self::plugin_path() .
+            'admin/assistant/action.php';
+    }
+
+    public static function admin_crm_assistant_work_item_page(): string {
+        return self::plugin_path() .
+            'admin/assistant/work_item.php';
+    }
+
+    public static function admin_customer_success_plan_page(): string {
+        return self::plugin_path() .
+            'admin/assistant/plan.php';
+    }
+
+    public static function admin_customer_success_plan_action_page(): string {
+        return self::plugin_path() .
+            'admin/assistant/plan_action.php';
+    }
+
+    public static function admin_customer_success_plan_confirm_page(): string {
+        return self::plugin_path() .
+            'admin/assistant/plan_action_confirm.php';
+    }
+
+    public static function plugin_stylesheet_page(): string {
+        return self::plugin_path() .
+            'styles.css';
+    }
+
+    public static function crm_assistant_ai_endpoint(): string {
+        return self::plugin_path() .
+            'ajax/crm_assistant_ask.php';
+    }
+
     // -- Buttons --
     public static function button_admin_dashboard(): string {
         return \html_writer::link(

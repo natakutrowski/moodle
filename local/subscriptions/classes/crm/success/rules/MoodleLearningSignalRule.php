@@ -4,7 +4,6 @@ namespace local_subscriptions\crm\success\rules;
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\crm\success\collection\SuccessMetric;
 use local_subscriptions\crm\success\collection\SuccessMetricCollection;
 use local_subscriptions\crm\success\contracts\SuccessSignalRuleInterface;
 use local_subscriptions\crm\success\domain\SuccessMetricSource;

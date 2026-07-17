@@ -168,10 +168,10 @@ final class LevelUpXpRepository {
                     (int)$state->get_xp()
                 );
 
-                $level = max(
-                    0,
-                    (int)$state->get_level()
-                );
+                $level =
+                    $this->normalize_level_number(
+                        $state->get_level()
+                    ) ?? 0;
 
                 $xpinlevel = max(
                     0,
@@ -349,4 +349,114 @@ final class LevelUpXpRepository {
             'log_limit_reached' => 0,
         ];
     }
+
+    /**
+     * Extracts the numeric level from the different Level Up XP API versions.
+     */
+    private function normalize_level_number(
+        mixed $level
+    ): ?int {
+        if ($level === null) {
+            return null;
+        }
+
+        if (is_int($level)) {
+            return max(0, $level);
+        }
+
+        if (is_numeric($level)) {
+            return max(
+                0,
+                (int)$level
+            );
+        }
+
+        if (!is_object($level)) {
+            return null;
+        }
+
+        /*
+        * Known public accessors used by Level Up XP level objects.
+        */
+        foreach (
+            [
+                'get_number',
+                'get_level_number',
+                'get_rank',
+                'get_id',
+            ]
+            as $method
+        ) {
+            if (!method_exists($level, $method)) {
+                continue;
+            }
+
+            try {
+                $value = $level->{$method}();
+
+                if (
+                    is_int($value) ||
+                    is_numeric($value)
+                ) {
+                    return max(
+                        0,
+                        (int)$value
+                    );
+                }
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+
+        /*
+        * Some Level Up XP value objects expose their level through get_level().
+        * Only accept the result when it is scalar to avoid object recursion.
+        */
+        if (method_exists($level, 'get_level')) {
+            try {
+                $value = $level->get_level();
+
+                if (
+                    is_int($value) ||
+                    is_numeric($value)
+                ) {
+                    return max(
+                        0,
+                        (int)$value
+                    );
+                }
+            } catch (\Throwable) {
+                // Continue with property-based compatibility fallbacks.
+            }
+        }
+
+        foreach (
+            [
+                'level',
+                'number',
+                'rank',
+                'id',
+            ]
+            as $property
+        ) {
+            if (!isset($level->{$property})) {
+                continue;
+            }
+
+            $value = $level->{$property};
+
+            if (
+                is_int($value) ||
+                is_numeric($value)
+            ) {
+                return max(
+                    0,
+                    (int)$value
+                );
+            }
+        }
+
+        return null;
+    }
+
 }

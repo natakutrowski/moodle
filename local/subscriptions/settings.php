@@ -30,6 +30,30 @@ if (
     ));
 }
 
+if (
+    $hassiteconfig ||
+    has_capability(
+        Capabilities::VIEW_USERS,
+        context_system::instance()
+    )
+) {
+    $ADMIN->add(
+        'localplugins',
+        new admin_externalpage(
+            'local_subscriptions_crm_assistant',
+            get_string(
+                'crm_assistant_navigation',
+                'local_subscriptions'
+            ),
+            new moodle_url(
+                subscription_config::
+                    admin_crm_assistant_page()
+            ),
+            Capabilities::VIEW_USERS
+        )
+    );
+}
+
 if ($hassiteconfig) {
 
 	// Crée une catégorie principale "Subscriptions"

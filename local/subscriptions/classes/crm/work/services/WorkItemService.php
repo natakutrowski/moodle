@@ -311,6 +311,7 @@ final class WorkItemService {
             'digital_payment_request',
             'automation_rule',
             'intelligence_alert',
+            'recommendation',
             'course',
             'work_item',
         ];

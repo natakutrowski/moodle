@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/subscriptions/db" VERSION="2026071217" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="local/subscriptions/db" VERSION="2026071702" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
 		<TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
 			<FIELDS>
@@ -1513,6 +1513,659 @@
             </INDEXES>
         </TABLE>
 
+        <TABLE NAME="local_subscriptions_recommendation"
+            COMMENT="Persistent CRM intelligence recommendations">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10"
+                    NOTNULL="true" SEQUENCE="true"/>
+
+                <FIELD NAME="fingerprint" TYPE="char" LENGTH="64"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="recommendationkey" TYPE="char" LENGTH="100"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="recommendationtype" TYPE="char" LENGTH="50"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="presentationtype" TYPE="char" LENGTH="20"
+                    NOTNULL="true" DEFAULT="info"/>
+
+                <FIELD NAME="priority" TYPE="int" LENGTH="3"
+                    NOTNULL="true" DEFAULT="50"/>
+
+                <FIELD NAME="prioritylevel" TYPE="char" LENGTH="20"
+                    NOTNULL="true" DEFAULT="normal"/>
+
+                <FIELD NAME="status" TYPE="char" LENGTH="20"
+                    NOTNULL="true" DEFAULT="proposed"/>
+
+                <FIELD NAME="targettype" TYPE="char" LENGTH="50"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="targetid" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="sourcesjson" TYPE="text"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="evidencejson" TYPE="text"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="actionsjson" TYPE="text"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="generatedat" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="validuntil" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="firstdetectedat" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="lastdetectedat" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="acceptedby" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="acceptedat" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="dismissedby" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="dismissedat" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="completedby" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="completedat" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="dismissalreason" TYPE="char" LENGTH="100"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+
+                <KEY NAME="acceptedby_fk" TYPE="foreign"
+                    FIELDS="acceptedby"
+                    REFTABLE="user" REFFIELDS="id"/>
+
+                <KEY NAME="dismissedby_fk" TYPE="foreign"
+                    FIELDS="dismissedby"
+                    REFTABLE="user" REFFIELDS="id"/>
+
+                <KEY NAME="completedby_fk" TYPE="foreign"
+                    FIELDS="completedby"
+                    REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+
+            <INDEXES>
+                <INDEX NAME="fingerprint_uix" UNIQUE="true"
+                    FIELDS="fingerprint"/>
+
+                <INDEX NAME="status_priority_idx" UNIQUE="false"
+                    FIELDS="status,priority"/>
+
+                <INDEX NAME="target_status_idx" UNIQUE="false"
+                    FIELDS="targettype,targetid,status"/>
+
+                <INDEX NAME="type_status_idx" UNIQUE="false"
+                    FIELDS="recommendationtype,status"/>
+
+                <INDEX NAME="validuntil_idx" UNIQUE="false"
+                    FIELDS="validuntil"/>
+
+                <INDEX NAME="lastdetected_idx" UNIQUE="false"
+                    FIELDS="lastdetectedat"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subscriptions_recommendation_history"
+            COMMENT="Immutable lifecycle history of CRM recommendations">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10"
+                    NOTNULL="true" SEQUENCE="true"/>
+
+                <FIELD NAME="recommendationid" TYPE="int" LENGTH="10"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="actorid" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="action" TYPE="char" LENGTH="50"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="oldstatus" TYPE="char" LENGTH="20"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="newstatus" TYPE="char" LENGTH="20"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="metadatajson" TYPE="text"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+
+                <KEY NAME="recommendationid_fk" TYPE="foreign"
+                    FIELDS="recommendationid"
+                    REFTABLE="local_subscriptions_recommendation"
+                    REFFIELDS="id"/>
+
+                <KEY NAME="actorid_fk" TYPE="foreign"
+                    FIELDS="actorid"
+                    REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+
+            <INDEXES>
+                <INDEX NAME="recommendation_time_idx" UNIQUE="false"
+                    FIELDS="recommendationid,timecreated"/>
+
+                <INDEX NAME="action_idx" UNIQUE="false"
+                    FIELDS="action"/>
+
+                <INDEX NAME="actor_time_idx" UNIQUE="false"
+                    FIELDS="actorid,timecreated"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subscriptions_recommendation_run"
+            COMMENT="Operational reports for CRM Recommendation Engine batch runs">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10"
+                    NOTNULL="true" SEQUENCE="true"/>
+
+                <FIELD NAME="status" TYPE="char" LENGTH="20"
+                    NOTNULL="true" DEFAULT="running"/>
+
+                <FIELD NAME="source" TYPE="char" LENGTH="30"
+                    NOTNULL="true" DEFAULT="scheduled_task"/>
+
+                <FIELD NAME="startcursor" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="endcursor" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="wrapped" TYPE="int" LENGTH="1"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="requestedlimit" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="processedcount" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="successcount" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="failedcount" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="generatedcount" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="persistedcount" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="duplicatecount" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="correlationcount" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="expiredcount" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="durationms" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="failurejson" TYPE="text"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="startedat" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="finishedat" TYPE="int" LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10"
+                    NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+
+            <INDEXES>
+                <INDEX NAME="status_started_idx" UNIQUE="false"
+                    FIELDS="status,startedat"/>
+
+                <INDEX NAME="source_started_idx" UNIQUE="false"
+                    FIELDS="source,startedat"/>
+
+                <INDEX NAME="finishedat_idx" UNIQUE="false"
+                    FIELDS="finishedat"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subscriptions_cs_plan"
+            COMMENT="Customer Success action plans">
+
+            <FIELDS>
+                <FIELD NAME="id"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    SEQUENCE="true"/>
+
+                <FIELD NAME="reference"
+                    TYPE="char"
+                    LENGTH="32"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="userid"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="objectivekey"
+                    TYPE="char"
+                    LENGTH="100"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="title"
+                    TYPE="char"
+                    LENGTH="255"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="description"
+                    TYPE="text"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="status"
+                    TYPE="char"
+                    LENGTH="20"
+                    NOTNULL="true"
+                    DEFAULT="draft"/>
+
+                <FIELD NAME="source"
+                    TYPE="char"
+                    LENGTH="30"
+                    NOTNULL="true"
+                    DEFAULT="manual"/>
+
+                <FIELD NAME="priority"
+                    TYPE="char"
+                    LENGTH="20"
+                    NOTNULL="true"
+                    DEFAULT="normal"/>
+
+                <FIELD NAME="assignedteamid"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="assigneduserid"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="targetdate"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="blockedreason"
+                    TYPE="text"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="fingerprint"
+                    TYPE="char"
+                    LENGTH="64"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="activatedat"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="completedat"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="createdby"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    DEFAULT="0"/>
+
+                <FIELD NAME="modifiedby"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    DEFAULT="0"/>
+
+                <FIELD NAME="timecreated"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    DEFAULT="0"/>
+
+                <FIELD NAME="timemodified"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    DEFAULT="0"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary"
+                    TYPE="primary"
+                    FIELDS="id"/>
+
+                <KEY NAME="userid_fk"
+                    TYPE="foreign"
+                    FIELDS="userid"
+                    REFTABLE="user"
+                    REFFIELDS="id"/>
+            </KEYS>
+
+            <INDEXES>
+                <INDEX NAME="reference_uix"
+                    UNIQUE="true"
+                    FIELDS="reference"/>
+
+                <INDEX NAME="userid_status_idx"
+                    UNIQUE="false"
+                    FIELDS="userid,status"/>
+
+                <INDEX NAME="status_priority_idx"
+                    UNIQUE="false"
+                    FIELDS="status,priority"/>
+
+                <INDEX NAME="fingerprint_idx"
+                    UNIQUE="false"
+                    FIELDS="fingerprint"/>
+
+                <INDEX NAME="assignedteam_idx"
+                    UNIQUE="false"
+                    FIELDS="assignedteamid,status"/>
+
+                <INDEX NAME="assigneduser_idx"
+                    UNIQUE="false"
+                    FIELDS="assigneduserid,status"/>
+
+                <INDEX NAME="targetdate_idx"
+                    UNIQUE="false"
+                    FIELDS="targetdate"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subscriptions_cs_step"
+            COMMENT="Ordered steps of Customer Success action plans">
+
+            <FIELDS>
+                <FIELD NAME="id"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    SEQUENCE="true"/>
+
+                <FIELD NAME="planid"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="position"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    DEFAULT="1"/>
+
+                <FIELD NAME="stepkey"
+                    TYPE="char"
+                    LENGTH="100"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="title"
+                    TYPE="char"
+                    LENGTH="255"
+                    NOTNULL="true"/>
+
+                <FIELD NAME="description"
+                    TYPE="text"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="status"
+                    TYPE="char"
+                    LENGTH="20"
+                    NOTNULL="true"
+                    DEFAULT="pending"/>
+
+                <FIELD NAME="priority"
+                    TYPE="char"
+                    LENGTH="20"
+                    NOTNULL="true"
+                    DEFAULT="normal"/>
+
+                <FIELD NAME="dependsonstepid"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="blockedreason"
+                    TYPE="text"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="relationtype"
+                    TYPE="char"
+                    LENGTH="30"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="relationid"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="assignedteamid"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="assigneduserid"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="dueat"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="startedat"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="completedat"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="false"/>
+
+                <FIELD NAME="createdby"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    DEFAULT="0"/>
+
+                <FIELD NAME="modifiedby"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    DEFAULT="0"/>
+
+                <FIELD NAME="timecreated"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    DEFAULT="0"/>
+
+                <FIELD NAME="timemodified"
+                    TYPE="int"
+                    LENGTH="10"
+                    NOTNULL="true"
+                    DEFAULT="0"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary"
+                    TYPE="primary"
+                    FIELDS="id"/>
+
+                <KEY NAME="planid_fk"
+                    TYPE="foreign"
+                    FIELDS="planid"
+                    REFTABLE="local_subscriptions_cs_plan"
+                    REFFIELDS="id"/>
+            </KEYS>
+
+            <INDEXES>
+                <INDEX NAME="plan_position_uix"
+                    UNIQUE="true"
+                    FIELDS="planid,position"/>
+
+                <INDEX NAME="plan_stepkey_uix"
+                    UNIQUE="true"
+                    FIELDS="planid,stepkey"/>
+
+                <INDEX NAME="plan_status_idx"
+                    UNIQUE="false"
+                    FIELDS="planid,status"/>
+
+                <INDEX NAME="dependency_idx"
+                    UNIQUE="false"
+                    FIELDS="dependsonstepid"/>
+
+                <INDEX NAME="relation_idx"
+                    UNIQUE="false"
+                    FIELDS="relationtype,relationid"/>
+
+                <INDEX NAME="assignedteam_idx"
+                    UNIQUE="false"
+                    FIELDS="assignedteamid,status"/>
+
+                <INDEX NAME="assigneduser_idx"
+                    UNIQUE="false"
+                    FIELDS="assigneduserid,status"/>
+
+                <INDEX NAME="dueat_idx"
+                    UNIQUE="false"
+                    FIELDS="dueat"/>
+            </INDEXES>
+        </TABLE>
+
+		<TABLE NAME="local_subscriptions_cs_relation"
+			COMMENT="Relations between Customer Success plan steps and CRM objects">
+
+			<FIELDS>
+				<FIELD NAME="id"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					SEQUENCE="true"/>
+
+				<FIELD NAME="planid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"/>
+
+				<FIELD NAME="stepid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"/>
+
+				<FIELD NAME="objecttype"
+					TYPE="char"
+					LENGTH="30"
+					NOTNULL="true"/>
+
+				<FIELD NAME="objectid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"/>
+
+				<FIELD NAME="relation"
+					TYPE="char"
+					LENGTH="30"
+					NOTNULL="true"
+					DEFAULT="related"/>
+
+				<FIELD NAME="createdby"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="timecreated"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+			</FIELDS>
+
+			<KEYS>
+				<KEY NAME="primary"
+					TYPE="primary"
+					FIELDS="id"/>
+
+				<KEY NAME="planid_fk"
+					TYPE="foreign"
+					FIELDS="planid"
+					REFTABLE="local_subscriptions_cs_plan"
+					REFFIELDS="id"/>
+
+				<KEY NAME="stepid_fk"
+					TYPE="foreign"
+					FIELDS="stepid"
+					REFTABLE="local_subscriptions_cs_step"
+					REFFIELDS="id"/>
+			</KEYS>
+
+			<INDEXES>
+				<INDEX NAME="step_object_relation_uix"
+					UNIQUE="true"
+					FIELDS="stepid,objecttype,objectid,relation"/>
+
+				<INDEX NAME="plan_object_idx"
+					UNIQUE="false"
+					FIELDS="planid,objecttype,objectid"/>
+
+				<INDEX NAME="object_lookup_idx"
+					UNIQUE="false"
+					FIELDS="objecttype,objectid"/>
+			</INDEXES>
+		</TABLE>
 
     </TABLES>
 </XMLDB>

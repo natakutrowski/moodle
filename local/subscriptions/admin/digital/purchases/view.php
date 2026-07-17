@@ -40,7 +40,11 @@ $PAGE->set_context($context);
 $PAGE->set_url($url);
 $PAGE->set_title(get_string('digital_purchase_details', 'local_subscriptions') . ' #' . $purchase->id);
 $PAGE->set_heading(get_string('digital_purchase_details', 'local_subscriptions'));
-$PAGE->requires->css(new moodle_url('/local/subscriptions/styles.css'));
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
+);
 
 echo $OUTPUT->header();
 

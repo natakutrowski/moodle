@@ -64,11 +64,28 @@ final class UserProfileTimelineBuilder {
             );
         }
 
-        usort($events, static function(UserProfileTimelineEvent $a, UserProfileTimelineEvent $b): int {
-            return $b->timecreated <=> $a->timecreated;
-        });
+        usort(
+            $events,
+            static function(
+                UserProfileTimelineEvent $a,
+                UserProfileTimelineEvent $b
+            ): int {
+                return
+                    $b->timecreated <=>
+                    $a->timecreated;
+            }
+        );
 
-        return array_slice($events, 0, $limit);
+        $events = array_slice(
+            $events,
+            0,
+            $limit
+        );
+
+        return $this->enrich_actor_labels(
+            $events,
+            $repository
+        );
     }
 
     public function to_legacy_objects(array $events): array {
@@ -907,6 +924,125 @@ final class UserProfileTimelineBuilder {
                     ]
                 );
         }
+    }
+
+    /**
+     * Adds resolved actor labels to timeline event metadata.
+     *
+     * @param UserProfileTimelineEvent[] $events
+     * @return UserProfileTimelineEvent[]
+     */
+    private function enrich_actor_labels(
+        array $events,
+        UserProfileRepository $repository
+    ): array {
+        $actorids = [];
+
+        foreach ($events as $event) {
+            $actorid = (int)(
+                $event->metadata['actorid']
+                ?? 0
+            );
+
+            if ($actorid > 0) {
+                $actorids[] = $actorid;
+            }
+        }
+
+        if ($actorids === []) {
+            return $events;
+        }
+
+        $actors =
+            $repository->get_timeline_actors(
+                $actorids
+            );
+
+        return array_map(
+            function(
+                UserProfileTimelineEvent $event
+            ) use ($actors): UserProfileTimelineEvent {
+                $metadata = $event->metadata;
+
+                $actorid = (int)(
+                    $metadata['actorid']
+                    ?? 0
+                );
+
+                if ($actorid <= 0) {
+                    return $event;
+                }
+
+                $metadata['actorname'] =
+                    $this->resolve_actor_name(
+                        $actorid,
+                        $actors
+                    );
+
+                return new UserProfileTimelineEvent(
+                    type:
+                        $event->type,
+
+                    timecreated:
+                        $event->timecreated,
+
+                    title:
+                        $event->title,
+
+                    description:
+                        $event->description,
+
+                    icon:
+                        $event->icon,
+
+                    importance:
+                        $event->importance,
+
+                    actionurl:
+                        $event->actionurl,
+
+                    metadata:
+                        $metadata
+                );
+            },
+            $events
+        );
+    }
+
+    /**
+     * Resolves the display name of a timeline actor.
+     *
+     * @param array<int, \stdClass> $actors
+     */
+    private function resolve_actor_name(
+        int $actorid,
+        array $actors
+    ): string {
+        if (!isset($actors[$actorid])) {
+            return '';
+        }
+
+        $actor = $actors[$actorid];
+
+        $name = trim(
+            (string)($actor->firstname ?? '') .
+            ' ' .
+            (string)($actor->lastname ?? '')
+        );
+
+        if ($name !== '') {
+            return $name;
+        }
+
+        $email = trim(
+            (string)($actor->email ?? '')
+        );
+
+        if ($email !== '') {
+            return $email;
+        }
+
+        return '#' . $actorid;
     }
 
 }

@@ -16,7 +16,11 @@ $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url(subscription_config::automation_rules_admin_page()));
 $PAGE->set_title(get_string('crm_automations', 'local_subscriptions'));
 $PAGE->set_heading(get_string('crm_automations', 'local_subscriptions'));
-$PAGE->requires->css(new moodle_url('/local/subscriptions/styles.css'));
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
+);
 
 $service = new AutomationRuleService();
 $rules = $service->get_all();

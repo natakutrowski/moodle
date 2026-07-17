@@ -27,7 +27,11 @@ $PAGE->set_context($context);
 $PAGE->set_url($url);
 $PAGE->set_title(get_string('crm_user_profile', 'local_subscriptions') . ' - ' . fullname($user));
 $PAGE->set_heading(get_string('crm_user_profile', 'local_subscriptions'));
-$PAGE->requires->css(new moodle_url('/local/subscriptions/styles.css'));
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
+);
 
 echo $OUTPUT->header();
 

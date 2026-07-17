@@ -61,6 +61,41 @@ final class AdminEventPresentation {
 
         AdminEvents::INBOX_AI_REPLY_SUGGESTED =>
             '💡',
+
+        // Customer Success.
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_CREATED =>
+            '🧭',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_ACTIVATED =>
+            '▶️',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_PAUSED =>
+            '⏸️',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_CANCELLED =>
+            '🚫',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_COMPLETED =>
+            '✅',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_AUTO_COMPLETED =>
+            '🎯',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_STARTED =>
+            '🚀',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_COMPLETED =>
+            '✔️',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_SKIPPED =>
+            '⏭️',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_BLOCKED =>
+            '⛔',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_UNBLOCKED =>
+            '🔓',
+
     ];
 
     private const STRING_KEYS = [
@@ -118,6 +153,41 @@ final class AdminEventPresentation {
 
         AdminEvents::INBOX_AI_REPLY_SUGGESTED =>
             'admin_event_inbox_ai_reply_suggested',
+
+        // Customer Success.
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_CREATED =>
+            'admin_event_customer_success_plan_created',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_ACTIVATED =>
+            'admin_event_customer_success_plan_activated',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_PAUSED =>
+            'admin_event_customer_success_plan_paused',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_CANCELLED =>
+            'admin_event_customer_success_plan_cancelled',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_COMPLETED =>
+            'admin_event_customer_success_plan_completed',
+
+        AdminEvents::CUSTOMER_SUCCESS_PLAN_AUTO_COMPLETED =>
+            'admin_event_customer_success_plan_auto_completed',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_STARTED =>
+            'admin_event_customer_success_step_started',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_COMPLETED =>
+            'admin_event_customer_success_step_completed',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_SKIPPED =>
+            'admin_event_customer_success_step_skipped',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_BLOCKED =>
+            'admin_event_customer_success_step_blocked',
+
+        AdminEvents::CUSTOMER_SUCCESS_STEP_UNBLOCKED =>
+            'admin_event_customer_success_step_unblocked',
+
     ];
 
     public static function label(
@@ -145,6 +215,16 @@ final class AdminEventPresentation {
     public static function category(
         string $event
     ): string {
+
+        if (
+            str_starts_with(
+                $event,
+                'customer_success.'
+            )
+        ) {
+            return 'customer_success';
+        }
+
         if (
             str_starts_with(
                 $event,

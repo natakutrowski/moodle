@@ -36,7 +36,11 @@ $PAGE->set_heading(get_string('planentitlementsfor', 'local_subscriptions', $pla
 
 $PAGE->requires->css(new moodle_url('/local/subscriptions/select2.min.css'));
 $PAGE->requires->js(new moodle_url('/local/subscriptions/js/select2.min.js'), true);
-$PAGE->requires->css(new moodle_url('/local/subscriptions/styles.css'));
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
+);
 
 $formurl = new moodle_url(subscription_config::plan_entitlements_page(), ['planid' => $planid]);
 $mform = new plan_entitlement_form($formurl, ['planid' => $planid]);

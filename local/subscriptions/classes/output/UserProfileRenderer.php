@@ -15,6 +15,8 @@ use local_subscriptions\admin\AdminEntityLinks;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\inbox\rendering\InboxValuePresentation;
 use local_subscriptions\crm\work\rendering\UserWorkItemSection;
+use local_subscriptions\crm\assistant\rendering\UserAssistantSection;
+use local_subscriptions\crm\success\plans\rendering\CustomerSuccessPlanUserSection;
 
 final class UserProfileRenderer {
 
@@ -34,9 +36,47 @@ final class UserProfileRenderer {
 
         $out .= self::intelligence($profile);
 
+        $assistant =
+            UserAssistantSection::render(
+                (int)$profile->user->id
+            );
+
+        if ($assistant !== '') {
+            $out .= self::section(
+                get_string(
+                    'crm_assistant_user_section',
+                    'local_subscriptions'
+                ),
+                $assistant,
+                'crm-section-assistant'
+            );
+        }
+
+        $successplans =
+            (new CustomerSuccessPlanUserSection())
+                ->render(
+                    (int)$profile->user->id,
+                    Capabilities::can_manage_users()
+                );
+
+        if ($successplans !== '') {
+            $out .= self::section(
+                get_string(
+                    'csplanusersection',
+                    'local_subscriptions'
+                ),
+                $successplans,
+                'crm-section-customer-success-plans'
+            );
+        }
+
         $out .= self::inbox($profile);
 
-        $workitems = UserWorkItemSection::render((int)$profile->user->id);
+        $workitems =
+            UserWorkItemSection::render(
+                (int)$profile->user->id
+            );
+
         if ($workitems !== '') {
             $out .= self::section(
                 get_string('crm_work_user_section', 'local_subscriptions'),
@@ -1014,6 +1054,13 @@ final class UserProfileRenderer {
             self::timeline_filter_button('subscriptions', get_string('subscriptions', 'local_subscriptions')) .
             self::timeline_filter_button('purchases', get_string('crm_filter_purchases', 'local_subscriptions')) .
             self::timeline_filter_button('emails', get_string('crm_filter_emails', 'local_subscriptions')) .
+            self::timeline_filter_button(
+                'customer_success',
+                get_string(
+                    'crm_filter_customer_success',
+                    'local_subscriptions'
+                )
+            ) .
             self::timeline_filter_button('other', get_string('crm_filter_other', 'local_subscriptions')),
             'crm-timeline-filters mb-3'
         );
@@ -1708,28 +1755,37 @@ final class UserProfileRenderer {
         return $out;
     }
 
-    private static function timeline_actor_label(\stdClass $item): string {
-        global $DB;
-
-        $actorid = (int)($item->actorid ?? 0);
+    private static function timeline_actor_label(
+        \stdClass $item
+    ): string {
+        $actorid = (int)(
+            $item->actorid
+            ?? 0
+        );
 
         if ($actorid <= 0) {
             return '';
         }
 
-        $actor = $DB->get_record('user', ['id' => $actorid], 'id, firstname, lastname, email', IGNORE_MISSING);
+        $actorname = trim(
+            (string)(
+                $item->actorname
+                ?? ''
+            )
+        );
 
-        if (!$actor) {
-            return get_string('crm_timeline_by_admin', 'local_subscriptions');
+        if ($actorname === '') {
+            return get_string(
+                'crm_timeline_by_admin',
+                'local_subscriptions'
+            );
         }
 
-        $name = trim(($actor->firstname ?? '') . ' ' . ($actor->lastname ?? ''));
-
-        if ($name === '') {
-            $name = $actor->email ?? ('#' . $actorid);
-        }
-
-        return get_string('crm_timeline_by_actor', 'local_subscriptions', $name);
+        return get_string(
+            'crm_timeline_by_actor',
+            'local_subscriptions',
+            $actorname
+        );
     }
 
     private static function notes(array $notes): string {

@@ -9,6 +9,7 @@ use local_subscriptions\crm\intelligence\scoring\LeadScoreEngine;
 use local_subscriptions\crm\intelligence\segmentation\SegmentEngine;
 use local_subscriptions\crm\intelligence\opportunities\OpportunityEngine;
 use local_subscriptions\crm\intelligence\recommendations\RecommendationEngine;
+use local_subscriptions\crm\intelligence\recommendations\services\RecommendationContextBuilder;
 use local_subscriptions\crm\intelligence\trends\CrmScoreTrendService;
 
 final class UserIntelligenceBuilder {
@@ -19,6 +20,7 @@ final class UserIntelligenceBuilder {
         private readonly SegmentEngine $segmentEngine = new SegmentEngine(),
         private readonly OpportunityEngine $opportunityEngine = new OpportunityEngine(),
         private readonly RecommendationEngine $recommendationEngine = new RecommendationEngine(),
+        private readonly RecommendationContextBuilder $recommendationContextBuilder = new RecommendationContextBuilder(),
         private readonly CrmScoreTrendService $trendService = new CrmScoreTrendService(),
         private readonly ExplanationBuilder $explanationBuilder = new ExplanationBuilder()
     ) {
@@ -29,7 +31,21 @@ final class UserIntelligenceBuilder {
         $score = $this->leadScoreEngine->score($snapshot);
         $segments = $this->segmentEngine->detect($snapshot, $score);
         $opportunities = $this->opportunityEngine->detect($snapshot, $score);
-        $recommendations = $this->recommendationEngine->build($snapshot, $score, $opportunities);
+        $recommendationcontext =
+            $this->recommendationContextBuilder->build(
+                userid: (int)$user->id,
+                snapshot: $snapshot,
+                leadscore: $score,
+                opportunities: $opportunities
+            );
+
+        $recommendationresult =
+            $this->recommendationEngine->generate(
+                $recommendationcontext
+            );
+
+        $recommendations =
+            $recommendationresult->recommendations;
 
         $trend = $withtrend
             ? $this->trendService->global_trend_for_user((int)$user->id)

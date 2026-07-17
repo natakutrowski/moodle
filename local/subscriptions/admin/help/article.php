@@ -63,7 +63,9 @@ $PAGE->add_body_class(
 );
 
 $PAGE->requires->css(
-    new moodle_url('/local/subscriptions/styles.css')
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
 );
 
 $content = (new HelpArticleLoader())->render(

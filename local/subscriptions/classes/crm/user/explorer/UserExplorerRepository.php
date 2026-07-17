@@ -5,6 +5,8 @@ namespace local_subscriptions\crm\user\explorer;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\crm\user\UserExplorerFilter;
+use local_subscriptions\crm\success\plans\domain\CustomerSuccessPlanStatus;
+use local_subscriptions\crm\success\plans\domain\CustomerSuccessPlanStepStatus;
 
 final class UserExplorerRepository {
 
@@ -180,7 +182,20 @@ final class UserExplorerRepository {
                 COALESCE(
                     purchases.purchasecount,
                     0
-                ) AS purchasecount
+                ) AS purchasecount,
+
+                COALESCE(
+                    successplans.openplancount,
+                    0
+                ) AS customer_success_open_count,
+
+                COALESCE(
+                    successplans.blockedstepcount,
+                    0
+                ) AS customer_success_blocked_count,
+
+                successplans.highestpriority
+                    AS customer_success_highest_priority
 
                 {$inboxselect}
 
@@ -200,6 +215,8 @@ final class UserExplorerRepository {
             {$this->digital_purchase_count_join()}
 
             {$inboxjoin}
+
+            {$this->customer_success_plan_summary_join()}
 
             {$joins}
 
@@ -569,6 +586,83 @@ final class UserExplorerRepository {
                 time() - ($activitydays * DAYSECS);
         }
 
+        if (
+            $criteria->hascustomer_success_plan !==
+            UserExplorerCriteria::PRESENCE_ALL
+        ) {
+            [$openinsql, $openparams] =
+                $DB->get_in_or_equal(
+                    CustomerSuccessPlanStatus::open(),
+                    SQL_PARAMS_NAMED,
+                    'explorercsopen'
+                );
+
+            $exists = "
+                EXISTS (
+                    SELECT 1
+                    FROM {local_subscriptions_cs_plan}
+                        filteredcsplan
+                    WHERE filteredcsplan.userid = u.id
+                    AND filteredcsplan.status {$openinsql}
+                )
+            ";
+
+            $conditions[] =
+                $criteria->hascustomer_success_plan ===
+                UserExplorerCriteria::PRESENCE_YES
+                    ? $exists
+                    : "NOT ({$exists})";
+
+            $params += $openparams;
+        }
+
+        if (
+            $criteria->customer_success_plan_blocked !==
+            UserExplorerCriteria::PRESENCE_ALL
+        ) {
+            $exists = "
+                EXISTS (
+                    SELECT 1
+                    FROM {local_subscriptions_cs_plan}
+                        filteredblockedplan
+                    JOIN {local_subscriptions_cs_step}
+                        filteredblockedstep
+                        ON filteredblockedstep.planid =
+                        filteredblockedplan.id
+                    WHERE filteredblockedplan.userid = u.id
+                    AND filteredblockedstep.status =
+                        :explorercsblocked
+                )
+            ";
+
+            $conditions[] =
+                $criteria->customer_success_plan_blocked ===
+                UserExplorerCriteria::PRESENCE_YES
+                    ? $exists
+                    : "NOT ({$exists})";
+
+            $params['explorercsblocked'] =
+                CustomerSuccessPlanStepStatus::BLOCKED;
+        }
+
+        if (
+            $criteria->customer_success_plan_status !== ''
+        ) {
+            $conditions[] = "
+                EXISTS (
+                    SELECT 1
+                    FROM {local_subscriptions_cs_plan}
+                        filteredcsstatus
+                    WHERE filteredcsstatus.userid = u.id
+                    AND filteredcsstatus.status =
+                        :explorercsstatus
+                )
+            ";
+
+            $params['explorercsstatus'] =
+                $criteria->customer_success_plan_status;
+        }
+
         return [
             $joins,
             implode(' AND ', $conditions),
@@ -649,6 +743,99 @@ final class UserExplorerRepository {
             GROUP BY contact.matcheduserid
             ) inbox
               ON inbox.matcheduserid = u.id
+        ";
+    }
+
+    private function customer_success_plan_summary_join(): string {
+        return "
+            LEFT JOIN (
+                SELECT
+                    planmetrics.userid,
+                    planmetrics.openplancount,
+                    COALESCE(
+                        blockedmetrics.blockedstepcount,
+                        0
+                    ) AS blockedstepcount,
+                    planmetrics.highestpriority
+
+                FROM (
+                    SELECT
+                        p.userid,
+
+                        COUNT(
+                            DISTINCT CASE
+                                WHEN p.status IN (
+                                    'draft',
+                                    'active',
+                                    'paused'
+                                )
+                                THEN p.id
+                                ELSE NULL
+                            END
+                        ) AS openplancount,
+
+                        CASE
+                            MIN(
+                                CASE
+                                    WHEN p.status IN (
+                                        'draft',
+                                        'active',
+                                        'paused'
+                                    )
+                                    THEN
+                                        CASE p.priority
+                                            WHEN 'critical' THEN 1
+                                            WHEN 'urgent' THEN 2
+                                            WHEN 'high' THEN 3
+                                            WHEN 'normal' THEN 4
+                                            WHEN 'low' THEN 5
+                                            ELSE 6
+                                        END
+                                    ELSE 6
+                                END
+                            )
+                            WHEN 1 THEN 'critical'
+                            WHEN 2 THEN 'urgent'
+                            WHEN 3 THEN 'high'
+                            WHEN 4 THEN 'normal'
+                            WHEN 5 THEN 'low'
+                            ELSE NULL
+                        END AS highestpriority
+
+                    FROM {local_subscriptions_cs_plan} p
+
+                    GROUP BY p.userid
+                ) planmetrics
+
+                LEFT JOIN (
+                    SELECT
+                        blockedplan.userid,
+                        COUNT(
+                            DISTINCT blockedstep.id
+                        ) AS blockedstepcount
+
+                    FROM {local_subscriptions_cs_plan}
+                        blockedplan
+
+                    JOIN {local_subscriptions_cs_step}
+                        blockedstep
+                    ON blockedstep.planid =
+                        blockedplan.id
+
+                    WHERE blockedplan.status IN (
+                        'draft',
+                        'active',
+                        'paused'
+                    )
+                    AND blockedstep.status =
+                        'blocked'
+
+                    GROUP BY blockedplan.userid
+                ) blockedmetrics
+                ON blockedmetrics.userid =
+                    planmetrics.userid
+            ) successplans
+            ON successplans.userid = u.id
         ";
     }
 

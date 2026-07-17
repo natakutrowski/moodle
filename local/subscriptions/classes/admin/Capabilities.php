@@ -23,6 +23,7 @@ final class Capabilities {
     public const MANAGE_WORK_ITEMS = 'local/subscriptions:manage_work_items';
 
     public const MANAGE_WORK_CONFIGURATION = 'local/subscriptions:manage_work_configuration';
+    public const USE_CRM_ASSISTANT_AI = 'local/subscriptions:use_crm_assistant_ai';
 
     public static function can_view_users(?\context $context = null): bool {
         $context = $context ?? \context_system::instance();
@@ -82,6 +83,19 @@ final class Capabilities {
 
         return has_capability(
             self::MANAGE_WORK_CONFIGURATION,
+            $context
+        );
+    }
+
+    public static function can_use_crm_assistant_ai(
+        ?\context $context = null
+    ): bool {
+        $context =
+            $context ??
+            \context_system::instance();
+
+        return has_capability(
+            self::USE_CRM_ASSISTANT_AI,
             $context
         );
     }

@@ -39,7 +39,10 @@ final class UserExplorerCriteria {
         public readonly string $haspurchase = '',
         public readonly string $activity = '',
         public readonly string $hasinbox = '',
-        public readonly string $hasinboxunread = ''
+        public readonly string $hasinboxunread = '',
+        public readonly string $hascustomer_success_plan = '',
+        public readonly string $customer_success_plan_blocked = '',
+        public readonly string $customer_success_plan_status = ''
     ) {
     }
 
@@ -137,6 +140,27 @@ final class UserExplorerCriteria {
                     '',
                     PARAM_ALPHANUMEXT
                 )
+            ),
+            self::normalize_presence(
+                optional_param(
+                    'hascustomer_success_plan',
+                    '',
+                    PARAM_ALPHANUMEXT
+                )
+            ),
+            self::normalize_presence(
+                optional_param(
+                    'customer_success_plan_blocked',
+                    '',
+                    PARAM_ALPHANUMEXT
+                )
+            ),
+            self::normalize_plan_status(
+                optional_param(
+                    'customer_success_plan_status',
+                    '',
+                    PARAM_ALPHANUMEXT
+                )
             )
         );
     }
@@ -187,6 +211,24 @@ final class UserExplorerCriteria {
             ),
             self::normalize_presence(
                 (string)($params['hasinboxunread'] ?? '')
+            ),
+            self::normalize_presence(
+                (string)(
+                    $params['hascustomer_success_plan']
+                    ?? ''
+                )
+            ),
+            self::normalize_presence(
+                (string)(
+                    $params['customer_success_plan_blocked']
+                    ?? ''
+                )
+            ),
+            self::normalize_plan_status(
+                (string)(
+                    $params['customer_success_plan_status']
+                    ?? ''
+                )
             )
         );
     }
@@ -285,7 +327,10 @@ final class UserExplorerCriteria {
             $this->haspurchase,
             $this->activity,
             self::PRESENCE_ALL,
-            self::PRESENCE_ALL
+            self::PRESENCE_ALL,
+            $this->hascustomer_success_plan,
+            $this->customer_success_plan_blocked,
+            $this->customer_success_plan_status
         );
     }
 
@@ -307,7 +352,10 @@ final class UserExplorerCriteria {
             $this->haspurchase,
             $this->activity,
             $this->hasinbox,
-            $this->hasinboxunread
+            $this->hasinboxunread,
+            $this->hascustomer_success_plan,
+            $this->customer_success_plan_blocked,
+            $this->customer_success_plan_status
         );
     }
     
@@ -340,6 +388,14 @@ final class UserExplorerCriteria {
             'activity' => $this->activity,
             'hasinbox' => $this->hasinbox,
             'hasinboxunread' => $this->hasinboxunread,
+            'hascustomer_success_plan' =>
+                $this->hascustomer_success_plan,
+
+            'customer_success_plan_blocked' =>
+                $this->customer_success_plan_blocked,
+
+            'customer_success_plan_status' =>
+                $this->customer_success_plan_status,
         ] as $key => $value) {
             if ($value !== '') {
                 $params[$key] = $value;
@@ -372,6 +428,9 @@ final class UserExplorerCriteria {
             $this->activity,
             $this->hasinbox,
             $this->hasinboxunread,
+            $this->hascustomer_success_plan,
+            $this->customer_success_plan_blocked,
+            $this->customer_success_plan_status,
             $this->scoremin,
             $this->scoremax,
             $this->riskmin,
@@ -413,6 +472,25 @@ final class UserExplorerCriteria {
             self::activity_options(),
             true
         ) ? $activity : '';
+    }
+
+    private static function normalize_plan_status(
+        string $status
+    ): string {
+        return in_array(
+            $status,
+            [
+                '',
+                'draft',
+                'active',
+                'paused',
+                'completed',
+                'cancelled',
+            ],
+            true
+        )
+            ? $status
+            : '';
     }
 
     private static function normalize_score(
