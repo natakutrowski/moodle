@@ -108,11 +108,19 @@ final class CrmIntelligenceCard implements DashboardCard {
                 'text-muted'
             );
         } else {
-            foreach ($overview->priorityProfiles as $profile) {
+            foreach (
+                $overview->priorityProfiles
+                as $profile
+            ) {
                 $user = $profile->user;
-                $score = $profile->intelligence->leadScore;
 
-                $url = new moodle_url(subscription_config::admin_user_view_page(), ['id' => $user->id]);
+                $url = new moodle_url(
+                    subscription_config::
+                        admin_user_view_page(),
+                    [
+                        'id' => $user->id,
+                    ]
+                );
 
                 $profilecontent =
                     html_writer::link(
@@ -123,21 +131,23 @@ final class CrmIntelligenceCard implements DashboardCard {
                         ]
                     );
 
-                $profilecontent .= html_writer::div(
-                    s($user->email),
-                    'text-muted small'
-                );
+                $profilecontent .=
+                    html_writer::div(
+                        s($user->email),
+                        'text-muted small'
+                    );
 
-                $profilecontent .= html_writer::div(
-                    get_string(
-                        'crm_intelligence_global_score',
-                        'local_subscriptions'
-                    ) .
-                    ': ' .
-                    $score->global() .
-                    '/100',
-                    'small mt-1'
-                );
+                $profilecontent .=
+                    html_writer::div(
+                        get_string(
+                            'crm_intelligence_global_score',
+                            'local_subscriptions'
+                        ) .
+                        ': ' .
+                        $profile->globalScore .
+                        '/100',
+                        'small mt-1'
+                    );
 
                 if (
                     $canviewinbox &&

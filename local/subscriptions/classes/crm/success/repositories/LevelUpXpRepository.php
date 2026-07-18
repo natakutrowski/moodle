@@ -4,6 +4,8 @@ namespace local_subscriptions\crm\success\repositories;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\crm\success\runtime\CustomerSuccessRepositoryProfiler;
+
 /**
  * Reads Level Up XP state and activity without depending on deprecated fields.
  */
@@ -11,24 +13,50 @@ final class LevelUpXpRepository {
 
     private const MAX_RECENT_LOGS = 20000;
 
+    /**
+     * Cached Level Up availability.
+     */
+    private ?bool $availabilitycache = null;
+
+    /**
+     * Cached XP log table availability.
+     */
+    private ?bool $logtableavailable = null;
+
+    public function __construct(
+        private readonly EnrolledCourseProvider $courseprovider =
+            new EnrolledCourseProvider()
+    ) {
+    }
+
     public function is_available(): bool {
         global $DB;
 
+        if ($this->availabilitycache !== null) {
+            return $this->availabilitycache;
+        }
+
         if (
-            \core_component::get_component_directory('block_xp') === null
+            \core_component::get_component_directory(
+                'block_xp'
+            ) === null
         ) {
+            $this->availabilitycache = false;
+
             return false;
         }
 
         $manager = $DB->get_manager();
 
-        return
+        $this->availabilitycache =
             $manager->table_exists(
                 new \xmldb_table('block_xp')
             ) &&
             $manager->table_exists(
                 new \xmldb_table('block_xp_config')
             );
+
+        return $this->availabilitycache;
     }
 
     /**
@@ -52,31 +80,70 @@ final class LevelUpXpRepository {
             );
         }
 
-        if (!$this->is_available()) {
+        $available =
+            CustomerSuccessRepositoryProfiler::measure(
+                'levelup_xp',
+                $userid,
+                'availability',
+                fn(): bool =>
+                    $this->is_available()
+            );
+
+        if (!$available) {
             return $this->empty_statistics();
         }
 
-        $enabledcourseids = $this->get_enabled_enrolled_course_ids(
-            $userid
-        );
+        $enabledcourseids =
+            CustomerSuccessRepositoryProfiler::measure(
+                'levelup_xp',
+                $userid,
+                'enabled_courses',
+                fn(): array =>
+                    $this
+                        ->get_enabled_enrolled_course_ids(
+                            $userid
+                        )
+            );
 
-        $current = $this->get_current_states(
+        $current =
+            CustomerSuccessRepositoryProfiler::measure(
+                'levelup_xp',
+                $userid,
+                'current_states',
+                fn(): array =>
+                    $this->get_current_states(
+                        $userid,
+                        $enabledcourseids
+                    )
+            );
+
+        $recent =
+            CustomerSuccessRepositoryProfiler::measure(
+                'levelup_xp',
+                $userid,
+                'recent_activity',
+                fn(): array =>
+                    $this->get_recent_activity(
+                        $userid,
+                        $measuredat
+                    )
+            );
+
+        return CustomerSuccessRepositoryProfiler::measure(
+            'levelup_xp',
             $userid,
-            $enabledcourseids
-        );
-
-        $recent = $this->get_recent_activity(
-            $userid,
-            $measuredat
-        );
-
-        return array_merge(
-            [
-                'enabled_course_count' =>
-                    count($enabledcourseids),
-            ],
-            $current,
-            $recent
+            'result_merge',
+            fn(): array =>
+                array_merge(
+                    [
+                        'enabled_course_count' =>
+                            count(
+                                $enabledcourseids
+                            ),
+                    ],
+                    $current,
+                    $recent
+                )
         );
     }
 
@@ -88,23 +155,9 @@ final class LevelUpXpRepository {
     ): array {
         global $DB;
 
-        $courses = enrol_get_users_courses(
-            $userid,
-            true,
-            'id'
-        );
-
-        $enrolledcourseids = array_values(
-            array_filter(
-                array_map(
-                    static fn(\stdClass $course): int =>
-                        (int)$course->id,
-                    $courses
-                ),
-                static fn(int $courseid): bool =>
-                    $courseid > SITEID
-            )
-        );
+        $enrolledcourseids =
+            $this->courseprovider
+                ->get_course_ids($userid);
 
         if ($enrolledcourseids === []) {
             return [];
@@ -153,11 +206,21 @@ final class LevelUpXpRepository {
         $totalxpinlevel = 0;
         $totallevelcapacity = 0;
 
+        $worldfactory = null;
+
         foreach ($courseids as $courseid) {
             try {
-                $world = \block_xp\di::get(
-                    'course_world_factory'
-                )->get_world($courseid);
+                if ($worldfactory === null) {
+                    $worldfactory =
+                        \block_xp\di::get(
+                            'course_world_factory'
+                        );
+                }
+
+                $world =
+                    $worldfactory->get_world(
+                        $courseid
+                    );
 
                 $state = $world
                     ->get_store()
@@ -228,13 +291,16 @@ final class LevelUpXpRepository {
     ): array {
         global $DB;
 
-        $manager = $DB->get_manager();
+        if ($this->logtableavailable === null) {
+            $this->logtableavailable =
+                $DB->get_manager()->table_exists(
+                    new \xmldb_table(
+                        'block_xp_logs'
+                    )
+                );
+        }
 
-        if (
-            !$manager->table_exists(
-                new \xmldb_table('block_xp_logs')
-            )
-        ) {
+        if (!$this->logtableavailable) {
             return [
                 'xp_7d' => 0,
                 'xp_30d' => 0,

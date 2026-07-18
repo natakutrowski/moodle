@@ -9,6 +9,7 @@ use local_subscriptions\crm\success\collection\SuccessMetric;
 use local_subscriptions\crm\success\collection\SuccessMetricCollection;
 use local_subscriptions\crm\success\contracts\SuccessCollectorInterface;
 use local_subscriptions\crm\success\contracts\SuccessCollectorRegistryInterface;
+use local_subscriptions\crm\intelligence\runtime\CrmComputationProfiler;
 
 /**
  * Registry and execution coordinator for Customer Success collectors.
@@ -109,14 +110,43 @@ final class SuccessCollectorRegistry implements
 
         foreach ($this->collectors as $key => $collector) {
             try {
-                if (!$collector->is_available()) {
+                $availabilityprofile =
+                    CrmComputationProfiler::start();
+
+                $available =
+                    $collector->is_available();
+
+                CrmComputationProfiler::finish(
+                    runid: 'customer_success',
+                    userid: $userid,
+                    stage:
+                        'collector_' .
+                        $key .
+                        '_availability',
+                    start: $availabilityprofile
+                );
+
+                if (!$available) {
                     $unavailable[] = $key;
                     continue;
                 }
 
+                $collectionprofile =
+                    CrmComputationProfiler::start();
+
                 $collected = $collector->collect(
                     $userid,
                     $measuredat
+                );
+
+                CrmComputationProfiler::finish(
+                    runid: 'customer_success',
+                    userid: $userid,
+                    stage:
+                        'collector_' .
+                        $key .
+                        '_collect',
+                    start: $collectionprofile
                 );
 
                 if (

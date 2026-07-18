@@ -11,23 +11,54 @@ defined('MOODLE_INTERNAL') || die();
  */
 final class PoodllLearningRepository {
 
+    /**
+     * Runtime availability cache.
+     *
+     * @var array<string,bool>
+     */
+    private array $availabilitycache = [];
+
     public function is_module_available(
         string $component,
         string $tablename
     ): bool {
         global $DB;
 
+        $cachekey =
+            $component . ':' . $tablename;
+
         if (
-            \core_component::get_component_directory($component) === null
+            array_key_exists(
+                $cachekey,
+                $this->availabilitycache
+            )
         ) {
+            return $this
+                ->availabilitycache[$cachekey];
+        }
+
+        if (
+            \core_component::get_component_directory(
+                $component
+            ) === null
+        ) {
+            $this->availabilitycache[$cachekey] =
+                false;
+
             return false;
         }
 
-        return $DB->get_manager()->table_exists(
-            new \xmldb_table($tablename)
-        );
-    }
+        $available =
+            $DB->get_manager()->table_exists(
+                new \xmldb_table($tablename)
+            );
 
+        $this->availabilitycache[$cachekey] =
+            $available;
+
+        return $available;
+    }
+    
     /**
      * @return array<string,int|float|null>
      */
@@ -296,109 +327,218 @@ final class PoodllLearningRepository {
     ): array {
         global $DB;
 
-        $this->validate($userid, $measuredat);
+        $this->validate(
+            $userid,
+            $measuredat
+        );
 
-        $from7days = $measuredat - (7 * DAYSECS);
-        $from30days = $measuredat - (30 * DAYSECS);
+        $from7days =
+            $measuredat - (7 * DAYSECS);
 
-        $seen = $DB->get_record_sql(
-            "
-                SELECT
-                    COUNT(id) AS seenevents,
-                    COUNT(DISTINCT termid) AS distinctterms,
-                    SUM(
-                        CASE WHEN timecreated >= :from7days
-                        THEN 1 ELSE 0 END
-                    ) AS seen7d,
-                    SUM(
-                        CASE WHEN timecreated >= :from30days
-                        THEN 1 ELSE 0 END
-                    ) AS seen30d,
-                    MAX(timecreated) AS lastseenat
-                  FROM {wordcards_seen}
-                 WHERE userid = :userid
-            ",
+        $from30days =
+            $measuredat - (30 * DAYSECS);
+
+        $sql = "
+            SELECT
+                seen.seenevents,
+                seen.distinctterms,
+                seen.seen7d,
+                seen.seen30d,
+                seen.lastseenat,
+
+                associations.associationcount,
+                associations.successcount,
+                associations.failcount,
+                associations.lastsuccessat,
+                associations.lastfailat,
+
+                progress.modulecount,
+                progress.averagetotalgrade,
+                progress.besttotalgrade,
+                progress.lastprogressat
+
+              FROM (
+                    SELECT
+                        COUNT(id) AS seenevents,
+                        COUNT(DISTINCT termid)
+                            AS distinctterms,
+
+                        COALESCE(SUM(
+                            CASE
+                                WHEN timecreated >=
+                                    :seenfrom7days
+                                THEN 1
+                                ELSE 0
+                            END
+                        ), 0) AS seen7d,
+
+                        COALESCE(SUM(
+                            CASE
+                                WHEN timecreated >=
+                                    :seenfrom30days
+                                THEN 1
+                                ELSE 0
+                            END
+                        ), 0) AS seen30d,
+
+                        COALESCE(
+                            MAX(timecreated),
+                            0
+                        ) AS lastseenat
+
+                      FROM {wordcards_seen}
+                     WHERE userid = :seenuserid
+                   ) seen
+
+        CROSS JOIN (
+                    SELECT
+                        COUNT(id)
+                            AS associationcount,
+
+                        COALESCE(
+                            SUM(successcount),
+                            0
+                        ) AS successcount,
+
+                        COALESCE(
+                            SUM(failcount),
+                            0
+                        ) AS failcount,
+
+                        COALESCE(
+                            MAX(lastsuccess),
+                            0
+                        ) AS lastsuccessat,
+
+                        COALESCE(
+                            MAX(lastfail),
+                            0
+                        ) AS lastfailat
+
+                      FROM {wordcards_associations}
+                     WHERE userid =
+                        :associationsuserid
+                   ) associations
+
+        CROSS JOIN (
+                    SELECT
+                        COUNT(DISTINCT modid)
+                            AS modulecount,
+
+                        AVG(totalgrade)
+                            AS averagetotalgrade,
+
+                        MAX(totalgrade)
+                            AS besttotalgrade,
+
+                        COALESCE(
+                            MAX(timecreated),
+                            0
+                        ) AS lastprogressat
+
+                      FROM {wordcards_progress}
+                     WHERE userid =
+                        :progressuserid
+                   ) progress
+        ";
+
+        $record = $DB->get_record_sql(
+            $sql,
             [
-                'userid' => $userid,
-                'from7days' => $from7days,
-                'from30days' => $from30days,
+                'seenuserid' =>
+                    $userid,
+
+                'seenfrom7days' =>
+                    $from7days,
+
+                'seenfrom30days' =>
+                    $from30days,
+
+                'associationsuserid' =>
+                    $userid,
+
+                'progressuserid' =>
+                    $userid,
             ]
         );
 
-        $associations = $DB->get_record_sql(
-            "
-                SELECT
-                    COUNT(id) AS associationcount,
-                    SUM(successcount) AS successcount,
-                    SUM(failcount) AS failcount,
-                    MAX(lastsuccess) AS lastsuccessat,
-                    MAX(lastfail) AS lastfailat
-                  FROM {wordcards_associations}
-                 WHERE userid = :userid
-            ",
-            ['userid' => $userid]
-        );
+        $successcount =
+            (int)($record->successcount ?? 0);
 
-        $progress = $DB->get_record_sql(
-            "
-                SELECT
-                    COUNT(DISTINCT modid) AS modulecount,
-                    AVG(totalgrade) AS averagetotalgrade,
-                    MAX(totalgrade) AS besttotalgrade,
-                    MAX(timecreated) AS lastprogressat
-                  FROM {wordcards_progress}
-                 WHERE userid = :userid
-            ",
-            ['userid' => $userid]
-        );
+        $failcount =
+            (int)($record->failcount ?? 0);
 
-        $successcount = (int)($associations->successcount ?? 0);
-        $failcount = (int)($associations->failcount ?? 0);
-        $interactions = $successcount + $failcount;
+        $interactions =
+            $successcount + $failcount;
 
-        $successrate = $interactions > 0
-            ? round(
-                ($successcount / $interactions) * 100,
-                2
-            )
-            : null;
+        $successrate =
+            $interactions > 0
+                ? round(
+                    (
+                        $successcount /
+                        $interactions
+                    ) * 100,
+                    2
+                )
+                : null;
 
         return [
             'seen_event_count' =>
-                (int)($seen->seenevents ?? 0),
+                (int)($record->seenevents ?? 0),
+
             'distinct_term_count' =>
-                (int)($seen->distinctterms ?? 0),
+                (int)($record->distinctterms ?? 0),
+
             'seen_7d' =>
-                (int)($seen->seen7d ?? 0),
+                (int)($record->seen7d ?? 0),
+
             'seen_30d' =>
-                (int)($seen->seen30d ?? 0),
+                (int)($record->seen30d ?? 0),
+
             'last_seen_at' =>
-                (int)($seen->lastseenat ?? 0),
+                (int)($record->lastseenat ?? 0),
+
             'association_count' =>
-                (int)($associations->associationcount ?? 0),
-            'success_count' => $successcount,
-            'fail_count' => $failcount,
-            'interaction_count' => $interactions,
-            'success_rate_percentage' => $successrate,
+                (int)($record->associationcount ?? 0),
+
+            'success_count' =>
+                $successcount,
+
+            'fail_count' =>
+                $failcount,
+
+            'interaction_count' =>
+                $interactions,
+
+            'success_rate_percentage' =>
+                $successrate,
+
             'last_success_at' =>
-                (int)($associations->lastsuccessat ?? 0),
+                (int)($record->lastsuccessat ?? 0),
+
             'last_fail_at' =>
-                (int)($associations->lastfailat ?? 0),
+                (int)($record->lastfailat ?? 0),
+
             'module_count' =>
-                (int)($progress->modulecount ?? 0),
+                (int)($record->modulecount ?? 0),
+
             'average_total_grade' =>
-                $progress->averagetotalgrade !== null
+                $record->averagetotalgrade !== null
                     ? round(
-                        (float)$progress->averagetotalgrade,
+                        (float)$record
+                            ->averagetotalgrade,
                         2
                     )
                     : null,
+
             'best_total_grade' =>
-                $progress->besttotalgrade !== null
-                    ? (int)$progress->besttotalgrade
+                $record->besttotalgrade !== null
+                    ? (int)$record
+                        ->besttotalgrade
                     : null,
+
             'last_progress_at' =>
-                (int)($progress->lastprogressat ?? 0),
+                (int)($record->lastprogressat ?? 0),
         ];
     }
 

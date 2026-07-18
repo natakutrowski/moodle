@@ -4,36 +4,53 @@ namespace local_subscriptions\crm\intelligence\priority;
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\crm\intelligence\dashboard\CrmIntelligenceDashboardRepository;
-use local_subscriptions\crm\intelligence\core\UserIntelligenceBuilder;
 use local_subscriptions\crm\intelligence\core\CrmIntelligenceLimits;
 
+/**
+ * Builds Dashboard priorities from persistent recommendations.
+ *
+ * This read-side builder must never invoke:
+ * - UserIntelligenceBuilder;
+ * - CustomerSuccessRuntime;
+ * - RecommendationEngine;
+ * - CRM collectors.
+ */
 final class DailyPriorityBuilder {
 
     public function __construct(
-        private readonly CrmIntelligenceDashboardRepository $users = new CrmIntelligenceDashboardRepository(),
-        private readonly UserIntelligenceBuilder $builder = new UserIntelligenceBuilder()
+        private readonly DailyPriorityRepository $repository =
+            new DailyPriorityRepository()
     ) {
     }
 
-    public function build(int $limit = CrmIntelligenceLimits::DASHBOARD_PRIORITY_USERS): array {
+    /**
+     * Returns the highest active persisted recommendations.
+     *
+     * @param int $limit Maximum number of priorities.
+     * @return DailyPriority[]
+     */
+    public function build(
+        int $limit =
+            CrmIntelligenceLimits::DASHBOARD_PRIORITIES
+    ): array {
+        $limit = max(1, min(100, $limit));
+
         $priorities = [];
 
-        foreach ($this->users->get_candidate_users($limit) as $user) {
-            $intelligence = $this->builder->build_for_user($user, false);
-
-            foreach ($intelligence->recommendations as $recommendation) {
-                $priorities[] = new DailyPriority(
-                    (int)$user->id,
-                    $recommendation->key,
-                    $recommendation->priority,
-                    $recommendation->action?->action ?? 'open_user_profile'
-                );
-            }
+        foreach (
+            $this->repository
+                ->get_active_user_priorities($limit)
+            as $record
+        ) {
+            $priorities[] = new DailyPriority(
+                userid: (int)$record->userid,
+                key: (string)$record->recommendationkey,
+                score: (int)$record->priority,
+                action: 'open_user_profile',
+                displayname: fullname($record)
+            );
         }
 
-        usort($priorities, static fn($a, $b): int => $b->score <=> $a->score);
-
-        return array_slice($priorities, 0, CrmIntelligenceLimits::DASHBOARD_PRIORITIES);
+        return $priorities;
     }
 }

@@ -10,8 +10,20 @@ final class CrmScoreHistoryRepository {
 
     private const TABLE = 'local_subscriptions_crm_score';
 
-    public function save(int $userid, UserIntelligence $intelligence): int {
+    public function save(
+        int $userid,
+        UserIntelligence $intelligence,
+        ?int $timecreated = null
+    ): int {
         global $DB;
+
+        $timecreated = $timecreated ?? time();
+
+        if ($timecreated <= 0) {
+            throw new \InvalidArgumentException(
+                'CRM score snapshot timestamp must be greater than zero.'
+            );
+        }
 
         $score = $intelligence->leadScore;
 
@@ -25,7 +37,7 @@ final class CrmScoreHistoryRepository {
             'segmentsjson' => json_encode(array_map(static fn($segment) => $segment->key, $intelligence->segments)),
             'opportunitiesjson' => json_encode(array_map(static fn($opportunity) => $opportunity->key, $intelligence->opportunities)),
             'recommendationsjson' => json_encode(array_map(static fn($recommendation) => $recommendation->key, $intelligence->recommendations)),
-            'timecreated' => time(),
+            'timecreated' => $timecreated,
         ];
 
         return (int)$DB->insert_record(self::TABLE, $record);

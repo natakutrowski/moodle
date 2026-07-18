@@ -4063,3 +4063,9 @@ $string['crm_assistant_evidence_value_learning_low_progress'] =
 
 $string['crm_assistant_evidence_value_activity_inactive_14d'] =
     '{$a} day(s) since the last activity';
+
+$string['crm_daily_priorities_item_fallback'] =
+    'Recommended CRM action';
+
+$string['crm_intelligence_alert_fallback'] =
+    'CRM alert to review';

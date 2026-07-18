@@ -5,24 +5,44 @@ namespace local_subscriptions\crm\intelligence\dashboard;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\crm\intelligence\core\CrmIntelligenceLimits;
-use local_subscriptions\crm\intelligence\core\UserIntelligenceBuilder;
 use local_subscriptions\crm\intelligence\inbox\CrmIntelligenceInboxRepository;
 
+/**
+ * Builds the CRM Intelligence Dashboard from persisted snapshots.
+ *
+ * This builder belongs to the read side. It must never invoke:
+ * - UserIntelligenceBuilder;
+ * - CustomerSuccessRuntime;
+ * - RecommendationEngine;
+ * - CRM collectors.
+ */
 final class CrmIntelligenceDashboardBuilder {
 
     public function __construct(
-        private readonly CrmIntelligenceDashboardRepository $repository = new CrmIntelligenceDashboardRepository(),
-        private readonly UserIntelligenceBuilder $userIntelligenceBuilder = new UserIntelligenceBuilder(),
-        private readonly CrmIntelligenceInboxRepository $inboxRepository = new CrmIntelligenceInboxRepository()
+        private readonly CrmIntelligenceDashboardRepository
+            $repository =
+                new CrmIntelligenceDashboardRepository(),
+        private readonly CrmIntelligenceInboxRepository
+            $inboxRepository =
+                new CrmIntelligenceInboxRepository()
     ) {
     }
 
+    /**
+     * Builds the Dashboard Intelligence overview.
+     *
+     * @param int $limit Maximum number of latest user snapshots.
+     * @param bool $includeinbox Include grouped Inbox summaries.
+     * @return CrmIntelligenceDashboardOverview
+     */
     public function build(
         int $limit =
             CrmIntelligenceLimits::DASHBOARD_USERS,
         bool $includeinbox = false
     ): CrmIntelligenceDashboardOverview {
-        $users = $this->repository->get_candidate_users($limit);
+        $snapshots =
+            $this->repository
+                ->get_latest_snapshots($limit);
 
         $hotleads = 0;
         $atrisk = 0;
@@ -31,50 +51,102 @@ final class CrmIntelligenceDashboardBuilder {
         $upgradeopportunities = 0;
         $priorityprofiles = [];
 
-        foreach ($users as $user) {
-            $intelligence = $this->userIntelligenceBuilder->build_for_user($user, false);
+        foreach ($snapshots as $snapshot) {
+            $segments = self::decode_keys(
+                $snapshot->segmentsjson ?? null
+            );
 
-            foreach ($intelligence->segments as $segment) {
-                if ($segment->key === 'hot_lead') {
-                    $hotleads++;
-                }
+            $opportunities = self::decode_keys(
+                $snapshot->opportunitiesjson ?? null
+            );
 
-                if ($segment->key === 'at_risk') {
-                    $atrisk++;
-                }
+            $recommendations = self::decode_keys(
+                $snapshot->recommendationsjson ?? null
+            );
 
-                if ($segment->key === 'vip') {
-                    $vip++;
-                }
+            if (in_array('hot_lead', $segments, true)) {
+                $hotleads++;
             }
 
-            foreach ($intelligence->opportunities as $opportunity) {
-                if ($opportunity->key === 'trial_to_purchase') {
-                    $trialopportunities++;
-                }
+            if (in_array('at_risk', $segments, true)) {
+                $atrisk++;
+            }
 
-                if ($opportunity->key === 'upgrade_subscription') {
-                    $upgradeopportunities++;
-                }
+            if (in_array('vip', $segments, true)) {
+                $vip++;
             }
 
             if (
-                $intelligence->leadScore->global() >= 40 ||
-                !empty($intelligence->recommendations) ||
-                !empty($intelligence->opportunities)
+                in_array(
+                    'trial_to_purchase',
+                    $opportunities,
+                    true
+                )
             ) {
-                $priorityprofiles[] = new CrmIntelligenceDashboardProfile($user, $intelligence);
+                $trialopportunities++;
+            }
+
+            if (
+                in_array(
+                    'upgrade_subscription',
+                    $opportunities,
+                    true
+                )
+            ) {
+                $upgradeopportunities++;
+            }
+
+            $globalscore =
+                (int)$snapshot->globalscore;
+
+            if (
+                $globalscore >= 40 ||
+                $recommendations ||
+                $opportunities
+            ) {
+                $priorityprofiles[] =
+                    new CrmIntelligenceDashboardProfile(
+                        user: self::user_from_snapshot(
+                            $snapshot
+                        ),
+                        globalScore: $globalscore,
+                        snapshotTime:
+                            (int)$snapshot->snapshottime
+                    );
             }
         }
 
-        usort($priorityprofiles, static function($a, $b): int {
-            return $b->intelligence->leadScore->global() <=> $a->intelligence->leadScore->global();
-        });
+        /*
+         * The repository already orders snapshots by global score,
+         * but the explicit sort protects the read model if the
+         * repository ordering changes later.
+         */
+        usort(
+            $priorityprofiles,
+            static function(
+                CrmIntelligenceDashboardProfile $left,
+                CrmIntelligenceDashboardProfile $right
+            ): int {
+                if (
+                    $left->globalScore ===
+                    $right->globalScore
+                ) {
+                    return
+                        $right->snapshotTime <=>
+                        $left->snapshotTime;
+                }
+
+                return
+                    $right->globalScore <=>
+                    $left->globalScore;
+            }
+        );
 
         $priorityprofiles = array_slice(
             $priorityprofiles,
             0,
-            CrmIntelligenceLimits::DASHBOARD_PROFILES
+            CrmIntelligenceLimits::
+                DASHBOARD_PROFILES
         );
 
         if (
@@ -99,32 +171,130 @@ final class CrmIntelligenceDashboardBuilder {
                     static function(
                         CrmIntelligenceDashboardProfile
                             $profile
-                    ) use ($inboxbyuser):
-                        CrmIntelligenceDashboardProfile {
+                    ) use (
+                        $inboxbyuser
+                    ): CrmIntelligenceDashboardProfile {
                         $userid =
                             (int)$profile->user->id;
 
                         return new
                             CrmIntelligenceDashboardProfile(
-                                $profile->user,
-                                $profile->intelligence,
-                                $inboxbyuser[
-                                    $userid
-                                ] ?? null
+                                user: $profile->user,
+                                globalScore:
+                                    $profile->globalScore,
+                                snapshotTime:
+                                    $profile->snapshotTime,
+                                inbox:
+                                    $inboxbyuser[
+                                        $userid
+                                    ] ?? null
                             );
                     },
                     $priorityprofiles
                 );
         }
-        
+
         return new CrmIntelligenceDashboardOverview(
-            count($users),
-            $hotleads,
-            $atrisk,
-            $vip,
-            $trialopportunities,
-            $upgradeopportunities,
-            $priorityprofiles
+            analysedUsers: count($snapshots),
+            hotLeads: $hotleads,
+            atRisk: $atrisk,
+            vip: $vip,
+            trialOpportunities:
+                $trialopportunities,
+            upgradeOpportunities:
+                $upgradeopportunities,
+            priorityProfiles:
+                $priorityprofiles
         );
+    }
+
+    /**
+     * Safely decodes a JSON list of technical keys.
+     *
+     * Invalid legacy JSON is treated as an empty list. A malformed
+     * snapshot must not break the whole Dashboard.
+     *
+     * @param mixed $json JSON source.
+     * @return string[]
+     */
+    private static function decode_keys(
+        mixed $json
+    ): array {
+        if (
+            !is_string($json) ||
+            trim($json) === ''
+        ) {
+            return [];
+        }
+
+        try {
+            $decoded = json_decode(
+                $json,
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+        } catch (\JsonException) {
+            return [];
+        }
+
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        $keys = [];
+
+        foreach ($decoded as $value) {
+            if (
+                is_string($value) &&
+                $value !== ''
+            ) {
+                $keys[] = $value;
+            }
+        }
+
+        return array_values(
+            array_unique($keys)
+        );
+    }
+
+    /**
+     * Creates the user presentation record from a joined snapshot.
+     *
+     * @param \stdClass $snapshot Joined snapshot record.
+     * @return \stdClass
+     */
+    private static function user_from_snapshot(
+        \stdClass $snapshot
+    ): \stdClass {
+        return (object)[
+            'id' => (int)$snapshot->userid,
+            'firstname' =>
+                (string)$snapshot->firstname,
+            'lastname' =>
+                (string)$snapshot->lastname,
+            'firstnamephonetic' =>
+                (string)(
+                    $snapshot->firstnamephonetic
+                    ?? ''
+                ),
+            'lastnamephonetic' =>
+                (string)(
+                    $snapshot->lastnamephonetic
+                    ?? ''
+                ),
+            'middlename' =>
+                (string)(
+                    $snapshot->middlename
+                    ?? ''
+                ),
+            'alternatename' =>
+                (string)(
+                    $snapshot->alternatename
+                    ?? ''
+                ),
+            'email' =>
+                (string)$snapshot->email,
+        ];
     }
 }

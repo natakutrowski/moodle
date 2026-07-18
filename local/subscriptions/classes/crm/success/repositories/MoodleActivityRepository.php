@@ -4,6 +4,8 @@ namespace local_subscriptions\crm\success\repositories;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\crm\success\runtime\CustomerSuccessRepositoryProfiler;
+
 /**
  * Reads native Moodle activity data for Customer Success collectors.
  */
@@ -43,7 +45,7 @@ final class MoodleActivityRepository {
         );
     }
 
-    /**
+     /**
      * Returns normalized activity statistics for one user.
      *
      * @return array<string,int|float>
@@ -64,21 +66,44 @@ final class MoodleActivityRepository {
             );
         }
 
-        if (!$this->is_available()) {
+        $available =
+            CustomerSuccessRepositoryProfiler::measure(
+                'moodle_activity',
+                $userid,
+                'availability',
+                fn(): bool =>
+                    $this->is_available()
+            );
+
+        if (!$available) {
             return $this->empty_statistics();
         }
 
-        $from30days = $measuredat - (30 * DAYSECS);
+        $from30days =
+            $measuredat - (30 * DAYSECS);
 
-        $events = $this->get_recent_events(
+        $events =
+            CustomerSuccessRepositoryProfiler::measure(
+                'moodle_activity',
+                $userid,
+                'recent_events_query',
+                fn(): array =>
+                    $this->get_recent_events(
+                        $userid,
+                        $from30days,
+                        $measuredat
+                    )
+            );
+
+        return CustomerSuccessRepositoryProfiler::measure(
+            'moodle_activity',
             $userid,
-            $from30days,
-            $measuredat
-        );
-
-        return $this->build_statistics(
-            $events,
-            $measuredat
+            'statistics_build',
+            fn(): array =>
+                $this->build_statistics(
+                    $events,
+                    $measuredat
+                )
         );
     }
 

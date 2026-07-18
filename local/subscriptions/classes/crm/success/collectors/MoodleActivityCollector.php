@@ -18,7 +18,10 @@ final class MoodleActivityCollector implements
 
     public function __construct(
         private readonly MoodleActivityRepository $repository =
-            new MoodleActivityRepository()
+            new MoodleActivityRepository(),
+
+        private readonly ?int $userlastaccess =
+            null
     ) {
     }
 
@@ -35,7 +38,15 @@ final class MoodleActivityCollector implements
         int $measuredat
     ): SuccessMetricCollection {
         $lastaccess =
-            $this->repository->get_user_last_access($userid);
+            $this->userlastaccess !== null
+                ? max(
+                    0,
+                    $this->userlastaccess
+                )
+                : $this->repository
+                    ->get_user_last_access(
+                        $userid
+                    );
 
         $statistics =
             $this->repository->get_activity_statistics(

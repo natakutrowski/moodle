@@ -18,7 +18,8 @@ final class CommercialLoyaltyCollector implements
 
     public function __construct(
         private readonly CommercialLoyaltyRepository $repository =
-            new CommercialLoyaltyRepository()
+            new CommercialLoyaltyRepository(),
+        private readonly ?string $useremail = null
     ) {
     }
 
@@ -35,10 +36,20 @@ final class CommercialLoyaltyCollector implements
         int $measuredat
     ): SuccessMetricCollection {
 
+        $email = trim(
+            (string)$this->useremail
+        );
+
+        if ($email === '') {
+            $email =
+                $this->repository
+                    ->get_user_email($userid);
+        }
+
         $statistics =
             $this->repository->get_statistics(
                 $userid,
-                $this->repository->get_user_email($userid),
+                $email,
                 $measuredat
             );
 

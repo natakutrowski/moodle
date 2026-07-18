@@ -37,9 +37,19 @@ final class CrmIntelligenceAlertsCard implements DashboardCard {
         foreach ($alerts as $alert) {
             $key = 'crm_intelligence_alert_' . clean_param($alert->key, PARAM_ALPHANUMEXT);
 
-            $label = get_string_manager()->string_exists($key, 'local_subscriptions')
-                ? get_string($key, 'local_subscriptions')
-                : $alert->key;
+            $label =
+                get_string_manager()->string_exists(
+                    $key,
+                    'local_subscriptions'
+                )
+                    ? get_string(
+                        $key,
+                        'local_subscriptions'
+                    )
+                    : get_string(
+                        'crm_intelligence_alert_fallback',
+                        'local_subscriptions'
+                    );
 
             $classes = [
                 'danger' => 'border-danger',

@@ -4,6 +4,8 @@ namespace local_subscriptions\crm\success\repositories;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\crm\success\runtime\CustomerSuccessRepositoryProfiler;
+
 /**
  * Reads commercial and loyalty facts from subscriptions and payments.
  *
@@ -48,55 +50,104 @@ final class CommercialLoyaltyRepository {
         );
 
         $subscriptions =
-            $this->get_subscription_statistics(
+            CustomerSuccessRepositoryProfiler::measure(
+                'commercial_loyalty',
                 $userid,
-                $measuredat
+                'subscription_statistics',
+                fn(): array =>
+                    $this->get_subscription_statistics(
+                        $userid,
+                        $measuredat
+                    )
             );
 
         $subscriptionpayments =
-            $this->get_subscription_payment_statistics(
+            CustomerSuccessRepositoryProfiler::measure(
+                'commercial_loyalty',
                 $userid,
-                $email,
-                $measuredat
+                'subscription_payment_statistics',
+                fn(): array =>
+                    $this->get_subscription_payment_statistics(
+                        $userid,
+                        $email,
+                        $measuredat
+                    )
             );
 
         $digitalpayments =
-            $this->get_digital_payment_statistics(
+            CustomerSuccessRepositoryProfiler::measure(
+                'commercial_loyalty',
                 $userid,
-                $email,
-                $measuredat
+                'digital_payment_statistics',
+                fn(): array =>
+                    $this->get_digital_payment_statistics(
+                        $userid,
+                        $email,
+                        $measuredat
+                    )
             );
 
-        $firstcommercialat = $this->minimum_positive([
-            (int)$subscriptions['first_subscription_at'],
-            (int)$subscriptionpayments['first_payment_at'],
-            (int)$digitalpayments['first_digital_payment_at'],
-        ]);
+        return CustomerSuccessRepositoryProfiler::measure(
+            'commercial_loyalty',
+            $userid,
+            'result_merge',
+            function () use (
+                $subscriptions,
+                $subscriptionpayments,
+                $digitalpayments,
+                $measuredat
+            ): array {
+                $firstcommercialat =
+                    $this->minimum_positive([
+                        (int)$subscriptions[
+                            'first_subscription_at'
+                        ],
+                        (int)$subscriptionpayments[
+                            'first_payment_at'
+                        ],
+                        (int)$digitalpayments[
+                            'first_digital_payment_at'
+                        ],
+                    ]);
 
-        $lastcommercialat = max(
-            (int)$subscriptions['last_subscription_at'],
-            (int)$subscriptionpayments['last_payment_at'],
-            (int)$digitalpayments['last_digital_payment_at']
-        );
+                $lastcommercialat = max(
+                    (int)$subscriptions[
+                        'last_subscription_at'
+                    ],
+                    (int)$subscriptionpayments[
+                        'last_payment_at'
+                    ],
+                    (int)$digitalpayments[
+                        'last_digital_payment_at'
+                    ]
+                );
 
-        return array_merge(
-            $subscriptions,
-            $subscriptionpayments,
-            $digitalpayments,
-            [
-                'first_commercial_at' => $firstcommercialat,
-                'last_commercial_at' => $lastcommercialat,
-                'customer_age_days' =>
-                    $firstcommercialat > 0
-                        ? max(
-                            0,
-                            (int)floor(
-                                ($measuredat - $firstcommercialat) /
-                                DAYSECS
-                            )
-                        )
-                        : null,
-            ]
+                return array_merge(
+                    $subscriptions,
+                    $subscriptionpayments,
+                    $digitalpayments,
+                    [
+                        'first_commercial_at' =>
+                            $firstcommercialat,
+
+                        'last_commercial_at' =>
+                            $lastcommercialat,
+
+                        'customer_age_days' =>
+                            $firstcommercialat > 0
+                                ? max(
+                                    0,
+                                    (int)floor(
+                                        (
+                                            $measuredat -
+                                            $firstcommercialat
+                                        ) / DAYSECS
+                                    )
+                                )
+                                : null,
+                    ]
+                );
+            }
         );
     }
 
@@ -287,28 +338,59 @@ final class CommercialLoyaltyRepository {
         global $DB;
 
         $manager = $DB->get_manager();
+
         $table = new \xmldb_table(
             'subscription_payment_request'
         );
 
-        if (!$manager->table_exists($table)) {
+        $schema = CustomerSuccessRepositoryProfiler::measure(
+            'commercial_loyalty',
+            $userid,
+            'subscription_payment_schema_detection',
+            function () use (
+                $manager,
+                $table
+            ): array {
+                if (!$manager->table_exists($table)) {
+                    return [
+                        'tableexists' => false,
+                        'hasuserid' => false,
+                        'hasemail' => false,
+                        'hasstatus' => false,
+                    ];
+                }
+
+                return [
+                    'tableexists' => true,
+
+                    'hasuserid' =>
+                        $manager->field_exists(
+                            $table,
+                            new \xmldb_field('userid')
+                        ),
+
+                    'hasemail' =>
+                        $manager->field_exists(
+                            $table,
+                            new \xmldb_field('email')
+                        ),
+
+                    'hasstatus' =>
+                        $manager->field_exists(
+                            $table,
+                            new \xmldb_field('status')
+                        ),
+                ];
+            }
+        );
+
+        if (!$schema['tableexists']) {
             return $this->empty_subscription_payment_statistics();
         }
 
-        $hasuserid = $manager->field_exists(
-            $table,
-            new \xmldb_field('userid')
-        );
-
-        $hasemail = $manager->field_exists(
-            $table,
-            new \xmldb_field('email')
-        );
-
-        $hasstatus = $manager->field_exists(
-            $table,
-            new \xmldb_field('status')
-        );
+        $hasuserid = $schema['hasuserid'];
+        $hasemail = $schema['hasemail'];
+        $hasstatus = $schema['hasstatus'];
 
         if (!$hasstatus || (!$hasuserid && !$hasemail)) {
             return $this->empty_subscription_payment_statistics();
@@ -338,11 +420,25 @@ final class CommercialLoyaltyRepository {
             $whereparts
         ) . ')';
 
-        $activityexpression =
-            $this->payment_request_activity_expression($table);
+        $expressions = CustomerSuccessRepositoryProfiler::measure(
+            'commercial_loyalty',
+            $userid,
+            'subscription_payment_expression_build',
+            fn(): array => [
+                'activity' =>
+                    $this->payment_request_activity_expression(
+                        $table
+                    ),
 
-        $paymentexpression =
-            $this->payment_request_payment_expression($table);
+                'payment' =>
+                    $this->payment_request_payment_expression(
+                        $table
+                    ),
+            ]
+        );
+
+        $activityexpression = $expressions['activity'];
+        $paymentexpression = $expressions['payment'];
 
         $sql = "
             SELECT
@@ -374,7 +470,7 @@ final class CommercialLoyaltyRepository {
                         :recentpaid,
                         :recentcompleted
                     )
-                     AND {$activityexpression} >= :from30paid
+                    AND {$activityexpression} >= :from30paid
                     THEN 1 ELSE 0
                 END), 0) AS successful30d,
 
@@ -383,7 +479,7 @@ final class CommercialLoyaltyRepository {
                         :recentfailed,
                         :recentcancelled
                     )
-                     AND {$activityexpression} >= :from30failed
+                    AND {$activityexpression} >= :from30failed
                     THEN 1 ELSE 0
                 END), 0) AS failed30d,
 
@@ -400,8 +496,8 @@ final class CommercialLoyaltyRepository {
                     ELSE 0
                 END) AS lastfailedpaymentat
 
-              FROM {subscription_payment_request}
-             WHERE {$where}
+            FROM {subscription_payment_request}
+            WHERE {$where}
         ";
 
         $params += [
@@ -423,39 +519,50 @@ final class CommercialLoyaltyRepository {
             'lastcancelled' => 'CANCELLED',
         ];
 
-        $record = $DB->get_record_sql(
-            $sql,
-            $params
+        $record = CustomerSuccessRepositoryProfiler::measure(
+            'commercial_loyalty',
+            $userid,
+            'subscription_payment_query',
+            fn(): \stdClass =>
+                $DB->get_record_sql(
+                    $sql,
+                    $params
+                )
         );
 
-        return [
-            'subscription_payment_count' =>
-                (int)($record->paymentcount ?? 0),
+        return CustomerSuccessRepositoryProfiler::measure(
+            'commercial_loyalty',
+            $userid,
+            'subscription_payment_normalization',
+            fn(): array => [
+                'subscription_payment_count' =>
+                    (int)($record->paymentcount ?? 0),
 
-            'successful_subscription_payment_count' =>
-                (int)($record->successfulcount ?? 0),
+                'successful_subscription_payment_count' =>
+                    (int)($record->successfulcount ?? 0),
 
-            'failed_subscription_payment_count' =>
-                (int)($record->failedcount ?? 0),
+                'failed_subscription_payment_count' =>
+                    (int)($record->failedcount ?? 0),
 
-            'pending_subscription_payment_count' =>
-                (int)($record->pendingcount ?? 0),
+                'pending_subscription_payment_count' =>
+                    (int)($record->pendingcount ?? 0),
 
-            'successful_subscription_payments_30d' =>
-                (int)($record->successful30d ?? 0),
+                'successful_subscription_payments_30d' =>
+                    (int)($record->successful30d ?? 0),
 
-            'failed_subscription_payments_30d' =>
-                (int)($record->failed30d ?? 0),
+                'failed_subscription_payments_30d' =>
+                    (int)($record->failed30d ?? 0),
 
-            'first_payment_at' =>
-                (int)($record->firstpaymentat ?? 0),
+                'first_payment_at' =>
+                    (int)($record->firstpaymentat ?? 0),
 
-            'last_payment_at' =>
-                (int)($record->lastpaymentat ?? 0),
+                'last_payment_at' =>
+                    (int)($record->lastpaymentat ?? 0),
 
-            'last_failed_payment_at' =>
-                (int)($record->lastfailedpaymentat ?? 0),
-        ];
+                'last_failed_payment_at' =>
+                    (int)($record->lastfailedpaymentat ?? 0),
+            ]
+        );
     }
 
     /**

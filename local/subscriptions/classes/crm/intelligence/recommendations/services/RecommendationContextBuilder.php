@@ -34,7 +34,9 @@ final class RecommendationContextBuilder {
         CrmIntelligenceSnapshot $snapshot,
         LeadScore $leadscore,
         array $opportunities = [],
-        ?int $generatedat = null
+        ?int $generatedat = null,
+        ?string $useremail = null,
+        ?int $userlastaccess = null
     ): RecommendationGenerationContext {
         if ($userid <= 0) {
             throw new \InvalidArgumentException(
@@ -51,7 +53,13 @@ final class RecommendationContextBuilder {
         }
 
         $successresult = $this->successfactory
-            ->create()
+            ->create(
+                useremail:
+                    $useremail,
+
+                userlastaccess:
+                    $userlastaccess
+            )
             ->evaluate(
                 $userid,
                 $generatedat

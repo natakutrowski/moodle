@@ -19,6 +19,7 @@ use local_subscriptions\dashboard\cards\InboxOverviewCard;
 use local_subscriptions\dashboard\cards\WorkItemOverviewCard;
 use local_subscriptions\dashboard\cards\CrmAssistantCard;
 use local_subscriptions\crm\success\plans\rendering\CustomerSuccessPlanDashboardCard;
+use local_subscriptions\dashboard\runtime\DashboardCardProfiler;
 
 final class Dashboard {
 
@@ -34,17 +35,27 @@ final class Dashboard {
         $out .= html_writer::start_div('local-subscriptions-dashboard-grid');
 
         $out .= html_writer::start_div('local-subscriptions-dashboard-main');
-        $out .= StatsCard::render($period);
+
+        $out .= self::render_card(
+            'StatsCard',
+            static fn(): string => StatsCard::render($period)
+        );        
 
         $out .= html_writer::start_div('crm-dashboard-panels-grid');
 
         $out .= html_writer::div(
-            CrmIntelligenceCard::render(),
+            self::render_card(
+                'CrmIntelligenceCard',
+                static fn(): string =>
+                    CrmIntelligenceCard::render()
+            ),
             'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
         );
 
-        $assistantcard =
-            CrmAssistantCard::render();
+        $assistantcard = self::render_card(
+            'CrmAssistantCard',
+            static fn(): string => CrmAssistantCard::render()
+        );
 
         if ($assistantcard !== '') {
             $out .= html_writer::div(
@@ -53,7 +64,10 @@ final class Dashboard {
             );
         }
 
-        $inboxcard = InboxOverviewCard::render();
+        $inboxcard = self::render_card(
+            'InboxOverviewCard',
+            static fn(): string => InboxOverviewCard::render()
+        );
 
         if ($inboxcard !== '') {
             $out .= html_writer::div(
@@ -62,7 +76,10 @@ final class Dashboard {
             );
         }
 
-        $workcard = WorkItemOverviewCard::render();
+        $workcard = self::render_card(
+            'WorkItemOverviewCard',
+            static fn(): string => WorkItemOverviewCard::render()
+        );
 
         if ($workcard !== '') {
             $out .= html_writer::div(
@@ -71,9 +88,12 @@ final class Dashboard {
             );
         }
 
-        $successplancard =
-            (new CustomerSuccessPlanDashboardCard())
-                ->render();
+        $successplancard = self::render_card(
+            'CustomerSuccessPlanDashboardCard',
+            static fn(): string =>
+                (new CustomerSuccessPlanDashboardCard())
+                    ->render()
+        );
 
         if ($successplancard !== '') {
             $out .= html_writer::div(
@@ -83,27 +103,44 @@ final class Dashboard {
         }
 
         $out .= html_writer::div(
-            AlertsCard::render(),
+            self::render_card(
+                'AlertsCard',
+                static fn(): string => AlertsCard::render()
+            ),
             'crm-dashboard-panel-slot'
         );
 
         $out .= html_writer::div(
-            CrmDailyPrioritiesCard::render(),
+            self::render_card(
+                'CrmDailyPrioritiesCard',
+                static fn(): string =>
+                    CrmDailyPrioritiesCard::render()
+            ),
             'crm-dashboard-panel-slot'
         );
 
         $out .= html_writer::div(
-            CrmFunnelCard::render(),
+            self::render_card(
+                'CrmFunnelCard',
+                static fn(): string => CrmFunnelCard::render()
+            ),
             'crm-dashboard-panel-slot'
         );
 
         $out .= html_writer::div(
-            CrmTrendsCard::render(),
+            self::render_card(
+                'CrmTrendsCard',
+                static fn(): string => CrmTrendsCard::render()
+            ),
             'crm-dashboard-panel-slot'
         );
 
         $out .= html_writer::div(
-            CrmIntelligenceAlertsCard::render(),
+            self::render_card(
+                'CrmIntelligenceAlertsCard',
+                static fn(): string =>
+                    CrmIntelligenceAlertsCard::render()
+            ),
             'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
         );
 
@@ -129,4 +166,22 @@ final class Dashboard {
         $out .= html_writer::end_div();
         return $out;
     }
+
+    /**
+     * Renders a Card through the Dashboard runtime profiler.
+     *
+     * @param string $cardname Stable technical Card name.
+     * @param callable $renderer Rendering callback.
+     * @return string
+     */
+    private static function render_card(
+        string $cardname,
+        callable $renderer
+    ): string {
+        return DashboardCardProfiler::render(
+            $cardname,
+            $renderer
+        );
+    }
+
 }

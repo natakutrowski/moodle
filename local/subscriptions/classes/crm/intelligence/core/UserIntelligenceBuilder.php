@@ -4,70 +4,52 @@ namespace local_subscriptions\crm\intelligence\core;
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\crm\intelligence\explanation\ExplanationBuilder;
-use local_subscriptions\crm\intelligence\scoring\LeadScoreEngine;
-use local_subscriptions\crm\intelligence\segmentation\SegmentEngine;
-use local_subscriptions\crm\intelligence\opportunities\OpportunityEngine;
-use local_subscriptions\crm\intelligence\recommendations\RecommendationEngine;
-use local_subscriptions\crm\intelligence\recommendations\services\RecommendationContextBuilder;
-use local_subscriptions\crm\intelligence\trends\CrmScoreTrendService;
+use local_subscriptions\crm\intelligence\runtime\CrmComputationContext;
+use local_subscriptions\crm\intelligence\runtime\CrmComputationSources;
+use local_subscriptions\crm\intelligence\runtime\CrmUserComputationService;
 
+/**
+ * Backward-compatible facade for CRM user intelligence computation.
+ *
+ * Historical consumers may continue using this builder while the actual
+ * computation is delegated to the unified runtime service.
+ */
 final class UserIntelligenceBuilder {
 
     public function __construct(
-        private readonly CrmIntelligenceRepository $repository = new CrmIntelligenceRepository(),
-        private readonly LeadScoreEngine $leadScoreEngine = new LeadScoreEngine(),
-        private readonly SegmentEngine $segmentEngine = new SegmentEngine(),
-        private readonly OpportunityEngine $opportunityEngine = new OpportunityEngine(),
-        private readonly RecommendationEngine $recommendationEngine = new RecommendationEngine(),
-        private readonly RecommendationContextBuilder $recommendationContextBuilder = new RecommendationContextBuilder(),
-        private readonly CrmScoreTrendService $trendService = new CrmScoreTrendService(),
-        private readonly ExplanationBuilder $explanationBuilder = new ExplanationBuilder()
+        private readonly CrmUserComputationService $computation =
+            new CrmUserComputationService()
     ) {
     }
 
-    public function build_for_user(\stdClass $user, bool $withtrend = true): UserIntelligence {
-        $snapshot = $this->repository->snapshot_for_user($user);
-        $score = $this->leadScoreEngine->score($snapshot);
-        $segments = $this->segmentEngine->detect($snapshot, $score);
-        $opportunities = $this->opportunityEngine->detect($snapshot, $score);
-        $recommendationcontext =
-            $this->recommendationContextBuilder->build(
-                userid: (int)$user->id,
-                snapshot: $snapshot,
-                leadscore: $score,
-                opportunities: $opportunities
+    /**
+     * Build complete CRM Intelligence for one Moodle user.
+     *
+     * @param \stdClass $user Moodle user record.
+     * @param bool $withtrend Whether the score trend should be loaded.
+     * @param int|null $generatedat Optional stable generation timestamp.
+     * @return UserIntelligence
+     */
+    public function build_for_user(
+        \stdClass $user,
+        bool $withtrend = true,
+        ?int $generatedat = null
+    ): UserIntelligence {
+        $context =
+            CrmComputationContext::create(
+                source:
+                    CrmComputationSources::
+                        LEGACY_BUILDER,
+                startedat: $generatedat
             );
 
-        $recommendationresult =
-            $this->recommendationEngine->generate(
-                $recommendationcontext
+        $result =
+            $this->computation->compute(
+                user: $user,
+                context: $context,
+                withtrend: $withtrend
             );
 
-        $recommendations =
-            $recommendationresult->recommendations;
-
-        $trend = $withtrend
-            ? $this->trendService->global_trend_for_user((int)$user->id)
-            : null;
-
-        $intelligence = new UserIntelligence(
-            $snapshot,
-            $score,
-            $segments,
-            $opportunities,
-            $recommendations,
-            $trend
-        );
-
-        return new UserIntelligence(
-            $snapshot,
-            $score,
-            $segments,
-            $opportunities,
-            $recommendations,
-            $trend,
-            $this->explanationBuilder->build($intelligence)
-        );
+        return $result->intelligence;
     }
 }

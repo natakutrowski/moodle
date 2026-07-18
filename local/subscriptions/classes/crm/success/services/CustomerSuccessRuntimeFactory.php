@@ -26,24 +26,75 @@ use local_subscriptions\crm\success\scoring\SuccessScoreEngine;
 use local_subscriptions\crm\success\scoring\SuccessScoreProfile;
 use local_subscriptions\crm\success\signals\SuccessSignalEngine;
 use local_subscriptions\crm\success\signals\SuccessSignalRuleRegistry;
+use local_subscriptions\crm\success\repositories\PoodllLearningRepository;
+use local_subscriptions\crm\success\repositories\EnrolledCourseProvider;
+use local_subscriptions\crm\success\repositories\LevelUpXpRepository;
+use local_subscriptions\crm\success\repositories\MoodleCourseProgressRepository;
 
 /**
  * Builds the default Customer Success runtime.
  */
 final class CustomerSuccessRuntimeFactory {
 
-    public function create():
-        CustomerSuccessRuntime {
+    public function create(
+        ?string $useremail = null,
+        ?int $userlastaccess = null
+    ): CustomerSuccessRuntime {
+        $courseprovider =
+            new EnrolledCourseProvider();
+
+        $courseprogressrepository =
+            new MoodleCourseProgressRepository(
+                courseprovider:
+                    $courseprovider
+            );
+
+        $leveluprepository =
+            new LevelUpXpRepository(
+                courseprovider:
+                    $courseprovider
+            );
+
+        $poodllrepository =
+            new PoodllLearningRepository();
+
         $collectors =
             new SuccessCollectorRegistry([
-                new MoodleActivityCollector(),
-                new MoodleCourseProgressCollector(),
-                new LevelUpXpCollector(),
-                new PoodllMiniLessonCollector(),
-                new PoodllReadAloudCollector(),
-                new PoodllSoloCollector(),
-                new PoodllWordCardsCollector(),
-                new CommercialLoyaltyCollector(),
+                new MoodleActivityCollector(
+                    userlastaccess:
+                        $userlastaccess
+                ),
+                new MoodleCourseProgressCollector(
+                    repository:
+                        $courseprogressrepository
+                ),
+
+                new LevelUpXpCollector(
+                    repository:
+                        $leveluprepository
+                ),
+                new PoodllMiniLessonCollector(
+                    repository:
+                        $poodllrepository
+                ),
+
+                new PoodllReadAloudCollector(
+                    repository:
+                        $poodllrepository
+                ),
+
+                new PoodllSoloCollector(
+                    repository:
+                        $poodllrepository
+                ),
+
+                new PoodllWordCardsCollector(
+                    repository:
+                        $poodllrepository
+                ),
+                new CommercialLoyaltyCollector(
+                    useremail: $useremail
+                ),
                 new SupportInboxCollector(),
                 new WorkItemSuccessCollector(),
             ]);

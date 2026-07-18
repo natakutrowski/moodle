@@ -4,9 +4,6 @@ namespace local_subscriptions\crm\intelligence\recommendations\operations\servic
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\crm\intelligence\core\CrmIntelligenceRepository;
-use local_subscriptions\crm\intelligence\opportunities\OpportunityEngine;
-use local_subscriptions\crm\intelligence\recommendations\RecommendationEngine;
 use local_subscriptions\crm\intelligence\recommendations\operations\RecommendationBatchLimits;
 use local_subscriptions\crm\intelligence\recommendations\operations\RecommendationRunStatus;
 use local_subscriptions\crm\intelligence\recommendations\operations\dto\RecommendationBatchReport;
@@ -14,10 +11,10 @@ use local_subscriptions\crm\intelligence\recommendations\operations\dto\Recommen
 use local_subscriptions\crm\intelligence\recommendations\operations\repositories\RecommendationCandidateRepository;
 use local_subscriptions\crm\intelligence\recommendations\operations\repositories\RecommendationCursorStore;
 use local_subscriptions\crm\intelligence\recommendations\operations\repositories\RecommendationRunRepository;
-use local_subscriptions\crm\intelligence\recommendations\services\RecommendationContextBuilder;
 use local_subscriptions\crm\intelligence\recommendations\services\RecommendationLifecycleService;
 use local_subscriptions\crm\intelligence\recommendations\services\RecommendationPersistenceService;
-use local_subscriptions\crm\intelligence\scoring\LeadScoreEngine;
+use local_subscriptions\crm\intelligence\runtime\CrmComputationContext;
+use local_subscriptions\crm\intelligence\runtime\CrmUserComputationService;
 
 /**
  * Executes the complete Recommendation Engine pipeline for CRM users.
@@ -31,20 +28,12 @@ final class RecommendationBatchRunner {
             new RecommendationCursorStore(),
         private readonly RecommendationRunRepository $runs =
             new RecommendationRunRepository(),
-        private readonly CrmIntelligenceRepository $intelligence =
-            new CrmIntelligenceRepository(),
-        private readonly LeadScoreEngine $scores =
-            new LeadScoreEngine(),
-        private readonly OpportunityEngine $opportunities =
-            new OpportunityEngine(),
-        private readonly RecommendationContextBuilder $contexts =
-            new RecommendationContextBuilder(),
-        private readonly RecommendationEngine $engine =
-            new RecommendationEngine(),
         private readonly RecommendationPersistenceService $persistence =
             new RecommendationPersistenceService(),
         private readonly RecommendationLifecycleService $lifecycle =
-            new RecommendationLifecycleService()
+            new RecommendationLifecycleService(),
+        private readonly CrmUserComputationService $computation =
+            new CrmUserComputationService()
     ) {
     }
 
@@ -71,6 +60,13 @@ final class RecommendationBatchRunner {
             $startcursor,
             $limit
         );
+
+        $context =
+            CrmComputationContext::from_run(
+                runid: (string)$runid,
+                source: $source,
+                startedat: $startedat
+            );
 
         $userresults = [];
         $processedcount = 0;
@@ -120,37 +116,15 @@ final class RecommendationBatchRunner {
                 $processedcount++;
 
                 try {
-                    $snapshot =
-                        $this->intelligence
-                            ->snapshot_for_user(
-                                $user
-                            );
-
-                    $score =
-                        $this->scores->score(
-                            $snapshot
-                        );
-
-                    $opportunities =
-                        $this->opportunities
-                            ->detect(
-                                $snapshot,
-                                $score
-                            );
-
-                    $context =
-                        $this->contexts->build(
-                            userid: $userid,
-                            snapshot: $snapshot,
-                            leadscore: $score,
-                            opportunities:
-                                $opportunities
+                    $computation =
+                        $this->computation->compute(
+                            user: $user,
+                            context: $context,
+                            withtrend: false
                         );
 
                     $engineresult =
-                        $this->engine->generate(
-                            $context
-                        );
+                        $computation->recommendationresult;
 
                     $persistenceresult =
                         $this->persistence->persist(
@@ -224,7 +198,8 @@ final class RecommendationBatchRunner {
 
                     debugging(
                         sprintf(
-                            'Recommendation batch failed for user %d: %s',
+                            'Recommendation batch run %s failed for user %d: %s',
+                            $context->runid,
                             $userid,
                             $exception->getMessage()
                         ),

@@ -19,8 +19,6 @@ final class CrmDailyPrioritiesCard implements DashboardCard {
             return '';
         }
 
-        global $DB;
-
         $priorities = (new DailyPriorityBuilder())->build();
 
         $out = html_writer::tag('h3', '⭐ ' . get_string('crm_daily_priorities_title', 'local_subscriptions'), [
@@ -37,26 +35,53 @@ final class CrmDailyPrioritiesCard implements DashboardCard {
         }
 
         foreach ($priorities as $priority) {
-            $user = $DB->get_record('user', ['id' => $priority->userid], '*', IGNORE_MISSING);
+            $key =
+                'crm_intelligence_recommendation_' .
+                clean_param(
+                    $priority->key,
+                    PARAM_ALPHANUMEXT
+                );
 
-            if (!$user) {
-                continue;
-            }
+            $label =
+                get_string_manager()->string_exists(
+                    $key,
+                    'local_subscriptions'
+                )
+                    ? get_string(
+                        $key,
+                        'local_subscriptions'
+                    )
+                    : get_string(
+                        'crm_daily_priorities_item_fallback',
+                        'local_subscriptions'
+                    );
 
-            $key = 'crm_intelligence_recommendation_' . clean_param($priority->key, PARAM_ALPHANUMEXT);
-
-            $label = get_string_manager()->string_exists($key, 'local_subscriptions')
-                ? get_string($key, 'local_subscriptions')
-                : $priority->key;
-
-            $url = new moodle_url(subscription_config::admin_user_view_page(), ['id' => $priority->userid]);
+            $url = new moodle_url(
+                subscription_config::
+                    admin_user_view_page(),
+                [
+                    'id' => $priority->userid,
+                ]
+            );
 
             $out .= html_writer::div(
                 html_writer::div(
-                    html_writer::link($url, s(fullname($user)), ['class' => 'fw-bold']) .
-                    html_writer::span((string)$priority->score, 'badge bg-light text-dark border float-end')
+                    html_writer::link(
+                        $url,
+                        s($priority->displayname),
+                        [
+                            'class' => 'fw-bold',
+                        ]
+                    ) .
+                    html_writer::span(
+                        (string)$priority->score,
+                        'badge bg-light text-dark border float-end'
+                    )
                 ) .
-                html_writer::div(s($label), 'text-muted small mt-1'),
+                html_writer::div(
+                    s($label),
+                    'text-muted small mt-1'
+                ),
                 'border rounded p-2 mb-2'
             );
         }
