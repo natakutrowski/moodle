@@ -9,6 +9,7 @@ final class Status {
     public const EXPIRED  = 'expired';
     public const REPLACED = 'replaced';
     public const CANCELED = 'canceled';
+    public const CANCELLED = 'cancelled';
     public const PENDING = 'pending';
     public const FAILED = 'failed';
     public const ERROR = 'error';

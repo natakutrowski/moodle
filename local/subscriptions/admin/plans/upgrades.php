@@ -78,12 +78,27 @@ if ($data = $mform->get_data()) {
     );
 }
 
-if ($delete && confirm_sesskey()) {
-    $DB->delete_records('subscription_plan_upgrade', ['id' => $delete]);
+if ($delete) {
+    require_sesskey();
+
+    $upgrade = $DB->get_record(
+        'subscription_plan_upgrade',
+        ['id' => $delete],
+        '*',
+        MUST_EXIST
+    );
+
+    $DB->delete_records(
+        'subscription_plan_upgrade',
+        ['id' => $upgrade->id]
+    );
 
     redirect(
         $pageurl,
-        get_string('upgradedeleted', 'local_subscriptions'),
+        get_string(
+            'upgradedeleted',
+            'local_subscriptions'
+        ),
         null,
         \core\output\notification::NOTIFY_SUCCESS
     );

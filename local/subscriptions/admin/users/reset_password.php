@@ -22,7 +22,10 @@ $user = $DB->get_record('user', [
     'deleted' => 0,
 ], '*', MUST_EXIST);
 
-$url = new moodle_url('/local/subscriptions/admin/users/reset_password.php', ['id' => $id]);
+$url = new moodle_url(
+    subscription_config::admin_user_reset_password_page(),
+    ['id' => $id]
+);
 
 $PAGE->set_context($context);
 $PAGE->set_url($url);
@@ -77,7 +80,7 @@ if ($data = $form->get_data()) {
     user_update_user($updated, false, false);
 
     AdminLog::log(
-    AdminEvents::USER_PASSWORD_UPDATED,
+        AdminEvents::USER_PASSWORD_UPDATED,
         (int)$user->id,
         'user',
         (int)$user->id,

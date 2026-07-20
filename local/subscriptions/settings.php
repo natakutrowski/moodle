@@ -94,7 +94,7 @@ if ($hassiteconfig) {
     $ADMIN->add('localplugins', new admin_externalpage(
         'local_subscriptions_export',
         'Export des souscriptions',
-        new moodle_url('/local/subscriptions/admin/subscriptions_export.php'),
+        new moodle_url(subscription_config::subscriptions_export_page()),
         'moodle/site:config'
     ));
 

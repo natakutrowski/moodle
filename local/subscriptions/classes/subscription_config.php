@@ -380,6 +380,21 @@ class subscription_config {
             'admin/assistant/plan_action_confirm.php';
     }
 
+    public static function admin_crm_tools_page(): string {
+        return self::plugin_path() .
+            'admin/tools/index.php';
+    }
+
+    public static function admin_crm_tool_action_page(): string {
+        return self::plugin_path() .
+            'admin/tools/action.php';
+    }
+
+    public static function admin_crm_tool_history_page(): string {
+        return self::plugin_path() .
+            'admin/tools/history.php';
+    }
+
     public static function plugin_stylesheet_page(): string {
         return self::plugin_path() .
             'styles.css';

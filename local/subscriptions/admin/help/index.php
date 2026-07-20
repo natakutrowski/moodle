@@ -11,6 +11,8 @@ use local_subscriptions\crm\help\HelpRenderer;
 use local_subscriptions\crm\help\onboarding\HelpOnboardingService;
 use local_subscriptions\crm\help\onboarding\HelpOnboardingRenderer;
 use local_subscriptions\crm\help\guides\HelpGuideRegistry;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $PAGE, $OUTPUT, $USER;
 
@@ -99,6 +101,11 @@ $PAGE->requires->css(
 );
 
 echo $OUTPUT->header();
+
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::HELP,
+    $context
+);
 
 /*
  * Toolbar containing Help Center administrative actions.
@@ -223,5 +230,7 @@ echo HelpRenderer::render_home(
     $query,
     $categoryid
 );
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

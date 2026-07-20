@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use html_writer;
 use local_subscriptions\crm\intelligence\priority\DailyPriorityBuilder;
 use local_subscriptions\dashboard\DashboardCard;
+use local_subscriptions\dashboard\ui\DashboardCardUi;
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\Capabilities;
 use moodle_url;
@@ -21,17 +22,30 @@ final class CrmDailyPrioritiesCard implements DashboardCard {
 
         $priorities = (new DailyPriorityBuilder())->build();
 
-        $out = html_writer::tag('h3', '⭐ ' . get_string('crm_daily_priorities_title', 'local_subscriptions'), [
-            'class' => 'h4 mb-3',
-        ]);
+        $content = DashboardCardUi::header(
+            title: get_string(
+                'crm_daily_priorities_title',
+                'local_subscriptions'
+            ),
+            icon: '⭐',
+            titleid: 'crm-dashboard-priorities-title'
+        );
 
         if (empty($priorities)) {
-            $out .= html_writer::div(
-                get_string('crm_daily_priorities_empty', 'local_subscriptions'),
-                'text-muted'
+            $content .= DashboardCardUi::empty_state(
+                title: get_string(
+                    'crm_daily_priorities_empty',
+                    'local_subscriptions'
+                ),
+                icon: '✓',
+                tone: DashboardCardUi::TONE_SUCCESS
             );
 
-            return html_writer::div($out, 'card card-body local-subscriptions-dashboard-card mb-4');
+            return DashboardCardUi::shell(
+                content: $content,
+                extraclasses: 'crm-dashboard-priorities-card',
+                labelledby: 'crm-dashboard-priorities-title'
+            );
         }
 
         foreach ($priorities as $priority) {
@@ -64,7 +78,7 @@ final class CrmDailyPrioritiesCard implements DashboardCard {
                 ]
             );
 
-            $out .= html_writer::div(
+            $content .= DashboardCardUi::item(
                 html_writer::div(
                     html_writer::link(
                         $url,
@@ -82,10 +96,14 @@ final class CrmDailyPrioritiesCard implements DashboardCard {
                     s($label),
                     'text-muted small mt-1'
                 ),
-                'border rounded p-2 mb-2'
+                'crm-dashboard-priority-item'
             );
         }
 
-        return html_writer::div($out, 'card card-body local-subscriptions-dashboard-card mb-4');
+        return DashboardCardUi::shell(
+            content: $content,
+            extraclasses: 'crm-dashboard-priorities-card',
+            labelledby: 'crm-dashboard-priorities-title'
+        );
     }
 }

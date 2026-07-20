@@ -47,6 +47,62 @@ final class DashboardPeriod {
         ];
     }
 
+    /**
+     * Return the period immediately preceding the selected period.
+     *
+     * The previous period follows the same calendar semantics:
+     *
+     * - today: previous calendar day;
+     * - week: previous Monday-to-Monday week;
+     * - month: previous calendar month.
+     *
+     * @param string $period
+     * @return array{start: int, end: int}
+     */
+    public static function previous_range(
+        string $period
+    ): array {
+        $period = self::normalize($period);
+
+        if ($period === self::WEEK) {
+            return [
+                'start' => strtotime('monday last week'),
+                'end' => strtotime('monday this week'),
+            ];
+        }
+
+        if ($period === self::MONTH) {
+            return [
+                'start' => strtotime(
+                    'first day of last month 00:00:00'
+                ),
+                'end' => strtotime(
+                    'first day of this month 00:00:00'
+                ),
+            ];
+        }
+
+        $end = strtotime('today');
+
+        return [
+            'start' => $end - DAYSECS,
+            'end' => $end,
+        ];
+    }
+
+    /**
+     * Return the duration of one resolved range.
+     *
+     * @param array{start: int, end: int} $range
+     * @return int
+     */
+    public static function duration(array $range): int {
+        return max(
+            0,
+            (int)$range['end'] - (int)$range['start']
+        );
+    }
+
     public static function label(string $period): string {
         return get_string('dashboard_period_' . self::normalize($period), 'local_subscriptions');
     }

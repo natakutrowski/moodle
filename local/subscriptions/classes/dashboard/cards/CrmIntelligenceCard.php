@@ -6,6 +6,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use local_subscriptions\dashboard\DashboardCard;
+use local_subscriptions\dashboard\ui\DashboardCardUi;
 use local_subscriptions\crm\intelligence\dashboard\CrmIntelligenceDashboardBuilder;
 use local_subscriptions\crm\intelligence\core\CrmIntelligenceLimits;
 use local_subscriptions\subscription_config;
@@ -33,11 +34,16 @@ final class CrmIntelligenceCard implements DashboardCard {
                 $canviewinbox
             );
 
-        $out = html_writer::tag('h3', '🧠 ' . get_string('crm_intelligence_dashboard_title', 'local_subscriptions'), [
-            'class' => 'h4 mb-3',
-        ]);
+        $content = DashboardCardUi::header(
+            title: get_string(
+                'crm_intelligence_dashboard_title',
+                'local_subscriptions'
+            ),
+            icon: '🧠',
+            titleid: 'crm-dashboard-intelligence-title'
+        );
 
-        $out .= html_writer::start_div('row mb-3');
+        $content .= html_writer::start_div('row mb-3');
 
         $cards = [
             [
@@ -73,7 +79,7 @@ final class CrmIntelligenceCard implements DashboardCard {
         ];
 
         foreach ($cards as [$label, $value, $filter]) {
-            $content =
+            $cardcontent =
                 html_writer::div((string)$value, 'crm-stat-number') .
                 html_writer::div(s($label), 'text-muted small');
 
@@ -82,30 +88,34 @@ final class CrmIntelligenceCard implements DashboardCard {
                     'intelligence' => $filter,
                 ]);
 
-                $content = html_writer::link($url, $content, [
+                $cardcontent = html_writer::link($url, $cardcontent, [
                     'class' => 'crm-intelligence-metric-link',
                 ]);
             }
 
-            $out .= html_writer::div(
+            $content .= html_writer::div(
                 html_writer::div(
-                    $content,
+                    $cardcontent,
                     'card card-body local-subscriptions-dashboard-card crm-intelligence-metric-card'
                 ),
                 'col-md-6 col-xl-4 mb-3'
             );
         }
 
-        $out .= html_writer::end_div();
+        $content .= html_writer::end_div();
 
-        $out .= html_writer::tag('h4', get_string('crm_intelligence_dashboard_priority_profiles', 'local_subscriptions'), [
+        $content .= html_writer::tag('h4', get_string('crm_intelligence_dashboard_priority_profiles', 'local_subscriptions'), [
             'class' => 'h5 mt-3 mb-2',
         ]);
 
         if (empty($overview->priorityProfiles)) {
-            $out .= html_writer::div(
-                get_string('crm_intelligence_dashboard_no_priority_profiles', 'local_subscriptions'),
-                'text-muted'
+            $content .= DashboardCardUi::empty_state(
+                title: get_string(
+                    'crm_intelligence_dashboard_no_priority_profiles',
+                    'local_subscriptions'
+                ),
+                icon: '✓',
+                tone: DashboardCardUi::TONE_SUCCESS
             );
         } else {
             foreach (
@@ -160,14 +170,18 @@ final class CrmIntelligenceCard implements DashboardCard {
                         );
                 }
 
-                $out .= html_writer::div(
+                $content .= DashboardCardUi::item(
                     $profilecontent,
-                    'border rounded p-2 mb-2'
+                    'crm-intelligence-priority-profile'
                 );
             }
         }
 
-        return html_writer::div($out, 'card card-body local-subscriptions-dashboard-card mb-4');
+        return DashboardCardUi::shell(
+            content: $content,
+            extraclasses: 'crm-dashboard-intelligence-card',
+            labelledby: 'crm-dashboard-intelligence-title'
+        );
     }
 
     private static function render_inbox_summary(

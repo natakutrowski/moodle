@@ -4,20 +4,25 @@ require_once(__DIR__ . '/../../../../config.php');
 
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\inbox\dto\InboxThreadCriteria;
 use local_subscriptions\crm\inbox\rendering\InboxRenderer;
 use local_subscriptions\crm\inbox\repositories\InboxReadRepository;
 use local_subscriptions\crm\inbox\repositories\InboxTeamRepository;
 use local_subscriptions\crm\inbox\services\InboxReadService;
-use local_subscriptions\crm\help\CrmPageHeader;
-use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\subscription_config;
+
+global $PAGE, $OUTPUT, $USER;
 
 $context = AdminSecurity::require(
     Capabilities::VIEW_INBOX
 );
 
-$criteria = InboxThreadCriteria::from_request();
+$criteria =
+    InboxThreadCriteria::from_request();
 
 $service = new InboxReadService(
     new InboxReadRepository(),
@@ -29,13 +34,13 @@ $result = $service->search(
     (int)$USER->id
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url(
-    new moodle_url(
-        subscription_config::admin_inbox_page(),
-        $criteria->url_params()
-    )
+$pageurl = new moodle_url(
+    subscription_config::admin_inbox_page(),
+    $criteria->url_params()
 );
+
+$PAGE->set_context($context);
+$PAGE->set_url($pageurl);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(
     get_string(
@@ -50,12 +55,31 @@ $PAGE->set_heading(
     )
 );
 
+$PAGE->add_body_class(
+    'local-subscriptions-crm-workspace'
+);
+$PAGE->add_body_class(
+    'local-subscriptions-inbox-page'
+);
+
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::
+            plugin_stylesheet_page()
+    )
+);
+
 $PAGE->requires->js_call_amd(
     'local_subscriptions/inbox_ui',
     'init'
 );
 
 echo $OUTPUT->header();
+
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::INBOX,
+    $context
+);
 
 $headeractions = '';
 
@@ -94,5 +118,7 @@ echo CrmPageHeader::render(
 );
 
 echo InboxRenderer::render($result);
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

@@ -11,6 +11,7 @@ use local_subscriptions\commandcenter\CommandResult;
 use local_subscriptions\commandcenter\CommandScorer;
 use local_subscriptions\commandcenter\CommandTypes;
 use local_subscriptions\crm\intelligence\alerts\CrmAlertBuilder;
+use local_subscriptions\crm\intelligence\alerts\CrmAlertPresentation;
 use local_subscriptions\crm\intelligence\priority\DailyPriorityBuilder;
 use local_subscriptions\crm\assistant\repositories\AssistantRecommendationRepository;
 use local_subscriptions\crm\success\plans\repositories\CustomerSuccessPlanOperationsRepository;
@@ -555,7 +556,9 @@ final class IntelligenceProvider implements CommandProviderInterface {
                 continue;
             }
 
-            $label = self::alert_label((string)$alert->key);
+            $label = CrmAlertPresentation::label(
+                (string)$alert->key
+            );
 
             $score = CommandScorer::best(
                 CommandScorer::exact_or_prefix($text, $label, 100, 85, 60),
@@ -569,13 +572,24 @@ final class IntelligenceProvider implements CommandProviderInterface {
             $userid = (int)$alert->userid;
 
             $results[] = CommandResult::create()
-                ->icon('🚨')
+                ->icon(
+                    CrmAlertPresentation::icon(
+                        (string)$alert->key
+                    )
+                )
                 ->type(CommandTypes::user())
                 ->group('users', get_string('command_center_group_users', 'local_subscriptions'))
                 ->action_label(get_string('command_center_action_view', 'local_subscriptions'))
                 ->shortcut('user:' . $userid)
                 ->title($label)
-                ->subtitle(get_string('command_crm_alert_desc', 'local_subscriptions'))
+                ->subtitle(
+                    $alert->has_user_identity()
+                        ? $alert->displayname
+                        : get_string(
+                            'command_crm_alert_desc',
+                            'local_subscriptions'
+                        )
+                )
                 ->url((new moodle_url(subscription_config::admin_user_view_page(), [
                     'id' => $userid,
                 ]))->out(false))
@@ -587,6 +601,26 @@ final class IntelligenceProvider implements CommandProviderInterface {
                 ->meta('entity', 'alert')
                 ->meta('userid', $userid)
                 ->meta('alert', (string)$alert->key)
+                ->meta(
+                    'displayname',
+                    $alert->displayname
+                )
+                ->meta(
+                    'email',
+                    $alert->email
+                )
+                ->meta(
+                    'risk_score',
+                    $alert->riskscore
+                )
+                ->meta(
+                    'commercial_score',
+                    $alert->commercialscore
+                )
+                ->meta(
+                    'snapshot_time',
+                    $alert->snapshottime
+                )
                 ->to_array();
         }
     }
@@ -721,11 +755,4 @@ final class IntelligenceProvider implements CommandProviderInterface {
             ->to_array();
     }
 
-    private static function alert_label(string $alertkey): string {
-        $key = 'crm_intelligence_alert_' . clean_param($alertkey, PARAM_ALPHANUMEXT);
-
-        return get_string_manager()->string_exists($key, 'local_subscriptions')
-            ? get_string($key, 'local_subscriptions')
-            : $alertkey;
-    }
 }

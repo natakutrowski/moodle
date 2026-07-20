@@ -479,12 +479,28 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // C) subscription_payment_request.last_update
-        $table = new xmldb_table('subscription_payment_request');
-        $field = new xmldb_field('subscription_payment_request', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
+		// C) subscription_payment_request.last_update.
+		$table = new xmldb_table(
+			'subscription_payment_request'
+		);
+
+		$field = new xmldb_field(
+			'last_update',
+			XMLDB_TYPE_INTEGER,
+			'10',
+			null,
+			XMLDB_NOTNULL,
+			null,
+			'0',
+			'creation_date'
+		);
+
+		if (!$dbman->field_exists($table, $field)) {
+			$dbman->add_field(
+				$table,
+				$field
+			);
+		}
 
         upgrade_plugin_savepoint(true, 2025082800, 'local', 'subscriptions');
     }
@@ -5729,6 +5745,266 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		upgrade_plugin_savepoint(
 			true,
 			2026071703,
+			'local',
+			'subscriptions'
+		);
+	}
+
+	if ($oldversion < 2026071803) {
+		$table = new xmldb_table(
+			'subscription_payment_request'
+		);
+
+		if ($dbman->table_exists($table)) {
+			/*
+			* Ensure that the real last_update field exists.
+			*
+			* install.xml already contains it, but an old upgrade
+			* accidentally created a field named after the table.
+			*/
+			$lastupdatefield = new xmldb_field(
+				'last_update',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0',
+				'creation_date'
+			);
+
+			if (
+				!$dbman->field_exists(
+					$table,
+					$lastupdatefield
+				)
+			) {
+				$dbman->add_field(
+					$table,
+					$lastupdatefield
+				);
+			}
+
+			/*
+			* Remove the field accidentally created by upgrade 2025082800.
+			*/
+			$invalidfield = new xmldb_field(
+				'subscription_payment_request'
+			);
+
+			if (
+				$dbman->field_exists(
+					$table,
+					$invalidfield
+				)
+			) {
+				$dbman->drop_field(
+					$table,
+					$invalidfield
+				);
+			}
+
+			/*
+			* Backfill only empty technical timestamps.
+			*/
+			$DB->execute(
+				"
+					UPDATE {subscription_payment_request}
+					SET last_update = CASE
+						WHEN payment_date IS NOT NULL
+								AND payment_date > 0
+							THEN payment_date
+						WHEN last_attempt IS NOT NULL
+								AND last_attempt > 0
+							THEN last_attempt
+						ELSE creation_date
+					END
+					WHERE last_update IS NULL
+						OR last_update = 0
+				"
+			);
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026071803,
+			'local',
+			'subscriptions'
+		);
+	}
+
+	if ($oldversion < 2026072000) {
+		$table = new xmldb_table(
+			'local_subscriptions_admin_tool_run'
+		);
+
+		if (!$dbman->table_exists($table)) {
+			$table->add_field(
+				'id',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				XMLDB_SEQUENCE
+			);
+
+			$table->add_field(
+				'toolkey',
+				XMLDB_TYPE_CHAR,
+				'80',
+				null,
+				XMLDB_NOTNULL
+			);
+
+			$table->add_field(
+				'actorid',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_field(
+				'status',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'running'
+			);
+
+			$table->add_field(
+				'risklevel',
+				XMLDB_TYPE_CHAR,
+				'20',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'normal'
+			);
+
+			$table->add_field(
+				'requestid',
+				XMLDB_TYPE_CHAR,
+				'64',
+				null,
+				XMLDB_NOTNULL
+			);
+
+			$table->add_field(
+				'parametersjson',
+				XMLDB_TYPE_TEXT,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'resultjson',
+				XMLDB_TYPE_TEXT,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'errormessage',
+				XMLDB_TYPE_TEXT,
+				null,
+				null,
+				null
+			);
+
+			$table->add_field(
+				'startedat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_field(
+				'finishedat',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null
+			);
+
+			$table->add_field(
+				'durationms',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null
+			);
+
+			$table->add_field(
+				'timecreated',
+				XMLDB_TYPE_INTEGER,
+				'10',
+				null,
+				XMLDB_NOTNULL,
+				null,
+				'0'
+			);
+
+			$table->add_key(
+				'primary',
+				XMLDB_KEY_PRIMARY,
+				['id']
+			);
+
+			$table->add_key(
+				'actorid_fk',
+				XMLDB_KEY_FOREIGN,
+				['actorid'],
+				'user',
+				['id']
+			);
+
+			$table->add_index(
+				'requestid_uix',
+				XMLDB_INDEX_UNIQUE,
+				['requestid']
+			);
+
+			$table->add_index(
+				'tool_time_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				[
+					'toolkey',
+					'timecreated',
+				]
+			);
+
+			$table->add_index(
+				'actor_time_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				[
+					'actorid',
+					'timecreated',
+				]
+			);
+
+			$table->add_index(
+				'status_time_idx',
+				XMLDB_INDEX_NOTUNIQUE,
+				[
+					'status',
+					'timecreated',
+				]
+			);
+
+			$dbman->create_table($table);
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026072000,
 			'local',
 			'subscriptions'
 		);

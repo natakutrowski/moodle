@@ -34,8 +34,16 @@ $delete = optional_param('delete', 0, PARAM_INT);
 if ($currenttab === 'scopes') {
 
     if ($delete) {
-        require_once($CFG->dirroot . '/local/subscriptions/lib/scopes_lib.php');
-        local_subscriptions_delete_scope($delete);
+        require_sesskey();
+
+        require_once(
+            $CFG->dirroot .
+            '/local/subscriptions/lib/scopes_lib.php'
+        );
+
+        local_subscriptions_delete_scope(
+            $delete
+        );
     }
     
     require_once($CFG->dirroot . '/local/subscriptions/forms/access_scope_form.php');
@@ -95,8 +103,16 @@ if ($currenttab === 'scopes') {
 elseif ($currenttab === 'plans') {
 
     if ($delete) {
-        require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
-        local_subscriptions_delete_plan($delete);
+        require_sesskey();
+
+        require_once(
+            $CFG->dirroot .
+            '/local/subscriptions/lib/plans_lib.php'
+        );
+
+        local_subscriptions_delete_plan(
+            $delete
+        );
     }
 
     require_once($CFG->dirroot . '/local/subscriptions/forms/plan_form.php');

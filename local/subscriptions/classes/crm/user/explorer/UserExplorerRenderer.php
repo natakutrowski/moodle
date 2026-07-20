@@ -21,9 +21,16 @@ final class UserExplorerRenderer {
             'crm-user-explorer'
         );
 
+        if ($result->criteria->has_funnel_filter()) {
+            $out .= self::render_funnel_filter(
+                $result->criteria
+            );
+        }
+
         $out .= self::render_summary($result);
         $out .= self::render_workspace_toolbar($result);
         $out .= self::render_filters($result);
+        $out .= self::render_trend_context($result);
         $out .= self::render_intelligence_pills($result);
 
         if (!$result->has_results()) {
@@ -41,6 +48,93 @@ final class UserExplorerRenderer {
         return $out;
     }
 
+    /**
+     * Render the active Funnel drill-down context.
+     *
+     * @param UserExplorerCriteria $criteria
+     * @return string
+     */
+    private static function render_funnel_filter(
+        UserExplorerCriteria $criteria
+    ): string {
+        $label = match ($criteria->funnelstage) {
+            UserExplorerCriteria::FUNNEL_NEW_USERS =>
+                get_string(
+                    'dashboard_funnel_explorer_new_users',
+                    'local_subscriptions'
+                ),
+
+            UserExplorerCriteria::FUNNEL_TRIAL_USERS =>
+                get_string(
+                    'dashboard_funnel_explorer_trial_users',
+                    'local_subscriptions'
+                ),
+
+            UserExplorerCriteria::FUNNEL_NEW_CUSTOMERS =>
+                get_string(
+                    'dashboard_funnel_explorer_new_customers',
+                    'local_subscriptions'
+                ),
+
+            UserExplorerCriteria::FUNNEL_DIGITAL_BUYERS =>
+                get_string(
+                    'dashboard_funnel_explorer_digital_buyers',
+                    'local_subscriptions'
+                ),
+
+            UserExplorerCriteria::FUNNEL_CONVERTED_TRIALS =>
+                get_string(
+                    'dashboard_funnel_explorer_converted_trials',
+                    'local_subscriptions',
+                    $criteria->funnelwindow
+                ),
+
+            default => '',
+        };
+
+        if ($label === '') {
+            return '';
+        }
+
+        $periodlabel =
+            userdate(
+                $criteria->funnelstart,
+                get_string(
+                    'strftimedatetimeshort',
+                    'langconfig'
+                )
+            )
+            . ' – '
+            . userdate(
+                $criteria->funnelend - 1,
+                get_string(
+                    'strftimedatetimeshort',
+                    'langconfig'
+                )
+            );
+
+        return html_writer::div(
+            html_writer::div(
+                html_writer::tag(
+                    'strong',
+                    get_string(
+                        'dashboard_funnel_explorer_active',
+                        'local_subscriptions'
+                    )
+                )
+                . html_writer::span(
+                    s($label),
+                    'd-block'
+                )
+                . html_writer::span(
+                    s($periodlabel),
+                    'd-block small text-muted'
+                ),
+                'crm-user-explorer-funnel-filter-content'
+            ),
+            'alert alert-info crm-user-explorer-funnel-filter'
+        );
+    }
     private static function render_summary(
         UserExplorerResult $result
     ): string {
@@ -516,6 +610,28 @@ final class UserExplorerRenderer {
                 'class' => 'crm-user-explorer-filters',
             ]
         );
+
+        if (
+            $result->criteria
+                ->trendfilter
+                ->is_active()
+        ) {
+            foreach (
+                $result->criteria
+                    ->trendfilter
+                    ->params()
+                as $name => $value
+            ) {
+                $out .= html_writer::empty_tag(
+                    'input',
+                    [
+                        'type' => 'hidden',
+                        'name' => $name,
+                        'value' => $value,
+                    ]
+                );
+            }
+        }
 
         $out .= html_writer::start_div(
             'crm-user-explorer-filter-grid'
@@ -1517,4 +1633,125 @@ final class UserExplorerRenderer {
             )
         );
     }
+
+    /**
+     * Render the active Dashboard trend drill-down context.
+     */
+    private static function render_trend_context(
+        UserExplorerResult $result
+    ): string {
+        $filter =
+            $result->criteria->trendfilter;
+
+        if (!$filter->is_active()) {
+            return '';
+        }
+
+        $labelkey = match ($filter->trend) {
+            \local_subscriptions\dashboard\trends\DashboardTrendsRepository::METRIC_RISK_UP =>
+                        'crm_trends_metric_risk_up',
+
+            \local_subscriptions\dashboard\trends\DashboardTrendsRepository::METRIC_RISK_DOWN =>
+                        'crm_trends_metric_risk_down',
+
+            \local_subscriptions\dashboard\trends\DashboardTrendsRepository::METRIC_ENGAGEMENT_UP =>
+                        'crm_trends_metric_engagement_up',
+
+            \local_subscriptions\dashboard\trends\DashboardTrendsRepository::METRIC_ENGAGEMENT_DOWN =>
+                        'crm_trends_metric_engagement_down',
+
+            \local_subscriptions\dashboard\trends\DashboardTrendsRepository::METRIC_GLOBAL_UP =>
+                        'crm_trends_metric_global_up',
+
+            \local_subscriptions\dashboard\trends\DashboardTrendsRepository::METRIC_GLOBAL_DOWN =>
+                        'crm_trends_metric_global_down',
+
+            default =>
+                'crm_trends_metric_unknown',
+        };
+
+        $period = get_string(
+            'crm_user_explorer_trend_period',
+            'local_subscriptions',
+            (object)[
+                'start' => userdate(
+                    $filter->start,
+                    get_string(
+                        'strftimedate',
+                        'langconfig'
+                    )
+                ),
+                'end' => userdate(
+                    max(
+                        $filter->start,
+                        $filter->end - 1
+                    ),
+                    get_string(
+                        'strftimedate',
+                        'langconfig'
+                    )
+                ),
+            ]
+        );
+
+        $threshold = get_string(
+            'crm_user_explorer_trend_threshold',
+            'local_subscriptions',
+            $filter->delta
+        );
+
+        $title = html_writer::tag(
+            'strong',
+            get_string(
+                'crm_user_explorer_trend_active',
+                'local_subscriptions'
+            )
+        );
+
+        $details = html_writer::div(
+            html_writer::span(
+                get_string(
+                    $labelkey,
+                    'local_subscriptions'
+                ),
+                'crm-user-explorer-trend-name'
+            )
+            . html_writer::span(
+                $period,
+                'crm-user-explorer-trend-period'
+            )
+            . html_writer::span(
+                $threshold,
+                'crm-user-explorer-trend-threshold'
+            ),
+            'crm-user-explorer-trend-details'
+        );
+
+        $clearurl = new moodle_url(
+            subscription_config::admin_users_page()
+        );
+
+        $clear = html_writer::link(
+            $clearurl,
+            get_string(
+                'crm_user_explorer_trend_clear',
+                'local_subscriptions'
+            ),
+            [
+                'class' =>
+                    'btn btn-sm btn-outline-secondary '
+                    . 'crm-user-explorer-trend-clear',
+            ]
+        );
+
+        return html_writer::div(
+            html_writer::div(
+                $title . $details,
+                'crm-user-explorer-trend-content'
+            )
+            . $clear,
+            'crm-user-explorer-trend-context'
+        );
+    }
+
 }

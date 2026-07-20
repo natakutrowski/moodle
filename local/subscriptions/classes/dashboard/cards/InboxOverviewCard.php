@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use html_writer;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\dashboard\DashboardCard;
+use local_subscriptions\dashboard\ui\DashboardCardUi;
 use local_subscriptions\dashboard\inbox\DashboardInboxRepository;
 use local_subscriptions\dashboard\inbox\DashboardInboxService;
 use local_subscriptions\subscription_config;
@@ -33,71 +34,26 @@ final class InboxOverviewCard implements DashboardCard {
             subscription_config::admin_inbox_page()
         );
 
-        $out = html_writer::start_tag(
-            'section',
-            [
-                'class' =>
-                    'card card-body ' .
-                    'local-subscriptions-dashboard-card ' .
-                    'crm-dashboard-panel ' .
-                    'crm-dashboard-inbox-card',
-
-                'aria-labelledby' =>
-                    'crm-dashboard-inbox-title',
-            ]
-        );
-
-        $out .= html_writer::start_tag(
-            'header',
-            [
-                'class' =>
-                    'crm-dashboard-panel-header',
-            ]
-        );
-
-        $out .= html_writer::start_div(
-            'crm-dashboard-panel-heading'
-        );
-
-        $out .= html_writer::tag(
-            'h3',
-            get_string(
+        $content = DashboardCardUi::header(
+            title: get_string(
                 'dashboard_inbox_title',
                 'local_subscriptions'
             ),
-            [
-                'id' =>
-                    'crm-dashboard-inbox-title',
-
-                'class' =>
-                    'crm-dashboard-panel-title',
-            ]
-        );
-
-        $out .= html_writer::div(
-            get_string(
+            icon: '✉️',
+            subtitle: get_string(
                 'dashboard_inbox_subtitle',
                 'local_subscriptions'
             ),
-            'crm-dashboard-panel-subtitle'
-        );
-
-        $out .= html_writer::end_div();
-
-        $out .= html_writer::link(
-            $inboxurl,
-            get_string(
-                'dashboard_inbox_open',
-                'local_subscriptions'
+            actions: DashboardCardUi::action(
+                $inboxurl,
+                get_string(
+                    'dashboard_inbox_open',
+                    'local_subscriptions'
+                )
             ),
-            [
-                'class' =>
-                    'btn btn-sm btn-outline-primary ' .
-                    'crm-dashboard-panel-action',
-            ]
+            titleid:
+                'crm-dashboard-inbox-title'
         );
-
-        $out .= html_writer::end_tag('header');
 
         $metrics = [
             [
@@ -179,12 +135,12 @@ final class InboxOverviewCard implements DashboardCard {
             ],
         ];
 
-        $out .= html_writer::start_div(
+        $content .= html_writer::start_div(
             'crm-dashboard-inbox-metrics'
         );
 
         foreach ($metrics as $metric) {
-            $out .= html_writer::link(
+            $content .= html_writer::link(
                 $metric['url'],
 
                 html_writer::span(
@@ -217,9 +173,9 @@ final class InboxOverviewCard implements DashboardCard {
             );
         }
 
-        $out .= html_writer::end_div();
+        $content .= html_writer::end_div();
 
-        $out .= html_writer::tag(
+        $content .= html_writer::tag(
             'h4',
             get_string(
                 'dashboard_inbox_recent_activity',
@@ -231,15 +187,17 @@ final class InboxOverviewCard implements DashboardCard {
         );
 
         if (!$summary->has_activity()) {
-            $out .= html_writer::div(
-                get_string(
+            $content .= DashboardCardUi::empty_state(
+                title: get_string(
                     'dashboard_inbox_empty',
                     'local_subscriptions'
                 ),
-                'text-muted small'
+                icon: '✓',
+                tone:
+                    DashboardCardUi::TONE_SUCCESS
             );
         } else {
-            $out .= html_writer::start_tag(
+            $content .= html_writer::start_tag(
                 'ul',
                 [
                     'class' =>
@@ -321,7 +279,7 @@ final class InboxOverviewCard implements DashboardCard {
                     );
                 }
 
-                $out .= html_writer::tag(
+                $content .= html_writer::tag(
                     'li',
                     $item,
                     [
@@ -332,11 +290,15 @@ final class InboxOverviewCard implements DashboardCard {
                 );
             }
 
-            $out .= html_writer::end_tag('ul');
+            $content .= html_writer::end_tag('ul');
         }
 
-        $out .= html_writer::end_tag('section');
-
-        return $out;
+        return DashboardCardUi::shell(
+            content: $content,
+            extraclasses:
+                'crm-dashboard-inbox-card',
+            labelledby:
+                'crm-dashboard-inbox-title'
+        );
     }
 }

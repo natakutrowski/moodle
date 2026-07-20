@@ -7,11 +7,13 @@ defined('MOODLE_INTERNAL') || die();
 use html_writer;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\dashboard\DashboardCard;
+use local_subscriptions\dashboard\ui\DashboardCardUi;
 use local_subscriptions\crm\work\domain\WorkItemStatus;
 use local_subscriptions\subscription_config;
 use moodle_url;
 
-final class WorkItemOverviewCard {
+final class WorkItemOverviewCard implements DashboardCard {
 
     public static function render(): string {
         global $DB, $USER;
@@ -77,21 +79,71 @@ final class WorkItemOverviewCard {
             [get_string('crm_work_overdue', 'local_subscriptions'), $overdue, ['overdueonly' => 1]],
         ];
 
-        $out = html_writer::tag('h3', get_string('crm_work_dashboard_title', 'local_subscriptions'), ['class' => 'h5 mb-3']);
-        $out .= html_writer::start_div('row g-2');
-        foreach ($items as [$label, $value, $params]) {
-            $out .= html_writer::div(
+        $content = DashboardCardUi::header(
+            title: get_string(
+                'crm_work_dashboard_title',
+                'local_subscriptions'
+            ),
+            icon: '✅',
+            actions: DashboardCardUi::action(
+                new moodle_url(
+                    subscription_config::
+                        admin_work_items_page()
+                ),
+                get_string(
+                    'dashboard_open_all',
+                    'local_subscriptions'
+                )
+            ),
+            titleid: 'crm-dashboard-work-title'
+        );
+        
+        $content .= html_writer::start_div(
+            'row g-2'
+        );
+
+        foreach (
+            $items
+            as [
+                $label,
+                $value,
+                $params,
+            ]
+        ) {
+            $metriccontent =
+                html_writer::div(
+                    (string)$value,
+                    'h3 mb-1'
+                ) .
+                html_writer::div(
+                    s($label),
+                    'small'
+                );
+
+            $content .= html_writer::div(
                 html_writer::link(
-                    new moodle_url(subscription_config::admin_work_items_page(), $params),
-                    html_writer::div((string)$value, 'h3 mb-1') .
-                    html_writer::div($label, 'small'),
-                    ['class' => 'card card-body text-decoration-none h-100']
+                    new moodle_url(
+                        subscription_config::
+                            admin_work_items_page(),
+                        $params
+                    ),
+                    $metriccontent,
+                    [
+                        'class' =>
+                            'crm-dashboard-work-metric ' .
+                            'text-decoration-none h-100',
+                    ]
                 ),
                 'col-6'
             );
         }
-        $out .= html_writer::end_div();
 
-        return html_writer::div($out, 'crm-dashboard-card card card-body h-100');
+        $content .= html_writer::end_div();
+
+        return DashboardCardUi::shell(
+            content: $content,
+            extraclasses: 'crm-dashboard-work-card',
+            labelledby: 'crm-dashboard-work-title'
+        );
     }
 }

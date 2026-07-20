@@ -7,6 +7,8 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\subscription_config;
 use local_subscriptions\crm\help\guides\HelpGuideService;
 use local_subscriptions\crm\help\guides\HelpGuideRenderer;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $PAGE, $OUTPUT, $USER;
 
@@ -59,6 +61,11 @@ $state = (new HelpGuideService())->get_state(
 
 echo $OUTPUT->header();
 
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::HELP,
+    $context
+);
+
 echo html_writer::link(
     new moodle_url(
         subscription_config::admin_help_page()
@@ -68,7 +75,8 @@ echo html_writer::link(
         'local_subscriptions'
     ),
     [
-        'class' => 'crm-help-back-link',
+        'class' =>
+            'crm-help-back-link crm-app-back-link',
     ]
 );
 
@@ -76,5 +84,7 @@ echo HelpGuideRenderer::render_guide(
     $state,
     $url->out_as_local_url(false)
 );
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

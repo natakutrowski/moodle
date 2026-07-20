@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\crm\user\UserExplorerFilter;
 use local_subscriptions\crm\success\plans\domain\CustomerSuccessPlanStatus;
 use local_subscriptions\crm\success\plans\domain\CustomerSuccessPlanStepStatus;
+use local_subscriptions\crm\business\CrmBusinessSql;
 
 final class UserExplorerRepository {
 
@@ -663,11 +664,343 @@ final class UserExplorerRepository {
                 $criteria->customer_success_plan_status;
         }
 
+        $this->apply_funnel_filter(
+            $criteria,
+            $conditions,
+            $params
+        );
+
+        $this->apply_trend_filter(
+            $criteria,
+            $conditions,
+            $params
+        );
+
         return [
             $joins,
             implode(' AND ', $conditions),
             $params,
         ];
+    }
+
+    /**
+     * Apply one Dashboard Funnel drill-down filter.
+     *
+     * @param UserExplorerCriteria $criteria
+     * @param array $conditions
+     * @param array $params
+     * @return void
+     */
+    private function apply_funnel_filter(
+        UserExplorerCriteria $criteria,
+        array &$conditions,
+        array &$params
+    ): void {
+        if (!$criteria->has_funnel_filter()) {
+            return;
+        }
+
+        $params['funnelstart'] =
+            $criteria->funnelstart;
+
+        $params['funnelend'] =
+            $criteria->funnelend;
+
+        if (
+            $criteria->funnelstage ===
+            UserExplorerCriteria::FUNNEL_NEW_USERS
+        ) {
+            $conditions[] = "
+                u.timecreated >= :funnelstart
+                AND u.timecreated < :funnelend
+            ";
+
+            return;
+        }
+
+        if (
+            $criteria->funnelstage ===
+            UserExplorerCriteria::FUNNEL_TRIAL_USERS
+        ) {
+            $conditions[] = "
+                EXISTS (
+                    SELECT 1
+                    FROM {user_subscription} funneltrial
+                    JOIN {subscription_plan} funneltrialplan
+                        ON funneltrialplan.id =
+                            funneltrial.planid
+                    WHERE funneltrial.userid = u.id
+                    AND funneltrialplan.is_trial = 1
+                GROUP BY funneltrial.userid
+                    HAVING MIN(
+                        funneltrial.creation_date
+                    ) >= :funnelstart
+                    AND MIN(
+                        funneltrial.creation_date
+                    ) < :funnelend
+                )
+            ";
+
+            return;
+        }
+
+        if (
+            $criteria->funnelstage ===
+            UserExplorerCriteria::FUNNEL_NEW_CUSTOMERS
+        ) {
+            $paymentdate =
+                CrmBusinessSql::subscription_payment_date_expression(
+                    'funnelpayment'
+                );
+
+            $paymentcondition =
+                CrmBusinessSql::successful_subscription_payment_condition(
+                    'funnelpayment'
+                );
+
+            $conditions[] = "
+                EXISTS (
+                    SELECT 1
+                    FROM {subscription_payment_request}
+                        funnelpayment
+                    WHERE funnelpayment.userid = u.id
+                    AND {$paymentcondition}
+                GROUP BY funnelpayment.userid
+                    HAVING MIN({$paymentdate})
+                        >= :funnelstart
+                    AND MIN({$paymentdate})
+                        < :funnelend
+                )
+            ";
+
+            return;
+        }
+
+        if (
+            $criteria->funnelstage ===
+            UserExplorerCriteria::FUNNEL_DIGITAL_BUYERS
+        ) {
+            $paymentdate =
+                CrmBusinessSql::digital_payment_date_expression(
+                    'funneldigital'
+                );
+
+            $paymentcondition =
+                CrmBusinessSql::successful_digital_payment_condition(
+                    'funneldigital'
+                );
+
+            $conditions[] = "
+                EXISTS (
+                    SELECT 1
+                    FROM {subscription_digital_payment_request}
+                        funneldigital
+                    WHERE funneldigital.userid = u.id
+                    AND {$paymentcondition}
+                    AND {$paymentdate} >= :funnelstart
+                    AND {$paymentdate} < :funnelend
+                )
+            ";
+
+            return;
+        }
+
+        if (
+            $criteria->funnelstage ===
+            UserExplorerCriteria::FUNNEL_CONVERTED_TRIALS
+        ) {
+            $windowseconds =
+                $criteria->funnelwindow * DAYSECS;
+
+            $paymentdate =
+                CrmBusinessSql::subscription_payment_date_expression(
+                    'funnelconversionpayment'
+                );
+
+            $paymentcondition =
+                CrmBusinessSql::successful_subscription_payment_condition(
+                    'funnelconversionpayment'
+                );
+
+            $params['funnelwindowseconds'] =
+                $windowseconds;
+
+            $conditions[] = "
+                u.id IN (
+                    SELECT convertedcohort.userid
+                    FROM (
+                            SELECT
+                                trialcohort.userid,
+                                trialcohort.firsttrialdate
+
+                            FROM (
+                                    SELECT
+                                        funnelconversiontrial.userid,
+                                        MIN(
+                                            funnelconversiontrial.creation_date
+                                        ) AS firsttrialdate
+
+                                    FROM {user_subscription}
+                                        funnelconversiontrial
+
+                                    JOIN {subscription_plan}
+                                        funnelconversionplan
+                                        ON funnelconversionplan.id =
+                                            funnelconversiontrial.planid
+
+                                    WHERE funnelconversionplan.is_trial = 1
+                                GROUP BY
+                                        funnelconversiontrial.userid
+
+                                    HAVING MIN(
+                                        funnelconversiontrial.creation_date
+                                    ) >= :funnelstart
+
+                                    AND MIN(
+                                        funnelconversiontrial.creation_date
+                                    ) < :funnelend
+                            ) trialcohort
+
+                            WHERE EXISTS (
+                                    SELECT 1
+                                    FROM {subscription_payment_request}
+                                        funnelconversionpayment
+                                    WHERE funnelconversionpayment.userid =
+                                        trialcohort.userid
+                                    AND {$paymentcondition}
+                                    AND {$paymentdate} >=
+                                            trialcohort.firsttrialdate
+                                    AND {$paymentdate} <=
+                                            trialcohort.firsttrialdate
+                                            + :funnelwindowseconds
+                            )
+                    ) convertedcohort
+                )
+            ";
+        }
+    }
+
+    /**
+     * Apply one Dashboard CRM trend drill-down filter.
+     *
+     * This reproduces the Dashboard trends calculation:
+     * - latest persisted score during the selected period;
+     * - latest persisted score before the selected period;
+     * - minimum significant score difference.
+     *
+     * @param UserExplorerCriteria $criteria
+     * @param array<int, string> $conditions
+     * @param array<string, mixed> $params
+     * @return void
+     */
+    private function apply_trend_filter(
+        UserExplorerCriteria $criteria,
+        array &$conditions,
+        array &$params
+    ): void {
+        $filter = $criteria->trendfilter;
+
+        if (!$filter->is_active()) {
+            return;
+        }
+
+        $scorefield = $filter->score_field();
+
+        /*
+        * The SQL field cannot be passed as a bound parameter.
+        * It is therefore accepted only from this strict internal list.
+        */
+        if (
+            !in_array(
+                $scorefield,
+                [
+                    'engagementscore',
+                    'riskscore',
+                    'globalscore',
+                ],
+                true
+            )
+        ) {
+            return;
+        }
+
+        /*
+        * Moodle named SQL parameters must remain unique.
+        *
+        * The period start is needed twice, so two different
+        * parameter names are deliberately used.
+        */
+        $params['trendcurrentstart'] =
+            $filter->start;
+
+        $params['trendcurrentend'] =
+            $filter->end;
+
+        $params['trendbaselinestart'] =
+            $filter->start;
+
+        $params['trendcomparisondelta'] =
+            $filter->expects_increase()
+                ? $filter->delta
+                : -$filter->delta;
+
+        $operator = $filter->expects_increase()
+            ? '>='
+            : '<=';
+
+        $conditions[] = "
+            EXISTS (
+                SELECT 1
+
+                FROM {local_subscriptions_crm_score}
+                        trendcurrent
+
+                JOIN {local_subscriptions_crm_score}
+                        trendbaseline
+                    ON trendbaseline.userid =
+                        trendcurrent.userid
+
+                WHERE trendcurrent.userid = u.id
+
+                AND trendcurrent.id = (
+                        SELECT MAX(
+                            trendcurrentlatest.id
+                        )
+
+                        FROM {local_subscriptions_crm_score}
+                                trendcurrentlatest
+
+                        WHERE trendcurrentlatest.userid =
+                                trendcurrent.userid
+
+                        AND trendcurrentlatest.timecreated
+                                >= :trendcurrentstart
+
+                        AND trendcurrentlatest.timecreated
+                                < :trendcurrentend
+                )
+
+                AND trendbaseline.id = (
+                        SELECT MAX(
+                            trendbaselinelatest.id
+                        )
+
+                        FROM {local_subscriptions_crm_score}
+                                trendbaselinelatest
+
+                        WHERE trendbaselinelatest.userid =
+                                trendcurrent.userid
+
+                        AND trendbaselinelatest.timecreated
+                                < :trendbaselinestart
+                )
+
+                AND (
+                        trendcurrent.{$scorefield}
+                        - trendbaseline.{$scorefield}
+                ) {$operator} :trendcomparisondelta
+            )
+        ";
     }
 
     private function latest_score_join(): string {

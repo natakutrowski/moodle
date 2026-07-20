@@ -1312,9 +1312,8 @@ $string['dashboard_permission_payments'] = 'Paiements';
 $string['dashboard_permission_configuration'] = 'Configuration';
 $string['dashboard_today'] = 'Aujourd’hui';
 $string['dashboard_stats_new_users'] = 'Nouveaux utilisateurs';
-$string['dashboard_stats_new_subscriptions'] = 'Nouveaux abonnements';
 $string['dashboard_stats_digital_purchases'] = 'Achats digitaux';
-$string['dashboard_stats_revenue'] = 'CA digital';
+$string['dashboard_stats_revenue'] = 'Chiffre d’affaires';
 $string['dashboard_alerts'] = 'À traiter';
 $string['dashboard_alert_pending_digital'] = 'Achats digitaux en attente';
 $string['dashboard_alert_failed_digital'] = 'Achats digitaux échoués';
@@ -3838,3 +3837,587 @@ $string['crm_daily_priorities_item_fallback'] =
 
 $string['crm_intelligence_alert_fallback'] =
     'Alerte CRM à examiner';
+
+$string['dashboard_revenue_currency_select'] =
+    'Choisir la devise du chiffre d’affaires';
+
+$string['dashboard_revenue_subscriptions'] =
+    'Abonnements';
+
+$string['dashboard_revenue_digital'] =
+    'Produits digitaux';
+
+$string['dashboard_revenue_no_data'] =
+    'Aucun chiffre d’affaires sur cette période';
+
+$string['dashboard_new_trials'] = 'Nouveaux essais';
+$string['dashboard_new_customers'] = 'Nouveaux clients';
+
+$string['dashboard_trial_customer_ratio'] =
+    'Ratio clients / essais de la période';
+
+$string['dashboard_trial_customer_ratio_help'] =
+    'Compare les nouveaux clients et les utilisateurs ayant démarré un essai pendant la période sélectionnée. Cet indicateur n’est pas une conversion cohortée : un client peut avoir commencé son essai pendant une période antérieure.';
+
+$string['dashboard_trial_customer_ratio_unavailable'] = '—';
+
+$string['dashboard_trial_customer_ratio_value'] = '{$a} %';
+
+$string['dashboard_funnel_title'] =
+    'Funnel acquisition';
+
+$string['dashboard_funnel_subtitle'] =
+    'Cohortes et conversion vérifiable à {$a} jours';
+
+$string['dashboard_funnel_new_users'] =
+    'Nouveaux utilisateurs';
+
+$string['dashboard_funnel_trial_users'] =
+    'Premiers essais';
+
+$string['dashboard_funnel_new_customers'] =
+    'Nouveaux clients payants';
+
+$string['dashboard_funnel_digital_buyers'] =
+    'Acheteurs digitaux';
+
+$string['dashboard_funnel_conversion'] =
+    'Conversion des essais';
+
+$string['dashboard_funnel_conversion_details'] =
+    '{$a->converted} conversion(s) parmi {$a->mature} essai(s) ayant terminé leur fenêtre de {$a->days} jours';
+
+$string['dashboard_funnel_pending_observation'] =
+    '{$a} essai(s) récent(s) sont encore dans leur fenêtre d’observation.';
+
+$string['dashboard_funnel_rate_unavailable'] =
+    'Non disponible';
+
+$string['dashboard_funnel_rate_value'] =
+    '{$a} %';
+
+$string['dashboard_funnel_trend_stable'] =
+    'Stable par rapport à la période précédente';
+
+$string['dashboard_funnel_trend_not_comparable'] =
+    'Pas de comparaison disponible';
+
+$string['dashboard_funnel_trend_absolute'] =
+    '{$a} par rapport à la période précédente';
+
+$string['dashboard_funnel_trend_percent'] =
+    '{$a} % par rapport à la période précédente';
+
+$string['dashboard_funnel_trend_points'] =
+    '{$a} point(s) par rapport à la période précédente';
+
+$string['dashboard_funnel_explorer_active'] =
+    'Filtre Funnel actif';
+
+$string['dashboard_funnel_explorer_new_users'] =
+    'Utilisateurs créés pendant la période';
+
+$string['dashboard_funnel_explorer_trial_users'] =
+    'Utilisateurs dont le premier essai a commencé pendant la période';
+
+$string['dashboard_funnel_explorer_new_customers'] =
+    'Utilisateurs dont le premier paiement réussi a eu lieu pendant la période';
+
+$string['dashboard_funnel_explorer_digital_buyers'] =
+    'Acheteurs digitaux distincts pendant la période';
+
+$string['dashboard_funnel_explorer_converted_trials'] =
+    'Essais de la cohorte convertis dans la fenêtre de {$a} jours';
+
+// Phase 7.75E - Dashboard CRM trends.
+$string['crm_trends_subtitle'] = '{$a->analysed} utilisateurs comparables sur {$a->available} profils actualisés.';
+$string['crm_trends_users'] = 'utilisateur(s)';
+$string['crm_trends_previous_value'] = 'Période précédente : {$a}';
+$string['crm_trends_difference_only'] = '{$a} utilisateur(s)';
+$string['crm_trends_difference_with_percent'] = '{$a->difference} utilisateur(s) · {$a->variation} %';
+$string['crm_trends_stable'] = 'Stable';
+$string['crm_trends_open_explorer'] = 'Ouvrir l’Explorer';
+$string['crm_trends_freshness'] = 'Dernier snapshot : {$a}';
+$string['crm_trends_freshness_unknown'] = 'Date du dernier snapshot indisponible.';
+$string['crm_trends_no_current_data'] = 'Aucun snapshot Intelligence n’est disponible pour cette période.';
+$string['crm_trends_insufficient_data'] = 'Des snapshots existent, mais il n’y a pas encore assez d’historique pour calculer une évolution.';
+$string['crm_trends_no_movements'] = 'Aucune variation significative n’a été détectée pendant cette période.';
+$string['crm_trends_error'] = 'Les tendances CRM ne peuvent pas être chargées actuellement.';
+
+$string['crm_trends_metric_risk_up'] = 'Risque en hausse';
+$string['crm_trends_metric_risk_up_desc'] = 'Profils dont le score de risque a augmenté significativement.';
+$string['crm_trends_metric_risk_down'] = 'Risque en baisse';
+$string['crm_trends_metric_risk_down_desc'] = 'Profils dont le score de risque s’est amélioré significativement.';
+
+$string['crm_trends_metric_engagement_up'] = 'Engagement en hausse';
+$string['crm_trends_metric_engagement_up_desc'] = 'Profils dont le score d’engagement a progressé.';
+$string['crm_trends_metric_engagement_down'] = 'Engagement en baisse';
+$string['crm_trends_metric_engagement_down_desc'] = 'Profils dont le score d’engagement a diminué.';
+
+$string['crm_trends_metric_global_up'] = 'Score global en hausse';
+$string['crm_trends_metric_global_up_desc'] = 'Profils dont la santé CRM globale s’est améliorée.';
+$string['crm_trends_metric_global_down'] = 'Score global en baisse';
+$string['crm_trends_metric_global_down_desc'] = 'Profils dont la santé CRM globale s’est dégradée.';
+
+$string['crm_trends_metric_unknown'] = 'Évolution CRM';
+$string['crm_trends_metric_unknown_desc'] = 'Variation détectée dans les données CRM.';
+
+// Phase 7.75E - User Explorer trend drill-down.
+$string['crm_trends_metric_open'] = 'Afficher les utilisateurs concernés par : {$a}';
+$string['crm_user_explorer_trend_active'] = 'Filtre de tendance actif';
+$string['crm_user_explorer_trend_period'] = 'Du {$a->start} au {$a->end}';
+$string['crm_user_explorer_trend_threshold'] = 'Variation minimale : {$a} points';
+$string['crm_user_explorer_trend_clear'] = 'Quitter la tendance';
+
+$string['crm_intelligence_alert_priority_critical'] =
+    'Critique';
+
+$string['crm_intelligence_alert_priority_high'] =
+    'Élevée';
+
+$string['crm_intelligence_alert_priority_normal'] =
+    'Normale';
+
+$string['crm_intelligence_alert_priority_label'] =
+    'Priorité : {$a}';
+
+$string['crm_intelligence_alert_signal_date'] =
+    'Signal CRM évalué le {$a}';
+
+$string['crm_intelligence_alert_signal_age'] =
+    'Ancienneté du signal : {$a}';
+
+$string['crm_intelligence_alert_next_action_label'] =
+    'Prochaine action recommandée';
+
+$string['crm_intelligence_alert_next_action_high_risk_user'] =
+    'Vérifier la situation du client et organiser un suivi prioritaire.';
+
+$string['crm_intelligence_alert_next_action_trial_without_purchase'] =
+    'Contacter l’utilisateur pour identifier les freins à l’achat.';
+
+$string['crm_intelligence_alert_next_action_expired_without_reactivation'] =
+    'Proposer une réactivation ou une offre adaptée à son historique.';
+
+$string['crm_intelligence_alert_next_action_inactive_user'] =
+    'Vérifier la dernière activité et préparer une relance personnalisée.';
+
+$string['crm_intelligence_alert_next_action_hot_opportunity'] =
+    'Contacter rapidement l’utilisateur avec une proposition commerciale adaptée.';
+
+$string['crm_intelligence_alert_next_action_default'] =
+    'Consulter la fiche utilisateur et déterminer la prochaine action.';
+
+$string['crm_intelligence_alert_work_item'] =
+    'Work Item actif';
+
+$string['crm_intelligence_alert_cs_plan'] =
+    'Plan Customer Success';
+
+$string['crm_intelligence_alert_responsible'] =
+    'Responsable : {$a}';
+
+$string['crm_intelligence_alert_due_date'] =
+    'Échéance : {$a}';
+
+$string['crm_intelligence_alert_target_date'] =
+    'Date cible : {$a}';
+
+$string['crm_intelligence_alert_open_work_item'] =
+    'Ouvrir le Work Item';
+
+$string['crm_intelligence_alert_create_work_item'] =
+    'Créer un Work Item';
+
+$string['crm_intelligence_alert_open_cs_plan'] =
+    'Ouvrir le plan CS';
+
+$string['dashboard_state_loading_title'] =
+    'Chargement en cours';
+
+$string['dashboard_state_loading_description'] =
+    'Les informations de cette carte sont en cours de préparation.';
+
+$string['dashboard_state_error_title'] =
+    'Impossible de charger cette carte';
+
+$string['dashboard_state_error_description'] =
+    'Une erreur est survenue pendant le chargement des informations.';
+
+$string['dashboard_state_empty_title'] =
+    'Aucune information disponible';
+
+$string['dashboard_state_empty_description'] =
+    'Il n’y a rien à afficher pour le moment.';
+
+$string['dashboard_state_retry'] =
+    'Réessayer';
+
+$string['dashboard_open_all'] =
+    'Tout afficher';
+
+$string['admin_event_email_password_reset_notice_sent'] =
+    'Notification de réinitialisation du mot de passe envoyée';
+
+$string['admin_event_email_welcome_sent'] =
+    'E-mail de bienvenue envoyé';
+
+$string['admin_event_email_receipt_sent'] =
+    'Reçu de paiement envoyé';
+
+$string['admin_event_email_subscription_access_sent'] =
+    'Informations d’accès à l’abonnement envoyées';
+
+$string['admin_event_user_password_updated'] =
+    'Mot de passe utilisateur mis à jour';
+
+$string['admin_event_user_note_added'] =
+    'Note CRM ajoutée';
+
+$string['admin_event_subscription_created'] =
+    'Abonnement créé';
+
+$string['admin_event_subscription_created_manual'] =
+    'Abonnement créé manuellement';
+
+$string['admin_event_subscription_updated'] =
+    'Abonnement mis à jour';
+
+$string['admin_event_subscription_deleted'] =
+    'Abonnement supprimé';
+
+$string['admin_event_subscription_status_updated'] =
+    'Statut de l’abonnement mis à jour';
+
+$string['admin_event_subscription_dates_updated'] =
+    'Dates de l’abonnement mises à jour';
+
+$string['admin_event_subscription_created_auto'] =
+    'Abonnement créé automatiquement';
+
+$string['admin_event_subscription_extended'] =
+    'Abonnement prolongé';
+
+$string['admin_event_digital_provider_checked'] =
+    'Statut du paiement digital vérifié';
+
+$string['admin_event_payment_request_created'] =
+    'Demande de paiement créée';
+
+$string['admin_event_payment_request_paid'] =
+    'Demande de paiement payée';
+
+$string['admin_event_payment_request_failed'] =
+    'Échec de la demande de paiement';
+
+$string['admin_event_payment_request_cancelled'] =
+    'Demande de paiement annulée';
+
+$string['admin_event_trial_started'] =
+    'Période d’essai démarrée';
+
+$string['admin_event_trial_expired'] =
+    'Période d’essai expirée';
+
+$string['admin_event_work_item_created'] =
+    'Work Item créé';
+
+$string['admin_event_work_item_status_changed'] =
+    'Statut du Work Item modifié';
+
+$string['admin_event_work_item_priority_changed'] =
+    'Priorité du Work Item modifiée';
+
+$string['admin_event_work_item_assigned'] =
+    'Work Item attribué';
+
+$string['admin_event_work_item_comment_added'] =
+    'Commentaire ajouté au Work Item';
+
+$string['admin_event_work_item_linked'] =
+    'Élément lié au Work Item';
+
+$string['admin_event_work_item_suggestion_opened'] =
+    'Suggestion de Work Item ouverte';
+
+$string['admin_event_work_item_created_from_recommendation'] =
+    'Work Item créé depuis une recommandation';
+
+$string['admin_event_work_item_duplicate_override'] =
+    'Création forcée malgré un doublon potentiel';
+
+$string['admin_event_recommendation_created'] =
+    'Recommandation créée';
+
+$string['admin_event_recommendation_refreshed'] =
+    'Recommandation actualisée';
+
+$string['admin_event_recommendation_accepted'] =
+    'Recommandation acceptée';
+
+$string['admin_event_recommendation_dismissed'] =
+    'Recommandation ignorée';
+
+$string['admin_event_recommendation_completed'] =
+    'Recommandation terminée';
+
+$string['admin_event_recommendation_expired'] =
+    'Recommandation expirée';
+
+$string['admin_event_recommendation_run_completed'] =
+    'Génération des recommandations terminée';
+
+$string['admin_event_recommendation_run_partial'] =
+    'Génération des recommandations partiellement terminée';
+
+$string['admin_event_recommendation_run_failed'] =
+    'Échec de la génération des recommandations';
+
+$string['admin_event_recommendation_run_skipped'] =
+    'Génération des recommandations ignorée';
+
+$string['admin_event_description_reference'] =
+    'Référence : {$a}';
+
+$string['admin_event_description_transition'] =
+    '{$a->from} → {$a->to}';
+
+$string['admin_event_description_status'] =
+    'Statut : {$a}';
+
+$string['admin_event_description_priority'] =
+    'Priorité : {$a}';
+
+$string['admin_event_description_plan'] =
+    'Plan : {$a}';
+
+$string['admin_event_description_contact'] =
+    'Contact : {$a}';
+
+$string['admin_event_description_recommendation'] =
+    'Recommandation : {$a}';
+
+$string['admin_event_description_cs_plan'] =
+    '{$a->reference} — {$a->title}';
+
+$string['admin_event_description_cs_step'] =
+    '{$a->plan} — {$a->step}';
+
+$string['dashboard_activity_actor'] =
+    'Par {$a}';
+
+$string['dashboard_activity_system_actor'] =
+    'Action automatique';
+
+$string['dashboard_activity_open'] =
+    'Ouvrir';
+
+$string['dashboard_activity_target'] =
+    'Client : {$a}';
+
+$string['dashboard_activity_exact_date'] =
+    'Enregistré le {$a}';
+
+$string['crm_app_navigation'] =
+    'Navigation principale du CRM';
+
+$string['crm_admin_tools_title'] =
+    'Boîte à outils administrateur';
+
+$string['crm_admin_tools_description'] =
+    'Exécutez et contrôlez les opérations techniques du CRM depuis une interface sécurisée.';
+
+$string['crm_admin_tool_busy'] =
+    'Cette opération est déjà en cours d’exécution.';
+
+$string['crm_admin_tool_failed'] =
+    'L’opération a échoué. Consultez son historique pour plus de détails.';
+
+$string['crm_admin_tool_status_running'] =
+    'En cours';
+
+$string['crm_admin_tool_status_success'] =
+    'Terminée';
+
+$string['crm_admin_tool_status_failed'] =
+    'Échec';
+
+$string['crm_admin_tool_status_busy'] =
+    'Déjà en cours';
+
+$string['crm_admin_tool_status_cancelled'] =
+    'Annulée';
+
+$string['crm_admin_tool_risk_low'] =
+    'Risque faible';
+
+$string['crm_admin_tool_risk_normal'] =
+    'Risque modéré';
+
+$string['crm_admin_tool_risk_high'] =
+    'Risque élevé';
+
+$string['crm_admin_tools_nav'] =
+    'Outils';
+
+$string['crm_admin_tool_unknown'] =
+    'L’outil administrateur demandé est introuvable.';
+
+$string['crm_admin_tools_empty'] =
+    'Aucun outil administrateur n’est disponible pour votre rôle.';
+
+$string['crm_admin_tool_open'] =
+    'Ouvrir';
+
+$string['crm_admin_tool_execute'] =
+    'Exécuter maintenant';
+
+$string['crm_admin_tool_confirmation_warning'] =
+    'Cette opération peut modifier les données du CRM. Vérifiez les paramètres avant de continuer.';
+
+$string['crm_admin_tool_limit'] =
+    'Nombre maximal d’éléments à traiter';
+
+$string['crm_admin_tool_reset_cursor'] =
+    'Reprendre le traitement des recommandations depuis le début';
+
+$string['crm_admin_tool_never_run'] =
+    'Jamais exécuté';
+
+$string['crm_admin_tool_last_run'] =
+    'Dernière exécution : {$a->date} — {$a->status}';
+
+$string['crm_admin_tool_history'] =
+    'Historique des opérations';
+
+$string['crm_admin_tool_history_empty'] =
+    'Aucune opération administrateur n’a encore été exécutée.';
+
+$string['crm_admin_tool_history_date'] =
+    'Date';
+
+$string['crm_admin_tool_history_tool'] =
+    'Outil';
+
+$string['crm_admin_tool_history_actor'] =
+    'Utilisateur';
+
+$string['crm_admin_tool_history_status'] =
+    'État';
+
+$string['crm_admin_tool_history_duration'] =
+    'Durée';
+
+$string['crm_admin_tool_inbox_sync'] =
+    'Synchroniser la CRM Inbox';
+
+$string['crm_admin_tool_inbox_sync_desc'] =
+    'Récupère les nouveaux messages des comptes Inbox actifs.';
+
+$string['crm_admin_tool_inbox_sync_success'] =
+    'La synchronisation Inbox est terminée.';
+
+$string['crm_admin_tool_inbox_sync_partial'] =
+    'La synchronisation Inbox est terminée avec des erreurs.';
+
+$string['crm_admin_tool_inbox_diagnostics'] =
+    'Diagnostiquer la CRM Inbox';
+
+$string['crm_admin_tool_inbox_diagnostics_desc'] =
+    'Contrôle la configuration, les tables, les identifiants et les connexions IMAP/SMTP.';
+
+$string['crm_admin_tool_inbox_diagnostics_success'] =
+    'Tous les contrôles Inbox sont valides.';
+
+$string['crm_admin_tool_inbox_diagnostics_failed'] =
+    'Certains contrôles Inbox ont échoué.';
+
+$string['crm_admin_tool_automations'] =
+    'Relancer les automatisations';
+
+$string['crm_admin_tool_automations_desc'] =
+    'Exécute immédiatement les scanners et règles d’automatisation CRM.';
+
+$string['crm_admin_tool_automations_success'] =
+    'Les automatisations CRM ont été exécutées.';
+
+$string['crm_admin_tool_intelligence'] =
+    'Recalculer les scores Intelligence';
+
+$string['crm_admin_tool_intelligence_desc'] =
+    'Recalcule et mémorise les snapshots des scores CRM.';
+
+$string['crm_admin_tool_intelligence_success'] =
+    'Les snapshots Intelligence ont été recalculés.';
+
+$string['crm_admin_tool_recommendations'] =
+    'Recalculer les recommandations';
+
+$string['crm_admin_tool_recommendations_desc'] =
+    'Exécute un nouveau lot du moteur de recommandations CRM.';
+
+$string['crm_admin_tool_recommendations_success'] =
+    'Le lot de recommandations est terminé.';
+
+$string['crm_admin_tool_recommendations_partial'] =
+    'Le lot de recommandations est terminé partiellement ou avec des erreurs.';
+
+$string['crm_admin_tool_digital_reconciliation'] =
+    'Réconcilier les paiements digitaux';
+
+$string['crm_admin_tool_digital_reconciliation_desc'] =
+    'Vérifie auprès des fournisseurs les demandes de paiement digital encore en attente.';
+
+$string['crm_admin_tool_digital_reconciliation_success'] =
+    'La réconciliation des paiements digitaux est terminée.';
+
+$string['crm_admin_tool_digital_reconciliation_partial'] =
+    'La réconciliation digitale est terminée avec des erreurs.';
+
+$string['crm_admin_tool_help_validation'] =
+    'Valider le Help Center';
+
+$string['crm_admin_tool_help_validation_desc'] =
+    'Contrôle les articles, les guides, l’onboarding et les traductions du Help Center.';
+
+$string['crm_admin_tool_help_validation_success'] =
+    'Le Help Center est valide.';
+
+$string['crm_admin_tool_help_validation_failed'] =
+    'Le Help Center contient des erreurs.';
+
+$string['csplancommandsubtitle'] =
+    'Ouvrir et gérer le plan Customer Success de cet utilisateur';
+
+$string['crm_admin_tool_confirmation_required'] =
+    'Vous devez confirmer explicitement cette opération avant de l’exécuter.';
+
+$string['crm_admin_tool_confirmation_checkbox'] =
+    'Je comprends les conséquences de cette opération et je confirme son exécution.';
+
+$string['crm_admin_tool_limit_help'] =
+    'Valeur par défaut : {$a->default}. Maximum autorisé : {$a->maximum}.';
+
+$string['crm_admin_tool_unknown_actor'] =
+    'Utilisateur indisponible (#{$a})';
+
+$string['err_invalid_redirect_url'] =
+    'La passerelle de paiement a retourné une adresse de redirection invalide.';
+
+$string['payment_error_session_create'] =
+    'La page de paiement n’a pas pu être ouverte. Aucun paiement n’a été effectué. Vous pouvez réessayer dans quelques instants.';
+
+$string['payment_error_digital_session_create'] =
+    'La page de paiement de votre achat n’a pas pu être ouverte. Aucun paiement n’a été effectué.';
+
+$string['payment_error_retry'] =
+    'La nouvelle tentative de paiement n’a pas pu être lancée. Aucun nouveau paiement n’a été effectué.';
+
+$string['payment_error_invalid_redirect'] =
+    'La passerelle de paiement a retourné une adresse invalide. Aucun paiement n’a été effectué.';
+
+$string['payment_error_provider_unavailable'] =
+    'La passerelle de paiement est momentanément indisponible. Aucun paiement n’a été effectué.';
+
+$string['payment_error_reference'] =
+    'Référence de l’incident : {$a}';

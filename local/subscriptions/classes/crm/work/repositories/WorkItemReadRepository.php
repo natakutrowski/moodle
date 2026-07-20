@@ -217,6 +217,126 @@ final class WorkItemReadRepository {
         ));
     }
 
+    /**
+     * Returns the highest-priority active Work Item for each requested user.
+     *
+     * The method performs one grouped SQL query and never creates an N+1 query.
+     *
+     * @param int[] $userids
+     * @return array<int,\stdClass>
+     */
+    public function get_primary_active_for_users(
+        array $userids
+    ): array {
+        global $DB;
+
+        $userids = array_values(
+            array_unique(
+                array_filter(
+                    array_map(
+                        'intval',
+                        $userids
+                    ),
+                    static fn(int $userid): bool =>
+                        $userid > 0
+                )
+            )
+        );
+
+        if ($userids === []) {
+            return [];
+        }
+
+        [
+            $usersql,
+            $userparams,
+        ] = $DB->get_in_or_equal(
+            $userids,
+            SQL_PARAMS_NAMED,
+            'alertworkuser'
+        );
+
+        [
+            $statussql,
+            $statusparams,
+        ] = $DB->get_in_or_equal(
+            WorkItemStatus::active(),
+            SQL_PARAMS_NAMED,
+            'alertworkstatus'
+        );
+
+        $records = $DB->get_records_sql(
+            "SELECT item.*,
+                    assignee.firstname
+                        AS assigneefirstname,
+                    assignee.lastname
+                        AS assigneelastname,
+                    assignee.firstnamephonetic
+                        AS assigneefirstnamephonetic,
+                    assignee.lastnamephonetic
+                        AS assigneelastnamephonetic,
+                    assignee.middlename
+                        AS assigneemiddlename,
+                    assignee.alternatename
+                        AS assigneealternatename,
+                    team.name AS teamname
+
+            FROM {local_subscriptions_work_item} item
+
+        LEFT JOIN {user} assignee
+                ON assignee.id =
+                    item.assigneduserid
+
+        LEFT JOIN {local_subscriptions_work_team} team
+                ON team.id =
+                    item.assignedteamid
+
+            WHERE item.targetuserid {$usersql}
+                AND item.status {$statussql}
+
+        ORDER BY item.targetuserid ASC,
+
+                    CASE item.priority
+                        WHEN 'critical' THEN 1
+                        WHEN 'urgent' THEN 2
+                        WHEN 'high' THEN 3
+                        WHEN 'normal' THEN 4
+                        WHEN 'low' THEN 5
+                        ELSE 6
+                    END ASC,
+
+                    CASE
+                        WHEN item.dueat IS NULL
+                        OR item.dueat = 0
+                        THEN 1
+                        ELSE 0
+                    END ASC,
+
+                    item.dueat ASC,
+                    item.timemodified DESC,
+                    item.id DESC",
+            $userparams + $statusparams
+        );
+
+        $result = [];
+
+        foreach ($records as $record) {
+            $userid =
+                (int)$record->targetuserid;
+
+            if (
+                $userid <= 0 ||
+                isset($result[$userid])
+            ) {
+                continue;
+            }
+
+            $result[$userid] = $record;
+        }
+
+        return $result;
+    }
+
     public function get_user_summary(int $userid, int $limit = 5): \stdClass {
         global $DB;
 

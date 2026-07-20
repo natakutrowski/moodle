@@ -41,20 +41,28 @@ final class CrmAlertReadRepository {
                 score.globalscore,
                 score.segmentsjson,
                 score.opportunitiesjson,
-                score.timecreated AS snapshottime
+                score.timecreated AS snapshottime,
 
-              FROM {" . self::SCORE_TABLE . "} score
+                u.firstname,
+                u.lastname,
+                u.firstnamephonetic,
+                u.lastnamephonetic,
+                u.middlename,
+                u.alternatename,
+                u.email
 
-              JOIN {user} u
+            FROM {" . self::SCORE_TABLE . "} score
+
+            JOIN {user} u
                 ON u.id = score.userid
-               AND u.deleted = 0
-               AND u.suspended = 0
+            AND u.deleted = 0
+            AND u.suspended = 0
 
-             WHERE NOT EXISTS (
+            WHERE NOT EXISTS (
                     SELECT 1
-                      FROM {" . self::SCORE_TABLE . "} newer
-                     WHERE newer.userid = score.userid
-                       AND (
+                    FROM {" . self::SCORE_TABLE . "} newer
+                    WHERE newer.userid = score.userid
+                    AND (
                             newer.timecreated >
                                 score.timecreated
                             OR (
@@ -63,13 +71,13 @@ final class CrmAlertReadRepository {
                                 AND newer.id >
                                     score.id
                             )
-                       )
-             )
+                    )
+            )
 
-          ORDER BY score.riskscore DESC,
-                   score.commercialscore DESC,
-                   score.timecreated DESC,
-                   score.id DESC
+        ORDER BY score.riskscore DESC,
+                score.commercialscore DESC,
+                score.timecreated DESC,
+                score.id DESC
             ",
             [],
             0,

@@ -90,7 +90,6 @@ final class CrmAlertBuilder {
     private function build_for_snapshot(
         \stdClass $snapshot
     ): array {
-        $userid = (int)$snapshot->userid;
         $commercialscore =
             (int)$snapshot->commercialscore;
         $riskscore =
@@ -107,11 +106,11 @@ final class CrmAlertBuilder {
         $alerts = [];
 
         if ($riskscore >= 60) {
-            $alerts[] = new CrmAlert(
+            $alerts[] = $this->create_alert(
+                snapshot: $snapshot,
                 key: 'high_risk_user',
                 severity: 'danger',
-                priority: 95,
-                userid: $userid
+                priority: 95
             );
         }
 
@@ -122,11 +121,11 @@ final class CrmAlertBuilder {
                 true
             )
         ) {
-            $alerts[] = new CrmAlert(
+            $alerts[] = $this->create_alert(
+                snapshot: $snapshot,
                 key: 'trial_without_purchase',
                 severity: 'warning',
-                priority: 85,
-                userid: $userid
+                priority: 85
             );
         }
 
@@ -137,11 +136,11 @@ final class CrmAlertBuilder {
                 true
             )
         ) {
-            $alerts[] = new CrmAlert(
+            $alerts[] = $this->create_alert(
+                snapshot: $snapshot,
                 key: 'expired_without_reactivation',
                 severity: 'warning',
-                priority: 80,
-                userid: $userid
+                priority: 80
             );
         }
 
@@ -152,11 +151,11 @@ final class CrmAlertBuilder {
                 true
             )
         ) {
-            $alerts[] = new CrmAlert(
+            $alerts[] = $this->create_alert(
+                snapshot: $snapshot,
                 key: 'inactive_user',
                 severity: 'warning',
-                priority: 70,
-                userid: $userid
+                priority: 70
             );
         }
 
@@ -164,15 +163,105 @@ final class CrmAlertBuilder {
             $commercialscore >= 60 &&
             $riskscore <= 20
         ) {
-            $alerts[] = new CrmAlert(
+            $alerts[] = $this->create_alert(
+                snapshot: $snapshot,
                 key: 'hot_opportunity',
                 severity: 'success',
-                priority: 75,
-                userid: $userid
+                priority: 75
             );
         }
 
         return $alerts;
+    }
+
+    /**
+     * Creates an enriched alert from one persisted Intelligence snapshot.
+     *
+     * All data comes from the repository query. This method must never reload
+     * the Moodle user or invoke an Intelligence calculation.
+     */
+    private function create_alert(
+        \stdClass $snapshot,
+        string $key,
+        string $severity,
+        int $priority
+    ): CrmAlert {
+        return new CrmAlert(
+            key: $key,
+            severity: $severity,
+            priority: $priority,
+            userid: (int)$snapshot->userid,
+            displayname: fullname($snapshot),
+            email: self::nullable_string(
+                $snapshot->email ?? null
+            ),
+            snapshottime: self::nullable_positive_int(
+                $snapshot->snapshottime ?? null
+            ),
+            commercialscore: self::nullable_int(
+                $snapshot->commercialscore ?? null
+            ),
+            engagementscore: self::nullable_int(
+                $snapshot->engagementscore ?? null
+            ),
+            riskscore: self::nullable_int(
+                $snapshot->riskscore ?? null
+            ),
+            globalscore: self::nullable_int(
+                $snapshot->globalscore ?? null
+            )
+        );
+    }
+
+    /**
+     * Normalizes an optional integer value.
+     */
+    private static function nullable_int(
+        mixed $value
+    ): ?int {
+        if (
+            $value === null ||
+            $value === ''
+        ) {
+            return null;
+        }
+
+        return (int)$value;
+    }
+
+    /**
+     * Normalizes an optional positive integer value.
+     */
+    private static function nullable_positive_int(
+        mixed $value
+    ): ?int {
+        $value = self::nullable_int($value);
+
+        if (
+            $value === null ||
+            $value <= 0
+        ) {
+            return null;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Normalizes an optional string value.
+     */
+    private static function nullable_string(
+        mixed $value
+    ): ?string {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        return $value !== ''
+            ? $value
+            : null;
     }
 
     /**

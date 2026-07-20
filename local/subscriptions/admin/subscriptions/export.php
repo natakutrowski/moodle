@@ -3,6 +3,7 @@
 
 require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/excellib.class.php');
+use local_subscriptions\subscription_config;
 
 require_login();
 
@@ -15,7 +16,9 @@ define('LOCAL_SUBSCRIPTIONS_SCOPE_A1', 15);
 
 $download = optional_param('download', 0, PARAM_BOOL);
 
-$PAGE->set_url(new moodle_url('/local/subscriptions/admin/subscriptions_export.php'));
+$PAGE->set_url(
+    new moodle_url(subscription_config::subscriptions_export_page())
+);
 $PAGE->set_context($context);
 $PAGE->set_title('Export des souscriptions');
 $PAGE->set_heading('Export des souscriptions');
@@ -25,9 +28,10 @@ if (!$download) {
 
     echo $OUTPUT->heading('Export des souscriptions utilisateurs');
 
-    $url = new moodle_url('/local/subscriptions/admin/subscriptions_export.php', [
-        'download' => 1,
-    ]);
+    $url = new moodle_url(
+        subscription_config::subscriptions_export_page(),
+        ['download' => 1]
+    );
 
     echo html_writer::div(
         html_writer::link($url, 'Télécharger le fichier Excel', [

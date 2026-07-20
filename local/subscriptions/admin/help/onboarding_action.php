@@ -13,6 +13,16 @@ $context = AdminSecurity::require(
     Capabilities::VIEW_DASHBOARD
 );
 
+if (
+    ($_SERVER['REQUEST_METHOD'] ?? '') !==
+    'POST'
+) {
+    throw new moodle_exception(
+        'invalidrequest',
+        'error'
+    );
+}
+
 require_sesskey();
 
 $action = required_param(

@@ -83,16 +83,32 @@ if ($data = $mform->get_data()) {
     );
 }
 
-if ($delete && confirm_sesskey()) {
-    $entitlement = $DB->get_record('subscription_plan_entitlement', [
-        'id' => $delete,
-        'planid' => $planid,
-    ], '*', MUST_EXIST);
+if ($delete) {
+    require_sesskey();
 
-    $DB->delete_records('subscription_plan_entitlement', ['id' => $entitlement->id]);
+    $entitlement = $DB->get_record(
+        'subscription_plan_entitlement',
+        [
+            'id' => $delete,
+            'planid' => $planid,
+        ],
+        '*',
+        MUST_EXIST
+    );
 
-    redirect($pageurl,
-        get_string('entitlementdeleted', 'local_subscriptions'),
+    $DB->delete_records(
+        'subscription_plan_entitlement',
+        [
+            'id' => $entitlement->id,
+        ]
+    );
+
+    redirect(
+        $pageurl,
+        get_string(
+            'entitlementdeleted',
+            'local_subscriptions'
+        ),
         null,
         \core\output\notification::NOTIFY_SUCCESS
     );

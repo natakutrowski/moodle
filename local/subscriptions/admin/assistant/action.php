@@ -13,6 +13,16 @@ AdminSecurity::require(
     Capabilities::MANAGE_USERS
 );
 
+if (
+    ($_SERVER['REQUEST_METHOD'] ?? '') !==
+    'POST'
+) {
+    throw new moodle_exception(
+        'invalidrequest',
+        'error'
+    );
+}
+
 require_sesskey();
 
 $recommendationid = required_param(

@@ -74,7 +74,6 @@ class local_subscriptions_scopes_renderer extends plugin_renderer_base {
             $editurl = new moodle_url(subscription_config::manage_page(), [
                 'tab' => 'scopes',
                 'edit' => $s->id,
-                'sesskey' => sesskey()
             ]);
             $deleteurl = new moodle_url(subscription_config::manage_page(), [
                 'tab' => 'scopes',
@@ -83,7 +82,6 @@ class local_subscriptions_scopes_renderer extends plugin_renderer_base {
             ]);
             $translationurl = new moodle_url(subscription_config::scopes_translations_page(), [
                 'scopeid' => $s->id,
-                'sesskey' => sesskey()
             ]);
 
             $icons = [];

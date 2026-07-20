@@ -122,7 +122,8 @@ final class Dashboard {
         $out .= html_writer::div(
             self::render_card(
                 'CrmFunnelCard',
-                static fn(): string => CrmFunnelCard::render()
+                static fn(): string =>
+                    CrmFunnelCard::render()
             ),
             'crm-dashboard-panel-slot'
         );

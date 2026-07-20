@@ -5,12 +5,13 @@ require_once(__DIR__ . '/../../../../config.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\crm\user\explorer\UserExplorerCriteria;
-use local_subscriptions\crm\user\explorer\UserExplorerService;
 use local_subscriptions\crm\user\explorer\UserExplorerRenderer;
+use local_subscriptions\crm\user\explorer\UserExplorerService;
 
 global $PAGE, $OUTPUT;
 
@@ -59,7 +60,8 @@ $PAGE->add_body_class(
 
 $PAGE->requires->css(
     new moodle_url(
-        subscription_config::plugin_stylesheet_page()
+        subscription_config::
+            plugin_stylesheet_page()
     )
 );
 
@@ -68,15 +70,19 @@ $PAGE->requires->js_call_amd(
     'init'
 );
 
-$result = (new UserExplorerService())
-    ->explore(
-        $criteria,
-        $canviewinbox
-    );
+$result =
+    (new UserExplorerService())
+        ->explore(
+            $criteria,
+            $canviewinbox
+        );
 
 echo $OUTPUT->header();
 
-echo AdminNavigation::back_button();
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::USERS,
+    $context
+);
 
 echo CrmPageHeader::render(
     get_string(
@@ -90,6 +96,10 @@ echo CrmPageHeader::render(
     HelpContext::USER_EXPLORER
 );
 
-echo UserExplorerRenderer::render($result);
+echo UserExplorerRenderer::render(
+    $result
+);
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

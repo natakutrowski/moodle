@@ -106,6 +106,126 @@ final class CustomerSuccessPlanReadRepository {
         return $plans;
     }
 
+    /**
+     * Returns the highest-priority open Customer Success plan
+     * for each requested user.
+     *
+     * This summary query intentionally does not load plan steps.
+     *
+     * @param int[] $userids
+     * @return array<int,\stdClass>
+     */
+    public function get_primary_open_for_users(
+        array $userids
+    ): array {
+        global $DB;
+
+        $userids = array_values(
+            array_unique(
+                array_filter(
+                    array_map(
+                        'intval',
+                        $userids
+                    ),
+                    static fn(int $userid): bool =>
+                        $userid > 0
+                )
+            )
+        );
+
+        if ($userids === []) {
+            return [];
+        }
+
+        [
+            $usersql,
+            $userparams,
+        ] = $DB->get_in_or_equal(
+            $userids,
+            SQL_PARAMS_NAMED,
+            'alertcsuser'
+        );
+
+        [
+            $statussql,
+            $statusparams,
+        ] = $DB->get_in_or_equal(
+            CustomerSuccessPlanStatus::open(),
+            SQL_PARAMS_NAMED,
+            'alertcsstatus'
+        );
+
+        $records = $DB->get_records_sql(
+            "SELECT plan.*,
+                    assignee.firstname
+                        AS assigneefirstname,
+                    assignee.lastname
+                        AS assigneelastname,
+                    assignee.firstnamephonetic
+                        AS assigneefirstnamephonetic,
+                    assignee.lastnamephonetic
+                        AS assigneelastnamephonetic,
+                    assignee.middlename
+                        AS assigneemiddlename,
+                    assignee.alternatename
+                        AS assigneealternatename,
+                    team.name AS teamname
+
+            FROM {" . self::PLAN_TABLE . "} plan
+
+        LEFT JOIN {user} assignee
+                ON assignee.id =
+                    plan.assigneduserid
+
+        LEFT JOIN {local_subscriptions_work_team} team
+                ON team.id =
+                    plan.assignedteamid
+
+            WHERE plan.userid {$usersql}
+                AND plan.status {$statussql}
+
+        ORDER BY plan.userid ASC,
+
+                    CASE plan.priority
+                        WHEN 'critical' THEN 1
+                        WHEN 'urgent' THEN 2
+                        WHEN 'high' THEN 3
+                        WHEN 'normal' THEN 4
+                        WHEN 'low' THEN 5
+                        ELSE 6
+                    END ASC,
+
+                    CASE
+                        WHEN plan.targetdate IS NULL
+                        OR plan.targetdate = 0
+                        THEN 1
+                        ELSE 0
+                    END ASC,
+
+                    plan.targetdate ASC,
+                    plan.timemodified DESC,
+                    plan.id DESC",
+            $userparams + $statusparams
+        );
+
+        $result = [];
+
+        foreach ($records as $record) {
+            $userid = (int)$record->userid;
+
+            if (
+                $userid <= 0 ||
+                isset($result[$userid])
+            ) {
+                continue;
+            }
+
+            $result[$userid] = $record;
+        }
+
+        return $result;
+    }
+
     public function find_open_by_fingerprint(
         string $fingerprint
     ): ?CustomerSuccessPlan {

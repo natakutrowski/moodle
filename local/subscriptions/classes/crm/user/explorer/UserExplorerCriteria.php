@@ -22,6 +22,13 @@ final class UserExplorerCriteria {
     public const ACTIVITY_90_DAYS = '90days';
     public const ACTIVITY_NEVER = 'never';
 
+    public const FUNNEL_NONE = '';
+    public const FUNNEL_NEW_USERS = 'new_users';
+    public const FUNNEL_TRIAL_USERS = 'trial_users';
+    public const FUNNEL_NEW_CUSTOMERS = 'new_customers';
+    public const FUNNEL_DIGITAL_BUYERS = 'digital_buyers';
+    public const FUNNEL_CONVERTED_TRIALS = 'converted_trials';    
+
     public function __construct(
         public readonly string $query = '',
         public readonly string $intelligence = '',
@@ -42,7 +49,18 @@ final class UserExplorerCriteria {
         public readonly string $hasinboxunread = '',
         public readonly string $hascustomer_success_plan = '',
         public readonly string $customer_success_plan_blocked = '',
-        public readonly string $customer_success_plan_status = ''
+        public readonly string $customer_success_plan_status = '',
+        public readonly string $funnelstage = '',
+        public readonly int $funnelstart = 0,
+        public readonly int $funnelend = 0,
+        public readonly int $funnelwindow = 30,
+        public readonly UserExplorerTrendFilter $trendfilter =
+            new UserExplorerTrendFilter(
+                '',
+                0,
+                0,
+                5
+            )
     ) {
     }
 
@@ -161,7 +179,39 @@ final class UserExplorerCriteria {
                     '',
                     PARAM_ALPHANUMEXT
                 )
-            )
+            ),
+            self::normalize_funnel_stage(
+                optional_param(
+                    'funnelstage',
+                    '',
+                    PARAM_ALPHANUMEXT
+                )
+            ),
+            max(
+                0,
+                optional_param(
+                    'funnelstart',
+                    0,
+                    PARAM_INT
+                )
+            ),
+            max(
+                0,
+                optional_param(
+                    'funnelend',
+                    0,
+                    PARAM_INT
+                )
+            ),
+            self::normalize_funnel_window(
+                optional_param(
+                    'funnelwindow',
+                    30,
+                    PARAM_INT
+                )
+            ),
+            trendfilter:
+                self::trend_filter_from_request()
         );
     }
 
@@ -229,7 +279,28 @@ final class UserExplorerCriteria {
                     $params['customer_success_plan_status']
                     ?? ''
                 )
-            )
+            ),
+            self::normalize_funnel_stage(
+                (string)($params['funnelstage'] ?? '')
+            ),
+            max(
+                0,
+                (int)($params['funnelstart'] ?? 0)
+            ),
+            max(
+                0,
+                (int)($params['funnelend'] ?? 0)
+            ),
+            self::normalize_funnel_window(
+                (int)($params['funnelwindow'] ?? 30)
+            ),
+            trendfilter:
+                UserExplorerTrendFilter::create(
+                    (string)($params['trend'] ?? ''),
+                    (int)($params['trendstart'] ?? 0),
+                    (int)($params['trendend'] ?? 0),
+                    (int)($params['trenddelta'] ?? 5)
+                )
         );
     }
 
@@ -304,8 +375,8 @@ final class UserExplorerCriteria {
 
     public function without_inbox(): self {
         if (
-            $this->hasinbox === '' &&
-            $this->hasinboxunread === ''
+            $this->hasinbox === ''
+            && $this->hasinboxunread === ''
         ) {
             return $this;
         }
@@ -330,7 +401,12 @@ final class UserExplorerCriteria {
             self::PRESENCE_ALL,
             $this->hascustomer_success_plan,
             $this->customer_success_plan_blocked,
-            $this->customer_success_plan_status
+            $this->customer_success_plan_status,
+            $this->funnelstage,
+            $this->funnelstart,
+            $this->funnelend,
+            $this->funnelwindow,
+            $this->trendfilter
         );
     }
 
@@ -355,7 +431,12 @@ final class UserExplorerCriteria {
             $this->hasinboxunread,
             $this->hascustomer_success_plan,
             $this->customer_success_plan_blocked,
-            $this->customer_success_plan_status
+            $this->customer_success_plan_status,
+            $this->funnelstage,
+            $this->funnelstart,
+            $this->funnelend,
+            $this->funnelwindow,
+            $this->trendfilter
         );
     }
     
@@ -396,10 +477,26 @@ final class UserExplorerCriteria {
 
             'customer_success_plan_status' =>
                 $this->customer_success_plan_status,
+            'funnelstage' => $this->funnelstage,
         ] as $key => $value) {
             if ($value !== '') {
                 $params[$key] = $value;
             }
+        }
+
+        if (
+            $this->funnelstage !== ''
+            && $this->funnelstart > 0
+            && $this->funnelend > $this->funnelstart
+        ) {
+            $params['funnelstart'] =
+                $this->funnelstart;
+
+            $params['funnelend'] =
+                $this->funnelend;
+
+            $params['funnelwindow'] =
+                $this->funnelwindow;
         }
 
         foreach ([
@@ -412,6 +509,11 @@ final class UserExplorerCriteria {
                 $params[$key] = $value;
             }
         }
+
+        $params = array_merge(
+            $params,
+            $this->trendfilter->params()
+        );
 
         return $params;
     }
@@ -435,13 +537,23 @@ final class UserExplorerCriteria {
             $this->scoremax,
             $this->riskmin,
             $this->riskmax,
+            $this->funnelstage,
         ];
 
-        return count(array_filter(
-            $values,
-            static fn($value): bool =>
-                $value !== '' && $value !== null
-        ));
+        $count = count(
+            array_filter(
+                $values,
+                static fn(mixed $value): bool =>
+                    $value !== ''
+                    && $value !== null
+            )
+        );
+
+        if ($this->trendfilter->is_active()) {
+            $count++;
+        }
+
+        return $count;
     }
 
     private static function normalize_account_status(
@@ -518,4 +630,84 @@ final class UserExplorerCriteria {
             true
         ) ? $perpage : 25;
     }
+
+    /**
+     * Normalize one Dashboard Funnel drill-down stage.
+     *
+     * @param string $stage
+     * @return string
+     */
+    private static function normalize_funnel_stage(
+        string $stage
+    ): string {
+        return in_array(
+            $stage,
+            [
+                self::FUNNEL_NONE,
+                self::FUNNEL_NEW_USERS,
+                self::FUNNEL_TRIAL_USERS,
+                self::FUNNEL_NEW_CUSTOMERS,
+                self::FUNNEL_DIGITAL_BUYERS,
+                self::FUNNEL_CONVERTED_TRIALS,
+            ],
+            true
+        ) ? $stage : self::FUNNEL_NONE;
+    }
+
+    /**
+     * Normalize the cohort conversion observation window.
+     *
+     * @param int $days
+     * @return int
+     */
+    private static function normalize_funnel_window(
+        int $days
+    ): int {
+        return max(
+            1,
+            min(365, $days)
+        );
+    }
+
+    /**
+     * Whether a valid Funnel drill-down is active.
+     *
+     * @return bool
+     */
+    public function has_funnel_filter(): bool {
+        return
+            $this->funnelstage !== self::FUNNEL_NONE
+            && $this->funnelstart > 0
+            && $this->funnelend > $this->funnelstart;
+    }    
+
+    /**
+     * Read and normalize the Dashboard trend drill-down.
+     */
+    private static function trend_filter_from_request():
+            UserExplorerTrendFilter {
+        return UserExplorerTrendFilter::create(
+            optional_param(
+                'trend',
+                '',
+                PARAM_ALPHANUMEXT
+            ),
+            optional_param(
+                'trendstart',
+                0,
+                PARAM_INT
+            ),
+            optional_param(
+                'trendend',
+                0,
+                PARAM_INT
+            ),
+            optional_param(
+                'trenddelta',
+                5,
+                PARAM_INT
+            )
+        );
+    }
+
 }

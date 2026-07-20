@@ -114,4 +114,19 @@ $capabilities = [
         ],
     ],
 
+    'local/subscriptions:manage_crm_admin_tools' => [
+        'riskbitmask' =>
+            RISK_CONFIG |
+            RISK_DATALOSS |
+            RISK_PERSONAL,
+
+        'captype' => 'write',
+
+        'contextlevel' => CONTEXT_SYSTEM,
+
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
 ];

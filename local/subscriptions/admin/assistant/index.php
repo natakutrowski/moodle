@@ -10,6 +10,8 @@ use local_subscriptions\crm\assistant\rendering\CrmAssistantRenderer;
 use local_subscriptions\crm\assistant\services\CrmAssistantService;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\subscription_config;
 use local_subscriptions\crm\intelligence\recommendations\RecommendationStatus;
 use local_subscriptions\crm\intelligence\recommendations\RecommendationType;
@@ -118,8 +120,9 @@ $PAGE->requires->js_call_amd(
 
 echo $OUTPUT->header();
 
-echo html_writer::start_div(
-    'local-subscriptions-crm-workspace-shell'
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::ASSISTANT,
+    $context
 );
 
 echo CrmPageHeader::render(
@@ -155,6 +158,6 @@ echo CrmAssistantRenderer::workspace(
     $workspace
 );
 
-echo html_writer::end_div();
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

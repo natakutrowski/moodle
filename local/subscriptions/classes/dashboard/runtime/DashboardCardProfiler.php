@@ -4,14 +4,17 @@ namespace local_subscriptions\dashboard\runtime;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\dashboard\ui\DashboardCardUi;
+
 /**
- * Measures the runtime cost of a Dashboard Card.
+ * Measures and protects the runtime execution of a Dashboard Card.
  *
- * The profiler is presentation-neutral:
- * - it does not alter the returned HTML;
- * - it does not catch or hide exceptions;
- * - it does not execute database queries itself;
- * - it only measures and logs in developer debugging mode.
+ * The profiler:
+ * - isolates Card rendering failures;
+ * - returns a safe common error state;
+ * - never exposes technical exception details in the UI;
+ * - does not execute database queries itself;
+ * - records metrics only in developer debugging mode.
  */
 final class DashboardCardProfiler {
 
@@ -26,26 +29,93 @@ final class DashboardCardProfiler {
         string $cardname,
         callable $renderer
     ): string {
-        if (!self::is_enabled()) {
-            return (string)$renderer();
-        }
-
-        global $DB;
+        $profilingenabled =
+            self::is_enabled();
 
         $startedat = microtime(true);
-        $querystart = self::get_query_count($DB);
-        $memorystart = memory_get_usage(true);
+        $querystart = null;
+        $memorystart =
+            memory_get_usage(true);
+
+        if ($profilingenabled) {
+            global $DB;
+
+            $querystart =
+                self::get_query_count($DB);
+        }
 
         try {
             return (string)$renderer();
-        } finally {
-            self::log_metrics(
+        } catch (\Throwable $exception) {
+            self::log_rendering_failure(
                 $cardname,
-                $startedat,
-                $querystart,
-                $memorystart
+                $exception
             );
+
+            return DashboardCardUi::shell(
+                content:
+                    DashboardCardUi::
+                        error_state(
+                            title: get_string(
+                                'dashboard_state_error_title',
+                                'local_subscriptions'
+                            ),
+                            description: get_string(
+                                'dashboard_state_error_description',
+                                'local_subscriptions'
+                            )
+                        ),
+                extraclasses:
+                    'crm-dashboard-runtime-error'
+            );
+        } finally {
+            if ($profilingenabled) {
+                self::log_metrics(
+                    $cardname,
+                    $startedat,
+                    $querystart,
+                    $memorystart
+                );
+            }
         }
+    }
+
+    /**
+     * Records a Card rendering failure without exposing it in the UI.
+     */
+    private static function log_rendering_failure(
+        string $cardname,
+        \Throwable $exception
+    ): void {
+        $message = sprintf(
+            '[CRM Dashboard] card=%s rendering_error=%s',
+            self::normalize_identifier(
+                $cardname
+            ),
+            str_replace(
+                [
+                    "\r",
+                    "\n",
+                ],
+                ' ',
+                $exception->getMessage()
+            )
+        );
+
+        if (
+            defined('CLI_SCRIPT') &&
+            CLI_SCRIPT
+        ) {
+            mtrace($message);
+            return;
+        }
+
+        error_log($message);
+
+        debugging(
+            $message,
+            DEBUG_DEVELOPER
+        );
     }
 
     /**

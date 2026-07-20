@@ -7,6 +7,8 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\help\HelpRegistry;
 use local_subscriptions\crm\help\HelpArticleLoader;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $PAGE, $OUTPUT;
 
@@ -74,6 +76,11 @@ $content = (new HelpArticleLoader())->render(
 
 echo $OUTPUT->header();
 
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::HELP,
+    $context
+);
+
 echo html_writer::start_div(
     'crm-help-article-layout'
 );
@@ -130,6 +137,21 @@ if ($category !== null) {
             $classes .= ' active';
         }
 
+        $isactive =
+            $categoryarticle->id === $article->id;
+
+        if ($isactive) {
+            $classes .= ' active';
+        }
+
+        $linkattributes = [
+            'class' => $classes,
+        ];
+
+        if ($isactive) {
+            $linkattributes['aria-current'] = 'page';
+        }
+
         echo html_writer::link(
             new moodle_url(
                 subscription_config::admin_help_article_page(),
@@ -138,9 +160,7 @@ if ($category !== null) {
                 ]
             ),
             s($categoryarticle->title),
-            [
-                'class' => $classes,
-            ]
+            $linkattributes
         );
     }
 
@@ -183,5 +203,7 @@ echo html_writer::div(
 
 echo html_writer::end_tag('article');
 echo html_writer::end_div();
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

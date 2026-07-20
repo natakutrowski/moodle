@@ -11,6 +11,8 @@ use local_subscriptions\crm\work\dto\CreateWorkItemRequest;
 use local_subscriptions\crm\work\rendering\WorkItemRenderer;
 use local_subscriptions\crm\work\repositories\WorkItemReadRepository;
 use local_subscriptions\crm\work\services\WorkItemService;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\subscription_config;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_WORK_ITEMS);
@@ -68,13 +70,63 @@ $repository = new WorkItemReadRepository();
 $teams = $repository->get_teams();
 $assignees = $repository->get_assignees();
 
+$pageurl = new moodle_url(
+    subscription_config::admin_work_item_create_page()
+);
+
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url(subscription_config::admin_work_item_create_page()));
+$PAGE->set_url($pageurl);
 $PAGE->set_pagelayout('admin');
-$PAGE->set_title(get_string('crm_work_create', 'local_subscriptions'));
-$PAGE->set_heading(get_string('crm_work_create', 'local_subscriptions'));
+$PAGE->set_title(
+    get_string(
+        'crm_work_create',
+        'local_subscriptions'
+    )
+);
+$PAGE->set_heading(
+    get_string(
+        'crm_work_create',
+        'local_subscriptions'
+    )
+);
+
+$PAGE->add_body_class(
+    'local-subscriptions-crm-workspace'
+);
+$PAGE->add_body_class(
+    'local-subscriptions-work-page'
+);
+$PAGE->add_body_class(
+    'local-subscriptions-work-create-page'
+);
+
+$PAGE->requires->css(
+    new moodle_url(
+        subscription_config::plugin_stylesheet_page()
+    )
+);
 
 echo $OUTPUT->header();
+
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::WORK,
+    $context
+);
+
+echo html_writer::link(
+    new moodle_url(
+        subscription_config::admin_work_items_page()
+    ),
+    '← ' . get_string(
+        'crm_work_back',
+        'local_subscriptions'
+    ),
+    [
+        'class' =>
+            'crm-app-back-link btn btn-link ps-0 mb-3',
+    ]
+);
+
 echo html_writer::start_tag('form', [
     'method' => 'post',
     'action' => subscription_config::admin_work_item_create_page(),
@@ -106,4 +158,7 @@ echo html_writer::label(get_string('crm_work_due', 'local_subscriptions'), 'id_d
 echo html_writer::empty_tag('input', ['type' => 'datetime-local', 'name' => 'dueat', 'id' => 'id_dueat', 'class' => 'form-control mb-3']);
 echo html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-primary', 'value' => get_string('crm_work_create', 'local_subscriptions')]);
 echo html_writer::end_tag('form');
+
+echo CrmWorkspaceRenderer::end();
+
 echo $OUTPUT->footer();

@@ -100,4 +100,41 @@ final class UrlFactory {
         return new moodle_url('/local/subscriptions/download_pdf.php', $params);
     }
 
+    /**
+     * Valide une URL de redirection externe fournie par une passerelle.
+     *
+     * Seules les URLs HTTPS absolues sont acceptées.
+     *
+     * @param string $url URL fournie par le provider.
+     * @return string URL validée.
+     */
+    public static function validate_external_payment_url(
+        string $url
+    ): string {
+        $url = trim($url);
+
+        if ($url === '') {
+            throw new \moodle_exception(
+                'err_no_redirect_url',
+                'local_subscriptions'
+            );
+        }
+
+        $parts = parse_url($url);
+
+        if (
+            !is_array($parts) ||
+            strtolower((string)($parts['scheme'] ?? '')) !==
+                'https' ||
+            trim((string)($parts['host'] ?? '')) === ''
+        ) {
+            throw new \moodle_exception(
+                'err_invalid_redirect_url',
+                'local_subscriptions'
+            );
+        }
+
+        return $url;
+    }
+
 }

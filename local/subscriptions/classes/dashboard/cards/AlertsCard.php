@@ -6,6 +6,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use local_subscriptions\dashboard\DashboardCard;
+use local_subscriptions\dashboard\ui\DashboardCardUi;
 use local_subscriptions\dashboard\services\DashboardIssueService;
 
 final class AlertsCard implements DashboardCard {
@@ -18,56 +19,41 @@ final class AlertsCard implements DashboardCard {
             static fn($issue): bool => $issue->has_items()
         );
 
-        $out = html_writer::start_div(
-            'card card-body local-subscriptions-dashboard-card crm-dashboard-panel crm-issues-card'
+        $content = DashboardCardUi::header(
+            title: get_string(
+                'dashboard_issues_title',
+                'local_subscriptions'
+            ),
+            icon: '⚠️',
+            subtitle: get_string(
+                'dashboard_issues_subtitle',
+                'local_subscriptions'
+            ),
+            titleid: 'crm-dashboard-issues-title'
         );
-
-        $out .= html_writer::start_div('crm-dashboard-panel-header');
-        $out .= html_writer::start_div();
-
-        $out .= html_writer::tag(
-            'h3',
-            '⚠️ ' . get_string('dashboard_issues_title', 'local_subscriptions'),
-            ['class' => 'h5 mb-1']
-        );
-
-        $out .= html_writer::div(
-            get_string('dashboard_issues_subtitle', 'local_subscriptions'),
-            'text-muted small'
-        );
-
-        $out .= html_writer::end_div();
-        $out .= html_writer::end_div();
 
         if (!$activeissues) {
-            $out .= html_writer::div(
-                html_writer::div(
-                    '✓',
-                    'crm-issues-empty-icon'
-                ) .
-                html_writer::div(
-                    get_string(
-                        'dashboard_issues_empty_title',
-                        'local_subscriptions'
-                    ),
-                    'crm-issues-empty-title'
-                ) .
-                html_writer::div(
-                    get_string(
-                        'dashboard_issues_empty_description',
-                        'local_subscriptions'
-                    ),
-                    'crm-issues-empty-description'
+            $content .= DashboardCardUi::empty_state(
+                title: get_string(
+                    'dashboard_issues_empty_title',
+                    'local_subscriptions'
                 ),
-                'crm-issues-empty'
+                description: get_string(
+                    'dashboard_issues_empty_description',
+                    'local_subscriptions'
+                ),
+                icon: '✓',
+                tone: DashboardCardUi::TONE_SUCCESS
             );
 
-            $out .= html_writer::end_div();
-
-            return $out;
+            return DashboardCardUi::shell(
+                content: $content,
+                extraclasses: 'crm-issues-card',
+                labelledby: 'crm-dashboard-issues-title'
+            );
         }
 
-        $out .= html_writer::start_div('crm-issues-list mt-3');
+        $content .= html_writer::start_div('crm-issues-list mt-3');
 
         foreach ($activeissues as $issue) {
             $classes = [
@@ -79,32 +65,32 @@ final class AlertsCard implements DashboardCard {
                 $classes[] = 'has-issue';
             }
 
-            $out .= html_writer::start_div(implode(' ', $classes));
+            $content .= html_writer::start_div(implode(' ', $classes));
 
-            $out .= html_writer::start_div('crm-issue-main');
+            $content .= html_writer::start_div('crm-issue-main');
 
-            $out .= html_writer::div(
+            $content .= html_writer::div(
                 (string)$issue->count,
                 'crm-issue-count'
             );
 
-            $out .= html_writer::start_div('crm-issue-body');
+            $content .= html_writer::start_div('crm-issue-body');
 
-            $out .= html_writer::div(
+            $content .= html_writer::div(
                 s($issue->title),
                 'crm-issue-title'
             );
 
-            $out .= html_writer::div(
+            $content .= html_writer::div(
                 s($issue->description),
                 'crm-issue-description'
             );
 
-            $out .= html_writer::end_div();
-            $out .= html_writer::end_div();
+            $content .= html_writer::end_div();
+            $content .= html_writer::end_div();
 
             if ($issue->has_primary_action()) {
-                $out .= html_writer::link(
+                $content .= html_writer::link(
                     $issue->primaryactionurl,
                     s($issue->primaryactionlabel),
                     [
@@ -113,12 +99,15 @@ final class AlertsCard implements DashboardCard {
                 );
             }
 
-            $out .= html_writer::end_div();
+            $content .= html_writer::end_div();
         }
 
-        $out .= html_writer::end_div();
-        $out .= html_writer::end_div();
+        $content .= html_writer::end_div();
 
-        return $out;
+        return DashboardCardUi::shell(
+            content: $content,
+            extraclasses: 'crm-issues-card',
+            labelledby: 'crm-dashboard-issues-title'
+        );
     }
 }

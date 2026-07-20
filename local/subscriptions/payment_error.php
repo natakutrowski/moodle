@@ -2,6 +2,7 @@
 require_once(__DIR__.'/../../config.php');
 
 use local_subscriptions\url\UrlFactory;
+use local_subscriptions\payment\PaymentFailureReporter;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -14,10 +15,34 @@ function ls_money_fmt(float $amount, string $cur): string {
     return $usesymbol ? ($amt.' '.$sym) : ($amt.' '.$cur);
 }
 
-$code = optional_param('code', '', PARAM_ALPHANUMEXT);
-$msg  = optional_param('msg',  '', PARAM_RAW_TRIMMED);
-$pid  = optional_param('pid',  0,    PARAM_INT);
-$lang = optional_param('lang','', PARAM_ALPHANUMEXT);
+$code = optional_param(
+    'code',
+    'session_create',
+    PARAM_ALPHANUMEXT
+);
+
+$reference = optional_param(
+    'reference',
+    '',
+    PARAM_ALPHANUMEXT
+);
+
+$pid = optional_param(
+    'pid',
+    0,
+    PARAM_INT
+);
+
+$lang = optional_param(
+    'lang',
+    '',
+    PARAM_ALPHANUMEXT
+);
+
+$code =
+    PaymentFailureReporter::normalize_public_code(
+        $code
+    );
 if ($lang !== '') {
     // Ne pas utiliser force_current_language() ici
     $SESSION->lang = $lang;   // langue de session "normale", modifiable via le sélecteur
@@ -26,39 +51,128 @@ if ($lang !== '') {
 
 global $DB, $SITE, $OUTPUT, $CFG;
 
-$PAGE->set_url(UrlFactory::payment_error(['code'=>$code, 'pid'=>$pid]));
+$pageparams = [
+    'code' =>
+        $code,
+
+    'pid' =>
+        $pid,
+];
+
+if ($reference !== '') {
+    $pageparams['reference'] =
+        $reference;
+}
+
+$PAGE->set_url(
+    UrlFactory::payment_error(
+        $pageparams
+    )
+);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('payui_error_title', 'local_subscriptions'));
 $PAGE->set_heading(format_string($SITE->fullname));
 
 $map = [
-    'security'       => 'payui_reason_security',
-    'link'           => 'payui_reason_link',
-    'currency'       => 'payui_reason_currency',
-    'amount'         => 'payui_reason_amount',
-    'gateway'        => 'payui_reason_gateway',
-    'canceled'       => 'payui_reason_canceled',
-    'declined'       => 'payui_reason_declined',
-    'expired'        => 'payui_reason_expired',
-    'owner'          => 'payui_reason_owner',
-    'status'         => 'payui_reason_status',
-    'invalidsesskey' => 'payui_reason_security',
-    'session_create' => 'payui_reason_gateway',
-    'no_redirect'    => 'payui_reason_link',
+    'security' =>
+        'payui_reason_security',
+
+    'link' =>
+        'payui_reason_link',
+
+    'currency' =>
+        'payui_reason_currency',
+
+    'amount' =>
+        'payui_reason_amount',
+
+    'gateway' =>
+        'payui_reason_gateway',
+
+    'canceled' =>
+        'payui_reason_canceled',
+
+    'declined' =>
+        'payui_reason_declined',
+
+    'expired' =>
+        'payui_reason_expired',
+
+    'owner' =>
+        'payui_reason_owner',
+
+    'status' =>
+        'payui_reason_status',
+
+    'invalidsesskey' =>
+        'payui_reason_security',
+
+    'session_create' =>
+        'payment_error_session_create',
+
+    'payment_retry' =>
+        'payment_error_retry',
+
+    'digital_session_create' =>
+        'payment_error_digital_session_create',
+
+    'invalid_redirect' =>
+        'payment_error_invalid_redirect',
+
+    'provider_unavailable' =>
+        'payment_error_provider_unavailable',
+
+    'no_redirect' =>
+        'payui_reason_link',
 ];
 
-$key      = $map[$code] ?? null;
-$reason   = $key ? get_string($key,'local_subscriptions') : get_string('payui_error_generic','local_subscriptions');
-$subtitle = get_string('payui_error_subtitle','local_subscriptions');
-$generic  = get_string('payui_error_generic','local_subscriptions');
-$orderref = $pid ? get_string('payui_order_ref','local_subscriptions',$pid) : '';
+$key = $map[$code] ?? null;
+
+$reason = $key
+    ? get_string(
+        $key,
+        'local_subscriptions'
+    )
+    : get_string(
+        'payui_error_generic',
+        'local_subscriptions'
+    );
+
+$subtitle = get_string(
+    'payui_error_subtitle',
+    'local_subscriptions'
+);
+
+$generic = get_string(
+    'payui_error_generic',
+    'local_subscriptions'
+);
+
+$orderref = $pid
+    ? get_string(
+        'payui_order_ref',
+        'local_subscriptions',
+        $pid
+    )
+    : '';
 
 $support  = get_config('local_subscriptions','support_email') ?: 'support@campusfr.fr';
 $backUrl  = UrlFactory::subscribe();
 $backLbl  = get_string('payui_cta_back','local_subscriptions');
 $retryLbl = get_string('payui_cta_retry','local_subscriptions');
 $contact  = get_string('payui_cta_contact','local_subscriptions');
+
+$supportsubject = 'Payment error';
+
+if ($pid) {
+    $supportsubject .= ' #' . $pid;
+}
+
+if ($reference !== '') {
+    $supportsubject .=
+        ' [' . $reference . ']';
+}
 
 $retryUrl = null;
 if ($pid) {
@@ -91,6 +205,20 @@ echo html_writer::tag('p', s($generic),  ['class'=>'mb-3']);
 
 if (!empty($orderref)) {
     echo html_writer::div(html_writer::span(s($orderref), 'small text-muted'), 'mb-3');
+}
+
+if ($reference !== '') {
+    echo html_writer::div(
+        html_writer::span(
+            get_string(
+                'payment_error_reference',
+                'local_subscriptions',
+                s($reference)
+            ),
+            'small text-muted'
+        ),
+        'mb-3'
+    );
 }
 
 // --- Prix prévu (inchangé) ---
@@ -136,10 +264,6 @@ if ($prLocal) {
     }
 }
 
-if ($msg && (is_siteadmin() || !empty($CFG->debugdeveloper))) {
-    echo html_writer::div(html_writer::tag('pre', s($msg), ['class'=>'small text-muted']), 'mt-2');
-}
-
 // Boutons
 echo html_writer::start_div('d-flex flex-wrap gap-2 mt-2');
 if ($retryUrl) {
@@ -147,9 +271,18 @@ if ($retryUrl) {
 }
 echo html_writer::link($backUrl, $backLbl, ['class'=>'btn btn-outline-secondary']);
 echo html_writer::link(
-    new moodle_url('mailto:'.$support, ['subject'=>'Payment error '.($pid ? '#'.$pid : '')]),
+    new moodle_url(
+        'mailto:' . $support,
+        [
+            'subject' =>
+                $supportsubject,
+        ]
+    ),
     $contact,
-    ['class'=>'btn btn-link']
+    [
+        'class' =>
+            'btn btn-link',
+    ]
 );
 echo html_writer::end_div(); // ctas
 

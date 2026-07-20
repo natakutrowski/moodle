@@ -9,6 +9,8 @@ use local_subscriptions\digital\product_manager;
 use local_subscriptions\payment\PaymentGatewayFactory;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
+use local_subscriptions\payment\PaymentFailureReporter;
+use local_subscriptions\constants\Status;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -105,31 +107,130 @@ $options = [
 ];
 
 try {
-    $result = $gateway->create_checkout_session($pr, $options);
+    $result = $gateway->create_checkout_session(
+        $pr,
+        $options
+    );
 } catch (\Throwable $e) {
-    $DB->update_record(product_manager::TABLE_PAYMENT_REQUEST, (object)[
-        'id' => $pr->id,
-        'status' => 'failed',
-        'last_error' => '[checkout_create_failed] ' . $e->getMessage(),
-        'last_update' => time(),
-    ]);
+    $reference =
+        PaymentFailureReporter::generate_reference();
 
-    redirect(UrlFactory::digital_cancel([
-        'pid' => $pr->id,
-        'uilang' => $uilang,
-        'error' => 'gateway_timeout',
-    ]));
+    $technicalmessage =
+        PaymentFailureReporter::technical_message(
+            $e,
+            $reference,
+            'digital_checkout_create'
+        );
+
+    PaymentFailureReporter::log(
+        $e,
+        $reference,
+        'digital_checkout_create',
+        [
+            'payment_request_id' =>
+                (int)$pr->id,
+
+            'provider' =>
+                (string)$provider,
+
+            'currency' =>
+                (string)$pr->currency,
+
+            'product_id' =>
+                (int)$product->id,
+
+            'slug' =>
+                (string)$product->slug,
+        ]
+    );
+
+    $DB->update_record(
+        product_manager::TABLE_PAYMENT_REQUEST,
+        (object)[
+            'id' =>
+                (int)$pr->id,
+
+            'status' =>
+                Status::FAILED,
+
+            'last_error' =>
+                $technicalmessage,
+
+            'last_update' =>
+                time(),
+        ]
+    );
+
+    redirect(
+        UrlFactory::digital_cancel(
+            [
+                'pid' =>
+                    (int)$pr->id,
+
+                'uilang' =>
+                    $uilang,
+
+                'error' =>
+                    'gateway',
+
+                'reference' =>
+                    $reference,
+            ]
+        )
+    );
 }
+
+$redirecturl = '';
+
+if (is_string($result)) {
+    $redirecturl = $result;
+} elseif (is_array($result)) {
+    $redirecturl =
+        $result['redirect_url'] ??
+        $result['url'] ??
+        '';
+} elseif (is_object($result)) {
+    if (
+        property_exists(
+            $result,
+            'redirect_url'
+        )
+    ) {
+        $redirecturl =
+            $result->redirect_url;
+    } elseif (
+        method_exists(
+            $result,
+            'getUrl'
+        )
+    ) {
+        $redirecturl =
+            $result->getUrl();
+    } elseif (
+        method_exists(
+            $result,
+            'get_redirect_url'
+        )
+    ) {
+        $redirecturl =
+            $result->get_redirect_url();
+    }
+}
+
+$redirecturl =
+    UrlFactory::validate_external_payment_url(
+        (string)$redirecturl
+    );
 
 $update = new stdClass();
-$update->id = $pr->id;
-$update->payment_link = $result->redirect_url;
+$update->id = (int)$pr->id;
+$update->payment_link = $redirecturl;
+$update->last_error = null;
 $update->last_update = time();
 
-if (!empty($result->provider_session_id)) {
-    $update->sessionid = $result->provider_session_id;
-}
+$DB->update_record(
+    product_manager::TABLE_PAYMENT_REQUEST,
+    $update
+);
 
-$DB->update_record(product_manager::TABLE_PAYMENT_REQUEST, $update);
-
-redirect($result->redirect_url);
+redirect($redirecturl);

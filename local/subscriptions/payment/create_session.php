@@ -12,10 +12,12 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\payment\Provider;
 use local_subscriptions\payment\ProviderSelector;
 use local_subscriptions\payment\PaymentGatewayFactory;
-use local_subscriptions\constants\Status;
+use local_subscriptions\payment\PaymentFailureReporter;
 use local_subscriptions\constants\PaymentReturn;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Operation;
+use local_subscriptions\constants\Status;
+
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -571,6 +573,7 @@ $uselock = (isset($pr->locked_final_price) && (float)$pr->locked_final_price > 0
 // - UPGRADE_NOW_REPLACE_CHAIN (on encaisse la différence maintenant) OU
 // - QUEUE_FUTURE (on encaisse maintenant) OU
 // - il y a une remise verrouillée (ex. trial -15%).
+$op = $pr->operation ?? $operation;
 $needlockedpayment = $uselock && (
     $op === Operation::UPGRADE_NOW_REPLACE_CHAIN
     || $op === Operation::QUEUE_FUTURE
@@ -626,46 +629,124 @@ try {
         elseif (method_exists($result, 'get_redirect_url'))   { $url = $result->get_redirect_url(); }
     }
 
-    if (empty($url)) {
-        throw new \moodle_exception('err_no_redirect_url', 'local_subscriptions');
-    }
+    // Valider l’URL externe retournée par la passerelle.
+    //
+    // On accepte uniquement une URL HTTPS absolue avec un nom d’hôte.
+    // Cette validation s’applique aussi bien à Stripe qu’à Alfa.
+    $url = UrlFactory::validate_external_payment_url(
+        (string)$url
+    );
 
     // Si on est en mode popup (embedded=1) et provider = STRIPE,
     // on sort de l'iframe pour afficher Stripe Checkout au niveau top.
-    if ($embedded && $provider === Provider::STRIPE) {
-        while (ob_get_level()) { @ob_end_clean(); }
+    if (
+        $embedded &&
+        $provider === Provider::STRIPE
+    ) {
+        while (ob_get_level()) {
+            @ob_end_clean();
+        }
+
         \core\session\manager::write_close();
 
-        $safeurl = (new moodle_url($url))->out(false);
-        echo '<!doctype html><html><head><meta charset="utf-8"><script>
-            try {
-                if (window.top && window.top !== window) {
-                    window.top.location.href = '.json_encode($safeurl).';
-                } else {
-                    window.location.href = '.json_encode($safeurl).';
-                }
-            } catch (e) {
-                window.location.href = '.json_encode($safeurl).';
-            }
-        </script></head><body></body></html>';
+        echo '<!doctype html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <script>
+                    try {
+                        if (
+                            window.top &&
+                            window.top !== window
+                        ) {
+                            window.top.location.href = ' .
+                                json_encode($url) .
+                            ';
+                        } else {
+                            window.location.href = ' .
+                                json_encode($url) .
+                            ';
+                        }
+                    } catch (e) {
+                        window.location.href = ' .
+                            json_encode($url) .
+                        ';
+                    }
+                </script>
+            </head>
+            <body></body>
+            </html>';
+
         exit;
     }
 
-    // Cas normal (Alfa, ou Stripe en plein écran)
-    redirect(new moodle_url($url));
-
+    // Cas normal : Alfa ou Stripe en plein écran.
+    redirect($url);
 
 } catch (\Throwable $e) {
-    // Log & UX
-    $DB->update_record('subscription_payment_request', (object)[
-        'id'         => $pr->id,
-        'last_error' => $e->getMessage(),
-        'status'     => PaymentReturn::ERROR,
-        'last_update'=> time(),
-    ]);
-    redirect(UrlFactory::payment_error([
-        'code' => 'session_create',
-        'msg'  => $e->getMessage(),
-    ]));
-    exit;
+    $reference =
+        PaymentFailureReporter::
+            generate_reference();
+
+    $technicalmessage =
+        PaymentFailureReporter::
+            technical_message(
+                $e,
+                $reference,
+                'subscription_checkout_create'
+            );
+
+    PaymentFailureReporter::log(
+        $e,
+        $reference,
+        'subscription_checkout_create',
+        [
+            'payment_request_id' =>
+                (int)$pr->id,
+
+            'provider' =>
+                (string)$provider,
+
+            'currency' =>
+                (string)(
+                    $pr->currency ??
+                    $currency
+                ),
+
+            'operation' =>
+                (string)(
+                    $pr->operation ??
+                    $operation
+                ),
+        ]
+    );
+
+    $DB->update_record(
+        'subscription_payment_request',
+        (object)[
+            'id' =>
+                (int)$pr->id,
+
+            'last_error' =>
+                $technicalmessage,
+
+            'status' =>
+                Status::FAILED,
+
+            'last_update' =>
+                time(),
+        ]
+    );
+
+    redirect(
+        UrlFactory::payment_error(
+            [
+                'code' =>
+                    'session_create',
+
+                'reference' =>
+                    $reference,
+            ]
+        )
+    );
 }

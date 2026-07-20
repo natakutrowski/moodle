@@ -1322,9 +1322,8 @@ $string['dashboard_permission_payments'] = 'Платежи';
 $string['dashboard_permission_configuration'] = 'Конфигурация';
 $string['dashboard_today'] = 'Сегодня';
 $string['dashboard_stats_new_users'] = 'Новые пользователи';
-$string['dashboard_stats_new_subscriptions'] = 'Новые подписки';
 $string['dashboard_stats_digital_purchases'] = 'Цифровые покупки';
-$string['dashboard_stats_revenue'] = 'Выручка digital';
+$string['dashboard_stats_revenue'] = 'Выручка';
 $string['dashboard_alerts'] = 'Требует внимания';
 $string['dashboard_alert_pending_digital'] = 'Цифровые покупки в ожидании';
 $string['dashboard_alert_failed_digital'] = 'Неудачные цифровые покупки';
@@ -4075,3 +4074,587 @@ $string['crm_daily_priorities_item_fallback'] =
 
 $string['crm_intelligence_alert_fallback'] =
     'Предупреждение CRM для проверки';
+
+$string['dashboard_revenue_currency_select'] =
+    'Выбрать валюту выручки';
+
+$string['dashboard_revenue_subscriptions'] =
+    'Подписки';
+
+$string['dashboard_revenue_digital'] =
+    'Цифровые продукты';
+
+$string['dashboard_revenue_no_data'] =
+    'За этот период выручки нет';
+
+$string['dashboard_new_trials'] = 'Новые пробные подписки';
+$string['dashboard_new_customers'] = 'Новые клиенты';
+
+$string['dashboard_trial_customer_ratio'] =
+    'Соотношение клиентов и пробных подписок за период';
+
+$string['dashboard_trial_customer_ratio_help'] =
+    'Сравнивает новых клиентов с пользователями, начавшими пробную подписку за выбранный период. Это не когортная конверсия: клиент мог начать пробную подписку в более ранний период.';
+
+$string['dashboard_trial_customer_ratio_unavailable'] = '—';
+
+$string['dashboard_trial_customer_ratio_value'] = '{$a} %';
+
+$string['dashboard_funnel_title'] =
+    'Воронка привлечения';
+
+$string['dashboard_funnel_subtitle'] =
+    'Когорты и проверяемая конверсия за {$a} дней';
+
+$string['dashboard_funnel_new_users'] =
+    'Новые пользователи';
+
+$string['dashboard_funnel_trial_users'] =
+    'Первые пробные подписки';
+
+$string['dashboard_funnel_new_customers'] =
+    'Новые платящие клиенты';
+
+$string['dashboard_funnel_digital_buyers'] =
+    'Покупатели цифровых продуктов';
+
+$string['dashboard_funnel_conversion'] =
+    'Конверсия пробных подписок';
+
+$string['dashboard_funnel_conversion_details'] =
+    '{$a->converted} конверсий среди {$a->mature} пробных подписок с завершённым периодом наблюдения {$a->days} дней';
+
+$string['dashboard_funnel_pending_observation'] =
+    '{$a} недавних пробных подписок всё ещё находятся в периоде наблюдения.';
+
+$string['dashboard_funnel_rate_unavailable'] =
+    'Недоступно';
+
+$string['dashboard_funnel_rate_value'] =
+    '{$a} %';
+
+$string['dashboard_funnel_trend_stable'] =
+    'Без изменений по сравнению с предыдущим периодом';
+
+$string['dashboard_funnel_trend_not_comparable'] =
+    'Сравнение недоступно';
+
+$string['dashboard_funnel_trend_absolute'] =
+    '{$a} по сравнению с предыдущим периодом';
+
+$string['dashboard_funnel_trend_percent'] =
+    '{$a} % по сравнению с предыдущим периодом';
+
+$string['dashboard_funnel_trend_points'] =
+    '{$a} п.п. по сравнению с предыдущим периодом';
+
+$string['dashboard_funnel_explorer_active'] =
+    'Активен фильтр воронки';
+
+$string['dashboard_funnel_explorer_new_users'] =
+    'Пользователи, созданные за выбранный период';
+
+$string['dashboard_funnel_explorer_trial_users'] =
+    'Пользователи, чья первая пробная подписка началась за выбранный период';
+
+$string['dashboard_funnel_explorer_new_customers'] =
+    'Пользователи, чей первый успешный платёж выполнен за выбранный период';
+
+$string['dashboard_funnel_explorer_digital_buyers'] =
+    'Уникальные покупатели цифровых продуктов за период';
+
+$string['dashboard_funnel_explorer_converted_trials'] =
+    'Пробные подписки когорты, конвертированные в течение {$a} дней';
+
+// Phase 7.75E - Dashboard CRM trends.
+$string['crm_trends_subtitle'] = '{$a->analysed} пользователей доступны для сравнения из {$a->available} обновлённых профилей.';
+$string['crm_trends_users'] = 'пользователь(ей)';
+$string['crm_trends_previous_value'] = 'Предыдущий период: {$a}';
+$string['crm_trends_difference_only'] = '{$a} пользователь(ей)';
+$string['crm_trends_difference_with_percent'] = '{$a->difference} пользователь(ей) · {$a->variation} %';
+$string['crm_trends_stable'] = 'Без изменений';
+$string['crm_trends_open_explorer'] = 'Открыть Explorer';
+$string['crm_trends_freshness'] = 'Последний снимок: {$a}';
+$string['crm_trends_freshness_unknown'] = 'Дата последнего снимка недоступна.';
+$string['crm_trends_no_current_data'] = 'Для этого периода нет доступных снимков Intelligence.';
+$string['crm_trends_insufficient_data'] = 'Снимки существуют, но истории пока недостаточно для расчёта изменений.';
+$string['crm_trends_no_movements'] = 'За этот период значительных изменений не обнаружено.';
+$string['crm_trends_error'] = 'В настоящее время не удалось загрузить тенденции CRM.';
+
+$string['crm_trends_metric_risk_up'] = 'Рост риска';
+$string['crm_trends_metric_risk_up_desc'] = 'Профили, у которых показатель риска значительно вырос.';
+$string['crm_trends_metric_risk_down'] = 'Снижение риска';
+$string['crm_trends_metric_risk_down_desc'] = 'Профили, у которых показатель риска значительно улучшился.';
+
+$string['crm_trends_metric_engagement_up'] = 'Рост вовлечённости';
+$string['crm_trends_metric_engagement_up_desc'] = 'Профили, у которых вырос показатель вовлечённости.';
+$string['crm_trends_metric_engagement_down'] = 'Снижение вовлечённости';
+$string['crm_trends_metric_engagement_down_desc'] = 'Профили, у которых снизился показатель вовлечённости.';
+
+$string['crm_trends_metric_global_up'] = 'Рост общего показателя';
+$string['crm_trends_metric_global_up_desc'] = 'Профили, у которых улучшилось общее состояние CRM.';
+$string['crm_trends_metric_global_down'] = 'Снижение общего показателя';
+$string['crm_trends_metric_global_down_desc'] = 'Профили, у которых ухудшилось общее состояние CRM.';
+
+$string['crm_trends_metric_unknown'] = 'Изменение CRM';
+$string['crm_trends_metric_unknown_desc'] = 'В данных CRM было обнаружено изменение.';
+
+// Phase 7.75E - User Explorer trend drill-down.
+$string['crm_trends_metric_open'] = 'Показать пользователей по тенденции: {$a}';
+$string['crm_user_explorer_trend_active'] = 'Активный фильтр тенденции';
+$string['crm_user_explorer_trend_period'] = 'С {$a->start} по {$a->end}';
+$string['crm_user_explorer_trend_threshold'] = 'Минимальное изменение: {$a} баллов';
+$string['crm_user_explorer_trend_clear'] = 'Выйти из просмотра тенденции';
+
+$string['crm_intelligence_alert_priority_critical'] =
+    'Критический';
+
+$string['crm_intelligence_alert_priority_high'] =
+    'Высокий';
+
+$string['crm_intelligence_alert_priority_normal'] =
+    'Обычный';
+
+$string['crm_intelligence_alert_priority_label'] =
+    'Приоритет: {$a}';
+
+$string['crm_intelligence_alert_signal_date'] =
+    'CRM-сигнал оценён {$a}';
+
+$string['crm_intelligence_alert_signal_age'] =
+    'Возраст сигнала: {$a}';
+
+$string['crm_intelligence_alert_next_action_label'] =
+    'Рекомендуемое следующее действие';
+
+$string['crm_intelligence_alert_next_action_high_risk_user'] =
+    'Проверить ситуацию клиента и организовать приоритетное сопровождение.';
+
+$string['crm_intelligence_alert_next_action_trial_without_purchase'] =
+    'Связаться с пользователем и выяснить, что мешает совершить покупку.';
+
+$string['crm_intelligence_alert_next_action_expired_without_reactivation'] =
+    'Предложить повторную активацию или подходящее предложение с учётом истории клиента.';
+
+$string['crm_intelligence_alert_next_action_inactive_user'] =
+    'Проверить последнюю активность и подготовить персонализированное сообщение.';
+
+$string['crm_intelligence_alert_next_action_hot_opportunity'] =
+    'Быстро связаться с пользователем и предложить подходящее коммерческое решение.';
+
+$string['crm_intelligence_alert_next_action_default'] =
+    'Открыть профиль пользователя и определить следующее действие.';
+
+$string['crm_intelligence_alert_work_item'] =
+    'Активная рабочая задача';
+
+$string['crm_intelligence_alert_cs_plan'] =
+    'План Customer Success';
+
+$string['crm_intelligence_alert_responsible'] =
+    'Ответственный: {$a}';
+
+$string['crm_intelligence_alert_due_date'] =
+    'Срок выполнения: {$a}';
+
+$string['crm_intelligence_alert_target_date'] =
+    'Целевая дата: {$a}';
+
+$string['crm_intelligence_alert_open_work_item'] =
+    'Открыть рабочую задачу';
+
+$string['crm_intelligence_alert_create_work_item'] =
+    'Создать рабочую задачу';
+
+$string['crm_intelligence_alert_open_cs_plan'] =
+    'Открыть план CS';
+
+$string['dashboard_state_loading_title'] =
+    'Загрузка';
+
+$string['dashboard_state_loading_description'] =
+    'Информация для этой карточки подготавливается.';
+
+$string['dashboard_state_error_title'] =
+    'Не удалось загрузить карточку';
+
+$string['dashboard_state_error_description'] =
+    'При загрузке информации произошла ошибка.';
+
+$string['dashboard_state_empty_title'] =
+    'Нет доступной информации';
+
+$string['dashboard_state_empty_description'] =
+    'Сейчас здесь нечего отображать.';
+
+$string['dashboard_state_retry'] =
+    'Повторить';
+
+$string['dashboard_open_all'] =
+    'Показать всё';
+
+$string['admin_event_email_password_reset_notice_sent'] =
+    'Отправлено уведомление о сбросе пароля';
+
+$string['admin_event_email_welcome_sent'] =
+    'Отправлено приветственное письмо';
+
+$string['admin_event_email_receipt_sent'] =
+    'Отправлена квитанция об оплате';
+
+$string['admin_event_email_subscription_access_sent'] =
+    'Отправлена информация о доступе к подписке';
+
+$string['admin_event_user_password_updated'] =
+    'Пароль пользователя обновлён';
+
+$string['admin_event_user_note_added'] =
+    'Добавлена заметка CRM';
+
+$string['admin_event_subscription_created'] =
+    'Подписка создана';
+
+$string['admin_event_subscription_created_manual'] =
+    'Подписка создана вручную';
+
+$string['admin_event_subscription_updated'] =
+    'Подписка обновлена';
+
+$string['admin_event_subscription_deleted'] =
+    'Подписка удалена';
+
+$string['admin_event_subscription_status_updated'] =
+    'Статус подписки обновлён';
+
+$string['admin_event_subscription_dates_updated'] =
+    'Даты подписки обновлены';
+
+$string['admin_event_subscription_created_auto'] =
+    'Подписка создана автоматически';
+
+$string['admin_event_subscription_extended'] =
+    'Подписка продлена';
+
+$string['admin_event_digital_provider_checked'] =
+    'Статус цифрового платежа проверен';
+
+$string['admin_event_payment_request_created'] =
+    'Запрос на оплату создан';
+
+$string['admin_event_payment_request_paid'] =
+    'Запрос на оплату оплачен';
+
+$string['admin_event_payment_request_failed'] =
+    'Ошибка запроса на оплату';
+
+$string['admin_event_payment_request_cancelled'] =
+    'Запрос на оплату отменён';
+
+$string['admin_event_trial_started'] =
+    'Пробный период начат';
+
+$string['admin_event_trial_expired'] =
+    'Пробный период завершён';
+
+$string['admin_event_work_item_created'] =
+    'Рабочая задача создана';
+
+$string['admin_event_work_item_status_changed'] =
+    'Статус рабочей задачи изменён';
+
+$string['admin_event_work_item_priority_changed'] =
+    'Приоритет рабочей задачи изменён';
+
+$string['admin_event_work_item_assigned'] =
+    'Рабочая задача назначена';
+
+$string['admin_event_work_item_comment_added'] =
+    'К рабочей задаче добавлен комментарий';
+
+$string['admin_event_work_item_linked'] =
+    'К рабочей задаче добавлена связь';
+
+$string['admin_event_work_item_suggestion_opened'] =
+    'Открыто предложение рабочей задачи';
+
+$string['admin_event_work_item_created_from_recommendation'] =
+    'Рабочая задача создана из рекомендации';
+
+$string['admin_event_work_item_duplicate_override'] =
+    'Задача создана несмотря на возможный дубликат';
+
+$string['admin_event_recommendation_created'] =
+    'Рекомендация создана';
+
+$string['admin_event_recommendation_refreshed'] =
+    'Рекомендация обновлена';
+
+$string['admin_event_recommendation_accepted'] =
+    'Рекомендация принята';
+
+$string['admin_event_recommendation_dismissed'] =
+    'Рекомендация отклонена';
+
+$string['admin_event_recommendation_completed'] =
+    'Рекомендация выполнена';
+
+$string['admin_event_recommendation_expired'] =
+    'Срок рекомендации истёк';
+
+$string['admin_event_recommendation_run_completed'] =
+    'Формирование рекомендаций завершено';
+
+$string['admin_event_recommendation_run_partial'] =
+    'Формирование рекомендаций завершено частично';
+
+$string['admin_event_recommendation_run_failed'] =
+    'Ошибка формирования рекомендаций';
+
+$string['admin_event_recommendation_run_skipped'] =
+    'Формирование рекомендаций пропущено';
+
+$string['admin_event_description_reference'] =
+    'Номер: {$a}';
+
+$string['admin_event_description_transition'] =
+    '{$a->from} → {$a->to}';
+
+$string['admin_event_description_status'] =
+    'Статус: {$a}';
+
+$string['admin_event_description_priority'] =
+    'Приоритет: {$a}';
+
+$string['admin_event_description_plan'] =
+    'Тариф: {$a}';
+
+$string['admin_event_description_contact'] =
+    'Контакт: {$a}';
+
+$string['admin_event_description_recommendation'] =
+    'Рекомендация: {$a}';
+
+$string['admin_event_description_cs_plan'] =
+    '{$a->reference} — {$a->title}';
+
+$string['admin_event_description_cs_step'] =
+    '{$a->plan} — {$a->step}';
+
+$string['dashboard_activity_actor'] =
+    'Выполнил: {$a}';
+
+$string['dashboard_activity_system_actor'] =
+    'Автоматическое действие';
+
+$string['dashboard_activity_open'] =
+    'Открыть';
+
+$string['dashboard_activity_target'] =
+    'Клиент: {$a}';
+
+$string['dashboard_activity_exact_date'] =
+    'Зарегистрировано: {$a}';
+
+$string['crm_app_navigation'] =
+    'Основная навигация CRM';
+
+$string['crm_admin_tools_title'] =
+    'Инструменты администратора';
+
+$string['crm_admin_tools_description'] =
+    'Безопасный запуск и контроль технических операций CRM.';
+
+$string['crm_admin_tool_busy'] =
+    'Эта операция уже выполняется.';
+
+$string['crm_admin_tool_failed'] =
+    'Не удалось выполнить операцию. Подробности доступны в истории.';
+
+$string['crm_admin_tool_status_running'] =
+    'Выполняется';
+
+$string['crm_admin_tool_status_success'] =
+    'Завершено';
+
+$string['crm_admin_tool_status_failed'] =
+    'Ошибка';
+
+$string['crm_admin_tool_status_busy'] =
+    'Уже выполняется';
+
+$string['crm_admin_tool_status_cancelled'] =
+    'Отменено';
+
+$string['crm_admin_tool_risk_low'] =
+    'Низкий риск';
+
+$string['crm_admin_tool_risk_normal'] =
+    'Средний риск';
+
+$string['crm_admin_tool_risk_high'] =
+    'Высокий риск';
+
+$string['crm_admin_tools_nav'] =
+    'Инструменты';
+
+$string['crm_admin_tool_unknown'] =
+    'Запрошенный инструмент администратора не найден.';
+
+$string['crm_admin_tools_empty'] =
+    'Для вашей роли нет доступных инструментов администратора.';
+
+$string['crm_admin_tool_open'] =
+    'Открыть';
+
+$string['crm_admin_tool_execute'] =
+    'Запустить';
+
+$string['crm_admin_tool_confirmation_warning'] =
+    'Эта операция может изменить данные CRM. Проверьте параметры перед запуском.';
+
+$string['crm_admin_tool_limit'] =
+    'Максимальное количество элементов';
+
+$string['crm_admin_tool_reset_cursor'] =
+    'Начать обработку рекомендаций с начала';
+
+$string['crm_admin_tool_never_run'] =
+    'Никогда не запускалось';
+
+$string['crm_admin_tool_last_run'] =
+    'Последний запуск: {$a->date} — {$a->status}';
+
+$string['crm_admin_tool_history'] =
+    'История операций';
+
+$string['crm_admin_tool_history_empty'] =
+    'Операции администратора ещё не запускались.';
+
+$string['crm_admin_tool_history_date'] =
+    'Дата';
+
+$string['crm_admin_tool_history_tool'] =
+    'Инструмент';
+
+$string['crm_admin_tool_history_actor'] =
+    'Пользователь';
+
+$string['crm_admin_tool_history_status'] =
+    'Статус';
+
+$string['crm_admin_tool_history_duration'] =
+    'Длительность';
+
+$string['crm_admin_tool_inbox_sync'] =
+    'Синхронизировать CRM Inbox';
+
+$string['crm_admin_tool_inbox_sync_desc'] =
+    'Получает новые сообщения из активных почтовых ящиков.';
+
+$string['crm_admin_tool_inbox_sync_success'] =
+    'Синхронизация Inbox завершена.';
+
+$string['crm_admin_tool_inbox_sync_partial'] =
+    'Синхронизация Inbox завершена с ошибками.';
+
+$string['crm_admin_tool_inbox_diagnostics'] =
+    'Диагностика CRM Inbox';
+
+$string['crm_admin_tool_inbox_diagnostics_desc'] =
+    'Проверяет настройки, таблицы, учетные данные и подключения IMAP/SMTP.';
+
+$string['crm_admin_tool_inbox_diagnostics_success'] =
+    'Все проверки Inbox пройдены.';
+
+$string['crm_admin_tool_inbox_diagnostics_failed'] =
+    'Некоторые проверки Inbox завершились ошибкой.';
+
+$string['crm_admin_tool_automations'] =
+    'Запустить автоматизации';
+
+$string['crm_admin_tool_automations_desc'] =
+    'Немедленно запускает правила и сканеры автоматизации CRM.';
+
+$string['crm_admin_tool_automations_success'] =
+    'Автоматизации CRM выполнены.';
+
+$string['crm_admin_tool_intelligence'] =
+    'Пересчитать оценки Intelligence';
+
+$string['crm_admin_tool_intelligence_desc'] =
+    'Пересчитывает и сохраняет снимки оценок CRM.';
+
+$string['crm_admin_tool_intelligence_success'] =
+    'Оценки Intelligence пересчитаны.';
+
+$string['crm_admin_tool_recommendations'] =
+    'Пересчитать рекомендации';
+
+$string['crm_admin_tool_recommendations_desc'] =
+    'Запускает новый пакет движка рекомендаций CRM.';
+
+$string['crm_admin_tool_recommendations_success'] =
+    'Пакет рекомендаций обработан.';
+
+$string['crm_admin_tool_recommendations_partial'] =
+    'Пакет рекомендаций обработан частично или с ошибками.';
+
+$string['crm_admin_tool_digital_reconciliation'] =
+    'Сверить цифровые платежи';
+
+$string['crm_admin_tool_digital_reconciliation_desc'] =
+    'Проверяет ожидающие цифровые платежи у платежных провайдеров.';
+
+$string['crm_admin_tool_digital_reconciliation_success'] =
+    'Сверка цифровых платежей завершена.';
+
+$string['crm_admin_tool_digital_reconciliation_partial'] =
+    'Сверка цифровых платежей завершена с ошибками.';
+
+$string['crm_admin_tool_help_validation'] =
+    'Проверить Help Center';
+
+$string['crm_admin_tool_help_validation_desc'] =
+    'Проверяет статьи, руководства, онбординг и переводы Help Center.';
+
+$string['crm_admin_tool_help_validation_success'] =
+    'Help Center успешно прошёл проверку.';
+
+$string['crm_admin_tool_help_validation_failed'] =
+    'В Help Center обнаружены ошибки.';
+
+$string['csplancommandsubtitle'] =
+    'Открыть и управлять планом Customer Success этого пользователя';
+
+$string['crm_admin_tool_confirmation_required'] =
+    'Перед запуском необходимо явно подтвердить эту операцию.';
+
+$string['crm_admin_tool_confirmation_checkbox'] =
+    'Я понимаю последствия этой операции и подтверждаю её запуск.';
+
+$string['crm_admin_tool_limit_help'] =
+    'Значение по умолчанию: {$a->default}. Максимум: {$a->maximum}.';
+
+$string['crm_admin_tool_unknown_actor'] =
+    'Недоступный пользователь (#{$a})';
+
+$string['err_invalid_redirect_url'] =
+    'Платёжный шлюз вернул недопустимый адрес перенаправления.';
+
+$string['payment_error_session_create'] =
+    'Не удалось открыть страницу оплаты. Платёж не был выполнен. Повторите попытку через несколько минут.';
+
+$string['payment_error_digital_session_create'] =
+    'Не удалось открыть страницу оплаты покупки. Платёж не был выполнен.';
+
+$string['payment_error_retry'] =
+    'Не удалось запустить повторную попытку оплаты. Новый платёж не был выполнен.';
+
+$string['payment_error_invalid_redirect'] =
+    'Платёжный шлюз вернул недопустимый адрес. Платёж не был выполнен.';
+
+$string['payment_error_provider_unavailable'] =
+    'Платёжный шлюз временно недоступен. Платёж не был выполнен.';
+
+$string['payment_error_reference'] =
+    'Номер обращения: {$a}';

@@ -84,7 +84,6 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
                 $url = new moodle_url(subscription_config::manage_page(), [
                     'tab' => 'scopes',
                     'edit' => $p->accessscopeid,
-                    'sesskey' => sesskey()
                 ]);
                 $scopelink = html_writer::link($url, $scope->name, ['target' => '_blank']);
             }
@@ -92,7 +91,6 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
             $editurl = new moodle_url(subscription_config::manage_page(), [
                 'tab' => 'plans',
                 'edit' => $p->id,
-                'sesskey' => sesskey()
             ]);
             $deleteurl = new moodle_url(subscription_config::manage_page(), [
                 'tab' => 'plans',
@@ -101,15 +99,12 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
             ]);
             $translationurl = new moodle_url(subscription_config::plans_translations_page(), [
                 'planid' => $p->id,
-                'sesskey' => sesskey()
             ]);
             $priceurl = new moodle_url(subscription_config::plans_prices_page(), [
                 'planid' => $p->id,
-                'sesskey' => sesskey()
             ]);
             $entitlementsurl = new moodle_url(subscription_config::plan_entitlements_page(), [
                 'planid' => $p->id,
-                'sesskey' => sesskey()
             ]);
 
             $icons = [];

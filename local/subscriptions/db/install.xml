@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/subscriptions/db" VERSION="2026071702" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="local/subscriptions/db" VERSION="2026072000" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
 		<TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
 			<FIELDS>
@@ -2164,6 +2164,110 @@
 				<INDEX NAME="object_lookup_idx"
 					UNIQUE="false"
 					FIELDS="objecttype,objectid"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_admin_tool_run"
+			COMMENT="Execution history for CRM administrative tools">
+
+			<FIELDS>
+				<FIELD NAME="id"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					SEQUENCE="true"/>
+
+				<FIELD NAME="toolkey"
+					TYPE="char"
+					LENGTH="80"
+					NOTNULL="true"/>
+
+				<FIELD NAME="actorid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="status"
+					TYPE="char"
+					LENGTH="20"
+					NOTNULL="true"
+					DEFAULT="running"/>
+
+				<FIELD NAME="risklevel"
+					TYPE="char"
+					LENGTH="20"
+					NOTNULL="true"
+					DEFAULT="normal"/>
+
+				<FIELD NAME="requestid"
+					TYPE="char"
+					LENGTH="64"
+					NOTNULL="true"/>
+
+				<FIELD NAME="parametersjson"
+					TYPE="text"
+					NOTNULL="false"/>
+
+				<FIELD NAME="resultjson"
+					TYPE="text"
+					NOTNULL="false"/>
+
+				<FIELD NAME="errormessage"
+					TYPE="text"
+					NOTNULL="false"/>
+
+				<FIELD NAME="startedat"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="finishedat"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="false"/>
+
+				<FIELD NAME="durationms"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="false"/>
+
+				<FIELD NAME="timecreated"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+			</FIELDS>
+
+			<KEYS>
+				<KEY NAME="primary"
+					TYPE="primary"
+					FIELDS="id"/>
+
+				<KEY NAME="actorid_fk"
+					TYPE="foreign"
+					FIELDS="actorid"
+					REFTABLE="user"
+					REFFIELDS="id"/>
+			</KEYS>
+
+			<INDEXES>
+				<INDEX NAME="requestid_uix"
+					UNIQUE="true"
+					FIELDS="requestid"/>
+
+				<INDEX NAME="tool_time_idx"
+					UNIQUE="false"
+					FIELDS="toolkey,timecreated"/>
+
+				<INDEX NAME="actor_time_idx"
+					UNIQUE="false"
+					FIELDS="actorid,timecreated"/>
+
+				<INDEX NAME="status_time_idx"
+					UNIQUE="false"
+					FIELDS="status,timecreated"/>
 			</INDEXES>
 		</TABLE>
 

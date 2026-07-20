@@ -6,6 +6,8 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\subscription_config;
 use local_subscriptions\crm\help\validation\HelpCenterValidator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $PAGE, $OUTPUT;
 
@@ -49,6 +51,11 @@ $result = (new HelpCenterValidator())->validate();
 
 echo $OUTPUT->header();
 
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::HELP,
+    $context
+);
+
 echo html_writer::link(
     new moodle_url(
         subscription_config::admin_help_page()
@@ -58,7 +65,8 @@ echo html_writer::link(
         'local_subscriptions'
     ),
     [
-        'class' => 'crm-help-back-link',
+        'class' =>
+            'crm-help-back-link crm-app-back-link',
     ]
 );
 
@@ -90,7 +98,7 @@ echo html_writer::start_div(
 );
 
 echo html_writer::div(
-    html_writer::strong(
+    html_writer::tag('strong',
         (string)$result->success_count()
     ) .
     html_writer::span(
@@ -103,7 +111,7 @@ echo html_writer::div(
 );
 
 echo html_writer::div(
-    html_writer::strong(
+    html_writer::tag('strong',
         (string)$result->warning_count()
     ) .
     html_writer::span(
@@ -116,7 +124,7 @@ echo html_writer::div(
 );
 
 echo html_writer::div(
-    html_writer::strong(
+    html_writer::tag('strong',
         (string)$result->error_count()
     ) .
     html_writer::span(
@@ -208,5 +216,7 @@ foreach ($sections as $section) {
 }
 
 echo html_writer::end_div();
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

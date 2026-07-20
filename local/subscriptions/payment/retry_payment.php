@@ -5,6 +5,7 @@ require_once(__DIR__.'/../../../config.php');
 
 use local_subscriptions\constants\Status;
 use local_subscriptions\payment\PaymentGatewayFactory;
+use local_subscriptions\payment\PaymentFailureReporter;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\PaymentReturn;
@@ -115,12 +116,28 @@ if ($provider === Provider::ALFA) {
 }
 
 // 5) MàJ tentatives
-$DB->update_record('subscription_payment_request', (object)[
-    'id'           => $pr->id,
-    'attempts'     => (int)$pr->attempts + 1,
-    'last_attempt' => time(),
-    'status'       => Status::PENDING,
-]);
+$DB->update_record(
+    'subscription_payment_request',
+    (object)[
+        'id' =>
+            (int)$pr->id,
+
+        'attempts' =>
+            (int)$pr->attempts + 1,
+
+        'last_attempt' =>
+            time(),
+
+        'status' =>
+            Status::PENDING,
+
+        'last_error' =>
+            null,
+
+        'last_update' =>
+            time(),
+    ]
+);
 
 // 6) Appel provider-agnostique
 $gateway = PaymentGatewayFactory::for($provider);
@@ -150,26 +167,75 @@ try {
         }
     }
 
-    if ($redirect === '') {
-        throw new \moodle_exception('err_no_redirect_url', 'local_subscriptions');
-    }
+    $redirect =
+        UrlFactory::validate_external_payment_url(
+            (string)$redirect
+        );
 
     // Enregistre le lien de paiement
     $DB->set_field('subscription_payment_request', 'payment_link', $redirect, ['id'=>$pr->id]);
 
-    redirect(new moodle_url($redirect));
+    redirect($redirect);
 
 } catch (\Throwable $e) {
-    $DB->update_record('subscription_payment_request', (object)[
-        'id'         => $pr->id,
-        'last_error' => $e->getMessage(),
-        'status'     => Status::ERROR,
-        'last_update'=> time(),
-    ]);
-    redirect(UrlFactory::payment_error([
-        'pid' => $pr->id,
-        'code' => 'retry_session_create',
-        'msg'  => $e->getMessage(),
-    ]));
-    exit;
+    $reference =
+        PaymentFailureReporter::generate_reference();
+
+    $technicalmessage =
+        PaymentFailureReporter::technical_message(
+            $e,
+            $reference,
+            'subscription_payment_retry'
+        );
+
+    PaymentFailureReporter::log(
+        $e,
+        $reference,
+        'subscription_payment_retry',
+        [
+            'payment_request_id' =>
+                (int)$pr->id,
+
+            'provider' =>
+                (string)$provider,
+
+            'currency' =>
+                (string)$pr->currency,
+
+            'attempts' =>
+                (int)$pr->attempts + 1,
+        ]
+    );
+
+    $DB->update_record(
+        'subscription_payment_request',
+        (object)[
+            'id' =>
+                (int)$pr->id,
+
+            'last_error' =>
+                $technicalmessage,
+
+            'status' =>
+                Status::FAILED,
+
+            'last_update' =>
+                time(),
+        ]
+    );
+
+    redirect(
+        UrlFactory::payment_error(
+            [
+                'pid' =>
+                    (int)$pr->id,
+
+                'code' =>
+                    'payment_retry',
+
+                'reference' =>
+                    $reference,
+            ]
+        )
+    );
 }

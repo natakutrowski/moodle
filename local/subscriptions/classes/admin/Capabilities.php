@@ -17,6 +17,7 @@ final class Capabilities {
     public const VIEW_INBOX = 'local/subscriptions:view_inbox';
     public const MANAGE_INBOX = 'local/subscriptions:manage_inbox';
     public const MANAGE_CONFIGURATION = 'local/subscriptions:manage_configuration';
+    public const MANAGE_CRM_ADMIN_TOOLS = 'local/subscriptions:manage_crm_admin_tools';
     public const USE_INBOX_AI = 'local/subscriptions:use_inbox_ai';
     public const VIEW_WORK_ITEMS = 'local/subscriptions:view_work_items';
 
@@ -96,6 +97,19 @@ final class Capabilities {
 
         return has_capability(
             self::USE_CRM_ASSISTANT_AI,
+            $context
+        );
+    }
+
+    public static function can_manage_crm_admin_tools(
+        ?\context $context = null
+    ): bool {
+        $context =
+            $context ??
+            \context_system::instance();
+
+        return has_capability(
+            self::MANAGE_CRM_ADMIN_TOOLS,
             $context
         );
     }
