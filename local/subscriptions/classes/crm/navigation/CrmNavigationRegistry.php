@@ -149,6 +149,22 @@ final class CrmNavigationRegistry {
             ),
 
             new CrmNavigationItem(
+                key: CrmNavigationKeys::COMMERCE,
+                label: get_string(
+                    'crm_commerce_nav',
+                    'local_subscriptions'
+                ),
+                icon: '◆',
+                url: new moodle_url(
+                    subscription_config::
+                        admin_commerce_page()
+                ),
+                capability:
+                    Capabilities::VIEW_DASHBOARD,
+                position: 60
+            ),
+
+            new CrmNavigationItem(
                 key: CrmNavigationKeys::HELP,
                 label: get_string(
                     'crm_help_title',
@@ -161,7 +177,7 @@ final class CrmNavigationRegistry {
                 ),
                 capability:
                     Capabilities::VIEW_DASHBOARD,
-                position: 60
+                position: 70
             ),
             new CrmNavigationItem(
                 key: CrmNavigationKeys::TOOLS,
@@ -177,7 +193,7 @@ final class CrmNavigationRegistry {
                 capability:
                     Capabilities::
                         MANAGE_CRM_ADMIN_TOOLS,
-                position: 70
+                position: 80
             ),
 
         ];

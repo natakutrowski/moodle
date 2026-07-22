@@ -5,13 +5,20 @@ require_once(__DIR__ . '/../../../../config.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\AdminEntityLinks;
 use local_subscriptions\admin\AdminDetailRenderer;
 use local_subscriptions\support\SubsPresenter;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\constants\Status;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $DB, $PAGE, $OUTPUT;
 
@@ -58,28 +65,92 @@ if (!$paymentrequest) {
     ], IGNORE_MISSING);
 }
 
-$url = new moodle_url(subscription_config::user_subscription_view_page(), ['id' => $id]);
+$url = new moodle_url(
+    subscription_config::
+        user_subscription_view_page(),
+    [
+        'id' => $id,
+    ]
+);
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title(get_string('subscription_details', 'local_subscriptions') . ' #' . $subscription->id);
-$PAGE->set_heading(get_string('subscription_details', 'local_subscriptions'));
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
+$pagetitle =
+    get_string(
+        'subscription_details',
+        'local_subscriptions'
+    ) .
+    ' #' .
+    $subscription->id;
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $url,
+    $pagetitle,
+    'local-subscriptions-commerce-subscription-view-page'
 );
 
 echo $OUTPUT->header();
 
-echo AdminNavigation::back_button();
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
 
-echo html_writer::start_div('mb-4 d-flex flex-wrap gap-2');
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' => get_string(
+                'crm_commerce_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    admin_commerce_page()
+            ),
+        ],
+        [
+            'label' => get_string(
+                'crm_subscriptions_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    user_subscriptions_page()
+            ),
+        ],
+        [
+            'label' => $pagetitle,
+            'url' => null,
+        ],
+    ]
+);
 
-echo html_writer::link(
-    new moodle_url(subscription_config::user_subscriptions_page()),
-    '← ' . get_string('subscriptions', 'local_subscriptions'),
-    ['class' => 'btn btn-outline-secondary']
+echo CrmBackLinkRenderer::render(
+    new moodle_url(
+        subscription_config::
+            user_subscriptions_page()
+    ),
+    get_string(
+        'crm_subscriptions_title',
+        'local_subscriptions'
+    )
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_subscription_view_description',
+        'local_subscriptions'
+    ),
+    HelpContext::SUBSCRIPTIONS
+);
+
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::SUBSCRIPTIONS
+);
+
+echo html_writer::start_div(
+    'crm-commerce-actionbar mb-4 d-flex flex-wrap gap-2'
 );
 
 echo html_writer::link(
@@ -139,6 +210,8 @@ $rows = [
     get_string('creation_date', 'local_subscriptions') => AdminFormatter::datetime((int)($subscription->creation_date ?? 0)),
     get_string('last_update', 'local_subscriptions') => AdminFormatter::datetime((int)($subscription->last_update ?? 0)),
 ];
+
+echo html_writer::start_div('crm-commerce-detail-grid');
 
 echo AdminDetailRenderer::card(
     get_string('subscription_details', 'local_subscriptions') . ' #' . $subscription->id,
@@ -245,10 +318,8 @@ if ($paymentrequest) {
     );
 }
 
-echo html_writer::link(
-    new moodle_url(subscription_config::user_subscriptions_page()),
-    '← ' . get_string('subscriptions', 'local_subscriptions'),
-    ['class' => 'btn btn-outline-secondary']
-);
+echo html_writer::end_div();
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

@@ -12,18 +12,18 @@ final class DigitalPresenter {
         $status = strtoupper(trim((string)$status));
 
         $classes = [
-            'PAID' => 'badge bg-success',
-            'COMPLETED' => 'badge bg-success',
-            'FAILED' => 'badge bg-danger',
-            'CANCELED' => 'badge bg-secondary',
-            'CANCELLED' => 'badge bg-secondary',
-            'PENDING' => 'badge bg-warning text-dark',
-            'CREATED' => 'badge bg-info text-dark',
-            'EXPIRED' => 'badge bg-dark',
-            'ERROR' => 'badge bg-danger',
+            'PAID' => 'crm-commerce-status crm-commerce-status--success badge bg-success',
+            'COMPLETED' => 'crm-commerce-status crm-commerce-status--success badge bg-success',
+            'FAILED' => 'crm-commerce-status crm-commerce-status--danger badge bg-danger',
+            'CANCELED' => 'crm-commerce-status crm-commerce-status--neutral badge bg-secondary',
+            'CANCELLED' => 'crm-commerce-status crm-commerce-status--neutral badge bg-secondary',
+            'PENDING' => 'crm-commerce-status crm-commerce-status--warning badge bg-warning text-dark',
+            'CREATED' => 'crm-commerce-status crm-commerce-status--info badge bg-info text-dark',
+            'EXPIRED' => 'crm-commerce-status crm-commerce-status--neutral badge bg-dark',
+            'ERROR' => 'crm-commerce-status crm-commerce-status--danger badge bg-danger',
         ];
 
-        $class = $classes[$status] ?? 'badge bg-light text-dark border';
+        $class = $classes[$status] ?? 'crm-commerce-status crm-commerce-status--neutral badge bg-light text-dark border';
 
         return html_writer::span($status ?: '-', $class);
     }

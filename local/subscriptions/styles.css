@@ -14012,3 +14012,172 @@ textarea:focus-visible {
         outline-offset: 2px;
     }
 }
+
+/* Phase 7.92C.1 — Shared Commerce secondary navigation. */
+.crm-commerce-section-nav {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+}
+
+.crm-commerce-section-nav-list {
+    display: inline-flex;
+    min-width: 100%;
+    gap: 0.5rem;
+    padding: 0.375rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.875rem;
+    background: var(--bs-light, #f8f9fa);
+}
+
+.crm-commerce-section-nav-link {
+    display: inline-flex;
+    flex: 1 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    color: var(--bs-secondary-color, #495057);
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+
+.crm-commerce-section-nav-link:hover {
+    border-color: var(--bs-border-color, #dee2e6);
+    background: var(--bs-white, #fff);
+    color: var(--bs-primary, #0d6efd);
+    text-decoration: none;
+}
+
+.crm-commerce-section-nav-link.active {
+    border-color: rgba(13, 110, 253, 0.22);
+    background: var(--bs-white, #fff);
+    color: var(--bs-primary, #0d6efd);
+    box-shadow: 0 0.25rem 0.75rem rgba(33, 37, 41, 0.08);
+}
+
+.crm-commerce-section-nav-link:focus-visible {
+    outline: 3px solid rgba(13, 110, 253, 0.25);
+    outline-offset: 2px;
+}
+
+.crm-commerce-section-nav-icon {
+    display: inline-flex;
+    width: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+@media (max-width: 767.98px) {
+    .crm-commerce-section-nav-list {
+        min-width: max-content;
+    }
+
+    .crm-commerce-section-nav-link {
+        flex: 0 0 auto;
+    }
+}
+
+
+/* ==========================================================================
+   Commerce CRM — UX alignment (Phase 7.92C)
+   ========================================================================== */
+.crm-commerce-actionbar {
+    align-items: center;
+    padding: .875rem 1rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .75rem;
+    background: var(--bs-body-bg, #fff);
+    box-shadow: 0 .125rem .4rem rgba(0, 0, 0, .04);
+}
+.crm-commerce-actionbar .btn {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+}
+.crm-commerce-filter-card {
+    border-radius: .75rem;
+    border-color: var(--bs-border-color, #dee2e6);
+    box-shadow: 0 .125rem .4rem rgba(0, 0, 0, .04);
+}
+.crm-commerce-filter-card .form-label {
+    font-size: .8125rem;
+    font-weight: 600;
+    color: var(--bs-secondary-color, #6c757d);
+}
+.crm-commerce-list .generaltable,
+.crm-commerce-table-wrap .generaltable {
+    margin-bottom: 0;
+}
+.crm-commerce-list .generaltable thead th,
+.crm-commerce-table-wrap .generaltable thead th {
+    white-space: nowrap;
+    font-size: .8125rem;
+    letter-spacing: .01em;
+    vertical-align: middle;
+}
+.crm-commerce-list .generaltable tbody td,
+.crm-commerce-table-wrap .generaltable tbody td {
+    vertical-align: middle;
+}
+.crm-commerce-table-wrap {
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .75rem;
+    overflow: auto;
+    background: var(--bs-body-bg, #fff);
+}
+.crm-commerce-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+}
+.crm-commerce-detail-grid > * {
+    min-width: 0;
+    margin-bottom: 0 !important;
+}
+.crm-commerce-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.55rem;
+    padding: .25rem .55rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: none;
+    white-space: nowrap;
+}
+.crm-commerce-empty-state {
+    padding: 2rem;
+    text-align: center;
+    border: 1px dashed var(--bs-border-color, #ced4da);
+    border-radius: .75rem;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    color: var(--bs-secondary-color, #6c757d);
+}
+@media (max-width: 991.98px) {
+    .crm-commerce-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 575.98px) {
+    .crm-commerce-actionbar {
+        align-items: stretch;
+    }
+    .crm-commerce-actionbar .btn {
+        width: 100%;
+    }
+    .crm-commerce-filter-card .row > [class*="col-"] {
+        width: 100%;
+    }
+}

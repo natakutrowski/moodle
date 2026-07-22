@@ -481,6 +481,11 @@ class subscription_config {
             'admin/assistant/plan_action_confirm.php';
     }
 
+    public static function admin_commerce_page(): string {
+        return self::plugin_path() .
+            'admin/commerce/index.php';
+    }
+
     public static function admin_crm_tools_page(): string {
         return self::plugin_path() .
             'admin/tools/index.php';

@@ -169,21 +169,21 @@ final class SubsPresenter {
 
         // mapping : statut → classes bootstrap et libellé i18n
         $map = [
-            Status::ACTIVE   => ['cls' => 'badge bg-success',             'str' => 'status_active'],
-            Status::QUEUED   => ['cls' => 'badge bg-secondary',           'str' => 'status_queued'],
-            Status::EXPIRED  => ['cls' => 'badge bg-warning text-dark',   'str' => 'status_expired'],
-            Status::REPLACED => ['cls' => 'badge bg-warning text-dark',   'str' => 'status_replaced'],
+            Status::ACTIVE   => ['cls' => 'crm-commerce-status crm-commerce-status--success badge bg-success',             'str' => 'status_active'],
+            Status::QUEUED   => ['cls' => 'crm-commerce-status crm-commerce-status--neutral badge bg-secondary',           'str' => 'status_queued'],
+            Status::EXPIRED  => ['cls' => 'crm-commerce-status crm-commerce-status--warning badge bg-warning text-dark',   'str' => 'status_expired'],
+            Status::REPLACED => ['cls' => 'crm-commerce-status crm-commerce-status--warning badge bg-warning text-dark',   'str' => 'status_replaced'],
             // optionnels (au cas où tu les utilises déjà) :
-            Status::PENDING  => ['cls' => 'badge bg-info',                'str' => 'status_pending'],
-            Status::CANCELED => ['cls' => 'badge bg-dark',                'str' => 'status_canceled'],
-            Status::ERROR    => ['cls' => 'badge bg-danger',              'str' => 'status_error'],
-            Status::SUSPENDED => ['cls' => 'badge bg-light text-dark',    'str' => 'status_suspended'],
-            Status::PAID     => ['cls' => 'badge bg-success',             'str' => 'status_paid'],
-            Status::COMPLETED => ['cls' => 'badge bg-success',            'str' => 'status_completed'],
-            Status::FAILED    => ['cls' => 'badge bg-danger',             'str' => 'status_failed'],
+            Status::PENDING  => ['cls' => 'crm-commerce-status crm-commerce-status--info badge bg-info',                'str' => 'status_pending'],
+            Status::CANCELED => ['cls' => 'crm-commerce-status crm-commerce-status--neutral badge bg-dark',                'str' => 'status_canceled'],
+            Status::ERROR    => ['cls' => 'crm-commerce-status crm-commerce-status--danger badge bg-danger',              'str' => 'status_error'],
+            Status::SUSPENDED => ['cls' => 'crm-commerce-status crm-commerce-status--neutral badge bg-light text-dark',    'str' => 'status_suspended'],
+            Status::PAID     => ['cls' => 'crm-commerce-status crm-commerce-status--success badge bg-success',             'str' => 'status_paid'],
+            Status::COMPLETED => ['cls' => 'crm-commerce-status crm-commerce-status--success badge bg-success',            'str' => 'status_completed'],
+            Status::FAILED    => ['cls' => 'crm-commerce-status crm-commerce-status--danger badge bg-danger',             'str' => 'status_failed'],
         ];
 
-        $conf = $map[$s] ?? ['cls' => 'badge bg-light text-dark', 'str' => 'status_unknown'];
+        $conf = $map[$s] ?? ['cls' => 'crm-commerce-status crm-commerce-status--neutral badge bg-light text-dark', 'str' => 'status_unknown'];
         $label = get_string('sub'.$conf['str'], 'local_subscriptions');
         return \html_writer::span($label, $conf['cls'].' ls-status-badge');
     }

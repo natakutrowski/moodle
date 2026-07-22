@@ -5,7 +5,14 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\AdminEntityLinks;
 use local_subscriptions\support\DigitalPresenter;
@@ -58,13 +65,22 @@ $revenues = $DB->get_records_sql("
   ORDER BY currency ASC
 ", ['productid' => $id]);
 
-$PAGE->set_context($context);
-$PAGE->set_url(new moodle_url(subscription_config::digital_product_edit_admin_page(), ['id' => $id]));
-$PAGE->set_title($isnew
-    ? get_string('digital_product_edit_new_title', 'local_subscriptions')
-    : get_string('digital_product_edit_edit_title', 'local_subscriptions')
+$pageurl = new moodle_url(
+    subscription_config::digital_product_edit_admin_page(),
+    ['id' => $id]
 );
-$PAGE->set_heading($PAGE->title);
+
+$pagetitle = $isnew
+    ? get_string('digital_product_edit_new_title', 'local_subscriptions')
+    : get_string('digital_product_edit_edit_title', 'local_subscriptions');
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-digital-product-edit-page'
+);
 
 $langs = ['fr', 'en', 'ru'];
 
@@ -222,7 +238,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 echo $OUTPUT->header();
-echo AdminNavigation::back_button();
+
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::admin_commerce_page()),
+    ],
+    [
+        'label' => get_string('digital_products_admin_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::digital_products_admin_page()),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(subscription_config::digital_products_admin_page()),
+    get_string('digital_products_admin_title', 'local_subscriptions')
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        $isnew ? 'crm_digital_product_add_description' : 'crm_digital_product_edit_description',
+        'local_subscriptions'
+    ),
+    HelpContext::DIGITAL_PURCHASES
+);
+
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::DIGITAL_PRODUCTS
+);
 
 echo html_writer::start_div('row mb-4');
 
@@ -271,15 +324,6 @@ foreach ($cards as [$label, $value]) {
 echo html_writer::end_div();
 
 echo html_writer::start_div('container-fluid my-4');
-
-echo html_writer::div(
-    html_writer::link(
-        new moodle_url(subscription_config::digital_products_admin_page()),
-        '← ' . get_string('back'),
-        ['class' => 'btn btn-outline-secondary']
-    ),
-    'mb-4'
-);
 
 echo html_writer::start_tag('form', [
     'method' => 'post',
@@ -554,6 +598,8 @@ if ($recentpurchases) {
 } else {
     echo $OUTPUT->notification(get_string('digital_product_no_recent_purchases', 'local_subscriptions'), 'info');
 }
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();
 

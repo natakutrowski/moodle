@@ -8,7 +8,6 @@ use local_subscriptions\subscription_config;
  */
 function local_subscriptions_get_plan_for_edit(int $id): array {
     global $DB;
-    require_sesskey();
 
     $plan = $DB->get_record('subscription_plan', ['id' => $id], '*', MUST_EXIST);
     $accessscopeid = $plan->accessscopeid;

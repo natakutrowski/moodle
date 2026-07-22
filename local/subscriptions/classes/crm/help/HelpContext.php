@@ -26,6 +26,12 @@ final class HelpContext {
 
     public const ASSISTANT =
         'assistant';
+    
+    public const COMMERCE =
+        'commerce';
+
+    public const SUBSCRIPTIONS =
+        'subscriptions';        
 
     public const HELP_CENTER =
         'help_center';
@@ -49,6 +55,8 @@ final class HelpContext {
             self::INBOX_DIAGNOSTICS,
             self::WORK_ITEMS,
             self::ASSISTANT,
+            self::COMMERCE,
+            self::SUBSCRIPTIONS,
             self::HELP_CENTER,
             self::ADMIN_TOOLS,
         ];

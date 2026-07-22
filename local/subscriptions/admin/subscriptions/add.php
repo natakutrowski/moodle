@@ -9,8 +9,15 @@ use local_subscriptions\subscription_config;
 use local_subscriptions\subscription_manager;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\admin\AdminLog;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 function local_subscriptions_generate_unique_username_from_email(string $email): string {
     global $DB;
@@ -37,10 +44,28 @@ global $DB, $PAGE, $OUTPUT, $CFG;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 
-$PAGE->set_context($context);
-$PAGE->set_url(new moodle_url(subscription_config::add_manual_subscription_page()));
-$PAGE->set_title(get_string('add_subscription', 'local_subscriptions'));
-$PAGE->set_heading(get_string('add_subscription', 'local_subscriptions'));
+$preselecteduserid = optional_param('userid', 0, PARAM_INT);
+
+$pageurl = new moodle_url(
+    subscription_config::add_manual_subscription_page()
+);
+
+if ($preselecteduserid > 0) {
+    $pageurl->param('userid', $preselecteduserid);
+}
+
+$pagetitle = get_string(
+    'add_subscription',
+    'local_subscriptions'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-subscription-add-page'
+);
 
 $PAGE->requires->jquery();
 $PAGE->requires->jquery_plugin('ui');
@@ -57,7 +82,6 @@ $PAGE->requires->js(new moodle_url('/local/subscriptions/thirdparty/flatpickr/l1
 
 $renderer = new local_subscriptions_user_subs_renderer($PAGE, $OUTPUT);
 
-$preselecteduserid = optional_param('userid', 0, PARAM_INT);
 $preselecteduser = null;
 
 if ($preselecteduserid > 0) {
@@ -65,10 +89,6 @@ if ($preselecteduserid > 0) {
         'id' => $preselecteduserid,
         'deleted' => 0,
     ], '*', MUST_EXIST);
-
-    $PAGE->set_url(new moodle_url(subscription_config::add_manual_subscription_page(), [
-        'userid' => $preselecteduserid,
-    ]));
 }
 
 $plans = [];
@@ -172,16 +192,111 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($preselecteduserid > 0) {
-        redirect(new moodle_url(subscription_config::admin_user_view_page(), ['id' => $preselecteduserid]));
+        redirect(
+            new moodle_url(
+                subscription_config::
+                    admin_user_view_page(),
+                [
+                    'id' =>
+                        $preselecteduserid,
+                ]
+            )
+        );
     }
 
-    redirect(new moodle_url(subscription_config::user_subscriptions_page(), ['planid' => $planid]));
+    if (
+        $status === 'created' &&
+        !empty($subscription)
+    ) {
+        redirect(
+            new moodle_url(
+                subscription_config::
+                    user_subscription_view_page(),
+                [
+                    'id' =>
+                        $subscription->id,
+                ]
+            )
+        );
+    }
+
+    redirect(
+        new moodle_url(
+            subscription_config::
+                user_subscriptions_page(),
+            [
+                'planid' => $planid,
+            ]
+        )
+    );
 }
 
 echo $OUTPUT->header();
 
-echo AdminNavigation::back_button();
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
 
-echo $renderer->render_manual_subscription_form_v2($plans, $preselecteduser);
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' => get_string(
+                'crm_commerce_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    admin_commerce_page()
+            ),
+        ],
+        [
+            'label' => get_string(
+                'crm_subscriptions_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    user_subscriptions_page()
+            ),
+        ],
+        [
+            'label' => $pagetitle,
+            'url' => null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(
+        subscription_config::
+            user_subscriptions_page()
+    ),
+    get_string(
+        'crm_subscriptions_title',
+        'local_subscriptions'
+    )
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_subscription_add_description',
+        'local_subscriptions'
+    ),
+    HelpContext::SUBSCRIPTIONS
+);
+
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::SUBSCRIPTIONS
+);
+
+echo $renderer->
+    render_manual_subscription_form_v2(
+        $plans,
+        $preselecteduser
+    );
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

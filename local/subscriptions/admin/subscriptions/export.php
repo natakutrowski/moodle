@@ -4,11 +4,19 @@
 require_once(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/excellib.class.php');
 use local_subscriptions\subscription_config;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
-require_login();
-
-$context = context_system::instance();
-require_capability('moodle/site:config', $context);
+$context = AdminSecurity::require(
+    Capabilities::MANAGE_SUBSCRIPTIONS
+);
 
 define('LOCAL_SUBSCRIPTIONS_SCOPE_ALL_LEVELS', 13);
 define('LOCAL_SUBSCRIPTIONS_SCOPE_TRIAL', 14);
@@ -16,29 +24,114 @@ define('LOCAL_SUBSCRIPTIONS_SCOPE_A1', 15);
 
 $download = optional_param('download', 0, PARAM_BOOL);
 
-$PAGE->set_url(
-    new moodle_url(subscription_config::subscriptions_export_page())
+$pageurl = new moodle_url(
+    subscription_config::
+        subscriptions_export_page()
 );
-$PAGE->set_context($context);
-$PAGE->set_title('Export des souscriptions');
-$PAGE->set_heading('Export des souscriptions');
+
+$pagetitle = get_string(
+    'crm_subscriptions_export_title',
+    'local_subscriptions'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-subscriptions-export-page'
+);
 
 if (!$download) {
+    $downloadurl = new moodle_url(
+        subscription_config::
+            subscriptions_export_page(),
+        [
+            'download' => 1,
+        ]
+    );
+
     echo $OUTPUT->header();
 
-    echo $OUTPUT->heading('Export des souscriptions utilisateurs');
+    echo CrmWorkspaceRenderer::start(
+        CrmNavigationKeys::COMMERCE,
+        $context
+    );
 
-    $url = new moodle_url(
-        subscription_config::subscriptions_export_page(),
-        ['download' => 1]
+    echo CrmBreadcrumbRenderer::render(
+        [
+            [
+                'label' => get_string(
+                    'crm_commerce_title',
+                    'local_subscriptions'
+                ),
+                'url' => new moodle_url(
+                    subscription_config::
+                        admin_commerce_page()
+                ),
+            ],
+            [
+                'label' => get_string(
+                    'crm_subscriptions_title',
+                    'local_subscriptions'
+                ),
+                'url' => new moodle_url(
+                    subscription_config::
+                        user_subscriptions_page()
+                ),
+            ],
+            [
+                'label' => $pagetitle,
+                'url' => null,
+            ],
+        ]
+    );
+
+    echo CrmBackLinkRenderer::render(
+        new moodle_url(
+            subscription_config::
+                user_subscriptions_page()
+        ),
+        get_string(
+            'crm_subscriptions_title',
+            'local_subscriptions'
+        )
+    );
+
+    echo CrmPageHeader::render(
+        $pagetitle,
+        get_string(
+            'crm_subscriptions_export_description',
+            'local_subscriptions'
+        ),
+        HelpContext::SUBSCRIPTIONS
     );
 
     echo html_writer::div(
-        html_writer::link($url, 'Télécharger le fichier Excel', [
-            'class' => 'btn btn-primary',
-        ]),
-        'mt-4'
+        html_writer::tag(
+            'p',
+            get_string(
+                'crm_subscriptions_export_help',
+                'local_subscriptions'
+            ),
+            [
+                'class' => 'text-muted mb-4',
+            ]
+        ) .
+        html_writer::link(
+            $downloadurl,
+            get_string(
+                'crm_subscriptions_export_download',
+                'local_subscriptions'
+            ),
+            [
+                'class' => 'btn btn-primary',
+            ]
+        ),
+        'card card-body'
     );
+
+    echo CrmWorkspaceRenderer::end();
 
     echo $OUTPUT->footer();
     exit;
@@ -85,15 +178,24 @@ $records = $DB->get_records_sql($sql, [
 
 $sheets = [
     'long' => [
-        'title' => '1 an - 3 ans - à vie',
+        'title' => get_string(
+            'crm_subscriptions_export_sheet_long',
+            'local_subscriptions'
+        ),
         'records' => [],
     ],
     'a1' => [
-        'title' => 'Cours A1',
+        'title' => get_string(
+            'crm_subscriptions_export_sheet_a1',
+            'local_subscriptions'
+        ),
         'records' => [],
     ],
     'trial' => [
-        'title' => 'Essai',
+        'title' => get_string(
+            'crm_subscriptions_export_sheet_trial',
+            'local_subscriptions'
+        ),
         'records' => [],
     ],
 ];
@@ -122,7 +224,10 @@ foreach ($records as $record) {
     }
 }
 
-$filename = 'souscriptions_utilisateurs_' . date('Y-m-d_H-i') . '.xlsx';
+$filename =
+    'subscriptions_' .
+    date('Y-m-d_H-i') .
+    '.xlsx';
 
 $workbook = new MoodleExcelWorkbook('-');
 $workbook->send($filename);
@@ -137,16 +242,41 @@ $moneyformat = $workbook->add_format([
 ]);
 
 $headers = [
-    'Nom',
-    'Prénom',
-    'Email',
-    'Téléphone',
-    'Plan choisi',
-    'Scope',
-    'Prix payé',
-    'Devise',
-    'Date d’inscription',
-    'Statut',
+    get_string(
+        'lastname'
+    ),
+    get_string(
+        'firstname'
+    ),
+    get_string(
+        'email'
+    ),
+    get_string(
+        'phone'
+    ),
+    get_string(
+        'plan',
+        'local_subscriptions'
+    ),
+    get_string(
+        'scope',
+        'local_subscriptions'
+    ),
+    get_string(
+        'pricepaid',
+        'local_subscriptions'
+    ),
+    get_string(
+        'currency',
+        'local_subscriptions'
+    ),
+    get_string(
+        'registration_date',
+        'local_subscriptions'
+    ),
+    get_string(
+        'status'
+    ),
 ];
 
 foreach ($sheets as $sheetdata) {

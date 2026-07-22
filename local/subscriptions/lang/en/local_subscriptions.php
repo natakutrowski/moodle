@@ -5091,3 +5091,71 @@ $string['crm_inbox_preview_reading_region'] =
 
 $string['crm_inbox_preview_context_region'] =
     'Contact context';
+
+$string['crm_commerce_nav'] = 'Commerce';
+$string['crm_commerce_title'] = 'Commerce';
+$string['crm_commerce_description'] = 'Manage subscriptions, digital purchases and products from a unified commerce workspace.';
+
+$string['crm_commerce_no_access'] = 'You currently do not have access to any commerce modules.';
+
+$string['crm_commerce_subscriptions_title'] = 'Subscriptions';
+$string['crm_commerce_subscriptions_description'] = 'View and manage subscriptions, paid enrolments and their history.';
+
+$string['crm_commerce_imports_title'] = 'Imports';
+$string['crm_commerce_imports_description'] = 'Import subscriptions and access the related import tools.';
+
+$string['crm_commerce_configuration_title'] = 'Commerce configuration';
+$string['crm_commerce_configuration_description'] = 'Manage plans, prices, access entitlements, translations and plan upgrades.';
+
+$string['crm_commerce_digital_products_title'] = 'Digital products';
+$string['crm_commerce_digital_products_description'] = 'Create and manage the digital products available in the store.';
+
+$string['crm_commerce_digital_purchases_title'] = 'Digital purchases';
+$string['crm_commerce_digital_purchases_description'] = 'Review digital purchases, payments and customer access delivery.';
+
+$string['crm_commerce_statistics_title'] = 'Commerce statistics';
+$string['crm_commerce_statistics_description'] = 'Analyse digital sales, revenue and the main commerce indicators.';
+
+$string['admin_card_commerce_title'] = 'Commerce';
+$string['admin_card_commerce_description'] = 'Access subscriptions, digital products, purchases, imports, statistics and commerce tools.';
+
+$string['crm_subscriptions_title'] = 'Subscriptions';
+$string['crm_subscriptions_description'] = 'View and manage paid enrolments, access periods and plans assigned to users.';
+$string['crm_subscriptions_breadcrumb'] = 'Subscriptions';
+$string['crm_subscription_view_description'] = 'Review commerce information, access dates, the associated payment and provider references.';
+$string['crm_subscription_edit_description'] = 'Update the access dates and status of this subscription.';
+$string['crm_subscription_add_description'] = 'Manually assign a plan to an existing user or create a new account before enrolment.';
+$string['crm_subscriptions_export_title'] = 'Export subscriptions';
+$string['crm_subscriptions_export_description'] = 'Download subscriptions and their main commerce information as an Excel workbook.';
+$string['crm_subscriptions_export_help'] = 'The workbook contains separate sheets for long-term plans, the A1 course and trial subscriptions.';
+$string['crm_subscriptions_export_download'] = 'Download the Excel file';
+$string['crm_subscriptions_export_sheet_long'] = '1 year - 3 years - lifetime';
+$string['crm_subscriptions_export_sheet_a1'] = 'A1 course';
+$string['crm_subscriptions_export_sheet_trial'] = 'Trial';
+$string['crm_subscriptions_import_description'] = 'Import multiple subscriptions from a CSV file and review the data before creation.';
+$string['crm_subscriptions_import_result_title'] = 'Import result';
+$string['crm_subscriptions_import_result_description'] = 'Review imported subscriptions and the rows skipped during processing.';
+$string['crm_subscriptions_view_list'] = 'View subscriptions';
+$string['crm_subscriptions_import_another'] = 'Import another file';
+$string['crm_subscription_configuration_title'] = 'Subscription configuration';
+$string['crm_subscription_configuration_description'] = 'Manage commerce plans, their durations and the course access scopes they provide.';
+$string['crm_plan_prices_description'] = 'Manage multi-currency prices and payment-provider price identifiers for this plan.';
+$string['crm_plan_translations_title'] = 'Plan translations';
+$string['crm_plan_translations_description'] = 'Manage translated names and content for commerce plans in the available languages.';
+$string['crm_plan_entitlements_description'] = 'Define the courses, roles, groups and access levels automatically granted by this plan.';
+$string['crm_plan_upgrades_description'] = 'Configure allowed plan upgrades and the pricing method used for each path.';
+$string['crm_scope_translations_title'] = 'Access scope translations';
+$string['crm_scope_translations_description'] = 'Manage translated labels for the course access scopes used by plans.';
+$string['crm_digital_products_description'] = 'Manage digital products, files, translations, prices and storefront availability.';
+$string['crm_digital_product_add_description'] = 'Create a digital product, upload its files and prepare its sales content in French, English and Russian.';
+$string['crm_digital_product_edit_description'] = 'Update this digital product\'s files, prices, availability and translated content.';
+$string['crm_digital_purchase_view_description'] = 'Review commerce information, payment, file access and technical data for this digital purchase.';
+$string['crm_digital_sales_stats_description'] = 'Analyse digital product sales volume and cumulative growth over the selected period.';
+
+$string['crm_commerce_section_navigation'] = 'Commerce secondary navigation';
+$string['crm_commerce_nav_overview'] = 'Overview';
+$string['crm_commerce_nav_subscriptions'] = 'Subscriptions';
+$string['crm_commerce_nav_digital_purchases'] = 'Digital purchases';
+$string['crm_commerce_nav_digital_products'] = 'Digital products';
+$string['crm_commerce_nav_statistics'] = 'Statistics';
+$string['crm_commerce_nav_configuration'] = 'Configuration';

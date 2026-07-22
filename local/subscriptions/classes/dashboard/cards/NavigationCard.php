@@ -44,60 +44,39 @@ final class NavigationCard implements DashboardCard {
     private static function cards(): array {
         return [
             [
-                'title' => get_string('admin_card_crm_users_title', 'local_subscriptions'),
-                'description' => get_string('admin_card_crm_users_desc', 'local_subscriptions'),
-                'url' => new moodle_url(subscription_config::admin_users_page()),
+                'title' => get_string(
+                    'admin_card_crm_users_title',
+                    'local_subscriptions'
+                ),
+                'description' => get_string(
+                    'admin_card_crm_users_desc',
+                    'local_subscriptions'
+                ),
+                'url' => new moodle_url(
+                    subscription_config::
+                        admin_users_page()
+                ),
                 'icon' => '👤',
-                'capability' => Capabilities::VIEW_USERS,
+                'capability' =>
+                    Capabilities::VIEW_USERS,
             ],
+
             [
-                'title' => get_string('admin_card_user_subscriptions_title', 'local_subscriptions'),
-                'description' => get_string('admin_card_user_subscriptions_desc', 'local_subscriptions'),
-                'url' => new moodle_url(subscription_config::user_subscriptions_page()),
-                'icon' => '📋',
-                'capability' => Capabilities::MANAGE_SUBSCRIPTIONS,
-            ],
-            [
-                'title' => get_string('admin_card_add_subscription_title', 'local_subscriptions'),
-                'description' => get_string('admin_card_add_subscription_desc', 'local_subscriptions'),
-                'url' => new moodle_url(subscription_config::add_manual_subscription_page()),
-                'icon' => '➕',
-                'capability' => Capabilities::MANAGE_SUBSCRIPTIONS,
-            ],
-            [
-                'title' => get_string('admin_card_import_csv_title', 'local_subscriptions'),
-                'description' => get_string('admin_card_import_csv_desc', 'local_subscriptions'),
-                'url' => new moodle_url(subscription_config::import_csv_page()),
-                'icon' => '📂',
-                'capability' => Capabilities::MANAGE_SUBSCRIPTIONS,
-            ],
-            [
-                'title' => get_string('admin_card_plans_title', 'local_subscriptions'),
-                'description' => get_string('admin_card_plans_desc', 'local_subscriptions'),
-                'url' => new moodle_url(subscription_config::manage_page()),
-                'icon' => '🧩',
-                'capability' => Capabilities::MANAGE_CONFIGURATION,
-            ],
-            [
-                'title' => get_string('admin_card_digital_products_title', 'local_subscriptions'),
-                'description' => get_string('admin_card_digital_products_desc', 'local_subscriptions'),
-                'url' => new moodle_url(subscription_config::digital_products_admin_page()),
-                'icon' => '📦',
-                'capability' => Capabilities::MANAGE_DIGITAL,
-            ],
-            [
-                'title' => get_string('admin_card_digital_purchases_title', 'local_subscriptions'),
-                'description' => get_string('admin_card_digital_purchases_desc', 'local_subscriptions'),
-                'url' => new moodle_url(subscription_config::digital_purchases_admin_page()),
-                'icon' => '🧾',
-                'capability' => Capabilities::VIEW_DIGITAL,
-            ],
-            [
-                'title' => get_string('admin_card_digital_stats_title', 'local_subscriptions'),
-                'description' => get_string('admin_card_digital_stats_desc', 'local_subscriptions'),
-                'url' => new moodle_url(subscription_config::digital_sales_stats_admin_page()),
-                'icon' => '📊',
-                'capability' => Capabilities::VIEW_STATISTICS,
+                'title' => get_string(
+                    'admin_card_commerce_title',
+                    'local_subscriptions'
+                ),
+                'description' => get_string(
+                    'admin_card_commerce_description',
+                    'local_subscriptions'
+                ),
+                'url' => new moodle_url(
+                    subscription_config::
+                        admin_commerce_page()
+                ),
+                'icon' => '◆',
+                'capability' =>
+                    Capabilities::VIEW_DASHBOARD,
             ],
         ];
     }

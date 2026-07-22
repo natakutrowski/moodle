@@ -5141,3 +5141,71 @@ $string['crm_inbox_preview_reading_region'] =
 
 $string['crm_inbox_preview_context_region'] =
     'Контекст контакта';
+
+$string['crm_commerce_nav'] = 'Коммерция';
+$string['crm_commerce_title'] = 'Коммерция';
+$string['crm_commerce_description'] = 'Управляйте подписками, цифровыми покупками и продуктами в едином коммерческом пространстве.';
+
+$string['crm_commerce_no_access'] = 'У вас пока нет доступа к коммерческим модулям.';
+
+$string['crm_commerce_subscriptions_title'] = 'Подписки';
+$string['crm_commerce_subscriptions_description'] = 'Просматривайте и управляйте подписками, платными зачислениями и их историей.';
+
+$string['crm_commerce_imports_title'] = 'Импорт';
+$string['crm_commerce_imports_description'] = 'Импортируйте подписки и используйте связанные инструменты импорта.';
+
+$string['crm_commerce_configuration_title'] = 'Настройки коммерции';
+$string['crm_commerce_configuration_description'] = 'Управляйте тарифами, ценами, правами доступа, переводами и переходами между тарифами.';
+
+$string['crm_commerce_digital_products_title'] = 'Цифровые продукты';
+$string['crm_commerce_digital_products_description'] = 'Создавайте и управляйте цифровыми продуктами, доступными в магазине.';
+
+$string['crm_commerce_digital_purchases_title'] = 'Цифровые покупки';
+$string['crm_commerce_digital_purchases_description'] = 'Просматривайте цифровые покупки, платежи и предоставленный клиентам доступ.';
+
+$string['crm_commerce_statistics_title'] = 'Коммерческая статистика';
+$string['crm_commerce_statistics_description'] = 'Анализируйте цифровые продажи, выручку и основные коммерческие показатели.';
+
+$string['admin_card_commerce_title'] = 'Коммерция';
+$string['admin_card_commerce_description'] = 'Откройте подписки, цифровые продукты, покупки, импорт, статистику и коммерческие инструменты.';
+
+$string['crm_subscriptions_title'] = 'Подписки';
+$string['crm_subscriptions_description'] = 'Просматривайте и управляйте платными зачислениями, периодами доступа и назначенными пользователям тарифами.';
+$string['crm_subscriptions_breadcrumb'] = 'Подписки';
+$string['crm_subscription_view_description'] = 'Просматривайте коммерческие данные, сроки доступа, связанный платёж и идентификаторы платёжного провайдера.';
+$string['crm_subscription_edit_description'] = 'Измените сроки доступа и статус этой подписки.';
+$string['crm_subscription_add_description'] = 'Назначьте тариф существующему пользователю вручную или создайте новый аккаунт перед зачислением.';
+$string['crm_subscriptions_export_title'] = 'Экспорт подписок';
+$string['crm_subscriptions_export_description'] = 'Скачайте подписки и основные коммерческие данные в формате Excel.';
+$string['crm_subscriptions_export_help'] = 'Книга содержит отдельные листы для долгосрочных тарифов, курса A1 и пробных подписок.';
+$string['crm_subscriptions_export_download'] = 'Скачать файл Excel';
+$string['crm_subscriptions_export_sheet_long'] = '1 год - 3 года - бессрочно';
+$string['crm_subscriptions_export_sheet_a1'] = 'Курс A1';
+$string['crm_subscriptions_export_sheet_trial'] = 'Пробный период';
+$string['crm_subscriptions_import_description'] = 'Импортируйте несколько подписок из CSV-файла и проверьте данные перед созданием.';
+$string['crm_subscriptions_import_result_title'] = 'Результат импорта';
+$string['crm_subscriptions_import_result_description'] = 'Просмотрите импортированные подписки и строки, пропущенные во время обработки.';
+$string['crm_subscriptions_view_list'] = 'Открыть подписки';
+$string['crm_subscriptions_import_another'] = 'Импортировать другой файл';
+$string['crm_subscription_configuration_title'] = 'Настройки подписок';
+$string['crm_subscription_configuration_description'] = 'Управляйте тарифами, сроками действия и наборами курсов, к которым они предоставляют доступ.';
+$string['crm_plan_prices_description'] = 'Управляйте ценами в разных валютах и идентификаторами цен платёжного провайдера для этого тарифа.';
+$string['crm_plan_translations_title'] = 'Переводы тарифов';
+$string['crm_plan_translations_description'] = 'Управляйте переведёнными названиями и содержанием коммерческих тарифов на доступных языках.';
+$string['crm_plan_entitlements_description'] = 'Настройте курсы, роли, группы и уровни доступа, автоматически предоставляемые этим тарифом.';
+$string['crm_plan_upgrades_description'] = 'Настройте разрешённые переходы между тарифами и способ расчёта стоимости.';
+$string['crm_scope_translations_title'] = 'Переводы областей доступа';
+$string['crm_scope_translations_description'] = 'Управляйте переведёнными названиями областей доступа к курсам, используемых тарифами.';
+$string['crm_digital_products_description'] = 'Управляйте цифровыми продуктами, файлами, переводами, ценами и доступностью в магазине.';
+$string['crm_digital_product_add_description'] = 'Создайте цифровой продукт, загрузите файлы и подготовьте коммерческие тексты на французском, английском и русском языках.';
+$string['crm_digital_product_edit_description'] = 'Измените файлы, цены, доступность и переведённые материалы цифрового продукта.';
+$string['crm_digital_purchase_view_description'] = 'Просматривайте коммерческие данные, платёж, доступ к файлу и техническую информацию о цифровой покупке.';
+$string['crm_digital_sales_stats_description'] = 'Анализируйте объём и накопительную динамику продаж цифровых продуктов за выбранный период.';
+
+$string['crm_commerce_section_navigation'] = 'Дополнительная навигация раздела «Коммерция»';
+$string['crm_commerce_nav_overview'] = 'Обзор';
+$string['crm_commerce_nav_subscriptions'] = 'Подписки';
+$string['crm_commerce_nav_digital_purchases'] = 'Цифровые покупки';
+$string['crm_commerce_nav_digital_products'] = 'Цифровые продукты';
+$string['crm_commerce_nav_statistics'] = 'Статистика';
+$string['crm_commerce_nav_configuration'] = 'Настройки';

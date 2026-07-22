@@ -7,31 +7,134 @@ require_once(__DIR__ . '/../../renderer/user_subs_renderer.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 
-$PAGE->set_context($context);
-$PAGE->set_url(new moodle_url(subscription_config::process_csv_page()));
-$PAGE->set_title(get_string('import_subscriptions', 'local_subscriptions'));
-$PAGE->set_heading(get_string('import_subscriptions', 'local_subscriptions'));
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
+$pageurl = new moodle_url(
+    subscription_config::
+        process_csv_page()
+);
+
+$pagetitle = get_string(
+    'crm_subscriptions_import_result_title',
+    'local_subscriptions'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-subscriptions-import-result-page'
 );
 
 echo $OUTPUT->header();
-echo AdminNavigation::back_button();
 
-$renderer = new local_subscriptions_user_subs_renderer($PAGE, $OUTPUT);
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' => get_string(
+                'crm_commerce_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    admin_commerce_page()
+            ),
+        ],
+        [
+            'label' => get_string(
+                'crm_subscriptions_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    user_subscriptions_page()
+            ),
+        ],
+        [
+            'label' => get_string(
+                'import_subscriptions',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    import_csv_page()
+            ),
+        ],
+        [
+            'label' => $pagetitle,
+            'url' => null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(
+        subscription_config::
+            import_csv_page()
+    ),
+    get_string(
+        'import_subscriptions',
+        'local_subscriptions'
+    )
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_subscriptions_import_result_description',
+        'local_subscriptions'
+    ),
+    HelpContext::SUBSCRIPTIONS
+);
+
+$renderer =
+    new local_subscriptions_user_subs_renderer(
+        $PAGE,
+        $OUTPUT
+    );
 
 require_sesskey();
 
 $source = optional_param('sourcefile', '', PARAM_RAW);
 if (!$source) {
-    echo html_writer::div(get_string('missing_param', 'local_subscriptions'), 'subscription-message error');
-    echo subscription_config::button_import_csv();
+    echo html_writer::div(
+        get_string(
+            'missing_param',
+            'local_subscriptions'
+        ),
+        'alert alert-danger'
+    );
+
+    echo html_writer::link(
+        new moodle_url(
+            subscription_config::
+                import_csv_page()
+        ),
+        get_string(
+            'import_subscriptions',
+            'local_subscriptions'
+        ),
+        [
+            'class' => 'btn btn-primary',
+        ]
+    );
+
+    echo CrmWorkspaceRenderer::end();
+
     echo $OUTPUT->footer();
     exit;
 }
@@ -39,7 +142,16 @@ if (!$source) {
 $validrows = unserialize(base64_decode($source, true)); 
 
 if (!is_array($validrows) || empty($validrows)) {
-    echo html_writer::div(get_string('no_valid_rows', 'local_subscriptions'), 'subscription-message error');
+    echo html_writer::div(
+        get_string(
+            'no_valid_rows',
+            'local_subscriptions'
+        ),
+        'alert alert-warning'
+    );
+
+    echo CrmWorkspaceRenderer::end();
+
     echo $OUTPUT->footer();
     exit;
 }
@@ -50,6 +162,38 @@ if (!is_array($validrows) || empty($validrows)) {
 echo $renderer->render_import_summary($imported, $skipped);
 
 // Lien vers page de gestion
-echo subscription_config::button_manage_subscription();
+echo html_writer::div(
+    html_writer::link(
+        new moodle_url(
+            subscription_config::
+                user_subscriptions_page()
+        ),
+        get_string(
+            'crm_subscriptions_view_list',
+            'local_subscriptions'
+        ),
+        [
+            'class' => 'btn btn-primary',
+        ]
+    ) .
+    ' ' .
+    html_writer::link(
+        new moodle_url(
+            subscription_config::
+                import_csv_page()
+        ),
+        get_string(
+            'crm_subscriptions_import_another',
+            'local_subscriptions'
+        ),
+        [
+            'class' =>
+                'btn btn-outline-secondary',
+        ]
+    ),
+    'mt-4'
+);
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

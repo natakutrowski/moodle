@@ -296,6 +296,63 @@ $pages = [
     'admin/assistant/work_item.php' =>
         CrmNavigationKeys::ASSISTANT,
 
+    'admin/commerce/index.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/subscriptions/index.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/subscriptions/view.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/subscriptions/add.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/subscriptions/edit.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/subscriptions/export.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/imports/index.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/imports/process.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/manage.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/plans/prices.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/plans/translations.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/plans/entitlements.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/plans/upgrades.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/scopes/translations.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/digital/products/index.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/digital/products/edit.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/digital/purchases/index.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/digital/purchases/view.php' =>
+        CrmNavigationKeys::COMMERCE,
+
+    'admin/digital/stats.php' =>
+        CrmNavigationKeys::COMMERCE,
+
     'admin/help/index.php' =>
         CrmNavigationKeys::HELP,
 
@@ -346,6 +403,25 @@ $headerexpected = [
     'admin/assistant/plan.php',
     'admin/assistant/work_item.php',
 
+    'admin/subscriptions/index.php',
+    'admin/subscriptions/view.php',
+    'admin/subscriptions/add.php',
+    'admin/subscriptions/edit.php',
+    'admin/subscriptions/export.php',
+    'admin/imports/index.php',
+    'admin/imports/process.php',
+    'admin/manage.php',
+    'admin/plans/prices.php',
+    'admin/plans/translations.php',
+    'admin/plans/entitlements.php',
+    'admin/plans/upgrades.php',
+    'admin/scopes/translations.php',
+    'admin/digital/products/index.php',
+    'admin/digital/products/edit.php',
+    'admin/digital/purchases/index.php',
+    'admin/digital/purchases/view.php',
+    'admin/digital/stats.php',
+
     'admin/help/article.php',
     'admin/help/guide.php',
     'admin/help/diagnostics.php',
@@ -373,6 +449,25 @@ $breadcrumbexpected = [
     'admin/assistant/plan.php',
     'admin/assistant/work_item.php',
 
+    'admin/subscriptions/index.php',
+    'admin/subscriptions/view.php',
+    'admin/subscriptions/add.php',
+    'admin/subscriptions/edit.php',
+    'admin/subscriptions/export.php',
+    'admin/imports/index.php',
+    'admin/imports/process.php',
+    'admin/manage.php',
+    'admin/plans/prices.php',
+    'admin/plans/translations.php',
+    'admin/plans/entitlements.php',
+    'admin/plans/upgrades.php',
+    'admin/scopes/translations.php',
+    'admin/digital/products/index.php',
+    'admin/digital/products/edit.php',
+    'admin/digital/purchases/index.php',
+    'admin/digital/purchases/view.php',
+    'admin/digital/stats.php',
+
     'admin/help/article.php',
     'admin/help/guide.php',
     'admin/help/diagnostics.php',
@@ -387,6 +482,7 @@ $breadcrumbforbidden = [
     'admin/inbox/index.php',
     'admin/work/index.php',
     'admin/assistant/index.php',
+    'admin/commerce/index.php',
     'admin/help/index.php',
     'admin/tools/index.php',
 ];
@@ -398,12 +494,103 @@ $returnurlfiles = [
     'admin/help/onboarding_action.php',
 ];
 
+$backlinkexpected = [
+    'admin/subscriptions/view.php',
+    'admin/subscriptions/add.php',
+    'admin/subscriptions/edit.php',
+    'admin/subscriptions/export.php',
+    'admin/imports/index.php',
+    'admin/imports/process.php',
+    'admin/manage.php',
+    'admin/plans/prices.php',
+    'admin/plans/translations.php',
+    'admin/plans/entitlements.php',
+    'admin/plans/upgrades.php',
+    'admin/scopes/translations.php',
+    'admin/digital/products/index.php',
+    'admin/digital/products/edit.php',
+    'admin/digital/purchases/index.php',
+    'admin/digital/purchases/view.php',
+    'admin/digital/stats.php',
+];
+
+$actionendpoints = [
+    'admin/subscriptions/delete.php',
+
+    'admin/digital/products/delete.php',
+    'admin/digital/products/duplicate.php',
+    'admin/digital/products/toggle.php',
+
+    'admin/digital/purchases/cancel.php',
+    'admin/digital/purchases/check_provider.php',
+    'admin/digital/purchases/extend_token.php',
+    'admin/digital/purchases/regenerate_token.php',
+    'admin/digital/purchases/resend_email.php',
+];
+
 $contextchecks = [
     'admin/work/index.php' =>
         'HelpContext::WORK_ITEMS',
 
     'admin/assistant/index.php' =>
         'HelpContext::ASSISTANT',
+
+    'admin/commerce/index.php' =>
+        'HelpContext::COMMERCE',
+
+    'admin/subscriptions/index.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/subscriptions/view.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/subscriptions/add.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/subscriptions/edit.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/subscriptions/export.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/imports/index.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/imports/process.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/manage.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/plans/prices.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/plans/translations.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/plans/entitlements.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/plans/upgrades.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/scopes/translations.php' =>
+        'HelpContext::SUBSCRIPTIONS',
+
+    'admin/digital/products/index.php' =>
+        'HelpContext::DIGITAL_PURCHASES',
+
+    'admin/digital/products/edit.php' =>
+        'HelpContext::DIGITAL_PURCHASES',
+
+    'admin/digital/purchases/index.php' =>
+        'HelpContext::DIGITAL_PURCHASES',
+
+    'admin/digital/purchases/view.php' =>
+        'HelpContext::DIGITAL_PURCHASES',
+
+    'admin/digital/stats.php' =>
+        'HelpContext::DIGITAL_PURCHASES',
 
     'admin/tools/index.php' =>
         'HelpContext::ADMIN_TOOLS',
@@ -552,6 +739,9 @@ foreach ($pages as $relativepath => $navigationkey) {
         CrmNavigationKeys::ASSISTANT =>
             'ASSISTANT',
 
+        CrmNavigationKeys::COMMERCE =>
+            'COMMERCE',
+
         CrmNavigationKeys::HELP =>
             'HELP',
 
@@ -629,6 +819,17 @@ foreach ($pages as $relativepath => $navigationkey) {
     $forbidsbreadcrumb = in_array(
         $relativepath,
         $breadcrumbforbidden,
+        true
+    );
+
+    $hasbacklink = str_contains(
+        $source,
+        'CrmBackLinkRenderer::render'
+    );
+
+    $expectsbacklink = in_array(
+        $relativepath,
+        $backlinkexpected,
         true
     );
 
@@ -747,6 +948,19 @@ foreach ($pages as $relativepath => $navigationkey) {
         continue;
     }
 
+    if (
+        $expectsbacklink &&
+        !$hasbacklink
+    ) {
+        echo '[ERROR] ' .
+            $relativepath .
+            ': missing CRM back link.' .
+            PHP_EOL;
+
+        $failures++;
+        continue;
+    }
+
     if ($ismigrated) {
         $messages = [];
 
@@ -832,6 +1046,93 @@ foreach ($pages as $relativepath => $navigationkey) {
             ) .
             PHP_EOL;
     }
+}
+
+foreach ($actionendpoints as $relativepath) {
+    $source = read_source_file(
+        $pluginroot . '/' . $relativepath
+    );
+
+    if ($source === null) {
+        echo '[ERROR] Unable to read ' .
+            $relativepath .
+            PHP_EOL;
+
+        $failures++;
+        continue;
+    }
+
+    $hassecurity =
+        str_contains(
+            $source,
+            'AdminSecurity::require'
+        );
+
+    $hassesskey =
+        str_contains(
+            $source,
+            'require_sesskey'
+        );
+
+    $hasoutput =
+        str_contains(
+            $source,
+            '$OUTPUT->header'
+        ) ||
+        str_contains(
+            $source,
+            'CrmWorkspaceRenderer::start'
+        );
+
+    if (!$hassecurity) {
+        echo '[ERROR] ' .
+            $relativepath .
+            ': missing AdminSecurity::require().' .
+            PHP_EOL;
+
+        $failures++;
+        continue;
+    }
+
+    if (!$hassesskey) {
+        echo '[ERROR] ' .
+            $relativepath .
+            ': missing require_sesskey().' .
+            PHP_EOL;
+
+        $failures++;
+        continue;
+    }
+
+    if ($hasoutput) {
+        echo '[ERROR] ' .
+            $relativepath .
+            ': action endpoint must not render a page.' .
+            PHP_EOL;
+
+        $failures++;
+        continue;
+    }
+
+    if (
+        !str_contains(
+            $source,
+            'subscription_config::'
+        )
+    ) {
+        echo '[ERROR] ' .
+            $relativepath .
+            ': redirect does not use subscription_config.' .
+            PHP_EOL;
+
+        $failures++;
+        continue;
+    }
+
+    echo '[OK] ' .
+        $relativepath .
+        ' is a secured redirect-only action endpoint.' .
+        PHP_EOL;
 }
 
 foreach (

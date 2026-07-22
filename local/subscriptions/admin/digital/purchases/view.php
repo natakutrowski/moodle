@@ -5,7 +5,14 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\AdminEntityLinks;
 use local_subscriptions\admin\AdminDetailRenderer;
@@ -36,27 +43,57 @@ $purchase = $DB->get_record_sql("
 
 $url = new moodle_url(subscription_config::digital_purchase_view_admin_page(), ['id' => $id]);
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title(get_string('digital_purchase_details', 'local_subscriptions') . ' #' . $purchase->id);
-$PAGE->set_heading(get_string('digital_purchase_details', 'local_subscriptions'));
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
+$pagetitle = get_string(
+    'digital_purchase_details',
+    'local_subscriptions'
+) . ' #' . $purchase->id;
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $url,
+    $pagetitle,
+    'local-subscriptions-commerce-digital-purchase-view-page'
 );
 
 echo $OUTPUT->header();
 
-echo AdminNavigation::back_button();
-
-echo html_writer::start_div('mb-4 d-flex flex-wrap gap-2');
-
-echo html_writer::link(
-    new moodle_url(subscription_config::digital_purchases_admin_page()),
-    '← ' . get_string('digital_purchases', 'local_subscriptions'),
-    ['class' => 'btn btn-outline-secondary']
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
 );
+
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::admin_commerce_page()),
+    ],
+    [
+        'label' => get_string('digital_purchases_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::digital_purchases_admin_page()),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(subscription_config::digital_purchases_admin_page()),
+    get_string('digital_purchases_title', 'local_subscriptions')
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string('crm_digital_purchase_view_description', 'local_subscriptions'),
+    HelpContext::DIGITAL_PURCHASES
+);
+
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::DIGITAL_PURCHASES
+);
+
+echo html_writer::start_div('crm-commerce-actionbar mb-4 d-flex flex-wrap gap-2');
 
 echo html_writer::link(
     new moodle_url(subscription_config::digital_purchase_resend_email_admin_page(), [
@@ -159,15 +196,15 @@ $rows = [
     get_string('digital_response_json', 'local_subscriptions') => $providerdata,
 ];
 
+echo html_writer::start_div('crm-commerce-detail-grid');
+
 echo AdminDetailRenderer::card(
     get_string('digital_purchase_details', 'local_subscriptions') . ' #' . $purchase->id,
     $rows
 );
 
-echo html_writer::link(
-    new moodle_url(subscription_config::digital_purchases_admin_page()),
-    '← ' . get_string('digital_purchases', 'local_subscriptions'),
-    ['class' => 'btn btn-outline-secondary']
-);
+echo html_writer::end_div();
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

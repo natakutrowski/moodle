@@ -5,14 +5,33 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_DIGITAL);
 
-$PAGE->set_context($context);
-$PAGE->set_url(new moodle_url(subscription_config::digital_products_admin_page()));
-$PAGE->set_title(get_string('digital_products_admin_title', 'local_subscriptions'));
-$PAGE->set_heading(get_string('digital_products_admin_title', 'local_subscriptions'));
+$pageurl = new moodle_url(
+    subscription_config::digital_products_admin_page()
+);
+
+$pagetitle = get_string(
+    'digital_products_admin_title',
+    'local_subscriptions'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-digital-products-page'
+);
 
 $sql = "
     SELECT
@@ -71,9 +90,40 @@ $sql = "
 $products = $DB->get_records_sql($sql);
 
 echo $OUTPUT->header();
-echo AdminNavigation::back_button();
 
-echo html_writer::start_div('mb-4 d-flex gap-2 flex-wrap');
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::admin_commerce_page()),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(subscription_config::admin_commerce_page()),
+    get_string('crm_commerce_title', 'local_subscriptions')
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string('crm_digital_products_description', 'local_subscriptions'),
+    HelpContext::DIGITAL_PURCHASES
+);
+
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::DIGITAL_PRODUCTS
+);
+
+
+echo html_writer::start_div('crm-commerce-actionbar mb-4 d-flex gap-2 flex-wrap');
 
 echo html_writer::link(
     new moodle_url(subscription_config::digital_product_edit_admin_page()),
@@ -289,8 +339,10 @@ echo html_writer::tag('style', '
 
 echo html_writer::div(
     html_writer::table($table),
-    'table-responsive'
+    'crm-commerce-table-wrap table-responsive'
 );
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();
 

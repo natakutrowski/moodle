@@ -7,15 +7,20 @@ require_once($CFG->libdir . '/clilib.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\AdminEntityLinks;
 use local_subscriptions\support\DigitalPresenter;
 use local_subscriptions\digital\DigitalPurchaseAdminFilter;
 use local_subscriptions\digital\repositories\DigitalPurchaseAdminRepository;
 use local_subscriptions\crm\user\email\UserEmailPresetBuilder;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::VIEW_DIGITAL);
 $canmanagedigital = has_capability(Capabilities::MANAGE_DIGITAL, $context);
@@ -68,7 +73,6 @@ if ($reconcilepending) {
     );
 }
 
-$PAGE->set_context($context);
 $baseurlparams = [
     'checkprovider' => $checkprovider,
     'campususer' => $campususerfilter,
@@ -79,9 +83,23 @@ $baseurlparams = [
     'issue' => $issuefilter,
 ];
 
-$PAGE->set_url(new moodle_url(subscription_config::digital_purchases_admin_page(), $baseurlparams));
-$PAGE->set_title(get_string('digital_purchases_title', 'local_subscriptions'));
-$PAGE->set_heading(get_string('digital_purchases_title', 'local_subscriptions'));
+$pageurl = new moodle_url(
+    subscription_config::digital_purchases_admin_page(),
+    $baseurlparams
+);
+
+$pagetitle = get_string(
+    'digital_purchases_title',
+    'local_subscriptions'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-digital-purchases-page'
+);
 
 $lang = strtolower(substr(current_language(), 0, 2));
 
@@ -252,7 +270,27 @@ if ($download) {
 }
 
 echo $OUTPUT->header();
-echo AdminNavigation::back_button();
+
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::admin_commerce_page()),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(subscription_config::admin_commerce_page()),
+    get_string('crm_commerce_title', 'local_subscriptions')
+);
 
 echo CrmPageHeader::render(
     get_string(
@@ -266,7 +304,12 @@ echo CrmPageHeader::render(
     HelpContext::DIGITAL_PURCHASES
 );
 
-echo html_writer::start_div('card card-body mb-4');
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::DIGITAL_PURCHASES
+);
+
+
+echo html_writer::start_div('crm-commerce-filter-card card card-body mb-4');
 
 echo html_writer::start_tag('form', [
     'method' => 'get',
@@ -351,7 +394,7 @@ if ($issuefilter !== '') {
 
 echo html_writer::end_div();
 
-echo html_writer::start_div('mt-3 d-flex flex-wrap gap-2');
+echo html_writer::start_div('crm-commerce-actionbar mt-3 d-flex flex-wrap gap-2');
 
 echo html_writer::link(
     new moodle_url(subscription_config::digital_purchases_admin_page(), $baseurlparams + ['download' => 1]),
@@ -770,7 +813,7 @@ echo html_writer::tag('style', '
 
 echo html_writer::div(
     html_writer::table($table),
-    'table-responsive'
+    'crm-commerce-table-wrap table-responsive'
 );
 
 echo $OUTPUT->paging_bar(
@@ -779,6 +822,8 @@ echo $OUTPUT->paging_bar(
     $perpage,
     new moodle_url(subscription_config::digital_purchases_admin_page(), $baseurlparams)
 );
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();
 

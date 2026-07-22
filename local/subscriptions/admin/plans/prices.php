@@ -8,7 +8,13 @@ require_once($CFG->dirroot . '/local/subscriptions/renderer/plans_renderer.php')
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 
@@ -19,18 +25,31 @@ if (!$planid) {
     redirect(new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']));
 }
 
-$PAGE->set_url(new moodle_url(subscription_config::plans_prices_page(),['planid' => $planid]));
-$PAGE->set_context($context);
-$PAGE->set_title(get_string('planprices', 'local_subscriptions'));
-$PAGE->set_heading(get_string('planprices', 'local_subscriptions'));
+$plan = $DB->get_record('subscription_plan', ['id' => $planid], '*', MUST_EXIST);
+
+$pageurl = new moodle_url(
+    subscription_config::plans_prices_page(),
+    ['planid' => $planid]
+);
+
+$pagetitle = get_string(
+    'planpricesfor',
+    'local_subscriptions',
+    '“' . s($plan->name) . '”'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-plan-prices-page'
+);
 $PAGE->requires->js_call_amd('local_subscriptions/deleteprice', 'init');
 
 $add = optional_param('add', 0, PARAM_BOOL);
 $edit   = optional_param('edit', 0, PARAM_INT);
 $delete = optional_param('del', 0, PARAM_INT);
-
-// Vérifie que le plan existe
-$plan = $DB->get_record('subscription_plan', ['id' => $planid], '*', MUST_EXIST);
 
 // On prépare les données personnalisées pour le formulaire :
 $formdata = ['planid' => $planid];
@@ -80,17 +99,40 @@ if ($delete && confirm_sesskey()) {
 
 
 echo $OUTPUT->header();
-echo AdminNavigation::back_button();
 
-// 🧾 Récupère les prix
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::admin_commerce_page()),
+    ],
+    [
+        'label' => get_string('crm_subscription_configuration_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
+    get_string('backtoplanlist', 'local_subscriptions')
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string('crm_plan_prices_description', 'local_subscriptions'),
+    HelpContext::SUBSCRIPTIONS
+);
+
 $prices = local_subscriptions_get_plan_prices($planid);
-echo $OUTPUT->heading(get_string('planpricesfor', 'local_subscriptions', '"'.$plan->name.'"'), 3);
 echo local_subscriptions_plans_renderer::render_prices_table($prices);
-
-// Boutons retour
-$returnurl = new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']);
-$buttons = html_writer::link($returnurl, '← ' . get_string('backtoplanlist', 'local_subscriptions'), ['class' => 'btn btn-link']);
-echo html_writer::div($buttons, 'd-flex justify-content-start align-items-center', ['style' => 'margin-top: 30px; gap: 10px;']);
 
 // 📋 Formulaire
 if ($edit) {
@@ -109,5 +151,7 @@ if ($edit) {
         'style' => 'margin-bottom: 1em; display: inline-block;'
     ]);
 }
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

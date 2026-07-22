@@ -4,7 +4,14 @@ require_once(__DIR__ . '/../../../../config.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::VIEW_DIGITAL);
 
@@ -15,10 +22,23 @@ if ($days !== -1) {
     $days = max(1, min($days, 3650));
 }
 
-$PAGE->set_context($context);
-$PAGE->set_url(new moodle_url(subscription_config::digital_sales_stats_admin_page(), ['days' => $days]));
-$PAGE->set_title(get_string('digital_sales_stats_title', 'local_subscriptions'));
-$PAGE->set_heading(get_string('digital_sales_stats_title', 'local_subscriptions'));
+$pageurl = new moodle_url(
+    subscription_config::digital_sales_stats_admin_page(),
+    ['days' => $days]
+);
+
+$pagetitle = get_string(
+    'digital_sales_stats_title',
+    'local_subscriptions'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-digital-sales-stats-page'
+);
 
 if ($fromdate !== '') {
     $fromtimestamp = strtotime($fromdate . ' 00:00:00');
@@ -80,9 +100,44 @@ if ($count > 0) {
 }
 
 echo $OUTPUT->header();
-echo AdminNavigation::back_button();
 
-echo html_writer::start_div('container my-4');
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::admin_commerce_page()),
+    ],
+    [
+        'label' => get_string('digital_purchases_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::digital_purchases_admin_page()),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(subscription_config::digital_purchases_admin_page()),
+    get_string('digital_purchases_title', 'local_subscriptions')
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string('crm_digital_sales_stats_description', 'local_subscriptions'),
+    HelpContext::DIGITAL_PURCHASES
+);
+
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::STATISTICS
+);
+
+
+echo html_writer::start_div('container-fluid px-0 my-4');
 
 echo html_writer::start_div('mb-4 d-flex gap-2 flex-wrap');
 
@@ -142,6 +197,7 @@ echo html_writer::tag('p', get_string('digital_sales_stats_sales_found', 'local_
 if ($count === 0) {
     echo $OUTPUT->notification(get_string('digital_sales_stats_no_sales', 'local_subscriptions'), 'info');
     echo html_writer::end_div();
+    echo CrmWorkspaceRenderer::end();
     echo $OUTPUT->footer();
     exit;
 }
@@ -153,6 +209,8 @@ echo html_writer::tag('h2', get_string('digital_sales_stats_cumulative', 'local_
 echo local_subscriptions_render_line_chart($cumulative);
 
 echo html_writer::end_div();
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();
 

@@ -8,9 +8,16 @@ use local_subscriptions\subscription_manager;
 use local_subscriptions\form\user_subscription_edit_form;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\admin\AdminLog;
 use local_subscriptions\admin\AdminFormatter;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 
@@ -22,12 +29,26 @@ $subscription = $DB->get_record('user_subscription', ['id' => $id], '*', MUST_EX
 $user = $DB->get_record('user', ['id' => $subscription->userid], '*', MUST_EXIST);
 $plan = $DB->get_record('subscription_plan', ['id' => $subscription->planid], '*', MUST_EXIST);
 
-$url = new moodle_url(subscription_config::user_subscription_edit_page(), ['id' => $id]);
+$url = new moodle_url(
+    subscription_config::
+        user_subscription_edit_page(),
+    [
+        'id' => $id,
+    ]
+);
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title(get_string('edit_user_subscription', 'local_subscriptions'));
-$PAGE->set_heading(get_string('edit_user_subscription', 'local_subscriptions'));
+$pagetitle = get_string(
+    'edit_user_subscription',
+    'local_subscriptions'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $url,
+    $pagetitle,
+    'local-subscriptions-commerce-subscription-edit-page'
+);
 
 $form = new user_subscription_edit_form($url);
 
@@ -42,7 +63,15 @@ $defaultdata = [
 $form->set_data($defaultdata);
 
 if ($form->is_cancelled()) {
-    redirect(new moodle_url(subscription_config::user_subscriptions_page()));
+    redirect(
+        new moodle_url(
+            subscription_config::
+                user_subscription_view_page(),
+            [
+                'id' => $id,
+            ]
+        )
+    );
 }
 
 if ($data = $form->get_data()) {
@@ -84,32 +113,162 @@ if ($data = $form->get_data()) {
     AdminLog::subscriptionUpdated($updatedsubscription, $plan, $changes);
 
     redirect(
-        new moodle_url(subscription_config::user_subscriptions_page()),
-        get_string('subscription_updated_successfully', 'local_subscriptions'),
+        new moodle_url(
+            subscription_config::
+                user_subscription_view_page(),
+            [
+                'id' =>
+                    $updatedsubscription->id,
+            ]
+        ),
+        get_string(
+            'subscription_updated_successfully',
+            'local_subscriptions'
+        ),
         null,
-        \core\output\notification::NOTIFY_SUCCESS
+        \core\output\notification::
+            NOTIFY_SUCCESS
     );
 }
 
 echo $OUTPUT->header();
 
-echo AdminNavigation::back_button();
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' => get_string(
+                'crm_commerce_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    admin_commerce_page()
+            ),
+        ],
+        [
+            'label' => get_string(
+                'crm_subscriptions_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    user_subscriptions_page()
+            ),
+        ],
+        [
+            'label' =>
+                get_string(
+                    'subscription_details',
+                    'local_subscriptions'
+                ) .
+                ' #' .
+                $subscription->id,
+            'url' => new moodle_url(
+                subscription_config::
+                    user_subscription_view_page(),
+                [
+                    'id' =>
+                        $subscription->id,
+                ]
+            ),
+        ],
+        [
+            'label' => $pagetitle,
+            'url' => null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(
+        subscription_config::
+            user_subscription_view_page(),
+        [
+            'id' =>
+                $subscription->id,
+        ]
+    ),
+    get_string(
+        'subscription_details',
+        'local_subscriptions'
+    )
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_subscription_edit_description',
+        'local_subscriptions'
+    ),
+    HelpContext::SUBSCRIPTIONS
+);
+
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::SUBSCRIPTIONS
+);
 
 echo html_writer::div(
-    html_writer::tag('h3', get_string('subscription_summary', 'local_subscriptions'), ['class' => 'h5 mb-3']) .
-    html_writer::tag('p',
-        html_writer::tag('strong', get_string('user', 'local_subscriptions') . ': ') .
-        html_writer::link(new moodle_url('/user/profile.php', ['id' => $user->id]), fullname($user))
+    html_writer::tag(
+        'h3',
+        get_string(
+            'subscription_summary',
+            'local_subscriptions'
+        ),
+        [
+            'class' => 'h5 mb-3',
+        ]
     ) .
-    html_writer::tag('p',
-        html_writer::tag('strong', get_string('email') . ': ') . s($user->email)
+    html_writer::tag(
+        'p',
+        html_writer::tag(
+            'strong',
+            get_string(
+                'user',
+                'local_subscriptions'
+            ) .
+            ': '
+        ) .
+        html_writer::link(
+            new moodle_url(
+                subscription_config::
+                    admin_user_view_page(),
+                [
+                    'id' => $user->id,
+                ]
+            ),
+            fullname($user)
+        )
     ) .
-    html_writer::tag('p',
-        html_writer::tag('strong', get_string('plan', 'local_subscriptions') . ': ') . format_string($plan->name)
+    html_writer::tag(
+        'p',
+        html_writer::tag(
+            'strong',
+            get_string('email') . ': '
+        ) .
+        s($user->email)
+    ) .
+    html_writer::tag(
+        'p',
+        html_writer::tag(
+            'strong',
+            get_string(
+                'plan',
+                'local_subscriptions'
+            ) .
+            ': '
+        ) .
+        format_string($plan->name)
     ),
     'card card-body mb-4'
 );
 
 $form->display();
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

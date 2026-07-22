@@ -19,7 +19,10 @@ final class CrmNavigationKeys {
 
     public const ASSISTANT = 'assistant';
 
+    public const COMMERCE = 'commerce';
+
     public const HELP = 'help';
+
     public const TOOLS = 'tools';
 
     /**
@@ -32,6 +35,7 @@ final class CrmNavigationKeys {
             self::INBOX,
             self::WORK,
             self::ASSISTANT,
+            self::COMMERCE,
             self::HELP,
             self::TOOLS,
         ];

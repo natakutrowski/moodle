@@ -7,7 +7,13 @@ require_once($CFG->dirroot . '/local/subscriptions/classes/subscription_config.p
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 
@@ -29,18 +35,22 @@ if ($planid <= 0 || !$plan = $DB->get_record('subscription_plan', ['id' => $plan
 
 $pageurl = new moodle_url(subscription_config::plan_entitlements_page(), ['planid' => $planid]);
 
-$PAGE->set_url($pageurl);
-$PAGE->set_context($context);
-$PAGE->set_title(get_string('planentitlements', 'local_subscriptions'));
-$PAGE->set_heading(get_string('planentitlementsfor', 'local_subscriptions', $plan->name));
+$pagetitle = get_string(
+    'planentitlementsfor',
+    'local_subscriptions',
+    s($plan->name)
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-plan-entitlements-page'
+);
 
 $PAGE->requires->css(new moodle_url('/local/subscriptions/select2.min.css'));
 $PAGE->requires->js(new moodle_url('/local/subscriptions/js/select2.min.js'), true);
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
-);
 
 $formurl = new moodle_url(subscription_config::plan_entitlements_page(), ['planid' => $planid]);
 $mform = new plan_entitlement_form($formurl, ['planid' => $planid]);
@@ -115,9 +125,34 @@ if ($delete) {
 }
 
 echo $OUTPUT->header();
-echo AdminNavigation::back_button();
 
-echo $OUTPUT->heading(get_string('planentitlementsfor', 'local_subscriptions', $plan->name), 3);
+echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
+
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::admin_commerce_page()),
+    ],
+    [
+        'label' => get_string('crm_subscription_configuration_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
+    get_string('backtoplanlist', 'local_subscriptions')
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string('crm_plan_entitlements_description', 'local_subscriptions'),
+    HelpContext::SUBSCRIPTIONS
+);
 
 $entitlements = $DB->get_records_sql("
     SELECT e.*, c.fullname AS coursename
@@ -180,12 +215,6 @@ if ($entitlements) {
     echo $OUTPUT->notification(get_string('noentitlements', 'local_subscriptions'), \core\output\notification::NOTIFY_INFO);
 }
 
-$returnurl = new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']);
-echo \html_writer::div(
-    \html_writer::link($returnurl, '← ' . get_string('backtoplanlist', 'local_subscriptions'), ['class' => 'btn btn-link']),
-    'mb-3'
-);
-
 if ($edit) {
     $entitlement = $DB->get_record('subscription_plan_entitlement', [
         'id' => $edit,
@@ -210,5 +239,7 @@ if ($edit) {
         ['class' => 'btn btn-primary']
     );
 }
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

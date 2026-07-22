@@ -4904,3 +4904,71 @@ $string['crm_inbox_preview_reading_region'] =
 
 $string['crm_inbox_preview_context_region'] =
     'Contexte du contact';
+
+$string['crm_commerce_nav'] = 'Commerce';
+$string['crm_commerce_title'] = 'Commerce';
+$string['crm_commerce_description'] = 'Gérez les abonnements, les achats digitaux et les produits depuis un espace commercial unifié.';
+
+$string['crm_commerce_no_access'] = 'Vous ne disposez actuellement d’aucun accès aux modules commerciaux.';
+
+$string['crm_commerce_subscriptions_title'] = 'Abonnements';
+$string['crm_commerce_subscriptions_description'] = 'Consultez et gérez les abonnements, les inscriptions payantes et leur historique.';
+
+$string['crm_commerce_imports_title'] = 'Imports';
+$string['crm_commerce_imports_description'] = 'Importez des abonnements et consultez les outils associés aux imports.';
+
+$string['crm_commerce_configuration_title'] = 'Configuration commerciale';
+$string['crm_commerce_configuration_description'] = 'Gérez les plans, les tarifs, les droits d’accès, les traductions et les évolutions de formule.';
+
+$string['crm_commerce_digital_products_title'] = 'Produits digitaux';
+$string['crm_commerce_digital_products_description'] = 'Créez et gérez les produits numériques proposés dans la boutique.';
+
+$string['crm_commerce_digital_purchases_title'] = 'Achats digitaux';
+$string['crm_commerce_digital_purchases_description'] = 'Consultez les achats numériques, les paiements et les accès délivrés aux clients.';
+
+$string['crm_commerce_statistics_title'] = 'Statistiques commerciales';
+$string['crm_commerce_statistics_description'] = 'Analysez les ventes digitales, les revenus et les principaux indicateurs commerciaux.';
+
+$string['admin_card_commerce_title'] = 'Commerce';
+$string['admin_card_commerce_description'] = 'Accédez aux abonnements, produits digitaux, achats, imports, statistiques et outils commerciaux.';
+
+$string['crm_subscriptions_title'] = 'Abonnements';
+$string['crm_subscriptions_description'] = 'Consultez et gérez les inscriptions payantes, les périodes d’accès et les formules attribuées aux utilisateurs.';
+$string['crm_subscriptions_breadcrumb'] = 'Abonnements';
+$string['crm_subscription_view_description'] = 'Consultez les informations commerciales, les dates d’accès, le paiement associé et les références du fournisseur.';
+$string['crm_subscription_edit_description'] = 'Modifiez les dates d’accès et le statut de cet abonnement.';
+$string['crm_subscription_add_description'] = 'Attribuez manuellement une formule à un utilisateur existant ou créez un nouveau compte avant l’inscription.';
+$string['crm_subscriptions_export_title'] = 'Exporter les abonnements';
+$string['crm_subscriptions_export_description'] = 'Téléchargez les abonnements et leurs principales informations commerciales au format Excel.';
+$string['crm_subscriptions_export_help'] = 'Le classeur contient des feuilles distinctes pour les formules longues, le cours A1 et les abonnements d’essai.';
+$string['crm_subscriptions_export_download'] = 'Télécharger le fichier Excel';
+$string['crm_subscriptions_export_sheet_long'] = '1 an - 3 ans - à vie';
+$string['crm_subscriptions_export_sheet_a1'] = 'Cours A1';
+$string['crm_subscriptions_export_sheet_trial'] = 'Essai';
+$string['crm_subscriptions_import_description'] = 'Importez plusieurs abonnements depuis un fichier CSV, puis vérifiez les données avant leur création.';
+$string['crm_subscriptions_import_result_title'] = 'Résultat de l’import';
+$string['crm_subscriptions_import_result_description'] = 'Consultez les abonnements importés et les lignes ignorées pendant le traitement.';
+$string['crm_subscriptions_view_list'] = 'Voir les abonnements';
+$string['crm_subscriptions_import_another'] = 'Importer un autre fichier';
+$string['crm_subscription_configuration_title'] = 'Configuration des abonnements';
+$string['crm_subscription_configuration_description'] = 'Gérez les plans commerciaux, leurs durées et les périmètres de cours auxquels ils donnent accès.';
+$string['crm_plan_prices_description'] = 'Gérez les tarifs multi-devises et les identifiants de prix du fournisseur de paiement pour cette formule.';
+$string['crm_plan_translations_title'] = 'Traductions des formules';
+$string['crm_plan_translations_description'] = 'Gérez les noms et contenus traduits des formules commerciales dans les langues disponibles.';
+$string['crm_plan_entitlements_description'] = 'Définissez les cours, rôles, groupes et niveaux d’accès automatiquement attribués par cette formule.';
+$string['crm_plan_upgrades_description'] = 'Configurez les évolutions autorisées entre les formules et leur méthode de calcul tarifaire.';
+$string['crm_scope_translations_title'] = 'Traductions des périmètres d’accès';
+$string['crm_scope_translations_description'] = 'Gérez les libellés traduits des périmètres de cours utilisés par les formules.';
+$string['crm_digital_products_description'] = 'Gérez les produits numériques, leurs fichiers, leurs traductions, leurs prix et leur disponibilité dans la boutique.';
+$string['crm_digital_product_add_description'] = 'Créez un produit numérique, ajoutez ses fichiers et préparez ses contenus commerciaux en français, anglais et russe.';
+$string['crm_digital_product_edit_description'] = 'Modifiez les fichiers, les prix, la disponibilité et les contenus traduits de ce produit numérique.';
+$string['crm_digital_purchase_view_description'] = 'Consultez les informations commerciales, le paiement, l’accès au fichier et les données techniques de cet achat numérique.';
+$string['crm_digital_sales_stats_description'] = 'Analysez le volume et l’évolution cumulée des ventes de produits numériques sur la période choisie.';
+
+$string['crm_commerce_section_navigation'] = 'Navigation secondaire du commerce';
+$string['crm_commerce_nav_overview'] = 'Vue d’ensemble';
+$string['crm_commerce_nav_subscriptions'] = 'Abonnements';
+$string['crm_commerce_nav_digital_purchases'] = 'Achats numériques';
+$string['crm_commerce_nav_digital_products'] = 'Produits numériques';
+$string['crm_commerce_nav_statistics'] = 'Statistiques';
+$string['crm_commerce_nav_configuration'] = 'Configuration';

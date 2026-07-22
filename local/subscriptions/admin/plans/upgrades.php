@@ -7,7 +7,13 @@ require_once($CFG->dirroot . '/local/subscriptions/classes/subscription_config.p
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 
@@ -19,10 +25,15 @@ $delete = optional_param('del', 0, PARAM_INT);
 
 $pageurl = new moodle_url(subscription_config::plan_upgrades_page());
 
-$PAGE->set_url($pageurl);
-$PAGE->set_context($context);
-$PAGE->set_title(get_string('planupgrades', 'local_subscriptions'));
-$PAGE->set_heading(get_string('planupgrades', 'local_subscriptions'));
+$pagetitle = get_string('planupgrades', 'local_subscriptions');
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-plan-upgrades-page'
+);
 
 $PAGE->requires->css(new moodle_url('/local/subscriptions/select2.min.css'));
 $PAGE->requires->js(new moodle_url('/local/subscriptions/js/select2.min.js'), true);
@@ -105,9 +116,34 @@ if ($delete) {
 }
 
 echo $OUTPUT->header();
-echo AdminNavigation::back_button();
 
-echo $OUTPUT->heading(get_string('planupgrades', 'local_subscriptions'), 3);
+echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
+
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::admin_commerce_page()),
+    ],
+    [
+        'label' => get_string('crm_subscription_configuration_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
+    get_string('backtoplanlist', 'local_subscriptions')
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string('crm_plan_upgrades_description', 'local_subscriptions'),
+    HelpContext::SUBSCRIPTIONS
+);
 
 echo html_writer::div(
     get_string('planupgradesintro', 'local_subscriptions'),
@@ -182,17 +218,6 @@ if ($upgrades) {
     );
 }
 
-$returnurl = new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']);
-
-echo html_writer::div(
-    html_writer::link(
-        $returnurl,
-        '← ' . get_string('backtoplanlist', 'local_subscriptions'),
-        ['class' => 'btn btn-link']
-    ),
-    'mb-3'
-);
-
 if ($edit) {
     $upgrade = $DB->get_record('subscription_plan_upgrade', ['id' => $edit], '*', MUST_EXIST);
     $mform->set_data($upgrade);
@@ -219,5 +244,7 @@ if ($edit) {
         ]
     );
 }
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

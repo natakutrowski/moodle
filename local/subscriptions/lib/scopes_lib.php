@@ -8,7 +8,6 @@ use local_subscriptions\subscription_config;
  */
 function local_subscriptions_get_scope_for_edit(int $id): array {
     global $DB;
-    require_sesskey();
 
     $accessscope = $DB->get_record('subscription_access_scope', ['id' => $id], '*', MUST_EXIST);
     $course_ids = explode(',', $accessscope->course_ids);

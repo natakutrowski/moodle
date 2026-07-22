@@ -4,32 +4,69 @@ require_once(__DIR__ . '/../../../config.php');
 
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\admin\AdminNavigation;
 use local_subscriptions\subscription_config;
-
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 
 $PAGE->requires->css(new moodle_url('/local/subscriptions/select2.min.css'));
 $PAGE->requires->js(new moodle_url('/local/subscriptions/js/select2.min.js'), true);
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
+
+$currenttab = optional_param(
+    'tab',
+    'scopes',
+    PARAM_ALPHANUMEXT
 );
-//$PAGE->requires->css(new moodle_url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css'));
-//$PAGE->requires->js(new moodle_url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'), true);
 
+$delete = optional_param(
+    'delete',
+    0,
+    PARAM_INT
+);
 
-$PAGE->set_url(new moodle_url(subscription_config::manage_page()));
-$PAGE->set_context($context);
-$PAGE->set_title(get_string('manage_subscriptions', 'local_subscriptions'));
-$PAGE->set_heading(get_string('manage_subscriptions', 'local_subscriptions'));
+$allowedtabs = [
+    'scopes',
+    'plans',
+];
 
+if (
+    !in_array(
+        $currenttab,
+        $allowedtabs,
+        true
+    )
+) {
+    $currenttab = 'scopes';
 
-// Tabs
-$currenttab = optional_param('tab', 'scopes', PARAM_ALPHANUMEXT);
-$delete = optional_param('delete', 0, PARAM_INT);
+}
+
+$pageurl = new moodle_url(
+    subscription_config::
+        manage_page(),
+    [
+        'tab' => $currenttab,
+    ]
+);
+
+$pagetitle = get_string(
+    'crm_subscription_configuration_title',
+    'local_subscriptions'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-commerce-subscription-configuration-page'
+);
 
 if ($currenttab === 'scopes') {
 
@@ -177,18 +214,95 @@ elseif ($currenttab === 'plans') {
     // IMPORTANT : on laisse $mform disponible pour l’affichage plus bas.
 }
 
-
-
 echo $OUTPUT->header();
 
-echo AdminNavigation::back_button();
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::COMMERCE,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' => get_string(
+                'crm_commerce_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    admin_commerce_page()
+            ),
+        ],
+        [
+            'label' => $pagetitle,
+            'url' => null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    new moodle_url(
+        subscription_config::
+            admin_commerce_page()
+    ),
+    get_string(
+        'crm_commerce_title',
+        'local_subscriptions'
+    )
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_subscription_configuration_description',
+        'local_subscriptions'
+    ),
+    HelpContext::SUBSCRIPTIONS
+);
+
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::CONFIGURATION
+);
+
 
 $tabs = [
-    new tabobject('scopes', new moodle_url(subscription_config::manage_page(), ['tab' => 'scopes']), get_string('scopes', 'local_subscriptions')),
-    new tabobject('plans', new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']), get_string('plans', 'local_subscriptions')),
+    new tabobject(
+        'scopes',
+        new moodle_url(
+            subscription_config::
+                manage_page(),
+            [
+                'tab' => 'scopes',
+            ]
+        ),
+        get_string(
+            'scopes',
+            'local_subscriptions'
+        )
+    ),
+
+    new tabobject(
+        'plans',
+        new moodle_url(
+            subscription_config::
+                manage_page(),
+            [
+                'tab' => 'plans',
+            ]
+        ),
+        get_string(
+            'plans',
+            'local_subscriptions'
+        )
+    ),
 ];
 
-print_tabs([$tabs], $currenttab);
+print_tabs(
+    [
+        $tabs,
+    ],
+    $currenttab
+);
 
 // Include selected tab
 switch ($currenttab) {
@@ -200,5 +314,7 @@ switch ($currenttab) {
         include_once(__DIR__ . '/../tabs/scopes.php');
         break;
 }
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

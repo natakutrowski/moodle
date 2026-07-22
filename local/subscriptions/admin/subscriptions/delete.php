@@ -15,7 +15,15 @@ global $DB;
 
 $id = required_param('id', PARAM_INT);
 
+$returnto = optional_param(
+    'returnto',
+    'list',
+    PARAM_ALPHA
+);
+
 $subscription = $DB->get_record('user_subscription', ['id' => $id], '*', MUST_EXIST);
+
+$userid = (int)$subscription->userid;
 
 $plan = $DB->get_record('subscription_plan', ['id' => $subscription->planid], '*', IGNORE_MISSING);
 
@@ -24,9 +32,28 @@ AdminLog::subscriptionDeleted($subscription, $plan ?: null);
 subscription_manager::unenrol_user_from_plan((int)$subscription->userid, (int)$subscription->planid);
 $DB->delete_records('user_subscription', ['id' => $id]);
 
+if ($returnto === 'user') {
+    $returnurl = new moodle_url(
+        subscription_config::
+            admin_user_view_page(),
+        [
+            'id' => $userid,
+        ]
+    );
+} else {
+    $returnurl = new moodle_url(
+        subscription_config::
+            user_subscriptions_page()
+    );
+}
+
 redirect(
-    new moodle_url(subscription_config::user_subscriptions_page()),
-    get_string('subscription_deleted_successfully', 'local_subscriptions'),
+    $returnurl,
+    get_string(
+        'subscription_deleted_successfully',
+        'local_subscriptions'
+    ),
     null,
-    \core\output\notification::NOTIFY_SUCCESS
+    \core\output\notification::
+        NOTIFY_SUCCESS
 );
