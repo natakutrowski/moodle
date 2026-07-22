@@ -11,6 +11,12 @@ use moodle_url;
 
 final class InboxRenderer {
 
+    /**
+     * Renders the complete legacy Inbox view.
+     *
+     * Kept as a compatibility entry point while the Inbox is migrated
+     * progressively to the generic CRM Workspace.
+     */
     public static function render(
         InboxThreadListResult $result
     ): string {
@@ -25,95 +31,18 @@ final class InboxRenderer {
             ]
         );
 
-        $out .= self::filters($result);
+        $out .= self::render_filters($result);
+        $out .= self::render_thread_list($result);
 
-        $out .= html_writer::div(
-            get_string(
-                'crm_inbox_result_count',
-                'local_subscriptions',
-                $result->total
-            ),
-            'crm-inbox-result-summary',
-            [
-                'role' => 'status',
-                'aria-live' => 'polite',
-                'aria-atomic' => 'true',
-                'data-inbox-live-region' => '1',
-            ]
-        );
-
-        if (!$result->has_results()) {
-            $out .= html_writer::div(
-                html_writer::tag(
-                    'strong',
-                    get_string(
-                        'crm_inbox_empty_title',
-                        'local_subscriptions'
-                    ),
-                    [
-                        'class' => 'd-block mb-1',
-                    ]
-                ) .
-                html_writer::span(
-                    get_string(
-                        'crm_inbox_empty',
-                        'local_subscriptions'
-                    )
-                ),
-                'alert alert-light border crm-inbox-empty-state',
-                [
-                    'role' => 'status',
-                ]
-            );
-
-            $out .= html_writer::end_tag(
-                'section'
-            );
-
-            return $out;
-        }
-
-        $out .= html_writer::start_tag(
-            'div',
-            [
-                'class' =>
-                    'crm-inbox-thread-list',
-
-                'role' => 'list',
-
-                'aria-label' => get_string(
-                    'crm_inbox_thread_list_label',
-                    'local_subscriptions'
-                ),
-            ]
-        );
-
-        foreach ($result->threads as $thread) {
-            $out .= self::thread_card($thread);
-        }
-
-        $out .= html_writer::end_div();
-
-        $baseurl = new moodle_url(
-            subscription_config::admin_inbox_page(),
-            $result->criteria->url_params(false)
-        );
-
-        $out .= $GLOBALS['OUTPUT']->paging_bar(
-            $result->total,
-            $result->criteria->page,
-            $result->criteria->perpage,
-            $baseurl
-        );
-
-        $out .= html_writer::end_tag(
-            'section'
-        );
+        $out .= html_writer::end_tag('section');
 
         return $out;
     }
 
-    private static function filters(
+    /**
+     * Renders the Inbox search and filtering panel.
+     */
+    public static function render_filters(
         InboxThreadListResult $result
     ): string {
         $criteria = $result->criteria;
@@ -376,6 +305,110 @@ final class InboxRenderer {
         return $out;
     }
 
+    /**
+     * Renders the Inbox result summary, thread list and pagination.
+     */
+    public static function render_thread_list(
+        InboxThreadListResult $result
+    ): string {
+        $out = html_writer::start_tag(
+            'section',
+            [
+                'class' =>
+                    'crm-inbox-thread-list-panel',
+                'aria-label' => get_string(
+                    'crm_inbox_thread_list_label',
+                    'local_subscriptions'
+                ),
+            ]
+        );
+
+        $out .= html_writer::div(
+            get_string(
+                'crm_inbox_result_count',
+                'local_subscriptions',
+                $result->total
+            ),
+            'crm-inbox-result-summary',
+            [
+                'role' => 'status',
+                'aria-live' => 'polite',
+                'aria-atomic' => 'true',
+                'data-inbox-live-region' => '1',
+            ]
+        );
+
+        if (!$result->has_results()) {
+            $out .= html_writer::div(
+                html_writer::tag(
+                    'strong',
+                    get_string(
+                        'crm_inbox_empty_title',
+                        'local_subscriptions'
+                    ),
+                    [
+                        'class' => 'd-block mb-1',
+                    ]
+                )
+                . html_writer::span(
+                    get_string(
+                        'crm_inbox_empty',
+                        'local_subscriptions'
+                    )
+                ),
+                'alert alert-light border crm-inbox-empty-state',
+                [
+                    'role' => 'status',
+                ]
+            );
+
+            $out .= html_writer::end_tag(
+                'section'
+            );
+
+            return $out;
+        }
+
+        $out .= html_writer::start_tag(
+            'div',
+            [
+                'class' =>
+                    'crm-inbox-thread-list',
+
+                'role' => 'list',
+
+                'aria-label' => get_string(
+                    'crm_inbox_thread_list_label',
+                    'local_subscriptions'
+                ),
+            ]
+        );
+
+        foreach ($result->threads as $thread) {
+            $out .= self::thread_card($thread);
+        }
+
+        $out .= html_writer::end_div();
+
+        $baseurl = new moodle_url(
+            subscription_config::admin_inbox_page(),
+            $result->criteria->url_params(false)
+        );
+
+        $out .= $GLOBALS['OUTPUT']->paging_bar(
+            $result->total,
+            $result->criteria->page,
+            $result->criteria->perpage,
+            $baseurl
+        );
+
+        $out .= html_writer::end_tag(
+            'section'
+        );
+
+        return $out;
+    }
+
     private static function thread_card(
         object $thread
     ): string {
@@ -422,6 +455,19 @@ final class InboxRenderer {
         $threadid =
             (int)$thread->id;
 
+        $threadurl = new moodle_url(
+            subscription_config::
+                admin_inbox_thread_page(),
+            [
+                'id' => $threadid,
+            ]
+        );
+
+        $previewurl = new moodle_url(
+            subscription_config::
+                ajax_inbox_thread_preview_page()
+        );            
+
         $threadtitleid =
             'crm-inbox-thread-title-' .
             $threadid;
@@ -436,6 +482,14 @@ final class InboxRenderer {
 
                 'aria-labelledby' =>
                     $threadtitleid,
+
+                'data-inbox-thread-card' => '1',
+
+                'data-thread-id' =>
+                    $threadid,
+
+                'data-preview-url' =>
+                    $previewurl->out(false),
             ]
         );
 
@@ -452,11 +506,7 @@ final class InboxRenderer {
         );
 
         $out .= html_writer::link(
-            new moodle_url(
-                subscription_config::
-                    admin_inbox_thread_page(),
-                ['id' => (int)$thread->id]
-            ),
+            $threadurl,
             s(
                 trim((string)$thread->subject) !== ''
                     ? (string)$thread->subject
@@ -472,6 +522,14 @@ final class InboxRenderer {
                     'h5 d-block mb-1 ' .
                     'text-decoration-none ' .
                     'crm-inbox-thread-title',
+
+                'data-inbox-thread-preview' => '1',
+
+                'data-thread-id' =>
+                    $threadid,
+
+                'aria-controls' =>
+                    'crm-inbox-preview-regions',
             ]
         );
 

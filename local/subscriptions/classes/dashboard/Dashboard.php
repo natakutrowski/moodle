@@ -5,184 +5,238 @@ namespace local_subscriptions\dashboard;
 defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
-use local_subscriptions\dashboard\cards\TeamCard;
-use local_subscriptions\dashboard\cards\NavigationCard;
-use local_subscriptions\dashboard\cards\StatsCard;
-use local_subscriptions\dashboard\cards\AlertsCard;
-use local_subscriptions\dashboard\cards\ActivityCard;
-use local_subscriptions\dashboard\cards\CrmIntelligenceCard;
-use local_subscriptions\dashboard\cards\CrmIntelligenceAlertsCard;
-use local_subscriptions\dashboard\cards\CrmFunnelCard;
-use local_subscriptions\dashboard\cards\CrmTrendsCard;
-use local_subscriptions\dashboard\cards\CrmDailyPrioritiesCard;
-use local_subscriptions\dashboard\cards\InboxOverviewCard;
-use local_subscriptions\dashboard\cards\WorkItemOverviewCard;
-use local_subscriptions\dashboard\cards\CrmAssistantCard;
-use local_subscriptions\crm\success\plans\rendering\CustomerSuccessPlanDashboardCard;
-use local_subscriptions\dashboard\runtime\DashboardCardProfiler;
+use local_subscriptions\crm\workspace\WorkspacePreferenceService;
+use local_subscriptions\crm\workspace\WorkspaceToolbarState;
+use local_subscriptions\crm\workspace\rendering\WorkspaceRenderer;
+use local_subscriptions\crm\workspace\rendering\WorkspaceToolbarRenderer;
+use local_subscriptions\dashboard\personalization\DashboardPersonalizationRenderer;
+use local_subscriptions\dashboard\services\DashboardPeriod;
+use local_subscriptions\dashboard\workspace\DashboardWorkspaceFactory;
+use local_subscriptions\crm\workspace\WorkspaceDefinition;
+use local_subscriptions\crm\workspace\WorkspaceLayout;
 
+/**
+ * Dashboard implemented as a CRM Workspace.
+ */
 final class Dashboard {
 
-    public static function render(string $period = \local_subscriptions\dashboard\services\DashboardPeriod::TODAY): string {
-        $out = html_writer::start_div('local-subscriptions-dashboard-workspace');
+    /**
+     * Renders the complete personalized Dashboard Workspace.
+     */
+    public static function render(
+        string $period = DashboardPeriod::TODAY,
+        string $returnurl = ''
+    ): string {
+        global $USER;
 
-        $out .= html_writer::tag(
-            'p',
-            get_string('admin_dashboard_intro', 'local_subscriptions'),
-            ['class' => 'lead text-muted mb-4']
-        );
+        $period = DashboardPeriod::normalize($period);
 
-        $out .= html_writer::start_div('local-subscriptions-dashboard-grid');
-
-        $out .= html_writer::start_div('local-subscriptions-dashboard-main');
-
-        $out .= self::render_card(
-            'StatsCard',
-            static fn(): string => StatsCard::render($period)
-        );        
-
-        $out .= html_writer::start_div('crm-dashboard-panels-grid');
-
-        $out .= html_writer::div(
-            self::render_card(
-                'CrmIntelligenceCard',
-                static fn(): string =>
-                    CrmIntelligenceCard::render()
-            ),
-            'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
-        );
-
-        $assistantcard = self::render_card(
-            'CrmAssistantCard',
-            static fn(): string => CrmAssistantCard::render()
-        );
-
-        if ($assistantcard !== '') {
-            $out .= html_writer::div(
-                $assistantcard,
-                'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
+        $definition =
+            DashboardWorkspaceFactory::create(
+                (int)$USER->id,
+                $period,
+                $returnurl
             );
-        }
 
-        $inboxcard = self::render_card(
-            'InboxOverviewCard',
-            static fn(): string => InboxOverviewCard::render()
+        $preferences =
+            new WorkspacePreferenceService($definition);
+
+        $layout = $preferences->load(
+            (int)$USER->id
         );
 
-        if ($inboxcard !== '') {
-            $out .= html_writer::div(
-                $inboxcard,
-                'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
-            );
-        }
-
-        $workcard = self::render_card(
-            'WorkItemOverviewCard',
-            static fn(): string => WorkItemOverviewCard::render()
+        $out = WorkspaceRenderer::start(
+            $definition,
+            $layout,
+            [
+                'class' =>
+                    'crm-workspace ' .
+                    'crm-workspace-dashboard ' .
+                    'local-subscriptions-dashboard-workspace',
+            ]
         );
 
-        if ($workcard !== '') {
-            $out .= html_writer::div(
-                $workcard,
-                'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
-            );
-        }
-
-        $successplancard = self::render_card(
-            'CustomerSuccessPlanDashboardCard',
-            static fn(): string =>
-                (new CustomerSuccessPlanDashboardCard())
-                    ->render()
+        $out .= self::render_heading(
+            $layout->to_array()
         );
 
-        if ($successplancard !== '') {
-            $out .= html_writer::div(
-                $successplancard,
-                'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
-            );
-        }
+        $out .= WorkspaceToolbarRenderer::render(
+            new WorkspaceToolbarState(
+                workspacekey: $definition->key,
+                hiddencount: $layout->hidden_count(),
+                canreset: true,
+                cansave: true
+            )
+        );
 
-        $out .= html_writer::div(
-            self::render_card(
-                'AlertsCard',
-                static fn(): string => AlertsCard::render()
+        $out .= WorkspaceRenderer::render_zone(
+            $definition,
+            $layout,
+            DashboardWorkspaceFactory::ZONE_ONBOARDING,
+            'crm-dashboard-onboarding-zone'
+        );
+
+        $out .= self::render_workspace_zone(
+            $definition,
+            $layout,
+            DashboardWorkspaceFactory::ZONE_HERO,
+            'crm-dashboard-hero-zone',
+            get_string(
+                'dashboard_workspace_empty_hero',
+                'local_subscriptions'
             ),
-            'crm-dashboard-panel-slot'
+            '📊',
+            true
         );
 
-        $out .= html_writer::div(
-            self::render_card(
-                'CrmDailyPrioritiesCard',
-                static fn(): string =>
-                    CrmDailyPrioritiesCard::render()
-            ),
-            'crm-dashboard-panel-slot'
+        $out .= html_writer::start_div(
+            'local-subscriptions-dashboard-grid'
         );
 
-        $out .= html_writer::div(
-            self::render_card(
-                'CrmFunnelCard',
-                static fn(): string =>
-                    CrmFunnelCard::render()
-            ),
-            'crm-dashboard-panel-slot'
+        $out .= html_writer::start_div(
+            'local-subscriptions-dashboard-main'
         );
 
-        $out .= html_writer::div(
-            self::render_card(
-                'CrmTrendsCard',
-                static fn(): string => CrmTrendsCard::render()
+        $out .= self::render_workspace_zone(
+            $definition,
+            $layout,
+            DashboardWorkspaceFactory::ZONE_MAIN,
+            'crm-dashboard-panels-grid',
+            get_string(
+                'dashboard_workspace_empty_main',
+                'local_subscriptions'
             ),
-            'crm-dashboard-panel-slot'
+            '🧩',
+            false
+        );
+        $out .= html_writer::end_div();
+
+        $out .= html_writer::start_div(
+            'local-subscriptions-dashboard-side'
         );
 
-        $out .= html_writer::div(
-            self::render_card(
-                'CrmIntelligenceAlertsCard',
-                static fn(): string =>
-                    CrmIntelligenceAlertsCard::render()
+        $out .= self::render_workspace_zone(
+            $definition,
+            $layout,
+            DashboardWorkspaceFactory::ZONE_SIDE,
+            'crm-dashboard-side-zone',
+            get_string(
+                'dashboard_workspace_empty_side',
+                'local_subscriptions'
             ),
-            'crm-dashboard-panel-slot crm-dashboard-panel-slot-span-2'
+            '📌',
+            true
         );
 
         $out .= html_writer::end_div();
-
-        $out .= DashboardSection::render([
-            NavigationCard::class,
-        ]);
-
-        $out .= DashboardSection::render([
-            ActivityCard::class,
-        ], 'd-block');
         $out .= html_writer::end_div();
 
-        $out .= html_writer::start_div('local-subscriptions-dashboard-side');
-        $out .= DashboardSection::render([
-            TeamCard::class,
-        ], 'd-block');
-        $out .= html_writer::end_div();
+        $out .= WorkspaceRenderer::end();
 
-        $out .= html_writer::end_div();
-
-        $out .= html_writer::end_div();
         return $out;
     }
 
     /**
-     * Renders a Card through the Dashboard runtime profiler.
-     *
-     * @param string $cardname Stable technical Card name.
-     * @param callable $renderer Rendering callback.
-     * @return string
+     * Renders the Dashboard title row and current personalization panel.
      */
-    private static function render_card(
-        string $cardname,
-        callable $renderer
+    private static function render_heading(
+        array $layout
     ): string {
-        return DashboardCardProfiler::render(
-            $cardname,
-            $renderer
+        $out = html_writer::start_div(
+            'crm-dashboard-heading-row'
+        );
+
+        $out .= html_writer::tag(
+            'p',
+            get_string(
+                'admin_dashboard_intro',
+                'local_subscriptions'
+            ),
+            [
+                'class' =>
+                    'lead text-muted mb-0',
+            ]
+        );
+
+        $out .= DashboardPersonalizationRenderer::render(
+            $layout
+        );
+
+        $out .= html_writer::end_div();
+
+        return $out;
+    }
+
+    /**
+     * Renders one Dashboard Workspace zone and its optional empty state.
+     */
+    private static function render_workspace_zone(
+        WorkspaceDefinition $definition,
+        WorkspaceLayout $layout,
+        string $zone,
+        string $class,
+        string $emptymessage,
+        string $emptyicon,
+        bool $editonlyempty
+    ): string {
+        $content = WorkspaceRenderer::render_zone(
+            $definition,
+            $layout,
+            $zone,
+            $class
+        );
+
+        if ($content !== '') {
+            return $content;
+        }
+
+        return self::empty_zone(
+            $zone,
+            $emptymessage,
+            $emptyicon,
+            $editonlyempty
         );
     }
 
+    /**
+     * Renders an empty Dashboard Workspace zone.
+     */
+    private static function empty_zone(
+        string $zone,
+        string $message,
+        string $icon,
+        bool $editonly
+    ): string {
+        $classes = [
+            'crm-dashboard-workspace-empty-zone',
+            'crm-dashboard-workspace-empty-zone-' . $zone,
+        ];
+
+        if ($editonly) {
+            $classes[] =
+                'crm-dashboard-workspace-empty-zone-edit-only';
+        }
+
+        $content = html_writer::div(
+            s($icon),
+            'crm-dashboard-workspace-empty-icon',
+            [
+                'aria-hidden' => 'true',
+            ]
+        );
+
+        $content .= html_writer::div(
+            s($message),
+            'crm-dashboard-workspace-empty-label'
+        );
+
+        return html_writer::div(
+            $content,
+            implode(' ', $classes),
+            [
+                'data-workspace-empty-zone' => $zone,
+                'aria-live' => 'polite',
+            ]
+        );
+    }
 }

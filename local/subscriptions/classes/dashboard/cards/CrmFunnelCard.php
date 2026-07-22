@@ -24,13 +24,11 @@ final class CrmFunnelCard implements DashboardCard {
      *
      * @return string
      */
-    public static function render(): string {
+    public static function render(
+        string $period = DashboardPeriod::TODAY
+    ): string {
         $period = DashboardPeriod::normalize(
-            optional_param(
-                'period',
-                DashboardPeriod::TODAY,
-                PARAM_ALPHA
-            )
+            $period
         );
 
         $comparison = (

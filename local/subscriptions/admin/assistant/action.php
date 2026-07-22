@@ -5,6 +5,7 @@ require_once(__DIR__ . '/../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\intelligence\recommendations\services\RecommendationLifecycleService;
+use local_subscriptions\crm\navigation\CrmReturnUrlResolver;
 use local_subscriptions\subscription_config;
 
 global $USER;
@@ -49,6 +50,17 @@ $returnurl = optional_param(
 
 $service =
     new RecommendationLifecycleService();
+
+$fallbackurl = new moodle_url(
+    subscription_config::
+        admin_crm_assistant_page()
+);
+
+$redirecturl =
+    CrmReturnUrlResolver::resolve(
+        $returnurl,
+        $fallbackurl
+    );
 
 try {
     switch ($action) {
@@ -95,13 +107,6 @@ try {
             );
     }
 
-    $redirecturl = $returnurl !== ''
-        ? new moodle_url($returnurl)
-        : new moodle_url(
-            subscription_config::
-                admin_crm_assistant_page()
-        );
-
     redirect(
         $redirecturl,
         $message,
@@ -115,10 +120,7 @@ try {
     );
 
     redirect(
-        new moodle_url(
-            subscription_config::
-                admin_crm_assistant_page()
-        ),
+        $redirecturl,
         get_string(
             'crm_assistant_action_failed',
             'local_subscriptions'

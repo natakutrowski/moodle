@@ -27,6 +27,10 @@ final class DashboardFunnelService {
         $currentrange =
             DashboardPeriod::range($period);
 
+        /*
+        * The all-time period intentionally compares against an empty
+        * snapshot because no meaningful previous all-time range exists.
+        */
         $previousrange =
             DashboardPeriod::previous_range($period);
 

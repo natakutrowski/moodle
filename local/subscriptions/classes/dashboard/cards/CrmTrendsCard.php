@@ -29,18 +29,24 @@ final class CrmTrendsCard implements DashboardCard {
     /**
      * Render the CRM trends Dashboard card.
      */
-    public static function render(): string {
+    public static function render(
+        string $period = DashboardPeriod::TODAY
+    ): string {
         if (!Capabilities::can_view_users()) {
             return '';
         }
 
         $period = DashboardPeriod::normalize(
-            optional_param(
-                'period',
-                DashboardPeriod::TODAY,
-                PARAM_ALPHA
-            )
+            $period
         );
+
+        if (
+            !DashboardPeriod::is_comparable(
+                $period
+            )
+        ) {
+            return self::render_non_comparable_card();
+        }
 
         try {
             $comparison = (
@@ -488,6 +494,38 @@ final class CrmTrendsCard implements DashboardCard {
             icon: $icon,
             tone: $tone
         );
+    }
+
+    /**
+     * Renders the Trends Card when no previous period exists.
+     */
+    private static function render_non_comparable_card(): string {
+        $content = DashboardCardUi::header(
+            title: get_string(
+                'crm_trends_title',
+                'local_subscriptions'
+            ),
+            icon: '📉',
+            subtitle: get_string(
+                'dashboard_trends_all_time_subtitle',
+                'local_subscriptions'
+            ),
+            titleid: 'crm-dashboard-trends-title'
+        );
+
+        $content .= DashboardCardUi::info_state(
+            title: get_string(
+                'dashboard_trends_all_time_title',
+                'local_subscriptions'
+            ),
+            description: get_string(
+                'dashboard_trends_all_time_message',
+                'local_subscriptions'
+            ),
+            icon: '∞'
+        );
+
+        return self::wrap_card($content);
     }
 
     /**

@@ -13,6 +13,7 @@ use local_subscriptions\commandcenter\CommandQuery;
 use local_subscriptions\commandcenter\CommandResult;
 use local_subscriptions\commandcenter\CommandScorer;
 use local_subscriptions\commandcenter\CommandTypes;
+use local_subscriptions\commandcenter\actions\CommandActionKeys;
 use local_subscriptions\commandcenter\repositories\InboxSearchRepository;
 use local_subscriptions\crm\inbox\rendering\InboxValuePresentation;
 use local_subscriptions\subscription_config;
@@ -317,7 +318,7 @@ final class InboxProvider implements
                 )->out(false)
             )
             ->action(
-                'open_url',
+                CommandActionKeys::OPEN_URL,
                 [
                     'url' =>
                         (
@@ -475,7 +476,7 @@ final class InboxProvider implements
                 $url->out(false)
             )
             ->action(
-                'open_url',
+                CommandActionKeys::OPEN_URL,
                 [
                     'url' =>
                         $url->out(false),

@@ -17,7 +17,44 @@ final class UserProfileTimelineBuilder {
         int $limit = 40,
         bool $includeinbox = false
     ): array {
-        $repository = new UserProfileRepository();
+        return $this->build_page_for_user(
+            $user,
+            $limit,
+            0,
+            $includeinbox
+        )->events;
+    }
+
+    /**
+     * Builds one page of unified Timeline events.
+     */
+    public function build_page_for_user(
+        \stdClass $user,
+        int $limit = 20,
+        int $offset = 0,
+        bool $includeinbox = false
+    ): UserProfileTimelinePage {
+        $limit = max(
+            1,
+            min(100, $limit)
+        );
+
+        $offset = max(
+            0,
+            min(1000, $offset)
+        );
+
+        /*
+        * Each source must provide enough records to reconstruct the global
+        * page after all sources have been merged and sorted.
+        */
+        $fetchlimit =
+            $offset +
+            $limit +
+            1;
+
+        $repository =
+            new UserProfileRepository();
 
         $events = [];
         $seenlogids = [];
@@ -27,31 +64,74 @@ final class UserProfileTimelineBuilder {
             $seenlogids,
             $repository->get_admin_logs(
                 (int)$user->id,
-                $limit
+                $fetchlimit
             ),
             $includeinbox
         );
-        $this->add_notes($events, $repository->get_user_notes((int)$user->id, $limit));
+
+        $this->add_notes(
+            $events,
+            $repository->get_user_notes(
+                (int)$user->id,
+                $fetchlimit
+            )
+        );
+
         $this->add_automation_history(
             $events,
-            $repository->get_automation_history_for_timeline((int)$user->id, $limit)
+            $repository
+                ->get_automation_history_for_timeline(
+                    (int)$user->id,
+                    $fetchlimit
+                )
         );
+
         $this->add_subscription_payments(
             $events,
-            $repository->get_subscription_payments_for_timeline((int)$user->id, (string)$user->email, $limit)
+            $repository
+                ->get_subscription_payments_for_timeline(
+                    (int)$user->id,
+                    (string)($user->email ?? ''),
+                    $fetchlimit
+                )
         );
-        $this->add_subscriptions($events, $repository->get_subscriptions_for_timeline((int)$user->id, $limit));
 
-        $digitalpurchases = $repository->get_digital_purchases_for_timeline((int)$user->id, (string)$user->email, $limit);
-        $purchaseids = array_map(static fn($purchase): int => (int)$purchase->id, $digitalpurchases);
+        $this->add_subscriptions(
+            $events,
+            $repository
+                ->get_subscriptions_for_timeline(
+                    (int)$user->id,
+                    $fetchlimit
+                )
+        );
+
+        $digitalpurchases =
+            $repository
+                ->get_digital_purchases_for_timeline(
+                    (int)$user->id,
+                    (string)($user->email ?? ''),
+                    $fetchlimit
+                );
+
+        $purchaseids = array_map(
+            static fn(\stdClass $purchase): int =>
+                (int)$purchase->id,
+            $digitalpurchases
+        );
 
         $this->add_digital_logs(
             $events,
             $seenlogids,
-            $repository->get_digital_purchase_logs($purchaseids, $limit)
+            $repository->get_digital_purchase_logs(
+                $purchaseids,
+                $fetchlimit
+            )
         );
 
-        $this->add_digital_purchases($events, $digitalpurchases);
+        $this->add_digital_purchases(
+            $events,
+            $digitalpurchases
+        );
 
         if ($includeinbox) {
             $this->add_inbox_messages(
@@ -59,7 +139,7 @@ final class UserProfileTimelineBuilder {
                 $repository
                     ->get_inbox_messages_for_timeline(
                         (int)$user->id,
-                        $limit
+                        $fetchlimit
                     )
             );
         }
@@ -67,24 +147,76 @@ final class UserProfileTimelineBuilder {
         usort(
             $events,
             static function(
-                UserProfileTimelineEvent $a,
-                UserProfileTimelineEvent $b
+                UserProfileTimelineEvent $left,
+                UserProfileTimelineEvent $right
             ): int {
-                return
-                    $b->timecreated <=>
-                    $a->timecreated;
+                $timecomparison =
+                    $right->timecreated <=>
+                    $left->timecreated;
+
+                if ($timecomparison !== 0) {
+                    return $timecomparison;
+                }
+
+                $typecomparison =
+                    strcmp(
+                        $right->type,
+                        $left->type
+                    );
+
+                if ($typecomparison !== 0) {
+                    return $typecomparison;
+                }
+
+                $leftkey = json_encode(
+                    [
+                        $left->title,
+                        $left->description,
+                        $left->actionurl,
+                        $left->metadata,
+                    ],
+                    JSON_UNESCAPED_UNICODE
+                    | JSON_UNESCAPED_SLASHES
+                );
+
+                $rightkey = json_encode(
+                    [
+                        $right->title,
+                        $right->description,
+                        $right->actionurl,
+                        $right->metadata,
+                    ],
+                    JSON_UNESCAPED_UNICODE
+                    | JSON_UNESCAPED_SLASHES
+                );
+
+                return strcmp(
+                    (string)$rightkey,
+                    (string)$leftkey
+                );
             }
         );
 
+        $hasmore =
+            count($events) >
+            $offset + $limit;
+
         $events = array_slice(
             $events,
-            0,
+            $offset,
             $limit
         );
 
-        return $this->enrich_actor_labels(
+        $events = $this->enrich_actor_labels(
             $events,
             $repository
+        );
+
+        return new UserProfileTimelinePage(
+            $events,
+            $offset,
+            $limit,
+            $hasmore
         );
     }
 

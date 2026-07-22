@@ -6,16 +6,18 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
-use local_subscriptions\crm\inbox\ai\rendering\InboxAiPanelRenderer;
-use local_subscriptions\crm\inbox\rendering\InboxThreadRenderer;
+use local_subscriptions\crm\inbox\workspace\InboxThreadWorkspaceRenderer;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\inbox\repositories\InboxReadRepository;
 use local_subscriptions\crm\inbox\repositories\InboxTeamRepository;
 use local_subscriptions\crm\inbox\services\InboxReadService;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\subscription_config;
 
-global $PAGE, $OUTPUT, $SESSION;
+global $PAGE, $OUTPUT, $SESSION, $USER;
 
 $context = AdminSecurity::require(
     Capabilities::VIEW_INBOX
@@ -49,37 +51,45 @@ $threadtitle =
             'local_subscriptions'
         );
 
-$PAGE->set_context($context);
-$PAGE->set_url($pageurl);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title($threadtitle);
-$PAGE->set_heading(
-    get_string(
-        'crm_inbox_title',
-        'local_subscriptions'
-    )
-);
-
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
-    'local-subscriptions-inbox-page'
-);
-$PAGE->add_body_class(
-    'local-subscriptions-inbox-thread-page'
-);
-
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::
-            plugin_stylesheet_page()
-    )
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $threadtitle,
+    [
+        'local-subscriptions-inbox-page',
+        'local-subscriptions-inbox-thread-page',
+    ]
 );
 
 $PAGE->requires->js_call_amd(
     'local_subscriptions/inbox_ui',
     'init'
+);
+
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/workspace_edit_mode',
+    'init'
+);
+
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/workspace_drag_drop',
+    'init'
+);
+
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/workspace_item_menu',
+    'init'
+);
+
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/workspace_personalization',
+    'init'
+);
+
+$backurl = new moodle_url(
+    subscription_config::
+        admin_inbox_page()
 );
 
 echo $OUTPUT->header();
@@ -89,19 +99,37 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-echo html_writer::link(
-    new moodle_url(
-        subscription_config::
-            admin_inbox_page()
-    ),
-    '← ' . get_string(
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'crm_inbox_title',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_inbox_page()
+                ),
+        ],
+        [
+            'label' =>
+                $threadtitle,
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    $backurl,
+    get_string(
         'crm_inbox_back',
         'local_subscriptions'
-    ),
-    [
-        'class' =>
-            'btn btn-link ps-0 mb-3',
-    ]
+    )
 );
 
 echo CrmPageHeader::render(
@@ -111,13 +139,6 @@ echo CrmPageHeader::render(
         'local_subscriptions'
     ),
     HelpContext::INBOX_AI
-);
-
-echo InboxThreadRenderer::render(
-    $thread,
-    AdminSecurity::can(
-        Capabilities::MANAGE_INBOX
-    )
 );
 
 $airesult = null;
@@ -150,15 +171,20 @@ if (
     );
 }
 
-echo InboxAiPanelRenderer::render(
-    $threadid,
+$canmanage = AdminSecurity::can(
+    Capabilities::MANAGE_INBOX
+);
+
+$canuseai = AdminSecurity::can(
+    Capabilities::USE_INBOX_AI
+);
+
+echo InboxThreadWorkspaceRenderer::render(
+    $thread,
+    $canmanage,
+    $canuseai,
     $airesult,
-    AdminSecurity::can(
-        Capabilities::USE_INBOX_AI
-    ),
-    AdminSecurity::can(
-        Capabilities::MANAGE_INBOX
-    )
+    (int)$USER->id
 );
 
 echo CrmWorkspaceRenderer::end();

@@ -11,6 +11,7 @@ use local_subscriptions\commandcenter\CommandScorer;
 use local_subscriptions\commandcenter\CommandTypes;
 use local_subscriptions\commandcenter\CommandContext;
 use local_subscriptions\commandcenter\CommandContextAwareProviderInterface;
+use local_subscriptions\commandcenter\actions\CommandActionKeys;
 use local_subscriptions\commandcenter\repositories\AdminActionRepository;
 
 final class AdminActionProvider implements CommandProviderInterface, CommandContextAwareProviderInterface {
@@ -104,11 +105,10 @@ final class AdminActionProvider implements CommandProviderInterface, CommandCont
             ->url($action['url'])
             ->action(
                 $action['actionkey']
-                    ?? 'open_url',
-                $action['payload']
-                    ?? [
-                        'url' => $action['url'],
-                    ]
+                    ?? CommandActionKeys::OPEN_URL,
+                $action['payload'] ?? [
+                    'url' => $action['url'],
+                ]
             )
             ->score($score)
             ->meta(

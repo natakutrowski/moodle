@@ -2,17 +2,20 @@
 
 require_once(__DIR__ . '/../../../../config.php');
 
-use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\crm\help\HelpRegistry;
-use local_subscriptions\crm\help\HelpSearchService;
-use local_subscriptions\crm\help\HelpRenderer;
-use local_subscriptions\crm\help\onboarding\HelpOnboardingService;
-use local_subscriptions\crm\help\onboarding\HelpOnboardingRenderer;
 use local_subscriptions\crm\help\guides\HelpGuideRegistry;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\help\HelpRegistry;
+use local_subscriptions\crm\help\HelpRenderer;
+use local_subscriptions\crm\help\HelpSearchService;
+use local_subscriptions\crm\help\onboarding\HelpOnboardingRenderer;
+use local_subscriptions\crm\help\onboarding\HelpOnboardingService;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\subscription_config;
 
 global $PAGE, $OUTPUT, $USER;
 
@@ -36,7 +39,9 @@ $registry = new HelpRegistry();
 
 if (
     $categoryid !== '' &&
-    !$registry->category_exists($categoryid)
+    !$registry->category_exists(
+        $categoryid
+    )
 ) {
     $categoryid = '';
 }
@@ -48,11 +53,13 @@ if ($query !== '') {
 }
 
 if ($categoryid !== '') {
-    $urlparams['category'] = $categoryid;
+    $urlparams['category'] =
+        $categoryid;
 }
 
 $url = new moodle_url(
-    subscription_config::admin_help_page(),
+    subscription_config::
+        admin_help_page(),
     $urlparams
 );
 
@@ -60,44 +67,38 @@ $url = new moodle_url(
  * Search has priority over category filtering.
  */
 if ($query !== '') {
-    $articles = (new HelpSearchService($registry))
-        ->search($query);
-} else if ($categoryid !== '') {
-    $articles = $registry->articles_by_category(
-        $categoryid
+    $articles = (
+        new HelpSearchService(
+            $registry
+        )
+    )->search(
+        $query
     );
+} else if ($categoryid !== '') {
+    $articles =
+        $registry->articles_by_category(
+            $categoryid
+        );
 } else {
-    $articles = $registry->articles();
+    $articles =
+        $registry->articles();
 }
 
-$guides = (new HelpGuideRegistry())->guides();
+$guides = (
+    new HelpGuideRegistry()
+)->guides();
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title(
-    get_string(
-        'crm_help_title',
-        'local_subscriptions'
-    )
-);
-$PAGE->set_heading(
-    get_string(
-        'crm_help_title',
-        'local_subscriptions'
-    )
+$pagetitle = get_string(
+    'crm_help_title',
+    'local_subscriptions'
 );
 
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $url,
+    $pagetitle,
     'local-subscriptions-help-page'
-);
-
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
 );
 
 echo $OUTPUT->header();
@@ -189,36 +190,48 @@ if (
     }
 }
 
-echo html_writer::div(
-    $helpactions,
-    'crm-help-toolbar'
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_help_home_subtitle',
+        'local_subscriptions'
+    ),
+    HelpContext::HELP_CENTER,
+    $helpactions
 );
 
 /*
  * Personal administrator onboarding.
  */
 $currenturl = new moodle_url(
-    subscription_config::admin_help_page(),
+    subscription_config::
+        admin_help_page(),
     $urlparams
 );
 
-$onboardingstate = (new HelpOnboardingService())
-    ->get_state((int)$USER->id);
+$onboardingstate = (
+    new HelpOnboardingService()
+)->get_state(
+    (int)$USER->id
+);
 
 echo HelpOnboardingRenderer::render(
     $onboardingstate,
-    $currenturl->out_as_local_url(false)
+    $currenturl->out_as_local_url(
+        false
+    )
 );
 
 /*
- * Practical guides.
- *
- * We only show the complete guide catalogue from the Help Center
- * homepage. On a category or search result page, we keep the
- * interface focused on the requested content.
+ * Practical guides are only displayed on the unfiltered homepage.
  */
-if ($query === '' && $categoryid === '') {
-    echo HelpRenderer::render_guides($guides);
+if (
+    $query === '' &&
+    $categoryid === ''
+) {
+    echo HelpRenderer::render_guides(
+        $guides
+    );
 }
 
 /*

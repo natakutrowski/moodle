@@ -17,110 +17,20 @@ use local_subscriptions\crm\inbox\rendering\InboxValuePresentation;
 use local_subscriptions\crm\work\rendering\UserWorkItemSection;
 use local_subscriptions\crm\assistant\rendering\UserAssistantSection;
 use local_subscriptions\crm\success\plans\rendering\CustomerSuccessPlanUserSection;
+use local_subscriptions\crm\user\UserProfileTimelineCategory;
 
 final class UserProfileRenderer {
 
-    public static function render(\stdClass $profile): string {
-        $out = '';
-
-        $out .= html_writer::start_div('crm-user-profile-360');
-
-        $out .= self::hero($profile);
-        $out .= self::section(
-            get_string('crm_section_quick_actions', 'local_subscriptions'),
-            self::quick_actions($profile),
-            'crm-section-actions'
-        );
-
-        $out .= self::stats($profile);
-
-        $out .= self::intelligence($profile);
-
-        $assistant =
-            UserAssistantSection::render(
-                (int)$profile->user->id
-            );
-
-        if ($assistant !== '') {
-            $out .= self::section(
-                get_string(
-                    'crm_assistant_user_section',
-                    'local_subscriptions'
-                ),
-                $assistant,
-                'crm-section-assistant'
-            );
-        }
-
-        $successplans =
-            (new CustomerSuccessPlanUserSection())
-                ->render(
-                    (int)$profile->user->id,
-                    Capabilities::can_manage_users()
-                );
-
-        if ($successplans !== '') {
-            $out .= self::section(
-                get_string(
-                    'csplanusersection',
-                    'local_subscriptions'
-                ),
-                $successplans,
-                'crm-section-customer-success-plans'
-            );
-        }
-
-        $out .= self::inbox($profile);
-
-        $workitems =
-            UserWorkItemSection::render(
-                (int)$profile->user->id
-            );
-
-        if ($workitems !== '') {
-            $out .= self::section(
-                get_string('crm_work_user_section', 'local_subscriptions'),
-                $workitems,
-                'crm-section-work-items'
-            );
-        }        
-
-        $out .= self::section(
-            get_string('crm_section_subscriptions', 'local_subscriptions'),
-            self::subscriptions_content($profile->subscriptions),
-            'crm-section-subscriptions'
-        );
-
-        $out .= self::section(
-            get_string('crm_section_digital_purchases', 'local_subscriptions'),
-            self::digital_purchases_content($profile->digitalpayments),
-            'crm-section-digital'
-        );
-
-        $out .= self::section(
-            get_string('crm_section_courses', 'local_subscriptions'),
-            self::courses_content($profile->courses ?? []),
-            'crm-section-courses'
-        );
-
-        $out .= self::section(
-            get_string('crm_section_notes', 'local_subscriptions'),
-            self::notes($profile->notes ?? []),
-            'crm-section-notes'
-        );
-
-        $out .= self::section(
-            get_string('crm_section_timeline', 'local_subscriptions'),
-            self::timeline_content($profile->timeline ?? []),
-            'crm-section-timeline'
-        );
-
-        $out .= html_writer::end_div();
-
-        return $out;
-    }
-
-    private static function hero(\stdClass $profile): string {
+    /**
+     * Renders the fixed User360 identity Hero.
+     *
+     * This public entry point allows the Hero to be registered as an
+     * independent Workspace item without duplicating its business
+     * presentation logic.
+     */
+    public static function render_hero(
+        \stdClass $profile
+    ): string {
         $user = $profile->user;
         $stats = $profile->stats;
 
@@ -196,6 +106,294 @@ final class UserProfileRenderer {
             html_writer::div(implode('', $meta), 'crm-hero-meta') .
             html_writer::div($links, 'crm-hero-links mt-3'),
             'crm-hero card card-body mb-4'
+        );
+    }
+
+    /**
+     * Renders the User360 Intelligence panel.
+     */
+    public static function render_intelligence_panel(
+        \stdClass $profile
+    ): string {
+        return self::intelligence(
+            $profile
+        );
+    }
+
+    /**
+     * Renders the User360 Customer Success panel.
+     */
+    public static function render_customer_success_panel(
+        \stdClass $profile
+    ): string {
+        $content =
+            (new CustomerSuccessPlanUserSection())
+                ->render(
+                    (int)$profile->user->id,
+                    Capabilities::can_manage_users()
+                );
+
+        if ($content === '') {
+            return '';
+        }
+
+        return self::section(
+            get_string(
+                'csplanusersection',
+                'local_subscriptions'
+            ),
+            $content,
+            'crm-section-customer-success-plans'
+        );
+    }
+
+    /**
+     * Renders the User360 Inbox panel.
+     */
+    public static function render_inbox_panel(
+        \stdClass $profile
+    ): string {
+        return self::inbox(
+            $profile
+        );
+    }
+
+    /**
+     * Renders the User360 Work Items panel.
+     */
+    public static function render_work_items_panel(
+        \stdClass $profile
+    ): string {
+        $content =
+            UserWorkItemSection::render(
+                (int)$profile->user->id
+            );
+
+        if ($content === '') {
+            return '';
+        }
+
+        return self::section(
+            get_string(
+                'crm_work_user_section',
+                'local_subscriptions'
+            ),
+            $content,
+            'crm-section-work-items'
+        );
+    }
+
+    /**
+     * Renders the User360 Notes panel.
+     */
+    public static function render_notes_panel(
+        \stdClass $profile
+    ): string {
+        return self::section(
+            get_string(
+                'crm_section_notes',
+                'local_subscriptions'
+            ),
+            self::notes(
+                $profile->notes ?? []
+            ),
+            'crm-section-notes'
+        );
+    }
+
+    /**
+     * Renders the fixed User360 Timeline panel.
+     */
+    public static function render_timeline_panel(
+        \stdClass $profile
+    ): string {
+        return self::section(
+            get_string(
+                'crm_section_timeline',
+                'local_subscriptions'
+            ),
+            self::timeline_content(
+                $profile
+            ),
+            'crm-section-timeline'
+        );
+    }    
+
+    /**
+     * Renders the User360 quick actions panel.
+     */
+    public static function render_quick_actions_panel(
+        \stdClass $profile
+    ): string {
+        return self::section(
+            get_string(
+                'crm_section_quick_actions',
+                'local_subscriptions'
+            ),
+            self::quick_actions($profile),
+            'crm-section-actions'
+        );
+    }
+
+    /**
+     * Renders the User360 overview statistics.
+     */
+    public static function render_stats_panel(
+        \stdClass $profile
+    ): string {
+        return html_writer::div(
+            self::stats($profile),
+            'crm-section-overview-panel'
+        );
+    }
+
+    /**
+     * Renders the User360 CRM Assistant panel.
+     */
+    public static function render_assistant_panel(
+        \stdClass $profile
+    ): string {
+        $content = UserAssistantSection::render(
+            (int)$profile->user->id
+        );
+
+        if ($content === '') {
+            return '';
+        }
+
+        return self::section(
+            get_string(
+                'crm_assistant_user_section',
+                'local_subscriptions'
+            ),
+            $content,
+            'crm-section-assistant'
+        );
+    }
+
+    /**
+     * Renders the complete commercial activity panel.
+     */
+    public static function render_commercial_panel(
+        \stdClass $profile
+    ): string {
+        $subscriptions = self::commercial_subsection(
+            get_string(
+                'crm_section_subscriptions',
+                'local_subscriptions'
+            ),
+            self::subscriptions_content(
+                $profile->subscriptions ?? []
+            ),
+            'crm-commercial-subscriptions'
+        );
+
+        $digital = self::commercial_subsection(
+            get_string(
+                'crm_section_digital_purchases',
+                'local_subscriptions'
+            ),
+            self::digital_purchases_content(
+                $profile->digitalpayments ?? []
+            ),
+            'crm-commercial-digital'
+        );
+
+        return self::section(
+            get_string(
+                'user360_workspace_commercial',
+                'local_subscriptions'
+            ),
+            html_writer::div(
+                $subscriptions . $digital,
+                'crm-user360-commercial-grid'
+            ),
+            'crm-section-commercial'
+        );
+    }
+
+    /**
+     * Renders the User360 courses panel.
+     */
+    public static function render_courses_panel(
+        \stdClass $profile
+    ): string {
+        return self::section(
+            get_string(
+                'crm_section_courses',
+                'local_subscriptions'
+            ),
+            self::courses_content(
+                $profile->courses ?? []
+            ),
+            'crm-section-courses'
+        );
+    }
+
+    /**
+     * Renders Timeline groups for progressive AJAX loading.
+     *
+     * @return array<int, array{
+     *     key: string,
+     *     label: string,
+     *     html: string
+     * }>
+     */
+    public static function render_timeline_ajax_groups(
+        array $items
+    ): array {
+        $groups =
+            self::group_timeline_items(
+                $items
+            );
+
+        $result = [];
+
+        foreach ($groups as $key => $group) {
+            $html = '';
+
+            foreach ($group['items'] as $item) {
+                $html .= self::timeline_item(
+                    $item
+                );
+            }
+
+            $result[] = [
+                'key' => (string)$key,
+                'label' => (string)$group['label'],
+                'html' => $html,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Renders one subsection of the commercial activity panel.
+     */
+    private static function commercial_subsection(
+        string $title,
+        string $content,
+        string $class
+    ): string {
+        return html_writer::tag(
+            'section',
+            html_writer::tag(
+                'h4',
+                $title,
+                [
+                    'class' =>
+                        'crm-commercial-subsection-title h6 mb-3',
+                ]
+            ) .
+            html_writer::div(
+                $content,
+                'crm-commercial-subsection-content'
+            ),
+            [
+                'class' =>
+                    'crm-commercial-subsection ' . $class,
+            ]
         );
     }
 
@@ -1036,93 +1234,527 @@ final class UserProfileRenderer {
         return html_writer::div(implode(' ', $items), 'crm-quick-actions-buttons mb-3') . $noteform;
 
     }
-    private static function timeline_content(array $items): string {
-        if (!$items) {
+    private static function timeline_content(
+        \stdClass $profile
+    ): string {
+
+        $items = $profile->timeline ?? [];
+
+        if ($items === []) {
             return html_writer::div(
-                get_string('crm_timeline_empty', 'local_subscriptions'),
-                'alert alert-info'
+                get_string(
+                    'crm_timeline_empty',
+                    'local_subscriptions'
+                ),
+                'crm-timeline-empty alert alert-info',
+                [
+                    'role' => 'status',
+                ]
             );
         }
 
-        $groups = self::group_timeline_items($items);
+        $groups = self::group_timeline_items(
+            $items
+        );
 
-        $out = html_writer::start_div('crm-timeline');
+        $counts = self::timeline_category_counts(
+            $items
+        );
 
-        $out .= html_writer::div(
-            html_writer::span(get_string('show') . ' : ', 'me-2') .
-            self::timeline_filter_button('all', get_string('all')) .
-            self::timeline_filter_button('subscriptions', get_string('subscriptions', 'local_subscriptions')) .
-            self::timeline_filter_button('purchases', get_string('crm_filter_purchases', 'local_subscriptions')) .
-            self::timeline_filter_button('emails', get_string('crm_filter_emails', 'local_subscriptions')) .
-            self::timeline_filter_button(
-                'customer_success',
-                get_string(
-                    'crm_filter_customer_success',
-                    'local_subscriptions'
-                )
-            ) .
-            self::timeline_filter_button('other', get_string('crm_filter_other', 'local_subscriptions')),
-            'crm-timeline-filters mb-3'
+        $timelineid = 'crm-user-timeline';
+
+        $out = html_writer::start_div(
+            'crm-timeline',
+            [
+                'id' => $timelineid,
+                'data-user-timeline' => '1',
+            ]
+        );
+
+        $out .= self::timeline_toolbar(
+            $timelineid,
+            $counts,
+            count($items)
         );
 
         $out .= html_writer::div(
-            html_writer::tag('button', '▾ ' . get_string('crm_timeline_expand_all', 'local_subscriptions'), [
-                'type' => 'button',
-                'class' => 'btn btn-sm btn-outline-secondary me-2',
-                'onclick' => "
-                    document.querySelectorAll('.crm-timeline-body').forEach(function(e){e.classList.remove('d-none');});
-                    document.querySelectorAll('.crm-timeline-toggle').forEach(function(b){b.innerText='▴';});
-                ",
-            ]) .
-            html_writer::tag('button', '▴ ' . get_string('crm_timeline_collapse_all', 'local_subscriptions'), [
-                'type' => 'button',
-                'class' => 'btn btn-sm btn-outline-secondary',
-                'onclick' => "
-                    document.querySelectorAll('.crm-timeline-body').forEach(function(e){e.classList.add('d-none');});
-                    document.querySelectorAll('.crm-timeline-toggle').forEach(function(b){b.innerText='▾';});
-                ",
-            ]),
-            'mb-3'
+            get_string(
+                'crm_timeline_results_count',
+                'local_subscriptions',
+                count($items)
+            ),
+            'crm-timeline-results mb-3',
+            [
+                'data-timeline-results' =>
+                    '1',
+
+                'data-count-template' =>
+                    get_string(
+                        'crm_timeline_results_count',
+                        'local_subscriptions',
+                        '__COUNT__'
+                    ),
+
+                'aria-live' =>
+                    'polite',
+
+                'aria-atomic' =>
+                    'true',
+            ]
+        );
+
+        $out .= html_writer::start_div(
+            'crm-timeline-groups',
+            [
+                'data-timeline-groups' => '1',
+            ]
         );
 
         foreach ($groups as $groupkey => $group) {
-            if (!$group['items']) {
+            if ($group['items'] === []) {
                 continue;
             }
 
-            $collapseid = 'crm-timeline-group-' . $groupkey;
-
-            $out .= html_writer::start_div('crm-timeline-group card mb-2');
-
-            $out .= html_writer::tag('button',
-                html_writer::span($group['icon'] . ' ' . $group['label'], 'fw-bold') .
-                html_writer::span(' ' . count($group['items']), 'badge bg-primary ms-2') .
-                html_writer::span('▾', 'float-end'),
+            $out .= html_writer::start_tag(
+                'section',
                 [
-                    'type' => 'button',
-                    'class' => 'btn btn-light text-start w-100 crm-timeline-group-toggle',
-                    'onclick' => "
-                        var el = document.getElementById('$collapseid');
-                        el.classList.toggle('d-none');
-                        this.querySelector('.float-end').innerText = el.classList.contains('d-none') ? '▸' : '▾';
-                    ",
+                    'class' =>
+                        'crm-timeline-group',
+
+                    'data-timeline-group' =>
+                        $groupkey,
                 ]
             );
 
-            $hidden = $groupkey === 'recent' ? '' : ' d-none';
-            $out .= html_writer::start_div('crm-timeline-group-body' . $hidden, ['id' => $collapseid]);
+            $out .= html_writer::tag(
+                'h3',
+                s($group['label']),
+                [
+                    'class' =>
+                        'crm-timeline-date-heading',
+                ]
+            );
+
+            $out .= html_writer::start_div(
+                'crm-timeline-group-body',
+                [
+                    'data-timeline-group-body' =>
+                        '1',
+                ]
+            );
 
             foreach ($group['items'] as $item) {
-                $out .= self::timeline_item($item);
+                $out .= self::timeline_item(
+                    $item
+                );
             }
 
             $out .= html_writer::end_div();
-            $out .= html_writer::end_div();
+            $out .= html_writer::end_tag(
+                'section'
+            );
+        }
+
+        $out .= html_writer::end_div();
+
+        $out .= html_writer::div(
+            get_string(
+                'crm_timeline_no_filtered_results',
+                'local_subscriptions'
+            ),
+            'crm-timeline-filter-empty alert alert-light d-none',
+            [
+                'data-timeline-empty' => '1',
+                'role' => 'status',
+            ]
+        );
+
+        if (
+            !empty($profile->timelinehasmore)
+        ) {
+            $out .= html_writer::div(
+                html_writer::tag(
+                    'button',
+                    get_string(
+                        'crm_timeline_load_more',
+                        'local_subscriptions'
+                    ),
+                    [
+                        'type' =>
+                            'button',
+
+                        'class' =>
+                            'btn btn-outline-secondary',
+
+                        'data-timeline-load-more' =>
+                            '1',
+
+                        'data-userid' =>
+                            (int)$profile->user->id,
+
+                        'data-offset' =>
+                            (int)$profile->timelinenextoffset,
+
+                        'data-limit' =>
+                            20,
+
+                        'data-sesskey' => sesskey(),
+
+                        'data-url' =>
+                            (
+                                new moodle_url(
+                                    subscription_config::
+                                        admin_user_timeline_ajax_page()
+                                )
+                            )->out(false),
+
+                        'data-loading-label' =>
+                            get_string(
+                                'crm_timeline_loading',
+                                'local_subscriptions'
+                            ),
+
+                        'data-error-label' =>
+                            get_string(
+                                'crm_timeline_loading_error',
+                                'local_subscriptions'
+                            ),
+                    ]
+                ),
+                'crm-timeline-load-more text-center'
+            );
         }
 
         $out .= html_writer::end_div();
 
         return $out;
+    }
+
+    /**
+     * Renders the Timeline filtering toolbar.
+     *
+     * @param array<string, int> $counts
+     */
+    private static function timeline_toolbar(
+        string $timelineid,
+        array $counts,
+        int $total
+    ): string {
+        $categorybuttons = '';
+
+        $categorybuttons .=
+            self::timeline_category_button(
+                UserProfileTimelineCategory::ALL,
+                get_string('all'),
+                $total,
+                true
+            );
+
+        foreach (
+            UserProfileTimelineCategory::values()
+            as $category
+        ) {
+            $categorybuttons .=
+                self::timeline_category_button(
+                    $category,
+                    UserProfileTimelineCategory::label(
+                        $category
+                    ),
+                    $counts[$category] ?? 0
+                );
+        }
+
+        $searchlabel = get_string(
+            'crm_timeline_search',
+            'local_subscriptions'
+        );
+
+        $search = html_writer::tag(
+            'label',
+            s($searchlabel),
+            [
+                'for' =>
+                    $timelineid . '-search',
+
+                'class' =>
+                    'visually-hidden',
+            ]
+        );
+
+        $search .= html_writer::empty_tag(
+            'input',
+            [
+                'id' =>
+                    $timelineid . '-search',
+
+                'type' =>
+                    'search',
+
+                'class' =>
+                    'form-control form-control-sm',
+
+                'placeholder' =>
+                    $searchlabel,
+
+                'data-timeline-search' =>
+                    '1',
+
+                'autocomplete' =>
+                    'off',
+            ]
+        );
+
+        $period = html_writer::select(
+            [
+                'all' =>
+                    get_string(
+                        'crm_timeline_period_all',
+                        'local_subscriptions'
+                    ),
+
+                '7' =>
+                    get_string(
+                        'crm_timeline_period_7_days',
+                        'local_subscriptions'
+                    ),
+
+                '30' =>
+                    get_string(
+                        'crm_timeline_period_30_days',
+                        'local_subscriptions'
+                    ),
+
+                '90' =>
+                    get_string(
+                        'crm_timeline_period_90_days',
+                        'local_subscriptions'
+                    ),
+
+                '365' =>
+                    get_string(
+                        'crm_timeline_period_year',
+                        'local_subscriptions'
+                    ),
+            ],
+            'timelineperiod',
+            'all',
+            false,
+            [
+                'class' =>
+                    'form-select form-select-sm',
+
+                'data-timeline-period' =>
+                    '1',
+
+                'aria-label' =>
+                    get_string(
+                        'crm_timeline_period',
+                        'local_subscriptions'
+                    ),
+            ]
+        );
+
+        $importance = html_writer::tag(
+            'label',
+            html_writer::empty_tag(
+                'input',
+                [
+                    'type' =>
+                        'checkbox',
+
+                    'class' =>
+                        'form-check-input',
+
+                    'data-timeline-important' =>
+                        '1',
+                ]
+            )
+            . html_writer::span(
+                get_string(
+                    'crm_timeline_important_only',
+                    'local_subscriptions'
+                ),
+                'form-check-label'
+            ),
+            [
+                'class' =>
+                    'form-check crm-timeline-important-filter',
+            ]
+        );
+
+        $reset = html_writer::tag(
+            'button',
+            get_string(
+                'reset'
+            ),
+            [
+                'type' =>
+                    'button',
+
+                'class' =>
+                    'btn btn-sm btn-outline-secondary',
+
+                'data-timeline-reset' =>
+                    '1',
+            ]
+        );
+
+        $expand = html_writer::tag(
+            'button',
+            get_string(
+                'crm_timeline_expand_all',
+                'local_subscriptions'
+            ),
+            [
+                'type' =>
+                    'button',
+
+                'class' =>
+                    'btn btn-sm btn-outline-secondary',
+
+                'data-timeline-expand-all' =>
+                    '1',
+            ]
+        );
+
+        $collapse = html_writer::tag(
+            'button',
+            get_string(
+                'crm_timeline_collapse_all',
+                'local_subscriptions'
+            ),
+            [
+                'type' =>
+                    'button',
+
+                'class' =>
+                    'btn btn-sm btn-outline-secondary',
+
+                'data-timeline-collapse-all' =>
+                    '1',
+            ]
+        );
+
+        $filters = html_writer::div(
+            $categorybuttons,
+            'crm-timeline-category-filters',
+            [
+                'role' =>
+                    'group',
+
+                'aria-label' =>
+                    get_string(
+                        'crm_timeline_filter_categories',
+                        'local_subscriptions'
+                    ),
+            ]
+        );
+
+        $controls = html_writer::div(
+            html_writer::div(
+                $search,
+                'crm-timeline-search'
+            )
+            . html_writer::div(
+                $period,
+                'crm-timeline-period'
+            )
+            . $importance
+            . $reset,
+            'crm-timeline-secondary-filters'
+        );
+
+        $displayactions = html_writer::div(
+            $expand . $collapse,
+            'crm-timeline-display-actions'
+        );
+
+        return html_writer::tag(
+            'div',
+            $filters .
+                $controls .
+                $displayactions,
+            [
+                'class' =>
+                    'crm-timeline-toolbar mb-3',
+            ]
+        );
+    }
+
+    /**
+     * Renders one Timeline category button.
+     */
+    private static function timeline_category_button(
+        string $category,
+        string $label,
+        int $count,
+        bool $active = false
+    ): string {
+        $buttonlabel =
+            html_writer::span(
+                s($label),
+                'crm-timeline-filter-label'
+            );
+
+        $buttonlabel .=
+            html_writer::span(
+                (string)$count,
+                'crm-timeline-filter-count badge rounded-pill'
+            );
+
+        return html_writer::tag(
+            'button',
+            $buttonlabel,
+            [
+                'type' =>
+                    'button',
+
+                'class' =>
+                    'btn btn-sm ' .
+                    (
+                        $active
+                            ? 'btn-primary'
+                            : 'btn-outline-secondary'
+                    ),
+
+                'data-timeline-category-filter' =>
+                    $category,
+
+                'aria-pressed' =>
+                    $active
+                        ? 'true'
+                        : 'false',
+            ]
+        );
+    }
+
+    /**
+     * Counts Timeline events by functional category.
+     *
+     * @return array<string, int>
+     */
+    private static function timeline_category_counts(
+        array $items
+    ): array {
+        $counts = array_fill_keys(
+            UserProfileTimelineCategory::values(),
+            0
+        );
+
+        foreach ($items as $item) {
+            $category =
+                UserProfileTimelineCategory::resolve(
+                    $item
+                );
+
+            if (!isset($counts[$category])) {
+                $counts[$category] = 0;
+            }
+
+            $counts[$category]++;
+        }
+
+        return $counts;
     }
 
     private static function render_timeline_body(\stdClass $item): string {
@@ -1596,163 +2228,349 @@ final class UserProfileRenderer {
         ]);
     }
 
-    private static function group_timeline_items(array $items): array {
-        $now = time();
-
-        $groups = [
-            'recent' => [
-                'label' => get_string('crm_timeline_recent', 'local_subscriptions'),
-                'icon' => '🗓️',
-                'items' => [],
-            ],
-            'middle' => [
-                'label' => get_string('crm_timeline_middle', 'local_subscriptions'),
-                'icon' => '📦',
-                'items' => [],
-            ],
-            'old' => [
-                'label' => get_string('crm_timeline_old', 'local_subscriptions'),
-                'icon' => '🗂️',
-                'items' => [],
-            ],
-        ];
+    /**
+     * Groups Timeline items by calendar day.
+     *
+     * @return array<string, array{
+     *     label: string,
+     *     items: array
+     * }>
+     */
+    private static function group_timeline_items(
+        array $items
+    ): array {
+        $groups = [];
 
         foreach ($items as $item) {
-            $age = $now - (int)$item->timecreated;
+            $timestamp = (int)(
+                $item->timecreated
+                ?? 0
+            );
 
-            if ($age <= 30 * DAYSECS) {
-                $groups['recent']['items'][] = $item;
-            } else if ($age <= 90 * DAYSECS) {
-                $groups['middle']['items'][] = $item;
-            } else {
-                $groups['old']['items'][] = $item;
+            if ($timestamp <= 0) {
+                continue;
             }
+
+            $key = userdate(
+                $timestamp,
+                '%Y-%m-%d'
+            );
+
+            if (!isset($groups[$key])) {
+                $groups[$key] = [
+                    'label' =>
+                        self::timeline_day_label(
+                            $timestamp
+                        ),
+
+                    'items' =>
+                        [],
+                ];
+            }
+
+            $groups[$key]['items'][] =
+                $item;
         }
 
         return $groups;
     }
 
-    private static function timeline_category(\stdClass $item): string {
-
-        if (
-            str_starts_with(
-                (string)($item->type ?? ''),
-                'inbox_'
-            ) ||
-            (string)($item->rawtype ?? '') ===
-                'inbox_message'
-        ) {
-            return 'emails';
-        }
-
-        $type = (string)($item->type ?? '');
-
-        if (str_contains($type, 'subscription') || str_contains($type, 'trial')) {
-            return 'subscriptions';
-        }
-
-        if (str_contains($type, 'digital') || str_contains($type, 'purchase') || str_contains($type, 'payment')) {
-            return 'purchases';
-        }
-
-        if (str_contains($type, 'email')) {
-            return 'emails';
-        }
-
-        $objecttype = (string)($item->objecttype ?? '');
-        $action = (string)($item->action ?? '');
-
-        if (str_starts_with($action, 'email.')) {
-            return 'emails';
-        }
-
-        if (
-            $type === 'subscription_payment' ||
-            $type === 'digital_purchase' ||
-            str_contains($objecttype, 'purchase') ||
-            str_contains($objecttype, 'payment')
-        ) {
-            return 'purchases';
-        }
-
-        if (
-            $type === 'subscription_snapshot' ||
-            $objecttype === 'subscription' ||
-            str_contains($action, 'subscription') ||
-            str_contains($action, 'trial')
-        ) {
-            return 'subscriptions';
-        }
-
-        return 'other';
-    }
-
-    private static function timeline_item(\stdClass $item): string {
-        $body = self::render_timeline_body($item);
-        $category = self::timeline_category($item);
-
-        $meta = AdminFormatter::datetime((int)$item->timecreated);
-        $actor = self::timeline_actor_label($item);
-
-        $technical = $meta;
-        if ($actor !== '') {
-            $technical .= ' · ' . $actor;
-        }
-
-        $out = html_writer::start_div('crm-timeline-item border-top p-2 w-100', [
-            'data-category' => $category,
-            'data-importance' => $item->importance ?? 'normal',
-        ]);
-
-        $hasbody = $body !== '';
-
-        $out .= html_writer::start_div('d-flex align-items-center w-100 crm-timeline-line' . ($hasbody ? ' crm-timeline-line-clickable' : ''), [
-            'onclick' => $hasbody ? "
-                var item = this.closest('.crm-timeline-item');
-                var body = item.querySelector('.crm-timeline-body');
-                var toggle = item.querySelector('.crm-timeline-toggle');
-                body.classList.toggle('d-none');
-                toggle.innerText = body.classList.contains('d-none') ? '▾' : '▴';
-            " : '',
-        ]);
-
-        $out .= html_writer::span($item->icon ?? '•', 'crm-timeline-icon flex-shrink-0');
-
-        $out .= html_writer::start_div('flex-grow-1 w-100');
-
-        $out .= html_writer::start_div('d-flex align-items-center w-100 crm-timeline-line');
-
-        $out .= html_writer::div(
-            html_writer::tag('strong', ' ' . s((string)$item->title)) .
-            html_writer::span(' (' . s($technical) . ')', 'text-muted small ms-2'),
-            'flex-grow-1'
+    /**
+     * Returns a readable label for one Timeline day.
+     */
+    private static function timeline_day_label(
+        int $timestamp
+    ): string {
+        $today = usergetmidnight(
+            time()
         );
 
-        if ($body !== '') {
-            $out .= html_writer::tag('button', '▾', [
-                'type' => 'button',
-                'class' => 'btn btn-sm btn-link crm-timeline-toggle ms-auto',
-                'title' => get_string('crm_timeline_view_details', 'local_subscriptions'),
-                'onclick' => "event.stopPropagation();
-                    var item = this.closest('.crm-timeline-item');
-                    var body = item.querySelector('.crm-timeline-body');
-                    body.classList.toggle('d-none');
-                    this.innerText = body.classList.contains('d-none') ? '▾' : '▴';
-                ",
-            ]);
+        $eventday = usergetmidnight(
+            $timestamp
+        );
+
+        if ($eventday === $today) {
+            return get_string(
+                'today'
+            );
         }
 
-        $out .= html_writer::end_div();
-
-        if ($body !== '') {
-            $out .= html_writer::div($body, 'crm-timeline-body d-none mt-2 w-100');
+        if (
+            $eventday ===
+            $today - DAYSECS
+        ) {
+            return get_string(
+                'crm_timeline_yesterday',
+                'local_subscriptions'
+            );
         }
 
-        $out .= html_writer::end_div();
-        $out .= html_writer::end_div();
-        $out .= html_writer::end_div();
+        return userdate(
+            $timestamp,
+            get_string(
+                'strftimedatefullshort',
+                'langconfig'
+            )
+        );
+    }
 
-        return $out;
+
+    private static function timeline_item(
+        \stdClass $item
+    ): string {
+        $body = self::render_timeline_body(
+            $item
+        );
+
+        $category =
+            UserProfileTimelineCategory::resolve(
+                $item
+            );
+
+        $timestamp = (int)(
+            $item->timecreated
+            ?? 0
+        );
+
+        $importance = strtolower(
+            trim(
+                (string)(
+                    $item->importance
+                    ?? 'normal'
+                )
+            )
+        );
+
+        if (
+            !in_array(
+                $importance,
+                [
+                    'normal',
+                    'medium',
+                    'high',
+                ],
+                true
+            )
+        ) {
+            $importance = 'normal';
+        }
+
+        $meta = AdminFormatter::datetime(
+            $timestamp
+        );
+
+        $actor =
+            self::timeline_actor_label(
+                $item
+            );
+
+        if ($actor !== '') {
+            $meta .= ' · ' . $actor;
+        }
+
+        $title = trim(
+            (string)(
+                $item->title
+                ?? ''
+            )
+        );
+
+        if ($title === '') {
+            $title = get_string(
+                'crm_timeline_event',
+                'local_subscriptions'
+            );
+        }
+
+        $description = trim(
+            strip_tags(
+                (string)(
+                    $item->description
+                    ?? $item->body
+                    ?? ''
+                )
+            )
+        );
+
+        $searchtext = \core_text::strtolower(
+            implode(
+                ' ',
+                [
+                    $title,
+                    $description,
+                    $actor,
+                    UserProfileTimelineCategory::label(
+                        $category
+                    ),
+                ]
+            )
+        );
+
+        $eventid = self::timeline_html_id(
+            'crm-timeline-event-'
+        );
+
+        $bodyid =
+            $eventid . '-body';
+
+        $hasbody =
+            $body !== '';
+
+        $icon = html_writer::span(
+            s(
+                (string)(
+                    $item->icon
+                    ?? UserProfileTimelineCategory::icon(
+                        $category
+                    )
+                )
+            ),
+            'crm-timeline-icon',
+            [
+                'aria-hidden' =>
+                    'true',
+            ]
+        );
+
+        $heading = html_writer::div(
+            html_writer::tag(
+                'strong',
+                s($title),
+                [
+                    'class' =>
+                        'crm-timeline-title',
+                ]
+            )
+            . html_writer::span(
+                s($meta),
+                'crm-timeline-meta'
+            ),
+            'crm-timeline-heading'
+        );
+
+        $categorybadge = html_writer::span(
+            s(
+                UserProfileTimelineCategory::label(
+                    $category
+                )
+            ),
+            'crm-timeline-category-badge'
+        );
+
+        $summary = html_writer::div(
+            $heading . $categorybadge,
+            'crm-timeline-summary'
+        );
+
+        $toggle = '';
+
+        if ($hasbody) {
+            $toggle = html_writer::tag(
+                'button',
+                html_writer::span(
+                    get_string(
+                        'crm_timeline_view_details',
+                        'local_subscriptions'
+                    ),
+                    'visually-hidden'
+                )
+                . html_writer::span(
+                    '⌄',
+                    'crm-timeline-toggle-icon',
+                    [
+                        'aria-hidden' =>
+                            'true',
+                    ]
+                ),
+                [
+                    'type' =>
+                        'button',
+
+                    'class' =>
+                        'btn btn-sm btn-link crm-timeline-toggle',
+
+                    'data-timeline-toggle' =>
+                        '1',
+
+                    'aria-expanded' =>
+                        'false',
+
+                    'aria-controls' =>
+                        $bodyid,
+                ]
+            );
+        }
+
+        $action = '';
+
+        if (
+            !empty($item->actionurl)
+        ) {
+            $action = html_writer::link(
+                new moodle_url(
+                    (string)$item->actionurl
+                ),
+                get_string(
+                    'crm_timeline_open_event',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-sm btn-outline-secondary crm-timeline-action',
+                ]
+            );
+        }
+
+        $header = html_writer::div(
+            $icon .
+                $summary .
+                $action .
+                $toggle,
+            'crm-timeline-line'
+        );
+
+        $content = '';
+
+        if ($hasbody) {
+            $content = html_writer::div(
+                $body,
+                'crm-timeline-body d-none',
+                [
+                    'id' =>
+                        $bodyid,
+
+                    'data-timeline-body' =>
+                        '1',
+                ]
+            );
+        }
+
+        return html_writer::tag(
+            'article',
+            $header . $content,
+            [
+                'id' =>
+                    $eventid,
+
+                'class' =>
+                    'crm-timeline-item',
+
+                'data-timeline-item' =>
+                    '1',
+
+                'data-category' =>
+                    $category,
+
+                'data-importance' =>
+                    $importance,
+
+                'data-timecreated' =>
+                    $timestamp,
+
+                'data-search-text' =>
+                    $searchtext,
+            ]
+        );
     }
 
     private static function timeline_actor_label(
@@ -2039,6 +2857,168 @@ final class UserProfileRenderer {
         }
 
         return html_writer::div($out, 'crm-intelligence-explanations mt-3');
+    }
+
+    /**
+     * Renders a compact Timeline summary for the User360 summary zone.
+     */
+    public static function render_timeline_summary_panel(
+        \stdClass $profile
+    ): string {
+        $events = array_slice(
+            $profile->timeline ?? [],
+            0,
+            3
+        );
+
+        $importantcount = 0;
+
+        foreach (
+            $profile->timeline ?? []
+            as $event
+        ) {
+            if (
+                in_array(
+                    strtolower(
+                        (string)(
+                            $event->importance
+                            ?? 'normal'
+                        )
+                    ),
+                    [
+                        'medium',
+                        'high',
+                    ],
+                    true
+                )
+            ) {
+                $importantcount++;
+            }
+        }
+
+        $content = html_writer::div(
+            html_writer::span(
+                (string)count(
+                    $profile->timeline ?? []
+                ),
+                'crm-timeline-summary-value'
+            )
+            . html_writer::span(
+                get_string(
+                    'crm_timeline_loaded_events',
+                    'local_subscriptions'
+                ),
+                'crm-timeline-summary-label'
+            ),
+            'crm-timeline-summary-stat'
+        );
+
+        $content .= html_writer::div(
+            html_writer::span(
+                (string)$importantcount,
+                'crm-timeline-summary-value'
+            )
+            . html_writer::span(
+                get_string(
+                    'crm_timeline_important_events',
+                    'local_subscriptions'
+                ),
+                'crm-timeline-summary-label'
+            ),
+            'crm-timeline-summary-stat'
+        );
+
+        if ($events !== []) {
+            $latest = $events[0];
+
+            $content .= html_writer::div(
+                html_writer::span(
+                    get_string(
+                        'crm_timeline_latest_event',
+                        'local_subscriptions'
+                    ),
+                    'crm-timeline-summary-label'
+                )
+                . html_writer::tag(
+                    'strong',
+                    s(
+                        (string)(
+                            $latest->title
+                            ?? get_string(
+                                'crm_timeline_event',
+                                'local_subscriptions'
+                            )
+                        )
+                    ),
+                    [
+                        'class' =>
+                            'crm-timeline-summary-latest-title',
+                    ]
+                )
+                . html_writer::span(
+                    AdminFormatter::datetime(
+                        (int)$latest->timecreated
+                    ),
+                    'crm-timeline-summary-latest-date'
+                ),
+                'crm-timeline-summary-latest'
+            );
+        }
+
+        $content .= html_writer::link(
+            '#crm-user-timeline',
+            get_string(
+                'crm_timeline_view_full',
+                'local_subscriptions'
+            ),
+            [
+                'class' =>
+                    'btn btn-sm btn-outline-secondary',
+
+                'data-timeline-scroll' =>
+                    '1',
+            ]
+        );
+
+        return self::section(
+            get_string(
+                'crm_section_timeline',
+                'local_subscriptions'
+            ),
+            $content,
+            'crm-section-timeline-summary'
+        );
+    }
+
+    /**
+     * Renders the read-only Timeline of a deleted user.
+     */
+    public static function render_historical_timeline_panel(
+        \stdClass $profile
+    ): string {
+        return self::section(
+            get_string(
+                'crm_section_timeline',
+                'local_subscriptions'
+            ),
+            self::timeline_content(
+                $profile
+            ),
+            'crm-section-timeline crm-section-timeline-historical'
+        );
+    }
+
+    /**
+     * Generates a sufficiently unique HTML identifier.
+     */
+    private static function timeline_html_id(
+        string $prefix
+    ): string {
+        static $sequence = 0;
+
+        $sequence++;
+
+        return $prefix . $sequence;
     }
 
 }

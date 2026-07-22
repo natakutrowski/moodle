@@ -2926,41 +2926,6 @@ body.local-subscriptions-dashboard-page .breadcrumb {
     margin-bottom: 1.5rem;
 }
 
-.local-subscriptions-workspace-command {
-    width: 100%;
-    min-width: 0;
-    margin-bottom: 1.5rem;
-}
-
-.local-subscriptions-workspace-command
-.campusfr-command-center {
-    width: 100%;
-    min-width: 0;
-}
-
-.local-subscriptions-workspace-command
-.campusfr-command-trigger {
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-    min-height: 3.625rem;
-    padding: 0.875rem 1.125rem;
-}
-
-.local-subscriptions-workspace-command
-.campusfr-command-placeholder {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.local-subscriptions-workspace-command
-.campusfr-command-shortcut {
-    flex: 0 0 auto;
-}
-
 body.local-subscriptions-dashboard-page
 .local-subscriptions-dashboard-main,
 body.local-subscriptions-dashboard-page
@@ -2980,19 +2945,6 @@ body.local-subscriptions-dashboard-page
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
-}
-
-@media (max-width: 575.98px) {
-    .local-subscriptions-workspace-command
-    .campusfr-command-trigger {
-        min-height: 3.25rem;
-        padding: 0.75rem 0.875rem;
-    }
-
-    .local-subscriptions-workspace-command
-    .campusfr-command-shortcut {
-        display: none;
-    }
 }
 
 body.local-subscriptions-dashboard-page #region-main > .container,
@@ -6124,6 +6076,197 @@ div#page.container.bottom-region-main-box {
 }
 
 /* ============================================================
+   Phase 7.90E — Inbox Workspace
+   ============================================================ */
+
+.local-subscriptions-inbox-workspace {
+    width: 100%;
+    min-width: 0;
+}
+
+.crm-inbox-workspace-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    min-width: 0;
+}
+
+.crm-inbox-workspace-content {
+    display: grid;
+    grid-template-columns:
+        minmax(17rem, 0.9fr)
+        minmax(24rem, 1.6fr)
+        minmax(16rem, 0.8fr);
+    gap: 1rem;
+    align-items: stretch;
+    min-width: 0;
+}
+
+.crm-inbox-workspace-navigation,
+.crm-inbox-workspace-list,
+.crm-inbox-workspace-reading,
+.crm-inbox-workspace-context {
+    min-width: 0;
+}
+
+.crm-inbox-workspace-navigation
+.crm-workspace-item,
+.crm-inbox-workspace-list
+.crm-workspace-item,
+.crm-inbox-workspace-reading
+.crm-workspace-item,
+.crm-inbox-workspace-context
+.crm-workspace-item {
+    width: 100%;
+    min-width: 0;
+}
+
+.crm-inbox-workspace-navigation
+.crm-workspace-item-content,
+.crm-inbox-workspace-list
+.crm-workspace-item-content,
+.crm-inbox-workspace-reading
+.crm-workspace-item-content,
+.crm-inbox-workspace-context
+.crm-workspace-item-content {
+    min-width: 0;
+    height: 100%;
+}
+
+.crm-inbox-workspace-navigation
+.crm-inbox-filters {
+    margin-bottom: 0 !important;
+}
+
+.crm-inbox-workspace-list
+.crm-inbox-thread-list-panel {
+    min-width: 0;
+}
+
+.crm-inbox-workspace-list
+.crm-inbox-thread-list {
+    min-width: 0;
+}
+
+.crm-inbox-workspace-reading,
+.crm-inbox-workspace-context {
+    display: flex;
+}
+
+.crm-inbox-workspace-reading
+.crm-workspace-zone,
+.crm-inbox-workspace-context
+.crm-workspace-zone {
+    width: 100%;
+}
+
+.crm-inbox-workspace-reading
+.crm-workspace-item,
+.crm-inbox-workspace-context
+.crm-workspace-item {
+    height: 100%;
+}
+
+.crm-inbox-workspace-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 26rem;
+    height: 100%;
+    padding: 2rem 1.5rem;
+    border: 1px dashed rgba(148, 163, 184, 0.48);
+    border-radius: 0.9rem;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(248, 250, 252, 0.86),
+            rgba(255, 255, 255, 0.98)
+        );
+    text-align: center;
+}
+
+.crm-inbox-workspace-placeholder-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    background: rgba(79, 70, 229, 0.09);
+    font-size: 1.45rem;
+    line-height: 1;
+}
+
+.crm-inbox-workspace-placeholder-title {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.crm-inbox-workspace-placeholder-description {
+    max-width: 25rem;
+    margin: 0.55rem 0 0;
+    color: #64748b;
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+.crm-inbox-workspace-context
+.crm-inbox-workspace-placeholder {
+    min-height: 20rem;
+}
+
+@media (max-width: 1399.98px) {
+    .crm-inbox-workspace-content {
+        grid-template-columns:
+            minmax(16rem, 0.9fr)
+            minmax(22rem, 1.5fr);
+    }
+
+    .crm-inbox-workspace-context {
+        grid-column: 1 / -1;
+    }
+
+    .crm-inbox-workspace-context
+    .crm-inbox-workspace-placeholder {
+        min-height: 12rem;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .crm-inbox-workspace-content {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .crm-inbox-workspace-list,
+    .crm-inbox-workspace-reading,
+    .crm-inbox-workspace-context {
+        grid-column: auto;
+    }
+
+    .crm-inbox-workspace-placeholder {
+        min-height: 14rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-inbox-workspace-layout,
+    .crm-inbox-workspace-content {
+        gap: 0.75rem;
+    }
+
+    .crm-inbox-workspace-placeholder {
+        min-height: 11rem;
+        padding: 1.5rem 1rem;
+        border-radius: 0.75rem;
+    }
+}
+
+/* ============================================================
    Phase 6.5F — Inbox UX, accessibility and responsive polish
    ============================================================ */
 
@@ -8341,23 +8484,228 @@ body.local-subscriptions-dashboard-page
 }
 
 /* ==========================================================================
-   Phase 7.75J — CRM application shell
+   CRM Top Bar — Layout and branding
+   ========================================================================== */
+
+.crm-app-topbar {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 4rem;
+    padding: 0.625rem 0.875rem;
+    margin-bottom: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow:
+        0 0.35rem 1.25rem rgba(15, 23, 42, 0.05);
+}
+
+.crm-app-topbar-brand {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+}
+
+.crm-app-topbar-brand-link {
+    display: inline-flex;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0.25rem 0.5rem;
+    align-items: center;
+    gap: 0.55rem;
+    border-radius: 0.75rem;
+    color: #0f172a;
+    line-height: 1.2;
+    text-decoration: none;
+}
+
+.crm-app-topbar-brand-link:hover {
+    background: rgba(99, 102, 241, 0.06);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.crm-app-topbar-brand-link:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.28);
+    outline-offset: 2px;
+}
+
+.crm-app-topbar-brand-logo {
+    display: block;
+    width: auto;
+    max-width: min(11.5rem, 45vw);
+    height: 2.5rem;
+    object-fit: contain;
+}
+
+.crm-app-topbar-brand-link:hover
+.crm-app-topbar-brand-logo {
+    opacity: 0.94;
+}
+
+@media (max-width: 479.98px) {
+    .crm-app-topbar-brand-logo {
+        max-width: 9.5rem;
+        height: 2.25rem;
+    }
+}
+
+.crm-app-topbar-brand-fallback {
+    display: none;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+}
+
+.crm-app-topbar-brand-secondary {
+    padding: 0.2rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.1);
+    color: #4338ca;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.crm-app-topbar-actions {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.crm-app-topbar-action {
+    display: inline-flex;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.7rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 0.7rem;
+    background: #ffffff;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.25;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.crm-app-topbar-action:hover {
+    border-color: rgba(99, 102, 241, 0.22);
+    background: rgba(99, 102, 241, 0.06);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.crm-app-topbar-action:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.28);
+    outline-offset: 2px;
+}
+
+.crm-app-topbar-action-icon {
+    display: inline-flex;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 1.25rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.crm-app-topbar-language,
+.crm-app-topbar-user {
+    min-width: 0;
+}
+
+@media (max-width: 767.98px) {
+    .crm-app-topbar {
+        padding: 0.5rem;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 0.5rem;
+        border-radius: 0.875rem;
+    }
+
+    .crm-app-topbar-brand {
+        width: 100%;
+    }
+
+    .crm-app-topbar-brand-link {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .crm-app-topbar-actions {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .crm-app-topbar-admin-link {
+        flex: 1 1 100%;
+    }
+
+    .crm-app-topbar-action-label {
+        white-space: normal;
+        text-align: center;
+    }
+
+    .crm-app-topbar-language,
+    .crm-app-topbar-user {
+        max-width: 100%;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-app-topbar,
+    .crm-app-topbar-action {
+        border-color: CanvasText;
+    }
+
+    .crm-app-topbar-brand-link:focus-visible,
+    .crm-app-topbar-action:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+}
+
+/* ==========================================================================
+   Phase 7.91.3 — CRM application shell
    ========================================================================== */
 
 .crm-app-shell {
+    display: flex;
     width: 100%;
     max-width: none;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.crm-app-content {
+    width: 100%;
     min-width: 0;
 }
 
 .crm-app-main {
+    display: block;
     width: 100%;
     min-width: 0;
 }
 
 .crm-app-navigation {
     position: sticky;
-    top: 0;
+    top: 0.5rem;
     z-index: 1020;
     width: 100%;
     min-width: 0;
@@ -8601,39 +8949,226 @@ body.local-subscriptions-dashboard-page
     }
 }
 
-.local-subscriptions-inbox-thread-page
-.crm-app-main
-> .btn-link:first-child {
-    border-radius: 0.375rem;
-    font-weight: 600;
-    text-decoration: none;
+/* ==========================================================================
+   Phase 7.91.3 — CRM Moodle integration
+   ========================================================================== */
+
+/*
+ * Autonomous CRM pages still use Moodle's header and footer output methods
+ * to load required assets, but the embedded page layout removes the regular
+ * Moodle navigation chrome.
+ */
+
+body.local-subscriptions-crm-autonomous {
+    min-width: 20rem;
+    background: #f8fafc;
 }
 
-.local-subscriptions-inbox-thread-page
-.crm-app-main
-> .btn-link:first-child:hover {
-    text-decoration: underline;
+/*
+ * Edly adds a top offset to #page in the embedded layout.
+ * The autonomous CRM shell manages its own spacing.
+ */
+html body.local-subscriptions-crm-autonomous
+div#page {
+    min-width: 0;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    background: transparent;
 }
 
-.local-subscriptions-inbox-thread-page
-.crm-app-main
-> .btn-link:first-child:focus-visible {
-    outline: 3px solid rgba(79, 70, 229, 0.28);
-    outline-offset: 2px;
+body.local-subscriptions-crm-autonomous
+#page-wrapper {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
-@media (forced-colors: active) {
-    .local-subscriptions-inbox-thread-page
-    .crm-app-main
-    > .btn-link:first-child:focus-visible {
-        outline: 2px solid Highlight;
-        outline-offset: 2px;
+/*
+ * Edly applies a top offset to #page on embedded pages.
+ * The autonomous CRM shell owns its own spacing.
+ */
+
+body.local-subscriptions-crm-autonomous
+#page {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+body.local-subscriptions-crm-autonomous
+#page-wrapper {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+html body.local-subscriptions-crm-autonomous
+div#page {
+    padding-top: 0 !important;
+}
+
+body.local-subscriptions-crm-autonomous
+#page-content {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+}
+
+body.local-subscriptions-crm-autonomous
+#region-main-box,
+body.local-subscriptions-crm-autonomous
+#region-main {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+}
+
+body.local-subscriptions-crm-autonomous
+#region-main {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body.local-subscriptions-crm-autonomous
+#region-main
+> .card {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body.local-subscriptions-crm-autonomous
+#region-main
+> .card
+> .card-body {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+}
+
+body.local-subscriptions-crm-autonomous
+.local-subscriptions-crm-workspace-shell {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding:
+        clamp(0.75rem, 1.5vw, 1.5rem);
+    margin: 0 auto;
+}
+
+body.local-subscriptions-crm-autonomous
+#page-header {
+    display: none;
+}
+
+body.local-subscriptions-crm-autonomous
+.breadcrumb-nav {
+    display: none;
+}
+
+body.local-subscriptions-crm-autonomous
+.secondary-navigation {
+    display: none;
+}
+
+body.local-subscriptions-crm-autonomous
+.drawer {
+    display: none;
+}
+
+body.local-subscriptions-crm-autonomous
+.drawer-toggles {
+    display: none;
+}
+
+body.local-subscriptions-crm-autonomous
+[data-region="drawer-toggle"] {
+    display: none;
+}
+
+body.local-subscriptions-crm-autonomous
+#page-footer {
+    display: none;
+}
+
+/*
+ * Edly compatibility.
+ *
+ * These selectors only remove layout chrome and spacing. The CRM does not
+ * depend on Edly-specific markup for its core layout.
+ */
+
+body.local-subscriptions-crm-autonomous
+.edly-main {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+}
+
+body.local-subscriptions-crm-autonomous
+.edly-main
+#region-main {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+}
+
+body.local-subscriptions-crm-autonomous
+.bottom-region-main-box {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+}
+
+body.local-subscriptions-crm-autonomous
+.bottom-region-main-box
+.region-main-content {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+}
+
+@media (max-width: 767.98px) {
+    body.local-subscriptions-crm-autonomous
+    .local-subscriptions-crm-workspace-shell {
+        padding: 0.5rem;
+    }
+
+    .crm-app-navigation {
+        top: 0;
     }
 }
 
-/* ==========================================================================
-   Phase 7.75J — Moodle application integration
-   ========================================================================== */
+@media (max-width: 479.98px) {
+    body.local-subscriptions-crm-autonomous {
+        min-width: 0;
+    }
+
+    body.local-subscriptions-crm-autonomous
+    .local-subscriptions-crm-workspace-shell {
+        padding: 0.375rem;
+    }
+}
+
+@media (forced-colors: active) {
+    body.local-subscriptions-crm-autonomous
+    #region-main {
+        border-color: Canvas;
+        background: Canvas;
+    }
+}
 
 body.local-subscriptions-crm-workspace
 #region-main {
@@ -8894,5 +9429,4586 @@ body.local-subscriptions-user-explorer-page
     .crm-admin-tool-action-form,
     .crm-admin-tool-risk {
         border: 1px solid CanvasText;
+    }
+}
+
+/* ==========================================================================
+   CRM Top Bar — User menu
+   ========================================================================== */
+
+.crm-app-topbar-user {
+    position: relative;
+    min-width: 0;
+    margin: 0;
+}
+
+.crm-app-topbar-user > summary {
+    list-style: none;
+}
+
+.crm-app-topbar-user > summary::-webkit-details-marker {
+    display: none;
+}
+
+.crm-app-topbar-user-toggle {
+    display: inline-flex;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0.35rem 0.55rem;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.8rem;
+    background: #ffffff;
+    color: #1e293b;
+    cursor: pointer;
+    user-select: none;
+}
+
+.crm-app-topbar-user-toggle:hover {
+    border-color: rgba(99, 102, 241, 0.24);
+    background: rgba(99, 102, 241, 0.06);
+    color: #312e81;
+}
+
+.crm-app-topbar-user-toggle:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.28);
+    outline-offset: 2px;
+}
+
+.crm-app-topbar-user-avatar,
+.crm-app-topbar-menu-avatar {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+}
+
+.crm-app-topbar-user-picture,
+.crm-app-topbar-user-avatar img,
+.crm-app-topbar-menu-avatar img {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+    max-width: none;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.crm-app-topbar-user-name {
+    display: block;
+    max-width: 11rem;
+    overflow: hidden;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-app-topbar-user-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    transition: transform 0.18s ease;
+}
+
+.crm-app-topbar-user[open]
+.crm-app-topbar-user-chevron {
+    transform: rotate(180deg);
+}
+
+.crm-app-topbar-user-dropdown {
+    position: absolute;
+    z-index: 1080;
+    top: calc(100% + 0.55rem);
+    right: 0;
+    width: 17rem;
+    max-width: calc(100vw - 1rem);
+    padding: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.9rem;
+    background: #ffffff;
+    box-shadow:
+        0 1rem 2.5rem rgba(15, 23, 42, 0.16);
+}
+
+.crm-app-topbar-user-header {
+    display: flex;
+    padding: 0.65rem;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.crm-app-topbar-menu-avatar img {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.crm-app-topbar-menu-identity {
+    min-width: 0;
+}
+
+.crm-app-topbar-menu-fullname {
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-app-topbar-menu-profile-link {
+    display: inline-block;
+    margin-top: 0.15rem;
+    color: #4f46e5;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.crm-app-topbar-user-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.crm-app-topbar-user-link {
+    display: flex;
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.7rem;
+    align-items: center;
+    gap: 0.65rem;
+    border-radius: 0.6rem;
+    color: #334155;
+    font-size: 0.86rem;
+    line-height: 1.3;
+    text-decoration: none;
+}
+
+.crm-app-topbar-user-link:hover,
+.crm-app-topbar-user-link:focus {
+    background: rgba(99, 102, 241, 0.08);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.crm-app-topbar-user-link:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.24);
+    outline-offset: 1px;
+}
+
+.crm-app-topbar-user-link-icon {
+    display: inline-flex;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 1.25rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.crm-app-topbar-user-divider {
+    height: 1px;
+    margin: 0.4rem 0;
+    background: rgba(148, 163, 184, 0.25);
+}
+
+.crm-app-topbar-user-link-danger {
+    color: #dc2626;
+}
+
+.crm-app-topbar-user-link-danger:hover,
+.crm-app-topbar-user-link-danger:focus {
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+}
+
+@media (max-width: 767.98px) {
+    .crm-app-topbar-user-name {
+        max-width: 8rem;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .crm-app-topbar-user-name {
+        display: none;
+    }
+
+    .crm-app-topbar-user-dropdown {
+        position: fixed;
+        top: auto;
+        right: 0.5rem;
+        bottom: 0.5rem;
+        left: 0.5rem;
+        width: auto;
+        max-width: none;
+        max-height: calc(100vh - 1rem);
+        overflow-y: auto;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-app-topbar-user-toggle,
+    .crm-app-topbar-user-dropdown {
+        border-color: CanvasText;
+    }
+}
+
+/* ==========================================================================
+   CRM Top Bar — Language selector
+   ========================================================================== */
+
+.crm-app-topbar-language {
+    position: relative;
+    min-width: 0;
+    margin: 0;
+}
+
+.crm-app-topbar-language > summary {
+    list-style: none;
+}
+
+.crm-app-topbar-language
+> summary::-webkit-details-marker {
+    display: none;
+}
+
+.crm-app-topbar-language-toggle {
+    display: inline-flex;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.7rem;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.8rem;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    user-select: none;
+}
+
+.crm-app-topbar-language-toggle:hover {
+    border-color: rgba(99, 102, 241, 0.24);
+    background: rgba(99, 102, 241, 0.06);
+    color: #312e81;
+}
+
+.crm-app-topbar-language-toggle:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.28);
+    outline-offset: 2px;
+}
+
+.crm-app-topbar-language-flag {
+    display: inline-flex;
+    width: 1.3rem;
+    height: 1.3rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.crm-app-topbar-language-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    transition: transform 0.18s ease;
+}
+
+.crm-app-topbar-language[open]
+.crm-app-topbar-language-chevron {
+    transform: rotate(180deg);
+}
+
+.crm-app-topbar-language-dropdown {
+    position: absolute;
+    z-index: 1080;
+    top: calc(100% + 0.55rem);
+    right: 0;
+    display: flex;
+    width: 13rem;
+    max-width: calc(100vw - 1rem);
+    padding: 0.45rem;
+    flex-direction: column;
+    gap: 0.1rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.9rem;
+    background: #ffffff;
+    box-shadow:
+        0 1rem 2.5rem rgba(15, 23, 42, 0.16);
+}
+
+.crm-app-topbar-language-option {
+    display: flex;
+    width: 100%;
+    min-height: 2.6rem;
+    padding: 0.55rem 0.7rem;
+    align-items: center;
+    gap: 0.65rem;
+    border-radius: 0.6rem;
+    color: #334155;
+    font-size: 0.87rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-decoration: none;
+}
+
+.crm-app-topbar-language-option:hover,
+.crm-app-topbar-language-option:focus {
+    background: rgba(99, 102, 241, 0.08);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.crm-app-topbar-language-option:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.24);
+    outline-offset: 1px;
+}
+
+.crm-app-topbar-language-option-active {
+    background: rgba(99, 102, 241, 0.08);
+    color: #312e81;
+}
+
+.crm-app-topbar-language-option-flag {
+    display: inline-flex;
+    width: 1.4rem;
+    height: 1.4rem;
+    flex: 0 0 1.4rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.crm-app-topbar-language-option-name {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.crm-app-topbar-language-option-check {
+    display: inline-flex;
+    width: 1rem;
+    flex: 0 0 1rem;
+    align-items: center;
+    justify-content: center;
+    color: #4f46e5;
+    font-weight: 800;
+}
+
+@media (max-width: 479.98px) {
+    .crm-app-topbar-language-label {
+        display: none;
+    }
+
+    .crm-app-topbar-language-toggle {
+        padding-right: 0.55rem;
+        padding-left: 0.55rem;
+    }
+
+    .crm-app-topbar-language-dropdown {
+        right: 0;
+        left: auto;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-app-topbar-language-toggle,
+    .crm-app-topbar-language-dropdown {
+        border-color: CanvasText;
+    }
+}
+
+/* ==========================================================================
+   CRM Dashboard — Personalization
+   ========================================================================== */
+
+.crm-dashboard-heading-row {
+    display: flex;
+    min-width: 0;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.crm-dashboard-heading-row > * {
+    min-width: 0;
+}
+
+.crm-dashboard-personalization {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.crm-dashboard-customize-button {
+    display: inline-flex;
+    min-height: 2.6rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border-radius: 0.75rem;
+    white-space: nowrap;
+}
+
+.crm-dashboard-customize-button:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.28);
+    outline-offset: 2px;
+}
+
+.crm-dashboard-customize-icon {
+    line-height: 1;
+}
+
+/* The panel overlays the Dashboard without changing its layout. */
+
+.crm-dashboard-personalization-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1100;
+    width: min(31rem, 100vw);
+    height: 100vh;
+    padding: 1.25rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-left: 1px solid rgba(148, 163, 184, 0.25);
+    background: #ffffff;
+    box-shadow:
+        -1.5rem 0 4.5rem rgba(15, 23, 42, 0.18);
+    overscroll-behavior: contain;
+}
+
+.crm-dashboard-personalization-panel[hidden] {
+    display: none;
+}
+
+.crm-dashboard-personalization-header {
+    display: flex;
+    min-width: 0;
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.crm-dashboard-personalization-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.2rem;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.crm-dashboard-personalization-description {
+    max-width: 25rem;
+    margin-top: 0.35rem;
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.crm-dashboard-personalization-close {
+    display: inline-flex;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    cursor: pointer;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.crm-dashboard-personalization-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.crm-dashboard-personalization-close:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.28);
+    outline-offset: 2px;
+}
+
+.crm-dashboard-personalization-zone {
+    margin-bottom: 1.35rem;
+}
+
+.crm-dashboard-personalization-zone-title {
+    margin: 0 0 0.55rem;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.055em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.crm-dashboard-personalization-list {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    flex-direction: column;
+    gap: 0.5rem;
+    list-style: none;
+}
+
+.crm-dashboard-personalization-card {
+    display: grid;
+    min-width: 0;
+    padding: 0.7rem;
+    grid-template-columns:
+        auto
+        auto
+        minmax(0, 1fr)
+        auto;
+    align-items: center;
+    gap: 0.65rem;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 0.85rem;
+    background: #f8fafc;
+    transition:
+        border-color 120ms ease,
+        box-shadow 120ms ease,
+        opacity 120ms ease;
+}
+
+.crm-dashboard-personalization-card:hover {
+    border-color: rgba(99, 102, 241, 0.28);
+    background: #ffffff;
+}
+
+.crm-dashboard-personalization-card.is-dragging {
+    border-color: rgba(99, 102, 241, 0.45);
+    box-shadow:
+        0 0.8rem 2rem rgba(15, 23, 42, 0.14);
+    opacity: 0.55;
+}
+
+.crm-dashboard-personalization-drag {
+    display: inline-flex;
+    width: 1.25rem;
+    flex: 0 0 1.25rem;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    cursor: grab;
+    font-size: 0.9rem;
+    line-height: 1;
+    user-select: none;
+}
+
+.crm-dashboard-personalization-card:active
+.crm-dashboard-personalization-drag {
+    cursor: grabbing;
+}
+
+.crm-dashboard-card-visibility {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.crm-dashboard-personalization-card-identity {
+    min-width: 0;
+}
+
+.crm-dashboard-personalization-card-icon {
+    display: none;
+}
+
+.crm-dashboard-personalization-card-label {
+    min-width: 0;
+    color: #0f172a;
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.crm-dashboard-personalization-card-description {
+    min-width: 0;
+    margin-top: 0.15rem;
+    color: #64748b;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.crm-dashboard-personalization-card-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.crm-dashboard-personalization-move {
+    display: inline-flex;
+    width: 1.9rem;
+    height: 1.9rem;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 0.5rem;
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.crm-dashboard-personalization-move:hover {
+    border-color: rgba(99, 102, 241, 0.35);
+    background: rgba(99, 102, 241, 0.07);
+    color: #4338ca;
+}
+
+.crm-dashboard-personalization-move:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.25);
+    outline-offset: 1px;
+}
+
+.crm-dashboard-personalization-actions {
+    position: sticky;
+    bottom: -1.25rem;
+    display: flex;
+    padding: 1rem 0 1.25rem;
+    margin-top: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    background: #ffffff;
+}
+
+.crm-dashboard-personalization-actions-end {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.crm-dashboard-personalization[aria-busy="true"] {
+    cursor: wait;
+}
+
+.crm-dashboard-personalization[aria-busy="true"]
+.crm-dashboard-personalization-panel {
+    opacity: 0.78;
+}
+
+/* Personalized Card slots. */
+
+.crm-dashboard-card-slot {
+    display: flex;
+    min-width: 0;
+}
+
+.crm-dashboard-card-slot > * {
+    width: 100%;
+    min-width: 0;
+}
+
+.crm-dashboard-card-slot-span-1 {
+    grid-column: span 1;
+}
+
+.crm-dashboard-card-slot-span-2 {
+    grid-column: span 2;
+}
+
+.crm-dashboard-card-slot-span-3 {
+    grid-column: 1 / -1;
+}
+
+.crm-dashboard-hero-zone {
+    min-width: 0;
+}
+
+.crm-dashboard-side-zone {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/*
+ * DashboardSection may return its own Bootstrap row.
+ * Full-width personalized Cards must remain aligned with the grid.
+ */
+
+.crm-dashboard-card-slot-navigation > .row,
+.crm-dashboard-card-slot-activity > .d-block,
+.crm-dashboard-card-slot-team > .d-block {
+    width: 100%;
+    min-width: 0;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+@media (max-width: 1499.98px) {
+    .crm-dashboard-card-slot-span-3 {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 759.98px) {
+    .crm-dashboard-card-slot-span-1,
+    .crm-dashboard-card-slot-span-2,
+    .crm-dashboard-card-slot-span-3 {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .crm-dashboard-heading-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .crm-dashboard-customize-button {
+        width: 100%;
+    }
+
+    .crm-dashboard-personalization-panel {
+        width: 100vw;
+        border-left: 0;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .crm-dashboard-personalization-panel {
+        padding: 0.875rem;
+    }
+
+    .crm-dashboard-personalization-card {
+        grid-template-columns:
+            auto
+            minmax(0, 1fr)
+            auto;
+    }
+
+    .crm-dashboard-personalization-drag {
+        display: none;
+    }
+
+    .crm-dashboard-personalization-card-description {
+        display: none;
+    }
+
+    .crm-dashboard-personalization-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .crm-dashboard-personalization-actions-start,
+    .crm-dashboard-personalization-actions-end,
+    .crm-dashboard-personalization-actions button {
+        width: 100%;
+    }
+
+    .crm-dashboard-personalization-actions-end {
+        flex-direction: column-reverse;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-dashboard-personalization-card,
+    .crm-dashboard-personalization-move {
+        transition: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-dashboard-personalization-panel,
+    .crm-dashboard-personalization-card,
+    .crm-dashboard-personalization-move {
+        border-color: CanvasText;
+    }
+
+    .crm-dashboard-customize-button:focus-visible,
+    .crm-dashboard-personalization-close:focus-visible,
+    .crm-dashboard-personalization-move:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+}
+
+/* ==========================================================================
+   CRM Workspace Framework
+   ========================================================================== */
+
+.crm-workspace {
+    min-width: 0;
+}
+
+.crm-workspace-zone {
+    min-width: 0;
+}
+
+.crm-workspace-item {
+    position: relative;
+    min-width: 0;
+}
+
+.crm-workspace-item-content {
+    width: 100%;
+    min-width: 0;
+}
+
+.crm-workspace-item-span-1 {
+    grid-column: span 1;
+}
+
+.crm-workspace-item-span-2 {
+    grid-column: span 2;
+}
+
+.crm-workspace-item-span-3 {
+    grid-column: 1 / -1;
+}
+
+/*
+ * The onboarding area is a system-widget zone above the main
+ * Dashboard indicators.
+ */
+
+.crm-dashboard-onboarding-zone {
+    display: grid;
+    min-width: 0;
+    margin-bottom: 1.25rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.crm-dashboard-onboarding-zone
+.crm-workspace-item {
+    grid-column: 1 / -1;
+}
+
+/*
+ * Dashboard main zone keeps the existing Card grid behavior.
+ */
+
+.crm-dashboard-panels-grid.crm-workspace-zone {
+    display: grid;
+    min-width: 0;
+}
+
+.crm-dashboard-side-zone.crm-workspace-zone {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/*
+ * Compatibility with Cards that return Bootstrap rows or block
+ * wrappers internally.
+ */
+
+.crm-workspace-item-navigation
+.crm-workspace-item-content > .row,
+.crm-workspace-item-activity
+.crm-workspace-item-content > .d-block,
+.crm-workspace-item-team
+.crm-workspace-item-content > .d-block {
+    width: 100%;
+    min-width: 0;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.crm-dashboard-personalization-card-widget {
+    border-style: dashed;
+}
+
+.crm-dashboard-personalization-card-widget
+.crm-dashboard-personalization-card-label::after {
+    display: inline-flex;
+    padding: 0.1rem 0.35rem;
+    margin-left: 0.4rem;
+    align-items: center;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.1);
+    color: #4338ca;
+    content: "Widget";
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+@media (max-width: 759.98px) {
+    .crm-workspace-item-span-1,
+    .crm-workspace-item-span-2,
+    .crm-workspace-item-span-3 {
+        grid-column: 1 / -1;
+    }
+
+    .crm-dashboard-onboarding-zone {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-dashboard-personalization-card-widget {
+        border-color: CanvasText;
+    }
+}
+
+/*
+ * Workspace edit-mode engine.
+ *
+ * Detailed toolbar, Card controls and drag visuals are introduced
+ * progressively in 7.90C-3B to 7.90C-3D.
+ */
+
+.crm-workspace[data-workspace-editing="0"] {
+    --crm-workspace-editing: 0;
+}
+
+.crm-workspace.is-workspace-editing {
+    --crm-workspace-editing: 1;
+}
+
+.crm-workspace.is-workspace-editing,
+[data-region="workspace-edit-controller"].is-workspace-editing {
+    position: relative;
+}
+
+.crm-workspace.is-workspace-dirty {
+    --crm-workspace-dirty: 1;
+}
+
+body.local-subscriptions-workspace-editing {
+    overflow-x: hidden;
+}
+
+/*
+ * The existing personalization panel remains the visible editing
+ * interface during C-3A.
+ */
+
+[data-region="workspace-edit-controller"].is-workspace-editing
+.crm-dashboard-personalization-panel {
+    isolation: isolate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-workspace.is-workspace-editing *,
+    [data-region="workspace-edit-controller"].is-workspace-editing * {
+        scroll-behavior: auto !important;
+    }
+}
+
+/*
+ * CRM Workspace editing toolbar.
+ */
+
+.crm-workspace-toolbar {
+    position: relative;
+    z-index: 20;
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    padding: 1rem 1.1rem;
+    margin: 0 0 1.25rem;
+    grid-template-columns:
+        minmax(16rem, 1.2fr)
+        minmax(12rem, 0.8fr)
+        auto;
+    gap: 1rem;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid
+        rgba(99, 102, 241, 0.2);
+    border-radius: 1rem;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.96),
+            rgba(248, 250, 252, 0.92)
+        );
+    box-shadow:
+        0 0.75rem 2.25rem
+        rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(12px);
+    animation:
+        crm-workspace-toolbar-enter
+        180ms ease-out both;
+}
+
+.crm-workspace-toolbar[hidden] {
+    display: none !important;
+}
+
+.crm-workspace-toolbar::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 0.25rem;
+    background: #6366f1;
+    content: "";
+}
+
+.crm-workspace-toolbar-identity {
+    display: flex;
+    min-width: 0;
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.crm-workspace-toolbar-icon {
+    display: inline-flex;
+    width: 2.65rem;
+    height: 2.65rem;
+    flex: 0 0 2.65rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.85rem;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.16),
+            rgba(168, 85, 247, 0.12)
+        );
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.crm-workspace-toolbar-heading {
+    min-width: 0;
+}
+
+.crm-workspace-toolbar-title {
+    margin: 0;
+    color: #172033;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.crm-workspace-toolbar-description {
+    max-width: 42rem;
+    margin-top: 0.2rem;
+    color: #64748b;
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.crm-workspace-toolbar-meta {
+    display: flex;
+    min-width: 0;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.crm-workspace-toolbar-status,
+.crm-workspace-toolbar-hidden {
+    display: inline-flex;
+    min-height: 2rem;
+    padding: 0.35rem 0.65rem;
+    gap: 0.4rem;
+    align-items: center;
+    border: 1px solid
+        rgba(148, 163, 184, 0.22);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.crm-workspace-toolbar-status-indicator {
+    width: 0.45rem;
+    height: 0.45rem;
+    flex: 0 0 0.45rem;
+    border-radius: 50%;
+    background: #94a3b8;
+    box-shadow:
+        0 0 0 0.18rem
+        rgba(148, 163, 184, 0.14);
+}
+
+.crm-workspace-toolbar-hidden-number {
+    color: #4338ca;
+    font-size: 0.8rem;
+    font-weight: 900;
+}
+
+.crm-workspace-toolbar-actions {
+    display: flex;
+    min-width: max-content;
+    gap: 0.65rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.crm-workspace-toolbar-actions-primary {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.crm-workspace-toolbar-button {
+    display: inline-flex;
+    min-height: 2.35rem;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.crm-workspace-toolbar-action-icon {
+    font-size: 0.9rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.crm-workspace-toolbar-save {
+    min-width: 7rem;
+    border-color: #4f46e5;
+    background:
+        linear-gradient(
+            135deg,
+            #6366f1,
+            #4f46e5
+        );
+    box-shadow:
+        0 0.45rem 1rem
+        rgba(79, 70, 229, 0.2);
+}
+
+.crm-workspace-toolbar-save:hover,
+.crm-workspace-toolbar-save:focus {
+    border-color: #4338ca;
+    background:
+        linear-gradient(
+            135deg,
+            #5558e8,
+            #4338ca
+        );
+}
+
+.crm-workspace-toolbar-save:disabled {
+    border-color: #cbd5e1;
+    background: #e2e8f0;
+    box-shadow: none;
+    color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+/*
+ * Dirty state.
+ */
+
+.crm-workspace-toolbar[
+    data-workspace-toolbar-state="dirty"
+] {
+    border-color:
+        rgba(245, 158, 11, 0.34);
+    box-shadow:
+        0 0.75rem 2.25rem
+        rgba(180, 83, 9, 0.09);
+}
+
+.crm-workspace-toolbar[
+    data-workspace-toolbar-state="dirty"
+]::before {
+    background: #f59e0b;
+}
+
+.crm-workspace-toolbar[
+    data-workspace-toolbar-state="dirty"
+]
+.crm-workspace-toolbar-status {
+    border-color:
+        rgba(245, 158, 11, 0.25);
+    background:
+        rgba(255, 251, 235, 0.92);
+    color: #92400e;
+}
+
+.crm-workspace-toolbar[
+    data-workspace-toolbar-state="dirty"
+]
+.crm-workspace-toolbar-status-indicator {
+    background: #f59e0b;
+    box-shadow:
+        0 0 0 0.18rem
+        rgba(245, 158, 11, 0.16);
+}
+
+/*
+ * Saving state.
+ */
+
+.crm-workspace-toolbar[
+    data-workspace-toolbar-state="saving"
+] {
+    border-color:
+        rgba(59, 130, 246, 0.3);
+}
+
+.crm-workspace-toolbar[
+    data-workspace-toolbar-state="saving"
+]::before {
+    background: #3b82f6;
+}
+
+.crm-workspace-toolbar[
+    data-workspace-toolbar-state="saving"
+]
+.crm-workspace-toolbar-status {
+    border-color:
+        rgba(59, 130, 246, 0.24);
+    background:
+        rgba(239, 246, 255, 0.94);
+    color: #1d4ed8;
+}
+
+.crm-workspace-toolbar[
+    data-workspace-toolbar-state="saving"
+]
+.crm-workspace-toolbar-status-indicator {
+    background: #3b82f6;
+    animation:
+        crm-workspace-toolbar-pulse
+        900ms ease-in-out infinite;
+}
+
+/*
+ * Toolbar appearance animation.
+ */
+
+@keyframes crm-workspace-toolbar-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-0.45rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes crm-workspace-toolbar-pulse {
+    0%,
+    100% {
+        opacity: 0.45;
+        transform: scale(0.85);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+}
+
+/*
+ * Tablet layout.
+ */
+
+@media (max-width: 1199.98px) {
+    .crm-workspace-toolbar {
+        grid-template-columns:
+            minmax(0, 1fr)
+            auto;
+    }
+
+    .crm-workspace-toolbar-meta {
+        justify-content: flex-end;
+    }
+
+    .crm-workspace-toolbar-actions {
+        grid-column: 1 / -1;
+        justify-content: space-between;
+    }
+}
+
+/*
+ * Mobile layout.
+ */
+
+@media (max-width: 759.98px) {
+    .crm-workspace-toolbar {
+        padding: 0.9rem;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.85rem;
+        border-radius: 0.85rem;
+    }
+
+    .crm-workspace-toolbar-meta {
+        justify-content: flex-start;
+    }
+
+    .crm-workspace-toolbar-actions {
+        display: grid;
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .crm-workspace-toolbar-actions-primary {
+        display: grid;
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .crm-workspace-toolbar-button {
+        width: 100%;
+    }
+
+    .crm-workspace-toolbar-reset {
+        order: 2;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-workspace-toolbar,
+    .crm-workspace-toolbar-status-indicator {
+        animation: none !important;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-workspace-toolbar {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        box-shadow: none;
+    }
+
+    .crm-workspace-toolbar::before {
+        background: Highlight;
+    }
+
+    .crm-workspace-toolbar-status,
+    .crm-workspace-toolbar-hidden {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        color: CanvasText;
+    }
+}
+
+/* ==========================================================================
+   CRM Workspace item edit overlay
+   ========================================================================== */
+
+/*
+ * The edit chrome is injected by WorkspaceItemRenderer but remains
+ * hidden until the generic Workspace edit engine activates it.
+ */
+
+.crm-workspace-item-editable {
+    --crm-workspace-edit-border:
+        rgba(99, 102, 241, 0.42);
+    --crm-workspace-edit-background:
+        rgba(248, 250, 252, 0.96);
+    --crm-workspace-edit-accent:
+        #6366f1;
+    --crm-workspace-edit-text:
+        #172033;
+    --crm-workspace-edit-muted:
+        #64748b;
+}
+
+.crm-workspace-item-edit-chrome[hidden] {
+    display: none !important;
+}
+
+/*
+ * Editing container.
+ */
+
+.crm-workspace-item-editable
+.crm-workspace-item-content {
+    position: relative;
+    z-index: 1;
+    min-height: 100%;
+}
+
+.crm-workspace-item-editable
+.crm-workspace-item-edit-chrome {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    min-width: 0;
+    min-height: 3rem;
+    padding: 0.55rem 0.7rem;
+    gap: 0.7rem;
+    align-items: center;
+    border-bottom: 1px solid
+        rgba(99, 102, 241, 0.16);
+    background:
+        linear-gradient(
+            135deg,
+            rgba(248, 250, 252, 0.98),
+            rgba(238, 242, 255, 0.92)
+        );
+    color: var(--crm-workspace-edit-text);
+}
+
+/*
+ * Outside editing mode, the item keeps its original appearance.
+ */
+
+.crm-workspace-item-editable
+.crm-workspace-item-edit-chrome[hidden]
++
+.crm-workspace-item-content {
+    border-radius: inherit;
+}
+
+/*
+ * Main editing frame.
+ */
+
+.crm-workspace-item-editable.is-workspace-item-editing {
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid
+        var(--crm-workspace-edit-border);
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow:
+        0 0 0 0.2rem
+        rgba(99, 102, 241, 0.07),
+        0 0.8rem 2rem
+        rgba(15, 23, 42, 0.09);
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        transform 160ms ease;
+}
+
+.crm-workspace-item-editable.is-workspace-item-editing:hover {
+    border-color:
+        rgba(79, 70, 229, 0.68);
+    box-shadow:
+        0 0 0 0.22rem
+        rgba(99, 102, 241, 0.1),
+        0 1rem 2.4rem
+        rgba(15, 23, 42, 0.12);
+    transform: translateY(-0.1rem);
+}
+
+.crm-workspace-item-editable.is-workspace-item-editing
+.crm-workspace-item-content {
+    overflow: hidden;
+    border-radius:
+        0 0 0.95rem 0.95rem;
+}
+
+/*
+ * Avoid keeping the original outer margins when the business Card
+ * already supplies its own rounded panel.
+ */
+
+.crm-workspace-item-editable.is-workspace-item-editing
+.crm-workspace-item-content > :first-child {
+    margin-top: 0;
+}
+
+.crm-workspace-item-editable.is-workspace-item-editing
+.crm-workspace-item-content > :last-child {
+    margin-bottom: 0;
+}
+
+/*
+ * Drag handle visual.
+ *
+ * It remains decorative during C-3C. Native dragging is connected
+ * during C-3D.
+ */
+
+.crm-workspace-item-edit-handle {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    padding: 0.48rem 0.52rem;
+    grid-template-columns:
+        repeat(2, 0.24rem);
+    grid-template-rows:
+        repeat(3, 0.24rem);
+    gap: 0.18rem;
+    align-content: center;
+    justify-content: center;
+    border: 1px solid
+        rgba(99, 102, 241, 0.18);
+    border-radius: 0.6rem;
+    background:
+        rgba(255, 255, 255, 0.76);
+    cursor: grab;
+    user-select: none;
+}
+
+.crm-workspace-item-edit-handle-dot {
+    display: block;
+    width: 0.24rem;
+    height: 0.24rem;
+    border-radius: 50%;
+    background: #64748b;
+}
+
+.crm-workspace-item-editable.is-workspace-item-editing:hover
+.crm-workspace-item-edit-handle {
+    border-color:
+        rgba(79, 70, 229, 0.3);
+    background: #fff;
+}
+
+.crm-workspace-item-editable.is-workspace-item-editing:hover
+.crm-workspace-item-edit-handle-dot {
+    background: #4f46e5;
+}
+
+/*
+ * Card identity.
+ */
+
+.crm-workspace-item-edit-identity {
+    display: flex;
+    min-width: 0;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.crm-workspace-item-edit-icon {
+    display: inline-flex;
+    width: 1.85rem;
+    height: 1.85rem;
+    flex: 0 0 1.85rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.55rem;
+    background:
+        rgba(99, 102, 241, 0.1);
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.crm-workspace-item-edit-identity-text {
+    display: flex;
+    min-width: 0;
+    gap: 0.45rem;
+    align-items: center;
+}
+
+.crm-workspace-item-edit-label {
+    overflow: hidden;
+    color: #172033;
+    font-size: 0.77rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-workspace-item-edit-type {
+    display: inline-flex;
+    min-height: 1.3rem;
+    padding: 0.15rem 0.42rem;
+    align-items: center;
+    border-radius: 999px;
+    background:
+        rgba(99, 102, 241, 0.1);
+    color: #4338ca;
+    font-size: 0.56rem;
+    font-weight: 850;
+    letter-spacing: 0.045em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/*
+ * Widget distinction.
+ */
+
+.crm-workspace-item-widget.is-workspace-item-editing {
+    border-style: dashed;
+}
+
+.crm-workspace-item-widget
+.crm-workspace-item-edit-type {
+    background:
+        rgba(14, 165, 233, 0.11);
+    color: #0369a1;
+}
+
+.crm-workspace-item-widget
+.crm-workspace-item-edit-icon {
+    background:
+        rgba(14, 165, 233, 0.1);
+}
+
+/*
+ * Items that cannot be moved do not display a drag handle.
+ */
+
+.crm-workspace-item-editable[
+    data-workspace-movable="0"
+]
+.crm-workspace-item-edit-chrome {
+    padding-left: 0.85rem;
+}
+
+/*
+ * Entrance animation.
+ */
+
+.is-workspace-item-editing
+.crm-workspace-item-edit-chrome {
+    animation:
+        crm-workspace-item-chrome-enter
+        160ms ease-out both;
+}
+
+@keyframes crm-workspace-item-chrome-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-0.35rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/*
+ * Tablet and mobile.
+ */
+
+@media (max-width: 759.98px) {
+    .crm-workspace-item-editable.is-workspace-item-editing {
+        border-radius: 0.85rem;
+    }
+
+    .crm-workspace-item-edit-chrome {
+        min-height: 2.75rem;
+        padding: 0.48rem 0.55rem;
+        gap: 0.55rem;
+    }
+
+    .crm-workspace-item-edit-handle {
+        width: 1.85rem;
+        height: 1.85rem;
+        flex-basis: 1.85rem;
+    }
+
+    .crm-workspace-item-edit-icon {
+        display: none;
+    }
+
+    .crm-workspace-item-edit-label {
+        font-size: 0.72rem;
+    }
+
+    .crm-workspace-item-edit-type {
+        font-size: 0.52rem;
+    }
+}
+
+/*
+ * Reduced motion.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-workspace-item-editable.is-workspace-item-editing,
+    .crm-workspace-item-edit-chrome {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .crm-workspace-item-editable.is-workspace-item-editing:hover {
+        transform: none;
+    }
+}
+
+/*
+ * Forced colors.
+ */
+
+@media (forced-colors: active) {
+    .crm-workspace-item-editable.is-workspace-item-editing {
+        border: 2px solid Highlight;
+        background: Canvas;
+        box-shadow: none;
+    }
+
+    .crm-workspace-item-edit-chrome {
+        border-bottom: 1px solid CanvasText;
+        background: Canvas;
+        color: CanvasText;
+    }
+
+    .crm-workspace-item-edit-handle,
+    .crm-workspace-item-edit-icon,
+    .crm-workspace-item-edit-type {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        color: CanvasText;
+    }
+
+    .crm-workspace-item-edit-handle-dot {
+        background: CanvasText;
+    }
+}
+
+/* ==========================================================================
+   CRM Workspace grid drag and drop
+   ========================================================================== */
+
+/*
+ * Native dragging is activated by JavaScript only while the Workspace
+ * is in edit mode.
+ */
+
+.crm-workspace-item[
+    data-workspace-draggable="0"
+] {
+    cursor: default;
+}
+
+.crm-workspace-item[
+    data-workspace-draggable="1"
+]
+.crm-workspace-item-edit-handle {
+    cursor: grab;
+    touch-action: none;
+}
+
+.crm-workspace-item[
+    data-workspace-draggable="1"
+]
+.crm-workspace-item-edit-handle:active {
+    cursor: grabbing;
+}
+
+.crm-workspace-item-drag-armed
+.crm-workspace-item-edit-handle {
+    border-color:
+        rgba(79, 70, 229, 0.52);
+    background:
+        rgba(238, 242, 255, 0.98);
+}
+
+.crm-workspace-item-drag-armed
+.crm-workspace-item-edit-handle-dot {
+    background: #4338ca;
+}
+
+/*
+ * Source zone.
+ */
+
+.crm-workspace-zone.is-workspace-drop-zone {
+    position: relative;
+    border-radius: 1rem;
+    transition:
+        background-color 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.crm-workspace-zone.is-workspace-drop-zone-active {
+    background:
+        rgba(99, 102, 241, 0.035);
+    box-shadow:
+        inset 0 0 0 0.12rem
+        rgba(99, 102, 241, 0.12);
+}
+
+/*
+ * Dragged item.
+ *
+ * The real DOM item acts as the insertion placeholder. Its business
+ * content remains visible but softened so the future position remains
+ * immediately understandable.
+ */
+
+.crm-workspace-item.is-workspace-item-dragging {
+    z-index: 50;
+    border-color:
+        rgba(79, 70, 229, 0.78);
+    background:
+        rgba(238, 242, 255, 0.96);
+    box-shadow:
+        0 0 0 0.25rem
+        rgba(99, 102, 241, 0.14),
+        0 1.15rem 2.6rem
+        rgba(15, 23, 42, 0.18);
+    opacity: 0.52;
+    transform: scale(0.985);
+}
+
+.crm-workspace-item.is-workspace-item-dragging
+.crm-workspace-item-edit-handle {
+    cursor: grabbing;
+    border-color:
+        rgba(79, 70, 229, 0.55);
+    background: #fff;
+}
+
+.crm-workspace-item.is-workspace-item-dragging
+.crm-workspace-item-content {
+    pointer-events: none;
+}
+
+/*
+ * During a drag operation, the other movable Cards communicate that
+ * they are valid insertion neighbours.
+ */
+
+.crm-workspace.is-workspace-dragging
+.crm-workspace-item-movable:not(
+    .is-workspace-item-dragging
+) {
+    transition:
+        transform 150ms ease,
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.crm-workspace.is-workspace-dragging
+.is-workspace-drop-zone-active
+.crm-workspace-item-movable:not(
+    .is-workspace-item-dragging
+):hover {
+    border-color:
+        rgba(99, 102, 241, 0.5);
+}
+
+/*
+ * Fixed-zone rule.
+ *
+ * Zones other than the source zone are deliberately not presented as
+ * drop targets until the Workspace PHP model supports changing zones.
+ */
+
+.crm-workspace.is-workspace-dragging
+.crm-workspace-zone:not(
+    .is-workspace-drop-zone-active
+) {
+    opacity: 0.72;
+}
+
+.crm-workspace.is-workspace-dragging
+.crm-workspace-zone:not(
+    .is-workspace-drop-zone-active
+)
+.crm-workspace-item-edit-handle {
+    cursor: not-allowed;
+}
+
+/*
+ * Prevent accidental selection while dragging.
+ */
+
+.crm-workspace.is-workspace-dragging,
+.crm-workspace.is-workspace-dragging * {
+    user-select: none;
+}
+
+/*
+ * Keep links and controls usable while editing but not during an actual
+ * drag operation.
+ */
+
+.crm-workspace.is-workspace-dragging
+.crm-workspace-item-content {
+    pointer-events: none;
+}
+
+/*
+ * Responsive grids continue to use their existing Workspace definitions.
+ * No fixed column count is imposed by the drag engine.
+ */
+
+@media (max-width: 759.98px) {
+    .crm-workspace-zone.is-workspace-drop-zone-active {
+        border-radius: 0.85rem;
+    }
+
+    .crm-workspace-item.is-workspace-item-dragging {
+        transform: scale(0.99);
+    }
+}
+
+/*
+ * Reduced motion.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-workspace-zone.is-workspace-drop-zone,
+    .crm-workspace-item.is-workspace-item-dragging,
+    .crm-workspace.is-workspace-dragging
+    .crm-workspace-item-movable {
+        transition: none !important;
+        transform: none !important;
+    }
+}
+
+/*
+ * Windows high-contrast mode.
+ */
+
+@media (forced-colors: active) {
+    .crm-workspace-zone.is-workspace-drop-zone-active {
+        outline: 2px dashed Highlight;
+        background: Canvas;
+        box-shadow: none;
+    }
+
+    .crm-workspace-item.is-workspace-item-dragging {
+        border: 3px solid Highlight;
+        background: Canvas;
+        box-shadow: none;
+        opacity: 0.7;
+    }
+}
+
+/* ==========================================================================
+   CRM Workspace contextual item menu
+   ========================================================================== */
+
+.crm-workspace-item-menu-wrapper {
+    position: relative;
+    z-index: 10;
+    margin-left: auto;
+    flex: 0 0 auto;
+}
+
+.crm-workspace-item-menu-trigger {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 0.6rem;
+    background: transparent;
+    color: #475569;
+    cursor: pointer;
+    font: inherit;
+    line-height: 1;
+    transition:
+        border-color 140ms ease,
+        background-color 140ms ease,
+        color 140ms ease;
+}
+
+.crm-workspace-item-menu-trigger:hover,
+.crm-workspace-item-menu-trigger:focus-visible,
+.crm-workspace-item-menu-wrapper.is-workspace-item-menu-open
+.crm-workspace-item-menu-trigger {
+    border-color:
+        rgba(99, 102, 241, 0.25);
+    background:
+        rgba(99, 102, 241, 0.1);
+    color: #4338ca;
+}
+
+.crm-workspace-item-menu-trigger-icon {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 800;
+    line-height: 1;
+    transform: translateY(-0.08rem);
+}
+
+.crm-workspace-item-menu[hidden] {
+    display: none !important;
+}
+
+.crm-workspace-item-menu {
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    display: flex;
+    width: max-content;
+    min-width: 12.5rem;
+    max-width: min(18rem, 80vw);
+    padding: 0.35rem;
+    flex-direction: column;
+    border: 1px solid
+        rgba(148, 163, 184, 0.32);
+    border-radius: 0.75rem;
+    background: #fff;
+    box-shadow:
+        0 1rem 2.5rem
+        rgba(15, 23, 42, 0.16);
+    animation:
+        crm-workspace-item-menu-enter
+        120ms ease-out both;
+}
+
+.crm-workspace-item-menu-action {
+    display: flex;
+    width: 100%;
+    min-height: 2.35rem;
+    padding: 0.48rem 0.65rem;
+    gap: 0.65rem;
+    align-items: center;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: #1e293b;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: left;
+}
+
+.crm-workspace-item-menu-action:hover,
+.crm-workspace-item-menu-action:focus-visible {
+    background:
+        rgba(99, 102, 241, 0.09);
+    color: #4338ca;
+}
+
+.crm-workspace-item-menu-action:disabled {
+    background: transparent;
+    color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.crm-workspace-item-menu-action-icon {
+    display: inline-flex;
+    width: 1.25rem;
+    flex: 0 0 1.25rem;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    font-size: 0.92rem;
+    line-height: 1;
+}
+
+.crm-workspace-item-menu-action-label {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.crm-workspace-item-menu-action-danger {
+    color: #b42318;
+}
+
+.crm-workspace-item-menu-action-danger:hover,
+.crm-workspace-item-menu-action-danger:focus-visible {
+    background:
+        rgba(220, 38, 38, 0.08);
+    color: #b42318;
+}
+
+.crm-workspace-item-menu-separator {
+    height: 1px;
+    margin: 0.3rem 0.4rem;
+    background:
+        rgba(148, 163, 184, 0.3);
+}
+
+.crm-workspace-item-menu-wrapper.is-workspace-item-menu-open {
+    z-index: 120;
+}
+
+.crm-workspace-item:has(
+    .crm-workspace-item-menu-wrapper.is-workspace-item-menu-open
+) {
+    z-index: 100;
+    overflow: visible;
+}
+
+.crm-workspace-item:has(
+    .crm-workspace-item-menu-wrapper.is-workspace-item-menu-open
+)
+.crm-workspace-item-edit-chrome {
+    overflow: visible;
+}
+
+@keyframes crm-workspace-item-menu-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-0.3rem)
+            scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+            scale(1);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-workspace-item-menu {
+        right: -0.25rem;
+        min-width: 11.5rem;
+    }
+
+    .crm-workspace-item-menu-action {
+        min-height: 2.5rem;
+        font-size: 0.76rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-workspace-item-menu,
+    .crm-workspace-item-menu-trigger,
+    .crm-workspace-item-menu-action {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-workspace-item-menu {
+        border: 2px solid CanvasText;
+        background: Canvas;
+        box-shadow: none;
+    }
+
+    .crm-workspace-item-menu-trigger,
+    .crm-workspace-item-menu-action {
+        color: CanvasText;
+    }
+
+    .crm-workspace-item-menu-trigger:focus-visible,
+    .crm-workspace-item-menu-action:focus-visible {
+        outline: 2px solid Highlight;
+        background: Canvas;
+        color: CanvasText;
+    }
+
+    .crm-workspace-item-menu-separator {
+        background: CanvasText;
+    }
+}
+
+/* ==========================================================================
+   CRM Workspace extensible contextual actions
+   ========================================================================== */
+
+.crm-workspace-item-menu-action-custom {
+    position: relative;
+}
+
+.crm-workspace-item-menu-action-custom::after {
+    display: inline-block;
+    margin-left: auto;
+    color: #94a3b8;
+    content: "›";
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.crm-workspace-item-menu-action-custom:hover::after,
+.crm-workspace-item-menu-action-custom:focus-visible::after {
+    color: currentColor;
+}
+
+.crm-workspace-item-menu-action-custom:disabled::after {
+    color: currentColor;
+}
+
+@media (forced-colors: active) {
+    .crm-workspace-item-menu-action-custom::after {
+        color: CanvasText;
+    }
+}
+
+/* ==========================================================================
+   CRM Workspace drag-and-drop finishing
+   ========================================================================== */
+
+.crm-workspace-item-movable
+.crm-workspace-item-edit-handle {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.crm-workspace-item-movable
+.crm-workspace-item-edit-handle:active,
+.crm-workspace-item.is-workspace-item-drag-armed
+.crm-workspace-item-edit-handle {
+    cursor: grabbing;
+}
+
+.crm-workspace-item.is-workspace-item-dragging {
+    z-index: 4;
+    opacity: .52;
+    transform: scale(.985);
+}
+
+.crm-workspace-item.is-workspace-item-dragging
+.crm-workspace-item-content {
+    pointer-events: none;
+}
+
+.crm-workspace-zone.is-workspace-drop-zone {
+    position: relative;
+}
+
+.crm-workspace-zone.is-workspace-drop-zone-active {
+    border-radius: 1rem;
+    outline: 2px dashed rgba(59, 130, 246, .42);
+    outline-offset: .45rem;
+}
+
+.crm-workspace-item.is-workspace-drop-before,
+.crm-workspace-item.is-workspace-drop-after {
+    position: relative;
+}
+
+.crm-workspace-item.is-workspace-drop-before::before,
+.crm-workspace-item.is-workspace-drop-after::after {
+    position: absolute;
+    right: .25rem;
+    left: .25rem;
+    z-index: 8;
+    height: 3px;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, .13);
+    color: #2563eb;
+    content: "";
+    pointer-events: none;
+}
+
+.crm-workspace-item.is-workspace-drop-before::before {
+    top: -.5rem;
+}
+
+.crm-workspace-item.is-workspace-drop-after::after {
+    bottom: -.5rem;
+}
+
+.crm-workspace-item.is-workspace-item-just-moved {
+    animation:
+        crm-workspace-item-moved
+        420ms ease-out;
+}
+
+@keyframes crm-workspace-item-moved {
+    0% {
+        transform: scale(.985);
+        box-shadow:
+            0 0 0 0
+            rgba(37, 99, 235, .3);
+    }
+
+    55% {
+        transform: scale(1.008);
+        box-shadow:
+            0 0 0 5px
+            rgba(37, 99, 235, .12);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow:
+            0 0 0 0
+            rgba(37, 99, 235, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-workspace-item.is-workspace-item-dragging {
+        transform: none;
+    }
+
+    .crm-workspace-item.is-workspace-item-just-moved {
+        animation: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-workspace-zone.is-workspace-drop-zone-active {
+        outline-color: Highlight;
+    }
+
+    .crm-workspace-item.is-workspace-drop-before::before,
+    .crm-workspace-item.is-workspace-drop-after::after {
+        background: Highlight;
+        box-shadow: none;
+        color: Highlight;
+    }
+}
+
+/* Dashboard Workspace catalogue metadata. */
+
+.crm-dashboard-personalization-card-titleline {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.crm-dashboard-personalization-card-titleline
+.crm-dashboard-personalization-card-label {
+    flex: 1 1 auto;
+}
+
+.crm-dashboard-personalization-card-badges {
+    display: inline-flex;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25rem;
+}
+
+.crm-dashboard-personalization-badge {
+    display: inline-flex;
+    min-height: 1.25rem;
+    padding: 0.13rem 0.38rem;
+    align-items: center;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 999px;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+.crm-dashboard-personalization-badge-category {
+    border-color: rgba(79, 70, 229, 0.18);
+    background: rgba(79, 70, 229, 0.07);
+    color: #4338ca;
+}
+
+.crm-dashboard-personalization-badge-period {
+    border-color: rgba(14, 116, 144, 0.18);
+    background: rgba(14, 116, 144, 0.07);
+    color: #0e7490;
+}
+
+.crm-dashboard-personalization-card.is-dashboard-item-hidden {
+    opacity: 0.68;
+}
+
+.crm-dashboard-personalization-card.is-dashboard-item-hidden
+.crm-dashboard-personalization-card-label {
+    text-decoration: line-through;
+    text-decoration-color: rgba(100, 116, 139, 0.5);
+}
+
+@media (max-width: 575.98px) {
+    .crm-dashboard-personalization-card-titleline {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .crm-dashboard-personalization-card-badges {
+        justify-content: flex-start;
+    }
+
+    .crm-dashboard-personalization-badge-type {
+        display: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-dashboard-personalization-badge {
+        border-color: CanvasText;
+        background: Canvas;
+        color: CanvasText;
+    }
+}
+
+/* Dashboard personalization catalogue. */
+
+.crm-dashboard-personalization-item-marker {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    line-height: 1;
+}
+
+.crm-dashboard-personalization-order-hint {
+    display: flex;
+    margin-top: 0.6rem;
+    align-items: flex-start;
+    gap: 0.45rem;
+    color: #64748b;
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+.crm-dashboard-personalization-order-hint-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 1.2rem;
+    height: 1.2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(79, 70, 229, 0.08);
+    color: #4338ca;
+    font-weight: 700;
+}
+
+.crm-dashboard-personalization-card {
+    cursor: default;
+}
+
+.crm-dashboard-personalization-card[draggable="true"] {
+    cursor: default;
+}
+
+.crm-dashboard-personalization-card-actions,
+.crm-dashboard-personalization-move,
+.crm-dashboard-personalization-drag {
+    display: none;
+}
+
+.crm-workspace-item-menu-action[
+    data-workspace-custom-action="open_details"
+] {
+    font-weight: 600;
+}
+
+.crm-workspace-item-menu-action[
+    data-workspace-custom-action="open_details"
+]
+.crm-workspace-item-menu-action-icon {
+    color: #4f46e5;
+}
+
+/* ==========================================================================
+   Dashboard Workspace empty zones
+   ========================================================================== */
+
+.crm-dashboard-workspace-empty-zone {
+    display: flex;
+    min-width: 0;
+    min-height: 7rem;
+    padding: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.55rem;
+    border: 1px dashed rgba(148, 163, 184, 0.42);
+    border-radius: 1rem;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(248, 250, 252, 0.96),
+            rgba(255, 255, 255, 0.98)
+        );
+    color: #64748b;
+    text-align: center;
+}
+
+.crm-dashboard-workspace-empty-icon {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.8rem;
+    background: rgba(99, 102, 241, 0.08);
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.crm-dashboard-workspace-empty-label {
+    max-width: 28rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.crm-dashboard-workspace-empty-zone-edit-only {
+    display: none;
+}
+
+.crm-workspace.is-workspace-editing
+.crm-dashboard-workspace-empty-zone-edit-only {
+    display: flex;
+}
+
+.crm-dashboard-workspace-empty-zone-hero {
+    margin-bottom: 1rem;
+}
+
+.crm-dashboard-workspace-empty-zone-main {
+    grid-column: 1 / -1;
+    min-height: 12rem;
+}
+
+.crm-dashboard-workspace-empty-zone-side {
+    min-height: 10rem;
+}
+
+.crm-workspace.is-workspace-editing
+.crm-dashboard-workspace-empty-zone {
+    border-color: rgba(79, 70, 229, 0.45);
+    background:
+        repeating-linear-gradient(
+            -45deg,
+            rgba(99, 102, 241, 0.025),
+            rgba(99, 102, 241, 0.025) 10px,
+            rgba(255, 255, 255, 0.6) 10px,
+            rgba(255, 255, 255, 0.6) 20px
+        );
+}
+
+@media (max-width: 759.98px) {
+    .crm-dashboard-workspace-empty-zone {
+        min-height: 6rem;
+        padding: 1rem;
+    }
+
+    .crm-dashboard-workspace-empty-zone-main,
+    .crm-dashboard-workspace-empty-zone-side {
+        min-height: 7rem;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-dashboard-workspace-empty-zone {
+        border-color: CanvasText;
+        background: Canvas;
+        color: CanvasText;
+    }
+
+    .crm-dashboard-workspace-empty-icon {
+        background: Canvas;
+    }
+}
+
+/* Dashboard period selector with extended ranges. */
+
+.crm-dashboard-period-control {
+    display: flex;
+    max-width: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.crm-dashboard-period-pill {
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .crm-dashboard-period-control {
+        display: grid;
+        width: 100%;
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .crm-dashboard-period-pill {
+        display: flex;
+        min-height: 2.25rem;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .crm-dashboard-period-pill:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+/* ============================================================
+   Phase 7.90E-6 — Inbox Thread Workspace
+   ============================================================ */
+
+.local-subscriptions-inbox-thread-workspace {
+    width: 100%;
+    min-width: 0;
+}
+
+.crm-inbox-thread-workspace-heading {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.75rem;
+}
+
+.crm-inbox-thread-workspace-layout {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 2fr)
+        minmax(19rem, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+    min-width: 0;
+}
+
+.crm-inbox-thread-workspace-layout.without-context {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.crm-inbox-thread-workspace-reading,
+.crm-inbox-thread-workspace-context,
+.crm-inbox-thread-reading-zone,
+.crm-inbox-thread-context-zone {
+    min-width: 0;
+}
+
+.crm-inbox-thread-reading-zone,
+.crm-inbox-thread-context-zone {
+    display: grid;
+    gap: 1rem;
+}
+
+.crm-inbox-thread-workspace-context {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.crm-inbox-thread-workspace-context
+.crm-workspace-item,
+.crm-inbox-thread-workspace-reading
+.crm-workspace-item {
+    min-width: 0;
+}
+
+.crm-inbox-thread-workspace-context
+.crm-workspace-item-content,
+.crm-inbox-thread-workspace-reading
+.crm-workspace-item-content {
+    min-width: 0;
+}
+
+.crm-inbox-thread-context-card {
+    margin: 0;
+    overflow: hidden;
+    border-color: rgba(148, 163, 184, 0.32);
+    border-radius: 0.85rem;
+    box-shadow:
+        0 0.15rem 0.7rem
+        rgba(15, 23, 42, 0.05);
+}
+
+.crm-inbox-thread-context-card
+.card-body {
+    padding: 1rem;
+}
+
+.crm-inbox-thread-panel-title {
+    margin: 0 0 0.85rem;
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.crm-inbox-thread-badges
+.badge {
+    font-size: 0.72rem;
+    font-weight: 650;
+}
+
+.crm-inbox-thread-detail-list {
+    display: grid;
+    gap: 0;
+}
+
+.crm-inbox-thread-detail-row {
+    display: grid;
+    grid-template-columns:
+        minmax(7rem, 0.85fr)
+        minmax(0, 1.15fr);
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-top: 1px solid
+        rgba(148, 163, 184, 0.2);
+}
+
+.crm-inbox-thread-detail-row:first-child {
+    border-top: 0;
+}
+
+.crm-inbox-thread-detail-label,
+.crm-inbox-thread-detail-value {
+    margin: 0;
+}
+
+.crm-inbox-thread-detail-label {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 650;
+}
+
+.crm-inbox-thread-detail-value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: #1e293b;
+    font-size: 0.82rem;
+    text-align: right;
+}
+
+.crm-inbox-thread-contact-name {
+    overflow-wrap: anywhere;
+    color: #1e293b;
+}
+
+.crm-inbox-thread-contact-email {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.crm-inbox-thread-contact-separator {
+    height: 1px;
+    margin: 1rem 0;
+    background:
+        rgba(148, 163, 184, 0.22);
+}
+
+.crm-inbox-thread-match-label {
+    color: #334155;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.crm-inbox-thread-actions-panel
+.crm-inbox-thread-actions {
+    width: 100%;
+}
+
+.crm-inbox-thread-actions-panel
+.crm-inbox-action-form,
+.crm-inbox-thread-actions-panel
+.crm-inbox-action-form
+button,
+.crm-inbox-thread-actions-panel
+.crm-inbox-thread-actions
+a.btn {
+    width: 100%;
+}
+
+.crm-inbox-thread-actions-panel
+.crm-inbox-action-form
+button,
+.crm-inbox-thread-actions-panel
+.crm-inbox-thread-actions
+a.btn {
+    display: flex;
+    min-height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+}
+
+.crm-inbox-thread-reply-panel {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.crm-inbox-thread-reply-panel
+.btn {
+    min-width: 8rem;
+}
+
+.crm-inbox-thread-messages-panel,
+.crm-inbox-message-list {
+    min-width: 0;
+}
+
+.crm-inbox-message {
+    overflow: hidden;
+}
+
+.crm-inbox-message-html,
+.crm-inbox-message-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.crm-inbox-message-html
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.crm-inbox-message-html
+table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+@media (max-width: 1199.98px) {
+    .crm-inbox-thread-workspace-layout {
+        grid-template-columns:
+            minmax(0, 1.75fr)
+            minmax(17rem, 1fr);
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .crm-inbox-thread-workspace-layout,
+    .crm-inbox-thread-workspace-layout.without-context {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+    .crm-inbox-thread-workspace-context {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .crm-inbox-thread-context-zone {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .crm-inbox-thread-context-zone {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+    .crm-inbox-thread-detail-row {
+        grid-template-columns:
+            minmax(0, 1fr);
+        gap: 0.2rem;
+    }
+
+    .crm-inbox-thread-detail-value {
+        text-align: left;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-inbox-thread-workspace-layout,
+    .crm-inbox-thread-reading-zone,
+    .crm-inbox-thread-context-zone {
+        gap: 0.75rem;
+    }
+
+    .crm-inbox-thread-context-card
+    .card-body {
+        padding: 0.85rem;
+    }
+
+    .crm-inbox-thread-reply-panel
+    .btn {
+        width: 100%;
+    }
+}
+
+/* ============================================================
+   Phase 7.90E-8 — Workspace final accessibility polish
+   ============================================================ */
+
+.crm-workspace-personalization-panel[role="dialog"] {
+    max-height: min(42rem, calc(100vh - 3rem));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.crm-workspace-personalization-panel:focus {
+    outline: none;
+}
+
+.crm-workspace-personalization-panel:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.32);
+    outline-offset: 3px;
+}
+
+.crm-workspace-customize-button:focus-visible,
+.crm-workspace-personalization-panel
+button:focus-visible,
+.crm-workspace-personalization-panel
+input:focus-visible,
+.crm-workspace-toolbar-button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.32);
+    outline-offset: 2px;
+}
+
+.crm-workspace-personalization
+[aria-busy="true"],
+.crm-workspace-personalization[aria-busy="true"] {
+    cursor: progress;
+}
+
+.crm-workspace-personalization[aria-busy="true"]
+.crm-workspace-personalization-panel {
+    opacity: 0.78;
+}
+
+.crm-inbox-thread-workspace-context {
+    scroll-padding-block: 1rem;
+}
+
+.crm-inbox-thread-context-zone:empty,
+.crm-inbox-thread-reading-zone:empty {
+    display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-workspace-personalization-panel,
+    .crm-workspace-customize-button,
+    .crm-workspace-toolbar-button,
+    .crm-workspace-item {
+        scroll-behavior: auto;
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-inbox-thread-context-card,
+    .crm-workspace-personalization-panel,
+    .crm-workspace-toolbar {
+        border: 1px solid CanvasText;
+    }
+
+    .crm-workspace-customize-button:focus-visible,
+    .crm-workspace-personalization-panel
+    button:focus-visible,
+    .crm-workspace-personalization-panel
+    input:focus-visible,
+    .crm-workspace-toolbar-button:focus-visible {
+        outline: 2px solid Highlight;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-inbox-thread-workspace-heading {
+        justify-content: stretch;
+    }
+
+    .crm-inbox-thread-workspace-heading
+    .crm-workspace-personalization,
+    .crm-inbox-thread-workspace-heading
+    .crm-workspace-customize-button {
+        width: 100%;
+    }
+
+    .crm-workspace-personalization-panel[role="dialog"] {
+        max-height: calc(100vh - 1.5rem);
+    }
+}
+
+/* ============================================================
+   Phase 7.90F-1/F-2 — User360 Workspace foundation
+   ============================================================ */
+
+.crm-user360-workspace {
+    width: 100%;
+    min-width: 0;
+}
+
+.crm-user360-workspace-hero {
+    display: block;
+    min-width: 0;
+}
+
+.crm-user360-workspace-hero
+.crm-workspace-item {
+    min-width: 0;
+}
+
+.crm-user360-workspace-hero
+.crm-workspace-item-content {
+    min-width: 0;
+}
+
+.crm-user360-workspace-hero
+.crm-hero {
+    margin-bottom: 1.5rem !important;
+}
+
+/*
+ * WorkspaceItemRenderer supplies the generic item shell. The fixed
+ * identity Hero must visually remain the main User360 header rather
+ * than appearing as a nested dashboard card.
+ */
+.crm-user360-workspace-hero
+.crm-workspace-item {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.crm-user360-workspace-hero
+.crm-workspace-item-header {
+    display: none;
+}
+
+.crm-user360-workspace-hero
+.crm-workspace-item-body,
+.crm-user360-workspace-hero
+.crm-workspace-item-content {
+    padding: 0;
+}
+
+@media (max-width: 767.98px) {
+    .crm-user360-workspace-hero
+    .crm-hero {
+        margin-bottom: 1rem !important;
+    }
+}
+
+/* ============================================================
+   Phase 7.90F-3/F-4/F-5 — User360 Workspace modules
+   ============================================================ */
+
+.crm-user360-workspace-heading {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-width: 0;
+    margin-bottom: 0.75rem;
+}
+
+.crm-user360-workspace-layout {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 2fr)
+        minmax(20rem, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+    min-width: 0;
+}
+
+.crm-user360-workspace-layout.without-sidebar {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.crm-user360-workspace-layout.without-main {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.crm-user360-workspace-main,
+.crm-user360-workspace-sidebar,
+.crm-user360-workspace-main-zone,
+.crm-user360-workspace-sidebar-zone,
+.crm-user360-workspace-timeline-zone {
+    min-width: 0;
+}
+
+.crm-user360-workspace-main-zone,
+.crm-user360-workspace-sidebar-zone {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+}
+
+.crm-user360-workspace-sidebar {
+    position: sticky;
+    top: 1rem;
+}
+
+.crm-user360-workspace
+.crm-workspace-item-content >
+.crm-section {
+    margin-bottom: 0 !important;
+}
+
+.crm-user360-workspace
+.crm-workspace-item-content >
+.crm-section-intelligence,
+.crm-user360-workspace
+.crm-workspace-item-content >
+.crm-section-customer-success-plans,
+.crm-user360-workspace
+.crm-workspace-item-content >
+.crm-section-inbox,
+.crm-user360-workspace
+.crm-workspace-item-content >
+.crm-section-notes,
+.crm-user360-workspace
+.crm-workspace-item-content >
+.crm-section-work-items,
+.crm-user360-workspace
+.crm-workspace-item-content >
+.crm-section-timeline {
+    height: 100%;
+}
+
+.crm-user360-workspace-timeline-zone {
+    margin-top: 1.25rem;
+}
+
+.crm-user360-workspace-timeline-zone
+.crm-workspace-item {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.crm-user360-workspace-timeline-zone
+.crm-workspace-item-header {
+    display: none;
+}
+
+.crm-user360-workspace-timeline-zone
+.crm-workspace-item-body,
+.crm-user360-workspace-timeline-zone
+.crm-workspace-item-content {
+    padding: 0;
+}
+
+@media (max-width: 1199.98px) {
+    .crm-user360-workspace-layout {
+        grid-template-columns:
+            minmax(0, 1.65fr)
+            minmax(18rem, 1fr);
+    }
+}
+
+@media (max-width: 991.98px) {
+    .crm-user360-workspace-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .crm-user360-workspace-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-user360-workspace-heading,
+    .crm-user360-workspace-heading
+    .crm-workspace-personalization,
+    .crm-user360-workspace-heading
+    .crm-workspace-customize-button {
+        width: 100%;
+    }
+
+    .crm-user360-workspace-layout,
+    .crm-user360-workspace-main-zone,
+    .crm-user360-workspace-sidebar-zone {
+        gap: 1rem;
+    }
+}
+
+/* ============================================================
+   Phase 7.90F-6/F-7 — Completed User360 Workspace
+   ============================================================ */
+
+.crm-user360-workspace-summary-zone {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 2fr)
+        minmax(18rem, 1fr);
+    gap: 1.25rem;
+    align-items: stretch;
+    min-width: 0;
+    margin-bottom: 1.25rem;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-workspace-item {
+    min-width: 0;
+    height: 100%;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-workspace-item-body,
+.crm-user360-workspace-summary-zone
+.crm-workspace-item-content {
+    height: 100%;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-section,
+.crm-user360-workspace-summary-zone
+.crm-section-overview-panel {
+    height: 100%;
+    margin-bottom: 0 !important;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-stats-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-right: 0;
+    margin-left: 0;
+    margin-bottom: 0 !important;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-stats-grid > [class*="col-"] {
+    width: auto;
+    max-width: none;
+    flex: none;
+    padding: 0;
+    margin-bottom: 0 !important;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-stat-card {
+    min-width: 0;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-stat-number {
+    overflow-wrap: anywhere;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-section-actions
+.crm-section-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-section-actions
+.btn {
+    white-space: normal;
+    text-align: left;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-quick-note-form {
+    margin-top: auto !important;
+}
+
+.crm-user360-workspace-summary-zone
+.crm-quick-note-form textarea,
+.crm-user360-workspace-summary-zone
+.crm-quick-note-form input[type="text"] {
+    width: 100%;
+}
+
+.crm-user360-commercial-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    min-width: 0;
+}
+
+.crm-commercial-subsection {
+    min-width: 0;
+}
+
+.crm-commercial-subsection + .crm-commercial-subsection {
+    padding-top: 1.25rem;
+    border-top: 1px solid
+        var(--bs-border-color, #dee2e6);
+}
+
+.crm-commercial-subsection-title {
+    font-weight: 700;
+}
+
+.crm-commercial-subsection-content {
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.crm-commercial-subsection-content
+.table {
+    min-width: 42rem;
+    margin-bottom: 0;
+}
+
+.crm-user360-workspace
+.crm-workspace-item {
+    min-width: 0;
+}
+
+.crm-user360-workspace-main-zone
+.crm-workspace-item,
+.crm-user360-workspace-sidebar-zone
+.crm-workspace-item {
+    scroll-margin-top: 1rem;
+}
+
+.crm-user360-workspace-main-zone
+.crm-workspace-item-content,
+.crm-user360-workspace-sidebar-zone
+.crm-workspace-item-content {
+    min-width: 0;
+}
+
+.crm-user360-workspace-main-zone
+.crm-section,
+.crm-user360-workspace-sidebar-zone
+.crm-section {
+    margin-bottom: 0 !important;
+}
+
+.crm-user360-workspace
+.crm-section-body {
+    min-width: 0;
+}
+
+.crm-user360-workspace
+.table-responsive,
+.crm-user360-workspace
+.crm-section-body {
+    max-width: 100%;
+}
+
+.crm-user360-workspace
+table.generaltable,
+.crm-user360-workspace
+table.table {
+    width: 100%;
+}
+
+.crm-user360-workspace-main-zone
+.crm-workspace-item-content >
+.crm-section,
+.crm-user360-workspace-sidebar-zone
+.crm-workspace-item-content >
+.crm-section,
+.crm-user360-workspace-summary-zone
+.crm-workspace-item-content >
+.crm-section {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+}
+
+.crm-user360-workspace-main-zone
+.crm-workspace-item-header:not([hidden])
++
+.crm-workspace-item-body
+.crm-workspace-item-content >
+.crm-section >
+.crm-section-header,
+
+.crm-user360-workspace-sidebar-zone
+.crm-workspace-item-header:not([hidden])
++
+.crm-workspace-item-body
+.crm-workspace-item-content >
+.crm-section >
+.crm-section-header,
+
+.crm-user360-workspace-summary-zone
+.crm-workspace-item-header:not([hidden])
++
+.crm-workspace-item-body
+.crm-workspace-item-content >
+.crm-section >
+.crm-section-header {
+    display: none;
+}
+
+@media (max-width: 1199.98px) {
+    .crm-user360-workspace-summary-zone {
+        grid-template-columns:
+            minmax(0, 1.6fr)
+            minmax(17rem, 1fr);
+    }
+
+    .crm-user360-workspace-summary-zone
+    .crm-stats-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991.98px) {
+    .crm-user360-workspace-summary-zone {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .crm-user360-workspace-summary-zone
+    .crm-stats-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .crm-user360-workspace-summary-zone
+    .crm-stats-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .crm-user360-workspace
+    .crm-workspace-toolbar {
+        align-items: stretch;
+    }
+
+    .crm-user360-workspace
+    .crm-workspace-toolbar-actions {
+        width: 100%;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-user360-workspace-summary-zone,
+    .crm-user360-workspace-layout,
+    .crm-user360-workspace-main-zone,
+    .crm-user360-workspace-sidebar-zone {
+        gap: 1rem;
+    }
+
+    .crm-user360-workspace-summary-zone
+    .crm-stats-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .crm-user360-workspace
+    .crm-workspace-toolbar-button,
+    .crm-user360-workspace
+    .crm-workspace-customize-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .crm-commercial-subsection-content
+    .table {
+        min-width: 36rem;
+    }
+}
+
+.crm-user360-workspace
+a:focus-visible,
+.crm-user360-workspace
+button:focus-visible,
+.crm-user360-workspace
+input:focus-visible,
+.crm-user360-workspace
+select:focus-visible,
+.crm-user360-workspace
+textarea:focus-visible {
+    outline: 3px solid
+        var(--bs-primary, #0d6efd);
+    outline-offset: 2px;
+}
+
+.crm-user360-workspace
+.crm-workspace-item[data-workspace-dragging="true"] {
+    opacity: 0.72;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-user360-workspace
+    .crm-workspace-item,
+    .crm-user360-workspace
+    .crm-workspace-toolbar-button,
+    .crm-user360-workspace
+    .crm-workspace-customize-button {
+        transition: none !important;
+        animation: none !important;
+        scroll-behavior: auto;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-user360-workspace
+    .crm-workspace-item,
+    .crm-user360-workspace
+    .crm-section,
+    .crm-commercial-subsection {
+        border-color: CanvasText;
+    }
+
+    .crm-user360-workspace
+    a:focus-visible,
+    .crm-user360-workspace
+    button:focus-visible,
+    .crm-user360-workspace
+    input:focus-visible,
+    .crm-user360-workspace
+    select:focus-visible,
+    .crm-user360-workspace
+    textarea:focus-visible {
+        outline-color: Highlight;
+    }
+}
+
+/* ==========================================================================
+   CRM User360 — Historical deleted-user profile
+   ========================================================================== */
+
+.crm-user-history {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.crm-user-history-warning {
+    margin: 0;
+}
+
+.crm-user-history-summary {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(10rem, 1fr)
+    );
+    gap: 1rem;
+}
+
+.crm-user-history-stat {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    background: var(--bs-body-bg);
+}
+
+.crm-user-history-stat-label {
+    margin-bottom: 0.35rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.crm-user-history-stat-value {
+    overflow-wrap: anywhere;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.crm-user-history-navigation {
+    margin: 0;
+}
+
+.crm-user-history-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        2,
+        minmax(0, 1fr)
+    );
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.crm-user-history-section {
+    min-width: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    background: var(--bs-body-bg);
+}
+
+.crm-user-history-section-title {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.crm-user-history-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.crm-user-history-item,
+.crm-user-history-note {
+    min-width: 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.crm-user-history-item:last-child,
+.crm-user-history-note:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.crm-user-history-item-title {
+    font-weight: 600;
+}
+
+.crm-user-history-item-meta {
+    margin-top: 0.2rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+}
+
+.crm-user-history-table {
+    margin-bottom: 0;
+}
+
+.crm-user-history-table th,
+.crm-user-history-table td {
+    vertical-align: middle;
+}
+
+@media (max-width: 767.98px) {
+    .crm-user-history-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .crm-user-history-section {
+        padding: 1rem;
+    }
+
+    .crm-user-history-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+/* ==========================================================================
+   User360 Timeline — Phase 7.91.1
+   ========================================================================== */
+
+.crm-timeline {
+    display: grid;
+    gap: 1rem;
+}
+
+.crm-timeline-toolbar {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    background: var(--bs-tertiary-bg);
+}
+
+.crm-timeline-category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.crm-timeline-category-filters .btn {
+    display: inline-flex;
+    gap: 0.45rem;
+    align-items: center;
+}
+
+.crm-timeline-filter-count {
+    min-width: 1.6rem;
+    color: inherit;
+    background: rgb(0 0 0 / 10%);
+}
+
+.crm-timeline-secondary-filters {
+    display: grid;
+    grid-template-columns:
+        minmax(14rem, 1fr)
+        minmax(10rem, auto)
+        auto
+        auto;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.crm-timeline-search {
+    min-width: 0;
+}
+
+.crm-timeline-important-filter {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.crm-timeline-display-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.crm-timeline-results {
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+}
+
+.crm-timeline-groups {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.crm-timeline-group {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.crm-timeline-date-heading {
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.crm-timeline-group-body {
+    position: relative;
+    display: grid;
+    gap: 0.75rem;
+    padding-inline-start: 1.25rem;
+}
+
+.crm-timeline-group-body::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    inset-inline-start: 0.45rem;
+    width: 2px;
+    background: var(--bs-border-color);
+    content: "";
+}
+
+.crm-timeline-item {
+    position: relative;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    background: var(--bs-body-bg);
+}
+
+.crm-timeline-item::before {
+    position: absolute;
+    top: 1.35rem;
+    inset-inline-start: -1.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 2px solid var(--bs-body-bg);
+    border-radius: 50%;
+    background: var(--bs-secondary-color);
+    box-shadow: 0 0 0 1px var(--bs-border-color);
+    content: "";
+}
+
+.crm-timeline-item[data-importance="medium"]::before {
+    background: var(--bs-warning);
+}
+
+.crm-timeline-item[data-importance="high"]::before {
+    background: var(--bs-danger);
+}
+
+.crm-timeline-line {
+    display: grid;
+    grid-template-columns:
+        auto
+        minmax(0, 1fr)
+        auto
+        auto;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.crm-timeline-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--bs-tertiary-bg);
+    font-size: 1rem;
+}
+
+.crm-timeline-summary {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    align-items: center;
+}
+
+.crm-timeline-heading {
+    display: grid;
+    min-width: 0;
+    gap: 0.2rem;
+}
+
+.crm-timeline-title {
+    overflow-wrap: anywhere;
+}
+
+.crm-timeline-meta {
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+}
+
+.crm-timeline-category-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.crm-timeline-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    text-decoration: none;
+}
+
+.crm-timeline-toggle-icon {
+    display: inline-block;
+    transition: transform 160ms ease;
+}
+
+.crm-timeline-toggle[aria-expanded="true"]
+.crm-timeline-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.crm-timeline-body {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.crm-timeline-card {
+    margin: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.crm-timeline-filter-empty {
+    margin: 0;
+}
+
+@media (max-width: 991.98px) {
+    .crm-timeline-secondary-filters {
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(10rem, auto);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .crm-timeline-toolbar {
+        padding: 0.75rem;
+    }
+
+    .crm-timeline-secondary-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .crm-timeline-line {
+        grid-template-columns:
+            auto
+            minmax(0, 1fr)
+            auto;
+    }
+
+    .crm-timeline-action {
+        grid-column: 2 / -1;
+        justify-self: start;
+    }
+
+    .crm-timeline-category-badge {
+        width: fit-content;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-timeline-toggle-icon {
+        transition: none;
+    }
+}
+
+.crm-section-timeline-summary {
+    height: 100%;
+}
+
+.crm-section-timeline-summary .crm-admin-section-body {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.crm-timeline-summary-stat {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+}
+
+.crm-timeline-summary-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.crm-timeline-summary-label,
+.crm-timeline-summary-latest-date {
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+}
+
+.crm-timeline-summary-latest {
+    display: grid;
+    gap: 0.2rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.crm-timeline-summary-latest-title {
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   Phase 7.91.2B — Persistent and responsive CRM navigation
+   ========================================================================== */
+
+.crm-app-navigation-toggle,
+.crm-app-command-toggle {
+    appearance: none;
+    cursor: pointer;
+}
+
+.crm-app-navigation-toggle {
+    display: none;
+}
+
+.crm-app-command-shortcut {
+    padding: 0.12rem 0.35rem;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 0.35rem;
+    background: rgba(248, 250, 252, 0.9);
+    color: #64748b;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.crm-app-navigation-panel {
+    width: 100%;
+    min-width: 0;
+}
+
+.crm-app-navigation-link[aria-current="page"] {
+    pointer-events: none;
+}
+
+@media (max-width: 767.98px) {
+    .crm-app-topbar {
+        position: relative;
+        z-index: 1040;
+    }
+
+    .crm-app-topbar-brand {
+        justify-content: space-between;
+    }
+
+    .crm-app-topbar-brand-link {
+        width: auto;
+        justify-content: flex-start;
+    }
+
+    .crm-app-topbar-actions {
+        justify-content: flex-start;
+    }
+
+    .crm-app-navigation-toggle {
+        display: inline-flex;
+    }
+
+    .crm-app-navigation {
+        position: relative;
+        z-index: 1035;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+    }
+
+    .crm-app-navigation-panel {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 1055;
+        width: min(22rem, calc(100vw - 2rem));
+        height: 100vh;
+        height: 100dvh;
+        padding: 5.25rem 1rem 1rem;
+        overflow-y: auto;
+        visibility: hidden;
+        background: #ffffff;
+        box-shadow:
+            -1rem 0 3rem rgba(15, 23, 42, 0.22);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(100%);
+        transition:
+            transform 180ms ease,
+            opacity 180ms ease,
+            visibility 180ms ease;
+        overscroll-behavior: contain;
+    }
+
+    .crm-app-navigation-panel.is-open {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0);
+    }
+
+    .crm-app-navigation-list {
+        display: grid;
+        width: 100%;
+        padding: 0;
+        gap: 0.45rem;
+        overflow: visible;
+        scroll-snap-type: none;
+    }
+
+    .crm-app-navigation-item {
+        width: 100%;
+    }
+
+    .crm-app-navigation-link {
+        width: 100%;
+        min-height: 3.1rem;
+        padding: 0.7rem 0.85rem;
+        justify-content: flex-start;
+        gap: 0.75rem;
+        border-color: rgba(148, 163, 184, 0.18);
+        background: #ffffff;
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .crm-app-navigation-link.is-active {
+        border-color: rgba(99, 102, 241, 0.24);
+        background: rgba(99, 102, 241, 0.08);
+        box-shadow: none;
+    }
+
+    .crm-app-navigation-icon {
+        width: 1.75rem;
+        height: 1.75rem;
+        flex-basis: 1.75rem;
+        font-size: 1.15rem;
+    }
+
+    .crm-app-navigation-label {
+        display: block;
+        max-width: none;
+        font-size: inherit;
+        line-height: 1.3;
+        text-align: left;
+        white-space: normal;
+    }
+
+    body.crm-navigation-overlay-open {
+        overflow: hidden;
+    }
+
+    body.crm-navigation-overlay-open::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 1050;
+        background: rgba(15, 23, 42, 0.46);
+        backdrop-filter: blur(0.1rem);
+    }
+
+    .crm-app-shell.is-navigation-open
+    .crm-app-topbar {
+        z-index: 1060;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .crm-app-command-shortcut {
+        display: none;
+    }
+
+    .crm-app-navigation-toggle,
+    .crm-app-command-toggle {
+        flex: 1 1 auto;
+    }
+
+    .crm-app-topbar-admin-link {
+        flex: 1 1 auto;
+    }
+
+    .crm-app-navigation-panel {
+        width: calc(100vw - 1rem);
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-app-navigation-panel {
+        transition: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-app-navigation-panel {
+        border-left: 2px solid CanvasText;
+        background: Canvas;
+    }
+
+    .crm-app-command-shortcut {
+        border-color: CanvasText;
+    }
+
+    body.crm-navigation-overlay-open::before {
+        background: transparent;
+    }
+}
+
+/* ==========================================================================
+   Phase 7.91.3A — Global shell-hosted Command Center
+   ========================================================================== */
+
+/*
+ * The CRM shell contains one Command Center instance on every page.
+ * The TopBar button is now its only visible trigger.
+ */
+.campusfr-command-center--shell {
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.campusfr-command-center--shell
+.campusfr-command-trigger--shell-proxy {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/*
+ * The modal remains available even though its technical trigger is hidden.
+ */
+.campusfr-command-center--shell
+.campusfr-command-modal {
+    width: auto;
+    height: auto;
+}
+
+/* ==========================================================================
+   Phase 7.91.3B — Contextual CRM back links
+   ========================================================================== */
+
+.crm-app-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    max-width: 100%;
+    text-decoration: none;
+}
+
+.crm-app-back-link-icon {
+    flex: 0 0 auto;
+    font-size: 1.05em;
+    line-height: 1;
+    transition: transform 160ms ease;
+}
+
+.crm-app-back-link-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-app-back-link:hover
+.crm-app-back-link-icon,
+.crm-app-back-link:focus-visible
+.crm-app-back-link-icon {
+    transform: translateX(-0.15rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-app-back-link-icon {
+        transition: none;
+    }
+
+    .crm-app-back-link:hover
+    .crm-app-back-link-icon,
+    .crm-app-back-link:focus-visible
+    .crm-app-back-link-icon {
+        transform: none;
+    }
+}
+
+/* ==========================================================================
+   Phase 7.91.3C — Unified CRM page headings
+   ========================================================================== */
+
+.crm-page-header {
+    min-width: 0;
+}
+
+.crm-page-header-main {
+    min-width: 0;
+}
+
+.crm-page-header-title {
+    overflow-wrap: anywhere;
+}
+
+.crm-page-header-subtitle {
+    max-width: 72rem;
+    overflow-wrap: anywhere;
+}
+
+.crm-email-preview-subject {
+    margin-bottom: 1rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(
+        --crm-border-color,
+        #dee2e6
+    );
+    border-radius: 0.75rem;
+    background: var(
+        --crm-surface-muted,
+        #f8f9fa
+    );
+}
+
+.local-subscriptions-email-preview-frame {
+    display: block;
+    width: 100%;
+    min-height: 800px;
+    border: 1px solid var(
+        --crm-border-color,
+        #dee2e6
+    );
+    border-radius: 0.75rem;
+    background: #fff;
+}
+
+/* ==========================================================================
+   Phase 7.91.3D — Lightweight CRM breadcrumbs
+   ========================================================================== */
+
+.crm-breadcrumb {
+    min-width: 0;
+    margin: 0 0 0.5rem;
+}
+
+.crm-breadcrumb-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+}
+
+.crm-breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    color: var(
+        --crm-text-muted,
+        #6c757d
+    );
+}
+
+.crm-breadcrumb-item:not(:last-child)::after {
+    content: "›";
+    flex: 0 0 auto;
+    margin: 0 0.5rem;
+    color: var(
+        --crm-text-muted,
+        #6c757d
+    );
+    opacity: 0.7;
+}
+
+.crm-breadcrumb-link {
+    display: inline-block;
+    min-width: 0;
+    max-width: 18rem;
+    overflow: hidden;
+    color: inherit;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.crm-breadcrumb-link:hover,
+.crm-breadcrumb-link:focus-visible {
+    color: var(
+        --crm-link-color,
+        currentColor
+    );
+    text-decoration: underline;
+}
+
+.crm-breadcrumb-current {
+    display: inline-block;
+    min-width: 0;
+    max-width: 28rem;
+    overflow: hidden;
+    color: var(
+        --crm-text-color,
+        inherit
+    );
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+    .crm-breadcrumb-list {
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+
+    .crm-breadcrumb-item {
+        flex: 0 1 auto;
+        overflow: hidden;
+    }
+
+    .crm-breadcrumb-item:first-child {
+        flex: 0 0 auto;
+    }
+
+    .crm-breadcrumb-item:not(:first-child) {
+        min-width: 0;
+    }
+
+    .crm-breadcrumb-link,
+    .crm-breadcrumb-current {
+        max-width: 10rem;
+    }
+}
+
+.crm-app-skip-link {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 1100;
+    padding: 0.625rem 0.875rem;
+    border: 2px solid currentColor;
+    border-radius: 0.5rem;
+    background: #fff;
+    color: #1e293b;
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform 150ms ease;
+}
+
+.crm-app-skip-link:focus {
+    color: #1e293b;
+    text-decoration: none;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-app-skip-link {
+        transition: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-app-skip-link {
+        border-color: Highlight;
+        background: Canvas;
+        color: CanvasText;
+    }
+
+    .crm-app-skip-link:focus {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+}
+
+/* ==========================================================================
+   Phase 7.91.4D — Inbox dynamic split view
+   ========================================================================== */
+
+.crm-inbox-thread-card {
+    cursor: pointer;
+    transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease,
+        background-color 150ms ease;
+}
+
+.crm-inbox-thread-card:hover {
+    border-color: rgba(79, 70, 229, 0.42);
+    box-shadow: 0 0.25rem 0.75rem rgba(15, 23, 42, 0.08);
+}
+
+.crm-inbox-thread-card.is-selected {
+    border-color: #4f46e5;
+    background: rgba(79, 70, 229, 0.05);
+    box-shadow:
+        inset 0.25rem 0 0 #4f46e5,
+        0 0.25rem 0.75rem rgba(15, 23, 42, 0.08);
+}
+
+.crm-inbox-thread-card.is-selected
+.crm-inbox-thread-title {
+    color: #3730a3;
+}
+
+.crm-inbox-preview-region {
+    min-width: 0;
+    min-height: 18rem;
+}
+
+.crm-inbox-preview-region.is-loading {
+    opacity: 0.78;
+}
+
+.crm-inbox-preview-loading {
+    display: flex;
+    min-height: 12rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: #64748b;
+}
+
+.crm-inbox-preview-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.crm-inbox-preview-title {
+    min-width: 0;
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.crm-inbox-preview-open {
+    flex: 0 0 auto;
+}
+
+.crm-inbox-preview-context-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.crm-inbox-preview-management {
+    padding-top: 0.25rem;
+}
+
+.crm-inbox-preview-reading-content
+.crm-inbox-thread-messages-panel {
+    margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crm-inbox-thread-card {
+        transition: none;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .crm-inbox-workspace-content {
+        display: block;
+    }
+
+    .crm-inbox-workspace-list,
+    .crm-inbox-workspace-reading,
+    .crm-inbox-workspace-context {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .crm-inbox-workspace-reading,
+    .crm-inbox-workspace-context {
+        margin-top: 1rem;
+    }
+
+    .crm-inbox-thread-card.is-selected {
+        scroll-margin-top: 1rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-inbox-preview-header {
+        display: block;
+    }
+
+    .crm-inbox-preview-open {
+        margin-top: 0.75rem;
+        width: 100%;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-inbox-thread-card.is-selected {
+        border-color: Highlight;
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
     }
 }

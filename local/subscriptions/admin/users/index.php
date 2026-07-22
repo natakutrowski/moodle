@@ -2,16 +2,17 @@
 
 require_once(__DIR__ . '/../../../../config.php');
 
-use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\crm\user\explorer\UserExplorerCriteria;
 use local_subscriptions\crm\user\explorer\UserExplorerRenderer;
 use local_subscriptions\crm\user\explorer\UserExplorerService;
+use local_subscriptions\subscription_config;
 
 global $PAGE, $OUTPUT;
 
@@ -32,37 +33,22 @@ if (!$canviewinbox) {
 }
 
 $url = new moodle_url(
-    subscription_config::admin_users_page(),
+    subscription_config::
+        admin_users_page(),
     $criteria->url_params()
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title(
-    get_string(
-        'crm_users',
-        'local_subscriptions'
-    )
-);
-$PAGE->set_heading(
-    get_string(
-        'crm_users',
-        'local_subscriptions'
-    )
+$pagetitle = get_string(
+    'crm_users',
+    'local_subscriptions'
 );
 
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $url,
+    $pagetitle,
     'local-subscriptions-user-explorer-page'
-);
-
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::
-            plugin_stylesheet_page()
-    )
 );
 
 $PAGE->requires->js_call_amd(
@@ -70,12 +56,12 @@ $PAGE->requires->js_call_amd(
     'init'
 );
 
-$result =
-    (new UserExplorerService())
-        ->explore(
-            $criteria,
-            $canviewinbox
-        );
+$result = (
+    new UserExplorerService()
+)->explore(
+    $criteria,
+    $canviewinbox
+);
 
 echo $OUTPUT->header();
 
@@ -85,10 +71,7 @@ echo CrmWorkspaceRenderer::start(
 );
 
 echo CrmPageHeader::render(
-    get_string(
-        'crm_users',
-        'local_subscriptions'
-    ),
+    $pagetitle,
     get_string(
         'crm_users_explorer_description',
         'local_subscriptions'

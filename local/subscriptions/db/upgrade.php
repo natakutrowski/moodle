@@ -6010,5 +6010,88 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
 		);
 	}
 
+	if ($oldversion < 2026072100) {
+		$table = new xmldb_table(
+			'local_subscriptions_inbox_message'
+		);
+
+		$providerkeyfield = new xmldb_field(
+			'providerkey',
+			XMLDB_TYPE_CHAR,
+			'64',
+			null,
+			null,
+			null,
+			null,
+			'provideruid'
+		);
+
+		$providerkeyindex = new xmldb_index(
+			'provider_key_uix',
+			XMLDB_INDEX_UNIQUE,
+			[
+				'accountid',
+				'providerkey',
+			]
+		);
+
+		/*
+		* XMLDB cannot alter a field while an index depends on it.
+		* Temporarily remove the unique provider index.
+		*/
+		if (
+			$dbman->table_exists($table)
+			&& $dbman->index_exists(
+				$table,
+				$providerkeyindex
+			)
+		) {
+			$dbman->drop_index(
+				$table,
+				$providerkeyindex
+			);
+		}
+
+		/*
+		* Drafts created locally do not yet have a remote provider key.
+		* The field must therefore allow NULL.
+		*/
+		if (
+			$dbman->table_exists($table)
+			&& $dbman->field_exists(
+				$table,
+				$providerkeyfield
+			)
+		) {
+			$dbman->change_field_notnull(
+				$table,
+				$providerkeyfield
+			);
+		}
+
+		/*
+		* Restore the unique index after changing the field.
+		*/
+		if (
+			$dbman->table_exists($table)
+			&& !$dbman->index_exists(
+				$table,
+				$providerkeyindex
+			)
+		) {
+			$dbman->add_index(
+				$table,
+				$providerkeyindex
+			);
+		}
+
+		upgrade_plugin_savepoint(
+			true,
+			2026072100,
+			'local',
+			'subscriptions'
+		);
+	}
+
     return true;
 }

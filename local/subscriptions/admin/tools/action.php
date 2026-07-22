@@ -9,7 +9,12 @@ use local_subscriptions\crm\admin_tools\AdminToolParameterPolicy;
 use local_subscriptions\crm\admin_tools\AdminToolRiskLevels;
 use local_subscriptions\crm\admin_tools\services\AdminToolRunner;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\subscription_config;
 
 global $USER;
@@ -45,23 +50,15 @@ $returnurl = new moodle_url(
         admin_crm_tools_page()
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($pageurl);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title($tool->title());
-$PAGE->set_heading($tool->title());
-
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
-    'local-subscriptions-admin-tools-page'
-);
-
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $tool->title(),
+    [
+        'local-subscriptions-admin-tools-page',
+        'local-subscriptions-admin-tool-action-page',
+    ]
 );
 
 if (
@@ -131,16 +128,43 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-echo html_writer::link(
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'crm_admin_tools_title',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_crm_tools_page()
+                ),
+        ],
+        [
+            'label' =>
+                $tool->title(),
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
     $returnurl,
-    '← ' . get_string(
+    get_string(
         'crm_admin_tools_title',
         'local_subscriptions'
-    ),
-    [
-        'class' =>
-            'crm-app-back-link btn btn-link ps-0 mb-3',
-    ]
+    )
+);
+
+echo CrmPageHeader::render(
+    $tool->title(),
+    $tool->description(),
+    HelpContext::ADMIN_TOOLS
 );
 
 echo html_writer::start_tag(
@@ -160,16 +184,6 @@ echo html_writer::empty_tag(
         'name' => 'sesskey',
         'value' => sesskey(),
     ]
-);
-
-echo html_writer::tag(
-    'h2',
-    s($tool->title())
-);
-
-echo html_writer::tag(
-    'p',
-    s($tool->description())
 );
 
 echo html_writer::div(

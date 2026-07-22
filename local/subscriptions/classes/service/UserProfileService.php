@@ -11,6 +11,8 @@ use local_subscriptions\crm\user\UserProfileActionBuilder;
 use local_subscriptions\crm\user\UserProfileTimelineBuilder;
 use local_subscriptions\crm\user\UserProfileNoteService;
 use local_subscriptions\crm\user\UserProfileTagService;
+use local_subscriptions\crm\user\UserProfileLookupResult;
+use local_subscriptions\crm\user\UserProfileNotFoundException;
 use local_subscriptions\crm\intelligence\core\UserIntelligenceBuilder;
 use local_subscriptions\crm\user\inbox\UserInboxRepository;
 use local_subscriptions\crm\user\inbox\UserInboxService;
@@ -30,7 +32,24 @@ final class UserProfileService {
     }
 
     public function load_view_model(int $userid): UserProfileViewModel {
-        $user = $this->repository->get_user($userid);
+        $lookup = $this->repository->resolve_user(
+            $userid
+        );
+
+        if (!$lookup->is_active()) {
+            throw new UserProfileNotFoundException(
+                $lookup->get_userid(),
+                $lookup->get_status()
+            );
+        }
+
+        $user = $lookup->get_user();
+
+        if ($user === null) {
+            throw new \coding_exception(
+                'An active UserProfile lookup must contain a Moodle user record.'
+            );
+        }
 
         $canviewinbox = Capabilities::can_view_inbox();
 
@@ -43,15 +62,19 @@ final class UserProfileService {
         $timelinebuilder = new UserProfileTimelineBuilder();
         $actionbuilder = new UserProfileActionBuilder();
 
+        $timelinepage =
+            $timelinebuilder
+                ->build_page_for_user(
+                    $user,
+                    20,
+                    0,
+                    $canviewinbox
+                );
+
         $timeline =
             $timelinebuilder
                 ->to_legacy_objects(
-                    $timelinebuilder
-                        ->build_for_user(
-                            $user,
-                            40,
-                            $canviewinbox
-                        )
+                    $timelinepage->events
                 );
 
         $stats = new UserProfileStats(
@@ -87,6 +110,8 @@ final class UserProfileService {
             $noteservice->get_for_profile($userid, 20),
             $timeline,
             $courses,
+            $timelinepage->hasmore,
+            $timelinepage->next_offset(),
             $tagservice->get_for_profile($userid),
             array_map(
                 static fn($action): \stdClass => $action->to_object(),

@@ -17,6 +17,8 @@ final class UserProfileViewModel {
         public readonly array $notes,
         public readonly array $timeline,
         public readonly array $courses,
+        public readonly bool $timelinehasmore = false,
+        public readonly int $timelinenextoffset = 0,
         public readonly array $tags = [],
         public readonly array $actions = [],
         public readonly ?UserIntelligence $intelligence = null,
@@ -32,6 +34,10 @@ final class UserProfileViewModel {
             'stats' => $this->stats->to_object(),
             'notes' => $this->notes,
             'timeline' => $this->timeline,
+            'timelinehasmore' =>
+                $this->timelinehasmore,
+            'timelinenextoffset' =>
+                $this->timelinenextoffset,
             'courses' => $this->courses,
             'actions' => $this->actions,
             'tags' => $this->tags,

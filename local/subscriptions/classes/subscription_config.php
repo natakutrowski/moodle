@@ -77,6 +77,94 @@ class subscription_config {
         return self::plugin_path() . 'admin/dashboard.php';
     }
 
+    /**
+     * Returns the main Moodle administration page.
+     */
+    public static function moodle_admin_page(): string {
+        return '/admin/search.php';
+    }
+
+    /**
+     * Returns the CampusFR student courses page.
+     */
+    public static function campus_my_courses_page(): string {
+        return '/local/campus/mycourses.php';
+    }
+
+    /**
+     * Returns the current user's Moodle profile page.
+     */
+    public static function moodle_user_profile_page(): string {
+        return '/user/profile.php';
+    }
+
+    /**
+     * Returns the current user's grade overview page.
+     */
+    public static function moodle_grade_overview_page(): string {
+        return '/grade/report/overview/index.php';
+    }
+
+    /**
+     * Returns the Moodle calendar page.
+     */
+    public static function moodle_calendar_page(): string {
+        return '/calendar/view.php';
+    }
+
+    /**
+     * Returns the current user's preferences page.
+     */
+    public static function moodle_user_preferences_page(): string {
+        return '/user/preferences.php';
+    }
+
+    /**
+     * Returns the Moodle role switching page.
+     */
+    public static function moodle_switch_role_page(): string {
+        return '/course/switchrole.php';
+    }
+
+    /**
+     * Returns the Moodle logout page.
+     */
+    public static function moodle_logout_page(): string {
+        return '/login/logout.php';
+    }
+
+    /**
+     * Returns the favicon configured in the Edly theme.
+     *
+     * The embedded Edly layout does not always include the configured theme
+     * favicon, so autonomous CRM pages reuse the same stored theme file
+     * explicitly.
+     *
+     * @return \moodle_url|null
+     */
+    public static function crm_favicon_url(): ?\moodle_url {
+        $favicon = get_config(
+            'theme_edly',
+            'favicon'
+        );
+
+        if (
+            !is_string($favicon) ||
+            trim($favicon) === ''
+        ) {
+            return null;
+        }
+
+        return \moodle_url::make_pluginfile_url(
+            \context_system::instance()->id,
+            'theme_edly',
+            'favicon',
+            0,
+            '/',
+            $favicon
+        );
+    }  
+
     public static function import_csv_page(): string {
         return self::plugin_path() . 'admin/imports/index.php';
     }
@@ -230,6 +318,19 @@ class subscription_config {
     public static function command_center_execute_ajax(): string {
         return self::plugin_path() . 'ajax/command_center_execute.php';
     }
+
+    public static function admin_user_timeline_ajax_page(): string {
+        return self::plugin_path()
+            . 'ajax/user_timeline.php';
+    }    
+
+    /**
+     * Returns the Inbox thread preview AJAX endpoint.
+     */
+    public static function ajax_inbox_thread_preview_page(): string {
+        return self::plugin_path()
+            . 'ajax/inbox_thread_preview.php';
+    }    
 
     public static function automation_rules_admin_page(): string {
         return self::plugin_path() . 'admin/automations/index.php';
@@ -393,6 +494,20 @@ class subscription_config {
     public static function admin_crm_tool_history_page(): string {
         return self::plugin_path() .
             'admin/tools/history.php';
+    }
+
+    /**
+     * Returns the CRM brand logo image URL.
+     *
+     * @return \moodle_url
+     */
+    public static function crm_brand_logo_url(): \moodle_url {
+        global $OUTPUT;
+
+        return $OUTPUT->image_url(
+            'branding/campusfr-crm',
+            'local_subscriptions'
+        );
     }
 
     public static function plugin_stylesheet_page(): string {

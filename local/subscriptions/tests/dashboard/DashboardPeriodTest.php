@@ -96,4 +96,118 @@ final class DashboardPeriodTest extends advanced_testcase {
             )
         );
     }
+
+    public function test_allowed_periods_include_year_and_all_time(): void {
+        $this->assertSame(
+            [
+                DashboardPeriod::TODAY,
+                DashboardPeriod::WEEK,
+                DashboardPeriod::MONTH,
+                DashboardPeriod::YEAR,
+                DashboardPeriod::ALL,
+            ],
+            DashboardPeriod::allowed()
+        );
+    }
+
+    public function test_year_range_starts_at_current_year(): void {
+        $range = DashboardPeriod::range(
+            DashboardPeriod::YEAR
+        );
+
+        $this->assertSame(
+            date('Y-01-01 00:00:00'),
+            date(
+                'Y-m-d H:i:s',
+                $range['start']
+            )
+        );
+
+        $this->assertGreaterThan(
+            $range['start'],
+            $range['end']
+        );
+    }
+
+    public function test_year_previous_range_ends_at_current_start(): void {
+        $current = DashboardPeriod::range(
+            DashboardPeriod::YEAR
+        );
+
+        $previous = DashboardPeriod::previous_range(
+            DashboardPeriod::YEAR
+        );
+
+        $this->assertSame(
+            $current['start'],
+            $previous['end']
+        );
+
+        $this->assertGreaterThanOrEqual(
+            365 * DAYSECS,
+            DashboardPeriod::duration(
+                $previous
+            )
+        );
+
+        $this->assertLessThanOrEqual(
+            366 * DAYSECS,
+            DashboardPeriod::duration(
+                $previous
+            )
+        );
+    }
+
+    public function test_all_time_range_starts_at_unix_epoch(): void {
+        $range = DashboardPeriod::range(
+            DashboardPeriod::ALL
+        );
+
+        $this->assertSame(
+            0,
+            $range['start']
+        );
+
+        $this->assertGreaterThanOrEqual(
+            time(),
+            $range['end']
+        );
+    }
+
+    public function test_all_time_has_no_previous_range(): void {
+        $this->assertSame(
+            [
+                'start' => 0,
+                'end' => 0,
+            ],
+            DashboardPeriod::previous_range(
+                DashboardPeriod::ALL
+            )
+        );
+
+        $this->assertFalse(
+            DashboardPeriod::is_comparable(
+                DashboardPeriod::ALL
+            )
+        );
+    }
+
+    public function test_regular_periods_are_comparable(): void {
+        foreach (
+            [
+                DashboardPeriod::TODAY,
+                DashboardPeriod::WEEK,
+                DashboardPeriod::MONTH,
+                DashboardPeriod::YEAR,
+            ]
+            as $period
+        ) {
+            $this->assertTrue(
+                DashboardPeriod::is_comparable(
+                    $period
+                )
+            );
+        }
+    }
+
 }

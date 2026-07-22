@@ -7,8 +7,13 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\help\HelpRegistry;
 use local_subscriptions\crm\help\HelpArticleLoader;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 
 global $PAGE, $OUTPUT;
 
@@ -42,32 +47,15 @@ $url = new moodle_url(
     ]
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title($article->title);
-$PAGE->set_heading(
-    get_string(
-        'crm_help_title',
-        'local_subscriptions'
-    )
-);
-
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-
-$PAGE->add_body_class(
-    'local-subscriptions-help-page'
-);
-
-$PAGE->add_body_class(
-    'local-subscriptions-help-article-page'
-);
-
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $url,
+    $article->title,
+    [
+        'local-subscriptions-help-page',
+        'local-subscriptions-help-article-page',
+    ]
 );
 
 $content = (new HelpArticleLoader())->render(
@@ -79,6 +67,37 @@ echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(
     CrmNavigationKeys::HELP,
     $context
+);
+
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'crm_help_title',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_help_page()
+                ),
+        ],
+        [
+            'label' =>
+                $article->title,
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmPageHeader::render(
+    $article->title,
+    $article->summary,
+    HelpContext::HELP_CENTER
 );
 
 echo html_writer::start_div(
@@ -96,16 +115,17 @@ echo html_writer::start_tag(
     ]
 );
 
-echo html_writer::link(
+echo CrmBackLinkRenderer::render(
     new moodle_url(
-        subscription_config::admin_help_page()
+        subscription_config::
+            admin_help_page()
     ),
-    '← ' . get_string(
+    get_string(
         'crm_help_home',
         'local_subscriptions'
     ),
     [
-        'class' => 'crm-help-sidebar-back',
+        'crm-help-sidebar-back',
     ]
 );
 
@@ -132,10 +152,6 @@ if ($category !== null) {
         as $categoryarticle
     ) {
         $classes = 'crm-help-sidebar-article';
-
-        if ($categoryarticle->id === $article->id) {
-            $classes .= ' active';
-        }
 
         $isactive =
             $categoryarticle->id === $article->id;
@@ -182,19 +198,6 @@ if ($category !== null) {
         'crm-help-article-category'
     );
 }
-
-echo html_writer::tag(
-    'h1',
-    s($article->title),
-    [
-        'class' => 'crm-help-article-title',
-    ]
-);
-
-echo html_writer::div(
-    s($article->summary),
-    'crm-help-article-summary'
-);
 
 echo html_writer::div(
     $content,

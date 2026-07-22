@@ -2,75 +2,226 @@
 
 require_once(__DIR__ . '/../../../../config.php');
 
-use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\mail\MailRenderer;
 use local_subscriptions\mailer;
+use local_subscriptions\subscription_config;
 
 global $DB, $PAGE, $OUTPUT;
 
-$context = AdminSecurity::require(Capabilities::VIEW_USERS);
+$context = AdminSecurity::require(
+    Capabilities::VIEW_USERS
+);
 
-$logid = required_param('logid', PARAM_INT);
+$logid = required_param(
+    'logid',
+    PARAM_INT
+);
 
-$log = $DB->get_record('local_subscriptions_admin_log', [
-    'id' => $logid,
-], '*', MUST_EXIST);
+$log = $DB->get_record(
+    'local_subscriptions_admin_log',
+    [
+        'id' => $logid,
+    ],
+    '*',
+    MUST_EXIST
+);
 
-$details = json_decode((string)$log->details, true);
+$details = json_decode(
+    (string)$log->details,
+    true
+);
+
 if (!is_array($details)) {
     $details = [];
 }
 
 $userid = (int)$log->targetuserid;
 
-$user = $DB->get_record('user', [
-    'id' => $userid,
-    'deleted' => 0,
-], '*', MUST_EXIST);
+$backurl = new moodle_url(
+    subscription_config::
+        admin_user_view_page(),
+    [
+        'id' => $userid,
+    ]
+);
 
-$subject = (string)($details['subject'] ?? '');
-$body = (string)($details['body'] ?? '');
-$buttonlabel = trim((string)($details['buttonlabel'] ?? ''));
-$buttonurl = trim((string)($details['buttonurl'] ?? ''));
+$user = $DB->get_record(
+    'user',
+    [
+        'id' => $userid,
+        'deleted' => 0,
+    ],
+    '*',
+    MUST_EXIST
+);
+
+$subject = (string)(
+    $details['subject'] ?? ''
+);
+
+$body = (string)(
+    $details['body'] ?? ''
+);
+
+$buttonlabel = trim(
+    (string)(
+        $details['buttonlabel'] ?? ''
+    )
+);
+
+$buttonurl = trim(
+    (string)(
+        $details['buttonurl'] ?? ''
+    )
+);
 
 $buttonhtml = '';
-if ($buttonlabel !== '' && $buttonurl !== '') {
-    $buttonhtml = mailer::email_button($buttonurl, s($buttonlabel));
+
+if (
+    $buttonlabel !== '' &&
+    $buttonurl !== ''
+) {
+    $buttonhtml = mailer::email_button(
+        $buttonurl,
+        s($buttonlabel)
+    );
 }
 
-$url = new moodle_url(subscription_config::admin_user_email_preview_page(), ['logid' => $logid]);
+$pageurl = new moodle_url(
+    subscription_config::
+        admin_user_email_preview_page(),
+    [
+        'logid' => $logid,
+    ]
+);
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title(get_string('crm_email_preview', 'local_subscriptions'));
-$PAGE->set_heading(get_string('crm_email_preview', 'local_subscriptions'));
+$pagetitle = get_string(
+    'crm_email_preview',
+    'local_subscriptions'
+);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    [
+        'local-subscriptions-user-profile-page',
+        'local-subscriptions-user-email-preview-page',
+    ]
+);
 
 [$html, $text] = MailRenderer::layout(
     $subject,
-    format_text($body, FORMAT_HTML) . $buttonhtml,
+    format_text(
+        $body,
+        FORMAT_HTML
+    ) . $buttonhtml,
     '',
     ''
 );
 
 echo $OUTPUT->header();
 
-echo html_writer::link(
-    new moodle_url(subscription_config::admin_user_view_page(), ['id' => $userid]),
-    '← ' . get_string('back'),
-    ['class' => 'btn btn-outline-secondary mb-3']
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::USERS,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'crm_users',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_users_page()
+                ),
+        ],
+        [
+            'label' =>
+                fullname($user),
+
+            'url' =>
+                $backurl,
+        ],
+        [
+            'label' =>
+                get_string(
+                    'crm_email_preview',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    $backurl,
+    get_string(
+        'back',
+        'core'
+    )
+);
+
+echo CrmPageHeader::render(
+    get_string(
+        'crm_email_preview',
+        'local_subscriptions'
+    ),
+    $user->email,
+    HelpContext::EMAIL
 );
 
 echo html_writer::div(
-    html_writer::tag('h4', s($subject), ['class' => 'mb-1']) .
-    html_writer::div(s($user->email), 'text-muted'),
-    'card card-body mb-4'
+    html_writer::tag(
+        'strong',
+        get_string(
+            'subject',
+            'core'
+        ) .
+        get_string(
+            'labelsep',
+            'langconfig'
+        )
+    ) .
+    ' ' .
+    s($subject),
+    'crm-email-preview-subject'
 );
 
-echo html_writer::tag('iframe', '', [
-    'srcdoc' => $html,
-    'style' => 'width:100%;min-height:800px;border:1px solid #dee2e6;border-radius:8px;background:white;',
-]);
+echo html_writer::tag(
+    'iframe',
+    '',
+    [
+        'srcdoc' => $html,
+
+        'title' => get_string(
+            'crm_email_preview',
+            'local_subscriptions'
+        ),
+
+        'class' =>
+            'local-subscriptions-email-preview-frame',
+    ]
+);
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

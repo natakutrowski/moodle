@@ -11,8 +11,14 @@ use local_subscriptions\crm\work\dto\CreateWorkItemRequest;
 use local_subscriptions\crm\work\rendering\WorkItemRenderer;
 use local_subscriptions\crm\work\repositories\WorkItemReadRepository;
 use local_subscriptions\crm\work\services\WorkItemService;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmReturnUrlResolver;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\subscription_config;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_WORK_ITEMS);
@@ -20,6 +26,13 @@ $targetuserid = optional_param('targetuserid', 0, PARAM_INT);
 $parentid = optional_param('parentid', 0, PARAM_INT);
 $source = optional_param('source', WorkItemSource::MANUAL, PARAM_ALPHANUMEXT);
 $threadid = optional_param('threadid', 0, PARAM_INT);
+
+$returnurl = optional_param(
+    'returnurl',
+    '',
+    PARAM_LOCALURL
+);
+
 if (!WorkItemSource::is_valid($source)) {
     $source = WorkItemSource::MANUAL;
 }
@@ -70,40 +83,67 @@ $repository = new WorkItemReadRepository();
 $teams = $repository->get_teams();
 $assignees = $repository->get_assignees();
 
+$pageparams = [];
+
+if ($targetuserid > 0) {
+    $pageparams['targetuserid'] =
+        $targetuserid;
+}
+
+if ($parentid > 0) {
+    $pageparams['parentid'] =
+        $parentid;
+}
+
+if (
+    $source !==
+    WorkItemSource::MANUAL
+) {
+    $pageparams['source'] =
+        $source;
+}
+
+if ($threadid > 0) {
+    $pageparams['threadid'] =
+        $threadid;
+}
+
+if ($returnurl !== '') {
+    $pageparams['returnurl'] =
+        $returnurl;
+}
+
 $pageurl = new moodle_url(
-    subscription_config::admin_work_item_create_page()
+    subscription_config::
+        admin_work_item_create_page(),
+    $pageparams
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($pageurl);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(
-    get_string(
-        'crm_work_create',
-        'local_subscriptions'
-    )
-);
-$PAGE->set_heading(
-    get_string(
-        'crm_work_create',
-        'local_subscriptions'
-    )
+$fallbackurl = new moodle_url(
+    subscription_config::
+        admin_work_items_page()
 );
 
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
-    'local-subscriptions-work-page'
-);
-$PAGE->add_body_class(
-    'local-subscriptions-work-create-page'
+$backurl =
+    CrmReturnUrlResolver::resolve(
+        $returnurl,
+        $fallbackurl
+    );
+
+$pagetitle = get_string(
+    'crm_work_create',
+    'local_subscriptions'
 );
 
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    [
+        'local-subscriptions-work-page',
+        'local-subscriptions-work-create-page',
+    ]
 );
 
 echo $OUTPUT->header();
@@ -113,23 +153,51 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-echo html_writer::link(
-    new moodle_url(
-        subscription_config::admin_work_items_page()
-    ),
-    '← ' . get_string(
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'crm_work_title',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_work_items_page()
+                ),
+        ],
+        [
+            'label' =>
+                $pagetitle,
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    $backurl,
+    get_string(
         'crm_work_back',
         'local_subscriptions'
+    )
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_work_create_subtitle',
+        'local_subscriptions'
     ),
-    [
-        'class' =>
-            'crm-app-back-link btn btn-link ps-0 mb-3',
-    ]
+    HelpContext::WORK_ITEMS
 );
 
 echo html_writer::start_tag('form', [
     'method' => 'post',
-    'action' => subscription_config::admin_work_item_create_page(),
+    'action' => $pageurl->out(false),
     'class' => 'card card-body crm-work-create-form',
 ]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
@@ -137,6 +205,17 @@ echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'targetuseri
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'parentid', 'value' => $parentid]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'source', 'value' => $source]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'threadid', 'value' => $threadid]);
+
+if ($returnurl !== '') {
+    echo html_writer::empty_tag(
+        'input',
+        [
+            'type' => 'hidden',
+            'name' => 'returnurl',
+            'value' => $returnurl,
+        ]
+    );
+}
 
 echo html_writer::label(get_string('crm_work_field_title', 'local_subscriptions'), 'id_title');
 echo html_writer::empty_tag('input', ['type' => 'text', 'name' => 'title', 'id' => 'id_title', 'class' => 'form-control mb-3', 'required' => 'required']);

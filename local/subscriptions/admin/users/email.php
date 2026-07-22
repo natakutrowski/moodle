@@ -10,6 +10,14 @@ use local_subscriptions\service\UserEmailService;
 use local_subscriptions\crm\user\UserProfileRepository;
 use local_subscriptions\crm\user\email\UserEmailPresetBuilder;
 use local_subscriptions\digital\repositories\DigitalPurchaseAdminActionRepository;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmReturnUrlResolver;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 
 global $PAGE, $OUTPUT;
 
@@ -48,15 +56,23 @@ $url = new moodle_url(
     $urlparams
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title(
-    get_string('crm_send_email', 'local_subscriptions') .
+$pagetitle =
+    get_string(
+        'crm_send_email',
+        'local_subscriptions'
+    ) .
     ' - ' .
-    fullname($user)
-);
-$PAGE->set_heading(
-    get_string('crm_send_email', 'local_subscriptions')
+    fullname($user);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $url,
+    $pagetitle,
+    [
+        'local-subscriptions-user-profile-page',
+        'local-subscriptions-user-email-page',
+    ]
 );
 
 class local_subscriptions_crm_email_form extends moodleform {
@@ -230,9 +246,11 @@ $fallbackurl = new moodle_url(
     ['id' => $id]
 );
 
-$redirecturl = $returnurl !== ''
-    ? new moodle_url($returnurl)
-    : $fallbackurl;
+$redirecturl =
+    CrmReturnUrlResolver::resolve(
+        $returnurl,
+        $fallbackurl
+    );
 
 if ($form->is_cancelled()) {
     redirect($redirecturl);
@@ -272,12 +290,71 @@ if ($data = $form->get_data()) {
 
 echo $OUTPUT->header();
 
-echo html_writer::link(
-    $redirecturl,
-    '← ' . get_string('back'),
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::USERS,
+    $context
+);
+
+$userurl = new moodle_url(
+    subscription_config::
+        admin_user_view_page(),
     [
-        'class' => 'btn btn-outline-secondary mb-3',
+        'id' => $user->id,
     ]
+);
+
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'admin_users',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_users_page()
+                ),
+        ],
+        [
+            'label' =>
+                fullname($user),
+
+            'url' =>
+                $userurl,
+        ],
+        [
+            'label' =>
+                get_string(
+                    'crm_send_email',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    $redirecturl,
+    get_string(
+        'back',
+        'core'
+    )
+);
+
+echo CrmPageHeader::render(
+    get_string(
+        'crm_send_email',
+        'local_subscriptions'
+    ),
+    fullname($user) .
+        ' · ' .
+        $user->email,
+    HelpContext::EMAIL
 );
 
 if ($preset === UserEmailPresetBuilder::DIGITAL_PAYMENT_HELP) {
@@ -300,19 +377,8 @@ if ($preset === UserEmailPresetBuilder::DIGITAL_PAYMENT_HELP) {
     );
 }
 
-echo html_writer::div(
-    html_writer::tag(
-        'h4',
-        fullname($user),
-        ['class' => 'mb-1']
-    ) .
-    html_writer::div(
-        s($user->email),
-        'text-muted'
-    ),
-    'card card-body mb-4'
-);
-
 $form->display();
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

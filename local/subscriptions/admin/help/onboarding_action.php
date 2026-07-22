@@ -6,6 +6,7 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\subscription_config;
 use local_subscriptions\crm\help\onboarding\HelpOnboardingService;
+use local_subscriptions\crm\navigation\CrmReturnUrlResolver;
 
 global $USER, $PAGE;
 
@@ -46,9 +47,16 @@ $fallbackurl = new moodle_url(
     subscription_config::admin_help_page()
 );
 
-$redirecturl = $returnurl !== ''
-    ? new moodle_url($returnurl)
-    : $fallbackurl;
+$fallbackurl = new moodle_url(
+    subscription_config::
+        admin_help_page()
+);
+
+$redirecturl =
+    CrmReturnUrlResolver::resolve(
+        $returnurl,
+        $fallbackurl
+    );
 
 $PAGE->set_context($context);
 $PAGE->set_url(

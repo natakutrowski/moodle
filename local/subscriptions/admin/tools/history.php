@@ -8,8 +8,13 @@ use local_subscriptions\crm\admin_tools\rendering\AdminToolRenderer;
 use local_subscriptions\crm\admin_tools\repositories\AdminToolActorRepository;
 use local_subscriptions\crm\admin_tools\repositories\AdminToolRunRepository;
 use local_subscriptions\crm\admin_tools\AdminToolRegistry;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\subscription_config;
 
 $context = AdminSecurity::require(
@@ -26,33 +31,20 @@ $returnurl = new moodle_url(
         admin_crm_tools_page()
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($pageurl);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(
-    get_string(
-        'crm_admin_tool_history',
-        'local_subscriptions'
-    )
-);
-$PAGE->set_heading(
-    get_string(
-        'crm_admin_tool_history',
-        'local_subscriptions'
-    )
+$pagetitle = get_string(
+    'crm_admin_tool_history',
+    'local_subscriptions'
 );
 
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
-    'local-subscriptions-admin-tools-page'
-);
-
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    [
+        'local-subscriptions-admin-tools-page',
+        'local-subscriptions-admin-tools-history-page',
+    ]
 );
 
 $runs =
@@ -72,24 +64,46 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-echo html_writer::link(
-    $returnurl,
-    '← ' . get_string(
-        'crm_admin_tools_title',
-        'local_subscriptions'
-    ),
+echo CrmBreadcrumbRenderer::render(
     [
-        'class' =>
-            'crm-app-back-link btn btn-link ps-0 mb-3',
+        [
+            'label' =>
+                get_string(
+                    'crm_admin_tools_title',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_crm_tools_page()
+                ),
+        ],
+        [
+            'label' =>
+                $pagetitle,
+
+            'url' =>
+                null,
+        ],
     ]
 );
 
-echo $OUTPUT->heading(
+echo CrmBackLinkRenderer::render(
+    $returnurl,
     get_string(
-        'crm_admin_tool_history',
+        'crm_admin_tools_title',
+        'local_subscriptions'
+    )
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_admin_tool_history_subtitle',
         'local_subscriptions'
     ),
-    2
+    HelpContext::ADMIN_TOOLS
 );
 
 echo AdminToolRenderer::render_history(

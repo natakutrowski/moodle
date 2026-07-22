@@ -5,15 +5,13 @@ require_once(__DIR__ . '/../../../config.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\commandcenter\CommandCenterRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
-use local_subscriptions\crm\help\onboarding\HelpOnboardingRenderer;
-use local_subscriptions\crm\help\onboarding\HelpOnboardingService;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\dashboard\Dashboard;
 use local_subscriptions\dashboard\services\DashboardPeriod;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 
 global $PAGE, $OUTPUT, $USER;
 
@@ -36,36 +34,116 @@ $pageurl = new moodle_url(
     ]
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($pageurl);
-$PAGE->set_title(
-    get_string(
-        'admin_dashboard',
-        'local_subscriptions'
-    )
+$pagetitle = get_string(
+    'admin_dashboard',
+    'local_subscriptions'
 );
-$PAGE->set_heading(
-    get_string(
-        'admin_dashboard',
-        'local_subscriptions'
-    )
-);
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
     'local-subscriptions-dashboard-page'
 );
 
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::
-            plugin_stylesheet_page()
-    )
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/workspace_edit_mode',
+    'init'
 );
 
 $PAGE->requires->js_call_amd(
-    'local_subscriptions/command_center',
+    'local_subscriptions/workspace_drag_drop',
+    'init'
+);
+
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/workspace_item_menu',
+    'init'
+);
+
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/dashboard_workspace_actions',
+    'init',
+    [
+        [
+            'routes' => [
+                'stats' => (
+                    new moodle_url(
+                        subscription_config::
+                            user_subscriptions_page()
+                    )
+                )->out(false),
+
+                'intelligence' => (
+                    new moodle_url(
+                        subscription_config::
+                            admin_users_page()
+                    )
+                )->out(false),
+
+                'assistant' => (
+                    new moodle_url(
+                        subscription_config::
+                            admin_crm_assistant_page()
+                    )
+                )->out(false),
+
+                'inbox' => (
+                    new moodle_url(
+                        subscription_config::
+                            admin_inbox_page()
+                    )
+                )->out(false),
+
+                'work' => (
+                    new moodle_url(
+                        subscription_config::
+                            admin_work_items_page()
+                    )
+                )->out(false),
+
+                'priorities' => (
+                    new moodle_url(
+                        subscription_config::
+                            admin_crm_assistant_page()
+                    )
+                )->out(false),
+
+                'funnel' => (
+                    new moodle_url(
+                        subscription_config::
+                            admin_users_page()
+                    )
+                )->out(false),
+
+                'trends' => (
+                    new moodle_url(
+                        subscription_config::
+                            admin_users_page()
+                    )
+                )->out(false),
+
+                'intelligence_alerts' => (
+                    new moodle_url(
+                        subscription_config::
+                            admin_users_page()
+                    )
+                )->out(false),
+
+                'team' => (
+                    new moodle_url(
+                        subscription_config::
+                            admin_users_page()
+                    )
+                )->out(false),
+            ],
+        ],
+    ]
+);
+
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/workspace_personalization',
     'init'
 );
 
@@ -93,27 +171,10 @@ echo CrmPageHeader::render(
     HelpContext::DASHBOARD
 );
 
-$onboardingstate =
-    (new HelpOnboardingService())
-        ->get_state((int)$USER->id);
-
-if (!$onboardingstate->finished) {
-    echo HelpOnboardingRenderer::render(
-        $onboardingstate,
-        $pageurl->out_as_local_url(false),
-        true
-    );
-}
-
-echo html_writer::start_div(
-    'local-subscriptions-workspace-command'
+echo Dashboard::render(
+    $period,
+    $pageurl->out_as_local_url(false)
 );
-
-echo CommandCenterRenderer::render();
-
-echo html_writer::end_div();
-
-echo Dashboard::render($period);
 
 echo CrmWorkspaceRenderer::end();
 

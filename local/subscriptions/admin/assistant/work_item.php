@@ -11,8 +11,13 @@ use local_subscriptions\crm\work\intelligence\rendering\WorkItemSuggestionRender
 use local_subscriptions\crm\work\intelligence\services\SuggestedWorkItemCreationService;
 use local_subscriptions\crm\work\intelligence\services\WorkItemSuggestionService;
 use local_subscriptions\crm\work\repositories\WorkItemReadRepository;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\subscription_config;
 
 global $PAGE, $OUTPUT, $USER;
@@ -164,37 +169,20 @@ $pageurl = new moodle_url(
     ]
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($pageurl);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(
-    get_string(
-        'crm_work_suggestion_title',
-        'local_subscriptions'
-    )
-);
-$PAGE->set_heading(
-    get_string(
-        'crm_work_suggestion_title',
-        'local_subscriptions'
-    )
+$pagetitle = get_string(
+    'crm_work_suggestion_title',
+    'local_subscriptions'
 );
 
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
-    'local-subscriptions-assistant-page'
-);
-$PAGE->add_body_class(
-    'local-subscriptions-assistant-work-item-page'
-);
-
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::
-            plugin_stylesheet_page()
-    )
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    [
+        'local-subscriptions-assistant-page',
+        'local-subscriptions-assistant-work-item-page',
+    ]
 );
 
 echo $OUTPUT->header();
@@ -204,18 +192,49 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-echo html_writer::link(
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'crm_assistant_title',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_crm_assistant_page()
+                ),
+        ],
+        [
+            'label' =>
+                $pagetitle,
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
     new moodle_url(
-        subscription_config::admin_crm_assistant_page()
+        subscription_config::
+            admin_crm_assistant_page()
     ),
-    '← ' . get_string(
+    get_string(
         'crm_assistant_title',
         'local_subscriptions'
+    )
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_work_suggestion_subtitle',
+        'local_subscriptions'
     ),
-    [
-        'class' =>
-            'crm-app-back-link btn btn-link ps-0 mb-3',
-    ]
+    HelpContext::ASSISTANT
 );
 
 echo WorkItemSuggestionRenderer::render(

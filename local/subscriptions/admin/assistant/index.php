@@ -4,18 +4,18 @@ require_once(__DIR__ . '/../../../../config.php');
 
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\commandcenter\CommandCenterRenderer;
+use local_subscriptions\crm\assistant\ai\rendering\CrmAssistantConversationRenderer;
 use local_subscriptions\crm\assistant\dto\AssistantRecommendationCriteria;
 use local_subscriptions\crm\assistant\rendering\CrmAssistantRenderer;
 use local_subscriptions\crm\assistant\services\CrmAssistantService;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\intelligence\recommendations\RecommendationStatus;
+use local_subscriptions\crm\intelligence\recommendations\RecommendationType;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\subscription_config;
-use local_subscriptions\crm\intelligence\recommendations\RecommendationStatus;
-use local_subscriptions\crm\intelligence\recommendations\RecommendationType;
-use local_subscriptions\crm\assistant\ai\rendering\CrmAssistantConversationRenderer;
 
 global $PAGE, $OUTPUT;
 
@@ -47,70 +47,79 @@ $priority = optional_param(
     PARAM_ALPHANUMEXT
 );
 
-$status = $status !== '' &&
-    RecommendationStatus::is_valid($status)
+$status =
+    $status !== '' &&
+    RecommendationStatus::is_valid(
+        $status
+    )
         ? $status
         : null;
 
-$type = $type !== '' &&
-    RecommendationType::is_valid($type)
+$type =
+    $type !== '' &&
+    RecommendationType::is_valid(
+        $type
+    )
         ? $type
         : null;
 
-$criteria = new AssistantRecommendationCriteria(
-    scope: $scope,
-    status: $status,
-    type: $type,
-    prioritylevel:
-        $priority !== '' ? $priority : null,
-    limit: 200
+$criteria =
+    new AssistantRecommendationCriteria(
+        scope: $scope,
+        status: $status,
+        type: $type,
+        prioritylevel:
+            $priority !== ''
+                ? $priority
+                : null,
+        limit: 200
+    );
+
+$workspace = (
+    new CrmAssistantService()
+)->workspace(
+    $criteria
 );
 
-$workspace =
-    (new CrmAssistantService())
-        ->workspace($criteria);
+$pageparams = [
+    'scope' =>
+        $criteria->scope,
+];
+
+if ($criteria->status !== null) {
+    $pageparams['status'] =
+        $criteria->status;
+}
+
+if ($criteria->type !== null) {
+    $pageparams['type'] =
+        $criteria->type;
+}
+
+if (
+    $criteria->prioritylevel !== null
+) {
+    $pageparams['priority'] =
+        $criteria->prioritylevel;
+}
 
 $pageurl = new moodle_url(
     subscription_config::
         admin_crm_assistant_page(),
-    [
-        'scope' => $criteria->scope,
-        'status' => $criteria->status,
-        'type' => $criteria->type,
-        'priority' =>
-            $criteria->prioritylevel,
-    ]
+    $pageparams
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($pageurl);
-$PAGE->set_title(
-    get_string(
-        'crm_assistant_title',
-        'local_subscriptions'
-    )
+$pagetitle = get_string(
+    'crm_assistant_title',
+    'local_subscriptions'
 );
-$PAGE->set_heading(
-    get_string(
-        'crm_assistant_title',
-        'local_subscriptions'
-    )
-);
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
     'local-subscriptions-assistant-page'
-);
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::
-            plugin_stylesheet_page()
-    )
-);
-$PAGE->requires->js_call_amd(
-    'local_subscriptions/command_center',
-    'init'
 );
 
 $PAGE->requires->js_call_amd(
@@ -126,24 +135,13 @@ echo CrmWorkspaceRenderer::start(
 );
 
 echo CrmPageHeader::render(
-    get_string(
-        'crm_assistant_title',
-        'local_subscriptions'
-    ),
+    $pagetitle,
     get_string(
         'crm_assistant_description',
         'local_subscriptions'
     ),
-    HelpContext::DASHBOARD
+    HelpContext::ASSISTANT
 );
-
-echo html_writer::start_div(
-    'local-subscriptions-workspace-command'
-);
-
-echo CommandCenterRenderer::render();
-
-echo html_writer::end_div();
 
 if (
     has_capability(

@@ -11,6 +11,13 @@ use local_subscriptions\crm\inbox\repositories\InboxDraftRepository;
 use local_subscriptions\crm\inbox\repositories\InboxReadRepository;
 use local_subscriptions\crm\inbox\repositories\InboxThreadRepository;
 use local_subscriptions\crm\inbox\services\InboxReplyService;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\subscription_config;
 
 $context = AdminSecurity::require(
@@ -126,28 +133,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             )
         );
     }
+
+    throw new moodle_exception(
+        'crm_inbox_invalid_form_action',
+        'local_subscriptions'
+    );
+
 }
 
-$PAGE->set_context($context);
-$PAGE->set_url(
-    new moodle_url(
-        subscription_config::
-            admin_inbox_reply_page(),
-        ['threadid' => $threadid]
-    )
+$pageurl = new moodle_url(
+    subscription_config::
+        admin_inbox_reply_page(),
+    [
+        'threadid' => $threadid,
+    ]
 );
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(
-    get_string(
-        'crm_inbox_reply',
-        'local_subscriptions'
-    )
+
+$pagetitle = get_string(
+    'crm_inbox_reply',
+    'local_subscriptions'
 );
-$PAGE->set_heading(
-    get_string(
-        'crm_inbox_reply',
-        'local_subscriptions'
-    )
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    [
+        'local-subscriptions-inbox-page',
+        'local-subscriptions-inbox-reply-page',
+    ]
 );
 
 $PAGE->requires->js_call_amd(
@@ -156,6 +171,80 @@ $PAGE->requires->js_call_amd(
 );
 
 echo $OUTPUT->header();
+
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::INBOX,
+    $context
+);
+
+$threadurl = new moodle_url(
+    subscription_config::
+        admin_inbox_thread_page(),
+    [
+        'id' => $threadid,
+    ]
+);
+
+$threadtitle =
+    trim(
+        (string)$thread->subject
+    ) !== ''
+        ? trim(
+            (string)$thread->subject
+        )
+        : get_string(
+            'crm_inbox_thread_without_subject',
+            'local_subscriptions'
+        );
+
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'crm_inbox_title',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_inbox_page()
+                ),
+        ],
+        [
+            'label' =>
+                $threadtitle,
+
+            'url' =>
+                $threadurl,
+        ],
+        [
+            'label' =>
+                $pagetitle,
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    $threadurl,
+    get_string(
+        'crm_inbox_back_to_thread',
+        'local_subscriptions'
+    )
+);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    get_string(
+        'crm_inbox_reply_help_subtitle',
+        'local_subscriptions'
+    ),
+    HelpContext::INBOX
+);
 
 echo html_writer::start_tag(
     'form',
@@ -346,6 +435,9 @@ echo html_writer::link(
 echo html_writer::end_tag(
     'div'
 );
+
 echo html_writer::end_tag('form');
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

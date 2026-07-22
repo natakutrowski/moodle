@@ -4658,3 +4658,486 @@ $string['payment_error_provider_unavailable'] =
 
 $string['payment_error_reference'] =
     'Номер обращения: {$a}';
+
+$string['crm_topbar_brand_suffix'] = 'CRM';
+$string['crm_topbar_dashboard_link'] = 'Открыть панель CampusFR CRM';
+$string['crm_topbar_moodle_admin'] = 'Администрирование Moodle';
+
+$string['crm_topbar_user_menu'] = 'Открыть меню пользователя';
+$string['crm_topbar_user_navigation'] = 'Навигация по учётной записи';
+$string['crm_topbar_view_profile'] = 'Открыть профиль';
+$string['crm_topbar_my_courses'] = 'Мои курсы';
+$string['crm_topbar_grades'] = 'Оценки';
+$string['crm_topbar_calendar'] = 'Календарь';
+$string['crm_topbar_preferences'] = 'Настройки';
+$string['crm_topbar_switch_role'] = 'Сменить роль…';
+$string['crm_topbar_logout'] = 'Выйти';
+
+$string['crm_topbar_language'] = 'Язык';
+$string['crm_topbar_language_menu'] = 'Выбрать язык';
+$string['crm_topbar_language_navigation'] = 'Доступные языки';
+
+$string['dashboard_personalization_open'] = 'Настроить дашборд';
+$string['dashboard_personalization_title'] = 'Настроить дашборд';
+$string['dashboard_personalization_description'] = 'Выберите отображаемые карточки и измените их порядок перетаскиванием или кнопками Вверх и Вниз.';
+$string['dashboard_personalization_close'] = 'Закрыть настройки дашборда';
+$string['dashboard_personalization_save'] = 'Сохранить расположение';
+$string['dashboard_personalization_reset'] = 'Восстановить расположение по умолчанию';
+$string['dashboard_personalization_reset_confirm'] = 'Восстановить расположение дашборда по умолчанию?';
+$string['dashboard_personalization_save_error'] = 'Не удалось сохранить расположение дашборда.';
+$string['dashboard_personalization_drag'] = 'Перетащите для перемещения';
+$string['dashboard_personalization_move_up'] = 'Переместить карточку «{$a}» вверх';
+$string['dashboard_personalization_move_down'] = 'Переместить карточку «{$a}» вниз';
+$string['dashboard_personalization_visibility'] = 'Показывать карточку «{$a}»';
+$string['dashboard_personalization_zone_hero'] = 'Основные показатели';
+$string['dashboard_personalization_zone_main'] = 'Основной дашборд';
+$string['dashboard_personalization_zone_side'] = 'Боковая колонка';
+$string['dashboard_personalization_main_empty'] = 'Все карточки основного дашборда скрыты. Используйте кнопку настройки, чтобы снова их отобразить.';
+
+$string['dashboard_personalization_card_stats'] = 'Основные показатели';
+$string['dashboard_personalization_card_stats_description'] = 'Пользователи, подписки, пробные периоды, покупки и доход.';
+$string['dashboard_personalization_card_intelligence'] = 'CRM Intelligence';
+$string['dashboard_personalization_card_intelligence_description'] = 'Оценки, сегменты, возможности и приоритетные профили.';
+$string['dashboard_personalization_card_assistant'] = 'CRM-ассистент';
+$string['dashboard_personalization_card_assistant_description'] = 'Рекомендации и действия, предложенные ассистентом.';
+$string['dashboard_personalization_card_inbox'] = 'CRM Inbox';
+$string['dashboard_personalization_card_inbox_description'] = 'Сообщения, непрочитанные диалоги и недавняя активность.';
+$string['dashboard_personalization_card_work'] = 'Рабочие задачи';
+$string['dashboard_personalization_card_work_description'] = 'Назначенные, срочные, просроченные и свободные задачи.';
+$string['dashboard_personalization_card_customer_success'] = 'Customer Success';
+$string['dashboard_personalization_card_customer_success_description'] = 'Активные планы, прогресс, блокировки и критические ситуации.';
+$string['dashboard_personalization_card_issues'] = 'Требует внимания';
+$string['dashboard_personalization_card_issues_description'] = 'Проблемы и аномалии, требующие вмешательства.';
+$string['dashboard_personalization_card_priorities'] = 'Ежедневные приоритеты';
+$string['dashboard_personalization_card_priorities_description'] = 'Приоритетные профили и действия на сегодня.';
+$string['dashboard_personalization_card_funnel'] = 'Воронка';
+$string['dashboard_personalization_card_funnel_description'] = 'Привлечение, пробные периоды, конверсии и новые клиенты.';
+$string['dashboard_personalization_card_trends'] = 'Тенденции';
+$string['dashboard_personalization_card_trends_description'] = 'Изменение риска, вовлечённости и прогресса.';
+$string['dashboard_personalization_card_intelligence_alerts'] = 'Интеллектуальные уведомления';
+$string['dashboard_personalization_card_intelligence_alerts_description'] = 'Расширенные CRM-уведомления и контекст Customer Success.';
+$string['dashboard_personalization_card_navigation'] = 'Административные ссылки';
+$string['dashboard_personalization_card_navigation_description'] = 'Доступ к пользователям, планам, покупкам и инструментам.';
+$string['dashboard_personalization_card_activity'] = 'Недавняя активность';
+$string['dashboard_personalization_card_activity_description'] = 'Последние события, зарегистрированные в CRM.';
+$string['dashboard_personalization_card_team'] = 'Команда';
+$string['dashboard_personalization_card_team_description'] = 'Сводка элементов, назначенных текущему пользователю.';
+$string['dashboard_personalization_zone_onboarding'] = 'Знакомство с CRM';
+
+$string['workspace_toolbar_title'] = 'Режим редактирования';
+$string['workspace_toolbar_description'] = 'Настройте рабочее пространство. Изменения расположения будут применены после сохранения.';
+$string['workspace_toolbar_status_clean'] = 'Нет несохранённых изменений';
+$string['workspace_toolbar_status_dirty'] = 'Есть несохранённые изменения';
+$string['workspace_toolbar_status_saving'] = 'Сохранение…';
+$string['workspace_toolbar_hidden_singular'] = 'скрытый элемент';
+$string['workspace_toolbar_hidden_plural'] = 'скрытых элементов';
+$string['workspace_toolbar_reset'] = 'Восстановить настройки';
+$string['workspace_toolbar_cancel'] = 'Отменить';
+$string['workspace_toolbar_save'] = 'Сохранить';
+$string['workspace_item_type_card'] = 'Карточка';
+$string['workspace_item_type_widget'] = 'Виджет';
+$string['workspace_item_type_system'] = 'Системный элемент';
+$string['workspace_item_drag_handle'] = 'Переместить этот элемент';
+$string['workspace_item_drag_handle_named'] = 'Переместить элемент «{$a}»';
+$string['workspace_item_menu_open_named'] = 'Открыть действия для элемента «{$a}»';
+$string['workspace_item_menu_label_named'] = 'Доступные действия для элемента «{$a}»';
+$string['workspace_item_move_before'] = 'Переместить выше';
+$string['workspace_item_move_after'] = 'Переместить ниже';
+$string['workspace_item_hide'] = 'Скрыть';
+$string['workspace_item_reset'] = 'Сбросить изменения элемента';
+$string['workspace_action_configure'] = 'Настроить';
+$string['workspace_action_duplicate'] = 'Дублировать';
+
+$string['dashboard_category_overview'] = 'Обзор';
+$string['dashboard_category_intelligence'] = 'Интеллект';
+$string['dashboard_category_operations'] = 'Операции';
+$string['dashboard_category_customer_success'] = 'Customer Success';
+$string['dashboard_category_navigation_activity'] = 'Навигация и активность';
+$string['dashboard_category_team'] = 'Команда';
+$string['dashboard_category_system'] = 'Система';
+$string['dashboard_category_other'] = 'Другое';
+
+$string['dashboard_personalization_width_compact'] = 'Компактная';
+$string['dashboard_personalization_width_medium'] = 'Средняя';
+$string['dashboard_personalization_width_full'] = 'На всю ширину';
+
+$string['dashboard_personalization_type_card'] = 'Карточка';
+$string['dashboard_personalization_type_widget'] = 'Виджет';
+$string['dashboard_personalization_type_system'] = 'Системный элемент';
+
+$string['dashboard_personalization_period_aware'] = 'Зависит от периода';
+$string['dashboard_personalization_order_hint'] = 'Изменяйте порядок элементов прямо на дашборде в режиме редактирования.';
+$string['dashboard_workspace_action_open_details'] = 'Открыть подробный обзор';
+$string['dashboard_workspace_empty_hero'] = 'Основные показатели сейчас не отображаются.';
+$string['dashboard_workspace_empty_main'] = 'В основной области сейчас нет отображаемых карточек.';
+$string['dashboard_workspace_empty_side'] = 'В боковой колонке сейчас нет отображаемых элементов.';
+$string['dashboard_period_year'] = 'Этот год';
+$string['dashboard_period_all'] = 'За всё время';
+
+$string['dashboard_trends_all_time_title'] = 'Сводные данные';
+$string['dashboard_trends_all_time_subtitle'] = 'Данные с момента создания CRM';
+$string['dashboard_trends_all_time_message'] = 'Для отображения тенденций необходим сопоставимый предыдущий период. Выберите Сегодня, Эту неделю, Этот месяц или Этот год.';
+
+$string['inbox_workspace_name'] = 'Рабочее пространство Inbox';
+
+$string['inbox_workspace_navigation'] = 'Навигация';
+
+$string['inbox_workspace_list'] = 'Диалоги';
+
+$string['inbox_workspace_reading'] = 'Просмотр';
+
+$string['inbox_workspace_context'] = 'Контекст клиента';
+$string['inbox_workspace_filters_label'] =
+    'Фильтры Inbox';
+
+$string['inbox_workspace_filters_description'] =
+    'Поиск и фильтрация диалогов Inbox.';
+
+$string['inbox_workspace_thread_list_label'] =
+    'Список диалогов';
+
+$string['inbox_workspace_thread_list_description'] =
+    'Просмотр диалогов, соответствующих активным фильтрам.';
+
+$string['inbox_thread_workspace_messages'] = 'Сообщения';
+$string['inbox_thread_workspace_messages_description'] =
+    'Просмотр полной истории диалога.';
+$string['inbox_thread_workspace_reply'] = 'Ответить';
+$string['inbox_thread_workspace_reply_description'] =
+    'Подготовить ответ на этот диалог.';
+$string['inbox_thread_workspace_context'] =
+    'Диалог и контакт';
+$string['inbox_thread_workspace_context_description'] =
+    'Просмотр контакта, статуса и доступных действий.';
+$string['inbox_thread_workspace_ai'] = 'ИИ-помощник';
+$string['inbox_thread_workspace_ai_description'] =
+    'Проанализировать диалог и подготовить ответ.';
+$string['inbox_thread_workspace_context_zone'] =
+    'Контекст диалога';
+$string['inbox_workspace_personalization_open'] =
+    'Настроить';
+$string['inbox_workspace_personalization_title'] =
+    'Настроить диалог';
+$string['inbox_workspace_personalization_description'] =
+    'Выберите видимые панели и измените порядок контекста диалога.';
+$string['inbox_workspace_personalization_close'] =
+    'Закрыть настройки';
+$string['inbox_workspace_personalization_save_error'] =
+    'Не удалось сохранить расположение диалога.';
+$string['inbox_workspace_personalization_reset_confirm'] =
+    'Сбросить расположение диалога?';
+
+$string['inbox_workspace_zone_reading'] = 'Переписка';
+$string['inbox_workspace_zone_context'] = 'Контекст';
+
+$string['inbox_workspace_reading_placeholder_label'] =
+    'Предпросмотр диалога';
+
+$string['inbox_workspace_reading_placeholder_item_description'] =
+    'Область для просмотра выбранного диалога.';
+
+$string['inbox_workspace_reading_placeholder_title'] =
+    'Выберите диалог';
+
+$string['inbox_workspace_reading_placeholder_description'] =
+    'Здесь появится предварительный просмотр переписки.';
+
+$string['inbox_workspace_context_placeholder_label'] =
+    'Контекст диалога';
+
+$string['inbox_workspace_context_placeholder_item_description'] =
+    'Область для информации о контакте и диалоге.';
+
+$string['inbox_workspace_context_placeholder_title'] =
+    'Контекстная информация';
+
+$string['inbox_workspace_context_placeholder_description'] =
+    'Выберите диалог, чтобы увидеть контакт, статус и полезную информацию.';
+
+$string['inbox_thread_workspace_overview'] =
+    'Обзор';
+
+$string['inbox_thread_workspace_overview_description'] =
+    'Статус, приоритет, почтовый ящик и основные сведения о переписке.';
+
+$string['inbox_thread_workspace_contact'] =
+    'Контакт';
+
+$string['inbox_thread_workspace_contact_description'] =
+    'Контактные данные и ссылка на соответствующий профиль CRM.';
+
+$string['inbox_thread_workspace_actions'] =
+    'Действия';
+
+$string['inbox_thread_workspace_actions_description'] =
+    'Доступные действия для управления этой перепиской.';
+
+$string['inbox_thread_overview_account'] =
+    'Почтовый ящик';
+
+$string['inbox_thread_overview_folder'] =
+    'Папка';
+
+$string['inbox_thread_overview_messages'] =
+    'Сообщения';
+
+$string['inbox_thread_overview_unread'] =
+    'Непрочитанные';
+
+$string['inbox_thread_overview_assignment'] =
+    'Назначение';
+
+$string['inbox_thread_overview_last_message'] =
+    'Последнее сообщение';
+
+$string['inbox_thread_assignment_team'] =
+    'Команда: {$a}';
+
+$string['inbox_thread_assignment_user'] =
+    'Пользователь: {$a}';
+
+$string['inbox_thread_assignment_unassigned'] =
+    'Не назначено';
+
+$string['inbox_thread_contact_title'] =
+    'Контакт';
+
+$string['inbox_thread_contact_unavailable'] =
+    'Контактные данные отсутствуют.';
+
+$string['inbox_thread_contact_open_profile'] =
+    'Открыть профиль CRM';
+
+$string['inbox_thread_contact_external_description'] =
+    'Этот контакт пока не связан с пользователем Moodle.';
+
+$string['inbox_thread_actions_title'] =
+    'Действия';
+
+$string['inbox_thread_actions_description'] =
+    'Измените статус, архивируйте переписку или создайте задачу для дальнейшей работы.';
+
+$string['user360_workspace_region_label'] =
+    'Рабочее пространство профиля пользователя';
+
+$string['user360_workspace_hero'] =
+    'Данные пользователя';
+
+$string['user360_workspace_hero_description'] =
+    'Основные данные пользователя, статус CRM, теги и сведения об аккаунте.';
+
+$string['user360_workspace_zone_hero'] =
+    'Профиль';
+
+$string['user360_workspace_zone_main'] =
+    'Основная информация';
+
+$string['user360_workspace_zone_sidebar'] =
+    'Дополнительная информация';
+
+$string['user360_workspace_zone_timeline'] =
+    'История';
+
+$string['user360_workspace_personalization_open'] =
+    'Настроить профиль';
+
+$string['user360_workspace_personalization_title'] =
+    'Настройка профиля пользователя';
+
+$string['user360_workspace_personalization_description'] =
+    'Выберите отображаемые панели и расположите их в удобном для работы порядке.';
+
+$string['user360_workspace_personalization_close'] =
+    'Закрыть настройку';
+
+$string['user360_workspace_personalization_save_error'] =
+    'Не удалось сохранить настройки профиля пользователя.';
+
+$string['user360_workspace_personalization_reset_confirm'] =
+    'Сбросить расположение блоков профиля пользователя?';
+
+$string['user360_workspace_intelligence'] =
+    'CRM-аналитика';
+
+$string['user360_workspace_intelligence_description'] =
+    'Оценки, тенденции, сегменты, возможности и рекомендации для этого пользователя.';
+
+$string['user360_workspace_customer_success'] =
+    'Customer Success';
+
+$string['user360_workspace_customer_success_description'] =
+    'Планы сопровождения, последующие действия и поддержка пользователя.';
+
+$string['user360_workspace_inbox'] =
+    'Входящие';
+
+$string['user360_workspace_inbox_description'] =
+    'Переписка, непрочитанные сообщения и последние обращения пользователя.';
+
+$string['user360_workspace_notes'] =
+    'Заметки';
+
+$string['user360_workspace_notes_description'] =
+    'Внутренние CRM-заметки, связанные с этим пользователем.';
+
+$string['user360_workspace_work_items'] =
+    'Задачи';
+
+$string['user360_workspace_work_items_description'] =
+    'Задачи и рабочие элементы, связанные с этим пользователем.';
+
+$string['user360_workspace_timeline'] =
+    'Хронология';
+
+$string['user360_workspace_timeline_description'] =
+    'Полная хронологическая история событий, связанных с пользователем.';
+
+$string['user360_workspace_zone_summary'] =
+    'Сводка';
+
+$string['user360_workspace_stats'] =
+    'Обзор';
+
+$string['user360_workspace_stats_description'] =
+    'CRM-статус, подписки, покупки, доступные курсы, доход и последняя активность.';
+
+$string['user360_workspace_quick_actions'] =
+    'Быстрые действия';
+
+$string['user360_workspace_quick_actions_description'] =
+    'Административные действия и быстрое добавление заметки для пользователя.';
+
+$string['user360_workspace_assistant'] =
+    'CRM-ассистент';
+
+$string['user360_workspace_assistant_description'] =
+    'Анализ, рекомендации и действия, предложенные CRM-ассистентом.';
+
+$string['user360_workspace_commercial'] =
+    'Коммерческая активность';
+
+$string['user360_workspace_commercial_description'] =
+    'Подписки и цифровые покупки, связанные с пользователем.';
+
+$string['user360_workspace_courses'] =
+    'Доступные курсы';
+
+$string['user360_workspace_courses_description'] =
+    'Курсы, доступные этому пользователю в настоящее время.';
+
+$string['crm_user_not_found'] = 'Пользователь не найден';
+$string['crm_user_not_found_description'] = 'Запрошенный профиль CRM невозможно отобразить.';
+$string['crm_user_not_found_message'] = 'Активный пользователь Moodle с идентификатором {$a} не найден. Возможно, пользователь был удалён или ссылка устарела.';
+$string['crm_user_not_found_back'] = 'Вернуться к пользователям';
+$string['crm_user_deleted'] = 'Удалённая учётная запись Moodle';
+$string['crm_user_deleted_description'] = 'Этот пользователь больше не активен в Moodle.';
+$string['crm_user_deleted_message'] = 'Учётная запись Moodle с идентификатором {$a} была удалена. Некоторые исторические данные CRM всё ещё могут быть доступны.';
+$string['crm_user_history_title'] = 'Исторический профиль CRM · пользователь {$a}';
+$string['crm_user_history_description'] = 'Данные CRM, сохранённые для удалённой учётной записи Moodle.';
+$string['crm_user_history_readonly'] = 'Исторический профиль только для чтения';
+$string['crm_user_history_readonly_description'] = 'Учётная запись Moodle с идентификатором {$a} была удалена. Отображаемые здесь данные нельзя использовать для действий с учётной записью.';
+$string['crm_user_history_summary'] = 'Сводка исторического профиля CRM';
+$string['crm_user_history_userid'] = 'Идентификатор Moodle';
+$string['crm_user_history_subscriptions'] = 'История подписок';
+$string['crm_user_history_digital_purchases'] = 'Цифровые покупки';
+$string['crm_user_history_courses'] = 'История курсов';
+$string['crm_user_history_last_activity'] = 'Последняя активность CRM';
+$string['crm_user_history_revenue'] = 'Историческая выручка';
+$string['crm_user_history_open_users'] = 'Вернуться к пользователям';
+$string['crm_user_history_open_inbox'] = 'Открыть во входящих';
+$string['crm_user_history_open_work'] = 'Открыть рабочие задачи';
+$string['crm_user_history_no_subscriptions'] = 'Исторические подписки не найдены.';
+$string['crm_user_history_no_digital_purchases'] = 'Исторические цифровые покупки не найдены.';
+$string['crm_user_history_no_notes'] = 'Исторические заметки CRM не найдены.';
+$string['crm_user_history_no_tags'] = 'Исторические теги CRM не найдены.';
+$string['crm_user_history_unknown_plan'] = 'Недоступный тариф';
+$string['crm_user_history_unknown_product'] = 'Недоступный продукт';
+$string['crm_user_history_plan'] = 'Тариф';
+$string['crm_user_history_amount'] = 'Сумма';
+$string['crm_notes'] = 'Заметки CRM';
+$string['crm_tags'] = 'Теги CRM';
+
+$string['crm_inbox_invalid_form_action'] = 'Действие формы входящих сообщений отсутствует или является недопустимым.';
+
+$string['crm_timeline_category_commercial'] = 'Продажи';
+$string['crm_timeline_category_learning'] = 'Обучение';
+$string['crm_timeline_category_inbox'] = 'Входящие';
+$string['crm_timeline_category_notes'] = 'Заметки и теги';
+$string['crm_timeline_category_work'] = 'Рабочие задачи';
+$string['crm_timeline_category_customer_success'] = 'Customer Success';
+$string['crm_timeline_category_automation'] = 'Автоматизации';
+$string['crm_timeline_category_administration'] = 'Администрирование';
+
+$string['crm_timeline_search'] = 'Поиск по хронологии';
+$string['crm_timeline_period'] = 'Период хронологии';
+$string['crm_timeline_period_all'] = 'За всё время';
+$string['crm_timeline_period_7_days'] = 'Последние 7 дней';
+$string['crm_timeline_period_30_days'] = 'Последние 30 дней';
+$string['crm_timeline_period_90_days'] = 'Последние 90 дней';
+$string['crm_timeline_period_year'] = 'Последние 12 месяцев';
+$string['crm_timeline_important_only'] = 'Только важные события';
+$string['crm_timeline_filter_categories'] = 'Фильтр хронологии по категориям';
+$string['crm_timeline_results_count'] = 'Отображено событий: {$a}';
+$string['crm_timeline_no_filtered_results'] = 'Нет событий, соответствующих выбранным фильтрам.';
+$string['crm_timeline_open_event'] = 'Открыть';
+$string['crm_timeline_event'] = 'Событие CRM';
+$string['crm_timeline_yesterday'] = 'Вчера';
+$string['crm_timeline_load_more'] = 'Показать больше событий';
+$string['crm_timeline_loading'] = 'Загрузка…';
+$string['crm_timeline_loading_error'] = 'Повторить загрузку';
+$string['crm_timeline_loaded_events'] = 'загружено событий';
+$string['crm_timeline_important_events'] = 'важных событий';
+$string['crm_timeline_latest_event'] = 'Последнее событие';
+$string['crm_timeline_view_full'] = 'Открыть полную хронологию';
+
+$string['user360_workspace_timeline_summary'] = 'Сводка хронологии';
+$string['user360_workspace_timeline_summary_description'] = 'Показывает последние события и количество важных элементов.';
+
+$string['crm_navigation_toggle'] = 'Навигация';
+$string['crm_navigation_open'] = 'Открыть навигацию CRM';
+$string['crm_navigation_close'] = 'Закрыть навигацию CRM';
+$string['crm_command_center_short_label'] = 'Поиск';
+
+$string['crm_inbox_back_to_thread'] =
+    'Вернуться к переписке';
+
+$string['crm_inbox_reply_help_subtitle'] =
+    'Напишите, сохраните или отправьте ответ в этой переписке.';
+$string['crm_work_create_subtitle'] =
+    'Создайте задачу, контрольное действие или другое действие CRM и назначьте его сотруднику или команде.';
+$string['crm_work_teams_subtitle'] =
+    'Создавайте команды CRM и управляйте их участниками, руководителями и доступностью.';
+$string['crm_customer_success_plan_subtitle'] =
+    'Просмотрите цели, действия, сроки и сигналы, связанные с этим планом Customer Success.';
+$string['crm_work_suggestion_subtitle'] =
+    'Проверьте предложение Ассистента перед созданием Work Item.';
+$string['crm_admin_tool_history_subtitle'] =
+    'Просмотрите последние запуски административных инструментов и их результаты.';
+
+$string['crm_breadcrumb_navigation'] =
+    'Навигационная цепочка CRM';
+$string['crm_help_home_subtitle'] =
+    'Откройте документацию, практические руководства и инструменты диагностики CRM CampusFR.';
+$string['crm_skip_to_content'] =
+    'Перейти непосредственно к содержимому';
+
+$string['crm_inbox_preview_loading'] =
+    'Загрузка переписки…';
+
+$string['crm_inbox_preview_error'] =
+    'Не удалось загрузить предварительный просмотр переписки.';
+
+$string['crm_inbox_preview_loaded'] =
+    'Переписка «{$a}» загружена.';
+
+$string['crm_inbox_preview_open_full'] =
+    'Открыть всю переписку';
+
+$string['crm_inbox_preview_manage'] =
+    'Ответить и управлять перепиской';
+
+$string['crm_inbox_preview_reading_region'] =
+    'Предварительный просмотр переписки';
+
+$string['crm_inbox_preview_context_region'] =
+    'Контекст контакта';

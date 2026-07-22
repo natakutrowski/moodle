@@ -10,16 +10,20 @@ use moodle_url;
 
 final class InboxThreadRenderer {
 
+    /**
+     * Renders the complete legacy thread view.
+     *
+     * Kept as a compatibility entry point while the thread page
+     * is migrated to the generic CRM Workspace.
+     */
     public static function render(
         object $thread,
         bool $canmanage
     ): string {
-        
         $out = html_writer::start_tag(
             'section',
             [
                 'class' => 'crm-inbox-thread',
-
                 'aria-label' => get_string(
                     'crm_inbox_thread_region_label',
                     'local_subscriptions'
@@ -27,96 +31,137 @@ final class InboxThreadRenderer {
             ]
         );
 
-        $out .= html_writer::div(
-            '',
-            'visually-hidden',
-            [
-                'role' => 'status',
-                'aria-live' => 'polite',
-                'aria-atomic' => 'true',
-                'data-inbox-live-region' => '1',
-            ]
-        );
-
-        $out .= self::header(
+        $out .= self::render_context_panel(
             $thread,
             $canmanage
         );
 
-        $messagesheadingid =
-            'crm-inbox-thread-messages-' .
-            (int)$thread->id;
-
-        $out .= html_writer::tag(
-            'h2',
-            get_string(
-                'crm_inbox_messages_heading',
-                'local_subscriptions'
-            ),
-            [
-                'id' =>
-                    $messagesheadingid,
-
-                'class' =>
-                    'visually-hidden',
-            ]
+        $out .= self::render_messages_panel(
+            $thread
         );
 
-        $out .= html_writer::start_tag(
-            'div',
-            [
-                'class' =>
-                    'crm-inbox-message-list',
-
-                'role' => 'list',
-
-                'aria-labelledby' =>
-                    $messagesheadingid,
-            ]
+        $out .= self::render_reply_panel(
+            $thread,
+            $canmanage
         );
 
-        foreach ($thread->messages as $message) {
-            $out .= self::message($message);
-        }
-
-        $out .= html_writer::end_tag(
-            'div'
-        );
-
-        if ($canmanage) {
-            $out .= html_writer::link(
-                new moodle_url(
-                    subscription_config::
-                        admin_inbox_reply_page(),
-                    ['threadid' => (int)$thread->id]
-                ),
-                get_string(
-                    'crm_inbox_reply',
-                    'local_subscriptions'
-                ),
-                [
-                    'class' =>
-                        'btn btn-primary mt-3',
-                ]
-            );
-        }
-
-        $out .= html_writer::end_tag(
-            'section'
-        );
+        $out .= html_writer::end_tag('section');
 
         return $out;
     }
 
-    private static function header(
+    /**
+     * Renders the legacy combined context panel.
+     *
+     * Kept as a compatibility entry point for callers that still expect
+     * the former all-in-one context renderer.
+     */
+    public static function render_context_panel(
         object $thread,
         bool $canmanage
     ): string {
+        $out = self::render_overview_panel(
+            $thread
+        );
+
+        $out .= self::render_contact_panel(
+            $thread
+        );
+
+        if ($canmanage) {
+            $out .= self::render_actions_panel(
+                $thread,
+                true
+            );
+        }
+
+        return $out;
+    }
+
+    /**
+     * Renders the main business information about the conversation.
+     */
+    public static function render_overview_panel(
+        object $thread
+    ): string {
+        $subject =
+            trim((string)($thread->subject ?? ''));
+
+        if ($subject === '') {
+            $subject = get_string(
+                'crm_inbox_no_subject',
+                'local_subscriptions'
+            );
+        }
+
+        $status =
+            trim((string)($thread->status ?? ''));
+
+        $priority =
+            trim((string)($thread->priority ?? ''));
+
+        $statuslabel = self::translated_value(
+            'crm_inbox_status_',
+            $status,
+            'crm_inbox_status_unknown'
+        );
+
+        $prioritylabel = self::translated_value(
+            'crm_inbox_priority_',
+            $priority,
+            'crm_inbox_priority_unknown'
+        );
+
+        $statusclass = match ($status) {
+            'open' =>
+                'bg-primary',
+
+            'pending' =>
+                'bg-warning text-dark',
+
+            'resolved' =>
+                'bg-success',
+
+            'closed' =>
+                'bg-secondary',
+
+            'spam' =>
+                'bg-danger',
+
+            default =>
+                'bg-light text-dark border',
+        };
+
+        $priorityclass = match ($priority) {
+            'urgent' =>
+                'bg-danger',
+
+            'high' =>
+                'bg-warning text-dark',
+
+            'normal' =>
+                'bg-info text-dark',
+
+            'low' =>
+                'bg-light text-dark border',
+
+            default =>
+                'bg-light text-dark border',
+        };
+
+        $headingid =
+            'crm-inbox-thread-overview-' .
+            (int)$thread->id;
+
         $out = html_writer::start_tag(
-            'header',
+            'section',
             [
                 'class' =>
-                    'card mb-3 crm-inbox-thread-header',
+                    'card crm-inbox-thread-context-card ' .
+                    'crm-inbox-thread-overview-panel',
+
+                'aria-labelledby' =>
+                    $headingid,
             ]
         );
 
@@ -126,64 +171,459 @@ final class InboxThreadRenderer {
 
         $out .= html_writer::tag(
             'h2',
-            s(
-                trim((string)$thread->subject) !== ''
-                    ? (string)$thread->subject
-                    : get_string(
-                        'crm_inbox_no_subject',
-                        'local_subscriptions'
-                    )
-            ),
-            ['class' => 'h4']
+            s($subject),
+            [
+                'id' => $headingid,
+                'class' =>
+                    'h5 crm-inbox-thread-panel-title',
+            ]
         );
 
-        if (!empty($thread->contactemail)) {
+        $out .= html_writer::div(
+            html_writer::span(
+                s($statuslabel),
+                'badge ' . $statusclass
+            )
+            .
+            html_writer::span(
+                s($prioritylabel),
+                'badge ' . $priorityclass
+            ),
+            'crm-inbox-thread-badges ' .
+            'd-flex flex-wrap gap-2 mb-3'
+        );
+
+        $rows = [];
+
+        if (
+            trim(
+                (string)($thread->accountemail ?? '')
+            ) !== ''
+        ) {
+            $rows[] = self::detail_row(
+                get_string(
+                    'inbox_thread_overview_account',
+                    'local_subscriptions'
+                ),
+                s((string)$thread->accountemail)
+            );
+        }
+
+        if (
+            trim(
+                (string)($thread->folder ?? '')
+            ) !== ''
+        ) {
+            $rows[] = self::detail_row(
+                get_string(
+                    'inbox_thread_overview_folder',
+                    'local_subscriptions'
+                ),
+                s((string)$thread->folder)
+            );
+        }
+
+        $rows[] = self::detail_row(
+            get_string(
+                'inbox_thread_overview_messages',
+                'local_subscriptions'
+            ),
+            (string)(int)($thread->messagecount ?? 0)
+        );
+
+        $rows[] = self::detail_row(
+            get_string(
+                'inbox_thread_overview_unread',
+                'local_subscriptions'
+            ),
+            (string)(int)($thread->unreadcount ?? 0)
+        );
+
+        $assignment =
+            self::assignment_label($thread);
+
+        $rows[] = self::detail_row(
+            get_string(
+                'inbox_thread_overview_assignment',
+                'local_subscriptions'
+            ),
+            s($assignment)
+        );
+
+        $lastmessageat =
+            (int)($thread->lastmessageat ?? 0);
+
+        if ($lastmessageat > 0) {
+            $rows[] = self::detail_row(
+                get_string(
+                    'inbox_thread_overview_last_message',
+                    'local_subscriptions'
+                ),
+                userdate(
+                    $lastmessageat,
+                    get_string(
+                        'strftimedatetimeshort',
+                        'langconfig'
+                    )
+                )
+            );
+        }
+
+        $out .= html_writer::tag(
+            'dl',
+            implode('', $rows),
+            [
+                'class' =>
+                    'crm-inbox-thread-detail-list mb-0',
+            ]
+        );
+
+        $out .= html_writer::end_div();
+        $out .= html_writer::end_tag('section');
+
+        return $out;
+    }
+
+    /**
+     * Renders the contact and Moodle-user matching information.
+     */
+    public static function render_contact_panel(
+        object $thread
+    ): string {
+        $headingid =
+            'crm-inbox-thread-contact-' .
+            (int)$thread->id;
+
+        $out = html_writer::start_tag(
+            'section',
+            [
+                'class' =>
+                    'card crm-inbox-thread-context-card ' .
+                    'crm-inbox-thread-contact-panel',
+
+                'aria-labelledby' =>
+                    $headingid,
+            ]
+        );
+
+        $out .= html_writer::start_div(
+            'card-body'
+        );
+
+        $out .= html_writer::tag(
+            'h2',
+            get_string(
+                'inbox_thread_contact_title',
+                'local_subscriptions'
+            ),
+            [
+                'id' => $headingid,
+                'class' =>
+                    'h5 crm-inbox-thread-panel-title',
+            ]
+        );
+
+        $contactname =
+            trim(
+                (string)($thread->contactname ?? '')
+            );
+
+        $contactemail =
+            trim(
+                (string)($thread->contactemail ?? '')
+            );
+
+        if ($contactname !== '') {
             $out .= html_writer::div(
-                s(
-                    (string)($thread->contactname ?? '')
-                ) .
-                ' &lt;' .
-                s((string)$thread->contactemail) .
-                '&gt;',
+                s($contactname),
+                'crm-inbox-thread-contact-name fw-semibold'
+            );
+        }
+
+        if ($contactemail !== '') {
+            $out .= html_writer::link(
+                'mailto:' . $contactemail,
+                s($contactemail),
+                [
+                    'class' =>
+                        'crm-inbox-thread-contact-email ' .
+                        'd-inline-block mt-1',
+                ]
+            );
+        }
+
+        if (
+            $contactname === ''
+            && $contactemail === ''
+        ) {
+            $out .= html_writer::div(
+                get_string(
+                    'inbox_thread_contact_unavailable',
+                    'local_subscriptions'
+                ),
                 'text-muted'
             );
         }
 
+        $out .= html_writer::div(
+            '',
+            'crm-inbox-thread-contact-separator'
+        );
+
         if (!empty($thread->matcheduserid)) {
+            $matchedname =
+                self::matched_user_fullname($thread);
+
+            $profileurl = new moodle_url(
+                subscription_config::
+                    admin_user_view_page(),
+                [
+                    'id' =>
+                        (int)$thread->matcheduserid,
+                ]
+            );
+
             $out .= html_writer::div(
                 get_string(
                     'crm_inbox_matched_user',
                     'local_subscriptions',
-                    fullname((object)[
-                        'firstname' =>
-                            $thread->matchedfirstname,
-                        'lastname' =>
-                            $thread->matchedlastname,
-                    ])
+                    $matchedname
                 ),
-                'mt-2'
+                'crm-inbox-thread-match-label'
+            );
+
+            $out .= html_writer::link(
+                $profileurl,
+                get_string(
+                    'inbox_thread_contact_open_profile',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-sm btn-outline-primary mt-3',
+                ]
             );
         } else {
-            $out .= html_writer::div(
+            $out .= html_writer::span(
                 get_string(
                     'crm_inbox_external_contact',
                     'local_subscriptions'
                 ),
-                'badge bg-light text-dark mt-2'
+                'badge bg-light text-dark border'
+            );
+
+            $out .= html_writer::div(
+                get_string(
+                    'inbox_thread_contact_external_description',
+                    'local_subscriptions'
+                ),
+                'small text-muted mt-2'
             );
         }
 
-        if ($canmanage) {
-            $out .= self::actions($thread);
-        }
-
         $out .= html_writer::end_div();
-
-        $out .= html_writer::end_tag(
-            'header'
-        );
+        $out .= html_writer::end_tag('section');
 
         return $out;
+    }
+
+    /**
+     * Renders the available business actions.
+     */
+    public static function render_actions_panel(
+        object $thread,
+        bool $canmanage
+    ): string {
+        if (!$canmanage) {
+            return '';
+        }
+
+        $headingid =
+            'crm-inbox-thread-actions-' .
+            (int)$thread->id;
+
+        $out = html_writer::start_tag(
+            'section',
+            [
+                'class' =>
+                    'card crm-inbox-thread-context-card ' .
+                    'crm-inbox-thread-actions-panel',
+
+                'aria-labelledby' =>
+                    $headingid,
+            ]
+        );
+
+        $out .= html_writer::start_div(
+            'card-body'
+        );
+
+        $out .= html_writer::tag(
+            'h2',
+            get_string(
+                'inbox_thread_actions_title',
+                'local_subscriptions'
+            ),
+            [
+                'id' => $headingid,
+                'class' =>
+                    'h5 crm-inbox-thread-panel-title',
+            ]
+        );
+
+        $out .= html_writer::div(
+            get_string(
+                'inbox_thread_actions_description',
+                'local_subscriptions'
+            ),
+            'small text-muted'
+        );
+
+        $out .= self::actions($thread);
+
+        $out .= html_writer::end_div();
+        $out .= html_writer::end_tag('section');
+
+        return $out;
+    }
+
+    /**
+     * Returns a translated Inbox value without triggering an invalid
+     * get_string() call when a provider returns an unknown value.
+     */
+    private static function translated_value(
+        string $prefix,
+        string $value,
+        string $fallbackkey
+    ): string {
+        $key = $prefix . $value;
+
+        if (
+            $value !== ''
+            && get_string_manager()->string_exists(
+                $key,
+                'local_subscriptions'
+            )
+        ) {
+            return get_string(
+                $key,
+                'local_subscriptions'
+            );
+        }
+
+        return get_string(
+            $fallbackkey,
+            'local_subscriptions'
+        );
+    }
+
+    /**
+     * Renders one definition-list row.
+     */
+    private static function detail_row(
+        string $label,
+        string $value
+    ): string {
+        return html_writer::div(
+            html_writer::tag(
+                'dt',
+                $label,
+                [
+                    'class' =>
+                        'crm-inbox-thread-detail-label',
+                ]
+            )
+            .
+            html_writer::tag(
+                'dd',
+                $value,
+                [
+                    'class' =>
+                        'crm-inbox-thread-detail-value',
+                ]
+            ),
+            'crm-inbox-thread-detail-row'
+        );
+    }
+
+    /**
+     * Returns the current user or team assignment label.
+     */
+    private static function assignment_label(
+        object $thread
+    ): string {
+        $teamname =
+            trim(
+                (string)(
+                    $thread->assignedteamname ?? ''
+                )
+            );
+
+        if ($teamname !== '') {
+            return get_string(
+                'inbox_thread_assignment_team',
+                'local_subscriptions',
+                $teamname
+            );
+        }
+
+        $firstname =
+            trim(
+                (string)(
+                    $thread->assignedfirstname ?? ''
+                )
+            );
+
+        $lastname =
+            trim(
+                (string)(
+                    $thread->assignedlastname ?? ''
+                )
+            );
+
+        $fullname =
+            trim($firstname . ' ' . $lastname);
+
+        if ($fullname !== '') {
+            return get_string(
+                'inbox_thread_assignment_user',
+                'local_subscriptions',
+                $fullname
+            );
+        }
+
+        return get_string(
+            'inbox_thread_assignment_unassigned',
+            'local_subscriptions'
+        );
+    }
+
+    /**
+     * Builds a Moodle-compatible fullname for the matched user.
+     *
+     * The Inbox query currently exposes the matched user's first and last
+     * names through matchedfirstname and matchedlastname. Moodle 5 expects
+     * every configurable name field to exist on objects passed to fullname().
+     */
+    private static function matched_user_fullname(
+        object $thread
+    ): string {
+        $user = new \stdClass();
+
+        foreach (
+            \core_user\fields::get_name_fields()
+            as $field
+        ) {
+            $user->{$field} = '';
+        }
+
+        $user->firstname =
+            (string)($thread->matchedfirstname ?? '');
+
+        $user->lastname =
+            (string)($thread->matchedlastname ?? '');
+
+        return fullname($user);
     }
 
     private static function actions(
@@ -196,7 +636,7 @@ final class InboxThreadRenderer {
             [
                 'class' =>
                     'crm-inbox-thread-actions ' .
-                    'd-flex flex-wrap gap-2 mt-3',
+                    'd-grid gap-2 mt-3',
 
                 'role' => 'group',
 
@@ -298,6 +738,105 @@ final class InboxThreadRenderer {
         );
 
         return $out;
+    }
+
+    /**
+     * Renders the thread messages.
+     */
+    public static function render_messages_panel(
+        object $thread
+    ): string {
+        $out = html_writer::start_tag(
+            'section',
+            [
+                'class' =>
+                    'crm-inbox-thread-messages-panel',
+                'aria-label' => get_string(
+                    'crm_inbox_messages_heading',
+                    'local_subscriptions'
+                ),
+            ]
+        );
+
+        $out .= html_writer::div(
+            '',
+            'visually-hidden',
+            [
+                'role' => 'status',
+                'aria-live' => 'polite',
+                'aria-atomic' => 'true',
+                'data-inbox-live-region' => '1',
+            ]
+        );
+
+        $messagesheadingid =
+            'crm-inbox-thread-messages-' .
+            (int)$thread->id;
+
+        $out .= html_writer::tag(
+            'h2',
+            get_string(
+                'crm_inbox_messages_heading',
+                'local_subscriptions'
+            ),
+            [
+                'id' => $messagesheadingid,
+                'class' => 'visually-hidden',
+            ]
+        );
+
+        $out .= html_writer::start_tag(
+            'div',
+            [
+                'class' => 'crm-inbox-message-list',
+                'role' => 'list',
+                'aria-labelledby' =>
+                    $messagesheadingid,
+            ]
+        );
+
+        foreach ($thread->messages as $message) {
+            $out .= self::message($message);
+        }
+
+        $out .= html_writer::end_tag('div');
+        $out .= html_writer::end_tag('section');
+
+        return $out;
+    }
+
+    /**
+     * Renders the main reply action.
+     */
+    public static function render_reply_panel(
+        object $thread,
+        bool $canmanage
+    ): string {
+        if (!$canmanage) {
+            return '';
+        }
+
+        return html_writer::div(
+            html_writer::link(
+                new moodle_url(
+                    subscription_config::
+                        admin_inbox_reply_page(),
+                    [
+                        'threadid' =>
+                            (int)$thread->id,
+                    ]
+                ),
+                get_string(
+                    'crm_inbox_reply',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-primary',
+                ]
+            ),
+            'crm-inbox-thread-reply-panel'
+        );
     }
 
     private static function message(

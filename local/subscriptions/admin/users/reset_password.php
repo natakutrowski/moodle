@@ -10,6 +10,14 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\service\UserEmailService;
 use local_subscriptions\admin\AdminLog;
 use local_subscriptions\admin\AdminEvents;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmReturnUrlResolver;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 
 global $DB, $PAGE, $OUTPUT;
 
@@ -17,20 +25,50 @@ $context = AdminSecurity::require(Capabilities::MANAGE_USERS);
 
 $id = required_param('id', PARAM_INT);
 
+$returnurl = optional_param(
+    'returnurl',
+    '',
+    PARAM_LOCALURL
+);
+
 $user = $DB->get_record('user', [
     'id' => $id,
     'deleted' => 0,
 ], '*', MUST_EXIST);
 
+$urlparams = [
+    'id' => $id,
+];
+
+if ($returnurl !== '') {
+    $urlparams['returnurl'] =
+        $returnurl;
+}
+
 $url = new moodle_url(
-    subscription_config::admin_user_reset_password_page(),
-    ['id' => $id]
+    subscription_config::
+        admin_user_reset_password_page(),
+    $urlparams
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title(get_string('crm_reset_password', 'local_subscriptions') . ' - ' . fullname($user));
-$PAGE->set_heading(get_string('crm_reset_password', 'local_subscriptions'));
+$pagetitle =
+    get_string(
+        'crm_reset_password',
+        'local_subscriptions'
+    ) .
+    ' - ' .
+    fullname($user);
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $url,
+    $pagetitle,
+    [
+        'local-subscriptions-user-profile-page',
+        'local-subscriptions-user-reset-password-page',
+    ]
+);
 
 class local_subscriptions_crm_reset_password_form extends moodleform {
 
@@ -66,8 +104,22 @@ class local_subscriptions_crm_reset_password_form extends moodleform {
 $form = new local_subscriptions_crm_reset_password_form($url);
 $form->set_data(['id' => $id]);
 
+$fallbackurl = new moodle_url(
+    subscription_config::
+        admin_user_view_page(),
+    [
+        'id' => $id,
+    ]
+);
+
+$redirecturl =
+    CrmReturnUrlResolver::resolve(
+        $returnurl,
+        $fallbackurl
+    );
+
 if ($form->is_cancelled()) {
-    redirect(new moodle_url(subscription_config::admin_user_view_page(), ['id' => $id]));
+    redirect($redirecturl);
 }
 
 if ($data = $form->get_data()) {
@@ -95,7 +147,7 @@ if ($data = $form->get_data()) {
     }
 
     redirect(
-        new moodle_url(subscription_config::admin_user_view_page(), ['id' => $id]),
+        $redirecturl,
         get_string('crm_password_updated_successfully', 'local_subscriptions'),
         null,
         \core\output\notification::NOTIFY_SUCCESS
@@ -104,20 +156,69 @@ if ($data = $form->get_data()) {
 
 echo $OUTPUT->header();
 
-echo html_writer::link(
-    new moodle_url(subscription_config::admin_user_view_page(), ['id' => $id]),
-    '← ' . get_string('back'),
-    ['class' => 'btn btn-outline-secondary mb-3']
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::USERS,
+    $context
 );
 
-echo html_writer::div(
-    html_writer::tag('h4', fullname($user), ['class' => 'mb-1']) .
-    html_writer::div(s($user->email), 'text-muted'),
-    'card card-body mb-4'
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'admin_users',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_users_page()
+                ),
+        ],
+        [
+            'label' =>
+                fullname($user),
+
+            'url' =>
+                $fallbackurl,
+        ],
+        [
+            'label' =>
+                get_string(
+                    'crm_reset_password',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
+    $redirecturl,
+    get_string(
+        'back',
+        'core'
+    )
+);
+
+echo CrmPageHeader::render(
+    get_string(
+        'crm_reset_password',
+        'local_subscriptions'
+    ),
+    fullname($user) .
+        ' · ' .
+        $user->email,
+    HelpContext::USER_PROFILE
 );
 
 echo $OUTPUT->notification(get_string('crm_reset_password_warning', 'local_subscriptions'), 'warning');
 
 $form->display();
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

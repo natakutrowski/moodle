@@ -7,10 +7,11 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\inbox\dto\InboxThreadCriteria;
-use local_subscriptions\crm\inbox\rendering\InboxRenderer;
+use local_subscriptions\crm\inbox\workspace\InboxWorkspaceRenderer;
 use local_subscriptions\crm\inbox\repositories\InboxReadRepository;
 use local_subscriptions\crm\inbox\repositories\InboxTeamRepository;
 use local_subscriptions\crm\inbox\services\InboxReadService;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\subscription_config;
@@ -39,34 +40,17 @@ $pageurl = new moodle_url(
     $criteria->url_params()
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($pageurl);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(
-    get_string(
-        'crm_inbox_title',
-        'local_subscriptions'
-    )
-);
-$PAGE->set_heading(
-    get_string(
-        'crm_inbox_title',
-        'local_subscriptions'
-    )
+$pagetitle = get_string(
+    'crm_inbox_title',
+    'local_subscriptions'
 );
 
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
     'local-subscriptions-inbox-page'
-);
-
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::
-            plugin_stylesheet_page()
-    )
 );
 
 $PAGE->requires->js_call_amd(
@@ -105,10 +89,7 @@ if (
 }
 
 echo CrmPageHeader::render(
-    get_string(
-        'crm_inbox_title',
-        'local_subscriptions'
-    ),
+    $pagetitle,
     get_string(
         'crm_inbox_help_subtitle',
         'local_subscriptions'
@@ -117,7 +98,10 @@ echo CrmPageHeader::render(
     $headeractions
 );
 
-echo InboxRenderer::render($result);
+echo InboxWorkspaceRenderer::render(
+    $result,
+    (int)$USER->id
+);
 
 echo CrmWorkspaceRenderer::end();
 

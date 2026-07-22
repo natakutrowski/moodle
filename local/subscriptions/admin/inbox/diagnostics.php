@@ -13,6 +13,11 @@ use local_subscriptions\crm\inbox\repositories\InboxDiagnosticsRepository;
 use local_subscriptions\crm\inbox\services\InboxDiagnosticsService;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\subscription_config;
 
 $context = AdminSecurity::require(
@@ -35,25 +40,25 @@ $service = new InboxDiagnosticsService(
 
 $result = $service->diagnose();
 
-$PAGE->set_context($context);
-$PAGE->set_url(
-    new moodle_url(
-        subscription_config::
-            admin_inbox_diagnostics_page()
-    )
+$pageurl = new moodle_url(
+    subscription_config::
+        admin_inbox_diagnostics_page()
 );
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(
-    get_string(
-        'crm_inbox_diagnostics',
-        'local_subscriptions'
-    )
+
+$pagetitle = get_string(
+    'crm_inbox_diagnostics',
+    'local_subscriptions'
 );
-$PAGE->set_heading(
-    get_string(
-        'crm_inbox_diagnostics',
-        'local_subscriptions'
-    )
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    [
+        'local-subscriptions-inbox-page',
+        'local-subscriptions-inbox-diagnostics-page',
+    ]
 );
 
 $PAGE->requires->js_call_amd(
@@ -63,15 +68,45 @@ $PAGE->requires->js_call_amd(
 
 echo $OUTPUT->header();
 
-echo html_writer::link(
+echo CrmWorkspaceRenderer::start(
+    CrmNavigationKeys::INBOX,
+    $context
+);
+
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'crm_inbox_title',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_inbox_page()
+                ),
+        ],
+        [
+            'label' =>
+                $pagetitle,
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
     new moodle_url(
-        subscription_config::admin_inbox_page()
+        subscription_config::
+            admin_inbox_page()
     ),
-    '← ' . get_string(
+    get_string(
         'crm_inbox_back',
         'local_subscriptions'
-    ),
-    ['class' => 'btn btn-link ps-0 mb-3']
+    )
 );
 
 echo CrmPageHeader::render(
@@ -135,5 +170,7 @@ if (!empty($result['metrics'])) {
 }
 
 echo html_writer::end_div();
+
+echo CrmWorkspaceRenderer::end();
 
 echo $OUTPUT->footer();

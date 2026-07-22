@@ -6,13 +6,54 @@ defined('MOODLE_INTERNAL') || die();
 
 final class UserProfileRepository {
 
-    public function get_user(int $userid): \stdClass {
+    public function get_user(int $userid): ?\stdClass {
         global $DB;
 
-        return $DB->get_record('user', [
-            'id' => $userid,
-            'deleted' => 0,
-        ], '*', MUST_EXIST);
+        $user = $DB->get_record(
+            'user',
+            [
+                'id' => $userid,
+                'deleted' => 0,
+            ],
+            '*',
+            IGNORE_MISSING
+        );
+
+        return $user ?: null;
+    }
+
+    /**
+     * Resolves an active, deleted or missing Moodle user.
+     */
+    public function resolve_user(
+        int $userid
+    ): UserProfileLookupResult {
+        global $DB;
+
+        $user = $DB->get_record(
+            'user',
+            [
+                'id' => $userid,
+            ],
+            '*',
+            IGNORE_MISSING
+        );
+
+        if (!$user) {
+            return UserProfileLookupResult::missing(
+                $userid
+            );
+        }
+
+        if (!empty($user->deleted)) {
+            return UserProfileLookupResult::deleted(
+                $user
+            );
+        }
+
+        return UserProfileLookupResult::active(
+            $user
+        );
     }
 
     public function get_subscriptions(int $userid): array {
@@ -85,6 +126,167 @@ final class UserProfileRepository {
                AND ue.status = 0
                AND e.status = 0
         ", ['userid' => $userid]);
+    }
+
+    /**
+     * Counts all historical course enrolments for a user.
+     *
+     * Unlike count_accessible_courses(), this method also includes inactive
+     * and expired enrolments because the historical profile is read-only.
+     */
+    public function count_historical_courses(
+        int $userid
+    ): int {
+        global $DB;
+
+        return (int)$DB->count_records_sql(
+            "
+            SELECT COUNT(DISTINCT e.courseid)
+            FROM {user_enrolments} ue
+            JOIN {enrol} e
+                ON e.id = ue.enrolid
+            WHERE ue.userid = :userid
+            AND e.courseid <> :siteid
+            ",
+            [
+                'userid' => $userid,
+                'siteid' => SITEID,
+            ]
+        );
+    }
+
+    /**
+     * Loads historical digital payments strictly by Moodle user ID.
+     *
+     * The deleted Moodle user's current email must not be used because Moodle
+     * may have anonymised it during account deletion.
+     */
+    public function get_historical_digital_payments(
+        int $userid,
+        int $limit = 50
+    ): array {
+        global $DB;
+
+        if (
+            !$DB->get_manager()->table_exists(
+                'subscription_digital_payment_request'
+            )
+        ) {
+            return [];
+        }
+
+        return array_values(
+            $DB->get_records_sql(
+                "
+                SELECT dpr.*,
+                    dp.name AS productname
+                FROM {subscription_digital_payment_request} dpr
+            LEFT JOIN {subscription_digital_product} dp
+                    ON dp.id = dpr.productid
+                WHERE dpr.userid = :userid
+            ORDER BY dpr.creation_date DESC,
+                    dpr.id DESC
+                ",
+                [
+                    'userid' => $userid,
+                ],
+                0,
+                $limit
+            )
+        );
+    }
+
+    /**
+     * Returns historical revenue totals indexed by currency.
+     *
+     * @return array<string, float>
+     */
+    public function get_revenue_by_currency(
+        int $userid
+    ): array {
+        global $DB;
+
+        $totals = [];
+
+        $subscriptionrecords = $DB->get_records_sql(
+            "
+            SELECT currency,
+                COALESCE(SUM(pricepaid), 0) AS total
+            FROM {user_subscription}
+            WHERE userid = :userid
+            AND currency IS NOT NULL
+            AND currency <> ''
+            AND status IN (
+                'active',
+                'expired',
+                'cancelled',
+                'replaced'
+            )
+        GROUP BY currency
+            ",
+            [
+                'userid' => $userid,
+            ]
+        );
+
+        foreach ($subscriptionrecords as $record) {
+            $currency = strtoupper(
+                trim((string)$record->currency)
+            );
+
+            if ($currency === '') {
+                continue;
+            }
+
+            $totals[$currency] =
+                ($totals[$currency] ?? 0.0)
+                + (float)$record->total;
+        }
+
+        if (
+            $DB->get_manager()->table_exists(
+                'subscription_digital_payment_request'
+            )
+        ) {
+            $digitalrecords = $DB->get_records_sql(
+                "
+                SELECT currency,
+                    COALESCE(SUM(price), 0) AS total
+                FROM {subscription_digital_payment_request}
+                WHERE userid = :userid
+                AND currency IS NOT NULL
+                AND currency <> ''
+                AND status IN (
+                    'paid',
+                    'completed',
+                    'PAID',
+                    'COMPLETED'
+                )
+            GROUP BY currency
+                ",
+                [
+                    'userid' => $userid,
+                ]
+            );
+
+            foreach ($digitalrecords as $record) {
+                $currency = strtoupper(
+                    trim((string)$record->currency)
+                );
+
+                if ($currency === '') {
+                    continue;
+                }
+
+                $totals[$currency] =
+                    ($totals[$currency] ?? 0.0)
+                    + (float)$record->total;
+            }
+        }
+
+        ksort($totals);
+
+        return $totals;
     }
 
     public function has_subscription_status(int $userid, string $status): bool {

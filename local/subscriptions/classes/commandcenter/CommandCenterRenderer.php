@@ -10,50 +10,121 @@ use moodle_url;
 
 final class CommandCenterRenderer {
 
-    public static function render(): string {
+    /**
+     * Renders the Command Center.
+     *
+     * The visible trigger may be omitted when the Command Center is hosted by
+     * the autonomous CRM shell. A hidden technical trigger is still rendered
+     * because the existing JavaScript state expects one.
+     *
+     * @param bool $showtrigger Whether to display the large search trigger.
+     * @return string
+     */
+    public static function render(
+        bool $showtrigger = true
+    ): string {
         $searchurl = (new moodle_url(subscription_config::command_center_search_ajax()))->out(false);
 
         $out = '';
 
-        $out .= html_writer::start_div('campusfr-command-center mb-4', [
-            'data-search-url' => $searchurl,
-            'data-execute-url' => (new moodle_url(subscription_config::command_center_execute_ajax()))->out(false),
-            'data-empty-label' => get_string('command_center_empty', 'local_subscriptions'),
-            'data-error-label' => get_string('command_center_error', 'local_subscriptions'),
-            'data-loading-label' => get_string('command_center_loading', 'local_subscriptions'),
-            'data-initial-label' => get_string('command_center_initial', 'local_subscriptions'),
-            'data-recent-label' => get_string('command_center_recent', 'local_subscriptions'),
-            'data-favorite-label' => get_string('command_center_favorites', 'local_subscriptions'),
-            'data-favorite-title' => get_string('command_center_favorite_toggle', 'local_subscriptions'),
-            'data-clear-recent-label' => get_string('command_center_clear_recent', 'local_subscriptions'),
-            'data-action-error-label' => get_string('command_center_action_error', 'local_subscriptions'),
-            'data-action-failed-label' => get_string('command_center_action_failed', 'local_subscriptions'),
-            'data-confirm-label' => get_string('command_center_confirm', 'local_subscriptions'),
-            'data-cancel-label' => get_string('command_center_cancel', 'local_subscriptions'),
-            'data-danger-confirm-label' => get_string('command_center_danger_confirm', 'local_subscriptions'),
-            'data-menu-actions-label' =>
+        $rootclasses = [
+            'campusfr-command-center',
+        ];
+
+        if ($showtrigger) {
+            $rootclasses[] = 'mb-4';
+        } else {
+            $rootclasses[] =
+                'campusfr-command-center--shell';
+        }
+
+        $out .= html_writer::start_div(
+            implode(' ', $rootclasses),
+            [
+                'data-search-url' => $searchurl,
+                'data-execute-url' => (new moodle_url(subscription_config::command_center_execute_ajax()))->out(false),
+                'data-empty-label' => get_string('command_center_empty', 'local_subscriptions'),
+                'data-error-label' => get_string('command_center_error', 'local_subscriptions'),
+                'data-loading-label' => get_string('command_center_loading', 'local_subscriptions'),
+                'data-initial-label' => get_string('command_center_initial', 'local_subscriptions'),
+                'data-recent-label' => get_string('command_center_recent', 'local_subscriptions'),
+                'data-favorite-label' => get_string('command_center_favorites', 'local_subscriptions'),
+                'data-favorite-title' => get_string('command_center_favorite_toggle', 'local_subscriptions'),
+                'data-clear-recent-label' => get_string('command_center_clear_recent', 'local_subscriptions'),
+                'data-action-error-label' => get_string('command_center_action_error', 'local_subscriptions'),
+                'data-action-failed-label' => get_string('command_center_action_failed', 'local_subscriptions'),
+                'data-confirm-label' => get_string('command_center_confirm', 'local_subscriptions'),
+                'data-cancel-label' => get_string('command_center_cancel', 'local_subscriptions'),
+                'data-danger-confirm-label' => get_string('command_center_danger_confirm', 'local_subscriptions'),
+                'data-menu-actions-label' =>
+                    get_string(
+                        'command_center_menu_actions',
+                        'local_subscriptions'
+                    ),
+
+                'data-dialog-label' =>
+                    get_string(
+                        'command_center_confirmation_dialog',
+                        'local_subscriptions'
+                    ),
+            ]
+        );
+
+        $triggerclasses = [
+            'campusfr-command-trigger',
+        ];
+
+        $triggerattributes = [
+            'role' =>
+                'button',
+
+            'tabindex' =>
+                $showtrigger
+                    ? '0'
+                    : '-1',
+
+            'aria-label' =>
                 get_string(
-                    'command_center_menu_actions',
+                    'command_center_open',
                     'local_subscriptions'
                 ),
+        ];
 
-            'data-dialog-label' =>
+        if (!$showtrigger) {
+            $triggerclasses[] =
+                'campusfr-command-trigger--shell-proxy';
+
+            $triggerattributes['aria-hidden'] =
+                'true';
+        }
+
+        $triggerattributes['class'] =
+            implode(
+                ' ',
+                $triggerclasses
+            );
+
+        $out .= html_writer::start_tag(
+            'div',
+            $triggerattributes
+        );
+
+        if ($showtrigger) {
+            $out .= html_writer::span(
+                'Ctrl / ⌘ K · Ctrl Alt K',
+                'campusfr-command-shortcut'
+            );
+
+            $out .= html_writer::span(
                 get_string(
-                    'command_center_confirmation_dialog',
+                    'command_center_placeholder',
                     'local_subscriptions'
                 ),
-        ]);
+                'campusfr-command-placeholder'
+            );
+        }
 
-        $out .= html_writer::start_div('campusfr-command-trigger', [
-            'role' => 'button',
-            'tabindex' => '0',
-            'aria-label' => get_string('command_center_open', 'local_subscriptions'),
-        ]);
-
-        $out .= html_writer::span('Ctrl / ⌘ K · Ctrl Alt K', 'campusfr-command-shortcut');
-        $out .= html_writer::span(get_string('command_center_placeholder', 'local_subscriptions'), 'campusfr-command-placeholder');
-
-        $out .= html_writer::end_div();
+        $out .= html_writer::end_tag('div');
 
         $out .= html_writer::start_div(
             'campusfr-command-modal d-none',

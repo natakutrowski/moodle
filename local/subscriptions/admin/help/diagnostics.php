@@ -6,8 +6,13 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\subscription_config;
 use local_subscriptions\crm\help\validation\HelpCenterValidator;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 
 global $PAGE, $OUTPUT;
 
@@ -19,32 +24,20 @@ $url = new moodle_url(
     subscription_config::admin_help_diagnostics_page()
 );
 
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-$PAGE->set_title(
-    get_string(
-        'crm_help_diagnostics_title',
-        'local_subscriptions'
-    )
-);
-$PAGE->set_heading(
-    get_string(
-        'crm_help_title',
-        'local_subscriptions'
-    )
+$pagetitle = get_string(
+    'crm_help_diagnostics_title',
+    'local_subscriptions'
 );
 
-$PAGE->add_body_class(
-    'local-subscriptions-crm-workspace'
-);
-$PAGE->add_body_class(
-    'local-subscriptions-help-page'
-);
-
-$PAGE->requires->css(
-    new moodle_url(
-        subscription_config::plugin_stylesheet_page()
-    )
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $url,
+    $pagetitle,
+    [
+        'local-subscriptions-help-page',
+        'local-subscriptions-help-diagnostics-page',
+    ]
 );
 
 $result = (new HelpCenterValidator())->validate();
@@ -56,41 +49,56 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-echo html_writer::link(
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                get_string(
+                    'crm_help_title',
+                    'local_subscriptions'
+                ),
+
+            'url' =>
+                new moodle_url(
+                    subscription_config::
+                        admin_help_page()
+                ),
+        ],
+        [
+            'label' =>
+                $pagetitle,
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
+echo CrmBackLinkRenderer::render(
     new moodle_url(
-        subscription_config::admin_help_page()
+        subscription_config::
+            admin_help_page()
     ),
-    '← ' . get_string(
+    get_string(
         'crm_help_home',
         'local_subscriptions'
     ),
     [
-        'class' =>
-            'crm-help-back-link crm-app-back-link',
+        'crm-help-back-link',
     ]
 );
 
-echo html_writer::start_div(
-    'crm-help-diagnostics'
-);
-
-echo html_writer::tag(
-    'h2',
-    get_string(
-        'crm_help_diagnostics_title',
-        'local_subscriptions'
-    ),
-    [
-        'class' => 'crm-help-diagnostics-title',
-    ]
-);
-
-echo html_writer::div(
+echo CrmPageHeader::render(
+    $pagetitle,
     get_string(
         'crm_help_diagnostics_description',
         'local_subscriptions'
     ),
-    'crm-help-diagnostics-description'
+    HelpContext::HELP_CENTER
+);
+
+echo html_writer::start_div(
+    'crm-help-diagnostics'
 );
 
 echo html_writer::start_div(
