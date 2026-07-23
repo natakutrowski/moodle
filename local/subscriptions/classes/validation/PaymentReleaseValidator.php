@@ -31,6 +31,7 @@ final class PaymentReleaseValidator {
         $this->validate_language_strings($result);
         $this->validate_database_schema($result);
         $this->validate_payment_files($result);
+        (new CommerceReleaseValidator())->validate($result);
 
         return $result;
     }

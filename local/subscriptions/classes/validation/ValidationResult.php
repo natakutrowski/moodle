@@ -159,6 +159,18 @@ final class ValidationResult {
      *
      * @return array<string,int>
      */
+    public function release_status(): string {
+        if ($this->has_errors()) {
+            return 'BLOCKED';
+        }
+
+        if ($this->has_warnings()) {
+            return 'READY_WITH_WARNINGS';
+        }
+
+        return 'READY';
+    }
+
     public function summary(): array {
         return [
             'ok' =>

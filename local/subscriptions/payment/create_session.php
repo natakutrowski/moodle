@@ -11,13 +11,13 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\payment\Provider;
 use local_subscriptions\payment\ProviderSelector;
-use local_subscriptions\payment\PaymentGatewayFactory;
 use local_subscriptions\payment\PaymentFailureReporter;
 use local_subscriptions\constants\PaymentReturn;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Operation;
 use local_subscriptions\constants\Status;
-
+use local_subscriptions\commerce\checkout\CommerceCheckoutFactory;
+use local_subscriptions\commerce\checkout\CommerceCheckoutPersistenceService;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -587,100 +587,42 @@ if ($needlockedpayment) {
 
 
 // ──────────────────────────────────────────────────────────────────────────
-// 4) Appel gateway & redirection
+// 4) Appel checkout commun & redirection
 // ──────────────────────────────────────────────────────────────────────────
-$gateway = PaymentGatewayFactory::for($provider);
-
 try {
-
-    // === amount_minor sûr avant appel gateway ===========================
-    $major        = (float)($pr->locked_final_price ?? $pr->price);
+    $major = (float)($pr->locked_final_price ?? $pr->price);
     $safeCurrency = strtoupper($pr->currency ?? $currency ?? (($provider === Provider::ALFA) ? 'RUB' : 'EUR'));
-
     $options['amount_minor'] = local_subs_money_to_minor_units(
         number_format($major, 2, '.', ''),
         $safeCurrency
     );
-    // ====================================================================
 
-
-    $result = $gateway->create_checkout_session($pr, $options);
-
-    // Tenter de mémoriser une session provider si fournie par le DTO
-    if (is_object($result)) {
-        if (property_exists($result, 'provider_session_id') && !empty($result->provider_session_id)) {
-            $DB->update_record('subscription_payment_request', (object)[
-                'id'               => $pr->id,
-                'payment_provider' => $provider,
-                'sessionid'        => (string)$result->provider_session_id,
-            ]);
-        }
-    }
-
-    // URL de redirection (robuste)
-    $url = '';
-    if (is_string($result)) {
-        $url = $result;
-    } elseif (is_array($result)) {
-        $url = $result['redirect_url'] ?? $result['url'] ?? '';
-    } elseif (is_object($result)) {
-        if (property_exists($result, 'redirect_url'))       { $url = $result->redirect_url; }
-        elseif (method_exists($result, 'getUrl'))             { $url = $result->getUrl(); }
-        elseif (method_exists($result, 'get_redirect_url'))   { $url = $result->get_redirect_url(); }
-    }
-
-    // Valider l’URL externe retournée par la passerelle.
-    //
-    // On accepte uniquement une URL HTTPS absolue avec un nom d’hôte.
-    // Cette validation s’applique aussi bien à Stripe qu’à Alfa.
-    $url = UrlFactory::validate_external_payment_url(
-        (string)$url
+    $checkoutresult = CommerceCheckoutFactory::create()->initialize(
+        $pr,
+        'subscription_payment_request',
+        $options,
+        'subscription_create_session',
+        !empty(get_config('local_subscriptions', 'live_mode'))
     );
 
-    // Si on est en mode popup (embedded=1) et provider = STRIPE,
-    // on sort de l'iframe pour afficher Stripe Checkout au niveau top.
-    if (
-        $embedded &&
-        $provider === Provider::STRIPE
-    ) {
+    $url = UrlFactory::validate_external_payment_url($checkoutresult->get_redirect_url());
+    (new CommerceCheckoutPersistenceService())->persist(
+        'subscription_payment_request',
+        (int)$pr->id,
+        $checkoutresult
+    );
+
+    if ($embedded && $provider === Provider::STRIPE) {
         while (ob_get_level()) {
             @ob_end_clean();
         }
-
         \core\session\manager::write_close();
-
-        echo '<!doctype html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <script>
-                    try {
-                        if (
-                            window.top &&
-                            window.top !== window
-                        ) {
-                            window.top.location.href = ' .
-                                json_encode($url) .
-                            ';
-                        } else {
-                            window.location.href = ' .
-                                json_encode($url) .
-                            ';
-                        }
-                    } catch (e) {
-                        window.location.href = ' .
-                            json_encode($url) .
-                        ';
-                    }
-                </script>
-            </head>
-            <body></body>
-            </html>';
-
+        echo '<!doctype html><html><head><meta charset="utf-8"><script>try{if(window.top&&window.top!==window){window.top.location.href=' .
+            json_encode($url) . ';}else{window.location.href=' . json_encode($url) .
+            ';}}catch(e){window.location.href=' . json_encode($url) . ';}</script></head><body></body></html>';
         exit;
     }
 
-    // Cas normal : Alfa ou Stripe en plein écran.
     redirect($url);
 
 } catch (\Throwable $e) {

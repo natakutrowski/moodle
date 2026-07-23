@@ -24,11 +24,21 @@ final class DashboardStatsRepositoryTest extends advanced_testcase {
 
         $now = time();
 
+        $scopeid = (int)$DB->insert_record(
+            'subscription_access_scope',
+            (object)[
+                'name' => 'Test scope ' . uniqid('', true),
+                'course_ids' => '[]',
+                'creation_date' => $now,
+                'last_update' => $now,
+            ]
+        );
+
         return (int)$DB->insert_record(
             'subscription_plan',
             (object)[
                 'name' => 'Test plan ' . uniqid('', true),
-                'accessscopeid' => 0,
+                'access_scope_id' => $scopeid,
                 'duration_key' => '1month',
                 'is_active' => 1,
                 'is_recurring' => 0,

@@ -114,11 +114,11 @@ final class UserSubscriptionEmailService {
 
         $pr = self::find_payment_request($sub);
 
-        if (!$pr && $receiptrequired) {
+        if ($pr === null && $receiptrequired) {
             throw new \moodle_exception('crm_receipt_not_available', 'local_subscriptions');
         }
 
-        if (!$pr) {
+        if ($pr === null) {
             $pr = (object)[
                 'id' => 0,
                 'userid' => $userid,
@@ -137,37 +137,53 @@ final class UserSubscriptionEmailService {
     private static function find_payment_request(\stdClass $sub): ?\stdClass {
         global $DB;
 
-        if ($DB->get_manager()->field_exists('subscription_payment_request', 'subscriptionid')) {
-            $pr = $DB->get_record('subscription_payment_request', [
-                'subscriptionid' => $sub->id,
-            ], '*', IGNORE_MISSING);
+        /*
+        * A manually created subscription legitimately has no payment request.
+        *
+        * Only use explicit links that identify the payment request belonging
+        * to this exact subscription. Never fall back to userid + planid,
+        * because that could associate an older unrelated payment request.
+        */
+        if (
+            $DB->get_manager()->field_exists(
+                'subscription_payment_request',
+                'subscriptionid'
+            )
+        ) {
+            $records = $DB->get_records(
+                'subscription_payment_request',
+                [
+                    'subscriptionid' => (int)$sub->id,
+                ],
+                'id DESC',
+                '*',
+                0,
+                1
+            );
 
-            if ($pr) {
-                return $pr;
+            if ($records) {
+                $pr = reset($records);
+
+                return $pr instanceof \stdClass
+                    ? $pr
+                    : null;
             }
         }
 
         if (!empty($sub->transactionid)) {
-            $pr = $DB->get_record('subscription_payment_request', [
-                'transactionid' => $sub->transactionid,
-            ], '*', IGNORE_MISSING);
+            $pr = $DB->get_record(
+                'subscription_payment_request',
+                [
+                    'transactionid' =>
+                        (string)$sub->transactionid,
+                ],
+                '*',
+                IGNORE_MISSING
+            );
 
-            if ($pr) {
-                return $pr;
-            }
+            return $pr ?: null;
         }
 
-        return $DB->get_record_sql("
-            SELECT *
-              FROM {subscription_payment_request}
-             WHERE userid = :userid
-               AND planid = :planid
-               AND status = :paid
-          ORDER BY id DESC
-        ", [
-            'userid' => $sub->userid,
-            'planid' => $sub->planid,
-            'paid' => Status::PAID,
-        ], IGNORE_MISSING);
+        return null;
     }
 }

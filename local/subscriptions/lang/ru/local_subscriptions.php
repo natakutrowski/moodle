@@ -5209,3 +5209,24 @@ $string['crm_commerce_nav_digital_purchases'] = 'Цифровые покупки
 $string['crm_commerce_nav_digital_products'] = 'Цифровые продукты';
 $string['crm_commerce_nav_statistics'] = 'Статистика';
 $string['crm_commerce_nav_configuration'] = 'Настройки';
+
+$string['commerce_payment_shadow_enabled'] =
+    'Включить теневой режим платежей Commerce';
+
+$string['commerce_payment_shadow_enabled_desc'] =
+    'Сравнивает данные старого оформления платежа с оркестратором Commerce без создания второго платежа.';
+
+$string['settings:commerce_migration_heading'] = 'Commerce — миграция и безопасность';
+$string['settings:commerce_migration_heading_desc'] = 'Расширенные настройки платежных потоков Commerce. Изменения могут повлиять на выручку: проверяйте каждый сценарий и сохраняйте возможность отката.';
+$string['settings:commerce_checkout_shadow_enabled'] = 'Включить теневой режим checkout Commerce';
+$string['settings:commerce_checkout_shadow_enabled_desc'] = 'Сравнивает Legacy и Commerce без создания второго платежа. Используется для диагностики.';
+$string['settings:commerce_checkout_digital_stripe_eur_enabled'] = 'Commerce — цифровые покупки Stripe EUR';
+$string['settings:commerce_checkout_digital_stripe_eur_enabled_desc'] = 'Направляет цифровые покупки Stripe в EUR через фасад Commerce. Отключение немедленно возвращает Legacy-путь.';
+$string['settings:commerce_checkout_subscription_stripe_eur_enabled'] = 'Commerce — подписки Stripe EUR';
+$string['settings:commerce_checkout_subscription_stripe_eur_enabled_desc'] = 'Направляет подписки, upgrades и повторные попытки Stripe EUR через фасад Commerce.';
+$string['settings:commerce_checkout_digital_alfa_rub_enabled'] = 'Commerce — цифровые покупки Alfa RUB';
+$string['settings:commerce_checkout_digital_alfa_rub_enabled_desc'] = 'Направляет цифровые покупки Alfa в RUB через фасад Commerce.';
+$string['settings:commerce_checkout_subscription_alfa_rub_enabled'] = 'Commerce — подписки Alfa RUB';
+$string['settings:commerce_checkout_subscription_alfa_rub_enabled_desc'] = 'Направляет подписки и повторные попытки Alfa RUB через фасад Commerce.';
+$string['settings:commerce_fulfillment_enabled'] = 'Включить fulfillment Commerce';
+$string['settings:commerce_fulfillment_enabled_desc'] = 'Включает post-payment bridge Commerce. Активируйте только после проверки webhook, идемпотентности, выдачи доступа и писем.';

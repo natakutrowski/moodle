@@ -71,6 +71,9 @@ $result =
 if (!empty($options['json'])) {
     echo json_encode(
         [
+            'status' =>
+                $result->release_status(),
+
             'summary' =>
                 $result->summary(),
 
@@ -118,6 +121,8 @@ if (!empty($options['json'])) {
         $result->summary();
 
     echo PHP_EOL;
+
+    echo 'Statut de release : ' . $result->release_status() . PHP_EOL;
 
     echo sprintf(
         'Résumé : %d OK, %d avertissement(s), %d erreur(s), %d contrôle(s).',

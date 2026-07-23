@@ -4,11 +4,12 @@ define('NO_DEBUG_DISPLAY', true);
 require_once(__DIR__.'/../../../config.php');
 
 use local_subscriptions\constants\Status;
-use local_subscriptions\payment\PaymentGatewayFactory;
 use local_subscriptions\payment\PaymentFailureReporter;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\PaymentReturn;
+use local_subscriptions\commerce\checkout\CommerceCheckoutFactory;
+use local_subscriptions\commerce\checkout\CommerceCheckoutPersistenceService;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -115,6 +116,29 @@ if ($provider === Provider::ALFA) {
     }
 }
 
+// Reconstitue explicitement le contexte nécessaire au bridge Commerce.
+$options['operation'] = $pr->operation ?? null;
+$options['ref_sub_id'] = !empty($pr->reference_subscription_id)
+    ? (int)$pr->reference_subscription_id
+    : null;
+$options['amount_minor'] = (int)($pr->amount_minor ?? round((float)($pr->locked_final_price ?? $pr->price) * 100));
+$options['use_locked_amount'] = 1;
+
+if ($provider === Provider::STRIPE) {
+    $plan = $plan ?? $DB->get_record('subscription_plan', ['id' => $pr->planid], '*', IGNORE_MISSING);
+    $mode = !empty($plan->is_recurring) ? 'subscription' : 'payment';
+    if (
+        in_array((string)($pr->operation ?? ''), [
+            \local_subscriptions\constants\Operation::UPGRADE_NOW_REPLACE_CHAIN,
+            \local_subscriptions\constants\Operation::QUEUE_FUTURE,
+        ], true)
+        || (int)($pr->locked_discount_percent ?? 0) > 0
+    ) {
+        $mode = 'payment';
+    }
+    $options['mode'] = $mode;
+}
+
 // 5) MàJ tentatives
 $DB->update_record(
     'subscription_payment_request',
@@ -139,41 +163,25 @@ $DB->update_record(
     ]
 );
 
-// 6) Appel provider-agnostique
-$gateway = PaymentGatewayFactory::for($provider);
-
+// 6) Appel via la façade checkout commune
 try {
-    $res = $gateway->create_checkout_session($pr, $options);
+    $checkoutresult = CommerceCheckoutFactory::create()->initialize(
+        $pr,
+        'subscription_payment_request',
+        $options,
+        'subscription_retry_payment',
+        !empty(get_config('local_subscriptions', 'live_mode'))
+    );
 
-    // Mémorise la session/lien si renvoyés par le DTO
-    $redirect = '';
-    if (is_string($res)) {
-        $redirect = $res;
-    } elseif (is_array($res)) {
-        $redirect = $res['redirect_url'] ?? $res['url'] ?? '';
-        if (!empty($res['provider_session_id'])) {
-            $DB->set_field('subscription_payment_request', 'sessionid', (string)$res['provider_session_id'], ['id'=>$pr->id]);
-        }
-    } elseif (is_object($res)) {
-        if (property_exists($res, 'redirect_url')) {
-            $redirect = $res->redirect_url;
-        } elseif (method_exists($res, 'getUrl')) {
-            $redirect = $res->getUrl();
-        } elseif (method_exists($res, 'get_redirect_url')) {
-            $redirect = $res->get_redirect_url();
-        }
-        if (property_exists($res, 'provider_session_id') && !empty($res->provider_session_id)) {
-            $DB->set_field('subscription_payment_request', 'sessionid', (string)$res->provider_session_id, ['id'=>$pr->id]);
-        }
-    }
+    $redirect = UrlFactory::validate_external_payment_url(
+        $checkoutresult->get_redirect_url()
+    );
 
-    $redirect =
-        UrlFactory::validate_external_payment_url(
-            (string)$redirect
-        );
-
-    // Enregistre le lien de paiement
-    $DB->set_field('subscription_payment_request', 'payment_link', $redirect, ['id'=>$pr->id]);
+    (new CommerceCheckoutPersistenceService())->persist(
+        'subscription_payment_request',
+        (int)$pr->id,
+        $checkoutresult
+    );
 
     redirect($redirect);
 

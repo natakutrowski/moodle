@@ -5159,3 +5159,24 @@ $string['crm_commerce_nav_digital_purchases'] = 'Digital purchases';
 $string['crm_commerce_nav_digital_products'] = 'Digital products';
 $string['crm_commerce_nav_statistics'] = 'Statistics';
 $string['crm_commerce_nav_configuration'] = 'Configuration';
+
+$string['commerce_payment_shadow_enabled'] =
+    'Enable Commerce payment shadow mode';
+
+$string['commerce_payment_shadow_enabled_desc'] =
+    'Silently compares Legacy checkout data with the Commerce orchestrator without creating a second payment.';
+
+$string['settings:commerce_migration_heading'] = 'Commerce — migration and safety';
+$string['settings:commerce_migration_heading_desc'] = 'Advanced settings controlling Commerce payment flows. Changes may affect revenue: validate each scenario and keep a rollback plan.';
+$string['settings:commerce_checkout_shadow_enabled'] = 'Enable Commerce checkout shadow mode';
+$string['settings:commerce_checkout_shadow_enabled_desc'] = 'Compares Legacy and Commerce checkout data without creating a second payment. Intended for diagnostics.';
+$string['settings:commerce_checkout_digital_stripe_eur_enabled'] = 'Commerce — Stripe EUR digital purchases';
+$string['settings:commerce_checkout_digital_stripe_eur_enabled_desc'] = 'Routes Stripe EUR digital purchases through the Commerce facade. Disable to return immediately to the Legacy path.';
+$string['settings:commerce_checkout_subscription_stripe_eur_enabled'] = 'Commerce — Stripe EUR subscriptions';
+$string['settings:commerce_checkout_subscription_stripe_eur_enabled_desc'] = 'Routes Stripe EUR subscriptions, upgrades and retries through the Commerce facade.';
+$string['settings:commerce_checkout_digital_alfa_rub_enabled'] = 'Commerce — Alfa RUB digital purchases';
+$string['settings:commerce_checkout_digital_alfa_rub_enabled_desc'] = 'Routes Alfa RUB digital purchases through the Commerce facade.';
+$string['settings:commerce_checkout_subscription_alfa_rub_enabled'] = 'Commerce — Alfa RUB subscriptions';
+$string['settings:commerce_checkout_subscription_alfa_rub_enabled_desc'] = 'Routes Alfa RUB subscriptions and retries through the Commerce facade.';
+$string['settings:commerce_fulfillment_enabled'] = 'Enable Commerce fulfillment';
+$string['settings:commerce_fulfillment_enabled_desc'] = 'Enables the Commerce post-payment bridge. Activate only after validating webhooks, idempotency, access delivery and emails.';

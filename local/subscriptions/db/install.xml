@@ -6,7 +6,7 @@
 				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
 				<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
 				<FIELD NAME="planid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-				<FIELD NAME="pricepaid" TYPE="number" LENGTH="10,2" NOTNULL="false"/>
+				<FIELD NAME="pricepaid" TYPE="number" LENGTH="10" DECIMALS="2" NOTNULL="false"/>
 				<FIELD NAME="currency" TYPE="char" LENGTH="10" NOTNULL="false"/>
 				<FIELD NAME="transactionid" TYPE="char" LENGTH="255" NOTNULL="false"/>
 				<FIELD NAME="payment_provider" TYPE="char" LENGTH="50" NOTNULL="false"/>
@@ -79,7 +79,7 @@
 			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
 			<FIELD NAME="plan_id" TYPE="int" LENGTH="10" NOTNULL="true" />
 			<FIELD NAME="currency" TYPE="char" LENGTH="10" NOTNULL="true" />
-			<FIELD NAME="price" TYPE="number" LENGTH="10, 2" NOTNULL="true" SEQUENCE="false" DEFAULT="0.00"/>
+			<FIELD NAME="price" TYPE="number" LENGTH="10" DECIMALS="2" NOTNULL="true" SEQUENCE="false" DEFAULT="0.00"/>
 			<FIELD NAME="stripe_price_id" TYPE="char" LENGTH="191" NOTNULL="false" SEQUENCE="false" COMMENT="ID Stripe du prix (pour les abonnements)"/>
 		  </FIELDS>
 		  <KEYS>
@@ -110,14 +110,16 @@
 		</TABLE>
 		
 		<TABLE NAME="subscription_plan_translation" COMMENT="Stores translations for subscription plans.">
-			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-			<FIELD NAME="plan_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
-			<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
-			<FIELD NAME="name" TYPE="text" NOTNULL="true"/>
-			<FIELD NAME="description" TYPE="text" NOTNULL="false"/>
-			<FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Format of description; 1=FORMAT_HTML"/>
-			<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="false"/>
-			<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="false"/>
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="plan_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="name" TYPE="text" NOTNULL="true"/>
+				<FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+				<FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Format of description; 1=FORMAT_HTML"/>
+				<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="false"/>
+				<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="false"/>
+			</FIELDS>
 			<KEYS>
 				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 				<KEY NAME="plan_id_fk" TYPE="foreign" FIELDS="plan_id" REFTABLE="subscription_plan" REFFIELDS="id"/>
@@ -127,52 +129,54 @@
 			</INDEXES>
 		</TABLE>
 
-		<TABLE NAME="subscription_payment_request">
-			<FIELD NAME="id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true" DEFAULT="auto_increment"/>
-			<FIELD NAME="planid"         TYPE="int"    LENGTH="10" NOTNULL="false" />
-        	<FIELD NAME="userid"         TYPE="int"    LENGTH="10" NOTNULL="false" />
-        	<FIELD NAME="email"          TYPE="char"   LENGTH="255" NOTNULL="false" />
-        	<FIELD NAME="firstname"      TYPE="char"   LENGTH="100" NOTNULL="false" />
-        	<FIELD NAME="lastname"       TYPE="char"   LENGTH="100" NOTNULL="false" />
-			<FIELD NAME="phone" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Guest/checkout phone number"/>
-			<FIELD NAME="phone_country" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ISO country code for phone"/>
-			<FIELD NAME="subscriptionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-			<FIELD NAME="currency" TYPE="char" LENGTH="10" UNSIGNED="false" NOTNULL="true"/>
-			<FIELD NAME="price" TYPE="number" LENGTH="10,2" UNSIGNED="false" NOTNULL="true"/>
-			<FIELD NAME="amount_minor" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Montant final payé en unités minor (ex: cents)"/>
-			<FIELD NAME="created_ip" TYPE="char" LENGTH="45" NOTNULL="false" SEQUENCE="false" COMMENT="IPv4/IPv6 at creation"/>
-			<FIELD NAME="created_useragent" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" COMMENT="HTTP User-Agent at creation"/>
-			<FIELD NAME="accept_language" TYPE="char" LENGTH="191" NOTNULL="false" SEQUENCE="false" COMMENT="HTTP Accept-Language header"/>
-			<FIELD NAME="http_referer" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" COMMENT="HTTP Referer at creation"/>
-			<FIELD NAME="payment_provider" TYPE="char" LENGTH="50" UNSIGNED="false" NOTNULL="true"/>
-			<FIELD NAME="sessionid"      TYPE="char"   LENGTH="255" NOTNULL="false" />
-			<FIELD NAME="status" TYPE="char" LENGTH="20" UNSIGNED="false" NOTNULL="true" DEFAULT="pending"/>
-			<FIELD NAME="transactionid" TYPE="char" LENGTH="255" UNSIGNED="false" NOTNULL="false"/>
-			<FIELD NAME="payment_link" TYPE="text" LENGTH="" UNSIGNED="false" NOTNULL="false"/>
-			<FIELD NAME="response_json" TYPE="text" LENGTH="" UNSIGNED="false" NOTNULL="false"/>
-			<FIELD NAME="creation_date" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
-			<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
-			<FIELD NAME="payment_date" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="false"/>
-			<FIELD NAME="expiration_date" TYPE="int" LENGTH="10" NOTNULL="false"/>
-			<FIELD NAME="emailsent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
-			<FIELD NAME="attempts" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" />
-			<FIELD NAME="last_attempt" TYPE="int" LENGTH="10" NOTNULL="false" />
-			<FIELD NAME="last_error" TYPE="text" LENGTH="" NOTNULL="false" />
-			<FIELD NAME="retry_token" TYPE="char" LENGTH="64" NOTNULL="false" />
-			<FIELD NAME="retry_expires" TYPE="int" LENGTH="10" NOTNULL="false" />
-			<FIELD NAME="reminder_stage" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
-			<FIELD NAME="reminder1_at" TYPE="int" LENGTH="10" NOTNULL="false" />
-			<FIELD NAME="reminder2_at" TYPE="int" LENGTH="10" NOTNULL="false" />
-			<FIELD NAME="login_token" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Jeton de connexion à usage unique après paiement"/>
-			<FIELD NAME="login_token_expires" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Expiration du jeton (timestamp Unix)"/>
-			<FIELD NAME="operation" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="purchase_new|extend_now|queue_future|upgrade_prorata"/>
-			<FIELD NAME="reference_subscription_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Souscription impactée (si pertinent)"/>
-			<FIELD NAME="locked_list_price" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Prix catalogue verrouillé (au checkout)"/>
-			<FIELD NAME="locked_discount_percent" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" COMMENT="Remise % verrouillée"/>
-			<FIELD NAME="locked_discount_amount" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Remise € verrouillée"/>
-			<FIELD NAME="locked_discount_reason" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Raison de la remise (ex: trial72h)"/>
-			<FIELD NAME="locked_final_price" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Montant final facturé (verrouillé)"/>
-			<FIELD NAME="locked_at" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Timestamp du verrouillage"/>
+		<TABLE NAME="subscription_payment_request" COMMENT="Payment requests for subscription purchases">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="planid"         TYPE="int"    LENGTH="10" NOTNULL="false" />
+				<FIELD NAME="userid"         TYPE="int"    LENGTH="10" NOTNULL="false" />
+				<FIELD NAME="email"          TYPE="char"   LENGTH="255" NOTNULL="false" />
+				<FIELD NAME="firstname"      TYPE="char"   LENGTH="100" NOTNULL="false" />
+				<FIELD NAME="lastname"       TYPE="char"   LENGTH="100" NOTNULL="false" />
+				<FIELD NAME="phone" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Guest/checkout phone number"/>
+				<FIELD NAME="phone_country" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ISO country code for phone"/>
+				<FIELD NAME="subscriptionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="currency" TYPE="char" LENGTH="10" UNSIGNED="false" NOTNULL="true"/>
+				<FIELD NAME="price" TYPE="number" LENGTH="10" DECIMALS="2" UNSIGNED="false" NOTNULL="true"/>
+				<FIELD NAME="amount_minor" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Montant final payé en unités minor (ex: cents)"/>
+				<FIELD NAME="created_ip" TYPE="char" LENGTH="45" NOTNULL="false" SEQUENCE="false" COMMENT="IPv4/IPv6 at creation"/>
+				<FIELD NAME="created_useragent" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="HTTP User-Agent at creation"/>
+				<FIELD NAME="accept_language" TYPE="char" LENGTH="191" NOTNULL="false" SEQUENCE="false" COMMENT="HTTP Accept-Language header"/>
+				<FIELD NAME="http_referer" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="HTTP Referer at creation"/>
+				<FIELD NAME="payment_provider" TYPE="char" LENGTH="50" UNSIGNED="false" NOTNULL="true"/>
+				<FIELD NAME="sessionid"      TYPE="char"   LENGTH="255" NOTNULL="false" />
+				<FIELD NAME="status" TYPE="char" LENGTH="20" UNSIGNED="false" NOTNULL="true" DEFAULT="pending"/>
+				<FIELD NAME="transactionid" TYPE="char" LENGTH="255" UNSIGNED="false" NOTNULL="false"/>
+				<FIELD NAME="payment_link" TYPE="text" UNSIGNED="false" NOTNULL="false"/>
+				<FIELD NAME="response_json" TYPE="text" UNSIGNED="false" NOTNULL="false"/>
+				<FIELD NAME="creation_date" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+				<FIELD NAME="last_update" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+				<FIELD NAME="payment_date" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="false"/>
+				<FIELD NAME="expiration_date" TYPE="int" LENGTH="10" NOTNULL="false"/>
+				<FIELD NAME="emailsent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
+				<FIELD NAME="attempts" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" />
+				<FIELD NAME="last_attempt" TYPE="int" LENGTH="10" NOTNULL="false" />
+				<FIELD NAME="last_error" TYPE="text" NOTNULL="false" />
+				<FIELD NAME="retry_token" TYPE="char" LENGTH="64" NOTNULL="false" />
+				<FIELD NAME="retry_expires" TYPE="int" LENGTH="10" NOTNULL="false" />
+				<FIELD NAME="reminder_stage" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
+				<FIELD NAME="reminder1_at" TYPE="int" LENGTH="10" NOTNULL="false" />
+				<FIELD NAME="reminder2_at" TYPE="int" LENGTH="10" NOTNULL="false" />
+				<FIELD NAME="login_token" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Jeton de connexion à usage unique après paiement"/>
+				<FIELD NAME="login_token_expires" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Expiration du jeton (timestamp Unix)"/>
+				<FIELD NAME="operation" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="purchase_new|extend_now|queue_future|upgrade_prorata"/>
+				<FIELD NAME="reference_subscription_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Souscription impactée (si pertinent)"/>
+				<FIELD NAME="locked_list_price" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Prix catalogue verrouillé (au checkout)"/>
+				<FIELD NAME="locked_discount_percent" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" COMMENT="Remise % verrouillée"/>
+				<FIELD NAME="locked_discount_amount" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Remise € verrouillée"/>
+				<FIELD NAME="locked_discount_reason" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Raison de la remise (ex: trial72h)"/>
+				<FIELD NAME="locked_final_price" TYPE="number" LENGTH="12" DECIMALS="2" NOTNULL="true" DEFAULT="0.00" COMMENT="Montant final facturé (verrouillé)"/>
+				<FIELD NAME="locked_at" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Timestamp du verrouillage"/>
+			</FIELDS>
 			<KEYS>
 				<KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscriptionid" REFTABLE="user_subscription" REFFIELDS="id"/>
 				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -208,7 +212,7 @@
 			<FIELD NAME="eventtype" TYPE="char" LENGTH="32" NOTNULL="true" COMMENT="e.g. invoice_failed, invoice_paid, subscription_canceled"/>
 			<FIELD NAME="provider_event_id" TYPE="char" LENGTH="64" NOTNULL="false" COMMENT="Stripe event or invoice id"/>
 			<FIELD NAME="occurred_at" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Unix timestamp"/>
-			<FIELD NAME="payload_json" TYPE="text" LENGTH="big" NOTNULL="false" COMMENT="Raw event metadata (JSON)"/>
+			<FIELD NAME="payload_json" TYPE="text" NOTNULL="false" COMMENT="Raw event metadata (JSON)"/>
 		</FIELDS>
 		<KEYS>
 			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>

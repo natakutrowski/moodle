@@ -8,6 +8,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\inbox\workspace\InboxThreadWorkspaceFactory;
 use local_subscriptions\crm\inbox\workspace\InboxWorkspaceFactory;
 use local_subscriptions\dashboard\workspace\DashboardWorkspaceFactory;
+use local_subscriptions\crm\user360\workspace\User360WorkspaceFactory;
 
 /**
  * Tests the generic CRM Workspace registry.
@@ -24,6 +25,7 @@ final class WorkspaceRegistryTest
                 DashboardWorkspaceFactory::WORKSPACE_KEY,
                 InboxWorkspaceFactory::WORKSPACE_KEY,
                 InboxThreadWorkspaceFactory::WORKSPACE_KEY,
+                User360WorkspaceFactory::WORKSPACE_KEY,
             ],
             WorkspaceRegistry::keys()
         );

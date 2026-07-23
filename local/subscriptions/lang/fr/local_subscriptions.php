@@ -4972,3 +4972,24 @@ $string['crm_commerce_nav_digital_purchases'] = 'Achats numériques';
 $string['crm_commerce_nav_digital_products'] = 'Produits numériques';
 $string['crm_commerce_nav_statistics'] = 'Statistiques';
 $string['crm_commerce_nav_configuration'] = 'Configuration';
+
+$string['commerce_payment_shadow_enabled'] =
+    'Activer le shadow mode des paiements Commerce';
+
+$string['commerce_payment_shadow_enabled_desc'] =
+    'Compare silencieusement les données du checkout historique avec l’orchestrateur Commerce, sans créer un second paiement.';
+
+$string['settings:commerce_migration_heading'] = 'Commerce — migration et sécurité';
+$string['settings:commerce_migration_heading_desc'] = 'Réglages avancés contrôlant les flux de paiement Commerce. Toute modification peut affecter les revenus : validez chaque scénario et conservez un plan de rollback.';
+$string['settings:commerce_checkout_shadow_enabled'] = 'Activer le shadow checkout Commerce';
+$string['settings:commerce_checkout_shadow_enabled_desc'] = 'Compare le checkout historique et le checkout Commerce sans créer de second paiement. À utiliser pour le diagnostic.';
+$string['settings:commerce_checkout_digital_stripe_eur_enabled'] = 'Commerce — achats digitaux Stripe EUR';
+$string['settings:commerce_checkout_digital_stripe_eur_enabled_desc'] = 'Route les achats digitaux Stripe en EUR via la façade Commerce. Désactivez ce réglage pour revenir immédiatement au chemin Legacy.';
+$string['settings:commerce_checkout_subscription_stripe_eur_enabled'] = 'Commerce — abonnements Stripe EUR';
+$string['settings:commerce_checkout_subscription_stripe_eur_enabled_desc'] = 'Route les abonnements, upgrades et retries Stripe en EUR via la façade Commerce.';
+$string['settings:commerce_checkout_digital_alfa_rub_enabled'] = 'Commerce — achats digitaux Alfa RUB';
+$string['settings:commerce_checkout_digital_alfa_rub_enabled_desc'] = 'Route les achats digitaux Alfa en RUB via la façade Commerce.';
+$string['settings:commerce_checkout_subscription_alfa_rub_enabled'] = 'Commerce — abonnements Alfa RUB';
+$string['settings:commerce_checkout_subscription_alfa_rub_enabled_desc'] = 'Route les abonnements et retries Alfa en RUB via la façade Commerce.';
+$string['settings:commerce_fulfillment_enabled'] = 'Activer le fulfillment Commerce';
+$string['settings:commerce_fulfillment_enabled_desc'] = 'Active le bridge post-paiement Commerce. Ne l’activez qu’après validation complète des webhooks, de l’idempotence, des accès et des e-mails.';

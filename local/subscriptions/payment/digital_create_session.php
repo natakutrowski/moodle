@@ -6,11 +6,12 @@ defined('MOODLE_INTERNAL') || die();
 require_sesskey();
 
 use local_subscriptions\digital\product_manager;
-use local_subscriptions\payment\PaymentGatewayFactory;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\payment\PaymentFailureReporter;
 use local_subscriptions\constants\Status;
+use local_subscriptions\commerce\checkout\CommerceCheckoutFactory;
+use local_subscriptions\commerce\checkout\CommerceCheckoutPersistenceService;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -53,8 +54,6 @@ $pr = product_manager::create_payment_request(
 );
 
 $provider = $pr->payment_provider;
-$gateway = PaymentGatewayFactory::for($provider);
-
 if ($provider === Provider::STRIPE) {
     $successurl = UrlFactory::digital_success([
         'pid' => $pr->id,
@@ -107,10 +106,20 @@ $options = [
 ];
 
 try {
-    $result = $gateway->create_checkout_session(
-        $pr,
-        $options
-    );
+    $checkoutresult =
+        CommerceCheckoutFactory::create()
+            ->initialize(
+                $pr,
+                product_manager::TABLE_PAYMENT_REQUEST,
+                $options,
+                'digital_create_session',
+                !empty(
+                    get_config(
+                        'local_subscriptions',
+                        'live_mode'
+                    )
+                ),
+            );
 } catch (\Throwable $e) {
     $reference =
         PaymentFailureReporter::generate_reference();
@@ -180,57 +189,17 @@ try {
     );
 }
 
-$redirecturl = '';
-
-if (is_string($result)) {
-    $redirecturl = $result;
-} elseif (is_array($result)) {
-    $redirecturl =
-        $result['redirect_url'] ??
-        $result['url'] ??
-        '';
-} elseif (is_object($result)) {
-    if (
-        property_exists(
-            $result,
-            'redirect_url'
-        )
-    ) {
-        $redirecturl =
-            $result->redirect_url;
-    } elseif (
-        method_exists(
-            $result,
-            'getUrl'
-        )
-    ) {
-        $redirecturl =
-            $result->getUrl();
-    } elseif (
-        method_exists(
-            $result,
-            'get_redirect_url'
-        )
-    ) {
-        $redirecturl =
-            $result->get_redirect_url();
-    }
-}
+$redirecturl = $checkoutresult->get_redirect_url();
 
 $redirecturl =
     UrlFactory::validate_external_payment_url(
         (string)$redirecturl
     );
 
-$update = new stdClass();
-$update->id = (int)$pr->id;
-$update->payment_link = $redirecturl;
-$update->last_error = null;
-$update->last_update = time();
-
-$DB->update_record(
+(new CommerceCheckoutPersistenceService())->persist(
     product_manager::TABLE_PAYMENT_REQUEST,
-    $update
+    (int)$pr->id,
+    $checkoutresult
 );
 
 redirect($redirecturl);

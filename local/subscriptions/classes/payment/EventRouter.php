@@ -8,7 +8,13 @@ final class EventRouter {
         if (($e->meta['payment_context'] ?? '') === 'digital_product') {
             switch ($e->type) {
                 case 'checkout_completed':
-                    \local_subscriptions\digital\digital_payment_service::on_checkout_completed($e);
+                    $postpayment = new \local_subscriptions\commerce\postpayment\DigitalStripePostPaymentProcessor();
+                    $decision = $postpayment->before_legacy($e);
+
+                    if ($decision->requires_legacy()) {
+                        \local_subscriptions\digital\digital_payment_service::on_checkout_completed($e);
+                        $postpayment->after_legacy($e);
+                    }
                     return;
 
                 case 'payment_failed':

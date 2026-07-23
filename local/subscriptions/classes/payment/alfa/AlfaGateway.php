@@ -81,7 +81,7 @@ final class AlfaGateway implements PaymentGatewayInterface {
     /**
      * Crée la session de paiement et renvoie l'URL de redirection de la page de paiement Alfa.
      *
-     * @param \stdClass $payment_request  Enregistrement DB PR (contient id, currency, price (major), description, etc.)
+     * @param stdClass $payment_request  Enregistrement DB PR (contient id, currency, price (major), description, etc.)
      * @param array     $options          returnurl, failurl, language ('ru' par défaut), email, phone
      */
     public function create_checkout_session(stdClass $payment_request, array $options = []): CheckoutInitResult {
@@ -250,7 +250,10 @@ final class AlfaGateway implements PaymentGatewayInterface {
             'status'           => Status::PENDING,
         ]);
 
-        return new CheckoutInitResult($formUrl);
+        return new CheckoutInitResult(
+            $formUrl,
+            (string)$orderId
+        );
     }
 
     /**

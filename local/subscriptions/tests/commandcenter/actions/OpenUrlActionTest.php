@@ -84,9 +84,13 @@ final class OpenUrlActionTest
             $data['success']
         );
 
-        $this->assertArrayNotHasKey(
+        $this->assertArrayHasKey(
             'redirectUrl',
             $data
+        );
+
+        $this->assertNull(
+            $data['redirectUrl']
         );
     }
 
