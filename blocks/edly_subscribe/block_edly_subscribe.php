@@ -3,8 +3,8 @@ defined('MOODLE_INTERNAL') || die();
 
 class block_edly_subscribe extends block_base {
 
-    public function init() {
-        $this->title = ''; // Titre de header du bloc (laisse vide)
+    public function init(): void {
+        $this->title = get_string('pluginname', 'block_edly_subscribe');
     }
 
     public function specialization() {

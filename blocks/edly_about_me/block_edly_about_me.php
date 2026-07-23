@@ -3,8 +3,8 @@ defined('MOODLE_INTERNAL') || die();
 
 class block_edly_about_me extends block_base {
 
-    public function init() {
-        $this->title = ''; // pas de titre de bloc visible (design plein)
+    public function init(): void {
+        $this->title = get_string('pluginname', 'block_edly_about_me');
     }
 
     public function specialization() {
