@@ -6,12 +6,12 @@ defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
 use local_subscriptions\commerce\postpayment\CommercePostPaymentProcessingResult;
-use local_subscriptions\commerce\postpayment\DigitalStripePostPaymentProcessor;
+use local_subscriptions\commerce\postpayment\DigitalPostPaymentProcessor;
 
 /**
  * Architecture and decision tests for phase 7.93G.4/G.5A.
  */
-final class commerce_post_payment_pilot_test extends advanced_testcase {
+final class commerce_post_payment_processor_test extends advanced_testcase {
 
     public function test_processing_result_distinguishes_legacy_and_commerce(): void {
         $legacy = CommercePostPaymentProcessingResult::legacy_required(12);
@@ -27,17 +27,32 @@ final class commerce_post_payment_pilot_test extends advanced_testcase {
     }
 
     public function test_post_payment_processor_is_available(): void {
-        $this->assertTrue(class_exists(DigitalStripePostPaymentProcessor::class));
+        $this->assertTrue(class_exists(DigitalPostPaymentProcessor::class));
     }
 
     public function test_event_router_uses_controlled_post_payment_processor(): void {
         $source = file_get_contents(__DIR__ . '/../classes/payment/EventRouter.php');
 
         $this->assertIsString($source);
-        $this->assertStringContainsString('DigitalStripePostPaymentProcessor', $source);
-        $this->assertStringContainsString('before_legacy($e)', $source);
-        $this->assertStringContainsString('after_legacy($e)', $source);
-        $this->assertStringContainsString('requires_legacy()', $source);
+        $this->assertStringContainsString(
+            'DigitalPostPaymentProcessor',
+            $source
+        );
+
+        $this->assertStringContainsString(
+            '->process($event)',
+            $source
+        );
+
+        $this->assertStringNotContainsString(
+            'after_legacy',
+            $source
+        );
+
+        $this->assertStringNotContainsString(
+            'before_legacy',
+            $source
+        );
     }
 
     public function test_digital_post_action_persists_receipt_idempotency_flag(): void {

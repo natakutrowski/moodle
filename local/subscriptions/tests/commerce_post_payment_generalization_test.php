@@ -7,12 +7,19 @@ defined('MOODLE_INTERNAL') || die();
 use advanced_testcase;
 use local_subscriptions\commerce\audit\runtime\CommerceRuntimeAuditReport;
 use local_subscriptions\commerce\postpayment\CommercePostPaymentProcessingResult;
+use local_subscriptions\commerce\postpayment\DigitalPostPaymentProcessor;
 use local_subscriptions\commerce\postpayment\SubscriptionPostPaymentProcessor;
 
 final class commerce_post_payment_generalization_test extends advanced_testcase {
 
     public function test_subscription_processor_and_runtime_audit_are_available(): void {
-        $this->assertTrue(class_exists(SubscriptionPostPaymentProcessor::class));
+        $this->assertTrue(
+            class_exists(DigitalPostPaymentProcessor::class)
+        );
+
+        $this->assertTrue(
+            class_exists(SubscriptionPostPaymentProcessor::class)
+        );
         $this->assertTrue(class_exists(\local_subscriptions\commerce\audit\runtime\CommerceRuntimeAuditor::class));
     }
 

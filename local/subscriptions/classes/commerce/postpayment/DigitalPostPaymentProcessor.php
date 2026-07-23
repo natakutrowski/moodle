@@ -17,19 +17,22 @@ use local_subscriptions\payment\dto\InternalEvent;
 use local_subscriptions\payment\Provider;
 
 /**
- * Controlled post-payment bridge for Digital Stripe/EUR and Alfa/RUB pilots.
+ * Commerce post-payment processor for Digital Stripe/EUR and Alfa/RUB.
  *
- * When the pilot is disabled, Legacy remains authoritative and this class only
- * emits a read-only shadow report after Legacy processing.
+ * When Commerce fulfillment is disabled, the processor explicitly delegates
+ * to the Legacy digital payment service. Once Commerce processing starts,
+ * failures are fail-closed and Legacy is not executed a second time.
  */
-final class DigitalStripePostPaymentProcessor {
+final class DigitalPostPaymentProcessor {
 
     public function __construct(
         private readonly ?CommercePostPaymentLogger $logger = null
     ) {
     }
 
-    public function before_legacy(InternalEvent $event): CommercePostPaymentProcessingResult {
+    public function process(
+        InternalEvent $event
+    ): CommercePostPaymentProcessingResult {
         if (!$this->supports($event)) {
             return CommercePostPaymentProcessingResult::unsupported();
         }
@@ -37,22 +40,25 @@ final class DigitalStripePostPaymentProcessor {
         $paymentrequest = $this->find_payment_request($event);
 
         if ($paymentrequest === null) {
-            $this->get_logger()->log('before_legacy', 'payment_request_missing', $this->log_context($event));
+            $this->get_logger()->log('process', 'payment_request_missing', $this->log_context($event));
             return CommercePostPaymentProcessingResult::legacy_required();
         }
 
-        if (!$this->pilot_enabled_for($event, $paymentrequest)) {
+        if (!$this->commerce_enabled_for($event, $paymentrequest)) {
             return CommercePostPaymentProcessingResult::legacy_required((int)$paymentrequest->id);
         }
 
         if ($this->is_fulfilled($paymentrequest)) {
-            $this->get_logger()->log('before_legacy', 'already_processed', $this->log_context($event, $paymentrequest));
+            $this->get_logger()->log('process', 'already_processed', $this->log_context($event, $paymentrequest));
             return CommercePostPaymentProcessingResult::already_processed((int)$paymentrequest->id);
         }
 
         $runtime = CommerceRuntimeFactory::create();
         $preparation = $runtime->purchase_preparation()->prepare(
-            $this->build_purchase_request($paymentrequest)
+            $this->build_purchase_request(
+                $event,
+                $paymentrequest
+            )
         );
 
         $context = CommerceFulfillmentContext::confirmed(
@@ -63,7 +69,7 @@ final class DigitalStripePostPaymentProcessor {
             $this->resolve_currency($event, $paymentrequest),
             time(),
             (int)$paymentrequest->id,
-            'stripe_webhook',
+            $this->resolve_provider($event, $paymentrequest) . '_webhook',
             [
                 'event_type' => $event->type,
                 'payment_context' => 'digital_product',
@@ -74,7 +80,7 @@ final class DigitalStripePostPaymentProcessor {
 
         if (!$result->is_enabled()) {
             throw new \RuntimeException(
-                'Commerce fulfillment pilot is eligible but the fulfillment bridge is disabled.'
+                'Commerce fulfillment is eligible but the fulfillment bridge is disabled.'
             );
         }
 
@@ -84,45 +90,12 @@ final class DigitalStripePostPaymentProcessor {
             );
         }
 
-        $this->get_logger()->log('before_legacy', 'commerce_completed', array_merge(
+        $this->get_logger()->log('process', 'commerce_completed', array_merge(
             $this->log_context($event, $paymentrequest),
             ['commerce_status' => 'fulfilled']
         ));
 
         return CommercePostPaymentProcessingResult::commerce_completed((int)$paymentrequest->id);
-    }
-
-    public function after_legacy(InternalEvent $event): void {
-        if (!$this->supports($event) || !$this->shadow_enabled()) {
-            return;
-        }
-
-        try {
-            $paymentrequest = $this->find_payment_request($event);
-
-            if ($paymentrequest === null) {
-                $this->get_logger()->log('after_legacy', 'payment_request_missing', $this->log_context($event));
-                return;
-            }
-
-            $product = product_manager::get_product_by_id((int)$paymentrequest->productid, false);
-            $purchase = DigitalPurchaseFactory::from_legacy_records($paymentrequest, $product ?: null);
-            $report = CommerceRuntimeFactory::create()->fulfillment_shadow()->inspect($purchase);
-
-            $this->get_logger()->log(
-                'after_legacy',
-                $report->is_compatible() ? 'ready' : 'mismatch',
-                array_merge($this->log_context($event, $paymentrequest), [
-                    'commerce_status' => $report->is_fulfilled() ? 'fulfilled' : 'not_fulfilled',
-                    'issues' => $report->get_issues(),
-                ])
-            );
-        } catch (\Throwable $exception) {
-            $this->get_logger()->log('after_legacy', 'shadow_error', array_merge(
-                $this->log_context($event),
-                ['issues' => [get_class($exception) . ': ' . $exception->getMessage()]]
-            ));
-        }
     }
 
     private function supports(InternalEvent $event): bool {
@@ -138,37 +111,29 @@ final class DigitalStripePostPaymentProcessor {
             || ($provider === Provider::ALFA && $currency === 'RUB');
     }
 
-    private function pilot_enabled(): bool {
-        if (empty(get_config('local_subscriptions', 'commerce_fulfillment_enabled'))) {
+    private function commerce_enabled_for(
+        InternalEvent $event,
+        \stdClass $paymentrequest
+    ): bool {
+        if (empty(get_config(
+            'local_subscriptions',
+            'commerce_fulfillment_enabled'
+        ))) {
             return false;
         }
 
-        // The event is resolved again in before_legacy via the payment request;
-        // this method is retained for backwards-compatible tests and Stripe.
-        return true;
-    }
+        $provider = $this->resolve_provider(
+            $event,
+            $paymentrequest
+        );
 
-    private function pilot_enabled_for(InternalEvent $event, \stdClass $paymentrequest): bool {
-        if (empty(get_config('local_subscriptions', 'commerce_fulfillment_enabled'))) {
-            return false;
-        }
+        $currency = $this->resolve_currency(
+            $event,
+            $paymentrequest
+        );
 
-        $provider = $this->resolve_provider($event, $paymentrequest);
-        $currency = $this->resolve_currency($event, $paymentrequest);
-
-        if ($provider === Provider::STRIPE && $currency === 'EUR') {
-            return !empty(get_config('local_subscriptions', 'commerce_checkout_digital_stripe_eur_enabled'));
-        }
-
-        if ($provider === Provider::ALFA && $currency === 'RUB') {
-            return !empty(get_config('local_subscriptions', 'commerce_checkout_digital_alfa_rub_enabled'));
-        }
-
-        return false;
-    }
-
-    private function shadow_enabled(): bool {
-        return !empty(get_config('local_subscriptions', 'commerce_checkout_shadow_enabled'));
+        return ($provider === Provider::STRIPE && $currency === 'EUR')
+            || ($provider === Provider::ALFA && $currency === 'RUB');
     }
 
     private function find_payment_request(InternalEvent $event): ?\stdClass {
@@ -210,7 +175,10 @@ final class DigitalStripePostPaymentProcessor {
         return $record ?: null;
     }
 
-    private function build_purchase_request(\stdClass $paymentrequest): CommercePurchaseRequest {
+    private function build_purchase_request(
+        InternalEvent $event,
+        \stdClass $paymentrequest
+    ): CommercePurchaseRequest {
         $product = product_manager::get_product_by_id((int)$paymentrequest->productid, false);
 
         if (!$product) {
@@ -238,12 +206,18 @@ final class DigitalStripePostPaymentProcessor {
                 new CommercePurchaseRequestItem(
                     $item,
                     1,
-                    $this->resolve_amount_minor(null, $paymentrequest),
-                    'EUR',
+                    $this->resolve_amount_minor($event, $paymentrequest),
+                    $this->resolve_currency(
+                        $event,
+                        $paymentrequest
+                    ),
                     ['productid' => (int)$product->id]
                 ),
             ],
-            preferredprovider: Provider::STRIPE,
+            preferredprovider: $this->resolve_provider(
+                $event,
+                $paymentrequest
+            ),
             metadata: [
                 'legacy_payment_request_id' => (int)$paymentrequest->id,
                 'payment_context' => 'digital_product',
@@ -283,7 +257,9 @@ final class DigitalStripePostPaymentProcessor {
             }
         }
 
-        throw new \RuntimeException('The Stripe confirmation has no transaction identifier.');
+        throw new \RuntimeException(
+            'The payment confirmation has no transaction identifier.'
+        );
     }
 
     private function resolve_amount_minor(?InternalEvent $event, \stdClass $paymentrequest): int {
@@ -307,7 +283,9 @@ final class DigitalStripePostPaymentProcessor {
             'provider' => $paymentrequest !== null ? $this->resolve_provider($event, $paymentrequest) : strtolower((string)($event->meta['provider'] ?? Provider::STRIPE)),
             'event_type' => $event->type,
             'payment_request_id' => $requestid,
-            'currency' => strtoupper((string)($event->currency ?? ($paymentrequest->currency ?? 'EUR'))),
+            'currency' => $paymentrequest !== null
+                ? $this->resolve_currency($event, $paymentrequest)
+                : strtoupper((string)($event->currency ?? '')),
             'legacy_status' => $paymentrequest->status ?? null,
             'correlation_id' => substr(hash('sha256', implode('|', [
                 strtolower((string)($event->meta['provider'] ?? Provider::STRIPE)),

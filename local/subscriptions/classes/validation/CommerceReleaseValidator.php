@@ -22,11 +22,7 @@ use local_subscriptions\commerce\runtime\CommerceRuntimeFactory;
 final class CommerceReleaseValidator {
 
     private const TOGGLES = [
-        'commerce_checkout_shadow_enabled',
-        'commerce_checkout_digital_stripe_eur_enabled',
-        'commerce_checkout_subscription_stripe_eur_enabled',
-        'commerce_checkout_digital_alfa_rub_enabled',
-        'commerce_checkout_subscription_alfa_rub_enabled',
+        'commerce_checkout_enabled',
         'commerce_fulfillment_enabled',
     ];
 
@@ -171,13 +167,17 @@ final class CommerceReleaseValidator {
     }
 
     private function stripe_enabled(): bool {
-        return !empty(get_config('local_subscriptions', 'commerce_checkout_digital_stripe_eur_enabled'))
-            || !empty(get_config('local_subscriptions', 'commerce_checkout_subscription_stripe_eur_enabled'));
+        return !empty(get_config(
+            'local_subscriptions',
+            'commerce_checkout_enabled'
+        ));
     }
 
     private function alfa_enabled(): bool {
-        return !empty(get_config('local_subscriptions', 'commerce_checkout_digital_alfa_rub_enabled'))
-            || !empty(get_config('local_subscriptions', 'commerce_checkout_subscription_alfa_rub_enabled'));
+        return !empty(get_config(
+            'local_subscriptions',
+            'commerce_checkout_enabled'
+        ));
     }
 
     private function environment(string $provider): string {

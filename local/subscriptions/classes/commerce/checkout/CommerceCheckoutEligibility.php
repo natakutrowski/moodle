@@ -9,7 +9,7 @@ use local_subscriptions\digital\product_manager;
 use local_subscriptions\payment\Provider;
 
 /**
- * Determines whether a Legacy checkout belongs to an enabled Commerce pilot.
+ * Determines whether a Legacy checkout matches a supported Commerce scenario.
  */
 final class CommerceCheckoutEligibility {
 

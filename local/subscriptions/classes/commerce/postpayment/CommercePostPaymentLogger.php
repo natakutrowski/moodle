@@ -5,7 +5,7 @@ namespace local_subscriptions\commerce\postpayment;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Structured, secret-free logger for the post-payment migration.
+ * Structured, secret-free logger for Commerce post-payment processing.
  */
 final class CommercePostPaymentLogger {
 

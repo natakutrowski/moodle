@@ -4,7 +4,6 @@ namespace local_subscriptions\commerce\checkout;
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\commerce\checkout\shadow\CommerceCheckoutShadowService;
 use local_subscriptions\commerce\payment\legacy\LegacyCommercePaymentRequestFactory;
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentOrchestrator;
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentProviderContextFactory;
@@ -18,7 +17,6 @@ final class CommerceCheckoutService {
     public function __construct(
         private readonly CommerceCheckoutFeatureToggle $toggle,
         private readonly CommerceCheckoutEligibility $eligibility,
-        private readonly CommerceCheckoutShadowService $shadowservice,
         private readonly LegacyCommercePaymentRequestFactory $legacyrequestfactory,
         private readonly CommercePaymentProviderContextFactory $contextfactory,
         private readonly CommercePaymentOrchestrator $paymentorchestrator
@@ -32,12 +30,6 @@ final class CommerceCheckoutService {
         string $source,
         bool $live
     ): CommerceCheckoutResult {
-        if ($this->toggle->is_shadow_enabled()) {
-            $this->log_shadow(
-                $this->shadowservice->evaluate($paymentrequest, $paymentrequesttable, $legacyoptions),
-                $source
-            );
-        }
 
         if ($this->should_use_commerce($paymentrequest, $paymentrequesttable)) {
             return $this->initialize_commerce(
@@ -53,19 +45,14 @@ final class CommerceCheckoutService {
     }
 
     private function should_use_commerce(\stdClass $request, string $table): bool {
-        return (
-            $this->toggle->is_digital_stripe_eur_enabled()
-            && $this->eligibility->is_digital_stripe_eur($request, $table)
-        ) || (
-            $this->toggle->is_subscription_stripe_eur_enabled()
-            && $this->eligibility->is_subscription_stripe_eur($request, $table)
-        ) || (
-            $this->toggle->is_digital_alfa_rub_enabled()
-            && $this->eligibility->is_digital_alfa_rub($request, $table)
-        ) || (
-            $this->toggle->is_subscription_alfa_rub_enabled()
-            && $this->eligibility->is_subscription_alfa_rub($request, $table)
-        );
+        if (!$this->toggle->is_enabled()) {
+            return false;
+        }
+
+        return $this->eligibility->is_digital_stripe_eur($request, $table)
+            || $this->eligibility->is_subscription_stripe_eur($request, $table)
+            || $this->eligibility->is_digital_alfa_rub($request, $table)
+            || $this->eligibility->is_subscription_alfa_rub($request, $table);
     }
 
     private function initialize_legacy(\stdClass $request, array $options, string $source): CommerceCheckoutResult {
@@ -152,18 +139,5 @@ final class CommerceCheckoutService {
         }
         $value = trim((string)$value);
         return $value !== '' ? $value : null;
-    }
-
-    private function log_shadow(
-        \local_subscriptions\commerce\checkout\shadow\CommerceCheckoutShadowReport $report,
-        string $source
-    ): void {
-        $payload = json_encode($report->to_array(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        error_log(sprintf(
-            '[Commerce checkout shadow][%s][%s] %s',
-            $source,
-            $report->is_compatible() ? 'OK' : 'DIFF',
-            $payload ?: '{}'
-        ));
     }
 }

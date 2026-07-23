@@ -22,14 +22,70 @@ final class CommerceCertificationMatrix {
         ];
 
         return [
-            new CommerceCertificationScenario('digital_stripe_eur', 'digital', 'stripe', 'EUR', 'commerce_checkout_digital_stripe_eur_enabled', 'payment', $standard),
-            new CommerceCertificationScenario('subscription_stripe_eur', 'subscription', 'stripe', 'EUR', 'commerce_checkout_subscription_stripe_eur_enabled', 'payment', $standard),
-            new CommerceCertificationScenario('subscription_stripe_eur_recurring', 'subscription', 'stripe', 'EUR', 'commerce_checkout_subscription_stripe_eur_enabled', 'subscription', $standard),
-            new CommerceCertificationScenario('upgrade_stripe_eur', 'subscription_upgrade', 'stripe', 'EUR', 'commerce_checkout_subscription_stripe_eur_enabled', 'payment', $standard),
-            new CommerceCertificationScenario('retry_stripe_eur', 'retry', 'stripe', 'EUR', 'commerce_checkout_subscription_stripe_eur_enabled', 'original', $standard),
-            new CommerceCertificationScenario('digital_alfa_rub', 'digital', 'alfa', 'RUB', 'commerce_checkout_digital_alfa_rub_enabled', 'payment', $standard),
-            new CommerceCertificationScenario('subscription_alfa_rub', 'subscription', 'alfa', 'RUB', 'commerce_checkout_subscription_alfa_rub_enabled', 'payment', $standard),
-            new CommerceCertificationScenario('retry_alfa_rub', 'retry', 'alfa', 'RUB', 'commerce_checkout_subscription_alfa_rub_enabled', 'original', $standard),
+            new CommerceCertificationScenario(
+                'digital_stripe_eur',
+                'digital',
+                'stripe',
+                'EUR',
+                'payment',
+                $standard
+            ),
+            new CommerceCertificationScenario(
+                'subscription_stripe_eur',
+                'subscription',
+                'stripe',
+                'EUR',
+                'payment',
+                $standard
+            ),
+            new CommerceCertificationScenario(
+                'subscription_stripe_eur_recurring',
+                'subscription',
+                'stripe',
+                'EUR',
+                'subscription',
+                $standard
+            ),
+            new CommerceCertificationScenario(
+                'upgrade_stripe_eur',
+                'subscription_upgrade',
+                'stripe',
+                'EUR',
+                'payment',
+                $standard
+            ),
+            new CommerceCertificationScenario(
+                'retry_stripe_eur',
+                'retry',
+                'stripe',
+                'EUR',
+                'original',
+                $standard
+            ),
+            new CommerceCertificationScenario(
+                'digital_alfa_rub',
+                'digital',
+                'alfa',
+                'RUB',
+                'payment',
+                $standard
+            ),
+            new CommerceCertificationScenario(
+                'subscription_alfa_rub',
+                'subscription',
+                'alfa',
+                'RUB',
+                'payment',
+                $standard
+            ),
+            new CommerceCertificationScenario(
+                'retry_alfa_rub',
+                'retry',
+                'alfa',
+                'RUB',
+                'original',
+                $standard
+            ),
         ];
     }
 

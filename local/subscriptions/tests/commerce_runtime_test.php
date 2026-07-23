@@ -20,7 +20,6 @@ use local_subscriptions\commerce\payment\provider\stripe\StripeCommercePaymentPr
 use local_subscriptions\commerce\payment\legacy\LegacyCommercePaymentRequestFactory;
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentOrchestrator;
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentProviderContextFactory;
-use local_subscriptions\commerce\payment\shadow\CommercePaymentShadowService;
 
 /**
  * Tests for the Commerce runtime.
@@ -78,13 +77,6 @@ final class commerce_runtime_test extends advanced_testcase {
         $legacypaymentrequestfactory =
             new LegacyCommercePaymentRequestFactory();
 
-        $paymentshadowservice =
-            new CommercePaymentShadowService(
-                $legacypaymentrequestfactory,
-                $paymentcontextfactory,
-                $paymentorchestrator
-            );
-
         $runtime = new CommerceRuntime(
             $purchaseservice,
             new CommercePurchaseFinancialClassifier(),
@@ -100,8 +92,7 @@ final class commerce_runtime_test extends advanced_testcase {
             $paymentproviderregistry,
             $paymentorchestrator,
             $paymentcontextfactory,
-            $legacypaymentrequestfactory,
-            $paymentshadowservice
+            $legacypaymentrequestfactory
         );
 
         CommerceRuntimeFactory::set_for_testing(
@@ -224,11 +215,6 @@ final class commerce_runtime_test extends advanced_testcase {
         $this->assertInstanceOf(
             LegacyCommercePaymentRequestFactory::class,
             $runtime->legacy_payment_requests()
-        );
-
-        $this->assertInstanceOf(
-            CommercePaymentShadowService::class,
-            $runtime->payment_shadow()
         );
     }
 

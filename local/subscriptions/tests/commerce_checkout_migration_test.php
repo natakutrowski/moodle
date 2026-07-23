@@ -8,7 +8,6 @@ use advanced_testcase;
 use local_subscriptions\commerce\checkout\CommerceCheckoutEligibility;
 use local_subscriptions\commerce\checkout\CommerceCheckoutResult;
 use local_subscriptions\commerce\checkout\shadow\CommerceCheckoutComparison;
-use local_subscriptions\commerce\checkout\shadow\CommerceCheckoutShadowReport;
 use local_subscriptions\digital\product_manager;
 
 /**
@@ -55,18 +54,5 @@ final class commerce_checkout_migration_test extends advanced_testcase {
             'unknown',
             'https://payments.example.test/session'
         );
-    }
-
-    public function test_shadow_report_detects_difference(): void {
-        $report = new CommerceCheckoutShadowReport(
-            'legacy:digital_product:12',
-            [
-                new CommerceCheckoutComparison('currency', 'EUR', 'EUR'),
-                new CommerceCheckoutComparison('amount_minor', 2900, 3000),
-            ]
-        );
-
-        $this->assertFalse($report->is_compatible());
-        $this->assertCount(2, $report->get_comparisons());
     }
 }

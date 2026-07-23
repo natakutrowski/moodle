@@ -5210,23 +5210,43 @@ $string['crm_commerce_nav_digital_products'] = 'Цифровые продукт�
 $string['crm_commerce_nav_statistics'] = 'Статистика';
 $string['crm_commerce_nav_configuration'] = 'Настройки';
 
-$string['commerce_payment_shadow_enabled'] =
-    'Включить теневой режим платежей Commerce';
-
-$string['commerce_payment_shadow_enabled_desc'] =
-    'Сравнивает данные старого оформления платежа с оркестратором Commerce без создания второго платежа.';
-
 $string['settings:commerce_migration_heading'] = 'Commerce — миграция и безопасность';
 $string['settings:commerce_migration_heading_desc'] = 'Расширенные настройки платежных потоков Commerce. Изменения могут повлиять на выручку: проверяйте каждый сценарий и сохраняйте возможность отката.';
-$string['settings:commerce_checkout_shadow_enabled'] = 'Включить теневой режим checkout Commerce';
-$string['settings:commerce_checkout_shadow_enabled_desc'] = 'Сравнивает Legacy и Commerce без создания второго платежа. Используется для диагностики.';
-$string['settings:commerce_checkout_digital_stripe_eur_enabled'] = 'Commerce — цифровые покупки Stripe EUR';
-$string['settings:commerce_checkout_digital_stripe_eur_enabled_desc'] = 'Направляет цифровые покупки Stripe в EUR через фасад Commerce. Отключение немедленно возвращает Legacy-путь.';
-$string['settings:commerce_checkout_subscription_stripe_eur_enabled'] = 'Commerce — подписки Stripe EUR';
-$string['settings:commerce_checkout_subscription_stripe_eur_enabled_desc'] = 'Направляет подписки, upgrades и повторные попытки Stripe EUR через фасад Commerce.';
-$string['settings:commerce_checkout_digital_alfa_rub_enabled'] = 'Commerce — цифровые покупки Alfa RUB';
-$string['settings:commerce_checkout_digital_alfa_rub_enabled_desc'] = 'Направляет цифровые покупки Alfa в RUB через фасад Commerce.';
-$string['settings:commerce_checkout_subscription_alfa_rub_enabled'] = 'Commerce — подписки Alfa RUB';
-$string['settings:commerce_checkout_subscription_alfa_rub_enabled_desc'] = 'Направляет подписки и повторные попытки Alfa RUB через фасад Commerce.';
 $string['settings:commerce_fulfillment_enabled'] = 'Включить fulfillment Commerce';
-$string['settings:commerce_fulfillment_enabled_desc'] = 'Включает post-payment bridge Commerce. Активируйте только после проверки webhook, идемпотентности, выдачи доступа и писем.';
+$string['settings:commerce_fulfillment_enabled_desc'] =
+    'Использует сертифицированный Commerce fulfillment после подтверждения платежа. Отключите этот параметр для немедленного возврата к Legacy-обработке платежа.';
+$string['settings:commerce_checkout_enabled'] =
+    'Включить оформление платежей Commerce';
+
+$string['settings:commerce_checkout_enabled_desc'] =
+    'Использует сертифицированную архитектуру Commerce для создания платежей Stripe в EUR и Alfa в RUB. Отключите этот параметр для немедленного возврата к Legacy checkout.';
+
+$string['crm_help_category_commerce'] =
+    'Commerce и платежи';
+
+$string['crm_help_category_commerce_desc'] =
+    'Архитектура Commerce, оформление платежей, провайдеры, fulfillment, эксплуатация и диагностика.';
+
+$string['crm_help_article_commerce_overview_title'] =
+    'Архитектура Commerce';
+
+$string['crm_help_article_commerce_overview_summary'] =
+    'Обзор покупок Commerce, платежей, checkout и fulfillment.';
+
+$string['crm_help_article_commerce_operations_title'] =
+    'Эксплуатация Commerce в production';
+
+$string['crm_help_article_commerce_operations_summary'] =
+    'Конфигурация, аварийные выключатели, провайдеры и безопасный откат.';
+
+$string['crm_help_article_commerce_diagnostics_title'] =
+    'Аудит и диагностика Commerce';
+
+$string['crm_help_article_commerce_diagnostics_summary'] =
+    'Команды проверки, сертификации, целостности и диагностики fulfillment.';
+
+$string['crm_help_article_commerce_extension_title'] =
+    'Расширение архитектуры Commerce';
+
+$string['crm_help_article_commerce_extension_summary'] =
+    'Добавление провайдера, типа покупки или fulfillment-handler без обхода контрактов Commerce.';

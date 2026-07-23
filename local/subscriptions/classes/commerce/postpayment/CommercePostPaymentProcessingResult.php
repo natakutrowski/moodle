@@ -5,7 +5,7 @@ namespace local_subscriptions\commerce\postpayment;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Decision returned before the Legacy post-payment handler is invoked.
+ * Routing decision returned by a Commerce post-payment processor.
  */
 final class CommercePostPaymentProcessingResult {
 

@@ -37,6 +37,19 @@ final class HelpRegistry {
                 40
             ),
             new HelpCategory(
+                'commerce',
+                get_string(
+                    'crm_help_category_commerce',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_category_commerce_desc',
+                    'local_subscriptions'
+                ),
+                '💳',
+                42
+            ),
+            new HelpCategory(
                 'inbox',
                 get_string(
                     'crm_help_category_inbox',
@@ -208,6 +221,131 @@ final class HelpRegistry {
                     HelpContext::DASHBOARD,
                 ],
                 40
+            ),
+            new HelpArticle(
+                'commerce_overview',
+                'commerce',
+                get_string(
+                    'crm_help_article_commerce_overview_title',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_article_commerce_overview_summary',
+                    'local_subscriptions'
+                ),
+                'commerce_overview.md',
+                [
+                    'commerce',
+                    'purchase',
+                    'subscription',
+                    'digital',
+                    'checkout',
+                    'payment',
+                    'fulfillment',
+                    'stripe',
+                    'alfa',
+                    'architecture',
+                ],
+                [
+                    HelpContext::COMMERCE,
+                    HelpContext::SUBSCRIPTIONS,
+                    HelpContext::DIGITAL_PURCHASES,
+                    HelpContext::GENERAL,
+                ],
+                41
+            ),
+            new HelpArticle(
+                'commerce_operations',
+                'commerce',
+                get_string(
+                    'crm_help_article_commerce_operations_title',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_article_commerce_operations_summary',
+                    'local_subscriptions'
+                ),
+                'commerce_operations.md',
+                [
+                    'commerce',
+                    'production',
+                    'checkout',
+                    'fulfillment',
+                    'kill switch',
+                    'rollback',
+                    'stripe',
+                    'alfa',
+                    'provider',
+                    'configuration',
+                ],
+                [
+                    HelpContext::COMMERCE,
+                    HelpContext::ADMIN_TOOLS,
+                    HelpContext::GENERAL,
+                ],
+                42
+            ),
+            new HelpArticle(
+                'commerce_diagnostics',
+                'commerce',
+                get_string(
+                    'crm_help_article_commerce_diagnostics_title',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_article_commerce_diagnostics_summary',
+                    'local_subscriptions'
+                ),
+                'commerce_diagnostics.md',
+                [
+                    'commerce',
+                    'audit',
+                    'diagnostic',
+                    'certification',
+                    'integrity',
+                    'idempotency',
+                    'fulfillment',
+                    'runtime',
+                    'payment request',
+                    'webhook',
+                ],
+                [
+                    HelpContext::COMMERCE,
+                    HelpContext::ADMIN_TOOLS,
+                    HelpContext::GENERAL,
+                ],
+                43
+            ),
+            new HelpArticle(
+                'commerce_extension',
+                'commerce',
+                get_string(
+                    'crm_help_article_commerce_extension_title',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'crm_help_article_commerce_extension_summary',
+                    'local_subscriptions'
+                ),
+                'commerce_extension.md',
+                [
+                    'commerce',
+                    'developer',
+                    'provider',
+                    'product',
+                    'purchase handler',
+                    'fulfillment handler',
+                    'registry',
+                    'extension',
+                    'architecture',
+                    'testing',
+                ],
+                [
+                    HelpContext::COMMERCE,
+                    HelpContext::GENERAL,
+                ],
+                44,
+                true
             ),
 
             new HelpArticle(

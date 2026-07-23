@@ -19,7 +19,6 @@ use local_subscriptions\commerce\payment\legacy\LegacyCommercePaymentRequestFact
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentOrchestrator;
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentProviderContextFactory;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderRegistry;
-use local_subscriptions\commerce\payment\shadow\CommercePaymentShadowService;
 use local_subscriptions\commerce\purchase\domain\CommercePurchaseBuilder;
 use local_subscriptions\commerce\purchase\domain\CommercePurchaseMapper;
 use local_subscriptions\commerce\purchase\domain\CommercePurchaseValidator;
@@ -70,9 +69,7 @@ final class CommerceRuntime {
         private readonly CommercePaymentProviderContextFactory
             $paymentcontextfactory,
         private readonly LegacyCommercePaymentRequestFactory
-            $legacypaymentrequestfactory,
-        private readonly CommercePaymentShadowService
-            $paymentshadowservice
+            $legacypaymentrequestfactory
     ) {
     }
 
@@ -128,11 +125,6 @@ final class CommerceRuntime {
     public function legacy_payment_requests():
         LegacyCommercePaymentRequestFactory {
         return $this->legacypaymentrequestfactory;
-    }
-
-    public function payment_shadow():
-        CommercePaymentShadowService {
-        return $this->paymentshadowservice;
     }
 
     /**

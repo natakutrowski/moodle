@@ -347,21 +347,6 @@ if ($hassiteconfig) {
             ]
         ));
 
-        $settings->add(
-            new admin_setting_configcheckbox(
-                'local_subscriptions/commerce_payment_shadow_enabled',
-                get_string(
-                    'commerce_payment_shadow_enabled',
-                    'local_subscriptions'
-                ),
-                get_string(
-                    'commerce_payment_shadow_enabled_desc',
-                    'local_subscriptions'
-                ),
-                0
-            )
-        );
-
         // === Stripe ================================================================
         $settings->add(new admin_setting_heading(
             'local_subscriptions_stripe_hdr',
@@ -641,21 +626,17 @@ if ($hassiteconfig) {
             get_string('settings:commerce_migration_heading_desc', 'local_subscriptions')
         ));
 
-        $commerceflags = [
-            'commerce_checkout_shadow_enabled',
-            'commerce_checkout_digital_stripe_eur_enabled',
-            'commerce_checkout_subscription_stripe_eur_enabled',
-            'commerce_checkout_digital_alfa_rub_enabled',
-            'commerce_checkout_subscription_alfa_rub_enabled',
-            'commerce_fulfillment_enabled',
+        $commercedefaults = [
+            'commerce_checkout_enabled' => 1,
+            'commerce_fulfillment_enabled' => 1,
         ];
 
-        foreach ($commerceflags as $commerceflag) {
+        foreach ($commercedefaults as $commerceflag => $defaultvalue) {
             $settings->add(new admin_setting_configcheckbox(
                 'local_subscriptions/' . $commerceflag,
                 get_string('settings:' . $commerceflag, 'local_subscriptions'),
                 get_string('settings:' . $commerceflag . '_desc', 'local_subscriptions'),
-                0
+                $defaultvalue
             ));
         }
 

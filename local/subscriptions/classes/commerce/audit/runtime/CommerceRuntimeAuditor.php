@@ -57,8 +57,9 @@ final class CommerceRuntimeAuditor {
 
         $checks['commerce_fulfillment_enabled'] =
             !empty(get_config('local_subscriptions', 'commerce_fulfillment_enabled'));
-        $checks['shadow_enabled'] =
-            !empty(get_config('local_subscriptions', 'commerce_checkout_shadow_enabled'));
+
+        $checks['commerce_checkout_enabled'] =
+            !empty(get_config('local_subscriptions','commerce_checkout_enabled'));
 
         return new CommerceRuntimeAuditReport($checks, $issues);
     }

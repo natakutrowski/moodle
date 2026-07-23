@@ -4973,23 +4973,43 @@ $string['crm_commerce_nav_digital_products'] = 'Produits numériques';
 $string['crm_commerce_nav_statistics'] = 'Statistiques';
 $string['crm_commerce_nav_configuration'] = 'Configuration';
 
-$string['commerce_payment_shadow_enabled'] =
-    'Activer le shadow mode des paiements Commerce';
-
-$string['commerce_payment_shadow_enabled_desc'] =
-    'Compare silencieusement les données du checkout historique avec l’orchestrateur Commerce, sans créer un second paiement.';
-
 $string['settings:commerce_migration_heading'] = 'Commerce — migration et sécurité';
 $string['settings:commerce_migration_heading_desc'] = 'Réglages avancés contrôlant les flux de paiement Commerce. Toute modification peut affecter les revenus : validez chaque scénario et conservez un plan de rollback.';
-$string['settings:commerce_checkout_shadow_enabled'] = 'Activer le shadow checkout Commerce';
-$string['settings:commerce_checkout_shadow_enabled_desc'] = 'Compare le checkout historique et le checkout Commerce sans créer de second paiement. À utiliser pour le diagnostic.';
-$string['settings:commerce_checkout_digital_stripe_eur_enabled'] = 'Commerce — achats digitaux Stripe EUR';
-$string['settings:commerce_checkout_digital_stripe_eur_enabled_desc'] = 'Route les achats digitaux Stripe en EUR via la façade Commerce. Désactivez ce réglage pour revenir immédiatement au chemin Legacy.';
-$string['settings:commerce_checkout_subscription_stripe_eur_enabled'] = 'Commerce — abonnements Stripe EUR';
-$string['settings:commerce_checkout_subscription_stripe_eur_enabled_desc'] = 'Route les abonnements, upgrades et retries Stripe en EUR via la façade Commerce.';
-$string['settings:commerce_checkout_digital_alfa_rub_enabled'] = 'Commerce — achats digitaux Alfa RUB';
-$string['settings:commerce_checkout_digital_alfa_rub_enabled_desc'] = 'Route les achats digitaux Alfa en RUB via la façade Commerce.';
-$string['settings:commerce_checkout_subscription_alfa_rub_enabled'] = 'Commerce — abonnements Alfa RUB';
-$string['settings:commerce_checkout_subscription_alfa_rub_enabled_desc'] = 'Route les abonnements et retries Alfa en RUB via la façade Commerce.';
 $string['settings:commerce_fulfillment_enabled'] = 'Activer le fulfillment Commerce';
-$string['settings:commerce_fulfillment_enabled_desc'] = 'Active le bridge post-paiement Commerce. Ne l’activez qu’après validation complète des webhooks, de l’idempotence, des accès et des e-mails.';
+$string['settings:commerce_fulfillment_enabled_desc'] =
+    'Utilise le fulfillment Commerce certifié après confirmation du paiement. Désactivez ce réglage pour revenir immédiatement au traitement post-paiement Legacy.';
+$string['settings:commerce_checkout_enabled'] =
+    'Activer le checkout Commerce';
+
+$string['settings:commerce_checkout_enabled_desc'] =
+    'Utilise l’architecture Commerce certifiée pour initialiser les paiements Stripe EUR et Alfa RUB. Désactivez ce réglage pour revenir immédiatement au checkout Legacy.';
+
+$string['crm_help_category_commerce'] =
+    'Commerce et paiements';
+
+$string['crm_help_category_commerce_desc'] =
+    'Architecture Commerce, checkout, providers, fulfillment, exploitation et diagnostics.';
+
+$string['crm_help_article_commerce_overview_title'] =
+    'Comprendre l’architecture Commerce';
+
+$string['crm_help_article_commerce_overview_summary'] =
+    'Vue d’ensemble des achats Commerce, des paiements, du checkout et du fulfillment.';
+
+$string['crm_help_article_commerce_operations_title'] =
+    'Exploiter Commerce en production';
+
+$string['crm_help_article_commerce_operations_summary'] =
+    'Configuration, kill switches, providers et procédure de rollback sécurisé.';
+
+$string['crm_help_article_commerce_diagnostics_title'] =
+    'Auditer et diagnostiquer Commerce';
+
+$string['crm_help_article_commerce_diagnostics_summary'] =
+    'Commandes de validation, certification, intégrité, fulfillment et résolution des incidents.';
+
+$string['crm_help_article_commerce_extension_title'] =
+    'Étendre l’architecture Commerce';
+
+$string['crm_help_article_commerce_extension_summary'] =
+    'Ajouter un provider, un type d’achat ou un handler de fulfillment sans contourner les contrats Commerce.';

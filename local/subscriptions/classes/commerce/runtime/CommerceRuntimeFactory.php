@@ -21,7 +21,6 @@ use local_subscriptions\commerce\payment\provider\CommercePaymentProviderRegistr
 use local_subscriptions\commerce\payment\legacy\LegacyCommercePaymentRequestFactory;
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentOrchestrator;
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentProviderContextFactory;
-use local_subscriptions\commerce\payment\shadow\CommercePaymentShadowService;
 
 /**
  * Central construction point for Commerce services.
@@ -86,13 +85,6 @@ final class CommerceRuntimeFactory {
         $legacypaymentrequestfactory =
             new LegacyCommercePaymentRequestFactory();
 
-        $paymentshadowservice =
-            new CommercePaymentShadowService(
-                $legacypaymentrequestfactory,
-                $paymentcontextfactory,
-                $paymentorchestrator
-            );
-
         self::$runtime =
             new CommerceRuntime(
                 $purchaseservice,
@@ -105,8 +97,7 @@ final class CommerceRuntimeFactory {
                 $paymentproviderregistry,
                 $paymentorchestrator,
                 $paymentcontextfactory,
-                $legacypaymentrequestfactory,
-                $paymentshadowservice
+                $legacypaymentrequestfactory
             );
 
         return self::$runtime;

@@ -28,6 +28,9 @@ final class HelpContextResolver {
         'local-subscriptions-admin-digital-purchases-index' =>
             HelpContext::DIGITAL_PURCHASES,
 
+        'local-subscriptions-admin-commerce-index' =>
+            HelpContext::COMMERCE,            
+
         'local-subscriptions-admin-automations-index' =>
             HelpContext::AUTOMATIONS,
 

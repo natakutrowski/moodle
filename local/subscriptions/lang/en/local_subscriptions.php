@@ -5160,23 +5160,43 @@ $string['crm_commerce_nav_digital_products'] = 'Digital products';
 $string['crm_commerce_nav_statistics'] = 'Statistics';
 $string['crm_commerce_nav_configuration'] = 'Configuration';
 
-$string['commerce_payment_shadow_enabled'] =
-    'Enable Commerce payment shadow mode';
-
-$string['commerce_payment_shadow_enabled_desc'] =
-    'Silently compares Legacy checkout data with the Commerce orchestrator without creating a second payment.';
-
 $string['settings:commerce_migration_heading'] = 'Commerce — migration and safety';
 $string['settings:commerce_migration_heading_desc'] = 'Advanced settings controlling Commerce payment flows. Changes may affect revenue: validate each scenario and keep a rollback plan.';
-$string['settings:commerce_checkout_shadow_enabled'] = 'Enable Commerce checkout shadow mode';
-$string['settings:commerce_checkout_shadow_enabled_desc'] = 'Compares Legacy and Commerce checkout data without creating a second payment. Intended for diagnostics.';
-$string['settings:commerce_checkout_digital_stripe_eur_enabled'] = 'Commerce — Stripe EUR digital purchases';
-$string['settings:commerce_checkout_digital_stripe_eur_enabled_desc'] = 'Routes Stripe EUR digital purchases through the Commerce facade. Disable to return immediately to the Legacy path.';
-$string['settings:commerce_checkout_subscription_stripe_eur_enabled'] = 'Commerce — Stripe EUR subscriptions';
-$string['settings:commerce_checkout_subscription_stripe_eur_enabled_desc'] = 'Routes Stripe EUR subscriptions, upgrades and retries through the Commerce facade.';
-$string['settings:commerce_checkout_digital_alfa_rub_enabled'] = 'Commerce — Alfa RUB digital purchases';
-$string['settings:commerce_checkout_digital_alfa_rub_enabled_desc'] = 'Routes Alfa RUB digital purchases through the Commerce facade.';
-$string['settings:commerce_checkout_subscription_alfa_rub_enabled'] = 'Commerce — Alfa RUB subscriptions';
-$string['settings:commerce_checkout_subscription_alfa_rub_enabled_desc'] = 'Routes Alfa RUB subscriptions and retries through the Commerce facade.';
 $string['settings:commerce_fulfillment_enabled'] = 'Enable Commerce fulfillment';
-$string['settings:commerce_fulfillment_enabled_desc'] = 'Enables the Commerce post-payment bridge. Activate only after validating webhooks, idempotency, access delivery and emails.';
+$string['settings:commerce_fulfillment_enabled_desc'] =
+    'Uses certified Commerce fulfillment after payment confirmation. Disable this setting to immediately return to Legacy post-payment processing.';
+$string['settings:commerce_checkout_enabled'] =
+    'Enable Commerce checkout';
+
+$string['settings:commerce_checkout_enabled_desc'] =
+    'Uses the certified Commerce architecture to initialize Stripe EUR and Alfa RUB payments. Disable this setting to immediately return to the Legacy checkout.';
+
+$string['crm_help_category_commerce'] =
+    'Commerce and payments';
+
+$string['crm_help_category_commerce_desc'] =
+    'Commerce architecture, checkout, providers, fulfillment, operations and diagnostics.';
+
+$string['crm_help_article_commerce_overview_title'] =
+    'Understanding the Commerce architecture';
+
+$string['crm_help_article_commerce_overview_summary'] =
+    'Overview of Commerce purchases, payments, checkout and fulfillment.';
+
+$string['crm_help_article_commerce_operations_title'] =
+    'Operating Commerce in production';
+
+$string['crm_help_article_commerce_operations_summary'] =
+    'Configuration, kill switches, providers and safe rollback procedures.';
+
+$string['crm_help_article_commerce_diagnostics_title'] =
+    'Auditing and diagnosing Commerce';
+
+$string['crm_help_article_commerce_diagnostics_summary'] =
+    'Validation, certification, integrity and fulfillment commands for incident diagnosis.';
+
+$string['crm_help_article_commerce_extension_title'] =
+    'Extending the Commerce architecture';
+
+$string['crm_help_article_commerce_extension_summary'] =
+    'Add a provider, purchase type or fulfillment handler without bypassing Commerce contracts.';
