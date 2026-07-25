@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/subscriptions/db" VERSION="2026072100" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="local/subscriptions/db" VERSION="2026072512" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
 		<TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
 			<FIELDS>
@@ -54,7 +54,7 @@
 		  <FIELDS>
 			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
 			<FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" />
-			<FIELD NAME="access_scope_id" TYPE="int" LENGTH="10" NOTNULL="true" />
+			<FIELD NAME="accessscopeid" TYPE="int" LENGTH="10" NOTNULL="false" />
 			<FIELD NAME="duration_key" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="1month" />
 			<FIELD NAME="is_active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
 			<FIELD NAME="creation_date" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
@@ -67,7 +67,7 @@
 		  </FIELDS>
 		  <KEYS>
 			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-			<KEY NAME="access_scope_fk" TYPE="foreign" FIELDS="access_scope_id" REFTABLE="subscription_access_scope" REFFIELDS="id"/>
+			<KEY NAME="access_scope_fk" TYPE="foreign" FIELDS="accessscopeid" REFTABLE="subscription_access_scope" REFFIELDS="id"/>
 		  </KEYS>
 			<INDEXES>
 				<INDEX NAME="uniq_plan_name" UNIQUE="true" FIELDS="name"/>
@@ -2274,6 +2274,519 @@
 					FIELDS="status,timecreated"/>
 			</INDEXES>
 		</TABLE>
+
+		<TABLE NAME="local_subscriptions_commerce_purchase"
+			COMMENT="Native Commerce purchase aggregate roots">
+
+			<FIELDS>
+				<FIELD NAME="id"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					SEQUENCE="true"/>
+
+				<FIELD NAME="purchaseuuid"
+					TYPE="char"
+					LENGTH="32"
+					NOTNULL="true"/>
+
+				<FIELD NAME="reference"
+					TYPE="char"
+					LENGTH="28"
+					NOTNULL="true"/>
+
+				<FIELD NAME="type"
+					TYPE="char"
+					LENGTH="64"
+					NOTNULL="true"/>
+
+				<FIELD NAME="legacyfamily"
+					TYPE="char"
+					LENGTH="32"
+					NOTNULL="false"/>
+
+				<FIELD NAME="legacyid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="false"/>
+
+				<FIELD NAME="userid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="false"/>
+
+				<FIELD NAME="customeremail"
+					TYPE="char"
+					LENGTH="254"
+					NOTNULL="false"/>
+
+				<FIELD NAME="status"
+					TYPE="char"
+					LENGTH="32"
+					NOTNULL="true"/>
+
+				<FIELD NAME="currency"
+					TYPE="char"
+					LENGTH="3"
+					NOTNULL="true"/>
+
+				<FIELD NAME="subtotalminor"
+					TYPE="int"
+					LENGTH="18"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="discountminor"
+					TYPE="int"
+					LENGTH="18"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="totalminor"
+					TYPE="int"
+					LENGTH="18"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="customerjson"
+					TYPE="text"
+					NOTNULL="true"/>
+
+				<FIELD NAME="snapshotjson"
+					TYPE="text"
+					NOTNULL="true"/>
+
+				<FIELD NAME="metadatajson"
+					TYPE="text"
+					NOTNULL="true"/>
+
+				<FIELD NAME="snapshotversion"
+					TYPE="int"
+					LENGTH="4"
+					NOTNULL="true"
+					DEFAULT="1"/>
+
+				<FIELD NAME="timecreated"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+
+				<FIELD NAME="timemodified"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"/>
+			</FIELDS>
+
+			<KEYS>
+				<KEY NAME="primary"
+					TYPE="primary"
+					FIELDS="id"/>
+			</KEYS>
+
+			<INDEXES>
+				<INDEX NAME="purchaseuuid_uix"
+					UNIQUE="true"
+					FIELDS="purchaseuuid"/>
+
+				<INDEX NAME="reference_uix"
+					UNIQUE="true"
+					FIELDS="reference"/>
+
+				<INDEX NAME="legacy_reference_uix"
+					UNIQUE="true"
+					FIELDS="legacyfamily,legacyid"/>
+
+				<INDEX NAME="userid_time_idx"
+					UNIQUE="false"
+					FIELDS="userid,timecreated"/>
+
+				<INDEX NAME="status_time_idx"
+					UNIQUE="false"
+					FIELDS="status,timemodified"/>
+
+				<INDEX NAME="type_time_idx"
+					UNIQUE="false"
+					FIELDS="type,timecreated"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_commerce_purchase_item"
+			COMMENT="Immutable line items belonging to native Commerce purchases">
+
+			<FIELDS>
+				<FIELD NAME="id"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					SEQUENCE="true"
+					COMMENT="Internal database identifier"/>
+
+				<FIELD NAME="purchaseid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					COMMENT="Parent native Commerce purchase"/>
+
+				<FIELD NAME="position"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"
+					COMMENT="Stable zero-based position inside the purchase"/>
+
+				<FIELD NAME="itemtype"
+					TYPE="char"
+					LENGTH="64"
+					NOTNULL="true"
+					COMMENT="Commerce item family such as subscription digital or bundle"/>
+
+				<FIELD NAME="itemreference"
+					TYPE="char"
+					LENGTH="255"
+					NOTNULL="true"
+					COMMENT="Immutable commercial reference captured at purchase time"/>
+
+				<FIELD NAME="label"
+					TYPE="char"
+					LENGTH="255"
+					NOTNULL="true"
+					COMMENT="Item label captured at purchase time"/>
+
+				<FIELD NAME="quantity"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="1"
+					COMMENT="Purchased quantity"/>
+
+				<FIELD NAME="currency"
+					TYPE="char"
+					LENGTH="3"
+					NOTNULL="true"
+					COMMENT="ISO 4217 currency code"/>
+
+				<FIELD NAME="unitminor"
+					TYPE="int"
+					LENGTH="18"
+					NOTNULL="true"
+					DEFAULT="0"
+					COMMENT="Unit amount expressed in currency minor units"/>
+
+				<FIELD NAME="grossminor"
+					TYPE="int"
+					LENGTH="18"
+					NOTNULL="true"
+					DEFAULT="0"
+					COMMENT="Gross line amount before discount in minor units"/>
+
+				<FIELD NAME="discountminor"
+					TYPE="int"
+					LENGTH="18"
+					NOTNULL="true"
+					DEFAULT="0"
+					COMMENT="Line discount expressed in minor units"/>
+
+				<FIELD NAME="netminor"
+					TYPE="int"
+					LENGTH="18"
+					NOTNULL="true"
+					DEFAULT="0"
+					COMMENT="Net line amount after discount in minor units"/>
+
+				<FIELD NAME="pricingjson"
+					TYPE="text"
+					NOTNULL="true"
+					COMMENT="Immutable pricing snapshot encoded as JSON"/>
+
+				<FIELD NAME="fulfillmentjson"
+					TYPE="text"
+					NOTNULL="true"
+					COMMENT="Immutable fulfillment instructions encoded as JSON"/>
+
+				<FIELD NAME="metadatajson"
+					TYPE="text"
+					NOTNULL="true"
+					COMMENT="Additional item metadata encoded as JSON"/>
+			</FIELDS>
+
+			<KEYS>
+				<KEY NAME="primary"
+					TYPE="primary"
+					FIELDS="id"/>
+
+				<KEY NAME="purchase_fk"
+					TYPE="foreign"
+					FIELDS="purchaseid"
+					REFTABLE="local_subscriptions_commerce_purchase"
+					REFFIELDS="id"/>
+			</KEYS>
+
+			<INDEXES>
+				<INDEX NAME="purchase_position_uix"
+					UNIQUE="true"
+					FIELDS="purchaseid,position"/>
+
+				<INDEX NAME="item_reference_idx"
+					UNIQUE="false"
+					FIELDS="itemtype,itemreference"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_commerce_payment"
+			COMMENT="Payment attempts belonging to native Commerce purchases">
+
+			<FIELDS>
+				<FIELD NAME="id"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					SEQUENCE="true"
+					COMMENT="Internal database identifier"/>
+
+				<FIELD NAME="purchaseid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					COMMENT="Parent native Commerce purchase"/>
+
+				<FIELD NAME="sequence"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"
+					COMMENT="Stable zero-based payment position inside the purchase"/>
+
+				<FIELD NAME="provider"
+					TYPE="char"
+					LENGTH="64"
+					NOTNULL="false"
+					COMMENT="Payment provider identifier"/>
+
+				<FIELD NAME="providerreference"
+					TYPE="char"
+					LENGTH="255"
+					NOTNULL="false"
+					COMMENT="Provider-side payment or checkout reference"/>
+
+				<FIELD NAME="status"
+					TYPE="char"
+					LENGTH="32"
+					NOTNULL="true"
+					COMMENT="Normalised Commerce payment status"/>
+
+				<FIELD NAME="currency"
+					TYPE="char"
+					LENGTH="3"
+					NOTNULL="true"
+					COMMENT="ISO 4217 currency code"/>
+
+				<FIELD NAME="amountminor"
+					TYPE="int"
+					LENGTH="18"
+					NOTNULL="true"
+					DEFAULT="0"
+					COMMENT="Payment amount expressed in currency minor units"/>
+
+				<FIELD NAME="transactionid"
+					TYPE="char"
+					LENGTH="255"
+					NOTNULL="false"
+					COMMENT="Final provider transaction identifier"/>
+
+				<FIELD NAME="legacyrequestid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="false"
+					COMMENT="Historical legacy payment request identifier"/>
+
+				<FIELD NAME="paidat"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="false"
+					COMMENT="Timestamp at which the payment became successful"/>
+
+				<FIELD NAME="metadatajson"
+					TYPE="text"
+					NOTNULL="true"
+					COMMENT="Provider-independent payment metadata encoded as JSON"/>
+			</FIELDS>
+
+			<KEYS>
+				<KEY NAME="primary"
+					TYPE="primary"
+					FIELDS="id"/>
+
+				<KEY NAME="purchase_fk"
+					TYPE="foreign"
+					FIELDS="purchaseid"
+					REFTABLE="local_subscriptions_commerce_purchase"
+					REFFIELDS="id"/>
+			</KEYS>
+
+			<INDEXES>
+				<INDEX NAME="purchase_sequence_uix"
+					UNIQUE="true"
+					FIELDS="purchaseid,sequence"/>
+
+				<INDEX NAME="provider_reference_idx"
+					UNIQUE="false"
+					FIELDS="provider,providerreference"/>
+
+				<INDEX NAME="provider_transaction_idx"
+					UNIQUE="false"
+					FIELDS="provider,transactionid"/>
+
+				<INDEX NAME="status_idx"
+					UNIQUE="false"
+					FIELDS="status"/>
+
+				<INDEX NAME="legacy_request_idx"
+					UNIQUE="false"
+					FIELDS="legacyrequestid"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subscriptions_commerce_fulfillment"
+			COMMENT="Fulfillment operations belonging to native Commerce purchases">
+
+			<FIELDS>
+				<FIELD NAME="id"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					SEQUENCE="true"
+					COMMENT="Internal database identifier"/>
+
+				<FIELD NAME="purchaseid"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					COMMENT="Parent native Commerce purchase"/>
+
+				<FIELD NAME="sequence"
+					TYPE="int"
+					LENGTH="10"
+					NOTNULL="true"
+					DEFAULT="0"
+					COMMENT="Stable zero-based fulfillment position inside the purchase"/>
+
+				<FIELD NAME="reference"
+					TYPE="char"
+					LENGTH="255"
+					NOTNULL="true"
+					COMMENT="Stable fulfillment operation reference"/>
+
+				<FIELD NAME="fulfillmentkey"
+					TYPE="char"
+					LENGTH="128"
+					NOTNULL="true"
+					COMMENT="Handler or fulfillment capability key"/>
+
+				<FIELD NAME="idempotencykey"
+					TYPE="char"
+					LENGTH="255"
+					NOTNULL="true"
+					COMMENT="Idempotency key preventing duplicate fulfillment execution"/>
+
+				<FIELD NAME="status"
+					TYPE="char"
+					LENGTH="32"
+					NOTNULL="true"
+					COMMENT="Normalised Commerce fulfillment status"/>
+
+				<FIELD NAME="metadatajson"
+					TYPE="text"
+					NOTNULL="true"
+					COMMENT="Provider-independent fulfillment metadata encoded as JSON"/>
+			</FIELDS>
+
+			<KEYS>
+				<KEY NAME="primary"
+					TYPE="primary"
+					FIELDS="id"/>
+
+				<KEY NAME="purchase_fk"
+					TYPE="foreign"
+					FIELDS="purchaseid"
+					REFTABLE="local_subscriptions_commerce_purchase"
+					REFFIELDS="id"/>
+			</KEYS>
+
+			<INDEXES>
+				<INDEX NAME="purchase_sequence_uix"
+					UNIQUE="true"
+					FIELDS="purchaseid,sequence"/>
+
+				<INDEX NAME="idempotencykey_uix"
+					UNIQUE="true"
+					FIELDS="idempotencykey"/>
+
+				<INDEX NAME="purchase_reference_uix"
+					UNIQUE="true"
+					FIELDS="purchaseid,reference"/>
+
+				<INDEX NAME="fulfillmentkey_status_idx"
+					UNIQUE="false"
+					FIELDS="fulfillmentkey,status"/>
+
+				<INDEX NAME="status_idx"
+					UNIQUE="false"
+					FIELDS="status"/>
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="local_subs_commerce_cron_run" COMMENT="Execution history and metrics for Commerce scheduled tasks">
+			<FIELDS>
+				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+				<FIELD NAME="jobname" TYPE="char" LENGTH="128" NOTNULL="true"/>
+				<FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true"/>
+				<FIELD NAME="countersjson" TYPE="text" NOTNULL="true"/>
+				<FIELD NAME="warningsjson" TYPE="text" NOTNULL="true"/>
+				<FIELD NAME="errorsjson" TYPE="text" NOTNULL="true"/>
+				<FIELD NAME="startedat" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="finishedat" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="durationms" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="peakmemorybytes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="dbqueries" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+				<FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="jobname_finishedat_idx" UNIQUE="false" FIELDS="jobname,finishedat"/>
+				<INDEX NAME="status_timecreated_idx" UNIQUE="false" FIELDS="status,timecreated"/>
+				<INDEX NAME="timecreated_idx" UNIQUE="false" FIELDS="timecreated"/>
+			</INDEXES>
+		</TABLE>
+
+
+        <TABLE NAME="local_subs_commerce_idem" COMMENT="Persistent idempotency registry for Commerce commands">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="scope" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="idempotencykey" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="payloadhash" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true"/>
+                <FIELD NAME="resultjson" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="errormessage" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="lockeduntil" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="attempts" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="scope_key_uix" UNIQUE="true" FIELDS="scope,idempotencykey"/>
+                <INDEX NAME="status_lockeduntil_idx" UNIQUE="false" FIELDS="status,lockeduntil"/>
+                <INDEX NAME="timemodified_idx" UNIQUE="false" FIELDS="timemodified"/>
+            </INDEXES>
+        </TABLE>
 
     </TABLES>
 </XMLDB>

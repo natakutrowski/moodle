@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\fulfillment\CommerceFulfillmentContext;
 use local_subscriptions\commerce\fulfillment\CommerceFulfillmentResult;
 use local_subscriptions\commerce\fulfillment\digital\DigitalDownloadFulfillmentHandler;
+use local_subscriptions\commerce\dualwrite\CommerceDualWriteBridge;
 use local_subscriptions\digital\product_manager;
 use local_subscriptions\mailer;
 use local_subscriptions\service\DigitalPurchaseEmailService;
@@ -57,6 +58,7 @@ final class DigitalEmailPostFulfillmentAction
         $receiptsent = (int)($pr->receipt_sent ?? 0) === 1;
 
         if ($accesssent && $receiptsent) {
+            CommerceDualWriteBridge::digital($purchaseid, 'digital_emails_already_sent');
             return new CommercePostFulfillmentActionResult(
                 $this->get_key(),
                 CommercePostFulfillmentActionResult::STATUS_SKIPPED,
@@ -122,6 +124,8 @@ final class DigitalEmailPostFulfillmentAction
                 throw $exception;
             }
         }
+
+        CommerceDualWriteBridge::digital($purchaseid, 'digital_emails_completed');
 
         return new CommercePostFulfillmentActionResult(
             $this->get_key(),

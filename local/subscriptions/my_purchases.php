@@ -9,6 +9,7 @@ use local_subscriptions\constants\Status;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\support\SubsPresenter;
+use local_subscriptions\commerce\student\StudentCommercePurchaseFactory;
 
 require_login();
 
@@ -163,7 +164,11 @@ echo html_writer::tag('h3', get_string('mysubs_title', 'local_subscriptions'), [
  */
 echo html_writer::tag('h4', get_string('course_purchases_profile_title', 'local_subscriptions'), ['class' => 'mb-3']);
 
-$subs = $DB->get_records('user_subscription', ['userid' => $targetuser->id], 'end_date DESC');
+$studentcommerce = StudentCommercePurchaseFactory::create()->get_for_customer(
+    (int)$targetuser->id,
+    (string)$targetuser->email
+);
+$subs = $studentcommerce->get_subscriptions();
 
 if (!$subs) {
     echo $OUTPUT->notification(get_string('mysubs_empty', 'local_subscriptions'), \core\output\notification::NOTIFY_INFO);
@@ -512,32 +517,41 @@ if (!$subs) {
 echo html_writer::tag('h4', get_string('digital_purchases_profile_title', 'local_subscriptions'), ['class' => 'mt-5 mb-3']);
 
 $lang = strtolower(substr(current_language(), 0, 2));
+$digitalpurchases = $studentcommerce->get_digital_purchases();
 
-$sql = "
-    SELECT
-        pr.*,
-        p.slug,
-        p.mobile_filename,
-        COALESCE(NULLIF(tcur.title, ''), NULLIF(tfr.title, ''), p.name) AS productname
-      FROM {subscription_digital_payment_request} pr
-      JOIN {subscription_digital_product} p ON p.id = pr.productid
- LEFT JOIN {subscription_digital_product_lang} tcur
-        ON tcur.productid = p.id AND tcur.lang = :lang
- LEFT JOIN {subscription_digital_product_lang} tfr
-        ON tfr.productid = p.id AND tfr.lang = 'fr'
-     WHERE pr.status IN ('paid', 'completed')
-       AND (
-            pr.userid = :userid
-            OR " . $DB->sql_compare_text('pr.email') . " = " . $DB->sql_compare_text(':useremail') . "
-       )
-  ORDER BY COALESCE(pr.payment_date, pr.creation_date) DESC, pr.id DESC
-";
-
-$digitalpurchases = $DB->get_records_sql($sql, [
-    'lang' => $lang,
-    'userid' => $targetuser->id,
-    'useremail' => $targetuser->email,
-]);
+if ($digitalpurchases) {
+    $productids = array_values(array_unique(array_filter(array_map(
+        static fn($purchase): int => (int)($purchase->productid ?? 0),
+        $digitalpurchases
+    ))));
+    $products = $productids
+        ? $DB->get_records_list('subscription_digital_product', 'id', $productids)
+        : [];
+    $translations = [];
+    if ($productids) {
+        $translationrecords = $DB->get_records_list(
+            'subscription_digital_product_lang',
+            'productid',
+            $productids
+        );
+        foreach ($translationrecords as $translation) {
+            $translations[(int)$translation->productid][(string)$translation->lang] = $translation;
+        }
+    }
+    foreach ($digitalpurchases as $purchase) {
+        $product = $products[(int)$purchase->productid] ?? null;
+        $currenttranslation = $translations[(int)$purchase->productid][$lang] ?? null;
+        $frenchtranslation = $translations[(int)$purchase->productid]['fr'] ?? null;
+        $purchase->slug = $product->slug
+            ?? ($purchase->productslug ?? null);
+        $purchase->mobile_filename = $product->mobile_filename ?? null;
+        $purchase->productname = $currenttranslation->title
+            ?? $frenchtranslation->title
+            ?? $product->name
+            ?? ($purchase->productname ?? null)
+            ?? ('Digital product #' . (int)$purchase->productid);
+    }
+}
 
 if (!$digitalpurchases) {
     echo $OUTPUT->notification(get_string('digital_purchases_empty', 'local_subscriptions'), \core\output\notification::NOTIFY_INFO);

@@ -5250,3 +5250,48 @@ $string['crm_help_article_commerce_extension_title'] =
 
 $string['crm_help_article_commerce_extension_summary'] =
     'Добавление провайдера, типа покупки или fulfillment-handler без обхода контрактов Commerce.';
+
+$string['settings:commerce_dual_write_enabled'] = 'Включить двойную запись Commerce';
+$string['settings:commerce_dual_write_enabled_desc'] = 'После изменения Legacy-покупки синхронизирует и проверяет нативный снимок Commerce. По умолчанию отключено.';
+$string['settings:commerce_dual_write_strict'] = 'Строгая двойная запись Commerce';
+$string['settings:commerce_dual_write_strict_desc'] = 'Прерывает исходную операцию при ошибке нативной синхронизации. На начальном этапе наблюдения оставьте выключенным.';
+$string['settings:commerce_native_read_shadow_enabled'] = 'Включить теневое чтение Commerce';
+$string['settings:commerce_native_read_shadow_enabled_desc'] = 'Дополнительно читает и сравнивает нативный снимок, но всегда возвращает Legacy. По умолчанию отключено.';
+$string['settings:commerce_native_read_shadow_strict'] = 'Строгое теневое чтение Commerce';
+$string['settings:commerce_native_read_shadow_strict_desc'] = 'Вызывает исключение при расхождении. Использовать только для тестов и аудитов DEV.';
+
+$string['settings:commerce_runtime_read_mode'] = 'Режим чтения Commerce runtime';
+$string['settings:commerce_runtime_read_mode_desc'] = 'Выбирает источник данных для runtime I7. Экраны CRM и студента будут переведены в I8 и I9.';
+$string['settings:commerce_runtime_read_mode_legacy'] = 'Только Legacy';
+$string['settings:commerce_runtime_read_mode_shadow'] = 'Shadow: вернуть Legacy и сравнить Native';
+$string['settings:commerce_runtime_read_mode_native'] = 'Только Native';
+$string['settings:commerce_runtime_read_mode_auto'] = 'Auto: Native с автоматическим fallback на Legacy';
+$string['settings:commerce_runtime_read_strict'] = 'Строгий режим чтения Commerce runtime';
+$string['settings:commerce_runtime_read_strict_desc'] = 'Выбрасывает исключение при fallback, расхождении или отсутствии данных. Только для DEV.';
+$string['settings:commerce_native_crm_reads_enabled'] = 'Native-чтение Commerce для CRM';
+$string['settings:commerce_native_crm_reads_enabled_desc'] = 'Использует слой Native-чтения I10C для CRM.';
+$string['settings:commerce_native_admin_reads_enabled'] = 'Native-чтение Commerce для администрирования';
+$string['settings:commerce_native_admin_reads_enabled_desc'] = 'Использует слой Native-чтения I10C для административных страниц.';
+$string['settings:commerce_native_user_reads_enabled'] = 'Native-чтение Commerce для страниц пользователя';
+$string['settings:commerce_native_user_reads_enabled_desc'] = 'Использует слой Native-чтения I10C для пользовательских страниц.';
+$string['settings:commerce_native_email_reads_enabled'] = 'Native-чтение Commerce для писем';
+$string['settings:commerce_native_email_reads_enabled_desc'] = 'Использует слой Native-чтения I10C для контекстов писем.';
+$string['settings:commerce_native_task_reads_enabled'] = 'Native-чтение Commerce для задач';
+$string['settings:commerce_native_task_reads_enabled_desc'] = 'Использует слой Native-чтения I10C для плановых задач Commerce.';
+$string['settings:commerce_native_shadow_compare_enabled'] = 'Сравнивать Native и Legacy чтение';
+$string['settings:commerce_native_shadow_compare_enabled_desc'] = 'Выполняет неблокирующее Shadow-сравнение источников Native и Legacy.';
+$string['settings:commerce_native_legacy_fallback_enabled'] = 'Разрешить fallback на Legacy';
+$string['settings:commerce_native_legacy_fallback_enabled_desc'] = 'Использует Legacy-данные, если Native-чтение недоступно.';
+
+// I10D Native-aware commands.
+$string['settings:commerce_native_dual_write_enabled'] = 'Включить Native dual-write I10D';
+$string['settings:commerce_native_dual_write_enabled_desc'] = 'Разрешает сервисам команд Commerce синхронизировать Legacy-записи с Native-хранилищем. По умолчанию отключено.';
+$string['settings:commerce_native_task_dual_write_enabled'] = 'Включить dual-write I10D для задач';
+$string['settings:commerce_native_task_dual_write_enabled_desc'] = 'Разрешает плановым задачам Commerce синхронизировать Legacy-изменения с Native-хранилищем. По умолчанию отключено.';
+$string['settings:commerce_native_shadow_write_compare_enabled'] = 'Включить Shadow-сравнение записей I10D';
+$string['settings:commerce_native_shadow_write_compare_enabled_desc'] = 'Сравнивает состояния Legacy и Native после команды, не меняя результат для пользователя.';
+
+$string['commerce_native_reconciliation_enabled'] = 'Сверка Native Commerce';
+$string['commerce_native_reconciliation_enabled_desc'] = 'Включает сверку Native Commerce.';
+$string['commerce_native_repair_enabled'] = 'Исправление Native Commerce';
+$string['commerce_native_repair_enabled_desc'] = 'Разрешает явные исправления во время сверки.';

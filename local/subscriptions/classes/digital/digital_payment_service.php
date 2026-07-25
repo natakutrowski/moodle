@@ -4,6 +4,7 @@ namespace local_subscriptions\digital;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\constants\Status;
+use local_subscriptions\commerce\dualwrite\CommerceDualWriteBridge;
 use local_subscriptions\payment\dto\InternalEvent;
 use stdClass;
 
@@ -152,6 +153,8 @@ final class digital_payment_service {
                 debugging('[digital_product] Receipt email failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
             }
         }
+
+        CommerceDualWriteBridge::digital((int)$pr->id, 'legacy_digital_checkout_completed');
     }
 
     public static function on_payment_failed(InternalEvent $e): void {
@@ -175,5 +178,7 @@ final class digital_payment_service {
             'last_error' => $e->meta['reason'] ?? $e->meta['errorMessage'] ?? 'payment_failed',
             'last_update' => time(),
         ]);
+
+        CommerceDualWriteBridge::digital((int)$pr->id, 'legacy_digital_payment_failed');
     }
 }

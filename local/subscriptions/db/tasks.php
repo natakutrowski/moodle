@@ -54,16 +54,6 @@ $tasks[] = [
 
 
 $tasks[] = [
-    'classname' => '\local_subscriptions\task\subscription_rollover_task',
-    'blocking'  => 0,
-    'minute'    => '*/5',    // toutes les 5 min
-    'hour'      => '*',
-    'day'       => '*',
-    'dayofweek' => '*',
-    'month'     => '*',
-];
-
-$tasks[] = [
     'classname' => '\local_subscriptions\task\enrol_scope_fill_task',
     'blocking'  => 0,
     'minute'    => 'R',

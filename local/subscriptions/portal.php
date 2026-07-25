@@ -7,6 +7,7 @@ use local_subscriptions\payment\PaymentGatewayFactory;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\payment\ProviderSelector;
 use local_subscriptions\payment\PortalGatewayInterface;
+use local_subscriptions\commerce\student\StudentCommercePurchaseFactory;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -16,23 +17,34 @@ $return  = optional_param('return', '', PARAM_LOCALURL); // optionnel: forcer un
 
 global $DB, $USER;
 
-// 1) Résoudre la souscription cible
+// 1) Résoudre la souscription cible via le runtime Student Commerce.
+$studentcommerce = StudentCommercePurchaseFactory::create()->get_for_customer(
+    (int)$USER->id,
+    (string)$USER->email
+);
+$subscriptions = $studentcommerce->get_subscriptions();
 $sub = null;
-if ($subid) {
-    $sub = $DB->get_record('user_subscription', ['id'=>$subid, 'userid'=>$USER->id], '*', IGNORE_MISSING);
+
+if ($subid > 0) {
+    foreach ($subscriptions as $candidate) {
+        if ((int)$candidate->id === $subid && (int)$candidate->userid === (int)$USER->id) {
+            $sub = $candidate;
+            break;
+        }
+    }
 }
-if (!$sub) {
-    // fallback: dernière active (ou la plus récente) pour cet utilisateur
-    $sub = $DB->get_record_sql("
-        SELECT *
-          FROM {user_subscription}
-         WHERE userid = :u
-      ORDER BY (status='active') DESC, end_date DESC, id DESC
-         LIMIT 1
-    ", ['u'=>$USER->id]);
+
+if (!$sub && $subscriptions) {
+    foreach ($subscriptions as $candidate) {
+        if ((string)$candidate->status === 'active') {
+            $sub = $candidate;
+            break;
+        }
+    }
+    $sub ??= reset($subscriptions);
 }
+
 if (!$sub) {
-    // rien à gérer -> profil
     redirect(UrlFactory::my_subscriptions());
 }
 

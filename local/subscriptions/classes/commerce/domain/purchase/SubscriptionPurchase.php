@@ -7,6 +7,8 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\domain\CommerceItem;
 use local_subscriptions\commerce\domain\CommercePayment;
 use local_subscriptions\commerce\domain\CommercePurchase;
+use local_subscriptions\commerce\domain\value\CommerceLegacyPurchaseReference;
+use local_subscriptions\commerce\fulfillment\CommerceFulfillmentOperation;
 
 /**
  * Commerce representation of a historical subscription purchase.
@@ -28,7 +30,8 @@ final class SubscriptionPurchase extends CommercePurchase {
         private readonly ?int $enddate = null,
         ?int $createdat = null,
         ?int $updatedat = null,
-        array $metadata = []
+        array $metadata = [],
+        array $fulfillments = []
     ) {
         if ($legacysubscriptionid <= 0) {
             throw new \coding_exception('A legacy subscription identifier must be positive.');
@@ -47,7 +50,15 @@ final class SubscriptionPurchase extends CommercePurchase {
             $status,
             $createdat,
             $updatedat,
-            $metadata
+            $metadata,
+            null,
+            null,
+            CommerceLegacyPurchaseReference::for_subscription($legacysubscriptionid),
+            null,
+            null,
+            null,
+            null,
+            $fulfillments
         );
     }
 

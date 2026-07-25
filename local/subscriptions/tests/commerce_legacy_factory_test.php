@@ -6,6 +6,9 @@ defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
 use local_subscriptions\commerce\domain\CommercePayment;
+use local_subscriptions\commerce\domain\CommercePurchaseStatus;
+use local_subscriptions\commerce\fulfillment\subscription\SubscriptionEnrolmentFulfillmentHandler;
+use local_subscriptions\commerce\fulfillment\digital\DigitalDownloadFulfillmentHandler;
 use local_subscriptions\commerce\domain\purchase\DigitalPurchase;
 use local_subscriptions\commerce\domain\purchase\SubscriptionPurchase;
 use local_subscriptions\commerce\legacy\DigitalPurchaseFactory;
@@ -86,7 +89,7 @@ final class commerce_legacy_factory_test extends advanced_testcase {
         $plan = (object)[
             'id' => 14,
             'name' => 'CampusFR A1',
-            'access_scope_id' => 4,
+            'accessscopeid' => 4,
         ];
 
         $user = (object)[
@@ -172,6 +175,53 @@ final class commerce_legacy_factory_test extends advanced_testcase {
         );
     }
 
+
+    public function test_replaced_subscription_remains_fulfilled_and_projects_access_operation(): void {
+        $subscription = (object)[
+            'id' => 304,
+            'userid' => 110,
+            'planid' => 31,
+            'pricepaid' => 100.00,
+            'currency' => 'EUR',
+            'transactionid' => 'pi_replaced',
+            'payment_provider' => 'stripe',
+            'start_date' => 1784918623,
+            'end_date' => 0,
+            'status' => 'replaced',
+            'creation_date' => 1784918623,
+            'last_update' => 1784918667,
+            'payment_failed' => 0,
+        ];
+
+        $plan = (object)[
+            'id' => 31,
+            'name' => 'A2 Grammar',
+            'accessscopeid' => 17,
+        ];
+
+        $purchase = SubscriptionPurchaseFactory::from_legacy_records(
+            $subscription,
+            null,
+            $plan
+        );
+
+        $this->assertSame(
+            CommercePurchaseStatus::FULFILLED,
+            $purchase->get_lifecycle_status()
+        );
+        $this->assertSame('replaced', $purchase->get_metadata_value('legacy_status'));
+        $this->assertSame(17, $purchase->get_item()->get_metadata_value('access_scope_id'));
+        $this->assertCount(1, $purchase->get_fulfillments());
+
+        $fulfillment = $purchase->get_fulfillments()[0];
+        $this->assertSame(
+            SubscriptionEnrolmentFulfillmentHandler::KEY,
+            $fulfillment->get_key()
+        );
+        $this->assertSame('completed', $fulfillment->get_metadata_value('persistence_status'));
+        $this->assertSame(17, $fulfillment->get_metadata_value('access_scope_id'));
+    }
+
     public function test_digital_factory_preserves_legacy_data(): void {
         $paymentrequest = (object)[
             'id' => 55,
@@ -241,6 +291,72 @@ final class commerce_legacy_factory_test extends advanced_testcase {
         $this->assertSame(
             10,
             $purchase->get_metadata_value('locked_discount_percent')
+        );
+
+        $this->assertSame(
+            CommercePurchaseStatus::FULFILLED,
+            $purchase->get_lifecycle_status()
+        );
+        $this->assertCount(1, $purchase->get_fulfillments());
+
+        $fulfillment = $purchase->get_fulfillments()[0];
+        $this->assertSame(
+            DigitalDownloadFulfillmentHandler::KEY,
+            $fulfillment->get_key()
+        );
+        $this->assertSame(
+            'completed',
+            $fulfillment->get_metadata_value('persistence_status')
+        );
+        $this->assertTrue(
+            $fulfillment->get_metadata_value('download_token_present')
+        );
+        $this->assertSame(
+            8,
+            $fulfillment->get_metadata_value('product_id')
+        );
+    }
+
+    public function test_paid_digital_without_token_is_fulfillment_pending(): void {
+        $paymentrequest = (object)[
+            'id' => 56,
+            'productid' => 8,
+            'userid' => 96,
+            'email' => 'student@example.com',
+            'currency' => 'EUR',
+            'amount_minor' => 1900,
+            'payment_provider' => 'stripe',
+            'status' => 'paid',
+            'transactionid' => 'digital-paid-without-token',
+            'creation_date' => 1700000000,
+            'last_update' => 1700000100,
+        ];
+
+        $product = (object)[
+            'id' => 8,
+            'name' => 'PDF des verbes',
+            'slug' => 'verbs-pdf',
+            'enabled' => 1,
+        ];
+
+        $purchase = DigitalPurchaseFactory::from_legacy_records(
+            $paymentrequest,
+            $product
+        );
+
+        $this->assertSame(
+            CommercePurchaseStatus::FULFILLMENT_PENDING,
+            $purchase->get_lifecycle_status()
+        );
+        $this->assertCount(1, $purchase->get_fulfillments());
+        $this->assertSame(
+            'pending',
+            $purchase->get_fulfillments()[0]
+                ->get_metadata_value('persistence_status')
+        );
+        $this->assertFalse(
+            $purchase->get_fulfillments()[0]
+                ->get_metadata_value('download_token_present')
         );
     }
 

@@ -8,11 +8,15 @@ use local_subscriptions\digital\product_manager;
 use local_subscriptions\mailer;
 use local_subscriptions\admin\AdminLog;
 use local_subscriptions\admin\AdminEvents;
+use local_subscriptions\commerce\dualwrite\CommerceDualWriteBridge;
+use local_subscriptions\commerce\read\email\CommerceEmailReadGateway;
 
 final class DigitalPurchaseEmailService {
 
     public static function resend_access_email(int $purchaseid): void {
         global $DB;
+
+        (new CommerceEmailReadGateway())->inspect_digital_purchase($purchaseid);
 
         $pr = $DB->get_record(
             product_manager::TABLE_PAYMENT_REQUEST,
@@ -90,6 +94,8 @@ final class DigitalPurchaseEmailService {
                 'purchaseid' => $pr->id,
             ]
         );
+
+        CommerceDualWriteBridge::digital($purchaseid, 'digital_access_email_resent');
     }
 
     public static function regenerate_token(int $purchaseid): void {
@@ -125,6 +131,8 @@ final class DigitalPurchaseEmailService {
                 'oldtoken' => $oldtoken ? substr($oldtoken, 0, 8) . '…' : '-',
             ]
         );
+
+        CommerceDualWriteBridge::digital($purchaseid, 'digital_token_regenerated');
     }
 
     public static function extend_token(int $purchaseid, int $days = 30): void {
@@ -166,6 +174,8 @@ final class DigitalPurchaseEmailService {
                 'expires' => \local_subscriptions\admin\AdminFormatter::datetime($expires),
             ]
         );
+
+        CommerceDualWriteBridge::digital($purchaseid, 'digital_token_extended');
     }
 
     private static function log_digital_action(string $event, \stdClass $pr, array $details = []): void {

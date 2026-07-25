@@ -629,6 +629,10 @@ if ($hassiteconfig) {
         $commercedefaults = [
             'commerce_checkout_enabled' => 1,
             'commerce_fulfillment_enabled' => 1,
+            'commerce_dual_write_enabled' => 0,
+            'commerce_dual_write_strict' => 0,
+            'commerce_native_read_shadow_enabled' => 0,
+            'commerce_native_read_shadow_strict' => 0,
         ];
 
         foreach ($commercedefaults as $commerceflag => $defaultvalue) {
@@ -636,6 +640,60 @@ if ($hassiteconfig) {
                 'local_subscriptions/' . $commerceflag,
                 get_string('settings:' . $commerceflag, 'local_subscriptions'),
                 get_string('settings:' . $commerceflag . '_desc', 'local_subscriptions'),
+                $defaultvalue
+            ));
+        }
+
+        $settings->add(new admin_setting_configselect(
+            'local_subscriptions/commerce_runtime_read_mode',
+            get_string('settings:commerce_runtime_read_mode', 'local_subscriptions'),
+            get_string('settings:commerce_runtime_read_mode_desc', 'local_subscriptions'),
+            'legacy',
+            [
+                'legacy' => get_string('settings:commerce_runtime_read_mode_legacy', 'local_subscriptions'),
+                'shadow' => get_string('settings:commerce_runtime_read_mode_shadow', 'local_subscriptions'),
+                'native' => get_string('settings:commerce_runtime_read_mode_native', 'local_subscriptions'),
+                'auto' => get_string('settings:commerce_runtime_read_mode_auto', 'local_subscriptions'),
+            ]
+        ));
+
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/commerce_runtime_read_strict',
+            get_string('settings:commerce_runtime_read_strict', 'local_subscriptions'),
+            get_string('settings:commerce_runtime_read_strict_desc', 'local_subscriptions'),
+            0
+        ));
+
+        $i10creadflags = [
+            'commerce_native_crm_reads_enabled' => 0,
+            'commerce_native_admin_reads_enabled' => 0,
+            'commerce_native_user_reads_enabled' => 0,
+            'commerce_native_email_reads_enabled' => 0,
+            'commerce_native_task_reads_enabled' => 0,
+            'commerce_native_shadow_compare_enabled' => 0,
+            'commerce_native_legacy_fallback_enabled' => 1,
+        ];
+
+        foreach ($i10creadflags as $flag => $defaultvalue) {
+            $settings->add(new admin_setting_configcheckbox(
+                'local_subscriptions/' . $flag,
+                get_string('settings:' . $flag, 'local_subscriptions'),
+                get_string('settings:' . $flag . '_desc', 'local_subscriptions'),
+                $defaultvalue
+            ));
+        }
+
+        $i10dwriteflags = [
+            'commerce_native_dual_write_enabled' => 0,
+            'commerce_native_task_dual_write_enabled' => 0,
+            'commerce_native_shadow_write_compare_enabled' => 0,
+        ];
+
+        foreach ($i10dwriteflags as $flag => $defaultvalue) {
+            $settings->add(new admin_setting_configcheckbox(
+                'local_subscriptions/' . $flag,
+                get_string('settings:' . $flag, 'local_subscriptions'),
+                get_string('settings:' . $flag . '_desc', 'local_subscriptions'),
                 $defaultvalue
             ));
         }
@@ -661,4 +719,19 @@ if ($hassiteconfig) {
 
     $ADMIN->add('localplugins', $settings);
 
+
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_subscriptions/commerce_native_reconciliation_enabled',
+        get_string('commerce_native_reconciliation_enabled', 'local_subscriptions'),
+        get_string('commerce_native_reconciliation_enabled_desc', 'local_subscriptions'),
+        0
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_subscriptions/commerce_native_repair_enabled',
+        get_string('commerce_native_repair_enabled', 'local_subscriptions'),
+        get_string('commerce_native_repair_enabled_desc', 'local_subscriptions'),
+        0
+    ));
 }

@@ -136,6 +136,14 @@ final class crm_commerce_customer_service_test extends advanced_testcase {
         );
 
         $this->assertSame(
+            [
+                'completed' => 1,
+                'fulfilled' => 1,
+            ],
+            $snapshot->get_status_usage()
+        );
+
+        $this->assertSame(
             1700000000,
             $snapshot->get_first_purchase_at()
         );
@@ -145,4 +153,85 @@ final class crm_commerce_customer_service_test extends advanced_testcase {
             $snapshot->get_last_purchase_at()
         );
     }
+
+    public function test_snapshot_uses_canonical_lifecycle_statuses(): void {
+        $paymentpending = new DigitalPurchase(
+            'digital:56',
+            new CommerceItem(
+                CommerceItem::TYPE_DIGITAL,
+                'digital-product:pending',
+                'Pending product',
+                9
+            ),
+            new CommercePayment(
+                1900,
+                'EUR',
+                CommercePayment::STATUS_PENDING,
+                'stripe'
+            ),
+            96,
+            'student@example.com',
+            'pending',
+            56,
+            9
+        );
+
+        $captured = new SubscriptionPurchase(
+            'subscription:124',
+            new CommerceItem(
+                CommerceItem::TYPE_SUBSCRIPTION,
+                'subscription-plan:15',
+                'CampusFR A2',
+                15
+            ),
+            new CommercePayment(
+                12000,
+                'EUR',
+                CommercePayment::STATUS_COMPLETED,
+                'stripe'
+            ),
+            96,
+            'student@example.com',
+            'suspended',
+            124,
+            15
+        );
+
+        $purchaseservice = $this->getMockBuilder(
+            CommercePurchaseService::class
+        )
+            ->disableOriginalConstructor()
+            ->onlyMethods([
+                'get_customer_purchases',
+            ])
+            ->getMock();
+
+        $purchaseservice
+            ->expects($this->once())
+            ->method('get_customer_purchases')
+            ->with(
+                96,
+                'student@example.com'
+            )
+            ->willReturn([
+                $paymentpending,
+                $captured,
+            ]);
+
+        $snapshot = (new CrmCommerceCustomerService(
+            $purchaseservice
+        ))->build_snapshot(
+            96,
+            'student@example.com'
+        );
+
+        $this->assertSame(
+            [
+                'captured' => 1,
+                'payment_pending' => 1,
+            ],
+            $snapshot->get_status_usage()
+        );
+    }
+
 }

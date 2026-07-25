@@ -10,6 +10,7 @@ use local_subscriptions\support\Duration;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\mailer;
 use local_subscriptions\admin\AdminLog;
+use local_subscriptions\commerce\dualwrite\CommerceDualWriteBridge;
 
 require_once(__DIR__ . '/../../lib/user_subs_lib.php');
 
@@ -54,8 +55,14 @@ class PaymentService {
         }
         if (!$pr) { return; }
 
-        // Idempotence : si déjà traité, on sort
-        if (in_array($pr->status ?? '', [Status::PAID, Status::COMPLETED], true)) { return; }
+        // Idempotence: a successful request is complete only when its linked
+        // subscription still exists. Paid-but-unlinked requests are deliberately
+        // allowed through so the repair task can replay the canonical pipeline.
+        $alreadyPaid = in_array($pr->status ?? '', [Status::PAID, Status::COMPLETED], true);
+        if ($alreadyPaid && !empty($pr->subscriptionid)
+                && $DB->record_exists('user_subscription', ['id' => (int)$pr->subscriptionid])) {
+            return;
+        }
 
         // 3) Transaction ID via le resolver (agnostique Stripe/Alfa/…)
         $transactionid = TransactionIdResolver::resolve_from_spr($pr, $e->meta ?? []);
@@ -63,9 +70,9 @@ class PaymentService {
         // 4) Finaliser la demande + réponse json brute utile au debug
         $transaction = $DB->start_delegated_transaction();
 
-        $pr->status         = Status::PAID;
+        $pr->status = Status::PAID;
         if (!empty($transactionid) && empty($pr->transactionid)) { $pr->transactionid = (string)$transactionid; }
-        $pr->payment_date   = time();
+        if (empty($pr->payment_date)) { $pr->payment_date = time(); }
         if (empty($pr->response_json)) {
             // on mémorise un résumé minimal de l’événement
             $pr->response_json = json_encode([
@@ -96,9 +103,32 @@ class PaymentService {
         }
 
         // email prioritaire : PR (saisi côté checkout.php) sinon métadonnées événement
-        $email = $pr->email ?? null;
-        if (!$email && !empty($e->meta['customer_email'])) { $email = $e->meta['customer_email']; }
-        if (!$email) { $transaction->allow_commit(); return; }
+        $email = trim((string) ($pr->email ?? ''));
+
+        if ($email === '' && !empty($e->meta['customer_email'])) {
+            $email = trim((string) $e->meta['customer_email']);
+        }
+
+        // Historical paid requests may have a valid userid but no copied email.
+        // Resolve the current Moodle user email so the canonical repair pipeline
+        // can recreate and link the missing subscription.
+        if ($email === '' && !empty($pr->userid)) {
+            $linkeduser = $DB->get_record(
+                'user',
+                ['id' => (int) $pr->userid, 'deleted' => 0],
+                'id, email',
+                IGNORE_MISSING,
+            );
+
+            if ($linkeduser && !empty($linkeduser->email)) {
+                $email = (string) $linkeduser->email;
+            }
+        }
+
+        if ($email === '') {
+            $transaction->allow_commit();
+            return;
+        }
 
         [$user, $isnew, $tmpPassword] = local_subscriptions_ensure_user(
             \core_text::strtolower($email),
@@ -199,6 +229,10 @@ class PaymentService {
 
         $isupgrade = false;
         $sub = null; // la sub créée dans le case (pour les emails/receipt)
+
+        // IDs des anciennes souscriptions basculées vers REPLACED pendant un upgrade.
+        // Leur projection Commerce native sera rafraîchie uniquement après le commit Legacy.
+        $replacedsubscriptionids = [];
 
         switch ($operation) {
 
@@ -350,6 +384,8 @@ class PaymentService {
                     $row->status      = Status::REPLACED;
                     $row->last_update = time();
                     $DB->update_record('user_subscription', $row);
+
+                    $replacedsubscriptionids[] = (int)$row->id;
                 }
 
                 // (Ré)inscrire idempotent
@@ -411,6 +447,16 @@ class PaymentService {
         }
 
         $transaction->allow_commit();
+
+        // Synchroniser les anciennes souscriptions remplacées seulement après
+        // la validation de la transaction Legacy. La nouvelle souscription est
+        // déjà projetée par SubscriptionPostPaymentProcessor.
+        foreach (array_values(array_unique($replacedsubscriptionids)) as $replacedsubscriptionid) {
+            CommerceDualWriteBridge::subscription(
+                (int)$replacedsubscriptionid,
+                'subscription_upgrade_replaced'
+            );
+        }
 
         // 9) Emails (idempotent + robustes)
         if (empty($pr->emailsent)) {

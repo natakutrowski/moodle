@@ -12,6 +12,8 @@ defined('MOODLE_INTERNAL') || die();
  */
 final class CommercePurchaseStatus {
 
+    public const DRAFT = 'draft';
+
     public const CREATED = 'created';
 
     public const PREPARED = 'prepared';
@@ -22,7 +24,13 @@ final class CommercePurchaseStatus {
 
     public const CAPTURED = 'captured';
 
+    public const PAID = 'paid';
+
+    public const FULFILLMENT_PENDING = 'fulfillment_pending';
+
     public const FULFILLED = 'fulfilled';
+
+    public const COMPLETED = 'completed';
 
     public const CANCELLED = 'cancelled';
 
@@ -36,12 +44,16 @@ final class CommercePurchaseStatus {
      * Supported normalised statuses.
      */
     private const VALID_STATUSES = [
+        self::DRAFT,
         self::CREATED,
         self::PREPARED,
         self::PAYMENT_PENDING,
         self::AUTHORIZED,
         self::CAPTURED,
+        self::PAID,
+        self::FULFILLMENT_PENDING,
         self::FULFILLED,
+        self::COMPLETED,
         self::CANCELLED,
         self::FAILED,
         self::REFUNDED,
@@ -71,14 +83,14 @@ final class CommercePurchaseStatus {
             in_array(
                 $status,
                 [
+                    self::DRAFT,
                     self::CREATED,
                     'new',
-                    'draft',
                 ],
                 true
             )
         ) {
-            return self::CREATED;
+            return $status === self::DRAFT ? self::DRAFT : self::CREATED;
         }
 
         if (
@@ -137,14 +149,24 @@ final class CommercePurchaseStatus {
             return self::CAPTURED;
         }
 
+        if ($status === self::PAID) {
+            return self::PAID;
+        }
+
+        if ($status === self::FULFILLMENT_PENDING) {
+            return self::FULFILLMENT_PENDING;
+        }
+
+        if ($status === self::COMPLETED) {
+            return self::COMPLETED;
+        }
+
         if (
             in_array(
                 $status,
                 [
                     self::FULFILLED,
                     'active',
-                    'paid',
-                    'completed',
                     'fulfilled',
                     'expired',
                     'delivered',
@@ -256,7 +278,7 @@ final class CommercePurchaseStatus {
         return in_array(
             $status,
             [
-                self::FULFILLED,
+                self::COMPLETED,
                 self::CANCELLED,
                 self::FAILED,
                 self::REFUNDED,
@@ -283,10 +305,49 @@ final class CommercePurchaseStatus {
             $status,
             [
                 self::CAPTURED,
+                self::PAID,
+                self::FULFILLMENT_PENDING,
                 self::FULFILLED,
+                self::COMPLETED,
                 self::REFUNDED,
             ],
             true
         );
+    }
+
+    /**
+     * Whether the aggregate may move from one lifecycle status to another.
+     */
+    public static function can_transition(string $from, string $to): bool {
+        $from = self::normalise($from);
+        $to = self::normalise($to);
+
+        if ($from === $to) {
+            return true;
+        }
+
+        $transitions = [
+            self::DRAFT => [self::PREPARED, self::CANCELLED],
+            self::CREATED => [self::PREPARED, self::PAYMENT_PENDING, self::CANCELLED],
+            self::PREPARED => [self::PAYMENT_PENDING, self::PAID, self::CANCELLED],
+            self::PAYMENT_PENDING => [self::PAID, self::CANCELLED],
+            self::AUTHORIZED => [self::PAID, self::CAPTURED, self::CANCELLED],
+            self::CAPTURED => [self::PAID, self::FULFILLMENT_PENDING, self::FULFILLED],
+            self::PAID => [self::FULFILLMENT_PENDING, self::FULFILLED, self::COMPLETED, self::REFUNDED],
+            self::FULFILLMENT_PENDING => [self::FULFILLED, self::CANCELLED, self::REFUNDED],
+            self::FULFILLED => [self::COMPLETED, self::REFUNDED],
+            self::COMPLETED => [self::REFUNDED],
+            self::FAILED => [self::PAYMENT_PENDING, self::CANCELLED],
+            self::UNKNOWN => [self::PREPARED, self::PAYMENT_PENDING, self::PAID, self::FULFILLED, self::CANCELLED],
+            self::CANCELLED => [],
+            self::REFUNDED => [],
+        ];
+
+        return in_array($to, $transitions[$from] ?? [], true);
+    }
+
+    /** Whether purchase lines are still editable. */
+    public static function is_editable(string $status): bool {
+        return in_array(self::normalise($status), [self::DRAFT, self::CREATED], true);
     }
 }

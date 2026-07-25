@@ -74,9 +74,13 @@ class CrmCommerceCustomerService {
                 $providerusage
             );
 
+            // Compare CRM snapshots using the canonical Commerce lifecycle.
+            // Raw Legacy statuses such as "pending" or "suspended" may
+            // legitimately map to "payment_pending" or "captured" once
+            // the associated payment state is taken into account.
             $status = strtolower(
                 trim(
-                    $purchase->get_status()
+                    $purchase->get_lifecycle_status()
                 )
             );
 

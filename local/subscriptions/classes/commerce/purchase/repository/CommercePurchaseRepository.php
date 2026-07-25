@@ -8,6 +8,8 @@ use local_subscriptions\commerce\CommercePurchaseService;
 use local_subscriptions\commerce\CommercePurchaseType;
 use local_subscriptions\commerce\domain\CommercePurchase;
 use local_subscriptions\commerce\domain\CommercePurchaseIdentity;
+use local_subscriptions\commerce\domain\value\CommercePurchaseId;
+use local_subscriptions\commerce\domain\value\CommercePurchaseReference;
 
 /**
  * Unified read-only repository for Commerce purchases.
@@ -55,6 +57,33 @@ final class CommercePurchaseRepository {
             $identity->get_type(),
             $identity->get_legacy_id()
         );
+    }
+
+
+    /** Resolve a purchase through its native Commerce identity. */
+    public function get_by_purchase_id(
+        CommercePurchaseId $purchaseid,
+        int $scanlimit = 1000
+    ): ?CommercePurchase {
+        foreach ($this->get_recent($scanlimit) as $purchase) {
+            if ($purchase->get_purchase_id()->equals($purchaseid)) {
+                return $purchase;
+            }
+        }
+        return null;
+    }
+
+    /** Resolve a purchase through its stable public reference. */
+    public function get_by_reference(
+        CommercePurchaseReference $reference,
+        int $scanlimit = 1000
+    ): ?CommercePurchase {
+        foreach ($this->get_recent($scanlimit) as $purchase) {
+            if ($purchase->get_purchase_reference()->equals($reference)) {
+                return $purchase;
+            }
+        }
+        return null;
     }
 
     /**

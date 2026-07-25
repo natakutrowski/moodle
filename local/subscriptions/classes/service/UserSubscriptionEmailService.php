@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\mailer;
 use local_subscriptions\admin\AdminLog;
 use local_subscriptions\constants\Status;
+use local_subscriptions\commerce\read\email\CommerceEmailReadGateway;
 
 final class UserSubscriptionEmailService {
 
@@ -101,6 +102,8 @@ final class UserSubscriptionEmailService {
 
     private static function load_context(int $userid, int $subscriptionid, bool $receiptrequired): array {
         global $DB;
+
+        (new CommerceEmailReadGateway())->inspect_subscription($subscriptionid);
 
         $user = \core_user::get_user($userid, '*', MUST_EXIST);
         $user->mailformat = 1;

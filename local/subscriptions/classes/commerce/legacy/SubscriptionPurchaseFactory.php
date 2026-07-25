@@ -6,6 +6,9 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\domain\CommerceItem;
 use local_subscriptions\commerce\domain\CommercePayment;
+use local_subscriptions\commerce\domain\CommercePurchaseStatus;
+use local_subscriptions\commerce\fulfillment\CommerceFulfillmentOperation;
+use local_subscriptions\commerce\fulfillment\subscription\SubscriptionEnrolmentFulfillmentHandler;
 use local_subscriptions\commerce\domain\purchase\SubscriptionPurchase;
 
 /**
@@ -82,8 +85,11 @@ final class SubscriptionPurchaseFactory {
             $planid,
             [
                 'legacy_table' => 'subscription_plan',
+                'legacy_id' => $planid,
+                'plan_id' => $planid,
                 'access_scope_id' => self::nullable_positive_int(
-                    $plan->access_scope_id
+                    $plan->accessscopeid
+                        ?? $plan->access_scope_id
                         ?? $plan->scopeid
                         ?? null
                 ),
@@ -125,8 +131,9 @@ final class SubscriptionPurchaseFactory {
             $payment,
             self::nullable_positive_int($subscription->userid ?? null),
             $email !== '' ? $email : null,
-            LegacyCommerceStatusMapper::purchase_status(
-                $subscription->status ?? null
+            self::resolve_purchase_status(
+                $subscription,
+                $payment
             ),
             $subscriptionid,
             $planid,
@@ -136,6 +143,10 @@ final class SubscriptionPurchaseFactory {
             self::nullable_positive_int($subscription->last_update ?? null),
             [
                 'legacy_table' => 'user_subscription',
+                'legacy_status' => self::nullable_string($subscription->status ?? null),
+                'plan_id' => $planid,
+                'start_date' => self::nullable_positive_int($subscription->start_date ?? null),
+                'end_date' => self::nullable_positive_int($subscription->end_date ?? null),
                 'is_trial' => !empty(
                     $plan->is_trial ?? false
                 ),
@@ -163,8 +174,74 @@ final class SubscriptionPurchaseFactory {
                 'discount_reason' => self::nullable_string(
                     $subscription->discount_reason ?? null
                 ),
-            ]
+            ],
+            self::build_fulfillments(
+                $subscription,
+                $plan
+            )
         );
+    }
+
+    /**
+     * Resolve the Native lifecycle without confusing access replacement with
+     * an incomplete payment or fulfillment.
+     */
+    private static function resolve_purchase_status(
+        \stdClass $subscription,
+        CommercePayment $payment
+    ): string {
+        $status = strtolower(trim((string)($subscription->status ?? '')));
+
+        if (in_array($status, ['active', 'expired', 'replaced'], true)) {
+            return CommercePurchaseStatus::FULFILLED;
+        }
+
+        if ($status === 'queued' && $payment->is_successful()) {
+            return CommercePurchaseStatus::FULFILLMENT_PENDING;
+        }
+
+        return LegacyCommerceStatusMapper::purchase_status($status);
+    }
+
+    /**
+     * Reconstruct one deterministic subscription access fulfillment from the
+     * current Legacy truth. The operation records an observed outcome; it does
+     * not execute enrollment again.
+     *
+     * @return CommerceFulfillmentOperation[]
+     */
+    private static function build_fulfillments(
+        \stdClass $subscription,
+        ?\stdClass $plan
+    ): array {
+        $status = strtolower(trim((string)($subscription->status ?? '')));
+
+        if (!in_array($status, ['active', 'expired', 'replaced', 'queued'], true)) {
+            return [];
+        }
+
+        $subscriptionid = (int)$subscription->id;
+        $planid = (int)$subscription->planid;
+        $completed = in_array($status, ['active', 'expired', 'replaced'], true);
+
+        return [new CommerceFulfillmentOperation(
+            'subscription:' . $subscriptionid . ':access',
+            SubscriptionEnrolmentFulfillmentHandler::KEY,
+            [
+                'persistence_status' => $completed ? 'completed' : 'pending',
+                'projection_source' => 'legacy_observation',
+                'historical_fulfillment_inferred' => true,
+                'legacy_subscription_id' => $subscriptionid,
+                'legacy_status' => $status,
+                'plan_id' => $planid,
+                'access_scope_id' => self::nullable_positive_int(
+                    $plan->accessscopeid
+                        ?? $plan->access_scope_id
+                        ?? $plan->scopeid
+                        ?? null
+                ),
+            ]
+        )];
     }
 
     private static function validate_subscription(\stdClass $subscription): void {

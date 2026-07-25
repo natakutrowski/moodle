@@ -5,6 +5,7 @@ namespace local_subscriptions\commerce\postpayment;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\fulfillment\shadow\CommerceFulfillmentShadowService;
+use local_subscriptions\commerce\dualwrite\CommerceDualWriteBridge;
 use local_subscriptions\commerce\legacy\SubscriptionPurchaseFactory;
 use local_subscriptions\commerce\runtime\CommerceRuntimeFactory;
 use local_subscriptions\constants\Status;
@@ -45,6 +46,7 @@ final class SubscriptionPostPaymentProcessor {
 
         if ($this->is_fulfilled($paymentrequest)) {
             $this->get_logger()->log('process', 'already_processed', $this->log_context($event, $paymentrequest));
+            CommerceDualWriteBridge::subscription((int)$paymentrequest->subscriptionid, 'subscription_postpayment_already_processed');
             return CommercePostPaymentProcessingResult::already_processed((int)$paymentrequest->id);
         }
 
@@ -67,6 +69,8 @@ final class SubscriptionPostPaymentProcessor {
                 'gateway' => 'legacy_subscription_domain_adapter',
             ]
         ));
+
+        CommerceDualWriteBridge::subscription((int)$paymentrequest->subscriptionid, 'subscription_postpayment_completed');
 
         return CommercePostPaymentProcessingResult::commerce_completed((int)$paymentrequest->id);
     }

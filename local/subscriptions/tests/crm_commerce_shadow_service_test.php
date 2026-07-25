@@ -104,6 +104,10 @@ final class crm_commerce_shadow_service_test
             'student@example.com'
         );
 
+        $this->assertDebuggingCalled(
+            '[Commerce shadow] Commerce failed for user 96: RuntimeException: Simulated Commerce failure'
+        );
+
         $this->assertSame(
             $legacy,
             $result->get_snapshot()

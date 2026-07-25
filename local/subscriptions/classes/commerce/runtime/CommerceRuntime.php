@@ -26,6 +26,10 @@ use local_subscriptions\commerce\purchase\handler\CommercePurchaseHandlerRegistr
 use local_subscriptions\commerce\purchase\preparation\CommercePurchasePreparationOrchestrator;
 use local_subscriptions\commerce\purchase\repository\CommercePurchaseRepository;
 use local_subscriptions\commerce\purchase\shadow\CommercePurchaseShadowService;
+use local_subscriptions\commerce\read\CommerceNativeReadFactory;
+use local_subscriptions\commerce\read\CommerceNativeReadService;
+use local_subscriptions\commerce\runtime\read\CommerceRuntimeReadFactory;
+use local_subscriptions\commerce\runtime\read\CommerceRuntimeReadService;
 
 /**
  * Runtime container for the Commerce domain.
@@ -47,6 +51,10 @@ final class CommerceRuntime {
     private ?CommercePostPaymentBridge $postpaymentbridge = null;
 
     private ?CommerceFulfillmentShadowService $fulfillmentshadow = null;
+
+    private ?CommerceNativeReadService $nativereadshadow = null;
+
+    private ?CommerceRuntimeReadService $runtimereader = null;
 
     public function __construct(
         private readonly CommercePurchaseService $purchaseservice,
@@ -235,5 +243,17 @@ final class CommerceRuntime {
             );
 
         return $this->purchaseshadowservice;
+    }
+
+    /** Return the I6 Legacy-first native shadow-read facade. */
+    public function native_read_shadow(): CommerceNativeReadService {
+        $this->nativereadshadow ??= CommerceNativeReadFactory::create();
+        return $this->nativereadshadow;
+    }
+
+    /** Return the I7 configurable Commerce runtime reader. */
+    public function runtime_reader(): CommerceRuntimeReadService {
+        $this->runtimereader ??= CommerceRuntimeReadFactory::create();
+        return $this->runtimereader;
     }
 }

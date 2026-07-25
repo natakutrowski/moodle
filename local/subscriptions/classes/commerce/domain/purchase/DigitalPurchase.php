@@ -7,6 +7,8 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\domain\CommerceItem;
 use local_subscriptions\commerce\domain\CommercePayment;
 use local_subscriptions\commerce\domain\CommercePurchase;
+use local_subscriptions\commerce\domain\value\CommerceLegacyPurchaseReference;
+use local_subscriptions\commerce\fulfillment\CommerceFulfillmentOperation;
 
 /**
  * Commerce representation of a historical digital-product purchase.
@@ -28,7 +30,8 @@ final class DigitalPurchase extends CommercePurchase {
         private readonly ?int $downloadtokenexpires = null,
         ?int $createdat = null,
         ?int $updatedat = null,
-        array $metadata = []
+        array $metadata = [],
+        array $fulfillments = []
     ) {
         if ($legacypurchaseid <= 0) {
             throw new \coding_exception('A legacy digital purchase identifier must be positive.');
@@ -47,7 +50,15 @@ final class DigitalPurchase extends CommercePurchase {
             $status,
             $createdat,
             $updatedat,
-            $metadata
+            $metadata,
+            null,
+            null,
+            CommerceLegacyPurchaseReference::for_digital_purchase($legacypurchaseid),
+            null,
+            null,
+            null,
+            null,
+            $fulfillments
         );
     }
 

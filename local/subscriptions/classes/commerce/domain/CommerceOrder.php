@@ -7,6 +7,8 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Represents a Commerce order.
  *
+ * @deprecated since Phase 7.93I. Use CommercePurchase as the aggregate root.
+ *
  * During Phase 7.93 this object is an in-memory domain representation only.
  * It is not backed by a new SQL table.
  */

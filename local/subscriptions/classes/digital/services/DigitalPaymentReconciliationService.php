@@ -95,13 +95,18 @@ final class DigitalPaymentReconciliationService {
                         $providerstatus
                     )
                 ) {
-                    $this->repository
-                        ->mark_failed_if_pending(
-                            (int)$current->id,
-                            '[cron_reconcile] Provider failed/unpaid: ' .
-                            $providerstatus->reason,
-                            time()
-                        );
+                    digital_payment_service::on_payment_failed(
+                        new InternalEvent('payment_failed', [
+                            'payment_request_id' => (string)$current->id,
+                            'currency' => (string)$current->currency,
+                            'amount_minor' => (int)$current->amount_minor,
+                            'meta' => [
+                                'payment_context' => 'digital_product',
+                                'provider' => (string)$current->payment_provider,
+                                'reason' => '[cron_reconcile] Provider failed/unpaid: ' . $providerstatus->reason,
+                            ],
+                        ])
+                    );
 
                     $result['failed']++;
                     continue;

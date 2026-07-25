@@ -159,6 +159,10 @@ final class safe_crm_commerce_customer_service_test
             'student@example.com'
         );
 
+        $this->assertDebuggingCalled(
+            '[Commerce safe fallback] Commerce failed for user 96: RuntimeException: Simulated Commerce failure'
+        );
+
         $this->assertSame(
             $fallbacksnapshot,
             $result

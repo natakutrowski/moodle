@@ -17,12 +17,15 @@ use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\AdminEntityLinks;
 use local_subscriptions\admin\AdminDetailRenderer;
 use local_subscriptions\support\DigitalPresenter;
+use local_subscriptions\commerce\read\admin\CommerceAdminReadGateway;
 
 global $DB, $PAGE, $OUTPUT;
 
 $context = AdminSecurity::require(Capabilities::VIEW_DIGITAL);
 
 $id = required_param('id', PARAM_INT);
+
+$commerceread = (new CommerceAdminReadGateway())->inspect_digital_purchase($id);
 
 $purchase = $DB->get_record_sql("
     SELECT

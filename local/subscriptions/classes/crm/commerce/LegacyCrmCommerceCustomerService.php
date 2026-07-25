@@ -5,6 +5,9 @@ namespace local_subscriptions\crm\commerce;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\domain\CommercePurchase;
+use local_subscriptions\commerce\legacy\repository\DigitalPurchaseRepository;
+use local_subscriptions\commerce\legacy\repository\SubscriptionPurchaseRepository;
+use local_subscriptions\commerce\domain\CommercePurchaseStatus;
 
 /**
  * Emergency read-only fallback for CRM Commerce customer summaries.
@@ -354,53 +357,99 @@ class LegacyCrmCommerceCustomerService {
     ): array {
         global $DB;
 
-        $result = [];
+        $purchases = [];
 
-        $subscriptions = $DB->get_records_sql(
-            "
-                SELECT status, COUNT(1) AS total
-                  FROM {user_subscription}
-                 WHERE userid = :userid
-              GROUP BY status
-            ",
+        $subscriptionrepository =
+            new SubscriptionPurchaseRepository();
+
+        foreach (
+            $subscriptionrepository->get_by_user_id($userid)
+            as $purchase
+        ) {
+            $this->add_status_purchase(
+                $purchases,
+                $purchase
+            );
+        }
+
+        $digitalrepository =
+            new DigitalPurchaseRepository();
+
+        foreach (
+            $digitalrepository->get_by_user_id($userid)
+            as $purchase
+        ) {
+            $this->add_status_purchase(
+                $purchases,
+                $purchase
+            );
+        }
+
+        $email = $DB->get_field(
+            'user',
+            'email',
             [
-                'userid' => $userid,
+                'id' => $userid,
             ]
         );
 
-        foreach ($subscriptions as $record) {
-            $status = $this->normalise_status(
-                $record->status ?? null
-            );
-
-            $result[$status] =
-                ($result[$status] ?? 0)
-                + (int)$record->total;
-        }
-
-        $digital = $DB->get_records_sql(
-            "
-                SELECT status, COUNT(1) AS total
-                  FROM {subscription_digital_payment_request}
-                 WHERE {$digitalselect}
-              GROUP BY status
-            ",
-            $digitalparams
+        $email = trim(
+            \core_text::strtolower(
+                (string)$email
+            )
         );
 
-        foreach ($digital as $record) {
-            $status = $this->normalise_status(
-                $record->status ?? null
-            );
+        if ($email !== '') {
+            foreach (
+                $digitalrepository->get_by_email($email)
+                as $purchase
+            ) {
+                $this->add_status_purchase(
+                    $purchases,
+                    $purchase
+                );
+            }
+        }
+
+        $result = [];
+
+        foreach ($purchases as $purchase) {
+            $status = $purchase->get_lifecycle_status();
 
             $result[$status] =
-                ($result[$status] ?? 0)
-                + (int)$record->total;
+                ($result[$status] ?? 0) + 1;
         }
 
         ksort($result);
 
         return $result;
+    }
+    
+    /**
+     * Ajoute un achat en évitant les doublons trouvés à la fois
+     * par userid et par adresse email.
+     *
+     * @param array<string, CommercePurchase> $purchases
+     */
+    private function add_status_purchase(
+        array &$purchases,
+        CommercePurchase $purchase
+    ): void {
+        $legacyreference = $purchase->get_legacy_reference();
+
+        if ($legacyreference === null) {
+            throw new \RuntimeException(
+                'Legacy CRM status aggregation received a purchase '
+                . 'without a Legacy reference.'
+            );
+        }
+
+        $key =
+            $legacyreference->get_family()
+            . ':'
+            . $legacyreference->get_legacy_id();
+
+        $purchases[$key] = $purchase;
     }
 
     /**
@@ -486,14 +535,8 @@ class LegacyCrmCommerceCustomerService {
     private function normalise_status(
         mixed $status
     ): string {
-        $status = strtolower(
-            trim(
-                (string)$status
-            )
+        return CommercePurchaseStatus::normalise(
+            (string)$status
         );
-
-        return $status !== ''
-            ? $status
-            : 'unknown';
     }
 }

@@ -19,12 +19,15 @@ use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\commerce\read\admin\CommerceAdminReadGateway;
 
 global $DB, $PAGE, $OUTPUT;
 
 $context = AdminSecurity::require(Capabilities::VIEW_USERS);
 
 $id = required_param('id', PARAM_INT);
+
+$commerceread = (new CommerceAdminReadGateway())->inspect_subscription($id);
 
 $subscription = $DB->get_record_sql("
     SELECT

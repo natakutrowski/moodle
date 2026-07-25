@@ -5,6 +5,7 @@ namespace local_subscriptions\commerce\postpayment;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\domain\CommerceItem;
+use local_subscriptions\commerce\dualwrite\CommerceDualWriteBridge;
 use local_subscriptions\commerce\fulfillment\CommerceFulfillmentContext;
 use local_subscriptions\commerce\legacy\DigitalPurchaseFactory;
 use local_subscriptions\commerce\purchase\CommerceCustomer;
@@ -50,6 +51,7 @@ final class DigitalPostPaymentProcessor {
 
         if ($this->is_fulfilled($paymentrequest)) {
             $this->get_logger()->log('process', 'already_processed', $this->log_context($event, $paymentrequest));
+            CommerceDualWriteBridge::digital((int)$paymentrequest->id, 'digital_postpayment_already_processed');
             return CommercePostPaymentProcessingResult::already_processed((int)$paymentrequest->id);
         }
 
@@ -94,6 +96,8 @@ final class DigitalPostPaymentProcessor {
             $this->log_context($event, $paymentrequest),
             ['commerce_status' => 'fulfilled']
         ));
+
+        CommerceDualWriteBridge::digital((int)$paymentrequest->id, 'digital_postpayment_completed');
 
         return CommercePostPaymentProcessingResult::commerce_completed((int)$paymentrequest->id);
     }

@@ -5,6 +5,7 @@ namespace local_subscriptions\commerce\checkout;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\payment\legacy\LegacyPaymentRequestContext;
+use local_subscriptions\commerce\dualwrite\CommerceDualWriteBridge;
 use local_subscriptions\digital\product_manager;
 
 /**
@@ -41,5 +42,9 @@ final class CommerceCheckoutPersistenceService {
         }
 
         $DB->update_record($table, $record);
+
+        if ($table === product_manager::TABLE_PAYMENT_REQUEST) {
+            CommerceDualWriteBridge::digital($paymentrequestid, 'digital_checkout_persisted');
+        }
     }
 }

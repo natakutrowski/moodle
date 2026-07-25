@@ -57,14 +57,18 @@ final class inbox_workspace_factory_test
 
         $this->assertSame(
             [
-                InboxWorkspaceFactory::ZONE_NAVIGATION
-                    => [],
-                InboxWorkspaceFactory::ZONE_LIST
-                    => [],
-                InboxWorkspaceFactory::ZONE_READING
-                    => [],
-                InboxWorkspaceFactory::ZONE_CONTEXT
-                    => [],
+                InboxWorkspaceFactory::ZONE_NAVIGATION => [
+                    InboxWorkspaceFactory::ITEM_FILTERS,
+                ],
+                InboxWorkspaceFactory::ZONE_LIST => [
+                    InboxWorkspaceFactory::ITEM_THREAD_LIST,
+                ],
+                InboxWorkspaceFactory::ZONE_READING => [
+                    InboxWorkspaceFactory::ITEM_READING_PLACEHOLDER,
+                ],
+                InboxWorkspaceFactory::ZONE_CONTEXT => [
+                    InboxWorkspaceFactory::ITEM_CONTEXT_PLACEHOLDER,
+                ],
             ],
             $layout->order
         );
@@ -148,8 +152,12 @@ final class inbox_workspace_factory_test
                 InboxWorkspaceFactory::ZONE_LIST => [
                     InboxWorkspaceFactory::ITEM_THREAD_LIST,
                 ],
-                InboxWorkspaceFactory::ZONE_READING => [],
-                InboxWorkspaceFactory::ZONE_CONTEXT => [],
+                InboxWorkspaceFactory::ZONE_READING => [
+                    InboxWorkspaceFactory::ITEM_READING_PLACEHOLDER,
+                ],
+                InboxWorkspaceFactory::ZONE_CONTEXT => [
+                    InboxWorkspaceFactory::ITEM_CONTEXT_PLACEHOLDER,
+                ],
             ],
             $definition->default_order()
         );
