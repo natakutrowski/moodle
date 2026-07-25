@@ -341,13 +341,31 @@ foreach ($cours as $c) {
     $bycat[$catid][] = $c;
 }
 
-// Récupère les noms de catégories
+// Récupère les noms de catégories.
 $catnames = [];
+
 if (!empty($bycat)) {
-    list($insql, $params) = $DB->get_in_or_equal(array_keys($bycat), SQL_PARAMS_NAMED);
-    $cats = $DB->get_records_select('course_categories', "id $insql", $params, '', 'id, name');
+    list($insql, $params) = $DB->get_in_or_equal(
+        array_keys($bycat),
+        SQL_PARAMS_NAMED
+    );
+
+    $cats = $DB->get_records_select(
+        'course_categories',
+        "id $insql",
+        $params,
+        '',
+        'id, name'
+    );
+
     foreach ($cats as $cat) {
-        $catnames[(int)$cat->id] = format_string($cat->name);
+        $categorycontext = \context_coursecat::instance((int)$cat->id);
+
+        $catnames[(int)$cat->id] = format_string(
+            $cat->name,
+            true,
+            ['context' => $categorycontext]
+        );
     }
 }
 
