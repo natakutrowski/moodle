@@ -379,4 +379,91 @@ final class commerce_legacy_factory_test extends advanced_testcase {
             ]
         );
     }
+
+    public function test_invalid_historical_email_is_ignored_when_userid_exists(): void {
+        $subscription = (object)[
+            'id' => 556,
+            'planid' => 1,
+            'userid' => 123,
+            'status' => 'expired',
+            'pricepaid' => 0,
+            'creation_date' => 1700000000,
+            'start_date' => 1700000000,
+            'end_date' => 1700604800,
+            'last_update' => 1700604800,
+        ];
+
+        $plan = (object)[
+            'id' => 1,
+            'name' => 'Trial',
+            'is_trial' => 1,
+        ];
+
+        $user = (object)[
+            'id' => 123,
+            'email' => 'deleted-user-123',
+        ];
+
+        $purchase = SubscriptionPurchaseFactory::from_legacy_records(
+            $subscription,
+            null,
+            $plan,
+            $user
+        );
+
+        $customer = $purchase->get_customer();
+
+        $this->assertSame(123, $customer->get_user_id());
+        $this->assertNull($customer->get_email());
+    }
+
+    public function test_valid_user_email_is_used_when_payment_email_is_invalid(): void {
+        $subscription = (object)[
+            'id' => 557,
+            'planid' => 1,
+            'userid' => 124,
+            'status' => 'active',
+            'pricepaid' => 10,
+            'creation_date' => 1700000000,
+            'start_date' => 1700000000,
+            'end_date' => 1700604800,
+            'last_update' => 1700000000,
+        ];
+
+        $paymentrequest = (object)[
+            'id' => 9001,
+            'email' => 'deleted-user-124',
+            'status' => 'completed',
+            'price' => 10,
+            'currency' => 'EUR',
+            'payment_date' => 1700000000,
+        ];
+
+        $plan = (object)[
+            'id' => 1,
+            'name' => 'A1 Full',
+            'is_trial' => 0,
+        ];
+
+        $user = (object)[
+            'id' => 124,
+            'email' => 'customer@example.com',
+        ];
+
+        $purchase = SubscriptionPurchaseFactory::from_legacy_records(
+            $subscription,
+            $paymentrequest,
+            $plan,
+            $user
+        );
+
+        $customer = $purchase->get_customer();
+
+        $this->assertSame(124, $customer->get_user_id());
+        $this->assertSame(
+            'customer@example.com',
+            $customer->get_email()
+        );
+    }
+
 }

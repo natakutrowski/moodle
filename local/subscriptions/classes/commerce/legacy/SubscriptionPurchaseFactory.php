@@ -120,7 +120,7 @@ final class SubscriptionPurchaseFactory {
             ]
         );
 
-        $email = self::first_non_empty([
+        $email = self::first_valid_email([
             $paymentrequest->email ?? null,
             $user->email ?? null,
         ]);
@@ -130,7 +130,7 @@ final class SubscriptionPurchaseFactory {
             $item,
             $payment,
             self::nullable_positive_int($subscription->userid ?? null),
-            $email !== '' ? $email : null,
+            $email,
             self::resolve_purchase_status(
                 $subscription,
                 $payment
@@ -293,6 +293,27 @@ final class SubscriptionPurchaseFactory {
         }
 
         return $status;
+    }
+
+    /**
+     * Returns the first non-empty valid historical email address.
+     *
+     * Deleted or anonymised Moodle users may retain an invalid value in the
+     * email field. Such a value must not prevent the historical purchase from
+     * being reconstructed when a stable Legacy user identifier is available.
+     */
+    private static function first_valid_email(
+        array $values
+    ): ?string {
+        foreach ($values as $value) {
+            $email = self::nullable_string($value);
+
+            if ($email !== null && validate_email($email)) {
+                return $email;
+            }
+        }
+
+        return null;
     }
 
     private static function first_non_empty(
