@@ -1018,3 +1018,13 @@
     line-height: 1;
     margin-bottom: 8px;
 }
+
+/* Masque les indicateurs de progression des sous-sections
+   dans la section "Практическая информация". */
+#course-index-section-204
+    > .courseindex-item-content
+    > .courseindex-sectioncontent
+    > .mod_subsection_item
+    .campus-subsection-dot {
+    display: none;
+}
