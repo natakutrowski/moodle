@@ -63,9 +63,14 @@ final class EventRouter {
                     $event,
                     'event_router.subscription',
                     static function () use ($event): void {
+                        PaymentService::on_checkout_completed($event);
+                    },
+                    static function () use ($event): void {
                         $result = (new SubscriptionPostPaymentProcessor())->process($event);
                         if ($result->requires_legacy()) {
-                            PaymentService::on_checkout_completed($event);
+                            throw new \RuntimeException(
+                                'Commerce Subscription post-payment processing requested Legacy fallback.'
+                            );
                         }
                     }
                 );

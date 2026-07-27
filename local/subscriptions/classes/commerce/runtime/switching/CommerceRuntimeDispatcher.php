@@ -16,7 +16,12 @@ final class CommerceRuntimeDispatcher {
     ) {
     }
 
-    public function checkout_completed(InternalEvent $event, string $entrypoint, callable $legacy): void {
+    public function checkout_completed(
+        InternalEvent $event,
+        string $entrypoint,
+        callable $legacy,
+        ?callable $native = null
+    ): void {
         $configuration = $this->configuration ?? new CommerceRuntimeConfiguration();
         $mode = $configuration->get_mode();
 
@@ -31,12 +36,21 @@ final class CommerceRuntimeDispatcher {
         }
 
         try {
+            if ($native !== null) {
+                $native();
+                return;
+            }
+
             ($this->native ?? new CommerceNativeRuntimeExecutor())->execute($event, $entrypoint);
         } catch (\Throwable $exception) {
             if (!$configuration->native_fallback_enabled()) {
                 throw $exception;
             }
-            debugging('Native Commerce runtime fallback to Legacy: ' . $exception->getMessage(), DEBUG_DEVELOPER);
+            error_log(
+                '[local_subscriptions] Native Commerce runtime fallback to Legacy: '
+                . $exception->getMessage()
+            );
+
             $legacy();
         }
     }

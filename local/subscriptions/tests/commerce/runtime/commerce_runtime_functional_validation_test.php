@@ -58,9 +58,49 @@ final class commerce_runtime_functional_validation_test extends \advanced_testca
                 $legacycalls++;
             });
 
-        $this->assertDebuggingCalled(
-            'Native Commerce runtime fallback to Legacy: Expected Native failure.'
-        );
+        $this->assertSame(1, $legacycalls);
+    }
+
+
+    public function test_native_callback_bypasses_generic_executor(): void {
+        $nativeexecutor = $this->createMock(CommerceNativeRuntimeExecutor::class);
+        $nativeexecutor->expects($this->never())->method('execute');
+        $legacycalls = 0;
+        $nativecalls = 0;
+
+        (new CommerceRuntimeDispatcher($this->configuration(CommerceRuntimeMode::NATIVE), $nativeexecutor))
+            ->checkout_completed(
+                $this->event(),
+                'test.native_callback',
+                static function () use (&$legacycalls): void {
+                    $legacycalls++;
+                },
+                static function () use (&$nativecalls): void {
+                    $nativecalls++;
+                }
+            );
+
+        $this->assertSame(0, $legacycalls);
+        $this->assertSame(1, $nativecalls);
+    }
+
+    public function test_native_callback_failure_falls_back_exactly_once(): void {
+        $nativeexecutor = $this->createMock(CommerceNativeRuntimeExecutor::class);
+        $nativeexecutor->expects($this->never())->method('execute');
+        $legacycalls = 0;
+
+        (new CommerceRuntimeDispatcher($this->configuration(CommerceRuntimeMode::NATIVE, true), $nativeexecutor))
+            ->checkout_completed(
+                $this->event(),
+                'test.native_callback_fallback',
+                static function () use (&$legacycalls): void {
+                    $legacycalls++;
+                },
+                static function (): void {
+                    throw new \RuntimeException('Expected callback failure.');
+                }
+            );
+
         $this->assertSame(1, $legacycalls);
     }
 
