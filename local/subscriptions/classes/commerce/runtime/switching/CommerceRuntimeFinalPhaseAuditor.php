@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace local_subscriptions\commerce\runtime\switching;
 
+use local_subscriptions\commerce\runtime\rollback\CommerceRuntimeRollbackService;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -36,7 +38,6 @@ final class CommerceRuntimeFinalPhaseAuditor {
         $router = $this->read($root . '/classes/payment/EventRouter.php');
         $dispatcher = $this->read($root . '/classes/commerce/runtime/switching/CommerceRuntimeDispatcher.php');
         $settings = $this->read($root . '/settings.php');
-        $rollback = $this->read($root . '/cli/commerce/operations/rollback_commerce_runtime.php');
 
         $checks['dispatcher_wired'] = str_contains($router, 'CommerceRuntimeDispatcher');
         $checks['single_runtime_entrypoint'] = substr_count($router, 'checkout_completed(') >= 2
@@ -48,7 +49,7 @@ final class CommerceRuntimeFinalPhaseAuditor {
         $checks['exception_propagation'] = str_contains($dispatcher, 'throw $exception');
         $checks['settings_present'] = str_contains($settings, 'commerce_runtime_mode')
             && str_contains($settings, 'commerce_runtime_native_fallback_enabled');
-        $checks['rollback_forces_legacy'] = str_contains($rollback, 'CommerceRuntimeMode::LEGACY');
+        $checks['rollback_forces_legacy'] = $this->rollback_targets_safe_legacy();
         $checks['scenario_matrix_complete'] = CommerceRuntimeValidationMatrix::count() >= 20;
         $checks['safe_default'] = CommerceRuntimeMode::normalize(null) === CommerceRuntimeMode::LEGACY;
 
@@ -61,6 +62,23 @@ final class CommerceRuntimeFinalPhaseAuditor {
             'errors' => $errors,
             'certified' => $errors === 0,
         ];
+    }
+
+    /**
+     * Verifies the guarded rollback target through its public read-only contract.
+     */
+    private function rollback_targets_safe_legacy(): bool {
+        try {
+            $inspection = (new CommerceRuntimeRollbackService())->inspect();
+            $target = $inspection['target'] ?? [];
+
+            return ($target['runtime_mode'] ?? null) === CommerceRuntimeMode::LEGACY
+                && ($target['native_fallback_enabled'] ?? null) === true
+                && ($target['shadow_enabled'] ?? null) === false
+                && ($inspection['data_changes'] ?? null) === false;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function files_exist(string $root, array $files): bool {
