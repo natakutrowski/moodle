@@ -5058,3 +5058,134 @@ $string['commerce_native_reconciliation_enabled'] = 'Réconciliation Native Comm
 $string['commerce_native_reconciliation_enabled_desc'] = 'Active la réconciliation Native Commerce.';
 $string['commerce_native_repair_enabled'] = 'Réparation Native Commerce';
 $string['commerce_native_repair_enabled_desc'] = 'Autorise les réparations explicites pendant une réconciliation.';
+
+// Phase 7.94E4 - Unified Commerce Product Editor.
+$string['crm_commerce_nav_products'] = 'Produits';
+$string['commerce_products_title'] = 'Produits Commerce';
+$string['commerce_products_description'] = 'Gérer le catalogue unifié Native Commerce.';
+$string['commerce_product_add'] = 'Ajouter un produit';
+$string['commerce_product_sku'] = 'SKU';
+$string['commerce_product_name'] = 'Nom';
+$string['commerce_product_type'] = 'Type';
+$string['commerce_product_status'] = 'Statut';
+$string['commerce_product_description'] = 'Description';
+$string['commerce_product_definition'] = 'Définition';
+$string['commerce_product_definition_counts'] = 'Prix : {$a->prices} ; traductions : {$a->translations} ; composants : {$a->components} ; droits : {$a->entitlements}';
+$string['commerce_bundle_edit_components'] = 'Modifier les composants du bundle';
+
+// Phase 7.94E5 - Bundle visual component editor.
+$string['commerce_bundle_components_title'] = 'Composants — {$a}';
+$string['commerce_bundle_components_help'] = 'Sélectionnez les produits, les quantités et l’ordre d’affichage. Les lignes vides sont ignorées. L’enregistrement valide toute l’expansion récursive.';
+$string['commerce_bundle_component_number'] = 'Composant {$a}';
+$string['commerce_bundle_component_product'] = 'Produit';
+$string['commerce_bundle_component_quantity'] = 'Quantité';
+$string['commerce_bundle_component_order'] = 'Ordre';
+$string['commerce_bundle_add_rows'] = 'Ajouter des lignes';
+$string['commerce_bundle_preview_title'] = 'Aperçu du bundle développé';
+
+// Phase 7.94E6 - Bundle preview and guided CRM workflow.
+$string['commerce_product_workflow'] = 'Étapes de configuration du produit';
+$string['commerce_product_step_information'] = 'Informations';
+$string['commerce_product_step_components'] = 'Composition';
+$string['commerce_product_step_preview'] = 'Aperçu';
+$string['commerce_product_step_pricing'] = 'Tarification';
+$string['commerce_bundle_open_preview'] = 'Voir l’aperçu complet';
+$string['commerce_bundle_preview_eyebrow'] = 'Contrôle avant commercialisation';
+$string['commerce_bundle_preview_intro'] = 'Vérifiez les produits réellement inclus, leurs quantités, leurs prix disponibles et les droits qui seront accordés.';
+$string['commerce_bundle_preview_unavailable'] = 'L’aperçu ne peut pas encore être généré';
+$string['commerce_bundle_fix_components'] = 'Corriger la composition';
+$string['commerce_bundle_preview_products'] = 'Produits terminaux';
+$string['commerce_bundle_preview_quantity'] = 'Quantité totale';
+$string['commerce_bundle_preview_entitlements'] = 'Droits annoncés';
+$string['commerce_bundle_preview_depth'] = 'Profondeur maximale';
+$string['commerce_bundle_preview_empty'] = 'Ce bundle ne contient encore aucun produit terminal.';
+$string['commerce_bundle_preview_prices'] = 'Prix actifs du produit';
+$string['commerce_bundle_preview_rights'] = 'Droits accordés';
+$string['commerce_bundle_preview_paths'] = 'Chemins de composition';
+$string['commerce_no_active_price'] = 'Aucun prix actif';
+$string['commerce_no_entitlement'] = 'Aucun droit défini';
+$string['commerce_entitlement_lifetime'] = 'À vie';
+$string['commerce_back_to_products'] = 'Retour aux produits';
+
+// Phase 7.94E7 - Bundle pricing.
+$string['commerce_bundle_pricing_title'] = 'Tarification — {$a}';
+$string['commerce_bundle_pricing_eyebrow'] = 'Stratégie commerciale';
+$string['commerce_bundle_pricing_intro'] = 'Définissez comment le prix du bundle est obtenu et vérifiez immédiatement le résultat dans chaque devise.';
+$string['commerce_bundle_pricing_method'] = 'Méthode de calcul';
+$string['commerce_bundle_pricing_method_help'] = 'Le prix fixe utilise le prix propre du bundle. La somme reprend les prix des produits inclus. La remise applique un pourcentage à cette somme.';
+$string['commerce_bundle_pricing_fixed'] = 'Prix fixe du bundle';
+$string['commerce_bundle_pricing_sum'] = 'Somme des composants';
+$string['commerce_bundle_pricing_discount'] = 'Somme des composants avec remise';
+$string['commerce_bundle_discount_percent'] = 'Remise (%)';
+$string['commerce_bundle_fixed_prices'] = 'Prix fixes du bundle';
+$string['commerce_bundle_fixed_prices_help'] = 'Utilisés uniquement avec la méthode « prix fixe ». Laissez vide pour ne pas modifier un prix existant.';
+$string['commerce_bundle_price_simulation'] = 'Simulation actuelle';
+$string['commerce_bundle_final_price'] = 'Prix final du bundle';
+$string['commerce_bundle_component_total'] = 'Valeur séparée';
+$string['commerce_bundle_savings'] = 'Économie client';
+
+// 7.94E8 - Gestionnaire unifié des produits Commerce.
+$string['commerce_product_type_course_access'] = 'Accès à un cours';
+$string['commerce_product_type_digital_download'] = 'Produit numérique';
+$string['commerce_product_type_bundle'] = 'Pack / Bundle';
+$string['commerce_product_type_service'] = 'Service';
+$string['commerce_product_status_draft'] = 'Brouillon';
+$string['commerce_product_status_active'] = 'Actif';
+$string['commerce_product_status_inactive'] = 'Inactif';
+$string['commerce_product_status_archived'] = 'Archivé';
+$string['commerce_product_edit_steps'] = 'Étapes de configuration du produit';
+$string['commerce_product_type_help'] = 'Le type peut être modifié tant que le produit reste en brouillon. Le SKU est un identifiant technique stable et ne peut plus être changé après création.';
+$string['commerce_product_description_help'] = 'Cette description par défaut sert de contenu de repli. Les textes visibles par le client doivent être renseignés dans les traductions ci-dessous.';
+$string['commerce_product_translations_title'] = 'Contenus multilingues';
+$string['commerce_product_translations_help'] = 'Renseignez le nom et les descriptions commerciales affichés au client dans chaque langue.';
+$string['commerce_product_short_description'] = 'Description courte';
+$string['commerce_product_summary'] = 'Vue d’ensemble du produit';
+$string['commerce_prices'] = 'prix';
+$string['commerce_translations'] = 'traductions';
+$string['commerce_components'] = 'composants';
+$string['commerce_entitlements'] = 'droits';
+$string['commerce_products_empty'] = 'Aucun produit ne correspond aux filtres sélectionnés.';
+$string['commerce_product_archived'] = 'Le produit a été archivé. Il reste disponible dans l’historique et n’est plus proposé à la vente.';
+$string['commerce_products_card_description'] = 'Gérer le catalogue unifié, les packs, les traductions, les prix et les droits associés.';
+$string['commerce_entitlement_course_access'] = 'Accès au cours {$a->courseid} — {$a->level}';
+$string['commerce_entitlement_course_generic'] = 'Accès à un cours : {$a}';
+$string['commerce_entitlement_digital_product'] = 'Téléchargement du produit numérique n°{$a}';
+$string['commerce_entitlement_digital_generic'] = 'Produit numérique : {$a}';
+$string['commerce_entitlement_generic'] = '{$a->type} : {$a->resource}';
+$string['commerce_entitlement_access_full'] = 'accès complet';
+$string['commerce_entitlement_access_grammar'] = 'accès grammaire';
+$string['commerce_entitlement_access_trial'] = 'accès d’essai';
+$string['commerce_bundle_preview_pricing'] = 'Tarification du pack';
+$string['commerce_bundle_pricing_incomplete'] = 'La tarification n’est pas encore complète pour cette devise.';
+
+// 7.94E9 - Certification finale.
+$string['commerce_bundle_phase_certification'] = 'Certification Commerce Products et Bundles';
+
+$string['commerce_product_type_unknown'] = 'Autre produit';
+$string['commerce_product_status_unknown'] = 'Statut inconnu';
+$string['commerce_entitlement_course_named'] = 'Accès au cours « {$a->course} » — {$a->level}';
+$string['commerce_entitlement_digital_named'] = 'Accès au produit numérique « {$a} »';
+$string['commerce_entitlement_generic_readable'] = '{$a->type} : {$a->resource}';
+$string['commerce_entitlement_type_course'] = 'Accès à un cours';
+$string['commerce_entitlement_type_digital_product'] = 'Accès numérique';
+$string['commerce_entitlement_type_other'] = 'Autre droit';
+$string['commerce_course_fallback'] = 'Cours n°{$a}';
+$string['commerce_digital_product_fallback'] = 'Produit numérique n°{$a}';
+$string['commerce_entitlement_access_generic'] = 'accès standard';
+$string['commerce_product_archive'] = 'Archiver';
+$string['commerce_bundle_add_currency'] = 'Ajouter une autre devise';
+$string['commerce_bundle_add_currency_help'] = 'Saisissez n’importe quel code devise ISO 4217, par exemple USD, GBP, CAD ou AUD.';
+
+$string['commerce_price'] = 'Prix';
+
+$string['commerce_bundle_component_comparison_unavailable'] = 'Le tarif du pack est actif. La valeur séparée et l’économie client seront disponibles lorsque tous les composants auront un tarif actif dans cette devise.';
+
+$string['commerce_fulfillment_shadow_enabled'] = 'Activer le Shadow du fulfillment natif';
+$string['commerce_fulfillment_shadow_enabled_desc'] = 'Exécute le fulfillment natif en dry-run après le fulfillment Legacy et persiste les comparaisons, sans modifier les droits.';
+$string['commerce_runtime_mode'] = 'Mode d’exécution du fulfillment Commerce';
+$string['commerce_runtime_mode_desc'] = 'Sélectionne le moteur de fulfillment autoritaire. Legacy est le mode sûr par défaut ; Shadow conserve Legacy comme autorité ; Native rend le moteur Native autoritaire.';
+$string['commerce_runtime_mode_legacy'] = 'Legacy';
+$string['commerce_runtime_mode_shadow'] = 'Shadow';
+$string['commerce_runtime_mode_native'] = 'Native';
+$string['commerce_runtime_native_fallback_enabled'] = 'Activer le fallback automatique vers Legacy';
+$string['commerce_runtime_native_fallback_enabled_desc'] = 'Si le fulfillment Native lève une exception, exécute immédiatement le chemin Legacy. À conserver activé pendant la bascule DEV.';

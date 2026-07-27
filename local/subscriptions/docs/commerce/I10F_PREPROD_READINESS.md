@@ -16,9 +16,9 @@ Only an unclassified fifth group, **migration candidate**, blocks technical read
 ## Commands
 
 ```bash
-php local/subscriptions/cli/audit_i10f_commerce_runtime.php --strict
-php local/subscriptions/cli/audit_i10f_migration_safety.php --strict
-php local/subscriptions/cli/audit_i10f_preprod_readiness.php
+php local/subscriptions/cli/commerce/audit/audit_i10f_commerce_runtime.php --strict
+php local/subscriptions/cli/commerce/audit/audit_i10f_migration_safety.php --strict
+php local/subscriptions/cli/commerce/certification/audit_i10f_preprod_readiness.php
 vendor/bin/phpunit --testsuite local_subscriptions_testsuite
 ```
 

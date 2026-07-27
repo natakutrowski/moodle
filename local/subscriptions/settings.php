@@ -721,6 +721,32 @@ if ($hassiteconfig) {
 
 
 
+    $settings->add(new admin_setting_configselect(
+        'local_subscriptions/commerce_runtime_mode',
+        get_string('commerce_runtime_mode', 'local_subscriptions'),
+        get_string('commerce_runtime_mode_desc', 'local_subscriptions'),
+        'legacy',
+        [
+            'legacy' => get_string('commerce_runtime_mode_legacy', 'local_subscriptions'),
+            'shadow' => get_string('commerce_runtime_mode_shadow', 'local_subscriptions'),
+            'native' => get_string('commerce_runtime_mode_native', 'local_subscriptions'),
+        ]
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_subscriptions/commerce_runtime_native_fallback_enabled',
+        get_string('commerce_runtime_native_fallback_enabled', 'local_subscriptions'),
+        get_string('commerce_runtime_native_fallback_enabled_desc', 'local_subscriptions'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_subscriptions/commerce_fulfillment_shadow_enabled',
+        get_string('commerce_fulfillment_shadow_enabled', 'local_subscriptions'),
+        get_string('commerce_fulfillment_shadow_enabled_desc', 'local_subscriptions'),
+        0
+    ));
+
     $settings->add(new admin_setting_configcheckbox(
         'local_subscriptions/commerce_native_reconciliation_enabled',
         get_string('commerce_native_reconciliation_enabled', 'local_subscriptions'),

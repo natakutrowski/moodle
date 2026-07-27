@@ -1,0 +1,1010 @@
+[
+  {
+    "path": "cli/audit_7_94a_legacy_dependencies.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_bundle_component_editor.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_bundle_crm_backend.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_bundle_domain.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_bundle_expansion.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_bundle_phase_7_94e.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_bundle_preview.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_bundle_pricing.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_catalog_checkout_certification.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_catalog_internationalisation.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_catalog_parity.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_catalog_payment_pipeline.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_catalog_purchase_shadow.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_compatibility.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_dual_write.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_entitlement_execution_certification.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_entitlement_ledger.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_entitlement_planning.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_fulfillment.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_integrity.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_native_backfill.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_native_course_fulfillment.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_native_digital_persistence.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_native_fulfillment_kernel.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_native_fulfillment_phase.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_native_persistence.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_native_reads.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_payment_bridges.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_payment_orchestration.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_product_editor.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_product_ux.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_products_polish.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_purchase_architecture.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_purchase_domain.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_read_dependencies.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_runtime.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_runtime_reads.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_shadow_export.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_shadow_g1_g3.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_shadow_g4_g6.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_shadow_phase.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_shadow_search.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_shadow_summary.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_task_writes.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_ux.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_commerce_write_dependencies.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_crm_business_rules.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_crm_commerce_shadow.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_crm_native_runtime.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_crm_shell.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_filedir.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_filedir_v2.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10c_read_rollout.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10d_write_rollout.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10e_certification.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10e_rollout_readiness.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10e_rollout_stage.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10e_runtime_paths.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10e_runtime_writes.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10e_safe_flags.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10e_shadow_rollout.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10f_commerce_runtime.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10f_migration_safety.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_i10f_preprod_readiness.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/audit_student_native_runtime.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/backfill_digital_payment_userids.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "migration_or_repair",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/backfill_native_commerce_dev.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "migration_or_repair",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/certify_i10e_preprod.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/certify_native_commerce_persistence.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/check_crm_recommendation_health.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/check_digital_payment_status.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/check_recurring_status.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/cleanup_crm_inbox.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "migration_or_repair",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/cleanup_duplicate_lang_keys.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "migration_or_repair",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/compare_commerce_reads.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/compare_i10e_runtime_batch.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/compare_legacy_commerce.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/configure_crm_inbox_account.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "operation",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/diagnose_crm_inbox.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/discover_crm_inbox_folders.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "operation",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/download_crm_inbox_attachments.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/enrol_scope_fill.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/find_hardcoded_strings.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/fix_subscriptions_emergency.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/generate_commerce_certification_report.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/grant_a1_lifetime.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/import_legacy_commerce_catalog.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "migration_or_repair",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/lang_audit.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/lang_check.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/list_automation_rules.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/migrate_legacy_commerce_purchases.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "migration_or_repair",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/poc_price_tampering.html",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "artifact",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/preview_all_emails.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/preview_emails.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/quote_upgrade.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/reconcile_commerce_dual_write.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "migration_or_repair",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/reconcile_native_commerce.php",
+    "action": "MOVE",
+    "provisional_domain": "commerce",
+    "type": "migration_or_repair",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/resync_enrolments.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/run_crm_intelligence_snapshot.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "operation",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/run_crm_recommendations.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "operation",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/run_subs_crons.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "operation",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/seed_automation_rules.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/seed_digital_product_lang.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/seed_digital_products.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/seed_nico_plan1.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/seed_nico_plan14.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/send_mobile_pdf_email.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "operation",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/send_preview_mail.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "operation",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/show_commerce_certification_matrix.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/show_nico_subs.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/sync_crm_inbox.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "operation",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_automation.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_inbox_ai_analysis.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_inbox_ai_fallback.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_inbox_ai_orchestrator.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_inbox_ai_reply.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_inbox_connection.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_inbox_openai.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_inbox_smtp.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_recommendations.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_success.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_success_plan_builder.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_crm_work_items.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/test_username.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "development",
+    "type": "development",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/toggle_automation_rule.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/upgrade_user_to_a1.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/user_intelligence.php",
+    "action": "MANUAL_REVIEW",
+    "provisional_domain": "manual_review",
+    "type": "uncategorized",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_admin_events.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_assistant_ai.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_correlations.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_help.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_language_integrity.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_phase7_final.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_phase7_languages.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_phase7_tests.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_presentation.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_recommendation_operations.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_success_plan_integrity.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_success_plan_lifecycle.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_success_plans.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_trends.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_crm_work_intelligence.php",
+    "action": "MOVE",
+    "provisional_domain": "crm",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_payment_consistency.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  },
+  {
+    "path": "cli/validate_payment_release.php",
+    "action": "MOVE",
+    "provisional_domain": "maintenance",
+    "type": "audit",
+    "status": "inventory_only_h0a"
+  }
+]

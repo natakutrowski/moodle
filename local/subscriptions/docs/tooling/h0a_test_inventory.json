@@ -1,0 +1,317 @@
+[
+  {
+    "source": "tests/admin/admin_event_presentation_test.php",
+    "action": "KEEP",
+    "destination": "tests/admin/admin_event_presentation_test.php",
+    "domain": "admin",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/alfa_commerce_payment_provider_test.php",
+    "action": "MOVE",
+    "destination": "tests/commerce/checkout/alfa_commerce_payment_provider_test.php",
+    "domain": "commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/commandcenter/actions/OpenUrlActionTest.php",
+    "action": "KEEP",
+    "destination": "tests/commandcenter/actions/OpenUrlActionTest.php",
+    "domain": "commandcenter",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/inbox/workspace/inbox_workspace_factory_test.php",
+    "action": "KEEP",
+    "destination": "tests/crm/inbox/workspace/inbox_workspace_factory_test.php",
+    "domain": "crm/inbox",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/intelligence/alerts/alert_test.php",
+    "action": "KEEP",
+    "destination": "tests/crm/intelligence/alerts/alert_test.php",
+    "domain": "crm/intelligence",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/intelligence/alerts/context_test.php",
+    "action": "KEEP",
+    "destination": "tests/crm/intelligence/alerts/context_test.php",
+    "domain": "crm/intelligence",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/intelligence/alerts/presentation_test.php",
+    "action": "KEEP",
+    "destination": "tests/crm/intelligence/alerts/presentation_test.php",
+    "domain": "crm/intelligence",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/navigation/InternalMoodleUrlValidatorTest.php",
+    "action": "KEEP",
+    "destination": "tests/crm/navigation/InternalMoodleUrlValidatorTest.php",
+    "domain": "crm/navigation",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/success/plans/customer_success_plan_step_test.php",
+    "action": "KEEP",
+    "destination": "tests/crm/success/plans/customer_success_plan_step_test.php",
+    "domain": "crm/success",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/success/plans/dependency_state_service_test.php",
+    "action": "KEEP",
+    "destination": "tests/crm/success/plans/dependency_state_service_test.php",
+    "domain": "crm/success",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/success/plans/presentation_test.php",
+    "action": "KEEP",
+    "destination": "tests/crm/success/plans/presentation_test.php",
+    "domain": "crm/success",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/success/plans/status_test.php",
+    "action": "KEEP",
+    "destination": "tests/crm/success/plans/status_test.php",
+    "domain": "crm/success",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/user/explorer/UserExplorerCriteriaTrendTest.php",
+    "action": "KEEP",
+    "destination": "tests/crm/user/explorer/UserExplorerCriteriaTrendTest.php",
+    "domain": "crm/user",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/user/explorer/UserExplorerTrendFilterTest.php",
+    "action": "KEEP",
+    "destination": "tests/crm/user/explorer/UserExplorerTrendFilterTest.php",
+    "domain": "crm/user",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/workspace/WorkspaceRegistryTest.php",
+    "action": "KEEP",
+    "destination": "tests/crm/workspace/WorkspaceRegistryTest.php",
+    "domain": "crm/workspace",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm/workspace/workspace_preference_service_test.php",
+    "action": "KEEP",
+    "destination": "tests/crm/workspace/workspace_preference_service_test.php",
+    "domain": "crm/workspace",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/crm_business_rules_test.php",
+    "action": "MOVE",
+    "destination": "tests/crm/business/crm_business_rules_test.php",
+    "domain": "crm/business",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/crm_commerce_customer_service_test.php",
+    "action": "MOVE",
+    "destination": "tests/crm/commerce/crm_commerce_customer_service_test.php",
+    "domain": "crm/commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/crm_commerce_shadow_service_test.php",
+    "action": "MOVE",
+    "destination": "tests/crm/commerce/crm_commerce_shadow_service_test.php",
+    "domain": "crm/commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/crm_commerce_snapshot_comparator_test.php",
+    "action": "MOVE",
+    "destination": "tests/crm/commerce/crm_commerce_snapshot_comparator_test.php",
+    "domain": "crm/commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/crm_native_runtime_customer_service_test.php",
+    "action": "MOVE",
+    "destination": "tests/crm/commerce/crm_native_runtime_customer_service_test.php",
+    "domain": "crm/commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/currency_test.php",
+    "action": "MOVE",
+    "destination": "tests/currency/currency_test.php",
+    "domain": "currency",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/dashboard/DashboardFunnelComparisonTest.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/DashboardFunnelComparisonTest.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/dashboard/DashboardFunnelRepositoryTest.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/DashboardFunnelRepositoryTest.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/dashboard/DashboardFunnelServiceTest.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/DashboardFunnelServiceTest.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/dashboard/DashboardFunnelSnapshotTest.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/DashboardFunnelSnapshotTest.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/dashboard/DashboardPeriodTest.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/DashboardPeriodTest.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/dashboard/DashboardStatsRepositoryTest.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/DashboardStatsRepositoryTest.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/dashboard/DashboardTrendComparisonTest.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/DashboardTrendComparisonTest.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/dashboard/DashboardTrendsRepositoryTest.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/DashboardTrendsRepositoryTest.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/dashboard/DashboardTrendsServiceTest.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/DashboardTrendsServiceTest.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/dashboard/ui/dashboard_card_ui_test.php",
+    "action": "KEEP",
+    "destination": "tests/dashboard/ui/dashboard_card_ui_test.php",
+    "domain": "dashboard",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/digital_purchase_handler_test.php",
+    "action": "MOVE",
+    "destination": "tests/commerce/purchase/digital_purchase_handler_test.php",
+    "domain": "commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/fixtures/CommerceCatalogTestPaymentProvider.php",
+    "action": "KEEP",
+    "destination": "tests/fixtures/CommerceCatalogTestPaymentProvider.php",
+    "domain": "fixtures",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/fixtures/CommerceEntitlementTestHandler.php",
+    "action": "KEEP",
+    "destination": "tests/fixtures/CommerceEntitlementTestHandler.php",
+    "domain": "fixtures",
+    "status": "already_classified"
+  },
+  {
+    "source": "tests/legacy_alfa_payment_gateway_test.php",
+    "action": "MOVE",
+    "destination": "tests/commerce/legacy/legacy_alfa_payment_gateway_test.php",
+    "domain": "commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/legacy_commerce_payment_request_factory_test.php",
+    "action": "MOVE",
+    "destination": "tests/commerce/legacy/legacy_commerce_payment_request_factory_test.php",
+    "domain": "commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/legacy_crm_commerce_revenue_test.php",
+    "action": "MOVE",
+    "destination": "tests/crm/commerce/legacy_crm_commerce_revenue_test.php",
+    "domain": "crm/commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/legacy_payment_request_adapter_test.php",
+    "action": "MOVE",
+    "destination": "tests/commerce/legacy/legacy_payment_request_adapter_test.php",
+    "domain": "commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/legacy_stripe_payment_gateway_test.php",
+    "action": "MOVE",
+    "destination": "tests/commerce/legacy/legacy_stripe_payment_gateway_test.php",
+    "domain": "commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/safe_crm_commerce_customer_service_test.php",
+    "action": "MOVE",
+    "destination": "tests/crm/commerce/safe_crm_commerce_customer_service_test.php",
+    "domain": "crm/commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/stripe_commerce_payment_provider_test.php",
+    "action": "MOVE",
+    "destination": "tests/commerce/checkout/stripe_commerce_payment_provider_test.php",
+    "domain": "commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/student_commerce_purchase_collection_test.php",
+    "action": "MOVE",
+    "destination": "tests/commerce/runtime/student_commerce_purchase_collection_test.php",
+    "domain": "commerce",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/subscription_config_test.php",
+    "action": "MOVE",
+    "destination": "tests/config/subscription_config_test.php",
+    "domain": "config",
+    "status": "planned_h0b"
+  },
+  {
+    "source": "tests/subscription_purchase_handler_test.php",
+    "action": "MOVE",
+    "destination": "tests/commerce/purchase/subscription_purchase_handler_test.php",
+    "domain": "commerce",
+    "status": "planned_h0b"
+  }
+]

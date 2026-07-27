@@ -16,6 +16,7 @@ use moodle_url;
 final class CommerceSectionNavigationRenderer {
 
     public const OVERVIEW = 'overview';
+    public const PRODUCTS = 'products';
     public const SUBSCRIPTIONS = 'subscriptions';
     public const DIGITAL_PURCHASES = 'digital_purchases';
     public const DIGITAL_PRODUCTS = 'digital_products';
@@ -90,6 +91,12 @@ final class CommerceSectionNavigationRenderer {
                 'icon' => '⌂',
                 'url' => new moodle_url(subscription_config::admin_commerce_page()),
                 'capability' => Capabilities::VIEW_DASHBOARD,
+            ],
+            self::PRODUCTS => [
+                'label' => get_string('crm_commerce_nav_products', 'local_subscriptions'),
+                'icon' => '▦',
+                'url' => new moodle_url('/local/subscriptions/admin/commerce/products/index.php'),
+                'capability' => Capabilities::MANAGE_CONFIGURATION,
             ],
             self::SUBSCRIPTIONS => [
                 'label' => get_string('crm_commerce_nav_subscriptions', 'local_subscriptions'),

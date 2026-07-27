@@ -6,6 +6,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\postpayment\DigitalPostPaymentProcessor;
 use local_subscriptions\commerce\postpayment\SubscriptionPostPaymentProcessor;
+use local_subscriptions\commerce\runtime\switching\CommerceRuntimeDispatcher;
 use local_subscriptions\digital\digital_payment_service;
 use local_subscriptions\domain\PaymentService;
 use local_subscriptions\domain\SubscriptionService;
@@ -30,14 +31,16 @@ final class EventRouter {
     ): void {
         switch ($event->type) {
             case 'checkout_completed':
-                $result = (new DigitalPostPaymentProcessor())
-                    ->process($event);
-
-                if ($result->requires_legacy()) {
-                    digital_payment_service::on_checkout_completed(
-                        $event
-                    );
-                }
+                (new CommerceRuntimeDispatcher())->checkout_completed(
+                    $event,
+                    'event_router.digital',
+                    static function () use ($event): void {
+                        $result = (new DigitalPostPaymentProcessor())->process($event);
+                        if ($result->requires_legacy()) {
+                            digital_payment_service::on_checkout_completed($event);
+                        }
+                    }
+                );
                 return;
 
             case 'payment_failed':
@@ -56,12 +59,16 @@ final class EventRouter {
     ): void {
         switch ($event->type) {
             case 'checkout_completed':
-                $result = (new SubscriptionPostPaymentProcessor())
-                    ->process($event);
-
-                if ($result->requires_legacy()) {
-                    PaymentService::on_checkout_completed($event);
-                }
+                (new CommerceRuntimeDispatcher())->checkout_completed(
+                    $event,
+                    'event_router.subscription',
+                    static function () use ($event): void {
+                        $result = (new SubscriptionPostPaymentProcessor())->process($event);
+                        if ($result->requires_legacy()) {
+                            PaymentService::on_checkout_completed($event);
+                        }
+                    }
+                );
                 return;
 
             case 'checkout_expired':

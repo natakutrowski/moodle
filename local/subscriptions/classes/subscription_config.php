@@ -486,6 +486,21 @@ class subscription_config {
             'admin/commerce/index.php';
     }
 
+    public static function commerce_products_admin_page(): string {
+        return self::plugin_path() .
+            'admin/commerce/products/index.php';
+    }
+
+    public static function commerce_product_edit_admin_page(): string {
+        return self::plugin_path() .
+            'admin/commerce/products/edit.php';
+    }
+
+    public static function commerce_bundle_components_admin_page(): string {
+        return self::plugin_path() .
+            'admin/commerce/products/components.php';
+    }
+
     public static function admin_crm_tools_page(): string {
         return self::plugin_path() .
             'admin/tools/index.php';

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/subscriptions/db" VERSION="2026072512" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="local/subscriptions/db" VERSION="2026072605" COMMENT="XMLDB file for local_subscriptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
 		<TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
 			<FIELDS>
@@ -77,22 +77,22 @@
 		<TABLE NAME="subscription_plan_price" COMMENT="Price for each plan in multiple currencies">
 		  <FIELDS>
 			<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
-			<FIELD NAME="plan_id" TYPE="int" LENGTH="10" NOTNULL="true" />
+			<FIELD NAME="planid" TYPE="int" LENGTH="10" NOTNULL="true" />
 			<FIELD NAME="currency" TYPE="char" LENGTH="10" NOTNULL="true" />
 			<FIELD NAME="price" TYPE="number" LENGTH="10" DECIMALS="2" NOTNULL="true" SEQUENCE="false" DEFAULT="0.00"/>
 			<FIELD NAME="stripe_price_id" TYPE="char" LENGTH="191" NOTNULL="false" SEQUENCE="false" COMMENT="ID Stripe du prix (pour les abonnements)"/>
 		  </FIELDS>
 		  <KEYS>
 			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-			<KEY NAME="plan_fk" TYPE="foreign" FIELDS="plan_id" REFTABLE="subscription_plan" REFFIELDS="id"/>
-			<KEY NAME="plan_currency_unique" TYPE="unique" FIELDS="plan_id,currency"/>
+			<KEY NAME="plan_fk" TYPE="foreign" FIELDS="planid" REFTABLE="subscription_plan" REFFIELDS="id"/>
+			<KEY NAME="plan_currency_unique" TYPE="unique" FIELDS="planid,currency"/>
 		  </KEYS>
 		</TABLE>
         
 		<TABLE NAME="subscription_access_scope_translation" COMMENT="Traductions des noms et descriptions des scopes">
 			<FIELDS>
 				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-				<FIELD NAME="scope_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="accessscopeid" TYPE="int" LENGTH="10" NOTNULL="true"/>
 				<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
 				<FIELD NAME="name" TYPE="text" NOTNULL="true"/>
 				<FIELD NAME="description" TYPE="text" NOTNULL="false"/>
@@ -102,17 +102,17 @@
 			</FIELDS>
 			<KEYS>
 				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-				<KEY NAME="scopefk" TYPE="foreign" FIELDS="scope_id" REFTABLE="subscription_access_scope" REFFIELDS="id"/>
+				<KEY NAME="scopefk" TYPE="foreign" FIELDS="accessscopeid" REFTABLE="subscription_access_scope" REFFIELDS="id"/>
 			</KEYS>
 			<INDEXES>
-				<INDEX NAME="lang_scope_unique" UNIQUE="true" FIELDS="scope_id, lang"/>
+				<INDEX NAME="lang_scope_unique" UNIQUE="true" FIELDS="accessscopeid, lang"/>
 			</INDEXES>
 		</TABLE>
 		
 		<TABLE NAME="subscription_plan_translation" COMMENT="Stores translations for subscription plans.">
 			<FIELDS>
 				<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-				<FIELD NAME="plan_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="planid" TYPE="int" LENGTH="10" NOTNULL="true"/>
 				<FIELD NAME="lang" TYPE="char" LENGTH="10" NOTNULL="true"/>
 				<FIELD NAME="name" TYPE="text" NOTNULL="true"/>
 				<FIELD NAME="description" TYPE="text" NOTNULL="false"/>
@@ -122,10 +122,10 @@
 			</FIELDS>
 			<KEYS>
 				<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-				<KEY NAME="plan_id_fk" TYPE="foreign" FIELDS="plan_id" REFTABLE="subscription_plan" REFFIELDS="id"/>
+				<KEY NAME="plan_id_fk" TYPE="foreign" FIELDS="planid" REFTABLE="subscription_plan" REFFIELDS="id"/>
 			</KEYS>
 			<INDEXES>
-				<INDEX NAME="lang_plan_unique" UNIQUE="true" FIELDS="plan_id, lang"/>
+				<INDEX NAME="lang_plan_unique" UNIQUE="true" FIELDS="planid, lang"/>
 			</INDEXES>
 		</TABLE>
 
@@ -139,7 +139,7 @@
 				<FIELD NAME="lastname"       TYPE="char"   LENGTH="100" NOTNULL="false" />
 				<FIELD NAME="phone" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Guest/checkout phone number"/>
 				<FIELD NAME="phone_country" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ISO country code for phone"/>
-				<FIELD NAME="subscriptionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+				<FIELD NAME="subscriptionid" TYPE="int" LENGTH="10" NOTNULL="false"/>
 				<FIELD NAME="currency" TYPE="char" LENGTH="10" UNSIGNED="false" NOTNULL="true"/>
 				<FIELD NAME="price" TYPE="number" LENGTH="10" DECIMALS="2" UNSIGNED="false" NOTNULL="true"/>
 				<FIELD NAME="amount_minor" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Montant final payé en unités minor (ex: cents)"/>
@@ -217,6 +217,11 @@
 		<KEYS>
 			<KEY NAME="primary" TYPE="primary" FIELDS="id"/>
 		</KEYS>
+		<INDEXES>
+			<INDEX NAME="subscriptionid_idx" UNIQUE="false" FIELDS="subscriptionid"/>
+			<INDEX NAME="eventtype_idx" UNIQUE="false" FIELDS="eventtype"/>
+			<INDEX NAME="provider_event_id_idx" UNIQUE="false" FIELDS="provider_event_id"/>
+		</INDEXES>
 		</TABLE>
 
 		<!-- Journal des réponses envoyées depuis quickreply.php -->
@@ -2785,6 +2790,287 @@
                 <INDEX NAME="scope_key_uix" UNIQUE="true" FIELDS="scope,idempotencykey"/>
                 <INDEX NAME="status_lockeduntil_idx" UNIQUE="false" FIELDS="status,lockeduntil"/>
                 <INDEX NAME="timemodified_idx" UNIQUE="false" FIELDS="timemodified"/>
+            </INDEXES>
+        </TABLE>
+
+
+        <TABLE NAME="local_subs_commerce_product" COMMENT="Native Commerce catalogue products">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="sku" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="metadatajson" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="availablefrom" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="availableuntil" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES>
+                <INDEX NAME="sku_uix" UNIQUE="true" FIELDS="sku"/>
+                <INDEX NAME="status_availability_idx" UNIQUE="false" FIELDS="status,availablefrom,availableuntil"/>
+                <INDEX NAME="type_status_idx" UNIQUE="false" FIELDS="type,status"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_prod_price" COMMENT="Native Commerce catalogue prices">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="currency" TYPE="char" LENGTH="3" NOTNULL="true"/>
+                <FIELD NAME="amountminor" TYPE="int" LENGTH="18" NOTNULL="true"/>
+                <FIELD NAME="provider" TYPE="char" LENGTH="64" NOTNULL="false"/>
+                <FIELD NAME="providerpriceid" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="metadatajson" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="product_fk" TYPE="foreign" FIELDS="productid" REFTABLE="local_subs_commerce_product" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="product_currency_provider_uix" UNIQUE="true" FIELDS="productid,currency,provider"/>
+                <INDEX NAME="active_currency_idx" UNIQUE="false" FIELDS="active,currency"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_prod_tr" COMMENT="Native Commerce catalogue translations">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="language" TYPE="char" LENGTH="20" NOTNULL="true"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="shortdescription" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="metadatajson" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="product_fk" TYPE="foreign" FIELDS="productid" REFTABLE="local_subs_commerce_product" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES><INDEX NAME="product_language_uix" UNIQUE="true" FIELDS="productid,language"/></INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_prod_comp" COMMENT="Native Commerce bundle product components">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="parentproductid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="childproductid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="quantity" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="metadatajson" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="parent_fk" TYPE="foreign" FIELDS="parentproductid" REFTABLE="local_subs_commerce_product" REFFIELDS="id"/>
+                <KEY NAME="child_fk" TYPE="foreign" FIELDS="childproductid" REFTABLE="local_subs_commerce_product" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="parent_child_uix" UNIQUE="true" FIELDS="parentproductid,childproductid"/>
+                <INDEX NAME="parent_sortorder_idx" UNIQUE="false" FIELDS="parentproductid,sortorder"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_prod_ent" COMMENT="Native Commerce product entitlement definitions">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="resourcekey" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="durationseconds" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="quantity" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="configurationjson" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="product_fk" TYPE="foreign" FIELDS="productid" REFTABLE="local_subs_commerce_product" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="product_definition_uix" UNIQUE="true" FIELDS="productid,type,resourcekey"/>
+                <INDEX NAME="product_sortorder_idx" UNIQUE="false" FIELDS="productid,sortorder"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_prod_map" COMMENT="Mapping between Native Commerce products and Legacy catalogue records">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="legacyfamily" TYPE="char" LENGTH="32" NOTNULL="true"/>
+                <FIELD NAME="legacytable" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="legacyid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="product_fk" TYPE="foreign" FIELDS="productid" REFTABLE="local_subs_commerce_product" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="legacy_source_uix" UNIQUE="true" FIELDS="legacytable,legacyid"/>
+                <INDEX NAME="product_family_uix" UNIQUE="true" FIELDS="productid,legacyfamily"/>
+            </INDEXES>
+        </TABLE>
+
+
+        <TABLE NAME="local_subs_commerce_grant" COMMENT="Native Commerce customer entitlement grant ledger">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="grantreference" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="idempotencykey" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="purchasereference" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="itemreference" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="productsku" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="resourcekey" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="quantity" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="beneficiaryuserid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="beneficiaryemail" TYPE="char" LENGTH="254" NOTNULL="true"/>
+                <FIELD NAME="validfrom" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="validuntil" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="planned"/>
+                <FIELD NAME="configurationjson" TYPE="text" NOTNULL="true"/>
+                <FIELD NAME="metadatajson" TYPE="text" NOTNULL="true"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="grantreference_uix" UNIQUE="true" FIELDS="grantreference"/>
+                <INDEX NAME="idempotencykey_uix" UNIQUE="true" FIELDS="idempotencykey"/>
+                <INDEX NAME="purchase_status_idx" UNIQUE="false" FIELDS="purchasereference,status"/>
+                <INDEX NAME="beneficiary_status_idx" UNIQUE="false" FIELDS="beneficiaryuserid,status"/>
+                <INDEX NAME="type_status_idx" UNIQUE="false" FIELDS="type,status"/>
+                <INDEX NAME="status_validuntil_idx" UNIQUE="false" FIELDS="status,validuntil"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_dig_access" COMMENT="Native Commerce digital download authorizations">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="grantreference" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="idempotencykey" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="purchasereference" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="productsku" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="resourcekey" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="beneficiaryuserid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="beneficiaryemail" TYPE="char" LENGTH="254" NOTNULL="true"/>
+                <FIELD NAME="downloadtoken" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="maxdownloads" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="downloadcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="validfrom" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="validuntil" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="active"/>
+                <FIELD NAME="lastdownloadat" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES>
+                <INDEX NAME="grantreference_uix" UNIQUE="true" FIELDS="grantreference"/>
+                <INDEX NAME="idempotencykey_uix" UNIQUE="true" FIELDS="idempotencykey"/>
+                <INDEX NAME="downloadtoken_uix" UNIQUE="true" FIELDS="downloadtoken"/>
+                <INDEX NAME="beneficiary_status_idx" UNIQUE="false" FIELDS="beneficiaryuserid,status"/>
+                <INDEX NAME="email_status_idx" UNIQUE="false" FIELDS="beneficiaryemail,status"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_ful_state" COMMENT="Current Native Commerce fulfillment state per entitlement grant">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="grantreference" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="idempotencykey" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="granttype" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="handlerclass" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true"/>
+                <FIELD NAME="attempts" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="lastexecutionreference" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="lastsource" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="lastactoruserid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="lastpayloadjson" TYPE="text" NOTNULL="true"/>
+                <FIELD NAME="lastmessage" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="lasterrorclass" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES>
+                <INDEX NAME="grantreference_uix" UNIQUE="true" FIELDS="grantreference"/>
+                <INDEX NAME="idempotencykey_uix" UNIQUE="true" FIELDS="idempotencykey"/>
+                <INDEX NAME="status_idx" UNIQUE="false" FIELDS="status"/>
+                <INDEX NAME="granttype_status_idx" UNIQUE="false" FIELDS="granttype,status"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_ful_attempt" COMMENT="Immutable Native Commerce fulfillment attempt history">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="grantreference" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="idempotencykey" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="executionreference" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="granttype" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="handlerclass" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true"/>
+                <FIELD NAME="dryrun" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="source" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="actoruserid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="payloadjson" TYPE="text" NOTNULL="true"/>
+                <FIELD NAME="message" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="errorclass" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES>
+                <INDEX NAME="executionreference_uix" UNIQUE="true" FIELDS="executionreference"/>
+                <INDEX NAME="grantreference_idx" UNIQUE="false" FIELDS="grantreference"/>
+                <INDEX NAME="status_idx" UNIQUE="false" FIELDS="status"/>
+                <INDEX NAME="granttype_status_idx" UNIQUE="false" FIELDS="granttype,status"/>
+            </INDEXES>
+        </TABLE>
+
+
+        <TABLE NAME="local_subs_commerce_shadow" COMMENT="Immutable Native fulfillment Shadow comparison runs">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="executionreference" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="purchasereference" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="source" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="entrypoint" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="comparisonstatus" TYPE="char" LENGTH="32" NOTNULL="true"/>
+                <FIELD NAME="classification" TYPE="char" LENGTH="32" NOTNULL="true"/>
+                <FIELD NAME="legacyjson" TYPE="text" NOTNULL="true"/>
+                <FIELD NAME="nativejson" TYPE="text" NOTNULL="true"/>
+                <FIELD NAME="differencesjson" TYPE="text" NOTNULL="true"/>
+                <FIELD NAME="errorclass" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="errormessage" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timefinished" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="executionreference_uix" UNIQUE="true" FIELDS="executionreference"/>
+                <INDEX NAME="purchase_time_idx" UNIQUE="false" FIELDS="purchasereference,timecreated"/>
+                <INDEX NAME="status_time_idx" UNIQUE="false" FIELDS="comparisonstatus,timecreated"/>
+                <INDEX NAME="classification_time_idx" UNIQUE="false" FIELDS="classification,timecreated"/>
             </INDEXES>
         </TABLE>
 

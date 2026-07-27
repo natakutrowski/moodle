@@ -1,0 +1,722 @@
+[
+  {
+    "source": "cli/audit_7_94a_legacy_dependencies.php",
+    "destination": "cli/commerce/audit/audit_7_94a_legacy_dependencies.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_bundle_component_editor.php",
+    "destination": "cli/commerce/audit/audit_commerce_bundle_component_editor.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_bundle_crm_backend.php",
+    "destination": "cli/commerce/audit/audit_commerce_bundle_crm_backend.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_bundle_domain.php",
+    "destination": "cli/commerce/audit/audit_commerce_bundle_domain.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_bundle_expansion.php",
+    "destination": "cli/commerce/audit/audit_commerce_bundle_expansion.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_bundle_phase_7_94e.php",
+    "destination": "cli/commerce/certification/audit_commerce_bundle_phase_7_94e.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_bundle_preview.php",
+    "destination": "cli/commerce/audit/audit_commerce_bundle_preview.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_bundle_pricing.php",
+    "destination": "cli/commerce/audit/audit_commerce_bundle_pricing.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_catalog_checkout_certification.php",
+    "destination": "cli/commerce/certification/audit_commerce_catalog_checkout_certification.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_catalog_internationalisation.php",
+    "destination": "cli/commerce/audit/audit_commerce_catalog_internationalisation.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_catalog_parity.php",
+    "destination": "cli/commerce/audit/audit_commerce_catalog_parity.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_catalog_payment_pipeline.php",
+    "destination": "cli/commerce/audit/audit_commerce_catalog_payment_pipeline.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_catalog_purchase_shadow.php",
+    "destination": "cli/commerce/audit/audit_commerce_catalog_purchase_shadow.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_compatibility.php",
+    "destination": "cli/commerce/audit/audit_commerce_compatibility.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_dual_write.php",
+    "destination": "cli/commerce/audit/audit_commerce_dual_write.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_entitlement_execution_certification.php",
+    "destination": "cli/commerce/certification/audit_commerce_entitlement_execution_certification.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_entitlement_ledger.php",
+    "destination": "cli/commerce/audit/audit_commerce_entitlement_ledger.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_entitlement_planning.php",
+    "destination": "cli/commerce/audit/audit_commerce_entitlement_planning.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_fulfillment.php",
+    "destination": "cli/commerce/audit/audit_commerce_fulfillment.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_integrity.php",
+    "destination": "cli/commerce/audit/audit_commerce_integrity.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_native_backfill.php",
+    "destination": "cli/commerce/migration/audit_commerce_native_backfill.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_native_course_fulfillment.php",
+    "destination": "cli/commerce/audit/audit_commerce_native_course_fulfillment.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_native_digital_persistence.php",
+    "destination": "cli/commerce/audit/audit_commerce_native_digital_persistence.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_native_fulfillment_kernel.php",
+    "destination": "cli/commerce/audit/audit_commerce_native_fulfillment_kernel.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_native_fulfillment_phase.php",
+    "destination": "cli/commerce/certification/audit_commerce_native_fulfillment_phase.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_native_persistence.php",
+    "destination": "cli/commerce/audit/audit_commerce_native_persistence.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_native_reads.php",
+    "destination": "cli/commerce/audit/audit_commerce_native_reads.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_payment_bridges.php",
+    "destination": "cli/commerce/audit/audit_commerce_payment_bridges.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_payment_orchestration.php",
+    "destination": "cli/commerce/audit/audit_commerce_payment_orchestration.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_product_editor.php",
+    "destination": "cli/commerce/audit/audit_commerce_product_editor.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_product_ux.php",
+    "destination": "cli/commerce/audit/audit_commerce_product_ux.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_products_polish.php",
+    "destination": "cli/commerce/audit/audit_commerce_products_polish.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_purchase_architecture.php",
+    "destination": "cli/commerce/audit/audit_commerce_purchase_architecture.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_purchase_domain.php",
+    "destination": "cli/commerce/audit/audit_commerce_purchase_domain.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_read_dependencies.php",
+    "destination": "cli/commerce/audit/audit_commerce_read_dependencies.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_runtime.php",
+    "destination": "cli/commerce/audit/audit_commerce_runtime.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_runtime_reads.php",
+    "destination": "cli/commerce/audit/audit_commerce_runtime_reads.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_shadow_export.php",
+    "destination": "cli/commerce/reporting/audit_commerce_shadow_export.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_shadow_g1_g3.php",
+    "destination": "cli/commerce/audit/audit_commerce_shadow_g1_g3.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_shadow_g4_g6.php",
+    "destination": "cli/commerce/audit/audit_commerce_shadow_g4_g6.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_shadow_phase.php",
+    "destination": "cli/commerce/certification/audit_commerce_shadow_phase.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_shadow_search.php",
+    "destination": "cli/commerce/reporting/audit_commerce_shadow_search.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_shadow_summary.php",
+    "destination": "cli/commerce/reporting/audit_commerce_shadow_summary.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_task_writes.php",
+    "destination": "cli/commerce/audit/audit_commerce_task_writes.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_ux.php",
+    "destination": "cli/commerce/audit/audit_commerce_ux.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_commerce_write_dependencies.php",
+    "destination": "cli/commerce/audit/audit_commerce_write_dependencies.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_crm_business_rules.php",
+    "destination": "cli/crm/audit/audit_crm_business_rules.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_crm_commerce_shadow.php",
+    "destination": "cli/crm/audit/audit_crm_commerce_shadow.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_crm_native_runtime.php",
+    "destination": "cli/crm/audit/audit_crm_native_runtime.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_crm_shell.php",
+    "destination": "cli/crm/audit/audit_crm_shell.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_filedir.php",
+    "destination": "cli/maintenance/filedir/audit_filedir.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_filedir_v2.php",
+    "destination": "cli/maintenance/filedir/audit_filedir_v2.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10c_read_rollout.php",
+    "destination": "cli/commerce/audit/audit_i10c_read_rollout.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10d_write_rollout.php",
+    "destination": "cli/commerce/audit/audit_i10d_write_rollout.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10e_certification.php",
+    "destination": "cli/commerce/certification/audit_i10e_certification.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10e_rollout_readiness.php",
+    "destination": "cli/commerce/certification/audit_i10e_rollout_readiness.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10e_rollout_stage.php",
+    "destination": "cli/commerce/audit/audit_i10e_rollout_stage.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10e_runtime_paths.php",
+    "destination": "cli/commerce/audit/audit_i10e_runtime_paths.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10e_runtime_writes.php",
+    "destination": "cli/commerce/audit/audit_i10e_runtime_writes.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10e_safe_flags.php",
+    "destination": "cli/commerce/audit/audit_i10e_safe_flags.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10e_shadow_rollout.php",
+    "destination": "cli/commerce/audit/audit_i10e_shadow_rollout.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10f_commerce_runtime.php",
+    "destination": "cli/commerce/audit/audit_i10f_commerce_runtime.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10f_migration_safety.php",
+    "destination": "cli/commerce/audit/audit_i10f_migration_safety.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_i10f_preprod_readiness.php",
+    "destination": "cli/commerce/certification/audit_i10f_preprod_readiness.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/audit_student_native_runtime.php",
+    "destination": "cli/operations/audit_student_native_runtime.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/backfill_digital_payment_userids.php",
+    "destination": "cli/commerce/migration/backfill_digital_payment_userids.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/backfill_native_commerce_dev.php",
+    "destination": "cli/commerce/migration/backfill_native_commerce_dev.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/certify_i10e_preprod.php",
+    "destination": "cli/commerce/certification/certify_i10e_preprod.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/certify_native_commerce_persistence.php",
+    "destination": "cli/commerce/certification/certify_native_commerce_persistence.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/check_crm_recommendation_health.php",
+    "destination": "cli/crm/recommendations/check_crm_recommendation_health.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/check_digital_payment_status.php",
+    "destination": "cli/commerce/operations/check_digital_payment_status.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/check_recurring_status.php",
+    "destination": "cli/commerce/operations/check_recurring_status.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/cleanup_crm_inbox.php",
+    "destination": "cli/crm/inbox/cleanup_crm_inbox.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/cleanup_duplicate_lang_keys.php",
+    "destination": "cli/maintenance/language/cleanup_duplicate_lang_keys.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/compare_commerce_reads.php",
+    "destination": "cli/commerce/audit/compare_commerce_reads.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/compare_i10e_runtime_batch.php",
+    "destination": "cli/commerce/audit/compare_i10e_runtime_batch.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/compare_legacy_commerce.php",
+    "destination": "cli/commerce/audit/compare_legacy_commerce.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/configure_crm_inbox_account.php",
+    "destination": "cli/crm/inbox/configure_crm_inbox_account.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/diagnose_crm_inbox.php",
+    "destination": "cli/crm/inbox/diagnose_crm_inbox.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/discover_crm_inbox_folders.php",
+    "destination": "cli/crm/inbox/discover_crm_inbox_folders.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/download_crm_inbox_attachments.php",
+    "destination": "cli/crm/inbox/download_crm_inbox_attachments.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/enrol_scope_fill.php",
+    "destination": "cli/maintenance/enrolment/enrol_scope_fill.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/find_hardcoded_strings.php",
+    "destination": "cli/maintenance/language/find_hardcoded_strings.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/fix_subscriptions_emergency.php",
+    "destination": "cli/commerce/operations/fix_subscriptions_emergency.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/generate_commerce_certification_report.php",
+    "destination": "cli/commerce/reporting/generate_commerce_certification_report.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/grant_a1_lifetime.php",
+    "destination": "cli/commerce/operations/grant_a1_lifetime.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/import_legacy_commerce_catalog.php",
+    "destination": "cli/commerce/migration/import_legacy_commerce_catalog.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/lang_audit.php",
+    "destination": "cli/maintenance/language/lang_audit.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/lang_check.php",
+    "destination": "cli/maintenance/language/lang_check.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/list_automation_rules.php",
+    "destination": "cli/crm/automation/list_automation_rules.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/migrate_legacy_commerce_purchases.php",
+    "destination": "cli/commerce/migration/migrate_legacy_commerce_purchases.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/poc_price_tampering.html",
+    "destination": "cli/development/poc_price_tampering.html",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/preview_all_emails.php",
+    "destination": "cli/mail/preview_all_emails.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/preview_emails.php",
+    "destination": "cli/mail/preview_emails.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/quote_upgrade.php",
+    "destination": "cli/commerce/operations/quote_upgrade.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/reconcile_commerce_dual_write.php",
+    "destination": "cli/commerce/migration/reconcile_commerce_dual_write.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/reconcile_native_commerce.php",
+    "destination": "cli/commerce/migration/reconcile_native_commerce.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/resync_enrolments.php",
+    "destination": "cli/maintenance/enrolment/resync_enrolments.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/run_crm_intelligence_snapshot.php",
+    "destination": "cli/crm/audit/run_crm_intelligence_snapshot.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/run_crm_recommendations.php",
+    "destination": "cli/crm/recommendations/run_crm_recommendations.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/run_subs_crons.php",
+    "destination": "cli/maintenance/cron/run_subs_crons.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/seed_automation_rules.php",
+    "destination": "cli/crm/automation/seed_automation_rules.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/seed_digital_product_lang.php",
+    "destination": "cli/maintenance/language/seed_digital_product_lang.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/seed_digital_products.php",
+    "destination": "cli/development/seed_digital_products.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/seed_nico_plan1.php",
+    "destination": "cli/development/seed_nico_plan1.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/seed_nico_plan14.php",
+    "destination": "cli/development/seed_nico_plan14.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/send_mobile_pdf_email.php",
+    "destination": "cli/mail/send_mobile_pdf_email.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/send_preview_mail.php",
+    "destination": "cli/mail/send_preview_mail.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/show_commerce_certification_matrix.php",
+    "destination": "cli/commerce/reporting/show_commerce_certification_matrix.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/show_nico_subs.php",
+    "destination": "cli/development/show_nico_subs.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/sync_crm_inbox.php",
+    "destination": "cli/crm/inbox/sync_crm_inbox.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_automation.php",
+    "destination": "cli/crm/automation/test_automation.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_inbox_ai_analysis.php",
+    "destination": "cli/crm/inbox/test_crm_inbox_ai_analysis.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_inbox_ai_fallback.php",
+    "destination": "cli/crm/inbox/test_crm_inbox_ai_fallback.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_inbox_ai_orchestrator.php",
+    "destination": "cli/crm/inbox/test_crm_inbox_ai_orchestrator.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_inbox_ai_reply.php",
+    "destination": "cli/crm/inbox/test_crm_inbox_ai_reply.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_inbox_connection.php",
+    "destination": "cli/crm/inbox/test_crm_inbox_connection.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_inbox_openai.php",
+    "destination": "cli/crm/inbox/test_crm_inbox_openai.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_inbox_smtp.php",
+    "destination": "cli/crm/inbox/test_crm_inbox_smtp.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_recommendations.php",
+    "destination": "cli/crm/recommendations/test_crm_recommendations.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_success.php",
+    "destination": "cli/crm/success/test_crm_success.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_success_plan_builder.php",
+    "destination": "cli/crm/success/test_crm_success_plan_builder.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_crm_work_items.php",
+    "destination": "cli/crm/success/test_crm_work_items.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/test_username.php",
+    "destination": "cli/development/test_username.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/toggle_automation_rule.php",
+    "destination": "cli/crm/automation/toggle_automation_rule.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/upgrade_user_to_a1.php",
+    "destination": "cli/commerce/operations/upgrade_user_to_a1.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/user_intelligence.php",
+    "destination": "cli/crm/audit/user_intelligence.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_admin_events.php",
+    "destination": "cli/crm/audit/validate_crm_admin_events.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_assistant_ai.php",
+    "destination": "cli/crm/audit/validate_crm_assistant_ai.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_correlations.php",
+    "destination": "cli/crm/audit/validate_crm_correlations.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_help.php",
+    "destination": "cli/crm/audit/validate_crm_help.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_language_integrity.php",
+    "destination": "cli/crm/audit/validate_crm_language_integrity.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_phase7_final.php",
+    "destination": "cli/crm/audit/validate_crm_phase7_final.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_phase7_languages.php",
+    "destination": "cli/crm/audit/validate_crm_phase7_languages.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_phase7_tests.php",
+    "destination": "cli/crm/audit/validate_crm_phase7_tests.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_presentation.php",
+    "destination": "cli/crm/audit/validate_crm_presentation.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_recommendation_operations.php",
+    "destination": "cli/crm/recommendations/validate_crm_recommendation_operations.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_success_plan_integrity.php",
+    "destination": "cli/crm/success/validate_crm_success_plan_integrity.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_success_plan_lifecycle.php",
+    "destination": "cli/crm/success/validate_crm_success_plan_lifecycle.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_success_plans.php",
+    "destination": "cli/crm/success/validate_crm_success_plans.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_trends.php",
+    "destination": "cli/crm/audit/validate_crm_trends.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_crm_work_intelligence.php",
+    "destination": "cli/crm/success/validate_crm_work_intelligence.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_payment_consistency.php",
+    "destination": "cli/commerce/operations/validate_payment_consistency.php",
+    "status": "MOVE"
+  },
+  {
+    "source": "cli/validate_payment_release.php",
+    "destination": "cli/commerce/operations/validate_payment_release.php",
+    "status": "MOVE"
+  }
+]

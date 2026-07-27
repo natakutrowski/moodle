@@ -5295,3 +5295,134 @@ $string['commerce_native_reconciliation_enabled'] = 'Сверка Native Commerc
 $string['commerce_native_reconciliation_enabled_desc'] = 'Включает сверку Native Commerce.';
 $string['commerce_native_repair_enabled'] = 'Исправление Native Commerce';
 $string['commerce_native_repair_enabled_desc'] = 'Разрешает явные исправления во время сверки.';
+
+// Phase 7.94E4 - Unified Commerce Product Editor.
+$string['crm_commerce_nav_products'] = 'Товары';
+$string['commerce_products_title'] = 'Товары Commerce';
+$string['commerce_products_description'] = 'Управление единым каталогом Native Commerce.';
+$string['commerce_product_add'] = 'Добавить товар';
+$string['commerce_product_sku'] = 'SKU';
+$string['commerce_product_name'] = 'Название';
+$string['commerce_product_type'] = 'Тип';
+$string['commerce_product_status'] = 'Статус';
+$string['commerce_product_description'] = 'Описание';
+$string['commerce_product_definition'] = 'Состав';
+$string['commerce_product_definition_counts'] = 'Цены: {$a->prices}; переводы: {$a->translations}; компоненты: {$a->components}; права: {$a->entitlements}';
+$string['commerce_bundle_edit_components'] = 'Изменить компоненты набора';
+
+// Phase 7.94E5 - Bundle visual component editor.
+$string['commerce_bundle_components_title'] = 'Компоненты — {$a}';
+$string['commerce_bundle_components_help'] = 'Выберите товары, количество и порядок отображения. Пустые строки игнорируются. При сохранении проверяется всё рекурсивное раскрытие набора.';
+$string['commerce_bundle_component_number'] = 'Компонент {$a}';
+$string['commerce_bundle_component_product'] = 'Товар';
+$string['commerce_bundle_component_quantity'] = 'Количество';
+$string['commerce_bundle_component_order'] = 'Порядок';
+$string['commerce_bundle_add_rows'] = 'Добавить строки';
+$string['commerce_bundle_preview_title'] = 'Предпросмотр раскрытого набора';
+
+// Phase 7.94E6 - Bundle preview and guided CRM workflow.
+$string['commerce_product_workflow'] = 'Этапы настройки продукта';
+$string['commerce_product_step_information'] = 'Информация';
+$string['commerce_product_step_components'] = 'Состав';
+$string['commerce_product_step_preview'] = 'Предпросмотр';
+$string['commerce_product_step_pricing'] = 'Цена';
+$string['commerce_bundle_open_preview'] = 'Открыть полный предпросмотр';
+$string['commerce_bundle_preview_eyebrow'] = 'Проверка перед публикацией';
+$string['commerce_bundle_preview_intro'] = 'Проверьте включённые продукты, их количество, доступные цены и предоставляемые права.';
+$string['commerce_bundle_preview_unavailable'] = 'Предпросмотр пока недоступен';
+$string['commerce_bundle_fix_components'] = 'Исправить состав';
+$string['commerce_bundle_preview_products'] = 'Конечные продукты';
+$string['commerce_bundle_preview_quantity'] = 'Общее количество';
+$string['commerce_bundle_preview_entitlements'] = 'Заявленные права';
+$string['commerce_bundle_preview_depth'] = 'Максимальная глубина';
+$string['commerce_bundle_preview_empty'] = 'В этом наборе пока нет конечных продуктов.';
+$string['commerce_bundle_preview_prices'] = 'Активные цены продукта';
+$string['commerce_bundle_preview_rights'] = 'Предоставляемые права';
+$string['commerce_bundle_preview_paths'] = 'Пути состава';
+$string['commerce_no_active_price'] = 'Нет активной цены';
+$string['commerce_no_entitlement'] = 'Права не определены';
+$string['commerce_entitlement_lifetime'] = 'Бессрочно';
+$string['commerce_back_to_products'] = 'Назад к продуктам';
+
+// Phase 7.94E7 - Bundle pricing.
+$string['commerce_bundle_pricing_title'] = 'Цена — {$a}';
+$string['commerce_bundle_pricing_eyebrow'] = 'Коммерческая стратегия';
+$string['commerce_bundle_pricing_intro'] = 'Выберите способ расчёта цены набора и сразу проверьте результат для каждой валюты.';
+$string['commerce_bundle_pricing_method'] = 'Метод расчёта';
+$string['commerce_bundle_pricing_method_help'] = 'Фиксированная цена использует цену самого набора. Сумма складывает цены продуктов. Скидка применяется к этой сумме.';
+$string['commerce_bundle_pricing_fixed'] = 'Фиксированная цена набора';
+$string['commerce_bundle_pricing_sum'] = 'Сумма цен компонентов';
+$string['commerce_bundle_pricing_discount'] = 'Сумма компонентов со скидкой';
+$string['commerce_bundle_discount_percent'] = 'Скидка (%)';
+$string['commerce_bundle_fixed_prices'] = 'Фиксированные цены набора';
+$string['commerce_bundle_fixed_prices_help'] = 'Используются только для фиксированной цены. Оставьте пустым, чтобы не менять существующую цену.';
+$string['commerce_bundle_price_simulation'] = 'Текущий расчёт';
+$string['commerce_bundle_final_price'] = 'Итоговая цена набора';
+$string['commerce_bundle_component_total'] = 'Стоимость отдельно';
+$string['commerce_bundle_savings'] = 'Экономия клиента';
+
+// 7.94E8 - Единый менеджер товаров Commerce.
+$string['commerce_product_type_course_access'] = 'Доступ к курсу';
+$string['commerce_product_type_digital_download'] = 'Цифровой продукт';
+$string['commerce_product_type_bundle'] = 'Пакет / Bundle';
+$string['commerce_product_type_service'] = 'Услуга';
+$string['commerce_product_status_draft'] = 'Черновик';
+$string['commerce_product_status_active'] = 'Активен';
+$string['commerce_product_status_inactive'] = 'Неактивен';
+$string['commerce_product_status_archived'] = 'В архиве';
+$string['commerce_product_edit_steps'] = 'Этапы настройки продукта';
+$string['commerce_product_type_help'] = 'Тип можно менять, пока продукт остаётся черновиком. SKU — стабильный технический идентификатор, который нельзя изменить после создания.';
+$string['commerce_product_description_help'] = 'Описание по умолчанию используется как резервное. Тексты для клиента следует заполнить в переводах ниже.';
+$string['commerce_product_translations_title'] = 'Многоязычный контент';
+$string['commerce_product_translations_help'] = 'Укажите название и коммерческие описания для клиента на каждом языке.';
+$string['commerce_product_short_description'] = 'Краткое описание';
+$string['commerce_product_summary'] = 'Обзор продукта';
+$string['commerce_prices'] = 'цен';
+$string['commerce_translations'] = 'переводов';
+$string['commerce_components'] = 'компонентов';
+$string['commerce_entitlements'] = 'прав';
+$string['commerce_products_empty'] = 'Нет продуктов, соответствующих выбранным фильтрам.';
+$string['commerce_product_archived'] = 'Продукт помещён в архив. Он остаётся в истории и больше не предлагается к продаже.';
+$string['commerce_products_card_description'] = 'Управление единым каталогом, пакетами, переводами, ценами и связанными правами.';
+$string['commerce_entitlement_course_access'] = 'Доступ к курсу {$a->courseid} — {$a->level}';
+$string['commerce_entitlement_course_generic'] = 'Доступ к курсу: {$a}';
+$string['commerce_entitlement_digital_product'] = 'Скачивание цифрового продукта №{$a}';
+$string['commerce_entitlement_digital_generic'] = 'Цифровой продукт: {$a}';
+$string['commerce_entitlement_generic'] = '{$a->type}: {$a->resource}';
+$string['commerce_entitlement_access_full'] = 'полный доступ';
+$string['commerce_entitlement_access_grammar'] = 'доступ к грамматике';
+$string['commerce_entitlement_access_trial'] = 'пробный доступ';
+$string['commerce_bundle_preview_pricing'] = 'Тарификация пакета';
+$string['commerce_bundle_pricing_incomplete'] = 'Тарификация для этой валюты ещё не завершена.';
+
+// 7.94E9 - Итоговая сертификация.
+$string['commerce_bundle_phase_certification'] = 'Сертификация товаров и пакетов Commerce';
+
+$string['commerce_product_type_unknown'] = 'Другой продукт';
+$string['commerce_product_status_unknown'] = 'Неизвестный статус';
+$string['commerce_entitlement_course_named'] = 'Доступ к курсу «{$a->course}» — {$a->level}';
+$string['commerce_entitlement_digital_named'] = 'Доступ к цифровому продукту «{$a}»';
+$string['commerce_entitlement_generic_readable'] = '{$a->type}: {$a->resource}';
+$string['commerce_entitlement_type_course'] = 'Доступ к курсу';
+$string['commerce_entitlement_type_digital_product'] = 'Цифровой доступ';
+$string['commerce_entitlement_type_other'] = 'Другое право';
+$string['commerce_course_fallback'] = 'Курс №{$a}';
+$string['commerce_digital_product_fallback'] = 'Цифровой продукт №{$a}';
+$string['commerce_entitlement_access_generic'] = 'стандартный доступ';
+$string['commerce_product_archive'] = 'Архивировать';
+$string['commerce_bundle_add_currency'] = 'Добавить другую валюту';
+$string['commerce_bundle_add_currency_help'] = 'Введите любой код валюты ISO 4217, например USD, GBP, CAD или AUD.';
+
+$string['commerce_price'] = 'Цена';
+
+$string['commerce_bundle_component_comparison_unavailable'] = 'Цена пакета активна. Общая стоимость компонентов и экономия клиента появятся, когда для всех компонентов будет задана активная цена в этой валюте.';
+
+$string['commerce_fulfillment_shadow_enabled'] = 'Включить Shadow нативного fulfillment';
+$string['commerce_fulfillment_shadow_enabled_desc'] = 'Запускает нативный fulfillment в dry-run после Legacy и сохраняет сравнения без изменения прав.';
+$string['commerce_runtime_mode'] = 'Режим выполнения Commerce fulfillment';
+$string['commerce_runtime_mode_desc'] = 'Выберите основной механизм fulfillment. Legacy используется по умолчанию; Shadow сохраняет Legacy основным; Native делает Native-механизм основным.';
+$string['commerce_runtime_mode_legacy'] = 'Legacy';
+$string['commerce_runtime_mode_shadow'] = 'Shadow';
+$string['commerce_runtime_mode_native'] = 'Native';
+$string['commerce_runtime_native_fallback_enabled'] = 'Включить автоматический возврат к Legacy';
+$string['commerce_runtime_native_fallback_enabled_desc'] = 'Если Native fulfillment завершится исключением, немедленно выполнить Legacy-путь. Оставьте включённым во время DEV-переключения.';

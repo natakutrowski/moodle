@@ -1,0 +1,26 @@
+<?php
+// Explicit paths removed by phase 7.94H0D.
+return [
+    'commerce/audit/audit_i10c_read_rollout.php',
+    'commerce/audit/audit_i10d_write_rollout.php',
+    'commerce/audit/audit_i10e_rollout_readiness.php',
+    'commerce/audit/audit_i10e_rollout_stage.php',
+    'commerce/audit/audit_i10e_runtime_paths.php',
+    'commerce/audit/audit_i10e_runtime_writes.php',
+    'commerce/audit/audit_i10e_safe_flags.php',
+    'commerce/audit/audit_i10e_shadow_rollout.php',
+    'commerce/audit/audit_i10f_commerce_runtime.php',
+    'commerce/audit/audit_i10f_migration_safety.php',
+    'commerce/audit/audit_i10f_preprod_readiness.php',
+    'commerce/certification/audit_i10e_certification.php',
+    'commerce/certification/certify_i10e_preprod.php',
+    'commerce/certification/compare_i10e_runtime_batch.php',
+    'maintenance/apply_h0b_test_cleanup.php',
+    'maintenance/audit_h0_test_structure.php',
+    'maintenance/h0b_cleanup_manifest.php',
+    'maintenance/h0c/apply_h0c_cli_cleanup.php',
+    'maintenance/h0c/audit_h0c_cli_structure.php',
+    'maintenance/h0c/h0c_cli_cleanup_manifest.php',
+    'maintenance/filedir/audit_filedir.php',
+    'development/poc_price_tampering.html',
+];

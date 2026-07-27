@@ -60,6 +60,14 @@ final class CommerceWorkspaceRenderer {
     private static function definitions(): array {
         return [
             [
+                'title' => get_string('commerce_products_title', 'local_subscriptions'),
+                'description' => get_string('commerce_products_card_description', 'local_subscriptions'),
+                'icon' => '🛍',
+                'url' => new moodle_url('/local/subscriptions/admin/commerce/products/index.php'),
+                'capability' => Capabilities::MANAGE_CONFIGURATION,
+            ],
+
+            [
                 'title' => get_string(
                     'crm_commerce_subscriptions_title',
                     'local_subscriptions'
