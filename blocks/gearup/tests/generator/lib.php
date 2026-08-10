@@ -343,10 +343,10 @@ class block_gearup_generator extends \testing_block_generator {
         $model = $this->create_mission_model($data);
 
         $objgetter = function () use ($model) {
-            $objmodels = ns\model\objective::get_records(['missionid' => $model->get('id')]);
-            return array_map(function ($objmodel) {
+            $objmodels = ns\model\objective::get_records(['missionid' => $model->get('id')], 'id', 'ASC');
+            return array_values(array_map(function ($objmodel) {
                 return new persisted_objective($objmodel, di::get('objective_type_resolver'));
-            }, $objmodels);
+            }, $objmodels));
         };
 
         if ($model->is_achievement()) {
@@ -396,6 +396,34 @@ class block_gearup_generator extends \testing_block_generator {
         $mo = di::get('mission_operator');
         $mission = $repo->get_mission($data->missionid);
         return $mo->assign_mission($mission, $data->subjectid);
+    }
+
+    /**
+     * Create a speech file.
+     *
+     * @param mission|int $mission The mission or mission ID.
+     * @param string $storyline The storyline.
+     * @param int $messageid The message ID.
+     * @param string|null $fixturepath The fixture file path.
+     * @return \stored_file
+     */
+    public function create_speech_file($mission, string $storyline = 'description', int $messageid = 0) {
+        if (!$mission instanceof mission) {
+            $mission = di::get('repository')->get_mission($mission);
+        }
+
+        $record = (object) [
+            'contextid' => $mission->get_context()->id,
+            'component' => 'block_gearup',
+            'filearea' => 'speech',
+            'itemid' => $mission->get_id(),
+            'filepath' => '/' . trim($storyline, '/') . '/',
+            'filename' => (string) $messageid,
+            'mimetype' => 'audio/mp3',
+        ];
+
+        $fs = get_file_storage();
+        return $fs->create_file_from_string($record, 'mock audio');
     }
 
     /**

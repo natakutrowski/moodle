@@ -7,18 +7,17 @@
     {{#str}} addanother, block_gearup {{/str}}
 </button>
 {{#js}}
-require(['block_gearup/role_button', 'core/modal_factory', 'core/str', 'block_gearup/compat', 'core/templates'],
-    function(RoleButton, ModalFactory, Str, Compat, Templates) {
+require(['block_gearup/role_button', 'core/str', 'core/modal', 'block_gearup/compat', 'core/templates'],
+    function(RoleButton, Str, Modal, Compat, Templates) {
     RoleButton.registerClick('#new-mission-{{ uniqid }}', function(e) {
-        var modalPromise = ModalFactory.create(Compat.patchModalConfig({
+        Compat.createModal({
             title: Str.get_string('addanother', 'block_gearup'),
             body: Templates.render('block_gearup/missions_type_chooser', {
                 createquesturl: '{{createquesturl}}',
                 createachievementurl: '{{createachievementurl}}',
                 createchallengeurl: '{{createchallengeurl}}',
             })
-        }));
-        modalPromise.then(function(modal) {
+        }, Modal).then(function(modal) {
             modal.getRoot().addClass('block_gearup');
             modal.show();
         });

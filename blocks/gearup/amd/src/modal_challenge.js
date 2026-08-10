@@ -27,9 +27,9 @@
 import Templates from 'core/templates';
 import Ajax from 'core/ajax';
 import log from 'core/log';
+import ModalCancel from 'core/modal_cancel';
 import * as Str from 'core/str';
 import * as Compat from 'block_gearup/compat';
-import ModalFactory from 'core/modal_factory';
 import {delegateClick} from 'block_gearup/role_button';
 
 // Trigger pre-loading.
@@ -58,7 +58,7 @@ function registerFromRoot(mixedSelector) {
  */
 async function open(missionInstId) {
 
-    const modal = await ModalFactory.create(Compat.patchModalConfig({type: ModalFactory.types.CANCEL}));
+    const modal = await Compat.createModal({}, ModalCancel);
     const cancelBtn = modal.getFooter().find(modal.getActionSelector('cancel'));
 
     // Dynamically load the content.

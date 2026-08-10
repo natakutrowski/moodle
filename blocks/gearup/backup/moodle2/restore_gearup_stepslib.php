@@ -168,7 +168,7 @@ class restore_gearup_block_structure_step extends restore_structure_step {
         unset($data['id']);
 
         $newid = $DB->insert_record('block_gearup_mission', $data);
-        $this->set_mapping('block_gearup_mission', $oldid, $newid);
+        $this->set_mapping('block_gearup_mission', $oldid, $newid, true, $this->task->get_old_course_contextid());
     }
 
     /**
@@ -254,6 +254,7 @@ class restore_gearup_block_structure_step extends restore_structure_step {
 
         $this->add_related_files('block_gearup', 'questnarrators', null, $this->task->get_old_course_contextid());
         $this->add_related_files('block_gearup', 'achievementbadges', null, $this->task->get_old_course_contextid());
+        $this->add_related_files('block_gearup', 'speech', 'block_gearup_mission', $this->task->get_old_course_contextid());
 
         // Fix iteration of missions that were restored without the iteration field.
         foreach ($this->fixiterationofmissions as $missionid) {

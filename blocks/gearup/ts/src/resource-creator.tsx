@@ -203,7 +203,6 @@ const dependencies = makeDependenciesDefinition([
     'core/ajax',
     'core/aria',
     'core/modal_events',
-    'core/modal_factory',
     'core/notification',
     'core/str',
 ]);

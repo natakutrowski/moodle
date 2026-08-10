@@ -32,7 +32,18 @@ namespace block_gearup\local\xp\compat;
  */
 defined('MOODLE_INTERNAL') || die();
 
-if (interface_exists('local_xp\local\reason\reason_with_short_description')) {
+if (interface_exists('block_xp\local\reason\reason_with_short_description')) {
+    /**
+     * Reason with short description.
+     *
+     * @package    block_gearup
+     * @copyright  2026 Frédéric Massart
+     * @author     Frédéric Massart <fred@branchup.tech>
+     * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+     */
+    interface reason_with_short_description extends \block_xp\local\reason\reason_with_short_description {
+    }
+} else if (interface_exists('local_xp\local\reason\reason_with_short_description')) {
     /**
      * Reason.
      *

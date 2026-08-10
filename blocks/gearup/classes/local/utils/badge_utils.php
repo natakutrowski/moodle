@@ -16,27 +16,35 @@
 //
 // https://levelup.plus
 
-namespace block_gearup\local\xp;
+namespace block_gearup\local\utils;
 
 /**
- * Achievement unlocked reason.
+ * Badge utils.
  *
  * @package    block_gearup
- * @copyright  2021 Frédéric Massart
+ * @copyright  2026 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class achievement_unlocked_reason extends mission_completed_reason {
-
-    public function get_short_description() {
-        return get_string('achievementunlocked', 'block_gearup');
-    }
+class badge_utils {
 
     /**
-     * @deprecated Since XP 20.
+     * Process manual award.
+     *
+     * @param int $userid Recipient user id.
+     * @param int $issuerid Issuer user id.
+     * @param int $roleid Issuer role id.
+     * @param int $badgeid Badge id.
      */
-    public static function get_type() {
-        return __CLASS__;
-    }
+    public static function process_manual_award(int $userid, int $issuerid, int $roleid, int $badgeid): void {
+        global $CFG;
 
+        if (is_callable([\core_badges\award_manager::class, 'process_manual_award'])) {
+            \core_badges\award_manager::process_manual_award($userid, $issuerid, $roleid, $badgeid);
+            return;
+        }
+
+        require_once($CFG->dirroot . '/badges/lib/awardlib.php');
+        \process_manual_award($userid, $issuerid, $roleid, $badgeid);
+    }
 }

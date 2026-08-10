@@ -27,10 +27,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version      = 2025100500;
-$plugin->requires     = 2022112800;   // Moodle 4.1.0.
+$plugin->version      = 2026070700;
+$plugin->requires     = 2024100700;   // Moodle 4.5.0.
 $plugin->component    = 'block_gearup';
 $plugin->maturity     = MATURITY_STABLE;
-$plugin->release      = '1.8.0';
-$plugin->supported    = [401, 501];
+$plugin->release      = '1.9.1';
+$plugin->supported    = [405, 502];
 $plugin->dependencies = [];

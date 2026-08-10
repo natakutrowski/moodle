@@ -112,6 +112,7 @@ class backup_gearup_block_structure_step extends backup_block_structure_step {
         // File annotations.
         $gearup->annotate_files('block_gearup', 'questnarrators', null, $coursecontext->id);
         $gearup->annotate_files('block_gearup', 'achievementbadges', null, $coursecontext->id);
+        $mission->annotate_files('block_gearup', 'speech', 'id', $coursecontext->id);
 
         // Persistent joy.
         $mission->annotate_ids('user', 'usermodified');
