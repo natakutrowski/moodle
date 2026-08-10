@@ -55,6 +55,12 @@ class shortcodes {
     public static function quest_discovery($shortcode, $args, $content, $env, $next) {
         global $PAGE, $USER;
 
+        if (!$USER->id || isguestuser()) {
+            return '';
+        } else if (!di::get('lm')->is_active()) {
+            return '';
+        }
+
         $mh = di::get('mission_helper');
         $mr = di::get('repository');
         $apf = di::get('access_permissions_factory');
@@ -164,6 +170,8 @@ class shortcodes {
         global $PAGE, $USER;
 
         if (!$USER->id || isguestuser()) {
+            return '';
+        } else if (!di::get('lm')->is_active()) {
             return '';
         }
 

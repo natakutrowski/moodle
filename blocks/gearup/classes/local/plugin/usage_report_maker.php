@@ -43,7 +43,7 @@ use core_plugin_manager;
 class usage_report_maker {
 
     /** @var string Hash. */
-    protected $lkh = '40ac2286bd28e3aca1d2232437465f4efd4fc559';
+    protected $lkh = '0ed5df37d5bff33da1bac236df52ebcadddf23c3';
 
     /**
      * Constructor.

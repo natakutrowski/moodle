@@ -285,6 +285,36 @@ final class backup_test extends base_testcase {
     }
 
     /**
+     * Test.
+     */
+    public function test_restore_speech_files(): void {
+        global $DB;
+
+        $dg = $this->getDataGenerator();
+        $gudg = $this->generator;
+
+        $c1 = $dg->create_course();
+        $c1ctx = context_course::instance($c1->id);
+
+        $this->setAdminUser();
+        $this->add_block_to_course($c1->id);
+        $mission = $gudg->create_quest(['contextid' => $c1ctx->id]);
+
+        $this->generator->create_speech_file($mission, 'description', 0);
+
+        $backupid = $this->backup($c1);
+        $newid = restore_dbops::create_new_course($c1->fullname . 'new', $c1->shortname . 'new', $c1->category);
+        $newctx = context_course::instance($newid);
+        $this->restore($backupid, $newid, backup::TARGET_NEW_COURSE, ['users' => false]);
+
+        $fs = get_file_storage();
+        $newmissionid = $DB->get_field('block_gearup_mission', 'id', ['contextid' => $newctx->id], MUST_EXIST);
+        $file = $fs->get_file($newctx->id, 'block_gearup', 'speech', $newmissionid, '/description/', '0');
+
+        $this->assertNotFalse($file);
+    }
+
+    /**
      * Count mission instances in context.
      *
      * @param int $contextid The context ID.

@@ -26,7 +26,7 @@
 
 import $ from 'jquery';
 import ModalEvents from 'core/modal_events';
-import ModalFactory from 'core/modal_factory';
+import ModalSaveCancel from 'core/modal_save_cancel';
 import Pending from 'core/pending';
 import * as Compat from 'block_gearup/compat';
 import * as RoleButton from 'block_gearup/role_button';
@@ -71,12 +71,11 @@ export async function launchInModal(mod, propsId, modalConfig = {}, originatingN
 export async function launchInModalWithProps(mod, props, modalConfig = {}, originatingNode) {
     const id = `gu-react-launcher-in-modal-${Date.now()}`;
     const pendingBody = $.Deferred();
-    const modal = await ModalFactory.create(Compat.patchModalConfig({
-        type: ModalFactory.types.SAVE_CANCEL,
+    const modal = await Compat.createModal({
         removeOnClose: true,
         ...modalConfig,
         body: pendingBody,
-    }));
+    }, ModalSaveCancel);
     modal.getRoot().addClass('block_gearup');
 
     // Keep the React node height in sync with the modal body to avoid for the modal

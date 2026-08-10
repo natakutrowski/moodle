@@ -1,6 +1,26 @@
 Changelog
 =========
 
+v1.9.1
+------
+
+Bug fixes
+
+- Modal forms did not open as expected in Moodle 4.5 to 5.1
+
+v1.9.0
+------
+
+Bug fixes
+
+- Generated links for XP logs now point to the correct locations
+- Support inclusion of voice lines in the backup and restore
+
+Technical changes
+
+- Compatibility with Moodle 5.2
+- Raised minimum required version to Moodle 4.5
+
 v1.8.0
 ------
 

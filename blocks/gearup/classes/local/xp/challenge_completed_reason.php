@@ -16,15 +16,6 @@
 //
 // https://levelup.plus
 
-/**
- * Challenge completed reason.
- *
- * @package    block_gearup
- * @copyright  2023 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace block_gearup\local\xp;
 
 /**
@@ -41,6 +32,9 @@ class challenge_completed_reason extends mission_completed_reason {
         return get_string('challengecompleted', 'block_gearup');
     }
 
+    /**
+     * @deprecated Since XP 20.
+     */
     public static function get_type() {
         return __CLASS__;
     }

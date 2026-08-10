@@ -41,6 +41,7 @@ use block_gearup\local\mission\mission;
 use block_gearup\local\mission\mission_instance;
 use block_gearup\local\outcome\outcome;
 use block_gearup\local\outcome\persisted_outcome;
+use block_gearup\local\utils\badge_utils;
 use context;
 use core_user;
 use lang_string;
@@ -49,7 +50,6 @@ use moodle_exception;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/badgeslib.php');
-require_once($CFG->dirroot . '/badges/lib/awardlib.php');
 
 // phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
 
@@ -155,7 +155,7 @@ class award_badge implements
 
         // Award the badge by each role.
         foreach ($roleids as $roleid) {
-            process_manual_award($userid, $issuerid, $roleid, $badgeid);
+            badge_utils::process_manual_award($userid, $issuerid, $roleid, $badgeid);
         }
 
         // Finally, trigger an update.

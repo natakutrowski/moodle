@@ -73,11 +73,11 @@ class xp implements has_availability_info, has_availability_info_for_context, ha
         $reason = null;
         if ($store instanceof state_store_with_reason) {
             if ($mh->is_a_quest($missioninst)) {
-                $reason = new quest_completed_reason($missioninst->get_id());
+                $reason = quest_completed_reason::from_mission_instance($missioninst);
             } else if ($mh->is_an_achievement($missioninst)) {
-                $reason = new achievement_unlocked_reason($missioninst->get_id());
+                $reason = achievement_unlocked_reason::from_mission_instance($missioninst);
             } else if ($mh->is_a_challenge($missioninst)) {
-                $reason = new challenge_completed_reason($missioninst->get_id());
+                $reason = challenge_completed_reason::from_mission_instance($missioninst);
             }
 
             // Fail-safe due in relation to block_gearup\local\xp\compat\reason.

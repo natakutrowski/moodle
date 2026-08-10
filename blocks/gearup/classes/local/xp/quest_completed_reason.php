@@ -41,6 +41,9 @@ class quest_completed_reason extends mission_completed_reason {
         return get_string('questcompleted', 'block_gearup');
     }
 
+    /**
+     * @deprecated Since XP 20.
+     */
     public static function get_type() {
         return __CLASS__;
     }

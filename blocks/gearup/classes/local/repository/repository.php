@@ -234,9 +234,9 @@ class repository {
         if ($context) {
             $filters['contextid'] = $context->id;
         }
-        return array_map(function ($model) {
+        return array_values(array_map(function ($model) {
             return $this->make_mission_from_model($model);
-        }, mission_model::get_records($filters, 'title', 'ASC', $offset, $limit));
+        }, mission_model::get_records($filters, 'title', 'ASC', $offset, $limit)));
     }
 
     /**
@@ -263,9 +263,9 @@ class repository {
 
     public function get_assigners(int $missionid) {
         $filters = ['missionid' => $missionid];
-        return array_map(function ($model) {
+        return array_values(array_map(function ($model) {
             return new persisted_assigner($model, $this->assignertyperesolver);
-        }, assigner_model::get_records($filters, 'id', 'ASC'));
+        }, assigner_model::get_records($filters, 'id', 'ASC')));
     }
 
     /**
@@ -402,9 +402,9 @@ class repository {
         if ($context) {
             $filters['contextid'] = $context->id;
         }
-        return array_map(function ($model) {
+        return array_values(array_map(function ($model) {
             return $this->make_mission_from_model($model);
-        }, mission_model::get_records($filters, 'title', 'ASC', $offset, $limit));
+        }, mission_model::get_records($filters, 'title', 'ASC', $offset, $limit)));
     }
 
     /**
@@ -871,9 +871,9 @@ class repository {
      */
     public function get_objectives(int $missionid) {
         $filters = ['missionid' => $missionid];
-        return array_map(function ($model) {
+        return array_values(array_map(function ($model) {
             return new persisted_objective($model, $this->objtyperesolver);
-        }, objective_model::get_records($filters, 'id', 'ASC'));
+        }, objective_model::get_records($filters, 'id', 'ASC')));
     }
 
     /**
@@ -888,9 +888,9 @@ class repository {
         if ($visibleonly) {
             $filters['visibility'] = 1;
         }
-        return array_map(function ($model) {
+        return array_values(array_map(function ($model) {
             return new persisted_outcome($model, $this->outcometyperesolver);
-        }, outcome_model::get_records($filters, 'id', 'ASC'));
+        }, outcome_model::get_records($filters, 'id', 'ASC')));
     }
 
     /**
@@ -1044,9 +1044,9 @@ class repository {
         if ($context) {
             $filters['contextid'] = $context->id;
         }
-        return array_map(function ($model) {
+        return array_values(array_map(function ($model) {
             return $this->make_mission_from_model($model);
-        }, mission_model::get_records($filters, 'title', 'ASC', $offset, $limit));
+        }, mission_model::get_records($filters, 'title', 'ASC', $offset, $limit)));
     }
 
     /**

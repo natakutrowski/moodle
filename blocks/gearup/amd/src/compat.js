@@ -25,12 +25,22 @@
  */
 
 import Modal from 'core/modal';
-import ModalFactory from 'core/modal_factory';
 import ModalForm from 'core_form/modalform';
-import ModalRegistry from 'core/modal_registry';
 import DynamicForm from 'core_form/dynamicform';
 
 const IS_MODAL_TYPE_DEPRECATED = 'create' in Modal;
+
+/**
+ * Load an AMD module.
+ *
+ * @param {String} name
+ * @returns {Promise<*>}
+ */
+const getModuleAsync = (name) => {
+    return new Promise((resolve, reject) => {
+        require([name], resolve, reject);
+    });
+};
 
 /**
  * Create a modal.
@@ -47,18 +57,39 @@ export function createModal(config, ModalClass = Modal) {
         return ModalClass.create(config);
     }
 
-    const typeName = config.type ?? config.template;
-    let type = ModalRegistry.get(typeName);
-    if (!type) {
-        ModalRegistry.register(typeName, ModalClass, config.template);
-    }
+    return Promise.all([
+        getModuleAsync('core/modal_factory'),
+        getModuleAsync('core/modal_registry'),
+        getModuleAsync('core/modal_save_cancel'),
+        getModuleAsync('core/modal_cancel'),
+    ]).then(([ModalFactory, ModalRegistry, ModalSaveCancel, ModalCancel]) => {
+        let typeName = config.type ?? config.template;
 
-    return ModalFactory.create({
-        ...config,
-        type: typeName,
+        // If config does not provide the type or template, guess the type and template from the class object.
+        let legacyName = 'DEFAULT';
+        let legacyTemplate = 'core/modal';
+        if (!typeName) {
+            if (ModalClass === ModalSaveCancel) {
+                legacyName = 'SAVE_CANCEL';
+                legacyTemplate = 'core/modal_save_cancel';
+            } else if (ModalClass === ModalCancel) {
+                legacyName = 'CANCEL';
+                legacyTemplate = 'core/modal_cancel';
+            }
+        }
+
+        typeName = typeName ?? legacyName;
+        if (!ModalRegistry.get(typeName)) {
+            const templateName = config.template ?? legacyTemplate;
+            ModalRegistry.register(typeName, ModalClass, templateName);
+        }
+
+        return ModalFactory.create({
+            ...config,
+            type: typeName,
+        });
     });
 }
-
 
 /**
  * Get form node.
@@ -97,26 +128,22 @@ export function markFormSubmitted(node) {
 }
 
 /**
- * Patch a modal config to be compatible.
+ * Register a legacy modal type.
  *
- * This is mostly a mitigation between the deprecation of the 'type' (see MDL-78324),
- * and a bug in Moodle 4.3 that does not load the right template (MDL-81339).
- *
- * In time, we will have to convert away from using the type altogether in favour
- * of a separate modal module for each type of modal, see MDL-79182 for final deprecation.
- *
- * @param {Object} modalConfig The config.
- * @returns {Object}
+ * @param {String} type
+ * @param {Function} ModalClass
+ * @param {String} template
+ * @returns {Promise}
  */
-export function patchModalConfig(modalConfig) {
+export function registerModalType(type, ModalClass, template) {
     if (IS_MODAL_TYPE_DEPRECATED) {
-        // We hardcode the DEFAULT name to avoid importing the factory module.
-        const type = modalConfig.type || 'DEFAULT';
-        const {template} = ModalRegistry.get(type);
-        return {
-            ...modalConfig,
-            template, // Force the template declaration due to MDL-81339 affecting custom templates with built-in modules.
-        };
+        return Promise.resolve();
     }
-    return modalConfig;
+
+    return getModuleAsync('core/modal_registry').then((ModalRegistry) => {
+        if (!ModalRegistry.get(type)) {
+            ModalRegistry.register(type, ModalClass, template);
+        }
+        return;
+    });
 }

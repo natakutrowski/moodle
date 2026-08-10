@@ -386,30 +386,12 @@ class user_utils {
      * @return array Where keys are user properties, and values are labels.
      */
     public static function get_visible_identity_fields(context $context) {
-        global $CFG;
-
-        $identityfields = [];
-        if (has_capability('moodle/site:viewuseridentity', $context)) {
-
-            // Defining which fields are to be hidden.
-            $hiddenidentityfields = explode(',', $CFG->hiddenuserfields);
-            $isincourse = (bool) $context->get_course_context(false);
-            if (!$isincourse && has_capability('moodle/user:viewhiddendetails', $context)) {
-                $hiddenidentityfields = [];
-            } else if (!$isincourse && has_capability('moodle/course:viewhiddenuserfields', $context)) {
-                $hiddenidentityfields = [];
-            }
-
-            // Gathering the additional identity fields.
-            $showuseridentity = explode(',', $CFG->showuseridentity);
-            $identityfields = array_diff_key(array_intersect_key([
-                'username' => get_string('username', 'core'),
-                'idnumber' => get_string('idnumber', 'core'),
-                'email' => get_string('email', 'core'),
-            ], array_flip($showuseridentity)), array_flip($hiddenidentityfields));
-        }
-
-        return $identityfields;
+        $identityfields = fields::get_identity_fields($context, false);
+        return array_intersect_key([
+            'username' => get_string('username', 'core'),
+            'idnumber' => get_string('idnumber', 'core'),
+            'email' => get_string('email', 'core'),
+        ], array_flip($identityfields));
     }
 
 }

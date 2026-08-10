@@ -135,7 +135,8 @@ class watch_video implements has_availability_info, type, type_with_supporting_u
 
         // Filter out if context is not matching the activity.
         if (!empty($config->cmid) && ($action->get_context()->contextlevel != CONTEXT_MODULE
-                || $config->cmid != $action->get_context()->instanceid)) {
+                || $config->cmid != $action->get_context()->instanceid)
+        ) {
             return false;
         }
 

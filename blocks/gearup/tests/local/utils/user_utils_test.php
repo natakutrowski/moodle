@@ -16,21 +16,11 @@
 //
 // https://levelup.plus
 
-/**
- * Testcase.
- *
- * @package    block_gearup
- * @copyright  2025 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace block_gearup\local\utils;
 
 use block_gearup\local\utils\user_utils;
 use block_gearup\tests\base_testcase;
 use context_course;
-use RecursiveArrayIterator;
 
 /**
  * Testcase.
@@ -402,6 +392,105 @@ final class user_utils_test extends base_testcase {
         }, $expected));
         sort($expectedids);
         $this->assert_get_group_select_options_group_ids($course, $user, $expectedids);
+    }
+
+    /**
+     * Data provider for testing get_visible_identity_fields.
+     *
+     * @return array
+     */
+    public static function get_visible_identity_fields_provider(): array {
+        return [
+            'no identity permission' => [
+                'showuseridentity' => 'username,idnumber,email',
+                'hiddenuserfields' => '',
+                'viewidentity' => false,
+                'viewhidden' => false,
+                'expected' => [],
+            ],
+            'configured username only' => [
+                'showuseridentity' => 'username',
+                'hiddenuserfields' => '',
+                'viewidentity' => true,
+                'viewhidden' => false,
+                'expected' => ['username'],
+            ],
+            'all configured fields' => [
+                'showuseridentity' => 'username,idnumber,email',
+                'hiddenuserfields' => '',
+                'viewidentity' => true,
+                'viewhidden' => false,
+                'expected' => ['username', 'idnumber', 'email'],
+            ],
+            'hidden fields without permission' => [
+                'showuseridentity' => 'username,idnumber,email',
+                'hiddenuserfields' => 'idnumber,email',
+                'viewidentity' => true,
+                'viewhidden' => false,
+                'expected' => ['username'],
+            ],
+            'hidden fields with permission' => [
+                'showuseridentity' => 'username,idnumber,email',
+                'hiddenuserfields' => 'idnumber,email',
+                'viewidentity' => true,
+                'viewhidden' => true,
+                'expected' => ['username', 'idnumber', 'email'],
+            ],
+            'unsupported configured field ignored' => [
+                'showuseridentity' => 'username,department,email',
+                'hiddenuserfields' => '',
+                'viewidentity' => true,
+                'viewhidden' => false,
+                'expected' => ['username', 'email'],
+            ],
+        ];
+    }
+
+    /**
+     * Test get_visible_identity_fields method.
+     *
+     * @dataProvider get_visible_identity_fields_provider
+     * @covers \block_gearup\local\utils\user_utils::get_visible_identity_fields
+     * @param string $showuseridentity
+     * @param string $hiddenuserfields
+     * @param bool $viewidentity
+     * @param bool $viewhidden
+     * @param array $expected
+     */
+    public function test_get_visible_identity_fields(
+        string $showuseridentity,
+        string $hiddenuserfields,
+        bool $viewidentity,
+        bool $viewhidden,
+        array $expected
+    ): void {
+        $dg = $this->getDataGenerator();
+        $course = $dg->create_course();
+        $context = context_course::instance($course->id);
+        $user = $dg->create_user();
+        $roleid = $dg->create_role();
+        set_config('showuseridentity', $showuseridentity);
+        set_config('hiddenuserfields', $hiddenuserfields);
+
+        $dg->enrol_user($user->id, $course->id);
+        $dg->role_assign($roleid, $user->id, $context->id);
+        if ($viewidentity) {
+            assign_capability('moodle/site:viewuseridentity', CAP_ALLOW, $roleid, $context->id, true);
+        }
+        if ($viewhidden) {
+            assign_capability('moodle/course:viewhiddenuserfields', CAP_ALLOW, $roleid, $context->id, true);
+        }
+        accesslib_clear_all_caches_for_unit_testing();
+        $this->setUser($user);
+
+        $labels = [
+            'username' => get_string('username', 'core'),
+            'idnumber' => get_string('idnumber', 'core'),
+            'email' => get_string('email', 'core'),
+        ];
+        $expectedlabels = array_intersect_key($labels, array_flip($expected));
+
+        $this->assertEquals($expectedlabels, user_utils::get_visible_identity_fields($context));
     }
 
     /**

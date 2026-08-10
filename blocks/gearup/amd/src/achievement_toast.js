@@ -32,9 +32,7 @@ import {registerClick} from 'block_gearup/role_button';
 import {ws} from 'block_gearup/utils';
 import * as Str from 'core/str';
 import * as Compat from 'block_gearup/compat';
-import ModalFactory from 'core/modal_factory';
 import ModalEvents from 'core/modal_events';
-import ModalRegistry from 'core/modal_registry';
 import Modal from 'core/modal';
 import {throwCelebrationConfettis, throwRandomConfettis} from 'block_gearup/confetti-lazy';
 
@@ -53,10 +51,6 @@ let registeredOnWindowFocus = false;
 let windowHasFocus = true;
 
 document.body.appendChild(rootContainer);
-
-// Modal registration.
-// TODO Remove in favour of individual module, see MDL-79182.
-ModalRegistry.register('block_gearup_achievement_celebration', Modal, 'block_gearup/achievements/modal_celebration');
 
 // Trigger pre-loading.
 Str.get_strings([
@@ -77,11 +71,11 @@ async function openModal(inst) {
     pause = true;
 
     const body = Templates.render('block_gearup/achievements/modal_body', inst);
-    const modal = await ModalFactory.create(Compat.patchModalConfig({
-        type: 'block_gearup_achievement_celebration',
+    const modal = await Compat.createModal({
+        template: 'block_gearup/achievements/modal_celebration',
         body: body,
         title: Str.get_string('achievementunlockedexcl', 'block_gearup')
-    }));
+    }, Modal);
     modal.setRemoveOnClose(true);
     modal.registerCloseOnCancel();
 

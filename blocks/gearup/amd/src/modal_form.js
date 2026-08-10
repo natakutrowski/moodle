@@ -26,18 +26,13 @@
 
 import * as Str from 'core/str';
 import Notification from 'core/notification';
-import ModalFactory from 'core/modal_factory';
 import ModalSaveCancel from 'core/modal_save_cancel';
 import ModalEvents from 'core/modal_events';
-import ModalRegistry from 'core/modal_registry';
 import * as Compat from 'block_gearup/compat';
 import ModalForm from 'core_form/modalform';
 import {smartRefreshFromNode} from 'block_gearup/refreshable';
 import * as RoleButton from 'block_gearup/role_button';
 import {extractNodeData} from 'block_gearup/utils';
-
-// TODO Remove in favour of individual module, see MDL-79182.
-ModalRegistry.register('block_gearup_form', ModalSaveCancel, 'block_gearup/modal_form');
 
 const getButton = (modalForm, action) => {
     const saveBtnJq = modalForm.modal.getFooter().find(modalForm.modal.getActionSelector(action));
@@ -49,7 +44,7 @@ const getButton = (modalForm, action) => {
  *
  * @param {Node} node The node.
  */
-function open(node) {
+async function open(node) {
     const formClass = node.dataset.formClass;
     const formArgs = extractNodeData(node, 'formArgs');
     const modalConfig = extractNodeData(node, 'modal');
@@ -62,10 +57,10 @@ function open(node) {
         }
     }
 
-    const finalModalConfig = Compat.patchModalConfig({
-        type: 'block_gearup_form',
+    const finalModalConfig = {
+        template: 'block_gearup/modal_form',
         title: modalConfig.title,
-    });
+    };
     if ('large' in modalConfig) {
         finalModalConfig.large = modalConfig.large === 'true';
     }
@@ -74,7 +69,8 @@ function open(node) {
         formClass: formClass,
         args: formArgs,
         returnFocus: node,
-        modalConfig: finalModalConfig
+        modalConfig: finalModalConfig,
+        moduleName: 'core/modal_save_cancel',
     });
     modalForm.addEventListener(modalForm.events.LOADED, () => {
         const root = modalForm.modal.getRoot();
@@ -109,8 +105,7 @@ function open(node) {
             deleteBtn.style.display = '';
             deleteBtn.addEventListener('click', () => {
 
-                ModalFactory.create({
-                    type: ModalFactory.types.SAVE_CANCEL,
+                Compat.createModal({
                     body: Str.get_string('reallydeletethis', 'block_gearup'),
                     title: Str.get_string('confirm', 'core'),
                     buttons: {
@@ -118,8 +113,7 @@ function open(node) {
                         cancel: Str.get_string('cancel', 'core')
                     },
                     removeOnClose: true,
-
-                }).then((modal) => {
+                }, ModalSaveCancel).then((modal) => {
                     modal.getFooter().find(modal.getActionSelector('save'))[0].classList.add('btn-danger');
                     modal.getRoot().on(ModalEvents.save, () => {
 

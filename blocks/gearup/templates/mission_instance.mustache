@@ -242,20 +242,19 @@
     {{/missioninst}}
 </div>
 {{#js}}
-require(['core/str', 'core/modal_factory', 'core/modal_events', 'block_gearup/role_button', 'block_gearup/modal_form',
-    'block_gearup/compat'], function(Str, ModalFactory, ModalEvents, RoleButton, ModalForm, Compact) {
+require(['core/str', 'core/modal_events', 'core/modal_save_cancel', 'block_gearup/role_button', 'block_gearup/compat'],
+    function(Str, ModalEvents, ModalSaveCancel, RoleButton, Compat) {
 
     RoleButton.delegateClick('#mission-inst-{{ uniqid }}', '[data-action=confirm-url]', function(node) {
         var url = node.dataset.url;
         if (!url) {
             return;
         }
-        ModalFactory.create(Compact.patchModalConfig({
-            type: ModalFactory.types.SAVE_CANCEL,
+        Compat.createModal({
             title: Str.get_string('confirm', 'core'),
             body: Str.get_string('areyousure', 'core'),
             removeOnClose: true,
-        })).then(function(modal) {
+        }, ModalSaveCancel).then(function(modal) {
                 modal.setSaveButtonText(Str.get_string('confirm', 'core'));
                 modal.getRoot().on(ModalEvents.save, function() {
                     document.location.href = url;
