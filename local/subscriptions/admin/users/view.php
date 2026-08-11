@@ -24,27 +24,26 @@ $context = AdminSecurity::require(
     Capabilities::VIEW_USERS
 );
 
-$id = required_param(
-    'id',
-    PARAM_INT
-);
+$id = optional_param('id', 0, PARAM_INT);
+$email = optional_param('email', '', PARAM_EMAIL);
 
+if ($id <= 0 && $email === '') {
+    throw new moodle_exception('invalidparameter');
+}
+
+$urlparams = $id > 0 ? ['id' => $id] : ['email' => $email];
 $url = new moodle_url(
-    subscription_config::
-        admin_user_view_page(),
-    [
-        'id' => $id,
-    ]
+    subscription_config::admin_user_view_page(),
+    $urlparams
 );
 
 $profile = null;
 $historicalprofile = null;
 
 try {
-    $profile =
-        UserProfileService::load(
-            $id
-        );
+    $profile = $id > 0
+        ? UserProfileService::load($id)
+        : UserProfileService::load_by_email($email);
 } catch (
     UserProfileNotFoundException $exception
 ) {
@@ -149,9 +148,11 @@ try {
         exit;
     }
 
-    $historicalprofile =
-        HistoricalUserProfileService::create()
-            ->load($id);
+    if ($id > 0) {
+        $historicalprofile =
+            HistoricalUserProfileService::create()
+                ->load($id);
+    }
 }
 
 if ($historicalprofile !== null) {
@@ -161,13 +162,20 @@ if ($historicalprofile !== null) {
         $historicalprofile->userid
     );
 } else {
+    $displayname = trim(fullname($profile->user));
+    if ($displayname === '') {
+        $displayname = (string)($profile->user->email ?? '');
+    }
+
     $pagetitle =
         get_string(
-            'crm_user_profile',
+            !empty($profile->iscommerceguest)
+                ? 'crm_commerce_guest_profile'
+                : 'crm_user_profile',
             'local_subscriptions'
         ) .
         ' - ' .
-        fullname($profile->user);
+        $displayname;
 }
 
 CrmPageConfigurator::configure(
@@ -184,7 +192,7 @@ CrmPageConfigurator::configure(
 /*
  * The editable workspace is only available for active users.
  */
-if ($historicalprofile === null) {
+if ($historicalprofile === null && empty($profile->iscommerceguest)) {
     $PAGE->requires->js_call_amd(
         'local_subscriptions/workspace_edit_mode',
         'init'
@@ -278,14 +286,12 @@ if ($historicalprofile !== null) {
     );
 } else {
     echo CrmPageHeader::render(
-        get_string(
-            'crm_user_profile',
-            'local_subscriptions'
-        ),
-        get_string(
-            'crm_user_profile_help_description',
-            'local_subscriptions'
-        ),
+        !empty($profile->iscommerceguest)
+            ? get_string('crm_commerce_guest_profile', 'local_subscriptions')
+            : get_string('crm_user_profile', 'local_subscriptions'),
+        !empty($profile->iscommerceguest)
+            ? get_string('crm_commerce_guest_profile_description', 'local_subscriptions')
+            : get_string('crm_user_profile_help_description', 'local_subscriptions'),
         HelpContext::USER_PROFILE
     );
 

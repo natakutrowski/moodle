@@ -144,6 +144,9 @@
                 </div>
                 <form method="get" action="{{producturl}}" class="commerce-storefront__currency-form commerce-product-cta__currency-form">
                     <input type="hidden" name="sku" value="{{sku}}">
+                    {{#navigationparams}}
+                        <input type="hidden" name="{{name}}" value="{{value}}">
+                    {{/navigationparams}}
                     {{> local_subscriptions/storefront/currency_selector }}
                 </form>
             {{/owned}}

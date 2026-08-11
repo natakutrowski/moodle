@@ -60,7 +60,7 @@ final class CommerceStorefrontPageEditor {
         $merchandising = (new CommerceStorefrontMerchandisingResolver())->resolve($metadata);
         $promotioneur = $merchandising->get_promotion('EUR');
         $promotionrub = $merchandising->get_promotion('RUB');
-        $experience = (new CommerceStorefrontExperienceResolver())->resolve($metadata, $product->get_type());
+        $experience = (new CommerceStorefrontExperienceResolver())->resolve($metadata, $product->get_type(), $language);
 
         $shellmode = strtolower(trim((string)($configuration['shell_mode'] ?? 'standard')));
         if (!in_array($shellmode, ['standard', 'fullwidth', 'landing', 'immersive'], true)) {
@@ -614,14 +614,23 @@ final class CommerceStorefrontPageEditor {
         }
         $existingstorefront['recommendations'] = $this->parse_sku_lines((string)($submitted['recommendations'] ?? ''));
 
+        $quickfacts = $this->parse_items((string)($submitted['quickfacts'] ?? ''), 'value', 'label');
+        $existingglobalexperience = is_array($existingstorefront['experience'] ?? null)
+            ? $existingstorefront['experience']
+            : [];
         $globalexperience = [
             'group' => $this->clean_group((string)($submitted['group'] ?? 'auto')),
             'trust' => $this->clean_trust((array)($submitted['trust'] ?? [])),
-            'quickfacts' => $this->parse_items((string)($submitted['quickfacts'] ?? ''), 'value', 'label'),
+            // Keep the historical/default quick facts stable when editing another locale.
+            'quickfacts' => $language === 'fr'
+                ? $quickfacts
+                : (is_array($existingglobalexperience['quickfacts'] ?? null)
+                    ? $existingglobalexperience['quickfacts']
+                    : []),
         ];
         $existingstorefront['experience'] = $globalexperience;
         $existingstorefront['locales'][$language]['experience'] = [
-            'quickfacts' => $globalexperience['quickfacts'],
+            'quickfacts' => $quickfacts,
         ];
 
         $existingstorefront['merchandising'] = [
@@ -771,10 +780,12 @@ final class CommerceStorefrontPageEditor {
             if ($line === '') {
                 continue;
             }
-            [$left, $right] = array_pad(explode('|||', $line, 2), 2, '');
+            $separator = str_contains($line, '|||') ? '|||' : '|';
+            [$left, $right] = array_pad(explode($separator, $line, 2), 2, '');
             $left = trim($left);
-            if ($left !== '') {
-                $items[] = [$leftkey => $left, $rightkey => trim($right)];
+            $right = trim($right);
+            if ($left !== '' && $right !== '') {
+                $items[] = [$leftkey => $left, $rightkey => $right];
             }
         }
         return $items;

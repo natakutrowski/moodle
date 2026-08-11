@@ -1168,14 +1168,30 @@ final class UserExplorerRenderer {
     ): array {
         $user = $viewmodel->user;
 
-        $identity =
-            AdminEntityLinks::user(
+        $displayname = trim(fullname($user));
+        if ($displayname === '') {
+            $displayname = (string)$user->email;
+        }
+
+        if (!empty($user->iscommerceguest)) {
+            $identitylink = html_writer::link(
+                new moodle_url(
+                    subscription_config::admin_user_view_page(),
+                    ['email' => (string)$user->email]
+                ),
+                s($displayname),
+                ['class' => 'crm-user-explorer-user-link']
+            );
+        } else {
+            $identitylink = AdminEntityLinks::user(
                 (int)$user->id,
-                s(fullname($user)),
-                [
-                    'class' => 'crm-user-explorer-user-link',
-                ]
-            ) .
+                s($displayname),
+                ['class' => 'crm-user-explorer-user-link']
+            );
+        }
+
+        $identity =
+            $identitylink .
             html_writer::div(
                 s((string)$user->email),
                 'crm-user-explorer-email'

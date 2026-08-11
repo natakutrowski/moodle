@@ -116,47 +116,53 @@ final class User360WorkspaceFactory {
             $profile
         );
 
-        self::register_intelligence(
-            $definition,
-            $profile
-        );
+        $iscommerceguest = !empty($profile?->iscommerceguest);
 
-        self::register_customer_success(
-            $definition,
-            $profile
-        );
+        if (!$iscommerceguest) {
+            self::register_intelligence(
+                $definition,
+                $profile
+            );
+
+            self::register_customer_success(
+                $definition,
+                $profile
+            );
+        }
 
         self::register_commercial(
             $definition,
             $profile
         );
 
-        self::register_courses(
-            $definition,
-            $profile
-        );
+        if (!$iscommerceguest) {
+            self::register_courses(
+                $definition,
+                $profile
+            );
 
-        self::register_notes(
-            $definition,
-            $profile
-        );
+            self::register_notes(
+                $definition,
+                $profile
+            );
 
-        if ($canviewinbox) {
-            self::register_inbox(
+            if ($canviewinbox) {
+                self::register_inbox(
+                    $definition,
+                    $profile
+                );
+            }
+
+            self::register_assistant(
+                $definition,
+                $profile
+            );
+
+            self::register_work_items(
                 $definition,
                 $profile
             );
         }
-
-        self::register_assistant(
-            $definition,
-            $profile
-        );        
-
-        self::register_work_items(
-            $definition,
-            $profile
-        );
 
         self::register_timeline(
             $definition,

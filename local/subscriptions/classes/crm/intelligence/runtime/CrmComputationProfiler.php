@@ -43,6 +43,11 @@ final class CrmComputationProfiler {
     ): void {
         global $CFG, $DB;
 
+        // PHPUnit treats profiler output as unexpected test output.
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST) {
+            return;
+        }
+
         if (
             empty($CFG->debug) ||
             $CFG->debug < DEBUG_DEVELOPER

@@ -156,7 +156,7 @@ if (class_exists(DOMDocument::class)) {
 
                 $newactions = [];
                 foreach (array_keys($skus) as $sku) {
-                    $producturl = (CommerceCustomerPublicUrlResolver::product($sku))->out(false);
+                    $producturl = (CommerceCustomerPublicUrlResolver::storefront($sku))->out(false);
                     if (!isset($existinghrefs[$producturl])) {
                         $newactions[] = [
                             'url' => $producturl,
@@ -528,7 +528,7 @@ if (class_exists(DOMDocument::class)) {
                     unset($params['sku']);
                     $anchor->setAttribute(
                         'href',
-                        \local_subscriptions\url\CommerceCustomerPublicUrlResolver::product(
+                        \local_subscriptions\url\CommerceCustomerPublicUrlResolver::storefront(
                             $sku,
                             $params
                         )->out(false)

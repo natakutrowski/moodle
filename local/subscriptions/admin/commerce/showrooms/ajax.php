@@ -153,7 +153,6 @@ try {
 
         case 'delete':
             $blockid = required_param('blockid', PARAM_INT);
-            $mediamanager->delete_block($blockid);
             $repository->delete_block($showroomid, $blockid);
             break;
 

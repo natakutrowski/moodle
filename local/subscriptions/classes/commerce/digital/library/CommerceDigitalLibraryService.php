@@ -191,12 +191,12 @@ final class CommerceDigitalLibraryService {
     }
 
     /**
-     * Resolve the canonical customer-facing product URL.
+     * Resolve the direct customer-facing product Storefront URL.
      *
-     * Mes Ressources must use exactly the same routing decision as the public
-     * Storefront: translated catalogue prefix, product type segment and the
-     * configured locale slug. The low-level customer resolver remains a safe
-     * fallback for incomplete or legacy catalogue records.
+     * Mes Ressources is an owned surface: its explicit product-page link must
+     * open the Storefront rather than restart public discovery in a Showroom.
+     * The low-level customer resolver remains a safe fallback for incomplete
+     * or legacy catalogue records.
      */
     private function public_product_url(string $sku): ?string {
         $sku = strtoupper(trim($sku));
@@ -211,10 +211,10 @@ final class CommerceDigitalLibraryService {
             true
         );
         if ($product !== null) {
-            return CommerceStorefrontUrlResolver::details($product)->out(false);
+            return CommerceStorefrontUrlResolver::direct_storefront($product)->out(false);
         }
 
-        return CommerceCustomerPublicUrlResolver::product($sku)->out(false);
+        return CommerceCustomerPublicUrlResolver::storefront($sku)->out(false);
     }
 
     private function downloads_from_native_access(

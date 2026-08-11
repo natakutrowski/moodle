@@ -18,6 +18,7 @@ use local_subscriptions\commerce\catalog\status\CommerceCatalogVisibility;
 use local_subscriptions\commerce\storefront\merchandising\CommerceStorefrontMerchandisingResolver;
 use local_subscriptions\commerce\storefront\merchandising\CommerceStorefrontPromotionResolver;
 use local_subscriptions\commerce\storefront\experience\CommerceStorefrontExperienceResolver;
+use local_subscriptions\commerce\storefront\localisation\CommerceStorefrontComponentLocaliser;
 use local_subscriptions\commerce\storefront\ownership\CommerceStorefrontOwnershipResolver;
 use local_subscriptions\commerce\storefront\readmodel\CommerceStorefrontListFilter;
 use local_subscriptions\commerce\storefront\readmodel\CommerceStorefrontListResult;
@@ -138,7 +139,7 @@ final class CommerceStorefrontRepository {
         $metadata = $summary->get_metadata();
         $merchandising = (new CommerceStorefrontMerchandisingResolver())->resolve($metadata);
         $promotionresolver = new CommerceStorefrontPromotionResolver();
-        $experience = (new CommerceStorefrontExperienceResolver())->resolve($metadata, $summary->get_type());
+        $experience = (new CommerceStorefrontExperienceResolver())->resolve($metadata, $summary->get_type(), $language);
         global $USER;
         $owned = isloggedin() && !isguestuser()
             ? (new CommerceStorefrontOwnershipResolver($this->db))->owns((int)$USER->id, $summary->get_sku())
@@ -216,7 +217,10 @@ final class CommerceStorefrontRepository {
             $description,
             $summary->get_type(),
             $prices,
-            $details->get_components(),
+            (new CommerceStorefrontComponentLocaliser($this->db))->localise(
+                $details->get_components(),
+                $language
+            ),
             count($prices) === 1,
             $this->cover_url($details),
             $details->get_legacy_references(),

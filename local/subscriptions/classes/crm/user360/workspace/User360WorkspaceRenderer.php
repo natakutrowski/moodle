@@ -70,27 +70,29 @@ final class User360WorkspaceRenderer {
             'crm-user360-workspace-summary-zone'
         );
 
-        $out .= html_writer::div(
-            User360PersonalizationRenderer::render(
-                $definition,
-                $layout
-            ),
-            'crm-user360-workspace-heading'
-        );
+        if (empty($profile->iscommerceguest)) {
+            $out .= html_writer::div(
+                User360PersonalizationRenderer::render(
+                    $definition,
+                    $layout
+                ),
+                'crm-user360-workspace-heading'
+            );
 
-        $out .= WorkspaceToolbarRenderer::render(
-            new WorkspaceToolbarState(
-                workspacekey:
-                    $definition->key,
+            $out .= WorkspaceToolbarRenderer::render(
+                new WorkspaceToolbarState(
+                    workspacekey:
+                        $definition->key,
 
-                hiddencount:
-                    $layout->hidden_count(),
+                    hiddencount:
+                        $layout->hidden_count(),
 
-                canreset: true,
+                    canreset: true,
 
-                cansave: true
-            )
-        );
+                    cansave: true
+                )
+            );
+        }
 
         $mainzone =
             WorkspaceRenderer::render_zone(

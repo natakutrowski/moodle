@@ -6,10 +6,50 @@ require_once(__DIR__ . '/../../config.php');
 
 use local_subscriptions\url\CommerceProductSlugService;
 use local_subscriptions\url\CommerceRouteRegistry;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomSlugService;
 
 $route = optional_param('route', '', PARAM_ALPHANUMEXT);
 $slug = optional_param('slug', '', PARAM_PATH);
 $category = optional_param('category', '', PARAM_PATH);
+
+$renderShowroom = static function (): never {
+    global $CFG, $DB, $PAGE, $OUTPUT, $USER, $SESSION;
+
+    try {
+        require(__DIR__ . '/showroom.php');
+    } catch (\moodle_exception $exception) {
+        if ($exception->errorcode !== 'commerce_showroom_not_found') {
+            throw $exception;
+        }
+
+        // Fail closed without exposing exception details publicly.
+        http_response_code(404);
+        $PAGE->set_context(context_system::instance());
+        $PAGE->set_url(new moodle_url(
+            '/local/subscriptions/public_router.php',
+            ['route' => CommerceRouteRegistry::SHOWROOM]
+        ));
+        $PAGE->set_pagelayout('standard');
+        $PAGE->set_title(get_string(
+            'commerce_showroom_not_found',
+            'local_subscriptions'
+        ));
+        $PAGE->set_heading(get_string(
+            'commerce_showroom_not_found',
+            'local_subscriptions'
+        ));
+
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string(
+            'commerce_showroom_not_found',
+            'local_subscriptions'
+        ));
+        echo $OUTPUT->footer();
+    }
+
+    exit;
+};
+
 
 if (in_array($route, ['terms', 'privacy'], true)) {
     $urls = \local_subscriptions\support\Region::policyUrls();
@@ -34,11 +74,32 @@ if ($route !== '') {
     }
 
     $target = CommerceRouteRegistry::target($route);
+
+    if ($route === CommerceRouteRegistry::SHOWROOM) {
+        $renderShowroom();
+    }
+
     require(__DIR__ . '/' . $target);
     exit;
 }
 
 if ($slug !== '') {
+    // J16S12 — dynamic top-level Showroom routing keeps the historical routing
+    // precedence of the old explicit .htaccess Showroom rules.
+    //
+    // Category product URLs (/digital/..., etc.) are never intercepted.
+    if ($category === '') {
+        $showroomkey = (
+            new CommerceShowroomSlugService($DB)
+        )->find_published_showroom_key($slug);
+
+        if ($showroomkey !== null) {
+            $_GET['showroomkey'] = $showroomkey;
+            $_REQUEST['showroomkey'] = $showroomkey;
+            $renderShowroom();
+        }
+    }
+
     $slugservice = new CommerceProductSlugService($DB);
     $sku = $slugservice->find_sku(
         $slug,
@@ -56,16 +117,17 @@ if ($slug !== '') {
         );
     }
 
-    if ($sku === null) {
-        throw new moodle_exception(
-            'commerce_route_not_found',
-            'local_subscriptions'
-        );
+    if ($sku !== null) {
+        $_GET['sku'] = $sku;
+        $_REQUEST['sku'] = $sku;
+        require(__DIR__ . '/storefront_product.php');
+        exit;
     }
-    $_GET['sku'] = $sku;
-    $_REQUEST['sku'] = $sku;
-    require(__DIR__ . '/storefront_product.php');
-    exit;
+
+    throw new moodle_exception(
+        'commerce_route_not_found',
+        'local_subscriptions'
+    );
 }
 
 throw new moodle_exception('commerce_route_not_found', 'local_subscriptions');

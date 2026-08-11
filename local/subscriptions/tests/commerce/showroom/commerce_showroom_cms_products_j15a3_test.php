@@ -16,7 +16,7 @@ final class commerce_showroom_cms_products_j15a3_test extends \advanced_testcase
         $this->resetAfterTest(true);
 
         $repository = new CommerceShowroomCmsRepository($DB);
-        $repository->save([
+        $showroomid = $repository->save([
             'showroomkey' => 'third-group-verbs',
             'status' => 'published',
             'name' => 'Verbes du 3e groupe',
@@ -30,6 +30,11 @@ final class commerce_showroom_cms_products_j15a3_test extends \advanced_testcase
             ], JSON_THROW_ON_ERROR),
             'settingsjson' => '{}',
         ], 2);
+        $repository->save_block($showroomid, [
+            'blocktype' => 'hero',
+            'enabled' => true,
+            'configjson' => '{}',
+        ], 2);
 
         $definition = (
             new CommerceShowroomPublishedDefinitionResolver($DB)
@@ -42,16 +47,28 @@ final class commerce_showroom_cms_products_j15a3_test extends \advanced_testcase
         ], $definition->get_products());
     }
 
-    public function test_draft_cms_products_do_not_override_public_registry(): void {
-        $definition = \local_subscriptions\commerce\showroom\CommerceShowroomRegistry::require(
-            \local_subscriptions\commerce\showroom\CommerceShowroomRegistry::THIRD_GROUP_VERBS
-        );
-        $products = $definition->get_products();
-        self::assertSame('COURSE_ACCESS.THIRD_GROUP_VERBS_COURSE', $products['course']);
-        self::assertSame('DIGITAL.VERBES-3E-GROUPE', $products['pdf']);
-        self::assertSame('BUNDLE.THIRD_GROUP_VERBS_BUNDLE', $products['bundle']);
+    public function test_draft_cms_showroom_is_not_publicly_resolved(): void {
+        global $DB;
+        $this->resetAfterTest(true);
 
+        $repository = new CommerceShowroomCmsRepository($DB);
+        $showroomid = $repository->save([
+            'showroomkey' => 'third-group-verbs',
+            'status' => 'draft',
+            'name' => 'Verbes du 3e groupe',
+            'template' => 'local_subscriptions/showroom/third_group_verbs',
+            'productsjson' => '{}',
+            'settingsjson' => '{}',
+        ], 2);
+        $repository->save_block($showroomid, [
+            'blocktype' => 'hero',
+            'enabled' => true,
+            'configjson' => '{}',
+        ], 2);
 
+        $this->expectException(\moodle_exception::class);
+        (new CommerceShowroomPublishedDefinitionResolver($DB))
+            ->require('third-group-verbs');
     }
 
     public function test_empty_published_role_can_remove_an_offer(): void {
@@ -60,7 +77,7 @@ final class commerce_showroom_cms_products_j15a3_test extends \advanced_testcase
         $this->resetAfterTest(true);
 
         $repository = new CommerceShowroomCmsRepository($DB);
-        $repository->save([
+        $showroomid = $repository->save([
             'showroomkey' => 'third-group-verbs',
             'status' => 'published',
             'name' => 'Verbes du 3e groupe',
@@ -73,6 +90,11 @@ final class commerce_showroom_cms_products_j15a3_test extends \advanced_testcase
                 'bundle' => 'BUNDLEA1VERBES',
             ], JSON_THROW_ON_ERROR),
             'settingsjson' => '{}',
+        ], 2);
+        $repository->save_block($showroomid, [
+            'blocktype' => 'hero',
+            'enabled' => true,
+            'configjson' => '{}',
         ], 2);
 
         $definition = (

@@ -59,11 +59,11 @@
                     {{/owneddownloads}}
                 </div>
             {{/hasowneddownloads}}
-            {{#showbacktoshop}}<a href="{{backurl}}" class="commerce-product-commerce-panel__back commerce-product-commerce-panel__back--owned btn btn-link mt-2">&larr; {{backlabel}}</a>{{/showbacktoshop}}
+            {{#showbacklink}}<a href="{{backurl}}" class="commerce-product-commerce-panel__back commerce-product-commerce-panel__back--owned btn btn-link mt-2">&larr; {{backlabel}}</a>{{/showbacklink}}
         {{/owned}}
         {{^owned}}
             <a href="{{carturl}}" class="btn btn-link w-100 mt-2">🛒 {{cartlabel}} ({{cartlinecount}}) · {{carttotalformatted}}</a>
-            {{#showbacktoshop}}<a href="{{backurl}}" class="commerce-product-commerce-panel__back btn btn-link w-100 mt-1">&larr; {{backlabel}}</a>{{/showbacktoshop}}
+            {{#showbacklink}}<a href="{{backurl}}" class="commerce-product-commerce-panel__back btn btn-link w-100 mt-1">&larr; {{backlabel}}</a>{{/showbacklink}}
         {{/owned}}
 
         {{#hasshowroom}}

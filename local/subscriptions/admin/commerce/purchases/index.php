@@ -112,10 +112,11 @@ $table = new html_table();
             : ($purchase->customer->email !== '' ? $purchase->customer->email : get_string('unknownuser'));
         $customerhtml = '';
 
-        if ($purchase->customer->userid !== null) {
-            $user360url = new moodle_url('/local/subscriptions/admin/users/view.php', [
-                'id' => $purchase->customer->userid,
-            ]);
+        if ($purchase->customer->userid !== null || $purchase->customer->email !== '') {
+            $user360params = $purchase->customer->userid !== null
+                ? ['id' => $purchase->customer->userid]
+                : ['email' => $purchase->customer->email];
+            $user360url = new moodle_url('/local/subscriptions/admin/users/view.php', $user360params);
             $customerhtml .= html_writer::div(
                 html_writer::link($user360url, s($customerlabel), ['class' => 'fw-semibold']),
                 'commerce-purchase-customer-name'

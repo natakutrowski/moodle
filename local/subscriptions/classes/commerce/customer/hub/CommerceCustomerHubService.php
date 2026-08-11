@@ -88,7 +88,7 @@ final class CommerceCustomerHubService {
     /** @return array<int,array<string,mixed>> */
     private function course_cards(int $userid): array {
         $result = [];
-        foreach (array_slice($this->courses->get_courses($userid), 0, 6) as $course) {
+        foreach ($this->courses->get_courses($userid) as $course) {
             $progress = $this->course_progress((int)$course->id, $userid);
             $imageurl = $this->course_image_url($course);
             $result[] = [

@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 use advanced_testcase;
 use local_subscriptions\commerce\catalog\presentation\CommerceProductDiscoveryUrlResolver;
 use local_subscriptions\commerce\showroom\CommerceShowroomProductLinkService;
+use local_subscriptions\url\CommerceCustomerPublicUrlResolver;
 
 final class commerce_product_discovery_routing_l2_l3_test extends advanced_testcase {
     private const SHOWROOM = 'third-group-verbs';
@@ -89,6 +90,45 @@ final class commerce_product_discovery_routing_l2_l3_test extends advanced_testc
 
         $disabled = $service->present($this->metadata('storefront', false), 'fr');
         self::assertFalse($disabled['hasshowroom']);
+    }
+
+    public function test_owned_customer_product_page_explicitly_bypasses_showroom_discovery(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $this->create_showroom('published');
+
+        $now = time();
+        $DB->insert_record('local_subs_commerce_product', (object)[
+            'sku' => 'COURSE_ACCESS.OWNED_NAV',
+            'type' => 'course_access',
+            'status' => 'active',
+            'name' => 'Owned navigation course',
+            'description' => '',
+            'metadatajson' => json_encode($this->metadata('showroom', true)),
+            'timecreated' => $now,
+            'timemodified' => $now,
+        ]);
+
+        $discovery = CommerceCustomerPublicUrlResolver::product(
+            'COURSE_ACCESS.OWNED_NAV'
+        )->out(false);
+        $storefront = CommerceCustomerPublicUrlResolver::storefront(
+            'COURSE_ACCESS.OWNED_NAV'
+        )->out(false);
+
+        self::assertMatchesRegularExpression(
+            '~/(?:verbes-3e-groupe|third-group-verbs|glagoly-tretey-gruppy)(?:\\?|$)~',
+            $discovery
+        );
+        self::assertStringContainsString(
+            '/local/subscriptions/storefront_product.php',
+            $storefront
+        );
+        self::assertDoesNotMatchRegularExpression(
+            '~/(?:verbes-3e-groupe|third-group-verbs|glagoly-tretey-gruppy)(?:\\?|$)~',
+            $storefront
+        );
     }
 
     public function test_showroom_offer_details_explicitly_bypass_discovery_routing(): void {

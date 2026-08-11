@@ -20,6 +20,20 @@ final class CommerceStorefrontPageResolver {
                 ?? $configuration['template']
                 ?? 'standard')
         );
+
+        // The admin-facing page model deliberately exposes only the generic
+        // visual modes (Standard / Editorial / Immersive). When Standard is
+        // selected for a native course-access product, resolve it to the
+        // dedicated Course storefront layout. This keeps the Builder simple
+        // while making the product-specific Course template reachable.
+        if ($layout === CommerceStorefrontLayoutContract::STANDARD
+                && $product->get_type() === 'course_access') {
+            $layout = CommerceStorefrontLayoutContract::COURSE;
+        }
+        if ($layout === CommerceStorefrontLayoutContract::STANDARD
+                && $product->get_type() === 'bundle') {
+            $layout = CommerceStorefrontLayoutContract::BUNDLE;
+        }
         $template = CommerceStorefrontLayoutContract::template($layout);
         $commerceposition =
             CommerceStorefrontLayoutContract::normalise_commerce_position(
@@ -29,8 +43,18 @@ final class CommerceStorefrontPageResolver {
         $theme = $this->clean_theme((string)($configuration['theme'] ?? 'default'));
         $sections = $this->normalise_sections($configuration['sections'] ?? []);
 
-        if ($sections === []) {
+        if ($sections === [] && $layout !== CommerceStorefrontLayoutContract::BUNDLE) {
             $sections = $this->default_sections($product);
+        }
+
+        // The dedicated Bundle template renders its catalogue components in a
+        // compact, product-aware block. Do not render a second generic
+        // "components" section below the hero.
+        if ($layout === CommerceStorefrontLayoutContract::BUNDLE) {
+            $sections = array_values(array_filter(
+                $sections,
+                static fn(array $section): bool => ($section['type'] ?? '') !== 'components'
+            ));
         }
 
         foreach ($sections as &$section) {
