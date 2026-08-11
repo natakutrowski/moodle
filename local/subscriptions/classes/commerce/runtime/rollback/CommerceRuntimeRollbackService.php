@@ -26,6 +26,7 @@ final class CommerceRuntimeRollbackService {
             'before' => $this->current_state(),
             'target' => [
                 'runtime_mode' => CommerceRuntimeMode::LEGACY,
+                'runtime_read_mode' => 'legacy',
                 'native_fallback_enabled' => true,
                 'shadow_enabled' => false,
             ],
@@ -42,10 +43,12 @@ final class CommerceRuntimeRollbackService {
         $before = $this->current_state();
 
         $this->configuration->set_mode(CommerceRuntimeMode::LEGACY);
+        set_config('commerce_runtime_read_mode', 'legacy', 'local_subscriptions');
         set_config('commerce_runtime_native_fallback_enabled', 1, 'local_subscriptions');
 
         $after = $this->current_state();
         $verified = $after['runtime_mode'] === CommerceRuntimeMode::LEGACY
+            && $after['runtime_read_mode'] === 'legacy'
             && $after['native_fallback_enabled'] === true
             && $after['shadow_enabled'] === false;
 
@@ -67,6 +70,7 @@ final class CommerceRuntimeRollbackService {
     private function current_state(): array {
         return [
             'runtime_mode' => $this->configuration->get_mode(),
+            'runtime_read_mode' => (string) get_config('local_subscriptions', 'commerce_runtime_read_mode'),
             'native_fallback_enabled' => $this->configuration->native_fallback_enabled(),
             'shadow_enabled' => (bool) get_config('local_subscriptions', 'commerce_fulfillment_shadow_enabled'),
         ];
