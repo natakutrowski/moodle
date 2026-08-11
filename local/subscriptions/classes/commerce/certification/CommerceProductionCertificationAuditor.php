@@ -34,6 +34,11 @@ final class CommerceProductionCertificationAuditor {
             'families' => array_values($families),
             'batch_size' => $batchsize,
             'runtime_mode' => (string)get_config('local_subscriptions', 'commerce_runtime_mode'),
+            'runtime_read_mode' => (string)get_config('local_subscriptions', 'commerce_runtime_read_mode'),
+            'native_fallback_enabled' => (bool)get_config(
+                'local_subscriptions',
+                'commerce_runtime_native_fallback_enabled'
+            ),
             'git_branch' => trim((string)($releaseidentity['git_branch'] ?? '')),
             'git_commit' => strtolower(trim((string)($releaseidentity['git_commit'] ?? ''))),
             'operator' => trim((string)($releaseidentity['operator'] ?? '')),
@@ -113,13 +118,26 @@ final class CommerceProductionCertificationAuditor {
         );
 
         $runtimeisshadow = $metadata['runtime_mode'] === 'shadow';
+        $runtimeisnativerollout = $metadata['runtime_mode'] === 'native'
+            && $metadata['runtime_read_mode'] === 'native'
+            && $metadata['native_fallback_enabled'] === true;
+        $runtimestatecertifiable = $runtimeisshadow || $runtimeisnativerollout;
+
         $report->add_check(
             'code_freeze_runtime_state',
-            $runtimeisshadow,
+            $runtimestatecertifiable,
             $runtimeisshadow
-                ? 'Runtime remains in Shadow mode at certification time.'
-                : 'Runtime must be in Shadow mode at certification time.',
-            ['runtime_mode' => $metadata['runtime_mode']]
+                ? 'Runtime remains in Shadow mode at pre-production certification time.'
+                : (
+                    $runtimeisnativerollout
+                        ? 'Runtime and reads are Native with guarded Legacy fallback enabled.'
+                        : 'Runtime must be Shadow, or fully Native with Native reads and guarded Legacy fallback enabled.'
+                ),
+            [
+                'runtime_mode' => $metadata['runtime_mode'],
+                'runtime_read_mode' => $metadata['runtime_read_mode'],
+                'native_fallback_enabled' => $metadata['native_fallback_enabled'],
+            ]
         );
 
         $report->finish();
