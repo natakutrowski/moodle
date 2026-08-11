@@ -22,7 +22,7 @@ final class CommerceDeploymentChecklistAuditor {
      * @param array<string, bool> $acknowledgements
      */
     public function audit(array $families, int $batchsize, array $acknowledgements): CommerceDeploymentChecklistReport {
-        global $DB;
+        global $CFG, $DB;
 
         $report = CommerceDeploymentChecklistReport::start([
             'families' => array_values($families),
@@ -30,7 +30,35 @@ final class CommerceDeploymentChecklistAuditor {
             'runtime_mode' => (string)get_config('local_subscriptions', 'commerce_runtime_mode'),
         ]);
 
-        $readiness = (new CommerceProductionReadinessAuditor())->audit();
+        $runtime = (string)get_config('local_subscriptions', 'commerce_runtime_mode');
+        if (!in_array($runtime, ['legacy', 'shadow', 'native'], true)) {
+            $runtime = 'shadow';
+        }
+        $family = count($families) === 1 && in_array(reset($families), ['subscription', 'digital'], true)
+            ? (string)reset($families)
+            : 'all';
+
+        $readiness = (new CommerceProductionReadinessAuditor(
+            $DB,
+            $CFG->dirroot,
+            $CFG->dirroot . '/local/subscriptions'
+        ))->audit([
+            'branch' => '',
+            'mode' => $runtime,
+            'family' => $family,
+            'batch_size' => $batchsize,
+            // This historical checklist already carries explicit operator
+            // acknowledgements for backup and rollback procedures.
+            'include_backup_rollback' => false,
+        ]);
+
+        $summary = ['blocking' => 0, 'important' => 0, 'cosmetic' => 0];
+        foreach ($readiness['phases'] ?? [] as $phase) {
+            foreach (array_keys($summary) as $key) {
+                $summary[$key] += (int)($phase['summary'][$key] ?? 0);
+            }
+        }
+
         $report->add_automated_check(
             'production_readiness',
             !empty($readiness['ready']),
@@ -38,9 +66,10 @@ final class CommerceDeploymentChecklistAuditor {
                 ? 'Production readiness audit passed.'
                 : 'Production readiness audit contains blocking errors.',
             [
-                'errors' => (int)($readiness['errors'] ?? 0),
-                'warnings' => (int)($readiness['warnings'] ?? 0),
-                'runtime_mode' => (string)($readiness['runtime_mode'] ?? ''),
+                'blocking' => $summary['blocking'],
+                'important' => $summary['important'],
+                'cosmetic' => $summary['cosmetic'],
+                'runtime_mode' => $runtime,
             ]
         );
 

@@ -36,16 +36,21 @@ final class CommerceProductionReadinessAuditor {
         $git = (new CommerceGitReadinessAuditor($this->moodleroot))->audit($branch)->to_array();
         $native = (new CommerceNativeReadinessAuditor($this->db))->audit($mode)->to_array();
         $backfill = (new CommerceBackfillReadinessAuditor($this->db))->audit($family, $batchsize)->to_array();
-        $backup = (new CommerceBackupRollbackReadinessAuditor($this->moodleroot, $this->pluginroot))->audit(
-            [
-                'database' => (string)($options['database_backup'] ?? ''),
-                'code' => (string)($options['code_backup'] ?? ''),
-                'moodledata' => (string)($options['moodledata_backup'] ?? ''),
-            ],
-            (string)($options['rollback_ref'] ?? ''),
-            (int)($options['max_backup_age_hours'] ?? 24),
-            (int)($options['minimum_free_gb'] ?? 5)
-        )->to_array();
+        $includebackuprollback = !array_key_exists('include_backup_rollback', $options)
+            || !empty($options['include_backup_rollback']);
+        $backup = null;
+        if ($includebackuprollback) {
+            $backup = (new CommerceBackupRollbackReadinessAuditor($this->moodleroot, $this->pluginroot))->audit(
+                [
+                    'database' => (string)($options['database_backup'] ?? ''),
+                    'code' => (string)($options['code_backup'] ?? ''),
+                    'moodledata' => (string)($options['moodledata_backup'] ?? ''),
+                ],
+                (string)($options['rollback_ref'] ?? ''),
+                (int)($options['max_backup_age_hours'] ?? 24),
+                (int)($options['minimum_free_gb'] ?? 5)
+            )->to_array();
+        }
 
         $baseline = (new CommerceStorefrontBaselineAuditor($this->db))->audit()->to_array();
         $pricing = (new CommercePricingCertificationAuditor($this->db))->audit()->to_array();
@@ -57,7 +62,6 @@ final class CommerceProductionReadinessAuditor {
             'F8A Git' => $this->normalise($git),
             'F8B Native' => $this->normalise($native),
             'F8C Backfill' => $this->normalise($backfill),
-            'F8D Backup & rollback' => $this->normalise($backup),
             'F7A Baseline' => [
                 'passed' => (bool)($baseline['certifiablebaseline'] ?? false),
                 'summary' => $baseline['summary'] ?? [],
@@ -67,6 +71,11 @@ final class CommerceProductionReadinessAuditor {
             'F7D Ownership' => $this->normalise($ownership),
             'F7F UX' => $this->normalise($ux),
         ];
+        if ($includebackuprollback && $backup !== null) {
+            $phases = array_slice($phases, 0, 3, true)
+                + ['F8D Backup & rollback' => $this->normalise($backup)]
+                + array_slice($phases, 3, null, true);
+        }
 
         $ready = true;
         foreach ($phases as $phase) {
@@ -93,7 +102,7 @@ final class CommerceProductionReadinessAuditor {
                 'f8a_git' => $git,
                 'f8b_native' => $native,
                 'f8c_backfill' => $backfill,
-                'f8d_backup_rollback' => $backup,
+                'f8d_backup_rollback' => $includebackuprollback ? $backup : null,
                 'f7a_baseline' => $baseline,
                 'f7b_pricing' => $pricing,
                 'f7c_checkout' => $checkout,
