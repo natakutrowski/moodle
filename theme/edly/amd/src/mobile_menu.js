@@ -9,7 +9,13 @@ const S = {
   btn: '.campus-menu-toggle',
   offcanvasId: 'campusMobileMenu',
   userWraps: '.navbar-user-wrap, .edly-header-user-sec',
-  userToggle: '[data-bs-toggle="dropdown"], .dropdown-toggle'
+  userToggle: '[data-bs-toggle="dropdown"], .dropdown-toggle',
+  topbarDetails: [
+    '.campus-customer-nav__admin-menu',
+    '.campus-customer-nav-mobile__admin-menu',
+    '.campus-topbar-language',
+    '.campus-topbar-user'
+  ].join(', ')
 };
 const bs = () => window.bootstrap || null;
 
@@ -48,6 +54,21 @@ function wireUserDropdown(){
   document.querySelectorAll(S.userWraps).forEach(wrap=>{
     const toggle = wrap.querySelector(S.userToggle);
     if (toggle){ B.Dropdown.getOrCreateInstance(toggle, { autoClose: 'outside' }); }
+  });
+}
+
+/* ---- Details topbar : fermeture au clic extérieur ---- */
+let topbarDetailsWired = false;
+function wireTopbarDetailsAutoClose(){
+  if (topbarDetailsWired) return;
+  topbarDetailsWired = true;
+
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll(`${S.topbarDetails}[open]`).forEach(details => {
+      if (!details.contains(e.target)) {
+        details.removeAttribute('open');
+      }
+    });
   });
 }
 
@@ -144,6 +165,7 @@ export const init = () => {
     wirePrimaryMenu();
     wireOffcanvas();
     wireUserDropdown();
+    wireTopbarDetailsAutoClose();
     wireUserMenuCarouselDelegation();
     wireStripPreferencesOnOpen();
   };
