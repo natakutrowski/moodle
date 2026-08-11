@@ -22,7 +22,7 @@ class StripeTransactionIdResolver {
         if (!empty($meta['session'])) {
             try {
                 require_once($CFG->dirroot . '/local/subscriptions/vendor/autoload.php');
-                \Stripe\Stripe::setApiKey(self::secretKey());
+                \Stripe\Stripe::setApiKey(self::secretKey($meta['stripe_profile'] ?? null));
                 $session = \Stripe\Checkout\Session::retrieve($meta['session']);
                 if (!empty($session->payment_intent)) {
                     if (is_string($session->payment_intent)) {
@@ -41,10 +41,7 @@ class StripeTransactionIdResolver {
     }
 
     // Récupère ta clé Stripe (adapte à ton code existant).
-    private static function secretKey(): string {
-        $env = get_config('local_subscriptions', 'stripe_env') ?: 'test';
-        $env = ($env === 'live') ? 'live' : 'test';
-
-        return get_config('local_subscriptions', "stripe_{$env}_secret") ?: '';
+    private static function secretKey(?string $profile = null): string {
+        return StripeConfiguration::secret_key($profile);
     }
 }

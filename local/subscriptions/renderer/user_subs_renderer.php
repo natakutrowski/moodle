@@ -944,7 +944,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         return $output;
     }
 
-    public function render_manual_subscription_form_v2(array $plans, ?stdClass $preselecteduser = null): string {
+    public function render_manual_subscription_form_v2(array $plans, ?stdClass $preselecteduser = null, array $nativeproducts = []): string {
         $output = '';
 
         $existinglabel = get_string('existing_user', 'local_subscriptions');
@@ -1094,6 +1094,31 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
 
         $output .= html_writer::tag('hr', '');
 
+        $output .= html_writer::tag('h4', get_string('commerce_manual_grant_access_type', 'local_subscriptions'));
+        $output .= html_writer::start_div('form-group mb-4');
+        $output .= html_writer::tag(
+            'label',
+            html_writer::empty_tag('input', [
+                'type' => 'radio',
+                'name' => 'grant_mode',
+                'value' => 'legacy',
+                'checked' => 'checked',
+                'class' => 'me-1',
+            ]) . get_string('commerce_manual_grant_mode_legacy', 'local_subscriptions'),
+            ['class' => 'me-4']
+        );
+        $output .= html_writer::tag(
+            'label',
+            html_writer::empty_tag('input', [
+                'type' => 'radio',
+                'name' => 'grant_mode',
+                'value' => 'native',
+                'class' => 'me-1',
+            ]) . get_string('commerce_manual_grant_mode_native', 'local_subscriptions')
+        );
+        $output .= html_writer::end_div();
+
+        $output .= html_writer::start_div('', ['id' => 'manual-legacy-access-block']);
         $output .= html_writer::tag('h4', get_string('manual_subscription_plan_section', 'local_subscriptions'));
 
         $output .= html_writer::div(
@@ -1146,13 +1171,74 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                 'value' => date('d/m/Y'),
                 'placeholder' => get_string('date_format_placeholder', 'local_subscriptions'),
                 'autocomplete' => 'off',
-                'required' => 'required',
             ]),
             'form-group mb-4'
         );
 
+        $output .= html_writer::end_div();
+
+        $output .= html_writer::start_div('', [
+            'id' => 'manual-native-access-block',
+            'style' => 'display:none;',
+        ]);
+        $output .= html_writer::tag('h4', get_string('commerce_manual_grant_native_section', 'local_subscriptions'));
+
         $output .= html_writer::div(
-            html_writer::tag('button', get_string('submit_sub', 'local_subscriptions'), [
+            html_writer::label(
+                get_string('commerce_manual_grant_native_product', 'local_subscriptions'),
+                'manual-native-product'
+            ) .
+            html_writer::select(
+                $nativeproducts,
+                'native_product_id',
+                '',
+                ['' => '—'],
+                ['class' => 'form-control', 'id' => 'manual-native-product']
+            ) .
+            html_writer::div(
+                get_string('commerce_manual_grant_native_product_help', 'local_subscriptions'),
+                'form-text'
+            ),
+            'form-group mb-3'
+        );
+
+        $output .= html_writer::div(
+            html_writer::checkbox(
+                'send_access_email',
+                1,
+                true,
+                get_string('commerce_manual_grant_send_email', 'local_subscriptions'),
+                ['id' => 'manual-grant-send-email']
+            ) .
+            html_writer::div(
+                get_string('commerce_manual_grant_send_email_help', 'local_subscriptions'),
+                'form-text'
+            ),
+            'form-group mb-3'
+        );
+
+        $output .= html_writer::div(
+            html_writer::label(
+                get_string('commerce_manual_grant_reason', 'local_subscriptions'),
+                'manual-grant-reason'
+            ) .
+            html_writer::empty_tag('input', [
+                'type' => 'text',
+                'name' => 'grant_reason',
+                'id' => 'manual-grant-reason',
+                'class' => 'form-control',
+                'maxlength' => 255,
+            ]) .
+            html_writer::div(
+                get_string('commerce_manual_grant_reason_help', 'local_subscriptions'),
+                'form-text'
+            ),
+            'form-group mb-4'
+        );
+        $output .= html_writer::end_div();
+
+        $output .= html_writer::div(
+            html_writer::tag('button', get_string('commerce_manual_grant_submit', 'local_subscriptions'), [
                 'type' => 'submit',
                 'class' => 'btn btn-primary me-2',
             ]) .
@@ -1181,6 +1267,31 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         var priceInput = document.getElementById('manual-price');
         var currencySelect = document.getElementById('manual-currency');
         var countrySelect = document.getElementById('manual-new-user-country');
+        var legacyAccessBlock = document.getElementById('manual-legacy-access-block');
+        var nativeAccessBlock = document.getElementById('manual-native-access-block');
+        var nativeProductSelect = document.getElementById('manual-native-product');
+
+        function refreshGrantMode() {
+            var checked = document.querySelector('input[name="grant_mode"]:checked');
+            var mode = checked ? checked.value : 'legacy';
+
+            if (legacyAccessBlock) {
+                legacyAccessBlock.style.display = mode === 'legacy' ? '' : 'none';
+            }
+            if (nativeAccessBlock) {
+                nativeAccessBlock.style.display = mode === 'native' ? '' : 'none';
+            }
+            if (planSelect) {
+                planSelect.required = mode === 'legacy';
+            }
+            if (priceInput) {
+                priceInput.required = mode === 'legacy';
+            }
+            if (nativeProductSelect) {
+                nativeProductSelect.required = mode === 'native';
+            }
+        }
+
 
         function refreshUserMode() {
             var checkedMode = document.querySelector('input[name="user_mode"]:checked');
@@ -1224,6 +1335,10 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                     currencySelect.value = parts[1] || 'EUR';
                 });
         }
+
+        document.querySelectorAll('input[name="grant_mode"]').forEach(function(input) {
+            input.addEventListener('change', refreshGrantMode);
+        });
 
         document.querySelectorAll('input[name="user_mode"]').forEach(function(input) {
             input.addEventListener('change', refreshUserMode);
@@ -1282,6 +1397,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         }
 
         refreshUserMode();
+        refreshGrantMode();
     });
     JS);
 

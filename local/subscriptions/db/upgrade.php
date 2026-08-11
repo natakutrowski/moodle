@@ -7277,5 +7277,629 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026072603, 'local', 'subscriptions');
     }
 
+
+    if ($oldversion < 2026072901) {
+        $table = new xmldb_table('local_subs_commerce_promo');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '191', null, XMLDB_NOTNULL);
+        $table->add_field('code', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('discounttype', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL);
+        $table->add_field('discountvalue', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('currency', XMLDB_TYPE_CHAR, '3');
+        $table->add_field('minimumcartminor', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('startsat', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('endsat', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('active', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('automatic', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('stackable', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('priority', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('globalusagelimit', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('userusagelimit', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('productskusjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('producttypesjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('metadatajson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('code_uix', XMLDB_INDEX_UNIQUE, ['code']);
+        $table->add_index('automatic_active_idx', XMLDB_INDEX_NOTUNIQUE, ['automatic', 'active', 'priority']);
+        $table->add_index('active_window_idx', XMLDB_INDEX_NOTUNIQUE, ['active', 'startsat', 'endsat']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_subs_commerce_promouse');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('cartreference', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('purchasereference', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('code', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('discountminor', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('currency', XMLDB_TYPE_CHAR, '3', null, XMLDB_NOTNULL);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'applied');
+        $table->add_field('metadatajson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('promotion_fk', XMLDB_KEY_FOREIGN, ['promotionid'], 'local_subs_commerce_promo', ['id']);
+        $table->add_index('promotion_status_idx', XMLDB_INDEX_NOTUNIQUE, ['promotionid', 'status']);
+        $table->add_index('promotion_user_status_idx', XMLDB_INDEX_NOTUNIQUE, ['promotionid', 'userid', 'status']);
+        $table->add_index('purchase_idx', XMLDB_INDEX_NOTUNIQUE, ['purchasereference']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026072901, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026073001) {
+        $table = new xmldb_table('local_subscriptions_commerce_payment');
+
+        $fields = [
+            new xmldb_field('providerorderid', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'providerreference'),
+            new xmldb_field('paymenturl', XMLDB_TYPE_TEXT, null, null, null, null, null, 'metadatajson'),
+            new xmldb_field('providerpayload', XMLDB_TYPE_TEXT, null, null, null, null, null, 'paymenturl'),
+            new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'providerpayload'),
+            new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timecreated'),
+        ];
+
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        $providerorderindex = new xmldb_index(
+            'provider_order_idx',
+            XMLDB_INDEX_NOTUNIQUE,
+            ['provider', 'providerorderid']
+        );
+        if (!$dbman->index_exists($table, $providerorderindex)) {
+            $dbman->add_index($table, $providerorderindex);
+        }
+
+        $purchasestatusindex = new xmldb_index(
+            'purchase_status_idx',
+            XMLDB_INDEX_NOTUNIQUE,
+            ['purchaseid', 'status']
+        );
+        if (!$dbman->index_exists($table, $purchasestatusindex)) {
+            $dbman->add_index($table, $purchasestatusindex);
+        }
+
+        $now = time();
+        $DB->execute(
+            "UPDATE {local_subscriptions_commerce_payment}
+                SET timecreated = :timecreated
+              WHERE timecreated = 0",
+            ['timecreated' => $now]
+        );
+        $DB->execute(
+            "UPDATE {local_subscriptions_commerce_payment}
+                SET timemodified = timecreated
+              WHERE timemodified = 0"
+        );
+
+        upgrade_plugin_savepoint(true, 2026073001, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026073002) {
+        $table = new xmldb_table('local_subs_commerce_guest');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('reference', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $table->add_field('token', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'identity_pending');
+        $table->add_field('currency', XMLDB_TYPE_CHAR, '3', null, XMLDB_NOTNULL);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('email', XMLDB_TYPE_CHAR, '254');
+        $table->add_field('firstname', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('lastname', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('purchasereference', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('paymentreference', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('expiresat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('metadatajson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('reference_uix', XMLDB_INDEX_UNIQUE, ['reference']);
+        $table->add_index('token_uix', XMLDB_INDEX_UNIQUE, ['token']);
+        $table->add_index('status_expiry_idx', XMLDB_INDEX_NOTUNIQUE, ['status', 'expiresat']);
+        $table->add_index('email_status_idx', XMLDB_INDEX_NOTUNIQUE, ['email', 'status']);
+        $table->add_index('user_status_idx', XMLDB_INDEX_NOTUNIQUE, ['userid', 'status']);
+        $table->add_index('purchase_idx', XMLDB_INDEX_NOTUNIQUE, ['purchasereference']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026073002, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026073101) {
+        $table = new xmldb_table('local_subs_commerce_mail');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('mailtype', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'queued');
+        $table->add_field('idempotencykey', XMLDB_TYPE_CHAR, '191', null, XMLDB_NOTNULL);
+        $table->add_field('purchaseid', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('recipientemail', XMLDB_TYPE_CHAR, '254', null, XMLDB_NOTNULL);
+        $table->add_field('recipientname', XMLDB_TYPE_CHAR, '255');
+        $table->add_field('language', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL);
+        $table->add_field('subject', XMLDB_TYPE_TEXT);
+        $table->add_field('contextjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('attemptcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('maxattempts', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '5');
+        $table->add_field('nextruntime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('lasterror', XMLDB_TYPE_TEXT);
+        $table->add_field('timeprocessing', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('timesent', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('idempotency_uix', XMLDB_INDEX_UNIQUE, ['idempotencykey']);
+        $table->add_index('status_runtime_idx', XMLDB_INDEX_NOTUNIQUE, ['status', 'nextruntime']);
+        $table->add_index('purchase_idx', XMLDB_INDEX_NOTUNIQUE, ['purchaseid']);
+        $table->add_index('recipient_idx', XMLDB_INDEX_NOTUNIQUE, ['recipientemail']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026073101, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026073102) {
+        $table = new xmldb_table('local_subs_commerce_mail_tpl');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('mailtype', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+        $table->add_field('language', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL);
+        $table->add_field('enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('subject', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $table->add_field('preheader', XMLDB_TYPE_TEXT);
+        $table->add_field('heading', XMLDB_TYPE_CHAR, '255');
+        $table->add_field('introhtml', XMLDB_TYPE_TEXT);
+        $table->add_field('introformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('outrohtml', XMLDB_TYPE_TEXT);
+        $table->add_field('outroformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('signaturehtml', XMLDB_TYPE_TEXT);
+        $table->add_field('signatureformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('headerimage', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('type_lang_uix', XMLDB_INDEX_UNIQUE, ['mailtype', 'language']);
+        $table->add_index('enabled_idx', XMLDB_INDEX_NOTUNIQUE, ['enabled']);
+        $table->add_index('modified_idx', XMLDB_INDEX_NOTUNIQUE, ['timemodified']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026073102, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080500) {
+        $table = new xmldb_table('local_subs_showroom');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('showroomkey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'draft');
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $table->add_field('template', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $table->add_field('slugfr', XMLDB_TYPE_CHAR, '191');
+        $table->add_field('slugen', XMLDB_TYPE_CHAR, '191');
+        $table->add_field('slugru', XMLDB_TYPE_CHAR, '191');
+        $table->add_field('titlekey', XMLDB_TYPE_CHAR, '191');
+        $table->add_field('descriptionkey', XMLDB_TYPE_CHAR, '191');
+        $table->add_field('productsjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('settingsjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('showroomkey_uix', XMLDB_INDEX_UNIQUE, ['showroomkey']);
+        $table->add_index('status_idx', XMLDB_INDEX_NOTUNIQUE, ['status']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        $blocktable = new xmldb_table('local_subs_showroom_block');
+        $blocktable->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $blocktable->add_field('showroomid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $blocktable->add_field('blockkey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $blocktable->add_field('blocktype', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $blocktable->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $blocktable->add_field('enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $blocktable->add_field('configjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $blocktable->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $blocktable->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $blocktable->add_field('usermodified', XMLDB_TYPE_INTEGER, '10');
+        $blocktable->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $blocktable->add_key('showroom_fk', XMLDB_KEY_FOREIGN, ['showroomid'], 'local_subs_showroom', ['id']);
+        $blocktable->add_index('showroom_block_uix', XMLDB_INDEX_UNIQUE, ['showroomid', 'blockkey']);
+        $blocktable->add_index('showroom_sort_idx', XMLDB_INDEX_NOTUNIQUE, ['showroomid', 'sortorder']);
+        if (!$dbman->table_exists($blocktable)) {
+            $dbman->create_table($blocktable);
+        }
+
+        if (!$DB->record_exists('local_subs_showroom', ['showroomkey' => 'third-group-verbs'])) {
+            $now = time();
+            $showroomid = $DB->insert_record('local_subs_showroom', (object)[
+                'showroomkey' => 'third-group-verbs',
+                'status' => 'draft',
+                'name' => 'Verbes du 3e groupe',
+                'template' => 'local_subscriptions/showroom/third_group_verbs',
+                'slugfr' => 'verbes-3e-groupe',
+                'slugen' => 'third-group-verbs',
+                'slugru' => 'glagoly-tretey-gruppy',
+                'titlekey' => 'commerce_showroom_third_group_verbs_title',
+                'descriptionkey' => 'commerce_showroom_third_group_verbs_description',
+                'productsjson' => json_encode([
+                    'course' => 'SUB.PLAN.30',
+                    'pdf' => 'DIGITAL.VERBES-3E-GROUPE',
+                    'bundle' => 'BUNDLEA1VERBES',
+                ], JSON_UNESCAPED_SLASHES),
+                'settingsjson' => '{}',
+                'timecreated' => $now,
+                'timemodified' => $now,
+                'usermodified' => null,
+            ]);
+            $types = ['hero', 'stats', 'video', 'journey', 'exercise_explorer', 'offers', 'comparison', 'method', 'faq', 'support', 'cta'];
+            foreach ($types as $sortorder => $type) {
+                $DB->insert_record('local_subs_showroom_block', (object)[
+                    'showroomid' => $showroomid,
+                    'blockkey' => $type,
+                    'blocktype' => $type,
+                    'sortorder' => ($sortorder + 1) * 10,
+                    'enabled' => 1,
+                    'configjson' => '{}',
+                    'timecreated' => $now,
+                    'timemodified' => $now,
+                    'usermodified' => null,
+                ]);
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2026080500, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080504) {
+        $table = new xmldb_table('local_subs_showroom_rev');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('showroomid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('revisionno', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('action', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+        $table->add_field('note', XMLDB_TYPE_TEXT);
+        $table->add_field('snapshotjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('usercreated', XMLDB_TYPE_INTEGER, '10');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('showroom_fk', XMLDB_KEY_FOREIGN, ['showroomid'], 'local_subs_showroom', ['id']);
+        $table->add_index('showroom_revision_uix', XMLDB_INDEX_UNIQUE, ['showroomid', 'revisionno']);
+        $table->add_index('showroom_created_idx', XMLDB_INDEX_NOTUNIQUE, ['showroomid', 'timecreated']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026080504, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080701) {
+        $table = new xmldb_table('local_subs_commerce_offer');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('offeruuid', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+        $table->add_field('campaignkey', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('sourcepurchaseid', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('targetproductid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('beneficiaryuserid', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('beneficiaryemail', XMLDB_TYPE_CHAR, '254', null, XMLDB_NOTNULL);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'issued');
+        $table->add_field('validfrom', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('expiresat', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('termsversion', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('termsjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('metadatajson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('redeemedat', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('redeemedpurchaseid', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('revokedat', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('revokedbyuserid', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('revokereason', XMLDB_TYPE_TEXT);
+        $table->add_field('issuedbyuserid', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('sourcepurchase_fk', XMLDB_KEY_FOREIGN, ['sourcepurchaseid'], 'local_subscriptions_commerce_purchase', ['id']);
+        $table->add_key('targetproduct_fk', XMLDB_KEY_FOREIGN, ['targetproductid'], 'local_subs_commerce_product', ['id']);
+        $table->add_key('redeemedpurchase_fk', XMLDB_KEY_FOREIGN, ['redeemedpurchaseid'], 'local_subscriptions_commerce_purchase', ['id']);
+        $table->add_index('offeruuid_uix', XMLDB_INDEX_UNIQUE, ['offeruuid']);
+        $table->add_index('campaign_status_idx', XMLDB_INDEX_NOTUNIQUE, ['campaignkey', 'status']);
+        $table->add_index('beneficiary_user_status_idx', XMLDB_INDEX_NOTUNIQUE, ['beneficiaryuserid', 'status']);
+        $table->add_index('beneficiary_email_status_idx', XMLDB_INDEX_NOTUNIQUE, ['beneficiaryemail', 'status']);
+        $table->add_index('target_product_status_idx', XMLDB_INDEX_NOTUNIQUE, ['targetproductid', 'status']);
+        $table->add_index('expires_status_idx', XMLDB_INDEX_NOTUNIQUE, ['expiresat', 'status']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026080701, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080702) {
+        $table = new xmldb_table('local_subs_commerce_offer_token');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('offerid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('tokenversion', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('tokenhash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+        $table->add_field('issuancekey', XMLDB_TYPE_CHAR, '191', null, XMLDB_NOTNULL);
+        $table->add_field('requesthash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('offer_fk', XMLDB_KEY_FOREIGN, ['offerid'], 'local_subs_commerce_offer', ['id']);
+        $table->add_index('tokenhash_uix', XMLDB_INDEX_UNIQUE, ['tokenhash']);
+        $table->add_index('issuancekey_uix', XMLDB_INDEX_UNIQUE, ['issuancekey']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026080702, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080800) {
+        $table = new xmldb_table('local_subs_commerce_offer_campaign');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('campaignkey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $table->add_field('audiencetype', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL);
+        $table->add_field('sourceproductsku', XMLDB_TYPE_CHAR, '100');
+        $table->add_field('targetproductid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('termsversion', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('termsjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('criteriajson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('validfrom', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('expiresat', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'draft');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('usercreated', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('targetproduct_fk', XMLDB_KEY_FOREIGN, ['targetproductid'], 'local_subs_commerce_product', ['id']);
+        $table->add_index('campaignkey_uix', XMLDB_INDEX_UNIQUE, ['campaignkey']);
+        $table->add_index('status_modified_idx', XMLDB_INDEX_NOTUNIQUE, ['status', 'timemodified']);
+        if (!$dbman->table_exists($table)) { $dbman->create_table($table); }
+
+        $member = new xmldb_table('local_subs_commerce_offer_campaign_member');
+        $member->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $member->add_field('campaignid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $member->add_field('memberkey', XMLDB_TYPE_CHAR, '191', null, XMLDB_NOTNULL);
+        $member->add_field('purchaseid', XMLDB_TYPE_INTEGER, '10');
+        $member->add_field('userid', XMLDB_TYPE_INTEGER, '10');
+        $member->add_field('email', XMLDB_TYPE_CHAR, '254', null, XMLDB_NOTNULL);
+        $member->add_field('eligibilitystatus', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+        $member->add_field('reason', XMLDB_TYPE_TEXT);
+        $member->add_field('offerid', XMLDB_TYPE_INTEGER, '10');
+        $member->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $member->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $member->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $member->add_key('campaign_fk', XMLDB_KEY_FOREIGN, ['campaignid'], 'local_subs_commerce_offer_campaign', ['id']);
+        $member->add_key('purchase_fk', XMLDB_KEY_FOREIGN, ['purchaseid'], 'local_subscriptions_commerce_purchase', ['id']);
+        $member->add_key('offer_fk', XMLDB_KEY_FOREIGN, ['offerid'], 'local_subs_commerce_offer', ['id']);
+        $member->add_index('campaign_member_uix', XMLDB_INDEX_UNIQUE, ['campaignid', 'memberkey']);
+        $member->add_index('campaign_status_idx', XMLDB_INDEX_NOTUNIQUE, ['campaignid', 'eligibilitystatus']);
+        $member->add_index('email_idx', XMLDB_INDEX_NOTUNIQUE, ['email']);
+        if (!$dbman->table_exists($member)) { $dbman->create_table($member); }
+
+        upgrade_plugin_savepoint(true, 2026080800, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080801) {
+        // K9 registers the dedicated throttled Personal Offer mail scheduled task.
+        upgrade_plugin_savepoint(true, 2026080801, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080901) {
+        $table = new xmldb_table('local_subs_commerce_grant_campaign');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('campaignkey', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $table->add_field('sourcetype', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+        $table->add_field('sourceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('sourcejson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('targetproductid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('targetjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $table->add_field('reason', XMLDB_TYPE_TEXT);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'ready');
+        $table->add_field('selectedcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('processedcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('successcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('skippedcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('failedcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('startedat', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('completedat', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('usercreated', XMLDB_TYPE_INTEGER, '10');
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('targetproduct_fk', XMLDB_KEY_FOREIGN, ['targetproductid'], 'local_subs_commerce_product', ['id']);
+        $table->add_index('campaignkey_uix', XMLDB_INDEX_UNIQUE, ['campaignkey']);
+        $table->add_index('status_created_idx', XMLDB_INDEX_NOTUNIQUE, ['status', 'timecreated']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        $member = new xmldb_table('local_subs_commerce_grant_campaign_member');
+        $member->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $member->add_field('campaignid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $member->add_field('memberkey', XMLDB_TYPE_CHAR, '191', null, XMLDB_NOTNULL);
+        $member->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $member->add_field('firstname', XMLDB_TYPE_CHAR, '100');
+        $member->add_field('lastname', XMLDB_TYPE_CHAR, '100');
+        $member->add_field('email', XMLDB_TYPE_CHAR, '254', null, XMLDB_NOTNULL);
+        $member->add_field('evidencejson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $member->add_field('ownershipsource', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, 'none');
+        $member->add_field('plannedgrantcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $member->add_field('status', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'queued');
+        $member->add_field('attempts', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $member->add_field('lasterror', XMLDB_TYPE_TEXT);
+        $member->add_field('lastattemptat', XMLDB_TYPE_INTEGER, '10');
+        $member->add_field('completedat', XMLDB_TYPE_INTEGER, '10');
+        $member->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $member->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $member->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $member->add_key('campaign_fk', XMLDB_KEY_FOREIGN, ['campaignid'], 'local_subs_commerce_grant_campaign', ['id']);
+        $member->add_key('user_fk', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+        $member->add_index('campaign_member_uix', XMLDB_INDEX_UNIQUE, ['campaignid', 'memberkey']);
+        $member->add_index('campaign_status_idx', XMLDB_INDEX_NOTUNIQUE, ['campaignid', 'status']);
+        if (!$dbman->table_exists($member)) {
+            $dbman->create_table($member);
+        }
+
+        upgrade_plugin_savepoint(true, 2026080901, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080902) {
+        $table = new xmldb_table('local_subs_commerce_grant_campaign');
+        $field = new xmldb_field(
+            'sendemail',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '1',
+            'reason'
+        );
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026080902, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080903) {
+        $table = new xmldb_table('local_subs_commerce_offer_campaign_member');
+
+        $fields = [
+            new xmldb_field('firstname', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'userid'),
+            new xmldb_field('lastname', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'firstname'),
+            new xmldb_field('evidencejson', XMLDB_TYPE_TEXT, null, null, null, null, null, 'email'),
+            new xmldb_field('existingofferid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'reason'),
+        ];
+
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        $key = new xmldb_key(
+            'existingoffer_fk',
+            XMLDB_KEY_FOREIGN,
+            ['existingofferid'],
+            'local_subs_commerce_offer',
+            ['id']
+        );
+        if (!$dbman->find_key_name($table, $key)) {
+            $dbman->add_key($table, $key);
+        }
+
+        upgrade_plugin_savepoint(true, 2026080903, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080904) {
+        $table = new xmldb_table('local_subs_commerce_offer_campaign');
+
+        $fields = [
+            new xmldb_field('snapshotat', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'expiresat'),
+            new xmldb_field('snapshothash', XMLDB_TYPE_CHAR, '64', null, null, null, null, 'snapshotat'),
+            new xmldb_field('selectedcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'snapshothash'),
+        ];
+
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        $snapshotselected = new xmldb_field(
+            'snapshotselected',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'existingofferid'
+        );
+        $membertable = new xmldb_table('local_subs_commerce_offer_campaign_member');
+        if (!$dbman->field_exists($membertable, $snapshotselected)) {
+            $dbman->add_field($membertable, $snapshotselected);
+        }
+
+        // Fresh installs already get this FK from install.xml. Existing K15A/B
+        // installations may have the field without the key.
+        $existingofferkey = new xmldb_key(
+            'existingoffer_fk',
+            XMLDB_KEY_FOREIGN,
+            ['existingofferid'],
+            'local_subs_commerce_offer',
+            ['id']
+        );
+        if (
+            $dbman->table_exists($membertable)
+            && $dbman->field_exists($membertable, new xmldb_field('existingofferid'))
+            && !$dbman->find_key_name($membertable, $existingofferkey)
+        ) {
+            $dbman->add_key($membertable, $existingofferkey);
+        }
+
+        upgrade_plugin_savepoint(true, 2026080904, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026080905) {
+        $table = new xmldb_table('local_subs_commerce_offer_campaign');
+
+        $fields = [
+            new xmldb_field(
+                'certifiedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null,
+                'selectedcount'
+            ),
+            new xmldb_field(
+                'certifiedby',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null,
+                'certifiedat'
+            ),
+        ];
+
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2026080905, 'local', 'subscriptions');
+    }
+
     return true;
 }

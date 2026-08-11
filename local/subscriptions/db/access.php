@@ -67,6 +67,13 @@ $capabilities = [
         ],
     ],
 
+    'local/subscriptions:manage_showrooms' => [
+        'riskbitmask' => RISK_CONFIG | RISK_XSS,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => ['manager' => CAP_ALLOW],
+    ],
+
     'local/subscriptions:manage_configuration' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,

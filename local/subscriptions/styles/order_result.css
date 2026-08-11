@@ -1,0 +1,481 @@
+.commerce-order-result { max-width: 1120px; }
+.commerce-order-hero { display:flex; gap:1rem; align-items:flex-start; padding:1.5rem; border-radius:1.25rem; background:#f8f9fa; }
+.commerce-order-hero__icon { width:3rem; height:3rem; flex:0 0 3rem; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:700; background:#fff; box-shadow:0 .25rem 1rem rgba(0,0,0,.08); }
+.commerce-order-hero__title { margin:0 0 .35rem; font-size:clamp(1.6rem,3vw,2.35rem); }
+.commerce-order-hero__message { margin:0; color:#5f6670; }
+.commerce-order-hero--success { background:#edf9f1; }
+.commerce-order-hero--danger { background:#fff1f1; }
+.commerce-order-hero--warning { background:#fff8e8; }
+.commerce-order-hero--info { background:#eef6ff; }
+.commerce-order-card { border-radius:1.25rem; overflow:hidden; }
+.commerce-order-total { font-size:1.45rem; font-weight:700; white-space:nowrap; }
+.commerce-order-item { display:flex; justify-content:space-between; gap:1rem; padding:1rem 0; border-top:1px solid rgba(0,0,0,.08); }
+.commerce-order-item:first-of-type { border-top:0; }
+.commerce-order-next li + li { margin-top:.8rem; }
+.commerce-order-next a { text-decoration:none; font-weight:600; }
+@media (max-width: 576px) { .commerce-order-hero { padding:1.1rem; } .commerce-order-item { align-items:flex-start; } }
+
+/* Professional post-purchase states and accessibility. */
+.commerce-order-access-state {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    margin-top: .75rem;
+    padding: .4rem .7rem;
+    border-radius: 999px;
+    font-size: .875rem;
+    font-weight: 650;
+}
+.commerce-order-access-state--preparing { background: #fff6df; color: #795900; }
+.commerce-order-access-state--failed { background: #fff0f0; color: #9f2020; }
+.commerce-order-result a:focus-visible,
+.commerce-order-result button:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+}
+@media (max-width: 576px) {
+    .commerce-order-result .btn { max-width: 100%; white-space: normal; }
+    .commerce-order-total { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .commerce-order-result *, .commerce-order-result *::before, .commerce-order-result *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+    }
+}
+
+.commerce-order-account-card {
+    border: 1px solid #f3dce7 !important;
+    background: linear-gradient(145deg, #fff 0%, #fff7fb 100%);
+}
+
+.commerce-order-account-card__icon {
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    background: #ffe9f3;
+    font-size: 1.35rem;
+    place-items: center;
+}
+
+/* J6.7B14 — four-step post-payment journey. */
+.commerce-order-result .commerce-checkout-steps {
+    margin: 0 0 1.5rem;
+}
+
+.commerce-order-result .commerce-checkout-steps__list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.commerce-order-result .commerce-checkout-steps__item {
+    position: relative;
+    min-width: 0;
+    text-align: center;
+}
+
+.commerce-order-result
+.commerce-checkout-steps__item:not(:last-child)::before {
+    position: absolute;
+    z-index: 0;
+    top: 1rem;
+    left: calc(50% + 1rem);
+    width: calc(100% - 2rem);
+    height: 2px;
+    background: #dfe3ea;
+    content: "";
+}
+
+.commerce-order-result
+.commerce-checkout-steps__item.is-complete:not(:last-child)::before {
+    background: #168a58;
+}
+
+.commerce-order-result .commerce-checkout-steps__link {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: .45rem;
+    color: #7a8496;
+    text-decoration: none;
+}
+
+.commerce-order-result .commerce-checkout-steps__marker {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 2px solid #dfe3ea;
+    border-radius: 50%;
+    background: #fff;
+    color: #7a8496;
+    font-size: .78rem;
+    font-weight: 850;
+}
+
+.commerce-order-result .commerce-checkout-steps__label {
+    overflow: hidden;
+    max-width: 100%;
+    font-size: .76rem;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.commerce-order-result
+.commerce-checkout-steps__item.is-complete
+.commerce-checkout-steps__marker {
+    border-color: #168a58;
+    background: #168a58;
+    color: #fff;
+}
+
+.commerce-order-result
+.commerce-checkout-steps__item.is-complete
+.commerce-checkout-steps__label {
+    color: #146c49;
+}
+
+.commerce-order-result
+.commerce-checkout-steps__item.is-current
+.commerce-checkout-steps__marker {
+    border-color: var(--primary, var(--bs-primary, #ec4899));
+    background: var(--primary, var(--bs-primary, #ec4899));
+    color: #fff;
+}
+
+.commerce-order-result
+.commerce-checkout-steps__item.is-current
+.commerce-checkout-steps__label {
+    color: #2f1f35;
+}
+
+.commerce-order-result
+.commerce-checkout-steps__item.is-failed
+.commerce-checkout-steps__marker {
+    border-color: #d14343;
+    background: #d14343;
+    color: transparent;
+}
+
+.commerce-order-result
+.commerce-checkout-steps__item.is-failed
+.commerce-checkout-steps__marker::before {
+    color: #fff;
+    content: "!";
+    font-size: .9rem;
+    font-weight: 900;
+}
+
+.commerce-order-result
+.commerce-checkout-steps__item.is-failed
+.commerce-checkout-steps__label {
+    color: #b42318;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-order-result .commerce-checkout-steps__label {
+        font-size: .65rem;
+        white-space: normal;
+    }
+
+    .commerce-order-result
+    .commerce-checkout-steps__item:not(:last-child)::before {
+        left: calc(50% + .85rem);
+        width: calc(100% - 1.7rem);
+    }
+}
+
+/* J6.7B15 — post-payment content actions and visual rhythm. */
+.commerce-order-item-group {
+    padding: 1rem 0;
+}
+
+.commerce-order-item-group + .commerce-order-item-group {
+    border-top: 1px solid rgba(0, 0, 0, .08);
+}
+
+.commerce-order-item {
+    padding: 0;
+    border-top: 0;
+}
+
+.commerce-order-item__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    margin-top: .85rem;
+    padding-bottom: .1rem;
+}
+
+.commerce-order-item__actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important;
+}
+
+.commerce-order-item__actions
+.commerce-order-access-state {
+    margin-top: 0;
+}
+
+.commerce-order-next {
+    display: grid;
+    gap: .55rem;
+}
+
+.commerce-order-next li + li {
+    margin-top: 0;
+}
+
+.commerce-order-next a {
+    display: flex;
+    min-height: 2.65rem;
+    align-items: center;
+    gap: .7rem;
+    padding: .55rem .7rem;
+    border: 1px solid rgba(152, 162, 179, .22);
+    border-radius: .7rem;
+    background: #fafbfc;
+}
+
+.commerce-order-next a:hover {
+    border-color: rgba(247, 37, 133, .32);
+    background: #fff7fb;
+}
+
+.commerce-order-next a i {
+    display: inline-grid;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex: 0 0 1.75rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #ffe7f2;
+    color: var(--primary, var(--bs-primary, #ec4899));
+    font-size: .78rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-order-item__actions {
+        display: grid;
+    }
+
+    .commerce-order-item__actions .btn {
+        width: 100%;
+    }
+}
+
+
+
+/* J12E — post-purchase account finalisation. */
+.commerce-account-dialog { width:min(92vw, 34rem); padding:0; border:0; border-radius:1.35rem; background:#fff; color:#2f1f35; box-shadow:0 1.5rem 5rem rgba(25,20,45,.28); }
+.commerce-account-dialog::backdrop { background:rgba(22,17,38,.62); backdrop-filter:blur(3px); }
+.commerce-account-dialog[open] { padding:clamp(1.5rem,4vw,2.5rem); text-align:center; }
+.commerce-account-dialog__icon { font-size:2.6rem; margin-bottom:.8rem; }
+.commerce-account-dialog h2 { margin:0 0 .75rem; color:#2f1f55; font-weight:800; }
+.commerce-account-dialog p { color:#667085; line-height:1.6; }
+.commerce-account-dialog__benefits { display:grid; gap:.45rem; margin:1.2rem 0; padding:0; list-style:none; text-align:left; }
+.commerce-account-dialog__benefits li::before { margin-right:.55rem; color:#168a58; content:'✓'; font-weight:800; }
+.commerce-account-dialog__actions { display:flex; flex-direction:column; gap:.45rem; align-items:stretch; }
+.commerce-account-ready-confirmation { border-radius:.85rem; }
+
+/* J12F — product visuals and clearer post-purchase hierarchy. */
+.commerce-order-item__identity {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: .9rem;
+}
+
+.commerce-order-item__visual {
+    display: grid;
+    width: 4.5rem;
+    height: 4.5rem;
+    flex: 0 0 4.5rem;
+    overflow: hidden;
+    place-items: center;
+    border-radius: .9rem;
+    background: linear-gradient(135deg, #f0e9ff, #ffe8f2);
+    color: var(--primary, var(--bs-primary, #ec4899));
+    font-size: 1.55rem;
+}
+
+.commerce-order-item__cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.commerce-order-item__price {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.commerce-order-next__primary a {
+    border-color: var(--primary, var(--bs-primary, #ec4899));
+    background: var(--primary, var(--bs-primary, #ec4899));
+    color: #fff;
+}
+
+.commerce-order-next__primary a:hover,
+.commerce-order-next__primary a:focus {
+    border-color: #d91f78;
+    background: #d91f78;
+    color: #fff;
+}
+
+.commerce-order-next__primary a i {
+    background: rgba(255, 255, 255, .18);
+    color: #fff;
+}
+
+.commerce-order-secondary-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-order-item {
+        align-items: flex-start;
+    }
+
+    .commerce-order-item__visual {
+        width: 4rem;
+        height: 4rem;
+        flex-basis: 4rem;
+    }
+
+    .commerce-order-item__price {
+        padding-top: .2rem;
+    }
+}
+
+/* J14B — bundle fulfilment actions grouped by purchased article. */
+.commerce-order-bundle-components {
+    display: grid;
+    gap: .75rem;
+    margin-top: 1rem;
+    padding: .85rem;
+    border: 1px solid rgba(15, 23, 42, .08);
+    border-radius: .9rem;
+    background: #fafbfc;
+}
+
+.commerce-order-bundle-component {
+    padding: .85rem;
+    border: 1px solid rgba(15, 23, 42, .08);
+    border-radius: .8rem;
+    background: #fff;
+}
+
+.commerce-order-bundle-component__identity {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: .8rem;
+}
+
+.commerce-order-bundle-component__visual {
+    display: grid;
+    width: 3.5rem;
+    height: 3.5rem;
+    flex: 0 0 3.5rem;
+    place-items: center;
+    overflow: hidden;
+    border-radius: .7rem;
+    background: linear-gradient(135deg, #efe8ff, #ffe8f2);
+    color: var(--primary, var(--bs-primary, #ec4899));
+}
+
+.commerce-order-bundle-component__cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.commerce-order-bundle-component__main {
+    min-width: 0;
+}
+
+
+/* J14G1 — Order result navigation and account-ready spacing. */
+.commerce-order-account-ready {
+    margin-top: 1.5rem;
+}
+
+.commerce-order-account-ready .alert {
+    margin-bottom: 0;
+}
+
+.commerce-order-next__store {
+    margin-top: .7rem;
+    padding-top: .85rem;
+    border-top: 1px solid rgba(152, 162, 179, .24);
+}
+
+.commerce-order-next__store a {
+    background: #fff;
+}
+
+.commerce-order-next__store a:hover {
+    border-color: rgba(247, 37, 133, .38);
+    background: #fff7fb;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-order-account-ready {
+        margin-top: 1rem;
+    }
+}
+
+
+/* J15H.1A — readable order items on narrow phones. */
+@media (max-width: 575.98px) {
+    .commerce-order-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: .65rem;
+    }
+
+    .commerce-order-item__identity {
+        min-width: 0;
+        align-items: flex-start;
+    }
+
+    .commerce-order-item__main {
+        min-width: 0;
+    }
+
+    .commerce-order-item__main h3 {
+        overflow-wrap: anywhere;
+    }
+
+    .commerce-order-item__price {
+        padding-left: calc(4.5rem + .75rem);
+        font-size: 1rem;
+        text-align: left;
+        white-space: normal;
+    }
+}
+
+
+/* J15H.1I — account-finalisation gate for protected course actions. */
+.commerce-order-account-gated-action {
+    position: relative;
+}
+.commerce-order-account-gated-action::after {
+    margin-left: .55rem;
+    content: "\f023";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    opacity: .72;
+}

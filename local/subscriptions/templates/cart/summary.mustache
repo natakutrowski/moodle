@@ -1,0 +1,73 @@
+<aside class="commerce-cart-summary card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <h2 class="h4 mb-4">{{totallabel}}</h2>
+
+        <div class="commerce-cart-promo mb-4">
+            <form method="post" action="{{removeaction}}" class="commerce-cart-promo__form">
+                <input type="hidden" name="action" value="applypromo">
+                <input type="hidden" name="currency" value="{{currency}}">
+                <input type="hidden" name="returnurl" value="{{returnurl}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <label for="commerce-cart-promotion-code" class="form-label">{{promocodelabel}}</label>
+                <div class="input-group">
+                    <input id="commerce-cart-promotion-code" class="form-control" type="text" name="promotioncode"
+                           value="{{promotioncode}}" placeholder="{{promocodeplaceholder}}" autocomplete="off" maxlength="64">
+                    <button class="btn btn-outline-primary" type="submit">{{promoapplylabel}}</button>
+                </div>
+            </form>
+            {{#haspromotioncode}}
+                <div class="commerce-cart-promo__applied d-flex align-items-center justify-content-between gap-2 mt-2">
+                    <span><strong>{{promotioncode}}</strong></span>
+                    <form method="post" action="{{removeaction}}">
+                        <input type="hidden" name="action" value="removepromo">
+                        <input type="hidden" name="currency" value="{{currency}}">
+                        <input type="hidden" name="returnurl" value="{{returnurl}}">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}">
+                        <button class="btn btn-sm btn-link text-danger p-0" type="submit">{{promoremovelabel}}</button>
+                    </form>
+                </div>
+            {{/haspromotioncode}}
+        </div>
+
+        <dl class="commerce-cart-summary__totals mb-4">
+            <div>
+                <dt>{{listtotallabel}}</dt>
+                <dd>{{listtotalformatted}}</dd>
+            </div>
+            {{#hasproductpromotiontotal}}
+                <div class="commerce-cart-summary__discount">
+                    <dt>{{productpromotiontotallabel}}</dt>
+                    <dd>− {{productpromotiontotalformatted}}</dd>
+                </div>
+            {{/hasproductpromotiontotal}}
+            {{#hastrialdiscounttotal}}
+                <div class="commerce-cart-summary__discount">
+                    <dt>{{trialdiscounttotallabel}}</dt>
+                    <dd>− {{trialdiscounttotalformatted}}</dd>
+                </div>
+            {{/hastrialdiscounttotal}}
+            {{#hasupgradecredittotal}}
+                <div class="commerce-cart-summary__discount">
+                    <dt>{{upgradecredittotallabel}}</dt>
+                    <dd>− {{upgradecredittotalformatted}}</dd>
+                </div>
+            {{/hasupgradecredittotal}}
+            {{#promotionadjustments}}
+                <div class="commerce-cart-summary__discount">
+                    <dt>{{#hascode}}{{code}}{{/hascode}}{{^hascode}}{{name}}{{/hascode}}</dt>
+                    <dd>− {{amountformatted}}</dd>
+                </div>
+            {{/promotionadjustments}}
+            {{#hastotalreductions}}
+                <div class="commerce-cart-summary__total-reductions">
+                    <dt>{{totalreductionslabel}}</dt>
+                    <dd>− {{totalreductionsformatted}}</dd>
+                </div>
+            {{/hastotalreductions}}
+            <div class="commerce-cart-summary__grand-total"><dt>{{totallabel}}</dt><dd>{{totalformatted}}</dd></div>
+        </dl>
+        {{#checkoutdisabled}}<button class="btn btn-primary btn-lg w-100" type="button" disabled>{{checkoutlabel}}</button>{{/checkoutdisabled}}
+        {{^checkoutdisabled}}<a class="btn btn-primary btn-lg w-100" href="{{checkouturl}}">{{checkoutlabel}}</a>{{/checkoutdisabled}}
+        {{> local_subscriptions/commerce/payment_reassurance}}
+    </div>
+</aside>

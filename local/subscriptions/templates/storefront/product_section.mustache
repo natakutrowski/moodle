@@ -1,0 +1,262 @@
+<section id="{{id}}" class="commerce-product-section commerce-product-section--{{type}} commerce-product-section--style-{{style}} commerce-product-section--presentation-{{presentation}} commerce-product-section--animation-{{animation}} {{composerclasses}}" data-premium-animation="{{animation}}" data-composer-row="{{composerrowid}}" data-composer-column="{{composercolumn}}" data-composer-columns="{{composercolumns}}">
+    {{#ishero}}
+        <div class="commerce-editorial-hero {{heroclasses}}">
+            <div class="commerce-editorial-hero__content">
+                {{#title}}{{#builderproducthero}}<h1 class="commerce-product-section__title commerce-product-section__title--hero">{{title}}</h1>{{/builderproducthero}}{{^builderproducthero}}<h2 class="commerce-product-section__title">{{title}}</h2>{{/builderproducthero}}{{/title}}
+                {{#subtitle}}<p class="commerce-product-section__subtitle">{{subtitle}}</p>{{/subtitle}}
+                {{#content}}<div class="commerce-product-section__richtext">{{{content}}}</div>{{/content}}
+            </div>
+            {{#hasurl}}<img src="{{url}}" alt="{{alt}}" class="commerce-editorial-hero__image">{{/hasurl}}
+        </div>
+    {{/ishero}}
+
+    {{^ishero}}
+        {{#title}}<h2 class="commerce-product-section__title">{{title}}</h2>{{/title}}
+        {{#subtitle}}<p class="commerce-product-section__subtitle">{{subtitle}}</p>{{/subtitle}}
+    {{/ishero}}
+
+    {{#isrichtext}}
+        <div class="commerce-product-section__richtext">{{{content}}}</div>
+    {{/isrichtext}}
+
+    {{#isimagetext}}
+        <div class="commerce-image-text {{#imagecontain}}commerce-image-text--contain {{/imagecontain}}{{#imageright}}commerce-image-text--reverse{{/imageright}} {{#ratio4060}}commerce-image-text--40-60{{/ratio4060}} {{#ratio6040}}commerce-image-text--60-40{{/ratio6040}}">
+            <div class="commerce-image-text__media">
+                {{#hasimagehtml}}{{{imagehtml}}}{{/hasimagehtml}}
+            </div>
+            <div class="commerce-image-text__content">{{{content}}}</div>
+        </div>
+    {{/isimagetext}}
+
+    {{#isvideo}}
+        <figure class="commerce-product-video {{#ratio43}}commerce-product-video--4-3{{/ratio43}} {{#ratio11}}commerce-product-video--1-1{{/ratio11}}">
+            {{#hasvideohtml}}
+                {{{videohtml}}}
+            {{/hasvideohtml}}
+            {{#isembed}}
+                <iframe src="{{embedurl}}" title="{{title}}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+            {{/isembed}}
+            {{#caption}}<figcaption>{{{caption}}}</figcaption>{{/caption}}
+        </figure>
+    {{/isvideo}}
+
+    {{#ish5p}}
+        <div class="commerce-product-h5p">
+            {{#hash5phtml}}
+                {{{h5phtml}}}
+            {{/hash5phtml}}
+            {{^hash5phtml}}
+                <div class="alert alert-light">{{#str}}commerce_storefront_h5p_missing, local_subscriptions{{/str}}</div>
+            {{/hash5phtml}}
+            {{#content}}<div class="commerce-product-h5p__caption">{{{content}}}</div>{{/content}}
+        </div>
+    {{/ish5p}}
+
+    {{#isfeatures}}
+        {{#content}}<div class="commerce-product-section__richtext">{{{content}}}</div>{{/content}}
+        <div class="row g-4 {{#featuresfour}}commerce-product-features--four{{/featuresfour}}">
+            {{#items}}
+            <div class="col-12 col-md-6 {{^featuresfour}}col-xl-4{{/featuresfour}}">
+                <div class="commerce-product-feature h-100">
+                    {{#title}}<h3>{{title}}</h3>{{/title}}
+                    <div>{{{content}}}</div>
+                </div>
+            </div>
+            {{/items}}
+        </div>
+    {{/isfeatures}}
+
+    {{#isprogram}}
+        <ol class="commerce-product-program">
+            {{#items}}
+            <li>
+                <span class="commerce-product-program__number">{{number}}</span>
+                <div>
+                    <h3>{{title}}</h3>
+                    <div>{{{content}}}</div>
+                </div>
+            </li>
+            {{/items}}
+        </ol>
+    {{/isprogram}}
+
+    {{#isinstructor}}
+        <div class="commerce-product-instructor">
+            {{#url}}<img src="{{url}}" alt="{{alt}}" loading="lazy">{{/url}}
+            <div>
+                {{#name}}<h3>{{name}}</h3>{{/name}}
+                {{#role}}<p class="commerce-product-instructor__role">{{role}}</p>{{/role}}
+                <div>{{{content}}}</div>
+            </div>
+        </div>
+    {{/isinstructor}}
+
+    {{#ismedia}}
+        {{#url}}<figure class="commerce-product-media"><img src="{{url}}" alt="{{alt}}" class="img-fluid rounded-4">{{#caption}}<figcaption>{{{caption}}}</figcaption>{{/caption}}</figure>{{/url}}
+    {{/ismedia}}
+
+    {{#istestimonial}}
+        <blockquote class="commerce-product-testimonial">
+            <div>{{{quote}}}</div>
+            {{#author}}<footer>{{author}}</footer>{{/author}}
+        </blockquote>
+    {{/istestimonial}}
+
+    {{#istestimonials}}
+        <div class="commerce-product-testimonials">
+            {{#items}}
+            <blockquote class="commerce-product-testimonial">
+                <div>{{{quote}}}</div>
+                {{#author}}<footer>{{author}}</footer>{{/author}}
+            </blockquote>
+            {{/items}}
+        </div>
+    {{/istestimonials}}
+
+    {{#isfaq}}
+        <div class="commerce-product-faq">
+            {{#items}}
+            <details>
+                <summary>{{question}}</summary>
+                <div class="pt-3">{{{answer}}}</div>
+            </details>
+            {{/items}}
+        </div>
+    {{/isfaq}}
+
+    {{#isgallery}}
+        <div class="commerce-product-gallery">
+            {{#items}}
+            <figure>
+                <img src="{{url}}" alt="{{alt}}" loading="lazy">
+                {{#caption}}<figcaption>{{caption}}</figcaption>{{/caption}}
+            </figure>
+            {{/items}}
+        </div>
+    {{/isgallery}}
+
+    {{#iscta}}
+        <div class="commerce-product-cta text-center">
+            <div class="mb-4">{{{content}}}</div>
+            {{^owned}}
+                <div class="commerce-product-cta__pricing">
+                    {{> local_subscriptions/storefront/product_price }}
+                </div>
+                <form method="get" action="{{producturl}}" class="commerce-storefront__currency-form commerce-product-cta__currency-form">
+                    <input type="hidden" name="sku" value="{{sku}}">
+                    {{> local_subscriptions/storefront/currency_selector }}
+                </form>
+            {{/owned}}
+            {{#hasupgrade}}
+                {{#canaddupgradetocart}}
+                    <div class="commerce-product-cta__actions d-flex flex-wrap justify-content-center gap-2">
+                        <form method="post" action="{{cartaction}}">
+                            <input type="hidden" name="action" value="{{upgradetoggleaction}}">
+                            {{^upgradeincart}}<input type="hidden" name="operation" value="upgrade">{{/upgradeincart}}
+                            {{^upgradeincart}}<input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}">{{/upgradeincart}}
+                            <input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{upgradepriceid}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                            <button type="submit" class="btn {{#upgradeincart}}btn-outline-danger{{/upgradeincart}}{{^upgradeincart}}btn-primary{{/upgradeincart}} btn-lg">{{upgradetogglelabel}}</button>
+                        </form>
+                        {{^upgradeincart}}
+                            <form method="post" action="{{cartaction}}">
+                                <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1"><input type="hidden" name="operation" value="upgrade"><input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{upgradepriceid}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                <button type="submit" class="btn btn-outline-primary btn-lg"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{buy_now_label}}</button>
+                            </form>
+                        {{/upgradeincart}}
+                    </div>
+                {{/canaddupgradetocart}}
+            {{/hasupgrade}}
+            {{^hasupgrade}}
+            {{#canpurchase}}
+                {{#prices}}
+                    {{#canaddtocart}}
+                        <div class="commerce-product-cta__actions d-flex flex-wrap justify-content-center gap-2">
+                            <form method="post" action="{{cartaction}}">
+                                <input type="hidden" name="action" value="{{toggleaction}}">
+                                <input type="hidden" name="sku" value="{{sku}}">
+                                <input type="hidden" name="priceid" value="{{id}}">
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                <button type="submit" class="btn {{#incart}}btn-outline-danger{{/incart}}{{^incart}}btn-primary{{/incart}} btn-lg">
+                                    {{#incart}}<i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{/incart}}
+                                    {{^incart}}<i class="fa-solid fa-cart-plus me-2" aria-hidden="true"></i>{{/incart}}
+                                    {{togglelabel}}
+                                </button>
+                            </form>
+                            {{^incart}}
+                                <form method="post" action="{{cartaction}}">
+                                    <input type="hidden" name="action" value="buynow">
+                                    <input type="hidden" name="express" value="1">
+                                    <input type="hidden" name="sku" value="{{sku}}">
+                                    <input type="hidden" name="priceid" value="{{id}}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                    <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                    <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                    <button type="submit" class="btn btn-outline-primary btn-lg">
+                                        <i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{buy_now_label}}
+                                    </button>
+                                </form>
+                            {{/incart}}
+                        </div>
+                    {{/canaddtocart}}
+                {{/prices}}
+            {{/canpurchase}}
+            {{/hasupgrade}}
+            {{#owned}}
+                {{#hasowneddownloads}}
+                    <div class="commerce-product-cta__actions d-flex flex-wrap justify-content-center gap-2">
+                        {{#owneddownloads}}
+                            <a href="{{url}}" class="btn {{buttonclass}} btn-lg">
+                                <i class="{{buttonicon}} me-2" aria-hidden="true"></i>{{label}}
+                            </a>
+                        {{/owneddownloads}}
+                    </div>
+                {{/hasowneddownloads}}
+                {{^hasowneddownloads}}
+                    <a href="{{ownedactionurl}}" class="btn btn-success btn-lg">{{ownedactionlabel}}</a>
+                {{/hasowneddownloads}}
+            {{/owned}}
+            {{#hasshowroom}}
+                <div class="mt-3">
+                    <a href="{{showroomurl}}" class="btn btn-link commerce-product-cta__showroom">
+                        <i class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></i>{{showroomlabel}}
+                    </a>
+                </div>
+            {{/hasshowroom}}
+        </div>
+    {{/iscta}}
+
+    {{#iscomponents}}
+        <div class="row g-3">
+            {{#items}}
+            <div class="col-md-6">
+                <div class="commerce-product-component h-100">
+                    <h3>{{name}}</h3>
+                    <div>{{{description}}}</div>
+                </div>
+            </div>
+            {{/items}}
+        </div>
+    {{/iscomponents}}
+    {{#istimeline}}
+        <ol class="commerce-premium-timeline">
+            {{#items}}<li><span class="commerce-premium-timeline__dot" aria-hidden="true"></span><div><h3>{{title}}</h3><div>{{{content}}}</div></div></li>{{/items}}
+        </ol>
+    {{/istimeline}}
+
+    {{#iscomparison}}
+        <div class="commerce-premium-comparison">
+            {{#items}}<article><h3>{{title}}</h3><div>{{{content}}}</div></article>{{/items}}
+        </div>
+    {{/iscomparison}}
+
+    {{#isaccordion}}
+        <div class="commerce-premium-accordion">
+            {{#items}}<details><summary>{{title}}</summary><div>{{{content}}}</div></details>{{/items}}
+        </div>
+    {{/isaccordion}}
+
+</section>

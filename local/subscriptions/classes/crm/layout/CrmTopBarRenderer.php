@@ -8,6 +8,7 @@ use context;
 use context_system;
 use html_writer;
 use local_subscriptions\subscription_config;
+use local_subscriptions\url\UrlFactory;
 use moodle_url;
 
 /**
@@ -341,10 +342,16 @@ final class CrmTopBarRenderer {
         );
 
         $out .= $this->render_user_menu_link(
-            new moodle_url(
-                subscription_config::
-                    campus_my_courses_page()
-            ),
+            UrlFactory::my_campus(),
+            '⌂',
+            get_string(
+                'crm_topbar_my_campus',
+                'local_subscriptions'
+            )
+        );
+
+        $out .= $this->render_user_menu_link(
+            UrlFactory::my_courses(),
             '📚',
             get_string(
                 'crm_topbar_my_courses',
@@ -352,32 +359,39 @@ final class CrmTopBarRenderer {
             )
         );
 
-/*         $out .= $this->render_user_menu_link(
-            new moodle_url(
-                subscription_config::
-                    moodle_grade_overview_page()
-            ),
-            '🎓',
+        $out .= $this->render_user_menu_link(
+            UrlFactory::my_digital_products(),
+            '📁',
             get_string(
-                'crm_topbar_grades',
+                'crm_topbar_my_resources',
                 'local_subscriptions'
             )
         );
- */
 
         $out .= $this->render_user_menu_link(
-            new moodle_url(
-                subscription_config::
-                    moodle_calendar_page(),
-                [
-                    'view' => 'month',
-                ]
-            ),
-            '📅',
+            UrlFactory::my_purchases(),
+            '🧾',
             get_string(
-                'crm_topbar_calendar',
+                'crm_topbar_my_purchases',
                 'local_subscriptions'
             )
+        );
+
+        $out .= $this->render_user_menu_link(
+            UrlFactory::storefront(),
+            '🏪',
+            get_string(
+                'crm_topbar_shop',
+                'local_subscriptions'
+            )
+        );
+
+        $out .= html_writer::div(
+            '',
+            'crm-app-topbar-user-divider',
+            [
+                'aria-hidden' => 'true',
+            ]
         );
 
         $out .= $this->render_user_menu_link(

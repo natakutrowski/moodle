@@ -186,6 +186,23 @@ final class UserExplorerRepository {
                 ) AS purchasecount,
 
                 COALESCE(
+                    purchases.successfulpurchasecount,
+                    0
+                ) AS successfulpurchasecount,
+
+                COALESCE(
+                    purchases.revenueeurminor,
+                    0
+                ) AS revenueeurminor,
+
+                COALESCE(
+                    purchases.revenuerubminor,
+                    0
+                ) AS revenuerubminor,
+
+                purchases.lastpurchaseat AS lastpurchaseat,
+
+                COALESCE(
                     successplans.openplancount,
                     0
                 ) AS customer_success_open_count,
@@ -457,12 +474,36 @@ final class UserExplorerRepository {
             UserExplorerCriteria::PRESENCE_YES
         ) {
             $conditions[] = "
-                EXISTS (
-                    SELECT 1
-                    FROM {user_subscription} filteredsubscription
-                    WHERE filteredsubscription.userid = u.id
+                (
+                    EXISTS (
+                        SELECT 1
+                        FROM {user_subscription} filteredsubscription
+                        WHERE filteredsubscription.userid = u.id
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM {local_subscriptions_commerce_purchase} filteredcoursepurchase
+                        WHERE filteredcoursepurchase.userid = u.id
+                        AND LOWER(filteredcoursepurchase.type) IN (
+                            'course', 'course_access', 'subscription'
+                        )
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM {local_subscriptions_commerce_purchase_item} filteredupgradeitem
+                        JOIN {local_subscriptions_commerce_purchase} filteredupgradepurchase
+                          ON filteredupgradepurchase.id = filteredupgradeitem.purchaseid
+                        WHERE filteredupgradepurchase.userid = u.id
+                        AND " . $DB->sql_like(
+                            'filteredupgradeitem.metadatajson',
+                            ':explorerupgradeoperation',
+                            false,
+                            false
+                        ) . "
+                    )
                 )
             ";
+            $params['explorerupgradeoperation'] = '%\"operation\":\"upgrade\"%';
         }
 
         if (
@@ -470,12 +511,36 @@ final class UserExplorerRepository {
             UserExplorerCriteria::PRESENCE_NO
         ) {
             $conditions[] = "
-                NOT EXISTS (
-                    SELECT 1
-                    FROM {user_subscription} filteredsubscription
-                    WHERE filteredsubscription.userid = u.id
+                NOT (
+                    EXISTS (
+                        SELECT 1
+                        FROM {user_subscription} filteredsubscription
+                        WHERE filteredsubscription.userid = u.id
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM {local_subscriptions_commerce_purchase} filteredcoursepurchase
+                        WHERE filteredcoursepurchase.userid = u.id
+                        AND LOWER(filteredcoursepurchase.type) IN (
+                            'course', 'course_access', 'subscription'
+                        )
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM {local_subscriptions_commerce_purchase_item} filteredupgradeitem
+                        JOIN {local_subscriptions_commerce_purchase} filteredupgradepurchase
+                          ON filteredupgradepurchase.id = filteredupgradeitem.purchaseid
+                        WHERE filteredupgradepurchase.userid = u.id
+                        AND " . $DB->sql_like(
+                            'filteredupgradeitem.metadatajson',
+                            ':explorernoUpgradeOperation',
+                            false,
+                            false
+                        ) . "
+                    )
                 )
             ";
+            $params['explorernoUpgradeOperation'] = '%\"operation\":\"upgrade\"%';
         }
 
         if (
@@ -483,27 +548,35 @@ final class UserExplorerRepository {
             UserExplorerCriteria::PRESENCE_ALL
         ) {
             $purchaseemailcompare =
-                $DB->sql_compare_text('filteredpurchase.email') .
+                $DB->sql_compare_text('filteredpurchase.customeremail') .
                 ' = ' .
                 $DB->sql_compare_text('u.email');
 
             $purchaseexists = "
                 EXISTS (
                     SELECT 1
-                    FROM {subscription_digital_payment_request}
+                    FROM {local_subscriptions_commerce_purchase}
                         filteredpurchase
-                    WHERE filteredpurchase.status IN (
+                    WHERE (
+                        filteredpurchase.userid = u.id
+                        OR (
+                            filteredpurchase.userid IS NULL
+                            AND {$purchaseemailcompare}
+                        )
+                    )
+                    AND EXISTS (
+                        SELECT 1
+                        FROM {local_subscriptions_commerce_payment}
+                            filteredpayment
+                        WHERE filteredpayment.purchaseid =
+                            filteredpurchase.id
+                        AND LOWER(filteredpayment.status) IN (
                             'paid',
                             'completed',
-                            'PAID',
-                            'COMPLETED'
+                            'captured',
+                            'succeeded',
+                            'success'
                         )
-                    AND (
-                            filteredpurchase.userid = u.id
-                            OR (
-                                filteredpurchase.userid IS NULL
-                                AND {$purchaseemailcompare}
-                            )
                     )
                 )
             ";
@@ -1178,47 +1251,73 @@ final class UserExplorerRepository {
         $emailcompare =
             $DB->sql_compare_text('matcheduser.email') .
             ' = ' .
-            $DB->sql_compare_text('purchase.email');
+            $DB->sql_compare_text('purchase.customeremail');
 
         return "
             LEFT JOIN (
                 SELECT
                     matched.matcheduserid,
-                    COUNT(DISTINCT matched.purchaseid)
-                        AS purchasecount
+                    COUNT(DISTINCT matched.purchaseid) AS purchasecount,
+                    COUNT(DISTINCT CASE
+                        WHEN matched.successful = 1 THEN matched.purchaseid
+                        ELSE NULL
+                    END) AS successfulpurchasecount,
+                    SUM(CASE
+                        WHEN matched.successful = 1
+                         AND matched.currency = 'EUR'
+                        THEN matched.paidminor
+                        ELSE 0
+                    END) AS revenueeurminor,
+                    SUM(CASE
+                        WHEN matched.successful = 1
+                         AND matched.currency = 'RUB'
+                        THEN matched.paidminor
+                        ELSE 0
+                    END) AS revenuerubminor,
+                    MAX(matched.timecreated) AS lastpurchaseat
+                FROM (
+                    SELECT
+                        purchase.userid AS matcheduserid,
+                        purchase.id AS purchaseid,
+                        purchase.timecreated,
+                        purchase.currency,
+                        CASE WHEN EXISTS (
+                            SELECT 1
+                            FROM {local_subscriptions_commerce_payment} paidpayment
+                            WHERE paidpayment.purchaseid = purchase.id
+                            AND LOWER(paidpayment.status) IN (
+                                'paid', 'completed', 'captured',
+                                'succeeded', 'success'
+                            )
+                        ) THEN 1 ELSE 0 END AS successful,
+                        purchase.totalminor AS paidminor
+                    FROM {local_subscriptions_commerce_purchase} purchase
+                    WHERE purchase.userid IS NOT NULL
 
-                  FROM (
-                        SELECT
-                            purchase.userid AS matcheduserid,
-                            purchase.id AS purchaseid
-                        FROM {subscription_digital_payment_request} purchase
-                        WHERE purchase.userid IS NOT NULL
-                        AND purchase.status IN (
-                                'paid',
-                                'completed',
-                                'PAID',
-                                'COMPLETED'
-                        )
+                    UNION ALL
 
-                        UNION ALL
-
-                        SELECT
-                            matcheduser.id AS matcheduserid,
-                            purchase.id AS purchaseid
-                        FROM {subscription_digital_payment_request} purchase
-                        JOIN {user} matcheduser
-                            ON {$emailcompare}
-                        AND matcheduser.deleted = 0
-                        WHERE purchase.userid IS NULL
-                        AND purchase.status IN (
-                                'paid',
-                                'completed',
-                                'PAID',
-                                'COMPLETED'
-                        )
-                  ) matched
-
-              GROUP BY matched.matcheduserid
+                    SELECT
+                        matcheduser.id AS matcheduserid,
+                        purchase.id AS purchaseid,
+                        purchase.timecreated,
+                        purchase.currency,
+                        CASE WHEN EXISTS (
+                            SELECT 1
+                            FROM {local_subscriptions_commerce_payment} paidpayment
+                            WHERE paidpayment.purchaseid = purchase.id
+                            AND LOWER(paidpayment.status) IN (
+                                'paid', 'completed', 'captured',
+                                'succeeded', 'success'
+                            )
+                        ) THEN 1 ELSE 0 END AS successful,
+                        purchase.totalminor AS paidminor
+                    FROM {local_subscriptions_commerce_purchase} purchase
+                    JOIN {user} matcheduser
+                      ON {$emailcompare}
+                     AND matcheduser.deleted = 0
+                    WHERE purchase.userid IS NULL
+                ) matched
+                GROUP BY matched.matcheduserid
             ) purchases
               ON purchases.matcheduserid = u.id
         ";

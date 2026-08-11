@@ -1,0 +1,30 @@
+<div class="commerce-storefront commerce-product-page commerce-product-page--editorial commerce-product-page--{{theme}}">
+    {{#showproducthero}}
+    <header class="commerce-product-editorial-hero">
+        <div class="container py-5 py-lg-6">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-7">
+                    <span class="badge rounded-pill text-bg-light border commerce-product-type-badge mb-3">{{typelabel}}</span>
+                    <h1 class="display-3 fw-bold mb-4">{{name}}</h1>
+                    <div class="lead mb-4">{{{shortdescription}}}</div>
+                </div>
+                <div class="col-lg-5">{{> local_subscriptions/storefront/product_main_visual }}{{#commerceinhero}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--hero mt-4">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commerceinhero}}</div>
+            </div>
+        </div>
+    </header>
+    {{/showproducthero}}
+    {{#commercebelowhero}}<div class="container commerce-product-commerce-slot commerce-product-commerce-slot--wide mt-4">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commercebelowhero}}
+    <div class="container py-5">
+        <div class="row g-5 align-items-start">
+            <div class="{{#commerceissidebar}}col-lg-8{{/commerceissidebar}}{{^commerceissidebar}}col-12{{/commerceissidebar}} commerce-product-sections">
+                {{> local_subscriptions/storefront/product_intro_sections }}
+                {{#commerceafterintro}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide my-4">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commerceafterintro}}
+                {{> local_subscriptions/storefront/product_remaining_sections }}
+            </div>
+            {{#commerceissidebar}}<aside class="col-lg-4 commerce-product-commerce-slot commerce-product-commerce-slot--sticky">{{> local_subscriptions/storefront/product_commerce_panel }}</aside>{{/commerceissidebar}}
+        </div>
+        {{#commercepagebottom}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide mt-5">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commercepagebottom}}
+    </div>
+</div>
+{{> local_subscriptions/storefront/product_recommendations }}
+{{> local_subscriptions/storefront/cart_added_modal }}

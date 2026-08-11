@@ -17,7 +17,8 @@ final class CommerceProductResolver {
         private readonly CommerceProductRepository $products,
         private readonly CommerceProductPriceRepository $prices,
         private readonly CommerceProductTranslationRepository $translations,
-        private readonly CommerceProductEntitlementRepository $entitlements
+        private readonly CommerceProductEntitlementRepository $entitlements,
+        private readonly ?CommerceEffectiveEntitlementResolver $effectiveentitlements = null
     ) {
     }
 
@@ -50,7 +51,9 @@ final class CommerceProductResolver {
             $product,
             $price,
             $this->translations->find($product->get_sku(), $language),
-            $this->entitlements->find_by_product_sku($product->get_sku())
+            $this->effectiveentitlements !== null
+                ? $this->effectiveentitlements->resolve($product)
+                : $this->entitlements->find_by_product_sku($product->get_sku())
         );
     }
 }

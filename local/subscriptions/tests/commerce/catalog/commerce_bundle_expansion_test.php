@@ -100,6 +100,57 @@ final class commerce_bundle_expansion_test extends advanced_testcase {
         (new CommerceBundleExpansionService($products, $components))->expand('PACK.A');
     }
 
+
+    public function test_draft_root_bundle_can_be_expanded_for_admin_validation(): void {
+        $this->resetAfterTest();
+
+        [$products, $components] = $this->repositories();
+        $products->save($this->product('COURSE.ONE', CommerceProductType::COURSE_ACCESS));
+        $products->save($this->product(
+            'PACK.DRAFT',
+            CommerceProductType::BUNDLE,
+            CommerceProductStatus::DRAFT
+        ));
+        $components->replace_for_parent('PACK.DRAFT', [
+            new CommerceProductComponent('PACK.DRAFT', 'COURSE.ONE'),
+        ]);
+
+        $result = (new CommerceBundleExpansionService($products, $components))->expand(
+            'PACK.DRAFT',
+            1,
+            true
+        );
+
+        $this->assertSame(1, $result->get_item_count());
+        $this->assertSame('COURSE.ONE', $result->get_items()[0]->get_sku());
+    }
+
+    public function test_admin_validation_still_rejects_inactive_descendant(): void {
+        $this->resetAfterTest();
+
+        [$products, $components] = $this->repositories();
+        $products->save($this->product(
+            'COURSE.INACTIVE',
+            CommerceProductType::COURSE_ACCESS,
+            CommerceProductStatus::INACTIVE
+        ));
+        $products->save($this->product(
+            'PACK.DRAFT',
+            CommerceProductType::BUNDLE,
+            CommerceProductStatus::DRAFT
+        ));
+        $components->replace_for_parent('PACK.DRAFT', [
+            new CommerceProductComponent('PACK.DRAFT', 'COURSE.INACTIVE'),
+        ]);
+
+        $this->expectException(\coding_exception::class);
+        (new CommerceBundleExpansionService($products, $components))->expand(
+            'PACK.DRAFT',
+            1,
+            true
+        );
+    }
+
     public function test_expansion_audit_is_certified_without_bundles(): void {
         global $DB;
 

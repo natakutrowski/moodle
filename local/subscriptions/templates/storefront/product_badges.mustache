@@ -1,0 +1,22 @@
+{{! Shared renderer for commercial merchandising badges only. }}
+{{#hasbadges}}
+<div class="d-flex flex-wrap gap-2 commerce-product-badges{{#badgecontainerclass}} {{badgecontainerclass}}{{/badgecontainerclass}}">
+    {{#badges}}
+        {{#isgustave}}
+            <span class="badge rounded-pill {{class}} commerce-product-badge commerce-product-badge--gustave">
+                <span class="commerce-product-badge__gustave-medallion" aria-hidden="true">
+                    {{#hascustomicon}}<img src="{{customiconurl}}" alt="" class="commerce-product-badge__gustave-image">{{/hascustomicon}}
+                    {{^hascustomicon}}<span class="commerce-product-badge__gustave-fallback">{{icon}}</span>{{/hascustomicon}}
+                </span>
+                <span class="commerce-product-badge__gustave-label">{{label}}</span>
+            </span>
+        {{/isgustave}}
+        {{^isgustave}}
+            <span class="badge rounded-pill {{class}} commerce-product-badge">
+                {{#icon}}<span class="commerce-product-badge__icon" aria-hidden="true">{{icon}}</span>{{/icon}}
+                <span class="commerce-product-badge__label">{{label}}</span>
+            </span>
+        {{/isgustave}}
+    {{/badges}}
+</div>
+{{/hasbadges}}

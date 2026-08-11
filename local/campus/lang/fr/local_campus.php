@@ -133,7 +133,7 @@ $string['trial_already_subscribed_html'] =
     'Vous avez déjà un abonnement actif. Veuillez <a href="{$a->login}" class="link-primary" target="_top" rel="noopener">vous connecter</a>.';
 
 $string['trial_expired_html'] =
-    'Votre période d’essai est terminée. <a href="{$a->subscribe}" class="link-primary" rel="noopener" data-subs-modal="1">Souscrivez un abonnement</a> pour continuer.';
+    'Votre période d’essai est terminée. <a href="{$a->subscribe}" class="link-primary" rel="noopener">Souscrivez un abonnement</a> pour continuer.';
 
 $string['trial_discount_banner_title'] = 'Réduction de −{$a}% pour la période d’essai.';
 $string['trial_discount_banner_body']  = 'Il reste : ';
@@ -145,7 +145,7 @@ $string['trial_banner_reminder_body']  = 'Votre accès d’essai se termine le {
 
 $string['trial_banner_expired_html'] =
     'Votre accès d’essai a expiré le <strong>{$a->date}</strong>. '
-    .'<a href="{$a->url}" class="link-primary" data-subs-modal="1">Souscrivez un abonnement</a> pour continuer.';
+    .'<a href="{$a->url}" class="link-primary">Souscrivez un abonnement</a> pour continuer.';
 
 $string['sub_expiry_banner'] =
     'Votre abonnement « {$a->plan} » expire le <strong>{$a->date}</strong> (dans {$a->days} j.).';
@@ -321,3 +321,66 @@ $string['audio_browser_not_supported'] = 'Votre navigateur ne supporte pas l’a
 $string['other_courses_available_title'] = 'Découvrir d’autres cours';
 $string['other_courses_available_text'] = 'Vous pouvez compléter votre parcours avec les autres cours disponibles sur Campus<small><sup>FR</sup></small>.';
 $string['trial_badge'] = 'Essai';
+$string['course_access_origin_purchase'] = 'Acheté';
+$string['course_access_origin_gift'] = 'Offert';
+$string['course_access_origin_trial'] = 'Essai';
+$string['course_access_origin_granted'] = 'Accès accordé';
+$string['course_access_lifetime'] = 'Accès à vie';
+$string['course_access_from'] = 'Disponible à partir du {$a}';
+$string['course_access_until'] = 'Accès jusqu’au {$a}';
+$string['course_access_expired'] = 'Accès expiré le {$a}';
+$string['course_access_view_purchase'] = 'Voir l’achat';
+
+$string['mycourses_enriched_intro'] = 'Retrouvez ici tous les cours auxquels vous avez réellement accès, leur progression et les informations utiles sur votre accès.';
+$string['mycourses_stat_total'] = 'Cours accessibles';
+$string['mycourses_stat_inprogress'] = 'En cours';
+$string['mycourses_stat_completed'] = 'Terminés';
+$string['mycourses_stat_trial'] = 'En essai';
+$string['mycourses_empty_title'] = 'Votre espace de cours est prêt';
+$string['mycourses_empty_text'] = 'Vous n’avez encore aucun cours accessible. Découvrez la boutique CampusFR ou commencez par les cours disponibles à l’essai.';
+$string['mycourses_empty_storefront'] = 'Découvrir la boutique';
+$string['mycourses_empty_trial'] = 'Voir les cours d’essai';
+$string['mycourses_course_image_alt'] = 'Illustration du cours {$a}';
+$string['mycourses_progress_not_started'] = 'Prêt à commencer quand vous le souhaitez.';
+$string['mycourses_progress_started'] = 'Beau départ, continuez sur cette lancée !';
+$string['mycourses_progress_halfway'] = 'Vous avancez bien dans ce cours.';
+$string['mycourses_progress_final_stretch'] = 'Dernière ligne droite !';
+$string['mycourses_progress_completed'] = 'Cours terminé — bravo !';
+$string['mycourses_cta_review'] = 'Revoir le cours';
+$string['mycourses_recommendations_title'] = 'Poursuivez votre parcours';
+$string['mycourses_recommendations_text'] = 'Découvrez des cours et formules adaptés à la suite de votre apprentissage.';
+$string['mycourses_recommendation_course'] = 'Cours';
+$string['mycourses_recommendation_bundle'] = 'Pack';
+$string['mycourses_recommendation_upgrade'] = 'Upgrade';
+$string['mycourses_recommendation_view'] = 'Voir la page du produit';
+$string['mycourses_recommendation_image_alt'] = 'Illustration de {$a}';
+
+$string['mycourses_recommendation_discover'] = 'Découvrir';
+
+$string['mycourses_recommendation_upgrade_heading'] = 'Complétez votre accès';
+
+$string['mycourses_recommendation_upgrade_text'] = 'Débloquez la formule complète en ne payant que le complément.';
+
+$string['mycourses_recommendation_upgrade_price'] = 'Prix upgrade';
+
+$string['nav_my_courses'] = 'Mes cours';
+$string['nav_my_resources'] = 'Mes ressources';
+$string['nav_my_purchases'] = 'Mes achats';
+$string['nav_my_profile'] = 'Mon profil';
+$string['mycourses_recommendation_discovery_price'] = 'Prix découverte';
+$string['mycourses_recommendation_standard_price'] = 'Prix';
+$string['mycourses_recommendation_upgrade_saving'] = 'Vous gagnez {$a}';
+$string['mycourses_recommendation_upgrade_saving_text'] = 'Vous avez déjà accès à {$a}. Le montant déjà payé est déduit du prix.';
+$string['trial_discount_banner_prefix'] = '🎁 −{$a} % sur les cours inclus dans votre offre d’essai. Réduction disponible encore';
+$string['trial_discount_banner_cta_current_course'] = 'Acheter ce cours';
+
+$string['mobilecoverspage'] = 'Covers mobiles des cours';
+$string['mobilecoversintro'] = 'Configurez une image paysage 4:3 utilisée dans « Mes cours » sur téléphone. En l’absence de cover dédiée, l’image principale du cours Moodle reste utilisée.';
+$string['mobilecovercourse'] = 'Cours';
+$string['mobilecoverfield'] = 'Cover mobile 4:3';
+$string['mobilecoverfield_help'] = 'Formats JPG, PNG ou WebP. Dimensions conseillées : 1600 × 1200 px. Taille maximale : 5 Mo.';
+$string['mobilecoversaved'] = 'La cover mobile a été enregistrée.';
+$string['mobilecoverdeleted'] = 'La cover mobile a été supprimée.';
+$string['mobilecoverdelete'] = 'Supprimer la cover mobile';
+$string['mobilecovernone'] = 'Aucune cover mobile dédiée. L’image principale Moodle sera utilisée en fallback.';
+$string['mobilecoverpreviewalt'] = 'Aperçu de la cover mobile du cours {$a}';

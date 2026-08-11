@@ -21,6 +21,8 @@ final class CrmNavigationKeys {
 
     public const COMMERCE = 'commerce';
 
+    public const SHOWROOMS = 'showrooms';
+
     public const HELP = 'help';
 
     public const TOOLS = 'tools';
@@ -36,6 +38,7 @@ final class CrmNavigationKeys {
             self::WORK,
             self::ASSISTANT,
             self::COMMERCE,
+            self::SHOWROOMS,
             self::HELP,
             self::TOOLS,
         ];

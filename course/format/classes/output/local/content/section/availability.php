@@ -269,55 +269,122 @@ class availability implements named_templatable, renderable {
             return;
         }
 
-        $rules = $this->extract_role_rules_from_availability($availability);
+        // CampusFR commerce messaging is only valid for a restriction tree
+        // made exclusively of role conditions. Completion, date, grade, group
+        // and mixed trees must keep Moodle's native availability explanation.
+        $conditiontypes = $this->extract_condition_types($availability);
+        if ($conditiontypes !== ['role']) {
+            return;
+        }
 
+        $rules = $this->extract_role_rules_from_availability($availability);
         $allowed = $rules['allowed'] ?? [];
         $forbidden = $rules['forbidden'] ?? [];
 
-        if (empty($allowed) && empty($forbidden)) {
+        if ($allowed === [] && $forbidden === []) {
             return;
         }
 
-        $unlocktype = '';
-
-        // Cas : interdit aux visiteurs anonymes et aux trialstudent.
-        // => réservé aux abonnés, sans savoir si Grammar ou Full.
-        if (
-            in_array('guest', $forbidden, true)
-            && in_array('trialstudent', $forbidden, true)
-        ) {
-            $unlocktype = 'subscriber';
-
-        // Cas Grammar : la section accepte grammarstudent.
-        // Exemple : grammarstudent OU student.
-        } else if (in_array('grammarstudent', $allowed, true)) {
-            $unlocktype = 'grammar';
-
-        // Cas Full : la section accepte uniquement student.
+        // Restriction semantics are independent from the number of products.
+        // A generic Trial exclusion must never be presented as an upgrade.
+        if (in_array('grammarstudent', $allowed, true)) {
+            $restrictiontype = 'grammar';
         } else if (in_array('student', $allowed, true)) {
-            $unlocktype = 'full';
-
-        // Sécurité : si grammarstudent est interdit, c’est au-dessus de Grammar.
+            $restrictiontype = 'full';
+        } else if (
+            in_array('trialstudent', $forbidden, true)
+            || (
+                in_array('guest', $forbidden, true)
+                && in_array('trialstudent', $forbidden, true)
+            )
+        ) {
+            $restrictiontype = 'subscriber';
         } else if (in_array('grammarstudent', $forbidden, true)) {
-            $unlocktype = 'full';
+            $restrictiontype = 'full';
+        } else {
+            return;
         }
 
-        if ($unlocktype === '') {
-            return;
+        $resolverclass =
+            '\local_subscriptions\commerce\course\storefront\\'
+            . 'CommerceCourseStorefrontTargetResolver';
+        $resolver = class_exists($resolverclass)
+            ? $resolverclass::create()
+            : null;
+        $courseids = $this->related_course_ids();
+
+        $grammarcount = $resolver === null
+            ? 0
+            : $resolver->count_offers($courseids, 'grammar');
+        $fullcount = $resolver === null
+            ? 0
+            : $resolver->count_offers($courseids, 'full');
+        $allcount = $resolver === null
+            ? 0
+            : $resolver->count_offers($courseids, 'subscriber');
+
+        if ($restrictiontype === 'grammar') {
+            $titlekey = 'unlock_grammar_title';
+            $textkey = 'unlock_grammar_text';
+            $buttonkey = 'unlock_grammar_button';
+            $urllevel = 'grammar';
+        } else if ($restrictiontype === 'full') {
+            $titlekey = 'unlock_full_title';
+            $textkey = 'unlock_full_text';
+            $buttonkey = 'unlock_full_button';
+            $urllevel = 'full';
+        } else if ($allcount === 1) {
+            // A1: one purchasable course, no customer-facing "formula" concept.
+            $titlekey = 'unlock_course_title';
+            $textkey = 'unlock_course_text';
+            $buttonkey = 'unlock_course_button';
+            $urllevel = $grammarcount === 1 && $fullcount === 0
+                ? 'grammar'
+                : 'full';
+        } else {
+            // A2: Grammar + Full are two genuine customer choices.
+            $titlekey = 'unlock_subscriber_title';
+            $textkey = 'unlock_subscriber_text';
+            $buttonkey = 'unlock_subscriber_button';
+            $urllevel = 'subscriber';
         }
 
         $payload = [
-            'campusunlocktype' => $unlocktype,
-            'campusunlocktitle' => get_string('unlock_' . $unlocktype . '_title', 'local_subscriptions'),
-            'campusunlocktext' => get_string('unlock_' . $unlocktype . '_text', 'local_subscriptions'),
-            'campusunlockbutton' => get_string('unlock_' . $unlocktype . '_button', 'local_subscriptions'),
-            'campusunlockurl' => $this->find_plan_checkout_url_by_accesslevel($unlocktype),
+            'hascampusunlock' => true,
+            'campusunlocktype' => $restrictiontype,
+            'campusunlocktitle' => get_string($titlekey, 'local_subscriptions'),
+            'campusunlocktext' => get_string($textkey, 'local_subscriptions'),
+            'campusunlockbutton' => get_string($buttonkey, 'local_subscriptions'),
+            'campusunlockurl' => $resolver === null
+                ? (new \moodle_url('/boutique'))->out(false)
+                : $resolver->url(
+                    $courseids,
+                    $urllevel,
+                    $this->has_active_trial_conversion()
+                )->out(false),
         ];
 
-        if ($unlocktype === 'grammar') {
-            $payload['iscampusgrammarunlock'] = true;
-        } else if ($unlocktype === 'full') {
-            $payload['iscampusfullunlock'] = true;
+        if ($this->restriction_debug_enabled()) {
+            $payload['campusunlockdebug'] = json_encode([
+                'sectionid' => (int)$this->section->id,
+                'courseid' => (int)$this->section->course,
+                'availability' => $availability,
+                'conditiontypes' => $conditiontypes,
+                'allowed' => $allowed,
+                'forbidden' => $forbidden,
+                'restrictiontype' => $restrictiontype,
+                'courseids' => $courseids,
+                'grammarcount' => $grammarcount,
+                'fullcount' => $fullcount,
+                'allcount' => $allcount,
+                'titlekey' => $titlekey,
+                'textkey' => $textkey,
+                'buttonkey' => $buttonkey,
+                'urllevel' => $urllevel,
+                'diagnostic' => $resolver === null
+                    ? null
+                    : $resolver->diagnose($courseids, $urllevel),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         }
 
         if (is_array($data->info)) {
@@ -335,6 +402,56 @@ class availability implements named_templatable, renderable {
             }
         }
     }
+
+    private function has_active_trial_conversion(): bool {
+        global $USER;
+
+        return isloggedin()
+            && !isguestuser()
+            && class_exists('\local_subscriptions\trial_manager')
+            && \local_subscriptions\trial_manager::user_has_active_trial(
+                (int)$USER->id
+            ) !== null
+            && \local_subscriptions\trial_manager::is_discount_window_open(
+                (int)$USER->id
+            );
+    }
+
+    private function restriction_debug_enabled(): bool {
+        return optional_param('campusrestrictionsdebug', 0, PARAM_BOOL)
+            && has_capability(
+                'moodle/site:config',
+                \context_system::instance()
+            );
+    }
+
+    /**
+     * Extract the availability condition types used by a restriction tree.
+     *
+     * @param mixed $node
+     * @return string[]
+     */
+    private function extract_condition_types($node): array {
+        $types = [];
+
+        if (is_object($node)) {
+            if (!empty($node->type) && is_string($node->type)) {
+                $types[] = strtolower($node->type);
+            }
+            foreach (get_object_vars($node) as $value) {
+                $types = array_merge($types, $this->extract_condition_types($value));
+            }
+        } else if (is_array($node)) {
+            foreach ($node as $value) {
+                $types = array_merge($types, $this->extract_condition_types($value));
+            }
+        }
+
+        $types = array_values(array_unique(array_filter($types)));
+        sort($types);
+        return $types;
+    }
+
     /**
      * Extract Moodle role shortnames from section availability JSON.
      *
@@ -400,48 +517,21 @@ class availability implements named_templatable, renderable {
         return $rules;
     }
 
-    private function find_plan_checkout_url_by_accesslevel(string $accesslevel): string {
-        global $DB;
+    /** @return int[] */
+    private function related_course_ids(): array {
+        $courseids = [(int)$this->section->course];
 
-        $courseids = [];
-        $courseids[] = (int)$this->section->course;
-
-        // Si CampusFR utilise des champs custom pour mapper trial/réel,
-        // on tente aussi les cours liés.
         foreach (['realcourseid', 'trialcourseid'] as $fieldshortname) {
-            $mappedid = $this->get_course_customfield_int((int)$this->section->course, $fieldshortname);
+            $mappedid = $this->get_course_customfield_int(
+                (int)$this->section->course,
+                $fieldshortname
+            );
             if ($mappedid > 0) {
                 $courseids[] = $mappedid;
             }
         }
 
-        $courseids = array_values(array_unique(array_filter($courseids)));
-
-        if (empty($courseids)) {
-            return (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
-        }
-
-        [$insql, $params] = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'courseid');
-        $params['accesslevel'] = $accesslevel;
-
-        $planid = $DB->get_field_sql("
-            SELECT p.id
-            FROM {subscription_plan_entitlement} e
-            JOIN {subscription_plan} p ON p.id = e.planid
-            WHERE e.courseid $insql
-            AND e.accesslevel = :accesslevel
-            AND p.is_active = 1
-        ORDER BY e.priority DESC, p.id ASC
-            LIMIT 1
-        ", $params);
-
-        if (!$planid) {
-            return (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
-        }
-
-        return (new \moodle_url('/local/subscriptions/checkout.php', [
-            'planid' => (int)$planid,
-        ]))->out(false);
+        return array_values(array_unique(array_filter($courseids)));
     }
 
     private function get_course_customfield_int(int $courseid, string $shortname): int {

@@ -1,0 +1,836 @@
+/* Theme-safe width reset for the Edly login layout. */
+body.commerce-guest-activation-page.pagelayout-login .login-wrapper,
+body#page-local-subscriptions-guest_account_activate.pagelayout-login .login-wrapper {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+body.commerce-guest-activation-page.pagelayout-login .login-container,
+body#page-local-subscriptions-guest_account_activate.pagelayout-login .login-container {
+    display: block !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+body.commerce-guest-activation-page .commerce-guest-activation,
+body#page-local-subscriptions-guest_account_activate .commerce-guest-activation {
+    box-sizing: border-box;
+    width: min(calc(100vw - 2rem), 1100px) !important;
+    max-width: none !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+
+body.commerce-guest-activation-page .commerce-guest-activation__card,
+body#page-local-subscriptions-guest_account_activate .commerce-guest-activation__card {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 960px !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+
+.commerce-guest-activation {
+    display: grid;
+    min-height: 72vh;
+    padding: clamp(1rem, 4vw, 3rem);
+    place-items: center;
+}
+
+.commerce-guest-activation__card {
+    width: min(100%, 960px);
+    padding: clamp(1.5rem, 5vw, 4.25rem);
+    border: 1px solid #edf0f5;
+    border-radius: 1.5rem;
+    background: #fff;
+    box-shadow: 0 1rem 3.5rem rgba(45, 39, 69, .11);
+}
+
+.commerce-guest-activation__header {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+    text-align: center;
+}
+
+.commerce-guest-activation__icon {
+    display: grid;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin: 0 auto 1.25rem;
+    border-radius: 50%;
+    background: #fff0f6;
+    font-size: 2rem;
+    place-items: center;
+}
+
+.commerce-guest-activation__title {
+    margin: 0;
+    color: #241850;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.12;
+}
+
+.commerce-guest-activation__intro {
+    max-width: 720px;
+    margin: 1rem auto 0;
+    color: #526078;
+    font-size: clamp(1rem, 2vw, 1.18rem);
+    line-height: 1.75;
+}
+
+.commerce-guest-activation__email {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 720px;
+    margin: 0 auto 2rem;
+    padding: 1.15rem 1.25rem;
+    border: 1px solid #e7eaf0;
+    border-radius: .9rem;
+    background: #f8f9fc;
+}
+
+.commerce-guest-activation__email-icon {
+    display: grid;
+    flex: 0 0 auto;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid #ffd0e2;
+    border-radius: 50%;
+    background: #fff0f6;
+    color: #f60b72;
+    font-size: 1.35rem;
+    place-items: center;
+}
+
+.commerce-guest-activation__email-content {
+    min-width: 0;
+}
+
+.commerce-guest-activation__email-label {
+    color: #526078;
+    font-size: .92rem;
+}
+
+.commerce-guest-activation__email-address {
+    overflow-wrap: anywhere;
+    color: #17213d;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.commerce-guest-activation__divider {
+    max-width: 780px;
+    height: 1px;
+    margin: 0 auto 2rem;
+    background: #e7eaf0;
+}
+
+.commerce-guest-activation__form {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+/* Moodle forms use a horizontal Bootstrap grid by default. This page deliberately
+   switches every field to a full-width vertical layout. */
+.commerce-guest-activation .mform .row.fitem,
+.commerce-guest-activation .mform .form-group.row {
+    display: block;
+    margin-right: 0;
+    margin-bottom: 1.65rem;
+    margin-left: 0;
+}
+
+.commerce-guest-activation .mform .col-form-label,
+.commerce-guest-activation .mform .fitemtitle {
+    display: block;
+    width: 100%;
+    max-width: none;
+    padding: 0 0 .65rem;
+    color: #17213d;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.commerce-guest-activation .mform .felement,
+.commerce-guest-activation .mform .col-md-9,
+.commerce-guest-activation .mform .col-md-3 {
+    width: 100%;
+    max-width: none;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.commerce-guest-activation .mform .form-control,
+.commerce-guest-activation .mform .input-group {
+    width: 100%;
+    max-width: none;
+}
+
+.commerce-guest-activation .mform .form-control {
+    min-height: 3.75rem;
+    padding: .9rem 1rem;
+    border: 1px solid #cfd6e2;
+    border-radius: .75rem;
+    background: #fff;
+    color: #17213d;
+    font-size: 1rem;
+    box-shadow: none;
+}
+
+.commerce-guest-activation .mform .form-control:focus {
+    border-color: #f60b72;
+    box-shadow: 0 0 0 .2rem rgba(246, 11, 114, .12);
+}
+
+.commerce-guest-activation .mform .input-group .btn,
+.commerce-guest-activation .mform .input-group .input-group-text {
+    border-color: #cfd6e2;
+}
+
+.commerce-guest-activation .mform .form-control-feedback,
+.commerce-guest-activation .mform .form-text,
+.commerce-guest-activation .mform .form-control-static {
+    margin-top: .55rem;
+    color: #68748a;
+    font-size: .9rem;
+    line-height: 1.55;
+}
+
+.commerce-guest-activation .mform .form-control-feedback.invalid-feedback {
+    color: #c8294d;
+}
+
+.commerce-guest-activation__security {
+    display: flex;
+    gap: 1rem;
+    margin: .25rem 0 2rem;
+    padding: 1.25rem 1.35rem;
+    border: 1px solid #ffd6e6;
+    border-radius: .9rem;
+    background: #fff7fa;
+}
+
+.commerce-guest-activation__security-icon {
+    flex: 0 0 auto;
+    font-size: 1.45rem;
+}
+
+.commerce-guest-activation__security-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.commerce-guest-activation__security-title {
+    margin: 0 0 .8rem;
+    color: #26324e;
+    font-size: 1rem;
+    font-weight: 750;
+}
+
+.commerce-guest-activation__requirements {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .55rem 2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.commerce-guest-activation__requirement {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    color: #526078;
+    font-size: .92rem;
+    line-height: 1.45;
+}
+
+.commerce-guest-activation__requirement-icon {
+    display: inline-grid;
+    flex: 0 0 auto;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: .08rem;
+    border: 1px solid #f60b72;
+    border-radius: 50%;
+    color: #f60b72;
+    font-size: .72rem;
+    font-weight: 800;
+    place-items: center;
+}
+
+.commerce-guest-activation .mform .fitem_actionbuttons,
+.commerce-guest-activation .mform .fitem[data-groupname="buttonar"] {
+    margin-bottom: 0;
+}
+
+.commerce-guest-activation .mform .fitem_actionbuttons .felement,
+.commerce-guest-activation .mform .fitem[data-groupname="buttonar"] .felement {
+    margin-left: 0;
+}
+
+.commerce-guest-activation .btn-primary {
+    width: 100%;
+    min-height: 4rem;
+    padding: .9rem 1.5rem;
+    border-color: #f60b72;
+    border-radius: .7rem;
+    background: linear-gradient(90deg, #ee0065 0%, #fb157d 100%);
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 750;
+    white-space: normal;
+    box-shadow: 0 .65rem 1.35rem rgba(246, 11, 114, .18);
+}
+
+.commerce-guest-activation .btn-primary:hover,
+.commerce-guest-activation .btn-primary:focus {
+    border-color: #d9005b;
+    background: linear-gradient(90deg, #d9005b 0%, #eb0a6c 100%);
+    color: #fff;
+}
+
+.commerce-guest-activation__divider--footer {
+    margin-top: 2.15rem;
+    margin-bottom: 1.5rem;
+}
+
+.commerce-guest-activation__secure-note {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: .75rem;
+    text-align: center;
+}
+
+.commerce-guest-activation__secure-note-icon {
+    color: #f60b72;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.commerce-guest-activation__secure-note-title {
+    color: #26324e;
+    font-weight: 750;
+}
+
+.commerce-guest-activation__secure-note-text {
+    margin-top: .2rem;
+    color: #68748a;
+    font-size: .92rem;
+}
+
+@media (max-width: 767.98px) {
+    .commerce-guest-activation {
+        display: block;
+        min-height: 0;
+        padding: .75rem;
+    }
+
+    .commerce-guest-activation__card {
+        padding: 1.4rem 1rem;
+        border-radius: 1rem;
+    }
+
+    .commerce-guest-activation__icon {
+        width: 3.75rem;
+        height: 3.75rem;
+        font-size: 1.6rem;
+    }
+
+    .commerce-guest-activation__title {
+        font-size: 1.85rem;
+    }
+
+    .commerce-guest-activation__intro {
+        font-size: .98rem;
+        line-height: 1.6;
+    }
+
+    .commerce-guest-activation__email {
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .commerce-guest-activation__requirements {
+        grid-template-columns: 1fr;
+    }
+
+    .commerce-guest-activation__security {
+        padding: 1rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .commerce-guest-activation *,
+    .commerce-guest-activation *::before,
+    .commerce-guest-activation *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+    }
+}
+
+.commerce-guest-activation .mform [data-fieldtype="password"],
+.commerce-guest-activation .mform [data-fieldtype="password"] > div,
+.commerce-guest-activation .mform .felement > input[type="password"] {
+    width: 100%;
+    max-width: none;
+}
+.commerce-guest-activation .mform .fdescription.required {
+    display: none;
+}
+
+
+/* J5.7 — accessible password visibility controls. */
+.commerce-guest-activation__password-control {
+    position: relative;
+    width: 100%;
+}
+
+.commerce-guest-activation__password-control .form-control {
+    padding-right: 3.25rem;
+}
+
+.commerce-guest-activation__password-toggle {
+    position: absolute;
+    top: 50%;
+    right: .75rem;
+    display: inline-grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: .55rem;
+    background: transparent;
+    color: #526078;
+    transform: translateY(-50%);
+    place-items: center;
+}
+
+.commerce-guest-activation__password-toggle:hover,
+.commerce-guest-activation__password-toggle:focus-visible {
+    background: #fff0f6;
+    color: #f60b72;
+    outline: none;
+}
+
+.commerce-guest-activation__password-toggle:focus-visible {
+    box-shadow: 0 0 0 .2rem rgba(246, 11, 114, .16);
+}
+
+.commerce-guest-activation__secure-note {
+    max-width: 780px;
+    margin-right: auto;
+    margin-left: auto;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid #e7eaf0;
+    border-radius: .9rem;
+    background: #f8f9fc;
+    text-align: left;
+}
+
+.commerce-guest-activation__secure-note-icon {
+    display: inline-grid;
+    flex: 0 0 auto;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: #fff0f6;
+    color: #f60b72;
+    font-size: 1.15rem;
+    place-items: center;
+}
+
+
+/* J5.8 — definitive Moodle form grid reset and password controls. */
+.commerce-guest-activation .mform .row.fitem > .col-form-label,
+.commerce-guest-activation .mform .row.fitem > .felement,
+.commerce-guest-activation .mform .row.fitem > .col-md-3,
+.commerce-guest-activation .mform .row.fitem > .col-md-9 {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.commerce-guest-activation__password-control {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.commerce-guest-activation__password-control > input.form-control {
+    display: block !important;
+    width: 100% !important;
+    padding-right: 3.75rem !important;
+}
+
+.commerce-guest-activation__password-toggle {
+    position: absolute;
+    top: 50%;
+    right: .75rem;
+    z-index: 5;
+    display: inline-grid;
+    width: 2.35rem;
+    height: 2.35rem;
+    padding: 0;
+    border: 0;
+    border-radius: .55rem;
+    background: transparent;
+    color: #526078;
+    transform: translateY(-50%);
+    cursor: pointer;
+    place-items: center;
+}
+
+.commerce-guest-activation__password-toggle:hover,
+.commerce-guest-activation__password-toggle:focus-visible {
+    background: #fff0f6;
+    color: #f60b72;
+}
+
+.commerce-guest-activation__password-toggle:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 .2rem rgba(246, 11, 114, .16);
+}
+
+.commerce-guest-activation__password-toggle i {
+    margin: 0 !important;
+    pointer-events: none;
+}
+
+.commerce-guest-activation #fitem_id_submitbutton {
+    display: block !important;
+}
+
+.commerce-guest-activation #fitem_id_submitbutton > .col-form-label {
+    display: none !important;
+}
+
+.commerce-guest-activation #fitem_id_submitbutton > .felement {
+    display: flex !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    justify-content: center !important;
+}
+
+.commerce-guest-activation #id_submitbutton {
+    display: block !important;
+    width: min(100%, 560px) !important;
+    margin: 0 auto !important;
+}
+
+.commerce-guest-activation #fitem_id_submitbutton {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+.commerce-guest-activation #fitem_id_submitbutton > .felement {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+.commerce-guest-activation #fitem_id_submitbutton > .col-form-label {
+    display: none !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+.commerce-guest-activation #id_submitbutton {
+    display: block !important;
+    width: min(100%, 560px) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+/* J12D — live password policy feedback. */
+.commerce-guest-activation__requirement {
+    transition: color .18s ease;
+}
+
+.commerce-guest-activation__requirement.is-valid {
+    color: #137a48;
+}
+
+.commerce-guest-activation__requirement.is-valid .commerce-guest-activation__requirement-icon {
+    border-color: #1b9a5d;
+    background: #eaf8f0;
+    color: #137a48;
+}
+
+.commerce-guest-activation__requirement.is-invalid {
+    color: #b42343;
+}
+
+.commerce-guest-activation__requirement.is-invalid .commerce-guest-activation__requirement-icon {
+    border-color: #d74b68;
+    background: #fff0f3;
+    color: #b42343;
+}
+
+.commerce-guest-activation .btn-primary:disabled,
+.commerce-guest-activation .btn-primary[aria-disabled="true"] {
+    border-color: #cbd2dd;
+    background: #d9dee7;
+    color: #748096;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 1;
+}
+
+
+/* J15H.1I.2 — focused account activation layout without the Edly page banner. */
+body#page-local-subscriptions-guest_account_activate .page-banner-area,
+body#page-local-subscriptions-guest_account_activate .page-title-area,
+body#page-local-subscriptions-guest_account_activate #page-header,
+body#page-local-subscriptions-guest_account_activate .breadcrumb-area,
+body.commerce-guest-activation-page .page-banner-area,
+body.commerce-guest-activation-page .page-title-area,
+body.commerce-guest-activation-page #page-header,
+body.commerce-guest-activation-page .breadcrumb-area {
+    display: none !important;
+}
+body#page-local-subscriptions-guest_account_activate #page,
+body#page-local-subscriptions-guest_account_activate #page-content,
+body#page-local-subscriptions-guest_account_activate #region-main,
+body.commerce-guest-activation-page #page,
+body.commerce-guest-activation-page #page-content,
+body.commerce-guest-activation-page #region-main {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* J15H.1I.3 — premium activation screen and direct activation anchor. */
+body.commerce-guest-activation-page,
+body#page-local-subscriptions-guest_account_activate {
+    background:
+        radial-gradient(circle at 18% 8%, rgba(246, 31, 130, .055), transparent 28rem),
+        radial-gradient(circle at 88% 18%, rgba(108, 90, 188, .05), transparent 26rem),
+        #fdfcff;
+}
+
+body.commerce-guest-activation-page.pagelayout-login .login-wrapper,
+body#page-local-subscriptions-guest_account_activate.pagelayout-login .login-wrapper,
+body.commerce-guest-activation-page.pagelayout-login .login-container,
+body#page-local-subscriptions-guest_account_activate.pagelayout-login .login-container,
+body.commerce-guest-activation-page #page,
+body#page-local-subscriptions-guest_account_activate #page,
+body.commerce-guest-activation-page #page-content,
+body#page-local-subscriptions-guest_account_activate #page-content,
+body.commerce-guest-activation-page #region-main,
+body#page-local-subscriptions-guest_account_activate #region-main {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.commerce-guest-activation-page.pagelayout-login .login-container,
+body#page-local-subscriptions-guest_account_activate.pagelayout-login .login-container {
+    padding: 0 !important;
+}
+
+body.commerce-guest-activation-page .commerce-guest-activation,
+body#page-local-subscriptions-guest_account_activate .commerce-guest-activation {
+    width: min(calc(100vw - 2rem), 860px) !important;
+    min-height: calc(100svh - 5.5rem);
+    padding: clamp(1rem, 3.5vh, 2.75rem) 0 clamp(2rem, 6vh, 4rem);
+    scroll-margin-top: 5.5rem;
+}
+
+body.commerce-guest-activation-page .commerce-guest-activation__card,
+body#page-local-subscriptions-guest_account_activate .commerce-guest-activation__card {
+    max-width: 800px !important;
+    padding: clamp(2rem, 4.5vw, 3.75rem);
+    border: 1px solid rgba(52, 34, 95, .09);
+    border-radius: 2rem;
+    background: rgba(255, 255, 255, .97);
+    box-shadow:
+        0 2rem 5rem rgba(45, 39, 69, .10),
+        0 .3rem 1.25rem rgba(246, 31, 130, .035);
+}
+
+.commerce-guest-activation__header {
+    margin-bottom: 1.7rem;
+}
+
+.commerce-guest-activation__icon {
+    width: 4.15rem;
+    height: 4.15rem;
+    margin-bottom: 1.05rem;
+    border: 1px solid rgba(246, 31, 130, .10);
+    background: linear-gradient(145deg, #fff2f7, #fff8fb);
+    box-shadow: 0 .8rem 2rem rgba(246, 31, 130, .10);
+}
+
+.commerce-guest-activation__title {
+    font-size: clamp(2rem, 4.2vw, 3.15rem);
+    text-wrap: balance;
+}
+
+.commerce-guest-activation__title-brand {
+    color: #f61f82;
+}
+
+.commerce-guest-activation__intro {
+    margin-top: .85rem;
+    line-height: 1.65;
+}
+
+.commerce-guest-activation__quick-note {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-top: 1rem;
+    padding: .5rem .8rem;
+    border-radius: 999px;
+    background: #fff5f9;
+    color: #5e5273;
+    font-size: .88rem;
+    font-weight: 700;
+}
+
+.commerce-guest-activation__quick-note .fa-clock {
+    color: #f61f82;
+}
+
+.commerce-guest-activation__email {
+    max-width: 680px;
+    margin-bottom: 1.6rem;
+    padding: 1rem 1.15rem;
+    border-color: rgba(52, 34, 95, .09);
+    border-radius: 1rem;
+    background: #faf9fd;
+}
+
+.commerce-guest-activation__email-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+}
+
+.commerce-guest-activation__divider {
+    max-width: 700px;
+    margin-bottom: 1.6rem;
+    background: rgba(52, 34, 95, .09);
+}
+
+.commerce-guest-activation__form,
+.commerce-guest-activation__secure-note {
+    max-width: 700px;
+}
+
+.commerce-guest-activation .mform .row.fitem,
+.commerce-guest-activation .mform .form-group.row {
+    margin-bottom: 1.35rem;
+}
+
+.commerce-guest-activation .mform .form-control {
+    min-height: 3.55rem;
+    border-radius: .85rem;
+}
+
+.commerce-guest-activation .btn-primary {
+    min-height: 3.85rem;
+    border-radius: .9rem;
+    box-shadow:
+        0 .85rem 1.8rem rgba(246, 11, 114, .22),
+        0 0 0 .25rem rgba(246, 31, 130, .06);
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.commerce-guest-activation .btn-primary:hover,
+.commerce-guest-activation .btn-primary:focus {
+    transform: translateY(-2px);
+    box-shadow:
+        0 1rem 2.15rem rgba(246, 11, 114, .28),
+        0 0 0 .32rem rgba(246, 31, 130, .08);
+}
+
+.commerce-guest-activation__divider--footer {
+    margin-top: 1.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.commerce-guest-activation__secure-note {
+    padding: 1rem 1.15rem;
+    border-color: rgba(52, 34, 95, .08);
+    background: #faf9fd;
+}
+
+@media (max-width: 767.98px) {
+    body.commerce-guest-activation-page .commerce-guest-activation,
+    body#page-local-subscriptions-guest_account_activate .commerce-guest-activation {
+        width: min(calc(100vw - 1rem), 860px) !important;
+        padding-top: .75rem;
+        scroll-margin-top: 4.75rem;
+    }
+
+    body.commerce-guest-activation-page .commerce-guest-activation__card,
+    body#page-local-subscriptions-guest_account_activate .commerce-guest-activation__card {
+        padding: 1.65rem 1rem;
+        border-radius: 1.35rem;
+    }
+
+    .commerce-guest-activation__quick-note {
+        border-radius: .85rem;
+        line-height: 1.4;
+    }
+
+    .commerce-guest-activation__email {
+        margin-bottom: 1.35rem;
+    }
+}
+
+/* J15H.1I.3.2 — compact top spacing and continuous activation backdrop. */
+body.commerce-guest-activation-page,
+body#page-local-subscriptions-guest_account_activate {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 14% 8%, rgba(246, 31, 130, .075), transparent 34rem),
+        radial-gradient(circle at 88% 28%, rgba(108, 90, 188, .065), transparent 38rem),
+        linear-gradient(145deg, #fff 0%, #fffafd 48%, #f8f6ff 100%);
+    background-attachment: fixed, fixed, fixed;
+    background-repeat: no-repeat;
+    background-size: 100% 100%, 100% 100%, 100% 100%;
+}
+
+body.commerce-guest-activation-page #page-wrapper,
+body#page-local-subscriptions-guest_account_activate #page-wrapper,
+body.commerce-guest-activation-page .login-wrapper,
+body#page-local-subscriptions-guest_account_activate .login-wrapper,
+body.commerce-guest-activation-page .login-container,
+body#page-local-subscriptions-guest_account_activate .login-container {
+    min-height: 0 !important;
+    background: transparent !important;
+}
+
+body.commerce-guest-activation-page .commerce-guest-activation,
+body#page-local-subscriptions-guest_account_activate .commerce-guest-activation {
+    min-height: 0;
+    padding-top: clamp(.35rem, 1.2vh, .85rem);
+    padding-bottom: clamp(2rem, 5vh, 3.5rem);
+    place-items: start center;
+}
+
+@media (max-width: 767.98px) {
+    body.commerce-guest-activation-page .commerce-guest-activation,
+    body#page-local-subscriptions-guest_account_activate .commerce-guest-activation {
+        padding-top: .25rem;
+        padding-bottom: 2rem;
+    }
+}

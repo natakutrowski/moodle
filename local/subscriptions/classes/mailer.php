@@ -204,7 +204,9 @@ class mailer {
                     return \local_subscriptions\mail\Catalog::contact_ack($args['toemail'], $args['fullname'], $args['message'],$args['fromsupport'] ?? null);    
 
                 case self::T_TRIAL_STARTED:
-                    \local_subscriptions\mail\Catalog::trial_started($args); break;
+                    (new \local_subscriptions\commerce\mail\service\CommerceTrialWelcomeMailService())
+                        ->queue_and_send($args);
+                    break;
 
                 case self::T_TRIAL_REM3:
                     \local_subscriptions\mail\Catalog::trial_rem3($args); break;
@@ -1017,7 +1019,7 @@ class mailer {
         $body .= \html_writer::tag('p', $effectline);
         $body .= $tbl;
 
-        $subUrl = self::login_redirect_for(new \moodle_url('/local/subscriptions/subscribe.php'));
+        $subUrl = self::login_redirect_for(new \moodle_url('/boutique'));
         [$html, $text] = MailRenderer::layout(
             $title,
             $body,
@@ -1198,7 +1200,7 @@ class mailer {
 
             $brandcolor = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
             $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
-            $buttonurl = (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+            $buttonurl = (new \moodle_url('/boutique'))->out(false);
             $buttonurl  = self::login_redirect_for($buttonurl);
             $buttonlabel = get_string('mail_trial_discount_btn', 'local_campus',
                     (object)['pct' => $dpct]);
@@ -1265,7 +1267,7 @@ class mailer {
         );
 
 
-        $buttonurl   = (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+        $buttonurl   = (new \moodle_url('/boutique'))->out(false);
         $buttonurl   = self::login_redirect_for($buttonurl);
         $buttonlabel = get_string('mail_trial_rem3_button', 'local_campus', $dpct);
 

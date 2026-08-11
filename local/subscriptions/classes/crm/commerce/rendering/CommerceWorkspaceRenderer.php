@@ -159,6 +159,31 @@ final class CommerceWorkspaceRenderer {
 
             [
                 'title' => get_string(
+                    'commerce_mail_admin_title',
+                    'local_subscriptions'
+                ),
+                'description' => get_string(
+                    'commerce_mail_dashboard_description',
+                    'local_subscriptions'
+                ),
+                'icon' => '✉️',
+                'url' => new moodle_url(
+                    '/local/subscriptions/admin/commerce/mail/index.php'
+                ),
+                'capability' =>
+                    Capabilities::VIEW_PAYMENTS,
+            ],
+
+            [
+                'title' => get_string('commerce_grants_title', 'local_subscriptions'),
+                'description' => get_string('commerce_grants_card_description', 'local_subscriptions'),
+                'icon' => '🎁',
+                'url' => new moodle_url('/local/subscriptions/admin/commerce/grants/index.php'),
+                'capability' => Capabilities::MANAGE_SUBSCRIPTIONS,
+            ],
+
+            [
+                'title' => get_string(
                     'crm_commerce_statistics_title',
                     'local_subscriptions'
                 ),

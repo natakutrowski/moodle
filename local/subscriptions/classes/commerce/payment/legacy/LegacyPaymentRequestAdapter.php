@@ -373,6 +373,7 @@ final class LegacyPaymentRequestAdapter {
     ): void {
         if (
             $context->is_subscription()
+            && !$context->is_commerce_transaction()
             && (
                 !isset($record->planid)
                 || (int)$record->planid <= 0

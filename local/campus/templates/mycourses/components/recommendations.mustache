@@ -1,0 +1,186 @@
+{{#hasitems}}
+<section class="campus-course-recommendations container" aria-labelledby="campus-course-recommendations-title">
+    <header class="campus-course-recommendations__header">
+        <div>
+            <h2 id="campus-course-recommendations-title">{{title}}</h2>
+            <p>{{text}}</p>
+        </div>
+    </header>
+
+    <div class="campus-course-recommendations__grid">
+        {{#items}}
+            <article class="campus-course-recommendation{{#upgrade}} campus-course-recommendation--upgrade{{/upgrade}}{{#trialoffer}} campus-course-recommendation--discovery{{/trialoffer}}">
+                <a class="campus-course-recommendation__visual" href="{{producturl}}" target="_blank" rel="noopener noreferrer">
+                    {{#hasimage}}
+                        <img src="{{imageurl}}" alt="{{imagealt}}" loading="lazy">
+                    {{/hasimage}}
+                    {{^hasimage}}
+                        <span class="campus-course-recommendation__placeholder" aria-hidden="true">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </span>
+                    {{/hasimage}}
+                </a>
+
+                <div class="campus-course-recommendation__body">
+                    <h3>
+                        <a href="{{producturl}}" target="_blank" rel="noopener noreferrer">
+                            {{title}}
+                        </a>
+                    </h3>
+
+                    <div class="campus-course-recommendation__footer">
+                        {{#trialoffer}}
+                            {{#hastrialprice}}
+                                <div class="campus-course-recommendation__price-card campus-course-recommendation__price-card--discovery">
+                                    <span class="campus-course-recommendation__price-label">
+                                        {{discoverypricelabel}}
+                                    </span>
+
+                                    <div class="campus-course-recommendation__price-line">
+                                        <strong>{{trialpriceformatted}}</strong>
+                                        {{#hastrialcompareprice}}
+                                            <del>{{trialcomparepriceformatted}}</del>
+                                        {{/hastrialcompareprice}}
+                                    </div>
+
+                                    <div class="campus-course-recommendation__price-actions">
+                                        <span>
+                                            {{#trialdiscountpercentage}}
+                                                <span class="campus-course-recommendation__discount">
+                                                    −{{trialdiscountpercentage}}%
+                                                </span>
+                                            {{/trialdiscountpercentage}}
+                                        </span>
+
+                                        <a class="campus-course-recommendation__discover-link" href="{{producturl}}" target="_blank" rel="noopener noreferrer">
+                                            <span>{{ctlabel}}</span>
+                                            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            {{/hastrialprice}}
+                        {{/trialoffer}}
+
+                        {{#upgrade}}
+                            {{#hasupgradeprice}}
+                                <div class="campus-course-recommendation__price-card campus-course-recommendation__price-card--upgrade">
+                                    <span class="campus-course-recommendation__price-label">
+                                        {{upgradepricelabel}}
+                                    </span>
+
+                                    <div class="campus-course-recommendation__price-line">
+                                        <strong>{{upgradepriceformatted}}</strong>
+                                        {{#hasupgradecompareprice}}
+                                            <del>{{upgradecomparepriceformatted}}</del>
+                                        {{/hasupgradecompareprice}}
+                                    </div>
+
+                                    <div class="campus-course-recommendation__price-actions">
+                                        <span>
+                                            {{#hasupgradediscount}}
+                                                <span class="campus-course-recommendation__discount">
+                                                    −{{upgradediscountpercentage}}%
+                                                </span>
+                                            {{/hasupgradediscount}}
+                                        </span>
+
+                                        <a class="campus-course-recommendation__discover-link" href="{{producturl}}" target="_blank" rel="noopener noreferrer">
+                                            <span>{{ctlabel}}</span>
+                                            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            {{/hasupgradeprice}}
+                        {{/upgrade}}
+
+                        {{^trialoffer}}
+                            {{^upgrade}}
+                                {{#hasprice}}
+                                    <div class="campus-course-recommendation__price-card campus-course-recommendation__price-card--standard">
+                                        <span class="campus-course-recommendation__price-label">
+                                            {{standardpricelabel}}
+                                        </span>
+
+                                        <div class="campus-course-recommendation__price-line">
+                                            <strong>{{priceformatted}}</strong>
+                                            {{#hascompareprice}}
+                                                <del>{{comparepriceformatted}}</del>
+                                            {{/hascompareprice}}
+                                        </div>
+
+                                        <div class="campus-course-recommendation__price-actions">
+                                            <span>
+                                                {{#hasdiscount}}
+                                                    <span class="campus-course-recommendation__discount">
+                                                        −{{discountpercentage}}%
+                                                    </span>
+                                                {{/hasdiscount}}
+                                            </span>
+
+                                            <a class="campus-course-recommendation__discover-link" href="{{producturl}}" target="_blank" rel="noopener noreferrer">
+                                                <span>{{ctlabel}}</span>
+                                                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                {{/hasprice}}
+
+                                {{^hasprice}}
+                                    <a class="campus-course-recommendation__cta" href="{{producturl}}" target="_blank" rel="noopener noreferrer">
+                                        <span>{{ctlabel}}</span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                                    </a>
+                                {{/hasprice}}
+                            {{/upgrade}}
+                        {{/trialoffer}}
+                    </div>
+
+                    {{#upgrade}}
+                        <div class="campus-course-recommendation__upgrade-panel">
+                            <div class="campus-course-recommendation__upgrade-section">
+                                <span class="campus-course-recommendation__upgrade-panel-icon" aria-hidden="true">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                </span>
+                                <div>
+                                    <span class="campus-course-recommendation__upgrade-panel-label">
+                                        {{upgradelabel}}
+                                    </span>
+                                    <strong>{{upgradeheading}}</strong>
+
+                                    {{#hasupgradepath}}
+                                        <span class="campus-course-recommendation__upgrade-path">
+                                            {{upgradefromlabel}}
+                                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                                            {{upgradetolabel}}
+                                        </span>
+                                    {{/hasupgradepath}}
+
+                                    {{^hasupgradepath}}
+                                        <span>{{upgradetext}}</span>
+                                    {{/hasupgradepath}}
+                                </div>
+                            </div>
+
+                            {{#hasupgradesaving}}
+                                <div class="campus-course-recommendation__upgrade-section campus-course-recommendation__upgrade-section--saving">
+                                    <span class="campus-course-recommendation__upgrade-panel-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-gift"></i>
+                                    </span>
+                                    <div>
+                                        <strong>{{upgradesavinglabel}}</strong>
+                                        <span>{{upgradesavingtext}}</span>
+                                    </div>
+                                </div>
+                            {{/hasupgradesaving}}
+                        </div>
+                    {{/upgrade}}
+
+                    {{#hasdescription}}
+                        <p>{{description}}</p>
+                    {{/hasdescription}}
+                </div>
+            </article>
+        {{/items}}
+    </div>
+</section>
+{{/hasitems}}

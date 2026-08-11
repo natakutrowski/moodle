@@ -1,0 +1,67 @@
+<article class="campus-mycourse-card{{#completed}} campus-mycourse-card--completed{{/completed}}">
+    <a class="campus-mycourse-card__visual" href="{{courseurl}}" aria-label="{{title}}">
+        {{#hasimage}}
+            <picture class="campus-mycourse-card__picture">
+                {{#hasmobileimage}}<source media="(max-width: 767.98px)" srcset="{{mobileimageurl}}">{{/hasmobileimage}}
+                <img class="campus-mycourse-card__image" src="{{imageurl}}" alt="{{imagealt}}" loading="lazy" decoding="async">
+            </picture>
+        {{/hasimage}}
+        {{^hasimage}}
+            <span class="campus-mycourse-card__placeholder" aria-hidden="true">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </span>
+        {{/hasimage}}
+        {{#completed}}
+            <span class="campus-mycourse-card__completed-badge">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                {{#str}}completed_badge, local_campus{{/str}}
+            </span>
+        {{/completed}}
+    </a>
+
+    <div class="campus-mycourse-card__body">
+        <div class="campus-mycourse-card__heading">
+            <div class="campus-mycourse-card__badges">
+                {{#trial}}
+                    <span class="campus-mycourse-card__badge campus-mycourse-card__badge--trial">{{triallabel}}</span>
+                {{/trial}}
+                {{#hasaccesslabel}}
+                    <span class="campus-mycourse-card__access campus-mycourse-card__access--{{accessstate}}">
+                        <i class="{{#completed}}fa-solid fa-circle-check{{/completed}}{{^completed}}fa-regular fa-clock{{/completed}}" aria-hidden="true"></i>
+                        {{accesslabel}}
+                    </span>
+                {{/hasaccesslabel}}
+            </div>
+            <h3 class="campus-mycourse-card__title">
+                <a href="{{courseurl}}">{{title}}</a>
+            </h3>
+            {{#hassummary}}
+                <p class="campus-mycourse-card__summary">{{summary}}</p>
+            {{/hassummary}}
+        </div>
+
+        <div class="campus-mycourse-card__progress">
+            <div class="campus-mycourse-card__progress-head">
+                <span class="campus-mycourse-card__progress-message">{{progress.label}}</span>
+                <strong class="campus-mycourse-card__progress-percent">{{progress.display}}%</strong>
+            </div>
+            <div class="campus-mycourse-card__progress-track"
+                 role="progressbar"
+                 aria-valuemin="0"
+                 aria-valuemax="100"
+                 aria-valuenow="{{progress.percentage}}">
+                <span style="width: {{progress.percentage}}%"></span>
+            </div>
+            {{#progress.hascounts}}
+                <span class="campus-mycourse-card__progress-ratio">{{progress.ratio}}</span>
+            {{/progress.hascounts}}
+        </div>
+
+        <div class="campus-mycourse-card__actions">
+            <a class="default-btn campus-mycourse-card__cta" href="{{courseurl}}">
+                <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+                <span>{{ctlabel}}</span>
+            </a>
+        </div>
+    </div>
+</article>

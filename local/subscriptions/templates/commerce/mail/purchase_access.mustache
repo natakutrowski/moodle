@@ -1,0 +1,12 @@
+{{#has_editorial_heading}}<h1 style="margin:0 0 18px;font-size:26px;line-height:1.25;color:#111827;">{{editorial_heading}}</h1>{{/has_editorial_heading}}
+{{#has_editorial_intro}}<div style="margin-bottom:18px;">{{{editorial_intro}}}</div>{{/has_editorial_intro}}
+{{#hasreference}}<p><strong>{{reference_label}} :</strong> {{reference}}</p>{{/hasreference}}
+{{#hasitems}}
+    {{#items}}
+        {{> local_subscriptions/commerce/mail/components/access_item }}
+    {{/items}}
+{{/hasitems}}
+{{^hasitems}}<p>{{#str}}commerce_mail_no_item_details, local_subscriptions{{/str}}</p>{{/hasitems}}
+
+{{#has_editorial_outro}}<div style="margin-top:20px;">{{{editorial_outro}}}</div>{{/has_editorial_outro}}
+{{#has_editorial_signature}}<div style="margin-top:18px;">{{{editorial_signature}}}</div>{{/has_editorial_signature}}

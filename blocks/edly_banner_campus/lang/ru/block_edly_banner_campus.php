@@ -13,3 +13,9 @@ $string['trial_note'] = '7 дней бесплатного доступа ко �
 $string['hero_greeting'] = 'Bonjour {$a} 😊';
 $string['hero_cta_trial_continue'] = 'Продолжить пробный доступ';
 $string['hero_cta_subscribed_mycourses'] = 'Перейти к моим курсам';
+
+$string['hero_shop'] = 'Магазин';
+
+$string['hero_my_campus'] = 'Мой кампус';
+
+$string['hero_cta_my_space'] = 'Перейти в моё пространство';

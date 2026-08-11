@@ -4,6 +4,8 @@ namespace local_subscriptions\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\url\UrlFactory;
+
 use html_writer;
 use html_table;
 use moodle_url;
@@ -96,7 +98,7 @@ final class UserProfileRenderer {
         );
 
         $links = html_writer::link(
-            new moodle_url('/user/profile.php', ['id' => $user->id]),
+            UrlFactory::my_profile(['id' => (int)$user->id]),
             get_string('view_moodle_profile', 'local_subscriptions'),
             ['class' => 'btn btn-outline-primary btn-sm']
         );
@@ -277,6 +279,17 @@ final class UserProfileRenderer {
     public static function render_commercial_panel(
         \stdClass $profile
     ): string {
+        if (!empty($profile->commercepurchases)) {
+            return self::section(
+                get_string(
+                    'user360_workspace_commercial',
+                    'local_subscriptions'
+                ),
+                self::commerce_purchases_content($profile->commercepurchases),
+                'crm-section-commercial crm-section-commercial-native'
+            );
+        }
+
         $subscriptions = self::commercial_subsection(
             get_string(
                 'crm_section_subscriptions',
@@ -481,16 +494,16 @@ final class UserProfileRenderer {
                 'muted' => get_string('crm_stats_status_hint', 'local_subscriptions'),
             ],
             [
-                'icon' => '📚',
-                'label' => get_string('subscriptions', 'local_subscriptions'),
-                'value' => $stats->subscriptions ?? 0,
-                'muted' => get_string('crm_stats_subscriptions_hint', 'local_subscriptions'),
+                'icon' => '🧾',
+                'label' => get_string('crm_commerce_orders', 'local_subscriptions'),
+                'value' => $stats->purchasecount ?? (($stats->subscriptions ?? 0) + ($stats->digitalpayments ?? 0)),
+                'muted' => get_string('crm_commerce_orders_hint', 'local_subscriptions'),
             ],
             [
-                'icon' => '📦',
-                'label' => get_string('digital_purchases', 'local_subscriptions'),
-                'value' => $stats->digitalpayments ?? 0,
-                'muted' => get_string('crm_stats_digital_hint', 'local_subscriptions'),
+                'icon' => '🔑',
+                'label' => get_string('crm_commerce_active_grants', 'local_subscriptions'),
+                'value' => $stats->activegrantcount ?? 0,
+                'muted' => get_string('crm_commerce_active_grants_hint', 'local_subscriptions'),
             ],
             [
                 'icon' => '🎓',
@@ -1084,6 +1097,69 @@ final class UserProfileRenderer {
             ),
             'badge ' . $class
         );
+    }
+
+    /** Renders unified Native Commerce purchases for User360. */
+    private static function commerce_purchases_content(array $purchases): string {
+        global $OUTPUT;
+
+        if ($purchases === []) {
+            return $OUTPUT->notification(
+                get_string('crm_commerce_no_purchases', 'local_subscriptions'),
+                'info'
+            );
+        }
+
+        $table = new html_table();
+        $table->attributes['class'] = 'generaltable crm-commerce-purchases-table';
+        $table->head = [
+            get_string('crm_commerce_reference', 'local_subscriptions'),
+            get_string('crm_commerce_purchase_type', 'local_subscriptions'),
+            get_string('crm_commerce_contents', 'local_subscriptions'),
+            get_string('status', 'local_subscriptions'),
+            get_string('crm_commerce_amount', 'local_subscriptions'),
+            get_string('date'),
+            get_string('actions', 'local_subscriptions'),
+        ];
+
+        foreach ($purchases as $purchase) {
+            $type = (string)($purchase->type ?? 'unknown');
+            $typekey = 'crm_commerce_type_' . $type;
+            $typelabel = get_string_manager()->string_exists($typekey, 'local_subscriptions')
+                ? get_string($typekey, 'local_subscriptions')
+                : ucfirst($type);
+
+            $status = (string)($purchase->status ?? '');
+            $statuskey = 'crm_commerce_status_' . $status;
+            $statuslabel = get_string_manager()->string_exists($statuskey, 'local_subscriptions')
+                ? get_string($statuskey, 'local_subscriptions')
+                : ucfirst($status);
+
+            $badgeclass = !empty($purchase->successful)
+                ? 'bg-success'
+                : (!empty($purchase->failedpayment) ? 'bg-danger' : 'bg-secondary');
+
+            $amount = AdminFormatter::price(
+                (float)($purchase->total ?? 0),
+                (string)($purchase->currency ?? '')
+            );
+
+            $table->data[] = [
+                s((string)($purchase->publicreference ?? $purchase->reference ?? '-')),
+                html_writer::span(s($typelabel), 'badge bg-light text-dark border'),
+                s((string)($purchase->label ?? '-')),
+                html_writer::span(s($statuslabel), 'badge ' . $badgeclass),
+                $amount,
+                AdminFormatter::datetime((int)($purchase->timecreated ?? 0)),
+                html_writer::link(
+                    (string)($purchase->orderurl ?? '#'),
+                    get_string('crm_commerce_view_order', 'local_subscriptions'),
+                    ['class' => 'btn btn-sm btn-outline-primary']
+                ),
+            ];
+        }
+
+        return html_writer::table($table);
     }
 
     private static function subscriptions_content(array $subscriptions): string {

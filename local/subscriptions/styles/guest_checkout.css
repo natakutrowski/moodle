@@ -1,0 +1,64 @@
+.commerce-guest-checkout__input-wrap { position: relative; }
+.commerce-guest-checkout__status { position:absolute; top:50%; right:.9rem; transform:translateY(-50%); font-weight:800; }
+.commerce-guest-checkout__input-wrap .is-valid + .commerce-guest-checkout__status { color:#168a58; }
+.commerce-guest-checkout__input-wrap .is-invalid + .commerce-guest-checkout__status { color:#b42318; }
+.commerce-guest-checkout__feedback { min-height:1.35rem; margin-top:.35rem; font-size:.86rem; }
+.commerce-guest-checkout__feedback.is-valid { color:#168a58; }
+.commerce-guest-checkout__feedback.is-invalid { color:#b42318; }
+[data-guest-checkout-submit][disabled] { cursor:not-allowed; opacity:.55; }
+
+/* J14A: guest identity is collected inside the unified checkout. */
+.commerce-checkout-identity {
+    padding: 1rem;
+    border: 1px solid rgba(236, 72, 153, .18);
+    border-radius: .9rem;
+    background: rgba(252, 231, 243, .22);
+}
+
+.commerce-checkout-identity .is-valid {
+    border-color: #198754;
+}
+
+.commerce-checkout-identity .is-invalid {
+    border-color: #dc3545;
+}
+
+
+/* J14B — compact identity form and legal consent. */
+.commerce-checkout__payment .card-body {
+    padding: clamp(1.25rem, 2vw, 2rem) !important;
+}
+
+.commerce-checkout-identity {
+    padding: .9rem 1rem;
+}
+
+.commerce-checkout-identity .form-label {
+    margin-bottom: .35rem;
+}
+
+.commerce-checkout-identity .form-control {
+    min-height: 2.75rem;
+}
+
+.commerce-checkout-legal {
+    padding: .85rem 1rem .85rem 2.5rem;
+    border: 1px solid rgba(236, 72, 153, .18);
+    border-radius: .85rem;
+    background: rgba(252, 231, 243, .18);
+    line-height: 1.45;
+}
+
+.commerce-checkout-legal .form-check-input {
+    margin-left: -1.5rem;
+}
+
+.commerce-checkout-legal a {
+    font-weight: 600;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout__payment .card-body {
+        padding: 1.1rem !important;
+    }
+}

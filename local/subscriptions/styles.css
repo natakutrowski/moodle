@@ -14345,3 +14345,1212 @@ textarea:focus-visible {
     font-size: .78rem;
     font-weight: 400;
 }
+
+/* Commerce 7.95B3-B4 shared UX foundation. */
+.crm-commerce-page-header-actions .crm-commerce-actionbar {
+    margin-bottom: 0;
+}
+
+.crm-commerce-metrics {
+    margin-bottom: 1.5rem;
+}
+
+.crm-commerce-empty-state {
+    text-align: center;
+    border: 1px dashed var(--bs-border-color, #dee2e6);
+    border-radius: .75rem;
+    padding: 2rem;
+    background: var(--bs-body-bg, #fff);
+}
+
+@media (max-width: 767.98px) {
+    .crm-commerce-page-header-actions,
+    .crm-commerce-page-header-actions .crm-commerce-actionbar,
+    .crm-commerce-page-header-actions .btn {
+        width: 100%;
+    }
+}
+
+
+/* Commerce 7.95B5-B10 editor completion, accessibility and responsive polish. */
+.crm-commerce-editor-form {
+    max-width: 1100px;
+}
+
+.crm-commerce-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.crm-commerce-section-heading {
+    margin: 1.75rem 0 1rem;
+}
+
+.crm-commerce-notice {
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 575.98px) {
+    .crm-commerce-page-header-actions,
+    .crm-commerce-page-header-actions .btn,
+    .crm-commerce-form-actions,
+    .crm-commerce-form-actions .btn,
+    .crm-commerce-form-actions input[type="submit"] {
+        width: 100%;
+    }
+
+    .crm-commerce-form-actions {
+        align-items: stretch;
+    }
+
+    .crm-commerce-preview-card .d-flex {
+        flex-direction: column;
+    }
+}
+
+/* Commerce 7.95C4-C6 — Native statistics dashboard. */
+.crm-commerce-statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.crm-commerce-statistics-card {
+    display: flex;
+    min-height: 150px;
+    flex-direction: column;
+    padding: 1.1rem;
+    border: 1px solid #dee2e6;
+    border-radius: .85rem;
+    background: #fff;
+    color: inherit;
+    text-decoration: none;
+    transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+}
+
+.crm-commerce-statistics-card:hover,
+.crm-commerce-statistics-card:focus-visible {
+    border-color: #adb5bd;
+    box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .08);
+    color: inherit;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.crm-commerce-statistics-label {
+    color: #6c757d;
+    font-size: .84rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+
+.crm-commerce-statistics-value {
+    margin: .45rem 0;
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 750;
+    line-height: 1.15;
+}
+
+.crm-commerce-statistics-trend {
+    font-size: .875rem;
+}
+
+.crm-commerce-statistics-link {
+    margin-top: auto;
+    padding-top: 1rem;
+    color: #0d6efd;
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+@media (max-width: 991.98px) {
+    .crm-commerce-statistics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crm-commerce-statistics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .crm-commerce-statistics-card {
+        min-height: 135px;
+    }
+}
+
+
+/* Commerce 7.95C7-C9: graphical statistics. */
+.crm-commerce-statistics-chart-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.crm-commerce-statistics-chart { min-width:0; overflow:hidden; }
+.crm-commerce-statistics-chart .chart-area,
+.crm-commerce-statistics-chart .chart-image { width:100%; max-width:100%; overflow:hidden; }
+.crm-commerce-statistics-chart canvas,
+.crm-commerce-statistics-chart svg { max-width:100%; }
+.crm-commerce-statistics-chart .chart-area { min-height:280px; }
+@media (max-width: 900px) { .crm-commerce-statistics-chart-grid { grid-template-columns:1fr; } }
+
+
+/* Commerce plan status switch. */
+.commerce-toggle-form {
+    display: inline-block;
+    margin: 0;
+}
+
+.commerce-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .2rem .55rem .2rem .25rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+}
+
+.commerce-toggle-track {
+    position: relative;
+    display: inline-block;
+    width: 2.75rem;
+    height: 1.5rem;
+    border: 2px solid #adb5bd;
+    border-radius: 999px;
+    background: #dee2e6;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.commerce-toggle-track::after {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .28);
+    content: '';
+    transition: transform .15s ease;
+}
+
+.commerce-toggle.is-active .commerce-toggle-track {
+    border-color: #198754;
+    background: #198754;
+}
+
+.commerce-toggle.is-active .commerce-toggle-track::after {
+    transform: translateX(1.25rem);
+}
+
+.commerce-toggle-label {
+    min-width: 3.8rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.commerce-toggle:focus-visible {
+    outline: 3px solid rgba(13, 110, 253, .35);
+    outline-offset: 2px;
+}
+
+.crm-commerce-step-return {
+    margin-right: .75rem;
+    border-right: 1px solid #dee2e6;
+}
+
+/* Commerce 7.95 I4.2: premium customer purchase presentation. */
+.my-purchases-premium {
+    --mypurchases-bg: #f6f7fb;
+    --mypurchases-surface: #fff;
+    --mypurchases-border: #e5e7eb;
+    --mypurchases-text: #1f2937;
+    --mypurchases-muted: #6b7280;
+    --mypurchases-primary: #5b4de3;
+    --mypurchases-primary-soft: #eeecff;
+    --mypurchases-course: #2563eb;
+    --mypurchases-course-soft: #eaf2ff;
+    --mypurchases-digital: #8b5cf6;
+    --mypurchases-digital-soft: #f3efff;
+    margin: -1rem;
+    padding: clamp(1rem, 3vw, 2.5rem);
+    background:
+        radial-gradient(circle at top right, rgba(91, 77, 227, .09), transparent 34rem),
+        var(--mypurchases-bg);
+    color: var(--mypurchases-text);
+}
+
+.my-purchases-premium__inner {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+}
+
+.my-purchases-hero {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid rgba(91, 77, 227, .15);
+    border-radius: 1.25rem;
+    background: linear-gradient(135deg, #fff 0%, #f8f7ff 100%);
+    box-shadow: 0 18px 45px rgba(31, 41, 55, .08);
+}
+
+.my-purchases-hero__icon {
+    display: grid;
+    flex: 0 0 auto;
+    width: 3.5rem;
+    height: 3.5rem;
+    place-items: center;
+    border-radius: 1rem;
+    background: var(--mypurchases-primary);
+    color: #fff;
+    font-size: 1.35rem;
+    box-shadow: 0 12px 24px rgba(91, 77, 227, .24);
+}
+
+.my-purchases-hero__content { min-width: 0; }
+.my-purchases-hero__title {
+    margin: 0;
+    color: var(--mypurchases-text);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 750;
+    letter-spacing: -.025em;
+}
+
+.my-purchases-hero__summary {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    margin-top: .35rem;
+    color: var(--mypurchases-muted);
+}
+
+.my-purchases-hero__count {
+    color: var(--mypurchases-primary);
+    font-size: 1.15rem;
+    font-weight: 750;
+}
+
+.my-purchases-hero__label { font-size: .9rem; }
+
+.my-purchases-section {
+    margin-bottom: 2.25rem;
+}
+
+.my-purchases-section__heading {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+.my-purchases-section__icon {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border-radius: .8rem;
+    background: var(--mypurchases-primary-soft);
+    color: var(--mypurchases-primary);
+}
+
+.my-purchases-section--courses .my-purchases-section__icon {
+    background: var(--mypurchases-course-soft);
+    color: var(--mypurchases-course);
+}
+
+.my-purchases-section--digital .my-purchases-section__icon {
+    background: var(--mypurchases-digital-soft);
+    color: var(--mypurchases-digital);
+}
+
+.my-purchases-section__title {
+    flex: 1 1 auto;
+    margin: 0;
+    color: var(--mypurchases-text);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.my-purchases-section__count {
+    display: inline-flex;
+    min-width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0 .65rem;
+    border: 1px solid var(--mypurchases-border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--mypurchases-muted);
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.my-purchases-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.my-purchase-card {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 0 !important;
+    border: 1px solid var(--mypurchases-border) !important;
+    border-radius: 1rem !important;
+    background: var(--mypurchases-surface) !important;
+    box-shadow: 0 8px 24px rgba(31, 41, 55, .06) !important;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.my-purchase-card::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--mypurchases-primary);
+    content: '';
+}
+
+.my-purchase-card--course::before { background: var(--mypurchases-course); }
+.my-purchase-card--digital::before { background: var(--mypurchases-digital); }
+
+.my-purchase-card:hover {
+    transform: translateY(-2px);
+    border-color: #d6d8e2 !important;
+    box-shadow: 0 14px 34px rgba(31, 41, 55, .1) !important;
+}
+
+.my-purchase-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: .85rem;
+    padding: 1.15rem 1.15rem .8rem 1.3rem;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.my-purchase-card__icon {
+    display: grid;
+    flex: 0 0 auto;
+    width: 2.55rem;
+    height: 2.55rem;
+    place-items: center;
+    border-radius: .8rem;
+    background: var(--mypurchases-primary-soft);
+    color: var(--mypurchases-primary);
+}
+
+.my-purchase-card--course .my-purchase-card__icon {
+    background: var(--mypurchases-course-soft);
+    color: var(--mypurchases-course);
+}
+
+.my-purchase-card--digital .my-purchase-card__icon {
+    background: var(--mypurchases-digital-soft);
+    color: var(--mypurchases-digital);
+}
+
+.my-purchase-card__heading {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.my-purchase-card__heading > .d-flex {
+    align-items: flex-start !important;
+    gap: .65rem;
+}
+
+.my-purchase-card__heading .h5 {
+    overflow-wrap: anywhere;
+    color: var(--mypurchases-text);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.my-purchase-card__heading .badge {
+    flex: 0 0 auto;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 700;
+}
+
+.my-purchase-card__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    padding: .35rem 1.15rem 1.15rem 1.3rem !important;
+}
+
+.my-purchase-card__meta {
+    flex: 1 1 auto;
+    color: var(--mypurchases-text);
+}
+
+.my-purchase-card__meta ul {
+    display: grid;
+    gap: .48rem;
+    margin: 0 !important;
+}
+
+.my-purchase-card__meta li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    align-items: baseline;
+    padding-bottom: .45rem;
+    border-bottom: 1px dashed #eceef3;
+    line-height: 1.45;
+}
+
+.my-purchase-card__meta li:last-child { border-bottom: 0; }
+.my-purchase-card__meta .text-muted {
+    color: var(--mypurchases-muted) !important;
+    font-weight: 600;
+}
+
+.my-purchase-card__meta a {
+    color: var(--mypurchases-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.my-purchase-card__meta a:hover { text-decoration: underline; }
+
+.my-purchase-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    margin-top: 1rem;
+    padding-top: .9rem;
+    border-top: 1px solid #eceef3;
+}
+
+.my-purchase-card__action { display: inline-flex; }
+.my-purchase-card__actions .btn {
+    min-height: 2.3rem;
+    border-radius: .65rem;
+    font-size: .8rem;
+    font-weight: 650;
+}
+
+.my-purchase-card__actions .btn-outline-primary {
+    border-color: rgba(91, 77, 227, .28);
+    background: var(--mypurchases-primary-soft);
+    color: var(--mypurchases-primary);
+}
+
+.my-purchase-card__actions .btn-outline-primary:hover,
+.my-purchase-card__actions .btn-outline-primary:focus {
+    border-color: var(--mypurchases-primary);
+    background: var(--mypurchases-primary);
+    color: #fff;
+}
+
+.my-purchase-card__actions .btn-outline-secondary {
+    border-color: var(--mypurchases-border);
+    background: #fff;
+    color: #4b5563;
+}
+
+.my-purchases-section > .alert {
+    border: 1px dashed #d8dbe5;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, .72);
+}
+
+.my-purchases-premium .modal-content {
+    overflow: hidden;
+    border: 0;
+    border-radius: 1rem;
+    box-shadow: 0 24px 70px rgba(31, 41, 55, .22);
+}
+
+.my-purchases-premium .modal-header {
+    border-bottom: 1px solid #eceef3;
+    background: #fafaff;
+}
+
+@media (max-width: 767.98px) {
+    .my-purchases-premium {
+        margin: -.5rem;
+        padding: 1rem;
+    }
+
+    .my-purchases-grid { grid-template-columns: 1fr; }
+    .my-purchases-hero { align-items: flex-start; }
+    .my-purchases-hero__icon { width: 3rem; height: 3rem; }
+    .my-purchase-card__heading > .d-flex { flex-direction: column; }
+    .my-purchase-card__actions .btn { width: 100%; justify-content: center; }
+    .my-purchase-card__action { flex: 1 1 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .my-purchase-card { transition: none; }
+    .my-purchase-card:hover { transform: none; }
+}
+
+
+/* 7.95 I4.3 - precise vertical alignment for purchase actions and status badges. */
+.my-purchase-card__actions .btn,
+.my-purchases-premium .badge,
+.my-purchase-card__heading .badge,
+.my-purchase-card__meta .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.my-purchase-card__actions .btn {
+    padding-top: .55rem;
+    padding-bottom: .55rem;
+}
+
+.my-purchases-premium .badge,
+.my-purchase-card__heading .badge,
+.my-purchase-card__meta .badge {
+    min-height: 1.65rem;
+    padding-top: .34rem;
+    padding-bottom: .34rem;
+}
+
+/* 7.95 I4.9 — customer purchase projection. */
+.my-purchases-section--bundles .my-purchases-section__icon,
+.my-purchase-card--bundle .my-purchase-card__icon {
+    background: rgba(245, 158, 11, .14);
+    color: #b45309;
+}
+
+.my-purchase-card__actions .btn i {
+    margin-right: .35rem;
+}
+
+
+/* 7.95 I4.11 — shared Commerce colour language and purchase health. */
+:root { --mypurchases-subscription:#e83e8c; --mypurchases-subscription-soft:#fff0f6; --mypurchases-digital:#2563eb; --mypurchases-digital-soft:#eff6ff; --mypurchases-bundle:#d99a00; --mypurchases-bundle-soft:#fff8db; }
+.my-purchases-section--courses .my-purchases-section__icon{background:var(--mypurchases-subscription-soft);color:var(--mypurchases-subscription)}
+.my-purchases-section--digital .my-purchases-section__icon{background:var(--mypurchases-digital-soft);color:var(--mypurchases-digital)}
+.my-purchases-section--bundles .my-purchases-section__icon{background:var(--mypurchases-bundle-soft);color:var(--mypurchases-bundle)}
+.my-purchase-card--course::before{background:var(--mypurchases-subscription)}
+.my-purchase-card--digital::before{background:var(--mypurchases-digital)}
+.my-purchase-card--bundle::before{background:var(--mypurchases-bundle)}
+.my-purchases .crm-commerce-status-badge,.my-purchase-card .badge{border-radius:.4rem;padding:.42rem .75rem;line-height:1.15}
+.my-purchase-bundle-items li{padding:.28rem 0;border-bottom:1px solid rgba(15,23,42,.07)}
+.my-purchase-bundle-items li:last-child{border-bottom:0}
+.my-purchase-card--warning{background:#fffdf1}.my-purchase-card--error{background:#fff5f5}.my-purchase-card--inactive{background:#f5f6f8}
+
+/* J10E10 — harmonised CRM account menu. */
+.crm-app-topbar-user-links {
+    gap: 0.125rem;
+}
+
+.crm-app-topbar-user-link {
+    min-height: 2.75rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+}
+
+.crm-app-topbar-user-link-icon {
+    width: 1.375rem;
+    height: 1.375rem;
+    flex-basis: 1.375rem;
+}
+
+.crm-app-topbar-user-divider {
+    margin: 0.5rem 0;
+}
+
+
+/* J14E1 — context-aware provider transition experience. */
+.commerce-provider-experience {
+    width: min(92vw, 34rem);
+    padding: 0;
+    border: 0;
+    border-radius: 1.5rem;
+    background: transparent;
+    color: inherit;
+    overflow: visible;
+}
+
+.commerce-provider-experience::backdrop {
+    background: rgba(15, 23, 42, .62);
+    backdrop-filter: blur(5px);
+}
+
+.commerce-provider-experience__panel {
+    position: relative;
+    padding: 2rem;
+    border: 1px solid rgba(226, 232, 240, .9);
+    border-radius: 1.5rem;
+    background: #fff;
+    box-shadow: 0 1.5rem 4rem rgba(15, 23, 42, .28);
+}
+
+.commerce-provider-experience__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #475569;
+}
+
+.commerce-provider-experience__icon {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1.25rem;
+    border-radius: 1.25rem;
+    background: linear-gradient(135deg, #e0f2fe, #dcfce7);
+    color: #087f5b;
+    font-size: 1.5rem;
+}
+
+.commerce-provider-experience[data-active-provider="alfa"] .commerce-provider-experience__icon {
+    background: linear-gradient(135deg, #fff7ed, #ffedd5);
+    color: #c2410c;
+}
+
+.commerce-provider-experience__title {
+    margin: 0 3rem .75rem 0;
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+    line-height: 1.2;
+}
+
+.commerce-provider-experience__summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: .9rem 1rem;
+    border-radius: 1rem;
+    background: #f8fafc;
+}
+
+.commerce-provider-experience__summary strong {
+    color: #0f172a;
+}
+
+.commerce-provider-experience__summary span {
+    color: #d63384;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.commerce-provider-experience__message {
+    margin-bottom: .75rem;
+    color: #475569;
+}
+
+.commerce-provider-experience__advice {
+    margin: 1rem 0 0;
+    padding: .95rem 1rem .95rem 3rem;
+    border: 1px solid #bae6fd;
+    border-radius: .9rem;
+    background: #f0f9ff;
+    color: #0c4a6e;
+    font-weight: 600;
+    position: relative;
+}
+
+.commerce-provider-experience__advice::before {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: #0284c7;
+    content: "\f3ed";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+}
+
+.commerce-provider-experience[data-active-provider="alfa"] .commerce-provider-experience__advice {
+    border-color: #fed7aa;
+    background: #fff7ed;
+    color: #7c2d12;
+}
+
+.commerce-provider-experience[data-active-provider="alfa"] .commerce-provider-experience__advice::before {
+    color: #ea580c;
+    content: "\f071";
+}
+
+.commerce-provider-experience__actions {
+    display: grid;
+    gap: .65rem;
+    margin-top: 1.5rem;
+}
+
+.commerce-provider-experience__actions .btn {
+    min-height: 3rem;
+}
+
+@media (max-width: 480px) {
+    .commerce-provider-experience__panel {
+        padding: 1.5rem;
+    }
+
+    .commerce-provider-experience__summary {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .commerce-provider-experience {
+        scroll-behavior: auto;
+    }
+}
+
+/* J14E3 — Alfa alternative-currency redirector. */
+.commerce-provider-currency {
+    width: min(92vw, 31rem);
+    padding: 0;
+    border: 0;
+    border-radius: 1.5rem;
+    background: transparent;
+    color: inherit;
+    overflow: visible;
+}
+
+.commerce-provider-currency::backdrop {
+    background: rgba(15, 23, 42, .62);
+    backdrop-filter: blur(5px);
+}
+
+.commerce-provider-currency__panel {
+    position: relative;
+    padding: 2rem;
+    border: 1px solid rgba(226, 232, 240, .9);
+    border-radius: 1.5rem;
+    background: #fff;
+    box-shadow: 0 1.5rem 4rem rgba(15, 23, 42, .28);
+}
+
+.commerce-provider-currency__icon {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1.25rem;
+    border-radius: 1.25rem;
+    background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+    color: #be185d;
+    font-size: 1.5rem;
+}
+
+.commerce-provider-currency__title {
+    margin: 0 3rem .75rem 0;
+    font-size: clamp(1.35rem, 3vw, 1.7rem);
+    line-height: 1.2;
+}
+
+.commerce-provider-currency__message {
+    margin-bottom: 1.25rem;
+    color: #475569;
+    line-height: 1.55;
+}
+
+.commerce-provider-currency__choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.commerce-provider-currency__choice {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+.commerce-provider-currency__choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.commerce-provider-currency__choice-content {
+    display: flex;
+    min-height: 4rem;
+    padding: .8rem 1rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: #fff;
+    color: #334155;
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.commerce-provider-currency__choice-content strong {
+    color: #0f172a;
+    font-size: 1rem;
+}
+
+.commerce-provider-currency__choice-content span {
+    color: #d63384;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.commerce-provider-currency__choice:hover .commerce-provider-currency__choice-content {
+    border-color: #f9a8d4;
+    background: #fff7fb;
+}
+
+.commerce-provider-currency__choice input:checked + .commerce-provider-currency__choice-content {
+    border-color: #d63384;
+    background: #fdf2f8;
+    box-shadow: 0 0 0 3px rgba(214, 51, 132, .12);
+}
+
+.commerce-provider-currency__choice input:focus-visible + .commerce-provider-currency__choice-content {
+    outline: 3px solid rgba(214, 51, 132, .24);
+    outline-offset: 2px;
+}
+
+.commerce-provider-currency__status {
+    min-height: 1.5rem;
+    margin-top: .8rem;
+    color: #b45309;
+    font-size: .9rem;
+}
+
+.commerce-provider-currency__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: .75rem;
+    margin-top: 1rem;
+}
+
+.commerce-provider-currency__actions .btn {
+    min-height: 3rem;
+}
+
+@media (max-width: 480px) {
+    .commerce-provider-currency__panel {
+        padding: 1.5rem;
+    }
+
+    .commerce-provider-currency__choices,
+    .commerce-provider-currency__actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* J15H.1A — Checkout has its own compact Commerce shell. */
+.commerce-chromeless-page #page-header,
+.commerce-chromeless-page .secondary-navigation,
+.commerce-chromeless-page .navbar.fixed-top,
+.commerce-chromeless-page header.navbar {
+    display: none !important;
+}
+.commerce-chromeless-page #page { margin-top: 0 !important; }
+
+
+/* J15H.1B — Edly page banner is redundant on Commerce customer pages. */
+body.commerce-chromeless-page .page-banner-area,
+body.commerce-chromeless-page .page-title-area,
+body.commerce-chromeless-page #page-header,
+body.commerce-chromeless-page .breadcrumb-area {
+    display: none !important;
+}
+body.commerce-chromeless-page #page-content,
+body.commerce-chromeless-page #region-main {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.my-purchases-store-link-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin: -.25rem 0 1rem;
+}
+.my-purchases-store-link {
+    color: #6f6280;
+    font-size: .9rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+.my-purchases-store-link:hover { color: var(--mypurchases-primary); text-decoration: underline; }
+.my-purchase-card__title-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .75rem;
+    align-items: start;
+    width: 100%;
+}
+.my-purchase-card__title { min-width: 0; overflow-wrap: anywhere; }
+.my-purchase-card__status { align-self: start; white-space: nowrap; }
+@media (max-width: 575.98px) {
+    .my-purchase-card__title-row { grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; }
+    .my-purchase-card__title { font-size: 1rem !important; line-height: 1.35; }
+    .my-purchase-card__status { font-size: .76rem; padding: .34rem .55rem !important; }
+}
+
+/* J15H.1C — checkout title banner fallback for Edly layouts where the body class is late. */
+body#page-local-subscriptions-checkout .page-banner-area,
+body#page-local-subscriptions-checkout .page-title-area,
+body#page-local-subscriptions-checkout #page-header,
+body#page-local-subscriptions-checkout .breadcrumb-area {
+    display: none !important;
+}
+body#page-local-subscriptions-checkout #page-content,
+body#page-local-subscriptions-checkout #region-main {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+
+/* CampusFR J15H.2 — Commerce accessibility certification. */
+:where(.commerce-showroom, .commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details, .digital-library)
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid #f61f82;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px rgba(246, 31, 130, .16);
+}
+
+:where(.commerce-showroom, .commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details, .digital-library)
+:where(button, [role="button"], a).disabled,
+:where(.commerce-showroom, .commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details, .digital-library)
+:where(button, [role="button"], a)[aria-disabled="true"] {
+    cursor: not-allowed;
+}
+
+.commerce-account-dialog[open],
+.commerce-provider-experience[open],
+.commerce-provider-currency[open] {
+    outline: none;
+}
+
+.commerce-account-dialog::backdrop,
+.commerce-provider-experience::backdrop,
+.commerce-provider-currency::backdrop {
+    background: rgba(25, 15, 45, .72);
+}
+
+@media (forced-colors: active) {
+    .commerce-showroom-btn,
+    .commerce-product-card,
+    .commerce-cart-line,
+    .commerce-checkout__summary,
+    .commerce-checkout__payment,
+    .commerce-order-panel {
+        border: 1px solid CanvasText !important;
+        box-shadow: none !important;
+    }
+
+    .commerce-showroom-offer--bundle.is-featured {
+        outline: 3px solid Highlight;
+        outline-offset: 3px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html:focus-within {
+        scroll-behavior: auto;
+    }
+}
+
+/* CampusFR J15H.4 — unified Commerce UI language. */
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library) {
+    --commerce-ui-pink: #f61f82;
+    --commerce-ui-pink-dark: #d8116c;
+    --commerce-ui-purple: #34225f;
+    --commerce-ui-ink: #241a37;
+    --commerce-ui-muted: #716a7b;
+    --commerce-ui-line: rgba(52, 34, 95, .12);
+    --commerce-ui-surface: #fff;
+    --commerce-ui-surface-soft: #fff7fb;
+    --commerce-ui-success: #168d5d;
+    --commerce-ui-warning: #a76700;
+    --commerce-ui-radius-control: .8rem;
+    --commerce-ui-radius-card: 1.25rem;
+    --commerce-ui-radius-dialog: 1.5rem;
+    --commerce-ui-shadow-card: 0 1rem 2.8rem rgba(52, 34, 95, .08);
+    --commerce-ui-shadow-raised: 0 1.35rem 3.5rem rgba(52, 34, 95, .14);
+}
+
+/* Cards and panels share the same radius, border and elevation. */
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library)
+:where(.commerce-product-card,
+       .commerce-cart-line,
+       .commerce-cart-summary,
+       .commerce-checkout__summary,
+       .commerce-checkout__payment,
+       .commerce-order-panel,
+       .commerce-order-bundle,
+       .commerce-order-result__panel,
+       .my-purchase-card,
+       .digital-library-resource) {
+    border: 1px solid var(--commerce-ui-line) !important;
+    border-radius: var(--commerce-ui-radius-card) !important;
+    background: var(--commerce-ui-surface);
+    box-shadow: var(--commerce-ui-shadow-card) !important;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+@media (hover: hover) {
+    :where(.commerce-storefront, .commerce-cart, .commerce-order-details,
+           .my-purchases-page, .digital-library)
+    :where(.commerce-product-card, .commerce-cart-line,
+           .commerce-order-panel, .my-purchase-card,
+           .digital-library-resource):hover {
+        border-color: rgba(246, 31, 130, .24) !important;
+        box-shadow: var(--commerce-ui-shadow-raised) !important;
+        transform: translateY(-2px);
+    }
+}
+
+/* Buttons use one consistent height and geometry without changing their semantic colours. */
+:where(.commerce-showroom, .commerce-storefront, .commerce-cart,
+       .commerce-checkout, .commerce-order-result,
+       .commerce-order-details, .my-purchases-page, .digital-library)
+:where(.btn, .commerce-showroom-btn) {
+    min-height: 2.875rem;
+    border-radius: var(--commerce-ui-radius-control, .8rem);
+    font-weight: 750;
+    line-height: 1.15;
+    transition: background-color .18s ease, border-color .18s ease,
+                box-shadow .18s ease, color .18s ease, transform .18s ease;
+}
+
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library)
+.btn-primary {
+    border-color: var(--commerce-ui-pink) !important;
+    background: var(--commerce-ui-pink) !important;
+    box-shadow: 0 .75rem 1.7rem rgba(246, 31, 130, .2);
+}
+
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library)
+.btn-primary:hover,
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library)
+.btn-primary:focus-visible {
+    border-color: var(--commerce-ui-pink-dark) !important;
+    background: var(--commerce-ui-pink-dark) !important;
+    box-shadow: 0 .9rem 2rem rgba(216, 17, 108, .27);
+    transform: translateY(-1px);
+}
+
+/* Form controls and currency selectors share the same compact rhythm. */
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library)
+:where(.form-control, .form-select, select, input[type="text"],
+       input[type="email"], input[type="password"], textarea) {
+    min-height: 2.75rem;
+    border-color: rgba(52, 34, 95, .18);
+    border-radius: var(--commerce-ui-radius-control);
+    color: var(--commerce-ui-ink);
+    background-color: #fff;
+}
+
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library)
+:where(.form-control, .form-select, select, input, textarea):focus {
+    border-color: rgba(246, 31, 130, .58);
+    box-shadow: 0 0 0 .22rem rgba(246, 31, 130, .13);
+}
+
+/* Pills and statuses are visually consistent across the purchasing journey. */
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library)
+:where(.badge, .commerce-order-status, .commerce-product-type-badge,
+       .commerce-order-result__status, .my-purchase-card__status) {
+    border-radius: 999px !important;
+    font-weight: 800;
+    letter-spacing: .01em;
+}
+
+/* Shared modal treatment for payment and account-finalisation experiences. */
+:where(.commerce-account-dialog, .commerce-provider-experience,
+       .commerce-provider-currency) {
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: var(--commerce-ui-radius-dialog, 1.5rem);
+    background: #fff;
+    box-shadow: 0 2.5rem 6rem rgba(25, 15, 45, .34);
+}
+
+:where(.commerce-account-dialog, .commerce-provider-experience,
+       .commerce-provider-currency)::backdrop {
+    background: rgba(25, 15, 45, .72);
+    backdrop-filter: blur(7px);
+}
+
+/* Page headings use the same visual hierarchy and measure. */
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library)
+:where(h1, .display-5) {
+    color: var(--commerce-ui-purple);
+    letter-spacing: -.025em;
+    text-wrap: balance;
+}
+
+:where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+       .commerce-order-result, .commerce-order-details,
+       .my-purchases-page, .digital-library)
+:where(.text-muted, .lead, .small) {
+    color: var(--commerce-ui-muted) !important;
+}
+
+@media (max-width: 575.98px) {
+    :where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+           .commerce-order-result, .commerce-order-details,
+           .my-purchases-page, .digital-library)
+    :where(.commerce-product-card, .commerce-cart-line,
+           .commerce-checkout__summary, .commerce-checkout__payment,
+           .commerce-order-panel, .commerce-order-result__panel,
+           .my-purchase-card, .digital-library-resource) {
+        border-radius: 1rem !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :where(.commerce-storefront, .commerce-cart, .commerce-checkout,
+           .commerce-order-result, .commerce-order-details,
+           .my-purchases-page, .digital-library)
+    :where(.commerce-product-card, .commerce-cart-line,
+           .commerce-order-panel, .my-purchase-card,
+           .digital-library-resource, .btn) {
+        transition: none !important;
+        transform: none !important;
+    }
+}

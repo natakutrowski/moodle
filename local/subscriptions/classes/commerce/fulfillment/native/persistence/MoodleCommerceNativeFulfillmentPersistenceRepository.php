@@ -12,6 +12,7 @@ use local_subscriptions\commerce\fulfillment\native\CommerceNativeFulfillmentRes
 
 /** Moodle database persistence for Native fulfillment state and attempts. */
 final class MoodleCommerceNativeFulfillmentPersistenceRepository implements CommerceNativeFulfillmentPersistenceRepository {
+    private const GRANT_TABLE = 'local_subs_commerce_grant';
     private const STATE_TABLE = 'local_subs_commerce_ful_state';
     private const ATTEMPT_TABLE = 'local_subs_commerce_ful_attempt';
 
@@ -19,6 +20,33 @@ final class MoodleCommerceNativeFulfillmentPersistenceRepository implements Comm
         global $DB;
         $record = $DB->get_record(self::STATE_TABLE, ['grantreference' => trim($grantreference)]);
         return $record === false ? null : $record;
+    }
+
+    public function activate_grant_if_planned(CommerceEntitlementGrant $grant, ?int $now = null): bool {
+        global $DB;
+
+        $record = $DB->get_record(
+            self::GRANT_TABLE,
+            ['grantreference' => $grant->get_reference()],
+            'id,status',
+            IGNORE_MISSING
+        );
+
+        if ($record === false) {
+            throw new \RuntimeException('The Native Commerce entitlement grant could not be found.');
+        }
+
+        if ((string) $record->status !== 'planned') {
+            return false;
+        }
+
+        $DB->update_record(self::GRANT_TABLE, (object) [
+            'id' => (int) $record->id,
+            'status' => 'active',
+            'timemodified' => $now ?? time(),
+        ]);
+
+        return true;
     }
 
     public function begin_attempt(
@@ -66,7 +94,7 @@ final class MoodleCommerceNativeFulfillmentPersistenceRepository implements Comm
         return (int) $DB->insert_record(self::ATTEMPT_TABLE, (object) [
             'grantreference' => $grant->get_reference(),
             'idempotencykey' => $grant->get_idempotency_key(),
-            'executionreference' => $context->get_execution_reference(),
+            'executionreference' => $this->attempt_execution_reference($context, $grant),
             'granttype' => $grant->get_type(),
             'handlerclass' => $handlerclass,
             'status' => 'running',
@@ -79,6 +107,17 @@ final class MoodleCommerceNativeFulfillmentPersistenceRepository implements Comm
             'timestarted' => $now,
             'timecompleted' => null,
         ]);
+    }
+
+    private function attempt_execution_reference(
+        CommerceNativeFulfillmentContext $context,
+        CommerceEntitlementGrant $grant
+    ): string {
+        $base = trim($context->get_execution_reference());
+        $suffix = substr(hash('sha256', $grant->get_reference()), 0, 12);
+        $maximumBaseLength = 100 - 1 - strlen($suffix);
+
+        return substr($base, 0, $maximumBaseLength) . '-' . $suffix;
     }
 
     public function complete_attempt(

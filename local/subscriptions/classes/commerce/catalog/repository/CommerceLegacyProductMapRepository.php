@@ -59,6 +59,59 @@ final class CommerceLegacyProductMapRepository {
         $this->db->insert_record(self::TABLE, $data);
     }
 
+
+    public function find_by_product(int $productid, string $legacytable): ?\stdClass {
+        $record = $this->db->get_record(self::TABLE, [
+            'productid' => $productid,
+            'legacytable' => trim($legacytable),
+        ]);
+        return $record ?: null;
+    }
+
+    public function find_legacy_link(string $legacytable, int $legacyid): ?\stdClass {
+        $record = $this->db->get_record(self::TABLE, [
+            'legacytable' => trim($legacytable),
+            'legacyid' => $legacyid,
+        ]);
+        return $record ?: null;
+    }
+
+    public function transfer_product(int $productid, string $legacyfamily, string $legacytable, int $legacyid): void {
+        $transaction = $this->db->start_delegated_transaction();
+        try {
+            $this->db->delete_records(self::TABLE, [
+                'legacytable' => trim($legacytable),
+                'legacyid' => $legacyid,
+            ]);
+            $this->link_product($productid, $legacyfamily, $legacytable, $legacyid);
+            $transaction->allow_commit();
+        } catch (\Throwable $exception) {
+            $transaction->rollback($exception);
+        }
+    }
+
+    public function link_product(int $productid, string $legacyfamily, string $legacytable, int $legacyid): void {
+        $conflict = $this->db->get_record(self::TABLE, [
+            'legacytable' => trim($legacytable),
+            'legacyid' => $legacyid,
+        ]);
+        if ($conflict && (int)$conflict->productid !== $productid) {
+            throw new \coding_exception('This Legacy record is already linked to another Native product.');
+        }
+        $current = $this->find_by_product($productid, $legacytable);
+        if ($current && (int)$current->legacyid !== $legacyid) {
+            $this->db->delete_records(self::TABLE, ['id' => (int)$current->id]);
+        }
+        $this->save($productid, $legacyfamily, $legacytable, $legacyid);
+    }
+
+    public function unlink_product(int $productid, string $legacytable): void {
+        $this->db->delete_records(self::TABLE, [
+            'productid' => $productid,
+            'legacytable' => trim($legacytable),
+        ]);
+    }
+
     /** @return array<int, \stdClass> */
     public function find_by_family(string $legacyfamily): array {
         return array_values($this->db->get_records(self::TABLE, [

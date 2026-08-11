@@ -1,0 +1,288 @@
+<div class="commerce-checkout container py-4 py-lg-5">
+    <div class="commerce-checkout__header mb-4 mb-lg-5">
+        <h1 class="display-5 fw-bold mb-2">{{title}}</h1>
+        <p class="lead text-muted mb-0">{{subtitle}}</p>
+    </div>
+
+    {{#issues}}
+        <div class="alert alert-warning" role="alert">{{message}}</div>
+    {{/issues}}
+
+    {{> local_subscriptions/checkout/steps}}
+
+    <div class="commerce-checkout__grid">
+        <section class="commerce-checkout__summary card border-0 shadow-sm" aria-labelledby="commerce-checkout-summary-title">
+            <div class="card-body p-4 p-lg-5">
+                <div class="commerce-checkout__summary-heading">
+                    <h2 id="commerce-checkout-summary-title" class="h3 mb-0">{{ordersummarytitle}}</h2>
+                    <div class="commerce-checkout__print-actions">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-commerce-print-summary>
+                            <i class="fa-solid fa-print me-1" aria-hidden="true"></i>{{printsummarylabel}}
+                        </button>
+                        <a class="btn btn-sm btn-link" href="{{detailedcartprinturl}}" target="_blank" rel="noopener">
+                            {{detailedcartprintlabel}}
+                            <i class="fa-solid fa-arrow-up-right-from-square ms-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+
+                {{#personalofferhasmultiplecurrencies}}
+                    <div class="commerce-personal-offer-currency-card commerce-showroom-currency-card mb-4">
+                        <span class="commerce-showroom-currency-card__icon" aria-hidden="true">
+                            <i class="fa-solid fa-coins"></i>
+                        </span>
+                        <span class="commerce-showroom-currency-card__copy">
+                            <strong>{{personaloffercurrencytitle}}</strong>
+                            <small>{{personaloffercurrencyhelp}}</small>
+                        </span>
+                        <label class="visually-hidden" for="personal-offer-currency">{{personaloffercurrencytitle}}</label>
+                        <select id="personal-offer-currency" data-personal-offer-currency-select>
+                            {{#personaloffercurrencies}}
+                                <option value="{{url}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                            {{/personaloffercurrencies}}
+                        </select>
+                    </div>
+                {{/personalofferhasmultiplecurrencies}}
+
+                <div class="commerce-checkout__items d-grid gap-3 mb-4">
+                    {{#items}}
+                        <article class="commerce-checkout-item">
+                            <div class="commerce-checkout-item__visual" aria-hidden="true">
+                                {{#hascover}}<img src="{{coverurl}}"{{#coverresponsive}} srcset="{{coversrcset}}" sizes="(max-width: 767px) 72px, 96px"{{/coverresponsive}} width="{{coverwidth}}" height="{{coverheight}}" loading="lazy" decoding="async" alt="" class="commerce-checkout-item__cover">{{/hascover}}
+                                {{^hascover}}<div class="commerce-checkout-item__placeholder"><i class="{{placeholdericon}}" aria-hidden="true"></i></div>{{/hascover}}
+                            </div>
+                            <div class="commerce-checkout-item__content">
+                                {{#hastype}}<div class="small text-muted">{{typelabel}}</div>{{/hastype}}
+                                <h3 class="h6 mb-1">{{name}}</h3>
+                                <div class="small text-muted">× {{quantity}}</div>
+                            </div>
+                            <div class="commerce-checkout-item__price">
+                                {{#ispersonaloffer}}
+                                    <span class="commerce-personal-offer-badge d-inline-flex mb-1">
+                                        <i class="fa-solid fa-star commerce-personal-offer-badge__star commerce-personal-offer-badge__star--left" aria-hidden="true"></i>
+                                        <span>{{personalofferbadge}}</span>
+                                        <i class="fa-solid fa-star commerce-personal-offer-badge__star commerce-personal-offer-badge__star--right" aria-hidden="true"></i>
+                                    </span>
+                                {{/ispersonaloffer}}
+                                <strong class="d-block">{{cartpricefinalformatted}}</strong>
+                                {{#cartpricehascompare}}
+                                    <del>{{cartpricecompareformatted}}</del>
+                                {{/cartpricehascompare}}
+                            </div>
+                        </article>
+                    {{/items}}
+                </div>
+
+                <dl class="commerce-checkout__totals commerce-checkout__totals--separated mb-0">
+                    <div>
+                        <dt>{{listtotallabel}}</dt>
+                        <dd>{{listtotalformatted}}</dd>
+                    </div>
+                    {{#hasproductpromotiontotal}}
+                        <div class="commerce-checkout__discount">
+                            <dt>{{productpromotiontotallabel}}</dt>
+                            <dd>− {{productpromotiontotalformatted}}</dd>
+                        </div>
+                    {{/hasproductpromotiontotal}}
+                    {{#hastrialdiscounttotal}}
+                        <div class="commerce-checkout__discount">
+                            <dt>{{trialdiscounttotallabel}}</dt>
+                            <dd>− {{trialdiscounttotalformatted}}</dd>
+                        </div>
+                    {{/hastrialdiscounttotal}}
+                    {{#hasupgradecredittotal}}
+                        <div class="commerce-checkout__discount">
+                            <dt>{{upgradecredittotallabel}}</dt>
+                            <dd>− {{upgradecredittotalformatted}}</dd>
+                        </div>
+                    {{/hasupgradecredittotal}}
+                    {{#promotionadjustments}}
+                        <div class="commerce-checkout__discount">
+                            <dt>{{#hascode}}{{code}}{{/hascode}}{{^hascode}}{{name}}{{/hascode}}</dt>
+                            <dd>− {{amountformatted}}</dd>
+                        </div>
+                    {{/promotionadjustments}}
+                    {{#hastotalreductions}}
+                        <div class="commerce-checkout__discount commerce-checkout__discount--total">
+                            <dt>{{totalreductionslabel}}</dt>
+                            <dd>− {{totalreductionsformatted}}</dd>
+                        </div>
+                    {{/hastotalreductions}}
+                    <div class="commerce-checkout__grand-total"><dt>{{totallabel}}</dt><dd>{{totalformatted}}</dd></div>
+                </dl>
+            </div>
+        </section>
+
+        <aside class="commerce-checkout__payment card border-0 shadow-sm" aria-labelledby="commerce-checkout-payment-title">
+            <div class="card-body p-4 p-lg-5">
+                <h2 id="commerce-checkout-payment-title" class="h3 mb-2">{{paymenttitle}}</h2>
+                <p class="text-muted mb-4">{{paymentdescription}}</p>
+
+                {{#ispersonaloffer}}
+                    <div class="alert alert-primary border-0 mb-4" role="status">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="fs-4" aria-hidden="true">★</span>
+                            <div>
+                                <div class="fw-semibold">{{personalofferreservedtitle}}</div>
+                                <div class="small">{{personalofferreservedfor}}</div>
+                            </div>
+                        </div>
+                    </div>
+                {{/ispersonaloffer}}
+
+                {{#existingaccount}}
+                    <section class="commerce-checkout-login-gate mb-4" aria-labelledby="commerce-checkout-login-title">
+                        <div class="commerce-checkout-login-gate__header">
+                            <span class="commerce-checkout-login-gate__icon" aria-hidden="true">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <div>
+                                <h3 id="commerce-checkout-login-title" class="h5 mb-1">{{embeddedlogintitle}}</h3>
+                                <p class="small text-muted mb-0">{{embeddedloginhelp}}</p>
+                            </div>
+                        </div>
+
+                        {{#hasembeddedlogin}}
+                            <form method="post" action="{{embeddedloginactionurl}}" class="commerce-checkout-login-gate__form mt-3" autocomplete="on">
+                                <input type="hidden" name="logintoken" value="{{embeddedloginlogintoken}}">
+                                <input type="hidden" name="username" value="{{embeddedloginusername}}">
+                                <div class="mb-3">
+                                    <label class="form-label">{{#str}}email{{/str}}</label>
+                                    <div class="form-control bg-light" aria-readonly="true">{{embeddedloginemail}}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="commerce-checkout-existing-password">{{embeddedloginpasswordlabel}}</label>
+                                    <input class="form-control" id="commerce-checkout-existing-password" type="password" name="password" required autocomplete="current-password">
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">{{embeddedloginsubmitlabel}}</button>
+                                    {{^ispersonaloffer}}<a class="btn btn-link" href="{{otheremailurl}}">{{otheremaillabel}}</a>{{/ispersonaloffer}}
+                                </div>
+                            </form>
+                        {{/hasembeddedlogin}}
+
+                        {{^hasembeddedlogin}}
+                            <div class="alert alert-info mt-3 mb-0" role="status">{{existingmessage}}</div>
+                            <div class="d-grid gap-2 mt-3">
+                                <a class="btn btn-primary" href="{{loginurl}}">{{loginlabel}}</a>
+                                {{^ispersonaloffer}}<a class="btn btn-outline-secondary" href="{{otheremailurl}}">{{otheremaillabel}}</a>{{/ispersonaloffer}}
+                            </div>
+                        {{/hasembeddedlogin}}
+                    </section>
+                {{/existingaccount}}
+
+                {{^existingaccount}}
+                <form method="post" action="{{actionurl}}" data-provider-experience data-provider-context="standard" data-product="{{title}}" data-price="{{totalformatted}}" {{#showguestidentity}}data-guest-checkout-form novalidate{{/showguestidentity}}>
+                    <input type="hidden" name="currency" value="{{currency}}">
+                    <input type="hidden" name="flow" value="{{flow}}">
+                    <input type="hidden" name="source" value="{{source}}">
+                    <input type="hidden" name="showroom" value="{{showroom}}">
+                    <input type="hidden" name="showroomoffer" value="{{showroomoffer}}">
+                    <input type="hidden" name="originreturn" value="{{originreturn}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+
+                    {{#ispersonaloffer}}
+                        <input type="hidden" name="email" value="{{personalofferemail}}">
+                        {{^personalofferneedsfirstname}}
+                            <input type="hidden" name="firstname" value="{{personalofferfirstname}}">
+                        {{/personalofferneedsfirstname}}
+                        {{^personalofferneedslastname}}
+                            <input type="hidden" name="lastname" value="{{personalofferlastname}}">
+                        {{/personalofferneedslastname}}
+                        {{#personalofferneedsfirstname}}
+                            <div class="mb-3">
+                                <label class="form-label" for="personal-offer-firstname">{{#str}}firstname{{/str}}</label>
+                                <input class="form-control" id="personal-offer-firstname" type="text" name="firstname" required maxlength="100" autocomplete="given-name">
+                            </div>
+                        {{/personalofferneedsfirstname}}
+                        {{#personalofferneedslastname}}
+                            <div class="mb-3">
+                                <label class="form-label" for="personal-offer-lastname">{{#str}}lastname{{/str}}</label>
+                                <input class="form-control" id="personal-offer-lastname" type="text" name="lastname" required maxlength="100" autocomplete="family-name">
+                            </div>
+                        {{/personalofferneedslastname}}
+                    {{/ispersonaloffer}}
+
+                    {{#showguestidentity}}
+                        <section class="commerce-checkout-identity mb-4" aria-labelledby="commerce-checkout-identity-title">
+                            <h3 id="commerce-checkout-identity-title" class="h5 mb-2">{{guestidentitytitle}}</h3>
+                            <p class="small text-muted mb-3">{{guestidentitydescription}}</p>
+                            <div class="mb-3">
+                                <label class="form-label" for="guest-email">Email</label>
+                                <div class="commerce-guest-checkout__input-wrap">
+                                    <input class="form-control" id="guest-email" type="email" name="email" value="{{email}}" required aria-required="true" maxlength="100" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="guest-email-feedback" aria-invalid="false">
+                                    <span class="commerce-guest-checkout__status" aria-hidden="true"></span>
+                                </div>
+                                <div id="guest-email-feedback" class="commerce-guest-checkout__feedback" aria-live="polite" data-valid-label="{{emailvalidlabel}}" data-invalid-label="{{emailinvalidlabel}}"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="guest-firstname">{{#str}}firstname{{/str}}</label>
+                                <input class="form-control" id="guest-firstname" data-required-name type="text" name="firstname" value="{{firstname}}" required aria-required="true" maxlength="100" autocomplete="given-name">
+                            </div>
+                            <div>
+                                <label class="form-label" for="guest-lastname">{{#str}}lastname{{/str}}</label>
+                                <input class="form-control" id="guest-lastname" data-required-name type="text" name="lastname" value="{{lastname}}" required aria-required="true" maxlength="100" autocomplete="family-name">
+                            </div>
+                        </section>
+                    {{/showguestidentity}}
+
+                    <fieldset class="commerce-checkout-providers mb-4" {{#existingaccount}}disabled{{/existingaccount}}>
+                        <legend class="form-label fw-semibold">{{providerlabel}}</legend>
+                        <div class="d-grid gap-2">
+                            {{#providers}}
+                                {{#available}}
+                                    <label class="commerce-checkout-provider{{#selected}} is-selected{{/selected}}">
+                                        <input class="form-check-input" type="radio" name="provider" value="{{key}}" {{#selected}}checked{{/selected}}>
+                                        <img src="{{iconurl}}" alt="" class="commerce-checkout-provider__icon">
+                                        <span>
+                                            <strong class="d-block">{{label}}</strong>
+                                            <small class="text-muted">{{description}}</small>
+                                        </span>
+                                    </label>
+                                {{/available}}
+                            {{/providers}}
+                        </div>
+                    </fieldset>
+
+                    <div class="commerce-checkout-legal form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="commerce-checkout-accept-terms" name="accept_terms" value="1" required aria-required="true" data-checkout-terms>
+                        <label class="form-check-label small" for="commerce-checkout-accept-terms">{{{legalacceptlabel}}}</label>
+                    </div>
+
+                    <button class="btn btn-primary btn-lg w-100" type="submit" data-guest-checkout-submit data-checkout-submit {{#launchdisabled}}disabled{{/launchdisabled}}>{{paylabel}}</button>
+                    {{#launchdisabled}}<p class="small text-muted text-center mt-2 mb-0">{{launchhint}}</p>{{/launchdisabled}}
+                </form>
+                {{/existingaccount}}
+
+                {{> local_subscriptions/commerce/payment_reassurance}}
+                <a href="{{backurl}}" class="btn btn-link w-100 mt-3">← {{backlabel}}</a>
+            </div>
+        </aside>
+    </div>
+</div>
+
+{{#js}}
+    const personalOfferCurrency = document.querySelector('[data-personal-offer-currency-select]');
+    if (personalOfferCurrency) {
+        personalOfferCurrency.addEventListener('change', function() {
+            if (this.value) {
+                window.location.assign(this.value);
+            }
+        });
+    }
+
+    const printSummaryButton = document.querySelector('[data-commerce-print-summary]');
+    if (printSummaryButton) {
+        printSummaryButton.addEventListener('click', function() {
+            window.print();
+        });
+    }
+{{/js}}
+
+{{> local_subscriptions/checkout/provider_experience}}
+
+{{#js}}
+require(['local_subscriptions/provider_experience'], function(ProviderExperience) {
+    ProviderExperience.init();
+});
+{{/js}}

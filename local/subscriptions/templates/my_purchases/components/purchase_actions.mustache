@@ -1,0 +1,10 @@
+{{!
+    @template local_subscriptions/my_purchases/components/purchase_actions
+}}
+{{#hasactions}}
+<div class="{{classes}}" role="group">
+    {{#actions}}
+        <span class="my-purchase-card__action">{{{html}}}</span>
+    {{/actions}}
+</div>
+{{/hasactions}}

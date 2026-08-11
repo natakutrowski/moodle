@@ -55,7 +55,108 @@ defined('MOODLE_INTERNAL') || die;
  * @copyright  2021 HiBootstrap
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 class core_renderer extends \core_renderer {
+
+    /**
+     * Render the breadcrumb with the CampusFR customer root on course pages.
+     *
+     * Edly exports the breadcrumb before late output hooks run. Adding the
+     * customer root here guarantees that the final HTML rendered by the theme
+     * starts with Mon Campus without mutating Moodle's navigation tree.
+     */
+    public function navbar(): string {
+        $html = parent::navbar();
+
+        if (
+            !isloggedin()
+            || isguestuser()
+            || !($this->page->context instanceof \context_course)
+            || empty($this->page->course->id)
+            || (int)$this->page->course->id === SITEID
+            || !class_exists('\\local_subscriptions\\url\\UrlFactory')
+        ) {
+            return $html;
+        }
+
+        $html = $this->remove_home_breadcrumb_item($html);
+
+        $label = get_string(
+            'commerce_customer_hub_title',
+            'local_subscriptions'
+        );
+        $url = \local_subscriptions\url\UrlFactory::my_campus();
+        $escapedurl = s($url->out(false));
+        $escapedlabel = s($label);
+
+        if (
+            str_contains($html, $escapedurl)
+            || str_contains($html, '>' . $escapedlabel . '<')
+        ) {
+            return $html;
+        }
+
+        $item = html_writer::tag(
+            'li',
+            html_writer::link($url, $label),
+            ['class' => 'breadcrumb-item']
+        );
+
+        return preg_replace(
+            '/(<ol\b[^>]*class="[^"]*breadcrumb[^"]*"[^>]*>)/i',
+            '$1' . $item,
+            $html,
+            1
+        ) ?? $html;
+    }
+
+    /**
+     * Remove Moodle's home item from course breadcrumbs.
+     *
+     * The customer journey starts at Mon Campus, so the core home link must
+     * not remain between Mon Campus and Mes cours. Detection is URL-based and
+     * therefore works independently of the active FR, EN or RU language.
+     */
+    private function remove_home_breadcrumb_item(string $html): string {
+        global $CFG;
+
+        $pattern = '~<li\b[^>]*class="[^"]*\bbreadcrumb-item\b[^"]*"[^>]*>\s*'
+            . '<a\b[^>]*href="([^"]*)"[^>]*>.*?</a>\s*</li>~is';
+
+        $result = preg_replace_callback(
+            $pattern,
+            static function(array $matches) use ($CFG): string {
+                $href = html_entity_decode(
+                    (string)($matches[1] ?? ''),
+                    ENT_QUOTES | ENT_HTML5
+                );
+                $path = (string)(parse_url($href, PHP_URL_PATH) ?? '');
+                $wwwrootpath = (string)(
+                    parse_url((string)$CFG->wwwroot, PHP_URL_PATH) ?? ''
+                );
+
+                $path = '/' . ltrim($path, '/');
+                $wwwrootpath = rtrim('/' . ltrim($wwwrootpath, '/'), '/');
+                if (
+                    $wwwrootpath !== ''
+                    && str_starts_with($path, $wwwrootpath . '/')
+                ) {
+                    $path = substr($path, strlen($wwwrootpath));
+                }
+
+                $normalised = rtrim($path, '/');
+                if ($normalised === '' || $normalised === '/index.php') {
+                    return '';
+                }
+
+                return (string)$matches[0];
+            },
+            $html,
+            1
+        );
+
+        return is_string($result) ? $result : $html;
+    }
 
     public function edly_is_siteadmin() {
         if (is_siteadmin()) {
@@ -202,7 +303,7 @@ class core_renderer extends \core_renderer {
 
         $hide_banner            = get_config('theme_edly', 'hide_banner');
         $hide_global_banner     = get_config('theme_edly', 'hide_global_banner');
-        if($hide_global_banner == 0){            
+        if($hide_global_banner == 0){
             if($hide_banner){
                 foreach(preg_split("/((\r?\n)|(\r\n?))/", $hide_banner) as $line){
                     $old_url = 'http://localhost:8888/moodle/edly-4.3/';
@@ -231,7 +332,7 @@ class core_renderer extends \core_renderer {
             return new moodle_url($url);
             return parent::get_theme_image_favicon($maxwidth, $maxheight);
         }
-  
+
     }
 
     /**
@@ -759,7 +860,7 @@ class core_renderer extends \core_renderer {
                         // Silently skip invalid entries (should we post a notification?).
                         break;
 
-                    case 'link':                        
+                    case 'link':
                         $edly_nav_items .= '<a class="dropdown-item" href="'. $value->url .'">'. $value->title .'</a>';
 
                         // Process this as a link item.
@@ -794,7 +895,7 @@ class core_renderer extends \core_renderer {
                     $am->add($divider);
                 }
             }
-        }        
+        }
         return $edly_nav_items;
     }
 
@@ -868,7 +969,7 @@ class core_renderer extends \core_renderer {
         return $firstview;
     }
 
-    
+
    /**
      * Returns standard navigation between activities in a course.
      *
@@ -913,7 +1014,7 @@ class core_renderer extends \core_renderer {
         // Put the modules into an array in order by the position they are shown in the course.
         $mods = [];
         $activitylist = [];
-        foreach ($modules as $module) {        
+        foreach ($modules as $module) {
             // Only add activities the user can access, aren't in stealth mode and have a url (eg. mod_label does not).
             if (!$module->uservisible || $module->is_stealth() || empty($module->url)) {
                 continue;

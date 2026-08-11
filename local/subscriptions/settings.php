@@ -54,6 +54,15 @@ if (
     );
 }
 
+if ($hassiteconfig || has_capability('local/subscriptions:manage_showrooms', context_system::instance())) {
+    $ADMIN->add('localplugins', new admin_externalpage(
+        'local_subscriptions_showrooms',
+        get_string('commerce_showroom_cms_title', 'local_subscriptions'),
+        new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'),
+        'local/subscriptions:manage_showrooms'
+    ));
+}
+
 if ($hassiteconfig) {
 
 	// Crée une catégorie principale "Subscriptions"
@@ -109,6 +118,41 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_subscriptions_settings', get_string('pluginname', 'local_subscriptions'));
 
     if ($ADMIN->fulltree) {
+
+        $settings->add(
+            new admin_setting_heading(
+                'local_subscriptions_storefront_header',
+                get_string('settings:storefront_header', 'local_subscriptions'),
+                get_string('settings:storefront_header_desc', 'local_subscriptions')
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'local_subscriptions/storefront_enabled',
+                get_string('settings:storefront_enabled', 'local_subscriptions'),
+                get_string('settings:storefront_enabled_desc', 'local_subscriptions'),
+                0
+            )
+        );
+
+
+        $settings->add(
+            new admin_setting_heading(
+                'local_subscriptions_commerce_security_header',
+                get_string('settings:commerce_security_header', 'local_subscriptions'),
+                get_string('settings:commerce_security_header_desc', 'local_subscriptions')
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'local_subscriptions/commerce_allow_destructive_product_delete',
+                get_string('settings:commerce_allow_destructive_product_delete', 'local_subscriptions'),
+                get_string('settings:commerce_allow_destructive_product_delete_desc', 'local_subscriptions'),
+                0
+            )
+        );
 
         $settings->add(
             new admin_setting_heading(
@@ -354,14 +398,17 @@ if ($hassiteconfig) {
             ''
         ));
 
-        // Environnement Stripe: test/live
+        // Profil Stripe actif: Test / Live EI / Live SAS
         $settings->add(new admin_setting_configselect(
             'local_subscriptions/stripe_env',
             get_string('env_mode', 'local_subscriptions'),
             get_string('env_mode_desc', 'local_subscriptions'),
             'test',
-            ['test' => get_string('env_test', 'local_subscriptions'),
-            'live' => get_string('env_live', 'local_subscriptions')]
+            [
+                'test' => get_string('stripe_profile_test', 'local_subscriptions'),
+                'live_ei' => get_string('stripe_profile_live_ei', 'local_subscriptions'),
+                'live_sas' => get_string('stripe_profile_live_sas', 'local_subscriptions'),
+            ]
         ));
 
         // TEST keys
@@ -388,7 +435,7 @@ if ($hassiteconfig) {
             '', PARAM_RAW_TRIMMED
         ));
 
-        // LIVE keys
+        // LIVE EI keys (historical stripe_live_* settings, preserved for compatibility)
         $settings->add(new admin_setting_configpasswordunmask(
             'local_subscriptions/stripe_live_secret',
             get_string('stripe_secret_live', 'local_subscriptions'),
@@ -408,6 +455,30 @@ if ($hassiteconfig) {
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/stripe_live_portal_configuration_id',
             get_string('stripe_portal_configuration_id_live', 'local_subscriptions'),
+            get_string('stripe_portal_configuration_id_desc', 'local_subscriptions'),
+            '', PARAM_RAW_TRIMMED
+        ));
+
+
+        // LIVE SAS keys.
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/stripe_live_sas_secret',
+            get_string('stripe_secret_live_sas', 'local_subscriptions'),
+            '', ''
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/stripe_live_sas_publishable',
+            get_string('stripe_publishable_live_sas', 'local_subscriptions'),
+            '', '', PARAM_RAW_TRIMMED
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/stripe_live_sas_webhook_secret',
+            get_string('stripe_webhook_secret_live_sas', 'local_subscriptions'),
+            '', ''
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/stripe_live_sas_portal_configuration_id',
+            get_string('stripe_portal_configuration_id_live_sas', 'local_subscriptions'),
             get_string('stripe_portal_configuration_id_desc', 'local_subscriptions'),
             '', PARAM_RAW_TRIMMED
         ));
@@ -505,6 +576,27 @@ if ($hassiteconfig) {
             PARAM_EMAIL
         ));
 
+
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_personal_offer_mail_header',
+            get_string('settings:personal_offer_mail_header', 'local_subscriptions'),
+            get_string('settings:personal_offer_mail_header_desc', 'local_subscriptions')
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/personal_offer_mail_batch_size',
+            get_string('settings:personal_offer_mail_batch_size', 'local_subscriptions'),
+            get_string('settings:personal_offer_mail_batch_size_desc', 'local_subscriptions'),
+            20,
+            PARAM_INT
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/personal_offer_mail_hourly_limit',
+            get_string('settings:personal_offer_mail_hourly_limit', 'local_subscriptions'),
+            get_string('settings:personal_offer_mail_hourly_limit_desc', 'local_subscriptions'),
+            100,
+            PARAM_INT
+        ));
+
         $settings->add(new admin_setting_configtext(
             'local_subscriptions/brand_logo_url',
         get_string('brand_logo_url_label', 'local_subscriptions'),
@@ -590,6 +682,76 @@ if ($hassiteconfig) {
             get_string('email_copy_to', 'local_subscriptions'),
             get_string('email_copy_to_desc', 'local_subscriptions'),
             'admin@campusfr.fr', PARAM_RAW_TRIMMED
+        ));
+
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_commerce_mail_audit_heading',
+            get_string('settings:commerce_mail_audit_heading', 'local_subscriptions'),
+            get_string('settings:commerce_mail_audit_heading_desc', 'local_subscriptions')
+        ));
+
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/commerce_mail_audit_copy_enabled',
+            get_string('settings:commerce_mail_audit_copy_enabled', 'local_subscriptions'),
+            get_string('settings:commerce_mail_audit_copy_enabled_desc', 'local_subscriptions'),
+            0
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/commerce_mail_audit_copy_address',
+            get_string('settings:commerce_mail_audit_copy_address', 'local_subscriptions'),
+            get_string('settings:commerce_mail_audit_copy_address_desc', 'local_subscriptions'),
+            'log@campusfr.fr',
+            PARAM_EMAIL
+        ));
+
+        $settings->add(new admin_setting_configmulticheckbox(
+            'local_subscriptions/commerce_mail_audit_copy_types',
+            get_string('settings:commerce_mail_audit_copy_types', 'local_subscriptions'),
+            get_string('settings:commerce_mail_audit_copy_types_desc', 'local_subscriptions'),
+            [
+                \local_subscriptions\commerce\mail\CommerceMailType::PURCHASE_RECEIPT => 1,
+                \local_subscriptions\commerce\mail\CommerceMailType::PURCHASE_ACCESS => 1,
+            ],
+            [
+                \local_subscriptions\commerce\mail\CommerceMailType::PURCHASE_RECEIPT =>
+                    get_string('commerce_mail_type_purchase_receipt', 'local_subscriptions'),
+                \local_subscriptions\commerce\mail\CommerceMailType::PURCHASE_ACCESS =>
+                    get_string('commerce_mail_type_purchase_access', 'local_subscriptions'),
+                \local_subscriptions\commerce\mail\CommerceMailType::PAYMENT_PENDING =>
+                    get_string('commerce_mail_type_payment_pending', 'local_subscriptions'),
+                \local_subscriptions\commerce\mail\CommerceMailType::PAYMENT_FAILED =>
+                    get_string('commerce_mail_type_payment_failed', 'local_subscriptions'),
+                \local_subscriptions\commerce\mail\CommerceMailType::PAYMENT_CANCELLED =>
+                    get_string('commerce_mail_type_payment_cancelled', 'local_subscriptions'),
+            ]
+        ));
+
+    $settings->add(
+        new admin_setting_configtext(
+            'local_subscriptions/commerce_mail_audit_batch_size',
+            get_string('settings:commerce_mail_audit_batch_size', 'local_subscriptions'),
+            get_string('settings:commerce_mail_audit_batch_size_desc', 'local_subscriptions'),
+            10,
+            PARAM_INT
+        )
+    );
+
+    $settings->add(
+        new admin_setting_configtext(
+            'local_subscriptions/commerce_mail_audit_hourly_limit',
+            get_string('settings:commerce_mail_audit_hourly_limit', 'local_subscriptions'),
+            get_string('settings:commerce_mail_audit_hourly_limit_desc', 'local_subscriptions'),
+            50,
+            PARAM_INT
+        )
+    );
+
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/commerce_mail_audit_copy_include_attachment',
+            get_string('settings:commerce_mail_audit_copy_include_attachment', 'local_subscriptions'),
+            get_string('settings:commerce_mail_audit_copy_include_attachment_desc', 'local_subscriptions'),
+            0
         ));
 
         // --- Section Essai 7 jours ---
@@ -697,6 +859,43 @@ if ($hassiteconfig) {
                 $defaultvalue
             ));
         }
+
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_invoice_heading',
+            get_string('commerce_i411_invoice_settings', 'local_subscriptions'),
+            get_string('commerce_i411_invoice_settings_desc', 'local_subscriptions')
+        ));
+        foreach (['eur', 'rub'] as $invoicecurrency) {
+            $settings->add(new admin_setting_heading(
+                'local_subscriptions_invoice_' . $invoicecurrency . '_heading',
+                get_string('commerce_i411_invoice_profile_' . $invoicecurrency, 'local_subscriptions'),
+                ''
+            ));
+            foreach (['name', 'address', 'legal', 'email', 'phone', 'website', 'tax_notice', 'footer'] as $invoicefield) {
+                $settingclass = in_array($invoicefield, ['address', 'legal', 'tax_notice', 'footer'], true)
+                    ? admin_setting_configtextarea::class : admin_setting_configtext::class;
+                $settings->add(new $settingclass(
+                    'local_subscriptions/invoice_' . $invoicecurrency . '_' . $invoicefield,
+                    get_string('commerce_i411_invoice_' . $invoicefield, 'local_subscriptions'),
+                    '',
+                    '',
+                    PARAM_RAW_TRIMMED
+                ));
+            }
+        }
+
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_commerce_catalog_heading',
+            get_string('settings:commerce_catalog_heading', 'local_subscriptions'),
+            get_string('settings:commerce_catalog_heading_desc', 'local_subscriptions')
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/commerce_enabled_currencies',
+            get_string('settings:commerce_enabled_currencies', 'local_subscriptions'),
+            get_string('settings:commerce_enabled_currencies_desc', 'local_subscriptions'),
+            'EUR,RUB',
+            PARAM_RAW_TRIMMED
+        ));
 
         $settings->add(new admin_setting_heading('ls_paylock_heading',
             get_string('settings_paylock_section', 'local_subscriptions'), ''));

@@ -332,11 +332,22 @@ $string['trial_only_guests'] = 'Показывать ссылку на демо-
 $string['trial_access'] = 'Перейти к демо-курсу';
 $string['image'] = 'Картина';
 
-$string['locked_title'] = 'Доступ ограничен';
-$string['locked_desc'] = 'Купите курс, чтобы открыть это задание.';
-$string['locked_subscribe'] = 'Купить';
+$string['locked_title'] = 'Задание доступно участникам';
+$string['locked_desc'] = 'Это задание недоступно в пробном режиме.';
+$string['locked_subscribe'] = 'Посмотреть варианты';
 
 $string['mobilemenu_button'] = 'Меню';
 $string['mobilemenu_open_aria'] = 'Открыть меню';
 $string['mobilemenu_title'] = 'Меню';
 $string['mobilemenu_close_aria'] = 'Закрыть';
+$string['customernavigation_crm'] = 'CRM';
+$string['customernavigation_moodleadmin'] = 'Администрирование Moodle';
+$string['customernavigation_admin_root'] = 'Общие настройки';
+$string['customernavigation_admin_users'] = 'Пользователи';
+$string['customernavigation_admin_courses'] = 'Курсы';
+$string['customernavigation_admin_grades'] = 'Оценки';
+$string['customernavigation_admin_modules'] = 'Плагины';
+$string['customernavigation_admin_appearance'] = 'Внешний вид';
+$string['customernavigation_admin_server'] = 'Сервер';
+$string['customernavigation_admin_reports'] = 'Отчёты';
+$string['customernavigation_admin_development'] = 'Разработка';

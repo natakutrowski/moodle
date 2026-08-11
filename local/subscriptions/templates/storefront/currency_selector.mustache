@@ -1,0 +1,11 @@
+<span class="commerce-storefront__currency-icon" aria-hidden="true">
+    <i class="fa-solid fa-coins"></i>
+</span>
+<label for="{{currencyselectid}}" class="commerce-storefront__currency-label">
+    {{currencyselectlabel}}
+</label>
+<select id="{{currencyselectid}}" class="form-select" name="currency" onchange="this.form.submit()">
+    {{#currencies}}
+        <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+    {{/currencies}}
+</select>

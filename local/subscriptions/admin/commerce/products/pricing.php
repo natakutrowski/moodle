@@ -10,6 +10,8 @@ use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
+use local_subscriptions\crm\commerce\presentation\CommerceProductPageHeaderRenderer;
 use local_subscriptions\commerce\catalog\rendering\CommerceProductEditorNavigationRenderer;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
@@ -22,13 +24,24 @@ if (!$product->is_bundle()) {
 }
 $pricing = $factory->bundle_pricing_service();
 $configuration = $pricing->get_configuration($sku);
-$currencies = $factory->currency_service()->get_product_currencies($sku);
+$currencies = $factory->currency_service()->get_product_currencies($sku, true, true);
 if ($currencies === []) {
     $currencies = ['EUR'];
 }
 $pageurl = new moodle_url('/local/subscriptions/admin/commerce/products/pricing.php', ['sku' => $sku]);
 $pagetitle = get_string('commerce_bundle_pricing_title', 'local_subscriptions', $product->get_name());
 CrmPageConfigurator::configure($PAGE, $context, $pageurl, $pagetitle, 'local-subscriptions-commerce-bundle-pricing-page');
+
+$action = optional_param('action', '', PARAM_ALPHA);
+if ($action === 'deleteprice' && data_submitted() && confirm_sesskey()) {
+    $priceid = required_param('priceid', PARAM_INT);
+    $currency = strtoupper(required_param('currency', PARAM_ALPHA));
+    $manager->delete_price($sku, $priceid);
+    redirect(
+        $pageurl,
+        get_string('commerce_price_currency_deleted', 'local_subscriptions', $currency)
+    );
+}
 
 if (data_submitted() && confirm_sesskey()) {
     $strategy = required_param('strategy', PARAM_ALPHANUMEXT);
@@ -68,15 +81,15 @@ if (data_submitted() && confirm_sesskey()) {
 $quotes = [];
 foreach ($currencies as $currency) {
     try {
-        $quotes[$currency] = $pricing->quote($sku, $currency);
+        $quotes[$currency] = $pricing->quote($sku, $currency, true);
     } catch (Throwable $exception) {
         $quotes[$currency] = $exception->getMessage();
     }
 }
 $existingprices = [];
 foreach ($manager->get_editor_data($sku)->get_prices() as $price) {
-    if ($price->get_provider() === null) {
-        $existingprices[$price->get_currency()] = $price->get_amount_minor() / 100;
+    if ($price->get_provider() === null && $price->is_active()) {
+        $existingprices[$price->get_currency()] = $price;
     }
 }
 $strategylabels = [
@@ -89,12 +102,32 @@ $formatmoney = static fn(int $minor, string $currency): string => format_float($
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 echo CommerceProductEditorNavigationRenderer::breadcrumb($product->get_name(), get_string('commerce_product_step_pricing', 'local_subscriptions'));
-echo CommerceProductEditorNavigationRenderer::render($sku, CommerceProductEditorNavigationRenderer::PRICING);
-echo html_writer::div(
-    html_writer::div(html_writer::tag('div', get_string('commerce_bundle_pricing_eyebrow', 'local_subscriptions'), ['class' => 'crm-commerce-eyebrow']) . $OUTPUT->heading(format_string($pagetitle), 2) . html_writer::tag('p', get_string('commerce_bundle_pricing_intro', 'local_subscriptions'), ['class' => 'text-muted mb-0']), 'flex-grow-1') .
+echo CommerceProductEditorNavigationRenderer::render($product, CommerceProductEditorNavigationRenderer::PRICING);
+echo CommerceProductPageHeaderRenderer::render(
+    $pagetitle,
+    CommerceDesignSystemRenderer::page_intro(get_string('commerce_bundle_pricing_intro', 'local_subscriptions')),
     html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/preview.php', ['sku' => $sku]), get_string('commerce_bundle_open_preview', 'local_subscriptions'), ['class' => 'btn btn-outline-secondary']),
-    'crm-commerce-page-header'
+    get_string('commerce_bundle_pricing_eyebrow', 'local_subscriptions')
 );
+foreach ($existingprices as $currency => $price) {
+    if ($price->get_id() === null) {
+        continue;
+    }
+    $deleteformid = 'commerce-bundle-delete-price-' . strtolower($currency);
+    echo html_writer::start_tag('form', [
+        'id' => $deleteformid,
+        'method' => 'post',
+        'action' => $pageurl->out(false),
+        'class' => 'd-none',
+    ]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sku', 'value' => $sku]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'deleteprice']);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'priceid', 'value' => $price->get_id()]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'currency', 'value' => $currency]);
+    echo html_writer::end_tag('form');
+}
+
 echo html_writer::start_tag('form', ['method' => 'post', 'class' => 'card card-body mb-4']);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 echo html_writer::tag('h3', get_string('commerce_bundle_pricing_method', 'local_subscriptions'), ['class' => 'h5']);
@@ -106,9 +139,33 @@ echo html_writer::tag('h3', get_string('commerce_bundle_fixed_prices', 'local_su
 echo html_writer::tag('p', get_string('commerce_bundle_fixed_prices_help', 'local_subscriptions'), ['class' => 'text-muted']);
 echo html_writer::start_div('row g-3');
 foreach ($currencies as $currency) {
+    $existingprice = $existingprices[$currency] ?? null;
     echo html_writer::start_div('col-md-6');
     echo html_writer::tag('label', $currency, ['for' => 'price_' . strtolower($currency), 'class' => 'form-label']);
-    echo html_writer::empty_tag('input', ['id' => 'price_' . strtolower($currency), 'name' => 'price_' . strtolower($currency), 'value' => isset($existingprices[$currency]) ? format_float($existingprices[$currency], 2) : '', 'class' => 'form-control', 'inputmode' => 'decimal']);
+    echo html_writer::start_div('d-flex align-items-center gap-2');
+    echo html_writer::empty_tag('input', [
+        'id' => 'price_' . strtolower($currency),
+        'name' => 'price_' . strtolower($currency),
+        'value' => $existingprice !== null ? format_float($existingprice->get_amount_minor() / 100, 2) : '',
+        'class' => 'form-control',
+        'inputmode' => 'decimal',
+    ]);
+    if ($existingprice !== null && $existingprice->get_id() !== null) {
+        $deleteformid = 'commerce-bundle-delete-price-' . strtolower($currency);
+        echo html_writer::tag('button', get_string('delete'), [
+            'type' => 'submit',
+            'class' => 'btn btn-outline-danger flex-shrink-0',
+            'form' => $deleteformid,
+            'data-confirmation' => 'modal',
+            'data-confirmation-title-str' => json_encode(['commerce_price_currency_delete_title', 'local_subscriptions']),
+            'data-confirmation-question-str' => json_encode([
+                'commerce_price_currency_delete_confirm',
+                'local_subscriptions',
+                $currency,
+            ]),
+        ]);
+    }
+    echo html_writer::end_div();
     echo html_writer::end_div();
 }
 echo html_writer::end_div();
@@ -126,7 +183,9 @@ echo html_writer::div(
     'col-md-8'
 );
 echo html_writer::end_div();
-echo html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-primary mt-4 align-self-start', 'value' => get_string('savechanges')]);
+echo CommerceDesignSystemRenderer::form_actions(
+    html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-primary', 'value' => get_string('savechanges')])
+);
 echo html_writer::end_tag('form');
 
 echo html_writer::tag('h3', get_string('commerce_bundle_price_simulation', 'local_subscriptions'), ['class' => 'h4']);

@@ -1,0 +1,81 @@
+=========================================================
+CampusFR Commerce 7.95 - Certification J6
+Date : Mon Aug  3 00:14:21 UTC 2026
+Commit : 2d061ac424a
+=========================================================
+
+================ local_subscriptions ================
+Moodle 5.0.7 (Build: 20260420), 2d061ac424ad02045c899d9e36501b8606127109
+Php: 8.4.5, mysqli: 8.4.5, OS: Linux 6.14.0-37-generic x86_64
+PHPUnit 11.5.55 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.4.5
+Configuration: /var/www/moodle-dev/phpunit.xml
+
+.............................................................   61 / 1178 (  5%)
+.............................................................  122 / 1178 ( 10%)
+.............................................................  183 / 1178 ( 15%)
+.............................................................  244 / 1178 ( 20%)
+.............................................................  305 / 1178 ( 25%)
+.............................................................  366 / 1178 ( 31%)
+.............................................................  427 / 1178 ( 36%)
+.............................................................  488 / 1178 ( 41%)
+.............................................................  549 / 1178 ( 46%)
+.............................................................  610 / 1178 ( 51%)
+.............................................................  671 / 1178 ( 56%)
+.............................................................  732 / 1178 ( 62%)
+.............................................................  793 / 1178 ( 67%)
+.............................................................  854 / 1178 ( 72%)
+.............................................................  915 / 1178 ( 77%)
+.........................F...................................  976 / 1178 ( 82%)
+......F...................................................... 1037 / 1178 ( 88%)
+............................................................. 1098 / 1178 ( 93%)
+............................................................. 1159 / 1178 ( 98%)
+...................                                           1178 / 1178 (100%)
+
+Time: 07:59.385, Memory: 167.00 MB
+
+There were 2 failures:
+
+1) local_subscriptions\commerce_795f3_product_page_composer_test::test_unknown_template_falls_back_and_description_is_automatic
+Failed asserting that two strings are identical.
+--- Expected
++++ Actual
+@@ @@
+-'local_subscriptions/storefront/product_templates/default'
++'local_subscriptions/storefront/product_templates/standard'
+
+/var/www/moodle-dev/local/subscriptions/tests/commerce/storefront/commerce_795f3_product_page_composer_test.php:63
+
+2) local_subscriptions\commerce_storefront_editorial_builder_test::test_template_contains_responsive_video_and_new_sections
+Failed asserting that '{{#sections}}\n
+    {{> local_subscriptions/storefront/product_section }}\n
+{{/sections}}\n
+' [ASCII](length: 86) contains "{{#ishero}}" [ASCII](length: 11).
+
+/var/www/moodle-dev/local/subscriptions/tests/commerce/storefront/commerce_storefront_editorial_builder_test.php:72
+
+FAILURES!
+Tests: 1178, Assertions: 4782, Failures: 2, PHPUnit Deprecations: 101.
+
+================ local_campus ========================
+Moodle 5.0.7 (Build: 20260420), 2d061ac424ad02045c899d9e36501b8606127109
+Php: 8.4.5, mysqli: 8.4.5, OS: Linux 6.14.0-37-generic x86_64
+PHPUnit 11.5.55 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.4.5
+Configuration: /var/www/moodle-dev/phpunit.xml
+
+...........................                                       27 / 27 (100%)
+
+Time: 00:03.929, Memory: 79.00 MB
+
+OK (27 tests, 137 assertions)
+
+=========================================================
+Résumé
+local_subscriptions : 1
+local_campus        : 0
+
+CERTIFICATION : FAILED
+Rapport : /var/www/moodle-dev/local/subscriptions/certification/J6-certification-20260803-001421.log

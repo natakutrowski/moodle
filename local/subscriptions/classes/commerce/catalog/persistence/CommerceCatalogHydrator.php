@@ -11,12 +11,13 @@ use local_subscriptions\commerce\catalog\domain\CommerceProductComponent;
 use local_subscriptions\commerce\catalog\domain\CommerceProductEntitlementDefinition;
 use local_subscriptions\commerce\catalog\domain\CommerceProductPrice;
 use local_subscriptions\commerce\catalog\domain\CommerceProductTranslation;
+use local_subscriptions\commerce\catalog\presentation\CommerceProductDisplayText;
 use local_subscriptions\commerce\domain\value\CommerceMoney;
 
 /** Hydrates Native Commerce catalogue domain objects from SQL records. */
 final class CommerceCatalogHydrator {
     public function product(\stdClass $record): CommerceProduct {
-        return new CommerceProduct($record->sku, $record->type, $record->status, $record->name,
+        return new CommerceProduct($record->sku, $record->type, $record->status, CommerceProductDisplayText::title((string)$record->name),
             (string)($record->description ?? ''), self::decode_json($record->metadatajson ?? null), (int)$record->id,
             self::nullable_int($record->availablefrom ?? null), self::nullable_int($record->availableuntil ?? null),
             (int)$record->timecreated, (int)$record->timemodified);
@@ -27,7 +28,7 @@ final class CommerceCatalogHydrator {
             self::nullable_string($record->providerpriceid ?? null), self::decode_json($record->metadatajson ?? null), (int)$record->id);
     }
     public function translation(\stdClass $record, string $sku): CommerceProductTranslation {
-        return new CommerceProductTranslation($sku, $record->language, $record->name,
+        return new CommerceProductTranslation($sku, $record->language, CommerceProductDisplayText::title((string)$record->name),
             (string)($record->shortdescription ?? ''), (string)($record->description ?? ''),
             self::decode_json($record->metadatajson ?? null), (int)$record->id);
     }

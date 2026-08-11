@@ -1,0 +1,2158 @@
+{
+    "generatedat": 1785717769,
+    "readonly": true,
+    "products": [
+        {
+            "id": 1,
+            "sku": "SUB.PLAN.21",
+            "name": "All levels - 1 month",
+            "type": "course_access",
+            "status": "inactive",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 2,
+            "sku": "SUB.PLAN.22",
+            "name": "All levels - 6 months",
+            "type": "course_access",
+            "status": "inactive",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 3,
+            "sku": "SUB.PLAN.23",
+            "name": "All levels - 12 months",
+            "type": "course_access",
+            "status": "inactive",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 4,
+            "sku": "SUB.PLAN.24",
+            "name": "All levels - 1 year (launch offer)",
+            "type": "course_access",
+            "status": "inactive",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 5,
+            "sku": "SUB.PLAN.25",
+            "name": "All levels - 3 years (launch offer)",
+            "type": "course_access",
+            "status": "inactive",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 6,
+            "sku": "SUB.PLAN.26",
+            "name": "All levels - lifetime (launch offer)",
+            "type": "course_access",
+            "status": "inactive",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 7,
+            "sku": "SUB.PLAN.27",
+            "name": "Trial",
+            "type": "course_access",
+            "status": "inactive",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 8,
+            "sku": "SUB.PLAN.28",
+            "name": "All levels - 36 months",
+            "type": "course_access",
+            "status": "inactive",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 9,
+            "sku": "SUB.PLAN.30",
+            "name": "A1 Full",
+            "type": "course_access",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": "cover",
+                    "filename": "blockA1.png",
+                    "filesize": "1794579",
+                    "width": 1648,
+                    "height": 2612,
+                    "available": false,
+                    "fallback_available": true,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": true,
+                    "available_roles": [
+                        "cover"
+                    ]
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": "cover",
+                    "filename": "blockA1.png",
+                    "filesize": "1794579",
+                    "width": 1648,
+                    "height": 2612,
+                    "available": false,
+                    "fallback_available": true,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": true,
+                    "available_roles": [
+                        "cover"
+                    ]
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": "cover",
+                    "filename": "blockA1.png",
+                    "filesize": "1794579",
+                    "width": 1648,
+                    "height": 2612,
+                    "available": false,
+                    "fallback_available": true,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": true,
+                    "available_roles": [
+                        "cover"
+                    ]
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": "cover",
+                    "filename": "blockA1.png",
+                    "filesize": "1794579",
+                    "width": 1648,
+                    "height": 2612,
+                    "available": false,
+                    "fallback_available": true,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": true,
+                    "available_roles": [
+                        "cover"
+                    ]
+                }
+            },
+            "legacy_roles": [
+                "cover"
+            ]
+        },
+        {
+            "id": 11,
+            "sku": "SUB.PLAN.32",
+            "name": "A2 Full",
+            "type": "course_access",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 12,
+            "sku": "SUB.PLAN.33",
+            "name": "Test",
+            "type": "course_access",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 13,
+            "sku": "DIGITAL.CONJUGAISON-3E-GROUPE",
+            "name": "Les verbes du 3e groupe — PDF pratique",
+            "type": "digital_download",
+            "status": "archived",
+            "placeholder_icon": "fa-solid fa-file-arrow-down",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": "cover",
+                    "filename": "frontpage.png",
+                    "filesize": "6882919",
+                    "width": 5760,
+                    "height": 3804,
+                    "available": false,
+                    "fallback_available": true,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": true,
+                    "available_roles": [
+                        "cover"
+                    ]
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": "cover",
+                    "filename": "frontpage.png",
+                    "filesize": "6882919",
+                    "width": 5760,
+                    "height": 3804,
+                    "available": false,
+                    "fallback_available": true,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": true,
+                    "available_roles": [
+                        "cover"
+                    ]
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": "cover",
+                    "filename": "frontpage.png",
+                    "filesize": "6882919",
+                    "width": 5760,
+                    "height": 3804,
+                    "available": false,
+                    "fallback_available": true,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": true,
+                    "available_roles": [
+                        "cover"
+                    ]
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": "cover",
+                    "filename": "frontpage.png",
+                    "filesize": "6882919",
+                    "width": 5760,
+                    "height": 3804,
+                    "available": false,
+                    "fallback_available": true,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": true,
+                    "available_roles": [
+                        "cover"
+                    ]
+                }
+            },
+            "legacy_roles": [
+                "cover"
+            ]
+        },
+        {
+            "id": 14,
+            "sku": "DIGITAL.VERBES-3E-GROUPE",
+            "name": "Les verbes du 3e groupe — PDF pratique",
+            "type": "digital_download",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-file-arrow-down",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 15,
+            "sku": "BUNDLEA1VERBES",
+            "name": "Pack A1 + Verbes",
+            "type": "bundle",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-boxes-stacked",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 18,
+            "sku": "DIGITAL_DOWNLOAD.PRODUIT_DIGITAL_TEST",
+            "name": "Produit Digital Test",
+            "type": "digital_download",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-file-arrow-down",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 19,
+            "sku": "BUNDLE.PACK_A1_A2",
+            "name": "Pack A1 + A2",
+            "type": "bundle",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-boxes-stacked",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 20,
+            "sku": "BUNDLE.PACK_DIGITAL",
+            "name": "Pack digital",
+            "type": "bundle",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-boxes-stacked",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 21,
+            "sku": "BUNDLE.BUNDLE_TEST_MULTI",
+            "name": "Bundle test multi",
+            "type": "bundle",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-boxes-stacked",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 22,
+            "sku": "COURSE_ACCESS.A2_GRAMMAR",
+            "name": "A2 Grammar",
+            "type": "course_access",
+            "status": "active",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        },
+        {
+            "id": 23,
+            "sku": "COURSE_ACCESS.COURSE_TEST",
+            "name": "Course Test",
+            "type": "course_access",
+            "status": "inactive",
+            "placeholder_icon": "fa-solid fa-graduation-cap",
+            "formats": {
+                "square": {
+                    "format": "square",
+                    "ratio": "1:1",
+                    "recommended": "1200x1200",
+                    "surfaces": [
+                        "checkout",
+                        "order_result",
+                        "order_details_compact",
+                        "crm_lists",
+                        "email_thumbnail"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "landscape": {
+                    "format": "landscape",
+                    "ratio": "4:3",
+                    "recommended": "1600x1200",
+                    "surfaces": [
+                        "storefront_catalogue",
+                        "my_courses_recommendations",
+                        "storefront_recommendations",
+                        "standard_product_preview"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "wide": {
+                    "format": "wide",
+                    "ratio": "16:9",
+                    "recommended": "1920x1080",
+                    "surfaces": [
+                        "product_hero",
+                        "immersive_layout",
+                        "video_poster",
+                        "social_open_graph",
+                        "wide_gallery",
+                        "email_banner"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                },
+                "portrait": {
+                    "format": "portrait",
+                    "ratio": "4:5",
+                    "recommended": "1200x1500",
+                    "surfaces": [
+                        "cart",
+                        "printable_cart",
+                        "digital_library",
+                        "digital_product_cover",
+                        "vertical_cards"
+                    ],
+                    "source_role": null,
+                    "filename": null,
+                    "filesize": 0,
+                    "width": 0,
+                    "height": 0,
+                    "available": false,
+                    "fallback_available": false,
+                    "ratio_ok": false,
+                    "fallback_ratio_ok": false,
+                    "fallback": false,
+                    "available_roles": []
+                }
+            },
+            "legacy_roles": []
+        }
+    ],
+    "summary": {
+        "products": 20,
+        "missing_master_formats": 72,
+        "fallback_only_formats": 8,
+        "ratio_mismatches": 0,
+        "includes_inactive": true
+    },
+    "contract": {
+        "square": {
+            "ratio": "1:1",
+            "width": 1200,
+            "height": 1200,
+            "roles": [
+                "checkout"
+            ],
+            "surfaces": [
+                "checkout",
+                "order_result",
+                "order_details_compact",
+                "crm_lists",
+                "email_thumbnail"
+            ]
+        },
+        "landscape": {
+            "ratio": "4:3",
+            "width": 1600,
+            "height": 1200,
+            "roles": [
+                "storefront",
+                "recommendation"
+            ],
+            "surfaces": [
+                "storefront_catalogue",
+                "my_courses_recommendations",
+                "storefront_recommendations",
+                "standard_product_preview"
+            ]
+        },
+        "wide": {
+            "ratio": "16:9",
+            "width": 1920,
+            "height": 1080,
+            "roles": [
+                "product",
+                "social",
+                "email"
+            ],
+            "surfaces": [
+                "product_hero",
+                "immersive_layout",
+                "video_poster",
+                "social_open_graph",
+                "wide_gallery",
+                "email_banner"
+            ]
+        },
+        "portrait": {
+            "ratio": "4:5",
+            "width": 1200,
+            "height": 1500,
+            "roles": [
+                "resources"
+            ],
+            "surfaces": [
+                "cart",
+                "printable_cart",
+                "digital_library",
+                "digital_product_cover",
+                "vertical_cards"
+            ]
+        }
+    }
+}

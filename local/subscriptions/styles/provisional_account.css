@@ -1,0 +1,73 @@
+.commerce-provisional-login-notice {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border: 1px solid rgba(246, 31, 130, .24);
+    border-radius: 1rem;
+    background: #fff6fa;
+    box-shadow: 0 .8rem 2.2rem rgba(52, 34, 95, .1);
+}
+.commerce-provisional-login-notice__icon { font-size: 1.8rem; }
+.commerce-provisional-login-notice__copy { min-width: 0; }
+.commerce-provisional-login-notice__copy strong { display: block; color: #34225f; }
+.commerce-provisional-login-notice__copy p { margin: .2rem 0 0; color: #6f6878; line-height: 1.45; }
+@media (max-width: 575.98px) {
+    .commerce-provisional-login-notice { grid-template-columns: auto minmax(0, 1fr); }
+    .commerce-provisional-login-notice .btn { grid-column: 1 / -1; width: 100%; }
+}
+
+
+/* J15H.1I.2 — shared provisional-account dialog. */
+.commerce-account-dialog {
+    width: min(92vw, 34rem);
+    padding: 0;
+    border: 0;
+    border-radius: 1.35rem;
+    background: #fff;
+    color: #2f1f35;
+    box-shadow: 0 1.5rem 5rem rgba(25, 20, 45, .28);
+}
+.commerce-account-dialog::backdrop {
+    background: rgba(22, 17, 38, .62);
+    backdrop-filter: blur(3px);
+}
+.commerce-account-dialog[open] {
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    text-align: center;
+}
+.commerce-account-dialog__icon {
+    margin-bottom: .8rem;
+    font-size: 2.6rem;
+}
+.commerce-account-dialog h2 {
+    margin: 0 0 .75rem;
+    color: #2f1f55;
+    font-weight: 800;
+}
+.commerce-account-dialog p {
+    color: #667085;
+    line-height: 1.6;
+}
+.commerce-account-dialog__benefits {
+    display: grid;
+    gap: .45rem;
+    margin: 1.2rem 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+}
+.commerce-account-dialog__benefits li::before {
+    margin-right: .55rem;
+    color: #168a58;
+    content: "✓";
+    font-weight: 800;
+}
+.commerce-account-dialog__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .45rem;
+}

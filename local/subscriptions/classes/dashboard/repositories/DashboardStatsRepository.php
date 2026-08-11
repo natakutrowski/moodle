@@ -7,11 +7,22 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\crm\business\CrmBusinessSql;
 use local_subscriptions\currency\Currency;
 use local_subscriptions\dashboard\value\DashboardRevenue;
+use local_subscriptions\commerce\customer\analytics\CommerceCustomerAnalyticsRepository;
 
 /**
  * Dashboard statistical queries.
  */
 final class DashboardStatsRepository {
+
+    public function __construct(
+        private readonly ?CommerceCustomerAnalyticsRepository $nativeanalytics = null
+    ) {
+    }
+
+    private function native_analytics(): CommerceCustomerAnalyticsRepository {
+        global $DB;
+        return $this->nativeanalytics ?? new CommerceCustomerAnalyticsRepository($DB);
+    }
 
     public function count_new_users(int $start, int $end): int {
         global $DB;
@@ -86,6 +97,11 @@ final class DashboardStatsRepository {
         int $to
     ): int {
         global $DB;
+
+        $native = $this->native_analytics()->snapshot($from, $to);
+        if ($native->has_activity()) {
+            return $native->newcustomercount;
+        }
 
         /*
         * Keep this definition aligned with the canonical Phase 7.75A
@@ -169,6 +185,13 @@ final class DashboardStatsRepository {
     ): int {
         global $DB;
 
+        $native = $this->native_analytics()->snapshot($start, $end);
+        if ($native->has_activity()) {
+            return (int)($native->purchasesbytype['digital'] ?? 0)
+                + (int)($native->purchasesbytype['bundle'] ?? 0)
+                + (int)($native->purchasesbytype['mixed'] ?? 0);
+        }
+
         $successcondition =
             CrmBusinessSql::successful_digital_payment_condition(
                 'dpr'
@@ -206,6 +229,21 @@ final class DashboardStatsRepository {
         int $end
     ): array {
         global $DB;
+
+        $native = $this->native_analytics()->snapshot($start, $end);
+        if ($native->has_activity()) {
+            $result = [];
+            foreach ($native->revenuebycurrency as $currency => $totalminor) {
+                $digitalminor = (int)($native->revenuebytypecurrency['digital'][$currency] ?? 0);
+                $subscriptionminor = max(0, (int)$totalminor - $digitalminor);
+                $result[$currency] = new DashboardRevenue(
+                    $currency,
+                    $subscriptionminor / 100,
+                    $digitalminor / 100
+                );
+            }
+            return $result;
+        }
 
         $subscriptionamount =
             CrmBusinessSql::subscription_payment_amount_expression(

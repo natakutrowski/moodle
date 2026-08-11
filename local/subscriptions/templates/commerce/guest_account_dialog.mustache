@@ -1,0 +1,24 @@
+{{! @template local_subscriptions/commerce/guest_account_dialog }}
+<dialog class="commerce-account-dialog"
+        data-guest-account-dialog
+        data-account-dialog-auto-open="{{autoopen}}"
+        aria-modal="true"
+        aria-labelledby="commerce-account-dialog-title"
+        aria-describedby="commerce-account-dialog-description">
+    <div class="commerce-account-dialog__icon" aria-hidden="true">🎉</div>
+    <h2 id="commerce-account-dialog-title">{{#str}}commerce_guest_activation_modal_title, local_subscriptions{{/str}}</h2>
+    <p id="commerce-account-dialog-description">{{#str}}commerce_guest_activation_modal_message, local_subscriptions{{/str}}</p>
+    <ul class="commerce-account-dialog__benefits">
+        <li>{{#str}}commerce_guest_activation_modal_courses, local_subscriptions{{/str}}</li>
+        <li>{{#str}}commerce_guest_activation_modal_resources, local_subscriptions{{/str}}</li>
+        <li>{{#str}}commerce_guest_activation_modal_orders, local_subscriptions{{/str}}</li>
+    </ul>
+    <div class="commerce-account-dialog__actions">
+        <a class="btn btn-primary" href="{{accountactivationurl}}" data-account-primary>
+            {{#str}}commerce_guest_activation_modal_primary, local_subscriptions{{/str}}
+        </a>
+        <button type="button" class="btn btn-link" data-account-later>
+            {{#str}}commerce_guest_activation_modal_later, local_subscriptions{{/str}}
+        </button>
+    </div>
+</dialog>

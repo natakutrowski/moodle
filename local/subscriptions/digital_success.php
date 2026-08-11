@@ -10,7 +10,13 @@ use local_subscriptions\payment\Provider;
 use local_subscriptions\payment\dto\InternalEvent;
 use local_subscriptions\url\UrlFactory;
 
+use local_subscriptions\commerce\compatibility\CommerceLegacyUrlCompatibilityService;
+
 \local_subscriptions\subscription_config::guard_public_access();
+
+global $DB;
+(new CommerceLegacyUrlCompatibilityService($DB))->redirect_native_result_if_present('success');
+
 
 $PAGE->set_context(context_system::instance());
 

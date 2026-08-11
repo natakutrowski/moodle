@@ -67,6 +67,12 @@ final class legacy_alfa_payment_gateway_test
                     'commerce_reference' =>
                         'subscription:payment:' . $record->id,
 
+                    'commerce_payment_id' =>
+                        '474',
+
+                    'commerce_purchase_uuid' =>
+                        '1234567890abcdef1234567890abcdef',
+
                     'legacy_payment_request_id' =>
                         (int)$record->id,
 
@@ -181,6 +187,12 @@ final class legacy_alfa_payment_gateway_test
                     'commerce_reference' =>
                         'digital:payment:' . $record->id,
 
+                    'commerce_payment_id' =>
+                        '475',
+
+                    'commerce_purchase_uuid' =>
+                        'abcdef1234567890abcdef1234567890',
+
                     'legacy_payment_request_id' =>
                         (int)$record->id,
 
@@ -217,10 +229,22 @@ final class legacy_alfa_payment_gateway_test
         );
 
         $this->assertSame(
-            'digital_product',
+            '475',
             $response->get_metadata()[
-                'legacy_payment_context'
+                'commerce_payment_id'
             ]
+        );
+
+        $this->assertSame(
+            'abcdef1234567890abcdef1234567890',
+            $response->get_metadata()[
+                'commerce_purchase_uuid'
+            ]
+        );
+
+        $this->assertArrayNotHasKey(
+            'legacy_payment_context',
+            $response->get_metadata()
         );
     }
 

@@ -1,0 +1,36 @@
+{{!
+    @template local_subscriptions/my_digital_products/components/resource_card
+}}
+<article class="digital-library-resource" data-resource-key="{{key}}">
+    <div class="digital-library-resource__visual">
+        {{#hascover}}
+            <img class="digital-library-resource__cover" src="{{coverurl}}"{{#coverresponsive}} srcset="{{coversrcset}}" sizes="(max-width: 767px) 120px, 180px"{{/coverresponsive}} width="{{coverwidth}}" height="{{coverheight}}" loading="lazy" decoding="async" alt="{{title}}">
+        {{/hascover}}
+        {{^hascover}}
+            <div class="digital-library-resource__placeholder" aria-hidden="true">
+                <i class="fa fa-file-pdf-o"></i>
+            </div>
+        {{/hascover}}
+    </div>
+
+    <div class="digital-library-resource__content">
+        <h3 class="digital-library-resource__title">{{title}}</h3>
+
+        {{#hasdownloads}}
+            <section class="digital-library-files" aria-label="{{fileslabel}}">
+                <div class="digital-library-files__list">
+                    {{#downloads}}
+                        {{> local_subscriptions/my_digital_products/components/download_action}}
+                    {{/downloads}}
+                </div>
+            </section>
+        {{/hasdownloads}}
+
+        {{#hasproducturl}}
+            <a class="digital-library-resource__product-link" href="{{producturl}}" target="_blank" rel="noopener noreferrer">
+                {{productlabel}}
+                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+        {{/hasproducturl}}
+    </div>
+</article>

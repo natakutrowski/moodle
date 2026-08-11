@@ -2,91 +2,59 @@
 
 namespace local_subscriptions\commerce\certification;
 
-defined('MOODLE_INTERNAL') || die();
-
-/** Aggregate production-certification report. */
+/**
+ * Small immutable-friendly report builder for Commerce certification phases.
+ */
 final class CommerceCertificationReport {
-    /** @param CommerceCertificationCheck[] $checks */
-    public function __construct(
-        private readonly array $checks,
-        private readonly int $baseline,
-        private readonly int $generatedat
-    ) {
+    /** @var array<int, array<string, mixed>> */
+    private array $issues = [];
+
+    /** @var array<string, mixed> */
+    private array $inventory = [];
+
+    public function __construct(private readonly string $phase) {
     }
 
-    public function checks(): array { return $this->checks; }
-    public function baseline(): int { return $this->baseline; }
-    public function generated_at(): int { return $this->generatedat; }
+    public function add_inventory(string $key, mixed $value): void {
+        $this->inventory[$key] = $value;
+    }
 
-    public function global_status(): string {
-        foreach ($this->checks as $check) {
-            if ($check->status() === CommerceCertificationCheck::FAIL) {
-                return 'BLOCKED';
+    /** @param array<string, mixed> $context */
+    public function add_issue(string $severity, string $code, string $message, array $context = []): void {
+        $this->issues[] = [
+            'severity' => $severity,
+            'code' => $code,
+            'message' => $message,
+            'context' => $context,
+        ];
+    }
+
+    public function is_certifiable(): bool {
+        foreach ($this->issues as $issue) {
+            if ($issue['severity'] === 'blocking') {
+                return false;
             }
         }
-        foreach ($this->checks as $check) {
-            if ($check->status() === CommerceCertificationCheck::WARNING) {
-                return 'READY_WITH_WARNINGS';
-            }
-        }
-        return 'READY_FOR_PRODUCTION';
+        return true;
     }
 
-    public function summary(): array {
-        $summary = ['PASS' => 0, 'WARNING' => 0, 'FAIL' => 0, 'TOTAL' => count($this->checks)];
-        foreach ($this->checks as $check) {
-            $summary[$check->status()]++;
-        }
-        return $summary;
-    }
-
-    public function sections(): array {
-        $sections = [];
-        foreach ($this->checks as $check) {
-            $sections[$check->section()][] = $check;
-        }
-        return $sections;
-    }
-
+    /** @return array<string, mixed> */
     public function to_array(): array {
-        return [
-            'status' => $this->global_status(),
-            'baseline' => $this->baseline,
-            'generated_at' => $this->generatedat,
-            'summary' => $this->summary(),
-            'checks' => array_map(static fn(CommerceCertificationCheck $check): array => $check->to_array(), $this->checks),
-        ];
-    }
-
-    public function to_markdown(): string {
-        $lines = [
-            '# Commerce Production Certification Report',
-            '',
-            '- Generated: ' . userdate($this->generatedat, '%Y-%m-%d %H:%M:%S %Z'),
-            '- Baseline: ' . userdate($this->baseline, '%Y-%m-%d %H:%M:%S %Z'),
-            '- Global status: **' . $this->global_status() . '**',
-            '',
-        ];
-        foreach ($this->sections() as $section => $checks) {
-            $lines[] = '## ' . $section;
-            $lines[] = '';
-            foreach ($checks as $check) {
-                $symbol = $check->status() === 'PASS' ? '✅' : ($check->status() === 'WARNING' ? '⚠️' : '❌');
-                $lines[] = '- ' . $symbol . ' **' . $check->status() . '** `' . $check->code() . '` — ' . $check->message();
+        $summary = ['blocking' => 0, 'important' => 0, 'cosmetic' => 0, 'total' => count($this->issues)];
+        foreach ($this->issues as $issue) {
+            $severity = (string)$issue['severity'];
+            if (array_key_exists($severity, $summary)) {
+                $summary[$severity]++;
             }
-            $lines[] = '';
         }
-        $summary = $this->summary();
-        $lines[] = '## Summary';
-        $lines[] = '';
-        $lines[] = '- PASS: ' . $summary['PASS'];
-        $lines[] = '- WARNING: ' . $summary['WARNING'];
-        $lines[] = '- FAIL: ' . $summary['FAIL'];
-        $lines[] = '';
-        $lines[] = '## Decision';
-        $lines[] = '';
-        $lines[] = '**' . $this->global_status() . '**';
-        $lines[] = '';
-        return implode("\n", $lines);
+
+        return [
+            'phase' => $this->phase,
+            'generatedat' => time(),
+            'certifiable' => $this->is_certifiable(),
+            'summary' => $summary,
+            'inventory' => $this->inventory,
+            'issues' => $this->issues,
+        ];
     }
 }

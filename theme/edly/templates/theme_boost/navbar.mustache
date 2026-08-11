@@ -45,40 +45,28 @@
                 {{! -- CONNECTÉ (non-invité) : on affiche directement le menu utilisateur }}
                 {{#isloggedin}}
                     {{^isguest}}
-                        <div class="ms-auto d-lg-none navbar-user-wrap">
-                            {{> theme_edly/edly_navbar_user }}
-                        </div>
-                    {{/isguest}}
-                {{/isloggedin}}
-
-                {{! -- VISITEUR ou INVITÉ : bouton Menu pour l'offcanvas }}
-                {{^isloggedin}}
-                    <div class="ms-auto d-lg-none">
-                        <button class="btn btn-outline-dark btn-sm rounded-pill px-3 campus-menu-toggle"
-                                type="button"
-                                data-bs-toggle="offcanvas"
-                                data-bs-target="#campusMobileMenu"
-                                aria-controls="campusMobileMenu"
-                                aria-label="{{#str}}mobilemenu_open_aria, theme_edly{{/str}}">
-                            <span aria-hidden="true">☰</span>
-                            <span class="ms-1">{{#str}}mobilemenu_button, theme_edly{{/str}}</span>
-                        </button>
-                    </div>
-                {{/isloggedin}}
-
-                {{#isloggedin}}
-                    {{#isguest}}
-                        <div class="ms-auto d-lg-none">
-                            <button class="btn btn-outline-dark btn-sm rounded-pill px-3 campus-menu-toggle"
+                        <div class="ms-auto d-lg-none d-flex align-items-center gap-2 navbar-user-wrap">
+                            <button class="btn btn-outline-dark btn-sm rounded-pill campus-menu-toggle campus-mobile-customer-toggle"
                                     type="button"
                                     data-bs-toggle="offcanvas"
                                     data-bs-target="#campusMobileMenu"
                                     aria-controls="campusMobileMenu"
                                     aria-label="{{#str}}mobilemenu_open_aria, theme_edly{{/str}}">
                                 <span aria-hidden="true">☰</span>
-                                <span class="ms-1">{{#str}}mobilemenu_button, theme_edly{{/str}}</span>
                             </button>
+
                         </div>
+                    {{/isguest}}
+                {{/isloggedin}}
+
+                {{! -- VISITEUR ou INVITÉ : actions compactes identiques à la landing }}
+                {{^isloggedin}}
+                    <div class="ms-auto d-lg-none">{{> theme_edly/guest_navigation_mobile }}</div>
+                {{/isloggedin}}
+
+                {{#isloggedin}}
+                    {{#isguest}}
+                        <div class="ms-auto d-lg-none">{{> theme_edly/guest_navigation_mobile }}</div>
                     {{/isguest}}
                 {{/isloggedin}}
             </div>
@@ -110,48 +98,11 @@
                         {{ ! output.custom_menu }}
                     </ul>
 
-                    {{# istrial }}
-                    <div class="nav-cta d-none d-lg-flex align-items-center ms-auto" id="campus-cta-anchor" style="width:85%">
-                        <div class="option-item ms-auto">
-                            <a href="{{{ signup_url }}}" class="default-btn" data-subs-modal="1">
-                                {{ subscribe_label }}
-                            </a>
-                        </div>
-                    </div>
-                    {{/ istrial }}
-
-
-                    {{^istrial }}
-                    <div class="nav-cta d-none d-lg-flex align-items-center ms-auto" id="campus-cta-anchor">
-                        {{# show_subscribe_btn }}
-                            {{# has_lang_menu }}
-                                <div class="option-item langmenu me-2">
-                                    {{{ lang_menu }}}
-                                </div>
-                            {{/ has_lang_menu }}
-
-                            <!-- S’abonner : visible pour NON connectés ET invités -->
-                            <div class="option-item me-2">
-                                <a href="{{{ signup_url }}}" class="default-btn" data-subs-modal="1">{{ subscribe_label }}</a>
-                            </div>
-
-                            <!-- Connexion : seulement pour NON connectés (pas pour l’invité) -->
-                            {{# show_login_btn }}
-                                <div class="option-item">
-                                    <a href="{{{ login_url }}}"
-                                       class="default-btn second"
-                                       aria-label="{{ login_label }}">
-                                       {{ login_label }}
-                                    </a>
-                                </div>
-                            {{/ show_login_btn }}
-                        {{/ show_subscribe_btn }}
-                    </div>
-                    {{/ istrial }}
+                    {{> theme_edly/guest_navigation }}
 
                     {{#isloggedin}}
                         {{^isguest}}
-                            {{> theme_edly/edly_navbar_user }}
+                            {{> theme_edly/customer_navigation }}
                         {{/isguest}}
                     {{/isloggedin}}
                 </div>
@@ -168,23 +119,15 @@
         </div>
 
         <div class="offcanvas-body">
-            {{# has_lang_menu }}
-                <div class="mb-3 langmenu d-flex justify-content-center">
-                    {{{ lang_menu }}}
-                </div>
-            {{/ has_lang_menu }}
+            {{#isloggedin}}
+                {{^isguest}}
+                    {{> theme_edly/customer_navigation_mobile }}
+                {{/isguest}}
+            {{/isloggedin}}
 
-            {{# show_subscribe_btn }}
-                <!-- CTA compacts et centrés -->
-                <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
-                    <a href="{{{ signup_url }}}" class="default-btn" data-subs-modal="1">{{ subscribe_label }}</a>
-                    {{^istrial }}
-                    {{# show_login_btn }}
-                        <a href="{{{ login_url }}}" class="default-btn second">{{ login_label }}</a>
-                    {{/ show_login_btn }}
-                    {{/ istrial }}
-                </div>
-            {{/ show_subscribe_btn }}
+            {{#isloggedin}}
+                {{^isguest}}{{! customer navigation already rendered above }}{{/isguest}}
+            {{/isloggedin}}
 
             {{# header_search_bar }}
                 <div class="mb-3">
@@ -199,10 +142,6 @@
             </div>
         </div>
     </div>
-
-    {{#js}}
-        require(['theme_edly/mobile_menu'], function(M){ M.init(); });
-    {{/js}}
 
 </div>
 <!-- End Navbar Area -->

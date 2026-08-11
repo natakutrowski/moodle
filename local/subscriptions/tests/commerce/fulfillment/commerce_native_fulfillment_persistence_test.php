@@ -32,6 +32,7 @@ final class commerce_native_fulfillment_persistence_test extends advanced_testca
         self::assertTrue($result->is_skipped());
         self::assertTrue($result->get_payload()['idempotent']);
         self::assertSame(0, $repository->begins);
+        self::assertSame(1, $repository->activations);
     }
 
     public function test_attempt_is_started_and_completed(): void {
@@ -46,6 +47,7 @@ final class commerce_native_fulfillment_persistence_test extends advanced_testca
         self::assertTrue($result->is_completed());
         self::assertSame(1, $repository->begins);
         self::assertSame(1, $repository->completions);
+        self::assertSame(1, $repository->activations);
     }
 
     public function test_failed_handler_is_persisted_as_failed_result(): void {
@@ -66,6 +68,7 @@ final class commerce_native_fulfillment_persistence_test extends advanced_testca
         self::assertTrue($result->is_failed());
         self::assertSame('boom', $result->get_message());
         self::assertSame('failed', $repository->laststatus);
+        self::assertSame(0, $repository->activations);
     }
 
     private function handler(): CommerceNativeFulfillmentHandler {
@@ -81,9 +84,14 @@ final class commerce_native_fulfillment_persistence_test extends advanced_testca
         return new class($state) implements CommerceNativeFulfillmentPersistenceRepository {
             public int $begins = 0;
             public int $completions = 0;
+            public int $activations = 0;
             public ?string $laststatus = null;
             public function __construct(private ?\stdClass $state) {}
             public function find_state(string $grantreference): ?\stdClass { return $this->state; }
+            public function activate_grant_if_planned(CommerceEntitlementGrant $grant, ?int $now = null): bool {
+                $this->activations++;
+                return true;
+            }
             public function begin_attempt(CommerceEntitlementGrant $grant, CommerceNativeFulfillmentContext $context, string $handlerclass): int {
                 $this->begins++;
                 return 17;

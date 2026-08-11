@@ -30,7 +30,7 @@ try {
         local_campus_clear_cookie();
         echo json_encode([
             'status'    => 'expired',
-            'subscribe' => (new moodle_url('/local/subscriptions/subscribe.php'))->out(false)
+            'subscribe' => (new moodle_url('/boutique'))->out(false)
         ]);
         exit;
     }

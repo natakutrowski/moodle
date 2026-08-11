@@ -80,6 +80,12 @@ final class legacy_stripe_payment_gateway_test
                     'commerce:stripe:test:1',
 
                     [
+                        'commerce_payment_id' =>
+                            'pay_test_native_123',
+
+                        'commerce_purchase_uuid' =>
+                            'cmp_test_native_123',
+
                         'legacy_payment_request_id' =>
                             (int)$record->id,
 
@@ -122,11 +128,21 @@ final class legacy_stripe_payment_gateway_test
             $response->get_checkout_url()
         );
 
+        $metadata = $response->get_metadata();
+
         $this->assertSame(
-            (int)$record->id,
-            $response->get_metadata()[
-                'legacy_payment_request_id'
-            ]
+            'pay_test_native_123',
+            $metadata['commerce_payment_id']
+        );
+
+        $this->assertSame(
+            'cmp_test_native_123',
+            $metadata['commerce_purchase_uuid']
+        );
+
+        $this->assertSame(
+            'cs_test_commerce_123',
+            $metadata['stripe_session_id']
         );
     }
 
@@ -181,6 +197,12 @@ final class legacy_stripe_payment_gateway_test
                     'commerce:stripe:digital:1',
 
                     [
+                        'commerce_payment_id' =>
+                            'pay_test_native_123',
+
+                        'commerce_purchase_uuid' =>
+                            'cmp_test_native_123',
+
                         'legacy_payment_request_id' =>
                             (int)$record->id,
 
@@ -210,11 +232,21 @@ final class legacy_stripe_payment_gateway_test
             $response->get_status()
         );
 
+        $metadata = $response->get_metadata();
+
         $this->assertSame(
-            'digital_product',
-            $response->get_metadata()[
-                'legacy_payment_context'
-            ]
+            'pay_test_native_123',
+            $metadata['commerce_payment_id']
+        );
+
+        $this->assertSame(
+            'cmp_test_native_123',
+            $metadata['commerce_purchase_uuid']
+        );
+
+        $this->assertSame(
+            'cs_test_commerce_123',
+            $metadata['stripe_session_id']
         );
     }
 

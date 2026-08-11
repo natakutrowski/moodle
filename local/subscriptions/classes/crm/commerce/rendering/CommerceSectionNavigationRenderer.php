@@ -1,55 +1,55 @@
 <?php
 
+declare(strict_types=1);
+
 namespace local_subscriptions\crm\commerce\rendering;
 
 defined('MOODLE_INTERNAL') || die();
 
+use context;
+use context_system;
 use html_writer;
-use local_subscriptions\admin\AdminSecurity;
-use local_subscriptions\admin\Capabilities;
-use local_subscriptions\subscription_config;
-use moodle_url;
+use local_subscriptions\crm\commerce\navigation\CommerceSectionNavigationRegistry;
 
-/**
- * Renders the shared secondary navigation for the Commerce workspace.
- */
+/** Renders the shared secondary navigation for the Commerce workspace. */
 final class CommerceSectionNavigationRenderer {
+    public const OVERVIEW = CommerceSectionNavigationRegistry::OVERVIEW;
+    public const PRODUCTS = CommerceSectionNavigationRegistry::PRODUCTS;
+    public const PURCHASES = CommerceSectionNavigationRegistry::PURCHASES;
+    public const SUBSCRIPTIONS = CommerceSectionNavigationRegistry::SUBSCRIPTIONS;
+    public const DIGITAL_PURCHASES = CommerceSectionNavigationRegistry::DIGITAL_PURCHASES;
+    public const DIGITAL_PRODUCTS = CommerceSectionNavigationRegistry::DIGITAL_PRODUCTS;
+    public const MAIL = CommerceSectionNavigationRegistry::MAIL;
+    public const IDENTITIES = CommerceSectionNavigationRegistry::IDENTITIES;
+    public const PERSONAL_OFFERS = CommerceSectionNavigationRegistry::PERSONAL_OFFERS;
+    public const GRANTS = CommerceSectionNavigationRegistry::GRANTS;
+    public const STATISTICS = CommerceSectionNavigationRegistry::STATISTICS;
+    public const CONFIGURATION = CommerceSectionNavigationRegistry::CONFIGURATION;
 
-    public const OVERVIEW = 'overview';
-    public const PRODUCTS = 'products';
-    public const SUBSCRIPTIONS = 'subscriptions';
-    public const DIGITAL_PURCHASES = 'digital_purchases';
-    public const DIGITAL_PRODUCTS = 'digital_products';
-    public const STATISTICS = 'statistics';
-    public const CONFIGURATION = 'configuration';
-
-    public static function render(string $activekey): string {
+    public static function render(string $activekey, ?context $context = null): string {
+        $context ??= context_system::instance();
+        $registry = new CommerceSectionNavigationRegistry();
         $items = [];
 
-        foreach (self::definitions() as $key => $definition) {
-            if (!AdminSecurity::can($definition['capability'])) {
-                continue;
-            }
+        foreach ($registry->visible_items($context) as $item) {
+            $isactive = $item->key === $activekey;
+            $attributes = [
+                'class' => 'crm-commerce-section-nav-link' . ($isactive ? ' active' : ''),
+            ];
 
-            $classes = 'crm-commerce-section-nav-link';
-            $attributes = [];
-
-            if ($key === $activekey) {
-                $classes .= ' active';
+            if ($isactive) {
                 $attributes['aria-current'] = 'page';
             }
 
-            $attributes['class'] = $classes;
-
             $items[] = html_writer::link(
-                $definition['url'],
+                $item->url,
                 html_writer::span(
-                    $definition['icon'],
+                    $item->icon,
                     'crm-commerce-section-nav-icon',
                     ['aria-hidden' => 'true']
                 ) .
                 html_writer::span(
-                    s($definition['label']),
+                    s($item->label),
                     'crm-commerce-section-nav-label'
                 ),
                 $attributes
@@ -62,10 +62,7 @@ final class CommerceSectionNavigationRenderer {
 
         return html_writer::tag(
             'nav',
-            html_writer::div(
-                implode('', $items),
-                'crm-commerce-section-nav-list'
-            ),
+            html_writer::div(implode('', $items), 'crm-commerce-section-nav-list'),
             [
                 'class' => 'crm-commerce-section-nav mb-4',
                 'aria-label' => get_string(
@@ -74,60 +71,5 @@ final class CommerceSectionNavigationRenderer {
                 ),
             ]
         );
-    }
-
-    /**
-     * @return array<string, array{
-     *     label: string,
-     *     icon: string,
-     *     url: moodle_url,
-     *     capability: string
-     * }>
-     */
-    private static function definitions(): array {
-        return [
-            self::OVERVIEW => [
-                'label' => get_string('crm_commerce_nav_overview', 'local_subscriptions'),
-                'icon' => '⌂',
-                'url' => new moodle_url(subscription_config::admin_commerce_page()),
-                'capability' => Capabilities::VIEW_DASHBOARD,
-            ],
-            self::PRODUCTS => [
-                'label' => get_string('crm_commerce_nav_products', 'local_subscriptions'),
-                'icon' => '▦',
-                'url' => new moodle_url('/local/subscriptions/admin/commerce/products/index.php'),
-                'capability' => Capabilities::MANAGE_CONFIGURATION,
-            ],
-            self::SUBSCRIPTIONS => [
-                'label' => get_string('crm_commerce_nav_subscriptions', 'local_subscriptions'),
-                'icon' => '▣',
-                'url' => new moodle_url(subscription_config::user_subscriptions_page()),
-                'capability' => Capabilities::MANAGE_SUBSCRIPTIONS,
-            ],
-            self::DIGITAL_PURCHASES => [
-                'label' => get_string('crm_commerce_nav_digital_purchases', 'local_subscriptions'),
-                'icon' => '◆',
-                'url' => new moodle_url(subscription_config::digital_purchases_admin_page()),
-                'capability' => Capabilities::VIEW_DIGITAL,
-            ],
-            self::DIGITAL_PRODUCTS => [
-                'label' => get_string('crm_commerce_nav_digital_products', 'local_subscriptions'),
-                'icon' => '▤',
-                'url' => new moodle_url(subscription_config::digital_products_admin_page()),
-                'capability' => Capabilities::MANAGE_DIGITAL,
-            ],
-            self::STATISTICS => [
-                'label' => get_string('crm_commerce_nav_statistics', 'local_subscriptions'),
-                'icon' => '▥',
-                'url' => new moodle_url(subscription_config::digital_sales_stats_admin_page()),
-                'capability' => Capabilities::VIEW_STATISTICS,
-            ],
-            self::CONFIGURATION => [
-                'label' => get_string('crm_commerce_nav_configuration', 'local_subscriptions'),
-                'icon' => '⚙',
-                'url' => new moodle_url(subscription_config::manage_page()),
-                'capability' => Capabilities::MANAGE_CONFIGURATION,
-            ],
-        ];
     }
 }

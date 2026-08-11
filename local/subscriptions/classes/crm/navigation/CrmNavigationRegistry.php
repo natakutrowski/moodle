@@ -165,6 +165,20 @@ final class CrmNavigationRegistry {
             ),
 
             new CrmNavigationItem(
+                key: CrmNavigationKeys::SHOWROOMS,
+                label: get_string(
+                    'commerce_showroom_cms_title',
+                    'local_subscriptions'
+                ),
+                icon: '▣',
+                url: new moodle_url(
+                    '/local/subscriptions/admin/commerce/showrooms/index.php'
+                ),
+                capability: 'local/subscriptions:manage_showrooms',
+                position: 65
+            ),
+
+            new CrmNavigationItem(
                 key: CrmNavigationKeys::HELP,
                 label: get_string(
                     'crm_help_title',

@@ -25,6 +25,8 @@ final class CommercePersistentNativeFulfillmentExecutor {
     ): CommerceNativeFulfillmentResult {
         $state = $this->persistence->find_state($grant->get_reference());
         if (!$context->is_dry_run() && $state !== null && (string) $state->status === CommerceNativeFulfillmentResult::STATUS_COMPLETED) {
+            $this->persistence->activate_grant_if_planned($grant);
+
             return CommerceNativeFulfillmentResult::skipped(
                 $grant,
                 'Native fulfillment was already completed for this grant.',
@@ -64,6 +66,11 @@ final class CommercePersistentNativeFulfillmentExecutor {
         }
 
         $this->persistence->complete_attempt($attemptid, $grant, $context, $handlerclass, $result);
+
+        if (!$context->is_dry_run() && $result->is_completed()) {
+            $this->persistence->activate_grant_if_planned($grant);
+        }
+
         return $result;
     }
 }

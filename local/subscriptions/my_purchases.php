@@ -1,15 +1,18 @@
 <?php
 // local/subscriptions/my_purchases.php.
 
-require_once(__DIR__ . '/../../config.php');
-require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
-require_once($CFG->dirroot . '/local/subscriptions/lib/user_subs_lib.php');
+declare(strict_types=1);
 
-use local_subscriptions\constants\Status;
-use local_subscriptions\payment\Provider;
+require_once(__DIR__ . '/../../config.php');
+
+use local_subscriptions\url\CommerceCustomerPublicUrlResolver;
+use local_subscriptions\output\my_purchases\MyPurchasesFilter;
+use local_subscriptions\commerce\order\presentation\CommerceCustomerStatusResolver;
+use local_subscriptions\commerce\catalog\resolution\CommerceLegacyStorefrontProductResolver;
+use local_subscriptions\commerce\order\presentation\CommerceOrderPresentationService;
+use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
+use local_subscriptions\output\my_purchases\MyPurchasesPage;
 use local_subscriptions\url\UrlFactory;
-use local_subscriptions\support\SubsPresenter;
-use local_subscriptions\commerce\student\StudentCommercePurchaseFactory;
 
 require_login();
 
@@ -17,10 +20,10 @@ if (isguestuser()) {
     redirect(new moodle_url('/login/index.php'));
 }
 
-global $DB, $OUTPUT, $USER;
+global $OUTPUT, $PAGE, $USER;
 
 $requesteduserid = optional_param('userid', 0, PARAM_INT);
-$targetuserid = $USER->id;
+$targetuserid = (int)$USER->id;
 
 if ($requesteduserid > 0 && $requesteduserid !== (int)$USER->id) {
     $targetcontext = context_user::instance($requesteduserid, IGNORE_MISSING);
@@ -33,701 +36,520 @@ if ($requesteduserid > 0 && $requesteduserid !== (int)$USER->id) {
 }
 
 $targetuser = core_user::get_user($targetuserid, '*', MUST_EXIST);
-$isadminview = ((int)$targetuser->id !== (int)$USER->id);
+$isadminview = (int)$targetuser->id !== (int)$USER->id;
+$pageurlparams = $isadminview ? ['userid' => $targetuserid] : [];
 
 $PAGE->set_context(context_user::instance($targetuserid));
-$PAGE->set_url(UrlFactory::my_purchases(), $targetuserid !== (int)$USER->id ? ['userid' => $targetuserid] : []);
+$PAGE->set_url(UrlFactory::my_purchases(), $pageurlparams);
 $PAGE->set_pagelayout('standard');
+$PAGE->requires->css(new moodle_url('/local/subscriptions/styles/my_purchases.css'));
 
-$pagetitle = ($targetuserid === (int)$USER->id)
-    ? get_string('mysubs_title', 'local_subscriptions')
-    : get_string('user_purchases_title', 'local_subscriptions', fullname($targetuser));
+$pagetitle = $isadminview
+    ? get_string('user_purchases_title', 'local_subscriptions', fullname($targetuser))
+    : get_string('mysubs_title', 'local_subscriptions');
 
 $PAGE->set_title($pagetitle);
 $PAGE->set_heading($pagetitle);
+$PAGE->navbar->ignore_active();
+$PAGE->navbar->add(
+    get_string('commerce_customer_hub_title', 'local_subscriptions'),
+    UrlFactory::my_campus()
+);
+$PAGE->navbar->add($pagetitle);
 
-$fmtmoney = static function($amt, $cur): string {
-    return format_float((float)$amt, 2) . ' ' . strtoupper((string)$cur);
-};
+$page = new MyPurchasesPage(
+    $targetuser,
+    $isadminview,
+    MyPurchasesFilter::from_request()
+);
 
-$isunlimited = static function($ts): bool {
-    return empty($ts) || (int)$ts >= 4102444800; // 0/null OR >= 2100-01-01.
-};
+/** @var local_subscriptions\output\renderer $renderer */
+$renderer = $PAGE->get_renderer('local_subscriptions');
 
-$trialids = array_filter(array_map('intval',
-    explode(',', (string)get_config('local_subscriptions', 'trial_planids'))
-));
+$purchasecontent = $renderer->render_my_purchases_page($page);
 
-$detecttrial = static function($plan, $sub) use ($trialids): bool {
-    if (!empty($trialids) && in_array((int)$plan->id, $trialids, true)) {
-        return true;
-    }
-
-    $name = mb_strtolower((string)format_string($plan->name), 'UTF-8');
-
-    if (preg_match('/\b(essai|trial|проб)/u', $name)) {
-        return true;
-    }
-
-    $durationsec = (int)$sub->end_date - (int)$sub->start_date;
-    $days = (int)round($durationsec / DAYSECS);
-    $paid0 = (float)($sub->pricepaid ?? 0) == 0.0;
-
-    return $paid0 && $days >= 6 && $days <= 8;
-};
-
-$renderdetailmodal = static function(string $modalid, string $title, array $rows): string {
-    $table = html_writer::start_tag('table', ['class' => 'table table-sm mb-0']);
-
-    foreach ($rows as $row) {
-        if (!empty($row['section'])) {
-            $table .= html_writer::tag(
-                'tr',
-                html_writer::tag(
-                    'th',
-                    html_writer::tag('i', '', [
-                        'class' => ($row['icon'] ?? 'fa-solid fa-circle-info') . ' me-2',
-                        'aria-hidden' => 'true',
-                    ]) .
-                    format_string($row['section']),
-                    [
-                        'colspan' => 2,
-                        'class' => 'bg-light fw-bold text-dark border-top',
-                    ]
-                )
-            );
-
-            continue;
-        }
-
-        [$k, $v] = $row;
-
-        $table .= '<tr>';
-        $table .= '<th class="text-muted" style="width:28%;white-space:nowrap;">' . s($k) . '</th>';
-        $table .= '<td class="fw-semibold">' . $v . '</td>';
-        $table .= '</tr>';
-    }
-
-    $table .= html_writer::end_tag('table');
-
-    $html = html_writer::start_div('modal fade', [
-        'id' => $modalid,
-        'tabindex' => '-1',
-        'aria-hidden' => 'true',
-    ]);
-
-    $html .= html_writer::start_div('modal-dialog modal-lg modal-dialog-scrollable');
-    $html .= html_writer::start_div('modal-content');
-
-    $html .= html_writer::div(
-        html_writer::tag('h5', $title, ['class' => 'modal-title']) .
-        html_writer::tag('button', '', [
-            'type' => 'button',
-            'class' => 'btn-close',
-            'data-bs-dismiss' => 'modal',
-            'aria-label' => 'Close',
-        ]),
-        'modal-header d-flex align-items-center justify-content-between'
-    );
-
-    $html .= html_writer::div($table, 'modal-body bg-light');
-
-    $html .= html_writer::div(
-        html_writer::tag('button', get_string('close', 'local_subscriptions'), [
-            'class' => 'btn btn-secondary',
-            'data-bs-dismiss' => 'modal',
-        ]),
-        'modal-footer'
-    );
-
-    $html .= html_writer::end_div();
-    $html .= html_writer::end_div();
-    $html .= html_writer::end_div();
-
-    return $html;
-};
-
-$addsection = static function(array &$rows, string $title, string $icon = 'fa-solid fa-circle-info'): void {
-    $rows[] = [
-        'section' => $title,
-        'icon' => $icon,
-    ];
-};
-
-
-echo $OUTPUT->header();
-
-echo html_writer::tag('h3', get_string('mysubs_title', 'local_subscriptions'), ['class' => 'mb-4']);
-
-/**
- * Achats de cours.
- */
-echo html_writer::tag('h4', get_string('course_purchases_profile_title', 'local_subscriptions'), ['class' => 'mb-3']);
-
-$studentcommerce = StudentCommercePurchaseFactory::create()->get_for_customer(
+$nativeorders = (new CommercePurchaseReadRepository($DB))->find_details_for_customer(
     (int)$targetuser->id,
     (string)$targetuser->email
 );
-$subs = $studentcommerce->get_subscriptions();
+$presentations = [];
+$presentationservice = CommerceOrderPresentationService::create();
+$legacyproductresolver = new CommerceLegacyStorefrontProductResolver($DB);
+$courseaccesssinglelabel = get_string('commerce_i49_open_course', 'local_subscriptions');
+[$courseaccessmultiplelabel] = match (current_language()) {
+    'fr', 'fr_ca' => ['Accéder à mes cours'],
+    'ru' => ['Перейти к моим курсам'],
+    default => ['Access my courses'],
+};
+$productpagelabel = get_string('digital_product_view_page', 'local_subscriptions');
+foreach ($nativeorders as $nativeorder) {
+    $presentations[$nativeorder->summary->reference] = $presentationservice->present($nativeorder);
+}
 
-if (!$subs) {
-    echo $OUTPUT->notification(get_string('mysubs_empty', 'local_subscriptions'), \core\output\notification::NOTIFY_INFO);
-    echo html_writer::div(
-        html_writer::link(UrlFactory::subscribe(), get_string('subscribe', 'local_subscriptions'), ['class' => 'btn btn-primary']),
-        'mt-3 mb-5'
+if (class_exists(DOMDocument::class)) {
+    $previouslibxmlstate = libxml_use_internal_errors(true);
+    $document = new DOMDocument('1.0', 'UTF-8');
+    $loaded = $document->loadHTML(
+        '<?xml encoding="UTF-8"><div id="my-purchases-enhanced-root">' . $purchasecontent . '</div>',
+        LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
     );
-} else {
-    $planids = array_unique(array_map(static fn($s) => (int)$s->planid, $subs));
-    $plans = $planids ? $DB->get_records_list('subscription_plan', 'id', $planids, '', 'id,name,is_recurring,is_trial') : [];
 
-    foreach ($subs as $sub) {
-        $plan = $plans[$sub->planid] ?? (object)[
-            'id' => 0,
-            'name' => get_string('unknown_plan', 'local_subscriptions'),
-            'is_recurring' => 0,
-            'is_trial' => 0,
-        ];
+    if ($loaded) {
+        $xpath = new DOMXPath($document);
+        $detailanchors = $xpath->query('//a[contains(@href, "order_details.php")]');
+        $statusresolver = new CommerceCustomerStatusResolver();
 
-        $istrial = $detecttrial($plan, $sub);
-        $planname = local_subscriptions_plan_display_name($plan);
-        $isactive = ($sub->status === Status::ACTIVE);
-        $unlimited = $isunlimited($sub->end_date ?? null);
+        foreach ($detailanchors as $detailanchor) {
+            if (!$detailanchor instanceof DOMElement) {
+                continue;
+            }
 
-        $cardclasses = 'card shadow-sm mb-3' . ($isactive ? '' : ' border-0 bg-light');
+            $href = html_entity_decode($detailanchor->getAttribute('href'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $query = (string)(parse_url($href, PHP_URL_QUERY) ?? '');
+            parse_str($query, $params);
+            $reference = trim((string)($params['reference'] ?? ''));
+            $presentation = $presentations[$reference] ?? null;
+            if ($presentation === null) {
+                continue;
+            }
 
-        $head = html_writer::start_div('d-flex align-items-center justify-content-between');
-        $head .= html_writer::tag('span', format_string($planname), ['class' => 'h5 m-0']);
-        $head .= SubsPresenter::render_status_badge($sub->status);
-        $head .= html_writer::end_div();
+            $card = $detailanchor;
+            while ($card !== null
+                    && !($card instanceof DOMElement
+                        && $card->tagName === 'article'
+                        && str_contains(' ' . $card->getAttribute('class') . ' ', ' my-purchase-card '))) {
+                $card = $card->parentNode;
+            }
+            if (!$card instanceof DOMElement) {
+                continue;
+            }
 
-        $list = html_writer::start_tag('ul', ['class' => 'list-unstyled mb-2 small']);
+            $type = strtolower(trim((string)$presentation->type));
+            $actions = $xpath->query('.//div[contains(concat(" ", normalize-space(@class), " "), " my-purchase-card__actions ")]', $card)?->item(0);
 
-        $datelabel = (!$istrial && $unlimited)
-            ? get_string('purchase_date', 'local_subscriptions')
-            : get_string('start_date', 'local_subscriptions');
+            if (in_array($type, ['digital', 'digital_download'], true) && $actions instanceof DOMElement) {
+                $existinghrefs = [];
+                foreach ($xpath->query('.//a[@href]', $actions) as $existinganchor) {
+                    if ($existinganchor instanceof DOMElement) {
+                        $existinghrefs[html_entity_decode($existinganchor->getAttribute('href'), ENT_QUOTES | ENT_HTML5, 'UTF-8')] = true;
+                    }
+                }
 
-        $list .= html_writer::tag('li',
-            html_writer::tag('span', $datelabel . ': ', ['class' => 'text-muted']) .
-            userdate((int)$sub->start_date)
-        );
+                $skus = [];
+                foreach ($presentation->items as $item) {
+                    $sku = trim((string)($item->metadata['productsku'] ?? $item->metadata['sku'] ?? ''));
+                    if ($sku !== '') {
+                        $skus[$sku] = true;
+                    }
+                }
+                foreach ($nativeorders as $nativeorder) {
+                    if ($nativeorder->summary->reference !== $reference) {
+                        continue;
+                    }
+                    foreach ($nativeorder->grants as $grant) {
+                        if ($grant->type === 'digital_download' && trim($grant->productsku) !== '') {
+                            $skus[trim($grant->productsku)] = true;
+                        }
+                    }
+                    break;
+                }
 
-        if (!$unlimited) {
-            $list .= html_writer::tag('li',
-                html_writer::tag('span', get_string('end_date', 'local_subscriptions') . ': ', ['class' => 'text-muted']) .
-                userdate((int)$sub->end_date)
-            );
+                $newactions = [];
+                foreach (array_keys($skus) as $sku) {
+                    $producturl = (CommerceCustomerPublicUrlResolver::product($sku))->out(false);
+                    if (!isset($existinghrefs[$producturl])) {
+                        $newactions[] = [
+                            'url' => $producturl,
+                            'label' => get_string('digital_product_view_page', 'local_subscriptions'),
+                            'icon' => 'fa-solid fa-arrow-up-right-from-square',
+                            'class' => 'btn btn-outline-primary btn-sm product-page-action',
+                        ];
+                    }
+                }
+
+                foreach ($presentation->items as $item) {
+                    foreach ($item->accesses as $access) {
+                        if ($access->type !== 'digital_download' || !$access->available || $access->url === null) {
+                            continue;
+                        }
+                        $versions = [];
+                        if (!empty($access->metadata['hasdesktop'])) {
+                            $versions[] = ['desktop', get_string('digital_download_classic', 'local_subscriptions'), 'fa-solid fa-download'];
+                        }
+                        if (!empty($access->metadata['hasmobile'])) {
+                            $versions[] = ['mobile', get_string('digital_download_mobile', 'local_subscriptions'), 'fa-solid fa-mobile-screen-button'];
+                        }
+                        if ($versions === []) {
+                            $versions[] = ['', get_string('digital_download_classic', 'local_subscriptions'), 'fa-solid fa-download'];
+                        }
+
+                        foreach ($versions as [$version, $label, $icon]) {
+                            $downloadurl = new moodle_url($access->url);
+                            if ($version !== '') {
+                                $downloadurl->param('version', $version);
+                            }
+                            $downloadhref = $downloadurl->out(false);
+                            if (!isset($existinghrefs[$downloadhref])) {
+                                $newactions[] = [
+                                    'url' => $downloadhref,
+                                    'label' => $label,
+                                    'icon' => $icon,
+                                    'class' => 'btn btn-outline-primary btn-sm',
+                                ];
+                                $existinghrefs[$downloadhref] = true;
+                            }
+                        }
+                    }
+                }
+
+                foreach ($newactions as $action) {
+                    $wrapper = $document->createElement('span');
+                    $wrapper->setAttribute('class', 'my-purchase-card__action');
+                    $anchor = $document->createElement('a');
+                    $anchor->setAttribute('href', $action['url']);
+                    $anchor->setAttribute('class', $action['class']);
+                    if ($action['icon'] !== '') {
+                        $icon = $document->createElement('i');
+                        $icon->setAttribute('class', $action['icon']);
+                        $icon->setAttribute('aria-hidden', 'true');
+                        $anchor->appendChild($icon);
+                        $anchor->appendChild($document->createTextNode(' '));
+                    }
+                    $anchor->appendChild($document->createTextNode($action['label']));
+                    $wrapper->appendChild($anchor);
+                    $actions->insertBefore($wrapper, $detailanchor->parentNode);
+                }
+            }
+
+            if ($type === 'bundle') {
+                $paymentstate = $statusresolver->resolve_payment((string)$presentation->paymentstatus);
+                $badge = $xpath->query(
+                    './/*[contains(concat(" ", normalize-space(@class), " "), " crm-commerce-status-badge ")]',
+                    $card
+                )?->item(0);
+                if ($badge instanceof DOMElement) {
+                    while ($badge->firstChild !== null) {
+                        $badge->removeChild($badge->firstChild);
+                    }
+                    $badge->appendChild($document->createTextNode($paymentstate['label']));
+                    $badge->setAttribute(
+                        'class',
+                        'crm-commerce-status-badge crm-commerce-status-' . $paymentstate['class']
+                    );
+                }
+
+                $classes = trim($card->getAttribute('class'));
+                if ($paymentstate['class'] === 'warning') {
+                    $classes .= ' my-purchase-card--payment-pending';
+                } elseif ($paymentstate['class'] === 'danger') {
+                    $classes .= ' my-purchase-card--payment-error';
+                }
+                $card->setAttribute('class', trim($classes));
+
+                foreach ($xpath->query('.//a[contains(@href, "storefront_product.php")]', $card) as $productanchor) {
+                    if ($productanchor instanceof DOMElement) {
+                        while ($productanchor->firstChild !== null) {
+                            $productanchor->removeChild($productanchor->firstChild);
+                        }
+                        $productanchor->appendChild($document->createTextNode($productpagelabel));
+                    }
+                }
+            }
         }
 
-        if (!$istrial) {
-            $list .= html_writer::tag('li',
-                html_writer::tag('span', get_string('pricepaid', 'local_subscriptions') . ': ', ['class' => 'text-muted']) .
-                $fmtmoney($sub->pricepaid ?? 0, $sub->currency ?? '')
-            );
-        }
+        foreach ($xpath->query('//article[contains(concat(" ", normalize-space(@class), " "), " my-purchase-card--course ")]') as $coursecard) {
+            if (!$coursecard instanceof DOMElement) {
+                continue;
+            }
 
-        $courses = local_subscriptions_get_courses_by_plan((int)$sub->planid);
-        if ($courses) {
-            $links = [];
-            foreach ($courses as $course) {
-                $links[] = html_writer::link(
-                    new moodle_url('/course/view.php', ['id' => $course->id]),
-                    format_string($course->fullname)
+            $actions = $xpath->query(
+                './/div[contains(concat(" ", normalize-space(@class), " "), " my-purchase-card__actions ")]',
+                $coursecard
+            )?->item(0);
+            if (!$actions instanceof DOMElement) {
+                continue;
+            }
+
+            $detailcontrol = $xpath->query(
+                './/a[contains(@href, "order_details.php")] | .//button[contains(@data-bs-target, "#subModal")]',
+                $actions
+            )?->item(0);
+            $detailwrapper = $detailcontrol?->parentNode;
+            if (!$detailwrapper instanceof DOMNode) {
+                continue;
+            }
+
+            $courseurls = [];
+            $producturl = '';
+
+            foreach ($xpath->query('.//li[.//a[contains(@href, "/course/view.php")]]', $coursecard) as $courseli) {
+                if (!$courseli instanceof DOMElement) {
+                    continue;
+                }
+                foreach ($xpath->query('.//a[contains(@href, "/course/view.php")]', $courseli) as $courseanchor) {
+                    if ($courseanchor instanceof DOMElement) {
+                        $coursehref = html_entity_decode(
+                            $courseanchor->getAttribute('href'),
+                            ENT_QUOTES | ENT_HTML5,
+                            'UTF-8'
+                        );
+                        if ($coursehref !== '') {
+                            $courseurls[$coursehref] = true;
+                        }
+                    }
+                }
+                $courseli->parentNode?->removeChild($courseli);
+            }
+
+            foreach ($xpath->query('.//a[@href]', $actions) as $existinganchor) {
+                if (!$existinganchor instanceof DOMElement) {
+                    continue;
+                }
+                $existinghref = html_entity_decode(
+                    $existinganchor->getAttribute('href'),
+                    ENT_QUOTES | ENT_HTML5,
+                    'UTF-8'
+                );
+                if (str_contains($existinghref, '/storefront_product.php')) {
+                    $producturl = $existinghref;
+                }
+                if (str_contains($existinghref, '/course/view.php')) {
+                    $courseurls[$existinghref] = true;
+                }
+            }
+
+            if ($producturl === '' && $detailcontrol instanceof DOMElement && $detailcontrol->tagName === 'button') {
+                $target = $detailcontrol->getAttribute('data-bs-target');
+                if (preg_match('/#subModal([1-9][0-9]*)$/', $target, $matches)) {
+                    $legacysubscription = $DB->get_record(
+                        'user_subscription',
+                        ['id' => (int)$matches[1]],
+                        'id,planid',
+                        IGNORE_MISSING
+                    );
+                    if ($legacysubscription) {
+                        $resolvedurl = $legacyproductresolver->storefront_url(
+                            'subscription_plan',
+                            (int)$legacysubscription->planid
+                        );
+                        if ($resolvedurl !== null) {
+                            $producturl = $resolvedurl->out(false);
+                        }
+                    }
+                }
+            }
+
+            foreach (iterator_to_array($xpath->query('./*', $actions)) as $actionwrapper) {
+                if (!$actionwrapper instanceof DOMElement || $actionwrapper === $detailwrapper) {
+                    continue;
+                }
+                $anchor = $xpath->query('.//a[@href]', $actionwrapper)?->item(0);
+                if (!$anchor instanceof DOMElement) {
+                    continue;
+                }
+                $href = html_entity_decode($anchor->getAttribute('href'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                if (str_contains($href, '/storefront_product.php') || str_contains($href, '/course/view.php')) {
+                    $actions->removeChild($actionwrapper);
+                }
+            }
+
+            $insertcoursebutton = static function(
+                DOMDocument $document,
+                DOMElement $actions,
+                DOMNode $before,
+                string $url,
+                string $label,
+                string $class,
+                string $icon = '',
+                bool $external = false
+            ): void {
+                if ($url === '') {
+                    return;
+                }
+                $wrapper = $document->createElement('span');
+                $wrapper->setAttribute('class', 'my-purchase-card__action');
+                $anchor = $document->createElement('a');
+                $anchor->setAttribute('href', $url);
+                $anchor->setAttribute('class', $class);
+                if ($external) {
+                    $anchor->setAttribute('target', '_blank');
+                    $anchor->setAttribute('rel', 'noopener noreferrer');
+                }
+                if ($icon !== '') {
+                    $iconelement = $document->createElement('i');
+                    $iconelement->setAttribute('class', $icon);
+                    $iconelement->setAttribute('aria-hidden', 'true');
+                    $anchor->appendChild($iconelement);
+                    $anchor->appendChild($document->createTextNode(' '));
+                }
+                $anchor->appendChild($document->createTextNode($label));
+                $wrapper->appendChild($anchor);
+                $actions->insertBefore($wrapper, $before);
+            };
+
+            // The product page is the first action for both Legacy and Native purchases.
+            $insertcoursebutton(
+                $document,
+                $actions,
+                $actions->firstChild ?? $detailwrapper,
+                $producturl,
+                $productpagelabel,
+                'btn btn-outline-primary btn-sm product-page-action',
+                'fa-solid fa-arrow-up-right-from-square',
+                true
+            );
+
+            $courseurls = array_keys($courseurls);
+            if (count($courseurls) === 1) {
+                $insertcoursebutton(
+                    $document,
+                    $actions,
+                    $detailwrapper,
+                    $courseurls[0],
+                    $courseaccesssinglelabel,
+                    'btn btn-primary btn-sm',
+                    'fa-solid fa-graduation-cap'
+                );
+            } elseif (count($courseurls) > 1) {
+                $insertcoursebutton(
+                    $document,
+                    $actions,
+                    $detailwrapper,
+                    \local_subscriptions\url\UrlFactory::my_courses()->out(false),
+                    $courseaccessmultiplelabel,
+                    'btn btn-primary btn-sm',
+                    'fa-solid fa-graduation-cap'
                 );
             }
-
-            $list .= html_writer::tag('li',
-                html_writer::tag('span', get_string('available_courses', 'local_subscriptions') . ': ', ['class' => 'text-muted']) .
-                implode(', ', $links)
-            );
         }
 
-        if (!empty($sub->payment_failed)) {
-            $list .= html_writer::tag('li',
-                html_writer::span(get_string('payment_failed', 'local_subscriptions'), 'badge bg-warning text-dark') .
-                (!empty($sub->last_payment_failed_at) ? html_writer::span(' — ' . userdate($sub->last_payment_failed_at), 'text-muted ms-1') : ''),
-                ['class' => 'mt-1']
+        foreach ($xpath->query('//a[@href]') as $productanchor) {
+            if (!$productanchor instanceof DOMElement) {
+                continue;
+            }
+
+            $producthref = html_entity_decode(
+                $productanchor->getAttribute('href'),
+                ENT_QUOTES | ENT_HTML5,
+                'UTF-8'
             );
-        }
-
-        $list .= html_writer::end_tag('ul');
-
-        $btns = [];
-
-        if (!empty($plan->is_recurring) && $sub->payment_provider === Provider::STRIPE && !empty($sub->provider_customer_id)) {
-            $btns[] = html_writer::link(
-                UrlFactory::portal(['subid' => $sub->id]),
-                get_string('manage_billing', 'local_subscriptions'),
-                ['class' => 'btn btn-outline-primary btn-sm']
-            );
-
-            $list .= html_writer::div(
-                html_writer::span(get_string('badge_recurring', 'local_subscriptions'), 'badge bg-info'),
-                'mb-2'
-            );
-        }
-
-        $modalid = 'subModal' . $sub->id;
-
-        $btns[] = html_writer::tag('button', get_string('details', 'local_subscriptions'), [
-            'class' => 'btn btn-outline-secondary btn-sm',
-            'data-bs-toggle' => 'modal',
-            'data-bs-target' => '#' . $modalid,
-        ]);
-
-        echo html_writer::start_div($cardclasses);
-        echo html_writer::div($head, 'card-header bg-white');
-        echo html_writer::start_div('card-body');
-        echo $list;
-        echo html_writer::div(implode(' ', $btns), 'mt-2');
-        echo html_writer::end_div();
-        echo html_writer::end_div();
-
-        $rows = SubsPresenter::rows(
-            $sub,
-            $plan,
-            function(float $amount, string $cur) use ($fmtmoney): string {
-                return $fmtmoney($amount, $cur);
-            },
-            'user'
-        );
-
-        if ($isadminview) {
-            $addsection(
-                $rows,
-                get_string('admin_subscription_details', 'local_subscriptions'),
-                'fa-solid fa-user-shield'
-            );
-
-            $rows[] = [get_string('subfield_id', 'local_subscriptions'), s((string)$sub->id)];
-            $rows[] = [get_string('subfield_userid', 'local_subscriptions'), s((string)$sub->userid)];
-            $rows[] = [get_string('subfield_planid', 'local_subscriptions'), s((string)$sub->planid)];
-
-            if (!empty($sub->payment_provider)) {
-                $rows[] = [
-                    get_string('subfield_provider', 'local_subscriptions'),
-                    Provider::label_with_icon_env($sub->payment_provider),
-                ];
-            }
-
-            if (!empty($sub->payment_request_id)) {
-                $rows[] = [get_string('subfield_payment_request_id', 'local_subscriptions'), s((string)$sub->payment_request_id)];
-            }
-
-            if (!empty($sub->provider_subscription_id)) {
-                $rows[] = [get_string('subfield_provider_subscription_id', 'local_subscriptions'), s($sub->provider_subscription_id)];
-            }
-
-            if (!empty($sub->provider_customer_id)) {
-                $rows[] = [get_string('subfield_provider_customer_id', 'local_subscriptions'), s($sub->provider_customer_id)];
-            }
-
-            if (!empty($sub->transactionid)) {
-                $rows[] = [get_string('subfield_txn', 'local_subscriptions'), s($sub->transactionid)];
-            }
-
-            if (!empty($sub->renewal_date)) {
-                $rows[] = [get_string('subfield_renewal_date', 'local_subscriptions'), userdate((int)$sub->renewal_date)];
-            }
-
-            $paymentrequest = null;
-
-            if (!empty($sub->payment_request_id)) {
-                $paymentrequest = $DB->get_record(
-                    'subscription_payment_request',
-                    ['id' => (int)$sub->payment_request_id],
-                    '*',
-                    IGNORE_MISSING
-                );
-            }
-
-            if (!$paymentrequest) {
-                $paymentrequest = $DB->get_record_sql("
-                    SELECT *
-                    FROM {subscription_payment_request}
-                    WHERE subscriptionid = :subscriptionid
-                ORDER BY id DESC
-                ", [
-                    'subscriptionid' => (int)$sub->id,
-                ], IGNORE_MULTIPLE);
-            }
-
-            if ($paymentrequest) {
-                $addsection(
-                    $rows,
-                    get_string('admin_payment_request_details', 'local_subscriptions'),
-                    'fa-solid fa-credit-card'
+            if (str_contains($producthref, '/digital_product.php')) {
+                $query = (string)(parse_url($producthref, PHP_URL_QUERY) ?? '');
+                parse_str($query, $productparams);
+                $slug = trim((string)($productparams['p'] ?? ''));
+                $legacyproductid = $slug === '' ? 0 : (int)$DB->get_field(
+                    'subscription_digital_product',
+                    'id',
+                    ['slug' => $slug]
                 );
 
-                $rows[] = [get_string('subfield_payment_request_id', 'local_subscriptions'), s((string)$paymentrequest->id)];
-
-                if (!empty($paymentrequest->operation)) {
-                    $rows[] = [get_string('subfield_operation', 'local_subscriptions'), s($paymentrequest->operation)];
+                if ($legacyproductid > 0) {
+                    $resolvedurl = $legacyproductresolver->storefront_url(
+                        'subscription_digital_product',
+                        $legacyproductid
+                    );
+                    if ($resolvedurl !== null) {
+                        $producthref = $resolvedurl->out(false);
+                        $productanchor->setAttribute('href', $producthref);
+                    } else {
+                        $wrapper = $productanchor->parentNode;
+                        if ($wrapper instanceof DOMElement
+                                && str_contains(' ' . $wrapper->getAttribute('class') . ' ', ' my-purchase-card__action ')) {
+                            $wrapper->parentNode?->removeChild($wrapper);
+                        } else {
+                            $productanchor->parentNode?->removeChild($productanchor);
+                        }
+                        continue;
+                    }
+                } else {
+                    // Never keep a link to the deprecated Legacy product page.
+                    $wrapper = $productanchor->parentNode;
+                    if ($wrapper instanceof DOMElement
+                            && str_contains(' ' . $wrapper->getAttribute('class') . ' ', ' my-purchase-card__action ')) {
+                        $wrapper->parentNode?->removeChild($wrapper);
+                    } else {
+                        $productanchor->parentNode?->removeChild($productanchor);
+                    }
+                    continue;
                 }
+            }
 
-                if (!empty($paymentrequest->status)) {
-                    $rows[] = [
-                        get_string('subfield_status', 'local_subscriptions'),
-                        SubsPresenter::render_status_badge($paymentrequest->status),
-                    ];
-                }
+            if (!str_contains($producthref, '/storefront_product.php')) {
+                continue;
+            }
 
-                if (!empty($paymentrequest->payment_provider)) {
-                    $rows[] = [
-                        get_string('subfield_provider', 'local_subscriptions'),
-                        Provider::label_with_icon_env($paymentrequest->payment_provider),
-                    ];
-                }
+            while ($productanchor->firstChild !== null) {
+                $productanchor->removeChild($productanchor->firstChild);
+            }
+            $externalicon = $document->createElement('i');
+            $externalicon->setAttribute('class', 'fa-solid fa-arrow-up-right-from-square');
+            $externalicon->setAttribute('aria-hidden', 'true');
+            $productanchor->appendChild($externalicon);
+            $productanchor->appendChild($document->createTextNode(' ' . $productpagelabel));
+            $productanchor->setAttribute('class', 'btn btn-outline-primary btn-sm product-page-action');
+            $productanchor->setAttribute('target', '_blank');
+            $productanchor->setAttribute('rel', 'noopener noreferrer');
+        }
 
-                if (!empty($paymentrequest->sessionid)) {
-                    $rows[] = [get_string('subfield_sessionid', 'local_subscriptions'), s($paymentrequest->sessionid)];
-                }
+        // Final customer-facing URL normalisation. Legacy renderers may still
+        // expose technical Moodle URLs; convert them before returning HTML.
+        foreach ($xpath->query('//a[@href]') as $anchor) {
+            if (!$anchor instanceof DOMElement) {
+                continue;
+            }
+            $href = html_entity_decode(
+                $anchor->getAttribute('href'),
+                ENT_QUOTES | ENT_HTML5,
+                'UTF-8'
+            );
+            $path = (string)(parse_url($href, PHP_URL_PATH) ?? '');
+            $query = (string)(parse_url($href, PHP_URL_QUERY) ?? '');
+            parse_str($query, $params);
 
-                if (!empty($paymentrequest->transactionid)) {
-                    $rows[] = [get_string('subfield_txn', 'local_subscriptions'), s($paymentrequest->transactionid)];
-                }
-
-                if (!empty($paymentrequest->amount_minor)) {
-                    $rows[] = [get_string('subfield_amount_minor', 'local_subscriptions'), s((string)$paymentrequest->amount_minor)];
-                }
-
-                if (isset($paymentrequest->locked_list_price)) {
-                    $rows[] = [
-                        get_string('subfield_locked_list_price', 'local_subscriptions'),
-                        $fmtmoney($paymentrequest->locked_list_price, $paymentrequest->currency ?? ''),
-                    ];
-                }
-
-                if (!empty($paymentrequest->locked_discount_percent)) {
-                    $rows[] = [
-                        get_string('subfield_locked_discount_percent', 'local_subscriptions'),
-                        s((string)$paymentrequest->locked_discount_percent) . ' %',
-                    ];
-                }
-
-                if (!empty($paymentrequest->locked_discount_amount)) {
-                    $rows[] = [
-                        get_string('subfield_locked_discount_amount', 'local_subscriptions'),
-                        $fmtmoney($paymentrequest->locked_discount_amount, $paymentrequest->currency ?? ''),
-                    ];
-                }
-
-                if (!empty($paymentrequest->locked_discount_reason)) {
-                    $rows[] = [get_string('subfield_locked_discount_reason', 'local_subscriptions'), s($paymentrequest->locked_discount_reason)];
-                }
-
-                if (!empty($paymentrequest->locked_at)) {
-                    $rows[] = [get_string('subfield_locked_at', 'local_subscriptions'), userdate((int)$paymentrequest->locked_at)];
-                }
-
-                if (!empty($paymentrequest->creation_date)) {
-                    $rows[] = [get_string('subfield_created_at', 'local_subscriptions'), userdate((int)$paymentrequest->creation_date)];
-                }
-
-                if (!empty($paymentrequest->last_update)) {
-                    $rows[] = [get_string('subfield_updated_at', 'local_subscriptions'), userdate((int)$paymentrequest->last_update)];
-                }
-
-                if (!empty($paymentrequest->payment_date)) {
-                    $rows[] = [get_string('subfield_paid_at', 'local_subscriptions'), userdate((int)$paymentrequest->payment_date)];
-                }
-
-                if (!empty($paymentrequest->expiration_date)) {
-                    $rows[] = [get_string('subfield_expires_at', 'local_subscriptions'), userdate((int)$paymentrequest->expiration_date)];
-                }
-
-                if (!empty($paymentrequest->attempts)) {
-                    $rows[] = [get_string('subfield_attempts', 'local_subscriptions'), s((string)$paymentrequest->attempts)];
-                }
-
-                if (!empty($paymentrequest->last_attempt)) {
-                    $rows[] = [get_string('subfield_last_attempt', 'local_subscriptions'), userdate((int)$paymentrequest->last_attempt)];
-                }
-
-                if (!empty($paymentrequest->last_error)) {
-                    $rows[] = [
-                        get_string('subfield_last_error', 'local_subscriptions'),
-                        html_writer::tag('pre', s($paymentrequest->last_error), [
-                            'class' => 'small mb-0 text-danger',
-                            'style' => 'white-space:pre-wrap;max-height:180px;overflow:auto;',
-                        ]),
-                    ];
-                }
-
-                if (!empty($paymentrequest->created_ip)) {
-                    $rows[] = [get_string('subfield_created_ip', 'local_subscriptions'), s($paymentrequest->created_ip)];
-                }
-
-                if (!empty($paymentrequest->accept_language)) {
-                    $rows[] = [get_string('subfield_accept_language', 'local_subscriptions'), s($paymentrequest->accept_language)];
-                }
-
-                if (!empty($paymentrequest->http_referer)) {
-                    $rows[] = [
-                        get_string('subfield_http_referer', 'local_subscriptions'),
-                        html_writer::link($paymentrequest->http_referer, s($paymentrequest->http_referer), [
-                            'target' => '_blank',
-                            'rel' => 'noopener',
-                        ]),
-                    ];
-                }
-
-                if (!empty($paymentrequest->payment_link)) {
-                    $rows[] = [
-                        get_string('subfield_payment_link', 'local_subscriptions'),
-                        html_writer::link($paymentrequest->payment_link, s($paymentrequest->payment_link), [
-                            'target' => '_blank',
-                            'rel' => 'noopener',
-                        ]),
-                    ];
-                }
-
-                if (!empty($paymentrequest->response_json)) {
-                    $rows[] = [
-                        get_string('subfield_response_json', 'local_subscriptions'),
-                        html_writer::tag('pre', s($paymentrequest->response_json), [
-                            'class' => 'small mb-0',
-                            'style' => 'white-space:pre-wrap;max-height:260px;overflow:auto;',
-                        ]),
-                    ];
-                }
-
-                if (!empty($paymentrequest->created_useragent)) {
-                    $rows[] = [
-                        get_string('subfield_created_useragent', 'local_subscriptions'),
-                        html_writer::tag('pre', s($paymentrequest->created_useragent), [
-                            'class' => 'small mb-0',
-                            'style' => 'white-space:pre-wrap;max-height:120px;overflow:auto;',
-                        ]),
-                    ];
+            if ($path === '/course/view.php' && (int)($params['id'] ?? 0) > 0) {
+                $anchor->setAttribute(
+                    'href',
+                    \local_subscriptions\url\UrlFactory::course(
+                        (int)$params['id']
+                    )->out(false)
+                );
+                continue;
+            }
+            if ($path === '/my/courses.php') {
+                $anchor->setAttribute(
+                    'href',
+                    \local_subscriptions\url\UrlFactory::my_courses()->out(false)
+                );
+                continue;
+            }
+            if ($path === '/local/subscriptions/storefront_product.php') {
+                $sku = trim((string)($params['sku'] ?? ''));
+                if ($sku !== '') {
+                    unset($params['sku']);
+                    $anchor->setAttribute(
+                        'href',
+                        \local_subscriptions\url\CommerceCustomerPublicUrlResolver::product(
+                            $sku,
+                            $params
+                        )->out(false)
+                    );
                 }
             }
         }
 
-        echo $renderdetailmodal(
-            $modalid,
-            get_string('subscription_details', 'local_subscriptions'),
-            $rows
-        );
+        $root = $document->getElementById('my-purchases-enhanced-root');
+        if ($root !== null) {
+            $purchasecontent = '';
+            foreach ($root->childNodes as $child) {
+                $purchasecontent .= $document->saveHTML($child);
+            }
+        }
     }
+
+    libxml_clear_errors();
+    libxml_use_internal_errors($previouslibxmlstate);
 }
 
-/**
- * Achats digitaux.
- */
-echo html_writer::tag('h4', get_string('digital_purchases_profile_title', 'local_subscriptions'), ['class' => 'mt-5 mb-3']);
-
-$lang = strtolower(substr(current_language(), 0, 2));
-$digitalpurchases = $studentcommerce->get_digital_purchases();
-
-if ($digitalpurchases) {
-    $productids = array_values(array_unique(array_filter(array_map(
-        static fn($purchase): int => (int)($purchase->productid ?? 0),
-        $digitalpurchases
-    ))));
-    $products = $productids
-        ? $DB->get_records_list('subscription_digital_product', 'id', $productids)
-        : [];
-    $translations = [];
-    if ($productids) {
-        $translationrecords = $DB->get_records_list(
-            'subscription_digital_product_lang',
-            'productid',
-            $productids
-        );
-        foreach ($translationrecords as $translation) {
-            $translations[(int)$translation->productid][(string)$translation->lang] = $translation;
-        }
-    }
-    foreach ($digitalpurchases as $purchase) {
-        $product = $products[(int)$purchase->productid] ?? null;
-        $currenttranslation = $translations[(int)$purchase->productid][$lang] ?? null;
-        $frenchtranslation = $translations[(int)$purchase->productid]['fr'] ?? null;
-        $purchase->slug = $product->slug
-            ?? ($purchase->productslug ?? null);
-        $purchase->mobile_filename = $product->mobile_filename ?? null;
-        $purchase->productname = $currenttranslation->title
-            ?? $frenchtranslation->title
-            ?? $product->name
-            ?? ($purchase->productname ?? null)
-            ?? ('Digital product #' . (int)$purchase->productid);
-    }
-}
-
-if (!$digitalpurchases) {
-    echo $OUTPUT->notification(get_string('digital_purchases_empty', 'local_subscriptions'), \core\output\notification::NOTIFY_INFO);
-} else {
-    foreach ($digitalpurchases as $purchase) {
-        $productname = format_string($purchase->productname ?? '');
-        $purchasedate = !empty($purchase->payment_date)
-            ? userdate((int)$purchase->payment_date)
-            : userdate((int)$purchase->creation_date);
-
-        $downloadlinks = [];
-
-        if (!empty($purchase->download_token)) {
-            $downloadlinks[] = html_writer::link(
-                UrlFactory::digital_download(['token' => $purchase->download_token]),
-                get_string('digital_download_classic', 'local_subscriptions'),
-                ['class' => 'btn btn-outline-primary btn-sm']
-            );
-
-            if (!empty($purchase->mobile_filename)) {
-                $downloadlinks[] = html_writer::link(
-                    UrlFactory::digital_download([
-                        'token' => $purchase->download_token,
-                        'version' => 'mobile',
-                    ]),
-                    get_string('digital_download_mobile', 'local_subscriptions'),
-                    ['class' => 'btn btn-outline-primary btn-sm']
-                );
-            }
-        }
-
-        $modalid = 'digitalPurchaseModal' . $purchase->id;
-
-        $head = html_writer::start_div('d-flex align-items-center justify-content-between');
-        $head .= html_writer::tag('span', $productname, ['class' => 'h5 m-0']);
-        $head .= SubsPresenter::render_status_badge($purchase->status);
-        $head .= html_writer::end_div();
-
-        $list = html_writer::start_tag('ul', ['class' => 'list-unstyled mb-2 small']);
-
-        $list .= html_writer::tag('li',
-            html_writer::tag('span', get_string('digital_purchase_date', 'local_subscriptions') . ': ', ['class' => 'text-muted']) .
-            $purchasedate
-        );
-
-        $list .= html_writer::tag('li',
-            html_writer::tag('span', get_string('pricepaid', 'local_subscriptions') . ': ', ['class' => 'text-muted']) .
-            $fmtmoney($purchase->price ?? 0, $purchase->currency ?? '')
-        );
-
-        $list .= html_writer::tag('li',
-            html_writer::tag('span', get_string('email') . ': ', ['class' => 'text-muted']) .
-            s($purchase->email ?? '')
-        );
-
-        $list .= html_writer::end_tag('ul');
-
-        $btns = [];
-
-        if (!empty($purchase->slug)) {
-            $btns[] = html_writer::link(
-                UrlFactory::digital_product($purchase->slug),
-                get_string('digital_product_view_page', 'local_subscriptions'),
-                ['class' => 'btn btn-outline-primary btn-sm']
-            );
-        }
-
-        $btns = array_merge($btns, $downloadlinks);
-
-        $btns[] = html_writer::tag('button', get_string('details', 'local_subscriptions'), [
-            'class' => 'btn btn-outline-secondary btn-sm',
-            'data-bs-toggle' => 'modal',
-            'data-bs-target' => '#' . $modalid,
-        ]);
-
-        echo html_writer::start_div('card shadow-sm mb-3');
-        echo html_writer::div($head, 'card-header bg-white');
-        echo html_writer::start_div('card-body');
-        echo $list;
-        echo html_writer::div(implode(' ', $btns), 'mt-2 d-flex flex-wrap gap-2');
-        echo html_writer::end_div();
-        echo html_writer::end_div();
-
-        $rows = [
-            [get_string('digital_product', 'local_subscriptions'), $productname],
-            [get_string('status', 'local_subscriptions'), SubsPresenter::render_status_badge($purchase->status)],
-        ];
-
-        if (!empty($downloadlinks)) {
-            $rows[] = [get_string('digital_purchase_downloads', 'local_subscriptions'), implode(' ', $downloadlinks)];
-        }
-
-        if (!empty($purchase->payment_provider)) {
-            $rows[] = [
-                get_string('subfield_provider', 'local_subscriptions'),
-                Provider::label_with_icon_env($purchase->payment_provider),
-            ];
-        }
-
-        if ($isadminview) {
-            $addsection(
-                $rows,
-                get_string('admin_details', 'local_subscriptions'),
-                'fa-solid fa-user-shield'
-            );
-            $rows[] = [get_string('subfield_id', 'local_subscriptions'), s((string)$purchase->id)];
-            $rows[] = [get_string('subfield_userid', 'local_subscriptions'), s((string)($purchase->userid ?? ''))];
-            $rows[] = [get_string('subfield_productid', 'local_subscriptions'), s((string)($purchase->productid ?? ''))];
-            $rows[] = [get_string('subfield_slug', 'local_subscriptions'), s($purchase->slug ?? '')];
-
-            if (!empty($purchase->paymentid)) {
-                $rows[] = [get_string('subfield_paymentid', 'local_subscriptions'), s($purchase->paymentid)];
-            }
-
-            if (!empty($purchase->provider_paymentid)) {
-                $rows[] = [get_string('subfield_provider_paymentid', 'local_subscriptions'), s($purchase->provider_paymentid)];
-            }
-
-            if (!empty($purchase->transactionid)) {
-                $rows[] = [get_string('subfield_txn', 'local_subscriptions'), s($purchase->transactionid)];
-            }
-
-            if (!empty($purchase->creation_date)) {
-                $rows[] = [get_string('subfield_created_at', 'local_subscriptions'), userdate((int)$purchase->creation_date)];
-            }
-
-            if (!empty($purchase->expiration_date)) {
-                $rows[] = [get_string('subfield_expires_at', 'local_subscriptions'), userdate((int)$purchase->expiration_date)];
-            }
-
-            if (!empty($purchase->checkout_url)) {
-                $rows[] = [
-                    get_string('subfield_checkout_url', 'local_subscriptions'),
-                    html_writer::link($purchase->checkout_url, s($purchase->checkout_url), ['target' => '_blank', 'rel' => 'noopener']),
-                ];
-            }
-
-            if (!empty($purchase->success_url)) {
-                $rows[] = [
-                    get_string('subfield_success_url', 'local_subscriptions'),
-                    html_writer::link($purchase->success_url, s($purchase->success_url), ['target' => '_blank', 'rel' => 'noopener']),
-                ];
-            }
-
-            if (!empty($purchase->cancel_url)) {
-                $rows[] = [
-                    get_string('subfield_cancel_url', 'local_subscriptions'),
-                    html_writer::link($purchase->cancel_url, s($purchase->cancel_url), ['target' => '_blank', 'rel' => 'noopener']),
-                ];
-            }
-
-            if (!empty($purchase->download_token)) {
-                $rows[] = [get_string('subfield_download_token', 'local_subscriptions'), s($purchase->download_token)];
-            }
-
-            if (!empty($purchase->buyer_lang)) {
-                $rows[] = [get_string('language'), s($purchase->buyer_lang)];
-            }
-
-            if (!empty($purchase->raw_response)) {
-                $rows[] = [
-                    get_string('subfield_raw_response', 'local_subscriptions'),
-                    html_writer::tag('pre', s($purchase->raw_response), [
-                        'class' => 'small mb-0',
-                        'style' => 'white-space:pre-wrap;max-height:260px;overflow:auto;',
-                    ]),
-                ];
-            }
-        }
-
-        echo $renderdetailmodal(
-            $modalid,
-            get_string('digital_purchase_details', 'local_subscriptions'),
-            $rows
-        );
-    }
-}
-
+echo $OUTPUT->header();
+echo $purchasecontent;
 echo $OUTPUT->footer();

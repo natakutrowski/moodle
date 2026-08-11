@@ -1,0 +1,324 @@
+/* J8.2A visual section builder. */
+.commerce-storefront-builder{display:grid;grid-template-columns:minmax(16rem,22rem) minmax(0,1fr);gap:1.5rem;align-items:start}
+.commerce-storefront-builder__sidebar{position:sticky;top:1rem}
+.commerce-storefront-section-card{border:1px solid #dfe3ea;border-radius:1rem;background:#fff;overflow:hidden}
+.commerce-storefront-section-card__summary{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.75rem;align-items:center;padding:1rem 1.15rem;cursor:pointer;background:#f8f9fb}
+.commerce-storefront-section-card__summary::marker{display:none}.commerce-storefront-section-card__type{font-weight:800;color:#344054}.commerce-storefront-section-card__name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#667085}
+.commerce-storefront-section-card__body{padding:1rem 1.15rem}.commerce-storefront-section-card__actions{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}.commerce-storefront-section-card__preview{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:4.5rem;margin-bottom:1rem;padding:1rem;border-radius:.8rem;background:linear-gradient(135deg,#f7f8fa,#eceff3);color:#667085}.commerce-storefront-section-card__preview strong{color:#344054}.commerce-storefront-section-card__preview--hero{min-height:7rem}.commerce-storefront-section-card__preview--video::before{content:'▶';font-size:2rem}.commerce-storefront-section-card__preview--h5p::before{content:'🧩';font-size:2rem}.commerce-storefront-section-card__preview--image_text::before{content:'🖼';font-size:2rem}
+@media(max-width:991.98px){.commerce-storefront-builder{grid-template-columns:1fr}.commerce-storefront-builder__sidebar{position:static}}
+
+/* J8.2B drag-and-drop ordering. */
+.commerce-storefront-section-list {
+    min-height: 3rem;
+}
+
+.commerce-storefront-section-card {
+    transition:
+        border-color .16s ease,
+        box-shadow .16s ease,
+        opacity .16s ease,
+        transform .16s ease;
+}
+
+.commerce-storefront-section-card__drag-handle {
+    cursor: grab;
+    user-select: none;
+}
+
+.commerce-storefront-section-card__drag-handle:active {
+    cursor: grabbing;
+}
+
+.commerce-storefront-section-card__drag-handle:focus-visible {
+    border-radius: .35rem;
+    outline: 3px solid rgba(247, 37, 133, .35);
+    outline-offset: 3px;
+}
+
+.commerce-storefront-section-card--dragging {
+    opacity: .55;
+    border-color: var(--primary, #f72585);
+    box-shadow: 0 .8rem 2rem rgba(31, 41, 55, .16);
+    transform: scale(.995);
+}
+
+.commerce-storefront-section-list--dragging
+.commerce-storefront-section-card:not(
+    .commerce-storefront-section-card--dragging
+) {
+    border-style: dashed;
+}
+
+.commerce-storefront-builder--unsaved
+.commerce-storefront-builder__toolbar {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 .15rem rgba(245, 158, 11, .12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .commerce-storefront-section-card {
+        transition: none;
+    }
+}
+
+
+.commerce-storefront-composer-layout {
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .75rem;
+    background: color-mix(in srgb, var(--bs-light) 65%, white);
+}
+
+.commerce-storefront-section-card[data-composer-columns="2"] {
+    border-left: .35rem solid var(--bs-primary);
+}
+
+.commerce-storefront-section-card[data-composer-columns="3"] {
+    border-left: .35rem solid var(--bs-info);
+}
+
+/* J8.3C responsive visual preview. */
+.commerce-storefront-preview-canvas{margin-inline:auto;padding:1rem;border:1px solid #d8dde6;border-radius:1rem;background:#f4f6f9;transition:max-width .2s ease,box-shadow .2s ease}.commerce-storefront-preview-canvas--desktop{max-width:100%}.commerce-storefront-preview-canvas--tablet{max-width:768px;box-shadow:0 14px 38px rgba(16,24,40,.12)}.commerce-storefront-preview-canvas--mobile{max-width:390px;box-shadow:0 14px 38px rgba(16,24,40,.16)}.commerce-storefront-preview-canvas--tablet .commerce-storefront-section-card__body,.commerce-storefront-preview-canvas--mobile .commerce-storefront-section-card__body{padding:.85rem}.commerce-storefront-preview-canvas--mobile .commerce-storefront-section-card__summary{align-items:flex-start;flex-wrap:wrap}.commerce-storefront-preview-canvas--mobile .commerce-storefront-section-card__preview{align-items:flex-start;flex-direction:column}.commerce-storefront-preview-canvas--mobile .commerce-storefront-composer-layout .col-md-6,.commerce-storefront-preview-canvas--mobile .commerce-storefront-section-card__body .col-lg-3,.commerce-storefront-preview-canvas--mobile .commerce-storefront-section-card__body .col-lg-4,.commerce-storefront-preview-canvas--mobile .commerce-storefront-section-card__body .col-lg-6{width:100%}.commerce-storefront-preview-toolbar .btn[aria-pressed=true]{font-weight:600}.commerce-storefront-template-picker{border-style:dashed}
+
+/* J8.6 wide visual workspace. */
+.local-subscriptions-commerce-product-storefront-page #page.container,
+.local-subscriptions-commerce-product-storefront-page #page-content,
+.local-subscriptions-commerce-product-storefront-page #region-main-box,
+.local-subscriptions-commerce-product-storefront-page #region-main { max-width: none !important; width: 100% !important; }
+.commerce-storefront-admin-workspace { width: 100%; }
+.commerce-storefront-admin-workspace .commerce-storefront-builder-shell { max-width: none; }
+.commerce-storefront-admin-workspace .commerce-storefront-builder-main { min-width: 0; }
+@media (min-width: 1200px) {
+ .commerce-storefront-admin-workspace .commerce-storefront-builder-shell { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: 1.5rem; align-items: start; }
+ .commerce-storefront-admin-workspace .commerce-storefront-builder-sidebar { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow: auto; }
+}
+
+/* J8.6.1 Edly CRM workspace width correction. */
+.local-subscriptions-commerce-product-storefront-page .crm-app-content,
+.local-subscriptions-commerce-product-storefront-page #local-subscriptions-crm-main,
+.local-subscriptions-commerce-product-storefront-page .crm-app-main,
+.local-subscriptions-commerce-product-storefront-page .crm-commerce-editor-form,
+.local-subscriptions-commerce-product-storefront-page .commerce-storefront-admin-workspace {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+}
+
+.local-subscriptions-commerce-product-storefront-page #local-subscriptions-crm-main {
+    padding-inline: clamp(1rem, 2vw, 2rem);
+}
+
+.local-subscriptions-commerce-product-storefront-page
+.commerce-storefront-admin-workspace
+.commerce-storefront-builder {
+    width: 100%;
+    grid-template-columns: minmax(17rem, 21rem) minmax(0, 1fr);
+}
+
+.local-subscriptions-commerce-product-storefront-page
+.commerce-storefront-builder__content,
+.local-subscriptions-commerce-product-storefront-page
+.commerce-storefront-preview-canvas {
+    min-width: 0;
+    width: 100%;
+}
+
+@media (min-width: 1400px) {
+    .local-subscriptions-commerce-product-storefront-page
+    .commerce-storefront-admin-workspace
+    .commerce-storefront-builder {
+        grid-template-columns: 20rem minmax(0, 1fr);
+        gap: 2rem;
+    }
+}
+
+
+/* J8.6.2 compact global Storefront settings. */
+.commerce-storefront-admin-layout__fields {
+    display: grid;
+    gap: 1rem;
+}
+
+.commerce-storefront-admin-layout__field {
+    min-width: 0;
+}
+
+.commerce-storefront-admin-layout__field .form-label {
+    display: block;
+    margin-bottom: .4rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.commerce-storefront-admin-layout__field .form-select {
+    width: 100%;
+    min-width: 0;
+}
+
+.commerce-storefront-admin-layout__visibility {
+    display: grid;
+    gap: .65rem;
+    min-width: 0;
+    margin: 0;
+    padding: .85rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .65rem;
+    background: var(--bs-light, #f8f9fa);
+}
+
+.commerce-storefront-admin-layout__visibility .form-check {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: .55rem;
+    align-items: start;
+    min-height: auto;
+    margin: 0;
+    padding: 0;
+}
+
+.commerce-storefront-admin-layout__visibility .form-check-input {
+    position: static;
+    float: none;
+    margin: .18rem 0 0;
+}
+
+.commerce-storefront-admin-layout__visibility .form-check-label {
+    min-width: 0;
+    line-height: 1.4;
+}
+
+.commerce-storefront-section-card__save-status {
+    min-width: 0;
+    margin-inline-start: .25rem;
+    font-size: .78rem;
+    color: var(--bs-success-text-emphasis, #0f5132);
+}
+
+.commerce-storefront-section-card--saving {
+    opacity: .72;
+}
+
+.commerce-storefront-section-card--saving [data-save-section] .fa-floppy-disk {
+    animation: commerce-storefront-save-spin .8s linear infinite;
+}
+
+.commerce-storefront-section-card--save-error .commerce-storefront-section-card__save-status {
+    color: var(--bs-danger-text-emphasis, #842029);
+}
+
+.commerce-storefront-section-card--dirty [data-save-section] {
+    box-shadow: 0 0 0 .15rem rgba(13, 110, 253, .12);
+}
+
+@keyframes commerce-storefront-save-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* J8.8.4 consolidated transfer, global zones and reset dialog. */
+.commerce-storefront-global-zones {
+    display: grid;
+    gap: .5rem;
+}
+
+.commerce-storefront-global-zone {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .75rem .875rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .75rem;
+    background: var(--bs-body-bg, #fff);
+    cursor: grab;
+}
+
+.commerce-storefront-global-zone:focus {
+    outline: 3px solid color-mix(in srgb, var(--bs-primary, #0d6efd) 25%, transparent);
+    outline-offset: 2px;
+}
+
+.commerce-storefront-global-zone.is-dragging {
+    opacity: .55;
+}
+
+.commerce-storefront-reset-dialog {
+    width: min(34rem, calc(100vw - 2rem));
+    padding: 0;
+    border: 0;
+    border-radius: 1rem;
+    box-shadow: 0 1.5rem 4rem rgba(15, 23, 42, .24);
+}
+
+.commerce-storefront-reset-dialog:not([open]) {
+    display: none;
+}
+
+.commerce-storefront-reset-dialog::backdrop {
+    background: rgba(15, 23, 42, .55);
+}
+
+.commerce-storefront-reset-dialog__content {
+    padding: 1.5rem;
+    background: var(--bs-body-bg, #fff);
+}
+
+.local-subscriptions-commerce-product-storefront-page .crm-commerce-page-header {
+    background: transparent !important;
+    color: inherit !important;
+    box-shadow: none !important;
+}
+
+.local-subscriptions-commerce-product-storefront-page .crm-commerce-page-header h1,
+.local-subscriptions-commerce-product-storefront-page .crm-commerce-page-header h2 {
+    color: var(--bs-body-color, #212529) !important;
+}
+
+
+.commerce-storefront-section-card__preview img,
+.commerce-storefront-section-card__preview video {
+    display: block;
+    width: 100%;
+    max-height: 18rem;
+    object-fit: contain;
+    border-radius: .65rem;
+    background: #101828;
+}
+.commerce-storefront-section-card__preview--image_text img {
+    background: #fff;
+}
+.commerce-storefront-section-card__preview-file {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    min-height: 6rem;
+    padding: 1rem;
+    border: 1px solid #d0d5dd;
+    border-radius: .65rem;
+    background: #fff;
+    color: #344054;
+}
+.commerce-storefront-section-card__preview-file .fa-puzzle-piece {
+    font-size: 2rem;
+}
+.commerce-storefront-section-card__preview-excerpt {
+    width: 100%;
+    color: #475467;
+}
+
+/* J13E3 — Dedicated Showroom media preview in the product editor. */
+.commerce-storefront-showroom-media__preview {
+    overflow: hidden;
+    max-width: 38rem;
+    aspect-ratio: 16 / 9;
+    background: #f8f6fb;
+    border: 1px solid rgba(63, 43, 92, .12);
+}
+
+.commerce-storefront-showroom-media__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

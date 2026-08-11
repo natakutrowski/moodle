@@ -1,0 +1,35 @@
+{{!
+    @template local_subscriptions/my_purchases/components/purchase_detail_modal
+}}
+<div class="modal fade" id="{{modalid}}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header d-flex align-items-center justify-content-between">
+                <h5 class="modal-title">{{title}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <table class="table table-sm mb-0">
+                    {{#rows}}
+                        {{#issect}}
+                            <tr>
+                                <th colspan="2" class="bg-light fw-bold text-dark border-top">
+                                    <i class="{{icon}} me-2" aria-hidden="true"></i>{{section}}
+                                </th>
+                            </tr>
+                        {{/issect}}
+                        {{#isrow}}
+                            <tr>
+                                <th class="text-muted" style="width:28%;white-space:nowrap;">{{label}}</th>
+                                <td class="fw-semibold">{{{value}}}</td>
+                            </tr>
+                        {{/isrow}}
+                    {{/rows}}
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">{{closelabel}}</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,51 @@
+<div class="commerce-cart-price{{#cartpriceisupgrade}} commerce-cart-price--upgrade{{/cartpriceisupgrade}}{{#cartpriceistrial}} commerce-cart-price--trial{{/cartpriceistrial}}{{#cartpricehaspromotion}} commerce-cart-price--promotion{{/cartpricehaspromotion}}{{#cartpriceisstandard}} commerce-cart-price--standard{{/cartpriceisstandard}}">
+    <div class="commerce-cart-price__badges">
+        {{#cartpriceisupgrade}}
+            <span class="commerce-storefront-price__badge commerce-storefront-price__badge--upgrade">
+                {{cartpriceupgradebadge}}
+            </span>
+        {{/cartpriceisupgrade}}
+
+        {{#cartpriceistrial}}
+            <span class="commerce-storefront-price__badge commerce-storefront-price__badge--trial">
+                {{cartpricetrialbadge}}
+            </span>
+        {{/cartpriceistrial}}
+
+        {{#cartpricehastrialbadge}}
+            <span class="commerce-storefront-price__badge commerce-storefront-price__badge--saving">
+                {{cartpricetrialdiscountbadge}}
+            </span>
+        {{/cartpricehastrialbadge}}
+
+        {{#cartpricehaspromotionbadge}}
+            <span class="commerce-storefront-price__badge commerce-storefront-price__badge--promotion">
+                {{cartpricepromotionbadge}}
+            </span>
+        {{/cartpricehaspromotionbadge}}
+    </div>
+
+    <div class="commerce-cart-price__main">
+        <div class="commerce-cart-price__copy">
+            <div class="commerce-cart-price__heading">
+                <span>{{cartpricelabel}}</span>
+                {{#cartpriceisupgrade}}
+                    {{#hasupgradepath}}
+                        <small>{{upgradepath}}</small>
+                    {{/hasupgradepath}}
+                {{/cartpriceisupgrade}}
+            </div>
+
+            {{#cartpriceisupgrade}}
+                {{> local_subscriptions/cart/upgrade_breakdown }}
+            {{/cartpriceisupgrade}}
+        </div>
+
+        <div class="commerce-cart-price__values">
+            <strong>{{cartpricefinalformatted}}</strong>
+            {{#cartpricehascompare}}
+                <del>{{cartpricecompareformatted}}</del>
+            {{/cartpricehascompare}}
+        </div>
+    </div>
+</div>

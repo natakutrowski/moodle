@@ -1,0 +1,39 @@
+<section class="campus-mycourses" aria-labelledby="campus-mycourses-title">
+    <div class="campus-mycourses-hero container">
+        <div class="campus-mycourses-hero__inner">
+            <div class="campus-mycourses-hero__copy">
+                <h1 id="campus-mycourses-title" class="campus-mycourses-hero__title">{{hero.title}}</h1>
+                <p class="campus-mycourses-hero__text">{{hero.text}}</p>
+            </div>
+            {{#hero.hasstats}}
+                <div class="campus-mycourses-hero__stats">
+                    {{#hero.stats}}
+                        <div class="campus-mycourses-stat">
+                            <i class="{{icon}}" aria-hidden="true"></i>
+                            <div class="campus-mycourses-stat__copy">
+                                <span class="campus-mycourses-stat__value">{{value}}</span>
+                                <span class="campus-mycourses-stat__label">{{label}}</span>
+                            </div>
+                        </div>
+                    {{/hero.stats}}
+                </div>
+            {{/hero.hasstats}}
+        </div>
+    </div>
+
+    {{#hascourses}}
+        <div class="campus-mycourses__catalogue container">
+            {{#categories}}
+                {{> local_campus/mycourses/components/category}}
+            {{/categories}}
+        </div>
+    {{/hascourses}}
+
+    {{^hascourses}}
+        {{> local_campus/mycourses/components/empty_state}}
+    {{/hascourses}}
+
+    {{#recommendations}}
+        {{> local_campus/mycourses/components/recommendations}}
+    {{/recommendations}}
+</section>

@@ -1,0 +1,36 @@
+{{#hascommercialupgradepricing}}
+<details class="commerce-cart-upgrade-details">
+    <summary>{{commercialdetailslabel}}</summary>
+
+    <dl>
+        <div>
+            <dt>{{commercialinitiallabel}}</dt>
+            <dd>{{commercialinitialformatted}}</dd>
+        </div>
+
+        {{#hascommercialpromotion}}
+            <div class="commerce-cart-upgrade-details__reduction">
+                <dt>{{commercialpromotionlabel}}</dt>
+                <dd>− {{commercialpromotionformatted}}</dd>
+            </div>
+        {{/hascommercialpromotion}}
+
+        {{#hascommercialtrial}}
+            <div class="commerce-cart-upgrade-details__reduction">
+                <dt>{{commercialtriallabel}}</dt>
+                <dd>− {{commercialtrialformatted}}</dd>
+            </div>
+        {{/hascommercialtrial}}
+
+        <div class="commerce-cart-upgrade-details__reduction">
+            <dt>{{commercialcreditlabel}}</dt>
+            <dd>− {{commercialcreditformatted}}</dd>
+        </div>
+
+        <div class="commerce-cart-upgrade-details__final">
+            <dt>{{commercialfinallabel}}</dt>
+            <dd>{{commercialfinalformatted}}</dd>
+        </div>
+    </dl>
+</details>
+{{/hascommercialupgradepricing}}

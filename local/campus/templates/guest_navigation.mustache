@@ -1,0 +1,40 @@
+{{#guestnavigation.enabled}}
+<nav class="campus-guest-actions {{#guestnavigation.landing}}campus-guest-actions--landing{{/guestnavigation.landing}}"
+     aria-label="{{guestnavigation.shoplabel}}"
+     data-campus-guest-navigation>
+    {{#guestnavigation.haslanguages}}
+        <details class="campus-guest-actions__language" data-campus-guest-language>
+            <summary class="campus-guest-actions__control campus-guest-actions__control--language"
+                     aria-label="{{guestnavigation.languagelabel}}">
+                <span class="campus-guest-actions__flag" aria-hidden="true">{{guestnavigation.currentlanguageflag}}</span>
+                <span class="campus-guest-actions__label">{{guestnavigation.languagelabel}}</span>
+                <span class="campus-guest-actions__chevron" aria-hidden="true">▾</span>
+            </summary>
+            <nav class="campus-guest-actions__language-menu" aria-label="{{guestnavigation.languagelabel}}">
+                {{#guestnavigation.languages}}
+                    <a class="campus-guest-actions__language-option {{#active}}is-active{{/active}}"
+                       href="{{{url}}}" {{#active}}aria-current="page"{{/active}}>
+                        <span class="campus-guest-actions__language-flag" aria-hidden="true">{{flag}}</span>
+                        <span>{{name}}</span>
+                        {{#active}}<span class="campus-guest-actions__check" aria-hidden="true">✓</span>{{/active}}
+                    </a>
+                {{/guestnavigation.languages}}
+            </nav>
+        </details>
+    {{/guestnavigation.haslanguages}}
+
+    {{#guestnavigation.showshop}}
+    <a class="campus-guest-actions__control campus-guest-actions__action campus-guest-actions__action--shop is-compact"
+       href="{{{guestnavigation.shopurl}}}" aria-label="{{guestnavigation.shoplabel}}" data-campus-guest-action data-collapsible="1">
+        <i class="fa-solid fa-store" aria-hidden="true"></i>
+        <span class="campus-guest-actions__label">{{guestnavigation.shoplabel}}</span>
+    </a>
+    {{/guestnavigation.showshop}}
+
+    <a class="campus-guest-actions__control campus-guest-actions__action campus-guest-actions__action--login is-expanded"
+       href="{{{guestnavigation.loginurl}}}" aria-label="{{guestnavigation.loginlabel}}" {{#guestnavigation.loginrequiresaccountfinalisation}}data-requires-account-finalisation="1"{{/guestnavigation.loginrequiresaccountfinalisation}} data-campus-guest-action data-collapsible="1">
+        <i class="{{guestnavigation.loginicon}}" aria-hidden="true"></i>
+        <span class="campus-guest-actions__label">{{guestnavigation.loginlabel}}</span>
+    </a>
+</nav>
+{{/guestnavigation.enabled}}

@@ -4,34 +4,54 @@ require_once(__DIR__ . '/../../../../config.php');
 
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\crm\work\rendering\WorkItemRenderer;
-use local_subscriptions\crm\work\repositories\WorkItemReadRepository;
-use local_subscriptions\crm\layout\CrmPageConfigurator;
-use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
-use local_subscriptions\crm\navigation\CrmNavigationKeys;
-use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
-use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\work\rendering\WorkItemRenderer;
+use local_subscriptions\crm\work\repositories\WorkItemReadRepository;
 use local_subscriptions\subscription_config;
 
-$context = AdminSecurity::require(Capabilities::VIEW_WORK_ITEMS);
-$itemid = required_param('id', PARAM_INT);
+$context = AdminSecurity::require(
+    Capabilities::VIEW_WORK_ITEMS
+);
+
+$itemid = required_param(
+    'id',
+    PARAM_INT
+);
+
 $repository = new WorkItemReadRepository();
 $item = $repository->get_detail($itemid);
 
 $pageurl = new moodle_url(
-    subscription_config::
-        admin_work_item_view_page(),
+    subscription_config::admin_work_item_view_page(),
     [
         'id' => $itemid,
+    ]
+);
+
+/*
+ * format_string() peut consulter $PAGE->context.
+ * Le contexte doit donc être défini avant le calcul du titre.
+ */
+$PAGE->set_context($context);
+
+$formattedtitle = format_string(
+    $item->title,
+    true,
+    [
+        'context' => $context,
     ]
 );
 
 $pagetitle =
     $item->reference .
     ' — ' .
-    format_string($item->title);
+    $formattedtitle;
 
 CrmPageConfigurator::configure(
     $PAGE,
@@ -59,32 +79,24 @@ echo CrmWorkspaceRenderer::start(
 echo CrmBreadcrumbRenderer::render(
     [
         [
-            'label' =>
-                get_string(
-                    'crm_work_title',
-                    'local_subscriptions'
-                ),
-
-            'url' =>
-                new moodle_url(
-                    subscription_config::
-                        admin_work_items_page()
-                ),
+            'label' => get_string(
+                'crm_work_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::admin_work_items_page()
+            ),
         ],
         [
-            'label' =>
-                $item->reference,
-
-            'url' =>
-                null,
+            'label' => $item->reference,
+            'url' => null,
         ],
     ]
 );
 
 echo CrmBackLinkRenderer::render(
     new moodle_url(
-        subscription_config::
-            admin_work_items_page()
+        subscription_config::admin_work_items_page()
     ),
     get_string(
         'crm_work_back',
@@ -94,9 +106,7 @@ echo CrmBackLinkRenderer::render(
 
 echo CrmPageHeader::render(
     $item->reference,
-    format_string(
-        $item->title
-    ),
+    $formattedtitle,
     HelpContext::WORK_ITEMS
 );
 

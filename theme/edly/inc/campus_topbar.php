@@ -1,3 +1,13 @@
+<?php
+$storefrontpath = '/boutique';
+if (class_exists('\local_subscriptions\subscription_config')) {
+    $configuredstorefront = \local_subscriptions\subscription_config::storefront_page();
+    $storefrontpath = $configuredstorefront instanceof \moodle_url
+        ? $configuredstorefront->out(false)
+        : (string)$configuredstorefront;
+}
+$storefronturl = (new \moodle_url($storefrontpath))->out(false);
+?>
 <header class="campus-topbar">
     <div class="campus-topbar-inner">
 
@@ -57,7 +67,7 @@
 
             <!-- CTA -->
             <div class="campus-topbar-ctas">
-                <a href="<?php echo $CFG->wwwroot; ?>/local/subscriptions/subscribe.php"
+                <a href="<?php echo s($storefronturl); ?>"
                    class="campus-topbar-btn campus-topbar-btn-primary">
                     Commencer
                 </a>

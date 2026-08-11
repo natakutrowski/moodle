@@ -26,14 +26,30 @@ final class CommerceProductTranslationRepository {
             return null;
         }
 
-        $record = $this->db->get_record(self::TABLE, [
-            'productid' => $product->get_id(),
-            'language' => strtolower(trim($language)),
-        ]);
+        $requested = strtolower(trim($language));
+        $base = explode('_', str_replace('-', '_', $requested))[0];
 
-        return $record
-            ? $this->hydrator->translation($record, $product->get_sku())
-            : null;
+        foreach (array_values(array_unique(array_filter([$requested, $base, 'fr', 'en', 'ru']))) as $candidate) {
+            $record = $this->db->get_record(self::TABLE, [
+                'productid' => $product->get_id(),
+                'language' => $candidate,
+            ]);
+            if ($record) {
+                return $this->hydrator->translation($record, $product->get_sku());
+            }
+        }
+
+        $record = $this->db->get_record_sql(
+            'SELECT *
+               FROM {' . self::TABLE . '}
+              WHERE productid = :productid
+           ORDER BY CASE language WHEN \'fr\' THEN 0 WHEN \'en\' THEN 1 WHEN \'ru\' THEN 2 ELSE 3 END,
+                    language ASC, id ASC',
+            ['productid' => $product->get_id()],
+            IGNORE_MISSING
+        );
+
+        return $record ? $this->hydrator->translation($record, $product->get_sku()) : null;
     }
 
     /**

@@ -2,6 +2,7 @@
 namespace local_subscriptions\domain;
 
 use local_subscriptions\constants\Operation;
+use local_subscriptions\commerce\upgrade\CommercePlanOwnershipResolver;
 use local_subscriptions\constants\Status;
 
 defined('MOODLE_INTERNAL') || die();
@@ -74,6 +75,38 @@ class SubscriptionAdvisor {
         ORDER BY s.end_date DESC
         ", ['u' => $userid, 'status' => Status::ACTIVE, 'now' => $now]);
 
+        // Native purchases may own the source plan without creating a Legacy user_subscription.
+        // Add synthetic ownership records only for active upgrade rules targeting this plan.
+        $knownplanids = [];
+        foreach ($activesubs as $subscription) {
+            $knownplanids[(int)$subscription->planid] = true;
+        }
+        $ownershipresolver = new CommercePlanOwnershipResolver($DB);
+        foreach ($DB->get_records('subscription_plan_upgrade', [
+            'toplanid' => $targetplanid,
+            'isactive' => 1,
+        ], 'id ASC') as $upgraderule) {
+            $sourceplanid = (int)$upgraderule->fromplanid;
+            if ($sourceplanid <= 0 || isset($knownplanids[$sourceplanid])) {
+                continue;
+            }
+            $ownership = $ownershipresolver->resolve($userid, $sourceplanid);
+            if ($ownership === null || !str_starts_with((string)$ownership['source'], 'native_')) {
+                continue;
+            }
+            $synthetic = (object)[
+                'id' => 0,
+                'userid' => $userid,
+                'planid' => $sourceplanid,
+                'start_date' => (int)$ownership['startdate'],
+                'end_date' => (int)$ownership['enddate'],
+                'status' => Status::ACTIVE,
+                '_commerce_source' => (string)$ownership['source'],
+            ];
+            $activesubs['native_plan_' . $sourceplanid] = $synthetic;
+            $knownplanids[$sourceplanid] = true;
+        }
+
         $samePlanActive  = null;
         $sameScopeActive = null;
 
@@ -140,12 +173,12 @@ class SubscriptionAdvisor {
                 'badge'     => get_string('upgrade_badge', 'local_subscriptions'),
                 'amount'    => $amount,
                 'currency'  => $currency,
-                'ref_subid' => (int)$s->id,
+                'ref_subid' => (int)$s->id > 0 ? (int)$s->id : null,
                 'extra'     => [
                     'upgrade_type' => 'plan_difference',
                     'from_planid'  => (int)$s->planid,
                     'to_planid'    => $targetplanid,
-                    'replace_ids'  => [(int)$s->id],
+                    'replace_ids'  => (int)$s->id > 0 ? [(int)$s->id] : [],
 
                     'source_price' => (float)$sourceprice,
                     'target_price' => (float)$targetpricevalue,

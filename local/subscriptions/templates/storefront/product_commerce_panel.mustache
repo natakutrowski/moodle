@@ -1,0 +1,83 @@
+<aside class="commerce-product-commerce-panel card border-0 shadow-sm {{#owned}}commerce-product-commerce-panel--owned {{#ownedisdigital}}commerce-product-commerce-panel--owned-digital{{/ownedisdigital}}{{^ownedisdigital}}{{^hasowneddownloads}}commerce-product-commerce-panel--owned-single{{/hasowneddownloads}}{{/ownedisdigital}}{{/owned}}">
+    <div class="card-body p-4">
+        {{^owned}}{{> local_subscriptions/storefront/product_badges }}{{/owned}}
+        {{^owned}}
+            {{> local_subscriptions/storefront/product_price }}
+        {{/owned}}
+        {{#hasupgrade}}
+            {{#canaddupgradetocart}}
+                <div class="d-grid gap-2">
+                    <form method="post" action="{{cartaction}}">
+                        <input type="hidden" name="action" value="{{upgradetoggleaction}}">
+                        {{^upgradeincart}}<input type="hidden" name="operation" value="upgrade">{{/upgradeincart}}
+                        {{^upgradeincart}}<input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}">{{/upgradeincart}}
+                        <input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{upgradepriceid}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                        <button type="submit" class="btn {{#upgradeincart}}btn-outline-danger{{/upgradeincart}}{{^upgradeincart}}btn-primary{{/upgradeincart}} btn-lg w-100">{{#upgradeincart}}<i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{/upgradeincart}}{{^upgradeincart}}<i class="fa-solid fa-cart-plus me-2" aria-hidden="true"></i>{{/upgradeincart}}{{upgradetogglelabel}}</button>
+                    </form>
+                    {{^upgradeincart}}
+                        <form method="post" action="{{cartaction}}">
+                            <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1"><input type="hidden" name="operation" value="upgrade"><input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{upgradepriceid}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                            <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{buy_now_label}}</button>
+                        </form>
+                    {{/upgradeincart}}
+                </div>
+            {{/canaddupgradetocart}}
+        {{/hasupgrade}}
+        {{#canpurchase}}
+            {{#prices}}
+                {{#canaddtocart}}
+                    <div class="d-grid gap-2">
+                        <form method="post" action="{{cartaction}}">
+                            <input type="hidden" name="action" value="{{toggleaction}}"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{id}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                            <button type="submit" class="btn {{#incart}}btn-outline-danger{{/incart}}{{^incart}}btn-primary{{/incart}} btn-lg w-100">{{#incart}}<i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{/incart}}{{^incart}}<i class="fa-solid fa-cart-plus me-2" aria-hidden="true"></i>{{/incart}}{{togglelabel}}</button>
+                        </form>
+                        {{^incart}}
+                            <form method="post" action="{{cartaction}}" data-provider-experience data-provider-context="express-candidate" data-currency="{{cartcurrency}}" data-product="{{name}}" data-price="{{formatted}}">
+                                <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{id}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{buy_now_label}}</button>
+                            </form>
+                        {{/incart}}
+                    </div>
+                {{/canaddtocart}}
+            {{/prices}}
+        {{/canpurchase}}
+        {{#owned}}
+            {{^ownedisdigital}}
+                <a href="{{ownedactionurl}}" class="commerce-product-owned-primary btn btn-success btn-lg">
+                    {{#ownediscourse}}<i class="fa-solid fa-graduation-cap me-2" aria-hidden="true"></i>{{/ownediscourse}}
+                    {{^ownediscourse}}<i class="fa-solid fa-bag-shopping me-2" aria-hidden="true"></i>{{/ownediscourse}}
+                    {{ownedactionlabel}}
+                </a>
+            {{/ownedisdigital}}
+            {{#hasowneddownloads}}
+                <div class="commerce-product-owned-downloads commerce-product-owned-downloads--compact mt-3">
+                    {{#owneddownloads}}
+                        <a href="{{url}}" class="btn {{buttonclass}} commerce-product-owned-download">
+                            <i class="{{buttonicon}} me-2" aria-hidden="true"></i>
+                            {{label}}
+                        </a>
+                    {{/owneddownloads}}
+                </div>
+            {{/hasowneddownloads}}
+            {{#showbacktoshop}}<a href="{{backurl}}" class="commerce-product-commerce-panel__back commerce-product-commerce-panel__back--owned btn btn-link mt-2">&larr; {{backlabel}}</a>{{/showbacktoshop}}
+        {{/owned}}
+        {{^owned}}
+            <a href="{{carturl}}" class="btn btn-link w-100 mt-2">🛒 {{cartlabel}} ({{cartlinecount}}) · {{carttotalformatted}}</a>
+            {{#showbacktoshop}}<a href="{{backurl}}" class="commerce-product-commerce-panel__back btn btn-link w-100 mt-1">&larr; {{backlabel}}</a>{{/showbacktoshop}}
+        {{/owned}}
+
+        {{#hasshowroom}}
+            <a href="{{showroomurl}}" class="commerce-product-showroom-link btn btn-outline-primary mt-3">
+                <i class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></i>{{showroomlabel}}
+            </a>
+        {{/hasshowroom}}
+    </div>
+</aside>
+
+{{> local_subscriptions/checkout/provider_experience}}
+
+{{#js}}
+require(['local_subscriptions/provider_experience'], function(ProviderExperience) {
+    ProviderExperience.init();
+});
+{{/js}}

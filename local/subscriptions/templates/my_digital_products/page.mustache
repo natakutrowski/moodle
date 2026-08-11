@@ -1,0 +1,28 @@
+{{!
+    @template local_subscriptions/my_digital_products/page
+
+    Customer digital product library.
+}}
+<div class="local-subscriptions-digital-library" data-region="digital-library-page">
+    <header class="digital-library-header">
+        <div>
+            <h2 class="digital-library-header__title">{{pagetitle}}</h2>
+            <p class="digital-library-header__subtitle">{{pagesubtitle}}</p>
+        </div>
+        {{#hasresources}}
+            <span class="digital-library-header__count" aria-label="{{resourcecount}}">{{resourcecount}}</span>
+        {{/hasresources}}
+    </header>
+
+    {{#hasresources}}
+        <div class="digital-library-grid">
+            {{#resources}}
+                {{> local_subscriptions/my_digital_products/components/resource_card}}
+            {{/resources}}
+        </div>
+    {{/hasresources}}
+
+    {{^hasresources}}
+        {{> local_subscriptions/my_digital_products/components/empty_state}}
+    {{/hasresources}}
+</div>

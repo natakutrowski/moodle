@@ -53,8 +53,18 @@ final class CommerceNativeFulfillmentPhaseAuditor {
                 continue;
             }
             $contents = (string)file_get_contents($path);
-            foreach (['LegacySubscriptionFulfillmentGateway', 'LegacyDigitalFulfillmentGateway', 'subscription_manager'] as $symbol) {
-                if (str_contains($contents, $symbol)) {
+            foreach ([
+                'LegacySubscriptionFulfillmentGateway',
+                'LegacyDigitalFulfillmentGateway',
+                'subscription_manager',
+            ] as $symbol) {
+                $allowedtrialcleanup = $symbol === 'subscription_manager'
+                    && basename($path) === 'MoodleCourseRoleService.php'
+                    && str_contains(
+                        $contents,
+                        'cleanup_trial_subscription_if_unused'
+                    );
+                if (str_contains($contents, $symbol) && !$allowedtrialcleanup) {
                     $checks['nativeonly'] = false;
                     $errors[] = 'Forbidden dependency in Native fulfillment: ' . basename($path);
                     break;

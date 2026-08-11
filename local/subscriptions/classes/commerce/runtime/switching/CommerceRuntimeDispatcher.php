@@ -12,11 +12,17 @@ use local_subscriptions\payment\dto\InternalEvent;
 final class CommerceRuntimeDispatcher {
     public function __construct(
         private readonly ?CommerceRuntimeConfiguration $configuration = null,
-        private readonly ?CommerceNativeRuntimeExecutor $native = null
+        private readonly ?CommerceNativeRuntimeExecutor $native = null,
+        private readonly mixed $fallbackLogger = null
     ) {
     }
 
-    public function checkout_completed(InternalEvent $event, string $entrypoint, callable $legacy): void {
+    public function checkout_completed(
+        InternalEvent $event,
+        string $entrypoint,
+        callable $legacy,
+        ?callable $native = null
+    ): void {
         $configuration = $this->configuration ?? new CommerceRuntimeConfiguration();
         $mode = $configuration->get_mode();
 
@@ -31,12 +37,25 @@ final class CommerceRuntimeDispatcher {
         }
 
         try {
+            if ($native !== null) {
+                $native();
+                return;
+            }
+
             ($this->native ?? new CommerceNativeRuntimeExecutor())->execute($event, $entrypoint);
         } catch (\Throwable $exception) {
             if (!$configuration->native_fallback_enabled()) {
                 throw $exception;
             }
-            debugging('Native Commerce runtime fallback to Legacy: ' . $exception->getMessage(), DEBUG_DEVELOPER);
+            $message =
+                '[local_subscriptions] Native Commerce runtime fallback to Legacy: '
+                . $exception->getMessage();
+            if (is_callable($this->fallbackLogger)) {
+                ($this->fallbackLogger)($message, $exception);
+            } else {
+                error_log($message);
+            }
+
             $legacy();
         }
     }

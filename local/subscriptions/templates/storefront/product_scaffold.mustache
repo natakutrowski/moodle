@@ -1,0 +1,23 @@
+<div class="commerce-storefront commerce-product-page container py-4 py-lg-5">
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-5">
+            <div class="commerce-product-page__media">
+                {{#hascover}}<img src="{{coverurl}}" alt="" class="img-fluid rounded-4 shadow-sm">{{/hascover}}
+                {{^hascover}}<div class="commerce-product-card__placeholder rounded-4">CampusFR</div>{{/hascover}}
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <span class="badge rounded-pill text-bg-light border mb-3">{{typelabel}}</span>
+            <h1 class="display-5 fw-bold mb-3">{{name}}</h1>
+            <div class="lead text-muted mb-4">{{{shortdescription}}}</div>
+            <div class="commerce-product-page__prices mb-4">
+                {{#prices}}<span class="commerce-product-card__price">{{formatted}}</span>{{/prices}}
+            </div>
+            <a href="{{quickpurchaseurl}}" class="btn btn-primary btn-lg">{{quickpurchaselabel}}</a>
+        </div>
+    </div>
+    <section class="commerce-product-page__content mt-5 pt-lg-4">
+        <div class="card border-0 shadow-sm"><div class="card-body p-4 p-lg-5">{{{description}}}</div></div>
+    </section>
+    <div class="alert alert-light border mt-4 mb-0">{{detailnotice}}</div>
+</div>

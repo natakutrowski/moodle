@@ -14,6 +14,7 @@ use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 
@@ -26,7 +27,7 @@ $delete = optional_param('delete', 0, PARAM_INT);
 
 if ($planid <= 0 || !$plan = $DB->get_record('subscription_plan', ['id' => $planid])) {
     redirect(
-        new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
+        new moodle_url(subscription_config::commerce_plans_page()),
         get_string('invalidplanid', 'local_subscriptions'),
         null,
         \core\output\notification::NOTIFY_ERROR
@@ -128,14 +129,16 @@ echo $OUTPUT->header();
 
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 
+echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::CONFIGURATION, $context);
+
 echo CrmBreadcrumbRenderer::render([
     [
         'label' => get_string('crm_commerce_title', 'local_subscriptions'),
         'url' => new moodle_url(subscription_config::admin_commerce_page()),
     ],
     [
-        'label' => get_string('crm_subscription_configuration_title', 'local_subscriptions'),
-        'url' => new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
+        'label' => get_string('commerce_plans_title', 'local_subscriptions'),
+        'url' => new moodle_url(subscription_config::commerce_plans_page()),
     ],
     [
         'label' => $pagetitle,
@@ -144,8 +147,8 @@ echo CrmBreadcrumbRenderer::render([
 ]);
 
 echo CrmBackLinkRenderer::render(
-    new moodle_url(subscription_config::manage_page(), ['tab' => 'plans']),
-    get_string('backtoplanlist', 'local_subscriptions')
+    new moodle_url(subscription_config::commerce_plan_view_page(), ['id' => $planid]),
+    get_string('commerce_back_to_plan', 'local_subscriptions')
 );
 
 echo CrmPageHeader::render(

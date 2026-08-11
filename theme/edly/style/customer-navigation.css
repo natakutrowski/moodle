@@ -1,0 +1,1046 @@
+.campus-customer-nav {
+    gap: .7rem;
+    margin-left: auto;
+    margin-right: .85rem;
+    min-width: 0;
+}
+
+.campus-customer-nav__trigger,
+.campus-customer-nav__cart {
+    align-items: center;
+    background: rgba(255, 255, 255, .94);
+    border: 1px solid rgba(15, 108, 118, .16);
+    border-radius: 999px;
+    color: #173f45;
+    display: inline-flex;
+    font-weight: 700;
+    gap: .5rem;
+    min-height: 42px;
+    padding: .55rem .9rem;
+    text-decoration: none;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.campus-customer-nav__trigger:hover,
+.campus-customer-nav__trigger:focus,
+.campus-customer-nav__cart:hover,
+.campus-customer-nav__cart:focus {
+    border-color: rgba(15, 108, 118, .46);
+    box-shadow: 0 8px 24px rgba(15, 108, 118, .12);
+    color: #0f6c76;
+    outline: 0;
+    transform: translateY(-1px);
+}
+
+.campus-customer-nav__cart {
+    justify-content: center;
+    padding-inline: .8rem;
+}
+
+.campus-customer-nav__menu {
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 18px 50px rgba(19, 46, 53, .16);
+    min-width: 255px;
+    padding: .55rem;
+}
+
+.campus-customer-nav__item {
+    align-items: center;
+    border-radius: 12px;
+    display: flex;
+    gap: .7rem;
+    padding: .7rem .8rem;
+}
+
+.campus-customer-nav__item i {
+    color: #0f6c76;
+    text-align: center;
+    width: 1.25rem;
+}
+
+.campus-customer-nav__item:hover,
+.campus-customer-nav__item:focus,
+.campus-customer-nav__item.is-active {
+    background: rgba(15, 108, 118, .09);
+    color: #0f6c76;
+}
+
+.campus-customer-nav__language .form-select,
+.campus-customer-nav__language select {
+    border-radius: 999px;
+    min-height: 42px;
+}
+
+.campus-mobile-customer-toggle {
+    align-items: center;
+    border-color: rgba(15, 108, 118, .3);
+    color: #173f45;
+    display: inline-flex;
+    justify-content: center;
+    min-height: 38px;
+    min-width: 42px;
+}
+
+.campus-customer-nav-mobile {
+    border-bottom: 1px solid rgba(15, 108, 118, .12);
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+}
+
+.campus-customer-nav-mobile__title {
+    color: #173f45;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    margin-bottom: .7rem;
+    text-transform: uppercase;
+}
+
+.campus-customer-nav-mobile__list {
+    display: grid;
+    gap: .35rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.campus-customer-nav-mobile__item {
+    align-items: center;
+    border-radius: 12px;
+    color: #173f45;
+    display: flex;
+    font-weight: 650;
+    gap: .75rem;
+    padding: .72rem .75rem;
+    text-decoration: none;
+}
+
+.campus-customer-nav-mobile__item i {
+    color: #0f6c76;
+    text-align: center;
+    width: 1.25rem;
+}
+
+.campus-customer-nav-mobile__item:hover,
+.campus-customer-nav-mobile__item:focus,
+.campus-customer-nav-mobile__item.is-active {
+    background: rgba(15, 108, 118, .09);
+    color: #0f6c76;
+}
+
+@media (max-width: 1199.98px) {
+    .campus-customer-nav__trigger span {
+        display: none;
+    }
+}
+
+.campus-customer-nav__cart { position:relative; }
+.campus-customer-nav__cart-count { position:absolute; top:-.45rem; right:-.5rem; min-width:1.25rem; height:1.25rem; padding:0 .28rem; display:grid; place-items:center; border-radius:999px; background:#d63384; color:#fff; font-size:.68rem; font-weight:800; line-height:1; box-shadow:0 0 0 2px #fff; }
+.campus-customer-nav-mobile__count { margin-left:auto; min-width:1.45rem; height:1.45rem; padding:0 .35rem; display:inline-grid; place-items:center; border-radius:999px; background:#d63384; color:#fff; font-size:.75rem; font-weight:800; }
+
+/* J10E8 — unified CampusFR customer topbar, inspired by the CRM topbar. */
+.campus-customer-nav {
+    gap: .6rem;
+    margin-left: auto;
+    margin-right: .65rem;
+}
+
+.campus-customer-nav__home,
+.campus-customer-nav__cart,
+.campus-topbar-language__toggle,
+.campus-topbar-user__toggle {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .4rem .7rem;
+    border: 1px solid rgba(148, 163, 184, .28);
+    border-radius: .8rem;
+    background: #fff;
+    color: #334155;
+    font-size: .85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.campus-customer-nav__home:hover,
+.campus-customer-nav__home:focus,
+.campus-customer-nav__home.is-active,
+.campus-customer-nav__cart:hover,
+.campus-customer-nav__cart:focus,
+.campus-topbar-language__toggle:hover,
+.campus-topbar-user__toggle:hover {
+    border-color: rgba(99, 102, 241, .24);
+    background: rgba(99, 102, 241, .06);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.campus-topbar-language,
+.campus-topbar-user {
+    position: relative;
+    min-width: 0;
+    margin: 0;
+}
+
+.campus-topbar-language > summary,
+.campus-topbar-user > summary {
+    list-style: none;
+}
+
+.campus-topbar-language > summary::-webkit-details-marker,
+.campus-topbar-user > summary::-webkit-details-marker {
+    display: none;
+}
+
+.campus-topbar-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    transition: transform .18s ease;
+}
+
+.campus-topbar-language[open] .campus-topbar-chevron,
+.campus-topbar-user[open] .campus-topbar-chevron {
+    transform: rotate(180deg);
+}
+
+.campus-topbar-language__flag,
+.campus-topbar-language__option-flag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.campus-topbar-language__flag {
+    width: 1.3rem;
+    height: 1.3rem;
+    font-size: 1.1rem;
+}
+
+.campus-topbar-language__dropdown,
+.campus-topbar-user__dropdown {
+    position: absolute;
+    z-index: 1085;
+    top: calc(100% + .55rem);
+    right: 0;
+    max-width: calc(100vw - 1rem);
+    padding: .5rem;
+    border: 1px solid rgba(148, 163, 184, .28);
+    border-radius: .9rem;
+    background: #fff;
+    box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, .16);
+}
+
+.campus-topbar-language__dropdown {
+    display: flex;
+    width: 13rem;
+    flex-direction: column;
+    gap: .1rem;
+}
+
+.campus-topbar-language__option {
+    display: flex;
+    width: 100%;
+    min-height: 2.6rem;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem .7rem;
+    border-radius: .6rem;
+    color: #334155;
+    font-size: .87rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.campus-topbar-language__option:hover,
+.campus-topbar-language__option:focus,
+.campus-topbar-language__option.is-active {
+    background: rgba(99, 102, 241, .08);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.campus-topbar-language__option-flag {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex: 0 0 1.4rem;
+    font-size: 1.15rem;
+}
+
+.campus-topbar-language__check {
+    margin-left: auto;
+    color: #4f46e5;
+    font-weight: 800;
+}
+
+.campus-topbar-user__toggle {
+    min-width: 0;
+    padding: .35rem .55rem;
+}
+
+.campus-topbar-user__avatar,
+.campus-topbar-user__menu-avatar {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+}
+
+.campus-topbar-user__picture,
+.campus-topbar-user__avatar img,
+.campus-topbar-user__menu-avatar img {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+    max-width: none;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.campus-topbar-user__name {
+    display: block;
+    max-width: 11rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.campus-topbar-user__dropdown {
+    width: 18rem;
+}
+
+.campus-topbar-user__header {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .65rem;
+}
+
+.campus-topbar-user__menu-avatar img {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.campus-topbar-user__header strong {
+    display: block;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: .9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.campus-topbar-user__header a {
+    color: #4f46e5;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+.campus-topbar-user__links {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+}
+
+.campus-topbar-user__link {
+    display: flex;
+    width: 100%;
+    min-height: 2.5rem;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem .7rem;
+    border-radius: .6rem;
+    color: #334155;
+    font-size: .86rem;
+    text-decoration: none;
+}
+
+.campus-topbar-user__link i {
+    width: 1.25rem;
+    color: #4f46e5;
+    text-align: center;
+}
+
+.campus-topbar-user__link:hover,
+.campus-topbar-user__link:focus,
+.campus-topbar-user__link.is-active {
+    background: rgba(99, 102, 241, .08);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.campus-topbar-user__divider {
+    height: 1px;
+    margin: .4rem 0;
+    background: rgba(148, 163, 184, .25);
+}
+
+.campus-topbar-user__link--danger,
+.campus-topbar-user__link--danger i {
+    color: #dc2626;
+}
+
+.campus-topbar-user__link--danger:hover,
+.campus-topbar-user__link--danger:focus {
+    background: rgba(220, 38, 38, .08);
+    color: #b91c1c;
+}
+
+.campus-topbar-notifications {
+    margin-left: 0;
+}
+
+.campus-customer-nav-mobile__languages {
+    display: grid;
+    gap: .15rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(148, 163, 184, .25);
+}
+
+.campus-customer-nav-mobile__item--danger,
+.campus-customer-nav-mobile__item--danger i {
+    color: #dc2626;
+}
+
+@media (max-width: 1199.98px) {
+    .campus-customer-nav__home span,
+    .campus-topbar-user__name {
+        display: none;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .campus-topbar-language__label {
+        display: none;
+    }
+}
+
+/* Dropdowns must escape the Storefront header flex containers. */
+.navbar-area,
+.navbar-area .main-navbar,
+.navbar-area .main-navbar .navbar,
+.navbar-area .main-navbar .navbar-collapse,
+.navbar-area .main-navbar .mean-menu {
+    overflow: visible;
+}
+
+.navbar-area {
+    position: relative;
+    z-index: 1040;
+}
+
+
+/* J10E9 — right-aligned topbar and administrator shortcuts. */
+.main-navbar .navbar-collapse {
+    justify-content: flex-end;
+}
+
+.main-navbar #menu-primary-menu {
+    margin-right: 0 !important;
+}
+
+.campus-customer-nav {
+    margin-left: auto;
+    margin-right: 0;
+    justify-content: flex-end;
+}
+
+.campus-customer-nav__admin-link {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .4rem .75rem;
+    border: 1px solid rgba(148, 163, 184, .28);
+    border-radius: .8rem;
+    background: #fff;
+    color: #334155;
+    font-size: .82rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.campus-customer-nav__admin-link:hover,
+.campus-customer-nav__admin-link:focus {
+    border-color: rgba(99, 102, 241, .24);
+    background: rgba(99, 102, 241, .06);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.campus-topbar-notifications,
+.main-responsive-nav .user-notif,
+.main-navbar .user-notif {
+    display: none !important;
+}
+
+@media (max-width: 1199.98px) {
+    .campus-customer-nav__admin-link span {
+        display: none;
+    }
+}
+
+/* J11 — unified guest navigation for Moodle pages. */
+.campus-guest-nav {
+    align-items: center;
+    gap: .6rem;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+.campus-guest-nav__control,
+.campus-guest-nav__button {
+    min-height: 2.75rem;
+}
+
+.campus-guest-nav__button {
+    align-items: center;
+    border: 1px solid #ff1472;
+    border-radius: .8rem;
+    display: inline-flex;
+    font-size: .86rem;
+    font-weight: 750;
+    gap: .5rem;
+    justify-content: center;
+    line-height: 1.2;
+    padding: .55rem .9rem;
+    text-decoration: none;
+    transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease, transform .18s ease;
+    white-space: nowrap;
+}
+
+.campus-guest-nav__button--shop {
+    background: #ff1472;
+    color: #fff;
+}
+
+.campus-guest-nav__button--shop:hover,
+.campus-guest-nav__button--shop:focus {
+    background: #e60060;
+    border-color: #e60060;
+    box-shadow: 0 .65rem 1.6rem rgba(255, 20, 114, .22);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.campus-guest-nav__button--login {
+    background: #fff;
+    color: #d60059;
+}
+
+.campus-guest-nav__button--login:hover,
+.campus-guest-nav__button--login:focus {
+    background: rgba(255, 20, 114, .07);
+    color: #b8004c;
+    transform: translateY(-1px);
+}
+
+.campus-guest-nav-mobile__actions {
+    display: grid;
+    gap: .65rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.campus-guest-nav-mobile__languages {
+    margin-top: 1rem;
+}
+
+@media (max-width: 575.98px) {
+    .campus-guest-nav-mobile__actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* J12A — landing-style compact guest controls on mobile. */
+.campus-guest-mobile-compact {
+    align-items: center;
+    display: flex;
+    gap: .45rem;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.campus-guest-mobile-compact__item,
+.campus-guest-mobile-compact__trigger {
+    align-items: center;
+    background: rgba(255, 255, 255, .96);
+    border: 1px solid #ff1472;
+    border-radius: .7rem;
+    color: #d60059;
+    display: inline-flex;
+    justify-content: center;
+    min-height: 2.35rem;
+    min-width: 2.35rem;
+    text-decoration: none;
+}
+
+.campus-guest-mobile-compact__trigger {
+    cursor: pointer;
+    list-style: none;
+}
+
+.campus-guest-mobile-compact__trigger::-webkit-details-marker {
+    display: none;
+}
+
+.campus-guest-mobile-compact__item--shop {
+    background: #ff1472;
+    color: #fff;
+}
+
+.campus-guest-mobile-compact__item--login {
+    gap: .4rem;
+    padding: .45rem .7rem;
+}
+
+.campus-guest-mobile-compact__language {
+    position: relative;
+}
+
+.campus-guest-mobile-compact__dropdown {
+    background: #fff;
+    border: 1px solid rgba(148, 163, 184, .24);
+    border-radius: .85rem;
+    box-shadow: 0 1rem 2.4rem rgba(15, 23, 42, .18);
+    min-width: 13rem;
+    padding: .45rem;
+    position: absolute;
+    right: 0;
+    top: calc(100% + .45rem);
+    z-index: 1100;
+}
+
+@media (min-width: 992px) {
+    .campus-guest-mobile-compact {
+        display: none;
+    }
+}
+
+/* J12A1 — shared landing-style guest controls and reliable mobile hit areas. */
+.main-responsive-nav,
+.main-responsive-nav .container,
+.main-responsive-nav .main-responsive-menu {
+    overflow: visible;
+}
+.campus-guest-mobile-compact {
+    z-index: 1200;
+    pointer-events: auto;
+}
+.campus-guest-mobile-compact details,
+.campus-guest-mobile-compact a,
+.campus-guest-mobile-compact summary {
+    pointer-events: auto;
+    touch-action: manipulation;
+}
+.campus-guest-mobile-compact__item,
+.campus-guest-mobile-compact__trigger {
+    height: 34px;
+    min-height: 34px;
+    border-radius: 12px;
+    box-shadow: none;
+}
+.campus-guest-mobile-compact__item--login {
+    font-weight: 750;
+}
+.campus-guest-mobile-compact__dropdown {
+    z-index: 1300;
+}
+
+/* J12C — admin controls restored and aligned with the CampusFR topbar. */
+.campus-customer-nav__edit-switch {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+}
+
+.campus-customer-nav__edit-switch .editmode-switch-form {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    margin: 0;
+}
+
+.campus-customer-nav__edit-switch .form-check,
+.campus-customer-nav__edit-switch .form-switch {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    margin: 0;
+}
+
+.campus-customer-nav-mobile__separator {
+    height: 1px;
+    margin: .45rem 0;
+    background: rgba(148, 163, 184, .28);
+    list-style: none;
+}
+
+/* J12E — Moodle edit switch aligned with the other topbar controls. */
+.campus-customer-nav__edit-control {
+    display: inline-flex;
+    min-height: 2.75rem;
+    height: 2.75rem;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    padding: .4rem .75rem;
+    border: 1px solid rgba(148, 163, 184, .28);
+    border-radius: .8rem;
+    background: #fff;
+    color: #334155;
+    font-size: .82rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.campus-customer-nav__edit-control > i,
+.campus-customer-nav__edit-label,
+.campus-customer-nav__edit-switch { display:inline-flex; align-items:center; line-height:1; }
+.campus-customer-nav__edit-control .editmode-switch-form,
+.campus-customer-nav__edit-control .form-check,
+.campus-customer-nav__edit-control .form-switch {
+    display:inline-flex; align-items:center; min-height:0; height:auto; margin:0; padding-top:0; padding-bottom:0; line-height:1;
+}
+.campus-customer-nav__edit-control .form-check-input { margin-top:0; vertical-align:middle; }
+.campus-customer-nav__edit-control .form-check-label { display:none; }
+.campus-customer-nav__edit-control:has(.form-check-input:checked) {
+    border-color:#f60b72;
+    box-shadow:0 0 0 .14rem rgba(246,11,114,.10);
+}
+
+
+
+/* J12F — compact desktop navbar. */
+@media (min-width: 768px) {
+    .main-navbar .navbar {
+        min-height: 4.5rem;
+        padding-top: .3rem;
+        padding-bottom: .3rem;
+    }
+
+    .main-navbar .navbar-brand {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 1rem;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .main-navbar .navbar-brand img {
+        width: auto !important;
+        height: 3.5rem !important;
+        max-height: 3.5rem !important;
+    }
+}
+
+/* J13E1 — dedicated full-width Showroom topbar shell. */
+.showroom-shell {
+    width: 100%;
+    max-width: none;
+    overflow-x: clip;
+}
+
+.showroom-shell__topbar {
+    position: relative;
+    z-index: 40;
+    display: flex;
+    min-height: 4.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .55rem clamp(1rem, 3vw, 3rem);
+    border-bottom: 1px solid #eee7f1;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: 0 8px 24px rgba(43, 26, 66, .06);
+    backdrop-filter: blur(12px);
+}
+
+.showroom-shell__brand {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    color: #3d285f;
+    font-size: 1.35rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.showroom-shell__brand img {
+    display: block;
+    width: auto;
+    max-width: 190px;
+    max-height: 52px;
+}
+
+.showroom-shell__navigation {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.showroom-shell__main {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+@media (max-width: 991.98px) {
+    .showroom-shell__topbar {
+        min-height: 4rem;
+        padding: .45rem .8rem;
+    }
+
+    .showroom-shell__brand img {
+        max-width: 145px;
+        max-height: 44px;
+    }
+}
+
+
+/* J13H1 — dedicated Showroom topbar containment. */
+.showroom-shell__navigation { display:flex; align-items:center; justify-content:flex-end; min-width:0; }
+.showroom-shell__mobile-menu { position:relative; }
+.showroom-shell__mobile-menu > summary { display:grid; width:2.75rem; height:2.75rem; place-items:center; border:1px solid #e4e8ef; border-radius:.8rem; background:#fff; color:#35245f; list-style:none; cursor:pointer; }
+.showroom-shell__mobile-menu > summary::-webkit-details-marker { display:none; }
+.showroom-shell__mobile-menu-panel { position:absolute; top:calc(100% + .65rem); right:0; z-index:1060; width:min(22rem,calc(100vw - 2rem)); max-height:calc(100vh - 6rem); overflow:auto; border:1px solid #e5e8ef; border-radius:1rem; background:#fff; box-shadow:0 1.5rem 4rem rgba(31,38,51,.18); }
+.showroom-shell__mobile-menu-panel .campus-customer-nav-mobile { display:block; }
+@media (min-width:992px) { .showroom-shell__mobile-menu { display:none !important; } }
+
+/* J13H2.1 — Showroom shell keeps the shared CampusFR topbar for every session state. */
+.showroom-shell__topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+}
+
+.showroom-shell__navigation > .campus-customer-nav,
+.showroom-shell__navigation > .campus-guest-nav {
+    margin-left: auto;
+}
+
+@media (max-width: 991.98px) {
+    .showroom-shell__navigation > .campus-customer-nav,
+    .showroom-shell__navigation > .campus-guest-nav {
+        display: none !important;
+    }
+}
+
+
+/* J13H2.2 — keep the Guest Showroom topbar visible on mobile, like other CampusFR pages. */
+@media (max-width: 991.98px) {
+    .showroom-shell__navigation > .campus-guest-nav {
+        display: flex !important;
+        gap: .35rem;
+    }
+    .showroom-shell__navigation > .campus-guest-nav .campus-guest-nav__control,
+    .showroom-shell__navigation > .campus-guest-nav .campus-guest-nav__button {
+        min-width: 2.65rem;
+        min-height: 2.65rem;
+        padding: .55rem .7rem;
+    }
+    .showroom-shell__navigation > .campus-guest-nav .campus-guest-nav__button span,
+    .showroom-shell__navigation > .campus-guest-nav .campus-topbar-language__label {
+        display: none;
+    }
+}
+@media (max-width: 430px) {
+    .showroom-shell__brand img { max-width: 112px; }
+    .showroom-shell__topbar { gap: .45rem; padding-inline: .55rem; }
+}
+
+
+/* J13H2.3 — reuse the exact shared CampusFR guest actions on Showroom mobile. */
+.showroom-shell__guest-mobile {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+.showroom-shell__guest-mobile .campus-guest-actions {
+    margin: 0;
+}
+@media (max-width: 767.98px) {
+    .showroom-shell__topbar {
+        gap: .5rem;
+    }
+    .showroom-shell__guest-mobile {
+        min-width: 0;
+    }
+}
+
+/* J15H.1C — the showroom uses its own details panel, not Bootstrap's offcanvas. */
+@media (max-width: 991.98px) {
+    .showroom-shell__mobile-menu-panel .campus-customer-nav-mobile__title {
+        margin: 0;
+        padding: 1rem 1.25rem .55rem;
+        line-height: 1.25;
+    }
+}
+
+/* Administrator navigation dropdowns. */
+.campus-customer-nav__admin-menu {
+    position: relative;
+}
+
+.campus-customer-nav__admin-menu > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.campus-customer-nav__admin-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.campus-customer-nav__admin-chevron {
+    margin-left: .1rem;
+    font-size: .62rem;
+    opacity: .62;
+    transition: transform .18s ease;
+}
+
+.campus-customer-nav__admin-menu[open] .campus-customer-nav__admin-chevron {
+    transform: rotate(180deg);
+}
+
+.campus-customer-nav__admin-menu[open] > .campus-customer-nav__admin-link {
+    border-color: rgba(99, 102, 241, .24);
+    background: rgba(99, 102, 241, .06);
+    color: #312e81;
+}
+
+.campus-customer-nav__admin-dropdown {
+    position: absolute;
+    top: calc(100% + .55rem);
+    left: 0;
+    z-index: 1050;
+    display: grid;
+    min-width: 15.5rem;
+    padding: .45rem;
+    border: 1px solid rgba(148, 163, 184, .22);
+    border-radius: .9rem;
+    background: #fff;
+    box-shadow: 0 18px 46px rgba(15, 23, 42, .14);
+}
+
+.campus-customer-nav__admin-dropdown--moodle {
+    min-width: 17rem;
+}
+
+.campus-customer-nav__admin-item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-height: 2.35rem;
+    padding: .52rem .65rem;
+    border-radius: .65rem;
+    color: #334155;
+    font-size: .82rem;
+    font-weight: 650;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.campus-customer-nav__admin-item > i,
+.campus-customer-nav__admin-symbol {
+    width: 1.15rem;
+    flex: 0 0 1.15rem;
+    color: #64748b;
+    text-align: center;
+}
+
+.campus-customer-nav__admin-symbol {
+    font-size: .9rem;
+    font-weight: 800;
+}
+
+.campus-customer-nav__admin-item:hover,
+.campus-customer-nav__admin-item:focus {
+    background: #f8fafc;
+    color: #312e81;
+    text-decoration: none;
+}
+
+.campus-customer-nav__admin-item:hover > i,
+.campus-customer-nav__admin-item:focus > i,
+.campus-customer-nav__admin-item:hover > .campus-customer-nav__admin-symbol,
+.campus-customer-nav__admin-item:focus > .campus-customer-nav__admin-symbol {
+    color: #6366f1;
+}
+
+.campus-customer-nav-mobile__admin-menu > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.campus-customer-nav-mobile__admin-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.campus-customer-nav-mobile__admin-chevron {
+    margin-left: auto;
+    font-size: .65rem;
+    opacity: .6;
+    transition: transform .18s ease;
+}
+
+.campus-customer-nav-mobile__admin-menu[open] .campus-customer-nav-mobile__admin-chevron {
+    transform: rotate(180deg);
+}
+
+.campus-customer-nav-mobile__submenu {
+    display: grid;
+    gap: .15rem;
+    margin: .2rem 0 .45rem 2.1rem;
+    padding: .35rem;
+    border-left: 2px solid #eef2f7;
+}
+
+.campus-customer-nav-mobile__subitem {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-height: 2.2rem;
+    padding: .45rem .6rem;
+    border-radius: .6rem;
+    color: #475569;
+    font-size: .82rem;
+    font-weight: 650;
+    line-height: 1.2;
+    text-decoration: none;
+}
+
+.campus-customer-nav-mobile__subitem > i,
+.campus-customer-nav-mobile__subitem > .campus-customer-nav__admin-symbol {
+    width: 1.1rem;
+    flex: 0 0 1.1rem;
+    text-align: center;
+}
+
+.campus-customer-nav-mobile__subitem:hover,
+.campus-customer-nav-mobile__subitem:focus {
+    background: #f8fafc;
+    color: #312e81;
+    text-decoration: none;
+}
+
+@media (max-width: 1199.98px) {
+    .campus-customer-nav__admin-chevron {
+        display: none;
+    }
+}

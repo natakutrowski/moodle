@@ -1,0 +1,94 @@
+{{#customernavigation.enabled}}
+<nav class="campus-customer-nav-mobile" aria-label="{{customernavigation.label}}">
+    <p class="campus-customer-nav-mobile__title">{{customernavigation.label}}</p>
+    <ul class="campus-customer-nav-mobile__list">
+        {{#customernavigation.items}}
+            <li>
+                <a class="campus-customer-nav-mobile__item {{#active}}is-active{{/active}}" href="{{{url}}}" {{#active}}aria-current="page"{{/active}}>
+                    <i class="{{icon}}" aria-hidden="true"></i>
+                    <span>{{label}}</span>
+                </a>
+            </li>
+        {{/customernavigation.items}}
+        {{#customernavigation.isadmin}}
+            <li>
+                <details class="campus-customer-nav-mobile__admin-menu">
+                    <summary class="campus-customer-nav-mobile__item">
+                        <i class="fa-solid fa-users-gear" aria-hidden="true"></i>
+                        <span>{{customernavigation.crmlabel}}</span>
+                        <i class="fa-solid fa-chevron-down campus-customer-nav-mobile__admin-chevron" aria-hidden="true"></i>
+                    </summary>
+                    <div class="campus-customer-nav-mobile__submenu">
+                        {{#customernavigation.crmitems}}
+                            <a class="campus-customer-nav-mobile__subitem" href="{{{url}}}">
+                                {{#icon}}<i class="{{icon}}" aria-hidden="true"></i>{{/icon}}
+                                {{#symbol}}<span class="campus-customer-nav__admin-symbol" aria-hidden="true">{{symbol}}</span>{{/symbol}}
+                                <span>{{label}}</span>
+                            </a>
+                        {{/customernavigation.crmitems}}
+                    </div>
+                </details>
+            </li>
+            <li>
+                <details class="campus-customer-nav-mobile__admin-menu">
+                    <summary class="campus-customer-nav-mobile__item">
+                        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+                        <span>{{customernavigation.adminlabel}}</span>
+                        <i class="fa-solid fa-chevron-down campus-customer-nav-mobile__admin-chevron" aria-hidden="true"></i>
+                    </summary>
+                    <div class="campus-customer-nav-mobile__submenu">
+                        {{#customernavigation.adminitems}}
+                            <a class="campus-customer-nav-mobile__subitem" href="{{{url}}}">
+                                <i class="{{icon}}" aria-hidden="true"></i>
+                                <span>{{label}}</span>
+                            </a>
+                        {{/customernavigation.adminitems}}
+                    </div>
+                </details>
+            </li>
+            <li class="campus-customer-nav-mobile__separator" aria-hidden="true"></li>
+            <li>
+                <a class="campus-customer-nav-mobile__item" href="{{{customernavigation.preferencesurl}}}">
+                    <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                    <span>{{customernavigation.preferenceslabel}}</span>
+                </a>
+            </li>
+            {{#customernavigation.canswitchrole}}
+                <li>
+                    <a class="campus-customer-nav-mobile__item" href="{{{customernavigation.switchroleurl}}}">
+                        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                        <span>{{customernavigation.switchrolelabel}}</span>
+                    </a>
+                </li>
+            {{/customernavigation.canswitchrole}}
+        {{/customernavigation.isadmin}}
+        {{#customernavigation.showcart}}
+            <li>
+                <a class="campus-customer-nav-mobile__item" href="{{{customernavigation.carturl}}}">
+                    <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                    <span>{{customernavigation.cartlabel}}</span>
+                    {{#customernavigation.hascartitems}}<span class="campus-customer-nav-mobile__count">{{customernavigation.cartcount}}</span>{{/customernavigation.hascartitems}}
+                </a>
+            </li>
+        {{/customernavigation.showcart}}
+        <li>
+            <a class="campus-customer-nav-mobile__item campus-customer-nav-mobile__item--danger" href="{{{customernavigation.logouturl}}}">
+                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                <span>{{customernavigation.logoutlabel}}</span>
+            </a>
+        </li>
+    </ul>
+
+    {{#customernavigation.haslanguages}}
+        <div class="campus-customer-nav-mobile__languages">
+            {{#customernavigation.languages}}
+                <a class="campus-topbar-language__option {{#active}}is-active{{/active}}" href="{{{url}}}">
+                    <span class="campus-topbar-language__option-flag" aria-hidden="true">{{flag}}</span>
+                    <span>{{name}}</span>
+                    {{#active}}<span class="campus-topbar-language__check" aria-hidden="true">✓</span>{{/active}}
+                </a>
+            {{/customernavigation.languages}}
+        </div>
+    {{/customernavigation.haslanguages}}
+</nav>
+{{/customernavigation.enabled}}

@@ -52,18 +52,45 @@ final class CommerceBundlePricingService {
                 $bundle->get_time_modified()
             ));
 
-            foreach ($fixedpricesminor as $currency => $amountminor) {
-                if ($amountminor === null) {
-                    continue;
+            // Bundle prices are the canonical prices consumed by the catalogue,
+            // storefront, cart and checkout. Rebuild them whenever the pricing
+            // configuration changes so every read path observes the same result.
+            $this->db->set_field(
+                'local_subs_commerce_prod_price',
+                'active',
+                0,
+                ['productid' => (int)$saved->get_id()]
+            );
+
+            if ($configuration->get_strategy() === CommerceBundlePricingStrategy::FIXED) {
+                foreach ($fixedpricesminor as $currency => $amountminor) {
+                    if ($amountminor === null) {
+                        continue;
+                    }
+                    if ($amountminor < 0) {
+                        throw new \coding_exception('A Bundle fixed price cannot be negative.');
+                    }
+                    $this->prices->save(new CommerceProductPrice(
+                        $saved->get_sku(),
+                        CommerceMoney::from_minor($amountminor, strtoupper($currency)),
+                        true
+                    ));
                 }
-                if ($amountminor < 0) {
-                    throw new \coding_exception('A Bundle fixed price cannot be negative.');
+            } else {
+                foreach ($this->get_common_component_currencies($saved->get_sku()) as $currency) {
+                    $quote = $this->quote($saved->get_sku(), $currency, true);
+                    $this->prices->save(new CommerceProductPrice(
+                        $saved->get_sku(),
+                        $quote->get_final_price(),
+                        true,
+                        null,
+                        null,
+                        [
+                            'source' => 'bundle_calculated',
+                            'strategy' => $configuration->get_strategy(),
+                        ]
+                    ));
                 }
-                $this->prices->save(new CommerceProductPrice(
-                    $saved->get_sku(),
-                    CommerceMoney::from_minor($amountminor, strtoupper($currency)),
-                    true
-                ));
             }
 
             $transaction->allow_commit();
@@ -73,11 +100,15 @@ final class CommerceBundlePricingService {
         }
     }
 
-    public function quote(string $sku, string $currency): CommerceBundlePriceQuote {
+    public function quote(
+        string $sku,
+        string $currency,
+        bool $allowinactiveroot = false
+    ): CommerceBundlePriceQuote {
         $bundle = $this->require_bundle($sku);
         $currency = strtoupper(trim($currency));
         $configuration = CommerceBundlePricingConfiguration::from_product($bundle);
-        $preview = $this->preview->build($bundle->get_sku());
+        $preview = $this->preview->build($bundle->get_sku(), $allowinactiveroot);
         $componenttotalminor = 0;
         $componentcomparisoncomplete = true;
         $lines = [];
@@ -113,6 +144,29 @@ final class CommerceBundlePricingService {
             $lines,
             $componentcomparisoncomplete
         );
+    }
+
+
+    /** @return string[] */
+    private function get_common_component_currencies(string $sku): array {
+        $preview = $this->preview->build($sku, true);
+        $common = null;
+
+        foreach ($preview->get_items() as $item) {
+            $currencies = [];
+            foreach ($this->prices->find_by_product_sku($item->get_product()->get_sku(), true) as $price) {
+                $currencies[$price->get_currency()] = true;
+            }
+
+            $common = $common === null ? $currencies : array_intersect_key($common, $currencies);
+            if ($common === []) {
+                return [];
+            }
+        }
+
+        $result = array_keys($common ?? []);
+        sort($result, SORT_STRING);
+        return $result;
     }
 
     private function require_bundle(string $sku): CommerceProduct {

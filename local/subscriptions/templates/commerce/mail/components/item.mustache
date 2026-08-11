@@ -1,0 +1,30 @@
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:12px 0;border:1px solid #e5e7eb;border-radius:12px;background:#ffffff;">
+    <tr>
+        <td style="padding:16px;">
+            <div style="font-size:16px;font-weight:700;color:#111827;">{{title}}</div>
+            {{#hasdescription}}<div style="margin-top:5px;color:#6b7280;">{{description}}</div>{{/hasdescription}}
+            <div style="margin-top:8px;font-size:13px;color:#6b7280;">
+                {{#showquantity}}{{quantity_label}} : {{quantity}}{{/showquantity}}
+                {{#hastotal}}{{#showquantity}} · {{/showquantity}}{{total_label}} : {{totalformatted}}{{/hastotal}}
+            </div>
+            {{#hasaccesses}}
+                <div style="margin-top:12px;">
+                    {{#accesses}}
+                        <div style="margin:7px 0;">
+                            <a href="{{url}}" style="color:#d94682;text-decoration:none;font-weight:600;">
+                                {{#label}}{{label}}{{/label}}
+                                {{^label}}{{#iscourse}}{{access_course_label}}{{/iscourse}}{{#isdownload}}{{download_label}}{{/isdownload}}{{/label}}
+                            </a>
+                            {{#hasfilename}}<span style="color:#6b7280;"> — {{filename}}</span>{{/hasfilename}}
+                            {{#hasfiletype}}<span style="color:#9ca3af;"> · {{filetype}}</span>{{/hasfiletype}}
+                            {{#hasfilesize}}<span style="color:#9ca3af;"> · {{filesize}}</span>{{/hasfilesize}}
+                        </div>
+                    {{/accesses}}
+                </div>
+            {{/hasaccesses}}
+            {{#hasproducturl}}
+                <div style="margin-top:10px;"><a href="{{producturl}}" style="font-size:13px;color:#6b7280;text-decoration:underline;">{{view_product_label}}</a></div>
+            {{/hasproducturl}}
+        </td>
+    </tr>
+</table>

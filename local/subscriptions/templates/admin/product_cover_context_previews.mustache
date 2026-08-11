@@ -1,0 +1,190 @@
+<section class="commerce-cover-context-previews card card-body mt-4" aria-labelledby="commerce-cover-context-previews-title">
+    <div class="commerce-cover-context-previews__header">
+        <div>
+            <h3 id="commerce-cover-context-previews-title" class="h5 mb-1">{{title}}</h3>
+            <p class="text-muted mb-0">{{description}}</p>
+        </div>
+        <span class="badge rounded-pill text-bg-light border">{{badge}}</span>
+    </div>
+
+    <div class="commerce-cover-context-previews__grid">
+        <article class="commerce-cover-context-preview">
+            <div class="commerce-cover-context-preview__title">
+                <span>{{boutiquelabel}}</span>
+                <small>4:3</small>
+            </div>
+            <div class="commerce-cover-context-preview__viewport commerce-cover-context-preview__viewport--boutique">
+                <div class="row g-0">
+                    <div class="col-12 d-flex">
+                        <article class="commerce-product-card card border-0 shadow-sm w-100 overflow-hidden">
+                            <div class="commerce-product-card__media text-decoration-none">
+                                {{#boutique.hascover}}
+                                    <img src="{{boutique.coverurl}}" alt="" class="commerce-product-card__cover">
+                                {{/boutique.hascover}}
+                                {{^boutique.hascover}}
+                                    <div class="commerce-product-placeholder commerce-product-placeholder--landscape commerce-product-placeholder--{{producttype}}" aria-hidden="true">
+                                        <i class="{{placeholdericon}}"></i>
+                                    </div>
+                                {{/boutique.hascover}}
+                            </div>
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="d-flex flex-wrap gap-2 align-items-center mb-3 commerce-product-card__badge-row">
+                                    <span class="badge rounded-pill text-bg-light border commerce-product-type-badge">{{typelabel}}</span>
+                                </div>
+                                <h2 class="h4 mb-3 commerce-product-card__title">{{productname}}</h2>
+                                <div class="commerce-product-card__description text-muted mb-3">{{sampledescription}}</div>
+                                <div class="mt-auto">
+                                    <div class="commerce-storefront-price commerce-storefront-price--standard mb-3">
+                                        <div class="commerce-storefront-price__eyebrow">{{pricelabel}}</div>
+                                        <div class="commerce-storefront-price__amount">{{sampleprice}}</div>
+                                    </div>
+                                    <div class="commerce-product-card__cart-actions">
+                                        <span class="btn btn-primary flex-grow-1 disabled" aria-hidden="true">
+                                            <i class="fa-solid fa-cart-plus me-2"></i>{{addtocartlabel}}
+                                        </span>
+                                        <span class="btn btn-outline-secondary flex-grow-1 disabled" aria-hidden="true">{{detailslabel}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="commerce-cover-context-preview">
+            <div class="commerce-cover-context-preview__title">
+                <span>{{storefrontlabel}}</span>
+                <small>16:9</small>
+            </div>
+            <div class="commerce-cover-context-preview__viewport commerce-cover-context-preview__viewport--storefront">
+                <div class="commerce-storefront commerce-product-page commerce-product-page--standard commerce-product-page--default">
+                    <div class="row g-4 align-items-start">
+                        <div class="col-5">
+                            <div class="commerce-product-page__media commerce-product-page__media--wide">
+                                {{#storefront.hascover}}
+                                    <img src="{{storefront.coverurl}}" alt="" class="img-fluid rounded-4 shadow-sm">
+                                {{/storefront.hascover}}
+                                {{^storefront.hascover}}
+                                    <div class="commerce-product-placeholder commerce-product-placeholder--wide commerce-product-placeholder--{{producttype}}" aria-hidden="true">
+                                        <i class="{{placeholdericon}}"></i>
+                                    </div>
+                                {{/storefront.hascover}}
+                            </div>
+                        </div>
+                        <div class="col-7">
+                            <span class="badge rounded-pill text-bg-light border commerce-product-type-badge mb-3">{{typelabel}}</span>
+                            <h2 class="h3 fw-bold mb-2">{{productname}}</h2>
+                            <div class="text-muted mb-3">{{sampledescription}}</div>
+                            <aside class="commerce-product-commerce-panel card border-0 shadow-sm">
+                                <div class="card-body p-3">
+                                    <div class="commerce-storefront-price commerce-storefront-price--standard mb-3">
+                                        <div class="commerce-storefront-price__eyebrow">{{pricelabel}}</div>
+                                        <div class="commerce-storefront-price__amount">{{sampleprice}}</div>
+                                    </div>
+                                    <span class="btn btn-primary w-100 disabled" aria-hidden="true">
+                                        <i class="fa-solid fa-cart-plus me-2"></i>{{addtocartlabel}}
+                                    </span>
+                                </div>
+                            </aside>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="commerce-cover-context-preview">
+            <div class="commerce-cover-context-preview__title">
+                <span>{{checkoutlabel}}</span>
+                <small>1:1</small>
+            </div>
+            <div class="commerce-cover-context-preview__viewport commerce-cover-context-preview__viewport--checkout">
+                <section class="commerce-checkout__summary card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="h5 mb-3">{{ordersummarylabel}}</h2>
+                        <article class="commerce-checkout-item">
+                            <div class="commerce-checkout-item__visual" aria-hidden="true">
+                                {{#checkout.hascover}}
+                                    <img src="{{checkout.coverurl}}" alt="" class="commerce-checkout-item__cover">
+                                {{/checkout.hascover}}
+                                {{^checkout.hascover}}
+                                    <div class="commerce-product-placeholder commerce-product-placeholder--square commerce-product-placeholder--{{producttype}}" aria-hidden="true">
+                                        <i class="{{placeholdericon}}"></i>
+                                    </div>
+                                {{/checkout.hascover}}
+                            </div>
+                            <div class="commerce-checkout-item__content">
+                                <div class="small text-muted">{{typelabel}}</div>
+                                <h3 class="h6 mb-1">{{productname}}</h3>
+                                <div class="small text-muted">× 1</div>
+                            </div>
+                            <div class="commerce-checkout-item__price">
+                                <strong>{{sampleprice}}</strong>
+                            </div>
+                        </article>
+                        <dl class="commerce-checkout__totals commerce-checkout__totals--separated mb-0 mt-3">
+                            <div class="commerce-checkout__grand-total">
+                                <dt>{{totallabel}}</dt>
+                                <dd>{{sampleprice}}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </section>
+            </div>
+        </article>
+
+        <article class="commerce-cover-context-preview">
+            <div class="commerce-cover-context-preview__title">
+                <span>{{resourceslabel}}</span>
+                <small>4:5</small>
+            </div>
+            <div class="commerce-cover-context-preview__viewport commerce-cover-context-preview__viewport--resources">
+                <div class="local-subscriptions-digital-library">
+                    <article class="digital-library-resource">
+                        <div class="digital-library-resource__visual">
+                            {{#resources.hascover}}
+                                <img src="{{resources.coverurl}}" alt="" class="digital-library-resource__cover">
+                            {{/resources.hascover}}
+                            {{^resources.hascover}}
+                                <div class="digital-library-resource__placeholder" aria-hidden="true">
+                                    <i class="{{placeholdericon}}"></i>
+                                </div>
+                            {{/resources.hascover}}
+                        </div>
+                        <div class="digital-library-resource__content">
+                            <h2 class="digital-library-resource__title">{{productname}}</h2>
+                            <div class="digital-library-files">
+                                <div class="digital-library-files__list">
+                                    <div class="digital-library-file">
+                                        <div class="digital-library-file__identity">
+                                            <span class="digital-library-file__icon">
+                                                <i class="fa-solid fa-file-pdf"></i>
+                                            </span>
+                                            <div class="digital-library-file__details">
+                                                <div class="digital-library-file__heading">
+                                                    <strong>{{classiclabel}}</strong>
+                                                    <span class="digital-library-file__type">PDF</span>
+                                                </div>
+                                                <div class="digital-library-file__name">campusfr-document.pdf</div>
+                                            </div>
+                                        </div>
+                                        <div class="digital-library-file__status">
+                                            <span class="digital-library-file__history digital-library-file__history--downloaded">
+                                                <i class="fa-solid fa-circle-check"></i>
+                                                <span class="digital-library-file__history-text">{{availablelabel}}</span>
+                                            </span>
+                                        </div>
+                                        <span class="btn btn-primary digital-library-file__download disabled" aria-hidden="true">
+                                            <i class="fa-solid fa-download"></i>
+                                            <span>{{downloadlabel}}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </article>
+    </div>
+</section>

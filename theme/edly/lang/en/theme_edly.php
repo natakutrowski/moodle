@@ -86,7 +86,7 @@ $string['last_updated'] = 'Last Updated ';
 
     $string['hide_banner']        = 'Add your website page link that you want to hide page banner';
     $string['hide_banner_desc']   = 'Enter each link on a new line';
-    
+
     $string['hide_page_bottom_content']        = 'Add your website page link that you want to hide page bottom content';
     $string['hide_page_bottom_content_desc']   = 'Enter each link on a new line. Note: It will not work when Edit mode is on';
 
@@ -333,11 +333,22 @@ $string['trial_only_guests'] = 'Show the trial link to guests only';
 $string['trial_access'] = 'Access the trial course';
 $string['image'] = 'Image';
 
-$string['locked_title'] = 'Restricted access';
-$string['locked_desc'] = 'Buy the course to unlock this activity.';
-$string['locked_subscribe'] = 'Buy';
+$string['locked_title'] = 'Activity reserved for members';
+$string['locked_desc'] = 'This activity is not available with trial access.';
+$string['locked_subscribe'] = 'View plans';
 
 $string['mobilemenu_button'] = 'Menu';
 $string['mobilemenu_open_aria'] = 'Open menu';
 $string['mobilemenu_title'] = 'Menu';
 $string['mobilemenu_close_aria'] = 'Close';
+$string['customernavigation_crm'] = 'CRM';
+$string['customernavigation_moodleadmin'] = 'Moodle administration';
+$string['customernavigation_admin_root'] = 'General';
+$string['customernavigation_admin_users'] = 'Users';
+$string['customernavigation_admin_courses'] = 'Courses';
+$string['customernavigation_admin_grades'] = 'Grades';
+$string['customernavigation_admin_modules'] = 'Plugins';
+$string['customernavigation_admin_appearance'] = 'Appearance';
+$string['customernavigation_admin_server'] = 'Server';
+$string['customernavigation_admin_reports'] = 'Reports';
+$string['customernavigation_admin_development'] = 'Development';

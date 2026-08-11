@@ -173,37 +173,35 @@ try {
         }
 
         if ($user) {
-            // On peut au besoin rafraîchir le nom/prénom, mais on ne change ni username ni password.
-            if ($user->auth !== 'manual') {
-                $user->auth = 'manual';
-            }
-            if (!empty($firstname)) {
-                $user->firstname = $firstname;
-            }
-            if (!empty($lastname)) {
-                $user->lastname  = $lastname;
-            }
-            $user->confirmed = 1;
-            $DB->update_record('user', $user);
+            // An active Trial keeps its existing password, but any provisional
+            // Guest Checkout identity must still be finalised before login.
+            $user = local_campus_finalise_trial_account(
+                $user,
+                $firstname,
+                $lastname,
+                $realemail,
+                null,
+                $phonefull,
+                $phoneiso
+            );
         } else {
-            // Cas filet (très rare) : le trial existe mais plus d'utilisateur,
-            // on recrée un compte avec les credentials fournis.
-            $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $realemail);
+            // Rare recovery path: recreate the account with the credentials
+            // explicitly chosen in the Trial form.
+            $username = local_subscriptions_generate_unique_username(
+                $firstname ?? '',
+                $lastname ?? '',
+                $realemail
+            );
             $user = create_user_record($username, $password, 'manual');
-            $user->firstname = $firstname;
-            $user->lastname  = $lastname;
-            $user->email     = $realemail;
-            $user->confirmed = 1;
-            $user->lang      = $USER->lang ?? $CFG->lang ?? 'en';
-
-            if (!empty($phonefull)) {
-                $user->phone2 = $phonefull;
-            }
-            if (!empty($phoneiso) && empty($user->country)) {
-                $user->country = $phoneiso;
-            }
-
-            $DB->update_record('user', $user);
+            $user = local_campus_finalise_trial_account(
+                $user,
+                $firstname,
+                $lastname,
+                $realemail,
+                $password,
+                $phonefull,
+                $phoneiso
+            );
         }
 
         // 2) Garantir l'essai via trial_manager (idempotent)
@@ -240,7 +238,7 @@ try {
         echo json_encode([
             'status'    => 'expired',
             'message'   => get_string('trial_expired_msg','local_campus'),
-            'subscribe' => (new moodle_url('/local/subscriptions/subscribe.php'))->out(false)
+            'subscribe' => (new moodle_url('/boutique'))->out(false)
         ]); exit;
     }
 
@@ -250,34 +248,41 @@ try {
     $realemail = $email;
 
     // a) Crée (ou convertit) un user manual sur l'email réel
-    $existing = $DB->get_record('user', ['email'=>$realemail, 'deleted'=>0], '*', IGNORE_MISSING);
+    $existing = $DB->get_record(
+        'user',
+        ['email' => $realemail, 'deleted' => 0],
+        '*',
+        IGNORE_MISSING
+    );
+
     if ($existing) {
-        $user = $existing;
-        if ($user->auth !== 'manual') {
-            $user->auth = 'manual';
-        }
-        $user->firstname = $firstname;
-        $user->lastname  = $lastname;
-        $user->confirmed = 1;
-        user_update_user($user, false);
-        update_internal_user_password($user, $password);
+        // Important: this may be an abandoned provisional Guest Checkout
+        // account (username checkout_* + forced password reset).
+        $user = local_campus_finalise_trial_account(
+            $existing,
+            $firstname,
+            $lastname,
+            $realemail,
+            $password,
+            $phonefull,
+            $phoneiso
+        );
     } else {
-        $username = local_subscriptions_generate_unique_username($firstname ?? '', $lastname ?? '', $realemail);
-        $user = create_user_record($username, $password, 'manual'); // password hashé
-        $user->firstname = $firstname;
-        $user->lastname  = $lastname;
-        $user->email     = $realemail;
-        $user->confirmed = 1;
-        $user->lang      = $USER->lang ?? $CFG->lang ?? 'en';
-
-        if (!empty($phonefull)) {
-            $user->phone2 = $phonefull; // "Mobile phone" dans Moodle
-        }
-        if (!empty($phoneiso) && empty($user->country)) {
-            $user->country = $phoneiso;
-        }
-
-        $DB->update_record('user', $user);
+        $username = local_subscriptions_generate_unique_username(
+            $firstname ?? '',
+            $lastname ?? '',
+            $realemail
+        );
+        $user = create_user_record($username, $password, 'manual');
+        $user = local_campus_finalise_trial_account(
+            $user,
+            $firstname,
+            $lastname,
+            $realemail,
+            $password,
+            $phonefull,
+            $phoneiso
+        );
     }
 
     // b) Démarre l'essai via trial_manager (inscriptions auto)
@@ -315,7 +320,7 @@ try {
     // e) Mail de bienvenue (avec identifiants)
     $loginurl     = (new moodle_url('/login/index.php'))->out(false);
     $changepwurl  = (new moodle_url('/login/change_password.php'))->out(false);
-    $subscribeurl = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+    $subscribeurl = (new moodle_url('/boutique'))->out(false);
     $mycoursesurl = (new moodle_url('/local/campus/mycourses.php'))->out(false);
     $reseturl     = (new moodle_url('/login/forgot_password.php'))->out(false);
 

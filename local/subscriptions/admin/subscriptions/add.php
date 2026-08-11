@@ -18,6 +18,9 @@ use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\commerce\catalog\presentation\CommerceProductDisplayNameResolver;
+use local_subscriptions\commerce\grant\CommerceManualProductGrantService;
+use local_subscriptions\commerce\mail\service\CommerceGrantAccessMailService;
 
 function local_subscriptions_generate_unique_username_from_email(string $email): string {
     global $DB;
@@ -103,20 +106,49 @@ foreach ($DB->get_records('subscription_plan', null, 'name ASC') as $plan) {
     $plans[$plan->id] = $label;
 }
 
+
+$nativeproducts = [];
+$productnameresolver = CommerceProductDisplayNameResolver::create($DB);
+foreach ($DB->get_records(
+    'local_subs_commerce_product',
+    ['status' => 'active'],
+    'name ASC, id ASC',
+    'id,sku,type,name,status'
+) as $product) {
+    $displayname = $productnameresolver->resolve(
+        [(string)$product->sku],
+        current_language(),
+        (string)$product->name
+    );
+    $nativeproducts[(int)$product->id] = $displayname
+        . ' · ' . strtoupper((string)$product->type)
+        . ' · ' . (string)$product->sku;
+}
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
 
-    $planid = required_param('plan', PARAM_INT);
-    $price = required_param('price', PARAM_FLOAT);
-    $currency = required_param('currency', PARAM_ALPHA);
-    $currency = strtoupper($currency);
-    $pricecurrency = number_format($price, 2, '.', '') . '|' . $currency;
+    $grantmode = optional_param('grant_mode', 'legacy', PARAM_ALPHA);
+    if (!in_array($grantmode, ['legacy', 'native'], true)) {
+        throw new moodle_exception('commerce_manual_grant_invalid_mode', 'local_subscriptions');
+    }
 
-    $startraw = optional_param('start_date', '', PARAM_RAW_TRIMMED);
+    $planid = 0;
+    $pricecurrency = '';
+    $startraw = '';
 
-    if ($startraw !== '' && preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $startraw, $m)) {
-        $startraw = $m[3] . '-' . $m[2] . '-' . $m[1];
-    }  
+    if ($grantmode === 'legacy') {
+        $planid = required_param('plan', PARAM_INT);
+        $price = required_param('price', PARAM_FLOAT);
+        $currency = strtoupper(required_param('currency', PARAM_ALPHA));
+        $pricecurrency = number_format($price, 2, '.', '') . '|' . $currency;
+
+        $startraw = optional_param('start_date', '', PARAM_RAW_TRIMMED);
+        if ($startraw !== '' && preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $startraw, $m)) {
+            $startraw = $m[3] . '-' . $m[2] . '-' . $m[1];
+        }
+    }
 
     $userid = optional_param('userid', 0, PARAM_INT);
     $usermode = optional_param('user_mode', 'existing', PARAM_ALPHA);
@@ -157,7 +189,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         throw new moodle_exception('missing_user_for_manual_subscription', 'local_subscriptions');
     }
 
-    $status = local_subscriptions_enrol_user_manual($userid, $planid, $pricecurrency, $startraw, true);
+    if ($grantmode === 'native') {
+        $productid = required_param('native_product_id', PARAM_INT);
+        $reason = optional_param('grant_reason', '', PARAM_TEXT);
+
+        $result = (new CommerceManualProductGrantService($DB))->grant(
+            $userid,
+            $productid,
+            (int)$USER->id,
+            $reason
+        );
+
+        if (optional_param('send_access_email', 0, PARAM_BOOL)) {
+            CommerceGrantAccessMailService::create()->queue(
+                $userid,
+                $productid,
+                $result['plan'],
+                true
+            );
+        }
+
+        $user = core_user::get_user($userid, '*', MUST_EXIST);
+        $a = (object)[
+            'user' => fullname($user) . ' (' . $user->email . ')',
+            'product' => $nativeproducts[$productid] ?? ('#' . $productid),
+            'count' => $result['plan']->count(),
+        ];
+        \core\notification::success(
+            get_string('commerce_manual_grant_success', 'local_subscriptions', $a)
+        );
+
+        redirect(new moodle_url(
+            subscription_config::admin_user_view_page(),
+            ['id' => $userid]
+        ));
+    }
+
+    $initialoblevel = ob_get_level();
+    ob_start();
+
+    try {
+        $status = local_subscriptions_enrol_user_manual(
+            $userid,
+            $planid,
+            $pricecurrency,
+            $startraw,
+            true
+        );
+
+    } finally {
+        $unexpectedoutput = '';
+
+        while (ob_get_level() > $initialoblevel) {
+            $unexpectedoutput = (string)ob_get_clean() . $unexpectedoutput;
+        }
+
+        $unexpectedoutput = trim($unexpectedoutput);
+
+        if ($unexpectedoutput !== '') {
+            error_log(
+                '[local_subscriptions] Unexpected output during manual subscription creation: '
+                . strip_tags($unexpectedoutput)
+            );
+        }
+    }
 
     if ($status === 'created') {
         $subscription = $DB->get_record_sql("
@@ -294,7 +389,8 @@ echo CommerceSectionNavigationRenderer::render(
 echo $renderer->
     render_manual_subscription_form_v2(
         $plans,
-        $preselecteduser
+        $preselecteduser,
+        $nativeproducts
     );
 
 echo CrmWorkspaceRenderer::end();

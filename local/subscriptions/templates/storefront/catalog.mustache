@@ -1,0 +1,144 @@
+<div class="commerce-storefront container py-4 py-lg-5">
+    <header class="commerce-storefront__hero mb-4 position-relative">
+        <h1 class="commerce-storefront__title">{{title}}</h1>
+        <p class="commerce-storefront__intro mb-0">{{intro}}</p>
+    </header>
+
+    {{#hastrialbanner}}
+        <div class="commerce-storefront__trial-banner mb-4">
+            {{{trialbannerhtml}}}
+        </div>
+    {{/hastrialbanner}}
+
+    <details class="commerce-storefront__filters-shell card border-0 shadow-sm mb-3" data-storefront-filters open>
+        <summary class="commerce-storefront__filters-summary">
+            <span class="commerce-storefront__filters-summary-content"><span class="commerce-storefront__filters-chevron" aria-hidden="true"></span><i class="fa-solid fa-filter commerce-storefront__filters-icon" aria-hidden="true"></i><span>{{filterstogglelabel}}</span></span>
+        </summary>
+        <form action="{{filteraction}}" method="get" class="commerce-storefront__filters">
+        <input type="hidden" name="currency" value="{{currency}}">
+        <div class="card-body row g-3 align-items-end">
+            <div class="col-lg-5">
+                <label for="storefront-q" class="form-label">{{searchlabel}}</label>
+                <input id="storefront-q" class="form-control" type="search" name="q" value="{{query}}" placeholder="{{searchplaceholder}}">
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label for="storefront-type" class="form-label">{{typelabel}}</label>
+                <select id="storefront-type" class="form-select" name="type">
+                    {{#types}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/types}}
+                </select>
+            </div>
+            {{#showownedfilter}}
+                <div class="col-12">
+                    <input type="hidden" name="hideowned" value="0">
+                    <div class="form-check form-switch commerce-storefront__owned-filter">
+                        <input
+                            id="storefront-hide-owned"
+                            class="form-check-input"
+                            type="checkbox"
+                            name="hideowned"
+                            value="1"
+                            data-storefront-owned-toggle
+                            {{#hideowned}}checked{{/hideowned}}
+                        >
+                        <label class="form-check-label" for="storefront-hide-owned">
+                            <strong>{{hideownedlabel}}</strong>
+                            <span>{{hideownedhelp}}</span>
+                        </label>
+                    </div>
+                </div>
+            {{/showownedfilter}}
+
+            <div class="col-lg-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">{{filterlabel}}</button>
+                <a href="{{reseturl}}" class="btn btn-outline-secondary">{{resetlabel}}</a>
+            </div>
+        </div>
+        </form>
+    </details>
+
+    <div class="commerce-storefront__toolbar d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div class="text-muted small">{{resultcount}}</div>
+
+        <div class="commerce-storefront__toolbar-actions">
+            <form action="{{filteraction}}" method="get" class="commerce-storefront__currency-form">
+                <input type="hidden" name="q" value="{{query}}">
+                <input type="hidden" name="type" value="{{currenttype}}">
+                {{#hideowned}}<input type="hidden" name="hideowned" value="1">{{/hideowned}}
+                {{> local_subscriptions/storefront/currency_selector }}
+            </form>
+
+        <a href="{{carturl}}" class="commerce-cart-trigger commerce-cart-trigger--prominent btn btn-primary">
+            <span class="commerce-cart-trigger__icon" aria-hidden="true">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </span>
+            <span>{{cartlabel}}</span>
+            <span class="commerce-cart-trigger__count">{{cartlinecount}}</span>
+            <strong>{{carttotalformatted}}</strong>
+        </a>
+        </div>
+    </div>
+
+    {{#hasproducts}}
+        {{#groups}}
+            <section class="commerce-storefront-group mb-5" data-group="{{key}}">
+                <header class="commerce-storefront-group__header mb-3">
+                    <h2 class="commerce-storefront-group__title">{{title}}</h2>
+                    <p class="commerce-storefront-group__intro text-muted mb-0">{{intro}}</p>
+                </header>
+                <div class="row g-4 commerce-storefront__grid">
+                    {{#products}}
+                        {{> local_subscriptions/storefront/product_card }}
+                    {{/products}}
+                </div>
+            </section>
+        {{/groups}}
+        <div class="mt-4">{{{pagination}}}</div>
+    {{/hasproducts}}
+
+    {{^hasproducts}}
+        <div class="commerce-storefront__empty text-center card border-0 shadow-sm">
+            <div class="card-body py-5">
+                <h2 class="h4">{{emptytitle}}</h2>
+                <p class="text-muted mb-0">{{emptytext}}</p>
+            </div>
+        </div>
+    {{/hasproducts}}
+</div>
+
+{{> local_subscriptions/storefront/cart_added_modal }}
+
+{{#js}}
+    const filters = document.querySelector('[data-storefront-filters]');
+    if (filters && window.matchMedia('(max-width: 767.98px)').matches) {
+        filters.removeAttribute('open');
+    }
+{{/js}}
+
+{{#showownedfilter}}
+    {{#js}}
+        const ownedToggle = document.querySelector(
+            '[data-storefront-owned-toggle]'
+        );
+
+        if (ownedToggle && !ownedToggle.dataset.reloadBound) {
+            ownedToggle.dataset.reloadBound = '1';
+
+            ownedToggle.addEventListener('change', function() {
+                const form = ownedToggle.closest('form');
+
+                if (form) {
+                    form.requestSubmit();
+                }
+            });
+        }
+    {{/js}}
+{{/showownedfilter}}
+
+
+{{> local_subscriptions/checkout/provider_experience}}
+
+{{#js}}
+require(['local_subscriptions/provider_experience'], function(ProviderExperience) {
+    ProviderExperience.init();
+});
+{{/js}}

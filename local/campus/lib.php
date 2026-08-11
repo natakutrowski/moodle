@@ -2,6 +2,174 @@
 defined('MOODLE_INTERNAL') || die();
 
 /** Secret HMAC pour cookies trial */
+
+/** Serves the dedicated mobile cover attached to a course. */
+function local_campus_pluginfile(
+    $course,
+    $cm,
+    \context $context,
+    string $filearea,
+    array $args,
+    bool $forcedownload,
+    array $options = []
+): bool {
+    if ($filearea !== \local_campus\mycourses\MyCourseMobileCoverService::FILEAREA
+            || !$context instanceof \context_course) {
+        return false;
+    }
+
+    require_login($course);
+    if (!can_access_course($course) && !has_capability('moodle/course:update', $context)) {
+        return false;
+    }
+
+    $itemid = (int)array_shift($args);
+    if ($itemid !== (int)$course->id || $itemid !== (int)$context->instanceid || !$args) {
+        return false;
+    }
+
+    $filename = array_pop($args);
+    $filepath = '/' . ($args ? implode('/', $args) . '/' : '');
+    $file = get_file_storage()->get_file(
+        $context->id,
+        \local_campus\mycourses\MyCourseMobileCoverService::COMPONENT,
+        $filearea,
+        $itemid,
+        $filepath,
+        $filename
+    );
+    if (!$file || $file->is_directory()) {
+        return false;
+    }
+
+    send_stored_file($file, DAYSECS, 0, false, $options);
+    return true;
+}
+
+
+/**
+ * Finalises a Moodle account for the Trial flow.
+ *
+ * Trial users choose their own password before the account is created. A
+ * provisional Guest Checkout account must therefore be converted into a
+ * regular Moodle account instead of inheriting the Guest Checkout
+ * force-password-change lifecycle.
+ */
+function local_campus_finalise_trial_account(
+    \stdClass $user,
+    string $firstname,
+    string $lastname,
+    string $email,
+    ?string $password = null,
+    string $phone = '',
+    ?string $country = null
+): \stdClass {
+    global $CFG, $DB;
+
+    require_once($CFG->dirroot . '/user/lib.php');
+    require_once($CFG->libdir . '/moodlelib.php');
+
+    if (!function_exists('local_subscriptions_generate_unique_username')) {
+        require_once(
+            $CFG->dirroot . '/local/subscriptions/lib/user_subs_lib.php'
+        );
+    }
+
+    $email = \core_text::strtolower(trim($email));
+    $previoususername = (string)($user->username ?? '');
+
+    if (str_starts_with($previoususername, 'checkout_')) {
+        $user->username = local_subscriptions_generate_unique_username(
+            trim($firstname),
+            trim($lastname),
+            $email
+        );
+    }
+
+    $user->auth = 'manual';
+    $user->confirmed = 1;
+    $user->suspended = 0;
+    $user->firstname = trim($firstname);
+    $user->lastname = trim($lastname);
+    $user->email = $email;
+
+    if (trim($phone) !== '') {
+        $user->phone2 = trim($phone);
+    }
+    if ($country !== null && trim($country) !== '') {
+        $user->country = strtoupper(trim($country));
+    }
+
+    user_update_user($user, false, false);
+
+    if ($password !== null) {
+        update_internal_user_password($user, $password);
+    }
+
+    // Trial users already chose their password in the Trial modal.
+    unset_user_preference('auth_forcepasswordchange', (int)$user->id);
+
+    // If this email had an abandoned provisional Guest Checkout account,
+    // make that session stop advertising an activation/password-reset flow.
+    // Never touch a checkout that already owns a purchase/payment reference.
+    $guesttable = new \xmldb_table('local_subs_commerce_guest');
+    if ($DB->get_manager()->table_exists($guesttable)) {
+        $guestsessions = $DB->get_records(
+            'local_subs_commerce_guest',
+            ['userid' => (int)$user->id],
+            'id ASC'
+        );
+
+        foreach ($guestsessions as $guestsession) {
+            if (
+                !empty($guestsession->purchasereference)
+                || !empty($guestsession->paymentreference)
+            ) {
+                continue;
+            }
+
+            $metadata = json_decode(
+                (string)($guestsession->metadatajson ?? ''),
+                true
+            );
+            $metadata = is_array($metadata) ? $metadata : [];
+
+            if (($metadata['account_origin'] ?? '') !== 'guest_checkout') {
+                continue;
+            }
+
+            $metadata['account_origin'] = 'trial';
+            $metadata['account_state'] = 'ready';
+            $metadata['activation_requires_password_reset'] = false;
+            $metadata['password_set_at'] = time();
+            $metadata['converted_to_trial_at'] = time();
+
+            if ($previoususername !== (string)$user->username) {
+                $metadata['provisional_username'] = $previoususername;
+                $metadata['final_username'] = (string)$user->username;
+            }
+
+            $DB->update_record('local_subs_commerce_guest', (object)[
+                'id' => (int)$guestsession->id,
+                'metadatajson' => json_encode(
+                    $metadata,
+                    JSON_UNESCAPED_UNICODE
+                    | JSON_UNESCAPED_SLASHES
+                    | JSON_THROW_ON_ERROR
+                ),
+                'timemodified' => time(),
+            ]);
+        }
+    }
+
+    return $DB->get_record(
+        'user',
+        ['id' => (int)$user->id, 'deleted' => 0],
+        '*',
+        MUST_EXIST
+    );
+}
+
 function local_campus_secret(): string {
     global $CFG;
     return hash('sha256', $CFG->siteidentifier . '::local_campus_trial');
@@ -73,12 +241,28 @@ function local_campus_is_trial_user(): bool {
 /**
  * Appelé à chaque page pour permettre au plugin de modifier l'arbre de navigation global.
  */
-function local_campus_extend_navigation(global_navigation $nav) : void {
+function local_campus_extend_navigation(global_navigation $nav): void {
+    global $USER;
 
-    // Optionnel : on ne filtre que pour les comptes d'essai
-    if (!function_exists('local_campus_is_trial_user') || !local_campus_is_trial_user()) {
-        return;
+    if (isloggedin() && !isguestuser()) {
+        $profileurl = class_exists('\local_subscriptions\url\UrlFactory')
+            ? \local_subscriptions\url\UrlFactory::my_profile(['id' => (int)$USER->id])
+            : new moodle_url('/user/profile.php', ['id' => (int)$USER->id]);
+        $items = [
+            ['local_campus_my_courses', get_string('nav_my_courses', 'local_campus'), \local_subscriptions\url\UrlFactory::my_courses()],
+            ['local_campus_my_resources', get_string('nav_my_resources', 'local_campus'), \local_subscriptions\url\UrlFactory::my_digital_products()],
+            ['local_campus_my_purchases', get_string('nav_my_purchases', 'local_campus'), new moodle_url('/mes-achats')],
+            ['local_campus_my_profile', get_string('nav_my_profile', 'local_campus'), $profileurl],
+        ];
+
+        foreach ($items as [$key, $label, $url]) {
+            if ($nav->find($key, navigation_node::TYPE_CUSTOM) === false) {
+                $nav->add($label, $url, navigation_node::TYPE_CUSTOM, null, $key);
+            }
+        }
     }
+
+    // Trial restrictions remain handled by capabilities and settings navigation.
 }
 
 /**
@@ -92,7 +276,10 @@ function local_campus_extend_navigation(global_navigation $nav) : void {
 function local_campus_extend_navigation_course($navigation, $course, $context) {
     global $PAGE;
 
-    // Ici, on est sûrs d'être dans un cours → on peut charger notre JS.
+    // Do not mutate the breadcrumb while Moodle is still building the course
+    // navigation tree. Doing so can inject non-node values into the tree and
+    // break navigation_node::find(). The breadcrumb is rebuilt later, once the
+    // page navigation is fully initialised.
     $PAGE->requires->js_call_amd('local_campus/courseindex_subsections', 'init');
 }
 
@@ -161,7 +348,7 @@ function local_campus_render_tabs(array $tabs): string {
 }
 
 function local_campus_header_tabs_html(bool $activeMy): string {
-    $my  = new moodle_url('/local/campus/mycourses.php');
+    $my  = \local_subscriptions\url\UrlFactory::my_courses();
     $cat = new moodle_url('/local/campus/courses.php');
 
     $btnMy  = html_writer::link($my,  get_string('tab_mycourses','local_campus'),
@@ -174,7 +361,7 @@ function local_campus_header_tabs_html(bool $activeMy): string {
 
 // Boutons inline « Mes cours | Catalogue » (pilules collées)
 function local_campus_tabs_inline_html(bool $activeMy): string {
-    $my  = new moodle_url('/local/campus/mycourses.php');
+    $my  = \local_subscriptions\url\UrlFactory::my_courses();
     $cat = new moodle_url('/local/campus/courses.php');
 
     $a1 = html_writer::link($my,  get_string('tab_mycourses','local_campus'),
@@ -252,8 +439,49 @@ function local_campus_is_trial_user_byid(int $userid): bool {
     ]);
 }
 
+
+/**
+ * Resolve the current user's Trial conversion destination.
+ *
+ * The homepage Trial creation modal remains Legacy and is intentionally not
+ * changed by J6.1. This helper is used only after a Trial already exists.
+ */
+function local_campus_trial_conversion_offer(
+    int $userid,
+    ?int $courseid = null
+): ?\local_subscriptions\commerce\trial\CommerceTrialConversionOffer {
+    if (
+        $userid <= 0 ||
+        !class_exists('\local_subscriptions\commerce\trial\CommerceTrialConversionBridge')
+    ) {
+        return null;
+    }
+
+    $bridge = \local_subscriptions\commerce\trial\CommerceTrialConversionBridge::create();
+
+    if ($courseid !== null && $courseid > 1) {
+        $offer = $bridge->resolve_for_course($userid, $courseid, 'full');
+        if ($offer !== null && $offer->targets_product()) {
+            return $offer;
+        }
+    }
+
+    return null;
+}
+
+function local_campus_trial_conversion_url(
+    int $userid,
+    ?int $courseid = null
+): string {
+    $offer = local_campus_trial_conversion_offer($userid, $courseid);
+
+    return $offer !== null
+        ? $offer->get_url()->out(false)
+        : (new moodle_url('/boutique'))->out(false);
+}
+
 function local_campus_render_trial_discount_banner(?bool $showcta = null): void {
-    global $USER, $CFG, $PAGE;
+    global $USER, $CFG, $PAGE, $COURSE;
 
     if (!isloggedin() || isguestuser()) {
         return;
@@ -265,6 +493,11 @@ function local_campus_render_trial_discount_banner(?bool $showcta = null): void 
     if (!$trial) {
         return;
     }
+    if (!\local_subscriptions\trial_manager::user_has_trial_access_remaining(
+        (int)$USER->id
+    )) {
+        return;
+    }
     if (!\local_subscriptions\trial_manager::is_discount_window_open((int)$USER->id)) {
         return;
     }
@@ -273,19 +506,35 @@ function local_campus_render_trial_discount_banner(?bool $showcta = null): void 
     //$dt = new DateTime('2026-04-26 00:00:00', new DateTimeZone('Europe/Paris'));
     //$deadline  = (int)$dt->getTimestamp();
     $deadline  = (int)\local_subscriptions\trial_manager::discount_window_deadline((int)$USER->id);
-    $subscribe = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+    $courseid = isset($COURSE->id) && (int)$COURSE->id > 1
+        ? (int)$COURSE->id
+        : null;
+    $trialoffer = local_campus_trial_conversion_offer(
+        (int)$USER->id,
+        $courseid
+    );
+    $subscribe = $trialoffer !== null
+        ? $trialoffer->get_url()->out(false)
+        : (new moodle_url('/boutique'))->out(false);
+    $ctastring = $courseid !== null && $trialoffer !== null && $trialoffer->targets_product()
+        ? 'trial_discount_banner_cta_current_course'
+        : 'trial_discount_banner_cta';
 
     // Détection auto : pas de CTA sur subscribe.php
     if ($showcta === null) {
-        $onSubscribe = (strpos($PAGE->url->out(false), '/local/subscriptions/subscribe.php') !== false);
+        $onSubscribe = (strpos($PAGE->url->out(false), '/boutique') !== false);
         $showcta = !$onSubscribe;
     }
 
     $daysLabel = get_string('trial_days_word','local_campus'); // 'jours' / 'days' / 'дн.'
 
-    // 🔁 On réutilise la même string que pour le checkout
-    // ex RU : "🎁 -20% на подписку. Скидка доступна только"
-    $prefix = get_string('checkout_discount_note_prefix', 'local_subscriptions', $discPct);
+    // The banner has its own copy because the Trial discount only applies
+    // to courses included in the configured Trial scope.
+    $prefix = get_string(
+        'trial_discount_banner_prefix',
+        'local_campus',
+        $discPct
+    );
 
     echo html_writer::start_div('campus-trial-15 banner');
     echo html_writer::start_div('container d-flex align-items-center justify-content-between');
@@ -306,10 +555,9 @@ function local_campus_render_trial_discount_banner(?bool $showcta = null): void 
     if ($showcta) {
         echo html_writer::link(
             $subscribe,
-            get_string('trial_discount_banner_cta','local_campus'),
+            get_string($ctastring, 'local_campus'),
             [
                 'class'          => 'default-btn campus-trial-15-cta ms-4',
-                'data-subs-modal'=> '1',
             ]
         );
     }
@@ -411,7 +659,7 @@ function local_campus_render_subscription_expiry_banner(): void {
     if ($daysleft > $threshold || $daysleft <= 0) return;
  
     $date = userdate((int)$sub->end_date, '%e %B %Y, %H:%M');
-    $renew = (new moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+    $renew = (new moodle_url('/boutique'))->out(false);
 
     $txt = get_string('sub_expiry_banner','local_campus', (object)[
         'plan' => format_string($sub->planname),
@@ -515,7 +763,7 @@ function local_campus_inject_trial_ui(\moodle_page $PAGE): void {
 
       <div class="modal-footer trial-footer">
         <div class="trial-footer-buttons">
-          <a id="campusTrialSubscribe" href="/local/subscriptions/subscribe.php" class="default-btn d-none">
+          <a id="campusTrialSubscribe" href="/boutique" class="default-btn d-none">
             '.s($btnSub).'
           </a>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">'.s($btnCancel).'</button>
@@ -957,5 +1205,4 @@ function local_campus_render_signup_fields(string $context, ?\stdClass $defaults
 
     return $html;
 }
-
 

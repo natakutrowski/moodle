@@ -191,6 +191,7 @@ final class commerce_persistence_database_schema_test extends advanced_testcase 
                 'sequence',
                 'provider',
                 'providerreference',
+                'providerorderid',
                 'status',
                 'currency',
                 'amountminor',
@@ -198,6 +199,10 @@ final class commerce_persistence_database_schema_test extends advanced_testcase 
                 'legacyrequestid',
                 'paidat',
                 'metadatajson',
+                'paymenturl',
+                'providerpayload',
+                'timecreated',
+                'timemodified',
             ]
         );
 
@@ -210,6 +215,35 @@ final class commerce_persistence_database_schema_test extends advanced_testcase 
                     [
                         'purchaseid',
                         'sequence',
+                    ]
+                )
+            )
+        );
+
+
+        $this->assertTrue(
+            $dbman->index_exists(
+                $table,
+                new xmldb_index(
+                    'provider_order_idx',
+                    XMLDB_INDEX_NOTUNIQUE,
+                    [
+                        'provider',
+                        'providerorderid',
+                    ]
+                )
+            )
+        );
+
+        $this->assertTrue(
+            $dbman->index_exists(
+                $table,
+                new xmldb_index(
+                    'purchase_status_idx',
+                    XMLDB_INDEX_NOTUNIQUE,
+                    [
+                        'purchaseid',
+                        'status',
                     ]
                 )
             )

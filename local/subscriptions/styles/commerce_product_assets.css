@@ -1,0 +1,195 @@
+/* J7.5A — product cover diagnostics and real previews. */
+.commerce-product-asset-card{display:flex;flex-direction:column;padding:1rem;border:1px solid #dfe3ea;border-radius:1rem;background:#f8f9fb}
+.commerce-product-asset-card__heading{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.commerce-product-asset-card__format{color:#667085;font-size:.75rem;font-weight:700}
+.commerce-product-asset-preview{position:relative;display:grid;width:min(100%,28rem);margin:0 auto;place-items:center;overflow:hidden;border:1px solid #d7dce4;border-radius:.85rem;background:radial-gradient(circle at 25% 20%,rgba(255,255,255,.8),transparent 38%),linear-gradient(135deg,#f7f8fa,#eceff3)}
+.commerce-product-asset-preview--square{aspect-ratio:1 / 1;width:min(100%,16rem)}
+.commerce-product-asset-preview--landscape{aspect-ratio:4 / 3}
+.commerce-product-asset-preview--wide{aspect-ratio:16 / 9}
+.commerce-product-asset-preview--portrait{aspect-ratio:4 / 5;width:min(100%,16rem)}
+.commerce-product-asset-preview img{width:100%;height:100%;object-fit:cover}
+.commerce-product-asset-preview--fallback img{opacity:.88}
+.commerce-product-asset-preview__fallback{position:absolute;right:.55rem;bottom:.55rem;max-width:calc(100% - 1.1rem);padding:.3rem .55rem;border-radius:999px;background:rgba(47,31,53,.86);color:#fff;font-size:.68rem;font-weight:800}
+.commerce-product-asset-preview__placeholder{display:grid;width:100%;height:100%;place-items:center;color:#7a8496}
+.commerce-product-asset-preview__placeholder i{font-size:clamp(2.2rem,8vw,4.5rem);opacity:.72}
+.commerce-product-asset-card__metadata{display:grid;gap:.4rem;margin-top:1rem;padding:.75rem;border-radius:.75rem;background:#fff}
+.commerce-product-asset-card__metadata-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:baseline;font-size:.78rem}
+.commerce-product-asset-card__metadata-row span{color:#667085}
+.commerce-product-asset-card__metadata-row strong{text-align:right}
+.commerce-product-asset-card__actions{display:grid;gap:.65rem;margin-top:auto;padding-top:1rem}
+@media (max-width:575.98px){.commerce-product-asset-card__metadata-row{grid-template-columns:1fr;gap:.1rem}.commerce-product-asset-card__metadata-row strong{text-align:left}}
+
+/* J7.5B — simulated production-context previews.
+   Component internals deliberately reuse storefront.css and
+   my_digital_products.css without duplicated styling. */
+.commerce-cover-context-previews__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.commerce-cover-context-previews__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.commerce-cover-context-preview {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid #dfe3ea;
+    border-radius: 1rem;
+    background: #f8f9fb;
+}
+
+.commerce-cover-context-preview__title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .75rem;
+    color: #344054;
+    font-weight: 800;
+}
+
+.commerce-cover-context-preview__title small {
+    color: #667085;
+    font-weight: 700;
+}
+
+.commerce-cover-context-preview__viewport {
+    overflow: hidden;
+    border: 1px solid #d7dce4;
+    border-radius: .9rem;
+    background: #fff;
+}
+
+.commerce-cover-context-preview__viewport--boutique {
+    max-width: 31rem;
+    margin: 0 auto;
+}
+
+.commerce-cover-context-preview__viewport--storefront {
+    padding: 1rem;
+}
+
+.commerce-cover-context-preview__viewport--storefront
+.commerce-product-page {
+    padding: 0 !important;
+}
+
+.commerce-cover-context-preview__viewport--storefront
+.commerce-product-commerce-panel {
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.commerce-cover-context-preview__viewport--checkout {
+    padding: 1rem;
+}
+
+.commerce-cover-context-preview__viewport--checkout
+.commerce-checkout__summary {
+    width: 100%;
+}
+
+.commerce-cover-context-preview__viewport--resources {
+    padding: 1rem;
+}
+
+.commerce-cover-context-preview__viewport--resources
+.local-subscriptions-digital-library {
+    --digital-library-cover-width: 120px;
+    --digital-library-cover-ratio: 4 / 5;
+}
+
+.commerce-cover-context-preview__viewport--resources
+.digital-library-resource {
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.commerce-cover-context-preview__viewport--resources
+.digital-library-resource__title {
+    font-size: 1.2rem;
+}
+
+.commerce-cover-context-preview__viewport--resources
+.digital-library-file {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.commerce-cover-context-preview__viewport--resources
+.digital-library-file__status {
+    grid-column: 1;
+}
+
+.commerce-cover-context-preview__viewport--resources
+.digital-library-file__download {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+}
+
+.commerce-cover-context-preview a,
+.commerce-cover-context-preview button,
+.commerce-cover-context-preview .btn {
+    pointer-events: none;
+}
+
+.commerce-cover-context-preview
+.commerce-product-card:hover {
+    transform: none;
+}
+
+@media (max-width: 1199.98px) {
+    .commerce-cover-context-previews__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .commerce-cover-context-preview__viewport--storefront
+    .row {
+        display: block;
+    }
+
+    .commerce-cover-context-preview__viewport--storefront
+    .col-5,
+    .commerce-cover-context-preview__viewport--storefront
+    .col-7 {
+        width: 100%;
+    }
+
+    .commerce-cover-context-preview__viewport--storefront
+    .col-7 {
+        margin-top: 1rem;
+    }
+
+    .commerce-cover-context-preview__viewport--resources
+    .digital-library-resource {
+        grid-template-columns: 1fr;
+    }
+
+    .commerce-cover-context-preview__viewport--resources
+    .digital-library-resource__visual {
+        width: min(100%, 160px);
+    }
+}
+
+/* J7.5C — one isolated upload form per visual format. */
+.commerce-product-asset-card__upload-form {
+    display: grid;
+    gap: .65rem;
+}
+
+.commerce-product-asset-card__upload-form .btn {
+    justify-self: start;
+}
+
+.commerce-product-asset-card__actions > .btn-outline-danger {
+    margin-top: .15rem;
+}

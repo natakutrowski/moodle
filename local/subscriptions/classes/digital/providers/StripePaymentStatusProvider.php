@@ -5,6 +5,7 @@ namespace local_subscriptions\digital\providers;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\digital\dto\DigitalPaymentProviderStatus;
+use local_subscriptions\payment\stripe\StripeConfiguration;
 
 /**
  * Checks Stripe Checkout session statuses.
@@ -44,24 +45,8 @@ final class StripePaymentStatusProvider
                 );
         }
 
-        $environment =
-            get_config(
-                'local_subscriptions',
-                'stripe_env'
-            ) ?: 'test';
-
-        $environment =
-            $environment === 'live'
-                ? 'live'
-                : 'test';
-
-        $secret =
-            get_config(
-                'local_subscriptions',
-                'stripe_' .
-                $environment .
-                '_secret'
-            ) ?: '';
+        $environment = StripeConfiguration::active_profile();
+        $secret = StripeConfiguration::secret_key($environment);
 
         if ($secret === '') {
             return

@@ -1,0 +1,76 @@
+<dialog class="commerce-provider-experience" data-provider-experience-dialog
+    aria-modal="true" aria-labelledby="commerce-provider-experience-title" aria-describedby="commerce-provider-experience-message"
+    data-title="{{#str}}commerce_provider_experience_title, local_subscriptions{{/str}}"
+    data-message="{{#str}}commerce_provider_experience_message, local_subscriptions{{/str}}"
+    data-advice=""
+    data-continue="{{#str}}commerce_provider_experience_continue, local_subscriptions{{/str}}"
+    data-secondary="{{#str}}commerce_provider_experience_stay, local_subscriptions{{/str}}"
+    data-stripe-title="{{#str}}commerce_provider_experience_stripe_title, local_subscriptions{{/str}}"
+    data-stripe-message="{{#str}}commerce_provider_experience_stripe_message, local_subscriptions{{/str}}"
+    data-stripe-advice="{{#str}}commerce_provider_experience_stripe_advice, local_subscriptions{{/str}}"
+    data-stripe-continue="{{#str}}commerce_provider_experience_stripe_continue, local_subscriptions{{/str}}"
+    data-stripe-secondary="{{#str}}commerce_provider_experience_stay, local_subscriptions{{/str}}"
+    data-alfa-title="{{#str}}commerce_provider_experience_alfa_title, local_subscriptions{{/str}}"
+    data-alfa-message="{{#str}}commerce_provider_experience_alfa_message, local_subscriptions{{/str}}"
+    data-alfa-advice="{{#str}}commerce_provider_experience_alfa_advice, local_subscriptions{{/str}}"
+    data-alfa-continue="{{#str}}commerce_provider_experience_alfa_continue, local_subscriptions{{/str}}"
+    data-alfa-secondary="{{#str}}commerce_provider_experience_alfa_other_currency, local_subscriptions{{/str}}"
+    data-alfa-standard-secondary="{{#str}}commerce_provider_experience_alfa_standard_secondary, local_subscriptions{{/str}}">
+    <div class="commerce-provider-experience__panel" role="document">
+        <button type="button" class="commerce-provider-experience__close"
+            data-provider-experience-close aria-label="{{#str}}closebuttontitle{{/str}}">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+        <div class="commerce-provider-experience__icon" aria-hidden="true">
+            <i class="fa-solid fa-shield-halved" data-provider-experience-icon></i>
+        </div>
+        <div class="commerce-provider-experience__content">
+            <h2 id="commerce-provider-experience-title" class="commerce-provider-experience__title" data-provider-experience-title></h2>
+            <div class="commerce-provider-experience__summary">
+                <strong data-provider-experience-product hidden></strong>
+                <span data-provider-experience-price hidden></span>
+            </div>
+            <p id="commerce-provider-experience-message" class="commerce-provider-experience__message" data-provider-experience-message></p>
+            <div class="commerce-provider-experience__advice" data-provider-experience-advice hidden></div>
+        </div>
+        <div class="commerce-provider-experience__actions">
+            <button type="button" class="btn btn-primary" data-provider-experience-continue></button>
+            <button type="button" class="btn btn-outline-secondary" data-provider-experience-secondary></button>
+        </div>
+    </div>
+</dialog>
+
+
+<dialog class="commerce-provider-currency" data-provider-currency-dialog
+    aria-modal="true" aria-labelledby="commerce-provider-currency-title" aria-describedby="commerce-provider-currency-message"
+    data-title="{{#str}}commerce_provider_currency_title, local_subscriptions{{/str}}"
+    data-message="{{#str}}commerce_provider_currency_message, local_subscriptions{{/str}}"
+    data-submit="{{#str}}commerce_provider_currency_submit, local_subscriptions{{/str}}"
+    data-empty="{{#str}}commerce_provider_currency_empty, local_subscriptions{{/str}}"
+    data-error="{{#str}}commerce_provider_currency_error, local_subscriptions{{/str}}">
+    <div class="commerce-provider-currency__panel" role="document">
+        <button type="button" class="commerce-provider-experience__close"
+            data-provider-currency-close aria-label="{{#str}}closebuttontitle{{/str}}">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+        <div class="commerce-provider-currency__icon" aria-hidden="true">
+            <i class="fa-solid fa-coins"></i>
+        </div>
+        <h2 id="commerce-provider-currency-title" class="commerce-provider-currency__title" data-provider-currency-title></h2>
+        <p id="commerce-provider-currency-message" class="commerce-provider-currency__message" data-provider-currency-message></p>
+        <form method="post" action=""
+            data-provider-currency-form>
+            <input type="hidden" name="action" value="switchpurchasecurrency">
+            <input type="hidden" name="currency" data-provider-currency-source>
+            <input type="hidden" name="sesskey" value="" data-provider-currency-sesskey>
+            <div class="commerce-provider-currency__choices" data-provider-currency-choices></div>
+            <div class="commerce-provider-currency__status" data-provider-currency-status aria-live="polite"></div>
+            <div class="commerce-provider-currency__actions">
+                <button type="button" class="btn btn-outline-secondary" data-provider-currency-back>
+                    {{#str}}back{{/str}}
+                </button>
+                <button type="submit" class="btn btn-primary" data-provider-currency-submit disabled></button>
+            </div>
+        </form>
+    </div>
+</dialog>

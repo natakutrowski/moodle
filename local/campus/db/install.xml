@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/campus/db" VERSION="2025102100" COMMENT="Install XML for local_campus" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<XMLDB PATH="local/campus/db" VERSION="2026080100" COMMENT="Install XML for local_campus" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <TABLES>
     <TABLE NAME="local_campus_trial" COMMENT="Trial access tokens, one per email">
       <FIELDS>

@@ -1,0 +1,159 @@
+.local-subscriptions-my-purchases {
+    --purchase-course: #e83e8c;
+    --purchase-course-soft: #fff0f6;
+    --purchase-course-border: #f3b6d2;
+    --purchase-digital: #2563eb;
+    --purchase-digital-soft: #eff6ff;
+    --purchase-digital-border: #bfdbfe;
+    --purchase-bundle: #d99a00;
+    --purchase-bundle-soft: #fff8db;
+    --purchase-bundle-border: #f5d66f;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card__header {
+    align-items: center;
+    padding: 5px 10px;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card__body {
+    padding: 5px 10px !important;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card__heading {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card__heading > .d-flex {
+    width: 100%;
+    align-items: center !important;
+}
+
+.local-subscriptions-my-purchases .my-purchases-section--courses .my-purchases-section__icon,
+.local-subscriptions-my-purchases .my-purchase-card--course .my-purchase-card__icon {
+    background: var(--purchase-course-soft);
+    color: var(--purchase-course);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--course::before {
+    background: var(--purchase-course);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--course .my-purchase-card__actions .btn:not(.btn-outline-secondary) {
+    border-color: var(--purchase-course-border);
+    background: var(--purchase-course-soft);
+    color: var(--purchase-course);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--course .my-purchase-card__actions .btn:not(.btn-outline-secondary):hover,
+.local-subscriptions-my-purchases .my-purchase-card--course .my-purchase-card__actions .btn:not(.btn-outline-secondary):focus {
+    border-color: var(--purchase-course);
+    background: var(--purchase-course);
+    color: #fff;
+}
+
+.local-subscriptions-my-purchases .my-purchases-section--digital .my-purchases-section__icon,
+.local-subscriptions-my-purchases .my-purchase-card--digital .my-purchase-card__icon {
+    background: var(--purchase-digital-soft);
+    color: var(--purchase-digital);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--digital::before {
+    background: var(--purchase-digital);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--digital .my-purchase-card__actions .btn:not(.btn-outline-secondary) {
+    border-color: var(--purchase-digital-border);
+    background: var(--purchase-digital-soft);
+    color: var(--purchase-digital);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--digital .my-purchase-card__actions .btn:not(.btn-outline-secondary):hover,
+.local-subscriptions-my-purchases .my-purchase-card--digital .my-purchase-card__actions .btn:not(.btn-outline-secondary):focus {
+    border-color: var(--purchase-digital);
+    background: var(--purchase-digital);
+    color: #fff;
+}
+
+.local-subscriptions-my-purchases .my-purchases-section--bundles .my-purchases-section__icon,
+.local-subscriptions-my-purchases .my-purchase-card--bundle .my-purchase-card__icon {
+    background: var(--purchase-bundle-soft);
+    color: var(--purchase-bundle);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--bundle::before {
+    background: var(--purchase-bundle);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--bundle .my-purchase-card__actions .btn:not(.btn-outline-secondary) {
+    border-color: var(--purchase-bundle-border);
+    background: var(--purchase-bundle-soft);
+    color: #8a6100;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--bundle .my-purchase-card__actions .btn:not(.btn-outline-secondary):hover,
+.local-subscriptions-my-purchases .my-purchase-card--bundle .my-purchase-card__actions .btn:not(.btn-outline-secondary):focus {
+    border-color: var(--purchase-bundle);
+    background: var(--purchase-bundle);
+    color: #fff;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card__heading .badge,
+.local-subscriptions-my-purchases .crm-commerce-status-badge {
+    min-height: 1.65rem;
+    padding: .38rem .78rem;
+    border-radius: .38rem;
+    line-height: 1;
+}
+
+.local-subscriptions-my-purchases .crm-commerce-status-success,
+.local-subscriptions-my-purchases .crm-commerce-status-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.local-subscriptions-my-purchases .crm-commerce-status-warning {
+    background: #fff9eb;
+    color: #8a5a00;
+}
+
+.local-subscriptions-my-purchases .crm-commerce-status-danger {
+    background: #fff4f4;
+    color: #9b2c2c;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--inactive {
+    background: #f4f5f7 !important;
+    border-color: #dfe3e8 !important;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--payment-pending {
+    background: #fffefa !important;
+    border-color: #faefca !important;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--payment-error {
+    background: #fffdfd !important;
+    border-color: #fbe8e8 !important;
+}
+
+.local-subscriptions-my-purchases .my-purchase-card__actions .btn-outline-secondary {
+    border-color: var(--mypurchases-border, #e5e7eb);
+    background: #fff;
+    color: #4b5563;
+}
+
+.local-subscriptions-my-purchases .product-page-action {
+    display: inline-flex;
+    align-items: center;
+    gap: .42rem;
+}
+
+.local-subscriptions-my-purchases .product-page-action i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    line-height: 1;
+}

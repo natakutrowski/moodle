@@ -1,0 +1,14 @@
+<nav class="commerce-checkout-steps" aria-label="{{stepslabel}}">
+    <ol class="commerce-checkout-steps__list">
+        {{#steps}}
+            <li class="commerce-checkout-steps__item {{state}}"{{#current}} aria-current="step"{{/current}}>
+                {{#clickable}}<a class="commerce-checkout-steps__link" href="{{url}}">{{/clickable}}
+                {{^clickable}}<span class="commerce-checkout-steps__link" aria-disabled="true">{{/clickable}}
+                    <span class="commerce-checkout-steps__marker">{{number}}</span>
+                    <strong class="commerce-checkout-steps__label">{{label}}</strong>
+                {{#clickable}}</a>{{/clickable}}
+                {{^clickable}}</span>{{/clickable}}
+            </li>
+        {{/steps}}
+    </ol>
+</nav>

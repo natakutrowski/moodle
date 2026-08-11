@@ -27,6 +27,9 @@ final class LegacyPaymentRequestContext {
     public const CONTEXT_DIGITAL_PRODUCT =
         'digital_product';
 
+    public const CONTEXT_COMMERCE_TRANSACTION =
+        'commerce_transaction';
+
     private const ALLOWED_TABLES = [
         self::TABLE_SUBSCRIPTION,
         self::TABLE_DIGITAL,
@@ -35,6 +38,7 @@ final class LegacyPaymentRequestContext {
     private const ALLOWED_CONTEXTS = [
         self::CONTEXT_SUBSCRIPTION,
         self::CONTEXT_DIGITAL_PRODUCT,
+        self::CONTEXT_COMMERCE_TRANSACTION,
     ];
 
     private const ALLOWED_PROVIDERS = [
@@ -259,6 +263,11 @@ final class LegacyPaymentRequestContext {
             === self::TABLE_DIGITAL;
     }
 
+    public function is_commerce_transaction(): bool {
+        return $this->get_payment_context()
+            === self::CONTEXT_COMMERCE_TRANSACTION;
+    }
+
     public function get_order_number(): string {
         return sprintf(
             '%s-%d',
@@ -274,7 +283,14 @@ final class LegacyPaymentRequestContext {
         $valid =
             (
                 $table === self::TABLE_SUBSCRIPTION
-                && $context === self::CONTEXT_SUBSCRIPTION
+                && in_array(
+                    $context,
+                    [
+                        self::CONTEXT_SUBSCRIPTION,
+                        self::CONTEXT_COMMERCE_TRANSACTION,
+                    ],
+                    true
+                )
             )
             ||
             (

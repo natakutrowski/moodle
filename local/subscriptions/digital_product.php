@@ -5,12 +5,20 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\digital\product_manager;
 use local_subscriptions\url\UrlFactory;
+use local_subscriptions\commerce\compatibility\CommerceLegacyUrlCompatibilityService;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
 $slug = required_param('p', PARAM_ALPHANUMEXT);
 
 $product = product_manager::get_localized_product_by_slug($slug, current_language(), true);
+
+if ($product && !optional_param('legacy', 0, PARAM_BOOL)) {
+    $nativeurl = (new CommerceLegacyUrlCompatibilityService($DB))->digital_product_url((int)$product->id);
+    if ($nativeurl !== null) {
+        redirect($nativeurl);
+    }
+}
 
 if (!$product) {
     redirect(

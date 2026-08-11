@@ -1,0 +1,442 @@
+.commerce-mail-health {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid #dbe7df;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f8fcfa 0%, #f3f8f6 100%);
+}
+
+.commerce-mail-health.has-attention {
+    border-color: #f0d9ba;
+    background: linear-gradient(135deg, #fffaf2 0%, #fff7e9 100%);
+}
+
+.commerce-mail-health__heading {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    min-width: 0;
+}
+
+.commerce-mail-health__heading > i {
+    flex: 0 0 auto;
+    font-size: 1.55rem;
+    color: #27845f;
+}
+
+.commerce-mail-health.has-attention .commerce-mail-health__heading > i {
+    color: #b7791f;
+}
+
+.commerce-mail-health__title,
+.commerce-mail-health__subtitle {
+    display: block;
+}
+
+.commerce-mail-health__title {
+    color: #24352e;
+    font-size: 1rem;
+}
+
+.commerce-mail-health__subtitle {
+    margin-top: .1rem;
+    color: #66756e;
+    font-size: .85rem;
+}
+
+.commerce-mail-health__metrics {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .55rem;
+}
+
+.commerce-mail-health__metric {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .35rem;
+    padding: .38rem .65rem;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(36, 53, 46, .08);
+}
+
+.commerce-mail-health__metric-value {
+    font-size: 1rem;
+    font-weight: 750;
+}
+
+.commerce-mail-health__metric-label {
+    font-size: .78rem;
+    color: #67736d;
+}
+
+.commerce-mail-health__metric.is-ok .commerce-mail-health__metric-value { color: #27845f; }
+.commerce-mail-health__metric.is-warning .commerce-mail-health__metric-value { color: #b7791f; }
+.commerce-mail-health__metric.is-error .commerce-mail-health__metric-value { color: #c2415d; }
+
+.commerce-mail-preview-nav {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-bottom: 1rem;
+    padding: .3rem;
+    border: 1px solid #e4e8ee;
+    border-radius: 12px;
+    background: #f7f8fa;
+}
+
+.commerce-mail-preview-nav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .55rem .8rem;
+    border-radius: 9px;
+    color: #5c6370;
+    font-size: .88rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.commerce-mail-preview-nav__link:hover,
+.commerce-mail-preview-nav__link:focus-visible {
+    color: var(--primary, var(--bs-primary, #e85f95));
+    background: #fff;
+    text-decoration: none;
+}
+
+.commerce-mail-preview-nav__link.is-active {
+    color: #fff;
+    background: var(--primary, var(--bs-primary, #e85f95));
+    box-shadow: 0 3px 10px rgba(232, 95, 149, .22);
+}
+
+.commerce-mail-preview-stage {
+    min-height: 760px;
+    padding: 1.25rem;
+    overflow: auto;
+    border: 1px solid #e5e8ed;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #f4f5f8 0%, #ebeef3 100%);
+}
+
+.commerce-mail-preview-device {
+    width: min(100%, 920px);
+    margin: 0 auto;
+    border: 1px solid #d7dce4;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(29, 39, 54, .12);
+}
+
+.commerce-mail-preview-device.is-mobile {
+    width: min(100%, 390px);
+    border-width: 8px;
+    border-color: #2d3038;
+    border-radius: 28px;
+}
+
+.commerce-mail-preview-frame {
+    display: block;
+    width: 100%;
+    height: 720px;
+    border: 0;
+    background: #fff;
+}
+
+.commerce-mail-preview-frame.is-mobile {
+    height: 720px;
+}
+
+.commerce-mail-preview-text,
+.commerce-mail-preview-source {
+    max-height: 760px;
+    margin: 0;
+    padding: 1.15rem;
+    overflow: auto;
+    border: 1px solid #e1e5ea;
+    border-radius: 12px;
+    background: #10151d;
+    color: #e8edf4;
+    font: .83rem/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.commerce-mail-preview-source {
+    white-space: pre;
+}
+
+@media (max-width: 767.98px) {
+    .commerce-mail-health {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .commerce-mail-health__metrics {
+        justify-content: flex-start;
+    }
+
+    .commerce-mail-preview-nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    .commerce-mail-preview-nav__link {
+        justify-content: center;
+    }
+
+    .commerce-mail-preview-stage {
+        min-height: 620px;
+        padding: .65rem;
+    }
+
+    .commerce-mail-preview-frame,
+    .commerce-mail-preview-frame.is-mobile {
+        height: 600px;
+    }
+}
+
+.commerce-mail-health__title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .55rem;
+}
+
+.commerce-mail-health__release {
+    display: inline-flex;
+    align-items: center;
+    padding: .2rem .48rem;
+    border: 1px solid rgba(39, 132, 95, .2);
+    border-radius: 999px;
+    background: rgba(39, 132, 95, .08);
+    color: #226e50;
+    font-size: .68rem;
+    font-weight: 750;
+    letter-spacing: .025em;
+    text-transform: uppercase;
+}
+
+.commerce-mail-health.has-attention .commerce-mail-health__release {
+    border-color: rgba(183, 121, 31, .22);
+    background: rgba(183, 121, 31, .08);
+    color: #8b5d18;
+}
+
+
+.commerce-mail-preview-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.commerce-mail-preview-toolbar .commerce-mail-preview-nav {
+    margin-bottom: 0;
+}
+
+.commerce-mail-preview-toolbar__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+@media (max-width: 767.98px) {
+    .commerce-mail-preview-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .commerce-mail-preview-toolbar__navigation,
+    .commerce-mail-preview-toolbar__actions,
+    .commerce-mail-preview-toolbar__actions .btn {
+        width: 100%;
+    }
+
+    .commerce-mail-preview-toolbar__actions {
+        margin-left: 0;
+    }
+}
+
+
+.commerce-mail-preview-toolbar__navigation {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: center;
+}
+
+.commerce-mail-preview-toolbar__navigation .commerce-mail-preview-nav {
+    width: auto;
+    max-width: 100%;
+}
+
+.commerce-mail-preview-toolbar__actions {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+@media (min-width: 768px) {
+    .commerce-mail-preview-toolbar {
+        flex-wrap: nowrap;
+    }
+
+    .commerce-mail-preview-toolbar__navigation {
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    .commerce-mail-preview-toolbar__actions {
+        white-space: nowrap;
+    }
+}
+
+
+.commerce-mail-preview-toolbar__font {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.commerce-mail-preview-font {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    padding: .25rem;
+    border: 1px solid #dfe3ea;
+    border-radius: .75rem;
+    background: #fff;
+}
+
+.commerce-mail-preview-font__label {
+    padding: 0 .45rem;
+    color: #6b7280;
+    font-size: .78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.commerce-mail-preview-font__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: .35rem .65rem;
+    border-radius: .55rem;
+    color: #4b5563;
+    font-size: .8rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.commerce-mail-preview-font__link:hover {
+    color: #38235d;
+    background: #f7f3fb;
+}
+
+.commerce-mail-preview-font__link.is-active {
+    color: #fff;
+    background: #38235d;
+}
+
+@media (max-width: 767.98px) {
+    .commerce-mail-preview-toolbar__font,
+    .commerce-mail-preview-font {
+        width: 100%;
+    }
+
+    .commerce-mail-preview-font {
+        justify-content: space-between;
+    }
+
+    .commerce-mail-preview-font__link {
+        flex: 1 1 0;
+        justify-content: center;
+    }
+}
+
+
+.commerce-mail-preview-device.is-mobile {
+    width: min(100%, 414px);
+    padding: 10px 6px;
+    overflow: hidden;
+    border-width: 7px;
+    border-color: #2d3038;
+    border-radius: 30px;
+    background: #2d3038;
+}
+
+.commerce-mail-preview-device.is-mobile .commerce-mail-preview-frame {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    border-radius: 19px;
+    background: #fff;
+}
+
+
+.commerce-mail-preview-toolbar__language {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.commerce-mail-preview-language {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    min-height: 2.5rem;
+    padding: .25rem .35rem .25rem .65rem;
+    border: 1px solid #dfe3ea;
+    border-radius: .75rem;
+    background: #fff;
+}
+
+.commerce-mail-preview-language__label {
+    margin: 0;
+    color: #6b7280;
+    font-size: .78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.commerce-mail-preview-language__select {
+    width: auto;
+    min-width: 8.5rem;
+    border: 0;
+    background-color: #f7f3fb;
+    color: #38235d;
+    font-size: .8rem;
+    font-weight: 700;
+    box-shadow: none !important;
+}
+
+.commerce-mail-preview-language__select:focus {
+    border: 0;
+    box-shadow: none;
+}
+
+@media (max-width: 767.98px) {
+    .commerce-mail-preview-toolbar__language,
+    .commerce-mail-preview-language {
+        width: 100%;
+    }
+
+    .commerce-mail-preview-language {
+        justify-content: space-between;
+    }
+
+    .commerce-mail-preview-language__select {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}

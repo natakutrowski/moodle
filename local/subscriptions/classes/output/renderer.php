@@ -11,6 +11,8 @@ use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Status;
 use local_subscriptions\support\Region;
 use local_subscriptions\support\SubsPresenter;
+use local_subscriptions\output\my_purchases\MyPurchasesPage;
+use local_subscriptions\output\my_digital_products\MyDigitalProductsPage;
 
 class renderer extends plugin_renderer_base {
 
@@ -156,7 +158,7 @@ class renderer extends plugin_renderer_base {
             foreach ($rawcourses as $index => $course) {
                 $courses[] = [
                     'name' => format_string($course->fullname),
-                    'url'  => (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false),
+                    'url'  => UrlFactory::course((int)$course->id)->out(false),
                     'last' => ($index === $totalcourses - 1),
                 ];
             }
@@ -226,7 +228,7 @@ class renderer extends plugin_renderer_base {
             foreach ($rawcourses as $index => $course) {
                 $courses[] = [
                     'name' => format_string($course->fullname),
-                    'url'  => (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false),
+                    'url'  => UrlFactory::course((int)$course->id)->out(false),
                     'last' => ($index === $totalcourses - 1),
                 ];
             }
@@ -680,4 +682,19 @@ class renderer extends plugin_renderer_base {
         return empty($ts) || (int)$ts >= 4102444800; // 0/null OR >= 2100-01-01.
     }
     
+
+    /**
+     * Renders the student purchase history page.
+     */
+    public function render_my_digital_products_page(MyDigitalProductsPage $page): string {
+        return $this->render_from_template('local_subscriptions/my_digital_products/page', $page->export_for_template($this));
+    }
+
+    public function render_my_purchases_page(MyPurchasesPage $page): string {
+        return $this->render_from_template(
+            'local_subscriptions/my_purchases/page',
+            $page->export_for_template($this)
+        );
+    }
+
 }

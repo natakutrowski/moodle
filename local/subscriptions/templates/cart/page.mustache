@@ -1,0 +1,181 @@
+<div class="commerce-cart container py-4 py-lg-5">
+    {{> local_subscriptions/checkout/steps}}
+
+    <header class="commerce-cart__masthead mb-4">
+        <div class="commerce-cart__heading-row">
+            <h1 class="display-5 fw-bold mb-0">{{title}}</h1>
+
+            {{#hasitems}}
+                <form method="post" action="{{currencyswitchaction}}" class="commerce-cart-currency-switch">
+                    <input type="hidden" name="action" value="switchcurrency">
+                    <input type="hidden" name="currency" value="{{currency}}">
+                    <input type="hidden" name="returnurl" value="{{returnurl}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <label class="commerce-cart-currency-switch__control">
+                        <span class="commerce-cart-currency-switch__icon" aria-hidden="true"><i class="fa-solid fa-coins"></i></span>
+                        <span class="commerce-cart-currency-switch__copy">
+                            <span class="commerce-cart-currency-switch__label">{{currencyswitchlabel}}</span>
+                            <span class="commerce-cart-currency-switch__help">{{currencyswitchhelp}}</span>
+                        </span>
+                        <select class="form-select" name="targetcurrency" onchange="this.form.submit()">
+                            {{#currencies}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/currencies}}
+                        </select>
+                    </label>
+                </form>
+            {{/hasitems}}
+        </div>
+
+        {{#hasitems}}
+            <div class="commerce-cart__toolbar" aria-label="{{title}}">
+                <a href="{{continueshoppingurl}}" class="btn btn-outline-secondary">{{continueshoppinglabel}}</a>
+                <a class="btn btn-outline-secondary" href="{{detailedcartprinturl}}" target="_blank" rel="noopener">
+                    <i class="fa-solid fa-print me-2" aria-hidden="true"></i>{{detailedcartprintlabel}}
+                </a>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#commerce-clear-cart-modal">
+                    <i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{clearlabel}}
+                </button>
+            </div>
+        {{/hasitems}}
+    </header>
+
+
+    {{#currencyreport.visible}}
+        <div class="alert alert-info commerce-cart-currency-report" role="status">
+            <div class="d-flex gap-3 align-items-start">
+                <i class="fa-solid fa-circle-info mt-1" aria-hidden="true"></i>
+                <div>
+                    <div class="fw-semibold">{{currencyreport.successtext}}</div>
+                    {{#currencyreport.hasremoved}}<div class="mt-1">{{currencyreport.removedtext}}</div>{{/currencyreport.hasremoved}}
+                    {{#currencyreport.promotionremoved}}<div class="mt-1">{{currencyreport.promotionremovedtext}}</div>{{/currencyreport.promotionremoved}}
+                </div>
+            </div>
+        </div>
+    {{/currencyreport.visible}}
+    {{#hasitems}}
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-8">
+                <div class="commerce-cart-lines d-grid gap-3">
+                    {{#items}}
+                        <article class="commerce-cart-line commerce-cart-line__compact card border-0 shadow-sm">
+                            <div class="card-body commerce-cart-line__body">
+                                <div class="commerce-cart-line__layout">
+                                    <div class="commerce-cart-line__visual commerce-cart-line__visual--portrait" aria-hidden="true">
+                                        {{#hascover}}<img src="{{coverurl}}"{{#coverresponsive}} srcset="{{coversrcset}}" sizes="(max-width: 767px) 96px, 128px"{{/coverresponsive}} width="{{coverwidth}}" height="{{coverheight}}" loading="lazy" decoding="async" alt="" class="commerce-cart-line__cover">{{/hascover}}
+                                        {{^hascover}}<div class="commerce-cart-line__placeholder"><i class="{{placeholdericon}}" aria-hidden="true"></i></div>{{/hascover}}
+                                    </div>
+
+                                    <div class="commerce-cart-line__content">
+                                        {{#hastype}}
+                                            <div class="mb-2">
+                                                <span class="badge rounded-pill text-bg-light border commerce-product-type-badge">
+                                                    {{typelabel}}
+                                                </span>
+                                            </div>
+                                        {{/hastype}}
+                                        <h2 class="h5 mb-2">{{name}}</h2>
+                                        {{> local_subscriptions/cart/price }}
+                                    </div>
+                                </div>
+
+                                <div class="commerce-cart-line__actions mt-3">
+                                    <div class="commerce-cart-line__action commerce-cart-line__action--quantity">
+                                        {{#quantitylocked}}
+                                            <span class="commerce-cart-line__action-label mb-0">{{quantitylabel}}</span>
+                                            <span class="commerce-cart-line__quantity-badge">×{{quantity}}</span>
+                                        {{/quantitylocked}}
+
+                                        {{^quantitylocked}}
+                                            <form method="post" action="{{removeaction}}" class="commerce-cart-line__quantity-form">
+                                                <input type="hidden" name="action" value="update">
+                                                <input type="hidden" name="sku" value="{{productsku}}">
+                                                <input type="hidden" name="priceid" value="{{priceid}}">
+                                                <input type="hidden" name="currency" value="{{currency}}">
+                                                <input type="hidden" name="returnurl" value="{{returnurl}}">
+                                                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                                                <label class="mb-0">
+                                                    <span class="commerce-cart-line__action-label">{{quantitylabel}}</span>
+                                                    <input class="form-control form-control-sm" type="number" name="quantity" value="{{quantity}}" min="{{minimumquantity}}" {{#hasmaximumquantity}}max="{{maximumquantity}}"{{/hasmaximumquantity}} step="{{quantitystep}}">
+                                                </label>
+                                                <button class="btn btn-sm btn-outline-primary" type="submit">{{updatelabel}}</button>
+                                            </form>
+                                        {{/quantitylocked}}
+                                    </div>
+
+                                    <div class="commerce-cart-line__action commerce-cart-line__action--details">
+                                        {{#hasdetailsurl}}
+                                            <a href="{{detailsurl}}" target="_blank" rel="noopener noreferrer" class="commerce-cart-line__details">
+                                                <span>{{viewproductlabel}}</span>
+                                                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                                            </a>
+                                        {{/hasdetailsurl}}
+                                    </div>
+
+                                    <div class="commerce-cart-line__action commerce-cart-line__action--remove">
+                                        <form method="post" action="{{removeaction}}">
+                                            <input type="hidden" name="action" value="remove">
+                                            <input type="hidden" name="sku" value="{{productsku}}">
+                                            <input type="hidden" name="priceid" value="{{priceid}}">
+                                            <input type="hidden" name="currency" value="{{currency}}">
+                                            <input type="hidden" name="returnurl" value="{{returnurl}}">
+                                            <input type="hidden" name="sesskey" value="{{sesskey}}">
+                                            <button class="btn btn-link text-danger commerce-cart-line__remove" type="submit">
+                                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                                                <span>{{removelabel}}</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    {{/items}}
+                </div>
+            </div>
+            <div class="col-lg-4">{{> local_subscriptions/cart/summary}}</div>
+        </div>
+    {{/hasitems}}
+
+    {{^hasitems}}
+        <div class="commerce-cart-empty card border-0 shadow-sm text-center">
+            <div class="card-body py-5 px-4">
+                <div class="commerce-cart-empty__icon mb-3" aria-hidden="true">🛒</div>
+                <h2 class="h3">{{emptytitle}}</h2>
+                <p class="text-muted mb-4">{{emptytext}}</p>
+                <a href="{{continueshoppingurl}}" class="btn btn-primary">{{continueshoppinglabel}}</a>
+            </div>
+        </div>
+    {{/hasitems}}
+</div>
+
+
+{{#hasitems}}
+<div class="modal fade commerce-clear-cart-modal" id="commerce-clear-cart-modal" tabindex="-1" aria-labelledby="commerce-clear-cart-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h2 class="modal-title h4" id="commerce-clear-cart-modal-title">{{clearlabel}}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{clearcancellabel}}"></button>
+            </div>
+            <div class="modal-body pt-3">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="commerce-clear-cart-modal__icon" aria-hidden="true">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <p class="mb-0 text-muted">{{clearconfirm}}</p>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{clearcancellabel}}</button>
+                <form method="post" action="{{clearaction}}" class="m-0">
+                    <input type="hidden" name="action" value="clear">
+                    <input type="hidden" name="currency" value="{{currency}}">
+                    <input type="hidden" name="returnurl" value="{{continueshoppingurl}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{clearconfirmlabel}}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{/hasitems}}

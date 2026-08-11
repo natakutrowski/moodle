@@ -121,4 +121,10 @@ if ($h = new admin_settingpage('local_campus', get_string('pluginname', 'local_c
 
 
     $ADMIN->add('localplugins', $h);
+    $ADMIN->add('localplugins', new admin_externalpage(
+        'local_campus_mobile_covers',
+        get_string('mobilecoverspage', 'local_campus'),
+        new moodle_url('/local/campus/mobile_course_covers.php'),
+        'moodle/site:config'
+    ));
 }

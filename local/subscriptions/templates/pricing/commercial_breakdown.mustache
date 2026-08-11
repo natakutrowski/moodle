@@ -1,0 +1,40 @@
+{{#hascommercialupgradepricing}}
+<details class="commerce-commercial-price-breakdown">
+    <summary class="commerce-commercial-price-breakdown__summary">
+        <span class="commerce-commercial-price-breakdown__details-label">
+            {{commercialdetailslabel}}
+        </span>
+    </summary>
+
+    <dl class="commerce-commercial-price-breakdown__rows">
+        <div class="commerce-commercial-price-breakdown__row">
+            <dt>{{commercialinitiallabel}}</dt>
+            <dd>{{commercialinitialformatted}}</dd>
+        </div>
+
+        {{#hascommercialpromotion}}
+            <div class="commerce-commercial-price-breakdown__row commerce-commercial-price-breakdown__row--reduction">
+                <dt>{{commercialpromotionlabel}}</dt>
+                <dd>− {{commercialpromotionformatted}}</dd>
+            </div>
+        {{/hascommercialpromotion}}
+
+        {{#hascommercialtrial}}
+            <div class="commerce-commercial-price-breakdown__row commerce-commercial-price-breakdown__row--reduction">
+                <dt>{{commercialtriallabel}}</dt>
+                <dd>− {{commercialtrialformatted}}</dd>
+            </div>
+        {{/hascommercialtrial}}
+
+        <div class="commerce-commercial-price-breakdown__row commerce-commercial-price-breakdown__row--reduction">
+            <dt>{{commercialcreditlabel}}</dt>
+            <dd>− {{commercialcreditformatted}}</dd>
+        </div>
+
+        <div class="commerce-commercial-price-breakdown__row commerce-commercial-price-breakdown__row--final">
+            <dt>{{commercialfinallabel}}</dt>
+            <dd>{{commercialfinalformatted}}</dd>
+        </div>
+    </dl>
+</details>
+{{/hascommercialupgradepricing}}

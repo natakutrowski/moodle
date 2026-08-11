@@ -41,18 +41,18 @@
 				  enabled:true
 				}
 			  });
-			
+
 
 			// Header Sticky
 			$(window).on('scroll',function() {
-				if ($(this).scrollTop() > 30){  
+				if ($(this).scrollTop() > 30){
 					$('.navbar-area').addClass("is-sticky");
 				}
 				else{
 					$('.navbar-area').removeClass("is-sticky");
 				}
 			});
-            
+
             $("body.role-standard:not(.path-contentbank):not(#page-contentbank) .bottom-region-main-box").each(function() {
                 if (!$(this).find(".block").length && !$(this).find(".edly-main").text().trim().length) {
                 $(".bottom-region-main-box, .bottom-region-main-box #page-content").css({
@@ -89,7 +89,7 @@
 				preloader: false,
 				fixedContentPos: false
 			});
-			
+
 			// Click Event JS
 			$('.go-top').on('click', function() {
 				$("html, body").animate({ scrollTop: "0" }, 100);
@@ -99,7 +99,7 @@
 			$('.mean-menu').meanmenu({
 				meanScreenWidth: "1199"
 			});
-			
+
 			$(".popover-region-notifications").click(function() {
 				$(".popover-region-notifications").toggleClass('collapsed');
 			});
@@ -205,14 +205,14 @@
 			}
 		});
 
-		// Count Time 
+		// Count Time
 		function makeTimer() {
-			var endTime = new Date("September 20, 2025 17:00:00 PDT");			
+			var endTime = new Date("September 20, 2025 17:00:00 PDT");
 			var endTime = (Date.parse(endTime)) / 1000;
 			var now = new Date();
 			var now = (Date.parse(now) / 1000);
 			var timeLeft = endTime - now;
-			var days = Math.floor(timeLeft / 86400); 
+			var days = Math.floor(timeLeft / 86400);
 			var hours = Math.floor((timeLeft - (days * 86400)) / 3600);
 			var minutes = Math.floor((timeLeft - (days * 86400) - (hours * 3600 )) / 60);
 			var seconds = Math.floor((timeLeft - (days * 86400) - (hours * 3600) - (minutes * 60)));
@@ -245,7 +245,7 @@
 
 		// AOS JS
 		AOS.init();
-		
+
 		// Masonry PACKAGED Js
 		$('.review-grid').masonry({
 			// options
@@ -256,7 +256,7 @@
 		(function ($) {
 			$('.tab ul.tabs').addClass('active').find('> li:eq(0)').addClass('current');
 			$('.tab ul.tabs li a').on('click', function (g) {
-				var tab = $(this).closest('.tab'), 
+				var tab = $(this).closest('.tab'),
 				index = $(this).closest('li').index();
 				tab.find('ul.tabs > li').removeClass('current');
 				$(this).closest('li').addClass('current');
@@ -276,7 +276,7 @@
 				// Hide The Other Panels
 				$('.accordion-content').not($(this).next()).slideUp('fast');
 				// Removes Active Class From Other Titles
-				$('.accordion-title').not($(this)).removeClass('active');		
+				$('.accordion-title').not($(this)).removeClass('active');
 			});
 		});
 
@@ -285,11 +285,11 @@
 			var scrolled = $(window).scrollTop();
 			if (scrolled > 600) $('.go-top').addClass('active');
 			if (scrolled < 600) $('.go-top').removeClass('active');
-		});  
+		});
 		$('.go-top').on('click', function() {
 			$("html, body").animate({ scrollTop: "0" },  500);
 		});
-		
+
 		// Preloader JS
 		jQuery(window).on('load',function(){
 			jQuery(".preloader").fadeOut(500);
@@ -312,120 +312,42 @@ $(function () {
 
 // ==== CAMPUS – Améliorations des champs de réponse dans les quiz ====
 document.addEventListener('DOMContentLoaded', function () {
-
-    // On ne fait tout ça que sur les pages de quiz
-    if (!document.body.classList.contains('path-mod-quiz')) {
-        return;
-    }
-
-    // --- 1. Grandes réponses : transformer l'input en textarea auto-height ---
-    (function enhanceLongShortAnswers() {
-        var inputs = document.querySelectorAll(
-            '.que.shortanswer .answer input[type="text"].form-control'
-        );
-
-        inputs.forEach(function (input) {
-            if (input.dataset.enhanced === '1') {
-                return;
-            }
-            input.dataset.enhanced = '1';
-
-            // Créer le textarea visible
-            var ta = document.createElement('textarea');
-            ta.className = 'form-control quiz-longanswer';
-            ta.id = input.id + '_visible';
-            ta.name = input.name + '_visible';
-            ta.rows = 1;
-            ta.value = input.value || '';
-
-            var init = input.getAttribute('data-initial-value');
-            if (init !== null && !ta.value) {
-                ta.value = init;
-            }
-
-            function autoResize() {
-                ta.style.height = 'auto';
-                ta.style.overflowY = 'hidden';
-                ta.style.height = ta.scrollHeight + 'px';
-            }
-
-            ta.addEventListener('input', function () {
-                input.value = ta.value; // on alimente l’input caché pour Moodle
-                autoResize();
-            });
-
-            // Insérer le textarea dans le DOM
-            input.parentNode.insertBefore(ta, input);
-
-            // Premier sizing
-            autoResize();
-
-            // Cacher l’input original mais le garder dans le formulaire
-            input.style.position = 'absolute';
-            input.style.left = '-9999px';
-            input.style.width = '0';
-            input.style.height = '0';
-            input.setAttribute('aria-hidden', 'true');
-            input.tabIndex = -1;
-
-            // Mettre à jour le label pour qu'il pointe vers le textarea
-            var label = input.closest('label');
-            if (label && label.getAttribute('for') === input.id) {
-                label.setAttribute('for', ta.id);
-            }
-        });
-    })();
-
-    // --- 2. Trous dans la phrase : input qui s'élargit/rétrécit horizontalement ---
-    (function enhanceGapInputs() {
-        var gaps = document.querySelectorAll(
-            '.qtext input[type="text"].form-control.d-inline'
-        );
-
-        gaps.forEach(function (input) {
-            // Classe pour pouvoir le styler
-            input.classList.add('quiz-gap');
-
-            // Base : l'attribut size si présent, sinon 10 caractères
-            var sizeAttr = parseInt(input.getAttribute('size') || '0', 10);
-            var minCh = sizeAttr > 0 ? sizeAttr : 10;  // plus large par défaut
-            var maxCh = 24;                            // limite max
-
-            function autoWidth() {
-                var len = input.value.length;
-                var widthCh = len + 1; // petite marge
-
-                if (widthCh < minCh) {
-                    widthCh = minCh;
-                } else if (widthCh > maxCh) {
-                    widthCh = maxCh;
-                }
-
-                input.style.width = widthCh + 'ch';
-            }
-
-            // Largeur initiale
-            autoWidth();
-
-            // Recalcul à chaque frappe (ajout ou suppression)
-            input.addEventListener('input', autoWidth);
-        });
-    })();
-
-});
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    // On ne fait ça que s'il y a un menu utilisateur → user connecté
+    // Edly historically removed the first breadcrumb item for connected users
+    // because it was normally the Moodle home node. CampusFR now deliberately
+    // uses "Mon Campus" as the first customer breadcrumb entry, so only remove
+    // a genuine home node and preserve every custom first item.
     if (!document.querySelector('.usermenu')) {
         return;
     }
 
-    // Pour chaque fil d'Ariane dans la bannière, on supprime le premier <li>
-    document.querySelectorAll('.page-banner-area .breadcrumb').forEach(function (bc) {
-        var firstItem = bc.querySelector('.breadcrumb-item:first-child');
-        if (firstItem) {
-            firstItem.parentNode.removeChild(firstItem);
+    document.querySelectorAll('.page-banner-area .breadcrumb').forEach(function (breadcrumb) {
+        var firstItem = breadcrumb.querySelector('.breadcrumb-item:first-child');
+        if (!firstItem) {
+            return;
+        }
+
+        var link = firstItem.querySelector('a');
+        var href = link ? (link.getAttribute('href') || '') : '';
+        var label = (firstItem.textContent || '').trim().toLowerCase();
+        var pathname = '';
+
+        if (href !== '') {
+            try {
+                pathname = new URL(href, window.location.origin).pathname;
+            } catch (error) {
+                pathname = href.split(/[?#]/, 1)[0];
+            }
+        }
+
+        // Only remove the genuine Moodle site home. A friendly route such as
+        // /mon-campus/ may legitimately end with a slash and must be kept.
+        var normalisedPath = pathname.replace(/\/+$/, '') || '/';
+        var isSiteHome = normalisedPath === '/'
+            || normalisedPath === '/index.php'
+            || ['accueil', 'home', 'главная'].indexOf(label) !== -1;
+
+        if (isSiteHome) {
+            firstItem.remove();
         }
     });
 });

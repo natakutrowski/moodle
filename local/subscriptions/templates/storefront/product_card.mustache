@@ -1,0 +1,114 @@
+<div class="{{#featured}}col-12{{/featured}}{{^featured}}col-12 col-lg-6{{/featured}} d-flex">
+    <article class="commerce-product-card card border-0 shadow-sm w-100 overflow-hidden{{#featured}} commerce-product-card--featured{{/featured}}">
+        {{#featured}}
+            <div class="commerce-product-card__featured-label">{{featuredlabel}}</div>
+        {{/featured}}
+        <a href="{{detailsurl}}" class="commerce-product-card__media text-decoration-none" aria-label="{{name}}">
+            {{#hascover}}
+                <img src="{{coverurl}}"{{#coverresponsive}} srcset="{{coversrcset}}" sizes="(max-width: 991px) calc(100vw - 48px), 50vw"{{/coverresponsive}} width="{{coverwidth}}" height="{{coverheight}}" {{#featured}}loading="eager" fetchpriority="high"{{/featured}}{{^featured}}loading="lazy" fetchpriority="low"{{/featured}} decoding="async" alt="" class="commerce-product-card__cover">
+            {{/hascover}}
+            {{^hascover}}
+                {{> local_subscriptions/storefront/product_placeholder }}
+            {{/hascover}}
+        </a>
+        <div class="card-body p-4 d-flex flex-column">
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-3 commerce-product-card__badge-row">
+                <span class="badge rounded-pill text-bg-light border commerce-product-type-badge">{{typelabel}}</span>
+                {{^owned}}{{> local_subscriptions/storefront/product_badges }}{{/owned}}
+            </div>
+            <h2 class="h4 mb-3"><a href="{{detailsurl}}" class="stretched-link commerce-product-card__title">{{name}}</a></h2>
+            <div class="commerce-product-card__description text-muted mb-3">{{{shortdescription}}}</div>
+            {{#hasquickfacts}}
+                <div class="commerce-product-card__facts mb-3">
+                    {{#quickfacts}}
+                        <span class="commerce-product-card__fact"><strong>{{value}}</strong> <span class="commerce-product-badge__icon" aria-hidden="true">{{icon}}</span>{{label}}</span>
+                    {{/quickfacts}}
+                </div>
+            {{/hasquickfacts}}
+            {{#owned}}
+                <div class="commerce-product-card__owned mb-3" role="status">✓ {{ownedlabel}}</div>
+            {{/owned}}
+            <div class="mt-auto position-relative" style="z-index:2">
+                {{^owned}}
+                    {{> local_subscriptions/storefront/product_price }}
+                {{/owned}}
+                {{^owned}}
+                    {{#hastrustitems}}
+                        <div class="commerce-product-card__trust mb-3">
+                            {{#trustitems}}<span>✓ <span class="commerce-product-badge__icon" aria-hidden="true">{{icon}}</span>{{label}}</span>{{/trustitems}}
+                        </div>
+                    {{/hastrustitems}}
+                {{/owned}}
+                <div class="commerce-product-card__cart-actions">
+                    {{#hasupgrade}}
+                        {{#canaddupgradetocart}}
+                            <form method="post" action="{{cartaction}}" class="flex-grow-1">
+                                <input type="hidden" name="action" value="{{upgradetoggleaction}}">
+                                {{^upgradeincart}}<input type="hidden" name="operation" value="upgrade">{{/upgradeincart}}
+                                {{^upgradeincart}}<input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}">{{/upgradeincart}}
+                                <input type="hidden" name="sku" value="{{sku}}">
+                                <input type="hidden" name="priceid" value="{{upgradepriceid}}">
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                <button type="submit" class="btn {{#upgradeincart}}btn-outline-danger{{/upgradeincart}}{{^upgradeincart}}btn-primary{{/upgradeincart}} w-100">{{#upgradeincart}}<i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{/upgradeincart}}{{^upgradeincart}}<i class="fa-solid fa-cart-plus me-2" aria-hidden="true"></i>{{/upgradeincart}}{{upgradetogglelabel}}</button>
+                            </form>
+                            {{^upgradeincart}}
+                                <form method="post" action="{{cartaction}}" class="flex-grow-1">
+                                    <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1">
+                                    <input type="hidden" name="operation" value="upgrade">
+                                    <input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}">
+                                    <input type="hidden" name="sku" value="{{sku}}">
+                                    <input type="hidden" name="priceid" value="{{upgradepriceid}}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                    <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                    <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                    <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{buy_now_label}}</button>
+                                </form>
+                            {{/upgradeincart}}
+                        {{/canaddupgradetocart}}
+                    {{/hasupgrade}}
+                    {{#canpurchase}}
+                        {{#prices}}
+                            {{#canaddtocart}}
+                                <form method="post" action="{{cartaction}}" class="flex-grow-1">
+                                    <input type="hidden" name="action" value="{{toggleaction}}">
+                                    <input type="hidden" name="sku" value="{{sku}}">
+                                    <input type="hidden" name="priceid" value="{{id}}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                    <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                    <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                    <button type="submit" class="btn {{#incart}}btn-outline-danger{{/incart}}{{^incart}}btn-primary{{/incart}} w-100">{{#incart}}<i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{/incart}}{{^incart}}<i class="fa-solid fa-cart-plus me-2" aria-hidden="true"></i>{{/incart}}{{togglelabel}}</button>
+                                </form>
+                                {{^incart}}
+                                    <form method="post" action="{{cartaction}}" data-provider-experience data-provider-context="express-candidate" data-currency="{{cartcurrency}}" data-product="{{name}}" data-price="{{formatted}}" class="flex-grow-1">
+                                        <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1">
+                                        <input type="hidden" name="sku" value="{{sku}}">
+                                        <input type="hidden" name="priceid" value="{{id}}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                        <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                        <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                        <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{buy_now_label}}</button>
+                                    </form>
+                                {{/incart}}
+                            {{/canaddtocart}}
+                        {{/prices}}
+                    {{/canpurchase}}
+                    {{#owned}}
+                        <a href="{{ownedactionurl}}" class="btn btn-success flex-grow-1">
+                            {{#ownediscourse}}<i class="fa-solid fa-graduation-cap me-2" aria-hidden="true"></i>{{/ownediscourse}}
+                            {{#ownedisdigital}}<i class="fa-solid fa-file-arrow-down me-2" aria-hidden="true"></i>{{/ownedisdigital}}
+                            {{^ownediscourse}}{{^ownedisdigital}}<i class="fa-solid fa-bag-shopping me-2" aria-hidden="true"></i>{{/ownedisdigital}}{{/ownediscourse}}
+                            {{ownedactionlabel}}
+                        </a>
+                    {{/owned}}
+                    <a href="{{detailsurl}}" class="btn btn-outline-secondary flex-grow-1">{{detailslabel}}</a>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>

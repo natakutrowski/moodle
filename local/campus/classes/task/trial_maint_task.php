@@ -148,7 +148,7 @@ class trial_maint_task extends \core\task\scheduled_task {
                         'toemail'         => (string)$t->email,
                         'firstname'       => (string)($t->firstname ?? ''),
                         'continue_url'    => $continueurl,
-                        'subscribe_url'   => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
+                        'subscribe_url'   => (new \moodle_url('/boutique'))->out(false),
                         'course_fullname' => $coursefullname,
                         'daysleft'        => max(0, (int)ceil(($expiresAt - $now) / DAYSECS)),
                         'lang'            => $langpref,
@@ -180,7 +180,7 @@ class trial_maint_task extends \core\task\scheduled_task {
 /*                 \local_subscriptions\mailer::dispatch(\local_subscriptions\mailer::T_TRIAL_EXPIRED, [
                     'toemail'         => (string)$t->email,
                     'firstname'       => (string)($t->firstname ?? ''),
-                    'subscribe_url'   => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
+                    'subscribe_url'   => (new \moodle_url('/boutique'))->out(false),
                     'course_fullname' => $coursefullname,
                     'suspend_date'    => $suspendTs,
                     'lang'            => $langpref,
@@ -204,7 +204,7 @@ class trial_maint_task extends \core\task\scheduled_task {
                     'toemail'       => (string)$t->email,
                     'firstname'     => (string)($t->firstname ?? ''),
                     'suspend_date'  => (int)$expiresAt + $suspendAfter*DAYSECS,
-                    'subscribe_url' => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
+                    'subscribe_url' => (new \moodle_url('/boutique'))->out(false),
                     'lang'          => $langpref,
                 ]); */
 
@@ -244,7 +244,7 @@ class trial_maint_task extends \core\task\scheduled_task {
                     'firstname'     => (string)($t->firstname ?? ''),
                     'suspend_date'  => (int)$expiresAt + $suspendAfter*DAYSECS,
                     'delete_date'   => (int)$expiresAt + $deleteAfter*DAYSECS,
-                    'subscribe_url' => (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
+                    'subscribe_url' => (new \moodle_url('/boutique'))->out(false),
                     'lang'          => $langpref,
                 ]); */
 

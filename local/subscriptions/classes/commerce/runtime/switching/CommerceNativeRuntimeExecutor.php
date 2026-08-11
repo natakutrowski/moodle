@@ -20,6 +20,7 @@ use local_subscriptions\payment\dto\InternalEvent;
 
 class CommerceNativeRuntimeExecutor {
     public function execute(InternalEvent $event, string $entrypoint): void {
+        global $DB;
         $legacyrequestid = (int) ($event->payment_request_id ?? $event->meta['payment_request_id'] ?? 0);
         $legacyfamily = $this->legacy_family($event);
         $reference = (new CommerceShadowPurchaseReferenceResolver())->resolve($legacyrequestid, $legacyfamily);
@@ -32,7 +33,10 @@ class CommerceNativeRuntimeExecutor {
             new CommerceDigitalDownloadFulfillmentHandler(),
         ]);
         $orchestrator = new CommerceNativePurchaseFulfillmentOrchestrator(
-            new CommerceEntitlementGrantRepository(),
+            new CommerceEntitlementGrantRepository(
+                $DB,
+                new CommerceEntitlementGrantRecordMapper()
+            ),
             new CommerceEntitlementGrantRecordMapper(),
             new CommercePersistentNativeFulfillmentExecutor(
                 $registry,

@@ -1,0 +1,23 @@
+{{> theme_boost/head }}
+<body {{{bodyattributes}}}>
+{{> core/local/toast/wrapper}}
+<div class="storefront-shell storefront-shell--{{#storefrontfullwidth}}fullwidth{{/storefrontfullwidth}}{{^storefrontfullwidth}}standard{{/storefrontfullwidth}}">
+    {{^storefrontminimal}}
+        <header class="storefront-shell__header">
+            {{#campustopbar}}{{{campustopbar}}}{{/campustopbar}}
+            {{> theme_boost/navbar }}
+        </header>
+    {{/storefrontminimal}}
+    {{{ output.standard_top_of_body_html }}}
+    <main id="page-content" class="storefront-shell__main" aria-label="{{#str}}content{{/str}}">
+        {{{ output.main_content }}}
+    </main>
+    {{^storefrontminimal}}
+        <footer class="storefront-shell__footer">{{> theme_boost/footer }}</footer>
+    {{/storefrontminimal}}
+</div>
+{{#storefrontminimal}}
+{{{ output.standard_end_of_body_html }}}
+{{/storefrontminimal}}
+</body>
+</html>

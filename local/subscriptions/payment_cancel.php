@@ -6,7 +6,13 @@ use local_subscriptions\mailer;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Status;
 
+use local_subscriptions\commerce\compatibility\CommerceLegacyUrlCompatibilityService;
+
 \local_subscriptions\subscription_config::guard_public_access();
+
+global $DB;
+(new CommerceLegacyUrlCompatibilityService($DB))->redirect_native_result_if_present('cancelled');
+
 
 // --- Helper format prix (respecte l’option symbole) ---
 function ls_money_fmt(float $amount, string $cur): string {

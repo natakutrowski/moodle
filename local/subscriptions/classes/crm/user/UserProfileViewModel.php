@@ -22,7 +22,9 @@ final class UserProfileViewModel {
         public readonly array $tags = [],
         public readonly array $actions = [],
         public readonly ?UserIntelligence $intelligence = null,
-        public readonly ?UserInboxSummary $inbox = null
+        public readonly ?UserInboxSummary $inbox = null,
+        public readonly array $commercepurchases = [],
+        public readonly ?array $commercesnapshot = null
     ) {
     }
 
@@ -46,6 +48,8 @@ final class UserProfileViewModel {
 
             'inbox' =>
                 $this->inbox?->to_object(),
+            'commercepurchases' => $this->commercepurchases,
+            'commercesnapshot' => $this->commercesnapshot,
         ];
     }
 }

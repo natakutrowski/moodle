@@ -8044,23 +8044,36 @@ body.pagelayout-frontpage {
     overflow-y: auto;
 }
 
+/* ============================================================
+   CampusFR - Course blocks responsive placement
+   Desktop: side-pre
+   Mobile: above-content
+   ============================================================ */
+
 /* Desktop */
-#block-region-above-content .block_xp {
+
+#block-region-above-content .block_xp,
+#block-region-above-content [data-block="gearup"] {
     display: none;
 }
 
-#block-region-side-pre .block_xp {
+#block-region-side-pre .block_xp,
+#block-region-side-pre [data-block="gearup"] {
     display: block;
 }
 
+
 /* Mobile */
+
 @media (max-width: 768px) {
 
-    #block-region-above-content .block_xp {
+    #block-region-above-content .block_xp,
+    #block-region-above-content [data-block="gearup"] {
         display: block;
     }
 
-    #block-region-side-pre .block_xp {
+    #block-region-side-pre .block_xp,
+    #block-region-side-pre [data-block="gearup"] {
         display: none;
     }
 }
@@ -8194,4 +8207,74 @@ body.path-mod-readaloud #mod_readaloud_footernav_cont ol.main-nav > li .nav-link
     min-height: 50px !important;
     padding: 6px 4px !important;
     font-size: 10px !important;
+}
+
+/* CampusFR J6.4 — unified restricted-content banners. */
+.cf-locked-row--campus {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 64px;
+    padding: 12px 14px;
+    border-radius: 15px;
+    background: linear-gradient(90deg, #edf0f4 0%, #edf0f4 82%, #f7eaf2 100%);
+}
+
+.cf-locked-row--campus .cf-locked-ico {
+    display: inline-flex;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #fff;
+    color: #738198;
+    font-size: 20px;
+}
+
+.cf-locked-row--campus .cf-locked-copy {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.cf-locked-row--campus .cf-locked-title {
+    margin-bottom: 2px;
+    color: #261851;
+    font-weight: 700;
+}
+
+.cf-locked-row--campus .cf-locked-desc {
+    color: #526078;
+    line-height: 1.45;
+}
+
+.cf-locked-row--campus .cf-locked-actions {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 767.98px) {
+    .cf-locked-row--campus {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .cf-locked-row--campus .cf-locked-actions {
+        width: 100%;
+        padding-left: 54px;
+    }
+}
+
+
+/* J15H.1B — keep the connected mobile menu heading clear of the rounded panel edge. */
+@media (max-width: 991.98px) {
+    #campusMobileMenu .offcanvas-header {
+        padding: 1.35rem 1.35rem .75rem 1.55rem;
+    }
+    #campusMobileMenu .offcanvas-title,
+    #campusMobileMenu #campusMobileMenuLabel {
+        margin: 0;
+        line-height: 1.25;
+    }
 }

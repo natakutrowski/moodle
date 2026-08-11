@@ -4,25 +4,25 @@ namespace local_subscriptions\service;
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\crm\user\UserProfileRepository;
-use local_subscriptions\crm\user\UserProfileStats;
-use local_subscriptions\crm\user\UserProfileViewModel;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\commerce\customer\crm\CommerceCustomerCrmAdapter;
+use local_subscriptions\commerce\customer\readmodel\CommerceCustomerReadService;
+use local_subscriptions\crm\intelligence\core\UserIntelligenceBuilder;
 use local_subscriptions\crm\user\UserProfileActionBuilder;
-use local_subscriptions\crm\user\UserProfileTimelineBuilder;
-use local_subscriptions\crm\user\UserProfileNoteService;
-use local_subscriptions\crm\user\UserProfileTagService;
 use local_subscriptions\crm\user\UserProfileLookupResult;
 use local_subscriptions\crm\user\UserProfileNotFoundException;
-use local_subscriptions\crm\intelligence\core\UserIntelligenceBuilder;
+use local_subscriptions\crm\user\UserProfileNoteService;
+use local_subscriptions\crm\user\UserProfileRepository;
+use local_subscriptions\crm\user\UserProfileTagService;
+use local_subscriptions\crm\user\UserProfileTimelineBuilder;
+use local_subscriptions\crm\user\UserProfileViewModel;
 use local_subscriptions\crm\user\inbox\UserInboxRepository;
 use local_subscriptions\crm\user\inbox\UserInboxService;
-use local_subscriptions\admin\Capabilities;
 
 final class UserProfileService {
 
     public static function load(int $userid): \stdClass {
         $service = new self(new UserProfileRepository());
-
         return $service->load_view_model($userid)->to_legacy_object();
     }
 
@@ -32,9 +32,7 @@ final class UserProfileService {
     }
 
     public function load_view_model(int $userid): UserProfileViewModel {
-        $lookup = $this->repository->resolve_user(
-            $userid
-        );
+        $lookup = $this->repository->resolve_user($userid);
 
         if (!$lookup->is_active()) {
             throw new UserProfileNotFoundException(
@@ -44,7 +42,6 @@ final class UserProfileService {
         }
 
         $user = $lookup->get_user();
-
         if ($user === null) {
             throw new \coding_exception(
                 'An active UserProfile lookup must contain a Moodle user record.'
@@ -52,54 +49,52 @@ final class UserProfileService {
         }
 
         $canviewinbox = Capabilities::can_view_inbox();
-
-        $subscriptions = $this->repository->get_subscriptions((int)$user->id);
-        $digitalpayments = $this->repository->get_digital_payments((int)$user->id, (string)$user->email);
         $courses = $this->repository->get_accessible_courses((int)$user->id);
         $noteservice = new UserProfileNoteService($this->repository);
         $tagservice = new UserProfileTagService($this->repository);
-
-        $timelinebuilder = new UserProfileTimelineBuilder();
         $actionbuilder = new UserProfileActionBuilder();
 
-        $timelinepage =
-            $timelinebuilder
-                ->build_page_for_user(
-                    $user,
-                    20,
-                    0,
-                    $canviewinbox
-                );
+        global $DB;
 
-        $timeline =
-            $timelinebuilder
-                ->to_legacy_objects(
-                    $timelinepage->events
-                );
+        $snapshot = (new CommerceCustomerReadService($DB))->build(
+            (int)$user->id,
+            (string)$user->email
+        );
+        $adapter = new CommerceCustomerCrmAdapter();
+        $commercepurchases = $adapter->purchase_rows($snapshot);
 
-        $stats = new UserProfileStats(
-            $this->crm_status((int)$user->id, !empty($user->suspended)),
-            count($subscriptions),
-            count($digitalpayments),
+        // Keep Legacy arrays as fallback/adapters during the 7.95 transition.
+        $subscriptions = $this->repository->get_subscriptions((int)$user->id);
+        $digitalpayments = $this->repository->get_digital_payments(
+            (int)$user->id,
+            (string)$user->email
+        );
+
+        $timelinebuilder = new UserProfileTimelineBuilder();
+        $timelinepage = $timelinebuilder->build_page_for_user(
+            $user,
+            20,
+            0,
+            $canviewinbox,
+            $snapshot
+        );
+        $timeline = $timelinebuilder->to_legacy_objects($timelinepage->events);
+
+        $legacystatus = $this->legacy_crm_status((int)$user->id);
+        $stats = $adapter->stats(
+            $snapshot,
             $this->repository->count_accessible_courses((int)$user->id),
-            $this->repository->sum_spent_by_currency((int)$user->id, 'EUR'),
-            $this->repository->sum_spent_by_currency((int)$user->id, 'RUB'),
-            $this->repository->last_activity((int)$user->id)
+            $this->repository->last_activity((int)$user->id),
+            !empty($user->suspended),
+            $legacystatus
         );
 
         $intelligence = (new UserIntelligenceBuilder())->build_for_user($user);
 
         $inbox = null;
-
         if ($canviewinbox) {
-            $inboxservice = new UserInboxService(
-                new UserInboxRepository()
-            );
-
-            $inbox = $inboxservice->get_for_user(
-                (int)$user->id,
-                5
-            );
+            $inbox = (new UserInboxService(new UserInboxRepository()))
+                ->get_for_user((int)$user->id, 5);
         }
 
         return new UserProfileViewModel(
@@ -118,27 +113,22 @@ final class UserProfileService {
                 $actionbuilder->build_for_profile($user, $digitalpayments)
             ),
             $intelligence,
-            $inbox
+            $inbox,
+            $commercepurchases,
+            $snapshot->to_array()
         );
     }
 
-    private function crm_status(int $userid, bool $usersuspended): string {
-        if ($usersuspended) {
-            return 'suspended';
-        }
-
+    private function legacy_crm_status(int $userid): string {
         if ($this->repository->has_subscription_status($userid, 'active')) {
             return 'active_customer';
         }
-
         if ($this->repository->has_subscription_status($userid, 'trial')) {
             return 'trial';
         }
-
         if ($this->repository->has_past_subscription($userid)) {
             return 'former_customer';
         }
-
         return 'lead';
     }
 }

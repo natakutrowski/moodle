@@ -4,8 +4,14 @@ require_once(__DIR__ . '/../../../../../config.php');
 
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
-use local_subscriptions\commerce\catalog\presentation\CommerceProductPresentation;
+use local_subscriptions\commerce\catalog\navigation\CommerceCatalogLinkGenerator;
+use local_subscriptions\commerce\catalog\presentation\CommerceCatalogPresentation;
+use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogListFilter;
+use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogReadRepository;
+use local_subscriptions\commerce\catalog\validation\CommerceCatalogValidator;
+use local_subscriptions\commerce\catalog\validation\CommerceCatalogActivationValidator;
 use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
+use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
@@ -15,23 +21,75 @@ use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
+$query = optional_param('q', '', PARAM_RAW_TRIMMED);
 $type = optional_param('type', '', PARAM_ALPHANUMEXT);
-$status = optional_param('status', '', PARAM_ALPHANUMEXT);
-$pageurl = new moodle_url('/local/subscriptions/admin/commerce/products/index.php');
-$pagetitle = get_string('commerce_products_title', 'local_subscriptions');
+$editorial = '';
+$visibility = '';
+$availability = '';
+$technical = '';
+$currency = strtoupper(optional_param('currency', '', PARAM_ALPHA));
+$origin = optional_param('origin', '', PARAM_ALPHANUMEXT);
+$page = optional_param('page', 0, PARAM_INT);
+$perpage = optional_param('perpage', 25, PARAM_INT);
 
+$filter = new CommerceCatalogListFilter($query, $type, $editorial, $visibility, $availability, $technical, $currency, $origin);
+$repository = new CommerceCatalogReadRepository($DB);
+$productmanager = (new CommerceCatalogFactory($DB))->product_manager();
+$activationvalidator = new CommerceCatalogActivationValidator($DB);
+$result = $repository->search($filter, $page, $perpage);
+$allproducts = $repository->find_all();
+$pageurl = new moodle_url('/local/subscriptions/admin/commerce/products/index.php');
+$pagetitle = get_string('commerce_catalog_title', 'local_subscriptions');
 CrmPageConfigurator::configure($PAGE, $context, $pageurl, $pagetitle, 'local-subscriptions-commerce-products-page');
-$factory = new CommerceCatalogFactory($DB);
-$manager = $factory->product_manager();
-$products = $manager->list_products($type ?: null, $status ?: null);
-$typeoptions = ['' => get_string('all')] + array_combine(
-    array_map(static fn($item): string => $item->get_code(), $factory->product_type_registry()->all()),
-    array_map(static fn($item): string => CommerceProductPresentation::type_label($item->get_code()), $factory->product_type_registry()->all())
+
+$collect = static function(array $products, callable $getter): array {
+    $values = [];
+    foreach ($products as $product) { $values[$getter($product)] = true; }
+    ksort($values);
+    return array_keys($values);
+};
+$options = static fn(string $dimension, array $values): array => ['' => get_string('all')] + array_combine(
+    $values,
+    array_map(static fn(string $value): string => CommerceCatalogPresentation::label($dimension, $value), $values)
 );
-$statusoptions = ['' => get_string('all')];
-foreach (\local_subscriptions\commerce\catalog\domain\CommerceProductStatus::all() as $statuscode) {
-    $statusoptions[$statuscode] = CommerceProductPresentation::status_label($statuscode);
+
+$typeoptions = $options('type', $collect($allproducts, static fn($p): string => $p->get_type()));
+$currencies = [];
+foreach ($allproducts as $product) {
+    foreach ($product->get_prices() as $price) { $currencies[$price->get_currency()] = $price->get_currency(); }
 }
+ksort($currencies);
+$currencyoptions = ['' => get_string('all')] + $currencies;
+$originoptions = [
+    '' => get_string('all'),
+    'native' => get_string('commerce_catalog_origin_native', 'local_subscriptions'),
+    'legacy_plan' => get_string('commerce_catalog_origin_legacy_only', 'local_subscriptions'),
+    'legacy_digital' => get_string('commerce_catalog_origin_legacy_only', 'local_subscriptions'),
+];
+
+$select = static function(string $name, string $label, array $choices, string $selected, string $class = 'col-md-3'): string {
+    return html_writer::div(
+        html_writer::tag('label', $label, ['for' => $name, 'class' => 'form-label']) .
+        html_writer::select($choices, $name, $selected, false, ['id' => $name, 'class' => 'form-select']),
+        $class
+    );
+};
+
+$filterhtml = html_writer::start_tag('form', ['method' => 'get', 'class' => 'row g-3 align-items-end']);
+$filterhtml .= html_writer::div(
+    html_writer::tag('label', get_string('search'), ['for' => 'q', 'class' => 'form-label']) .
+    html_writer::empty_tag('input', ['type' => 'search', 'name' => 'q', 'id' => 'q', 'value' => $query, 'class' => 'form-control']),
+    'col-md-6'
+);
+$filterhtml .= $select('type', get_string('commerce_product_type', 'local_subscriptions'), $typeoptions, $type);
+$filterhtml .= $select('currency', get_string('currency'), $currencyoptions, $currency, 'col-md-2');
+$filterhtml .= $select('origin', get_string('commerce_catalog_origin', 'local_subscriptions'), $originoptions, $origin, 'col-md-2');
+$filterhtml .= html_writer::div(
+    html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-outline-primary me-2', 'value' => get_string('filter')]) .
+    html_writer::link($pageurl, get_string('reset'), ['class' => 'btn btn-outline-secondary']),
+    'col-md-2 d-flex'
+);
+$filterhtml .= html_writer::end_tag('form');
 
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
@@ -39,73 +97,120 @@ echo CrmBreadcrumbRenderer::render([
     ['label' => get_string('crm_commerce_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php')],
     ['label' => $pagetitle, 'url' => null],
 ]);
-echo CrmPageHeader::render($pagetitle, get_string('commerce_products_description', 'local_subscriptions'), HelpContext::COMMERCE);
+echo CrmPageHeader::render($pagetitle, get_string('commerce_catalog_description', 'local_subscriptions'), HelpContext::COMMERCE);
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PRODUCTS);
+echo CommerceDesignSystemRenderer::filter_panel($filterhtml);
+echo CommerceDesignSystemRenderer::action_bar([[
+    'label' => get_string('commerce_product_add', 'local_subscriptions'),
+    'url' => new moodle_url('/local/subscriptions/admin/commerce/products/edit.php'),
+    'class' => 'btn btn-primary',
+]], 'mb-3');
 
-echo html_writer::start_div('card card-body mb-4');
-echo html_writer::start_tag('form', ['method' => 'get', 'class' => 'row g-3 align-items-end']);
-echo html_writer::start_div('col-md-4');
-echo html_writer::tag('label', get_string('commerce_product_type', 'local_subscriptions'), ['for' => 'type', 'class' => 'form-label']);
-echo html_writer::select($typeoptions, 'type', $type, false, ['id' => 'type', 'class' => 'form-select']);
-echo html_writer::end_div();
-echo html_writer::start_div('col-md-4');
-echo html_writer::tag('label', get_string('commerce_product_status', 'local_subscriptions'), ['for' => 'status', 'class' => 'form-label']);
-echo html_writer::select($statusoptions, 'status', $status, false, ['id' => 'status', 'class' => 'form-select']);
-echo html_writer::end_div();
-echo html_writer::start_div('col-md-4 d-flex gap-2');
-echo html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-outline-primary', 'value' => get_string('filter')]);
-echo html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/index.php'), get_string('reset'), ['class' => 'btn btn-outline-secondary']);
-echo html_writer::end_div();
-echo html_writer::end_tag('form');
-echo html_writer::end_div();
-
-echo html_writer::div(
-    html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/edit.php'), get_string('commerce_product_add', 'local_subscriptions'), ['class' => 'btn btn-primary']),
-    'mb-3'
-);
-
-if ($products === []) {
-    echo html_writer::div(get_string('commerce_products_empty', 'local_subscriptions'), 'alert alert-info');
+if ($result->items === []) {
+    echo CommerceDesignSystemRenderer::empty_state(
+        get_string('commerce_products_empty_title', 'local_subscriptions'),
+        get_string('commerce_products_empty', 'local_subscriptions')
+    );
 } else {
     $table = new html_table();
     $table->head = [
         get_string('commerce_product_name', 'local_subscriptions'),
         get_string('commerce_product_type', 'local_subscriptions'),
         get_string('commerce_product_status', 'local_subscriptions'),
-        get_string('commerce_product_definition', 'local_subscriptions'),
+        get_string('commerce_prices', 'local_subscriptions'),
         get_string('actions'),
     ];
     $table->attributes['class'] = 'generaltable table table-hover align-middle';
-
-    foreach ($products as $summary) {
-        $product = $summary->get_product();
-        $viewurl = new moodle_url('/local/subscriptions/admin/commerce/products/view.php', ['sku' => $product->get_sku()]);
-        $definition = get_string('commerce_product_definition_counts', 'local_subscriptions', (object) [
-            'prices' => $summary->get_price_count(),
-            'translations' => $summary->get_translation_count(),
-            'components' => $summary->get_component_count(),
-            'entitlements' => $summary->get_entitlement_count(),
-        ]);
-        $namehtml = html_writer::link($viewurl, format_string($product->get_name()), ['class' => 'fw-semibold']) .
-            html_writer::tag('div', s($product->get_sku()), ['class' => 'small text-muted font-monospace']);
-        $actions = html_writer::link($viewurl, get_string('view'), ['class' => 'btn btn-sm btn-outline-secondary me-1']) .
-            html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/edit.php', ['sku' => $product->get_sku()]), get_string('edit'), ['class' => 'btn btn-sm btn-outline-primary me-1']);
-        if (!$product->is_archived()) {
+    $table->attributes['aria-label'] = get_string('commerce_catalog_table_label', 'local_subscriptions');
+    foreach ($result->items as $product) {
+        $viewurl = CommerceCatalogLinkGenerator::view_url($product);
+        $originlabel = $product->get_origin() === 'native'
+            ? get_string('commerce_catalog_origin_native_short', 'local_subscriptions')
+            : get_string('commerce_catalog_origin_legacy_short', 'local_subscriptions');
+        $name = html_writer::link($viewurl, format_string($product->get_name()), ['class' => 'fw-semibold']) .
+            html_writer::div(
+                s($product->get_sku()) . ' (' . s($originlabel) . ')',
+                'small text-muted font-monospace'
+            );
+        $validation = $product->get_origin() === 'native'
+            ? $activationvalidator->validate($productmanager->get_editor_data($product->get_sku())->get_product())
+            : (new CommerceCatalogValidator())->validate($product);
+        $lifecyclestatus = $product->get_editorial_status() === 'archived'
+            ? 'archived'
+            : ($product->get_availability() === 'on_sale' ? 'active' : 'inactive');
+        $statuses = CommerceCatalogPresentation::badge('lifecycle', $lifecyclestatus) . ' ' .
+            CommerceCatalogPresentation::badge('technical', $validation->is_valid() ? 'valid' : 'incomplete');
+        if ($validation->has_issues()) {
+            $statuses .= html_writer::div(implode(' · ', array_map(static fn($issue): string => s($issue->message), $validation->issues)), 'small text-muted mt-1');
+        }
+        $actions = html_writer::link(
+            $viewurl,
+            $product->get_origin() === 'native'
+                ? get_string('view')
+                : get_string(
+                    $product->get_origin() === 'legacy_plan'
+                        ? 'commerce_catalog_open_legacy_plan'
+                        : 'commerce_catalog_open_legacy_digital',
+                    'local_subscriptions'
+                ),
+            ['class' => 'btn btn-sm btn-outline-primary me-1']
+        );
+        if ($product->get_origin() === 'native') {
             $actions .= html_writer::link(
-                new moodle_url('/local/subscriptions/admin/commerce/products/archive.php', ['sku' => $product->get_sku(), 'sesskey' => sesskey()]),
-                get_string('commerce_product_archive', 'local_subscriptions'),
-                ['class' => 'btn btn-sm btn-outline-danger']
+                new moodle_url('/local/subscriptions/admin/commerce/products/edit.php', ['sku' => $product->get_sku()]),
+                get_string('edit'),
+                ['class' => 'btn btn-sm btn-outline-secondary']
+            );
+            if ($lifecyclestatus === 'active') {
+                $actions .= html_writer::link(
+                    new moodle_url('/local/subscriptions/admin/commerce/products/status.php', [
+                        'sku' => $product->get_sku(), 'action' => 'deactivate', 'sesskey' => sesskey(),
+                    ]),
+                    get_string('commerce_product_deactivate', 'local_subscriptions'),
+                    ['class' => 'btn btn-sm btn-outline-warning ms-1']
+                );
+            } else if ($lifecyclestatus === 'inactive') {
+                $actions .= html_writer::link(
+                    new moodle_url('/local/subscriptions/admin/commerce/products/status.php', [
+                        'sku' => $product->get_sku(), 'action' => 'activate', 'sesskey' => sesskey(),
+                    ]),
+                    get_string('commerce_product_activate', 'local_subscriptions'),
+                    ['class' => 'btn btn-sm btn-success ms-1']
+                );
+            }
+        } else {
+            $legacyaction = $lifecyclestatus === 'active' ? 'deactivate' : 'activate';
+            $actions .= html_writer::link(
+                new moodle_url('/local/subscriptions/admin/commerce/products/legacy_status.php', [
+                    'origin' => $product->get_origin(),
+                    'id' => (int)$product->get_id(),
+                    'action' => $legacyaction,
+                    'return' => 'index',
+                    'sesskey' => sesskey(),
+                ]),
+                get_string(
+                    $legacyaction === 'deactivate' ? 'commerce_product_deactivate' : 'commerce_product_activate',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' => $legacyaction === 'deactivate'
+                        ? 'btn btn-sm btn-outline-warning ms-1'
+                        : 'btn btn-sm btn-success ms-1',
+                ]
             );
         }
         $table->data[] = [
-            $namehtml,
-            CommerceProductPresentation::type_badge($product->get_type()),
-            CommerceProductPresentation::status_badge($product->get_status()),
-            s($definition),
+            $name,
+            CommerceCatalogPresentation::badge('type', $product->get_type()),
+            $statuses,
+            CommerceCatalogPresentation::prices($product->get_prices()),
             $actions,
         ];
     }
     echo html_writer::table($table);
+    $params = compact('type', 'editorial', 'visibility', 'availability', 'technical', 'currency', 'origin', 'perpage');
+    $params['q'] = $query;
+    echo $OUTPUT->paging_bar($result->total, $result->page, $result->perpage, new moodle_url($pageurl, $params));
 }
 
 echo CrmWorkspaceRenderer::end();

@@ -4,7 +4,13 @@ require_once(__DIR__.'/../../config.php');
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\payment\PaymentFailureReporter;
 
+use local_subscriptions\commerce\compatibility\CommerceLegacyUrlCompatibilityService;
+
 \local_subscriptions\subscription_config::guard_public_access();
+
+global $DB;
+(new CommerceLegacyUrlCompatibilityService($DB))->redirect_native_result_if_present('failed');
+
 
 // --- Helper format prix (respecte l’option symbole) ---
 function ls_money_fmt(float $amount, string $cur): string {

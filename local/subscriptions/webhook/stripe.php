@@ -5,7 +5,8 @@ $PAGE->set_context(\context_system::instance());
 $payload = file_get_contents('php://input');
 $headers = function_exists('getallheaders') ? getallheaders() : [];
 
-$gateway = new \local_subscriptions\payment\stripe\StripeGateway();
+$profile = optional_param('profile', '', PARAM_ALPHANUMEXT);
+$gateway = new \local_subscriptions\payment\stripe\StripeGateway($profile !== '' ? $profile : null);
 $event = $gateway->parse_webhook($payload, $headers);
 
 \local_subscriptions\payment\EventRouter::handle($event);

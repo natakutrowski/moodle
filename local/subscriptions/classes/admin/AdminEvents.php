@@ -85,6 +85,16 @@ final class AdminEvents {
     public const DIGITAL_PROVIDER_CHECKED =
         'digital.provider.checked';
 
+    // Native Commerce purchases.
+    public const COMMERCE_PURCHASE_FULFILLMENT_RETRIED =
+        'commerce.purchase.fulfillment_retried';
+
+    public const COMMERCE_PURCHASE_NOTE_ADDED =
+        'commerce.purchase.note_added';
+
+    public const COMMERCE_PURCHASE_FULFILLMENT_CLOSED_WITHOUT_DELIVERY =
+        'commerce.purchase.fulfillment_closed_without_delivery';
+
     // Payments.
     public const PAYMENT_REQUEST_CREATED =
         'payment_request.created';
@@ -251,6 +261,10 @@ final class AdminEvents {
             self::DIGITAL_TOKEN_REGENERATED,
             self::DIGITAL_TOKEN_EXTENDED,
             self::DIGITAL_PROVIDER_CHECKED,
+
+            self::COMMERCE_PURCHASE_FULFILLMENT_RETRIED,
+            self::COMMERCE_PURCHASE_FULFILLMENT_CLOSED_WITHOUT_DELIVERY,
+            self::COMMERCE_PURCHASE_NOTE_ADDED,
 
             self::PAYMENT_REQUEST_CREATED,
             self::PAYMENT_REQUEST_PAID,

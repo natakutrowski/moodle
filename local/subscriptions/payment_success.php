@@ -4,7 +4,13 @@ require_once(__DIR__ . '/../../config.php');
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Status;
 
+use local_subscriptions\commerce\compatibility\CommerceLegacyUrlCompatibilityService;
+
 \local_subscriptions\subscription_config::guard_public_access();
+
+global $DB;
+(new CommerceLegacyUrlCompatibilityService($DB))->redirect_native_result_if_present('success');
+
 
 // --- Helper format prix (respecte l’option symbole) ---
 function ls_money_fmt(float $amount, string $cur): string {
@@ -76,7 +82,7 @@ $amountHtml = '';
 $planHtml   = '';
 
 $successimg    = new moodle_url('/local/subscriptions/pix/payment_success.png');
-$mycoursesUrl  = new \moodle_url('/local/campus/mycourses.php');
+$mycoursesUrl  = UrlFactory::my_courses();
 $mycoursesLbl  = get_string('payui_cta_mycourses','local_subscriptions');
 $contactLbl    = get_string('payui_cta_contact','local_subscriptions');
 
@@ -166,7 +172,7 @@ if ($pr) {
 }
 
 
-$mycoursesUrl = new \moodle_url('/local/campus/mycourses.php');
+$mycoursesUrl = UrlFactory::my_courses();
 $mycoursesLbl = get_string('payui_cta_mycourses','local_subscriptions');
 $contactLbl = get_string('payui_cta_contact','local_subscriptions');
 

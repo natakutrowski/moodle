@@ -12,11 +12,11 @@ final class commerce_bundle_phase_certification_test extends advanced_testcase {
         $this->resetAfterTest();
 
         self::assertSame(
-            get_string('commerce_product_type_bundle', 'local_subscriptions'),
+            get_string('commerce_vocabulary_product_type_crm_bundle', 'local_subscriptions'),
             CommerceProductPresentation::type_label('bundle')
         );
         self::assertSame(
-            get_string('commerce_product_type_course_access', 'local_subscriptions'),
+            get_string('commerce_vocabulary_product_type_crm_course_access', 'local_subscriptions'),
             CommerceProductPresentation::type_label('course_access')
         );
     }

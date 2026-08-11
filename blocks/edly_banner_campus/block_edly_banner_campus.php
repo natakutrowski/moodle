@@ -31,7 +31,7 @@ class block_edly_banner_campus extends block_base {
     }
 
     public function get_content() {
-        global $CFG, $DB, $PAGE, $SITE, $USER;
+        global $CFG, $DB, $OUTPUT, $PAGE, $SITE, $USER;
 
         if ($this->content !== null) {
             return $this->content;
@@ -66,67 +66,77 @@ class block_edly_banner_campus extends block_base {
 
         $trial_note = get_string('trial_note', 'block_edly_banner_campus');
 
-        // Langues supportées
+        // Navigation guest partagée avec le thème Edly.
+        $guestbuilder = '\local_campus\navigation\GuestNavigationBuilder';
+        $guestnavigation = class_exists($guestbuilder)
+            ? $guestbuilder::build($PAGE)
+            : null;
+
         $currentlang = current_language();
-
-        $langsfull = [
-            'en' => '🇬🇧 English (en)',
-            'fr' => '🇫🇷 Français (fr)',
-            'ru' => '🇷🇺 Русский (ru)',
-        ];
-
-        $langsshort = [
-            'en' => '🇬🇧 EN',
-            'fr' => '🇫🇷 FR',
-            'ru' => '🇷🇺 RU',
-        ];
-
+        $translations = $guestnavigation['languages']
+            ?? [];
+        $currentlanguageflag = $guestnavigation['currentlanguageflag']
+            ?? '🌐';
         $langmenu = '';
-        if (!empty($langsfull)) {
-            $action = $PAGE->url->out(false);
 
-            $langmenu .= '<div class="campus-hero-lang-inner">';
+        if (!empty($translations)) {
+            $langmenu .= '<details class="campus-landing-language">';
+            $langmenu .= '<summary class="campus-landing-language__toggle" aria-label="'.s(get_string('language')).'">';
+            $langmenu .= '<span class="campus-landing-language__flag" aria-hidden="true">'.$currentlanguageflag.'</span>';
+            $langmenu .= '<span class="campus-landing-language__label">'.s(get_string('language')).'</span>';
+            $langmenu .= '<span class="campus-landing-language__chevron" aria-hidden="true">▾</span>';
+            $langmenu .= '</summary>';
+            $langmenu .= '<nav class="campus-landing-language__dropdown" aria-label="'.s(get_string('language')).'">';
 
-            // Version DESKTOP (full label)
-            $langmenu .= '<form method="get" action="'.$action.'" class="langmenu-form langmenu-desktop d-inline">';
-            $langmenu .= '<select name="lang" class="form-select langmenu" onchange="this.form.submit()">';
-            foreach ($langsfull as $code => $label) {
-                $selected = ($code === $currentlang) ? ' selected' : '';
-                $langmenu .= '<option value="'.s($code).'"'.$selected.'>'.s($label).'</option>';
+            foreach ($translations as $language) {
+                $active = !empty($language['active']);
+                $langmenu .= '<a class="campus-landing-language__option'.($active ? ' is-active' : '').'" href="'.s($language['url']).'"'.($active ? ' aria-current="true"' : '').'>';
+                $langmenu .= '<span class="campus-landing-language__option-flag" aria-hidden="true">'.s($language['flag']).'</span>';
+                $langmenu .= '<span>'.s($language['name']).'</span>';
+                if ($active) {
+                    $langmenu .= '<span class="campus-landing-language__check" aria-hidden="true">✓</span>';
+                }
+                $langmenu .= '</a>';
             }
-            $langmenu .= '</select></form>';
 
-            // Version MOBILE (compact label)
-            $langmenu .= '<form method="get" action="'.$action.'" class="langmenu-form langmenu-mobile d-inline">';
-            $langmenu .= '<select name="lang" class="form-select langmenu" onchange="this.form.submit()">';
-            foreach ($langsshort as $code => $label) {
-                $selected = ($code === $currentlang) ? ' selected' : '';
-                $langmenu .= '<option value="'.s($code).'"'.$selected.'>'.s($label).'</option>';
-            }
-            $langmenu .= '</select></form>';
-
-            $langmenu .= '</div>';
+            $langmenu .= '</nav></details>';
         }
 
-        $haslangmenu = ($langmenu !== '');
+        $haslangmenu = $langmenu !== '';
 
-        // URL "Mes cours" (hub utilisateur connecté)
-        $mycourses = new moodle_url('/local/campus/mycourses.php');
-        $mycoursesurl = $mycourses->out(false);
-        $mycourseslabel = get_string('mycourses_title','local_campus'); // "Mes cours" / "Мои курсы" / "My courses"
+        // URLs publiques CampusFR avec fallbacks sûrs pendant les mises à jour.
+        $urlfactory = '\local_subscriptions\url\UrlFactory';
+        $mycampus = class_exists($urlfactory) && is_callable([$urlfactory, 'my_campus'])
+            ? $urlfactory::my_campus()
+            : new moodle_url('/local/subscriptions/mon_campus.php');
+        $mycampusurl = $mycampus instanceof moodle_url ? $mycampus->out(false) : (string)$mycampus;
+        $shopurl = $guestnavigation['shopurl']
+            ?? (new moodle_url('/boutique'))->out(false);
 
-
-        // URLs login / logout / abonnement
-        $signupurl = new moodle_url('/local/subscriptions/subscribe.php');
-        $loginurl  = new moodle_url('/login/index.php', [
-            'returnurl' => $mycoursesurl,  // après login → Mes cours
-        ]);
-
+        $loginurl = new moodle_url(
+            $guestnavigation['loginurl']
+                ?? (new moodle_url('/login/index.php', ['returnurl' => $mycampusurl]))->out(false)
+        );
         $logouturl = new moodle_url('/login/logout.php', ['sesskey' => sesskey()]);
 
-        $loginlabel   = get_string('login');   // core
-        $logoutlabel  = get_string('logout');  // core
-        $subscribelabel = get_string('subscribe', 'local_subscriptions');
+        $loginlabel = get_string('login');
+        $logoutlabel = get_string('logout');
+        $shoplabel = get_string('hero_shop', 'block_edly_banner_campus');
+        $mycampuslabel = get_string('hero_my_campus', 'block_edly_banner_campus');
+
+        $sharedguestnavigation = '';
+        if ($isguest && is_array($guestnavigation)) {
+            $guestnavigation['enabled'] = true;
+            $guestnavigation['landing'] = true;
+            $guestnavigation['shoplabel'] = $shoplabel;
+            $guestnavigation['loginlabel'] = $loginlabel;
+            $guestnavigation['languagelabel'] = get_string('language');
+            $sharedguestnavigation = $OUTPUT->render_from_template(
+                'local_campus/guest_navigation',
+                ['guestnavigation' => $guestnavigation]
+            );
+            $PAGE->requires->js_call_amd('local_campus/guest_navigation', 'init');
+        }
 
 
         // Logo du thème Edly
@@ -177,9 +187,6 @@ class block_edly_banner_campus extends block_base {
         }
 
 
-
-        // URL "Mes cours" (hub utilisateur connecté)
-        $mycoursesurl = (new moodle_url('/local/campus/mycourses.php'))->out(false);
 
         // === CampusFR : déterminer un cours d'essai par défaut pour le bouton "Commencer" ===
         $trialredirect = null;
@@ -248,67 +255,55 @@ class block_edly_banner_campus extends block_base {
                 <div class="campus-hero-nav">
                     <div class="campus-hero-nav-inner">';
 
-        if ($haslangmenu) {
-            $text .= '
+        if ($isguest) {
+            $text .= $sharedguestnavigation;
+        } else {
+            if ($haslangmenu) {
+                $text .= '
                         <div class="campus-hero-lang langmenu">'
                             .$langmenu.
                         '</div>';
-        }
+            }
 
-        // Boutons Abonnement / Connexion/Déconnexion
-        $text .= '
+            $text .= '
                         <div class="campus-hero-ctas">';
 
-        // Abonnement : visible pour invités ET comptes en trial
-        if ($isguest || $istrial) {
-            $text .= '
-                            <a href="'.$signupurl->out(false).'"
+            if ($istrial) {
+                $text .= '
+                            <a href="'.s($shopurl).'"
                             class="hero-btn hero-btn-primary hero-compact"
-                            data-role="subscribe" data-subs-modal="1">
-                                <i class="ri-vip-crown-line hero-btn-icon" aria-hidden="true"></i>
-                                <span class="hero-btn-label">'.s($subscribelabel).'</span>
+                            data-role="storefront">
+                                <i class="ri-store-2-line hero-btn-icon" aria-hidden="true"></i>
+                                <span class="hero-btn-label">'.s($shoplabel).'</span>
                             </a>';
-        }
-        
-        if (!$isguest) {
-            // CONNECTÉ (trial ou abo) : "Mes cours" (plein) + "Déconnexion" (compact)
+            }
+
             $text .= '
-                      <a href="'. $mycoursesurl .'"
+                      <a href="'.s($mycampusurl).'"
                          class="hero-btn hero-btn-primary hero-compact"
-                         data-role="mycourses">
-                        <i class="ri-book-mark-line hero-btn-icon" aria-hidden="true"></i>
-                        <span class="hero-btn-label">'. s($mycourseslabel) .'</span>
+                         data-role="mycampus">
+                        <i class="ri-home-heart-line hero-btn-icon" aria-hidden="true"></i>
+                        <span class="hero-btn-label">'.s($mycampuslabel).'</span>
                       </a>';
-        }
 
-        // Connexion ou Déconnexion
-        if ($isguest) {
-            // Invité → bouton Connexion
-            $authurl   = $loginurl;
-            $authlabel = $loginlabel;
-            $authicon  = 'ri-login-box-line';
-            $authrole  = 'login';
-        } else {
-            // Utilisateur connecté (avec ou sans trial) → bouton Déconnexion
-            $authurl   = $logouturl;
-            $authlabel = $logoutlabel;
-            $authicon  = 'ri-logout-box-line';
-            $authrole  = 'logout';
-        }
-
-        $text .= '
-                            <a href="'.$authurl->out(false).'"
+            $text .= '
+                            <a href="'.$logouturl->out(false).'"
                             class="hero-btn hero-btn-secondary hero-expanded"
-                            data-role="'.s($authrole).'">
-                                <i class="'.$authicon.' hero-btn-icon" aria-hidden="true"></i>
-                                <span class="hero-btn-label">'.s($authlabel).'</span>
+                            data-role="logout">
+                                <i class="ri-logout-box-line hero-btn-icon" aria-hidden="true"></i>
+                                <span class="hero-btn-label">'.s($logoutlabel).'</span>
                             </a>';
 
+            $text .= '
+                        </div> <!-- .campus-hero-ctas -->';
+        }
+
+        // Close the shared navigation wrappers before rendering the hero copy.
+        // Without these closing tags, the main hero container becomes a child
+        // of the navigation flex row and the topbar drifts into the page body.
         $text .= '
-                        </div> <!-- .campus-hero-ctas -->
                     </div> <!-- .campus-hero-nav-inner -->
                 </div> <!-- .campus-hero-nav -->';
-
 
         // === CONTENU PRINCIPAL CENTRÉ ===
         $text .= '
@@ -355,15 +350,11 @@ class block_edly_banner_campus extends block_base {
 
             } else {
                 // Utilisateur connecté (trial ou abonné)
-                if ($istrial) {
-                    $mainctatext = get_string('hero_cta_trial_continue', 'block_edly_banner_campus');
-                } else {
-                    $mainctatext = get_string('hero_cta_subscribed_mycourses', 'block_edly_banner_campus');
-                }
+                $mainctatext = get_string('hero_cta_my_space', 'block_edly_banner_campus');
 
                 $text .= '
-                    <a href="'.$mycoursesurl.'" class="default-btn">
-                        <i class="ri-book-mark-fill hero-main-cta-icon pr-2" aria-hidden="true"></i>
+                    <a href="'.s($mycampusurl).'" class="default-btn">
+                        <i class="ri-home-heart-fill hero-main-cta-icon pr-2" aria-hidden="true"></i>
                         <span class="hero-main-cta-label">'.s($mainctatext).'</span>
                     </a>';
             }
@@ -387,14 +378,14 @@ class block_edly_banner_campus extends block_base {
 
         // Shapes
         if ($shape_two) {
-            $text .= '            
+            $text .= '
                 <div class="banner-large-shape-1">
                     <img src="'.edly_block_image_process($shape_two).'" alt="'.strip_tags($title).'">
                 </div>';
         }
 
         if ($shape) {
-            $text .= '            
+            $text .= '
                 <div class="banner-large-shape-2">
                     <img src="'.edly_block_image_process($shape).'" alt="'.strip_tags($title).'">
                 </div>';

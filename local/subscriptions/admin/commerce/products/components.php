@@ -9,6 +9,8 @@ use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
+use local_subscriptions\crm\commerce\presentation\CommerceProductPageHeaderRenderer;
 use local_subscriptions\commerce\catalog\rendering\CommerceProductEditorNavigationRenderer;
 use local_subscriptions\commerce\catalog\presentation\CommerceProductPresentation;
 
@@ -62,9 +64,17 @@ $rowcount = max($rowcount, count($current) + 2);
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 echo CommerceProductEditorNavigationRenderer::breadcrumb($product->get_name(), get_string('commerce_product_step_components', 'local_subscriptions'));
-echo CommerceProductEditorNavigationRenderer::render($sku, CommerceProductEditorNavigationRenderer::COMPONENTS);
-echo $OUTPUT->heading(format_string($pagetitle));
-echo html_writer::tag('p', get_string('commerce_bundle_components_help', 'local_subscriptions'), ['class' => 'text-muted']);
+echo CommerceProductEditorNavigationRenderer::render($product, CommerceProductEditorNavigationRenderer::COMPONENTS);
+echo CommerceProductPageHeaderRenderer::render(
+    $pagetitle,
+    CommerceDesignSystemRenderer::page_intro(get_string('commerce_bundle_components_help', 'local_subscriptions')),
+    html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/products/preview.php', ['sku' => $sku]),
+        get_string('commerce_bundle_open_preview', 'local_subscriptions'),
+        ['class' => 'btn btn-outline-secondary']
+    ),
+    get_string('commerce_product_step_components', 'local_subscriptions')
+);
 echo html_writer::start_tag('form', ['method' => 'post']);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 echo html_writer::start_div('d-flex flex-column gap-3');
@@ -91,21 +101,11 @@ for ($index = 0; $index < $rowcount; $index++) {
 }
 
 echo html_writer::end_div();
-echo html_writer::div(
-    html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-primary', 'value' => get_string('savechanges')]) .
-    ' ' .
-    html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/components.php', ['sku' => $sku, 'rows' => $rowcount + 5]), get_string('commerce_bundle_add_rows', 'local_subscriptions'), ['class' => 'btn btn-outline-secondary']),
-    'mt-4'
+echo CommerceDesignSystemRenderer::form_actions(
+    html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-primary', 'value' => get_string('savechanges')]),
+    html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/components.php', ['sku' => $sku, 'rows' => $rowcount + 5]), get_string('commerce_bundle_add_rows', 'local_subscriptions'), ['class' => 'btn btn-outline-secondary'])
 );
 echo html_writer::end_tag('form');
-echo html_writer::div(
-    html_writer::link(
-        new moodle_url('/local/subscriptions/admin/commerce/products/preview.php', ['sku' => $sku]),
-        get_string('commerce_bundle_open_preview', 'local_subscriptions'),
-        ['class' => 'btn btn-outline-primary']
-    ),
-    'mt-3'
-);
 
 if ($editor->get_expansion() !== null) {
     echo $OUTPUT->heading(get_string('commerce_bundle_preview_title', 'local_subscriptions'), 3, 'mt-5');

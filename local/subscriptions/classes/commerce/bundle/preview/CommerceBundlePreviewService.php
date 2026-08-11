@@ -23,14 +23,14 @@ final class CommerceBundlePreviewService {
     ) {
     }
 
-    public function build(string $sku): CommerceBundlePreviewResult {
+    public function build(string $sku, bool $allowinactiveroot = false): CommerceBundlePreviewResult {
         $bundle = $this->products->find_by_sku($sku);
 
         if ($bundle === null || !$bundle->is_bundle()) {
             throw new \coding_exception('A CRM bundle preview requires an existing Bundle product.');
         }
 
-        $expansion = $this->expander->expand($bundle->get_sku());
+        $expansion = $this->expander->expand($bundle->get_sku(), 1, $allowinactiveroot);
         $items = [];
 
         foreach ($expansion->get_items() as $expandeditem) {

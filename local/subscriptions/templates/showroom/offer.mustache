@@ -1,0 +1,35 @@
+<article class="commerce-showroom-offer commerce-showroom-offer--{{role}} {{#isfeatured}}is-featured{{/isfeatured}} {{#ispreferred}}is-preferred{{/ispreferred}} {{#owned}}is-owned{{/owned}} {{#bundleblocked}}is-bundle-blocked{{/bundleblocked}}" data-showroom-offer="{{role}}" data-showroom-offer-sku="{{sku}}" tabindex="0">
+    {{#isfeatured}}<span class="commerce-showroom-offer__featured">{{featuredlabel}}</span>{{/isfeatured}}
+    {{#owned}}<span class="commerce-showroom-offer__owned-badge"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>{{ownedcompactlabel}}</span>{{/owned}}
+    <div class="commerce-showroom-offer__visual" data-showroom-product-visual>
+        <span class="commerce-showroom-offer__packaging" aria-hidden="true"><span></span><span></span><span></span></span>
+        {{#hascover}}<img src="{{coverurl}}"{{#coverresponsive}} srcset="{{coversrcset}}" sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1199px) 42vw, 360px"{{/coverresponsive}} width="960" height="540" {{#isfeatured}}loading="eager" fetchpriority="high"{{/isfeatured}}{{^isfeatured}}loading="lazy" fetchpriority="low"{{/isfeatured}} decoding="async" alt="{{coveralt}}">{{/hascover}}
+        {{^hascover}}<span class="commerce-showroom-offer__placeholder" aria-hidden="true"><i class="{{placeholdericon}}"></i></span>{{/hascover}}
+    </div>
+    <div class="commerce-showroom-offer__body">
+        <p class="commerce-showroom-offer__role">{{rolelabel}}</p>
+        <h3 class="commerce-showroom-offer__title" data-showroom-fit-lines="1" data-showroom-fit-min="14">{{name}}</h3>
+        {{#hassubtitle}}<p class="commerce-showroom-offer__subtitle" data-showroom-fit-lines="2" data-showroom-fit-min="13">{{subtitle}}</p>{{/hassubtitle}}
+        {{#hasdescription}}<div class="commerce-showroom-offer__description" data-showroom-fit-lines="2" data-showroom-fit-min="12.5">{{{shortdescription}}}</div>{{/hasdescription}}
+        {{#hasfeatures}}<ul class="commerce-showroom-offer__features">{{#features}}<li><i class="fa-solid fa-circle-check" aria-hidden="true"></i>{{text}}</li>{{/features}}</ul>{{/hasfeatures}}
+        <div class="commerce-showroom-offer__pricing">
+            <div class="commerce-showroom-offer__pricing-promotion {{^haspromotion}}is-empty{{/haspromotion}}" aria-hidden="{{^haspromotion}}true{{/haspromotion}}{{#haspromotion}}false{{/haspromotion}}">
+                {{#hascompareprice}}<del data-showroom-compare-price>{{compareformatted}}</del>{{/hascompareprice}}
+                {{#haspromotion}}<span class="commerce-showroom-offer__discount" data-showroom-discount>{{discountlabel}}</span>{{/haspromotion}}
+            </div>
+            <strong data-showroom-price>{{priceformatted}}</strong>
+        </div>
+        <div class="commerce-showroom-offer__actions">
+            {{#canbuy}}
+                <form method="post" action="{{cartaction}}" data-provider-experience data-provider-context="express-candidate" data-currency="{{currency}}" data-product="{{name}}" data-price="{{priceformatted}}" data-showroom-track="offer_buy" data-showroom-track-role="{{role}}">
+                    <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{priceid}}" data-showroom-priceid><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{currency}}" data-showroom-currency-input><input type="hidden" name="returnurl" value="{{returnurl}}"><input type="hidden" name="source" value="showroom"><input type="hidden" name="showroom" value="{{showroomkey}}"><input type="hidden" name="showroomoffer" value="{{role}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <button class="commerce-showroom-btn commerce-showroom-btn--primary" type="submit">{{buylabel}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+                </form>
+            {{/canbuy}}
+            {{#canaccess}}<a class="commerce-showroom-btn commerce-showroom-btn--success" href="{{ownedactionurl}}">{{ownedactionlabel}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>{{/canaccess}}
+            {{#bundleblocked}}<p class="commerce-showroom-offer__bundle-note"><i class="fa-solid fa-circle-info" aria-hidden="true"></i>{{bundleblockedmessage}}</p>{{/bundleblocked}}
+            {{^available}}<span class="commerce-showroom-offer__pending">{{priceformatted}}</span>{{/available}}
+            {{#available}}{{#showdetails}}<a class="commerce-showroom-offer__details" href="{{detailsurl}}" data-showroom-track="offer_details" data-showroom-track-role="{{role}}">{{detailslabel}}</a>{{/showdetails}}{{/available}}
+        </div>
+    </div>
+</article>

@@ -1,0 +1,41 @@
+{{#has_editorial_heading}}<h1 style="margin:0 0 18px;font-size:28px;line-height:1.2;color:#171827;">{{editorial_heading}}</h1>{{/has_editorial_heading}}
+{{#has_editorial_intro}}<div style="margin-bottom:18px;">{{{editorial_intro}}}</div>{{/has_editorial_intro}}
+
+{{#hasaccountemail}}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:18px 0;">
+<tr>
+    <td style="padding:14px 16px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a7d96;font-weight:800;">{{welcome_login_email_label}}</div>
+        <div style="margin-top:4px;font-family:'Courier New',Courier,monospace;font-size:14px;color:#38235d;word-break:break-all;">
+            <a href="mailto:{{accountemail}}" style="color:#38235d;text-decoration:none;">{{accountemail}}</a>
+        </div>
+    </td>
+</tr>
+</table>
+{{/hasaccountemail}}
+
+{{#hasactivationurl}}
+<div style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#374151;">{{welcome_activation_explanation}}</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 18px;">
+<tr><td align="center">
+    <a href="{{activationurl}}" target="_blank" rel="noopener noreferrer"
+       style="display:inline-block;background:#f72585;border:1px solid #f72585;border-radius:10px;padding:13px 22px;color:#ffffff;text-decoration:none;font-family:Nunito,'Segoe UI',Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;box-shadow:0 7px 18px rgba(247,37,133,.18);">
+        <img src="{{keyiconurl}}" alt="" width="14" height="14" style="display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:8px;border:0;">{{welcome_activation_cta}}
+    </a>
+</td></tr>
+</table>
+<div style="margin:0 0 22px;padding:12px 14px;background:#fff8fb;border:1px solid #f7dbe8;border-radius:10px;font-size:12px;line-height:1.65;color:#6b5362;">
+    {{#activationexpires}}{{#str}}commerce_guest_activation_email_expiry_soft, local_subscriptions, {{activationexpires}}{{/str}} {{/activationexpires}}{{welcome_activation_security}}
+</div>
+{{/hasactivationurl}}
+
+<div style="margin:0 0 20px;font-size:14px;line-height:1.7;color:#374151;">{{welcome_postactivation}}</div>
+
+{{> local_subscriptions/commerce/mail/components/welcome_telegram }}
+
+{{#has_editorial_outro}}<div style="margin-top:20px;">{{{editorial_outro}}}</div>{{/has_editorial_outro}}
+{{#has_editorial_signature}}<div style="margin-top:18px;">{{{editorial_signature}}}</div>{{/has_editorial_signature}}
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0 0;">
+<tr><td><img src="{{welcomeimageurl}}" alt="" width="752" style="display:block;width:100%;max-width:752px;height:auto;border:0;border-radius:14px;outline:none;text-decoration:none;"></td></tr>
+</table>

@@ -150,22 +150,85 @@ class trial_manager {
         return $sub;
     }
 
-    /** Vrai si l’utilisateur est dans la fenêtre de réduction (ex: 72h après le début de l’essai). */
-    public static function is_discount_window_open(int $userid): bool {
-        $trial = self::user_has_active_trial($userid);
-        if (!$trial) { return false; }
-        if (get_config('local_subscriptions','trial_discount_hours') == 0) { return false; }
-        $hours = max(1, (int)(get_config('local_subscriptions','trial_discount_hours') ?? 72));
-        return (time() - (int)$trial->start_date) <= ($hours * HOURSECS);
+
+    /**
+     * Returns true while the user still has at least one Trial course role.
+     *
+     * This is deliberately separate from the Trial subscription row: during a
+     * multi-course conversion the subscription remains active until the last
+     * Trial-scoped course has been purchased.
+     */
+    public static function user_has_trial_access_remaining(int $userid): bool {
+        global $DB;
+
+        if ($userid <= 0) {
+            return false;
+        }
+
+        $trialroleid = (int)$DB->get_field(
+            'role',
+            'id',
+            ['shortname' => 'trialstudent'],
+            IGNORE_MISSING
+        );
+        if ($trialroleid <= 0) {
+            return false;
+        }
+
+        return $DB->record_exists_select(
+            'role_assignments',
+            'userid = :userid AND roleid = :roleid',
+            [
+                'userid' => $userid,
+                'roleid' => $trialroleid,
+            ]
+        );
     }
 
-    /** Timestamp (unix) de fin de fenêtre de réduction, ou 0 si pas d’essai. */
+    /** Vrai si l’utilisateur est dans la fenêtre de réduction. */
+    public static function is_discount_window_open(int $userid): bool {
+        $deadline = self::discount_window_deadline($userid);
+
+        return $deadline > time();
+    }
+
+    /** Timestamp de fin de fenêtre de réduction, ou 0 si pas d’essai. */
     public static function discount_window_deadline(int $userid): int {
         $trial = self::user_has_active_trial($userid);
-        if (!$trial) { return 0; }
-        if (get_config('local_subscriptions','trial_discount_hours') == 0) { return 0; }
-        $hours = max(1, (int)(get_config('local_subscriptions','trial_discount_hours') ?? 72));
-        return ((int)$trial->start_date) + ($hours * HOURSECS);
+        if (!$trial) {
+            return 0;
+        }
+
+        $configuredhours = (int)get_config(
+            'local_subscriptions',
+            'trial_discount_hours'
+        );
+        if ($configuredhours === 0) {
+            return 0;
+        }
+
+        $hours = max(1, $configuredhours ?: 72);
+        $now = time();
+        $startdate = (int)($trial->start_date ?? 0);
+        $creationdate = (int)($trial->creation_date ?? 0);
+
+        // Some historical Trial records contain a future start_date inherited
+        // from an old long-lived plan. Never expose a multi-year countdown:
+        // use the actual subscription creation time, then now as fallback.
+        if ($startdate <= 0 || $startdate > $now) {
+            $startdate = $creationdate > 0 && $creationdate <= $now
+                ? $creationdate
+                : $now;
+        }
+
+        $deadline = $startdate + ($hours * HOURSECS);
+
+        // A conversion discount can never outlive the Trial itself.
+        if (!empty($trial->end_date)) {
+            $deadline = min($deadline, (int)$trial->end_date);
+        }
+
+        return $deadline;
     }
 
     /** True si ce plan est marqué comme plan d’essai. */

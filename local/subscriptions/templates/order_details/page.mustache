@@ -1,0 +1,212 @@
+{{! @template local_subscriptions/order_details/page }}
+<div class="commerce-order-details container py-3 py-lg-4">
+    {{#requiresaccountfinalisation}}
+        <aside class="commerce-account-reminder" data-account-reminder role="status">
+            <div>
+                <strong>{{#str}}commerce_guest_activation_result_title, local_subscriptions{{/str}}</strong>
+                <span>{{#str}}commerce_guest_activation_result_message, local_subscriptions{{/str}}</span>
+            </div>
+            <a class="btn btn-primary commerce-account-reminder__action" href="{{accountactivationurl}}">
+                <i class="fa-solid fa-key" aria-hidden="true"></i>
+                {{#str}}commerce_guest_activation_result_cta, local_subscriptions{{/str}}
+            </a>
+        </aside>
+
+        {{> local_subscriptions/commerce/guest_account_dialog }}
+    {{/requiresaccountfinalisation}}
+
+    <a class="commerce-order-details__back" href="{{backurl}}">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        {{#str}}commerce_i43_back, local_subscriptions{{/str}}
+    </a>
+
+    <header class="commerce-order-details__hero">
+        <div>
+            <div class="commerce-order-details__eyebrow">{{#str}}commerce_i43_order, local_subscriptions{{/str}}</div>
+            <h1 class="commerce-order-details__title">{{reference}}</h1>
+            <div class="commerce-order-details__date">{{createdat}}</div>
+        </div>
+        <div class="commerce-order-details__total">
+            <span>{{#str}}commerce_i43_total, local_subscriptions{{/str}}</span>
+            <strong>{{total}}</strong>
+        </div>
+    </header>
+
+    <section class="commerce-order-details__statuses" aria-label="{{#str}}commerce_i43_statuses, local_subscriptions{{/str}}">
+        <div class="commerce-order-status commerce-order-status--{{statusclass}}">
+            <span>{{#str}}commerce_i43_order_status, local_subscriptions{{/str}}</span><strong>{{status}}</strong>
+        </div>
+        <div class="commerce-order-status commerce-order-status--{{paymentstatusclass}}">
+            <span>{{#str}}commerce_i43_payment_status, local_subscriptions{{/str}}</span><strong>{{paymentstatus}}</strong>
+        </div>
+        {{#hasaccessstatus}}
+            <div class="commerce-order-status commerce-order-status--{{accessstatusclass}}">
+                <span>{{#str}}commerce_i410_product_access, local_subscriptions{{/str}}</span><strong>{{accessstatus}}</strong>
+            </div>
+        {{/hasaccessstatus}}
+    </section>
+
+    {{#isbundle}}
+        <section class="commerce-order-bundle">
+            <div class="commerce-order-bundle__icon"><i class="fa-solid fa-box-open" aria-hidden="true"></i></div>
+            <div>
+                <div class="commerce-order-bundle__eyebrow">{{#str}}commerce_i47_bundle_eyebrow, local_subscriptions{{/str}}</div>
+                <h2>{{#str}}commerce_i47_bundle_title, local_subscriptions{{/str}}</h2>
+                <p>{{#str}}commerce_i47_bundle_description, local_subscriptions{{/str}}</p>
+                <div class="commerce-order-bundle__metrics">
+                    <span><strong>{{itemcount}}</strong> {{#str}}commerce_i47_bundle_items, local_subscriptions{{/str}}</span>
+                    {{#hascourses}}<span><strong>{{coursecount}}</strong> {{#str}}commerce_i47_bundle_courses, local_subscriptions{{/str}}</span>{{/hascourses}}
+                    {{#hasdigitals}}<span><strong>{{digitalcount}}</strong> {{#str}}commerce_i47_bundle_digitals, local_subscriptions{{/str}}</span>{{/hasdigitals}}
+                </div>
+            </div>
+        </section>
+    {{/isbundle}}
+
+    <div class="row g-4">
+        <main class="col-lg-8">
+            <section class="commerce-order-panel">
+                <div class="commerce-order-panel__heading"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i><h2>{{#str}}commerce_i43_items, local_subscriptions{{/str}}</h2></div>
+                {{#hasitems}}<div class="commerce-order-items">
+                    {{#items}}
+                        <article class="commerce-order-item-detail {{#iscourse}}commerce-order-item-detail--course{{/iscourse}}{{#isdigital}}commerce-order-item-detail--digital{{/isdigital}}{{#isbundleitem}} commerce-order-item-detail--bundle{{/isbundleitem}}">
+                            <div class="commerce-order-item-detail__main">
+                                <div>
+                                    <div class="commerce-order-item-detail__type">{{typelabel}}</div>
+                                    <h3>{{label}}</h3>
+                                    {{#hasupgradepath}}
+                                        <div class="commerce-order-item-detail__upgrade-path">{{upgradepath}}</div>
+                                    {{/hasupgradepath}}
+                                </div>
+                                <div class="commerce-order-item-detail__price">
+                                    <strong>{{finalprice}}</strong>
+                                    {{#hascompareprice}}<del>{{compareprice}}</del>{{/hascompareprice}}
+                                </div>
+                            </div>
+                            {{#showunitprice}}
+                                <div class="commerce-order-item-detail__calculation">{{unitprice}} × {{quantity}}</div>
+                            {{/showunitprice}}
+                            {{#hascommercialpricing}}
+                                <div class="commerce-order-item-detail__badges">
+                                    {{#isupgradepricing}}
+                                        <span class="commerce-order-pricing-badge commerce-order-pricing-badge--upgrade">{{#str}}commerce_storefront_upgrade_offer_badge, local_subscriptions{{/str}}</span>
+                                    {{/isupgradepricing}}
+                                    {{^isupgradepricing}}
+                                        {{#hastrialdiscount}}<span class="commerce-order-pricing-badge commerce-order-pricing-badge--trial">{{#str}}commerce_trial_storefront_badge, local_subscriptions{{/str}}</span>{{/hastrialdiscount}}
+                                    {{/isupgradepricing}}
+                                    {{#hastrialpercent}}<span class="commerce-order-pricing-badge commerce-order-pricing-badge--saving">{{#str}}commerce_trial_storefront_discount, local_subscriptions, {{trialpercent}}{{/str}}</span>{{/hastrialpercent}}
+                                    {{#haspromotionpercent}}<span class="commerce-order-pricing-badge commerce-order-pricing-badge--promotion">−{{promotionpercent}}%</span>{{/haspromotionpercent}}
+                                </div>
+
+                                <details class="commerce-order-item-detail__pricing-details">
+                                    <summary>{{#str}}commerce_pricing_details, local_subscriptions{{/str}}</summary>
+                                    <dl class="commerce-order-item-detail__pricing">
+                                        <div><dt>{{#str}}commerce_cart_list_total, local_subscriptions{{/str}}</dt><dd>{{initialprice}}</dd></div>
+                                        {{#hasproductpromotion}}<div class="commerce-order-item-detail__pricing-reduction"><dt>{{productpromotionlabel}}</dt><dd>− {{productpromotion}}</dd></div>{{/hasproductpromotion}}
+                                        {{#hastrialdiscount}}<div class="commerce-order-item-detail__pricing-reduction"><dt>{{#str}}commerce_cart_trial_discount_total, local_subscriptions{{/str}}</dt><dd>− {{trialdiscount}}</dd></div>{{/hastrialdiscount}}
+                                        {{#hasownedcredit}}<div class="commerce-order-item-detail__pricing-reduction"><dt>{{ownedcreditlabel}}</dt><dd>− {{ownedcredit}}</dd></div>{{/hasownedcredit}}
+                                        {{#hasotherdiscount}}<div class="commerce-order-item-detail__pricing-reduction"><dt>{{#ispersonaloffer}}{{personalofferlabel}}{{/ispersonaloffer}}{{^ispersonaloffer}}{{#str}}commerce_invoice_other_discount, local_subscriptions{{/str}}{{/ispersonaloffer}}</dt><dd>− {{otherdiscount}}</dd></div>{{/hasotherdiscount}}
+                                        <div class="commerce-order-item-detail__pricing-final"><dt>{{#str}}commerce_invoice_total_paid, local_subscriptions{{/str}}</dt><dd>{{finalprice}}</dd></div>
+                                    </dl>
+                                </details>
+                            {{/hascommercialpricing}}
+
+                            {{#hascomponents}}
+                                <div class="commerce-order-components">
+                                    <div class="commerce-order-components__title">{{#str}}commerce_i410_bundle_includes, local_subscriptions{{/str}}</div>
+                                    {{#components}}
+                                        <div class="commerce-order-component">
+                                            <i class="{{#iscourse}}fa-solid fa-graduation-cap{{/iscourse}}{{#isdigital}}fa-solid fa-file-arrow-down{{/isdigital}}{{^iscourse}}{{^isdigital}}fa-solid fa-box{{/isdigital}}{{/iscourse}}" aria-hidden="true"></i>
+                                            <span>{{name}}</span>{{#quantity}}<small>× {{quantity}}</small>{{/quantity}}
+                                        </div>
+                                    {{/components}}
+                                </div>
+                            {{/hascomponents}}
+
+                            {{#hasaccesses}}<div class="commerce-order-item-detail__accesses">
+                                {{#accesses}}
+                                    <div class="commerce-order-resource-action">
+                                        {{#hasresourcelabel}}<div class="commerce-order-resource-action__label">{{resourcelabel}}</div>{{/hasresourcelabel}}
+                                        <div class="commerce-order-resource-action__buttons">
+                                            {{#available}}
+                                                {{#iscourse}}<a class="btn btn-primary" href="{{url}}" {{#requiresaccountfinalisation}}data-requires-account-finalisation="1" aria-describedby="commerce-account-dialog-title"{{/requiresaccountfinalisation}}><i class="fa-solid {{#requiresaccountfinalisation}}fa-lock{{/requiresaccountfinalisation}}{{^requiresaccountfinalisation}}fa-graduation-cap{{/requiresaccountfinalisation}}" aria-hidden="true"></i>{{#str}}commerce_i410_open_course, local_subscriptions{{/str}}</a>{{/iscourse}}
+                                                {{#isdigital}}
+                                                    {{#hasdesktop}}<a class="btn btn-primary" href="{{desktopurl}}"><i class="fa-solid fa-download"></i>{{#str}}digital_download_classic, local_subscriptions{{/str}}</a>{{/hasdesktop}}
+                                                    {{#hasmobile}}<a class="btn btn-outline-primary" href="{{mobileurl}}"><i class="fa-solid fa-mobile-screen-button"></i>{{#str}}digital_download_mobile, local_subscriptions{{/str}}</a>{{/hasmobile}}
+                                                {{/isdigital}}
+                                            {{/available}}
+                                            {{^available}}<span class="commerce-order-access commerce-order-access--{{accessstateclass}}" role="status"><i class="fa-solid fa-clock" aria-hidden="true"></i>{{pendinglabel}}</span>{{/available}}
+                                        </div>
+                                    </div>
+                                {{/accesses}}
+                            </div>{{/hasaccesses}}
+                        </article>
+                    {{/items}}
+                </div>{{/hasitems}}
+            </section>
+
+            {{#hastimeline}}<section class="commerce-order-panel commerce-order-panel--timeline">
+                <div class="commerce-order-panel__heading"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><h2>{{#str}}commerce_i44_timeline, local_subscriptions{{/str}}</h2></div>
+                <ol class="commerce-order-timeline">{{#timeline}}
+                    <li class="commerce-order-timeline__event commerce-order-timeline__event--{{statusclass}}">
+                        <div class="commerce-order-timeline__marker"><i class="fa-solid fa-check"></i></div>
+                        <div class="commerce-order-timeline__content"><div class="commerce-order-timeline__header"><div><strong>{{label}}</strong>{{#hasdetail}} <small class="commerce-order-timeline__detail">({{detail}})</small>{{/hasdetail}}</div><time>{{date}}</time></div><span class="commerce-order-timeline__status commerce-order-timeline__status--{{statusclass}}">{{status}}</span></div>
+                    </li>
+                {{/timeline}}</ol>
+            </section>{{/hastimeline}}
+        </main>
+
+        <aside class="col-lg-4">
+            <section class="commerce-order-panel">
+                <div class="commerce-order-panel__heading"><i class="fa-solid fa-receipt" aria-hidden="true"></i><h2>{{#str}}commerce_i43_summary, local_subscriptions{{/str}}</h2></div>
+                <dl class="commerce-order-summary">
+                    <div><dt>{{#str}}commerce_i410_reference, local_subscriptions{{/str}}</dt><dd>{{reference}}</dd></div>
+                    <div><dt>{{#str}}commerce_i410_order_date, local_subscriptions{{/str}}</dt><dd>{{createdat}}</dd></div>
+                    <div><dt>{{#str}}commerce_i410_article_count, local_subscriptions{{/str}}</dt><dd>{{itemcount}}</dd></div>
+                    <div class="commerce-order-summary__total"><dt>{{#str}}commerce_i43_total, local_subscriptions{{/str}}</dt><dd>{{total}}</dd></div>
+                </dl>
+            </section>
+
+            {{#payment}}<section class="commerce-order-panel commerce-order-panel--payment">
+                <div class="commerce-order-panel__heading"><i class="fa-solid fa-credit-card" aria-hidden="true"></i><h2>{{#str}}commerce_i45_payment_information, local_subscriptions{{/str}}</h2></div>
+                <dl class="commerce-order-summary">
+                    <div><dt>{{#str}}commerce_i45_payment_status, local_subscriptions{{/str}}</dt><dd><span class="commerce-order-payment-badge commerce-order-payment-badge--{{statusclass}}">{{status}}</span></dd></div>
+                    <div><dt>{{#str}}commerce_i410_payment_method, local_subscriptions{{/str}}</dt><dd class="commerce-order-provider">{{{providerhtml}}}</dd></div>
+                    <div><dt>{{#str}}commerce_i410_amount_paid, local_subscriptions{{/str}}</dt><dd>{{amount}}</dd></div>
+                    <div><dt>{{#str}}commerce_i45_paid_at, local_subscriptions{{/str}}</dt><dd>{{paidat}}</dd></div>
+                    {{#promotion.haspromotion}}
+                        <div class="commerce-order-summary__pricing-start"><dt>{{#str}}commerce_cart_list_total, local_subscriptions{{/str}}</dt><dd>{{promotion.subtotal}}</dd></div>
+                        {{#promotion.hasproductpromotion}}<div><dt>{{#str}}commerce_cart_product_promotions_total, local_subscriptions{{/str}}</dt><dd class="commerce-order-summary__discount">− {{promotion.productpromotion}}</dd></div>{{/promotion.hasproductpromotion}}
+                        {{#promotion.hastrialdiscount}}<div><dt>{{#str}}commerce_cart_trial_discount_total, local_subscriptions{{/str}}</dt><dd class="commerce-order-summary__discount">− {{promotion.trialdiscount}}</dd></div>{{/promotion.hastrialdiscount}}
+                        {{#promotion.hasownedcredit}}<div><dt>{{#str}}commerce_cart_upgrade_credit_total, local_subscriptions{{/str}}</dt><dd class="commerce-order-summary__discount">− {{promotion.ownedcredit}}</dd></div>{{/promotion.hasownedcredit}}
+                        {{^promotion.ispersonaloffer}}{{#promotion.hasadjustmentdiscount}}<div><dt>{{#str}}commerce_invoice_other_discount, local_subscriptions{{/str}}</dt><dd class="commerce-order-summary__discount">− {{promotion.adjustmentdiscount}}</dd></div>{{/promotion.hasadjustmentdiscount}}{{/promotion.ispersonaloffer}}
+                        {{#isadmin}}{{#promotion.ispersonaloffer}}<div><dt>{{#str}}commerce_personal_offer_order_admin_reference, local_subscriptions{{/str}}</dt><dd><a href="{{promotion.personalofferurl}}">#{{promotion.personalofferid}} — {{#str}}commerce_personal_offer_order_open, local_subscriptions{{/str}}</a></dd></div>{{/promotion.ispersonaloffer}}{{/isadmin}}
+                        <div class="commerce-order-summary__reductions-total"><dt>{{#promotion.ispersonaloffer}}{{promotion.personalofferlabel}}{{/promotion.ispersonaloffer}}{{^promotion.ispersonaloffer}}{{#str}}commerce_cart_total_reductions, local_subscriptions{{/str}}{{/promotion.ispersonaloffer}}</dt><dd class="commerce-order-summary__discount">− {{promotion.discount}}</dd></div>
+                        {{#promotion.hascodes}}<div><dt>{{#str}}commerce_i411_promo_code, local_subscriptions{{/str}}</dt><dd>{{promotion.codes}}</dd></div>{{/promotion.hascodes}}
+                        <div class="commerce-order-summary__paid"><dt>{{#str}}commerce_invoice_total_paid, local_subscriptions{{/str}}</dt><dd>{{promotion.paid}}</dd></div>
+                    {{/promotion.haspromotion}}
+                </dl>
+            </section>{{/payment}}
+
+            <section class="commerce-order-panel commerce-order-panel--invoice">
+                <div class="commerce-order-panel__heading"><i class="fa-solid fa-file-invoice"></i><h2>{{#str}}commerce_i410_invoice, local_subscriptions{{/str}}</h2></div>
+                <div class="commerce-order-panel__body">
+                    <p>{{#str}}commerce_i410_invoice_description, local_subscriptions{{/str}}</p>
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-outline-primary w-100" href="{{invoiceurl}}"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i>{{#str}}commerce_i410_download_invoice, local_subscriptions{{/str}}</a>
+                        <a class="btn btn-outline-secondary w-100 commerce-order-details__print" href="{{printurl}}"><i class="fa-solid fa-print" aria-hidden="true"></i>{{#str}}commerce_order_print, local_subscriptions{{/str}}</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="commerce-order-panel commerce-order-panel--support">
+                <div class="commerce-order-panel__heading"><i class="fa-regular fa-life-ring"></i><h2>{{#str}}commerce_i46_support_title, local_subscriptions{{/str}}</h2></div>
+                <div class="commerce-order-panel__body"><p>{{#str}}commerce_i46_support_description, local_subscriptions{{/str}}</p><div class="commerce-order-support__reference"><span>{{#str}}commerce_i46_reference_to_share, local_subscriptions{{/str}}</span><strong>{{reference}}</strong></div><a class="btn btn-primary w-100" href="{{supporturl}}"><i class="fa-regular fa-envelope"></i>{{#str}}commerce_i46_contact_support, local_subscriptions{{/str}}</a><div class="commerce-order-support__email">{{supportemail}}</div></div>
+            </section>
+
+            {{#isadmin}}<section class="commerce-order-panel commerce-order-panel--technical">
+                <div class="commerce-order-panel__heading"><i class="fa-solid fa-shield-halved"></i><h2>{{#str}}commerce_i43_technical, local_subscriptions{{/str}}</h2></div>
+                <dl class="commerce-order-summary"><div><dt>{{#str}}commerce_purchase_origin, local_subscriptions{{/str}}</dt><dd>{{purchaseorigin}}</dd></div><div><dt>Purchase ID</dt><dd>{{purchaseid}}</dd></div><div><dt>Internal reference</dt><dd class="text-break">{{internalreference}}</dd></div><div><dt>UUID</dt><dd class="text-break">{{uuid}}</dd></div>{{#payment}}<div><dt>Provider reference</dt><dd class="text-break">{{providerreference}}</dd></div><div><dt>Transaction ID</dt><dd class="text-break">{{transactionid}}</dd></div>{{/payment}}</dl>
+            </section>{{/isadmin}}
+        </aside>
+    </div>
+</div>

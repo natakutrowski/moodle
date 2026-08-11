@@ -1,0 +1,126 @@
+{{#hasupgrade}}
+    <div class="commerce-storefront-price commerce-storefront-price--upgrade">
+        <div class="commerce-storefront-price__badges commerce-storefront-price__badges--upgrade">
+            <span class="commerce-storefront-price__badge commerce-storefront-price__badge--upgrade">
+                {{#str}}commerce_storefront_upgrade_offer_badge, local_subscriptions{{/str}}
+            </span>
+
+            {{#hascommercialtrialpercent}}
+                <span class="commerce-storefront-price__badge commerce-storefront-price__badge--saving">
+                    {{#str}}commerce_trial_storefront_discount, local_subscriptions, {{commercialtrialpercent}}{{/str}}
+                </span>
+            {{/hascommercialtrialpercent}}
+
+            {{#hascommercialpromotionpercent}}
+                <span class="commerce-storefront-price__badge commerce-storefront-price__badge--promotion">
+                    −{{commercialpromotionpercent}}%
+                </span>
+            {{/hascommercialpromotionpercent}}
+        </div>
+
+        <div class="commerce-storefront-price__heading commerce-storefront-price__heading--upgrade">
+            <div class="commerce-storefront-price__label">
+                {{upgradepricelabelcard}}
+            </div>
+
+            {{#hasupgradepath}}
+                <span class="commerce-product-card__upgrade-path">
+                    {{upgradefromlabel}}
+                    <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    {{upgradetolabel}}
+                </span>
+            {{/hasupgradepath}}
+        </div>
+
+        <div class="commerce-storefront-price__values">
+            <strong>{{commercialfinalformatted}}</strong>
+            <del>{{commercialinitialformatted}}</del>
+        </div>
+
+        <p class="commerce-storefront-price__explanation">
+            {{commercialsavinglabel}} {{commercialsavingformatted}}.
+            {{#str}}commerce_storefront_upgrade_owned_explanation, local_subscriptions, {{upgradefromlabel}}{{/str}}
+        </p>
+
+        <div class="commerce-storefront-price__details">
+            {{> local_subscriptions/pricing/commercial_breakdown }}
+        </div>
+    </div>
+{{/hasupgrade}}
+
+{{^hasupgrade}}
+    {{#hasprices}}
+        <div class="commerce-product-card__prices">
+            {{#prices}}
+                {{#istrialconversion}}
+                    <div class="commerce-storefront-price commerce-storefront-price--trial">
+                        <div class="commerce-storefront-price__badges">
+                            <span class="commerce-storefront-price__badge commerce-storefront-price__badge--trial">
+                                {{trialconversionlabel}}
+                            </span>
+
+                            <span class="commerce-storefront-price__badge commerce-storefront-price__badge--saving">
+                                {{triallabel}}
+                            </span>
+
+                            {{#hasproductpromotionbeforetrial}}
+                                <span class="commerce-storefront-price__badge commerce-storefront-price__badge--promotion">
+                                    {{discountlabel}}
+                                </span>
+                            {{/hasproductpromotionbeforetrial}}
+                        </div>
+
+                        <div class="commerce-storefront-price__label">
+                            {{#str}}commerce_storefront_price_discovery, local_subscriptions{{/str}}
+                        </div>
+
+                        <div class="commerce-storefront-price__values">
+                            <strong>{{trialformatted}}</strong>
+                            <del>{{trialbaseformatted}}</del>
+                        </div>
+
+                        <p class="commerce-storefront-price__explanation">
+                            {{trialexplanation}}
+                        </p>
+
+                        {{#haspromotionend}}
+                            <div class="commerce-storefront-price__end">
+                                {{promotionendlabel}}
+                            </div>
+                        {{/haspromotionend}}
+                    </div>
+                {{/istrialconversion}}
+
+                {{^istrialconversion}}
+                    <div class="commerce-storefront-price{{#haspromotion}} commerce-storefront-price--promotion{{/haspromotion}}{{^haspromotion}} commerce-storefront-price--standard{{/haspromotion}}">
+                        <div class="commerce-storefront-price__heading">
+                            <div class="commerce-storefront-price__label">
+                                {{#haspromotion}}{{promotionpricelabel}}{{/haspromotion}}
+                                {{^haspromotion}}{{standardpricelabel}}{{/haspromotion}}
+                            </div>
+
+                            {{#haspromotion}}
+                                <span class="commerce-storefront-price__badge commerce-storefront-price__badge--promotion">
+                                    {{discountlabel}}
+                                </span>
+                            {{/haspromotion}}
+                        </div>
+
+                        <div class="commerce-storefront-price__values">
+                            <strong>{{formatted}}</strong>
+                            {{#haspromotion}}
+                                <del>{{compareformatted}}</del>
+                            {{/haspromotion}}
+                        </div>
+
+                        {{#haspromotionend}}
+                            <div class="commerce-storefront-price__end">
+                                {{promotionendlabel}}
+                            </div>
+                        {{/haspromotionend}}
+                    </div>
+                {{/istrialconversion}}
+            {{/prices}}
+        </div>
+    {{/hasprices}}
+{{/hasupgrade}}

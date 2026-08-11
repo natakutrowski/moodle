@@ -14,3 +14,9 @@ $string['hero_greeting'] = 'Bonjour {$a} 😊';
 $string['hero_cta_trial_continue'] = 'Continuer votre essai';
 $string['hero_cta_subscribed_mycourses'] = 'Accéder à mes cours';
 
+
+$string['hero_shop'] = 'Boutique';
+
+$string['hero_my_campus'] = 'Mon Campus';
+
+$string['hero_cta_my_space'] = 'Accéder à mon espace';

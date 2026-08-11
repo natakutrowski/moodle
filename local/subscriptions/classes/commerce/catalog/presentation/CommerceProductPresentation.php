@@ -7,21 +7,23 @@ namespace local_subscriptions\commerce\catalog\presentation;
 defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
+use local_subscriptions\commerce\presentation\CommercePresentationContext;
+use local_subscriptions\commerce\presentation\CommerceVocabulary;
 
 /** Human-readable labels and badges for Native Commerce objects in the CRM. */
 final class CommerceProductPresentation {
-    public static function type_label(string $type): string {
-        $key = 'commerce_product_type_' . strtolower(trim($type));
-        return get_string_manager()->string_exists($key, 'local_subscriptions')
-            ? get_string($key, 'local_subscriptions')
-            : get_string('commerce_product_type_unknown', 'local_subscriptions');
+    public static function type_label(
+        string $type,
+        string $context = CommercePresentationContext::CRM
+    ): string {
+        return CommerceVocabulary::product_type($type, $context)->label();
     }
 
-    public static function status_label(string $status): string {
-        $key = 'commerce_product_status_' . strtolower(trim($status));
-        return get_string_manager()->string_exists($key, 'local_subscriptions')
-            ? get_string($key, 'local_subscriptions')
-            : get_string('commerce_product_status_unknown', 'local_subscriptions');
+    public static function status_label(
+        string $status,
+        string $context = CommercePresentationContext::CRM
+    ): string {
+        return CommerceVocabulary::product_status($status, $context)->label();
     }
 
     public static function type_badge(string $type): string {
@@ -52,7 +54,10 @@ final class CommerceProductPresentation {
         $type = strtolower(trim($type));
         $resourcekey = trim($resourcekey);
 
-        if ($type === 'course' && preg_match('/^course:(\d+):([a-z0-9_-]+)$/i', $resourcekey, $matches)) {
+        // The resource key is the authoritative source for known entitlement families.
+        // Historical records may expose a generic type such as "other" even though the
+        // resource key still identifies a course or a digital product precisely.
+        if (preg_match('/^course:(\d+):([a-z0-9_-]+)$/i', $resourcekey, $matches)) {
             $coursename = self::course_name((int) $matches[1], $db);
             return get_string('commerce_entitlement_course_named', 'local_subscriptions', (object) [
                 'course' => $coursename,
@@ -60,7 +65,7 @@ final class CommerceProductPresentation {
             ]);
         }
 
-        if ($type === 'digital-product' && preg_match('/^digital-product:(\d+)$/i', $resourcekey, $matches)) {
+        if (preg_match('/^digital-product:(\d+)$/i', $resourcekey, $matches)) {
             $productname = self::digital_product_name((int) $matches[1], $db);
             return get_string('commerce_entitlement_digital_named', 'local_subscriptions', $productname);
         }
@@ -76,7 +81,14 @@ final class CommerceProductPresentation {
         ]);
     }
 
-    public static function entitlement_reference(string $resourcekey): string {
+    public static function entitlement_reference(
+        string $resourcekey,
+        string $context = CommercePresentationContext::DIAGNOSTIC
+    ): string {
+        if (!CommercePresentationContext::allows_technical_details($context)) {
+            return '';
+        }
+
         return html_writer::span(
             '(' . s(trim($resourcekey)) . ')',
             'crm-commerce-technical-reference'
@@ -86,11 +98,12 @@ final class CommerceProductPresentation {
     public static function entitlement_html(
         string $type,
         string $resourcekey,
-        ?\moodle_database $db = null
+        ?\moodle_database $db = null,
+        string $context = CommercePresentationContext::CRM
     ): string {
         return html_writer::div(
             html_writer::div(self::entitlement_label($type, $resourcekey, $db), 'crm-commerce-entitlement-label') .
-            self::entitlement_reference($resourcekey),
+            self::entitlement_reference($resourcekey, $context),
             'crm-commerce-entitlement'
         );
     }

@@ -1,0 +1,8 @@
+{{#hasrecommendations}}
+<section class="commerce-storefront-recommendations container py-5">
+    <h2 class="h3 mb-4">{{recommendationstitle}}</h2>
+    <div class="row g-4">
+        {{#recommendations}}{{> local_subscriptions/storefront/product_card }}{{/recommendations}}
+    </div>
+</section>
+{{/hasrecommendations}}

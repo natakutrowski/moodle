@@ -1,0 +1,121 @@
+{{#customernavigation.enabled}}
+<nav class="campus-customer-nav d-none d-lg-flex align-items-center" aria-label="{{customernavigation.label}}">
+    {{#customernavigation.isadmin}}
+        <div class="campus-customer-nav__edit-control">
+            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+            <span class="campus-customer-nav__edit-label">{{customernavigation.editmodelabel}}</span>
+            <span class="campus-customer-nav__edit-switch">{{{ output.edit_switch }}}</span>
+        </div>
+        <details class="campus-customer-nav__admin-menu">
+            <summary class="campus-customer-nav__admin-link" aria-label="{{customernavigation.crmlabel}}">
+                <i class="fa-solid fa-users-gear" aria-hidden="true"></i>
+                <span>{{customernavigation.crmlabel}}</span>
+                <i class="fa-solid fa-chevron-down campus-customer-nav__admin-chevron" aria-hidden="true"></i>
+            </summary>
+            <nav class="campus-customer-nav__admin-dropdown" aria-label="{{customernavigation.crmlabel}}">
+                {{#customernavigation.crmitems}}
+                    <a class="campus-customer-nav__admin-item" href="{{{url}}}">
+                        {{#icon}}<i class="{{icon}}" aria-hidden="true"></i>{{/icon}}
+                        {{#symbol}}<span class="campus-customer-nav__admin-symbol" aria-hidden="true">{{symbol}}</span>{{/symbol}}
+                        <span>{{label}}</span>
+                    </a>
+                {{/customernavigation.crmitems}}
+            </nav>
+        </details>
+        <details class="campus-customer-nav__admin-menu">
+            <summary class="campus-customer-nav__admin-link" aria-label="{{customernavigation.adminlabel}}">
+                <i class="fa-solid fa-gear" aria-hidden="true"></i>
+                <span>{{customernavigation.adminlabel}}</span>
+                <i class="fa-solid fa-chevron-down campus-customer-nav__admin-chevron" aria-hidden="true"></i>
+            </summary>
+            <nav class="campus-customer-nav__admin-dropdown campus-customer-nav__admin-dropdown--moodle" aria-label="{{customernavigation.adminlabel}}">
+                {{#customernavigation.adminitems}}
+                    <a class="campus-customer-nav__admin-item" href="{{{url}}}">
+                        <i class="{{icon}}" aria-hidden="true"></i>
+                        <span>{{label}}</span>
+                    </a>
+                {{/customernavigation.adminitems}}
+            </nav>
+        </details>
+    {{/customernavigation.isadmin}}
+
+    <a class="campus-customer-nav__home {{#customernavigation.campusactive}}is-active{{/customernavigation.campusactive}}"
+       href="{{{customernavigation.campusurl}}}">
+        <i class="fa-solid fa-house" aria-hidden="true"></i>
+        <span>{{customernavigation.label}}</span>
+    </a>
+
+    {{#customernavigation.showcart}}
+        <a class="campus-customer-nav__cart"
+           href="{{{customernavigation.carturl}}}"
+           aria-label="{{customernavigation.cartlabel}}"
+           title="{{customernavigation.cartlabel}}">
+            <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+            {{#customernavigation.hascartitems}}<span class="campus-customer-nav__cart-count">{{customernavigation.cartcount}}</span>{{/customernavigation.hascartitems}}
+        </a>
+    {{/customernavigation.showcart}}
+
+    {{#customernavigation.haslanguages}}
+        <details class="campus-topbar-language">
+            <summary class="campus-topbar-language__toggle" aria-label="{{customernavigation.languagelabel}}">
+                <span class="campus-topbar-language__flag" aria-hidden="true">{{customernavigation.currentlanguageflag}}</span>
+                <span class="campus-topbar-language__label">{{customernavigation.languagelabel}}</span>
+                <span class="campus-topbar-chevron" aria-hidden="true">▾</span>
+            </summary>
+            <nav class="campus-topbar-language__dropdown" aria-label="{{customernavigation.languagelabel}}">
+                {{#customernavigation.languages}}
+                    <a class="campus-topbar-language__option {{#active}}is-active{{/active}}"
+                       href="{{{url}}}" {{#active}}aria-current="true"{{/active}}>
+                        <span class="campus-topbar-language__option-flag" aria-hidden="true">{{flag}}</span>
+                        <span>{{name}}</span>
+                        {{#active}}<span class="campus-topbar-language__check" aria-hidden="true">✓</span>{{/active}}
+                    </a>
+                {{/customernavigation.languages}}
+            </nav>
+        </details>
+    {{/customernavigation.haslanguages}}
+
+    <details class="campus-topbar-user">
+        <summary class="campus-topbar-user__toggle" aria-label="{{customernavigation.fullname}}">
+            <span class="campus-topbar-user__avatar">{{{customernavigation.userpicture}}}</span>
+            <span class="campus-topbar-user__name">{{customernavigation.fullname}}</span>
+            <span class="campus-topbar-chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="campus-topbar-user__dropdown">
+            <div class="campus-topbar-user__header">
+                <span class="campus-topbar-user__menu-avatar">{{{customernavigation.userpicture}}}</span>
+                <div>
+                    <strong>{{customernavigation.fullname}}</strong>
+                    <a href="{{{customernavigation.profileurl}}}">{{customernavigation.viewprofilelabel}}</a>
+                </div>
+            </div>
+            <nav class="campus-topbar-user__links" aria-label="{{customernavigation.label}}">
+                {{#customernavigation.items}}
+                    <a class="campus-topbar-user__link {{#active}}is-active{{/active}}" href="{{{url}}}">
+                        <i class="{{icon}}" aria-hidden="true"></i>
+                        <span>{{label}}</span>
+                    </a>
+                {{/customernavigation.items}}
+            </nav>
+            {{#customernavigation.isadmin}}
+                <div class="campus-topbar-user__divider" aria-hidden="true"></div>
+                <a class="campus-topbar-user__link" href="{{{customernavigation.preferencesurl}}}">
+                    <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                    <span>{{customernavigation.preferenceslabel}}</span>
+                </a>
+                {{#customernavigation.canswitchrole}}
+                    <a class="campus-topbar-user__link" href="{{{customernavigation.switchroleurl}}}">
+                        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                        <span>{{customernavigation.switchrolelabel}}</span>
+                    </a>
+                {{/customernavigation.canswitchrole}}
+            {{/customernavigation.isadmin}}
+            <div class="campus-topbar-user__divider" aria-hidden="true"></div>
+            <a class="campus-topbar-user__link campus-topbar-user__link--danger" href="{{{customernavigation.logouturl}}}">
+                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                <span>{{customernavigation.logoutlabel}}</span>
+            </a>
+        </div>
+    </details>
+</nav>
+{{/customernavigation.enabled}}

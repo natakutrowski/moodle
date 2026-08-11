@@ -283,26 +283,33 @@ final class LegacyStripePaymentGateway
         StripeGatewayRequest $request,
         LegacyPaymentRequestContext $context
     ): array {
+        $source = $request->get_metadata();
+
         $metadata = [
             'commerce_reference' =>
                 $request->get_reference(),
 
+            'commerce_payment_id' =>
+                $this->required_native_identity(
+                    $source,
+                    'commerce_payment_id'
+                ),
+
+            'commerce_purchase_uuid' =>
+                $this->required_native_identity(
+                    $source,
+                    'commerce_purchase_uuid'
+                ),
+
             'payment_context' =>
-                $context->get_payment_context(),
-
-            'legacy_payment_request_id' =>
-                (string)$context
-                    ->get_payment_request_id(),
-
-            'legacy_payment_request_table' =>
-                $context
-                    ->get_payment_request_table(),
+                'commerce',
         ];
-
-        $source = $request->get_metadata();
 
         foreach (
             [
+                'userid' =>
+                    'userid',
+
                 'legacy_plan_id' =>
                     'planid',
 
@@ -317,26 +324,15 @@ final class LegacyStripePaymentGateway
 
                 'legacy_slug' =>
                     'slug',
-
-                'userid' =>
-                    'userid',
             ] as $sourcekey => $targetkey
         ) {
-            if (
-                !array_key_exists(
-                    $sourcekey,
-                    $source
-                )
-            ) {
+            if (!array_key_exists($sourcekey, $source)) {
                 continue;
             }
 
             $value = $source[$sourcekey];
 
-            if (
-                !is_scalar($value)
-                || trim((string)$value) === ''
-            ) {
+            if (!is_scalar($value) || trim((string)$value) === '') {
                 continue;
             }
 
@@ -345,6 +341,27 @@ final class LegacyStripePaymentGateway
         }
 
         return $metadata;
+    }
+
+    private function required_native_identity(
+        array $metadata,
+        string $key
+    ): string {
+        $value = $metadata[$key] ?? null;
+
+        if (!is_scalar($value) || trim((string)$value) === '') {
+            throw new CommercePaymentProviderException(
+                'The Commerce Stripe request is missing its Native payment identity.',
+                Provider::STRIPE,
+                'commerce_stripe_native_identity_missing',
+                [
+                    'missingkey' => $key,
+                    'commerce_reference' => $metadata['commerce_reference'] ?? null,
+                ]
+            );
+        }
+
+        return trim((string)$value);
     }
 
     private function build_product_name(
@@ -450,16 +467,17 @@ final class LegacyStripePaymentGateway
                 'commerce_reference' =>
                     $request->get_reference(),
 
-                'legacy_payment_request_id' =>
-                    $context->get_payment_request_id(),
+                'commerce_payment_id' =>
+                    $this->required_native_identity(
+                        $request->get_metadata(),
+                        'commerce_payment_id'
+                    ),
 
-                'legacy_payment_request_table' =>
-                    $context
-                        ->get_payment_request_table(),
-
-                'legacy_payment_context' =>
-                    $context
-                        ->get_payment_context(),
+                'commerce_purchase_uuid' =>
+                    $this->required_native_identity(
+                        $request->get_metadata(),
+                        'commerce_purchase_uuid'
+                    ),
 
                 'stripe_session_id' =>
                     $sessionid,

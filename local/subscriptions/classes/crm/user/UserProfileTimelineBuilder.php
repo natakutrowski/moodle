@@ -9,19 +9,24 @@ use local_subscriptions\admin\AdminEvents;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\crm\automation\AutomationTriggerKeys;
 use local_subscriptions\subscription_config;
+use local_subscriptions\commerce\customer\crm\CommerceCustomerTimelineCollector;
+use local_subscriptions\commerce\customer\readmodel\CommerceCustomerReadService;
+use local_subscriptions\commerce\customer\readmodel\CommerceCustomerSnapshot;
 
 final class UserProfileTimelineBuilder {
 
     public function build_for_user(
         \stdClass $user,
         int $limit = 40,
-        bool $includeinbox = false
+        bool $includeinbox = false,
+        ?CommerceCustomerSnapshot $commercesnapshot = null
     ): array {
         return $this->build_page_for_user(
             $user,
             $limit,
             0,
-            $includeinbox
+            $includeinbox,
+            $commercesnapshot
         )->events;
     }
 
@@ -32,7 +37,8 @@ final class UserProfileTimelineBuilder {
         \stdClass $user,
         int $limit = 20,
         int $offset = 0,
-        bool $includeinbox = false
+        bool $includeinbox = false,
+        ?CommerceCustomerSnapshot $commercesnapshot = null
     ): UserProfileTimelinePage {
         $limit = max(
             1,
@@ -58,6 +64,17 @@ final class UserProfileTimelineBuilder {
 
         $events = [];
         $seenlogids = [];
+
+        global $DB;
+
+        $commercesnapshot ??= (new CommerceCustomerReadService($DB))->build(
+            (int)$user->id,
+            (string)($user->email ?? '')
+        );
+
+        foreach ((new CommerceCustomerTimelineCollector())->collect($commercesnapshot) as $commerceevent) {
+            $events[] = $commerceevent;
+        }
 
         $this->add_admin_logs(
             $events,
@@ -86,52 +103,55 @@ final class UserProfileTimelineBuilder {
                 )
         );
 
-        $this->add_subscription_payments(
-            $events,
-            $repository
-                ->get_subscription_payments_for_timeline(
-                    (int)$user->id,
-                    (string)($user->email ?? ''),
+        if (!$commercesnapshot->has_purchases()) {
+            $this->add_subscription_payments(
+                $events,
+                $repository
+                    ->get_subscription_payments_for_timeline(
+                        (int)$user->id,
+                        (string)($user->email ?? ''),
+                        $fetchlimit
+                    )
+            );
+
+            $this->add_subscriptions(
+                $events,
+                $repository
+                    ->get_subscriptions_for_timeline(
+                        (int)$user->id,
+                        $fetchlimit
+                    )
+            );
+
+            $digitalpurchases =
+                $repository
+                    ->get_digital_purchases_for_timeline(
+                        (int)$user->id,
+                        (string)($user->email ?? ''),
+                        $fetchlimit
+                    );
+
+            $purchaseids = array_map(
+                static fn(\stdClass $purchase): int =>
+                    (int)$purchase->id,
+                $digitalpurchases
+            );
+
+            $this->add_digital_logs(
+                $events,
+                $seenlogids,
+                $repository->get_digital_purchase_logs(
+                    $purchaseids,
                     $fetchlimit
                 )
-        );
+            );
 
-        $this->add_subscriptions(
-            $events,
-            $repository
-                ->get_subscriptions_for_timeline(
-                    (int)$user->id,
-                    $fetchlimit
-                )
-        );
+            $this->add_digital_purchases(
+                $events,
+                $digitalpurchases
+            );
 
-        $digitalpurchases =
-            $repository
-                ->get_digital_purchases_for_timeline(
-                    (int)$user->id,
-                    (string)($user->email ?? ''),
-                    $fetchlimit
-                );
-
-        $purchaseids = array_map(
-            static fn(\stdClass $purchase): int =>
-                (int)$purchase->id,
-            $digitalpurchases
-        );
-
-        $this->add_digital_logs(
-            $events,
-            $seenlogids,
-            $repository->get_digital_purchase_logs(
-                $purchaseids,
-                $fetchlimit
-            )
-        );
-
-        $this->add_digital_purchases(
-            $events,
-            $digitalpurchases
-        );
+        }
 
         if ($includeinbox) {
             $this->add_inbox_messages(

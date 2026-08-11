@@ -40,7 +40,14 @@ $headercontent = $header->export_for_template($renderer);
 
 $login_url  = get_login_url();
 
-$signup_url = "{$CFG->wwwroot}/local/subscriptions/subscribe.php";
+$storefrontpath = '/boutique';
+if (class_exists('\local_subscriptions\subscription_config')) {
+    $configuredstorefront = \local_subscriptions\subscription_config::storefront_page();
+    $storefrontpath = $configuredstorefront instanceof \moodle_url
+        ? $configuredstorefront->out(false)
+        : (string)$configuredstorefront;
+}
+$signup_url = (new \moodle_url($storefrontpath))->out(false);
 $isloggedin = isloggedin();
 
 // Qui est qui ?
@@ -203,7 +210,7 @@ $header_search          = get_config('theme_edly', 'header_search');
 
 // URL de base du bouton (page d’abonnement).
 $header_btn_url       = get_config('theme_edly', 'header_btn_url'); // si Edly l’utilise ailleurs
-$header_left_btn_url  = $signup_url; // déjà défini plus haut : "{$CFG->wwwroot}/local/subscriptions/subscribe.php"
+$header_left_btn_url = $signup_url;
 $header_btn_icon      = get_config('theme_edly', 'header_btn_icon_edly_icon_class');
 
 // Libellé multilingue depuis local_subscriptions (suivant la langue de l’utilisateur).

@@ -7,15 +7,17 @@ namespace local_subscriptions;
 use local_subscriptions\commerce\readiness\CommerceProductionReadinessAuditor;
 
 final class commerce_production_readiness_auditor_test extends \advanced_testcase {
-    public function test_manifest_contains_critical_migration_and_rollback_tools(): void {
-        $auditor = new CommerceProductionReadinessAuditor();
-        $files = $auditor->required_files();
+    public function test_auditor_uses_current_dependency_injection_contract(): void {
+        global $CFG, $DB;
 
-        $this->assertArrayHasKey('cli_backfill', $files);
-        $this->assertArrayHasKey('cli_integrity_audit', $files);
-        $this->assertArrayHasKey('cli_runtime_switch', $files);
-        $this->assertArrayHasKey('cli_runtime_rollback', $files);
-        $this->assertArrayHasKey('cli_h7_certification', $files);
+        $auditor = new CommerceProductionReadinessAuditor(
+            $DB,
+            $CFG->dirroot,
+            $CFG->dirroot . '/local/subscriptions'
+        );
+
+        $this->assertInstanceOf(CommerceProductionReadinessAuditor::class, $auditor);
+        $this->assertTrue(method_exists($auditor, 'audit'));
     }
 
     public function test_runtime_mode_registry_exposes_all_dispatcher_modes(): void {
@@ -29,7 +31,6 @@ final class commerce_production_readiness_auditor_test extends \advanced_testcas
             'checkout_completed'
         ));
     }
-
 
     public function test_rollback_service_declares_safe_legacy_target_without_data_changes(): void {
         $inspection = (new \local_subscriptions\commerce\runtime\rollback\CommerceRuntimeRollbackService())->inspect();
@@ -48,7 +49,7 @@ final class commerce_production_readiness_auditor_test extends \advanced_testcas
 
         $paths = [
             $CFG->dirroot . '/local/subscriptions/classes/commerce/readiness/CommerceProductionReadinessAuditor.php',
-            $CFG->dirroot . '/local/subscriptions/cli/commerce/readiness/audit_commerce_production_readiness.php',
+            $CFG->dirroot . '/local/subscriptions/cli/commerce/prod_ready.php',
         ];
         foreach ($paths as $path) {
             $contents = (string)file_get_contents($path);

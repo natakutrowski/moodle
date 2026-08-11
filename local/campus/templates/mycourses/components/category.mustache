@@ -1,0 +1,10 @@
+<section class="campus-mycourses-category">
+    {{#hastitle}}
+        <h2 class="campus-mycourses-category__title">{{title}}</h2>
+    {{/hastitle}}
+    <div class="campus-mycourses-list">
+        {{#courses}}
+            {{> local_campus/mycourses/components/course_card}}
+        {{/courses}}
+    </div>
+</section>

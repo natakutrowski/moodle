@@ -141,7 +141,7 @@ $string['trial_already_subscribed_html'] =
     'You already have an active subscription. Please <a href="{$a->login}" class="link-primary" target="_top" rel="noopener">log in</a>.';
 
 $string['trial_expired_html'] =
-    'Your trial period has ended. <a href="{$a->subscribe}" class="link-primary" rel="noopener" data-subs-modal="1">Subscribe</a> to continue.';
+    'Your trial period has ended. <a href="{$a->subscribe}" class="link-primary" rel="noopener">Subscribe</a> to continue.';
 
 $string['trial_discount_banner_title'] = '−{$a}% discount for trial users.';
 $string['trial_discount_banner_body']  = 'Time left: ';
@@ -153,7 +153,7 @@ $string['trial_banner_reminder_body']  = 'Your trial access ends on {$a}. To con
 
 $string['trial_banner_expired_html'] =
     'Your trial access expired on <strong>{$a->date}</strong>. '
-    .'<a href="{$a->url}" class="link-primary" data-subs-modal="1">Subscribe</a> to continue.';
+    .'<a href="{$a->url}" class="link-primary">Subscribe</a> to continue.';
 
 $string['sub_expiry_banner'] =
     'Your subscription “{$a->plan}” expires on <strong>{$a->date}</strong> (in {$a->days} days).';
@@ -324,3 +324,66 @@ $string['audio_browser_not_supported'] = 'Your browser does not support audio pl
 $string['other_courses_available_title'] = 'Discover more courses';
 $string['other_courses_available_text'] = 'You can continue your learning journey with other courses available on Campus<small><sup>FR</sup></small>.';
 $string['trial_badge'] = 'Trial';
+$string['course_access_origin_purchase'] = 'Purchased';
+$string['course_access_origin_gift'] = 'Gifted';
+$string['course_access_origin_trial'] = 'Trial';
+$string['course_access_origin_granted'] = 'Access granted';
+$string['course_access_lifetime'] = 'Lifetime access';
+$string['course_access_from'] = 'Available from {$a}';
+$string['course_access_until'] = 'Access until {$a}';
+$string['course_access_expired'] = 'Access expired on {$a}';
+$string['course_access_view_purchase'] = 'View purchase';
+
+$string['mycourses_enriched_intro'] = 'Find all the courses you can currently access, follow your progress and review useful information about each access.';
+$string['mycourses_stat_total'] = 'Available courses';
+$string['mycourses_stat_inprogress'] = 'In progress';
+$string['mycourses_stat_completed'] = 'Completed';
+$string['mycourses_stat_trial'] = 'Trial courses';
+$string['mycourses_empty_title'] = 'Your course space is ready';
+$string['mycourses_empty_text'] = 'You do not have access to any course yet. Explore the CampusFR store or start with the courses available as a trial.';
+$string['mycourses_empty_storefront'] = 'Explore the store';
+$string['mycourses_empty_trial'] = 'View trial courses';
+$string['mycourses_course_image_alt'] = 'Course illustration for {$a}';
+$string['mycourses_progress_not_started'] = 'Ready whenever you are.';
+$string['mycourses_progress_started'] = 'A great start — keep going!';
+$string['mycourses_progress_halfway'] = 'You are making good progress.';
+$string['mycourses_progress_final_stretch'] = 'You are on the final stretch!';
+$string['mycourses_progress_completed'] = 'Course completed — well done!';
+$string['mycourses_cta_review'] = 'Review the course';
+$string['mycourses_recommendations_title'] = 'Continue your learning journey';
+$string['mycourses_recommendations_text'] = 'Discover courses and offers suited to the next step in your learning.';
+$string['mycourses_recommendation_course'] = 'Course';
+$string['mycourses_recommendation_bundle'] = 'Bundle';
+$string['mycourses_recommendation_upgrade'] = 'Upgrade';
+$string['mycourses_recommendation_view'] = 'View product page';
+$string['mycourses_recommendation_image_alt'] = 'Illustration for {$a}';
+
+$string['mycourses_recommendation_discover'] = 'Discover';
+
+$string['mycourses_recommendation_upgrade_heading'] = 'Complete your access';
+
+$string['mycourses_recommendation_upgrade_text'] = 'Unlock the full offer and pay only the upgrade amount.';
+
+$string['mycourses_recommendation_upgrade_price'] = 'Upgrade price';
+
+$string['nav_my_courses'] = 'My courses';
+$string['nav_my_resources'] = 'My resources';
+$string['nav_my_purchases'] = 'My purchases';
+$string['nav_my_profile'] = 'My profile';
+$string['mycourses_recommendation_discovery_price'] = 'Discovery price';
+$string['mycourses_recommendation_standard_price'] = 'Price';
+$string['mycourses_recommendation_upgrade_saving'] = 'You save {$a}';
+$string['mycourses_recommendation_upgrade_saving_text'] = 'You already have access to {$a}. The amount already paid is deducted from the price.';
+$string['trial_discount_banner_prefix'] = '🎁 −{$a}% on courses included in your Trial offer. Discount available for another';
+$string['trial_discount_banner_cta_current_course'] = 'Buy this course';
+
+$string['mobilecoverspage'] = 'Mobile course covers';
+$string['mobilecoversintro'] = 'Configure a 4:3 landscape image used on phones in “My courses”. When no dedicated cover exists, the main Moodle course image remains the fallback.';
+$string['mobilecovercourse'] = 'Course';
+$string['mobilecoverfield'] = '4:3 mobile cover';
+$string['mobilecoverfield_help'] = 'JPG, PNG or WebP. Recommended dimensions: 1600 × 1200 px. Maximum size: 5 MB.';
+$string['mobilecoversaved'] = 'The mobile cover has been saved.';
+$string['mobilecoverdeleted'] = 'The mobile cover has been deleted.';
+$string['mobilecoverdelete'] = 'Delete mobile cover';
+$string['mobilecovernone'] = 'No dedicated mobile cover. The main Moodle image will be used as fallback.';
+$string['mobilecoverpreviewalt'] = 'Mobile cover preview for course {$a}';

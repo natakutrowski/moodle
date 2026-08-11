@@ -11,25 +11,21 @@ use stdClass;
 
 final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInterface {
 
+    public function __construct(private readonly ?string $profile = null) {
+    }
+
     private function cfg(array $overrides = []): array {
-
-        $env = get_config('local_subscriptions', 'stripe_env') ?: 'test';
-        $env = ($env === 'live') ? 'live' : 'test';
-
-        // Nouvelles clés (test/live)
-        $secret   = get_config('local_subscriptions', "stripe_{$env}_secret") ?: '';
-        $pub      = get_config('local_subscriptions', "stripe_{$env}_publishable") ?: '';
-        $whsecret = get_config('local_subscriptions', "stripe_{$env}_webhook_secret") ?: '';
-        $portalid = get_config('local_subscriptions', "stripe_{$env}_portal_configuration_id") ?: '';
+        $stripe = StripeConfiguration::get($this->profile);
 
 
         // URLs par défaut (peuvent être écrasées par $overrides)
         $defaults = [
-            'mode'                    => $env, // 'test' | 'live' — utile pour tes logs
-            'secret_key'              => (string)$secret,
-            'publishable_key'         => $pub ?: null,
-            'webhook_secret'          => $whsecret ?: null,
-            'portal_configuration_id' => $portalid ?: null,
+            'profile'                 => $stripe['profile'],
+            'mode'                    => $stripe['mode'],
+            'secret_key'              => $stripe['secret_key'],
+            'publishable_key'         => $stripe['publishable_key'] ?: null,
+            'webhook_secret'          => $stripe['webhook_secret'] ?: null,
+            'portal_configuration_id' => $stripe['portal_configuration_id'] ?: null,
             'success_url'             => UrlFactory::payment_success()->out(false),
             'cancel_url'              => UrlFactory::payment_cancel()->out(false),
             'portal_return'           => UrlFactory::my_subscriptions()->out(false),
@@ -100,6 +96,7 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
             'metadata' => array_merge(
                 [
                     'payment_request_id' => (string)$payment_request->id,
+                    'stripe_profile' => $cfg['profile'],
                 ],
                 $options['metadata'] ?? []
             ),
@@ -136,7 +133,10 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
 
                 $params['payment_intent_data'] = [
                     'metadata' => array_merge(
-                        ['payment_request_id' => (string)$payment_request->id],
+                        [
+                            'payment_request_id' => (string)$payment_request->id,
+                            'stripe_profile' => $cfg['profile'],
+                        ],
                         $options['metadata'] ?? []
                     ),
                 ];
@@ -155,7 +155,10 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
                     'quantity' => 1,
                 ]];
                 $params['payment_intent_data'] = [
-                    'metadata' => ['payment_request_id' => (string)$payment_request->id]
+                    'metadata' => [
+                        'payment_request_id' => (string)$payment_request->id,
+                        'stripe_profile' => $cfg['profile'],
+                    ]
                 ];
             }
         } else {
@@ -173,7 +176,10 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
                 }
                 $params['line_items'] = [[ 'price' => $priceId, 'quantity' => 1 ]];  
                 $params['subscription_data'] = [
-                    'metadata' => ['payment_request_id' => (string)$payment_request->id]
+                    'metadata' => [
+                        'payment_request_id' => (string)$payment_request->id,
+                        'stripe_profile' => $cfg['profile'],
+                    ]
                 ];
             }
         }
@@ -242,7 +248,10 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
                     'meta' => array_merge($metadata, [
                         'provider' => Provider::STRIPE,
                         'session' => $obj->id,
+                        'provider_payment_id' => $obj->id,
                         'payment_intent' => $obj->payment_intent ?? null,
+                        'payment_status' => $obj->payment_status ?? null,
+                        'checkout_status' => $obj->status ?? null,
                         'customer_email' => $obj->customer_details->email ?? $obj->customer_email ?? null,
                     ]),
                 ]);

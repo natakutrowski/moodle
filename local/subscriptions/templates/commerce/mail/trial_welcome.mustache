@@ -1,0 +1,18 @@
+{{#has_editorial_heading}}<h1 style="margin:0 0 18px;font-size:28px;line-height:1.2;color:#171827;">{{editorial_heading}}</h1>{{/has_editorial_heading}}
+{{#has_editorial_intro}}<div style="margin-bottom:18px;">{{{editorial_intro}}}</div>{{/has_editorial_intro}}
+
+{{#hasaccountemail}}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:18px 0;">
+<tr><td style="padding:14px 16px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a7d96;font-weight:800;">{{welcome_login_email_label}}</div>
+    <div style="margin-top:4px;font-family:'Courier New',Courier,monospace;font-size:14px;color:#38235d;word-break:break-all;">{{accountemail}}</div>
+</td></tr>
+</table>
+{{/hasaccountemail}}
+
+{{#hasreseturl}}
+<div style="margin:14px 0 22px;font-size:12px;color:#6b7280;">{{welcome_forgot_password}} <a href="{{reseturl}}" target="_blank" rel="noopener noreferrer" style="color:#f72585;text-decoration:none;font-weight:700;">{{welcome_reset_password}}</a></div>
+{{/hasreseturl}}
+
+{{#has_editorial_outro}}<div style="margin-top:20px;">{{{editorial_outro}}}</div>{{/has_editorial_outro}}
+{{#has_editorial_signature}}<div style="margin-top:18px;">{{{editorial_signature}}}</div>{{/has_editorial_signature}}

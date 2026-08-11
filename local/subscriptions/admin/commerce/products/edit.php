@@ -5,6 +5,7 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\catalog\admin\CommerceCatalogProductInput;
+use local_subscriptions\commerce\catalog\admin\CommerceProductSkuGenerator;
 use local_subscriptions\commerce\catalog\domain\CommerceProductStatus;
 use local_subscriptions\commerce\catalog\domain\CommerceProductTranslation;
 use local_subscriptions\commerce\catalog\presentation\CommerceProductPresentation;
@@ -15,6 +16,8 @@ use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
+use local_subscriptions\crm\commerce\presentation\CommerceProductPageHeaderRenderer;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 $sku = optional_param('sku', '', PARAM_RAW_TRIMMED);
@@ -28,11 +31,16 @@ $pagetitle = $product ? $product->get_name() : get_string('commerce_product_add'
 CrmPageConfigurator::configure($PAGE, $context, $pageurl, $pagetitle, 'local-subscriptions-commerce-product-edit-page');
 
 if (data_submitted() && confirm_sesskey()) {
+    $producttype = required_param('producttype', PARAM_ALPHANUMEXT);
+    $technicalname = required_param('productname', PARAM_TEXT);
+    $submittedsku = $sku !== ''
+        ? $sku
+        : (new CommerceProductSkuGenerator($DB))->generate($producttype, $technicalname);
     $input = new CommerceCatalogProductInput(
-        required_param('productsku', PARAM_RAW_TRIMMED),
-        required_param('producttype', PARAM_ALPHANUMEXT),
-        required_param('productstatus', PARAM_ALPHANUMEXT),
-        required_param('productname', PARAM_TEXT),
+        $submittedsku,
+        $producttype,
+        optional_param('productstatus', CommerceProductStatus::INACTIVE, PARAM_ALPHANUMEXT),
+        $technicalname,
         optional_param('description', '', PARAM_TEXT)
     );
 
@@ -68,16 +76,30 @@ echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 if ($product !== null) {
     echo CommerceProductEditorNavigationRenderer::breadcrumb($product->get_name(), get_string('commerce_product_step_information', 'local_subscriptions'));
-    echo CommerceProductEditorNavigationRenderer::render($product->get_sku(), CommerceProductEditorNavigationRenderer::INFORMATION);
+    echo CommerceProductEditorNavigationRenderer::render($product, CommerceProductEditorNavigationRenderer::INFORMATION);
 }
-echo $OUTPUT->heading(format_string($pagetitle));
-echo html_writer::start_tag('form', ['method' => 'post', 'class' => 'card card-body']);
+echo CommerceProductPageHeaderRenderer::render(
+    $pagetitle,
+    CommerceDesignSystemRenderer::page_intro(get_string('commerce_product_description_help', 'local_subscriptions')),
+    '',
+    get_string('commerce_products_title', 'local_subscriptions')
+);
+echo html_writer::start_tag('form', ['method' => 'post', 'class' => 'card card-body crm-commerce-editor-form']);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 
 $fields = [
-    ['productsku', get_string('commerce_product_sku', 'local_subscriptions'), $product?->get_sku() ?? '', $product !== null],
-    ['productname', get_string('commerce_product_name', 'local_subscriptions'), $product?->get_name() ?? '', false],
+    ['productname', get_string('commerce_product_technical_name', 'local_subscriptions'), $product?->get_name() ?? '', false],
 ];
+
+if ($product !== null) {
+    echo html_writer::start_div('mb-3');
+    echo html_writer::tag('label', get_string('commerce_product_sku', 'local_subscriptions'), ['class' => 'form-label']);
+    echo html_writer::tag('code', s($product->get_sku()), ['class' => 'form-control-plaintext d-block']);
+    echo html_writer::tag('div', get_string('commerce_product_sku_immutable_help', 'local_subscriptions'), ['class' => 'form-text']);
+    echo html_writer::end_div();
+} else {
+    echo html_writer::tag('div', get_string('commerce_product_sku_generated_help', 'local_subscriptions'), ['class' => 'alert alert-info']);
+}
 
 foreach ($fields as [$name, $label, $value, $readonly]) {
     echo html_writer::start_div('mb-3');
@@ -111,14 +133,12 @@ if ($product !== null && $product->get_status() !== CommerceProductStatus::DRAFT
 echo html_writer::tag('div', get_string('commerce_product_type_help', 'local_subscriptions'), ['class' => 'form-text']);
 echo html_writer::end_div();
 
-$statuscodes = CommerceProductStatus::all();
 echo html_writer::start_div('mb-3');
-echo html_writer::tag('label', get_string('commerce_product_status', 'local_subscriptions'), ['for' => 'productstatus', 'class' => 'form-label']);
-$statusoptions = [];
-foreach ($statuscodes as $statuscode) {
-    $statusoptions[$statuscode] = CommerceProductPresentation::status_label($statuscode);
-}
-echo html_writer::select($statusoptions, 'productstatus', $product?->get_status() ?? CommerceProductStatus::INACTIVE, false, ['class' => 'form-select', 'id' => 'productstatus']);
+echo html_writer::tag('label', get_string('commerce_product_status', 'local_subscriptions'), ['class' => 'form-label']);
+$currentstatus = $product?->get_status() ?? CommerceProductStatus::INACTIVE;
+echo html_writer::div(CommerceProductPresentation::status_label($currentstatus), 'form-control-plaintext fw-semibold');
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'productstatus', 'value' => $currentstatus]);
+echo html_writer::tag('div', get_string('commerce_product_status_managed_help', 'local_subscriptions'), ['class' => 'form-text']);
 echo html_writer::end_div();
 
 echo html_writer::start_div('mb-3');
@@ -146,9 +166,22 @@ foreach ($factory->locale_service()->get_languages() as $language => $languagela
     echo html_writer::end_div();
 }
 
-echo html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-primary', 'value' => get_string('savechanges')]);
+echo CommerceDesignSystemRenderer::form_actions(
+    html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-primary', 'value' => get_string('savechanges')]),
+    html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/index.php'), get_string('cancel'), ['class' => 'btn btn-outline-secondary'])
+);
 echo html_writer::end_tag('form');
 
+if ($product !== null) {
+    echo html_writer::div(
+        html_writer::link(
+            new moodle_url('/local/subscriptions/admin/commerce/products/lifecycle.php', ['sku' => $product->get_sku()]),
+            get_string('commerce_product_lifecycle_title', 'local_subscriptions'),
+            ['class' => 'btn btn-outline-danger']
+        ),
+        'card card-body mt-4'
+    );
+}
 
 echo CrmWorkspaceRenderer::end();
 echo $OUTPUT->footer();

@@ -14,6 +14,9 @@ use local_subscriptions\commerce\fulfillment\native\CommerceNativeFulfillmentRes
 interface CommerceNativeFulfillmentPersistenceRepository {
     public function find_state(string $grantreference): ?\stdClass;
 
+    /** Activates a planned grant after a successful, non-dry-run fulfillment. */
+    public function activate_grant_if_planned(CommerceEntitlementGrant $grant, ?int $now = null): bool;
+
     public function begin_attempt(
         CommerceEntitlementGrant $grant,
         CommerceNativeFulfillmentContext $context,

@@ -5,46 +5,38 @@
 {{/isfullinfo}}
 
 {{^isfullinfo}}
-  <div class="cf-locked-row" role="note" aria-live="polite">
-    <span class="cf-locked-ico" aria-hidden="true">
-      <i class="ri-lock-2-line"></i>
-    </span>
+  {{#hascampusunlock}}
+    <div class="cf-locked-row cf-locked-row--campus cf-locked-row--{{campusunlocktype}}"
+         role="note"
+         aria-live="polite">
+      <span class="cf-locked-ico" aria-hidden="true">
+        <i class="ri-lock-2-line"></i>
+      </span>
 
-    <div class="cf-locked-copy">
-      <div class="cf-locked-title">{{#str}}locked_title, theme_edly{{/str}}</div>
-      <div class="cf-locked-desc">{{#str}}locked_desc, theme_edly{{/str}}</div>
+      <div class="cf-locked-copy">
+        <div class="cf-locked-title">{{campusunlocktitle}}</div>
+        <div class="cf-locked-desc">{{campusunlocktext}}</div>
+      </div>
+
+      <div class="cf-locked-actions">
+        <a class="default-btn cf-locked-subscribe"
+           href="{{campusunlockurl}}">
+          {{campusunlockbutton}}
+        </a>
+      </div>
+
+      {{#campusunlockdebug}}
+        <details class="cf-restriction-debug">
+          <summary>Diagnostic restriction CampusFR</summary>
+          <pre>{{campusunlockdebug}}</pre>
+        </details>
+      {{/campusunlockdebug}}
     </div>
+  {{/hascampusunlock}}
 
-    <div class="cf-locked-actions">
-      <a class="default-btn cf-locked-subscribe" href="{{config.wwwroot}}/local/subscriptions/subscribe.php" data-subs-modal="1">
-        {{#str}}locked_subscribe, theme_edly{{/str}}
-      </a>
+  {{^hascampusunlock}}
+    <div class="availabilityinfo {{classes}}" role="note">
+      {{{ text }}}
     </div>
-  </div>
-
-  <script>
-  (function(){
-    try{
-      var banner = document.currentScript.previousElementSibling;
-      if(!banner) return;
-      var item = banner.closest('.activity-item, li.activity'); if(!item) return;
-
-      item.classList.add('cf-locked');
-
-      var titleLink = item.querySelector('.activityname a, .activityinstance a, .instancename a, a.aalink');
-      if(titleLink){
-        titleLink.classList.add('cf-locked-titlelink');
-        titleLink.setAttribute('aria-disabled','true');
-        titleLink.setAttribute('tabindex','-1');
-        titleLink.addEventListener('click', function(e){ e.preventDefault(); }, {capture:true});
-      }
-
-      // Fallback si RemixIcon n'est pas chargé (icône largeur ~0)
-      var ri = banner.querySelector('.cf-locked-ico i');
-      if (ri && ri.getBoundingClientRect().width < 4) {
-        banner.querySelector('.cf-locked-ico').textContent = '🔒';
-      }
-    }catch(e){}
-  })();
-  </script>
+  {{/hascampusunlock}}
 {{/isfullinfo}}

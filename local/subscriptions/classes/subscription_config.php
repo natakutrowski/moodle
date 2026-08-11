@@ -24,6 +24,91 @@ class subscription_config {
         'CHF' => 'CHF',
     ];
 
+
+
+    /** Public customer routes, translated by locale. */
+    /** Product route segments translated by locale and Commerce type. */
+    public const PUBLIC_PRODUCT_ROUTES = [
+        'fr' => [
+            'root' => 'catalogue',
+            'course' => 'cours',
+            'resource' => 'ressources',
+            'bundle' => 'packs',
+        ],
+        'en' => [
+            'root' => 'catalog',
+            'course' => 'courses',
+            'resource' => 'resources',
+            'bundle' => 'bundles',
+        ],
+        'ru' => [
+            'root' => 'katalog',
+            'course' => 'kursy',
+            'resource' => 'resursy',
+            'bundle' => 'komplekty',
+        ],
+    ];
+
+    public const PUBLIC_ROUTES = [
+        'my_campus' => ['fr' => 'mon-campus', 'en' => 'my-campus', 'ru' => 'moy-kampus'],
+        'my_courses' => ['fr' => 'mes-cours', 'en' => 'my-courses', 'ru' => 'moi-kursy'],
+        'my_purchases' => ['fr' => 'mes-achats', 'en' => 'my-orders', 'ru' => 'moi-pokupki'],
+        'my_resources' => ['fr' => 'mes-ressources', 'en' => 'my-resources', 'ru' => 'moi-resursy'],
+        'my_profile' => ['fr' => 'mon-profil', 'en' => 'my-profile', 'ru' => 'moy-profil'],
+        'cart' => ['fr' => 'panier', 'en' => 'cart', 'ru' => 'korzina'],
+        'checkout' => ['fr' => 'commande', 'en' => 'checkout', 'ru' => 'oformlenie'],
+        'order_details' => ['fr' => 'commande/details', 'en' => 'order/details', 'ru' => 'zakaz/details'],
+        'order_result' => ['fr' => 'commande/resultat', 'en' => 'order/result', 'ru' => 'zakaz/result'],
+        'storefront' => ['fr' => 'boutique', 'en' => 'shop', 'ru' => 'magazin'],
+        'course' => ['fr' => 'cours', 'en' => 'courses', 'ru' => 'kurs'],
+        'support' => ['fr' => 'aide', 'en' => 'support', 'ru' => 'podderzhka'],
+    ];
+
+    public static function public_route_slug(string $route, ?string $language = null): string {
+        $language = self::normalise_public_language($language);
+        $definitions = self::PUBLIC_ROUTES[$route] ?? null;
+        if (!is_array($definitions)) {
+            throw new \coding_exception('Unknown public route: ' . $route);
+        }
+        return (string)($definitions[$language] ?? $definitions['fr']);
+    }
+
+    public static function public_route_path(string $route, ?string $language = null): string {
+        return '/' . ltrim(self::public_route_slug($route, $language), '/');
+    }
+
+    private static function normalise_public_language(?string $language): string {
+        $language = strtolower(trim((string)($language ?: current_language())));
+        $language = explode('_', str_replace('-', '_', $language))[0];
+        return in_array($language, ['fr', 'en', 'ru'], true) ? $language : 'fr';
+    }
+
+    public static function product_route_segments(string $producttype, ?string $language = null): array {
+        $language = self::normalise_public_language($language);
+        $definitions = self::PUBLIC_PRODUCT_ROUTES[$language]
+            ?? self::PUBLIC_PRODUCT_ROUTES['fr'];
+        $category = match (strtolower(trim($producttype))) {
+            'subscription', 'course_access', 'course' => 'course',
+            'digital', 'digital_download', 'resource' => 'resource',
+            'bundle', 'pack' => 'bundle',
+            default => 'resource',
+        };
+        return [
+            'root' => (string)$definitions['root'],
+            'category' => (string)$definitions[$category],
+        ];
+    }
+
+    public static function public_product_path(
+        string $producttype,
+        string $slug,
+        ?string $language = null
+    ): string {
+        $segments = self::product_route_segments($producttype, $language);
+        return '/' . $segments['root'] . '/' . $segments['category'] . '/'
+            . ltrim($slug, '/');
+    }
+
     public const AVAILABLE_LANGUAGES = [
         'fr' => 'Français',
         'en' => 'English',
@@ -88,14 +173,29 @@ class subscription_config {
      * Returns the CampusFR student courses page.
      */
     public static function campus_my_courses_page(): string {
-        return '/local/campus/mycourses.php';
+        return self::public_route_path('my_courses');
+    }
+
+    /** Returns the public Native storefront route. */
+    public static function storefront_page(): string {
+        return self::public_route_path('storefront');
+    }
+
+    /** Returns the current customer's purchases route. */
+    public static function customer_purchases_page(): string {
+        return self::public_route_path('my_purchases');
+    }
+
+    /** Returns the current customer's digital library route. */
+    public static function customer_digital_library_page(): string {
+        return self::public_route_path('my_resources');
     }
 
     /**
      * Returns the current user's Moodle profile page.
      */
     public static function moodle_user_profile_page(): string {
-        return '/user/profile.php';
+        return self::public_route_path('my_profile');
     }
 
     /**
@@ -173,6 +273,42 @@ class subscription_config {
     }
     public static function manage_page(): string {
         return self::plugin_path() . 'admin/manage.php';
+    }
+
+    public static function commerce_plans_page(): string {
+        return self::plugin_path() . 'admin/commerce/plans/index.php';
+    }
+
+    public static function commerce_plan_view_page(): string {
+        return self::plugin_path() . 'admin/commerce/plans/view.php';
+    }
+
+    public static function commerce_plan_edit_page(): string {
+        return self::plugin_path() . 'admin/commerce/plans/edit.php';
+    }
+
+    public static function commerce_plan_delete_page(): string {
+        return self::plugin_path() . 'admin/commerce/plans/delete.php';
+    }
+
+    public static function commerce_plan_toggle_page(): string {
+        return self::plugin_path() . 'admin/commerce/plans/toggle.php';
+    }
+
+    public static function commerce_access_scopes_page(): string {
+        return self::plugin_path() . 'admin/commerce/accessscopes/index.php';
+    }
+
+    public static function commerce_access_scope_view_page(): string {
+        return self::plugin_path() . 'admin/commerce/accessscopes/view.php';
+    }
+
+    public static function commerce_access_scope_edit_page(): string {
+        return self::plugin_path() . 'admin/commerce/accessscopes/edit.php';
+    }
+
+    public static function commerce_access_scope_delete_page(): string {
+        return self::plugin_path() . 'admin/commerce/accessscopes/delete.php';
     }
     public static function scopes_translations_page(): string {
         return self::plugin_path() . 'admin/scopes/translations.php';

@@ -6,7 +6,13 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\digital\product_manager;
 use local_subscriptions\url\UrlFactory;
 
+use local_subscriptions\commerce\compatibility\CommerceLegacyUrlCompatibilityService;
+
 \local_subscriptions\subscription_config::guard_public_access();
+
+global $DB;
+(new CommerceLegacyUrlCompatibilityService($DB))->redirect_native_result_if_present('cancelled');
+
 
 $pid = optional_param('pid', 0, PARAM_INT);
 $uilang = optional_param('uilang', '', PARAM_ALPHANUMEXT);

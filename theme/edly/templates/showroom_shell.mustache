@@ -1,0 +1,48 @@
+{{> theme_boost/head }}
+<body {{{bodyattributes}}}>
+{{> core/local/toast/wrapper}}
+<div class="storefront-shell storefront-shell--fullwidth showroom-shell">
+    <header class="showroom-shell__topbar">
+        <a class="showroom-shell__brand" href="{{{config.wwwroot}}}" aria-label="{{sitename}}">
+            {{#main_logo}}<img src="{{{main_logo}}}" alt="{{sitename}}">{{/main_logo}}
+            {{^main_logo}}<span>{{sitename}}</span>{{/main_logo}}
+        </a>
+        <div class="showroom-shell__navigation">
+            {{> theme_edly/customer_navigation }}
+            <div class="showroom-shell__guest-desktop d-none d-lg-block">
+                {{> theme_edly/guest_navigation }}
+            </div>
+            {{#guestnavigation.enabled}}
+                <div class="showroom-shell__guest-mobile d-lg-none">
+                    {{> local_campus/guest_navigation }}
+                </div>
+            {{/guestnavigation.enabled}}
+            {{#customernavigation.enabled}}
+                <details class="showroom-shell__mobile-menu d-lg-none">
+                    <summary aria-label="Menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></summary>
+                    <div class="showroom-shell__mobile-menu-panel">
+                        {{> theme_edly/customer_navigation_mobile }}
+                    </div>
+                </details>
+            {{/customernavigation.enabled}}
+        </div>
+    </header>
+
+    {{{ output.standard_top_of_body_html }}}
+
+    <main id="page-content" class="storefront-shell__main showroom-shell__main" aria-label="{{#str}}content{{/str}}">
+        {{{ output.main_content }}}
+    </main>
+</div>
+
+{{!--
+    The full Edly footer is intentionally omitted on showroom pages.
+    Keep Moodle's standard end-of-body output: it loads RequireJS first and
+    then executes every module registered through $PAGE->requires->js_call_amd().
+    Rendering theme_boost/footer here used to insert extra theme scripts before
+    the requirements pipeline and could leave generated require([...]) calls
+    without the RequireJS function on the dedicated showroom shell.
+--}}
+{{{ output.standard_end_of_body_html }}}
+</body>
+</html>

@@ -3,6 +3,8 @@
 define('CLI_SCRIPT', true);
 
 require_once(__DIR__ . '/../../../../../config.php');
+
+use local_subscriptions\payment\stripe\StripeConfiguration;
 require_once($CFG->libdir . '/clilib.php');
 
 global $DB, $CFG;
@@ -97,10 +99,8 @@ mtrace("Done. No DB update was performed. No email was sent.");
 function check_stripe_status(stdClass $pr): void {
     global $CFG;
 
-    $env = get_config('local_subscriptions', 'stripe_env') ?: 'test';
-    $env = ($env === 'live') ? 'live' : 'test';
-
-    $secret = get_config('local_subscriptions', "stripe_{$env}_secret") ?: '';
+    $env = StripeConfiguration::active_profile();
+    $secret = StripeConfiguration::secret_key($env);
 
     if ($secret === '') {
         throw new moodle_exception('Missing Stripe secret key for env: ' . $env);

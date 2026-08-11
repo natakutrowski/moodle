@@ -5,11 +5,22 @@ namespace local_subscriptions\dashboard\funnel;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\crm\business\CrmBusinessSql;
+use local_subscriptions\commerce\customer\analytics\CommerceCustomerAnalyticsRepository;
 
 /**
  * Funnel cohort queries.
  */
 final class DashboardFunnelRepository {
+
+    public function __construct(
+        private readonly ?CommerceCustomerAnalyticsRepository $nativeanalytics = null
+    ) {
+    }
+
+    private function native_analytics(): CommerceCustomerAnalyticsRepository {
+        global $DB;
+        return $this->nativeanalytics ?? new CommerceCustomerAnalyticsRepository($DB);
+    }
 
     /**
      * Build one Funnel snapshot.
@@ -223,6 +234,11 @@ final class DashboardFunnelRepository {
     ): int {
         global $DB;
 
+        $native = $this->native_analytics()->snapshot($start, $end);
+        if ($native->has_activity()) {
+            return $native->newcustomercount;
+        }
+
         $paymentdate =
             CrmBusinessSql::subscription_payment_date_expression(
                 'pr'
@@ -265,6 +281,11 @@ final class DashboardFunnelRepository {
         int $end
     ): int {
         global $DB;
+
+        $native = $this->native_analytics()->snapshot($start, $end);
+        if ($native->has_activity()) {
+            return $native->digitalbuyercount;
+        }
 
         $condition =
             CrmBusinessSql::successful_digital_payment_condition(

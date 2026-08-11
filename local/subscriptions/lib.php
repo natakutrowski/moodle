@@ -58,68 +58,51 @@ use core_user\output\myprofile\node;
 use core_user\output\myprofile\category;
 
 function local_subscriptions_myprofile_navigation(tree $tree, stdClass $user) {
-    global $USER, $PAGE;
+    global $USER;
 
-    $context = \context_user::instance($user->id);
-
-    // Autoriser si l'utilisateur voit son propre profil ou a la capacité d'en voir d'autres
-    $isownprofile = ($USER->id === $user->id);
-
-    if (!$isownprofile && !has_capability('moodle/user:viewdetails', $context, $USER)) {
+    if ((int)$USER->id !== (int)$user->id) {
         return;
     }
-    
-    /** @var \local_subscriptions\output\renderer $renderer */
-    $renderer = $PAGE->get_renderer('local_subscriptions');
-
-    // Charge les abonnements
-    $subscriptions = get_user_active_and_nearest_queued($user->id);
-    $digitalpurchases = local_subscriptions_get_user_digital_purchases((int)$user->id);
-
-    $mypurchasesurl = ($USER->id == $user->id)
-        ? \local_subscriptions\url\UrlFactory::my_purchases()->out(false)
-        : \local_subscriptions\url\UrlFactory::my_purchases([
-            'userid' => $user->id,
-        ])->out(false);
-
-    $content = $renderer->render_user_subscriptions_block(
-        $subscriptions,
-        $digitalpurchases,
-        $mypurchasesurl
-    );
-
-    // Injecter la popup d’abonnement réutilisable dans le bloc Profil
-    ob_start();
-    local_subscriptions_inject_subscribe_modal($PAGE);
-    $subspopup = ob_get_clean();
-
-    $content .= $subspopup;
-
 
     $category = new category(
-        'local_subscriptions', 
-        get_string('pluginname','local_subscriptions'),
-        'contact');
+        'local_subscriptions_customer_space',
+        get_string('profile_customer_space_title', 'local_subscriptions'),
+        'contact'
+    );
     $tree->add_category($category);
 
-    // Crée un nœud dans la catégorie
-    $node = new node(
-        'local_subscriptions', // $parentcat — catégorie parente
-        'zzz_local_subscriptions', // $name — identifiant unique du nœud
-        html_writer::span('', 'sr-only'), //get_string('your_subscriptions', 'local_subscriptions'), // $title
-        null, // $after — tu peux mettre null ou un autre ID pour le placer après un nœud spécifique
-        null, // $url — pas de lien, car on injecte du contenu directement
-        $content // $content — ton bloc HTML
-    );
+    $links = [
+        [
+            'name' => 'local_subscriptions_profile_campus',
+            'label' => get_string('commerce_customer_hub_title', 'local_subscriptions'),
+            'url' => \local_subscriptions\url\UrlFactory::my_campus(),
+        ],
+        [
+            'name' => 'local_subscriptions_profile_courses',
+            'label' => get_string('profile_link_courses', 'local_subscriptions'),
+            'url' => new moodle_url(\local_subscriptions\subscription_config::campus_my_courses_page()),
+        ],
+        [
+            'name' => 'local_subscriptions_profile_resources',
+            'label' => get_string('profile_link_resources', 'local_subscriptions'),
+            'url' => new moodle_url(\local_subscriptions\subscription_config::customer_digital_library_page()),
+        ],
+        [
+            'name' => 'local_subscriptions_profile_purchases',
+            'label' => get_string('profile_link_purchases', 'local_subscriptions'),
+            'url' => new moodle_url(\local_subscriptions\subscription_config::customer_purchases_page()),
+        ],
+    ];
 
-    $tree->add_node($node);
-
-    // Lancer le tweak DOM : renommer le heading (fallback) + réécrire les liens
-    // $PAGE->requires->js_call_amd('local_subscriptions/myprofile_courses', 'init', [
-    //     'label' => get_string('mycourses_profile_heading', 'local_subscriptions')
-    // ]);
-
-
+    foreach ($links as $link) {
+        $tree->add_node(new node(
+            'local_subscriptions_customer_space',
+            $link['name'],
+            $link['label'],
+            null,
+            $link['url']
+        ));
+    }
 }
 
 /**
@@ -455,6 +438,11 @@ function local_subscriptions_pluginfile(
         'plan_desc',
         'scope_desc',
         'inbox_attachment',
+        'catalog_media',
+        \local_subscriptions\commerce\storefront\content\CommerceStorefrontContentFileService::FILEAREA,
+        \local_subscriptions\commerce\mail\template\studio\CommerceMailHeaderImageService::FILEAREA,
+        \local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferMailImageService::FILEAREA,
+        \local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockMediaManager::FILEAREA,
     ];
 
     if (!in_array($filearea, $allowedareas, true)) {
@@ -468,6 +456,135 @@ function local_subscriptions_pluginfile(
      * Les pièces jointes Inbox nécessitent une authentification
      * et la capacité de lecture de la CRM Inbox.
      */
+    if ($filearea === \local_subscriptions\commerce\mail\template\studio\CommerceMailHeaderImageService::FILEAREA) {
+        if (count($args) < 2) {
+            return false;
+        }
+        $itemid = (int)array_shift($args);
+        $filename = clean_param((string)array_pop($args), PARAM_FILE);
+        $filepath = '/' . (count($args) ? implode('/', $args) . '/' : '');
+        $file = get_file_storage()->get_file(
+            $context->id,
+            'local_subscriptions',
+            $filearea,
+            $itemid,
+            $filepath,
+            $filename
+        );
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+        send_stored_file($file, 86400, 0, false, $options + ['cacheability' => 'public']);
+        return true;
+    }
+
+    if (
+        $filearea
+        === \local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockMediaManager::FILEAREA
+    ) {
+        if (count($args) < 2) {
+            return false;
+        }
+
+        $itemid = (int)array_shift($args);
+        $filename = clean_param(
+            (string)array_pop($args),
+            PARAM_FILE
+        );
+        if ($itemid <= 0 || $filename === '') {
+            return false;
+        }
+
+        $filepath = '/'
+            . (count($args) ? implode('/', $args) . '/' : '');
+        $file = get_file_storage()->get_file(
+            $context->id,
+            'local_subscriptions',
+            $filearea,
+            $itemid,
+            $filepath,
+            $filename
+        );
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+
+        send_stored_file(
+            $file,
+            86400,
+            0,
+            false,
+            $options + ['cacheability' => 'public']
+        );
+        return true;
+    }
+
+    if ($filearea === 'catalog_media') {
+        if (count($args) < 2) {
+            return false;
+        }
+        $itemid = (int)array_shift($args);
+        $filename = array_pop($args);
+        if ($itemid <= 0 || $filename === null || trim((string)$filename) === '') {
+            return false;
+        }
+        $filepath = '/' . (count($args) ? implode('/', $args) . '/' : '');
+        $file = get_file_storage()->get_file(
+            $context->id,
+            'local_subscriptions',
+            'catalog_media',
+            $itemid,
+            $filepath,
+            clean_param((string)$filename, PARAM_FILE)
+        );
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+        send_stored_file($file, 86400, 0, false, $options);
+        return true;
+    }
+
+    if (
+        $filearea
+        === \local_subscriptions\commerce\storefront\content\CommerceStorefrontContentFileService::FILEAREA
+    ) {
+        if (count($args) < 2) {
+            return false;
+        }
+
+        $itemid = (int)array_shift($args);
+        $filename = clean_param(
+            (string)array_pop($args),
+            PARAM_FILE
+        );
+        if ($itemid <= 0 || $filename === '') {
+            return false;
+        }
+
+        $filepath = '/'
+            . (count($args) ? implode('/', $args) . '/' : '');
+        $file = get_file_storage()->get_file(
+            $context->id,
+            'local_subscriptions',
+            $filearea,
+            $itemid,
+            $filepath,
+            $filename
+        );
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+
+        send_stored_file(
+            $file,
+            86400,
+            0,
+            false,
+            $options + ['cacheability' => 'public']
+        );
+        return true;
+    }
+
     if ($filearea === 'inbox_attachment') {
         require_login();
 

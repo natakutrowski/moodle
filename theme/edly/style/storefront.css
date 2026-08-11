@@ -1,0 +1,7 @@
+.edly-storefront-shell { margin: 0; }
+.storefront-shell { min-height: 100vh; display: flex; flex-direction: column; }
+.storefront-shell__main { flex: 1 0 auto; width: 100%; min-width: 0; }
+.storefront-shell--standard .storefront-shell__main { max-width: 1320px; margin-inline: auto; }
+.storefront-shell--fullwidth .storefront-shell__main { max-width: none; margin: 0; padding: 0; }
+.commerce-storefront-hide-header .storefront-shell__header,
+.commerce-storefront-hide-footer .storefront-shell__footer { display: none !important; }

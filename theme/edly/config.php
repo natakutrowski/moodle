@@ -28,7 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $THEME->name = 'edly';
-$THEME->sheets = [ 'bootstrap-select', 'owl-carousel', 'owl-theme-default', 'magnific-popup', 'fancybox', 'animate', 'aos', 'boxicons', 'remixicon', 'meanmenu', 'odometer', 'style', 'edly-mdl-core', 'responsive', 'dashboard' ];
+$THEME->sheets = [ 'bootstrap-select', 'owl-carousel', 'owl-theme-default', 'magnific-popup', 'fancybox', 'animate', 'aos', 'boxicons', 'remixicon', 'meanmenu', 'odometer', 'style', 'edly-mdl-core', 'responsive', 'dashboard', 'storefront', 'customer-navigation' ];
 $THEME->editor_sheets = [];
 $THEME->parents = ['boost'];
 
@@ -100,6 +100,33 @@ $THEME->layouts = [
         'options' => array('langmenu' => true),
         'defaultregion' => 'below-content',
     ),
+
+    // Native Storefront layouts used by local_subscriptions.
+    'storefront' => [
+        'file' => 'storefront.php',
+        'regions' => [],
+    ],
+    'storefront_fullwidth' => [
+        'file' => 'storefront.php',
+        'regions' => [],
+    ],
+    'storefront_landing' => [
+        'file' => 'storefront.php',
+        'regions' => [],
+        'options' => ['nonavbar' => true, 'nofooter' => true],
+    ],
+    'storefront_immersive' => [
+        'file' => 'storefront.php',
+        'regions' => [],
+        'options' => ['nonavbar' => true, 'nofooter' => true],
+    ],
+
+    // Dedicated full-width CampusFR showroom: custom topbar only, no Moodle header.
+    'showroom' => [
+        'file' => 'showroom.php',
+        'regions' => [],
+        'options' => ['nonavbar' => true, 'nocontextheader' => true],
+    ],
 
     // Pages that appear in pop-up windows - no navigation, no blocks, no header and bare activity header.
     'popup' => array(

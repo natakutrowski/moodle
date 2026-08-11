@@ -1,9 +1,17 @@
 <?php
+
+// Register the navigation module through Moodle's page requirements API.
+// Inline `require(...)` calls in Mustache can execute before RequireJS is
+// available in the dedicated Storefront shell.
+$PAGE->requires->js_call_amd('theme_edly/mobile_menu', 'init');
 /*
 @edlyRef: @theme_edly/layout
  */
 
 defined('MOODLE_INTERNAL') || die();
+
+use theme_edly\local\customer_navigation;
+
 require_once($CFG->dirroot.'/local/subscriptions/lib.php');
 require_once($CFG->dirroot.'/local/campus/lib.php');
 
@@ -150,6 +158,10 @@ local_subscriptions_inject_subscribe_modal($PAGE);
 $templatecontext['subsmodal'] = ob_get_clean();
 
 $templatecontext['campus_trial_banner'] = local_campus_get_trial_discount_banner_html();
-
+$templatecontext['customernavigation'] = customer_navigation::build($PAGE);
+$templatecontext['guestnavigation'] = customer_navigation::build_guest($PAGE);
+if (!empty($templatecontext['guestnavigation']['enabled'])) {
+    $PAGE->requires->js_call_amd('local_campus/guest_navigation', 'init');
+}
 
 $PAGE->requires->jquery();

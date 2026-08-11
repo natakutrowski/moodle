@@ -307,11 +307,22 @@ $string['trial_access'] = 'Accéder au cours d’essai';
 $string['trial_only_guests'] = 'Afficher le lien d’essai uniquement pour les invités';
 $string['image'] = 'Image';
 
-$string['locked_title'] = 'Accès réservé';
-$string['locked_desc'] = 'Acheter le cours pour débloquer cette activité.';
-$string['locked_subscribe'] = 'Acheter';
+$string['locked_title'] = 'Activité réservée aux membres';
+$string['locked_desc'] = 'Cette activité n’est pas disponible avec l’accès d’essai.';
+$string['locked_subscribe'] = 'Voir les formules';
 
 $string['mobilemenu_button'] = 'Menu';
 $string['mobilemenu_open_aria'] = 'Ouvrir le menu';
 $string['mobilemenu_title'] = 'Menu';
 $string['mobilemenu_close_aria'] = 'Fermer';
+$string['customernavigation_crm'] = 'CRM';
+$string['customernavigation_moodleadmin'] = 'Administration Moodle';
+$string['customernavigation_admin_root'] = 'Général';
+$string['customernavigation_admin_users'] = 'Utilisateurs';
+$string['customernavigation_admin_courses'] = 'Cours';
+$string['customernavigation_admin_grades'] = 'Notes';
+$string['customernavigation_admin_modules'] = 'Plugins';
+$string['customernavigation_admin_appearance'] = 'Présentation';
+$string['customernavigation_admin_server'] = 'Serveur';
+$string['customernavigation_admin_reports'] = 'Rapports';
+$string['customernavigation_admin_development'] = 'Développement';

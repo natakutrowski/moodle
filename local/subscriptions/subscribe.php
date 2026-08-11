@@ -6,6 +6,7 @@ require_once($CFG->dirroot . '/local/subscriptions/lib/plans_lib.php');
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\constants\Operation;
 use local_subscriptions\domain\SubscriptionAdvisor;
+use local_subscriptions\commerce\storefront\rollout\CommerceStorefrontRollout;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -19,6 +20,19 @@ if (!in_array($currency, ['EUR','RUB'], true)) {
 }
 
 $embedded = optional_param('embedded', 0, PARAM_BOOL);
+$planid = optional_param('planid', 0, PARAM_INT);
+
+if (CommerceStorefrontRollout::should_redirect_subscribe(
+    CommerceStorefrontRollout::is_enabled(),
+    (bool)$embedded,
+    $planid > 0 ? $planid : null
+)) {
+    redirect(UrlFactory::digital_catalog([
+        'type' => 'course_access',
+        'currency' => $currency,
+    ]));
+}
+
 // Pas besoin de require_login(); → page publique
 
 $PAGE->set_context(context_system::instance());

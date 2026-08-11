@@ -121,7 +121,7 @@ $string['emailalreadysubscribed']='Этот адрес уже связан с а
 $string['trial_already_subscribed_html'] =
     'У вас уже есть активная подписка. Пожалуйста, <a href="{$a->login}" class="link-primary" target="_top" rel="noopener">войдите</a>.';
 $string['trial_expired_html'] =
-    'Пробный период завершён. <a href="{$a->subscribe}" class="link-primary" rel="noopener" data-subs-modal="1">Оформите подписку</a>, чтобы продолжить.';
+    'Пробный период завершён. <a href="{$a->subscribe}" class="link-primary" rel="noopener">Оформите подписку</a>, чтобы продолжить.';
 $string['trial_discount_banner_title'] = 'Скидка −{$a}% для пробного доступа.';
 $string['trial_discount_banner_body']  = 'Осталось: ';
 $string['trial_discount_banner_cta']   = 'Купить курс';
@@ -129,7 +129,7 @@ $string['trial_days_word']             = 'дн.';
 
 $string['trial_banner_reminder_title'] = 'Напоминание о пробном доступе.';
 $string['trial_banner_reminder_body']  = 'Ваш пробный доступ заканчивается {$a}. Чтобы продолжить, оформите подписку.';
-$string['trial_banner_expired_html']   = 'Пробный доступ истёк <strong>{$a->date}</strong>. <a href="{$a->url}" class="link-primary" data-subs-modal="1">Оформите подписку</a>, чтобы продолжить.';
+$string['trial_banner_expired_html']   = 'Пробный доступ истёк <strong>{$a->date}</strong>. <a href="{$a->url}" class="link-primary">Оформите подписку</a>, чтобы продолжить.';
 
 $string['sub_expiry_banner'] = 'Ваша подписка « {$a->plan} » истекает <strong>{$a->date}</strong> (через {$a->days} дн.).';
 $string['login_suspended_html'] = 'Ваша учётная запись <strong>заблокирована</strong> (пробный период завершён). '
@@ -290,3 +290,67 @@ $string['audio_browser_not_supported'] = 'Ваш браузер не подде�
 $string['other_courses_available_title'] = 'Открыть другие курсы';
 $string['other_courses_available_text'] = 'Вы можете продолжить обучение и добавить другие доступные курсы Campus<small><sup>FR</sup></small>.';
 $string['trial_badge'] = 'Пробный доступ';
+
+$string['course_access_origin_purchase'] = 'Куплено';
+$string['course_access_origin_gift'] = 'Подарено';
+$string['course_access_origin_trial'] = 'Пробный доступ';
+$string['course_access_origin_granted'] = 'Доступ предоставлен';
+$string['course_access_lifetime'] = 'Бессрочный доступ';
+$string['course_access_from'] = 'Доступно с {$a}';
+$string['course_access_until'] = 'Доступ до {$a}';
+$string['course_access_expired'] = 'Доступ закончился {$a}';
+$string['course_access_view_purchase'] = 'Посмотреть покупку';
+
+$string['mycourses_enriched_intro'] = 'Здесь собраны все курсы, к которым у вас есть доступ, ваш прогресс и полезная информация о каждом доступе.';
+$string['mycourses_stat_total'] = 'Доступные курсы';
+$string['mycourses_stat_inprogress'] = 'В процессе';
+$string['mycourses_stat_completed'] = 'Завершено';
+$string['mycourses_stat_trial'] = 'Пробные курсы';
+$string['mycourses_empty_title'] = 'Ваше пространство курсов готово';
+$string['mycourses_empty_text'] = 'У вас пока нет доступных курсов. Загляните в магазин CampusFR или начните с курсов, доступных в пробном формате.';
+$string['mycourses_empty_storefront'] = 'Перейти в магазин';
+$string['mycourses_empty_trial'] = 'Посмотреть пробные курсы';
+$string['mycourses_course_image_alt'] = 'Иллюстрация курса {$a}';
+$string['mycourses_progress_not_started'] = 'Можно начинать, когда будете готовы.';
+$string['mycourses_progress_started'] = 'Отличное начало — продолжайте!';
+$string['mycourses_progress_halfway'] = 'Вы уверенно продвигаетесь по курсу.';
+$string['mycourses_progress_final_stretch'] = 'Вы на финишной прямой!';
+$string['mycourses_progress_completed'] = 'Курс завершён — браво!';
+$string['mycourses_cta_review'] = 'Повторить курс';
+$string['mycourses_recommendations_title'] = 'Продолжайте обучение';
+$string['mycourses_recommendations_text'] = 'Откройте курсы и предложения, подходящие для следующего этапа обучения.';
+$string['mycourses_recommendation_course'] = 'Курс';
+$string['mycourses_recommendation_bundle'] = 'Набор';
+$string['mycourses_recommendation_upgrade'] = 'Апгрейд';
+$string['mycourses_recommendation_view'] = 'Открыть страницу продукта';
+$string['mycourses_recommendation_image_alt'] = 'Иллюстрация: {$a}';
+
+$string['mycourses_recommendation_discover'] = 'Подробнее';
+
+$string['mycourses_recommendation_upgrade_heading'] = 'Расширьте свой доступ';
+
+$string['mycourses_recommendation_upgrade_text'] = 'Откройте полную версию, оплатив только стоимость расширения.';
+
+$string['mycourses_recommendation_upgrade_price'] = 'Цена расширения';
+
+$string['nav_my_courses'] = 'Мои курсы';
+$string['nav_my_resources'] = 'Мои ресурсы';
+$string['nav_my_purchases'] = 'Мои покупки';
+$string['nav_my_profile'] = 'Мой профиль';
+$string['mycourses_recommendation_discovery_price'] = 'Цена знакомства';
+$string['mycourses_recommendation_standard_price'] = 'Цена';
+$string['mycourses_recommendation_upgrade_saving'] = 'Ваша выгода — {$a}';
+$string['mycourses_recommendation_upgrade_saving_text'] = 'У вас уже есть доступ к {$a}. Ранее оплаченная сумма вычтена из цены.';
+$string['trial_discount_banner_prefix'] = '🎁 Скидка −{$a}% на курсы, включённые в пробное предложение. Осталось';
+$string['trial_discount_banner_cta_current_course'] = 'Купить этот курс';
+
+$string['mobilecoverspage'] = 'Мобильные обложки курсов';
+$string['mobilecoversintro'] = 'Настройте горизонтальную обложку 4:3 для раздела «Мои курсы» на телефоне. Если отдельная обложка не задана, используется основное изображение курса Moodle.';
+$string['mobilecovercourse'] = 'Курс';
+$string['mobilecoverfield'] = 'Мобильная обложка 4:3';
+$string['mobilecoverfield_help'] = 'Форматы JPG, PNG или WebP. Рекомендуемый размер: 1600 × 1200 пикселей. Максимальный вес: 5 МБ.';
+$string['mobilecoversaved'] = 'Мобильная обложка сохранена.';
+$string['mobilecoverdeleted'] = 'Мобильная обложка удалена.';
+$string['mobilecoverdelete'] = 'Удалить мобильную обложку';
+$string['mobilecovernone'] = 'Отдельная мобильная обложка не задана. Будет использовано основное изображение Moodle.';
+$string['mobilecoverpreviewalt'] = 'Предпросмотр мобильной обложки курса {$a}';

@@ -1,0 +1,61 @@
+{{!
+    @template local_subscriptions/my_digital_products/components/download_action
+}}
+<div class="digital-library-file" data-download-variant="{{variant}}" data-asset-key="{{assetkey}}">
+    <div class="digital-library-file__identity">
+        <span class="digital-library-file__icon" aria-hidden="true">
+            {{#ismobile}}<i class="fa fa-mobile"></i>{{/ismobile}}
+            {{^ismobile}}<i class="fa fa-file-pdf-o"></i>{{/ismobile}}
+        </span>
+
+        <div class="digital-library-file__details">
+            <div class="digital-library-file__heading">
+                <strong>{{label}}</strong>
+                {{#hasfiletype}}<span class="digital-library-file__type">{{filetype}}</span>{{/hasfiletype}}
+            </div>
+
+            {{#hasfilename}}
+                <div class="digital-library-file__name" title="{{filename}}">{{filename}}</div>
+            {{/hasfilename}}
+
+            {{#hasfilesize}}
+                <div class="digital-library-file__size">{{filesizeformatted}}</div>
+            {{/hasfilesize}}
+        </div>
+    </div>
+
+    <div class="digital-library-file__status">
+        {{#hasdownloadhistory}}
+            <div class="digital-library-file__history {{#hasbeendownloaded}}digital-library-file__history--downloaded{{/hasbeendownloaded}}">
+                <i class="fa {{#hasbeendownloaded}}fa-check-circle{{/hasbeendownloaded}}{{^hasbeendownloaded}}fa-clock-o{{/hasbeendownloaded}}" aria-hidden="true"></i>
+                <div class="digital-library-file__history-text">
+                    <span>{{downloadedlabel}}</span>
+                    {{#hasbeendownloaded}}
+                        <small>{{downloadcountlabel}}</small>
+                    {{/hasbeendownloaded}}
+                </div>
+            </div>
+        {{/hasdownloadhistory}}
+
+        {{#historyunavailable}}
+            <div class="digital-library-file__history digital-library-file__history--unavailable">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                <div class="digital-library-file__history-text">
+                    <span>{{historyunavailablelabel}}</span>
+                </div>
+            </div>
+        {{/historyunavailable}}
+    </div>
+
+    <div class="digital-library-file__last-download">
+        {{#haslastdownload}}
+            <span>{{lastdownloadlabel}}</span>
+            <strong>{{lastdownloaddate}}</strong>
+        {{/haslastdownload}}
+    </div>
+
+    <a class="btn btn-primary digital-library-file__download" href="{{url}}" aria-label="{{downloadarialabel}}">
+        <i class="fa fa-download" aria-hidden="true"></i>
+        <span>{{downloadlabel}}</span>
+    </a>
+</div>

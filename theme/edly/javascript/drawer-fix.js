@@ -24,26 +24,44 @@
 })();
 
 (function () {
-    const moveBlock = () => {
-        const block = document.querySelector('.block_xp');
+    const moveBlocks = () => {
+        const xpBlock = document.querySelector('.block_xp');
+        const questBlock = document.querySelector('[data-block="gearup"]');
+
         const side = document.querySelector('#block-region-side-pre');
         const top = document.querySelector('#block-region-above-content');
 
-        if (!block || !side || !top) return;
+        if (!side || !top) {
+            return;
+        }
 
         if (window.innerWidth <= 768) {
-            // mobile → en haut
-            if (!top.contains(block)) {
-                top.prepend(block);
+            // Mobile:
+            // 1. Level Up Quest tout en haut
+            // 2. XP juste en dessous
+
+            if (xpBlock && !top.contains(xpBlock)) {
+                top.prepend(xpBlock);
+            }
+
+            if (questBlock) {
+                // prepend après XP => Quest passe devant XP.
+                top.prepend(questBlock);
             }
         } else {
-            // desktop → à droite
-            if (!side.contains(block)) {
-                side.prepend(block);
+            // Desktop:
+            // Les deux blocs reviennent dans la colonne de droite.
+
+            if (questBlock && !side.contains(questBlock)) {
+                side.prepend(questBlock);
+            }
+
+            if (xpBlock && !side.contains(xpBlock)) {
+                side.appendChild(xpBlock);
             }
         }
     };
 
-    window.addEventListener('load', moveBlock);
-    window.addEventListener('resize', moveBlock);
+    window.addEventListener('load', moveBlocks);
+    window.addEventListener('resize', moveBlocks);
 })();

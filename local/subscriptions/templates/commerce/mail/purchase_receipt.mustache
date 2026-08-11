@@ -1,0 +1,126 @@
+{{#has_editorial_heading}}<h1 style="margin:0 0 18px;font-size:26px;line-height:1.25;color:#111827;">{{editorial_heading}}</h1>{{/has_editorial_heading}}
+{{#has_editorial_intro}}<div style="margin-bottom:18px;">{{{editorial_intro}}}</div>{{/has_editorial_intro}}
+
+{{#hasreference}}
+<div style="margin:0 0 18px;font-size:13px;color:#6b7280;">
+    <strong style="color:#374151;">{{reference_label}} :</strong> {{reference}}
+</div>
+{{/hasreference}}
+
+{{#hasitems}}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 16px;">
+{{#items}}
+<tr><td>{{> local_subscriptions/commerce/mail/components/receipt_item }}</td></tr>
+{{/items}}
+</table>
+{{/hasitems}}
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:16px 0 22px;">
+    {{#hasdiscount}}
+    <tr>
+        <td style="padding:9px 0;border-top:1px solid #e5e7eb;color:#4b5563;">{{receipt_price_before_discounts_label}}</td>
+        <td style="padding:9px 0;border-top:1px solid #e5e7eb;text-align:right;font-weight:700;color:#241a35;">{{grossformatted}}</td>
+    </tr>
+    {{#hasproductpromotion}}
+    <tr>
+        <td style="padding:7px 0;color:#4b5563;">{{receipt_product_promotions_label}}</td>
+        <td style="padding:7px 0;text-align:right;font-weight:700;color:#079455;">− {{productpromotionformatted}}</td>
+    </tr>
+    {{/hasproductpromotion}}
+    {{#hastrialdiscount}}
+    <tr>
+        <td style="padding:7px 0;color:#4b5563;">{{receipt_trial_discount_label}}</td>
+        <td style="padding:7px 0;text-align:right;font-weight:700;color:#079455;">− {{trialdiscountformatted}}</td>
+    </tr>
+    {{/hastrialdiscount}}
+    {{#hasownedcredit}}
+    <tr>
+        <td style="padding:7px 0;color:#4b5563;">{{receipt_owned_credit_label}}</td>
+        <td style="padding:7px 0;text-align:right;font-weight:700;color:#079455;">− {{ownedcreditformatted}}</td>
+    </tr>
+    {{/hasownedcredit}}
+    {{#haspromocode}}
+    <tr>
+        <td style="padding:7px 0;color:#4b5563;">
+            {{receipt_promo_code_label}}{{#haspromotioncodes}} <span style="color:#9ca3af;">({{promotioncodes}})</span>{{/haspromotioncodes}}
+        </td>
+        <td style="padding:7px 0;text-align:right;font-weight:700;color:#079455;">− {{promocodeformatted}}</td>
+    </tr>
+    {{/haspromocode}}
+    {{#haspersonaloffer}}
+    <tr>
+        <td style="padding:7px 0;color:#4b5563;">{{receipt_personal_offer_label}}</td>
+        <td style="padding:7px 0;text-align:right;font-weight:700;color:#b7791f;">− {{personalofferformatted}}</td>
+    </tr>
+    {{/haspersonaloffer}}
+    {{#hasotherdiscount}}
+    <tr>
+        <td style="padding:7px 0;color:#4b5563;">{{receipt_other_discount_label}}</td>
+        <td style="padding:7px 0;text-align:right;font-weight:700;color:#079455;">− {{otherdiscountformatted}}</td>
+    </tr>
+    {{/hasotherdiscount}}
+    <tr>
+        <td style="padding:9px 0;color:#374151;font-weight:700;">{{receipt_discounts_label}}</td>
+        <td style="padding:9px 0;text-align:right;font-weight:800;color:#079455;">− {{discountformatted}}</td>
+    </tr>
+    {{/hasdiscount}}
+    {{#hastotal}}
+    <tr>
+        <td style="padding:13px 0;border-top:1px solid #d1d5db;font-size:17px;color:#374151;">{{receipt_total_paid_label}}</td>
+        <td style="padding:13px 0;border-top:1px solid #d1d5db;text-align:right;font-size:19px;font-weight:800;color:#241a35;">{{totalformatted}}</td>
+    </tr>
+    {{/hastotal}}
+</table>
+
+{{#haspayment}}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:18px 0;background:#f8fafc;border-radius:12px;">
+<tr><td colspan="2" style="padding:14px 16px 9px;font-weight:800;color:#38235d;">{{payment_label}}</td></tr>
+
+{{#payment.hasprovider}}
+<tr>
+    <td style="padding:7px 16px;color:#6b7280;">{{provider_label}}</td>
+    <td style="padding:7px 16px;text-align:right;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="right"><tr>
+            {{#payment.hasprovidericon}}<td style="padding-right:8px;vertical-align:middle;"><img src="{{payment.providericonurl}}" alt="" height="22" style="display:block;height:22px;width:auto;border:0;"></td>{{/payment.hasprovidericon}}
+            <td style="vertical-align:middle;font-weight:700;color:#241a35;">{{payment.providerlabel}}</td>
+        </tr></table>
+    </td>
+</tr>
+{{/payment.hasprovider}}
+
+{{#payment.hastransactionreference}}
+<tr>
+    <td style="padding:7px 16px;color:#6b7280;">{{transaction_label}}</td>
+    <td style="padding:7px 16px;text-align:right;font-family:'Courier New',Courier,monospace;font-size:12px;color:#374151;word-break:break-all;">{{payment.transactionreference}}</td>
+</tr>
+{{/payment.hastransactionreference}}
+
+{{#payment.hasstatus}}
+<tr>
+    <td style="padding:7px 16px 14px;color:#6b7280;">{{status_label}}</td>
+    <td style="padding:7px 16px 14px;text-align:right;">
+        {{#payment.statussuccess}}<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:11px;font-weight:800;">{{payment.status}}</span>{{/payment.statussuccess}}
+        {{#payment.statuswarning}}<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:#fef3c7;color:#a16207;font-size:11px;font-weight:800;">{{payment.status}}</span>{{/payment.statuswarning}}
+        {{#payment.statusdanger}}<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:800;">{{payment.status}}</span>{{/payment.statusdanger}}
+        {{#payment.statusneutral}}<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:#e5e7eb;color:#4b5563;font-size:11px;font-weight:800;">{{payment.status}}</span>{{/payment.statusneutral}}
+    </td>
+</tr>
+{{/payment.hasstatus}}
+{{#links.hasorder}}
+<tr>
+    <td colspan="2" style="padding:6px 16px 16px;text-align:right;">
+        <a href="{{links.order}}" target="_blank" rel="noopener noreferrer"
+           style="display:inline-block;background:#ffffff;border:1px solid #ff1684;border-radius:8px;padding:7px 10px;color:#ff1684;text-decoration:none;font-weight:800;font-size:12px;line-height:1.2;">
+            <img src="{{receipt_order_icon_url}}" alt="" width="12" height="12"
+                 style="display:inline-block;width:12px;height:12px;vertical-align:-2px;margin-right:5px;border:0;">{{receipt_view_order_label}}
+        </a>
+    </td>
+</tr>
+{{/links.hasorder}}
+</table>
+{{/haspayment}}
+
+
+
+{{#has_editorial_outro}}<div style="margin-top:20px;">{{{editorial_outro}}}</div>{{/has_editorial_outro}}
+{{#has_editorial_signature}}<div style="margin-top:18px;">{{{editorial_signature}}}</div>{{/has_editorial_signature}}

@@ -1,0 +1,78 @@
+<main class="commerce-cart-print">
+    <header class="commerce-cart-print__header">
+        <div>
+            <h1>{{title}}</h1>
+            <p>{{subtitle}}</p>
+            <small>{{generatedlabel}}</small>
+        </div>
+        <div class="commerce-cart-print__actions">
+            <button type="button" class="btn btn-primary" data-commerce-print-document>
+                <i class="fa-solid fa-print me-2" aria-hidden="true"></i>{{printlabel}}
+            </button>
+            <a class="btn btn-outline-secondary" href="{{backurl}}">{{backlabel}}</a>
+        </div>
+    </header>
+
+    <section class="commerce-cart-print__items">
+        {{#items}}
+            <article class="commerce-cart-print-item">
+                <div class="commerce-cart-print-item__visual">
+                    {{#hascover}}<img src="{{coverurl}}" alt="">{{/hascover}}
+                    {{^hascover}}<div class="commerce-cart-print-item__placeholder"><i class="fa-solid {{placeholdericon}}" aria-hidden="true"></i></div>{{/hascover}}
+                </div>
+                <div class="commerce-cart-print-item__content">
+                    {{#hastype}}<span class="commerce-product-type-badge">{{typelabel}}</span>{{/hastype}}
+                    <h2>{{name}}</h2>
+                    <p>× {{quantity}}</p>
+
+                    <div class="commerce-cart-print-item__badges">
+                        {{#ispersonaloffer}}
+                            <span class="commerce-personal-offer-badge commerce-personal-offer-badge--print">
+                                <i class="fa-solid fa-star commerce-personal-offer-badge__star commerce-personal-offer-badge__star--left" aria-hidden="true"></i>
+                                <span>{{personalofferbadge}}</span>
+                                <i class="fa-solid fa-star commerce-personal-offer-badge__star commerce-personal-offer-badge__star--right" aria-hidden="true"></i>
+                            </span>
+                        {{/ispersonaloffer}}
+                        {{#cartpriceisupgrade}}<span>{{cartpriceupgradebadge}}</span>{{/cartpriceisupgrade}}
+                        {{#cartpriceistrial}}<span>{{cartpricetrialbadge}}</span>{{/cartpriceistrial}}
+                        {{#cartpricehastrialbadge}}<span>{{cartpricetrialdiscountbadge}}</span>{{/cartpricehastrialbadge}}
+                        {{#cartpricehaspromotionbadge}}<span>{{cartpricepromotionbadge}}</span>{{/cartpricehaspromotionbadge}}
+                    </div>
+
+                    {{#hascommercialupgradepricing}}
+                        <dl class="commerce-cart-print-item__breakdown">
+                            <div><dt>{{commercialinitiallabel}}</dt><dd>{{commercialinitialformatted}}</dd></div>
+                            {{#hascommercialpromotion}}<div><dt>{{commercialpromotionlabel}}</dt><dd class="is-discount">− {{commercialpromotionformatted}}</dd></div>{{/hascommercialpromotion}}
+                            {{#hascommercialtrial}}<div><dt>{{commercialtriallabel}}</dt><dd class="is-discount">− {{commercialtrialformatted}}</dd></div>{{/hascommercialtrial}}
+                            <div><dt>{{commercialcreditlabel}}</dt><dd class="is-discount">− {{commercialcreditformatted}}</dd></div>
+                            <div class="is-final"><dt>{{commercialfinallabel}}</dt><dd>{{commercialfinalformatted}}</dd></div>
+                        </dl>
+                    {{/hascommercialupgradepricing}}
+                </div>
+                <div class="commerce-cart-print-item__price">
+                    <strong>{{cartpricefinalformatted}}</strong>
+                    {{#cartpricehascompare}}<del>{{cartpricecompareformatted}}</del>{{/cartpricehascompare}}
+                </div>
+            </article>
+        {{/items}}
+    </section>
+
+    <dl class="commerce-cart-print__totals">
+        <div><dt>{{listtotallabel}}</dt><dd>{{listtotalformatted}}</dd></div>
+        {{#hasproductpromotiontotal}}<div><dt>{{productpromotiontotallabel}}</dt><dd class="is-discount">− {{productpromotiontotalformatted}}</dd></div>{{/hasproductpromotiontotal}}
+        {{#hastrialdiscounttotal}}<div><dt>{{trialdiscounttotallabel}}</dt><dd class="is-discount">− {{trialdiscounttotalformatted}}</dd></div>{{/hastrialdiscounttotal}}
+        {{#hasupgradecredittotal}}<div><dt>{{upgradecredittotallabel}}</dt><dd class="is-discount">− {{upgradecredittotalformatted}}</dd></div>{{/hasupgradecredittotal}}
+        {{#promotionadjustments}}<div><dt>{{#hascode}}{{code}}{{/hascode}}{{^hascode}}{{name}}{{/hascode}}</dt><dd class="is-discount">− {{amountformatted}}</dd></div>{{/promotionadjustments}}
+        {{#hastotalreductions}}<div class="is-reduction-total"><dt>{{totalreductionslabel}}</dt><dd class="is-discount">− {{totalreductionsformatted}}</dd></div>{{/hastotalreductions}}
+        <div class="is-grand-total"><dt>{{totallabel}}</dt><dd>{{totalformatted}}</dd></div>
+    </dl>
+</main>
+
+{{#js}}
+    const printDocumentButton = document.querySelector('[data-commerce-print-document]');
+    if (printDocumentButton) {
+        printDocumentButton.addEventListener('click', function() {
+            window.print();
+        });
+    }
+{{/js}}

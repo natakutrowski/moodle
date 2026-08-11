@@ -1,5 +1,7 @@
 <?php
 namespace local_subscriptions\payment;
+
+use local_subscriptions\payment\stripe\StripeConfiguration;
 final class Provider {
     public const STRIPE = 'stripe';
     public const ALFA   = 'alfa';
@@ -43,7 +45,7 @@ final class Provider {
         $code = strtolower((string)$code);
         return match ($code) {
             self::ALFA   => get_config('local_subscriptions', 'alfa_env') ?: 'test',
-            self::STRIPE => get_config('local_subscriptions', 'stripe_env') ?: 'test',
+            self::STRIPE => StripeConfiguration::active_profile(),
             default      => 'n/a',
         };
     }
@@ -52,8 +54,10 @@ final class Provider {
     public static function env_text(?string $code): string {
         $env = self::env($code);
         return match ($env) {
-            'live' => get_string('env_live', 'local_subscriptions'),
-            'test' => get_string('env_test', 'local_subscriptions'),
+            'live_ei' => get_string('stripe_profile_live_ei', 'local_subscriptions'),
+            'live_sas' => get_string('stripe_profile_live_sas', 'local_subscriptions'),
+            'live' => get_string('stripe_profile_live_ei', 'local_subscriptions'),
+            'test' => get_string('stripe_profile_test', 'local_subscriptions'),
             default => '', // pas de badge
         };
     }
@@ -111,11 +115,12 @@ final class Provider {
     public static function label_with_icon_env(?string $code): string {
         $base = self::label_with_icon($code);
         $env  = self::env($code);
-        if (!in_array($env, ['test', 'live'])) {
+        if (!in_array($env, ['test', 'live', 'live_ei', 'live_sas'], true)) {
             return $base;
         }
         $envtx = self::env_text($code);
-        $badge = \html_writer::span($envtx, 'ls-env-badge ls-env-'.$env);
+        $badgeclass = $env === 'test' ? 'test' : 'live';
+        $badge = \html_writer::span($envtx, 'ls-env-badge ls-env-'.$badgeclass);
         return \html_writer::span($base.' '.$badge, 'ls-provider-with-env');
     }
 

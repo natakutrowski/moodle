@@ -13,7 +13,14 @@ final class UserProfileStats {
         public readonly int $accessiblecourses,
         public readonly float $spent_eur,
         public readonly float $spent_rub,
-        public readonly int $lastactivity
+        public readonly int $lastactivity,
+        public readonly int $purchasecount = 0,
+        public readonly int $successfulpurchasecount = 0,
+        public readonly int $bundlecount = 0,
+        public readonly int $upgradecount = 0,
+        public readonly int $paymentattemptcount = 0,
+        public readonly int $activegrantcount = 0,
+        public readonly bool $hasguesthistory = false
     ) {
     }
 
@@ -26,6 +33,13 @@ final class UserProfileStats {
             'spent_eur' => $this->spent_eur,
             'spent_rub' => $this->spent_rub,
             'lastactivity' => $this->lastactivity,
+            'purchasecount' => $this->purchasecount,
+            'successfulpurchasecount' => $this->successfulpurchasecount,
+            'bundlecount' => $this->bundlecount,
+            'upgradecount' => $this->upgradecount,
+            'paymentattemptcount' => $this->paymentattemptcount,
+            'activegrantcount' => $this->activegrantcount,
+            'hasguesthistory' => $this->hasguesthistory,
         ];
     }
 }

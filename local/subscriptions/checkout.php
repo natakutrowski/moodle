@@ -12,9 +12,9 @@ if ($campusdir && file_exists($campusdir.'/lib.php')) {
 
 
 use local_subscriptions\url\UrlFactory;
-use local_subscriptions\domain\SubscriptionAdvisor;
+use local_subscriptions\commerce\catalog\checkout\CommerceSubscriptionCheckoutPlanInactiveException;
+use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
 use local_subscriptions\constants\Operation;
-use local_subscriptions\constants\Status;
 use local_subscriptions\support\Region;
 
 \local_subscriptions\subscription_config::guard_public_access();
@@ -62,26 +62,36 @@ $effUserid = (!$isguest && !$forceguest) ? $userid : 0;
 
 
 try {
-    $options = $effUserid ? SubscriptionAdvisor::advise_options($effUserid, $planid, $currency) : [];
-} catch (\moodle_exception $e) {
-    if ($e->errorcode === 'plan_inactive' && $e->module === 'local_subscriptions') {
-        $scopeid = (int)$DB->get_field('subscription_plan', 'accessscopeid', ['id' => $planid]);
-        $url = new \moodle_url('/local/subscriptions/subscribe.php', ['scope' => $scopeid]);
-        redirect($url, get_string('plan_inactive_redirect', 'local_subscriptions'),
-            0, \core\output\notification::NOTIFY_WARNING);
-    }
-    throw $e;
+    $checkoutcontext = CommerceCatalogFactory::create()
+        ->subscription_checkout_page()
+        ->prepare($userid, $effUserid, $planid, $currency);
+} catch (CommerceSubscriptionCheckoutPlanInactiveException $exception) {
+    $url = new \moodle_url('/local/subscriptions/subscribe.php', [
+        'scope' => $exception->get_scope_id(),
+    ]);
+    redirect(
+        $url,
+        get_string('plan_inactive_redirect', 'local_subscriptions'),
+        0,
+        \core\output\notification::NOTIFY_WARNING
+    );
 }
 
-global $DB, $USER, $SITE;
+global $USER, $SITE;
 
-// Récup plan actif.
-$plan = $DB->get_record('subscription_plan', ['id' => $planid, 'is_active' => 1], '*', MUST_EXIST);
+$plan = $checkoutcontext->get_plan();
+$currsub = $checkoutcontext->get_current_subscription();
+$currplan = $checkoutcontext->get_current_plan();
+$options = $checkoutcontext->get_options();
+$usedCurrency = $checkoutcontext->get_used_currency();
+$basePrice = $checkoutcontext->get_base_price();
+$hasSelected = $checkoutcontext->is_requested_currency_available();
+$discountOpen = $checkoutcontext->is_discount_open();
+$discPct = $checkoutcontext->get_discount_percent();
+$deadlineTs = $checkoutcontext->get_discount_deadline();
+$finalPriceNew = $checkoutcontext->get_final_purchase_price();
 
-// Double sécurité : empêcher l'achat d'un plan déjà couvert
-// par un accès équivalent ou supérieur.
-// Exemple : si l'utilisateur a A2 Full, il ne peut plus acheter A2 Grammar.
-if ($effUserid && SubscriptionAdvisor::user_has_higher_or_equal_access_for_plan($effUserid, $planid)) {
+if ($checkoutcontext->is_already_covered()) {
     redirect(
         new moodle_url('/local/subscriptions/subscribe.php', ['currency' => $currency]),
         get_string('plan_already_covered', 'local_subscriptions'),
@@ -90,55 +100,7 @@ if ($effUserid && SubscriptionAdvisor::user_has_higher_or_equal_access_for_plan(
     );
 }
 
-// Sub active la plus récente dans le MÊME scope que le plan cible (pour la popover d’upgrade).
-$currsub  = null;
-$currplan = null;
-if (!empty($userid)) {
-    $currsub = $DB->get_record_sql("
-        SELECT s.*
-          FROM {user_subscription} s
-          JOIN {subscription_plan} p ON p.id = s.planid
-          WHERE s.userid = :u AND s.status = '".Status::ACTIVE."' AND p.accessscopeid = :scope
-          ORDER BY s.end_date DESC, s.id DESC
-          LIMIT 1
-    ", ['u' => $userid, 'scope' => (int)$plan->accessscopeid]);
-    if ($currsub) {
-        $currplan = $DB->get_record('subscription_plan', ['id' => $currsub->planid], '*', MUST_EXIST);
-    }
-}
-
-// Prix du plan dans la devise voulue (fallback si indispo)
-require_once($CFG->dirroot.'/local/subscriptions/classes/pricing_manager.php');
-
-$info = \local_subscriptions\pricing_manager::get_plan_price_or_fallback($planid, $currency, $DB);
-$usedCurrency = strtoupper($info['currency']);   // devise réellement utilisée
-$basePrice    = (float)$info['price'];           // prix catalogue dans cette devise
-$hasSelected  = (bool)$info['available'];        // la devise demandée existe-t-elle pour ce plan ?
-
-// Remise -15% si fenêtre d’essai ouverte
-$discountOpen = (isloggedin() && !isguestuser())
-    ? \local_subscriptions\trial_manager::is_discount_window_open((int)$USER->id)
-    : false;
-$discPct = (int)(get_config('local_subscriptions','trial_discount_percent') ?? 15);
-
-// On applique la remise SEULEMENT pour l’option "Achat simple" (purchase_new)
-$applyDiscount = ($discountOpen && $discPct > 0);
-
-// Montant final "achat simple"
-$finalPriceNew = $applyDiscount ? round($basePrice * (100 - $discPct) / 100, 2) : $basePrice;
-
-
-// Si pas connecté (achat invité), ne propose pas upgrade -> achat standard :
-if (!$effUserid || empty($options)) {
-    $options = [[
-        'key'       => Operation::PURCHASE_NEW,
-        'label'     => get_string('option_purchase_new', 'local_subscriptions'),
-        'amount'    => $finalPriceNew,     // ← prix remisé si applicable
-        'currency'  => $usedCurrency,
-        'ref_subid' => null
-    ]];
-}
-$multipleOptions = (count($options) > 1);
+$multipleOptions = count($options) > 1;
 
 // Texte d’aide au-dessus des options (selon le contexte)
 $hasupgrade = array_reduce($options, fn($c,$o)=>$c || ($o['key']===Operation::UPGRADE_NOW_REPLACE_CHAIN), false);
@@ -169,6 +131,7 @@ $PAGE->set_url(new moodle_url(UrlFactory::checkout($planid, $currency)->out(fals
 $PAGE->set_context(context_system::instance());
 
 $PAGE->set_pagelayout('standard');
+$PAGE->add_body_class('commerce-chromeless-page');
 $PAGE->set_title(get_string('checkout_title', 'local_subscriptions'));
 $PAGE->set_heading(format_string($SITE->fullname));
 $PAGE->requires->css(
@@ -463,17 +426,6 @@ if ($multipleOptions) {
 $displayBase = $basePrice; // prix catalogue (dans $usedCurrency)
 
 // ----- LIGNE D’INFO PROMO (sous le titre, avant les radios) -----
-require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
-
-$discountOpen = (isloggedin() && !isguestuser())
-    ? \local_subscriptions\trial_manager::is_discount_window_open((int)$USER->id)
-    : false;
-
-$discPct    = (int)(get_config('local_subscriptions','trial_discount_percent') ?? 15);
-$deadlineTs = $discountOpen ? (int)\local_subscriptions\trial_manager::discount_window_deadline((int)$USER->id) : 0;
-//$dt = new DateTime('2026-04-26 00:00:00', new DateTimeZone('Europe/Paris'));
-//$deadlineTs  = (int)$dt->getTimestamp();
-
 if ($discountOpen && $discPct > 0 && $deadlineTs > time()) {
     echo \html_writer::div(
         get_string('checkout_discount_note_prefix','local_subscriptions', $discPct) .
@@ -566,7 +518,7 @@ if (!$multipleOptions) {
         $isupgrade = (strpos($opt['key'], Operation::UPGRADE_NOW_REPLACE_CHAIN) === 0);
         $cur  = strtoupper($opt['currency'] ?? $usedCurrency);
 
-        // Montant final calculé par SubscriptionAdvisor.
+        // Montant final préparé par la frontière Native checkout.
         $finalForThis = (float)$opt['amount'];
 
         if ($opt['key'] === Operation::PURCHASE_NEW && $discountOpen && $discPct > 0) {
@@ -628,7 +580,12 @@ if (!$multipleOptions) {
 
         // Label texte + prix HTML (on ne l'échappe pas pour garder les <span>)
         $labelHtml = $opt['label'] . ' — ' . $priceHtml;
-        echo html_writer::label($labelHtml, $id, ['class' => 'form-check-label']);
+        echo html_writer::label(
+            $labelHtml,
+            $id,
+            false,
+            ['class' => 'form-check-label']
+        );
 
         // Détails pour upgrade (inchangé)
         if ($isupgrade && $currsub && $currplan) {

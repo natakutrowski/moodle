@@ -238,7 +238,7 @@ define(['core/config'], function(config) {
                     }
 
                     if (j.status === 'expired') {
-                        var subHref = j.subscribe || (config.wwwroot + '/local/subscriptions/subscribe.php');
+                        var subHref = j.subscribe || (config.wwwroot + '/boutique');
                         if (redirEl) {
                             redirEl.value = redirectid;
                         }
@@ -359,7 +359,7 @@ define(['core/config'], function(config) {
                         }
 
                         if (j.status === 'expired') {
-                            var subHref = j.subscribe || (config.wwwroot + '/local/subscriptions/subscribe.php');
+                            var subHref = j.subscribe || (config.wwwroot + '/boutique');
 
                             if (expiredEl) {
                                 expiredEl.classList.remove('d-none', 'alert-danger');

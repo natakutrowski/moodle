@@ -1,0 +1,90 @@
+<div class="commerce-customer-hub">
+    <section class="commerce-customer-hub__hero">
+        <div>
+            <span class="commerce-customer-hub__eyebrow">{{#str}}commerce_customer_hub_eyebrow, local_subscriptions{{/str}}</span>
+            <h1>{{welcome}}</h1>
+            <p>{{#str}}commerce_customer_hub_intro, local_subscriptions{{/str}}</p>
+        </div>
+        <a href="{{profileurl}}" class="commerce-customer-hub__avatar-link" title="{{#str}}commerce_customer_hub_view_profile, local_subscriptions{{/str}}" aria-label="{{#str}}commerce_customer_hub_view_profile, local_subscriptions{{/str}}"><img src="{{avatarurl}}" alt="{{fullname}}" class="commerce-customer-hub__avatar"></a>
+    </section>
+
+    <nav class="commerce-customer-hub__shortcuts" aria-label="{{#str}}commerce_customer_hub_shortcuts, local_subscriptions{{/str}}">
+        <a href="{{mycoursesurl}}" class="commerce-customer-hub__shortcut">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+            <span><strong>{{#str}}commerce_customer_hub_courses, local_subscriptions{{/str}}</strong><small>{{coursecount}} {{#str}}commerce_customer_hub_available, local_subscriptions{{/str}}</small></span>
+        </a>
+        <a href="{{myresourcesurl}}" class="commerce-customer-hub__shortcut">
+            <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+            <span><strong>{{#str}}commerce_customer_hub_resources, local_subscriptions{{/str}}</strong><small>{{resourcecount}} {{#str}}commerce_customer_hub_available, local_subscriptions{{/str}}</small></span>
+        </a>
+        <a href="{{mypurchasesurl}}" class="commerce-customer-hub__shortcut">
+            <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+            <span><strong>{{#str}}commerce_customer_hub_purchases, local_subscriptions{{/str}}</strong><small>{{purchasecount}} {{#str}}commerce_customer_hub_orders, local_subscriptions{{/str}}</small></span>
+        </a>
+        <a href="{{boutiqueurl}}" class="commerce-customer-hub__shortcut commerce-customer-hub__shortcut--boutique">
+            <i class="fa-solid fa-store" aria-hidden="true"></i>
+            <span><strong>{{#str}}commerce_customer_hub_shop, local_subscriptions{{/str}}</strong><small>{{#str}}commerce_customer_hub_shop_help, local_subscriptions{{/str}}</small></span>
+        </a>
+        <a href="{{supporturl}}" class="commerce-customer-hub__shortcut commerce-customer-hub__shortcut--support">
+            <i class="fa-solid fa-headset" aria-hidden="true"></i>
+            <span><strong>{{#str}}commerce_customer_hub_support, local_subscriptions{{/str}}</strong><small>{{#str}}commerce_customer_hub_support_help_short, local_subscriptions{{/str}}</small></span>
+        </a>
+    </nav>
+
+    <div class="commerce-customer-hub__grid">
+        <section class="commerce-customer-hub__panel commerce-customer-hub__panel--courses">
+            <header>
+                <div>
+                    <span class="commerce-customer-hub__section-icon"><i class="fa-solid fa-book-open" aria-hidden="true"></i></span>
+                    <h2>{{#str}}commerce_customer_hub_continue, local_subscriptions{{/str}}</h2>
+                </div>
+                <a href="{{mycoursesurl}}">{{#str}}commerce_customer_hub_view_all, local_subscriptions{{/str}}</a>
+            </header>
+            {{#hascourses}}
+                <div class="commerce-customer-hub__courses">
+                    {{#courses}}
+                        <a href="{{url}}" class="commerce-customer-hub__course">
+                            {{#hasimage}}<img class="commerce-customer-hub__course-cover" src="{{imageurl}}" alt="{{name}}" loading="lazy">{{/hasimage}}{{^hasimage}}<span class="commerce-customer-hub__course-initial" aria-hidden="true"><i class="fa-solid fa-graduation-cap"></i></span>{{/hasimage}}
+                            <span class="commerce-customer-hub__course-copy"><strong>{{name}}</strong><span class="commerce-customer-hub__course-progress" role="progressbar" aria-valuenow="{{progress}}" aria-valuemin="0" aria-valuemax="100"><span style="{{progressstyle}}"></span></span><small>{{progress}}%</small></span>
+                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    {{/courses}}
+                </div>
+            {{/hascourses}}
+            {{^hascourses}}
+                <div class="commerce-customer-hub__empty">
+                    <i class="fa-solid fa-compass" aria-hidden="true"></i>
+                    <p>{{#str}}commerce_customer_hub_no_courses, local_subscriptions{{/str}}</p>
+                    <a href="{{catalogurl}}" class="btn btn-primary">{{#str}}commerce_customer_hub_discover, local_subscriptions{{/str}}</a>
+                </div>
+            {{/hascourses}}
+        </section>
+
+        <aside class="commerce-customer-hub__panel commerce-customer-hub__panel--xp">
+            <header>
+                <div>
+                    <span class="commerce-customer-hub__section-icon commerce-customer-hub__section-icon--croissant" aria-hidden="true">🥐</span>
+                    <h2>{{#str}}commerce_customer_hub_xp_title, local_subscriptions{{/str}}</h2>
+                </div>
+            </header>
+            {{#xpavailable}}
+                <div class="commerce-customer-hub__xp-level"><strong>{{#str}}commerce_customer_hub_level, local_subscriptions{{/str}} {{highestlevel}}</strong>{{#hasxpbadge}}<img class="commerce-customer-hub__xp-badge-image" src="{{xpbadgeurl}}" alt="{{#str}}commerce_customer_hub_level, local_subscriptions{{/str}} {{highestlevel}}">{{/hasxpbadge}}</div>
+                <div class="commerce-customer-hub__progress" role="progressbar" aria-valuenow="{{xpprogress}}" aria-valuemin="0" aria-valuemax="100">
+                    <span style="{{xpprogressstyle}}"></span>
+                </div>
+                <dl class="commerce-customer-hub__xp-stats">
+                    <div><dt>{{#str}}commerce_customer_hub_total_xp, local_subscriptions{{/str}}</dt><dd>{{totalxp}} <span aria-hidden="true">🥐</span></dd></div>
+                    <div><dt>{{#str}}commerce_customer_hub_xp_30d, local_subscriptions{{/str}}</dt><dd>+{{xp30d}}</dd></div>
+                    {{#hasxprank}}<div><dt>{{#str}}commerce_customer_hub_xp_ranking, local_subscriptions{{/str}}</dt><dd>#{{xprank}}{{#xpparticipants}} / {{xpparticipants}}{{/xpparticipants}}</dd></div>{{/hasxprank}}
+                    <div><dt>{{#str}}commerce_customer_hub_last_activity, local_subscriptions{{/str}}</dt><dd>{{lastreward}}</dd></div>
+                </dl>
+            {{/xpavailable}}
+            {{^xpavailable}}
+                <div class="commerce-customer-hub__empty commerce-customer-hub__empty--compact">
+                    <span aria-hidden="true" class="commerce-customer-hub__empty-croissant">🥐</span>
+                    <p>{{#str}}commerce_customer_hub_xp_unavailable, local_subscriptions{{/str}}</p>
+                </div>
+            {{/xpavailable}}
+        </aside>
+    </div>
+</div>

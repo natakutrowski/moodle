@@ -34,6 +34,11 @@ use local_subscriptions\commerce\producttype\CommerceProductTypeRegistry;
 
 /** Creates the catalogue service graph for CLI and integration boundaries. */
 final class CommerceCatalogFactory {
+    public static function create(): self {
+        global $DB;
+        return new self($DB);
+    }
+
     private CommerceCatalogHydrator $hydrator;
     private CommerceProductRepository $products;
     private CommerceProductPriceRepository $prices;
@@ -78,7 +83,12 @@ final class CommerceCatalogFactory {
             $this->products,
             $this->prices,
             $this->translations,
-            $this->entitlements
+            $this->entitlements,
+            new CommerceEffectiveEntitlementResolver(
+                $this->db,
+                $this->products,
+                $this->entitlements
+            )
         );
     }
 
@@ -133,6 +143,15 @@ final class CommerceCatalogFactory {
         return new \local_subscriptions\commerce\catalog\audit\CommerceCatalogPurchaseShadowAuditor(
             $this->db,
             $this->purchase_request_factory()
+        );
+    }
+
+    public function subscription_checkout_page(): \local_subscriptions\commerce\catalog\checkout\CommerceSubscriptionCheckoutPageService {
+        return new \local_subscriptions\commerce\catalog\checkout\CommerceSubscriptionCheckoutPageService(
+            $this->db,
+            new CommerceLegacyProductMapRepository($this->db),
+            $this->products,
+            $this->prices
         );
     }
 

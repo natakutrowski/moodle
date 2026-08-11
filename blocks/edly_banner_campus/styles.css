@@ -430,3 +430,146 @@
 }
 
 
+
+/* J11 — navigation Landing harmonisée avec la topbar CampusFR. */
+.block_edly_banner_campus .campus-landing-language {
+    position: relative;
+    margin: 0;
+}
+
+.block_edly_banner_campus .campus-landing-language > summary {
+    list-style: none;
+}
+
+.block_edly_banner_campus .campus-landing-language > summary::-webkit-details-marker {
+    display: none;
+}
+
+.block_edly_banner_campus .campus-landing-language__toggle,
+.block_edly_banner_campus .hero-btn {
+    min-height: 42px;
+    border-radius: 12px;
+    font-weight: 750;
+}
+
+.block_edly_banner_campus .campus-landing-language__toggle {
+    align-items: center;
+    background: rgba(255, 255, 255, .94);
+    border: 1px solid rgba(255, 255, 255, .76);
+    color: #7a1748;
+    cursor: pointer;
+    display: inline-flex;
+    gap: .5rem;
+    justify-content: center;
+    padding: .5rem .8rem;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.block_edly_banner_campus .campus-landing-language__toggle:hover,
+.block_edly_banner_campus .campus-landing-language__toggle:focus {
+    background: #fff;
+    box-shadow: 0 .75rem 2rem rgba(70, 10, 40, .18);
+    outline: 0;
+}
+
+.block_edly_banner_campus .campus-landing-language__chevron {
+    font-size: .72rem;
+    transition: transform .18s ease;
+}
+
+.block_edly_banner_campus .campus-landing-language[open] .campus-landing-language__chevron {
+    transform: rotate(180deg);
+}
+
+.block_edly_banner_campus .campus-landing-language__dropdown {
+    background: #fff;
+    border: 1px solid rgba(148, 163, 184, .28);
+    border-radius: 14px;
+    box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, .2);
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+    min-width: 13rem;
+    padding: .5rem;
+    position: absolute;
+    right: 0;
+    top: calc(100% + .55rem);
+    z-index: 30;
+}
+
+.block_edly_banner_campus .campus-landing-language__option {
+    align-items: center;
+    border-radius: 10px;
+    color: #334155;
+    display: flex;
+    font-size: .87rem;
+    font-weight: 650;
+    gap: .65rem;
+    min-height: 2.6rem;
+    padding: .55rem .7rem;
+    text-decoration: none;
+}
+
+.block_edly_banner_campus .campus-landing-language__option:hover,
+.block_edly_banner_campus .campus-landing-language__option:focus,
+.block_edly_banner_campus .campus-landing-language__option.is-active {
+    background: rgba(255, 20, 114, .08);
+    color: #b8004c;
+}
+
+.block_edly_banner_campus .campus-landing-language__option-flag {
+    font-size: 1.15rem;
+    width: 1.4rem;
+}
+
+.block_edly_banner_campus .campus-landing-language__check {
+    color: #ff1472;
+    font-weight: 850;
+    margin-left: auto;
+}
+
+.block_edly_banner_campus .hero-btn-primary {
+    background: #ff1472;
+    border-color: #ff1472;
+    color: #fff;
+}
+
+.block_edly_banner_campus .hero-btn-secondary {
+    background: rgba(255, 255, 255, .94);
+    border-color: #ff1472;
+    color: #b8004c;
+}
+
+.block_edly_banner_campus .hero-btn-primary:hover,
+.block_edly_banner_campus .hero-btn-primary:focus {
+    background: #e60060;
+    border-color: #e60060;
+    color: #fff;
+}
+
+.block_edly_banner_campus .hero-btn-secondary:hover,
+.block_edly_banner_campus .hero-btn-secondary:focus {
+    background: #fff;
+    color: #990040;
+}
+
+@media (max-width: 767.98px) {
+    .block_edly_banner_campus .campus-landing-language__toggle,
+    .block_edly_banner_campus .hero-btn {
+        height: 34px;
+        min-height: 34px;
+    }
+
+    .block_edly_banner_campus .campus-landing-language__toggle {
+        padding: .3rem .55rem;
+    }
+
+    .block_edly_banner_campus .campus-landing-language__label {
+        display: none;
+    }
+
+    .block_edly_banner_campus .campus-landing-language__dropdown {
+        min-width: 12rem;
+    }
+}

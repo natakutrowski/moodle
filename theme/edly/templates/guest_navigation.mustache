@@ -1,0 +1,34 @@
+{{#guestnavigation.enabled}}
+<nav class="campus-guest-nav d-none d-lg-flex align-items-center" aria-label="{{guestnavigation.shoplabel}}">
+    {{#guestnavigation.haslanguages}}
+        <details class="campus-topbar-language campus-guest-nav__language">
+            <summary class="campus-topbar-language__toggle campus-guest-nav__control" aria-label="{{guestnavigation.languagelabel}}">
+                <span class="campus-topbar-language__flag" aria-hidden="true">{{guestnavigation.currentlanguageflag}}</span>
+                <span class="campus-topbar-language__label">{{guestnavigation.languagelabel}}</span>
+                <span class="campus-topbar-chevron" aria-hidden="true">▾</span>
+            </summary>
+            <nav class="campus-topbar-language__dropdown" aria-label="{{guestnavigation.languagelabel}}">
+                {{#guestnavigation.languages}}
+                    <a class="campus-topbar-language__option {{#active}}is-active{{/active}}"
+                       href="{{{url}}}" {{#active}}aria-current="page"{{/active}}>
+                        <span class="campus-topbar-language__option-flag" aria-hidden="true">{{flag}}</span>
+                        <span>{{name}}</span>
+                        {{#active}}<span class="campus-topbar-language__check" aria-hidden="true">✓</span>{{/active}}
+                    </a>
+                {{/guestnavigation.languages}}
+            </nav>
+        </details>
+    {{/guestnavigation.haslanguages}}
+
+    {{#guestnavigation.showshop}}
+    <a class="campus-guest-nav__button campus-guest-nav__button--shop" href="{{{guestnavigation.shopurl}}}">
+        <i class="fa-solid fa-store" aria-hidden="true"></i>
+        <span>{{guestnavigation.shoplabel}}</span>
+    </a>
+    {{/guestnavigation.showshop}}
+    <a class="campus-guest-nav__button campus-guest-nav__button--login" href="{{{guestnavigation.loginurl}}}" aria-label="{{guestnavigation.loginlabel}}" {{#guestnavigation.loginrequiresaccountfinalisation}}data-requires-account-finalisation="1"{{/guestnavigation.loginrequiresaccountfinalisation}}>
+        <i class="{{guestnavigation.loginicon}}" aria-hidden="true"></i>
+        <span>{{guestnavigation.loginlabel}}</span>
+    </a>
+</nav>
+{{/guestnavigation.enabled}}

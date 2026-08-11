@@ -51,6 +51,11 @@ final class MoodleCourseRoleService implements CommerceCourseRoleService {
             role_assign($roleid, $userid, $context->id);
         }
 
+        if (!$dryrun && $roleshortname !== 'trialstudent') {
+            \local_subscriptions\subscription_manager::
+                cleanup_trial_subscription_if_unused($userid);
+        }
+
         return [
             'status' => $alreadyassigned ? 'unchanged' : ($dryrun ? 'would_assign' : 'assigned'),
             'roleid' => $roleid,

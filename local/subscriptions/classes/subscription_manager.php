@@ -248,12 +248,60 @@ class subscription_manager {
 					$manual->enrol_user($instance, $userid, $roleid, (int)$startdate, (int)$enddate, ENROL_USER_ACTIVE);
 				}
 
+			} catch (\Throwable $e) {
+				/*
+				 * Certains observers Moodle, notamment le processeur email,
+				 * peuvent échouer après la persistance effective de
+				 * l'inscription.
+				 *
+				 * On vérifie donc l'état réel avant de considérer
+				 * l'inscription comme échouée.
+				 */
+				$persistedenrolment = $DB->record_exists('user_enrolments', [
+					'enrolid' => $instance->id,
+					'userid' => $userid,
+				]);
+
+				if (!$persistedenrolment) {
+					error_log(
+						'[local_subscriptions] enrol entitlement failed for user '
+						. $userid
+						. ', course '
+						. $courseid
+						. ': '
+						. $e->getMessage()
+					);
+
+					continue;
+				}
+
+				error_log(
+					'[local_subscriptions] enrolment persisted for user '
+					. $userid
+					. ', course '
+					. $courseid
+					. ', but a post-enrolment operation failed: '
+					. $e->getMessage()
+				);
+			}
+
+			try {
 				self::assign_entitlement_role($userid, $entitlement);
-				self::ensure_user_group($userid, $courseid, (string)($entitlement->groupname ?? ''));
+				self::ensure_user_group(
+					$userid,
+					$courseid,
+					(string)($entitlement->groupname ?? '')
+				);
 
 			} catch (\Throwable $e) {
-				debugging('[local_subscriptions] enrol entitlement failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
-				continue;
+				error_log(
+					'[local_subscriptions] entitlement post-processing failed for user '
+					. $userid
+					. ', course '
+					. $courseid
+					. ': '
+					. $e->getMessage()
+				);
 			}
 		}
 		self::cleanup_trial_subscription_if_unused($userid);

@@ -69,7 +69,8 @@ class MailRenderer {
     }
 
 
-    public static function layout(string $title, string $bodyhtml, ?string $buttonlabel = null, ?string $buttonurl = null): array {
+    public static function layout(string $title, string $bodyhtml, ?string $buttonlabel = null, ?string $buttonurl = null, array $options = []): array {
+        global $CFG;
         global $SITE;
 
         // ── Branding configurable (fallbacks sûrs) ──────────────────────────────────
@@ -79,23 +80,60 @@ class MailRenderer {
 
         $brandcolor     = get_config('local_subscriptions', 'brand_color') ?: '#005f73';
         $brandcolorDark = get_config('local_subscriptions', 'brand_color_dark') ?: '#013140';
-        $logo           = get_config('local_subscriptions', 'brand_logo_url') ?: '';
+        $logo           = trim((string)($options['headerimageurl'] ?? '')) ?: (get_config('local_subscriptions', 'brand_logo_url') ?: '');
+        $preheader      = trim((string)($options['preheader'] ?? ''));
+        $buttonvariant  = strtolower(trim((string)($options['buttonvariant'] ?? 'standard')));
+        $buttonicon     = strtolower(trim((string)($options['buttonicon'] ?? '')));
+        $afterbuttonhtml = trim((string)($options['afterbuttonhtml'] ?? ''));
 
         // ── Bouton (HTML) ───────────────────────────────────────────────────────────
         $btn = '';
         if ($buttonlabel && $buttonurl) {
-            $btn = '
-            <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;">
-            <tr>
-                <td bgcolor="'.s($brandcolor).'" style="border-radius:8px;">
-                <a href="'.s($buttonurl).'"
-                    style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;border-radius:8px;background:'.s($brandcolor).';"
-                    onmouseover="this.style.background=\''.s($brandcolorDark).'\';"
-                    onmouseout="this.style.background=\''.s($brandcolor).'\';"
-                >'.s($buttonlabel).'</a>
-                </td>
-            </tr>
-            </table>';
+            if ($buttonvariant === 'premium') {
+                // Email-client-safe premium CTA: gold outer frame + dark CampusFR core.
+                // The premium effect does not depend on gradients or hover support.
+                $btn = '
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:28px auto;">
+                <tr>
+                    <td bgcolor="#d7b65a" style="padding:2px;border-radius:13px;background:#d7b65a;box-shadow:0 10px 24px rgba(90,62,10,.20);">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                            <td bgcolor="#fff7df" style="border-radius:11px;background:#fff7df;">
+                                <a href="'.s($buttonurl).'" target="_blank" rel="noopener noreferrer"
+                                    style="display:inline-block;padding:14px 28px;color:#624817;text-decoration:none;font-family:Nunito,Segoe UI,Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;line-height:1.2;border-radius:11px;background:#fff7df;letter-spacing:.01em;text-shadow:0 1px 0 rgba(255,255,255,.55);"
+                                ><span style="color:#b08424;">✦</span>&nbsp; '.s($buttonlabel).' &nbsp;<span style="color:#b08424;">✦</span></a>
+                            </td>
+                        </tr>
+                        </table>
+                    </td>
+                </tr>
+                </table>';
+            } else {
+                $btn = '
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:26px auto;">
+                <tr>
+                    <td bgcolor="#d91f73" style="padding:1px;border-radius:12px;background:#d91f73;box-shadow:0 9px 22px rgba(247,37,133,.20);">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                            <td bgcolor="#f72585" style="border-radius:11px;background:#f72585;">
+                                <a href="'.s($buttonurl).'" target="_blank" rel="noopener noreferrer"
+                                    style="display:inline-block;padding:14px 26px;color:#ffffff;text-decoration:none;font-family:Nunito,Segoe UI,Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;line-height:1.2;border-radius:11px;background:#f72585;letter-spacing:.01em;"
+                                >'.($buttonicon === 'key'
+                                    ? '<img src="'.s(rtrim((string)$CFG->wwwroot, '/') . '/local/subscriptions/pix/email/key-white.png').'" alt="" width="14" height="14" style="display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:8px;border:0;">'
+                                    : ($buttonicon === 'receipt'
+                                        ? '<img src="'.s(rtrim((string)$CFG->wwwroot, '/') . '/local/subscriptions/pix/email/receipt-white.png').'" alt="" width="14" height="14" style="display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:8px;border:0;">'
+                                        : '')).s($buttonlabel).($buttonicon === 'external'
+                                    ? ' &nbsp;<img src="'.s(rtrim((string)$CFG->wwwroot, '/') . '/local/subscriptions/pix/email/external-white.png').'" alt="" width="12" height="12" style="display:inline-block;width:12px;height:12px;vertical-align:-1px;border:0;">'
+                                    : (in_array($buttonicon, ['key', 'receipt'], true)
+                                        ? ''
+                                        : ' &nbsp;<span style="font-size:12px;color:#ffd5e8;">›</span>')).'</a>
+                            </td>
+                        </tr>
+                        </table>
+                    </td>
+                </tr>
+                </table>';
+            }
         }
 
         // ── En-tête bandeau / marque ────────────────────────────────────────────────
@@ -103,7 +141,7 @@ class MailRenderer {
             // Bandeau image pleine largeur (hauteur limitée)
             $logoHtml = '<img src="'.s($logo).'"
                             alt="'.s($brandPlain).'"
-                            style="display:block;width:100%;max-height:220px;object-fit:cover;border:0;outline:none;text-decoration:none;">';
+                            class="ls-header-image" style="display:block;width:100%;max-height:220px;object-fit:cover;border:0;outline:none;text-decoration:none;">';
         } else {
             // Fallback texte "CampusFR" avec FR en exposant
             $logoHtml = '<div style="font-size:20px;font-weight:600;color:#111;">'.$brandnameHTML.'</div>';
@@ -127,8 +165,30 @@ class MailRenderer {
         // ── HTML (avec dark-mode) ───────────────────────────────────────────────────
         $html = '<!doctype html><html><head><meta charset="utf-8">
                     <meta name="x-apple-disable-message-reformatting">
+                    <meta name="viewport" content="width=device-width,initial-scale=1">
                     <meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
                     <style>
+                    html, body, table, td, div, p, a, h1, h2, h3, h4, h5, h6 {
+                        font-family:Nunito,Segoe UI,Arial,Helvetica,sans-serif;
+                    }
+                    @media only screen and (max-width:600px) {
+                        .ls-shell { width:100% !important; max-width:100% !important; }
+                        .ls-body { padding:20px 16px 6px 16px !important; }
+                        .ls-footer { padding:14px 16px 18px 16px !important; }
+                        .ls-footer-table,
+                        .ls-footer-table tbody,
+                        .ls-footer-table tr,
+                        .ls-footer-table td {
+                            display:block !important;
+                            width:100% !important;
+                        }
+                        .ls-footer-date { text-align:left !important; padding-top:8px !important; }
+                        .ls-header-image { max-height:none !important; height:auto !important; }
+                        .po-desktop { display:none !important; mso-hide:all !important; }
+                        .po-mobile { display:table-row !important; mso-hide:none !important; }
+                        .po-mobile table { max-width:100% !important; }
+                        .po-mobile img { max-width:100% !important; }
+                    }
                     @media (prefers-color-scheme: dark) {
                         body { background:#0b1220 !important; }
                         .ls-card { background:#111827 !important; box-shadow:none !important; }
@@ -138,12 +198,13 @@ class MailRenderer {
                     }
                     </style>
                     </head>
-                    <body style="margin:0;padding:0;background:#f6f9fc;">
+                    <body style="margin:0;padding:0;background:#f6f9fc;font-family:Nunito,Segoe UI,Arial,Helvetica,sans-serif;">
+                    '.($preheader !== '' ? '<div style="display:none!important;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">'.s($preheader).'</div>' : '').'
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                     <tr><td align="center" style="padding:24px 12px;">
                         <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="800"
-                            class="ls-card"
-                            style="max-width:800px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+                            class="ls-card ls-shell"
+                            style="max-width:800px;background:#ffffff;border:1px solid #e6e1ec;border-radius:16px;overflow:hidden;box-shadow:0 10px 32px rgba(56,35,93,0.09);">
 
                         <!-- En-tête : bandeau image ou texte de marque -->
                         <tr>
@@ -154,22 +215,23 @@ class MailRenderer {
 
                         <!-- Corps -->
                         <tr>
-                            <td style="padding:24px 24px 8px 24px;">
-                            <div style="font-size:14px;line-height:1.7;color:#374151;" class="ls-text">'.$bodyhtml.'</div>
+                            <td class="ls-body" style="padding:24px 24px 8px 24px;font-family:Nunito,Segoe UI,Arial,Helvetica,sans-serif;">
+                            <div style="font-family:Nunito,Segoe UI,Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#374151;" class="ls-text">'.$bodyhtml.'</div>
                             '.$btn.'
+                            '.$afterbuttonhtml.'
                             </td>
                         </tr>
 
                         <!-- Footer : copyright + date à droite -->
                         <tr>
-                            <td style="padding:16px 24px 20px 24px;border-top:1px solid #eee;" class="ls-border">
-                                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <td style="padding:16px 24px 20px 24px;border-top:1px solid #eee;" class="ls-border ls-footer">
+                                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" class="ls-footer-table">
                                     <tr>
                                         <td style="font-size:12px;color:#6b7280;vertical-align:top;" class="ls-muted">
                                             '.$copyright.
                                             ($footernote ? '<div style="margin-top:4px">'.format_text($footernote, FORMAT_HTML).'</div>' : '').
                                         '</td>
-                                        <td style="font-size:12px;color:#6b7280;text-align:right;white-space:nowrap;vertical-align:top;" class="ls-muted">
+                                        <td style="font-size:12px;color:#6b7280;text-align:right;white-space:nowrap;vertical-align:top;" class="ls-muted ls-footer-date">
                                             '.s($datestr).'
                                         </td>
                                     </tr>

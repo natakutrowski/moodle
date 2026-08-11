@@ -1,0 +1,14 @@
+@media print {
+    @page { margin: 14mm; }
+    body { background:#fff !important; color:#000 !important; }
+    #page-header, #page-footer, .navbar, .drawer, .secondary-navigation,
+    .commerce-order-details__back, .commerce-order-details__print,
+    .commerce-order-resource-action__buttons, .commerce-order-panel--support, .commerce-order-panel--technical,
+    .commerce-order-details .btn, [data-region="drawer-toggle"] { display:none !important; }
+    #page, #page-content, .main-inner, .commerce-order-details { width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; }
+    .commerce-order-details__hero, .commerce-order-panel, .commerce-order-bundle,
+    .commerce-order-item-detail { break-inside:avoid; box-shadow:none !important; background:#fff !important; }
+    .commerce-order-panel { border:1px solid #cbd5e1 !important; }
+    .commerce-order-details__statuses { grid-template-columns:repeat(3,1fr) !important; }
+    a { color:#000 !important; text-decoration:none !important; }
+}

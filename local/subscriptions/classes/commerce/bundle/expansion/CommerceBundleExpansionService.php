@@ -19,7 +19,11 @@ final class CommerceBundleExpansionService {
     ) {
     }
 
-    public function expand(string $sku, int $quantity = 1): CommerceBundleExpansionResult {
+    public function expand(
+        string $sku,
+        int $quantity = 1,
+        bool $allowinactiveroot = false
+    ): CommerceBundleExpansionResult {
         $sku = strtoupper(trim($sku));
 
         if ($quantity <= 0) {
@@ -37,7 +41,8 @@ final class CommerceBundleExpansionService {
             [],
             $items,
             $visitedbundles,
-            $maximumdepth
+            $maximumdepth,
+            $allowinactiveroot
         );
 
         ksort($items);
@@ -58,7 +63,8 @@ final class CommerceBundleExpansionService {
         array $path,
         array &$items,
         array &$visitedbundles,
-        int &$maximumdepth
+        int &$maximumdepth,
+        bool $allowinactiveroot
     ): void {
         if (isset($ancestors[$sku])) {
             $cycle = array_merge($path, [$sku]);
@@ -74,7 +80,9 @@ final class CommerceBundleExpansionService {
             throw new \coding_exception('Unknown Commerce product in bundle composition: ' . $sku);
         }
 
-        if (!$product->is_active()) {
+        $isroot = $path === [];
+
+        if (!$product->is_active() && !($isroot && $allowinactiveroot)) {
             throw new \coding_exception('Inactive Commerce product in bundle composition: ' . $sku);
         }
 
@@ -112,7 +120,8 @@ final class CommerceBundleExpansionService {
                 $path,
                 $items,
                 $visitedbundles,
-                $maximumdepth
+                $maximumdepth,
+                $allowinactiveroot
             );
         }
     }

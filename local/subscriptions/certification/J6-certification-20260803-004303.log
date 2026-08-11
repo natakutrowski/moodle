@@ -1,0 +1,469 @@
+=========================================================
+CampusFR Commerce 7.95 - Certification J6
+Date : Mon Aug  3 00:43:03 UTC 2026
+Commit : 2d061ac424a
+=========================================================
+
+================ local_subscriptions ================
+Moodle 5.0.7 (Build: 20260420), 2d061ac424ad02045c899d9e36501b8606127109
+Php: 8.4.5, mysqli: 8.4.5, OS: Linux 6.14.0-37-generic x86_64
+PHPUnit 11.5.55 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.4.5
+Configuration: /var/www/moodle-dev/phpunit.xml
+
+.............................................................   61 / 1187 (  5%)
+.............................................................  122 / 1187 ( 10%)
+..........................................................F.F  183 / 1187 ( 15%)
+.............................................................  244 / 1187 ( 20%)
+.............................................................  305 / 1187 ( 25%)
+.............................................................  366 / 1187 ( 30%)
+.............................................................  427 / 1187 ( 35%)
+.............................................................  488 / 1187 ( 41%)
+.............................................................  549 / 1187 ( 46%)
+.............................................................  610 / 1187 ( 51%)
+.............................................................  671 / 1187 ( 56%)
+.............................................................  732 / 1187 ( 61%)
+.............................................................  793 / 1187 ( 66%)
+.............................................................  854 / 1187 ( 71%)
+.............................................................  915 / 1187 ( 77%)
+.............................E...............................  976 / 1187 ( 82%)
+............................................................. 1037 / 1187 ( 87%)
+............................................................. 1098 / 1187 ( 92%)
+............................................................. 1159 / 1187 ( 97%)
+............................                                  1187 / 1187 (100%)
+
+Time: 06:42.581, Memory: 167.00 MB
+
+There was 1 error:
+
+1) local_subscriptions\tests\commerce\storefront\commerce_795f4_storefront_editor_test::test_editor_merges_storefront_configuration_without_losing_metadata
+Error: Class "local_subscriptions\commerce\storefront\admin\core_text" not found
+
+/var/www/moodle-dev/local/subscriptions/classes/commerce/storefront/admin/CommerceStorefrontPageEditor.php:552
+/var/www/moodle-dev/local/subscriptions/classes/commerce/storefront/admin/CommerceStorefrontPageEditor.php:295
+/var/www/moodle-dev/local/subscriptions/tests/commerce/storefront/commerce_795f4_storefront_editor_test.php:29
+
+--
+
+There were 2 failures:
+
+1) local_subscriptions\commerce_product_cover_admin_test::test_product_asset_page_exposes_specialised_visual_roles
+Failed asserting that '<?php\n
+\n
+require_once(__DIR__ . '/../../../../../config.php');\n
+\n
+use local_subscriptions\admin\AdminSecurity;\n
+use local_subscriptions\admin\Capabilities;\n
+use local_subscriptions\commerce\catalog\assets\CommerceCatalogDigitalFileManager;\n
+use local_subscriptions\commerce\catalog\assets\CommerceCatalogDigitalProductConfigurator;\n
+use local_subscriptions\commerce\catalog\assets\CommerceCatalogMediaManager;\n
+use local_subscriptions\commerce\catalog\cover\CommerceProductCoverService;\n
+use local_subscriptions\commerce\catalog\rendering\CommerceProductEditorNavigationRenderer;\n
+use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;\n
+use local_subscriptions\crm\layout\CrmPageConfigurator;\n
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;\n
+use local_subscriptions\crm\navigation\CrmNavigationKeys;\n
+\n
+$context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);\n
+$sku = required_param('sku', PARAM_RAW_TRIMMED);\n
+$factory = new CommerceCatalogFactory($DB);\n
+$manager = $factory->product_manager();\n
+$editor = $manager->get_editor_data($sku);\n
+$product = $editor->get_product();\n
+$productid = (int)$product->get_id();\n
+$pageurl = new moodle_url('/local/subscriptions/admin/commerce/products/assets.php', ['sku' => $sku]);\n
+CrmPageConfigurator::configure(\n
+    $PAGE,\n
+    $context,\n
+    $pageurl,\n
+    get_string('commerce_product_assets_title', 'local_subscriptions'),\n
+    'local-subscriptions-commerce-product-assets-page'\n
+);\n
+\n
+$media = new CommerceCatalogMediaManager($context);\n
+$digitalfiles = new CommerceCatalogDigitalFileManager($context);\n
+$coverservice = new CommerceProductCoverService($media);\n
+\n
+$coverroles = [\n
+    CommerceCatalogMediaManager::ROLE_CHECKOUT,\n
+    CommerceCatalogMediaManager::ROLE_STOREFRONT,\n
+    CommerceCatalogMediaManager::ROLE_PRODUCT,\n
+    CommerceCatalogMediaManager::ROLE_RESOURCES,\n
+];\n
+$visualformats = [\n
+    CommerceCatalogMediaManager::ROLE_CHECKOUT => [\n
+        'format' => 'square',\n
+        'ratio' => '1:1',\n
+        'recommended' => '1200 × 1200 px',\n
+    ],\n
+    CommerceCatalogMediaManager::ROLE_STOREFRONT => [\n
+        'format' => 'landscape',\n
+        'ratio' => '4:3',\n
+        'recommended' => '1600 × 1200 px',\n
+    ],\n
+    CommerceCatalogMediaManager::ROLE_PRODUCT => [\n
+        'format' => 'wide',\n
+        'ratio' => '16:9',\n
+        'recommended' => '1920 × 1080 px',\n
+    ],\n
+    CommerceCatalogMediaManager::ROLE_RESOURCES => [\n
+        'format' => 'portrait',\n
+        'ratio' => '4:5',\n
+        'recommended' => '1200 × 1500 px',\n
+    ],\n
+];\n
+\n
+$requestedaction = optional_param('action', '', PARAM_ALPHAEXT);\n
+$hasaction = data_submitted()\n
+    || str_starts_with($requestedaction, 'delete_cover_')\n
+    || in_array($requestedaction, ['delete_desktop', 'delete_mobile'], true);\n
+\n
+if ($hasaction && confirm_sesskey()) {\n
+    $action = $requestedaction !== '' ? $requestedaction : 'save_covers';\n
+\n
+    try {\n
+        if ($action === 'save_covers') {\n
+            foreach ($coverroles as $role) {\n
+                $media->store_uploaded_file($productid, $role, 'cover_' . $role);\n
+            }\n
+        } else if (str_starts_with($action, 'delete_cover_')) {\n
+            $role = substr($action, strlen('delete_cover_'));\n
+            if (!in_array($role, $coverroles, true)) {\n
+                throw new moodle_exception('invalidparameter');\n
+            }\n
+            $media->delete_file($productid, $role);\n
+        } else if ($product->get_type() === 'digital_download' && $action === 'save_digital') {\n
+            $desktop = $digitalfiles->store_uploaded_file(\n
+                $productid,\n
+                CommerceCatalogDigitalFileManager::ROLE_DESKTOP,\n
+                'desktop_file'\n
+            );\n
+            $mobile = $digitalfiles->store_uploaded_file(\n
+                $productid,\n
+                CommerceCatalogDigitalFileManager::ROLE_MOBILE,\n
+                'mobile_file'\n
+            );\n
+\n
+            if ($desktop !== null || $mobile !== null) {\n
+                $definitions = (new CommerceCatalogDigitalProductConfigurator())->with_default_entitlement(\n
+                    $product,\n
+                    $editor->get_entitlements()\n
+                );\n
+                if (count($definitions) !== count($editor->get_entitlements())) {\n
+                    $manager->save_entitlements($sku, $definitions);\n
+                }\n
+            }\n
+        } else if ($product->get_type() === 'digital_download' && $action === 'delete_desktop') {\n
+            $digitalfiles->delete_file($productid, CommerceCatalogDigitalFileManager::ROLE_DESKTOP);\n
+        } else if ($product->get_type() === 'digital_download' && $action === 'delete_mobile') {\n
+            $digitalfiles->delete_file($productid, CommerceCatalogDigitalFileManager::ROLE_MOBILE);\n
+        } else {\n
+            throw new moodle_exception('invalidparameter');\n
+        }\n
+\n
+        redirect($pageurl, get_string('changessaved'));\n
+    } catch (moodle_exception $exception) {\n
+        $expected = [\n
+            'maxbytes',\n
+            'error_uploading_file',\n
+            'commerce_invalid_asset_type',\n
+            'commerce_invalid_digital_file_type',\n
+        ];\n
+        if (!in_array($exception->errorcode, $expected, true)) {\n
+            throw $exception;\n
+        }\n
+\n
+        $message = $exception->errorcode === 'maxbytes'\n
+            ? get_string(\n
+                'commerce_digital_file_error_maxbytes',\n
+                'local_subscriptions',\n
+                display_size(CommerceCatalogDigitalFileManager::MAX_BYTES)\n
+            )\n
+            : get_string('commerce_digital_file_error_upload', 'local_subscriptions');\n
+        redirect($pageurl, $message, null, \core\output\notification::NOTIFY_ERROR);\n
+    }\n
+}\n
+\n
+$digital = null;\n
+if ($product->get_type() === 'digital_download') {\n
+    $map = $DB->get_record('local_subs_commerce_prod_map', [\n
+        'productid' => $productid,\n
+        'legacytable' => 'subscription_digital_product',\n
+    ]);\n
+    $digital = $map ? $DB->get_record('subscription_digital_product', ['id' => $map->legacyid]) : null;\n
+}\n
+\n
+$resolvedcovers = $coverservice->resolve_all($productid);\n
+\n
+echo $OUTPUT->header();\n
+echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);\n
+echo CommerceProductEditorNavigationRenderer::breadcrumb(\n
+    $product->get_name(),\n
+    get_string('commerce_product_step_assets', 'local_subscriptions')\n
+);\n
+echo CommerceProductEditorNavigationRenderer::render(\n
+    $product,\n
+    CommerceProductEditorNavigationRenderer::ASSETS\n
+);\n
+echo $OUTPUT->heading(get_string('commerce_product_assets_title', 'local_subscriptions'));\n
+echo html_writer::tag(\n
+    'p',\n
+    get_string('commerce_product_assets_help', 'local_subscriptions'),\n
+    ['class' => 'text-muted']\n
+);\n
+\n
+echo html_writer::start_tag('form', [\n
+    'method' => 'post',\n
+    'enctype' => 'multipart/form-data',\n
+    'class' => 'card card-body mb-4',\n
+]);\n
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);\n
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'save_covers']);\n
+echo html_writer::tag(\n
+    'h3',\n
+    get_string('commerce_product_covers_title', 'local_subscriptions'),\n
+    ['class' => 'h5']\n
+);\n
+echo html_writer::tag(\n
+    'p',\n
+    get_string('commerce_product_covers_help', 'local_subscriptions'),\n
+    ['class' => 'text-muted']\n
+);\n
+echo html_writer::start_div('row g-3');\n
+\n
+foreach ($coverroles as $role) {\n
+    $file = $media->get_file($productid, $role);\n
+    $url = $media->get_url($productid, $role);\n
+    $resolved = $resolvedcovers[$role] ?? null;\n
+\n
+    echo html_writer::start_div('col-12 col-xl-6');\n
+    echo html_writer::start_div('border rounded-4 p-3 h-100 bg-light');\n
+    echo html_writer::tag(\n
+        'h4',\n
+        get_string(\n
+            'commerce_product_visual_format_'\n
+                . $visualformats[$role]['format'],\n
+            'local_subscriptions'\n
+        ),\n
+        ['class' => 'h6 mb-1']\n
+    );\n
+    echo html_writer::tag(\n
+        'p',\n
+        get_string(\n
+            'commerce_product_visual_format_'\n
+                . $visualformats[$role]['format']\n
+                . '_help',\n
+            'local_subscriptions',\n
+            $visualformats[$role]['recommended']\n
+        ),\n
+        ['class' => 'small text-muted mb-3']\n
+    );\n
+\n
+    if ($url !== null && $file instanceof stored_file) {\n
+        echo html_writer::empty_tag('img', [\n
+            'src' => $url->out(false),\n
+            'alt' => '',\n
+            'class' => 'img-fluid rounded border mb-3 bg-white',\n
+            'style' => 'width:100%;height:220px;object-fit:contain',\n
+        ]);\n
+        $dimensions = @getimagesizefromstring($file->get_content());\n
+        $width = is_array($dimensions) ? (int)($dimensions[0] ?? 0) : 0;\n
+        $height = is_array($dimensions) ? (int)($dimensions[1] ?? 0) : 0;\n
+        $ratiook = \local_subscriptions\commerce\catalog\visual\CommerceProductVisualFormat::ratio_matches(\n
+                $visualformats[$role]['format'],\n
+                $width,\n
+                $height\n
+            );\n
+\n
+        echo html_writer::div(\n
+            s($file->get_filename())\n
+                . ' · '\n
+                . display_size($file->get_filesize())\n
+                . (\n
+                    $width > 0 && $height > 0\n
+                        ? ' · ' . $width . ' × ' . $height . ' px'\n
+                        : ''\n
+                ),\n
+            'small mb-2'\n
+        );\n
+        echo html_writer::div(\n
+            $ratiook\n
+                ? get_string(\n
+                    'commerce_product_visual_ratio_ok',\n
+                    'local_subscriptions',\n
+                    $visualformats[$role]['ratio']\n
+                )\n
+                : get_string(\n
+                    'commerce_product_visual_ratio_warning',\n
+                    'local_subscriptions',\n
+                    $visualformats[$role]['ratio']\n
+                ),\n
+            $ratiook\n
+                ? 'alert alert-success py-2 small'\n
+                : 'alert alert-warning py-2 small'\n
+        );\n
+        echo html_writer::link(\n
+            new moodle_url($pageurl, [\n
+                'action' => 'delete_cover_' . $role,\n
+                'sesskey' => sesskey(),\n
+            ]),\n
+            get_string('delete'),\n
+            ['class' => 'btn btn-sm btn-outline-danger mb-3']\n
+        );\n
+    } else {\n
+        $fallbacklabel = get_string('commerce_product_cover_fallback_notice', 'local_subscriptions');\n
+        if ($resolved !== null && $resolved->exists() && $resolved->get_resolved_context() !== null) {\n
+            $fallbacklabel .= ' (' . s($resolved->get_resolved_context()) . ')';\n
+        }\n
+        echo html_writer::div($fallbacklabel, 'alert alert-light small');\n
+    }\n
+\n
+    echo html_writer::empty_tag('input', [\n
+        'type' => 'file',\n
+        'name' => 'cover_' . $role,\n
+        'accept' => '.png,.jpg,.jpeg,.webp',\n
+        'class' => 'form-control',\n
+        'aria-label' => get_string('commerce_product_cover_role_' . $role, 'local_subscriptions'),\n
+    ]);\n
+    echo html_writer::end_div();\n
+    echo html_writer::end_div();\n
+}\n
+\n
+echo html_writer::end_div();\n
+echo html_writer::empty_tag('input', [\n
+    'type' => 'submit',\n
+    'class' => 'btn btn-primary mt-4',\n
+    'value' => get_string('savechanges'),\n
+]);\n
+echo html_writer::end_tag('form');\n
+\n
+if ($product->get_type() === 'digital_download') {\n
+    $desktopfile = $digitalfiles->get_file(\n
+        $productid,\n
+        CommerceCatalogDigitalFileManager::ROLE_DESKTOP\n
+    );\n
+    $mobilefile = $digitalfiles->get_file(\n
+        $productid,\n
+        CommerceCatalogDigitalFileManager::ROLE_MOBILE\n
+    );\n
+\n
+    echo html_writer::start_div('card card-body');\n
+    echo html_writer::tag('h3', get_string('commerce_digital_files', 'local_subscriptions'), ['class' => 'h5']);\n
+    echo html_writer::tag(\n
+        'p',\n
+        get_string('commerce_digital_files_native_help', 'local_subscriptions'),\n
+        ['class' => 'text-muted']\n
+    );\n
+\n
+    foreach ([\n
+        CommerceCatalogDigitalFileManager::ROLE_DESKTOP => [\n
+            $desktopfile,\n
+            'commerce_desktop_file',\n
+            'delete_desktop',\n
+        ],\n
+        CommerceCatalogDigitalFileManager::ROLE_MOBILE => [\n
+            $mobilefile,\n
+            'commerce_mobile_file',\n
+            'delete_mobile',\n
+        ],\n
+    ] as $role => [$file, $labelkey, $deleteaction]) {\n
+        $value = $file instanceof stored_file\n
+            ? s($file->get_filename()) . ' · ' . display_size($file->get_filesize())\n
+            : get_string('none');\n
+        echo html_writer::start_div('d-flex align-items-center justify-content-between border rounded p-2 mb-2');\n
+        echo html_writer::div(get_string($labelkey, 'local_subscriptions') . ': ' . $value);\n
+        if ($file instanceof stored_file) {\n
+            $deleteurl = new moodle_url($pageurl, [\n
+                'action' => $deleteaction,\n
+                'sesskey' => sesskey(),\n
+            ]);\n
+            echo html_writer::link(\n
+                $deleteurl,\n
+                get_string('delete'),\n
+                ['class' => 'btn btn-sm btn-outline-danger']\n
+            );\n
+        }\n
+        echo html_writer::end_div();\n
+    }\n
+\n
+    echo html_writer::start_tag('form', [\n
+        'method' => 'post',\n
+        'enctype' => 'multipart/form-data',\n
+        'class' => 'mt-3',\n
+    ]);\n
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);\n
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'save_digital']);\n
+    echo html_writer::tag(\n
+        'label',\n
+        get_string('commerce_desktop_file', 'local_subscriptions'),\n
+        ['class' => 'form-label']\n
+    );\n
+    echo html_writer::empty_tag('input', [\n
+        'type' => 'file',\n
+        'name' => 'desktop_file',\n
+        'accept' => '.pdf,application/pdf',\n
+        'class' => 'form-control mb-3',\n
+    ]);\n
+    echo html_writer::tag(\n
+        'label',\n
+        get_string('commerce_mobile_file', 'local_subscriptions'),\n
+        ['class' => 'form-label']\n
+    );\n
+    echo html_writer::empty_tag('input', [\n
+        'type' => 'file',\n
+        'name' => 'mobile_file',\n
+        'accept' => '.pdf,application/pdf',\n
+        'class' => 'form-control mb-3',\n
+    ]);\n
+    echo html_writer::empty_tag('input', [\n
+        'type' => 'submit',\n
+        'class' => 'btn btn-primary',\n
+        'value' => get_string('savechanges'),\n
+    ]);\n
+    echo html_writer::end_tag('form');\n
+\n
+    if ($digital && !$desktopfile && !$mobilefile) {\n
+        echo html_writer::div(\n
+            get_string('commerce_digital_files_legacy_fallback', 'local_subscriptions'),\n
+            'alert alert-info mt-3 mb-0'\n
+        );\n
+    }\n
+    echo html_writer::end_div();\n
+}\n
+\n
+echo CrmWorkspaceRenderer::end();\n
+echo $OUTPUT->footer();\n
+' [UTF-8](length: 14504) contains "ROLE_RECOMMENDATION" [ASCII](length: 19).
+
+/var/www/moodle-dev/local/subscriptions/tests/commerce/catalog/commerce_product_cover_admin_test.php:11
+
+2) local_subscriptions\commerce_product_cover_service_test::test_context_specific_cover_and_storefront_fallback_are_resolved
+Failed asserting that 'https://www.example.com/moodle/pluginfile.php/1/local_subscriptions/catalog_media/987/storefront/store.jpg' [ASCII](length: 106) contains "rec.jpg" [ASCII](length: 7).
+
+/var/www/moodle-dev/local/subscriptions/tests/commerce/catalog/commerce_product_cover_service_test.php:27
+
+ERRORS!
+Tests: 1187, Assertions: 4807, Errors: 1, Failures: 2, PHPUnit Deprecations: 101.
+
+================ local_campus ========================
+Moodle 5.0.7 (Build: 20260420), 2d061ac424ad02045c899d9e36501b8606127109
+Php: 8.4.5, mysqli: 8.4.5, OS: Linux 6.14.0-37-generic x86_64
+PHPUnit 11.5.55 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.4.5
+Configuration: /var/www/moodle-dev/phpunit.xml
+
+...........................                                       27 / 27 (100%)
+
+Time: 00:04.205, Memory: 79.00 MB
+
+OK (27 tests, 137 assertions)
+
+=========================================================
+Résumé
+local_subscriptions : 2
+local_campus        : 0
+
+CERTIFICATION : FAILED
+Rapport : /var/www/moodle-dev/local/subscriptions/certification/J6-certification-20260803-004303.log

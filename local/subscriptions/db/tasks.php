@@ -169,3 +169,44 @@ $tasks[] = [
     'month' => '*',
     'dayofweek' => '*',
 ];
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\process_commerce_mail_queue_task',
+    'blocking' => 0,
+    'minute' => '*/5',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\process_personal_offer_mail_queue_task',
+    'blocking' => 0,
+    'minute' => '*/5',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+
+$tasks[] = [
+    'classname' => '\\local_subscriptions\\task\\process_commerce_mail_audit_queue_task',
+    'blocking' => 0,
+    'minute' => '7,22,37,52',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\process_commerce_grant_campaigns_task',
+    'blocking' => 0,
+    'minute' => '*/5',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];

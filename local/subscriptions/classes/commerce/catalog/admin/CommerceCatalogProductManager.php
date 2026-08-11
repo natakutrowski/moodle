@@ -85,6 +85,50 @@ final class CommerceCatalogProductManager {
     /**
      * @param array<int, CommerceProductTranslation> $translations
      */
+    public function save_price(\local_subscriptions\commerce\catalog\domain\CommerceProductPrice $price): void {
+        $this->require_product($price->get_product_sku());
+        $this->admin->set_price($price);
+    }
+
+    public function update_price(\local_subscriptions\commerce\catalog\domain\CommerceProductPrice $price): void {
+        $this->require_product($price->get_product_sku());
+        $this->prices->update_by_id($price);
+    }
+
+    public function delete_price(string $sku, int $priceid): void {
+        $this->require_product($sku);
+        $this->prices->delete_by_id($sku, $priceid);
+    }
+
+    public function price_currency_exists(string $sku, string $currency, ?int $excludeid = null): bool {
+        return $this->prices->currency_exists($sku, $currency, $excludeid);
+    }
+
+    /** @param array<int, \local_subscriptions\commerce\catalog\domain\CommerceProductEntitlementDefinition> $definitions */
+    public function save_entitlements(string $sku, array $definitions): void {
+        $this->require_product($sku);
+        $this->entitlements->replace_for_product($sku, $definitions);
+    }
+
+    public function save_metadata(string $sku, array $metadata): CommerceCatalogProductEditorData {
+        $product = $this->require_product($sku);
+        $updated = new CommerceProduct(
+            $product->get_sku(),
+            $product->get_type(),
+            $product->get_status(),
+            $product->get_name(),
+            $product->get_description(),
+            $metadata,
+            $product->get_id(),
+            $product->get_available_from(),
+            $product->get_available_until(),
+            $product->get_time_created(),
+            $product->get_time_modified()
+        );
+        $this->admin->save_product($updated);
+        return $this->get_editor_data($sku);
+    }
+
     public function save_translations(string $sku, array $translations): void {
         $this->require_product($sku);
 
@@ -97,6 +141,25 @@ final class CommerceCatalogProductManager {
             }
             $this->admin->set_translation($translation);
         }
+    }
+
+    public function set_status(string $sku, string $status): CommerceCatalogProductEditorData {
+        $product = $this->require_product($sku);
+        $updated = new CommerceProduct(
+            $product->get_sku(),
+            $product->get_type(),
+            $status,
+            $product->get_name(),
+            $product->get_description(),
+            $product->get_metadata(),
+            $product->get_id(),
+            $product->get_available_from(),
+            $product->get_available_until(),
+            $product->get_time_created(),
+            $product->get_time_modified()
+        );
+        $this->admin->save_product($updated);
+        return $this->get_editor_data($sku);
     }
 
     public function archive_product(string $sku): CommerceCatalogProductEditorData {
@@ -125,7 +188,7 @@ final class CommerceCatalogProductManager {
 
         if ($product->is_bundle()) {
             try {
-                $expansion = $this->expander->expand($product->get_sku());
+                $expansion = $this->expander->expand($product->get_sku(), 1, true);
             } catch (\Throwable) {
                 // Draft and incomplete bundles must remain editable. Strict
                 // validation is applied by preview_bundle() and save_bundle().
@@ -170,7 +233,7 @@ final class CommerceCatalogProductManager {
 
             // Expansion is the final integrity gate. It detects empty bundles,
             // inactive descendants and cycles before the transaction commits.
-            $this->expander->expand($saved->get_sku());
+            $this->expander->expand($saved->get_sku(), 1, true);
             $transaction->allow_commit();
         } catch (\Throwable $exception) {
             $transaction->rollback($exception);
@@ -186,7 +249,7 @@ final class CommerceCatalogProductManager {
             throw new \coding_exception('Only a bundle can be previewed as a composition.');
         }
 
-        return $this->expander->expand($product->get_sku());
+        return $this->expander->expand($product->get_sku(), 1, true);
     }
 
     private function require_product(string $sku): CommerceProduct {

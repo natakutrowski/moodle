@@ -23,9 +23,10 @@ final class callbacks {
         $notice = $SESSION->local_campus_login_notice;
         unset($SESSION->local_campus_login_notice);
 
-        $link = $notice['subscribe'] ?? (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false);
+        $link = $notice['subscribe'] ?? (new \moodle_url('/boutique'))->out(false);
         $msg  = get_string('login_suspended_html', 'local_campus', (object)['link' => $link]);
 
         \core\notification::add($msg, \core\output\notification::NOTIFY_WARNING);
     }
+
 }

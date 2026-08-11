@@ -85,7 +85,7 @@ class observers {
             $SESSION->local_campus_login_notice = [
                 'type'     => 'suspended',
                 'login'    => (new \moodle_url('/login/index.php'))->out(false),
-                'subscribe'=> (new \moodle_url('/local/subscriptions/subscribe.php'))->out(false),
+                'subscribe'=> (new \moodle_url('/boutique'))->out(false),
             ];
         }
     }

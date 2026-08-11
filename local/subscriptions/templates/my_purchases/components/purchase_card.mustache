@@ -1,0 +1,21 @@
+{{!
+    @template local_subscriptions/my_purchases/components/purchase_card
+}}
+<article class="{{classes}} my-purchase-card--{{variant}}">
+    <div class="{{headerclasses}}">
+        <div class="my-purchase-card__icon" aria-hidden="true">
+            <i class="{{icon}}"></i>
+        </div>
+        <div class="my-purchase-card__heading">
+            {{{header}}}
+        </div>
+    </div>
+    <div class="card-body my-purchase-card__body">
+        <div class="my-purchase-card__meta">
+            {{{body}}}
+        </div>
+        {{#actions}}
+            {{> local_subscriptions/my_purchases/components/purchase_actions}}
+        {{/actions}}
+    </div>
+</article>

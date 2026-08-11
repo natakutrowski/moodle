@@ -1,0 +1,28 @@
+<div class="commerce-storefront commerce-product-page commerce-product-page--{{theme}} container py-4 py-lg-5">
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-5">
+            <div class="commerce-product-page__media">
+                {{#hascover}}<img src="{{coverurl}}" alt="" class="img-fluid rounded-4 shadow-sm">{{/hascover}}
+                {{^hascover}}<div class="commerce-product-card__placeholder rounded-4">CampusFR</div>{{/hascover}}
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <span class="badge rounded-pill text-bg-light border commerce-product-type-badge mb-3">{{typelabel}}</span>
+            <h1 class="display-5 fw-bold mb-3">{{name}}</h1>
+            <div class="lead text-muted mb-4">{{{shortdescription}}}</div>
+            {{> local_subscriptions/storefront/product_commerce_panel}}
+        </div>
+    </div>
+    <div class="commerce-product-sections mt-5 pt-lg-4">
+        {{> local_subscriptions/storefront/product_sections}}
+    </div>
+</div>
+
+{{#hasrecommendations}}
+<section class="commerce-storefront-recommendations container py-5">
+  <h2 class="h3 mb-4">{{recommendationstitle}}</h2>
+  <div class="row g-4">{{#recommendations}}{{> local_subscriptions/storefront/product_card }}{{/recommendations}}</div>
+</section>
+{{/hasrecommendations}}
+
+{{> local_subscriptions/storefront/cart_added_modal }}

@@ -159,12 +159,17 @@ final class LevelUpXpRepository {
             $this->courseprovider
                 ->get_course_ids($userid);
 
-        if ($enrolledcourseids === []) {
-            return [];
-        }
+        // Level Up XP may run in site-wide mode. In that configuration the
+        // active world is attached to SITEID rather than to an enrolled
+        // course, so limiting the lookup to enrolments returns no current
+        // state even though the user has XP in the official block.
+        $candidatecourseids = array_values(array_unique(array_merge(
+            [SITEID],
+            $enrolledcourseids
+        )));
 
         [$insql, $params] = $DB->get_in_or_equal(
-            $enrolledcourseids,
+            $candidatecourseids,
             SQL_PARAMS_NAMED,
             'xpcourse'
         );
@@ -205,8 +210,11 @@ final class LevelUpXpRepository {
         $courseswithxp = 0;
         $totalxpinlevel = 0;
         $totallevelcapacity = 0;
+        $bestleaderboardrank = 0;
+        $leaderboardcount = 0;
 
         $worldfactory = null;
+        $processedworlds = [];
 
         foreach ($courseids as $courseid) {
             try {
@@ -221,6 +229,16 @@ final class LevelUpXpRepository {
                     $worldfactory->get_world(
                         $courseid
                     );
+
+                // In site-wide mode every course resolves to the SITEID
+                // world. Count that state once, not once per enrolment.
+                $worldid = method_exists($world, 'get_courseid')
+                    ? (int)$world->get_courseid()
+                    : (int)$courseid;
+                if (isset($processedworlds[$worldid])) {
+                    continue;
+                }
+                $processedworlds[$worldid] = true;
 
                 $state = $world
                     ->get_store()
@@ -258,6 +276,16 @@ final class LevelUpXpRepository {
                 if ($xp > 0) {
                     $courseswithxp++;
                 }
+
+                [$rank, $participants] = $this->get_absolute_rank(
+                    $userid,
+                    $worldid,
+                    $xp
+                );
+                if ($rank > 0 && ($bestleaderboardrank === 0 || $rank < $bestleaderboardrank)) {
+                    $bestleaderboardrank = $rank;
+                    $leaderboardcount = $participants;
+                }
             } catch (\Throwable $exception) {
                 // One unavailable or malformed world must not break all XP data.
                 continue;
@@ -279,7 +307,99 @@ final class LevelUpXpRepository {
             'current_levels_capacity' => $totallevelcapacity,
             'current_levels_progress_percentage' =>
                 $levelprogress,
+            'leaderboard_rank' => $bestleaderboardrank,
+            'leaderboard_count' => $leaderboardcount,
         ];
+    }
+
+    /**
+     * Returns the absolute Level Up position for one world.
+     *
+     * This mirrors the ordering used by Level Up XP's course leaderboard:
+     * XP descending, then user ID ascending for ties.
+     *
+     * @return array{0:int,1:int} Rank (1-based) and participant count.
+     */
+    private function get_absolute_rank(
+        int $userid,
+        int $worldid,
+        int $xp
+    ): array {
+        global $DB;
+
+        if ($worldid <= 0 || $xp < 0) {
+            return [0, 0];
+        }
+
+        try {
+            $params = [
+                'courseid' => $worldid,
+                'userid' => $userid,
+                'xp' => $xp,
+                'xpeq' => $xp,
+            ];
+            $conditions = [
+                'x.courseid = :courseid',
+                'u.deleted = 0',
+                'u.suspended = 0',
+            ];
+
+            $guestid = (int)guest_user()->id;
+            if ($guestid > 0) {
+                $conditions[] = 'u.id <> :guestid';
+                $params['guestid'] = $guestid;
+            }
+
+            $adminids = array_values(array_unique(array_map(
+                static fn(\stdClass $admin): int => (int)$admin->id,
+                get_admins()
+            )));
+            if ($adminids !== []) {
+                [$notinsql, $adminparams] = $DB->get_in_or_equal(
+                    $adminids,
+                    SQL_PARAMS_NAMED,
+                    'xpadmin',
+                    false
+                );
+                $conditions[] = "u.id {$notinsql}";
+                $params += $adminparams;
+            }
+
+            $where = implode(' AND ', $conditions);
+            $from = '{block_xp} x JOIN {user} u ON u.id = x.userid';
+
+            $eligible = $DB->record_exists_sql(
+                "SELECT 1
+                   FROM {$from}
+                  WHERE {$where}
+                    AND x.userid = :userid",
+                $params
+            );
+            if (!$eligible) {
+                return [0, 0];
+            }
+
+            $participants = (int)$DB->count_records_sql(
+                "SELECT COUNT(1)
+                   FROM {$from}
+                  WHERE {$where}",
+                $params
+            );
+            $ahead = (int)$DB->count_records_sql(
+                "SELECT COUNT(1)
+                   FROM {$from}
+                  WHERE {$where}
+                    AND (
+                        x.xp > :xp
+                        OR (x.xp = :xpeq AND x.userid < :userid)
+                    )",
+                $params
+            );
+
+            return [$ahead + 1, $participants];
+        } catch (\Throwable) {
+            return [0, 0];
+        }
     }
 
     /**
@@ -405,6 +525,8 @@ final class LevelUpXpRepository {
             'xp_in_current_levels' => 0,
             'current_levels_capacity' => 0,
             'current_levels_progress_percentage' => null,
+            'leaderboard_rank' => 0,
+            'leaderboard_count' => 0,
             'xp_7d' => 0,
             'xp_30d' => 0,
             'reward_events_7d' => 0,

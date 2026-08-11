@@ -4,177 +4,110 @@ declare(strict_types=1);
 
 namespace local_subscriptions\commerce\readiness;
 
-use local_subscriptions\commerce\runtime\rollback\CommerceRuntimeRollbackService;
-use local_subscriptions\commerce\runtime\switching\CommerceRuntimeMode;
-use xmldb_table;
-
-defined('MOODLE_INTERNAL') || die();
+use local_subscriptions\commerce\certification\CommerceCheckoutCertificationAuditor;
+use local_subscriptions\commerce\certification\CommerceOwnershipCertificationAuditor;
+use local_subscriptions\commerce\certification\CommercePricingCertificationAuditor;
+use local_subscriptions\commerce\certification\CommerceStorefrontBaselineAuditor;
+use local_subscriptions\commerce\certification\CommerceStorefrontUxCertificationAuditor;
+use moodle_database;
 
 /**
- * Read-only production-readiness audit for phase 7.94I1.
+ * Aggregates F7 and F8 evidence into the final 7.95 production decision.
  */
 final class CommerceProductionReadinessAuditor {
-    private const ERROR = 'error';
-    private const WARNING = 'warning';
-    private const OK = 'ok';
+    public function __construct(
+        private readonly moodle_database $db,
+        private readonly string $moodleroot,
+        private readonly string $pluginroot
+    ) {
+    }
 
-    /** @return array<string, mixed> */
-    public function audit(): array {
-        global $CFG, $DB;
+    /**
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
+    public function audit(array $options): array {
+        global $release, $version;
+        $branch = trim((string)($options['branch'] ?? ''));
+        $mode = trim((string)($options['mode'] ?? 'native'));
+        $family = trim((string)($options['family'] ?? 'all'));
+        $batchsize = (int)($options['batch_size'] ?? 100);
 
-        $root = $CFG->dirroot . '/local/subscriptions';
-        $checks = [];
+        $git = (new CommerceGitReadinessAuditor($this->moodleroot))->audit($branch)->to_array();
+        $native = (new CommerceNativeReadinessAuditor($this->db))->audit($mode)->to_array();
+        $backfill = (new CommerceBackfillReadinessAuditor($this->db))->audit($family, $batchsize)->to_array();
+        $backup = (new CommerceBackupRollbackReadinessAuditor($this->moodleroot, $this->pluginroot))->audit(
+            [
+                'database' => (string)($options['database_backup'] ?? ''),
+                'code' => (string)($options['code_backup'] ?? ''),
+                'moodledata' => (string)($options['moodledata_backup'] ?? ''),
+            ],
+            (string)($options['rollback_ref'] ?? ''),
+            (int)($options['max_backup_age_hours'] ?? 24),
+            (int)($options['minimum_free_gb'] ?? 5)
+        )->to_array();
 
-        $mode = CommerceRuntimeMode::normalize((string)get_config('local_subscriptions', 'commerce_runtime_mode'));
-        $fallback = (bool)get_config('local_subscriptions', 'commerce_runtime_native_fallback_enabled');
-        $shadow = (bool)get_config('local_subscriptions', 'commerce_fulfillment_shadow_enabled');
+        $baseline = (new CommerceStorefrontBaselineAuditor($this->db))->audit()->to_array();
+        $pricing = (new CommercePricingCertificationAuditor($this->db))->audit()->to_array();
+        $checkout = (new CommerceCheckoutCertificationAuditor($this->db))->audit()->to_array();
+        $ownership = (new CommerceOwnershipCertificationAuditor($this->db))->audit()->to_array();
+        $ux = (new CommerceStorefrontUxCertificationAuditor($this->pluginroot))->audit()->to_array();
 
-        $this->add($checks, 'runtime_mode_valid', in_array($mode, [
-            CommerceRuntimeMode::LEGACY,
-            CommerceRuntimeMode::SHADOW,
-            CommerceRuntimeMode::NATIVE,
-        ], true), self::ERROR, 'Runtime mode is valid.', 'Invalid Commerce Runtime mode.');
-        $this->add($checks, 'runtime_predeployment_mode', $mode === CommerceRuntimeMode::SHADOW, self::WARNING,
-            'Runtime is in Shadow mode.', 'Expected Shadow mode before the production switch; current mode: ' . $mode . '.');
-        $this->add($checks, 'native_fallback_enabled', $fallback, self::ERROR,
-            'Native fallback is enabled.', 'Native fallback must remain enabled for the production migration.');
-        $this->add($checks, 'shadow_enabled', $shadow, self::WARNING,
-            'Shadow execution is enabled.', 'Shadow should be enabled before production certification.');
+        $phases = [
+            'F8A Git' => $this->normalise($git),
+            'F8B Native' => $this->normalise($native),
+            'F8C Backfill' => $this->normalise($backfill),
+            'F8D Backup & rollback' => $this->normalise($backup),
+            'F7A Baseline' => [
+                'passed' => (bool)($baseline['certifiablebaseline'] ?? false),
+                'summary' => $baseline['summary'] ?? [],
+            ],
+            'F7B Pricing' => $this->normalise($pricing),
+            'F7C Checkout' => $this->normalise($checkout),
+            'F7D Ownership' => $this->normalise($ownership),
+            'F7F UX' => $this->normalise($ux),
+        ];
 
-        foreach ($this->required_files() as $name => $relativepath) {
-            $this->add($checks, $name, is_file($root . '/' . $relativepath), self::ERROR,
-                $relativepath . ' is present.', $relativepath . ' is missing.');
+        $ready = true;
+        foreach ($phases as $phase) {
+            $ready = $ready && !empty($phase['passed']);
         }
 
-        foreach ($this->required_classes() as $name => $classname) {
-            $this->add($checks, $name, class_exists($classname), self::ERROR,
-                $classname . ' is autoloadable.', $classname . ' cannot be autoloaded.');
-        }
-
-        $manager = $DB->get_manager();
-        foreach ($this->required_tables() as $name => $tablename) {
-            $this->add($checks, $name, $manager->table_exists(new xmldb_table($tablename)), self::ERROR,
-                $tablename . ' exists.', $tablename . ' is missing.');
-        }
-
-        $tasks = $this->read($root . '/db/tasks.php');
-        foreach ($this->required_task_markers() as $name => $marker) {
-            $this->add($checks, $name, str_contains($tasks, $marker), self::ERROR,
-                $marker . ' is scheduled.', $marker . ' is absent from db/tasks.php.');
-        }
-
-        $dispatcher = $this->read($root . '/classes/commerce/runtime/switching/CommerceRuntimeDispatcher.php');
-        $supportedmodes = CommerceRuntimeMode::all();
-        $dispatchermethod = method_exists(
-            \local_subscriptions\commerce\runtime\switching\CommerceRuntimeDispatcher::class,
-            'checkout_completed'
-        );
-        $this->add($checks, 'runtime_dispatcher_modes',
-            $supportedmodes === [
-                CommerceRuntimeMode::LEGACY,
-                CommerceRuntimeMode::SHADOW,
-                CommerceRuntimeMode::NATIVE,
-            ] && $dispatchermethod,
-            self::ERROR,
-            'Runtime mode registry declares Legacy, Shadow and Native and the Dispatcher entrypoint is available.',
-            'Runtime mode registry or Dispatcher entrypoint coverage is incomplete.');
-        $this->add($checks, 'runtime_dispatcher_fallback', str_contains($dispatcher, 'native_fallback_enabled'), self::ERROR,
-            'Dispatcher contains the Native fallback guard.', 'Dispatcher Native fallback guard is missing.');
-
-        $rollbackinspection = (new CommerceRuntimeRollbackService())->inspect();
-        $rollbacktarget = $rollbackinspection['target'] ?? [];
-        $this->add($checks, 'rollback_forces_legacy',
-            ($rollbacktarget['runtime_mode'] ?? null) === CommerceRuntimeMode::LEGACY
-                && ($rollbacktarget['native_fallback_enabled'] ?? null) === true
-                && ($rollbacktarget['shadow_enabled'] ?? null) === false
-                && ($rollbackinspection['data_changes'] ?? null) === false,
-            self::ERROR,
-            'Rollback service targets Legacy with fallback enabled, Shadow disabled and no Commerce data changes.',
-            'Rollback service does not provide the expected safe Legacy configuration.');
-
-        $errors = 0;
-        $warnings = 0;
-        foreach ($checks as $check) {
-            if ($check['status'] === self::ERROR) {
-                $errors++;
-            } else if ($check['status'] === self::WARNING) {
-                $warnings++;
-            }
-        }
-
+        $gitinventory = $git['inventory'] ?? [];
         return [
-            'phase' => '7.94I1',
+            'phase' => '7.95F8E',
+            'generatedat' => time(),
             'readonly' => true,
-            'runtime_mode' => $mode,
-            'checks' => $checks,
-            'errors' => $errors,
-            'warnings' => $warnings,
-            'ready' => $errors === 0,
+            'ready' => $ready,
+            'environment' => [
+                'commerce_version' => '7.95',
+                'moodle_release' => isset($release) ? (string)$release : null,
+                'moodle_version' => isset($version) ? (string)$version : null,
+                'php_version' => PHP_VERSION,
+                'git_branch' => $gitinventory['branch'] ?? null,
+                'git_commit' => $gitinventory['commit'] ?? null,
+                'head_tags' => $gitinventory['head_tags'] ?? [],
+            ],
+            'phases' => $phases,
+            'reports' => [
+                'f8a_git' => $git,
+                'f8b_native' => $native,
+                'f8c_backfill' => $backfill,
+                'f8d_backup_rollback' => $backup,
+                'f7a_baseline' => $baseline,
+                'f7b_pricing' => $pricing,
+                'f7c_checkout' => $checkout,
+                'f7d_ownership' => $ownership,
+                'f7f_ux' => $ux,
+            ],
         ];
     }
 
-    /** @param array<string, array<string, mixed>> $checks */
-    private function add(array &$checks, string $name, bool $passed, string $failurelevel,
-            string $successmessage, string $failuremessage): void {
-        $checks[$name] = [
-            'status' => $passed ? self::OK : $failurelevel,
-            'message' => $passed ? $successmessage : $failuremessage,
-        ];
-    }
-
-    /** @return array<string, string> */
-    public function required_files(): array {
+    /** @param array<string, mixed> $report @return array<string, mixed> */
+    private function normalise(array $report): array {
         return [
-            'cli_backfill' => 'cli/commerce/migration/migrate_legacy_commerce_purchases.php',
-            'cli_backfill_audit' => 'cli/commerce/migration/audit_commerce_native_backfill.php',
-            'cli_reconciliation' => 'cli/commerce/migration/reconcile_native_commerce.php',
-            'cli_integrity_audit' => 'cli/commerce/audit/audit_commerce_integrity.php',
-            'cli_runtime_switch' => 'cli/commerce/operations/set_commerce_runtime_mode.php',
-            'cli_runtime_rollback' => 'cli/commerce/operations/rollback_commerce_runtime.php',
-            'cli_h7_certification' => 'cli/commerce/certification/audit_commerce_runtime_h7.php',
-            'cli_shadow_summary' => 'cli/commerce/reporting/audit_commerce_shadow_summary.php',
-            'runtime_dispatcher' => 'classes/commerce/runtime/switching/CommerceRuntimeDispatcher.php',
-            'shadow_hook' => 'classes/commerce/shadow/runtime/CommerceShadowRuntimeHook.php',
-            'legacy_migrator' => 'classes/commerce/migration/CommerceLegacyPurchaseMigrator.php',
+            'passed' => (bool)($report['certifiable'] ?? false),
+            'summary' => $report['summary'] ?? [],
         ];
-    }
-
-    /** @return array<string, class-string> */
-    private function required_classes(): array {
-        return [
-            'class_runtime_dispatcher' => \local_subscriptions\commerce\runtime\switching\CommerceRuntimeDispatcher::class,
-            'class_runtime_rollback_service' => CommerceRuntimeRollbackService::class,
-            'class_native_executor' => \local_subscriptions\commerce\runtime\switching\CommerceNativeRuntimeExecutor::class,
-            'class_shadow_hook' => \local_subscriptions\commerce\shadow\runtime\CommerceShadowRuntimeHook::class,
-            'class_legacy_migrator' => \local_subscriptions\commerce\migration\CommerceLegacyPurchaseMigrator::class,
-            'class_provider_registry' => \local_subscriptions\commerce\payment\provider\CommercePaymentProviderRegistry::class,
-            'class_fulfillment_registry' => \local_subscriptions\commerce\fulfillment\native\CommerceNativeFulfillmentHandlerRegistry::class,
-        ];
-    }
-
-    /** @return array<string, string> */
-    private function required_tables(): array {
-        return [
-            'table_legacy_subscription' => 'user_subscription',
-            'table_legacy_digital' => 'subscription_digital_payment_request',
-            'table_native_purchase' => 'local_subscriptions_commerce_purchase',
-            'table_native_item' => 'local_subscriptions_commerce_purchase_item',
-            'table_native_payment' => 'local_subscriptions_commerce_payment',
-            'table_native_fulfillment' => 'local_subscriptions_commerce_fulfillment',
-            'table_native_grant' => 'local_subs_commerce_grant',
-            'table_native_shadow' => 'local_subs_commerce_shadow',
-        ];
-    }
-
-    /** @return array<string, string> */
-    private function required_task_markers(): array {
-        return [
-            'task_paid_request_repair' => 'repair_paid_pr_task',
-            'task_digital_reconciliation' => 'reconcile_digital_payments_task',
-        ];
-    }
-
-    private function read(string $path): string {
-        return is_file($path) ? (string)file_get_contents($path) : '';
     }
 }

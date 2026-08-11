@@ -8,6 +8,7 @@ use local_subscriptions\currency\CurrencyFormatter;
 use local_subscriptions\currency\CurrencyPreferenceService;
 use local_subscriptions\dashboard\repositories\DashboardStatsRepository;
 use local_subscriptions\dashboard\value\DashboardRevenue;
+use local_subscriptions\commerce\customer\analytics\CommerceCustomerAnalyticsRepository;
 
 /**
  * Builds Dashboard statistics for one period.
@@ -18,7 +19,8 @@ final class DashboardStatsService {
         private readonly DashboardStatsRepository $repository =
             new DashboardStatsRepository(),
         private readonly CurrencyPreferenceService $currencypreferences =
-            new CurrencyPreferenceService()
+            new CurrencyPreferenceService(),
+        private readonly ?CommerceCustomerAnalyticsRepository $nativeanalytics = null
     ) {
     }
 
@@ -96,6 +98,19 @@ final class DashboardStatsService {
 
         $stats->formattedrevenues =
             $this->format_revenues($revenues);
+
+        global $DB;
+        $native = ($this->nativeanalytics ?? new CommerceCustomerAnalyticsRepository($DB))
+            ->snapshot($range['start'], $range['end']);
+        $stats->nativecommerce = $native->has_activity();
+        $stats->purchasecount = $native->purchasecount;
+        $stats->successfulpurchasecount = $native->successfulpurchasecount;
+        $stats->failedpurchasecount = $native->failedpurchasecount;
+        $stats->fulfilledpurchasecount = $native->fulfilledpurchasecount;
+        $stats->guestpurchasecount = $native->guestpurchasecount;
+        $stats->attachedguestcount = $native->attachedguestcount;
+        $stats->purchasesbytype = $native->purchasesbytype;
+        $stats->purchasesbystatus = $native->purchasesbystatus;
 
         return $stats;
     }
