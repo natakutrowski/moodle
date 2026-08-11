@@ -63,7 +63,12 @@ final class CommerceStorefrontUxCertificationAuditor {
             'local_subscriptions/storefront/product_badges',
             'card_shared_badges'
         );
-        $this->expect_contains($report, $card, 'commerce-product-card__prices', 'card_prices');
+        $this->expect_partial(
+            $report,
+            $card,
+            'local_subscriptions/storefront/product_price',
+            'card_prices'
+        );
         $this->expect_any_contains(
             $report,
             $card,
@@ -71,11 +76,11 @@ final class CommerceStorefrontUxCertificationAuditor {
             'card_purchase_action'
         );
 
-        $this->expect_partial_before_marker(
+        $this->expect_partial_before_partial(
             $report,
             $panel,
             'local_subscriptions/storefront/product_badges',
-            'commerce-product-page__prices',
+            'local_subscriptions/storefront/product_price',
             'panel_commercial_badges_before_prices',
             'The Commerce panel must render merchandising badges before prices.'
         );
@@ -124,19 +129,20 @@ final class CommerceStorefrontUxCertificationAuditor {
         return $content === false ? '' : $content;
     }
 
-    private function expect_partial_before_marker(
+    private function expect_partial_before_partial(
         CommerceCertificationReport $report,
         string $source,
-        string $partial,
-        string $marker,
+        string $firstpartial,
+        string $secondpartial,
         string $check,
         string $message
     ): void {
-        $partialposition = $this->partial_position($source, $partial);
-        $markerposition = strpos($source, $marker);
-        $passed = $partialposition !== null
-            && $markerposition !== false
-            && $partialposition < $markerposition;
+        $firstposition = $this->partial_position($source, $firstpartial);
+        $secondposition = $this->partial_position($source, $secondpartial);
+
+        $passed = $firstposition !== null
+            && $secondposition !== null
+            && $firstposition < $secondposition;
 
         $this->record_check($report, $passed, $check, $message);
     }
