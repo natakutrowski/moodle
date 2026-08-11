@@ -30,10 +30,18 @@ echo $OUTPUT->heading(get_string('commerce_showroom_cms_title', 'local_subscript
 echo html_writer::div(
     html_writer::link(
         new moodle_url('/local/subscriptions/admin/commerce/showrooms/edit.php'),
-        get_string('commerce_showroom_cms_create', 'local_subscriptions'),
+        '<i class="fa-solid fa-plus" aria-hidden="true"></i> '
+            . get_string('commerce_showroom_cms_create', 'local_subscriptions'),
         ['class' => 'btn btn-primary']
+    )
+    . ' '
+    . html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/showrooms/import.php'),
+        '<i class="fa-solid fa-file-import" aria-hidden="true"></i> '
+            . get_string('commerce_showroom_import_create', 'local_subscriptions'),
+        ['class' => 'btn btn-outline-primary']
     ),
-    'mb-4'
+    'mb-4 d-flex flex-wrap gap-2'
 );
 
 $table = new html_table();

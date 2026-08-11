@@ -111,11 +111,12 @@ if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)) {
         ]
     );
 }
-if ($summary->customer->userid !== null) {
+if ($summary->customer->userid !== null || trim((string)$summary->customer->email) !== '') {
+    $user360params = $summary->customer->userid !== null
+        ? ['id' => $summary->customer->userid]
+        : ['email' => (string)$summary->customer->email];
     $quickactions .= html_writer::link(
-        new moodle_url('/local/subscriptions/admin/users/view.php', [
-            'id' => $summary->customer->userid,
-        ]),
+        new moodle_url('/local/subscriptions/admin/users/view.php', $user360params),
         get_string('commerce_purchase_open_user360', 'local_subscriptions'),
         ['class' => 'btn btn-outline-secondary']
     );
@@ -167,18 +168,23 @@ echo html_writer::end_div();
 echo html_writer::start_div('col-lg-6');
 $customername = $summary->customer->display_name();
 $customeractions = '';
-if ($summary->customer->userid !== null) {
+if ($summary->customer->userid !== null || trim((string)$summary->customer->email) !== '') {
     $customeractions = html_writer::start_div('d-flex flex-wrap gap-2 mt-2');
+    $user360params = $summary->customer->userid !== null
+        ? ['id' => $summary->customer->userid]
+        : ['email' => (string)$summary->customer->email];
     $customeractions .= html_writer::link(
-        new moodle_url('/local/subscriptions/admin/users/view.php', ['id' => $summary->customer->userid]),
+        new moodle_url('/local/subscriptions/admin/users/view.php', $user360params),
         get_string('commerce_purchase_open_user360', 'local_subscriptions'),
         ['class' => 'btn btn-sm btn-outline-primary']
     );
-    $customeractions .= html_writer::link(
-        new moodle_url('/user/profile.php', ['id' => $summary->customer->userid]),
-        get_string('commerce_purchase_open_moodle_profile', 'local_subscriptions'),
-        ['class' => 'btn btn-sm btn-outline-secondary']
-    );
+    if ($summary->customer->userid !== null) {
+        $customeractions .= html_writer::link(
+            new moodle_url('/user/profile.php', ['id' => $summary->customer->userid]),
+            get_string('commerce_purchase_open_moodle_profile', 'local_subscriptions'),
+            ['class' => 'btn btn-sm btn-outline-secondary']
+        );
+    }
     $customeractions .= html_writer::end_div();
 }
 echo CommerceDesignSystemRenderer::panel(get_string('commerce_purchase_customer_section', 'local_subscriptions'), $definition([

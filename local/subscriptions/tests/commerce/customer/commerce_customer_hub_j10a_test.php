@@ -34,6 +34,38 @@ final class commerce_customer_hub_j10a_test extends \advanced_testcase {
         $this->assertStringContainsString('public static function my_campus', $urls);
     }
 
+    public function test_hub_course_cards_include_all_enrolled_courses(): void {
+        $this->resetAfterTest(true);
+
+        $generator = $this->getDataGenerator();
+        $user = $generator->create_user();
+        $courseids = [];
+
+        for ($index = 1; $index <= 8; $index++) {
+            $course = $generator->create_course([
+                'fullname' => 'Hub course ' . $index,
+                'shortname' => 'hub-course-' . $index,
+            ]);
+            $generator->enrol_user((int)$user->id, (int)$course->id);
+            $courseids[] = (int)$course->id;
+        }
+
+        $service = \local_subscriptions\commerce\customer\hub\CommerceCustomerHubService::create();
+        $method = new \ReflectionMethod($service, 'course_cards');
+        $method->setAccessible(true);
+
+        $cards = $method->invoke($service, (int)$user->id);
+
+        $this->assertCount(8, $cards);
+        $cardids = array_map(
+            static fn(array $card): int => (int)$card['id'],
+            $cards
+        );
+        sort($courseids);
+        sort($cardids);
+        $this->assertSame($courseids, $cardids);
+    }
+
     public function test_hub_language_strings_exist_in_all_supported_languages(): void {
         $root = dirname(__DIR__, 3);
         foreach (['fr', 'en', 'ru'] as $language) {

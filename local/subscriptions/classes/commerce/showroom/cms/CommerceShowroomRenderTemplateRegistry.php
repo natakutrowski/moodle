@@ -13,13 +13,33 @@ defined('MOODLE_INTERNAL') || die();
  * only templates implementing the Showroom public contract may be selected.
  */
 final class CommerceShowroomRenderTemplateRegistry {
-    /** @return array<string,array{label:string}> */
+    /**
+     * @return array<string,array{
+     *     label:string,
+     *     titlekey:string,
+     *     descriptionkey:string
+     * }>
+     */
     public static function definitions(): array {
         return [
             'local_subscriptions/showroom/third_group_verbs' => [
                 'label' => 'Showroom — Verbes du 3e groupe',
+                'titlekey' => 'commerce_showroom_third_group_verbs_title',
+                'descriptionkey' => 'commerce_showroom_third_group_verbs_description',
             ],
         ];
+    }
+
+    /**
+     * @return array{
+     *     label:string,
+     *     titlekey:string,
+     *     descriptionkey:string
+     * }
+     */
+    public static function require_definition(string $template): array {
+        $template = self::normalise($template);
+        return self::definitions()[$template];
     }
 
     /** @return array<string,string> */

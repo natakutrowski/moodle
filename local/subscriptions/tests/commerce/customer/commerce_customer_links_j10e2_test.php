@@ -40,7 +40,7 @@ final class commerce_customer_links_j10e2_test extends \advanced_testcase {
         );
         $this->assertIsString($purchases);
         $this->assertStringContainsString(
-            'CommerceCustomerPublicUrlResolver::product(',
+            'CommerceCustomerPublicUrlResolver::storefront(',
             $purchases
         );
         $this->assertIsString($hub);

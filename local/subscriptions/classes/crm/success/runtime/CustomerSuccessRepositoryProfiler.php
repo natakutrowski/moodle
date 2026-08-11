@@ -87,6 +87,11 @@ final class CustomerSuccessRepositoryProfiler {
     private static function is_enabled(): bool {
         global $CFG;
 
+        // PHPUnit treats mtrace/error_log profiler output as unexpected output.
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST) {
+            return false;
+        }
+
         return isset($CFG->debug)
             && (int)$CFG->debug >= DEBUG_DEVELOPER;
     }

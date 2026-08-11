@@ -77,6 +77,13 @@ final class UserExplorerUserViewModel {
     }
 
     public function account_status_label(): string {
+        if (!empty($this->user->iscommerceguest)) {
+            return get_string(
+                'crm_user_account_commerce_only',
+                'local_subscriptions'
+            );
+        }
+
         return !empty($this->user->suspended)
             ? get_string(
                 'crm_user_account_suspended',

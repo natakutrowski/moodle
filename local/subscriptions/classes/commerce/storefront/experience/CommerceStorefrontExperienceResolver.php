@@ -15,8 +15,9 @@ final class CommerceStorefrontExperienceResolver {
     public const GROUPS = ['auto', 'courses', 'resources', 'bundles'];
     public const TRUST_ITEMS = ['secure_payment', 'immediate_access', 'support', 'lifetime_access'];
 
-    public function resolve(array $metadata, string $producttype): CommerceStorefrontExperience {
+    public function resolve(array $metadata, string $producttype, ?string $language = null): CommerceStorefrontExperience {
         $storefront = is_array($metadata['storefront'] ?? null) ? $metadata['storefront'] : [];
+        $storefront = (new CommerceStorefrontLocaleResolver())->resolve($storefront, $language);
         $raw = is_array($storefront['experience'] ?? null) ? $storefront['experience'] : [];
 
         $group = strtolower(trim((string)($raw['group'] ?? 'auto')));

@@ -21,14 +21,31 @@ use local_subscriptions\commerce\storefront\seo\CommerceStorefrontSeoHeadRegistr
 use local_subscriptions\support\Region;
 use local_subscriptions\commerce\order\invoice\CommerceInvoiceProfileResolver;
 
-\local_subscriptions\subscription_config::guard_public_access();
+$adminpreview = $GLOBALS['local_subscriptions_showroom_admin_preview'] ?? null;
+$isadminpreview = is_array($adminpreview)
+    && isset(
+        $adminpreview['definition'],
+        $adminpreview['runtimeblocks'],
+        $adminpreview['pageurl'],
+        $adminpreview['currencyendpoint']
+    );
 
-$showroomkey = optional_param(
-    'showroomkey',
-    CommerceShowroomRegistry::THIRD_GROUP_VERBS,
-    PARAM_ALPHANUMEXT
-);
-$definition = (new CommerceShowroomPublishedDefinitionResolver($DB))->require($showroomkey);
+if (!$isadminpreview) {
+    \local_subscriptions\subscription_config::guard_public_access();
+}
+
+if ($isadminpreview) {
+    $definition = $adminpreview['definition'];
+    $showroomkey = $definition->get_key();
+} else {
+    $showroomkey = optional_param(
+        'showroomkey',
+        CommerceShowroomRegistry::THIRD_GROUP_VERBS,
+        PARAM_ALPHANUMEXT
+    );
+    $definition = (new CommerceShowroomPublishedDefinitionResolver($DB))
+        ->require($showroomkey);
+}
 
 $requestedcurrency = strtoupper(optional_param('currency', '', PARAM_ALPHA));
 $availablecurrencies = CommerceShowroomCurrencyResolver::active_currencies($DB);
@@ -45,11 +62,16 @@ $currency = CommerceShowroomCurrencyResolver::resolve(
 $SESSION->local_subscriptions_showroom_currency = $currency;
 $SESSION->local_subscriptions_storefront_currency = $currency;
 
-$pageurl = CommerceShowroomUrl::make($definition, ['currency' => $currency]);
+$pageurl = $isadminpreview
+    ? new moodle_url($adminpreview['pageurl'], ['currency' => $currency])
+    : CommerceShowroomUrl::make($definition, ['currency' => $currency]);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url($pageurl);
 $PAGE->set_pagelayout('showroom');
 $PAGE->add_body_class('commerce-showroom-page');
+if ($isadminpreview) {
+    $PAGE->add_body_class('commerce-showroom-admin-preview');
+}
 
 $offers = CommerceShowroomProductResolver::create($DB)->resolve(
     $definition,
@@ -65,12 +87,18 @@ if (method_exists($PAGE, 'set_description')) {
     $PAGE->set_description($seo['description']);
 }
 $seoheadhtml = $seoservice->head_html($seo);
+if ($isadminpreview) {
+    $seoheadhtml .= "\n"
+        . '<meta name="robots" content="noindex,nofollow,noarchive">';
+}
 
 $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/showroom.css'));
 $PAGE->requires->js_call_amd('local_subscriptions/showroom', 'init');
 
 $data = (new CommerceShowroomPresenter())->present($definition, $offers, $currency);
-$runtimeblocks = CommerceShowroomRuntimeBlockSet::load($DB, $definition->get_key());
+$runtimeblocks = $isadminpreview
+    ? $adminpreview['runtimeblocks']
+    : CommerceShowroomRuntimeBlockSet::load($DB, $definition->get_key());
 $data = array_replace($data, $runtimeblocks->to_template_data());
 $data = (new CommerceShowroomBlockConfigurationPresenter())->apply($data, $runtimeblocks);
 $data = (new CommerceShowroomExerciseExplorerPresenter(context_system::instance()))->apply(
@@ -79,7 +107,9 @@ $data = (new CommerceShowroomExerciseExplorerPresenter(context_system::instance(
     $runtimeblocks->block_id('exercise_explorer'),
     current_language()
 );
-$data['currencyendpoint'] = (new moodle_url('/local/subscriptions/ajax/showroom_prices.php'))->out(false);
+$data['currencyendpoint'] = $isadminpreview
+    ? $adminpreview['currencyendpoint']->out(false)
+    : (new moodle_url('/local/subscriptions/ajax/showroom_prices.php'))->out(false);
 $data['currencyerrormessage'] = get_string('commerce_showroom_currency_update_error', 'local_subscriptions');
 $data['currencies'] = array_map(
     static function(string $candidate) use ($currency): array {

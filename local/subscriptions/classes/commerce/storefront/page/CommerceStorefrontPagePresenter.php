@@ -101,6 +101,16 @@ final class CommerceStorefrontPagePresenter {
                 );
         $data['producttype'] = $product->get_type();
 
+        $bundlecomponents = $product->get_type() === 'bundle'
+            ? $this->present_components($product->get_components())
+            : [];
+        $data['bundlecomponents'] = $bundlecomponents;
+        $data['hasbundlecomponents'] = $bundlecomponents !== [];
+        $data['bundleincludeslabel'] = get_string(
+            'commerce_storefront_bundle_includes',
+            'local_subscriptions'
+        );
+
         return $data;
     }
 

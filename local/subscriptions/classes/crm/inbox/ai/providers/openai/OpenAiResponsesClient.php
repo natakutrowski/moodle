@@ -180,7 +180,7 @@ final class OpenAiResponsesClient
 
     private function client_request_id(): string {
         return sprintf(
-            'campusfr-inbox-%s-%s',
+            'campusfr-openai-%s-%s',
             time(),
             bin2hex(random_bytes(8))
         );

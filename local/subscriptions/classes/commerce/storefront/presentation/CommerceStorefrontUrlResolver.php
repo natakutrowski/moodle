@@ -54,6 +54,8 @@ final class CommerceStorefrontUrlResolver {
                 self::owned_course_access($product),
             'digital', 'digital_download' =>
                 UrlFactory::my_digital_products(),
+            'bundle' =>
+                UrlFactory::my_campus(),
             default =>
                 UrlFactory::my_purchases(),
         };

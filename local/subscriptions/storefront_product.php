@@ -10,6 +10,7 @@ use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
 use local_subscriptions\commerce\storefront\recommendation\CommerceStorefrontRecommendationResolver;
 use local_subscriptions\commerce\storefront\recommendation\CommerceStorefrontRecommendationService;
 use local_subscriptions\commerce\storefront\page\CommerceStorefrontPageResolver;
+use local_subscriptions\commerce\storefront\navigation\CommerceStorefrontReturnNavigationResolver;
 use local_subscriptions\commerce\storefront\page\CommerceStorefrontLayoutContract;
 use local_subscriptions\commerce\storefront\seo\CommerceStorefrontSeoPresenter;
 use local_subscriptions\commerce\storefront\seo\CommerceStorefrontSeoHeadRegistry;
@@ -99,12 +100,26 @@ if ($product === null) {
 }
 
 $context = context_system::instance();
+$from = optional_param('from', '', PARAM_ALPHANUMEXT);
+$source = optional_param('source', '', PARAM_ALPHANUMEXT);
+$showroomkey = optional_param('showroom', '', PARAM_ALPHANUMEXT);
+$showroomoffer = optional_param('showroomoffer', '', PARAM_ALPHANUMEXT);
+
+$returnnavigation = (new CommerceStorefrontReturnNavigationResolver())->resolve(
+    $from,
+    $source,
+    $showroomkey,
+    $showroomoffer,
+    $currency,
+    current_language()
+);
+
 $pageurlparams = [
     'sku' => $sku,
     'currency' => $currency,
 ];
-if (optional_param('from', '', PARAM_ALPHANUMEXT) === 'shop') {
-    $pageurlparams['from'] = 'shop';
+foreach ($returnnavigation['params'] as $navigationparam) {
+    $pageurlparams[$navigationparam['name']] = $navigationparam['value'];
 }
 $pageurl = new moodle_url('/local/subscriptions/storefront_product.php', $pageurlparams);
 $PAGE->set_context($context);
@@ -144,8 +159,12 @@ $data = (new CommerceStorefrontPagePresenter())->present(
     $product,
     $definition,
     $currency,
-    UrlFactory::digital_catalog(['currency' => $currency])->out(false)
+    $returnnavigation['url']
 );
+$data['backlabel'] = $returnnavigation['label'];
+$data['showbacklink'] = $returnnavigation['show'];
+$data['navigationparams'] = $returnnavigation['params'];
+$data['hasnavigationparams'] = $returnnavigation['params'] !== [];
 $data['producturl'] = (new moodle_url('/local/subscriptions/storefront_product.php'))->out(false);
 $data['currencyselectlabel'] = get_string(
     'commerce_storefront_currency_displayed',
@@ -162,7 +181,8 @@ $data['currencies'] = array_map(
     },
     $availablecurrencies
 );
-$from = optional_param('from', '', PARAM_ALPHANUMEXT);
+// Kept for backwards-compatible template/data consumers. New templates use
+// showbacklink because the contextual return target can now be Shop or Showroom.
 $data['showbacktoshop'] = $from === 'shop';
 $customerid = isloggedin() && !isguestuser() ? (int)$USER->id : 0;
 $cartdata = CommerceCartPresenter::present(
@@ -427,7 +447,10 @@ if ($customerid > 0) {
     }
 }
 
-$recommendationskus = (new CommerceStorefrontRecommendationResolver())->resolve($product->get_metadata());
+$recommendationskus = (new CommerceStorefrontRecommendationResolver())->resolve(
+    $product->get_metadata(),
+    $product->get_sku()
+);
 $recommendations = (new CommerceStorefrontRecommendationService($repository))->cards($recommendationskus, current_language(), $currency);
 $data['recommendations'] = $recommendations;
 $data['hasrecommendations'] = $recommendations !== [];

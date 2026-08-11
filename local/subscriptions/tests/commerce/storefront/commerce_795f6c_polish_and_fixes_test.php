@@ -22,6 +22,26 @@ final class commerce_795f6c_polish_and_fixes_test extends \advanced_testcase {
         $result=(new CommerceStorefrontRecommendationResolver())->resolve(['storefront'=>['recommendations'=>[' a.1 ','A.1','b.2','c.3','d.4','e.5']]]);
         $this->assertSame(['A.1','B.2','C.3','D.4'],$result);
     }
+
+    public function test_current_product_is_never_recommended_to_itself(): void {
+        $result = (new CommerceStorefrontRecommendationResolver())->resolve(
+            [
+                'storefront' => [
+                    'recommendations' => [
+                        'course.main',
+                        'bundle.main',
+                        'pdf.main',
+                    ],
+                ],
+            ],
+            'COURSE.MAIN'
+        );
+
+        $this->assertSame(
+            ['BUNDLE.MAIN', 'PDF.MAIN'],
+            $result
+        );
+    }
     public function test_ownership_query_does_not_embed_limit(): void {
         $source=file_get_contents(__DIR__.'/../../../classes/commerce/storefront/ownership/CommerceStorefrontOwnershipResolver.php');
         $this->assertStringNotContainsString('LIMIT 1', $source);

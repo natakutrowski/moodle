@@ -1,26 +1,72 @@
 <div class="commerce-storefront commerce-product-page commerce-product-page--course commerce-product-page--{{theme}} container py-4 py-lg-5">
     {{#showproducthero}}
-    <header class="commerce-product-course-hero mb-5">
-        <div class="row g-5 align-items-center">
-            <div class="col-lg-7">
-                <span class="badge rounded-pill commerce-product-type-badge mb-3">{{typelabel}}</span>
-                <h1 class="display-4 fw-bold mb-3">{{name}}</h1>
-                <div class="lead text-muted">{{{shortdescription}}}</div>
+    <header class="commerce-product-course-hero">
+        <div class="commerce-product-course-hero__grid">
+            <div class="commerce-product-course-hero__visual">
+                {{> local_subscriptions/storefront/product_main_visual }}
             </div>
-            <div class="col-lg-5">{{> local_subscriptions/storefront/product_main_visual }}{{#commerceinhero}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--hero mt-4">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commerceinhero}}</div>
+            <div class="commerce-product-course-hero__summary">
+                <span class="badge rounded-pill commerce-product-type-badge mb-3">{{typelabel}}</span>
+                <h1 class="commerce-product-course-hero__title">{{name}}</h1>
+                {{#shortdescription}}
+                    <div class="commerce-product-course-hero__description">{{{shortdescription}}}</div>
+                {{/shortdescription}}
+
+                {{#hasquickfacts}}
+                    <div class="commerce-product-course-facts" aria-label="{{name}}">
+                        {{#quickfacts}}
+                            <span class="commerce-product-course-fact">
+                                <strong>{{value}}</strong>
+                                <span>{{label}}</span>
+                            </span>
+                        {{/quickfacts}}
+                    </div>
+                {{/hasquickfacts}}
+
+                {{#commerceinhero}}
+                    <div class="commerce-product-commerce-slot commerce-product-commerce-slot--hero commerce-product-course-commerce">
+                        {{> local_subscriptions/storefront/product_commerce_panel }}
+                    </div>
+                {{/commerceinhero}}
+                {{#commerceissidebar}}
+                    <div class="commerce-product-commerce-slot commerce-product-course-commerce">
+                        {{> local_subscriptions/storefront/product_commerce_panel }}
+                    </div>
+                {{/commerceissidebar}}
+            </div>
         </div>
     </header>
     {{/showproducthero}}
-    {{#commercebelowhero}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide mb-5">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commercebelowhero}}
-    <div class="row g-5 align-items-start">
-        <main class="{{#commerceissidebar}}col-lg-8{{/commerceissidebar}}{{^commerceissidebar}}col-12{{/commerceissidebar}} commerce-product-sections">
-            {{> local_subscriptions/storefront/product_intro_sections }}
-            {{#commerceafterintro}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide my-4">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commerceafterintro}}
-            {{> local_subscriptions/storefront/product_remaining_sections }}
-        </main>
-        {{#commerceissidebar}}<aside class="col-lg-4 commerce-product-commerce-slot commerce-product-commerce-slot--sticky">{{> local_subscriptions/storefront/product_commerce_panel }}</aside>{{/commerceissidebar}}
-    </div>
-    {{#commercepagebottom}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide mt-5">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commercepagebottom}}
+
+    {{#commercebelowhero}}
+        <div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide commerce-product-course-commerce commerce-product-course-commerce--standalone">
+            {{> local_subscriptions/storefront/product_commerce_panel }}
+        </div>
+    {{/commercebelowhero}}
+
+    <main class="commerce-product-sections commerce-product-course-sections">
+        {{> local_subscriptions/storefront/product_intro_sections }}
+        {{#commerceafterintro}}
+            <div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide commerce-product-course-commerce">
+                {{> local_subscriptions/storefront/product_commerce_panel }}
+            </div>
+        {{/commerceafterintro}}
+        {{> local_subscriptions/storefront/product_remaining_sections }}
+    </main>
+
+    {{^showproducthero}}
+        {{#commerceissidebar}}
+            <div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide commerce-product-course-commerce commerce-product-course-commerce--standalone">
+                {{> local_subscriptions/storefront/product_commerce_panel }}
+            </div>
+        {{/commerceissidebar}}
+    {{/showproducthero}}
+
+    {{#commercepagebottom}}
+        <div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide commerce-product-course-commerce commerce-product-course-commerce--standalone">
+            {{> local_subscriptions/storefront/product_commerce_panel }}
+        </div>
+    {{/commercepagebottom}}
 </div>
 {{> local_subscriptions/storefront/product_recommendations }}
 {{> local_subscriptions/storefront/cart_added_modal }}

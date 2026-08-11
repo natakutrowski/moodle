@@ -24,7 +24,8 @@ final class UserProfileViewModel {
         public readonly ?UserIntelligence $intelligence = null,
         public readonly ?UserInboxSummary $inbox = null,
         public readonly array $commercepurchases = [],
-        public readonly ?array $commercesnapshot = null
+        public readonly ?array $commercesnapshot = null,
+        public readonly bool $iscommerceguest = false
     ) {
     }
 
@@ -50,6 +51,7 @@ final class UserProfileViewModel {
                 $this->inbox?->to_object(),
             'commercepurchases' => $this->commercepurchases,
             'commercesnapshot' => $this->commercesnapshot,
+            'iscommerceguest' => $this->iscommerceguest,
         ];
     }
 }

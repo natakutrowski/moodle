@@ -108,7 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $savedid = $repository->save([
         'id' => $id,
         'showroomkey' => required_param('showroomkey', PARAM_ALPHANUMEXT),
-        'status' => required_param('status', PARAM_ALPHA),
+        // J16S6: workflow status is immutable from the general configuration form.
+        // New records always start as draft; existing records preserve their status.
+        'status' => $record !== null
+            ? (string)$record->status
+            : CommerceShowroomStatus::DRAFT,
         'name' => required_param('name', PARAM_TEXT),
         'template' => CommerceShowroomRenderTemplateRegistry::normalise(required_param('template', PARAM_RAW_TRIMMED)),
         'slugfr' => optional_param('slugfr', '', PARAM_ALPHANUMEXT),
@@ -275,18 +279,38 @@ echo html_writer::link(
 echo $OUTPUT->heading(get_string('commerce_showroom_cms_edit', 'local_subscriptions'), 2, 'mb-0');
 echo html_writer::end_div();
 if ($record !== null) {
-    $slug = $record->slugfr ?: $record->slugen ?: $record->slugru;
-    if ($slug !== '') {
-        echo html_writer::link(
-            new moodle_url('/' . ltrim($slug, '/')),
-            '<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> '
-                . get_string('commerce_showroom_builder_preview', 'local_subscriptions'),
-            ['class' => 'btn btn-outline-primary', 'target' => '_blank', 'rel' => 'noopener']
-        );
-    }
+    echo html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/showrooms/preview.php',
+            ['id' => $id]
+        ),
+        '<i class="fa-solid fa-eye" aria-hidden="true"></i> '
+            . get_string('commerce_showroom_builder_preview', 'local_subscriptions'),
+        [
+            'class' => 'btn btn-outline-primary',
+            'target' => '_blank',
+            'rel' => 'noopener',
+        ]
+    );
     echo ' ' . html_writer::link(
-        new moodle_url('/local/subscriptions/admin/commerce/showrooms/export.php', ['id' => $id, 'sesskey' => sesskey()]),
-        '<i class="fa-solid fa-file-export" aria-hidden="true"></i> ' . get_string('commerce_showroom_export', 'local_subscriptions'),
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/showrooms/export_portable_preflight.php',
+            ['id' => $id]
+        ),
+        '<i class="fa-solid fa-box-archive" aria-hidden="true"></i> '
+            . get_string(
+                'commerce_showroom_export_portable',
+                'local_subscriptions'
+            ),
+        ['class' => 'btn btn-success']
+    );
+    echo ' ' . html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/showrooms/export.php',
+            ['id' => $id, 'sesskey' => sesskey()]
+        ),
+        '<i class="fa-solid fa-file-code" aria-hidden="true"></i> '
+            . get_string('commerce_showroom_export_json', 'local_subscriptions'),
         ['class' => 'btn btn-outline-secondary']
     );
     echo ' ' . html_writer::link(
@@ -368,13 +392,23 @@ echo html_writer::tag(
 echo html_writer::end_div();
 
 echo html_writer::start_div('col-12 col-md-6 col-xl-3');
-echo html_writer::tag('label', get_string('status'), ['for' => 'status', 'class' => 'form-label']);
-echo html_writer::select(
-    CommerceShowroomStatus::options(),
-    'status',
-    $defaults->status,
-    false,
-    ['id' => 'status', 'class' => 'form-select']
+echo html_writer::tag(
+    'label',
+    get_string('status'),
+    ['class' => 'form-label d-block']
+);
+echo html_writer::tag(
+    'span',
+    CommerceShowroomStatus::label((string)$defaults->status),
+    [
+        'class' => 'badge bg-'
+            . CommerceShowroomStatus::badge_class((string)$defaults->status),
+    ]
+);
+echo html_writer::tag(
+    'div',
+    get_string('commerce_showroom_status_workflow_only', 'local_subscriptions'),
+    ['class' => 'form-text']
 );
 echo html_writer::end_div();
 

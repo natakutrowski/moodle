@@ -1,26 +1,72 @@
 <div class="commerce-storefront commerce-product-page commerce-product-page--bundle commerce-product-page--{{theme}} container py-4 py-lg-5">
     {{#showproducthero}}
-    <header class="commerce-product-bundle-hero mb-5">
-        <div class="row g-5 align-items-center">
-            <div class="col-lg-7">
-                <span class="badge rounded-pill commerce-product-type-badge mb-3">{{typelabel}}</span>
-                <h1 class="display-4 fw-bold mb-3">{{name}}</h1>
-                <div class="lead text-muted">{{{shortdescription}}}</div>
+    <header class="commerce-product-bundle-hero">
+        <div class="commerce-product-bundle-hero__grid">
+            <div class="commerce-product-bundle-hero__visual">
+                {{> local_subscriptions/storefront/product_main_visual }}
             </div>
-            <div class="col-lg-5">{{> local_subscriptions/storefront/product_main_visual }}{{#commerceinhero}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--hero mt-4">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commerceinhero}}</div>
+
+            <div class="commerce-product-bundle-hero__summary">
+                <h1 class="commerce-product-bundle-hero__title">{{name}}</h1>
+
+                {{#shortdescription}}
+                <div class="commerce-product-bundle-hero__description">{{{shortdescription}}}</div>
+                {{/shortdescription}}
+
+                {{#hasbundlecomponents}}
+                <div class="commerce-product-bundle-includes">
+                    <div class="commerce-product-bundle-includes__label">{{bundleincludeslabel}}</div>
+                    <div class="commerce-product-bundle-includes__grid">
+                        {{#bundlecomponents}}
+                        <article class="commerce-product-bundle-component">
+                            <h2>{{name}}</h2>
+                            {{#description}}<div>{{{description}}}</div>{{/description}}
+                        </article>
+                        {{/bundlecomponents}}
+                    </div>
+                </div>
+                {{/hasbundlecomponents}}
+
+                {{#commerceinhero}}
+                <div class="commerce-product-bundle-commerce">
+                    {{> local_subscriptions/storefront/product_commerce_panel }}
+                </div>
+                {{/commerceinhero}}
+            </div>
         </div>
     </header>
     {{/showproducthero}}
-    {{#commercebelowhero}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide mb-5">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commercebelowhero}}
-    <div class="row g-5 align-items-start">
-        <main class="{{#commerceissidebar}}col-lg-8{{/commerceissidebar}}{{^commerceissidebar}}col-12{{/commerceissidebar}} commerce-product-sections">
-            {{> local_subscriptions/storefront/product_intro_sections }}
-            {{#commerceafterintro}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide my-4">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commerceafterintro}}
-            {{> local_subscriptions/storefront/product_remaining_sections }}
-        </main>
-        {{#commerceissidebar}}<aside class="col-lg-4 commerce-product-commerce-slot commerce-product-commerce-slot--sticky">{{> local_subscriptions/storefront/product_commerce_panel }}</aside>{{/commerceissidebar}}
+
+    {{#commercebelowhero}}
+    <div class="commerce-product-bundle-commerce commerce-product-bundle-commerce--standalone">
+        {{> local_subscriptions/storefront/product_commerce_panel }}
     </div>
-    {{#commercepagebottom}}<div class="commerce-product-commerce-slot commerce-product-commerce-slot--wide mt-5">{{> local_subscriptions/storefront/product_commerce_panel }}</div>{{/commercepagebottom}}
+    {{/commercebelowhero}}
+
+    {{#hassections}}
+    <main class="commerce-product-bundle-sections">
+        {{> local_subscriptions/storefront/product_intro_sections }}
+        {{#commerceafterintro}}
+        <div class="commerce-product-bundle-commerce commerce-product-bundle-commerce--standalone">
+            {{> local_subscriptions/storefront/product_commerce_panel }}
+        </div>
+        {{/commerceafterintro}}
+        {{> local_subscriptions/storefront/product_remaining_sections }}
+    </main>
+    {{/hassections}}
+
+    {{#commerceissidebar}}
+    <div class="commerce-product-bundle-commerce commerce-product-bundle-commerce--standalone">
+        {{> local_subscriptions/storefront/product_commerce_panel }}
+    </div>
+    {{/commerceissidebar}}
+
+    {{#commercepagebottom}}
+    <div class="commerce-product-bundle-commerce commerce-product-bundle-commerce--standalone">
+        {{> local_subscriptions/storefront/product_commerce_panel }}
+    </div>
+    {{/commercepagebottom}}
 </div>
+
 {{> local_subscriptions/storefront/product_recommendations }}
 {{> local_subscriptions/storefront/cart_added_modal }}

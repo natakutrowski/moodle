@@ -213,6 +213,10 @@ final class CommerceStorefrontPresenter {
                 'commerce_storefront_view_my_products',
                 'local_subscriptions'
             ),
+            'bundle' => get_string(
+                'commerce_storefront_access_bundle_contents',
+                'local_subscriptions'
+            ),
             default => get_string(
                 'commerce_storefront_access_purchase',
                 'local_subscriptions'

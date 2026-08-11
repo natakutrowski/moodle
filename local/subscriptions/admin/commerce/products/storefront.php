@@ -14,6 +14,8 @@ use local_subscriptions\commerce\storefront\admin\CommerceStorefrontVisualBuilde
 use local_subscriptions\commerce\storefront\content\CommerceStorefrontContentFileService;
 use local_subscriptions\commerce\storefront\content\CommerceStorefrontH5pService;
 use local_subscriptions\commerce\storefront\transfer\CommerceStorefrontPackageService;
+use local_subscriptions\commerce\storefront\localisation\CommerceStorefrontLocaleTransferService;
+use local_subscriptions\commerce\storefront\translation\CommerceStorefrontAiTranslationService;
 use local_subscriptions\commerce\storefront\page\CommerceStorefrontLayoutContract;
 use local_subscriptions\commerce\showroom\CommerceShowroomRegistry;
 use local_subscriptions\commerce\showroom\CommerceShowroomMediaService;
@@ -89,6 +91,89 @@ if ($storefrontaction === 'reset' && data_submitted() && confirm_sesskey()) {
         null,
         \core\output\notification::NOTIFY_SUCCESS
     );
+}
+
+
+$localeaction = optional_param('locale_action', '', PARAM_ALPHANUMEXT);
+if ($localeaction !== '' && data_submitted() && confirm_sesskey()) {
+    $localetransfer = new CommerceStorefrontLocaleTransferService();
+    $source = optional_param('locale_source', '', PARAM_ALPHANUMEXT);
+
+    if ($localeaction === 'copy') {
+        $updatedmetadata = $localetransfer->copy(
+            $product->get_metadata(),
+            $source,
+            $editlanguage
+        );
+        $manager->save_metadata($product->get_sku(), $updatedmetadata);
+        redirect(
+            $pageurl,
+            get_string('commerce_storefront_locale_copy_success', 'local_subscriptions'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
+    }
+
+    if ($localeaction === 'translate_preview') {
+        $translationservice = CommerceStorefrontAiTranslationService::create();
+        $preview = $translationservice->preview(
+            $product->get_metadata(),
+            $source,
+            $editlanguage
+        );
+        $token = bin2hex(random_bytes(16));
+        $SESSION->local_subscriptions_storefront_translation_previews =
+            is_array($SESSION->local_subscriptions_storefront_translation_previews ?? null)
+                ? $SESSION->local_subscriptions_storefront_translation_previews
+                : [];
+        $SESSION->local_subscriptions_storefront_translation_previews[$token] = [
+            'sku' => $product->get_sku(),
+            'userid' => (int)$USER->id,
+            'created' => time(),
+            'preview' => $preview,
+        ];
+        redirect(new moodle_url($pageurl, ['translation_preview' => $token]));
+    }
+
+    if (in_array($localeaction, ['translate_apply', 'translate_cancel'], true)) {
+        $token = required_param('translation_preview', PARAM_ALPHANUMEXT);
+        $previews = is_array($SESSION->local_subscriptions_storefront_translation_previews ?? null)
+            ? $SESSION->local_subscriptions_storefront_translation_previews
+            : [];
+        $stored = $previews[$token] ?? null;
+        if (
+            !is_array($stored)
+            || (string)($stored['sku'] ?? '') !== $product->get_sku()
+            || (int)($stored['userid'] ?? 0) !== (int)$USER->id
+            || (int)($stored['created'] ?? 0) < time() - HOURSECS
+            || !is_array($stored['preview'] ?? null)
+        ) {
+            unset($SESSION->local_subscriptions_storefront_translation_previews[$token]);
+            throw new moodle_exception(
+                'commerce_storefront_ai_translation_preview_expired',
+                'local_subscriptions'
+            );
+        }
+
+        if ($localeaction === 'translate_cancel') {
+            unset($SESSION->local_subscriptions_storefront_translation_previews[$token]);
+            redirect($pageurl);
+        }
+
+        $translationservice = CommerceStorefrontAiTranslationService::create();
+        $updatedmetadata = $translationservice->apply_preview(
+            $product->get_metadata(),
+            $stored['preview']
+        );
+        $manager->save_metadata($product->get_sku(), $updatedmetadata);
+        unset($SESSION->local_subscriptions_storefront_translation_previews[$token]);
+        redirect(
+            $pageurl,
+            get_string('commerce_storefront_ai_translation_applied', 'local_subscriptions'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
+    }
 }
 
 if (data_submitted() && confirm_sesskey()) {
@@ -475,6 +560,156 @@ echo html_writer::tag('label', get_string('commerce_storefront_edit_language', '
 echo html_writer::select($languageoptions, 'editlang', $editlanguage, false, ['id' => 'editlang', 'class' => 'form-select mb-3', 'onchange' => 'this.form.submit()']);
 echo html_writer::tag('p', get_string('commerce_storefront_edit_language_help', 'local_subscriptions'), ['class' => 'form-text mb-0']);
 echo html_writer::end_tag('form');
+
+$localesourceoptions = $languageoptions;
+unset($localesourceoptions[$editlanguage]);
+$defaultsource = isset($localesourceoptions['ru']) ? 'ru' : (string)array_key_first($localesourceoptions);
+$translationservice = CommerceStorefrontAiTranslationService::create();
+
+echo html_writer::start_div('card card-body mb-4 commerce-storefront-locale-tools');
+echo html_writer::tag(
+    'h3',
+    get_string('commerce_storefront_locale_tools_title', 'local_subscriptions'),
+    ['class' => 'h5']
+);
+echo html_writer::tag(
+    'p',
+    get_string('commerce_storefront_locale_tools_help', 'local_subscriptions'),
+    ['class' => 'text-muted']
+);
+echo html_writer::start_div('row g-3 align-items-end');
+
+echo html_writer::start_div('col-lg-6');
+echo html_writer::start_tag('form', ['method' => 'post', 'class' => 'card card-body h-100']);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'locale_action', 'value' => 'copy']);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'editlang', 'value' => $editlanguage]);
+echo html_writer::tag('h4', get_string('commerce_storefront_locale_copy_title', 'local_subscriptions'), ['class' => 'h6']);
+echo html_writer::tag('p', get_string('commerce_storefront_locale_copy_help', 'local_subscriptions'), ['class' => 'form-text']);
+echo html_writer::tag('label', get_string('commerce_storefront_locale_source', 'local_subscriptions'), ['for' => 'commerce-storefront-copy-source', 'class' => 'form-label']);
+echo html_writer::select($localesourceoptions, 'locale_source', $defaultsource, false, [
+    'id' => 'commerce-storefront-copy-source',
+    'class' => 'form-select mb-3',
+]);
+echo html_writer::tag(
+    'button',
+    '<i class="fa-solid fa-copy me-2" aria-hidden="true"></i>'
+        . s(get_string('commerce_storefront_locale_copy_button', 'local_subscriptions')),
+    [
+        'type' => 'submit',
+        'class' => 'btn btn-outline-primary align-self-start',
+        'onclick' => "return confirm(" . json_encode(get_string('commerce_storefront_locale_copy_confirm', 'local_subscriptions')) . ");",
+    ]
+);
+echo html_writer::end_tag('form');
+echo html_writer::end_div();
+
+echo html_writer::start_div('col-lg-6');
+echo html_writer::start_tag('form', ['method' => 'post', 'class' => 'card card-body h-100']);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'locale_action', 'value' => 'translate_preview']);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'editlang', 'value' => $editlanguage]);
+echo html_writer::tag('h4', get_string('commerce_storefront_ai_translation_title', 'local_subscriptions'), ['class' => 'h6']);
+echo html_writer::tag('p', get_string('commerce_storefront_ai_translation_help', 'local_subscriptions'), ['class' => 'form-text']);
+echo html_writer::tag('label', get_string('commerce_storefront_locale_source', 'local_subscriptions'), ['for' => 'commerce-storefront-translate-source', 'class' => 'form-label']);
+echo html_writer::select($localesourceoptions, 'locale_source', $defaultsource, false, [
+    'id' => 'commerce-storefront-translate-source',
+    'class' => 'form-select mb-3',
+]);
+if (!$translationservice->available()) {
+    echo html_writer::div(
+        get_string('commerce_storefront_ai_translation_unavailable_help', 'local_subscriptions'),
+        'alert alert-warning py-2'
+    );
+}
+echo html_writer::tag(
+    'button',
+    '<i class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></i>'
+        . s(get_string('commerce_storefront_ai_translation_preview_button', 'local_subscriptions')),
+    [
+        'type' => 'submit',
+        'class' => 'btn btn-primary align-self-start',
+        'disabled' => $translationservice->available() ? null : 'disabled',
+    ]
+);
+echo html_writer::end_tag('form');
+echo html_writer::end_div();
+echo html_writer::end_div();
+echo html_writer::end_div();
+
+$translationpreviewtoken = optional_param('translation_preview', '', PARAM_ALPHANUMEXT);
+$storedtranslationpreview = null;
+if ($translationpreviewtoken !== '') {
+    $previews = is_array($SESSION->local_subscriptions_storefront_translation_previews ?? null)
+        ? $SESSION->local_subscriptions_storefront_translation_previews
+        : [];
+    $candidate = $previews[$translationpreviewtoken] ?? null;
+    if (
+        is_array($candidate)
+        && (string)($candidate['sku'] ?? '') === $product->get_sku()
+        && (int)($candidate['userid'] ?? 0) === (int)$USER->id
+        && (int)($candidate['created'] ?? 0) >= time() - HOURSECS
+        && is_array($candidate['preview'] ?? null)
+    ) {
+        $storedtranslationpreview = $candidate['preview'];
+    }
+}
+
+if (is_array($storedtranslationpreview)) {
+    $changes = is_array($storedtranslationpreview['changes'] ?? null)
+        ? $storedtranslationpreview['changes']
+        : [];
+    $changedcount = count(array_filter($changes, static fn(array $change): bool => !empty($change['changed'])));
+    echo html_writer::start_div('card card-body mb-4 border-primary commerce-storefront-translation-preview');
+    echo html_writer::tag('h3', get_string('commerce_storefront_ai_translation_preview_title', 'local_subscriptions'), ['class' => 'h5']);
+    echo html_writer::tag(
+        'p',
+        get_string('commerce_storefront_ai_translation_preview_summary', 'local_subscriptions', (object)[
+            'source' => strtoupper((string)$storedtranslationpreview['source']),
+            'target' => strtoupper((string)$storedtranslationpreview['target']),
+            'count' => $changedcount,
+            'model' => (string)($storedtranslationpreview['model'] ?? ''),
+        ]),
+        ['class' => 'text-muted']
+    );
+    echo html_writer::start_div('commerce-storefront-translation-preview__changes');
+    foreach ($changes as $change) {
+        if (!is_array($change)) {
+            continue;
+        }
+        echo html_writer::start_tag('details', ['class' => 'border rounded-3 p-3 mb-2']);
+        echo html_writer::tag('summary', s((string)($change['id'] ?? '')), ['class' => 'fw-semibold']);
+        echo html_writer::start_div('row g-3 mt-1');
+        echo html_writer::div(
+            html_writer::tag('strong', get_string('commerce_storefront_ai_translation_source_text', 'local_subscriptions'))
+                . html_writer::tag('div', s(trim(strip_tags((string)($change['source'] ?? '')))), ['class' => 'small text-muted mt-1']),
+            'col-lg-6'
+        );
+        echo html_writer::div(
+            html_writer::tag('strong', get_string('commerce_storefront_ai_translation_target_text', 'local_subscriptions'))
+                . html_writer::tag('div', s(trim(strip_tags((string)($change['translated'] ?? '')))), ['class' => 'small mt-1']),
+            'col-lg-6'
+        );
+        echo html_writer::end_div();
+        echo html_writer::end_tag('details');
+    }
+    echo html_writer::end_div();
+    echo html_writer::start_div('d-flex flex-wrap gap-2 mt-3');
+    foreach (['translate_apply' => 'commerce_storefront_ai_translation_apply', 'translate_cancel' => 'cancel'] as $action => $stringkey) {
+        echo html_writer::start_tag('form', ['method' => 'post']);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'locale_action', 'value' => $action]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'editlang', 'value' => $editlanguage]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'translation_preview', 'value' => $translationpreviewtoken]);
+        echo html_writer::tag('button', get_string($stringkey, $stringkey === 'cancel' ? 'moodle' : 'local_subscriptions'), [
+            'type' => 'submit',
+            'class' => $action === 'translate_apply' ? 'btn btn-primary' : 'btn btn-secondary',
+        ]);
+        echo html_writer::end_tag('form');
+    }
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+}
 
 echo html_writer::start_div('card card-body mb-4 commerce-storefront-transfer');
 echo html_writer::tag(

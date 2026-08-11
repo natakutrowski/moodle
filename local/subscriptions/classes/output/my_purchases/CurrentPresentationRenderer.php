@@ -364,7 +364,7 @@ final class CurrentPresentationRenderer {
                     ['course_access', 'course', 'subscription']
                 );
                 $producturl = $nativeproductsku !== ''
-                    ? CommerceCustomerPublicUrlResolver::product($nativeproductsku)
+                    ? CommerceCustomerPublicUrlResolver::storefront($nativeproductsku)
                     : $legacyproductresolver->storefront_url('subscription_plan', (int)$sub->planid);
                 if ($producturl !== null) {
                     $btns[] = html_writer::link(
@@ -792,7 +792,7 @@ final class CurrentPresentationRenderer {
                     ['digital_download', 'digital']
                 );
                 $producturl = $nativeproductsku !== ''
-                    ? CommerceCustomerPublicUrlResolver::product($nativeproductsku)
+                    ? CommerceCustomerPublicUrlResolver::storefront($nativeproductsku)
                     : $legacyproductresolver->storefront_url(
                         'subscription_digital_product',
                         (int)($purchase->productid ?? 0)
@@ -999,7 +999,7 @@ final class CurrentPresentationRenderer {
                 $sku = $bundleitem === null ? '' : trim((string)($bundleitem->metadata['productsku'] ?? $bundleitem->metadata['sku'] ?? $bundleitem->reference));
                 if ($sku !== '') {
                     $btns[] = html_writer::link(
-                        CommerceCustomerPublicUrlResolver::product($sku),
+                        CommerceCustomerPublicUrlResolver::storefront($sku),
                         html_writer::tag('i', '', [
                             'class' => 'fa-solid fa-arrow-up-right-from-square',
                             'aria-hidden' => 'true',

@@ -9,8 +9,8 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Published Showroom block state exposed to the public renderer.
  *
- * A CMS Showroom with no block records falls back to the historical full page,
- * preventing older installations from losing sections after the upgrade.
+ * J16S1: missing, unpublished or empty CMS state is unavailable. load() never
+ * selects the historical legacy full-page fallback automatically.
  */
 final class CommerceShowroomRuntimeBlockSet {
     /** @var string[] */
@@ -88,12 +88,32 @@ final class CommerceShowroomRuntimeBlockSet {
         $showroom = $repository->get_by_key($showroomkey);
 
         if ($showroom === null || (string)$showroom->status !== CommerceShowroomStatus::PUBLISHED) {
-            return self::legacy();
+            return self::unavailable();
         }
 
         $blocks = $repository->blocks((int)$showroom->id);
+        return self::from_blocks($blocks);
+    }
+
+    public static function load_preview(
+        \moodle_database $db,
+        int $showroomid
+    ): self {
+        $repository = new CommerceShowroomCmsRepository($db);
+        $showroom = $repository->get($showroomid);
+        if ($showroom === null) {
+            return self::unavailable();
+        }
+
+        return self::from_blocks($repository->blocks($showroomid));
+    }
+
+    /**
+     * @param array<int,\stdClass> $blocks
+     */
+    private static function from_blocks(array $blocks): self {
         if ($blocks === []) {
-            return self::legacy();
+            return self::unavailable();
         }
 
         $enabled = array_fill_keys(self::TYPES, false);
@@ -124,6 +144,16 @@ final class CommerceShowroomRuntimeBlockSet {
         self::apply_legacy_aliases($enabled, $configs, $sequence);
 
         return new self(true, $enabled, $configs, $sequence, $blockids);
+    }
+
+    public static function unavailable(): self {
+        return new self(
+            true,
+            array_fill_keys(self::TYPES, false),
+            [],
+            [],
+            []
+        );
     }
 
     public static function legacy(): self {

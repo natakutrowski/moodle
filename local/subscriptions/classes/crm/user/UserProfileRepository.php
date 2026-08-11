@@ -56,6 +56,58 @@ final class UserProfileRepository {
         );
     }
 
+    /**
+     * Resolves an active Moodle user by email, case-insensitively.
+     */
+    public function get_user_by_email(string $email): ?\stdClass {
+        global $DB;
+
+        $email = trim(\core_text::strtolower($email));
+        if ($email === '') {
+            return null;
+        }
+
+        $user = $DB->get_record_sql(
+            "SELECT *
+               FROM {user}
+              WHERE deleted = 0
+                AND " . $DB->sql_equal('email', ':email', false) . "
+           ORDER BY id DESC",
+            ['email' => $email],
+            IGNORE_MULTIPLE
+        );
+
+        return $user ?: null;
+    }
+
+    /**
+     * Returns the Legacy digital purchase records used to build a Commerce-only
+     * CRM identity when no Moodle account exists for the email address.
+     */
+    public function get_digital_payments_by_email(string $email, int $limit = 50): array {
+        global $DB;
+
+        if (!$DB->get_manager()->table_exists('subscription_digital_payment_request')) {
+            return [];
+        }
+
+        $email = trim(\core_text::strtolower($email));
+        if ($email === '') {
+            return [];
+        }
+
+        return array_values($DB->get_records_sql(
+            "SELECT dpr.*, dp.name AS productname
+               FROM {subscription_digital_payment_request} dpr
+          LEFT JOIN {subscription_digital_product} dp ON dp.id = dpr.productid
+              WHERE " . $DB->sql_equal('dpr.email', ':email', false) . "
+           ORDER BY dpr.creation_date DESC, dpr.id DESC",
+            ['email' => $email],
+            0,
+            $limit
+        ));
+    }
+
     public function get_subscriptions(int $userid): array {
         global $DB;
 

@@ -164,17 +164,63 @@ final class CommerceShowroomCmsRepository {
         if ($block === null || (int)$block->showroomid !== $showroomid) {
             throw new \invalid_parameter_exception('Invalid showroom block.');
         }
-        $this->db->delete_records('local_subs_showroom_block', ['id' => $blockid]);
+
+        $this->delete_block_media($blockid);
+        $this->db->delete_records(
+            'local_subs_showroom_block',
+            ['id' => $blockid]
+        );
     }
 
     public function delete(int $id): void {
-        $this->db->delete_records('local_subs_showroom_block', ['showroomid' => $id]);
-        $this->db->delete_records('local_subs_showroom', ['id' => $id]);
+        if ($this->get($id) === null) {
+            return;
+        }
+
+        $transaction = $this->db->start_delegated_transaction();
+
+        foreach ($this->blocks($id) as $block) {
+            $this->delete_block_media((int)$block->id);
+        }
+
+        // Explicitly remove revisions before the parent row. This does not
+        // depend on database-specific FK cascade behaviour.
+        $this->db->delete_records(
+            'local_subs_showroom_rev',
+            ['showroomid' => $id]
+        );
+        $this->db->delete_records(
+            'local_subs_showroom_block',
+            ['showroomid' => $id]
+        );
+        $this->db->delete_records(
+            'local_subs_showroom',
+            ['id' => $id]
+        );
+
+        $transaction->allow_commit();
+    }
+
+    /**
+     * Removes every block and its Moodle File API media.
+     *
+     * Used when a template/restore replaces the complete block set so old
+     * block itemids cannot leave orphaned files in moodledata.
+     */
+    public function delete_all_blocks(int $showroomid): void {
+        foreach ($this->blocks($showroomid) as $block) {
+            $this->delete_block_media((int)$block->id);
+        }
+
+        $this->db->delete_records(
+            'local_subs_showroom_block',
+            ['showroomid' => $showroomid]
+        );
     }
 
     public function apply_template(int $showroomid, string $templatekey, int $userid): void {
         $template = CommerceShowroomPageTemplateRegistry::get($templatekey);
-        $this->db->delete_records('local_subs_showroom_block', ['showroomid' => $showroomid]);
+        $this->delete_all_blocks($showroomid);
         foreach ($template['blocks'] as $index => $type) {
             $this->save_block($showroomid, [
                 'blocktype' => $type,
@@ -266,6 +312,12 @@ final class CommerceShowroomCmsRepository {
             ['showroomid' => $showroomid]
         );
         return ((int)$max) + 10;
+    }
+
+    private function delete_block_media(int $blockid): void {
+        (new CommerceShowroomBlockMediaManager(
+            \context_system::instance()
+        ))->delete_block($blockid);
     }
 
     private function unique_block_key(int $showroomid, string $type): string {

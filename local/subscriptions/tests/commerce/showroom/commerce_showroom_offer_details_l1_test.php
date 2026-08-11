@@ -39,7 +39,8 @@ final class commerce_showroom_offer_details_l1_test extends \advanced_testcase {
         global $DB;
         $this->resetAfterTest(true);
 
-        (new CommerceShowroomCmsRepository($DB))->save([
+        $repository = new CommerceShowroomCmsRepository($DB);
+        $showroomid = $repository->save([
             'showroomkey' => 'third-group-verbs',
             'status' => 'published',
             'name' => 'Verbes du 3e groupe',
@@ -48,6 +49,11 @@ final class commerce_showroom_offer_details_l1_test extends \advanced_testcase {
             'descriptionkey' => 'commerce_showroom_third_group_verbs_description',
             'productsjson' => '{"course":"COURSE_ACCESS.THIRD_GROUP_VERBS_COURSE","pdf":"DIGITAL.VERBES-3E-GROUPE","bundle":"BUNDLE.THIRD_GROUP_VERBS_BUNDLE"}',
             'settingsjson' => '{"offers":{"course":{"detailsenabled":false},"pdf":{"detailsenabled":false},"bundle":{"detailsenabled":true}}}',
+        ], 2);
+        $repository->save_block($showroomid, [
+            'blocktype' => 'hero',
+            'enabled' => true,
+            'configjson' => '{}',
         ], 2);
 
         $definition = (new CommerceShowroomPublishedDefinitionResolver($DB))->require('third-group-verbs');

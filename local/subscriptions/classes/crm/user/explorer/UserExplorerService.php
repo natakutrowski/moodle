@@ -7,13 +7,14 @@ defined('MOODLE_INTERNAL') || die();
 final class UserExplorerService {
 
     private UserExplorerRepository $repository;
+    private UserExplorerLegacyGuestRepository $legacyguests;
 
     public function __construct(
-        ?UserExplorerRepository $repository = null
+        ?UserExplorerRepository $repository = null,
+        ?UserExplorerLegacyGuestRepository $legacyguests = null
     ) {
-        $this->repository =
-            $repository ??
-            new UserExplorerRepository();
+        $this->repository = $repository ?? new UserExplorerRepository();
+        $this->legacyguests = $legacyguests ?? new UserExplorerLegacyGuestRepository();
     }
 
     public function explore(
@@ -27,9 +28,9 @@ final class UserExplorerService {
                 $criteria->without_inbox();
         }
 
-        $total = $this->repository->count(
-            $criteria
-        );
+        $moodletotal = $this->repository->count($criteria);
+        $guesttotal = $this->legacyguests->count($criteria);
+        $total = $moodletotal + $guesttotal;
 
         $lastpage = $total > 0
             ? (int)floor(
@@ -45,11 +46,27 @@ final class UserExplorerService {
                 );
         }
 
-        $records = $this->repository
-            ->get_records(
-                $criteria,
-                $canviewinbox
-            );
+        // Fetch enough rows from each identity source to build the requested
+        // combined page correctly, then apply the Explorer sort once.
+        $window = $criteria->offset() + $criteria->perpage;
+        $moodlecriteria = $criteria->with_page(0);
+        $records = $this->repository->get_records_for_export(
+            $moodlecriteria,
+            $window,
+            $canviewinbox
+        );
+        $records = array_merge(
+            $records,
+            $this->legacyguests->get_records($criteria, $window)
+        );
+        usort($records, fn(\stdClass $a, \stdClass $b): int =>
+            $this->compare_records($a, $b, $criteria->sort)
+        );
+        $records = array_slice(
+            $records,
+            $criteria->offset(),
+            $criteria->perpage
+        );
 
         $userids = array_map(
             static fn(
@@ -105,4 +122,37 @@ final class UserExplorerService {
             $canviewinbox
         );
     }
+
+    private function compare_records(
+        \stdClass $a,
+        \stdClass $b,
+        string $sort
+    ): int {
+        $name = static function (\stdClass $record): string {
+            return core_text::strtolower(trim(
+                (string)($record->lastname ?? '') . ' ' .
+                (string)($record->firstname ?? '') . ' ' .
+                (string)($record->email ?? '')
+            ));
+        };
+
+        $descnum = static function (mixed $left, mixed $right): int {
+            return ((int)$right) <=> ((int)$left);
+        };
+
+        $cmp = match (UserExplorerSort::normalize($sort)) {
+            UserExplorerSort::NAME_DESC => strcmp($name($b), $name($a)),
+            UserExplorerSort::SCORE_DESC => $descnum($a->globalscore ?? 0, $b->globalscore ?? 0),
+            UserExplorerSort::RISK_DESC => $descnum($a->riskscore ?? 0, $b->riskscore ?? 0),
+            UserExplorerSort::LAST_ACCESS_DESC => $descnum($a->lastaccess ?? 0, $b->lastaccess ?? 0),
+            UserExplorerSort::CREATED_DESC => $descnum($a->timecreated ?? 0, $b->timecreated ?? 0),
+            default => strcmp($name($a), $name($b)),
+        };
+
+        return $cmp !== 0 ? $cmp : strcmp(
+            (string)($a->email ?? ''),
+            (string)($b->email ?? '')
+        );
+    }
+
 }

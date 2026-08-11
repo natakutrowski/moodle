@@ -36,7 +36,12 @@ final class UserProfileRenderer {
         $user = $profile->user;
         $stats = $profile->stats;
 
-        $identity = html_writer::tag('h2', fullname($user), [
+        $displayname = trim(fullname($user));
+        if ($displayname === '' && !empty($profile->iscommerceguest)) {
+            $displayname = (string)$user->email;
+        }
+
+        $identity = html_writer::tag('h2', s($displayname), [
             'class' => 'crm-hero-title mb-1',
         ]);
 
@@ -71,37 +76,53 @@ final class UserProfileRenderer {
             );
         }        
 
-        if (has_capability(Capabilities::VIEW_USERS, \context_system::instance())) {
+        if (empty($profile->iscommerceguest) && has_capability(Capabilities::VIEW_USERS, \context_system::instance())) {
             $identity .= self::tag_controls($profile);
         }
 
         $meta = [];
 
-        $meta[] = self::hero_meta_item(
-            get_string('country'),
-            s($user->country ?: '-')
-        );
+        if (!empty($profile->iscommerceguest)) {
+            $meta[] = self::hero_meta_item(
+                get_string('crm_commerce_identity_type', 'local_subscriptions'),
+                get_string('crm_commerce_identity_legacy_guest', 'local_subscriptions')
+            );
+        } else {
+            $meta[] = self::hero_meta_item(
+                get_string('country'),
+                s($user->country ?: '-')
+            );
+        }
 
         $meta[] = self::hero_meta_item(
-            get_string('timecreated'),
+            !empty($profile->iscommerceguest)
+                ? get_string('crm_first_purchase', 'local_subscriptions')
+                : get_string('timecreated'),
             !empty($user->timecreated) ? AdminFormatter::date((int)$user->timecreated) : '-'
         );
 
-        $meta[] = self::hero_meta_item(
-            get_string('lastaccess'),
-            !empty($user->lastaccess) ? AdminFormatter::datetime((int)$user->lastaccess) : '-'
-        );
+        if (empty($profile->iscommerceguest)) {
+            $meta[] = self::hero_meta_item(
+                get_string('lastaccess'),
+                !empty($user->lastaccess) ? AdminFormatter::datetime((int)$user->lastaccess) : '-'
+            );
+        }
 
         $meta[] = self::hero_meta_item(
             get_string('crm_last_activity', 'local_subscriptions'),
             !empty($stats->lastactivity) ? AdminFormatter::datetime((int)$stats->lastactivity) : '-'
         );
 
-        $links = html_writer::link(
-            UrlFactory::my_profile(['id' => (int)$user->id]),
-            get_string('view_moodle_profile', 'local_subscriptions'),
-            ['class' => 'btn btn-outline-primary btn-sm']
-        );
+        $links = !empty($profile->iscommerceguest)
+            ? html_writer::span(
+                get_string('crm_no_moodle_account', 'local_subscriptions'),
+                'badge bg-light text-dark border'
+            )
+            : html_writer::link(
+                UrlFactory::my_profile(['id' => (int)$user->id]),
+                get_string('view_moodle_profile', 'local_subscriptions'),
+                ['class' => 'btn btn-outline-primary btn-sm']
+            );
 
         return html_writer::div(
             html_writer::div($identity, 'crm-hero-main') .
@@ -279,6 +300,30 @@ final class UserProfileRenderer {
     public static function render_commercial_panel(
         \stdClass $profile
     ): string {
+        if (!empty($profile->iscommerceguest)) {
+            $content = '';
+
+            if (!empty($profile->commercepurchases)) {
+                $content .= self::commercial_subsection(
+                    get_string('crm_commerce_native_history', 'local_subscriptions'),
+                    self::commerce_purchases_content($profile->commercepurchases),
+                    'crm-commercial-native'
+                );
+            }
+
+            $content .= self::commercial_subsection(
+                get_string('crm_section_digital_purchases', 'local_subscriptions'),
+                self::digital_purchases_content($profile->digitalpayments ?? []),
+                'crm-commercial-digital'
+            );
+
+            return self::section(
+                get_string('user360_workspace_commercial', 'local_subscriptions'),
+                $content,
+                'crm-section-commercial crm-section-commerce-guest'
+            );
+        }
+
         if (!empty($profile->commercepurchases)) {
             return self::section(
                 get_string(
@@ -1218,6 +1263,7 @@ final class UserProfileRenderer {
             get_string('price', 'local_subscriptions'),
             get_string('status', 'local_subscriptions'),
             get_string('creation_date', 'local_subscriptions'),
+            get_string('actions', 'local_subscriptions'),
         ];
 
         foreach ($digitalpayments as $payment) {
@@ -1231,10 +1277,40 @@ final class UserProfileRenderer {
                 $price,
                 DigitalPresenter::render_status_badge($payment->status),
                 !empty($payment->creation_date) ? AdminFormatter::date((int)$payment->creation_date) : '-',
+                self::digital_purchase_actions($payment),
             ];
         }
 
         return html_writer::table($table);
+    }
+
+    private static function digital_purchase_actions(\stdClass $payment): string {
+        global $PAGE;
+
+        if (!has_capability(Capabilities::MANAGE_DIGITAL, \context_system::instance())) {
+            return '-';
+        }
+
+        $status = strtoupper(trim((string)($payment->status ?? '')));
+        if (empty($payment->id) || !in_array($status, ['PAID', 'COMPLETED'], true)) {
+            return '-';
+        }
+
+        $returnurl = $PAGE->url->out_as_local_url(false);
+        $url = new moodle_url(
+            subscription_config::digital_purchase_resend_email_admin_page(),
+            [
+                'id' => (int)$payment->id,
+                'sesskey' => sesskey(),
+                'returnurl' => $returnurl,
+            ]
+        );
+
+        return html_writer::link(
+            $url,
+            '🔐 ' . get_string('crm_resend_access_email', 'local_subscriptions'),
+            ['class' => 'btn btn-sm btn-outline-primary']
+        );
     }
 
     private static function quick_actions(\stdClass $profile): string {
@@ -1253,6 +1329,16 @@ final class UserProfileRenderer {
                 s($action->label),
                 ['class' => $classes]
             );
+        }
+
+        if (!empty($profile->iscommerceguest)) {
+            if ($items === []) {
+                return html_writer::div(
+                    get_string('crm_commerce_guest_no_actions', 'local_subscriptions'),
+                    'text-muted small'
+                );
+            }
+            return html_writer::div(implode('', $items), 'crm-quick-actions');
         }
 
         $noteform = html_writer::start_tag('form', [

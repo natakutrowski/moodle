@@ -256,6 +256,22 @@ if ($hassiteconfig) {
             )
         );
 
+
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'local_subscriptions/storefront_ai_translation_enabled',
+                get_string(
+                    'settings:storefront_ai_translation_enabled',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'settings:storefront_ai_translation_enabled_desc',
+                    'local_subscriptions'
+                ),
+                0
+            )
+        );
+
         $settings->add(
             new admin_setting_configcheckbox(
                 'local_subscriptions/inbox_ai_include_crm_context',
