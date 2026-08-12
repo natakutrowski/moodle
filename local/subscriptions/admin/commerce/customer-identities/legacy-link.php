@@ -9,6 +9,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\customer\identity\CommerceCustomerIdentityNavigationRenderer;
 use local_subscriptions\commerce\customer\identity\CommerceCustomerIdentitySimilarityService;
 use local_subscriptions\commerce\customer\identity\CommerceLegacyDigitalIdentityLinkService;
+use local_subscriptions\commerce\customer\reconciliation\CommerceCustomerIdentityReconciliationService;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
@@ -45,7 +46,8 @@ CrmPageConfigurator::configure(
 
 $service = new CommerceLegacyDigitalIdentityLinkService(
     $DB,
-    new CommerceCustomerIdentitySimilarityService($DB)
+    new CommerceCustomerIdentitySimilarityService($DB),
+    new CommerceCustomerIdentityReconciliationService($DB)
 );
 
 $preview = $service->preview(
