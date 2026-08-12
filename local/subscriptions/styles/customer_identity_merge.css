@@ -1,0 +1,178 @@
+/* CampusFR Commerce 7.95 M7.3/M7.4 — manual identity merge workflow. */
+.m734-merge-selector {
+    margin-bottom: 24px;
+    padding: 20px;
+    border: 1px solid #eadfea;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fff 0%, #fffafd 100%);
+    box-shadow: 0 8px 28px rgba(59, 38, 74, .05);
+}
+
+.m734-selector-title {
+    margin: 0;
+    color: #3f2854;
+    font-size: 1rem;
+    font-weight: 850;
+}
+
+.m734-selector-help {
+    margin-top: 5px;
+    color: #766a7d;
+    font-size: .76rem;
+    line-height: 1.45;
+}
+
+.m734-selected-accounts,
+.m734-search-results {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.m734-selected-account,
+.m734-search-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 13px 15px;
+    border: 1px solid #ece5ef;
+    border-radius: 13px;
+    background: #fff;
+}
+
+.m734-selected-account {
+    border-color: #dfd0e5;
+    background: #fcf9fd;
+}
+
+.m734-account-copy {
+    min-width: 0;
+}
+
+.m734-account-copy > strong {
+    color: #342040;
+    font-size: .88rem;
+}
+
+.m734-account-meta {
+    margin-top: 4px;
+    overflow: hidden;
+    color: #7a6e80;
+    font-size: .7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.m734-account-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.m734-account-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 7px;
+}
+
+.m734-search-form {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #eee7f0;
+}
+
+.m734-results-title {
+    margin: 18px 0 8px;
+    color: #52405f;
+    font-size: .82rem;
+    font-weight: 800;
+}
+
+.m734-selector-footer {
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #eee7f0;
+}
+
+.m734-select-hint {
+    margin-top: 14px;
+    color: #817486;
+    font-size: .72rem;
+}
+
+.m734-merge-direction {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 18px;
+    align-items: stretch;
+    margin: 20px 0;
+    padding: 16px;
+    border: 1px solid #dfd5e5;
+    border-radius: 16px;
+    background: #fbf8fc;
+}
+
+.m734-direction-side {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.m734-direction-side--target {
+    border: 1px solid #cce7d8;
+    background: #f3fbf7;
+}
+
+.m734-direction-label {
+    margin-bottom: 5px;
+    color: #8a7e8f;
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.m734-direction-side strong {
+    overflow: hidden;
+    color: #382245;
+    font-size: .82rem;
+    text-overflow: ellipsis;
+}
+
+.m734-direction-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9d69a7;
+    font-size: 1.55rem;
+    font-weight: 800;
+}
+
+@media (max-width: 760px) {
+    .m734-selected-account,
+    .m734-search-result {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .m734-account-actions {
+        width: 100%;
+    }
+
+    .m734-merge-direction {
+        grid-template-columns: 1fr;
+    }
+
+    .m734-direction-arrow {
+        transform: rotate(90deg);
+    }
+}

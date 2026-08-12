@@ -69,6 +69,8 @@ $reasonlabels = [
         'commerce_identity_similarity_reason_email_local_exact',
     CommerceCustomerIdentitySimilarityService::REASON_EMAIL_LOCAL_CLOSE =>
         'commerce_identity_similarity_reason_email_local_close',
+    CommerceCustomerIdentitySimilarityService::REASON_EMAIL_DOMAIN_CLOSE =>
+        'commerce_identity_similarity_reason_email_domain_close',
     CommerceCustomerIdentitySimilarityService::REASON_NAME_EXACT =>
         'commerce_identity_similarity_reason_name_exact',
     CommerceCustomerIdentitySimilarityService::REASON_NAME_REVERSED =>
@@ -77,6 +79,8 @@ $reasonlabels = [
         'commerce_identity_similarity_reason_firstname_close',
     CommerceCustomerIdentitySimilarityService::REASON_LASTNAME_CLOSE =>
         'commerce_identity_similarity_reason_lastname_close',
+    CommerceCustomerIdentitySimilarityService::REASON_ALTERNATE_NAME =>
+        'commerce_identity_similarity_reason_alternate_name',
     CommerceCustomerIdentitySimilarityService::REASON_PHONE_EXACT =>
         'commerce_identity_similarity_reason_phone_exact',
 ];
@@ -301,6 +305,10 @@ echo html_writer::div(
             'matches' => count($result['matches']),
         ]
     ),
+    'small text-muted mb-1'
+);
+echo html_writer::div(
+    get_string('commerce_identity_similarity_score_help', 'local_subscriptions'),
     'small text-muted mb-3'
 );
 
@@ -372,8 +380,13 @@ if ($result['matches'] === []) {
         foreach ($match->reasons as $reason) {
             $key = $reasonlabels[$reason] ?? null;
             if ($key !== null) {
+                $weight = (int)($match->signalweights[$reason] ?? 0);
+                $label = get_string($key, 'local_subscriptions');
+                if ($weight > 0 && $match->score < 100) {
+                    $label .= ' +' . $weight;
+                }
                 $reasons[] = html_writer::span(
-                    get_string($key, 'local_subscriptions'),
+                    $label,
                     'badge bg-light text-dark border me-1 mb-1'
                 );
             }

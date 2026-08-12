@@ -92,7 +92,7 @@ final class commerce_customer_merge_execution_m42d_test extends advanced_testcas
         ));
     }
 
-    public function test_source_with_pedagogical_history_is_blocked_and_not_suspended(): void {
+    public function test_source_with_pedagogical_history_is_consolidated_and_suspended(): void {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -109,29 +109,31 @@ final class commerce_customer_merge_execution_m42d_test extends advanced_testcas
             (int)$target->id
         );
 
-        self::assertContains(
+        self::assertNotContains(
             CommerceCustomerMergeExecutionService::BLOCK_PEDAGOGICAL_HISTORY,
             array_column($service->blockers($plan), 'type')
         );
 
-        try {
-            $service->execute(
-                [(int)$source->id, (int)$target->id],
-                (int)$target->id,
-                (int)$target->id
-            );
-            self::fail('Expected blocked merge to throw.');
-        } catch (\moodle_exception $exception) {
-            self::assertSame(
-                'commerce_identity_merge_execution_blocked',
-                $exception->errorcode
-            );
-        }
+        $result = $service->execute(
+            [(int)$source->id, (int)$target->id],
+            (int)$target->id,
+            (int)$target->id
+        );
 
+        self::assertGreaterThan(0, $result->mergeid);
+        self::assertGreaterThan(0, $result->transfers['learning_enrolments']);
         self::assertEquals(
-            0,
+            1,
             $DB->get_field('user', 'suspended', ['id' => $source->id])
         );
+        self::assertGreaterThan(0, $DB->count_records_sql(
+            'SELECT COUNT(1)
+               FROM {user_enrolments} ue
+               JOIN {enrol} e ON e.id = ue.enrolid
+              WHERE ue.userid = :userid
+                AND e.courseid = :courseid',
+            ['userid' => $target->id, 'courseid' => $course->id]
+        ));
     }
 
     public function test_duplicate_tags_are_deduplicated_without_unique_key_failure(): void {

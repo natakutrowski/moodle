@@ -501,7 +501,7 @@ final class UserProfileRenderer {
         return $out;
     }
 
-    private static function section(string $title, string $content, string $class = ''): string {
+    public static function section(string $title, string $content, string $class = ''): string {
         return html_writer::div(
             html_writer::div(
                 html_writer::tag('h3', $title, ['class' => 'crm-section-title mb-0']),
