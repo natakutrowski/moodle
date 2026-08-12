@@ -318,7 +318,20 @@ if ($previewplans !== []) {
                 . s((string)$account->email)
                 . ' · '
                 . (int)$match->score
-                . '%';
+                . '% · '
+                . html_writer::link(
+                    new moodle_url(
+                        '/local/subscriptions/admin/commerce/customer-identities/legacy-link.php',
+                        [
+                            'email' => $plan->email,
+                            'targetuserid' => (int)$account->id,
+                        ]
+                    ),
+                    get_string(
+                        'commerce_identity_legacy_link_action',
+                        'local_subscriptions'
+                    )
+                );
         }
 
         $override = '';
@@ -637,7 +650,20 @@ foreach ($search['items'] as $plan) {
                 . s((string)$account->email)
                 . ' ('
                 . (int)$match->score
-                . '%)';
+                . '%) · '
+                . html_writer::link(
+                    new moodle_url(
+                        '/local/subscriptions/admin/commerce/customer-identities/legacy-link.php',
+                        [
+                            'email' => $plan->email,
+                            'targetuserid' => (int)$account->id,
+                        ]
+                    ),
+                    get_string(
+                        'commerce_identity_legacy_link_action',
+                        'local_subscriptions'
+                    )
+                );
         }
         $details = implode('<br>', $candidateparts);
     }
