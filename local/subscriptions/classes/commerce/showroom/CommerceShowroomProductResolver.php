@@ -12,6 +12,7 @@ use local_subscriptions\commerce\storefront\repository\CommerceStorefrontReposit
 use local_subscriptions\commerce\storefront\readmodel\CommerceStorefrontPrice;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
 use local_subscriptions\url\UrlFactory;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferShoppingContextService;
 
 /** Resolves products attached to a Showroom while keeping incomplete catalogues non-fatal. */
 final class CommerceShowroomProductResolver {
@@ -57,7 +58,8 @@ final class CommerceShowroomProductResolver {
             );
         }
         $offers = $this->apply_bundle_merchandising_price($offers, $currency);
-        return $this->apply_bundle_ownership_rules($offers);
+        $offers = $this->apply_bundle_ownership_rules($offers);
+        return $this->apply_personal_offer_pricing($definition, $offers, $currency);
     }
 
     /** @return array<string,mixed> */
@@ -283,6 +285,39 @@ final class CommerceShowroomProductResolver {
         return $offers;
     }
 
+
+
+    /** @param array<int,array<string,mixed>> $offers @return array<int,array<string,mixed>> */
+    private function apply_personal_offer_pricing(
+        CommerceShowroomDefinition $definition,
+        array $offers,
+        string $currency
+    ): array {
+        $service = CommercePersonalOfferShoppingContextService::create();
+        foreach ($offers as &$offer) {
+            if (empty($offer['available']) || empty($offer['priceid'])) {
+                continue;
+            }
+            $personal = $service->resolve((string)($offer['sku'] ?? ''), $currency, $definition->get_key());
+            if ($personal === null) {
+                continue;
+            }
+            $offer['amountminor'] = $personal['offeramountminor'];
+            $offer['compareamountminor'] = $personal['regularamountminor'];
+            $offer['priceformatted'] = $personal['offerformatted'];
+            $offer['compareformatted'] = $personal['hasdiscount'] ? $personal['regularformatted'] : '';
+            $offer['hascompareprice'] = $personal['hasdiscount'];
+            $offer['haspromotion'] = $personal['hasdiscount'];
+            $offer['discountlabel'] = $personal['discountlabel'];
+            $offer['ispersonaloffer'] = true;
+            $offer['personalofferbadge'] = get_string(
+                'commerce_personal_offer_checkout_badge',
+                'local_subscriptions'
+            );
+        }
+        unset($offer);
+        return $offers;
+    }
 
     private function tracking_url(string $url, string $showroomkey, string $role): string {
         $target = new \moodle_url($url);

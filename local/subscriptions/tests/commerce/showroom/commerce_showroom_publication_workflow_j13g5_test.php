@@ -20,6 +20,7 @@ final class commerce_showroom_publication_workflow_j13g5_test extends \advanced_
             'status' => 'draft',
             'name' => 'Workflow test',
             'template' => 'local_subscriptions/showroom/third_group_verbs',
+            'slugfr' => 'workflow-test',
             'productsjson' => '{}',
             'settingsjson' => '{}',
         ], (int)$user->id);
@@ -30,13 +31,22 @@ final class commerce_showroom_publication_workflow_j13g5_test extends \advanced_
         ], (int)$user->id);
 
         $service = new CommerceShowroomPublicationService($DB, $repository);
+        $service->submit_for_review($showroomid, (int)$user->id, 'Ready for review');
         $revisionid = $service->publish($showroomid, (int)$user->id, 'First publication');
         $this->assertGreaterThan(0, $revisionid);
         $this->assertSame('published', $repository->get($showroomid)->status);
-        $this->assertCount(1, $service->revisions($showroomid));
+
+        // Every workflow transition is now revisioned: submit_review + publish.
+        $revisions = $service->revisions($showroomid);
+        $this->assertCount(2, $revisions);
+        $this->assertSame('publish', (string)$revisions[0]->action);
+        $this->assertSame('submit_review', (string)$revisions[1]->action);
 
         $service->restore($showroomid, $revisionid, (int)$user->id);
         $this->assertSame('draft', $repository->get($showroomid)->status);
-        $this->assertCount(2, $service->revisions($showroomid));
+
+        $revisions = $service->revisions($showroomid);
+        $this->assertCount(3, $revisions);
+        $this->assertSame('restore', (string)$revisions[0]->action);
     }
 }

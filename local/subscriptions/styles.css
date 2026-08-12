@@ -9495,6 +9495,14 @@ body.local-subscriptions-user-explorer-page
     object-fit: cover;
 }
 
+.crm-app-topbar-user-identity {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
 .crm-app-topbar-user-name {
     display: block;
     max-width: 11rem;
@@ -9502,6 +9510,19 @@ body.local-subscriptions-user-explorer-page
     font-size: 0.875rem;
     font-weight: 700;
     line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-app-topbar-user-role {
+    display: block;
+    max-width: 11rem;
+    margin-top: 0.05rem;
+    overflow: hidden;
+    color: #ff1472;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.1;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -9558,6 +9579,14 @@ body.local-subscriptions-user-explorer-page
     line-height: 1.25;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.crm-app-topbar-menu-current-role {
+    margin-top: 0.08rem;
+    color: #ff1472;
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1.2;
 }
 
 .crm-app-topbar-menu-profile-link {
@@ -9735,7 +9764,9 @@ body.local-subscriptions-user-explorer-page
     display: flex;
     width: 13rem;
     max-width: calc(100vw - 1rem);
+    max-height: calc(100vh - 5rem);
     padding: 0.45rem;
+    overflow-y: auto;
     flex-direction: column;
     gap: 0.1rem;
     border: 1px solid rgba(148, 163, 184, 0.28);
@@ -15552,5 +15583,141 @@ body#page-local-subscriptions-checkout #region-main {
            .digital-library-resource, .btn) {
         transition: none !important;
         transform: none !important;
+    }
+}
+
+/* ==========================================================================
+   CRM Top Bar — Moodle administration menu
+   ========================================================================== */
+
+.crm-app-topbar-admin {
+    position: relative;
+    min-width: 0;
+    margin: 0;
+}
+
+.crm-app-topbar-admin > summary {
+    list-style: none;
+}
+
+.crm-app-topbar-admin > summary::-webkit-details-marker {
+    display: none;
+}
+
+.crm-app-topbar-admin-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+.crm-app-topbar-admin-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    transition: transform 0.18s ease;
+}
+
+.crm-app-topbar-admin[open] .crm-app-topbar-admin-chevron {
+    transform: rotate(180deg);
+}
+
+.crm-app-topbar-admin-dropdown {
+    position: absolute;
+    z-index: 1080;
+    top: calc(100% + 0.55rem);
+    right: 0;
+    display: flex;
+    width: 19rem;
+    max-width: calc(100vw - 1rem);
+    padding: 0.45rem;
+    flex-direction: column;
+    gap: 0.1rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.9rem;
+    background: #ffffff;
+    box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.16);
+}
+
+.crm-app-topbar-admin-section-label {
+    padding: 0.65rem 0.7rem 0.35rem;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.crm-app-topbar-admin-option {
+    display: flex;
+    width: 100%;
+    min-height: 2.6rem;
+    padding: 0.55rem 0.7rem;
+    align-items: center;
+    gap: 0.65rem;
+    border-radius: 0.6rem;
+    color: #334155;
+    font-size: 0.87rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-decoration: none;
+}
+
+.crm-app-topbar-admin-option:hover,
+.crm-app-topbar-admin-option:focus {
+    background: rgba(99, 102, 241, 0.08);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.crm-app-topbar-admin-option:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.24);
+    outline-offset: 1px;
+}
+
+.crm-app-topbar-admin-option-primary {
+    margin-bottom: 0.15rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 0.6rem 0.6rem 0 0;
+    font-weight: 800;
+}
+
+.crm-app-topbar-admin-option-icon {
+    display: inline-flex;
+    width: 1.35rem;
+    height: 1.35rem;
+    flex: 0 0 1.35rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.crm-app-topbar-admin-option-label {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+@media (max-width: 479.98px) {
+    .crm-app-topbar-admin {
+        flex: 1 1 100%;
+    }
+
+    .crm-app-topbar-admin-toggle {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .crm-app-topbar-admin-dropdown {
+        right: 0;
+        left: 0;
+        width: auto;
+        max-width: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .crm-app-topbar-admin-toggle,
+    .crm-app-topbar-admin-dropdown {
+        border-color: CanvasText;
     }
 }

@@ -21,4 +21,5 @@ if ($token === '') {
 redirect(new moodle_url('/local/subscriptions/offer.php', [
     'token' => $token,
     'currency' => $currency,
+    'destination' => 'checkout',
 ]));

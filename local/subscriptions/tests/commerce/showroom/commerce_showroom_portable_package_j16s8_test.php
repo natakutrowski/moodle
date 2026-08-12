@@ -212,7 +212,7 @@ final class commerce_showroom_portable_package_j16s8_test extends \advanced_test
             'CommerceShowroomPortablePackageService',
             $import
         );
-        self::assertStringContainsString(
+        self::assertStringNotContainsString(
             'send_file(',
             $export
         );

@@ -281,7 +281,11 @@ final class commerce_showroom_package_j16s7_test extends \advanced_testcase {
             $import
         );
         self::assertStringContainsString(
-            "strtolower(pathinfo(\$filename, PATHINFO_EXTENSION)) !== 'json'",
+            "if (\$extension === 'zip')",
+            $import
+        );
+        self::assertStringContainsString(
+            "if (\$extension !== 'json')",
             $import
         );
         self::assertStringContainsString(
@@ -289,7 +293,11 @@ final class commerce_showroom_package_j16s7_test extends \advanced_testcase {
             $import
         );
         self::assertStringContainsString(
-            'commerce_showroom_import_media_warning',
+            'CommerceShowroomPortablePackageService',
+            $import
+        );
+        self::assertStringContainsString(
+            "'.zip,.json,application/zip,application/json'",
             $import
         );
     }

@@ -10,6 +10,7 @@ use local_subscriptions\commerce\checkout\express\CommerceCheckoutExpressService
 use local_subscriptions\commerce\showroom\CommerceShowroomCurrencyResolver;
 use local_subscriptions\commerce\showroom\CommerceShowroomTrackingContext;
 use local_subscriptions\url\UrlFactory;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferShoppingContextService;
 
 \local_subscriptions\subscription_config::guard_public_access();
 require_sesskey();
@@ -51,6 +52,32 @@ try {
             );
             $SESSION->local_subscriptions_showroom_currency = $currency;
         }
+        if ($operation !== 'upgrade') {
+            $personalservice = CommercePersonalOfferShoppingContextService::create($DB);
+            $personalcurrencies = $personalservice->available_currencies($sku);
+            if ($personalcurrencies !== null) {
+                if ($personalcurrencies === []) {
+                    throw new moodle_exception('commerce_personal_offer_link_unavailable', 'local_subscriptions');
+                }
+                if (!in_array($currency, $personalcurrencies, true)) {
+                    throw new moodle_exception('commerce_personal_offer_currency_unavailable', 'local_subscriptions');
+                }
+                $personal = $personalservice->resolve(
+                    $sku,
+                    $currency,
+                    $source === 'showroom' && $showroom !== '' ? $showroom : null
+                );
+                if ($personal === null) {
+                    throw new moodle_exception('commerce_personal_offer_link_unavailable', 'local_subscriptions');
+                }
+                $metadata = array_replace($metadata, $personal['metadata']);
+
+                // The visual origin remains the Showroom (showroom/showroomoffer/returnurl),
+                // but the checkout itself must know that this cart line is a Personal Offer.
+                // This unlocks authoritative beneficiary display and EUR/RUB switching.
+                $source = 'personaloffer';
+            }
+        }
         if ($action === 'buynow') {
             $service->clear_cart($customerid, $currency);
         }
@@ -78,6 +105,26 @@ try {
             if ($source === 'showroom') {
                 $metadata = CommerceShowroomTrackingContext::metadata($showroom, $showroomoffer);
                 $SESSION->local_subscriptions_showroom_currency = $currency;
+            }
+            $personalservice = CommercePersonalOfferShoppingContextService::create($DB);
+            $personalcurrencies = $personalservice->available_currencies($sku);
+            if ($personalcurrencies !== null) {
+                if ($personalcurrencies === []) {
+                    throw new moodle_exception('commerce_personal_offer_link_unavailable', 'local_subscriptions');
+                }
+                if (!in_array($currency, $personalcurrencies, true)) {
+                    throw new moodle_exception('commerce_personal_offer_currency_unavailable', 'local_subscriptions');
+                }
+                $personal = $personalservice->resolve(
+                    $sku,
+                    $currency,
+                    $source === 'showroom' && $showroom !== '' ? $showroom : null
+                );
+                if ($personal === null) {
+                    throw new moodle_exception('commerce_personal_offer_link_unavailable', 'local_subscriptions');
+                }
+                $metadata = array_replace($metadata, $personal['metadata']);
+                $source = 'personaloffer';
             }
             $service->clear_cart($customerid, $currency);
             $prepared = $service->add_product(

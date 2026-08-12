@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026080905" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026081202" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
         <TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
             <FIELDS>
@@ -1722,6 +1722,9 @@
                 <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="issued" />
                 <FIELD NAME="validfrom" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="expiresat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="validitymode" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="legacy" />
+                <FIELD NAME="validityduration" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="validitytimezone" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="Europe/Paris" />
                 <FIELD NAME="termsversion" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" />
                 <FIELD NAME="termsjson" TYPE="text" NOTNULL="true" />
                 <FIELD NAME="metadatajson" TYPE="text" NOTNULL="true" />
@@ -1782,6 +1785,9 @@
                 <FIELD NAME="criteriajson" TYPE="text" NOTNULL="true" />
                 <FIELD NAME="validfrom" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="expiresat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="validitymode" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="legacy" />
+                <FIELD NAME="validityduration" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="validitytimezone" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="Europe/Paris" />
                 <FIELD NAME="snapshotat" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="snapshothash" TYPE="char" LENGTH="64" NOTNULL="false" />
                 <FIELD NAME="selectedcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
@@ -1995,6 +2001,48 @@
             </INDEXES>
         </TABLE>
 
+        <TABLE NAME="local_subs_commerce_offer_campaign_email_config" COMMENT="Technical email destination configuration for a Personal Offer campaign">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="campaignid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="ctadestination" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="checkout" />
+                <FIELD NAME="showroomid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="campaign_fk" TYPE="foreign-unique" FIELDS="campaignid" REFTABLE="local_subs_commerce_offer_campaign" REFFIELDS="id" />
+                <KEY NAME="showroom_fk" TYPE="foreign" FIELDS="showroomid" REFTABLE="local_subs_showroom" REFFIELDS="id" />
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_offer_campaign_email_content" COMMENT="Localised editorial content for Personal Offer campaign emails">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="campaignid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="language" TYPE="char" LENGTH="5" NOTNULL="true" />
+                <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="body" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="bodyformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" />
+                <FIELD NAME="ctalabel" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="closing" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="closingformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="campaign_fk" TYPE="foreign" FIELDS="campaignid" REFTABLE="local_subs_commerce_offer_campaign" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="campaign_language_uix" UNIQUE="true" FIELDS="campaignid,language" />
+            </INDEXES>
+        </TABLE>
+
         <TABLE NAME="local_subs_commerce_grant_campaign" COMMENT="Frozen CRM bulk Native grant campaigns">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
@@ -2057,6 +2105,45 @@
             <INDEXES>
                 <INDEX NAME="campaign_member_uix" UNIQUE="true" FIELDS="campaignid,memberkey" />
                 <INDEX NAME="campaign_status_idx" UNIQUE="false" FIELDS="campaignid,status" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_identity_merge" COMMENT="Auditable customer identity merge operations">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="mergeuuid" TYPE="char" LENGTH="32" NOTNULL="true" />
+                <FIELD NAME="targetuserid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="completed" />
+                <FIELD NAME="planjson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="resultjson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="performedby" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="mergeuuid_uix" UNIQUE="true" FIELDS="mergeuuid" />
+                <INDEX NAME="target_time_idx" UNIQUE="false" FIELDS="targetuserid,timecreated" />
+                <INDEX NAME="actor_time_idx" UNIQUE="false" FIELDS="performedby,timecreated" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_identity_merge_source" COMMENT="Source accounts participating in auditable customer identity merges">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="mergeid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="sourceuserid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="sourceemail" TYPE="char" LENGTH="254" NOTNULL="false" />
+                <FIELD NAME="wassuspended" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="merge_fk" TYPE="foreign" FIELDS="mergeid" REFTABLE="local_subs_identity_merge" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="merge_source_uix" UNIQUE="true" FIELDS="mergeid,sourceuserid" />
+                <INDEX NAME="source_user_idx" UNIQUE="false" FIELDS="sourceuserid" />
             </INDEXES>
         </TABLE>
     </TABLES>

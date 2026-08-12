@@ -23,12 +23,22 @@ final class CommercePersonalOfferCheckoutService {
     }
 
     /** @return array{offer:CommercePersonalOffer,sku:string,priceid:int,currency:string} */
-    public function prepare(string $token, string $currency, ?int $userid, ?string $email, string $language): array {
+    public function validate_entry(string $token, string $currency, ?int $userid, ?string $email): array {
         $validation = CommercePersonalOfferFactory::create($this->db)->validate_token($token);
         if (!$validation->is_valid() || $validation->get_offer() === null) {
             throw new \moodle_exception('commerce_personal_offer_link_unavailable', 'local_subscriptions');
         }
         $offer = $validation->get_offer();
+
+        // M3H.7: a short-lived campaign test email is an admin certification aid.
+        // If the tester opens it while authenticated as another Moodle account,
+        // treat the signed test link exactly like an anonymous bearer link instead
+        // of rejecting it for the tester's unrelated session identity.
+        $metadata = $offer->get_metadata();
+        if (!empty($metadata['campaignemailtest'])) {
+            $userid = null;
+            $email = null;
+        }
         $this->assert_identity($offer, $userid, $email, true);
 
         $hydrator = new CommerceCatalogHydrator();
@@ -42,33 +52,59 @@ final class CommercePersonalOfferCheckoutService {
         foreach ($prices->find_by_product_sku($product->get_sku(), true) as $candidate) {
             if ($candidate->get_currency() === strtoupper($currency)) {
                 $price = $candidate;
-                if ($candidate->get_provider() === null) { break; }
+                if ($candidate->get_provider() === null) {
+                    break;
+                }
             }
         }
         if ($price === null || $price->get_id() === null) {
             throw new \moodle_exception('commerce_personal_offer_currency_unavailable', 'local_subscriptions');
         }
 
-        // Validate terms for this currency before mutating the cart.
+        // The real Personal Offer terms are always resolved server-side for the requested currency.
         CommercePersonalOfferCheckoutPricingService::create($this->db)->resolve_unit_minor(
-            $offer->get_offer_uuid(), $product->get_sku(), $currency, $price->get_amount_minor()
+            $offer->get_offer_uuid(),
+            $product->get_sku(),
+            $currency,
+            $price->get_amount_minor()
         );
+
+        return [
+            'offer' => $offer,
+            'sku' => $product->get_sku(),
+            'priceid' => $price->get_id(),
+            'currency' => strtoupper($currency),
+        ];
+    }
+
+    /** @return array{offer:CommercePersonalOffer,sku:string,priceid:int,currency:string} */
+    public function prepare(string $token, string $currency, ?int $userid, ?string $email, string $language): array {
+        $prepared = $this->validate_entry($token, $currency, $userid, $email);
+        $offer = $prepared['offer'];
 
         $customerid = $userid ?? 0;
         $cart = CommerceCartRuntimeFactory::create();
-        $cart->clear_cart($customerid, $currency);
-        $result = $cart->add_product($customerid, $currency, $language, $product->get_sku(), $price->get_id(), 1, [
-            'operation' => 'personaloffer',
-            'personal_offer_uuid' => $offer->get_offer_uuid(),
-            'personal_offer_campaign' => (string)($offer->get_campaign_key() ?? ''),
-        ]);
+        $cart->clear_cart($customerid, $prepared['currency']);
+        $result = $cart->add_product(
+            $customerid,
+            $prepared['currency'],
+            $language,
+            $prepared['sku'],
+            $prepared['priceid'],
+            1,
+            [
+                'operation' => 'personaloffer',
+                'personal_offer_uuid' => $offer->get_offer_uuid(),
+                'personal_offer_campaign' => (string)($offer->get_campaign_key() ?? ''),
+            ]
+        );
         if (!$result->has_changed()) {
             // A Personal Offer entry must be replay-safe. A previous request may have
             // prepared the cart successfully and then failed later while rendering the
             // checkout (theme/cache/navigation, browser retry, etc.). In that case,
             // accept the existing identical Personal Offer line instead of presenting
             // the signed link as invalid.
-            $existing = CommerceCartRuntimeFactory::create()->open($customerid, $currency);
+            $existing = CommerceCartRuntimeFactory::create()->open($customerid, $prepared['currency']);
             $matched = false;
             foreach ($existing->get_items() as $item) {
                 $metadata = $item->get_metadata();
@@ -85,9 +121,8 @@ final class CommercePersonalOfferCheckoutService {
                 throw new \moodle_exception('commerce_personal_offer_cart_failed', 'local_subscriptions');
             }
         }
-        return ['offer' => $offer, 'sku' => $product->get_sku(), 'priceid' => $price->get_id(), 'currency' => strtoupper($currency)];
+        return $prepared;
     }
-
 
 
     public function choose_currency(string $token, string $fallback): string {

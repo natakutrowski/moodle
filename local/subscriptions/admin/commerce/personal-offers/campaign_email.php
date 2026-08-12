@@ -1,0 +1,281 @@
+<?php
+require_once(__DIR__ . '/../../../../../config.php');
+
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailBuilderService;
+use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+
+$context = AdminSecurity::require(Capabilities::MANAGE_CRM_ADMIN_TOOLS);
+$id = required_param('id', PARAM_INT);
+$builder = CommercePersonalOfferCampaignEmailBuilderService::create($DB);
+$state = $builder->state($id);
+$campaign = $state['campaign'];
+$url = new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_email.php', ['id' => $id]);
+$title = get_string('commerce_personal_offer_campaign_email_title', 'local_subscriptions');
+CrmPageConfigurator::configure($PAGE, $context, $url, $title, 'local-subscriptions-commerce-personal-offer-campaign-email-page');
+
+$requestedlanguage = optional_param('lang', 'fr', PARAM_ALPHA);
+$activelanguage = in_array($requestedlanguage, CommercePersonalOfferCampaignEmailService::SUPPORTED_LANGUAGES, true)
+    ? $requestedlanguage
+    : 'fr';
+
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_sesskey();
+    try {
+        $translations = [];
+        foreach (CommercePersonalOfferCampaignEmailService::SUPPORTED_LANGUAGES as $language) {
+            $translations[$language] = [
+                'subject' => optional_param('subject_' . $language, '', PARAM_RAW_TRIMMED),
+                'body' => optional_param('body_' . $language, '', PARAM_RAW),
+                'bodyformat' => optional_param('bodyformat_' . $language, (int)FORMAT_HTML, PARAM_INT),
+                'ctalabel' => optional_param('ctalabel_' . $language, '', PARAM_RAW_TRIMMED),
+                'closing' => optional_param('closing_' . $language, '', PARAM_RAW),
+                'closingformat' => optional_param('closingformat_' . $language, (int)FORMAT_HTML, PARAM_INT),
+            ];
+        }
+        $postedlanguage = optional_param('activelang', $activelanguage, PARAM_ALPHA);
+        if (in_array($postedlanguage, CommercePersonalOfferCampaignEmailService::SUPPORTED_LANGUAGES, true)) { $activelanguage = $postedlanguage; }
+        $builder->save(
+            $id,
+            required_param('ctadestination', PARAM_ALPHA),
+            optional_param('showroomid', 0, PARAM_INT) ?: null,
+            $translations,
+            (int)$USER->id,
+            isset($_FILES['campaignbanner']) && is_array($_FILES['campaignbanner'])
+                ? $_FILES['campaignbanner']
+                : null,
+            optional_param('deletebanner', 0, PARAM_BOOL) === 1
+        );
+        redirect(
+            new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_email_preview.php', ['id' => $id, 'language' => $activelanguage]),
+            get_string('commerce_personal_offer_campaign_email_saved_preview_next', 'local_subscriptions'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
+    } catch (Throwable $e) {
+        $error = $e->getMessage();
+    }
+    $state = $builder->state($id);
+}
+
+$config = $state['config'];
+$translations = $state['translations'];
+$destination = $config ? (string)$config->ctadestination : CommercePersonalOfferCampaignEmailService::DESTINATION_CHECKOUT;
+$selectedshowroom = $config && $config->showroomid !== null ? (int)$config->showroomid : 0;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $error !== '') {
+    $destination = optional_param('ctadestination', $destination, PARAM_ALPHA);
+    $selectedshowroom = optional_param('showroomid', $selectedshowroom, PARAM_INT);
+}
+
+$labels = ['fr' => '🇫🇷 Français', 'en' => '🇬🇧 English', 'ru' => '🇷🇺 Русский'];
+
+echo $OUTPUT->header();
+echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
+echo CrmBreadcrumbRenderer::render([
+    ['label' => get_string('crm_commerce_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php')],
+    ['label' => get_string('commerce_personal_offer_campaigns', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaigns.php')],
+    ['label' => (string)$campaign->name, 'url' => new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_view.php', ['id' => $id])],
+    ['label' => $title, 'url' => null],
+]);
+echo CrmPageHeader::render($title, get_string('commerce_personal_offer_campaign_email_help', 'local_subscriptions'), HelpContext::COMMERCE);
+echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PERSONAL_OFFERS, $context);
+if ($error !== '') {
+    echo html_writer::div(s($error), 'alert alert-danger');
+}
+if (!$state['editable']) {
+    echo html_writer::div(get_string('commerce_personal_offer_campaign_email_locked', 'local_subscriptions'), 'alert alert-warning');
+}
+
+echo html_writer::start_tag('form', [
+    'method' => 'post',
+    'enctype' => 'multipart/form-data',
+    'class' => 'card card-body',
+]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'activelang', 'id' => 'campaign-email-active-language', 'value' => $activelanguage]);
+
+echo html_writer::tag('h3', get_string('commerce_personal_offer_campaign_email_destination', 'local_subscriptions'), ['class' => 'h5']);
+echo html_writer::start_div('mb-4');
+foreach ([
+    CommercePersonalOfferCampaignEmailService::DESTINATION_CHECKOUT => 'commerce_personal_offer_campaign_email_destination_checkout',
+    CommercePersonalOfferCampaignEmailService::DESTINATION_SHOWROOM => 'commerce_personal_offer_campaign_email_destination_showroom',
+] as $value => $stringkey) {
+    $attrs = ['type' => 'radio', 'class' => 'form-check-input', 'name' => 'ctadestination', 'value' => $value, 'id' => 'ctadestination_' . $value];
+    if ($destination === $value) { $attrs['checked'] = 'checked'; }
+    if (!$state['editable']) { $attrs['disabled'] = 'disabled'; }
+    echo html_writer::start_div('form-check mb-2');
+    echo html_writer::empty_tag('input', $attrs);
+    echo html_writer::tag('label', get_string($stringkey, 'local_subscriptions'), ['for' => 'ctadestination_' . $value, 'class' => 'form-check-label']);
+    echo html_writer::end_div();
+}
+$showroomopts = [0 => get_string('commerce_personal_offer_campaign_email_showroom_choose', 'local_subscriptions')] + $state['showrooms'];
+echo html_writer::tag('label', get_string('commerce_personal_offer_campaign_email_showroom', 'local_subscriptions'), ['for' => 'showroomid', 'class' => 'form-label fw-semibold mt-2']);
+$showroomattrs = ['id' => 'showroomid', 'class' => 'form-select'];
+if (!$state['editable']) { $showroomattrs['disabled'] = 'disabled'; }
+echo html_writer::select($showroomopts, 'showroomid', $selectedshowroom, false, $showroomattrs);
+echo html_writer::div(get_string('commerce_personal_offer_campaign_email_showroom_help', 'local_subscriptions'), 'form-text');
+echo html_writer::end_div();
+
+echo html_writer::tag(
+    'h3',
+    get_string('commerce_personal_offer_campaign_banner_title', 'local_subscriptions'),
+    ['class' => 'h5 mt-2']
+);
+echo html_writer::div(
+    get_string('commerce_personal_offer_campaign_banner_help', 'local_subscriptions'),
+    'text-muted mb-3'
+);
+echo html_writer::start_div('mb-4');
+if (!empty($state['bannerurl'])) {
+    echo html_writer::div(
+        html_writer::empty_tag('img', [
+            'src' => $state['bannerurl'],
+            'alt' => '',
+            'style' => 'display:block;width:100%;max-width:800px;max-height:220px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;',
+        ]),
+        'mb-3'
+    );
+}
+$bannerattrs = [
+    'type' => 'file',
+    'id' => 'campaignbanner',
+    'name' => 'campaignbanner',
+    'class' => 'form-control',
+    'accept' => 'image/jpeg,image/png,image/webp',
+];
+if (!$state['editable']) {
+    $bannerattrs['disabled'] = 'disabled';
+}
+echo html_writer::tag(
+    'label',
+    get_string('commerce_personal_offer_campaign_banner_file', 'local_subscriptions'),
+    ['for' => 'campaignbanner', 'class' => 'form-label fw-semibold']
+);
+echo html_writer::empty_tag('input', $bannerattrs);
+echo html_writer::div(
+    get_string('commerce_personal_offer_campaign_banner_format_help', 'local_subscriptions'),
+    'form-text'
+);
+if (!empty($state['bannerurl']) && $state['editable']) {
+    echo html_writer::start_div('form-check mt-2');
+    echo html_writer::empty_tag('input', [
+        'type' => 'checkbox',
+        'id' => 'deletebanner',
+        'name' => 'deletebanner',
+        'value' => '1',
+        'class' => 'form-check-input',
+    ]);
+    echo html_writer::tag(
+        'label',
+        get_string('commerce_personal_offer_campaign_banner_delete', 'local_subscriptions'),
+        ['for' => 'deletebanner', 'class' => 'form-check-label']
+    );
+    echo html_writer::end_div();
+}
+echo html_writer::end_div();
+
+echo html_writer::tag('h3', get_string('commerce_personal_offer_campaign_email_content', 'local_subscriptions'), ['class' => 'h5']);
+echo html_writer::div(get_string('commerce_personal_offer_campaign_email_content_help', 'local_subscriptions'), 'text-muted mb-3');
+
+$variablechips = '';
+foreach ($state['variables'] as $variable) {
+    $variablechips .= html_writer::tag('code', '{{' . s($variable) . '}}', ['class' => 'badge bg-light text-dark border me-1 mb-1']);
+}
+echo html_writer::div(html_writer::tag('strong', get_string('commerce_personal_offer_campaign_email_variables', 'local_subscriptions')) . '<br>' . $variablechips, 'alert alert-light border');
+
+echo html_writer::start_tag('ul', ['class' => 'nav nav-tabs mb-3', 'role' => 'tablist']);
+foreach ($labels as $language => $label) {
+    $isactive = $language === $activelanguage;
+    echo html_writer::tag('li', html_writer::tag('button', $label, [
+        'class' => 'nav-link' . ($isactive ? ' active' : ''), 'type' => 'button', 'role' => 'tab',
+        'data-bs-toggle' => 'tab', 'data-bs-target' => '#campaign-email-' . $language,
+        'data-language' => $language,
+        'aria-controls' => 'campaign-email-' . $language, 'aria-selected' => $isactive ? 'true' : 'false',
+    ]), ['class' => 'nav-item', 'role' => 'presentation']);
+}
+echo html_writer::end_tag('ul');
+
+echo html_writer::start_div('tab-content');
+$preferrededitor = editors_get_preferred_editor((int)FORMAT_HTML);
+foreach ($labels as $language => $label) {
+    $record = $translations[$language] ?? null;
+    $values = [
+        'subject' => $record ? (string)$record->subject : '',
+        'body' => $record ? (string)$record->body : '',
+        'bodyformat' => $record ? (int)$record->bodyformat : (int)FORMAT_HTML,
+        'ctalabel' => $record ? (string)$record->ctalabel : '',
+        'closing' => $record ? (string)($record->closing ?? '') : '',
+        'closingformat' => $record ? (int)$record->closingformat : (int)FORMAT_HTML,
+    ];
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && $error !== '') {
+        $values['subject'] = optional_param('subject_' . $language, $values['subject'], PARAM_RAW_TRIMMED);
+        $values['body'] = optional_param('body_' . $language, $values['body'], PARAM_RAW);
+        $values['bodyformat'] = optional_param('bodyformat_' . $language, (int)FORMAT_HTML, PARAM_INT);
+        $values['ctalabel'] = optional_param('ctalabel_' . $language, $values['ctalabel'], PARAM_RAW_TRIMMED);
+        $values['closing'] = optional_param('closing_' . $language, $values['closing'], PARAM_RAW);
+        $values['closingformat'] = optional_param('closingformat_' . $language, (int)FORMAT_HTML, PARAM_INT);
+    }
+    if ($values['bodyformat'] !== (int)FORMAT_HTML && $values['body'] !== '') {
+        $values['body'] = format_text($values['body'], $values['bodyformat'], ['context' => $context, 'filter' => false]);
+    }
+    if ($values['closingformat'] !== (int)FORMAT_HTML && $values['closing'] !== '') {
+        $values['closing'] = format_text($values['closing'], $values['closingformat'], ['context' => $context, 'filter' => false]);
+    }
+    $isactive = $language === $activelanguage;
+    echo html_writer::start_div('tab-pane fade' . ($isactive ? ' show active' : ''), ['id' => 'campaign-email-' . $language, 'role' => 'tabpanel']);
+    foreach ([
+        'subject' => ['commerce_personal_offer_campaign_email_subject', false],
+        'body' => ['commerce_personal_offer_campaign_email_body', true],
+        'ctalabel' => ['commerce_personal_offer_campaign_email_cta_label', false],
+        'closing' => ['commerce_personal_offer_campaign_email_closing', true],
+    ] as $field => [$stringkey, $richeditor]) {
+        echo html_writer::start_div('mb-3');
+        $fieldid = $field . '_' . $language;
+        echo html_writer::tag('label', get_string($stringkey, 'local_subscriptions'), ['for' => $fieldid, 'class' => 'form-label fw-semibold']);
+        $attrs = ['id' => $fieldid, 'name' => $fieldid, 'class' => 'form-control'];
+        if (!$state['editable']) { $attrs['disabled'] = 'disabled'; }
+        if ($richeditor) {
+            echo html_writer::tag('textarea', $values[$field], $attrs + ['rows' => $field === 'body' ? 12 : 6]);
+            echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $field . 'format_' . $language, 'value' => (int)FORMAT_HTML]);
+            if ($state['editable']) {
+                $preferrededitor->use_editor($fieldid, [
+                    'context' => $context,
+                    'maxfiles' => 0,
+                    'maxbytes' => 0,
+                    'noclean' => false,
+                ]);
+            }
+        } else {
+            echo html_writer::empty_tag('input', $attrs + ['type' => 'text', 'value' => $values[$field]]);
+        }
+        echo html_writer::end_div();
+    }
+    echo html_writer::end_div();
+}
+echo html_writer::end_div();
+
+if ($state['editable']) {
+    echo html_writer::tag('button', get_string('savechanges'), ['type' => 'submit', 'class' => 'btn btn-primary']);
+}
+echo html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_view.php', ['id' => $id]), get_string('cancel'), ['class' => 'btn btn-link ms-2']);
+echo html_writer::end_tag('form');
+$PAGE->requires->js_amd_inline(<<<'JS'
+document.querySelectorAll('[data-bs-toggle="tab"][data-language]').forEach(function(tab) {
+    tab.addEventListener('shown.bs.tab', function() {
+        var field = document.getElementById('campaign-email-active-language');
+        if (field) { field.value = tab.dataset.language || 'fr'; }
+    });
+});
+JS);
+echo CrmWorkspaceRenderer::end();
+echo $OUTPUT->footer();

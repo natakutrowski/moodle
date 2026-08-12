@@ -18,6 +18,31 @@
         <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#94630d;font-weight:800;white-space:nowrap;">✦ &nbsp;{{personaloffer.offerlabel}}&nbsp; ✦</div>
         <div style="margin-top:8px;font-size:21px;line-height:1.3;font-weight:800;color:#241a35;">{{personaloffer.productname}}</div>
 
+        {{#personaloffer.iscampaignemail}}
+        {{#personaloffer.hascampaignprices}}
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top:16px;"><tr>
+        {{#personaloffer.campaignprices}}
+        <td style="padding:0 9px 0 0;vertical-align:top;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="min-width:118px;border:1px solid #e5bd58;border-radius:12px;background:#fff;">
+            <tr><td style="padding:10px 12px 11px;">
+                <div style="font-size:10px;line-height:1;color:#806226;font-weight:800;letter-spacing:.06em;">{{flag}} {{currency}}</div>
+                <div style="margin-top:6px;font-size:20px;line-height:1.08;color:#6d4808;font-weight:900;white-space:nowrap;">{{offerformatted}}</div>
+                {{#hasregularprice}}
+                <div style="margin-top:6px;white-space:nowrap;">
+                    <span style="font-size:12px;color:#9a8c73;text-decoration:line-through;">{{regularformatted}}</span>
+                    {{#hasdiscountpercent}}
+                    <span style="display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;background:#f41966;color:#fff;font-size:10px;line-height:1;font-weight:800;">−{{discountpercentformatted}}</span>
+                    {{/hasdiscountpercent}}
+                </div>
+                {{/hasregularprice}}
+            </td></tr>
+            </table>
+        </td>
+        {{/personaloffer.campaignprices}}
+        </tr></table>
+        {{/personaloffer.hascampaignprices}}
+        {{/personaloffer.iscampaignemail}}
+        {{^personaloffer.iscampaignemail}}
         {{#personaloffer.hasprices}}
         <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top:16px;"><tr>
         {{#personaloffer.prices}}
@@ -34,6 +59,7 @@
         {{/personaloffer.hasprices}}
 
         {{^personaloffer.hasprices}}{{#personaloffer.priceformatted}}<div style="margin-top:12px;font-size:18px;color:#7d5410;font-weight:800;">{{personaloffer.priceformatted}}</div>{{/personaloffer.priceformatted}}{{/personaloffer.hasprices}}
+        {{/personaloffer.iscampaignemail}}
 
         {{#personaloffer.hasvalidityperiod}}
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid #ead9a8;font-size:12px;color:#7d715f;">
@@ -66,6 +92,33 @@
                     <div style="font-size:20px;line-height:1.25;font-weight:800;color:#241a35;">{{personaloffer.productname}}</div>
                 </td>
             </tr>
+            {{#personaloffer.iscampaignemail}}
+            {{#personaloffer.hascampaignprices}}
+            <tr><td colspan="2" style="padding:0 0 12px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                    {{#personaloffer.campaignprices}}
+                        <td width="50%" style="padding:0 6px 0 0;vertical-align:top;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border:1px solid #e5bd58;border-radius:11px;background:#fff;">
+                            <tr><td style="padding:9px 10px 10px;">
+                                <div style="font-size:10px;line-height:1;color:#806226;font-weight:800;letter-spacing:.05em;">{{flag}} {{currency}}</div>
+                                <div style="margin-top:6px;font-size:17px;line-height:1.08;color:#6d4808;font-weight:900;white-space:nowrap;">{{offerformatted}}</div>
+                                {{#hasregularprice}}
+                                <div style="margin-top:6px;">
+                                    <span style="font-size:11px;color:#9a8c73;text-decoration:line-through;">{{regularformatted}}</span>
+                                    {{#hasdiscountpercent}}<span style="display:inline-block;margin:4px 0 0 5px;padding:3px 6px;border-radius:999px;background:#f41966;color:#fff;font-size:9px;line-height:1;font-weight:800;">−{{discountpercentformatted}}</span>{{/hasdiscountpercent}}
+                                </div>
+                                {{/hasregularprice}}
+                            </td></tr>
+                            </table>
+                        </td>
+                    {{/personaloffer.campaignprices}}
+                    </tr>
+                </table>
+            </td></tr>
+            {{/personaloffer.hascampaignprices}}
+            {{/personaloffer.iscampaignemail}}
+            {{^personaloffer.iscampaignemail}}
             {{#personaloffer.hasprices}}
             <tr>
                 <td colspan="2" style="padding:0 0 12px;">
@@ -91,6 +144,7 @@
                 <tr><td colspan="2" style="padding:0 0 12px;font-size:18px;color:#7d5410;font-weight:800;">{{personaloffer.priceformatted}}</td></tr>
                 {{/personaloffer.priceformatted}}
             {{/personaloffer.hasprices}}
+            {{/personaloffer.iscampaignemail}}
             <tr>
                 <td colspan="2" style="padding-top:11px;border-top:1px solid #ead9a8;font-size:12px;line-height:1.5;color:#7d715f;">
                     {{#personaloffer.hasvalidityperiod}}

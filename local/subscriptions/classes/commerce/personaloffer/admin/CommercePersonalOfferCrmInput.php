@@ -133,5 +133,18 @@ final class CommercePersonalOfferCrmInput {
         ];
     }
 
+    public static function datetime_local(string $value, string $timezone): ?int {
+        $value = trim($value);
+        if ($value === '') { return null; }
+        try { $tz = new \DateTimeZone($timezone); } catch (\Throwable) {
+            throw new \coding_exception('Invalid timezone.');
+        }
+        $dt = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $value, $tz);
+        if (!$dt || $dt->format('Y-m-d\TH:i') !== $value) {
+            throw new \coding_exception('Invalid date and time.');
+        }
+        return $dt->getTimestamp();
+    }
+
     public static function timestamp(string $date,bool $end=false): ?int { if(trim($date)==='')return null;$dt=\DateTimeImmutable::createFromFormat('!Y-m-d',trim($date),new \DateTimeZone('UTC'));if(!$dt||$dt->format('Y-m-d')!==trim($date))throw new \coding_exception('Invalid date.');if($end)$dt=$dt->setTime(23,59,59);return $dt->getTimestamp(); }
 }

@@ -20,6 +20,7 @@ use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitio
 use local_subscriptions\commerce\storefront\seo\CommerceStorefrontSeoHeadRegistry;
 use local_subscriptions\support\Region;
 use local_subscriptions\commerce\order\invoice\CommerceInvoiceProfileResolver;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferShoppingContextService;
 
 $adminpreview = $GLOBALS['local_subscriptions_showroom_admin_preview'] ?? null;
 $isadminpreview = is_array($adminpreview)
@@ -49,6 +50,18 @@ if ($isadminpreview) {
 
 $requestedcurrency = strtoupper(optional_param('currency', '', PARAM_ALPHA));
 $availablecurrencies = CommerceShowroomCurrencyResolver::active_currencies($DB);
+if (!$isadminpreview) {
+    foreach ($definition->get_products() as $personalsku) {
+        $personaloffercurrencies = CommercePersonalOfferShoppingContextService::create($DB)
+            ->available_currencies((string)$personalsku);
+        if ($personaloffercurrencies !== null) {
+            if ($personaloffercurrencies !== []) {
+                $availablecurrencies = array_values(array_intersect($availablecurrencies, $personaloffercurrencies));
+            }
+            break;
+        }
+    }
+}
 $storedcurrency = strtoupper((string)(
     $SESSION->local_subscriptions_showroom_currency
         ?? $SESSION->local_subscriptions_storefront_currency

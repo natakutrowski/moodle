@@ -7,19 +7,26 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomCmsRepository;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPackageService;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPortablePackageService;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 
 require_login();
 $context = context_system::instance();
 require_capability('local/subscriptions:manage_showrooms', $context);
 
-$PAGE->set_context($context);
-$PAGE->set_url('/local/subscriptions/admin/commerce/showrooms/import.php');
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(
-    get_string('commerce_showroom_import_create', 'local_subscriptions')
-);
-$PAGE->set_heading(
-    get_string('commerce_showroom_import_create', 'local_subscriptions')
+$pageurl = new moodle_url('/local/subscriptions/admin/commerce/showrooms/import.php');
+$pagetitle = get_string('commerce_showroom_import_create', 'local_subscriptions');
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-showroom-import-page'
 );
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -116,9 +123,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(
-    get_string('commerce_showroom_import_create', 'local_subscriptions')
+echo CrmWorkspaceRenderer::start(CrmNavigationKeys::SHOWROOMS, $context);
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php'),
+    ],
+    [
+        'label' => get_string('commerce_showroom_cms_title', 'local_subscriptions'),
+        'url' => new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+echo CrmPageHeader::render(
+    $pagetitle,
+    null,
+    HelpContext::COMMERCE
 );
+
 
 echo $OUTPUT->notification(
     get_string('commerce_showroom_import_portable_help', 'local_subscriptions'),
@@ -184,4 +209,5 @@ echo html_writer::tag(
 );
 
 echo html_writer::end_tag('form');
+echo CrmWorkspaceRenderer::end();
 echo $OUTPUT->footer();

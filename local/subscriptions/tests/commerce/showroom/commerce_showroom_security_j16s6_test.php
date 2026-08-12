@@ -20,6 +20,7 @@ final class commerce_showroom_security_j16s6_test extends \advanced_testcase {
             'status' => 'draft',
             'name' => 'Security',
             'template' => 'local_subscriptions/showroom/third_group_verbs',
+            'slugfr' => 'security-showroom',
             'productsjson' => '{}',
             'settingsjson' => '{}',
         ], 2);
@@ -51,7 +52,7 @@ final class commerce_showroom_security_j16s6_test extends \advanced_testcase {
         $repository->save_block($id, [
             'blocktype' => 'hero',
             'enabled' => true,
-            'configjson' => '{}',
+            'configjson' => '{"title":"Security hero"}',
         ], 2);
 
         $publication->publish($id, 2);

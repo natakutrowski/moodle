@@ -6,15 +6,27 @@ require_once(__DIR__ . '/../../../../../config.php');
 
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomCmsRepository;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomStatus;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 
 require_login();
 require_capability('local/subscriptions:manage_showrooms', context_system::instance());
 
-$PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'));
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(get_string('commerce_showroom_cms_title', 'local_subscriptions'));
-$PAGE->set_heading(get_string('commerce_showroom_cms_title', 'local_subscriptions'));
+$context = context_system::instance();
+$pageurl = new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php');
+$pagetitle = get_string('commerce_showroom_cms_title', 'local_subscriptions');
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-showroom-list-page'
+);
 
 $repository = new CommerceShowroomCmsRepository($DB);
 $delete = optional_param('delete', 0, PARAM_INT);
@@ -26,7 +38,23 @@ if ($delete > 0 && confirm_sesskey()) {
 $showrooms = $repository->all();
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('commerce_showroom_cms_title', 'local_subscriptions'));
+echo CrmWorkspaceRenderer::start(CrmNavigationKeys::SHOWROOMS, $context);
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php'),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
+echo CrmPageHeader::render(
+    $pagetitle,
+    null,
+    HelpContext::COMMERCE
+);
 echo html_writer::div(
     html_writer::link(
         new moodle_url('/local/subscriptions/admin/commerce/showrooms/edit.php'),
@@ -70,4 +98,5 @@ foreach ($showrooms as $showroom) {
     ];
 }
 echo html_writer::table($table);
+echo CrmWorkspaceRenderer::end();
 echo $OUTPUT->footer();

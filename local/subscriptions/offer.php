@@ -4,7 +4,11 @@ require_once(__DIR__ . '/../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferCheckoutService;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferDestinationResolver;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferSessionService;
+use local_subscriptions\commerce\showroom\CommerceShowroomUrl;
 use local_subscriptions\support\Region;
 use local_subscriptions\url\UrlFactory;
 
@@ -14,6 +18,14 @@ global $USER, $SESSION;
 
 $token = trim((string)required_param('token', PARAM_RAW_TRIMMED));
 $requestedcurrency = strtoupper(optional_param('currency', '', PARAM_ALPHA));
+$requesteddestination = strtolower(optional_param('destination', '', PARAM_ALPHA));
+if (!in_array($requesteddestination, ['', 'checkout'], true)) {
+    throw new invalid_parameter_exception('Unsupported Personal Offer destination override.');
+}
+$requestedanchor = strtolower(optional_param('anchor', '', PARAM_ALPHANUMEXT));
+if (!in_array($requestedanchor, ['', 'showroom-offers'], true)) {
+    throw new invalid_parameter_exception('Unsupported Personal Offer return anchor.');
+}
 $fallbackcurrency = in_array(Region::detect_country(), ['RU', 'BY'], true) ? 'RUB' : 'EUR';
 
 try {
@@ -23,22 +35,81 @@ try {
         : $personaloffers->choose_currency($token, $fallbackcurrency);
     $userid = isloggedin() && !isguestuser() ? (int)$USER->id : null;
     $email = $userid !== null ? (string)$USER->email : null;
-    $prepared = $personaloffers->prepare(
-        $token,
-        $currency,
-        $userid,
-        $email,
-        current_language()
-    );
-    $SESSION->local_subscriptions_personal_offer_token = $token;
-    $SESSION->local_subscriptions_personal_offer_uuid = $prepared['offer']->get_offer_uuid();
+    // Validate the signed offer and authoritative currency before resolving any destination.
+    // This does not mutate the cart, which is important for Showroom-first campaigns.
+    $validated = $personaloffers->validate_entry($token, $currency, $userid, $email);
+    $destination = CommercePersonalOfferDestinationResolver::create()->resolve($validated['offer']);
+    $campaigndestination = $destination;
+    if ($requesteddestination === CommercePersonalOfferCampaignEmailService::DESTINATION_CHECKOUT) {
+        // Direct checkout is a safe one-way override: it never changes offer/product/price
+        // and can never force a Showroom that the Campaign did not authorise.
+        $destination = [
+            'destination' => CommercePersonalOfferCampaignEmailService::DESTINATION_CHECKOUT,
+            'campaignid' => $destination['campaignid'] ?? null,
+            'showroomid' => null,
+            'showroomkey' => null,
+            'definition' => null,
+        ];
+    }
 
-    redirect(new moodle_url('/local/subscriptions/commerce_checkout.php', [
+    (new CommercePersonalOfferSessionService())->initialise(
+        $token,
+        $validated['offer'],
+        $validated['sku'],
+        $currency,
+        $destination
+    );
+
+    if ($destination['destination'] === CommercePersonalOfferCampaignEmailService::DESTINATION_SHOWROOM) {
+        if ($destination['definition'] === null) {
+            throw new moodle_exception('commerce_personal_offer_link_unavailable', 'local_subscriptions');
+        }
+        $SESSION->local_subscriptions_showroom_currency = $currency;
+        $SESSION->local_subscriptions_storefront_currency = $currency;
+        $showroomurl = CommerceShowroomUrl::make(
+            $destination['definition'],
+            ['currency' => $currency],
+            current_language()
+        );
+        $showroomtarget = $showroomurl->out(false);
+        if ($requestedanchor === 'showroom-offers') {
+            // Append the fragment explicitly to the final Location target. This avoids
+            // losing the anchor during redirect URL normalisation while keeping the
+            // anchor itself server allow-listed above.
+            $showroomtarget .= '#showroom-offers';
+        }
+        redirect($showroomtarget);
+    }
+
+    // Historical/direct-checkout campaigns retain the exact existing cart preparation path.
+    $personaloffers->prepare($token, $currency, $userid, $email, current_language());
+
+    // If this is a Showroom-first campaign and the customer deliberately chose direct
+    // checkout, "Back to offer" must return to the Showroom rather than re-entering the
+    // checkout override and looping on the same page.
+    $originreturn = '';
+    if (
+        ($campaigndestination['destination'] ?? '') === CommercePersonalOfferCampaignEmailService::DESTINATION_SHOWROOM
+        && ($campaigndestination['definition'] ?? null) !== null
+    ) {
+        // Re-enter through the signed Personal Offer boundary so the Showroom session
+        // is revalidated/reinitialised before displaying the personalised prices again.
+        $originreturn = (new moodle_url('/local/subscriptions/offer.php', [
+            'token' => $token,
+            'currency' => $currency,
+            'anchor' => 'showroom-offers',
+        ]))->out(false);
+    }
+
+    $checkoutparams = [
         'currency' => $currency,
         'flow' => 'direct',
         'source' => 'personaloffer',
-        'originreturn' => '/local/subscriptions/offer.php?token=' . rawurlencode($token) . '&currency=' . rawurlencode($currency),
-    ]));
+    ];
+    if ($originreturn !== '') {
+        $checkoutparams['originreturn'] = $originreturn;
+    }
+    redirect(new moodle_url('/local/subscriptions/commerce_checkout.php', $checkoutparams));
 } catch (Throwable $exception) {
     // Do not turn every checkout/runtime failure into "invalid offer link".
     // That message is reserved for genuine offer availability/identity failures.
