@@ -8564,3 +8564,13 @@ body.path-mod-readaloud #mod_readaloud_footernav_cont ol.main-nav > li .nav-link
 .course-section:has(.campus-section-restricted-cover) .section_goto {
     display: none !important;
 }
+
+/* CampusFR — privileged viewers keep restricted section covers in colour.
+   Moodle also renders .availabilityinfo.isrestricted for teachers/admins who
+   are allowed to view the section. Only the dedicated restricted-cover image
+   represents the genuinely locked student state and keeps its grayscale. */
+.course-section:has(.availabilityinfo.isrestricted)
+    .campus-section-cover:not(.campus-section-restricted-cover .campus-section-cover) {
+    filter: none !important;
+    opacity: 1 !important;
+}
