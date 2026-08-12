@@ -39,7 +39,23 @@ $guestrepository = new CommerceGuestCheckoutSessionRepository($DB);
 if ($isguestcheckout) {
     $token = trim((string)($SESSION->local_subscriptions_guest_checkout_token ?? ''));
     $guestsession = $token !== '' ? $guestrepository->find_by_token($token) : null;
-    if ($guestsession === null || $guestsession->is_expired() || $guestsession->get_currency() !== $currency) {
+
+    if ($guestsession !== null
+            && !$guestsession->is_expired()
+            && $guestsession->get_currency() !== $currency
+            && $guestsession->get_status() === 'provisional'
+            && $guestsession->get_user_id() !== null) {
+        // A Personal Offer currency switch has already prepared the requested
+        // anonymous cart. Keep the same provisional account and transfer that
+        // cart instead of creating a new session that would see checkout_* as
+        // an unrelated "existing account".
+        $guestsession = CommerceGuestCheckoutService::create()->switch_provisional_currency(
+            $guestsession,
+            $currency
+        );
+    } else if ($guestsession === null
+            || $guestsession->is_expired()
+            || $guestsession->get_currency() !== $currency) {
         $guestsession = CommerceGuestCheckoutService::create()->start($currency, [
             'entrypoint' => 'commerce_checkout.php',
             'purchase_flow' => $flow,

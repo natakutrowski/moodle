@@ -56,21 +56,45 @@ if (!$acceptterms) {
 }
 
 try {
+    $isguestcheckout = !isloggedin() || isguestuser();
+    $sessions = null;
+    $guestsession = null;
+
+    // Resolve an existing Guest Checkout session before validating the Personal
+    // Offer. Once identification has transferred the cart, the authoritative
+    // Personal Offer line belongs to the provisional userid, not customer 0.
+    if ($isguestcheckout) {
+        $token = trim((string)($SESSION->local_subscriptions_guest_checkout_token ?? ''));
+        $sessions = new CommerceGuestCheckoutSessionRepository($DB);
+        $guestsession = $token !== '' ? $sessions->find_by_token($token) : null;
+        if ($guestsession !== null
+                && ($guestsession->is_expired() || $guestsession->get_currency() !== $currency)) {
+            $guestsession = null;
+        }
+    }
+
     $personalofferidentity = null;
-    if ($source === 'personaloffer' && (!isloggedin() || isguestuser())) {
+    if ($source === 'personaloffer' && $isguestcheckout) {
         $personaloffers = CommercePersonalOfferCheckoutService::create($DB);
-        $cartoffer = $personaloffers->get_cart_offer(0, $currency);
+        $offercustomerid = 0;
+        if ($guestsession !== null
+                && in_array($guestsession->get_status(), ['provisional', 'payment_pending'], true)
+                && $guestsession->get_user_id() !== null) {
+            $offercustomerid = $guestsession->get_user_id();
+        }
+
+        $cartoffer = $personaloffers->get_cart_offer($offercustomerid, $currency);
         if ($cartoffer === null || !$cartoffer->is_available_at(time())) {
             throw new moodle_exception('commerce_personal_offer_not_redeemable', 'local_subscriptions');
         }
         $personalofferidentity = $personaloffers->get_beneficiary_identity($cartoffer);
     }
 
-    if (!isloggedin() || isguestuser()) {
-        $token = trim((string)($SESSION->local_subscriptions_guest_checkout_token ?? ''));
-        $sessions = new CommerceGuestCheckoutSessionRepository($DB);
-        $guestsession = $token !== '' ? $sessions->find_by_token($token) : null;
-        if ($guestsession === null || $guestsession->is_expired() || $guestsession->get_currency() !== $currency) {
+    if ($isguestcheckout) {
+        if ($sessions === null) {
+            $sessions = new CommerceGuestCheckoutSessionRepository($DB);
+        }
+        if ($guestsession === null) {
             $guestsession = CommerceGuestCheckoutService::create()->start($currency, [
                 'entrypoint' => 'commerce_checkout_action.php',
                 'purchase_flow' => $flow,
