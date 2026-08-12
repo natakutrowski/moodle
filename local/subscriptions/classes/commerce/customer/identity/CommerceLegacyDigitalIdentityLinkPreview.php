@@ -6,9 +6,7 @@ namespace local_subscriptions\commerce\customer\identity;
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Read-only cross-source link preview.
- */
+/** Read-only cross-source link preview. */
 final class CommerceLegacyDigitalIdentityLinkPreview {
     public function __construct(
         public readonly string $legacyemail,
@@ -18,6 +16,8 @@ final class CommerceLegacyDigitalIdentityLinkPreview {
         public readonly string $targetemail,
         public readonly string $targetfullname,
         public readonly int $legacypurchases,
+        public readonly int $nativepurchases,
+        public readonly int $nativepurchaseslinked,
         public readonly int $similarityscore,
         public readonly array $reasons
     ) {

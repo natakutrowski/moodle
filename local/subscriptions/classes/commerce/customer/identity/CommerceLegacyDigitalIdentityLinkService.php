@@ -8,18 +8,23 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\admin\AdminEvents;
 use local_subscriptions\admin\AdminLog;
+use local_subscriptions\commerce\customer\reconciliation\CommerceCustomerIdentityReconciliationService;
+use local_subscriptions\commerce\persistence\CommercePersistenceSchema;
 use moodle_database;
 
 /**
- * Manually attaches an account-less Legacy Digital identity to an existing
- * Moodle user without changing that Moodle user's email or learning history.
+ * Manually attaches a Legacy Digital identity to an existing Moodle user.
+ *
+ * Both the historical Legacy row and its Native Commerce projection are
+ * reconciled. This is required when student screens run in Native mode.
  */
 final class CommerceLegacyDigitalIdentityLinkService {
     private const TABLE = 'subscription_digital_payment_request';
 
     public function __construct(
         private readonly moodle_database $database,
-        private readonly CommerceCustomerIdentitySimilarityService $similarity
+        private readonly CommerceCustomerIdentitySimilarityService $similarity,
+        private readonly CommerceCustomerIdentityReconciliationService $reconciliation
     ) {
     }
 
@@ -30,10 +35,7 @@ final class CommerceLegacyDigitalIdentityLinkService {
         global $CFG;
 
         $legacyemail = \core_text::strtolower(trim($legacyemail));
-        if (
-            $legacyemail === ''
-            || !filter_var($legacyemail, FILTER_VALIDATE_EMAIL)
-        ) {
+        if ($legacyemail === '' || !filter_var($legacyemail, FILTER_VALIDATE_EMAIL)) {
             throw new \invalid_parameter_exception('Invalid Legacy Digital email.');
         }
 
@@ -50,7 +52,9 @@ final class CommerceLegacyDigitalIdentityLinkService {
             MUST_EXIST
         );
 
-        $identity = $this->legacy_identity($legacyemail);
+        // Include rows already linked to the selected target. This makes the
+        // operation repairable after the original M4.2G partial link.
+        $identity = $this->legacy_identity($legacyemail, $targetuserid);
         if ($identity['count'] <= 0) {
             throw new \moodle_exception(
                 'commerce_identity_legacy_link_no_purchases',
@@ -75,6 +79,28 @@ final class CommerceLegacyDigitalIdentityLinkService {
         $score = $match?->score ?? 0;
         $reasons = $match?->reasons ?? [];
 
+        $nativepurchases = 0;
+        $nativepurchaseslinked = 0;
+        foreach ($identity['ids'] as $legacyid) {
+            $native = $this->database->get_record(
+                CommercePersistenceSchema::TABLE_PURCHASE,
+                [
+                    'legacyfamily' => 'digital',
+                    'legacyid' => $legacyid,
+                ],
+                'id,userid',
+                IGNORE_MISSING
+            );
+            if ($native === false) {
+                continue;
+            }
+
+            $nativepurchases++;
+            if ((int)($native->userid ?? 0) === $targetuserid) {
+                $nativepurchaseslinked++;
+            }
+        }
+
         return new CommerceLegacyDigitalIdentityLinkPreview(
             $legacyemail,
             $identity['firstname'],
@@ -83,6 +109,8 @@ final class CommerceLegacyDigitalIdentityLinkService {
             (string)$user->email,
             fullname($user),
             $identity['count'],
+            $nativepurchases,
+            $nativepurchaseslinked,
             $score,
             $reasons
         );
@@ -101,37 +129,37 @@ final class CommerceLegacyDigitalIdentityLinkService {
             );
         }
 
-        $transaction = $this->database->start_delegated_transaction();
+        $identity = $this->legacy_identity($legacyemail, $targetuserid);
+        $missingnative = 0;
 
-        $current = $this->preview($legacyemail, $targetuserid);
-        if (!$current->can_execute()) {
-            throw new \moodle_exception(
-                'commerce_identity_legacy_link_similarity_too_low',
-                'local_subscriptions'
+        foreach ($identity['ids'] as $legacyid) {
+            $result = $this->reconciliation->reconcile_legacy_digital_to_user(
+                $legacyid,
+                $targetuserid,
+                true
+            );
+
+            if ($result->status === 'not_found') {
+                $missingnative++;
+                continue;
+            }
+
+            if (!in_array($result->status, ['reconciled', 'unchanged'], true)) {
+                throw new \moodle_exception(
+                    'commerce_identity_legacy_link_similarity_too_low',
+                    'local_subscriptions'
+                );
+            }
+        }
+
+        if ($missingnative > 0) {
+            throw new \coding_exception(
+                'Legacy Digital identity link is missing a Native Commerce projection '
+                    . 'for ' . $missingnative . ' purchase(s).'
             );
         }
 
-        $emailcondition = $this->database->sql_equal(
-            'email',
-            ':legacyemail',
-            false
-        );
-
-        $this->database->execute(
-            'UPDATE {' . self::TABLE . '}
-                SET userid = :targetuserid,
-                    last_update = :now
-              WHERE userid IS NULL
-                AND status IN (\'paid\', \'completed\')
-                AND ' . $emailcondition,
-            [
-                'targetuserid' => $targetuserid,
-                'now' => time(),
-                'legacyemail' => $legacyemail,
-            ]
-        );
-
-        $transaction->allow_commit();
+        $current = $this->preview($legacyemail, $targetuserid);
 
         AdminLog::log(
             AdminEvents::USER_LEGACY_DIGITAL_LINKED,
@@ -142,6 +170,8 @@ final class CommerceLegacyDigitalIdentityLinkService {
                 'legacyemail' => $legacyemail,
                 'targetemail' => $current->targetemail,
                 'legacypurchases' => $current->legacypurchases,
+                'nativepurchases' => $current->nativepurchases,
+                'nativepurchaseslinked' => $current->nativepurchaseslinked,
                 'similarityscore' => $current->similarityscore,
                 'reasons' => $current->reasons,
                 'source' => 'legacy_digital_identity_link',
@@ -152,9 +182,12 @@ final class CommerceLegacyDigitalIdentityLinkService {
     }
 
     /**
-     * @return array{firstname:string,lastname:string,count:int}
+     * @return array{firstname:string,lastname:string,count:int,ids:int[]}
      */
-    private function legacy_identity(string $legacyemail): array {
+    private function legacy_identity(
+        string $legacyemail,
+        int $targetuserid
+    ): array {
         $emailcondition = $this->database->sql_equal(
             'email',
             ':legacyemail',
@@ -164,11 +197,14 @@ final class CommerceLegacyDigitalIdentityLinkService {
         $records = array_values($this->database->get_records_sql(
             'SELECT id,firstname,lastname
                FROM {' . self::TABLE . '}
-              WHERE userid IS NULL
+              WHERE (userid IS NULL OR userid = :targetuserid)
                 AND status IN (\'paid\', \'completed\')
                 AND ' . $emailcondition . '
            ORDER BY COALESCE(payment_date, creation_date) DESC, id DESC',
-            ['legacyemail' => $legacyemail]
+            [
+                'legacyemail' => $legacyemail,
+                'targetuserid' => $targetuserid,
+            ]
         ));
 
         $firstname = '';
@@ -189,6 +225,10 @@ final class CommerceLegacyDigitalIdentityLinkService {
             'firstname' => $firstname,
             'lastname' => $lastname,
             'count' => count($records),
+            'ids' => array_map(
+                static fn(\stdClass $record): int => (int)$record->id,
+                $records
+            ),
         ];
     }
 }

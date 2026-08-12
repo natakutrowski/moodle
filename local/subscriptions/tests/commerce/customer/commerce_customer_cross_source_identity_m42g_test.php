@@ -69,6 +69,10 @@ final class commerce_customer_cross_source_identity_m42g_test extends advanced_t
             'Дарья',
             'Зобнина'
         );
+        $nativepurchaseid = $this->create_native_projection(
+            $purchaseid,
+            'dzobninaa@gmail.com'
+        );
 
         $before = $DB->get_record(
             'user',
@@ -79,7 +83,8 @@ final class commerce_customer_cross_source_identity_m42g_test extends advanced_t
 
         $service = new CommerceLegacyDigitalIdentityLinkService(
             $DB,
-            new CommerceCustomerIdentitySimilarityService($DB)
+            new CommerceCustomerIdentitySimilarityService($DB),
+            new CommerceCustomerIdentityReconciliationService($DB)
         );
 
         $preview = $service->preview(
@@ -104,6 +109,14 @@ final class commerce_customer_cross_source_identity_m42g_test extends advanced_t
                 ['id' => $purchaseid]
             )
         );
+        self::assertSame(
+            (int)$moodleuser->id,
+            (int)$DB->get_field(
+                'local_subscriptions_commerce_purchase',
+                'userid',
+                ['id' => $nativepurchaseid]
+            )
+        );
 
         $after = $DB->get_record(
             'user',
@@ -116,6 +129,73 @@ final class commerce_customer_cross_source_identity_m42g_test extends advanced_t
         self::assertSame($before->firstname, $after->firstname);
         self::assertSame($before->lastname, $after->lastname);
         self::assertSame($before->suspended, $after->suspended);
+    }
+
+    public function test_link_refuses_partial_attachment_when_native_projection_is_missing(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $moodleuser = $this->getDataGenerator()->create_user([
+            'firstname' => 'даша',
+            'lastname' => 'Зобнина',
+            'email' => 'dzobnina06@gmail.com',
+        ]);
+
+        $this->create_legacy_purchase(
+            'dzobninaa@gmail.com',
+            'Дарья',
+            'Зобнина'
+        );
+
+        $service = new CommerceLegacyDigitalIdentityLinkService(
+            $DB,
+            new CommerceCustomerIdentitySimilarityService($DB),
+            new CommerceCustomerIdentityReconciliationService($DB)
+        );
+
+        $this->expectException(\coding_exception::class);
+        $this->expectExceptionMessage(
+            'Legacy Digital identity link is missing a Native Commerce projection for 1 purchase(s).'
+        );
+
+        $service->execute(
+            'dzobninaa@gmail.com',
+            (int)$moodleuser->id,
+            (int)get_admin()->id
+        );
+    }
+
+    private function create_native_projection(int $legacyid, string $email): int {
+        global $DB;
+
+        $reference = 'cmp_m42g_' . bin2hex(random_bytes(8));
+        $now = time();
+
+        return (int)$DB->insert_record(
+            'local_subscriptions_commerce_purchase',
+            (object)[
+                'purchaseuuid' => bin2hex(random_bytes(16)),
+                'reference' => $reference,
+                'type' => 'digital',
+                'legacyfamily' => 'digital',
+                'legacyid' => $legacyid,
+                'userid' => null,
+                'customeremail' => $email,
+                'status' => 'fulfilled',
+                'currency' => 'EUR',
+                'subtotalminor' => 990,
+                'discountminor' => 0,
+                'totalminor' => 990,
+                'customerjson' => '{}',
+                'snapshotjson' => '{}',
+                'metadatajson' => '{}',
+                'snapshotversion' => 1,
+                'timecreated' => $now,
+                'timemodified' => $now,
+            ]
+        );
     }
 
     private function create_legacy_purchase(

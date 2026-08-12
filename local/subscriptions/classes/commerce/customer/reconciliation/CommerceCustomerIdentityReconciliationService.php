@@ -225,6 +225,192 @@ final class CommerceCustomerIdentityReconciliationService {
         return $this->reconcile_purchase_record($purchase, reset($users), $execute);
     }
 
+    /**
+     * Explicitly reconcile one projected Legacy Digital purchase to a selected
+     * Moodle user, even when the historical buyer email differs from the
+     * Moodle account email.
+     *
+     * This is an administrator-confirmed cross-source path and is never used by
+     * automatic email reconciliation.
+     */
+    public function reconcile_legacy_digital_to_user(
+        int $legacyid,
+        int $userid,
+        bool $execute = false
+    ): CommerceCustomerIdentityReconciliationResult {
+        global $CFG;
+
+        if ($legacyid <= 0 || $userid <= 1) {
+            throw new \invalid_parameter_exception(
+                'A positive Legacy Digital id and Moodle userid are required.'
+            );
+        }
+
+        $user = $this->database->get_record(
+            'user',
+            [
+                'id' => $userid,
+                'deleted' => 0,
+                'mnethostid' => (int)$CFG->mnet_localhost_id,
+            ],
+            'id,email',
+            MUST_EXIST
+        );
+
+        $purchase = $this->database->get_record(
+            CommercePersistenceSchema::TABLE_PURCHASE,
+            [
+                'legacyfamily' => 'digital',
+                'legacyid' => $legacyid,
+            ],
+            '*',
+            IGNORE_MISSING
+        );
+
+        if ($purchase === false) {
+            return new CommerceCustomerIdentityReconciliationResult(
+                CommerceCustomerIdentityReconciliationResult::STATUS_NOT_FOUND,
+                null,
+                null,
+                null,
+                $userid
+            );
+        }
+
+        $legacy = $this->database->get_record(
+            self::TABLE_LEGACY_DIGITAL,
+            ['id' => $legacyid],
+            '*',
+            MUST_EXIST
+        );
+
+        if (
+            (!empty($purchase->userid) && (int)$purchase->userid !== $userid)
+            || (!empty($legacy->userid) && (int)$legacy->userid !== $userid)
+        ) {
+            return new CommerceCustomerIdentityReconciliationResult(
+                CommerceCustomerIdentityReconciliationResult::STATUS_AMBIGUOUS,
+                (int)$purchase->id,
+                (string)$purchase->reference,
+                $this->normalise_email((string)$purchase->customeremail) ?: null,
+                null
+            );
+        }
+
+        $email = $this->normalise_email((string)$purchase->customeremail);
+        if ($email === '') {
+            $email = $this->normalise_email((string)$legacy->email);
+        }
+
+        if (!$execute) {
+            return new CommerceCustomerIdentityReconciliationResult(
+                CommerceCustomerIdentityReconciliationResult::STATUS_MATCHED,
+                (int)$purchase->id,
+                (string)$purchase->reference,
+                $email !== '' ? $email : null,
+                $userid
+            );
+        }
+
+        $transaction = $this->database->start_delegated_transaction();
+
+        $current = $this->database->get_record(
+            CommercePersistenceSchema::TABLE_PURCHASE,
+            ['id' => (int)$purchase->id],
+            '*',
+            MUST_EXIST
+        );
+        $currentlegacy = $this->database->get_record(
+            self::TABLE_LEGACY_DIGITAL,
+            ['id' => $legacyid],
+            '*',
+            MUST_EXIST
+        );
+
+        if (
+            (!empty($current->userid) && (int)$current->userid !== $userid)
+            || (!empty($currentlegacy->userid) && (int)$currentlegacy->userid !== $userid)
+        ) {
+            $transaction->allow_commit();
+            return new CommerceCustomerIdentityReconciliationResult(
+                CommerceCustomerIdentityReconciliationResult::STATUS_AMBIGUOUS,
+                (int)$current->id,
+                (string)$current->reference,
+                $email !== '' ? $email : null,
+                null
+            );
+        }
+
+        $now = time();
+
+        if (empty($current->userid)) {
+            $this->database->update_record(
+                CommercePersistenceSchema::TABLE_PURCHASE,
+                (object)[
+                    'id' => (int)$current->id,
+                    'userid' => $userid,
+                    'timemodified' => $now,
+                ]
+            );
+        }
+
+        $grantsupdated = $email !== ''
+            ? $this->update_beneficiaries(
+                self::TABLE_GRANT,
+                (string)$current->reference,
+                $email,
+                $userid,
+                $now
+            )
+            : 0;
+
+        $digitalaccessupdated = $email !== ''
+            ? $this->update_beneficiaries(
+                self::TABLE_DIGITAL_ACCESS,
+                (string)$current->reference,
+                $email,
+                $userid,
+                $now
+            )
+            : 0;
+
+        $guestsessionsupdated = $email !== ''
+            ? $this->update_guest_sessions(
+                (string)$current->reference,
+                $email,
+                $userid,
+                $now
+            )
+            : 0;
+
+        $legacyrecordsupdated = 0;
+        if (empty($currentlegacy->userid)) {
+            $this->database->update_record(
+                self::TABLE_LEGACY_DIGITAL,
+                (object)[
+                    'id' => $legacyid,
+                    'userid' => $userid,
+                    'last_update' => $now,
+                ]
+            );
+            $legacyrecordsupdated = 1;
+        }
+
+        $transaction->allow_commit();
+
+        return new CommerceCustomerIdentityReconciliationResult(
+            CommerceCustomerIdentityReconciliationResult::STATUS_RECONCILED,
+            (int)$current->id,
+            (string)$current->reference,
+            $email !== '' ? $email : null,
+            $userid,
+            $grantsupdated,
+            $digitalaccessupdated,
+            $guestsessionsupdated,
+            $legacyrecordsupdated
+        );
+    }
+
     private function reconcile_purchase_record(
         \stdClass $purchase,
         \stdClass $user,
