@@ -35,6 +35,55 @@ final class CommerceGuestCheckoutService {
         return $this->sessions->create($currency, time() + self::ABANDONED_TTL, $metadata);
     }
 
+    /**
+     * Move an active provisional Guest Checkout session to another currency.
+     *
+     * The signed Personal Offer entry prepares the requested currency as the
+     * anonymous cart first. We then transfer that authoritative cart to the same
+     * provisional Moodle user instead of provisioning a second account/session.
+     */
+    public function switch_provisional_currency(
+        CommerceGuestCheckoutSession $session,
+        string $currency
+    ): CommerceGuestCheckoutSession {
+        $currency = strtoupper(trim($currency));
+        if (!preg_match('/^[A-Z]{3}$/', $currency)) {
+            throw new \coding_exception('Guest Checkout currency must use ISO 4217 format.');
+        }
+        if ($session->is_expired()
+                || $session->get_status() !== 'provisional'
+                || $session->get_user_id() === null) {
+            throw new \coding_exception(
+                'Only an active provisional Guest Checkout session can switch currency.'
+            );
+        }
+        if ($session->get_currency() === $currency) {
+            return $session;
+        }
+
+        $cart = $this->carts->transfer($session->get_user_id(), $currency);
+        if ($cart === null || $cart->is_empty()) {
+            throw new \moodle_exception(
+                'commerce_guest_checkout_identity_required',
+                'local_subscriptions'
+            );
+        }
+
+        $metadata = $session->get_metadata();
+        $metadata['currency_switched_at'] = time();
+        $metadata['currency_switched_from'] = $session->get_currency();
+        $metadata['cart_transferred'] = true;
+        $metadata['cart_uuid'] = $cart->get_uuid();
+        $metadata['cart_item_count'] = count($cart->get_items());
+
+        return $this->sessions->transition($session, 'provisional', [
+            'currency' => $currency,
+            'purchasereference' => null,
+            'paymentreference' => null,
+            'metadatajson' => $metadata,
+        ]);
+    }
+
     public function identify(
         CommerceGuestCheckoutSession $session,
         string $email,
