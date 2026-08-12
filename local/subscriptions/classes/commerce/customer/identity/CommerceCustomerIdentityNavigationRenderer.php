@@ -20,6 +20,7 @@ final class CommerceCustomerIdentityNavigationRenderer {
     public const SIMILARITIES = 'similarities';
     public const MERGE = 'merge';
     public const PROVISIONING = 'provisioning';
+    public const LEGACY_QUALITY = 'legacy_quality';
 
     public static function render(string $active): string {
         $items = [
@@ -57,6 +58,15 @@ final class CommerceCustomerIdentityNavigationRenderer {
                 ),
                 'url' => new moodle_url(
                     '/local/subscriptions/admin/commerce/customer-identities/provisioning.php'
+                ),
+            ],
+            self::LEGACY_QUALITY => [
+                'label' => get_string(
+                    'commerce_identity_nav_legacy_quality',
+                    'local_subscriptions'
+                ),
+                'url' => new moodle_url(
+                    '/local/subscriptions/admin/commerce/customer-identities/legacy-quality.php'
                 ),
             ],
         ];

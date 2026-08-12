@@ -42,8 +42,8 @@ final class commerce_e20_product_statistics_test extends \advanced_testcase {
         $page = file_get_contents($root . '/admin/commerce/products/view.php');
 
         self::assertIsString($page);
-        self::assertStringContainsString('$statisticsrepository->product_statistics_for_references(', $page);
-        self::assertStringContainsString('CommerceStatisticsChartRenderer::product(', $page);
+        self::assertStringContainsString('CommerceProductStatisticsDashboardRepository', $page);
+        self::assertStringContainsString('CommerceProductStatisticsDashboardRenderer', $page);
         self::assertStringContainsString("'fr' => '🇫🇷'", $page);
         self::assertStringContainsString("'en' => '🇬🇧'", $page);
         self::assertStringContainsString("'ru' => '🇷🇺'", $page);

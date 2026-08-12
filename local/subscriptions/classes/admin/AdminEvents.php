@@ -41,6 +41,9 @@ final class AdminEvents {
     public const USER_LEGACY_DIGITAL_LINKED =
         'user.legacy_digital.linked';
 
+    public const USER_LEGACY_DIGITAL_IDENTITY_UPDATED =
+        'user.legacy_digital.identity_updated';
+
     // Subscriptions.
     public const SUBSCRIPTION_CREATED =
         'subscription.created';
@@ -97,6 +100,9 @@ final class AdminEvents {
 
     public const COMMERCE_PURCHASE_NOTE_ADDED =
         'commerce.purchase.note_added';
+
+    public const COMMERCE_PERSONAL_OFFER_BENEFICIARY_CORRECTED =
+        'commerce.personal_offer.beneficiary_corrected';
 
     public const COMMERCE_PURCHASE_FULFILLMENT_CLOSED_WITHOUT_DELIVERY =
         'commerce.purchase.fulfillment_closed_without_delivery';
@@ -251,6 +257,7 @@ final class AdminEvents {
             self::USER_REACTIVATED,
             self::USER_LEGACY_DIGITAL_PROVISIONED,
             self::USER_LEGACY_DIGITAL_LINKED,
+            self::USER_LEGACY_DIGITAL_IDENTITY_UPDATED,
 
             self::SUBSCRIPTION_CREATED,
             self::SUBSCRIPTION_CREATED_MANUAL,
@@ -273,6 +280,7 @@ final class AdminEvents {
             self::COMMERCE_PURCHASE_FULFILLMENT_RETRIED,
             self::COMMERCE_PURCHASE_FULFILLMENT_CLOSED_WITHOUT_DELIVERY,
             self::COMMERCE_PURCHASE_NOTE_ADDED,
+            self::COMMERCE_PERSONAL_OFFER_BENEFICIARY_CORRECTED,
 
             self::PAYMENT_REQUEST_CREATED,
             self::PAYMENT_REQUEST_PAID,
