@@ -128,7 +128,8 @@ try {
                 $guestsession,
                 $email,
                 $firstname,
-                $lastname
+                $lastname,
+                $personalofferidentity !== null
             );
         }
 
