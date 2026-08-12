@@ -38,6 +38,9 @@ final class AdminEvents {
     public const USER_LEGACY_DIGITAL_PROVISIONED =
         'user.legacy_digital.provisioned';
 
+    public const USER_LEGACY_DIGITAL_LINKED =
+        'user.legacy_digital.linked';
+
     // Subscriptions.
     public const SUBSCRIPTION_CREATED =
         'subscription.created';
@@ -247,6 +250,7 @@ final class AdminEvents {
             self::USER_SUSPENDED,
             self::USER_REACTIVATED,
             self::USER_LEGACY_DIGITAL_PROVISIONED,
+            self::USER_LEGACY_DIGITAL_LINKED,
 
             self::SUBSCRIPTION_CREATED,
             self::SUBSCRIPTION_CREATED_MANUAL,

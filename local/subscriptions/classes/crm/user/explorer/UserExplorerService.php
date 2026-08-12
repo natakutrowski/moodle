@@ -129,7 +129,7 @@ final class UserExplorerService {
         string $sort
     ): int {
         $name = static function (\stdClass $record): string {
-            return core_text::strtolower(trim(
+            return \core_text::strtolower(trim(
                 (string)($record->lastname ?? '') . ' ' .
                 (string)($record->firstname ?? '') . ' ' .
                 (string)($record->email ?? '')

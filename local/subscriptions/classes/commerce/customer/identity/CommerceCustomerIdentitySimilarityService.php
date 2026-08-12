@@ -28,6 +28,7 @@ final class CommerceCustomerIdentitySimilarityService {
     public const REASON_FIRSTNAME_CLOSE = 'firstname_close';
     public const REASON_LASTNAME_CLOSE = 'lastname_close';
     public const REASON_PHONE_EXACT = 'phone_exact';
+    public const REASON_EMAIL_NAME_COMBINATION = 'email_name_combination';
 
     public function __construct(
         private readonly moodle_database $database
@@ -247,9 +248,9 @@ final class CommerceCustomerIdentitySimilarityService {
             } elseif (
                 strlen($a['emaillocal']) >= 5
                 && strlen($b['emaillocal']) >= 5
-                && $this->ratio($a['emaillocal'], $b['emaillocal']) >= 0.84
+                && $this->ratio($a['emaillocal'], $b['emaillocal']) >= 0.78
             ) {
-                $score += 25;
+                $score += 30;
                 $reasons[] = self::REASON_EMAIL_LOCAL_CLOSE;
             }
 
@@ -291,6 +292,15 @@ final class CommerceCustomerIdentitySimilarityService {
                     $score += 25;
                     $reasons[] = self::REASON_LASTNAME_CLOSE;
                 }
+            }
+
+            if (
+                in_array(self::REASON_EMAIL_LOCAL_CLOSE, $reasons, true)
+                && $a['lastname'] !== ''
+                && $a['lastname'] === $b['lastname']
+            ) {
+                $score += 15;
+                $reasons[] = self::REASON_EMAIL_NAME_COMBINATION;
             }
 
             if (
@@ -339,7 +349,7 @@ final class CommerceCustomerIdentitySimilarityService {
                 sort($parts, SORT_STRING);
                 $keys[] = 'nameparts:' . implode(':', $parts);
                 $keys[] = 'lastname:' . $profile['lastname']
-                    . ':' . substr($profile['firstname'], 0, 1);
+                    . ':' . core_text::substr($profile['firstname'], 0, 1);
             }
             foreach ($profile['phones'] as $phone) {
                 $keys[] = 'phone:' . $phone;
@@ -410,9 +420,17 @@ final class CommerceCustomerIdentitySimilarityService {
 
     private function normalise(string $value): string {
         $value = core_text::strtolower(trim($value));
-        $value = core_text::specialtoascii($value);
-        $value = preg_replace('/[^a-z0-9]+/', '', $value) ?? '';
-        return trim($value);
+
+        // Prefer Moodle's ASCII transliteration when available, but never
+        // discard non-Latin identities such as Cyrillic customer names.
+        $ascii = core_text::specialtoascii($value);
+        $ascii = preg_replace('/[^a-z0-9]+/', '', $ascii) ?? '';
+        if ($ascii !== '') {
+            return trim($ascii);
+        }
+
+        $unicode = preg_replace('/[^\p{L}\p{N}]+/u', '', $value) ?? '';
+        return trim($unicode);
     }
 
     private function ratio(string $first, string $second): float {

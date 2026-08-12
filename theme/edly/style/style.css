@@ -8557,3 +8557,10 @@ body.path-mod-readaloud #mod_readaloud_footernav_cont ol.main-nav > li .nav-link
         line-height: 1.16;
     }
 }
+
+
+/* CampusFR — hide the section navigation arrow only when the current user
+   is actually shown the dedicated locked-section cover. */
+.course-section:has(.campus-section-restricted-cover) .section_goto {
+    display: none !important;
+}

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/../../config.php');
 
+use local_subscriptions\admin\Capabilities;
+use local_subscriptions\url\CommerceCustomerProfileRouteResolver;
 use local_subscriptions\url\CommerceProductSlugService;
 use local_subscriptions\url\CommerceRouteRegistry;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomSlugService;
@@ -70,7 +72,24 @@ if ($route !== '') {
 
     if ($route === CommerceRouteRegistry::MY_PROFILE) {
         require_login();
-        redirect(new moodle_url('/user/profile.php', ['id' => (int)$USER->id]));
+
+        $requesteduserid = optional_param('id', 0, PARAM_INT);
+        $systemcontext = context_system::instance();
+        $canviewotherusers = is_siteadmin()
+            || Capabilities::can_view_users($systemcontext);
+
+        $profileuserid = CommerceCustomerProfileRouteResolver::resolve(
+            (int)$USER->id,
+            $requesteduserid,
+            $canviewotherusers
+        );
+
+        redirect(
+            new moodle_url(
+                '/user/profile.php',
+                ['id' => $profileuserid]
+            )
+        );
     }
 
     $target = CommerceRouteRegistry::target($route);
