@@ -4,6 +4,7 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignManager;
+use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferBeneficiaryCorrectionService;
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferMailService;
 use local_subscriptions\commerce\personaloffer\audience\CommercePersonalOfferAudienceProviderRegistry;
 use local_subscriptions\commerce\mail\admin\CommerceMailAdminPresentation;
@@ -21,6 +22,7 @@ $context = AdminSecurity::require(Capabilities::VIEW_PAYMENTS);
 $id = required_param('id', PARAM_INT);
 $manager = CommercePersonalOfferCampaignManager::create($DB);
 $mailservice = CommercePersonalOfferMailService::create($DB);
+$beneficiarycorrection = CommercePersonalOfferBeneficiaryCorrectionService::create($DB);
 $campaign = $manager->get_campaign($id);
 $url = new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_view.php', ['id' => $id]);
 CrmPageConfigurator::configure($PAGE, $context, $url, $campaign->name, 'local-subscriptions-commerce-personal-offer-campaign-view-page');
@@ -571,6 +573,23 @@ if ($members) {
             ? get_string($statuskey, 'local_subscriptions')
             : (string)$member->eligibilitystatus;
 
+        $messagehtml = s($reason !== '' ? $reason : '—');
+        if (
+            has_capability(Capabilities::MANAGE_CRM_ADMIN_TOOLS, $context)
+            && $beneficiarycorrection->can_correct($id, (int)$member->id)
+        ) {
+            $messagehtml .= html_writer::div(
+                html_writer::link(
+                    new moodle_url('/local/subscriptions/admin/commerce/personal-offers/correct-beneficiary.php', [
+                        'campaignid' => $id,
+                        'memberid' => (int)$member->id,
+                    ]),
+                    get_string('commerce_personal_offer_correct_beneficiary', 'local_subscriptions'),
+                    ['class' => 'btn btn-sm btn-outline-secondary mt-2']
+                )
+            );
+        }
+
         $table->data[] = [
             $checkbox,
             s($fullname !== '' ? $fullname : '—'),
@@ -581,7 +600,7 @@ if ($members) {
             $existingoffer,
             $offer,
             $mailstatus,
-            s($reason !== '' ? $reason : '—'),
+            $messagehtml,
         ];
     }
     echo html_writer::table($table);

@@ -19,10 +19,14 @@ use local_subscriptions\commerce\statistics\CommerceStatisticsFilter;
 use local_subscriptions\commerce\statistics\CommerceStatisticsPeriod;
 use local_subscriptions\commerce\statistics\CommerceStatisticsRepository;
 use local_subscriptions\commerce\statistics\CommerceStatisticsSeriesService;
+use local_subscriptions\commerce\statistics\CommerceStatisticsPeriodResolver;
+use local_subscriptions\commerce\statistics\product\CommerceProductStatisticsDashboardRepository;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
 use local_subscriptions\crm\commerce\presentation\CommerceProductPageHeaderRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\commerce\statistics\CommerceStatisticsChartRenderer;
+use local_subscriptions\crm\commerce\statistics\CommerceProductStatisticsDashboardRenderer;
+use local_subscriptions\crm\commerce\statistics\CommerceStatisticsBreakdownRenderer;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
@@ -34,7 +38,9 @@ $origin = optional_param('origin', '', PARAM_ALPHANUMEXT);
 $id = optional_param('id', 0, PARAM_INT);
 $sku = optional_param('sku', '', PARAM_RAW_TRIMMED);
 $statisticscurrency = strtoupper(optional_param('statscurrency', '', PARAM_ALPHA));
-$statisticsperiodkey = optional_param('statsperiod', '90', PARAM_ALPHANUMEXT);
+$statisticsperiodkey = optional_param('statsperiod', '30', PARAM_ALPHANUMEXT);
+$statisticsfrom = optional_param('statsfrom', '', PARAM_RAW_TRIMMED);
+$statisticsuntil = optional_param('statsuntil', '', PARAM_RAW_TRIMMED);
 $statisticschartmode = optional_param('statschartmode', 'instant', PARAM_ALPHA);
 if (!in_array($statisticschartmode, ['instant', 'cumulative'], true)) {
     $statisticschartmode = 'instant';
@@ -54,6 +60,8 @@ if ($details === null) { throw new moodle_exception('commerce_catalog_product_no
 $product = $details->get_summary();
 $pageurl = CommerceCatalogLinkGenerator::view_url($product);
 CrmPageConfigurator::configure($PAGE, $context, $pageurl, $product->get_name(), 'local-subscriptions-commerce-product-view-page');
+$PAGE->requires->css(new moodle_url('/local/subscriptions/styles/commerce_product_statistics.css'));
+$PAGE->requires->css(new moodle_url('/local/subscriptions/styles/commerce_statistics_breakdowns.css'));
 
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
@@ -321,143 +329,110 @@ if ($details->get_legacy_references() !== []) {
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-// Product performance spans the complete workspace width.
-$statisticsperiodoptions = [
-    '30' => get_string('commerce_statistics_period_30_days', 'local_subscriptions'),
-    '90' => get_string('commerce_statistics_period_90_days', 'local_subscriptions'),
-    '180' => get_string('commerce_statistics_period_180_days', 'local_subscriptions'),
-    '365' => get_string('commerce_statistics_period_365_days', 'local_subscriptions'),
-    'all' => get_string('commerce_statistics_period_all_time', 'local_subscriptions'),
-];
-if (!array_key_exists($statisticsperiodkey, $statisticsperiodoptions)) {
-    $statisticsperiodkey = '90';
-}
-$statisticsperiod = $statisticsperiodkey === 'all'
-    ? CommerceStatisticsPeriod::custom(0, time() + 1)
-    : CommerceStatisticsPeriod::last_days((int)$statisticsperiodkey);
-$statisticsrepository = new CommerceStatisticsRepository($DB);
+// M5.1 Product Statistics 2.0 — precise, payment-aware and reusable.
+$statisticsperiodoptions = CommerceStatisticsPeriodResolver::options();
+if (!array_key_exists($statisticsperiodkey, $statisticsperiodoptions)) { $statisticsperiodkey = '30'; }
+$statisticsperiod = CommerceStatisticsPeriodResolver::resolve($statisticsperiodkey, $statisticsfrom, $statisticsuntil);
 $productreferences = [$product->get_sku()];
 foreach ($details->get_legacy_references() as $reference) {
     if ($reference['table'] === 'subscription_plan') {
         $productreferences[] = 'subscription-plan:' . (int)$reference['id'];
     } else if ($reference['table'] === 'subscription_digital_product') {
         $productreferences[] = 'digital-product:' . (int)$reference['id'];
-        $legacyrecord = $DB->get_record(
-            'subscription_digital_product',
-            ['id' => (int)$reference['id']],
-            'slug',
-            IGNORE_MISSING
-        );
-        if ($legacyrecord && trim((string)$legacyrecord->slug) !== '') {
-            $productreferences[] = 'digital-product:' . trim((string)$legacyrecord->slug);
-        }
+        $legacyrecord = $DB->get_record('subscription_digital_product', ['id' => (int)$reference['id']], 'slug', IGNORE_MISSING);
+        if ($legacyrecord && trim((string)$legacyrecord->slug) !== '') { $productreferences[] = 'digital-product:' . trim((string)$legacyrecord->slug); }
     }
 }
 $productreferences = array_values(array_unique($productreferences));
-$availablecurrencies = [];
-foreach ($statisticsrepository->product_statistics_for_references($statisticsperiod, $productreferences) as $row) {
-    $availablecurrencies[$row->currency] = $row->currency;
+$m51repository = new CommerceProductStatisticsDashboardRepository($DB);
+$allstats = $m51repository->snapshot($statisticsperiod, $productreferences, $product->get_sku(), null);
+$availablecurrencies = array_combine(array_keys($allstats['currencies']), array_keys($allstats['currencies'])) ?: [];
+if ($statisticscurrency !== '' && !isset($availablecurrencies[$statisticscurrency])) { $statisticscurrency = ''; }
+$dashboard = $m51repository->snapshot(
+    $statisticsperiod,
+    $productreferences,
+    $product->get_sku(),
+    $statisticscurrency !== '' ? $statisticscurrency : null
+);
+$previousperiod = CommerceStatisticsPeriodResolver::previous($statisticsperiodkey, $statisticsperiod);
+$previousdashboard = $previousperiod !== null
+    ? $m51repository->snapshot(
+        $previousperiod,
+        $productreferences,
+        $product->get_sku(),
+        $statisticscurrency !== '' ? $statisticscurrency : null
+    )
+    : null;
+
+$comparisondescription = null;
+if ($previousperiod !== null) {
+    $comparisonrange = (object)[
+        'from' => userdate($previousperiod->start(), get_string('strftimedatetimeshort')),
+        'until' => userdate($previousperiod->end() - 1, get_string('strftimedatetimeshort')),
+    ];
+    $comparisondescription = $statisticsperiodkey === 'today'
+        ? get_string('commerce_m51_comparison_today', 'local_subscriptions', $comparisonrange)
+        : get_string('commerce_m51_comparison_previous', 'local_subscriptions', $comparisonrange);
 }
-ksort($availablecurrencies);
-if ($statisticscurrency !== '' && !isset($availablecurrencies[$statisticscurrency])) {
-    $statisticscurrency = '';
-}
-$productstatistics = $statisticsrepository->product_statistics_for_references(
-    $statisticsperiod,
-    $productreferences,
-    100,
-    $statisticscurrency !== '' ? $statisticscurrency : null
-);
-$productperformance = (new CommerceStatisticsSeriesService($statisticsrepository))
-    ->product($statisticsperiod, $productreferences, $statisticscurrency !== '' ? $statisticscurrency : null);
-$productorderseries = $statisticsrepository->product_order_series_for_references(
-    $statisticsperiod,
-    $productreferences,
-    $statisticscurrency !== '' ? $statisticscurrency : null
-);
-$productfailedpayments = $statisticsrepository->product_failed_payments_for_references(
-    $statisticsperiod,
-    $productreferences,
-    $statisticscurrency !== '' ? $statisticscurrency : null
-);
 
-$formatmoney = static function(int $minor, string $currency): string {
-    $major = $minor / 100;
-    if (class_exists('NumberFormatter')) {
-        $formatter = new \NumberFormatter(current_language(), \NumberFormatter::CURRENCY);
-        $formatted = $formatter->formatCurrency($major, $currency);
-        if ($formatted !== false) {
-            return $formatted;
-        }
-    }
-    return format_float($major, 2) . ' ' . $currency;
-};
+$revenueseries = $m51repository->revenue_series($statisticsperiod, $productreferences, $statisticscurrency !== '' ? $statisticscurrency : null);
+$deliveryseries = $m51repository->delivery_series($statisticsperiod, $productreferences, $product->get_sku(), $statisticscurrency !== '' ? $statisticscurrency : null);
+$formatmoney = static function(int $minor, string $currency): string { $major=$minor/100; if(class_exists('NumberFormatter')){$f=new \NumberFormatter(current_language(),\NumberFormatter::CURRENCY);$v=$f->formatCurrency($major,$currency);if($v!==false)return$v;}return format_float($major,2).' '.$currency; };
 
-echo html_writer::start_div('card card-body mb-4');
-echo html_writer::tag('h3', get_string('commerce_product_statistics_title', 'local_subscriptions'), ['class' => 'h5']);
-
+echo html_writer::start_div('m51-statistics-shell mb-4');
+echo html_writer::div(html_writer::tag('h3', get_string('commerce_m51_title','local_subscriptions'), ['class'=>'h4 mb-1']) . html_writer::div(get_string('commerce_m51_subtitle','local_subscriptions'),'text-muted'), 'mb-3');
 $filterurl = CommerceCatalogLinkGenerator::view_url($product);
-echo html_writer::start_tag('form', ['method' => 'get', 'action' => $filterurl->out_omit_querystring(), 'class' => 'row g-3 align-items-end mb-4']);
-foreach ($filterurl->params() as $name => $value) {
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
-}
-$currencyoptions = ['' => get_string('commerce_statistics_all_currencies', 'local_subscriptions')] + $availablecurrencies;
-echo html_writer::div(
-    html_writer::tag('label', get_string('currency'), ['for' => 'statscurrency', 'class' => 'form-label']) .
-    html_writer::select($currencyoptions, 'statscurrency', $statisticscurrency, false, ['id' => 'statscurrency', 'class' => 'form-select']),
-    'col-md-4'
-);
-echo html_writer::div(
-    html_writer::tag('label', get_string('commerce_statistics_period_label', 'local_subscriptions'), ['for' => 'statsperiod', 'class' => 'form-label']) .
-    html_writer::select($statisticsperiodoptions, 'statsperiod', $statisticsperiodkey, false, ['id' => 'statsperiod', 'class' => 'form-select']),
-    'col-md-4'
-);
-echo html_writer::div(
-    html_writer::tag('label', get_string('commerce_statistics_chart_mode', 'local_subscriptions'), ['for' => 'statschartmode', 'class' => 'form-label']) .
-    html_writer::select([
-        'instant' => get_string('commerce_statistics_chart_mode_instant', 'local_subscriptions'),
-        'cumulative' => get_string('commerce_statistics_chart_mode_cumulative', 'local_subscriptions'),
-    ], 'statschartmode', $statisticschartmode, false, ['id' => 'statschartmode', 'class' => 'form-select']),
-    'col-md-4'
-);
-echo html_writer::div(
-    html_writer::tag('button', get_string('filter'), ['type' => 'submit', 'class' => 'btn btn-primary']),
-    'col-12'
-);
+echo html_writer::start_tag('form',['method'=>'get','action'=>$filterurl->out_omit_querystring(),'class'=>'m51-stat-toolbar']);foreach($filterurl->params() as $name=>$value){echo html_writer::empty_tag('input',['type'=>'hidden','name'=>$name,'value'=>$value]);}
+$currencyoptions=[''=>get_string('commerce_statistics_all_currencies','local_subscriptions')]+$availablecurrencies;
+echo html_writer::div(html_writer::tag('label',get_string('currency'),['for'=>'statscurrency','class'=>'form-label']).html_writer::select($currencyoptions,'statscurrency',$statisticscurrency,false,['id'=>'statscurrency','class'=>'form-select']),'form-group');
+echo html_writer::div(html_writer::tag('label',get_string('commerce_statistics_period_label','local_subscriptions'),['for'=>'statsperiod','class'=>'form-label']).html_writer::select($statisticsperiodoptions,'statsperiod',$statisticsperiodkey,false,['id'=>'statsperiod','class'=>'form-select']),'form-group');
+$customstyle=$statisticsperiodkey==='custom'?'':'style="display:none"';
+echo '<div class="form-group m51-custom-range" '.$customstyle.'><div><label class="form-label">'.s(get_string('commerce_m51_from','local_subscriptions')).'</label><input class="form-control" type="date" name="statsfrom" value="'.s($statisticsfrom).'" /></div><div><label class="form-label">'.s(get_string('commerce_m51_until','local_subscriptions')).'</label><input class="form-control" type="date" name="statsuntil" value="'.s($statisticsuntil).'" /></div></div>';
+echo html_writer::div(html_writer::tag('button',get_string('filter'),['type'=>'submit','class'=>'btn btn-primary w-100']),'form-group');
+$exportparams=['sku'=>$product->get_sku(),'statsperiod'=>$statisticsperiodkey,'statsfrom'=>$statisticsfrom,'statsuntil'=>$statisticsuntil,'statscurrency'=>$statisticscurrency];
+echo html_writer::div(html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/statistics_export.php',$exportparams),get_string('commerce_m51_export_excel','local_subscriptions'),['class'=>'btn btn-outline-success w-100']),'form-group');
 echo html_writer::end_tag('form');
+echo '<script>document.addEventListener("DOMContentLoaded",function(){var s=document.getElementById("statsperiod"),r=document.querySelector(".m51-custom-range");if(s&&r){s.addEventListener("change",function(){r.style.display=this.value==="custom"?"flex":"none";});}document.querySelectorAll(".m52-revenue-mode").forEach(function(select){select.addEventListener("change",function(){var card=this.closest(".m52-revenue-card");if(!card)return;card.querySelector(".m52-revenue-chart--period").classList.toggle("d-none",this.value!=="period");card.querySelector(".m52-revenue-chart--cumulative").classList.toggle("d-none",this.value!=="cumulative");});});});</script>';
+echo CommerceProductStatisticsDashboardRenderer::comparison_note($comparisondescription);
+echo CommerceProductStatisticsDashboardRenderer::kpis(
+    $dashboard,
+    $formatmoney,
+    $previousdashboard
+);
+echo CommerceProductStatisticsDashboardRenderer::insights($dashboard, $previousdashboard, $formatmoney);
+echo CommerceProductStatisticsDashboardRenderer::payment_journey($dashboard);
+echo CommerceStatisticsBreakdownRenderer::render($dashboard, $formatmoney);
+$revenuehtml = CommerceProductStatisticsDashboardRenderer::revenue($OUTPUT, $revenueseries);
+$deliverieshtml = CommerceProductStatisticsDashboardRenderer::deliveries($OUTPUT, $deliveryseries);
+$piehtml = CommerceProductStatisticsDashboardRenderer::payment_pies($OUTPUT, $dashboard['payments']);
 
-if ($productstatistics === []) {
+if ($revenuehtml !== '' || $deliverieshtml !== '' || $piehtml !== '') {
+    echo html_writer::start_div('m51-chart-dashboard');
+
+    if ($revenuehtml !== '') {
+        echo html_writer::div($revenuehtml, 'm51-chart-section m51-chart-section--revenue');
+    }
+
+    if ($deliverieshtml !== '') {
+        echo html_writer::div(
+            $deliverieshtml,
+            'm51-chart-section m51-chart-section--deliveries'
+        );
+    }
+
+    if ($piehtml !== '') {
+        echo html_writer::div(
+            $piehtml,
+            'm51-chart-section m51-chart-section--payments'
+        );
+    }
+
+    echo html_writer::end_div();
+} else {
     echo html_writer::div(
         get_string('commerce_product_statistics_empty', 'local_subscriptions'),
         'alert alert-info mb-0'
     );
-} else {
-    $statisticsbycurrency = [];
-    foreach ($productstatistics as $row) {
-        $statisticsbycurrency[$row->currency] = $row;
-    }
-    foreach ($statisticsbycurrency as $currency => $row) {
-        echo html_writer::start_tag('section', ['class' => 'border rounded p-3 mb-4']);
-        echo html_writer::tag('h4', s($currency), ['class' => 'h5 mb-3']);
-        echo CommerceDesignSystemRenderer::metrics([
-            ['label' => get_string('commerce_statistics_product_orders', 'local_subscriptions'), 'value' => $row->orders],
-            ['label' => get_string('commerce_statistics_product_paid_orders', 'local_subscriptions'), 'value' => $row->paidorders],
-            ['label' => get_string('commerce_statistics_product_free_orders', 'local_subscriptions'), 'value' => $row->freeorders],
-            ['label' => get_string('commerce_statistics_product_quantity', 'local_subscriptions'), 'value' => $row->quantity],
-            ['label' => get_string('commerce_statistics_product_revenue', 'local_subscriptions'), 'value' => $formatmoney($row->revenueminor, $currency)],
-            ['label' => get_string('commerce_statistics_product_failed_payments', 'local_subscriptions'), 'value' => $productfailedpayments[$currency] ?? 0],
-        ]);
-        $series = $productperformance->series_by_currency();
-        if (isset($series[$currency])) {
-            echo CommerceStatisticsChartRenderer::product(
-                $OUTPUT,
-                [$currency => $series[$currency]],
-                isset($productorderseries[$currency]) ? [$currency => $productorderseries[$currency]] : [],
-                $statisticschartmode === 'cumulative'
-            );
-        }
-        echo html_writer::end_tag('section');
-    }
 }
 echo html_writer::end_div();
 
