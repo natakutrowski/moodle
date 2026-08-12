@@ -23,6 +23,7 @@ use local_subscriptions\commerce\digital\library\CommerceDigitalLibraryService;
 use local_subscriptions\support\Region;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\commerce\showroom\CommerceShowroomProductLinkService;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferShoppingContextService;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -44,6 +45,10 @@ $availablecurrencies = array_values(array_unique(array_filter(array_map(
 ))));
 if ($availablecurrencies === []) {
     $availablecurrencies = ['EUR', 'RUB'];
+}
+$personaloffercurrencies = CommercePersonalOfferShoppingContextService::create($DB)->available_currencies($sku);
+if ($personaloffercurrencies !== null && $personaloffercurrencies !== []) {
+    $availablecurrencies = array_values(array_intersect($availablecurrencies, $personaloffercurrencies));
 }
 
 $storedcurrency = isloggedin() && !isguestuser()
@@ -161,6 +166,27 @@ $data = (new CommerceStorefrontPagePresenter())->present(
     $currency,
     $returnnavigation['url']
 );
+$personalofferpricing = CommercePersonalOfferShoppingContextService::create($DB)->resolve(
+    $product->get_sku(),
+    $currency,
+    $showroomkey !== '' ? $showroomkey : null
+);
+if ($personalofferpricing !== null && isset($data['prices']) && is_array($data['prices'])) {
+    foreach ($data['prices'] as &$displayprice) {
+        if ((int)($displayprice['id'] ?? 0) !== $personalofferpricing['priceid']) {
+            continue;
+        }
+        $displayprice['formatted'] = $personalofferpricing['offerformatted'];
+        $displayprice['compareformatted'] = $personalofferpricing['hasdiscount']
+            ? $personalofferpricing['regularformatted'] : null;
+        $displayprice['haspromotion'] = $personalofferpricing['hasdiscount'];
+        $displayprice['discountlabel'] = $personalofferpricing['discountlabel'];
+        $displayprice['ispersonaloffer'] = true;
+    }
+    unset($displayprice);
+    $data['ispersonaloffer'] = true;
+}
+
 $data['backlabel'] = $returnnavigation['label'];
 $data['showbacklink'] = $returnnavigation['show'];
 $data['navigationparams'] = $returnnavigation['params'];

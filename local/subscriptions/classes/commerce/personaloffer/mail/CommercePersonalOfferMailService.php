@@ -58,7 +58,14 @@ final class CommercePersonalOfferMailService {
         if ($url === null) { throw new \coding_exception('Personal Offer has no valid secure token.'); }
         $product = $this->db->get_record(self::PRODUCT, ['id'=>$offer->get_target_product_id()], 'id,name,sku', MUST_EXIST);
         $user = $offer->get_beneficiary_user_id() ? $this->db->get_record('user', ['id'=>$offer->get_beneficiary_user_id(),'deleted'=>0], 'id,firstname,lastname,email,lang', IGNORE_MISSING) : null;
-        $campaign = $campaignid ? $this->db->get_record(self::CAMPAIGN, ['id'=>$campaignid], 'id,name,campaignkey', IGNORE_MISSING) : null;
+        $campaign = $campaignid
+            ? $this->db->get_record(
+                self::CAMPAIGN,
+                ['id' => $campaignid],
+                'id,name,campaignkey,validitymode,validitytimezone',
+                IGNORE_MISSING
+            )
+            : null;
         $name = $user ? trim((string)$user->firstname . ' ' . (string)$user->lastname) : '';
         if ($name === '' && $offer->get_source_purchase_id()) {
             $sourcepurchase = $this->db->get_record('local_subscriptions_commerce_purchase', ['id' => $offer->get_source_purchase_id()], 'customerjson', IGNORE_MISSING);
@@ -89,6 +96,8 @@ final class CommercePersonalOfferMailService {
                 'validfrom'=>$offer->get_valid_from(),
                 'expiresat'=>$offer->get_expires_at(),
                 'campaignid'=>$campaignid, 'campaignmemberid'=>$memberid,
+                'validitymode'=>$campaign ? (string)($campaign->validitymode ?? 'legacy') : 'legacy',
+                'validitytimezone'=>$campaign ? (string)($campaign->validitytimezone ?? 'Europe/Paris') : 'Europe/Paris',
                 'mailimageurl'=>$mailimageurl?->out(false) ?? '',
             ],
         ]);

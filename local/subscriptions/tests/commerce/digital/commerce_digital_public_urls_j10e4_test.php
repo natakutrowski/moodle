@@ -21,7 +21,7 @@ final class commerce_digital_public_urls_j10e4_test extends \advanced_testcase {
 
         $this->assertIsString($source);
         $this->assertStringContainsString(
-            'CommerceStorefrontUrlResolver::details($product)->out(false)',
+            'CommerceStorefrontUrlResolver::direct_storefront($product)->out(false)',
             $source
         );
         $this->assertStringContainsString(

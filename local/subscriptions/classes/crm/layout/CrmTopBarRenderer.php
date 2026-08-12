@@ -97,30 +97,7 @@ final class CrmTopBarRenderer {
                 $context
             )
         ) {
-            $out .= html_writer::link(
-                new moodle_url(
-                    subscription_config::moodle_admin_page()
-                ),
-                html_writer::span(
-                    '⚙',
-                    'crm-app-topbar-action-icon',
-                    [
-                        'aria-hidden' => 'true',
-                    ]
-                ) .
-                html_writer::span(
-                    get_string(
-                        'crm_topbar_moodle_admin',
-                        'local_subscriptions'
-                    ),
-                    'crm-app-topbar-action-label'
-                ),
-                [
-                    'class' =>
-                        'crm-app-topbar-action ' .
-                        'crm-app-topbar-admin-link',
-                ]
-            );
+            $out .= $this->render_moodle_admin_menu();
         }
 
         $out .= $this->render_language_menu();
@@ -137,6 +114,208 @@ final class CrmTopBarRenderer {
         $out .= html_writer::end_tag('header');
 
         return $out;
+    }
+
+    /**
+     * Renders the Moodle administration dropdown and frequent shortcuts.
+     *
+     * @return string
+     */
+    private function render_moodle_admin_menu(): string {
+        $togglecontent = html_writer::span(
+            '⚙',
+            'crm-app-topbar-action-icon',
+            [
+                'aria-hidden' => 'true',
+            ]
+        );
+
+        $togglecontent .= html_writer::span(
+            get_string(
+                'crm_topbar_moodle_admin',
+                'local_subscriptions'
+            ),
+            'crm-app-topbar-action-label'
+        );
+
+        $togglecontent .= html_writer::span(
+            '▾',
+            'crm-app-topbar-admin-chevron',
+            [
+                'aria-hidden' => 'true',
+            ]
+        );
+
+        $out = html_writer::start_tag(
+            'details',
+            [
+                'class' => 'crm-app-topbar-admin',
+            ]
+        );
+
+        $out .= html_writer::tag(
+            'summary',
+            $togglecontent,
+            [
+                'class' =>
+                    'crm-app-topbar-action ' .
+                    'crm-app-topbar-admin-toggle',
+                'aria-label' => get_string(
+                    'crm_topbar_moodle_admin',
+                    'local_subscriptions'
+                ),
+            ]
+        );
+
+        $out .= html_writer::start_tag(
+            'nav',
+            [
+                'class' => 'crm-app-topbar-admin-dropdown',
+                'aria-label' => get_string(
+                    'crm_topbar_moodle_admin',
+                    'local_subscriptions'
+                ),
+            ]
+        );
+
+        $out .= $this->render_moodle_admin_link(
+            new moodle_url(
+                subscription_config::moodle_admin_page()
+            ),
+            '⚙',
+            get_string(
+                'crm_topbar_moodle_admin',
+                'local_subscriptions'
+            ),
+            true
+        );
+
+        $adminsections = [
+            ['anchor' => 'linkroot', 'icon' => '⚙', 'string' => 'crm_topbar_admin_general'],
+            ['anchor' => 'linkusers', 'icon' => '👥', 'string' => 'crm_topbar_admin_users'],
+            ['anchor' => 'linkcourses', 'icon' => '📚', 'string' => 'crm_topbar_admin_courses'],
+            ['anchor' => 'linkgrades', 'icon' => '✓', 'string' => 'crm_topbar_admin_grades'],
+            ['anchor' => 'linkmodules', 'icon' => '🧩', 'string' => 'crm_topbar_admin_plugins'],
+            ['anchor' => 'linkappearance', 'icon' => '🎨', 'string' => 'crm_topbar_admin_appearance'],
+            ['anchor' => 'linkserver', 'icon' => '🖥', 'string' => 'crm_topbar_admin_server'],
+            ['anchor' => 'linkreports', 'icon' => '📊', 'string' => 'crm_topbar_admin_reports'],
+            ['anchor' => 'linkdevelopment', 'icon' => '⌨', 'string' => 'crm_topbar_admin_development'],
+        ];
+
+        foreach ($adminsections as $adminsection) {
+            $adminurl = new moodle_url('/admin/search.php');
+            $adminurl->set_anchor($adminsection['anchor']);
+
+            $out .= $this->render_moodle_admin_link(
+                $adminurl,
+                $adminsection['icon'],
+                get_string(
+                    $adminsection['string'],
+                    'local_subscriptions'
+                )
+            );
+        }
+
+        $out .= html_writer::div(
+            get_string(
+                'crm_topbar_admin_shortcuts',
+                'local_subscriptions'
+            ),
+            'crm-app-topbar-admin-section-label'
+        );
+
+        $out .= $this->render_moodle_admin_link(
+            new moodle_url('/admin/purgecaches.php'),
+            '🧹',
+            get_string(
+                'crm_topbar_admin_purge_caches',
+                'local_subscriptions'
+            )
+        );
+
+        $out .= $this->render_moodle_admin_link(
+            new moodle_url(
+                '/admin/settings.php',
+                ['section' => 'maintenancemode']
+            ),
+            '🛠',
+            get_string(
+                'crm_topbar_admin_maintenance_mode',
+                'local_subscriptions'
+            )
+        );
+
+        $out .= $this->render_moodle_admin_link(
+            new moodle_url(
+                '/admin/settings.php',
+                ['section' => 'local_subscriptions_settings']
+            ),
+            '💳',
+            get_string(
+                'crm_topbar_admin_subscriptions_config',
+                'local_subscriptions'
+            )
+        );
+
+        $out .= $this->render_moodle_admin_link(
+            new moodle_url(
+                '/admin/settings.php',
+                ['section' => 'local_campus_settings']
+            ),
+            '🏫',
+            get_string(
+                'crm_topbar_admin_campus_config',
+                'local_subscriptions'
+            )
+        );
+
+        $out .= html_writer::end_tag('nav');
+        $out .= html_writer::end_tag('details');
+
+        return $out;
+    }
+
+    /**
+     * Renders one entry in the Moodle administration dropdown.
+     *
+     * @param moodle_url $url Destination URL.
+     * @param string $icon Visual icon.
+     * @param string $label Link label.
+     * @param bool $primary Whether this is the main Moodle administration link.
+     * @return string
+     */
+    private function render_moodle_admin_link(
+        moodle_url $url,
+        string $icon,
+        string $label,
+        bool $primary = false
+    ): string {
+        $classes = 'crm-app-topbar-admin-option';
+
+        if ($primary) {
+            $classes .= ' crm-app-topbar-admin-option-primary';
+        }
+
+        $content = html_writer::span(
+            $icon,
+            'crm-app-topbar-admin-option-icon',
+            [
+                'aria-hidden' => 'true',
+            ]
+        );
+
+        $content .= html_writer::span(
+            s($label),
+            'crm-app-topbar-admin-option-label'
+        );
+
+        return html_writer::link(
+            $url,
+            $content,
+            [
+                'class' => $classes,
+            ]
+        );
     }
 
     /**
@@ -271,9 +450,19 @@ final class CrmTopBarRenderer {
      * @return string
      */
     private function render_user_menu(): string {
-        global $OUTPUT, $PAGE, $USER;
+        global $DB, $OUTPUT, $PAGE, $USER;
 
         $fullname = fullname($USER);
+        $sitecontext = \context_course::instance(SITEID);
+        $roleswitched = is_role_switched(SITEID);
+        $currentrolename = '';
+
+        if ($roleswitched) {
+            $roleid = (int)($USER->access['rsw'][$sitecontext->path] ?? 0);
+            if ($roleid > 0 && ($role = $DB->get_record('role', ['id' => $roleid]))) {
+                $currentrolename = role_get_name($role, $sitecontext, ROLENAME_BOTH);
+            }
+        }
 
         $picture = $OUTPUT->user_picture(
             $USER,
@@ -285,14 +474,26 @@ final class CrmTopBarRenderer {
             ]
         );
 
+        $summaryidentity = html_writer::span(
+            s($fullname),
+            'crm-app-topbar-user-name'
+        );
+
+        if ($currentrolename !== '') {
+            $summaryidentity .= html_writer::span(
+                s($currentrolename),
+                'crm-app-topbar-user-role'
+            );
+        }
+
         $summarycontent =
             html_writer::span(
                 $picture,
                 'crm-app-topbar-user-avatar'
             ) .
             html_writer::span(
-                s($fullname),
-                'crm-app-topbar-user-name'
+                $summaryidentity,
+                'crm-app-topbar-user-identity'
             ) .
             html_writer::span(
                 '▾',
@@ -327,7 +528,8 @@ final class CrmTopBarRenderer {
 
         $out .= $this->render_user_menu_header(
             $picture,
-            $fullname
+            $fullname,
+            $currentrolename
         );
 
         $out .= html_writer::start_tag(
@@ -406,30 +608,38 @@ final class CrmTopBarRenderer {
             )
         );
 
-        if (
-            has_capability(
-                'moodle/role:switchroles',
-                $PAGE->context
-            )
-        ) {
+        $canswitchrole = $roleswitched || has_capability(
+            'moodle/role:switchroles',
+            $sitecontext
+        );
+
+        if ($canswitchrole) {
             $returnurl = $PAGE->url
                 ->out_as_local_url(false);
+            $switchroleparams = [
+                'id' => SITEID,
+                'returnurl' => $returnurl,
+            ];
+            if ($roleswitched) {
+                $switchroleparams['switchrole'] = 0;
+                $switchroleparams['sesskey'] = sesskey();
+            } else {
+                $switchroleparams['switchrole'] = -1;
+            }
 
             $out .= $this->render_user_menu_link(
                 new moodle_url(
                     subscription_config::
                         moodle_switch_role_page(),
-                    [
-                        'id' => SITEID,
-                        'switchrole' => -1,
-                        'returnurl' => $returnurl,
-                    ]
+                    $switchroleparams
                 ),
                 '👤',
-                get_string(
-                    'crm_topbar_switch_role',
-                    'local_subscriptions'
-                )
+                $roleswitched
+                    ? get_string('switchrolereturn')
+                    : get_string(
+                        'crm_topbar_switch_role',
+                        'local_subscriptions'
+                    )
             );
         }
 
@@ -470,11 +680,13 @@ final class CrmTopBarRenderer {
      *
      * @param string $picture Rendered user picture.
      * @param string $fullname User full name.
+     * @param string $currentrolename Current switched role name, if any.
      * @return string
      */
     private function render_user_menu_header(
         string $picture,
-        string $fullname
+        string $fullname,
+        string $currentrolename = ''
     ): string {
         $profileurl = new moodle_url(
             subscription_config::
@@ -494,6 +706,13 @@ final class CrmTopBarRenderer {
             s($fullname),
             'crm-app-topbar-menu-fullname'
         );
+
+        if ($currentrolename !== '') {
+            $content .= html_writer::div(
+                s($currentrolename),
+                'crm-app-topbar-menu-current-role'
+            );
+        }
 
         $content .= html_writer::link(
             $profileurl,

@@ -6,6 +6,12 @@ require_once(__DIR__ . '/../../../../../config.php');
 
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomCmsRepository;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPortablePackageService;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\help\CrmPageHeader;
+use local_subscriptions\crm\help\HelpContext;
 
 require_login();
 
@@ -19,17 +25,18 @@ if ($showroom === null) {
     throw new moodle_exception('invalidrecord');
 }
 
-$PAGE->set_context($context);
-$PAGE->set_url(
+$pageurl = new moodle_url(
     '/local/subscriptions/admin/commerce/showrooms/export_portable_preflight.php',
     ['id' => $id]
 );
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(
-    get_string('commerce_showroom_export_portable', 'local_subscriptions')
-);
-$PAGE->set_heading(
-    get_string('commerce_showroom_export_portable', 'local_subscriptions')
+$pagetitle = get_string('commerce_showroom_export_portable', 'local_subscriptions');
+
+CrmPageConfigurator::configure(
+    $PAGE,
+    $context,
+    $pageurl,
+    $pagetitle,
+    'local-subscriptions-showroom-export-page'
 );
 
 $service = new CommerceShowroomPortablePackageService(
@@ -43,6 +50,27 @@ $enoughdisk = $stats['freetempbytes'] === 0
     || $stats['freetempbytes'] >= $stats['requiredfreetempbytes'];
 
 echo $OUTPUT->header();
+echo CrmWorkspaceRenderer::start(CrmNavigationKeys::SHOWROOMS, $context);
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php'),
+    ],
+    [
+        'label' => get_string('commerce_showroom_cms_title', 'local_subscriptions'),
+        'url' => new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+echo CrmPageHeader::render(
+    $pagetitle,
+    null,
+    HelpContext::COMMERCE
+);
+
 echo $OUTPUT->heading(
     get_string('commerce_showroom_export_preflight_title', 'local_subscriptions')
 );
@@ -124,4 +152,5 @@ echo html_writer::link(
     ['class' => 'btn btn-outline-secondary']
 );
 
+echo CrmWorkspaceRenderer::end();
 echo $OUTPUT->footer();

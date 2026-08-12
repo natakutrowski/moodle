@@ -41,7 +41,15 @@ final class CommercePersonalOfferCheckoutPricingService {
             throw new \moodle_exception('commerce_personal_offer_target_mismatch', 'local_subscriptions');
         }
 
-        $terms = $offer->get_terms();
+        return $this->resolve_from_terms($offer->get_terms(), $currency, $catalogunitminor);
+    }
+
+    /** Server-authoritative pricing formula shared by checkout and campaign previews. */
+    public function resolve_from_terms(
+        CommercePersonalOfferTerms $terms,
+        string $currency,
+        int $catalogunitminor
+    ): int {
         $currency = strtoupper(trim($currency));
         return match ($terms->get_pricing_strategy()) {
             CommercePersonalOfferTerms::STRATEGY_FIXED_PRICE => $this->require_currency_amount($terms, $currency),

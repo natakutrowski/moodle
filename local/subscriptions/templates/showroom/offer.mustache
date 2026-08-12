@@ -17,7 +17,16 @@
                 {{#hascompareprice}}<del data-showroom-compare-price>{{compareformatted}}</del>{{/hascompareprice}}
                 {{#haspromotion}}<span class="commerce-showroom-offer__discount" data-showroom-discount>{{discountlabel}}</span>{{/haspromotion}}
             </div>
-            <strong data-showroom-price>{{priceformatted}}</strong>
+            <div class="commerce-showroom-offer__price-row">
+                <strong data-showroom-price>{{priceformatted}}</strong>
+                {{#ispersonaloffer}}
+                <span class="commerce-showroom-offer__personal-badge commerce-personal-offer-badge">
+                    <i class="fa-solid fa-star commerce-personal-offer-badge__star commerce-personal-offer-badge__star--left" aria-hidden="true"></i>
+                    <span>{{personalofferbadge}}</span>
+                    <i class="fa-solid fa-star commerce-personal-offer-badge__star commerce-personal-offer-badge__star--right" aria-hidden="true"></i>
+                </span>
+                {{/ispersonaloffer}}
+            </div>
         </div>
         <div class="commerce-showroom-offer__actions">
             {{#canbuy}}

@@ -142,6 +142,35 @@ final class CommerceCustomerIdentityReconciliationService {
         );
     }
 
+    /** Build a read-only impact preview for one unresolved purchase. */
+    public function preview_purchase(int $purchaseid): CommerceCustomerIdentityReconciliationPreview {
+        $result = $this->reconcile_purchase($purchaseid, false);
+        if (
+            $result->status !== CommerceCustomerIdentityReconciliationResult::STATUS_MATCHED
+            || $result->userid === null
+            || $result->purchaseid === null
+        ) {
+            return new CommerceCustomerIdentityReconciliationPreview($result);
+        }
+
+        $purchase = $this->database->get_record(
+            CommercePersistenceSchema::TABLE_PURCHASE,
+            ['id' => $result->purchaseid],
+            '*',
+            MUST_EXIST
+        );
+        $email = $this->normalise_email((string)$purchase->customeremail);
+
+        return new CommerceCustomerIdentityReconciliationPreview(
+            $result,
+            1,
+            $this->count_beneficiaries(self::TABLE_GRANT, (string)$purchase->reference, $email),
+            $this->count_beneficiaries(self::TABLE_DIGITAL_ACCESS, (string)$purchase->reference, $email),
+            $this->count_guest_sessions((string)$purchase->reference, $email),
+            $this->count_legacy_digital_source($purchase, $email)
+        );
+    }
+
     /**
      * Inspect or reconcile one unresolved purchase by its Native Commerce id.
      *
@@ -301,6 +330,42 @@ final class CommerceCustomerIdentityReconciliationService {
             ],
             0,
             2
+        );
+    }
+
+    private function count_beneficiaries(string $table, string $purchasereference, string $email): int {
+        $emailcondition = $this->database->sql_equal('beneficiaryemail', ':beneficiaryemail', false);
+        return (int)$this->database->count_records_sql(
+            'SELECT COUNT(1) FROM {' . $table . '}
+              WHERE purchasereference = :purchasereference
+                AND beneficiaryuserid IS NULL
+                AND ' . $emailcondition,
+            ['purchasereference' => $purchasereference, 'beneficiaryemail' => $email]
+        );
+    }
+
+    private function count_guest_sessions(string $purchasereference, string $email): int {
+        $emailcondition = $this->database->sql_equal('email', ':email', false);
+        return (int)$this->database->count_records_sql(
+            'SELECT COUNT(1) FROM {' . self::TABLE_GUEST . '}
+              WHERE purchasereference = :purchasereference
+                AND userid IS NULL
+                AND ' . $emailcondition,
+            ['purchasereference' => $purchasereference, 'email' => $email]
+        );
+    }
+
+    private function count_legacy_digital_source(\stdClass $purchase, string $email): int {
+        if ((string)($purchase->legacyfamily ?? '') !== 'digital' || empty($purchase->legacyid)) {
+            return 0;
+        }
+        $emailcondition = $this->database->sql_equal('email', ':email', false);
+        return (int)$this->database->count_records_sql(
+            'SELECT COUNT(1) FROM {' . self::TABLE_LEGACY_DIGITAL . '}
+              WHERE id = :legacyid
+                AND userid IS NULL
+                AND ' . $emailcondition,
+            ['legacyid' => (int)$purchase->legacyid, 'email' => $email]
         );
     }
 

@@ -15,6 +15,7 @@ const SELECTORS = {
     commandCenter: '.campusfr-command-center',
     commandTrigger: '.campusfr-command-trigger',
     topbarDetails:
+        '.crm-app-topbar-admin, ' +
         '.crm-app-topbar-language, ' +
         '.crm-app-topbar-user',
     main: '#local-subscriptions-crm-main'

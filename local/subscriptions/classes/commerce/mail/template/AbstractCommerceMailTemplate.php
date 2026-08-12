@@ -46,6 +46,8 @@ abstract class AbstractCommerceMailTemplate implements CommerceMailTemplate {
                 ]
                 : $defaults + ['templateid' => 0];
 
+            $editorial = $this->resolve_editorial($request, $context, $editorial);
+
             if ($this->get_type() === CommerceMailType::PURCHASE_RECEIPT) {
                 $legacyoutros = [
                     '<p>Votre facture sera jointe à cet e-mail dès l’activation de cette fonctionnalité. Vous pouvez déjà consulter votre commande à tout moment depuis votre espace CampusFR.</p>',
@@ -134,6 +136,9 @@ abstract class AbstractCommerceMailTemplate implements CommerceMailTemplate {
             if (!empty($editorial['headerimage']) && !empty($editorial['templateid'])) {
                 $headerimageurl = CommerceMailHeaderImageService::url((int)$editorial['templateid']);
             }
+            if (!empty($editorial['headerimageurl'])) {
+                $headerimageurl = trim((string)$editorial['headerimageurl']);
+            }
 
             $body = $this->render_body($this->template_name(), $context);
             [$html, $text] = MailRenderer::layout(
@@ -175,6 +180,18 @@ abstract class AbstractCommerceMailTemplate implements CommerceMailTemplate {
     /** @return array<string,mixed> */
     protected function additional_context(CommerceMailRequest $request): array {
         return [];
+    }
+
+    /**
+     * Allow a specialised template to replace editorial copy while preserving
+     * the shared CampusFR mail shell and Mail Studio fallback.
+     *
+     * @param array<string,mixed> $context
+     * @param array<string,mixed> $editorial
+     * @return array<string,mixed>
+     */
+    protected function resolve_editorial(CommerceMailRequest $request, array $context, array $editorial): array {
+        return $editorial;
     }
 
     /** @return \local_subscriptions\commerce\mail\CommerceMailAttachment[] */

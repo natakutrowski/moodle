@@ -20,7 +20,8 @@ final class commerce_showroom_stabilisation_j13h21_test extends \advanced_testca
         self::assertIsString($edit);
         self::assertIsString($status);
         self::assertStringContainsString('CommerceShowroomStatus::label', $index);
-        self::assertStringContainsString('CommerceShowroomStatus::options()', $edit);
+        self::assertStringNotContainsString('CommerceShowroomStatus::options()', $edit);
+        self::assertStringContainsString('commerce_showroom_status_workflow_only', $edit);
         self::assertStringContainsString("\$_SERVER['REQUEST_METHOD'] === 'POST'", $edit);
         self::assertStringContainsString('require_sesskey();', $edit);
         self::assertStringNotContainsString('if ($id > 0 && confirm_sesskey())', $edit);

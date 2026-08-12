@@ -146,6 +146,83 @@ echo CommerceDesignSystemRenderer::panel(
     )
 );
 
+$emailconfig = \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService::create($DB)->get($id);
+$emailtranslations = array_keys($emailconfig['translations']);
+$emaildestination = $emailconfig['config']
+    ? (string)$emailconfig['config']->ctadestination
+    : \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService::DESTINATION_CHECKOUT;
+$emailshowroomname = '';
+if ($emaildestination === \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService::DESTINATION_SHOWROOM && $emailconfig['config'] && !empty($emailconfig['config']->showroomid)) {
+    $emailshowroomname = (string)$DB->get_field('local_subs_showroom', 'name', ['id' => (int)$emailconfig['config']->showroomid], IGNORE_MISSING);
+}
+$emailready = $emailtranslations !== [];
+$destinationready = $emaildestination !== \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService::DESTINATION_SHOWROOM || $emailshowroomname !== '';
+$audienceready = $summary['eligible'] > 0 || in_array((string)$campaign->status, ['snapshot', 'issued', 'closed'], true);
+$snapshotready = !empty($campaign->snapshotat) || in_array((string)$campaign->status, ['snapshot', 'issued', 'closed'], true);
+$issuedready = in_array((string)$campaign->status, ['issued', 'closed'], true);
+$workflowitems = [
+    [true, 'commerce_personal_offer_workflow_commercial', 'commerce_personal_offer_workflow_commercial_ready'],
+    [$emailready && $destinationready, 'commerce_personal_offer_workflow_email', $emailready && $destinationready ? 'commerce_personal_offer_workflow_email_ready' : 'commerce_personal_offer_workflow_email_missing'],
+    [$audienceready, 'commerce_personal_offer_workflow_audience', $audienceready ? 'commerce_personal_offer_workflow_audience_ready' : 'commerce_personal_offer_workflow_audience_missing'],
+    [$snapshotready, 'commerce_personal_offer_workflow_snapshot', $snapshotready ? 'commerce_personal_offer_workflow_snapshot_ready' : 'commerce_personal_offer_workflow_snapshot_missing'],
+    [$issuedready, 'commerce_personal_offer_workflow_issue', $issuedready ? 'commerce_personal_offer_workflow_issue_ready' : 'commerce_personal_offer_workflow_issue_missing'],
+];
+$workflowcontent = html_writer::start_div('list-group list-group-flush');
+foreach ($workflowitems as [$ready, $labelkey, $detailkey]) {
+    $detail = $detailkey === 'commerce_personal_offer_workflow_audience_ready'
+        ? get_string($detailkey, 'local_subscriptions', (int)$summary['eligible'])
+        : get_string($detailkey, 'local_subscriptions');
+    $workflowcontent .= html_writer::div(
+        html_writer::tag('strong', ($ready ? '✓ ' : '○ ') . get_string($labelkey, 'local_subscriptions'), ['class' => $ready ? 'text-success' : 'text-muted']) .
+        html_writer::div($detail, 'small text-muted ms-4'),
+        'list-group-item px-0'
+    );
+}
+$workflowcontent .= html_writer::end_div();
+if (has_capability(\local_subscriptions\admin\Capabilities::MANAGE_CRM_ADMIN_TOOLS, $context)) {
+    $workflowcontent .= html_writer::start_div('d-flex flex-wrap gap-2 mt-3');
+    $workflowcontent .= html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_email.php', ['id' => $id]), get_string('commerce_personal_offer_workflow_configure_email', 'local_subscriptions'), ['class' => 'btn btn-outline-primary']);
+    $workflowcontent .= html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_email_preview.php', ['id' => $id]), get_string('commerce_personal_offer_workflow_preview_test', 'local_subscriptions'), ['class' => 'btn btn-outline-secondary']);
+    $workflowcontent .= html_writer::link(new moodle_url($url, ['anchor' => 'campaign-audience']), get_string('commerce_personal_offer_workflow_view_audience', 'local_subscriptions'), ['class' => 'btn btn-outline-secondary']);
+    $workflowcontent .= html_writer::end_div();
+}
+echo CommerceDesignSystemRenderer::panel(get_string('commerce_personal_offer_workflow_title', 'local_subscriptions'), html_writer::div(get_string('commerce_personal_offer_workflow_help', 'local_subscriptions'), 'text-muted mb-2') . $workflowcontent, 'mt-3');
+
+$emailcontent = html_writer::tag(
+    'p',
+    $emailtranslations === []
+        ? get_string('commerce_personal_offer_campaign_email_fallback_active', 'local_subscriptions')
+        : get_string('commerce_personal_offer_campaign_email_languages_configured', 'local_subscriptions', strtoupper(implode(', ', $emailtranslations))),
+    ['class' => 'mb-2']
+);
+$emailcontent .= html_writer::tag(
+    'p',
+    get_string('commerce_personal_offer_campaign_email_destination_summary', 'local_subscriptions') . ': ' .
+    s(get_string('commerce_personal_offer_campaign_email_destination_' . $emaildestination, 'local_subscriptions')),
+    ['class' => 'text-muted mb-3']
+);
+if ($emailshowroomname !== '') {
+    $emailcontent .= html_writer::tag('p', get_string('commerce_personal_offer_workflow_showroom', 'local_subscriptions') . ': ' . s($emailshowroomname) . html_writer::tag('span', ' · ' . get_string('commerce_personal_offer_workflow_direct_checkout_also', 'local_subscriptions'), ['class' => 'small text-muted']), ['class' => 'mb-3']);
+}
+if (has_capability(\local_subscriptions\admin\Capabilities::MANAGE_CRM_ADMIN_TOOLS, $context)) {
+    $emailcontent .= html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_email.php', ['id' => $id]),
+        get_string('commerce_personal_offer_campaign_email_manage', 'local_subscriptions'),
+        ['class' => 'btn btn-outline-primary']
+    );
+    $emailcontent .= ' ' . html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_email_preview.php', ['id' => $id]),
+        get_string('commerce_personal_offer_campaign_email_preview', 'local_subscriptions'),
+        ['class' => 'btn btn-outline-secondary']
+    );
+}
+echo CommerceDesignSystemRenderer::panel(
+    get_string('commerce_personal_offer_campaign_email_title', 'local_subscriptions'),
+    $emailcontent,
+    'mt-3'
+);
+
+
 
 if ($campaign->status === 'snapshot' || !empty($campaign->snapshotat)) {
     echo CommerceDesignSystemRenderer::panel(
@@ -395,6 +472,8 @@ echo html_writer::div(
     html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/mail/index.php', ['mailtype' => 'personal_offer']), get_string('commerce_personal_offer_mail_log', 'local_subscriptions'), ['class' => 'btn btn-sm btn-outline-secondary']),
     'mb-4'
 );
+
+echo html_writer::tag('div', '', ['id' => 'campaign-audience']);
 
 if ($campaign->audiencetype === 'criteria') {
     echo html_writer::div(get_string('commerce_personal_offer_criteria_generated_list_help', 'local_subscriptions'), 'alert alert-info mt-4');

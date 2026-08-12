@@ -118,7 +118,7 @@ final class commerce_showroom_cms_autonomous_j16s10_test extends \advanced_testc
             'blockkey' => 'hero',
             'sortorder' => 10,
             'enabled' => true,
-            'configjson' => '{}',
+            'configjson' => '{"title":"Autonomous hero"}',
         ], 2);
 
         $publication = new CommerceShowroomPublicationService(

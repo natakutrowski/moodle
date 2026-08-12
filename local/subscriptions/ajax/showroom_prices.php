@@ -10,6 +10,7 @@ use local_subscriptions\commerce\showroom\CommerceShowroomCurrencyResolver;
 use local_subscriptions\commerce\showroom\CommerceShowroomProductResolver;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitionResolver;
 use local_subscriptions\commerce\order\invoice\CommerceInvoiceProfileResolver;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferShoppingContextService;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -24,6 +25,17 @@ try {
     $available = CommerceShowroomCurrencyResolver::active_currencies($DB);
     if (!in_array($currency, $available, true)) {
         throw new invalid_parameter_exception('Unsupported currency.');
+    }
+    foreach ($definition->get_products() as $personalsku) {
+        $personaloffercurrencies = CommercePersonalOfferShoppingContextService::create($DB)
+            ->available_currencies((string)$personalsku);
+        if ($personaloffercurrencies === null) {
+            continue;
+        }
+        if (!in_array($currency, $personaloffercurrencies, true)) {
+            throw new invalid_parameter_exception('Unsupported Personal Offer currency.');
+        }
+        break;
     }
 
     $offers = CommerceShowroomProductResolver::create($DB)->resolve(

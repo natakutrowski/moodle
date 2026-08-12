@@ -35,6 +35,9 @@ final class AdminEvents {
     public const USER_REACTIVATED =
         'user.reactivated';
 
+    public const USER_LEGACY_DIGITAL_PROVISIONED =
+        'user.legacy_digital.provisioned';
+
     // Subscriptions.
     public const SUBSCRIPTION_CREATED =
         'subscription.created';
@@ -243,6 +246,7 @@ final class AdminEvents {
             self::USER_NOTE_ADDED,
             self::USER_SUSPENDED,
             self::USER_REACTIVATED,
+            self::USER_LEGACY_DIGITAL_PROVISIONED,
 
             self::SUBSCRIPTION_CREATED,
             self::SUBSCRIPTION_CREATED_MANUAL,

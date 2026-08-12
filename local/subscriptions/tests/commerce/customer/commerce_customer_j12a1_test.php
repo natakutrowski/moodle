@@ -30,7 +30,7 @@ final class commerce_customer_j12a1_test extends \advanced_testcase {
             'commerce-storefront__filters-chevron',
             $catalog
         );
-        self::assertStringContainsString('{{#showbacktoshop}}', $panel);
+        self::assertStringContainsString('{{#showbacklink}}', $panel);
         self::assertStringContainsString(
             "\$data['showbacktoshop']",
             $page

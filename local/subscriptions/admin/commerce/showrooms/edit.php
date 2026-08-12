@@ -20,6 +20,7 @@ use local_subscriptions\commerce\catalog\domain\CommerceProductType;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 
 require_login();
 require_capability('local/subscriptions:manage_showrooms', context_system::instance());
@@ -263,6 +264,21 @@ if ($id > 0) {
 
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::SHOWROOMS, $context);
+echo CrmBreadcrumbRenderer::render([
+    [
+        'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+        'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php'),
+    ],
+    [
+        'label' => get_string('commerce_showroom_cms_title', 'local_subscriptions'),
+        'url' => new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'),
+    ],
+    [
+        'label' => $pagetitle,
+        'url' => null,
+    ],
+]);
+
 echo html_writer::start_div('commerce-showroom-admin commerce-showroom-admin--crm');
 echo html_writer::start_div('d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4');
 echo html_writer::start_div('d-flex align-items-center gap-2');

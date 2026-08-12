@@ -46,6 +46,20 @@ final class CommercePersonalOfferCampaignManager {
         if ($this->db->record_exists(self::CAMPAIGN, ['campaignkey' => $key])) { throw new \coding_exception('Campaign key already exists.'); }
         $audience = (string)($data['audiencetype'] ?? self::AUDIENCE_CRITERIA);
         if (!in_array($audience, [self::AUDIENCE_CRITERIA, self::AUDIENCE_LIST], true)) { throw new \coding_exception('Invalid audience type.'); }
+        $validitymode = CommercePersonalOfferCampaignValidityService::normalise_mode(
+            (string)($data['validitymode'] ?? CommercePersonalOfferCampaignValidityService::MODE_LEGACY)
+        );
+        $validityduration = isset($data['validityduration']) ? (int)$data['validityduration'] : null;
+        if ($validitymode === CommercePersonalOfferCampaignValidityService::MODE_DURATION
+            && ($validityduration === null || $validityduration <= 0)) {
+            throw new \coding_exception('Personal Offer campaign duration must be positive.');
+        }
+        $validfrom = isset($data['validfrom']) ? (int)$data['validfrom'] : null;
+        $expiresat = isset($data['expiresat']) ? (int)$data['expiresat'] : null;
+        if ($validitymode === CommercePersonalOfferCampaignValidityService::MODE_FIXED
+            && ($expiresat === null || ($validfrom !== null && $expiresat <= $validfrom))) {
+            throw new \coding_exception('A valid fixed Personal Offer campaign expiration is required.');
+        }
         $now=time();
         return (int)$this->db->insert_record(self::CAMPAIGN, (object)[
             'campaignkey'=>$key, 'name'=>trim((string)$data['name']), 'audiencetype'=>$audience,
@@ -53,7 +67,10 @@ final class CommercePersonalOfferCampaignManager {
             'targetproductid'=>(int)$data['targetproductid'], 'termsversion'=>(int)($data['termsversion'] ?? 1),
             'termsjson'=>json_encode($data['terms'], JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES),
             'criteriajson'=>json_encode($data['criteria'] ?? [], JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES),
-            'validfrom'=>$data['validfrom'] ?? null, 'expiresat'=>$data['expiresat'] ?? null,
+            'validfrom'=>$validfrom, 'expiresat'=>$expiresat,
+            'validitymode'=>$validitymode,
+            'validityduration'=>$validityduration,
+            'validitytimezone'=>CommercePersonalOfferCampaignValidityService::normalise_timezone((string)($data['validitytimezone'] ?? CommercePersonalOfferCampaignValidityService::DEFAULT_TIMEZONE)),
             'status'=>self::STATUS_DRAFT, 'timecreated'=>$now, 'timemodified'=>$now, 'usercreated'=>$userid, 'usermodified'=>$userid,
         ]);
     }
@@ -266,6 +283,9 @@ final class CommercePersonalOfferCampaignManager {
             'criteriajson' => (string)$campaign->criteriajson,
             'validfrom' => empty($campaign->validfrom) ? null : (int)$campaign->validfrom,
             'expiresat' => empty($campaign->expiresat) ? null : (int)$campaign->expiresat,
+            'validitymode' => (string)($campaign->validitymode ?? CommercePersonalOfferCampaignValidityService::MODE_LEGACY),
+            'validityduration' => empty($campaign->validityduration) ? null : (int)$campaign->validityduration,
+            'validitytimezone' => (string)($campaign->validitytimezone ?? CommercePersonalOfferCampaignValidityService::DEFAULT_TIMEZONE),
             'members' => [],
         ];
 
@@ -402,6 +422,7 @@ final class CommercePersonalOfferCampaignManager {
                     continue;
                 }
 
+                $validity = (new CommercePersonalOfferCampaignValidityService())->resolve($campaign, time());
                 $result = $this->offers->issue(new CommercePersonalOfferIssueRequest(
                     'crm-campaign:' . $campaign->campaignkey . ':' . $member->memberkey,
                     (int)$campaign->targetproductid,
@@ -410,8 +431,8 @@ final class CommercePersonalOfferCampaignManager {
                     (string)$campaign->campaignkey,
                     empty($member->purchaseid) ? null : (int)$member->purchaseid,
                     empty($member->userid) ? null : (int)$member->userid,
-                    empty($campaign->validfrom) ? null : (int)$campaign->validfrom,
-                    empty($campaign->expiresat) ? null : (int)$campaign->expiresat,
+                    $validity['validfrom'],
+                    $validity['expiresat'],
                     array_filter([
                         'campaignsource' => 'crm_ui',
                         'eligibilitymode' => 'campaign_snapshot',
@@ -419,6 +440,8 @@ final class CommercePersonalOfferCampaignManager {
                         'campaignkey' => (string)$campaign->campaignkey,
                         'campaignname' => (string)$campaign->name,
                         'campaignmemberid' => (int)$member->id,
+                        'validitymode' => (string)($campaign->validitymode ?? CommercePersonalOfferCampaignValidityService::MODE_LEGACY),
+                        'validitytimezone' => (string)($campaign->validitytimezone ?? CommercePersonalOfferCampaignValidityService::DEFAULT_TIMEZONE),
                         'audiencetype' => (string)$campaign->audiencetype,
                         'sourceproductsku' => $campaign->sourceproductsku !== null
                             ? (string)$campaign->sourceproductsku

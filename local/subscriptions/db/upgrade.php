@@ -7901,5 +7901,171 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026080905, 'local', 'subscriptions');
     }
 
+
+    if ($oldversion < 2026081101) {
+        // M3A: per-campaign Personal Offer email configuration and translations.
+        $config = new xmldb_table('local_subs_commerce_offer_campaign_email_config');
+        $config->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $config->add_field('campaignid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $config->add_field('ctadestination', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'checkout');
+        $config->add_field('showroomid', XMLDB_TYPE_INTEGER, '10');
+        $config->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $config->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $config->add_field('usercreated', XMLDB_TYPE_INTEGER, '10');
+        $config->add_field('usermodified', XMLDB_TYPE_INTEGER, '10');
+        $config->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $config->add_key(
+            'campaign_fk',
+            XMLDB_KEY_FOREIGN_UNIQUE,
+            ['campaignid'],
+            'local_subs_commerce_offer_campaign',
+            ['id']
+        );
+        $config->add_key('showroom_fk', XMLDB_KEY_FOREIGN, ['showroomid'], 'local_subs_showroom', ['id']);
+        if (!$dbman->table_exists($config)) {
+            $dbman->create_table($config);
+        }
+
+        $content = new xmldb_table('local_subs_commerce_offer_campaign_email_content');
+        $content->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $content->add_field('campaignid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $content->add_field('language', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL);
+        $content->add_field('subject', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $content->add_field('body', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $content->add_field('bodyformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
+        $content->add_field('ctalabel', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $content->add_field('closing', XMLDB_TYPE_TEXT);
+        $content->add_field('closingformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
+        $content->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $content->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $content->add_field('usercreated', XMLDB_TYPE_INTEGER, '10');
+        $content->add_field('usermodified', XMLDB_TYPE_INTEGER, '10');
+        $content->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $content->add_key(
+            'campaign_fk',
+            XMLDB_KEY_FOREIGN,
+            ['campaignid'],
+            'local_subs_commerce_offer_campaign',
+            ['id']
+        );
+        $content->add_index('campaign_language_uix', XMLDB_INDEX_UNIQUE, ['campaignid', 'language']);
+        if (!$dbman->table_exists($content)) {
+            $dbman->create_table($content);
+        }
+
+        // No backfill by design: absence of M3A rows means the legacy Personal
+        // Offer email renderer remains authoritative for existing campaigns.
+        upgrade_plugin_savepoint(true, 2026081101, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026081102) {
+        // M4.2D: auditable customer identity merge execution.
+        $merge = new xmldb_table('local_subs_identity_merge');
+        $merge->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $merge->add_field('mergeuuid', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+        $merge->add_field('targetuserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $merge->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'completed');
+        $merge->add_field('planjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $merge->add_field('resultjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $merge->add_field('performedby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $merge->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $merge->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $merge->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $merge->add_index('mergeuuid_uix', XMLDB_INDEX_UNIQUE, ['mergeuuid']);
+        $merge->add_index('target_time_idx', XMLDB_INDEX_NOTUNIQUE, ['targetuserid', 'timecreated']);
+        $merge->add_index('actor_time_idx', XMLDB_INDEX_NOTUNIQUE, ['performedby', 'timecreated']);
+        if (!$dbman->table_exists($merge)) {
+            $dbman->create_table($merge);
+        }
+
+        $source = new xmldb_table('local_subs_identity_merge_source');
+        $source->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $source->add_field('mergeid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $source->add_field('sourceuserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $source->add_field('sourceemail', XMLDB_TYPE_CHAR, '254');
+        $source->add_field('wassuspended', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $source->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $source->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $source->add_key(
+            'merge_fk',
+            XMLDB_KEY_FOREIGN,
+            ['mergeid'],
+            'local_subs_identity_merge',
+            ['id']
+        );
+        $source->add_index('merge_source_uix', XMLDB_INDEX_UNIQUE, ['mergeid', 'sourceuserid']);
+        $source->add_index('source_user_idx', XMLDB_INDEX_NOTUNIQUE, ['sourceuserid']);
+        if (!$dbman->table_exists($source)) {
+            $dbman->create_table($source);
+        }
+
+        upgrade_plugin_savepoint(true, 2026081102, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026081103) {
+        // M3G.1: fixed local date/time or duration from Personal Offer issuance.
+        $table = new xmldb_table('local_subs_commerce_offer_campaign');
+        $field = new xmldb_field('validitymode', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'legacy', 'expiresat');
+        if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+        $field = new xmldb_field('validityduration', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'validitymode');
+        if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+        $field = new xmldb_field('validitytimezone', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, 'Europe/Paris', 'validityduration');
+        if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+        upgrade_plugin_savepoint(true, 2026081103, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026081202) {
+        // M3 schema repair: fresh-install schema and upgraded databases must expose
+        // the same campaign validity fields. Intentionally idempotent.
+        $table = new xmldb_table('local_subs_commerce_offer_campaign');
+
+        $field = new xmldb_field(
+            'validitymode',
+            XMLDB_TYPE_CHAR,
+            '20',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            'legacy',
+            'expiresat'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field(
+            'validityduration',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+            null,
+            null,
+            'validitymode'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field(
+            'validitytimezone',
+            XMLDB_TYPE_CHAR,
+            '64',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            'Europe/Paris',
+            'validityduration'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026081202, 'local', 'subscriptions');
+    }
+
     return true;
 }
