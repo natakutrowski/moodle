@@ -13,13 +13,15 @@ final class CommerceCustomerMergeExecutionResult {
     /**
      * @param int[] $sourceuserids
      * @param array<string,int> $transfers
+     * @param array<string,mixed> $certification
      */
     public function __construct(
         public readonly int $mergeid,
         public readonly string $mergeuuid,
         public readonly int $targetuserid,
         public readonly array $sourceuserids,
-        public readonly array $transfers
+        public readonly array $transfers,
+        public readonly array $certification
     ) {
     }
 }

@@ -9,11 +9,10 @@ defined('MOODLE_INTERNAL') || die();
 use moodle_database;
 
 /**
- * Executes only the identity transfers certified safe by M4.2D.
+ * Executes and certifies a CampusFR customer account merge.
  *
- * Moodle pedagogical history is never rewritten. A source account containing
- * pedagogical history, or unsupported Legacy subscription ownership, is a hard
- * blocker and cannot be suspended by this service.
+ * Learning state, commercial ownership and CRM references are consolidated in one
+ * transaction. Mandatory post-merge integrity checks must pass before commit.
  */
 final class CommerceCustomerMergeExecutionService {
     private const AUDIT = 'local_subs_identity_merge';
@@ -23,6 +22,7 @@ final class CommerceCustomerMergeExecutionService {
     public const BLOCK_LEGACY_SUBSCRIPTION = 'legacy_subscription';
     public const BLOCK_ALREADY_MERGED = 'already_merged';
     public const BLOCK_SUSPENDED_TARGET = 'suspended_target';
+    public const BLOCK_PRIVILEGED_ACCOUNT = CommerceCustomerLearningMergeService::BLOCK_PRIVILEGED_ACCOUNT;
 
     public function __construct(
         private readonly moodle_database $database,
@@ -33,7 +33,7 @@ final class CommerceCustomerMergeExecutionService {
     /**
      * @return array<int,array{type:string,userid:int,count:int}>
      */
-    public function blockers(CommerceCustomerMergePlan $plan): array {
+    public function blockers(CommerceCustomerMergePlan $plan, array $learningresolutions = []): array {
         $blockers = [];
 
         if ((int)$plan->target_profile()->user->suspended === 1) {
@@ -44,31 +44,27 @@ final class CommerceCustomerMergeExecutionService {
             ];
         }
 
+        $learning = new CommerceCustomerLearningMergeService($this->database);
+        $seen = [];
         foreach ($plan->source_profiles() as $profile) {
             $userid = $profile->userid();
 
-            if ($profile->has_pedagogical_history()) {
-                $blockers[] = [
-                    'type' => self::BLOCK_PEDAGOGICAL_HISTORY,
-                    'userid' => $userid,
-                    'count' =>
-                        $profile->enrolledcourses
-                        + $profile->completedactivities
-                        + $profile->gradecount,
-                ];
+            foreach ($learning->blockers($userid, $plan->targetuserid) as $blocker) {
+                $key = $blocker['type'] . ':' . $blocker['userid'];
+                if (!isset($seen[$key])) {
+                    $seen[$key] = true;
+                    $blockers[] = $blocker;
+                }
             }
-
-            $legacy = $this->database->count_records('user_subscription', [
-                'userid' => $userid,
-            ]) + $this->database->count_records('subscription_payment_request', [
-                'userid' => $userid,
-            ]);
-            if ($legacy > 0) {
-                $blockers[] = [
-                    'type' => self::BLOCK_LEGACY_SUBSCRIPTION,
-                    'userid' => $userid,
-                    'count' => $legacy,
-                ];
+            foreach ($learning->conflicts($userid, $plan->targetuserid) as $conflict) {
+                if (!in_array($learningresolutions[$conflict['id']] ?? '', ['source', 'target'], true)) {
+                    $blockers[] = [
+                        'type' => CommerceCustomerLearningMergeService::BLOCK_UNRESOLVED_CONFLICT,
+                        'userid' => $userid,
+                        'count' => 1,
+                        'conflictid' => $conflict['id'],
+                    ];
+                }
             }
 
             if ($this->database->record_exists(self::AUDIT_SOURCE, [
@@ -88,7 +84,8 @@ final class CommerceCustomerMergeExecutionService {
     public function execute(
         array $userids,
         int $targetuserid,
-        int $actoruserid
+        int $actoruserid,
+        array $learningresolutions = []
     ): CommerceCustomerMergeExecutionResult {
         global $CFG;
 
@@ -96,7 +93,7 @@ final class CommerceCustomerMergeExecutionService {
 
         // Rebuild from current DB state at the exact moment of execution.
         $plan = $this->planner->build($userids, $targetuserid);
-        $blockers = $this->blockers($plan);
+        $blockers = $this->blockers($plan, $learningresolutions);
         if ($blockers !== []) {
             throw new \moodle_exception(
                 'commerce_identity_merge_execution_blocked',
@@ -105,6 +102,18 @@ final class CommerceCustomerMergeExecutionService {
         }
 
         $target = $plan->target_profile()->user;
+        $sourceuserids = array_map(
+            static fn(CommerceCustomerMergeAccountProfile $profile): int => $profile->userid(),
+            $plan->source_profiles()
+        );
+        $learningservice = new CommerceCustomerLearningMergeService($this->database);
+        $premergeconflicts = [];
+        foreach ($sourceuserids as $sourceuserid) {
+            foreach ($learningservice->conflicts($sourceuserid, $targetuserid) as $conflict) {
+                $premergeconflicts[] = $conflict;
+            }
+        }
+
         $now = time();
         $transaction = $this->database->start_delegated_transaction();
 
@@ -114,8 +123,17 @@ final class CommerceCustomerMergeExecutionService {
             'digitalaccesses' => 0,
             'guestsessions' => 0,
             'legacydigital' => 0,
+            'legacysubscriptions' => 0,
+            'legacypaymentrequests' => 0,
+            'legacyreminders' => 0,
             'offers' => 0,
             'promouses' => 0,
+            'offercampaignmembers' => 0,
+            'grantcampaignmembers' => 0,
+            'commerceemails' => 0,
+            'automationhistory' => 0,
+            'csplans' => 0,
+            'worktargets' => 0,
             'notes' => 0,
             'tags' => 0,
             'tagsdeduplicated' => 0,
@@ -124,59 +142,23 @@ final class CommerceCustomerMergeExecutionService {
             'suspendedaccounts' => 0,
         ];
 
+        $legacyservice = new CommerceCustomerLegacyConsolidationService($this->database);
+
         foreach ($plan->source_profiles() as $profile) {
             $sourceuserid = $profile->userid();
 
-            $transfers['purchases'] += $this->move_simple(
-                'local_subscriptions_commerce_purchase',
-                'userid',
+            foreach ($learningservice->merge($sourceuserid, $targetuserid, $learningresolutions) as $key => $count) {
+                $transferkey = 'learning_' . $key;
+                $transfers[$transferkey] = ($transfers[$transferkey] ?? 0) + $count;
+            }
+
+            foreach ($legacyservice->merge(
                 $sourceuserid,
                 $targetuserid,
-                true
-            );
-            $transfers['grants'] += $this->move_simple(
-                'local_subs_commerce_grant',
-                'beneficiaryuserid',
-                $sourceuserid,
-                $targetuserid,
-                true
-            );
-            $transfers['digitalaccesses'] += $this->move_simple(
-                'local_subs_commerce_dig_access',
-                'beneficiaryuserid',
-                $sourceuserid,
-                $targetuserid,
-                true
-            );
-            $transfers['guestsessions'] += $this->move_simple(
-                'local_subs_commerce_guest',
-                'userid',
-                $sourceuserid,
-                $targetuserid,
-                true
-            );
-            $transfers['legacydigital'] += $this->move_simple(
-                'subscription_digital_payment_request',
-                'userid',
-                $sourceuserid,
-                $targetuserid,
-                false,
-                'last_update'
-            );
-            $transfers['offers'] += $this->move_simple(
-                'local_subs_commerce_offer',
-                'beneficiaryuserid',
-                $sourceuserid,
-                $targetuserid,
-                true
-            );
-            $transfers['promouses'] += $this->move_simple(
-                'local_subs_commerce_promouse',
-                'userid',
-                $sourceuserid,
-                $targetuserid,
-                true
-            );
+                (string)$target->email
+            ) as $key => $count) {
+                $transfers[$key] = ($transfers[$key] ?? 0) + $count;
+            }
             $transfers['notes'] += $this->move_simple(
                 'local_subscriptions_user_note',
                 'userid',
@@ -218,15 +200,25 @@ final class CommerceCustomerMergeExecutionService {
             }
         }
 
+        $certification = (new CommerceCustomerMergeCertificationService($this->database))->certify(
+            $sourceuserids,
+            $targetuserid,
+            (string)$target->email,
+            $premergeconflicts,
+            $learningresolutions
+        );
+        if (!$certification['passed']) {
+            throw new \moodle_exception('commerce_identity_merge_certification_failed', 'local_subscriptions');
+        }
+
         $mergeuuid = bin2hex(random_bytes(16));
         $planpayload = $this->plan_payload($plan);
         $resultpayload = [
             'targetuserid' => $targetuserid,
-            'sourceuserids' => array_map(
-                static fn(CommerceCustomerMergeAccountProfile $p): int => $p->userid(),
-                $plan->source_profiles()
-            ),
+            'sourceuserids' => $sourceuserids,
             'transfers' => $transfers,
+            'learningresolutions' => $learningresolutions,
+            'certification' => $certification,
         ];
 
         $mergeid = (int)$this->database->insert_record(self::AUDIT, (object)[
@@ -263,7 +255,8 @@ final class CommerceCustomerMergeExecutionService {
             $mergeuuid,
             $targetuserid,
             $resultpayload['sourceuserids'],
-            $transfers
+            $transfers,
+            $certification
         );
     }
 

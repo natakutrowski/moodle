@@ -8366,14 +8366,14 @@ $string['commerce_personal_offer_campaign_email_preview_help'] = 'Безопас
 $string['commerce_personal_offer_campaign_email_preview_refresh'] = 'Обновить';
 $string['commerce_personal_offer_campaign_email_test_send'] = 'Отправить тестовое письмо';
 $string['commerce_personal_offer_campaign_email_test_sent'] = 'Тестовое письмо отправлено на {$a}.';
-$string['commerce_identity_merge_blockers'] = 'Автоматическое объединение заблокировано';
-$string['commerce_identity_merge_blocker_pedagogy'] = 'В исходном аккаунте #{$a->userid} есть учебная история ({$a->count} сигналов). Его нужно сохранить доступным или обработать вручную.';
-$string['commerce_identity_merge_blocker_legacy_subscription'] = 'В исходном аккаунте #{$a->userid} есть {$a->count} Legacy-запись(ей) подписки/платежа, перенос которых не сертифицирован для автоматической операции.';
+$string['commerce_identity_merge_blockers'] = 'Проверки, необходимые перед объединением';
+$string['commerce_identity_merge_blocker_pedagogy'] = 'В объединяемом аккаунте #{$a->userid} есть учебная история, требующая проверки ({$a->count} элемент(ов)).';
+$string['commerce_identity_merge_blocker_legacy_subscription'] = 'В объединяемом аккаунте #{$a->userid} есть {$a->count} коммерческих записей, требующих проверки.';
 $string['commerce_identity_merge_blocker_already_merged'] = 'Исходный аккаунт #{$a->userid} уже использовался как источник в предыдущем объединении.';
 $string['commerce_identity_merge_blocker_suspended_target'] = 'Основной аккаунт #{$a->userid} заблокирован.';
 $string['commerce_identity_merge_blocker_generic'] = 'Объединение содержит блокирующий фактор и требует ручной проверки.';
-$string['commerce_identity_merge_execution_warning'] = 'Операция выполняется транзакционно, но не отменяется из интерфейса: сертифицированные данные Commerce/CRM будут перенесены, а исходные аккаунты — заблокированы. Учебные данные никогда не переписываются.';
-$string['commerce_identity_merge_execution_confirm'] = 'Я подтверждаю, что проверил(а) dry-run и хочу объединить эти профили.';
+$string['commerce_identity_merge_execution_warning'] = 'Действие выполняется транзакционно, но его нельзя отменить через интерфейс: учебное состояние, владение Legacy/Commerce и CRM-данные личности будут объединены в сохраняемом аккаунте, после чего исходные аккаунты будут приостановлены. Исторические журналы аудита сохраняются.';
+$string['commerce_identity_merge_execution_confirm'] = 'Я подтверждаю, что проверил(а) предпросмотр и хочу окончательно объединить эти аккаунты.';
 $string['commerce_identity_merge_execute'] = 'Выполнить объединение';
 $string['commerce_identity_merge_confirmation_required'] = 'Необходимо явно подтвердить объединение.';
 $string['commerce_identity_merge_execution_blocked'] = 'Объединение заблокировано: один или несколько аккаунтов содержат данные, которые нельзя безопасно перенести автоматически.';
@@ -8400,8 +8400,6 @@ $string['crm_topbar_admin_subscriptions_config'] = 'Настройки Commerce'
 $string['crm_topbar_admin_campus_config'] = 'Настройки Campus';
 $string['commerce_identity_nav_merge'] = 'Объединить профили';
 $string['commerce_identity_merge_title'] = 'Объединение аккаунтов';
-$string['commerce_identity_merge_description'] = 'Сравните несколько аккаунтов, выберите основной и предварительно просмотрите объединение без изменения данных.';
-$string['commerce_identity_merge_dryrun_only'] = 'Только dry-run: на этом этапе аккаунты и данные не изменяются.';
 $string['commerce_identity_merge_ids'] = 'ID Moodle для сравнения';
 $string['commerce_identity_merge_preview'] = 'Предпросмотр объединения';
 $string['commerce_identity_merge_select_account'] = 'Выбрать аккаунт Moodle #{$a}';
@@ -8428,12 +8426,11 @@ $string['commerce_identity_merge_virtual_profile'] = 'Симуляция ито�
 $string['commerce_identity_merge_virtual_profile_summary'] = 'Основной аккаунт: #{$a->userid} — {$a->name} — {$a->email}';
 $string['commerce_identity_merge_transfer_summary'] = 'Планируемый перенос Commerce: покупок {$a->purchases}, прав {$a->grants}, цифровых доступов {$a->digital}, гостевых сессий {$a->guests}.';
 $string['commerce_identity_merge_warnings'] = 'Что нужно проверить';
-$string['commerce_identity_merge_warning_pedagogical_history'] = 'Исходный аккаунт #{$a->userid} содержит учебную историю. Она не будет переноситься автоматически.';
+$string['commerce_identity_merge_warning_pedagogical_history'] = 'В объединяемом аккаунте #{$a->userid} есть учебная история. Поддерживаемое учебное состояние будет перенесено в сохраняемый аккаунт.';
 $string['commerce_identity_merge_warning_shared_courses'] = 'Аккаунты участвуют в {$a->count} общих курсах. Прогресс, оценки и попытки могут конфликтовать.';
 $string['commerce_identity_merge_warning_different_emails'] = 'Аккаунты используют разные email. Будет сохранён email основного аккаунта.';
 $string['commerce_identity_merge_warning_suspended_target'] = 'Выбранный основной аккаунт #{$a->userid} заблокирован.';
 $string['commerce_identity_merge_warning_generic'] = 'Этот пункт требует ручной проверки.';
-$string['commerce_identity_merge_nonmergeable'] = 'Учебные данные не объединяются автоматически: оценки, попытки quiz/H5P, задания, сообщения, форумы, бейджи/сертификаты, логи и конфликтующая история прогресса. M4.2D выполнит только явно сертифицированные безопасные переносы.';
 $string['commerce_identity_nav_provisioning'] = 'Создать аккаунты';
 $string['commerce_identity_provisioning_title'] = 'Создание аккаунтов для покупателей цифровых продуктов';
 $string['commerce_identity_provisioning_description'] = 'Создавайте аккаунты Moodle для покупателей Legacy Digital, у которых ещё нет профиля, с dry-run и проверкой похожих аккаунтов.';
@@ -8663,3 +8660,95 @@ $string['commerce_identity_legacy_quality_search'] = 'Поиск по email, и�
 $string['commerce_identity_legacy_quality_suggestion'] = 'Возможное исправление: {$a}';
 $string['commerce_identity_legacy_quality_title'] = 'Качество email Legacy Digital';
 $string['commerce_identity_nav_legacy_quality'] = 'Качество Legacy email';
+
+$string['commerce_identity_similarity_reason_email_domain_close'] = 'Похожий домен e-mail (возможна опечатка)';
+$string['commerce_identity_similarity_reason_alternate_name'] = 'Совпадает альтернативное / фонетическое имя';
+$string['commerce_identity_similarity_score_help'] = 'Оценка — это объяснимый индикатор, а не решение об автоматическом объединении. Метки показывают вклад сигналов.';
+
+// Commerce 7.95 M7.3/M7.4 — manual merge selection and preview.
+$string['commerce_identity_merge_description'] = 'Найдите и вручную выберите аккаунты Moodle, сравните их, выберите основной аккаунт и выполните только подтверждённые безопасные переносы.';
+$string['commerce_identity_merge_dryrun_only'] = 'Выбор и предпросмотр не изменяют данные. Объединение выполняется только после явного подтверждения и успешного прохождения всех проверок безопасности.';
+$string['commerce_identity_merge_nonmergeable'] = 'Поддерживаемый учебный прогресс и коммерческие данные будут объединены до отключения старых аккаунтов. Исторические журналы и аудит намеренно сохраняют исходные ссылки на участников; привилегированные аккаунты защищены от объединения.';
+$string['commerce_identity_merge_manual_selection_title'] = 'Ручной выбор аккаунтов';
+$string['commerce_identity_merge_manual_selection_help'] = 'Найдите любой аккаунт Moodle по ID, имени, фамилии, логину или e-mail. Этот выбор не зависит от механизма поиска похожих аккаунтов.';
+$string['commerce_identity_merge_search_label'] = 'Найти аккаунт для добавления';
+$string['commerce_identity_merge_search_placeholder'] = 'Напр. 847, natalia@example.com, Natalia Kutrowski…';
+$string['commerce_identity_merge_search_results'] = 'Результаты поиска';
+$string['commerce_identity_merge_search_empty'] = 'Подходящий аккаунт Moodle не найден.';
+$string['commerce_identity_merge_add_account'] = 'Добавить к объединению';
+$string['commerce_identity_merge_reset_selection'] = 'Сбросить выбор';
+$string['commerce_identity_merge_select_two_hint'] = 'Выберите как минимум два аккаунта для предварительного просмотра объединения.';
+$string['commerce_identity_merge_direction_sources'] = 'Исходный аккаунт(ы)';
+$string['commerce_identity_merge_direction_target'] = 'Сохраняемый основной аккаунт';
+
+$string['commerce_identity_merge_blocker_privileged'] = 'Аккаунт #{$a->userid} имеет привилегированные или системные права и не может участвовать в этом объединении.';
+$string['commerce_identity_merge_m756_scope_title'] = 'Данные, которые будут объединены';
+$string['commerce_identity_merge_m756_scope_detail'] = 'Предпросмотр обнаружил {$a->learning} учебных и {$a->commerce} коммерческих элементов в объединяемых аккаунтах. Они будут консолидированы до отключения старых аккаунтов.';
+$string['commerce_identity_merge_conflicts_title'] = 'Разрешение конфликтов прогресса';
+$string['commerce_identity_merge_conflicts_help'] = 'Эти элементы есть в обоих аккаунтах, но их состояния различаются. Выберите отдельно, какие данные сохранить. Однозначные данные объединяются автоматически.';
+$string['commerce_identity_merge_conflict_grade'] = 'Оценка — элемент Moodle #{$a->id}';
+$string['commerce_identity_merge_conflict_activity'] = 'Прогресс — активность Moodle #{$a->id}';
+$string['commerce_identity_merge_conflict_recommended'] = 'Рекомендуемый выбор: аккаунт {$a}. Рекомендацию можно изменить.';
+$string['commerce_identity_merge_conflict_choice'] = 'Аккаунт {$a->letter} — пользователь #{$a->userid} — значение: {$a->value}';
+
+$string['commerce_identity_merge_certification_failed'] = 'Проверка целостности после объединения не пройдена. Изменения не были сохранены.';
+
+$string['commerce_identity_merge_certification_title'] = 'Объединение сертифицировано';
+
+$string['commerce_identity_merge_certification_summary'] = 'Пройдено проверок целостности: {$a->checks}. Сохранено ручных решений по учебным данным: {$a->decisions}.';
+
+$string['commerce_identity_merge_certification_primary_account_active'] = 'Основной аккаунт активен и доступен.';
+
+$string['commerce_identity_merge_certification_merged_account_suspended'] = 'Старых аккаунтов корректно отключено: {$a}.';
+
+$string['commerce_identity_merge_certification_ownership_transferred'] = 'Проверок коммерческих данных пройдено: {$a}. Поддерживаемые данные больше не привязаны к старым аккаунтам.';
+
+$string['commerce_identity_merge_certification_learning_state_transferred'] = 'Проверок учебных данных пройдено: {$a}. Поддерживаемый прогресс привязан к сохранённому аккаунту.';
+
+$string['commerce_identity_merge_certification_manual_learning_decision_applied'] = 'Ручных решений по учебным данным применено и проверено: {$a}.';
+
+$string['commerce_identity_merge_certification_customer_email_aligned'] = 'Проверок коммерческой идентичности пройдено: {$a}. Активные права используют email сохранённого аккаунта.';
+
+$string['commerce_identity_merge_certification_audit'] = 'Ссылка аудита: {$a}. Детали переносов и ручные решения сохранены в истории объединения.';
+
+$string['user360_merge_history_title'] = 'История объединений';
+
+$string['user360_merge_history_description'] = 'Сертифицированная история аккаунтов, объединённых с этой учётной записью.';
+
+$string['user360_merge_certified'] = 'Объединение сертифицировано';
+
+$string['user360_merge_completed'] = 'Объединение завершено';
+
+$string['user360_merge_retained_account'] = 'Этот аккаунт был сохранён как основной.';
+
+$string['user360_merge_absorbed_accounts'] = 'Объединённые аккаунты:';
+
+$string['user360_merge_absorbed_notice'] = 'Этот аккаунт был объединён с другим аккаунтом.';
+
+$string['user360_merge_open_retained'] = 'Открыть сохранённый аккаунт';
+
+$string['user360_merge_summary'] = 'Перенесено элементов: {$a->transfers} · ручных решений: {$a->decisions} · проверок пройдено: {$a->checks}';
+
+$string['user360_merge_performed_by'] = 'Объединение выполнил(а): {$a}.';
+
+$string['user360_merge_audit_reference'] = 'Ссылка аудита: {$a}';
+
+$string['user360_merge_view_details'] = 'Посмотреть детали переноса';
+
+$string['user360_merge_transfer_accounts'] = 'Отключённые аккаунты';
+
+$string['user360_merge_transfer_notes'] = 'Заметки CRM';
+
+$string['user360_merge_transfer_scores'] = 'Оценки CRM';
+
+$string['user360_merge_transfer_inbox'] = 'Контакты Inbox';
+
+$string['user360_merge_transfer_tags'] = 'Теги';
+
+$string['user360_merge_transfer_tags_deduplicated'] = 'Объединённые дубликаты тегов';
+
+$string['user360_merge_transfer_learning'] = 'Учебные данные';
+
+$string['user360_merge_transfer_legacy'] = 'Данные Legacy';
+
+$string['user360_merge_transfer_commerce'] = 'Данные Commerce';

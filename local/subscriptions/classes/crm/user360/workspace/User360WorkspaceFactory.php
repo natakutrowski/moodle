@@ -8,6 +8,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\workspace\WorkspaceDefinition;
 use local_subscriptions\crm\workspace\WorkspaceItemDefinition;
 use local_subscriptions\output\UserProfileRenderer;
+use local_subscriptions\crm\user360\merge\User360MergeHistoryRenderer;
 
 /**
  * Builds the CRM User360 Workspace.
@@ -52,6 +53,9 @@ final class User360WorkspaceFactory {
 
     public const ITEM_COMMERCIAL =
         'user360_commercial';
+
+    public const ITEM_MERGE_HISTORY =
+        'user360_merge_history';
 
     public const ITEM_COURSES =
         'user360_courses';
@@ -134,6 +138,13 @@ final class User360WorkspaceFactory {
             $definition,
             $profile
         );
+
+        if (!$iscommerceguest) {
+            self::register_merge_history(
+                $definition,
+                $profile
+            );
+        }
 
         if (!$iscommerceguest) {
             self::register_courses(
@@ -501,6 +512,43 @@ final class User360WorkspaceFactory {
                         render_commercial_panel(
                             $profile
                         );
+                }
+            )
+        );
+    }
+
+    /**
+     * Registers auditable account merge history.
+     */
+    private static function register_merge_history(
+        WorkspaceDefinition $definition,
+        ?\stdClass $profile
+    ): void {
+        $definition->register(
+            new WorkspaceItemDefinition(
+                key: self::ITEM_MERGE_HISTORY,
+                label: get_string('user360_merge_history_title', 'local_subscriptions'),
+                description: get_string('user360_merge_history_description', 'local_subscriptions'),
+                icon: '🔗',
+                zone: self::ZONE_MAIN,
+                span: 3,
+                type: WorkspaceItemDefinition::TYPE_WIDGET,
+                hideable: true,
+                movable: true,
+                defaultvisible: true,
+                renderer: static function () use ($profile): string {
+                    if ($profile === null || empty($profile->user->id)) {
+                        return '';
+                    }
+                    $content = User360MergeHistoryRenderer::render((int)$profile->user->id);
+                    if ($content === '') {
+                        return '';
+                    }
+                    return UserProfileRenderer::section(
+                        get_string('user360_merge_history_title', 'local_subscriptions'),
+                        $content,
+                        'crm-section-merge-history'
+                    );
                 }
             )
         );

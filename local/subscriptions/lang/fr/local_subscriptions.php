@@ -8127,14 +8127,14 @@ $string['commerce_personal_offer_campaign_email_preview_help'] = 'Prévisualisat
 $string['commerce_personal_offer_campaign_email_preview_refresh'] = 'Actualiser';
 $string['commerce_personal_offer_campaign_email_test_send'] = 'Envoyer un e-mail de test';
 $string['commerce_personal_offer_campaign_email_test_sent'] = 'E-mail de test envoyé à {$a}.';
-$string['commerce_identity_merge_blockers'] = 'Fusion impossible automatiquement';
-$string['commerce_identity_merge_blocker_pedagogy'] = 'Le compte source #{$a->userid} possède un historique pédagogique ({$a->count} signaux). Il doit rester accessible ou être traité manuellement.';
-$string['commerce_identity_merge_blocker_legacy_subscription'] = 'Le compte source #{$a->userid} possède {$a->count} donnée(s) Legacy de souscription/paiement non certifiée(s) pour un transfert automatique.';
+$string['commerce_identity_merge_blockers'] = 'Vérifications requises avant la fusion';
+$string['commerce_identity_merge_blocker_pedagogy'] = 'Le compte à fusionner #{$a->userid} contient un historique pédagogique qui nécessite une vérification ({$a->count} élément(s)).';
+$string['commerce_identity_merge_blocker_legacy_subscription'] = 'Le compte à fusionner #{$a->userid} contient {$a->count} donnée(s) commerciale(s) qui nécessitent une vérification.';
 $string['commerce_identity_merge_blocker_already_merged'] = 'Le compte source #{$a->userid} a déjà été utilisé comme source d’une fusion précédente.';
 $string['commerce_identity_merge_blocker_suspended_target'] = 'Le compte principal #{$a->userid} est suspendu.';
 $string['commerce_identity_merge_blocker_generic'] = 'La fusion comporte un blocage nécessitant une vérification manuelle.';
-$string['commerce_identity_merge_execution_warning'] = 'Cette action est transactionnelle mais irréversible depuis l’interface : les données Commerce/CRM certifiées seront transférées et les comptes sources seront suspendus. Les données pédagogiques ne sont jamais réécrites.';
-$string['commerce_identity_merge_execution_confirm'] = 'Je confirme avoir vérifié le dry-run et vouloir fusionner ces identités.';
+$string['commerce_identity_merge_execution_warning'] = 'Cette action est transactionnelle mais irréversible depuis l’interface : l’état pédagogique, les possessions Legacy/Commerce et les données d’identité CRM seront consolidés dans le compte conservé, puis les comptes sources seront suspendus. Les journaux d’audit historiques sont préservés.';
+$string['commerce_identity_merge_execution_confirm'] = 'Je confirme avoir vérifié la prévisualisation et vouloir fusionner définitivement ces comptes.';
 $string['commerce_identity_merge_execute'] = 'Exécuter la fusion';
 $string['commerce_identity_merge_confirmation_required'] = 'Vous devez confirmer explicitement la fusion.';
 $string['commerce_identity_merge_execution_blocked'] = 'Cette fusion est bloquée car un ou plusieurs comptes contiennent des données qui ne peuvent pas être transférées automatiquement en toute sécurité.';
@@ -8161,8 +8161,6 @@ $string['crm_topbar_admin_subscriptions_config'] = 'Configuration Commerce';
 $string['crm_topbar_admin_campus_config'] = 'Configuration Campus';
 $string['commerce_identity_nav_merge'] = 'Fusionner les identités';
 $string['commerce_identity_merge_title'] = 'Fusion de comptes';
-$string['commerce_identity_merge_description'] = 'Comparez plusieurs comptes, choisissez le compte principal et prévisualisez la fusion sans modifier les données.';
-$string['commerce_identity_merge_dryrun_only'] = 'Mode dry-run uniquement : aucun compte ni aucune donnée n’est modifié à cette étape.';
 $string['commerce_identity_merge_ids'] = 'IDs Moodle à comparer';
 $string['commerce_identity_merge_preview'] = 'Prévisualiser la fusion';
 $string['commerce_identity_merge_select_account'] = 'Sélectionner le compte Moodle #{$a}';
@@ -8189,12 +8187,11 @@ $string['commerce_identity_merge_virtual_profile'] = 'Profil final simulé';
 $string['commerce_identity_merge_virtual_profile_summary'] = 'Compte principal : #{$a->userid} — {$a->name} — {$a->email}';
 $string['commerce_identity_merge_transfer_summary'] = 'Transfert Commerce prévu : {$a->purchases} achats, {$a->grants} droits, {$a->digital} accès digitaux et {$a->guests} sessions guest.';
 $string['commerce_identity_merge_warnings'] = 'Points d’attention';
-$string['commerce_identity_merge_warning_pedagogical_history'] = 'Le compte source #{$a->userid} contient un historique pédagogique. Il ne sera pas déplacé automatiquement.';
+$string['commerce_identity_merge_warning_pedagogical_history'] = 'Le compte à fusionner #{$a->userid} contient un historique pédagogique. Son état pédagogique pris en charge sera consolidé dans le compte conservé.';
 $string['commerce_identity_merge_warning_shared_courses'] = 'Les comptes partagent {$a->count} cours. Les progressions, notes et tentatives peuvent entrer en conflit.';
 $string['commerce_identity_merge_warning_different_emails'] = 'Les comptes utilisent des adresses email différentes. L’adresse du compte principal sera conservée.';
 $string['commerce_identity_merge_warning_suspended_target'] = 'Le compte principal sélectionné #{$a->userid} est suspendu.';
 $string['commerce_identity_merge_warning_generic'] = 'Un point d’attention nécessite une vérification manuelle.';
-$string['commerce_identity_merge_nonmergeable'] = 'Données pédagogiques non fusionnées automatiquement : notes, tentatives de quiz/H5P, remises de devoirs, messages, forums, badges/certificats, logs et historiques de progression contradictoires. M4.2D n’exécutera que les transferts explicitement certifiés sûrs.';
 $string['commerce_identity_nav_provisioning'] = 'Créer des comptes';
 $string['commerce_identity_provisioning_title'] = 'Créer des comptes pour les acheteurs digitaux';
 $string['commerce_identity_provisioning_description'] = 'Créez un espace Moodle pour les acheteurs de produits digitaux Legacy qui n’ont pas encore de compte, avec dry-run et contrôle des comptes similaires.';
@@ -8424,3 +8421,95 @@ $string['commerce_identity_legacy_quality_search'] = 'Rechercher par email, pré
 $string['commerce_identity_legacy_quality_suggestion'] = 'Suggestion : {$a}';
 $string['commerce_identity_legacy_quality_title'] = 'Qualité des emails Legacy Digital';
 $string['commerce_identity_nav_legacy_quality'] = 'Qualité emails Legacy';
+
+$string['commerce_identity_similarity_reason_email_domain_close'] = 'Domaine e-mail proche (faute possible)';
+$string['commerce_identity_similarity_reason_alternate_name'] = 'Nom alternatif / phonétique correspondant';
+$string['commerce_identity_similarity_score_help'] = 'Le score est un indice explicable, pas une décision de fusion automatique. Les badges indiquent la contribution des signaux.';
+
+// Commerce 7.95 M7.3/M7.4 — manual merge selection and preview.
+$string['commerce_identity_merge_description'] = 'Recherchez et sélectionnez manuellement des comptes Moodle, comparez-les, choisissez le compte principal puis exécutez uniquement les transferts certifiés sûrs.';
+$string['commerce_identity_merge_dryrun_only'] = 'La sélection et la prévisualisation ne modifient aucune donnée. La fusion n’est exécutée qu’après confirmation explicite et lorsque tous les contrôles de sécurité sont satisfaits.';
+$string['commerce_identity_merge_nonmergeable'] = 'La progression pédagogique et les données commerciales prises en charge seront consolidées avant la désactivation des anciens comptes. Les journaux et audits historiques conservent volontairement leurs références d’origine ; les comptes privilégiés restent protégés contre la fusion.';
+$string['commerce_identity_merge_manual_selection_title'] = 'Sélection manuelle des comptes';
+$string['commerce_identity_merge_manual_selection_help'] = 'Recherchez n’importe quel compte Moodle par ID, nom, prénom, identifiant ou e-mail. Cette sélection est indépendante du moteur de comptes similaires.';
+$string['commerce_identity_merge_search_label'] = 'Rechercher un compte à ajouter';
+$string['commerce_identity_merge_search_placeholder'] = 'Ex. 847, natalia@example.com, Natalia Kutrowski…';
+$string['commerce_identity_merge_search_results'] = 'Résultats de recherche';
+$string['commerce_identity_merge_search_empty'] = 'Aucun compte Moodle correspondant n’a été trouvé.';
+$string['commerce_identity_merge_add_account'] = 'Ajouter à la fusion';
+$string['commerce_identity_merge_reset_selection'] = 'Réinitialiser la sélection';
+$string['commerce_identity_merge_select_two_hint'] = 'Sélectionnez au moins deux comptes pour pouvoir prévisualiser une fusion.';
+$string['commerce_identity_merge_direction_sources'] = 'Compte(s) source(s)';
+$string['commerce_identity_merge_direction_target'] = 'Compte principal conservé';
+
+$string['commerce_identity_merge_blocker_privileged'] = 'Le compte #{$a->userid} possède des droits privilégiés ou système. Il ne peut pas participer à cette fusion.';
+$string['commerce_identity_merge_m756_scope_title'] = 'Données prises en charge par la fusion';
+$string['commerce_identity_merge_m756_scope_detail'] = 'La prévisualisation a détecté {$a->learning} élément(s) pédagogiques et {$a->commerce} élément(s) commerciaux sur les comptes à fusionner. Ils seront consolidés avant la désactivation des anciens comptes.';
+$string['commerce_identity_merge_conflicts_title'] = 'Arbitrages pédagogiques';
+$string['commerce_identity_merge_conflicts_help'] = 'Les éléments ci-dessous existent sur les deux comptes avec des états différents. Choisissez individuellement la donnée à conserver. Les unions sans ambiguïté sont fusionnées automatiquement.';
+$string['commerce_identity_merge_conflict_grade'] = 'Note — élément Moodle #{$a->id}';
+$string['commerce_identity_merge_conflict_activity'] = 'Progression — activité Moodle #{$a->id}';
+$string['commerce_identity_merge_conflict_recommended'] = 'Choix recommandé : compte {$a}. La recommandation reste modifiable.';
+$string['commerce_identity_merge_conflict_choice'] = 'Compte {$a->letter} — utilisateur #{$a->userid} — valeur : {$a->value}';
+
+$string['commerce_identity_merge_certification_failed'] = 'La vérification d’intégrité après fusion a échoué. Aucune modification n’a été conservée.';
+
+$string['commerce_identity_merge_certification_title'] = 'Fusion certifiée';
+
+$string['commerce_identity_merge_certification_summary'] = '{$a->checks} contrôle(s) d’intégrité validé(s). {$a->decisions} décision(s) pédagogique(s) manuelle(s) enregistrée(s).';
+
+$string['commerce_identity_merge_certification_primary_account_active'] = 'Compte principal actif et accessible.';
+
+$string['commerce_identity_merge_certification_merged_account_suspended'] = '{$a} ancien(s) compte(s) correctement désactivé(s).';
+
+$string['commerce_identity_merge_certification_ownership_transferred'] = '{$a} contrôle(s) de propriété commerciale validé(s) : aucune donnée prise en charge ne reste rattachée aux anciens comptes.';
+
+$string['commerce_identity_merge_certification_learning_state_transferred'] = '{$a} contrôle(s) pédagogiques validé(s) : la progression prise en charge est rattachée au compte conservé.';
+
+$string['commerce_identity_merge_certification_manual_learning_decision_applied'] = '{$a} arbitrage(s) pédagogique(s) manuel(s) appliqué(s) et vérifié(s).';
+
+$string['commerce_identity_merge_certification_customer_email_aligned'] = '{$a} contrôle(s) d’identité commerciale validé(s) : les droits actifs utilisent l’adresse du compte conservé.';
+
+$string['commerce_identity_merge_certification_audit'] = 'Référence d’audit : {$a}. Le détail des transferts et des décisions manuelles est conservé dans l’historique de fusion.';
+
+$string['user360_merge_history_title'] = 'Historique des fusions';
+
+$string['user360_merge_history_description'] = 'Historique certifié des comptes fusionnés avec cette identité.';
+
+$string['user360_merge_certified'] = 'Fusion certifiée';
+
+$string['user360_merge_completed'] = 'Fusion terminée';
+
+$string['user360_merge_retained_account'] = 'Ce compte est le compte conservé.';
+
+$string['user360_merge_absorbed_accounts'] = 'Comptes fusionnés :';
+
+$string['user360_merge_absorbed_notice'] = 'Ce compte a été fusionné dans un autre compte.';
+
+$string['user360_merge_open_retained'] = 'Ouvrir le compte conservé';
+
+$string['user360_merge_summary'] = '{$a->transfers} élément(s) transféré(s) · {$a->decisions} décision(s) manuelle(s) · {$a->checks} contrôle(s) validé(s)';
+
+$string['user360_merge_performed_by'] = 'Fusion effectuée par {$a}.';
+
+$string['user360_merge_audit_reference'] = 'Référence d’audit : {$a}';
+
+$string['user360_merge_view_details'] = 'Voir le détail des transferts';
+
+$string['user360_merge_transfer_accounts'] = 'Comptes désactivés';
+
+$string['user360_merge_transfer_notes'] = 'Notes CRM';
+
+$string['user360_merge_transfer_scores'] = 'Scores CRM';
+
+$string['user360_merge_transfer_inbox'] = 'Contacts Inbox';
+
+$string['user360_merge_transfer_tags'] = 'Tags';
+
+$string['user360_merge_transfer_tags_deduplicated'] = 'Tags dédupliqués';
+
+$string['user360_merge_transfer_learning'] = 'Données pédagogiques';
+
+$string['user360_merge_transfer_legacy'] = 'Données Legacy';
+
+$string['user360_merge_transfer_commerce'] = 'Données Commerce';
