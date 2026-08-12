@@ -20,9 +20,20 @@ final class customer_topbar_j10e9_test extends \advanced_testcase {
         self::assertStringContainsString('campus-customer-nav__admin-menu', $template);
         self::assertStringContainsString('customernavigation.crmitems', $template);
         self::assertStringContainsString('customernavigation.adminitems', $template);
+        self::assertStringContainsString('customernavigation.adminshortcuts', $template);
+        self::assertStringContainsString("'/admin/purgecaches.php'", $service);
+        self::assertStringContainsString("'maintenancemode'", $service);
+        self::assertStringContainsString("'local_subscriptions_settings'", $service);
+        self::assertStringContainsString("'local_campus_settings'", $service);
         self::assertStringContainsString('campus-customer-nav__admin-dropdown', $template);
         self::assertStringNotContainsString('output.navbar_plugin_output', $navbar);
         self::assertStringContainsString('justify-content: flex-end', $css);
         self::assertStringContainsString('.campus-customer-nav__admin-dropdown', $css);
+        self::assertStringContainsString('is_role_switched(SITEID)', $service);
+        self::assertStringContainsString("get_string('switchrolereturn')", $service);
+        self::assertStringContainsString("\$switchroleparams['switchrole'] = 0", $service);
+        self::assertStringContainsString("\$switchroleparams['sesskey'] = sesskey()", $service);
+        self::assertStringContainsString('customernavigation.currentrolename', $template);
+        self::assertStringContainsString('.campus-topbar-user__current-role', $css);
     }
 }

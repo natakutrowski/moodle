@@ -352,3 +352,11 @@ $string['customernavigation_admin_appearance'] = 'Appearance';
 $string['customernavigation_admin_server'] = 'Server';
 $string['customernavigation_admin_reports'] = 'Reports';
 $string['customernavigation_admin_development'] = 'Development';
+
+$string['customernavigation_admin_shortcuts'] = 'My admin shortcuts';
+$string['customernavigation_admin_purgecaches'] = 'Purge caches';
+$string['customernavigation_admin_maintenance'] = 'Maintenance mode';
+$string['customernavigation_admin_subscriptions'] = 'Configure local/subscriptions';
+$string['customernavigation_admin_campus'] = 'Configure local/campus';
+$string['coursesection_complete_previous'] = 'Complete step {$a} to unlock this step';
+$string['coursesection_available_soon'] = 'Available soon';

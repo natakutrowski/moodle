@@ -5,38 +5,67 @@
 {{/isfullinfo}}
 
 {{^isfullinfo}}
-  {{#hascampusunlock}}
-    <div class="cf-locked-row cf-locked-row--campus cf-locked-row--{{campusunlocktype}}"
-         role="note"
-         aria-live="polite">
-      <span class="cf-locked-ico" aria-hidden="true">
-        <i class="ri-lock-2-line"></i>
-      </span>
-
-      <div class="cf-locked-copy">
-        <div class="cf-locked-title">{{campusunlocktitle}}</div>
-        <div class="cf-locked-desc">{{campusunlocktext}}</div>
+  {{#hascampussectionrestriction}}
+    {{#hascampussectioncover}}
+      <div class="campus-section-restricted-cover" role="note" aria-live="polite">
+        <img class="campus-section-cover campus-section-cover--restricted"
+             src="{{campussectioncoverurl}}"
+             alt="">
+        <div class="campus-section-restricted-cover__message">
+          <span class="campus-section-restricted-cover__icon" aria-hidden="true">
+            <i class="ri-lock-2-line"></i>
+          </span>
+          <span class="campus-section-restricted-cover__text">{{campussectionrestrictiontext}}</span>
+        </div>
       </div>
+    {{/hascampussectioncover}}
 
-      <div class="cf-locked-actions">
-        <a class="default-btn cf-locked-subscribe"
-           href="{{campusunlockurl}}">
-          {{campusunlockbutton}}
-        </a>
+    {{^hascampussectioncover}}
+      <div class="campus-section-restriction-message"
+           role="note"
+           aria-live="polite">
+        <span class="campus-section-restriction-message__icon" aria-hidden="true">
+          <i class="ri-lock-2-line"></i>
+        </span>
+        <span class="campus-section-restriction-message__text">{{campussectionrestrictiontext}}</span>
       </div>
+    {{/hascampussectioncover}}
+  {{/hascampussectionrestriction}}
 
-      {{#campusunlockdebug}}
-        <details class="cf-restriction-debug">
-          <summary>Diagnostic restriction CampusFR</summary>
-          <pre>{{campusunlockdebug}}</pre>
-        </details>
-      {{/campusunlockdebug}}
-    </div>
-  {{/hascampusunlock}}
+  {{^hascampussectionrestriction}}
+    {{#hascampusunlock}}
+      <div class="cf-locked-row cf-locked-row--campus cf-locked-row--{{campusunlocktype}}"
+           role="note"
+           aria-live="polite">
+        <span class="cf-locked-ico" aria-hidden="true">
+          <i class="ri-lock-2-line"></i>
+        </span>
 
-  {{^hascampusunlock}}
-    <div class="availabilityinfo {{classes}}" role="note">
-      {{{ text }}}
-    </div>
-  {{/hascampusunlock}}
+        <div class="cf-locked-copy">
+          <div class="cf-locked-title">{{campusunlocktitle}}</div>
+          <div class="cf-locked-desc">{{campusunlocktext}}</div>
+        </div>
+
+        <div class="cf-locked-actions">
+          <a class="default-btn cf-locked-subscribe"
+             href="{{campusunlockurl}}">
+            {{campusunlockbutton}}
+          </a>
+        </div>
+
+        {{#campusunlockdebug}}
+          <details class="cf-restriction-debug">
+            <summary>Diagnostic restriction CampusFR</summary>
+            <pre>{{campusunlockdebug}}</pre>
+          </details>
+        {{/campusunlockdebug}}
+      </div>
+    {{/hascampusunlock}}
+
+    {{^hascampusunlock}}
+      <div class="availabilityinfo {{classes}}" role="note">
+        {{{ text }}}
+      </div>
+    {{/hascampusunlock}}
+  {{/hascampussectionrestriction}}
 {{/isfullinfo}}

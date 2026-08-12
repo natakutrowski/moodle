@@ -351,3 +351,11 @@ $string['customernavigation_admin_appearance'] = 'Внешний вид';
 $string['customernavigation_admin_server'] = 'Сервер';
 $string['customernavigation_admin_reports'] = 'Отчёты';
 $string['customernavigation_admin_development'] = 'Разработка';
+
+$string['customernavigation_admin_shortcuts'] = 'Мои быстрые настройки';
+$string['customernavigation_admin_purgecaches'] = 'Очистить кэши';
+$string['customernavigation_admin_maintenance'] = 'Режим обслуживания';
+$string['customernavigation_admin_subscriptions'] = 'Настройки local/subscriptions';
+$string['customernavigation_admin_campus'] = 'Настройки local/campus';
+$string['coursesection_complete_previous'] = 'Завершите этап {$a}, чтобы разблокировать этот этап';
+$string['coursesection_available_soon'] = 'Скоро будет доступно';

@@ -35,6 +35,21 @@
                         <span>{{label}}</span>
                     </a>
                 {{/customernavigation.adminitems}}
+                <details class="campus-customer-nav__admin-shortcuts">
+                    <summary class="campus-customer-nav__admin-item">
+                        <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                        <span>{{customernavigation.adminshortcutlabel}}</span>
+                        <i class="fa-solid fa-chevron-right campus-customer-nav__admin-shortcuts-chevron" aria-hidden="true"></i>
+                    </summary>
+                    <div class="campus-customer-nav__admin-shortcuts-panel">
+                        {{#customernavigation.adminshortcuts}}
+                            <a class="campus-customer-nav__admin-item" href="{{{url}}}">
+                                <i class="{{icon}}" aria-hidden="true"></i>
+                                <span>{{label}}</span>
+                            </a>
+                        {{/customernavigation.adminshortcuts}}
+                    </div>
+                </details>
             </nav>
         </details>
     {{/customernavigation.isadmin}}
@@ -78,7 +93,12 @@
     <details class="campus-topbar-user">
         <summary class="campus-topbar-user__toggle" aria-label="{{customernavigation.fullname}}">
             <span class="campus-topbar-user__avatar">{{{customernavigation.userpicture}}}</span>
-            <span class="campus-topbar-user__name">{{customernavigation.fullname}}</span>
+            <span class="campus-topbar-user__identity">
+                <span class="campus-topbar-user__name">{{customernavigation.fullname}}</span>
+                {{#customernavigation.roleswitched}}
+                    <span class="campus-topbar-user__role">{{customernavigation.currentrolename}}</span>
+                {{/customernavigation.roleswitched}}
+            </span>
             <span class="campus-topbar-chevron" aria-hidden="true">▾</span>
         </summary>
         <div class="campus-topbar-user__dropdown">
@@ -86,6 +106,9 @@
                 <span class="campus-topbar-user__menu-avatar">{{{customernavigation.userpicture}}}</span>
                 <div>
                     <strong>{{customernavigation.fullname}}</strong>
+                    {{#customernavigation.roleswitched}}
+                        <span class="campus-topbar-user__current-role">{{customernavigation.currentrolename}}</span>
+                    {{/customernavigation.roleswitched}}
                     <a href="{{{customernavigation.profileurl}}}">{{customernavigation.viewprofilelabel}}</a>
                 </div>
             </div>
@@ -103,13 +126,14 @@
                     <i class="fa-solid fa-sliders" aria-hidden="true"></i>
                     <span>{{customernavigation.preferenceslabel}}</span>
                 </a>
-                {{#customernavigation.canswitchrole}}
-                    <a class="campus-topbar-user__link" href="{{{customernavigation.switchroleurl}}}">
-                        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
-                        <span>{{customernavigation.switchrolelabel}}</span>
-                    </a>
-                {{/customernavigation.canswitchrole}}
             {{/customernavigation.isadmin}}
+            {{#customernavigation.canswitchrole}}
+                {{^customernavigation.isadmin}}<div class="campus-topbar-user__divider" aria-hidden="true"></div>{{/customernavigation.isadmin}}
+                <a class="campus-topbar-user__link" href="{{{customernavigation.switchroleurl}}}">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                    <span>{{customernavigation.switchrolelabel}}</span>
+                </a>
+            {{/customernavigation.canswitchrole}}
             <div class="campus-topbar-user__divider" aria-hidden="true"></div>
             <a class="campus-topbar-user__link campus-topbar-user__link--danger" href="{{{customernavigation.logouturl}}}">
                 <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>

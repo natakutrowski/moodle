@@ -305,10 +305,31 @@
     object-fit: cover;
 }
 
+.campus-topbar-user__identity {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
 .campus-topbar-user__name {
     display: block;
     max-width: 11rem;
     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.campus-topbar-user__role {
+    display: block;
+    max-width: 11rem;
+    margin-top: .05rem;
+    overflow: hidden;
+    color: #ff1472;
+    font-size: .72rem;
+    font-weight: 800;
+    line-height: 1.1;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -336,6 +357,15 @@
     font-size: .9rem;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.campus-topbar-user__current-role {
+    display: block;
+    margin-top: .08rem;
+    color: #ff1472;
+    font-size: .76rem;
+    font-weight: 800;
+    line-height: 1.2;
 }
 
 .campus-topbar-user__header a {
@@ -1043,4 +1073,58 @@
     .campus-customer-nav__admin-chevron {
         display: none;
     }
+}
+
+
+/* CampusFR admin favourites nested inside Administration Moodle. */
+.campus-customer-nav__admin-shortcuts {
+    position: relative;
+}
+.campus-customer-nav__admin-shortcuts > summary,
+.campus-customer-nav-mobile__shortcut-menu > summary {
+    list-style: none;
+    cursor: pointer;
+}
+.campus-customer-nav__admin-shortcuts > summary::-webkit-details-marker,
+.campus-customer-nav-mobile__shortcut-menu > summary::-webkit-details-marker {
+    display: none;
+}
+.campus-customer-nav__admin-shortcuts-chevron {
+    margin-left: auto;
+    font-size: .58rem;
+    opacity: .58;
+    transition: transform .18s ease;
+}
+.campus-customer-nav__admin-shortcuts[open] .campus-customer-nav__admin-shortcuts-chevron {
+    transform: rotate(90deg);
+}
+.campus-customer-nav__admin-shortcuts-panel {
+    display: grid;
+    margin: .15rem .2rem .25rem 1.25rem;
+    padding: .3rem;
+    border-left: 2px solid #eef2f7;
+}
+.campus-customer-nav-mobile__shortcut-submenu {
+    display: grid;
+    gap: .1rem;
+    margin: .1rem 0 .2rem 1rem;
+    padding-left: .35rem;
+    border-left: 2px solid #eef2f7;
+}
+
+/* J12G — full-width edit-mode hit target and clearer active state. */
+.campus-customer-nav__edit-control {
+    cursor: pointer;
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
+}
+.campus-customer-nav__edit-control:hover {
+    background: rgba(246, 11, 114, .08);
+    border-color: rgba(246, 11, 114, .28);
+}
+.campus-customer-nav__edit-control:has(.form-check-input:checked) {
+    color: #f60b72;
+}
+.campus-customer-nav__edit-control:has(.form-check-input:checked) > i,
+.campus-customer-nav__edit-control:has(.form-check-input:checked) .campus-customer-nav__edit-label {
+    color: #f60b72;
 }
