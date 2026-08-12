@@ -72,6 +72,28 @@ function wireTopbarDetailsAutoClose(){
   });
 }
 
+
+/* ---- Mode d’édition : toute la zone est cliquable ---- */
+let editModeControlWired = false;
+function wireEditModeControl(){
+  if (editModeControlWired) return;
+  editModeControlWired = true;
+
+  document.addEventListener('click', (e) => {
+    const control = e.target.closest('.campus-customer-nav__edit-control');
+    if (!control) return;
+
+    // Le switch natif gère déjà son propre clic : ne pas le déclencher deux fois.
+    if (e.target.closest('.form-check-input, .form-check, .form-switch, .editmode-switch-form')) return;
+
+    const input = control.querySelector('.form-check-input');
+    if (!input || input.disabled) return;
+
+    e.preventDefault();
+    input.click();
+  });
+}
+
 /* ---- Fallback “dur” : rendre un item du carrousel visible ---- */
 function showUserMenuItem(menu, targetId){
   const carousel = menu.querySelector('#usermenu-carousel');
@@ -166,6 +188,7 @@ export const init = () => {
     wireOffcanvas();
     wireUserDropdown();
     wireTopbarDetailsAutoClose();
+    wireEditModeControl();
     wireUserMenuCarouselDelegation();
     wireStripPreferencesOnOpen();
   };

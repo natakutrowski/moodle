@@ -13,7 +13,7 @@ final class customer_navigation {
      * @return array<string, mixed>
      */
     public static function build(\moodle_page $page): array {
-        global $OUTPUT, $USER;
+        global $DB, $OUTPUT, $USER;
 
         if (!isloggedin() || isguestuser()) {
             return [
@@ -49,9 +49,27 @@ final class customer_navigation {
         $systemcontext = \context_system::instance();
         $isadmin = has_capability('moodle/site:config', $systemcontext);
         $sitecontext = \context_course::instance(SITEID);
-        $canswitchrole = $isadmin
-            && has_capability('moodle/role:switchroles', $sitecontext);
-        $currenturl = $page->url->out(false);
+        $roleswitched = is_role_switched(SITEID);
+        $canswitchrole = $roleswitched || ($isadmin
+            && has_capability('moodle/role:switchroles', $sitecontext));
+        $currenturl = $page->url->out_as_local_url(false);
+        $currentrolename = '';
+
+        if ($roleswitched) {
+            $roleid = (int)($USER->access['rsw'][$sitecontext->path] ?? 0);
+            if ($roleid > 0 && ($role = $DB->get_record('role', ['id' => $roleid]))) {
+                $currentrolename = role_get_name($role, $sitecontext, ROLENAME_BOTH);
+            }
+        }
+
+        $switchroleparams = [
+            'id' => SITEID,
+            'returnurl' => $currenturl,
+        ];
+        if ($roleswitched) {
+            $switchroleparams['switchrole'] = 0;
+            $switchroleparams['sesskey'] = sesskey();
+        }
 
         return [
             'enabled' => true,
@@ -60,8 +78,12 @@ final class customer_navigation {
             'campusactive' => self::normalise_path($campusurl) === $currentpath,
             'items' => $items,
             'showcart' => true,
-            'carturl' => self::url('cart', '/local/subscriptions/cart.php'),
-            'cartlabel' => get_string('commerce_cart_view', 'local_subscriptions'),
+            'carturl' => $cartcount > 0
+                ? self::url('cart', '/local/subscriptions/cart.php')
+                : self::url('storefront', '/local/subscriptions/digital_catalog.php'),
+            'cartlabel' => $cartcount > 0
+                ? get_string('commerce_cart_view', 'local_subscriptions')
+                : get_string('digital_products_view_catalog', 'local_subscriptions'),
             'cartcount' => $cartcount,
             'hascartitems' => $cartcount > 0,
             'profileurl' => self::url('my_profile', '/user/profile.php'),
@@ -82,14 +104,15 @@ final class customer_navigation {
             'adminurl' => (new \moodle_url('/admin/search.php'))->out(false),
             'adminlabel' => get_string('customernavigation_moodleadmin', 'theme_edly'),
             'adminitems' => $isadmin ? self::moodle_admin_items() : [],
+            'adminshortcutlabel' => get_string('customernavigation_admin_shortcuts', 'theme_edly'),
+            'adminshortcuts' => $isadmin ? self::moodle_admin_shortcuts() : [],
             'preferencesurl' => (new \moodle_url('/user/preferences.php'))->out(false),
             'preferenceslabel' => get_string('preferences'),
             'canswitchrole' => $canswitchrole,
-            'switchroleurl' => (new \moodle_url('/course/switchrole.php', [
-                'id' => SITEID,
-                'returnurl' => $currenturl,
-            ]))->out(false),
-            'switchrolelabel' => get_string('switchroleto'),
+            'roleswitched' => $roleswitched,
+            'currentrolename' => $currentrolename,
+            'switchroleurl' => (new \moodle_url('/course/switchrole.php', $switchroleparams))->out(false),
+            'switchrolelabel' => $roleswitched ? get_string('switchrolereturn') : get_string('switchroleto'),
         ];
     }
 
@@ -199,6 +222,32 @@ final class customer_navigation {
             );
         }
         return $items;
+    }
+
+    /** @return array<int, array<string, string>> */
+    private static function moodle_admin_shortcuts(): array {
+        return [
+            self::admin_menu_item(
+                get_string('customernavigation_admin_purgecaches', 'theme_edly'),
+                (new \moodle_url('/admin/purgecaches.php'))->out(false),
+                'fa-solid fa-broom'
+            ),
+            self::admin_menu_item(
+                get_string('customernavigation_admin_maintenance', 'theme_edly'),
+                (new \moodle_url('/admin/settings.php', ['section' => 'maintenancemode']))->out(false),
+                'fa-solid fa-screwdriver-wrench'
+            ),
+            self::admin_menu_item(
+                get_string('customernavigation_admin_subscriptions', 'theme_edly'),
+                (new \moodle_url('/admin/settings.php', ['section' => 'local_subscriptions_settings']))->out(false),
+                'fa-solid fa-credit-card'
+            ),
+            self::admin_menu_item(
+                get_string('customernavigation_admin_campus', 'theme_edly'),
+                (new \moodle_url('/admin/settings.php', ['section' => 'local_campus_settings']))->out(false),
+                'fa-solid fa-school'
+            ),
+        ];
     }
 
     /** @return array<string, string> */

@@ -108,6 +108,7 @@ class availability implements named_templatable, renderable {
 
         $data = (object) $this->get_info($output);
 
+        $this->add_campus_section_restriction_context($data);
         $this->add_campus_unlock_context($data);
 
         $attributename = $this->hasavailabilityname;
@@ -251,6 +252,180 @@ class availability implements named_templatable, renderable {
         }
 
         return (object) $data;
+    }
+
+
+    /**
+     * Add CampusFR pedagogical section restriction context.
+     *
+     * Completion-only restrictions get a concise previous-step message.
+     * Date-only restrictions get a generic "available soon" message only
+     * when a future start-date condition is actually blocking the section.
+     * Mixed restriction trees keep Moodle's native availability explanation.
+     *
+     * @param stdClass $data
+     * @return void
+     */
+    private function add_campus_section_restriction_context(stdClass $data): void {
+        if (
+            empty($data->info)
+            || $this->section->uservisible
+            || empty($this->section->availability)
+        ) {
+            return;
+        }
+
+        $availability = json_decode($this->section->availability);
+        if (!$availability) {
+            return;
+        }
+
+        $conditiontypes = $this->extract_condition_types($availability);
+        $payload = null;
+
+        if ($conditiontypes === ['completion']) {
+            $sectionnumber = (int)$this->section->section;
+            $previousstep = max(0, $sectionnumber - 1);
+
+            $payload = [
+                'hascampussectionrestriction' => true,
+                'campussectionrestrictiontype' => 'completion',
+                'campussectionrestrictiontext' => get_string(
+                    'coursesection_complete_previous',
+                    'theme_edly',
+                    $previousstep
+                ),
+            ];
+        } else if (
+            $conditiontypes === ['date']
+            && $this->has_future_start_date_condition($availability)
+        ) {
+            $payload = [
+                'hascampussectionrestriction' => true,
+                'campussectionrestrictiontype' => 'date',
+                'campussectionrestrictiontext' => get_string(
+                    'coursesection_available_soon',
+                    'theme_edly'
+                ),
+            ];
+        }
+
+        if ($payload === null) {
+            return;
+        }
+
+        // A restricted section does not render its activities for the current
+        // user, so the usual promoted Text & Media cover disappears with them.
+        // Resolve the first Text & Media image directly from section data and
+        // expose it to the availability template instead.
+        $coverurl = $this->get_first_text_media_image_url();
+        if ($coverurl !== null) {
+            $payload['campussectioncoverurl'] = $coverurl;
+            $payload['hascampussectioncover'] = true;
+        }
+
+        if (is_array($data->info)) {
+            foreach ($data->info as &$item) {
+                if (is_object($item)) {
+                    foreach ($payload as $key => $value) {
+                        $item->$key = $value;
+                    }
+                }
+            }
+            unset($item);
+        } else if (is_object($data->info)) {
+            foreach ($payload as $key => $value) {
+                $data->info->$key = $value;
+            }
+        }
+    }
+
+    /**
+     * Return the first image used by a Text & Media block in this section.
+     *
+     * Restricted sections do not expose their activities to the normal course
+     * renderer, therefore the CampusFR promoted cover has to be resolved from
+     * the module data itself. We deliberately inspect only mod_label (Moodle's
+     * Text & Media activity) and only return the first image found.
+     *
+     * @return string|null
+     */
+    private function get_first_text_media_image_url(): ?string {
+        global $DB;
+
+        $modinfo = get_fast_modinfo((int)$this->section->course);
+        $sectionnumber = (int)$this->section->section;
+        $cmids = $modinfo->sections[$sectionnumber] ?? [];
+
+        foreach ($cmids as $cmid) {
+            if (empty($modinfo->cms[$cmid])) {
+                continue;
+            }
+
+            $cm = $modinfo->cms[$cmid];
+            if ($cm->modname !== 'label') {
+                continue;
+            }
+
+            $intro = $DB->get_field('label', 'intro', ['id' => $cm->instance], IGNORE_MISSING);
+            if (!$intro) {
+                continue;
+            }
+
+            // Do not emit the normal mod_label pluginfile URL here. When the
+            // parent section is unavailable, Moodle can reject that file via
+            // the course-module access check together with the hidden label.
+            // The dedicated theme endpoint re-validates the course + section
+            // and serves only this promoted first image.
+            if (preg_match('/<img\b[^>]*\bsrc=["\']([^"\']+)["\']/i', $intro)) {
+                return (new \moodle_url('/theme/edly/section_cover.php', [
+                    'sectionid' => (int)$this->section->id,
+                ]))->out(false);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Return whether a restriction tree contains a future start-date condition.
+     *
+     * Moodle date availability conditions use "d" for the comparison direction
+     * and "t" for the Unix timestamp. Only >= / > conditions can represent a
+     * future opening date. End-date restrictions intentionally keep Moodle's
+     * native explanation.
+     *
+     * @param mixed $node
+     * @return bool
+     */
+    private function has_future_start_date_condition($node): bool {
+        if (is_object($node)) {
+            if (($node->type ?? '') === 'date') {
+                $direction = (string)($node->d ?? $node->direction ?? '');
+                $timestamp = (int)($node->t ?? $node->time ?? 0);
+
+                if (
+                    in_array($direction, ['>=', '>'], true)
+                    && $timestamp > time()
+                ) {
+                    return true;
+                }
+            }
+
+            foreach (get_object_vars($node) as $value) {
+                if ($this->has_future_start_date_condition($value)) {
+                    return true;
+                }
+            }
+        } else if (is_array($node)) {
+            foreach ($node as $value) {
+                if ($this->has_future_start_date_condition($value)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
