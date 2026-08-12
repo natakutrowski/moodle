@@ -208,12 +208,13 @@ if ($ispersonaloffer) {
         // customer reaches the Pay button, so an existing Moodle account becomes an
         // explicit authentication prerequisite instead of a late checkout error.
         if ($isguestcheckout && $guestsession !== null
-                && !in_array($guestsession->get_status(), ['existing_account', 'provisional', 'payment_pending'], true)) {
+                && !in_array($guestsession->get_status(), ['provisional', 'payment_pending'], true)) {
             $guestsession = CommerceGuestCheckoutService::create()->identify(
                 $guestsession,
                 (string)$personalofferidentity['email'],
                 (string)$personalofferidentity['firstname'],
-                (string)$personalofferidentity['lastname']
+                (string)$personalofferidentity['lastname'],
+                true
             );
         }
 

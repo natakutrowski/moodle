@@ -88,7 +88,8 @@ final class CommerceGuestCheckoutService {
         CommerceGuestCheckoutSession $session,
         string $email,
         string $firstname,
-        string $lastname
+        string $lastname,
+        bool $allowprovisionalresume = false
     ): CommerceGuestCheckoutSession {
         if ($session->is_expired()) {
             throw new \RuntimeException('The Guest Checkout session has expired.');
@@ -105,7 +106,13 @@ final class CommerceGuestCheckoutService {
             ]);
         }
 
-        $identified = $this->accounts->provision($session, $email, $firstname, $lastname);
+        $identified = $this->accounts->provision(
+            $session,
+            $email,
+            $firstname,
+            $lastname,
+            $allowprovisionalresume
+        );
         if ($identified->get_status() === 'provisional' && $identified->get_user_id() !== null) {
             $cart = $this->carts->transfer(
                 $identified->get_user_id(),
