@@ -143,11 +143,20 @@ final class CommerceCustomerLearningMergeService {
      * @return array<string,int>
      */
     public function merge(int $sourceuserid, int $targetuserid, array $resolutions = []): array {
+        $courseaccessservice = new CommerceCustomerCourseAccessMergeService($this->database);
+        // Snapshot role/interval semantics BEFORE user_enrolments and role_assignments
+        // are moved, otherwise a paid+Trial collision becomes indistinguishable.
+        $courseaccessplan = $courseaccessservice->plan($sourceuserid, $targetuserid);
+
         $result = [
             'enrolments' => 0,
             'enrolmentsdeduplicated' => 0,
             'roleassignments' => 0,
             'roleassignmentsdeduplicated' => 0,
+            'courseaccessesnormalised' => 0,
+            'courserolesremoved' => 0,
+            'courserolesdeduplicated' => 0,
+            'courseenrolmentsnormalised' => 0,
             'groupmemberships' => 0,
             'groupmembershipsdeduplicated' => 0,
             'coursecompletions' => 0,
@@ -179,6 +188,13 @@ final class CommerceCustomerLearningMergeService {
             $this->merge_enrolments($sourceuserid, $targetuserid);
         [$result['roleassignments'], $result['roleassignmentsdeduplicated']] =
             $this->merge_role_assignments($sourceuserid, $targetuserid);
+
+        $courseaccessresult = $courseaccessservice->apply($targetuserid, $courseaccessplan);
+        $result['courseaccessesnormalised'] = (int)$courseaccessresult['courses'];
+        $result['courserolesremoved'] = (int)$courseaccessresult['rolesremoved'];
+        $result['courserolesdeduplicated'] = (int)$courseaccessresult['rolesdeduplicated'];
+        $result['courseenrolmentsnormalised'] = (int)$courseaccessresult['enrolmentsnormalised'];
+
         [$result['groupmemberships'], $result['groupmembershipsdeduplicated']] =
             $this->merge_unique_membership('groups_members', 'groupid', $sourceuserid, $targetuserid);
         [$result['coursecompletions'], $result['coursecompletionsmerged']] =
