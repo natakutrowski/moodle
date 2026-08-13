@@ -76,6 +76,18 @@ final class CommerceGuestCheckoutService {
         $metadata['cart_uuid'] = $cart->get_uuid();
         $metadata['cart_item_count'] = count($cart->get_items());
 
+        // M9.5: the requested-currency anonymous cart is authoritative.
+        // Persist that exact transferred cart as the new durable recovery
+        // snapshot so a later Guest Checkout recovery cannot resurrect the
+        // previous currency/price id. Durable guest snapshots deliberately use
+        // customerid=0 because CommerceGuestCartTransferService validates them
+        // as anonymous carts before replaying them after session regeneration.
+        $metadata['guest_cart_snapshot'] = array_replace(
+            $cart->to_array(),
+            ['customerid' => 0]
+        );
+        $metadata['guest_cart_captured_at'] = time();
+
         return $this->sessions->transition($session, 'provisional', [
             'currency' => $currency,
             'purchasereference' => null,
