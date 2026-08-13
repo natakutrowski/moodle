@@ -7,6 +7,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\customer\identity\CommerceCustomerIdentityNavigationRenderer;
 use local_subscriptions\commerce\customer\merge\CommerceCustomerMergePlanner;
 use local_subscriptions\commerce\customer\merge\CommerceCustomerMergeExecutionService;
+use local_subscriptions\commerce\customer\merge\CommerceCustomerMergeFinalStateRenderer;
 use local_subscriptions\commerce\customer\merge\CommerceCustomerManualMergeCandidateService;
 use local_subscriptions\commerce\customer\merge\CommerceCustomerLearningMergeService;
 use local_subscriptions\commerce\customer\merge\CommerceCustomerLegacyConsolidationService;
@@ -595,57 +596,13 @@ if ($executionresult === null && $error === null && $plan !== null) {
     echo html_writer::end_tag('form');
 
     $target = $plan->target_profile();
-    $sourcenames = array_map(
-        static fn($profile): string => '#' . $profile->userid() . ' ' . $mergefullname($profile->user),
-        $plan->source_profiles()
-    );
-    echo html_writer::tag(
-        'section',
-        html_writer::div(
-            html_writer::tag('span', get_string('commerce_identity_merge_direction_sources', 'local_subscriptions'), ['class' => 'm734-direction-label']) .
-            html_writer::tag('strong', s(implode(' + ', $sourcenames))),
-            'm734-direction-side'
-        ) .
-        html_writer::div('→', 'm734-direction-arrow') .
-        html_writer::div(
-            html_writer::tag('span', get_string('commerce_identity_merge_direction_target', 'local_subscriptions'), ['class' => 'm734-direction-label']) .
-            html_writer::tag('strong', s('#' . $target->userid() . ' ' . $mergefullname($target->user))),
-            'm734-direction-side m734-direction-side--target'
-        ),
-        ['class' => 'm734-merge-direction']
-    );
-
-    echo html_writer::tag(
-        'h3',
-        get_string('commerce_identity_merge_virtual_profile', 'local_subscriptions'),
-        ['class' => 'h5']
-    );
-    echo html_writer::div(
-        get_string(
-            'commerce_identity_merge_virtual_profile_summary',
-            'local_subscriptions',
-            (object)[
-                'userid' => $target->userid(),
-                'name' => $mergefullname($target->user),
-                'email' => (string)$target->user->email,
-            ]
-        ),
-        'card card-body mb-3'
-    );
-
-    $totals = $plan->commerce_transfer_totals();
-    echo html_writer::div(
-        get_string(
-            'commerce_identity_merge_transfer_summary',
-            'local_subscriptions',
-            (object)[
-                'purchases' => $totals['purchases'],
-                'grants' => $totals['grants'],
-                'digital' => $totals['digitalaccesses'],
-                'guests' => $totals['guestsessions'],
-            ]
-        ),
-        'alert alert-secondary'
+    echo CommerceCustomerMergeFinalStateRenderer::render(
+        $plan,
+        $preferredidentityuserid,
+        $learningmergeservice,
+        $legacymergeservice,
+        $mergefullname,
+        $learningresolutions
     );
 
     if ($plan->warnings !== []) {
@@ -662,7 +619,9 @@ if ($executionresult === null && $error === null && $plan !== null) {
                 CommerceCustomerMergePlanner::WARNING_SHARED_COURSES =>
                     'commerce_identity_merge_warning_shared_courses',
                 CommerceCustomerMergePlanner::WARNING_DIFFERENT_EMAILS =>
-                    'commerce_identity_merge_warning_different_emails',
+                    $preferredidentityuserid !== $plan->targetuserid
+                        ? 'commerce_identity_merge_warning_different_emails_transfer'
+                        : 'commerce_identity_merge_warning_different_emails',
                 CommerceCustomerMergePlanner::WARNING_SUSPENDED_TARGET =>
                     'commerce_identity_merge_warning_suspended_target',
                 default => 'commerce_identity_merge_warning_generic',
@@ -834,6 +793,25 @@ if ($executionresult === null && $error === null && $plan !== null) {
                 'local_subscriptions'
             ),
             'alert alert-danger'
+        );
+
+        $confirmationidentity = $target;
+        foreach ($plan->profiles as $profile) {
+            if ($profile->userid() === $preferredidentityuserid) {
+                $confirmationidentity = $profile;
+                break;
+            }
+        }
+        $confirmationemail = $preferredidentityuserid !== $plan->targetuserid
+            ? (string)$confirmationidentity->user->email
+            : (string)$target->user->email;
+        echo html_writer::div(
+            s(get_string('commerce_identity_merge_final_confirmation', 'local_subscriptions', (object)[
+                'userid' => $target->userid(),
+                'email' => $confirmationemail,
+                'sources' => count($plan->source_profiles()),
+            ])),
+            'm13d-confirm-banner'
         );
 
         echo html_writer::start_div('form-check mb-3');
