@@ -295,6 +295,12 @@ final class CommercePersonalOfferCheckoutService {
         $usermatch = $userid !== null && $userid > 0 && $offer->get_beneficiary_user_id() !== null
             && $userid === $offer->get_beneficiary_user_id();
         if (!$emailmatch && !$usermatch) {
+            if ($allowanonymous && $email !== '') {
+                throw new CommercePersonalOfferIdentityConflictException(
+                    $offer->get_beneficiary_email(),
+                    $email
+                );
+            }
             throw new \moodle_exception('commerce_personal_offer_identity_mismatch', 'local_subscriptions');
         }
     }

@@ -85,7 +85,8 @@ final class CommerceCustomerMergeExecutionService {
         array $userids,
         int $targetuserid,
         int $actoruserid,
-        array $learningresolutions = []
+        array $learningresolutions = [],
+        ?int $preferredidentityuserid = null
     ): CommerceCustomerMergeExecutionResult {
         global $CFG;
 
@@ -114,8 +115,23 @@ final class CommerceCustomerMergeExecutionService {
             }
         }
 
+        if ($preferredidentityuserid !== null && $preferredidentityuserid !== $targetuserid
+            && !in_array($preferredidentityuserid, $sourceuserids, true)) {
+            throw new \moodle_exception('commerce_identity_merge_preferred_identity_invalid', 'local_subscriptions');
+        }
+
         $now = time();
         $transaction = $this->database->start_delegated_transaction();
+
+        $identitytransfer = null;
+        if ($preferredidentityuserid !== null && $preferredidentityuserid !== $targetuserid) {
+            $identitytransfer = (new CommerceCustomerPreferredIdentityTransferService($this->database))->transfer(
+                $targetuserid,
+                $preferredidentityuserid
+            );
+            // Downstream Legacy consolidation and certification must use the final identity.
+            $target = $this->database->get_record('user', ['id' => $targetuserid], '*', MUST_EXIST);
+        }
 
         $transfers = [
             'purchases' => 0,
@@ -218,6 +234,8 @@ final class CommerceCustomerMergeExecutionService {
             'sourceuserids' => $sourceuserids,
             'transfers' => $transfers,
             'learningresolutions' => $learningresolutions,
+            'preferredidentityuserid' => $preferredidentityuserid,
+            'identitytransfer' => $identitytransfer,
             'certification' => $certification,
         ];
 

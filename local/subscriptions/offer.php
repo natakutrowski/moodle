@@ -6,6 +6,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferCheckoutService;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferIdentityConflictException;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferIdentityConflictPresenter;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferDestinationResolver;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferSessionService;
 use local_subscriptions\commerce\showroom\CommerceShowroomUrl;
@@ -110,6 +112,56 @@ try {
         $checkoutparams['originreturn'] = $originreturn;
     }
     redirect(new moodle_url('/local/subscriptions/commerce_checkout.php', $checkoutparams));
+} catch (CommercePersonalOfferIdentityConflictException $exception) {
+    // The signed offer itself is valid; only the currently authenticated Moodle
+    // identity conflicts with its beneficiary. Keep the security boundary intact,
+    // but offer a clear, reversible logout-and-retry path.
+    $PAGE->set_context(context_system::instance());
+    $PAGE->set_url(new moodle_url('/local/subscriptions/offer.php'));
+    $PAGE->set_pagelayout('standard');
+    $PAGE->set_title(get_string('commerce_personal_offer_identity_conflict_title', 'local_subscriptions'));
+    $PAGE->set_heading(get_string('commerce_personal_offer_identity_conflict_title', 'local_subscriptions'));
+
+    $beneficiarymasked = CommercePersonalOfferIdentityConflictPresenter::mask_email($exception->beneficiaryemail);
+    $currentmasked = CommercePersonalOfferIdentityConflictPresenter::mask_email($exception->currentemail);
+
+    echo $OUTPUT->header();
+    echo $OUTPUT->notification(
+        get_string(
+            'commerce_personal_offer_identity_conflict_message',
+            'local_subscriptions',
+            (object)['offeremail' => $beneficiarymasked, 'currentemail' => $currentmasked]
+        ),
+        \core\output\notification::NOTIFY_WARNING
+    );
+    echo html_writer::start_tag('form', [
+        'method' => 'post',
+        'action' => (new moodle_url('/local/subscriptions/personal_offer_identity_continue.php'))->out(false),
+        'class' => 'mb-3',
+    ]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'token', 'value' => $token]);
+    if ($requestedcurrency !== '') {
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'currency', 'value' => $requestedcurrency]);
+    }
+    if ($requesteddestination !== '') {
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'destination', 'value' => $requesteddestination]);
+    }
+    if ($requestedanchor !== '') {
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'anchor', 'value' => $requestedanchor]);
+    }
+    echo html_writer::tag(
+        'button',
+        get_string('commerce_personal_offer_identity_conflict_continue', 'local_subscriptions'),
+        ['type' => 'submit', 'class' => 'btn btn-primary']
+    );
+    echo html_writer::end_tag('form');
+    echo html_writer::link(
+        UrlFactory::digital_catalog(),
+        get_string('commerce_personal_offer_identity_conflict_cancel', 'local_subscriptions'),
+        ['class' => 'btn btn-outline-secondary']
+    );
+    echo $OUTPUT->footer();
 } catch (Throwable $exception) {
     // Do not turn every checkout/runtime failure into "invalid offer link".
     // That message is reserved for genuine offer availability/identity failures.

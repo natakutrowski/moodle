@@ -77,6 +77,7 @@ $mergefullname = static function(object $user) use ($DB): string {
 $userids = optional_param_array('userids', [], PARAM_INT);
 $ids = trim(optional_param('ids', '', PARAM_RAW_TRIMMED));
 $targetuserid = optional_param('targetuserid', 0, PARAM_INT);
+$preferredidentityuserid = optional_param('preferredidentityuserid', 0, PARAM_INT);
 $q = trim(optional_param('q', '', PARAM_RAW_TRIMMED));
 $adduserid = optional_param('adduserid', 0, PARAM_INT);
 $removeuserid = optional_param('removeuserid', 0, PARAM_INT);
@@ -165,7 +166,8 @@ if (count($userids) >= CommerceCustomerMergePlanner::MIN_ACCOUNTS && in_array($a
                 $userids,
                 $plan->targetuserid,
                 (int)$USER->id,
-                $learningresolutions
+                $learningresolutions,
+                $preferredidentityuserid > 0 ? $preferredidentityuserid : null
             );
         }
     } catch (\Throwable $exception) {
@@ -554,6 +556,37 @@ if ($executionresult === null && $error === null && $plan !== null) {
     }
 
     echo html_writer::table($table);
+
+    if ($preferredidentityuserid <= 0 || !in_array($preferredidentityuserid, $userids, true)) {
+        $preferredidentityuserid = $plan->targetuserid;
+    }
+    echo html_writer::start_div('card card-body mb-3');
+    echo html_writer::tag('h4', get_string('commerce_identity_merge_preferred_identity_title', 'local_subscriptions'), ['class' => 'h6']);
+    echo html_writer::div(get_string('commerce_identity_merge_preferred_identity_help', 'local_subscriptions'), 'small text-muted mb-2');
+    foreach ($plan->profiles as $identityprofile) {
+        $identityuserid = $identityprofile->userid();
+        $identityid = 'preferred-identity-' . $identityuserid;
+        $identitylabel = get_string(
+            'commerce_identity_merge_preferred_identity_choice',
+            'local_subscriptions',
+            (object)[
+                'userid' => $identityuserid,
+                'email' => (string)$identityprofile->user->email,
+                'username' => (string)$identityprofile->user->username,
+            ]
+        );
+        echo html_writer::start_div('form-check');
+        echo html_writer::empty_tag('input', [
+            'type' => 'radio', 'class' => 'form-check-input', 'id' => $identityid,
+            'name' => 'preferredidentityuserid', 'value' => $identityuserid,
+            'checked' => $preferredidentityuserid === $identityuserid ? 'checked' : null,
+        ]);
+        echo html_writer::tag('label', s($identitylabel), ['for' => $identityid, 'class' => 'form-check-label']);
+        echo html_writer::end_div();
+    }
+    echo html_writer::div(get_string('commerce_identity_merge_preferred_identity_safety', 'local_subscriptions'), 'alert alert-warning py-2 small mt-3 mb-0');
+    echo html_writer::end_div();
+
     echo html_writer::tag(
         'button',
         get_string('commerce_identity_merge_recalculate', 'local_subscriptions'),
@@ -752,6 +785,11 @@ if ($executionresult === null && $error === null && $plan !== null) {
             'type' => 'hidden',
             'name' => 'targetuserid',
             'value' => $plan->targetuserid,
+        ]);
+        echo html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => 'preferredidentityuserid',
+            'value' => $preferredidentityuserid > 0 ? $preferredidentityuserid : $plan->targetuserid,
         ]);
         foreach ($userids as $userid) {
             echo html_writer::empty_tag('input', [

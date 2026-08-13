@@ -10,6 +10,7 @@ use local_subscriptions\crm\workspace\WorkspaceItemDefinition;
 use local_subscriptions\output\UserProfileRenderer;
 use local_subscriptions\crm\user360\merge\User360MergeHistoryRenderer;
 use local_subscriptions\crm\user360\guest\User360GuestCheckoutRecoveryRenderer;
+use local_subscriptions\crm\user360\identity\User360IdentityGraphRenderer;
 
 /**
  * Builds the CRM User360 Workspace.
@@ -57,6 +58,9 @@ final class User360WorkspaceFactory {
 
     public const ITEM_MERGE_HISTORY =
         'user360_merge_history';
+
+    public const ITEM_IDENTITY_GRAPH =
+        'user360_identity_graph';
 
     public const ITEM_GUEST_CHECKOUT_RECOVERY =
         'user360_guest_checkout_recovery';
@@ -143,6 +147,11 @@ final class User360WorkspaceFactory {
             $profile
         );
 
+        self::register_identity_graph(
+            $definition,
+            $profile
+        );
+
         self::register_guest_checkout_recovery(
             $definition,
             $profile
@@ -153,6 +162,7 @@ final class User360WorkspaceFactory {
                 $definition,
                 $profile
             );
+
         }
 
         if (!$iscommerceguest) {
@@ -600,6 +610,34 @@ final class User360WorkspaceFactory {
     /**
      * Registers accessible courses.
      */
+    private static function register_identity_graph(
+        WorkspaceDefinition $definition,
+        ?\stdClass $profile
+    ): void {
+        $definition->register(
+            new WorkspaceItemDefinition(
+                key: self::ITEM_IDENTITY_GRAPH,
+                label: get_string('user360_identity_graph_title', 'local_subscriptions'),
+                description: get_string('user360_identity_graph_help', 'local_subscriptions'),
+                icon: '🔗',
+                zone: self::ZONE_SIDEBAR,
+                span: 1,
+                type: WorkspaceItemDefinition::TYPE_WIDGET,
+                hideable: true,
+                movable: true,
+                defaultvisible: true,
+                renderer: static function () use ($profile): string {
+                    if ($profile === null || empty($profile->user)) { return ''; }
+                    if (!empty($profile->user->id)) {
+                        return User360IdentityGraphRenderer::render((int)$profile->user->id);
+                    }
+                    $email = trim((string)($profile->user->email ?? ''));
+                    return $email !== '' ? User360IdentityGraphRenderer::render_email($email) : '';
+                }
+            )
+        );
+    }
+
     private static function register_courses(
         WorkspaceDefinition $definition,
         ?\stdClass $profile
