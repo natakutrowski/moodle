@@ -47,14 +47,87 @@ final class CommercePurchaseMailContextFactory {
         $customer = CommercePurchaseCurrentCustomerResolver::create()->resolve($details);
         $name = $customer->display_name();
         $recipient = new CommerceMailRecipient($customer->email, $name, $customer->userid);
-        $language = $this->resolve_language($customer->userid, $details->metadata);
+        $language = (new CommercePurchaseMailLanguageResolver($this->database))->resolve($customer->userid, $details);
+
+        $contextvalues = $this->context_from_order($order, $name, $language);
+        $contextvalues = $this->with_legacy_digital_access(
+            $contextvalues,
+            $details,
+            $language
+        );
 
         return [
             'recipient' => $recipient,
-            'context' => new CommerceMailContext($this->context_from_order($order, $name, $language)),
+            'context' => new CommerceMailContext($contextvalues),
             'language' => $language,
             'purchaseid' => $order->purchaseid,
         ];
+    }
+
+    /**
+     * Legacy projected digital purchases may not have Native grants/digital-access rows.
+     * Preserve the Native transactional-mail engine, but reconstruct the download buttons
+     * from the authoritative Legacy token when the projected order exposes no access.
+     *
+     * @param array<string,mixed> $context
+     * @return array<string,mixed>
+     */
+    private function with_legacy_digital_access(
+        array $context,
+        \local_subscriptions\commerce\purchase\readmodel\CommercePurchaseDetails $details,
+        string $language
+    ): array {
+        if (
+            strtolower(trim((string)($details->legacyfamily ?? ''))) !== 'digital'
+            || empty($details->legacyid)
+        ) {
+            return $context;
+        }
+
+        $items = is_array($context['items'] ?? null) ? $context['items'] : [];
+
+        // Never override a real Native access projection.
+        foreach ($items as $item) {
+            if (is_array($item) && !empty($item['accesses'])) {
+                return $context;
+            }
+        }
+
+        $legacy = (new CommerceLegacyDigitalMailAccessResolver($this->database))->resolve(
+            (int)$details->legacyid,
+            $language
+        );
+        if ($legacy === null || $legacy['accesses'] === []) {
+            return $context;
+        }
+
+        if ($items === []) {
+            $items[] = [
+                'type' => 'digital',
+                'title' => $legacy['title'],
+                'productsku' => '',
+                'coverurl' => '',
+                'description' => '',
+                'quantity' => 1,
+                'grossformatted' => '',
+                'discountformatted' => '',
+                'totalformatted' => '',
+                'grossminor' => 0,
+                'discountminor' => 0,
+                'netminor' => 0,
+                'producturl' => '',
+                'accesses' => $legacy['accesses'],
+            ];
+        } else {
+            $items[0]['type'] = 'digital';
+            if (trim((string)($items[0]['title'] ?? '')) === '') {
+                $items[0]['title'] = $legacy['title'];
+            }
+            $items[0]['accesses'] = $legacy['accesses'];
+        }
+
+        $context['items'] = array_values($items);
+        return $context;
     }
 
     /** @return array<string,mixed> */
@@ -299,22 +372,6 @@ final class CommercePurchaseMailContextFactory {
         );
 
         return CommerceProductDisplayText::title((string)($record->name ?? ''));
-    }
-
-    private function resolve_language(?int $userid, array $metadata): string {
-        if ($userid !== null) {
-            $language = $this->database->get_field('user', 'lang', ['id' => $userid]);
-            if (is_string($language) && trim($language) !== '') {
-                return clean_param($language, PARAM_LANG);
-            }
-        }
-        foreach (['customerlang', 'language', 'lang'] as $key) {
-            $language = trim((string)($metadata[$key] ?? ''));
-            if ($language !== '') {
-                return clean_param($language, PARAM_LANG);
-            }
-        }
-        return clean_param(current_language(), PARAM_LANG) ?: 'fr';
     }
 
     private function normalise_item_type(string $type): string {
