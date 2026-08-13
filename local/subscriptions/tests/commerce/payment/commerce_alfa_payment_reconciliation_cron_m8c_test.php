@@ -11,6 +11,17 @@ use local_subscriptions\commerce\payment\reconciliation\alfa\AlfaPaymentReconcil
 use local_subscriptions\payment\dto\InternalEvent;
 
 final class local_subscriptions_commerce_alfa_payment_reconciliation_cron_m8c_test extends advanced_testcase {
+    public function test_scheduled_task_wiring_classes_are_autoloadable(): void {
+        self::assertTrue(
+            class_exists(\local_subscriptions\task\reconcile_alfa_payments_task::class),
+            'Scheduled Alfa reconciliation task class must be autoloadable.'
+        );
+        self::assertTrue(
+            class_exists(\local_subscriptions\commerce\task\job\AlfaPaymentReconciliationJob::class),
+            'Alfa reconciliation job class must be autoloadable.'
+        );
+    }
+
     public function test_batch_finds_stale_alfa_payment_and_reconciles_safe_provider_deposit(): void {
         global $DB;
         $this->resetAfterTest(true);
