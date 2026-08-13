@@ -120,7 +120,9 @@ $PAGE->set_title(get_string('commerce_checkout_title', 'local_subscriptions'));
 $PAGE->set_heading(get_string('commerce_checkout_title', 'local_subscriptions'));
 $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/storefront.css'));
 $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/guest_checkout.css'));
+$PAGE->requires->css(new moodle_url('/local/subscriptions/styles/payment_provider_transition.css'));
 $PAGE->requires->js_call_amd('local_subscriptions/guest_checkout_security', 'init');
+$PAGE->requires->js_call_amd('local_subscriptions/payment_provider_transition', 'init');
 
 $identity = null;
 if (!$isguestcheckout) {
@@ -322,6 +324,12 @@ $data += [
     'launchhint' => $existingaccount ? get_string('commerce_guest_checkout_existing_account', 'local_subscriptions') : '',
     'paymentsecurelabel' => get_string('commerce_cart_payment_secure', 'local_subscriptions'),
     'instantaccesslabel' => get_string('commerce_cart_instant_access', 'local_subscriptions'),
+    'providertransitiontitle' => get_string('commerce_provider_transition_title', 'local_subscriptions'),
+    'providertransitionmessage' => get_string('commerce_provider_transition_message', 'local_subscriptions'),
+    'providertransitionsecuritytitle' => get_string('commerce_provider_transition_security_title', 'local_subscriptions'),
+    'providertransitionsecuritymessage' => get_string('commerce_provider_transition_security_message', 'local_subscriptions'),
+    'providertransitionalfa' => get_string('commerce_provider_transition_alfa', 'local_subscriptions'),
+    'providertransitiondefault' => get_string('commerce_provider_transition_default', 'local_subscriptions'),
     'stripeiconurl' => (new moodle_url('/local/subscriptions/pix/email/stripe.png'))->out(false),
     'alfaiconurl' => (new moodle_url('/local/subscriptions/pix/email/alfa.png'))->out(false),
     'visaiconurl' => (new moodle_url('/local/subscriptions/pix/email/visa.png'))->out(false),

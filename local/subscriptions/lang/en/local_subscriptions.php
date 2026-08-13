@@ -8788,3 +8788,33 @@ $string['settings:alfa_reconciliation_max_age_desc'] = 'Payments older than this
 $string['settings:alfa_reconciliation_batch_size'] = 'Maximum payments per run';
 
 $string['settings:alfa_reconciliation_batch_size_desc'] = 'Limits the number of Alfa API calls made by one scheduled-task run. Recommended value: 20.';
+
+$string['commerce_alfa_confirmation_title'] = 'We are confirming your payment…';
+
+$string['commerce_alfa_confirmation_message'] = 'This usually takes only a few seconds.';
+
+$string['commerce_alfa_confirmation_security_title'] = 'Your data is secure';
+
+$string['commerce_alfa_confirmation_security_message'] = 'We are verifying the transaction directly with our payment provider.';
+
+$string['commerce_alfa_confirmation_confirmed_title'] = 'Payment confirmed!';
+
+$string['commerce_alfa_confirmation_confirmed_message'] = 'Your access is ready. Redirecting you now…';
+
+$string['commerce_provider_transition_title'] = 'Preparing your secure payment…';
+
+$string['commerce_provider_transition_message'] = 'One moment: we are opening the secure payment page.';
+
+$string['commerce_provider_transition_security_title'] = 'Secure connection';
+
+$string['commerce_provider_transition_security_message'] = 'You are about to be redirected to our payment provider.';
+
+$string['commerce_provider_transition_alfa'] = 'Redirecting to Alfa';
+
+$string['commerce_provider_transition_default'] = 'Redirecting to the payment provider';
+
+$string['commerce_payment_splash_preview_title'] = 'Payment screen preview';
+
+$string['commerce_payment_splash_preview_outbound'] = 'Leaving for provider';
+
+$string['commerce_payment_splash_preview_return'] = 'Payment confirmation';

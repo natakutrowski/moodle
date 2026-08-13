@@ -27,6 +27,7 @@ $reference = required_param('reference', PARAM_ALPHANUMEXT);
 $result = optional_param('result', '', PARAM_ALPHA);
 $code = optional_param('code', '', PARAM_ALPHANUMEXT);
 $accountfinalised = optional_param('accountfinalised', 0, PARAM_BOOL);
+$returnpaymentid = optional_param('paymentid', 0, PARAM_INT);
 $lang = strtolower(substr(optional_param('lang', '', PARAM_ALPHANUMEXT), 0, 2));
 if (in_array($lang, ['fr', 'en', 'ru'], true)) {
     $SESSION->lang = $lang;
@@ -180,6 +181,22 @@ $stepscontext = [
     'steps' => $steps,
 ];
 
+$showalfaconfirmationsplash = (
+    $returnpaymentid > 0
+    && strtolower((string)$order->provider) === 'alfa'
+    && $state->code === 'pending'
+);
+
+if ($showalfaconfirmationsplash) {
+    $PAGE->requires->css(
+        new moodle_url('/local/subscriptions/styles/alfa_payment_confirmation.css')
+    );
+    $PAGE->requires->js_call_amd(
+        'local_subscriptions/alfa_payment_confirmation',
+        'init'
+    );
+}
+
 $PAGE->requires->css(
     new moodle_url('/local/subscriptions/styles/order_result.css')
 );
@@ -187,6 +204,110 @@ $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/provisional_acc
 $PAGE->requires->js_call_amd('local_subscriptions/guest_checkout_security', 'init');
 
 echo $OUTPUT->header();
+
+if ($showalfaconfirmationsplash) {
+    $successurl = UrlFactory::order_result([
+        'reference' => $reference,
+        'result' => 'success',
+        'lang' => $lang,
+    ]);
+    $failureurl = UrlFactory::order_result([
+        'reference' => $reference,
+        'result' => 'failure',
+        'code' => 'alfa_reconciliation',
+        'lang' => $lang,
+    ]);
+
+    echo html_writer::start_div(
+        'alfa-payment-confirmation',
+        [
+            'data-alfa-payment-confirmation' => '1',
+            'data-endpoint' => (new moodle_url(
+                '/local/subscriptions/payment/alfa_return_poll.php'
+            ))->out(false),
+            'data-paymentid' => (string)$returnpaymentid,
+            'data-reference' => $reference,
+            'data-sesskey' => sesskey(),
+            'data-success-url' => $successurl->out(false),
+            'data-failure-url' => $failureurl->out(false),
+            'data-fast-attempts' => '12',
+            'data-fast-interval' => '1250',
+            'data-background-interval' => '5000',
+            'data-confirmed-title' => get_string(
+                'commerce_alfa_confirmation_confirmed_title',
+                'local_subscriptions'
+            ),
+            'data-confirmed-message' => get_string(
+                'commerce_alfa_confirmation_confirmed_message',
+                'local_subscriptions'
+            ),
+            'role' => 'status',
+            'aria-live' => 'polite',
+            'aria-atomic' => 'true',
+        ]
+    );
+
+    echo html_writer::start_div('alfa-payment-confirmation__glass');
+
+    echo html_writer::start_div('alfa-payment-confirmation__hourglass-wrap');
+    echo html_writer::div('', 'alfa-payment-confirmation__orbit', ['aria-hidden' => 'true']);
+    echo html_writer::tag(
+        'div',
+        html_writer::tag('i', '', [
+            'class' => 'fa-solid fa-hourglass-half',
+            'aria-hidden' => 'true',
+        ]),
+        ['class' => 'alfa-payment-confirmation__hourglass']
+    );
+    echo html_writer::end_div();
+
+    echo html_writer::tag(
+        'h1',
+        get_string('commerce_alfa_confirmation_title', 'local_subscriptions'),
+        [
+            'class' => 'alfa-payment-confirmation__title',
+            'data-alfa-title' => '1',
+        ]
+    );
+    echo html_writer::tag(
+        'p',
+        get_string('commerce_alfa_confirmation_message', 'local_subscriptions'),
+        [
+            'class' => 'alfa-payment-confirmation__message',
+            'data-alfa-message' => '1',
+        ]
+    );
+
+    echo html_writer::div('', 'alfa-payment-confirmation__progress', [
+        'data-alfa-progress' => '1',
+        'aria-hidden' => 'true',
+    ]);
+
+    echo html_writer::start_div('alfa-payment-confirmation__security');
+    echo html_writer::tag(
+        'span',
+        html_writer::tag('i', '', [
+            'class' => 'fa-solid fa-lock',
+            'aria-hidden' => 'true',
+        ]),
+        ['class' => 'alfa-payment-confirmation__security-icon']
+    );
+    echo html_writer::start_div('');
+    echo html_writer::tag(
+        'strong',
+        get_string('commerce_alfa_confirmation_security_title', 'local_subscriptions')
+    );
+    echo html_writer::tag(
+        'span',
+        get_string('commerce_alfa_confirmation_security_message', 'local_subscriptions')
+    );
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+}
+
 echo html_writer::start_div('commerce-order-result container py-4 py-lg-5');
 
 echo $OUTPUT->render_from_template(

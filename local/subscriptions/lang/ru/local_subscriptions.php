@@ -8863,3 +8863,33 @@ $string['settings:alfa_reconciliation_max_age_desc'] = 'Более старые 
 $string['settings:alfa_reconciliation_batch_size'] = 'Максимум платежей за один запуск';
 
 $string['settings:alfa_reconciliation_batch_size_desc'] = 'Ограничивает число запросов к Alfa за один запуск cron. Рекомендуемое значение: 20.';
+
+$string['commerce_alfa_confirmation_title'] = 'Подтверждаем ваш платёж…';
+
+$string['commerce_alfa_confirmation_message'] = 'Обычно это занимает всего несколько секунд.';
+
+$string['commerce_alfa_confirmation_security_title'] = 'Ваши данные защищены';
+
+$string['commerce_alfa_confirmation_security_message'] = 'Мы напрямую проверяем транзакцию у платёжного провайдера.';
+
+$string['commerce_alfa_confirmation_confirmed_title'] = 'Платёж подтверждён!';
+
+$string['commerce_alfa_confirmation_confirmed_message'] = 'Доступ уже готов. Перенаправляем вас…';
+
+$string['commerce_provider_transition_title'] = 'Подготавливаем безопасную оплату…';
+
+$string['commerce_provider_transition_message'] = 'Ещё мгновение: открываем защищённую страницу оплаты.';
+
+$string['commerce_provider_transition_security_title'] = 'Безопасное соединение';
+
+$string['commerce_provider_transition_security_message'] = 'Сейчас вы будете перенаправлены к платёжному провайдеру.';
+
+$string['commerce_provider_transition_alfa'] = 'Переход к Alfa';
+
+$string['commerce_provider_transition_default'] = 'Переход к платёжному провайдеру';
+
+$string['commerce_payment_splash_preview_title'] = 'Предпросмотр экранов оплаты';
+
+$string['commerce_payment_splash_preview_outbound'] = 'Переход к провайдеру';
+
+$string['commerce_payment_splash_preview_return'] = 'Подтверждение платежа';
