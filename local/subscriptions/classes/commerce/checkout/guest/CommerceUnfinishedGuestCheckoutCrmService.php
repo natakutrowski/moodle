@@ -33,7 +33,9 @@ final class CommerceUnfinishedGuestCheckoutCrmService {
         $rows = [];
         foreach ($this->recovery->audit($email) as $candidate) {
             $candidate['classification'] = $this->classify($candidate);
-            $candidate['payments'] = $this->payments_for_user((int)$candidate['userid']);
+            $candidate['payments'] = $this->decorate_provider_statuses(
+                $this->payments_for_user((int)$candidate['userid'])
+            );
             $candidate['age'] = $this->source_age((int)$candidate['source_session_id']);
             $candidate['user360url'] = (new \moodle_url(
                 '/local/subscriptions/admin/users/view.php',
@@ -183,6 +185,64 @@ final class CommerceUnfinishedGuestCheckoutCrmService {
               ORDER BY pay.timecreated DESC, pay.id DESC';
 
         return array_values($this->database->get_records_sql($sql, ['userid' => $userid]));
+    }
+
+
+    /**
+     * Add a best-effort, read-only provider snapshot to pending payment rows.
+     *
+     * Provider failures must never make the CRM queue unavailable. No Campus
+     * payment/purchase state is changed here; reconciliation remains an
+     * explicit administrator action.
+     *
+     * @param array<int,\stdClass> $payments
+     * @return array<int,\stdClass>
+     */
+    private function decorate_provider_statuses(array $payments): array {
+        foreach ($payments as $payment) {
+            $payment->providerlivechecked = false;
+            $payment->providerlivepaid = false;
+            $payment->providerlivestatus = '';
+            $payment->providerliveerror = false;
+
+            if (!in_array((string)$payment->status, ['created', 'redirected', 'pending'], true)) {
+                continue;
+            }
+
+            $provider = strtolower((string)$payment->provider);
+            if (!in_array($provider, [Provider::ALFA, Provider::STRIPE], true)) {
+                continue;
+            }
+
+            try {
+                if ($provider === Provider::ALFA) {
+                    $inspection = AlfaPaymentReconciliationService::create($this->database)
+                        ->inspect_payment((int)$payment->id);
+                    $payment->providerlivechecked = true;
+                    $payment->providerlivepaid = (bool)$inspection->providerpaid;
+                    $payment->providerlivestatus = $inspection->provider->paymentstate !== null
+                        ? (string)$inspection->provider->paymentstate
+                        : 'orderStatus=' . (string)($inspection->provider->orderstatus ?? '—');
+                } else {
+                    $inspection = StripePaymentReconciliationService::create($this->database)
+                        ->inspect_payment((int)$payment->id);
+                    $payment->providerlivechecked = true;
+                    $payment->providerlivepaid = (bool)$inspection->providerpaid;
+                    $payment->providerlivestatus = (string)$inspection->provider->checkoutstatus
+                        . ' / ' . (string)$inspection->provider->paymentstatus;
+                }
+            } catch (\Throwable $exception) {
+                $payment->providerliveerror = true;
+                debugging(
+                    '[local_subscriptions][unfinished_checkout_provider_probe] payment='
+                    . (int)$payment->id . ' provider=' . $provider . ' error='
+                    . $exception->getMessage(),
+                    DEBUG_DEVELOPER
+                );
+            }
+        }
+
+        return $payments;
     }
 
     private function source_age(int $sessionid): int {

@@ -212,6 +212,33 @@ if ($rows === []) {
                 foreach ($purchasepayments as $payment) {
                     echo html_writer::start_div('small mt-2');
                     echo s((string)$payment->provider) . ' · #' . (int)$payment->id . ' · ' . s((string)$payment->status);
+
+                    if (!empty($payment->providerlivechecked)) {
+                        echo ' · ';
+                        echo html_writer::span(
+                            get_string(
+                                'commerce_guest_crm_provider_live_status',
+                                'local_subscriptions',
+                                (object)['status' => (string)$payment->providerlivestatus]
+                            ),
+                            'text-muted'
+                        );
+                        if (!empty($payment->providerlivepaid)
+                                && (string)$payment->purchasestatus === 'payment_pending') {
+                            echo ' ';
+                            echo html_writer::span(
+                                get_string('commerce_guest_crm_provider_paid_pending', 'local_subscriptions'),
+                                'badge text-bg-danger'
+                            );
+                        }
+                    } elseif (!empty($payment->providerliveerror)) {
+                        echo ' · ';
+                        echo html_writer::span(
+                            get_string('commerce_guest_crm_provider_probe_unavailable', 'local_subscriptions'),
+                            'text-muted'
+                        );
+                    }
+
                     if (in_array(strtolower((string)$payment->provider), ['alfa', 'stripe'], true)
                             && in_array((string)$payment->status, ['created', 'redirected', 'pending'], true)) {
                         echo ' ';
