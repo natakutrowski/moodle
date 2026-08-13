@@ -8602,3 +8602,25 @@ $string['commerce_alfa_reconciliation_blocker_approved_amount_mismatch'] = 'Le m
 $string['commerce_alfa_reconciliation_blocker_deposited_amount_mismatch'] = 'Le montant réellement encaissé par Alfa ne correspond pas au montant attendu.';
 
 $string['commerce_alfa_reconciliation_blocker_provider_event_not_completed'] = 'Le statut Alfa ne produit pas un événement de paiement finalisé.';
+
+$string['task_reconcile_alfa_payments'] = 'Réconciliation automatique des paiements Alfa';
+
+$string['settings:alfa_reconciliation_header'] = 'Réconciliation automatique Alfa';
+
+$string['settings:alfa_reconciliation_header_desc'] = 'Récupère automatiquement les paiements encaissés par Alfa lorsque le retour navigateur ou la notification serveur n’a pas finalisé la commande CampusFR.';
+
+$string['settings:alfa_reconciliation_cron_enabled'] = 'Activer la réconciliation automatique Alfa';
+
+$string['settings:alfa_reconciliation_cron_enabled_desc'] = 'Le cron interroge Alfa pour les paiements CampusFR encore en attente et ne finalise que ceux dont le paiement, le montant et la devise sont confirmés par Alfa.';
+
+$string['settings:alfa_reconciliation_min_age'] = 'Délai minimum avant vérification (secondes)';
+
+$string['settings:alfa_reconciliation_min_age_desc'] = 'Temps minimal après la création du paiement avant qu’il puisse être vérifié automatiquement. Valeur recommandée : 300 secondes.';
+
+$string['settings:alfa_reconciliation_max_age'] = 'Ancienneté maximale vérifiée (secondes)';
+
+$string['settings:alfa_reconciliation_max_age_desc'] = 'Les paiements plus anciens que cette durée ne sont pas interrogés automatiquement. Valeur recommandée : 172800 secondes (48 h).';
+
+$string['settings:alfa_reconciliation_batch_size'] = 'Nombre maximal de paiements par exécution';
+
+$string['settings:alfa_reconciliation_batch_size_desc'] = 'Limite le nombre d’appels Alfa effectués lors d’une exécution du cron. Valeur recommandée : 20.';

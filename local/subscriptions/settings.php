@@ -570,6 +570,40 @@ if ($hassiteconfig) {
             '', ''
         ));
 
+
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_alfa_reconciliation_header',
+            get_string('settings:alfa_reconciliation_header', 'local_subscriptions'),
+            get_string('settings:alfa_reconciliation_header_desc', 'local_subscriptions')
+        ));
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/alfa_reconciliation_cron_enabled',
+            get_string('settings:alfa_reconciliation_cron_enabled', 'local_subscriptions'),
+            get_string('settings:alfa_reconciliation_cron_enabled_desc', 'local_subscriptions'),
+            0
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_reconciliation_min_age',
+            get_string('settings:alfa_reconciliation_min_age', 'local_subscriptions'),
+            get_string('settings:alfa_reconciliation_min_age_desc', 'local_subscriptions'),
+            300,
+            PARAM_INT
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_reconciliation_max_age',
+            get_string('settings:alfa_reconciliation_max_age', 'local_subscriptions'),
+            get_string('settings:alfa_reconciliation_max_age_desc', 'local_subscriptions'),
+            172800,
+            PARAM_INT
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_reconciliation_batch_size',
+            get_string('settings:alfa_reconciliation_batch_size', 'local_subscriptions'),
+            get_string('settings:alfa_reconciliation_batch_size_desc', 'local_subscriptions'),
+            20,
+            PARAM_INT
+        ));
+
         // === Misc. =============================================================
         $settings->add(new admin_setting_heading(
             'local_subs_email_heading',

@@ -8841,3 +8841,25 @@ $string['commerce_alfa_reconciliation_blocker_approved_amount_mismatch'] = 'Су
 $string['commerce_alfa_reconciliation_blocker_deposited_amount_mismatch'] = 'Фактически зачисленная сумма Alfa не совпадает с ожидаемой.';
 
 $string['commerce_alfa_reconciliation_blocker_provider_event_not_completed'] = 'Статус Alfa не соответствует окончательно подтверждённому платежу.';
+
+$string['task_reconcile_alfa_payments'] = 'Автоматическая сверка платежей Alfa';
+
+$string['settings:alfa_reconciliation_header'] = 'Автоматическая сверка Alfa';
+
+$string['settings:alfa_reconciliation_header_desc'] = 'Автоматически восстанавливает платежи, зачисленные Alfa, если возврат браузера или серверное уведомление не завершили заказ CampusFR.';
+
+$string['settings:alfa_reconciliation_cron_enabled'] = 'Включить автоматическую сверку Alfa';
+
+$string['settings:alfa_reconciliation_cron_enabled_desc'] = 'Задача cron проверяет в Alfa платежи CampusFR, которые всё ещё ожидают подтверждения, и завершает только те, для которых Alfa подтверждает статус, сумму и валюту.';
+
+$string['settings:alfa_reconciliation_min_age'] = 'Минимальная задержка перед проверкой (секунды)';
+
+$string['settings:alfa_reconciliation_min_age_desc'] = 'Минимальное время после создания платежа до автоматической проверки. Рекомендуемое значение: 300 секунд.';
+
+$string['settings:alfa_reconciliation_max_age'] = 'Максимальный возраст проверяемого платежа (секунды)';
+
+$string['settings:alfa_reconciliation_max_age_desc'] = 'Более старые платежи автоматически не проверяются. Рекомендуемое значение: 172800 секунд (48 часов).';
+
+$string['settings:alfa_reconciliation_batch_size'] = 'Максимум платежей за один запуск';
+
+$string['settings:alfa_reconciliation_batch_size_desc'] = 'Ограничивает число запросов к Alfa за один запуск cron. Рекомендуемое значение: 20.';
