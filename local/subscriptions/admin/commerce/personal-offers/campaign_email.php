@@ -38,6 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'body' => optional_param('body_' . $language, '', PARAM_RAW),
                 'bodyformat' => optional_param('bodyformat_' . $language, (int)FORMAT_HTML, PARAM_INT),
                 'ctalabel' => optional_param('ctalabel_' . $language, '', PARAM_RAW_TRIMMED),
+                'secondaryctalabel' => optional_param('secondaryctalabel_' . $language, '', PARAM_RAW_TRIMMED),
+                'secondaryctaurl' => optional_param('secondaryctaurl_' . $language, '', PARAM_RAW_TRIMMED),
                 'closing' => optional_param('closing_' . $language, '', PARAM_RAW),
                 'closingformat' => optional_param('closingformat_' . $language, (int)FORMAT_HTML, PARAM_INT),
             ];
@@ -214,6 +216,8 @@ foreach ($labels as $language => $label) {
         'body' => $record ? (string)$record->body : '',
         'bodyformat' => $record ? (int)$record->bodyformat : (int)FORMAT_HTML,
         'ctalabel' => $record ? (string)$record->ctalabel : '',
+        'secondaryctalabel' => $record ? (string)($record->secondaryctalabel ?? '') : '',
+        'secondaryctaurl' => $record ? (string)($record->secondaryctaurl ?? '') : '',
         'closing' => $record ? (string)($record->closing ?? '') : '',
         'closingformat' => $record ? (int)$record->closingformat : (int)FORMAT_HTML,
     ];
@@ -222,6 +226,8 @@ foreach ($labels as $language => $label) {
         $values['body'] = optional_param('body_' . $language, $values['body'], PARAM_RAW);
         $values['bodyformat'] = optional_param('bodyformat_' . $language, (int)FORMAT_HTML, PARAM_INT);
         $values['ctalabel'] = optional_param('ctalabel_' . $language, $values['ctalabel'], PARAM_RAW_TRIMMED);
+        $values['secondaryctalabel'] = optional_param('secondaryctalabel_' . $language, $values['secondaryctalabel'], PARAM_RAW_TRIMMED);
+        $values['secondaryctaurl'] = optional_param('secondaryctaurl_' . $language, $values['secondaryctaurl'], PARAM_RAW_TRIMMED);
         $values['closing'] = optional_param('closing_' . $language, $values['closing'], PARAM_RAW);
         $values['closingformat'] = optional_param('closingformat_' . $language, (int)FORMAT_HTML, PARAM_INT);
     }
@@ -237,6 +243,8 @@ foreach ($labels as $language => $label) {
         'subject' => ['commerce_personal_offer_campaign_email_subject', false],
         'body' => ['commerce_personal_offer_campaign_email_body', true],
         'ctalabel' => ['commerce_personal_offer_campaign_email_cta_label', false],
+        'secondaryctalabel' => ['commerce_personal_offer_campaign_email_secondary_cta_label', false],
+        'secondaryctaurl' => ['commerce_personal_offer_campaign_email_secondary_cta_url', false],
         'closing' => ['commerce_personal_offer_campaign_email_closing', true],
     ] as $field => [$stringkey, $richeditor]) {
         echo html_writer::start_div('mb-3');
@@ -256,7 +264,16 @@ foreach ($labels as $language => $label) {
                 ]);
             }
         } else {
-            echo html_writer::empty_tag('input', $attrs + ['type' => 'text', 'value' => $values[$field]]);
+            echo html_writer::empty_tag('input', $attrs + [
+                'type' => $field === 'secondaryctaurl' ? 'url' : 'text',
+                'value' => $values[$field],
+            ]);
+            if ($field === 'secondaryctaurl') {
+                echo html_writer::div(
+                    get_string('commerce_personal_offer_campaign_email_secondary_cta_help', 'local_subscriptions'),
+                    'form-text'
+                );
+            }
         }
         echo html_writer::end_div();
     }

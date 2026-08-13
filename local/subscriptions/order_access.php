@@ -35,7 +35,7 @@ try {
         $order = $service->find_for_user($reference, (int)$guestsession->get_user_id());
     }
 } catch (CommerceOrderPresentationAccessDeniedException $exception) {
-    throw new moodle_exception('nopermissions', 'error');
+    throw new moodle_exception('commerce_public_access_denied', 'local_subscriptions');
 }
 
 if ($order === null) {

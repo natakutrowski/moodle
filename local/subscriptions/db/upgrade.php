@@ -8067,5 +8067,16 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026081202, 'local', 'subscriptions');
     }
 
+
+    if ($oldversion < 2026081303) {
+        // M11.1: optional secondary CTA placed after campaign marketing content.
+        $table = new xmldb_table('local_subs_commerce_offer_campaign_email_content');
+        $field = new xmldb_field('secondaryctalabel', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'ctalabel');
+        if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+        $field = new xmldb_field('secondaryctaurl', XMLDB_TYPE_TEXT, null, null, null, null, null, 'secondaryctalabel');
+        if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); }
+        upgrade_plugin_savepoint(true, 2026081303, 'local', 'subscriptions');
+    }
+
     return true;
 }

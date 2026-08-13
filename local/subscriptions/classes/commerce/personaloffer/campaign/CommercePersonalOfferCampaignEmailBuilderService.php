@@ -38,7 +38,7 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
     }
 
     /**
-     * @param array<string,array{subject:string,body:string,bodyformat:int,ctalabel:string,closing:string,closingformat:int}> $translations
+     * @param array<string,array{subject:string,body:string,bodyformat:int,ctalabel:string,secondaryctalabel:string,secondaryctaurl:string,closing:string,closingformat:int}> $translations
      */
     public function save(
         int $campaignid,
@@ -58,17 +58,20 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
             $this->emailservice->save_destination($campaignid, $destination, $showroomid, $userid);
 
             foreach (CommercePersonalOfferCampaignEmailService::SUPPORTED_LANGUAGES as $language) {
-                $data = $translations[$language] ?? ['subject' => '', 'body' => '', 'bodyformat' => (int)FORMAT_HTML, 'ctalabel' => '', 'closing' => '', 'closingformat' => (int)FORMAT_HTML];
+                $data = $translations[$language] ?? ['subject' => '', 'body' => '', 'bodyformat' => (int)FORMAT_HTML, 'ctalabel' => '', 'secondaryctalabel' => '', 'secondaryctaurl' => '', 'closing' => '', 'closingformat' => (int)FORMAT_HTML];
                 $subject = trim((string)$data['subject']);
                 $body = trim((string)$data['body']);
                 $bodyformat = (int)($data['bodyformat'] ?? FORMAT_HTML);
                 $ctalabel = trim((string)$data['ctalabel']);
+                $secondaryctalabel = trim((string)($data['secondaryctalabel'] ?? ''));
+                $secondaryctaurl = trim((string)($data['secondaryctaurl'] ?? ''));
                 $closing = trim((string)$data['closing']);
                 $closingformat = (int)($data['closingformat'] ?? FORMAT_HTML);
                 $bodyempty = $this->editorial_empty($body, $bodyformat);
                 $closingempty = $this->editorial_empty($closing, $closingformat);
 
-                if ($subject === '' && $bodyempty && $ctalabel === '' && $closingempty) {
+                if ($subject === '' && $bodyempty && $ctalabel === '' && $secondaryctalabel === ''
+                        && $secondaryctaurl === '' && $closingempty) {
                     $this->emailservice->delete_content($campaignid, $language);
                     continue;
                 }
@@ -83,6 +86,8 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
                     $body,
                     $bodyformat,
                     $ctalabel,
+                    $secondaryctalabel !== '' ? $secondaryctalabel : null,
+                    $secondaryctaurl !== '' ? $secondaryctaurl : null,
                     !$closingempty ? $closing : null,
                     $closingformat,
                     $userid

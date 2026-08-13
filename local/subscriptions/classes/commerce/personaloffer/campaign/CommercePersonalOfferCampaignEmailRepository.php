@@ -82,6 +82,8 @@ final class CommercePersonalOfferCampaignEmailRepository {
         string $body,
         int $bodyformat,
         string $ctalabel,
+        ?string $secondaryctalabel,
+        ?string $secondaryctaurl,
         ?string $closing,
         int $closingformat,
         int $userid
@@ -96,6 +98,8 @@ final class CommercePersonalOfferCampaignEmailRepository {
             'body' => $body,
             'bodyformat' => $bodyformat,
             'ctalabel' => $ctalabel,
+            'secondaryctalabel' => $secondaryctalabel,
+            'secondaryctaurl' => $secondaryctaurl,
             'closing' => $closing,
             'closingformat' => $closingformat,
             'timemodified' => $now,

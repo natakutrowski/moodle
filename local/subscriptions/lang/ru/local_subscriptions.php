@@ -8992,3 +8992,9 @@ $string['commerce_guest_crm_provider_live_status'] = 'Провайдер: {$a->s
 $string['commerce_guest_crm_provider_paid_pending'] = 'Оплачено у провайдера — требуется сверка';
 $string['commerce_guest_crm_provider_probe_unavailable'] = 'Статус провайдера недоступен';
 
+// M11.1 — optional secondary campaign CTA.
+$string['commerce_personal_offer_campaign_email_secondary_cta_label'] = 'Текст дополнительной кнопки';
+$string['commerce_personal_offer_campaign_email_secondary_cta_url'] = 'URL дополнительной кнопки';
+$string['commerce_personal_offer_campaign_email_secondary_cta_help'] = 'Необязательно. Заполните текст и URL вместе, затем вставьте {{secondary_cta}} точно в то место маркетингового текста, где должна появиться кнопка. Без этого маркера дополнительная кнопка не отображается.';
+// M9.2b — resilient public Commerce access errors.
+$string['commerce_public_access_denied'] = 'Эта страница больше недоступна из текущей сессии. Вы можете продолжить в своём пространстве CampusFR.';
