@@ -36,7 +36,7 @@ final class commerce_m53_global_statistics_dashboard_test extends \advanced_test
         self::assertStringContainsString('m53-payment-tree-summary',$renderer);
         self::assertStringContainsString('premium_tree_node',$renderer);
         $css=(string)file_get_contents($CFG->dirroot.'/local/subscriptions/styles/commerce_global_statistics.css');
-        self::assertStringContainsString('M5.3D — pixel-perfect payment-tree connectors',$css);
+        self::assertStringContainsString('M5.3E — connector geometry final fix',$css);
         self::assertStringContainsString('--m53-junction-size',$css);
         self::assertStringContainsString('margin: 0 0 0 37.5%',$css);
         self::assertStringContainsString('.m53-tree-failure-branches::after',$css);

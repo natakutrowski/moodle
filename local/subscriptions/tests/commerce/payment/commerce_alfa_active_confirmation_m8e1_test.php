@@ -69,7 +69,11 @@ final class commerce_alfa_active_confirmation_m8e1_test extends advanced_testcas
             $source
         );
         self::assertStringContainsString(
-            "strtolower((string)\$order->provider) === 'alfa'",
+            "\$confirmationprovider = strtolower((string)\$order->provider)",
+            $source
+        );
+        self::assertStringContainsString(
+            "in_array(\$confirmationprovider, ['alfa', 'stripe'], true)",
             $source
         );
     }

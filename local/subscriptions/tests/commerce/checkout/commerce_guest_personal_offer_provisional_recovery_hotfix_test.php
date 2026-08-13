@@ -40,7 +40,7 @@ final class commerce_guest_personal_offer_provisional_recovery_hotfix_test exten
 
         $this->assertSame('provisional', $resumed->get_status());
         $this->assertSame($userid, $resumed->get_user_id());
-        $this->assertSame('provisional_resume', $resumed->get_metadata()['identity_resolution']);
+        $this->assertSame('unfinished_guest_checkout_resume', $resumed->get_metadata()['identity_resolution']);
         $this->assertSame('guest_checkout', $resumed->get_metadata()['account_origin']);
         $this->assertSame('provisional', $resumed->get_metadata()['account_state']);
         $this->assertSame(1, $DB->count_records('user', [
@@ -49,7 +49,7 @@ final class commerce_guest_personal_offer_provisional_recovery_hotfix_test exten
         ]));
     }
 
-    public function test_normal_checkout_does_not_resume_provisional_account_without_explicit_authorisation(): void {
+    public function test_normal_checkout_self_heals_our_unactivated_provisional_account(): void {
         $this->resetAfterTest(true);
 
         $service = CommerceGuestCheckoutService::create();
@@ -68,8 +68,12 @@ final class commerce_guest_personal_offer_provisional_recovery_hotfix_test exten
             'Customer'
         );
 
-        $this->assertSame('existing_account', $resolved->get_status());
+        $this->assertSame('provisional', $resolved->get_status());
         $this->assertSame($original->get_user_id(), $resolved->get_user_id());
+        $this->assertSame(
+            'unfinished_guest_checkout_resume',
+            $resolved->get_metadata()['identity_resolution']
+        );
     }
 
     public function test_real_existing_moodle_account_still_requires_authentication_even_for_personal_offer(): void {
@@ -91,7 +95,7 @@ final class commerce_guest_personal_offer_provisional_recovery_hotfix_test exten
         $this->assertSame((int)$user->id, $resolved->get_user_id());
     }
 
-    public function test_purchase_blocks_silent_provisional_resume(): void {
+    public function test_payment_pending_purchase_keeps_unactivated_guest_account_recoverable(): void {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -105,8 +109,9 @@ final class commerce_guest_personal_offer_provisional_recovery_hotfix_test exten
         );
         $userid = $original->get_user_id();
 
-        // A minimal Native purchase dependency is enough to make the account
-        // non-resumable through the pre-payment Personal Offer recovery path.
+        // M9 deliberately keeps an unactivated Guest Checkout account
+        // recoverable even when a Native payment_pending purchase already exists.
+        // That purchase becomes the preferred recovery source.
         $now = time();
         $reference = 'cmp_resume_block_' . bin2hex(random_bytes(4));
         $DB->insert_record('local_subscriptions_commerce_purchase', (object)[
@@ -139,11 +144,15 @@ final class commerce_guest_personal_offer_provisional_recovery_hotfix_test exten
             true
         );
 
-        $this->assertSame('existing_account', $resolved->get_status());
+        $this->assertSame('provisional', $resolved->get_status());
         $this->assertSame($userid, $resolved->get_user_id());
+        $this->assertSame(
+            'unfinished_guest_checkout_resume',
+            $resolved->get_metadata()['identity_resolution']
+        );
     }
 
-    public function test_public_personal_offer_checkout_opts_into_recovery_but_normal_checkout_does_not(): void {
+    public function test_public_personal_offer_checkout_keeps_explicit_recovery_hint(): void {
         global $CFG;
 
         $page = (string)file_get_contents(

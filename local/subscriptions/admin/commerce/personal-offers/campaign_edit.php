@@ -147,6 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && confirm_sesskey()) {
             'sourceid' => $sourceid,
             'additionalsources' => $additionalsources,
             'filtergroups' => $filtergroups,
+            'collisionpolicy' => optional_param('collisionpolicy', 'skip', PARAM_ALPHA),
         ];
 
         $sourceproductsku = '';
@@ -429,6 +430,18 @@ echo html_writer::start_div('form-check mb-4');
 echo html_writer::empty_tag('input', ['id' => 'excludeowned', 'class' => 'form-check-input', 'type' => 'checkbox', 'name' => 'excludeowned', 'value' => '1', 'checked' => 'checked']);
 echo html_writer::tag('label', get_string('commerce_personal_offer_exclude_owned', 'local_subscriptions'), ['for' => 'excludeowned', 'class' => 'form-check-label fw-semibold']);
 echo html_writer::div(get_string('commerce_personal_offer_exclude_owned_help', 'local_subscriptions'), 'form-text');
+echo html_writer::end_div();
+
+// M11: policy when the same beneficiary already has an active offer for the target product.
+echo html_writer::start_div('border rounded p-3 mb-4');
+echo html_writer::tag('h4', get_string('commerce_personal_offer_m11_collision_title', 'local_subscriptions'), ['class' => 'h6 mb-1']);
+echo html_writer::div(get_string('commerce_personal_offer_m11_collision_help', 'local_subscriptions'), 'text-muted small mb-2');
+echo html_writer::select([
+    'skip' => get_string('commerce_personal_offer_m11_collision_skip', 'local_subscriptions'),
+    'replace' => get_string('commerce_personal_offer_m11_collision_replace', 'local_subscriptions'),
+    'resend' => get_string('commerce_personal_offer_m11_collision_resend', 'local_subscriptions'),
+], 'collisionpolicy', 'skip', false, ['id' => 'collisionpolicy', 'class' => 'form-select']);
+echo html_writer::div(get_string('commerce_personal_offer_m11_collision_warning', 'local_subscriptions'), 'form-text');
 echo html_writer::end_div();
 
 // M10: optional advanced boolean ownership filters. Groups are ORed; rules inside a group are ANDed.

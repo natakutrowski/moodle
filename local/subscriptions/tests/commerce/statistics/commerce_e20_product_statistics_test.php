@@ -29,7 +29,11 @@ final class commerce_e20_product_statistics_test extends \advanced_testcase {
             $repository
         );
         self::assertStringContainsString(
-            'CommerceProductStatisticsRenderer::render($productstatistics)',
+            'CommerceGlobalStatisticsDashboardRepository',
+            $page
+        );
+        self::assertStringContainsString(
+            'CommerceGlobalStatisticsDashboardRenderer',
             $page
         );
         self::assertStringContainsString('self::sale_type($row->itemtype)', $renderer);

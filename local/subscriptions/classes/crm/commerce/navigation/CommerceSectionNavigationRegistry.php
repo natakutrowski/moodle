@@ -24,6 +24,7 @@ final class CommerceSectionNavigationRegistry {
     public const DIGITAL_PRODUCTS = 'digital_products';
     public const MAIL = 'mail';
     public const IDENTITIES = 'identities';
+    public const UNFINISHED_CHECKOUTS = 'unfinished_checkouts';
     public const PERSONAL_OFFERS = 'personal_offers';
     public const GRANTS = 'grants';
     public const STATISTICS = 'statistics';
@@ -94,6 +95,14 @@ final class CommerceSectionNavigationRegistry {
                 57
             ),
             new CommerceSectionNavigationItem(
+                self::UNFINISHED_CHECKOUTS,
+                get_string('crm_commerce_nav_unfinished_checkouts', 'local_subscriptions'),
+                '↻',
+                new moodle_url('/local/subscriptions/admin/commerce/unfinished-checkouts/index.php'),
+                Capabilities::VIEW_PAYMENTS,
+                57.5
+            ),
+            new CommerceSectionNavigationItem(
                 self::PERSONAL_OFFERS,
                 get_string('crm_commerce_nav_personal_offers', 'local_subscriptions'),
                 '◆',
@@ -136,6 +145,7 @@ final class CommerceSectionNavigationRegistry {
             self::DIGITAL_PRODUCTS,
             self::MAIL,
             self::IDENTITIES,
+            self::UNFINISHED_CHECKOUTS,
             self::PERSONAL_OFFERS,
             self::GRANTS,
             self::STATISTICS,

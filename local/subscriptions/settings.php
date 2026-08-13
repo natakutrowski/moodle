@@ -1036,4 +1036,31 @@ if ($hassiteconfig) {
         get_string('commerce_native_repair_enabled_desc', 'local_subscriptions'),
         0
     ));
+
+    $settings->add(new admin_setting_heading(
+        'local_subscriptions_guest_checkout_cleanup_hdr',
+        get_string('settings:guest_checkout_cleanup_header', 'local_subscriptions'),
+        get_string('settings:guest_checkout_cleanup_header_desc', 'local_subscriptions')
+    ));
+    $settings->add(new admin_setting_configcheckbox(
+        'local_subscriptions/guest_checkout_cleanup_enabled',
+        get_string('settings:guest_checkout_cleanup_enabled', 'local_subscriptions'),
+        get_string('settings:guest_checkout_cleanup_enabled_desc', 'local_subscriptions'),
+        0
+    ));
+    $settings->add(new admin_setting_configtext(
+        'local_subscriptions/guest_checkout_cleanup_age_days',
+        get_string('settings:guest_checkout_cleanup_age_days', 'local_subscriptions'),
+        get_string('settings:guest_checkout_cleanup_age_days_desc', 'local_subscriptions'),
+        30,
+        PARAM_INT
+    ));
+    $settings->add(new admin_setting_configtext(
+        'local_subscriptions/guest_checkout_cleanup_batch_size',
+        get_string('settings:guest_checkout_cleanup_batch_size', 'local_subscriptions'),
+        get_string('settings:guest_checkout_cleanup_batch_size_desc', 'local_subscriptions'),
+        20,
+        PARAM_INT
+    ));
+
 }

@@ -29,6 +29,9 @@ final class CommercePersonalOfferCampaignManager {
     public const MEMBER_ERROR = 'error';
     public const MEMBER_ISSUED = 'issued';
     public const MEMBER_REPLAYED = 'replayed';
+    public const COLLISION_SKIP = 'skip';
+    public const COLLISION_REPLACE = 'replace';
+    public const COLLISION_RESEND = 'resend';
 
     private const CAMPAIGN = 'local_subs_commerce_offer_campaign';
     private const MEMBER = 'local_subs_commerce_offer_campaign_member';
@@ -153,8 +156,21 @@ final class CommercePersonalOfferCampaignManager {
                     $now
                 );
                 if ($existingofferid !== null) {
-                    $status = self::MEMBER_COVERED;
-                    $reason = 'active_offer_exists';
+                    $collisionpolicy = $this->collision_policy($criteria);
+                    if ($collisionpolicy === self::COLLISION_SKIP) {
+                        $status = self::MEMBER_COVERED;
+                        $reason = 'active_offer_exists';
+                    } else if ($collisionpolicy === self::COLLISION_REPLACE
+                        && $this->offer_has_payment_in_progress($existingofferid)) {
+                        $status = self::MEMBER_COVERED;
+                        $reason = 'active_offer_payment_in_progress';
+                    } else {
+                        // Keep the row selectable. Generation will re-check the active offer and either
+                        // supersede it or reuse it according to the frozen campaign policy.
+                        $reason = $collisionpolicy === self::COLLISION_REPLACE
+                            ? 'active_offer_will_be_replaced'
+                            : 'active_offer_will_be_resent';
+                    }
                 }
             }
 
@@ -419,7 +435,7 @@ final class CommercePersonalOfferCampaignManager {
                     $existing = $this->db->get_record(
                         'local_subs_commerce_offer',
                         ['id' => $existingofferid],
-                        'id,campaignkey',
+                        'id,offeruuid,campaignkey',
                         MUST_EXIST
                     );
 
@@ -429,15 +445,48 @@ final class CommercePersonalOfferCampaignManager {
                         $member->eligibilitystatus = self::MEMBER_REPLAYED;
                         $member->offerid = $existingofferid;
                         $member->reason = null;
+                        $member->timemodified = $now;
+                        $this->db->update_record(self::MEMBER, $member);
+                        continue;
+                    }
+
+                    $collisionpolicy = $this->collision_policy($criteria);
+                    if ($collisionpolicy === self::COLLISION_RESEND) {
+                        $member->eligibilitystatus = self::MEMBER_REPLAYED;
+                        $member->offerid = $existingofferid;
+                        $member->existingofferid = $existingofferid;
+                        $member->reason = 'active_offer_reused';
+                        $member->timemodified = $now;
+                        $this->db->update_record(self::MEMBER, $member);
+                        continue;
+                    }
+
+                    if ($collisionpolicy === self::COLLISION_REPLACE) {
+                        if ($this->offer_has_payment_in_progress($existingofferid)) {
+                            $member->eligibilitystatus = self::MEMBER_COVERED;
+                            $member->existingofferid = $existingofferid;
+                            $member->reason = 'active_offer_payment_in_progress';
+                            $member->timemodified = $now;
+                            $this->db->update_record(self::MEMBER, $member);
+                            continue;
+                        }
+
+                        $this->offers->revoke(
+                            (string)$existing->offeruuid,
+                            $userid,
+                            'superseded_by_campaign:' . (string)$campaign->campaignkey,
+                            $now
+                        );
+                        $member->existingofferid = $existingofferid;
+                        // Continue below: a fresh offer/token is issued for this campaign.
                     } else {
                         $member->eligibilitystatus = self::MEMBER_COVERED;
                         $member->existingofferid = $existingofferid;
                         $member->reason = 'active_offer_created_after_snapshot';
+                        $member->timemodified = $now;
+                        $this->db->update_record(self::MEMBER, $member);
+                        continue;
                     }
-
-                    $member->timemodified = $now;
-                    $this->db->update_record(self::MEMBER, $member);
-                    continue;
                 }
 
                 $validity = (new CommercePersonalOfferCampaignValidityService())->resolve($campaign, time());
@@ -467,6 +516,8 @@ final class CommercePersonalOfferCampaignManager {
                         'eligibilitysourcetype' => $criteria['sourcetype'] ?? null,
                         'eligibilitysourceid' => $criteria['sourceid'] ?? null,
                         'eligibilityevidence' => $candidate['evidence'],
+                        'collisionpolicy' => $this->collision_policy($criteria),
+                        'supersedesofferid' => !empty($member->existingofferid) ? (int)$member->existingofferid : null,
                         'snapshotat' => (int)$campaign->snapshotat,
                         'snapshothash' => (string)$campaign->snapshothash,
                     ], static fn($value) => $value !== null && $value !== ''),
@@ -814,6 +865,53 @@ final class CommercePersonalOfferCampaignManager {
                 )',
             $params
         );
+    }
+
+    private function collision_policy(array $criteria): string {
+        $policy = strtolower(trim((string)($criteria['collisionpolicy'] ?? self::COLLISION_SKIP)));
+        return in_array($policy, [self::COLLISION_SKIP, self::COLLISION_REPLACE, self::COLLISION_RESEND], true)
+            ? $policy
+            : self::COLLISION_SKIP;
+    }
+
+    /**
+     * Protect an offer that is already attached to a checkout/payment attempt still in flight.
+     * The Personal Offer UUID is captured in immutable purchase-item metadata by checkout.
+     */
+    private function offer_has_payment_in_progress(int $offerid): bool {
+        $offer = $this->db->get_record('local_subs_commerce_offer', ['id' => $offerid], 'id,offeruuid', IGNORE_MISSING);
+        if (!$offer) {
+            return false;
+        }
+
+        $needle = '%"personal_offer_uuid":"' . $this->db->sql_like_escape((string)$offer->offeruuid) . '"%';
+        $items = $this->db->get_records_select(
+            self::ITEM,
+            $this->db->sql_like('metadatajson', ':offerneedle', false),
+            ['offerneedle' => $needle],
+            '',
+            'id,purchaseid',
+            0,
+            100
+        );
+        if (!$items) {
+            return false;
+        }
+
+        foreach ($items as $item) {
+            $payments = $this->db->get_records(self::PAYMENT, ['purchaseid' => (int)$item->purchaseid], 'id DESC', 'id,status');
+            foreach ($payments as $payment) {
+                $status = strtolower(trim((string)$payment->status));
+                if (in_array($status, ['pending', 'processing', 'created', 'initiated', 'authorized', 'requires_action'], true)) {
+                    return true;
+                }
+                // The newest terminal payment is decisive for this purchase.
+                if (in_array($status, array_merge(self::SUCCESS, ['failed', 'cancelled', 'canceled', 'refunded']), true)) {
+                    break;
+                }
+            }
+        }
+        return false;
     }
 
     private function active_offer_id(array $candidate, int $targetproductid, int $now): ?int {

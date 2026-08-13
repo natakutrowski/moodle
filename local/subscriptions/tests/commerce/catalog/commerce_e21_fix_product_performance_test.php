@@ -22,7 +22,7 @@ final class commerce_e21_fix_product_performance_test extends \advanced_testcase
         $this->assertStringContainsString("optional_param('statscurrency'", $view);
         $this->assertStringContainsString("optional_param('statsperiod'", $view);
         $this->assertStringContainsString('pi.currency = :productcurrency', $repository);
-        $this->assertStringContainsString("CommerceStatisticsPeriod::custom(0, time() + 1)", $view);
+        $this->assertStringContainsString('CommerceStatisticsPeriodResolver::resolve(', $view);
     }
 
     public function test_legacy_digital_cover_has_priority(): void {

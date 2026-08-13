@@ -16,7 +16,7 @@ final class CommerceSectionNavigationItem {
         public readonly string $icon,
         public readonly moodle_url $url,
         public readonly string $capability,
-        public readonly int $position
+        public readonly int|float $position
     ) {
         if (trim($this->key) === '') {
             throw new \coding_exception('Commerce navigation item key cannot be empty.');

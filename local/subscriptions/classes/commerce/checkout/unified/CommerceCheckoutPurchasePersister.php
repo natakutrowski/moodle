@@ -16,6 +16,7 @@ use local_subscriptions\commerce\domain\value\CommercePurchaseItem;
 use local_subscriptions\commerce\domain\value\CommercePurchaseReference;
 use local_subscriptions\commerce\domain\value\CommercePurchaseSnapshot;
 use local_subscriptions\commerce\persistence\CommercePurchasePersistenceMapper;
+use local_subscriptions\commerce\persistence\CommercePurchasePersistenceSnapshot;
 use local_subscriptions\commerce\payment\attempt\CommercePaymentAttempt;
 use local_subscriptions\commerce\payment\repository\CommercePaymentRepository;
 use local_subscriptions\commerce\persistence\sql\CommercePurchaseSqlRepository;
@@ -39,7 +40,7 @@ final class CommerceCheckoutPurchasePersister {
         $existing = $this->repository->find_by_reference($request->get_reference());
 
         if ($existing !== null) {
-            $this->assert_resume_matches($existing->get_purchase(), $request);
+            $this->assert_resume_matches($existing, $request);
 
             return new CommerceCheckoutPersistenceResult(
                 0,
@@ -64,35 +65,61 @@ final class CommerceCheckoutPurchasePersister {
 
 
     private function assert_resume_matches(
-        \local_subscriptions\commerce\domain\purchase\NativePurchase $purchase,
+        CommercePurchasePersistenceSnapshot $snapshot,
         CommercePurchaseRequest $request
     ): void {
-        if ($purchase->get_lifecycle_status() !== CommercePurchaseStatus::PAYMENT_PENDING) {
+        $purchase = $snapshot->get_purchase();
+        $purchaserecord = $purchase->to_record();
+
+        if ((string)$purchaserecord->status !== CommercePurchaseStatus::PAYMENT_PENDING) {
             throw new CommerceInterruptedCheckoutResumeMismatchException(
                 'Interrupted purchase is no longer payment_pending.'
             );
         }
 
-        $customer = $purchase->get_customer();
         $requestcustomer = $request->get_customer();
-        if ((int)($customer->get_user_id() ?? 0) !== (int)($requestcustomer->get_user_id() ?? 0)
-                || \core_text::strtolower((string)$customer->get_email())
-                    !== \core_text::strtolower((string)$requestcustomer->get_email())) {
+        $customerjson = json_decode(
+            (string)($purchaserecord->customerjson ?? '{}'),
+            true
+        );
+        $customerjson = is_array($customerjson) ? $customerjson : [];
+
+        $existinguserid = isset($purchaserecord->userid)
+            && $purchaserecord->userid !== null
+                ? (int)$purchaserecord->userid
+                : (int)($customerjson['userid'] ?? 0);
+        $existingemail = \core_text::strtolower(trim(
+            (string)($purchaserecord->customeremail
+                ?? $customerjson['email']
+                ?? '')
+        ));
+
+        if (
+            $existinguserid !== (int)($requestcustomer->get_user_id() ?? 0)
+            || $existingemail !== \core_text::strtolower($requestcustomer->get_email())
+        ) {
             throw new CommerceInterruptedCheckoutResumeMismatchException(
                 'Interrupted purchase customer does not match the checkout customer.'
             );
         }
 
-        if ($purchase->get_totals()->get_currency() !== $request->get_currency()
-                || $purchase->get_totals()->get_net_total()->get_amount_minor()
-                    !== $request->get_total_amount_minor()) {
+        if (
+            strtoupper((string)$purchaserecord->currency) !== $request->get_currency()
+            || (int)$purchaserecord->totalminor !== $request->get_total_amount_minor()
+        ) {
             throw new CommerceInterruptedCheckoutResumeMismatchException(
                 'Interrupted purchase total does not match the current checkout.'
             );
         }
 
-        $existingitems = $purchase->get_items();
-        $requestitems = $request->get_items();
+        $existingitems = array_values($snapshot->get_items());
+        usort(
+            $existingitems,
+            static fn($left, $right): int =>
+                $left->get_position() <=> $right->get_position()
+        );
+
+        $requestitems = array_values($request->get_items());
         if (count($existingitems) !== count($requestitems)) {
             throw new CommerceInterruptedCheckoutResumeMismatchException(
                 'Interrupted purchase item count does not match.'
@@ -100,12 +127,18 @@ final class CommerceCheckoutPurchasePersister {
         }
 
         foreach ($existingitems as $index => $existingitem) {
+            $persisted = $existingitem->to_record();
             $requestitem = $requestitems[$index];
-            if ($existingitem->get_item_reference() !== $requestitem->get_item()->get_reference()
-                    || $existingitem->get_quantity() !== $requestitem->get_quantity()
-                    || $existingitem->get_currency() !== $requestitem->get_currency()
-                    || $existingitem->get_net_amount()->get_amount_minor()
-                        !== $requestitem->get_total_amount_minor()) {
+
+            if (
+                (string)$persisted->itemreference
+                    !== $requestitem->get_item()->get_reference()
+                || (int)$persisted->quantity !== $requestitem->get_quantity()
+                || strtoupper((string)$persisted->currency)
+                    !== $requestitem->get_currency()
+                || (int)$persisted->netminor
+                    !== $requestitem->get_total_amount_minor()
+            ) {
                 throw new CommerceInterruptedCheckoutResumeMismatchException(
                     'Interrupted purchase lines do not match the current checkout.'
                 );

@@ -54,6 +54,48 @@ final class commerce_unfinished_guest_checkout_recovery_m9_test extends advanced
         self::assertSame('existing_account', $service->recover_session_if_possible($current)->get_status());
     }
 
+    public function test_payment_pending_source_wins_over_newer_repaired_provisional_sessions(): void {
+        global $DB;
+
+        [$user, $source] = $this->seed_unfinished_account(true);
+
+        for ($index = 0; $index < 3; $index++) {
+            $current = $this->seed_current_existing_account_session(
+                (int)$user->id,
+                $user->email
+            );
+
+            $DB->set_field(
+                'local_subs_commerce_guest',
+                'status',
+                'provisional',
+                ['id' => $current->get_id()]
+            );
+            $DB->set_field(
+                'local_subs_commerce_guest',
+                'metadatajson',
+                json_encode([
+                    'account_origin' => 'guest_checkout',
+                    'account_state' => 'provisional',
+                    'identity_resolution' => 'unfinished_guest_checkout_resume',
+                ]),
+                ['id' => $current->get_id()]
+            );
+        }
+
+        $service = new CommerceUnfinishedGuestCheckoutRecoveryService(
+            $DB,
+            new CommerceGuestCheckoutSessionRepository($DB)
+        );
+        $resolved = $service->find_source_session((int)$user->id);
+
+        self::assertNotNull($resolved);
+        self::assertSame($source->get_id(), $resolved->get_id());
+        self::assertSame('payment_pending', $resolved->get_status());
+        self::assertSame('cmp_m9_pending', $resolved->get_purchase_reference());
+        self::assertSame('pay_m9_pending', $resolved->get_payment_reference());
+    }
+
     public function test_cli_repair_only_changes_stuck_guest_sessions(): void {
         global $DB;
 
