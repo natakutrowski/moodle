@@ -8684,3 +8684,85 @@ $string['commerce_alfa_reconciliation_attempt_not_found'] = 'No Alfa payment att
 $string['commerce_alfa_reconciliation_wrong_provider'] = 'This payment is not an Alfa payment and cannot use Alfa reconciliation.';
 $string['commerce_alfa_reconciliation_missing_orderid'] = 'The Alfa order identifier is missing; the payment cannot be reconciled safely.';
 $string['commerce_alfa_reconciliation_not_safe'] = 'Alfa reconciliation was refused because the provider and Campus data do not match safely: {$a}';
+
+$string['commerce_alfa_crm_title'] = 'Alfa payment reconciliation';
+
+$string['commerce_alfa_crm_description'] = 'Verify the actual bank status before automatically restoring the CampusFR payment, access and emails.';
+
+$string['commerce_alfa_crm_live_warning'] = 'Alfa information shown on this page is checked live with the bank. Opening this page does not modify CampusFR data.';
+
+$string['commerce_alfa_crm_provider_error'] = 'Unable to verify this payment with Alfa: {$a}';
+
+$string['commerce_alfa_crm_state_complete'] = 'Payment already fully processed';
+
+$string['commerce_alfa_crm_state_complete_help'] = 'CampusFR and Alfa are consistent. No further reconciliation is required.';
+
+$string['commerce_alfa_crm_state_reconcilable'] = 'Payment deposited by Alfa, reconciliation available';
+
+$string['commerce_alfa_crm_state_reconcilable_help'] = 'All safety checks match. CampusFR can resume its normal pipeline to confirm the payment and restore access.';
+
+$string['commerce_alfa_crm_state_blocked'] = 'Reconciliation blocked';
+
+$string['commerce_alfa_crm_state_blocked_help'] = 'At least one check does not match. No payment action will be executed.';
+
+$string['commerce_alfa_crm_campus_section'] = 'CampusFR status';
+
+$string['commerce_alfa_crm_alfa_section'] = 'Live Alfa status';
+
+$string['commerce_alfa_crm_payment_id'] = 'Payment attempt';
+
+$string['commerce_alfa_crm_order_id'] = 'Alfa reference';
+
+$string['commerce_alfa_crm_order_status'] = 'Alfa order status';
+
+$string['commerce_alfa_crm_payment_state'] = 'Alfa payment state';
+
+$string['commerce_alfa_crm_deposited_amount'] = 'Actually deposited amount';
+
+$string['commerce_alfa_crm_checks_section'] = 'Safety checks';
+
+$string['commerce_alfa_crm_check_provider_paid'] = 'Alfa confirms the payment is deposited';
+
+$string['commerce_alfa_crm_check_amount'] = 'Alfa amount matches CampusFR amount';
+
+$string['commerce_alfa_crm_check_currency'] = 'Alfa currency matches CampusFR currency';
+
+$string['commerce_alfa_crm_check_approved'] = 'Approved amount matches the expected amount';
+
+$string['commerce_alfa_crm_check_deposited'] = 'Deposited amount matches the expected amount';
+
+$string['commerce_alfa_crm_check_ok'] = 'Matched';
+
+$string['commerce_alfa_crm_check_failed'] = 'Review';
+
+$string['commerce_alfa_crm_blockers'] = 'Reconciliation cannot run for the following reasons:';
+
+$string['commerce_alfa_crm_refresh'] = 'Check again with Alfa';
+
+$string['commerce_alfa_crm_execute'] = 'Reconcile payment and restore access';
+
+$string['commerce_alfa_crm_execute_confirm'] = 'CampusFR will query Alfa again and, only if all checks still match, run the normal payment pipeline: confirm the order, create entitlements and send emails. Continue?';
+
+$string['commerce_alfa_crm_success'] = 'The Alfa payment was successfully reconciled. The CampusFR order and access have been restored.';
+
+$string['commerce_alfa_crm_verify'] = 'Check with Alfa';
+
+$string['commerce_alfa_crm_verify_short'] = 'Check Alfa';
+
+$string['commerce_alfa_crm_purchase_panel'] = 'Alfa payment';
+
+$string['commerce_alfa_crm_purchase_pending_help'] = 'This Alfa payment is not yet fully finalized in CampusFR. You can request a live bank check without changing the order.';
+
+$string['commerce_alfa_crm_purchase_complete_help'] = 'This Alfa order is already finalized. A live check remains available to verify consistency with the bank.';
+
+$string['commerce_alfa_reconciliation_blocker_provider_not_paid'] = 'Alfa does not yet confirm a deposited payment.';
+
+$string['commerce_alfa_reconciliation_blocker_amount_mismatch'] = 'The amount returned by Alfa does not match the CampusFR amount.';
+
+$string['commerce_alfa_reconciliation_blocker_currency_mismatch'] = 'The currency returned by Alfa does not match the CampusFR currency.';
+
+$string['commerce_alfa_reconciliation_blocker_approved_amount_mismatch'] = 'The amount approved by Alfa does not match the expected amount.';
+
+$string['commerce_alfa_reconciliation_blocker_deposited_amount_mismatch'] = 'The amount actually deposited by Alfa does not match the expected amount.';
+
+$string['commerce_alfa_reconciliation_blocker_provider_event_not_completed'] = 'The Alfa status does not produce a completed payment event.';

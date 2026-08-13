@@ -26,6 +26,7 @@ $repository = new CommercePurchaseReadRepository($DB);
 $purchase = $repository->find_by_id($id);
 if ($purchase === null) { throw new moodle_exception('commerce_purchase_not_found', 'local_subscriptions'); }
 $summary = $purchase->summary;
+$alfareconciled = optional_param('alfa_reconciled', 0, PARAM_BOOL);
 $publicreference = $summary->publicreference !== ''
     ? $summary->publicreference
     : (new CommercePublicOrderReference())->from_internal(
@@ -55,6 +56,12 @@ echo CrmBreadcrumbRenderer::render([
 ]);
 echo CrmPageHeader::render($pagetitle, get_string('commerce_purchase_view_description', 'local_subscriptions'), HelpContext::COMMERCE);
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PURCHASES);
+if ($alfareconciled) {
+    echo html_writer::div(
+        s(get_string('commerce_alfa_crm_success', 'local_subscriptions')),
+        'alert alert-success mt-3'
+    );
+}
 $quickactions = html_writer::start_div('d-flex flex-wrap gap-2');
 $quickactions .= html_writer::link(
     $orderdetailsurl,
@@ -83,6 +90,13 @@ $quickactions .= html_writer::link(
     get_string('commerce_purchase_open_mail_journal', 'local_subscriptions'),
     ['class' => 'btn btn-outline-secondary']
 );
+if ($summary->provider === Provider::ALFA) {
+    $quickactions .= html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/purchases/reconcile_alfa.php', ['id' => $id]),
+        get_string('commerce_alfa_crm_verify', 'local_subscriptions'),
+        ['class' => 'btn btn-outline-primary']
+    );
+}
 if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)) {
     $resendreceipturl = new moodle_url(
         '/local/subscriptions/admin/commerce/purchases/resend_receipt.php',
@@ -147,6 +161,28 @@ echo CommerceDesignSystemRenderer::panel(
     )),
     'mt-4'
 );
+
+if ($summary->provider === Provider::ALFA) {
+    $pendingalfa = !in_array($summary->paymentstatus, ['paid', 'completed', 'succeeded'], true)
+        || $summary->commercialstatus !== 'fulfilled';
+    $alfacontent = html_writer::div(
+        s(get_string(
+            $pendingalfa ? 'commerce_alfa_crm_purchase_pending_help' : 'commerce_alfa_crm_purchase_complete_help',
+            'local_subscriptions'
+        )),
+        'text-muted mb-3'
+    );
+    $alfacontent .= html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/purchases/reconcile_alfa.php', ['id' => $id]),
+        get_string('commerce_alfa_crm_verify', 'local_subscriptions'),
+        ['class' => $pendingalfa ? 'btn btn-primary' : 'btn btn-outline-primary']
+    );
+    echo CommerceDesignSystemRenderer::panel(
+        get_string('commerce_alfa_crm_purchase_panel', 'local_subscriptions'),
+        $alfacontent,
+        'mt-4'
+    );
+}
 
 echo html_writer::start_div('row g-4 mt-1');
 echo html_writer::start_div('col-lg-6');

@@ -8759,3 +8759,85 @@ $string['commerce_alfa_reconciliation_attempt_not_found'] = 'Для этой п�
 $string['commerce_alfa_reconciliation_wrong_provider'] = 'Этот платёж не относится к Alfa и не может быть обработан сверкой Alfa.';
 $string['commerce_alfa_reconciliation_missing_orderid'] = 'Отсутствует идентификатор заказа Alfa; безопасная сверка платежа невозможна.';
 $string['commerce_alfa_reconciliation_not_safe'] = 'Сверка Alfa отклонена: данные Alfa и Campus недостаточно совпадают: {$a}';
+
+$string['commerce_alfa_crm_title'] = 'Сверка платежа Alfa';
+
+$string['commerce_alfa_crm_description'] = 'Проверьте фактический статус платежа в банке перед автоматическим восстановлением оплаты, доступа и писем CampusFR.';
+
+$string['commerce_alfa_crm_live_warning'] = 'Данные Alfa на этой странице проверяются напрямую в банке. Простое открытие страницы не изменяет данные CampusFR.';
+
+$string['commerce_alfa_crm_provider_error'] = 'Не удалось проверить платёж в Alfa: {$a}';
+
+$string['commerce_alfa_crm_state_complete'] = 'Платёж уже полностью обработан';
+
+$string['commerce_alfa_crm_state_complete_help'] = 'Данные CampusFR и Alfa согласованы. Дополнительная сверка не требуется.';
+
+$string['commerce_alfa_crm_state_reconcilable'] = 'Alfa подтверждает зачисление, платёж можно сверить';
+
+$string['commerce_alfa_crm_state_reconcilable_help'] = 'Все проверки безопасности совпадают. CampusFR может запустить обычный процесс подтверждения платежа и восстановления доступа.';
+
+$string['commerce_alfa_crm_state_blocked'] = 'Сверка заблокирована';
+
+$string['commerce_alfa_crm_state_blocked_help'] = 'Как минимум одна проверка не совпадает. Никаких действий с платежом выполнено не будет.';
+
+$string['commerce_alfa_crm_campus_section'] = 'Статус CampusFR';
+
+$string['commerce_alfa_crm_alfa_section'] = 'Статус Alfa в реальном времени';
+
+$string['commerce_alfa_crm_payment_id'] = 'Попытка оплаты';
+
+$string['commerce_alfa_crm_order_id'] = 'Ссылка Alfa';
+
+$string['commerce_alfa_crm_order_status'] = 'Статус заказа Alfa';
+
+$string['commerce_alfa_crm_payment_state'] = 'Состояние платежа Alfa';
+
+$string['commerce_alfa_crm_deposited_amount'] = 'Фактически зачисленная сумма';
+
+$string['commerce_alfa_crm_checks_section'] = 'Проверки безопасности';
+
+$string['commerce_alfa_crm_check_provider_paid'] = 'Alfa подтверждает, что платёж зачислен';
+
+$string['commerce_alfa_crm_check_amount'] = 'Сумма Alfa совпадает с суммой CampusFR';
+
+$string['commerce_alfa_crm_check_currency'] = 'Валюта Alfa совпадает с валютой CampusFR';
+
+$string['commerce_alfa_crm_check_approved'] = 'Подтверждённая сумма совпадает с ожидаемой';
+
+$string['commerce_alfa_crm_check_deposited'] = 'Зачисленная сумма совпадает с ожидаемой';
+
+$string['commerce_alfa_crm_check_ok'] = 'Совпадает';
+
+$string['commerce_alfa_crm_check_failed'] = 'Проверить';
+
+$string['commerce_alfa_crm_blockers'] = 'Сверку нельзя выполнить по следующим причинам:';
+
+$string['commerce_alfa_crm_refresh'] = 'Проверить в Alfa ещё раз';
+
+$string['commerce_alfa_crm_execute'] = 'Сверить платёж и восстановить доступ';
+
+$string['commerce_alfa_crm_execute_confirm'] = 'CampusFR ещё раз запросит статус в Alfa и, только если все проверки останутся успешными, запустит обычный процесс оплаты: подтвердит заказ, создаст права доступа и отправит письма. Продолжить?';
+
+$string['commerce_alfa_crm_success'] = 'Платёж Alfa успешно сверен. Заказ и доступ CampusFR восстановлены.';
+
+$string['commerce_alfa_crm_verify'] = 'Проверить в Alfa';
+
+$string['commerce_alfa_crm_verify_short'] = 'Проверить Alfa';
+
+$string['commerce_alfa_crm_purchase_panel'] = 'Платёж Alfa';
+
+$string['commerce_alfa_crm_purchase_pending_help'] = 'Этот платёж Alfa ещё не полностью завершён в CampusFR. Можно выполнить проверку в банке в реальном времени без изменения заказа.';
+
+$string['commerce_alfa_crm_purchase_complete_help'] = 'Этот заказ Alfa уже завершён. Проверка в реальном времени остаётся доступной для контроля согласованности с банком.';
+
+$string['commerce_alfa_reconciliation_blocker_provider_not_paid'] = 'Alfa пока не подтверждает зачисление платежа.';
+
+$string['commerce_alfa_reconciliation_blocker_amount_mismatch'] = 'Сумма, возвращённая Alfa, не совпадает с суммой CampusFR.';
+
+$string['commerce_alfa_reconciliation_blocker_currency_mismatch'] = 'Валюта, возвращённая Alfa, не совпадает с валютой CampusFR.';
+
+$string['commerce_alfa_reconciliation_blocker_approved_amount_mismatch'] = 'Сумма, подтверждённая Alfa, не совпадает с ожидаемой.';
+
+$string['commerce_alfa_reconciliation_blocker_deposited_amount_mismatch'] = 'Фактически зачисленная сумма Alfa не совпадает с ожидаемой.';
+
+$string['commerce_alfa_reconciliation_blocker_provider_event_not_completed'] = 'Статус Alfa не соответствует окончательно подтверждённому платежу.';

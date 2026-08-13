@@ -13,6 +13,7 @@ use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseListFilter;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
 use local_subscriptions\commerce\purchase\status\CommerceCommercialStatus;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
+use local_subscriptions\payment\Provider;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
@@ -182,6 +183,17 @@ $table = new html_table();
                         'rel' => 'noopener noreferrer',
                     ]
                 );
+
+                if ($purchase->provider === Provider::ALFA
+                        && !in_array($purchase->paymentstatus, ['paid', 'completed', 'succeeded'], true)) {
+                    $actions .= html_writer::link(
+                        new moodle_url('/local/subscriptions/admin/commerce/purchases/reconcile_alfa.php', [
+                            'id' => $purchase->id,
+                        ]),
+                        get_string('commerce_alfa_crm_verify_short', 'local_subscriptions'),
+                        ['class' => 'btn btn-sm btn-outline-primary me-1']
+                    );
+                }
 
                 $policy = new CommercePurchaseActionPolicy();
                 if (!isset($closedwithoutfulfillment[$purchase->id])

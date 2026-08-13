@@ -8520,3 +8520,85 @@ $string['commerce_alfa_reconciliation_attempt_not_found'] = 'Aucune tentative de
 $string['commerce_alfa_reconciliation_wrong_provider'] = 'Ce paiement n’est pas un paiement Alfa et ne peut pas utiliser la réconciliation Alfa.';
 $string['commerce_alfa_reconciliation_missing_orderid'] = 'La référence de commande Alfa est absente ; le paiement ne peut pas être réconcilié de façon sûre.';
 $string['commerce_alfa_reconciliation_not_safe'] = 'La réconciliation Alfa a été refusée car les données Alfa et Campus ne concordent pas suffisamment : {$a}';
+
+$string['commerce_alfa_crm_title'] = 'Réconciliation du paiement Alfa';
+
+$string['commerce_alfa_crm_description'] = 'Vérifiez le statut bancaire réel avant de rétablir automatiquement le paiement, les accès et les emails CampusFR.';
+
+$string['commerce_alfa_crm_live_warning'] = 'Les informations Alfa affichées sur cette page sont vérifiées en direct auprès de la banque. Ouvrir cette page ne modifie aucune donnée CampusFR.';
+
+$string['commerce_alfa_crm_provider_error'] = 'Impossible de vérifier ce paiement auprès d’Alfa : {$a}';
+
+$string['commerce_alfa_crm_state_complete'] = 'Paiement déjà complètement traité';
+
+$string['commerce_alfa_crm_state_complete_help'] = 'CampusFR et Alfa sont cohérents. Aucune réconciliation supplémentaire n’est nécessaire.';
+
+$string['commerce_alfa_crm_state_reconcilable'] = 'Paiement encaissé par Alfa, réconciliation possible';
+
+$string['commerce_alfa_crm_state_reconcilable_help'] = 'Tous les contrôles de sécurité concordent. CampusFR peut reprendre son pipeline normal pour confirmer le paiement et rétablir les accès.';
+
+$string['commerce_alfa_crm_state_blocked'] = 'Réconciliation bloquée';
+
+$string['commerce_alfa_crm_state_blocked_help'] = 'Au moins un contrôle ne concorde pas. Aucune action de paiement ne sera exécutée.';
+
+$string['commerce_alfa_crm_campus_section'] = 'État CampusFR';
+
+$string['commerce_alfa_crm_alfa_section'] = 'État Alfa en direct';
+
+$string['commerce_alfa_crm_payment_id'] = 'Tentative de paiement';
+
+$string['commerce_alfa_crm_order_id'] = 'Référence Alfa';
+
+$string['commerce_alfa_crm_order_status'] = 'Statut de commande Alfa';
+
+$string['commerce_alfa_crm_payment_state'] = 'État du paiement Alfa';
+
+$string['commerce_alfa_crm_deposited_amount'] = 'Montant réellement encaissé';
+
+$string['commerce_alfa_crm_checks_section'] = 'Contrôles de sécurité';
+
+$string['commerce_alfa_crm_check_provider_paid'] = 'Alfa confirme que le paiement est encaissé';
+
+$string['commerce_alfa_crm_check_amount'] = 'Le montant Alfa correspond au montant CampusFR';
+
+$string['commerce_alfa_crm_check_currency'] = 'La devise Alfa correspond à la devise CampusFR';
+
+$string['commerce_alfa_crm_check_approved'] = 'Le montant approuvé correspond au montant attendu';
+
+$string['commerce_alfa_crm_check_deposited'] = 'Le montant encaissé correspond au montant attendu';
+
+$string['commerce_alfa_crm_check_ok'] = 'Conforme';
+
+$string['commerce_alfa_crm_check_failed'] = 'À vérifier';
+
+$string['commerce_alfa_crm_blockers'] = 'La réconciliation ne peut pas être exécutée pour les raisons suivantes :';
+
+$string['commerce_alfa_crm_refresh'] = 'Vérifier à nouveau auprès d’Alfa';
+
+$string['commerce_alfa_crm_execute'] = 'Réconcilier le paiement et rétablir les accès';
+
+$string['commerce_alfa_crm_execute_confirm'] = 'CampusFR va interroger Alfa à nouveau puis, uniquement si les contrôles restent conformes, exécuter le pipeline normal de paiement : confirmation de la commande, création des droits et envoi des emails. Continuer ?';
+
+$string['commerce_alfa_crm_success'] = 'Le paiement Alfa a été réconcilié avec succès. La commande et les accès CampusFR ont été rétablis.';
+
+$string['commerce_alfa_crm_verify'] = 'Vérifier auprès d’Alfa';
+
+$string['commerce_alfa_crm_verify_short'] = 'Vérifier Alfa';
+
+$string['commerce_alfa_crm_purchase_panel'] = 'Paiement Alfa';
+
+$string['commerce_alfa_crm_purchase_pending_help'] = 'Ce paiement Alfa n’est pas encore complètement finalisé dans CampusFR. Vous pouvez demander une vérification bancaire en direct sans modifier la commande.';
+
+$string['commerce_alfa_crm_purchase_complete_help'] = 'Cette commande Alfa est déjà finalisée. La vérification en direct reste disponible pour contrôler la cohérence avec la banque.';
+
+$string['commerce_alfa_reconciliation_blocker_provider_not_paid'] = 'Alfa ne confirme pas encore un paiement encaissé.';
+
+$string['commerce_alfa_reconciliation_blocker_amount_mismatch'] = 'Le montant retourné par Alfa ne correspond pas au montant CampusFR.';
+
+$string['commerce_alfa_reconciliation_blocker_currency_mismatch'] = 'La devise retournée par Alfa ne correspond pas à la devise CampusFR.';
+
+$string['commerce_alfa_reconciliation_blocker_approved_amount_mismatch'] = 'Le montant approuvé par Alfa ne correspond pas au montant attendu.';
+
+$string['commerce_alfa_reconciliation_blocker_deposited_amount_mismatch'] = 'Le montant réellement encaissé par Alfa ne correspond pas au montant attendu.';
+
+$string['commerce_alfa_reconciliation_blocker_provider_event_not_completed'] = 'Le statut Alfa ne produit pas un événement de paiement finalisé.';
