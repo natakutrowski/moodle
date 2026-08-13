@@ -6886,6 +6886,14 @@ $string['commerce_purchase_resend_receipt_confirm'] = 'Un nouveau reçu sera env
 $string['commerce_purchase_receipt_resent'] = 'Le reçu a été renvoyé avec succès.';
 $string['commerce_purchase_receipt_queued'] = 'Le reçu a été placé dans la file d’envoi et sera retenté automatiquement.';
 $string['commerce_purchase_receipt_resend_failed'] = 'Le reçu n’a pas pu être renvoyé. Consultez le journal des emails pour le diagnostic.';
+$string['commerce_purchase_resend_access'] = 'Renvoyer les accès';
+$string['commerce_purchase_resend_access_confirm'] = 'Le mail contenant les accès sera reconstruit par le moteur transactionnel Commerce et envoyé à l’adresse actuelle {$a}. Continuer ?';
+$string['commerce_purchase_access_resent_to'] = 'Le mail d’accès a été renvoyé avec succès à {$a}.';
+$string['commerce_purchase_access_queued_to'] = 'Le mail d’accès pour {$a} a été placé dans la file d’envoi et sera retenté automatiquement.';
+$string['commerce_purchase_access_resend_failed'] = 'Le mail d’accès n’a pas pu être renvoyé. Consultez le journal des emails pour le diagnostic.';
+$string['commerce_purchase_receipt_resent_to'] = 'Le reçu a été renvoyé avec succès à {$a}.';
+$string['commerce_purchase_receipt_queued_to'] = 'Le reçu pour {$a} a été placé dans la file d’envoi et sera retenté automatiquement.';
+$string['commerce_purchase_historical_email'] = 'Adresse lors de l’achat';
 
 // J10A — Hub étudiant Mon Campus.
 $string['commerce_customer_hub_title'] = 'Mon Campus';
@@ -8759,3 +8767,9 @@ $string['commerce_personal_offer_campaign_email_secondary_cta_url'] = 'URL du CT
 $string['commerce_personal_offer_campaign_email_secondary_cta_help'] = 'Facultatif. Renseignez le libellé et l’URL ensemble, puis insérez {{secondary_cta}} exactement à l’endroit où le bouton doit apparaître dans le Contenu marketing. Sans ce marqueur, aucun CTA secondaire n’est affiché.';
 // M9.2b — resilient public Commerce access errors.
 $string['commerce_public_access_denied'] = 'Cette page n’est plus accessible depuis cette session. Vous pouvez continuer depuis votre espace CampusFR.';
+$string['commerce_mail_delivery_accepted'] = 'Envoi accepté par le transport de messagerie';
+$string['commerce_mail_delivery_sent_at'] = 'Envoyé le {$a}';
+$string['commerce_mail_delivery_attempts'] = 'Tentatives : {$a}';
+$string['commerce_mail_delivery_transport_smtp'] = 'Transport SMTP : {$a}';
+$string['commerce_mail_delivery_transport_local'] = 'Transport mail local';
+$string['commerce_mail_delivery_disclaimer'] = 'Ce statut confirme que CampusFR a remis le message avec succès au transport configuré. Il ne garantit pas son arrivée dans la boîte de réception du destinataire.';

@@ -135,6 +135,8 @@ final class commerce_personal_offer_campaign_email_m3a_test extends advanced_tes
             body: '<p>Bonjour {{firstname}}</p>',
             bodyformat: (int) FORMAT_HTML,
             ctalabel: 'Découvrir',
+            secondaryctalabel: null,
+            secondaryctaurl: null,
             closing: '<p>À bientôt</p>',
             closingformat: (int) FORMAT_HTML,
             userid: $userid
@@ -146,6 +148,8 @@ final class commerce_personal_offer_campaign_email_m3a_test extends advanced_tes
             body: '<p>Здравствуйте, {{firstname}}</p>',
             bodyformat: (int) FORMAT_HTML,
             ctalabel: 'Начать',
+            secondaryctalabel: null,
+            secondaryctaurl: null,
             closing: null,
             closingformat: (int) FORMAT_HTML,
             userid: $userid
@@ -174,6 +178,8 @@ final class commerce_personal_offer_campaign_email_m3a_test extends advanced_tes
             body: '<p>Текст {{firstname}}</p><script>alert(1)</script>',
             bodyformat: (int) FORMAT_HTML,
             ctalabel: '<i>Купить</i>',
+            secondaryctalabel: null,
+            secondaryctaurl: null,
             closing: '<p>До встречи</p><iframe src="https://example.test"></iframe>',
             closingformat: (int) FORMAT_HTML,
             userid: $userid
@@ -205,6 +211,8 @@ final class commerce_personal_offer_campaign_email_m3a_test extends advanced_tes
             body: 'Corps',
             bodyformat: (int) FORMAT_PLAIN,
             ctalabel: 'Acheter',
+            secondaryctalabel: null,
+            secondaryctaurl: null,
             closing: null,
             closingformat: (int) FORMAT_PLAIN,
             userid: $userid

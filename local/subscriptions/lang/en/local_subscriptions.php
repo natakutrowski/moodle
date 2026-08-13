@@ -7050,6 +7050,14 @@ $string['commerce_purchase_resend_receipt_confirm'] = 'A new receipt will be sen
 $string['commerce_purchase_receipt_resent'] = 'The receipt was resent successfully.';
 $string['commerce_purchase_receipt_queued'] = 'The receipt was queued and will be retried automatically.';
 $string['commerce_purchase_receipt_resend_failed'] = 'The receipt could not be resent. Review the email journal for diagnostics.';
+$string['commerce_purchase_resend_access'] = 'Resend access email';
+$string['commerce_purchase_resend_access_confirm'] = 'The access email will be rebuilt by the Commerce transactional mail engine and sent to the current address {$a}. Continue?';
+$string['commerce_purchase_access_resent_to'] = 'The access email was resent successfully to {$a}.';
+$string['commerce_purchase_access_queued_to'] = 'The access email for {$a} was queued and will be retried automatically.';
+$string['commerce_purchase_access_resend_failed'] = 'The access email could not be resent. Review the email journal for diagnostics.';
+$string['commerce_purchase_receipt_resent_to'] = 'The receipt was resent successfully to {$a}.';
+$string['commerce_purchase_receipt_queued_to'] = 'The receipt for {$a} was queued and will be retried automatically.';
+$string['commerce_purchase_historical_email'] = 'Email at purchase time';
 
 // J10A — My Campus student hub.
 $string['commerce_customer_hub_title'] = 'My Campus';
@@ -8923,3 +8931,9 @@ $string['commerce_personal_offer_campaign_email_secondary_cta_url'] = 'Secondary
 $string['commerce_personal_offer_campaign_email_secondary_cta_help'] = 'Optional. Enter the label and URL together, then insert {{secondary_cta}} exactly where the button should appear inside the Marketing content. Without this marker, no secondary CTA is displayed.';
 // M9.2b — resilient public Commerce access errors.
 $string['commerce_public_access_denied'] = 'This page is no longer available from this session. You can continue from your CampusFR account.';
+$string['commerce_mail_delivery_accepted'] = 'Message accepted by the mail transport';
+$string['commerce_mail_delivery_sent_at'] = 'Sent on {$a}';
+$string['commerce_mail_delivery_attempts'] = 'Attempts: {$a}';
+$string['commerce_mail_delivery_transport_smtp'] = 'SMTP transport: {$a}';
+$string['commerce_mail_delivery_transport_local'] = 'Local mail transport';
+$string['commerce_mail_delivery_disclaimer'] = 'This status confirms that CampusFR successfully handed the message to the configured mail transport. It does not guarantee delivery to the recipient’s inbox.';

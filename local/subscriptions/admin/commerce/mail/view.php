@@ -125,6 +125,24 @@ echo html_writer::div(
     'd-flex flex-wrap align-items-center gap-2 text-muted mb-3'
 );
 
+if ((string)$record->status === 'sent') {
+    $transport = !empty($CFG->smtphosts)
+        ? get_string('commerce_mail_delivery_transport_smtp', 'local_subscriptions', s((string)$CFG->smtphosts))
+        : get_string('commerce_mail_delivery_transport_local', 'local_subscriptions');
+    $deliverydetails = [
+        get_string('commerce_mail_delivery_sent_at', 'local_subscriptions',
+            userdate((int)$record->timesent, get_string('strftimedatetimeshort', 'langconfig'))),
+        get_string('commerce_mail_delivery_attempts', 'local_subscriptions', (int)$record->attemptcount),
+        $transport,
+    ];
+    echo html_writer::div(
+        html_writer::tag('strong', get_string('commerce_mail_delivery_accepted', 'local_subscriptions'))
+        . html_writer::tag('div', implode(' · ', array_map('s', $deliverydetails)), ['class' => 'small mt-1'])
+        . html_writer::tag('div', get_string('commerce_mail_delivery_disclaimer', 'local_subscriptions'), ['class' => 'small mt-1']),
+        'alert alert-success py-2 px-3 mb-3'
+    );
+}
+
 $previewnavigation = CommerceMailPreviewRenderer::render_navigation($url, $previewview);
 $fontnavigation = in_array(
     $previewview,

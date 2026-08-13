@@ -7125,6 +7125,14 @@ $string['commerce_purchase_resend_receipt_confirm'] = 'Новая квитанц
 $string['commerce_purchase_receipt_resent'] = 'Квитанция успешно отправлена повторно.';
 $string['commerce_purchase_receipt_queued'] = 'Квитанция добавлена в очередь и будет отправлена повторно автоматически.';
 $string['commerce_purchase_receipt_resend_failed'] = 'Не удалось повторно отправить квитанцию. Проверьте журнал писем.';
+$string['commerce_purchase_resend_access'] = 'Повторно отправить доступы';
+$string['commerce_purchase_resend_access_confirm'] = 'Письмо с доступами будет заново сформировано транзакционным почтовым движком Commerce и отправлено на текущий адрес {$a}. Продолжить?';
+$string['commerce_purchase_access_resent_to'] = 'Письмо с доступами успешно повторно отправлено на {$a}.';
+$string['commerce_purchase_access_queued_to'] = 'Письмо с доступами для {$a} добавлено в очередь и будет отправлено повторно автоматически.';
+$string['commerce_purchase_access_resend_failed'] = 'Не удалось повторно отправить письмо с доступами. Проверьте журнал писем.';
+$string['commerce_purchase_receipt_resent_to'] = 'Квитанция успешно повторно отправлена на {$a}.';
+$string['commerce_purchase_receipt_queued_to'] = 'Квитанция для {$a} добавлена в очередь и будет отправлена повторно автоматически.';
+$string['commerce_purchase_historical_email'] = 'Email на момент покупки';
 
 // J10A — Студенческий хаб «Мой Campus».
 $string['commerce_customer_hub_title'] = 'Мой Campus';
@@ -8998,3 +9006,9 @@ $string['commerce_personal_offer_campaign_email_secondary_cta_url'] = 'URL до�
 $string['commerce_personal_offer_campaign_email_secondary_cta_help'] = 'Необязательно. Заполните текст и URL вместе, затем вставьте {{secondary_cta}} точно в то место маркетингового текста, где должна появиться кнопка. Без этого маркера дополнительная кнопка не отображается.';
 // M9.2b — resilient public Commerce access errors.
 $string['commerce_public_access_denied'] = 'Эта страница больше недоступна из текущей сессии. Вы можете продолжить в своём пространстве CampusFR.';
+$string['commerce_mail_delivery_accepted'] = 'Письмо принято почтовым транспортом';
+$string['commerce_mail_delivery_sent_at'] = 'Отправлено: {$a}';
+$string['commerce_mail_delivery_attempts'] = 'Попыток: {$a}';
+$string['commerce_mail_delivery_transport_smtp'] = 'SMTP-транспорт: {$a}';
+$string['commerce_mail_delivery_transport_local'] = 'Локальный почтовый транспорт';
+$string['commerce_mail_delivery_disclaimer'] = 'Этот статус подтверждает, что CampusFR успешно передал письмо настроенному почтовому транспорту. Он не гарантирует доставку письма во входящие получателя.';

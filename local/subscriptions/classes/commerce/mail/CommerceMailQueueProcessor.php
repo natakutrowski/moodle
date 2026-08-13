@@ -20,7 +20,7 @@ final class CommerceMailQueueProcessor {
     }
 
     /**
-     * @return array{processed:int,sent:int,retried:int,failed:int,skipped:int}
+     * @return array{processed:int,sent:int,retried:int,failed:int,cancelled:int,skipped:int}
      */
     public function process_due(
         int $limit = 50,
@@ -41,7 +41,7 @@ final class CommerceMailQueueProcessor {
      * already-processing rows are safely ignored.
      *
      * @param int[] $ids
-     * @return array{processed:int,sent:int,retried:int,failed:int,skipped:int}
+     * @return array{processed:int,sent:int,retried:int,failed:int,cancelled:int,skipped:int}
      */
     public function process_ids(array $ids, ?int $now = null): array {
         $now ??= time();
@@ -62,10 +62,10 @@ final class CommerceMailQueueProcessor {
 
     /**
      * @param \stdClass[] $records
-     * @return array{processed:int,sent:int,retried:int,failed:int,skipped:int}
+     * @return array{processed:int,sent:int,retried:int,failed:int,cancelled:int,skipped:int}
      */
     private function process_records(array $records, int $now): array {
-        $result = ['processed' => 0, 'sent' => 0, 'retried' => 0, 'failed' => 0, 'skipped' => 0];
+        $result = ['processed' => 0, 'sent' => 0, 'retried' => 0, 'failed' => 0, 'cancelled' => 0, 'skipped' => 0];
 
         foreach ($records as $record) {
             if (!$this->templates->has((string)$record->mailtype)) {
@@ -88,6 +88,13 @@ final class CommerceMailQueueProcessor {
                 $message = $this->dispatcher->dispatch($this->request_from_record($record));
                 $this->repository->mark_sent((int)$record->id, $message->get_subject(), $now);
                 $result['sent']++;
+            } catch (CommerceMailTerminalCancellationException $exception) {
+                $this->repository->mark_cancelled(
+                    (int)$record->id,
+                    $exception->get_reason() . ': ' . $exception->getMessage(),
+                    $now
+                );
+                $result['cancelled']++;
             } catch (\Throwable $exception) {
                 $attemptcount = (int)$record->attemptcount;
                 $next = $attemptcount < (int)$record->maxattempts
