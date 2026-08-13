@@ -8909,3 +8909,11 @@ $string['settings:guest_checkout_cleanup_age_days_desc'] = 'A newer provisional 
 $string['settings:guest_checkout_cleanup_batch_size'] = 'Maximum cleanup batch size';
 $string['settings:guest_checkout_cleanup_batch_size_desc'] = 'Maximum accounts examined per run.';
 
+$string['admin_event_user_legacy_digital_linked'] = 'Legacy Digital purchase linked to Moodle account';
+$string['admin_event_commerce_personal_offer_beneficiary_corrected'] = 'Personal offer beneficiary corrected';
+
+// M9.3a — live provider status in unfinished checkout CRM.
+$string['commerce_guest_crm_provider_live_status'] = 'Provider: {$a->status}';
+$string['commerce_guest_crm_provider_paid_pending'] = 'Paid at provider — reconcile';
+$string['commerce_guest_crm_provider_probe_unavailable'] = 'Provider status unavailable';
+

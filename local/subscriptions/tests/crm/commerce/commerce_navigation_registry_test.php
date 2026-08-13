@@ -12,7 +12,7 @@ final class commerce_navigation_registry_test extends advanced_testcase {
         $this->resetAfterTest();
         $items = (new CommerceSectionNavigationRegistry())->all_items();
         $keys = array_map(static fn($item): string => $item->key, $items);
-        $positions = array_map(static fn($item): int => $item->position, $items);
+        $positions = array_map(static fn($item): int|float => $item->position, $items);
 
         $this->assertCount(9, $items);
         $this->assertSame([

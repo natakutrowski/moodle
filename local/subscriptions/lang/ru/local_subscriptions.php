@@ -8984,3 +8984,11 @@ $string['settings:guest_checkout_cleanup_age_days_desc'] = 'Более новы�
 $string['settings:guest_checkout_cleanup_batch_size'] = 'Максимальный размер пакета очистки';
 $string['settings:guest_checkout_cleanup_batch_size_desc'] = 'Максимальное число аккаунтов за один запуск.';
 
+$string['admin_event_user_legacy_digital_linked'] = 'Покупка Legacy Digital привязана к аккаунту Moodle';
+$string['admin_event_commerce_personal_offer_beneficiary_corrected'] = 'Получатель персонального предложения исправлен';
+
+// M9.3a — live provider status in unfinished checkout CRM.
+$string['commerce_guest_crm_provider_live_status'] = 'Провайдер: {$a->status}';
+$string['commerce_guest_crm_provider_paid_pending'] = 'Оплачено у провайдера — требуется сверка';
+$string['commerce_guest_crm_provider_probe_unavailable'] = 'Статус провайдера недоступен';
+
