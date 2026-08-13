@@ -8752,3 +8752,10 @@ $string['user360_merge_transfer_learning'] = 'Учебные данные';
 $string['user360_merge_transfer_legacy'] = 'Данные Legacy';
 
 $string['user360_merge_transfer_commerce'] = 'Данные Commerce';
+
+// Сверка платежей Alfa.
+$string['commerce_alfa_reconciliation_payment_not_found'] = 'Попытка платежа Commerce не найдена.';
+$string['commerce_alfa_reconciliation_attempt_not_found'] = 'Для этой покупки не найдена попытка платежа Alfa.';
+$string['commerce_alfa_reconciliation_wrong_provider'] = 'Этот платёж не относится к Alfa и не может быть обработан сверкой Alfa.';
+$string['commerce_alfa_reconciliation_missing_orderid'] = 'Отсутствует идентификатор заказа Alfa; безопасная сверка платежа невозможна.';
+$string['commerce_alfa_reconciliation_not_safe'] = 'Сверка Alfa отклонена: данные Alfa и Campus недостаточно совпадают: {$a}';

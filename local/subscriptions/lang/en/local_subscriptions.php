@@ -8677,3 +8677,10 @@ $string['user360_merge_transfer_learning'] = 'Learning data';
 $string['user360_merge_transfer_legacy'] = 'Legacy data';
 
 $string['user360_merge_transfer_commerce'] = 'Commerce data';
+
+// Alfa payment reconciliation.
+$string['commerce_alfa_reconciliation_payment_not_found'] = 'The Commerce payment attempt was not found.';
+$string['commerce_alfa_reconciliation_attempt_not_found'] = 'No Alfa payment attempt was found for this purchase.';
+$string['commerce_alfa_reconciliation_wrong_provider'] = 'This payment is not an Alfa payment and cannot use Alfa reconciliation.';
+$string['commerce_alfa_reconciliation_missing_orderid'] = 'The Alfa order identifier is missing; the payment cannot be reconciled safely.';
+$string['commerce_alfa_reconciliation_not_safe'] = 'Alfa reconciliation was refused because the provider and Campus data do not match safely: {$a}';
