@@ -20,7 +20,7 @@ use moodle_database;
  * It never marks a payment paid by administrative assertion. Alfa is queried
  * live and the existing EventRouter/Commerce fulfillment pipeline is reused.
  */
-final class AlfaPaymentReconciliationService {
+final class AlfaPaymentReconciliationService implements AlfaPaymentReconciliationEngineInterface {
     public function __construct(
         private readonly moodle_database $database,
         private readonly CommercePaymentRepository $payments,

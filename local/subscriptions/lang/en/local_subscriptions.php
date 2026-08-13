@@ -8766,3 +8766,25 @@ $string['commerce_alfa_reconciliation_blocker_approved_amount_mismatch'] = 'The 
 $string['commerce_alfa_reconciliation_blocker_deposited_amount_mismatch'] = 'The amount actually deposited by Alfa does not match the expected amount.';
 
 $string['commerce_alfa_reconciliation_blocker_provider_event_not_completed'] = 'The Alfa status does not produce a completed payment event.';
+
+$string['task_reconcile_alfa_payments'] = 'Automatic Alfa payment reconciliation';
+
+$string['settings:alfa_reconciliation_header'] = 'Automatic Alfa reconciliation';
+
+$string['settings:alfa_reconciliation_header_desc'] = 'Automatically recovers payments deposited by Alfa when the browser return or server notification did not finalize the CampusFR order.';
+
+$string['settings:alfa_reconciliation_cron_enabled'] = 'Enable automatic Alfa reconciliation';
+
+$string['settings:alfa_reconciliation_cron_enabled_desc'] = 'The scheduled task checks Alfa for CampusFR payments still pending and finalizes only payments whose provider status, amount and currency are confirmed by Alfa.';
+
+$string['settings:alfa_reconciliation_min_age'] = 'Minimum age before checking (seconds)';
+
+$string['settings:alfa_reconciliation_min_age_desc'] = 'Minimum time after payment creation before it can be checked automatically. Recommended value: 300 seconds.';
+
+$string['settings:alfa_reconciliation_max_age'] = 'Maximum payment age to check (seconds)';
+
+$string['settings:alfa_reconciliation_max_age_desc'] = 'Payments older than this are not queried automatically. Recommended value: 172800 seconds (48 h).';
+
+$string['settings:alfa_reconciliation_batch_size'] = 'Maximum payments per run';
+
+$string['settings:alfa_reconciliation_batch_size_desc'] = 'Limits the number of Alfa API calls made by one scheduled-task run. Recommended value: 20.';
