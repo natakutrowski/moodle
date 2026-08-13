@@ -6,8 +6,10 @@ require_once(dirname(__DIR__, 3) . '/config.php');
 use local_subscriptions\commerce\payment\attempt\CommercePaymentAttemptStatus;
 use local_subscriptions\commerce\payment\repository\CommercePaymentRepository;
 use local_subscriptions\commerce\payment\returnflow\CommercePaymentReturnResolver;
-use local_subscriptions\payment\EventRouter;
-use local_subscriptions\payment\PaymentGatewayFactory;
+use local_subscriptions\commerce\payment\reconciliation\alfa\AlfaPaymentReconciliationService;
+use local_subscriptions\commerce\payment\reconciliation\alfa\returnflow\AlfaInstantReturnReconciliationService;
+use local_subscriptions\commerce\payment\reconciliation\alfa\returnflow\AlfaInstantReturnResult;
+use local_subscriptions\commerce\payment\reconciliation\alfa\returnflow\NativeAlfaInstantReturnSleeper;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
 
@@ -79,36 +81,55 @@ if ($result === 'cancel') {
 }
 
 if ($provider === Provider::ALFA) {
-    $providerorderid = $orderid !== ''
-        ? $orderid
-        : ($payment->get_provider_order_id() ?? $payment->get_provider_reference() ?? '');
-
     try {
-        $event = PaymentGatewayFactory::for(Provider::ALFA)->parse_webhook(
-            json_encode(['orderId' => $providerorderid], JSON_UNESCAPED_UNICODE),
-            []
+        $instant = new AlfaInstantReturnReconciliationService(
+            AlfaPaymentReconciliationService::create($DB),
+            new NativeAlfaInstantReturnSleeper()
         );
-        $event->meta['provider'] = Provider::ALFA;
-        $event->meta['commerce_payment_id'] = (string)$paymentid;
-        $event->meta['commerce_purchase_uuid'] = $payment->get_purchase_uuid();
-        EventRouter::handle($event);
-    } catch (\Throwable $exception) {
-        $payments->update_status(
-            $paymentid,
-            CommercePaymentAttemptStatus::FAILED,
-            null,
-            ['return_error' => $exception->getMessage(), 'provider' => Provider::ALFA]
-        );
-        local_subscriptions_redirect_from_return(
-            UrlFactory::order_result(['result' => 'failure', 'code' => 'alfa_return'] + $baseparams),
-            (bool)$embedded
-        );
-    }
+        $instantresult = $instant->reconcile($paymentid);
 
-    if ($event->type !== 'checkout_completed') {
-        local_subscriptions_redirect_from_return(
-            UrlFactory::order_result(['result' => 'failure', 'code' => 'status'] + $baseparams),
-            (bool)$embedded
+        error_log(
+            '[local_subscriptions][alfa_return_reconciliation] ' .
+            json_encode([
+                'payment_id' => $paymentid,
+                'purchase_reference' => (string)$purchase->reference,
+                'result' => $instantresult->status,
+                'attempts' => $instantresult->attempts,
+                'campus_payment_status' => $instantresult->inspection->campuspaymentstatus,
+                'campus_purchase_status' => $instantresult->inspection->campuspurchasestatus,
+                'alfa_order_status' => $instantresult->inspection->provider->orderstatus,
+                'alfa_payment_state' => $instantresult->inspection->provider->paymentstate,
+                'blockers' => $instantresult->inspection->blockers,
+            ], JSON_UNESCAPED_SLASHES)
+        );
+
+        if ($instantresult->is_unsafe()) {
+            local_subscriptions_redirect_from_return(
+                UrlFactory::order_result([
+                    'result' => 'failure',
+                    'code' => 'alfa_reconciliation',
+                ] + $baseparams),
+                (bool)$embedded
+            );
+        }
+
+        // COMPLETE redirects to an immediately usable success page.
+        // PENDING deliberately also uses browser result=success: the durable
+        // payment state remains pending, so CommercePostPaymentStateResolver
+        // renders "confirmation in progress" while M8D/M8C keep working.
+    } catch (\Throwable $exception) {
+        // A temporary status/API failure after the customer has returned from
+        // the bank must never downgrade the payment to FAILED. Preserve the
+        // durable pending state and let callback/cron reconciliation recover it.
+        error_log(
+            '[local_subscriptions][alfa_return_reconciliation] ' .
+            json_encode([
+                'payment_id' => $paymentid,
+                'purchase_reference' => (string)$purchase->reference,
+                'result' => 'temporary_error',
+                'exception' => get_class($exception),
+                'message' => $exception->getMessage(),
+            ], JSON_UNESCAPED_SLASHES)
         );
     }
 }

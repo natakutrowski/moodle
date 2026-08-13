@@ -1,3 +1,37 @@
+
+<div class="payment-provider-transition"
+     data-payment-provider-transition
+     data-alfa-label="{{providertransitionalfa}}"
+     data-default-label="{{providertransitiondefault}}"
+     role="status"
+     aria-live="polite"
+     aria-atomic="true"
+     aria-hidden="true">
+    <div class="payment-provider-transition__glass">
+        <div class="payment-provider-transition__hourglass-wrap">
+            <div class="payment-provider-transition__orbit" aria-hidden="true"></div>
+            <div class="payment-provider-transition__hourglass" aria-hidden="true">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+        </div>
+        <h2 class="payment-provider-transition__title">{{providertransitiontitle}}</h2>
+        <p class="payment-provider-transition__message">{{providertransitionmessage}}</p>
+        <div class="payment-provider-transition__provider">
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            <span data-transition-provider>{{providertransitiondefault}}</span>
+        </div>
+        <div class="payment-provider-transition__security">
+            <span class="payment-provider-transition__security-icon" aria-hidden="true">
+                <i class="fa-solid fa-lock"></i>
+            </span>
+            <span>
+                <strong>{{providertransitionsecuritytitle}}</strong>
+                <small>{{providertransitionsecuritymessage}}</small>
+            </span>
+        </div>
+    </div>
+</div>
+
 <div class="commerce-checkout container py-4 py-lg-5">
     <div class="commerce-checkout__header mb-4 mb-lg-5">
         <h1 class="display-5 fw-bold mb-2">{{title}}</h1>

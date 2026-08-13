@@ -8624,3 +8624,33 @@ $string['settings:alfa_reconciliation_max_age_desc'] = 'Les paiements plus ancie
 $string['settings:alfa_reconciliation_batch_size'] = 'Nombre maximal de paiements par exécution';
 
 $string['settings:alfa_reconciliation_batch_size_desc'] = 'Limite le nombre d’appels Alfa effectués lors d’une exécution du cron. Valeur recommandée : 20.';
+
+$string['commerce_alfa_confirmation_title'] = 'Nous confirmons votre paiement…';
+
+$string['commerce_alfa_confirmation_message'] = 'Cela ne prend généralement que quelques secondes.';
+
+$string['commerce_alfa_confirmation_security_title'] = 'Vos données sont sécurisées';
+
+$string['commerce_alfa_confirmation_security_message'] = 'Nous vérifions directement la transaction auprès de notre prestataire de paiement.';
+
+$string['commerce_alfa_confirmation_confirmed_title'] = 'Paiement confirmé !';
+
+$string['commerce_alfa_confirmation_confirmed_message'] = 'Vos accès sont prêts. Nous vous redirigeons…';
+
+$string['commerce_provider_transition_title'] = 'Nous préparons votre paiement sécurisé…';
+
+$string['commerce_provider_transition_message'] = 'Encore un instant : nous ouvrons la page de paiement sécurisée.';
+
+$string['commerce_provider_transition_security_title'] = 'Connexion sécurisée';
+
+$string['commerce_provider_transition_security_message'] = 'Vous allez être redirigé vers notre prestataire de paiement.';
+
+$string['commerce_provider_transition_alfa'] = 'Redirection vers Alfa';
+
+$string['commerce_provider_transition_default'] = 'Redirection vers le prestataire de paiement';
+
+$string['commerce_payment_splash_preview_title'] = 'Aperçu des écrans de paiement';
+
+$string['commerce_payment_splash_preview_outbound'] = 'Départ vers le prestataire';
+
+$string['commerce_payment_splash_preview_return'] = 'Confirmation du paiement';

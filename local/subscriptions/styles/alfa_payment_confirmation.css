@@ -1,0 +1,294 @@
+.alfa-payment-confirmation {
+    --alfa-progress: 0%;
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: clamp(1rem, 4vw, 3rem);
+    background:
+        radial-gradient(circle at 12% 18%, rgba(255, 255, 255, .92) 0, rgba(255, 255, 255, 0) 29%),
+        radial-gradient(circle at 88% 13%, rgba(164, 181, 255, .68) 0, rgba(164, 181, 255, 0) 31%),
+        radial-gradient(circle at 86% 86%, rgba(246, 125, 220, .42) 0, rgba(246, 125, 220, 0) 34%),
+        radial-gradient(circle at 7% 87%, rgba(83, 164, 255, .55) 0, rgba(83, 164, 255, 0) 38%),
+        linear-gradient(135deg, #fff8fc 0%, #f6f4ff 44%, #eff6ff 100%);
+    transition: opacity .45s ease, visibility .45s ease;
+}
+
+.alfa-payment-confirmation::before,
+.alfa-payment-confirmation::after {
+    position: absolute;
+    width: min(42vw, 34rem);
+    aspect-ratio: 1.7;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 46% 54% 62% 38% / 45% 39% 61% 55%;
+    background: linear-gradient(135deg, rgba(255,255,255,.48), rgba(255,255,255,.12));
+    box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.82),
+        0 2rem 5rem rgba(72, 69, 150, .08);
+    content: "";
+    filter: blur(.15px);
+    pointer-events: none;
+}
+
+.alfa-payment-confirmation::before {
+    left: -12vw;
+    bottom: -7vw;
+    transform: rotate(23deg);
+}
+
+.alfa-payment-confirmation::after {
+    right: -10vw;
+    top: -5vw;
+    transform: rotate(-19deg);
+}
+
+.alfa-payment-confirmation__glass {
+    position: relative;
+    z-index: 2;
+    width: min(100%, 57rem);
+    padding: clamp(2rem, 5vw, 4.2rem);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.78);
+    border-radius: clamp(1.75rem, 4vw, 3rem);
+    background: linear-gradient(145deg, rgba(255,255,255,.58), rgba(255,255,255,.28));
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.92),
+        inset 0 -1px 0 rgba(255,255,255,.32),
+        0 2rem 6rem rgba(55, 48, 126, .15);
+    text-align: center;
+    backdrop-filter: blur(28px) saturate(145%);
+    -webkit-backdrop-filter: blur(28px) saturate(145%);
+}
+
+.alfa-payment-confirmation__glass::before {
+    position: absolute;
+    inset: -45% auto auto -15%;
+    width: 80%;
+    height: 70%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.7), rgba(255,255,255,0) 68%);
+    content: "";
+    pointer-events: none;
+}
+
+.alfa-payment-confirmation__hourglass-wrap {
+    position: relative;
+    display: grid;
+    width: 9.5rem;
+    height: 9.5rem;
+    margin: 0 auto 1.5rem;
+    place-items: center;
+}
+
+.alfa-payment-confirmation__orbit {
+    position: absolute;
+    inset: .15rem;
+    border: 3px solid transparent;
+    border-top-color: #45b7ff;
+    border-right-color: #ff3fa5;
+    border-bottom-color: rgba(255, 63, 165, .22);
+    border-left-color: rgba(69, 183, 255, .22);
+    border-radius: 50%;
+    filter: drop-shadow(0 .35rem .7rem rgba(100, 111, 238, .22));
+    animation: alfa-confirmation-orbit 2.1s linear infinite;
+}
+
+.alfa-payment-confirmation__hourglass {
+    position: relative;
+    display: grid;
+    width: 5.35rem;
+    height: 6.55rem;
+    border: 2px solid rgba(255,255,255,.88);
+    border-radius: 1.45rem;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.68), rgba(255,255,255,.24)),
+        radial-gradient(circle at 50% 29%, rgba(255,74,174,.62), rgba(255,74,174,0) 38%),
+        radial-gradient(circle at 50% 78%, rgba(185,61,197,.55), rgba(185,61,197,0) 40%);
+    box-shadow:
+        inset 0 0 1.2rem rgba(255,255,255,.75),
+        0 .8rem 2rem rgba(61,64,148,.14);
+    place-items: center;
+    transform-style: preserve-3d;
+    animation: alfa-confirmation-hourglass 3.2s ease-in-out infinite;
+}
+
+.alfa-payment-confirmation__hourglass::before,
+.alfa-payment-confirmation__hourglass::after {
+    position: absolute;
+    left: 50%;
+    width: 4.9rem;
+    height: .55rem;
+    border: 1px solid rgba(255,255,255,.86);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(198,206,255,.48));
+    box-shadow: 0 .18rem .5rem rgba(75,72,144,.13);
+    content: "";
+    transform: translateX(-50%);
+}
+
+.alfa-payment-confirmation__hourglass::before { top: -.18rem; }
+.alfa-payment-confirmation__hourglass::after { bottom: -.18rem; }
+
+.alfa-payment-confirmation__hourglass i {
+    font-size: 3rem;
+    color: #9b49cc;
+    filter: drop-shadow(0 .3rem .45rem rgba(156,73,204,.22));
+}
+
+.alfa-payment-confirmation__title {
+    position: relative;
+    margin: 0;
+    color: #2f225c;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -.035em;
+}
+
+.alfa-payment-confirmation__message {
+    position: relative;
+    max-width: 42rem;
+    margin: .7rem auto 0;
+    color: #636b8e;
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    line-height: 1.55;
+}
+
+.alfa-payment-confirmation__progress {
+    position: relative;
+    width: min(17rem, 70%);
+    height: .42rem;
+    margin: 2rem auto;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(116,122,190,.13);
+}
+
+.alfa-payment-confirmation__progress::after {
+    display: block;
+    width: var(--alfa-progress);
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #4bbcff 0%, #b987f7 52%, #ff2f91 100%);
+    box-shadow: 0 0 1rem rgba(255,47,145,.26);
+    content: "";
+    transition: width .5s ease;
+}
+
+.alfa-payment-confirmation__security {
+    position: relative;
+    display: flex;
+    gap: .9rem;
+    align-items: center;
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 1rem 1.2rem;
+    border: 1px solid rgba(255,255,255,.8);
+    border-radius: 1.35rem;
+    background: rgba(255,255,255,.27);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+    text-align: left;
+}
+
+.alfa-payment-confirmation__security-icon {
+    display: inline-flex;
+    flex: 0 0 2.9rem;
+    width: 2.9rem;
+    height: 2.9rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(145deg, rgba(123,158,255,.22), rgba(213,153,255,.26));
+    color: #654ac8;
+    line-height: 1;
+}
+
+.alfa-payment-confirmation__security-icon i {
+    display: block;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1;
+    transform: none;
+}
+
+.alfa-payment-confirmation__security > .alfa-payment-confirmation__security-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alfa-payment-confirmation__security strong {
+    display: block;
+    margin-bottom: .15rem;
+    color: #3a3264;
+}
+
+.alfa-payment-confirmation__security > div > span {
+    display: block;
+    color: #737895;
+    font-size: .9rem;
+}
+
+.alfa-payment-confirmation.is-confirmed .alfa-payment-confirmation__orbit {
+    border-color: rgba(28,183,126,.18);
+    border-top-color: #1cb77e;
+    border-right-color: #1cb77e;
+}
+
+.alfa-payment-confirmation.is-confirmed .alfa-payment-confirmation__hourglass {
+    animation-duration: .5s;
+}
+
+.alfa-payment-confirmation.is-released {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.alfa-payment-confirmation.is-background {
+    display: none;
+}
+
+@keyframes alfa-confirmation-orbit {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes alfa-confirmation-hourglass {
+    0%, 38% { transform: rotate(0deg) translateY(0); }
+    48%, 54% { transform: rotate(180deg) translateY(-.12rem); }
+    64%, 100% { transform: rotate(180deg) translateY(0); }
+}
+
+@media (max-width: 576px) {
+    .alfa-payment-confirmation__glass {
+        padding: 2rem 1.2rem;
+        border-radius: 2rem;
+    }
+
+    .alfa-payment-confirmation__hourglass-wrap {
+        width: 7.5rem;
+        height: 7.5rem;
+    }
+
+    .alfa-payment-confirmation__hourglass {
+        width: 4.45rem;
+        height: 5.35rem;
+    }
+
+    .alfa-payment-confirmation__hourglass::before,
+    .alfa-payment-confirmation__hourglass::after {
+        width: 4.15rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .alfa-payment-confirmation__orbit,
+    .alfa-payment-confirmation__hourglass {
+        animation: none;
+    }
+
+    .alfa-payment-confirmation__progress::after {
+        transition: none;
+    }
+}
