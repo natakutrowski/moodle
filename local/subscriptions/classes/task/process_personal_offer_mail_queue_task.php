@@ -32,8 +32,8 @@ final class process_personal_offer_mail_queue_task extends scheduled_task {
         $repository->recover_stale_processing($now - 1800, $now);
         $result = CommerceMailRuntime::processor()->process_due($limit, $now, [CommerceMailType::PERSONAL_OFFER], [], false);
         mtrace(sprintf(
-            '[Personal Offer Mail] limit=%d hourly_limit=%d sent_last_hour=%d processed=%d sent=%d retried=%d failed=%d skipped=%d',
-            $limit, $hourly, $sentlasthour, $result['processed'], $result['sent'], $result['retried'], $result['failed'], $result['skipped']
+            '[Personal Offer Mail] limit=%d hourly_limit=%d sent_last_hour=%d processed=%d sent=%d retried=%d failed=%d cancelled=%d skipped=%d',
+            $limit, $hourly, $sentlasthour, $result['processed'], $result['sent'], $result['retried'], $result['failed'], $result['cancelled'], $result['skipped']
         ));
     }
 }

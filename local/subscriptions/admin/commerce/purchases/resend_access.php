@@ -30,27 +30,35 @@ if ($purchase === null) {
 }
 
 try {
-    $result = (new CommercePurchaseCommunicationActionService())->resend_receipt(
+    $result = (new CommercePurchaseCommunicationActionService())->resend_access(
         $purchase->summary->reference,
         (int)$USER->id
     );
 
     if ($result['sent']) {
-        $message = get_string('commerce_purchase_receipt_resent_to', 'local_subscriptions', (string)$result['recipientemail']);
+        $message = get_string(
+            'commerce_purchase_access_resent_to',
+            'local_subscriptions',
+            (string)$result['recipientemail']
+        );
         $type = \core\output\notification::NOTIFY_SUCCESS;
     } else if ($result['queued']) {
-        $message = get_string('commerce_purchase_receipt_queued_to', 'local_subscriptions', (string)$result['recipientemail']);
+        $message = get_string(
+            'commerce_purchase_access_queued_to',
+            'local_subscriptions',
+            (string)$result['recipientemail']
+        );
         $type = \core\output\notification::NOTIFY_WARNING;
     } else {
-        $message = get_string('commerce_purchase_receipt_resend_failed', 'local_subscriptions');
+        $message = get_string('commerce_purchase_access_resend_failed', 'local_subscriptions');
         $type = \core\output\notification::NOTIFY_ERROR;
     }
 } catch (Throwable $exception) {
     debugging(
-        '[Commerce CRM] Receipt resend failed: ' . $exception->getMessage(),
+        '[Commerce CRM] Access resend failed: ' . $exception->getMessage(),
         DEBUG_DEVELOPER
     );
-    $message = get_string('commerce_purchase_receipt_resend_failed', 'local_subscriptions');
+    $message = get_string('commerce_purchase_access_resend_failed', 'local_subscriptions');
     $type = \core\output\notification::NOTIFY_ERROR;
 }
 

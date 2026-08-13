@@ -8,6 +8,7 @@ use local_subscriptions\commerce\purchase\action\CommercePurchaseActionPolicy;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseActionServiceFactory;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
+use local_subscriptions\commerce\purchase\communication\CommercePurchaseCurrentCustomerResolver;
 use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
 use local_subscriptions\commerce\pricing\CommercePersistedCommercialPricingPresenter;
 use local_subscriptions\payment\Provider;
@@ -26,6 +27,9 @@ $repository = new CommercePurchaseReadRepository($DB);
 $purchase = $repository->find_by_id($id);
 if ($purchase === null) { throw new moodle_exception('commerce_purchase_not_found', 'local_subscriptions'); }
 $summary = $purchase->summary;
+$currentcustomer = CommercePurchaseCurrentCustomerResolver::create()->resolve($purchase);
+$currentemail = trim((string)$currentcustomer->email);
+$historicalemail = trim((string)$summary->customer->email);
 $alfareconciled = optional_param('alfa_reconciled', 0, PARAM_BOOL);
 $publicreference = $summary->publicreference !== ''
     ? $summary->publicreference
@@ -124,11 +128,39 @@ if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)) {
             'data-confirmation-destination' => $resendreceipturl->out(false),
         ]
     );
+
+    $resendaccessurl = new moodle_url(
+        '/local/subscriptions/admin/commerce/purchases/resend_access.php',
+        [
+            'id' => $id,
+            'confirm' => 1,
+            'sesskey' => sesskey(),
+        ]
+    );
+    $quickactions .= html_writer::link(
+        $resendaccessurl,
+        get_string('commerce_purchase_resend_access', 'local_subscriptions'),
+        [
+            'class' => 'btn btn-outline-success',
+            'data-confirmation' => 'modal',
+            'data-confirmation-title-str' => json_encode([
+                'commerce_purchase_resend_access',
+                'local_subscriptions',
+            ]),
+            'data-confirmation-content-str' => json_encode([
+                'commerce_purchase_resend_access_confirm',
+                'local_subscriptions',
+                $currentemail,
+            ]),
+            'data-confirmation-yes-button-str' => json_encode(['yes']),
+            'data-confirmation-destination' => $resendaccessurl->out(false),
+        ]
+    );
 }
-if ($summary->customer->userid !== null || trim((string)$summary->customer->email) !== '') {
-    $user360params = $summary->customer->userid !== null
-        ? ['id' => $summary->customer->userid]
-        : ['email' => (string)$summary->customer->email];
+if ($currentcustomer->userid !== null || $currentemail !== '') {
+    $user360params = $currentcustomer->userid !== null
+        ? ['id' => $currentcustomer->userid]
+        : ['email' => $currentemail];
     $quickactions .= html_writer::link(
         new moodle_url('/local/subscriptions/admin/users/view.php', $user360params),
         get_string('commerce_purchase_open_user360', 'local_subscriptions'),
@@ -202,32 +234,45 @@ echo CommerceDesignSystemRenderer::panel(get_string('commerce_purchase_summary_s
 ]));
 echo html_writer::end_div();
 echo html_writer::start_div('col-lg-6');
-$customername = $summary->customer->display_name();
+$customername = $currentcustomer->display_name();
 $customeractions = '';
-if ($summary->customer->userid !== null || trim((string)$summary->customer->email) !== '') {
+if ($currentcustomer->userid !== null || $currentemail !== '') {
     $customeractions = html_writer::start_div('d-flex flex-wrap gap-2 mt-2');
-    $user360params = $summary->customer->userid !== null
-        ? ['id' => $summary->customer->userid]
-        : ['email' => (string)$summary->customer->email];
+    $user360params = $currentcustomer->userid !== null
+        ? ['id' => $currentcustomer->userid]
+        : ['email' => $currentemail];
     $customeractions .= html_writer::link(
         new moodle_url('/local/subscriptions/admin/users/view.php', $user360params),
         get_string('commerce_purchase_open_user360', 'local_subscriptions'),
         ['class' => 'btn btn-sm btn-outline-primary']
     );
-    if ($summary->customer->userid !== null) {
+    if ($currentcustomer->userid !== null) {
         $customeractions .= html_writer::link(
-            new moodle_url('/user/profile.php', ['id' => $summary->customer->userid]),
+            new moodle_url('/user/profile.php', ['id' => $currentcustomer->userid]),
             get_string('commerce_purchase_open_moodle_profile', 'local_subscriptions'),
             ['class' => 'btn btn-sm btn-outline-secondary']
         );
     }
     $customeractions .= html_writer::end_div();
 }
-echo CommerceDesignSystemRenderer::panel(get_string('commerce_purchase_customer_section', 'local_subscriptions'), $definition([
+$customerrows = [
     [get_string('name'), s($customername !== '' ? $customername : '—')],
-    [get_string('email'), s($summary->customer->email)],
-    [get_string('commerce_purchase_identifier', 'local_subscriptions'), s((string)($summary->customer->userid ?? '—'))],
-]) . $customeractions);
+    [get_string('email'), s($currentemail !== '' ? $currentemail : '—')],
+];
+if ($historicalemail !== '' && core_text::strtolower($historicalemail) !== core_text::strtolower($currentemail)) {
+    $customerrows[] = [
+        get_string('commerce_purchase_historical_email', 'local_subscriptions'),
+        html_writer::tag('span', s($historicalemail), ['class' => 'text-muted'])
+    ];
+}
+$customerrows[] = [
+    get_string('commerce_purchase_identifier', 'local_subscriptions'),
+    s((string)($currentcustomer->userid ?? '—'))
+];
+echo CommerceDesignSystemRenderer::panel(
+    get_string('commerce_purchase_customer_section', 'local_subscriptions'),
+    $definition($customerrows) . $customeractions
+);
 echo html_writer::end_div();
 echo html_writer::end_div();
 

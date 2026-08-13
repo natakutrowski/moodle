@@ -8,6 +8,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\mail\CommerceMailRequest;
 use local_subscriptions\commerce\mail\CommerceMailType;
+use local_subscriptions\commerce\mail\CommerceMailTerminalCancellationException;
+use local_subscriptions\commerce\personaloffer\domain\CommercePersonalOffer;
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferCampaignMailRenderer;
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferMailPricingPresentationService;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailBannerService;
@@ -22,6 +24,13 @@ final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
 
         $offer = $request->get_context()->get('personaloffer', []);
         if (!is_array($offer)) { $offer = []; }
+
+        // M12b: revalidate the offer immediately before rendering/sending.
+        // A queued campaign message can become stale while waiting in the
+        // throttled outbox (e.g. the customer purchases before the retry).
+        // Terminal offers must be cancelled, never rendered and never retried.
+        $this->assert_offer_is_deliverable($offer);
+
         $language = $request->get_language();
         $offer['offerlabel'] = $this->local_string('commerce_mail_personal_offer_card_label', $language);
         $offer['expirylabel'] = $this->local_string('commerce_mail_personal_offer_expiry_label', $language);
@@ -123,6 +132,57 @@ final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
             $resolved['headerimageurl'] = $bannerurl;
         }
         return $resolved;
+    }
+
+    /**
+     * Cancel a stale Personal Offer message before pricing/editorial rendering.
+     *
+     * @param array<string,mixed> $offer
+     */
+    private function assert_offer_is_deliverable(array $offer): void {
+        global $DB;
+
+        $offeruuid = trim((string)($offer['offeruuid'] ?? ''));
+        if ($offeruuid === '') {
+            return;
+        }
+
+        $record = $DB->get_record(
+            'local_subs_commerce_offer',
+            ['offeruuid' => $offeruuid],
+            'id,status,expiresat,redeemedpurchaseid,revokedat',
+            IGNORE_MISSING
+        );
+        if (!$record) {
+            return;
+        }
+
+        $status = (string)$record->status;
+        if ($status === CommercePersonalOffer::STATUS_REDEEMED) {
+            $purchase = !empty($record->redeemedpurchaseid)
+                ? ' purchase #' . (int)$record->redeemedpurchaseid
+                : '';
+            throw new CommerceMailTerminalCancellationException(
+                'personal_offer_redeemed',
+                'Personal Offer has already been redeemed' . $purchase . '.'
+            );
+        }
+
+        if ($status === CommercePersonalOffer::STATUS_REVOKED || !empty($record->revokedat)) {
+            throw new CommerceMailTerminalCancellationException(
+                'personal_offer_revoked',
+                'Personal Offer has been revoked.'
+            );
+        }
+
+        if ($status === CommercePersonalOffer::STATUS_ISSUED
+                && !empty($record->expiresat)
+                && time() > (int)$record->expiresat) {
+            throw new CommerceMailTerminalCancellationException(
+                'personal_offer_expired',
+                'Personal Offer has expired.'
+            );
+        }
     }
 
     /**

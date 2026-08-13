@@ -66,13 +66,33 @@ final class CommercePersonalOfferMailService {
                 IGNORE_MISSING
             )
             : null;
-        $name = $user ? trim((string)$user->firstname . ' ' . (string)$user->lastname) : '';
+        // Campaign members are an immutable audience snapshot and therefore the canonical
+        // recipient identity for campaign mail. This is especially important for Legacy-only
+        // beneficiaries who do not have a Moodle user account.
+        $member = ($campaignid && $memberid)
+            ? $this->db->get_record(
+                self::MEMBER,
+                ['id' => $memberid, 'campaignid' => $campaignid],
+                'id,firstname,lastname,email',
+                IGNORE_MISSING
+            )
+            : null;
+        $firstname = $member ? trim((string)$member->firstname) : '';
+        $lastname = $member ? trim((string)$member->lastname) : '';
+        $name = trim($firstname . ' ' . $lastname);
+        if ($name === '' && $user) {
+            $firstname = trim((string)$user->firstname);
+            $lastname = trim((string)$user->lastname);
+            $name = trim($firstname . ' ' . $lastname);
+        }
         if ($name === '' && $offer->get_source_purchase_id()) {
             $sourcepurchase = $this->db->get_record('local_subscriptions_commerce_purchase', ['id' => $offer->get_source_purchase_id()], 'customerjson', IGNORE_MISSING);
             if ($sourcepurchase) {
                 $customer = json_decode((string)$sourcepurchase->customerjson, true);
                 if (is_array($customer)) {
-                    $name = trim((string)($customer['firstname'] ?? $customer['first_name'] ?? '') . ' ' . (string)($customer['lastname'] ?? $customer['last_name'] ?? ''));
+                    $firstname = trim((string)($customer['firstname'] ?? $customer['first_name'] ?? ''));
+                    $lastname = trim((string)($customer['lastname'] ?? $customer['last_name'] ?? ''));
+                    $name = trim($firstname . ' ' . $lastname);
                 }
             }
         }
@@ -84,7 +104,7 @@ final class CommercePersonalOfferMailService {
         $mailimageurl = (new CommercePersonalOfferMailImageService())->url((int)$offer->get_id());
 
         $context = new CommerceMailContext([
-            'customer' => ['firstname'=>$user ? (string)$user->firstname : '', 'fullname'=>$name],
+            'customer' => ['firstname'=>$firstname, 'fullname'=>$name],
             'purchase' => ['reference'=>'', 'totalformatted'=>''],
             'items' => [], 'payment' => [], 'links' => [],
             'personaloffer' => [

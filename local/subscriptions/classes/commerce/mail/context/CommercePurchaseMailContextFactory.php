@@ -15,6 +15,7 @@ use local_subscriptions\commerce\order\presentation\CommerceOrderPresentation;
 use local_subscriptions\commerce\order\presentation\CommerceOrderPresentationService;
 use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
+use local_subscriptions\commerce\purchase\communication\CommercePurchaseCurrentCustomerResolver;
 use local_subscriptions\commerce\pricing\CommercePersistedCommercialPricingPresenter;
 use moodle_database;
 use moodle_url;
@@ -43,7 +44,7 @@ final class CommercePurchaseMailContextFactory {
         }
 
         $order = $this->orders->present($details);
-        $customer = $details->summary->customer;
+        $customer = CommercePurchaseCurrentCustomerResolver::create()->resolve($details);
         $name = $customer->display_name();
         $recipient = new CommerceMailRecipient($customer->email, $name, $customer->userid);
         $language = $this->resolve_language($customer->userid, $details->metadata);

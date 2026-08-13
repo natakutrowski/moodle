@@ -187,6 +187,18 @@ final class CommerceMailQueueRepository {
         ]);
     }
 
+    public function mark_cancelled(int $id, string $reason, ?int $now = null): void {
+        global $DB;
+        $now ??= time();
+        $DB->update_record(self::TABLE, (object)[
+            'id' => $id,
+            'status' => CommerceMailStatus::CANCELLED,
+            'lasterror' => $this->normalise_error($reason),
+            'timeprocessing' => null,
+            'timemodified' => $now,
+        ]);
+    }
+
     public function mark_retry(int $id, string $error, int $nextruntime, ?int $now = null): void {
         global $DB;
         $now ??= time();

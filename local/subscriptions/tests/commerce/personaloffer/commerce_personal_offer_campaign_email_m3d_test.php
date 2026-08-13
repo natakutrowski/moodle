@@ -49,6 +49,38 @@ final class commerce_personal_offer_campaign_email_m3d_test extends advanced_tes
         $this->assertStringContainsString('currency=EUR', html_entity_decode($message->get_html()));
     }
 
+    public function test_campaign_member_snapshot_supplies_identity_for_legacy_only_recipient(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $productid = $this->create_product('M12.LEGACY.IDENTITY', 3900, 390000);
+        $campaignid = $this->create_campaign($productid, 'm12-legacy-identity', ['EUR'=>2900,'RUB'=>290000]);
+        $this->insert_content($campaignid, 'fr', 'Offre {{firstname}}', 'Bonjour {{firstname}}');
+        $issued = CommercePersonalOfferFactory::create($DB)->issue(new CommercePersonalOfferIssueRequest(
+            'm12-legacy-identity', $productid, 'rgrg01099@gmail.com',
+            CommercePersonalOfferTerms::fixed_price(['EUR'=>2900,'RUB'=>290000]),
+            'm12-test', null, null, time()-60, time()+DAYSECS
+        ));
+        $offerid = (int)$issued->get_offer()->get_id();
+        $now = time();
+        $memberid = (int)$DB->insert_record('local_subs_commerce_offer_campaign_member', (object)[
+            'campaignid'=>$campaignid, 'memberkey'=>'email:m12-kasia', 'purchaseid'=>null, 'userid'=>null,
+            'firstname'=>'Кася', 'lastname'=>'Иванова', 'email'=>'rgrg01099@gmail.com', 'evidencejson'=>'[]',
+            'eligibilitystatus'=>'issued', 'reason'=>null, 'existingofferid'=>null, 'snapshotselected'=>1,
+            'offerid'=>$offerid, 'timecreated'=>$now, 'timemodified'=>$now,
+        ]);
+
+        $mail = CommercePersonalOfferMailService::create($DB)->queue_offer($offerid, $campaignid, $memberid);
+        $context = json_decode((string)$mail->contextjson, true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame('rgrg01099@gmail.com', (string)$mail->recipientemail);
+        $this->assertSame('Кася Иванова', (string)$mail->recipientname);
+        $this->assertSame('Кася', $context['customer']['firstname']);
+        $this->assertSame('Кася Иванова', $context['customer']['fullname']);
+        $preview = (new CommerceMailAdminService())->preview((int)$mail->id);
+        $this->assertSame('Offre Кася', $preview['subject']);
+        $this->assertStringContainsString('Bonjour Кася', $preview['html']);
+    }
+
     public function test_real_queue_and_admin_resend_keep_campaign_context_for_renderer(): void {
         global $DB;
         $this->resetAfterTest(true);
