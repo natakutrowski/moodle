@@ -19,6 +19,7 @@ final class CommerceCustomerIdentityNavigationRenderer {
     public const RECONCILIATION = 'reconciliation';
     public const SIMILARITIES = 'similarities';
     public const MERGE = 'merge';
+    public const RELATIONSHIPS = 'relationships';
     public const PROVISIONING = 'provisioning';
     public const LEGACY_QUALITY = 'legacy_quality';
 
@@ -50,6 +51,10 @@ final class CommerceCustomerIdentityNavigationRenderer {
                 'url' => new moodle_url(
                     '/local/subscriptions/admin/commerce/customer-identities/merge.php'
                 ),
+            ],
+            self::RELATIONSHIPS => [
+                'label' => get_string('commerce_identity_nav_relationships', 'local_subscriptions'),
+                'url' => new moodle_url('/local/subscriptions/admin/commerce/customer-identities/relationships.php'),
             ],
             self::PROVISIONING => [
                 'label' => get_string(

@@ -115,6 +115,22 @@ final class User360MergeHistoryRenderer {
             'small text-muted'
         );
 
+        if (!empty($merge['identitytransfer']) && is_array($merge['identitytransfer'])) {
+            $identity = $merge['identitytransfer'];
+            $out .= html_writer::div(
+                get_string(
+                    'user360_merge_identity_transfer',
+                    'local_subscriptions',
+                    (object)[
+                        'oldemail' => (string)($identity['target_before_email'] ?? ''),
+                        'newemail' => (string)($identity['target_after_email'] ?? ''),
+                        'sourceuserid' => (int)($identity['sourceuserid'] ?? 0),
+                    ]
+                ),
+                'alert alert-info py-2 small mt-3'
+            );
+        }
+
         if ($merge['transfers']) {
             $details = '';
             foreach ($merge['transfers'] as $key => $count) {
