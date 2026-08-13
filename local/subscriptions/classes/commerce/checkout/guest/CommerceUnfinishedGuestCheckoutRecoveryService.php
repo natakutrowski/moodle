@@ -43,6 +43,7 @@ final class CommerceUnfinishedGuestCheckoutRecoveryService {
             'id DESC'
         );
 
+        $candidates = [];
         foreach ($records as $record) {
             $session = new CommerceGuestCheckoutSession($record);
             $metadata = $session->get_metadata();
@@ -60,10 +61,50 @@ final class CommerceUnfinishedGuestCheckoutRecoveryService {
                 continue;
             }
 
-            return $session;
+            $candidates[] = $session;
         }
 
-        return null;
+        if ($candidates === []) {
+            return null;
+        }
+
+        usort($candidates, static function(
+            CommerceGuestCheckoutSession $left,
+            CommerceGuestCheckoutSession $right
+        ): int {
+            $leftscore = self::source_priority($left);
+            $rightscore = self::source_priority($right);
+
+            if ($leftscore !== $rightscore) {
+                return $rightscore <=> $leftscore;
+            }
+
+            return $right->get_id() <=> $left->get_id();
+        });
+
+        return $candidates[0];
+    }
+
+    private static function source_priority(
+        CommerceGuestCheckoutSession $session
+    ): int {
+        $haspurchase = trim((string)($session->get_purchase_reference() ?? '')) !== '';
+        $haspayment = trim((string)($session->get_payment_reference() ?? '')) !== '';
+
+        if ($session->get_status() === 'payment_pending' && $haspurchase) {
+            return $haspayment ? 400 : 350;
+        }
+        if ($haspurchase) {
+            return 300;
+        }
+        if ($session->get_status() === 'paid_pending_activation') {
+            return 250;
+        }
+        if ($session->get_status() === 'provisional') {
+            return 200;
+        }
+
+        return 100;
     }
 
     /**

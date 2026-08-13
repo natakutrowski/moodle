@@ -5,6 +5,7 @@ declare(strict_types=1);
 define('CLI_SCRIPT', true);
 
 require dirname(__DIR__, 5) . '/config.php';
+require_once($CFG->libdir . '/clilib.php');
 
 use local_subscriptions\commerce\checkout\guest\CommerceUnfinishedGuestCheckoutRecoveryService;
 

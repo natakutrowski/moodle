@@ -17,7 +17,7 @@ use moodle_database;
  * for an administrator to review. This service never mutates an account.
  */
 final class CommerceCustomerIdentitySimilarityService {
-    public const DEFAULT_MIN_SCORE = 50;
+    public const DEFAULT_MIN_SCORE = 60;
     public const MAX_USERS_SCANNED = 1500;
     private const MAX_BUCKET_SIZE = 80;
 
@@ -122,9 +122,9 @@ final class CommerceCustomerIdentitySimilarityService {
                 $signals[self::REASON_EMAIL_DOMAIN_CLOSE] = 12;
             }
             if ($a['fullname'] !== '' && $a['fullname'] === $b['fullname']) {
-                $signals[self::REASON_NAME_EXACT] = 55;
+                $signals[self::REASON_NAME_EXACT] = 65;
             } elseif ($a['firstname'] !== '' && $a['lastname'] !== '' && $a['firstname'] === $b['lastname'] && $a['lastname'] === $b['firstname']) {
-                $signals[self::REASON_NAME_REVERSED] = 52;
+                $signals[self::REASON_NAME_REVERSED] = 60;
             } else {
                 if (min(strlen($a['firstname']), strlen($b['firstname'])) >= 3 && $this->ratio($a['firstname'], $b['firstname']) >= .78) {
                     $signals[self::REASON_FIRSTNAME_CLOSE] = 18;
@@ -146,6 +146,14 @@ final class CommerceCustomerIdentitySimilarityService {
         if ($signals === []) {
             return null;
         }
+
+        // Alternate-name metadata can be populated independently from the
+        // primary identity (notably by generators/imports). It is useful as a
+        // supporting signal, but must never create a match on its own.
+        if (array_keys($signals) === [self::REASON_ALTERNATE_NAME]) {
+            return null;
+        }
+
         $score = min(100, array_sum($signals));
         return new CommerceCustomerIdentitySimilarityMatch($first, $second, $score, array_keys($signals), $signals);
     }

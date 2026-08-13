@@ -8854,3 +8854,58 @@ $string['commerce_personal_offer_m10_source_legacy_digital_prefix'] = 'Legacy di
 $string['commerce_personal_offer_m10_source_legacy_plan_prefix'] = 'Legacy subscription';
 $string['commerce_personal_offer_reason_advanced_rules_not_matched'] = 'Does not match the advanced audience filters.';
 
+
+// 7.95M11 - Personal Offer campaign collision policy.
+$string['commerce_personal_offer_m11_collision_title'] = 'Existing active offer for the same product';
+$string['commerce_personal_offer_m11_collision_help'] = 'Choose what to do when a campaign recipient already has an active Personal Offer for the target product.';
+$string['commerce_personal_offer_m11_collision_skip'] = 'Exclude the recipient (current behaviour)';
+$string['commerce_personal_offer_m11_collision_replace'] = 'Replace the active offer with this campaign’s new offer';
+$string['commerce_personal_offer_m11_collision_resend'] = 'Keep the active offer and send the new campaign email';
+$string['commerce_personal_offer_m11_collision_warning'] = 'An offer attached to an in-progress payment is never replaced. In replace mode, the old link is revoked while the audit history is preserved.';
+$string['commerce_personal_offer_reason_m11_will_replace'] = 'Eligible: the existing active offer will be replaced by this campaign’s offer.';
+$string['commerce_personal_offer_reason_m11_will_resend'] = 'Eligible: the existing active offer will be kept and reused for the new email.';
+$string['commerce_personal_offer_reason_m11_reused'] = 'Existing active offer reused for the follow-up campaign.';
+$string['commerce_personal_offer_reason_m11_payment_in_progress'] = 'Offer not replaced: a payment is currently in progress for this offer.';
+$string['crm_commerce_nav_unfinished_checkouts'] = 'Unfinished checkouts';
+
+// M9.3 / M9.4 — Guest checkout recovery CRM and safe cleanup.
+$string['commerce_guest_crm_title'] = 'Unfinished guest checkouts';
+$string['commerce_guest_crm_help'] = 'Diagnose and recover provisional accounts whose purchase flow was never completed.';
+$string['commerce_guest_crm_empty'] = 'No unfinished guest checkout needs attention.';
+$string['commerce_guest_crm_filter_all'] = 'All';
+$string['commerce_guest_crm_class_pending_purchase'] = 'Payment pending';
+$string['commerce_guest_crm_class_multiple_pending'] = 'Multiple pending purchases';
+$string['commerce_guest_crm_class_stuck_identity'] = 'Identity blocked';
+$string['commerce_guest_crm_class_provisional_no_purchase'] = 'Provisional without purchase';
+$string['commerce_guest_crm_class_provider_paid_pending'] = 'Paid at provider';
+$string['commerce_guest_crm_source_summary'] = 'Source session #{$a->session} ({$a->status}) · resume {$a->purchase} · blocked sessions {$a->stuck}';
+$string['commerce_guest_crm_user360'] = 'Open User360';
+$string['commerce_guest_crm_repair'] = 'Repair sessions';
+$string['commerce_guest_crm_pending_purchases'] = 'Pending purchases';
+$string['commerce_guest_crm_open_purchase'] = 'Open purchase';
+$string['commerce_guest_crm_use_for_resume'] = 'Use for resume';
+$string['commerce_guest_crm_current_resume'] = 'Current resume';
+$string['commerce_guest_crm_check_provider'] = 'Check / reconcile with provider';
+$string['commerce_guest_crm_no_purchase_help'] = 'This provisional account created no purchase. No payment should be invented; it can only be kept or cleaned after the configured delay.';
+$string['commerce_guest_crm_action_repaired'] = 'Blocked sessions were repaired.';
+$string['commerce_guest_crm_action_resume_selected'] = 'This purchase is now the checkout resume reference.';
+$string['commerce_guest_crm_action_reconciled'] = 'The payment was checked and reconciled.';
+$string['commerce_guest_crm_candidate_not_found'] = 'This account is no longer an unfinished guest checkout.';
+$string['commerce_guest_crm_source_not_found'] = 'No source guest session was found.';
+$string['commerce_guest_crm_provider_not_supported'] = 'This provider does not support automatic CRM reconciliation.';
+$string['commerce_guest_crm_source_session'] = 'Source session';
+$string['commerce_guest_crm_resume_purchase'] = 'Resume purchase';
+$string['commerce_guest_crm_stuck_sessions'] = 'Blocked sessions';
+$string['commerce_guest_crm_open_case'] = 'Handle unfinished checkout';
+$string['user360_guest_checkout_recovery_title'] = 'Unfinished guest checkout';
+$string['user360_guest_checkout_recovery_description'] = 'Diagnosis and recovery actions for the provisional account.';
+$string['task_cleanup_abandoned_guest_checkouts'] = 'Clean abandoned guest checkouts';
+$string['settings:guest_checkout_cleanup_header'] = 'Abandoned Guest Checkout cleanup';
+$string['settings:guest_checkout_cleanup_header_desc'] = 'Only removes old provisional accounts with no purchase or business activity. Disabled by default.';
+$string['settings:guest_checkout_cleanup_enabled'] = 'Enable automatic cleanup';
+$string['settings:guest_checkout_cleanup_enabled_desc'] = 'Disabled by default. When enabled, cron only handles checkout_* accounts that are unconfirmed, technically suspended and have no purchase, access, grant, enrolment or offer.';
+$string['settings:guest_checkout_cleanup_age_days'] = 'Minimum age before cleanup (days)';
+$string['settings:guest_checkout_cleanup_age_days_desc'] = 'A newer provisional account is never removed.';
+$string['settings:guest_checkout_cleanup_batch_size'] = 'Maximum cleanup batch size';
+$string['settings:guest_checkout_cleanup_batch_size_desc'] = 'Maximum accounts examined per run.';
+

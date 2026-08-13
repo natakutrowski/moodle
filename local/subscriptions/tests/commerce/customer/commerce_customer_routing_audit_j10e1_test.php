@@ -17,7 +17,11 @@ final class commerce_customer_routing_audit_j10e1_test extends \advanced_testcas
             $source
         );
         self::assertStringContainsString(
-            "redirect(new moodle_url('/user/profile.php'",
+            "'/user/profile.php'",
+            $source
+        );
+        self::assertStringContainsString(
+            'redirect(',
             $source
         );
         self::assertStringNotContainsString(

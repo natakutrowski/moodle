@@ -120,6 +120,10 @@ final class CommerceCustomerIdentityOperationsCertificationService {
             $root . 'classes/commerce/customer/merge/'
                 . 'CommerceCustomerMergeExecutionService.php'
         );
+        $legacyconsolidation = $this->read(
+            $root . 'classes/commerce/customer/merge/'
+                . 'CommerceCustomerLegacyConsolidationService.php'
+        );
         $dbman = $DB->get_manager();
         $mergetable = new \xmldb_table('local_subs_identity_merge');
         $sourcetable = new \xmldb_table('local_subs_identity_merge_source');
@@ -143,10 +147,10 @@ final class CommerceCustomerIdentityOperationsCertificationService {
             'Merge execution is transactional, blocks unsafe histories and suspends rather than deletes source accounts.'
         );
         $checks[] = $this->check(
-            str_contains($execution, "'local_subscriptions_commerce_purchase'")
-                && str_contains($execution, "'local_subs_commerce_grant'")
-                && str_contains($execution, "'local_subs_commerce_dig_access'")
-                && str_contains($execution, "'subscription_digital_payment_request'")
+            str_contains($legacyconsolidation, "'local_subscriptions_commerce_purchase'")
+                && str_contains($legacyconsolidation, "'local_subs_commerce_grant'")
+                && str_contains($legacyconsolidation, "'local_subs_commerce_dig_access'")
+                && str_contains($legacyconsolidation, "'subscription_digital_payment_request'")
                 && str_contains($execution, "'local_subscriptions_user_note'")
                 && str_contains($execution, "'local_subscriptions_user_tag'"),
             'M4.2D',

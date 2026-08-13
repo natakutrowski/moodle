@@ -47,7 +47,7 @@ final class commerce_m51_product_statistics_dashboard_test extends \advanced_tes
         self::assertStringContainsString('paymentsuccessrate',$repo);
         self::assertStringContainsString('int|float $current',$renderer);
         self::assertStringContainsString('payment_journey',$renderer);
-        $sharedrenderer=(string)file_get_contents($CFG->dirroot.'/local/subscriptions/classes/crm/commerce/statistics/CommerceStatisticsBreakdownRenderer.php');
+        $sharedrenderer=(string)file_get_contents($root.'/classes/crm/commerce/statistics/CommerceStatisticsBreakdownRenderer.php');
         self::assertStringContainsString('commerce-stat-acquisition-row',$sharedrenderer);
         self::assertStringContainsString('commerce-stat-provider-row',$sharedrenderer);
         self::assertStringNotContainsString('m52-funnel-card',$renderer);

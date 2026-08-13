@@ -231,3 +231,14 @@ $tasks[] = [
     'month' => '*',
     'dayofweek' => '*',
 ];
+
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\cleanup_abandoned_guest_checkouts_task',
+    'blocking' => 0,
+    'minute' => 'R',
+    'hour' => '4',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];

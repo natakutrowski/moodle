@@ -552,6 +552,10 @@ if ($members) {
             'active_offer_exists' => 'commerce_personal_offer_reason_active_offer_exists',
             'target_acquired_after_snapshot' => 'commerce_personal_offer_reason_target_acquired_after_snapshot',
             'active_offer_created_after_snapshot' => 'commerce_personal_offer_reason_active_offer_created_after_snapshot',
+            'active_offer_will_be_replaced' => 'commerce_personal_offer_reason_m11_will_replace',
+            'active_offer_will_be_resent' => 'commerce_personal_offer_reason_m11_will_resend',
+            'active_offer_reused' => 'commerce_personal_offer_reason_m11_reused',
+            'active_offer_payment_in_progress' => 'commerce_personal_offer_reason_m11_payment_in_progress',
             'advanced_audience_rules_not_matched' => 'commerce_personal_offer_reason_advanced_rules_not_matched',
         ];
         if (isset($reasonmap[$reason])) {

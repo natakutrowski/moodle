@@ -9,6 +9,7 @@ use local_subscriptions\crm\workspace\WorkspaceDefinition;
 use local_subscriptions\crm\workspace\WorkspaceItemDefinition;
 use local_subscriptions\output\UserProfileRenderer;
 use local_subscriptions\crm\user360\merge\User360MergeHistoryRenderer;
+use local_subscriptions\crm\user360\guest\User360GuestCheckoutRecoveryRenderer;
 
 /**
  * Builds the CRM User360 Workspace.
@@ -56,6 +57,9 @@ final class User360WorkspaceFactory {
 
     public const ITEM_MERGE_HISTORY =
         'user360_merge_history';
+
+    public const ITEM_GUEST_CHECKOUT_RECOVERY =
+        'user360_guest_checkout_recovery';
 
     public const ITEM_COURSES =
         'user360_courses';
@@ -135,6 +139,11 @@ final class User360WorkspaceFactory {
         }
 
         self::register_commercial(
+            $definition,
+            $profile
+        );
+
+        self::register_guest_checkout_recovery(
             $definition,
             $profile
         );
@@ -512,6 +521,40 @@ final class User360WorkspaceFactory {
                         render_commercial_panel(
                             $profile
                         );
+                }
+            )
+        );
+    }
+
+    private static function register_guest_checkout_recovery(
+        WorkspaceDefinition $definition,
+        ?\stdClass $profile
+    ): void {
+        $definition->register(
+            new WorkspaceItemDefinition(
+                key: self::ITEM_GUEST_CHECKOUT_RECOVERY,
+                label: get_string('user360_guest_checkout_recovery_title', 'local_subscriptions'),
+                description: get_string('user360_guest_checkout_recovery_description', 'local_subscriptions'),
+                icon: '↻',
+                zone: self::ZONE_MAIN,
+                span: 3,
+                type: WorkspaceItemDefinition::TYPE_WIDGET,
+                hideable: true,
+                movable: true,
+                defaultvisible: true,
+                renderer: static function () use ($profile): string {
+                    if ($profile === null || empty($profile->user->id)) {
+                        return '';
+                    }
+                    $content = User360GuestCheckoutRecoveryRenderer::render((int)$profile->user->id);
+                    if ($content === '') {
+                        return '';
+                    }
+                    return UserProfileRenderer::section(
+                        get_string('user360_guest_checkout_recovery_title', 'local_subscriptions'),
+                        $content,
+                        'crm-section-guest-checkout-recovery'
+                    );
                 }
             )
         );

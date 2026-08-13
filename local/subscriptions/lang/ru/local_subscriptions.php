@@ -8929,3 +8929,58 @@ $string['commerce_personal_offer_m10_source_legacy_digital_prefix'] = 'Legacy di
 $string['commerce_personal_offer_m10_source_legacy_plan_prefix'] = 'Legacy подписка';
 $string['commerce_personal_offer_reason_advanced_rules_not_matched'] = 'Не соответствует расширенным фильтрам аудитории.';
 
+
+// 7.95M11 - Personal Offer campaign collision policy.
+$string['commerce_personal_offer_m11_collision_title'] = 'Уже есть активное предложение на этот товар';
+$string['commerce_personal_offer_m11_collision_help'] = 'Выберите, что делать, если у участника кампании уже есть активное персональное предложение на предлагаемый товар.';
+$string['commerce_personal_offer_m11_collision_skip'] = 'Исключить получателя (текущее поведение)';
+$string['commerce_personal_offer_m11_collision_replace'] = 'Заменить активное предложение новым предложением этой кампании';
+$string['commerce_personal_offer_m11_collision_resend'] = 'Сохранить активное предложение и отправить новое письмо кампании';
+$string['commerce_personal_offer_m11_collision_warning'] = 'Предложение, связанное с незавершённым платежом, никогда не заменяется. При замене старая ссылка отзывается, а история сохраняется.';
+$string['commerce_personal_offer_reason_m11_will_replace'] = 'Подходит: существующее активное предложение будет заменено предложением этой кампании.';
+$string['commerce_personal_offer_reason_m11_will_resend'] = 'Подходит: существующее активное предложение будет сохранено и использовано в новом письме.';
+$string['commerce_personal_offer_reason_m11_reused'] = 'Существующее активное предложение повторно использовано для новой рассылки.';
+$string['commerce_personal_offer_reason_m11_payment_in_progress'] = 'Предложение не заменено: по нему сейчас выполняется платёж.';
+$string['crm_commerce_nav_unfinished_checkouts'] = 'Незавершённые оформления заказа';
+
+// M9.3 / M9.4 — Guest checkout recovery CRM and safe cleanup.
+$string['commerce_guest_crm_title'] = 'Незавершённые гостевые оформления';
+$string['commerce_guest_crm_help'] = 'Диагностика и восстановление временных аккаунтов, для которых покупка не была завершена.';
+$string['commerce_guest_crm_empty'] = 'Нет незавершённых гостевых оформлений, требующих обработки.';
+$string['commerce_guest_crm_filter_all'] = 'Все';
+$string['commerce_guest_crm_class_pending_purchase'] = 'Платёж ожидается';
+$string['commerce_guest_crm_class_multiple_pending'] = 'Несколько ожидающих покупок';
+$string['commerce_guest_crm_class_stuck_identity'] = 'Учётная запись заблокирована';
+$string['commerce_guest_crm_class_provisional_no_purchase'] = 'Временный аккаунт без покупки';
+$string['commerce_guest_crm_class_provider_paid_pending'] = 'Оплачено у провайдера';
+$string['commerce_guest_crm_source_summary'] = 'Исходная сессия #{$a->session} ({$a->status}) · продолжение {$a->purchase} · заблокированных сессий {$a->stuck}';
+$string['commerce_guest_crm_user360'] = 'Открыть User360';
+$string['commerce_guest_crm_repair'] = 'Исправить сессии';
+$string['commerce_guest_crm_pending_purchases'] = 'Ожидающие покупки';
+$string['commerce_guest_crm_open_purchase'] = 'Открыть покупку';
+$string['commerce_guest_crm_use_for_resume'] = 'Использовать для продолжения';
+$string['commerce_guest_crm_current_resume'] = 'Текущее продолжение';
+$string['commerce_guest_crm_check_provider'] = 'Проверить / сверить у провайдера';
+$string['commerce_guest_crm_no_purchase_help'] = 'Этот временный аккаунт не создал покупку. Платёж нельзя создавать искусственно; аккаунт можно сохранить или очистить после настроенного срока.';
+$string['commerce_guest_crm_action_repaired'] = 'Заблокированные сессии исправлены.';
+$string['commerce_guest_crm_action_resume_selected'] = 'Эта покупка выбрана для продолжения checkout.';
+$string['commerce_guest_crm_action_reconciled'] = 'Платёж проверен и сверён.';
+$string['commerce_guest_crm_candidate_not_found'] = 'Этот аккаунт больше не является незавершённым гостевым checkout.';
+$string['commerce_guest_crm_source_not_found'] = 'Исходная гостевая сессия не найдена.';
+$string['commerce_guest_crm_provider_not_supported'] = 'Этот провайдер не поддерживает автоматическую CRM-сверку.';
+$string['commerce_guest_crm_source_session'] = 'Исходная сессия';
+$string['commerce_guest_crm_resume_purchase'] = 'Покупка для продолжения';
+$string['commerce_guest_crm_stuck_sessions'] = 'Заблокированные сессии';
+$string['commerce_guest_crm_open_case'] = 'Обработать незавершённый checkout';
+$string['user360_guest_checkout_recovery_title'] = 'Незавершённый гостевой checkout';
+$string['user360_guest_checkout_recovery_description'] = 'Диагностика и восстановление временного аккаунта.';
+$string['task_cleanup_abandoned_guest_checkouts'] = 'Очистка старых брошенных гостевых checkout';
+$string['settings:guest_checkout_cleanup_header'] = 'Очистка брошенных Guest Checkout';
+$string['settings:guest_checkout_cleanup_header_desc'] = 'Удаляются только старые временные аккаунты без покупок и бизнес-активности. По умолчанию отключено.';
+$string['settings:guest_checkout_cleanup_enabled'] = 'Включить автоматическую очистку';
+$string['settings:guest_checkout_cleanup_enabled_desc'] = 'По умолчанию отключено. Cron обрабатывает только checkout_* аккаунты без подтверждения, технически заблокированные, без покупок, доступов, grant, записей на курсы и предложений.';
+$string['settings:guest_checkout_cleanup_age_days'] = 'Минимальный возраст перед очисткой (дни)';
+$string['settings:guest_checkout_cleanup_age_days_desc'] = 'Более новый временный аккаунт никогда не удаляется.';
+$string['settings:guest_checkout_cleanup_batch_size'] = 'Максимальный размер пакета очистки';
+$string['settings:guest_checkout_cleanup_batch_size_desc'] = 'Максимальное число аккаунтов за один запуск.';
+
