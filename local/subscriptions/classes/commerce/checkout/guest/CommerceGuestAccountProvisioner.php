@@ -52,25 +52,39 @@ final class CommerceGuestAccountProvisioner {
         if ($existing !== false) {
             $existinguserid = (int)$existing->id;
 
-            if ($allowprovisionalresume) {
-                $resumable = $this->find_resumable_provisional_account($existinguserid);
-                if ($resumable !== null) {
-                    return $this->sessions->update_identity(
-                        $session,
-                        $existinguserid,
-                        $email,
-                        $firstname,
-                        $lastname,
-                        'provisional',
-                        [
-                            'identity_resolution' => 'provisional_resume',
-                            'account_origin' => 'guest_checkout',
-                            'account_state' => 'provisional',
-                            'provisional_user_resumed_at' => time(),
-                            'provisional_user_source_session_id' => $resumable->get_id(),
-                        ]
-                    );
+            // M9: a checkout_* account with Guest Checkout provenance and
+            // no customer-defined password is not an "existing account" in the
+            // authentication sense. Resume that exact provisional userid.
+            $resumable = (new CommerceUnfinishedGuestCheckoutRecoveryService(
+                $this->database,
+                $this->sessions
+            ))->find_source_session($existinguserid);
+
+            if ($resumable !== null) {
+                $metadata = [
+                    'identity_resolution' => 'unfinished_guest_checkout_resume',
+                    'account_origin' => 'guest_checkout',
+                    'account_state' => 'provisional',
+                    'provisional_user_resumed_at' => time(),
+                    'provisional_user_source_session_id' => $resumable->get_id(),
+                    'm9_recovered_at' => time(),
+                ];
+                if ($resumable->get_purchase_reference() !== null) {
+                    $metadata['resume_purchase_reference'] = $resumable->get_purchase_reference();
                 }
+                if ($resumable->get_payment_reference() !== null) {
+                    $metadata['resume_payment_reference'] = $resumable->get_payment_reference();
+                }
+
+                return $this->sessions->update_identity(
+                    $session,
+                    $existinguserid,
+                    $email,
+                    $firstname,
+                    $lastname,
+                    'provisional',
+                    $metadata
+                );
             }
 
             return $this->sessions->update_identity(
@@ -123,49 +137,9 @@ final class CommerceGuestAccountProvisioner {
      * never resumable without authentication.
      */
     private function find_resumable_provisional_account(int $userid): ?CommerceGuestCheckoutSession {
-        $user = $this->database->get_record(
-            'user',
-            ['id' => $userid, 'deleted' => 0],
-            'id,username,auth,confirmed,suspended',
-            IGNORE_MISSING
-        );
-        if ($user === false
-                || !str_starts_with((string)$user->username, 'checkout_')
-                || (string)$user->auth !== 'manual'
-                || (int)$user->confirmed !== 0
-                || (int)$user->suspended !== 1) {
-            return null;
-        }
-
-        // A provisional account with an actual Native purchase is no longer an
-        // abandoned pre-payment identity and must not be silently resumed here.
-        if ($this->database->record_exists(
-            'local_subscriptions_commerce_purchase',
-            ['userid' => $userid]
-        )) {
-            return null;
-        }
-
-        $records = $this->database->get_records(
-            'local_subs_commerce_guest',
-            ['userid' => $userid],
-            'id DESC'
-        );
-        foreach ($records as $record) {
-            $candidate = new CommerceGuestCheckoutSession($record);
-            $metadata = $candidate->get_metadata();
-
-            if ($candidate->get_status() !== 'provisional'
-                    || $candidate->get_purchase_reference() !== null
-                    || $candidate->get_payment_reference() !== null
-                    || ($metadata['account_origin'] ?? '') !== 'guest_checkout'
-                    || ($metadata['account_state'] ?? '') !== 'provisional') {
-                continue;
-            }
-
-            return $candidate;
-        }
-
-        return null;
+        return (new CommerceUnfinishedGuestCheckoutRecoveryService(
+            $this->database,
+            $this->sessions
+        ))->find_source_session($userid);
     }
 }

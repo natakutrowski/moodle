@@ -8654,3 +8654,39 @@ $string['commerce_payment_splash_preview_title'] = 'Aperçu des écrans de paiem
 $string['commerce_payment_splash_preview_outbound'] = 'Départ vers le prestataire';
 
 $string['commerce_payment_splash_preview_return'] = 'Confirmation du paiement';
+
+$string['task_reconcile_stripe_payments'] = 'Réconciliation automatique des paiements Stripe';
+$string['stripe_reconciliation_heading'] = 'Réconciliation automatique Stripe';
+$string['stripe_reconciliation_desc'] = 'Filet de sécurité : vérifie auprès de Stripe les paiements Campus restés en attente et ne finalise que les Checkout Sessions réellement payées.';
+$string['stripe_reconciliation_cron_enabled'] = 'Activer la réconciliation automatique Stripe';
+$string['stripe_reconciliation_cron_enabled_desc'] = 'Vérifie périodiquement les paiements Stripe en attente. Le statut Stripe, le montant et la devise doivent tous correspondre avant toute délivrance.';
+$string['stripe_reconciliation_batch_size'] = 'Taille maximale du lot Stripe';
+$string['stripe_reconciliation_min_age'] = 'Âge minimum avant vérification Stripe (secondes)';
+$string['stripe_reconciliation_max_age'] = 'Âge maximum inspecté Stripe (secondes)';
+$string['commerce_stripe_reconciliation_payment_not_found'] = 'Paiement Stripe introuvable.';
+$string['commerce_stripe_reconciliation_not_safe'] = 'La réconciliation Stripe ne peut pas être exécutée en sécurité : {$a}';
+$string['commerce_stripe_reconciliation_wrong_provider'] = 'Ce paiement n’est pas un paiement Stripe.';
+$string['commerce_stripe_reconciliation_missing_session'] = 'La Checkout Session Stripe est absente de ce paiement.';
+
+$string['commerce_guest_unfinished_recovery_title'] = 'Nous avons retrouvé votre paiement interrompu';
+
+$string['commerce_guest_unfinished_recovery_message'] = 'Votre compte provisoire CampusFR est bien conservé. Vous pouvez reprendre le paiement sans mot de passe ; après confirmation, nous vous proposerons de créer votre mot de passe.';
+
+// 7.95M10 - Advanced personal-offer audiences.
+$string['commerce_personal_offer_m10_sources_title'] = 'Sources d’audience alternatives';
+$string['commerce_personal_offer_m10_sources_help'] = 'La source principale et les sources ajoutées ici sont combinées avec OU. Une personne présente dans au moins une de ces sources entre dans l’audience de départ.';
+$string['commerce_personal_offer_m10_add_source_or'] = '+ Ajouter une source en OU';
+$string['commerce_personal_offer_m10_filters_title'] = 'Filtres avancés d’éligibilité';
+$string['commerce_personal_offer_m10_filters_help'] = 'Les règles d’un même groupe sont combinées avec ET. Les groupes sont combinés entre eux avec OU. Les contrôles portent sur la possession réelle, Native ou Legacy.';
+$string['commerce_personal_offer_m10_add_rule'] = '+ Ajouter une règle';
+$string['commerce_personal_offer_m10_add_or_group'] = '+ Ajouter un groupe OU';
+$string['commerce_personal_offer_m10_filters_example'] = 'Exemple : possède les Cartes (Native ou Legacy), ET ne possède pas le Trainer Native, ET ne possède pas le Trainer Legacy.';
+$string['commerce_personal_offer_m10_group_first'] = 'Toutes les règles de ce groupe doivent être vraies (ET)';
+$string['commerce_personal_offer_m10_group_or'] = 'OU — groupe {n}';
+$string['commerce_personal_offer_m10_operator_owns'] = 'Possède';
+$string['commerce_personal_offer_m10_operator_not_owns'] = 'Ne possède pas';
+$string['commerce_personal_offer_m10_source_native_prefix'] = 'Native';
+$string['commerce_personal_offer_m10_source_legacy_digital_prefix'] = 'Legacy digital';
+$string['commerce_personal_offer_m10_source_legacy_plan_prefix'] = 'Legacy abonnement';
+$string['commerce_personal_offer_reason_advanced_rules_not_matched'] = 'Ne correspond pas aux filtres avancés de l’audience.';
+

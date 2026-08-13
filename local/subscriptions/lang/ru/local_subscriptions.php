@@ -8893,3 +8893,39 @@ $string['commerce_payment_splash_preview_title'] = 'Предпросмотр э�
 $string['commerce_payment_splash_preview_outbound'] = 'Переход к провайдеру';
 
 $string['commerce_payment_splash_preview_return'] = 'Подтверждение платежа';
+
+$string['task_reconcile_stripe_payments'] = 'Автоматическая сверка платежей Stripe';
+$string['stripe_reconciliation_heading'] = 'Автоматическая сверка Stripe';
+$string['stripe_reconciliation_desc'] = 'Резервный механизм: проверяет в Stripe платежи Campus, оставшиеся в ожидании, и выдаёт доступ только для действительно оплаченных Checkout Sessions.';
+$string['stripe_reconciliation_cron_enabled'] = 'Включить автоматическую сверку Stripe';
+$string['stripe_reconciliation_cron_enabled_desc'] = 'Периодически проверяет ожидающие платежи Stripe. Перед выдачей доступа должны совпадать статус Stripe, сумма и валюта.';
+$string['stripe_reconciliation_batch_size'] = 'Максимальный размер пакета Stripe';
+$string['stripe_reconciliation_min_age'] = 'Минимальный возраст перед проверкой Stripe (сек.)';
+$string['stripe_reconciliation_max_age'] = 'Максимальный возраст проверяемых платежей Stripe (сек.)';
+$string['commerce_stripe_reconciliation_payment_not_found'] = 'Платёж Stripe не найден.';
+$string['commerce_stripe_reconciliation_not_safe'] = 'Невозможно безопасно выполнить сверку Stripe: {$a}';
+$string['commerce_stripe_reconciliation_wrong_provider'] = 'Этот платёж не относится к Stripe.';
+$string['commerce_stripe_reconciliation_missing_session'] = 'В платеже отсутствует Stripe Checkout Session.';
+
+$string['commerce_guest_unfinished_recovery_title'] = 'Мы нашли вашу незавершённую оплату';
+
+$string['commerce_guest_unfinished_recovery_message'] = 'Ваш временный аккаунт CampusFR сохранён. Вы можете продолжить оплату без пароля; после подтверждения платежа мы предложим создать пароль.';
+
+// 7.95M10 - Advanced personal-offer audiences.
+$string['commerce_personal_offer_m10_sources_title'] = 'Дополнительные источники аудитории';
+$string['commerce_personal_offer_m10_sources_help'] = 'Основной источник и добавленные здесь источники объединяются условием ИЛИ. Клиент попадает в исходную аудиторию, если найден хотя бы в одном из них.';
+$string['commerce_personal_offer_m10_add_source_or'] = '+ Добавить источник ИЛИ';
+$string['commerce_personal_offer_m10_filters_title'] = 'Расширенные фильтры аудитории';
+$string['commerce_personal_offer_m10_filters_help'] = 'Правила внутри одной группы объединяются условием И. Группы между собой объединяются условием ИЛИ. Наличие продукта проверяется по данным Native и Legacy.';
+$string['commerce_personal_offer_m10_add_rule'] = '+ Добавить правило';
+$string['commerce_personal_offer_m10_add_or_group'] = '+ Добавить группу ИЛИ';
+$string['commerce_personal_offer_m10_filters_example'] = 'Пример: есть карточки (Native или Legacy), И нет тренажёра Native, И нет тренажёра Legacy.';
+$string['commerce_personal_offer_m10_group_first'] = 'Все правила этой группы должны выполняться (И)';
+$string['commerce_personal_offer_m10_group_or'] = 'ИЛИ — группа {n}';
+$string['commerce_personal_offer_m10_operator_owns'] = 'Есть продукт';
+$string['commerce_personal_offer_m10_operator_not_owns'] = 'Нет продукта';
+$string['commerce_personal_offer_m10_source_native_prefix'] = 'Native';
+$string['commerce_personal_offer_m10_source_legacy_digital_prefix'] = 'Legacy digital';
+$string['commerce_personal_offer_m10_source_legacy_plan_prefix'] = 'Legacy подписка';
+$string['commerce_personal_offer_reason_advanced_rules_not_matched'] = 'Не соответствует расширенным фильтрам аудитории.';
+

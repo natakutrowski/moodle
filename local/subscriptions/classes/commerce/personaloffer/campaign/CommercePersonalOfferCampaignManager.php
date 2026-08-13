@@ -11,6 +11,7 @@ use local_subscriptions\commerce\personaloffer\dto\CommercePersonalOfferIssueReq
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferFactory;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferService;
 use local_subscriptions\commerce\personaloffer\audience\CommercePersonalOfferAudienceProviderRegistry;
+use local_subscriptions\commerce\personaloffer\audience\CommercePersonalOfferAudienceRuleEvaluator;
 use local_subscriptions\commerce\storefront\ownership\CommerceStorefrontOwnershipResolver;
 
 final class CommercePersonalOfferCampaignManager {
@@ -118,6 +119,23 @@ final class CommercePersonalOfferCampaignManager {
                 } else if ($account === 'no' && !empty($candidate['userid'])) {
                     $status = self::MEMBER_EXCLUDED;
                     $reason = 'account_not_allowed';
+                }
+            }
+
+            if ($status === self::MEMBER_ELIGIBLE && !empty($criteria['filtergroups'])) {
+                $ruleevaluation = (new CommercePersonalOfferAudienceRuleEvaluator($this->db))->evaluate(
+                    $candidate,
+                    is_array($criteria['filtergroups']) ? $criteria['filtergroups'] : []
+                );
+                if (!empty($ruleevaluation['evidence'])) {
+                    $candidate['evidence'] = array_merge(
+                        is_array($candidate['evidence'] ?? null) ? $candidate['evidence'] : [],
+                        $ruleevaluation['evidence']
+                    );
+                }
+                if (!$ruleevaluation['matched']) {
+                    $status = self::MEMBER_EXCLUDED;
+                    $reason = 'advanced_audience_rules_not_matched';
                 }
             }
 
@@ -695,14 +713,62 @@ final class CommercePersonalOfferCampaignManager {
             throw new \coding_exception('Criteria campaigns require an eligibility source.');
         }
 
-        $provider = CommercePersonalOfferAudienceProviderRegistry::create($this->db)
-            ->get($sourcetype);
+        $sources = [[
+            'sourcetype' => $sourcetype,
+            'sourceid' => $sourceid,
+        ]];
+        foreach (($criteria['additionalsources'] ?? []) as $additionalsource) {
+            if (!is_array($additionalsource)) {
+                continue;
+            }
+            $additionalsourcetype = strtolower(trim((string)($additionalsource['sourcetype'] ?? '')));
+            $additionalsourceid = (int)($additionalsource['sourceid'] ?? 0);
+            if ($additionalsourcetype === '' || $additionalsourceid <= 0) {
+                continue;
+            }
+            $key = $additionalsourcetype . ':' . $additionalsourceid;
+            $already = false;
+            foreach ($sources as $source) {
+                if ($source['sourcetype'] . ':' . $source['sourceid'] === $key) {
+                    $already = true;
+                    break;
+                }
+            }
+            if (!$already) {
+                $sources[] = [
+                    'sourcetype' => $additionalsourcetype,
+                    'sourceid' => $additionalsourceid,
+                ];
+            }
+        }
 
-        return $provider->candidates(
-            $sourceid,
-            $criteria,
-            clean_param(current_language(), PARAM_LANG) ?: 'fr'
-        );
+        $registry = CommercePersonalOfferAudienceProviderRegistry::create($this->db);
+        $language = clean_param(current_language(), PARAM_LANG) ?: 'fr';
+        $merged = [];
+        foreach ($sources as $source) {
+            $provider = $registry->get((string)$source['sourcetype']);
+            foreach ($provider->candidates((int)$source['sourceid'], $criteria, $language) as $candidate) {
+                $key = !empty($candidate['userid'])
+                    ? 'u:' . (int)$candidate['userid']
+                    : 'e:' . strtolower(trim((string)($candidate['email'] ?? '')));
+                if (!isset($merged[$key])) {
+                    $merged[$key] = $candidate;
+                    continue;
+                }
+                $merged[$key]['evidence'] = array_values(array_unique(array_merge(
+                    is_array($merged[$key]['evidence'] ?? null) ? $merged[$key]['evidence'] : [],
+                    is_array($candidate['evidence'] ?? null) ? $candidate['evidence'] : []
+                )));
+                if (empty($merged[$key]['purchaseid']) && !empty($candidate['purchaseid'])) {
+                    $merged[$key]['purchaseid'] = (int)$candidate['purchaseid'];
+                }
+                if (empty($merged[$key]['identityreason']) && !empty($candidate['identityreason'])) {
+                    $merged[$key]['identityreason'] = (string)$candidate['identityreason'];
+                }
+            }
+        }
+
+        return array_values($merged);
     }
 
     private function customer_has_target(array $candidate, int $targetproductid): bool {

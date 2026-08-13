@@ -26,23 +26,44 @@ final class CommerceCheckoutRuntime {
         private readonly ?CommerceCheckoutPaymentIdentityEnricher $identityenricher = null
     ) {}
 
-    public function prepare(CommerceCheckoutContext $context, CommerceCustomer $customer): CommerceCheckoutSnapshot {
+    public function prepare(
+        CommerceCheckoutContext $context,
+        CommerceCustomer $customer,
+        ?string $reference = null
+    ): CommerceCheckoutSnapshot {
         $cartsnapshot = $this->cart->snapshot(
             $context->get_customer_id(),
             $context->get_currency(),
             $context->get_language()
         );
         $summary = $this->summaries->build($cartsnapshot, $context);
-        $purchase = $this->purchases->build($summary, $customer);
+        $purchase = $this->purchases->build($summary, $customer, $reference);
         $payment = $this->payments->build($purchase);
         return new CommerceCheckoutSnapshot($summary, $purchase, $payment);
     }
 
     public function launch(CommerceCheckoutContext $context, CommerceCustomer $customer): CommerceCheckoutLaunchResult {
-        $snapshot = $this->prepare($context, $customer);
-        $persistence = $this->persister?->persist_with_result(
-            $snapshot->get_purchase_request()
+        $resumereference = trim((string)(
+            $context->get_metadata()['resume_purchase_reference'] ?? ''
+        ));
+        $snapshot = $this->prepare(
+            $context,
+            $customer,
+            $resumereference !== '' ? $resumereference : null
         );
+
+        try {
+            $persistence = $this->persister?->persist_with_result(
+                $snapshot->get_purchase_request()
+            );
+        } catch (CommerceInterruptedCheckoutResumeMismatchException $exception) {
+            // The customer's cart changed since the interrupted checkout.
+            // Never force it onto the old immutable purchase; create a fresh one.
+            $snapshot = $this->prepare($context, $customer, null);
+            $persistence = $this->persister?->persist_with_result(
+                $snapshot->get_purchase_request()
+            );
+        }
         $paymentattempt = $persistence?->get_payment_attempt();
         $paymentrequest = $snapshot->get_payment_request();
 

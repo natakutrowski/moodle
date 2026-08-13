@@ -11,6 +11,7 @@ use local_subscriptions\commerce\catalog\presentation\CommerceProductDisplayName
 use local_subscriptions\commerce\personaloffer\audience\CommercePersonalOfferLegacyPlanAudienceProvider;
 use local_subscriptions\commerce\personaloffer\audience\CommercePersonalOfferLegacyDigitalAudienceProvider;
 use local_subscriptions\commerce\personaloffer\audience\CommercePersonalOfferNativeProductAudienceProvider;
+use local_subscriptions\commerce\personaloffer\audience\CommercePersonalOfferAudienceRuleEvaluator;
 use local_subscriptions\subscription_manager;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
@@ -103,6 +104,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && confirm_sesskey()) {
             default => 0,
         };
 
+        $rawsources = trim(optional_param('additionalsourcesjson', '', PARAM_RAW));
+        $additionalsources = [];
+        if ($rawsources !== '') {
+            $decodedsources = json_decode($rawsources, true, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($decodedsources)) {
+                throw new coding_exception('Invalid additional audience sources.');
+            }
+            foreach ($decodedsources as $additionalsource) {
+                if (!is_array($additionalsource)) {
+                    continue;
+                }
+                $additionalsourcetype = strtolower(trim((string)($additionalsource['sourcetype'] ?? '')));
+                $additionalsourceid = (int)($additionalsource['sourceid'] ?? 0);
+                if (in_array($additionalsourcetype, [
+                    CommercePersonalOfferLegacyPlanAudienceProvider::TYPE,
+                    CommercePersonalOfferLegacyDigitalAudienceProvider::TYPE,
+                    CommercePersonalOfferNativeProductAudienceProvider::TYPE,
+                ], true) && $additionalsourceid > 0) {
+                    $additionalsources[] = ['sourcetype' => $additionalsourcetype, 'sourceid' => $additionalsourceid];
+                }
+            }
+        }
+
+        $rawfilters = trim(optional_param('advancedfiltersjson', '', PARAM_RAW));
+        $filtergroups = [];
+        if ($rawfilters !== '') {
+            $decodedfilters = json_decode($rawfilters, true, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($decodedfilters)) {
+                throw new coding_exception('Invalid advanced audience filters.');
+            }
+            $filtergroups = (new CommercePersonalOfferAudienceRuleEvaluator($DB))->normalise_groups($decodedfilters);
+        }
+
         $criteria = [
             'excludeowned' => optional_param('excludeowned', 1, PARAM_BOOL),
             'account' => optional_param('account', 'all', PARAM_ALPHA),
@@ -111,6 +145,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && confirm_sesskey()) {
             'list' => optional_param('audiencelist', '', PARAM_RAW),
             'sourcetype' => $sourcetype,
             'sourceid' => $sourceid,
+            'additionalsources' => $additionalsources,
+            'filtergroups' => $filtergroups,
         ];
 
         $sourceproductsku = '';
@@ -211,6 +247,32 @@ foreach ($legacydigitals as $product) {
         $label .= ' · ' . get_string('label_inactive', 'local_subscriptions');
     }
     $legacydigitalopts[(int)$product->id] = $label;
+}
+
+$m10filteropts = ['' => get_string('choosedots')];
+foreach ($products as $product) {
+    $label = $productresolver->resolve([(string)$product->sku], current_language(), (string)$product->name);
+    if ((string)$product->status !== 'active') {
+        $label .= ' · ' . get_string('label_inactive', 'local_subscriptions');
+    }
+    $m10filteropts[CommercePersonalOfferNativeProductAudienceProvider::TYPE . ':' . (int)$product->id] =
+        get_string('commerce_personal_offer_m10_source_native_prefix', 'local_subscriptions') . ' · ' . $label;
+}
+foreach ($legacydigitals as $product) {
+    $translation = $DB->get_record(
+        'subscription_digital_product_lang',
+        ['productid' => (int)$product->id, 'lang' => current_language()],
+        'title',
+        IGNORE_MISSING
+    );
+    $label = $translation ? (string)$translation->title : (string)$product->name;
+    $m10filteropts[CommercePersonalOfferLegacyDigitalAudienceProvider::TYPE . ':' . (int)$product->id] =
+        get_string('commerce_personal_offer_m10_source_legacy_digital_prefix', 'local_subscriptions') . ' · ' . $label;
+}
+foreach ($legacyplans as $plan) {
+    $label = subscription_manager::get_translated_plan_name((int)$plan->id, current_language()) ?: (string)$plan->name;
+    $m10filteropts[CommercePersonalOfferLegacyPlanAudienceProvider::TYPE . ':' . (int)$plan->id] =
+        get_string('commerce_personal_offer_m10_source_legacy_plan_prefix', 'local_subscriptions') . ' · ' . $label;
 }
 
 echo $OUTPUT->header();
@@ -341,6 +403,18 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
 
+// M10: optional OR sources for the initial audience union.
+echo html_writer::start_div('border rounded p-3 mb-3', ['id' => 'm10-additional-sources']);
+echo html_writer::tag('h4', get_string('commerce_personal_offer_m10_sources_title', 'local_subscriptions'), ['class' => 'h6 mb-1']);
+echo html_writer::div(get_string('commerce_personal_offer_m10_sources_help', 'local_subscriptions'), 'text-muted small mb-2');
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'id' => 'additionalsourcesjson', 'name' => 'additionalsourcesjson', 'value' => '']);
+echo html_writer::start_div('', ['id' => 'm10-source-rows']);
+echo html_writer::end_div();
+echo html_writer::tag('button', get_string('commerce_personal_offer_m10_add_source_or', 'local_subscriptions'), [
+    'type' => 'button', 'id' => 'm10-add-source', 'class' => 'btn btn-sm btn-outline-secondary mt-2'
+]);
+echo html_writer::end_div();
+
 echo html_writer::start_div('row g-3 mb-3');
 foreach ([['purchasefrom', 'commerce_personal_offer_purchase_from', 'commerce_personal_offer_purchase_from_help'], ['purchaseto', 'commerce_personal_offer_purchase_to', 'commerce_personal_offer_purchase_to_help']] as [$name, $labelkey, $helpkey]) {
     echo html_writer::start_div('col-12 col-md-6');
@@ -356,6 +430,28 @@ echo html_writer::empty_tag('input', ['id' => 'excludeowned', 'class' => 'form-c
 echo html_writer::tag('label', get_string('commerce_personal_offer_exclude_owned', 'local_subscriptions'), ['for' => 'excludeowned', 'class' => 'form-check-label fw-semibold']);
 echo html_writer::div(get_string('commerce_personal_offer_exclude_owned_help', 'local_subscriptions'), 'form-text');
 echo html_writer::end_div();
+
+// M10: optional advanced boolean ownership filters. Groups are ORed; rules inside a group are ANDed.
+echo html_writer::start_div('border rounded p-3 mb-4', ['id' => 'm10-advanced-filters']);
+echo html_writer::tag('h4', get_string('commerce_personal_offer_m10_filters_title', 'local_subscriptions'), ['class' => 'h6 mb-1']);
+echo html_writer::div(get_string('commerce_personal_offer_m10_filters_help', 'local_subscriptions'), 'text-muted small mb-3');
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'id' => 'advancedfiltersjson', 'name' => 'advancedfiltersjson', 'value' => '']);
+echo html_writer::start_div('', ['id' => 'm10-filter-groups']);
+echo html_writer::end_div();
+echo html_writer::div(
+    html_writer::tag('button', get_string('commerce_personal_offer_m10_add_rule', 'local_subscriptions'), [
+        'type' => 'button', 'id' => 'm10-add-rule', 'class' => 'btn btn-sm btn-outline-secondary'
+    ]) .
+    html_writer::tag('button', get_string('commerce_personal_offer_m10_add_or_group', 'local_subscriptions'), [
+        'type' => 'button', 'id' => 'm10-add-group', 'class' => 'btn btn-sm btn-outline-secondary ms-2'
+    ]),
+    'mt-2'
+);
+echo html_writer::div(get_string('commerce_personal_offer_m10_filters_example', 'local_subscriptions'), 'form-text mt-2');
+echo html_writer::end_div();
+
+// JSON data consumed by the inline builder; labels remain fully server-localised.
+echo html_writer::script('window.CampusFRM10AudienceSources=' . json_encode($m10filteropts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';');
 
 echo html_writer::start_div('border rounded p-3 mb-4');
 echo html_writer::tag('h4', get_string('commerce_personal_offer_explicit_list', 'local_subscriptions'), ['class' => 'h6']);
@@ -461,6 +557,11 @@ echo html_writer::div(
 );
 echo html_writer::end_tag('form');
 
+$m10jsfirst = json_encode(get_string('commerce_personal_offer_m10_group_first', 'local_subscriptions'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$m10jsor = json_encode(get_string('commerce_personal_offer_m10_group_or', 'local_subscriptions'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$m10jsowns = json_encode(get_string('commerce_personal_offer_m10_operator_owns', 'local_subscriptions'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$m10jsnotowns = json_encode(get_string('commerce_personal_offer_m10_operator_not_owns', 'local_subscriptions'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
 $PAGE->requires->js_init_code("
 document.addEventListener('DOMContentLoaded', function() {
   var validityMode = document.getElementById('validitymode');
@@ -487,6 +588,8 @@ document.addEventListener('DOMContentLoaded', function() {
   var plan = document.getElementById('source-legacy-plan');
   var digital = document.getElementById('source-legacy-digital');
   var nativeProduct = document.getElementById('source-native-product');
+  var m10AdditionalSources = document.getElementById('m10-additional-sources');
+  var m10AdvancedFilters = document.getElementById('m10-advanced-filters');
 
   function refreshSource() {
     var value = sourceType ? sourceType.value : 'legacy_plan';
@@ -503,12 +606,140 @@ document.addEventListener('DOMContentLoaded', function() {
   function refreshAudience() {
     var criteria = !audience || audience.value === 'criteria';
     if (criteriaBlock) criteriaBlock.style.display = criteria ? '' : 'none';
+    if (m10AdditionalSources) m10AdditionalSources.style.display = criteria ? '' : 'none';
+    if (m10AdvancedFilters) m10AdvancedFilters.style.display = criteria ? '' : 'none';
     refreshSource();
   }
 
   if (audience) audience.addEventListener('change', refreshAudience);
   if (sourceType) sourceType.addEventListener('change', refreshSource);
   refreshAudience();
+
+  // M10 initial audience can be the union of several ownership sources.
+  var m10SourceRows = document.getElementById('m10-source-rows');
+  var m10SourcesHidden = document.getElementById('additionalsourcesjson');
+  var m10AddSource = document.getElementById('m10-add-source');
+  function m10SerializeSources() {
+    if (!m10SourceRows || !m10SourcesHidden) return;
+    var values = [];
+    m10SourceRows.querySelectorAll('.m10-audience-source').forEach(function(select) {
+      var bits = (select.value || '').split(':');
+      if (bits.length === 2 && bits[0] && parseInt(bits[1], 10)) {
+        values.push({sourcetype: bits[0], sourceid: parseInt(bits[1], 10)});
+      }
+    });
+    m10SourcesHidden.value = JSON.stringify(values);
+  }
+  if (m10AddSource) m10AddSource.addEventListener('click', function() {
+    var row = document.createElement('div');
+    row.className = 'row g-2 align-items-center mb-2';
+    var c1 = document.createElement('div'); c1.className = 'col-10 col-lg-11';
+    var select = document.createElement('select'); select.className = 'form-select form-select-sm m10-audience-source';
+    Object.keys(window.CampusFRM10AudienceSources || {}).forEach(function(value) {
+      var option = document.createElement('option'); option.value = value; option.textContent = window.CampusFRM10AudienceSources[value]; select.appendChild(option);
+    });
+    select.addEventListener('change', m10SerializeSources); c1.appendChild(select);
+    var c2 = document.createElement('div'); c2.className = 'col-2 col-lg-1 d-grid';
+    var remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-sm btn-outline-danger'; remove.textContent = '×';
+    remove.addEventListener('click', function(){ row.remove(); m10SerializeSources(); }); c2.appendChild(remove);
+    row.appendChild(c1); row.appendChild(c2); m10SourceRows.appendChild(row); m10SerializeSources();
+  });
+
+  // M10 advanced ownership filters: OR between groups, AND inside each group.
+  var m10Groups = document.getElementById('m10-filter-groups');
+  var m10Hidden = document.getElementById('advancedfiltersjson');
+  var m10AddRule = document.getElementById('m10-add-rule');
+  var m10AddGroup = document.getElementById('m10-add-group');
+  var m10Sources = window.CampusFRM10AudienceSources || {};
+  var m10NextGroup = 1;
+
+  function m10SourceSelect() {
+    var select = document.createElement('select');
+    select.className = 'form-select form-select-sm m10-source';
+    Object.keys(m10Sources).forEach(function(value) {
+      var option = document.createElement('option');
+      option.value = value;
+      option.textContent = m10Sources[value];
+      select.appendChild(option);
+    });
+    return select;
+  }
+
+  function m10EnsureGroup(groupId) {
+    var group = m10Groups ? m10Groups.querySelector('[data-m10-group=\"' + groupId + '\"]') : null;
+    if (group || !m10Groups) return group;
+    group = document.createElement('div');
+    group.className = 'm10-filter-group border rounded p-2 mb-2';
+    group.setAttribute('data-m10-group', String(groupId));
+    var title = document.createElement('div');
+    title.className = 'small fw-semibold mb-2';
+    title.textContent = groupId === 1
+      ? {$m10jsfirst}
+      : {$m10jsor}.replace('{n}', String(groupId));
+    group.appendChild(title);
+    m10Groups.appendChild(group);
+    return group;
+  }
+
+  function m10AddRuleTo(groupId) {
+    var group = m10EnsureGroup(groupId);
+    if (!group) return;
+    var row = document.createElement('div');
+    row.className = 'row g-2 align-items-center mb-2 m10-rule';
+
+    var c1 = document.createElement('div'); c1.className = 'col-12 col-lg-3';
+    var op = document.createElement('select'); op.className = 'form-select form-select-sm m10-operator';
+    var own = document.createElement('option'); own.value = 'owns'; own.textContent = {$m10jsowns};
+    var notOwn = document.createElement('option'); notOwn.value = 'not_owns'; notOwn.textContent = {$m10jsnotowns};
+    op.appendChild(own); op.appendChild(notOwn); c1.appendChild(op);
+
+    var c2 = document.createElement('div'); c2.className = 'col-10 col-lg-8'; c2.appendChild(m10SourceSelect());
+    var c3 = document.createElement('div'); c3.className = 'col-2 col-lg-1 d-grid';
+    var remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-sm btn-outline-danger'; remove.textContent = '×';
+    remove.addEventListener('click', function(){ row.remove(); m10CleanGroups(); m10Serialize(); }); c3.appendChild(remove);
+    row.appendChild(c1); row.appendChild(c2); row.appendChild(c3);
+    group.appendChild(row);
+    op.addEventListener('change', m10Serialize);
+    row.querySelector('.m10-source').addEventListener('change', m10Serialize);
+    m10Serialize();
+  }
+
+  function m10CleanGroups() {
+    if (!m10Groups) return;
+    Array.prototype.slice.call(m10Groups.querySelectorAll('.m10-filter-group')).forEach(function(group, index) {
+      if (!group.querySelector('.m10-rule')) group.remove();
+    });
+  }
+
+  function m10Serialize() {
+    if (!m10Groups || !m10Hidden) return;
+    var groups = [];
+    m10Groups.querySelectorAll('.m10-filter-group').forEach(function(group) {
+      var rules = [];
+      group.querySelectorAll('.m10-rule').forEach(function(row) {
+        var source = row.querySelector('.m10-source').value || '';
+        var bits = source.split(':');
+        if (bits.length !== 2 || !bits[0] || !parseInt(bits[1], 10)) return;
+        rules.push({operator: row.querySelector('.m10-operator').value, sourcetype: bits[0], sourceid: parseInt(bits[1], 10)});
+      });
+      if (rules.length) groups.push({rules: rules});
+    });
+    m10Hidden.value = JSON.stringify(groups);
+  }
+
+  if (m10AddRule) m10AddRule.addEventListener('click', function() {
+    var groups = m10Groups ? m10Groups.querySelectorAll('.m10-filter-group') : [];
+    var groupId = groups.length ? parseInt(groups[groups.length - 1].getAttribute('data-m10-group'), 10) : 1;
+    if (!groupId) groupId = 1;
+    m10NextGroup = Math.max(m10NextGroup, groupId);
+    m10AddRuleTo(groupId);
+  });
+  if (m10AddGroup) m10AddGroup.addEventListener('click', function() {
+    m10NextGroup++;
+    m10AddRuleTo(m10NextGroup);
+  });
+  var m10Form = m10Hidden ? m10Hidden.closest('form') : null;
+  if (m10Form) m10Form.addEventListener('submit', function(){ m10SerializeSources(); m10Serialize(); });
 
   var add = document.getElementById('recipient-add');
   var picker = document.getElementById('recipient-picker');

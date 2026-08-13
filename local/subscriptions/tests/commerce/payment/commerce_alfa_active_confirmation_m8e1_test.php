@@ -61,7 +61,7 @@ final class commerce_alfa_active_confirmation_m8e1_test extends advanced_testcas
             $source
         );
         self::assertStringContainsString(
-            'local_subscriptions/alfa_payment_confirmation',
+            'local_subscriptions/payment_confirmation',
             $source
         );
         self::assertStringContainsString(
