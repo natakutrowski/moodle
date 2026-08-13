@@ -8753,3 +8753,9 @@ $string['commerce_guest_crm_provider_live_status'] = 'Provider : {$a->status}';
 $string['commerce_guest_crm_provider_paid_pending'] = 'Payé chez le provider — à réconcilier';
 $string['commerce_guest_crm_provider_probe_unavailable'] = 'Statut provider indisponible';
 
+// M11.1 — optional secondary campaign CTA.
+$string['commerce_personal_offer_campaign_email_secondary_cta_label'] = 'Libellé du CTA secondaire';
+$string['commerce_personal_offer_campaign_email_secondary_cta_url'] = 'URL du CTA secondaire';
+$string['commerce_personal_offer_campaign_email_secondary_cta_help'] = 'Facultatif. Renseignez le libellé et l’URL ensemble, puis insérez {{secondary_cta}} exactement à l’endroit où le bouton doit apparaître dans le Contenu marketing. Sans ce marqueur, aucun CTA secondaire n’est affiché.';
+// M9.2b — resilient public Commerce access errors.
+$string['commerce_public_access_denied'] = 'Cette page n’est plus accessible depuis cette session. Vous pouvez continuer depuis votre espace CampusFR.';

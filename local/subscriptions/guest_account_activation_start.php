@@ -16,17 +16,35 @@ $repository = new CommerceGuestCheckoutSessionRepository($DB);
 $session = $repository->find_by_purchase_reference($reference);
 $token = trim((string)($SESSION->local_subscriptions_guest_checkout_token ?? ''));
 
-if ($session === null || $token === '' || !hash_equals($session->get_token(), $token)) {
-    throw new moodle_exception('nopermissions', 'error');
+if ($session === null) {
+    throw new moodle_exception('commerce_public_access_denied', 'local_subscriptions');
 }
 
 $metadata = $session->get_metadata();
-if (($metadata['account_origin'] ?? '') !== 'guest_checkout') {
-    redirect(new moodle_url('/login/index.php'));
+$activationobsolete = ($metadata['account_origin'] ?? '') !== 'guest_checkout'
+    || !empty($metadata['password_set_at']);
+
+if ($token === '' || !hash_equals($session->get_token(), $token)) {
+    if ($activationobsolete) {
+        $destination = UrlFactory::my_courses();
+        if (isloggedin() && !isguestuser()) {
+            redirect($destination);
+        }
+        redirect(new moodle_url('/login/index.php', [
+            'wantsurl' => $destination->out(false),
+        ]));
+    }
+
+    throw new moodle_exception('commerce_public_access_denied', 'local_subscriptions');
 }
-if (!empty($metadata['password_set_at'])) {
+
+if ($activationobsolete) {
+    $destination = UrlFactory::my_courses();
+    if (isloggedin() && !isguestuser()) {
+        redirect($destination);
+    }
     redirect(new moodle_url('/login/index.php', [
-        'wantsurl' => (UrlFactory::my_courses())->out(false),
+        'wantsurl' => $destination->out(false),
     ]));
 }
 

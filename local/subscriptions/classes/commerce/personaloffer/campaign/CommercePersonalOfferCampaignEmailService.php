@@ -127,6 +127,8 @@ final class CommercePersonalOfferCampaignEmailService {
         string $body,
         int $bodyformat,
         string $ctalabel,
+        ?string $secondaryctalabel,
+        ?string $secondaryctaurl,
         ?string $closing,
         int $closingformat,
         int $userid
@@ -143,6 +145,24 @@ final class CommercePersonalOfferCampaignEmailService {
 
         $subject = $this->clean_single_line($subject, 255, 'subject');
         $ctalabel = $this->clean_single_line($ctalabel, 255, 'CTA label');
+        $secondaryctalabel = trim(clean_param((string)$secondaryctalabel, PARAM_TEXT));
+        $secondaryctaurl = trim((string)$secondaryctaurl);
+        if (($secondaryctalabel === '') !== ($secondaryctaurl === '')) {
+            throw new \coding_exception('Secondary CTA label and URL must be configured together.');
+        }
+        if ($secondaryctalabel !== '') {
+            if (\core_text::strlen($secondaryctalabel) > 255) {
+                throw new \coding_exception('Personal Offer campaign email secondary CTA label is too long.');
+            }
+            if (\core_text::strlen($secondaryctaurl) > 2048
+                    || !filter_var($secondaryctaurl, FILTER_VALIDATE_URL)
+                    || !in_array(strtolower((string)parse_url($secondaryctaurl, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+                throw new \coding_exception('Personal Offer campaign email secondary CTA URL is invalid.');
+            }
+        } else {
+            $secondaryctalabel = null;
+            $secondaryctaurl = null;
+        }
         $body = trim($body);
         $closing = $closing === null ? null : trim($closing);
 
@@ -170,6 +190,8 @@ final class CommercePersonalOfferCampaignEmailService {
             $body,
             $bodyformat,
             $ctalabel,
+            $secondaryctalabel,
+            $secondaryctaurl,
             $closing,
             $closingformat,
             $userid

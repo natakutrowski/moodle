@@ -50,7 +50,7 @@ if ($reference !== '') {
             $order = $service->find_for_user($reference, $owneruserid);
         }
     } catch (CommerceOrderPresentationAccessDeniedException $exception) {
-        throw new moodle_exception('nopermissions', 'error');
+        throw new moodle_exception('commerce_public_access_denied', 'local_subscriptions');
     }
 
     if ($order === null) {

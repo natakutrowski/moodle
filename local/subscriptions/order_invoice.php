@@ -27,7 +27,7 @@ try {
         (string)$USER->email
     );
 } catch (CommerceOrderPresentationAccessDeniedException $exception) {
-    throw new moodle_exception('nopermissions', 'error');
+    throw new moodle_exception('commerce_public_access_denied', 'local_subscriptions');
 }
 if ($order === null) {
     throw new moodle_exception('commerce_i2_order_not_found', 'local_subscriptions');
