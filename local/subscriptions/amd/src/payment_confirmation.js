@@ -2,7 +2,7 @@
 //
 // M8E.1 — active Alfa confirmation splash.
 
-const SELECTOR = '[data-alfa-payment-confirmation]';
+const SELECTOR = '[data-alfa-payment-confirmation], [data-payment-confirmation]';
 
 const sleep = (milliseconds) => new Promise(resolve => window.setTimeout(resolve, milliseconds));
 

@@ -226,7 +226,8 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
 
         switch ($type) {
 
-            case 'checkout.session.completed': {
+            case 'checkout.session.completed':
+            case 'checkout.session.async_payment_succeeded': {
                 $metadata = [];
 
                 if (!empty($obj->metadata)) {
@@ -238,6 +239,23 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
                 $pid = isset($metadata['payment_request_id'])
                     ? (int)$metadata['payment_request_id']
                     : 0;
+
+                $paymentstatus = strtolower((string)($obj->payment_status ?? ''));
+                if ($paymentstatus !== 'paid') {
+                    return new InternalEvent('payment_pending', [
+                        'payment_request_id' => $pid,
+                        'currency' => strtoupper($obj->currency ?? ''),
+                        'amount_minor' => (int)($obj->amount_total ?? 0),
+                        'meta' => array_merge($metadata, [
+                            'provider' => Provider::STRIPE,
+                            'session' => $obj->id,
+                            'provider_payment_id' => $obj->id,
+                            'payment_intent' => $obj->payment_intent ?? null,
+                            'payment_status' => $obj->payment_status ?? null,
+                            'checkout_status' => $obj->status ?? null,
+                        ]),
+                    ]);
+                }
 
                 return new InternalEvent('checkout_completed', [
                     'payment_request_id' => $pid,
@@ -253,6 +271,25 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
                         'payment_status' => $obj->payment_status ?? null,
                         'checkout_status' => $obj->status ?? null,
                         'customer_email' => $obj->customer_details->email ?? $obj->customer_email ?? null,
+                    ]),
+                ]);
+            }
+
+            case 'checkout.session.async_payment_failed': {
+                $metadata = [];
+                if (!empty($obj->metadata)) {
+                    foreach ($obj->metadata as $key => $value) { $metadata[$key] = $value; }
+                }
+                return new InternalEvent('payment_failed', [
+                    'payment_request_id' => isset($metadata['payment_request_id']) ? (int)$metadata['payment_request_id'] : 0,
+                    'currency' => strtoupper($obj->currency ?? ''),
+                    'amount_minor' => (int)($obj->amount_total ?? 0),
+                    'meta' => array_merge($metadata, [
+                        'provider' => Provider::STRIPE,
+                        'session' => $obj->id,
+                        'provider_payment_id' => $obj->id,
+                        'payment_status' => $obj->payment_status ?? null,
+                        'checkout_status' => $obj->status ?? null,
                     ]),
                 ]);
             }

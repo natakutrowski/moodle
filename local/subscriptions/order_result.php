@@ -181,18 +181,19 @@ $stepscontext = [
     'steps' => $steps,
 ];
 
-$showalfaconfirmationsplash = (
+$confirmationprovider = strtolower((string)$order->provider);
+$showpaymentconfirmationsplash = (
     $returnpaymentid > 0
-    && strtolower((string)$order->provider) === 'alfa'
+    && in_array($confirmationprovider, ['alfa', 'stripe'], true)
     && $state->code === 'pending'
 );
 
-if ($showalfaconfirmationsplash) {
+if ($showpaymentconfirmationsplash) {
     $PAGE->requires->css(
         new moodle_url('/local/subscriptions/styles/alfa_payment_confirmation.css')
     );
     $PAGE->requires->js_call_amd(
-        'local_subscriptions/alfa_payment_confirmation',
+        'local_subscriptions/payment_confirmation',
         'init'
     );
 }
@@ -205,7 +206,7 @@ $PAGE->requires->js_call_amd('local_subscriptions/guest_checkout_security', 'ini
 
 echo $OUTPUT->header();
 
-if ($showalfaconfirmationsplash) {
+if ($showpaymentconfirmationsplash) {
     $successurl = UrlFactory::order_result([
         'reference' => $reference,
         'result' => 'success',
@@ -222,9 +223,13 @@ if ($showalfaconfirmationsplash) {
         'alfa-payment-confirmation',
         [
             'data-alfa-payment-confirmation' => '1',
+            'data-payment-confirmation' => '1',
             'data-endpoint' => (new moodle_url(
-                '/local/subscriptions/payment/alfa_return_poll.php'
+                $confirmationprovider === 'stripe'
+                    ? '/local/subscriptions/payment/stripe_return_poll.php'
+                    : '/local/subscriptions/payment/alfa_return_poll.php'
             ))->out(false),
+            'data-provider' => $confirmationprovider,
             'data-paymentid' => (string)$returnpaymentid,
             'data-reference' => $reference,
             'data-sesskey' => sesskey(),

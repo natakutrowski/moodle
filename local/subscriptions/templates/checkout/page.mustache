@@ -152,6 +152,18 @@
                 <h2 id="commerce-checkout-payment-title" class="h3 mb-2">{{paymenttitle}}</h2>
                 <p class="text-muted mb-4">{{paymentdescription}}</p>
 
+                {{#recoveringunfinishedguest}}
+                    <div class="alert alert-info border-0 commerce-checkout-unfinished-recovery mb-4" role="status">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="fs-4" aria-hidden="true"><i class="fa-solid fa-rotate"></i></span>
+                            <div>
+                                <div class="fw-semibold">{{unfinishedguestrecoverytitle}}</div>
+                                <div class="small">{{unfinishedguestrecoverymessage}}</div>
+                            </div>
+                        </div>
+                    </div>
+                {{/recoveringunfinishedguest}}
+
                 {{#ispersonaloffer}}
                     <div class="alert alert-primary border-0 mb-4" role="status">
                         <div class="d-flex gap-3 align-items-start">

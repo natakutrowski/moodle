@@ -8818,3 +8818,39 @@ $string['commerce_payment_splash_preview_title'] = 'Payment screen preview';
 $string['commerce_payment_splash_preview_outbound'] = 'Leaving for provider';
 
 $string['commerce_payment_splash_preview_return'] = 'Payment confirmation';
+
+$string['task_reconcile_stripe_payments'] = 'Automatic Stripe payment reconciliation';
+$string['stripe_reconciliation_heading'] = 'Automatic Stripe reconciliation';
+$string['stripe_reconciliation_desc'] = 'Safety net: checks Stripe for Campus payments still pending and only fulfils Checkout Sessions that are actually paid.';
+$string['stripe_reconciliation_cron_enabled'] = 'Enable automatic Stripe reconciliation';
+$string['stripe_reconciliation_cron_enabled_desc'] = 'Periodically checks pending Stripe payments. Stripe status, amount and currency must all match before fulfilment.';
+$string['stripe_reconciliation_batch_size'] = 'Maximum Stripe batch size';
+$string['stripe_reconciliation_min_age'] = 'Minimum age before Stripe check (seconds)';
+$string['stripe_reconciliation_max_age'] = 'Maximum Stripe age inspected (seconds)';
+$string['commerce_stripe_reconciliation_payment_not_found'] = 'Stripe payment not found.';
+$string['commerce_stripe_reconciliation_not_safe'] = 'Stripe reconciliation cannot be executed safely: {$a}';
+$string['commerce_stripe_reconciliation_wrong_provider'] = 'This payment is not a Stripe payment.';
+$string['commerce_stripe_reconciliation_missing_session'] = 'The Stripe Checkout Session is missing from this payment.';
+
+$string['commerce_guest_unfinished_recovery_title'] = 'We found your interrupted checkout';
+
+$string['commerce_guest_unfinished_recovery_message'] = 'Your provisional CampusFR account has been preserved. You can resume payment without a password; once payment is confirmed, we will ask you to create one.';
+
+// 7.95M10 - Advanced personal-offer audiences.
+$string['commerce_personal_offer_m10_sources_title'] = 'Alternative audience sources';
+$string['commerce_personal_offer_m10_sources_help'] = 'The primary source and the sources added here are combined with OR. A customer found in at least one source enters the initial audience.';
+$string['commerce_personal_offer_m10_add_source_or'] = '+ Add an OR source';
+$string['commerce_personal_offer_m10_filters_title'] = 'Advanced eligibility filters';
+$string['commerce_personal_offer_m10_filters_help'] = 'Rules inside one group are combined with AND. Groups are combined with OR. Ownership is checked across Native and Legacy data.';
+$string['commerce_personal_offer_m10_add_rule'] = '+ Add a rule';
+$string['commerce_personal_offer_m10_add_or_group'] = '+ Add an OR group';
+$string['commerce_personal_offer_m10_filters_example'] = 'Example: owns the Cards (Native or Legacy), AND does not own the Native Trainer, AND does not own the Legacy Trainer.';
+$string['commerce_personal_offer_m10_group_first'] = 'All rules in this group must match (AND)';
+$string['commerce_personal_offer_m10_group_or'] = 'OR — group {n}';
+$string['commerce_personal_offer_m10_operator_owns'] = 'Owns';
+$string['commerce_personal_offer_m10_operator_not_owns'] = 'Does not own';
+$string['commerce_personal_offer_m10_source_native_prefix'] = 'Native';
+$string['commerce_personal_offer_m10_source_legacy_digital_prefix'] = 'Legacy digital';
+$string['commerce_personal_offer_m10_source_legacy_plan_prefix'] = 'Legacy subscription';
+$string['commerce_personal_offer_reason_advanced_rules_not_matched'] = 'Does not match the advanced audience filters.';
+

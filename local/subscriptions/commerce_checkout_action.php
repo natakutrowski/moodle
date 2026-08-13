@@ -9,6 +9,7 @@ use local_subscriptions\commerce\checkout\guest\CommerceCheckoutIdentityResolver
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCartRecoveryService;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutService;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutSessionRepository;
+use local_subscriptions\commerce\checkout\guest\CommerceUnfinishedGuestCheckoutRecoveryService;
 use local_subscriptions\commerce\checkout\express\CommerceCheckoutExpressService;
 use local_subscriptions\commerce\checkout\unified\CommerceCheckoutContext;
 use local_subscriptions\commerce\checkout\unified\CommerceCheckoutRuntimeFactory;
@@ -134,6 +135,13 @@ try {
         }
 
         if ($guestsession->get_status() === 'existing_account') {
+            $guestsession = (new CommerceUnfinishedGuestCheckoutRecoveryService(
+                $DB,
+                $sessions
+            ))->recover_session_if_possible($guestsession);
+        }
+
+        if ($guestsession->get_status() === 'existing_account') {
             redirect(new moodle_url('/local/subscriptions/commerce_checkout.php', $checkoutparams));
         }
     }
@@ -166,6 +174,9 @@ try {
             'checkout_source' => $source,
             'showroom' => $showroom,
             'showroom_offer' => $showroomoffer,
+            'resume_purchase_reference' => $guestsession !== null
+                ? trim((string)($guestsession->get_metadata()['resume_purchase_reference'] ?? ''))
+                : '',
         ]
     );
     $customer = new CommerceCustomer(

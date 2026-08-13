@@ -9,6 +9,7 @@ use local_subscriptions\commerce\checkout\guest\CommerceCheckoutIdentityResolver
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCartRecoveryService;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutService;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutSessionRepository;
+use local_subscriptions\commerce\checkout\guest\CommerceUnfinishedGuestCheckoutRecoveryService;
 use local_subscriptions\commerce\checkout\unified\CommerceCheckoutContext;
 use local_subscriptions\commerce\checkout\unified\CommerceCheckoutRuntimeFactory;
 use local_subscriptions\commerce\checkout\unified\presentation\CommerceCheckoutPresenter;
@@ -65,6 +66,15 @@ if ($isguestcheckout) {
             'origin_return' => $originreturn,
         ]);
         $SESSION->local_subscriptions_guest_checkout_token = $guestsession->get_token();
+    }
+
+    // M9: heal an interrupted Guest Checkout before the page decides to
+    // render the normal existing-account password gate.
+    if ($guestsession !== null && $guestsession->get_status() === 'existing_account') {
+        $guestsession = (new CommerceUnfinishedGuestCheckoutRecoveryService(
+            $DB,
+            $guestrepository
+        ))->recover_session_if_possible($guestsession);
     }
 
     if (optional_param('resetidentity', 0, PARAM_BOOL)) {
@@ -194,6 +204,9 @@ try {
 }
 
 $existingaccount = $isguestcheckout && $guestsession?->get_status() === 'existing_account';
+$recoveringunfinishedguest = $isguestcheckout
+    && $guestsession !== null
+    && ($guestsession->get_metadata()['identity_resolution'] ?? '') === 'unfinished_guest_checkout_resume';
 $showguestidentity = $isguestcheckout && $identity === null && !$existingaccount;
 
 $ispersonaloffer = $source === 'personaloffer';
@@ -359,6 +372,9 @@ $data += [
     'personaloffercurrencies' => $personaloffercurrencies,
     'personalofferhasmultiplecurrencies' => count($personaloffercurrencies) > 1,
     'existingaccount' => $existingaccount,
+    'recoveringunfinishedguest' => $recoveringunfinishedguest,
+    'unfinishedguestrecoverytitle' => get_string('commerce_guest_unfinished_recovery_title', 'local_subscriptions'),
+    'unfinishedguestrecoverymessage' => get_string('commerce_guest_unfinished_recovery_message', 'local_subscriptions'),
     'guestidentitytitle' => get_string('commerce_guest_checkout_identity_title', 'local_subscriptions'),
     'guestidentitydescription' => get_string('commerce_guest_checkout_identity_checkout_description', 'local_subscriptions'),
     'email' => $guestsession?->get_email() ?? '',

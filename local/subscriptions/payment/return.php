@@ -10,6 +10,8 @@ use local_subscriptions\commerce\payment\reconciliation\alfa\AlfaPaymentReconcil
 use local_subscriptions\commerce\payment\reconciliation\alfa\returnflow\AlfaInstantReturnReconciliationService;
 use local_subscriptions\commerce\payment\reconciliation\alfa\returnflow\AlfaInstantReturnResult;
 use local_subscriptions\commerce\payment\reconciliation\alfa\returnflow\NativeAlfaInstantReturnSleeper;
+use local_subscriptions\commerce\payment\reconciliation\stripe\StripePaymentReconciliationService;
+use local_subscriptions\commerce\payment\reconciliation\stripe\returnflow\StripeReturnPollingService;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
 
@@ -134,9 +136,38 @@ if ($provider === Provider::ALFA) {
     }
 }
 
-/* Stripe fulfillment remains webhook-authoritative. The browser return only
- * resolves the Native payment identity; it never marks an unpaid session paid.
- */
+if ($provider === Provider::STRIPE) {
+    try {
+        $striperesult = (new StripeReturnPollingService(
+            StripePaymentReconciliationService::create($DB)
+        ))->check($paymentid);
+
+        error_log('[local_subscriptions][stripe_return_reconciliation] ' . json_encode([
+            'payment_id' => $paymentid,
+            'purchase_reference' => (string)$purchase->reference,
+            'result' => $striperesult->status,
+            'campus_payment_status' => $striperesult->inspection->campuspaymentstatus,
+            'campus_purchase_status' => $striperesult->inspection->campuspurchasestatus,
+            'stripe_checkout_status' => $striperesult->inspection->provider->checkoutstatus,
+            'stripe_payment_status' => $striperesult->inspection->provider->paymentstatus,
+            'stripe_profile' => $striperesult->inspection->provider->profile,
+            'blockers' => $striperesult->inspection->blockers,
+        ], JSON_UNESCAPED_SLASHES));
+
+        if ($striperesult->status === 'unsafe') {
+            local_subscriptions_redirect_from_return(
+                UrlFactory::order_result(['result'=>'failure','code'=>'stripe_reconciliation'] + $baseparams),
+                (bool)$embedded
+            );
+        }
+    } catch (\Throwable $exception) {
+        error_log('[local_subscriptions][stripe_return_reconciliation] ' . json_encode([
+            'payment_id'=>$paymentid,'purchase_reference'=>(string)$purchase->reference,
+            'result'=>'temporary_error','exception'=>get_class($exception),'message'=>$exception->getMessage(),
+        ], JSON_UNESCAPED_SLASHES));
+    }
+}
+
 local_subscriptions_redirect_from_return(
     UrlFactory::order_result(['result' => 'success'] + $baseparams),
     (bool)$embedded

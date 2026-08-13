@@ -499,6 +499,33 @@ if ($hassiteconfig) {
             '', PARAM_RAW_TRIMMED
         ));
 
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_stripe_reconciliation_hdr',
+            get_string('stripe_reconciliation_heading', 'local_subscriptions'),
+            get_string('stripe_reconciliation_desc', 'local_subscriptions')
+        ));
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/stripe_reconciliation_cron_enabled',
+            get_string('stripe_reconciliation_cron_enabled', 'local_subscriptions'),
+            get_string('stripe_reconciliation_cron_enabled_desc', 'local_subscriptions'),
+            1
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/stripe_reconciliation_batch_size',
+            get_string('stripe_reconciliation_batch_size', 'local_subscriptions'),
+            '', 20, PARAM_INT
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/stripe_reconciliation_min_age',
+            get_string('stripe_reconciliation_min_age', 'local_subscriptions'),
+            '', 300, PARAM_INT
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/stripe_reconciliation_max_age',
+            get_string('stripe_reconciliation_max_age', 'local_subscriptions'),
+            '', 172800, PARAM_INT
+        ));
+
         // === Alfa Bank =============================================================
         $settings->add(new admin_setting_heading(
             'local_subscriptions_alfa_hdr',

@@ -39,6 +39,8 @@ final class CommerceCheckoutPurchasePersister {
         $existing = $this->repository->find_by_reference($request->get_reference());
 
         if ($existing !== null) {
+            $this->assert_resume_matches($existing->get_purchase(), $request);
+
             return new CommerceCheckoutPersistenceResult(
                 0,
                 $this->create_payment_attempt(
@@ -58,6 +60,57 @@ final class CommerceCheckoutPurchasePersister {
                 $request
             )
         );
+    }
+
+
+    private function assert_resume_matches(
+        \local_subscriptions\commerce\domain\purchase\NativePurchase $purchase,
+        CommercePurchaseRequest $request
+    ): void {
+        if ($purchase->get_lifecycle_status() !== CommercePurchaseStatus::PAYMENT_PENDING) {
+            throw new CommerceInterruptedCheckoutResumeMismatchException(
+                'Interrupted purchase is no longer payment_pending.'
+            );
+        }
+
+        $customer = $purchase->get_customer();
+        $requestcustomer = $request->get_customer();
+        if ((int)($customer->get_user_id() ?? 0) !== (int)($requestcustomer->get_user_id() ?? 0)
+                || \core_text::strtolower((string)$customer->get_email())
+                    !== \core_text::strtolower((string)$requestcustomer->get_email())) {
+            throw new CommerceInterruptedCheckoutResumeMismatchException(
+                'Interrupted purchase customer does not match the checkout customer.'
+            );
+        }
+
+        if ($purchase->get_totals()->get_currency() !== $request->get_currency()
+                || $purchase->get_totals()->get_net_total()->get_amount_minor()
+                    !== $request->get_total_amount_minor()) {
+            throw new CommerceInterruptedCheckoutResumeMismatchException(
+                'Interrupted purchase total does not match the current checkout.'
+            );
+        }
+
+        $existingitems = $purchase->get_items();
+        $requestitems = $request->get_items();
+        if (count($existingitems) !== count($requestitems)) {
+            throw new CommerceInterruptedCheckoutResumeMismatchException(
+                'Interrupted purchase item count does not match.'
+            );
+        }
+
+        foreach ($existingitems as $index => $existingitem) {
+            $requestitem = $requestitems[$index];
+            if ($existingitem->get_item_reference() !== $requestitem->get_item()->get_reference()
+                    || $existingitem->get_quantity() !== $requestitem->get_quantity()
+                    || $existingitem->get_currency() !== $requestitem->get_currency()
+                    || $existingitem->get_net_amount()->get_amount_minor()
+                        !== $requestitem->get_total_amount_minor()) {
+                throw new CommerceInterruptedCheckoutResumeMismatchException(
+                    'Interrupted purchase lines do not match the current checkout.'
+                );
+            }
+        }
     }
 
     private function create_payment_attempt(

@@ -552,6 +552,7 @@ if ($members) {
             'active_offer_exists' => 'commerce_personal_offer_reason_active_offer_exists',
             'target_acquired_after_snapshot' => 'commerce_personal_offer_reason_target_acquired_after_snapshot',
             'active_offer_created_after_snapshot' => 'commerce_personal_offer_reason_active_offer_created_after_snapshot',
+            'advanced_audience_rules_not_matched' => 'commerce_personal_offer_reason_advanced_rules_not_matched',
         ];
         if (isset($reasonmap[$reason])) {
             $reason = get_string($reasonmap[$reason], 'local_subscriptions');

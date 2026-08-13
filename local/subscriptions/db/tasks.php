@@ -221,3 +221,13 @@ $tasks[] = [
     'month' => '*',
     'dayofweek' => '*',
 ];
+
+$tasks[] = [
+    'classname' => '\\local_subscriptions\\task\\reconcile_stripe_payments_task',
+    'blocking' => 0,
+    'minute' => '*/5',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
