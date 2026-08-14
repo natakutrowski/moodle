@@ -9,14 +9,15 @@ defined('MOODLE_INTERNAL') || die();
 use moodle_database;
 
 /**
- * Atomically swaps login identity (username + email) from one merge source onto
- * the retained account. Names and pedagogical identity remain on the retained account.
+ * Atomically swaps email + username from one merge source onto the retained account.
+ * The password owner is explicit and independent from the preferred login identity.
+ * Names and pedagogical identity remain on the retained account.
  */
 final class CommerceCustomerPreferredIdentityTransferService {
     public function __construct(private readonly moodle_database $database) {}
 
     /** @return array<string,mixed> */
-    public function transfer(int $targetuserid, int $sourceuserid): array {
+    public function transfer(int $targetuserid, int $sourceuserid, ?int $passwordowneruserid = null): array {
         global $CFG;
         require_once($CFG->dirroot . '/user/lib.php');
 
@@ -25,6 +26,13 @@ final class CommerceCustomerPreferredIdentityTransferService {
         }
         $target = $this->database->get_record('user', ['id' => $targetuserid, 'deleted' => 0], '*', MUST_EXIST);
         $source = $this->database->get_record('user', ['id' => $sourceuserid, 'deleted' => 0], '*', MUST_EXIST);
+
+        // Preserve the historical/safest behaviour by default: changing email + username does
+        // not change the password of the retained Moodle account unless the admin asks for it.
+        $passwordowneruserid ??= $targetuserid;
+        if (!in_array($passwordowneruserid, [$targetuserid, $sourceuserid], true)) {
+            throw new \moodle_exception('commerce_identity_merge_preferred_password_invalid', 'local_subscriptions');
+        }
 
         $snapshot = [
             'targetuserid' => $targetuserid,
@@ -37,11 +45,22 @@ final class CommerceCustomerPreferredIdentityTransferService {
             'target_after_username' => (string)$source->username,
             'source_after_email' => (string)$target->email,
             'source_after_username' => (string)$target->username,
+            'password_owner_userid' => $passwordowneruserid,
+            'password_swapped' => false,
         ];
 
         if (!validate_email((string)$source->email) || trim((string)$source->username) === '') {
             throw new \moodle_exception('commerce_identity_merge_preferred_identity_invalid', 'local_subscriptions');
         }
+
+        $swappassword = $passwordowneruserid === $sourceuserid;
+        if ($swappassword && ((string)$target->auth !== 'manual' || (string)$source->auth !== 'manual')) {
+            throw new \moodle_exception('commerce_identity_merge_preferred_password_manual_only', 'local_subscriptions');
+        }
+
+        // Never expose either hash in the returned/audited snapshot.
+        $targetpassword = $swappassword ? (string)$target->password : null;
+        $sourcepassword = $swappassword ? (string)$source->password : null;
 
         $nonce = substr(hash('sha256', $targetuserid . ':' . $sourceuserid . ':' . microtime(true)), 0, 12);
         $source->username = 'merge-swap-' . $sourceuserid . '-' . $nonce;
@@ -56,6 +75,14 @@ final class CommerceCustomerPreferredIdentityTransferService {
         $source->username = $snapshot['source_after_username'];
         $source->email = $snapshot['source_after_email'];
         user_update_user($source, false, false);
+
+        if ($swappassword) {
+            // user_update_user() expects clear-text passwords when a password is supplied. Use
+            // direct DB writes because these values are already Moodle password hashes.
+            $this->database->set_field('user', 'password', $sourcepassword, ['id' => $targetuserid]);
+            $this->database->set_field('user', 'password', $targetpassword, ['id' => $sourceuserid]);
+            $snapshot['password_swapped'] = true;
+        }
 
         return $snapshot;
     }

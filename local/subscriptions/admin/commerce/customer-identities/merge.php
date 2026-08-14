@@ -79,6 +79,7 @@ $userids = optional_param_array('userids', [], PARAM_INT);
 $ids = trim(optional_param('ids', '', PARAM_RAW_TRIMMED));
 $targetuserid = optional_param('targetuserid', 0, PARAM_INT);
 $preferredidentityuserid = optional_param('preferredidentityuserid', 0, PARAM_INT);
+$preferredpassworduserid = optional_param('preferredpassworduserid', 0, PARAM_INT);
 $q = trim(optional_param('q', '', PARAM_RAW_TRIMMED));
 $adduserid = optional_param('adduserid', 0, PARAM_INT);
 $removeuserid = optional_param('removeuserid', 0, PARAM_INT);
@@ -168,7 +169,8 @@ if (count($userids) >= CommerceCustomerMergePlanner::MIN_ACCOUNTS && in_array($a
                 $plan->targetuserid,
                 (int)$USER->id,
                 $learningresolutions,
-                $preferredidentityuserid > 0 ? $preferredidentityuserid : null
+                $preferredidentityuserid > 0 ? $preferredidentityuserid : null,
+                $preferredpassworduserid > 0 ? $preferredpassworduserid : null
             );
         }
     } catch (\Throwable $exception) {
@@ -586,6 +588,56 @@ if ($executionresult === null && $error === null && $plan !== null) {
         echo html_writer::end_div();
     }
     echo html_writer::div(get_string('commerce_identity_merge_preferred_identity_safety', 'local_subscriptions'), 'alert alert-warning py-2 small mt-3 mb-0');
+
+    // Password ownership is an explicit, separate decision. Only the retained account and the
+    // selected preferred-login account can be valid owners; unrelated merge sources are excluded.
+    $passwordchoices = [$plan->targetuserid];
+    if ($preferredidentityuserid !== $plan->targetuserid) {
+        $passwordchoices[] = $preferredidentityuserid;
+    }
+    if ($preferredpassworduserid <= 0 || !in_array($preferredpassworduserid, $passwordchoices, true)) {
+        $preferredpassworduserid = $plan->targetuserid;
+    }
+
+    echo html_writer::tag('h5', get_string('commerce_identity_merge_preferred_password_title', 'local_subscriptions'), ['class' => 'h6 mt-4']);
+    echo html_writer::div(get_string('commerce_identity_merge_preferred_password_help', 'local_subscriptions'), 'small text-muted mb-2');
+    foreach ($passwordchoices as $passworduserid) {
+        $passwordprofile = null;
+        foreach ($plan->profiles as $candidateprofile) {
+            if ($candidateprofile->userid() === $passworduserid) {
+                $passwordprofile = $candidateprofile;
+                break;
+            }
+        }
+        if ($passwordprofile === null) {
+            continue;
+        }
+        $passwordid = 'preferred-password-' . $passworduserid;
+        $canselectpassword = $passworduserid === $plan->targetuserid
+            || ((string)$plan->target_profile()->user->auth === 'manual'
+                && (string)$passwordprofile->user->auth === 'manual');
+        $passwordlabel = get_string(
+            'commerce_identity_merge_preferred_password_choice',
+            'local_subscriptions',
+            (object)[
+                'userid' => $passworduserid,
+                'email' => (string)$passwordprofile->user->email,
+            ]
+        );
+        if (!$canselectpassword) {
+            $passwordlabel .= ' — ' . get_string('commerce_identity_merge_preferred_password_unavailable', 'local_subscriptions');
+        }
+        echo html_writer::start_div('form-check');
+        echo html_writer::empty_tag('input', [
+            'type' => 'radio', 'class' => 'form-check-input', 'id' => $passwordid,
+            'name' => 'preferredpassworduserid', 'value' => $passworduserid,
+            'checked' => $preferredpassworduserid === $passworduserid ? 'checked' : null,
+            'disabled' => !$canselectpassword ? 'disabled' : null,
+        ]);
+        echo html_writer::tag('label', s($passwordlabel), ['for' => $passwordid, 'class' => 'form-check-label']);
+        echo html_writer::end_div();
+    }
+    echo html_writer::div(get_string('commerce_identity_merge_preferred_password_safety', 'local_subscriptions'), 'alert alert-info py-2 small mt-3 mb-0');
     echo html_writer::end_div();
 
     echo html_writer::tag(
@@ -749,6 +801,11 @@ if ($executionresult === null && $error === null && $plan !== null) {
             'type' => 'hidden',
             'name' => 'preferredidentityuserid',
             'value' => $preferredidentityuserid > 0 ? $preferredidentityuserid : $plan->targetuserid,
+        ]);
+        echo html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => 'preferredpassworduserid',
+            'value' => $preferredpassworduserid > 0 ? $preferredpassworduserid : $plan->targetuserid,
         ]);
         foreach ($userids as $userid) {
             echo html_writer::empty_tag('input', [

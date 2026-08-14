@@ -17,7 +17,10 @@ final class CommerceShowroomSeoService {
         array $offers = []
     ): array {
         $canonical = CommerceShowroomUrl::make($definition)->out(false);
-        $image = $this->preferred_image($offers);
+        $image = trim($definition->get_social_image());
+        if ($image === '') {
+            $image = $this->preferred_image($offers);
+        }
         $alternates = [];
 
         foreach ($definition->get_slugs() as $language => $slug) {

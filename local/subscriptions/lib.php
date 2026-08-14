@@ -445,6 +445,7 @@ function local_subscriptions_pluginfile(
         \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailBannerService::FILEAREA,
         \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailFooterImageService::FILEAREA,
         \local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockMediaManager::FILEAREA,
+        \local_subscriptions\commerce\showroom\cms\CommerceShowroomSocialImageService::FILEAREA,
     ];
 
     if (!in_array($filearea, $allowedareas, true)) {
@@ -489,6 +490,34 @@ function local_subscriptions_pluginfile(
         }
         $itemid = (int)array_shift($args);
         $filename = clean_param((string)array_pop($args), PARAM_FILE);
+        $filepath = '/' . (count($args) ? implode('/', $args) . '/' : '');
+        $file = get_file_storage()->get_file(
+            $context->id,
+            'local_subscriptions',
+            $filearea,
+            $itemid,
+            $filepath,
+            $filename
+        );
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+        send_stored_file($file, 86400, 0, false, $options + ['cacheability' => 'public']);
+        return true;
+    }
+
+    if (
+        $filearea
+        === \local_subscriptions\commerce\showroom\cms\CommerceShowroomSocialImageService::FILEAREA
+    ) {
+        if (count($args) < 2) {
+            return false;
+        }
+        $itemid = (int)array_shift($args);
+        $filename = clean_param((string)array_pop($args), PARAM_FILE);
+        if ($itemid <= 0 || $filename === '') {
+            return false;
+        }
         $filepath = '/' . (count($args) ? implode('/', $args) . '/' : '');
         $file = get_file_storage()->get_file(
             $context->id,

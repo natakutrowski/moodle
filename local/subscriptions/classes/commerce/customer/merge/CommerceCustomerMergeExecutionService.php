@@ -86,7 +86,8 @@ final class CommerceCustomerMergeExecutionService {
         int $targetuserid,
         int $actoruserid,
         array $learningresolutions = [],
-        ?int $preferredidentityuserid = null
+        ?int $preferredidentityuserid = null,
+        ?int $preferredpassworduserid = null
     ): CommerceCustomerMergeExecutionResult {
         global $CFG;
 
@@ -120,6 +121,17 @@ final class CommerceCustomerMergeExecutionService {
             throw new \moodle_exception('commerce_identity_merge_preferred_identity_invalid', 'local_subscriptions');
         }
 
+        // Password choice is deliberately independent from email/username. By default the
+        // retained Moodle account keeps its current password (historical M13 behaviour).
+        $preferredpassworduserid ??= $targetuserid;
+        $allowedpassworduserids = [$targetuserid];
+        if ($preferredidentityuserid !== null && $preferredidentityuserid !== $targetuserid) {
+            $allowedpassworduserids[] = $preferredidentityuserid;
+        }
+        if (!in_array($preferredpassworduserid, $allowedpassworduserids, true)) {
+            throw new \moodle_exception('commerce_identity_merge_preferred_password_invalid', 'local_subscriptions');
+        }
+
         $now = time();
         $transaction = $this->database->start_delegated_transaction();
 
@@ -127,7 +139,8 @@ final class CommerceCustomerMergeExecutionService {
         if ($preferredidentityuserid !== null && $preferredidentityuserid !== $targetuserid) {
             $identitytransfer = (new CommerceCustomerPreferredIdentityTransferService($this->database))->transfer(
                 $targetuserid,
-                $preferredidentityuserid
+                $preferredidentityuserid,
+                $preferredpassworduserid
             );
             // Downstream Legacy consolidation and certification must use the final identity.
             $target = $this->database->get_record('user', ['id' => $targetuserid], '*', MUST_EXIST);
@@ -235,6 +248,7 @@ final class CommerceCustomerMergeExecutionService {
             'transfers' => $transfers,
             'learningresolutions' => $learningresolutions,
             'preferredidentityuserid' => $preferredidentityuserid,
+            'preferredpassworduserid' => $preferredpassworduserid,
             'identitytransfer' => $identitytransfer,
             'certification' => $certification,
         ];
