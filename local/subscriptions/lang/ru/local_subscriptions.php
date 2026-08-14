@@ -9141,3 +9141,4 @@ $string['commerce_showroom_config_social_image_help'] = 'Это изображе
 $string['commerce_showroom_config_social_image_choose'] = 'Выбрать изображение';
 $string['commerce_showroom_config_social_image_format_help'] = 'PNG, JPG или WebP, до 20 МБ. Рекомендуемый размер: 1200 × 630 пикселей.';
 $string['commerce_showroom_config_social_image_remove'] = 'Удалить пользовательское изображение для публикации';
+$string['commerce_showroom_promotion_until_short'] = 'До {$a->date}, {$a->time}';
