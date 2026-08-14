@@ -32,6 +32,7 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
             'translations' => $stored['translations'],
             'showrooms' => $this->compatible_showrooms($campaignid),
             'bannerurl' => (new CommercePersonalOfferCampaignMailBannerService())->url($campaignid),
+            'footerimageurl' => (new CommercePersonalOfferCampaignMailFooterImageService())->url($campaignid),
             'variables' => CommercePersonalOfferCampaignMailVariableResolver::AVAILABLE,
             'editable' => !in_array((string)$campaign->status, ['issued', 'closed'], true),
         ];
@@ -47,7 +48,9 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
         array $translations,
         int $userid,
         ?array $bannerupload = null,
-        bool $deletebanner = false
+        bool $deletebanner = false,
+        ?array $footerimageupload = null,
+        bool $deletefooterimage = false
     ): void {
         if ($destination === CommercePersonalOfferCampaignEmailService::DESTINATION_SHOWROOM) {
             $this->assert_compatible_showroom($campaignid, (int)$showroomid);
@@ -75,7 +78,7 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
                     $this->emailservice->delete_content($campaignid, $language);
                     continue;
                 }
-                if ($subject === '' || $bodyempty || $ctalabel === '') {
+                if ($subject === '' || $bodyempty || ($ctalabel === '' && preg_match('/\{\{cta(?:\|[a-z_]+)?\}\}.*?\{\{\/cta\}\}/is', $body) !== 1)) {
                     throw new \coding_exception('Campaign email subject, body and CTA label are required for language ' . strtoupper($language) . '.');
                 }
 
@@ -85,7 +88,7 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
                     $subject,
                     $body,
                     $bodyformat,
-                    $ctalabel,
+                    $ctalabel !== '' ? $ctalabel : 'Voir mon offre',
                     $secondaryctalabel !== '' ? $secondaryctalabel : null,
                     $secondaryctaurl !== '' ? $secondaryctaurl : null,
                     !$closingempty ? $closing : null,
@@ -100,6 +103,15 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
             }
             if ($bannerupload !== null && (int)($bannerupload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
                 $banners->save_uploaded_file($campaignid, $bannerupload);
+            }
+
+            $footerimages = new CommercePersonalOfferCampaignMailFooterImageService();
+            if ($deletefooterimage) {
+                $footerimages->delete($campaignid);
+            }
+            if ($footerimageupload !== null
+                    && (int)($footerimageupload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                $footerimages->save_uploaded_file($campaignid, $footerimageupload);
             }
 
             $transaction->allow_commit();

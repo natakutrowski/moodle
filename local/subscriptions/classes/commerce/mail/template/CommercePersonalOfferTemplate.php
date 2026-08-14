@@ -269,6 +269,7 @@ final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
     }
 
     protected function primary_action_label(array $context): ?string {
+        if ($this->campaign_has_embedded_cta($context)) { return null; }
         if (empty($context['personaloffer']['url'])) {
             return null;
         }
@@ -289,8 +290,10 @@ final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
     protected function primary_action_after_html(array $context): string {
         $html = '';
 
+        $positionablelayout = !empty($context['personaloffer_positionable_layout']);
+
         $offer = $context['personaloffer'] ?? [];
-        if (is_array($offer) && !empty($offer['hasdirectcheckout'])) {
+        if (!$positionablelayout && is_array($offer) && !empty($offer['hasdirectcheckout'])) {
             $directurl = trim((string)($offer['directcheckouturl'] ?? ''));
             $directlabel = trim((string)($offer['directcheckoutlabel'] ?? ''));
             if ($directurl !== '' && $directlabel !== '') {
@@ -305,12 +308,17 @@ final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
             $html .= '<div style="margin:0 0 24px;">' . $signature . '</div>';
         }
 
-        $offer = $context['personaloffer'] ?? [];
-        if (!is_array($offer) || empty($offer['hasmailimage'])) {
+        if ($positionablelayout) {
             return $html;
         }
 
-        $imageurl = trim((string)($offer['mailimageurl'] ?? ''));
+        $offer = $context['personaloffer'] ?? [];
+        $campaignfooter = trim((string)($context['editorial_footerimageurl'] ?? ''));
+        $imageurl = $campaignfooter;
+        if ($imageurl === '' && is_array($offer) && !empty($offer['hasmailimage'])) {
+            // Backward-compatible fallback for historical Personal Offers.
+            $imageurl = trim((string)($offer['mailimageurl'] ?? ''));
+        }
         if ($imageurl === '') {
             return $html;
         }
@@ -325,4 +333,18 @@ final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
 
         return $html;
     }
+
+    private function campaign_has_embedded_cta(array $context): bool {
+        global $DB;
+        $offer = is_array($context['personaloffer'] ?? null) ? $context['personaloffer'] : [];
+        $campaignid = (int)($offer['campaignid'] ?? 0);
+        if ($campaignid <= 0 || empty($offer['iscampaignemail'])) { return false; }
+        $language = strtolower((string)($context['language'] ?? current_language()));
+        try {
+            $content = \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService::create($DB)
+                ->resolve_content($campaignid, $language);
+            return $content !== null && preg_match('/\{\{cta(?:\|[a-z_]+)?\}\}.*?\{\{\/cta\}\}/is', (string)$content->body) === 1;
+        } catch (\Throwable) { return false; }
+    }
+
 }

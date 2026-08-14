@@ -1094,6 +1094,9 @@
                 <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" />
                 <FIELD NAME="description" TYPE="text" NOTNULL="false" />
                 <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="draft" />
+                <FIELD NAME="scheduledat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="scheduledby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="startedat" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="source" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="manual" />
                 <FIELD NAME="priority" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="normal" />
                 <FIELD NAME="assignedteamid" TYPE="int" LENGTH="10" NOTNULL="false" />
@@ -1794,6 +1797,9 @@
                 <FIELD NAME="certifiedat" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="certifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="draft" />
+                <FIELD NAME="scheduledat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="scheduledby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="startedat" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
                 <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="false" />
@@ -1937,6 +1943,9 @@
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
                 <FIELD NAME="showroomkey" TYPE="char" LENGTH="100" NOTNULL="true" />
                 <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="draft" />
+                <FIELD NAME="scheduledat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="scheduledby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="startedat" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" />
                 <FIELD NAME="template" TYPE="char" LENGTH="255" NOTNULL="true" />
                 <FIELD NAME="slugfr" TYPE="char" LENGTH="191" NOTNULL="false" />

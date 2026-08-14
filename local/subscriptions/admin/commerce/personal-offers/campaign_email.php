@@ -55,7 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             isset($_FILES['campaignbanner']) && is_array($_FILES['campaignbanner'])
                 ? $_FILES['campaignbanner']
                 : null,
-            optional_param('deletebanner', 0, PARAM_BOOL) === 1
+            optional_param('deletebanner', 0, PARAM_BOOL) === 1,
+            isset($_FILES['campaignfooterimage']) && is_array($_FILES['campaignfooterimage'])
+                ? $_FILES['campaignfooterimage']
+                : null,
+            optional_param('deletefooterimage', 0, PARAM_BOOL) === 1
         );
         redirect(
             new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_email_preview.php', ['id' => $id, 'language' => $activelanguage]),
@@ -186,14 +190,74 @@ if (!empty($state['bannerurl']) && $state['editable']) {
 }
 echo html_writer::end_div();
 
+echo html_writer::tag(
+    'h3',
+    get_string('commerce_personal_offer_campaign_footer_title', 'local_subscriptions'),
+    ['class' => 'h5 mt-2']
+);
+echo html_writer::div(
+    get_string('commerce_personal_offer_campaign_footer_help', 'local_subscriptions'),
+    'text-muted mb-3'
+);
+echo html_writer::start_div('mb-4');
+if (!empty($state['footerimageurl'])) {
+    echo html_writer::empty_tag('img', [
+        'src' => (string)$state['footerimageurl'],
+        'alt' => '',
+        'style' => 'display:block;max-width:520px;width:100%;height:auto;border-radius:12px;margin-bottom:12px;',
+    ]);
+}
+$footerattrs = [
+    'type' => 'file',
+    'id' => 'campaignfooterimage',
+    'name' => 'campaignfooterimage',
+    'class' => 'form-control',
+    'accept' => 'image/jpeg,image/png,image/webp',
+];
+if (!$state['editable']) {
+    $footerattrs['disabled'] = 'disabled';
+}
+echo html_writer::empty_tag('input', $footerattrs);
+if (!empty($state['footerimageurl']) && $state['editable']) {
+    echo html_writer::start_div('form-check mt-2');
+    echo html_writer::empty_tag('input', [
+        'type' => 'checkbox',
+        'class' => 'form-check-input',
+        'id' => 'deletefooterimage',
+        'name' => 'deletefooterimage',
+        'value' => '1',
+    ]);
+    echo html_writer::tag(
+        'label',
+        get_string('commerce_personal_offer_campaign_footer_delete', 'local_subscriptions'),
+        ['for' => 'deletefooterimage', 'class' => 'form-check-label']
+    );
+    echo html_writer::end_div();
+}
+echo html_writer::end_div();
+
 echo html_writer::tag('h3', get_string('commerce_personal_offer_campaign_email_content', 'local_subscriptions'), ['class' => 'h5']);
 echo html_writer::div(get_string('commerce_personal_offer_campaign_email_content_help', 'local_subscriptions'), 'text-muted mb-3');
 
 $variablechips = '';
 foreach ($state['variables'] as $variable) {
-    $variablechips .= html_writer::tag('code', '{{' . s($variable) . '}}', ['class' => 'badge bg-light text-dark border me-1 mb-1']);
+    $tag = '{{' . $variable . '}}';
+    $variablechips .= html_writer::tag('button', s($tag), ['type'=>'button','class'=>'btn btn-sm btn-light border me-1 mb-1 js-campaign-tag','data-tag'=>$tag,'title'=>'Cliquer pour copier']);
 }
-echo html_writer::div(html_writer::tag('strong', get_string('commerce_personal_offer_campaign_email_variables', 'local_subscriptions')) . '<br>' . $variablechips, 'alert alert-light border');
+
+$structural = '';
+foreach ([
+    '{{offer}}',
+    '{{cta|gold}}Texte du bouton{{/cta}}',
+    '{{cta|campus_pink}}Texte du bouton{{/cta}}',
+    '{{cta|legacy_blue}}Texte du bouton{{/cta}}',
+    '{{secondary_cta}}',
+    '{{direct_pay}}',
+    '{{image}}',
+] as $tag) {
+    $structural .= html_writer::tag('button', s($tag), ['type'=>'button','class'=>'btn btn-sm btn-outline-secondary me-1 mb-1 js-campaign-tag','data-tag'=>$tag,'title'=>'Cliquer pour copier']);
+}
+echo html_writer::div(html_writer::tag('strong', get_string('commerce_personal_offer_campaign_email_variables', 'local_subscriptions')) . '<br>' . $variablechips . '<hr class="my-2">' . html_writer::tag('strong', 'Blocs de mise en page') . '<br>' . $structural . html_writer::div('Cliquez sur un tag pour le copier. Collez-le exactement où vous voulez dans le corps du mail.', 'small text-muted mt-1'), 'alert alert-light border');
 
 echo html_writer::start_tag('ul', ['class' => 'nav nav-tabs mb-3', 'role' => 'tablist']);
 foreach ($labels as $language => $label) {
@@ -221,6 +285,11 @@ foreach ($labels as $language => $label) {
         'closing' => $record ? (string)($record->closing ?? '') : '',
         'closingformat' => $record ? (int)$record->closingformat : (int)FORMAT_HTML,
     ];
+    // M14A migration-on-edit: old Body + Conclusion becomes one continuous body.
+    if ($record && trim((string)($record->closing ?? '')) !== '' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $values['body'] = rtrim($values['body']) . "\n\n" . (string)$record->closing;
+        $values['closing'] = '';
+    }
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $error !== '') {
         $values['subject'] = optional_param('subject_' . $language, $values['subject'], PARAM_RAW_TRIMMED);
         $values['body'] = optional_param('body_' . $language, $values['body'], PARAM_RAW);
@@ -242,10 +311,8 @@ foreach ($labels as $language => $label) {
     foreach ([
         'subject' => ['commerce_personal_offer_campaign_email_subject', false],
         'body' => ['commerce_personal_offer_campaign_email_body', true],
-        'ctalabel' => ['commerce_personal_offer_campaign_email_cta_label', false],
         'secondaryctalabel' => ['commerce_personal_offer_campaign_email_secondary_cta_label', false],
         'secondaryctaurl' => ['commerce_personal_offer_campaign_email_secondary_cta_url', false],
-        'closing' => ['commerce_personal_offer_campaign_email_closing', true],
     ] as $field => [$stringkey, $richeditor]) {
         echo html_writer::start_div('mb-3');
         $fieldid = $field . '_' . $language;
@@ -277,6 +344,9 @@ foreach ($labels as $language => $label) {
         }
         echo html_writer::end_div();
     }
+    echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'ctalabel_' . $language,'value'=>'']);
+    echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'closing_' . $language,'value'=>'']);
+    echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'closingformat_' . $language,'value'=>(int)FORMAT_HTML]);
     echo html_writer::end_div();
 }
 echo html_writer::end_div();
@@ -287,6 +357,14 @@ if ($state['editable']) {
 echo html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_view.php', ['id' => $id]), get_string('cancel'), ['class' => 'btn btn-link ms-2']);
 echo html_writer::end_tag('form');
 $PAGE->requires->js_amd_inline(<<<'JS'
+document.querySelectorAll('.js-campaign-tag').forEach(function(button) {
+    button.addEventListener('click', function() {
+        var tag = button.dataset.tag || '';
+        if (navigator.clipboard) { navigator.clipboard.writeText(tag); }
+        var old = button.innerHTML; button.innerHTML = '✓ Copié';
+        setTimeout(function(){ button.innerHTML = old; }, 900);
+    });
+});
 document.querySelectorAll('[data-bs-toggle="tab"][data-language]').forEach(function(tab) {
     tab.addEventListener('shown.bs.tab', function() {
         var field = document.getElementById('campaign-email-active-language');

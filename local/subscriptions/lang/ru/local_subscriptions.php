@@ -9122,3 +9122,10 @@ $string['commerce_identity_merge_detail_activity_grade_value'] = 'выполне
 $string['commerce_identity_merge_detail_download_value'] = 'Скачивания {$a->count}/{$a->max}';
 
 $string['commerce_identity_merge_detail_course_roles'] = 'Роль(и): {$a->roles} · период: {$a->start} → {$a->end}';
+
+$string['commerce_personal_offer_campaign_footer_title'] = 'Финальное изображение';
+$string['commerce_personal_offer_campaign_footer_help'] = 'Необязательное изображение кампании. Загрузите его здесь и поставьте {{image}} именно в том месте текста письма, где оно должно появиться. Без {{image}} новый редактор его не выводит.';
+$string['commerce_personal_offer_campaign_footer_delete'] = 'Удалить текущее финальное изображение';
+$string['commerce_personal_offer_campaign_footer_upload_error'] = 'Не удалось загрузить финальное изображение кампании.';
+$string['commerce_personal_offer_campaign_footer_too_large'] = 'Размер финального изображения кампании не должен превышать 8 МБ.';
+$string['commerce_personal_offer_campaign_footer_invalid_type'] = 'Финальное изображение должно быть в формате JPEG, PNG или WebP.';

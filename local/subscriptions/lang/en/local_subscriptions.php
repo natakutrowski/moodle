@@ -9047,3 +9047,10 @@ $string['commerce_identity_merge_detail_activity_grade_value'] = '{$a->activitie
 $string['commerce_identity_merge_detail_download_value'] = 'Downloads {$a->count}/{$a->max}';
 
 $string['commerce_identity_merge_detail_course_roles'] = 'Role(s): {$a->roles} · interval: {$a->start} → {$a->end}';
+
+$string['commerce_personal_offer_campaign_footer_title'] = 'End image';
+$string['commerce_personal_offer_campaign_footer_help'] = 'Optional campaign image. Upload it here, then place {{image}} exactly where it should appear in the email body. Without {{image}}, it is not displayed by the new editor.';
+$string['commerce_personal_offer_campaign_footer_delete'] = 'Delete the current end image';
+$string['commerce_personal_offer_campaign_footer_upload_error'] = 'The campaign end image could not be uploaded.';
+$string['commerce_personal_offer_campaign_footer_too_large'] = 'The campaign end image must not exceed 8 MB.';
+$string['commerce_personal_offer_campaign_footer_invalid_type'] = 'The end image must be a JPEG, PNG or WebP file.';

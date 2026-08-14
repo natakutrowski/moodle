@@ -443,6 +443,7 @@ function local_subscriptions_pluginfile(
         \local_subscriptions\commerce\mail\template\studio\CommerceMailHeaderImageService::FILEAREA,
         \local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferMailImageService::FILEAREA,
         \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailBannerService::FILEAREA,
+        \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailFooterImageService::FILEAREA,
         \local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockMediaManager::FILEAREA,
     ];
 
@@ -457,7 +458,10 @@ function local_subscriptions_pluginfile(
      * Les pièces jointes Inbox nécessitent une authentification
      * et la capacité de lecture de la CRM Inbox.
      */
-    if ($filearea === \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailBannerService::FILEAREA) {
+    if (in_array($filearea, [
+        \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailBannerService::FILEAREA,
+        \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailFooterImageService::FILEAREA,
+    ], true)) {
         if (count($args) < 2) {
             return false;
         }
