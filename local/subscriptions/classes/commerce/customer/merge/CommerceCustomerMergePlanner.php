@@ -138,7 +138,7 @@ final class CommerceCustomerMergePlanner {
                 'deleted' => 0,
                 'mnethostid' => (int)$CFG->mnet_localhost_id,
             ],
-            'id,username,firstname,lastname,email,confirmed,suspended,timecreated,lastaccess',
+            '*',
             MUST_EXIST
         );
 
@@ -168,6 +168,7 @@ final class CommerceCustomerMergePlanner {
         );
 
         [$gradecount, $averagegradepercent] = $this->grade_summary($userid);
+        $gamification = (new CommerceCustomerGamificationMergeService($this->database))->score_summary($userid);
 
         return new CommerceCustomerMergeAccountProfile(
             $user,
@@ -191,7 +192,9 @@ final class CommerceCustomerMergePlanner {
             (int)$this->database->count_records(
                 'local_subs_commerce_guest',
                 ['userid' => $userid]
-            )
+            ),
+            (int)$gamification['xp'],
+            (int)$gamification['quests']
         );
     }
 

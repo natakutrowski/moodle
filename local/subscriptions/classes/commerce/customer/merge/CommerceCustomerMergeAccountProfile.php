@@ -20,7 +20,9 @@ final class CommerceCustomerMergeAccountProfile {
         public readonly int $purchases,
         public readonly int $grants,
         public readonly int $digitalaccesses,
-        public readonly int $guestsessions
+        public readonly int $guestsessions,
+        public readonly int $levelupxp = 0,
+        public readonly int $levelupquests = 0
     ) {
     }
 
@@ -34,7 +36,9 @@ final class CommerceCustomerMergeAccountProfile {
             + ($this->completedactivities * 10)
             + ($this->enrolledcourses * 50)
             + $this->gradecount
-            + (int)round($this->averagegradepercent);
+            + (int)round($this->averagegradepercent)
+            + (int)floor($this->levelupxp / 10)
+            + ($this->levelupquests * 25);
     }
 
     public function commerce_score(): int {
@@ -50,6 +54,8 @@ final class CommerceCustomerMergeAccountProfile {
             $this->enrolledcourses > 0
             || $this->completedcourses > 0
             || $this->completedactivities > 0
-            || $this->gradecount > 0;
+            || $this->gradecount > 0
+            || $this->levelupxp > 0
+            || $this->levelupquests > 0;
     }
 }

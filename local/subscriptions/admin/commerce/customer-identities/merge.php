@@ -11,6 +11,8 @@ use local_subscriptions\commerce\customer\merge\CommerceCustomerMergeFinalStateR
 use local_subscriptions\commerce\customer\merge\CommerceCustomerManualMergeCandidateService;
 use local_subscriptions\commerce\customer\merge\CommerceCustomerLearningMergeService;
 use local_subscriptions\commerce\customer\merge\CommerceCustomerLegacyConsolidationService;
+use local_subscriptions\commerce\customer\merge\CommerceCustomerGamificationMergeService;
+use local_subscriptions\commerce\customer\merge\CommerceCustomerAdvancedProfileMergeService;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
@@ -80,6 +82,8 @@ $ids = trim(optional_param('ids', '', PARAM_RAW_TRIMMED));
 $targetuserid = optional_param('targetuserid', 0, PARAM_INT);
 $preferredidentityuserid = optional_param('preferredidentityuserid', 0, PARAM_INT);
 $preferredpassworduserid = optional_param('preferredpassworduserid', 0, PARAM_INT);
+$advancedmerge = optional_param('advancedmerge', 0, PARAM_BOOL);
+$profilechoices = optional_param_array('profilechoice', [], PARAM_INT);
 $q = trim(optional_param('q', '', PARAM_RAW_TRIMMED));
 $adduserid = optional_param('adduserid', 0, PARAM_INT);
 $removeuserid = optional_param('removeuserid', 0, PARAM_INT);
@@ -138,6 +142,7 @@ $executor = new CommerceCustomerMergeExecutionService($DB, $planner);
 $candidateservice = new CommerceCustomerManualMergeCandidateService($DB);
 $learningmergeservice = new CommerceCustomerLearningMergeService($DB);
 $legacymergeservice = new CommerceCustomerLegacyConsolidationService($DB);
+$gamificationmergeservice = new CommerceCustomerGamificationMergeService($DB);
 $selectedusers = $candidateservice->selected($userids);
 $searchresults = $q !== '' ? $candidateservice->search($q, $userids) : [];
 $defaultaction = count($userids) >= CommerceCustomerMergePlanner::MIN_ACCOUNTS ? 'preview' : 'select';
@@ -170,7 +175,8 @@ if (count($userids) >= CommerceCustomerMergePlanner::MIN_ACCOUNTS && in_array($a
                 (int)$USER->id,
                 $learningresolutions,
                 $preferredidentityuserid > 0 ? $preferredidentityuserid : null,
-                $preferredpassworduserid > 0 ? $preferredpassworduserid : null
+                $preferredpassworduserid > 0 ? $preferredpassworduserid : null,
+                $profilechoices
             );
         }
     } catch (\Throwable $exception) {
@@ -522,6 +528,11 @@ if ($executionresult === null && $error === null && $plan !== null) {
                 'score' => $profile->pedagogical_score(),
             ]
         );
+        $pedagogy .= "\n" . get_string(
+            'commerce_identity_merge_gamification_summary',
+            'local_subscriptions',
+            (object)['xp' => $profile->levelupxp, 'quests' => $profile->levelupquests]
+        );
 
         $commerce = get_string(
             'commerce_identity_merge_commerce_summary',
@@ -640,6 +651,98 @@ if ($executionresult === null && $error === null && $plan !== null) {
     echo html_writer::div(get_string('commerce_identity_merge_preferred_password_safety', 'local_subscriptions'), 'alert alert-info py-2 small mt-3 mb-0');
     echo html_writer::end_div();
 
+    echo html_writer::start_div('card card-body mb-3 commerce-identity-advanced-merge');
+    echo html_writer::start_div('form-check form-switch mb-2');
+    echo html_writer::empty_tag('input', [
+        'type' => 'checkbox', 'class' => 'form-check-input', 'id' => 'advancedmerge',
+        'name' => 'advancedmerge', 'value' => '1', 'checked' => $advancedmerge ? 'checked' : null,
+    ]);
+    echo html_writer::tag('label', get_string('commerce_identity_merge_advanced_mode', 'local_subscriptions'), [
+        'for' => 'advancedmerge', 'class' => 'form-check-label fw-semibold',
+    ]);
+    echo html_writer::end_div();
+    echo html_writer::div(get_string('commerce_identity_merge_advanced_mode_help', 'local_subscriptions'), 'small text-muted mb-3');
+
+    if ($advancedmerge) {
+        $fieldlabels = [
+            'firstname' => get_string('firstname'), 'lastname' => get_string('lastname'),
+            'middlename' => get_string('middlename'), 'alternatename' => get_string('alternatename'),
+            'idnumber' => get_string('idnumber'), 'institution' => get_string('institution'),
+            'department' => get_string('department'), 'phone1' => get_string('phone1'),
+            'phone2' => get_string('phone2'), 'address' => get_string('address'),
+            'city' => get_string('city'), 'country' => get_string('country'),
+            'lang' => get_string('preferredlanguage'), 'timezone' => get_string('timezone'),
+            'description' => get_string('userdescription'),
+        ];
+        $visiblefields = [];
+        foreach ($fieldlabels as $field => $label) {
+            $values = [];
+            foreach ($plan->profiles as $profile) {
+                $values[(string)($profile->user->{$field} ?? '')] = true;
+            }
+            if (count($values) > 1) {
+                $visiblefields[$field] = $label;
+            }
+        }
+        $customfields = $DB->get_records('user_info_field', null, 'sortorder ASC, id ASC');
+        foreach ($customfields as $customfield) {
+            $fieldkey = 'custom_' . (int)$customfield->id;
+            $values = [];
+            foreach ($plan->profiles as $profile) {
+                $data = $DB->get_field('user_info_data', 'data', [
+                    'userid' => $profile->userid(), 'fieldid' => (int)$customfield->id,
+                ]);
+                $values[(string)($data === false ? '' : $data)] = true;
+            }
+            if (count($values) > 1) {
+                $visiblefields[$fieldkey] = (string)$customfield->name;
+            }
+        }
+
+        if ($visiblefields === []) {
+            echo html_writer::div(get_string('commerce_identity_merge_advanced_no_profile_conflicts', 'local_subscriptions'), 'small text-muted');
+        } else {
+            $atable = new html_table();
+            $atable->attributes['class'] = 'generaltable table table-sm align-middle commerce-identity-advanced-table';
+            $atable->head = [get_string('commerce_identity_merge_advanced_field', 'local_subscriptions')];
+            foreach ($plan->profiles as $index => $profile) {
+                $atable->head[] = get_string('commerce_identity_merge_advanced_account_column', 'local_subscriptions', (object)[
+                    'letter' => chr(65 + $index), 'userid' => $profile->userid(),
+                ]);
+            }
+            foreach ($visiblefields as $field => $label) {
+                $row = [s($label)];
+                foreach ($plan->profiles as $profile) {
+                    $userid = $profile->userid();
+                    $selecteduserid = (int)($profilechoices[$field] ?? $plan->targetuserid);
+                    if (preg_match('/^custom_(\d+)$/', $field, $custommatch)) {
+                        $customvalue = $DB->get_field('user_info_data', 'data', [
+                            'userid' => $userid, 'fieldid' => (int)$custommatch[1],
+                        ]);
+                        $value = trim((string)($customvalue === false ? '' : $customvalue));
+                    } else {
+                        $value = trim((string)($profile->user->{$field} ?? ''));
+                    }
+                    if ($field === 'description') {
+                        $value = shorten_text(strip_tags($value), 80);
+                    }
+                    $inputid = 'profilechoice-' . $field . '-' . $userid;
+                    $cell = html_writer::empty_tag('input', [
+                        'type' => 'radio', 'name' => 'profilechoice[' . $field . ']', 'value' => $userid,
+                        'id' => $inputid, 'class' => 'form-check-input me-2',
+                        'checked' => $selecteduserid === $userid ? 'checked' : null,
+                    ]);
+                    $cell .= html_writer::tag('label', s($value !== '' ? $value : '—'), ['for' => $inputid]);
+                    $row[] = $cell;
+                }
+                $atable->data[] = $row;
+            }
+            echo html_writer::table($atable);
+            echo html_writer::div(get_string('commerce_identity_merge_advanced_identity_note', 'local_subscriptions'), 'alert alert-info py-2 small mb-0');
+        }
+    }
+    echo html_writer::end_div();
+
     echo html_writer::tag(
         'button',
         get_string('commerce_identity_merge_recalculate', 'local_subscriptions'),
@@ -703,9 +806,11 @@ if ($executionresult === null && $error === null && $plan !== null) {
 
     $learningpreviewtotal = 0;
     $legacypreviewtotal = 0;
+    $gamificationpreviewtotal = 0;
     foreach ($plan->source_profiles() as $sourceprofile) {
         $learningpreviewtotal += array_sum($learningmergeservice->preview($sourceprofile->userid()));
         $legacypreviewtotal += array_sum($legacymergeservice->preview($sourceprofile->userid()));
+        $gamificationpreviewtotal += array_sum($gamificationmergeservice->preview($sourceprofile->userid()));
     }
     echo html_writer::div(
         html_writer::tag(
@@ -719,6 +824,7 @@ if ($executionresult === null && $error === null && $plan !== null) {
                 (object)[
                     'learning' => $learningpreviewtotal,
                     'commerce' => $legacypreviewtotal,
+                    'gamification' => $gamificationpreviewtotal,
                 ]
             ),
             'small text-muted mt-1'
@@ -807,6 +913,16 @@ if ($executionresult === null && $error === null && $plan !== null) {
             'name' => 'preferredpassworduserid',
             'value' => $preferredpassworduserid > 0 ? $preferredpassworduserid : $plan->targetuserid,
         ]);
+        echo html_writer::empty_tag('input', [
+            'type' => 'hidden', 'name' => 'advancedmerge', 'value' => $advancedmerge ? '1' : '0',
+        ]);
+        foreach ($profilechoices as $field => $sourceuserid) {
+            if (in_array($field, CommerceCustomerAdvancedProfileMergeService::FIELDS, true) || preg_match('/^custom_\d+$/', (string)$field)) {
+                echo html_writer::empty_tag('input', [
+                    'type' => 'hidden', 'name' => 'profilechoice[' . $field . ']', 'value' => (int)$sourceuserid,
+                ]);
+            }
+        }
         foreach ($userids as $userid) {
             echo html_writer::empty_tag('input', [
                 'type' => 'hidden',
