@@ -8902,3 +8902,4 @@ $string['commerce_showroom_config_social_image_help'] = 'Image utilisée dans le
 $string['commerce_showroom_config_social_image_choose'] = 'Choisir une image';
 $string['commerce_showroom_config_social_image_format_help'] = 'PNG, JPG ou WebP, 20 Mo maximum. Format recommandé : 1200 × 630 px.';
 $string['commerce_showroom_config_social_image_remove'] = 'Supprimer l’image de partage personnalisée';
+$string['commerce_showroom_promotion_until_short'] = 'Jusqu’au {$a->date}, {$a->time}';

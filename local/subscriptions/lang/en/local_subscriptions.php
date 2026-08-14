@@ -9066,3 +9066,4 @@ $string['commerce_showroom_config_social_image_help'] = 'Image used for Telegram
 $string['commerce_showroom_config_social_image_choose'] = 'Choose an image';
 $string['commerce_showroom_config_social_image_format_help'] = 'PNG, JPG or WebP, up to 20 MB. Recommended size: 1200 × 630 px.';
 $string['commerce_showroom_config_social_image_remove'] = 'Remove the custom sharing image';
+$string['commerce_showroom_promotion_until_short'] = 'Until {$a->date}, {$a->time}';

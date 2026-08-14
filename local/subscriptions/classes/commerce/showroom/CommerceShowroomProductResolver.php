@@ -183,7 +183,9 @@ final class CommerceShowroomProductResolver {
             'haspromotion' => is_array($price) && !empty($price['haspromotion']),
             'discountlabel' => is_array($price) ? (string)($price['discountlabel'] ?? '') : '',
             'haspromotionend' => is_array($price) && !empty($price['haspromotionend']),
-            'promotionendlabel' => is_array($price) ? (string)($price['promotionendlabel'] ?? '') : '',
+            'promotionendlabel' => $pricemodel?->get_promotion_end() !== null
+                ? $this->short_promotion_end_label($pricemodel->get_promotion_end())
+                : '',
             'priceid' => $priceid,
             'detailsurl' => $this->tracking_url(
                 \local_subscriptions\commerce\storefront\presentation\CommerceStorefrontUrlResolver::direct_storefront(
@@ -200,6 +202,26 @@ final class CommerceShowroomProductResolver {
                 $product->get_components()
             ))),
         ]);
+    }
+
+
+    /**
+     * Compact deadline used only on showroom cards; the storefront keeps its full wording.
+     */
+    private function short_promotion_end_label(int $promotionend): string {
+        $timezone = 'Europe/Paris';
+        $promotionyear = (int)userdate($promotionend, '%Y', $timezone);
+        $currentyear = (int)userdate(time(), '%Y', $timezone);
+        $dateformat = $promotionyear === $currentyear ? '%e %b' : '%e %b %Y';
+
+        return get_string(
+            'commerce_showroom_promotion_until_short',
+            'local_subscriptions',
+            (object)[
+                'date' => trim(userdate($promotionend, $dateformat, $timezone)),
+                'time' => userdate($promotionend, '%H:%M', $timezone),
+            ]
+        );
     }
 
     /**
