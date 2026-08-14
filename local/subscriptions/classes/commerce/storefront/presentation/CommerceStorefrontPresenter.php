@@ -48,7 +48,11 @@ final class CommerceStorefrontPresenter {
                         : get_string(
                             'commerce_storefront_promotion_until',
                             'local_subscriptions',
-                            userdate($promotionend, get_string('strftimedate', 'langconfig'))
+                            userdate(
+                                $promotionend,
+                                get_string('strftimedatetime', 'langconfig'),
+                                'Europe/Paris'
+                            )
                         ),
                 ];
             },

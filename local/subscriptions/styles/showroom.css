@@ -691,6 +691,35 @@
     font-weight: 800;
 }
 
+.commerce-showroom-offer__validity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+    max-width: 100%;
+    margin: .4rem .55rem 0;
+    color: var(--showroom-muted);
+    font-size: .72rem;
+    font-weight: 650;
+    line-height: 1.25;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.commerce-showroom-offer__validity-icon {
+    flex: 0 0 auto;
+    font-size: .9rem;
+    line-height: 1;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-showroom-offer__validity {
+        margin-right: .25rem;
+        margin-left: .25rem;
+        white-space: normal;
+    }
+}
+
 .commerce-showroom-offer__actions {
     align-items: stretch;
     flex-direction: column;

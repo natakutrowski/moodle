@@ -25,7 +25,7 @@ final class commerce_showroom_offer_pricing_j13h25_test extends \advanced_testca
         self::assertIsString($template);
         self::assertIsString($css);
         self::assertStringContainsString('apply_bundle_merchandising_price', $resolver);
-        self::assertStringContainsString('$bundleamount >= $combinedamount', $resolver);
+        self::assertStringContainsString('$bestcompare = max($candidates);', $resolver);
         self::assertStringContainsString('CommercePurchasePresentation::money(', $resolver);
         self::assertStringContainsString('commerce_storefront_discount_percentage', $resolver);
         self::assertStringContainsString('commerce-showroom-offer__pricing-promotion', $template);
