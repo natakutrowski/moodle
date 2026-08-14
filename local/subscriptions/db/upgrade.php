@@ -8078,5 +8078,15 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026081303, 'local', 'subscriptions');
     }
 
+    if ($oldversion < 2026081401) {
+        $table = new xmldb_table('local_subs_commerce_offer_campaign');
+        foreach ([
+            new xmldb_field('scheduledat', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'status'),
+            new xmldb_field('scheduledby', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'scheduledat'),
+            new xmldb_field('startedat', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'scheduledby'),
+        ] as $field) { if (!$dbman->field_exists($table, $field)) { $dbman->add_field($table, $field); } }
+        upgrade_plugin_savepoint(true, 2026081401, 'local', 'subscriptions');
+    }
+
     return true;
 }

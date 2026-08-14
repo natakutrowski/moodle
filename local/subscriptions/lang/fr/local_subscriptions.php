@@ -8883,3 +8883,10 @@ $string['commerce_identity_merge_detail_activity_grade_value'] = '{$a->activitie
 $string['commerce_identity_merge_detail_download_value'] = 'Téléchargements {$a->count}/{$a->max}';
 
 $string['commerce_identity_merge_detail_course_roles'] = 'Rôle(s) : {$a->roles} · plage : {$a->start} → {$a->end}';
+
+$string['commerce_personal_offer_campaign_footer_title'] = 'Image de fin';
+$string['commerce_personal_offer_campaign_footer_help'] = 'Image facultative de campagne. Téléversez-la ici puis placez {{image}} exactement à l’endroit où elle doit apparaître dans le corps de l’e-mail. Sans {{image}}, elle n’est pas affichée dans le nouvel éditeur.';
+$string['commerce_personal_offer_campaign_footer_delete'] = 'Supprimer l’image de fin actuelle';
+$string['commerce_personal_offer_campaign_footer_upload_error'] = 'Impossible de téléverser l’image de fin de campagne.';
+$string['commerce_personal_offer_campaign_footer_too_large'] = 'L’image de fin de campagne ne doit pas dépasser 8 Mo.';
+$string['commerce_personal_offer_campaign_footer_invalid_type'] = 'L’image de fin doit être un fichier JPEG, PNG ou WebP.';

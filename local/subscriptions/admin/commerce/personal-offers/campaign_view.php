@@ -36,6 +36,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $manager->preview($id, (int)$USER->id);
         } elseif ($action === 'snapshot') {
             $manager->create_snapshot($id, (int)$USER->id);
+        } elseif ($action === 'schedule') {
+            $raw = required_param('scheduledat', PARAM_RAW_TRIMMED);
+            $tz = new DateTimeZone('Europe/Paris');
+            $dt = DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $raw, $tz);
+            if (!$dt || $dt->getTimestamp() <= time()) { throw new coding_exception('La date programmée doit être dans le futur.'); }
+            if (!empty($campaign->expiresat) && $dt->getTimestamp() >= (int)$campaign->expiresat) { throw new coding_exception('La campagne ne peut pas commencer après l’expiration de l’offre.'); }
+            $DB->set_field('local_subs_commerce_offer_campaign', 'scheduledat', $dt->getTimestamp(), ['id'=>$id]);
+            $DB->set_field('local_subs_commerce_offer_campaign', 'scheduledby', (int)$USER->id, ['id'=>$id]);
+        } elseif ($action === 'unschedule') {
+            $DB->set_field('local_subs_commerce_offer_campaign', 'scheduledat', null, ['id'=>$id]);
+            $DB->set_field('local_subs_commerce_offer_campaign', 'scheduledby', null, ['id'=>$id]);
         } elseif ($action === 'generate') {
             $manager->generate($id, (int)$USER->id);
         } elseif ($action === 'retrygeneration') {
@@ -317,6 +328,23 @@ if (
     );
 }
 
+if (has_capability(Capabilities::MANAGE_CRM_ADMIN_TOOLS, $context) && $campaign->status === 'snapshot') {
+    $schedulehtml = !empty($campaign->scheduledat)
+        ? html_writer::div('Envoi programmé : <strong>' . userdate((int)$campaign->scheduledat) . '</strong> (Europe/Paris). Les offres seront générées puis les emails entreront automatiquement dans la file.', 'alert alert-info')
+        : html_writer::div('Vous pouvez lancer maintenant ou programmer le démarrage. Une fois l’heure atteinte, la génération et la mise en file des emails sont automatiques.', 'text-muted mb-3');
+    if (empty($campaign->scheduledat)) {
+        $schedulehtml .= html_writer::start_tag('form', ['method'=>'post','class'=>'d-flex gap-2 align-items-end flex-wrap']);
+        $schedulehtml .= html_writer::empty_tag('input',['type'=>'hidden','name'=>'sesskey','value'=>sesskey()]);
+        $schedulehtml .= html_writer::empty_tag('input',['type'=>'hidden','name'=>'action','value'=>'schedule']);
+        $schedulehtml .= html_writer::div(html_writer::tag('label','Début des envois (heure de Paris)',['class'=>'form-label fw-semibold']) . html_writer::empty_tag('input',['type'=>'datetime-local','name'=>'scheduledat','class'=>'form-control','required'=>'required']), '');
+        $schedulehtml .= html_writer::tag('button','Programmer',['class'=>'btn btn-primary','type'=>'submit']);
+        $schedulehtml .= html_writer::end_tag('form');
+    } else {
+        $schedulehtml .= html_writer::start_tag('form',['method'=>'post']) . html_writer::empty_tag('input',['type'=>'hidden','name'=>'sesskey','value'=>sesskey()]) . html_writer::empty_tag('input',['type'=>'hidden','name'=>'action','value'=>'unschedule']) . html_writer::tag('button','Annuler la programmation',['class'=>'btn btn-outline-danger','type'=>'submit']) . html_writer::end_tag('form');
+    }
+    echo CommerceDesignSystemRenderer::panel('Programmation', $schedulehtml, 'mt-3');
+}
+
 if (has_capability(Capabilities::MANAGE_CRM_ADMIN_TOOLS, $context)) {
     $actions = html_writer::start_div('d-flex flex-wrap gap-2 mt-3');
 
@@ -349,7 +377,7 @@ if (has_capability(Capabilities::MANAGE_CRM_ADMIN_TOOLS, $context)) {
         $actions .= html_writer::end_tag('form');
     }
 
-    if ($campaign->status === 'snapshot') {
+    if ($campaign->status === 'snapshot' && empty($campaign->scheduledat)) {
         $actions .= html_writer::start_tag('form', ['method' => 'post']);
         $actions .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
         $actions .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'generate']);

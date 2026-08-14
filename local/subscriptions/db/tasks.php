@@ -242,3 +242,5 @@ $tasks[] = [
     'month' => '*',
     'dayofweek' => '*',
 ];
+
+$tasks[] = ['classname' => '\\local_subscriptions\\task\\process_personal_offer_scheduled_campaigns_task', 'blocking'=>0, 'minute'=>'*', 'hour'=>'*', 'day'=>'*', 'month'=>'*', 'dayofweek'=>'*'];

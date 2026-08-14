@@ -132,6 +132,13 @@ abstract class AbstractCommerceMailTemplate implements CommerceMailTemplate {
                 $context['has_editorial_signature'] = false;
             }
 
+            if (!empty($editorial['footerimageurl'])) {
+                $context['editorial_footerimageurl'] = trim((string)$editorial['footerimageurl']);
+            }
+            if (!empty($editorial['positionablelayout'])) {
+                $context['personaloffer_positionable_layout'] = true;
+            }
+
             $headerimageurl = '';
             if (!empty($editorial['headerimage']) && !empty($editorial['templateid'])) {
                 $headerimageurl = CommerceMailHeaderImageService::url((int)$editorial['templateid']);
@@ -152,6 +159,7 @@ abstract class AbstractCommerceMailTemplate implements CommerceMailTemplate {
                     'buttonvariant' => $this->primary_action_variant($context),
                     'buttonicon' => $this->primary_action_icon($context),
                     'afterbuttonhtml' => $this->primary_action_after_html($context),
+                    'headcss' => trim((string)($editorial['headcss'] ?? '')),
                 ]
             );
 

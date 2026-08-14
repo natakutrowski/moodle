@@ -85,6 +85,8 @@ class MailRenderer {
         $buttonvariant  = strtolower(trim((string)($options['buttonvariant'] ?? 'standard')));
         $buttonicon     = strtolower(trim((string)($options['buttonicon'] ?? '')));
         $afterbuttonhtml = trim((string)($options['afterbuttonhtml'] ?? ''));
+        // Optional email-specific progressive-enhancement CSS, injected in <head>.
+        $headcss = trim((string)($options['headcss'] ?? ''));
 
         // ── Bouton (HTML) ───────────────────────────────────────────────────────────
         $btn = '';
@@ -196,6 +198,7 @@ class MailRenderer {
                         .ls-text { color:#e5e7eb !important; }
                         .ls-muted { color:#9ca3af !important; }
                     }
+                    '.$headcss.'
                     </style>
                     </head>
                     <body style="margin:0;padding:0;background:#f6f9fc;font-family:Nunito,Segoe UI,Arial,Helvetica,sans-serif;">
