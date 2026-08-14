@@ -13,6 +13,14 @@ final class UserProfileActionBuilder {
 
         return [
             new UserProfileAction(
+                'changeemail',
+                get_string('commerce_customer_email_change_action', 'local_subscriptions'),
+                (new \moodle_url(subscription_config::admin_user_change_email_page(), ['id' => $userid]))->out(false),
+                'email',
+                'secondary'
+            ),
+
+            new UserProfileAction(
                 'email',
                 get_string('command_action_user_email', 'local_subscriptions'),
                 (new \moodle_url(subscription_config::admin_user_email_page(), ['id' => $userid]))->out(false),

@@ -432,6 +432,10 @@ class subscription_config {
         return self::plugin_path() . 'admin/users/email.php';
     }
 
+    public static function admin_user_change_email_page(): string {
+        return self::plugin_path() . 'admin/users/change_email.php';
+    }
+
     public static function admin_user_reset_password_page(): string {
         return self::plugin_path() . 'admin/users/reset_password.php';
     }
