@@ -87,7 +87,8 @@ final class CommerceCustomerMergeExecutionService {
         int $actoruserid,
         array $learningresolutions = [],
         ?int $preferredidentityuserid = null,
-        ?int $preferredpassworduserid = null
+        ?int $preferredpassworduserid = null,
+        array $profilechoices = []
     ): CommerceCustomerMergeExecutionResult {
         global $CFG;
 
@@ -169,9 +170,17 @@ final class CommerceCustomerMergeExecutionService {
             'crmscores' => 0,
             'inboxcontacts' => 0,
             'suspendedaccounts' => 0,
+            'gamification_xp_totals' => 0,
+            'gamification_xp_logs' => 0,
+            'gamification_xp_logs_deduplicated' => 0,
+            'gamification_xp_flags' => 0,
+            'gamification_quests' => 0,
+            'gamification_quest_conflicts_merged' => 0,
+            'gamification_quest_objectives' => 0,
         ];
 
         $legacyservice = new CommerceCustomerLegacyConsolidationService($this->database);
+        $gamificationservice = new CommerceCustomerGamificationMergeService($this->database);
 
         foreach ($plan->source_profiles() as $profile) {
             $sourceuserid = $profile->userid();
@@ -187,6 +196,11 @@ final class CommerceCustomerMergeExecutionService {
                 (string)$target->email
             ) as $key => $count) {
                 $transfers[$key] = ($transfers[$key] ?? 0) + $count;
+            }
+
+            foreach ($gamificationservice->merge($sourceuserid, $targetuserid) as $key => $count) {
+                $transferkey = 'gamification_' . $key;
+                $transfers[$transferkey] = ($transfers[$transferkey] ?? 0) + $count;
             }
             $transfers['notes'] += $this->move_simple(
                 'local_subscriptions_user_note',
@@ -229,6 +243,21 @@ final class CommerceCustomerMergeExecutionService {
             }
         }
 
+        foreach ($sourceuserids as $sourceuserid) {
+            if (array_sum($gamificationservice->preview($sourceuserid)) > 0) {
+                throw new \moodle_exception('commerce_identity_merge_gamification_incomplete', 'local_subscriptions');
+            }
+        }
+
+        $appliedprofilechoices = (new CommerceCustomerAdvancedProfileMergeService($this->database))->apply(
+            $targetuserid,
+            $profilechoices,
+            array_merge([$targetuserid], $sourceuserids)
+        );
+        if ($appliedprofilechoices !== []) {
+            $target = $this->database->get_record('user', ['id' => $targetuserid], '*', MUST_EXIST);
+        }
+
         $certification = (new CommerceCustomerMergeCertificationService($this->database))->certify(
             $sourceuserids,
             $targetuserid,
@@ -250,6 +279,7 @@ final class CommerceCustomerMergeExecutionService {
             'preferredidentityuserid' => $preferredidentityuserid,
             'preferredpassworduserid' => $preferredpassworduserid,
             'identitytransfer' => $identitytransfer,
+            'profilechoices' => $appliedprofilechoices,
             'certification' => $certification,
         ];
 

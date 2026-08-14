@@ -635,3 +635,13 @@
         min-width: 980px;
     }
 }
+/* M16 advanced merge: keep A/B choices readable without overpowering the merge preview. */
+.commerce-identity-advanced-table td:not(:first-child),
+.commerce-identity-advanced-table th:not(:first-child) {
+    min-width: 180px;
+}
+.commerce-identity-advanced-table label {
+    cursor: pointer;
+    font-size: .875rem;
+    overflow-wrap: anywhere;
+}
