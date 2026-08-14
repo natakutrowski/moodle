@@ -1300,7 +1300,7 @@ foreach (['eur' => 'EUR', 'rub' => 'RUB'] as $key => $currencylabel) {
         echo html_writer::start_div('col-lg-3');
         echo html_writer::tag('label', get_string('commerce_storefront_promotion_' . $datefield, 'local_subscriptions'), ['for' => 'promotion_' . $key . '_' . $datefield, 'class' => 'form-label']);
         echo html_writer::empty_tag('input', [
-            'type' => 'date',
+            'type' => 'datetime-local',
             'id' => 'promotion_' . $key . '_' . $datefield,
             'name' => 'promotion_' . $key . '_' . $datefield,
             'value' => $definition['promotion_' . $key . '_' . $datefield],

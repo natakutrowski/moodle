@@ -105,6 +105,8 @@ final class CommerceShowroomProductResolver {
             'hascompareprice' => false,
             'haspromotion' => false,
             'discountlabel' => '',
+            'haspromotionend' => false,
+            'promotionendlabel' => '',
             'priceid' => 0,
             'detailsurl' => UrlFactory::digital_catalog(['currency' => $currency])->out(false),
             'ownedactionurl' => '',
@@ -180,6 +182,8 @@ final class CommerceShowroomProductResolver {
             'hascompareprice' => is_array($price) && trim((string)($price['compareformatted'] ?? '')) !== '',
             'haspromotion' => is_array($price) && !empty($price['haspromotion']),
             'discountlabel' => is_array($price) ? (string)($price['discountlabel'] ?? '') : '',
+            'haspromotionend' => is_array($price) && !empty($price['haspromotionend']),
+            'promotionendlabel' => is_array($price) ? (string)($price['promotionendlabel'] ?? '') : '',
             'priceid' => $priceid,
             'detailsurl' => $this->tracking_url(
                 \local_subscriptions\commerce\storefront\presentation\CommerceStorefrontUrlResolver::direct_storefront(
@@ -226,7 +230,22 @@ final class CommerceShowroomProductResolver {
 
         $combinedamount = $courseamount + $pdfamount;
         $bundleindex = $indexes['bundle'];
-        if ($combinedamount <= 0 || $bundleamount >= $combinedamount) {
+
+        // A bundle can have two honest comparison references:
+        // 1) its own active Storefront compare price;
+        // 2) the current sum of the component products.
+        // Always expose the reference producing the largest real discount. Because the sale
+        // price is identical for both candidates, that is simply the highest valid reference.
+        $configuredcompare = $offers[$bundleindex]['compareamountminor'] ?? null;
+        $candidates = [];
+        if (is_int($configuredcompare) && $configuredcompare > $bundleamount) {
+            $candidates[] = $configuredcompare;
+        }
+        if ($combinedamount > $bundleamount) {
+            $candidates[] = $combinedamount;
+        }
+
+        if ($candidates === []) {
             $offers[$bundleindex]['compareformatted'] = '';
             $offers[$bundleindex]['compareamountminor'] = null;
             $offers[$bundleindex]['hascompareprice'] = false;
@@ -235,10 +254,11 @@ final class CommerceShowroomProductResolver {
             return $offers;
         }
 
-        $discount = (int)round((($combinedamount - $bundleamount) / $combinedamount) * 100);
-        $offers[$bundleindex]['compareamountminor'] = $combinedamount;
+        $bestcompare = max($candidates);
+        $discount = (int)round((($bestcompare - $bundleamount) / $bestcompare) * 100);
+        $offers[$bundleindex]['compareamountminor'] = $bestcompare;
         $offers[$bundleindex]['compareformatted'] = CommercePurchasePresentation::money(
-            $combinedamount,
+            $bestcompare,
             $currency
         );
         $offers[$bundleindex]['hascompareprice'] = true;

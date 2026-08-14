@@ -27,6 +27,9 @@
                 </span>
                 {{/ispersonaloffer}}
             </div>
+            {{#haspromotionend}}
+            <p class="commerce-showroom-offer__validity"><span class="commerce-showroom-offer__validity-icon" aria-hidden="true">🔥</span><span>{{promotionendlabel}}</span></p>
+            {{/haspromotionend}}
         </div>
         <div class="commerce-showroom-offer__actions">
             {{#canbuy}}

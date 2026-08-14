@@ -94,11 +94,11 @@ final class CommerceStorefrontPageEditor {
             'displayorder' => $merchandising->get_display_order(),
             'badges' => $merchandising->get_badges(),
             'promotion_eur_compare' => $this->minor_to_major($promotioneur['compareamountminor'] ?? null),
-            'promotion_eur_start' => $this->date_value($promotioneur['start'] ?? null),
-            'promotion_eur_end' => $this->date_value($promotioneur['end'] ?? null),
+            'promotion_eur_start' => $this->datetime_value($promotioneur['start'] ?? null),
+            'promotion_eur_end' => $this->datetime_value($promotioneur['end'] ?? null),
             'promotion_rub_compare' => $this->minor_to_major($promotionrub['compareamountminor'] ?? null),
-            'promotion_rub_start' => $this->date_value($promotionrub['start'] ?? null),
-            'promotion_rub_end' => $this->date_value($promotionrub['end'] ?? null),
+            'promotion_rub_start' => $this->datetime_value($promotionrub['start'] ?? null),
+            'promotion_rub_end' => $this->datetime_value($promotionrub['end'] ?? null),
             'group' => $experience->get_group(),
             'trust' => $experience->get_trust_items(),
             'quickfacts' => $this->quick_facts_to_text($experience->get_quick_facts()),
@@ -689,8 +689,8 @@ final class CommerceStorefrontPageEditor {
 
         return [
             'compareamountminor' => $minor,
-            'start' => $this->submitted_date((string)($submitted['promotion_' . $currency . '_start'] ?? ''), false),
-            'end' => $this->submitted_date((string)($submitted['promotion_' . $currency . '_end'] ?? ''), true),
+            'start' => $this->submitted_datetime((string)($submitted['promotion_' . $currency . '_start'] ?? ''), false),
+            'end' => $this->submitted_datetime((string)($submitted['promotion_' . $currency . '_end'] ?? ''), true),
         ];
     }
 
@@ -748,18 +748,34 @@ final class CommerceStorefrontPageEditor {
         return $minor === null ? '' : number_format($minor / 100, 2, '.', '');
     }
 
-    private function date_value(?int $timestamp): string {
-        return $timestamp === null ? '' : userdate($timestamp, '%Y-%m-%d', 99, false);
+    private function datetime_value(?int $timestamp): string {
+        if ($timestamp === null) {
+            return '';
+        }
+        $datetime = (new \DateTimeImmutable('@' . $timestamp))->setTimezone(new \DateTimeZone('Europe/Paris'));
+        return $datetime->format('Y-m-d\TH:i');
     }
 
-    private function submitted_date(string $value, bool $endofday): ?int {
+    private function submitted_datetime(string $value, bool $endofday): ?int {
         $value = trim($value);
-        if ($value === '' || preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+        if ($value === '') {
             return null;
         }
-        $suffix = $endofday ? ' 23:59:59' : ' 00:00:00';
-        $timestamp = strtotime($value . $suffix);
-        return $timestamp === false ? null : $timestamp;
+
+        // Backwards compatibility: historical forms submitted a date only. Keep the old
+        // start-of-day / end-of-day semantics when reading such values.
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1) {
+            $value .= $endofday ? 'T23:59:59' : 'T00:00:00';
+        } else if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/', $value) !== 1) {
+            return null;
+        }
+
+        try {
+            $datetime = new \DateTimeImmutable($value, new \DateTimeZone('Europe/Paris'));
+        } catch (\Exception) {
+            return null;
+        }
+        return $datetime->getTimestamp();
     }
 
     /** @return string[] */
