@@ -96,6 +96,7 @@ final class CommerceCustomerMergeHistoryService {
                 'certificationchecks' => (int)($summary['passed'] ?? 0),
                 'manualdecisions' => (int)($summary['manualdecisions'] ?? 0),
                 'preferredidentityuserid' => isset($result['preferredidentityuserid']) ? (int)$result['preferredidentityuserid'] : null,
+                'preferredpassworduserid' => isset($result['preferredpassworduserid']) ? (int)$result['preferredpassworduserid'] : null,
                 'identitytransfer' => is_array($result['identitytransfer'] ?? null) ? $result['identitytransfer'] : null,
             ];
         }

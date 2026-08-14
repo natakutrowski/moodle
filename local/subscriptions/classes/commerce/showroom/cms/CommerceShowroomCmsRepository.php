@@ -179,6 +179,10 @@ final class CommerceShowroomCmsRepository {
 
         $transaction = $this->db->start_delegated_transaction();
 
+        (new CommerceShowroomSocialImageService(
+            \context_system::instance()
+        ))->delete($id);
+
         foreach ($this->blocks($id) as $block) {
             $this->delete_block_media((int)$block->id);
         }
@@ -303,6 +307,9 @@ final class CommerceShowroomCmsRepository {
                 'configjson' => $block->configjson,
             ], $userid);
         }
+        (new CommerceShowroomSocialImageService(
+            \context_system::instance()
+        ))->duplicate($showroomid, $newid);
         return $newid;
     }
 

@@ -47,6 +47,13 @@ final class CommerceShowroomCmsDefinitionFactory {
         $offerconfig = CommerceShowroomOfferConfig::from_settings_json(
             (string)$record->settingsjson
         );
+        $socialimage = '';
+        if (!empty($record->id)) {
+            $socialimageurl = (new CommerceShowroomSocialImageService(
+                \context_system::instance()
+            ))->get_url((int)$record->id);
+            $socialimage = $socialimageurl?->out(false) ?? '';
+        }
 
         $titlekey = trim((string)($record->titlekey ?? ''));
         if ($titlekey === '') {
@@ -70,7 +77,8 @@ final class CommerceShowroomCmsDefinitionFactory {
             $titlekey,
             $descriptionkey,
             $seo,
-            $offerconfig
+            $offerconfig,
+            $socialimage
         );
     }
 

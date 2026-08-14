@@ -17,7 +17,8 @@ final class CommerceShowroomDefinition {
         private readonly string $titlekey,
         private readonly string $descriptionkey,
         private readonly array $seo = [],
-        private readonly array $offerconfig = []
+        private readonly array $offerconfig = [],
+        private readonly string $socialimage = ''
     ) {
     }
 
@@ -62,6 +63,10 @@ final class CommerceShowroomDefinition {
     public function is_offer_details_enabled(string $role): bool {
         $config = $this->get_offer_config($role);
         return !array_key_exists('detailsenabled', $config) || !empty($config['detailsenabled']);
+    }
+
+    public function get_social_image(): string {
+        return trim($this->socialimage);
     }
 
     public function get_seo(?string $language = null): array {

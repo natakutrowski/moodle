@@ -13,6 +13,7 @@ use local_subscriptions\commerce\showroom\cms\CommerceShowroomPageTemplateRegist
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublicationService;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomRenderTemplateRegistry;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomSeoConfig;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomSocialImageService;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomProductLinkOptions;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomOfferConfig;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomStatus;
@@ -124,6 +125,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'productsjson' => $productsjson,
         'settingsjson' => $settingsjson,
     ], (int)$USER->id);
+
+    $socialimageservice = new CommerceShowroomSocialImageService($context);
+    if (optional_param('socialimage_remove', 0, PARAM_BOOL) === 1) {
+        $socialimageservice->delete($savedid);
+    }
+    if (
+        isset($_FILES['socialimage'])
+        && (int)($_FILES['socialimage']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE
+    ) {
+        $socialimageservice->store_uploaded_image($savedid, 'socialimage');
+    }
+
     redirect(new moodle_url($PAGE->url, ['id' => $savedid]), get_string('changessaved'));
 }
 
@@ -139,6 +152,8 @@ $defaults = $record ?: (object)[
 $currentseo = CommerceShowroomSeoConfig::from_settings_json(
     (string)$defaults->settingsjson
 );
+$socialimageservice = new CommerceShowroomSocialImageService($context);
+$currentsocialimageurl = $id > 0 ? $socialimageservice->get_url($id) : null;
 
 $currentproducts = json_decode((string)$defaults->productsjson, true);
 $currentproducts = is_array($currentproducts) ? $currentproducts : [];
@@ -361,6 +376,7 @@ echo html_writer::end_div();
 
 echo html_writer::start_tag('form', [
     'method' => 'post',
+    'enctype' => 'multipart/form-data',
     'class' => 'card card-body mb-4 commerce-showroom-general-config',
 ]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
@@ -467,6 +483,61 @@ $seolanguages = [
     'en' => ['label' => 'English', 'flag' => '🇬🇧'],
     'ru' => ['label' => 'Русский', 'flag' => '🇷🇺'],
 ];
+
+echo html_writer::start_tag('section', [
+    'class' => 'commerce-showroom-social-image card card-body mb-4',
+]);
+echo html_writer::tag(
+    'h4',
+    get_string('commerce_showroom_config_social_image', 'local_subscriptions'),
+    ['class' => 'h6 mb-1']
+);
+echo html_writer::tag(
+    'p',
+    get_string('commerce_showroom_config_social_image_help', 'local_subscriptions'),
+    ['class' => 'text-muted mb-3']
+);
+if ($currentsocialimageurl !== null) {
+    echo html_writer::empty_tag('img', [
+        'src' => $currentsocialimageurl->out(false),
+        'alt' => '',
+        'class' => 'commerce-showroom-social-image__preview mb-3',
+    ]);
+}
+echo html_writer::tag(
+    'label',
+    get_string('commerce_showroom_config_social_image_choose', 'local_subscriptions'),
+    ['for' => 'socialimage', 'class' => 'form-label']
+);
+echo html_writer::empty_tag('input', [
+    'type' => 'file',
+    'id' => 'socialimage',
+    'name' => 'socialimage',
+    'accept' => 'image/png,image/jpeg,image/webp',
+    'class' => 'form-control',
+]);
+echo html_writer::tag(
+    'div',
+    get_string('commerce_showroom_config_social_image_format_help', 'local_subscriptions'),
+    ['class' => 'form-text']
+);
+if ($currentsocialimageurl !== null) {
+    echo html_writer::start_div('form-check mt-3');
+    echo html_writer::empty_tag('input', [
+        'type' => 'checkbox',
+        'id' => 'socialimage_remove',
+        'name' => 'socialimage_remove',
+        'value' => '1',
+        'class' => 'form-check-input',
+    ]);
+    echo html_writer::tag(
+        'label',
+        get_string('commerce_showroom_config_social_image_remove', 'local_subscriptions'),
+        ['for' => 'socialimage_remove', 'class' => 'form-check-label']
+    );
+    echo html_writer::end_div();
+}
+echo html_writer::end_tag('section');
 
 echo html_writer::start_div('commerce-showroom-seo-grid');
 foreach ($seolanguages as $language => $languageconfig) {
