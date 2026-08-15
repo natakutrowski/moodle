@@ -33,7 +33,7 @@ try {
         $service->reconcile_payment($userid, $paymentid);
         $message = get_string('commerce_guest_crm_action_reconciled', 'local_subscriptions');
     } else {
-        throw new \invalid_parameter_exception('Unknown M9.3 action.');
+        throw new \invalid_parameter_exception('Unknown checkout administration action.');
     }
 
     redirect($returnurl, $message, null, \core\output\notification::NOTIFY_SUCCESS);

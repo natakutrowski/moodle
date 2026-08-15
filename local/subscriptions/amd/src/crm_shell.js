@@ -11,6 +11,8 @@ const SELECTORS = {
     navigationPanel: '[data-crm-navigation-panel]',
     navigationToggle: '[data-crm-navigation-toggle]',
     navigationLink: '[data-crm-navigation-link]',
+    navigationMenuToggle: '[data-crm-navigation-menu-toggle]',
+    navigationMenuItem: '.crm-app-navigation-item.has-submenu',
     commandToggle: '[data-crm-command-open]',
     commandCenter: '.campusfr-command-center',
     commandTrigger: '.campusfr-command-trigger',
@@ -193,6 +195,39 @@ const closeTopbarMenus = (
     });
 };
 
+
+/**
+ * Closes CRM contextual navigation menus except one optional item.
+ *
+ * @param {HTMLElement} shell
+ * @param {HTMLElement|null} exception
+ */
+const closeNavigationMenus = (
+    shell,
+    exception = null
+) => {
+    shell.querySelectorAll(
+        SELECTORS.navigationMenuItem
+    ).forEach((item) => {
+        if (item === exception) {
+            return;
+        }
+
+        item.classList.remove('is-menu-open');
+
+        const toggle = item.querySelector(
+            SELECTORS.navigationMenuToggle
+        );
+
+        if (toggle) {
+            toggle.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+        }
+    });
+};
+
 /**
  * Connects the topbar shortcut to the actual Command Center.
  *
@@ -303,6 +338,46 @@ const initialiseShell = (shell) => {
     });
 
     shell.querySelectorAll(
+        SELECTORS.navigationMenuToggle
+    ).forEach((toggle) => {
+        toggle.addEventListener(
+            'click',
+            (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const item = toggle.closest(
+                    SELECTORS.navigationMenuItem
+                );
+
+                if (!item) {
+                    return;
+                }
+
+                const open =
+                    !item.classList.contains(
+                        'is-menu-open'
+                    );
+
+                closeNavigationMenus(
+                    shell,
+                    open ? item : null
+                );
+                closeTopbarMenus(shell);
+
+                item.classList.toggle(
+                    'is-menu-open',
+                    open
+                );
+                toggle.setAttribute(
+                    'aria-expanded',
+                    open ? 'true' : 'false'
+                );
+            }
+        );
+    });
+
+    shell.querySelectorAll(
         SELECTORS.topbarDetails
     ).forEach((details) => {
         details.addEventListener(
@@ -335,6 +410,15 @@ const initialiseShell = (shell) => {
 
             if (!insideTopbarMenu) {
                 closeTopbarMenus(shell);
+            }
+
+            const insideNavigationMenu =
+                event.target.closest(
+                    SELECTORS.navigationMenuItem
+                );
+
+            if (!insideNavigationMenu) {
+                closeNavigationMenus(shell);
             }
 
             if (
@@ -382,6 +466,7 @@ const initialiseShell = (shell) => {
                 );
 
             closeTopbarMenus(shell);
+            closeNavigationMenus(shell);
 
             setNavigationOpen(
                 shell,
@@ -397,6 +482,8 @@ const initialiseShell = (shell) => {
         );
 
     const handleResponsiveChange = () => {
+        closeNavigationMenus(shell);
+
         if (!mediaQuery.matches) {
             setNavigationOpen(
                 shell,

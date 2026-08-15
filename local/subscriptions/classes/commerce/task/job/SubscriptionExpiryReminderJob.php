@@ -6,6 +6,7 @@ use local_subscriptions\commerce\task\contract\CommerceTaskJob;
 use local_subscriptions\commerce\task\dto\TaskExecutionResult;
 use local_subscriptions\commerce\task\repository\SubscriptionReminderRepository;
 use local_subscriptions\commerce\task\support\TaskLock;
+use local_subscriptions\commerce\mail\legacy\CommerceLegacyAutomaticMailPolicy;
 use local_subscriptions\mailer;
 final class SubscriptionExpiryReminderJob implements CommerceTaskJob {
     public function __construct(private readonly ?SubscriptionReminderRepository $repository = null) {
@@ -18,6 +19,11 @@ final class SubscriptionExpiryReminderJob implements CommerceTaskJob {
             return $r->finish();
         }
         try {
+            if (!CommerceLegacyAutomaticMailPolicy::expiry_reminders_enabled()) {
+                $r->increment('legacy_reminders_disabled');
+                return $r->finish();
+            }
+
             $repo = $this->repository ?? new SubscriptionReminderRepository();
             $now = time();
             $global = $this->parse((string)(get_config('local_subscriptions', 'expiry_reminder_days') ?? '7'));

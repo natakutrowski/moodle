@@ -10,6 +10,7 @@ use local_subscriptions\commerce\mail\CommerceMailType;
 use local_subscriptions\commerce\mail\template\studio\CommerceMailHeaderImageService;
 use local_subscriptions\commerce\mail\template\studio\CommerceMailTemplateDefaults;
 use local_subscriptions\commerce\mail\template\studio\CommerceMailTemplateRepository;
+use local_subscriptions\commerce\mail\transactional\CommerceTransactionalMailStudioBridge;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
@@ -24,6 +25,17 @@ $mailtype = required_param('mailtype', PARAM_ALPHANUMEXT);
 $language = required_param('language', PARAM_ALPHANUMEXT);
 if (!in_array($mailtype, CommerceMailType::all(), true) || !in_array($language, ['fr', 'en', 'ru'], true)) {
     throw new moodle_exception('invalidparameter');
+}
+
+$transactionalbridge = CommerceTransactionalMailStudioBridge::create($DB);
+if (in_array($mailtype, CommerceTransactionalMailStudioBridge::supported_types(), true)) {
+    $mailstudiotemplate = $transactionalbridge->template($mailtype);
+    if ($mailstudiotemplate !== null) {
+        redirect(new moodle_url(
+            '/local/subscriptions/admin/commerce/mail/templates/library_edit.php',
+            ['id' => (int)$mailstudiotemplate->id]
+        ));
+    }
 }
 
 $listurl = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/index.php');

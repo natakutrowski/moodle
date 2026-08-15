@@ -18,6 +18,22 @@ use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CRM_ADMIN_TOOLS);
+
+$prefillemail = trim(optional_param('prefillemail', '', PARAM_EMAIL));
+$prefillsourcemode = optional_param(
+    'prefillsourcemode',
+    'none',
+    PARAM_ALPHANUMEXT
+);
+if (!in_array($prefillsourcemode, ['none', 'product', 'purchase'], true)) {
+    $prefillsourcemode = 'none';
+}
+$prefillsourcepurchase = trim(optional_param(
+    'prefillsourcepurchase',
+    '',
+    PARAM_RAW_TRIMMED
+));
+
 $url = new moodle_url('/local/subscriptions/admin/commerce/personal-offers/create.php');
 $title = get_string('commerce_personal_offer_create_individual', 'local_subscriptions');
 CrmPageConfigurator::configure($PAGE, $context, $url, $title, 'local-subscriptions-commerce-personal-offer-create-page');
@@ -131,7 +147,16 @@ echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', '
 
 echo html_writer::start_div('mb-4');
 echo html_writer::tag('label', get_string('commerce_personal_offer_email', 'local_subscriptions'), ['for' => 'offer-email', 'class' => 'form-label fw-semibold']);
-echo html_writer::empty_tag('input', ['id' => 'offer-email', 'name' => 'email', 'type' => 'text', 'list' => 'offer-email-list', 'class' => 'form-control', 'autocomplete' => 'off', 'required' => 'required']);
+echo html_writer::empty_tag('input', [
+    'id' => 'offer-email',
+    'name' => 'email',
+    'type' => 'text',
+    'list' => 'offer-email-list',
+    'class' => 'form-control',
+    'autocomplete' => 'off',
+    'required' => 'required',
+    'value' => $prefillemail,
+]);
 echo html_writer::start_tag('datalist', ['id' => 'offer-email-list']);
 foreach ($emailrecords as $record) {
     $fullname = trim((string)$record->firstname . ' ' . (string)$record->lastname);
@@ -156,7 +181,10 @@ echo html_writer::select([
     'none' => get_string('commerce_personal_offer_source_none', 'local_subscriptions'),
     'product' => get_string('commerce_personal_offer_source_product', 'local_subscriptions'),
     'purchase' => get_string('commerce_personal_offer_source_purchase_mode', 'local_subscriptions'),
-], 'sourcemode', 'none', false, ['id' => 'sourcemode', 'class' => 'form-select mb-2']);
+], 'sourcemode', $prefillsourcemode, false, [
+    'id' => 'sourcemode',
+    'class' => 'form-select mb-2',
+]);
 echo html_writer::div(get_string('commerce_personal_offer_source_basis_help', 'local_subscriptions'), 'form-text mb-3');
 
 echo html_writer::tag('label', get_string('commerce_personal_offer_source_product', 'local_subscriptions'), ['for' => 'sourceproductid', 'class' => 'form-label']);
@@ -165,7 +193,18 @@ foreach ($products as $product) { $sourceproductopts[$product->id] = CommercePer
 echo html_writer::select($sourceproductopts, 'sourceproductid', '', false, ['id' => 'sourceproductid', 'class' => 'form-select mb-3']);
 
 echo html_writer::tag('label', get_string('commerce_personal_offer_source_purchase_optional', 'local_subscriptions'), ['for' => 'sourcepurchase', 'class' => 'form-label']);
-echo html_writer::empty_tag('input', ['id' => 'sourcepurchase', 'name' => 'sourcepurchase', 'list' => 'sourcepurchase-list', 'class' => 'form-control', 'autocomplete' => 'off', 'placeholder' => get_string('commerce_personal_offer_source_purchase_placeholder', 'local_subscriptions')]);
+echo html_writer::empty_tag('input', [
+    'id' => 'sourcepurchase',
+    'name' => 'sourcepurchase',
+    'list' => 'sourcepurchase-list',
+    'class' => 'form-control',
+    'autocomplete' => 'off',
+    'placeholder' => get_string(
+        'commerce_personal_offer_source_purchase_placeholder',
+        'local_subscriptions'
+    ),
+    'value' => $prefillsourcepurchase,
+]);
 echo html_writer::start_tag('datalist', ['id' => 'sourcepurchase-list']);
 $publicreferences = new CommercePublicOrderReference();
 foreach ($purchases as $purchase) {

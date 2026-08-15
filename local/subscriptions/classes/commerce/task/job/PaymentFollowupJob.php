@@ -7,6 +7,7 @@ use local_subscriptions\commerce\task\contract\CommerceTaskJob;
 use local_subscriptions\commerce\task\dto\TaskExecutionResult;
 use local_subscriptions\commerce\task\repository\PaymentFollowupRepository;
 use local_subscriptions\commerce\task\support\TaskLock;
+use local_subscriptions\commerce\mail\legacy\CommerceLegacyAutomaticMailPolicy;
 use local_subscriptions\mailer;
 
 final class PaymentFollowupJob implements CommerceTaskJob {
@@ -47,6 +48,11 @@ final class PaymentFollowupJob implements CommerceTaskJob {
                 } catch (\Throwable $exception) {
                     $result->add_error((int)$request->id, $exception);
                 }
+            }
+
+            if (!CommerceLegacyAutomaticMailPolicy::payment_reminders_enabled()) {
+                $result->increment('legacy_reminders_disabled');
+                return $result->finish();
             }
 
             foreach ($repository->find_reminder_candidates($this->limit) as $request) {

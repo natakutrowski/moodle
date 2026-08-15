@@ -3,6 +3,8 @@ require_once(__DIR__ . '/../../../../../config.php');
 
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\commerce\mail\builder\CommerceMailBuilder;
+use local_subscriptions\commerce\mail\builder\CommerceMailBuilderEditorRenderer;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailBuilderService;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
@@ -21,6 +23,7 @@ $campaign = $state['campaign'];
 $url = new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_email.php', ['id' => $id]);
 $title = get_string('commerce_personal_offer_campaign_email_title', 'local_subscriptions');
 CrmPageConfigurator::configure($PAGE, $context, $url, $title, 'local-subscriptions-commerce-personal-offer-campaign-email-page');
+$PAGE->requires->css('/local/subscriptions/styles/commerce_mail_admin.css');
 
 $requestedlanguage = optional_param('lang', 'fr', PARAM_ALPHA);
 $activelanguage = in_array($requestedlanguage, CommercePersonalOfferCampaignEmailService::SUPPORTED_LANGUAGES, true)
@@ -101,6 +104,145 @@ if ($error !== '') {
 if (!$state['editable']) {
     echo html_writer::div(get_string('commerce_personal_offer_campaign_email_locked', 'local_subscriptions'), 'alert alert-warning');
 }
+
+$mailstudioaction = new moodle_url(
+    '/local/subscriptions/admin/commerce/personal-offers/campaign_email_template_action.php'
+);
+$mailstudiotemplates = $state['mailstudiotemplates'] ?? [];
+$mailstudiosource = $state['mailstudiosource'] ?? null;
+
+echo html_writer::start_div('commerce-personal-offer-mailstudio card card-body mb-4');
+echo html_writer::div(
+    html_writer::div(
+        html_writer::tag(
+            'h3',
+            get_string('commerce_personal_offer_mailstudio_title', 'local_subscriptions'),
+            ['class' => 'h5 mb-1']
+        )
+        . html_writer::div(
+            get_string('commerce_personal_offer_mailstudio_help', 'local_subscriptions'),
+            'text-muted small'
+        ),
+        'commerce-personal-offer-mailstudio-heading-copy'
+    )
+    . html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/mail/templates/index.php',
+            ['category' => 'personal_offer']
+        ),
+        get_string('commerce_personal_offer_mailstudio_library', 'local_subscriptions'),
+        ['class' => 'btn btn-sm btn-outline-secondary']
+    ),
+    'commerce-personal-offer-mailstudio-heading'
+);
+
+if ($mailstudiosource) {
+    echo html_writer::div(
+        html_writer::tag(
+            'i',
+            '',
+            ['class' => 'fa fa-copy me-1', 'aria-hidden' => 'true']
+        )
+        . get_string(
+            'commerce_personal_offer_mailstudio_snapshot_source',
+            'local_subscriptions',
+            (string)$mailstudiosource->name
+        ),
+        'commerce-personal-offer-mailstudio-source'
+    );
+}
+
+if ($state['editable']) {
+    echo html_writer::start_div('commerce-personal-offer-mailstudio-grid');
+
+    echo html_writer::start_tag('form', [
+        'method' => 'post',
+        'action' => $mailstudioaction->out(false),
+        'class' => 'commerce-personal-offer-mailstudio-action',
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey(),
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'id', 'value' => $id,
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'action', 'value' => 'applytemplate',
+    ]);
+    echo html_writer::tag(
+        'label',
+        get_string('commerce_personal_offer_mailstudio_apply', 'local_subscriptions'),
+        ['for' => 'personal-offer-mailstudio-template', 'class' => 'form-label fw-semibold']
+    );
+    if ($mailstudiotemplates !== []) {
+        echo html_writer::select(
+            $mailstudiotemplates,
+            'templateid',
+            0,
+            false,
+            [
+                'id' => 'personal-offer-mailstudio-template',
+                'class' => 'form-select',
+            ]
+        );
+        echo html_writer::div(
+            get_string('commerce_personal_offer_mailstudio_apply_help', 'local_subscriptions'),
+            'form-text'
+        );
+        echo html_writer::tag(
+            'button',
+            get_string('commerce_personal_offer_mailstudio_apply_button', 'local_subscriptions'),
+            ['type' => 'submit', 'class' => 'btn btn-outline-primary mt-2']
+        );
+    } else {
+        echo html_writer::div(
+            get_string('commerce_personal_offer_mailstudio_empty', 'local_subscriptions'),
+            'alert alert-light border py-2 mb-0'
+        );
+    }
+    echo html_writer::end_tag('form');
+
+    echo html_writer::start_tag('form', [
+        'method' => 'post',
+        'action' => $mailstudioaction->out(false),
+        'class' => 'commerce-personal-offer-mailstudio-action',
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey(),
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'id', 'value' => $id,
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'action', 'value' => 'savetemplate',
+    ]);
+    echo html_writer::tag(
+        'label',
+        get_string('commerce_personal_offer_mailstudio_save_as', 'local_subscriptions'),
+        ['for' => 'personal-offer-mailstudio-name', 'class' => 'form-label fw-semibold']
+    );
+    echo html_writer::empty_tag('input', [
+        'type' => 'text',
+        'id' => 'personal-offer-mailstudio-name',
+        'name' => 'templatename',
+        'value' => (string)$campaign->name,
+        'required' => 'required',
+        'class' => 'form-control',
+    ]);
+    echo html_writer::div(
+        get_string('commerce_personal_offer_mailstudio_save_help', 'local_subscriptions'),
+        'form-text'
+    );
+    echo html_writer::tag(
+        'button',
+        get_string('commerce_personal_offer_mailstudio_save_button', 'local_subscriptions'),
+        ['type' => 'submit', 'class' => 'btn btn-outline-secondary mt-2']
+    );
+    echo html_writer::end_tag('form');
+
+    echo html_writer::end_div();
+}
+echo html_writer::end_div();
 
 echo html_writer::start_tag('form', [
     'method' => 'post',
@@ -239,25 +381,10 @@ echo html_writer::end_div();
 echo html_writer::tag('h3', get_string('commerce_personal_offer_campaign_email_content', 'local_subscriptions'), ['class' => 'h5']);
 echo html_writer::div(get_string('commerce_personal_offer_campaign_email_content_help', 'local_subscriptions'), 'text-muted mb-3');
 
-$variablechips = '';
-foreach ($state['variables'] as $variable) {
-    $tag = '{{' . $variable . '}}';
-    $variablechips .= html_writer::tag('button', s($tag), ['type'=>'button','class'=>'btn btn-sm btn-light border me-1 mb-1 js-campaign-tag','data-tag'=>$tag,'title'=>'Cliquer pour copier']);
-}
-
-$structural = '';
-foreach ([
-    '{{offer}}',
-    '{{cta|gold}}Texte du bouton{{/cta}}',
-    '{{cta|campus_pink}}Texte du bouton{{/cta}}',
-    '{{cta|legacy_blue}}Texte du bouton{{/cta}}',
-    '{{secondary_cta}}',
-    '{{direct_pay}}',
-    '{{image}}',
-] as $tag) {
-    $structural .= html_writer::tag('button', s($tag), ['type'=>'button','class'=>'btn btn-sm btn-outline-secondary me-1 mb-1 js-campaign-tag','data-tag'=>$tag,'title'=>'Cliquer pour copier']);
-}
-echo html_writer::div(html_writer::tag('strong', get_string('commerce_personal_offer_campaign_email_variables', 'local_subscriptions')) . '<br>' . $variablechips . '<hr class="my-2">' . html_writer::tag('strong', 'Blocs de mise en page') . '<br>' . $structural . html_writer::div('Cliquez sur un tag pour le copier. Collez-le exactement où vous voulez dans le corps du mail.', 'small text-muted mt-1'), 'alert alert-light border');
+echo CommerceMailBuilderEditorRenderer::tag_palette(
+    $state['variables'],
+    CommerceMailBuilder::personal_offer_structural_tags()
+);
 
 echo html_writer::start_tag('ul', ['class' => 'nav nav-tabs mb-3', 'role' => 'tablist']);
 foreach ($labels as $language => $label) {
@@ -272,7 +399,6 @@ foreach ($labels as $language => $label) {
 echo html_writer::end_tag('ul');
 
 echo html_writer::start_div('tab-content');
-$preferrededitor = editors_get_preferred_editor((int)FORMAT_HTML);
 foreach ($labels as $language => $label) {
     $record = $translations[$language] ?? null;
     $values = [
@@ -320,16 +446,19 @@ foreach ($labels as $language => $label) {
         $attrs = ['id' => $fieldid, 'name' => $fieldid, 'class' => 'form-control'];
         if (!$state['editable']) { $attrs['disabled'] = 'disabled'; }
         if ($richeditor) {
-            echo html_writer::tag('textarea', $values[$field], $attrs + ['rows' => $field === 'body' ? 12 : 6]);
-            echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $field . 'format_' . $language, 'value' => (int)FORMAT_HTML]);
-            if ($state['editable']) {
-                $preferrededitor->use_editor($fieldid, [
-                    'context' => $context,
-                    'maxfiles' => 0,
-                    'maxbytes' => 0,
-                    'noclean' => false,
-                ]);
-            }
+            echo CommerceMailBuilderEditorRenderer::rich_editor(
+                $fieldid,
+                $fieldid,
+                $values[$field],
+                $context,
+                $state['editable'],
+                $field === 'body' ? 12 : 6
+            );
+            echo html_writer::empty_tag('input', [
+                'type' => 'hidden',
+                'name' => $field . 'format_' . $language,
+                'value' => (int)FORMAT_HTML,
+            ]);
         } else {
             echo html_writer::empty_tag('input', $attrs + [
                 'type' => $field === 'secondaryctaurl' ? 'url' : 'text',
@@ -344,9 +473,6 @@ foreach ($labels as $language => $label) {
         }
         echo html_writer::end_div();
     }
-    echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'ctalabel_' . $language,'value'=>'']);
-    echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'closing_' . $language,'value'=>'']);
-    echo html_writer::empty_tag('input', ['type'=>'hidden','name'=>'closingformat_' . $language,'value'=>(int)FORMAT_HTML]);
     echo html_writer::end_div();
 }
 echo html_writer::end_div();
@@ -356,19 +482,14 @@ if ($state['editable']) {
 }
 echo html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_view.php', ['id' => $id]), get_string('cancel'), ['class' => 'btn btn-link ms-2']);
 echo html_writer::end_tag('form');
+CommerceMailBuilderEditorRenderer::require_copy_behaviour($PAGE);
 $PAGE->requires->js_amd_inline(<<<'JS'
-document.querySelectorAll('.js-campaign-tag').forEach(function(button) {
-    button.addEventListener('click', function() {
-        var tag = button.dataset.tag || '';
-        if (navigator.clipboard) { navigator.clipboard.writeText(tag); }
-        var old = button.innerHTML; button.innerHTML = '✓ Copié';
-        setTimeout(function(){ button.innerHTML = old; }, 900);
-    });
-});
 document.querySelectorAll('[data-bs-toggle="tab"][data-language]').forEach(function(tab) {
     tab.addEventListener('shown.bs.tab', function() {
         var field = document.getElementById('campaign-email-active-language');
-        if (field) { field.value = tab.dataset.language || 'fr'; }
+        if (field) {
+            field.value = tab.dataset.language || 'fr';
+        }
     });
 });
 JS);

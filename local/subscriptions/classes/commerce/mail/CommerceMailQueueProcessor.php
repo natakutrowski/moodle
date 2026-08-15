@@ -57,14 +57,14 @@ final class CommerceMailQueueProcessor {
             }
         }
 
-        return $this->process_records($records, $now);
+        return $this->process_records($records, $now, true);
     }
 
     /**
      * @param \stdClass[] $records
      * @return array{processed:int,sent:int,retried:int,failed:int,cancelled:int,skipped:int}
      */
-    private function process_records(array $records, int $now): array {
+    private function process_records(array $records, int $now, bool $force = false): array {
         $result = ['processed' => 0, 'sent' => 0, 'retried' => 0, 'failed' => 0, 'cancelled' => 0, 'skipped' => 0];
 
         foreach ($records as $record) {
@@ -72,7 +72,10 @@ final class CommerceMailQueueProcessor {
                 $result['skipped']++;
                 continue;
             }
-            if (!$this->repository->mark_processing((int)$record->id, $now)) {
+            $claimed = $force
+                ? $this->repository->mark_processing_now((int)$record->id, $now)
+                : $this->repository->mark_processing((int)$record->id, $now);
+            if (!$claimed) {
                 $result['skipped']++;
                 continue;
             }

@@ -440,3 +440,1284 @@
         width: 100%;
     }
 }
+
+/* Commerce 7.95N4.1 — unified CRM e-mail journal workspace. */
+.commerce-mail-section-nav {
+    margin: -.15rem 0 .8rem;
+    border-bottom: 1px solid #e8edf4;
+}
+.commerce-mail-section-nav__list {
+    display: flex;
+    align-items: center;
+    gap: .15rem;
+    min-height: 2.65rem;
+}
+.commerce-mail-section-nav__link {
+    display: inline-flex;
+    min-height: 2.55rem;
+    align-items: center;
+    gap: .42rem;
+    padding: .6rem .8rem;
+    border-bottom: 2px solid transparent;
+    color: #526078;
+    font-size: .78rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+.commerce-mail-section-nav__link > .fa { color: #5b4b8a; }
+.commerce-mail-section-nav__link:hover {
+    color: #312e81;
+    background: rgba(91, 75, 138, .035);
+    text-decoration: none;
+}
+.commerce-mail-section-nav__link.is-active {
+    border-bottom-color: #f51b7b;
+    color: #f51b7b;
+}
+.commerce-mail-section-nav__link.is-active > .fa { color: #f51b7b; }
+
+/* Compact health banner. */
+.commerce-mail-health {
+    min-height: 3.7rem;
+    margin-bottom: .75rem;
+    padding: .65rem .85rem;
+    border-radius: .8rem;
+}
+.commerce-mail-health__heading > i { font-size: 1.3rem; }
+.commerce-mail-health__title { font-size: .84rem; }
+.commerce-mail-health__subtitle { font-size: .72rem; }
+.commerce-mail-health__metric { padding: .28rem .52rem; }
+.commerce-mail-health__metric-value { font-size: .82rem; }
+.commerce-mail-health__metric-label { font-size: .67rem; }
+.commerce-mail-health__diagnostic { position: relative; flex: 0 0 auto; }
+.commerce-mail-health__diagnostic > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .38rem .62rem;
+    border: 1px solid #d8e0e8;
+    border-radius: .5rem;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+    font-size: .7rem;
+    font-weight: 650;
+    list-style: none;
+}
+.commerce-mail-health__diagnostic > summary::-webkit-details-marker { display: none; }
+.commerce-mail-health__diagnostic[open] > summary .fa { transform: rotate(180deg); }
+.commerce-mail-health__diagnostic-panel {
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + .3rem);
+    right: 0;
+    width: 260px;
+    padding: .65rem;
+    border: 1px solid #dfe5ec;
+    border-radius: .6rem;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15,23,42,.13);
+}
+.commerce-mail-health__diagnostic-release { color: #334155; font-size: .7rem; font-weight: 750; }
+.commerce-mail-health__diagnostic-text { margin-top: .25rem; color: #718096; font-size: .67rem; }
+
+/* KPI strip follows the N3 sales vocabulary. */
+.commerce-mail-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    margin-bottom: .85rem;
+    overflow: hidden;
+    border: 1px solid #e3e8ef;
+    border-radius: .82rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15,23,42,.035);
+}
+.commerce-mail-kpi {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: .62rem;
+    padding: .78rem .82rem;
+    border-right: 1px solid #edf1f5;
+}
+.commerce-mail-kpi:last-child { border-right: 0; }
+.commerce-mail-kpi-icon {
+    display: inline-flex;
+    flex: 0 0 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .65rem;
+    background: rgba(91,75,138,.08);
+    color: #5b4b8a;
+}
+.commerce-mail-kpi-icon.is-success { background: rgba(22,155,98,.09); color: #169b62; }
+.commerce-mail-kpi-icon.is-warning { background: rgba(249,115,22,.09); color: #d8660c; }
+.commerce-mail-kpi-icon.is-danger { background: rgba(220,53,69,.08); color: #dc3545; }
+.commerce-mail-kpi-icon.is-campaign { background: rgba(245,27,123,.075); color: #be185d; }
+.commerce-mail-kpi-icon.is-template { background: rgba(59,130,246,.075); color: #2563eb; }
+.commerce-mail-kpi-copy { min-width: 0; }
+.commerce-mail-kpi-label { color: #5f6c81; font-size: .66rem; font-weight: 650; }
+.commerce-mail-kpi-value { margin-top: .05rem; color: #18233f; font-size: 1.18rem; font-weight: 800; line-height: 1.1; }
+.commerce-mail-kpi-foot { margin-top: .18rem; color: #94a3b8; font-size: .62rem; line-height: 1.2; }
+
+/* Collapsible filters. */
+.commerce-mail-filter-panel {
+    margin-bottom: .85rem;
+    overflow: visible;
+    border: 1px solid #e3e8ef;
+    border-radius: .82rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15,23,42,.035);
+}
+.commerce-mail-filter-panel-summary {
+    display: flex;
+    min-height: 2.55rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .55rem .85rem;
+    cursor: pointer;
+    list-style: none;
+}
+.commerce-mail-filter-panel-summary::-webkit-details-marker { display: none; }
+.commerce-mail-filter-panel-summary-copy { display: inline-flex; align-items: center; gap: .45rem; color: #312e81; font-size: .76rem; }
+.commerce-mail-filter-panel-summary-copy > .fa { color: #5b4b8a; }
+.commerce-mail-filter-panel-status {
+    padding: .14rem .35rem;
+    border-radius: 999px;
+    background: rgba(245,27,123,.08);
+    color: #be185d;
+    font-size: .6rem;
+    font-weight: 700;
+}
+.commerce-mail-filter-panel-chevron { color: #94a3b8; font-size: .7rem; transition: transform .15s ease; }
+.commerce-mail-filter-panel[open] .commerce-mail-filter-panel-chevron { transform: rotate(180deg); }
+.commerce-mail-filter-panel[open] > .commerce-mail-filter-panel-summary { border-bottom: 1px solid #edf1f5; }
+.commerce-mail-filter-panel-body { padding: .7rem .85rem .75rem; }
+.commerce-mail-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, 2.35fr) repeat(4, minmax(125px, 1fr));
+    gap: .6rem;
+}
+.commerce-mail-filter-field .form-label { margin-bottom: .18rem; color: #526078; font-size: .64rem; font-weight: 650; }
+.commerce-mail-filter-field .form-control,
+.commerce-mail-filter-field .form-select { min-height: 2.05rem; padding-top: .28rem; padding-bottom: .28rem; font-size: .73rem; }
+.commerce-mail-filter-search-control { position: relative; }
+.commerce-mail-filter-search-control .form-control { padding-right: 2rem; }
+.commerce-mail-filter-search-icon { position: absolute; top: 50%; right: .65rem; color: #94a3b8; transform: translateY(-50%); }
+.commerce-mail-filter-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-top: .55rem;
+}
+.commerce-mail-filter-advanced { position: relative; }
+.commerce-mail-filter-advanced > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .25rem .1rem;
+    color: #5b4b8a;
+    cursor: pointer;
+    font-size: .69rem;
+    font-weight: 650;
+    list-style: none;
+}
+.commerce-mail-filter-advanced > summary::-webkit-details-marker { display: none; }
+.commerce-mail-filter-advanced-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(145px, 1fr));
+    gap: .55rem;
+    margin-top: .45rem;
+    padding-top: .55rem;
+    border-top: 1px solid #edf1f5;
+}
+.commerce-mail-filter-actions { display: flex; align-items: center; gap: .42rem; }
+.commerce-mail-filter-actions .btn { display: inline-flex; min-height: 2rem; align-items: center; gap: .4rem; font-size: .7rem; }
+.commerce-mail-column-picker { position: relative; }
+.commerce-mail-column-picker > summary {
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    gap: .4rem;
+    padding: .36rem .65rem;
+    border: 1px solid #cfd7e3;
+    border-radius: .45rem;
+    color: #475569;
+    cursor: pointer;
+    font-size: .7rem;
+    font-weight: 600;
+    list-style: none;
+}
+.commerce-mail-column-picker > summary::-webkit-details-marker { display: none; }
+.commerce-mail-column-picker-menu {
+    position: absolute;
+    z-index: 45;
+    top: calc(100% + .3rem);
+    right: 0;
+    display: grid;
+    min-width: 14rem;
+    gap: .3rem;
+    padding: .65rem;
+    border: 1px solid #dfe5ed;
+    border-radius: .6rem;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(15,23,42,.14);
+    font-size: .7rem;
+}
+
+/* Journal table. */
+.commerce-mail-table-card {
+    overflow: visible;
+    border: 1px solid #e3e8ef;
+    border-radius: .82rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15,23,42,.035);
+}
+.commerce-mail-table-toolbar {
+    display: flex;
+    min-height: 2.8rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .58rem .78rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.commerce-mail-found { color: #334155; font-size: .73rem; }
+.commerce-mail-perpage { display: inline-flex; align-items: center; gap: .4rem; color: #64748b; font-size: .68rem; }
+.commerce-mail-perpage .form-select { width: auto; min-width: 4.1rem; }
+.commerce-mail-table-scroll { overflow-x: auto; }
+.commerce-mail-journal-table { min-width: 1120px; margin: 0; font-size: .78rem; }
+.commerce-mail-journal-table thead th { padding: .55rem .65rem; color: #475569; font-size: .68rem; white-space: nowrap; }
+.commerce-mail-journal-table tbody td { padding: .58rem .65rem; border-color: #edf1f5; vertical-align: middle; }
+.commerce-mail-sort-link { display: inline-flex; align-items: center; gap: .3rem; color: inherit; text-decoration: none; }
+.commerce-mail-sort-link > .fa { color: #a0a9b8; font-size: .62rem; }
+.commerce-mail-sort-link:hover,
+.commerce-mail-sort-link.is-active { color: #312e81; text-decoration: none; }
+.commerce-mail-date,
+.commerce-mail-recipient-name,
+.commerce-mail-context-title { color: #263650; font-weight: 700; }
+.commerce-mail-time,
+.commerce-mail-row-id,
+.commerce-mail-recipient-email-row,
+.commerce-mail-context-subtitle { margin-top: .08rem; color: #8996aa; font-size: .68rem; }
+.commerce-mail-id-link,
+.commerce-mail-recipient-name,
+.commerce-mail-recipient-email,
+.commerce-mail-context-title,
+.commerce-mail-context-product { color: #4338a8; text-decoration: none; }
+.commerce-mail-id-link:hover,
+.commerce-mail-recipient-name:hover,
+.commerce-mail-recipient-email:hover,
+.commerce-mail-context-title:hover,
+.commerce-mail-context-product:hover { color: #f51b7b; text-decoration: underline; }
+.commerce-mail-status-badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .68rem; }
+.commerce-mail-status-badge > .fa { font-size: .52rem; }
+.commerce-mail-attempts { font-weight: 700; white-space: nowrap; }
+.commerce-mail-error-text { display: inline-block; max-width: 180px; color: #dc3545; font-size: .7rem; }
+.commerce-mail-row-actions { display: inline-flex; align-items: center; gap: .3rem; white-space: nowrap; }
+.commerce-mail-view-button { display: inline-flex; align-items: center; gap: .32rem; }
+.commerce-mail-row-actions-menu { position: relative; }
+.commerce-mail-row-actions-menu > summary { display: inline-flex; align-items: center; justify-content: center; list-style: none; }
+.commerce-mail-row-actions-menu > summary::-webkit-details-marker { display: none; }
+.commerce-mail-row-menu {
+    position: absolute;
+    z-index: 50;
+    top: calc(100% + .28rem);
+    right: 0;
+    display: grid;
+    min-width: 13rem;
+    padding: .35rem;
+    border: 1px solid #dfe5ed;
+    border-radius: .58rem;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(15,23,42,.14);
+}
+.commerce-mail-row-menu-link {
+    display: flex;
+    align-items: center;
+    gap: .52rem;
+    padding: .45rem .52rem;
+    border-radius: .4rem;
+    color: #475569;
+    font-size: .69rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.commerce-mail-row-menu-link > .fa { width: 1rem; color: #5b4b8a; text-align: center; }
+.commerce-mail-row-menu-link:hover { background: rgba(91,75,138,.07); color: #312e81; text-decoration: none; }
+.commerce-mail-pagination { padding: .55rem .75rem; border-top: 1px solid #edf1f5; }
+
+@media (max-width: 1399.98px) {
+    .commerce-mail-kpi-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .commerce-mail-kpi:nth-child(3n) { border-right: 0; }
+    .commerce-mail-filter-grid { grid-template-columns: minmax(280px, 2fr) repeat(2, minmax(140px, 1fr)); }
+}
+@media (max-width: 767.98px) {
+    .commerce-mail-section-nav__list { overflow-x: auto; }
+    .commerce-mail-section-nav__link { white-space: nowrap; }
+    .commerce-mail-kpi-strip { grid-template-columns: 1fr 1fr; }
+    .commerce-mail-kpi:nth-child(2n) { border-right: 0; }
+    .commerce-mail-filter-grid,
+    .commerce-mail-filter-advanced-grid { grid-template-columns: 1fr; }
+    .commerce-mail-filter-footer { align-items: stretch; flex-direction: column; }
+    .commerce-mail-filter-actions { flex-wrap: wrap; }
+    .commerce-mail-health { align-items: stretch; }
+    .commerce-mail-health__diagnostic-panel { left: 0; right: auto; }
+}
+
+/* Commerce 7.95N4.2 — quieter engine status, neutral CRM links and unified badges. */
+.commerce-mail-workspace-nav-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    border-bottom: 1px solid #e5e9f0;
+}
+.commerce-mail-workspace-nav-row .commerce-mail-section-nav {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-bottom: 0;
+}
+.commerce-mail-health-compact {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: .38rem;
+    padding: .3rem .45rem;
+    color: #718096;
+    font-size: .67rem;
+    white-space: nowrap;
+}
+.commerce-mail-health-compact__dot {
+    width: .48rem;
+    height: .48rem;
+    border-radius: 50%;
+    background: #e2a11b;
+}
+.commerce-mail-health-compact__dot.is-ok { background: #209267; }
+.commerce-mail-health-compact__label { color: #44536a; font-weight: 700; }
+.commerce-mail-health-compact__detail { color: #94a3b8; }
+.commerce-mail-health-compact__diagnostic { margin-left: .12rem; color: #5b4b8a; text-decoration: none; }
+.commerce-mail-health-compact__diagnostic:hover { color: #312e81; text-decoration: underline; }
+
+/* Links remain discoverable without turning the journal into a wall of blue text. */
+.commerce-mail-journal-table .commerce-mail-recipient-name,
+.commerce-mail-journal-table .commerce-mail-recipient-email,
+.commerce-mail-journal-table .commerce-mail-context-title,
+.commerce-mail-journal-table .commerce-mail-context-product {
+    color: inherit;
+    text-decoration: none;
+}
+.commerce-mail-journal-table .commerce-mail-recipient-name,
+.commerce-mail-journal-table .commerce-mail-context-title { color: #263650; }
+.commerce-mail-journal-table .commerce-mail-recipient-email,
+.commerce-mail-journal-table .commerce-mail-context-product { color: #718096; }
+.commerce-mail-journal-table .commerce-mail-recipient-name:hover,
+.commerce-mail-journal-table .commerce-mail-recipient-email:hover,
+.commerce-mail-journal-table .commerce-mail-context-title:hover,
+.commerce-mail-journal-table .commerce-mail-context-product:hover {
+    color: #493c72;
+    text-decoration: underline;
+}
+
+/* Type and status badges share exactly the same geometry. */
+.commerce-mail-type-badge,
+.commerce-mail-status-badge {
+    display: inline-flex;
+    min-height: 1.45rem;
+    align-items: center;
+    gap: .3rem;
+    padding: .28rem .52rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1;
+}
+.commerce-mail-type-badge.text-bg-dark { background: #f2effb !important; border-color: #e4def5; color: #574481 !important; }
+.commerce-mail-type-badge.text-bg-success { background: #edf8f3 !important; border-color: #d9eee4; color: #247759 !important; }
+.commerce-mail-type-badge.text-bg-primary { background: #eef3fb !important; border-color: #dde7f5; color: #3f5f89 !important; }
+.commerce-mail-type-badge.text-bg-info { background: #edf7fa !important; border-color: #d9edf2; color: #357486 !important; }
+.commerce-mail-type-badge.text-bg-warning { background: #fff7e8 !important; border-color: #f4e6c6; color: #8b681c !important; }
+.commerce-mail-type-badge.text-bg-danger { background: #fff0f2 !important; border-color: #f5dce1; color: #a7485a !important; }
+.commerce-mail-type-badge.text-bg-secondary { background: #f3f5f7 !important; border-color: #e5e9ed; color: #64748b !important; }
+.commerce-mail-status-badge.text-bg-success { background: #edf8f3 !important; border-color: #d9eee4; color: #247759 !important; }
+.commerce-mail-status-badge.text-bg-info,
+.commerce-mail-status-badge.text-bg-warning { background: #fff7e8 !important; border-color: #f4e6c6; color: #8b681c !important; }
+.commerce-mail-status-badge.text-bg-primary { background: #eef3fb !important; border-color: #dde7f5; color: #3f5f89 !important; }
+.commerce-mail-status-badge.text-bg-danger { background: #fff0f2 !important; border-color: #f5dce1; color: #a7485a !important; }
+.commerce-mail-status-badge.text-bg-secondary { background: #f3f5f7 !important; border-color: #e5e9ed; color: #64748b !important; }
+.commerce-mail-row-menu-link.is-primary-action { color: #493c72; font-weight: 750; }
+.commerce-mail-row-menu-link.is-primary-action > .fa { color: #e69018; }
+
+@media (max-width: 900px) {
+    .commerce-mail-workspace-nav-row { align-items: stretch; flex-direction: column; gap: 0; }
+    .commerce-mail-health-compact { align-self: flex-end; padding-top: 0; padding-bottom: .45rem; }
+}
+
+
+/* Commerce 7.95N4.3 — audit visibility + operational campaign/SMTP KPIs. */
+.commerce-mail-filter-footer-left {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.commerce-mail-filter-audit-toggle {
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    gap: .42rem;
+    margin: 0;
+    padding: .28rem .55rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .5rem;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: .71rem;
+}
+.commerce-mail-filter-audit-toggle .form-check-input {
+    margin: 0;
+}
+.commerce-mail-filter-audit-toggle .form-check-label {
+    cursor: pointer;
+    font-weight: 600;
+}
+.commerce-mail-kpi-icon.is-throughput {
+    background: rgba(49, 46, 129, .08);
+    color: #4c3f78;
+}
+
+
+/* Commerce 7.95N4.4 — Mail Engine configuration workspace. */
+.commerce-mail-config-form {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.commerce-mail-config-global,
+.commerce-mail-config-worker,
+.commerce-mail-config-cron-note {
+    border: 1px solid #e2e8f0;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .035);
+}
+.commerce-mail-config-global {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, .42fr);
+    gap: 1rem;
+    padding: 1rem;
+}
+.commerce-mail-config-global-heading {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.commerce-mail-config-global-description,
+.commerce-mail-config-worker-description,
+.commerce-mail-config-section-help {
+    color: #718096;
+    font-size: .74rem;
+    line-height: 1.45;
+}
+.commerce-mail-config-load {
+    flex: 0 0 auto;
+    min-width: 9rem;
+    padding: .55rem .7rem;
+    border: 1px solid rgba(49, 46, 129, .12);
+    border-radius: .65rem;
+    background: rgba(49, 46, 129, .035);
+    text-align: right;
+}
+.commerce-mail-config-load-value {
+    color: #312e81;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+.commerce-mail-config-load-label {
+    color: #718096;
+    font-size: .65rem;
+}
+.commerce-mail-config-section-title {
+    margin: .2rem 0 0;
+}
+.commerce-mail-config-section-help {
+    margin-top: -.65rem;
+}
+.commerce-mail-config-workers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem;
+}
+.commerce-mail-config-worker {
+    min-width: 0;
+    padding: .9rem;
+}
+.commerce-mail-config-worker-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    margin-bottom: .8rem;
+}
+.commerce-mail-config-worker-icon {
+    display: inline-flex;
+    flex: 0 0 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .62rem;
+    background: rgba(91, 75, 138, .075);
+    color: #5b4b8a;
+}
+.commerce-mail-config-worker-heading-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.commerce-mail-config-task {
+    flex: 0 0 auto;
+    max-width: 10rem;
+    text-align: right;
+}
+.commerce-mail-config-task-status {
+    display: inline-flex;
+    padding: .18rem .38rem;
+    border-radius: 999px;
+    font-size: .62rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+.commerce-mail-config-task-status.is-success {
+    background: rgba(22, 155, 98, .09);
+    color: #137c50;
+}
+.commerce-mail-config-task-status.is-warning {
+    background: rgba(249, 115, 22, .1);
+    color: #c85f12;
+}
+.commerce-mail-config-task-status.is-danger {
+    background: rgba(220, 53, 69, .08);
+    color: #b42332;
+}
+.commerce-mail-config-task-meta {
+    margin-top: .25rem;
+    color: #94a3b8;
+    font-size: .58rem;
+    line-height: 1.3;
+}
+.commerce-mail-config-toggle {
+    margin-bottom: .75rem;
+    padding: .55rem .65rem;
+    border-radius: .6rem;
+    background: #f8fafc;
+}
+.commerce-mail-config-worker-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .6rem;
+}
+.commerce-mail-config-field .form-label {
+    margin-bottom: .2rem;
+    color: #526078;
+    font-size: .68rem;
+    font-weight: 700;
+}
+.commerce-mail-config-field .form-control {
+    min-height: 2.15rem;
+    font-size: .76rem;
+}
+.commerce-mail-config-field .form-text,
+.commerce-mail-config-toggle .form-text {
+    color: #94a3b8;
+    font-size: .61rem;
+    line-height: 1.35;
+}
+.commerce-mail-config-cron-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .7rem .85rem;
+}
+.commerce-mail-config-cron-note-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    color: #64748b;
+    font-size: .7rem;
+}
+.commerce-mail-config-cron-note-copy > .fa {
+    color: #5b4b8a;
+}
+.commerce-mail-config-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (max-width: 1199.98px) {
+    .commerce-mail-config-workers {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 767.98px) {
+    .commerce-mail-config-global {
+        grid-template-columns: 1fr;
+    }
+    .commerce-mail-config-global-heading,
+    .commerce-mail-config-cron-note {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .commerce-mail-config-load {
+        text-align: left;
+    }
+    .commerce-mail-config-worker-fields {
+        grid-template-columns: 1fr;
+    }
+    .commerce-mail-config-task {
+        max-width: none;
+    }
+}
+
+
+/* Commerce 7.95N5.1 — unified Mail Studio template library foundation. */
+.commerce-mail-library-toolbar {
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    margin:.75rem 0; padding:.85rem 1rem; border:1px solid #e2e8f0;
+    border-radius:.85rem; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.035);
+}
+.commerce-mail-library-toolbar-help,.commerce-mail-library-section-help,.commerce-mail-library-card-meta {
+    color:#718096; font-size:.7rem; line-height:1.4;
+}
+.commerce-mail-library-toolbar-actions { display:flex; gap:.45rem; }
+.commerce-mail-library-filter { display:flex; align-items:center; gap:.45rem; margin-bottom:1rem; }
+.commerce-mail-library-filter .form-select { width:auto; min-width:10rem; font-size:.75rem; }
+.commerce-mail-library-section-title { margin:1rem 0 .25rem; }
+.commerce-mail-library-section-help { margin-bottom:.7rem; }
+.commerce-mail-library-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.8rem; }
+.commerce-mail-library-card { min-width:0; padding:.85rem; border:1px solid #e2e8f0; border-radius:.8rem; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.03); }
+.commerce-mail-library-card.is-runtime { border-color:rgba(49,46,129,.14); background:linear-gradient(135deg,#fff,rgba(49,46,129,.025)); }
+.commerce-mail-library-card-eyebrow { display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+.commerce-mail-library-category,.commerce-mail-library-status { display:inline-flex; align-items:center; padding:.18rem .4rem; border-radius:999px; font-size:.61rem; font-weight:750; }
+.commerce-mail-library-category { background:rgba(91,75,138,.075); color:#5b4b8a; }
+.commerce-mail-library-status.is-draft { background:#f1f5f9; color:#64748b; }
+.commerce-mail-library-status.is-active { background:rgba(22,155,98,.09); color:#137c50; }
+.commerce-mail-library-status.is-archived { background:#f8fafc; color:#94a3b8; }
+.commerce-mail-library-status.is-runtime { background:rgba(245,27,123,.07); color:#be185d; }
+.commerce-mail-library-card-title { margin:.65rem 0 .5rem; color:#24324b; font-size:.9rem; font-weight:750; }
+.commerce-mail-library-languages { display:flex; gap:.25rem; margin-bottom:.5rem; }
+.commerce-mail-library-language { display:inline-flex; min-width:1.8rem; justify-content:center; padding:.15rem .3rem; border-radius:.35rem; font-size:.58rem; font-weight:800; }
+.commerce-mail-library-language.is-ready { background:rgba(22,155,98,.08); color:#137c50; }
+.commerce-mail-library-language.is-missing { background:#f8fafc; color:#cbd5e1; }
+.commerce-mail-library-card-actions { display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.7rem; padding-top:.65rem; border-top:1px solid #eef2f7; }
+.commerce-mail-library-empty { padding:2rem; border:1px dashed #cbd5e1; border-radius:.8rem; color:#94a3b8; text-align:center; }
+.commerce-mail-library-edit-form { display:grid; gap:.85rem; margin-bottom:2rem; }
+.commerce-mail-library-edit-meta { display:grid; grid-template-columns:minmax(260px,2fr) repeat(2,minmax(150px,.7fr)); gap:.65rem; padding:.85rem; border:1px solid #e2e8f0; border-radius:.8rem; background:#fff; }
+.commerce-mail-library-edit-field .form-label { margin-bottom:.2rem; color:#526078; font-size:.68rem; font-weight:700; }
+.commerce-mail-library-language-card { padding:.9rem; border:1px solid #e2e8f0; border-radius:.8rem; background:#fff; }
+.commerce-mail-library-language-heading { display:flex; align-items:center; gap:.5rem; margin-bottom:.65rem; }
+.commerce-mail-library-language-optional { color:#94a3b8; font-size:.62rem; }
+.commerce-mail-library-body { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.72rem; }
+.commerce-mail-library-edit-actions,.commerce-mail-library-import-actions { display:flex; justify-content:flex-end; gap:.45rem; }
+.commerce-mail-library-foundation-note { margin:0; font-size:.72rem; }
+.commerce-mail-library-import-form { max-width:720px; margin:1rem auto 2rem; padding:2rem; border:1px dashed #cbd5e1; border-radius:1rem; background:#fff; text-align:center; }
+.commerce-mail-library-import-icon { margin-bottom:.65rem; color:#5b4b8a; font-size:2rem; }
+.commerce-mail-library-import-help { margin:0 auto 1rem; max-width:580px; color:#718096; font-size:.75rem; }
+.commerce-mail-library-import-actions { margin-top:1rem; }
+@media (max-width:1199.98px){.commerce-mail-library-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width:767.98px){.commerce-mail-library-toolbar{align-items:stretch;flex-direction:column}.commerce-mail-library-toolbar-actions,.commerce-mail-library-filter{flex-wrap:wrap}.commerce-mail-library-grid{grid-template-columns:1fr}.commerce-mail-library-edit-meta{grid-template-columns:1fr}}
+
+
+/* Commerce 7.95N5.2 — shared Mail Builder / TinyMCE editing language. */
+.commerce-mail-builder-palette {
+    display: grid;
+    gap: .65rem;
+    margin: .8rem 0 1rem;
+    padding: .8rem .9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .75rem;
+    background: #f8fafc;
+}
+.commerce-mail-builder-palette-section {
+    display: grid;
+    gap: .35rem;
+}
+.commerce-mail-builder-palette-section > strong {
+    color: #475569;
+    font-size: .72rem;
+}
+.commerce-mail-builder-tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+}
+.commerce-mail-builder-tag {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: .68rem;
+    line-height: 1.2;
+}
+.commerce-mail-builder-palette-help {
+    color: #94a3b8;
+    font-size: .66rem;
+}
+.commerce-mail-builder-language-tabs {
+    margin-top: .9rem;
+    margin-bottom: 0;
+}
+.commerce-mail-builder-language-content {
+    padding-top: .75rem;
+}
+.commerce-mail-builder-editor {
+    min-height: 260px;
+}
+.commerce-mail-library-language-card.tab-pane {
+    padding: .85rem;
+    border: 1px solid #e2e8f0;
+    border-top: 0;
+    border-radius: 0 0 .75rem .75rem;
+    background: #fff;
+}
+.commerce-mail-library-language-card .tox-tinymce,
+.commerce-mail-library-language-card .editor_atto_wrap {
+    border-radius: .6rem;
+}
+
+.commerce-mail-library-builder-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .16rem .38rem;
+    border-radius: 999px;
+    background: rgba(91, 75, 138, .08);
+    color: #5b4b8a;
+    font-size: .6rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+
+/* Commerce 7.95N5.3 — Personal Offer campaigns use Mail Studio snapshots. */
+.commerce-personal-offer-mailstudio {
+    border-color: rgba(91, 75, 138, .16);
+    background: linear-gradient(135deg, rgba(91, 75, 138, .035), #fff 42%);
+}
+.commerce-personal-offer-mailstudio-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.commerce-personal-offer-mailstudio-heading-copy {
+    min-width: 0;
+}
+.commerce-personal-offer-mailstudio-source {
+    display: inline-flex;
+    align-items: center;
+    margin-top: .7rem;
+    padding: .3rem .5rem;
+    border: 1px solid rgba(91, 75, 138, .12);
+    border-radius: .55rem;
+    background: rgba(91, 75, 138, .045);
+    color: #5b4b8a;
+    font-size: .68rem;
+    font-weight: 650;
+}
+.commerce-personal-offer-mailstudio-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem;
+    margin-top: .85rem;
+}
+.commerce-personal-offer-mailstudio-action {
+    min-width: 0;
+    padding: .75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .7rem;
+    background: rgba(255, 255, 255, .88);
+}
+.commerce-personal-offer-mailstudio-action .form-text {
+    color: #94a3b8;
+    font-size: .65rem;
+    line-height: 1.4;
+}
+@media (max-width: 767.98px) {
+    .commerce-personal-offer-mailstudio-heading {
+        flex-direction: column;
+    }
+    .commerce-personal-offer-mailstudio-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N5.4 — generic marketing campaign workspace. */
+.commerce-mail-campaign-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin: .65rem 0 .85rem;
+}
+.commerce-mail-campaign-list {
+    display: grid;
+    gap: .65rem;
+}
+.commerce-mail-campaign-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.5fr) auto minmax(240px, .9fr) auto;
+    align-items: center;
+    gap: .8rem;
+    padding: .8rem .9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .75rem;
+    background: #fff;
+    box-shadow: 0 2px 7px rgba(15, 23, 42, .03);
+}
+.commerce-mail-campaign-main {
+    min-width: 0;
+}
+.commerce-mail-campaign-meta {
+    color: #94a3b8;
+    font-size: .67rem;
+}
+.commerce-mail-campaign-status {
+    display: inline-flex;
+    padding: .2rem .45rem;
+    border-radius: 999px;
+    font-size: .64rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+.commerce-mail-campaign-status.is-muted { background:#f1f5f9; color:#64748b; }
+.commerce-mail-campaign-status.is-warning { background:#fff7e6; color:#b26b00; }
+.commerce-mail-campaign-status.is-info { background:#eef2ff; color:#4f46a5; }
+.commerce-mail-campaign-status.is-success { background:#eaf8f1; color:#137c50; }
+.commerce-mail-campaign-status.is-danger { background:#fff0f2; color:#b42332; }
+.commerce-mail-campaign-stats {
+    display: flex;
+    justify-content: flex-end;
+    gap: .35rem;
+    flex-wrap: wrap;
+}
+.commerce-mail-campaign-stat {
+    padding: .18rem .38rem;
+    border-radius: .45rem;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: .63rem;
+    font-weight: 650;
+}
+.commerce-mail-campaign-editor {
+    gap: .9rem;
+    border-color: #e2e8f0;
+}
+.commerce-mail-campaign-editor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+.commerce-mail-campaign-field .form-label,
+.commerce-mail-campaign-audience .form-label {
+    color: #475569;
+    font-size: .72rem;
+    font-weight: 700;
+}
+.commerce-mail-campaign-field .form-text,
+.commerce-mail-campaign-audience .form-text {
+    color: #94a3b8;
+    font-size: .64rem;
+}
+.commerce-mail-campaign-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .55rem;
+    padding-top: .25rem;
+}
+@media (max-width: 991.98px) {
+    .commerce-mail-campaign-row {
+        grid-template-columns: 1fr auto;
+    }
+    .commerce-mail-campaign-stats {
+        justify-content: flex-start;
+        grid-column: 1 / -1;
+    }
+}
+@media (max-width: 767.98px) {
+    .commerce-mail-campaign-editor-grid {
+        grid-template-columns: 1fr;
+    }
+    .commerce-mail-config-workers {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N5.5 — unified transactional Mail Studio bridge. */
+.commerce-mail-transactional-builder-note {
+    color: #64748b;
+    font-size: .72rem;
+    line-height: 1.45;
+}
+.commerce-mail-library-transactional-toggle {
+    margin-top: .45rem;
+    padding: .55rem .7rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .6rem;
+    background: #f8fafc;
+}
+
+
+/* Commerce 7.95N5.6 — transactional consolidation controls. */
+.commerce-mail-transactional-bulk-action {
+    display: flex;
+    justify-content: flex-end;
+    margin: -.15rem 0 .8rem;
+}
+
+
+/* Commerce 7.95N5.7 — legacy automatic mail safety zone. */
+.commerce-mail-config-legacy {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid #f1d5a8;
+    border-radius: .8rem;
+    background: #fffdf8;
+}
+.commerce-mail-config-legacy-warning {
+    display: flex;
+    gap: .7rem;
+    align-items: flex-start;
+    margin-bottom: .9rem;
+    padding: .7rem .8rem;
+    border-radius: .65rem;
+    background: #fff7e6;
+    color: #805b18;
+}
+.commerce-mail-config-legacy-warning > .fa {
+    margin-top: .1rem;
+    color: #c98213;
+}
+.commerce-mail-config-legacy-warning-copy {
+    margin-top: .12rem;
+    font-size: .72rem;
+    line-height: 1.4;
+}
+.commerce-mail-config-legacy-toggles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+    margin: .75rem 0;
+}
+.commerce-mail-config-legacy-toggles .commerce-mail-config-toggle {
+    padding: .7rem;
+    border: 1px solid #eadfca;
+    border-radius: .65rem;
+    background: #fff;
+}
+.commerce-mail-config-legacy-tasks {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .55rem;
+    margin-top: .8rem;
+    padding-top: .8rem;
+    border-top: 1px solid #eadfca;
+}
+.commerce-mail-config-legacy-task {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem;
+    padding: .55rem .6rem;
+    border-radius: .55rem;
+    background: rgba(255,255,255,.72);
+    color: #64748b;
+    font-size: .68rem;
+}
+@media (max-width: 991.98px) {
+    .commerce-mail-config-legacy-toggles,
+    .commerce-mail-config-legacy-tasks {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N6.1 — contextual Sales -> Mail Studio follow-up workflow. */
+.commerce-sales-followup-layout {
+    display: grid;
+    grid-template-columns: minmax(250px, .72fr) minmax(0, 1.8fr);
+    gap: 1rem;
+    align-items: start;
+}
+.commerce-sales-followup-context {
+    position: sticky;
+    top: 1rem;
+    border-color: #e2e8f0;
+}
+.commerce-sales-followup-context-row {
+    display: grid;
+    grid-template-columns: minmax(90px, .75fr) minmax(0, 1.25fr);
+    gap: .55rem;
+    padding: .45rem 0;
+    border-bottom: 1px solid #eef2f7;
+}
+.commerce-sales-followup-context-label {
+    color: #94a3b8;
+    font-size: .67rem;
+    font-weight: 650;
+}
+.commerce-sales-followup-context-value {
+    overflow-wrap: anywhere;
+    color: #334155;
+    font-size: .72rem;
+    font-weight: 700;
+}
+.commerce-sales-followup-history {
+    margin-top: .75rem;
+    padding: .55rem .65rem;
+    border-radius: .55rem;
+    background: #fff7e6;
+    color: #8a5a0a;
+    font-size: .68rem;
+    line-height: 1.4;
+}
+.commerce-sales-followup-template-picker,
+.commerce-sales-followup-compose {
+    border-color: #e2e8f0;
+}
+.commerce-sales-followup-template-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .55rem;
+}
+.commerce-sales-followup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .55rem;
+    margin-top: .9rem;
+}
+.commerce-sales-followup-preview-frame {
+    width: 100%;
+    min-height: 560px;
+    border: 1px solid #e2e8f0;
+    border-radius: .65rem;
+    background: #fff;
+}
+.commerce-sales-followup-preview-subject {
+    margin-bottom: .65rem;
+    padding: .55rem .65rem;
+    border-radius: .55rem;
+    background: #f8fafc;
+    color: #334155;
+}
+.crm-sales-row-menu-followup > .fa {
+    color: #5b4b8a;
+}
+@media (max-width: 991.98px) {
+    .commerce-sales-followup-layout {
+        grid-template-columns: 1fr;
+    }
+    .commerce-sales-followup-context {
+        position: static;
+    }
+}
+@media (max-width: 575.98px) {
+    .commerce-sales-followup-template-row {
+        grid-template-columns: 1fr;
+    }
+    .commerce-sales-followup-actions {
+        flex-direction: column;
+    }
+}
+
+
+/* CRM contextual mail actions: same information hierarchy as Sales. */
+.commerce-mail-row-menu-section {
+    margin: .28rem .35rem .12rem;
+    padding-top: .28rem;
+    border-top: 1px solid #eef2f7;
+    color: #94a3b8;
+    font-size: .61rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+.commerce-mail-row-menu-section:first-child {
+    margin-top: .08rem;
+    padding-top: 0;
+    border-top: 0;
+}
+
+
+/* Mail journal table aligned with the Sales workspace. */
+.commerce-mail-journal-table {
+    font-size: .74rem;
+}
+.commerce-mail-journal-table thead th {
+    padding: .66rem .72rem;
+    border-top: 0;
+    border-right: 0 !important;
+    border-left: 0 !important;
+    border-bottom: 1px solid #e6ebf2;
+    background: #fbfcfe;
+    color: #4b5870;
+    font-size: .68rem;
+    font-weight: 800;
+}
+.commerce-mail-journal-table tbody td {
+    padding: .68rem .72rem;
+    border-right: 0 !important;
+    border-left: 0 !important;
+    border-bottom-color: #eef2f7;
+    color: #334155;
+    font-size: .74rem;
+}
+.commerce-mail-journal-table tbody tr {
+    transition: background-color .12s ease;
+}
+.commerce-mail-journal-table tbody tr:hover {
+    background: #f8fafc;
+}
+.commerce-mail-time,
+.commerce-mail-recipient-email-row,
+.commerce-mail-context-subtitle {
+    color: #718096;
+}
+.commerce-mail-recipient-name,
+.commerce-mail-context-title {
+    color: #283451;
+}
+.commerce-mail-recipient-email,
+.commerce-mail-context-product {
+    color: #66758b;
+}
+.commerce-mail-recipient-name:hover,
+.commerce-mail-recipient-email:hover,
+.commerce-mail-context-title:hover,
+.commerce-mail-context-product:hover {
+    color: #283451;
+    text-decoration: underline;
+}
+.commerce-mail-language-flag {
+    display: inline-block;
+    min-width: 1.4rem;
+    font-size: 1rem;
+    line-height: 1;
+    text-align: center;
+}
+.commerce-mail-row-menu.is-floating {
+    position: fixed !important;
+    z-index: 1080;
+    right: auto !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+
+/* Commerce mail journal typography aligned with the Sales workspace. */
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-panel-summary {
+    min-height: 2.65rem;
+    padding: .58rem .9rem;
+    color: #334155;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-panel-summary-copy {
+    gap: .48rem;
+    color: #334155;
+    font-size: .86rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-panel-summary-copy > strong {
+    font-weight: 750;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-panel-summary-copy > .fa {
+    width: 1rem;
+    color: #5b4b8a;
+    text-align: center;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-panel-status {
+    margin-left: .2rem;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #94a3b8;
+    font-size: .68rem;
+    font-weight: 500;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-panel:not([open]) {
+    margin-bottom: .7rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-panel:not([open])
+    .commerce-mail-filter-panel-summary {
+    min-height: 2.45rem;
+    padding-top: .48rem;
+    padding-bottom: .48rem;
+}
+
+/* Filters use the same readable scale as Sales. */
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-field .form-label {
+    margin-bottom: .18rem;
+    color: #516078;
+    font-size: .70rem;
+    font-weight: 700;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-field .form-control,
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-field .form-select {
+    min-height: 2.2rem;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
+    border-color: #dfe5ee;
+    border-radius: .58rem;
+    font-size: .78rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-advanced > summary,
+.local-subscriptions-commerce-mail-page .commerce-mail-column-picker > summary,
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-actions .btn,
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-footer-left {
+    font-size: .72rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-filter-panel-body {
+    padding: .72rem .9rem .78rem;
+}
+
+/* Table typography matches the Sales page rather than the previous compact mail scale. */
+.local-subscriptions-commerce-mail-page .commerce-mail-journal-table {
+    font-size: .96rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-journal-table thead th {
+    padding: .66rem .72rem;
+    font-size: .86rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-journal-table tbody td {
+    padding: .68rem .72rem;
+    font-size: .96rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-date,
+.local-subscriptions-commerce-mail-page .commerce-mail-recipient-name,
+.local-subscriptions-commerce-mail-page .commerce-mail-context-title,
+.local-subscriptions-commerce-mail-page .commerce-mail-context-product {
+    font-size: .96rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-time,
+.local-subscriptions-commerce-mail-page .commerce-mail-row-id,
+.local-subscriptions-commerce-mail-page .commerce-mail-recipient-email-row,
+.local-subscriptions-commerce-mail-page .commerce-mail-recipient-email,
+.local-subscriptions-commerce-mail-page .commerce-mail-context-subtitle {
+    font-size: .82rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-status-badge,
+.local-subscriptions-commerce-mail-page .commerce-mail-type-badge,
+.local-subscriptions-commerce-mail-page .commerce-mail-journal-table .badge,
+.local-subscriptions-commerce-mail-page .commerce-mail-journal-table .btn-sm,
+.local-subscriptions-commerce-mail-page .commerce-mail-row-menu-link {
+    font-size: .84rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-attempts,
+.local-subscriptions-commerce-mail-page .commerce-mail-error-text {
+    font-size: .82rem;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-found,
+.local-subscriptions-commerce-mail-page .commerce-mail-perpage {
+    font-size: .82rem;
+}

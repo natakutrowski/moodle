@@ -5,10 +5,12 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseActionPolicy;
+use local_subscriptions\commerce\purchase\action\CommercePurchaseAdminClosureService;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseActionServiceFactory;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
 use local_subscriptions\commerce\purchase\communication\CommercePurchaseCurrentCustomerResolver;
+use local_subscriptions\commerce\mail\sales\CommerceSalesFollowupService;
 use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
 use local_subscriptions\commerce\pricing\CommercePersistedCommercialPricingPresenter;
 use local_subscriptions\payment\Provider;
@@ -27,6 +29,9 @@ $repository = new CommercePurchaseReadRepository($DB);
 $purchase = $repository->find_by_id($id);
 if ($purchase === null) { throw new moodle_exception('commerce_purchase_not_found', 'local_subscriptions'); }
 $summary = $purchase->summary;
+$actionpolicy = new CommercePurchaseActionPolicy();
+$adminclosureservice = new CommercePurchaseAdminClosureService($DB);
+$salesfollowupservice = CommerceSalesFollowupService::create($DB);
 $currentcustomer = CommercePurchaseCurrentCustomerResolver::create()->resolve($purchase);
 $currentemail = trim((string)$currentcustomer->email);
 $historicalemail = trim((string)$summary->customer->email);
@@ -59,6 +64,23 @@ echo CrmBreadcrumbRenderer::render([
     ['label' => $publicreference, 'url' => null],
 ]);
 echo CrmPageHeader::render($pagetitle, get_string('commerce_purchase_view_description', 'local_subscriptions'), HelpContext::COMMERCE);
+if ($summary->adminclosed) {
+    echo html_writer::div(
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-archive me-2',
+            'aria-hidden' => 'true',
+        ])
+        . get_string(
+            'commerce_sales_closed_banner',
+            'local_subscriptions',
+            userdate(
+                $summary->adminclosedat,
+                get_string('strftimedatetimeshort', 'langconfig')
+            )
+        ),
+        'alert alert-secondary py-2'
+    );
+}
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PURCHASES);
 if ($alfareconciled) {
     echo html_writer::div(
@@ -101,7 +123,20 @@ if ($summary->provider === Provider::ALFA) {
         ['class' => 'btn btn-outline-primary']
     );
 }
-if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)) {
+if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)
+        && $salesfollowupservice->is_summary_eligible($summary)) {
+    $quickactions .= html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/purchases/followup_mail.php',
+            ['id' => $id]
+        ),
+        get_string('commerce_sales_followup_action', 'local_subscriptions'),
+        ['class' => 'btn btn-outline-primary']
+    );
+}
+
+if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)
+        && $actionpolicy->can_resend_receipt_summary($summary)) {
     $resendreceipturl = new moodle_url(
         '/local/subscriptions/admin/commerce/purchases/resend_receipt.php',
         [
@@ -128,7 +163,10 @@ if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)) {
             'data-confirmation-destination' => $resendreceipturl->out(false),
         ]
     );
+}
 
+if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)
+        && $actionpolicy->can_resend_access_summary($summary)) {
     $resendaccessurl = new moodle_url(
         '/local/subscriptions/admin/commerce/purchases/resend_access.php',
         [
@@ -166,6 +204,76 @@ if ($currentcustomer->userid !== null || $currentemail !== '') {
         get_string('commerce_purchase_open_user360', 'local_subscriptions'),
         ['class' => 'btn btn-outline-secondary']
     );
+}
+if (has_capability(Capabilities::MANAGE_CRM_ADMIN_TOOLS, $context)
+        && $actionpolicy->can_create_personal_offer_summary($summary)) {
+    $quickactions .= html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/personal-offers/create.php',
+            [
+                'prefillemail' => $currentemail !== ''
+                    ? $currentemail
+                    : $summary->customer->email,
+                'prefillsourcemode' => 'purchase',
+                'prefillsourcepurchase' => $summary->reference,
+            ]
+        ),
+        get_string('commerce_sales_action_create_offer', 'local_subscriptions'),
+        ['class' => 'btn btn-outline-secondary']
+    );
+}
+if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)) {
+    $returnurl = (new moodle_url(
+        '/local/subscriptions/admin/commerce/purchases/view.php',
+        ['id' => $id]
+    ))->out_as_local_url(false);
+
+    if ($summary->adminclosed) {
+        $quickactions .= html_writer::link(
+            new moodle_url(
+                '/local/subscriptions/admin/commerce/purchases/admin_state.php',
+                [
+                    'id' => $id,
+                    'action' => 'reopen',
+                    'sesskey' => sesskey(),
+                    'returnurl' => $returnurl,
+                ]
+            ),
+            get_string('commerce_sales_action_reopen', 'local_subscriptions'),
+            ['class' => 'btn btn-outline-secondary']
+        );
+    } elseif ($adminclosureservice->can_close($summary)) {
+        $closeurl = new moodle_url(
+            '/local/subscriptions/admin/commerce/purchases/admin_state.php',
+            [
+                'id' => $id,
+                'action' => 'close',
+                'sesskey' => sesskey(),
+                'returnurl' => $returnurl,
+            ]
+        );
+        $quickactions .= html_writer::link(
+            $closeurl,
+            get_string('commerce_sales_action_close', 'local_subscriptions'),
+            [
+                'class' => 'btn btn-outline-danger',
+                'data-confirmation' => 'modal',
+                'data-confirmation-title-str' => json_encode([
+                    'commerce_sales_action_close',
+                    'local_subscriptions',
+                ]),
+                'data-confirmation-content-str' => json_encode([
+                    'commerce_sales_action_close_confirm',
+                    'local_subscriptions',
+                ]),
+                'data-confirmation-yes-button-str' => json_encode([
+                    'commerce_sales_action_close',
+                    'local_subscriptions',
+                ]),
+                'data-confirmation-destination' => $closeurl->out(false),
+            ]
+        );
+    }
 }
 $quickactions .= html_writer::end_div();
 echo CommerceDesignSystemRenderer::panel(

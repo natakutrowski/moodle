@@ -67,149 +67,214 @@ final class CrmNavigationRegistry {
      * @return CrmNavigationItem[]
      */
     private function all_items(): array {
+        $child = static function(string $label, string $path, string $capability, string $icon): array {
+            return [
+                'label' => $label,
+                'url' => new moodle_url($path),
+                'capability' => $capability,
+                'icon' => $icon,
+            ];
+        };
+
         return [
             new CrmNavigationItem(
                 key: CrmNavigationKeys::DASHBOARD,
-                label: get_string(
-                    'admin_dashboard',
-                    'local_subscriptions'
-                ),
-                icon: '⌂',
-                url: new moodle_url(
-                    subscription_config::
-                        admin_dashboard_page()
-                ),
-                capability:
-                    Capabilities::VIEW_DASHBOARD,
-                position: 10
+                label: get_string('crm_nav_dashboard', 'local_subscriptions'),
+                icon: 'fa-dashboard',
+                url: new moodle_url(subscription_config::admin_dashboard_page()),
+                capability: Capabilities::VIEW_DASHBOARD,
+                position: 5
             ),
 
             new CrmNavigationItem(
                 key: CrmNavigationKeys::USERS,
-                label: get_string(
-                    'crm_users',
-                    'local_subscriptions'
-                ),
-                icon: '👥',
-                url: new moodle_url(
-                    subscription_config::
-                        admin_users_page()
-                ),
-                capability:
-                    Capabilities::VIEW_USERS,
-                position: 20
-            ),
-
-            new CrmNavigationItem(
-                key: CrmNavigationKeys::INBOX,
-                label: get_string(
-                    'crm_inbox_title',
-                    'local_subscriptions'
-                ),
-                icon: '✉',
-                url: new moodle_url(
-                    subscription_config::
-                        admin_inbox_page()
-                ),
-                capability:
-                    Capabilities::VIEW_INBOX,
-                position: 30
-            ),
-
-            new CrmNavigationItem(
-                key: CrmNavigationKeys::WORK,
-                label: get_string(
-                    'crm_work_title',
-                    'local_subscriptions'
-                ),
-                icon: '✓',
-                url: new moodle_url(
-                    subscription_config::
-                        admin_work_items_page()
-                ),
-                capability:
-                    Capabilities::VIEW_WORK_ITEMS,
-                position: 40
-            ),
-
-            new CrmNavigationItem(
-                key: CrmNavigationKeys::ASSISTANT,
-                label: get_string(
-                    'crm_assistant_title',
-                    'local_subscriptions'
-                ),
-                icon: '✦',
-                url: new moodle_url(
-                    subscription_config::
-                        admin_crm_assistant_page()
-                ),
-                capability:
-                    Capabilities::VIEW_USERS,
-                position: 50
+                label: get_string('crm_nav_users', 'local_subscriptions'),
+                icon: 'fa-users',
+                url: new moodle_url(subscription_config::admin_users_page()),
+                capability: Capabilities::VIEW_USERS,
+                position: 10,
+                children: [
+                    $child(
+                        get_string('crm_nav_users_overview', 'local_subscriptions'),
+                        subscription_config::admin_users_page(),
+                        Capabilities::VIEW_USERS,
+                        'fa-user-circle'
+                    ),
+                    $child(
+                        get_string('crm_commerce_nav_identities', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/customer-identities/index.php',
+                        Capabilities::VIEW_PAYMENTS,
+                        'fa-link'
+                    ),
+                ]
             ),
 
             new CrmNavigationItem(
                 key: CrmNavigationKeys::COMMERCE,
-                label: get_string(
-                    'crm_commerce_nav',
-                    'local_subscriptions'
-                ),
-                icon: '◆',
-                url: new moodle_url(
-                    subscription_config::
-                        admin_commerce_page()
-                ),
-                capability:
-                    Capabilities::VIEW_DASHBOARD,
-                position: 60
+                label: get_string('crm_nav_commerce', 'local_subscriptions'),
+                icon: 'fa-shopping-cart',
+                url: new moodle_url(subscription_config::admin_commerce_page()),
+                capability: Capabilities::VIEW_DASHBOARD,
+                position: 20,
+                children: [
+                    $child(
+                        get_string('crm_commerce_nav_overview', 'local_subscriptions'),
+                        subscription_config::admin_commerce_page(),
+                        Capabilities::VIEW_DASHBOARD,
+                        'fa-dashboard'
+                    ),
+                    $child(
+                        get_string('crm_commerce_nav_purchases', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/purchases/index.php',
+                        Capabilities::VIEW_PAYMENTS,
+                        'fa-credit-card'
+                    ),
+                    $child(
+                        get_string('crm_commerce_nav_products', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/products/index.php',
+                        Capabilities::MANAGE_CONFIGURATION,
+                        'fa-cube'
+                    ),
+                    $child(
+                        get_string('crm_nav_showrooms', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/showrooms/index.php',
+                        'local/subscriptions:manage_showrooms',
+                        'fa-picture-o'
+                    ),
+                    $child(
+                        get_string('crm_commerce_nav_personal_offers', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/personal-offers/index.php',
+                        Capabilities::VIEW_PAYMENTS,
+                        'fa-tag'
+                    ),
+                    $child(
+                        get_string('crm_commerce_nav_grants', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/grants/index.php',
+                        Capabilities::MANAGE_SUBSCRIPTIONS,
+                        'fa-key'
+                    ),
+                    $child(
+                        get_string('crm_commerce_nav_mail', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/mail/index.php',
+                        Capabilities::VIEW_PAYMENTS,
+                        'fa-envelope'
+                    ),
+                    $child(
+                        get_string('crm_commerce_nav_statistics', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/statistics/index.php',
+                        Capabilities::VIEW_STATISTICS,
+                        'fa-bar-chart'
+                    ),
+                    $child(
+                        get_string('crm_commerce_nav_configuration', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/configuration/index.php',
+                        Capabilities::MANAGE_CONFIGURATION,
+                        'fa-cog'
+                    ),
+                ]
             ),
 
             new CrmNavigationItem(
-                key: CrmNavigationKeys::SHOWROOMS,
-                label: get_string(
-                    'commerce_showroom_cms_title',
-                    'local_subscriptions'
-                ),
-                icon: '▣',
-                url: new moodle_url(
-                    '/local/subscriptions/admin/commerce/showrooms/index.php'
-                ),
-                capability: 'local/subscriptions:manage_showrooms',
-                position: 65
+                key: CrmNavigationKeys::INBOX,
+                label: get_string('crm_nav_inbox', 'local_subscriptions'),
+                icon: 'fa-envelope',
+                url: new moodle_url(subscription_config::admin_inbox_page()),
+                capability: Capabilities::VIEW_INBOX,
+                position: 30,
+                children: [
+                    $child(
+                        get_string('crm_nav_inbox_overview', 'local_subscriptions'),
+                        subscription_config::admin_inbox_page(),
+                        Capabilities::VIEW_INBOX,
+                        'fa-inbox'
+                    ),
+                    $child(
+                        get_string('crm_nav_diagnostics', 'local_subscriptions'),
+                        '/local/subscriptions/admin/inbox/diagnostics.php',
+                        Capabilities::VIEW_INBOX,
+                        'fa-stethoscope'
+                    ),
+                ]
+            ),
+
+            new CrmNavigationItem(
+                key: CrmNavigationKeys::WORK,
+                label: get_string('crm_nav_work', 'local_subscriptions'),
+                icon: 'fa-tasks',
+                url: new moodle_url(subscription_config::admin_work_items_page()),
+                capability: Capabilities::VIEW_WORK_ITEMS,
+                position: 40,
+                children: [
+                    $child(
+                        get_string('crm_nav_work_items', 'local_subscriptions'),
+                        subscription_config::admin_work_items_page(),
+                        Capabilities::VIEW_WORK_ITEMS,
+                        'fa-tasks'
+                    ),
+                    $child(
+                        get_string('crm_nav_work_teams', 'local_subscriptions'),
+                        subscription_config::admin_work_teams_page(),
+                        Capabilities::VIEW_WORK_ITEMS,
+                        'fa-users'
+                    ),
+                ]
+            ),
+
+            new CrmNavigationItem(
+                key: CrmNavigationKeys::ASSISTANT,
+                label: get_string('crm_nav_assistant', 'local_subscriptions'),
+                icon: 'fa-magic',
+                url: new moodle_url(subscription_config::admin_crm_assistant_page()),
+                capability: Capabilities::VIEW_USERS,
+                position: 50
+            ),
+
+
+            new CrmNavigationItem(
+                key: CrmNavigationKeys::TOOLS,
+                label: get_string('crm_nav_tools', 'local_subscriptions'),
+                icon: 'fa-wrench',
+                url: new moodle_url(subscription_config::admin_crm_tools_page()),
+                capability: Capabilities::MANAGE_CRM_ADMIN_TOOLS,
+                position: 70,
+                children: [
+                    $child(
+                        get_string('crm_nav_tools_overview', 'local_subscriptions'),
+                        subscription_config::admin_crm_tools_page(),
+                        Capabilities::MANAGE_CRM_ADMIN_TOOLS,
+                        'fa-wrench'
+                    ),
+                    $child(
+                        get_string('crm_nav_tools_history', 'local_subscriptions'),
+                        subscription_config::admin_crm_tool_history_page(),
+                        Capabilities::MANAGE_CRM_ADMIN_TOOLS,
+                        'fa-history'
+                    ),
+                ]
             ),
 
             new CrmNavigationItem(
                 key: CrmNavigationKeys::HELP,
-                label: get_string(
-                    'crm_help_title',
-                    'local_subscriptions'
-                ),
-                icon: '?',
-                url: new moodle_url(
-                    subscription_config::
-                        admin_help_page()
-                ),
-                capability:
-                    Capabilities::VIEW_DASHBOARD,
-                position: 70
+                label: get_string('crm_nav_help', 'local_subscriptions'),
+                icon: 'fa-question-circle',
+                url: new moodle_url(subscription_config::admin_help_page()),
+                capability: Capabilities::VIEW_DASHBOARD,
+                position: 999,
+                children: [
+                    $child(
+                        get_string('crm_nav_help_overview', 'local_subscriptions'),
+                        subscription_config::admin_help_page(),
+                        Capabilities::VIEW_DASHBOARD,
+                        'fa-question-circle'
+                    ),
+                    $child(
+                        get_string('crm_nav_diagnostics', 'local_subscriptions'),
+                        subscription_config::admin_help_diagnostics_page(),
+                        Capabilities::VIEW_DASHBOARD,
+                        'fa-stethoscope'
+                    ),
+                ]
             ),
-            new CrmNavigationItem(
-                key: CrmNavigationKeys::TOOLS,
-                label: get_string(
-                    'crm_admin_tools_nav',
-                    'local_subscriptions'
-                ),
-                icon: '⚙',
-                url: new moodle_url(
-                    subscription_config::
-                        admin_crm_tools_page()
-                ),
-                capability:
-                    Capabilities::
-                        MANAGE_CRM_ADMIN_TOOLS,
-                position: 80
-            ),
-
         ];
     }
 }

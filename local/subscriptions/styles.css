@@ -11486,7 +11486,7 @@ body.local-subscriptions-workspace-editing {
     right: 0;
     display: flex;
     width: max-content;
-    min-width: 12.5rem;
+    min-width: 15.5rem;
     max-width: min(18rem, 80vw);
     padding: 0.35rem;
     flex-direction: column;
@@ -15719,5 +15719,2573 @@ body#page-local-subscriptions-checkout #region-main {
     .crm-app-topbar-admin-toggle,
     .crm-app-topbar-admin-dropdown {
         border-color: CanvasText;
+    }
+}
+
+
+/* ==========================================================================
+   7.95N — CRM UX and navigation
+   ========================================================================== */
+
+.crm-app-navigation-item-main {
+    display: flex;
+    align-items: stretch;
+}
+
+.crm-app-navigation-item.has-submenu .crm-app-navigation-link {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.crm-app-navigation-menu-toggle {
+    display: inline-flex;
+    width: 1.9rem;
+    min-height: 2.75rem;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-left: 0;
+    border-radius: 0 0.75rem 0.75rem 0;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.crm-app-navigation-item:hover .crm-app-navigation-menu-toggle,
+.crm-app-navigation-item:focus-within .crm-app-navigation-menu-toggle,
+.crm-app-navigation-menu-toggle:hover,
+.crm-app-navigation-menu-toggle:focus {
+    border-color: rgba(99, 102, 241, 0.16);
+    background: rgba(99, 102, 241, 0.06);
+    color: #312e81;
+}
+
+.crm-app-navigation-item {
+    position: relative;
+}
+
+.crm-app-navigation-item.is-help {
+    margin-left: auto;
+}
+
+.crm-app-navigation-link.is-active {
+    cursor: pointer;
+}
+
+.crm-app-navigation-link[aria-current="page"] {
+    pointer-events: auto;
+}
+
+.crm-app-navigation-submenu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    z-index: 1060;
+    width: max-content;
+    min-width: 13rem;
+    max-width: 20rem;
+    padding: 0.4rem;
+    margin: 0;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 0.8rem;
+    background: #fff;
+    box-shadow: 0 0.9rem 2rem rgba(15, 23, 42, 0.14);
+    list-style: none;
+}
+
+.crm-app-navigation-item.is-help .crm-app-navigation-submenu {
+    right: 0;
+    left: auto;
+}
+
+.crm-app-navigation-item.has-submenu.is-menu-open > .crm-app-navigation-submenu {
+    display: block;
+}
+
+.crm-app-navigation-submenu-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.55rem;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 650;
+    line-height: 1.25;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.crm-app-navigation-submenu-icon {
+    display: inline-flex;
+    width: 1.15rem;
+    flex: 0 0 1.15rem;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.crm-app-navigation-submenu-link:hover .crm-app-navigation-submenu-icon,
+.crm-app-navigation-submenu-link:focus .crm-app-navigation-submenu-icon {
+    color: inherit;
+}
+
+.crm-app-navigation-submenu-link:hover,
+.crm-app-navigation-submenu-link:focus {
+    background: rgba(99, 102, 241, 0.07);
+    color: #312e81;
+    text-decoration: none;
+}
+
+@media (max-width: 767.98px) {
+    .crm-app-navigation-item.is-help {
+        margin-left: 0;
+    }
+
+    .crm-app-navigation-item-main {
+        width: 100%;
+    }
+
+    .crm-app-navigation-item.has-submenu .crm-app-navigation-link {
+        flex: 1 1 auto;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .crm-app-navigation-menu-toggle {
+        width: 2.75rem;
+        min-height: 3.1rem;
+        border-color: rgba(148, 163, 184, 0.18);
+        background: #fff;
+    }
+
+    .crm-app-navigation-submenu {
+        position: static;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        margin: 0.25rem 0 0.5rem 2.6rem;
+        box-shadow: none;
+    }
+
+    .crm-app-navigation-item.has-submenu.is-menu-open > .crm-app-navigation-submenu {
+        display: block;
+    }
+}
+
+
+/* ==========================================================================
+   7.95N1.B — CRM top navigation polish
+   ========================================================================== */
+
+@media (min-width: 768px) {
+    /* Dropdowns must escape the top bar; horizontal scrolling clips them. */
+    .crm-app-navigation-panel,
+    .crm-app-navigation-list {
+        overflow: visible;
+    }
+
+    .crm-app-navigation-list {
+        scroll-snap-type: none;
+        scrollbar-width: none;
+    }
+
+    /* The Dashboard is the CRM home, visually separated from workspaces. */
+    .crm-app-navigation-item.is-dashboard {
+        display: flex;
+        align-items: center;
+        margin-right: 0.45rem;
+        padding-right: 0.65rem;
+    }
+
+    .crm-app-navigation-item.is-dashboard::after {
+        width: 1px;
+        height: 1.25rem;
+        margin-left: 0.55rem;
+        background: rgba(148, 163, 184, 0.22);
+        content: "";
+    }
+
+    .crm-app-navigation-item.is-dashboard .crm-app-navigation-link {
+        border-color: transparent;
+        background: transparent;
+        color: #475569;
+    }
+
+    .crm-app-navigation-item.is-dashboard .crm-app-navigation-link:hover,
+    .crm-app-navigation-item.is-dashboard .crm-app-navigation-link:focus {
+        border-color: rgba(99, 102, 241, 0.16);
+        background: rgba(99, 102, 241, 0.06);
+        color: #312e81;
+        box-shadow: none;
+    }
+
+    .crm-app-navigation-item.is-dashboard .crm-app-navigation-link.is-active {
+        border-color: rgba(217, 70, 239, 0.22);
+        background: #fff4fa;
+        color: #831843;
+        box-shadow: 0 0.3rem 0.9rem rgba(131, 24, 67, 0.08);
+    }
+}
+
+/* Hovering/focusing only the chevron highlights the whole split button. */
+.crm-app-navigation-item.has-submenu:has(.crm-app-navigation-menu-toggle:hover) .crm-app-navigation-link,
+.crm-app-navigation-item.has-submenu:has(.crm-app-navigation-menu-toggle:focus) .crm-app-navigation-link,
+.crm-app-navigation-item.has-submenu.is-menu-open .crm-app-navigation-link {
+    border-color: rgba(99, 102, 241, 0.16);
+    background: rgba(99, 102, 241, 0.06);
+    color: #312e81;
+    text-decoration: none;
+}
+
+.crm-app-navigation-item.has-submenu.is-menu-open .crm-app-navigation-menu-toggle {
+    border-color: rgba(99, 102, 241, 0.16);
+    background: rgba(99, 102, 241, 0.06);
+    color: #312e81;
+}
+
+
+/* ==========================================================================
+   7.95N1.C — click-only contextual menus and submenu iconography
+   ========================================================================== */
+
+/* Menus are controlled exclusively by crm_shell.js; keyboard focus alone must not open them. */
+.crm-app-navigation-item.has-submenu:not(.is-menu-open) > .crm-app-navigation-submenu {
+    display: none;
+}
+
+.crm-app-navigation-item.has-submenu.is-menu-open > .crm-app-navigation-submenu {
+    display: block;
+}
+
+
+/* 7.95N1.C.1 — Dashboard hierarchy micro-polish. */
+@media (min-width: 768px) {
+    .crm-app-navigation-item.is-dashboard {
+        margin-right: 0.25rem;
+        padding-right: 0.55rem;
+    }
+
+    .crm-app-navigation-item.is-dashboard::after {
+        display: block;
+        width: 1px;
+        height: 1.35rem;
+        margin-left: 0.55rem;
+        background: rgba(100, 116, 139, 0.34);
+        content: "";
+        flex: 0 0 1px;
+    }
+
+    .crm-app-navigation-item.is-dashboard .crm-app-navigation-link:not(.is-active) {
+        border-color: rgba(148, 163, 184, 0.16);
+        background: rgba(241, 245, 249, 0.72);
+        color: #475569;
+        box-shadow: none;
+    }
+
+    .crm-app-navigation-item.is-dashboard .crm-app-navigation-link:not(.is-active):hover,
+    .crm-app-navigation-item.is-dashboard .crm-app-navigation-link:not(.is-active):focus {
+        border-color: rgba(99, 102, 241, 0.16);
+        background: rgba(99, 102, 241, 0.06);
+        color: #312e81;
+    }
+}
+/* ==========================================================================
+   Commerce 7.95N2 — Commerce dashboard and secondary navigation alignment.
+   ========================================================================== */
+.local-subscriptions-commerce-page .crm-breadcrumb,
+.local-subscriptions-commerce-purchases-page .crm-breadcrumb {
+    margin-bottom: 0.45rem;
+}
+
+.crm-breadcrumb {
+    font-size: 0.78rem;
+}
+
+.crm-breadcrumb-link {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.crm-breadcrumb-link:hover,
+.crm-breadcrumb-link:focus-visible {
+    color: #f51b7b;
+}
+
+.crm-breadcrumb-current {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.crm-commerce-section-nav {
+    overflow: visible;
+    padding-bottom: 0;
+}
+
+.crm-commerce-section-nav-list {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    gap: 0.2rem;
+    padding: 0.28rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.8rem;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.crm-commerce-section-nav-link {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.62rem;
+    border-radius: 0.62rem;
+    color: #475569;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.crm-commerce-section-nav-link:hover {
+    border-color: rgba(245, 27, 123, 0.13);
+    background: rgba(245, 27, 123, 0.035);
+    color: #be185d;
+}
+
+.crm-commerce-section-nav-link.active {
+    border-color: rgba(245, 27, 123, 0.22);
+    background: rgba(245, 27, 123, 0.055);
+    color: #f51b7b;
+    box-shadow: 0 2px 8px rgba(245, 27, 123, 0.09);
+}
+
+.crm-commerce-section-nav-icon {
+    width: 1.05rem;
+    color: currentColor;
+    font-size: 0.9rem;
+}
+
+.crm-commerce-section-nav-icon .fa {
+    width: 1em;
+    text-align: center;
+}
+
+.crm-commerce-dashboard {
+    --commerce-dashboard-border: #e5eaf1;
+    --commerce-dashboard-muted: #718096;
+    --commerce-dashboard-ink: #18233f;
+    --commerce-dashboard-pink: #f51b7b;
+    --commerce-dashboard-green: #169b62;
+    --commerce-dashboard-orange: #f97316;
+    --commerce-dashboard-yellow: #eab308;
+    margin-bottom: 2rem;
+}
+
+.crm-commerce-dashboard-card {
+    border: 1px solid var(--commerce-dashboard-border);
+    border-radius: 0.9rem;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.045);
+}
+
+.crm-commerce-dashboard-metrics {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.crm-commerce-dashboard-metric {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    gap: 0.72rem;
+    padding: 1rem;
+}
+
+.crm-commerce-dashboard-metric-icon {
+    display: inline-flex;
+    flex: 0 0 2.65rem;
+    width: 2.65rem;
+    height: 2.65rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: rgba(245, 27, 123, 0.09);
+    color: var(--commerce-dashboard-pink);
+    font-size: 1.05rem;
+}
+
+.crm-commerce-dashboard-metric:nth-child(2) .crm-commerce-dashboard-metric-icon {
+    background: rgba(99, 102, 241, 0.09);
+    color: #5b5bd6;
+}
+
+.crm-commerce-dashboard-metric:nth-child(3) .crm-commerce-dashboard-metric-icon,
+.crm-commerce-dashboard-metric-icon.is-success {
+    background: rgba(22, 155, 98, 0.09);
+    color: var(--commerce-dashboard-green);
+}
+
+.crm-commerce-dashboard-metric-icon.is-warning {
+    background: rgba(249, 115, 22, 0.1);
+    color: var(--commerce-dashboard-orange);
+}
+
+.crm-commerce-dashboard-metric-icon.is-attention {
+    background: rgba(234, 179, 8, 0.12);
+    color: #b58105;
+}
+
+.crm-commerce-dashboard-metric-copy {
+    min-width: 0;
+}
+
+.crm-commerce-dashboard-metric-label {
+    overflow: hidden;
+    margin-bottom: 0.28rem;
+    color: #516078;
+    font-size: 0.77rem;
+    font-weight: 650;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-commerce-dashboard-metric-value {
+    color: var(--commerce-dashboard-ink);
+    font-size: clamp(1.15rem, 1.4vw, 1.55rem);
+    font-weight: 750;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+}
+
+.crm-commerce-dashboard-metric-foot {
+    min-height: 1.05rem;
+    margin-top: 0.38rem;
+    color: var(--commerce-dashboard-muted);
+    font-size: 0.69rem;
+    line-height: 1.25;
+}
+
+.crm-commerce-dashboard-trend.is-up { color: var(--commerce-dashboard-green); }
+.crm-commerce-dashboard-trend.is-down { color: #dc3545; }
+.crm-commerce-dashboard-trend.is-flat { color: var(--commerce-dashboard-muted); }
+
+.crm-commerce-dashboard-grid {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.crm-commerce-dashboard-grid-main {
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, 1fr) minmax(260px, 0.82fr);
+}
+
+.crm-commerce-dashboard-grid-bottom {
+    grid-template-columns: minmax(250px, 0.82fr) minmax(300px, 1fr) minmax(420px, 1.4fr);
+}
+
+.crm-commerce-dashboard-panel {
+    min-width: 0;
+    padding: 1rem 1.05rem;
+}
+
+.crm-commerce-dashboard-panel-title {
+    margin: 0 0 0.9rem;
+    color: var(--commerce-dashboard-ink);
+    font-size: 0.95rem;
+    font-weight: 750;
+}
+
+.crm-commerce-dashboard-chart-panel {
+    min-height: 330px;
+}
+
+.crm-commerce-dashboard-chart-svg {
+    width: 100%;
+    height: 230px;
+    border-bottom: 1px solid #eef2f7;
+    background-image: linear-gradient(to bottom, transparent 24%, #f3f5f8 25%, transparent 26%, transparent 49%, #f3f5f8 50%, transparent 51%, transparent 74%, #f3f5f8 75%, transparent 76%);
+}
+
+.crm-commerce-dashboard-chart-line {
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.crm-commerce-dashboard-chart-line.series-0 { stroke: #f51b7b; }
+.crm-commerce-dashboard-chart-line.series-1 { stroke: #6366f1; }
+.crm-commerce-dashboard-chart-line.series-2 { stroke: #169b62; }
+
+.crm-commerce-dashboard-chart-legend {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin: -0.25rem 0 0.35rem;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.crm-commerce-dashboard-chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.crm-commerce-dashboard-chart-dot {
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+}
+
+.crm-commerce-dashboard-chart-dot.series-0 { background: #f51b7b; }
+.crm-commerce-dashboard-chart-dot.series-1 { background: #6366f1; }
+.crm-commerce-dashboard-chart-dot.series-2 { background: #169b62; }
+
+.crm-commerce-dashboard-sale-row,
+.crm-commerce-dashboard-product-row,
+.crm-commerce-dashboard-alert-row,
+.crm-commerce-dashboard-quick-link {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.crm-commerce-dashboard-sale-row {
+    justify-content: space-between;
+    gap: 0.7rem;
+    padding: 0.58rem 0;
+}
+
+.crm-commerce-dashboard-sale-row:last-of-type,
+.crm-commerce-dashboard-product-row:last-child,
+.crm-commerce-dashboard-alert-row:last-child,
+.crm-commerce-dashboard-quick-link:last-child {
+    border-bottom: 0;
+}
+
+.crm-commerce-dashboard-sale-main,
+.crm-commerce-dashboard-sale-meta {
+    min-width: 0;
+}
+
+.crm-commerce-dashboard-sale-customer {
+    overflow: hidden;
+    color: #2f3b55;
+    font-size: 0.78rem;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-commerce-dashboard-sale-product,
+.crm-commerce-dashboard-sale-time {
+    overflow: hidden;
+    color: var(--commerce-dashboard-muted);
+    font-size: 0.69rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-commerce-dashboard-sale-meta {
+    display: grid;
+    justify-items: end;
+}
+
+.crm-commerce-dashboard-sale-amount {
+    color: #27334e;
+    font-size: 0.76rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.crm-commerce-dashboard-panel-footer {
+    padding-top: 0.8rem;
+    text-align: center;
+    font-size: 0.76rem;
+    font-weight: 650;
+}
+
+.crm-commerce-dashboard-panel-footer a {
+    color: var(--commerce-dashboard-pink);
+    text-decoration: none;
+}
+
+.crm-commerce-dashboard-quick-link {
+    gap: 0.65rem;
+    padding: 0.58rem 0.15rem;
+    color: #334155;
+    font-size: 0.76rem;
+    text-decoration: none;
+}
+
+.crm-commerce-dashboard-quick-link > .fa {
+    width: 1.1rem;
+    color: var(--commerce-dashboard-pink);
+    text-align: center;
+}
+
+.crm-commerce-dashboard-quick-link:hover {
+    color: var(--commerce-dashboard-pink);
+    text-decoration: none;
+}
+
+.crm-commerce-dashboard-quick-label {
+    flex: 1 1 auto;
+}
+
+.crm-commerce-dashboard-quick-arrow,
+.crm-commerce-dashboard-alert-arrow {
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+.crm-commerce-dashboard-alert-row {
+    gap: 0.55rem;
+    padding: 0.42rem 0;
+    color: #334155;
+    font-size: 0.75rem;
+    text-decoration: none;
+}
+
+.crm-commerce-dashboard-alert-row:hover {
+    color: var(--commerce-dashboard-pink);
+    text-decoration: none;
+}
+
+.crm-commerce-dashboard-alert-icon {
+    display: inline-flex;
+    flex: 0 0 2rem;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.55rem;
+}
+
+.crm-commerce-dashboard-alert-icon.is-warning { background: rgba(249,115,22,.1); color: #f97316; }
+.crm-commerce-dashboard-alert-icon.is-attention { background: rgba(234,179,8,.12); color: #b58105; }
+.crm-commerce-dashboard-alert-icon.is-success { background: rgba(22,155,98,.09); color: #169b62; }
+.crm-commerce-dashboard-alert-label { flex: 1 1 auto; }
+
+.crm-commerce-dashboard-all-clear {
+    padding: 0.6rem 0;
+    color: #169b62;
+    font-size: 0.78rem;
+}
+
+.crm-commerce-dashboard-product-currency + .crm-commerce-dashboard-product-currency {
+    margin-top: 0.75rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid #eef2f7;
+}
+
+.crm-commerce-dashboard-currency-label {
+    margin-bottom: 0.3rem;
+    color: #94a3b8;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.crm-commerce-dashboard-product-row {
+    gap: 0.55rem;
+    padding: 0.48rem 0;
+    font-size: 0.75rem;
+}
+
+.crm-commerce-dashboard-product-rank {
+    display: inline-flex;
+    flex: 0 0 1.55rem;
+    width: 1.55rem;
+    height: 1.55rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.crm-commerce-dashboard-product-row:nth-child(2) .crm-commerce-dashboard-product-rank { background: #fff6d8; color: #9a6b00; }
+.crm-commerce-dashboard-product-row:nth-child(3) .crm-commerce-dashboard-product-rank { background: #eef0ff; color: #5652b9; }
+.crm-commerce-dashboard-product-row:nth-child(4) .crm-commerce-dashboard-product-rank { background: #fff0e8; color: #b95e2b; }
+.crm-commerce-dashboard-product-label { flex: 1 1 auto; min-width: 0; }
+.crm-commerce-dashboard-product-revenue { font-weight: 700; white-space: nowrap; }
+
+.crm-commerce-dashboard-product-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.55rem;
+}
+
+.crm-commerce-dashboard-product-summary-item {
+    padding: 0.75rem 0.5rem;
+    border: 1px solid #edf1f6;
+    border-radius: 0.65rem;
+    text-align: center;
+}
+
+.crm-commerce-dashboard-product-summary-label,
+.crm-commerce-dashboard-product-summary-foot {
+    color: var(--commerce-dashboard-muted);
+    font-size: 0.67rem;
+}
+
+.crm-commerce-dashboard-product-summary-value {
+    margin: 0.28rem 0 0.15rem;
+    color: var(--commerce-dashboard-ink);
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.crm-commerce-dashboard-empty {
+    display: flex;
+    min-height: 120px;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+@media (max-width: 1399.98px) {
+    .crm-commerce-dashboard-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .crm-commerce-dashboard-grid-main { grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr); }
+    .crm-commerce-dashboard-grid-main > :last-child { grid-column: 1 / -1; }
+    .crm-commerce-dashboard-grid-bottom { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .crm-commerce-dashboard-grid-bottom > :last-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 1199.98px) {
+    .crm-commerce-section-nav { overflow-x: auto; scrollbar-width: thin; }
+    .crm-commerce-section-nav-list { width: max-content; min-width: 100%; }
+    .crm-commerce-section-nav-link { flex: 0 0 auto; min-width: max-content; }
+}
+
+@media (max-width: 767.98px) {
+    .crm-commerce-dashboard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .crm-commerce-dashboard-grid-main,
+    .crm-commerce-dashboard-grid-bottom { grid-template-columns: 1fr; }
+    .crm-commerce-dashboard-grid-main > :last-child,
+    .crm-commerce-dashboard-grid-bottom > :last-child { grid-column: auto; }
+    .crm-commerce-dashboard-product-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 479.98px) {
+    .crm-commerce-dashboard-metrics { grid-template-columns: 1fr; }
+}
+
+
+/* Commerce 7.95N2.3 — operational navigation and dashboard period/KPI polish. */
+.crm-commerce-section-nav-link-configuration {
+    position: relative;
+    margin-left: 0.8rem;
+}
+
+.crm-commerce-section-nav-link-configuration::before {
+    position: absolute;
+    top: 20%;
+    bottom: 20%;
+    left: -0.55rem;
+    width: 1px;
+    background: rgba(100, 116, 139, 0.28);
+    content: "";
+}
+
+.crm-commerce-dashboard-period {
+    position: relative;
+    width: fit-content;
+    margin: -0.25rem 0 0.85rem auto;
+}
+
+.crm-commerce-dashboard-period-summary {
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.6rem;
+    background: #fff;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.72rem;
+    list-style: none;
+}
+
+.crm-commerce-dashboard-period-summary::-webkit-details-marker { display: none; }
+.crm-commerce-dashboard-period-summary:hover { border-color: #d5dae4; color: #334155; }
+.crm-commerce-dashboard-period-caption { font-weight: 600; }
+.crm-commerce-dashboard-period-value { color: #334155; font-weight: 750; }
+
+.crm-commerce-dashboard-period-menu {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    display: grid;
+    min-width: 10rem;
+    padding: 0.35rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.65rem;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+.crm-commerce-dashboard-period-option {
+    padding: 0.45rem 0.55rem;
+    border-radius: 0.45rem;
+    color: #475569;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.crm-commerce-dashboard-period-option:hover,
+.crm-commerce-dashboard-period-option.is-active { background: rgba(245, 27, 123, 0.055); color: #f51b7b; text-decoration: none; }
+
+.crm-commerce-dashboard-revenue-list {
+    display: grid;
+    gap: 0.2rem;
+    margin-top: 0.05rem;
+}
+
+.crm-commerce-dashboard-revenue-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.crm-commerce-dashboard-revenue-currency {
+    color: #94a3b8;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.crm-commerce-dashboard-revenue-amount {
+    overflow: hidden;
+    color: var(--commerce-dashboard-ink);
+    font-size: 0.92rem;
+    font-weight: 760;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crm-commerce-dashboard-revenue-trend {
+    font-size: 0.62rem;
+    white-space: nowrap;
+}
+
+.crm-commerce-dashboard-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.48rem;
+}
+
+.crm-commerce-dashboard-panel-title > .fa {
+    width: 1rem;
+    color: #f51b7b;
+    font-size: 0.84rem;
+    text-align: center;
+}
+
+@media (max-width: 1199.98px) {
+    .crm-commerce-section-nav-link-configuration { margin-left: 0.25rem; }
+    .crm-commerce-section-nav-link-configuration::before { display: none; }
+}
+
+
+.crm-commerce-section-nav-group {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.crm-commerce-section-nav-group > summary {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    list-style: none;
+}
+.crm-commerce-section-nav-group > summary::-webkit-details-marker { display: none; }
+.crm-commerce-section-nav-chevron { margin-left: auto; font-size: 0.7rem; opacity: 0.65; }
+.crm-commerce-section-nav-group[open] .crm-commerce-section-nav-chevron { transform: rotate(180deg); }
+
+.crm-commerce-section-nav-menu {
+    position: absolute;
+    z-index: 30;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    display: grid;
+    min-width: 13.5rem;
+    padding: 0.35rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.65rem;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.13);
+}
+
+.crm-commerce-section-nav-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 0.45rem;
+    color: #475569;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.crm-commerce-section-nav-menu-link > .fa { width: 1rem; color: #f51b7b; text-align: center; }
+.crm-commerce-section-nav-menu-link:hover { background: rgba(245, 27, 123, 0.055); color: #be185d; text-decoration: none; }
+
+/* Commerce 7.95N2.4 — dashboard density, currency and analytics polish. */
+.crm-commerce-dashboard-period-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .9rem;
+}
+.crm-commerce-dashboard-period-range {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: #64748b;
+    font-size: .82rem;
+    font-weight: 600;
+}
+.crm-commerce-dashboard-custom-period {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: .45rem;
+    padding-top: .55rem;
+    margin-top: .45rem;
+    border-top: 1px solid rgba(148,163,184,.18);
+}
+.crm-commerce-dashboard-revenue-card,
+.crm-commerce-dashboard-panel { position: relative; }
+.crm-commerce-dashboard-currency {
+    position: relative;
+    z-index: 5;
+}
+.crm-commerce-dashboard-metric-currency,
+.crm-commerce-dashboard-panel-currency {
+    position: absolute;
+    top: .8rem;
+    right: .8rem;
+}
+.crm-commerce-dashboard-currency summary {
+    list-style: none;
+    cursor: pointer;
+}
+.crm-commerce-dashboard-currency summary::-webkit-details-marker { display:none; }
+.crm-commerce-dashboard-currency-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .22rem .45rem;
+    border: 1px solid rgba(148,163,184,.22);
+    border-radius: .55rem;
+    background: rgba(255,255,255,.9);
+    color: #64748b;
+    font-size: .72rem;
+    font-weight: 700;
+}
+.crm-commerce-dashboard-currency-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + .3rem);
+    min-width: 7.5rem;
+    padding: .35rem;
+    border: 1px solid rgba(148,163,184,.22);
+    border-radius: .65rem;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15,23,42,.12);
+}
+.crm-commerce-dashboard-currency-option {
+    display:block;
+    padding:.35rem .45rem;
+    border-radius:.45rem;
+    color:#475569;
+    text-decoration:none;
+    font-size:.78rem;
+}
+.crm-commerce-dashboard-currency-option:hover,
+.crm-commerce-dashboard-currency-option.is-active { background:#fff1f6; color:#e91e63; }
+.crm-commerce-dashboard-chart-svg {
+    width: 100%;
+    height: 260px;
+    overflow: visible;
+    color: #ff1f73;
+}
+.crm-commerce-dashboard-chart-grid { stroke: rgba(148,163,184,.2); stroke-width:1; }
+.crm-commerce-dashboard-chart-axis-label { fill:#94a3b8; font-size:10px; }
+.crm-commerce-dashboard-chart-line { stroke:#ff1f73; stroke-width:2.2; vector-effect:non-scaling-stroke; }
+.crm-commerce-dashboard-chart-area { fill:url(#commerceDashGradient); color:#ff1f73; }
+.crm-commerce-dashboard-chart-point { fill:#fff; stroke:#ff1f73; stroke-width:2; }
+.crm-commerce-dashboard-sale-row { grid-template-columns: 38px minmax(0,1fr) auto; gap:.65rem; }
+.crm-commerce-dashboard-sale-avatar { width:34px; height:34px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.crm-commerce-dashboard-sale-avatar img { width:34px; height:34px; object-fit:cover; }
+.crm-commerce-dashboard-sale-avatar.is-initials { background:#eef2ff; color:#4338ca; font-size:.72rem; font-weight:800; }
+.crm-commerce-dashboard-sale-customer,
+.crm-commerce-dashboard-sale-product { text-decoration:none; }
+.crm-commerce-dashboard-sale-customer:hover,
+.crm-commerce-dashboard-sale-product:hover { color:#e91e63; text-decoration:underline; }
+.crm-commerce-dashboard-product-medal { width:2rem; text-align:center; font-size:1.15rem; flex:0 0 2rem; }
+.crm-commerce-dashboard-product-summary-item.is-total {
+    background: linear-gradient(135deg, rgba(255,31,115,.08), rgba(99,102,241,.06));
+    border-color: rgba(255,31,115,.22);
+}
+.crm-commerce-dashboard-product-summary-item.is-total .crm-commerce-dashboard-product-summary-value { color:#e91e63; }
+.crm-commerce-dashboard-trend.is-na { color:#94a3b8; }
+@media (max-width: 767.98px) {
+    .crm-commerce-dashboard-period-bar { align-items:flex-start; flex-direction:column; }
+    .crm-commerce-dashboard-custom-period { grid-template-columns:1fr; }
+}
+
+
+/* Commerce 7.95N2.5 — dashboard compactness and readability polish. */
+
+/* Secondary Commerce navigation follows the CRM navbar rhythm:
+   natural item widths on the left, Configuration pushed to the far right. */
+.crm-commerce-section-nav-list-natural {
+    justify-content: flex-start;
+}
+.crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-link,
+.crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-group {
+    flex: 0 0 auto;
+}
+.crm-commerce-section-nav-list-natural .crm-commerce-section-nav-link {
+    padding-left: .9rem;
+    padding-right: .9rem;
+}
+.crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-link-configuration {
+    margin-left: auto;
+}
+.crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-link-configuration::before {
+    left: -.7rem;
+}
+
+/* Period row: tighter vertical rhythm and a compact summary chip. */
+.crm-commerce-dashboard-period-bar {
+    margin: -.05rem 0 .65rem;
+    gap: .65rem;
+}
+.crm-commerce-dashboard-period-range {
+    min-height: 2rem;
+    padding: .34rem .62rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .6rem;
+    background: rgba(255,255,255,.78);
+    box-shadow: 0 1px 2px rgba(15,23,42,.025);
+    color: #64748b;
+    font-size: .75rem;
+    font-weight: 600;
+}
+.crm-commerce-dashboard-period {
+    margin: 0 0 0 auto;
+}
+
+/* Revenue KPI is intentionally lighter: currency is already carried by selector. */
+.crm-commerce-dashboard-revenue-card .crm-commerce-dashboard-metric-value {
+    font-size: clamp(1.08rem, 1.25vw, 1.42rem);
+    letter-spacing: -.015em;
+}
+
+/* Chart: clear axes, minor/major grid distinction, and hoverable data points. */
+.crm-commerce-dashboard-chart-grid.is-minor {
+    stroke: rgba(148,163,184,.10);
+}
+.crm-commerce-dashboard-chart-grid.is-major {
+    stroke: rgba(148,163,184,.22);
+}
+.crm-commerce-dashboard-chart-axis {
+    stroke: rgba(100,116,139,.42);
+    stroke-width: 1.1;
+    vector-effect: non-scaling-stroke;
+}
+.crm-commerce-dashboard-chart-point {
+    cursor: help;
+    transition: r .14s ease, fill .14s ease, stroke-width .14s ease;
+}
+.crm-commerce-dashboard-chart-point-wrap:hover .crm-commerce-dashboard-chart-point,
+.crm-commerce-dashboard-chart-point:focus {
+    r: 5.5px;
+    fill: #fff1f6;
+    stroke-width: 2.5;
+    outline: none;
+}
+
+/* Latest sales: consistent avatar geometry and explicit two-line copy. */
+.crm-commerce-dashboard-sale-row {
+    display: grid;
+    grid-template-columns: 32px minmax(0,1fr) auto;
+    align-items: center;
+    gap: .7rem;
+}
+.crm-commerce-dashboard-sale-avatar,
+.crm-commerce-dashboard-sale-avatar img {
+    width: 30px;
+    height: 30px;
+}
+.crm-commerce-dashboard-sale-avatar {
+    flex: 0 0 30px;
+}
+.crm-commerce-dashboard-sale-avatar.is-initials {
+    font-size: .68rem;
+    line-height: 1;
+}
+.crm-commerce-dashboard-sale-main {
+    display: grid;
+    align-content: center;
+    gap: .12rem;
+    min-width: 0;
+    text-align: left;
+}
+.crm-commerce-dashboard-sale-customer-line,
+.crm-commerce-dashboard-sale-product-line {
+    min-width: 0;
+    text-align: left;
+}
+.crm-commerce-dashboard-sale-customer,
+.crm-commerce-dashboard-sale-product {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.crm-commerce-dashboard-sale-customer {
+    font-size: .78rem;
+    line-height: 1.2;
+}
+.crm-commerce-dashboard-sale-product {
+    font-size: .69rem;
+    line-height: 1.2;
+}
+
+/* Quick actions: visually nested under the title; icons use a cool accent
+   so the panel-title pink remains the visual anchor. */
+.crm-commerce-dashboard-panel .crm-commerce-dashboard-quick-link {
+    margin-left: .35rem;
+    padding-left: .45rem;
+}
+.crm-commerce-dashboard-quick-link > .fa {
+    color: #52647f;
+}
+.crm-commerce-dashboard-quick-link:hover > .fa {
+    color: #334155;
+}
+
+/* Top 3: decreasing emphasis. */
+.crm-commerce-dashboard-product-row.is-rank-1 .crm-commerce-dashboard-product-medal {
+    font-size: 1.55rem;
+}
+.crm-commerce-dashboard-product-row.is-rank-1 .crm-commerce-dashboard-product-label,
+.crm-commerce-dashboard-product-row.is-rank-1 .crm-commerce-dashboard-product-revenue {
+    font-size: .84rem;
+    font-weight: 800;
+}
+.crm-commerce-dashboard-product-row.is-rank-2 .crm-commerce-dashboard-product-medal {
+    font-size: 1.32rem;
+}
+.crm-commerce-dashboard-product-row.is-rank-2 .crm-commerce-dashboard-product-label,
+.crm-commerce-dashboard-product-row.is-rank-2 .crm-commerce-dashboard-product-revenue {
+    font-size: .79rem;
+    font-weight: 750;
+}
+.crm-commerce-dashboard-product-row.is-rank-3 .crm-commerce-dashboard-product-medal {
+    font-size: 1.12rem;
+}
+.crm-commerce-dashboard-product-row.is-rank-3 .crm-commerce-dashboard-product-label,
+.crm-commerce-dashboard-product-row.is-rank-3 .crm-commerce-dashboard-product-revenue {
+    font-size: .74rem;
+    font-weight: 650;
+}
+
+@media (max-width: 1199.98px) {
+    .crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-link-configuration {
+        margin-left: .25rem;
+    }
+}
+
+
+/* Commerce 7.95N2.6 — dashboard cleanup and navigation harmonisation. */
+
+/* N2.5 now draws every grid line in SVG. Disable the historical CSS background
+   grid to avoid the thick duplicate horizontal bands. */
+.crm-commerce-dashboard-chart-svg {
+    background-image: none !important;
+    background-color: transparent;
+}
+
+/* Larger, better balanced profile pills in Latest sales. */
+.crm-commerce-dashboard-sale-row {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+}
+.crm-commerce-dashboard-sale-avatar,
+.crm-commerce-dashboard-sale-avatar img,
+.crm-commerce-dashboard-sale-avatar .userpicture {
+    width: 40px !important;
+    height: 40px !important;
+}
+.crm-commerce-dashboard-sale-avatar {
+    flex: 0 0 40px;
+}
+.crm-commerce-dashboard-sale-avatar.is-initials {
+    font-size: .82rem;
+    font-weight: 700;
+}
+.crm-commerce-dashboard-sale-time {
+    white-space: nowrap;
+}
+
+/* Tighter vertical rhythm around the Commerce secondary navbar. */
+.crm-commerce-section-nav {
+    margin-top: .45rem;
+    margin-bottom: .7rem;
+}
+.crm-commerce-section-nav-list {
+    padding-top: .22rem;
+    padding-bottom: .22rem;
+}
+
+/* Product + Showroom operational summary. */
+.crm-commerce-dashboard-summary-section + .crm-commerce-dashboard-summary-section {
+    margin-top: .85rem;
+    padding-top: .8rem;
+    border-top: 1px solid #eef2f7;
+}
+.crm-commerce-dashboard-summary-section-title {
+    margin-bottom: .45rem;
+    color: #64748b;
+    font-size: .69rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+.crm-commerce-dashboard-showroom-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .55rem;
+}
+.crm-commerce-dashboard-showroom-summary-item {
+    padding: .65rem .45rem;
+    border: 1px solid #edf1f6;
+    border-radius: .65rem;
+    background: #fff;
+    text-align: center;
+}
+.crm-commerce-dashboard-showroom-summary-item.is-total {
+    border-color: rgba(99, 102, 241, .16);
+    background: rgba(99, 102, 241, .045);
+}
+
+/* CRM dropdowns now share the same visual language as Commerce dropdowns. */
+.crm-app-navigation-submenu {
+    min-width: 13.5rem;
+    padding: .35rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .65rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .13);
+}
+.crm-app-navigation-submenu-link {
+    gap: .55rem;
+    padding: .5rem .6rem;
+    border-radius: .45rem;
+    color: #475569;
+    font-size: .76rem;
+    font-weight: 600;
+}
+.crm-app-navigation-submenu-icon {
+    width: 1rem;
+    flex: 0 0 1rem;
+    color: #f51b7b;
+    font-size: .78rem;
+}
+.crm-app-navigation-submenu-link:hover,
+.crm-app-navigation-submenu-link:focus {
+    background: rgba(245, 27, 123, .055);
+    color: #be185d;
+}
+.crm-app-navigation-submenu-link:hover .crm-app-navigation-submenu-icon,
+.crm-app-navigation-submenu-link:focus .crm-app-navigation-submenu-icon {
+    color: #f51b7b;
+}
+
+@media (max-width: 767.98px) {
+    .crm-commerce-dashboard-showroom-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N2.8 — avatar, top-5 and CRM submenu final polish. */
+
+/* Moodle renders initials as <span class="userinitials size-42"> inside our
+   wrapper. Target the real generated element rather than only img/.userpicture. */
+.crm-commerce-dashboard .crm-commerce-dashboard-sale-row {
+    grid-template-columns: 54px minmax(0, 1fr) auto;
+    column-gap: .8rem;
+}
+.crm-commerce-dashboard .crm-commerce-dashboard-sale-avatar {
+    display: inline-flex !important;
+    flex: 0 0 50px !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: visible;
+}
+.crm-commerce-dashboard .crm-commerce-dashboard-sale-avatar img,
+.crm-commerce-dashboard .crm-commerce-dashboard-sale-avatar .userpicture,
+.crm-commerce-dashboard .crm-commerce-dashboard-sale-avatar .userinitials {
+    display: inline-flex !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    object-fit: cover;
+    font-size: 1rem !important;
+    line-height: 50px !important;
+}
+.crm-commerce-dashboard .crm-commerce-dashboard-sale-avatar .userinitials {
+    background: #eef2f7 !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+}
+
+/* Top 5 hierarchy. */
+.crm-commerce-dashboard-product-row.is-rank-1 {
+    padding-top: .68rem;
+    padding-bottom: .68rem;
+}
+.crm-commerce-dashboard-product-row.is-rank-1 .crm-commerce-dashboard-product-medal {
+    flex: 0 0 3rem;
+    width: 3rem;
+    font-size: 2.2rem;
+}
+.crm-commerce-dashboard-product-row.is-rank-1 .crm-commerce-dashboard-product-label,
+.crm-commerce-dashboard-product-row.is-rank-1 .crm-commerce-dashboard-product-revenue {
+    font-size: .96rem;
+    font-weight: 820;
+}
+.crm-commerce-dashboard-product-row.is-rank-2 .crm-commerce-dashboard-product-medal {
+    flex: 0 0 2.7rem;
+    width: 2.7rem;
+    font-size: 1.85rem;
+}
+.crm-commerce-dashboard-product-row.is-rank-2 .crm-commerce-dashboard-product-label,
+.crm-commerce-dashboard-product-row.is-rank-2 .crm-commerce-dashboard-product-revenue {
+    font-size: .87rem;
+    font-weight: 760;
+}
+.crm-commerce-dashboard-product-row.is-rank-3 .crm-commerce-dashboard-product-medal {
+    flex: 0 0 2.4rem;
+    width: 2.4rem;
+    font-size: 1.55rem;
+}
+.crm-commerce-dashboard-product-row.is-rank-3 .crm-commerce-dashboard-product-label,
+.crm-commerce-dashboard-product-row.is-rank-3 .crm-commerce-dashboard-product-revenue {
+    font-size: .81rem;
+    font-weight: 700;
+}
+.crm-commerce-dashboard-product-row.is-rank-4 .crm-commerce-dashboard-product-medal,
+.crm-commerce-dashboard-product-row.is-rank-5 .crm-commerce-dashboard-product-medal {
+    display: inline-flex;
+    flex: 0 0 1.7rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: .7rem;
+    font-weight: 800;
+}
+
+/* CRM submenu: same violet family as submenu header. */
+.crm-app-navigation-submenu-icon,
+.crm-app-navigation-submenu-link:hover .crm-app-navigation-submenu-icon,
+.crm-app-navigation-submenu-link:focus .crm-app-navigation-submenu-icon {
+    color: #312e81 !important;
+}
+.crm-app-navigation-submenu-link:hover,
+.crm-app-navigation-submenu-link:focus {
+    background: rgba(91, 75, 138, .07);
+    color: #493c72;
+}
+
+/* Commerce 7.95N3.1 — Sales workspace UX. */
+
+/* Overview is the Commerce workspace home: subtly distinct, then a clearer divider. */
+.crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-link-overview {
+    position: relative;
+    margin-right: .85rem;
+    border-color: rgba(99, 102, 241, .12);
+    background: rgba(99, 102, 241, .045);
+    color: #475569;
+}
+.crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-link-overview::after {
+    position: absolute;
+    top: 18%;
+    right: -.62rem;
+    bottom: 18%;
+    width: 1px;
+    background: rgba(100, 116, 139, .32);
+    content: "";
+}
+.crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-link-overview:hover,
+.crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-link-overview.active {
+    border-color: rgba(99, 102, 241, .18);
+    background: rgba(99, 102, 241, .075);
+    color: #312e81;
+}
+.crm-commerce-section-nav-list-natural > .crm-commerce-section-nav-link-overview.active::after {
+    background: rgba(100, 116, 139, .32);
+}
+
+/* Sales filters. */
+.crm-sales-filter-card {
+    margin: .85rem 0 1rem;
+    padding: 1rem 1.05rem;
+    border: 1px solid #e5eaf1;
+    border-radius: .9rem;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .035);
+}
+.crm-sales-filter-form {
+    margin: 0;
+}
+.crm-sales-filter-title {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin-bottom: .8rem;
+    color: #312e81;
+    font-size: .9rem;
+}
+.crm-sales-filter-title > .fa {
+    color: #6d5bb3;
+}
+.crm-sales-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, 2.1fr) repeat(5, minmax(140px, 1fr));
+    gap: .7rem;
+    align-items: end;
+}
+.crm-sales-filter-field {
+    min-width: 0;
+}
+.crm-sales-filter-field .form-label {
+    margin-bottom: .28rem;
+    color: #516078;
+    font-size: .7rem;
+    font-weight: 700;
+}
+.crm-sales-filter-field .form-control,
+.crm-sales-filter-field .form-select {
+    min-height: 2.35rem;
+    border-color: #dfe5ee;
+    border-radius: .58rem;
+    font-size: .78rem;
+}
+.crm-sales-search-control {
+    position: relative;
+}
+.crm-sales-search-control .form-control {
+    padding-right: 2.25rem;
+}
+.crm-sales-search-icon {
+    position: absolute;
+    top: 50%;
+    right: .78rem;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+.crm-sales-filter-advanced {
+    margin-top: .65rem;
+}
+.crm-sales-filter-advanced > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .25rem .15rem;
+    color: #6d5bb3;
+    cursor: pointer;
+    font-size: .72rem;
+    font-weight: 700;
+    list-style: none;
+}
+.crm-sales-filter-advanced > summary::-webkit-details-marker { display: none; }
+.crm-sales-filter-advanced-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(170px, 1fr));
+    gap: .7rem;
+    margin-top: .6rem;
+    padding-top: .7rem;
+    border-top: 1px solid #eef2f7;
+}
+.crm-sales-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .55rem;
+    margin-top: .8rem;
+}
+
+/* One connected KPI strip instead of isolated cards. */
+.crm-sales-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    margin-bottom: 1rem;
+    border: 1px solid #e5eaf1;
+    border-radius: .9rem;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .035);
+    overflow: hidden;
+}
+.crm-sales-kpi {
+    position: relative;
+    min-width: 0;
+    padding: .9rem 1rem;
+}
+.crm-sales-kpi + .crm-sales-kpi::before {
+    position: absolute;
+    top: 18%;
+    bottom: 18%;
+    left: 0;
+    width: 1px;
+    background: #edf1f6;
+    content: "";
+}
+.crm-sales-kpi > .crm-sales-kpi-link,
+.crm-sales-kpi > div {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    color: inherit;
+    text-decoration: none;
+}
+.crm-sales-kpi-link:hover { text-decoration: none; }
+.crm-sales-kpi-icon {
+    display: inline-flex;
+    flex: 0 0 2.35rem;
+    width: 2.35rem;
+    height: 2.35rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .68rem;
+    background: rgba(245, 27, 123, .08);
+    color: #f51b7b;
+    font-size: .95rem;
+}
+.crm-sales-kpi-icon.is-success { background: rgba(22,155,98,.09); color: #169b62; }
+.crm-sales-kpi-icon.is-warning { background: rgba(249,115,22,.10); color: #f97316; }
+.crm-sales-kpi-icon.is-danger { background: rgba(220,53,69,.08); color: #dc3545; }
+.crm-sales-kpi-icon.is-attention { background: rgba(234,179,8,.11); color: #b58105; }
+.crm-sales-kpi-copy { min-width: 0; }
+.crm-sales-kpi-label {
+    margin-bottom: .18rem;
+    color: #64748b;
+    font-size: .66rem;
+    font-weight: 700;
+    line-height: 1.15;
+}
+.crm-sales-kpi-value {
+    color: #18233f;
+    font-size: 1.2rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+.crm-sales-kpi-foot {
+    margin-top: .25rem;
+    color: #8290a6;
+    font-size: .64rem;
+}
+.crm-sales-kpi-revenue {
+    display: grid;
+    gap: .12rem;
+}
+.crm-sales-kpi-money-row {
+    display: flex;
+    align-items: baseline;
+    gap: .35rem;
+}
+.crm-sales-kpi-currency {
+    color: #94a3b8;
+    font-size: .58rem;
+    font-weight: 800;
+}
+.crm-sales-kpi-money {
+    color: #18233f;
+    font-size: .9rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* Sales table container and visual hierarchy. */
+.crm-sales-table-card {
+    border: 1px solid #e5eaf1;
+    border-radius: .9rem;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .035);
+    overflow: hidden;
+}
+.crm-sales-table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .72rem 1rem;
+    border-bottom: 1px solid #eef2f7;
+}
+.crm-sales-table-count {
+    color: #334155;
+    font-size: .74rem;
+    font-weight: 750;
+}
+.crm-sales-table-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.crm-sales-perpage-select { width: auto; min-width: 70px; }
+.crm-sales-table-scroll { overflow-x: auto; }
+.crm-sales-table {
+    min-width: 1250px;
+    margin: 0;
+}
+.crm-sales-table thead th {
+    padding: .66rem .72rem;
+    border-top: 0;
+    border-bottom: 1px solid #e6ebf2;
+    background: #fbfcfe;
+    color: #4b5870;
+    font-size: .68rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.crm-sales-table tbody td {
+    padding: .68rem .72rem;
+    border-color: #eef2f7;
+    color: #334155;
+    font-size: .74rem;
+    vertical-align: middle;
+}
+.crm-sales-table tbody tr:hover { background: #fcfbff; }
+.crm-sales-date { color: #334155; font-weight: 700; white-space: nowrap; }
+.crm-sales-time { margin-top: .06rem; color: #94a3b8; font-size: .66rem; }
+.crm-sales-reference {
+    color: #312e81;
+    font-family: var(--bs-font-monospace);
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.crm-sales-internal-reference {
+    max-width: 190px;
+    margin-top: .12rem;
+    overflow: hidden;
+    color: #94a3b8;
+    font-size: .61rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.crm-sales-internal-reference code { color: #e05283; font-size: inherit; }
+.crm-sales-customer-name { color: #283451; font-weight: 750; text-decoration: none; }
+.crm-sales-customer-email { margin-top: .08rem; color: #8490a3; font-size: .65rem; }
+.crm-sales-product-link { color: #37445f; text-decoration: none; }
+.crm-sales-product-link:hover,
+.crm-sales-customer-name:hover,
+.crm-sales-reference:hover { color: #f51b7b; text-decoration: none; }
+.crm-sales-amount { color: #17223d; font-weight: 800; white-space: nowrap; }
+.crm-sales-status-meta { margin-top: .15rem; color: #94a3b8; font-size: .6rem; }
+.crm-sales-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .25rem; }
+.crm-sales-actions .btn { margin: 0 !important; white-space: nowrap; }
+.crm-sales-pagination {
+    padding: .65rem 1rem;
+    border-top: 1px solid #eef2f7;
+}
+.crm-sales-pagination .pagination { margin-bottom: 0; justify-content: center; }
+.crm-sales-empty {
+    padding: 3rem 1.5rem;
+    border: 1px solid #e5eaf1;
+    border-radius: .9rem;
+    background: #fff;
+    text-align: center;
+}
+
+@media (max-width: 1499.98px) {
+    .crm-sales-filter-grid {
+        grid-template-columns: minmax(280px, 2fr) repeat(3, minmax(150px, 1fr));
+    }
+    .crm-sales-kpi-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .crm-sales-kpi:nth-child(4)::before { display: none; }
+}
+@media (max-width: 991.98px) {
+    .crm-sales-filter-grid,
+    .crm-sales-filter-advanced-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .crm-sales-filter-search { grid-column: 1 / -1; }
+    .crm-sales-kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .crm-sales-kpi:nth-child(odd)::before { display: none; }
+}
+@media (max-width: 575.98px) {
+    .crm-sales-filter-grid,
+    .crm-sales-filter-advanced-grid,
+    .crm-sales-kpi-strip { grid-template-columns: 1fr; }
+    .crm-sales-kpi::before { display: none !important; }
+    .crm-sales-filter-actions { justify-content: stretch; }
+    .crm-sales-filter-actions .btn { flex: 1 1 0; }
+}
+
+
+/* Commerce 7.95N3.2 — compact filters, KPI alignment and operational sales table. */
+
+/* Compact the filter workspace without losing scanability. */
+.crm-sales-filter-card {
+    margin-top: .65rem;
+    margin-bottom: .85rem;
+    padding: .72rem .9rem .68rem;
+}
+.crm-sales-filter-title {
+    margin-bottom: .48rem;
+    font-size: .82rem;
+}
+.crm-sales-filter-grid-primary {
+    grid-template-columns: minmax(300px, 2.35fr) repeat(5, minmax(120px, 1fr));
+    gap: .58rem;
+}
+.crm-sales-filter-field .form-label {
+    margin-bottom: .18rem;
+    font-size: .64rem;
+}
+.crm-sales-filter-field .form-control,
+.crm-sales-filter-field .form-select {
+    min-height: 2.05rem;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
+    font-size: .73rem;
+}
+.crm-sales-filter-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-top: .58rem;
+}
+.crm-sales-filter-footer-left {
+    min-width: 0;
+}
+.crm-sales-filter-advanced {
+    position: relative;
+    margin-top: 0;
+}
+.crm-sales-filter-advanced > summary {
+    padding: .3rem .15rem;
+}
+.crm-sales-filter-advanced-grid {
+    margin-top: .45rem;
+    padding-top: .55rem;
+}
+.crm-sales-filter-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .45rem;
+    margin-top: 0;
+}
+.crm-sales-filter-actions > .btn,
+.crm-sales-filter-actions > details > summary {
+    min-height: 2rem;
+    font-size: .72rem;
+}
+
+/* Column picker behaves like a compact toolbar popup. */
+.crm-sales-column-picker {
+    position: relative;
+}
+.crm-sales-column-picker > summary {
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    gap: .42rem;
+    padding: .35rem .7rem;
+    border: 1px solid #cfd7e3;
+    border-radius: .45rem;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+    font-size: .72rem;
+    font-weight: 600;
+    list-style: none;
+}
+.crm-sales-column-picker > summary::-webkit-details-marker {
+    display: none;
+}
+.crm-sales-column-picker > summary:hover {
+    border-color: #aeb8c7;
+    color: #312e81;
+}
+.crm-sales-column-picker-menu {
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + .35rem);
+    right: 0;
+    display: grid;
+    min-width: 13.5rem;
+    gap: .35rem;
+    padding: .65rem;
+    border: 1px solid #dfe5ee;
+    border-radius: .65rem;
+    background: #fff;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, .14);
+}
+.crm-sales-column-picker-menu .form-check {
+    min-height: 1.35rem;
+    margin: 0;
+    font-size: .72rem;
+}
+.crm-sales-export-button {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+/* Fix N3.1 KPI markup: one inner flex row per metric. */
+.crm-sales-kpi {
+    display: flex;
+    align-items: stretch;
+    padding: .78rem .9rem;
+}
+.crm-sales-kpi > .crm-sales-kpi-link,
+.crm-sales-kpi > .crm-sales-kpi-inner {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: .68rem;
+}
+.crm-sales-kpi-link > .crm-sales-kpi-inner {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: .68rem;
+}
+.crm-sales-kpi-icon {
+    flex: 0 0 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+}
+.crm-sales-kpi-copy {
+    display: block !important;
+    min-width: 0;
+}
+.crm-sales-kpi-value {
+    font-size: 1.12rem;
+}
+.crm-sales-kpi-money-row {
+    justify-content: flex-start;
+}
+.crm-sales-kpi-money {
+    font-size: .82rem;
+}
+
+/* Sortable table headings. */
+.crm-sales-sort-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .28rem;
+    color: inherit;
+    text-decoration: none;
+}
+.crm-sales-sort-link:hover,
+.crm-sales-sort-link.is-active {
+    color: #312e81;
+    text-decoration: none;
+}
+.crm-sales-sort-icon {
+    color: #a0a9b8;
+    font-size: .65rem;
+}
+.crm-sales-sort-link.is-active .crm-sales-sort-icon {
+    color: #6d5bb3;
+}
+
+/* Provider is encoded as a compact icon left of payment status. */
+.crm-sales-payment-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: .32rem;
+    white-space: nowrap;
+}
+.crm-sales-provider-icon {
+    display: inline-block;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+.crm-sales-provider-icon-fallback {
+    display: inline-flex;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: .62rem;
+}
+
+/* Commercial status is the synthesis column: visually stronger than the two
+   technical dimensions that precede it. */
+.crm-sales-commercial-summary {
+    display: inline-flex;
+    padding: .18rem .24rem;
+    border-radius: .42rem;
+    background: rgba(49, 46, 129, .045);
+}
+.crm-sales-commercial-summary .badge {
+    font-weight: 750;
+    box-shadow: 0 0 0 1px rgba(49, 46, 129, .08);
+}
+
+/* Row actions: one primary action plus a compact contextual menu. */
+.crm-sales-actions {
+    position: relative;
+    flex-wrap: nowrap;
+}
+.crm-sales-row-actions-menu {
+    position: relative;
+}
+.crm-sales-row-actions-menu > summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+}
+.crm-sales-row-actions-menu > summary::-webkit-details-marker {
+    display: none;
+}
+.crm-sales-row-menu {
+    position: absolute;
+    z-index: 35;
+    top: calc(100% + .3rem);
+    right: 0;
+    display: grid;
+    min-width: 12.5rem;
+    padding: .35rem;
+    border: 1px solid #dfe5ee;
+    border-radius: .6rem;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .14);
+}
+.crm-sales-row-menu-section {
+    margin: .28rem .35rem .12rem;
+    padding-top: .28rem;
+    border-top: 1px solid #eef2f7;
+    color: #94a3b8;
+    font-size: .61rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+.crm-sales-row-menu-section:first-child {
+    margin-top: .08rem;
+    padding-top: 0;
+    border-top: 0;
+}
+.crm-sales-row-menu-link {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .45rem .55rem;
+    border-radius: .4rem;
+    color: #475569;
+    font-size: .7rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.crm-sales-row-menu-link > .fa {
+    width: 1rem;
+    color: #5b4b8a;
+    text-align: center;
+}
+.crm-sales-row-menu-link:hover {
+    background: rgba(91, 75, 138, .07);
+    color: #312e81;
+    text-decoration: none;
+}
+
+/* Keep the table dense but give the synthesis/action columns enough room. */
+.crm-sales-table {
+    min-width: 1180px;
+}
+.crm-sales-table thead th,
+.crm-sales-table tbody td {
+    padding-left: .62rem;
+    padding-right: .62rem;
+}
+
+/* On wide admin screens, keep all primary filters on a single compact row. */
+@media (min-width: 1500px) {
+    .crm-sales-filter-grid-primary {
+        grid-template-columns: minmax(320px, 2.5fr) repeat(5, minmax(125px, 1fr));
+    }
+}
+
+@media (max-width: 1499.98px) {
+    .crm-sales-filter-grid-primary {
+        grid-template-columns: minmax(280px, 2fr) repeat(3, minmax(145px, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .crm-sales-filter-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .crm-sales-filter-actions {
+        justify-content: stretch;
+        flex-wrap: wrap;
+    }
+    .crm-sales-filter-actions > .btn,
+    .crm-sales-filter-actions > details {
+        flex: 1 1 auto;
+    }
+}
+
+
+/* Commerce 7.95N3.3 — sales density, default columns and Personal Offer visibility. */
+
+/* Slightly larger table typography without losing the compact CRM density. */
+.crm-sales-table {
+    font-size: .78rem;
+}
+.crm-sales-table thead th {
+    font-size: .7rem;
+}
+.crm-sales-date,
+.crm-sales-reference,
+.crm-sales-customer-name,
+.crm-sales-product-link,
+.crm-sales-amount {
+    font-size: .78rem;
+}
+.crm-sales-time,
+.crm-sales-customer-email,
+.crm-sales-internal-reference {
+    font-size: .68rem;
+}
+
+/* Primary filters now expose Provider/Currency/Origin; technical Payment and
+   Fulfillment dimensions live in the advanced drawer. */
+.crm-sales-filter-grid-primary {
+    grid-template-columns: minmax(280px, 2.2fr) repeat(6, minmax(105px, .88fr));
+}
+.crm-sales-filter-advanced-grid {
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
+}
+
+/* Personal Offer rows are intentionally visible but remain softer than alerts. */
+.crm-sales-row-personal-offer > td {
+    background: linear-gradient(
+        90deg,
+        rgba(245, 27, 123, .035),
+        rgba(99, 102, 241, .018)
+    );
+}
+.crm-sales-row-personal-offer:hover > td {
+    background: linear-gradient(
+        90deg,
+        rgba(245, 27, 123, .06),
+        rgba(99, 102, 241, .035)
+    ) !important;
+}
+.crm-sales-personal-offer-wrap {
+    margin-top: .28rem;
+}
+.crm-sales-personal-offer-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .18rem .38rem;
+    border: 1px solid rgba(245, 27, 123, .18);
+    border-radius: 999px;
+    background: rgba(245, 27, 123, .065);
+    color: #be185d;
+    font-size: .62rem;
+    font-weight: 750;
+    line-height: 1.15;
+    text-decoration: none;
+    white-space: nowrap;
+}
+a.crm-sales-personal-offer-badge:hover {
+    border-color: rgba(245, 27, 123, .32);
+    background: rgba(245, 27, 123, .11);
+    color: #9d174d;
+    text-decoration: none;
+}
+
+/* Sixth KPI remains reserved for checkout health; Personal Offers replace the
+   old Delivered KPI to keep the strip capped at six metrics. */
+.crm-sales-kpi-icon.is-personal-offer {
+    background: rgba(245, 27, 123, .09);
+    color: #be185d;
+}
+
+@media (max-width: 1499.98px) {
+    .crm-sales-filter-grid-primary {
+        grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(135px, 1fr));
+    }
+}
+@media (max-width: 991.98px) {
+    .crm-sales-filter-advanced-grid {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+    }
+}
+
+
+/* Commerce 7.95N3.3B — collapsible Search & Filters workspace. */
+.crm-sales-filter-panel {
+    margin: .65rem 0 .85rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .8rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .035);
+    overflow: visible;
+}
+.crm-sales-filter-panel-summary {
+    display: flex;
+    min-height: 2.65rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .58rem .9rem;
+    color: #334155;
+    cursor: pointer;
+    list-style: none;
+}
+.crm-sales-filter-panel-summary::-webkit-details-marker {
+    display: none;
+}
+.crm-sales-filter-panel-summary:hover {
+    background: rgba(99, 102, 241, .025);
+}
+.crm-sales-filter-panel-summary-copy {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: .48rem;
+}
+.crm-sales-filter-panel-summary-copy > .fa {
+    width: 1rem;
+    color: #5b4b8a;
+    text-align: center;
+}
+.crm-sales-filter-panel-status {
+    margin-left: .2rem;
+    color: #94a3b8;
+    font-size: .68rem;
+    font-weight: 500;
+}
+.crm-sales-filter-panel[open] > .crm-sales-filter-panel-summary {
+    border-bottom: 1px solid #edf1f6;
+}
+.crm-sales-filter-panel-chevron {
+    color: #94a3b8;
+    font-size: .72rem;
+    transition: transform .16s ease;
+}
+.crm-sales-filter-panel[open] .crm-sales-filter-panel-chevron {
+    transform: rotate(180deg);
+}
+.crm-sales-filter-panel .crm-sales-filter-card-collapsible {
+    margin: 0;
+    padding: .62rem .9rem .68rem;
+    border: 0;
+    border-radius: 0 0 .8rem .8rem;
+    box-shadow: none;
+}
+.crm-sales-filter-panel .crm-sales-filter-card-collapsible .crm-sales-filter-title {
+    display: none;
+}
+
+/* Closed state is deliberately very compact. */
+.crm-sales-filter-panel:not([open]) {
+    margin-bottom: .7rem;
+}
+.crm-sales-filter-panel:not([open]) .crm-sales-filter-panel-summary {
+    min-height: 2.45rem;
+    padding-top: .48rem;
+    padding-bottom: .48rem;
+}
+
+
+/* Commerce 7.95N3.3C — improve sales table readability by >=20%. */
+.local-subscriptions-commerce-purchases-page .crm-sales-table {
+    font-size: .96rem;
+}
+.local-subscriptions-commerce-purchases-page .crm-sales-table thead th {
+    font-size: .86rem;
+}
+.local-subscriptions-commerce-purchases-page .crm-sales-date,
+.local-subscriptions-commerce-purchases-page .crm-sales-reference,
+.local-subscriptions-commerce-purchases-page .crm-sales-customer-name,
+.local-subscriptions-commerce-purchases-page .crm-sales-product-link,
+.local-subscriptions-commerce-purchases-page .crm-sales-amount {
+    font-size: .96rem;
+}
+.local-subscriptions-commerce-purchases-page .crm-sales-time,
+.local-subscriptions-commerce-purchases-page .crm-sales-customer-email,
+.local-subscriptions-commerce-purchases-page .crm-sales-internal-reference {
+    font-size: .82rem;
+}
+.local-subscriptions-commerce-purchases-page .crm-sales-table .badge,
+.local-subscriptions-commerce-purchases-page .crm-sales-table .commerce-purchase-type-badge {
+    font-size: .84rem;
+    line-height: 1.15;
+    padding: .34rem .58rem;
+}
+.local-subscriptions-commerce-purchases-page .crm-sales-personal-offer-badge {
+    font-size: .76rem;
+    padding: .25rem .5rem;
+}
+.local-subscriptions-commerce-purchases-page .crm-sales-table .btn-sm,
+.local-subscriptions-commerce-purchases-page .crm-sales-row-menu-link {
+    font-size: .84rem;
+}
+
+
+/* Commerce 7.95N6.3 — Sales workspace and unfinished-checkout UX. */
+.crm-sales-subnav {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    margin: -.25rem 0 .65rem;
+    padding: .2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .7rem;
+    background: #fff;
+    width: fit-content;
+}
+.crm-sales-subnav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .42rem;
+    min-height: 2rem;
+    padding: .38rem .68rem;
+    border-radius: .5rem;
+    color: #64748b;
+    font-size: .72rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+.crm-sales-subnav-link:hover {
+    background: rgba(91,75,138,.06);
+    color: #493c72;
+    text-decoration: none;
+}
+.crm-sales-subnav-link.active {
+    background: rgba(91,75,138,.09);
+    color: #493c72;
+    box-shadow: inset 0 0 0 1px rgba(91,75,138,.12);
+}
+.crm-sales-row-menu-link.is-danger {
+    color: #b42318;
+}
+.crm-sales-row-menu-link.is-danger > .fa {
+    color: #b42318;
+}
+.crm-sales-admin-closed-badge {
+    margin-left: .35rem;
+    border: 1px solid #d7dde7;
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+}
+.crm-unfinished-filter-form {
+    margin-bottom: .75rem;
+}
+.crm-unfinished-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 1.6fr) minmax(220px, .8fr) auto;
+    gap: .7rem;
+    align-items: end;
+}
+.crm-unfinished-filter-actions {
+    display: flex;
+    gap: .45rem;
+    padding-bottom: .02rem;
+}
+.crm-unfinished-kpis {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0,1fr));
+    margin-bottom: .75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .8rem;
+    background: #fff;
+    overflow: hidden;
+}
+.crm-unfinished-kpi {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    min-width: 0;
+    padding: .7rem .8rem;
+    border-right: 1px solid #eef2f7;
+}
+.crm-unfinished-kpi:last-child {
+    border-right: 0;
+}
+.crm-unfinished-kpi-icon {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .55rem;
+    background: #f8fafc;
+    color: #64748b;
+}
+.crm-unfinished-kpi-icon.is-warning { background:#fff7ed; color:#ea580c; }
+.crm-unfinished-kpi-icon.is-attention { background:#fefce8; color:#a16207; }
+.crm-unfinished-kpi-icon.is-danger { background:#fff1f2; color:#e11d48; }
+.crm-unfinished-kpi-icon.is-muted { background:#f8fafc; color:#64748b; }
+.crm-unfinished-kpi-label {
+    color: #64748b;
+    font-size: .64rem;
+    font-weight: 650;
+}
+.crm-unfinished-kpi-value {
+    color: #18233f;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+.crm-unfinished-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: .8rem;
+    background: #fff;
+}
+.crm-unfinished-table {
+    margin-bottom: 0;
+}
+.crm-unfinished-reference {
+    color: #334155;
+    font-weight: 750;
+}
+.crm-unfinished-payment-line + .crm-unfinished-payment-line {
+    margin-top: .25rem;
+}
+.crm-unfinished-provider {
+    margin-right: .25rem;
+    color: #475569;
+    font-size: .72rem;
+    font-weight: 700;
+}
+.crm-unfinished-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .32rem;
+}
+@media (max-width: 1199.98px) {
+    .crm-unfinished-kpis { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .crm-unfinished-kpi { border-bottom: 1px solid #eef2f7; }
+}
+@media (max-width: 767.98px) {
+    .crm-unfinished-filter-grid { grid-template-columns: 1fr; }
+    .crm-unfinished-kpis { grid-template-columns: 1fr 1fr; }
+    .crm-sales-subnav { width: 100%; }
+    .crm-sales-subnav-link { flex: 1 1 auto; justify-content: center; }
+}
+
+.crm-unfinished-purchase-block + .crm-unfinished-purchase-block {
+    margin-top: .45rem;
+    padding-top: .45rem;
+    border-top: 1px solid #eef2f7;
+}
+
+
+/* Sales table readability polish. */
+.crm-sales-time {
+    color: #6f7f95;
+}
+.crm-sales-reference {
+    color: #263650;
+}
+.crm-sales-internal-reference {
+    color: #718096;
+}
+.crm-sales-internal-reference code {
+    color: #64748b;
+}
+.crm-sales-customer-email {
+    color: #718096;
+}
+.crm-sales-reference:hover {
+    color: #263650;
+    text-decoration: underline;
+}
+
+/* Context menus float above table scrollers; the AMD module provides viewport
+   coordinates so lower rows never create nested scrollbars. */
+.crm-sales-row-menu.is-floating {
+    position: fixed !important;
+    z-index: 1080;
+    right: auto !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+
+/* Commerce 7.95N6.7 — unfinished checkout readability and provider visuals. */
+.crm-sales-provider-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+}
+.crm-sales-provider-cell .crm-sales-provider-icon {
+    display: block;
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+.crm-unfinished-filter-form .crm-sales-filter-title {
+    color: #334155;
+    font-size: .86rem;
+}
+.crm-unfinished-filter-form .crm-sales-filter-title > .fa {
+    color: #5b4b8a;
+}
+.crm-unfinished-secondary {
+    margin-top: .12rem;
+    color: #718096;
+    font-size: .72rem;
+}
+.crm-unfinished-product-link {
+    color: #263650;
+    font-weight: 750;
+    text-decoration: none;
+}
+.crm-unfinished-product-link:hover {
+    color: #263650;
+    text-decoration: underline;
+}
+.crm-unfinished-provider-logo {
+    display: block;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+.crm-unfinished-provider-logo-fallback {
+    display: inline-flex;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+.crm-unfinished-payment-line {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.crm-unfinished-provider-copy {
+    min-width: 0;
+}
+.crm-unfinished-provider-state {
+    margin-top: .16rem;
+    color: #718096;
+    font-size: .68rem;
+    line-height: 1.25;
+}
+.crm-unfinished-purchase-block .badge.text-bg-success {
+    margin-top: .28rem !important;
+    background: rgba(22,155,98,.09) !important;
+    color: #137a50 !important;
+    border: 1px solid rgba(22,155,98,.16);
+    font-size: .65rem;
+    font-weight: 750;
+}
+.crm-unfinished-help {
+    margin: 0 0 .75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .75rem;
+    background: rgba(255,255,255,.82);
+}
+.crm-unfinished-help-summary {
+    display: flex;
+    min-height: 2.35rem;
+    align-items: center;
+    gap: .45rem;
+    padding: .48rem .7rem;
+    color: #334155;
+    cursor: pointer;
+    font-size: .74rem;
+    list-style: none;
+}
+.crm-unfinished-help-summary::-webkit-details-marker {
+    display: none;
+}
+.crm-unfinished-help-summary > .fa {
+    color: #5b4b8a;
+}
+.crm-unfinished-help-hint {
+    margin-left: .1rem;
+    color: #94a3b8;
+    font-size: .66rem;
+    font-weight: 500;
+}
+.crm-unfinished-help-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .7rem 1rem;
+    padding: .2rem .8rem .8rem;
+    border-top: 1px solid #eef2f7;
+}
+.crm-unfinished-help-item strong {
+    color: #334155;
+    font-size: .7rem;
+}
+.crm-unfinished-help-item p {
+    margin: .18rem 0 0;
+    color: #718096;
+    font-size: .68rem;
+    line-height: 1.45;
+}
+@media (max-width: 767.98px) {
+    .crm-unfinished-help-grid {
+        grid-template-columns: 1fr;
     }
 }

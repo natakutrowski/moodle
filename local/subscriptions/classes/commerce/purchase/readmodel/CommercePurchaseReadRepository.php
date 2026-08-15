@@ -17,6 +17,7 @@ final class CommercePurchaseReadRepository {
     private const GRANT_TABLE = 'local_subs_commerce_grant';
     private const FULFILLMENT_STATE_TABLE = 'local_subs_commerce_ful_state';
     private const FULFILLMENT_ATTEMPT_TABLE = 'local_subs_commerce_ful_attempt';
+    private const ADMIN_STATE_TABLE = 'local_subs_commerce_purchase_admin';
 
     public function __construct(
         private readonly moodle_database $database,
@@ -120,27 +121,164 @@ final class CommercePurchaseReadRepository {
 
         $query = $filter->normalized_query();
         if (str_starts_with(core_text::strtoupper($query), 'CFR-')) {
-            return $this->search_by_public_reference($filter, $page, $perpage);
+            $result = $this->search_by_public_reference($filter, $page, $perpage);
+            return $this->sort_result_if_needed($result, $filter);
+        }
+
+        [$where, $params] = $this->build_search_conditions($filter);
+        $purchasetable = '{' . CommercePersistenceSchema::TABLE_PURCHASE . '}';
+        $sort = $filter->normalized_sort();
+
+        // Commercial status and the three aggregate columns are read-model values,
+        // not simple purchase-table fields. For those cases we map the bounded CRM
+        // result set first, then sort/filter before pagination so the result is exact.
+        $requiresmappedordering = $filter->commercialstatus !== ''
+            || in_array($sort, ['product', 'payment', 'fulfillment', 'commercial'], true);
+
+        if ($requiresmappedordering) {
+            $sql = "SELECT p.* FROM {$purchasetable} p WHERE {$where} ORDER BY p.timecreated DESC, p.id DESC";
+            $records = array_values($this->database->get_records_sql($sql, $params));
+            $summaries = $this->map_summaries_bulk($records);
+
+            if ($filter->commercialstatus !== '') {
+                $summaries = array_values(array_filter(
+                    $summaries,
+                    static fn(CommercePurchaseSummary $summary): bool =>
+                        $summary->commercialstatus === $filter->commercialstatus
+                ));
+            }
+
+            $this->sort_summaries($summaries, $filter);
+            $total = count($summaries);
+            $summaries = array_slice($summaries, $page * $perpage, $perpage);
+
+            return new CommercePurchaseListResult($summaries, $total, $page, $perpage);
+        }
+
+        $orderby = $this->sql_order_by($filter);
+        $sql = "SELECT p.* FROM {$purchasetable} p WHERE {$where} ORDER BY {$orderby}";
+        $countsql = "SELECT COUNT(1) FROM {$purchasetable} p WHERE {$where}";
+        $total = (int)$this->database->count_records_sql($countsql, $params);
+        $records = array_values($this->database->get_records_sql($sql, $params, $page * $perpage, $perpage));
+
+        return new CommercePurchaseListResult(
+            $this->map_summaries_bulk($records),
+            $total,
+            $page,
+            $perpage
+        );
+    }
+
+    /**
+     * @param CommercePurchaseSummary[] $summaries
+     */
+    private function sort_summaries(array &$summaries, CommercePurchaseListFilter $filter): void {
+        $sort = $filter->normalized_sort();
+        $direction = $filter->normalized_direction() === 'asc' ? 1 : -1;
+
+        usort($summaries, function(CommercePurchaseSummary $left, CommercePurchaseSummary $right) use ($sort, $direction): int {
+            $comparison = match ($sort) {
+                'reference' => $this->compare_text(
+                    $left->publicreference !== '' ? $left->publicreference : $left->reference,
+                    $right->publicreference !== '' ? $right->publicreference : $right->reference
+                ),
+                'customer' => $this->compare_text(
+                    $left->customer->display_name() ?: $left->customer->email,
+                    $right->customer->display_name() ?: $right->customer->email
+                ),
+                'type' => $this->compare_text($left->type, $right->type),
+                'product' => $this->compare_text(
+                    (string)($left->productlabels[0] ?? ''),
+                    (string)($right->productlabels[0] ?? '')
+                ),
+                'amount' => $left->totalminor <=> $right->totalminor,
+                'payment' => $this->compare_text($left->paymentstatus, $right->paymentstatus),
+                'fulfillment' => $this->compare_text($left->fulfillmentstatus, $right->fulfillmentstatus),
+                'commercial' => $this->compare_text($left->commercialstatus, $right->commercialstatus),
+                default => $left->timecreated <=> $right->timecreated,
+            };
+
+            if ($comparison === 0) {
+                $comparison = $left->id <=> $right->id;
+            }
+            return $comparison * $direction;
+        });
+    }
+
+    private function compare_text(string $left, string $right): int {
+        return core_text::strtolower(trim($left)) <=> core_text::strtolower(trim($right));
+    }
+
+    private function sql_order_by(CommercePurchaseListFilter $filter): string {
+        $field = match ($filter->normalized_sort()) {
+            'reference' => 'p.reference',
+            'customer' => 'p.customeremail',
+            'type' => 'p.type',
+            'amount' => 'p.totalminor',
+            default => 'p.timecreated',
+        };
+        $direction = strtoupper($filter->normalized_direction());
+        return "{$field} {$direction}, p.id {$direction}";
+    }
+
+    private function sort_result_if_needed(
+        CommercePurchaseListResult $result,
+        CommercePurchaseListFilter $filter
+    ): CommercePurchaseListResult {
+        if ($result->purchases === []) {
+            return $result;
+        }
+        $purchases = $result->purchases;
+        $this->sort_summaries($purchases, $filter);
+        return new CommercePurchaseListResult(
+            $purchases,
+            $result->total,
+            $result->page,
+            $result->perpage
+        );
+    }
+
+    /**
+     * Returns every summary matching the current operational filters.
+     *
+     * This is intended for bounded CRM analytics/KPI calculations on the sales page.
+     * The same mapping path as the paginated table is used so commercial/payment/
+     * fulfillment semantics stay aligned with the visible rows.
+     *
+     * @return CommercePurchaseSummary[]
+     */
+    public function summaries_for_metrics(CommercePurchaseListFilter $filter): array {
+        $query = $filter->normalized_query();
+        if (str_starts_with(core_text::strtoupper($query), 'CFR-')) {
+            return $this->search_by_public_reference($filter, 0, 100)->purchases;
         }
 
         [$where, $params] = $this->build_search_conditions($filter);
         $purchasetable = '{' . CommercePersistenceSchema::TABLE_PURCHASE . '}';
         $sql = "SELECT p.* FROM {$purchasetable} p WHERE {$where} ORDER BY p.timecreated DESC, p.id DESC";
-        $countsql = "SELECT COUNT(1) FROM {$purchasetable} p WHERE {$where}";
-        $total = (int)$this->database->count_records_sql($countsql, $params);
-        $records = array_values($this->database->get_records_sql($sql, $params, $page * $perpage, $perpage));
-
+        $records = array_values($this->database->get_records_sql($sql, $params));
         $summaries = $this->map_summaries_bulk($records);
+
         if ($filter->commercialstatus !== '') {
             $summaries = array_values(array_filter(
                 $summaries,
-                static fn(CommercePurchaseSummary $summary): bool => $summary->commercialstatus === $filter->commercialstatus
+                static fn(CommercePurchaseSummary $summary): bool =>
+                    $summary->commercialstatus === $filter->commercialstatus
             ));
-            // Commercial status is derived from three aggregates. The page remains bounded and Native-only.
-            $total = count($summaries) < count($records) ? ($page * $perpage + count($summaries)) : $total;
         }
 
-        return new CommercePurchaseListResult($summaries, $total, $page, $perpage);
+        return $summaries;
+    }
+
+    /**
+     * Complete sorted result for CSV/administrative export.
+     *
+     * @return CommercePurchaseSummary[]
+     */
+    public function summaries_for_export(CommercePurchaseListFilter $filter): array {
+        $summaries = $this->summaries_for_metrics($filter);
+        $this->sort_summaries($summaries, $filter);
+        return $summaries;
     }
 
     /** @return array{0:string,1:array} */
@@ -188,6 +326,31 @@ final class CommercePurchaseReadRepository {
                 . ' WHERE prv.purchaseid = p.id AND prv.provider = :provider)';
             $params['provider'] = $filter->provider;
         }
+
+        $adminstate = $filter->normalized_admin_state();
+        if ($adminstate === 'open') {
+            $conditions[] = 'NOT EXISTS (SELECT 1 FROM {' . self::ADMIN_STATE_TABLE . '} pas'
+                . ' WHERE pas.purchaseid = p.id AND pas.state = :adminclosedstate)';
+            $params['adminclosedstate'] = 'closed';
+        } elseif ($adminstate === 'closed') {
+            $conditions[] = 'EXISTS (SELECT 1 FROM {' . self::ADMIN_STATE_TABLE . '} pas'
+                . ' WHERE pas.purchaseid = p.id AND pas.state = :adminclosedstate)';
+            $params['adminclosedstate'] = 'closed';
+        }
+
+        $offerorigin = $filter->normalized_offer_origin();
+        if ($offerorigin !== '') {
+            $personalofferlike = '%"operation":"personaloffer"%';
+            $offerexists = 'EXISTS (SELECT 1 FROM {' . CommercePersistenceSchema::TABLE_ITEM . '} poi'
+                . ' WHERE poi.purchaseid = p.id AND '
+                . $this->database->sql_like('poi.metadatajson', ':personalofferoperation', false, false)
+                . ')';
+            $conditions[] = $offerorigin === 'personaloffer'
+                ? $offerexists
+                : 'NOT ' . $offerexists;
+            $params['personalofferoperation'] = $personalofferlike;
+        }
+
         $query = $filter->normalized_query();
         if ($query !== '') {
             $like = '%' . $this->database->sql_like_escape($query) . '%';
@@ -210,9 +373,22 @@ final class CommercePurchaseReadRepository {
         $nativefulfillment = $this->load_native_fulfillment((string)$purchase->reference);
         $fulfillments = $nativefulfillment['fulfillments'];
         $users = $this->load_users_for_purchases([$purchase]);
+        $adminstate = $this->database->get_record(
+            self::ADMIN_STATE_TABLE,
+            ['purchaseid' => $purchaseid, 'state' => 'closed'],
+            '*',
+            IGNORE_MISSING
+        );
 
         return new CommercePurchaseDetails(
-            $this->map_summary($purchase, $items, $payments, $fulfillments, $users),
+            $this->map_summary(
+                $purchase,
+                $items,
+                $payments,
+                $fulfillments,
+                $users,
+                $adminstate ?: null
+            ),
             $items,
             array_map(fn(\stdClass $payment): CommercePurchasePaymentSummary => new CommercePurchasePaymentSummary(
                 (string)$payment->status,
@@ -335,13 +511,22 @@ final class CommercePurchaseReadRepository {
         $payments = $this->group_by_purchase($this->database->get_records_select(CommercePersistenceSchema::TABLE_PAYMENT, "purchaseid {$insql}", $params, 'purchaseid, sequence, id'));
         $fulfillments = $this->load_native_fulfillment_statuses_for_purchases($purchases);
         $users = $this->load_users_for_purchases($purchases);
+        $adminstates = [];
+        foreach ($this->database->get_records_select(
+            self::ADMIN_STATE_TABLE,
+            "purchaseid {$insql} AND state = :adminstate",
+            $params + ['adminstate' => 'closed']
+        ) as $record) {
+            $adminstates[(int)$record->purchaseid] = $record;
+        }
 
         return array_map(fn(\stdClass $purchase): CommercePurchaseSummary => $this->map_summary(
             $purchase,
             $items[(int)$purchase->id] ?? [],
             $payments[(int)$purchase->id] ?? [],
             $fulfillments[(string)$purchase->reference] ?? [],
-            $users
+            $users,
+            $adminstates[(int)$purchase->id] ?? null
         ), $purchases);
     }
 
@@ -391,7 +576,8 @@ final class CommercePurchaseReadRepository {
         array $items,
         array $payments,
         array $fulfillments,
-        array $users = []
+        array $users = [],
+        ?\stdClass $adminstate = null
     ): CommercePurchaseSummary {
         $customerdata = $this->decode_json((string)$purchase->customerjson);
         $userid = $purchase->userid === null ? null : (int)$purchase->userid;
@@ -411,6 +597,21 @@ final class CommercePurchaseReadRepository {
             $fulfillments
         );
         $lastpayment = $payments === [] ? null : end($payments);
+
+        $haspersonaloffer = false;
+        $personalofferuuid = '';
+        $personaloffercampaign = '';
+        foreach ($items as $item) {
+            $itemmetadata = $this->decode_json((string)($item->metadatajson ?? ''));
+            if (strtolower(trim((string)($itemmetadata['operation'] ?? ''))) !== 'personaloffer') {
+                continue;
+            }
+            $haspersonaloffer = true;
+            $personalofferuuid = strtolower(trim((string)($itemmetadata['personal_offer_uuid'] ?? '')));
+            $personaloffercampaign = trim((string)($itemmetadata['personal_offer_campaign'] ?? ''));
+            break;
+        }
+
         return new CommercePurchaseSummary(
             (int)$purchase->id,
             (string)$purchase->purchaseuuid,
@@ -442,7 +643,14 @@ final class CommercePurchaseReadRepository {
             (new CommercePublicOrderReference())->from_internal(
                 (string)$purchase->reference,
                 (int)$purchase->timecreated
-            )
+            ),
+            $haspersonaloffer,
+            $personalofferuuid,
+            $personaloffercampaign,
+            $adminstate !== null,
+            $adminstate !== null ? (int)$adminstate->closedat : 0,
+            $adminstate !== null ? (int)$adminstate->closedby : 0,
+            $adminstate !== null ? (string)($adminstate->reason ?? '') : ''
         );
     }
 
@@ -472,7 +680,11 @@ final class CommercePurchaseReadRepository {
             $filter->provider,
             $filter->currency,
             $filter->datefrom,
-            $filter->dateto
+            $filter->dateto,
+            $filter->sort,
+            $filter->direction,
+            $filter->offerorigin,
+            $filter->adminstate
         );
         [$where, $params] = $this->build_search_conditions($filterwithoutquery);
 

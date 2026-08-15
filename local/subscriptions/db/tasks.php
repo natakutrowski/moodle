@@ -243,4 +243,25 @@ $tasks[] = [
     'dayofweek' => '*',
 ];
 
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\process_marketing_mail_campaigns_task',
+    'blocking' => 0,
+    'minute' => '*',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\process_marketing_mail_queue_task',
+    'blocking' => 0,
+    'minute' => '*/5',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
 $tasks[] = ['classname' => '\\local_subscriptions\\task\\process_personal_offer_scheduled_campaigns_task', 'blocking'=>0, 'minute'=>'*', 'hour'=>'*', 'day'=>'*', 'month'=>'*', 'dayofweek'=>'*'];

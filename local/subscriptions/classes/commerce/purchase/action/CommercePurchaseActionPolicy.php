@@ -46,6 +46,31 @@ final class CommercePurchaseActionPolicy {
         );
     }
 
+
+    public function can_resend_receipt_summary(CommercePurchaseSummary $purchase): bool {
+        return in_array(
+            $purchase->paymentstatus,
+            ['paid', 'succeeded', 'completed', 'captured'],
+            true
+        );
+    }
+
+    public function can_resend_access_summary(CommercePurchaseSummary $purchase): bool {
+        if (!$this->can_resend_receipt_summary($purchase)) {
+            return false;
+        }
+
+        return in_array(
+            $purchase->fulfillmentstatus,
+            ['fulfilled', 'completed', 'succeeded', 'success'],
+            true
+        );
+    }
+
+    public function can_create_personal_offer_summary(CommercePurchaseSummary $purchase): bool {
+        return $purchase->customer->email !== '';
+    }
+
     public function can_add_note(CommercePurchaseDetails $purchase): bool {
         return $purchase->summary->id > 0;
     }

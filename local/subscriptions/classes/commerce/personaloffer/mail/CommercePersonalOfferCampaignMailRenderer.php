@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use context_system;
 use local_subscriptions\commerce\mail\CommerceMailRequest;
+use local_subscriptions\commerce\mail\builder\CommerceMailBuilderCtaRenderer;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService;
 
 /** Resolves campaign-specific Personal Offer editorial copy with safe variables. */
@@ -76,7 +77,8 @@ final class CommercePersonalOfferCampaignMailRenderer {
 
         // CTA tags are intentionally rendered in place and may be repeated.
         $offerurl = trim((string)($offer['url'] ?? ''));
-        $bodyhtml = $this->render_cta_tags($bodyhtml, $offerurl);
+        $ctarenderer = new CommerceMailBuilderCtaRenderer();
+        $bodyhtml = $ctarenderer->render_tags($bodyhtml, $offerurl);
 
         $secondarylabel = clean_param(
             CommercePersonalOfferCampaignMailVariableResolver::replace(
@@ -205,62 +207,10 @@ final class CommercePersonalOfferCampaignMailRenderer {
                 : (new \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailFooterImageService())->url($campaignid),
             'positionablelayout' => $this->uses_positionable_layout((string)$content->body),
             // M14.2c: embedded hover CSS belongs in the document <head>, not in email body.
-            'headcss' => $this->button_hover_css(),
+            'headcss' => $ctarenderer->hover_css(),
             'templateid' => 0,
             'ctalabel' => clean_param(CommercePersonalOfferCampaignMailVariableResolver::replace((string)$content->ctalabel, $values), PARAM_TEXT),
         ];
-    }
-
-    private function render_cta_tags(string $html, string $url): string {
-        if ($url === '') { return preg_replace('/\{\{cta(?:\|[^}]*)?\}\}.*?\{\{\/cta\}\}/is', '', $html) ?? $html; }
-        return preg_replace_callback(
-            '/\{\{cta(?:\|([a-z_]+))?\}\}(.*?)\{\{\/cta\}\}/is',
-            function(array $m) use ($url): string {
-                $variant = strtolower(trim((string)($m[1] ?? 'gold')));
-                if (!in_array($variant, ['gold', 'campus_pink', 'legacy_blue'], true)) { $variant = 'gold'; }
-                $label = trim(html_entity_decode(strip_tags((string)$m[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-                if ($label === '') { return ''; }
-                return $this->cta_html($url, $label, $variant);
-            },
-            $html
-        ) ?? $html;
-    }
-
-    private function cta_html(string $url, string $label, string $variant): string {
-        $styles = [
-            'gold' => ['#dfbd59', '#fff7df', '#5f4514'],
-            'campus_pink' => ['#f72585', '#f72585', '#ffffff'],
-            'legacy_blue' => ['#1281ad', '#1281ad', '#ffffff'],
-        ];
-        [$border, $background, $color] = $styles[$variant];
-        $stars = $variant === 'gold';
-
-        // Compact one-surface button: the table/cell remain fully transparent and
-        // only the anchor paints the button. This prevents the "two buttons stacked"
-        // artefact produced when both TD and A had independent backgrounds/radii.
-        return '<table role="presentation" cellspacing="0" cellpadding="0" border="0" '
-            . 'align="center" style="margin:18px auto 20px;">'
-            . '<tr><td align="center" style="padding:0;background:transparent;border:0;">'
-            . '<a class="campusfr-campaign-cta campusfr-campaign-cta-' . $variant . '" href="' . s($url) . '" target="_blank" rel="noopener noreferrer" '
-            . 'style="display:inline-block;padding:10px 22px;color:' . $color . ';'
-            . 'text-decoration:none;font-family:Nunito,Segoe UI,Arial,Helvetica,sans-serif;'
-            . 'font-size:14px;font-weight:800;line-height:18px;border:1px solid ' . $border . ';'
-            . 'border-radius:11px;background:' . $background . ';white-space:nowrap;">'
-            . ($stars ? '✦&nbsp; ' : '') . s($label) . ($stars ? ' &nbsp;✦' : '')
-            . '</a></td></tr></table>';
-    }
-
-    private function button_hover_css(): string {
-        // MailRenderer already places headcss inside its document-level <style> block.
-        // Return raw CSS only: nested <style> tags are invalid and are recovered
-        // inconsistently by preview browsers/email clients.
-        return 'a.campusfr-campaign-cta.campusfr-campaign-cta-gold:hover{'
-            . 'background:#f1dda0!important;background-color:#f1dda0!important;'
-            . 'border-color:#cfa638!important;color:#5f4514!important;'
-            . 'box-shadow:0 3px 8px rgba(95,69,20,.14)!important;}'
-            . 'a.campusfr-campaign-cta-campus_pink:hover{background:#d91c73!important;border-color:#d91c73!important;color:#ffffff!important;}'
-            . 'a.campusfr-campaign-cta-legacy_blue:hover{background:#0d7097!important;border-color:#0d7097!important;color:#ffffff!important;}'
-            . 'a.campusfr-campaign-cta-secondary:hover{background:#f72585!important;border-color:#f72585!important;color:#ffffff!important;}';
     }
 
     /** @param array<string,mixed> $offer */

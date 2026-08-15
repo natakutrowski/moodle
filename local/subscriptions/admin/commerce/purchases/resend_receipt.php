@@ -12,10 +12,13 @@ require_sesskey();
 
 $id = required_param('id', PARAM_INT);
 $confirm = required_param('confirm', PARAM_BOOL);
-$returnurl = new moodle_url(
-    '/local/subscriptions/admin/commerce/purchases/view.php',
-    ['id' => $id]
-);
+$requestedreturnurl = optional_param('returnurl', '', PARAM_LOCALURL);
+$returnurl = $requestedreturnurl !== ''
+    ? new moodle_url($requestedreturnurl)
+    : new moodle_url(
+        '/local/subscriptions/admin/commerce/purchases/view.php',
+        ['id' => $id]
+    );
 
 $PAGE->set_context($context);
 $PAGE->set_url($returnurl);

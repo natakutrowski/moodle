@@ -12,6 +12,7 @@ defined('MOODLE_INTERNAL') || die();
 final class CommerceMailQueueRepository {
 
     private const TABLE = 'local_subs_commerce_mail';
+    private const AUDIT_EMAIL = 'log@campusfr.fr';
 
     public function enqueue(CommerceMailRequest $request, int $maxattempts = 5): \stdClass {
         global $DB;
@@ -158,11 +159,123 @@ final class CommerceMailQueueRepository {
         );
     }
 
+    public function count_non_audit_sent_since(int $since): int {
+        global $DB;
+        return (int)$DB->count_records_select(
+            self::TABLE,
+            'status = :status AND timesent IS NOT NULL AND timesent >= :since'
+                . ' AND idempotencykey NOT LIKE :auditpattern'
+                . ' AND LOWER(recipientemail) <> :auditmail',
+            [
+                'status' => CommerceMailStatus::SENT,
+                'since' => $since,
+                'auditpattern' => '%:audit',
+                'auditmail' => self::AUDIT_EMAIL,
+            ]
+        );
+    }
+
+    public function count_all_sent_since(int $since): int {
+        global $DB;
+        return (int)$DB->count_records_select(
+            self::TABLE,
+            'status = :status AND timesent IS NOT NULL AND timesent >= :since',
+            [
+                'status' => CommerceMailStatus::SENT,
+                'since' => $since,
+            ]
+        );
+    }
+
+    public function count_marketing_sent_since(int $since): int {
+        global $DB;
+        return (int)$DB->count_records_select(
+            self::TABLE,
+            'status = :status AND timesent IS NOT NULL AND timesent >= :since'
+                . ' AND mailtype = :mailtype',
+            [
+                'status' => CommerceMailStatus::SENT,
+                'since' => $since,
+                'mailtype' => CommerceMailType::MARKETING_CAMPAIGN,
+            ]
+        );
+    }
+
+    public function count_transactional_sent_since(int $since): int {
+        global $DB;
+        return (int)$DB->count_records_select(
+            self::TABLE,
+            'status = :status AND timesent IS NOT NULL AND timesent >= :since'
+                . ' AND mailtype <> :personaloffer'
+                . ' AND mailtype <> :marketing'
+                . ' AND idempotencykey NOT LIKE :auditpattern'
+                . ' AND LOWER(recipientemail) <> :auditmail',
+            [
+                'status' => CommerceMailStatus::SENT,
+                'since' => $since,
+                'personaloffer' => CommerceMailType::PERSONAL_OFFER,
+                'marketing' => CommerceMailType::MARKETING_CAMPAIGN,
+                'auditpattern' => '%:audit',
+                'auditmail' => self::AUDIT_EMAIL,
+            ]
+        );
+    }
+
+    /** @return array{sent:int,pending:int} */
+    public function personal_offer_operational_counts(array $filters): array {
+        global $DB;
+        $filters['mailtype'] = CommerceMailType::PERSONAL_OFFER;
+        $filters['includeaudit'] = false;
+        [$sqlwhere, $params] = $this->search_conditions($filters, false);
+        $rows = $DB->get_records_sql(
+            'SELECT MIN(id) AS rowid, status, COUNT(1) AS total'
+                . ' FROM {' . self::TABLE . '}'
+                . ' WHERE ' . $sqlwhere
+                . ' GROUP BY status',
+            $params
+        );
+
+        $result = ['sent' => 0, 'pending' => 0];
+        foreach ($rows as $row) {
+            $status = strtolower((string)$row->status);
+            $count = (int)$row->total;
+            if ($status === CommerceMailStatus::SENT) {
+                $result['sent'] += $count;
+            } else if (in_array(
+                $status,
+                [CommerceMailStatus::QUEUED, CommerceMailStatus::PROCESSING],
+                true
+            )) {
+                $result['pending'] += $count;
+            }
+        }
+        return $result;
+    }
+
     public function mark_processing(int $id, ?int $now = null): bool {
         global $DB;
         $now ??= time();
         $record = $this->find_by_id($id);
         if ($record === null || $record->status !== CommerceMailStatus::QUEUED || (int)$record->nextruntime > $now) {
+            return false;
+        }
+        $record->status = CommerceMailStatus::PROCESSING;
+        $record->attemptcount = (int)$record->attemptcount + 1;
+        $record->timeprocessing = $now;
+        $record->timemodified = $now;
+        $DB->update_record(self::TABLE, $record);
+        return true;
+    }
+
+    /**
+     * Claims a queued row immediately, regardless of its scheduled next runtime.
+     * Intended for an explicit CRM operator action, not normal cron processing.
+     */
+    public function mark_processing_now(int $id, ?int $now = null): bool {
+        global $DB;
+        $now ??= time();
+        $record = $this->find_by_id($id);
+        if ($record === null || $record->status !== CommerceMailStatus::QUEUED) {
             return false;
         }
         $record->status = CommerceMailStatus::PROCESSING;
@@ -291,20 +404,125 @@ final class CommerceMailQueueRepository {
     /** @return array{records:array,total:int} */
     public function search(array $filters, int $page = 0, int $perpage = 25): array {
         global $DB;
-        $where = ['1=1']; $params = [];
-        foreach (['status','mailtype','language'] as $field) {
-            if (!empty($filters[$field])) { $where[] = "$field = :$field"; $params[$field] = (string)$filters[$field]; }
-        }
-        if (!empty($filters['purchaseid'])) { $where[] = 'purchaseid = :purchaseid'; $params['purchaseid'] = (int)$filters['purchaseid']; }
-        if (!empty($filters['q'])) {
-            $where[] = '(recipientemail LIKE :q OR recipientname LIKE :q2 OR idempotencykey LIKE :q3)';
-            $like = '%' . $DB->sql_like_escape((string)$filters['q']) . '%';
-            $params += ['q'=>$like,'q2'=>$like,'q3'=>$like];
-        }
-        $sqlwhere = implode(' AND ', $where);
+        [$sqlwhere, $params] = $this->search_conditions($filters);
+        $sort = $this->search_sort((string)($filters['sort'] ?? 'date'), (string)($filters['dir'] ?? 'desc'));
         $total = $DB->count_records_select(self::TABLE, $sqlwhere, $params);
-        $records = array_values($DB->get_records_select(self::TABLE, $sqlwhere, $params, 'timecreated DESC, id DESC', '*', max(0,$page)*max(1,$perpage), max(1,$perpage)));
-        return ['records'=>$records,'total'=>$total];
+        $records = array_values($DB->get_records_select(
+            self::TABLE,
+            $sqlwhere,
+            $params,
+            $sort,
+            '*',
+            max(0, $page) * max(1, $perpage),
+            max(1, $perpage)
+        ));
+        return ['records' => $records, 'total' => $total];
+    }
+
+    /** @return \stdClass[] */
+    public function search_all(array $filters): array {
+        global $DB;
+        [$sqlwhere, $params] = $this->search_conditions($filters);
+        $sort = $this->search_sort((string)($filters['sort'] ?? 'date'), (string)($filters['dir'] ?? 'desc'));
+        return array_values($DB->get_records_select(self::TABLE, $sqlwhere, $params, $sort));
+    }
+
+    /** @return array{total:int,sent:int,pending:int,failed:int,cancelled:int} */
+    public function statistics(array $filters): array {
+        global $DB;
+        [$sqlwhere, $params] = $this->search_conditions($filters, false);
+        $rows = $DB->get_records_sql(
+            'SELECT MIN(id) AS rowid, status, COUNT(1) AS total'
+            . ' FROM {' . self::TABLE . '}'
+            . ' WHERE ' . $sqlwhere
+            . ' GROUP BY status',
+            $params
+        );
+        $result = ['total' => 0, 'sent' => 0, 'pending' => 0, 'failed' => 0, 'cancelled' => 0];
+        foreach ($rows as $row) {
+            $count = (int)$row->total;
+            $status = strtolower((string)$row->status);
+            $result['total'] += $count;
+            if ($status === CommerceMailStatus::SENT) {
+                $result['sent'] += $count;
+            } else if (in_array($status, [CommerceMailStatus::QUEUED, CommerceMailStatus::PROCESSING], true)) {
+                $result['pending'] += $count;
+            } else if ($status === CommerceMailStatus::FAILED) {
+                $result['failed'] += $count;
+            } else if ($status === CommerceMailStatus::CANCELLED) {
+                $result['cancelled'] += $count;
+            }
+        }
+        return $result;
+    }
+
+    /** @return array{0:string,1:array<string,mixed>} */
+    private function search_conditions(array $filters, bool $includestatus = true): array {
+        global $DB;
+        $where = ['1=1'];
+        $params = [];
+
+        if (empty($filters['includeaudit'])) {
+            $where[] = 'idempotencykey NOT LIKE :journal_auditpattern';
+            $where[] = 'LOWER(recipientemail) <> :journal_auditmail';
+            $params['journal_auditpattern'] = '%:audit';
+            $params['journal_auditmail'] = self::AUDIT_EMAIL;
+        }
+
+        foreach (['mailtype', 'language'] as $field) {
+            if (!empty($filters[$field])) {
+                $where[] = "$field = :$field";
+                $params[$field] = (string)$filters[$field];
+            }
+        }
+        if ($includestatus && !empty($filters['status'])) {
+            $where[] = 'status = :status';
+            $params['status'] = (string)$filters['status'];
+        }
+        if (!empty($filters['purchaseid'])) {
+            $where[] = 'purchaseid = :purchaseid';
+            $params['purchaseid'] = (int)$filters['purchaseid'];
+        }
+        if (!empty($filters['attempts'])) {
+            $where[] = 'attemptcount >= :attempts';
+            $params['attempts'] = max(0, (int)$filters['attempts']);
+        }
+        if (!empty($filters['datefrom'])) {
+            $where[] = 'timecreated >= :datefrom';
+            $params['datefrom'] = (int)$filters['datefrom'];
+        }
+        if (!empty($filters['dateto'])) {
+            $where[] = 'timecreated <= :dateto';
+            $params['dateto'] = (int)$filters['dateto'];
+        }
+        if (!empty($filters['q'])) {
+            $query = trim((string)$filters['q']);
+            $where[] = '(recipientemail LIKE :q OR recipientname LIKE :q2 OR idempotencykey LIKE :q3'
+                . ' OR subject LIKE :q4 OR contextjson LIKE :q5'
+                . (ctype_digit($query) ? ' OR purchaseid = :qpurchaseid' : '')
+                . ')';
+            $like = '%' . $DB->sql_like_escape($query) . '%';
+            $params += ['q' => $like, 'q2' => $like, 'q3' => $like, 'q4' => $like, 'q5' => $like];
+            if (ctype_digit($query)) {
+                $params['qpurchaseid'] = (int)$query;
+            }
+        }
+        return [implode(' AND ', $where), $params];
+    }
+
+    private function search_sort(string $sort, string $direction): string {
+        $field = match (strtolower($sort)) {
+            'recipient' => 'recipientemail',
+            'type' => 'mailtype',
+            'status' => 'status',
+            'language' => 'language',
+            'attempts' => 'attemptcount',
+            'error' => 'lasterror',
+            'id' => 'id',
+            default => 'timecreated',
+        };
+        $direction = strtolower($direction) === 'asc' ? 'ASC' : 'DESC';
+        return $field . ' ' . $direction . ', id ' . $direction;
     }
 
     public function cancel_pending(int $id, ?int $now = null): bool {

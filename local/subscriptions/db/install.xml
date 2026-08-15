@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026081202" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026081510" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
         <TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
             <FIELDS>
@@ -1247,6 +1247,25 @@
                 <INDEX NAME="type_time_idx" UNIQUE="false" FIELDS="type,timecreated" />
             </INDEXES>
         </TABLE>
+
+        <TABLE NAME="local_subs_commerce_purchase_admin" COMMENT="CRM administrative overlay for Commerce purchases">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="purchaseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="state" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="closed" />
+                <FIELD NAME="reason" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="closedat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="closedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="purchase_fk" TYPE="foreign-unique" FIELDS="purchaseid" REFTABLE="local_subscriptions_commerce_purchase" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="state_time_idx" UNIQUE="false" FIELDS="state,closedat" />
+            </INDEXES>
+        </TABLE>
         <TABLE NAME="local_subscriptions_commerce_purchase_item" COMMENT="Immutable line items belonging to native Commerce purchases">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Internal database identifier" />
@@ -1938,6 +1957,54 @@
             </INDEXES>
         </TABLE>
 
+        <TABLE NAME="local_subs_mail_library" COMMENT="Unified CampusFR Mail Studio template library">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="templateuuid" TYPE="char" LENGTH="32" NOTNULL="true" />
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="category" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="marketing" />
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="draft" />
+                <FIELD NAME="builderversion" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" />
+                <FIELD NAME="sourcekind" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="native" />
+                <FIELD NAME="runtimekey" TYPE="char" LENGTH="191" NOTNULL="false" />
+                <FIELD NAME="metadatajson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="templateuuid_uix" UNIQUE="true" FIELDS="templateuuid" />
+                <INDEX NAME="category_status_idx" UNIQUE="false" FIELDS="category,status" />
+                <INDEX NAME="runtimekey_uix" UNIQUE="true" FIELDS="runtimekey" />
+                <INDEX NAME="modified_idx" UNIQUE="false" FIELDS="timemodified" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_mail_lib_content" COMMENT="Localized contents for unified CampusFR Mail Studio templates">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="language" TYPE="char" LENGTH="5" NOTNULL="true" />
+                <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="preheader" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="contentjson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="template_fk" TYPE="foreign" FIELDS="templateid" REFTABLE="local_subs_mail_library" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="template_language_uix" UNIQUE="true" FIELDS="templateid,language" />
+            </INDEXES>
+        </TABLE>
+
         <TABLE NAME="local_subs_showroom" COMMENT="Editable Commerce showroom definitions">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
@@ -2016,6 +2083,7 @@
                 <FIELD NAME="campaignid" TYPE="int" LENGTH="10" NOTNULL="true" />
                 <FIELD NAME="ctadestination" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="checkout" />
                 <FIELD NAME="showroomid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="librarytemplateid" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
                 <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="false" />
@@ -2025,6 +2093,7 @@
                 <KEY NAME="primary" TYPE="primary" FIELDS="id" />
                 <KEY NAME="campaign_fk" TYPE="foreign-unique" FIELDS="campaignid" REFTABLE="local_subs_commerce_offer_campaign" REFFIELDS="id" />
                 <KEY NAME="showroom_fk" TYPE="foreign" FIELDS="showroomid" REFTABLE="local_subs_showroom" REFFIELDS="id" />
+                <KEY NAME="library_template_fk" TYPE="foreign" FIELDS="librarytemplateid" REFTABLE="local_subs_mail_library" REFFIELDS="id" />
             </KEYS>
         </TABLE>
         <TABLE NAME="local_subs_commerce_offer_campaign_email_content" COMMENT="Localised editorial content for Personal Offer campaign emails">
@@ -2157,5 +2226,72 @@
                 <INDEX NAME="source_user_idx" UNIQUE="false" FIELDS="sourceuserid" />
             </INDEXES>
         </TABLE>
+    
+        <TABLE NAME="local_subs_mail_campaign" COMMENT="Generic Mail Studio marketing campaigns.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="draft"/>
+                <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="ctaurl" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="scheduledat" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="queuedat" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="completedat" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="template_fk" TYPE="foreign" FIELDS="templateid" REFTABLE="local_subs_mail_library" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="status_schedule_idx" UNIQUE="false" FIELDS="status,scheduledat"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_mail_campaign_content" COMMENT="Frozen translated Mail Studio campaign snapshot.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="campaignid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="language" TYPE="char" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="subject" TYPE="text" NOTNULL="true"/>
+                <FIELD NAME="preheader" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="bodyhtml" TYPE="text" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="campaign_fk" TYPE="foreign" FIELDS="campaignid" REFTABLE="local_subs_mail_campaign" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="campaign_language_uix" UNIQUE="true" FIELDS="campaignid,language"/>
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_mail_campaign_recipient" COMMENT="Frozen recipients for generic marketing campaigns.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="campaignid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="firstname" TYPE="char" LENGTH="100" NOTNULL="false"/>
+                <FIELD NAME="lastname" TYPE="char" LENGTH="100" NOTNULL="false"/>
+                <FIELD NAME="language" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="fr"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="mailid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="draft"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="campaign_fk" TYPE="foreign" FIELDS="campaignid" REFTABLE="local_subs_mail_campaign" REFFIELDS="id"/>
+                <KEY NAME="mail_fk" TYPE="foreign" FIELDS="mailid" REFTABLE="local_subs_commerce_mail" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="campaign_email_uix" UNIQUE="true" FIELDS="campaignid,email"/>
+                <INDEX NAME="campaign_status_idx" UNIQUE="false" FIELDS="campaignid,status"/>
+            </INDEXES>
+        </TABLE>
+
     </TABLES>
 </XMLDB>

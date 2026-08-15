@@ -13,11 +13,11 @@ final class commerce_personal_offer_campaign_m14_2_test extends advanced_testcas
         global $CFG;
 
         $renderer = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/classes/commerce/personaloffer/mail/'
-            . 'CommercePersonalOfferCampaignMailRenderer.php'
+            $CFG->dirroot . '/local/subscriptions/classes/commerce/mail/builder/'
+            . 'CommerceMailBuilderCtaRenderer.php'
         );
 
-        self::assertStringContainsString('Compact one-surface button', $renderer);
+        self::assertStringContainsString('align="center" style="padding:0;background:transparent;border:0;"', $renderer);
         self::assertStringContainsString('padding:10px 22px', $renderer);
         self::assertStringContainsString('background:transparent;border:0', $renderer);
         self::assertStringNotContainsString('bgcolor="' . "' . \$background", $renderer);
@@ -33,9 +33,14 @@ final class commerce_personal_offer_campaign_m14_2_test extends advanced_testcas
             $CFG->dirroot . '/local/subscriptions/classes/commerce/personaloffer/mail/'
             . 'CommercePersonalOfferCampaignMailRenderer.php'
         );
+        $builder = file_get_contents(
+            $CFG->dirroot . '/local/subscriptions/classes/commerce/mail/builder/'
+            . 'CommerceMailBuilder.php'
+        );
 
-        self::assertStringContainsString("'{{direct_pay}}'", $editor);
-        self::assertStringContainsString("'{{image}}'", $editor);
+        self::assertStringContainsString("'{{direct_pay}}'", $builder);
+        self::assertStringContainsString("'{{image}}'", $builder);
+        self::assertStringContainsString('CommerceMailBuilder::personal_offer_structural_tags()', $editor);
         self::assertStringContainsString("CAMPUSFR_DIRECT_PAY_MARKER_", $renderer);
         self::assertStringContainsString("CAMPUSFR_IMAGE_MARKER_", $renderer);
         self::assertStringContainsString("direct_pay_html", $renderer);
@@ -104,11 +109,15 @@ final class commerce_personal_offer_campaign_m14_2_test extends advanced_testcas
         global $CFG;
 
         $renderer = file_get_contents(
+            $CFG->dirroot . '/local/subscriptions/classes/commerce/mail/builder/'
+            . 'CommerceMailBuilderCtaRenderer.php'
+        );
+        $personalrenderer = file_get_contents(
             $CFG->dirroot . '/local/subscriptions/classes/commerce/personaloffer/mail/'
             . 'CommercePersonalOfferCampaignMailRenderer.php'
         );
 
-        self::assertStringContainsString('button_hover_css', $renderer);
+        self::assertStringContainsString('hover_css', $renderer);
         self::assertStringContainsString('campusfr-campaign-cta-gold:hover', $renderer);
         self::assertStringContainsString('campusfr-campaign-cta.campusfr-campaign-cta-gold:hover', $renderer);
         self::assertStringContainsString('background-color:#f1dda0!important', $renderer);
@@ -117,7 +126,7 @@ final class commerce_personal_offer_campaign_m14_2_test extends advanced_testcas
         self::assertStringContainsString('campusfr-campaign-cta-campus_pink:hover', $renderer);
         self::assertStringContainsString('campusfr-campaign-cta-legacy_blue:hover', $renderer);
         self::assertStringContainsString('campusfr-campaign-cta-secondary:hover', $renderer);
-        self::assertStringContainsString('campusfr-campaign-cta campusfr-campaign-cta-secondary', $renderer);
+        self::assertStringContainsString('campusfr-campaign-cta campusfr-campaign-cta-secondary', $personalrenderer);
         self::assertStringContainsString("campusfr-campaign-cta-' . \$variant", $renderer);
     }
 
@@ -136,7 +145,7 @@ final class commerce_personal_offer_campaign_m14_2_test extends advanced_testcas
             $CFG->dirroot . '/local/subscriptions/classes/mail/MailRenderer.php'
         );
 
-        self::assertStringContainsString("'headcss' => \$this->button_hover_css()", $campaignrenderer);
+        self::assertStringContainsString("'headcss' => \$ctarenderer->hover_css()", $campaignrenderer);
         self::assertStringNotContainsString('$this->button_hover_css() . $bodyhtml', $campaignrenderer);
         self::assertStringContainsString("'headcss' => trim((string)(\$editorial['headcss'] ?? ''))", $abstract);
         self::assertStringContainsString("\$options['headcss'] ?? ''", $mailrenderer);

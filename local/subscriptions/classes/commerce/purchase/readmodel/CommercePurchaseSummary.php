@@ -23,7 +23,14 @@ final class CommercePurchaseSummary {
         public readonly string $source,
         public readonly int $timecreated,
         public readonly array $productitems = [],
-        public readonly string $publicreference = ''
+        public readonly string $publicreference = '',
+        public readonly bool $haspersonaloffer = false,
+        public readonly string $personalofferuuid = '',
+        public readonly string $personaloffercampaign = '',
+        public readonly bool $adminclosed = false,
+        public readonly int $adminclosedat = 0,
+        public readonly int $adminclosedby = 0,
+        public readonly string $adminclosereason = ''
     ) {
     }
 }

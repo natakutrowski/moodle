@@ -5,6 +5,7 @@ namespace local_subscriptions\crm\navigation;
 defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
+use local_subscriptions\subscription_config;
 use moodle_url;
 
 /**
@@ -57,6 +58,16 @@ final class CrmBreadcrumbRenderer {
                 'label' => $label,
                 'url' => $url,
             ];
+        }
+
+        // CRM is the stable root of every in-app breadcrumb. Callers only need
+        // to describe their local hierarchy (Commerce > Sales, Users > User360, ...).
+        $rootlabel = get_string('crm_breadcrumb_root', 'local_subscriptions');
+        if ($normalised === [] || \core_text::strtolower($normalised[0]['label']) !== \core_text::strtolower($rootlabel)) {
+            array_unshift($normalised, [
+                'label' => $rootlabel,
+                'url' => new moodle_url(subscription_config::admin_dashboard_page()),
+            ]);
         }
 
         if (count($normalised) < 2) {

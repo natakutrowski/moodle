@@ -26,6 +26,7 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
     public function state(int $campaignid): array {
         $campaign = $this->db->get_record('local_subs_commerce_offer_campaign', ['id' => $campaignid], '*', MUST_EXIST);
         $stored = $this->emailservice->get($campaignid);
+        $mailstudio = CommercePersonalOfferMailStudioBridge::create($this->db);
         return [
             'campaign' => $campaign,
             'config' => $stored['config'],
@@ -34,6 +35,8 @@ final class CommercePersonalOfferCampaignEmailBuilderService {
             'bannerurl' => (new CommercePersonalOfferCampaignMailBannerService())->url($campaignid),
             'footerimageurl' => (new CommercePersonalOfferCampaignMailFooterImageService())->url($campaignid),
             'variables' => CommercePersonalOfferCampaignMailVariableResolver::AVAILABLE,
+            'mailstudiotemplates' => $mailstudio->template_options(),
+            'mailstudiosource' => $mailstudio->source_template($campaignid),
             'editable' => !in_array((string)$campaign->status, ['issued', 'closed'], true),
         ];
     }
