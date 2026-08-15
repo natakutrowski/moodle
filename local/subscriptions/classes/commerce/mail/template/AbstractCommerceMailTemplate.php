@@ -16,6 +16,7 @@ use local_subscriptions\commerce\mail\template\studio\CommerceMailHeaderImageSer
 use local_subscriptions\commerce\mail\template\studio\CommerceMailTemplateDefaults;
 use local_subscriptions\commerce\mail\template\studio\CommerceMailTemplateRepository;
 use local_subscriptions\commerce\mail\template\studio\CommerceMailTokenResolver;
+use local_subscriptions\commerce\mail\transactional\CommerceTransactionalMailStudioBridge;
 use local_subscriptions\mail\MailRenderer;
 
 /**
@@ -32,19 +33,27 @@ abstract class AbstractCommerceMailTemplate implements CommerceMailTemplate {
             $presentation = CommerceMailPurchasePresentation::from_context($request->get_context());
             $context = $this->template_context($presentation->export()) + $this->additional_context($request);
             $defaults = CommerceMailTemplateDefaults::get($this->get_type(), $request->get_language());
-            $record = (new CommerceMailTemplateRepository($DB))->get($this->get_type(), $request->get_language());
-            $editorial = ($record !== null && !empty($record->enabled))
-                ? [
-                    'subject' => (string)$record->subject,
-                    'preheader' => (string)$record->preheader,
-                    'heading' => (string)$record->heading,
-                    'introhtml' => (string)$record->introhtml,
-                    'outrohtml' => (string)$record->outrohtml,
-                    'signaturehtml' => (string)$record->signaturehtml,
-                    'headerimage' => !empty($record->headerimage),
-                    'templateid' => (int)$record->id,
-                ]
-                : $defaults + ['templateid' => 0];
+            $mailstudioeditorial = CommerceTransactionalMailStudioBridge::create($DB)->resolve(
+                $this->get_type(),
+                $request->get_language()
+            );
+            $record = (new CommerceMailTemplateRepository($DB))->get(
+                $this->get_type(),
+                $request->get_language()
+            );
+            $editorial = $mailstudioeditorial
+                ?? (($record !== null && !empty($record->enabled))
+                    ? [
+                        'subject' => (string)$record->subject,
+                        'preheader' => (string)$record->preheader,
+                        'heading' => (string)$record->heading,
+                        'introhtml' => (string)$record->introhtml,
+                        'outrohtml' => (string)$record->outrohtml,
+                        'signaturehtml' => (string)$record->signaturehtml,
+                        'headerimage' => !empty($record->headerimage),
+                        'templateid' => (int)$record->id,
+                    ]
+                    : $defaults + ['templateid' => 0]);
 
             $editorial = $this->resolve_editorial($request, $context, $editorial);
 

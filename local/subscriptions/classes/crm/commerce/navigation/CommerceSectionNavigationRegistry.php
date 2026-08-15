@@ -16,6 +16,7 @@ use moodle_url;
 final class CommerceSectionNavigationRegistry {
     public const OVERVIEW = 'overview';
     public const PRODUCTS = 'products';
+    public const SHOWROOMS = 'showrooms';
     public const PURCHASES = 'purchases';
     /** @deprecated Compatibility key retained for old callers. */
     public const SUBSCRIPTIONS = self::PURCHASES;
@@ -57,82 +58,74 @@ final class CommerceSectionNavigationRegistry {
             new CommerceSectionNavigationItem(
                 self::OVERVIEW,
                 get_string('crm_commerce_nav_overview', 'local_subscriptions'),
-                '⌂',
+                'fa-home',
                 new moodle_url(subscription_config::admin_commerce_page()),
                 Capabilities::VIEW_DASHBOARD,
                 10
             ),
             new CommerceSectionNavigationItem(
-                self::PRODUCTS,
-                get_string('crm_commerce_nav_products', 'local_subscriptions'),
-                '▦',
-                new moodle_url('/local/subscriptions/admin/commerce/products/index.php'),
-                Capabilities::MANAGE_CONFIGURATION,
+                self::PURCHASES,
+                get_string('crm_commerce_nav_purchases', 'local_subscriptions'),
+                'fa-shopping-cart',
+                new moodle_url('/local/subscriptions/admin/commerce/purchases/index.php'),
+                Capabilities::VIEW_PAYMENTS,
                 20
             ),
             new CommerceSectionNavigationItem(
-                self::PURCHASES,
-                get_string('crm_commerce_nav_purchases', 'local_subscriptions'),
-                '▣',
-                new moodle_url('/local/subscriptions/admin/commerce/purchases/index.php'),
-                Capabilities::VIEW_PAYMENTS,
-                25
+                self::PRODUCTS,
+                get_string('crm_commerce_nav_products', 'local_subscriptions'),
+                'fa-cube',
+                new moodle_url('/local/subscriptions/admin/commerce/products/index.php'),
+                Capabilities::MANAGE_CONFIGURATION,
+                30
             ),
             new CommerceSectionNavigationItem(
-                self::MAIL,
-                get_string('crm_commerce_nav_mail', 'local_subscriptions'),
-                '✉',
-                new moodle_url('/local/subscriptions/admin/commerce/mail/index.php'),
-                Capabilities::VIEW_PAYMENTS,
-                55
-            ),
-            new CommerceSectionNavigationItem(
-                self::IDENTITIES,
-                get_string('crm_commerce_nav_identities', 'local_subscriptions'),
-                '◎',
-                new moodle_url('/local/subscriptions/admin/commerce/customer-identities/index.php'),
-                Capabilities::VIEW_PAYMENTS,
-                57
-            ),
-            new CommerceSectionNavigationItem(
-                self::UNFINISHED_CHECKOUTS,
-                get_string('crm_commerce_nav_unfinished_checkouts', 'local_subscriptions'),
-                '↻',
-                new moodle_url('/local/subscriptions/admin/commerce/unfinished-checkouts/index.php'),
-                Capabilities::VIEW_PAYMENTS,
-                57.5
+                self::SHOWROOMS,
+                get_string('crm_commerce_nav_showrooms', 'local_subscriptions'),
+                'fa-window-maximize',
+                new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'),
+                Capabilities::MANAGE_CONFIGURATION,
+                40
             ),
             new CommerceSectionNavigationItem(
                 self::PERSONAL_OFFERS,
                 get_string('crm_commerce_nav_personal_offers', 'local_subscriptions'),
-                '◆',
+                'fa-tag',
                 new moodle_url('/local/subscriptions/admin/commerce/personal-offers/index.php'),
                 Capabilities::VIEW_PAYMENTS,
-                58
+                50
             ),
             new CommerceSectionNavigationItem(
                 self::GRANTS,
                 get_string('crm_commerce_nav_grants', 'local_subscriptions'),
-                '⊕',
+                'fa-key',
                 new moodle_url('/local/subscriptions/admin/commerce/grants/index.php'),
-                Capabilities::MANAGE_SUBSCRIPTIONS,
-                59
+                Capabilities::VIEW_PAYMENTS,
+                60
+            ),
+            new CommerceSectionNavigationItem(
+                self::MAIL,
+                get_string('crm_commerce_nav_mail', 'local_subscriptions'),
+                'fa-envelope',
+                new moodle_url('/local/subscriptions/admin/commerce/mail/index.php'),
+                Capabilities::VIEW_PAYMENTS,
+                70
             ),
             new CommerceSectionNavigationItem(
                 self::STATISTICS,
                 get_string('crm_commerce_nav_statistics', 'local_subscriptions'),
-                '▥',
+                'fa-bar-chart',
                 new moodle_url('/local/subscriptions/admin/commerce/statistics/index.php'),
                 Capabilities::VIEW_STATISTICS,
-                60
+                80
             ),
             new CommerceSectionNavigationItem(
                 self::CONFIGURATION,
                 get_string('crm_commerce_nav_configuration', 'local_subscriptions'),
-                '⚙',
+                'fa-cog',
                 new moodle_url('/local/subscriptions/admin/commerce/configuration/index.php'),
                 Capabilities::MANAGE_CONFIGURATION,
-                70
+                100
             ),
         ];
     }
@@ -141,6 +134,7 @@ final class CommerceSectionNavigationRegistry {
         return in_array($key, [
             self::OVERVIEW,
             self::PRODUCTS,
+            self::SHOWROOMS,
             self::PURCHASES,
             self::DIGITAL_PRODUCTS,
             self::MAIL,

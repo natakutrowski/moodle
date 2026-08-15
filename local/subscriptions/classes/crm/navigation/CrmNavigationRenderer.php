@@ -5,6 +5,7 @@ namespace local_subscriptions\crm\navigation;
 defined('MOODLE_INTERNAL') || die();
 
 use context;
+use context_system;
 use html_writer;
 
 /**
@@ -46,8 +47,15 @@ final class CrmNavigationRenderer {
             );
         }
 
+        $context ??= context_system::instance();
+
         $items = $this->registry
             ->visible_items($context);
+
+        // Showrooms belong to the Commerce workspace from 7.95N onward.
+        $effectiveactivekey = $activekey === CrmNavigationKeys::SHOWROOMS
+            ? CrmNavigationKeys::COMMERCE
+            : $activekey;
 
         if ($items === []) {
             return '';
@@ -59,7 +67,8 @@ final class CrmNavigationRenderer {
             $listitems[] =
                 $this->render_item(
                     $item,
-                    $item->key === $activekey
+                    $item->key === $effectiveactivekey,
+                    $context
                 );
         }
 
@@ -108,11 +117,13 @@ final class CrmNavigationRenderer {
      *
      * @param CrmNavigationItem $item
      * @param bool $isactive
+     * @param context|null $context
      * @return string
      */
     private function render_item(
         CrmNavigationItem $item,
-        bool $isactive
+        bool $isactive,
+        ?context $context = null
     ): string {
         $attributes = [
             'class' =>
@@ -131,12 +142,12 @@ final class CrmNavigationRenderer {
                 'page';
         }
 
-        $icon = html_writer::span(
-            s($item->icon),
-            'crm-app-navigation-icon',
+        $icon = html_writer::tag(
+            'i',
+            '',
             [
-                'aria-hidden' =>
-                    'true',
+                'class' => 'fa ' . s($item->icon) . ' crm-app-navigation-icon',
+                'aria-hidden' => 'true',
             ]
         );
 
@@ -151,12 +162,63 @@ final class CrmNavigationRenderer {
             $attributes
         );
 
+        $children = array_values(array_filter(
+            $item->children,
+            static fn(array $child): bool => has_capability($child['capability'], $context)
+        ));
+
+        $submenu = '';
+        $toggle = '';
+        if ($children !== []) {
+            $toggle = html_writer::tag(
+                'button',
+                html_writer::tag('i', '', ['class' => 'fa fa-angle-down', 'aria-hidden' => 'true']),
+                [
+                    'type' => 'button',
+                    'class' => 'crm-app-navigation-menu-toggle',
+                    'aria-label' => get_string('crm_nav_open_menu', 'local_subscriptions', $item->label),
+                    'aria-expanded' => 'false',
+                    'data-crm-navigation-menu-toggle' => '1',
+                ]
+            );
+
+            $subitems = [];
+            foreach ($children as $child) {
+                $subitems[] = html_writer::tag(
+                    'li',
+                    html_writer::link(
+                        $child['url'],
+                        html_writer::tag(
+                            'i',
+                            '',
+                            [
+                                'class' => 'fa ' . s($child['icon']) . ' crm-app-navigation-submenu-icon',
+                                'aria-hidden' => 'true',
+                            ]
+                        ) . html_writer::span(
+                            s($child['label']),
+                            'crm-app-navigation-submenu-label'
+                        ),
+                        ['class' => 'crm-app-navigation-submenu-link']
+                    ),
+                    ['class' => 'crm-app-navigation-submenu-item']
+                );
+            }
+            $submenu = html_writer::tag(
+                'ul',
+                implode('', $subitems),
+                ['class' => 'crm-app-navigation-submenu']
+            );
+        }
+
         return html_writer::tag(
             'li',
-            $link,
+            html_writer::div($link . $toggle, 'crm-app-navigation-item-main') . $submenu,
             [
-                'class' =>
-                    'crm-app-navigation-item',
+                'class' => 'crm-app-navigation-item'
+                    . ($item->key === CrmNavigationKeys::DASHBOARD ? ' is-dashboard' : '')
+                    . ($item->key === CrmNavigationKeys::HELP ? ' is-help' : '')
+                    . ($children !== [] ? ' has-submenu' : ''),
             ]
         );
     }

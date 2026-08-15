@@ -18,6 +18,8 @@ final class commerce_m53_global_statistics_dashboard_test extends \advanced_test
         $export=(string)file_get_contents($CFG->dirroot.'/local/subscriptions/admin/commerce/statistics/export.php');
 
         self::assertStringContainsString("pay.status IN ('paid','succeeded','completed','captured')",$repository);
+        self::assertStringContainsString('CommerceStatisticsProductCanonicalizer',$repository);
+        self::assertStringContainsString('pi.metadatajson',$repository);
         self::assertStringContainsString('latest payment attempt',$repository);
         self::assertStringContainsString('paymentattempts',$repository);
         self::assertStringContainsString('acquisition_breakdown',$repository);

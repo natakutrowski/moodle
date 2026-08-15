@@ -31,9 +31,15 @@ class local_subscriptions_change_email_form extends moodleform {
         $mform = $this->_form;
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
-        $mform->addElement('text', 'newemail', get_string('newemail'));
+        $mform->addElement('text', 'newemail', get_string('commerce_customer_email_change_newemail', 'local_subscriptions'));
         $mform->setType('newemail', PARAM_EMAIL);
         $mform->addRule('newemail', null, 'required', null, 'client');
+        $mform->addElement(
+            'select',
+            'newlang',
+            get_string('commerce_customer_email_change_newlang', 'local_subscriptions'),
+            get_string_manager()->get_list_of_translations()
+        );
         $mform->addElement('advcheckbox', 'confirmchange', get_string('commerce_customer_email_change_confirm', 'local_subscriptions'));
         $buttons = [];
         $buttons[] = $mform->createElement('submit', 'previewbutton', get_string('commerce_customer_email_change_preview', 'local_subscriptions'));
@@ -45,7 +51,7 @@ class local_subscriptions_change_email_form extends moodleform {
 
 $service = new CommerceCustomerEmailChangeService($DB);
 $form = new local_subscriptions_change_email_form($url);
-$form->set_data(['id' => $userid, 'newemail' => (string)$user->email]);
+$form->set_data(['id' => $userid, 'newemail' => (string)$user->email, 'newlang' => (string)$user->lang]);
 $error = null;
 $preview = null;
 
@@ -54,12 +60,12 @@ if ($form->is_cancelled()) {
 } else if ($data = $form->get_data()) {
     require_sesskey();
     try {
-        $preview = $service->preview($userid, (string)$data->newemail);
+        $preview = $service->preview($userid, (string)$data->newemail, (string)$data->newlang);
         if (!empty($data->executebutton)) {
             if (empty($data->confirmchange)) {
                 throw new moodle_exception('commerce_customer_email_change_confirmation_required', 'local_subscriptions');
             }
-            $service->change($userid, (string)$data->newemail, (int)$USER->id);
+            $service->change($userid, (string)$data->newemail, (int)$USER->id, (string)$data->newlang);
             redirect($returnurl, get_string('commerce_customer_email_change_success', 'local_subscriptions'));
         }
         $form->set_data($data);
@@ -69,7 +75,7 @@ if ($form->is_cancelled()) {
     }
 } else {
     try {
-        $preview = $service->preview($userid, (string)$user->email);
+        $preview = $service->preview($userid, (string)$user->email, (string)$user->lang);
     } catch (\Throwable $ignored) {
         $preview = null;
     }
@@ -98,12 +104,71 @@ echo html_writer::tag('ul',
 echo html_writer::end_div();
 
 $form->display();
-if ($preview !== null && $preview['oldemail'] !== $preview['newemail']) {
+if ($preview !== null && (!empty($preview['emailchanged']) || !empty($preview['langchanged']))) {
     echo html_writer::start_div('card card-body mt-4 border-primary');
-    echo html_writer::tag('h3', get_string('commerce_customer_email_change_preview_title', 'local_subscriptions'), ['class' => 'h6']);
-    echo html_writer::div(s($preview['oldemail']) . ' → ' . s($preview['newemail']), 'fw-semibold mb-3');
-    echo html_writer::div(get_string('commerce_customer_email_change_preview_current', 'local_subscriptions', (object)['count' => (int)$preview['currenttotal']]), 'mb-2');
-    echo html_writer::div(get_string('commerce_customer_email_change_preview_history', 'local_subscriptions', (object)['count' => (int)$preview['historicaltotal']]), 'text-muted small');
+    echo html_writer::tag('h3', get_string('commerce_customer_email_change_preview_title', 'local_subscriptions'), ['class' => 'h6 mb-3']);
+
+    $changes = [];
+    if (!empty($preview['emailchanged'])) {
+        $changes[] = html_writer::tag('li',
+            html_writer::tag('strong', get_string('commerce_customer_email_change_preview_email', 'local_subscriptions'))
+            . ': ' . s($preview['oldemail']) . ' → ' . s($preview['newemail'])
+        );
+    }
+    if (!empty($preview['langchanged'])) {
+        $translations = get_string_manager()->get_list_of_translations();
+        $oldlanglabel = $translations[$preview['oldlang']] ?? $preview['oldlang'];
+        $newlanglabel = $translations[$preview['newlang']] ?? $preview['newlang'];
+        $changes[] = html_writer::tag('li',
+            html_writer::tag('strong', get_string('commerce_customer_email_change_preview_language', 'local_subscriptions'))
+            . ': ' . s($oldlanglabel) . ' → ' . s($newlanglabel)
+        );
+    }
+    echo html_writer::tag('ul', implode('', $changes), ['class' => 'mb-3']);
+
+    echo html_writer::tag('h4', get_string('commerce_customer_email_change_preview_impacted_title', 'local_subscriptions'), ['class' => 'h6 mb-2']);
+    $impactlabels = [
+        'local_subs_commerce_grant' => 'commerce_customer_email_change_impact_grants',
+        'local_subs_commerce_dig_access' => 'commerce_customer_email_change_impact_digital',
+        'local_subs_commerce_offer' => 'commerce_customer_email_change_impact_offers',
+        'local_subs_commerce_offer_campaign_member' => 'commerce_customer_email_change_impact_offer_campaigns',
+        'local_subs_commerce_grant_campaign_member' => 'commerce_customer_email_change_impact_grant_campaigns',
+        'local_subs_commerce_guest' => 'commerce_customer_email_change_impact_guests',
+    ];
+    $impactrows = [];
+    if (!empty($preview['emailchanged'])) {
+        $impactrows[] = html_writer::tag('li', get_string('commerce_customer_email_change_impact_moodle_email', 'local_subscriptions'));
+    }
+    if (!empty($preview['langchanged'])) {
+        $impactrows[] = html_writer::tag('li', get_string('commerce_customer_email_change_impact_moodle_language', 'local_subscriptions'));
+    }
+    if (!empty($preview['emailchanged'])) {
+        foreach ($preview['current'] as $table => $count) {
+            if ((int)$count <= 0 || !isset($impactlabels[$table])) {
+                continue;
+            }
+            $impactrows[] = html_writer::tag('li', get_string($impactlabels[$table], 'local_subscriptions', (int)$count));
+        }
+    }
+    echo html_writer::tag('ul', implode('', $impactrows), ['class' => 'mb-3']);
+
+    echo html_writer::tag('h4', get_string('commerce_customer_email_change_preview_preserved_title', 'local_subscriptions'), ['class' => 'h6 mb-2']);
+    $historylabels = [
+        'local_subscriptions_commerce_purchase' => 'commerce_customer_email_change_history_purchases',
+        'subscription_payment_request' => 'commerce_customer_email_change_history_payments',
+        'subscription_digital_payment_request' => 'commerce_customer_email_change_history_digital_payments',
+    ];
+    $historyrows = [];
+    foreach ($preview['historical'] as $table => $count) {
+        if ((int)$count <= 0 || !isset($historylabels[$table])) {
+            continue;
+        }
+        $historyrows[] = html_writer::tag('li', get_string($historylabels[$table], 'local_subscriptions', (int)$count));
+    }
+    if ($historyrows === []) {
+        $historyrows[] = html_writer::tag('li', get_string('commerce_customer_email_change_history_none', 'local_subscriptions'));
+    }
+    echo html_writer::tag('ul', implode('', $historyrows), ['class' => 'mb-0 text-muted']);
     echo html_writer::end_div();
 }
 echo CrmWorkspaceRenderer::end();

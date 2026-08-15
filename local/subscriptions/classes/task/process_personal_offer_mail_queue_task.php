@@ -19,11 +19,43 @@ final class process_personal_offer_mail_queue_task extends scheduled_task {
 
     public function execute(): void {
         $now = time();
+
+        if ((string)get_config('local_subscriptions', 'personal_offer_mail_enabled') === '0') {
+            mtrace('[Personal Offer Mail] disabled by Commerce CRM configuration.');
+            return;
+        }
+
+        set_config(
+            'personal_offer_mail_last_check_at',
+            $now,
+            'local_subscriptions'
+        );
         $batch = max(1, min(500, (int)(get_config('local_subscriptions', 'personal_offer_mail_batch_size') ?: 20)));
         $hourly = max(1, min(5000, (int)(get_config('local_subscriptions', 'personal_offer_mail_hourly_limit') ?: 100)));
         $repository = new CommerceMailQueueRepository();
         $sentlasthour = $repository->count_sent_since(CommerceMailType::PERSONAL_OFFER, $now - HOURSECS);
         $remaining = max(0, $hourly - $sentlasthour);
+
+        $globalhourly = max(
+            0,
+            min(
+                10000,
+                (int)(get_config(
+                    'local_subscriptions',
+                    'commerce_mail_global_hourly_limit'
+                ) ?: 0)
+            )
+        );
+        if ($globalhourly > 0) {
+            $remaining = min(
+                $remaining,
+                max(
+                    0,
+                    $globalhourly - $repository->count_all_sent_since($now - HOURSECS)
+                )
+            );
+        }
+
         if ($remaining <= 0) {
             mtrace(sprintf('[Personal Offer Mail] throttled hourly_limit=%d sent_last_hour=%d', $hourly, $sentlasthour));
             return;

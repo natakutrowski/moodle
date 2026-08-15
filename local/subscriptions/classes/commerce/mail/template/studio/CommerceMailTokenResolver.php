@@ -17,22 +17,29 @@ final class CommerceMailTokenResolver {
         $supportemail = (string)(get_config('local_subscriptions', 'support_email') ?: 'support@campusfr.fr');
         $offer = is_array($presentation['personaloffer'] ?? null) ? $presentation['personaloffer'] : [];
 
-        return [
-            '{firstname}' => $firstname !== '' ? $firstname : get_string('commerce_mail_customer_fallback', 'local_subscriptions'),
-            '{fullname}' => $fullname !== '' ? $fullname : get_string('commerce_mail_customer_fallback', 'local_subscriptions'),
-            '{order_reference}' => (string)($presentation['reference'] ?? ''),
-            '{order_total}' => (string)($presentation['totalformatted'] ?? ''),
-            '{order_url}' => (string)($links['order'] ?? ''),
-            '{my_purchases_url}' => (string)($links['purchases'] ?? ''),
-            '{my_courses_url}' => (string)($links['courses'] ?? ''),
-            '{digital_library_url}' => (string)($links['resources'] ?? ''),
-            '{support_email}' => $supportemail,
-            '{offer_url}' => (string)($offer['url'] ?? ''),
-            '{offer_product}' => (string)($offer['productname'] ?? ''),
-            '{offer_expiry}' => (string)($offer['expiresformatted'] ?? ''),
-            '{offer_price}' => (string)($offer['priceformatted'] ?? ''),
-            '{campaign_name}' => (string)($offer['campaignname'] ?? ''),
+        $values = [
+            'firstname' => $firstname !== '' ? $firstname : get_string('commerce_mail_customer_fallback', 'local_subscriptions'),
+            'fullname' => $fullname !== '' ? $fullname : get_string('commerce_mail_customer_fallback', 'local_subscriptions'),
+            'order_reference' => (string)($presentation['reference'] ?? ''),
+            'order_total' => (string)($presentation['totalformatted'] ?? ''),
+            'order_url' => (string)($links['order'] ?? ''),
+            'my_purchases_url' => (string)($links['purchases'] ?? ''),
+            'my_courses_url' => (string)($links['courses'] ?? ''),
+            'digital_library_url' => (string)($links['resources'] ?? ''),
+            'support_email' => $supportemail,
+            'offer_url' => (string)($offer['url'] ?? ''),
+            'offer_product' => (string)($offer['productname'] ?? ''),
+            'offer_expiry' => (string)($offer['expiresformatted'] ?? ''),
+            'offer_price' => (string)($offer['priceformatted'] ?? ''),
+            'campaign_name' => (string)($offer['campaignname'] ?? ''),
         ];
+
+        $tokens = [];
+        foreach ($values as $name => $value) {
+            $tokens['{' . $name . '}'] = $value;
+            $tokens['{{' . $name . '}}'] = $value;
+        }
+        return $tokens;
     }
 
     /** @param array<string,string> $values */

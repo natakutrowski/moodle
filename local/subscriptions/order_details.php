@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/classes/commerce/tracking/CommerceTrackedActionUrl.php');
 
+use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\checkout\guest\CommerceProvisionalGuestAccountContext;
 use local_subscriptions\commerce\order\presentation\CommerceBundleComponentResolver;
 use local_subscriptions\commerce\order\presentation\CommerceCustomerStatusResolver;
@@ -28,9 +29,14 @@ global $DB, $OUTPUT, $PAGE, $SITE, $USER, $SESSION;
 
 $reference = required_param('reference', PARAM_ALPHANUMEXT);
 $autoprint = optional_param('print', 0, PARAM_BOOL);
+$adminreturn = optional_param('adminreturn', 0, PARAM_BOOL);
 $context = context_system::instance();
 $isfullyauthenticated = isloggedin() && !isguestuser();
-$isadmin = $isfullyauthenticated && has_capability('moodle/site:config', $context);
+$isadmin = $isfullyauthenticated && (
+    has_capability('moodle/site:config', $context)
+    || has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)
+);
+$adminreturn = $isadmin && $adminreturn;
 $provisionalcontext = $isfullyauthenticated ? null : CommerceProvisionalGuestAccountContext::resolve($reference);
 $requiresaccountfinalisation = $provisionalcontext !== null;
 $accountactivationurl = $requiresaccountfinalisation
@@ -107,7 +113,11 @@ $accessstatus = $statusresolver->resolve_access($order->fulfillmentstatus);
 $supportemail = (string)(get_config('local_subscriptions', 'support_email') ?: 'support@campusfr.fr');
 $supportdestination = UrlFactory::support_for_order($reference);
 $invoicedestination = new moodle_url('/local/subscriptions/order_invoice.php', ['reference' => $reference]);
-$printdestination = new moodle_url('/local/subscriptions/order_details.php', ['reference' => $reference, 'print' => 1]);
+$printdestination = new moodle_url('/local/subscriptions/order_details.php', [
+    'reference' => $reference,
+    'print' => 1,
+    'adminreturn' => $adminreturn ? 1 : 0,
+]);
 $supporturl = CommerceTrackedActionUrl::build($reference, 'order_contact_support', 'order_details', $supportdestination)->out(false);
 $invoiceurl = CommerceTrackedActionUrl::build($reference, 'order_download_invoice', 'order_details', $invoicedestination)->out(false);
 $printurl = CommerceTrackedActionUrl::build($reference, 'order_print', 'order_details', $printdestination)->out(false);
@@ -330,8 +340,21 @@ $templatecontext = [
     'accessstatus' => $accessstatus['label'] ?? '',
     'accessstatusclass' => $accessstatus['class'] ?? 'neutral',
     'backurl' => $requiresaccountfinalisation
-        ? (new moodle_url('/local/subscriptions/order_result.php', ['reference' => $reference]))->out(false)
-        : UrlFactory::my_purchases()->out(false),
+        ? (new moodle_url(
+            '/local/subscriptions/order_result.php',
+            ['reference' => $reference]
+        ))->out(false)
+        : ($adminreturn
+            ? (new moodle_url(
+                '/local/subscriptions/admin/commerce/purchases/index.php'
+            ))->out(false)
+            : UrlFactory::my_purchases()->out(false)),
+    'backlabel' => $adminreturn
+        ? get_string(
+            'commerce_order_details_back_to_sales',
+            'local_subscriptions'
+        )
+        : get_string('commerce_i43_back', 'local_subscriptions'),
     'requiresaccountfinalisation' => $requiresaccountfinalisation,
     'accountactivationurl' => $accountactivationurl?->out(false) ?? '',
     'autoopen' => '0',

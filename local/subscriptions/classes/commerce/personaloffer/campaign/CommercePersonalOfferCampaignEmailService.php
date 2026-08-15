@@ -88,6 +88,30 @@ final class CommercePersonalOfferCampaignEmailService {
         return $this->repository->get_content($campaignid, 'fr');
     }
 
+    public function set_library_template_source(
+        int $campaignid,
+        ?int $librarytemplateid,
+        int $userid
+    ): void {
+        $this->require_editable_campaign($campaignid);
+        if ($librarytemplateid !== null
+                && !$this->db->record_exists('local_subs_mail_library', ['id' => $librarytemplateid])) {
+            throw new \coding_exception('Unknown Mail Studio template.');
+        }
+        $this->repository->set_library_template_source(
+            $campaignid,
+            $librarytemplateid,
+            $userid
+        );
+    }
+
+    public function library_template_source_id(int $campaignid): int {
+        $config = $this->repository->get_config($campaignid);
+        return $config && !empty($config->librarytemplateid)
+            ? (int)$config->librarytemplateid
+            : 0;
+    }
+
     public function save_destination(
         int $campaignid,
         string $destination,

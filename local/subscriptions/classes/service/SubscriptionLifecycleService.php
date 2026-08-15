@@ -5,6 +5,7 @@ namespace local_subscriptions\service;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\constants\Status;
+use local_subscriptions\commerce\mail\legacy\CommerceLegacyAutomaticMailPolicy;
 use local_subscriptions\mailer;
 use local_subscriptions\subscription_manager;
 
@@ -79,21 +80,23 @@ final class SubscriptionLifecycleService {
         $subscription->status = Status::ACTIVE;
         $subscription->last_update = $now;
 
-        try {
-            mailer::dispatch(
-                mailer::T_SUBSCRIPTION_ACTIVATED,
-                [
-                    'user' => $user,
-                    'plan' => $plan,
-                    'sub' => $subscription,
-                ],
-            );
-        } catch (\Throwable $exception) {
-            debugging(
-                '[local_subscriptions][lifecycle] Activation email failed for subscription #'
-                    . (int) $subscription->id . ': ' . $exception->getMessage(),
-                DEBUG_DEVELOPER,
-            );
+        if (CommerceLegacyAutomaticMailPolicy::lifecycle_emails_enabled()) {
+            try {
+                mailer::dispatch(
+                    mailer::T_SUBSCRIPTION_ACTIVATED,
+                    [
+                        'user' => $user,
+                        'plan' => $plan,
+                        'sub' => $subscription,
+                    ],
+                );
+            } catch (\Throwable $exception) {
+                debugging(
+                    '[local_subscriptions][lifecycle] Activation email failed for subscription #'
+                        . (int) $subscription->id . ': ' . $exception->getMessage(),
+                    DEBUG_DEVELOPER,
+                );
+            }
         }
 
         return true;
@@ -171,7 +174,7 @@ final class SubscriptionLifecycleService {
             IGNORE_MISSING,
         );
 
-        if ($user) {
+        if ($user && CommerceLegacyAutomaticMailPolicy::lifecycle_emails_enabled()) {
             try {
                 mailer::dispatch(
                     mailer::T_SUBSCRIPTION_EXPIRED,

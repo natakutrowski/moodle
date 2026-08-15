@@ -51,7 +51,8 @@ final class CommercePersonalOfferCampaignEmailRepository {
         int $campaignid,
         string $ctadestination,
         ?int $showroomid,
-        int $userid
+        int $userid,
+        ?int $librarytemplateid = null
     ): void {
         $existing = $this->get_config($campaignid);
         $now = time();
@@ -60,6 +61,7 @@ final class CommercePersonalOfferCampaignEmailRepository {
             'campaignid' => $campaignid,
             'ctadestination' => $ctadestination,
             'showroomid' => $showroomid,
+            'librarytemplateid' => $librarytemplateid ?? ($existing->librarytemplateid ?? null),
             'timemodified' => $now,
             'usermodified' => $userid,
         ];
@@ -73,6 +75,32 @@ final class CommercePersonalOfferCampaignEmailRepository {
         $record->timecreated = $now;
         $record->usercreated = $userid;
         $this->db->insert_record(self::CONFIG, $record);
+    }
+
+    public function set_library_template_source(
+        int $campaignid,
+        ?int $librarytemplateid,
+        int $userid
+    ): void {
+        $existing = $this->get_config($campaignid);
+        if ($existing === null) {
+            $this->upsert_config(
+                $campaignid,
+                CommercePersonalOfferCampaignEmailService::DESTINATION_CHECKOUT,
+                null,
+                $userid,
+                $librarytemplateid
+            );
+            return;
+        }
+
+        $record = (object)[
+            'id' => (int)$existing->id,
+            'librarytemplateid' => $librarytemplateid,
+            'timemodified' => time(),
+            'usermodified' => $userid,
+        ];
+        $this->db->update_record(self::CONFIG, $record);
     }
 
     public function upsert_content(

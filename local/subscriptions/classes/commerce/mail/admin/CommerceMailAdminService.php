@@ -22,6 +22,38 @@ final class CommerceMailAdminService {
         return $this->repository->search($filters, $page, $perpage);
     }
 
+    /** @return \stdClass[] */
+    public function search_all(array $filters): array {
+        return $this->repository->search_all($filters);
+    }
+
+    /** @return array{total:int,sent:int,pending:int,failed:int,cancelled:int} */
+    public function statistics(array $filters): array {
+        return $this->repository->statistics($filters);
+    }
+
+    /**
+     * @return array{
+     *   offerssent:int,
+     *   offerspending:int,
+     *   sentlasthour:int,
+     *   lastoffercheck:int
+     * }
+     */
+    public function operational_statistics(array $filters, ?int $now = null): array {
+        $now ??= time();
+        $offercounts = $this->repository->personal_offer_operational_counts($filters);
+        return [
+            'offerssent' => $offercounts['sent'],
+            'offerspending' => $offercounts['pending'],
+            'sentlasthour' => $this->repository->count_non_audit_sent_since($now - HOURSECS),
+            'lastoffercheck' => (int)(get_config(
+                'local_subscriptions',
+                'personal_offer_mail_last_check_at'
+            ) ?: 0),
+        ];
+    }
+
     public function find(int $id): ?\stdClass { return $this->repository->find_by_id($id); }
 
     public function preview(int $id): array {
@@ -38,6 +70,29 @@ final class CommerceMailAdminService {
         $registry = CommerceMailRuntime::template_registry();
         $message = (new CommerceMailDispatcher($registry, new MoodleCommerceMailTransport()))->preview($request);
         return ['subject' => $message->get_subject(), 'html' => $message->get_html(), 'text' => $message->get_text()];
+    }
+
+
+    /** Immediately processes an existing queued outbox row through the certified queue processor. */
+    public function send_now(int $id): array {
+        $record = $this->required($id);
+        if ((string)$record->status !== 'queued') {
+            throw new \moodle_exception('commerce_mail_send_now_not_allowed', 'local_subscriptions');
+        }
+
+        // A direct CRM send happens inside an HTTP request. Some lower-level
+        // Moodle/SMTP debugging paths can emit output before throwing. Capture
+        // that output so the queue processor can persist the real exception and
+        // the controller can still redirect cleanly afterwards.
+        $level = ob_get_level();
+        ob_start();
+        try {
+            return CommerceMailRuntime::processor()->process_ids([$id]);
+        } finally {
+            while (ob_get_level() > $level) {
+                ob_end_clean();
+            }
+        }
     }
 
     public function retry(int $id): bool { return $this->repository->reset_failed($id); }

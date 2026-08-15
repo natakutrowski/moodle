@@ -32,10 +32,13 @@ final class CommerceUnfinishedGuestCheckoutCrmService {
     public function queue(?string $email = null): array {
         $rows = [];
         foreach ($this->recovery->audit($email) as $candidate) {
-            $candidate['classification'] = $this->classify($candidate);
+            $candidate['purchases'] = $this->decorate_purchase_products(
+                $candidate['purchases']
+            );
             $candidate['payments'] = $this->decorate_provider_statuses(
                 $this->payments_for_user((int)$candidate['userid'])
             );
+            $candidate['classification'] = $this->classify($candidate);
             $candidate['age'] = $this->source_age((int)$candidate['source_session_id']);
             $candidate['user360url'] = (new \moodle_url(
                 '/local/subscriptions/admin/users/view.php',
@@ -156,6 +159,13 @@ final class CommerceUnfinishedGuestCheckoutCrmService {
     }
 
     private function classify(array $candidate): string {
+        foreach ($candidate['payments'] ?? [] as $payment) {
+            if (!empty($payment->providerlivepaid)
+                    && (string)$payment->purchasestatus === 'payment_pending') {
+                return 'provider_paid_pending';
+            }
+        }
+
         $pending = array_values(array_filter(
             $candidate['purchases'],
             static fn($purchase): bool => (string)$purchase->status === 'payment_pending'
@@ -171,6 +181,56 @@ final class CommerceUnfinishedGuestCheckoutCrmService {
             return 'stuck_identity';
         }
         return 'provisional_no_purchase';
+    }
+
+    /**
+     * Adds product labels to the purchases shown in the unfinished-checkout CRM.
+     *
+     * @param array<int,\stdClass> $purchases
+     * @return array<int,\stdClass>
+     */
+    private function decorate_purchase_products(array $purchases): array {
+        if ($purchases === []) {
+            return [];
+        }
+
+        $purchaseids = array_values(array_filter(array_map(
+            static fn(\stdClass $purchase): int => (int)$purchase->id,
+            $purchases
+        )));
+        if ($purchaseids === []) {
+            return $purchases;
+        }
+
+        [$insql, $params] = $this->database->get_in_or_equal(
+            $purchaseids,
+            SQL_PARAMS_NAMED,
+            'unfinisheditem'
+        );
+        $items = $this->database->get_records_select(
+            CommercePersistenceSchema::TABLE_ITEM,
+            'purchaseid ' . $insql,
+            $params,
+            'purchaseid ASC, position ASC, id ASC',
+            'id,purchaseid,label,itemreference,position'
+        );
+
+        $labels = [];
+        foreach ($items as $item) {
+            $label = trim((string)$item->label);
+            if ($label === '') {
+                $label = trim((string)$item->itemreference);
+            }
+            if ($label !== '') {
+                $labels[(int)$item->purchaseid][] = $label;
+            }
+        }
+
+        foreach ($purchases as $purchase) {
+            $purchase->productlabels = $labels[(int)$purchase->id] ?? [];
+        }
+
+        return $purchases;
     }
 
     /** @return array<int,\stdClass> */

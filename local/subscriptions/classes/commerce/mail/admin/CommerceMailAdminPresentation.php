@@ -33,7 +33,7 @@ final class CommerceMailAdminPresentation {
     public static function type_options(): array {
         $options = [];
 
-        foreach (CommerceMailType::all() as $type) {
+        foreach (CommerceMailType::routable() as $type) {
             $options[$type] = self::type_label($type);
         }
 
@@ -93,19 +93,24 @@ final class CommerceMailAdminPresentation {
             CommerceMailType::ACCOUNT_ACTIVATION => 'text-bg-info',
             CommerceMailType::PERSONAL_OFFER => 'text-bg-dark',
             CommerceMailType::TRIAL_WELCOME => 'text-bg-info',
+            CommerceMailType::MARKETING_CAMPAIGN => 'text-bg-primary',
+            CommerceMailType::SALES_FOLLOWUP => 'text-bg-warning',
             default => 'text-bg-light',
         };
     }
 
-    public static function language_label(string $language): string {
-        $language = strtolower(trim($language));
-
-        $flag = match ($language) {
+    public static function language_flag(string $language): string {
+        return match (strtolower(trim($language))) {
             'fr', 'fr_fr' => '🇫🇷',
             'en', 'en_us', 'en_gb' => '🇬🇧',
             'ru', 'ru_ru' => '🇷🇺',
             default => '🌐',
         };
+    }
+
+    public static function language_label(string $language): string {
+        $language = strtolower(trim($language));
+        $flag = self::language_flag($language);
 
         $key = 'commerce_mail_language_' . substr($language, 0, 2);
         $label = get_string_manager()->string_exists($key, 'local_subscriptions')

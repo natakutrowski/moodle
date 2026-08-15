@@ -42,9 +42,10 @@ final class CommerceCustomerEmailChangeService {
     ) {}
 
     /** @return array<string,mixed> */
-    public function preview(int $userid, string $newemail): array {
+    public function preview(int $userid, string $newemail, ?string $newlang = null): array {
         $user = $this->load_user($userid);
         $newemail = $this->normalise_email($newemail);
+        $newlang = $this->normalise_language($newlang ?? (string)$user->lang);
         $this->assert_available($userid, $newemail);
 
         $current = [];
@@ -57,10 +58,17 @@ final class CommerceCustomerEmailChangeService {
             $historical[$spec['table']] = $this->count_historical($spec, $userid);
         }
 
+        $oldemail = $this->normalise_email((string)$user->email);
+        $oldlang = $this->normalise_language((string)$user->lang);
+
         return [
             'userid' => $userid,
-            'oldemail' => $this->normalise_email((string)$user->email),
+            'oldemail' => $oldemail,
             'newemail' => $newemail,
+            'oldlang' => $oldlang,
+            'newlang' => $newlang,
+            'emailchanged' => $oldemail !== $newemail,
+            'langchanged' => $oldlang !== $newlang,
             'current' => $current,
             'historical' => $historical,
             'currenttotal' => array_sum($current),
@@ -69,12 +77,12 @@ final class CommerceCustomerEmailChangeService {
     }
 
     /** @return array<string,mixed> */
-    public function change(int $userid, string $newemail, int $actoruserid): array {
+    public function change(int $userid, string $newemail, int $actoruserid, ?string $newlang = null): array {
         global $CFG;
         require_once($CFG->dirroot . '/user/lib.php');
 
-        $preview = $this->preview($userid, $newemail);
-        if ($preview['oldemail'] === $preview['newemail']) {
+        $preview = $this->preview($userid, $newemail, $newlang);
+        if (!$preview['emailchanged'] && !$preview['langchanged']) {
             return $preview + ['changed' => false, 'updated' => []];
         }
 
@@ -90,6 +98,8 @@ final class CommerceCustomerEmailChangeService {
                 'userid' => $userid,
                 'oldemail' => $preview['oldemail'],
                 'newemail' => $preview['newemail'],
+                'oldlang' => $preview['oldlang'],
+                'newlang' => $preview['newlang'],
                 'historical_preserved' => array_keys($preview['historical']),
             ]
         );
@@ -98,11 +108,14 @@ final class CommerceCustomerEmailChangeService {
             $transaction = $this->database->start_delegated_transaction();
             $user = $this->load_user($userid);
             $user->email = $preview['newemail'];
+            $user->lang = $preview['newlang'];
             user_update_user($user, false, false);
 
             $updated = [];
-            foreach (self::CURRENT_IDENTITY_TABLES as $spec) {
-                $updated[$spec['table']] = $this->rewrite_current($spec, $userid, $preview['newemail']);
+            if ($preview['emailchanged']) {
+                foreach (self::CURRENT_IDENTITY_TABLES as $spec) {
+                    $updated[$spec['table']] = $this->rewrite_current($spec, $userid, $preview['newemail']);
+                }
             }
 
             $transaction->allow_commit();
@@ -142,6 +155,16 @@ final class CommerceCustomerEmailChangeService {
             throw new \invalid_parameter_exception('A valid email address is required.');
         }
         return $email;
+    }
+
+
+    private function normalise_language(string $language): string {
+        $language = trim($language);
+        $translations = get_string_manager()->get_list_of_translations();
+        if ($language === '' || !array_key_exists($language, $translations)) {
+            throw new \invalid_parameter_exception('A valid installed Moodle language is required.');
+        }
+        return $language;
     }
 
     private function assert_available(int $userid, string $email): void {

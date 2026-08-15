@@ -18,6 +18,12 @@ final class process_commerce_mail_audit_queue_task extends scheduled_task {
 
     public function execute(): void {
         $now = time();
+
+        if ((string)get_config('local_subscriptions', 'commerce_mail_audit_enabled') === '0') {
+            mtrace('[Commerce Mail Audit] disabled by Commerce CRM configuration.');
+            return;
+        }
+
         $batch = max(1, min(200, (int)(get_config('local_subscriptions', 'commerce_mail_audit_batch_size') ?: 10)));
         $hourly = max(1, min(2000, (int)(get_config('local_subscriptions', 'commerce_mail_audit_hourly_limit') ?: 50)));
 
@@ -31,6 +37,27 @@ final class process_commerce_mail_audit_queue_task extends scheduled_task {
 
         $sentlasthour = $repository->count_audit_sent_since($now - HOURSECS);
         $remaining = max(0, $hourly - $sentlasthour);
+
+        $globalhourly = max(
+            0,
+            min(
+                10000,
+                (int)(get_config(
+                    'local_subscriptions',
+                    'commerce_mail_global_hourly_limit'
+                ) ?: 0)
+            )
+        );
+        if ($globalhourly > 0) {
+            $remaining = min(
+                $remaining,
+                max(
+                    0,
+                    $globalhourly - $repository->count_all_sent_since($now - HOURSECS)
+                )
+            );
+        }
+
         if ($remaining <= 0) {
             mtrace(sprintf(
                 '[Commerce Mail Audit] throttled hourly_limit=%d sent_last_hour=%d',

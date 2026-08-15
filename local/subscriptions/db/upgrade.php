@@ -8088,5 +8088,312 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026081401, 'local', 'subscriptions');
     }
 
+
+    if ($oldversion < 2026081501) {
+        // N5.1: unified CampusFR Mail Studio template library. Runtime mail
+        // rendering remains unchanged; this is a foundation layer only.
+        $library = new xmldb_table('local_subs_mail_library');
+        $library->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $library->add_field('templateuuid', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+        $library->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $library->add_field('category', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'marketing');
+        $library->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'draft');
+        $library->add_field('builderversion', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '1');
+        $library->add_field('sourcekind', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'native');
+        $library->add_field('metadatajson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $library->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $library->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $library->add_field('usercreated', XMLDB_TYPE_INTEGER, '10');
+        $library->add_field('usermodified', XMLDB_TYPE_INTEGER, '10');
+        $library->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $library->add_index('templateuuid_uix', XMLDB_INDEX_UNIQUE, ['templateuuid']);
+        $library->add_index('category_status_idx', XMLDB_INDEX_NOTUNIQUE, ['category', 'status']);
+        $library->add_index('modified_idx', XMLDB_INDEX_NOTUNIQUE, ['timemodified']);
+        if (!$dbman->table_exists($library)) {
+            $dbman->create_table($library);
+        }
+
+        $content = new xmldb_table('local_subs_mail_lib_content');
+        $content->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $content->add_field('templateid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $content->add_field('language', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL);
+        $content->add_field('subject', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $content->add_field('preheader', XMLDB_TYPE_TEXT);
+        $content->add_field('contentjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+        $content->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $content->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $content->add_field('usercreated', XMLDB_TYPE_INTEGER, '10');
+        $content->add_field('usermodified', XMLDB_TYPE_INTEGER, '10');
+        $content->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $content->add_key('template_fk', XMLDB_KEY_FOREIGN, ['templateid'], 'local_subs_mail_library', ['id']);
+        $content->add_index('template_language_uix', XMLDB_INDEX_UNIQUE, ['templateid', 'language']);
+        if (!$dbman->table_exists($content)) {
+            $dbman->create_table($content);
+        }
+
+        upgrade_plugin_savepoint(true, 2026081501, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026081502) {
+        // N5.3: record the reusable Mail Studio template used to seed a
+        // Personal Offer campaign. Campaign content remains a frozen snapshot.
+        $table = new xmldb_table('local_subs_commerce_offer_campaign_email_config');
+        $field = new xmldb_field(
+            'librarytemplateid',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+            null,
+            null,
+            'showroomid'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $index = new xmldb_index(
+            'librarytemplate_idx',
+            XMLDB_INDEX_NOTUNIQUE,
+            ['librarytemplateid']
+        );
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Moodle database_manager has no key_exists() API. This N5.3
+        // savepoint can only reach this statement once: if a previous attempt
+        // failed here, the FK was not added because key_exists() threw before
+        // add_key(). Once add_key() succeeds, the savepoint prevents this block
+        // from running again.
+        $key = new xmldb_key(
+            'library_template_fk',
+            XMLDB_KEY_FOREIGN,
+            ['librarytemplateid'],
+            'local_subs_mail_library',
+            ['id']
+        );
+        $dbman->add_key($table, $key);
+
+        upgrade_plugin_savepoint(true, 2026081502, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026081503) {
+        // N5.4: generic Mail Studio marketing campaigns.
+        $table = new xmldb_table('local_subs_mail_campaign');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+            $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'draft');
+            $table->add_field('templateid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('ctaurl', XMLDB_TYPE_TEXT, null, null, null);
+            $table->add_field('scheduledat', XMLDB_TYPE_INTEGER, '10', null, null);
+            $table->add_field('queuedat', XMLDB_TYPE_INTEGER, '10', null, null);
+            $table->add_field('completedat', XMLDB_TYPE_INTEGER, '10', null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('template_fk', XMLDB_KEY_FOREIGN, ['templateid'], 'local_subs_mail_library', ['id']);
+            $table->add_index('status_schedule_idx', XMLDB_INDEX_NOTUNIQUE, ['status', 'scheduledat']);
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_subs_mail_campaign_content');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('campaignid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('language', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL);
+            $table->add_field('subject', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+            $table->add_field('preheader', XMLDB_TYPE_TEXT, null, null, null);
+            $table->add_field('bodyhtml', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('campaign_fk', XMLDB_KEY_FOREIGN, ['campaignid'], 'local_subs_mail_campaign', ['id']);
+            $table->add_index('campaign_language_uix', XMLDB_INDEX_UNIQUE, ['campaignid', 'language']);
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_subs_mail_campaign_recipient');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('campaignid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('email', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+            $table->add_field('firstname', XMLDB_TYPE_CHAR, '100', null, null);
+            $table->add_field('lastname', XMLDB_TYPE_CHAR, '100', null, null);
+            $table->add_field('language', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'fr');
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, null);
+            $table->add_field('mailid', XMLDB_TYPE_INTEGER, '10', null, null);
+            $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'draft');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('campaign_fk', XMLDB_KEY_FOREIGN, ['campaignid'], 'local_subs_mail_campaign', ['id']);
+            $table->add_key('mail_fk', XMLDB_KEY_FOREIGN, ['mailid'], 'local_subs_commerce_mail', ['id']);
+            $table->add_index('campaign_email_uix', XMLDB_INDEX_UNIQUE, ['campaignid', 'email']);
+            $table->add_index('campaign_status_idx', XMLDB_INDEX_NOTUNIQUE, ['campaignid', 'status']);
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026081503, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026081504) {
+        // N5.5: allow a Mail Studio template to become the authoritative
+        // reusable runtime definition for a transactional mail type.
+        $table = new xmldb_table('local_subs_mail_library');
+        $field = new xmldb_field(
+            'runtimekey',
+            XMLDB_TYPE_CHAR,
+            '191',
+            null,
+            null,
+            null,
+            null,
+            'sourcekind'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $index = new xmldb_index(
+            'runtimekey_uix',
+            XMLDB_INDEX_UNIQUE,
+            ['runtimekey']
+        );
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(true, 2026081504, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026081505) {
+        // N5.6: transactional Mail Studio consolidation. No database change;
+        // the savepoint records the runtime/UI migration release.
+        upgrade_plugin_savepoint(true, 2026081505, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026081506) {
+        // N5.7: legacy automatic mail safety policy. No schema change.
+        // Legacy reminder channels are opt-in in code/configuration.
+        upgrade_plugin_savepoint(true, 2026081506, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026081507) {
+        // N5.7.1: Mail Studio archived-template deletion and legacy config hotfix.
+        // No schema change.
+        upgrade_plugin_savepoint(true, 2026081507, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026081508) {
+        // N6.1: contextual sales follow-up emails bridge Sales -> Mail Studio.
+        // No schema change.
+        upgrade_plugin_savepoint(true, 2026081508, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026081509) {
+        // N6.2: contextual Commerce sales workstation actions.
+        // No schema change.
+        upgrade_plugin_savepoint(true, 2026081509, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026081510) {
+        // N6.3: persist CRM-only manual closure separately from Commerce
+        // purchase/payment/fulfillment state.
+        $table = new xmldb_table('local_subs_commerce_purchase_admin');
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE,
+                null
+            );
+            $table->add_field(
+                'purchaseid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null
+            );
+            $table->add_field(
+                'state',
+                XMLDB_TYPE_CHAR,
+                '16',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'closed'
+            );
+            $table->add_field(
+                'reason',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+            $table->add_field(
+                'closedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'closedby',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key(
+                'purchase_fk',
+                XMLDB_KEY_FOREIGN_UNIQUE,
+                ['purchaseid'],
+                'local_subscriptions_commerce_purchase',
+                ['id']
+            );
+
+            $table->add_index(
+                'state_time_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['state', 'closedat']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026081510,
+            'local',
+            'subscriptions'
+        );
+    }
+
     return true;
 }

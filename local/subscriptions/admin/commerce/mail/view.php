@@ -6,6 +6,7 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\mail\admin\CommerceMailAdminPresentation;
 use local_subscriptions\commerce\mail\admin\CommerceMailAdminService;
+use local_subscriptions\commerce\mail\admin\CommerceMailSectionNavigationRenderer;
 use local_subscriptions\commerce\mail\admin\CommerceMailPreviewRenderer;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
@@ -118,12 +119,21 @@ echo CrmPageHeader::render(
     HelpContext::COMMERCE
 );
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::MAIL);
+echo CommerceMailSectionNavigationRenderer::render(CommerceMailSectionNavigationRenderer::JOURNAL);
 
 echo html_writer::tag('h2', s($preview['subject']), ['class' => 'h4 mb-2']);
 echo html_writer::div(
     $metadata,
     'd-flex flex-wrap align-items-center gap-2 text-muted mb-3'
 );
+
+$technicaldetails = html_writer::tag('summary', get_string('commerce_mail_technical_details', 'local_subscriptions'))
+    . html_writer::div(
+        html_writer::div(get_string('commerce_mail_internal_id', 'local_subscriptions') . ': #' . (int)$record->id)
+        . html_writer::div(get_string('commerce_mail_idempotency_key', 'local_subscriptions') . ': ' . s((string)$record->idempotencykey)),
+        'small text-muted mt-2'
+    );
+echo html_writer::tag('details', $technicaldetails, ['class' => 'mb-3']);
 
 if ((string)$record->status === 'sent') {
     $transport = !empty($CFG->smtphosts)
@@ -151,7 +161,18 @@ $fontnavigation = in_array(
 )
     ? CommerceMailPreviewRenderer::render_font_navigation($url, $previewfont)
     : '';
-$toolbaractions = implode('', array_filter([$resendbutton]));
+$sendnowbutton = '';
+if ((string)$record->status === 'queued') {
+    $sendnowbutton = html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/mail/action.php', [
+            'id' => $id, 'action' => 'sendnow', 'sesskey' => sesskey(),
+        ]),
+        html_writer::tag('i', '', ['class' => 'fa fa-bolt mr-1', 'aria-hidden' => 'true'])
+            . get_string('commerce_mail_send_now', 'local_subscriptions'),
+        ['class' => 'btn btn-primary']
+    );
+}
+$toolbaractions = implode('', array_filter([$sendnowbutton, $resendbutton]));
 
 $toolbar = html_writer::div(
     $previewnavigation,

@@ -18,6 +18,7 @@ final class CrmNavigationItem {
      * @param moodle_url $url Destination URL.
      * @param string $capability Capability required to display the item.
      * @param int $position Display order.
+     * @param array<int,array{label:string,url:moodle_url,capability:string,icon:string}> $children Contextual shortcuts.
      */
     public function __construct(
         public readonly string $key,
@@ -25,7 +26,8 @@ final class CrmNavigationItem {
         public readonly string $icon,
         public readonly moodle_url $url,
         public readonly string $capability,
-        public readonly int $position
+        public readonly int $position,
+        public readonly array $children = []
     ) {
         if (trim($this->key) === '') {
             throw new \coding_exception(

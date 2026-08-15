@@ -178,40 +178,74 @@ final class CommerceGlobalStatisticsDashboardRepository {
             $where[] = 'pi.currency = :currency';
             $params['currency'] = $currency;
         }
+
         $providerwhere = '';
         if ($provider !== null) {
             $params['provider'] = $provider;
             $providerwhere = ' AND pay.provider = :provider';
         }
 
-        $sql = "SELECT MIN(pi.id) recordid,pi.currency,pi.itemreference,pi.label,pi.itemtype,
-                       SUM(pi.quantity) quantity,SUM(pi.netminor) revenueminor
+        $sql = "SELECT MIN(pi.id) recordid, pi.currency, pi.itemreference, pi.label,
+                       pi.itemtype, pi.metadatajson,
+                       SUM(pi.quantity) quantity, SUM(pi.netminor) revenueminor
                   FROM {local_subscriptions_commerce_purchase_item} pi
-                  JOIN {local_subscriptions_commerce_purchase} p ON p.id=pi.purchaseid
+                  JOIN {local_subscriptions_commerce_purchase} p ON p.id = pi.purchaseid
                  WHERE " . implode(' AND ', $where) . "
                    AND EXISTS (
                        SELECT 1 FROM {local_subscriptions_commerce_payment} pay
-                        WHERE pay.purchaseid=p.id
+                        WHERE pay.purchaseid = p.id
                           AND pay.status IN ('paid','succeeded','completed','captured')
                           {$providerwhere}
                    )
-              GROUP BY pi.currency,pi.itemreference,pi.label,pi.itemtype
-              ORDER BY revenueminor DESC";
+              GROUP BY pi.currency, pi.itemreference, pi.label, pi.itemtype, pi.metadatajson";
+
+        $canonicalizer = new CommerceStatisticsProductCanonicalizer($this->db);
+        $aggregated = [];
+
+        foreach ($this->db->get_records_sql($sql, $params) as $row) {
+            $code = strtoupper((string)$row->currency);
+            $canonical = $canonicalizer->canonicalise(
+                (string)$row->itemreference,
+                (string)$row->label,
+                (string)$row->metadatajson
+            );
+            $displaykey = \core_text::strtolower(trim((string)$canonical['label']));
+            $key = $code . '|label:' . $displaykey;
+
+            if (!isset($aggregated[$key])) {
+                $aggregated[$key] = [
+                    'currency' => $code,
+                    'reference' => $canonical['reference'],
+                    'label' => $canonical['label'],
+                    'itemtype' => (string)$row->itemtype,
+                    'quantity' => 0,
+                    'revenue_minor' => 0,
+                    '_priority' => (int)$canonical['priority'],
+                ];
+            } else if ((int)$canonical['priority'] > (int)$aggregated[$key]['_priority']) {
+                $aggregated[$key]['reference'] = $canonical['reference'];
+                $aggregated[$key]['label'] = $canonical['label'];
+                $aggregated[$key]['_priority'] = (int)$canonical['priority'];
+            }
+
+            $aggregated[$key]['quantity'] += (int)$row->quantity;
+            $aggregated[$key]['revenue_minor'] += (int)$row->revenueminor;
+        }
+
+        $bycurrency = [];
+        foreach ($aggregated as $row) {
+            unset($row['_priority']);
+            $bycurrency[$row['currency']][] = $row;
+        }
 
         $out = [];
-        foreach ($this->db->get_records_sql($sql, $params, 0, max(8, $limit) * 4) as $row) {
-            $code = strtoupper((string)$row->currency);
-            if (count($out[$code] ?? []) >= $limit) {
-                continue;
-            }
-            $out[$code][] = [
-                'reference' => (string)$row->itemreference,
-                'label' => (string)$row->label,
-                'itemtype' => (string)$row->itemtype,
-                'quantity' => (int)$row->quantity,
-                'revenue_minor' => (int)$row->revenueminor,
-            ];
+        foreach ($bycurrency as $code => $rows) {
+            usort($rows, static fn(array $a, array $b): int =>
+                $b['revenue_minor'] <=> $a['revenue_minor']
+            );
+            $out[$code] = array_slice($rows, 0, $limit);
         }
+
         return $out;
     }
 
