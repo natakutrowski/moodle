@@ -13,6 +13,7 @@ use local_subscriptions\commerce\catalog\presentation\CommerceProductDisplayName
 use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
 use local_subscriptions\commerce\catalog\persistence\CommerceCatalogHydrator;
 use local_subscriptions\commerce\entitlement\domain\CommerceEntitlementGrantPlan;
+use local_subscriptions\commerce\customer\provisioning\CommerceLegacyDigitalAccountActivationService;
 use local_subscriptions\commerce\mail\CommerceMailContext;
 use local_subscriptions\commerce\mail\CommerceMailRecipient;
 use moodle_database;
@@ -36,7 +37,9 @@ final class CommerceGrantAccessMailContextFactory {
     public function build(
         int $userid,
         int $rootproductid,
-        CommerceEntitlementGrantPlan $plan
+        CommerceEntitlementGrantPlan $plan,
+        array $mailtemplatesnapshot = [],
+        array $campaigncontext = []
     ): array {
         $user = $this->db->get_record(
             'user',
@@ -96,6 +99,14 @@ final class CommerceGrantAccessMailContextFactory {
         ];
 
         $fullname = fullname($user);
+        $activation = null;
+        $accountorigin = (string)get_user_preferences('local_subscriptions_account_origin', '', (int)$user->id);
+        $accountstate = (string)get_user_preferences('local_subscriptions_account_state', '', (int)$user->id);
+        if ($accountorigin === 'crm_manual_grant' && $accountstate === 'activation_pending') {
+            $activation = (new CommerceLegacyDigitalAccountActivationService($this->db))
+                ->issue_activation_url($user);
+        }
+
         $recipient = new CommerceMailRecipient(
             (string)$user->email,
             $fullname,
@@ -121,7 +132,11 @@ final class CommerceGrantAccessMailContextFactory {
                     'sourcereference' => $plan->get_purchase_reference(),
                     'rootproductid' => $rootproductid,
                     'rootsku' => $root->get_sku(),
+                    'mailtemplatesnapshot' => $mailtemplatesnapshot,
+                    'activationurl' => $activation !== null ? $activation['url']->out(false) : '',
+                    'activationexpiresat' => $activation !== null ? (int)$activation['expiresat'] : 0,
                 ],
+                'grantcampaign' => $campaigncontext,
             ]),
         ];
     }

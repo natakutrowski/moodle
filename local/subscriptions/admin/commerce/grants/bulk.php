@@ -7,8 +7,13 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\catalog\presentation\CommerceProductDisplayNameResolver;
 use local_subscriptions\commerce\grant\CommerceBulkGrantDryRunService;
 use local_subscriptions\commerce\grant\CommerceBulkGrantCampaignService;
+use local_subscriptions\commerce\mail\service\CommerceGrantMailStudioSelection;
+use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmInput;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessWorkflowRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessConfigurationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
@@ -54,7 +59,7 @@ foreach ($DB->get_records(
         (string)$product->name
     );
     $products[(int)$product->id] = [
-        'label' => $name . ' · ' . (string)$product->sku,
+        'label' => $name,
         'name' => $name,
         'sku' => (string)$product->sku,
         'type' => (string)$product->type,
@@ -71,6 +76,8 @@ $sourceproductid = optional_param('source_product_id', 0, PARAM_INT);
 $targetproductid = optional_param('target_product_id', 0, PARAM_INT);
 $simulation = null;
 $error = null;
+$mailselection = CommerceGrantMailStudioSelection::create($DB);
+$mailtemplateoptions = $mailselection->template_options();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
@@ -82,6 +89,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             : $sourceplanid;
 
         if ($action === 'snapshot') {
+            $scheduledat = null;
+            if (optional_param('schedule_enabled', 0, PARAM_BOOL) === 1) {
+                $scheduledat = CommercePersonalOfferCrmInput::datetime_local(
+                    required_param('scheduled_at', PARAM_RAW_TRIMMED),
+                    \core_date::get_user_timezone()
+                );
+                if ($scheduledat === null || $scheduledat <= time()) {
+                    throw new moodle_exception(
+                        'commerce_bulk_grant_schedule_future_required',
+                        'local_subscriptions'
+                    );
+                }
+            }
+
             $campaignid = (new CommerceBulkGrantCampaignService($DB))->create_snapshot(
                 required_param('campaign_name', PARAM_TEXT),
                 $sourcetype,
@@ -90,7 +111,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 optional_param_array('selected_userids', [], PARAM_INT),
                 (int)$USER->id,
                 optional_param('campaign_reason', '', PARAM_TEXT),
-                optional_param('send_access_email', 0, PARAM_BOOL) === 1
+                optional_param('send_access_email', 0, PARAM_BOOL) === 1,
+                optional_param('mailtemplateid', 0, PARAM_INT),
+                optional_param('mailtemplateid', 0, PARAM_INT) > 0
+                    ? $mailselection->snapshot(
+                        optional_param('mailtemplateid', 0, PARAM_INT)
+                    )
+                    : [],
+                $scheduledat
             );
 
             redirect(new moodle_url(
@@ -127,6 +155,10 @@ echo CrmBreadcrumbRenderer::render([
         'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php'),
     ],
     [
+        'label' => get_string('commerce_offers_access_title', 'local_subscriptions'),
+        'url' => new moodle_url('/local/subscriptions/admin/commerce/offers-access/index.php'),
+    ],
+    [
         'label' => get_string('commerce_grants_title', 'local_subscriptions'),
         'url' => new moodle_url('/local/subscriptions/admin/commerce/grants/index.php'),
     ],
@@ -138,15 +170,25 @@ echo CrmPageHeader::render(
     HelpContext::COMMERCE
 );
 echo CommerceSectionNavigationRenderer::render(
-    CommerceSectionNavigationRenderer::GRANTS,
+    CommerceSectionNavigationRenderer::OFFERS_ACCESS,
     $context
+);
+echo CommerceOffersAccessNavigationRenderer::render(
+    CommerceOffersAccessNavigationRenderer::GRANTS
+);
+echo CommerceOffersAccessWorkflowRenderer::render(
+    $simulation !== null
+        ? CommerceOffersAccessWorkflowRenderer::VERIFICATION
+        : CommerceOffersAccessWorkflowRenderer::BENEFICIARIES,
+    'grant',
+    'many'
 );
 
 echo CommerceDesignSystemRenderer::action_bar([
     [
         'label' => get_string('commerce_grants_manual_action', 'local_subscriptions'),
-        'url' => new moodle_url(subscription_config::add_manual_subscription_page()),
-        'class' => 'btn btn-outline-primary',
+        'url' => new moodle_url(subscription_config::add_manual_subscription_page(), ['workspace' => 'grants']),
+        'class' => 'btn crm-grant-action-outline',
     ],
     [
         'label' => get_string('commerce_grants_back', 'local_subscriptions'),
@@ -158,6 +200,14 @@ echo CommerceDesignSystemRenderer::action_bar([
 if ($error !== null) {
     echo html_writer::div(s($error), 'alert alert-danger');
 }
+
+echo CommerceOffersAccessConfigurationRenderer::start_layout();
+echo CommerceOffersAccessConfigurationRenderer::start_main();
+echo CommerceOffersAccessConfigurationRenderer::start_section(
+    get_string('commerce_offers_access_config_bulk_audience_title', 'local_subscriptions'),
+    get_string('commerce_offers_access_config_bulk_audience_help', 'local_subscriptions'),
+    'fa-users'
+);
 
 echo CommerceDesignSystemRenderer::filter_panel(
     html_writer::start_tag('form', ['method' => 'post', 'class' => 'mform']) .
@@ -250,12 +300,51 @@ echo CommerceDesignSystemRenderer::filter_panel(
         html_writer::tag(
             'button',
             get_string('commerce_bulk_grant_simulate', 'local_subscriptions'),
-            ['type' => 'submit', 'class' => 'btn btn-primary']
+            ['type' => 'submit', 'class' => 'btn crm-grant-action-primary']
         ),
         'mt-4'
     ) .
     html_writer::end_tag('form')
 );
+echo CommerceOffersAccessConfigurationRenderer::end_section();
+echo CommerceOffersAccessConfigurationRenderer::end_main();
+
+$selectedsource = $sourcetype === CommerceBulkGrantDryRunService::SOURCE_NATIVE_PRODUCT
+    ? ($products[$sourceproductid]['name'] ?? get_string('commerce_offers_access_config_not_set', 'local_subscriptions'))
+    : ($plans[$sourceplanid] ?? get_string('commerce_offers_access_config_not_set', 'local_subscriptions'));
+$selectedtarget = $products[$targetproductid]['name']
+    ?? get_string('commerce_offers_access_config_not_set', 'local_subscriptions');
+$beneficiarycount = $simulation !== null
+    ? (string)($simulation['summary']['total'] ?? 0)
+    : get_string('commerce_offers_access_config_simulation_required', 'local_subscriptions');
+
+echo CommerceOffersAccessConfigurationRenderer::summary(
+    get_string('commerce_offers_access_config_summary_grant_campaign', 'local_subscriptions'),
+    [
+        [
+            'label' => get_string('commerce_offers_access_config_source', 'local_subscriptions'),
+            'value' => $selectedsource,
+        ],
+        [
+            'label' => get_string('commerce_offers_access_config_product', 'local_subscriptions'),
+            'value' => $selectedtarget,
+        ],
+        [
+            'label' => get_string('commerce_offers_access_config_audience', 'local_subscriptions'),
+            'value' => $beneficiarycount,
+        ],
+        [
+            'label' => get_string('commerce_offers_access_config_mode', 'local_subscriptions'),
+            'value' => get_string('commerce_offers_access_workflow_many', 'local_subscriptions'),
+        ],
+    ],
+    'grant',
+    new moodle_url(
+        '/local/subscriptions/admin/commerce/mail/templates/index.php',
+        ['category' => 'transactional']
+    )
+);
+echo CommerceOffersAccessConfigurationRenderer::end_layout();
 
 $PAGE->requires->js_init_code(<<<JS
 (function() {
@@ -377,9 +466,6 @@ if ($simulation !== null) {
     $table->head = [
         get_string('select'),
         get_string('commerce_bulk_grant_customer', 'local_subscriptions'),
-        get_string('email'),
-        get_string('commerce_bulk_grant_moodle_account', 'local_subscriptions'),
-        get_string('commerce_bulk_grant_evidence', 'local_subscriptions'),
         get_string('commerce_bulk_grant_target_product', 'local_subscriptions'),
         get_string('commerce_bulk_grant_current_ownership', 'local_subscriptions'),
         get_string('commerce_bulk_grant_decision', 'local_subscriptions'),
@@ -392,22 +478,59 @@ if ($simulation !== null) {
         }
 
         $userid = $row['userid'];
-        $account = $userid
+        $clientnamehtml = $userid
             ? html_writer::link(
-                new moodle_url(subscription_config::admin_user_view_page(), ['id' => $userid]),
-                '#' . $userid
+                new moodle_url(
+                    subscription_config::admin_user_view_page(),
+                    ['id' => $userid]
+                ),
+                s($fullname),
+                ['class' => 'crm-offers-access-preview-client-link']
             )
-            : html_writer::span(
-                get_string('commerce_bulk_grant_account_unresolved', 'local_subscriptions'),
-                'text-warning fw-semibold'
-            );
+            : s($fullname);
 
-        $evidence = $row['evidence'] === []
-            ? '—'
-            : implode('<br>', array_map(
-                static fn(string $value): string => html_writer::tag('code', s($value)),
-                $row['evidence']
-            ));
+        $clienthtml = html_writer::div(
+            $clientnamehtml,
+            'crm-offers-access-preview-client-name'
+        )
+        . html_writer::div(
+            s((string)$row['email']),
+            'crm-offers-access-preview-client-email'
+        );
+
+        if (!$userid) {
+            $clienthtml .= html_writer::div(
+                get_string(
+                    'commerce_bulk_grant_account_unresolved',
+                    'local_subscriptions'
+                ),
+                'crm-offers-access-preview-warning'
+            );
+        }
+
+        if ($row['evidence'] !== []) {
+            $clienthtml .= html_writer::tag(
+                'details',
+                html_writer::tag(
+                    'summary',
+                    get_string(
+                        'commerce_offers_access_config_technical_evidence',
+                        'local_subscriptions'
+                    )
+                )
+                . html_writer::div(
+                    implode('<br>', array_map(
+                        static fn(string $value): string => html_writer::tag(
+                            'code',
+                            s($value)
+                        ),
+                        $row['evidence']
+                    )),
+                    'crm-offers-access-preview-evidence'
+                ),
+                ['class' => 'crm-offers-access-preview-details']
+            );
+        }
 
         $ownershipkey = 'commerce_bulk_grant_ownership_' . $row['ownershipsource'];
         $ownership = get_string_manager()->string_exists($ownershipkey, 'local_subscriptions')
@@ -459,14 +582,8 @@ if ($simulation !== null) {
 
         $table->data[] = new html_table_row([
             $select,
-            s($fullname),
-            s((string)$row['email']),
-            $account,
-            $evidence,
-            s($targetlabel) . html_writer::div(
-                s((string)$simulation['target']['sku']),
-                'small text-muted'
-            ),
+            $clienthtml,
+            s($targetlabel),
             s($ownership),
             $decisionhtml,
         ]);
@@ -494,7 +611,7 @@ if ($simulation !== null) {
                 'id' => 'bulk-select-none',
             ]
         ),
-        'mb-3'
+        'mb-4 mt-3 crm-grant-selection-actions'
     );
 
     echo html_writer::start_div('card card-body border-0 shadow-sm mt-3');
@@ -543,25 +660,174 @@ if ($simulation !== null) {
         'col-lg-6'
     );
     echo html_writer::end_div();
-    echo html_writer::div(
-        html_writer::checkbox(
-            'send_access_email',
-            1,
-            true,
+    $communication = html_writer::div(
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-envelope-o me-2',
+            'aria-hidden' => 'true',
+        ])
+        . html_writer::tag(
+            'strong',
+            get_string(
+                'commerce_offers_access_config_communication',
+                'local_subscriptions'
+            )
+        ),
+        'mb-2'
+    );
+    $communication .= html_writer::div(
+        html_writer::empty_tag('input', [
+            'type' => 'checkbox',
+            'name' => 'send_access_email',
+            'value' => 1,
+            'id' => 'bulk-send-access-email',
+            'class' => 'form-check-input',
+            'checked' => 'checked',
+        ])
+        . html_writer::tag(
+            'label',
             get_string('commerce_bulk_grant_send_email', 'local_subscriptions'),
-            ['id' => 'bulk-send-access-email']
-        ) .
-        html_writer::div(
-            get_string('commerce_bulk_grant_send_email_help', 'local_subscriptions'),
+            [
+                'for' => 'bulk-send-access-email',
+                'class' => 'form-check-label',
+            ]
+        ),
+        'form-check crm-grant-mail-check'
+    );
+    $communication .= html_writer::div(
+        get_string('commerce_bulk_grant_send_email_help', 'local_subscriptions'),
+        'form-text'
+    );
+    $communication .= html_writer::div(
+        get_string('commerce_bulk_grant_silent_help', 'local_subscriptions'),
+        'form-text text-muted'
+    );
+    $communication .= html_writer::div(
+        html_writer::label(
+            get_string('commerce_bulk_grant_mail_template', 'local_subscriptions'),
+            'bulk-mail-template',
+            false,
+            ['class' => 'form-label fw-semibold']
+        )
+        . html_writer::select(
+            [0 => get_string(
+                'commerce_bulk_grant_mail_template_default',
+                'local_subscriptions'
+            )] + $mailtemplateoptions,
+            'mailtemplateid',
+            0,
+            false,
+            [
+                'id' => 'bulk-mail-template',
+                'class' => 'form-select',
+            ]
+        )
+        . html_writer::div(
+            get_string(
+                'commerce_bulk_grant_mail_template_help',
+                'local_subscriptions'
+            ),
             'form-text'
         ),
         'mt-3'
+    );
+    $communication .= html_writer::link(
+        '#',
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-eye me-1',
+            'aria-hidden' => 'true',
+        ])
+        . get_string(
+            'commerce_grant_preview_email',
+            'local_subscriptions'
+        ),
+        [
+            'id' => 'bulk-grant-email-preview',
+            'class' => 'btn btn-sm crm-grant-action-outline mt-2 me-2',
+            'data-preview-base' => (
+                new moodle_url(
+                    '/local/subscriptions/admin/commerce/grants/mail_preview.php'
+                )
+            )->out(false),
+            'target' => '_blank',
+            'rel' => 'noopener',
+        ]
+    );
+
+    $communication .= html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/mail/templates/index.php',
+            ['category' => 'transactional']
+        ),
+        get_string(
+            'commerce_offers_access_config_open_mailstudio',
+            'local_subscriptions'
+        ) . ' →',
+        [
+            'class' => 'btn btn-sm btn-outline-secondary mt-2',
+            'target' => '_blank',
+            'rel' => 'noopener',
+        ]
+    );
+    echo html_writer::div(
+        $communication,
+        'crm-offers-access-communication mt-3'
+    );
+
+    echo html_writer::div(
+        html_writer::div(
+            html_writer::empty_tag('input', [
+                'type' => 'checkbox',
+                'name' => 'schedule_enabled',
+                'value' => 1,
+                'id' => 'bulk-schedule-enabled',
+                'class' => 'form-check-input',
+            ])
+            . html_writer::tag(
+                'label',
+                get_string(
+                    'commerce_bulk_grant_schedule_enable',
+                    'local_subscriptions'
+                ),
+                [
+                    'for' => 'bulk-schedule-enabled',
+                    'class' => 'form-check-label',
+                ]
+            ),
+            'form-check crm-grant-schedule-check'
+        )
+        . html_writer::div(
+            html_writer::label(
+                get_string(
+                    'commerce_bulk_grant_schedule_at',
+                    'local_subscriptions'
+                ),
+                'bulk-scheduled-at',
+                false,
+                ['class' => 'form-label fw-semibold']
+            )
+            . html_writer::empty_tag('input', [
+                'type' => 'datetime-local',
+                'name' => 'scheduled_at',
+                'id' => 'bulk-scheduled-at',
+                'class' => 'form-control',
+            ])
+            . html_writer::div(
+                get_string(
+                    'commerce_bulk_grant_schedule_timezone',
+                    'local_subscriptions',
+                    \core_date::get_user_timezone()
+                ),
+                'form-text'
+            ),
+            'mt-2'
+        ),
+        'crm-grant-schedule mt-3'
     );
     echo html_writer::div(
         html_writer::tag(
             'button',
             get_string('commerce_bulk_grant_create_snapshot', 'local_subscriptions'),
-            ['type' => 'submit', 'class' => 'btn btn-primary']
+            ['type' => 'submit', 'class' => 'btn crm-grant-action-primary']
         ),
         'mt-4'
     );
@@ -607,6 +873,40 @@ if ($simulation !== null) {
 })();
 JS);
 }
+
+
+$PAGE->requires->js_init_code(<<<JS
+(function() {
+    var preview = document.getElementById('bulk-grant-email-preview');
+    var template = document.getElementById('bulk-mail-template');
+    var product = document.querySelector('[name="targetproductid"]');
+    var sendmail = document.getElementById('bulk-send-access-email');
+
+    if (!preview) {
+        return;
+    }
+
+    function refreshPreview() {
+        var params = new URLSearchParams();
+        if (template && template.value) {
+            params.set('templateid', template.value);
+        }
+        if (product && product.value) {
+            params.set('productid', product.value);
+        }
+        preview.href = preview.dataset.previewBase
+            + (params.toString() ? '?' + params.toString() : '');
+        preview.style.display = sendmail && !sendmail.checked ? 'none' : '';
+    }
+
+    [template, product, sendmail].forEach(function(field) {
+        if (field) {
+            field.addEventListener('change', refreshPreview);
+        }
+    });
+    refreshPreview();
+})();
+JS);
 
 echo CrmWorkspaceRenderer::end();
 echo $OUTPUT->footer();

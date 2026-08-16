@@ -85,7 +85,14 @@ $filterhtml .= $select('type', get_string('commerce_product_type', 'local_subscr
 $filterhtml .= $select('currency', get_string('currency'), $currencyoptions, $currency, 'col-md-2');
 $filterhtml .= $select('origin', get_string('commerce_catalog_origin', 'local_subscriptions'), $originoptions, $origin, 'col-md-2');
 $filterhtml .= html_writer::div(
-    html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-outline-primary me-2', 'value' => get_string('filter')]) .
+    html_writer::tag(
+        'button',
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-filter me-1',
+            'aria-hidden' => 'true',
+        ]) . get_string('commerce_filters_apply', 'local_subscriptions'),
+        ['type' => 'submit', 'class' => 'btn btn-outline-primary me-2']
+    ) .
     html_writer::link($pageurl, get_string('reset'), ['class' => 'btn btn-outline-secondary']),
     'col-md-2 d-flex'
 );

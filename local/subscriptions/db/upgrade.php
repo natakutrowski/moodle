@@ -8395,5 +8395,66 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         );
     }
 
+
+    if ($oldversion < 2026081601) {
+        // N7.12: Mail Studio selection and scheduling for grant campaigns.
+        $table = new xmldb_table('local_subs_commerce_grant_campaign');
+
+        $fields = [
+            new xmldb_field(
+                'mailtemplateid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null,
+                'sendemail'
+            ),
+            new xmldb_field(
+                'mailtemplatesnapshot',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null,
+                null,
+                null,
+                'mailtemplateid'
+            ),
+            new xmldb_field(
+                'scheduledat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null,
+                'mailtemplatesnapshot'
+            ),
+        ];
+
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        $index = new xmldb_index(
+            'status_schedule_idx',
+            XMLDB_INDEX_NOTUNIQUE,
+            ['status', 'scheduledat']
+        );
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026081601,
+            'local',
+            'subscriptions'
+        );
+    }
+
     return true;
 }

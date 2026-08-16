@@ -11,6 +11,9 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\admin\AdminLog;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessWorkflowRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessConfigurationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
@@ -21,6 +24,7 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\commerce\catalog\presentation\CommerceProductDisplayNameResolver;
 use local_subscriptions\commerce\grant\CommerceManualProductGrantService;
 use local_subscriptions\commerce\mail\service\CommerceGrantAccessMailService;
+use local_subscriptions\commerce\mail\service\CommerceGrantMailStudioSelection;
 
 function local_subscriptions_generate_unique_username_from_email(string $email): string {
     global $DB;
@@ -48,6 +52,7 @@ global $DB, $PAGE, $OUTPUT, $CFG;
 $context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
 
 $preselecteduserid = optional_param('userid', 0, PARAM_INT);
+$grantworkspace = optional_param('workspace', '', PARAM_ALPHA) === 'grants';
 
 $pageurl = new moodle_url(
     subscription_config::add_manual_subscription_page()
@@ -56,11 +61,13 @@ $pageurl = new moodle_url(
 if ($preselecteduserid > 0) {
     $pageurl->param('userid', $preselecteduserid);
 }
+if ($grantworkspace) {
+    $pageurl->param('workspace', 'grants');
+}
 
-$pagetitle = get_string(
-    'add_subscription',
-    'local_subscriptions'
-);
+$pagetitle = $grantworkspace
+    ? get_string('commerce_manual_grant_page_title', 'local_subscriptions')
+    : get_string('add_subscription', 'local_subscriptions');
 
 CrmPageConfigurator::configure(
     $PAGE,
@@ -120,11 +127,11 @@ foreach ($DB->get_records(
         current_language(),
         (string)$product->name
     );
-    $nativeproducts[(int)$product->id] = $displayname
-        . ' · ' . strtoupper((string)$product->type)
-        . ' · ' . (string)$product->sku;
+    $nativeproducts[(int)$product->id] = $displayname;
 }
 
+$mailselection = CommerceGrantMailStudioSelection::create($DB);
+$grantmailtemplateoptions = $mailselection->template_options();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
@@ -152,6 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $userid = optional_param('userid', 0, PARAM_INT);
     $usermode = optional_param('user_mode', 'existing', PARAM_ALPHA);
+    $createdforgrant = false;
 
     if ($userid <= 0 && $usermode === 'new') {
         $firstname = required_param('firstname', PARAM_TEXT);
@@ -159,6 +167,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = required_param('email', PARAM_EMAIL);
         $country = optional_param('country', '', PARAM_ALPHA);
         $country = strtoupper($country);
+        $language = clean_param(
+            optional_param(
+                'lang',
+                $grantworkspace ? 'ru' : current_language(),
+                PARAM_LANG
+            ),
+            PARAM_LANG
+        );
+        if ($language === '') {
+            $language = $grantworkspace ? 'ru' : 'fr';
+        }
 
         $existing = $DB->get_record('user', ['email' => $email, 'deleted' => 0], '*', IGNORE_MISSING);
 
@@ -176,12 +195,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'lastname' => $lastname,
                 'email' => $email,
                 'country' => $country,
+                'lang' => $language,
                 'password' => hash_internal_user_password($password),
                 'timecreated' => time(),
                 'timemodified' => time(),
             ];
 
             $userid = user_create_user($newuser, false, false);
+            $createdforgrant = true;
+            set_user_preference('local_subscriptions_account_origin', 'crm_manual_grant', $userid);
+            set_user_preference('local_subscriptions_account_state', 'activation_pending', $userid);
+            set_user_preference('auth_forcepasswordchange', 1, $userid);
         }
     }
 
@@ -201,11 +225,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
 
         if (optional_param('send_access_email', 0, PARAM_BOOL)) {
+            $mailtemplateid = optional_param('mailtemplateid', 0, PARAM_INT);
+            $mailtemplatesnapshot = $mailtemplateid > 0
+                ? $mailselection->snapshot($mailtemplateid)
+                : [];
             CommerceGrantAccessMailService::create()->queue(
                 $userid,
                 $productid,
                 $result['plan'],
-                true
+                true,
+                $mailtemplatesnapshot
             );
         }
 
@@ -333,65 +362,128 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-echo CrmBreadcrumbRenderer::render(
-    [
+if ($grantworkspace) {
+    echo CrmBreadcrumbRenderer::render([
         [
-            'label' => get_string(
-                'crm_commerce_title',
-                'local_subscriptions'
-            ),
+            'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+            'url' => new moodle_url(subscription_config::admin_commerce_page()),
+        ],
+        [
+            'label' => get_string('commerce_offers_access_title', 'local_subscriptions'),
             'url' => new moodle_url(
-                subscription_config::
-                    admin_commerce_page()
+                '/local/subscriptions/admin/commerce/offers-access/index.php'
             ),
         ],
         [
-            'label' => get_string(
-                'crm_subscriptions_title',
-                'local_subscriptions'
-            ),
+            'label' => get_string('commerce_grants_title', 'local_subscriptions'),
             'url' => new moodle_url(
-                subscription_config::
-                    user_subscriptions_page()
+                '/local/subscriptions/admin/commerce/grants/index.php'
+            ),
+        ],
+        ['label' => $pagetitle, 'url' => null],
+    ]);
+} else {
+    echo CrmBreadcrumbRenderer::render([
+        [
+            'label' => get_string('crm_commerce_title', 'local_subscriptions'),
+            'url' => new moodle_url(
+                subscription_config::admin_commerce_page()
             ),
         ],
         [
-            'label' => $pagetitle,
-            'url' => null,
+            'label' => get_string('crm_subscriptions_title', 'local_subscriptions'),
+            'url' => new moodle_url(
+                subscription_config::user_subscriptions_page()
+            ),
         ],
-    ]
-);
+        ['label' => $pagetitle, 'url' => null],
+    ]);
 
-echo CrmBackLinkRenderer::render(
-    new moodle_url(
-        subscription_config::
-            user_subscriptions_page()
-    ),
-    get_string(
-        'crm_subscriptions_title',
-        'local_subscriptions'
-    )
-);
+    echo CrmBackLinkRenderer::render(
+        new moodle_url(subscription_config::user_subscriptions_page()),
+        get_string('crm_subscriptions_title', 'local_subscriptions')
+    );
+}
 
 echo CrmPageHeader::render(
     $pagetitle,
     get_string(
-        'crm_subscription_add_description',
+        $grantworkspace
+            ? 'commerce_manual_grant_page_description'
+            : 'crm_subscription_add_description',
         'local_subscriptions'
     ),
-    HelpContext::SUBSCRIPTIONS
+    $grantworkspace ? HelpContext::COMMERCE : HelpContext::SUBSCRIPTIONS
 );
 
 echo CommerceSectionNavigationRenderer::render(
-    CommerceSectionNavigationRenderer::SUBSCRIPTIONS
+    $grantworkspace
+        ? CommerceSectionNavigationRenderer::OFFERS_ACCESS
+        : CommerceSectionNavigationRenderer::SUBSCRIPTIONS
 );
 
-echo $renderer->
+if ($grantworkspace) {
+    echo CommerceOffersAccessNavigationRenderer::render(
+        CommerceOffersAccessNavigationRenderer::GRANTS
+    );
+    echo CommerceOffersAccessWorkflowRenderer::render(
+        CommerceOffersAccessWorkflowRenderer::CONFIGURATION,
+        'grant',
+        'one'
+    );
+}
+
+$manualform = $renderer->
     render_manual_subscription_form_v2(
         $plans,
         $preselecteduser,
-        $nativeproducts
+        $nativeproducts,
+        $grantworkspace,
+        $grantmailtemplateoptions
     );
+
+if ($grantworkspace) {
+    echo CommerceOffersAccessConfigurationRenderer::start_layout();
+    echo CommerceOffersAccessConfigurationRenderer::start_main();
+    echo CommerceOffersAccessConfigurationRenderer::start_section(
+        get_string('commerce_offers_access_config_manual_access_title', 'local_subscriptions'),
+        get_string('commerce_offers_access_config_manual_access_help', 'local_subscriptions'),
+        'fa-key'
+    );
+    echo $manualform;
+    echo CommerceOffersAccessConfigurationRenderer::end_section();
+    echo CommerceOffersAccessConfigurationRenderer::end_main();
+
+    $beneficiary = $preselecteduser
+        ? fullname($preselecteduser) . ' · ' . (string)$preselecteduser->email
+        : get_string('commerce_offers_access_config_not_set', 'local_subscriptions');
+
+    echo CommerceOffersAccessConfigurationRenderer::summary(
+        get_string('commerce_offers_access_config_summary_grant', 'local_subscriptions'),
+        [
+            [
+                'label' => get_string('commerce_offers_access_config_beneficiary', 'local_subscriptions'),
+                'value' => $beneficiary,
+            ],
+            [
+                'label' => get_string('commerce_offers_access_config_mode', 'local_subscriptions'),
+                'value' => get_string('commerce_offers_access_workflow_one', 'local_subscriptions'),
+            ],
+            [
+                'label' => get_string('commerce_offers_access_config_product', 'local_subscriptions'),
+                'value' => get_string('commerce_offers_access_config_choose_in_form', 'local_subscriptions'),
+            ],
+        ],
+        'grant',
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/mail/templates/index.php',
+            ['category' => 'transactional']
+        )
+    );
+    echo CommerceOffersAccessConfigurationRenderer::end_layout();
+} else {
+    echo $manualform;
+}
 
 echo CrmWorkspaceRenderer::end();
 

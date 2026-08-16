@@ -26,7 +26,10 @@ final class CommerceSectionNavigationRegistry {
     public const MAIL = 'mail';
     public const IDENTITIES = 'identities';
     public const UNFINISHED_CHECKOUTS = 'unfinished_checkouts';
+    public const OFFERS_ACCESS = 'offers_access';
+    /** @deprecated N7.1 compatibility key retained for old callers/tests. */
     public const PERSONAL_OFFERS = 'personal_offers';
+    /** @deprecated N7.1 compatibility key retained for old callers/tests. */
     public const GRANTS = 'grants';
     public const STATISTICS = 'statistics';
     public const CONFIGURATION = 'configuration';
@@ -88,20 +91,12 @@ final class CommerceSectionNavigationRegistry {
                 40
             ),
             new CommerceSectionNavigationItem(
-                self::PERSONAL_OFFERS,
-                get_string('crm_commerce_nav_personal_offers', 'local_subscriptions'),
-                'fa-tag',
-                new moodle_url('/local/subscriptions/admin/commerce/personal-offers/index.php'),
+                self::OFFERS_ACCESS,
+                get_string('crm_commerce_nav_offers_access', 'local_subscriptions'),
+                'fa-gift',
+                new moodle_url('/local/subscriptions/admin/commerce/offers-access/index.php'),
                 Capabilities::VIEW_PAYMENTS,
                 50
-            ),
-            new CommerceSectionNavigationItem(
-                self::GRANTS,
-                get_string('crm_commerce_nav_grants', 'local_subscriptions'),
-                'fa-key',
-                new moodle_url('/local/subscriptions/admin/commerce/grants/index.php'),
-                Capabilities::VIEW_PAYMENTS,
-                60
             ),
             new CommerceSectionNavigationItem(
                 self::MAIL,
@@ -140,6 +135,7 @@ final class CommerceSectionNavigationRegistry {
             self::MAIL,
             self::IDENTITIES,
             self::UNFINISHED_CHECKOUTS,
+            self::OFFERS_ACCESS,
             self::PERSONAL_OFFERS,
             self::GRANTS,
             self::STATISTICS,

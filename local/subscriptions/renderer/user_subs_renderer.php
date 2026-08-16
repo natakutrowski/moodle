@@ -288,7 +288,10 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         $output = '';
         // Form
         $output .= html_writer::start_div('subscription-card');
-        $output .= html_writer::start_tag('form', ['method' => 'post', 'class' => 'mform']);
+        $output .= html_writer::start_tag('form', [
+            'method' => 'post',
+            'class' => 'mform',
+        ]);
 
         $output .= html_writer::empty_tag('input', [
             'type'  => 'hidden',
@@ -944,7 +947,13 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         return $output;
     }
 
-    public function render_manual_subscription_form_v2(array $plans, ?stdClass $preselecteduser = null, array $nativeproducts = []): string {
+    public function render_manual_subscription_form_v2(
+        array $plans,
+        ?stdClass $preselecteduser = null,
+        array $nativeproducts = [],
+        bool $grantworkspace = false,
+        array $mailtemplateoptions = []
+    ): string {
         $output = '';
 
         $existinglabel = get_string('existing_user', 'local_subscriptions');
@@ -952,16 +961,42 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         $searchplaceholder = get_string('search_user_placeholder', 'local_subscriptions');
         $chooseprice = get_string('select_price', 'local_subscriptions');
 
-        $output .= html_writer::start_div('subscription-card');
-        $output .= html_writer::start_tag('form', ['method' => 'post', 'class' => 'mform']);
+        $output .= html_writer::start_div(
+            $grantworkspace
+                ? 'crm-grant-individual-form'
+                : 'subscription-card'
+        );
+        $output .= html_writer::start_tag('form', [
+            'method' => 'post',
+            'class' => 'mform',
+        ]);
 
         $output .= html_writer::empty_tag('input', [
             'type' => 'hidden',
             'name' => 'sesskey',
             'value' => sesskey(),
         ]);
+        if ($grantworkspace) {
+            $output .= html_writer::empty_tag('input', [
+                'type' => 'hidden',
+                'name' => 'workspace',
+                'value' => 'grants',
+            ]);
+        }
 
-        $output .= html_writer::tag('h4', get_string('manual_subscription_user_section', 'local_subscriptions'));
+        if ($grantworkspace) {
+            $output .= html_writer::start_div('crm-grant-form-section');
+        }
+        $output .= html_writer::tag(
+            'h4',
+            get_string(
+                $grantworkspace
+                    ? 'commerce_manual_grant_beneficiary_section'
+                    : 'manual_subscription_user_section',
+                'local_subscriptions'
+            ),
+            ['class' => $grantworkspace ? 'crm-grant-form-title' : '']
+        );
 
         if ($preselecteduser) {
             $currency = in_array(strtoupper((string)$preselecteduser->country), ['RU', 'BY'], true) ? 'RUB' : 'EUR';
@@ -984,7 +1019,10 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                 html_writer::tag('strong', fullname($preselecteduser)) . '<br>' .
                 html_writer::span(s($preselecteduser->email), 'text-muted') . '<br>' .
                 html_writer::link(
-                    new moodle_url(\local_subscriptions\subscription_config::add_manual_subscription_page()),
+                    new moodle_url(
+                        \local_subscriptions\subscription_config::add_manual_subscription_page(),
+                        $grantworkspace ? ['workspace' => 'grants'] : []
+                    ),
                     get_string('change_user', 'local_subscriptions'),
                     ['class' => 'btn btn-sm btn-outline-secondary mt-2']
                 ),
@@ -1089,37 +1127,136 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                 'form-group mb-3'
             );
 
+            if ($grantworkspace) {
+                $output .= html_writer::div(
+                    html_writer::label(
+                        get_string(
+                            'commerce_manual_grant_user_language',
+                            'local_subscriptions'
+                        ),
+                        'manual-new-user-language'
+                    )
+                    . html_writer::select(
+                        [
+                            'ru' => get_string(
+                                'commerce_language_ru',
+                                'local_subscriptions'
+                            ),
+                            'fr' => get_string(
+                                'commerce_language_fr',
+                                'local_subscriptions'
+                            ),
+                            'en' => get_string(
+                                'commerce_language_en',
+                                'local_subscriptions'
+                            ),
+                        ],
+                        'lang',
+                        'ru',
+                        false,
+                        [
+                            'class' => 'form-select',
+                            'id' => 'manual-new-user-language',
+                        ]
+                    )
+                    . html_writer::div(
+                        get_string(
+                            'commerce_manual_grant_user_language_help',
+                            'local_subscriptions'
+                        ),
+                        'form-text'
+                    ),
+                    'form-group mb-3'
+                );
+            }
+
             $output .= html_writer::end_div();
         }
 
-        $output .= html_writer::tag('hr', '');
+        if ($grantworkspace) {
+            $output .= html_writer::end_div();
+            $output .= html_writer::start_div('crm-grant-form-section');
+        } else {
+            $output .= html_writer::tag('hr', '');
+        }
 
-        $output .= html_writer::tag('h4', get_string('commerce_manual_grant_access_type', 'local_subscriptions'));
+        $output .= html_writer::tag(
+            'h4',
+            get_string('commerce_manual_grant_access_type', 'local_subscriptions'),
+            ['class' => $grantworkspace ? 'crm-grant-form-title' : '']
+        );
         $output .= html_writer::start_div('form-group mb-4');
-        $output .= html_writer::tag(
-            'label',
-            html_writer::empty_tag('input', [
-                'type' => 'radio',
-                'name' => 'grant_mode',
-                'value' => 'legacy',
-                'checked' => 'checked',
-                'class' => 'me-1',
-            ]) . get_string('commerce_manual_grant_mode_legacy', 'local_subscriptions'),
-            ['class' => 'me-4']
-        );
-        $output .= html_writer::tag(
-            'label',
-            html_writer::empty_tag('input', [
-                'type' => 'radio',
-                'name' => 'grant_mode',
-                'value' => 'native',
-                'class' => 'me-1',
-            ]) . get_string('commerce_manual_grant_mode_native', 'local_subscriptions')
-        );
+        if ($grantworkspace) {
+            $output .= html_writer::tag(
+                'label',
+                html_writer::empty_tag('input', [
+                    'type' => 'radio',
+                    'name' => 'grant_mode',
+                    'value' => 'native',
+                    'checked' => 'checked',
+                    'class' => 'me-1',
+                ]) . get_string(
+                    'commerce_manual_grant_mode_commerce_product',
+                    'local_subscriptions'
+                ),
+                ['class' => 'me-4']
+            );
+            $output .= html_writer::tag(
+                'label',
+                html_writer::empty_tag('input', [
+                    'type' => 'radio',
+                    'name' => 'grant_mode',
+                    'value' => 'legacy',
+                    'class' => 'me-1',
+                ]) . get_string(
+                    'commerce_manual_grant_mode_legacy_access',
+                    'local_subscriptions'
+                )
+            );
+        } else {
+            $output .= html_writer::tag(
+                'label',
+                html_writer::empty_tag('input', [
+                    'type' => 'radio',
+                    'name' => 'grant_mode',
+                    'value' => 'legacy',
+                    'checked' => 'checked',
+                    'class' => 'me-1',
+                ]) . get_string(
+                    'commerce_manual_grant_mode_legacy',
+                    'local_subscriptions'
+                ),
+                ['class' => 'me-4']
+            );
+            $output .= html_writer::tag(
+                'label',
+                html_writer::empty_tag('input', [
+                    'type' => 'radio',
+                    'name' => 'grant_mode',
+                    'value' => 'native',
+                    'class' => 'me-1',
+                ]) . get_string(
+                    'commerce_manual_grant_mode_native',
+                    'local_subscriptions'
+                )
+            );
+        }
         $output .= html_writer::end_div();
 
-        $output .= html_writer::start_div('', ['id' => 'manual-legacy-access-block']);
-        $output .= html_writer::tag('h4', get_string('manual_subscription_plan_section', 'local_subscriptions'));
+        $output .= html_writer::start_div('', [
+            'id' => 'manual-legacy-access-block',
+            'style' => $grantworkspace ? 'display:none;' : '',
+        ]);
+        $output .= html_writer::tag(
+            'h4',
+            get_string(
+                $grantworkspace
+                    ? 'commerce_manual_grant_legacy_section'
+                    : 'manual_subscription_plan_section',
+                'local_subscriptions'
+            ),
+            ['class' => $grantworkspace ? 'crm-grant-form-title' : '']
+        );
 
         $output .= html_writer::div(
             html_writer::label(get_string('plan', 'local_subscriptions'), 'plan') .
@@ -1179,9 +1316,13 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
 
         $output .= html_writer::start_div('', [
             'id' => 'manual-native-access-block',
-            'style' => 'display:none;',
+            'style' => $grantworkspace ? '' : 'display:none;',
         ]);
-        $output .= html_writer::tag('h4', get_string('commerce_manual_grant_native_section', 'local_subscriptions'));
+        $output .= html_writer::tag(
+            'h4',
+            get_string('commerce_manual_grant_commerce_section', 'local_subscriptions'),
+            ['class' => $grantworkspace ? 'crm-grant-form-title' : '']
+        );
 
         $output .= html_writer::div(
             html_writer::label(
@@ -1203,19 +1344,99 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         );
 
         $output .= html_writer::div(
-            html_writer::checkbox(
-                'send_access_email',
-                1,
-                true,
-                get_string('commerce_manual_grant_send_email', 'local_subscriptions'),
-                ['id' => 'manual-grant-send-email']
-            ) .
             html_writer::div(
+                html_writer::empty_tag('input', [
+                    'type' => 'checkbox',
+                    'name' => 'send_access_email',
+                    'value' => 1,
+                    'id' => 'manual-grant-send-email',
+                    'class' => 'form-check-input',
+                    'checked' => 'checked',
+                ])
+                . html_writer::tag(
+                    'label',
+                    get_string('commerce_manual_grant_send_email', 'local_subscriptions'),
+                    [
+                        'for' => 'manual-grant-send-email',
+                        'class' => 'form-check-label',
+                    ]
+                ),
+                'form-check crm-grant-mail-check'
+            )
+            . html_writer::div(
                 get_string('commerce_manual_grant_send_email_help', 'local_subscriptions'),
+                'form-text'
+            )
+            . html_writer::div(
+                get_string('commerce_manual_grant_silent_help', 'local_subscriptions'),
+                'form-text text-muted'
+            )
+            . html_writer::div(
+                get_string('commerce_manual_grant_new_user_silent_warning', 'local_subscriptions'),
+                'form-text text-warning crm-grant-new-user-silent-warning'
+            ),
+            'form-group mb-3'
+        );
+
+        $output .= html_writer::div(
+            html_writer::label(
+                get_string('commerce_manual_grant_mail_template', 'local_subscriptions'),
+                'manual-grant-mail-template'
+            )
+            . html_writer::select(
+                [0 => get_string(
+                    'commerce_manual_grant_mail_template_default',
+                    'local_subscriptions'
+                )] + $mailtemplateoptions,
+                'mailtemplateid',
+                0,
+                false,
+                [
+                    'id' => 'manual-grant-mail-template',
+                    'class' => 'form-select',
+                ]
+            )
+            . html_writer::div(
+                get_string('commerce_manual_grant_mail_template_help', 'local_subscriptions'),
                 'form-text'
             ),
             'form-group mb-3'
         );
+
+        if ($grantworkspace) {
+            $previewbase = (new moodle_url(
+                '/local/subscriptions/admin/commerce/grants/mail_preview.php'
+            ))->out(false);
+
+            $output .= html_writer::div(
+                html_writer::link(
+                    '#',
+                    html_writer::tag('i', '', [
+                        'class' => 'fa fa-eye me-1',
+                        'aria-hidden' => 'true',
+                    ])
+                    . get_string(
+                        'commerce_grant_preview_email',
+                        'local_subscriptions'
+                    ),
+                    [
+                        'id' => 'manual-grant-email-preview',
+                        'class' => 'btn btn-sm crm-grant-action-outline',
+                        'data-preview-base' => $previewbase,
+                        'target' => '_blank',
+                        'rel' => 'noopener',
+                    ]
+                )
+                . html_writer::div(
+                    get_string(
+                        'commerce_grant_preview_email_help',
+                        'local_subscriptions'
+                    ),
+                    'form-text'
+                ),
+                'form-group mb-3'
+            );
+        }
 
         $output .= html_writer::div(
             html_writer::label(
@@ -1237,19 +1458,40 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         );
         $output .= html_writer::end_div();
 
-        $output .= html_writer::div(
-            html_writer::tag('button', get_string('commerce_manual_grant_submit', 'local_subscriptions'), [
-                'type' => 'submit',
-                'class' => 'btn btn-primary me-2',
-            ]) .
-            \local_subscriptions\subscription_config::button_manage_subscription() .
-            \local_subscriptions\subscription_config::button_import_csv(),
-            'form-group d-flex flex-wrap align-items-center',
-            ['style' => 'gap: 10px;']
-        );
+        if ($grantworkspace) {
+            $output .= html_writer::end_div();
+            $output .= html_writer::div(
+                html_writer::tag(
+                    'button',
+                    get_string('commerce_manual_grant_submit', 'local_subscriptions'),
+                    [
+                        'type' => 'submit',
+                        'class' => 'btn crm-grant-action-primary',
+                    ]
+                ),
+                'crm-grant-submit-row'
+            );
+        } else {
+            $output .= html_writer::div(
+                html_writer::tag(
+                    'button',
+                    get_string('commerce_manual_grant_submit', 'local_subscriptions'),
+                    [
+                        'type' => 'submit',
+                        'class' => 'btn btn-primary me-2',
+                    ]
+                )
+                . \local_subscriptions\subscription_config::button_manage_subscription()
+                . \local_subscriptions\subscription_config::button_import_csv(),
+                'form-group d-flex flex-wrap align-items-center',
+                ['style' => 'gap: 10px;']
+            );
+        }
 
         $output .= html_writer::end_tag('form');
         $output .= html_writer::end_div();
+
+        $defaultgrantmode = $grantworkspace ? 'native' : 'legacy';
 
         $output .= html_writer::script(<<<JS
     document.addEventListener('DOMContentLoaded', function() {
@@ -1270,10 +1512,40 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         var legacyAccessBlock = document.getElementById('manual-legacy-access-block');
         var nativeAccessBlock = document.getElementById('manual-native-access-block');
         var nativeProductSelect = document.getElementById('manual-native-product');
+        var sendEmailCheckbox = document.getElementById('manual-grant-send-email');
+        var mailTemplateSelect = document.getElementById('manual-grant-mail-template');
+        var mailPreview = document.getElementById('manual-grant-email-preview');
+        var languageSelect = document.getElementById('manual-new-user-language');
+
+        function refreshMailPreview() {
+            if (!mailPreview) {
+                return;
+            }
+
+            var base = mailPreview.dataset.previewBase || '#';
+            var params = new URLSearchParams();
+            if (mailTemplateSelect && mailTemplateSelect.value) {
+                params.set('templateid', mailTemplateSelect.value);
+            }
+            if (nativeProductSelect && nativeProductSelect.value) {
+                params.set('productid', nativeProductSelect.value);
+            }
+            if (fixedUserInput && fixedUserInput.value) {
+                params.set('userid', fixedUserInput.value);
+            }
+            if (languageSelect && languageSelect.value) {
+                params.set('language', languageSelect.value);
+            }
+
+            mailPreview.href = base + (params.toString() ? '?' + params.toString() : '');
+            mailPreview.style.display = sendEmailCheckbox && !sendEmailCheckbox.checked
+                ? 'none'
+                : '';
+        }
 
         function refreshGrantMode() {
             var checked = document.querySelector('input[name="grant_mode"]:checked');
-            var mode = checked ? checked.value : 'legacy';
+            var mode = checked ? checked.value : '{$defaultgrantmode}';
 
             if (legacyAccessBlock) {
                 legacyAccessBlock.style.display = mode === 'legacy' ? '' : 'none';
@@ -1337,8 +1609,24 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         }
 
         document.querySelectorAll('input[name="grant_mode"]').forEach(function(input) {
-            input.addEventListener('change', refreshGrantMode);
+            input.addEventListener('change', function() {
+                refreshGrantMode();
+                refreshMailPreview();
+            });
         });
+
+        if (sendEmailCheckbox) {
+            sendEmailCheckbox.addEventListener('change', refreshMailPreview);
+        }
+        if (mailTemplateSelect) {
+            mailTemplateSelect.addEventListener('change', refreshMailPreview);
+        }
+        if (nativeProductSelect) {
+            nativeProductSelect.addEventListener('change', refreshMailPreview);
+        }
+        if (languageSelect) {
+            languageSelect.addEventListener('change', refreshMailPreview);
+        }
 
         document.querySelectorAll('input[name="user_mode"]').forEach(function(input) {
             input.addEventListener('change', refreshUserMode);
@@ -1378,6 +1666,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                     document.getElementById('manual-user-id').value = ui.item.id;
                     preferredCurrency = ui.item.currency || 'EUR';
                     loadPrices();
+                    refreshMailPreview();
                 },
                 change: function(event, ui) {
                     if (!ui.item) {
@@ -1398,6 +1687,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
 
         refreshUserMode();
         refreshGrantMode();
+        refreshMailPreview();
     });
     JS);
 

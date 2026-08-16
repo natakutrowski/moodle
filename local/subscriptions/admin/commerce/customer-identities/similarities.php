@@ -285,7 +285,7 @@ echo html_writer::end_div();
 echo html_writer::start_div('col-12 col-md-2 d-flex align-items-end');
 echo html_writer::tag(
     'button',
-    get_string('filter'),
+    get_string('commerce_filters_apply', 'local_subscriptions'),
     [
         'type' => 'submit',
         'class' => 'btn btn-primary w-100',

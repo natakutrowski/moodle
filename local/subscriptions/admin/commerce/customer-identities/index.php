@@ -110,7 +110,14 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::start_div('d-flex gap-2 mt-3');
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'perpage', 'value' => $perpage]);
-echo html_writer::tag('button', get_string('filter'), ['type' => 'submit', 'class' => 'btn btn-primary']);
+echo html_writer::tag(
+    'button',
+    html_writer::tag('i', '', [
+        'class' => 'fa fa-filter me-1',
+        'aria-hidden' => 'true',
+    ]) . get_string('commerce_filters_apply', 'local_subscriptions'),
+    ['type' => 'submit', 'class' => 'btn btn-primary']
+);
 echo html_writer::link($filterurl, get_string('reset'), ['class' => 'btn btn-outline-secondary']);
 echo html_writer::end_div();
 echo html_writer::end_tag('form');

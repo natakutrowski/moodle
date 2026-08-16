@@ -261,6 +261,84 @@ final class CommercePersonalOfferCampaignManager {
         $this->db->update_record(self::CAMPAIGN, $campaign);
     }
 
+    /**
+     * Persists selection changes for only the currently visible member page.
+     *
+     * @param int[] $visiblememberids
+     * @param int[] $selectedmemberids
+     */
+    public function update_visible_member_selection(
+        int $campaignid,
+        array $visiblememberids,
+        array $selectedmemberids,
+        int $userid
+    ): void {
+        $campaign = $this->get_campaign($campaignid);
+        if (in_array(
+            $campaign->status,
+            [self::STATUS_SNAPSHOT, self::STATUS_ISSUED, self::STATUS_CLOSED],
+            true
+        )) {
+            throw new \coding_exception(
+                'Issued or closed campaigns cannot be edited.'
+            );
+        }
+
+        $visible = array_fill_keys(
+            array_map(
+                'intval',
+                array_filter($visiblememberids, 'is_numeric')
+            ),
+            true
+        );
+        $selected = array_fill_keys(
+            array_map(
+                'intval',
+                array_filter($selectedmemberids, 'is_numeric')
+            ),
+            true
+        );
+
+        if ($visible === []) {
+            return;
+        }
+
+        $now = time();
+        foreach ($this->members($campaignid) as $member) {
+            $memberid = (int)$member->id;
+            if (!isset($visible[$memberid])) {
+                continue;
+            }
+
+            $status = (string)$member->eligibilitystatus;
+            $reason = (string)($member->reason ?? '');
+
+            if (
+                $status === self::MEMBER_ELIGIBLE
+                && !isset($selected[$memberid])
+            ) {
+                $member->eligibilitystatus = self::MEMBER_EXCLUDED;
+                $member->reason = 'manual_exclusion';
+            } else if (
+                $status === self::MEMBER_EXCLUDED
+                && $reason === 'manual_exclusion'
+                && isset($selected[$memberid])
+            ) {
+                $member->eligibilitystatus = self::MEMBER_ELIGIBLE;
+                $member->reason = null;
+            } else {
+                continue;
+            }
+
+            $member->timemodified = $now;
+            $this->db->update_record(self::MEMBER, $member);
+        }
+
+        $campaign->timemodified = $now;
+        $campaign->usermodified = $userid;
+        $this->db->update_record(self::CAMPAIGN, $campaign);
+    }
+
     public function create_snapshot(int $campaignid, int $userid): array {
         $campaign = $this->get_campaign($campaignid);
         if ($campaign->status !== self::STATUS_PREVIEWED) {
@@ -673,7 +751,13 @@ final class CommercePersonalOfferCampaignManager {
                 'ownershipsource' => $data['ownershipsource'] ?? null,
                 'ownershipproductid' => $data['ownershipproductid'] ?? null,
                 'ownershipproductsku' => $data['ownershipproductsku'] ?? null,
-            ], static fn($value) => $value !== null && $value !== ''), $userid));
+                'validitymode' => $data['validitymode'] ?? null,
+                'validitytimezone' => $data['validitytimezone'] ?? null,
+                'noexpiration' => $data['noexpiration'] ?? null,
+                'mailtemplateid' => $data['mailtemplateid'] ?? null,
+                'mailtemplatename' => $data['mailtemplatename'] ?? null,
+                'mailtemplatesnapshot' => $data['mailtemplatesnapshot'] ?? null,
+            ], static fn($value) => $value !== null && $value !== '' && $value !== []), $userid));
         return ['offer'=>$result->get_offer(),'token'=>$result->get_token()];
     }
 

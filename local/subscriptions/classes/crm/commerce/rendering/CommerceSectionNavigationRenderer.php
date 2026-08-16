@@ -23,6 +23,7 @@ final class CommerceSectionNavigationRenderer {
     public const MAIL = CommerceSectionNavigationRegistry::MAIL;
     public const IDENTITIES = CommerceSectionNavigationRegistry::IDENTITIES;
     public const UNFINISHED_CHECKOUTS = CommerceSectionNavigationRegistry::UNFINISHED_CHECKOUTS;
+    public const OFFERS_ACCESS = CommerceSectionNavigationRegistry::OFFERS_ACCESS;
     public const PERSONAL_OFFERS = CommerceSectionNavigationRegistry::PERSONAL_OFFERS;
     public const GRANTS = CommerceSectionNavigationRegistry::GRANTS;
     public const STATISTICS = CommerceSectionNavigationRegistry::STATISTICS;

@@ -2135,6 +2135,9 @@
                 <FIELD NAME="targetjson" TYPE="text" NOTNULL="true" />
                 <FIELD NAME="reason" TYPE="text" NOTNULL="false" />
                 <FIELD NAME="sendemail" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
+                <FIELD NAME="mailtemplateid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="mailtemplatesnapshot" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="scheduledat" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="ready" />
                 <FIELD NAME="selectedcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
                 <FIELD NAME="processedcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
@@ -2155,6 +2158,7 @@
             <INDEXES>
                 <INDEX NAME="campaignkey_uix" UNIQUE="true" FIELDS="campaignkey" />
                 <INDEX NAME="status_created_idx" UNIQUE="false" FIELDS="status,timecreated" />
+                <INDEX NAME="status_schedule_idx" UNIQUE="false" FIELDS="status,scheduledat" />
             </INDEXES>
         </TABLE>
         <TABLE NAME="local_subs_commerce_grant_campaign_member" COMMENT="Frozen selected beneficiaries of a CRM bulk Native grant campaign">

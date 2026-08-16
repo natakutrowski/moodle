@@ -220,6 +220,192 @@ $filtersareactive = $query !== ''
     || $customfrom !== ''
     || $customto !== '';
 
+$salesperiodlabel = static function(
+    string $period,
+    int $datefrom,
+    int $dateto
+) use ($periodoptions): string {
+    if ($period === 'all') {
+        return get_string(
+            'commerce_result_scope_period_all',
+            'local_subscriptions'
+        );
+    }
+
+    if ($datefrom > 0 && $dateto > 0) {
+        $dateformat = get_string('strftimedatetimeshort', 'langconfig');
+        return get_string(
+            'commerce_result_scope_period_range',
+            'local_subscriptions',
+            (object)[
+                'from' => userdate($datefrom, $dateformat),
+                'to' => userdate($dateto, $dateformat),
+            ]
+        );
+    }
+
+    return get_string(
+        'commerce_result_scope_period_named',
+        'local_subscriptions',
+        $periodoptions[$period] ?? $period
+    );
+};
+
+$salesremoveurl = static function(
+    array $params,
+    string $name,
+    mixed $reset = null
+): moodle_url {
+    unset($params['page']);
+
+    if ($reset === null || $reset === '') {
+        unset($params[$name]);
+    } else {
+        $params[$name] = $reset;
+    }
+
+    if ($name === 'period') {
+        unset($params['from'], $params['to']);
+    }
+
+    return new moodle_url(
+        '/local/subscriptions/admin/commerce/purchases/index.php',
+        $params
+    );
+};
+
+$salesscopepill = static function(
+    string $label,
+    ?moodle_url $removeurl = null
+): string {
+    $remove = '';
+    if ($removeurl !== null) {
+        $remove = html_writer::link(
+            $removeurl,
+            html_writer::span('×', 'crm-result-scope-pill-remove-symbol'),
+            [
+                'class' => 'crm-result-scope-pill-remove',
+                'title' => get_string(
+                    'commerce_result_scope_remove_filter',
+                    'local_subscriptions'
+                ),
+                'aria-label' => get_string(
+                    'commerce_result_scope_remove_filter_named',
+                    'local_subscriptions',
+                    $label
+                ),
+            ]
+        );
+    }
+
+    return html_writer::span(
+        html_writer::span(s($label), 'crm-result-scope-pill-label') . $remove,
+        'crm-result-scope-pill'
+    );
+};
+
+$salesscopeparams = $params;
+unset($salesscopeparams['page']);
+
+$salesscopepills = [];
+$salesscopepills[] = $salesscopepill(
+    $salesperiodlabel($period, $datefrom, $dateto),
+    $period !== '30'
+        ? $salesremoveurl($salesscopeparams, 'period', '30')
+        : null
+);
+
+if ($query !== '') {
+    $salesscopepills[] = $salesscopepill(
+        get_string(
+            'commerce_result_scope_search',
+            'local_subscriptions',
+            $query
+        ),
+        $salesremoveurl($salesscopeparams, 'q')
+    );
+}
+if ($type !== '') {
+    $salesscopepills[] = $salesscopepill(
+        get_string(
+            'commerce_result_scope_product_type',
+            'local_subscriptions',
+            $typeoptions[$type] ?? $type
+        ),
+        $salesremoveurl($salesscopeparams, 'type')
+    );
+}
+if ($commercialstatus !== '') {
+    $salesscopepills[] = $salesscopepill(
+        get_string(
+            'commerce_result_scope_commercial_status',
+            'local_subscriptions',
+            $commercialoptions[$commercialstatus] ?? $commercialstatus
+        ),
+        $salesremoveurl($salesscopeparams, 'commercialstatus')
+    );
+}
+if ($provider !== '') {
+    $salesscopepills[] = $salesscopepill(
+        get_string(
+            'commerce_result_scope_provider',
+            'local_subscriptions',
+            $provideroptions[$provider] ?? $provider
+        ),
+        $salesremoveurl($salesscopeparams, 'provider')
+    );
+}
+if ($currency !== '') {
+    $salesscopepills[] = $salesscopepill(
+        get_string(
+            'commerce_result_scope_currency',
+            'local_subscriptions',
+            $currency
+        ),
+        $salesremoveurl($salesscopeparams, 'currency')
+    );
+}
+if ($offerorigin !== '') {
+    $salesscopepills[] = $salesscopepill(
+        get_string(
+            'commerce_result_scope_origin',
+            'local_subscriptions',
+            $offeroriginoptions[$offerorigin] ?? $offerorigin
+        ),
+        $salesremoveurl($salesscopeparams, 'offerorigin')
+    );
+}
+if ($paymentstatus !== '') {
+    $salesscopepills[] = $salesscopepill(
+        get_string(
+            'commerce_result_scope_payment',
+            'local_subscriptions',
+            $paymentoptions[$paymentstatus] ?? $paymentstatus
+        ),
+        $salesremoveurl($salesscopeparams, 'paymentstatus')
+    );
+}
+if ($fulfillmentstatus !== '') {
+    $salesscopepills[] = $salesscopepill(
+        get_string(
+            'commerce_result_scope_fulfillment',
+            'local_subscriptions',
+            $fulfillmentoptions[$fulfillmentstatus] ?? $fulfillmentstatus
+        ),
+        $salesremoveurl($salesscopeparams, 'fulfillmentstatus')
+    );
+}
+if ($adminstate !== 'open') {
+    $salesscopepills[] = $salesscopepill(
+        get_string(
+            'commerce_result_scope_admin_state',
+            'local_subscriptions',
+            $adminstateoptions[$adminstate] ?? $adminstate
+        ),
+        $salesremoveurl($salesscopeparams, 'adminstate', 'open')
+    );
+}
+
 // Compact operational filter panel.
 $filterhtml = html_writer::start_tag('form', [
     'method' => 'get',
@@ -433,7 +619,7 @@ $filterhtml .= html_writer::div(
         . html_writer::tag(
             'button',
             html_writer::tag('i', '', ['class' => 'fa fa-filter me-1', 'aria-hidden' => 'true'])
-                . get_string('filter'),
+                . get_string('commerce_filters_apply', 'local_subscriptions'),
             ['type' => 'submit', 'class' => 'btn btn-primary']
         ),
         'crm-sales-filter-actions'
@@ -511,8 +697,26 @@ foreach ($kpiitems as $item) {
 // Table toolbar.
 $tabletoolbar = html_writer::div(
     html_writer::div(
-        get_string('commerce_sales_found', 'local_subscriptions', format_float($result->total, 0)),
-        'crm-sales-table-count'
+        html_writer::div(
+            get_string(
+                'commerce_sales_found',
+                'local_subscriptions',
+                format_float($result->total, 0)
+            ),
+            'crm-sales-table-count'
+        )
+        . html_writer::div(
+            html_writer::span(
+                get_string(
+                    'commerce_result_scope_label',
+                    'local_subscriptions'
+                ),
+                'crm-result-scope-label'
+            )
+            . implode('', $salesscopepills),
+            'crm-result-scope-pills'
+        ),
+        'crm-result-summary'
     )
     . html_writer::div(
         html_writer::tag('span', get_string('commerce_sales_per_page', 'local_subscriptions'), ['class' => 'text-muted small'])

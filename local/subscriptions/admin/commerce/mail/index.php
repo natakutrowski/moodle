@@ -140,6 +140,185 @@ $periodoptions = [
     'custom' => get_string('commerce_mail_period_custom', 'local_subscriptions'),
 ];
 
+$mailtypeoptions = $filteroptions + CommerceMailAdminPresentation::type_options();
+$mailstatusoptions = $filteroptions + CommerceMailAdminPresentation::status_options();
+$maillanguageoptions = $filteroptions + CommerceMailAdminPresentation::language_options();
+
+$mailperiodlabel = static function(
+    string $period,
+    int $datefrom,
+    int $dateto
+) use ($periodoptions): string {
+    if ($period === 'all') {
+        return get_string(
+            'commerce_result_scope_period_all',
+            'local_subscriptions'
+        );
+    }
+
+    if ($datefrom > 0 && $dateto > 0) {
+        $dateformat = get_string('strftimedatetimeshort', 'langconfig');
+        return get_string(
+            'commerce_result_scope_period_range',
+            'local_subscriptions',
+            (object)[
+                'from' => userdate($datefrom, $dateformat),
+                'to' => userdate($dateto, $dateformat),
+            ]
+        );
+    }
+
+    return get_string(
+        'commerce_result_scope_period_named',
+        'local_subscriptions',
+        $periodoptions[$period] ?? $period
+    );
+};
+
+$mailremoveurl = static function(
+    array $params,
+    string $name,
+    mixed $reset = null
+): moodle_url {
+    unset($params['page']);
+
+    if ($reset === null || $reset === '') {
+        unset($params[$name]);
+    } else {
+        $params[$name] = $reset;
+    }
+
+    if ($name === 'period') {
+        unset($params['from'], $params['to']);
+    }
+
+    return new moodle_url(
+        '/local/subscriptions/admin/commerce/mail/index.php',
+        $params
+    );
+};
+
+$mailscopepill = static function(
+    string $label,
+    ?moodle_url $removeurl = null,
+    string $modifier = ''
+): string {
+    $remove = '';
+    if ($removeurl !== null) {
+        $remove = html_writer::link(
+            $removeurl,
+            html_writer::span('×', 'crm-result-scope-pill-remove-symbol'),
+            [
+                'class' => 'crm-result-scope-pill-remove',
+                'title' => get_string(
+                    'commerce_result_scope_remove_filter',
+                    'local_subscriptions'
+                ),
+                'aria-label' => get_string(
+                    'commerce_result_scope_remove_filter_named',
+                    'local_subscriptions',
+                    $label
+                ),
+            ]
+        );
+    }
+
+    $class = 'crm-result-scope-pill';
+    if ($modifier !== '') {
+        $class .= ' ' . $modifier;
+    }
+
+    return html_writer::span(
+        html_writer::span(s($label), 'crm-result-scope-pill-label') . $remove,
+        $class
+    );
+};
+
+$mailscopeparams = $baseparams;
+unset($mailscopeparams['page']);
+
+$mailscopepills = [];
+$mailscopepills[] = $mailscopepill(
+    $mailperiodlabel($period, $datefrom, $dateto),
+    $period !== '30'
+        ? $mailremoveurl($mailscopeparams, 'period', '30')
+        : null
+);
+
+if ($q !== '') {
+    $mailscopepills[] = $mailscopepill(
+        get_string(
+            'commerce_result_scope_search',
+            'local_subscriptions',
+            $q
+        ),
+        $mailremoveurl($mailscopeparams, 'q')
+    );
+}
+if ($mailtype !== '') {
+    $mailscopepills[] = $mailscopepill(
+        get_string(
+            'commerce_result_scope_mail_type',
+            'local_subscriptions',
+            $mailtypeoptions[$mailtype] ?? $mailtype
+        ),
+        $mailremoveurl($mailscopeparams, 'mailtype')
+    );
+}
+if ($status !== '') {
+    $mailscopepills[] = $mailscopepill(
+        get_string(
+            'commerce_result_scope_mail_status',
+            'local_subscriptions',
+            $mailstatusoptions[$status] ?? $status
+        ),
+        $mailremoveurl($mailscopeparams, 'status')
+    );
+}
+if ($language !== '') {
+    $mailscopepills[] = $mailscopepill(
+        get_string(
+            'commerce_result_scope_language',
+            'local_subscriptions',
+            $maillanguageoptions[$language] ?? strtoupper($language)
+        ),
+        $mailremoveurl($mailscopeparams, 'language')
+    );
+}
+if ($purchaseid > 0) {
+    $mailscopepills[] = $mailscopepill(
+        get_string(
+            'commerce_result_scope_purchase',
+            'local_subscriptions',
+            $purchaseid
+        ),
+        $mailremoveurl($mailscopeparams, 'purchaseid')
+    );
+}
+if ($attempts > 0) {
+    $mailscopepills[] = $mailscopepill(
+        get_string(
+            'commerce_result_scope_attempts',
+            'local_subscriptions',
+            $attempts
+        ),
+        $mailremoveurl($mailscopeparams, 'attempts')
+    );
+}
+
+$mailscopepills[] = $mailscopepill(
+    get_string(
+        $includeaudit
+            ? 'commerce_result_scope_audit_included'
+            : 'commerce_result_scope_audit_excluded',
+        'local_subscriptions'
+    ),
+    $includeaudit
+        ? $mailremoveurl($mailscopeparams, 'includeaudit')
+        : null,
+    $includeaudit ? 'is-audit-included' : 'is-audit-excluded'
+);
+
 $columnlabels = [
     'date' => get_string('date', 'local_subscriptions'),
     'recipient' => get_string('commerce_mail_recipient_column', 'local_subscriptions'),
@@ -184,17 +363,17 @@ $form .= html_writer::div(
 );
 $form .= html_writer::div(
     html_writer::label(get_string('commerce_mail_type_filter', 'local_subscriptions'), 'commerce-mail-type', false, ['class' => 'form-label'])
-    . html_writer::select($filteroptions + CommerceMailAdminPresentation::type_options(), 'mailtype', $mailtype, false, ['id' => 'commerce-mail-type', 'class' => 'form-select']),
+    . html_writer::select($mailtypeoptions, 'mailtype', $mailtype, false, ['id' => 'commerce-mail-type', 'class' => 'form-select']),
     'commerce-mail-filter-field'
 );
 $form .= html_writer::div(
     html_writer::label(get_string('commerce_mail_status_filter', 'local_subscriptions'), 'commerce-mail-status', false, ['class' => 'form-label'])
-    . html_writer::select($filteroptions + CommerceMailAdminPresentation::status_options(), 'status', $status, false, ['id' => 'commerce-mail-status', 'class' => 'form-select']),
+    . html_writer::select($mailstatusoptions, 'status', $status, false, ['id' => 'commerce-mail-status', 'class' => 'form-select']),
     'commerce-mail-filter-field'
 );
 $form .= html_writer::div(
     html_writer::label(get_string('commerce_mail_language_filter', 'local_subscriptions'), 'commerce-mail-language', false, ['class' => 'form-label'])
-    . html_writer::select($filteroptions + CommerceMailAdminPresentation::language_options(), 'language', $language, false, ['id' => 'commerce-mail-language', 'class' => 'form-select']),
+    . html_writer::select($maillanguageoptions, 'language', $language, false, ['id' => 'commerce-mail-language', 'class' => 'form-select']),
     'commerce-mail-filter-field'
 );
 $form .= html_writer::end_div();
@@ -298,7 +477,7 @@ $form .= html_writer::div(
             . get_string('commerce_mail_export', 'local_subscriptions'), ['class' => 'btn btn-outline-secondary'])
         . html_writer::link($pageurl, get_string('reset'), ['class' => 'btn btn-outline-secondary'])
         . html_writer::tag('button', html_writer::tag('i', '', ['class' => 'fa fa-filter', 'aria-hidden' => 'true'])
-            . get_string('filter'), ['type' => 'submit', 'class' => 'btn btn-primary']),
+            . get_string('commerce_filters_apply', 'local_subscriptions'), ['type' => 'submit', 'class' => 'btn btn-primary']),
         'commerce-mail-filter-actions'
     ),
     'commerce-mail-filter-footer'
@@ -579,6 +758,27 @@ foreach ($result['records'] as $record) {
         );
     }
 
+    $grantcampaignpath = '/local/subscriptions/admin/commerce/grants/campaign_view.php';
+    $isgrantcampaignurl = $resolved['contexturl'] instanceof moodle_url
+        && $resolved['contexturl']->get_path() === $grantcampaignpath;
+
+    if ($isgrantcampaignurl
+            && (string)$record->mailtype === 'grant_access') {
+        $sections['context'][] = html_writer::link(
+            $resolved['contexturl'],
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-key',
+                'aria-hidden' => 'true',
+            ]) . html_writer::span(
+                get_string(
+                    'commerce_mail_action_open_grant_campaign',
+                    'local_subscriptions'
+                )
+            ),
+            ['class' => 'commerce-mail-row-menu-link']
+        );
+    }
+
     if ($resolved['contexturl'] instanceof moodle_url
             && (string)$record->mailtype === 'personal_offer') {
         $sections['context'][] = html_writer::link(
@@ -689,7 +889,29 @@ foreach ($baseparams as $name => $value) {
         $toolbar .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
     }
 }
-$toolbar .= html_writer::tag('strong', get_string('commerce_mail_found', 'local_subscriptions', $result['total']), ['class' => 'commerce-mail-found']);
+$toolbar .= html_writer::div(
+    html_writer::tag(
+        'strong',
+        get_string(
+            'commerce_mail_found',
+            'local_subscriptions',
+            $result['total']
+        ),
+        ['class' => 'commerce-mail-found']
+    )
+    . html_writer::div(
+        html_writer::span(
+            get_string(
+                'commerce_result_scope_label',
+                'local_subscriptions'
+            ),
+            'crm-result-scope-label'
+        )
+        . implode('', $mailscopepills),
+        'crm-result-scope-pills'
+    ),
+    'crm-result-summary'
+);
 $toolbar .= html_writer::div(
     html_writer::label(get_string('commerce_mail_per_page', 'local_subscriptions'), 'commerce-mail-perpage', false, ['class' => 'form-label mb-0'])
     . html_writer::select([25 => '25', 50 => '50', 100 => '100'], 'perpage', $perpage, false, [

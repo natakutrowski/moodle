@@ -14,14 +14,13 @@ final class commerce_navigation_registry_test extends advanced_testcase {
         $keys = array_map(static fn($item): string => $item->key, $items);
         $positions = array_map(static fn($item): int|float => $item->position, $items);
 
-        $this->assertCount(9, $items);
+        $this->assertCount(8, $items);
         $this->assertSame([
             CommerceSectionNavigationRegistry::OVERVIEW,
             CommerceSectionNavigationRegistry::PURCHASES,
             CommerceSectionNavigationRegistry::PRODUCTS,
             CommerceSectionNavigationRegistry::SHOWROOMS,
-            CommerceSectionNavigationRegistry::PERSONAL_OFFERS,
-            CommerceSectionNavigationRegistry::GRANTS,
+            CommerceSectionNavigationRegistry::OFFERS_ACCESS,
             CommerceSectionNavigationRegistry::MAIL,
             CommerceSectionNavigationRegistry::STATISTICS,
             CommerceSectionNavigationRegistry::CONFIGURATION,

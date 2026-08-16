@@ -83,7 +83,7 @@ final class CommerceLegacyDigitalAccountActivationService {
         );
 
         if (
-            $origin !== 'legacy_digital_provisioning'
+            !in_array($origin, ['legacy_digital_provisioning', 'crm_manual_grant'], true)
             || $state !== 'activation_pending'
         ) {
             throw new \moodle_exception('invalidkey');

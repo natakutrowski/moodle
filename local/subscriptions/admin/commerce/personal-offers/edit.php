@@ -10,6 +10,7 @@ use local_subscriptions\commerce\personaloffer\domain\CommercePersonalOfferTerms
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferMailImageService;
 use local_subscriptions\commerce\personaloffer\repository\MoodleCommercePersonalOfferRepository;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
@@ -67,11 +68,18 @@ echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 echo CrmBreadcrumbRenderer::render([
     ['label' => get_string('crm_commerce_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php')],
+    ['label' => get_string('commerce_offers_access_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/offers-access/index.php')],
     ['label' => get_string('commerce_personal_offers_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/personal-offers/index.php')],
     ['label' => $title, 'url' => null],
 ]);
 echo CrmPageHeader::render($title, get_string('commerce_personal_offer_edit_help', 'local_subscriptions'), HelpContext::COMMERCE);
-echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PERSONAL_OFFERS, $context);
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::OFFERS_ACCESS,
+    $context
+);
+echo CommerceOffersAccessNavigationRenderer::render(
+    CommerceOffersAccessNavigationRenderer::OFFERS
+);
 echo html_writer::div(get_string('commerce_personal_offer_edit_replace_notice', 'local_subscriptions'), 'alert alert-info');
 if ($error !== '') { echo html_writer::div(s($error), 'alert alert-danger'); }
 
@@ -84,7 +92,7 @@ foreach($campaigns as $c){$campaignopts[$c->campaignkey]=$c->name.' ['.$c->campa
 echo html_writer::tag('label', get_string('commerce_personal_offer_campaign','local_subscriptions'), ['class'=>'form-label']);
 echo html_writer::select($campaignopts,'campaignkey',$offer->get_campaign_key()??'',false,['class'=>'form-select mb-3']);
 
-$productopts=[]; foreach($products as $product){$productopts[$product->id]=CommercePersonalOfferCrmPresentation::product_label($DB,(int)$product->id);}
+$productopts=[]; foreach($products as $product){$productopts[$product->id]=CommercePersonalOfferCrmPresentation::business_product_label($DB,(int)$product->id);}
 echo html_writer::tag('label', get_string('commerce_personal_offer_target','local_subscriptions'), ['class'=>'form-label']);
 echo html_writer::select($productopts,'targetproductid',$offer->get_target_product_id(),false,['class'=>'form-select mb-3']);
 

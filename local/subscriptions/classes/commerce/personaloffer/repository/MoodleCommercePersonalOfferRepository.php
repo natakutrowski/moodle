@@ -89,6 +89,14 @@ final class MoodleCommercePersonalOfferRepository implements CommercePersonalOff
             $clauses[] = 'o.targetproductid = :targetproductid';
             $params['targetproductid'] = (int)$filters['targetproductid'];
         }
+        if (!empty($filters['timecreatedfrom'])) {
+            $clauses[] = 'o.timecreated >= :timecreatedfrom';
+            $params['timecreatedfrom'] = (int)$filters['timecreatedfrom'];
+        }
+        if (!empty($filters['timecreatedto'])) {
+            $clauses[] = 'o.timecreated < :timecreatedto';
+            $params['timecreatedto'] = (int)$filters['timecreatedto'];
+        }
         return [$clauses ? 'WHERE ' . implode(' AND ', $clauses) : '', $params];
     }
 

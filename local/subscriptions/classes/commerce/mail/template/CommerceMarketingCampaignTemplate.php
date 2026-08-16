@@ -51,9 +51,17 @@ final class CommerceMarketingCampaignTemplate implements CommerceMailTemplate {
         );
 
         $recipient = $request->get_recipient();
+        $firstname = trim((string)$request->get_context()->get('firstname', ''));
+        $greeting = match ($language) {
+            'ru' => $firstname !== '' ? 'Здравствуйте, ' . $firstname . '!' : 'Здравствуйте!',
+            'en' => $firstname !== '' ? 'Hello ' . $firstname . '!' : 'Hello!',
+            default => $firstname !== '' ? 'Bonjour ' . $firstname . ' !' : 'Bonjour !',
+        };
         $tokens = [
-            '{{firstname}}' => trim((string)$request->get_context()->get('firstname', '')),
+            '{{greeting}}' => $greeting,
+            '{{firstname}}' => $firstname,
             '{{fullname}}' => trim((string)$request->get_context()->get('fullname', '')),
+            '{{username}}' => trim((string)$request->get_context()->get('username', '')),
             '{{email}}' => $recipient->get_email(),
         ];
 

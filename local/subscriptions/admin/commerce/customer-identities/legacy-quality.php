@@ -74,7 +74,14 @@ echo html_writer::select([
 ], 'quality', $qualitystatus, false, ['id' => 'legacy-quality-status', 'class' => 'form-select']);
 echo html_writer::end_div();
 echo html_writer::start_div('col-12 col-md-3 d-flex gap-2');
-echo html_writer::tag('button', get_string('filter'), ['type' => 'submit', 'class' => 'btn btn-primary']);
+echo html_writer::tag(
+    'button',
+    html_writer::tag('i', '', [
+        'class' => 'fa fa-filter me-1',
+        'aria-hidden' => 'true',
+    ]) . get_string('commerce_filters_apply', 'local_subscriptions'),
+    ['type' => 'submit', 'class' => 'btn btn-primary']
+);
 echo html_writer::link($filterurl, get_string('reset'), ['class' => 'btn btn-outline-secondary']);
 echo html_writer::end_div();
 echo html_writer::end_div();

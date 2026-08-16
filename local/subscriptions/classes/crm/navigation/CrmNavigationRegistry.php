@@ -142,16 +142,10 @@ final class CrmNavigationRegistry {
                         'fa-picture-o'
                     ),
                     $child(
-                        get_string('crm_commerce_nav_personal_offers', 'local_subscriptions'),
-                        '/local/subscriptions/admin/commerce/personal-offers/index.php',
+                        get_string('crm_commerce_nav_offers_access', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/offers-access/index.php',
                         Capabilities::VIEW_PAYMENTS,
-                        'fa-tag'
-                    ),
-                    $child(
-                        get_string('crm_commerce_nav_grants', 'local_subscriptions'),
-                        '/local/subscriptions/admin/commerce/grants/index.php',
-                        Capabilities::MANAGE_SUBSCRIPTIONS,
-                        'fa-key'
+                        'fa-gift'
                     ),
                     $child(
                         get_string('crm_commerce_nav_mail', 'local_subscriptions'),

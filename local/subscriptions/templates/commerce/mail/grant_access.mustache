@@ -1,6 +1,15 @@
 {{#has_editorial_heading}}<h1 style="margin:0 0 18px;font-size:26px;line-height:1.25;color:#111827;">{{editorial_heading}}</h1>{{/has_editorial_heading}}
 {{#has_editorial_intro}}<div style="margin-bottom:18px;">{{{editorial_intro}}}</div>{{/has_editorial_intro}}
 
+{{#hasaccountactivation}}
+<div style="margin:20px 0;padding:18px;border:1px solid #dbeafe;border-radius:12px;background:#f0f7ff;">
+    <div style="font-weight:800;color:#173b69;margin-bottom:6px;">{{accountactivationtitle}}</div>
+    <div style="color:#526077;font-size:14px;line-height:1.5;margin-bottom:14px;">{{accountactivationhelp}}</div>
+    <a href="{{accountactivationurl}}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 18px;border-radius:8px;background:#257de8;color:#fff;text-decoration:none;font-weight:800;">{{accountactivationbutton}}</a>
+    {{#accountactivationexpires}}<div style="margin-top:9px;color:#718096;font-size:12px;">{{accountactivationexpires}}</div>{{/accountactivationexpires}}
+</div>
+{{/hasaccountactivation}}
+
 {{#hasitems}}
     {{#items}}
         {{> local_subscriptions/commerce/mail/components/access_item }}

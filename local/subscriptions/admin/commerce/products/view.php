@@ -388,7 +388,14 @@ echo html_writer::div(html_writer::tag('label',get_string('currency'),['for'=>'s
 echo html_writer::div(html_writer::tag('label',get_string('commerce_statistics_period_label','local_subscriptions'),['for'=>'statsperiod','class'=>'form-label']).html_writer::select($statisticsperiodoptions,'statsperiod',$statisticsperiodkey,false,['id'=>'statsperiod','class'=>'form-select']),'form-group');
 $customstyle=$statisticsperiodkey==='custom'?'':'style="display:none"';
 echo '<div class="form-group m51-custom-range" '.$customstyle.'><div><label class="form-label">'.s(get_string('commerce_m51_from','local_subscriptions')).'</label><input class="form-control" type="date" name="statsfrom" value="'.s($statisticsfrom).'" /></div><div><label class="form-label">'.s(get_string('commerce_m51_until','local_subscriptions')).'</label><input class="form-control" type="date" name="statsuntil" value="'.s($statisticsuntil).'" /></div></div>';
-echo html_writer::div(html_writer::tag('button',get_string('filter'),['type'=>'submit','class'=>'btn btn-primary w-100']),'form-group');
+echo html_writer::div(html_writer::tag(
+    'button',
+    html_writer::tag('i', '', [
+        'class' => 'fa fa-filter me-1',
+        'aria-hidden' => 'true',
+    ]) . get_string('commerce_filters_apply', 'local_subscriptions'),
+    ['type' => 'submit', 'class' => 'btn btn-primary w-100']
+),'form-group');
 $exportparams=['sku'=>$product->get_sku(),'statsperiod'=>$statisticsperiodkey,'statsfrom'=>$statisticsfrom,'statsuntil'=>$statisticsuntil,'statscurrency'=>$statisticscurrency];
 echo html_writer::div(html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/statistics_export.php',$exportparams),get_string('commerce_m51_export_excel','local_subscriptions'),['class'=>'btn btn-outline-success w-100']),'form-group');
 echo html_writer::end_tag('form');
