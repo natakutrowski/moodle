@@ -5,8 +5,10 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferAdminService;
 use local_subscriptions\commerce\personaloffer\repository\MoodleCommercePersonalOfferRepository;
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferMailService;
+use local_subscriptions\commerce\mail\admin\CommerceMailAdminService;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CRM_ADMIN_TOOLS);
+$PAGE->set_context($context);
 require_sesskey();
 $id = required_param('id', PARAM_INT);
 $action = required_param('action', PARAM_ALPHA);
@@ -26,6 +28,25 @@ if ($action === 'reissue') {
 if ($action === 'delete') {
     $admin->delete($offer);
     redirect(new moodle_url('/local/subscriptions/admin/commerce/personal-offers/index.php'), get_string('commerce_personal_offer_deleted_success', 'local_subscriptions'));
+}
+
+if ($action === 'sendmailnow') {
+    $mail = CommercePersonalOfferMailService::create($DB)->queue_offer($id);
+    $result = (new CommerceMailAdminService())->send_now((int)$mail->id);
+    $sent = (int)($result['sent'] ?? 0) === 1;
+    redirect(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/personal-offers/view.php',
+            ['id' => $id]
+        ),
+        $sent
+            ? get_string('commerce_mail_send_now_success', 'local_subscriptions')
+            : get_string('commerce_mail_send_now_failed', 'local_subscriptions'),
+        null,
+        $sent
+            ? \core\output\notification::NOTIFY_SUCCESS
+            : \core\output\notification::NOTIFY_WARNING
+    );
 }
 
 if ($action === 'sendmail') {

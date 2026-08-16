@@ -11,6 +11,7 @@ use local_subscriptions\commerce\mail\CommerceMailType;
 use local_subscriptions\commerce\mail\CommerceMailTerminalCancellationException;
 use local_subscriptions\commerce\personaloffer\domain\CommercePersonalOffer;
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferCampaignMailRenderer;
+use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferIndividualMailStudioBridge;
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferMailPricingPresentationService;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailBannerService;
 
@@ -123,7 +124,15 @@ final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
         $offer = is_array($context['personaloffer'] ?? null) ? $context['personaloffer'] : [];
         $campaignid = (int)($offer['campaignid'] ?? 0);
         if ($campaignid <= 0 || empty($offer['iscampaignemail'])) {
-            return $editorial;
+            $snapshot = is_array($offer['mailtemplatesnapshot'] ?? null)
+                ? $offer['mailtemplatesnapshot']
+                : [];
+            if ($snapshot === []) {
+                return $editorial;
+            }
+            return CommercePersonalOfferIndividualMailStudioBridge::create()
+                ->resolve($request, $snapshot, $context)
+                ?? $editorial;
         }
         $resolved = CommercePersonalOfferCampaignMailRenderer::create()->resolve($request, $campaignid, $context)
             ?? $editorial;

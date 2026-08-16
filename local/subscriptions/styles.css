@@ -18289,3 +18289,2922 @@ a.crm-sales-personal-offer-badge:hover {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* Commerce result scope summary shared by Sales and Mail journal. */
+.crm-result-summary {
+    display: grid;
+    min-width: 0;
+    gap: .32rem;
+}
+.crm-result-scope-pills {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .3rem;
+}
+.crm-result-scope-label {
+    margin-right: .08rem;
+    color: #94a3b8;
+    font-size: .64rem;
+    font-weight: 650;
+}
+.crm-result-scope-pill {
+    display: inline-flex;
+    min-height: 1.45rem;
+    align-items: center;
+    gap: .25rem;
+    padding: .18rem .28rem .18rem .45rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #536177;
+    font-size: .66rem;
+    font-weight: 650;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+.crm-result-scope-pill.is-audit-excluded {
+    background: #fafbfc;
+    color: #718096;
+}
+.crm-result-scope-pill.is-audit-included {
+    border-color: rgba(234, 179, 8, .22);
+    background: rgba(234, 179, 8, .07);
+    color: #8a6504;
+}
+.crm-result-scope-pill-remove {
+    display: inline-flex;
+    width: 1.05rem;
+    height: 1.05rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: background-color .12s ease, color .12s ease;
+}
+.crm-result-scope-pill-remove:hover,
+.crm-result-scope-pill-remove:focus-visible {
+    background: #e8edf4;
+    color: #334155;
+    text-decoration: none;
+}
+.crm-result-scope-pill-remove-symbol {
+    position: relative;
+    top: -.02rem;
+    font-size: .82rem;
+    font-weight: 700;
+    line-height: 1;
+}
+.crm-sales-table-toolbar {
+    align-items: flex-start;
+}
+@media (max-width: 767.98px) {
+    .crm-sales-table-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .crm-result-scope-pills {
+        row-gap: .36rem;
+    }
+}
+
+/* Commerce 7.95N7.1 — unified Offers & access workspace. */
+.crm-offers-access-tabs {
+    display: flex;
+    gap: .25rem;
+    margin: .15rem 0 1rem;
+    padding: 0 .2rem;
+    border-bottom: 1px solid #e5eaf1;
+}
+.crm-offers-access-tab {
+    position: relative;
+    padding: .72rem .9rem;
+    color: #475569;
+    font-size: .82rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+.crm-offers-access-tab:hover { color: #5b4b8a; text-decoration: none; }
+.crm-offers-access-tab.is-active { color: #5b4b8a; font-weight: 800; }
+.crm-offers-access-tab.is-active::after {
+    position: absolute; right: .7rem; bottom: -1px; left: .7rem; height: 2px;
+    border-radius: 2px; background: #7c5ac7; content: "";
+}
+.crm-offers-access-action-panel,
+.crm-offers-access-panel {
+    margin-bottom: 1rem; padding: 1rem; border: 1px solid #e2e8f0;
+    border-radius: .8rem; background: #fff; box-shadow: 0 2px 10px rgba(15,23,42,.035);
+}
+.crm-offers-access-eyebrow { margin-bottom: .7rem; color: #6d55a4; font-size: .72rem; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
+.crm-offers-access-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; }
+.crm-offers-access-action-card { padding: 1rem; border: 1px solid #e6eaf0; border-radius: .75rem; background: #fff; }
+.crm-offers-access-action-card.is-offer { background: linear-gradient(135deg,rgba(247,37,133,.035),#fff 58%); }
+.crm-offers-access-action-card.is-grant { background: linear-gradient(135deg,rgba(37,125,232,.04),#fff 58%); }
+.crm-offers-access-action-icon { display:inline-flex; width:2.2rem; height:2.2rem; align-items:center; justify-content:center; margin-bottom:.55rem; border-radius:.65rem; font-size:1rem; }
+.is-offer .crm-offers-access-action-icon { background:#fff0f6; color:#f72585; }
+.is-grant .crm-offers-access-action-icon { background:#edf6ff; color:#257de8; }
+.crm-offers-access-action-title { margin:0 0 .35rem; color:#17213b; font-size:1rem; font-weight:800; }
+.crm-offers-access-action-description { min-height:2.5rem; margin-bottom:.7rem; color:#64748b; font-size:.78rem; }
+.crm-offers-access-action-card.is-offer .crm-offers-access-action-button { background:#f72585; border-color:#f72585; color:#fff; }
+.crm-offers-access-action-card.is-grant .crm-offers-access-action-button { background:#257de8; border-color:#257de8; color:#fff; }
+.crm-offers-access-hint { margin-top:.75rem; padding:.55rem .7rem; border:1px solid #edf1f6; border-radius:.55rem; background:#f8fafc; color:#64748b; font-size:.72rem; }
+.crm-offers-access-metrics { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); margin-bottom:1rem; border:1px solid #e2e8f0; border-radius:.8rem; background:#fff; overflow:hidden; }
+.crm-offers-access-metric { display:flex; min-width:0; gap:.55rem; padding:.8rem; border-right:1px solid #edf1f6; }
+.crm-offers-access-metric:last-child { border-right:0; }
+.crm-offers-access-metric-icon { display:inline-flex; flex:0 0 2rem; width:2rem; height:2rem; align-items:center; justify-content:center; border-radius:.6rem; }
+.crm-offers-access-metric-icon.is-offer { background:#fff0f6;color:#f72585; }.crm-offers-access-metric-icon.is-success{background:#eaf8f1;color:#198754}.crm-offers-access-metric-icon.is-grant{background:#edf6ff;color:#257de8}.crm-offers-access-metric-icon.is-campaign{background:#f4efff;color:#7650bd}.crm-offers-access-metric-icon.is-pending{background:#fff5e8;color:#e57b12}.crm-offers-access-metric-icon.is-error{background:#fff0f1;color:#dc3545}
+.crm-offers-access-metric-copy{min-width:0}.crm-offers-access-metric-label{color:#53627a;font-size:.67rem;font-weight:700}.crm-offers-access-metric-value{color:#17213b;font-size:1.15rem;font-weight:850;line-height:1.15}.crm-offers-access-metric-foot{color:#94a3b8;font-size:.61rem}
+.crm-offers-access-panel-head{display:flex;align-items:center;justify-content:space-between;gap:1rem}.crm-offers-access-panel-title{margin:0;color:#17213b;font-size:.9rem;font-weight:800}.crm-offers-access-panel-link{color:#7650bd;font-size:.72rem;font-weight:700}.crm-offers-access-empty{padding:1.2rem 0 .3rem;color:#94a3b8;font-size:.78rem;text-align:center}
+.crm-offers-access-kind{display:inline-flex;align-items:center;padding:.22rem .45rem;border-radius:999px;font-size:.69rem;font-weight:750}.crm-offers-access-kind.is-offer{background:#fff0f6;color:#d91c73}.crm-offers-access-kind.is-grant{background:#edf6ff;color:#1769c2}.crm-offers-access-name-link{color:#17213b;font-weight:700;text-decoration:none}.crm-offers-access-name-link:hover{color:#f72585;text-decoration:none}.crm-offers-access-table thead th{background:#f8fafc;border-top:0}.crm-offers-access-table td,.crm-offers-access-table th{border-left:0;border-right:0}
+@media(max-width:1199.98px){.crm-offers-access-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.crm-offers-access-metric:nth-child(3){border-right:0}}
+@media(max-width:767.98px){.crm-offers-access-tabs{overflow-x:auto}.crm-offers-access-actions{grid-template-columns:1fr}.crm-offers-access-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.crm-offers-access-metric:nth-child(odd){border-right:1px solid #edf1f6}.crm-offers-access-metric:nth-child(even){border-right:0}}
+
+
+/* Commerce 7.95N7.2 — guided Offers & access workflows. */
+.crm-offers-access-create-shell {
+    max-width: 980px;
+    margin: 0 auto 1rem;
+    padding: 1rem;
+    border: 1px solid #e4e9f1;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, .035);
+}
+.crm-offers-access-create-eyebrow {
+    margin-bottom: .75rem;
+    color: #5b4b8a;
+    font-size: .72rem;
+    font-weight: 850;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+.crm-offers-access-create-grid,
+.crm-offers-access-audience-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .8rem;
+}
+.crm-offers-access-create-card,
+.crm-offers-access-audience-card {
+    display: block;
+    min-height: 170px;
+    padding: 1rem;
+    border: 1px solid #e4e9f1;
+    border-radius: .75rem;
+    background: #fff;
+    color: #263650;
+    text-decoration: none;
+    transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+}
+.crm-offers-access-create-card:hover,
+.crm-offers-access-audience-card:hover {
+    transform: translateY(-1px);
+    border-color: #d3dbe7;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .07);
+    color: #263650;
+    text-decoration: none;
+}
+.crm-offers-access-create-card.is-offer {
+    background: linear-gradient(135deg, rgba(247,37,133,.045), #fff 58%);
+}
+.crm-offers-access-create-card.is-grant {
+    background: linear-gradient(135deg, rgba(37,125,232,.055), #fff 58%);
+}
+.crm-offers-access-create-card-icon,
+.crm-offers-access-audience-icon {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: .65rem;
+    border-radius: .7rem;
+    background: #f3f0fb;
+    color: #5b4b8a;
+    font-size: 1rem;
+}
+.crm-offers-access-create-card.is-offer .crm-offers-access-create-card-icon {
+    background: #fff0f6;
+    color: #f72585;
+}
+.crm-offers-access-create-card.is-grant .crm-offers-access-create-card-icon {
+    background: #edf6ff;
+    color: #257de8;
+}
+.crm-offers-access-create-card-title,
+.crm-offers-access-audience-title {
+    margin: 0 0 .35rem;
+    color: #17213b;
+    font-size: 1rem;
+    font-weight: 800;
+}
+.crm-offers-access-create-card-copy,
+.crm-offers-access-audience-copy {
+    margin: 0 0 .6rem;
+    color: #64748b;
+    font-size: .78rem;
+    line-height: 1.45;
+}
+.crm-offers-access-create-card-action {
+    color: #5b4b8a;
+    font-size: .74rem;
+    font-weight: 800;
+}
+.crm-offers-access-create-selection {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    margin-bottom: 1rem;
+    padding: .65rem .75rem;
+    border: 1px solid #edf1f6;
+    border-radius: .65rem;
+    background: #f8fafc;
+}
+.crm-offers-access-create-selection-icon {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .55rem;
+}
+.crm-offers-access-create-selection-icon.is-offer { background:#fff0f6;color:#f72585; }
+.crm-offers-access-create-selection-icon.is-grant { background:#edf6ff;color:#257de8; }
+.crm-offers-access-create-selection-label {
+    color: #94a3b8;
+    font-size: .62rem;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+.crm-offers-access-create-selection-value {
+    color: #334155;
+    font-size: .78rem;
+    font-weight: 800;
+}
+.crm-offers-access-create-audience-title {
+    margin-bottom: .65rem;
+}
+.crm-offers-access-workflow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0 0 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .8rem;
+    background: #fff;
+    overflow: hidden;
+}
+.crm-offers-access-workflow-step {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: .55rem;
+    padding: .7rem .8rem;
+    border-right: 1px solid #edf1f6;
+    color: #94a3b8;
+}
+.crm-offers-access-workflow-step:last-child {
+    border-right: 0;
+}
+.crm-offers-access-workflow-number {
+    display: inline-flex;
+    flex: 0 0 1.7rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: .68rem;
+    font-weight: 850;
+}
+.crm-offers-access-workflow-label {
+    overflow: hidden;
+    font-size: .72rem;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.crm-offers-access-workflow-label > .fa {
+    width: 1rem;
+    margin-right: .28rem;
+}
+.crm-offers-access-workflow-meta {
+    margin-top: .08rem;
+    color: #94a3b8;
+    font-size: .61rem;
+}
+.crm-offers-access-workflow-step.is-active {
+    background: rgba(91,75,138,.035);
+    color: #493c72;
+}
+.crm-offers-access-workflow.is-offer .crm-offers-access-workflow-step.is-active {
+    background: rgba(247,37,133,.035);
+    color: #d91c73;
+}
+.crm-offers-access-workflow.is-grant .crm-offers-access-workflow-step.is-active {
+    background: rgba(37,125,232,.04);
+    color: #1769c2;
+}
+.crm-offers-access-workflow-step.is-active .crm-offers-access-workflow-number {
+    background: #5b4b8a;
+    color: #fff;
+}
+.crm-offers-access-workflow.is-offer .crm-offers-access-workflow-step.is-active .crm-offers-access-workflow-number {
+    background: #f72585;
+}
+.crm-offers-access-workflow.is-grant .crm-offers-access-workflow-step.is-active .crm-offers-access-workflow-number {
+    background: #257de8;
+}
+.crm-offers-access-workflow-step.is-complete {
+    color: #198754;
+}
+.crm-offers-access-workflow-step.is-complete .crm-offers-access-workflow-number {
+    background: #eaf8f1;
+    color: #198754;
+}
+@media (max-width: 767.98px) {
+    .crm-offers-access-create-grid,
+    .crm-offers-access-audience-grid {
+        grid-template-columns: 1fr;
+    }
+    .crm-offers-access-workflow {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .crm-offers-access-workflow-step:nth-child(2) {
+        border-right: 0;
+    }
+    .crm-offers-access-workflow-step:nth-child(-n+2) {
+        border-bottom: 1px solid #edf1f6;
+    }
+}
+
+
+/* Commerce 7.95N7.3 — progressive configuration forms for Offers & access. */
+.crm-offers-access-guided-form {
+    margin-bottom: 1rem;
+}
+.crm-offers-access-config-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+.crm-offers-access-config-main {
+    min-width: 0;
+}
+.crm-offers-access-config-section {
+    margin-bottom: .9rem;
+    padding: .95rem 1rem;
+    border: 1px solid #e4e9f1;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, .03);
+}
+.crm-offers-access-config-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    margin-bottom: .85rem;
+}
+.crm-offers-access-config-section-icon {
+    display: inline-flex;
+    flex: 0 0 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .65rem;
+    background: #f3f0fb;
+    color: #5b4b8a;
+}
+.crm-offers-access-config-section-title {
+    margin: 0;
+    color: #17213b;
+    font-size: .96rem;
+    font-weight: 800;
+}
+.crm-offers-access-config-section-help {
+    margin-top: .14rem;
+    color: #718096;
+    font-size: .72rem;
+    line-height: 1.4;
+}
+.crm-offers-access-advanced {
+    margin-top: .7rem;
+    border: 1px solid #edf1f6;
+    border-radius: .68rem;
+    background: #fbfcfe;
+}
+.crm-offers-access-advanced-summary {
+    display: flex;
+    min-height: 2.3rem;
+    align-items: center;
+    gap: .42rem;
+    padding: .48rem .65rem;
+    color: #536177;
+    cursor: pointer;
+    font-size: .72rem;
+    list-style: none;
+}
+.crm-offers-access-advanced-summary::-webkit-details-marker {
+    display: none;
+}
+.crm-offers-access-advanced-summary > .fa {
+    color: #5b4b8a;
+}
+.crm-offers-access-advanced-title {
+    font-weight: 750;
+}
+.crm-offers-access-advanced-hint {
+    margin-left: .12rem;
+    color: #94a3b8;
+    font-size: .64rem;
+    font-weight: 500;
+}
+.crm-offers-access-advanced[open] .crm-offers-access-advanced-summary {
+    border-bottom: 1px solid #edf1f6;
+}
+.crm-offers-access-advanced-body {
+    padding: .7rem;
+}
+.crm-offers-access-config-summary {
+    position: sticky;
+    top: 1rem;
+    padding: .9rem;
+    border: 1px solid #e4e9f1;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 7px 22px rgba(15, 23, 42, .06);
+}
+.crm-offers-access-config-summary-title {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin-bottom: .7rem;
+    padding-bottom: .6rem;
+    border-bottom: 1px solid #eef2f7;
+    color: #334155;
+    font-size: .8rem;
+}
+.crm-offers-access-config-summary-title.is-offer > .fa {
+    color: #f72585;
+}
+.crm-offers-access-config-summary-title.is-grant > .fa {
+    color: #257de8;
+}
+.crm-offers-access-config-summary-row {
+    display: grid;
+    gap: .08rem;
+    padding: .42rem 0;
+}
+.crm-offers-access-config-summary-label {
+    color: #94a3b8;
+    font-size: .61rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.crm-offers-access-config-summary-value {
+    overflow: hidden;
+    color: #334155;
+    font-size: .74rem;
+    font-weight: 750;
+    text-overflow: ellipsis;
+}
+.crm-offers-access-config-mail {
+    margin-top: .7rem;
+    padding-top: .7rem;
+    border-top: 1px solid #eef2f7;
+}
+.crm-offers-access-config-mail-title {
+    margin-bottom: .2rem;
+    color: #334155;
+    font-size: .72rem;
+    font-weight: 800;
+}
+.crm-offers-access-config-mail-title > .fa {
+    margin-right: .3rem;
+    color: #5b4b8a;
+}
+.crm-offers-access-config-mail-help {
+    margin-bottom: .45rem;
+    color: #718096;
+    font-size: .66rem;
+    line-height: 1.4;
+}
+.crm-offers-access-preview-client-name {
+    color: #263650;
+    font-size: .76rem;
+    font-weight: 800;
+}
+.crm-offers-access-preview-client-email {
+    color: #718096;
+    font-size: .68rem;
+}
+.crm-offers-access-preview-user-link {
+    display: inline-block;
+    margin-top: .16rem;
+    color: #5b4b8a;
+    font-size: .64rem;
+    font-weight: 700;
+}
+.crm-offers-access-preview-warning {
+    margin-top: .16rem;
+    color: #a16207;
+    font-size: .64rem;
+    font-weight: 700;
+}
+.crm-offers-access-preview-details {
+    margin-top: .25rem;
+    color: #718096;
+    font-size: .62rem;
+}
+.crm-offers-access-preview-details > summary {
+    cursor: pointer;
+}
+.crm-offers-access-preview-evidence {
+    margin-top: .25rem;
+    padding: .35rem;
+    border-radius: .45rem;
+    background: #f8fafc;
+}
+.crm-offers-access-communication {
+    padding: .7rem;
+    border: 1px solid #edf1f6;
+    border-radius: .65rem;
+    background: #fbfcfe;
+}
+.local-subscriptions-commerce-bulk-grant-page .crm-commerce-filter-panel {
+    box-shadow: none;
+}
+.local-subscriptions-commerce-bulk-grant-page .generaltable td,
+.local-subscriptions-commerce-bulk-grant-page .generaltable th {
+    vertical-align: middle;
+}
+@media (max-width: 991.98px) {
+    .crm-offers-access-config-layout {
+        grid-template-columns: 1fr;
+    }
+    .crm-offers-access-config-summary {
+        position: static;
+    }
+}
+
+
+/* Commerce 7.95N7.4 — unified campaign monitoring for Offers & access. */
+.crm-offers-access-campaign-overview {
+    margin-bottom: 1rem;
+    padding: .9rem 1rem;
+    border: 1px solid #e4e9f1;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .035);
+}
+.crm-offers-access-campaign-heading {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: .8rem;
+}
+.crm-offers-access-campaign-kind-icon {
+    display: inline-flex;
+    width: 2.35rem;
+    height: 2.35rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .7rem;
+}
+.crm-offers-access-campaign-kind-icon.is-offer {
+    background: #fff0f6;
+    color: #f72585;
+}
+.crm-offers-access-campaign-kind-icon.is-grant {
+    background: #edf6ff;
+    color: #257de8;
+}
+.crm-offers-access-campaign-kind-label {
+    color: #17213b;
+    font-size: .82rem;
+    font-weight: 850;
+}
+.crm-offers-access-campaign-status {
+    margin-top: .08rem;
+    color: #718096;
+    font-size: .68rem;
+}
+.crm-offers-access-campaign-workflow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid #edf1f6;
+    border-radius: .72rem;
+    overflow: hidden;
+}
+.crm-offers-access-campaign-step {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    gap: .48rem;
+    padding: .62rem .68rem;
+    border-right: 1px solid #edf1f6;
+    background: #fff;
+}
+.crm-offers-access-campaign-step:last-child {
+    border-right: 0;
+}
+.crm-offers-access-campaign-step.is-active {
+    background: rgba(91,75,138,.035);
+}
+.crm-offers-access-campaign-workflow.is-offer
+.crm-offers-access-campaign-step.is-active {
+    background: rgba(247,37,133,.035);
+}
+.crm-offers-access-campaign-workflow.is-grant
+.crm-offers-access-campaign-step.is-active {
+    background: rgba(37,125,232,.04);
+}
+.crm-offers-access-campaign-step-marker {
+    display: inline-flex;
+    flex: 0 0 1.65rem;
+    width: 1.65rem;
+    height: 1.65rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #94a3b8;
+    font-size: .66rem;
+}
+.crm-offers-access-campaign-step-marker.is-complete {
+    background: #eaf8f1;
+    color: #198754;
+}
+.crm-offers-access-campaign-step-marker.is-active {
+    background: #f3f0fb;
+    color: #5b4b8a;
+}
+.crm-offers-access-campaign-workflow.is-offer
+.crm-offers-access-campaign-step-marker.is-active {
+    background: #fff0f6;
+    color: #f72585;
+}
+.crm-offers-access-campaign-workflow.is-grant
+.crm-offers-access-campaign-step-marker.is-active {
+    background: #edf6ff;
+    color: #257de8;
+}
+.crm-offers-access-campaign-step-marker.is-error {
+    background: #fff1f2;
+    color: #dc3545;
+}
+.crm-offers-access-campaign-step-label {
+    color: #334155;
+    font-size: .7rem;
+    font-weight: 800;
+}
+.crm-offers-access-campaign-step-detail {
+    margin-top: .1rem;
+    color: #94a3b8;
+    font-size: .61rem;
+    line-height: 1.35;
+}
+.crm-offers-access-campaign-summary {
+    display: grid;
+    gap: .48rem;
+}
+.crm-offers-access-campaign-summary-row {
+    display: grid;
+    grid-template-columns: minmax(120px, .8fr) minmax(0, 1.4fr);
+    gap: .5rem;
+    align-items: baseline;
+}
+.crm-offers-access-campaign-summary-label {
+    color: #94a3b8;
+    font-size: .63rem;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+.crm-offers-access-campaign-summary-value {
+    color: #334155;
+    font-size: .75rem;
+    font-weight: 750;
+}
+.crm-offers-access-campaign-panel {
+    margin-top: 1rem;
+    padding: .9rem;
+    border: 1px solid #e4e9f1;
+    border-radius: .8rem;
+    background: #fff;
+}
+.crm-offers-access-campaign-panel-title {
+    margin-bottom: .7rem;
+    color: #334155;
+    font-size: .78rem;
+}
+.crm-offers-access-campaign-panel-title > .fa {
+    margin-right: .35rem;
+    color: #5b4b8a;
+}
+.crm-offers-access-campaign-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .55rem;
+}
+.crm-offers-access-campaign-metric {
+    padding: .62rem;
+    border: 1px solid #edf1f6;
+    border-radius: .65rem;
+    background: #fbfcfe;
+    text-align: center;
+}
+.crm-offers-access-campaign-metric-value {
+    color: #334155;
+    font-size: 1.05rem;
+    font-weight: 850;
+}
+.crm-offers-access-campaign-metric-label {
+    margin-top: .1rem;
+    color: #718096;
+    font-size: .63rem;
+}
+.crm-offers-access-campaign-metric.is-success
+.crm-offers-access-campaign-metric-value {
+    color: #198754;
+}
+.crm-offers-access-campaign-metric.is-error
+.crm-offers-access-campaign-metric-value {
+    color: #dc3545;
+}
+.crm-offers-access-campaign-panel-actions {
+    margin-top: .7rem;
+}
+.crm-offers-access-campaign-technical {
+    margin-top: .7rem;
+    border-top: 1px solid #eef2f7;
+}
+.crm-offers-access-campaign-technical-summary {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .55rem 0 .2rem;
+    color: #718096;
+    cursor: pointer;
+    font-size: .66rem;
+    list-style: none;
+}
+.crm-offers-access-campaign-technical-summary::-webkit-details-marker {
+    display: none;
+}
+.crm-offers-access-campaign-technical-body {
+    padding-top: .45rem;
+    color: #64748b;
+    font-size: .68rem;
+}
+@media (max-width: 767.98px) {
+    .crm-offers-access-campaign-workflow {
+        grid-template-columns: 1fr;
+    }
+    .crm-offers-access-campaign-step {
+        border-right: 0;
+        border-bottom: 1px solid #edf1f6;
+    }
+    .crm-offers-access-campaign-step:last-child {
+        border-bottom: 0;
+    }
+    .crm-offers-access-campaign-metrics {
+        grid-template-columns: 1fr;
+    }
+    .crm-offers-access-campaign-summary-row {
+        grid-template-columns: 1fr;
+        gap: .1rem;
+    }
+}
+
+
+/* Commerce 7.95N7.5 — operational lists for Offers, grants and campaigns. */
+.crm-offers-access-list-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-bottom: .75rem;
+}
+.crm-offers-access-filter-panel {
+    margin-bottom: .75rem;
+    padding: .75rem .85rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .78rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .025);
+}
+.crm-offers-access-filter-title {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin-bottom: .6rem;
+    color: #334155;
+    font-size: .78rem;
+}
+.crm-offers-access-filter-title > .fa {
+    color: #5b4b8a;
+}
+.crm-offers-access-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) repeat(3, minmax(145px, .8fr));
+    gap: .55rem;
+    align-items: end;
+}
+.crm-offers-access-filter-field {
+    min-width: 0;
+}
+.crm-offers-access-filter-field .form-label {
+    margin-bottom: .18rem;
+    color: #64748b;
+    font-size: .66rem;
+    font-weight: 700;
+}
+.crm-offers-access-filter-field .form-control,
+.crm-offers-access-filter-field .form-select {
+    min-height: 2.1rem;
+    border-color: #dfe5ee;
+    border-radius: .55rem;
+    font-size: .76rem;
+}
+.crm-offers-access-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: .55rem;
+}
+.crm-offers-access-result-summary {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin: .15rem 0 .55rem;
+    color: #334155;
+    font-size: .78rem;
+}
+.crm-offers-access-result-period {
+    padding: .15rem .4rem;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #718096;
+    font-size: .66rem;
+    font-weight: 650;
+}
+.crm-offers-access-list-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.crm-offers-access-list-table thead th {
+    border-bottom: 1px solid #dfe5ee;
+    background: #f8fafc;
+    color: #526077;
+    font-size: .72rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.crm-offers-access-list-table tbody td {
+    border-top: 0;
+    border-bottom: 1px solid #edf1f6;
+    color: #334155;
+    font-size: .76rem;
+}
+.crm-offers-access-list-table tbody tr:hover td {
+    background: #fbfcfe;
+}
+.crm-offers-access-client-link,
+.crm-offers-access-product-link,
+.crm-offers-access-name-link {
+    color: #263650;
+    font-weight: 750;
+    text-decoration: none;
+}
+.crm-offers-access-client-link:hover,
+.crm-offers-access-product-link:hover,
+.crm-offers-access-name-link:hover {
+    color: #263650;
+    text-decoration: underline;
+}
+.crm-offers-access-client-name {
+    color: #263650;
+    font-size: .76rem;
+    font-weight: 800;
+}
+.crm-offers-access-client-email {
+    margin-top: .08rem;
+    color: #718096;
+    font-size: .68rem;
+}
+.crm-offers-access-row-context {
+    margin-top: .16rem;
+    color: #718096;
+    font-size: .64rem;
+}
+.crm-offers-access-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.45rem;
+    padding: .16rem .45rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: .65rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+.crm-offers-access-status.is-success {
+    background: #eaf8f1;
+    color: #137a50;
+}
+.crm-offers-access-status.is-warning {
+    background: #fff7e8;
+    color: #a16207;
+}
+.crm-offers-access-status.is-error {
+    background: #fff1f2;
+    color: #c92a2a;
+}
+.crm-offers-access-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .65rem;
+    margin-bottom: .75rem;
+}
+.crm-offers-access-kpi {
+    padding: .75rem .8rem;
+    border: 1px solid #e6ebf2;
+    border-radius: .72rem;
+    background: #fff;
+}
+.crm-offers-access-kpi-value {
+    color: #25334c;
+    font-size: 1.25rem;
+    font-weight: 850;
+    line-height: 1;
+}
+.crm-offers-access-kpi-label {
+    margin-top: .24rem;
+    color: #718096;
+    font-size: .66rem;
+    font-weight: 650;
+}
+.crm-offers-access-kpi.is-success {
+    border-color: rgba(25,135,84,.16);
+    background: rgba(25,135,84,.025);
+}
+.crm-offers-access-kpi.is-success .crm-offers-access-kpi-value {
+    color: #198754;
+}
+.crm-offers-access-kpi.is-warning {
+    border-color: rgba(245,158,11,.18);
+    background: rgba(245,158,11,.025);
+}
+.crm-offers-access-kpi.is-warning .crm-offers-access-kpi-value {
+    color: #a16207;
+}
+.crm-offers-access-kpi.is-error {
+    border-color: rgba(220,53,69,.16);
+    background: rgba(220,53,69,.025);
+}
+.crm-offers-access-kpi.is-error .crm-offers-access-kpi-value {
+    color: #c92a2a;
+}
+.crm-offers-access-progress-track {
+    width: 100%;
+    min-width: 100px;
+    height: .38rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #eef2f7;
+}
+.crm-offers-access-progress-bar {
+    height: 100%;
+    border-radius: inherit;
+    background: #5b4b8a;
+}
+.crm-offers-access-progress-label {
+    margin-top: .18rem;
+    color: #718096;
+    font-size: .63rem;
+}
+.crm-offers-access-kind {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.45rem;
+    padding: .16rem .42rem;
+    border-radius: 999px;
+    font-size: .65rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+.crm-offers-access-kind.is-offer {
+    background: #fff0f6;
+    color: #d91c73;
+}
+.crm-offers-access-kind.is-grant {
+    background: #edf6ff;
+    color: #1769c2;
+}
+.crm-offers-access-row-actions {
+    position: relative;
+}
+.crm-offers-access-row-menu-trigger {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .5rem;
+    color: #64748b;
+    cursor: pointer;
+    list-style: none;
+}
+.crm-offers-access-row-menu-trigger::-webkit-details-marker {
+    display: none;
+}
+.crm-offers-access-row-actions[open] .crm-offers-access-row-menu-trigger,
+.crm-offers-access-row-menu-trigger:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+.crm-offers-access-row-menu {
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + .25rem);
+    right: 0;
+    display: grid;
+    min-width: 11rem;
+    padding: .3rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .62rem;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(15,23,42,.13);
+}
+.crm-offers-access-row-menu-item .btn {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    padding: .4rem .5rem;
+    border: 0;
+    background: transparent;
+    color: #475569;
+    font-size: .7rem;
+    text-align: left;
+}
+.crm-offers-access-row-menu-item .btn:hover {
+    background: #f8fafc;
+    color: #263650;
+}
+.crm-offers-access-recent {
+    margin-top: 1rem;
+    padding: .8rem;
+    border: 1px solid #e6ebf2;
+    border-radius: .75rem;
+    background: #fff;
+}
+.crm-offers-access-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .45rem;
+}
+.crm-offers-access-section-heading h2 {
+    margin: 0;
+    color: #334155;
+    font-size: .82rem;
+    font-weight: 800;
+}
+.crm-offers-access-section-link {
+    color: #5b4b8a;
+    font-size: .68rem;
+    font-weight: 700;
+}
+.crm-offers-access-recent-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+.crm-offers-access-recent-row {
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .42rem 0;
+    border-bottom: 1px solid #eef2f7;
+}
+.crm-offers-access-recent-link:last-child .crm-offers-access-recent-row {
+    border-bottom: 0;
+}
+.crm-offers-access-recent-name {
+    color: #334155;
+    font-size: .72rem;
+    font-weight: 750;
+}
+.crm-offers-access-recent-meta {
+    color: #718096;
+    font-size: .66rem;
+}
+@media (max-width: 991.98px) {
+    .crm-offers-access-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .crm-offers-access-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 575.98px) {
+    .crm-offers-access-filter-grid,
+    .crm-offers-access-kpis {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N7.6 — business-first individual offer/access details. */
+.crm-offers-access-detail-hero {
+    margin-bottom: .85rem;
+    padding: 1rem;
+    border: 1px solid #e4e9f1;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .035);
+}
+.crm-offers-access-detail-hero.is-offer {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(247,37,133,.035),
+            #fff 48%
+        );
+}
+.crm-offers-access-detail-hero.is-grant {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(37,125,232,.045),
+            #fff 48%
+        );
+}
+.crm-offers-access-detail-heading {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    margin-bottom: .8rem;
+}
+.crm-offers-access-detail-icon {
+    display: inline-flex;
+    flex: 0 0 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .72rem;
+}
+.crm-offers-access-detail-icon.is-offer {
+    background: #fff0f6;
+    color: #f72585;
+}
+.crm-offers-access-detail-icon.is-grant {
+    background: #edf6ff;
+    color: #257de8;
+}
+.crm-offers-access-detail-heading-copy {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.crm-offers-access-detail-title {
+    overflow: hidden;
+    color: #17213b;
+    font-size: 1rem;
+    font-weight: 850;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.crm-offers-access-detail-subtitle {
+    overflow: hidden;
+    margin-top: .08rem;
+    color: #718096;
+    font-size: .7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.crm-offers-access-status.is-offer {
+    background: #fff0f6;
+    color: #d91c73;
+}
+.crm-offers-access-detail-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .55rem;
+}
+.crm-offers-access-detail-fact {
+    min-width: 0;
+    padding: .58rem .62rem;
+    border: 1px solid #edf1f6;
+    border-radius: .62rem;
+    background: rgba(255,255,255,.72);
+}
+.crm-offers-access-detail-fact-label {
+    color: #94a3b8;
+    font-size: .59rem;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+.crm-offers-access-detail-fact-value {
+    overflow: hidden;
+    margin-top: .12rem;
+    color: #334155;
+    font-size: .72rem;
+    font-weight: 760;
+    text-overflow: ellipsis;
+}
+.crm-offers-access-detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin-bottom: .85rem;
+}
+.crm-offers-access-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+    margin-bottom: .85rem;
+}
+.crm-offers-access-detail-panel {
+    min-width: 0;
+    padding: .85rem;
+    border: 1px solid #e4e9f1;
+    border-radius: .78rem;
+    background: #fff;
+}
+.crm-offers-access-detail-panel-title {
+    display: flex;
+    align-items: center;
+    gap: .38rem;
+    margin-bottom: .65rem;
+    color: #334155;
+}
+.crm-offers-access-detail-panel-title > .fa {
+    color: #5b4b8a;
+}
+.crm-offers-access-detail-panel-title h2 {
+    margin: 0;
+    font-size: .78rem;
+    font-weight: 820;
+}
+.crm-offers-access-detail-rows {
+    display: grid;
+    gap: .42rem;
+}
+.crm-offers-access-detail-row {
+    display: grid;
+    grid-template-columns: minmax(110px, .75fr) minmax(0, 1.35fr);
+    gap: .55rem;
+    align-items: baseline;
+}
+.crm-offers-access-detail-row-label {
+    color: #94a3b8;
+    font-size: .61rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.crm-offers-access-detail-row-value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: #334155;
+    font-size: .72rem;
+    font-weight: 690;
+}
+.crm-offers-access-detail-link,
+.crm-offers-access-date-link {
+    color: #263650;
+    font-weight: 750;
+    text-decoration: none;
+}
+.crm-offers-access-detail-link:hover,
+.crm-offers-access-date-link:hover {
+    color: #263650;
+    text-decoration: underline;
+}
+.crm-offers-access-detail-management {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    align-items: center;
+}
+.crm-offers-access-reissue-form {
+    display: grid;
+    grid-template-columns: minmax(90px, 120px) auto;
+    gap: .4rem;
+    align-items: end;
+}
+.crm-offers-access-reissue-form .form-label {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+    color: #64748b;
+    font-size: .65rem;
+}
+.crm-offers-access-detail-technical {
+    margin-top: .75rem;
+    border: 1px solid #e7ebf1;
+    border-radius: .7rem;
+    background: #fbfcfe;
+}
+.crm-offers-access-detail-technical-summary {
+    display: flex;
+    align-items: center;
+    gap: .38rem;
+    padding: .58rem .7rem;
+    color: #64748b;
+    cursor: pointer;
+    font-size: .68rem;
+    list-style: none;
+}
+.crm-offers-access-detail-technical-summary::-webkit-details-marker {
+    display: none;
+}
+.crm-offers-access-detail-technical-summary > .fa {
+    color: #5b4b8a;
+}
+.crm-offers-access-detail-technical-title {
+    font-weight: 760;
+}
+.crm-offers-access-detail-technical-body {
+    padding: .7rem;
+    border-top: 1px solid #edf1f6;
+}
+.crm-offers-access-detail-metadata {
+    max-height: 320px;
+    overflow: auto;
+    margin: .55rem 0 0;
+    padding: .65rem;
+    border-radius: .55rem;
+    background: #111827;
+    color: #e5e7eb;
+    font-size: .62rem;
+}
+.crm-offers-access-secure-link {
+    display: block;
+    overflow-wrap: anywhere;
+    color: #334155;
+    font-size: .68rem;
+}
+@media (max-width: 991.98px) {
+    .crm-offers-access-detail-facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 767.98px) {
+    .crm-offers-access-detail-grid,
+    .crm-offers-access-detail-facts {
+        grid-template-columns: 1fr;
+    }
+    .crm-offers-access-detail-row {
+        grid-template-columns: 1fr;
+        gap: .08rem;
+    }
+    .crm-offers-access-detail-heading {
+        align-items: flex-start;
+    }
+}
+
+
+/* Commerce 7.95N7.7 — final Offers & access consolidation and responsive polish. */
+.crm-offers-access-filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin: -.15rem 0 .65rem;
+}
+.crm-offers-access-filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .18rem;
+    min-height: 1.65rem;
+    padding: .2rem .4rem .2rem .48rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #fff;
+    color: #526077;
+    font-size: .64rem;
+    text-decoration: none;
+}
+.crm-offers-access-filter-pill:hover {
+    border-color: #d6dce6;
+    background: #f8fafc;
+    color: #334155;
+    text-decoration: none;
+}
+.crm-offers-access-filter-pill-label {
+    color: #94a3b8;
+    font-weight: 650;
+}
+.crm-offers-access-filter-pill-value {
+    font-weight: 760;
+}
+.crm-offers-access-filter-pill-remove {
+    display: inline-flex;
+    width: 1.05rem;
+    height: 1.05rem;
+    align-items: center;
+    justify-content: center;
+    margin-left: .1rem;
+    border-radius: 50%;
+    color: #94a3b8;
+    font-size: .82rem;
+    line-height: 1;
+}
+.crm-offers-access-filter-pill:hover
+.crm-offers-access-filter-pill-remove {
+    background: #eef2f7;
+    color: #475569;
+}
+.crm-offers-access-empty {
+    display: flex;
+    min-height: 190px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .38rem;
+    margin-bottom: .8rem;
+    padding: 1.3rem;
+    border: 1px dashed #dbe2eb;
+    border-radius: .8rem;
+    background: #fbfcfe;
+    text-align: center;
+}
+.crm-offers-access-empty-icon {
+    display: inline-flex;
+    width: 2.65rem;
+    height: 2.65rem;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: .15rem;
+    border-radius: .72rem;
+    background: #f3f0fb;
+    color: #5b4b8a;
+    font-size: 1rem;
+}
+.crm-offers-access-empty-title {
+    margin: 0;
+    color: #334155;
+    font-size: .82rem;
+    font-weight: 820;
+}
+.crm-offers-access-empty-description {
+    max-width: 520px;
+    margin-bottom: .3rem;
+    color: #718096;
+    font-size: .69rem;
+    line-height: 1.45;
+}
+.crm-offers-access-row-actions[open] {
+    z-index: 60;
+}
+.crm-offers-access-list-table td:last-child,
+.crm-offers-access-list-table th:last-child {
+    text-align: right;
+}
+.crm-offers-access-list-table td {
+    vertical-align: middle;
+}
+.crm-offers-access-detail-actions .btn,
+.crm-offers-access-list-actions .btn {
+    white-space: nowrap;
+}
+.crm-offers-access-subnav,
+.crm-offers-access-navigation {
+    scrollbar-width: thin;
+}
+@media (max-width: 991.98px) {
+    .crm-offers-access-list-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    .crm-offers-access-list-table tbody,
+    .crm-offers-access-list-table thead {
+        width: max-content;
+        min-width: 100%;
+    }
+    .crm-offers-access-list-actions {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: .15rem;
+    }
+}
+@media (max-width: 575.98px) {
+    .crm-offers-access-filter-panel {
+        padding: .65rem;
+    }
+    .crm-offers-access-filter-actions {
+        justify-content: stretch;
+    }
+    .crm-offers-access-filter-actions .btn {
+        flex: 1 1 0;
+    }
+    .crm-offers-access-detail-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+    .crm-offers-access-detail-actions .btn {
+        width: 100%;
+        text-align: left;
+    }
+    .crm-offers-access-row-menu {
+        position: fixed;
+        z-index: 1000;
+        right: .75rem;
+        bottom: .75rem;
+        top: auto;
+        left: .75rem;
+        min-width: 0;
+    }
+}
+
+
+/* N7.7 corrective pass — semantic actions on individual Offers & access pages. */
+.crm-offers-access-action {
+    border-width: 1px;
+    font-weight: 700;
+}
+.crm-offers-access-action.is-client {
+    background: #fff;
+    border-color: #d9dee8;
+    color: #526077;
+}
+.crm-offers-access-action.is-sale {
+    background: #f5f9ff;
+    border-color: #b8d3f5;
+    color: #315f93;
+}
+.crm-offers-access-action.is-communication {
+    background: #fff5fa;
+    border-color: #f2b8d4;
+    color: #b42369;
+}
+.crm-offers-access-action.is-campaign {
+    background: #f7f4ff;
+    border-color: #d7caf6;
+    color: #654ca3;
+}
+.crm-offers-access-action.is-success {
+    background: #f3fbf6;
+    border-color: #b9e0c6;
+    color: #287044;
+}
+.crm-offers-access-action.is-client:hover,
+.crm-offers-access-action.is-sale:hover,
+.crm-offers-access-action.is-communication:hover,
+.crm-offers-access-action.is-campaign:hover,
+.crm-offers-access-action.is-success:hover {
+    filter: brightness(.97);
+}
+
+
+/* N7.8 — individual offer creation polish. */
+.local-subscriptions-commerce-personal-offer-create-page
+.crm-offers-access-currency-input::placeholder {
+    color: #aeb7c5;
+    font-style: italic;
+    opacity: 1;
+}
+.local-subscriptions-commerce-personal-offer-create-page
+.crm-offers-access-no-expiration {
+    padding: .58rem .65rem;
+    border: 1px solid #edf1f6;
+    border-radius: .62rem;
+    background: #fbfcfe;
+}
+.local-subscriptions-commerce-personal-offer-create-page
+.crm-offers-access-no-expiration .form-check {
+    margin-bottom: 0;
+}
+.local-subscriptions-commerce-personal-offer-create-page
+.crm-offers-access-no-expiration label {
+    color: #475569;
+    font-size: .74rem;
+    font-weight: 700;
+}
+
+
+/* N7.9 — individual offer create/detail final UX corrections. */
+.local-subscriptions-commerce-personal-offer-create-page
+.crm-offers-access-advanced + .row {
+    margin-top: .85rem;
+}
+.local-subscriptions-commerce-personal-offer-create-page
+.crm-offers-access-no-expiration .form-check {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+}
+.local-subscriptions-commerce-personal-offer-create-page
+.crm-offers-access-no-expiration .form-check-input {
+    margin: 0;
+}
+.crm-offers-access-communication-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-top: .65rem;
+}
+.crm-offers-access-mail-preview-panel {
+    grid-column: 1 / -1;
+}
+.crm-offers-access-mail-preview-heading {
+    margin-bottom: .55rem;
+}
+.crm-offers-access-mail-preview-subject {
+    color: #334155;
+    font-size: .74rem;
+}
+.crm-offers-access-mail-preview-frame {
+    display: block;
+    width: 100%;
+    min-height: 620px;
+    border: 1px solid #e2e8f0;
+    border-radius: .65rem;
+    background: #fff;
+}
+.crm-offers-access-secure-link-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .6rem;
+    align-items: center;
+}
+.crm-offers-access-secure-link {
+    padding: .5rem .6rem;
+    border: 1px solid #edf1f6;
+    border-radius: .5rem;
+    background: #fff;
+}
+@media (max-width: 767.98px) {
+    .crm-offers-access-secure-link-row {
+        grid-template-columns: 1fr;
+    }
+    .crm-offers-access-mail-preview-frame {
+        min-height: 520px;
+    }
+}
+
+
+/* Offers & access — final screen harmonisation. */
+.local-subscriptions-commerce-personal-offer-create-page
+.crm-personal-offer-conditions-after-communication {
+    margin-top: 1rem;
+}
+.crm-personal-offer-conditions-validity {
+    padding-top: .1rem;
+}
+.crm-personal-offer-conditions-pricing
+.crm-offers-access-currency-input::placeholder {
+    color: #b5bdc9;
+    font-style: italic;
+    opacity: 1;
+}
+.crm-offers-filter-panel {
+    margin-bottom: .8rem;
+}
+.crm-offers-filter-form {
+    margin: 0;
+}
+.crm-offers-filter-form .crm-sales-filter-grid {
+    align-items: end;
+}
+.crm-sales-filter-custom-period {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .65rem;
+    margin-top: .65rem;
+}
+.crm-offers-access-condition-price {
+    white-space: nowrap;
+}
+.crm-offers-access-action-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .35rem;
+}
+.crm-offers-access-row-menu-trigger.is-prominent {
+    border: 1px solid #d9e0e9;
+    background: #fff;
+    color: #475569;
+}
+.crm-offers-access-row-menu-trigger.is-prominent:hover,
+.crm-offers-access-row-actions[open]
+.crm-offers-access-row-menu-trigger.is-prominent {
+    border-color: #c7d0dc;
+    background: #f8fafc;
+    color: #263650;
+}
+.crm-offers-access-row-menu-group + .crm-offers-access-row-menu-group {
+    margin-top: .25rem;
+    padding-top: .25rem;
+    border-top: 1px solid #eef2f7;
+}
+.crm-offers-access-row-menu-heading {
+    padding: .28rem .5rem .18rem;
+    color: #94a3b8;
+    font-size: .58rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.crm-offers-access-menu-link {
+    display: block;
+    padding: .4rem .5rem;
+    border-radius: .42rem;
+    color: #475569;
+    font-size: .7rem;
+    text-decoration: none;
+}
+.crm-offers-access-menu-link:hover {
+    background: #f8fafc;
+    color: #263650;
+    text-decoration: none;
+}
+.crm-offers-access-menu-link.is-warning {
+    color: #9a6700;
+}
+.local-subscriptions-commerce-personal-offer-campaign-edit-page
+.crm-offers-access-config-summary {
+    top: 82px;
+}
+.crm-offers-access-form-actions {
+    margin-top: .25rem;
+    margin-bottom: 1rem;
+}
+.crm-offers-access-recent-activity {
+    display: grid;
+}
+.crm-offers-access-recent-activity-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: .65rem;
+    align-items: center;
+    padding: .58rem .1rem;
+    border-bottom: 1px solid #eef2f7;
+    color: inherit;
+    text-decoration: none;
+}
+.crm-offers-access-recent-activity-row:last-child {
+    border-bottom: 0;
+}
+.crm-offers-access-recent-activity-row:hover {
+    background: #fbfcfe;
+    text-decoration: none;
+}
+.crm-offers-access-recent-activity-icon {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .55rem;
+}
+.crm-offers-access-recent-activity-icon.is-offer {
+    background: #fff0f6;
+    color: #d91c73;
+}
+.crm-offers-access-recent-activity-icon.is-grant {
+    background: #edf6ff;
+    color: #1769c2;
+}
+.crm-offers-access-recent-activity-icon.is-campaign {
+    background: #f3f0fb;
+    color: #654ca3;
+}
+.crm-offers-access-recent-activity-title {
+    color: #334155;
+    font-size: .72rem;
+    font-weight: 750;
+}
+.crm-offers-access-recent-activity-time {
+    margin-top: .08rem;
+    color: #718096;
+    font-size: .64rem;
+}
+@media (max-width: 767.98px) {
+    .crm-sales-filter-custom-period {
+        grid-template-columns: 1fr;
+    }
+    .local-subscriptions-commerce-personal-offer-campaign-edit-page
+    .crm-offers-access-config-summary {
+        top: auto;
+    }
+}
+
+
+/* Commerce 7.95N7.10.1 — visual QA corrections. */
+.local-subscriptions-commerce-personal-offers-page .crm-sales-actions {
+    justify-content: flex-start;
+    text-align: left;
+}
+.local-subscriptions-commerce-personal-offers-page .crm-sales-row-menu {
+    right: 0;
+    text-align: left;
+}
+.local-subscriptions-commerce-personal-offers-page .crm-sales-row-menu-toggle {
+    min-width: 1.9rem;
+    padding-left: .42rem;
+    padding-right: .42rem;
+}
+.local-subscriptions-commerce-personal-offers-page
+.crm-sales-filter-search-control > .form-control {
+    padding-left: .75rem;
+}
+.local-subscriptions-commerce-personal-offer-campaign-edit-page
+.crm-offers-access-config-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    align-items: start;
+}
+.local-subscriptions-commerce-personal-offer-campaign-edit-page
+.crm-offers-access-config-main {
+    grid-column: 1;
+    grid-row: 1;
+}
+.local-subscriptions-commerce-personal-offer-campaign-edit-page
+.crm-offers-access-config-summary {
+    position: sticky;
+    top: 82px;
+    grid-column: 2;
+    grid-row: 1;
+}
+.local-subscriptions-commerce-personal-offer-campaign-edit-page
+.crm-offers-access-form-actions {
+    justify-content: flex-start;
+    padding: .15rem 0 .35rem;
+}
+@media (max-width: 991.98px) {
+    .local-subscriptions-commerce-personal-offer-campaign-edit-page
+    .crm-offers-access-config-layout {
+        grid-template-columns: 1fr;
+    }
+    .local-subscriptions-commerce-personal-offer-campaign-edit-page
+    .crm-offers-access-config-main,
+    .local-subscriptions-commerce-personal-offer-campaign-edit-page
+    .crm-offers-access-config-summary {
+        grid-column: 1;
+        grid-row: auto;
+    }
+    .local-subscriptions-commerce-personal-offer-campaign-edit-page
+    .crm-offers-access-config-summary {
+        position: static;
+    }
+}
+
+
+/* Commerce 7.95N7.10.2 — post-QA layout fixes. */
+.local-subscriptions-commerce-personal-offers-page
+.crm-offers-filter-form .crm-sales-filter-actions {
+    margin-top: 1.15rem;
+    padding-top: .15rem;
+}
+.local-subscriptions-commerce-personal-offers-page
+.crm-offers-result-summary {
+    margin: .9rem 0 .75rem;
+}
+.local-subscriptions-commerce-personal-offer-campaign-edit-page
+.crm-offers-access-config-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    gap: 1rem;
+    align-items: start;
+}
+.local-subscriptions-commerce-personal-offer-campaign-edit-page
+.crm-offers-access-config-main {
+    grid-column: 1;
+    min-width: 0;
+}
+.local-subscriptions-commerce-personal-offer-campaign-edit-page
+.crm-offers-access-config-summary {
+    position: sticky;
+    top: 82px;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+}
+.local-subscriptions-commerce-personal-offer-campaign-edit-page
+.crm-offers-access-form-actions {
+    margin-top: .2rem;
+    padding: .15rem 0 .6rem;
+}
+@media (max-width: 991.98px) {
+    .local-subscriptions-commerce-personal-offer-campaign-edit-page
+    .crm-offers-access-config-layout {
+        grid-template-columns: 1fr;
+    }
+    .local-subscriptions-commerce-personal-offer-campaign-edit-page
+    .crm-offers-access-config-main,
+    .local-subscriptions-commerce-personal-offer-campaign-edit-page
+    .crm-offers-access-config-summary {
+        grid-column: 1;
+        grid-row: auto;
+    }
+    .local-subscriptions-commerce-personal-offer-campaign-edit-page
+    .crm-offers-access-config-summary {
+        position: static;
+    }
+}
+
+
+/* Commerce 7.95N7.11 — Attributions use the blue semantic family. */
+.local-subscriptions-commerce-personal-offers-page
+.crm-offers-access-list-table th:last-child {
+    text-align: left;
+}
+
+.crm-grant-action-primary,
+.local-subscriptions-commerce-grants-bulk-page .btn.btn-primary {
+    border-color: #257de8 !important;
+    background: #257de8 !important;
+    color: #fff !important;
+}
+.crm-grant-action-primary:hover,
+.crm-grant-action-primary:focus,
+.local-subscriptions-commerce-grants-bulk-page .btn.btn-primary:hover,
+.local-subscriptions-commerce-grants-bulk-page .btn.btn-primary:focus {
+    border-color: #1769c2 !important;
+    background: #1769c2 !important;
+    color: #fff !important;
+}
+.crm-grant-action-outline {
+    border-color: #257de8 !important;
+    background: #fff !important;
+    color: #1769c2 !important;
+}
+.crm-grant-action-outline:hover,
+.crm-grant-action-outline:focus {
+    border-color: #1769c2 !important;
+    background: #edf6ff !important;
+    color: #145aa7 !important;
+}
+
+.crm-grant-individual-form {
+    padding: 1rem;
+    border: 1px solid #dce8f7;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 .35rem 1rem rgba(37, 125, 232, .05);
+}
+.crm-grant-individual-form .crm-grant-form-section {
+    padding: 0 0 1rem;
+    margin: 0 0 1rem;
+    border-bottom: 1px solid #edf2f7;
+}
+.crm-grant-individual-form .crm-grant-form-section:last-of-type {
+    border-bottom: 0;
+}
+.crm-grant-individual-form .crm-grant-form-title {
+    margin: 0 0 .65rem;
+    color: #20304a;
+    font-size: .92rem;
+    font-weight: 800;
+}
+.crm-grant-individual-form .form-group {
+    max-width: none;
+}
+.crm-grant-individual-form .form-check-input:checked,
+.crm-grant-individual-form input[type="radio"]:checked {
+    accent-color: #257de8;
+}
+.crm-grant-individual-form .crm-grant-submit-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    align-items: center;
+    margin-top: .35rem;
+}
+
+
+/* Commerce 7.95N7.12 — Attribution workflow polish. */
+.crm-grant-individual-form {
+    padding: 1rem 1.15rem;
+    border: 1px solid #dfe8f3;
+    border-left: 3px solid #257de8;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 .35rem 1rem rgba(37,125,232,.045);
+}
+.crm-grant-individual-form .crm-grant-form-section {
+    margin: 0 0 1rem;
+    padding: 0 0 1rem;
+    border-bottom: 1px solid #edf2f7;
+}
+.crm-grant-individual-form .crm-grant-form-title {
+    color: #24344f;
+}
+.crm-grant-mail-check,
+.crm-grant-schedule-check {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+}
+.crm-grant-mail-check .form-check-input,
+.crm-grant-schedule-check .form-check-input {
+    margin: 0;
+}
+.crm-grant-selection-actions {
+    padding-top: .45rem;
+}
+.crm-offers-access-preview-client-link {
+    color: #263650;
+    font-weight: 760;
+    text-decoration: none;
+}
+.crm-offers-access-preview-client-link:hover {
+    color: #1769c2;
+    text-decoration: underline;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-panel {
+    font-size: .76rem;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-metric-label {
+    font-size: .66rem;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-metric-value {
+    font-size: 1rem;
+}
+
+.local-subscriptions-commerce-grant-campaign-view-page .btn-primary {
+    border-color: #257de8 !important;
+    background: #257de8 !important;
+    color: #fff !important;
+}
+.local-subscriptions-commerce-grant-campaign-view-page .btn-outline-primary {
+    border-color: #257de8 !important;
+    background: #fff !important;
+    color: #1769c2 !important;
+}
+.local-subscriptions-commerce-grant-campaign-view-page .btn-outline-primary:hover {
+    background: #edf6ff !important;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-panel-title {
+    font-size: .82rem;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-panel-actions {
+    margin-top: .7rem;
+}
+
+
+/* Commerce 7.95N7.13 — Attributions workspace harmonisation. */
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-tab.is-active {
+    color: #1769c2;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-tab.is-active::after {
+    background: #257de8;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-list-table th:last-child,
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-list-table td:last-child {
+    text-align: left;
+}
+.local-subscriptions-commerce-grants-page
+.crm-sales-filter-panel {
+    margin-bottom: .8rem;
+}
+.local-subscriptions-commerce-grants-page
+.crm-sales-filter-actions {
+    margin-top: 1.05rem;
+}
+.local-subscriptions-commerce-grants-page
+.crm-grants-result-summary {
+    margin: .9rem 0 .75rem;
+}
+.local-subscriptions-commerce-grants-page
+.crm-sales-actions {
+    justify-content: flex-start;
+    text-align: left;
+}
+.local-subscriptions-commerce-grants-page
+.crm-sales-row-menu {
+    right: 0;
+    text-align: left;
+}
+.local-subscriptions-commerce-grants-page
+.crm-sales-row-menu-toggle {
+    min-width: 1.9rem;
+    padding-right: .42rem;
+    padding-left: .42rem;
+}
+.local-subscriptions-commerce-grants-page
+.crm-result-scope-pill {
+    border-color: #cfe1f7;
+    background: #f5f9ff;
+}
+.local-subscriptions-commerce-grants-page
+.crm-result-scope-pill-remove {
+    color: #1769c2;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent {
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: .8rem;
+    background: #f8fafc;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent-row {
+    padding: .7rem .8rem;
+    background: #f8fafc;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent-link + .crm-offers-access-recent-link
+.crm-offers-access-recent-row {
+    border-top: 1px solid #e8edf3;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-section-heading h2 {
+    display: flex;
+    align-items: center;
+    color: #263650;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-section-heading h2 .fa {
+    color: #257de8;
+}
+.local-subscriptions-commerce-grants-page
+.btn-primary,
+.local-subscriptions-commerce-grants-page
+.crm-grant-action-primary {
+    border-color: #257de8 !important;
+    background: #257de8 !important;
+    color: #fff !important;
+}
+.local-subscriptions-commerce-grants-page
+.btn-primary:hover,
+.local-subscriptions-commerce-grants-page
+.crm-grant-action-primary:hover {
+    border-color: #1769c2 !important;
+    background: #1769c2 !important;
+}
+.local-subscriptions-commerce-grants-page
+.crm-grant-action-outline {
+    border-color: #257de8 !important;
+    background: #fff !important;
+    color: #1769c2 !important;
+}
+.local-subscriptions-commerce-grants-page
+.crm-grant-action-outline:hover {
+    background: #edf6ff !important;
+}
+
+
+/* Commerce 7.95N7.14 — recent attribution campaigns row hierarchy. */
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent {
+    background: #fff;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent-row {
+    background: #fff;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent-link:first-of-type
+.crm-offers-access-recent-row {
+    border-bottom: 1px solid #e3e8ef;
+    background: #f6f8fb;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent-link + .crm-offers-access-recent-link
+.crm-offers-access-recent-row {
+    border-top: 0;
+}
+
+
+/* Commerce 7.95N7.15 — attribution campaign and Offers polish. */
+
+/* Semantic tab colours. Overview and Campaigns intentionally remain purple. */
+.crm-offers-access-tab.is-offer.is-active {
+    color: #f72585;
+}
+.crm-offers-access-tab.is-offer.is-active::after {
+    background: #f72585;
+}
+.crm-offers-access-tab.is-grant.is-active {
+    color: #1769c2;
+}
+.crm-offers-access-tab.is-grant.is-active::after {
+    background: #257de8;
+}
+
+/* Recent attribution campaigns: highlight the header, not a data row. */
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent {
+    border: 0;
+    border-radius: 0 0 .8rem .8rem;
+    background: #fff;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-panel-head {
+    margin: 0;
+    padding: .72rem .82rem;
+    border: 1px solid #e2e8f0;
+    border-bottom: 1px solid #d9e0e9;
+    border-radius: .8rem .8rem 0 0;
+    background: #f6f8fb;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent-row,
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent-link:first-of-type
+.crm-offers-access-recent-row {
+    border: 0;
+    border-bottom: 1px solid #edf1f6;
+    background: #fff;
+}
+.local-subscriptions-commerce-grants-page
+.crm-offers-access-recent-link:last-child
+.crm-offers-access-recent-row {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Grant campaign KPIs: one horizontal 5-card row on desktop. */
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-metrics {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .7rem;
+    margin-bottom: 1rem;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-metric {
+    min-height: 78px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #fff;
+    text-align: left;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-metric.is-primary {
+    border-color: #bcd7f7;
+    background: #edf6ff;
+    box-shadow: inset 3px 0 0 #257de8;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-metric.is-primary
+.crm-offers-access-campaign-metric-value {
+    color: #1769c2;
+}
+
+/* Communication mail preview. */
+.crm-offers-access-campaign-preview {
+    margin-top: .85rem;
+    border-top: 1px solid #edf1f6;
+}
+.crm-offers-access-campaign-preview-summary {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .7rem 0 .15rem;
+    color: #42526a;
+    cursor: pointer;
+    font-size: .72rem;
+    font-weight: 750;
+    list-style: none;
+}
+.crm-offers-access-campaign-preview-summary::-webkit-details-marker {
+    display: none;
+}
+.crm-offers-access-campaign-preview-summary .fa {
+    color: #257de8;
+}
+.crm-offers-access-campaign-preview-body {
+    padding-top: .65rem;
+}
+.crm-offers-access-campaign-preview-frame {
+    width: 100%;
+    min-height: 540px;
+    border: 1px solid #e2e8f0;
+    border-radius: .75rem;
+    background: #f8fafc;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-panel {
+    margin-bottom: 1.25rem;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-grant-campaign-members-table {
+    margin-top: .35rem;
+}
+
+/* Personal-offer status badges are deliberately easier to scan. */
+.local-subscriptions-commerce-personal-offers-page
+.crm-offers-access-list-table td:nth-child(5) .badge {
+    padding: .42rem .7rem;
+    border-radius: 999px;
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+@media (max-width: 991.98px) {
+    .local-subscriptions-commerce-grant-campaign-view-page
+    .crm-offers-access-campaign-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+@media (max-width: 767.98px) {
+    .local-subscriptions-commerce-grant-campaign-view-page
+    .crm-offers-access-campaign-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .crm-offers-access-campaign-preview-frame {
+        min-height: 430px;
+    }
+}
+
+/* Commerce 7.95N7.16 — definitive recent-grant header hierarchy. */
+.local-subscriptions-commerce-grants-page .crm-offers-access-recent {
+    padding: 0 !important; overflow: hidden; border: 1px solid #e2e8f0 !important;
+    border-radius: .8rem !important; background: #fff !important;
+}
+.local-subscriptions-commerce-grants-page .crm-offers-access-recent > .crm-offers-access-section-heading {
+    margin: 0 !important; padding: .72rem .82rem !important;
+    background: #f3f5f8 !important; border-bottom: 1px solid #d9e0e9 !important;
+}
+.local-subscriptions-commerce-grants-page .crm-offers-access-recent > .crm-offers-access-recent-link .crm-offers-access-recent-row {
+    margin: 0 .82rem; padding: .58rem 0; background: #fff !important;
+    border-bottom: 1px solid #eef2f7 !important;
+}
+.local-subscriptions-commerce-grants-page .crm-offers-access-recent > .crm-offers-access-recent-link:last-child .crm-offers-access-recent-row { border-bottom: 0 !important; }
+
+/* Commerce 7.95N7.16 — Campaigns workspace: purple semantics and compact monitoring. */
+.local-subscriptions-commerce-offers-access-campaigns-page .btn-primary,
+.local-subscriptions-commerce-personal-offer-campaign-view-page .btn-primary {
+    border-color:#6f52b5 !important; background:#6f52b5 !important; color:#fff !important;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page .btn-primary:hover,
+.local-subscriptions-commerce-personal-offer-campaign-view-page .btn-primary:hover {
+    border-color:#5c419f !important; background:#5c419f !important;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page .crm-campaign-view-button {
+    border:1px solid #6f52b5; background:#fff; color:#5c419f;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page .crm-campaign-view-button:hover { background:#f5f1ff; color:#4e378a; }
+.local-subscriptions-commerce-offers-access-campaigns-page .crm-offers-access-list-table th:last-child,
+.local-subscriptions-commerce-offers-access-campaigns-page .crm-offers-access-list-table td:last-child { text-align:left !important; }
+.local-subscriptions-commerce-offers-access-campaigns-page .crm-campaign-actions { justify-content:flex-start; }
+.local-subscriptions-commerce-offers-access-campaigns-page .crm-offers-access-progress-label::before { content:'Traités : '; color:#718096; }
+.local-subscriptions-commerce-offers-access-campaigns-page .crm-sales-filter-card { margin-top:.85rem; }
+
+/* Offer campaign detail: same compact density as attribution campaigns. */
+.local-subscriptions-commerce-personal-offer-campaign-view-page .crm-offers-access-campaign-summary,
+.local-subscriptions-commerce-personal-offer-campaign-view-page .commerce-design-system-panel { padding:.75rem .9rem; }
+.local-subscriptions-commerce-personal-offer-campaign-view-page .crm-offers-access-campaign-metrics,
+.local-subscriptions-commerce-personal-offer-campaign-view-page .commerce-design-system-metrics { gap:.55rem; }
+.local-subscriptions-commerce-personal-offer-campaign-view-page .crm-offers-access-campaign-metric,
+.local-subscriptions-commerce-personal-offer-campaign-view-page .commerce-design-system-metric { min-height:64px; padding:.62rem .72rem; }
+.local-subscriptions-commerce-personal-offer-campaign-view-page h3 { margin-top:1rem; font-size:1rem; }
+.local-subscriptions-commerce-personal-offer-campaign-view-page .alert { padding:.65rem .8rem; margin-bottom:.7rem; }
+.local-subscriptions-commerce-personal-offer-campaign-view-page #campaign-audience { margin-top:1rem; }
+
+
+/* Commerce 7.95N7.17 — Campaigns and campaign detail harmonisation. */
+
+/* Unified Campaigns workspace keeps the purple semantic family. */
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaign-action-primary {
+    border-color: #6f55b6 !important;
+    background: #6f55b6 !important;
+    color: #fff !important;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaign-action-primary:hover,
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaign-action-primary:focus {
+    border-color: #5d469d !important;
+    background: #5d469d !important;
+    color: #fff !important;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaign-action-outline,
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaign-view-button {
+    border: 1px solid #6f55b6 !important;
+    background: #fff !important;
+    color: #6249a5 !important;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaign-action-outline:hover,
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaign-view-button:hover {
+    border-color: #5d469d !important;
+    background: #f6f3fd !important;
+    color: #533b93 !important;
+}
+
+/* Filter panel follows Sales / Emails / Offers spacing. */
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaigns-filter-panel {
+    margin-bottom: .8rem;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaigns-filter-form .crm-sales-filter-actions {
+    margin-top: 1.15rem;
+    padding-top: .15rem;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-campaigns-result-summary {
+    margin: .9rem 0 .75rem;
+}
+
+/* Campaign action menu must float over the table instead of being clipped. */
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-offers-access-list-table,
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-offers-access-list-table tbody,
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-offers-access-list-table tr,
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-offers-access-list-table td {
+    overflow: visible;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-sales-actions {
+    justify-content: flex-start;
+    text-align: left;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-sales-row-actions-menu {
+    position: relative;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-sales-row-actions-menu[open] {
+    z-index: 80;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-sales-row-menu {
+    right: 0;
+    left: auto;
+    z-index: 90;
+    min-width: 225px;
+    text-align: left;
+    white-space: normal;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-sales-row-menu-link {
+    display: block;
+    padding: .42rem .5rem;
+    border-radius: .42rem;
+    color: #475569;
+    text-decoration: none;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-sales-row-menu-link:hover {
+    background: #f7f5fc;
+    color: #533b93;
+    text-decoration: none;
+}
+
+/* Beneficiary processing is deliberately distinct from workflow steps. */
+.crm-campaign-processing {
+    min-width: 150px;
+}
+.crm-campaign-processing-copy {
+    margin-bottom: .3rem;
+    color: #52627a;
+    font-size: .67rem;
+    font-weight: 700;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-offers-access-progress-track {
+    height: 5px;
+    border-radius: 999px;
+    background: #ede9f7;
+}
+.local-subscriptions-commerce-offers-access-campaigns-page
+.crm-offers-access-progress-bar {
+    border-radius: 999px;
+    background: #6f55b6;
+}
+
+/* Compact personal-offer campaign detail. */
+.local-subscriptions-commerce-personal-offer-campaign-view-page
+.crm-offer-campaign-summary-panel {
+    margin-top: .75rem;
+}
+.local-subscriptions-commerce-personal-offer-campaign-view-page
+.crm-offers-access-campaign-metrics {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .7rem;
+    margin: .75rem 0 .3rem;
+}
+.local-subscriptions-commerce-personal-offer-campaign-view-page
+.crm-offers-access-campaign-metric {
+    min-height: 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.local-subscriptions-commerce-personal-offer-campaign-view-page
+.crm-offers-access-campaign-metric.is-primary {
+    border-color: #f5b8d4;
+    background: #fff4f9;
+    box-shadow: inset 3px 0 0 #f72585;
+}
+.local-subscriptions-commerce-personal-offer-campaign-view-page
+.crm-offers-access-campaign-metric.is-primary
+.crm-offers-access-campaign-metric-value {
+    color: #d91c73;
+}
+.crm-offer-campaign-secondary-counts {
+    margin: 0 0 1rem;
+    color: #718096;
+    font-size: .68rem;
+}
+.crm-offer-campaign-summary-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .65rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: .7rem;
+    padding-top: .65rem;
+    border-top: 1px solid #edf1f6;
+}
+.crm-offer-campaign-certification-status {
+    color: #64748b;
+    font-size: .7rem;
+}
+.crm-offer-campaign-certification-status.is-ready {
+    color: #17895a;
+    font-weight: 700;
+}
+
+/* Communication must be visually separated from the audience table. */
+.local-subscriptions-commerce-personal-offer-campaign-view-page
+.crm-offers-access-campaign-panel {
+    margin-top: 1rem;
+    margin-bottom: 1.25rem;
+}
+.local-subscriptions-commerce-personal-offer-campaign-view-page
+.crm-offers-access-campaign-preview-frame {
+    min-height: 520px;
+}
+
+/* Audience table: business-level columns; technical proof is collapsible. */
+.crm-offer-campaign-audience-table {
+    margin-top: .45rem;
+}
+.crm-offer-campaign-audience-table th,
+.crm-offer-campaign-audience-table td {
+    vertical-align: middle;
+}
+.crm-offer-campaign-client-name {
+    color: #263650;
+    font-weight: 760;
+}
+.crm-offer-campaign-client-email {
+    margin-top: .08rem;
+    color: #718096;
+    font-size: .68rem;
+}
+.crm-offer-campaign-client-details {
+    min-width: 170px;
+}
+.crm-offer-campaign-client-details-summary {
+    color: #6249a5;
+    cursor: pointer;
+    font-size: .69rem;
+    font-weight: 750;
+    list-style: none;
+}
+.crm-offer-campaign-client-details-summary::-webkit-details-marker {
+    display: none;
+}
+.crm-offer-campaign-client-details-body {
+    min-width: 310px;
+    max-width: 520px;
+    margin-top: .5rem;
+    padding: .65rem .75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: .65rem;
+    background: #fafafa;
+}
+.crm-offer-campaign-client-details-list {
+    display: grid;
+    grid-template-columns: minmax(105px, auto) minmax(0, 1fr);
+    gap: .3rem .7rem;
+    font-size: .67rem;
+}
+.crm-offer-campaign-client-details-list dt {
+    color: #64748b;
+    font-weight: 750;
+}
+.crm-offer-campaign-client-details-list dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Grant detail wording changed from Snapshot to Summary; keep compact spacing. */
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-offers-access-campaign-summary {
+    margin-bottom: .1rem;
+}
+
+@media (max-width: 991.98px) {
+    .local-subscriptions-commerce-personal-offer-campaign-view-page
+    .crm-offers-access-campaign-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+@media (max-width: 767.98px) {
+    .local-subscriptions-commerce-personal-offer-campaign-view-page
+    .crm-offers-access-campaign-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .crm-offer-campaign-client-details-body {
+        min-width: 250px;
+    }
+}
+
+
+/* Commerce 7.95N7.18 — campaign beneficiary filtering and compact rows. */
+
+.crm-offer-campaign-simulation-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .3rem;
+    margin: .65rem 0 .75rem;
+    padding: 0;
+    color: #718096;
+    font-size: .68rem;
+    line-height: 1.35;
+}
+.crm-offer-campaign-simulation-note .fa {
+    margin-top: .08rem;
+    color: #94a3b8;
+}
+
+.crm-campaign-member-filters {
+    margin: .8rem 0 .65rem;
+    padding: .75rem .8rem;
+    border: 1px solid #e4e9f0;
+    border-radius: .75rem;
+    background: #fafbfc;
+}
+.crm-campaign-member-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(240px, 1.5fr) minmax(170px, .7fr) minmax(170px, .7fr);
+    gap: .65rem;
+    align-items: end;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-campaign-member-filter-grid {
+    grid-template-columns: minmax(260px, 1.5fr) minmax(180px, .7fr);
+}
+.crm-campaign-member-filter-field .form-label {
+    margin-bottom: .25rem;
+    color: #52627a;
+    font-size: .67rem;
+    font-weight: 750;
+}
+.crm-campaign-member-filter-field .form-control,
+.crm-campaign-member-filter-field .form-select {
+    min-height: 34px;
+    font-size: .72rem;
+}
+.crm-campaign-member-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: .65rem;
+}
+
+/* Denser campaign-member tables: hundreds of rows remain scannable. */
+.crm-offer-campaign-audience-table th,
+.crm-offer-campaign-audience-table td,
+.crm-grant-campaign-members-table th,
+.crm-grant-campaign-members-table td {
+    padding-top: .48rem;
+    padding-bottom: .48rem;
+    font-size: .72rem;
+}
+.crm-offer-campaign-audience-table th,
+.crm-grant-campaign-members-table th {
+    font-size: .69rem;
+}
+.crm-offer-campaign-client-name,
+.crm-offers-access-preview-client-name {
+    font-size: .74rem;
+}
+.crm-offer-campaign-client-email,
+.crm-offers-access-preview-client-email {
+    font-size: .64rem;
+}
+.crm-campaign-member-badge,
+.crm-campaign-mail-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .32rem .52rem;
+    border-radius: 999px;
+    font-size: .64rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+.local-subscriptions-commerce-personal-offer-campaign-view-page
+.crm-offer-campaign-client-details-summary {
+    font-size: .65rem;
+}
+
+/* Running grant notice sits between Summary and KPIs. */
+.local-subscriptions-commerce-grant-campaign-view-page
+.alert.alert-info.mt-3 {
+    margin-top: .75rem !important;
+    margin-bottom: .8rem;
+    border-color: #cfe4fa;
+    background: #f2f8ff;
+    color: #35506f;
+    font-size: .72rem;
+}
+
+@media (max-width: 991.98px) {
+    .crm-campaign-member-filter-grid,
+    .local-subscriptions-commerce-grant-campaign-view-page
+    .crm-campaign-member-filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .crm-campaign-member-filter-field.is-wide {
+        grid-column: 1 / -1;
+    }
+}
+@media (max-width: 767.98px) {
+    .crm-campaign-member-filter-grid,
+    .local-subscriptions-commerce-grant-campaign-view-page
+    .crm-campaign-member-filter-grid {
+        grid-template-columns: 1fr;
+    }
+    .crm-campaign-member-filter-field.is-wide {
+        grid-column: auto;
+    }
+}
+
+
+/* Commerce 7.95N7.19 — campaign mail truth, compact filters, sorting/paging. */
+
+.crm-campaign-member-filter-grid-offer {
+    grid-template-columns:
+        minmax(300px, 1.5fr)
+        minmax(155px, .55fr)
+        minmax(155px, .55fr)
+        auto;
+}
+.crm-campaign-member-filter-grid-grant {
+    grid-template-columns:
+        minmax(320px, 1.5fr)
+        minmax(180px, .65fr)
+        auto !important;
+}
+.crm-campaign-member-filter-actions {
+    align-self: end;
+    justify-content: flex-end;
+    margin-top: 0;
+    white-space: nowrap;
+}
+.crm-offer-campaign-apply {
+    border-color: #f72585 !important;
+    background: #f72585 !important;
+    color: #fff !important;
+}
+.crm-offer-campaign-apply:hover,
+.crm-offer-campaign-apply:focus {
+    border-color: #d91c73 !important;
+    background: #d91c73 !important;
+    color: #fff !important;
+}
+
+.crm-campaign-sort-link {
+    display: inline-flex;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+}
+.crm-campaign-sort-link:hover,
+.crm-campaign-sort-link.is-active {
+    color: #6249a5;
+    text-decoration: none;
+}
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-campaign-sort-link:hover,
+.local-subscriptions-commerce-grant-campaign-view-page
+.crm-campaign-sort-link.is-active {
+    color: #1769c2;
+}
+
+.crm-campaign-member-pagination-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    margin: .7rem 0 .45rem;
+    color: #64748b;
+    font-size: .68rem;
+}
+.crm-campaign-member-perpage {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+}
+.crm-campaign-perpage-select {
+    width: auto;
+    min-width: 68px;
+}
+
+.crm-grant-campaign-status-badge {
+    padding: .4rem .62rem;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 800;
+}
+
+.crm-offers-access-campaign-metric.is-success.is-emphasis {
+    border-color: #b9e4cf;
+    background: #effaf4;
+    box-shadow: inset 3px 0 0 #179b63;
+}
+.crm-offers-access-campaign-metric.is-error {
+    border-color: #f3c2c8;
+    background: #fff3f4;
+    box-shadow: inset 3px 0 0 #dc3545;
+}
+
+/* Never imply a mail is waiting when the beneficiary is excluded. */
+.crm-campaign-mail-badge.text-bg-secondary {
+    background: #eef2f7 !important;
+    color: #5f6b7a !important;
+}
+
+@media (max-width: 991.98px) {
+    .crm-campaign-member-filter-grid-offer,
+    .crm-campaign-member-filter-grid-grant {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .crm-campaign-member-filter-actions {
+        grid-column: 1 / -1;
+    }
+}
+@media (max-width: 767.98px) {
+    .crm-campaign-member-filter-grid-offer,
+    .crm-campaign-member-filter-grid-grant {
+        grid-template-columns: 1fr !important;
+    }
+    .crm-campaign-member-pagination-meta {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+
+/* Commerce 7.95N7.21 — Communication KPI semantic cards. */
+.crm-offers-access-campaign-panel
+.crm-offers-access-campaign-metric.is-success {
+    border-color: #b9e4cf;
+    background: #effaf4;
+    box-shadow: inset 3px 0 0 #179b63;
+}
+.crm-offers-access-campaign-panel
+.crm-offers-access-campaign-metric.is-success
+.crm-offers-access-campaign-metric-value {
+    color: #137a50;
+}
+.crm-offers-access-campaign-panel
+.crm-offers-access-campaign-metric.is-success
+.crm-offers-access-campaign-metric-label {
+    color: #39785b;
+}
+.crm-offers-access-campaign-panel
+.crm-offers-access-campaign-metric.is-error {
+    border-color: #f3c2c8;
+    background: #fff3f4;
+    box-shadow: inset 3px 0 0 #dc3545;
+}
+.crm-offers-access-campaign-panel
+.crm-offers-access-campaign-metric.is-error
+.crm-offers-access-campaign-metric-value {
+    color: #c92a2a;
+}
+.crm-offers-access-campaign-panel
+.crm-offers-access-campaign-metric.is-error
+.crm-offers-access-campaign-metric-label {
+    color: #a63c49;
+}
+
+/* Commerce 7.95N7.22 — Offers & access identity and navigation polish. */
+.crm-offers-access-tab{display:inline-flex;align-items:center;gap:.38rem}
+.crm-offers-access-tab-icon{width:1rem;text-align:center;opacity:.88}
+.crm-offers-access-tab.is-overview{margin-right:.65rem}
+.crm-offers-access-tab.is-overview::before{position:absolute;top:.55rem;right:-.45rem;bottom:.55rem;width:1px;background:#d8dee8;content:""}

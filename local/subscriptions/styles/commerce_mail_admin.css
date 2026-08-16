@@ -1721,3 +1721,29 @@
 .local-subscriptions-commerce-mail-page .commerce-mail-perpage {
     font-size: .82rem;
 }
+
+
+/* Mail journal result scope summary mirrors Sales. */
+.local-subscriptions-commerce-mail-page .commerce-mail-table-toolbar {
+    align-items: flex-start;
+}
+.local-subscriptions-commerce-mail-page .crm-result-summary {
+    flex: 1 1 auto;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-found {
+    font-size: .82rem;
+    font-weight: 750;
+}
+.local-subscriptions-commerce-mail-page .commerce-mail-perpage {
+    flex: 0 0 auto;
+    padding-top: .02rem;
+}
+@media (max-width: 767.98px) {
+    .local-subscriptions-commerce-mail-page .commerce-mail-table-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .local-subscriptions-commerce-mail-page .commerce-mail-perpage {
+        justify-content: flex-end;
+    }
+}

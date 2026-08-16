@@ -8,6 +8,7 @@ use local_subscriptions\commerce\mail\builder\CommerceMailBuilderEditorRenderer;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailBuilderService;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
@@ -92,12 +93,19 @@ echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 echo CrmBreadcrumbRenderer::render([
     ['label' => get_string('crm_commerce_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php')],
-    ['label' => get_string('commerce_personal_offer_campaigns', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaigns.php')],
+    ['label' => get_string('commerce_offers_access_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/offers-access/index.php')],
+    ['label' => get_string('commerce_offers_access_campaigns_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/offers-access/campaigns.php')],
     ['label' => (string)$campaign->name, 'url' => new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_view.php', ['id' => $id])],
     ['label' => $title, 'url' => null],
 ]);
 echo CrmPageHeader::render($title, get_string('commerce_personal_offer_campaign_email_help', 'local_subscriptions'), HelpContext::COMMERCE);
-echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PERSONAL_OFFERS, $context);
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::OFFERS_ACCESS,
+    $context
+);
+echo CommerceOffersAccessNavigationRenderer::render(
+    CommerceOffersAccessNavigationRenderer::CAMPAIGNS
+);
 if ($error !== '') {
     echo html_writer::div(s($error), 'alert alert-danger');
 }

@@ -222,7 +222,11 @@ if ($ispersonaloffer) {
         // Personal Offer identity is already authoritative. Resolve it now, before the
         // customer reaches the Pay button, so an existing Moodle account becomes an
         // explicit authentication prerequisite instead of a late checkout error.
+        $personalofferhascompleteidentity =
+            trim((string)$personalofferidentity['firstname']) !== ''
+            && trim((string)$personalofferidentity['lastname']) !== '';
         if ($isguestcheckout && $guestsession !== null
+                && $personalofferhascompleteidentity
                 && !in_array($guestsession->get_status(), ['provisional', 'payment_pending'], true)) {
             $guestsession = CommerceGuestCheckoutService::create()->identify(
                 $guestsession,

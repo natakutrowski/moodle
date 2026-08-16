@@ -45,7 +45,10 @@ final class CommerceBulkGrantCampaignService {
         array $selecteduserids,
         int $actoruserid,
         string $reason = '',
-        bool $sendemail = true
+        bool $sendemail = true,
+        int $mailtemplateid = 0,
+        array $mailtemplatesnapshot = [],
+        ?int $scheduledat = null
     ): int {
         $name = trim($name);
         if ($name === '') {
@@ -101,7 +104,17 @@ final class CommerceBulkGrantCampaignService {
             'targetjson' => json_encode($simulation['target'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'reason' => trim($reason),
             'sendemail' => $sendemail ? 1 : 0,
-            'status' => self::STATUS_READY,
+            'mailtemplateid' => $mailtemplateid > 0 ? $mailtemplateid : null,
+            'mailtemplatesnapshot' => $mailtemplatesnapshot !== []
+                ? json_encode(
+                    $mailtemplatesnapshot,
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                )
+                : null,
+            'scheduledat' => $scheduledat,
+            'status' => $scheduledat !== null && $scheduledat > time()
+                ? self::STATUS_QUEUED
+                : self::STATUS_READY,
             'selectedcount' => count($selecteduserids),
             'processedcount' => 0,
             'successcount' => 0,
@@ -156,6 +169,97 @@ final class CommerceBulkGrantCampaignService {
         $this->touch_campaign($campaignid, $actoruserid, $now);
     }
 
+    public function run_now(int $campaignid, int $actoruserid): array {
+        $campaign = $this->get_campaign($campaignid);
+        if (in_array((string)$campaign->status, [
+            self::STATUS_READY,
+            self::STATUS_COMPLETED_ERRORS,
+        ], true)) {
+            $this->launch($campaignid, $actoruserid);
+        } else if (!in_array((string)$campaign->status, [
+            self::STATUS_QUEUED,
+            self::STATUS_RUNNING,
+        ], true)) {
+            throw new \moodle_exception(
+                'commerce_bulk_grant_campaign_not_launchable',
+                'local_subscriptions'
+            );
+        }
+
+        $this->db->set_field(
+            self::TABLE_CAMPAIGN,
+            'scheduledat',
+            null,
+            ['id' => $campaignid]
+        );
+
+        $stats = [
+            'processed' => 0,
+            'completed' => 0,
+            'skipped' => 0,
+            'failed' => 0,
+        ];
+
+        do {
+            $campaign = $this->get_campaign($campaignid);
+            if ((string)$campaign->status === self::STATUS_QUEUED) {
+                $campaign->status = self::STATUS_RUNNING;
+                $campaign->timemodified = time();
+                $this->db->update_record(self::TABLE_CAMPAIGN, $campaign);
+            }
+
+            $members = $this->db->get_records(
+                self::TABLE_MEMBER,
+                [
+                    'campaignid' => $campaignid,
+                    'status' => self::MEMBER_QUEUED,
+                ],
+                'id ASC',
+                '*',
+                0,
+                200
+            );
+
+            foreach ($members as $member) {
+                $this->process_member($campaign, $member, $stats);
+            }
+
+            $this->refresh_counters($campaignid);
+            $this->finalise_if_done($campaignid);
+        } while ($members !== []);
+
+        return $stats;
+    }
+
+    public function schedule(
+        int $campaignid,
+        int $scheduledat,
+        int $actoruserid
+    ): void {
+        if ($scheduledat <= time()) {
+            throw new \moodle_exception(
+                'commerce_bulk_grant_schedule_future_required',
+                'local_subscriptions'
+            );
+        }
+
+        $campaign = $this->get_campaign($campaignid);
+        if ((string)$campaign->status !== self::STATUS_READY) {
+            throw new \moodle_exception(
+                'commerce_bulk_grant_campaign_not_launchable',
+                'local_subscriptions'
+            );
+        }
+
+        $campaign->scheduledat = $scheduledat;
+        $campaign->status = self::STATUS_QUEUED;
+        $campaign->startedat = null;
+        $campaign->completedat = null;
+        $campaign->timemodified = time();
+        $campaign->usermodified = $actoruserid;
+        $this->db->update_record(self::TABLE_CAMPAIGN, $campaign);
+    }
+
     public function retry_failures(int $campaignid, int $actoruserid): int {
         $campaign = $this->get_campaign($campaignid);
         if (!in_array((string)$campaign->status, [self::STATUS_COMPLETED_ERRORS, self::STATUS_COMPLETED], true)) {
@@ -207,8 +311,28 @@ final class CommerceBulkGrantCampaignService {
                 break;
             }
 
+            if (
+                !empty($campaign->scheduledat)
+                && (int)$campaign->scheduledat > time()
+            ) {
+                continue;
+            }
+
             if ((string)$campaign->status === self::STATUS_QUEUED) {
-                $this->db->set_field(self::TABLE_CAMPAIGN, 'status', self::STATUS_RUNNING, ['id' => $campaign->id]);
+                $this->db->set_field(
+                    self::TABLE_CAMPAIGN,
+                    'status',
+                    self::STATUS_RUNNING,
+                    ['id' => $campaign->id]
+                );
+                if (empty($campaign->startedat)) {
+                    $this->db->set_field(
+                        self::TABLE_CAMPAIGN,
+                        'startedat',
+                        time(),
+                        ['id' => $campaign->id]
+                    );
+                }
             }
 
             $remaining = $limit - $stats['processed'];
@@ -325,11 +449,27 @@ final class CommerceBulkGrantCampaignService {
             if (!$allskipped && !empty($campaign->sendemail)) {
                 // Queue only: the shared transactional-mail cron/throttling
                 // controls provider-safe bulk delivery.
+                $mailtemplatesnapshot = json_decode(
+                    (string)($campaign->mailtemplatesnapshot ?? ''),
+                    true
+                );
+                $mailtemplatesnapshot = is_array($mailtemplatesnapshot)
+                    ? $mailtemplatesnapshot
+                    : [];
+
                 CommerceGrantAccessMailService::create()->queue(
                     (int)$member->userid,
                     (int)$campaign->targetproductid,
                     $result['plan'],
-                    false
+                    false,
+                    $mailtemplatesnapshot,
+                    [
+                        'campaignid' => (int)$campaign->id,
+                        'campaignkey' => (string)$campaign->campaignkey,
+                        'campaignname' => (string)$campaign->name,
+                        'memberid' => (int)$member->id,
+                        'targetproductid' => (int)$campaign->targetproductid,
+                    ]
                 );
             }
 

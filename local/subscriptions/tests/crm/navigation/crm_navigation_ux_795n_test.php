@@ -175,21 +175,19 @@ final class crm_navigation_ux_795n_test extends \advanced_testcase {
         $sales = strpos($source, "crm_commerce_nav_purchases", $overview);
         $products = strpos($source, "crm_commerce_nav_products", $sales);
         $showrooms = strpos($source, "crm_nav_showrooms", $products);
-        $offers = strpos($source, "crm_commerce_nav_personal_offers", $showrooms);
-        $grants = strpos($source, "crm_commerce_nav_grants", $offers);
-        $mail = strpos($source, "crm_commerce_nav_mail", $grants);
+        $offers = strpos($source, "crm_commerce_nav_offers_access", $showrooms);
+        $mail = strpos($source, "crm_commerce_nav_mail", $offers);
         $statistics = strpos($source, "crm_commerce_nav_statistics", $mail);
         $configuration = strpos($source, "crm_commerce_nav_configuration", $statistics);
 
-        foreach ([$overview, $sales, $products, $showrooms, $offers, $grants, $mail, $statistics, $configuration] as $position) {
+        foreach ([$overview, $sales, $products, $showrooms, $offers, $mail, $statistics, $configuration] as $position) {
             $this->assertNotFalse($position);
         }
         $this->assertLessThan($sales, $overview);
         $this->assertLessThan($products, $sales);
         $this->assertLessThan($showrooms, $products);
         $this->assertLessThan($offers, $showrooms);
-        $this->assertLessThan($grants, $offers);
-        $this->assertLessThan($mail, $grants);
+        $this->assertLessThan($mail, $offers);
         $this->assertLessThan($statistics, $mail);
         $this->assertLessThan($configuration, $statistics);
 

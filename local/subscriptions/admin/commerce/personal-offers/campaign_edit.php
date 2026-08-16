@@ -4,6 +4,7 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmInput;
+use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmPresentation;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignManager;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignValidityService;
 use local_subscriptions\commerce\personaloffer\domain\CommercePersonalOfferTerms;
@@ -14,6 +15,10 @@ use local_subscriptions\commerce\personaloffer\audience\CommercePersonalOfferNat
 use local_subscriptions\commerce\personaloffer\audience\CommercePersonalOfferAudienceRuleEvaluator;
 use local_subscriptions\subscription_manager;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessWorkflowRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessConfigurationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommercePersonalOfferConditionsRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
@@ -169,19 +174,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && confirm_sesskey()) {
         $validfrom = null;
         $expiresat = null;
         $validityduration = null;
+        $noexpiration = optional_param('noexpiration', 0, PARAM_BOOL) === 1;
         if ($validitymode === CommercePersonalOfferCampaignValidityService::MODE_FIXED) {
             $validfrom = CommercePersonalOfferCrmInput::datetime_local(
                 optional_param('validfrom', '', PARAM_RAW_TRIMMED),
                 $validitytimezone
             );
-            $expiresat = CommercePersonalOfferCrmInput::datetime_local(
-                required_param('expiresat', PARAM_RAW_TRIMMED),
-                $validitytimezone
-            );
-            if ($validfrom !== null && $expiresat <= $validfrom) {
-                throw new coding_exception('Personal Offer campaign expiration must be after its start.');
+            if (!$noexpiration) {
+                $expiresraw = trim(required_param('expiresat', PARAM_RAW_TRIMMED));
+                if ($expiresraw === '') {
+                    throw new coding_exception(
+                        get_string(
+                            'commerce_personal_offer_expiration_required',
+                            'local_subscriptions'
+                        )
+                    );
+                }
+                $expiresat = CommercePersonalOfferCrmInput::datetime_local(
+                    $expiresraw,
+                    $validitytimezone
+                );
+                if ($expiresat === null) {
+                    throw new coding_exception(
+                        get_string(
+                            'commerce_personal_offer_expiration_required',
+                            'local_subscriptions'
+                        )
+                    );
+                }
+                if ($validfrom !== null && $expiresat <= $validfrom) {
+                    throw new coding_exception(
+                        get_string(
+                            'commerce_personal_offer_expiration_after_start',
+                            'local_subscriptions'
+                        )
+                    );
+                }
             }
         } else if ($validitymode === CommercePersonalOfferCampaignValidityService::MODE_DURATION) {
+            $noexpiration = false;
             $validityduration = CommercePersonalOfferCampaignValidityService::duration_seconds(
                 required_param('validitydurationvalue', PARAM_INT),
                 required_param('validitydurationunit', PARAM_ALPHA)
@@ -212,12 +243,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && confirm_sesskey()) {
 $productopts = ['' => get_string('choosedots')];
 $nativeopts = ['' => get_string('choosedots')];
 foreach ($products as $product) {
-    $displayname = $productresolver->resolve(
-        [(string)$product->sku],
-        current_language(),
-        (string)$product->name
+    $label = CommercePersonalOfferCrmPresentation::business_product_label(
+        $DB,
+        (int)$product->id
     );
-    $label = $displayname . ' [' . $product->sku . ']';
     if ((string)$product->status !== 'active') {
         $label .= ' · ' . get_string('label_inactive', 'local_subscriptions');
     }
@@ -252,7 +281,10 @@ foreach ($legacydigitals as $product) {
 
 $m10filteropts = ['' => get_string('choosedots')];
 foreach ($products as $product) {
-    $label = $productresolver->resolve([(string)$product->sku], current_language(), (string)$product->name);
+    $label = CommercePersonalOfferCrmPresentation::business_product_label(
+        $DB,
+        (int)$product->id
+    );
     if ((string)$product->status !== 'active') {
         $label .= ' · ' . get_string('label_inactive', 'local_subscriptions');
     }
@@ -280,32 +312,83 @@ echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 echo CrmBreadcrumbRenderer::render([
     ['label' => get_string('crm_commerce_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/index.php')],
-    ['label' => get_string('commerce_personal_offers_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/personal-offers/index.php')],
-    ['label' => get_string('commerce_personal_offer_campaigns', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaigns.php')],
+    ['label' => get_string('commerce_offers_access_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/offers-access/index.php')],
+    ['label' => get_string('commerce_offers_access_campaigns_title', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/offers-access/campaigns.php')],
+    ['label' => get_string('commerce_personal_offer_campaigns', 'local_subscriptions'), 'url' => new moodle_url('/local/subscriptions/admin/commerce/offers-access/campaigns.php', ['kind' => 'offer'])],
     ['label' => $title, 'url' => null],
 ]);
 echo CrmPageHeader::render($title, get_string('commerce_personal_offer_new_campaign_help', 'local_subscriptions'), HelpContext::COMMERCE);
-echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PERSONAL_OFFERS, $context);
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::OFFERS_ACCESS,
+    $context
+);
+echo CommerceOffersAccessNavigationRenderer::render(
+    CommerceOffersAccessNavigationRenderer::CAMPAIGNS
+);
+echo CommerceOffersAccessWorkflowRenderer::render(
+    CommerceOffersAccessWorkflowRenderer::CONFIGURATION,
+    'offer',
+    'many'
+);
 if ($error !== '') { echo html_writer::div(s($error), 'alert alert-danger'); }
 
-echo html_writer::start_tag('form', ['method' => 'post', 'class' => 'card card-body']);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
-
-echo html_writer::tag('h3', get_string('commerce_personal_offer_campaign_identity_title', 'local_subscriptions'), ['class' => 'h5']);
-echo html_writer::start_div('row g-3 mb-4');
+echo html_writer::start_tag('form', [
+    'method' => 'post',
+    'class' => 'crm-offers-access-guided-form',
+]);
+echo html_writer::empty_tag('input', [
+    'type' => 'hidden',
+    'name' => 'sesskey',
+    'value' => sesskey(),
+]);
+echo CommerceOffersAccessConfigurationRenderer::start_layout();
+echo CommerceOffersAccessConfigurationRenderer::start_main();
+echo CommerceOffersAccessConfigurationRenderer::start_section(
+    get_string('commerce_personal_offer_campaign_identity_title', 'local_subscriptions'),
+    get_string('commerce_offers_access_config_identity_help', 'local_subscriptions'),
+    'fa-pencil'
+);
+echo html_writer::start_div('row g-3');
 echo html_writer::start_div('col-12 col-lg-7');
 echo html_writer::tag('label', get_string('name'), ['for' => 'name', 'class' => 'form-label fw-semibold']);
 echo html_writer::empty_tag('input', ['id' => 'name', 'name' => 'name', 'class' => 'form-control', 'required' => 'required', 'placeholder' => get_string('commerce_personal_offer_campaign_name_placeholder', 'local_subscriptions')]);
 echo html_writer::div(get_string('commerce_personal_offer_campaign_name_help', 'local_subscriptions'), 'form-text');
 echo html_writer::end_div();
-echo html_writer::start_div('col-12 col-lg-5');
-echo html_writer::tag('label', get_string('commerce_personal_offer_campaign_key', 'local_subscriptions'), ['for' => 'campaignkey', 'class' => 'form-label fw-semibold']);
-echo html_writer::empty_tag('input', ['id' => 'campaignkey', 'name' => 'campaignkey', 'class' => 'form-control', 'placeholder' => get_string('commerce_personal_offer_campaign_key_auto', 'local_subscriptions')]);
-echo html_writer::div(get_string('commerce_personal_offer_campaign_key_help', 'local_subscriptions'), 'form-text');
-echo html_writer::end_div();
 echo html_writer::end_div();
 
-echo html_writer::tag('h3', get_string('commerce_personal_offer_audience_title', 'local_subscriptions'), ['class' => 'h5 mt-2']);
+$technicalidentity = html_writer::tag(
+    'label',
+    get_string('commerce_personal_offer_campaign_key', 'local_subscriptions'),
+    ['for' => 'campaignkey', 'class' => 'form-label fw-semibold']
+)
+. html_writer::empty_tag('input', [
+    'id' => 'campaignkey',
+    'name' => 'campaignkey',
+    'class' => 'form-control',
+    'placeholder' => get_string(
+        'commerce_personal_offer_campaign_key_auto',
+        'local_subscriptions'
+    ),
+])
+. html_writer::div(
+    get_string(
+        'commerce_personal_offer_campaign_key_help',
+        'local_subscriptions'
+    ),
+    'form-text'
+);
+echo CommerceOffersAccessConfigurationRenderer::advanced(
+    get_string('commerce_offers_access_config_technical', 'local_subscriptions'),
+    $technicalidentity,
+    get_string('commerce_offers_access_config_optional', 'local_subscriptions')
+);
+echo CommerceOffersAccessConfigurationRenderer::end_section();
+
+echo CommerceOffersAccessConfigurationRenderer::start_section(
+    get_string('commerce_personal_offer_audience_title', 'local_subscriptions'),
+    get_string('commerce_offers_access_config_audience_help', 'local_subscriptions'),
+    'fa-users'
+);
 echo html_writer::start_div('mb-3');
 echo html_writer::tag('label', get_string('commerce_personal_offer_audience', 'local_subscriptions'), ['for' => 'audiencetype', 'class' => 'form-label fw-semibold']);
 echo html_writer::select([
@@ -404,6 +487,29 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
 
+// Advanced audience options stay available without overwhelming the primary workflow.
+echo html_writer::start_tag('details', [
+    'class' => 'crm-offers-access-advanced',
+    'id' => 'advanced-audience-options',
+]);
+echo html_writer::tag(
+    'summary',
+    html_writer::tag('i', '', [
+        'class' => 'fa fa-sliders',
+        'aria-hidden' => 'true',
+    ])
+    . html_writer::span(
+        get_string('commerce_offers_access_config_advanced_audience', 'local_subscriptions'),
+        'crm-offers-access-advanced-title'
+    )
+    . html_writer::span(
+        get_string('commerce_offers_access_config_advanced_audience_hint', 'local_subscriptions'),
+        'crm-offers-access-advanced-hint'
+    ),
+    ['class' => 'crm-offers-access-advanced-summary']
+);
+echo html_writer::start_div('crm-offers-access-advanced-body');
+
 // M10: optional OR sources for the initial audience union.
 echo html_writer::start_div('border rounded p-3 mb-3', ['id' => 'm10-additional-sources']);
 echo html_writer::tag('h4', get_string('commerce_personal_offer_m10_sources_title', 'local_subscriptions'), ['class' => 'h6 mb-1']);
@@ -479,95 +585,101 @@ echo html_writer::end_tag('datalist');
 echo html_writer::tag('textarea', '', ['id' => 'audiencelist', 'name' => 'audiencelist', 'class' => 'form-control', 'rows' => 6, 'placeholder' => get_string('commerce_personal_offer_explicit_list_placeholder', 'local_subscriptions')]);
 echo html_writer::end_div();
 
-echo html_writer::tag('h3', get_string('commerce_personal_offer_offer_title', 'local_subscriptions'), ['class' => 'h5 mt-2']);
-echo html_writer::start_div('mb-4');
-echo html_writer::tag('label', get_string('commerce_personal_offer_target', 'local_subscriptions'), ['for' => 'targetproductid', 'class' => 'form-label fw-semibold']);
-echo html_writer::select($productopts, 'targetproductid', '', false, ['id' => 'targetproductid', 'class' => 'form-select', 'required' => 'required']);
-echo html_writer::div(get_string('commerce_personal_offer_target_help', 'local_subscriptions'), 'form-text');
+// Close the optional advanced-audience body and its <details> before
+// leaving the mandatory Destinataires section.
 echo html_writer::end_div();
+echo html_writer::end_tag('details');
+echo CommerceOffersAccessConfigurationRenderer::end_section();
 
-echo html_writer::start_div('mb-4');
-echo html_writer::tag('label', get_string('commerce_personal_offer_pricing', 'local_subscriptions'), ['for' => 'strategy', 'class' => 'form-label fw-semibold']);
-echo html_writer::select([
-    CommercePersonalOfferTerms::STRATEGY_FIXED_PRICE => get_string('commerce_personal_offer_strategy_fixed_price', 'local_subscriptions'),
-    CommercePersonalOfferTerms::STRATEGY_FIXED_DISCOUNT => get_string('commerce_personal_offer_strategy_fixed_discount', 'local_subscriptions'),
-    CommercePersonalOfferTerms::STRATEGY_PERCENTAGE_DISCOUNT => get_string('commerce_personal_offer_strategy_percentage_discount', 'local_subscriptions'),
-], 'strategy', CommercePersonalOfferTerms::STRATEGY_FIXED_PRICE, false, ['id' => 'strategy', 'class' => 'form-select']);
-echo html_writer::div(get_string('commerce_personal_offer_pricing_help', 'local_subscriptions'), 'form-text');
-echo html_writer::end_div();
-
-echo html_writer::start_div('row g-3 mb-4');
-foreach ($currencies as $currency) {
-    echo html_writer::start_div('col-12 col-md-4');
-    echo html_writer::tag('label', $currency . ($currency === 'EUR' ? ' (€)' : ($currency === 'RUB' ? ' (₽)' : '')), ['for' => 'amount-' . strtolower($currency), 'class' => 'form-label']);
-    echo html_writer::empty_tag('input', ['id' => 'amount-' . strtolower($currency), 'name' => 'amount_' . strtolower($currency), 'type' => 'number', 'min' => '0', 'step' => '0.01', 'class' => 'form-control', 'placeholder' => $currency === 'EUR' ? '30.00' : ($currency === 'RUB' ? '2990.00' : '')]);
-    echo html_writer::end_div();
-}
-echo html_writer::start_div('col-12 col-md-4');
-echo html_writer::tag('label', get_string('commerce_personal_offer_percent', 'local_subscriptions'), ['for' => 'percent', 'class' => 'form-label']);
-echo html_writer::empty_tag('input', ['id' => 'percent', 'name' => 'percent', 'type' => 'number', 'min' => '1', 'max' => '100', 'value' => '20', 'class' => 'form-control']);
-echo html_writer::end_div();
-echo html_writer::div(get_string('commerce_personal_offer_amounts_display_help', 'local_subscriptions'), 'col-12 form-text');
-echo html_writer::end_div();
-
-echo html_writer::start_div('card mb-4');
-echo html_writer::start_div('card-body');
-echo html_writer::tag('h3', get_string('commerce_personal_offer_validity_title', 'local_subscriptions'), ['class' => 'h5']);
-echo html_writer::div(get_string('commerce_personal_offer_validity_help', 'local_subscriptions'), 'text-muted mb-3');
-
-echo html_writer::start_div('mb-3');
-echo html_writer::tag('label', get_string('commerce_personal_offer_validity_mode', 'local_subscriptions'), ['for' => 'validitymode', 'class' => 'form-label fw-semibold']);
-echo html_writer::select([
-    CommercePersonalOfferCampaignValidityService::MODE_FIXED => get_string('commerce_personal_offer_validity_fixed', 'local_subscriptions'),
-    CommercePersonalOfferCampaignValidityService::MODE_DURATION => get_string('commerce_personal_offer_validity_duration', 'local_subscriptions'),
-], 'validitymode', CommercePersonalOfferCampaignValidityService::MODE_FIXED, false, ['id' => 'validitymode', 'class' => 'form-select']);
-echo html_writer::end_div();
-
-echo html_writer::start_div('row g-3', ['id' => 'validity-fixed']);
-foreach ([['validfrom', 'commerce_personal_offer_valid_from', false], ['expiresat', 'commerce_personal_offer_expires_at', true]] as [$name, $labelkey, $required]) {
-    echo html_writer::start_div('col-12 col-md-6');
-    echo html_writer::tag('label', get_string($labelkey, 'local_subscriptions'), ['for' => $name, 'class' => 'form-label fw-semibold']);
-    $attrs = ['id' => $name, 'name' => $name, 'type' => 'datetime-local', 'class' => 'form-control'];
-    if ($required) { $attrs['data-validity-required'] = '1'; }
-    echo html_writer::empty_tag('input', $attrs);
-    echo html_writer::end_div();
-}
-echo html_writer::end_div();
-
-echo html_writer::start_div('row g-3 d-none', ['id' => 'validity-duration']);
-echo html_writer::start_div('col-7 col-md-4');
-echo html_writer::tag('label', get_string('commerce_personal_offer_validity_duration_value', 'local_subscriptions'), ['for' => 'validitydurationvalue', 'class' => 'form-label fw-semibold']);
-echo html_writer::empty_tag('input', ['id' => 'validitydurationvalue', 'name' => 'validitydurationvalue', 'type' => 'number', 'min' => '1', 'max' => '8760', 'value' => '48', 'class' => 'form-control']);
-echo html_writer::end_div();
-echo html_writer::start_div('col-5 col-md-4');
-echo html_writer::tag('label', get_string('commerce_personal_offer_validity_duration_unit', 'local_subscriptions'), ['for' => 'validitydurationunit', 'class' => 'form-label fw-semibold']);
-echo html_writer::select([
-    'hours' => get_string('commerce_personal_offer_validity_hours', 'local_subscriptions'),
-    'days' => get_string('commerce_personal_offer_validity_days', 'local_subscriptions'),
-], 'validitydurationunit', 'hours', false, ['id' => 'validitydurationunit', 'class' => 'form-select']);
-echo html_writer::end_div();
-echo html_writer::div(get_string('commerce_personal_offer_validity_duration_help', 'local_subscriptions'), 'col-12 form-text');
-echo html_writer::end_div();
-
-echo html_writer::start_div('mt-3');
-echo html_writer::tag('label', get_string('commerce_personal_offer_validity_timezone', 'local_subscriptions'), ['for' => 'validitytimezone', 'class' => 'form-label fw-semibold']);
-echo html_writer::empty_tag('input', ['id' => 'validitytimezone', 'name' => 'validitytimezone', 'type' => 'text', 'value' => CommercePersonalOfferCampaignValidityService::DEFAULT_TIMEZONE, 'class' => 'form-control', 'list' => 'validity-timezones']);
-echo html_writer::tag('datalist',
-    html_writer::tag('option', '', ['value' => 'Europe/Paris']) .
-    html_writer::tag('option', '', ['value' => 'Europe/Moscow']) .
-    html_writer::tag('option', '', ['value' => 'UTC']),
-    ['id' => 'validity-timezones']
+echo CommerceOffersAccessConfigurationRenderer::start_section(
+    get_string('commerce_offers_access_config_conditions', 'local_subscriptions'),
+    get_string('commerce_personal_offer_conditions_required_help', 'local_subscriptions'),
+    'fa-sliders'
 );
-echo html_writer::div(get_string('commerce_personal_offer_validity_timezone_help', 'local_subscriptions'), 'form-text');
+echo html_writer::start_div('mb-4');
+echo html_writer::tag(
+    'label',
+    get_string('commerce_personal_offer_target', 'local_subscriptions'),
+    ['for' => 'targetproductid', 'class' => 'form-label fw-semibold']
+);
+echo html_writer::select(
+    $productopts,
+    'targetproductid',
+    '',
+    false,
+    [
+        'id' => 'targetproductid',
+        'class' => 'form-select',
+        'required' => 'required',
+    ]
+);
+echo html_writer::div(
+    get_string('commerce_personal_offer_target_help', 'local_subscriptions'),
+    'form-text'
+);
 echo html_writer::end_div();
-echo html_writer::end_div();
-echo html_writer::end_div();
+
+echo CommercePersonalOfferConditionsRenderer::pricing($currencies);
+echo html_writer::div(
+    CommercePersonalOfferConditionsRenderer::validity(true, true),
+    'crm-personal-offer-shared-validity'
+);
+echo CommerceOffersAccessConfigurationRenderer::end_section();
 
 echo html_writer::div(
-    html_writer::tag('button', get_string('savechanges'), ['type' => 'submit', 'class' => 'btn btn-primary']) .
-    html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaigns.php'), get_string('cancel'), ['class' => 'btn btn-outline-secondary ms-2']),
-    'd-flex gap-2'
+    html_writer::tag(
+        'button',
+        get_string('savechanges'),
+        ['type' => 'submit', 'class' => 'btn btn-primary']
+    )
+    . html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/offers-access/campaigns.php',
+            ['kind' => 'offer']
+        ),
+        get_string('cancel'),
+        ['class' => 'btn btn-outline-secondary ms-2']
+    ),
+    'd-flex gap-2 crm-offers-access-form-actions'
 );
+echo CommerceOffersAccessConfigurationRenderer::end_main();
+
+echo CommerceOffersAccessConfigurationRenderer::summary(
+    get_string('commerce_offers_access_config_summary_offer_campaign', 'local_subscriptions'),
+    [
+        [
+            'label' => get_string('name'),
+            'value' => get_string('commerce_offers_access_config_not_set', 'local_subscriptions'),
+            'id' => 'n73-summary-name',
+        ],
+        [
+            'label' => get_string('commerce_offers_access_config_audience', 'local_subscriptions'),
+            'value' => get_string('commerce_personal_offer_audience_criteria', 'local_subscriptions'),
+            'id' => 'n73-summary-audience',
+        ],
+        [
+            'label' => get_string('commerce_offers_access_config_product', 'local_subscriptions'),
+            'value' => get_string('commerce_offers_access_config_not_set', 'local_subscriptions'),
+            'id' => 'n73-summary-product',
+        ],
+        [
+            'label' => get_string('commerce_offers_access_config_conditions', 'local_subscriptions'),
+            'value' => get_string('commerce_personal_offer_strategy_fixed_price', 'local_subscriptions'),
+            'id' => 'n73-summary-pricing',
+        ],
+        [
+            'label' => get_string('commerce_offers_access_config_validity', 'local_subscriptions'),
+            'value' => get_string('commerce_personal_offer_validity_fixed', 'local_subscriptions'),
+            'id' => 'n73-summary-validity',
+        ],
+    ],
+    'offer',
+    new moodle_url(
+        '/local/subscriptions/admin/commerce/mail/templates/index.php',
+        ['category' => 'personal_offer']
+    )
+);
+echo CommerceOffersAccessConfigurationRenderer::end_layout();
 echo html_writer::end_tag('form');
 
 $m10jsfirst = json_encode(get_string('commerce_personal_offer_m10_group_first', 'local_subscriptions'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -577,19 +689,94 @@ $m10jsnotowns = json_encode(get_string('commerce_personal_offer_m10_operator_not
 
 $PAGE->requires->js_init_code("
 document.addEventListener('DOMContentLoaded', function() {
+  function optionText(select) {
+    if (!select || select.selectedIndex < 0) return '';
+    return select.options[select.selectedIndex].text || '';
+  }
+  function setSummary(id, value) {
+    var node = document.getElementById(id);
+    if (node) node.textContent = value || '—';
+  }
+  var nameField = document.getElementById('name');
+  var audienceSummary = document.getElementById('audiencetype');
+  var productSummary = document.getElementById('targetproductid');
+  var strategySummary = document.getElementById('strategy');
+  var validitySummary = document.getElementById('validitymode');
+  var validityTimezoneSummary = document.getElementById('validitytimezone');
+  var validityDurationValueSummary = document.getElementById('validitydurationvalue');
+  var validityDurationUnitSummary = document.getElementById('validitydurationunit');
+  var validityNoExpirationSummary = document.getElementById('noexpiration');
+  var validityFromSummary = document.getElementById('validfrom');
+  var validityToSummary = document.getElementById('expiresat');
+  function refreshN73Summary() {
+    setSummary('n73-summary-name', nameField ? nameField.value : '');
+    setSummary('n73-summary-audience', optionText(audienceSummary));
+    setSummary('n73-summary-product', optionText(productSummary));
+    setSummary('n73-summary-pricing', optionText(strategySummary));
+
+    var validity = optionText(validitySummary);
+    if (validitySummary && validitySummary.value === 'duration') {
+      validity += ' · '
+        + (validityDurationValueSummary ? validityDurationValueSummary.value : '')
+        + ' '
+        + optionText(validityDurationUnitSummary);
+    } else if (validityNoExpirationSummary && validityNoExpirationSummary.checked) {
+      validity += ' · ∞';
+    } else {
+      var dates = '';
+      if (validityFromSummary && validityFromSummary.value) dates += validityFromSummary.value;
+      if (validityToSummary && validityToSummary.value) {
+        dates += (dates ? ' → ' : '') + validityToSummary.value;
+      }
+      if (dates) validity += ' · ' + dates;
+    }
+    if (validityTimezoneSummary && validityTimezoneSummary.value) {
+      validity += ' · ' + validityTimezoneSummary.value;
+    }
+    setSummary('n73-summary-validity', validity);
+  }
+  [
+    nameField,
+    audienceSummary,
+    productSummary,
+    strategySummary,
+    validitySummary,
+    validityTimezoneSummary,
+    validityDurationValueSummary,
+    validityDurationUnitSummary,
+    validityNoExpirationSummary,
+    validityFromSummary,
+    validityToSummary
+  ]
+    .forEach(function(field) {
+      if (!field) return;
+      field.addEventListener(field.tagName === 'SELECT' ? 'change' : 'input', refreshN73Summary);
+    });
+  refreshN73Summary();
+
   var validityMode = document.getElementById('validitymode');
   var validityFixed = document.getElementById('validity-fixed');
   var validityDuration = document.getElementById('validity-duration');
   var expiresAt = document.getElementById('expiresat');
+  var noExpiration = document.getElementById('noexpiration');
   var durationValue = document.getElementById('validitydurationvalue');
   function syncValidityMode() {
     var duration = validityMode && validityMode.value === 'duration';
     if (validityFixed) validityFixed.classList.toggle('d-none', duration);
     if (validityDuration) validityDuration.classList.toggle('d-none', !duration);
-    if (expiresAt) expiresAt.required = !duration;
+    if (noExpiration) {
+      noExpiration.disabled = duration;
+      if (duration) noExpiration.checked = false;
+    }
+    if (expiresAt) {
+      expiresAt.disabled = duration || (noExpiration && noExpiration.checked);
+      expiresAt.required = !duration && !(noExpiration && noExpiration.checked);
+      if (noExpiration && noExpiration.checked) expiresAt.value = '';
+    }
     if (durationValue) durationValue.required = duration;
   }
   if (validityMode) validityMode.addEventListener('change', syncValidityMode);
+  if (noExpiration) noExpiration.addEventListener('change', syncValidityMode);
   syncValidityMode();
   var audience = document.getElementById('audiencetype');
   var criteriaBlock = document.getElementById('criteria-source-block');

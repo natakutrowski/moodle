@@ -256,7 +256,7 @@ echo html_writer::div(
         html_writer::tag('i', '', [
             'class' => 'fa fa-filter me-1',
             'aria-hidden' => 'true',
-        ]) . get_string('filter'),
+        ]) . get_string('commerce_filters_apply', 'local_subscriptions'),
         ['type' => 'submit', 'class' => 'btn btn-primary']
     )
     . html_writer::link(

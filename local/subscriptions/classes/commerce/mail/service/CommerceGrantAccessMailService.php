@@ -41,19 +41,38 @@ final class CommerceGrantAccessMailService {
         int $userid,
         int $rootproductid,
         CommerceEntitlementGrantPlan $plan,
-        bool $immediate = false
+        bool $immediate = false,
+        array $mailtemplatesnapshot = [],
+        array $campaigncontext = []
     ): ?\stdClass {
         try {
-            $mail = $this->contexts->build($userid, $rootproductid, $plan);
+            $mail = $this->contexts->build(
+                $userid,
+                $rootproductid,
+                $plan,
+                $mailtemplatesnapshot,
+                $campaigncontext
+            );
+
+            $campaignid = (int)($campaigncontext['campaignid'] ?? 0);
+            $memberid = (int)($campaigncontext['memberid'] ?? 0);
+            $idempotencykey = $campaignid > 0 && $memberid > 0
+                ? CommerceMailIdempotencyKey::normalise(
+                    'grant-campaign:' . $campaignid
+                    . ':member:' . $memberid
+                    . ':' . CommerceMailType::GRANT_ACCESS
+                )
+                : CommerceMailIdempotencyKey::for_grant_source(
+                    $plan->get_purchase_reference(),
+                    CommerceMailType::GRANT_ACCESS
+                );
+
             $record = $this->queue->queue(new CommerceMailRequest(
                 CommerceMailType::GRANT_ACCESS,
                 $mail['recipient'],
                 $mail['context'],
                 $mail['language'],
-                CommerceMailIdempotencyKey::for_grant_source(
-                    $plan->get_purchase_reference(),
-                    CommerceMailType::GRANT_ACCESS
-                ),
+                $idempotencykey,
                 null
             ));
 

@@ -8,6 +8,7 @@ use local_subscriptions\commerce\mail\admin\CommerceMailPreviewRenderer;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignManager;
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferCampaignMailPreviewService;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
@@ -22,6 +23,7 @@ $language = optional_param('language', 'fr', PARAM_ALPHA);
 $view = optional_param('view', CommerceMailPreviewRenderer::DESKTOP, PARAM_ALPHA);
 $font = optional_param('font', CommerceMailPreviewRenderer::FONT_BRAND, PARAM_ALPHA);
 $firstname = optional_param('firstname', 'Natalia', PARAM_TEXT);
+$embed = optional_param('embed', 0, PARAM_BOOL) === 1;
 $campaign = CommercePersonalOfferCampaignManager::create($DB)->get_campaign($id);
 $url = new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_email_preview.php', ['id'=>$id,'language'=>$language,'view'=>$view,'font'=>$font]);
 CrmPageConfigurator::configure($PAGE, $context, $url, get_string('commerce_personal_offer_campaign_email_preview', 'local_subscriptions'), 'local-subscriptions-personal-offer-campaign-email-preview');
@@ -41,15 +43,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $message = $service->preview($id, $language, $firstname);
 $back = new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaign_view.php', ['id'=>$id]);
 
+if ($embed) {
+    echo '<!doctype html><html><head><meta charset="utf-8">'
+        . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        . '<style>'
+        . 'html,body{margin:0;padding:0;background:#f8fafc;}'
+        . 'body{padding:14px;font-family:Arial,Helvetica,sans-serif;}'
+        . '.offer-mail-embed{max-width:760px;margin:0 auto;background:#fff;'
+        . 'border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;}'
+        . '</style></head><body><div class="offer-mail-embed">'
+        . $message->get_html()
+        . '</div></body></html>';
+    exit;
+}
+
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 echo CrmBreadcrumbRenderer::render([
-    ['label'=>get_string('commerce_personal_offer_campaigns','local_subscriptions'),'url'=>new moodle_url('/local/subscriptions/admin/commerce/personal-offers/campaigns.php')],
+    ['label'=>get_string('commerce_offers_access_title','local_subscriptions'),'url'=>new moodle_url('/local/subscriptions/admin/commerce/offers-access/index.php')],
+    ['label'=>get_string('commerce_offers_access_campaigns_title','local_subscriptions'),'url'=>new moodle_url('/local/subscriptions/admin/commerce/offers-access/campaigns.php')],
     ['label'=>(string)$campaign->name,'url'=>$back],
     ['label'=>get_string('commerce_personal_offer_campaign_email_preview','local_subscriptions'),'url'=>null],
 ]);
 echo CrmPageHeader::render(get_string('commerce_personal_offer_campaign_email_preview','local_subscriptions'), get_string('commerce_personal_offer_campaign_email_preview_help','local_subscriptions'), HelpContext::COMMERCE);
-echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PERSONAL_OFFERS, $context);
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::OFFERS_ACCESS,
+    $context
+);
+echo CommerceOffersAccessNavigationRenderer::render(
+    CommerceOffersAccessNavigationRenderer::CAMPAIGNS
+);
 
 echo html_writer::div(html_writer::link($back, get_string('back'), ['class'=>'btn btn-outline-secondary']), 'mb-3');
 echo html_writer::tag('h3', s($message->get_subject()), ['class'=>'h5 mb-3']);

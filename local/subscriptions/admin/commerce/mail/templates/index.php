@@ -102,7 +102,14 @@ foreach (CommerceMailLibrary::statuses() as $item) {
     $statusoptions[$item] = get_string('commerce_mail_library_status_' . $item, 'local_subscriptions');
 }
 $filter .= html_writer::select($statusoptions, 'status', $status, false, ['class' => 'form-select', 'aria-label' => get_string('status')]);
-$filter .= html_writer::tag('button', get_string('filter'), ['type' => 'submit', 'class' => 'btn btn-outline-primary']);
+$filter .= html_writer::tag(
+    'button',
+    html_writer::tag('i', '', [
+        'class' => 'fa fa-filter me-1',
+        'aria-hidden' => 'true',
+    ]) . get_string('commerce_filters_apply', 'local_subscriptions'),
+    ['type' => 'submit', 'class' => 'btn btn-outline-primary']
+);
 $filter .= html_writer::link($pageurl, get_string('reset'), ['class' => 'btn btn-link']);
 $filter .= html_writer::end_tag('form');
 

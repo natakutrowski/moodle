@@ -78,7 +78,7 @@ final class commerce_dashboard_795n2_test extends advanced_testcase {
             CommerceSectionNavigationRegistry::PURCHASES,
             CommerceSectionNavigationRegistry::PRODUCTS,
             CommerceSectionNavigationRegistry::SHOWROOMS,
-            CommerceSectionNavigationRegistry::PERSONAL_OFFERS,
+            CommerceSectionNavigationRegistry::OFFERS_ACCESS,
             CommerceSectionNavigationRegistry::MAIL,
             CommerceSectionNavigationRegistry::STATISTICS,
             CommerceSectionNavigationRegistry::CONFIGURATION,

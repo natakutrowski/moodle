@@ -41,6 +41,57 @@ final class CommercePersonalOfferCrmPresentation {
         return ($name !== '' ? $name : (string)$product->name) . ' [' . (string)$product->sku . ']';
     }
 
+    public static function business_product_label(
+        \moodle_database $db,
+        int $productid,
+        ?string $language = null
+    ): string {
+        $product = $db->get_record(
+            'local_subs_commerce_product',
+            ['id' => $productid],
+            'id,name',
+            IGNORE_MISSING
+        );
+        if (!$product) {
+            return '#' . $productid;
+        }
+
+        $language = strtolower(substr(
+            trim($language ?: current_language()),
+            0,
+            2
+        ));
+        $translation = $db->get_record(
+            'local_subs_commerce_prod_tr',
+            [
+                'productid' => $productid,
+                'language' => $language,
+            ],
+            'id,name',
+            IGNORE_MISSING
+        );
+        $name = trim((string)($translation->name ?? $product->name));
+        if ($name === '') {
+            $name = (string)$product->name;
+        }
+
+        $legacy = $db->record_exists_select(
+            'local_subs_commerce_prod_map',
+            'productid = :productid AND legacytable IS NOT NULL AND legacytable <> :empty',
+            [
+                'productid' => $productid,
+                'empty' => '',
+            ]
+        );
+
+        return $name . ($legacy
+            ? ' (' . get_string(
+                'commerce_offers_access_product_legacy',
+                'local_subscriptions'
+            ) . ')'
+            : '');
+    }
+
     public static function beneficiary_label(string $email, ?\stdClass $user = null, ?\stdClass $purchase = null): string {
         $name = self::customer_name_from_user($user);
         if ($name === '') { $name = self::customer_name_from_purchase($purchase); }

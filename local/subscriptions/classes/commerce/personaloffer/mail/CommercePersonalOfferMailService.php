@@ -7,6 +7,8 @@ namespace local_subscriptions\commerce\personaloffer\mail;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\mail\CommerceMailContext;
+use local_subscriptions\commerce\mail\CommerceMailDispatcher;
+use local_subscriptions\commerce\mail\MoodleCommerceMailTransport;
 use local_subscriptions\commerce\mail\CommerceMailIdempotencyKey;
 use local_subscriptions\commerce\mail\CommerceMailQueueRepository;
 use local_subscriptions\commerce\mail\CommerceMailRecipient;
@@ -48,7 +50,33 @@ final class CommercePersonalOfferMailService {
         return $result;
     }
 
-    public function queue_offer(int $offerid, ?int $campaignid = null, ?int $memberid = null): \stdClass {
+    public function queue_offer(
+        int $offerid,
+        ?int $campaignid = null,
+        ?int $memberid = null
+    ): \stdClass {
+        return CommerceMailRuntime::queue_service()->queue(
+            $this->request_for_offer($offerid, $campaignid, $memberid)
+        );
+    }
+
+    public function preview_offer(
+        int $offerid,
+        ?int $campaignid = null,
+        ?int $memberid = null
+    ): \local_subscriptions\commerce\mail\CommerceMailMessage {
+        $request = $this->request_for_offer(
+            $offerid,
+            $campaignid,
+            $memberid
+        );
+        return (new CommerceMailDispatcher(
+            CommerceMailRuntime::template_registry(),
+            new MoodleCommerceMailTransport()
+        ))->preview($request);
+    }
+
+    private function request_for_offer(int $offerid, ?int $campaignid = null, ?int $memberid = null): CommerceMailRequest {
         $offer = (new MoodleCommercePersonalOfferRepository($this->db))->get_by_id($offerid)
             ?? throw new \moodle_exception('commerce_personal_offer_not_found', 'local_subscriptions');
         if ($offer->get_effective_status(time()) !== CommercePersonalOffer::STATUS_ISSUED) {
@@ -102,6 +130,10 @@ final class CommercePersonalOfferMailService {
             ->resolve((int)$product->id, CommerceProductCoverContext::RESOURCES)
             ->get_url() ?? '');
         $mailimageurl = (new CommercePersonalOfferMailImageService())->url((int)$offer->get_id());
+        $offermetadata = $offer->get_metadata();
+        $mailtemplatesnapshot = is_array($offermetadata['mailtemplatesnapshot'] ?? null)
+            ? $offermetadata['mailtemplatesnapshot']
+            : [];
 
         $context = new CommerceMailContext([
             'customer' => ['firstname'=>$firstname, 'fullname'=>$name],
@@ -119,16 +151,26 @@ final class CommercePersonalOfferMailService {
                 'validitymode'=>$campaign ? (string)($campaign->validitymode ?? 'legacy') : 'legacy',
                 'validitytimezone'=>$campaign ? (string)($campaign->validitytimezone ?? 'Europe/Paris') : 'Europe/Paris',
                 'mailimageurl'=>$mailimageurl?->out(false) ?? '',
+                'mailtemplatesnapshot'=>$mailtemplatesnapshot,
+                'mailtemplateid'=>(int)($offermetadata['mailtemplateid'] ?? 0),
+                'mailtemplatename'=>(string)($offermetadata['mailtemplatename'] ?? ''),
             ],
         ]);
         $key = $campaignid && $memberid
             ? 'personal-offer:campaign:' . $campaignid . ':member:' . $memberid
             : 'personal-offer:offer:' . $offerid;
-        return CommerceMailRuntime::queue_service()->queue(new CommerceMailRequest(
+        return new CommerceMailRequest(
             CommerceMailType::PERSONAL_OFFER,
-            new CommerceMailRecipient($offer->get_beneficiary_email(), $name, $offer->get_beneficiary_user_id()),
-            $context, $language, CommerceMailIdempotencyKey::normalise($key), null
-        ));
+            new CommerceMailRecipient(
+                $offer->get_beneficiary_email(),
+                $name,
+                $offer->get_beneficiary_user_id()
+            ),
+            $context,
+            $language,
+            CommerceMailIdempotencyKey::normalise($key),
+            null
+        );
     }
 
     public function mail_record_for_campaign_member(int $campaignid, int $memberid): ?\stdClass {

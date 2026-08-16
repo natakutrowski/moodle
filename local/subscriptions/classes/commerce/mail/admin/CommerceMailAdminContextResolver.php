@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace local_subscriptions\commerce\mail\admin;
 
+use local_subscriptions\commerce\mail\service\CommerceGrantCampaignMailService;
 defined('MOODLE_INTERNAL') || die();
 
 use moodle_database;
@@ -68,8 +69,43 @@ final class CommerceMailAdminContextResolver {
         $contextsubtitle = '';
         $contexturl = null;
 
-        $offercontext = is_array($context['personaloffer'] ?? null) ? $context['personaloffer'] : [];
-        if ($offercontext !== []) {
+        $grantcampaigncontext = is_array($context['grantcampaign'] ?? null)
+            ? $context['grantcampaign']
+            : [];
+        $offercontext = is_array($context['personaloffer'] ?? null)
+            ? $context['personaloffer']
+            : [];
+
+        $grantcampaign = null;
+        if ((string)($record->mailtype ?? '') === 'grant_access') {
+            $grantcampaign = (new CommerceGrantCampaignMailService($this->db))
+                ->campaign_for_mail($record, $context);
+        }
+
+        if ($grantcampaign) {
+            $contexttitle = get_string(
+                'commerce_mail_context_grant_campaign',
+                'local_subscriptions'
+            ) . ' · ' . (string)$grantcampaign->name;
+            $contextsubtitle = $productlabel;
+            $contexturl = new moodle_url(
+                '/local/subscriptions/admin/commerce/grants/campaign_view.php',
+                ['id' => (int)$grantcampaign->id]
+            );
+        } else if ($grantcampaigncontext !== []) {
+            // Explicit but unresolved campaign context: preserve the business
+            // label, but never fall back to the product URL as a campaign link.
+            $campaignname = trim(
+                (string)($grantcampaigncontext['campaignname'] ?? '')
+            );
+            $contexttitle = get_string(
+                'commerce_mail_context_grant_campaign',
+                'local_subscriptions'
+            )
+                . ($campaignname !== '' ? ' · ' . $campaignname : '');
+            $contextsubtitle = $productlabel;
+            $contexturl = null;
+        } else if ($offercontext !== []) {
             $campaignname = trim((string)($offercontext['campaignname'] ?? ''));
             $contexttitle = get_string('commerce_mail_context_personal_offer', 'local_subscriptions')
                 . ($campaignname !== '' ? ' · ' . $campaignname : '');

@@ -16,10 +16,14 @@ final class CommerceMailTokenResolver {
         $links = is_array($presentation['links'] ?? null) ? $presentation['links'] : [];
         $supportemail = (string)(get_config('local_subscriptions', 'support_email') ?: 'support@campusfr.fr');
         $offer = is_array($presentation['personaloffer'] ?? null) ? $presentation['personaloffer'] : [];
+        $username = trim((string)($presentation['username'] ?? ''));
+        $greeting = self::greeting($firstname);
 
         $values = [
-            'firstname' => $firstname !== '' ? $firstname : get_string('commerce_mail_customer_fallback', 'local_subscriptions'),
-            'fullname' => $fullname !== '' ? $fullname : get_string('commerce_mail_customer_fallback', 'local_subscriptions'),
+            'greeting' => $greeting,
+            'firstname' => $firstname,
+            'fullname' => $fullname,
+            'username' => $username,
             'order_reference' => (string)($presentation['reference'] ?? ''),
             'order_total' => (string)($presentation['totalformatted'] ?? ''),
             'order_url' => (string)($links['order'] ?? ''),
@@ -45,6 +49,15 @@ final class CommerceMailTokenResolver {
     /** @param array<string,string> $values */
     public static function replace(string $content, array $values): string {
         return strtr($content, $values);
+    }
+
+    private static function greeting(string $firstname): string {
+        $language = clean_param(current_language(), PARAM_LANG);
+        return match ($language) {
+            'ru' => $firstname !== '' ? 'Здравствуйте, ' . $firstname . '!' : 'Здравствуйте!',
+            'en' => $firstname !== '' ? 'Hello ' . $firstname . '!' : 'Hello!',
+            default => $firstname !== '' ? 'Bonjour ' . $firstname . ' !' : 'Bonjour !',
+        };
     }
 
     private function __construct() {

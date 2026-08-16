@@ -63,15 +63,17 @@ final class CommerceMailBuilder {
 
     /** @return string[] */
     public static function common_variables(): array {
-        return ['firstname', 'fullname', 'email'];
+        return ['greeting', 'firstname', 'fullname', 'username', 'email'];
     }
 
     /** @return string[] */
     /** @return string[] */
     public static function sales_followup_variables(): array {
         return [
+            'greeting',
             'firstname',
             'fullname',
+            'username',
             'email',
             'order_reference',
             'product_name',
@@ -96,8 +98,10 @@ final class CommerceMailBuilder {
 
     public static function transactional_variables(): array {
         return [
+            'greeting',
             'firstname',
             'fullname',
+            'username',
             'order_reference',
             'order_total',
             'order_url',
