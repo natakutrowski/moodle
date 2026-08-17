@@ -21,19 +21,16 @@ class plan_form extends moodleform {
         $mform->addRule('name', null, 'required');
 
         $scopes = $DB->get_records_menu('subscription_access_scope', null, 'name ASC', 'id, name');
-        $mform->addElement('select', 'accessscopeid', get_string('scopes', 'local_subscriptions'), $scopes, [
-            'size' => 1,
-            'class' => 'select2'
+        $mform->addElement('autocomplete', 'accessscopeid', get_string('scopes', 'local_subscriptions'), $scopes, [
+            'multiple' => false,
+            'noselectionstring' => get_string('none'),
         ]);
 
         $mform->setDefault('accessscopeid', $default_scope);
         $mform->addRule('accessscopeid', null, 'required');
 
         $plan_keys = subscription_config::get_plans();
-        $mform->addElement('select', 'duration_key', get_string('planduration', 'local_subscriptions'), $plan_keys, [
-            'size' => 1,
-            'class' => 'select2'
-        ]);
+        $mform->addElement('select', 'duration_key', get_string('planduration', 'local_subscriptions'), $plan_keys);
         $mform->setDefault('duration_key', $default_duration_key);
         $mform->setType('duration_key', PARAM_TEXT);
         $mform->addRule('duration_key', null, 'required');

@@ -152,7 +152,7 @@ $PAGE->requires->js_call_amd('local_subscriptions/guest_email_hint', 'init');
 $PAGE->requires->js_call_amd('local_subscriptions/checkout', 'init');
 
 // Langue UI courante (priorité à la session, sinon langue effective de la page)
-$uilang = strtolower(substr((string)($SESSION->lang ?? current_language() ?? $USER->lang ?? $CFG->lang ?? (get_config('defaultuserlang','local_subscriptions') ?? 'ru')), 0, 2));
+$uilang = strtolower(substr((string)($SESSION->lang ?? current_language() ?? $USER->lang ?? $CFG->lang ?? (get_config('local_subscriptions', 'defaultuserlang') ?? 'ru')), 0, 2));
 if (!in_array($uilang, ['fr','en','ru'], true)) { $uilang = 'ru'; }
 
 // Rendu.

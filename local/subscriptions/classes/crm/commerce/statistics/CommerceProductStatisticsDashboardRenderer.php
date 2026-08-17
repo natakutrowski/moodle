@@ -203,39 +203,324 @@ final class CommerceProductStatisticsDashboardRenderer {
 
         $cards = '';
         foreach ($series as $currency => $seriesitem) {
-            $title = get_string('commerce_m51_revenue_evolution', 'local_subscriptions') . ' · ' . $currency;
-            $labels=$seriesitem->labels();
-            $periodvalues=array_map(static fn($value) => $value / 100, $seriesitem->values());
-            $cumulativevalues=[];$running=0.0;
-            foreach($periodvalues as $value){$running+=$value;$cumulativevalues[]=$running;}
+            $currency = strtoupper((string)$currency);
+            $flag = self::currency_flag($currency);
+            $title = get_string(
+                'commerce_m51_revenue_evolution',
+                'local_subscriptions'
+            ) . ' · ' . $flag . ' ' . $currency;
 
-            $periodchart=new \core\chart_line();
-            $periodchart->set_title($title);
-            $periodchart->set_labels($labels);
-            $periodchart->add_series(new \core\chart_series($currency,$periodvalues));
+            $labels = $seriesitem->labels();
+            $points = $seriesitem->points();
+            $periodvalues = array_map(
+                static fn($value): float => ((float)$value) / 100,
+                $seriesitem->values()
+            );
 
-            $cumulativechart=new \core\chart_line();
-            $cumulativechart->set_title($title);
-            $cumulativechart->set_labels($labels);
-            $cumulativechart->add_series(new \core\chart_series($currency,$cumulativevalues));
+            $timestamps = [];
+            foreach ($points as $index => $point) {
+                $timestamps[] = (int)($point['timestamp'] ?? 0);
+                if (!isset($labels[$index]) && isset($point['label'])) {
+                    $labels[$index] = (string)$point['label'];
+                }
+            }
 
-            $selector=html_writer::select([
-                'period'=>get_string('commerce_m52_revenue_period','local_subscriptions'),
-                'cumulative'=>get_string('commerce_m52_revenue_cumulative','local_subscriptions'),
-            ],'','period',false,['class'=>'form-select form-select-sm m52-revenue-mode','aria-label'=>get_string('commerce_m52_revenue_display','local_subscriptions')]);
+            $cumulativevalues = [];
+            $running = 0.0;
+            foreach ($periodvalues as $value) {
+                $running += $value;
+                $cumulativevalues[] = $running;
+            }
 
-            $body=html_writer::div($output->render($periodchart),'m52-revenue-chart m52-revenue-chart--period')
-                .html_writer::div($output->render($cumulativechart),'m52-revenue-chart m52-revenue-chart--cumulative d-none');
+            $selector = html_writer::select(
+                [
+                    'period' => get_string(
+                        'commerce_m52_revenue_period',
+                        'local_subscriptions'
+                    ),
+                    'cumulative' => get_string(
+                        'commerce_m52_revenue_cumulative',
+                        'local_subscriptions'
+                    ),
+                ],
+                '',
+                'period',
+                false,
+                [
+                    'class' => 'form-select form-select-sm m52-revenue-mode',
+                    'aria-label' => get_string(
+                        'commerce_m52_revenue_display',
+                        'local_subscriptions'
+                    ),
+                ]
+            );
 
-            $cards.=html_writer::tag('article',
+            $periodsvg = self::revenue_svg(
+                $labels,
+                $timestamps,
+                $periodvalues,
+                $currency,
+                'period'
+            );
+            $cumulativesvg = self::revenue_svg(
+                $labels,
+                $timestamps,
+                $cumulativevalues,
+                $currency,
+                'cumulative'
+            );
+
+            $body = html_writer::div(
+                $periodsvg,
+                'm52-revenue-chart m52-revenue-chart--period'
+            )
+            . html_writer::div(
+                $cumulativesvg,
+                'm52-revenue-chart m52-revenue-chart--cumulative d-none'
+            );
+
+            $cards .= html_writer::tag(
+                'article',
                 html_writer::div(
-                    html_writer::tag('h4',s($title),['class'=>'m51-chart-title mb-0']).$selector,
+                    html_writer::tag(
+                        'h4',
+                        html_writer::tag('i', '', [
+                            'class' => 'fa fa-line-chart me-2',
+                            'aria-hidden' => 'true',
+                        ])
+                        . s($title),
+                        ['class' => 'm51-chart-title mb-0']
+                    )
+                    . $selector,
                     'm52-chart-heading'
-                ).$body,
-                ['class'=>'m51-chart-card m51-chart-card--revenue m52-revenue-card']
+                )
+                . $body,
+                [
+                    'class' =>
+                        'm51-chart-card m51-chart-card--revenue '
+                        . 'm52-revenue-card m53-commerce-line-card',
+                ]
             );
         }
-        return html_writer::div($cards, 'm51-revenue-chart-grid');
+
+        return html_writer::div(
+            $cards,
+            'm51-revenue-chart-grid'
+        );
+    }
+
+    /**
+     * Commerce dashboard-style line chart with gradient area and point markers.
+     *
+     * @param string[] $labels
+     * @param int[] $timestamps
+     * @param float[] $values Major currency units.
+     */
+    private static function revenue_svg(
+        array $labels,
+        array $timestamps,
+        array $values,
+        string $currency,
+        string $mode
+    ): string {
+        if ($values === []) {
+            return '';
+        }
+
+        $width = 760;
+        $height = 310;
+        $left = 72;
+        $right = 22;
+        $top = 18;
+        $bottom = 48;
+        $plotw = $width - $left - $right;
+        $ploth = $height - $top - $bottom;
+
+        $rawmax = max(1.0, max($values));
+        $power = pow(10, floor(log10($rawmax)));
+        $normalized = $rawmax / $power;
+        $nice = $normalized <= 1
+            ? 1
+            : ($normalized <= 2 ? 2 : ($normalized <= 5 ? 5 : 10));
+        $axismax = max(1.0, $nice * $power);
+        $majorstep = $axismax / 4;
+
+        $grid = [];
+        $ylabels = [];
+        for ($i = 0; $i <= 4; $i++) {
+            $value = $majorstep * $i;
+            $y = $top + $ploth - ($ploth * ($value / $axismax));
+            $grid[] = html_writer::empty_tag('line', [
+                'x1' => $left,
+                'x2' => $width - $right,
+                'y1' => round($y, 1),
+                'y2' => round($y, 1),
+                'class' => 'm53-commerce-line-grid',
+            ]);
+            $ylabels[] = html_writer::tag(
+                'text',
+                self::chart_money_axis($value, $currency),
+                [
+                    'x' => $left - 10,
+                    'y' => round($y + 4, 1),
+                    'class' => 'm53-commerce-line-axis-label',
+                    'text-anchor' => 'end',
+                ]
+            );
+        }
+
+        $coords = [];
+        $circles = [];
+        $lastindex = max(1, count($values) - 1);
+        foreach ($values as $index => $value) {
+            $x = $left + ($plotw * ($index / $lastindex));
+            $y = $top + $ploth - ($ploth * ($value / $axismax));
+            $coords[] = [round($x, 1), round($y, 1)];
+
+            $date = isset($timestamps[$index]) && $timestamps[$index] > 0
+                ? userdate(
+                    $timestamps[$index],
+                    get_string('strftimedate', 'langconfig')
+                )
+                : (string)($labels[$index] ?? '');
+            $tooltip = $date
+                . ' · '
+                . format_float((float)$value, 2)
+                . ' '
+                . $currency;
+
+            $circles[] = html_writer::tag(
+                'g',
+                html_writer::tag('circle', '', [
+                    'cx' => round($x, 1),
+                    'cy' => round($y, 1),
+                    'r' => 4.2,
+                    'class' => 'm53-commerce-line-point',
+                    'tabindex' => '0',
+                    'aria-label' => $tooltip,
+                ])
+                . html_writer::tag('title', s($tooltip)),
+                ['class' => 'm53-commerce-line-point-wrap']
+            );
+        }
+
+        $linepoints = implode(
+            ' ',
+            array_map(
+                static fn(array $coord): string =>
+                    $coord[0] . ',' . $coord[1],
+                $coords
+            )
+        );
+        $basey = $top + $ploth;
+        $area = $left
+            . ','
+            . $basey
+            . ' '
+            . $linepoints
+            . ' '
+            . ($width - $right)
+            . ','
+            . $basey;
+
+        $gradientid = 'productRevenueGradient'
+            . preg_replace('/[^A-Za-z0-9]/', '', $currency . $mode);
+        $defs = '<defs><linearGradient id="' . $gradientid
+            . '" x1="0" y1="0" x2="0" y2="1">'
+            . '<stop offset="0%" stop-color="#f51b7b" stop-opacity="0.24"/>'
+            . '<stop offset="100%" stop-color="#f51b7b" stop-opacity="0.015"/>'
+            . '</linearGradient></defs>';
+
+        $xlabels = [];
+        $count = count($values);
+        $indices = array_values(array_unique([
+            0,
+            (int)round(($count - 1) / 4),
+            (int)round(($count - 1) / 2),
+            (int)round(3 * ($count - 1) / 4),
+            max(0, $count - 1),
+        ]));
+        foreach ($indices as $index) {
+            if (!isset($values[$index])) {
+                continue;
+            }
+            $x = $left + ($plotw * ($index / $lastindex));
+            $label = isset($timestamps[$index]) && $timestamps[$index] > 0
+                ? userdate(
+                    $timestamps[$index],
+                    get_string('strftimedateshort', 'langconfig')
+                )
+                : (string)($labels[$index] ?? '');
+            $xlabels[] = html_writer::tag(
+                'text',
+                s($label),
+                [
+                    'x' => round($x, 1),
+                    'y' => $height - 13,
+                    'class' => 'm53-commerce-line-axis-label',
+                    'text-anchor' => 'middle',
+                ]
+            );
+        }
+
+        $axes = html_writer::empty_tag('line', [
+            'x1' => $left,
+            'x2' => $left,
+            'y1' => $top,
+            'y2' => $basey,
+            'class' => 'm53-commerce-line-axis',
+        ])
+        . html_writer::empty_tag('line', [
+            'x1' => $left,
+            'x2' => $width - $right,
+            'y1' => $basey,
+            'y2' => $basey,
+            'class' => 'm53-commerce-line-axis',
+        ]);
+
+        $svgcontent = $defs
+            . implode('', $grid)
+            . $axes
+            . implode('', $ylabels)
+            . html_writer::empty_tag('polygon', [
+                'points' => $area,
+                'class' => 'm53-commerce-line-area',
+                'fill' => 'url(#' . $gradientid . ')',
+            ])
+            . html_writer::empty_tag('polyline', [
+                'points' => $linepoints,
+                'class' => 'm53-commerce-line-path',
+                'fill' => 'none',
+            ])
+            . implode('', $circles)
+            . implode('', $xlabels);
+
+        return html_writer::tag(
+            'svg',
+            $svgcontent,
+            [
+                'viewBox' => "0 0 {$width} {$height}",
+                'class' => 'm53-commerce-line-svg',
+                'role' => 'img',
+                'aria-label' => get_string(
+                    'commerce_m51_revenue_evolution',
+                    'local_subscriptions'
+                ) . ' · ' . $currency,
+            ]
+        );
+    }
+
+    private static function chart_money_axis(
+        float $value,
+        string $currency
+    ): string {
+        if ($value >= 1000000) {
+            return format_float($value / 1000000, 1) . 'M ' . $currency;
+        }
+        if ($value >= 1000) {
+            return format_float($value / 1000, 1) . 'k ' . $currency;
+        }
+        return format_float($value, 0) . ' ' . $currency;
     }
 
     /**
@@ -272,10 +557,16 @@ final class CommerceProductStatisticsDashboardRenderer {
 
         $chart = new \core\chart_bar();
         $title = get_string('commerce_m51_deliveries_evolution', 'local_subscriptions');
-        $chart->set_title($title);
         $chart->set_labels($labels);
         if (method_exists($chart, 'set_stacked')) {
             $chart->set_stacked(true);
+        }
+        if (method_exists($chart, 'set_colors')) {
+            $chart->set_colors([
+                '#f51b7b',
+                '#8b5cf6',
+                '#f3a8ca',
+            ]);
         }
         $chart->add_series(new \core\chart_series(
             get_string('commerce_m51_delivery_paid', 'local_subscriptions'),

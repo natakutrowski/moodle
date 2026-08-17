@@ -84,6 +84,140 @@ final class CommerceProductLifecycleService {
             && $counts['grants'] === 0;
     }
 
+
+    public function can_change_identity(int $productid, string $sku): bool {
+        return $this->can_delete_without_sales($productid, $sku);
+    }
+
+    /**
+     * Changes the stable catalogue identity only while no customer has consumed
+     * the product. Product-id based relations remain intact; known SKU-based
+     * configuration references are migrated atomically.
+     */
+    public function change_identity(
+        int $productid,
+        string $oldsku,
+        string $newsku,
+        string $newtype
+    ): void {
+        $oldsku = strtoupper(trim($oldsku));
+        $newsku = strtoupper(trim($newsku));
+        $newtype = strtolower(trim($newtype));
+
+        if (!$this->can_change_identity($productid, $oldsku)) {
+            throw new \moodle_exception(
+                'commerce_product_identity_locked',
+                'local_subscriptions'
+            );
+        }
+
+        $duplicate = $this->db->get_record_select(
+            'local_subs_commerce_product',
+            'sku = :sku AND id <> :id',
+            ['sku' => $newsku, 'id' => $productid],
+            'id',
+            IGNORE_MISSING
+        );
+        if ($duplicate) {
+            throw new \moodle_exception(
+                'commerce_product_sku_duplicate',
+                'local_subscriptions'
+            );
+        }
+
+        $transaction = $this->db->start_delegated_transaction();
+        try {
+            $this->db->set_field(
+                'local_subs_commerce_product',
+                'sku',
+                $newsku,
+                ['id' => $productid]
+            );
+            $this->db->set_field(
+                'local_subs_commerce_product',
+                'type',
+                $newtype,
+                ['id' => $productid]
+            );
+
+            if ($oldsku !== $newsku) {
+                $this->db->set_field(
+                    'local_subs_commerce_offer_campaign',
+                    'sourceproductsku',
+                    $newsku,
+                    ['sourceproductsku' => $oldsku]
+                );
+                $this->replace_json_reference(
+                    'local_subs_commerce_offer_campaign',
+                    'criteriajson',
+                    $oldsku,
+                    $newsku
+                );
+                $this->replace_json_reference(
+                    'local_subs_commerce_promo',
+                    'productskusjson',
+                    $oldsku,
+                    $newsku
+                );
+                $this->replace_json_reference(
+                    'local_subs_showroom',
+                    'productsjson',
+                    $oldsku,
+                    $newsku
+                );
+            }
+
+            $transaction->allow_commit();
+        } catch (\Throwable $exception) {
+            $transaction->rollback($exception);
+        }
+    }
+
+    private function replace_json_reference(
+        string $table,
+        string $field,
+        string $oldsku,
+        string $newsku
+    ): void {
+        $records = $this->db->get_records_select(
+            $table,
+            $field . ' LIKE :needle',
+            ['needle' => '%' . $this->db->sql_like_escape($oldsku) . '%'],
+            '',
+            'id,' . $field
+        );
+
+        foreach ($records as $record) {
+            $decoded = json_decode((string)$record->{$field}, true);
+            if (!is_array($decoded)) {
+                continue;
+            }
+            $updated = $this->replace_json_value($decoded, $oldsku, $newsku);
+            if ($updated === $decoded) {
+                continue;
+            }
+            $this->db->set_field(
+                $table,
+                $field,
+                json_encode($updated, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                ['id' => (int)$record->id]
+            );
+        }
+    }
+
+    private function replace_json_value(mixed $value, string $oldsku, string $newsku): mixed {
+        if (is_string($value)) {
+            return strtoupper(trim($value)) === $oldsku ? $newsku : $value;
+        }
+        if (!is_array($value)) {
+            return $value;
+        }
+        foreach ($value as $key => $item) {
+            $value[$key] = $this->replace_json_value($item, $oldsku, $newsku);
+        }
+        return $value;
+    }
+
     public function delete(int $productid, string $sku, bool $force = false): void {
         if (!$force && !$this->can_delete_without_sales($productid, $sku)) {
             throw new \coding_exception('A product with sales or grants cannot be deleted without destructive confirmation.');

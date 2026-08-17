@@ -866,8 +866,102 @@
         const exerciseFields = fields.filter(field => field.exercise);
         const regularFields = fields.filter(field => !field.exercise);
 
-        regularFields.filter(field => !field.translatable)
-            .forEach(field => renderRegularField(container, field, values, dialog, config));
+        const commonFieldNames = new Set([
+            'sectionwidth',
+            'sectionbackground',
+            'sectionbackgroundcolor',
+            'sectionbackgroundimageurl',
+            'sectionbackgroundopacity',
+            'sectionbackgroundblur',
+            'sectionspacing',
+            'sectionanimation',
+        ]);
+        const nonTranslatedFields = regularFields.filter(
+            field => !field.translatable
+        );
+        const commonFields = nonTranslatedFields.filter(
+            field => commonFieldNames.has(field.name)
+        );
+        const specificFields = nonTranslatedFields.filter(
+            field => !commonFieldNames.has(field.name)
+        );
+
+        specificFields.forEach(
+            field => renderRegularField(
+                container,
+                field,
+                values,
+                dialog,
+                config
+            )
+        );
+
+        if (commonFields.length) {
+            const presentation = document.createElement('details');
+            presentation.className =
+                'commerce-showroom-dialog__presentation';
+
+            const presentationSummary =
+                document.createElement('summary');
+            presentationSummary.innerHTML =
+                '<i class="fa-solid fa-palette" aria-hidden="true"></i> '
+                + config.strings.commonpresentation;
+
+            const help = document.createElement('p');
+            help.className =
+                'commerce-showroom-dialog__presentation-help';
+            help.textContent =
+                config.strings.commonpresentationhelp;
+
+            const body = document.createElement('div');
+            body.className =
+                'commerce-showroom-dialog__presentation-body';
+
+            const backgroundNames = new Set([
+                'sectionbackground',
+                'sectionbackgroundcolor',
+                'sectionbackgroundimageurl',
+                'sectionbackgroundopacity',
+                'sectionbackgroundblur',
+            ]);
+            const general = document.createElement('div');
+            general.className =
+                'commerce-showroom-dialog__presentation-grid';
+
+            const background = document.createElement('div');
+            background.className =
+                'commerce-showroom-dialog__presentation-background';
+
+            const backgroundTitle = document.createElement('h5');
+            backgroundTitle.textContent =
+                config.strings.commonbackground;
+            background.append(backgroundTitle);
+
+            commonFields.forEach(field => {
+                const target = backgroundNames.has(field.name)
+                    ? background
+                    : general;
+                renderRegularField(
+                    target,
+                    field,
+                    values,
+                    dialog,
+                    config
+                );
+            });
+
+            body.append(help, general);
+            if (
+                background.querySelector('[data-business-field]')
+            ) {
+                body.append(background);
+            }
+            presentation.append(
+                presentationSummary,
+                body
+            );
+            container.append(presentation);
+        }
 
         const translatedFields = regularFields.filter(field => field.translatable);
         if (translatedFields.length) {
@@ -1198,7 +1292,18 @@
                     await persistBlockOrder(root, config);
                 } else if (action === 'collapse-all' || action === 'expand-all') {
                     const collapsed = action === 'collapse-all';
-                    root.querySelectorAll('[data-block-id]').forEach(item => item.classList.toggle('is-collapsed', collapsed));
+                    root.querySelectorAll('[data-block-id]').forEach(item => {
+                        item.classList.toggle('is-collapsed', collapsed);
+                        const toggle = item.querySelector(
+                            '[data-action="collapse-block"]'
+                        );
+                        if (toggle) {
+                            toggle.setAttribute(
+                                'aria-expanded',
+                                collapsed ? 'false' : 'true'
+                            );
+                        }
+                    });
                 } else if (block && action === 'collapse-block') {
                     const collapsed = block.classList.toggle('is-collapsed');
                     button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');

@@ -81,7 +81,7 @@ class local_subscriptions_scopes_renderer extends plugin_renderer_base {
                 'sesskey' => sesskey()
             ]);
             $translationurl = new moodle_url(subscription_config::scopes_translations_page(), [
-                'scopeid' => $s->id,
+                'accessscopeid' => $s->id,
             ]);
 
             $icons = [];
@@ -183,7 +183,7 @@ class local_subscriptions_scopes_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
-    public static function local_subscriptions_render_scopes_translations_table(array $scopes, array $translations, int $scopeid = 0, int $adding = 0, int $editing = 0): string {
+    public static function local_subscriptions_render_scopes_translations_table(array $scopes, array $translations, int $scopeid = 0, int $adding = 0, int $editing = 0, array $nativeproductsbyscope = [], array $readonlyscopes = []): string {
         global $DB;
 
         $currentlang = current_language();
@@ -210,19 +210,22 @@ class local_subscriptions_scopes_renderer extends plugin_renderer_base {
             $rows = array_filter($translations, fn($t) => $t->accessscopeid == $scope->id);
             $rows = array_values($rows);
 
+            $scopeproducts = $nativeproductsbyscope[(int)$scope->id] ?? [];
+            $readonly = !empty($readonlyscopes[(int)$scope->id]);
+
             $langues = [];
             foreach ($rows as $t) {
-                $url = new moodle_url(subscription_config::scopes_translations_page(), [
-                    'edit' => $t->id,
-                    'sesskey' => sesskey()
-                ]);
-
                 $flag = local_subscriptions_get_lang_flag($t->lang);
                 $name = local_subscriptions_get_lang_name($t->lang);
-
-                $langues[] = html_writer::link($url, $flag, [
-                    'title' => $name
-                ]);
+                if ($readonly) {
+                    $langues[] = html_writer::span($flag, 'me-1', ['title' => $name]);
+                } else {
+                    $url = new moodle_url(subscription_config::scopes_translations_page(), [
+                        'edit' => $t->id,
+                        'sesskey' => sesskey(),
+                    ]);
+                    $langues[] = html_writer::link($url, $flag, ['title' => $name]);
+                }
             }
 
             $current = array_filter($rows, fn($t) => $t->lang === $currentlang);
@@ -237,14 +240,32 @@ class local_subscriptions_scopes_renderer extends plugin_renderer_base {
                 'style' => $tooltip ? 'cursor: help;' : ''
             ]);
 
-            $addurl = new moodle_url(subscription_config::scopes_translations_page(), [
-                'add' => $scope->id, 'sesskey' => sesskey()
-            ]);
+            $actions = '';
+            if ($readonly) {
+                $productlinks = [];
+                foreach ($scopeproducts as $product) {
+                    $productlinks[] = html_writer::link(
+                        new moodle_url('/local/subscriptions/admin/commerce/products/edit.php', ['sku' => $product->sku]),
+                        format_string($product->name),
+                        ['class' => 'btn btn-sm btn-outline-primary']
+                    );
+                }
+                $actions = html_writer::span(
+                    get_string('commerce_scope_legacy_readonly_badge', 'local_subscriptions'),
+                    'badge rounded-pill bg-light text-dark border me-2'
+                ) . implode(' ', $productlinks);
+            } else {
+                $addurl = new moodle_url(subscription_config::scopes_translations_page(), [
+                    'add' => $scope->id,
+                    'sesskey' => sesskey(),
+                ]);
+                $actions = html_writer::link($addurl, '➕ ' . get_string('addtranslation', 'local_subscriptions'));
+            }
 
             $table->data[] = [
                 $namediv,
                 !empty($langues) ? implode(' ', $langues) : '-',
-                html_writer::link($addurl, '➕ ' . get_string('addtranslation', 'local_subscriptions'))
+                $actions,
             ];
         }
 

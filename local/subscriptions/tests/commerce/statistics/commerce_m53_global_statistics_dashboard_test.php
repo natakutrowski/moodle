@@ -26,6 +26,11 @@ final class commerce_m53_global_statistics_dashboard_test extends \advanced_test
         self::assertStringContainsString('provider_breakdown',$repository);
         self::assertStringContainsString('conic-gradient',$renderer);
         self::assertStringContainsString('m53-revenue-mode',$renderer);
+        self::assertStringContainsString('premium_series_svg',$renderer);
+        self::assertStringContainsString('m53-dashboard-chart-svg',$renderer);
+        self::assertStringContainsString('m53-dashboard-bars',$renderer);
+        self::assertStringNotContainsString('new \core\chart_line',$renderer);
+        self::assertStringNotContainsString('new \core\chart_bar',$renderer);
         self::assertStringContainsString('CommerceStatisticsPeriodResolver::resolve',$page);
         self::assertStringContainsString('commerce_global_statistics.css',$page);
         self::assertStringContainsString('MoodleExcelWorkbook',$export);
@@ -37,8 +42,12 @@ final class commerce_m53_global_statistics_dashboard_test extends \advanced_test
         self::assertStringContainsString('m53-tree-failure-subtree',$renderer);
         self::assertStringContainsString('m53-payment-tree-summary',$renderer);
         self::assertStringContainsString('premium_tree_node',$renderer);
+        self::assertStringNotContainsString('html_writer::strong(', $renderer);
+        self::assertStringContainsString("html_writer::tag('strong'", $renderer);
         $css=(string)file_get_contents($CFG->dirroot.'/local/subscriptions/styles/commerce_global_statistics.css');
         self::assertStringContainsString('M5.3E — connector geometry final fix',$css);
+        self::assertStringContainsString('N10.8 — align Statistics charts with the Commerce overview dashboard',$css);
+        self::assertStringContainsString('.m53-dashboard-chart-line',$css);
         self::assertStringContainsString('--m53-junction-size',$css);
         self::assertStringContainsString('margin: 0 0 0 37.5%',$css);
         self::assertStringContainsString('.m53-tree-failure-branches::after',$css);
@@ -63,4 +72,30 @@ final class commerce_m53_global_statistics_dashboard_test extends \advanced_test
         self::assertSame(0.0,$snapshot['global']['paymentsuccessrate']);
         self::assertSame([],$snapshot['currencies']);
     }
+    public function test_n108_chart_renderer_is_defensive_and_uses_valid_html_writer_signatures(): void {
+        $root = dirname(__DIR__, 3);
+        $renderer = file_get_contents(
+            $root . '/classes/crm/commerce/statistics/CommerceGlobalStatisticsDashboardRenderer.php'
+        );
+
+        self::assertStringContainsString('is_scalar($value)&&is_numeric($value)', $renderer);
+        self::assertStringContainsString("get_string('strftimedate','langconfig')", $renderer);
+        self::assertStringContainsString("get_string('strftimedateshort','langconfig')", $renderer);
+        self::assertStringContainsString("html_writer::tag('circle',''", $renderer);
+        self::assertStringNotContainsString('labeltext=', $renderer);
+        self::assertStringNotContainsString("html_writer::empty_tag('circle'", $renderer);
+        self::assertStringContainsString(
+            "html_writer::span('', 'm53-dashboard-bar-fill', ['style'=>",
+            $renderer
+        );
+        self::assertStringNotContainsString(
+            "html_writer::span('',['class'=>'m53-dashboard-bar-fill'",
+            $renderer
+        );
+        self::assertStringContainsString('premium_bar_series_svg', $renderer);
+        self::assertStringContainsString('m53-dashboard-chart-bar', $renderer);
+        self::assertStringContainsString('sprintf(\'%.2F\',$width)', $renderer);
+        self::assertStringContainsString('currency_label', $renderer);
+    }
+
 }

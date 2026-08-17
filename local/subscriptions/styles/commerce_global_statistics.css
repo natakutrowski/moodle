@@ -976,3 +976,117 @@
         padding-top: 0;
     }
 }
+/* N10.8 — align Statistics charts with the Commerce overview dashboard. */
+.m53-chart-card--dashboard-style {
+    border: 1px solid #e7ebf2;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .04);
+    overflow: hidden;
+}
+.m53-chart-card--dashboard-style .m53-chart-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: 16px 18px 4px;
+}
+.m53-chart-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    min-width: 0;
+}
+.m53-chart-title-wrap > i {
+    color: #f51b7b;
+}
+.m53-chart-card--dashboard-style .m53-chart-title {
+    margin: 0;
+}
+.m53-dashboard-chart-svg {
+    display: block;
+    width: 100%;
+    min-height: 270px;
+    color: #f51b7b;
+    overflow: visible;
+}
+.m53-dashboard-chart-grid {
+    stroke: rgba(148, 163, 184, .2);
+    stroke-width: 1;
+}
+.m53-dashboard-chart-axis-label {
+    fill: #94a3b8;
+    font-size: 10px;
+}
+.m53-dashboard-chart-line {
+    stroke: #f51b7b;
+    stroke-width: 2.2;
+    vector-effect: non-scaling-stroke;
+}
+.m53-dashboard-chart-area {
+    fill: url(#m53DashboardGradient);
+    color: #f51b7b;
+}
+.m53-dashboard-chart-point {
+    fill: #fff;
+    stroke: #f51b7b;
+    stroke-width: 2;
+}
+.m53-dashboard-chart-point-wrap:hover .m53-dashboard-chart-point,
+.m53-dashboard-chart-point:focus {
+    stroke-width: 3;
+}
+.m53-dashboard-bars {
+    display: grid;
+    gap: 14px;
+    padding: 12px 18px 20px;
+}
+.m53-dashboard-bar-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 6px;
+}
+.m53-dashboard-bar-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.m53-dashboard-bar-value {
+    white-space: nowrap;
+}
+.m53-dashboard-bar-track {
+    height: 9px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    overflow: hidden;
+}
+.m53-dashboard-bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #f51b7b;
+}
+@media (max-width: 767.98px) {
+    .m53-chart-card--dashboard-style .m53-chart-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .m53-dashboard-chart-svg {
+        min-width: 620px;
+    }
+    .m53-revenue-chart {
+        overflow-x: auto;
+    }
+}
+
+/* N10.8.6 — restore order histograms and proportional product bars. */
+.m53-dashboard-chart-bar {
+    fill: #f51b7b;
+    opacity: .92;
+}
+.m53-dashboard-chart-bar-wrap:hover .m53-dashboard-chart-bar,
+.m53-dashboard-chart-bar:focus {
+    opacity: 1;
+}

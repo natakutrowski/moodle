@@ -181,11 +181,16 @@ final class customer_navigation {
             $registry = new $registryclass();
             $items = [];
             foreach ($registry->visible_items($context) as $item) {
+                $icon = trim((string)$item->icon);
+                if ($icon !== '' && !str_contains($icon, ' ')) {
+                    // CRM registry uses Moodle/FontAwesome short names such as fa-dashboard.
+                    // Pass them as icon classes, never as a textual symbol.
+                    $icon = 'fa ' . $icon;
+                }
                 $items[] = self::admin_menu_item(
                     (string)$item->label,
                     $item->url->out(false),
-                    '',
-                    (string)$item->icon
+                    $icon
                 );
             }
             return $items;

@@ -361,20 +361,31 @@ final class CommerceGlobalStatisticsDashboardRenderer {
         if(!$series)return'';
         $cards='';
         foreach($series as $currency=>$item){
-            $title=get_string('commerce_m53_revenue_evolution','local_subscriptions').' · '.$currency;
-            $labels=$item->labels();$instant=array_map(static fn($v)=>$v/100,$item->values());
+            $title=get_string('commerce_m53_revenue_evolution','local_subscriptions').' · '.self::currency_label((string)$currency);
+            $instant=array_map(static fn($v)=>(float)$v/100,$item->values());
             $cumulative=[];$running=0.0;foreach($instant as $v){$running+=$v;$cumulative[]=$running;}
-            $a=new \core\chart_line();$a->set_title($title);$a->set_labels($labels);$a->add_series(new \core\chart_series($currency,$instant));
-            $b=new \core\chart_line();$b->set_title($title);$b->set_labels($labels);$b->add_series(new \core\chart_series($currency,$cumulative));
             $select=html_writer::select([
                 'period'=>get_string('commerce_m52_revenue_period','local_subscriptions'),
                 'cumulative'=>get_string('commerce_m52_revenue_cumulative','local_subscriptions'),
             ],'','period',false,['class'=>'form-select form-select-sm m53-revenue-mode']);
             $cards.=html_writer::tag('article',
-                html_writer::div(html_writer::tag('h3',s($title),['class'=>'m53-chart-title']).$select,'m53-chart-head').
-                html_writer::div($output->render($a),'m53-revenue-chart m53-revenue-chart--period').
-                html_writer::div($output->render($b),'m53-revenue-chart m53-revenue-chart--cumulative d-none'),
-                ['class'=>'m53-chart-card m53-revenue-chart-card']
+                html_writer::div(
+                    html_writer::div(
+                        html_writer::tag('i','',['class'=>'fa fa-line-chart','aria-hidden'=>'true']).
+                        html_writer::tag('h3',s($title),['class'=>'m53-chart-title']),
+                        'm53-chart-title-wrap'
+                    ).$select,
+                    'm53-chart-head'
+                ).
+                html_writer::div(
+                    self::premium_series_svg($item->points(),$instant,(string)$currency,true),
+                    'm53-revenue-chart m53-revenue-chart--period'
+                ).
+                html_writer::div(
+                    self::premium_series_svg($item->points(),$cumulative,(string)$currency,true),
+                    'm53-revenue-chart m53-revenue-chart--cumulative d-none'
+                ),
+                ['class'=>'m53-chart-card m53-revenue-chart-card m53-chart-card--dashboard-style']
             );
         }
         return html_writer::div($cards,'m53-revenue-grid');
@@ -384,10 +395,22 @@ final class CommerceGlobalStatisticsDashboardRenderer {
         if(!$series)return'';
         $cards='';
         foreach($series as $currency=>$item){
-            $title=get_string('commerce_m53_paid_orders_evolution','local_subscriptions').' · '.$currency;
-            $chart=new \core\chart_bar();$chart->set_title($title);$chart->set_labels($item->labels());
-            $chart->add_series(new \core\chart_series($currency,$item->values()));
-            $cards.=self::chart_card($output->render($chart),$title);
+            $title=get_string('commerce_m53_paid_orders_evolution','local_subscriptions').' · '.self::currency_label((string)$currency);
+            $cards.=html_writer::tag('article',
+                html_writer::div(
+                    html_writer::div(
+                        html_writer::tag('i','',['class'=>'fa fa-shopping-cart','aria-hidden'=>'true']).
+                        html_writer::tag('h3',s($title),['class'=>'m53-chart-title']),
+                        'm53-chart-title-wrap'
+                    ),
+                    'm53-chart-head'
+                ).
+                html_writer::div(
+                    self::premium_bar_series_svg($item->points(),array_map('floatval',$item->values()),(string)$currency),
+                    'm53-revenue-chart'
+                ),
+                ['class'=>'m53-chart-card m53-chart-card--dashboard-style']
+            );
         }
         return html_writer::div($cards,'m53-orders-grid');
     }
@@ -411,19 +434,22 @@ final class CommerceGlobalStatisticsDashboardRenderer {
                 $legend.=html_writer::tag('li',
                     html_writer::tag('span','',['class'=>'m53-pie-swatch','style'=>'background:'.$def[1]]).
                     html_writer::tag('span',s(get_string($def[0],'local_subscriptions')),['class'=>'m53-pie-label']).
-                    html_writer::tag(
-                        'strong',
-                        s((string)$count).' · '.s(format_float($pct,1)).' %',
-                        ['class'=>'m53-pie-value']
-                    )
+                    html_writer::tag('strong',s((string)$count).' · '.s(format_float($pct,1)).' %',['class'=>'m53-pie-value'])
                 );
             }
             $pie=html_writer::tag('div','',['class'=>'m53-pie','style'=>'background:conic-gradient('.implode(',',$stops).')']);
-            $title=get_string('commerce_m53_payment_distribution','local_subscriptions').' · '.$currency;
+            $title=get_string('commerce_m53_payment_distribution','local_subscriptions').' · '.self::currency_label((string)$currency);
             $cards.=html_writer::tag('article',
-                html_writer::tag('h3',self::flag((string)$currency).' '.s($title),['class'=>'m53-chart-title']).
+                html_writer::div(
+                    html_writer::div(
+                        html_writer::tag('i','',['class'=>'fa fa-credit-card','aria-hidden'=>'true']).
+                        html_writer::tag('h3',s($title),['class'=>'m53-chart-title']),
+                        'm53-chart-title-wrap'
+                    ),
+                    'm53-chart-head'
+                ).
                 html_writer::div($pie.html_writer::tag('ul',$legend,['class'=>'m53-pie-legend']),'m53-pie-layout'),
-                ['class'=>'m53-chart-card m53-pie-card']
+                ['class'=>'m53-chart-card m53-pie-card m53-chart-card--dashboard-style']
             );
         }
         return $cards===''?'':html_writer::div($cards,'m53-pie-grid');
@@ -433,21 +459,187 @@ final class CommerceGlobalStatisticsDashboardRenderer {
         $cards='';
         foreach($rows as $currency=>$items){
             if(!$items)continue;
-            $title=get_string('commerce_statistics_chart_top_products','local_subscriptions').' · '.$currency;
-            $chart=new \core\chart_bar();$chart->set_title($title);$chart->set_horizontal(true);
-            $chart->set_labels(array_map(static fn($r)=>format_string($r['label']),$items));
-            $chart->add_series(new \core\chart_series($currency,array_map(static fn($r)=>$r['revenue_minor']/100,$items)));
-            $cards.=self::chart_card($output->render($chart),$title);
+            $title=get_string('commerce_statistics_chart_top_products','local_subscriptions').' · '.self::currency_label((string)$currency);
+            $max=max(1,max(array_map(static fn($r)=>(int)$r['revenue_minor'],$items)));
+            $bars='';
+            foreach($items as $item){
+                $value=(int)$item['revenue_minor'];
+                $width=max(2,min(100,($value/$max)*100));
+                $bars.=html_writer::div(
+                    html_writer::div(
+                        html_writer::span(format_string((string)$item['label']),'m53-dashboard-bar-label').
+                        html_writer::tag('strong',s(self::money_value($value,(string)$currency)),['class'=>'m53-dashboard-bar-value']),
+                        'm53-dashboard-bar-head'
+                    ).
+                    html_writer::div(
+                        html_writer::span('', 'm53-dashboard-bar-fill', ['style'=>'width:'.sprintf('%.2F',$width).'%']),
+                        'm53-dashboard-bar-track'
+                    ),
+                    'm53-dashboard-bar-row'
+                );
+            }
+            $cards.=html_writer::tag('article',
+                html_writer::div(
+                    html_writer::div(
+                        html_writer::tag('i','',['class'=>'fa fa-trophy','aria-hidden'=>'true']).
+                        html_writer::tag('h3',s($title),['class'=>'m53-chart-title']),
+                        'm53-chart-title-wrap'
+                    ),
+                    'm53-chart-head'
+                ).html_writer::div($bars,'m53-dashboard-bars'),
+                ['class'=>'m53-chart-card m53-chart-card--dashboard-style']
+            );
         }
         return $cards===''?'':html_writer::div($cards,'m53-top-products-grid');
     }
 
-    private static function chart_card(string $chart,string $title): string {
-        return html_writer::tag('article',
-            html_writer::tag('h3',s($title),['class'=>'m53-chart-title']).
-            html_writer::div($chart,'m53-chart-body crm-commerce-statistics-chart'),
-            ['class'=>'m53-chart-card']
-        );
+
+    /** Dashboard-style vertical histogram for paid-order evolution. */
+    private static function premium_bar_series_svg(array $points,array $values,string $currency): string {
+        if($points===[]||$values===[])return'';
+
+        $numericvalue=static function($value): float {
+            return is_scalar($value)&&is_numeric($value)?(float)$value:0.0;
+        };
+        $timestamp=static function($point): int {
+            if(!is_array($point))return 0;
+            $value=$point['timestamp']??0;
+            return is_scalar($value)&&is_numeric($value)?(int)$value:0;
+        };
+
+        $safevalues=array_map($numericvalue,$values);
+        $width=680;$height=270;$left=72;$right=18;$top=18;$bottom=46;
+        $plotw=$width-$left-$right;$ploth=$height-$top-$bottom;
+        $rawmax=max(1.0,max($safevalues));
+        $axismax=(float)ceil($rawmax/4)*4;
+        if($axismax<=0)$axismax=1.0;
+
+        $grid='';$ylabels='';
+        for($i=0;$i<=4;$i++){
+            $value=$axismax*$i/4;$y=$top+$ploth-($ploth*$i/4);
+            $grid.=html_writer::empty_tag('line',['x1'=>$left,'x2'=>$width-$right,'y1'=>round($y,1),'y2'=>round($y,1),'class'=>'m53-dashboard-chart-grid']);
+            $ylabels.=html_writer::tag('text',s(format_float($value,0)),['x'=>$left-9,'y'=>round($y+4,1),'class'=>'m53-dashboard-chart-axis-label','text-anchor'=>'end']);
+        }
+
+        $count=max(1,count($safevalues));
+        $slot=$plotw/$count;
+        $barwidth=max(4.0,min(18.0,$slot*.56));
+        $bars='';
+        foreach($safevalues as $i=>$value){
+            $barheight=$ploth*($value/$axismax);
+            $x=$left+($slot*$i)+(($slot-$barwidth)/2);
+            $y=$top+$ploth-$barheight;
+            $point=$points[$i]??[];
+            $pointtimestamp=$timestamp($point);
+            $datelabel=$pointtimestamp>0?userdate($pointtimestamp,get_string('strftimedate','langconfig')):'';
+            $tip=$datelabel!==''?$datelabel.' · '.format_float($value,0):format_float($value,0);
+            $bars.=html_writer::tag(
+                'g',
+                html_writer::tag('rect','',[
+                    'x'=>round($x,1),
+                    'y'=>round($y,1),
+                    'width'=>round($barwidth,1),
+                    'height'=>round(max(0.0,$barheight),1),
+                    'rx'=>3,
+                    'class'=>'m53-dashboard-chart-bar',
+                    'tabindex'=>'0',
+                    'aria-label'=>$tip,
+                ]).html_writer::tag('title',s($tip)),
+                ['class'=>'m53-dashboard-chart-bar-wrap']
+            );
+        }
+
+        $xlabels='';$last=max(0,count($safevalues)-1);
+        $indices=array_values(array_unique([0,(int)round($last/4),(int)round($last/2),(int)round(3*$last/4),$last]));
+        foreach($indices as $idx){
+            $point=$points[$idx]??end($points);
+            $x=$left+($slot*$idx)+($slot/2);
+            $pointtimestamp=$timestamp($point);
+            $xlabel=$pointtimestamp>0?userdate($pointtimestamp,get_string('strftimedateshort','langconfig')):'';
+            $xlabels.=html_writer::tag('text',s($xlabel),['x'=>round($x,1),'y'=>$height-12,'class'=>'m53-dashboard-chart-axis-label','text-anchor'=>'middle']);
+        }
+
+        return html_writer::tag('svg',$grid.$ylabels.$bars.$xlabels,[
+            'viewBox'=>"0 0 {$width} {$height}",
+            'class'=>'m53-dashboard-chart-svg m53-dashboard-bar-chart-svg',
+            'role'=>'img',
+        ]);
+    }
+
+    /** Dashboard-style SVG line/area chart shared by global statistics series. */
+    private static function premium_series_svg(array $points,array $values,string $currency,bool $money): string {
+        if($points===[]||$values===[])return'';
+
+        // CommerceStatisticsSeries guarantees scalar numeric values and timestamps,
+        // but keep this renderer defensive because statistics pages must never fail
+        // because of an unexpected historical/partially-migrated payload.
+        $numericvalue=static function($value): float {
+            return is_scalar($value)&&is_numeric($value)?(float)$value:0.0;
+        };
+        $timestamp=static function($point): int {
+            if(!is_array($point))return 0;
+            $value=$point['timestamp']??0;
+            return is_scalar($value)&&is_numeric($value)?(int)$value:0;
+        };
+
+        $safevalues=array_map($numericvalue,$values);
+        $width=680;$height=270;$left=72;$right=18;$top=18;$bottom=46;
+        $plotw=$width-$left-$right;$ploth=$height-$top-$bottom;
+        $rawmax=max(1.0,max($safevalues));
+        $axismax=(float)ceil($rawmax/4)*4;
+        if($axismax<=0)$axismax=1.0;
+        $grid='';$ylabels='';
+        for($i=0;$i<=4;$i++){
+            $value=$axismax*$i/4;$y=$top+$ploth-($ploth*$i/4);
+            $grid.=html_writer::empty_tag('line',['x1'=>$left,'x2'=>$width-$right,'y1'=>round($y,1),'y2'=>round($y,1),'class'=>'m53-dashboard-chart-grid']);
+            $label=$money?self::axis_money_value($value,$currency):format_float($value,0);
+            $ylabels.=html_writer::tag('text',s($label),['x'=>$left-9,'y'=>round($y+4,1),'class'=>'m53-dashboard-chart-axis-label','text-anchor'=>'end']);
+        }
+
+        $coords=[];$dots=[];$count=max(1,count($safevalues)-1);
+        foreach($safevalues as $i=>$value){
+            $x=$left+$plotw*($i/$count);$y=$top+$ploth-($ploth*($value/$axismax));
+            $coords[]=[round($x,1),round($y,1)];
+            $point=$points[$i]??[];
+            $pointtimestamp=$timestamp($point);
+            $datelabel=$pointtimestamp>0?userdate($pointtimestamp,get_string('strftimedate','langconfig')):'';
+            $formatted=$money?self::money_value((int)round($value*100),$currency):format_float($value,0);
+            $tip=$datelabel!==''?$datelabel.' · '.$formatted:$formatted;
+            $dots[]=html_writer::tag(
+                'g',
+                html_writer::tag('circle','',[
+                    'cx'=>round($x,1),
+                    'cy'=>round($y,1),
+                    'r'=>4,
+                    'class'=>'m53-dashboard-chart-point',
+                    'tabindex'=>'0',
+                    'aria-label'=>$tip,
+                ]).html_writer::tag('title',s($tip)),
+                ['class'=>'m53-dashboard-chart-point-wrap']
+            );
+        }
+
+        $line=implode(' ',array_map(static fn(array $c): string=>(string)$c[0].','.(string)$c[1],$coords));
+        $basey=$top+$ploth;$area=$left.','.$basey.' '.$line.' '.($width-$right).','.$basey;
+        $xlabels='';$indices=array_values(array_unique([0,(int)round($count/4),(int)round($count/2),(int)round(3*$count/4),$count]));
+        foreach($indices as $idx){
+            $point=$points[$idx]??end($points);$x=$left+$plotw*($idx/$count);
+            $pointtimestamp=$timestamp($point);
+            $xlabel=$pointtimestamp>0?userdate($pointtimestamp,get_string('strftimedateshort','langconfig')):'';
+            $xlabels.=html_writer::tag('text',s($xlabel),['x'=>round($x,1),'y'=>$height-12,'class'=>'m53-dashboard-chart-axis-label','text-anchor'=>'middle']);
+        }
+        $defs='<defs><linearGradient id="m53DashboardGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="currentColor" stop-opacity="0.28"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.02"/></linearGradient></defs>';
+        $svg=$defs.$grid.$ylabels.html_writer::empty_tag('polygon',['points'=>$area,'class'=>'m53-dashboard-chart-area']).html_writer::empty_tag('polyline',['points'=>$line,'class'=>'m53-dashboard-chart-line','fill'=>'none']).implode('',$dots).$xlabels;
+        return html_writer::tag('svg',$svg,['viewBox'=>"0 0 {$width} {$height}",'class'=>'m53-dashboard-chart-svg','role'=>'img']);
+    }
+
+    private static function money_value(int $minor,string $currency): string {
+        return format_float($minor/100,2).' '.strtoupper($currency);
+    }
+
+    private static function axis_money_value(float $major,string $currency): string {
+        if($major>=1000)return format_float($major/1000,1).'k '.strtoupper($currency);
+        return format_float($major,0).' '.strtoupper($currency);
     }
 
     private static function trend(int|float $current,int|float $previous): string {
@@ -459,6 +651,12 @@ final class CommerceGlobalStatisticsDashboardRenderer {
         if(abs($pct)<.5)return html_writer::tag('span','0 %',['class'=>'m53-trend m53-trend--flat']);
         $up=$pct>0;
         return html_writer::tag('span',($up?'↑ +':'↓ −').(int)round(abs($pct)).' %',['class'=>'m53-trend '.($up?'m53-trend--up':'m53-trend--down')]);
+    }
+
+
+    private static function currency_label(string $currency): string {
+        $currency=strtoupper($currency);
+        return self::flag($currency).' '.$currency;
     }
 
     private static function flag(string $currency): string {

@@ -21,4 +21,14 @@ final class customer_admin_topbar_j12c_test extends \advanced_testcase {
         self::assertLessThan($campus, $admin);
         self::assertLessThan($cart, $campus);
     }
+
+    public function test_crm_registry_icons_are_rendered_as_icons_not_text_symbols(): void {
+        $root = dirname(__DIR__, 2);
+        $service = file_get_contents($root . '/classes/local/customer_navigation.php');
+
+        self::assertStringContainsString("\$icon = 'fa ' . \$icon", $service);
+        self::assertStringContainsString("\$item->url->out(false),\n                    \$icon", $service);
+        self::assertStringNotContainsString("\$item->url->out(false),\n                    '',\n                    (string)\$item->icon", $service);
+    }
+
 }

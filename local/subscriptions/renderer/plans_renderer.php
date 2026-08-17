@@ -278,7 +278,7 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
-    public static function local_subscriptions_render_plans_translations_table(array $plans, array $translations, int $planid = 0, int $adding = 0, int $editing = 0): string {
+    public static function local_subscriptions_render_plans_translations_table(array $plans, array $translations, int $planid = 0, int $adding = 0, int $editing = 0, array $nativeproducts = []): string {
         global $DB;
 
         $currentlang = current_language();
@@ -315,9 +315,11 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
                 $flag = local_subscriptions_get_lang_flag($t->lang);
                 $name = local_subscriptions_get_lang_name($t->lang);
 
-                $langues[] = html_writer::link($url, $flag, [
-                    'title' => $name
-                ]);
+                $langues[] = isset($nativeproducts[$plan->id])
+                    ? html_writer::span($flag, 'me-1', ['title' => $name])
+                    : html_writer::link($url, $flag, [
+                        'title' => $name
+                    ]);
             }
 
             $current = array_filter($rows, fn($t) => $t->lang === $currentlang);
@@ -336,10 +338,21 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
                 'add' => $plan->id, 'sesskey' => sesskey()
             ]);
 
+            $translationaction = isset($nativeproducts[$plan->id])
+                ? html_writer::link(
+                    new moodle_url('/local/subscriptions/admin/commerce/products/edit.php', [
+                        'sku' => $nativeproducts[$plan->id]->sku,
+                    ]),
+                    html_writer::span('NATIVE', 'badge rounded-pill text-bg-success me-1')
+                        . get_string('commerce_plan_open_native_translations', 'local_subscriptions'),
+                    ['class' => 'text-decoration-none']
+                )
+                : html_writer::link($addurl, '➕ ' . get_string('addtranslation', 'local_subscriptions'));
+
             $table->data[] = [
                 $namediv,
                 !empty($langues) ? implode(' ', $langues) : '-',
-                html_writer::link($addurl, '➕ ' . get_string('addtranslation', 'local_subscriptions'))
+                $translationaction,
             ];
         }
 
@@ -349,7 +362,7 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
     /**
      * Affiche le tableau des prix pour un plan.
      */
-    public static function render_prices_table(array $prices): string {
+    public static function render_prices_table(array $prices, bool $readonly = false): string {
         global $OUTPUT, $DB;
 
         if (empty($prices)) {
@@ -363,27 +376,33 @@ class local_subscriptions_plans_renderer extends plugin_renderer_base {
             
             $icons = [];
 
-            // ✏️ Éditer
-            $icons[] = html_writer::link($editurl,
-                $OUTPUT->pix_icon('i/edit', get_string('editprice', 'local_subscriptions'), ''),
-                [
-                    'title' => get_string('editplan', 'local_subscriptions'),
-                    'class' => 'me-2 action-icon'
-                ]
-            );
+            if (!$readonly) {
+                // ✏️ Éditer
+                $icons[] = html_writer::link($editurl,
+                    $OUTPUT->pix_icon('i/edit', get_string('editprice', 'local_subscriptions'), ''),
+                    [
+                        'title' => get_string('editplan', 'local_subscriptions'),
+                        'class' => 'me-2 action-icon'
+                    ]
+                );
 
-            // 🗑️ Supprimer
-            $icons[] = html_writer::link('#',
-                $OUTPUT->pix_icon('i/delete', get_string('deleteprice', 'local_subscriptions'), ''),
-                [
-                    'class' => 'deleteprice me-2 action-icon',
-                    'data-deleteurl' => $deleteurl->out(false),
-                    'data-currency' => $price->currency,
-                    'data-id' => $price->id,
-                    'title' => get_string('deleteprice', 'local_subscriptions')
-                ]
-            );
-
+                // 🗑️ Supprimer
+                $icons[] = html_writer::link('#',
+                    $OUTPUT->pix_icon('i/delete', get_string('deleteprice', 'local_subscriptions'), ''),
+                    [
+                        'class' => 'deleteprice me-2 action-icon',
+                        'data-deleteurl' => $deleteurl->out(false),
+                        'data-currency' => $price->currency,
+                        'data-id' => $price->id,
+                        'title' => get_string('deleteprice', 'local_subscriptions')
+                    ]
+                );
+            } else {
+                $icons[] = html_writer::span(
+                    get_string('commerce_plan_legacy_readonly_badge', 'local_subscriptions'),
+                    'badge rounded-pill bg-light text-dark border'
+                );
+            }
 
             // Conteneur flex aligné
             $actions = html_writer::div(implode('', $icons), '', ['class' => 'd-flex align-items-center']);

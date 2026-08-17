@@ -21,9 +21,19 @@ final class CommerceDesignSystemRenderer {
             if ($index < count($actions) - 1) {
                 $buttonclass .= ' me-2';
             }
+            $label = s($action['label']);
+            if (!empty($action['icon'])) {
+                $label = html_writer::tag('i', '', [
+                    'class' => 'fa ' . clean_param(
+                        (string)$action['icon'],
+                        PARAM_TEXT
+                    ) . ' me-1',
+                    'aria-hidden' => 'true',
+                ]) . $label;
+            }
             $links[] = html_writer::link(
                 $action['url'],
-                s($action['label']),
+                $label,
                 ['class' => $buttonclass]
             );
         }

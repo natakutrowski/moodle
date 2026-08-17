@@ -16,7 +16,7 @@ use local_subscriptions\commerce\catalog\status\CommerceCatalogEditorialStatus;
 use local_subscriptions\commerce\catalog\status\CommerceCatalogTechnicalState;
 use local_subscriptions\commerce\catalog\status\CommerceCatalogVisibility;
 use local_subscriptions\commerce\storefront\merchandising\CommerceStorefrontMerchandisingResolver;
-use local_subscriptions\commerce\storefront\merchandising\CommerceStorefrontPromotionResolver;
+use local_subscriptions\commerce\pricing\CommerceProductPromotionService;
 use local_subscriptions\commerce\storefront\experience\CommerceStorefrontExperienceResolver;
 use local_subscriptions\commerce\storefront\localisation\CommerceStorefrontComponentLocaliser;
 use local_subscriptions\commerce\storefront\ownership\CommerceStorefrontOwnershipResolver;
@@ -138,7 +138,7 @@ final class CommerceStorefrontRepository {
         $translation = $this->translation($details->get_translations(), $language);
         $metadata = $summary->get_metadata();
         $merchandising = (new CommerceStorefrontMerchandisingResolver())->resolve($metadata);
-        $promotionresolver = new CommerceStorefrontPromotionResolver();
+        $promotionresolver = new CommerceProductPromotionService();
         $experience = (new CommerceStorefrontExperienceResolver())->resolve($metadata, $summary->get_type(), $language);
         global $USER;
         $owned = isloggedin() && !isguestuser()
@@ -182,13 +182,13 @@ final class CommerceStorefrontRepository {
                 continue;
             }
             $promotion = $promotionresolver->resolve(
-                $merchandising,
+                $metadata,
                 $price->get_currency(),
                 $price->get_amount_minor()
             );
             $prices[] = new CommerceStorefrontPrice(
                 $price->get_currency(),
-                $price->get_amount_minor(),
+                $promotion['amountminor'] ?? $price->get_amount_minor(),
                 $promotion['compareamountminor'] ?? null,
                 $promotion['discountpercentage'] ?? null,
                 $promotion['end'] ?? null,

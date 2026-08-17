@@ -18399,17 +18399,23 @@ a.crm-sales-personal-offer-badge:hover {
     border-radius: .8rem; background: #fff; box-shadow: 0 2px 10px rgba(15,23,42,.035);
 }
 .crm-offers-access-eyebrow { margin-bottom: .7rem; color: #6d55a4; font-size: .72rem; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
-.crm-offers-access-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; }
+.crm-offers-access-actions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .8rem; }
 .crm-offers-access-action-card { padding: 1rem; border: 1px solid #e6eaf0; border-radius: .75rem; background: #fff; }
 .crm-offers-access-action-card.is-offer { background: linear-gradient(135deg,rgba(247,37,133,.035),#fff 58%); }
 .crm-offers-access-action-card.is-grant { background: linear-gradient(135deg,rgba(37,125,232,.04),#fff 58%); }
+.crm-offers-access-action-card.is-promotion { background: linear-gradient(135deg,rgba(245,158,11,.05),#fff 58%); }
 .crm-offers-access-action-icon { display:inline-flex; width:2.2rem; height:2.2rem; align-items:center; justify-content:center; margin-bottom:.55rem; border-radius:.65rem; font-size:1rem; }
 .is-offer .crm-offers-access-action-icon { background:#fff0f6; color:#f72585; }
 .is-grant .crm-offers-access-action-icon { background:#edf6ff; color:#257de8; }
+.is-promotion .crm-offers-access-action-icon { background:#fff7e6; color:#c77800; }
 .crm-offers-access-action-title { margin:0 0 .35rem; color:#17213b; font-size:1rem; font-weight:800; }
 .crm-offers-access-action-description { min-height:2.5rem; margin-bottom:.7rem; color:#64748b; font-size:.78rem; }
 .crm-offers-access-action-card.is-offer .crm-offers-access-action-button { background:#f72585; border-color:#f72585; color:#fff; }
 .crm-offers-access-action-card.is-grant .crm-offers-access-action-button { background:#257de8; border-color:#257de8; color:#fff; }
+.crm-offers-access-action-card.is-promotion .crm-offers-access-action-button { background:#c77800; border-color:#c77800; color:#fff; }
+.crm-offers-access-tab.is-promotion { color:#8a5a00; }
+.crm-offers-access-tab.is-promotion.is-active::after { background:#c77800; }
+.commerce-promotions-context-note { color:#5f6673; font-size:.82rem; }
 .crm-offers-access-hint { margin-top:.75rem; padding:.55rem .7rem; border:1px solid #edf1f6; border-radius:.55rem; background:#f8fafc; color:#64748b; font-size:.72rem; }
 .crm-offers-access-metrics { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); margin-bottom:1rem; border:1px solid #e2e8f0; border-radius:.8rem; background:#fff; overflow:hidden; }
 .crm-offers-access-metric { display:flex; min-width:0; gap:.55rem; padding:.8rem; border-right:1px solid #edf1f6; }
@@ -21208,3 +21214,4774 @@ a.crm-sales-personal-offer-badge:hover {
 .crm-offers-access-tab-icon{width:1rem;text-align:center;opacity:.88}
 .crm-offers-access-tab.is-overview{margin-right:.65rem}
 .crm-offers-access-tab.is-overview::before{position:absolute;top:.55rem;right:-.45rem;bottom:.55rem;width:1px;background:#d8dee8;content:""}
+
+
+/* Commerce 7.95N8.1 — Products catalogue workspace harmonisation. */
+.local-subscriptions-commerce-products-page
+.crm-commerce-metrics {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .7rem;
+    margin: .8rem 0 1rem;
+}
+.local-subscriptions-commerce-products-page
+.crm-commerce-metric {
+    min-height: 76px;
+}
+.local-subscriptions-commerce-products-page
+.crm-commerce-metric:last-child {
+    border-color: #f1d2df;
+    background: #fff8fb;
+}
+
+.local-subscriptions-commerce-products-page
+.crm-products-filter-panel {
+    margin-bottom: .85rem;
+}
+.crm-products-filter-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(290px, 1.5fr)
+        repeat(5, minmax(130px, .65fr));
+    gap: .75rem;
+    align-items: end;
+}
+.crm-products-filter-field .form-label {
+    margin-bottom: .25rem;
+    color: #52627a;
+    font-size: .69rem;
+    font-weight: 750;
+}
+.crm-products-filter-field .form-control,
+.crm-products-filter-field .form-select {
+    min-height: 36px;
+    font-size: .74rem;
+}
+.crm-products-filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: .35rem;
+}
+.crm-product-action-primary {
+    border-color: #f72585 !important;
+    background: #f72585 !important;
+    color: #fff !important;
+}
+.crm-product-action-primary:hover,
+.crm-product-action-primary:focus {
+    border-color: #d91c73 !important;
+    background: #d91c73 !important;
+    color: #fff !important;
+}
+.crm-products-result-summary {
+    margin: .85rem 0 .7rem;
+}
+.crm-products-action-bar {
+    margin-bottom: .75rem;
+}
+
+.local-subscriptions-commerce-products-page
+.crm-products-table {
+    overflow: visible;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.local-subscriptions-commerce-products-page
+.crm-products-table thead th {
+    border-bottom: 1px solid #dfe5ec;
+    background: #f7f8fa;
+    color: #263650;
+    font-size: .72rem;
+    font-weight: 800;
+    text-align: left;
+}
+.local-subscriptions-commerce-products-page
+.crm-products-table tbody tr:hover {
+    background: #fafbfc;
+}
+.local-subscriptions-commerce-products-page
+.crm-products-table th,
+.local-subscriptions-commerce-products-page
+.crm-products-table td {
+    padding: .64rem .75rem;
+    border-right: 0;
+    vertical-align: middle;
+    font-size: .75rem;
+}
+.local-subscriptions-commerce-products-page
+.crm-products-table th:last-child,
+.local-subscriptions-commerce-products-page
+.crm-products-table td:last-child {
+    text-align: left;
+    overflow: visible;
+}
+.crm-product-name-link {
+    color: #263650;
+    font-weight: 800;
+    text-decoration: none;
+}
+.crm-product-name-link:hover {
+    color: #f72585;
+    text-decoration: none;
+}
+.crm-product-origin {
+    margin-top: .12rem;
+    color: #8390a3;
+    font-size: .64rem;
+    font-weight: 650;
+}
+.crm-product-sort-link {
+    display: inline-flex;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+}
+.crm-product-sort-link:hover,
+.crm-product-sort-link.is-active {
+    color: #f72585;
+    text-decoration: none;
+}
+.crm-product-action-outline {
+    border-color: #f72585 !important;
+    background: #fff !important;
+    color: #e71e7d !important;
+}
+.crm-product-action-outline:hover,
+.crm-product-action-outline:focus {
+    border-color: #d91c73 !important;
+    background: #fff4f9 !important;
+    color: #d91c73 !important;
+}
+.local-subscriptions-commerce-products-page
+.crm-sales-actions {
+    justify-content: flex-start;
+    text-align: left;
+}
+.local-subscriptions-commerce-products-page
+.crm-sales-row-actions-menu {
+    position: relative;
+}
+.local-subscriptions-commerce-products-page
+.crm-sales-row-actions-menu[open] {
+    z-index: 80;
+}
+.local-subscriptions-commerce-products-page
+.crm-sales-row-menu {
+    right: 0;
+    left: auto;
+    z-index: 90;
+    min-width: 225px;
+    text-align: left;
+    white-space: normal;
+}
+.local-subscriptions-commerce-products-page
+.crm-sales-row-menu-link {
+    display: block;
+    padding: .42rem .5rem;
+    border-radius: .42rem;
+    color: #475569;
+    text-decoration: none;
+}
+.local-subscriptions-commerce-products-page
+.crm-sales-row-menu-link:hover {
+    background: #fff4f9;
+    color: #d91c73;
+}
+.crm-product-perpage-select {
+    width: auto;
+    min-width: 68px;
+}
+
+@media (max-width: 1199.98px) {
+    .crm-products-filter-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .crm-products-filter-field.is-search {
+        grid-column: span 2;
+    }
+}
+@media (max-width: 991.98px) {
+    .local-subscriptions-commerce-products-page
+    .crm-commerce-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .crm-products-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 767.98px) {
+    .local-subscriptions-commerce-products-page
+    .crm-commerce-metrics,
+    .crm-products-filter-grid {
+        grid-template-columns: 1fr;
+    }
+    .crm-products-filter-field.is-search {
+        grid-column: auto;
+    }
+    .crm-products-filter-actions {
+        justify-content: stretch;
+    }
+}
+
+
+/* Commerce 7.95N8.1.1 — Products index micro-polish. */
+.crm-products-top-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: .75rem 0 .8rem;
+}
+.local-subscriptions-commerce-products-page
+.crm-products-table .badge {
+    padding: .36rem .58rem;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 800;
+}
+.crm-product-price-line {
+    display: flex;
+    align-items: center;
+    gap: .42rem;
+    min-height: 1.45rem;
+}
+.crm-product-price-flag {
+    flex: 0 0 auto;
+    width: 1.25rem;
+    font-size: .92rem;
+    line-height: 1;
+}
+.crm-product-price-value {
+    white-space: nowrap;
+}
+
+
+/* Commerce 7.95N8.2 — Product detail hierarchy and statistics polish. */
+.local-subscriptions-commerce-product-view-page
+.crm-commerce-page-header {
+    align-items: flex-start;
+    margin-bottom: .75rem;
+}
+.crm-product-view-origin-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: .5rem;
+    padding: .27rem .52rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: .66rem;
+    font-weight: 750;
+}
+.local-subscriptions-commerce-product-view-page
+.crm-commerce-page-header-actions {
+    max-width: 54%;
+}
+.local-subscriptions-commerce-product-view-page
+.crm-commerce-actionbar {
+    justify-content: flex-end;
+}
+.local-subscriptions-commerce-product-view-page
+.crm-commerce-actionbar .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    font-size: .72rem;
+    font-weight: 700;
+}
+.crm-product-view-card {
+    border-color: #e6eaf0;
+    border-radius: .75rem;
+    box-shadow: 0 2px 7px rgba(15,23,42,.025);
+}
+.crm-product-view-card-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: .75rem;
+    color: #263650;
+    font-size: .86rem;
+    font-weight: 800;
+}
+.crm-product-view-card-title > .fa {
+    color: #f51b7b;
+    font-size: .82rem;
+}
+.crm-product-view-summary-card .badge {
+    padding: .34rem .55rem;
+    border-radius: 999px;
+    font-size: .67rem;
+}
+.crm-product-view-price-row {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .2rem 0;
+}
+.crm-product-view-price-flag {
+    width: 1.3rem;
+    font-size: .94rem;
+}
+.crm-product-view-price-value {
+    color: #25334d;
+    font-size: .78rem;
+    font-weight: 800;
+}
+.crm-product-view-technical-details {
+    overflow: hidden;
+    border-color: #e6eaf0;
+    background: #fafbfc;
+}
+.crm-product-view-technical-summary {
+    padding: .75rem .85rem;
+    color: #64748b;
+    cursor: pointer;
+    font-size: .7rem;
+    font-weight: 750;
+    list-style: none;
+}
+.crm-product-view-technical-summary::-webkit-details-marker {
+    display: none;
+}
+.crm-product-view-technical-summary .fa {
+    color: #94a3b8;
+}
+.crm-product-view-technical-body {
+    padding: 0 .85rem .85rem;
+    border-top: 1px solid #edf1f6;
+}
+.crm-product-view-technical-list {
+    display: grid;
+    grid-template-columns: minmax(130px, auto) minmax(0, 1fr);
+    gap: .3rem .75rem;
+    padding-top: .75rem;
+    font-size: .68rem;
+}
+.crm-product-view-technical-list dt {
+    color: #718096;
+}
+.crm-product-view-technical-list dd {
+    margin: 0;
+}
+.crm-product-view-legacy-references {
+    margin-top: .65rem;
+    padding-top: .65rem;
+    border-top: 1px solid #edf1f6;
+    color: #64748b;
+    font-size: .68rem;
+}
+
+/* Statistics toolbar: selectors left, compact actions right. */
+.local-subscriptions-commerce-product-view-page
+.m51-stat-toolbar {
+    grid-template-columns:
+        minmax(160px, .65fr)
+        minmax(180px, .65fr)
+        minmax(0, 1.5fr)
+        auto;
+    align-items: end;
+    gap: .7rem;
+}
+.local-subscriptions-commerce-product-view-page
+.m51-stat-toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .45rem;
+    margin-left: auto;
+}
+.local-subscriptions-commerce-product-view-page
+.m51-stat-toolbar-actions .btn {
+    width: auto !important;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+/* Align product charts with the main Commerce visual language. */
+.local-subscriptions-commerce-product-view-page
+.m51-chart-card {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(245,27,123,.13);
+    background:
+        radial-gradient(
+            circle at 18% 0%,
+            rgba(245,27,123,.075),
+            transparent 34%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,1) 0%,
+            rgba(255,248,252,.82) 100%
+        );
+    box-shadow: 0 3px 12px rgba(245,27,123,.035);
+}
+.local-subscriptions-commerce-product-view-page
+.m51-chart-card::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        #f51b7b 0%,
+        #e879b0 48%,
+        #8b5cf6 100%
+    );
+    content: "";
+}
+.local-subscriptions-commerce-product-view-page
+.m51-chart-title {
+    color: #2f3854;
+    font-weight: 750;
+}
+.local-subscriptions-commerce-product-view-page
+.m51-chart-card .chart-area {
+    background: transparent;
+}
+
+@media (max-width: 991.98px) {
+    .local-subscriptions-commerce-product-view-page
+    .crm-commerce-page-header-actions {
+        max-width: 100%;
+    }
+    .local-subscriptions-commerce-product-view-page
+    .m51-stat-toolbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .local-subscriptions-commerce-product-view-page
+    .m51-stat-toolbar-actions {
+        grid-column: 1 / -1;
+    }
+}
+@media (max-width: 767.98px) {
+    .local-subscriptions-commerce-product-view-page
+    .m51-stat-toolbar {
+        grid-template-columns: 1fr;
+    }
+    .local-subscriptions-commerce-product-view-page
+    .m51-stat-toolbar-actions {
+        grid-column: auto;
+        justify-content: flex-start;
+    }
+}
+
+
+/* Commerce 7.95N8.3 — Product overview consolidation + Commerce SVG revenue charts. */
+.local-subscriptions-commerce-product-view-page
+.crm-commerce-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 980px;
+}
+.local-subscriptions-commerce-product-view-page
+.crm-commerce-metric-value {
+    font-size: 1.08rem;
+    line-height: 1.35;
+    white-space: pre-wrap;
+}
+.local-subscriptions-commerce-product-view-page
+.crm-commerce-metric-label {
+    margin-top: .15rem;
+}
+
+.crm-product-view-overview-grid {
+    display: grid;
+    gap: .9rem;
+    margin-bottom: 1rem;
+}
+.crm-product-view-summary-card {
+    padding: 1rem 1.05rem;
+}
+.crm-product-view-description {
+    margin: 0 0 .85rem;
+    color: #64748b;
+    font-size: .76rem;
+    line-height: 1.5;
+}
+.crm-product-view-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+    margin-top: .2rem;
+    border: 1px solid #e8edf3;
+    border-radius: .7rem;
+}
+.crm-product-view-status-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: .7rem;
+    padding: .66rem .75rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.crm-product-view-status-row:nth-child(odd) {
+    border-right: 1px solid #edf1f5;
+}
+.crm-product-view-status-row:nth-last-child(-n+2) {
+    border-bottom: 0;
+}
+.crm-product-view-status-copy {
+    display: grid;
+    min-width: 0;
+    gap: .08rem;
+}
+.crm-product-view-status-copy > strong {
+    color: #334155;
+    font-size: .72rem;
+}
+.crm-product-view-status-help {
+    color: #8a96a7;
+    font-size: .62rem;
+    line-height: 1.3;
+}
+.crm-product-view-status-badge {
+    flex: 0 0 auto;
+}
+.crm-product-view-status-badge .badge {
+    padding: .34rem .55rem;
+    border-radius: 999px;
+    font-size: .66rem;
+    font-weight: 800;
+}
+.crm-product-view-commercial-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .65rem;
+    margin-top: .75rem;
+}
+.crm-product-view-commercial-block {
+    padding: .72rem .78rem;
+    border: 1px solid #edf1f6;
+    border-radius: .65rem;
+    background: #fbfcfd;
+}
+.crm-product-view-commercial-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: .42rem;
+    color: #334155;
+    font-size: .78rem;
+}
+.crm-product-view-commercial-title > .fa {
+    color: #f51b7b;
+}
+.crm-product-view-price-row {
+    font-size: .8rem;
+}
+.crm-product-view-price-value {
+    font-size: .82rem;
+}
+.crm-product-view-availability-line {
+    color: #526078;
+    font-size: .72rem;
+    line-height: 1.55;
+}
+.crm-product-view-technical-details {
+    margin-top: .72rem;
+    border: 1px solid #edf1f6;
+    border-radius: .65rem;
+    background: #fafbfc;
+}
+
+/* Revenue line charts now reuse the Commerce dashboard visual grammar. */
+.m53-commerce-line-card {
+    padding: .85rem .95rem .72rem;
+}
+.m53-commerce-line-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 245px;
+}
+.m53-commerce-line-grid {
+    stroke: #edf1f6;
+    stroke-width: 1;
+}
+.m53-commerce-line-axis {
+    stroke: #d8e0e9;
+    stroke-width: 1;
+}
+.m53-commerce-line-axis-label {
+    fill: #8a9ab0;
+    font-size: 11px;
+}
+.m53-commerce-line-area {
+    pointer-events: none;
+}
+.m53-commerce-line-path {
+    stroke: #f51b7b;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.m53-commerce-line-point {
+    fill: #fff;
+    stroke: #f51b7b;
+    stroke-width: 2.3;
+    cursor: help;
+}
+.m53-commerce-line-point:focus,
+.m53-commerce-line-point:hover {
+    fill: #f51b7b;
+    outline: none;
+    r: 5.2;
+}
+.local-subscriptions-commerce-product-view-page
+.m52-chart-heading {
+    align-items: center;
+    margin-bottom: .2rem;
+}
+.local-subscriptions-commerce-product-view-page
+.m52-chart-heading .m51-chart-title {
+    display: flex;
+    align-items: center;
+    color: #25334d;
+    font-size: .83rem;
+    font-weight: 800;
+}
+.local-subscriptions-commerce-product-view-page
+.m52-chart-heading .m51-chart-title > .fa {
+    color: #f51b7b;
+}
+.local-subscriptions-commerce-product-view-page
+.m52-revenue-mode {
+    width: auto;
+    min-width: 145px;
+}
+
+/* Native chart cards: remove duplicate chart headings visually where the outer card already labels the graph. */
+.local-subscriptions-commerce-product-view-page
+.m51-chart-card--deliveries .chart-title {
+    display: none;
+}
+
+@media (max-width: 767.98px) {
+    .crm-product-view-status-grid,
+    .crm-product-view-commercial-grid {
+        grid-template-columns: 1fr;
+    }
+    .crm-product-view-status-row:nth-child(odd) {
+        border-right: 0;
+    }
+    .crm-product-view-status-row:nth-last-child(-n+2) {
+        border-bottom: 1px solid #edf1f5;
+    }
+    .crm-product-view-status-row:last-child {
+        border-bottom: 0;
+    }
+}
+
+
+/* Commerce 7.95N8.3.1 — digital-product files and neutral statistics cards. */
+.crm-product-view-digital-files {
+    padding: .9rem 1rem;
+}
+.crm-product-view-digital-files-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .85rem;
+    padding-bottom: .72rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.crm-product-view-digital-files-title {
+    display: flex;
+    align-items: center;
+    color: #263650;
+}
+.crm-product-view-digital-files-title .fa {
+    color: #f51b7b;
+}
+.crm-product-view-download-stat {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .35rem;
+    padding: .35rem .58rem;
+    border: 1px solid #e6eaf0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #263650;
+}
+.crm-product-view-download-stat > strong {
+    font-size: .82rem;
+    font-weight: 850;
+}
+.crm-product-view-download-stat-label {
+    color: #7b8798;
+    font-size: .65rem;
+    font-weight: 700;
+}
+.crm-product-view-digital-file-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .65rem;
+    padding-top: .72rem;
+}
+.crm-product-view-digital-file-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: .7rem;
+    padding: .68rem .75rem;
+    border: 1px solid #edf1f5;
+    border-radius: .65rem;
+    background: #fbfcfd;
+}
+.crm-product-view-digital-file-icon {
+    display: grid;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: .58rem;
+    background: #f1f5f9;
+    color: #58677c;
+    font-size: 1rem;
+}
+.crm-product-view-digital-file-copy {
+    min-width: 0;
+}
+.crm-product-view-digital-file-label {
+    display: block;
+    margin-bottom: .08rem;
+    color: #334155;
+    font-size: .72rem;
+}
+.crm-product-view-digital-file-name {
+    overflow: hidden;
+    color: #748197;
+    font-size: .67rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.crm-product-view-digital-file-name a {
+    color: inherit;
+}
+
+/* Keep the pink/purple top accent, but return analytics cards to neutral white. */
+.local-subscriptions-commerce-product-view-page
+.m51-chart-card {
+    background: #fff !important;
+}
+.local-subscriptions-commerce-product-view-page
+.m51-chart-card::before {
+    background: linear-gradient(
+        90deg,
+        #f51b7b 0%,
+        #e879b0 48%,
+        #8b5cf6 100%
+    );
+}
+
+@media (max-width: 767.98px) {
+    .crm-product-view-digital-files-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .crm-product-view-digital-file-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N8.4 — Bundle component business labels. */
+.crm-product-component-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.crm-product-component-row > .badge {
+    flex: 0 0 auto;
+    padding: .36rem .58rem;
+    font-size: .68rem;
+}
+.crm-product-component-link {
+    min-width: 0;
+    color: #263650;
+    text-decoration: none;
+}
+.crm-product-component-link:hover {
+    color: #f51b7b;
+    text-decoration: none;
+}
+.crm-product-component-quantity {
+    flex: 0 0 auto;
+    color: #64748b;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+
+/* Commerce 7.95N8.4.1 — translated product names and comparison prices. */
+.crm-product-price-presentation {
+    display: flex;
+    align-items: baseline;
+    gap: .45rem;
+    flex-wrap: wrap;
+}
+.crm-product-current-price {
+    color: #1f2937;
+}
+.crm-product-compare-price {
+    color: #8a96a7;
+    font-size: .72rem;
+    text-decoration: line-through;
+    text-decoration-thickness: 1.2px;
+}
+.crm-product-view-price-value .crm-product-price-presentation {
+    margin-bottom: 0 !important;
+}
+
+
+/* Commerce 7.95N8.5 — Product editor workspace. */
+.local-subscriptions-commerce-product-edit-page .crm-commerce-editor-form,
+.local-subscriptions-commerce-product-edit-page .crm-product-edit-shell {
+    width: 100%;
+    max-width: none !important;
+}
+.crm-product-edit-shell {
+    padding: 1rem;
+}
+.crm-product-edit-top-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, .85fr);
+    gap: 1rem;
+}
+.crm-product-edit-main-panel,
+.crm-product-edit-identity-panel,
+.crm-product-edit-translations {
+    border: 1px solid #e7ebf1;
+    border-radius: .75rem;
+    background: #fff;
+    padding: .95rem 1rem;
+}
+.crm-product-edit-identity-panel {
+    background: #fbfcfe;
+}
+.crm-product-edit-section-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: .85rem;
+    color: #263650;
+}
+.crm-product-edit-section-title > .fa {
+    color: #f51b7b;
+}
+.crm-product-edit-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .65rem .7rem;
+    margin-bottom: .8rem;
+    border: 1px solid #e8edf3;
+    border-radius: .65rem;
+    background: #fff;
+}
+.crm-product-edit-meta-label {
+    color: #68768c;
+    font-size: .72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .035em;
+}
+.crm-product-edit-identity-field + .crm-product-edit-identity-field {
+    margin-top: .8rem;
+}
+.crm-product-edit-identity-field .font-monospace {
+    color: #5f6d82;
+    font-size: .76rem;
+}
+.crm-product-language-tabs {
+    display: flex;
+    gap: .35rem;
+    flex-wrap: wrap;
+    padding-bottom: .65rem;
+    border-bottom: 1px solid #e8edf3;
+}
+.crm-product-language-tab {
+    appearance: none;
+    border: 1px solid transparent;
+    border-radius: .55rem .55rem 0 0;
+    background: transparent;
+    color: #65748a;
+    padding: .5rem .72rem;
+    font-size: .76rem;
+    font-weight: 750;
+}
+.crm-product-language-tab:hover {
+    color: #f51b7b;
+    background: #fff7fb;
+}
+.crm-product-language-tab.is-active {
+    color: #f51b7b;
+    border-color: #ffd3e6 #ffd3e6 #fff;
+    background: #fff;
+}
+.crm-product-language-pane {
+    display: none;
+    padding-top: .9rem;
+}
+.crm-product-language-pane.is-active {
+    display: block;
+}
+@media (max-width: 991.98px) {
+    .crm-product-edit-top-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N8.7 — business pricing and automatic temporary promotions. */
+.local-subscriptions-commerce-product-prices-page
+.crm-product-pricing-page-header {
+    margin-bottom: 1rem;
+}
+.local-subscriptions-commerce-product-prices-page
+.crm-product-pricing-list {
+    display: grid;
+    gap: .85rem;
+}
+.crm-product-pricing-card {
+    padding: 1rem;
+    border: 1px solid #e4e9ef;
+    border-radius: .8rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15,23,42,.035);
+}
+.crm-product-pricing-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .85rem;
+    margin-bottom: .85rem;
+    padding-bottom: .72rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.crm-product-pricing-card-title {
+    display: grid;
+    gap: .08rem;
+}
+.crm-product-pricing-currency-title {
+    color: #263650;
+    font-size: .9rem;
+    font-weight: 850;
+}
+.crm-product-pricing-currency-help {
+    color: #8591a3;
+    font-size: .65rem;
+}
+.crm-product-pricing-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .35rem;
+}
+.crm-product-pricing-card-badges .badge {
+    padding: .35rem .58rem;
+    font-size: .64rem;
+}
+.crm-product-pricing-base-grid {
+    display: grid;
+    grid-template-columns: minmax(160px,.7fr) minmax(180px,.8fr) minmax(220px,1fr);
+    gap: .75rem;
+    align-items: end;
+}
+.crm-product-pricing-field .form-label {
+    margin-bottom: .28rem;
+    color: #52627a;
+    font-size: .68rem;
+    font-weight: 750;
+}
+.crm-product-pricing-active-check {
+    min-height: 38px;
+    align-items: center;
+    display: flex;
+    gap: .45rem;
+}
+.crm-product-promotion-panel {
+    margin-top: .9rem;
+    padding: .8rem .85rem;
+    border: 1px solid #eadce4;
+    border-radius: .7rem;
+    background: #fffafd;
+}
+.crm-product-promotion-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+}
+.crm-product-promotion-auto-help {
+    color: #8a7280;
+    font-size: .64rem;
+}
+.crm-product-promotion-fields {
+    display: grid;
+    grid-template-columns: minmax(180px,.7fr) repeat(2,minmax(220px,1fr));
+    gap: .75rem;
+    margin-top: .75rem;
+}
+.crm-product-promotion-fields.is-disabled {
+    display: none;
+}
+.crm-product-promotion-timezone {
+    margin-top: .55rem;
+    color: #8591a3;
+    font-size: .63rem;
+}
+.crm-product-pricing-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: .85rem;
+}
+.crm-product-pricing-card-actions .btn {
+    display: inline-flex;
+    align-items: center;
+}
+.local-subscriptions-commerce-product-prices-page
+.form-control::placeholder {
+    color: #aeb7c4;
+    font-style: italic;
+}
+@media (max-width: 900px) {
+    .crm-product-pricing-base-grid,
+    .crm-product-promotion-fields {
+        grid-template-columns: 1fr;
+    }
+    .crm-product-promotion-panel-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+
+/* Commerce 7.95N8.8 — Product access scope business workspace. */
+.local-subscriptions-commerce-access-scope-page
+.crm-product-access-scope-page-header {
+    margin-bottom: .9rem;
+}
+.local-subscriptions-commerce-access-scope-page
+.crm-commerce-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: none;
+    margin-bottom: .9rem;
+}
+.crm-product-access-scope-main-card,
+.crm-product-access-scope-courses-card {
+    margin-bottom: .85rem;
+    border-color: #e5eaf0;
+    border-radius: .8rem;
+    box-shadow: 0 2px 8px rgba(15,23,42,.03);
+}
+.crm-product-access-scope-section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    margin-bottom: .9rem;
+}
+.crm-product-access-scope-section-icon {
+    display: grid;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: .62rem;
+    background: #fff1f7;
+    color: #f51b7b;
+}
+.crm-product-access-scope-section-copy p {
+    font-size: .72rem;
+    line-height: 1.45;
+}
+.crm-product-access-scope-field {
+    max-width: 760px;
+}
+.crm-product-access-scope-field .form-label {
+    color: #43536a;
+    font-size: .72rem;
+    font-weight: 800;
+}
+.crm-product-access-scope-effective {
+    display: inline-flex;
+    align-items: center;
+    margin-top: .75rem;
+    padding: .42rem .62rem;
+    border-radius: .55rem;
+    background: #eefaf4;
+    color: #16794d;
+    font-size: .69rem;
+    font-weight: 700;
+}
+.crm-product-access-scope-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: .85rem;
+}
+.crm-product-access-scope-courses-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding-bottom: .7rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.crm-product-access-scope-course-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .55rem;
+    padding-top: .75rem;
+}
+.crm-product-access-scope-course-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .62rem .7rem;
+    border: 1px solid #edf1f5;
+    border-radius: .6rem;
+    background: #fbfcfd;
+}
+.crm-product-access-scope-course-icon {
+    display: grid;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: .48rem;
+    background: #eef4ff;
+    color: #4d6fa5;
+}
+.crm-product-access-scope-course-copy {
+    color: #334155;
+    font-size: .7rem;
+}
+.crm-product-access-scope-empty {
+    margin-top: .75rem;
+    padding: .75rem;
+    border: 1px dashed #dce3eb;
+    border-radius: .6rem;
+    color: #7b8798;
+    font-size: .7rem;
+}
+.crm-product-access-scope-legacy-details {
+    margin-bottom: .85rem;
+    overflow: hidden;
+    border: 1px solid #e7ebf0;
+    border-radius: .75rem;
+    background: #fafbfc;
+}
+.crm-product-access-scope-legacy-summary {
+    display: flex;
+    align-items: center;
+    padding: .78rem .85rem;
+    color: #58667a;
+    cursor: pointer;
+    list-style: none;
+    font-size: .72rem;
+}
+.crm-product-access-scope-legacy-summary::-webkit-details-marker {
+    display: none;
+}
+.crm-product-access-scope-legacy-summary .fa {
+    color: #8b5cf6;
+}
+.crm-product-access-scope-legacy-body {
+    padding: .85rem;
+    border-top: 1px solid #edf1f5;
+}
+.crm-product-access-scope-legacy-form {
+    max-width: 760px;
+}
+.crm-product-access-scope-legacy-actions {
+    margin-top: .7rem;
+}
+.crm-product-access-scope-legacy-current {
+    margin-top: .75rem;
+    color: #64748b;
+    font-size: .68rem;
+}
+.crm-product-access-scope-shortcuts {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .45rem;
+    padding: .65rem .75rem;
+    border-top: 1px solid #e8edf3;
+}
+.crm-product-access-scope-shortcuts-label {
+    margin-right: auto;
+    color: #8a96a7;
+    font-size: .65rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+@media (max-width: 767.98px) {
+    .local-subscriptions-commerce-access-scope-page
+    .crm-commerce-metrics,
+    .crm-product-access-scope-course-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N8.9 — Bundle composition editor. */
+.crm-bundle-composition-form {
+    margin-top: .85rem;
+}
+.crm-bundle-composition-reorder-help {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: .65rem;
+    color: #78869a;
+    font-size: .68rem;
+}
+.crm-bundle-composition-reorder-help .fa {
+    color: #8b5cf6;
+}
+.crm-bundle-composition-list {
+    display: grid;
+    gap: .65rem;
+}
+.crm-bundle-composition-row {
+    padding: .78rem .85rem;
+    border: 1px solid #e5eaf0;
+    border-radius: .72rem;
+    background: #fff;
+    box-shadow: 0 2px 7px rgba(15,23,42,.025);
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+.crm-bundle-composition-row.is-dragging {
+    opacity: .55;
+    transform: scale(.995);
+}
+.crm-bundle-composition-row.is-drag-over {
+    border-color: #f51b7b;
+    box-shadow: 0 0 0 2px rgba(245,27,123,.08);
+}
+.crm-bundle-composition-row-header {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-bottom: .62rem;
+}
+.crm-bundle-composition-drag-handle {
+    display: grid;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: .5rem;
+    background: #f5f7fa;
+    color: #8a96a7;
+    cursor: grab;
+}
+.crm-bundle-composition-row-title {
+    display: grid;
+    gap: .03rem;
+}
+.crm-bundle-composition-row-number {
+    color: #263650;
+    font-size: .72rem;
+    font-weight: 850;
+}
+.crm-bundle-composition-row-help {
+    color: #98a2b2;
+    font-size: .61rem;
+}
+.crm-bundle-composition-row-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(110px, .18fr) auto;
+    gap: .75rem;
+    align-items: end;
+}
+.crm-bundle-composition-row-grid .form-label {
+    margin-bottom: .28rem;
+    color: #52627a;
+    font-size: .66rem;
+    font-weight: 750;
+}
+.crm-bundle-composition-row-actions {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+}
+.crm-bundle-composition-row-actions .btn {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    padding: 0;
+}
+.crm-bundle-composition-add {
+    margin-top: .7rem;
+}
+.crm-bundle-expanded-preview {
+    margin-top: 1rem;
+    border-color: #e5eaf0;
+    border-radius: .8rem;
+}
+.crm-bundle-expanded-preview-header {
+    padding-bottom: .7rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.crm-bundle-expanded-preview-header p {
+    font-size: .68rem;
+}
+.crm-bundle-expanded-preview-list {
+    display: grid;
+    padding-top: .65rem;
+}
+.crm-bundle-expanded-preview-row {
+    display: grid;
+    grid-template-columns: minmax(130px,.25fr) 1fr auto;
+    gap: .65rem;
+    align-items: center;
+    padding: .62rem .15rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.crm-bundle-expanded-preview-row:last-child {
+    border-bottom: 0;
+}
+.crm-bundle-expanded-preview-name a {
+    color: #263650;
+    text-decoration: none;
+}
+.crm-bundle-expanded-preview-name a:hover {
+    color: #f51b7b;
+}
+.crm-bundle-expanded-preview-quantity {
+    color: #64748b;
+    font-size: .7rem;
+    font-weight: 800;
+}
+@media (max-width: 767.98px) {
+    .crm-bundle-composition-row-grid {
+        grid-template-columns: 1fr;
+    }
+    .crm-bundle-composition-row-actions {
+        justify-content: flex-end;
+    }
+    .crm-bundle-expanded-preview-row {
+        grid-template-columns: 1fr auto;
+    }
+}
+
+
+/* Commerce 7.95N8.10 — Bundle pricing UX aligned with standard products. */
+.crm-bundle-pricing-form {
+    display: grid;
+    gap: .9rem;
+}
+.crm-bundle-pricing-strategy-card {
+    border-color: #e5eaf0;
+    border-radius: .8rem;
+}
+.crm-bundle-pricing-section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.crm-bundle-pricing-section-header > .fa {
+    display: grid;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: .58rem;
+    background: #fff1f7;
+    color: #f51b7b;
+}
+.crm-bundle-pricing-section-copy p {
+    font-size: .7rem;
+}
+.crm-bundle-pricing-strategy-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+    margin-top: .8rem;
+}
+.crm-bundle-pricing-strategy-option {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    min-height: 88px;
+    padding: .7rem;
+    border: 1px solid #e5eaf0;
+    border-radius: .65rem;
+    background: #fbfcfd;
+    cursor: pointer;
+}
+.crm-bundle-pricing-strategy-option.is-selected {
+    border-color: #f51b7b;
+    background: #fff8fb;
+    box-shadow: 0 0 0 2px rgba(245,27,123,.06);
+}
+.crm-bundle-pricing-strategy-copy {
+    display: grid;
+    gap: .15rem;
+}
+.crm-bundle-pricing-strategy-name {
+    color: #263650;
+    font-size: .72rem;
+}
+.crm-bundle-pricing-strategy-help {
+    color: #7d8999;
+    font-size: .63rem;
+    line-height: 1.45;
+}
+.crm-bundle-pricing-discount-field {
+    max-width: 280px;
+    margin-top: .75rem;
+}
+.crm-bundle-pricing-discount-field.is-hidden {
+    display: none;
+}
+.crm-bundle-pricing-currency-heading {
+    margin-top: .15rem;
+}
+.crm-bundle-pricing-currency-heading p {
+    font-size: .7rem;
+}
+.crm-bundle-pricing-currency-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+.crm-bundle-pricing-currency-card {
+    min-width: 0;
+    border-color: #e5eaf0;
+    border-radius: .78rem;
+}
+.crm-bundle-pricing-currency-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .7rem;
+    margin-bottom: .7rem;
+    padding-bottom: .65rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.crm-bundle-pricing-currency-identity {
+    display: flex;
+    align-items: baseline;
+    gap: .55rem;
+}
+.crm-bundle-pricing-currency-title {
+    color: #263650;
+    font-size: .82rem;
+}
+.crm-bundle-pricing-current-price {
+    color: #66768b;
+    font-size: .69rem;
+    font-weight: 700;
+}
+.crm-bundle-pricing-regular-field,
+.crm-bundle-pricing-calculated-price {
+    margin-bottom: .65rem;
+}
+.crm-bundle-pricing-calculated-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: .6rem .7rem;
+    border: 1px solid #e8edf3;
+    border-radius: .58rem;
+    background: #f8fafc;
+}
+.crm-bundle-pricing-calculated-label {
+    color: #6b7788;
+    font-size: .66rem;
+}
+.crm-bundle-pricing-calculated-value {
+    color: #263650;
+    font-size: .84rem;
+}
+.crm-bundle-pricing-comparison {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .65rem;
+    margin-bottom: .65rem;
+    color: #748195;
+    font-size: .64rem;
+}
+.crm-bundle-promotion-panel {
+    padding: .72rem;
+    border: 1px solid #eadce4;
+    border-radius: .65rem;
+    background: #fffafd;
+}
+.crm-bundle-promotion-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .65rem;
+}
+.crm-bundle-promotion-auto-help {
+    color: #8a7280;
+    font-size: .61rem;
+}
+.crm-bundle-promotion-fields {
+    display: grid;
+    grid-template-columns: minmax(150px,.7fr) repeat(2,minmax(180px,1fr));
+    gap: .6rem;
+    margin-top: .65rem;
+}
+.crm-bundle-promotion-fields.is-disabled {
+    display: none;
+}
+.crm-bundle-promotion-field .form-label,
+.crm-bundle-pricing-regular-field .form-label,
+.crm-bundle-pricing-add-field .form-label {
+    margin-bottom: .25rem;
+    color: #52627a;
+    font-size: .65rem;
+    font-weight: 750;
+}
+.crm-bundle-promotion-timezone {
+    margin-top: .48rem;
+    color: #8a96a7;
+    font-size: .61rem;
+}
+.crm-bundle-pricing-delete {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: .6rem;
+}
+.crm-bundle-pricing-add-currency {
+    border-color: #e5eaf0;
+    border-radius: .78rem;
+}
+.crm-bundle-pricing-add-currency p {
+    font-size: .68rem;
+}
+.crm-bundle-pricing-add-currency-grid {
+    display: grid;
+    grid-template-columns: minmax(160px,.35fr) minmax(200px,.65fr);
+    gap: .7rem;
+}
+.crm-bundle-pricing-save-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+@media (max-width: 900px) {
+    .crm-bundle-pricing-strategy-options,
+    .crm-bundle-pricing-currency-list,
+    .crm-bundle-promotion-fields,
+    .crm-bundle-pricing-add-currency-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N8.11 — Business-first Bundle preview. */
+.crm-bundle-preview-section-heading {
+    margin: 1rem 0 .65rem;
+}
+.crm-bundle-preview-section-heading p {
+    font-size: .69rem;
+}
+.crm-bundle-preview-items {
+    display: grid;
+    gap: .7rem;
+}
+.crm-bundle-preview-item-card {
+    border-color: #e5eaf0;
+    border-radius: .78rem;
+    box-shadow: 0 2px 8px rgba(15,23,42,.03);
+}
+.crm-bundle-preview-item-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+}
+.crm-bundle-preview-item-heading {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-width: 0;
+}
+.crm-bundle-preview-order {
+    display: grid;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff1f7;
+    color: #f51b7b;
+    font-size: .67rem;
+    font-weight: 850;
+}
+.crm-bundle-preview-item-heading-copy {
+    min-width: 0;
+}
+.crm-bundle-preview-name-link {
+    color: #263650;
+    text-decoration: none;
+}
+.crm-bundle-preview-name-link:hover {
+    color: #f51b7b;
+}
+.crm-bundle-preview-quantity {
+    font-size: .67rem;
+}
+.crm-bundle-preview-business-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: .65rem;
+    margin-top: .8rem;
+}
+.crm-bundle-preview-business-panel {
+    min-width: 0;
+    padding: .72rem;
+    border: 1px solid #e7ecf2;
+    border-radius: .65rem;
+    background: #fbfcfd;
+}
+.crm-bundle-preview-business-panel h4 {
+    color: #334155;
+}
+.crm-bundle-preview-price-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+}
+.crm-bundle-preview-price-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: .28rem .48rem;
+    border: 1px solid #dfe5ec;
+    border-radius: 999px;
+    background: #fff;
+    color: #334155;
+    font-size: .65rem;
+    font-weight: 750;
+}
+.crm-bundle-preview-right-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    margin-top: .35rem;
+}
+.crm-bundle-preview-right-icon {
+    color: #159a66;
+}
+.crm-bundle-preview-right-copy {
+    min-width: 0;
+    color: #3f4d61;
+    font-size: .68rem;
+}
+.crm-bundle-preview-right-meta {
+    margin-top: .1rem;
+    color: #8a96a7;
+    font-size: .61rem;
+}
+.crm-bundle-preview-muted {
+    color: #8a96a7;
+    font-size: .67rem;
+}
+.crm-bundle-preview-tech-details {
+    margin-top: .7rem;
+    border-top: 1px solid #edf1f5;
+}
+.crm-bundle-preview-tech-summary {
+    padding-top: .55rem;
+    color: #98a2b2;
+    cursor: pointer;
+    font-size: .62rem;
+}
+.crm-bundle-preview-tech-body {
+    margin-top: .45rem;
+    padding: .55rem .65rem;
+    border-radius: .5rem;
+    background: #f8fafc;
+}
+.crm-bundle-preview-tech-line {
+    color: #8a96a7;
+    font-family: var(--bs-font-monospace);
+    font-size: .58rem;
+    overflow-wrap: anywhere;
+}
+.crm-bundle-preview-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr)) minmax(260px,1.25fr);
+    gap: .7rem;
+}
+.crm-bundle-preview-pricing-card {
+    border-color: #e5eaf0;
+    border-radius: .72rem;
+}
+.crm-bundle-preview-final-price {
+    display: block;
+    color: #263650;
+    font-size: 1.05rem;
+}
+.crm-bundle-preview-compare-price {
+    display: inline-block;
+    margin-top: .1rem;
+    color: #9aa4b1;
+    font-size: .66rem;
+    text-decoration: line-through;
+}
+.crm-bundle-preview-pricing-label {
+    margin-top: .18rem;
+    color: #7d8999;
+    font-size: .63rem;
+}
+.crm-bundle-preview-pricing-meta {
+    margin-top: .32rem;
+    color: #68768a;
+    font-size: .62rem;
+}
+.crm-bundle-preview-pricing-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    padding: .8rem;
+    border: 1px solid #dce9f5;
+    border-radius: .72rem;
+    background: #f2f8fd;
+    color: #49627d;
+}
+.crm-bundle-preview-pricing-note > .fa {
+    margin-top: .12rem;
+    color: #3b82c4;
+}
+.crm-bundle-preview-note-copy {
+    font-size: .66rem;
+    line-height: 1.45;
+}
+.crm-bundle-preview-note-copy strong {
+    display: block;
+    margin-bottom: .22rem;
+    color: #35506e;
+}
+@media (max-width: 900px) {
+    .crm-bundle-preview-business-grid,
+    .crm-bundle-preview-pricing-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N8.12 — Page Boutique architecture hub. */
+.commerce-storefront-n812-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin: .85rem 0 1rem;
+    padding: .35rem;
+    border: 1px solid #e3e8ef;
+    border-radius: .75rem;
+    background: #fff;
+}
+.commerce-storefront-n812-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .55rem .75rem;
+    border-radius: .55rem;
+    color: #536176;
+    font-size: .72rem;
+    font-weight: 750;
+    text-decoration: none;
+}
+.commerce-storefront-n812-tab:hover {
+    color: #f51b7b;
+    background: #fff7fb;
+    text-decoration: none;
+}
+.commerce-storefront-n812-tab.is-active {
+    color: #f51b7b;
+    background: #fff0f6;
+    box-shadow: inset 0 0 0 1px #ffc1dc;
+}
+.commerce-storefront-n812-toolbar,
+.commerce-storefront-n812-section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: .8rem;
+    margin-bottom: .8rem;
+}
+.commerce-storefront-n812-language {
+    width: min(360px, 100%);
+}
+.commerce-storefront-n812-language .form-label {
+    margin-bottom: .25rem;
+    font-size: .66rem;
+    font-weight: 750;
+    color: #536176;
+}
+.commerce-storefront-n812-content-status {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .35rem;
+}
+.commerce-storefront-n812-section-copy p,
+.commerce-storefront-n812-setting-copy p {
+    font-size: .68rem;
+    line-height: 1.45;
+}
+.commerce-storefront-n812-section-list {
+    display: grid;
+    gap: .5rem;
+    margin-bottom: .85rem;
+}
+.commerce-storefront-n812-section-row {
+    display: grid;
+    grid-template-columns: auto minmax(0,1fr) auto;
+    align-items: center;
+    gap: .65rem;
+    padding: .7rem .75rem;
+    border: 1px solid #e5eaf0;
+    border-radius: .65rem;
+    background: #fff;
+}
+.commerce-storefront-n812-section-icon {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border-radius: .5rem;
+    background: #fff1f7;
+    color: #f51b7b;
+}
+.commerce-storefront-n812-section-main {
+    display: grid;
+    min-width: 0;
+    gap: .05rem;
+}
+.commerce-storefront-n812-section-name {
+    color: #28364d;
+    font-size: .72rem;
+}
+.commerce-storefront-n812-section-type {
+    color: #8a96a7;
+    font-size: .61rem;
+}
+.commerce-storefront-n812-roadmap {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    padding: .8rem;
+    border: 1px solid #eadcf3;
+    border-radius: .7rem;
+    background: #fbf8ff;
+    color: #66557c;
+}
+.commerce-storefront-n812-roadmap > .fa {
+    margin-top: .1rem;
+    color: #8b5cf6;
+}
+.commerce-storefront-n812-roadmap-copy {
+    font-size: .66rem;
+    line-height: 1.45;
+}
+.commerce-storefront-n812-roadmap-copy strong {
+    display: block;
+    margin-bottom: .15rem;
+    color: #493761;
+}
+.commerce-storefront-n812-setting-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: .7rem;
+}
+.commerce-storefront-n812-setting-card {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    min-height: 104px;
+    padding: .8rem;
+    border: 1px solid #e5eaf0;
+    border-radius: .7rem;
+    background: #fff;
+}
+.commerce-storefront-n812-setting-card > .fa {
+    display: grid;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: .55rem;
+    background: #fff1f7;
+    color: #f51b7b;
+}
+.commerce-storefront-n812-setting-copy {
+    min-width: 0;
+    color: #607087;
+}
+.commerce-storefront-n812-setting-copy strong {
+    display: block;
+    margin-bottom: .2rem;
+    color: #2b3950;
+    font-size: .72rem;
+}
+.commerce-storefront-n812-setting-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .2rem;
+}
+.commerce-storefront-n812-setting-title strong {
+    margin-bottom: 0;
+}
+.commerce-storefront-n812-advanced {
+    margin-top: .8rem;
+    overflow: hidden;
+    border: 1px solid #e5eaf0;
+    border-radius: .65rem;
+    background: #fafbfc;
+}
+.commerce-storefront-n812-advanced > summary {
+    padding: .65rem .75rem;
+    color: #7a8799;
+    cursor: pointer;
+    font-size: .65rem;
+    font-weight: 750;
+}
+.commerce-storefront-n812-advanced-body {
+    padding: .7rem .75rem;
+    border-top: 1px solid #edf1f5;
+    color: #7b8798;
+    font-size: .65rem;
+}
+.commerce-storefront-n812-builder-backbar {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin: .6rem 0 .85rem;
+    padding: .55rem .65rem;
+    border: 1px solid #e5eaf0;
+    border-radius: .6rem;
+    background: #fff;
+}
+@media (max-width: 767.98px) {
+    .commerce-storefront-n812-toolbar,
+    .commerce-storefront-n812-section-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .commerce-storefront-n812-content-status {
+        justify-content: flex-start;
+    }
+    .commerce-storefront-n812-setting-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N8.13 — Content-first Storefront Builder. */
+.commerce-storefront-builder--n813-content {
+    display: block !important;
+}
+.commerce-storefront-builder--n813-content
+.commerce-storefront-builder__sidebar {
+    display: none !important;
+}
+.commerce-storefront-builder--n813-content
+.commerce-storefront-builder__main {
+    width: 100% !important;
+    max-width: none !important;
+}
+.commerce-storefront-n813-builder-intro {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .8rem;
+    margin-bottom: .8rem;
+    padding: .85rem .95rem;
+    border: 1px solid #e5eaf0;
+    border-radius: .75rem;
+    background: #fff;
+}
+.commerce-storefront-n813-builder-intro-copy p {
+    font-size: .7rem;
+}
+.commerce-storefront-n813-add-block {
+    border-color: #e5eaf0;
+    border-radius: .78rem;
+}
+.commerce-storefront-n813-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+}
+.commerce-storefront-n813-type-card {
+    display: grid;
+    grid-template-rows: auto 68px 1fr;
+    gap: .55rem;
+    min-height: 164px;
+    padding: .7rem;
+    border: 1px solid #e3e8ef;
+    border-radius: .65rem;
+    background: #fff;
+    color: #4e5d72;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+.commerce-storefront-n813-type-card:hover {
+    border-color: #f51b7b;
+    box-shadow: 0 4px 14px rgba(245,27,123,.08);
+    transform: translateY(-1px);
+}
+.commerce-storefront-n813-type-title {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    color: #28364d;
+    font-size: .7rem;
+}
+.commerce-storefront-n813-type-title .fa-solid {
+    color: #f51b7b;
+}
+.commerce-storefront-n813-type-card > span {
+    color: #7c8899;
+    font-size: .61rem;
+    line-height: 1.4;
+}
+.commerce-storefront-n813-wireframe {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #dfe5ec;
+    border-radius: .45rem;
+    background: #f8fafc;
+}
+.commerce-storefront-n813-wireframe::before,
+.commerce-storefront-n813-wireframe::after {
+    content: "";
+    position: absolute;
+    border-radius: .22rem;
+    background: #d9e0e8;
+}
+.commerce-storefront-n813-wireframe--hero::before {
+    inset: 12px 48% 12px 12px;
+}
+.commerce-storefront-n813-wireframe--hero::after {
+    inset: 12px 12px 12px 56%;
+    background: #f7c6dc;
+}
+.commerce-storefront-n813-wireframe--text::before {
+    left: 14px;
+    right: 14px;
+    top: 16px;
+    height: 8px;
+    box-shadow: 0 15px 0 #e3e8ef, 0 30px 0 #e3e8ef;
+}
+.commerce-storefront-n813-wireframe--text::after {
+    display: none;
+}
+.commerce-storefront-n813-wireframe--split::before {
+    inset: 10px 52% 10px 10px;
+    background: #f7c6dc;
+}
+.commerce-storefront-n813-wireframe--split::after {
+    inset: 16px 12px 16px 56%;
+    box-shadow: 0 14px 0 #e3e8ef;
+}
+.commerce-storefront-n813-wireframe--media::before {
+    inset: 8px;
+    background: #e4e8ef;
+}
+.commerce-storefront-n813-wireframe--media::after {
+    width: 20px;
+    height: 20px;
+    left: calc(50% - 10px);
+    top: calc(50% - 10px);
+    border-radius: 50%;
+    background: #f51b7b;
+}
+.commerce-storefront-n813-wireframe--cards::before {
+    inset: 10px 67% 10px 8px;
+    box-shadow: 74px 0 0 #d9e0e8, 148px 0 0 #d9e0e8;
+}
+.commerce-storefront-n813-wireframe--cards::after {
+    display: none;
+}
+.commerce-storefront-n813-wireframe--cta::before {
+    left: 16px;
+    right: 82px;
+    top: 20px;
+    height: 9px;
+    box-shadow: 0 16px 0 #e3e8ef;
+}
+.commerce-storefront-n813-wireframe--cta::after {
+    width: 58px;
+    height: 24px;
+    right: 14px;
+    top: 22px;
+    background: #f51b7b;
+}
+.commerce-storefront-n813-more-types summary {
+    color: #6b7789;
+    cursor: pointer;
+    font-size: .65rem;
+    font-weight: 700;
+}
+.commerce-storefront-builder__toolbar--n813-fallback {
+    padding: .65rem .75rem !important;
+    border-style: dashed !important;
+    background: #fbfcfd !important;
+}
+.commerce-storefront-builder__toolbar--n813-fallback > h3,
+.commerce-storefront-builder__toolbar--n813-fallback > p {
+    display: none;
+}
+.commerce-storefront-builder--n813-content
+.commerce-storefront-template-picker {
+    border-style: dashed;
+    background: #fbfcfd;
+}
+.commerce-storefront-builder--n813-content
+.commerce-storefront-section-card {
+    overflow: hidden;
+    border: 1px solid #e3e8ef;
+    border-radius: .75rem;
+    background: #fff;
+}
+.commerce-storefront-builder--n813-content
+.commerce-storefront-section-card__summary {
+    padding: .7rem .8rem;
+    background: #fbfcfd;
+}
+.commerce-storefront-n813-live-preview {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    gap: .7rem;
+    min-height: 130px;
+    margin-bottom: .7rem;
+    padding: .75rem;
+    border: 1px solid #e6ebf1;
+    border-radius: .62rem;
+    background: #fff;
+}
+.commerce-storefront-n813-live-preview--hero,
+.commerce-storefront-n813-live-preview--image_text {
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+}
+.commerce-storefront-n813-live-preview--hero.is-hero-media_text,
+.commerce-storefront-n813-live-preview--image_text.is-image-right {
+    direction: rtl;
+}
+.commerce-storefront-n813-live-preview--hero.is-hero-media_text > *,
+.commerce-storefront-n813-live-preview--image_text.is-image-right > * {
+    direction: ltr;
+}
+.commerce-storefront-n813-live-preview--hero.is-hero-stacked {
+    grid-template-columns: 1fr;
+}
+.commerce-storefront-n813-live-preview--hero.is-hero-overlay {
+    position: relative;
+    grid-template-columns: 1fr;
+    min-height: 180px;
+}
+.commerce-storefront-n813-live-preview--hero.is-hero-overlay
+.commerce-storefront-n813-live-preview__media {
+    position: absolute;
+    inset: 0;
+}
+.commerce-storefront-n813-live-preview--hero.is-hero-overlay
+.commerce-storefront-n813-live-preview__copy {
+    position: relative;
+    z-index: 1;
+    align-self: end;
+    margin: .7rem;
+    padding: .65rem;
+    border-radius: .5rem;
+    background: rgba(255,255,255,.9);
+}
+.commerce-storefront-n813-live-preview__media {
+    min-height: 105px;
+    overflow: hidden;
+    border-radius: .48rem;
+    background: #f2f4f7;
+}
+.commerce-storefront-n813-live-preview__media img {
+    width: 100%;
+    height: 100%;
+    min-height: 105px;
+    object-fit: cover;
+}
+.commerce-storefront-n813-live-preview__media.is-placeholder {
+    display: grid;
+    place-items: center;
+    color: #a0a9b6;
+}
+.commerce-storefront-n813-live-preview__copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: .3rem;
+    color: #536176;
+    font-size: .65rem;
+}
+.commerce-storefront-n813-live-preview__title {
+    color: #28364d;
+    font-size: .82rem;
+}
+.commerce-storefront-n813-live-preview__subtitle {
+    color: #7b8797;
+}
+.commerce-storefront-n813-layout-guide {
+    margin: .8rem 0;
+    padding: .75rem;
+    border: 1px solid #e6ebf1;
+    border-radius: .65rem;
+    background: #fbfcfd;
+}
+.commerce-storefront-n813-layout-grid {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: .55rem;
+}
+.commerce-storefront-n813-layout-grid--two {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    max-width: 640px;
+}
+.commerce-storefront-n813-layout-card {
+    display: grid;
+    gap: .4rem;
+    padding: .55rem;
+    border: 1px solid #dfe5ec;
+    border-radius: .55rem;
+    background: #fff;
+    color: #5d6b7e;
+    font-size: .62rem;
+    text-align: center;
+    cursor: pointer;
+}
+.commerce-storefront-n813-layout-card:hover,
+.commerce-storefront-n813-layout-card.is-selected {
+    border-color: #f51b7b;
+    background: #fff7fb;
+    color: #d8166c;
+}
+.commerce-storefront-n813-layout-sketch {
+    position: relative;
+    height: 54px;
+    overflow: hidden;
+    border-radius: .35rem;
+    background: #f4f6f8;
+}
+.commerce-storefront-n813-layout-sketch::before,
+.commerce-storefront-n813-layout-sketch::after {
+    content: "";
+    position: absolute;
+    border-radius: .2rem;
+}
+.commerce-storefront-n813-layout-sketch--hero-text_media::before,
+.commerce-storefront-n813-layout-sketch--hero-media_text::after,
+.commerce-storefront-n813-layout-sketch--image-right::before,
+.commerce-storefront-n813-layout-sketch--image-left::after {
+    inset: 9px 53% 9px 9px;
+    background: #dbe2e9;
+}
+.commerce-storefront-n813-layout-sketch--hero-text_media::after,
+.commerce-storefront-n813-layout-sketch--hero-media_text::before,
+.commerce-storefront-n813-layout-sketch--image-right::after,
+.commerce-storefront-n813-layout-sketch--image-left::before {
+    inset: 7px 7px 7px 53%;
+    background: #f5bdd6;
+}
+.commerce-storefront-n813-layout-sketch--hero-stacked::before {
+    inset: 6px 20px 29px;
+    background: #dbe2e9;
+}
+.commerce-storefront-n813-layout-sketch--hero-stacked::after {
+    inset: 30px 20px 6px;
+    background: #f5bdd6;
+}
+.commerce-storefront-n813-layout-sketch--hero-overlay::before {
+    inset: 5px;
+    background: #f5bdd6;
+}
+.commerce-storefront-n813-layout-sketch--hero-overlay::after {
+    width: 50%;
+    height: 24px;
+    left: 12px;
+    bottom: 9px;
+    background: rgba(255,255,255,.9);
+}
+.commerce-storefront-n813-layout-auto {
+    padding: .65rem .7rem;
+    border-radius: .5rem;
+    background: #f5f7fa;
+    color: #738094;
+    font-size: .65rem;
+}
+.commerce-storefront-builder--n813-content
+.commerce-storefront-composer-layout {
+    margin-top: .55rem;
+    padding: .65rem;
+    border: 1px dashed #dfe5ec;
+    border-radius: .55rem;
+    background: #fcfdfe;
+}
+@media (max-width: 900px) {
+    .commerce-storefront-n813-type-grid,
+    .commerce-storefront-n813-layout-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+}
+@media (max-width: 600px) {
+    .commerce-storefront-n813-type-grid,
+    .commerce-storefront-n813-layout-grid,
+    .commerce-storefront-n813-layout-grid--two,
+    .commerce-storefront-n813-live-preview--hero,
+    .commerce-storefront-n813-live-preview--image_text {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N8.14 — Storefront Distribution simplified UX. */
+.commerce-storefront-n814-form {
+    display: grid;
+    gap: .8rem;
+}
+.commerce-storefront-n814-topbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: .8rem;
+}
+.commerce-storefront-n814-language {
+    width: min(340px,100%);
+}
+.commerce-storefront-n814-defaults-hint {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    color: #6f7d90;
+    font-size: .64rem;
+}
+.commerce-storefront-n814-defaults-hint .fa {
+    color: #f51b7b;
+}
+.commerce-storefront-n814-card {
+    border-color: #e5eaf0;
+    border-radius: .78rem;
+}
+.commerce-storefront-n814-card-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    margin-bottom: .8rem;
+    padding-bottom: .7rem;
+    border-bottom: 1px solid #edf1f5;
+}
+.commerce-storefront-n814-card-heading > .fa {
+    display: grid;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: .58rem;
+    background: #fff1f7;
+    color: #f51b7b;
+}
+.commerce-storefront-n814-heading-copy p {
+    font-size: .68rem;
+}
+.commerce-storefront-n814-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: .65rem;
+}
+.commerce-storefront-n814-choice {
+    display: grid;
+    grid-template-columns: auto auto minmax(0,1fr);
+    align-items: flex-start;
+    gap: .6rem;
+    padding: .75rem;
+    border: 1px solid #e2e7ed;
+    border-radius: .65rem;
+    background: #fff;
+    cursor: pointer;
+}
+.commerce-storefront-n814-choice.is-selected {
+    border-color: #f51b7b;
+    background: #fff8fb;
+    box-shadow: 0 0 0 2px rgba(245,27,123,.05);
+}
+.commerce-storefront-n814-choice > .fa {
+    margin-top: .12rem;
+    color: #f51b7b;
+}
+.commerce-storefront-n814-choice-copy {
+    display: grid;
+    gap: .15rem;
+}
+.commerce-storefront-n814-choice-copy strong {
+    color: #29384f;
+    font-size: .72rem;
+}
+.commerce-storefront-n814-choice-copy span {
+    color: #7c899b;
+    font-size: .62rem;
+    line-height: 1.4;
+}
+.commerce-storefront-n814-showroom-fields {
+    display: grid;
+    grid-template-columns: minmax(260px,.7fr) minmax(300px,1.3fr);
+    gap: .8rem;
+    margin-top: .75rem;
+    padding: .7rem;
+    border-radius: .6rem;
+    background: #fafbfc;
+}
+.commerce-storefront-n814-showroom-fields.is-secondary {
+    opacity: .7;
+}
+.commerce-storefront-n814-showroom-cta {
+    padding-top: 1.7rem;
+}
+.commerce-storefront-n814-badge-grid,
+.commerce-storefront-n814-custom-trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+}
+.commerce-storefront-n814-badge,
+.commerce-storefront-n814-trust-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .38rem .55rem;
+    border: 1px solid #e1e6ed;
+    border-radius: 999px;
+    background: #fff;
+    color: #536176;
+    font-size: .64rem;
+}
+.commerce-storefront-n814-auto-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: .7rem;
+    border: 1px solid #e5eaf0;
+    border-radius: .6rem;
+    background: #fbfcfd;
+}
+.commerce-storefront-n814-auto-copy {
+    min-width: 0;
+}
+.commerce-storefront-n814-auto-title {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .12rem;
+}
+.commerce-storefront-n814-mode-select {
+    width: min(290px,100%);
+}
+.commerce-storefront-n814-auto-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-top: .55rem;
+}
+.commerce-storefront-n814-auto-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: .3rem .48rem;
+    border-radius: 999px;
+    background: #edf9f3;
+    color: #247552;
+    font-size: .61rem;
+    font-weight: 700;
+}
+.commerce-storefront-n814-custom-trust {
+    margin-top: .55rem;
+}
+.commerce-storefront-n814-custom-trust.is-hidden,
+.commerce-storefront-n814-seo-custom.is-hidden {
+    display: none;
+}
+.commerce-storefront-n814-seo-preview {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem;
+    border: 1px solid #dce9e2;
+    border-radius: .6rem;
+    background: #f6fcf8;
+}
+.commerce-storefront-n814-seo-preview-copy {
+    display: grid;
+    min-width: 0;
+    color: #536176;
+    font-size: .66rem;
+}
+.commerce-storefront-n814-seo-preview-copy strong {
+    color: #29384f;
+    font-size: .76rem;
+}
+.commerce-storefront-n814-seo-label {
+    color: #8a96a7;
+    font-size: .58rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+.commerce-storefront-n814-advanced {
+    overflow: hidden;
+    border: 1px solid #e5eaf0;
+    border-radius: .6rem;
+    background: #fafbfc;
+}
+.commerce-storefront-n814-advanced > summary {
+    padding: .62rem .7rem;
+    color: #69778a;
+    cursor: pointer;
+    font-size: .65rem;
+    font-weight: 750;
+}
+.commerce-storefront-n814-slug-grid {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: .55rem;
+    padding: .7rem;
+    border-top: 1px solid #e8edf2;
+}
+.commerce-storefront-n814-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: .1rem;
+}
+@media (max-width: 800px) {
+    .commerce-storefront-n814-topbar,
+    .commerce-storefront-n814-auto-panel {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .commerce-storefront-n814-choice-grid,
+    .commerce-storefront-n814-showroom-fields,
+    .commerce-storefront-n814-slug-grid {
+        grid-template-columns: 1fr;
+    }
+    .commerce-storefront-n814-showroom-cta {
+        padding-top: .25rem;
+    }
+}
+
+
+/* Commerce 7.95N8.15 — dedicated Presentation and Tools screens. */
+.commerce-storefront-n815-presentation-form {
+    display: grid;
+    gap: .8rem;
+}
+.commerce-storefront-n815-card,
+.commerce-storefront-n815-tool-card,
+.commerce-storefront-n815-translation-preview {
+    border-color: #e5eaf0;
+    border-radius: .78rem;
+}
+.commerce-storefront-n815-card > p,
+.commerce-storefront-n815-tool-card > p {
+    font-size: .68rem;
+}
+.commerce-storefront-n815-layout-grid,
+.commerce-storefront-n815-position-grid {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: .65rem;
+}
+.commerce-storefront-n815-layout-choice,
+.commerce-storefront-n815-position-choice {
+    display: grid;
+    grid-template-rows: auto 92px auto 1fr;
+    gap: .45rem;
+    padding: .7rem;
+    border: 1px solid #e2e7ed;
+    border-radius: .65rem;
+    background: #fff;
+    color: #576579;
+    cursor: pointer;
+}
+.commerce-storefront-n815-layout-choice.is-selected,
+.commerce-storefront-n815-position-choice.is-selected {
+    border-color: #f51b7b;
+    background: #fff8fb;
+    box-shadow: 0 0 0 2px rgba(245,27,123,.05);
+}
+.commerce-storefront-n815-layout-choice strong,
+.commerce-storefront-n815-position-choice strong {
+    color: #28364d;
+    font-size: .7rem;
+}
+.commerce-storefront-n815-layout-choice > span,
+.commerce-storefront-n815-position-choice > span {
+    color: #7d899a;
+    font-size: .61rem;
+    line-height: 1.4;
+}
+.commerce-storefront-n815-template-wire,
+.commerce-storefront-n815-position-wire {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #e2e7ed;
+    border-radius: .45rem;
+    background: #f7f9fb;
+}
+.commerce-storefront-n815-template-wire::before,
+.commerce-storefront-n815-template-wire::after,
+.commerce-storefront-n815-position-wire::before,
+.commerce-storefront-n815-position-wire::after {
+    content: "";
+    position: absolute;
+    border-radius: .2rem;
+}
+.commerce-storefront-n815-template-wire--standard::before {
+    inset: 10px 28% 42px 10px;
+    background: #dce3ea;
+}
+.commerce-storefront-n815-template-wire--standard::after {
+    inset: 50px 10px 10px;
+    background: #f5c3da;
+}
+.commerce-storefront-n815-template-wire--editorial::before {
+    inset: 10px 42% 10px 10px;
+    background: #e2e7ed;
+}
+.commerce-storefront-n815-template-wire--editorial::after {
+    inset: 10px 10px 10px 64%;
+    background: #f5c3da;
+}
+.commerce-storefront-n815-template-wire--immersive::before {
+    inset: 6px;
+    background: #f5c3da;
+}
+.commerce-storefront-n815-template-wire--immersive::after {
+    width: 48%;
+    height: 34px;
+    left: 13px;
+    bottom: 14px;
+    background: rgba(255,255,255,.9);
+}
+.commerce-storefront-n815-position-wire--hero::before {
+    inset: 8px 8px 48px;
+    background: #f5c3da;
+}
+.commerce-storefront-n815-position-wire--hero::after {
+    inset: 52px 8px 8px;
+    background: #dfe5ec;
+}
+.commerce-storefront-n815-position-wire--sidebar::before {
+    inset: 8px 36% 8px 8px;
+    background: #dfe5ec;
+}
+.commerce-storefront-n815-position-wire--sidebar::after {
+    inset: 8px 8px 8px 70%;
+    background: #f5c3da;
+}
+.commerce-storefront-n815-position-wire--none::before {
+    inset: 8px;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #e0e6ed 0,
+            #e0e6ed 12px,
+            transparent 12px,
+            transparent 20px
+        );
+}
+.commerce-storefront-n815-position-wire--none::after {
+    display: none;
+}
+.commerce-storefront-n815-switches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+}
+.commerce-storefront-n815-advanced {
+    overflow: hidden;
+    border: 1px solid #e5eaf0;
+    border-radius: .6rem;
+    background: #fafbfc;
+}
+.commerce-storefront-n815-advanced > summary {
+    padding: .65rem .75rem;
+    color: #6e7b8d;
+    cursor: pointer;
+    font-size: .65rem;
+    font-weight: 750;
+}
+.commerce-storefront-n815-advanced-body {
+    padding: .75rem;
+    border-top: 1px solid #e8edf2;
+}
+.commerce-storefront-n815-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+}
+.commerce-storefront-n815-tools-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: .8rem;
+    margin-bottom: .8rem;
+}
+.commerce-storefront-n815-tools-language {
+    width: min(340px,100%);
+}
+.commerce-storefront-n815-tools-scope {
+    max-width: 580px;
+    color: #7c899b;
+    font-size: .64rem;
+}
+.commerce-storefront-n815-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: .75rem;
+}
+.commerce-storefront-n815-tool-card {
+    min-height: 220px;
+}
+.commerce-storefront-n815-tool-card h2 .fa {
+    color: #f51b7b;
+}
+.commerce-storefront-n815-tool-card--danger {
+    border-color: #f1d5da;
+    background: #fffafb;
+}
+.commerce-storefront-n815-tool-card--danger h2 .fa {
+    color: #dc3545;
+}
+.commerce-storefront-n815-translation-preview {
+    margin-top: .8rem;
+    border-color: #edbfd3;
+}
+.commerce-storefront-n815-translation-list {
+    display: grid;
+    gap: .45rem;
+    max-height: 560px;
+    overflow: auto;
+}
+.commerce-storefront-n815-translation-row {
+    padding: .65rem;
+    border: 1px solid #e5eaf0;
+    border-radius: .55rem;
+}
+.commerce-storefront-n815-translation-row > summary {
+    cursor: pointer;
+    color: #4e5d72;
+    font-size: .65rem;
+    font-weight: 750;
+}
+@media (max-width: 800px) {
+    .commerce-storefront-n815-layout-grid,
+    .commerce-storefront-n815-position-grid,
+    .commerce-storefront-n815-tools-grid {
+        grid-template-columns: 1fr;
+    }
+    .commerce-storefront-n815-tools-top {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
+
+/* Storefront Builder UX consolidation. */
+.commerce-storefront-n813-wireframe {
+    min-height: 68px;
+    background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+}
+.commerce-storefront-n813-wireframe--hero::before {
+    inset: 10px 52% 10px 10px;
+    background: linear-gradient(#dbe3ec 0 0) 0 5px/72% 7px no-repeat,
+        linear-gradient(#e8edf3 0 0) 0 20px/92% 5px no-repeat,
+        linear-gradient(#e8edf3 0 0) 0 31px/78% 5px no-repeat,
+        linear-gradient(#f51b7b 0 0) 0 47px/38% 9px no-repeat;
+}
+.commerce-storefront-n813-wireframe--hero::after,
+.commerce-storefront-n813-wireframe--split::before {
+    background: linear-gradient(135deg, #f8d6e5, #f4b8d3);
+}
+.commerce-storefront-n813-wireframe--split::after {
+    background: linear-gradient(#dbe3ec 0 0) 0 2px/70% 7px no-repeat,
+        linear-gradient(#e8edf3 0 0) 0 18px/100% 5px no-repeat,
+        linear-gradient(#e8edf3 0 0) 0 30px/82% 5px no-repeat;
+    box-shadow: none;
+}
+.commerce-storefront-n813-wireframe--cards::before {
+    inset: 9px 68% 9px 7px;
+    border: 1px solid #dfe5ec;
+    background: linear-gradient(#f7c6dc 0 0) 8px 8px/18px 18px no-repeat,
+        linear-gradient(#dbe3ec 0 0) 8px 33px/60% 5px no-repeat,
+        linear-gradient(#e8edf3 0 0) 8px 44px/76% 4px no-repeat,
+        #fff;
+    box-shadow: 104px 0 0 #fff, 104px 0 0 1px #dfe5ec,
+        208px 0 0 #fff, 208px 0 0 1px #dfe5ec;
+}
+.commerce-storefront-n816-advanced {
+    border: 1px solid #e1e6ed;
+    border-radius: .65rem;
+    background: #fbfcfe;
+}
+.commerce-storefront-n816-advanced-summary {
+    padding: .8rem 1rem;
+    cursor: pointer;
+    color: #5f6d80;
+    font-weight: 600;
+}
+.commerce-storefront-n816-advanced[open] .commerce-storefront-composer-layout {
+    padding: 0 1rem 1rem;
+}
+.commerce-storefront-n816-technical {
+    opacity: .72;
+}
+.commerce-storefront-n816-seo-language {
+    max-width: 420px;
+    padding: .75rem 1rem;
+    border: 1px solid #e6eaf0;
+    border-radius: .6rem;
+    background: #fbfcfe;
+}
+
+/* Commerce 7.95 N8.17 — focused Storefront block editing and faithful previews. */
+.commerce-storefront-n817-preview-label {
+    font-weight: 700;
+    margin: .25rem 0 .5rem;
+    color: var(--bs-body-color);
+}
+.commerce-storefront-n817-preview-content > :last-child { margin-bottom: 0; }
+.commerce-storefront-n817-preview-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: .75rem;
+    margin-top: 1rem;
+}
+.commerce-storefront-n817-preview-item {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    padding: .85rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .75rem;
+    background: var(--bs-body-bg);
+}
+
+
+/* Commerce 7.95N9 — Showrooms list harmonisation. */
+.local-subscriptions-showroom-list-page .crm-showrooms-top-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin: .65rem 0 .85rem;
+}
+.local-subscriptions-showroom-list-page .crm-showrooms-filter-panel {
+    margin-top: .75rem;
+}
+.local-subscriptions-showroom-list-page .crm-showrooms-filter-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(300px,2fr)
+        minmax(180px,.7fr)
+        minmax(180px,.7fr)
+        auto;
+    gap: .75rem;
+    align-items: end;
+}
+.local-subscriptions-showroom-list-page .crm-showrooms-filter-field {
+    min-width: 0;
+}
+.local-subscriptions-showroom-list-page
+.crm-showrooms-filter-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-top: 1.3rem;
+}
+.local-subscriptions-showroom-list-page
+.crm-showrooms-result-summary {
+    margin-block: .8rem;
+}
+.local-subscriptions-showroom-list-page .crm-showrooms-table {
+    overflow: visible;
+}
+.local-subscriptions-showroom-list-page
+.crm-showrooms-table th:last-child,
+.local-subscriptions-showroom-list-page
+.crm-showrooms-table td:last-child {
+    text-align: left !important;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-sort-link {
+    color: inherit;
+    text-decoration: none;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-sort-link.is-active {
+    color: #f51b7b;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-name-link {
+    color: #24324a;
+    font-weight: 750;
+    text-decoration: none;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-name-link:hover {
+    color: #f51b7b;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-status-badge {
+    min-width: 5.5rem;
+    padding: .38rem .65rem;
+    font-size: .7rem;
+    text-align: center;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-public-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-public-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    max-width: 100%;
+    padding: .28rem .48rem;
+    border: 1px solid #e0e6ed;
+    border-radius: 999px;
+    background: #fff;
+    color: #4b5a70;
+    font-size: .66rem;
+    text-decoration: none;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-public-link:hover {
+    border-color: #f6a1c5;
+    color: #f51b7b;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-public-slug {
+    overflow: hidden;
+    max-width: 180px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-updated {
+    color: #68768a;
+    font-size: .72rem;
+    white-space: nowrap;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    white-space: nowrap;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-primary-action {
+    border-color: #f51b7b;
+    color: #f51b7b;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-primary-action:hover {
+    border-color: #f51b7b;
+    background: #f51b7b;
+    color: #fff;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-row-actions {
+    position: relative;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-row-actions > summary {
+    list-style: none;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-row-actions > summary::-webkit-details-marker {
+    display: none;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-row-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 1.8rem;
+    border: 1px solid #93a0b2;
+    border-radius: .4rem;
+    background: #fff;
+    color: #526075;
+    cursor: pointer;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-row-actions[open]
+.crm-showroom-row-menu-trigger {
+    border-color: #f51b7b;
+    color: #f51b7b;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-row-actions .crm-sales-row-menu {
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + .35rem);
+    right: 0;
+    min-width: 245px;
+}
+.local-subscriptions-showroom-list-page
+.crm-showroom-actions-heading {
+    display: block;
+    text-align: left;
+}
+@media (max-width: 900px) {
+    .local-subscriptions-showroom-list-page
+    .crm-showrooms-filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .local-subscriptions-showroom-list-page
+    .crm-showrooms-filter-field.is-search {
+        grid-column: 1 / -1;
+    }
+    .local-subscriptions-showroom-list-page
+    .crm-showrooms-filter-actions {
+        grid-column: 1 / -1;
+    }
+}
+@media (max-width: 560px) {
+    .local-subscriptions-showroom-list-page
+    .crm-showrooms-filter-grid {
+        grid-template-columns: 1fr;
+    }
+    .local-subscriptions-showroom-list-page
+    .crm-showrooms-filter-field.is-search,
+    .local-subscriptions-showroom-list-page
+    .crm-showrooms-filter-actions {
+        grid-column: auto;
+    }
+    .local-subscriptions-showroom-list-page
+    .crm-showrooms-top-actions {
+        justify-content: stretch;
+    }
+    .local-subscriptions-showroom-list-page
+    .crm-showrooms-top-actions .btn {
+        flex: 1 1 auto;
+    }
+}
+
+/* Commerce 7.95N9.1 — Showroom KPI emphasis, menus and import page. */
+.local-subscriptions-showroom-list-page .crm-showrooms-kpis .crm-commerce-metrics {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: .7rem;
+}
+.local-subscriptions-showroom-list-page .crm-showrooms-kpis .crm-commerce-metric {
+    min-width: 0;
+}
+.local-subscriptions-showroom-list-page .crm-showrooms-kpis .crm-commerce-metric:nth-child(2) {
+    border-color: #87d8b2;
+    background: #f3fcf7;
+    box-shadow: inset 0 3px 0 #198754;
+}
+.local-subscriptions-showroom-list-page .crm-showrooms-kpis .crm-commerce-metric:nth-child(2) .crm-commerce-metric-value,
+.local-subscriptions-showroom-list-page .crm-showrooms-kpis .crm-commerce-metric:nth-child(2) .crm-commerce-metric-label {
+    color: #146c43;
+}
+.local-subscriptions-showroom-list-page .crm-showroom-row-actions .crm-sales-row-menu {
+    position: fixed !important;
+    right: auto !important;
+    z-index: 1085;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+}
+.local-subscriptions-showroom-list-page .crm-showrooms-table,
+.local-subscriptions-showroom-list-page .table-responsive {
+    overflow: visible !important;
+}
+
+.local-subscriptions-showroom-import-page .crm-showroom-import-form {
+    display: grid;
+    gap: 1rem;
+    max-width: none;
+}
+.local-subscriptions-showroom-import-page .crm-showroom-import-primary {
+    position: relative;
+    padding-left: 4.6rem;
+}
+.local-subscriptions-showroom-import-page .crm-showroom-import-icon {
+    position: absolute;
+    top: 1.15rem;
+    left: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: .7rem;
+    background: #fff1f7;
+    color: #f51b7b;
+    font-size: 1.15rem;
+}
+.local-subscriptions-showroom-import-page .crm-showroom-import-json {
+    overflow: hidden;
+}
+.local-subscriptions-showroom-import-page .crm-showroom-import-json-summary {
+    padding: .9rem 1rem;
+    cursor: pointer;
+    font-weight: 700;
+    list-style: none;
+}
+.local-subscriptions-showroom-import-page .crm-showroom-import-json-summary::-webkit-details-marker {
+    display: none;
+}
+.local-subscriptions-showroom-import-page .crm-showroom-import-json-body {
+    padding: 0 1rem 1rem;
+    border-top: 1px solid #edf0f4;
+    padding-top: .9rem;
+}
+.local-subscriptions-showroom-import-page .crm-showroom-import-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+}
+@media (max-width: 900px) {
+    .local-subscriptions-showroom-list-page .crm-showrooms-kpis .crm-commerce-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+@media (max-width: 560px) {
+    .local-subscriptions-showroom-list-page .crm-showrooms-kpis .crm-commerce-metrics {
+        grid-template-columns: 1fr !important;
+    }
+    .local-subscriptions-showroom-import-page .crm-showroom-import-primary {
+        padding-left: 1rem;
+        padding-top: 4.5rem;
+    }
+}
+
+
+/* Commerce 7.95N9.2 — Showroom history. */
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-top-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin: .65rem 0 .85rem;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    margin-bottom: .85rem;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-summary-card {
+    min-width: 0;
+    padding: .9rem 1rem;
+    border: 1px solid #dde4ec;
+    border-radius: .8rem;
+    background: #fff;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-summary-card.is-highlighted {
+    border-color: #f5a5c6;
+    box-shadow: inset 3px 0 0 #f51b7b;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-summary-value {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 2rem;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-summary-label {
+    color: #66758a;
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .025em;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-summary-number {
+    color: #18253a;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-summary-meta {
+    color: #718096;
+    font-size: .7rem;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-status-badge,
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-action-badge {
+    padding: .38rem .68rem;
+    font-size: .68rem;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-help {
+    margin-bottom: .8rem;
+    padding: .55rem .7rem;
+    border-radius: .55rem;
+    background: #f7f9fc;
+    color: #607087;
+    font-size: .72rem;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-table {
+    overflow: visible;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-table th:last-child,
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-table td:last-child {
+    text-align: left !important;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-actions-heading {
+    display: block;
+    text-align: left;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-table td {
+    padding-block: .6rem;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-date,
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-user,
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-note {
+    font-size: .75rem;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-restore {
+    border-color: #f51b7b;
+    color: #f51b7b;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-restore:hover {
+    border-color: #f51b7b;
+    background: #f51b7b;
+    color: #fff;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-latest-badge {
+    font-size: .6rem;
+}
+
+.local-subscriptions-showroom-history-page
+.crm-showroom-history-empty {
+    padding: 2rem;
+    border: 1px dashed #ccd5df;
+    border-radius: .75rem;
+    color: #6d7b8d;
+    text-align: center;
+}
+
+@media (max-width: 760px) {
+    .local-subscriptions-showroom-history-page
+    .crm-showroom-history-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* N9.3 — Showroom editor split navigation. */
+.commerce-showroom-subnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    padding: .35rem;
+    border: 1px solid #dee2e6;
+    border-radius: .75rem;
+    background: #fff;
+}
+.commerce-showroom-subnav__item {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .6rem .9rem;
+    border-radius: .55rem;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 600;
+}
+.commerce-showroom-subnav__item:hover { background: #f6f7f9; text-decoration: none; }
+.commerce-showroom-subnav__item.is-active { background: #f9187f; color: #fff; }
+
+
+/* Commerce 7.95N9.3.1 — Showroom information page. */
+.commerce-showroom-information-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: .45rem 0 1rem;
+}
+
+.commerce-showroom-information-header__title-line,
+.commerce-showroom-information-header__actions {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+}
+
+.commerce-showroom-information-header__status {
+    padding: .38rem .7rem;
+    font-size: .68rem;
+}
+
+.commerce-showroom-information-actions-menu {
+    position: relative;
+}
+
+.commerce-showroom-information-actions-menu > summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.7rem;
+    list-style: none;
+    cursor: pointer;
+}
+
+.commerce-showroom-information-actions-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.commerce-showroom-information-actions-menu__panel {
+    position: absolute;
+    z-index: 50;
+    top: calc(100% + .35rem);
+    right: 0;
+    min-width: 260px;
+    padding: .4rem;
+    border: 1px solid #dfe5ec;
+    border-radius: .7rem;
+    background: #fff;
+    box-shadow: 0 .9rem 2.2rem rgba(24,37,58,.14);
+}
+
+.commerce-showroom-information-actions-menu__heading {
+    padding: .45rem .55rem .3rem;
+    color: #8290a3;
+    font-size: .62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .035em;
+}
+
+.commerce-showroom-information-actions-menu__item {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .55rem;
+    border-radius: .5rem;
+    color: #34445a;
+    text-decoration: none;
+}
+
+.commerce-showroom-information-actions-menu__item:hover {
+    background: #f7f9fc;
+    color: #f51b7b;
+}
+
+.commerce-showroom-general-config {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.commerce-showroom-information-card,
+.commerce-showroom-information-advanced {
+    margin-bottom: .85rem;
+    border: 1px solid #dde5ed;
+    border-radius: .85rem;
+    background: #fff;
+}
+
+.commerce-showroom-information-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: 1rem 1.05rem .85rem;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.commerce-showroom-information-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    border-radius: .55rem;
+    background: #fff0f6;
+    color: #f51b7b;
+}
+
+.commerce-showroom-information-card__body {
+    padding: 1rem 1.05rem 1.1rem;
+}
+
+.commerce-showroom-information-products {
+    display: grid;
+    gap: 0;
+}
+
+.commerce-showroom-information-product {
+    display: grid;
+    grid-template-columns: auto minmax(0,1fr) auto;
+    gap: .8rem;
+    align-items: center;
+    padding: .85rem 1.05rem;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.commerce-showroom-information-product:last-child {
+    border-bottom: 0;
+}
+
+.commerce-showroom-information-product__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: .6rem;
+    background: #f6f8fb;
+    color: #536279;
+}
+
+.commerce-showroom-information-product__main {
+    min-width: 0;
+}
+
+.commerce-showroom-information-product__type {
+    display: block;
+    margin-bottom: .12rem;
+    color: #8290a3;
+    font-size: .62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .025em;
+}
+
+.commerce-showroom-information-product__name {
+    display: block;
+    overflow: hidden;
+    color: #27364a;
+    font-size: .88rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.commerce-showroom-information-product__details {
+    margin-top: .4rem;
+}
+
+.commerce-showroom-information-product__details .form-check-label {
+    color: #647388;
+    font-size: .7rem;
+}
+
+.commerce-showroom-information-product__change {
+    position: relative;
+}
+
+.commerce-showroom-information-product__change > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.commerce-showroom-information-product__change > summary::-webkit-details-marker {
+    display: none;
+}
+
+.commerce-showroom-information-product__selector {
+    position: absolute;
+    z-index: 35;
+    top: calc(100% + .35rem);
+    right: 0;
+    width: min(360px,80vw);
+    padding: .65rem;
+    border: 1px solid #dfe5ec;
+    border-radius: .65rem;
+    background: #fff;
+    box-shadow: 0 .9rem 2.2rem rgba(24,37,58,.14);
+}
+
+.commerce-showroom-information-advanced > summary {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .8rem 1rem;
+    color: #526177;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.commerce-showroom-information-advanced__body {
+    padding: 0 1rem 1rem;
+    border-top: 1px solid #edf1f5;
+}
+
+.commerce-showroom-information-save {
+    display: flex;
+    justify-content: flex-end;
+    margin: .85rem 0 1rem;
+}
+
+.commerce-showroom-information-publication__form {
+    padding: 1rem 1.05rem 1.1rem;
+}
+
+.commerce-showroom-information-publication__status {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    margin-bottom: 1rem;
+}
+
+.commerce-showroom-information-publication__label {
+    color: #7d899a;
+    font-size: .68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .025em;
+}
+
+.commerce-showroom-information-publication__description {
+    color: #65748a;
+    font-size: .75rem;
+}
+
+.commerce-showroom-information-publication__workflow {
+    display: grid;
+    grid-template-columns: minmax(280px,1fr) auto;
+    gap: .75rem;
+    align-items: end;
+}
+
+.commerce-showroom-information-publication__actions {
+    display: flex;
+    gap: .5rem;
+    justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+    .commerce-showroom-information-header,
+    .commerce-showroom-information-publication__status {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .commerce-showroom-information-header__actions {
+        width: 100%;
+    }
+
+    .commerce-showroom-information-product {
+        grid-template-columns: auto minmax(0,1fr);
+    }
+
+    .commerce-showroom-information-product__change {
+        grid-column: 1 / -1;
+        justify-self: end;
+    }
+
+    .commerce-showroom-information-publication__workflow {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.95N9.3.2 — Showroom SEO / Referencing page. */
+.commerce-showroom-seo-intro {
+    margin-bottom: .85rem;
+}
+
+.commerce-showroom-seo-image-card,
+.commerce-showroom-seo-locales,
+.commerce-showroom-seo-advanced {
+    margin-bottom: .85rem;
+    border: 1px solid #dde5ed;
+    border-radius: .85rem;
+    background: #fff;
+}
+
+.commerce-showroom-seo-image-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: 1rem 1.05rem .85rem;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.commerce-showroom-seo-image-card__body {
+    display: grid;
+    grid-template-columns: minmax(240px,360px) minmax(0,1fr);
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.05rem;
+}
+
+.commerce-showroom-seo-image-card__preview {
+    overflow: hidden;
+    min-height: 160px;
+    border: 1px solid #e1e7ed;
+    border-radius: .75rem;
+    background: #f7f9fc;
+}
+
+.commerce-showroom-seo-image-card__preview img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+}
+
+.commerce-showroom-seo-image-card__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    min-height: 160px;
+    color: #8290a3;
+}
+
+.commerce-showroom-seo-locales__tabs {
+    display: flex;
+    gap: .35rem;
+    padding: .65rem .7rem 0;
+    border-bottom: 1px solid #e8edf2;
+}
+
+.commerce-showroom-seo-locales__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .58rem .8rem;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: #536278;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.commerce-showroom-seo-locales__tab:hover {
+    color: #f51b7b;
+}
+
+.commerce-showroom-seo-locales__tab.is-active {
+    border-bottom-color: #f51b7b;
+    color: #f51b7b;
+}
+
+.commerce-showroom-seo-locales__flag {
+    font-size: 1rem;
+}
+
+.commerce-showroom-seo-locale {
+    display: none;
+    padding: 1rem 1.05rem 1.1rem;
+}
+
+.commerce-showroom-seo-locale.is-active {
+    display: block;
+}
+
+.commerce-showroom-seo-locale__heading {
+    margin-bottom: 1rem;
+}
+
+.commerce-showroom-seo-locale__grid {
+    display: grid;
+    grid-template-columns: minmax(260px,.8fr) minmax(0,1fr);
+    gap: 1rem;
+}
+
+.commerce-showroom-seo-field.is-url {
+    grid-row: 1 / span 2;
+}
+
+.commerce-showroom-seo-field__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .35rem;
+}
+
+.commerce-showroom-seo-counter {
+    color: #8995a5;
+    font-size: .65rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.commerce-showroom-seo-counter.is-near-limit {
+    color: #d97706;
+    font-weight: 700;
+}
+
+.commerce-showroom-seo-social {
+    margin-top: 1rem;
+    border: 1px solid #edf1f5;
+    border-radius: .65rem;
+    background: #fafbfc;
+}
+
+.commerce-showroom-seo-social > summary,
+.commerce-showroom-seo-advanced > summary {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem .85rem;
+    color: #536278;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.commerce-showroom-seo-social__body,
+.commerce-showroom-seo-advanced__body {
+    padding: .9rem;
+    border-top: 1px solid #e8edf2;
+}
+
+.commerce-showroom-seo-advanced {
+    background: #fafbfc;
+}
+
+@media (max-width: 800px) {
+    .commerce-showroom-seo-image-card__body,
+    .commerce-showroom-seo-locale__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .commerce-showroom-seo-field.is-url {
+        grid-row: auto;
+    }
+
+    .commerce-showroom-seo-locales__tabs {
+        overflow-x: auto;
+    }
+}
+
+
+/* Commerce 7.95N9.4.1 — harmonised Showroom page headers. */
+.commerce-showroom-information-header__identity {
+    min-width: 0;
+}
+
+.commerce-showroom-information-header__subtitle {
+    margin-top: .35rem;
+    max-width: 68rem;
+    font-size: .78rem;
+    line-height: 1.45;
+}
+
+.commerce-showroom-information-header__title-line {
+    flex-wrap: wrap;
+}
+
+
+/* Commerce 7.95N9.4.2 — critical Showroom Builder layout and menus. */
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+    padding: 1rem 1.1rem !important;
+    border: 1px solid #e1e6ec !important;
+    border-radius: .85rem .85rem 0 0 !important;
+    background: #fff !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__toolbar {
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
+    gap: .75rem !important;
+    padding: .8rem 1rem !important;
+    border: 1px solid #e1e6ec !important;
+    border-top: 0 !important;
+    background: #fafbfc !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__toolbar-primary {
+    display: grid !important;
+    grid-template-columns:
+        minmax(330px, 1.1fr)
+        minmax(330px, 1fr) !important;
+    gap: .75rem !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__tool-group {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    gap: .65rem !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    padding: .65rem .7rem !important;
+    border: 1px solid #e2e8ef !important;
+    border-radius: .7rem !important;
+    background: #fff !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__tool-group.is-primary {
+    border-color: #f4b5d0 !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__tool-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 2rem !important;
+    height: 2rem !important;
+    border-radius: .55rem !important;
+    background: #fff0f6 !important;
+    color: #f51b7b !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__tool-title {
+    display: block !important;
+    margin-bottom: .35rem !important;
+    color: #65748a !important;
+    font-size: .65rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .025em !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__tool-controls {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: .45rem !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__toolbar-secondary {
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__more-menu > summary,
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-block__more > summary {
+    list-style: none !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__more-menu > summary::-webkit-details-marker,
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-block__more > summary::-webkit-details-marker {
+    display: none !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__more-menu-panel,
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-block__more-panel {
+    z-index: 1065 !important;
+    min-width: 250px !important;
+    max-width: min(320px, calc(100vw - 24px)) !important;
+    padding: .4rem !important;
+    border: 1px solid #dfe5ec !important;
+    border-radius: .7rem !important;
+    background: #fff !important;
+    box-shadow: 0 .9rem 2.2rem rgba(24,37,58,.18) !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__menu-action,
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-block__menu-action {
+    display: flex !important;
+    align-items: center !important;
+    gap: .55rem !important;
+    width: 100% !important;
+    min-height: 2.25rem !important;
+    padding: .52rem .58rem !important;
+    border: 0 !important;
+    border-radius: .45rem !important;
+    background: transparent !important;
+    color: #405069 !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__menu-action:hover,
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-block__menu-action:hover {
+    background: #f7f9fc !important;
+    color: #f51b7b !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-block__technical {
+    margin: .2rem 0 !important;
+    border-top: 1px solid #edf1f5 !important;
+    border-bottom: 1px solid #edf1f5 !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-block__technical > summary {
+    display: flex !important;
+    align-items: center !important;
+    gap: .5rem !important;
+    padding: .5rem .58rem !important;
+    color: #66758a !important;
+    font-size: .72rem !important;
+}
+
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-block__technical-body {
+    display: grid !important;
+    gap: .2rem !important;
+    padding: 0 .58rem .55rem !important;
+}
+
+@media (max-width: 1100px) {
+    .local-subscriptions-showroom-edit-page
+    .commerce-showroom-builder__toolbar {
+        flex-direction: column !important;
+    }
+
+    .local-subscriptions-showroom-edit-page
+    .commerce-showroom-builder__toolbar-primary {
+        grid-template-columns: 1fr !important;
+    }
+
+    .local-subscriptions-showroom-edit-page
+    .commerce-showroom-builder__toolbar-secondary {
+        justify-content: flex-end !important;
+    }
+}
+
+@media (max-width: 700px) {
+    .local-subscriptions-showroom-edit-page
+    .commerce-showroom-builder__tool-controls {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
+/* Commerce 7.95N9.5 — Showroom Builder context-menu width guard. */
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-builder__more-menu-panel,
+.local-subscriptions-showroom-edit-page
+.commerce-showroom-block__more-panel {
+    width: 270px !important;
+    min-width: 270px !important;
+    max-width: min(270px, calc(100vw - 24px)) !important;
+}
+/* Commerce configuration hub — N10.1. */
+.commerce-config-catalogue { border-left: 4px solid var(--primary, #f72585); }
+.commerce-config-journey { display:flex; flex-wrap:wrap; align-items:center; gap:.65rem; }
+.commerce-config-step__number { display:inline-flex; width:1.65rem; height:1.65rem; align-items:center; justify-content:center; border-radius:50%; background:#fce7f1; color:#b5145d; font-weight:700; }
+.commerce-config-step__arrow { color:#98a2b3; }
+.commerce-configuration-card { border:1px solid #e5e7eb; transition:box-shadow .15s ease, transform .15s ease; }
+.commerce-configuration-card:hover { box-shadow:0 .35rem 1rem rgba(16,24,40,.08); transform:translateY(-1px); }
+.commerce-configuration-card__icon { font-size:1.35rem; }
+.commerce-config-facts { border-top:1px solid #eef0f3; margin-top:auto; padding-top:.65rem; }
+.commerce-config-fact { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.3rem 0; font-size:.875rem; }
+.commerce-config-card-link { display:inline-block; margin-top:.75rem; font-weight:600; }
+@media (max-width: 767.98px) { .commerce-config-step__arrow { display:none; } .commerce-config-journey { align-items:flex-start; flex-direction:column; } }
+
+/* Commerce configuration N10.2: readable domain detail pages. */
+.commerce-config-section { max-width: 1180px; }
+.commerce-config-section-card { border: 1px solid #e5e7eb; }
+.commerce-config-setting-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; }
+.commerce-config-setting { display: flex; justify-content: space-between; gap: 1.25rem; padding: .72rem 0; border-top: 1px solid #eef0f3; }
+.commerce-config-setting:nth-child(-n+2) { border-top: 0; }
+.commerce-config-setting__label { color: #667085; }
+.commerce-config-setting__value { font-weight: 600; text-align: right; }
+@media (max-width: 767.98px) {
+    .commerce-config-setting-list { grid-template-columns: 1fr; }
+    .commerce-config-setting:nth-child(2) { border-top: 1px solid #eef0f3; }
+}
+
+/* Commerce configuration editor — N10.3. */
+.commerce-config-edit-field { min-width: 0; }
+.commerce-config-technical-name { display: inline-block; padding: .15rem .4rem; border-radius: .35rem; background: #f5f6f8; color: #6c757d; font-size: .72rem; font-weight: 400; }
+.commerce-config-edit-form .form-text { max-width: 58rem; }
+
+/* Commerce configuration editor refinements. */
+.commerce-config-provider-icon { width: 18px; height: 18px; object-fit: contain; vertical-align: -3px; }
+.commerce-config-group-title { display: flex; align-items: center; gap: .45rem; }
+.commerce-config-group-icon { display: inline-flex; align-items: center; justify-content: center; width: 1.65rem; height: 1.65rem; border-radius: .5rem; background: #fff1f6; color: #f72585; font-size: .9rem; flex: 0 0 auto; }
+
+/* Commerce 7.95N10.3.4 — localisation and checkout configuration UX. */
+.commerce-config-currency-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+}
+
+.commerce-config-currency-option {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 2.65rem;
+    margin: 0;
+    padding: .55rem .7rem;
+    border: 1px solid #dfe5ec;
+    border-radius: .6rem;
+    background: #fff;
+    cursor: pointer;
+}
+
+.commerce-config-currency-option:hover {
+    border-color: #f5a4c6;
+    background: #fff8fb;
+}
+
+.commerce-config-currency-option .form-check-input {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.commerce-config-currency-label {
+    color: #34445a;
+    font-size: .78rem;
+    font-weight: 650;
+}
+
+.commerce-config-interpreted-value {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: .18rem .42rem;
+    border-radius: 999px;
+    background: #f4f7fa;
+    color: #69788d;
+    font-size: .65rem;
+    font-weight: 700;
+}
+
+.commerce-config-subtle-note {
+    padding: .65rem .8rem;
+    border-left: 3px solid #b8c4d2;
+    border-radius: .4rem;
+    background: #f7f9fb;
+    color: #647388;
+    font-size: .72rem;
+    line-height: 1.45;
+}
+
+@media (max-width: 680px) {
+    .commerce-config-currency-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Commerce N10.3.5 — Communications configuration. */
+.commerce-config-section-card--legacy {
+    border-color: #f3c978;
+    background: #fffdf8;
+}
+
+.commerce-config-section-card--legacy .commerce-config-group-title {
+    color: #8a5a00;
+}
+
+
+/* Commerce 7.95N10.4 — Configuration dashboard and internal navigation. */
+.commerce-config-subnav {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    margin: .65rem 0 1.15rem;
+    padding: .32rem;
+    overflow-x: auto;
+    border: 1px solid #dde4ec;
+    border-radius: .75rem;
+    background: #fff;
+    scrollbar-width: thin;
+}
+
+.commerce-config-subnav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    flex: 0 0 auto;
+    padding: .5rem .65rem;
+    border-radius: .55rem;
+    color: #4b5b70;
+    font-size: .76rem;
+    font-weight: 650;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.commerce-config-subnav__link:hover {
+    background: #f7f8fb;
+    color: #f51b7b;
+    text-decoration: none;
+}
+
+.commerce-config-subnav__link.is-active {
+    background: #fff0f6;
+    color: #f51b7b;
+    box-shadow: inset 0 0 0 1px #f8c4d9;
+}
+
+.commerce-configuration-card {
+    overflow: hidden;
+    border-color: #dfe5ec;
+    transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+
+.commerce-configuration-card:hover {
+    transform: translateY(-1px);
+    border-color: #f2bfd4;
+    box-shadow: 0 .55rem 1.4rem rgba(32,45,67,.09);
+}
+
+.commerce-configuration-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: .65rem;
+    background: #fff3f8;
+    font-size: 1.05rem;
+}
+
+.commerce-config-facts {
+    display: grid;
+    gap: .48rem;
+    margin-top: auto;
+    padding-top: .75rem;
+    border-top: 1px solid #edf1f5;
+}
+
+.commerce-config-fact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .65rem;
+    min-height: 1.55rem;
+    font-size: .72rem;
+}
+
+.commerce-config-summary-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-self: end;
+    width: max-content;
+    max-width: 100%;
+    gap: .28rem;
+    font-size: .62rem;
+}
+
+.commerce-config-summary-provider {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-weight: 700;
+}
+
+.commerce-config-summary-provider-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    object-fit: contain;
+}
+
+.commerce-config-summary-language,
+.commerce-config-summary-inline-badges .badge {
+    font-size: .62rem;
+}
+
+.commerce-config-summary-inline-badges {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .2rem;
+}
+
+.commerce-config-card-link {
+    display: inline-flex;
+    align-items: center;
+    margin-top: .8rem;
+    color: #f51b7b;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@media (max-width: 760px) {
+    .commerce-config-subnav {
+        margin-inline: -.1rem;
+    }
+
+    .commerce-config-fact {
+        grid-template-columns: 1fr;
+        gap: .2rem;
+    }
+
+    .commerce-config-summary-inline-badges {
+        justify-content: flex-start;
+    }
+}
+
+
+/* N10.5 — Course-to-Commerce onboarding on the Products workspace. */
+.crm-products-course-journey {
+    border-color: #f1c3d7;
+    border-left: 3px solid #f72585;
+    background: linear-gradient(135deg, #fff 0%, #fff9fc 100%);
+}
+
+/* The journey card draws its own expand/collapse chevron; hide the native <details> marker. */
+.crm-products-course-journey > summary {
+    list-style: none;
+}
+.crm-products-course-journey > summary::-webkit-details-marker {
+    display: none;
+}
+.crm-products-course-journey > summary::marker {
+    content: "";
+}
+
+.crm-products-course-journey__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 2.3rem;
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: .7rem;
+    background: #fff0f6;
+    color: #f72585;
+}
+
+.crm-products-course-journey__steps {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .55rem;
+    margin-top: .9rem;
+}
+
+.crm-products-course-step {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+.crm-products-course-step__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 999px;
+    background: #fde6f0;
+    color: #d71667;
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+.crm-products-course-step__label {
+    font-size: .82rem;
+    font-weight: 650;
+    color: #4c3955;
+}
+
+.crm-products-course-step__arrow {
+    color: #b7a4ae;
+    font-size: .78rem;
+}
+
+@media (max-width: 767.98px) {
+    .crm-products-course-step__arrow {
+        display: none;
+    }
+
+    .crm-products-course-journey__steps {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* N10.6A — Commerce access scopes. */
+.local-subscriptions-commerce-scopes-page .commerce-scope-list-card,
+.local-subscriptions-commerce-scope-edit-page .commerce-scope-form-card {
+    border: 1px solid #e5e9f2;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(38, 43, 70, .04);
+    overflow: hidden;
+}
+.local-subscriptions-commerce-scopes-page .commerce-scope-table th {
+    background: #fafbfe;
+    border-top: 0;
+    color: #34405b;
+    font-size: .82rem;
+    letter-spacing: .01em;
+}
+.local-subscriptions-commerce-scopes-page .commerce-scope-table td,
+.local-subscriptions-commerce-scopes-page .commerce-scope-table th {
+    padding: .85rem 1rem;
+    vertical-align: middle;
+}
+.local-subscriptions-commerce-scopes-page .commerce-scope-table tbody tr:hover {
+    background: #fff9fc;
+}
+.local-subscriptions-commerce-scopes-page .commerce-scope-name {
+    color: #34205f;
+    text-decoration: none;
+}
+.local-subscriptions-commerce-scopes-page .commerce-scope-plan-badge {
+    background: #fff0f7;
+    border: 1px solid #ffc5df;
+    color: #b51f65;
+}
+.local-subscriptions-commerce-scope-edit-page .commerce-scope-impact {
+    max-width: 920px;
+    padding: 1rem 1.15rem;
+    background: #fffaf2;
+    border: 1px solid #f2dfb5;
+    border-radius: 12px;
+}
+.local-subscriptions-commerce-scope-edit-page .commerce-scope-impact-icon {
+    font-size: 1.25rem;
+    line-height: 1.4;
+}
+.local-subscriptions-commerce-scope-edit-page .commerce-scope-form-card {
+    max-width: 920px;
+}
+.local-subscriptions-commerce-scope-edit-page .commerce-scope-form-card-header {
+    padding: 1rem 1.25rem;
+    background: #fafbfe;
+    border-bottom: 1px solid #e8ebf2;
+}
+.local-subscriptions-commerce-scope-edit-page .commerce-scope-form-card-body {
+    padding: 1.25rem;
+}
+.local-subscriptions-commerce-scope-edit-page .commerce-scope-form-card-body .mform > .form-group,
+.local-subscriptions-commerce-scope-edit-page .commerce-scope-form-card-body .mform .fitem {
+    max-width: 780px;
+}
+.local-subscriptions-commerce-scope-edit-page [data-fieldtype="autocomplete"] .form-autocomplete-selection {
+    min-height: 2.4rem;
+}
+@media (max-width: 767.98px) {
+    .local-subscriptions-commerce-scopes-page .commerce-scope-table td,
+    .local-subscriptions-commerce-scopes-page .commerce-scope-table th {
+        padding: .7rem;
+    }
+    .local-subscriptions-commerce-scope-edit-page .commerce-scope-form-card-body {
+        padding: 1rem;
+    }
+}
+
+/* N10.5.1 compatibility — stacked engine switches. */
+.commerce-config-summary-stack {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .28rem;
+}
+
+
+/* N10.6A.1 — Access scope detail page. */
+.local-subscriptions-commerce-scope-view-page .commerce-scope-view-card,
+.local-subscriptions-commerce-scope-view-page .commerce-scope-technical-card {
+    border: 1px solid #e5e9f2;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(38, 43, 70, .04);
+    overflow: hidden;
+}
+.local-subscriptions-commerce-scope-view-page .commerce-scope-view-card-header {
+    padding: 1rem 1.15rem;
+    border-bottom: 1px solid #edf1f5;
+    background: #fafbfe;
+}
+.local-subscriptions-commerce-scope-view-page .commerce-scope-view-card-body {
+    display: grid;
+    gap: .6rem;
+    padding: 1rem 1.15rem;
+}
+.local-subscriptions-commerce-scope-view-page .commerce-scope-view-item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .7rem .8rem;
+    border: 1px solid #edf1f5;
+    border-radius: 10px;
+    background: #fff;
+    color: #34205f;
+}
+.local-subscriptions-commerce-scope-view-page .commerce-scope-view-plan:hover {
+    border-color: #f6b6d2;
+    background: #fff9fc;
+}
+.local-subscriptions-commerce-scope-view-page .commerce-scope-view-item-icon {
+    flex: 0 0 auto;
+}
+.local-subscriptions-commerce-scope-view-page .commerce-scope-technical-table td {
+    padding: .78rem 1rem;
+    vertical-align: middle;
+}
+.local-subscriptions-commerce-scope-view-page .commerce-scope-technical-table td:first-child {
+    width: 38%;
+    color: #667085;
+}
+
+/* N10.6B — Plans, entitlements and upgrade rules. */
+.commerce-plans-list-card,
+.commerce-plan-form-card,
+.commerce-plan-view-card,
+.commerce-plan-rules-card,
+.commerce-plan-rule-form-card {
+    border: 1px solid rgba(48, 38, 89, .10);
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(48, 38, 89, .04);
+    overflow: hidden;
+}
+
+.commerce-plans-card-header {
+    padding: 1rem 1.15rem;
+    background: linear-gradient(180deg, #fff 0%, #fffafd 100%);
+    border-bottom: 1px solid rgba(48, 38, 89, .08);
+}
+
+.commerce-plans-table th,
+.commerce-plan-rules-card th {
+    white-space: nowrap;
+    font-weight: 700;
+    color: #302659;
+}
+
+.commerce-plans-table td,
+.commerce-plan-rules-card td {
+    vertical-align: middle;
+}
+
+.commerce-plan-row-actions {
+    white-space: nowrap;
+}
+
+.commerce-plan-native-product {
+    display: inline-flex;
+    align-items: center;
+    gap: .15rem;
+}
+
+.commerce-plan-form-card {
+    max-width: 980px;
+}
+
+.commerce-plan-form-body,
+.commerce-plan-rule-form-body {
+    padding: 1.25rem 1.35rem;
+}
+
+.commerce-plan-form-body .mform,
+.commerce-plan-rule-form-body .mform {
+    max-width: 850px;
+}
+
+.commerce-plan-form-body .mform .fitem,
+.commerce-plan-rule-form-body .mform .fitem {
+    margin-bottom: .85rem;
+}
+
+.commerce-plan-form-body .mform .form-control,
+.commerce-plan-form-body .mform .form-select,
+.commerce-plan-rule-form-body .mform .form-control,
+.commerce-plan-rule-form-body .mform .form-select,
+.commerce-plan-rule-form-body .select2-container {
+    max-width: 520px;
+}
+
+.commerce-plan-business-header,
+.commerce-plan-rules-header,
+.commerce-plan-rules-context {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.commerce-plan-business-status {
+    flex: 0 0 auto;
+    padding-top: .1rem;
+}
+
+.commerce-plan-rules-context {
+    align-items: center;
+    margin-bottom: .85rem;
+    padding: .7rem .9rem;
+    border: 1px solid rgba(48, 38, 89, .08);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.commerce-plan-context-label {
+    display: block;
+    margin-bottom: .1rem;
+    color: #777184;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.commerce-plan-context-name {
+    color: #302659;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.commerce-plan-rules-header-actions {
+    flex: 0 0 auto;
+}
+
+.commerce-plan-rules-note {
+    margin: .9rem 1rem;
+}
+
+.commerce-plan-rules-card .table-responsive {
+    border-top: 1px solid rgba(48, 38, 89, .06);
+}
+
+.commerce-plan-rule-form-card {
+    max-width: 980px;
+}
+
+.commerce-plan-detail-table td:first-child {
+    width: 40%;
+    color: #6c6878;
+    font-weight: 600;
+}
+
+.commerce-plan-native-empty {
+    padding: .35rem 0;
+}
+
+.commerce-plan-native-empty-icon {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    margin-right: .55rem;
+    border-radius: 50%;
+    background: #f7f4fa;
+    color: #8f879b;
+}
+
+.commerce-plan-subtle-note {
+    padding: .8rem 1rem;
+    border: 1px solid rgba(13, 202, 240, .25);
+    border-radius: 9px;
+    background: rgba(13, 202, 240, .07);
+    color: #4c5664;
+}
+
+@media (max-width: 991.98px) {
+    .commerce-plan-business-header,
+    .commerce-plan-rules-header,
+    .commerce-plan-rules-context {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .commerce-plans-table th,
+    .commerce-plan-rules-card th {
+        white-space: normal;
+    }
+}
+
+
+/* N10.7.1 — Promotions & coupons cockpit/editor. */
+.commerce-promotions-dashboard { margin-top:.25rem; }
+.commerce-promotions-metric { display:flex; flex-direction:row; align-items:center; gap:.85rem; border:1px solid #e4e7ec; box-shadow:0 2px 8px rgba(31,41,55,.035); }
+.commerce-promotions-metric-icon { width:2.35rem; height:2.35rem; border-radius:.7rem; display:flex; align-items:center; justify-content:center; background:#fff0f6; color:#f72585; flex:0 0 auto; }
+.commerce-promotions-metric-value { font-size:1.35rem; line-height:1.1; font-weight:700; color:#281f4f; }
+.commerce-promotions-metric-label { margin-top:.15rem; font-size:.78rem; color:#6b7280; }
+.commerce-promotions-context-note { display:flex; align-items:flex-start; gap:.75rem; padding:.85rem 1rem; border:1px solid #e4e7ec; border-left:3px solid #f72585; border-radius:.55rem; background:#fff; color:#4b5563; font-size:.86rem; }
+.commerce-promotions-context-note > .fa { margin-top:.15rem; color:#f72585; }
+.commerce-promotions-list-card { overflow:hidden; border:1px solid #e4e7ec; box-shadow:0 2px 8px rgba(31,41,55,.035); }
+.commerce-promotions-list-header { padding:1rem 1.15rem; border-bottom:1px solid #eceef2; background:#fffafd; }
+.commerce-promotions-table th { white-space:nowrap; font-size:.78rem; }
+.commerce-promotions-table td { vertical-align:middle; }
+.commerce-promotions-row-actions { display:flex; gap:.35rem; flex-wrap:wrap; min-width:19rem; }
+.commerce-promotions-type { font-weight:600; color:#374151; }
+.commerce-promotion-editor { max-width:1180px; }
+.commerce-promotion-editor-card { overflow:hidden; border:1px solid #e4e7ec; box-shadow:0 2px 8px rgba(31,41,55,.035); }
+.commerce-promotion-editor-card-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; padding:1rem 1.15rem; border-bottom:1px solid #eceef2; background:#fffafd; }
+.commerce-promotion-editor-card-copy { min-width:0; }
+.commerce-promotion-check-option { padding:.85rem 1rem; border:1px solid #eceef2; border-radius:.55rem; background:#fafbfc; }
+.commerce-promotion-editor .form-label { color:#30265d; }
+.commerce-promotion-editor select[multiple] { min-height:10rem; }
+.commerce-promotion-editor-actions { position:sticky; bottom:0; z-index:5; display:flex; gap:.5rem; margin-top:1rem; padding:.85rem 1rem; border:1px solid #e4e7ec; border-radius:.6rem; background:rgba(255,255,255,.96); box-shadow:0 -4px 16px rgba(31,41,55,.06); backdrop-filter:blur(6px); }
+@media (max-width: 767.98px) {
+  .commerce-promotions-row-actions { min-width:0; }
+  .commerce-promotion-editor-card-header { flex-direction:column; }
+  .commerce-promotion-editor-actions { position:static; }
+}
+
+/* N10.7.2 — Promotion details, validity and eligibility layout. */
+.commerce-promotion-eligibility-products > .col-12 + .col-12 {
+    margin-top: 1.1rem;
+}
+.commerce-promotion-eligibility-products select[multiple] {
+    width: 100%;
+    max-width: 760px;
+}
+.commerce-promotion-view-card {
+    overflow: hidden;
+    border: 1px solid #e4e7ec;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+}
+.commerce-promotion-detail-table td {
+    padding: .8rem 1rem;
+    vertical-align: middle;
+}
+.commerce-promotion-detail-table td:first-child {
+    width: 36%;
+    color: #6b7280;
+    font-weight: 600;
+}
+.local-subscriptions-commerce-promotion-view-page .commerce-promotions-list-header {
+    background: #fffafd;
+}
+@media (max-width: 767.98px) {
+    .commerce-promotion-detail-table td:first-child {
+        width: 44%;
+    }
+}
+
+/* Commerce N10.7.3 — promotions list filters, sorting and compact contextual actions. */
+.commerce-promotions-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(15rem, 2fr) repeat(3, minmax(10rem, 1fr)) auto;
+    gap: .85rem;
+    align-items: end;
+}
+.commerce-promotions-filter-field .form-label {
+    margin-bottom: .35rem;
+    font-weight: 650;
+    color: #30265d;
+}
+.commerce-promotions-filter-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    white-space: nowrap;
+}
+.commerce-promotions-result-summary {
+    margin: .7rem 0 .8rem;
+    color: #64748b;
+    font-size: .82rem;
+    font-weight: 650;
+}
+.commerce-promotions-sort-link {
+    color: inherit;
+    text-decoration: none;
+}
+.commerce-promotions-sort-link:hover,
+.commerce-promotions-sort-link.is-active {
+    color: #f72585;
+    text-decoration: none;
+}
+.commerce-promotions-row-actions {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    min-width: 8.25rem;
+    flex-wrap: nowrap;
+}
+.commerce-promotions-list-card {
+    overflow: visible;
+}
+.commerce-promotions-list-card .table-responsive {
+    overflow: visible;
+}
+.commerce-promotion-infinity-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.7rem;
+    height: 1.45rem;
+    padding: 0 .4rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #30265d;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1;
+}
+@media (max-width: 1100px) {
+    .commerce-promotions-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .commerce-promotions-filter-field.is-search,
+    .commerce-promotions-filter-actions {
+        grid-column: 1 / -1;
+    }
+    .commerce-promotions-filter-actions {
+        justify-content: flex-start;
+    }
+}
+@media (max-width: 767.98px) {
+    .commerce-promotions-filter-grid {
+        grid-template-columns: 1fr;
+    }
+    .commerce-promotions-filter-field.is-search,
+    .commerce-promotions-filter-actions {
+        grid-column: auto;
+    }
+    .commerce-promotions-list-card .table-responsive {
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+}

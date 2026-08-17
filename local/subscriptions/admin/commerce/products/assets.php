@@ -8,10 +8,12 @@ use local_subscriptions\commerce\catalog\assets\CommerceCatalogDigitalFileManage
 use local_subscriptions\commerce\catalog\assets\CommerceCatalogDigitalProductConfigurator;
 use local_subscriptions\commerce\catalog\assets\CommerceCatalogMediaManager;
 use local_subscriptions\commerce\catalog\cover\CommerceProductCoverService;
+use local_subscriptions\commerce\catalog\presentation\CommerceCatalogProductNameResolver;
 use local_subscriptions\commerce\catalog\rendering\CommerceProductEditorNavigationRenderer;
 use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
 use local_subscriptions\commerce\catalog\visual\CommerceProductVisualAuditService;
 use local_subscriptions\commerce\catalog\visual\CommerceProductVisualFormat;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
@@ -23,6 +25,11 @@ $manager = $factory->product_manager();
 $editor = $manager->get_editor_data($sku);
 $product = $editor->get_product();
 $productid = (int)$product->get_id();
+$displayname = CommerceCatalogProductNameResolver::resolve_native_id(
+    $DB,
+    $productid,
+    $product->get_name()
+);
 $pageurl = new moodle_url('/local/subscriptions/admin/commerce/products/assets.php', ['sku' => $sku]);
 CrmPageConfigurator::configure(
     $PAGE,
@@ -241,7 +248,7 @@ $contextpreview = [
         'commerce_product_visual_context_preview_badge',
         'local_subscriptions'
     ),
-    'productname' => format_string($product->get_name()),
+    'productname' => format_string($displayname),
     'producttype' => $product->get_type(),
     'placeholdericon' => $placeholdericon,
     'typelabel' => $typelabel,
@@ -323,8 +330,11 @@ $contextpreview = [
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 echo CommerceProductEditorNavigationRenderer::breadcrumb(
-    $product->get_name(),
+    $displayname,
     get_string('commerce_product_step_assets', 'local_subscriptions')
+);
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::PRODUCTS
 );
 echo CommerceProductEditorNavigationRenderer::render(
     $product,
@@ -466,7 +476,7 @@ foreach ($coverroles as $role) {
             'alt' => get_string(
                 'commerce_product_visual_preview_alt',
                 'local_subscriptions',
-                format_string($product->get_name())
+                format_string($displayname)
             ),
         ]);
         if ($isfallback) {
@@ -598,6 +608,7 @@ foreach ($coverroles as $role) {
             'local_subscriptions'
         ),
     ]);
+    echo html_writer::start_div('commerce-product-asset-card__button-row');
     echo html_writer::empty_tag('input', [
         'type' => 'submit',
         'class' => 'btn btn-primary',
@@ -606,22 +617,21 @@ foreach ($coverroles as $role) {
             'local_subscriptions'
         ),
     ]);
-    echo html_writer::end_tag('form');
-
     if ($masterfile instanceof stored_file) {
         echo html_writer::link(
             new moodle_url($pageurl, [
                 'action' => 'delete_cover_' . $role,
                 'sesskey' => sesskey(),
             ]),
-            get_string('delete'),
-            [
-                'class' =>
-                    'btn btn-sm btn-outline-danger align-self-start',
-            ]
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-trash-o me-1',
+                'aria-hidden' => 'true',
+            ]) . get_string('delete'),
+            ['class' => 'btn btn-outline-danger']
         );
     }
-
+    echo html_writer::end_div();
+    echo html_writer::end_tag('form');
     echo html_writer::end_div();
 
     echo html_writer::end_div();
@@ -646,85 +656,200 @@ if ($product->get_type() === 'digital_download') {
         CommerceCatalogDigitalFileManager::ROLE_MOBILE
     );
 
-    echo html_writer::start_div('card card-body');
-    echo html_writer::tag('h3', get_string('commerce_digital_files', 'local_subscriptions'), ['class' => 'h5']);
-    echo html_writer::tag(
-        'p',
-        get_string('commerce_digital_files_native_help', 'local_subscriptions'),
-        ['class' => 'text-muted']
+    echo html_writer::start_div('card card-body crm-product-assets-digital-files');
+    echo html_writer::div(
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-file-pdf-o',
+            'aria-hidden' => 'true',
+        ])
+        . html_writer::div(
+            html_writer::tag(
+                'h3',
+                get_string('commerce_digital_files', 'local_subscriptions'),
+                ['class' => 'h5 mb-1']
+            )
+            . html_writer::tag(
+                'p',
+                get_string('commerce_digital_files_native_help', 'local_subscriptions'),
+                ['class' => 'text-muted mb-0']
+            ),
+            'crm-product-assets-digital-heading-copy'
+        ),
+        'crm-product-assets-digital-heading'
     );
-
-    foreach ([
-        CommerceCatalogDigitalFileManager::ROLE_DESKTOP => [
-            $desktopfile,
-            'commerce_desktop_file',
-            'delete_desktop',
-        ],
-        CommerceCatalogDigitalFileManager::ROLE_MOBILE => [
-            $mobilefile,
-            'commerce_mobile_file',
-            'delete_mobile',
-        ],
-    ] as $role => [$file, $labelkey, $deleteaction]) {
-        $value = $file instanceof stored_file
-            ? s($file->get_filename()) . ' · ' . display_size($file->get_filesize())
-            : get_string('none');
-        echo html_writer::start_div('d-flex align-items-center justify-content-between border rounded p-2 mb-2');
-        echo html_writer::div(get_string($labelkey, 'local_subscriptions') . ': ' . $value);
-        if ($file instanceof stored_file) {
-            $deleteurl = new moodle_url($pageurl, [
-                'action' => $deleteaction,
-                'sesskey' => sesskey(),
-            ]);
-            echo html_writer::link(
-                $deleteurl,
-                get_string('delete'),
-                ['class' => 'btn btn-sm btn-outline-danger']
-            );
-        }
-        echo html_writer::end_div();
-    }
 
     echo html_writer::start_tag('form', [
         'method' => 'post',
         'enctype' => 'multipart/form-data',
-        'class' => 'mt-3',
+        'class' => 'crm-product-assets-digital-form',
     ]);
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'save_digital']);
-    echo html_writer::tag(
-        'label',
-        get_string('commerce_desktop_file', 'local_subscriptions'),
-        ['class' => 'form-label']
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'sesskey',
+        'value' => sesskey(),
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'action',
+        'value' => 'save_digital',
+    ]);
+
+    echo html_writer::start_div('crm-product-assets-digital-grid');
+    foreach ([
+        [
+            'file' => $desktopfile,
+            'label' => 'commerce_desktop_file',
+            'input' => 'desktop_file',
+            'delete' => 'delete_desktop',
+            'icon' => 'fa-desktop',
+        ],
+        [
+            'file' => $mobilefile,
+            'label' => 'commerce_mobile_file',
+            'input' => 'mobile_file',
+            'delete' => 'delete_mobile',
+            'icon' => 'fa-mobile',
+        ],
+    ] as $item) {
+        $file = $item['file'];
+        $hasfile = $file instanceof stored_file;
+
+        echo html_writer::start_div(
+            'crm-product-assets-digital-card' . ($hasfile ? ' has-file' : ' is-empty')
+        );
+        echo html_writer::div(
+            html_writer::div(
+                html_writer::tag('i', '', [
+                    'class' => 'fa ' . $item['icon'],
+                    'aria-hidden' => 'true',
+                ]),
+                'crm-product-assets-digital-icon'
+            )
+            . html_writer::div(
+                html_writer::tag(
+                    'strong',
+                    get_string($item['label'], 'local_subscriptions')
+                )
+                . html_writer::div(
+                    get_string(
+                        $hasfile
+                            ? 'commerce_product_digital_file_ready'
+                            : 'commerce_product_digital_file_missing',
+                        'local_subscriptions'
+                    ),
+                    'crm-product-assets-digital-state'
+                ),
+                'crm-product-assets-digital-title'
+            )
+            . html_writer::span(
+                get_string(
+                    $hasfile
+                        ? 'commerce_product_visual_status_ok'
+                        : 'commerce_product_visual_status_missing',
+                    'local_subscriptions'
+                ),
+                'badge rounded-pill ' . ($hasfile ? 'text-bg-success' : 'text-bg-secondary')
+            ),
+            'crm-product-assets-digital-card-header'
+        );
+
+        if ($hasfile) {
+            echo html_writer::div(
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-file-pdf-o me-2',
+                    'aria-hidden' => 'true',
+                ])
+                . html_writer::div(
+                    html_writer::tag(
+                        'strong',
+                        s($file->get_filename()),
+                        ['class' => 'text-break']
+                    )
+                    . html_writer::span(
+                        display_size($file->get_filesize()),
+                        'crm-product-assets-digital-filesize'
+                    ),
+                    'crm-product-assets-digital-current-copy'
+                ),
+                'crm-product-assets-digital-current'
+            );
+        } else {
+            echo html_writer::div(
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-cloud-upload me-2',
+                    'aria-hidden' => 'true',
+                ])
+                . get_string(
+                    'commerce_product_digital_file_upload_prompt',
+                    'local_subscriptions'
+                ),
+                'crm-product-assets-digital-empty'
+            );
+        }
+
+        echo html_writer::tag(
+            'label',
+            get_string(
+                'commerce_product_digital_file_replace_or_add',
+                'local_subscriptions'
+            ),
+            [
+                'for' => $item['input'],
+                'class' => 'form-label',
+            ]
+        );
+        echo html_writer::empty_tag('input', [
+            'id' => $item['input'],
+            'type' => 'file',
+            'name' => $item['input'],
+            'accept' => '.pdf,application/pdf',
+            'class' => 'form-control',
+        ]);
+
+        if ($hasfile) {
+            echo html_writer::div(
+                html_writer::link(
+                    new moodle_url($pageurl, [
+                        'action' => $item['delete'],
+                        'sesskey' => sesskey(),
+                    ]),
+                    html_writer::tag('i', '', [
+                        'class' => 'fa fa-trash-o me-1',
+                        'aria-hidden' => 'true',
+                    ]) . get_string('delete'),
+                    ['class' => 'btn btn-sm btn-outline-danger']
+                ),
+                'crm-product-assets-digital-delete'
+            );
+        }
+        echo html_writer::end_div();
+    }
+    echo html_writer::end_div();
+
+    echo html_writer::div(
+        html_writer::tag(
+            'button',
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-save me-1',
+                'aria-hidden' => 'true',
+            ]) . get_string('savechanges'),
+            [
+                'type' => 'submit',
+                'class' => 'btn btn-primary',
+            ]
+        ),
+        'crm-product-assets-digital-actions'
     );
-    echo html_writer::empty_tag('input', [
-        'type' => 'file',
-        'name' => 'desktop_file',
-        'accept' => '.pdf,application/pdf',
-        'class' => 'form-control mb-3',
-    ]);
-    echo html_writer::tag(
-        'label',
-        get_string('commerce_mobile_file', 'local_subscriptions'),
-        ['class' => 'form-label']
-    );
-    echo html_writer::empty_tag('input', [
-        'type' => 'file',
-        'name' => 'mobile_file',
-        'accept' => '.pdf,application/pdf',
-        'class' => 'form-control mb-3',
-    ]);
-    echo html_writer::empty_tag('input', [
-        'type' => 'submit',
-        'class' => 'btn btn-primary',
-        'value' => get_string('savechanges'),
-    ]);
     echo html_writer::end_tag('form');
 
     if ($digital && !$desktopfile && !$mobilefile) {
         echo html_writer::div(
-            get_string('commerce_digital_files_legacy_fallback', 'local_subscriptions'),
-            'alert alert-info mt-3 mb-0'
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-info-circle me-2',
+                'aria-hidden' => 'true',
+            ])
+            . get_string('commerce_digital_files_legacy_fallback', 'local_subscriptions'),
+            'crm-product-assets-digital-legacy-note'
         );
     }
     echo html_writer::end_div();

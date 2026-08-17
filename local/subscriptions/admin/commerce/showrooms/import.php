@@ -7,12 +7,13 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomCmsRepository;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPackageService;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPortablePackageService;
-use local_subscriptions\crm\layout\CrmPageConfigurator;
-use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
-use local_subscriptions\crm\navigation\CrmNavigationKeys;
-use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\layout\CrmPageConfigurator;
+use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
+use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 require_login();
 $context = context_system::instance();
@@ -138,74 +139,120 @@ echo CrmBreadcrumbRenderer::render([
         'url' => null,
     ],
 ]);
+
 echo CrmPageHeader::render(
     $pagetitle,
-    null,
+    get_string('commerce_showroom_n91_import_intro', 'local_subscriptions'),
     HelpContext::COMMERCE
 );
 
-
-echo $OUTPUT->notification(
-    get_string('commerce_showroom_import_portable_help', 'local_subscriptions'),
-    'warning'
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::SHOWROOMS,
+    $context
 );
 
-echo html_writer::start_tag(
-    'form',
-    [
-        'method' => 'post',
-        'enctype' => 'multipart/form-data',
-        'class' => 'card card-body',
-    ]
-);
-echo html_writer::empty_tag(
-    'input',
-    ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]
-);
+echo html_writer::start_tag('form', [
+    'method' => 'post',
+    'enctype' => 'multipart/form-data',
+    'class' => 'crm-showroom-import-form',
+]);
+echo html_writer::empty_tag('input', [
+    'type' => 'hidden',
+    'name' => 'sesskey',
+    'value' => sesskey(),
+]);
 
+echo html_writer::start_tag('section', [
+    'class' => 'card card-body crm-showroom-import-primary',
+]);
+echo html_writer::div(
+    html_writer::tag('i', '', [
+        'class' => 'fa fa-box-archive',
+        'aria-hidden' => 'true',
+    ]),
+    'crm-showroom-import-icon'
+);
+echo html_writer::tag(
+    'h2',
+    get_string('commerce_showroom_n91_import_package_title', 'local_subscriptions'),
+    ['class' => 'h4 mb-1']
+);
+echo html_writer::tag(
+    'p',
+    get_string('commerce_showroom_n91_import_package_help', 'local_subscriptions'),
+    ['class' => 'text-muted mb-3']
+);
 echo html_writer::tag(
     'label',
     get_string('commerce_showroom_import_file', 'local_subscriptions'),
     ['for' => 'packagefile', 'class' => 'form-label fw-bold']
 );
-echo html_writer::empty_tag(
-    'input',
-    [
-        'type' => 'file',
-        'id' => 'packagefile',
-        'name' => 'packagefile',
-        'accept' => '.zip,.json,application/zip,application/json',
-        'class' => 'form-control mb-3',
-    ]
-);
-
+echo html_writer::empty_tag('input', [
+    'type' => 'file',
+    'id' => 'packagefile',
+    'name' => 'packagefile',
+    'accept' => '.zip,.json,application/zip,application/json',
+    'class' => 'form-control',
+]);
 echo html_writer::tag(
     'div',
-    get_string('commerce_showroom_import_or_paste', 'local_subscriptions'),
-    ['class' => 'text-muted small mb-2']
+    get_string('commerce_showroom_n91_import_formats', 'local_subscriptions'),
+    ['class' => 'form-text']
 );
+echo html_writer::end_tag('section');
 
 echo html_writer::tag(
-    'label',
-    get_string('commerce_showroom_import_help', 'local_subscriptions'),
-    ['for' => 'packagejson', 'class' => 'form-label']
-);
-echo html_writer::tag(
-    'textarea',
-    '',
-    [
-        'id' => 'packagejson',
-        'name' => 'packagejson',
-        'rows' => 12,
-        'class' => 'form-control font-monospace mb-3',
-    ]
+    'details',
+    html_writer::tag(
+        'summary',
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-code me-2',
+            'aria-hidden' => 'true',
+        ])
+        . get_string(
+            'commerce_showroom_n91_import_json_advanced',
+            'local_subscriptions'
+        ),
+        ['class' => 'crm-showroom-import-json-summary']
+    )
+    . html_writer::div(
+        html_writer::tag(
+            'p',
+            get_string('commerce_showroom_import_help', 'local_subscriptions'),
+            ['class' => 'text-muted mb-2']
+        )
+        . html_writer::tag(
+            'textarea',
+            '',
+            [
+                'id' => 'packagejson',
+                'name' => 'packagejson',
+                'rows' => 10,
+                'class' => 'form-control font-monospace',
+                'placeholder' => '{ ... }',
+            ]
+        ),
+        'crm-showroom-import-json-body'
+    ),
+    ['class' => 'crm-showroom-import-json card']
 );
 
-echo html_writer::tag(
-    'button',
-    '<i class="fa-solid fa-file-import" aria-hidden="true"></i> '
-        . get_string('commerce_showroom_import_create', 'local_subscriptions'),
-    ['type' => 'submit', 'class' => 'btn btn-primary align-self-start']
+echo html_writer::div(
+    html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'),
+        get_string('cancel'),
+        ['class' => 'btn btn-outline-secondary']
+    )
+    . html_writer::tag(
+        'button',
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-file-import me-1',
+            'aria-hidden' => 'true',
+        ])
+        . get_string('commerce_showroom_n91_import_action', 'local_subscriptions'),
+        ['type' => 'submit', 'class' => 'btn btn-primary']
+    ),
+    'crm-showroom-import-actions'
 );
 
 echo html_writer::end_tag('form');

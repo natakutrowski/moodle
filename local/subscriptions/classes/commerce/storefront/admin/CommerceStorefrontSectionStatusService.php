@@ -47,9 +47,9 @@ final class CommerceStorefrontSectionStatusService {
         ));
         $subtitle = trim((string)($section['subtitle'] ?? ''));
         $url = trim((string)($section['url'] ?? ''));
-        $items = is_array($section['items'] ?? null)
-            ? $section['items']
-            : [];
+        $rawitems = $section['items'] ?? [];
+        $items = is_array($rawitems) ? $rawitems : [];
+        $hasitemtext = is_string($rawitems) && trim($rawitems) !== '';
 
         $hasimage = $this->has_slot($itemid, 'image') || $url !== '';
         $hasvideo = $this->has_slot($itemid, 'video') || $url !== '';
@@ -57,7 +57,7 @@ final class CommerceStorefrontSectionStatusService {
             || (int)($section['h5pcontentid'] ?? 0) > 0
             || $url !== '';
         $hastext = $title !== '' || $subtitle !== '' || $content !== '';
-        $hasitems = $items !== [];
+        $hasitems = $items !== [] || $hasitemtext;
 
         // Semantic statement/transition intentionally supports title-only
         // editorial sections regardless of their historical section type.
@@ -99,6 +99,42 @@ final class CommerceStorefrontSectionStatusService {
     /** @param array<string,mixed> $section */
     public function is_ready(array $section): bool {
         return $this->status($section) === self::READY;
+    }
+
+    /**
+     * Returns a compact semantic reason for an incomplete section.
+     *
+     * @param array<string,mixed> $section
+     */
+    public function missing_requirement(array $section): ?string {
+        if ($this->status($section) === self::READY) {
+            return null;
+        }
+
+        $type = strtolower(trim((string)($section['type'] ?? '')));
+        $itemid = max(0, (int)($section['mediaitemid'] ?? 0));
+        $rawitems = $section['items'] ?? [];
+        $hasitems = is_array($rawitems)
+            ? $rawitems !== []
+            : (is_string($rawitems) && trim($rawitems) !== '');
+        $hasimage = $this->has_slot($itemid, 'image')
+            || trim((string)($section['url'] ?? '')) !== '';
+        $hasvideo = $this->has_slot($itemid, 'video')
+            || trim((string)($section['url'] ?? '')) !== '';
+        $hash5p = $this->has_slot($itemid, 'h5p')
+            || (int)($section['h5pcontentid'] ?? 0) > 0
+            || trim((string)($section['url'] ?? '')) !== '';
+
+        return match ($type) {
+            'features', 'faq', 'gallery', 'program', 'testimonials',
+            'timeline', 'comparison', 'accordion' =>
+                $hasitems ? null : 'items',
+            'image_text' => $hasimage ? 'text' : 'image',
+            'video' => $hasvideo ? null : 'video',
+            'h5p' => $hash5p ? null : 'h5p',
+            'rich_text' => 'content',
+            default => 'content',
+        };
     }
 
     private function status_pair(bool $hastext, bool $hasmedia): string {

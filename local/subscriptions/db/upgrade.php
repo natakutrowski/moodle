@@ -8456,5 +8456,158 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         );
     }
 
+
+    if ($oldversion < 2026081602) {
+        // N8.7: invert historical Storefront comparison prices into
+        // canonical regular price + temporary promotional price.
+        $products = $DB->get_records_select(
+            'local_subs_commerce_product',
+            "metadatajson IS NOT NULL AND metadatajson <> ''",
+            null,
+            '',
+            'id,metadatajson,timemodified'
+        );
+
+        foreach ($products as $record) {
+            $metadata = json_decode(
+                (string)$record->metadatajson,
+                true
+            );
+            if (!is_array($metadata)) {
+                continue;
+            }
+
+            $storefront = $metadata['storefront'] ?? [];
+            $merchandising = is_array($storefront)
+                ? ($storefront['merchandising'] ?? [])
+                : [];
+            $legacypromotions = is_array($merchandising)
+                ? ($merchandising['promotions'] ?? [])
+                : [];
+
+            if (!is_array($legacypromotions) || $legacypromotions === []) {
+                continue;
+            }
+
+            $changed = false;
+            foreach ($legacypromotions as $currency => $promotion) {
+                $currency = strtoupper(trim((string)$currency));
+                if (
+                    preg_match('/^[A-Z]{3}$/', $currency) !== 1
+                    || !is_array($promotion)
+                ) {
+                    continue;
+                }
+
+                $compareminor = filter_var(
+                    $promotion['compareamountminor'] ?? null,
+                    FILTER_VALIDATE_INT
+                );
+                if ($compareminor === false || $compareminor <= 0) {
+                    continue;
+                }
+
+                $prices = $DB->get_records(
+                    'local_subs_commerce_prod_price',
+                    [
+                        'productid' => (int)$record->id,
+                        'currency' => $currency,
+                    ],
+                    'provider ASC, id ASC'
+                );
+                $price = null;
+                foreach ($prices as $candidate) {
+                    if (
+                        $candidate->provider === null
+                        || trim((string)$candidate->provider) === ''
+                    ) {
+                        $price = $candidate;
+                        break;
+                    }
+                }
+                if ($price === null && count($prices) === 1) {
+                    $price = reset($prices);
+                }
+                if ($price === null) {
+                    continue;
+                }
+
+                $saleamountminor = (int)$price->amountminor;
+                if ($compareminor <= $saleamountminor) {
+                    continue;
+                }
+
+                // Base price becomes the regular price.
+                $price->amountminor = $compareminor;
+                $price->timemodified = time();
+                $DB->update_record(
+                    'local_subs_commerce_prod_price',
+                    $price
+                );
+
+                $pricing = $metadata['pricing'] ?? [];
+                if (!is_array($pricing)) {
+                    $pricing = [];
+                }
+                $newpromotions = $pricing['promotions'] ?? [];
+                if (!is_array($newpromotions)) {
+                    $newpromotions = [];
+                }
+                $newpromotions[$currency] = [
+                    'saleamountminor' => $saleamountminor,
+                    'start' => isset($promotion['start'])
+                        ? (int)$promotion['start']
+                        : null,
+                    'end' => isset($promotion['end'])
+                        ? (int)$promotion['end']
+                        : null,
+                ];
+                $pricing['promotions'] = $newpromotions;
+                $metadata['pricing'] = $pricing;
+
+                unset(
+                    $metadata['storefront']['merchandising']
+                        ['promotions'][$currency]
+                );
+                $changed = true;
+            }
+
+            if ($changed) {
+                $remaining = $metadata['storefront']['merchandising']
+                    ['promotions'] ?? [];
+                if ($remaining === []) {
+                    unset(
+                        $metadata['storefront']['merchandising']
+                            ['promotions']
+                    );
+                }
+
+                $DB->set_field(
+                    'local_subs_commerce_product',
+                    'metadatajson',
+                    json_encode(
+                        $metadata,
+                        JSON_UNESCAPED_UNICODE
+                        | JSON_UNESCAPED_SLASHES
+                    ),
+                    ['id' => (int)$record->id]
+                );
+                $DB->set_field(
+                    'local_subs_commerce_product',
+                    'timemodified',
+                    time(),
+                    ['id' => (int)$record->id]
+                );
+            }
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026081602,
+            'local',
+            'subscriptions'
+        );
+    }
+
     return true;
 }

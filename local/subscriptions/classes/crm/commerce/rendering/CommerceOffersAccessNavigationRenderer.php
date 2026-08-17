@@ -15,6 +15,7 @@ final class CommerceOffersAccessNavigationRenderer {
     public const OFFERS = 'offers';
     public const GRANTS = 'grants';
     public const CAMPAIGNS = 'campaigns';
+    public const PROMOTIONS = 'promotions';
 
     public static function render(string $active): string {
         $items = [
@@ -22,12 +23,14 @@ final class CommerceOffersAccessNavigationRenderer {
             self::OFFERS => ['commerce_offers_access_tab_offers', '/local/subscriptions/admin/commerce/personal-offers/index.php', 'fa-tag'],
             self::GRANTS => ['commerce_offers_access_tab_grants', '/local/subscriptions/admin/commerce/grants/index.php', 'fa-key'],
             self::CAMPAIGNS => ['commerce_offers_access_tab_campaigns', '/local/subscriptions/admin/commerce/offers-access/campaigns.php', 'fa-bullseye'],
+            self::PROMOTIONS => ['commerce_offers_access_tab_promotions', '/local/subscriptions/admin/commerce/promotions/index.php', 'fa-percent'],
         ];
         $links = [];
         foreach ($items as $key => [$label, $url, $icon]) {
             $semanticclass = match ($key) {
                 self::OFFERS => ' is-offer',
                 self::GRANTS => ' is-grant',
+                self::PROMOTIONS => ' is-promotion',
                 default => '',
             };
             $content = html_writer::tag('i', '', [
