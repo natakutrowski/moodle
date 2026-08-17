@@ -52,8 +52,10 @@ final class commerce_catalog_e19d_purchase_actions_test extends \advanced_testca
         $planview = file_get_contents($this->plugin_file('admin/commerce/plans/view.php'));
         $accessscope = file_get_contents($this->plugin_file('admin/commerce/products/access_scope.php'));
 
-        $this->assertGreaterThanOrEqual(2, substr_count($planview, 'btn btn-outline-primary mt-3'));
-        $this->assertStringContainsString('d-flex gap-2 mt-3 mb-4 flex-wrap', $accessscope);
+        $this->assertStringContainsString('commerce-plan-view-card mt-3', $planview);
+        $this->assertGreaterThanOrEqual(2, substr_count($planview, 'btn btn-outline-primary btn-sm'));
+        $this->assertStringContainsString('crm-product-access-scope-actions', $accessscope);
+        $this->assertStringContainsString('crm-product-access-scope-shortcuts', $accessscope);
     }
 
 

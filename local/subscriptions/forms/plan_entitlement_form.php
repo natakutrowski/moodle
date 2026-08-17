@@ -32,8 +32,9 @@ class plan_entitlement_form extends moodleform {
             $courses[$course->id] = format_string($course->fullname);
         }
 
-        $mform->addElement('select', 'courseid', get_string('entitlement_course', 'local_subscriptions'), $courses, [
-            'class' => 'select2',
+        $mform->addElement('autocomplete', 'courseid', get_string('entitlement_course', 'local_subscriptions'), $courses, [
+            'multiple' => false,
+            'noselectionstring' => get_string('none'),
         ]);
         $mform->setType('courseid', PARAM_INT);
         $mform->addRule('courseid', null, 'required');
@@ -56,8 +57,9 @@ class plan_entitlement_form extends moodleform {
             $roles[$role->shortname] = $label;
         }
 
-        $mform->addElement('select', 'roleshortname', get_string('entitlement_role', 'local_subscriptions'), $roles, [
-            'class' => 'select2',
+        $mform->addElement('autocomplete', 'roleshortname', get_string('entitlement_role', 'local_subscriptions'), $roles, [
+            'multiple' => false,
+            'noselectionstring' => get_string('none'),
         ]);
         $mform->setType('roleshortname', PARAM_ALPHANUMEXT);
         $mform->setDefault('roleshortname', 'student');

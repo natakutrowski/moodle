@@ -10,6 +10,7 @@ use html_writer;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogFulfillment;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogPrice;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
+use local_subscriptions\commerce\pricing\CommerceProductPromotionService;
 
 /** Presentation vocabulary shared by the federated catalogue pages. */
 final class CommerceCatalogPresentation {
@@ -46,17 +47,69 @@ final class CommerceCatalogPresentation {
         return format_float($price->get_amount_minor() / 100, 2) . ' ' . s($price->get_currency());
     }
 
-    /** @param CommerceCatalogPrice[] $prices */
-    public static function prices(array $prices): string {
-        if ($prices === []) { return html_writer::span(get_string('none'), 'text-muted'); }
+    /**
+     * @param CommerceCatalogPrice[] $prices
+     * @param array<string,mixed> $productmetadata
+     */
+    public static function prices(
+        array $prices,
+        array $productmetadata = []
+    ): string {
+        if ($prices === []) {
+            return html_writer::span(get_string('none'), 'text-muted');
+        }
+
+        $promotionresolver = new CommerceProductPromotionService();
         $items = [];
+
         foreach ($prices as $price) {
+            $promotion = $promotionresolver->resolve(
+                $productmetadata,
+                $price->get_currency(),
+                $price->get_amount_minor()
+            );
+            $effectiveamountminor = (int)(
+                $promotion['amountminor']
+                ?? $price->get_amount_minor()
+            );
+            $compareminor = isset($promotion['compareamountminor'])
+                ? (int)$promotion['compareamountminor']
+                : null;
+
+            $pricehtml = html_writer::tag(
+                'strong',
+                format_float($effectiveamountminor / 100, 2)
+                    . ' '
+                    . s($price->get_currency()),
+                ['class' => 'crm-product-current-price']
+            );
+
+            if (
+                $compareminor !== null
+                && $compareminor > $effectiveamountminor
+            ) {
+                $compare = format_float($compareminor / 100, 2)
+                    . ' '
+                    . s($price->get_currency());
+                $pricehtml .= html_writer::span(
+                    $compare,
+                    'crm-product-compare-price'
+                );
+            }
+
+            if ($price->get_provider() !== null) {
+                $pricehtml .= html_writer::span(
+                    ' · ' . s($price->get_provider()),
+                    'small text-muted'
+                );
+            }
+
             $items[] = html_writer::div(
-                html_writer::tag('strong', self::money($price)) .
-                ($price->get_provider() !== null ? html_writer::span(' · ' . s($price->get_provider()), 'small text-muted') : ''),
-                'mb-1'
+                $pricehtml,
+                'mb-1 crm-product-price-presentation'
             );
         }
+
         return implode('', $items);
     }
 

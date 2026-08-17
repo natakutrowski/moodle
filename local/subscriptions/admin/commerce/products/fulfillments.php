@@ -9,6 +9,7 @@ use local_subscriptions\commerce\catalog\editing\CommerceProductEditorCapabiliti
 use local_subscriptions\commerce\catalog\presentation\CommerceCatalogFulfillmentPresentation;
 use local_subscriptions\commerce\catalog\rendering\CommerceProductEditorNavigationRenderer;
 use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
@@ -72,6 +73,9 @@ $durationoptions = [0 => get_string('commerce_duration_lifetime', 'local_subscri
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
 echo CommerceProductEditorNavigationRenderer::breadcrumb($product->get_name(), get_string('commerce_product_step_fulfillments', 'local_subscriptions'));
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::PRODUCTS
+);
 echo CommerceProductEditorNavigationRenderer::render($product, CommerceProductEditorNavigationRenderer::FULFILLMENTS);
 echo $OUTPUT->heading(get_string('commerce_product_fulfillments_title', 'local_subscriptions'));
 echo html_writer::tag('p', get_string('commerce_product_fulfillments_guided_help', 'local_subscriptions'), ['class' => 'text-muted']);

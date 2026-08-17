@@ -11,9 +11,10 @@ final class commerce_795g7f_promotion_polish_test extends \advanced_testcase {
         $registry = file_get_contents(__DIR__ . '/../../../classes/crm/commerce/navigation/CommerceSectionNavigationRegistry.php');
         $hub = file_get_contents(__DIR__ . '/../../../admin/commerce/configuration/index.php');
         $this->assertStringContainsString('/admin/commerce/configuration/index.php', $registry);
-        $this->assertStringContainsString('commerce_configuration_scopes_title', $hub);
-        $this->assertStringContainsString('commerce_configuration_plans_title', $hub);
-        $this->assertStringContainsString('commerce_configuration_promotions_title', $hub);
+        $this->assertStringContainsString('commerce_configuration_catalogue_title', $hub);
+        $this->assertStringContainsString('commerce_access_scopes_page()', $hub);
+        $this->assertStringContainsString('commerce_plans_page()', $hub);
+        $this->assertStringNotContainsString('commerce_configuration_promotions_title', $hub);
     }
 
     public function test_promotion_editor_uses_business_friendly_controls(): void {

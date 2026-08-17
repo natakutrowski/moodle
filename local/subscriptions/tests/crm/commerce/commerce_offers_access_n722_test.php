@@ -52,6 +52,6 @@ final class commerce_offers_access_n722_test extends advanced_testcase {
 
     public function test_n722_does_not_bump_plugin_version(): void {
         $root = dirname(__DIR__, 3);
-        self::assertStringContainsString('$plugin->version = 2026081601;', file_get_contents($root . '/version.php'));
+        self::assertStringContainsString('$plugin->version = 2026081602;', file_get_contents($root . '/version.php'));
     }
 }

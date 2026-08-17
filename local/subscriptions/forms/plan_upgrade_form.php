@@ -22,21 +22,21 @@ class plan_upgrade_form extends moodleform {
         );
 
         $mform->addElement(
-            'select',
+            'autocomplete',
             'fromplanid',
             get_string('upgrade_fromplan', 'local_subscriptions'),
             $plans,
-            ['class' => 'select2']
+            ['multiple' => false, 'noselectionstring' => get_string('none')]
         );
         $mform->setType('fromplanid', PARAM_INT);
         $mform->addRule('fromplanid', null, 'required');
 
         $mform->addElement(
-            'select',
+            'autocomplete',
             'toplanid',
             get_string('upgrade_toplan', 'local_subscriptions'),
             $plans,
-            ['class' => 'select2']
+            ['multiple' => false, 'noselectionstring' => get_string('none')]
         );
         $mform->setType('toplanid', PARAM_INT);
         $mform->addRule('toplanid', null, 'required');

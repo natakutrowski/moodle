@@ -18,11 +18,11 @@ class access_scope_form extends moodleform {
         $mform->addRule('name', null, 'required');
 
         $courses = $DB->get_records_menu('course', null, 'fullname ASC', 'id, fullname');
-        $mform->addElement('select', 'course_ids', get_string('includedcourses', 'local_subscriptions'), $courses, [
-            'multiple' => 'multiple',
-            'size' => 10,
-            'class' => 'select2'
+        $mform->addElement('autocomplete', 'course_ids', get_string('includedcourses', 'local_subscriptions'), $courses, [
+            'multiple' => true,
+            'noselectionstring' => get_string('commerce_scope_course_search', 'local_subscriptions'),
         ]);
+        $mform->addHelpButton('course_ids', 'commerce_scope_courses_help', 'local_subscriptions');
 
         $mform->setDefault('course_ids', $default_courses);
         $mform->addRule('course_ids', null, 'required');

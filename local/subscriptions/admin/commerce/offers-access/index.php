@@ -190,6 +190,7 @@ echo html_writer::start_div('crm-offers-access-actions');
 $actions = [
     ['offer', 'fa-tag', 'commerce_offers_access_offer_title', 'commerce_offers_access_offer_description', '/local/subscriptions/admin/commerce/offers-access/create.php?kind=offer', 'commerce_offers_access_offer_action'],
     ['grant', 'fa-key', 'commerce_offers_access_grant_title', 'commerce_offers_access_grant_description', '/local/subscriptions/admin/commerce/offers-access/create.php?kind=grant', 'commerce_offers_access_grant_action'],
+    ['promotion', 'fa-percent', 'commerce_offers_access_promotion_title', 'commerce_offers_access_promotion_description', '/local/subscriptions/admin/commerce/promotions/edit.php', 'commerce_offers_access_promotion_action'],
 ];
 foreach ($actions as [$kind, $icon, $heading, $description, $href, $button]) {
     echo html_writer::start_div('crm-offers-access-action-card is-' . $kind);

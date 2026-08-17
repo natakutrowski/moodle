@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\catalog\domain\CommerceProductType;
 use local_subscriptions\commerce\catalog\persistence\CommerceCatalogHydrator;
+use local_subscriptions\commerce\catalog\presentation\CommerceCatalogProductNameResolver;
 use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
 
 /**
@@ -15,8 +16,10 @@ use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
  */
 final class CommerceShowroomProductLinkOptions {
     private CommerceProductRepository $products;
+    private \moodle_database $database;
 
     public function __construct(\moodle_database $db) {
+        $this->database = $db;
         $this->products = new CommerceProductRepository(
             $db,
             new CommerceCatalogHydrator()
@@ -69,10 +72,15 @@ final class CommerceShowroomProductLinkOptions {
     private function options_for_type(string $type, string $current): array {
         $options = [];
         foreach ($this->products->find_by_type($type) as $product) {
-            $suffix = $product->is_active() ? '' : ' · ' . $product->get_status();
-            $options[$product->get_sku()] = $product->get_name()
-                . ' — ' . $product->get_sku()
-                . $suffix;
+            $suffix = $product->is_active()
+                ? ''
+                : ' · ' . $product->get_status();
+            $label = CommerceCatalogProductNameResolver::resolve_native_id(
+                $this->database,
+                (int)$product->get_id(),
+                $product->get_name()
+            );
+            $options[$product->get_sku()] = $label . $suffix;
         }
 
         // Preserve visibility of an old/legacy relationship that is not

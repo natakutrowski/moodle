@@ -633,15 +633,28 @@ final class CommerceStorefrontPageEditor {
             'quickfacts' => $quickfacts,
         ];
 
+        $existingmerchandising = is_array(
+            $existingstorefront['merchandising'] ?? null
+        ) ? $existingstorefront['merchandising'] : [];
         $existingstorefront['merchandising'] = [
             'featured' => !empty($submitted['featured']),
-            'displayorder' => max(0, min(999999, (int)($submitted['displayorder'] ?? 1000))),
-            'badges' => $this->clean_badges((array)($submitted['badges'] ?? [])),
-            'promotions' => array_filter([
-                'EUR' => $this->promotion_from_submission($submitted, 'eur'),
-                'RUB' => $this->promotion_from_submission($submitted, 'rub'),
-            ]),
+            'displayorder' => max(
+                0,
+                min(
+                    999999,
+                    (int)($submitted['displayorder'] ?? 1000)
+                )
+            ),
+            'badges' => $this->clean_badges(
+                (array)($submitted['badges'] ?? [])
+            ),
         ];
+        // Historical Storefront promotion data is preserved until the N8.7
+        // migration or the Tarification page converts/removes it.
+        if (!empty($existingmerchandising['promotions'])) {
+            $existingstorefront['merchandising']['promotions'] =
+                $existingmerchandising['promotions'];
+        }
 
         $showroom = is_array($metadata['showroom'] ?? null)
             ? $metadata['showroom']

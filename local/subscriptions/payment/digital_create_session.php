@@ -32,7 +32,7 @@ $currency = strtoupper(required_param('currency', PARAM_ALPHANUMEXT));
 $uilang = optional_param('uilang', '', PARAM_ALPHANUMEXT);
 
 if ($uilang === '') {
-    $uilang = strtolower(substr((string)($SESSION->lang ?? $USER->lang ?? $CFG->lang ?? (get_config('defaultuserlang', 'local_subscriptions') ?? 'ru')), 0, 2));
+    $uilang = strtolower(substr((string)($SESSION->lang ?? $USER->lang ?? $CFG->lang ?? (get_config('local_subscriptions', 'defaultuserlang') ?? 'ru')), 0, 2));
 }
 
 if (!in_array($uilang, ['fr', 'en', 'ru'], true)) {

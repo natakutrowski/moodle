@@ -94,12 +94,14 @@ final class CommerceProductRepository {
             'timemodified' => $now,
         ];
 
-        $existing = $this->db->get_record(self::TABLE, ['sku' => $product->get_sku()]);
+        $existing = $product->get_id() !== null
+            ? $this->db->get_record(self::TABLE, ['id' => $product->get_id()])
+            : $this->db->get_record(self::TABLE, ['sku' => $product->get_sku()]);
 
         if ($existing) {
             $data->id = $existing->id;
             $this->db->update_record(self::TABLE, $data);
-            $id = (int) $existing->id;
+            $id = (int)$existing->id;
         } else {
             $data->timecreated = $now;
             $id = (int) $this->db->insert_record(self::TABLE, $data);

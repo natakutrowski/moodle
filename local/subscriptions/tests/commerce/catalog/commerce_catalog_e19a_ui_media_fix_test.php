@@ -45,7 +45,7 @@ final class commerce_catalog_e19a_ui_media_fix_test extends advanced_testcase {
 
         $this->assertSame(1, substr_count(
             $source,
-            'CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::CONFIGURATION, $context)'
+            'CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PRODUCTS, $context)'
         ));
     }
 }

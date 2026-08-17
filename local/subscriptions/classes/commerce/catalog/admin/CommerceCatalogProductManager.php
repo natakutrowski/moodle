@@ -69,12 +69,23 @@ final class CommerceCatalogProductManager {
 
         $product = $input->to_product($existing);
 
-        if ($existing !== null && $existing->get_sku() !== $product->get_sku()) {
-            throw new \coding_exception('A Commerce product SKU cannot be changed after creation.');
-        }
-
         if (!$this->types->has($product->get_type())) {
             throw new \coding_exception('Unknown Commerce product type: ' . $product->get_type());
+        }
+
+        if (
+            $existing !== null
+            && (
+                $existing->get_sku() !== $product->get_sku()
+                || $existing->get_type() !== $product->get_type()
+            )
+        ) {
+            (new CommerceProductLifecycleService($this->db))->change_identity(
+                (int)$existing->get_id(),
+                $existing->get_sku(),
+                $product->get_sku(),
+                $product->get_type()
+            );
         }
 
         $saved = $this->admin->save_product($product);

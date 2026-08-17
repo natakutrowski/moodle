@@ -1577,7 +1577,7 @@ private static function digital_recipient_from_pr(\stdClass $pr): \stdClass {
         @email_to_user($rcpt, $from, $subject, $text, $html, '', '', true, $replyto, $replytoname);
 
         // Copie admin enrichie (mêmes règles que deliver)
-        $copy = trim((string)(get_config('local_subscriptions','email_copy_to') ?? ''));
+        $copy = trim((string)((get_config('local_subscriptions', 'commerce_mail_audit_copy_address') ?: get_config('local_subscriptions', 'email_copy_to')) ?? ''));
         if ($copy !== '') {
             $list = preg_split('/[,;\s]+/', $copy, -1, PREG_SPLIT_NO_EMPTY);
 
@@ -1788,7 +1788,7 @@ private static function digital_recipient_from_pr(\stdClass $pr): \stdClass {
         @email_to_user($recipient, $from, $subject, $text, $html);
 
         // --- Copie admin (log@...) enrichie ---
-        $copy = trim((string)(get_config('local_subscriptions', 'email_copy_to') ?? ''));
+        $copy = trim((string)((get_config('local_subscriptions', 'commerce_mail_audit_copy_address') ?: get_config('local_subscriptions', 'email_copy_to')) ?? ''));
         if ($copy !== '') {
             $list = preg_split('/[,;\s]+/', $copy, -1, PREG_SPLIT_NO_EMPTY);
 

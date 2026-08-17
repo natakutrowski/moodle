@@ -11,6 +11,8 @@ use local_subscriptions\commerce\cart\policy\CommerceQuantityPolicyResolver;
 use local_subscriptions\commerce\catalog\repository\CommerceProductPriceRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductTranslationRepository;
+use local_subscriptions\commerce\pricing\CommerceProductPromotionService;
+use local_subscriptions\commerce\domain\value\CommerceMoney;
 
 /** Native catalogue adapter used by the session cart runtime. */
 final class MoodleCommerceCartCatalogGateway implements CommerceCartCatalogGateway {
@@ -50,11 +52,22 @@ final class MoodleCommerceCartCatalogGateway implements CommerceCartCatalogGatew
 
         $translation = $this->translations->find($product->get_sku(), $language);
 
+        $promotion = (new CommerceProductPromotionService())->resolve(
+            $product->get_metadata(),
+            $price->get_currency(),
+            $price->get_amount_minor(),
+            $at ?? time()
+        );
+        $money = CommerceMoney::from_minor(
+            $promotion['amountminor'] ?? $price->get_amount_minor(),
+            $price->get_currency()
+        );
+
         return new CommerceCartProductQuote(
             $product->get_sku(),
             (int)$price->get_id(),
             $translation?->get_name() ?? $product->get_name(),
-            $price->get_money(),
+            $money,
             $this->quantitypolicies->resolve($product),
             $product->get_type()
         );

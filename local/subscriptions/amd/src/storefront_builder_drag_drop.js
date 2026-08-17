@@ -10,11 +10,12 @@ define([], function() {
         form: '[data-region="storefront-builder-form"]',
         composerControl: '[data-composer-control]',
         previewCanvas: '[data-region="storefront-preview-canvas"]',
-        previewButton: '[data-preview-device]',
+        previewButton: '[data-block-preview-device]',
         globalZones: '[data-region="storefront-global-zones"]',
         globalZonesValue: '[data-region="storefront-global-zones-value"]',
         saveSection: '[data-save-section]',
         saveStatus: '[data-section-save-status]',
+        preview: '[data-section-preview]',
     };
 
     let draggedCard = null;
@@ -414,62 +415,73 @@ define([], function() {
     };
 
 
-    const setPreviewDevice = function(device) {
-        if (!['desktop', 'tablet', 'mobile'].includes(device)) {
+    const setPreviewDevice = function(card, device) {
+        if (!card || !['desktop', 'tablet', 'mobile'].includes(device)) {
             return;
         }
 
-        const canvas = document.querySelector(SELECTORS.previewCanvas);
-        if (!canvas) {
+        const preview = card.querySelector(SELECTORS.preview);
+        if (!preview) {
             return;
         }
 
-        canvas.classList.remove(
-            'commerce-storefront-preview-canvas--desktop',
-            'commerce-storefront-preview-canvas--tablet',
-            'commerce-storefront-preview-canvas--mobile'
+        preview.classList.remove(
+            'commerce-storefront-block-preview--desktop',
+            'commerce-storefront-block-preview--tablet',
+            'commerce-storefront-block-preview--mobile'
         );
-        canvas.classList.add('commerce-storefront-preview-canvas--' + device);
-        canvas.dataset.previewDevice = device;
+        preview.classList.add(
+            'commerce-storefront-block-preview--' + device
+        );
+        preview.dataset.blockPreviewMode = device;
 
-        document.querySelectorAll(SELECTORS.previewButton).forEach(function(button) {
-            const active = button.dataset.previewDevice === device;
+        card.querySelectorAll(
+            SELECTORS.previewButton
+        ).forEach(function(button) {
+            const active = button.dataset.blockPreviewDevice === device;
             button.classList.toggle('active', active);
-            button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            button.setAttribute(
+                'aria-pressed',
+                active ? 'true' : 'false'
+            );
         });
-
-        try {
-            window.localStorage.setItem('local_subscriptions_storefront_preview', device);
-        } catch (error) {
-            // Private browsing or storage policy: the preview still works for this page.
-        }
     };
 
     const initialisePreview = function() {
-        let device = 'desktop';
-        try {
-            device = window.localStorage.getItem('local_subscriptions_storefront_preview') || device;
-        } catch (error) {
-            // Keep the safe desktop default.
-        }
+        document.querySelectorAll(
+            SELECTORS.card
+        ).forEach(function(card) {
+            setPreviewDevice(card, 'desktop');
 
-        setPreviewDevice(device);
-        document.querySelectorAll(SELECTORS.previewButton).forEach(function(button) {
-            button.addEventListener('click', function() {
-                setPreviewDevice(button.dataset.previewDevice || 'desktop');
-            });
-            button.addEventListener('keydown', function(event) {
-                if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) {
-                    return;
-                }
-                event.preventDefault();
-                const buttons = Array.from(document.querySelectorAll(SELECTORS.previewButton));
-                const position = buttons.indexOf(button);
-                const next = event.key === 'ArrowRight'
-                    ? (position + 1) % buttons.length
-                    : (position - 1 + buttons.length) % buttons.length;
-                buttons[next].focus();
-                setPreviewDevice(buttons[next].dataset.previewDevice || 'desktop');
+            const buttons = Array.from(
+                card.querySelectorAll(SELECTORS.previewButton)
+            );
+            buttons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    setPreviewDevice(
+                        card,
+                        button.dataset.blockPreviewDevice || 'desktop'
+                    );
+                });
+                button.addEventListener('keydown', function(event) {
+                    if (
+                        !['ArrowLeft', 'ArrowRight'].includes(event.key)
+                    ) {
+                        return;
+                    }
+                    event.preventDefault();
+                    const position = buttons.indexOf(button);
+                    const next = event.key === 'ArrowRight'
+                        ? (position + 1) % buttons.length
+                        : (
+                            position - 1 + buttons.length
+                        ) % buttons.length;
+                    buttons[next].focus();
+                    setPreviewDevice(
+                        card,
+                        buttons[next].dataset.previewDevice || 'desktop'
+                    );
+                });
             });
         });
     };
