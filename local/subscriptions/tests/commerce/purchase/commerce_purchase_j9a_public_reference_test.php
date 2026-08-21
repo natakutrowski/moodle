@@ -67,16 +67,38 @@ final class commerce_purchase_j9a_public_reference_test extends advanced_testcas
 
     public function test_crm_pages_use_public_reference_as_primary_label(): void {
         $root = dirname(__DIR__, 3);
-        $index = file_get_contents($root . '/admin/commerce/purchases/index.php');
-        $view = file_get_contents($root . '/admin/commerce/purchases/view.php');
+        $index = file_get_contents(
+            $root . '/admin/commerce/purchases/index.php'
+        );
+        $view = file_get_contents(
+            $root . '/admin/commerce/purchases/view.php'
+        );
 
         self::assertIsString($index);
         self::assertIsString($view);
-        self::assertStringContainsString('$purchase->publicreference', $index);
-        self::assertStringContainsString('commerce_purchase_internal_reference_short', $index);
-        self::assertStringContainsString('commerce_purchase_open_order_details', $index);
-        self::assertStringContainsString('$publicreference', $view);
-        self::assertStringContainsString('commerce_purchase_internal_reference', $view);
-        self::assertStringContainsString("'/local/subscriptions/order_details.php'", $view);
+        self::assertStringContainsString(
+            '$purchase->publicreference',
+            $index
+        );
+        self::assertStringContainsString(
+            'commerce_purchase_internal_reference_short',
+            $index
+        );
+        self::assertStringContainsString(
+            'commerce_sales_action_view_customer_order',
+            $index
+        );
+        self::assertStringContainsString(
+            '$publicreference',
+            $view
+        );
+        self::assertStringContainsString(
+            'commerce_purchase_internal_reference',
+            $view
+        );
+        self::assertStringContainsString(
+            "'/local/subscriptions/order_details.php'",
+            $view
+        );
     }
 }

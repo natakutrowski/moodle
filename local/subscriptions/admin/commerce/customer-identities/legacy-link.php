@@ -153,7 +153,7 @@ if ($executed) {
 
 $table = new html_table();
 $table->attributes['class'] =
-    'generaltable table table-hover align-middle';
+    'generaltable table table-hover align-middle crm-identity-table';
 $table->head = [
     get_string(
         'commerce_identity_legacy_link_source',

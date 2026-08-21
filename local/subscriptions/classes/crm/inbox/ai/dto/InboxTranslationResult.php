@@ -13,7 +13,8 @@ final class InboxTranslationResult {
         public readonly float $confidence,
         public readonly string $provider,
         public readonly bool $successful,
-        public readonly array $warnings = []
+        public readonly array $warnings = [],
+        public readonly ?string $error = null
     ) {
     }
 
@@ -52,7 +53,8 @@ final class InboxTranslationResult {
             ),
             $result->provider,
             $result->succeeded(),
-            $result->warnings
+            $result->warnings,
+            $result->error
         );
     }
 }

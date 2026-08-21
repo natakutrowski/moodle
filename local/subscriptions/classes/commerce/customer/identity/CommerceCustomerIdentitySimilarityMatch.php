@@ -18,7 +18,8 @@ final class CommerceCustomerIdentitySimilarityMatch {
         public readonly \stdClass $second,
         public readonly int $score,
         public readonly array $reasons,
-        public readonly array $signalweights = []
+        public readonly array $signalweights = [],
+        public readonly array $checks = []
     ) {
         if ($first->id === $second->id) {
             throw new \coding_exception(

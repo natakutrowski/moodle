@@ -14,6 +14,7 @@ final class UserExplorerResult {
         public readonly array $tags,
         public readonly array $visiblecolumns,
         public readonly array $savedviews,
+        public readonly array $kpis,
         public readonly bool $canviewinbox
     ) {
     }

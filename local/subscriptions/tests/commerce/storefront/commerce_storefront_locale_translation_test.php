@@ -149,7 +149,7 @@ final class commerce_storefront_locale_translation_test extends advanced_testcas
     }
 
     public function test_admin_builder_exposes_copy_translation_preview_and_apply_actions(): void {
-        $source = file_get_contents(__DIR__ . '/../../../admin/commerce/products/storefront.php');
+        $source = file_get_contents(__DIR__ . '/../../../admin/commerce/products/storefront_builder.php');
         $this->assertStringContainsString("'locale_action', 'value' => 'copy'", str_replace(["\n", "\r"], '', $source));
         $this->assertStringContainsString("'locale_action', 'value' => 'translate_preview'", str_replace(["\n", "\r"], '', $source));
         $this->assertStringContainsString("'translate_apply'", $source);

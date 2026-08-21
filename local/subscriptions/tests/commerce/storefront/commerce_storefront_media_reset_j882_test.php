@@ -67,7 +67,7 @@ final class commerce_storefront_media_reset_j882_test extends \advanced_testcase
         global $CFG;
         $page = file_get_contents(
             $CFG->dirroot
-                . '/local/subscriptions/admin/commerce/products/storefront.php'
+                . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
         $service = file_get_contents(
             $CFG->dirroot

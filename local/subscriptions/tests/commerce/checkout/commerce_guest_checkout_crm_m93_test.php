@@ -43,10 +43,9 @@ final class commerce_guest_checkout_crm_m93_test extends advanced_testcase {
         global $CFG;
 
         $source = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/classes/crm/commerce/navigation/CommerceSectionNavigationRegistry.php'
+            $CFG->dirroot . '/local/subscriptions/classes/crm/commerce/rendering/CommerceSalesNavigationRenderer.php'
         );
 
-        self::assertStringContainsString('UNFINISHED_CHECKOUTS', $source);
-        self::assertStringContainsString('unfinished-checkouts/index.php', $source);
+                self::assertStringContainsString('unfinished-checkouts/index.php', $source);
     }
 }

@@ -16,7 +16,7 @@ final class ActivityCard implements DashboardCard {
 
     public static function render(): string {
         $items =
-            DashboardActivityService::load(10);
+            DashboardActivityService::load(6);
 
         $content = DashboardCardUi::header(
             title: get_string(
@@ -115,29 +115,25 @@ final class ActivityCard implements DashboardCard {
             'dashboard-activity-title-row'
         );
 
-        $metadata = [];
-
         $actor =
             self::actor_label($item);
-
-        if ($actor !== '') {
-            $metadata[] = html_writer::span(
-                s($actor),
-                'dashboard-activity-actor'
-            );
-        }
 
         $target =
             self::target_label($item);
 
-        if ($target !== '') {
-            $metadata[] = html_writer::span(
-                $target,
-                'dashboard-activity-target'
-            );
-        }
+        $row = $title;
 
-        $metadata[] = html_writer::span(
+        $row .= html_writer::div(
+            $target !== '' ? $target : '—',
+            'dashboard-activity-target'
+        );
+
+        $row .= html_writer::div(
+            $actor !== '' ? s($actor) : '—',
+            'dashboard-activity-actor'
+        );
+
+        $row .= html_writer::div(
             AdminFormatter::datetime(
                 (int)$item->timecreated
             ),
@@ -157,24 +153,8 @@ final class ActivityCard implements DashboardCard {
             ]
         );
 
-        $body = $title;
-
-        if ($description !== '') {
-            $body .= html_writer::div(
-                s($description),
-                'dashboard-activity-description'
-            );
-        }
-
-        if ($metadata !== []) {
-            $body .= html_writer::div(
-                implode('', $metadata),
-                'dashboard-activity-meta'
-            );
-        }
-
         if ($eventurl !== null) {
-            $body .= html_writer::div(
+            $row .= html_writer::div(
                 html_writer::link(
                     $eventurl,
                     get_string(
@@ -187,6 +167,23 @@ final class ActivityCard implements DashboardCard {
                     ]
                 ),
                 'dashboard-activity-actions'
+            );
+        } else {
+            $row .= html_writer::div(
+                '',
+                'dashboard-activity-actions'
+            );
+        }
+
+        $body = html_writer::div(
+            $row,
+            'dashboard-activity-row'
+        );
+
+        if ($description !== '') {
+            $body .= html_writer::div(
+                s($description),
+                'dashboard-activity-description'
             );
         }
 

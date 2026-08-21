@@ -74,7 +74,7 @@ final class commerce_storefront_package_j87_test extends advanced_testcase {
     }
 
     public function test_admin_exposes_versioned_portable_package_actions(): void {
-        $source = file_get_contents(__DIR__ . '/../../../admin/commerce/products/storefront.php');
+        $source = file_get_contents(__DIR__ . '/../../../admin/commerce/products/storefront_builder.php');
         $this->assertStringContainsString("'storefront_action' => 'export'", $source);
         $this->assertStringContainsString("'name' => 'storefront_action', 'value' => 'import'", str_replace(["\n", "\r"], '', $source));
         $this->assertStringContainsString('.cfrproduct', $source);

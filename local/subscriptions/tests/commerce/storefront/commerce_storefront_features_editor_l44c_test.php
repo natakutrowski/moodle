@@ -11,7 +11,7 @@ final class commerce_storefront_features_editor_l44c_test extends \advanced_test
         global $CFG;
 
         $admin = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront.php'
+            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
         $editor = file_get_contents(
             $CFG->dirroot

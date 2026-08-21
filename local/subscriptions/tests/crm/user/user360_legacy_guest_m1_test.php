@@ -100,18 +100,40 @@ final class user360_legacy_guest_m1_test extends \advanced_testcase {
         global $CFG;
 
         $source = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/classes/output/UserProfileRenderer.php'
+            $CFG->dirroot
+            . '/local/subscriptions/classes/output/UserProfileRenderer.php'
         );
 
         self::assertIsString($source);
-        self::assertStringContainsString('digital_purchase_actions($payment)', $source);
-        self::assertStringContainsString('digital_purchase_resend_email_admin_page()', $source);
-        self::assertStringContainsString("['PAID', 'COMPLETED']", $source);
+        self::assertStringContainsString(
+            'digital_purchase_actions($payment)',
+            $source
+        );
+        self::assertStringContainsString(
+            'digital_purchase_resend_email_admin_page()',
+            $source
+        );
+        self::assertStringContainsString(
+            "['PAID', 'COMPLETED']",
+            $source
+        );
 
         $purchaseview = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/admin/commerce/purchases/view.php'
+            $CFG->dirroot
+            . '/local/subscriptions/admin/commerce/purchases/view.php'
         );
         self::assertIsString($purchaseview);
-        self::assertStringContainsString("['email' => (string)\$summary->customer->email]", $purchaseview);
+        self::assertStringContainsString(
+            '$currentemail',
+            $purchaseview
+        );
+        self::assertStringContainsString(
+            '$historicalemail',
+            $purchaseview
+        );
+        self::assertStringContainsString(
+            '/admin/commerce/purchases/resend_access.php',
+            $purchaseview
+        );
     }
 }

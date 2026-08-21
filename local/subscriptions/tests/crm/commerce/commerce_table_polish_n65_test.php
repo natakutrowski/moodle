@@ -86,7 +86,7 @@ final class commerce_table_polish_n65_test extends advanced_testcase {
         $version = file_get_contents($root . '/version.php');
 
         self::assertStringContainsString(
-            '$plugin->version = 2026081510;',
+            '$plugin->version = 2026081602;',
             $version
         );
     }

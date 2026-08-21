@@ -16,13 +16,58 @@ class user_subscription_edit_form extends \moodleform {
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
 
-        $mform->addElement('date_selector', 'start_date', get_string('start_date', 'local_subscriptions'));
-        $mform->addRule('start_date', null, 'required', null, 'client');
+        $mform->addElement(
+            'date_selector',
+            'start_date',
+            get_string(
+                'start_date',
+                'local_subscriptions'
+            )
+        );
+        $mform->addHelpButton(
+            'start_date',
+            'crm_subscription_edit_start_date',
+            'local_subscriptions'
+        );
+        $mform->addRule(
+            'start_date',
+            null,
+            'required',
+            null,
+            'client'
+        );
 
-        $mform->addElement('advcheckbox', 'no_end_date', get_string('no_end_date', 'local_subscriptions'));
-        $mform->setDefault('no_end_date', 0);
+        $mform->addElement(
+            'advcheckbox',
+            'no_end_date',
+            get_string(
+                'no_end_date',
+                'local_subscriptions'
+            )
+        );
+        $mform->addHelpButton(
+            'no_end_date',
+            'crm_subscription_edit_no_end_date',
+            'local_subscriptions'
+        );
+        $mform->setDefault(
+            'no_end_date',
+            0
+        );
 
-        $mform->addElement('date_selector', 'end_date', get_string('end_date', 'local_subscriptions'));
+        $mform->addElement(
+            'date_selector',
+            'end_date',
+            get_string(
+                'end_date',
+                'local_subscriptions'
+            )
+        );
+        $mform->addHelpButton(
+            'end_date',
+            'crm_subscription_edit_end_date',
+            'local_subscriptions'
+        );
 
         $statuses = [
             Status::ACTIVE => get_string('status_active', 'local_subscriptions'),
@@ -39,8 +84,27 @@ class user_subscription_edit_form extends \moodleform {
             Status::COMPLETED => get_string('status_completed', 'local_subscriptions'),
         ];
 
-        $mform->addElement('select', 'status', get_string('status', 'local_subscriptions'), $statuses);
-        $mform->addRule('status', null, 'required', null, 'client');
+        $mform->addElement(
+            'select',
+            'status',
+            get_string(
+                'status',
+                'local_subscriptions'
+            ),
+            $statuses
+        );
+        $mform->addHelpButton(
+            'status',
+            'crm_subscription_edit_status',
+            'local_subscriptions'
+        );
+        $mform->addRule(
+            'status',
+            null,
+            'required',
+            null,
+            'client'
+        );
 
         $this->add_action_buttons(
             true,

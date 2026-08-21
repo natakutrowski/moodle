@@ -62,10 +62,15 @@ final class commerce_customer_identity_similarity_m42b_test extends advanced_tes
         );
 
         self::assertNotNull($match);
-        self::assertSame(60, $match->score);
         self::assertContains(
             CommerceCustomerIdentitySimilarityService::REASON_NAME_REVERSED,
             $match->reasons
+        );
+        self::assertSame(
+            95,
+            $match->checks[
+                CommerceCustomerIdentitySimilarityService::CHECK_NAME
+            ]['score']
         );
     }
 
@@ -93,10 +98,15 @@ final class commerce_customer_identity_similarity_m42b_test extends advanced_tes
         );
 
         self::assertNotNull($match);
-        self::assertGreaterThanOrEqual(75, $match->score);
         self::assertContains(
             CommerceCustomerIdentitySimilarityService::REASON_PHONE_EXACT,
             $match->reasons
+        );
+        self::assertSame(
+            100,
+            $match->checks[
+                CommerceCustomerIdentitySimilarityService::CHECK_PHONE
+            ]['score']
         );
     }
 

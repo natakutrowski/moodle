@@ -166,7 +166,7 @@ echo CrmBreadcrumbRenderer::render(
         [
             'label' =>
                 get_string(
-                    'admin_users',
+                    'crm_users',
                     'local_subscriptions'
                 ),
 

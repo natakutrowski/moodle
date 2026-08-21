@@ -17,43 +17,80 @@ final class TeamCard implements DashboardCard {
 
         $permissions = self::permissions();
 
-        $items = '';
+        $rights = '';
 
         foreach ($permissions as $permission) {
-            $items .= html_writer::div('✓ ' . $permission, 'small mb-1');
+            $rights .= html_writer::div(
+                html_writer::span(
+                    '✓',
+                    'crm-dashboard-team-right-icon',
+                    [
+                        'aria-hidden' => 'true',
+                    ]
+                ) .
+                html_writer::span(
+                    s($permission),
+                    'crm-dashboard-team-right-label'
+                ),
+                'crm-dashboard-team-right'
+            );
         }
 
-        $content = DashboardCardUi::header(
-            title: get_string(
+        $summary = html_writer::span(
+            '👤',
+            'crm-dashboard-team-summary-icon',
+            [
+                'aria-hidden' => 'true',
+            ]
+        );
+
+        $summary .= html_writer::span(
+            get_string(
                 'dashboard_team_card_title',
                 'local_subscriptions'
             ),
-            icon: '👤',
-            titleid: 'crm-dashboard-team-title'
+            'crm-dashboard-team-summary-title'
         );
 
-        $content .= html_writer::div(
+        $summary .= html_writer::span(
             fullname($USER),
-            'fw-bold'
+            'crm-dashboard-team-summary-user'
         );
 
-        $content .= html_writer::div(
+        $content = html_writer::tag(
+            'summary',
+            $summary,
+            [
+                'class' =>
+                    'crm-dashboard-team-summary',
+            ]
+        );
+
+        $details = html_writer::div(
+            fullname($USER),
+            'crm-dashboard-team-name'
+        );
+
+        $details .= html_writer::div(
             s($USER->email),
-            'text-muted small mb-3'
+            'crm-dashboard-team-email'
         );
 
-        $content .= html_writer::div(
+        $details .= html_writer::div(
             get_string(
                 'dashboard_team_permissions',
                 'local_subscriptions'
             ),
-            'fw-semibold mb-2'
+            'crm-dashboard-team-rights-title'
         );
 
-        if ($items !== '') {
-            $content .= $items;
+        if ($rights !== '') {
+            $details .= html_writer::div(
+                $rights,
+                'crm-dashboard-team-rights'
+            );
         } else {
-            $content .= DashboardCardUi::empty_state(
+            $details .= DashboardCardUi::empty_state(
                 title: get_string(
                     'dashboard_team_no_permissions',
                     'local_subscriptions'
@@ -63,18 +100,30 @@ final class TeamCard implements DashboardCard {
             );
         }
 
-        $content .= DashboardCardUi::footer(
-            get_string('lastaccess') .
-            ': ' .
-            AdminFormatter::datetime(
-                (int)$USER->lastaccess
-            )
+        $details .= html_writer::div(
+            get_string(
+                'dashboard_team_last_access_n1211b',
+                'local_subscriptions',
+                AdminFormatter::datetime(
+                    (int)$USER->lastaccess
+                )
+            ),
+            'crm-dashboard-team-last-access'
         );
 
-        return DashboardCardUi::shell(
-            content: $content,
-            extraclasses: 'crm-dashboard-team-card',
-            labelledby: 'crm-dashboard-team-title'
+        $content .= html_writer::div(
+            $details,
+            'crm-dashboard-team-details'
+        );
+
+        return html_writer::tag(
+            'details',
+            $content,
+            [
+                'class' =>
+                    'crm-dashboard-team-card ' .
+                    'local-subscriptions-dashboard-card',
+            ]
         );
     }
 

@@ -10,7 +10,8 @@ final class commerce_bundle_price_currency_deletion_j16b_test extends \advanced_
         $page = file_get_contents($root . '/admin/commerce/products/pricing.php');
 
         self::assertStringContainsString("\$action === 'deleteprice'", $page);
-        self::assertStringContainsString('data_submitted() && confirm_sesskey()', $page);
+        self::assertStringContainsString('data_submitted()', $page);
+        self::assertStringContainsString('confirm_sesskey()', $page);
         self::assertStringContainsString('$manager->delete_price($sku, $priceid);', $page);
         self::assertStringContainsString("'method' => 'post'", $page);
         self::assertStringContainsString('commerce_price_currency_delete_confirm', $page);

@@ -28,7 +28,7 @@ final class local_subscriptions_commerce_customer_merge_ui_fullname_m75b2_test e
         self::assertStringContainsString('$mergefullname($selecteduser)', $source);
         self::assertStringContainsString('$mergefullname($candidate)', $source);
         self::assertStringContainsString('$mergefullname($profile->user)', $source);
-        self::assertStringContainsString('$mergefullname($target->user)', $source);
+        self::assertStringContainsString('$confirmationidentity = $target;', $source);
 
         preg_match_all('/(?<![A-Za-z0-9_])fullname\s*\(/', $source, $matches);
         self::assertCount(1, $matches[0]);

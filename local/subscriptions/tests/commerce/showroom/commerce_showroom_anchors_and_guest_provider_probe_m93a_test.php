@@ -42,17 +42,38 @@ final class commerce_showroom_anchors_and_guest_provider_probe_m93a_test extends
 
     public function test_unfinished_checkout_crm_has_read_only_provider_probe_display(): void {
         global $CFG;
+
         $service = file_get_contents(
             $CFG->dirroot
-            . '/local/subscriptions/classes/commerce/checkout/guest/CommerceUnfinishedGuestCheckoutCrmService.php'
+            . '/local/subscriptions/classes/commerce/checkout/guest/'
+            . 'CommerceUnfinishedGuestCheckoutCrmService.php'
         );
         $page = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/admin/commerce/unfinished-checkouts/index.php'
+            $CFG->dirroot
+            . '/local/subscriptions/admin/commerce/unfinished-checkouts/index.php'
         );
 
-        self::assertStringContainsString('->inspect_payment((int)$payment->id)', $service);
-        self::assertStringNotContainsString('->reconcile_payment((int)$payment->id)', $service);
-        self::assertStringContainsString('providerlivepaid', $page);
-        self::assertStringContainsString('commerce_guest_crm_provider_paid_pending', $page);
+        self::assertIsString($service);
+        self::assertIsString($page);
+        self::assertStringContainsString(
+            '->inspect_payment((int)$payment->id)',
+            $service
+        );
+        self::assertStringNotContainsString(
+            '->reconcile_payment((int)$payment->id)',
+            $service
+        );
+        self::assertStringContainsString(
+            'providerlivechecked',
+            $page
+        );
+        self::assertStringContainsString(
+            'providerlivestatus',
+            $page
+        );
+        self::assertStringContainsString(
+            'provider_paid_pending',
+            $page
+        );
     }
 }

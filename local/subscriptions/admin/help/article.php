@@ -10,10 +10,10 @@ use local_subscriptions\crm\help\HelpArticleLoader;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
-use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\help\HelpInternalNavigationRenderer;
 
 global $PAGE, $OUTPUT;
 
@@ -69,35 +69,49 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-echo CrmBreadcrumbRenderer::render(
+$breadcrumbs = [
     [
-        [
-            'label' =>
-                get_string(
-                    'crm_help_title',
-                    'local_subscriptions'
-                ),
+        'label' => get_string(
+            'crm_help_title',
+            'local_subscriptions'
+        ),
+        'url' => new moodle_url(
+            subscription_config::
+                admin_help_page()
+        ),
+    ],
+];
 
-            'url' =>
-                new moodle_url(
-                    subscription_config::
-                        admin_help_page()
-                ),
-        ],
-        [
-            'label' =>
-                $article->title,
+if ($category !== null) {
+    $breadcrumbs[] = [
+        'label' => $category->title,
+        'url' => new moodle_url(
+            subscription_config::
+                admin_help_page(),
+            [
+                'category' => $category->id,
+            ]
+        ),
+    ];
+}
 
-            'url' =>
-                null,
-        ],
-    ]
+$breadcrumbs[] = [
+    'label' => $article->title,
+    'url' => null,
+];
+
+echo CrmBreadcrumbRenderer::render(
+    $breadcrumbs
 );
 
 echo CrmPageHeader::render(
     $article->title,
     $article->summary,
     HelpContext::HELP_CENTER
+);
+
+echo HelpInternalNavigationRenderer::render(
+    'articles'
 );
 
 echo html_writer::start_div(
@@ -115,19 +129,6 @@ echo html_writer::start_tag(
     ]
 );
 
-echo CrmBackLinkRenderer::render(
-    new moodle_url(
-        subscription_config::
-            admin_help_page()
-    ),
-    get_string(
-        'crm_help_home',
-        'local_subscriptions'
-    ),
-    [
-        'crm-help-sidebar-back',
-    ]
-);
 
 if ($category !== null) {
     echo html_writer::link(

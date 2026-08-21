@@ -95,7 +95,7 @@ final class commerce_personal_offer_distribution_certification_k15ef_test extend
         $this->assertStringContainsString("'retrygeneration'", $page);
         $this->assertStringContainsString("'retrymail'", $page);
         $this->assertStringContainsString("'certify'", $page);
-        $this->assertStringContainsString('commerce_personal_offer_mail_processing', $page);
+        $this->assertStringContainsString('/admin/commerce/mail/view.php', $page);
         $this->assertStringContainsString('/admin/commerce/mail/view.php', $page);
     }
 }

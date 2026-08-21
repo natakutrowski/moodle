@@ -59,7 +59,7 @@ final class CrmIntelligenceAlertsCard implements DashboardCard {
             );
         }
 
-        foreach ($alerts as $alert) {
+        foreach (array_slice($alerts, 0, 3) as $alert) {
 
             $alertcontext = null;
 

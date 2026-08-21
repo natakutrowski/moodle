@@ -150,7 +150,7 @@ final class commerce_sales_mail_context_n64_test extends advanced_testcase {
         $version = file_get_contents($root . '/version.php');
 
         self::assertStringContainsString(
-            '$plugin->version = 2026081510;',
+            '$plugin->version = 2026081602;',
             $version
         );
     }

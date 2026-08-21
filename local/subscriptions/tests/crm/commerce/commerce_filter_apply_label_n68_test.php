@@ -73,7 +73,7 @@ final class commerce_filter_apply_label_n68_test extends advanced_testcase {
         $version = file_get_contents($root . '/version.php');
 
         self::assertStringContainsString(
-            '$plugin->version = 2026081510;',
+            '$plugin->version = 2026081602;',
             $version
         );
     }

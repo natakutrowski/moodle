@@ -9,7 +9,6 @@ use local_subscriptions\crm\success\plans\repositories\CustomerSuccessPlanReadRe
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
-use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
@@ -89,16 +88,6 @@ echo CrmBreadcrumbRenderer::render(
     ]
 );
 
-echo CrmBackLinkRenderer::render(
-    new moodle_url(
-        subscription_config::
-            admin_crm_assistant_page()
-    ),
-    get_string(
-        'crm_assistant_title',
-        'local_subscriptions'
-    )
-);
 
 echo CrmPageHeader::render(
     $pagetitle,

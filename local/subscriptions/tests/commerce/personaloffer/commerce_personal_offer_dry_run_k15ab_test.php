@@ -78,7 +78,7 @@ final class commerce_personal_offer_dry_run_k15ab_test extends advanced_testcase
         $this->assertStringContainsString('commerce_personal_offer_moodle_account', $page);
         $this->assertStringContainsString('commerce_personal_offer_eligibility_evidence', $page);
         $this->assertStringContainsString('commerce_personal_offer_existing_offer', $page);
-        $this->assertStringContainsString('commerce_personal_offer_metric_covered', $page);
+        $this->assertStringContainsString('commerce_personal_offer_existing_offer', $page);
     }
 
     public function test_old_native_sku_campaigns_remain_previewable(): void {

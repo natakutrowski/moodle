@@ -43,8 +43,12 @@ use local_subscriptions\dashboard\services\DashboardPeriod;
 final class DashboardCardRegistry {
 
     public const ZONE_HERO = 'hero';
-    public const ZONE_MAIN = 'main';
-    public const ZONE_SIDE = 'side';
+    public const ZONE_UTILITY = 'utility';
+    public const ZONE_FOCUS = 'focus';
+    public const ZONE_OPERATIONS = 'operations';
+    public const ZONE_OPERATIONS_SIDE = 'operations_side';
+    public const ZONE_INSIGHTS = 'insights';
+    public const ZONE_SECONDARY = 'secondary';
 
     public const CATEGORY_OVERVIEW = 'overview';
     public const CATEGORY_INTELLIGENCE = 'intelligence';
@@ -98,8 +102,8 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_intelligence_description',
                 icon: '🧠',
                 category: self::CATEGORY_INTELLIGENCE,
-                zone: self::ZONE_MAIN,
-                span: 2,
+                zone: self::ZONE_INSIGHTS,
+                span: 1,
                 actions: self::detail_actions()
             ),
 
@@ -111,8 +115,8 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_assistant_description',
                 icon: '🧭',
                 category: self::CATEGORY_INTELLIGENCE,
-                zone: self::ZONE_MAIN,
-                span: 2,
+                zone: self::ZONE_FOCUS,
+                span: 1,
                 actions: self::detail_actions()
             ),
 
@@ -124,7 +128,7 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_inbox_description',
                 icon: '✉️',
                 category: self::CATEGORY_OPERATIONS,
-                zone: self::ZONE_MAIN,
+                zone: self::ZONE_OPERATIONS,
                 span: 2,
                 actions: self::detail_actions()
             ),
@@ -137,8 +141,8 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_work_description',
                 icon: '✅',
                 category: self::CATEGORY_OPERATIONS,
-                zone: self::ZONE_MAIN,
-                span: 2,
+                zone: self::ZONE_OPERATIONS_SIDE,
+                span: 1,
                 actions: self::detail_actions()
             ),
 
@@ -151,8 +155,8 @@ final class DashboardCardRegistry {
                 icon: '🎯',
                 category:
                     self::CATEGORY_CUSTOMER_SUCCESS,
-                zone: self::ZONE_MAIN,
-                span: 2
+                zone: self::ZONE_OPERATIONS_SIDE,
+                span: 1
             ),
 
             'issues' => self::definition(
@@ -163,8 +167,8 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_issues_description',
                 icon: '⚠️',
                 category: self::CATEGORY_OPERATIONS,
-                zone: self::ZONE_MAIN,
-                span: 1
+                zone: self::ZONE_FOCUS,
+                span: 2
             ),
 
             'priorities' => self::definition(
@@ -175,7 +179,7 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_priorities_description',
                 icon: '⭐',
                 category: self::CATEGORY_INTELLIGENCE,
-                zone: self::ZONE_MAIN,
+                zone: self::ZONE_FOCUS,
                 span: 1,
                 actions: self::detail_actions()
             ),
@@ -188,7 +192,7 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_funnel_description',
                 icon: '📈',
                 category: self::CATEGORY_INTELLIGENCE,
-                zone: self::ZONE_MAIN,
+                zone: self::ZONE_INSIGHTS,
                 span: 1,
                 periodaware: true,
                 actions: self::detail_actions()
@@ -202,7 +206,7 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_trends_description',
                 icon: '📉',
                 category: self::CATEGORY_INTELLIGENCE,
-                zone: self::ZONE_MAIN,
+                zone: self::ZONE_INSIGHTS,
                 span: 1,
                 periodaware: true,
                 actions: self::detail_actions()
@@ -216,8 +220,8 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_intelligence_alerts_description',
                 icon: '🚨',
                 category: self::CATEGORY_INTELLIGENCE,
-                zone: self::ZONE_MAIN,
-                span: 2,
+                zone: self::ZONE_INSIGHTS,
+                span: 1,
                 actions: self::detail_actions()
             ),
 
@@ -230,8 +234,9 @@ final class DashboardCardRegistry {
                 icon: '🧰',
                 category:
                     self::CATEGORY_NAVIGATION_ACTIVITY,
-                zone: self::ZONE_MAIN,
-                span: 3
+                zone: self::ZONE_SECONDARY,
+                span: 1,
+                defaultvisible: false
             ),
 
             'activity' => self::definition(
@@ -243,8 +248,8 @@ final class DashboardCardRegistry {
                 icon: '🕒',
                 category:
                     self::CATEGORY_NAVIGATION_ACTIVITY,
-                zone: self::ZONE_MAIN,
-                span: 3
+                zone: self::ZONE_SECONDARY,
+                span: 2
             ),
 
             'team' => self::definition(
@@ -255,8 +260,9 @@ final class DashboardCardRegistry {
                     'dashboard_personalization_card_team_description',
                 icon: '👥',
                 category: self::CATEGORY_TEAM,
-                zone: self::ZONE_SIDE,
+                zone: self::ZONE_UTILITY,
                 span: 1,
+                defaultvisible: true,
                 actions: self::detail_actions()
             ),
         ];
@@ -307,8 +313,12 @@ final class DashboardCardRegistry {
     public static function default_order(): array {
         $order = [
             self::ZONE_HERO => [],
-            self::ZONE_MAIN => [],
-            self::ZONE_SIDE => [],
+            self::ZONE_UTILITY => [],
+            self::ZONE_FOCUS => [],
+            self::ZONE_OPERATIONS => [],
+            self::ZONE_OPERATIONS_SIDE => [],
+            self::ZONE_INSIGHTS => [],
+            self::ZONE_SECONDARY => [],
         ];
 
         foreach (

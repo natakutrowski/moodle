@@ -15,7 +15,7 @@ final class commerce_storefront_drag_drop_repository_j82b_test
         $page = file_get_contents(
             $CFG->dirroot
             . '/local/subscriptions/admin/commerce/products/'
-            . 'storefront.php'
+            . 'storefront_builder.php'
         );
         $amd = file_get_contents(
             $CFG->dirroot

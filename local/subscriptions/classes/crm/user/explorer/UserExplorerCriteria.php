@@ -11,6 +11,7 @@ final class UserExplorerCriteria {
     public const ACCOUNT_ALL = '';
     public const ACCOUNT_ACTIVE = 'active';
     public const ACCOUNT_SUSPENDED = 'suspended';
+    public const ACCOUNT_NO_MOODLE = 'no_moodle';
 
     public const PRESENCE_ALL = '';
     public const PRESENCE_YES = 'yes';
@@ -309,6 +310,7 @@ final class UserExplorerCriteria {
             self::ACCOUNT_ALL,
             self::ACCOUNT_ACTIVE,
             self::ACCOUNT_SUSPENDED,
+            self::ACCOUNT_NO_MOODLE,
         ];
     }
 
@@ -399,6 +401,67 @@ final class UserExplorerCriteria {
             $this->activity,
             self::PRESENCE_ALL,
             self::PRESENCE_ALL,
+            $this->hascustomer_success_plan,
+            $this->customer_success_plan_blocked,
+            $this->customer_success_plan_status,
+            $this->funnelstage,
+            $this->funnelstart,
+            $this->funnelend,
+            $this->funnelwindow,
+            $this->trendfilter
+        );
+    }
+
+    public function with_intelligence(string $intelligence): self {
+        return new self(
+            $this->query,
+            UserExplorerFilter::normalize($intelligence),
+            $this->country,
+            $this->tag,
+            $this->accountstatus,
+            $this->sort,
+            0,
+            $this->perpage,
+            $this->scoremin,
+            $this->scoremax,
+            $this->riskmin,
+            $this->riskmax,
+            $this->hassubscription,
+            $this->haspurchase,
+            $this->activity,
+            $this->hasinbox,
+            $this->hasinboxunread,
+            $this->hascustomer_success_plan,
+            $this->customer_success_plan_blocked,
+            $this->customer_success_plan_status,
+            $this->funnelstage,
+            $this->funnelstart,
+            $this->funnelend,
+            $this->funnelwindow,
+            $this->trendfilter
+        );
+    }
+
+
+    public function with_account_status(string $accountstatus): self {
+        return new self(
+            $this->query,
+            '',
+            $this->country,
+            $this->tag,
+            self::normalize_account_status($accountstatus),
+            $this->sort,
+            0,
+            $this->perpage,
+            $this->scoremin,
+            $this->scoremax,
+            $this->riskmin,
+            $this->riskmax,
+            $this->hassubscription,
+            $this->haspurchase,
+            $this->activity,
+            $this->hasinbox,
+            $this->hasinboxunread,
             $this->hascustomer_success_plan,
             $this->customer_success_plan_blocked,
             $this->customer_success_plan_status,

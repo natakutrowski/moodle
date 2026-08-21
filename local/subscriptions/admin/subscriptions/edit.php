@@ -15,7 +15,6 @@ use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
-use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
@@ -152,51 +151,25 @@ echo CrmBreadcrumbRenderer::render(
         ],
         [
             'label' => get_string(
-                'crm_subscriptions_title',
+                'crm_commerce_nav_purchases',
                 'local_subscriptions'
             ),
             'url' => new moodle_url(
-                subscription_config::
-                    user_subscriptions_page()
+                '/local/subscriptions/admin/commerce/purchases/index.php'
             ),
         ],
         [
-            'label' =>
-                get_string(
-                    'subscription_details',
-                    'local_subscriptions'
-                ) .
-                ' #' .
-                $subscription->id,
-            'url' => new moodle_url(
-                subscription_config::
-                    user_subscription_view_page(),
-                [
-                    'id' =>
-                        $subscription->id,
-                ]
+            'label' => get_string(
+                'crm_user360_n116a_legacy_subscriptions_title',
+                'local_subscriptions'
             ),
+            'url' => null,
         ],
         [
-            'label' => $pagetitle,
+            'label' => '#' . $subscription->id,
             'url' => null,
         ],
     ]
-);
-
-echo CrmBackLinkRenderer::render(
-    new moodle_url(
-        subscription_config::
-            user_subscription_view_page(),
-        [
-            'id' =>
-                $subscription->id,
-        ]
-    ),
-    get_string(
-        'subscription_details',
-        'local_subscriptions'
-    )
 );
 
 echo CrmPageHeader::render(
@@ -209,65 +182,229 @@ echo CrmPageHeader::render(
 );
 
 echo CommerceSectionNavigationRenderer::render(
-    CommerceSectionNavigationRenderer::SUBSCRIPTIONS
+    CommerceSectionNavigationRenderer::PURCHASES
+);
+
+$detailurl = new moodle_url(
+    subscription_config::
+        user_subscription_view_page(),
+    [
+        'id' => $subscription->id,
+    ]
+);
+
+$userurl = new moodle_url(
+    subscription_config::
+        admin_user_view_page(),
+    [
+        'id' => $user->id,
+    ]
+);
+
+$planurl = new moodle_url(
+    subscription_config::
+        commerce_plan_view_page(),
+    [
+        'id' => $plan->id,
+    ]
+);
+
+$statuskey = 'status_' . (string)$subscription->status;
+$statuslabel = get_string_manager()->string_exists(
+    $statuskey,
+    'local_subscriptions'
+)
+    ? get_string(
+        $statuskey,
+        'local_subscriptions'
+    )
+    : ucfirst((string)$subscription->status);
+
+$summarycontent =
+    html_writer::div(
+        html_writer::div(
+            html_writer::span(
+                get_string(
+                    'crm_subscription_edit_legacy_badge',
+                    'local_subscriptions'
+                ),
+                'crm-legacy-subscription-edit-type'
+            )
+            . html_writer::tag(
+                'h2',
+                format_string($plan->name),
+                [
+                    'class' =>
+                        'crm-legacy-subscription-edit-plan',
+                ]
+            )
+            . html_writer::div(
+                '#' . (int)$subscription->id,
+                'crm-legacy-subscription-edit-id'
+            ),
+            'crm-legacy-subscription-edit-heading-copy'
+        )
+        . html_writer::link(
+            $detailurl,
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-eye',
+                'aria-hidden' => 'true',
+            ])
+            . html_writer::span(
+                get_string(
+                    'subscription_details',
+                    'local_subscriptions'
+                )
+            ),
+            [
+                'class' =>
+                    'btn btn-outline-secondary '
+                    . 'crm-legacy-subscription-edit-details',
+            ]
+        ),
+        'crm-legacy-subscription-edit-heading'
+    )
+    . html_writer::div(
+        html_writer::div(
+            html_writer::span(
+                get_string(
+                    'user',
+                    'local_subscriptions'
+                ),
+                'crm-legacy-subscription-edit-meta-label'
+            )
+            . html_writer::link(
+                $userurl,
+                fullname($user),
+                [
+                    'class' =>
+                        'crm-legacy-subscription-edit-meta-value',
+                ]
+            )
+            . html_writer::span(
+                s($user->email),
+                'crm-legacy-subscription-edit-meta-help'
+            ),
+            'crm-legacy-subscription-edit-meta'
+        )
+        . html_writer::div(
+            html_writer::span(
+                get_string(
+                    'plan',
+                    'local_subscriptions'
+                ),
+                'crm-legacy-subscription-edit-meta-label'
+            )
+            . html_writer::link(
+                $planurl,
+                format_string($plan->name),
+                [
+                    'class' =>
+                        'crm-legacy-subscription-edit-meta-value',
+                ]
+            ),
+            'crm-legacy-subscription-edit-meta'
+        )
+        . html_writer::div(
+            html_writer::span(
+                get_string(
+                    'crm_subscription_edit_current_period',
+                    'local_subscriptions'
+                ),
+                'crm-legacy-subscription-edit-meta-label'
+            )
+            . html_writer::span(
+                AdminFormatter::date(
+                    (int)$subscription->start_date
+                )
+                . ' → '
+                . AdminFormatter::subscription_end(
+                    (int)$subscription->end_date
+                ),
+                'crm-legacy-subscription-edit-meta-value'
+            ),
+            'crm-legacy-subscription-edit-meta'
+        )
+        . html_writer::div(
+            html_writer::span(
+                get_string(
+                    'status',
+                    'local_subscriptions'
+                ),
+                'crm-legacy-subscription-edit-meta-label'
+            )
+            . html_writer::span(
+                s($statuslabel),
+                'crm-legacy-subscription-edit-status '
+                    . 'is-'
+                    . preg_replace(
+                        '/[^a-z0-9_-]+/',
+                        '-',
+                        strtolower(
+                            (string)$subscription->status
+                        )
+                    )
+            ),
+            'crm-legacy-subscription-edit-meta'
+        ),
+        'crm-legacy-subscription-edit-meta-grid'
+    );
+
+echo html_writer::tag(
+    'section',
+    $summarycontent,
+    [
+        'class' =>
+            'crm-legacy-subscription-edit-summary',
+        'aria-label' => get_string(
+            'subscription_summary',
+            'local_subscriptions'
+        ),
+    ]
+);
+
+echo html_writer::start_tag(
+    'section',
+    [
+        'class' =>
+            'crm-legacy-subscription-edit-form-card',
+        'aria-labelledby' =>
+            'crm-legacy-subscription-edit-form-title',
+    ]
 );
 
 echo html_writer::div(
     html_writer::tag(
-        'h3',
+        'h2',
         get_string(
-            'subscription_summary',
+            'crm_subscription_edit_access_title',
             'local_subscriptions'
         ),
         [
-            'class' => 'h5 mb-3',
+            'id' =>
+                'crm-legacy-subscription-edit-form-title',
+            'class' =>
+                'crm-legacy-subscription-edit-form-title',
         ]
-    ) .
-    html_writer::tag(
-        'p',
-        html_writer::tag(
-            'strong',
-            get_string(
-                'user',
-                'local_subscriptions'
-            ) .
-            ': '
-        ) .
-        html_writer::link(
-            new moodle_url(
-                subscription_config::
-                    admin_user_view_page(),
-                [
-                    'id' => $user->id,
-                ]
-            ),
-            fullname($user)
-        )
-    ) .
-    html_writer::tag(
-        'p',
-        html_writer::tag(
-            'strong',
-            get_string('email') . ': '
-        ) .
-        s($user->email)
-    ) .
-    html_writer::tag(
-        'p',
-        html_writer::tag(
-            'strong',
-            get_string(
-                'plan',
-                'local_subscriptions'
-            ) .
-            ': '
-        ) .
-        format_string($plan->name)
+    )
+    . html_writer::div(
+        get_string(
+            'crm_subscription_edit_access_help',
+            'local_subscriptions'
+        ),
+        'crm-legacy-subscription-edit-form-help'
     ),
-    'card card-body mb-4'
+    'crm-legacy-subscription-edit-form-header'
+);
+
+echo html_writer::start_div(
+    'crm-legacy-subscription-edit-form-body'
 );
 
 $form->display();
+
+echo html_writer::end_div();
+echo html_writer::end_tag('section');
 
 echo CrmWorkspaceRenderer::end();
 

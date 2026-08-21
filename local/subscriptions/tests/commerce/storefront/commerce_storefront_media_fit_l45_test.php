@@ -10,7 +10,7 @@ final class commerce_storefront_media_fit_l45_test extends \advanced_testcase {
     public function test_builder_persists_image_fit_and_public_template_supports_contain(): void {
         global $CFG;
 
-        $admin = file_get_contents($CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront.php');
+        $admin = file_get_contents($CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront_builder.php');
         $editor = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/storefront/admin/CommerceStorefrontPageEditor.php');
         $presenter = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/storefront/page/CommerceStorefrontPagePresenter.php');
         $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/storefront/product_section.mustache');

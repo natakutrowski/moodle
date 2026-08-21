@@ -206,7 +206,7 @@ final class commerce_sales_workspace_n63_test extends advanced_testcase {
             $upgrade
         );
         self::assertStringContainsString(
-            '$plugin->version = 2026081510;',
+            '$plugin->version = 2026081602;',
             $version
         );
     }

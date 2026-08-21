@@ -5,6 +5,9 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\customer\identity\CommerceCustomerIdentityNavigationRenderer;
+use local_subscriptions\commerce\customer\identity\CommerceCustomerIdentityImpactRenderer;
+use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
+use local_subscriptions\commerce\persistence\CommercePersistenceSchema;
 use local_subscriptions\commerce\customer\reconciliation\CommerceCustomerBulkReconciliationService;
 use local_subscriptions\commerce\customer\reconciliation\CommerceCustomerIdentityReconciliationResult;
 use local_subscriptions\commerce\customer\reconciliation\CommerceCustomerIdentityReconciliationService;
@@ -53,18 +56,150 @@ echo CommerceCustomerIdentityNavigationRenderer::render(
 );
 
 echo html_writer::div(get_string('commerce_identity_bulk_preview_warning','local_subscriptions'),'alert alert-warning');
-$table=new html_table();
-$table->attributes['class']='generaltable table table-hover align-middle';
-$table->head=[get_string('commerce_identity_purchase','local_subscriptions'),get_string('commerce_identity_diagnostic','local_subscriptions'),get_string('commerce_identity_candidate','local_subscriptions'),get_string('commerce_identity_dryrun_impact','local_subscriptions')];
-$matched=[];
-foreach($previews as $preview){
- $r=$preview->result;
- if($r->status===CommerceCustomerIdentityReconciliationResult::STATUS_MATCHED && $r->purchaseid!==null){$matched[]=$r->purchaseid;}
- $impact=$r->status===CommerceCustomerIdentityReconciliationResult::STATUS_MATCHED ? get_string('commerce_identity_dryrun_impact_summary','local_subscriptions',(object)['total'=>$preview->total_changes(),'grants'=>$preview->grantsupdated,'digital'=>$preview->digitalaccessupdated,'guests'=>$preview->guestsessionsupdated,'legacy'=>$preview->legacyrecordsupdated]) : '—';
- $table->data[]=[s($r->purchasereference ?? ('#'.($r->purchaseid ?? 0))),s(get_string('commerce_identity_status_'.$r->status,'local_subscriptions')),s($r->userid!==null ? '#'.$r->userid : ($r->candidateuserids!==[] ? implode(', ',array_map(static fn($id)=>'#'.(int)$id,$r->candidateuserids)) : '—')),s($impact)];
+$table = new html_table();
+$table->attributes['class'] =
+    'generaltable table table-hover align-middle crm-identity-table';
+$table->head = [
+    get_string(
+        'crm_identity_reconciliation_sale',
+        'local_subscriptions'
+    ),
+    get_string(
+        'commerce_identity_diagnostic',
+        'local_subscriptions'
+    ),
+    get_string(
+        'crm_identity_reconciliation_proposed_account',
+        'local_subscriptions'
+    ),
+    get_string(
+        'crm_identity_reconciliation_expected_effect',
+        'local_subscriptions'
+    ),
+];
+
+$matched = [];
+$publicreferencebuilder = new CommercePublicOrderReference();
+
+foreach ($previews as $preview) {
+    $r = $preview->result;
+
+    if (
+        $r->status
+            === CommerceCustomerIdentityReconciliationResult::
+                STATUS_MATCHED
+        && $r->purchaseid !== null
+    ) {
+        $matched[] = $r->purchaseid;
+    }
+
+    $purchase = $r->purchaseid !== null
+        ? $DB->get_record(
+            CommercePersistenceSchema::TABLE_PURCHASE,
+            ['id' => $r->purchaseid],
+            '*',
+            IGNORE_MISSING
+        )
+        : false;
+
+    $sale = '—';
+    if ($purchase !== false) {
+        $publicreference = $publicreferencebuilder->from_internal(
+            (string)$purchase->reference,
+            (int)$purchase->timecreated
+        );
+
+        $sale = html_writer::link(
+            new moodle_url(
+                '/local/subscriptions/admin/commerce/purchases/view.php',
+                ['id' => (int)$purchase->id]
+            ),
+            s($publicreference),
+            [
+                'class' =>
+                    'crm-identity-reconciliation-sale-reference',
+            ]
+        );
+    }
+
+    $candidate = '—';
+    if ($r->userid !== null) {
+        $candidateuser = $DB->get_record(
+            'user',
+            ['id' => $r->userid],
+            implode(
+                ',',
+                array_merge(
+                    ['id', 'email'],
+                    \core_user\fields::get_name_fields()
+                )
+            ),
+            IGNORE_MISSING
+        );
+
+        $candidate = html_writer::link(
+            new moodle_url(
+                '/local/subscriptions/admin/users/view.php',
+                ['id' => $r->userid]
+            ),
+            html_writer::span(
+                $candidateuser !== false
+                    ? fullname($candidateuser)
+                    : get_string(
+                        'crm_identity_reconciliation_moodle_account',
+                        'local_subscriptions'
+                    ),
+                'crm-identity-reconciliation-candidate-name'
+            )
+            . html_writer::span(
+                '#' . $r->userid,
+                'crm-identity-reconciliation-candidate-id'
+            ),
+            [
+                'class' =>
+                    'crm-identity-reconciliation-candidate-link',
+            ]
+        );
+    } else if ($r->candidateuserids !== []) {
+        $candidate = implode(
+            ', ',
+            array_map(
+                static function(int $candidateuserid): string {
+                    return '#' . $candidateuserid;
+                },
+                $r->candidateuserids
+            )
+        );
+    }
+
+    $impact = (
+        $r->status
+            === CommerceCustomerIdentityReconciliationResult::
+                STATUS_MATCHED
+        && $purchase !== false
+    )
+        ? CommerceCustomerIdentityImpactRenderer::render(
+            $preview,
+            $purchase,
+            $r->userid
+        )
+        : '—';
+
+    $table->data[] = [
+        $sale,
+        $statuslabel = get_string(
+            'commerce_identity_status_' . $r->status,
+            'local_subscriptions'
+        ),
+        $candidate,
+        $impact,
+    ];
 }
+
 echo html_writer::table($table);
-echo html_writer::start_div('d-flex gap-2');
+echo html_writer::start_div(
+    'd-flex gap-2 crm-identity-reconciliation-bulk-actions'
+);
 echo html_writer::link($returnurl,get_string('cancel'),['class'=>'btn btn-outline-secondary']);
 if($matched!==[]){
  echo html_writer::start_tag('form',['method'=>'post','action'=>$pageurl->out(false)]);

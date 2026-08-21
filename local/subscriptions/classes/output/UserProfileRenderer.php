@@ -21,6 +21,7 @@ use local_subscriptions\crm\assistant\rendering\UserAssistantSection;
 use local_subscriptions\crm\success\plans\rendering\CustomerSuccessPlanUserSection;
 use local_subscriptions\crm\user\UserProfileTimelineCategory;
 
+use local_subscriptions\crm\user360\rendering\User360OverviewRenderer;
 final class UserProfileRenderer {
 
     /**
@@ -36,10 +37,7 @@ final class UserProfileRenderer {
         $user = $profile->user;
         $stats = $profile->stats;
 
-        $displayname = trim(fullname($user));
-        if ($displayname === '' && !empty($profile->iscommerceguest)) {
-            $displayname = (string)$user->email;
-        }
+        $displayname = User360OverviewRenderer::display_name($profile);
 
         $identity = html_writer::tag('h2', s($displayname), [
             'class' => 'crm-hero-title mb-1',
@@ -243,6 +241,28 @@ final class UserProfileRenderer {
     }    
 
     /**
+     * N11.3G raw Timeline content adapter.
+     *
+     * The User360 Timeline domain owns its visual shell, so callers can reuse
+     * the complete Timeline engine without nesting the legacy section card.
+     */
+    public static function render_timeline_content(
+        \stdClass $profile
+    ): string {
+        return self::timeline_content($profile);
+    }
+
+
+    /**
+     * N11.3C relation adapter preserving current CRM actions and note composer.
+     */
+    public static function render_relation_actions_content(
+        \stdClass $profile
+    ): string {
+        return self::quick_actions($profile);
+    }
+
+    /**
      * Renders the User360 quick actions panel.
      */
     public static function render_quick_actions_panel(
@@ -271,13 +291,39 @@ final class UserProfileRenderer {
     }
 
     /**
+     * N11.5D raw CRM Assistant recommendations adapter.
+     */
+    public static function render_assistant_recommendations_content(
+        \stdClass $profile,
+        int $recommendationlimit = 10
+    ): string {
+        return UserAssistantSection::render_recommendations(
+            (int)$profile->user->id,
+            $recommendationlimit
+        );
+    }
+
+    /**
+     * N11.5D raw CRM Assistant question panel adapter.
+     */
+    public static function render_assistant_conversation_content(
+        \stdClass $profile
+    ): string {
+        return UserAssistantSection::render_conversation(
+            (int)$profile->user->id
+        );
+    }
+
+    /**
      * Renders the User360 CRM Assistant panel.
      */
     public static function render_assistant_panel(
-        \stdClass $profile
+        \stdClass $profile,
+        int $recommendationlimit = 10
     ): string {
         $content = UserAssistantSection::render(
-            (int)$profile->user->id
+            (int)$profile->user->id,
+            $recommendationlimit
         );
 
         if ($content === '') {
@@ -1205,6 +1251,34 @@ final class UserProfileRenderer {
         }
 
         return html_writer::table($table);
+    }
+
+    /**
+     * Public N11.3 adapter for the Commerce & access workspace.
+     */
+    public static function render_commerce_orders_content(array $purchases): string {
+        return self::commerce_purchases_content($purchases);
+    }
+
+    /**
+     * Public N11.3 adapter for subscriptions.
+     */
+    public static function render_subscriptions_content(array $subscriptions): string {
+        return self::subscriptions_content($subscriptions);
+    }
+
+    /**
+     * Public N11.3 adapter for Legacy/digital purchases.
+     */
+    public static function render_digital_purchases_content(array $payments): string {
+        return self::digital_purchases_content($payments);
+    }
+
+    /**
+     * Public N11.3 adapter for effective Moodle course access.
+     */
+    public static function render_courses_content(array $courses): string {
+        return self::courses_content($courses);
     }
 
     private static function subscriptions_content(array $subscriptions): string {
@@ -2634,7 +2708,7 @@ final class UserProfileRenderer {
                         'crm_timeline_view_details',
                         'local_subscriptions'
                     ),
-                    'visually-hidden'
+                    'crm-timeline-toggle-label'
                 )
                 . html_writer::span(
                     '⌄',

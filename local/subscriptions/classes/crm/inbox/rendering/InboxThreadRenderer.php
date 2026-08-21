@@ -744,7 +744,8 @@ final class InboxThreadRenderer {
      * Renders the thread messages.
      */
     public static function render_messages_panel(
-        object $thread
+        object $thread,
+        bool $allowremoteimages = false
     ): string {
         $out = html_writer::start_tag(
             'section',
@@ -795,8 +796,37 @@ final class InboxThreadRenderer {
             ]
         );
 
-        foreach ($thread->messages as $message) {
-            $out .= self::message($message);
+        $messages = array_values(
+            $thread->messages ?? []
+        );
+
+        usort(
+            $messages,
+            static function(
+                object $left,
+                object $right
+            ): int {
+                $leftdate = self::message_timestamp(
+                    $left
+                );
+                $rightdate = self::message_timestamp(
+                    $right
+                );
+
+                if ($leftdate !== $rightdate) {
+                    return $rightdate <=> $leftdate;
+                }
+
+                return (int)($right->id ?? 0)
+                    <=> (int)($left->id ?? 0);
+            }
+        );
+
+        foreach ($messages as $message) {
+            $out .= self::message(
+                $message,
+                $allowremoteimages
+            );
         }
 
         $out .= html_writer::end_tag('div');
@@ -840,7 +870,8 @@ final class InboxThreadRenderer {
     }
 
     private static function message(
-        object $message
+        object $message,
+        bool $allowremoteimages = false
     ): string {
         $messageid =
             (int)$message->id;
@@ -892,12 +923,12 @@ final class InboxThreadRenderer {
             )
         );
 
-        $date = $message->receivedat
-            ?? $message->sentat
-            ?? $message->timecreated;
+        $date = self::message_timestamp(
+            $message
+        );
 
         $out .= userdate(
-            (int)$date,
+            $date,
             get_string(
                 'strftimedatetimeshort',
                 'langconfig'
@@ -929,7 +960,8 @@ final class InboxThreadRenderer {
             $sanitizer = new InboxHtmlSanitizer();
 
             $safehtml = $sanitizer->sanitize(
-                (string)$message->bodyhtml
+                (string)$message->bodyhtml,
+                $allowremoteimages
             );
 
             $out .= html_writer::div(
@@ -1046,6 +1078,27 @@ final class InboxThreadRenderer {
         );
 
         return $out;
+    }
+
+    private static function message_timestamp(
+        object $message
+    ): int {
+        foreach (
+            [
+                'receivedat',
+                'sentat',
+                'timecreated',
+            ]
+            as $field
+        ) {
+            $value = (int)($message->{$field} ?? 0);
+
+            if ($value > 0) {
+                return $value;
+            }
+        }
+
+        return 0;
     }
 
     private static function action_form(

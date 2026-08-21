@@ -21,16 +21,35 @@ use moodle_url;
 final class CrmAssistantRenderer {
 
     public static function workspace(
-        AssistantWorkspace $workspace
+        AssistantWorkspace $workspace,
+        string $pagination = '',
+        int $perpage = 20
     ): string {
         $out = '';
 
-        $out .= self::overview(
-            $workspace->overview
+        $out .= self::filters(
+            $workspace,
+            $perpage
         );
 
-        $out .= self::filters(
-            $workspace
+        $out .= html_writer::div(
+            html_writer::span(
+                get_string(
+                    'crm_assistant_results_count_n129a',
+                    'local_subscriptions',
+                    $workspace->total
+                ),
+                'crm-assistant-results-count'
+            )
+            . (
+                $pagination !== ''
+                    ? html_writer::div(
+                        $pagination,
+                        'crm-assistant-pagination'
+                    )
+                    : ''
+            ),
+            'crm-assistant-results-toolbar'
         );
 
         if ($workspace->recommendations === []) {
@@ -61,8 +80,17 @@ final class CrmAssistantRenderer {
 
         $out .= html_writer::end_div();
 
+        if ($pagination !== '') {
+            $out .= html_writer::div(
+                $pagination,
+                'crm-assistant-pagination '
+                . 'crm-assistant-pagination-bottom'
+            );
+        }
+
         return $out;
     }
+
 
     public static function user_section(
         array $recommendations
@@ -92,6 +120,14 @@ final class CrmAssistantRenderer {
         $out .= html_writer::end_div();
 
         return $out;
+    }
+
+    public static function overview_panel(
+        AssistantOverview $overview
+    ): string {
+        return self::overview(
+            $overview
+        );
     }
 
     public static function dashboard_summary(
@@ -215,38 +251,50 @@ final class CrmAssistantRenderer {
             ],
         ];
 
-        $out = html_writer::start_div(
-            'row crm-assistant-overview mb-4'
-        );
+        $items = '';
 
         foreach ($cards as $card) {
-            $out .= html_writer::div(
-                html_writer::div(
-                    html_writer::tag(
-                        'div',
-                        (string)$card['value'],
-                        [
-                            'class' =>
-                                'crm-assistant-overview-value',
-                        ]
-                    ) .
-                    html_writer::div(
-                        s($card['label']),
-                        'crm-assistant-overview-label'
-                    ),
-                    'card card-body h-100'
+            $items .= html_writer::div(
+                html_writer::tag(
+                    'strong',
+                    (string)$card['value'],
+                    [
+                        'class' =>
+                            'crm-assistant-overview-value',
+                    ]
+                )
+                . html_writer::span(
+                    s($card['label']),
+                    'crm-assistant-overview-label'
                 ),
-                'col-6 col-md-4 col-xl-2 mb-3'
+                'crm-assistant-overview-item'
             );
         }
 
-        $out .= html_writer::end_div();
-
-        return $out;
+        return html_writer::div(
+            html_writer::tag(
+                'h2',
+                get_string(
+                    'crm_assistant_overview_title_n129a',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'crm-assistant-overview-title',
+                ]
+            )
+            . html_writer::div(
+                $items,
+                'crm-assistant-overview-grid'
+            ),
+            'crm-assistant-overview'
+        );
     }
 
+
     private static function filters(
-        AssistantWorkspace $workspace
+        AssistantWorkspace $workspace,
+        int $perpage
     ): string {
         $criteria = $workspace->criteria;
 
@@ -261,11 +309,11 @@ final class CrmAssistantRenderer {
                 'method' => 'get',
                 'action' => $url->out(false),
                 'class' =>
-                    'card card-body mb-4 crm-assistant-filters',
+                    'crm-assistant-filters',
             ]
         );
 
-        $out .= html_writer::start_div('row');
+        $out .= html_writer::start_div('crm-assistant-filter-grid');
 
         $out .= self::select_filter(
             'scope',
@@ -356,6 +404,20 @@ final class CrmAssistantRenderer {
             $criteria->status ?? ''
         );
 
+        $out .= self::select_filter(
+            'perpage',
+            get_string(
+                'crm_assistant_per_page_n129a',
+                'local_subscriptions'
+            ),
+            [
+                10 => '10',
+                20 => '20',
+                50 => '50',
+            ],
+            (string)$perpage
+        );
+
         $out .= html_writer::div(
             html_writer::tag(
                 'button',
@@ -366,10 +428,10 @@ final class CrmAssistantRenderer {
                 [
                     'type' => 'submit',
                     'class' =>
-                        'btn btn-primary w-100',
+                        'btn btn-primary',
                 ]
             ),
-            'col-md-3 d-flex align-items-end mb-3'
+            'crm-assistant-filter-submit'
         );
 
         $out .= html_writer::end_div();
@@ -405,7 +467,7 @@ final class CrmAssistantRenderer {
                 ]
             ) .
             $select,
-            'col-md-3 mb-3'
+            'crm-assistant-filter-field'
         );
     }
 
@@ -429,7 +491,7 @@ final class CrmAssistantRenderer {
                     s($title),
                     [
                         'class' =>
-                            'h5 mb-1 crm-assistant-recommendation-title',
+                            'crm-assistant-recommendation-title',
                     ]
                 ) .
                 (
@@ -512,7 +574,7 @@ final class CrmAssistantRenderer {
                 $body,
                 'crm-assistant-recommendation-body'
             ),
-            'card card-body mb-3 crm-assistant-recommendation ' .
+            'crm-assistant-recommendation ' .
             'crm-assistant-priority-' .
             s($recommendation->prioritylevel)
         );
@@ -532,7 +594,7 @@ final class CrmAssistantRenderer {
                 'local_subscriptions'
             ),
             [
-                'class' => 'h6 mb-2',
+                'class' => 'crm-assistant-why-title',
             ]
         );
 
@@ -548,7 +610,7 @@ final class CrmAssistantRenderer {
             array_slice(
                 $recommendation->evidence,
                 0,
-                8
+                4
             )
             as $evidence
         ) {

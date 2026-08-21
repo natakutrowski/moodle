@@ -10708,3 +10708,639 @@ $string['commerce_promotions_search_placeholder'] = 'Поиск по назва�
 $string['commerce_promotions_menu_manage'] = 'Управление';
 $string['commerce_promotions_menu_danger'] = 'Опасные действия';
 $string['commerce_promotion_delete_confirm'] = 'Удалить эту промоакцию? Это действие нельзя отменить.';
+
+/* Commerce 7.95N11.2.1 — User Explorer UX. */
+$string['crm_user_sort_score_asc'] = 'Самый низкий CRM-балл';
+$string['crm_user_sort_risk_asc'] = 'Самый низкий риск';
+$string['crm_user_sort_subscriptions_asc'] = 'Меньше всего подписок';
+$string['crm_user_sort_subscriptions_desc'] = 'Больше всего подписок';
+$string['crm_user_sort_purchases_asc'] = 'Меньше всего цифровых покупок';
+$string['crm_user_sort_purchases_desc'] = 'Больше всего цифровых покупок';
+$string['crm_user_sort_last_access_asc'] = 'Самая давняя активность';
+$string['crm_user_sort_created_asc'] = 'Самая ранняя регистрация';
+$string['crm_user_actions'] = 'Действия';
+$string['crm_user_more_actions'] = 'Другие действия';
+$string['crm_user_open_moodle_profile'] = 'Открыть профиль Moodle';
+$string['crm_user_open_inbox'] = 'Открыть входящие';
+
+/* Commerce 7.95N11.2.2 — User Explorer Sales-style UX. */
+$string['crm_user_kpi_suspended'] = 'Приостановленные Moodle-аккаунты';
+$string['crm_user_kpi_no_moodle'] = 'Без аккаунта Moodle';
+$string['crm_user_search_filters_title'] = 'Поиск и фильтры';
+$string['crm_user_filter_panel_hint'] = 'Нажмите, чтобы открыть';
+$string['crm_user_filter_panel_active'] = 'Активных фильтров: {$a}';
+$string['crm_user_save_view_help'] = 'Сохраняет текущие фильтры, поиск и сортировку под выбранным именем для быстрого повторного использования. Это не снимок списка пользователей.';
+$string['crm_user_menu_client'] = 'Клиент';
+$string['crm_user_menu_communication'] = 'Коммуникация';
+$string['crm_user_open_user360'] = 'Открыть User360';
+
+/* Commerce 7.95N11.2.6 — User Explorer Sales table. */
+$string['crm_user_explorer_found'] = 'Найдено пользователей: {$a}';
+$string['crm_user_explorer_active_filters_short'] = 'Фильтры';
+$string['crm_user_filter_type_label'] = 'Тип пользователя';
+
+$string['crm_user_account_status_no_moodle'] = 'Без аккаунта Moodle';
+
+/* Commerce 7.95N11.3A — User360 overview. */
+$string['crm_user360_n113_moodle_account'] = 'Аккаунт Moodle';
+$string['crm_user360_n113_created'] = 'Создан';
+$string['crm_user360_n113_active_subscriptions'] = 'Активные подписки';
+$string['crm_user360_n113_score'] = 'CRM-балл';
+$string['crm_user360_n113_risk'] = 'Риск';
+$string['crm_user360_n113_nav_label'] = 'Навигация User360';
+$string['crm_user360_n113_tab_overview'] = 'Обзор';
+$string['crm_user360_n113_tab_commerce'] = 'Покупки и доступ';
+$string['crm_user360_n113_tab_relation'] = 'CRM-отношения';
+$string['crm_user360_n113_tab_identities'] = 'Идентичности';
+$string['crm_user360_n113_tab_timeline'] = 'CRM Timeline';
+$string['crm_user360_n113_current_situation'] = 'Текущая ситуация';
+$string['crm_user360_n113_identity'] = 'Идентичность';
+$string['crm_user360_n113_no_intelligence'] = 'Для этого пользователя пока нет анализа CRM Intelligence.';
+$string['crm_user360_n113_guest_identity_help'] = 'Эта Commerce-идентичность пока не связана с аккаунтом Moodle.';
+$string['crm_user360_n113_recent_activity'] = 'Последняя активность';
+$string['crm_user360_n113_priority_actions'] = 'Приоритетные действия';
+$string['crm_user360_n113_priority_normal'] = 'Проверить';
+$string['crm_user360_n113_no_priority_action'] = 'Сейчас приоритетных действий нет.';
+$string['crm_user360_n113_work_items_hint'] = 'Подробные Work Items остаются доступны в CRM-разделах ниже.';
+$string['crm_user360_n113_send_email'] = 'Отправить письмо';
+$string['crm_user360_n113_create_offer'] = 'Создать предложение';
+$string['crm_user360_n113_detailed_sections'] = 'Подробные разделы — переход N11.3';
+
+// Commerce 7.95 N11.3B — User360 Commerce & access.
+$string['crm_user360_n113b_title'] = 'Покупки и доступ';
+$string['crm_user360_n113b_intro'] = 'Заказы, подписки, цифровые покупки и учебные доступы собраны в одном месте.';
+$string['crm_user360_n113b_orders'] = 'Заказы';
+$string['crm_user360_n113b_orders_help'] = 'Заказы Commerce Native, связанные с этим клиентом.';
+$string['crm_user360_n113b_subscriptions'] = 'Подписки';
+$string['crm_user360_n113b_subscriptions_help'] = 'Активные и исторические тарифы, связанные с этим клиентом.';
+$string['crm_user360_n113b_digital'] = 'Цифровые покупки';
+$string['crm_user360_n113b_digital_help'] = 'Цифровые покупки, включая Legacy-данные, которые ещё используются CRM.';
+$string['crm_user360_n113b_access'] = 'Текущие доступы';
+$string['crm_user360_n113b_access_help'] = 'Курсы, к которым аккаунт Moodle имеет доступ в данный момент.';
+$string['crm_user360_n113b_guest_access_title'] = 'Нет Moodle-доступов для отображения';
+$string['crm_user360_n113b_guest_access_help'] = 'Эта Commerce / Legacy-идентичность пока не связана с аккаунтом Moodle. Покупки остаются видимыми выше.';
+$string['crm_user360_n113b_empty'] = 'Для этого клиента не найдено коммерческой активности.';
+
+// Commerce 7.95 N11.3C — User360 Relation CRM.
+$string['crm_user360_n113c_title'] = 'CRM-отношения';
+$string['crm_user360_n113c_intro'] = 'Intelligence, действия, заметки, Inbox, Customer Success и Work Items собраны в одном месте.';
+$string['crm_user360_n113c_score'] = 'Коммерческий балл';
+$string['crm_user360_n113c_engagement'] = 'Вовлечённость';
+$string['crm_user360_n113c_risk'] = 'Риск';
+$string['crm_user360_n113c_unread'] = 'Непрочитанные письма';
+$string['crm_user360_n113c_intelligence'] = 'CRM Intelligence';
+$string['crm_user360_n113c_intelligence_help'] = 'Баллы, сегменты, возможности и рекомендации, рассчитанные для клиента.';
+$string['crm_user360_n113c_actions'] = 'CRM-действия';
+$string['crm_user360_n113c_actions_help'] = 'Операционные действия и быстрое добавление внутренней заметки.';
+$string['crm_user360_n113c_notes'] = 'Внутренние заметки';
+$string['crm_user360_n113c_notes_help'] = 'История заметок CRM-команды.';
+$string['crm_user360_n113c_customer_success'] = 'Customer Success';
+$string['crm_user360_n113c_customer_success_help'] = 'Планы сопровождения и этапы Customer Success клиента.';
+$string['crm_user360_n113c_inbox'] = 'CRM Inbox';
+$string['crm_user360_n113c_inbox_help'] = 'Диалоги и сообщения, связанные с клиентом.';
+$string['crm_user360_n113c_assistant'] = 'CRM Assistant';
+$string['crm_user360_n113c_assistant_help'] = 'Рекомендации и действия на основе CRM-сигналов.';
+$string['crm_user360_n113c_work_items'] = 'Work Items';
+$string['crm_user360_n113c_work_items_help'] = 'Открытые, срочные или просроченные CRM-задачи клиента.';
+
+// Commerce 7.95 N11.3D — User360 Identities + Timeline.
+$string['crm_user360_n113d_identities_title'] = 'Идентичности';
+$string['crm_user360_n113d_identities_intro'] = 'Известные e-mail, аккаунт Moodle, Commerce-идентичности и возможные совпадения собраны в одном месте.';
+$string['crm_user360_n113d_commerce_identity'] = 'Commerce / Legacy-идентичность';
+$string['crm_user360_n113d_moodle_identity'] = 'Аккаунт Moodle';
+$string['crm_user360_n113d_known_identities'] = 'E-mail и идентичности';
+$string['crm_user360_n113d_known_identities_help'] = 'История известных адресов и потенциально связанных аккаунтов.';
+$string['crm_user360_n113d_account_linking'] = 'Привязка Moodle';
+$string['crm_user360_n113d_account_linking_help'] = 'Создать или привязать аккаунт Moodle к этой Commerce-идентичности.';
+$string['crm_user360_n113d_merge_history'] = 'История объединений';
+$string['crm_user360_n113d_merge_history_help'] = 'Операции объединения идентичностей, уже выполненные для аккаунта.';
+$string['crm_user360_n113d_identity_safety'] = 'Проверка идентичности';
+$string['crm_user360_n113d_identity_safety_help'] = 'Возможные совпадения — только сигналы. Всегда проверяйте человека перед объединением или привязкой.';
+$string['crm_user360_n113d_no_identity_data'] = 'Дополнительных данных об идентичности нет.';
+$string['crm_user360_n113d_timeline_title'] = 'CRM Timeline';
+$string['crm_user360_n113d_timeline_intro'] = 'Полная фильтруемая история Commerce, учебных и CRM-событий.';
+$string['crm_user360_n113d_timeline_events'] = 'События';
+$string['crm_user360_n113d_timeline_important'] = 'Важные';
+
+// Commerce 7.95 N11.3E — User360 final polish.
+$string['crm_user360_n113e_match_high'] = 'Высокое совпадение';
+$string['crm_user360_n113e_match_medium'] = 'Возможное совпадение';
+$string['crm_user360_n113e_match_low'] = 'Проверить';
+
+// Commerce 7.95 N11.3F — User360 workspace consolidation.
+$string['crm_user360_n113f_assistant_open'] = 'Открыть CRM-ассистента';
+
+// Commerce 7.95 N11.4A — Support-first User360.
+$string['crm_user360_n114_orders'] = 'Заказы';
+$string['crm_user360_n114_spent'] = 'Потрачено';
+$string['crm_user360_n114_courses'] = 'Доступные курсы';
+$string['crm_user360_n114_started'] = 'Начатые курсы';
+$string['crm_user360_n114_completed'] = 'Завершённые курсы';
+$string['crm_user360_n114_last_activity'] = 'Последняя активность';
+$string['crm_user360_n114_purchases_title'] = 'Последние покупки';
+$string['crm_user360_n114_purchases_help'] = 'Что клиент купил на сайте.';
+$string['crm_user360_n114_no_purchases'] = 'Покупок у этого клиента не найдено.';
+$string['crm_user360_n114_learning_title'] = 'Курсы и прогресс';
+$string['crm_user360_n114_learning_help'] = 'Текущие доступы, прогресс Moodle и область Level Up XP.';
+$string['crm_user360_n114_no_moodle_learning'] = 'Эта Commerce-идентичность пока не связана с аккаунтом Moodle.';
+$string['crm_user360_n114_no_courses'] = 'Сейчас нет доступных курсов.';
+$string['crm_user360_n114_progress_unavailable'] = 'Не отслеживается';
+$string['crm_user360_n114_activity_progress'] = 'Завершено {$a->completed} из {$a->tracked} активностей';
+$string['crm_user360_n114_no_tracking'] = 'Прогресс Moodle не отслеживается';
+$string['crm_user360_n114_communication_title'] = 'Общение с клиентом';
+$string['crm_user360_n114_communication_help'] = 'Диалоги, сообщения и заметки, полезные службе поддержки.';
+$string['crm_user360_n114_conversations'] = 'Диалоги';
+$string['crm_user360_n114_unread'] = 'Непрочитанные';
+$string['crm_user360_n114_last_exchange'] = 'Последний обмен';
+$string['crm_user360_n114_internal_notes'] = 'Внутренние заметки';
+$string['crm_user360_n114_recent_title'] = 'Последняя активность';
+$string['crm_user360_n114_recent_help'] = 'Последние события, помогающие понять ситуацию клиента.';
+$string['crm_user360_n114_no_activity'] = 'Недавней активности нет.';
+$string['crm_user360_n114_actions_title'] = 'Быстрые действия';
+$string['crm_user360_n114_send_email'] = 'Отправить письмо';
+$string['crm_user360_n114_create_offer'] = 'Создать предложение';
+$string['crm_user360_n114_xp_disabled'] = 'XP выключен';
+$string['crm_user360_n114_xp_site_scope'] = 'XP · Глобально';
+$string['crm_user360_n114_xp_course_scope'] = 'XP · Курс';
+$string['crm_user360_n114_xp_level'] = 'Уровень {$a}';
+$string['crm_user360_n114_status_paid'] = 'Оплачено';
+$string['crm_user360_n114_status_failed'] = 'Ошибка';
+$string['crm_user360_n114_status_pending'] = 'Ожидает';
+$string['crm_user360_n114_advanced_open'] = 'Открыть расширенное CRM-досье';
+
+// Commerce 7.95 N11.4B — Support-first dashboard design.
+$string['crm_user360_n114b_started_sub'] = 'Начато курсов: {$a}';
+$string['crm_user360_n114b_xp_total'] = 'Level Up XP';
+$string['crm_user360_n114b_xp_courses_sub'] = 'XP на курсах: {$a}';
+$string['crm_user360_n114b_recent_purchases'] = 'Последние заказы';
+$string['crm_user360_n114b_view_all_purchases'] = 'Все заказы';
+$string['crm_user360_n114b_view_all_courses'] = 'Все курсы';
+$string['crm_user360_n114b_recent_conversations'] = 'Последние диалоги';
+$string['crm_user360_n114b_unread_badge'] = 'Непрочитано: {$a}';
+$string['crm_user360_n114b_no_conversations'] = 'Нет недавних диалогов.';
+$string['crm_user360_n114b_last_note'] = 'Последняя заметка';
+$string['crm_user360_n114b_internal_note'] = 'Внутренняя заметка';
+$string['crm_user360_n114b_no_notes'] = 'Нет внутренних заметок.';
+$string['crm_user360_n114b_open_exchanges'] = 'Открыть переписку';
+$string['crm_user360_n114b_recent_notes'] = 'Последние внутренние заметки';
+$string['crm_user360_n114b_recent_notes_help'] = 'Заметки и напоминания для команды поддержки.';
+$string['crm_user360_n114b_view_all_notes'] = 'Все заметки';
+$string['crm_user360_n114b_view_all_activity'] = 'Вся активность';
+$string['crm_user360_n114b_actions_help'] = 'Частые действия для работы с клиентом.';
+$string['crm_user360_n114b_open_inbox'] = 'Открыть переписку';
+$string['crm_user360_n114b_all_actions'] = 'Все действия';
+$string['crm_user360_n114b_total_activities'] = 'Всего заданий';
+$string['crm_user360_n114b_average_progress'] = 'Средний прогресс';
+$string['crm_user360_n114b_access_active'] = 'Активен';
+
+// Commerce 7.95 N11.4C — Support dashboard refinements.
+$string['crm_user360_n114c_no_course_activity'] = 'Нет завершённых заданий';
+
+// Commerce 7.95 N11.5A — User360 Advanced CRM architecture.
+$string['crm_user360_n115a_eyebrow'] = 'Экспертное досье';
+$string['crm_user360_n115a_title'] = 'Расширенный CRM';
+$string['crm_user360_n115a_intro'] = 'Аналитика, полная история и экспертные инструменты. Они дополняют карточку клиента, не перегружая ежедневную работу поддержки.';
+$string['crm_user360_n115a_navigation'] = 'Навигация расширенного CRM-досье';
+$string['crm_user360_n115a_relation'] = 'CRM-отношения';
+$string['crm_user360_n115a_relation_short'] = 'Аналитика и сопровождение';
+$string['crm_user360_n115a_relation_help'] = 'CRM Intelligence, действия, переписка, заметки и Customer Success.';
+$string['crm_user360_n115a_commerce'] = 'Расширенный Commerce';
+$string['crm_user360_n115a_commerce_short'] = 'История и доступы';
+$string['crm_user360_n115a_commerce_help'] = 'Native-заказы, подписки, Legacy-покупки и подробные права доступа.';
+$string['crm_user360_n115a_identities'] = 'Идентичности';
+$string['crm_user360_n115a_identities_short'] = 'Аккаунты и совпадения';
+$string['crm_user360_n115a_identities_help'] = 'Известные e-mail, потенциально связанные аккаунты, привязки и история объединений.';
+$string['crm_user360_n115a_timeline'] = 'Полная Timeline';
+$string['crm_user360_n115a_timeline_short'] = 'Фильтруемая история';
+$string['crm_user360_n115a_timeline_help'] = 'Полная история Commerce, обучения, Inbox, CRM и административных событий.';
+$string['crm_user360_n115a_intelligence_title'] = 'Подробная CRM Intelligence';
+$string['crm_user360_n115a_intelligence_help'] = 'Баллы, тенденция, сегменты, возможности и объяснение рассчитанных сигналов клиента.';
+$string['crm_user360_n115a_expert_followup'] = 'Экспертное сопровождение';
+$string['crm_user360_n115a_expert_followup_help'] = 'Редко используемые экспертные инструменты скрыты по умолчанию для компактности экрана.';
+$string['crm_user360_n115a_assistant_help'] = 'Рекомендации и запросы к CRM Assistant.';
+$string['crm_user360_n115a_workitems_help'] = 'Открытые, срочные и просроченные CRM-задачи.';
+$string['crm_user360_n115a_customer_success_help'] = 'Планы и этапы сопровождения Customer Success.';
+
+// Commerce 7.95 N11.5B — Advanced Relation CRM dashboard.
+$string['crm_user360_n115b_no_intelligence'] = 'Подробная CRM-аналитика для этого клиента пока недоступна.';
+$string['crm_user360_n115b_intelligence_dashboard_help'] = 'Сводка оценок и сигналов, помогающих понять текущую ситуацию клиента.';
+$string['crm_user360_n115b_why_score'] = 'Почему такой балл?';
+$string['crm_user360_n115b_why_score_help'] = 'Основные факторы, влияющие на итоговую оценку.';
+$string['crm_user360_n115b_segments_title'] = 'Сегменты и приоритеты';
+$string['crm_user360_n115b_segments_help'] = 'Текущие сегменты и обнаруженные рекомендации.';
+$string['crm_user360_n115b_recommendations_priority'] = 'Приоритетные рекомендации';
+$string['crm_user360_n115b_actions_help'] = 'Быстрые действия для работы с клиентом.';
+$string['crm_user360_n115b_inbox_help'] = 'Последние диалоги и сообщения клиента.';
+$string['crm_user360_n115b_inbox_unavailable'] = 'CRM Inbox недоступен для этого пользователя.';
+$string['crm_user360_n115b_notes_recent'] = 'Последние внутренние заметки';
+$string['crm_user360_n115b_notes_help'] = 'Последние заметки и напоминания команды CRM.';
+$string['crm_user360_n115b_assistant_help'] = 'Две приоритетные рекомендации ИИ и доступ к CRM Assistant.';
+$string['crm_user360_n115b_workitems_help'] = 'Открытые, срочные и просроченные CRM-задачи клиента.';
+$string['crm_user360_n115b_customer_success_help'] = 'Текущие планы и этапы сопровождения Customer Success.';
+$string['crm_user360_n115b_no_customer_success'] = 'Нет открытого плана Customer Success.';
+$string['crm_user360_n115b_no_score_factors'] = 'Подробные факторы оценки недоступны.';
+$string['crm_user360_n115b_no_segments'] = 'CRM-сегменты не обнаружены.';
+$string['crm_user360_n115c_digital_products'] = 'Цифровые продукты';
+$string['crm_user360_n115c_digital_products_help'] = 'Приобретённые цифровые материалы, доступные загрузки и история загрузок, если она отслеживается.';
+$string['crm_user360_n115c_no_digital_products'] = 'Нет доступных цифровых продуктов.';
+$string['crm_user360_n115c_owned_since'] = 'В собственности с {$a}';
+$string['crm_user360_n115c_download_count'] = 'Загрузок: {$a}';
+$string['crm_user360_n115c_last_download'] = 'Последняя загрузка: {$a}';
+$string['crm_user360_n115c_download_history_unavailable'] = 'История загрузок недоступна';
+$string['crm_user360_n115c_digital_resource'] = 'Цифровой продукт';
+$string['crm_user360_n115c_action_change_email_help'] = 'Изменить e-mail для входа в аккаунт.';
+$string['crm_user360_n115c_action_reset_password_help'] = 'Чувствительное действие: сбросить пароль.';
+$string['crm_user360_n115c_action_resend_delivery_help'] = 'Повторно отправить письмо с доступом к цифровой покупке.';
+$string['crm_user360_n115c_action_expert_help'] = 'Расширенное CRM-действие для клиента.';
+$string['crm_user360_n115c_no_expert_actions'] = 'Нет доступных расширенных CRM-действий.';
+$string['crm_intelligence_recommendation_review_customer_success_risk'] = 'Проверить риск Customer Success';
+$string['crm_intelligence_recommendation_intervene_disengagement_spiral'] = 'Отреагировать на снижение вовлечённости';
+$string['crm_intelligence_recommendation_review_learning_difficulty'] = 'Проверить учебную трудность';
+
+// Commerce 7.95 N11.5D — Relation CRM fixes.
+$string['crm_user360_n115d_assistant_recommendations'] = 'Приоритетные рекомендации';
+$string['crm_user360_n115d_assistant_question'] = 'Спросить Ассистента';
+$string['crm_user360_n115d_no_assistant_recommendations'] = 'Сейчас нет приоритетных рекомендаций.';
+$string['crm_user360_n115d_assistant_unavailable'] = 'Диалоговый Ассистент недоступен в этой сессии.';
+
+// Commerce 7.95 N11.6A — Advanced Commerce.
+$string['crm_user360_n116a_orders_title'] = 'Подробные заказы';
+$string['crm_user360_n116a_orders_help'] = 'История Native и объединённого Commerce с прямыми переходами к заказам и продуктам.';
+$string['crm_user360_n116a_legacy_subscriptions_title'] = 'Legacy-подписки';
+$string['crm_user360_n116a_legacy_subscriptions_help'] = 'Старые подписки, сохранённые для истории и операций поддержки.';
+$string['crm_user360_n116a_open_course'] = 'Открыть курс';
+$string['crm_user360_n116a_open_product'] = 'Открыть продукт';
+$string['crm_user360_n116a_communication'] = 'Коммуникация';
+$string['crm_user360_n116a_management'] = 'Управление';
+$string['crm_user360_n116a_extend_30_days'] = 'Продлить на 30 дней';
+$string['crm_user360_n116a_access_period'] = 'С {$a->start} по {$a->end}';
+$string['crm_user360_n116a_access_until'] = 'До {$a}';
+$string['crm_user360_n116a_access_unlimited'] = 'Бессрочный доступ';
+
+// Commerce 7.95 N11.6B — User360 Commerce actions/readability.
+$string['crm_user360_n116b_open_sales'] = 'Открыть в CRM Продажи';
+
+// Commerce 7.95 N11.6C — User360 / Commerce polish.
+$string['crm_user360_n116c_access_lifetime'] = 'Бессрочный доступ';
+$string['crm_user360_n116c_access_until'] = 'Доступ до {$a}';
+$string['crm_user360_n116c_access_expired'] = 'Доступ истёк';
+
+// Commerce 7.95 N11.7A — User360 Identity panel.
+$string['crm_user360_n117a_commerce_orders'] = '{$a} заказ(ов) Commerce';
+$string['crm_user360_n117a_legacy_purchases'] = '{$a} Legacy-покупок';
+$string['crm_user360_n117a_personal_offers'] = '{$a} персональных предложений';
+$string['crm_user360_n117a_merge_sources'] = '{$a} элементов объединения';
+$string['crm_user360_n117a_identity_source_details'] = 'Показать технические детали';
+
+// Commerce 7.95 N11.7B — Identity 2-column layout.
+$string['crm_user360_n117b_merge'] = 'Объединить';
+$string['crm_user360_n117b_potential_column_title'] = 'Возможно связанные аккаунты';
+
+// Commerce 7.95 N11.8A — Legacy subscription editor polish.
+$string['crm_subscription_edit_legacy_badge'] = 'Legacy-подписка';
+$string['crm_subscription_edit_current_period'] = 'Текущий период';
+$string['crm_subscription_edit_access_title'] = 'Параметры доступа';
+$string['crm_subscription_edit_access_help'] = 'Изменяйте только период доступа или административный статус этой Legacy-подписки.';
+$string['crm_subscription_edit_start_date'] = 'Дата начала';
+$string['crm_subscription_edit_start_date_help'] = 'Дата, с которой подписка предоставляет доступ к связанным ресурсам.';
+$string['crm_subscription_edit_no_end_date'] = 'Без даты окончания';
+$string['crm_subscription_edit_no_end_date_help'] = 'Включите эту опцию для бессрочного доступа.';
+$string['crm_subscription_edit_end_date'] = 'Дата окончания';
+$string['crm_subscription_edit_end_date_help'] = 'Последний день действия подписки при ограниченном сроке доступа.';
+$string['crm_subscription_edit_status'] = 'Статус';
+$string['crm_subscription_edit_status_help'] = 'Административный Legacy-статус подписки. Изменяйте только при необходимости ручной корректировки.';
+
+// Commerce 7.95 N11.8B — Legacy CSV import polish.
+$string['crm_legacy_import_upload_title'] = 'Импорт Legacy-доступов';
+$string['crm_legacy_import_upload_help'] = 'Выберите CSV-файл с Legacy-подписками. Перед созданием доступов можно проверить все строки.';
+$string['crm_legacy_import_preview_title'] = 'Проверка импорта';
+$string['crm_legacy_import_preview_help'] = 'Проверьте пользователей, планы и суммы. Обнаруженные дубликаты автоматически исключаются.';
+$string['crm_legacy_import_result_summary_title'] = 'Импорт завершён';
+$string['crm_legacy_import_result_summary_help'] = 'Результат создания Legacy-доступов из CSV-файла.';
+$string['crm_legacy_import_no_file'] = 'Файл не выбран';
+$string['crm_legacy_import_entry_title'] = 'Legacy CSV-импорт';
+$string['crm_legacy_import_entry_help'] = 'Создать несколько исторических Legacy-доступов из CSV-файла.';
+$string['crm_legacy_import_entry_action'] = 'Импортировать доступы';
+
+// Commerce 7.95 N11.9B — Identity reconciliation UX.
+$string['crm_identity_reconciliation_search_placeholder'] = 'E-mail, клиент, ссылка CFR…';
+$string['crm_identity_reconciliation_more_filters'] = 'Дополнительные фильтры';
+$string['crm_identity_reconciliation_results_title'] = '{$a} продаж(и) для сверки';
+$string['crm_identity_reconciliation_results_help'] = 'Для каждой строки предлагается наиболее вероятный аккаунт Moodle. Данные не изменяются до явного подтверждения.';
+$string['crm_identity_reconciliation_sale'] = 'Продажа';
+$string['crm_identity_reconciliation_proposed_account'] = 'Предлагаемый аккаунт';
+$string['crm_identity_reconciliation_expected_effect'] = 'Ожидаемый результат';
+$string['crm_identity_reconciliation_moodle_account'] = 'Аккаунт Moodle';
+$string['crm_identity_reconciliation_effect_total'] = '{$a} планируемых изменений';
+$string['crm_identity_reconciliation_effect_course_access'] = '{$a} доступов к курсам';
+$string['crm_identity_reconciliation_effect_digital'] = '{$a} цифровых доступов';
+$string['crm_identity_reconciliation_effect_guest'] = '{$a} гостевых сессий';
+$string['crm_identity_reconciliation_effect_legacy'] = '{$a} Legacy-записей';
+$string['crm_identity_reconciliation_effect_link_only'] = 'Связать клиента с продажей';
+
+// Commerce 7.95 N11.9B.1 — Reconciliation impact details.
+$string['crm_identity_reconciliation_effect_heading'] = 'Что будет изменено';
+$string['crm_identity_reconciliation_effect_purchase_link'] = 'Привязать продажу к аккаунту Moodle #{$a->userid}';
+$string['crm_identity_reconciliation_effect_course_access_detail'] = 'Назначить {$a->count} доступ(ов) к курсам аккаунту Moodle #{$a->userid}';
+$string['crm_identity_reconciliation_effect_digital_detail'] = 'Назначить {$a->count} цифровых доступов аккаунту Moodle #{$a->userid}';
+$string['crm_identity_reconciliation_effect_guest_detail'] = 'Привязать {$a->count} гостевых сессий к аккаунту Moodle #{$a->userid}';
+$string['crm_identity_reconciliation_effect_legacy_detail'] = 'Привязать Legacy-покупку #{$a->legacyid} к аккаунту Moodle #{$a->userid}';
+$string['crm_identity_reconciliation_effect_none'] = 'Дополнительные связанные данные обновлять не требуется';
+
+// Commerce 7.95 N11.9C — Similarity UX and scoring.
+$string['crm_identity_similarity_results_title'] = '{$a} предложенных совпадений';
+$string['crm_identity_similarity_scan_detail'] = '{$a} аккаунтов проанализировано';
+$string['crm_identity_similarity_score_help'] = 'Индекс показывает силу общих сигналов, а не гарантирует, что аккаунты принадлежат одному человеку. Два разных аккаунта никогда не получают 100 %, а объединение всегда выполняется вручную.';
+
+// Commerce 7.95 N11.9D — Weighted similarity and identity links UX.
+$string['crm_identity_similarity_check_email'] = 'E-mail';
+$string['crm_identity_similarity_check_name'] = 'Имя и фамилия';
+$string['crm_identity_similarity_check_phone'] = 'Телефон';
+$string['crm_identity_similarity_check_weight'] = 'вес {$a} %';
+$string['crm_identity_relationships_inspector_title'] = 'Проверить идентичность';
+$string['crm_identity_relationships_inspector_help'] = 'Найдите аккаунт Moodle или Commerce / Legacy-идентичность. Затем экран объединит известные e-mail и связи идентичностей.';
+$string['crm_identity_relationships_moodle_account'] = 'Аккаунт Moodle';
+$string['crm_identity_relationships_moodle_account_help'] = 'Используйте Moodle ID, если аккаунт уже существует.';
+$string['crm_identity_relationships_userid_placeholder'] = 'Напр. 163';
+$string['crm_identity_relationships_or'] = 'или';
+$string['crm_identity_relationships_external_identity'] = 'Commerce / Legacy-идентичность';
+$string['crm_identity_relationships_external_identity_help'] = 'Используйте e-mail, если аккаунт Moodle пока неизвестен.';
+$string['crm_identity_relationships_email_placeholder'] = 'client@example.com';
+$string['crm_identity_relationships_empty_help'] = 'Идентичность не выбрана. Введите Moodle ID или e-mail, чтобы открыть историю и связанные записи.';
+
+// Commerce 7.95 N11.9E — Provisioning and Legacy quality polish.
+$string['crm_identity_provisioning_diagnostic'] = 'Диагностика';
+$string['crm_identity_provisioning_recommendation'] = 'Рекомендуемое действие';
+$string['crm_identity_provisioning_ready_help'] = 'Подходящий аккаунт Moodle не найден: создание нового аккаунта можно предварительно проверить.';
+$string['crm_identity_provisioning_open_existing'] = 'Открыть аккаунт Moodle #{$a}';
+$string['crm_identity_provisioning_ambiguous_help'] = 'Несколько аккаунтов используют этот e-mail. Сначала проверьте личность.';
+$string['crm_identity_provisioning_similar_help'] = 'Обнаружено потенциально похожих аккаунтов: {$a}. Проверьте их перед созданием нового аккаунта.';
+$string['crm_identity_provisioning_more_candidates'] = '+ ещё {$a} кандидат(ов)';
+$string['crm_identity_legacy_quality_results_title'] = '{$a} Legacy-идентичностей';
+$string['crm_identity_legacy_quality_results_help'] = 'Подозрительные и некорректные адреса приоритетны; корректные можно показать фильтром.';
+$string['crm_identity_legacy_quality_history'] = 'История Legacy';
+$string['crm_identity_legacy_quality_correct'] = 'Исправить';
+
+// Commerce 7.95 N12.1 — CRM Inbox UX and manual refresh.
+$string['crm_inbox_refresh'] = 'Обновить почту';
+$string['crm_inbox_refresh_success'] = 'Почта обновлена: получено {$a->fetched}, новых {$a->created}, обновлено {$a->updated}, ошибок {$a->errors}.';
+$string['crm_inbox_refresh_has_more'] = 'Доступны дополнительные сообщения; при необходимости обновите почту ещё раз.';
+$string['crm_inbox_refresh_no_accounts'] = 'Нет активной настроенной CRM-почты.';
+$string['crm_inbox_refresh_failed'] = 'Не удалось обновить CRM-почту. Проверьте диагностику Inbox.';
+
+// Commerce 7.95 N12.2 — Inbox card badges and remote-image preview polish.
+$string['crm_inbox_unread_count_compact'] = 'Непрочитано: {$a}';
+$string['crm_inbox_remote_images_blocked_summary'] = 'Скрыто внешних изображений: {$a}. Их загрузка может сообщить отправителю, что письмо было открыто.';
+
+
+$string['crm_inbox_load_remote_images'] = 'Показать изображения';
+
+// Commerce 7.95 N12.4A — Inbox AI translation and analysis workspace.
+$string['crm_inbox_ai_panel_description_n124'] = 'Переведите последнее сообщение клиента, проанализируйте запрос или подготовьте ответ с помощью ИИ.';
+$string['crm_inbox_ai_translate_title'] = 'Перевести сообщение';
+$string['crm_inbox_ai_translate_help'] = 'Перевод последнего сообщения клиента на выбранный администратором язык.';
+$string['crm_inbox_ai_translate_action'] = 'Перевести';
+$string['crm_inbox_ai_analysis_title_n124'] = 'Проанализировать запрос';
+$string['crm_inbox_ai_analysis_help_n124'] = 'Определяет язык, срочность, категорию, запросы клиента и важные пункты.';
+$string['crm_inbox_ai_reply_title_n124'] = 'Подготовить ответ';
+$string['crm_inbox_ai_reply_help_n124'] = 'Создаёт черновик ответа, который нужно проверить перед отправкой.';
+$string['crm_inbox_ai_processing_n124'] = 'ИИ обрабатывает запрос…';
+$string['crm_inbox_ai_processing_short_n124'] = 'Обработка…';
+$string['crm_inbox_ai_empty_title_n124'] = 'Выберите инструмент';
+$string['crm_inbox_ai_empty_help_n124'] = 'Перевод и анализ появятся здесь в достаточно большом блоке для удобной проверки.';
+$string['crm_inbox_ai_translation_result_title'] = 'Перевод последнего сообщения';
+$string['crm_inbox_ai_analysis_result_title_n124'] = 'Анализ запроса клиента';
+$string['crm_inbox_ai_analysis_no_summary_n124'] = 'Не удалось получить полезное резюме.';
+$string['crm_inbox_ai_analysis_no_details_n124'] = 'Дополнительные пункты не обнаружены.';
+$string['crm_inbox_ai_fallback_notice_n124'] = 'Для части или всего результата использован локальный резервный анализ. Расширенные функции работают лучше при доступном внешнем ИИ-провайдере.';
+
+// Commerce 7.95 N12.4B — AI layout and result hierarchy fix.
+$string['crm_inbox_ai_translation_provider_missing_n124b'] = 'Для перевода требуется ИИ-провайдер OpenAI, но он недоступен в текущей конфигурации. Проверьте активацию провайдера, модель и API-ключ.';
+
+// Commerce 7.95 N12.7A — Work Management workspace polish.
+$string['crm_work_section_navigation_n127a'] = 'Навигация Work Management';
+$string['crm_work_open_n127a'] = 'Открыть';
+$string['crm_work_no_due_n127a'] = 'Без срока';
+$string['crm_work_unassigned_n127a'] = 'Не назначено';
+$string['crm_work_assignment_n127a'] = 'Назначение';
+$string['crm_work_assignee_n127a'] = 'Ответственный';
+$string['crm_work_management_n127a'] = 'Управление';
+$string['crm_work_description_n127a'] = 'Описание';
+$string['crm_work_create_content_n127a'] = 'Содержание Work Item';
+$string['crm_work_create_settings_n127a'] = 'Организация и приоритет';
+$string['crm_work_team_description_n127a'] = 'Описание';
+$string['crm_work_team_empty_n127a'] = 'Команды пока не созданы.';
+$string['crm_work_team_members_n127a'] = 'Участники';
+$string['crm_work_team_no_members_n127a'] = 'В этой команде пока нет участников.';
+
+// Commerce 7.95 N12.7A.1 — Work runtime/history polish.
+$string['crm_work_team_enabled_n127a1'] = 'Активна';
+$string['crm_work_team_disabled_n127a1'] = 'Неактивна';
+$string['crm_work_history_created_n127a1'] = 'Work Item создан';
+$string['crm_work_history_status_changed_n127a1'] = 'Статус изменён';
+$string['crm_work_history_priority_changed_n127a1'] = 'Приоритет изменён';
+$string['crm_work_history_assignment_changed_n127a1'] = 'Назначение изменено';
+$string['crm_work_history_comment_added_n127a1'] = 'Комментарий добавлен';
+$string['crm_work_history_link_added_n127a1'] = 'Ссылка добавлена';
+
+// Commerce 7.95 N12.8A — Administrator Tools workspace polish.
+$string['crm_admin_tools_navigation_n128a'] = 'Навигация административных инструментов';
+$string['crm_admin_tools_group_messaging_n128a'] = 'CRM-почта';
+$string['crm_admin_tools_group_messaging_help_n128a'] = 'Синхронизация, подключение и диагностика входящей почты.';
+$string['crm_admin_tools_group_automation_n128a'] = 'Интеллект и автоматизации';
+$string['crm_admin_tools_group_automation_help_n128a'] = 'Запуск CRM-механизмов, пересчётов и рекомендаций.';
+$string['crm_admin_tools_group_operations_n128a'] = 'Commerce и обслуживание';
+$string['crm_admin_tools_group_operations_help_n128a'] = 'Технические операции с цифровыми платежами и качеством Help Center.';
+$string['crm_admin_tool_execution_context_n128a'] = 'На этой странице выполняется контролируемая административная операция. Уровень риска показывает возможное влияние на данные и процессы CRM.';
+$string['crm_admin_tool_execution_settings_n128a'] = 'Параметры запуска';
+
+// Commerce 7.95 N12.9A — CRM Assistant workspace polish.
+$string['crm_assistant_results_count_n129a'] = 'Рекомендаций по фильтрам: {$a}';
+$string['crm_assistant_per_page_n129a'] = 'На странице';
+$string['crm_assistant_overview_title_n129a'] = 'Состояние CRM Assistant';
+
+// Commerce 7.95 N12.9B — Assistant Customer Success subpages polish.
+$string['csplanoverviewlabel_n129b'] = 'План Customer Success';
+$string['csplanconfirmhelp_n129b'] = 'Проверьте действие перед изменением плана Customer Success.';
+$string['csplanconfirmwarning_n129b'] = 'Это действие изменит сопровождение клиента. Можно вернуться к плану, не применяя изменение.';
+
+// Commerce 7.95 N12.9C — User360 Customer Success plan creation.
+$string['csplancreate_button_n129c'] = 'Создать план';
+$string['csplancreate_title_n129c'] = 'Создать план Customer Success';
+$string['csplancreate_help_n129c'] = 'Подготовьте план сопровождения для {$a}. Перед активацией план будет создан как черновик.';
+$string['csplancreate_success_n129c'] = 'План Customer Success создан.';
+$string['csplancreate_plan_section_n129c'] = 'Цель сопровождения';
+$string['csplancreate_title_field_n129c'] = 'Название плана';
+$string['csplancreate_description_field_n129c'] = 'Описание';
+$string['csplancreate_settings_section_n129c'] = 'Приоритет и срок';
+$string['csplancreate_priority_field_n129c'] = 'Приоритет';
+$string['csplancreate_targetdate_field_n129c'] = 'Общий срок';
+$string['csplancreate_first_step_section_n129c'] = 'Первый этап';
+$string['csplancreate_first_step_help_n129c'] = 'Необязательно: сразу добавьте первое действие.';
+$string['csplancreate_first_step_title_n129c'] = 'Действие';
+$string['csplancreate_first_step_description_n129c'] = 'Описание действия';
+$string['csplancreate_first_step_due_n129c'] = 'Срок этапа';
+$string['csplancreate_submit_n129c'] = 'Создать план';
+
+// Commerce 7.95 N12.9D — AI diagnostics and Customer Success polish.
+$string['csplancreate_new_after_cancel_n129d'] = 'Создать новый план';
+$string['crm_inbox_ai_diag_health_title_n129d'] = 'ИИ-помощник работает';
+$string['crm_inbox_ai_diag_health_detail_n129d'] = 'Пройдено проверок: {$a->ok} из {$a->total}.';
+$string['crm_inbox_ai_usage_global_label_n129d'] = 'Общий лимит сегодня';
+$string['crm_inbox_ai_usage_user_label_n129d'] = 'Ваш лимит сегодня';
+$string['crm_inbox_ai_failures_label_n129d'] = 'Ошибки сегодня';
+$string['crm_inbox_ai_diag_checks_title_n129d'] = 'Состояние конфигурации';
+$string['crm_inbox_ai_diag_checks_help_n129d'] = 'Технические проверки хранилища, ИИ-провайдера и оркестратора.';
+$string['crm_inbox_ai_diag_usage_help_n129d'] = 'Использование лимитов ИИ за текущий день.';
+
+// Commerce 7.95 N12.10A — Help diagnostics and Inbox AI navigation polish.
+$string['crm_nav_inbox_ai_diagnostics_n1210a'] = 'Диагностика ИИ';
+$string['crm_help_diagnostics_health_ok_n1210a'] = 'Центр помощи согласован';
+$string['crm_help_diagnostics_health_attention_n1210a'] = 'Требуются исправления';
+$string['crm_help_diagnostics_health_detail_n1210a'] = 'Проверок: {$a->total} · ошибок: {$a->errors} · предупреждений: {$a->warnings}';
+$string['crm_help_diagnostics_errors_help_n1210a'] = 'Критические проблемы или отсутствующие материалы, которые нужно исправить.';
+$string['crm_help_diagnostics_warnings_help_n1210a'] = 'Несоответствия или проблемы перевода, которые стоит проверить.';
+$string['crm_help_diagnostics_successes_help_n1210a'] = 'Успешно пройденные проверки. Раздел по умолчанию свернут.';
+
+// Commerce 7.95 N12.10B — Help Center homepage polish.
+$string['crm_help_quick_navigation_n1210b'] = 'Быстрые ссылки Центра помощи';
+
+// Commerce 7.95 N12.10C — missing Commerce configuration labels.
+$string['commerce_configuration_setting_alfa_env'] = 'Среда Alfa';
+$string['commerce_configuration_setting_alfa_reconciliation_batch_size'] = 'Размер пакета Alfa';
+$string['commerce_configuration_setting_alfa_reconciliation_cron_enabled'] = 'Сверка Alfa';
+$string['commerce_configuration_setting_availability_mode'] = 'Доступность Commerce';
+$string['commerce_configuration_setting_brand_logo_url'] = 'Логотип бренда';
+$string['commerce_configuration_setting_commerce_enabled_currencies'] = 'Активные валюты';
+$string['commerce_configuration_setting_commerce_fulfillment_shadow_enabled'] = 'Теневой fulfillment';
+$string['commerce_configuration_setting_commerce_mail_audit_batch_size'] = 'Размер пакета аудита писем';
+$string['commerce_configuration_setting_commerce_mail_audit_copy_address'] = 'Адрес копии аудита писем';
+$string['commerce_configuration_setting_commerce_mail_audit_copy_enabled'] = 'Копия аудита писем';
+$string['commerce_configuration_setting_commerce_mail_audit_hourly_limit'] = 'Лимит аудита писем в час';
+$string['commerce_configuration_setting_commerce_native_reconciliation_enabled'] = 'Нативная сверка';
+$string['commerce_configuration_setting_commerce_native_repair_enabled'] = 'Нативное исправление';
+$string['commerce_configuration_setting_commerce_runtime_mode'] = 'Основной runtime';
+$string['commerce_configuration_setting_commerce_runtime_native_fallback_enabled'] = 'Нативный fallback';
+$string['commerce_configuration_setting_commerce_runtime_read_mode'] = 'Режим чтения';
+$string['commerce_configuration_setting_commerce_runtime_read_strict'] = 'Строгое чтение';
+$string['commerce_configuration_setting_defaultemaillang'] = 'Язык писем по умолчанию';
+$string['commerce_configuration_setting_defaultuserlang'] = 'Язык аккаунтов по умолчанию';
+$string['commerce_configuration_setting_display_currency_symbols'] = 'Символы валют';
+$string['commerce_configuration_setting_email_copy_to'] = 'Копия писем';
+$string['commerce_configuration_setting_expire_pending_after_minutes'] = 'Срок ожидания платежа';
+$string['commerce_configuration_setting_featured_planid'] = 'Рекомендуемый план';
+$string['commerce_configuration_setting_guest_checkout_cleanup_age_days'] = 'Возраст перед очисткой (дни)';
+$string['commerce_configuration_setting_guest_checkout_cleanup_enabled'] = 'Очистка гостевых checkout';
+$string['commerce_configuration_setting_offer_url_row'] = 'Публичное предложение — другие регионы';
+$string['commerce_configuration_setting_offer_url_ru'] = 'Публичное предложение — Россия';
+$string['commerce_configuration_setting_payments_lock_strict'] = 'Строгая блокировка платежей';
+$string['commerce_configuration_setting_payments_mismatch_tolerance_cents'] = 'Допуск расхождения платежа (центы)';
+$string['commerce_configuration_setting_personal_offer_mail_batch_size'] = 'Размер пакета кампаний';
+$string['commerce_configuration_setting_personal_offer_mail_hourly_limit'] = 'Лимит кампаний в час';
+$string['commerce_configuration_setting_policy_url_row'] = 'Политика конфиденциальности — другие регионы';
+$string['commerce_configuration_setting_policy_url_ru'] = 'Политика конфиденциальности — Россия';
+$string['commerce_configuration_setting_provider_default'] = 'Провайдер по умолчанию';
+$string['commerce_configuration_setting_reminder1_after_minutes'] = 'Первое напоминание';
+$string['commerce_configuration_setting_reminder2_after_minutes'] = 'Второе напоминание';
+$string['commerce_configuration_setting_storefront_ai_translation_enabled'] = 'ИИ-перевод Storefront';
+$string['commerce_configuration_setting_stripe_env'] = 'Среда Stripe';
+$string['commerce_configuration_setting_stripe_reconciliation_batch_size'] = 'Размер пакета Stripe';
+$string['commerce_configuration_setting_stripe_reconciliation_cron_enabled'] = 'Сверка Stripe';
+$string['commerce_configuration_setting_support_email'] = 'E-mail поддержки';
+$string['commerce_configuration_setting_terms_url_row'] = 'Условия — другие регионы';
+$string['commerce_configuration_setting_terms_url_ru'] = 'Условия — Россия';
+
+// Commerce 7.95 N12.10C — localized Help Center diagnostic messages.
+$string['crm_help_diag_msg_content_dir_missing_n1210c'] = 'Каталог материалов Центра помощи не существует: {$a}';
+$string['crm_help_diag_msg_content_dir_unreadable_n1210c'] = 'Каталог материалов Центра помощи недоступен для чтения: {$a}';
+$string['crm_help_diag_msg_content_dir_ok_n1210c'] = 'Каталог материалов Центра помощи доступен.';
+$string['crm_help_diag_msg_language_dir_missing_n1210c'] = 'Отсутствует языковой каталог Центра помощи: {$a}';
+$string['crm_help_diag_msg_language_dir_unreadable_n1210c'] = 'Языковой каталог Центра помощи недоступен для чтения: {$a}';
+$string['crm_help_diag_msg_language_dir_ok_n1210c'] = 'Языковой каталог Центра помощи доступен: {$a}';
+$string['crm_help_diag_msg_language_file_unloadable_n1210c'] = 'Не удалось загрузить языковой файл: {$a}';
+$string['crm_help_diag_msg_language_strings_loaded_n1210c'] = 'Загружено строк: {$a->count}, язык: {$a->language}.';
+$string['crm_help_diag_msg_language_key_missing_n1210c'] = 'Отсутствует строка на языке {$a->language}: {$a->key}';
+$string['crm_help_diag_msg_language_key_extra_n1210c'] = 'Строка существует на языке {$a->language}, но отсутствует в английском: {$a->key}';
+$string['crm_help_diag_msg_language_keys_match_n1210c'] = 'Языковой файл {$a} соответствует набору английских ключей.';
+$string['crm_help_diag_msg_no_category_n1210c'] = 'В реестре Центра помощи нет категорий.';
+$string['crm_help_diag_msg_category_empty_id_n1210c'] = 'У категории Центра помощи пустой идентификатор.';
+$string['crm_help_diag_msg_category_duplicate_id_n1210c'] = 'Дублирующийся идентификатор категории: {$a}';
+$string['crm_help_diag_msg_category_empty_title_n1210c'] = 'У категории пустой заголовок: {$a}';
+$string['crm_help_diag_msg_category_no_description_n1210c'] = 'У категории нет описания: {$a}';
+$string['crm_help_diag_msg_categories_validated_n1210c'] = 'Проверено категорий Центра помощи: {$a}.';
+$string['crm_help_diag_msg_no_article_n1210c'] = 'В реестре Центра помощи нет статей.';
+$string['crm_help_diag_msg_articles_validated_n1210c'] = 'Проверено статей Центра помощи: {$a}.';
+$string['crm_help_diag_msg_article_empty_id_n1210c'] = 'У статьи Центра помощи пустой идентификатор.';
+$string['crm_help_diag_msg_article_duplicate_id_n1210c'] = 'Дублирующийся идентификатор статьи: {$a}';
+$string['crm_help_diag_msg_article_unknown_category_n1210c'] = 'Статья «{$a->article}» ссылается на неизвестную категорию «{$a->category}».';
+$string['crm_help_diag_msg_article_empty_title_n1210c'] = 'У статьи пустой заголовок: {$a}';
+$string['crm_help_diag_msg_article_no_summary_n1210c'] = 'У статьи нет краткого описания: {$a}';
+$string['crm_help_diag_msg_article_invalid_filename_n1210c'] = 'Статья «{$a->article}» использует недопустимое имя файла: {$a->file}';
+$string['crm_help_diag_msg_article_invalid_context_n1210c'] = 'Статья «{$a->article}» ссылается на недопустимый контекст «{$a->context}».';
+$string['crm_help_diag_msg_article_no_context_n1210c'] = 'Для статьи не назначен контекст: {$a}';
+$string['crm_help_diag_msg_article_no_keyword_n1210c'] = 'У статьи нет поисковых ключевых слов: {$a}';
+$string['crm_help_diag_msg_markdown_missing_n1210c'] = 'Отсутствует Markdown-файл статьи «{$a->article}» для языка «{$a->language}»: {$a->file}';
+$string['crm_help_diag_msg_markdown_unreadable_n1210c'] = 'Markdown-файл недоступен для чтения: {$a}';
+$string['crm_help_diag_msg_markdown_read_failed_n1210c'] = 'Не удалось прочитать Markdown-файл: {$a}';
+$string['crm_help_diag_msg_markdown_empty_n1210c'] = 'Пустой Markdown-файл: {$a}';
+$string['crm_help_diag_msg_markdown_no_h1_n1210c'] = 'В Markdown-файле нет заголовка первого уровня: {$a}';
+$string['crm_help_diag_msg_markdown_link_missing_n1210c'] = 'Статья «{$a->article}» ({$a->language}) ссылается на отсутствующий Markdown-файл «{$a->target}».';
+$string['crm_help_diag_source_article_n1210c'] = 'Статья {$a->article} ({$a->language})';
+$string['crm_help_diag_msg_markdown_unregistered_n1210c'] = 'Незарегистрированный Markdown-файл: {$a}';
+$string['crm_help_diag_msg_no_guide_n1210c'] = 'В Центре помощи нет практических руководств.';
+$string['crm_help_diag_msg_guides_validated_n1210c'] = 'Проверено практических руководств: {$a}.';
+$string['crm_help_diag_msg_guide_empty_id_n1210c'] = 'У практического руководства пустой идентификатор.';
+$string['crm_help_diag_msg_guide_duplicate_id_n1210c'] = 'Дублирующийся идентификатор руководства: {$a}';
+$string['crm_help_diag_msg_guide_empty_title_n1210c'] = 'У руководства пустой заголовок: {$a}';
+$string['crm_help_diag_msg_guide_no_description_n1210c'] = 'У руководства нет описания: {$a}';
+$string['crm_help_diag_msg_guide_no_step_n1210c'] = 'В руководстве нет этапов: {$a}';
+$string['crm_help_diag_msg_guide_invalid_context_n1210c'] = 'Руководство «{$a->guide}» ссылается на недопустимый контекст «{$a->context}».';
+$string['crm_help_diag_msg_guide_step_empty_id_n1210c'] = 'Руководство «{$a}» содержит этап без идентификатора.';
+$string['crm_help_diag_msg_guide_step_duplicate_n1210c'] = 'Руководство «{$a->guide}» содержит дублирующийся этап «{$a->step}».';
+$string['crm_help_diag_msg_guide_step_empty_title_n1210c'] = 'У этапа руководства пустой заголовок: {$a->guide}/{$a->step}';
+$string['crm_help_diag_msg_guide_step_incomplete_action_n1210c'] = 'У этапа руководства неполное действие: {$a->guide}/{$a->step}';
+$string['crm_help_diag_source_guide_step_n1210c'] = 'Этап руководства {$a->guide}/{$a->step}';
+$string['crm_help_diag_msg_no_onboarding_n1210c'] = 'В Центре помощи нет этапов знакомства с CRM.';
+$string['crm_help_diag_msg_onboarding_invalid_object_n1210c'] = 'Некорректный объект этапа знакомства с CRM.';
+$string['crm_help_diag_msg_onboarding_empty_id_n1210c'] = 'У этапа знакомства с CRM пустой идентификатор.';
+$string['crm_help_diag_msg_onboarding_duplicate_id_n1210c'] = 'Дублирующийся идентификатор этапа знакомства: {$a}';
+$string['crm_help_diag_msg_onboarding_empty_title_n1210c'] = 'У этапа знакомства пустой заголовок: {$a}';
+$string['crm_help_diag_msg_onboarding_no_description_n1210c'] = 'У этапа знакомства нет описания: {$a}';
+$string['crm_help_diag_source_onboarding_step_n1210c'] = 'Этап знакомства {$a}';
+$string['crm_help_diag_msg_onboarding_validated_n1210c'] = 'Проверено этапов знакомства: {$a}.';
+$string['crm_help_diag_msg_missing_page_n1210c'] = '{$a->source} ссылается на отсутствующую страницу: {$a->path}';
+$string['crm_help_diag_msg_unknown_help_article_n1210c'] = '{$a->source} ссылается на неизвестную статью Центра помощи: {$a->article}';
+$string['crm_help_diag_empty_value_n1210c'] = '[пусто]';
+
+// Commerce 7.95 N12.10D — Help Center page UX harmonisation.
+$string['crm_help_internal_navigation_n1210d'] = 'Навигация Центра помощи';
+$string['crm_help_nav_home_n1210d'] = 'Главная';
+$string['crm_help_nav_guides_n1210d'] = 'Практические руководства';
+$string['crm_help_nav_articles_n1210d'] = 'Документация';
+$string['crm_help_nav_diagnostics_n1210d'] = 'Диагностика';
+$string['crm_help_documentation_title_n1210d'] = 'Документация CRM';
+$string['crm_help_documentation_description_n1210d'] = 'Просматривайте статьи по темам, чтобы быстро понять работу экрана, инструмента или процесса.';
+
+// Commerce 7.95 N12.11A — Dashboard information architecture.
+$string['dashboard_n1211_focus_title'] = 'Требует внимания';
+$string['dashboard_n1211_focus_description'] = 'Сигналы и приоритеты, по которым нужно быстро принять решение или выполнить действие.';
+$string['dashboard_n1211_operations_title'] = 'Операционная работа';
+$string['dashboard_n1211_operations_description'] = 'Inbox, задачи и Customer Success в одной рабочей зоне.';
+$string['dashboard_n1211_insights_title'] = 'Аналитика и тенденции';
+$string['dashboard_n1211_insights_description'] = 'CRM Intelligence, воронка, тенденции и предупреждения для понимания изменений.';
+$string['dashboard_n1211_secondary_title'] = 'История и контекст';
+$string['dashboard_n1211_secondary_description'] = 'Недавняя активность и дополнительный контекст без перегрузки основной панели.';
+
+// Commerce 7.95 N12.11B — Dashboard grid and density polish.
+$string['dashboard_onboarding_open_full_n1211b'] = 'Открыть весь маршрут знакомства с CRM →';
+$string['dashboard_team_permissions_count_n1211b'] = 'Активных прав CRM: {$a}';
+$string['dashboard_team_last_access_n1211b'] = 'Последний вход: {$a}';
+
+// Commerce 7.95 final certification — Legacy Access Scope compatibility.
+$string['commerce_scope_legacy_compatibility_title'] = 'Совместимость Legacy';
+$string['commerce_scope_legacy_mapped_readonly_desc'] = 'Этот Legacy-периметр связан с одним или несколькими Native-продуктами Commerce. Старые переводы сохраняются для совместимости и аудита, но больше не являются официальным источником данных.';
+$string['commerce_scope_legacy_unmapped_desc'] = 'Этот периметр всё ещё относится к модели Legacy. Его переводы остаются доступными, пока его не заменит Native-продукт Commerce.';
+$string['commerce_scope_legacy_readonly_notice'] = 'Этот периметр управляется Native Commerce и больше не редактируется через Legacy-редактор.';
+$string['commerce_scope_legacy_readonly_badge'] = 'Только чтение';
+$string['commerce_scope_open_native_products'] = 'Открыть связанные Native-продукты:';
+

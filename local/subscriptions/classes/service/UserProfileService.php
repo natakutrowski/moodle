@@ -7,7 +7,11 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\customer\crm\CommerceCustomerCrmAdapter;
 use local_subscriptions\commerce\customer\readmodel\CommerceCustomerReadService;
+use local_subscriptions\commerce\digital\library\CommerceDigitalLibraryService;
+use local_subscriptions\url\UrlFactory;
 use local_subscriptions\crm\intelligence\core\UserIntelligenceBuilder;
+use local_subscriptions\crm\success\repositories\LevelUpXpRepository;
+use local_subscriptions\crm\success\repositories\MoodleCourseProgressRepository;
 use local_subscriptions\crm\user\UserProfileActionBuilder;
 use local_subscriptions\crm\user\UserProfileLookupResult;
 use local_subscriptions\crm\user\UserProfileNotFoundException;
@@ -61,6 +65,10 @@ final class UserProfileService {
 
         $canviewinbox = Capabilities::can_view_inbox();
         $courses = $this->repository->get_accessible_courses((int)$user->id);
+        $learningprogress = $this->build_learning_progress(
+            (int)$user->id,
+            $courses
+        );
         $noteservice = new UserProfileNoteService($this->repository);
         $tagservice = new UserProfileTagService($this->repository);
         $actionbuilder = new UserProfileActionBuilder();
@@ -79,6 +87,12 @@ final class UserProfileService {
         $digitalpayments = $this->repository->get_digital_payments(
             (int)$user->id,
             (string)$user->email
+        );
+
+        $digitalresources = $this->build_digital_resources(
+            (int)$user->id,
+            (string)$user->email,
+            $digitalpayments
         );
 
         $timelinebuilder = new UserProfileTimelineBuilder();
@@ -126,7 +140,10 @@ final class UserProfileService {
             $intelligence,
             $inbox,
             $commercepurchases,
-            $snapshot->to_array()
+            $snapshot->to_array(),
+            false,
+            $learningprogress,
+            $digitalresources
         );
     }
 
@@ -233,6 +250,10 @@ final class UserProfileService {
             break;
         }
 
+        $digitalresources = $this->build_guest_digital_resources(
+            $digitalpayments
+        );
+
         $model = new UserProfileViewModel(
             $user,
             [],
@@ -249,10 +270,176 @@ final class UserProfileService {
             null,
             $commercepurchases,
             $snapshot->to_array(),
-            true
+            true,
+            [],
+            $digitalresources
         );
 
         return $model;
+    }
+
+    /**
+     * Build a support-friendly digital library read model.
+     *
+     * Native resources expose download count / latest download where the
+     * Commerce delivery layer has this information. Legacy resources remain
+     * usable even when download history was never tracked.
+     */
+    private function build_digital_resources(
+        int $userid,
+        string $email,
+        array $digitalpayments
+    ): array {
+        try {
+            $library = CommerceDigitalLibraryService::create()
+                ->get_for_customer(
+                    $userid,
+                    $email
+                );
+
+            return array_map(
+                static function ($resource): array {
+                    $row = $resource->export();
+                    $row['purchasedat'] =
+                        (int)$resource->purchasedat;
+                    $row['purchaseddate'] =
+                        $resource->purchasedat > 0
+                            ? userdate(
+                                $resource->purchasedat,
+                                get_string(
+                                    'strftimedateshort',
+                                    'langconfig'
+                                )
+                            )
+                            : '';
+
+                    return $row;
+                },
+                $library->get_resources()
+            );
+        } catch (\Throwable $exception) {
+            // Support presentation enrichment only.
+            return $this->build_guest_digital_resources(
+                $digitalpayments
+            );
+        }
+    }
+
+    private function build_guest_digital_resources(
+        array $digitalpayments
+    ): array {
+        $resources = [];
+
+        foreach ($digitalpayments as $purchase) {
+            $status = strtoupper(
+                trim((string)($purchase->status ?? ''))
+            );
+            if (
+                !in_array(
+                    $status,
+                    ['PAID', 'COMPLETED'],
+                    true
+                )
+            ) {
+                continue;
+            }
+
+            $token = trim(
+                (string)($purchase->download_token ?? '')
+            );
+            if ($token === '') {
+                continue;
+            }
+
+            $title = trim(
+                (string)(
+                    $purchase->productname
+                    ?? $purchase->title
+                    ?? $purchase->name
+                    ?? ''
+                )
+            );
+            if ($title === '') {
+                $title = get_string(
+                    'crm_user360_n115c_digital_resource',
+                    'local_subscriptions'
+                );
+            }
+
+            $downloads = [
+                [
+                    'label' => get_string(
+                        'digital_download_classic',
+                        'local_subscriptions'
+                    ),
+                    'url' => UrlFactory::digital_download(
+                        ['token' => $token]
+                    )->out(false),
+                    'variant' => 'desktop',
+                    'available' => true,
+                    'downloadcount' => null,
+                    'historyavailable' => false,
+                    'hasdownloadhistory' => false,
+                    'haslastdownload' => false,
+                    'lastdownloaddate' => '',
+                ],
+            ];
+
+            $mobile = trim(
+                (string)($purchase->mobile_filename ?? '')
+            );
+            if ($mobile !== '') {
+                $downloads[] = [
+                    'label' => get_string(
+                        'digital_download_mobile',
+                        'local_subscriptions'
+                    ),
+                    'url' => UrlFactory::digital_download(
+                        [
+                            'token' => $token,
+                            'version' => 'mobile',
+                        ]
+                    )->out(false),
+                    'variant' => 'mobile',
+                    'available' => true,
+                    'downloadcount' => null,
+                    'historyavailable' => false,
+                    'hasdownloadhistory' => false,
+                    'haslastdownload' => false,
+                    'lastdownloaddate' => '',
+                ];
+            }
+
+            $purchasedat = (int)(
+                $purchase->payment_date
+                ?? $purchase->creation_date
+                ?? 0
+            );
+
+            $resources[] = [
+                'key' =>
+                    'legacy:' . (int)($purchase->id ?? 0),
+                'title' => $title,
+                'producturl' => null,
+                'hasproducturl' => false,
+                'downloads' => $downloads,
+                'downloadcount' => count($downloads),
+                'hasdownloads' => true,
+                'purchasedat' => $purchasedat,
+                'purchaseddate' =>
+                    $purchasedat > 0
+                        ? userdate(
+                            $purchasedat,
+                            get_string(
+                                'strftimedateshort',
+                                'langconfig'
+                            )
+                        )
+                        : '',
+            ];
+        }
+
+        return $resources;
     }
 
     /**
@@ -295,6 +482,87 @@ final class UserProfileService {
             0,
             true
         );
+    }
+
+    /**
+     * Builds the support-facing course progress summary.
+     *
+     * @param \stdClass[] $courses
+     * @return \stdClass[]
+     */
+    private function build_learning_progress(
+        int $userid,
+        array $courses
+    ): array {
+        if ($userid <= 0 || $courses === []) {
+            return [];
+        }
+
+        $courseids = array_values(array_map(
+            static fn(\stdClass $course): int => (int)$course->id,
+            $courses
+        ));
+
+        $progress = (new MoodleCourseProgressRepository())
+            ->get_course_progress_records($userid, $courseids);
+        $xp = (new LevelUpXpRepository())
+            ->get_course_scope_records($userid, $courseids);
+
+        $result = [];
+        foreach ($courses as $course) {
+            $courseid = (int)$course->id;
+            $courseprogress = $progress[$courseid] ?? null;
+            $xprecord = $xp[$courseid] ?? null;
+
+            $lastactivityname = '';
+            $lastcoursemoduleid =
+                (int)($courseprogress?->lastcoursemoduleid ?? 0);
+
+            if ($lastcoursemoduleid > 0) {
+                try {
+                    $modinfo = get_fast_modinfo(
+                        $courseid,
+                        $userid
+                    );
+
+                    $cm = $modinfo->get_cm(
+                        $lastcoursemoduleid
+                    );
+
+                    $lastactivityname =
+                        trim((string)$cm->name);
+                } catch (\Throwable $exception) {
+                    // Presentation enrichment only: progress must remain usable
+                    // even if one activity can no longer be resolved.
+                    $lastactivityname = '';
+                }
+            }
+
+            $result[] = (object)[
+                'courseid' => $courseid,
+                'fullname' => (string)($course->fullname ?? ''),
+                'shortname' => (string)($course->shortname ?? ''),
+                'accessstart' => (int)($course->timestart ?? 0),
+                'accessend' => (int)($course->timeend ?? 0),
+                'progresspercentage' => $courseprogress?->progresspercentage,
+                'trackedactivities' => (int)($courseprogress?->trackedactivities ?? 0),
+                'completedactivities' => (int)($courseprogress?->completedactivities ?? 0),
+                'lastcompletionat' => (int)($courseprogress?->lastcompletionat ?? 0),
+                'lastcoursemoduleid' => $lastcoursemoduleid,
+                'lastactivityname' => $lastactivityname,
+                'lastactivityat' => (int)($courseprogress?->lastactivityat ?? 0),
+                'coursecompleted' => (bool)($courseprogress?->coursecompleted ?? false),
+                'coursecompletedat' => (int)($courseprogress?->coursecompletedat ?? 0),
+                'xpavailable' => (bool)($xprecord?->available ?? false),
+                'xpenabled' => (bool)($xprecord?->enabled ?? false),
+                'xpscope' => (string)($xprecord?->scope ?? 'none'),
+                'xp' => (int)($xprecord?->xp ?? 0),
+                'xplevel' => (int)($xprecord?->level ?? 0),
+                'xplevelprogresspercentage' => $xprecord?->levelprogresspercentage,
+            ];
+        }
+
+        return $result;
     }
 
     private function legacy_crm_status(int $userid): string {

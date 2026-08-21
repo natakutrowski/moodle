@@ -130,15 +130,27 @@ final class DashboardPersonalizationRenderer {
                     'local_subscriptions'
                 ),
 
-            DashboardWorkspaceFactory::ZONE_MAIN =>
+            DashboardWorkspaceFactory::ZONE_FOCUS =>
                 get_string(
-                    'dashboard_personalization_zone_main',
+                    'dashboard_n1211_focus_title',
                     'local_subscriptions'
                 ),
 
-            DashboardWorkspaceFactory::ZONE_SIDE =>
+            DashboardWorkspaceFactory::ZONE_OPERATIONS =>
                 get_string(
-                    'dashboard_personalization_zone_side',
+                    'dashboard_n1211_operations_title',
+                    'local_subscriptions'
+                ),
+
+            DashboardWorkspaceFactory::ZONE_INSIGHTS =>
+                get_string(
+                    'dashboard_n1211_insights_title',
+                    'local_subscriptions'
+                ),
+
+            DashboardWorkspaceFactory::ZONE_SECONDARY =>
+                get_string(
+                    'dashboard_n1211_secondary_title',
                     'local_subscriptions'
                 ),
         ];

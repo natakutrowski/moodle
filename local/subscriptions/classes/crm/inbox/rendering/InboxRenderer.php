@@ -498,11 +498,13 @@ final class InboxRenderer {
         );
 
         $out .= html_writer::start_div(
-            'd-flex justify-content-between gap-3'
+            'd-flex justify-content-between gap-2 '
+            . 'crm-inbox-thread-card-layout'
         );
 
         $out .= html_writer::start_div(
-            'flex-grow-1'
+            'flex-grow-1 min-w-0 '
+            . 'crm-inbox-thread-card-main'
         );
 
         $out .= html_writer::link(
@@ -550,7 +552,12 @@ final class InboxRenderer {
         $out .= html_writer::end_div();
 
         $out .= html_writer::start_div(
-            'text-end flex-shrink-0'
+            'text-end flex-shrink-0 '
+            . 'crm-inbox-thread-card-meta'
+        );
+
+        $out .= html_writer::start_div(
+            'crm-inbox-thread-badges'
         );
 
         $out .= html_writer::span(
@@ -566,13 +573,13 @@ final class InboxRenderer {
         );
 
         if ((int)$thread->unreadcount > 0) {
-            $out .= html_writer::div(
+            $out .= html_writer::span(
                 get_string(
-                    'crm_inbox_unread_count',
+                    'crm_inbox_unread_count_compact',
                     'local_subscriptions',
                     (int)$thread->unreadcount
                 ),
-                'badge bg-primary',
+                'badge bg-primary crm-inbox-unread-badge',
                 [
                     'aria-label' => get_string(
                         'crm_inbox_unread_count_accessible',
@@ -582,6 +589,8 @@ final class InboxRenderer {
                 ]
             );
         }
+
+        $out .= html_writer::end_div();
 
         if (!empty($thread->lastmessageat)) {
             $out .= html_writer::div(

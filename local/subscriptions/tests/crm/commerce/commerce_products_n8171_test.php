@@ -11,7 +11,8 @@ use advanced_testcase;
 final class commerce_products_n8171_test extends advanced_testcase {
     public function test_builder_uses_resolved_product_name_in_header(): void {
         $source = file_get_contents(
-            __DIR__ . '/../../../admin/commerce/products/storefront_builder.php'
+            __DIR__
+            . '/../../../admin/commerce/products/storefront_builder.php'
         );
 
         self::assertIsString($source);
@@ -20,7 +21,11 @@ final class commerce_products_n8171_test extends advanced_testcase {
             $source
         );
         self::assertStringContainsString(
-            "    \$displayname\n);",
+            'CommerceProductPageHeaderRenderer::render(',
+            $source
+        );
+        self::assertStringContainsString(
+            ") . ' — ' . \$displayname",
             $source
         );
     }

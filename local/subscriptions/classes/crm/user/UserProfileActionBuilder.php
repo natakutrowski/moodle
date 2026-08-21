@@ -53,28 +53,13 @@ final class UserProfileActionBuilder {
         }, $this->build_for_user($user));
     }
 
-    public function build_for_profile(\stdClass $user, array $digitalpayments = []): array {
-        $actions = $this->build_for_user($user);
-
-        foreach ($digitalpayments as $purchase) {
-            if (empty($purchase->id)) {
-                continue;
-            }
-
-            $actions[] = new UserProfileAction(
-                'purchase_resend_' . (int)$purchase->id,
-                get_string('command_action_purchase_resend_email', 'local_subscriptions') . ' #' . (int)$purchase->id,
-                (new \moodle_url(subscription_config::digital_purchase_resend_email_admin_page(), [
-                    'id' => (int)$purchase->id,
-                ]))->out(false),
-                'email',
-                'secondary'
-            );
-
-            break;
-        }
-
-        return $actions;
+    public function build_for_profile(
+        \stdClass $user,
+        array $digitalpayments = []
+    ): array {
+        // Digital purchase delivery actions belong to Commerce advanced,
+        // where the existing action includes sesskey and the correct return URL.
+        return $this->build_for_user($user);
     }
 
 }

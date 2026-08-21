@@ -70,7 +70,7 @@ final class commerce_storefront_editorial_builder_l44a_test extends \advanced_te
 
         $source = file_get_contents(
             $CFG->dirroot
-            . '/local/subscriptions/admin/commerce/products/storefront.php'
+            . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
         $editor = file_get_contents(
             $CFG->dirroot

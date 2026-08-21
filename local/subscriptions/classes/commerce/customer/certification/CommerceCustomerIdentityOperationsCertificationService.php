@@ -108,8 +108,9 @@ final class CommerceCustomerIdentityOperationsCertificationService {
         );
         $checks[] = $this->check(
             str_contains($mergepage, 'CommerceCustomerMergePlanner')
-                && str_contains($mergepage, 'commerce_identity_merge_virtual_profile')
-                && str_contains($mergepage, 'targetuserid'),
+                && str_contains($mergepage, "'name' => 'targetuserid'")
+                && str_contains($mergepage, "'name' => 'preferredidentityuserid'")
+                && str_contains($mergepage, 'CommerceCustomerMergeFinalStateRenderer::render'),
             'M4.2C',
             'Virtual merge profile',
             'Administrators can preview the final account and manually override the recommended primary account.'

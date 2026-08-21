@@ -54,8 +54,11 @@ final class HelpCenterValidator {
 
         if (!is_dir($directory)) {
             $result->add_error(
-                'Help content directory does not exist: ' .
-                $directory
+                get_string(
+                    'crm_help_diag_msg_content_dir_missing_n1210c',
+                    'local_subscriptions',
+                    $directory
+                )
             );
 
             return;
@@ -63,15 +66,21 @@ final class HelpCenterValidator {
 
         if (!is_readable($directory)) {
             $result->add_error(
-                'Help content directory is not readable: ' .
-                $directory
+                get_string(
+                    'crm_help_diag_msg_content_dir_unreadable_n1210c',
+                    'local_subscriptions',
+                    $directory
+                )
             );
 
             return;
         }
 
         $result->add_success(
-            'Help content directory is available.'
+            get_string(
+                'crm_help_diag_msg_content_dir_ok_n1210c',
+                'local_subscriptions'
+            )
         );
 
         foreach (self::LANGUAGES as $language) {
@@ -79,8 +88,11 @@ final class HelpCenterValidator {
 
             if (!is_dir($languagedirectory)) {
                 $result->add_error(
-                    'Missing help language directory: ' .
-                    $languagedirectory
+                    get_string(
+                        'crm_help_diag_msg_language_dir_missing_n1210c',
+                        'local_subscriptions',
+                        $languagedirectory
+                    )
                 );
 
                 continue;
@@ -88,16 +100,22 @@ final class HelpCenterValidator {
 
             if (!is_readable($languagedirectory)) {
                 $result->add_error(
-                    'Help language directory is not readable: ' .
-                    $languagedirectory
+                    get_string(
+                        'crm_help_diag_msg_language_dir_unreadable_n1210c',
+                        'local_subscriptions',
+                        $languagedirectory
+                    )
                 );
 
                 continue;
             }
 
             $result->add_success(
-                'Help language directory is available: ' .
-                $language
+                get_string(
+                    'crm_help_diag_msg_language_dir_ok_n1210c',
+                    'local_subscriptions',
+                    $language
+                )
             );
         }
     }
@@ -115,8 +133,11 @@ final class HelpCenterValidator {
 
             if ($strings === null) {
                 $result->add_error(
-                    'Unable to load language file: ' .
-                    $language
+                    get_string(
+                        'crm_help_diag_msg_language_file_unloadable_n1210c',
+                        'local_subscriptions',
+                        $language
+                    )
                 );
 
                 continue;
@@ -126,10 +147,13 @@ final class HelpCenterValidator {
                 $strings;
 
             $result->add_success(
-                sprintf(
-                    '%d language strings loaded for %s.',
-                    count($strings),
-                    $language
+                get_string(
+                    'crm_help_diag_msg_language_strings_loaded_n1210c',
+                    'local_subscriptions',
+                    (object)[
+                        'count' => count($strings),
+                        'language' => $language,
+                    ]
                 )
             );
         }
@@ -183,28 +207,35 @@ final class HelpCenterValidator {
 
             foreach ($missing as $key) {
                 $result->add_error(
-                    sprintf(
-                        'Missing language string in %s: %s',
-                        $language,
-                        $key
+                    get_string(
+                        'crm_help_diag_msg_language_key_missing_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'language' => $language,
+                            'key' => $key,
+                        ]
                     )
                 );
             }
 
             foreach ($extra as $key) {
                 $result->add_warning(
-                    sprintf(
-                        'Language string exists in %s but not in en: %s',
-                        $language,
-                        $key
+                    get_string(
+                        'crm_help_diag_msg_language_key_extra_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'language' => $language,
+                            'key' => $key,
+                        ]
                     )
                 );
             }
 
             if (!$missing && !$extra) {
                 $result->add_success(
-                    sprintf(
-                        'Language file %s matches the English key set.',
+                    get_string(
+                        'crm_help_diag_msg_language_keys_match_n1210c',
+                        'local_subscriptions',
                         $language
                     )
                 );
@@ -259,7 +290,10 @@ final class HelpCenterValidator {
 
         if (!$categories) {
             $result->add_error(
-                'The help registry contains no category.'
+                get_string(
+                    'crm_help_diag_msg_no_category_n1210c',
+                    'local_subscriptions'
+                )
             );
 
             return;
@@ -270,7 +304,10 @@ final class HelpCenterValidator {
         foreach ($categories as $category) {
             if ($category->id === '') {
                 $result->add_error(
-                    'A help category has an empty identifier.'
+                    get_string(
+                        'crm_help_diag_msg_category_empty_id_n1210c',
+                        'local_subscriptions'
+                    )
                 );
 
                 continue;
@@ -278,8 +315,11 @@ final class HelpCenterValidator {
 
             if (isset($ids[$category->id])) {
                 $result->add_error(
-                    'Duplicate help category identifier: ' .
-                    $category->id
+                    get_string(
+                        'crm_help_diag_msg_category_duplicate_id_n1210c',
+                        'local_subscriptions',
+                        $category->id
+                    )
                 );
             }
 
@@ -287,22 +327,31 @@ final class HelpCenterValidator {
 
             if ($category->title === '') {
                 $result->add_error(
-                    'Help category has an empty title: ' .
-                    $category->id
+                    get_string(
+                        'crm_help_diag_msg_category_empty_title_n1210c',
+                        'local_subscriptions',
+                        $category->id
+                    )
                 );
             }
 
             if ($category->description === '') {
                 $result->add_warning(
-                    'Help category has no description: ' .
-                    $category->id
+                    get_string(
+                        'crm_help_diag_msg_category_no_description_n1210c',
+                        'local_subscriptions',
+                        $category->id
+                    )
                 );
             }
         }
 
         $result->add_success(
-            count($categories) .
-            ' help categories validated.'
+            get_string(
+                'crm_help_diag_msg_categories_validated_n1210c',
+                'local_subscriptions',
+                count($categories)
+            )
         );
     }
 
@@ -313,7 +362,10 @@ final class HelpCenterValidator {
 
         if (!$articles) {
             $result->add_error(
-                'The help registry contains no article.'
+                get_string(
+                    'crm_help_diag_msg_no_article_n1210c',
+                    'local_subscriptions'
+                )
             );
 
             return;
@@ -335,8 +387,11 @@ final class HelpCenterValidator {
         );
 
         $result->add_success(
-            count($articles) .
-            ' help articles validated.'
+            get_string(
+                'crm_help_diag_msg_articles_validated_n1210c',
+                'local_subscriptions',
+                count($articles)
+            )
         );
     }
 
@@ -347,7 +402,10 @@ final class HelpCenterValidator {
     ): void {
         if ($article->id === '') {
             $result->add_error(
-                'A help article has an empty identifier.'
+                get_string(
+                    'crm_help_diag_msg_article_empty_id_n1210c',
+                    'local_subscriptions'
+                )
             );
 
             return;
@@ -355,8 +413,11 @@ final class HelpCenterValidator {
 
         if (isset($ids[$article->id])) {
             $result->add_error(
-                'Duplicate help article identifier: ' .
-                $article->id
+                get_string(
+                    'crm_help_diag_msg_article_duplicate_id_n1210c',
+                    'local_subscriptions',
+                    $article->id
+                )
             );
         }
 
@@ -368,25 +429,34 @@ final class HelpCenterValidator {
             ) === null
         ) {
             $result->add_error(
-                'Article "' .
-                $article->id .
-                '" references unknown category "' .
-                $article->categoryid .
-                '".'
+                get_string(
+                    'crm_help_diag_msg_article_unknown_category_n1210c',
+                    'local_subscriptions',
+                    (object)[
+                        'article' => $article->id,
+                        'category' => $article->categoryid,
+                    ]
+                )
             );
         }
 
         if ($article->title === '') {
             $result->add_error(
-                'Article has an empty title: ' .
-                $article->id
+                get_string(
+                    'crm_help_diag_msg_article_empty_title_n1210c',
+                    'local_subscriptions',
+                    $article->id
+                )
             );
         }
 
         if ($article->summary === '') {
             $result->add_warning(
-                'Article has no summary: ' .
-                $article->id
+                get_string(
+                    'crm_help_diag_msg_article_no_summary_n1210c',
+                    'local_subscriptions',
+                    $article->id
+                )
             );
         }
 
@@ -397,10 +467,14 @@ final class HelpCenterValidator {
             ) !== 1
         ) {
             $result->add_error(
-                'Article "' .
-                $article->id .
-                '" has an invalid content filename: ' .
-                $article->contentfile
+                get_string(
+                    'crm_help_diag_msg_article_invalid_filename_n1210c',
+                    'local_subscriptions',
+                    (object)[
+                        'article' => $article->id,
+                        'file' => $article->contentfile,
+                    ]
+                )
             );
         }
 
@@ -413,26 +487,35 @@ final class HelpCenterValidator {
                 )
             ) {
                 $result->add_error(
-                    'Article "' .
-                    $article->id .
-                    '" references invalid context "' .
-                    $context .
-                    '".'
+                    get_string(
+                        'crm_help_diag_msg_article_invalid_context_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'article' => $article->id,
+                            'context' => $context,
+                        ]
+                    )
                 );
             }
         }
 
         if (!$article->contexts) {
             $result->add_warning(
-                'Article has no contextual assignment: ' .
-                $article->id
+                get_string(
+                    'crm_help_diag_msg_article_no_context_n1210c',
+                    'local_subscriptions',
+                    $article->id
+                )
             );
         }
 
         if (!$article->keywords) {
             $result->add_warning(
-                'Article has no search keyword: ' .
-                $article->id
+                get_string(
+                    'crm_help_diag_msg_article_no_keyword_n1210c',
+                    'local_subscriptions',
+                    $article->id
+                )
             );
         }
 
@@ -445,12 +528,15 @@ final class HelpCenterValidator {
 
             if (!is_file($filepath)) {
                 $result->add_error(
-                    'Missing Markdown file for article "' .
-                    $article->id .
-                    '" in language "' .
-                    $language .
-                    '": ' .
-                    $filepath
+                    get_string(
+                        'crm_help_diag_msg_markdown_missing_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'article' => $article->id,
+                            'language' => $language,
+                            'file' => $filepath,
+                        ]
+                    )
                 );
 
                 continue;
@@ -458,8 +544,11 @@ final class HelpCenterValidator {
 
             if (!is_readable($filepath)) {
                 $result->add_error(
-                    'Unreadable Markdown file: ' .
-                    $filepath
+                    get_string(
+                        'crm_help_diag_msg_markdown_unreadable_n1210c',
+                        'local_subscriptions',
+                        $filepath
+                    )
                 );
 
                 continue;
@@ -469,8 +558,11 @@ final class HelpCenterValidator {
 
             if ($content === false) {
                 $result->add_error(
-                    'Unable to read Markdown file: ' .
-                    $filepath
+                    get_string(
+                        'crm_help_diag_msg_markdown_read_failed_n1210c',
+                        'local_subscriptions',
+                        $filepath
+                    )
                 );
 
                 continue;
@@ -478,8 +570,11 @@ final class HelpCenterValidator {
 
             if (trim($content) === '') {
                 $result->add_error(
-                    'Empty Markdown file: ' .
-                    $filepath
+                    get_string(
+                        'crm_help_diag_msg_markdown_empty_n1210c',
+                        'local_subscriptions',
+                        $filepath
+                    )
                 );
 
                 continue;
@@ -492,8 +587,11 @@ final class HelpCenterValidator {
                 ) !== 1
             ) {
                 $result->add_warning(
-                    'Markdown file has no level-one heading: ' .
-                    $filepath
+                    get_string(
+                        'crm_help_diag_msg_markdown_no_h1_n1210c',
+                        'local_subscriptions',
+                        $filepath
+                    )
                 );
             }
 
@@ -570,11 +668,14 @@ final class HelpCenterValidator {
 
                 if (!is_file($filepath)) {
                     $result->add_error(
-                        sprintf(
-                            'Article "%s" in %s references missing Markdown file "%s".',
-                            $article->id,
-                            $language,
-                            $target
+                        get_string(
+                            'crm_help_diag_msg_markdown_link_missing_n1210c',
+                            'local_subscriptions',
+                            (object)[
+                                'article' => $article->id,
+                                'language' => $language,
+                                'target' => $target,
+                            ]
                         )
                     );
                 }
@@ -592,10 +693,13 @@ final class HelpCenterValidator {
                     new moodle_url(
                         $targetpath
                     ),
-                    sprintf(
-                        'Article %s (%s)',
-                        $article->id,
-                        $language
+                    get_string(
+                        'crm_help_diag_source_article_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'article' => $article->id,
+                            'language' => $language,
+                        ]
                     ),
                     $result
                 );
@@ -636,8 +740,11 @@ final class HelpCenterValidator {
 
                 if (!isset($registered[$filename])) {
                     $result->add_warning(
-                        'Unregistered Markdown file: ' .
-                        $filepath
+                        get_string(
+                            'crm_help_diag_msg_markdown_unregistered_n1210c',
+                            'local_subscriptions',
+                            $filepath
+                        )
                     );
                 }
             }
@@ -651,7 +758,10 @@ final class HelpCenterValidator {
 
         if (!$guides) {
             $result->add_warning(
-                'The Help Center contains no practical guide.'
+                get_string(
+                    'crm_help_diag_msg_no_guide_n1210c',
+                    'local_subscriptions'
+                )
             );
 
             return;
@@ -668,8 +778,11 @@ final class HelpCenterValidator {
         }
 
         $result->add_success(
-            count($guides) .
-            ' practical guides validated.'
+            get_string(
+                'crm_help_diag_msg_guides_validated_n1210c',
+                'local_subscriptions',
+                count($guides)
+            )
         );
     }
 
@@ -680,7 +793,10 @@ final class HelpCenterValidator {
     ): void {
         if ($guide->id === '') {
             $result->add_error(
-                'A practical guide has an empty identifier.'
+                get_string(
+                    'crm_help_diag_msg_guide_empty_id_n1210c',
+                    'local_subscriptions'
+                )
             );
 
             return;
@@ -688,8 +804,11 @@ final class HelpCenterValidator {
 
         if (isset($guideids[$guide->id])) {
             $result->add_error(
-                'Duplicate practical guide identifier: ' .
-                $guide->id
+                get_string(
+                    'crm_help_diag_msg_guide_duplicate_id_n1210c',
+                    'local_subscriptions',
+                    $guide->id
+                )
             );
         }
 
@@ -697,22 +816,31 @@ final class HelpCenterValidator {
 
         if ($guide->title === '') {
             $result->add_error(
-                'Guide has an empty title: ' .
-                $guide->id
+                get_string(
+                    'crm_help_diag_msg_guide_empty_title_n1210c',
+                    'local_subscriptions',
+                    $guide->id
+                )
             );
         }
 
         if ($guide->description === '') {
             $result->add_warning(
-                'Guide has no description: ' .
-                $guide->id
+                get_string(
+                    'crm_help_diag_msg_guide_no_description_n1210c',
+                    'local_subscriptions',
+                    $guide->id
+                )
             );
         }
 
         if (!$guide->steps) {
             $result->add_error(
-                'Guide has no step: ' .
-                $guide->id
+                get_string(
+                    'crm_help_diag_msg_guide_no_step_n1210c',
+                    'local_subscriptions',
+                    $guide->id
+                )
             );
 
             return;
@@ -727,11 +855,14 @@ final class HelpCenterValidator {
                 )
             ) {
                 $result->add_error(
-                    'Guide "' .
-                    $guide->id .
-                    '" references invalid context "' .
-                    $context .
-                    '".'
+                    get_string(
+                        'crm_help_diag_msg_guide_invalid_context_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'guide' => $guide->id,
+                            'context' => $context,
+                        ]
+                    )
                 );
             }
         }
@@ -741,9 +872,11 @@ final class HelpCenterValidator {
         foreach ($guide->steps as $step) {
             if ($step->id === '') {
                 $result->add_error(
-                    'Guide "' .
-                    $guide->id .
-                    '" contains a step with no identifier.'
+                    get_string(
+                        'crm_help_diag_msg_guide_step_empty_id_n1210c',
+                        'local_subscriptions',
+                        $guide->id
+                    )
                 );
 
                 continue;
@@ -751,11 +884,14 @@ final class HelpCenterValidator {
 
             if (isset($stepids[$step->id])) {
                 $result->add_error(
-                    'Guide "' .
-                    $guide->id .
-                    '" contains duplicate step "' .
-                    $step->id .
-                    '".'
+                    get_string(
+                        'crm_help_diag_msg_guide_step_duplicate_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'guide' => $guide->id,
+                            'step' => $step->id,
+                        ]
+                    )
                 );
             }
 
@@ -763,10 +899,14 @@ final class HelpCenterValidator {
 
             if ($step->title === '') {
                 $result->add_error(
-                    'Guide step has an empty title: ' .
-                    $guide->id .
-                    '/' .
-                    $step->id
+                    get_string(
+                        'crm_help_diag_msg_guide_step_empty_title_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'guide' => $guide->id,
+                            'step' => $step->id,
+                        ]
+                    )
                 );
             }
 
@@ -775,20 +915,28 @@ final class HelpCenterValidator {
                 ($step->actionlabel === null)
             ) {
                 $result->add_warning(
-                    'Guide step has an incomplete action: ' .
-                    $guide->id .
-                    '/' .
-                    $step->id
+                    get_string(
+                        'crm_help_diag_msg_guide_step_incomplete_action_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'guide' => $guide->id,
+                            'step' => $step->id,
+                        ]
+                    )
                 );
             }
 
             if ($step->url !== null) {
                 $this->validate_internal_url(
                     $step->url,
-                    'Guide step ' .
-                        $guide->id .
-                        '/' .
-                        $step->id,
+                    get_string(
+                        'crm_help_diag_source_guide_step_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'guide' => $guide->id,
+                            'step' => $step->id,
+                        ]
+                    ),
                     $result
                 );
             }
@@ -804,7 +952,10 @@ final class HelpCenterValidator {
 
         if (!$steps) {
             $result->add_warning(
-                'The Help Center contains no onboarding step.'
+                get_string(
+                    'crm_help_diag_msg_no_onboarding_n1210c',
+                    'local_subscriptions'
+                )
             );
 
             return;
@@ -818,7 +969,10 @@ final class HelpCenterValidator {
                 HelpOnboardingStep
             ) {
                 $result->add_error(
-                    'Invalid onboarding step object.'
+                    get_string(
+                        'crm_help_diag_msg_onboarding_invalid_object_n1210c',
+                        'local_subscriptions'
+                    )
                 );
 
                 continue;
@@ -826,7 +980,10 @@ final class HelpCenterValidator {
 
             if ($step->id === '') {
                 $result->add_error(
-                    'An onboarding step has an empty identifier.'
+                    get_string(
+                        'crm_help_diag_msg_onboarding_empty_id_n1210c',
+                        'local_subscriptions'
+                    )
                 );
 
                 continue;
@@ -834,8 +991,11 @@ final class HelpCenterValidator {
 
             if (isset($ids[$step->id])) {
                 $result->add_error(
-                    'Duplicate onboarding step identifier: ' .
-                    $step->id
+                    get_string(
+                        'crm_help_diag_msg_onboarding_duplicate_id_n1210c',
+                        'local_subscriptions',
+                        $step->id
+                    )
                 );
             }
 
@@ -843,29 +1003,41 @@ final class HelpCenterValidator {
 
             if ($step->title === '') {
                 $result->add_error(
-                    'Onboarding step has an empty title: ' .
-                    $step->id
+                    get_string(
+                        'crm_help_diag_msg_onboarding_empty_title_n1210c',
+                        'local_subscriptions',
+                        $step->id
+                    )
                 );
             }
 
             if ($step->description === '') {
                 $result->add_warning(
-                    'Onboarding step has no description: ' .
-                    $step->id
+                    get_string(
+                        'crm_help_diag_msg_onboarding_no_description_n1210c',
+                        'local_subscriptions',
+                        $step->id
+                    )
                 );
             }
 
             $this->validate_internal_url(
                 $step->url,
-                'Onboarding step ' .
-                    $step->id,
+                get_string(
+                    'crm_help_diag_source_onboarding_step_n1210c',
+                    'local_subscriptions',
+                    $step->id
+                ),
                 $result
             );
         }
 
         $result->add_success(
-            count($steps) .
-            ' onboarding steps validated.'
+            get_string(
+                'crm_help_diag_msg_onboarding_validated_n1210c',
+                'local_subscriptions',
+                count($steps)
+            )
         );
     }
 
@@ -904,9 +1076,14 @@ final class HelpCenterValidator {
 
         if (!is_file($filepath)) {
             $result->add_error(
-                $source .
-                ' references a missing page: ' .
-                $path
+                get_string(
+                    'crm_help_diag_msg_missing_page_n1210c',
+                    'local_subscriptions',
+                    (object)[
+                        'source' => $source,
+                        'path' => $path,
+                    ]
+                )
             );
 
             return;
@@ -940,12 +1117,19 @@ final class HelpCenterValidator {
                     ) === null
             ) {
                 $result->add_error(
-                    $source .
-                    ' references an unknown Help Center article: ' .
-                    (
-                        $articleid !== ''
-                            ? $articleid
-                            : '[empty]'
+                    get_string(
+                        'crm_help_diag_msg_unknown_help_article_n1210c',
+                        'local_subscriptions',
+                        (object)[
+                            'source' => $source,
+                            'article' =>
+                                $articleid !== ''
+                                    ? $articleid
+                                    : get_string(
+                                        'crm_help_diag_empty_value_n1210c',
+                                        'local_subscriptions'
+                                    ),
+                        ]
                     )
                 );
             }

@@ -84,7 +84,7 @@ final class commerce_mail_management_k10b_test extends advanced_testcase {
 
         $this->assertStringContainsString('$this->queue_audit_copy($mail, $type);', $service);
         $this->assertStringContainsString('process_ids([(int)$customer->id])', $service);
-        $this->assertStringContainsString('CommerceMailType::PERSONAL_OFFER], false', $mainworker);
+        $this->assertStringContainsString('[CommerceMailType::PERSONAL_OFFER, CommerceMailType::MARKETING_CAMPAIGN]', $mainworker);
         $this->assertStringContainsString('has_due_non_audit', $auditworker);
         $this->assertStringContainsString('count_audit_sent_since', $auditworker);
     }

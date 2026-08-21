@@ -25,10 +25,10 @@ final class commerce_personal_offer_campaign_m14_1_test extends advanced_testcas
         global $CFG;
 
         $editor = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/admin/commerce/personal-offers/campaign_email.php'
+            $CFG->dirroot . '/local/subscriptions/classes/commerce/mail/builder/CommerceMailBuilder.php'
         );
-        self::assertStringContainsString("'{{secondary_cta}}'", $editor);
-        self::assertStringContainsString('js-campaign-tag', $editor);
+        self::assertStringContainsString("'tag' => '{{secondary_cta}}'", $editor);
+        self::assertStringContainsString("'scope' => 'personal_offer'", $editor);
     }
 
     public function test_campaign_footer_image_is_publicly_delivered_and_used_as_override(): void {
@@ -51,7 +51,7 @@ final class commerce_personal_offer_campaign_m14_1_test extends advanced_testcas
             $CFG->dirroot . '/local/subscriptions/classes/commerce/personaloffer/mail/CommercePersonalOfferCampaignMailRenderer.php'
         );
 
-        self::assertStringContainsString('One presentation table + one TD only', $renderer);
+        self::assertStringContainsString("\$secondaryctamarker = '{{secondary_cta}}';", $renderer);
         self::assertStringNotContainsString("padding:2px;border-radius:13px", $renderer);
     }
 }

@@ -175,11 +175,18 @@ final class commerce_sales_795n3_test extends \advanced_testcase {
 
 
     public function test_n33_defaults_hide_technical_columns_and_promote_provider_currency(): void {
-        $page = file_get_contents(__DIR__ . '/../../../admin/commerce/purchases/index.php');
+        $page = file_get_contents(
+            __DIR__
+            . '/../../../admin/commerce/purchases/index.php'
+        );
         $this->assertIsString($page);
 
         $this->assertStringContainsString(
-            "\$defaultcolumns = [\n    'date', 'reference', 'customer', 'type', 'products', 'amount', 'commercial',",
+            "\$defaultcolumns = [",
+            $page
+        );
+        $this->assertStringContainsString(
+            "'products', 'provider', 'amount'",
             $page
         );
         $this->assertStringContainsString(

@@ -10,7 +10,7 @@ final class commerce_storefront_premium_design_l44_test extends \advanced_testca
         global $CFG;
 
         $admin = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront.php'
+            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
         $editor = file_get_contents(
             $CFG->dirroot . '/local/subscriptions/classes/commerce/storefront/admin/CommerceStorefrontPageEditor.php'

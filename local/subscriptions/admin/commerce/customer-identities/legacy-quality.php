@@ -24,7 +24,7 @@ if (!in_array($qualitystatus, ['', CommerceEmailQualityService::STATUS_OK, Comme
     $qualitystatus = 'suspect';
 }
 $page = max(0, optional_param('page', 0, PARAM_INT));
-$perpage = 100;
+$perpage = 50;
 
 $params = array_filter(['q' => $q, 'quality' => $qualitystatus, 'page' => $page], static fn($v) => $v !== '' && $v !== 0);
 $pageurl = new moodle_url('/local/subscriptions/admin/commerce/customer-identities/legacy-quality.php', $params);
@@ -58,7 +58,7 @@ echo CommerceCustomerIdentityNavigationRenderer::render(CommerceCustomerIdentity
 echo html_writer::div(get_string('commerce_identity_legacy_quality_notice', 'local_subscriptions'), 'alert alert-info');
 
 $filterurl = new moodle_url('/local/subscriptions/admin/commerce/customer-identities/legacy-quality.php');
-echo html_writer::start_tag('form', ['method' => 'get', 'action' => $filterurl->out(false), 'class' => 'card card-body mb-4']);
+echo html_writer::start_tag('form', ['method' => 'get', 'action' => $filterurl->out(false), 'class' => 'card card-body mb-4 crm-identity-filter-card']);
 echo html_writer::start_div('row g-3 align-items-end');
 echo html_writer::start_div('col-12 col-md-6');
 echo html_writer::tag('label', get_string('commerce_identity_legacy_quality_search', 'local_subscriptions'), ['for' => 'legacy-quality-q', 'class' => 'form-label']);
@@ -87,18 +87,41 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_tag('form');
 
-echo html_writer::div(get_string('commerce_identity_results_count', 'local_subscriptions', $result['total']), 'small text-muted mb-3');
+echo html_writer::div(
+    html_writer::div(
+        html_writer::tag(
+            'strong',
+            get_string(
+                'crm_identity_legacy_quality_results_title',
+                'local_subscriptions',
+                $result['total']
+            )
+        )
+        . html_writer::span(
+            get_string(
+                'crm_identity_legacy_quality_results_help',
+                'local_subscriptions'
+            ),
+            'crm-identity-legacy-quality-results-help'
+        ),
+        'crm-identity-legacy-quality-results-copy'
+    ),
+    'crm-identity-legacy-quality-results-bar'
+);
 
 if ($result['items'] === []) {
     echo html_writer::div(get_string('commerce_identity_legacy_quality_empty', 'local_subscriptions'), 'alert alert-success');
 } else {
     $table = new html_table();
-    $table->attributes['class'] = 'generaltable table table-hover align-middle';
+    $table->attributes['class'] = 'generaltable table table-hover align-middle crm-identity-table';
     $table->head = [
         get_string('commerce_identity_legacy_quality_customer', 'local_subscriptions'),
         get_string('commerce_identity_email', 'local_subscriptions'),
         get_string('commerce_identity_legacy_quality_diagnostic', 'local_subscriptions'),
-        get_string('commerce_identity_legacy_quality_purchase', 'local_subscriptions'),
+        get_string(
+            'crm_identity_legacy_quality_history',
+            'local_subscriptions'
+        ),
         get_string('actions'),
     ];
     foreach ($result['items'] as $item) {
@@ -112,23 +135,99 @@ if ($result['items'] === []) {
                 'small text-warning-emphasis mt-1'
             );
         }
-        $purchase = get_string('commerce_identity_legacy_quality_purchase_count', 'local_subscriptions', (int)$item['purchasecount'])
-            . html_writer::div(get_string('commerce_identity_legacy_quality_latest_purchase', 'local_subscriptions', (int)$record->id), 'small text-muted');
+        $purchase = html_writer::div(
+            html_writer::tag(
+                'strong',
+                get_string(
+                    'commerce_identity_legacy_quality_purchase_count',
+                    'local_subscriptions',
+                    (int)$item['purchasecount']
+                )
+            )
+            . html_writer::div(
+                get_string(
+                    'commerce_identity_legacy_quality_latest_purchase',
+                    'local_subscriptions',
+                    (int)$record->id
+                ),
+                'crm-identity-legacy-quality-history-meta'
+            ),
+            'crm-identity-legacy-quality-history'
+        );
+
+        $customer = s($name !== '' ? $name : '—');
+        if (!empty($record->userid)) {
+            $customer = html_writer::link(
+                new moodle_url(
+                    '/local/subscriptions/admin/users/view.php',
+                    ['id' => (int)$record->userid]
+                ),
+                s($name !== '' ? $name : '—'),
+                [
+                    'class' =>
+                        'crm-identity-legacy-quality-customer-link',
+                ]
+            )
+            . html_writer::div(
+                'Moodle #' . (int)$record->userid,
+                'crm-identity-legacy-quality-customer-meta'
+            );
+        }
+
         $actions = '—';
         if ($canmanage) {
-            $editurl = new moodle_url('/local/subscriptions/admin/commerce/customer-identities/legacy-edit.php', [
-                'id' => (int)$record->id,
-                'returnurl' => $pageurl->out(false),
-            ]);
-            $actions = html_writer::link($editurl, get_string('edit'), ['class' => 'btn btn-sm btn-outline-primary']);
+            $editurl = new moodle_url(
+                '/local/subscriptions/admin/commerce/customer-identities/legacy-edit.php',
+                [
+                    'id' => (int)$record->id,
+                    'returnurl' => $pageurl->out(false),
+                ]
+            );
+            $actions = html_writer::link(
+                $editurl,
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-pencil',
+                    'aria-hidden' => 'true',
+                ])
+                . html_writer::span(
+                    get_string(
+                        'crm_identity_legacy_quality_correct',
+                        'local_subscriptions'
+                    )
+                ),
+                [
+                    'class' =>
+                        'btn btn-sm btn-outline-primary '
+                        . 'crm-identity-legacy-quality-action',
+                ]
+            );
         }
+
+        $rowclass = '';
+        if (
+            $diagnostic->status ===
+            CommerceEmailQualityService::STATUS_INVALID
+        ) {
+            $rowclass = 'crm-identity-legacy-quality-row-invalid';
+        } elseif (
+            $diagnostic->status ===
+            CommerceEmailQualityService::STATUS_SUSPECT
+        ) {
+            $rowclass = 'crm-identity-legacy-quality-row-suspect';
+        }
+
         $table->data[] = [
-            s($name !== '' ? $name : '—') . (!empty($record->userid) ? html_writer::div('Moodle #' . (int)$record->userid, 'small text-muted') : ''),
+            $customer,
             $emailcell,
             $statusbadge($diagnostic->status),
             $purchase,
             $actions,
         ];
+
+        if ($rowclass !== '') {
+            $lastrow = count($table->data) - 1;
+            $table->rowclasses[$lastrow] = $rowclass;
+        }
     }
     echo html_writer::table($table);
     if ($result['total'] > $perpage) {

@@ -20,6 +20,9 @@ final class OpenAiInstructionBuilder {
             'Never invent payment, subscription, refund, access, or account facts.',
             'Only treat values explicitly present in CRM_CONTEXT as verified CRM facts.',
             'Always follow the requested JSON schema.',
+            'REQUESTED_OUTPUT_LANGUAGE_CODE: ' .
+                $request->requestedlanguage,
+            'For capabilities that generate human-readable text, the requested output language is authoritative even when the customer wrote in another language.',
         ];
 
         foreach (

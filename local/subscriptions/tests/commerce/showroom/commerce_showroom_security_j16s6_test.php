@@ -71,12 +71,15 @@ final class commerce_showroom_security_j16s6_test extends \advanced_testcase {
             . '/local/subscriptions/admin/commerce/showrooms/edit.php'
         );
 
+        self::assertIsString($source);
         self::assertStringNotContainsString(
             "required_param('status', PARAM_ALPHA)",
             $source
         );
         self::assertStringNotContainsString(
-            "html_writer::select(\n    CommerceShowroomStatus::options(),\n    'status'",
+            "html_writer::select(\n"
+            . "    CommerceShowroomStatus::options(),\n"
+            . "    'status'",
             $source
         );
         self::assertStringContainsString(
@@ -84,11 +87,15 @@ final class commerce_showroom_security_j16s6_test extends \advanced_testcase {
             $source
         );
         self::assertStringContainsString(
-            ": CommerceShowroomStatus::DRAFT",
+            ': CommerceShowroomStatus::DRAFT',
             $source
         );
         self::assertStringContainsString(
-            "commerce_showroom_status_workflow_only",
+            "\$workflowaction === 'review'",
+            $source
+        );
+        self::assertStringContainsString(
+            "\$workflowaction === 'publish'",
             $source
         );
     }

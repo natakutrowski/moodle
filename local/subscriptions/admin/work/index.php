@@ -11,6 +11,7 @@ use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\crm\work\dto\WorkItemCriteria;
 use local_subscriptions\crm\work\rendering\WorkItemRenderer;
+use local_subscriptions\crm\work\rendering\WorkSectionNavigationRenderer;
 use local_subscriptions\crm\work\repositories\WorkItemReadRepository;
 use local_subscriptions\subscription_config;
 
@@ -104,6 +105,10 @@ echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(
     CrmNavigationKeys::WORK,
     $context
+);
+
+echo WorkSectionNavigationRenderer::render(
+    WorkSectionNavigationRenderer::ITEMS
 );
 
 echo CrmPageHeader::render(

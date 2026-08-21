@@ -15,6 +15,7 @@ use local_subscriptions\crm\intelligence\recommendations\RecommendationType;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\subscription_config;
 
 global $PAGE, $OUTPUT;
@@ -47,6 +48,30 @@ $priority = optional_param(
     PARAM_ALPHANUMEXT
 );
 
+$page = optional_param(
+    'page',
+    0,
+    PARAM_INT
+);
+
+$perpage = optional_param(
+    'perpage',
+    20,
+    PARAM_INT
+);
+
+$page = max(0, $page);
+
+if (
+    !in_array(
+        $perpage,
+        [10, 20, 50],
+        true
+    )
+) {
+    $perpage = 20;
+}
+
 $status =
     $status !== '' &&
     RecommendationStatus::is_valid(
@@ -72,7 +97,8 @@ $criteria =
             $priority !== ''
                 ? $priority
                 : null,
-        limit: 200
+        limit: $perpage,
+        offset: $page * $perpage
     );
 
 $workspace = (
@@ -84,6 +110,8 @@ $workspace = (
 $pageparams = [
     'scope' =>
         $criteria->scope,
+    'perpage' =>
+        $perpage,
 ];
 
 if ($criteria->status !== null) {
@@ -134,6 +162,18 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
+echo CrmBreadcrumbRenderer::render(
+    [
+        [
+            'label' =>
+                $pagetitle,
+
+            'url' =>
+                null,
+        ],
+    ]
+);
+
 echo CrmPageHeader::render(
     $pagetitle,
     get_string(
@@ -143,17 +183,48 @@ echo CrmPageHeader::render(
     HelpContext::ASSISTANT
 );
 
-if (
-    has_capability(
-        Capabilities::USE_CRM_ASSISTANT_AI,
-        $context
-    )
-) {
-    echo CrmAssistantConversationRenderer::render();
+$canuseassistantai = has_capability(
+    Capabilities::USE_CRM_ASSISTANT_AI,
+    $context
+);
+
+if ($canuseassistantai) {
+    echo html_writer::start_div(
+        'crm-assistant-main-dashboard'
+    );
+
+    echo html_writer::div(
+        CrmAssistantConversationRenderer::render(),
+        'crm-assistant-main-ai'
+    );
+
+    echo html_writer::div(
+        CrmAssistantRenderer::overview_panel(
+            $workspace->overview
+        ),
+        'crm-assistant-main-summary'
+    );
+
+    echo html_writer::end_div();
 }
 
+$paginationurl = new moodle_url(
+    subscription_config::
+        admin_crm_assistant_page(),
+    $pageparams
+);
+
+$pagination = $OUTPUT->paging_bar(
+    $workspace->total,
+    $page,
+    $perpage,
+    $paginationurl
+);
+
 echo CrmAssistantRenderer::workspace(
-    $workspace
+    $workspace,
+    $pagination,
+    $perpage
 );
 
 echo CrmWorkspaceRenderer::end();

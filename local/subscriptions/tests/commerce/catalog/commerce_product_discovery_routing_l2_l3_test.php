@@ -150,7 +150,7 @@ final class commerce_product_discovery_routing_l2_l3_test extends advanced_testc
 
         $source = (string)file_get_contents(
             $CFG->dirroot
-            . '/local/subscriptions/admin/commerce/products/storefront.php'
+            . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
 
         self::assertStringContainsString(

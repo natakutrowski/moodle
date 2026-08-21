@@ -9,6 +9,7 @@ use local_subscriptions\crm\work\domain\WorkItemSource;
 use local_subscriptions\crm\work\domain\WorkItemType;
 use local_subscriptions\crm\work\dto\CreateWorkItemRequest;
 use local_subscriptions\crm\work\rendering\WorkItemRenderer;
+use local_subscriptions\crm\work\rendering\WorkSectionNavigationRenderer;
 use local_subscriptions\crm\work\repositories\WorkItemReadRepository;
 use local_subscriptions\crm\work\services\WorkItemService;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
@@ -153,6 +154,10 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
+echo WorkSectionNavigationRenderer::render(
+    WorkSectionNavigationRenderer::CREATE
+);
+
 echo CrmBreadcrumbRenderer::render(
     [
         [
@@ -178,13 +183,6 @@ echo CrmBreadcrumbRenderer::render(
     ]
 );
 
-echo CrmBackLinkRenderer::render(
-    $backurl,
-    get_string(
-        'crm_work_back',
-        'local_subscriptions'
-    )
-);
 
 echo CrmPageHeader::render(
     $pagetitle,
@@ -195,16 +193,42 @@ echo CrmPageHeader::render(
     HelpContext::WORK_ITEMS
 );
 
-echo html_writer::start_tag('form', [
-    'method' => 'post',
-    'action' => $pageurl->out(false),
-    'class' => 'card card-body crm-work-create-form',
-]);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'targetuserid', 'value' => $targetuserid]);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'parentid', 'value' => $parentid]);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'source', 'value' => $source]);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'threadid', 'value' => $threadid]);
+echo html_writer::start_tag(
+    'form',
+    [
+        'method' => 'post',
+        'action' => $pageurl->out(false),
+        'class' => 'crm-work-create-form',
+    ]
+);
+
+echo html_writer::empty_tag(
+    'input',
+    [
+        'type' => 'hidden',
+        'name' => 'sesskey',
+        'value' => sesskey(),
+    ]
+);
+
+foreach (
+    [
+        'targetuserid' => $targetuserid,
+        'parentid' => $parentid,
+        'source' => $source,
+        'threadid' => $threadid,
+    ]
+    as $name => $value
+) {
+    echo html_writer::empty_tag(
+        'input',
+        [
+            'type' => 'hidden',
+            'name' => $name,
+            'value' => $value,
+        ]
+    );
+}
 
 if ($returnurl !== '') {
     echo html_writer::empty_tag(
@@ -217,25 +241,222 @@ if ($returnurl !== '') {
     );
 }
 
-echo html_writer::label(get_string('crm_work_field_title', 'local_subscriptions'), 'id_title');
-echo html_writer::empty_tag('input', ['type' => 'text', 'name' => 'title', 'id' => 'id_title', 'class' => 'form-control mb-3', 'required' => 'required']);
-echo html_writer::label(get_string('crm_work_field_description', 'local_subscriptions'), 'id_description');
-echo html_writer::tag('textarea', '', ['name' => 'description', 'id' => 'id_description', 'rows' => 8, 'class' => 'form-control mb-3']);
+$teamoptions = [
+    0 => get_string('none'),
+];
 
-echo html_writer::start_div('row g-3');
-echo html_writer::div(html_writer::select(WorkItemRenderer::type_options(), 'type', WorkItemType::TASK, false, ['class' => 'custom-select']), 'col-md-3');
-echo html_writer::div(html_writer::select(WorkItemRenderer::priority_options(), 'priority', WorkItemPriority::NORMAL, false, ['class' => 'custom-select']), 'col-md-3');
-$teamoptions = [0 => get_string('none')];
-foreach ($teams as $team) { $teamoptions[$team->id] = format_string($team->name); }
-echo html_writer::div(html_writer::select($teamoptions, 'assignedteamid', 0, false, ['class' => 'custom-select']), 'col-md-3');
-$useroptions = [0 => get_string('none')];
-foreach ($assignees as $user) { $useroptions[$user->id] = fullname($user); }
-echo html_writer::div(html_writer::select($useroptions, 'assigneduserid', 0, false, ['class' => 'custom-select']), 'col-md-3');
+foreach ($teams as $team) {
+    $teamoptions[$team->id] =
+        format_string($team->name);
+}
+
+$useroptions = [
+    0 => get_string('none'),
+];
+
+foreach ($assignees as $user) {
+    $useroptions[$user->id] =
+        fullname($user);
+}
+
+echo html_writer::start_div(
+    'crm-work-create-grid'
+);
+
+echo html_writer::start_div(
+    'crm-work-create-main crm-work-panel'
+);
+
+echo html_writer::tag(
+    'h2',
+    get_string(
+        'crm_work_create_content_n127a',
+        'local_subscriptions'
+    ),
+    ['class' => 'crm-work-panel-title']
+);
+
+echo html_writer::label(
+    get_string(
+        'crm_work_field_title',
+        'local_subscriptions'
+    ),
+    'id_title',
+    false,
+    ['class' => 'form-label']
+);
+
+echo html_writer::empty_tag(
+    'input',
+    [
+        'type' => 'text',
+        'name' => 'title',
+        'id' => 'id_title',
+        'class' => 'form-control mb-3',
+        'required' => 'required',
+    ]
+);
+
+echo html_writer::label(
+    get_string(
+        'crm_work_field_description',
+        'local_subscriptions'
+    ),
+    'id_description',
+    false,
+    ['class' => 'form-label']
+);
+
+echo html_writer::tag(
+    'textarea',
+    '',
+    [
+        'name' => 'description',
+        'id' => 'id_description',
+        'rows' => 10,
+        'class' => 'form-control',
+    ]
+);
+
 echo html_writer::end_div();
 
-echo html_writer::label(get_string('crm_work_due', 'local_subscriptions'), 'id_dueat', false, ['class' => 'mt-3']);
-echo html_writer::empty_tag('input', ['type' => 'datetime-local', 'name' => 'dueat', 'id' => 'id_dueat', 'class' => 'form-control mb-3']);
-echo html_writer::empty_tag('input', ['type' => 'submit', 'class' => 'btn btn-primary', 'value' => get_string('crm_work_create', 'local_subscriptions')]);
+echo html_writer::start_div(
+    'crm-work-create-sidebar crm-work-panel'
+);
+
+echo html_writer::tag(
+    'h2',
+    get_string(
+        'crm_work_create_settings_n127a',
+        'local_subscriptions'
+    ),
+    ['class' => 'crm-work-panel-title']
+);
+
+$fields = [
+    [
+        'label' => get_string(
+            'crm_work_type',
+            'local_subscriptions'
+        ),
+        'id' => 'id_work_type',
+        'control' => html_writer::select(
+            WorkItemRenderer::type_options(),
+            'type',
+            WorkItemType::TASK,
+            false,
+            [
+                'id' => 'id_work_type',
+                'class' => 'custom-select',
+            ]
+        ),
+    ],
+    [
+        'label' => get_string(
+            'crm_work_priority',
+            'local_subscriptions'
+        ),
+        'id' => 'id_work_priority',
+        'control' => html_writer::select(
+            WorkItemRenderer::priority_options(),
+            'priority',
+            WorkItemPriority::NORMAL,
+            false,
+            [
+                'id' => 'id_work_priority',
+                'class' => 'custom-select',
+            ]
+        ),
+    ],
+    [
+        'label' => get_string(
+            'crm_work_team',
+            'local_subscriptions'
+        ),
+        'id' => 'id_work_team',
+        'control' => html_writer::select(
+            $teamoptions,
+            'assignedteamid',
+            0,
+            false,
+            [
+                'id' => 'id_work_team',
+                'class' => 'custom-select',
+            ]
+        ),
+    ],
+    [
+        'label' => get_string(
+            'crm_work_assignee_n127a',
+            'local_subscriptions'
+        ),
+        'id' => 'id_work_user',
+        'control' => html_writer::select(
+            $useroptions,
+            'assigneduserid',
+            0,
+            false,
+            [
+                'id' => 'id_work_user',
+                'class' => 'custom-select',
+            ]
+        ),
+    ],
+];
+
+foreach ($fields as $field) {
+    echo html_writer::div(
+        html_writer::label(
+            $field['label'],
+            $field['id'],
+            false,
+            ['class' => 'form-label']
+        )
+        . $field['control'],
+        'crm-work-create-field'
+    );
+}
+
+echo html_writer::div(
+    html_writer::label(
+        get_string(
+            'crm_work_due',
+            'local_subscriptions'
+        ),
+        'id_dueat',
+        false,
+        ['class' => 'form-label']
+    )
+    . html_writer::empty_tag(
+        'input',
+        [
+            'type' => 'datetime-local',
+            'name' => 'dueat',
+            'id' => 'id_dueat',
+            'class' => 'form-control',
+        ]
+    ),
+    'crm-work-create-field'
+);
+
+echo html_writer::end_div();
+echo html_writer::end_div();
+
+echo html_writer::div(
+    html_writer::empty_tag(
+        'input',
+        [
+            'type' => 'submit',
+            'class' => 'btn btn-primary',
+            'value' => get_string(
+                'crm_work_create',
+                'local_subscriptions'
+            ),
+        ]
+    ),
+    'crm-work-create-actions'
+);
+
 echo html_writer::end_tag('form');
 
 echo CrmWorkspaceRenderer::end();

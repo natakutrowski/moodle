@@ -16,7 +16,7 @@ final class commerce_customer_routes_j10b_test extends \advanced_testcase {
     public function test_router_and_product_slug_contract_are_present(): void {
         $root = dirname(__DIR__, 3);
         $router = file_get_contents($root . '/public_router.php');
-        $editor = file_get_contents($root . '/admin/commerce/products/storefront.php');
+        $editor = file_get_contents($root . '/admin/commerce/products/storefront_builder.php');
         $this->assertIsString($router);
         $this->assertStringContainsString('CommerceProductSlugService', $router);
         $this->assertIsString($editor);

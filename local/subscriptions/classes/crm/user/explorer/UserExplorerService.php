@@ -31,6 +31,7 @@ final class UserExplorerService {
         $moodletotal = $this->repository->count($criteria);
         $guesttotal = $this->legacyguests->count($criteria);
         $total = $moodletotal + $guesttotal;
+        $kpis = $this->build_kpis($criteria);
 
         $lastpage = $total > 0
             ? (int)floor(
@@ -119,8 +120,40 @@ final class UserExplorerService {
                 (int)$USER->id,
                 $canviewinbox
             ),
+            $kpis,
             $canviewinbox
         );
+    }
+
+
+    private function build_kpis(UserExplorerCriteria $criteria): array {
+        $filters = [
+            '' => 'users',
+            \local_subscriptions\crm\user\UserExplorerFilter::HOT_LEAD => 'hot_leads',
+            \local_subscriptions\crm\user\UserExplorerFilter::AT_RISK => 'at_risk',
+            \local_subscriptions\crm\user\UserExplorerFilter::VIP => 'vip',
+        ];
+
+        $counts = [];
+        foreach ($filters as $filter => $key) {
+            $scoped = $criteria->with_intelligence($filter);
+            $counts[$key] = $this->repository->count($scoped)
+                + $this->legacyguests->count($scoped);
+        }
+
+        $suspended = $criteria->with_account_status(
+            UserExplorerCriteria::ACCOUNT_SUSPENDED
+        );
+        $counts['suspended'] = $this->repository->count($suspended);
+
+        // The Legacy guest read model is the canonical identity source for
+        // digital customers who do not yet have a Moodle account.
+        $nomoodle = $criteria->with_account_status(
+            UserExplorerCriteria::ACCOUNT_NO_MOODLE
+        );
+        $counts['no_moodle'] = $this->legacyguests->count($nomoodle);
+
+        return $counts;
     }
 
     private function compare_records(
@@ -142,9 +175,17 @@ final class UserExplorerService {
 
         $cmp = match (UserExplorerSort::normalize($sort)) {
             UserExplorerSort::NAME_DESC => strcmp($name($b), $name($a)),
+            UserExplorerSort::SCORE_ASC => ((int)($a->globalscore ?? 0)) <=> ((int)($b->globalscore ?? 0)),
             UserExplorerSort::SCORE_DESC => $descnum($a->globalscore ?? 0, $b->globalscore ?? 0),
+            UserExplorerSort::RISK_ASC => ((int)($a->riskscore ?? 0)) <=> ((int)($b->riskscore ?? 0)),
             UserExplorerSort::RISK_DESC => $descnum($a->riskscore ?? 0, $b->riskscore ?? 0),
+            UserExplorerSort::SUBSCRIPTIONS_ASC => ((int)($a->subscriptioncount ?? 0)) <=> ((int)($b->subscriptioncount ?? 0)),
+            UserExplorerSort::SUBSCRIPTIONS_DESC => $descnum($a->subscriptioncount ?? 0, $b->subscriptioncount ?? 0),
+            UserExplorerSort::PURCHASES_ASC => ((int)($a->purchasecount ?? 0)) <=> ((int)($b->purchasecount ?? 0)),
+            UserExplorerSort::PURCHASES_DESC => $descnum($a->purchasecount ?? 0, $b->purchasecount ?? 0),
+            UserExplorerSort::LAST_ACCESS_ASC => ((int)($a->lastaccess ?? 0)) <=> ((int)($b->lastaccess ?? 0)),
             UserExplorerSort::LAST_ACCESS_DESC => $descnum($a->lastaccess ?? 0, $b->lastaccess ?? 0),
+            UserExplorerSort::CREATED_ASC => ((int)($a->timecreated ?? 0)) <=> ((int)($b->timecreated ?? 0)),
             UserExplorerSort::CREATED_DESC => $descnum($a->timecreated ?? 0, $b->timecreated ?? 0),
             default => strcmp($name($a), $name($b)),
         };

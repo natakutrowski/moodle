@@ -11,6 +11,7 @@ use local_subscriptions\crm\inbox\credentials\MoodleConfigInboxCredentialStore;
 use local_subscriptions\crm\inbox\repositories\InboxAccountRepository;
 use local_subscriptions\crm\inbox\repositories\InboxDiagnosticsRepository;
 use local_subscriptions\crm\inbox\services\InboxDiagnosticsService;
+use local_subscriptions\crm\inbox\rendering\InboxDiagnosticsRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
@@ -121,55 +122,13 @@ echo CrmPageHeader::render(
     HelpContext::INBOX_DIAGNOSTICS
 );
 
-echo html_writer::start_div(
-    'crm-inbox-diagnostics'
+echo InboxDiagnosticsRenderer::render(
+    $result,
+    $pageurl,
+    new moodle_url(
+        subscription_config::admin_inbox_page()
+    )
 );
-
-foreach ($result['checks'] as $check) {
-    echo html_writer::div(
-        ($check['success'] ? '✓ ' : '✕ ') .
-        s($check['message']),
-        $check['success']
-            ? 'alert alert-success'
-            : 'alert alert-danger'
-    );
-}
-
-if (!empty($result['metrics'])) {
-    echo $OUTPUT->heading(
-        get_string(
-            'crm_inbox_diagnostics_metrics',
-            'local_subscriptions'
-        ),
-        3
-    );
-
-    echo html_writer::start_tag(
-        'table',
-        ['class' => 'table table-striped']
-    );
-
-    foreach (
-        $result['metrics']
-        as $key => $value
-    ) {
-        echo html_writer::tag(
-            'tr',
-            html_writer::tag(
-                'th',
-                s($key)
-            ) .
-            html_writer::tag(
-                'td',
-                (string)$value
-            )
-        );
-    }
-
-    echo html_writer::end_tag('table');
-}
-
-echo html_writer::end_div();
 
 echo CrmWorkspaceRenderer::end();
 

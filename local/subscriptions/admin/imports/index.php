@@ -7,11 +7,12 @@ require_once(__DIR__ . '/../../renderer/user_subs_renderer.php');
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessNavigationRenderer;
+use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
-use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
@@ -56,12 +57,11 @@ echo CrmBreadcrumbRenderer::render(
         ],
         [
             'label' => get_string(
-                'crm_subscriptions_title',
+                'commerce_offers_access_title',
                 'local_subscriptions'
             ),
             'url' => new moodle_url(
-                subscription_config::
-                    user_subscriptions_page()
+                '/local/subscriptions/admin/commerce/offers-access/index.php'
             ),
         ],
         [
@@ -70,18 +70,6 @@ echo CrmBreadcrumbRenderer::render(
         ],
     ]
 );
-
-echo CrmBackLinkRenderer::render(
-    new moodle_url(
-        subscription_config::
-            user_subscriptions_page()
-    ),
-    get_string(
-        'crm_subscriptions_title',
-        'local_subscriptions'
-    )
-);
-
 echo CrmPageHeader::render(
     $pagetitle,
     get_string(
@@ -90,6 +78,16 @@ echo CrmPageHeader::render(
     ),
     HelpContext::SUBSCRIPTIONS
 );
+
+echo CommerceSectionNavigationRenderer::render(
+    CommerceSectionNavigationRenderer::OFFERS_ACCESS,
+    $context
+);
+
+echo CommerceOffersAccessNavigationRenderer::render(
+    CommerceOffersAccessNavigationRenderer::OVERVIEW
+);
+
 
 $renderer =
     new local_subscriptions_user_subs_renderer(
@@ -116,6 +114,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csvfile'])) {
         throw new moodle_exception('csvwritefail', 'local_subscriptions');
     }
 
+    echo html_writer::start_tag(
+        'section',
+        [
+            'class' => 'crm-legacy-import-card crm-legacy-import-preview-card',
+            'aria-labelledby' => 'crm-legacy-import-preview-title',
+        ]
+    );
+
+    echo html_writer::div(
+        html_writer::tag(
+            'h2',
+            get_string(
+                'crm_legacy_import_preview_title',
+                'local_subscriptions'
+            ),
+            [
+                'id' => 'crm-legacy-import-preview-title',
+                'class' => 'crm-legacy-import-card-title',
+            ]
+        )
+        . html_writer::div(
+            get_string(
+                'crm_legacy_import_preview_help',
+                'local_subscriptions'
+            ),
+            'crm-legacy-import-card-help'
+        ),
+        'crm-legacy-import-card-header'
+    );
+
+    echo html_writer::start_div(
+        'crm-legacy-import-card-body'
+    );
+
     // Formulaire de confirmation
 	echo $renderer->render_import_confirmation_form($validrows, $importid);
 
@@ -131,6 +163,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csvfile'])) {
 	echo html_writer::tag('p', get_string('import_preview', 'local_subscriptions'));
 	echo $renderer->render_import_actions_and_summary($ignored);	
     echo html_writer::end_tag('form');
+    echo html_writer::end_div();
+    echo html_writer::end_tag('section');
+
     echo $renderer->
         render_import_checkbox_script();
 
@@ -140,8 +175,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csvfile'])) {
     exit;
 }
 
-echo $renderer->
-    render_csv_upload_form();
+echo html_writer::start_tag(
+    'section',
+    [
+        'class' => 'crm-legacy-import-card crm-legacy-import-upload-card',
+        'aria-labelledby' => 'crm-legacy-import-upload-title',
+    ]
+);
+
+echo html_writer::div(
+    html_writer::span(
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-file-text-o',
+            'aria-hidden' => 'true',
+        ]),
+        'crm-legacy-import-card-icon'
+    )
+    . html_writer::div(
+        html_writer::tag(
+            'h2',
+            get_string(
+                'crm_legacy_import_upload_title',
+                'local_subscriptions'
+            ),
+            [
+                'id' => 'crm-legacy-import-upload-title',
+                'class' => 'crm-legacy-import-card-title',
+            ]
+        )
+        . html_writer::div(
+            get_string(
+                'crm_legacy_import_upload_help',
+                'local_subscriptions'
+            ),
+            'crm-legacy-import-card-help'
+        ),
+        'crm-legacy-import-card-heading-copy'
+    ),
+    'crm-legacy-import-card-header crm-legacy-import-card-header-with-icon'
+);
+
+echo html_writer::div(
+    $renderer->render_csv_upload_form(),
+    'crm-legacy-import-card-body'
+);
+
+echo html_writer::end_tag('section');
 
 echo CrmWorkspaceRenderer::end();
 

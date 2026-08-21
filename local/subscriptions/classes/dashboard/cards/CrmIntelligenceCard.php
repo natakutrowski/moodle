@@ -119,7 +119,11 @@ final class CrmIntelligenceCard implements DashboardCard {
             );
         } else {
             foreach (
-                $overview->priorityProfiles
+                array_slice(
+                    $overview->priorityProfiles,
+                    0,
+                    3
+                )
                 as $profile
             ) {
                 $user = $profile->user;
@@ -218,7 +222,7 @@ final class CrmIntelligenceCard implements DashboardCard {
                 'local_subscriptions',
                 $conversationcount
             ),
-            'badge bg-light text-dark border'
+            'crm-intelligence-inbox-badge crm-intelligence-inbox-badge-conversations'
         );
 
         if ($opencount > 0) {
@@ -228,7 +232,7 @@ final class CrmIntelligenceCard implements DashboardCard {
                     'local_subscriptions',
                     $opencount
                 ),
-                'badge bg-primary'
+                'crm-intelligence-inbox-badge crm-intelligence-inbox-badge-open'
             );
         }
 
@@ -239,7 +243,7 @@ final class CrmIntelligenceCard implements DashboardCard {
                     'local_subscriptions',
                     $unreadcount
                 ),
-                'badge bg-danger'
+                'crm-intelligence-inbox-badge crm-intelligence-inbox-badge-unread'
             );
         }
 
@@ -250,7 +254,7 @@ final class CrmIntelligenceCard implements DashboardCard {
                     'local_subscriptions',
                     $urgentcount
                 ),
-                'badge bg-warning text-dark'
+                'crm-intelligence-inbox-badge crm-intelligence-inbox-badge-urgent'
             );
         }
 

@@ -18,8 +18,6 @@ final class HelpRenderer {
     ): string {
         $out = html_writer::start_div('crm-help-center');
 
-        $out .= self::render_hero($query);
-
         if ($query !== '') {
             $out .= self::render_search_results(
                 $articles,
@@ -41,6 +39,14 @@ final class HelpRenderer {
         $out .= html_writer::end_div();
 
         return $out;
+    }
+
+    public static function render_search_hero(
+        string $query = ''
+    ): string {
+        return self::render_hero(
+            $query
+        );
     }
 
     private static function render_hero(string $query): string {
@@ -95,6 +101,29 @@ final class HelpRenderer {
         HelpRegistry $registry
     ): string {
         $out = html_writer::start_div(
+            'crm-help-documentation-section'
+        );
+
+        $out .= html_writer::tag(
+            'h2',
+            get_string(
+                'crm_help_documentation_title_n1210d',
+                'local_subscriptions'
+            ),
+            [
+                'class' => 'crm-help-section-title',
+            ]
+        );
+
+        $out .= html_writer::div(
+            get_string(
+                'crm_help_documentation_description_n1210d',
+                'local_subscriptions'
+            ),
+            'crm-help-section-description'
+        );
+
+        $out .= html_writer::start_div(
             'crm-help-category-grid'
         );
 
@@ -142,6 +171,7 @@ final class HelpRenderer {
             );
         }
 
+        $out .= html_writer::end_div();
         $out .= html_writer::end_div();
 
         return $out;

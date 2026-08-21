@@ -150,6 +150,90 @@ $statuslabels = [
         'commerce_identity_provisioning_status_invalid',
 ];
 
+$statusbadge = static function(string $status) use ($statuslabels): string {
+    $classes = [
+        CommerceLegacyDigitalProvisioningPlan::STATUS_CREATABLE =>
+            'badge bg-success',
+        CommerceLegacyDigitalProvisioningPlan::STATUS_EXISTING_ACCOUNT =>
+            'badge bg-secondary',
+        CommerceLegacyDigitalProvisioningPlan::STATUS_AMBIGUOUS_ACCOUNT =>
+            'badge bg-warning text-dark',
+        CommerceLegacyDigitalProvisioningPlan::STATUS_SIMILAR_ACCOUNT =>
+            'badge bg-warning text-dark',
+        CommerceLegacyDigitalProvisioningPlan::STATUS_INVALID_EMAIL =>
+            'badge bg-danger',
+    ];
+
+    return html_writer::span(
+        get_string(
+            $statuslabels[$status]
+                ?? 'commerce_identity_provisioning_status_invalid',
+            'local_subscriptions'
+        ),
+        $classes[$status] ?? 'badge bg-secondary'
+    );
+};
+
+$rendercandidate = static function(
+    \local_subscriptions\commerce\customer\identity\CommerceCustomerIdentitySimilarityMatch $match,
+    string $legacyemail
+): string {
+    $account = $match->second;
+
+    $name = trim(
+        (string)($account->firstname ?? '')
+        . ' '
+        . (string)($account->lastname ?? '')
+    );
+
+    $label = html_writer::span(
+        s($name !== '' ? $name : (string)$account->email),
+        'crm-identity-provisioning-candidate-name'
+    )
+    . html_writer::span(
+        '#' . (int)$account->id,
+        'crm-identity-provisioning-candidate-id'
+    )
+    . html_writer::span(
+        (int)$match->score . '%',
+        'crm-identity-provisioning-candidate-score'
+    );
+
+    return html_writer::div(
+        html_writer::link(
+            new moodle_url(
+                '/local/subscriptions/admin/users/view.php',
+                ['id' => (int)$account->id]
+            ),
+            $label,
+            [
+                'class' =>
+                    'crm-identity-provisioning-candidate-user',
+            ]
+        )
+        . html_writer::link(
+            new moodle_url(
+                '/local/subscriptions/admin/commerce/customer-identities/legacy-link.php',
+                [
+                    'email' => $legacyemail,
+                    'targetuserid' => (int)$account->id,
+                ]
+            ),
+            get_string(
+                'commerce_identity_legacy_link_action',
+                'local_subscriptions'
+            ),
+            [
+                'class' =>
+                    'btn btn-sm btn-outline-primary '
+                    . 'crm-identity-provisioning-link-action',
+            ]
+        ),
+        'crm-identity-provisioning-candidate'
+    );
+};
+
+
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(
     CrmNavigationKeys::COMMERCE,
@@ -252,7 +336,7 @@ if ($previewplans !== []) {
         [
             'method' => 'post',
             'action' => $pageurl->out(false),
-            'class' => 'card card-body mb-4',
+            'class' => 'card card-body mb-4 crm-identity-filter-card',
         ]
     );
     echo html_writer::empty_tag(
@@ -274,7 +358,7 @@ if ($previewplans !== []) {
 
     $previewtable = new html_table();
     $previewtable->attributes['class'] =
-        'generaltable table table-hover align-middle';
+        'generaltable table table-hover align-middle crm-identity-table';
     $previewtable->head = [
         get_string(
             'commerce_identity_provisioning_email',
@@ -310,28 +394,10 @@ if ($previewplans !== []) {
 
         $similar = [];
         foreach ($plan->similaraccounts as $match) {
-            $account = $match->second;
-            $similar[] =
-                '#'
-                . (int)$account->id
-                . ' · '
-                . s((string)$account->email)
-                . ' · '
-                . (int)$match->score
-                . '% · '
-                . html_writer::link(
-                    new moodle_url(
-                        '/local/subscriptions/admin/commerce/customer-identities/legacy-link.php',
-                        [
-                            'email' => $plan->email,
-                            'targetuserid' => (int)$account->id,
-                        ]
-                    ),
-                    get_string(
-                        'commerce_identity_legacy_link_action',
-                        'local_subscriptions'
-                    )
-                );
+            $similar[] = $rendercandidate(
+                $match,
+                $plan->email
+            );
         }
 
         $override = '';
@@ -367,17 +433,13 @@ if ($previewplans !== []) {
                 . (
                     $similar !== []
                     ? html_writer::div(
-                        implode('<br>', $similar),
-                        'small text-warning mt-1'
+                        implode('', $similar),
+                        'crm-identity-provisioning-candidates mt-2'
                     )
                     : ''
                 ),
             $plan->purchase_count(),
-            get_string(
-                $statuslabels[$plan->status]
-                    ?? 'commerce_identity_provisioning_status_invalid',
-                'local_subscriptions'
-            ),
+            $statusbadge($plan->status),
             $override,
         ];
     }
@@ -435,7 +497,7 @@ echo html_writer::start_tag(
                 '/local/subscriptions/admin/commerce/customer-identities/provisioning.php'
             )
         )->out(false),
-        'class' => 'card card-body mb-4',
+        'class' => 'card card-body mb-4 crm-identity-filter-card',
     ]
 );
 echo html_writer::start_div('row g-3');
@@ -515,14 +577,33 @@ echo html_writer::select(
 echo html_writer::end_div();
 
 echo html_writer::start_div(
-    'col-12 col-md-2 d-flex align-items-end'
+    'col-12 col-md-2 d-flex align-items-end gap-2 '
+    . 'crm-identity-provisioning-filter-actions'
 );
 echo html_writer::tag(
     'button',
-    get_string('commerce_filters_apply', 'local_subscriptions'),
+    html_writer::tag('i', '', [
+        'class' => 'fa fa-filter',
+        'aria-hidden' => 'true',
+    ])
+    . html_writer::span(
+        get_string(
+            'commerce_filters_apply',
+            'local_subscriptions'
+        )
+    ),
     [
         'type' => 'submit',
-        'class' => 'btn btn-primary w-100',
+        'class' => 'btn btn-primary',
+    ]
+);
+echo html_writer::link(
+    new moodle_url(
+        '/local/subscriptions/admin/commerce/customer-identities/provisioning.php'
+    ),
+    get_string('reset'),
+    [
+        'class' => 'btn btn-outline-secondary',
     ]
 );
 echo html_writer::end_div();
@@ -567,7 +648,7 @@ echo html_writer::empty_tag(
 
 $table = new html_table();
 $table->attributes['class'] =
-    'generaltable table table-hover align-middle';
+    'generaltable table table-hover align-middle crm-identity-table';
 $table->head = [
     get_string(
         'commerce_identity_select',
@@ -586,11 +667,11 @@ $table->head = [
         'local_subscriptions'
     ),
     get_string(
-        'commerce_identity_provisioning_status',
+        'crm_identity_provisioning_diagnostic',
         'local_subscriptions'
     ),
     get_string(
-        'commerce_identity_provisioning_details',
+        'crm_identity_provisioning_recommendation',
         'local_subscriptions'
     ),
 ];
@@ -617,56 +698,90 @@ foreach ($search['items'] as $plan) {
         )
         : '';
 
-    $details = '';
+    $details = html_writer::span(
+        get_string(
+            'crm_identity_provisioning_ready_help',
+            'local_subscriptions'
+        ),
+        'crm-identity-provisioning-detail-muted'
+    );
+
     if (
         $plan->status ===
         CommerceLegacyDigitalProvisioningPlan::STATUS_EXISTING_ACCOUNT
     ) {
-        $details = get_string(
-            'commerce_identity_provisioning_existing_user',
-            'local_subscriptions',
-            implode(', ', $plan->exactuserids)
+        $links = [];
+        foreach ($plan->exactuserids as $existinguserid) {
+            $links[] = html_writer::link(
+                new moodle_url(
+                    '/local/subscriptions/admin/users/view.php',
+                    ['id' => (int)$existinguserid]
+                ),
+                get_string(
+                    'crm_identity_provisioning_open_existing',
+                    'local_subscriptions',
+                    (int)$existinguserid
+                )
+            );
+        }
+        $details = html_writer::div(
+            implode(' · ', $links),
+            'crm-identity-provisioning-existing'
         );
     } elseif (
         $plan->status ===
         CommerceLegacyDigitalProvisioningPlan::STATUS_AMBIGUOUS_ACCOUNT
     ) {
-        $details = get_string(
-            'commerce_identity_provisioning_ambiguous_users',
-            'local_subscriptions',
-            implode(', ', $plan->exactuserids)
+        $details = html_writer::div(
+            get_string(
+                'crm_identity_provisioning_ambiguous_help',
+                'local_subscriptions'
+            ),
+            'crm-identity-provisioning-detail-warning'
         );
     } elseif (
         $plan->status ===
         CommerceLegacyDigitalProvisioningPlan::STATUS_SIMILAR_ACCOUNT
     ) {
-        $candidateparts = [];
-        foreach ($plan->similaraccounts as $match) {
-            $account = $match->second;
-            $candidateparts[] =
-                '#'
-                . (int)$account->id
-                . ' '
-                . s((string)$account->email)
-                . ' ('
-                . (int)$match->score
-                . '%) · '
-                . html_writer::link(
-                    new moodle_url(
-                        '/local/subscriptions/admin/commerce/customer-identities/legacy-link.php',
-                        [
-                            'email' => $plan->email,
-                            'targetuserid' => (int)$account->id,
-                        ]
-                    ),
-                    get_string(
-                        'commerce_identity_legacy_link_action',
-                        'local_subscriptions'
-                    )
-                );
+        $candidates = [];
+        foreach (
+            array_slice(
+                $plan->similaraccounts,
+                0,
+                2
+            ) as $match
+        ) {
+            $candidates[] = $rendercandidate(
+                $match,
+                $plan->email
+            );
         }
-        $details = implode('<br>', $candidateparts);
+
+        $details = html_writer::div(
+            get_string(
+                'crm_identity_provisioning_similar_help',
+                'local_subscriptions',
+                count($plan->similaraccounts)
+            ),
+            'crm-identity-provisioning-detail-warning'
+        )
+        . html_writer::div(
+            implode('', $candidates),
+            'crm-identity-provisioning-candidates'
+        );
+
+        if (count($plan->similaraccounts) > 2) {
+            $details .= html_writer::div(
+                get_string(
+                    'crm_identity_provisioning_more_candidates',
+                    'local_subscriptions',
+                    count($plan->similaraccounts) - 2
+                ),
+                'crm-identity-provisioning-more'
+            );
+        }
     }
+
 
     $table->data[] = [
         $selector,
@@ -679,27 +794,32 @@ foreach ($search['items'] as $plan) {
             )
         ),
         $plan->purchase_count(),
-        get_string(
-            $statuslabels[$plan->status]
-                ?? 'commerce_identity_provisioning_status_invalid',
-            'local_subscriptions'
-        ),
+        $statusbadge($plan->status),
         $details,
     ];
 }
 
 echo html_writer::table($table);
 
-echo html_writer::tag(
-    'button',
-    get_string(
-        'commerce_identity_provisioning_preview_selected',
-        'local_subscriptions'
+echo html_writer::div(
+    html_writer::tag(
+        'button',
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-eye',
+            'aria-hidden' => 'true',
+        ])
+        . html_writer::span(
+            get_string(
+                'commerce_identity_provisioning_preview_selected',
+                'local_subscriptions'
+            )
+        ),
+        [
+            'type' => 'submit',
+            'class' => 'btn btn-primary',
+        ]
     ),
-    [
-        'type' => 'submit',
-        'class' => 'btn btn-primary',
-    ]
+    'crm-identity-provisioning-table-actions'
 );
 
 echo html_writer::end_tag('form');

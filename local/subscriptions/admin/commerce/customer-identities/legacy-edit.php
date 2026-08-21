@@ -66,7 +66,7 @@ if ($diagnostic->suggestion !== null) {
 }
 echo html_writer::div(get_string('commerce_identity_legacy_edit_scope_notice', 'local_subscriptions'), 'alert alert-info');
 
-echo html_writer::start_tag('form', ['method' => 'post', 'action' => $pageurl->out(false), 'class' => 'card card-body']);
+echo html_writer::start_tag('form', ['method' => 'post', 'action' => $pageurl->out(false), 'class' => 'card card-body crm-identity-form-card']);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 foreach ([
     ['firstname', 'firstname', (string)$record->firstname, 'text'],

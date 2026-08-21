@@ -50,7 +50,7 @@ final class commerce_storefront_consolidation_j884_test extends \advanced_testca
 
     public function test_admin_restores_transfer_global_zones_and_native_dialog(): void {
         global $CFG;
-        $source = file_get_contents($CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront.php');
+        $source = file_get_contents($CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront_builder.php');
         $this->assertStringContainsString('CommerceStorefrontPackageService', $source);
         $this->assertStringContainsString('storefront_global_zones', $source);
         $this->assertStringContainsString("start_tag('dialog'", $source);
@@ -117,7 +117,7 @@ final class commerce_storefront_consolidation_j884_test extends \advanced_testca
     public function test_image_text_uses_plugin_language_strings_for_alignment(): void {
         global $CFG;
         $source = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront.php'
+            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
 
         $this->assertStringContainsString(

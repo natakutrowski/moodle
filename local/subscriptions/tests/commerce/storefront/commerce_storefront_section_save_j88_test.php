@@ -8,7 +8,7 @@ namespace local_subscriptions;
 final class commerce_storefront_section_save_j88_test extends \advanced_testcase {
     public function test_admin_form_exposes_per_section_save_contract(): void {
         $source = file_get_contents(
-            __DIR__ . '/../../../admin/commerce/products/storefront.php'
+            __DIR__ . '/../../../admin/commerce/products/storefront_builder.php'
         );
 
         $this->assertIsString($source);

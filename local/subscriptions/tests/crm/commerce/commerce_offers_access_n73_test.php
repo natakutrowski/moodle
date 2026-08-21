@@ -123,7 +123,7 @@ final class commerce_offers_access_n73_test extends advanced_testcase {
         $version = file_get_contents($root . '/version.php');
 
         self::assertStringContainsString(
-            '$plugin->version = 2026081601;',
+            '$plugin->version = 2026081602;',
             $version
         );
     }

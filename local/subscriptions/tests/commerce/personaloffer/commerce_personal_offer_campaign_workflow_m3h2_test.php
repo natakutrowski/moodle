@@ -5,7 +5,7 @@ defined('MOODLE_INTERNAL') || die();
 final class commerce_personal_offer_campaign_workflow_m3h2_test extends \advanced_testcase {
     public function test_campaign_view_exposes_guided_workflow(): void {
         $source = file_get_contents(__DIR__ . '/../../../admin/commerce/personal-offers/campaign_view.php');
-        $this->assertStringContainsString('commerce_personal_offer_workflow_title', $source);
+        $this->assertStringContainsString('CommerceOffersAccessCampaignRenderer::workflow', $source);
         $this->assertStringContainsString('campaign_email_preview.php', $source);
         $this->assertStringContainsString('campaign-audience', $source);
         $this->assertStringContainsString('$emailshowroomname', $source);

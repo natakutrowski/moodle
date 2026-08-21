@@ -27,8 +27,7 @@ final class UserExplorerRenderer {
             );
         }
 
-        $out .= self::render_summary($result);
-        $out .= self::render_workspace_toolbar($result);
+        $out .= self::render_kpis($result);
         $out .= self::render_filters($result);
         $out .= self::render_trend_context($result);
         $out .= self::render_intelligence_pills($result);
@@ -190,6 +189,123 @@ final class UserExplorerRenderer {
         return $out;
     }
 
+
+    private static function render_kpis(UserExplorerResult $result): string {
+        $criteria = $result->criteria;
+
+        $cards = [
+            [
+                'key' => 'users',
+                'label' => UserExplorerFilter::label(''),
+                'icon' => 'fa fa-users',
+                'tone' => 'users',
+                'params' => ['intelligence' => '', 'accountstatus' => ''],
+            ],
+            [
+                'key' => 'hot_leads',
+                'label' => UserExplorerFilter::label(UserExplorerFilter::HOT_LEAD),
+                'icon' => 'fa fa-fire',
+                'tone' => 'hot',
+                'params' => ['intelligence' => UserExplorerFilter::HOT_LEAD, 'accountstatus' => ''],
+            ],
+            [
+                'key' => 'at_risk',
+                'label' => UserExplorerFilter::label(UserExplorerFilter::AT_RISK),
+                'icon' => 'fa fa-exclamation-triangle',
+                'tone' => 'risk',
+                'params' => ['intelligence' => UserExplorerFilter::AT_RISK, 'accountstatus' => ''],
+            ],
+            [
+                'key' => 'vip',
+                'label' => UserExplorerFilter::label(UserExplorerFilter::VIP),
+                'icon' => 'fa fa-diamond',
+                'tone' => 'vip',
+                'params' => ['intelligence' => UserExplorerFilter::VIP, 'accountstatus' => ''],
+            ],
+            [
+                'key' => 'suspended',
+                'label' => get_string('crm_user_kpi_suspended', 'local_subscriptions'),
+                'icon' => 'fa fa-pause-circle',
+                'tone' => 'suspended',
+                'params' => [
+                    'intelligence' => '',
+                    'accountstatus' => UserExplorerCriteria::ACCOUNT_SUSPENDED,
+                ],
+            ],
+            [
+                'key' => 'no_moodle',
+                'label' => get_string('crm_user_kpi_no_moodle', 'local_subscriptions'),
+                'icon' => 'fa fa-user-times',
+                'tone' => 'nomoodle',
+                'params' => [
+                    'intelligence' => '',
+                    'accountstatus' => UserExplorerCriteria::ACCOUNT_NO_MOODLE,
+                ],
+            ],
+        ];
+
+        $html = html_writer::start_div('crm-user-explorer-kpi-grid');
+
+        foreach ($cards as $card) {
+            $content = html_writer::div(
+                html_writer::tag('i', '', [
+                    'class' => $card['icon'],
+                    'aria-hidden' => 'true',
+                ]),
+                'crm-user-explorer-kpi-icon'
+            )
+            . html_writer::div(
+                html_writer::tag(
+                    'strong',
+                    (string)($result->kpis[$card['key']] ?? 0),
+                    ['class' => 'crm-user-explorer-kpi-value']
+                )
+                . html_writer::span(
+                    s($card['label']),
+                    'crm-user-explorer-kpi-label'
+                ),
+                'crm-user-explorer-kpi-copy'
+            );
+
+            $classes = 'crm-user-explorer-kpi-card crm-user-explorer-kpi-card--'
+                . $card['tone'];
+
+            $params = $criteria->url_params(false);
+            unset($params['page']);
+            foreach ($card['params'] as $key => $value) {
+                if ($value === '') {
+                    unset($params[$key]);
+                } else {
+                    $params[$key] = $value;
+                }
+            }
+
+            $active = match ($card['key']) {
+                'users' => $criteria->intelligence === ''
+                    && $criteria->accountstatus === '',
+                'suspended' => $criteria->accountstatus
+                    === UserExplorerCriteria::ACCOUNT_SUSPENDED,
+                'no_moodle' => $criteria->accountstatus
+                    === UserExplorerCriteria::ACCOUNT_NO_MOODLE,
+                default => $criteria->intelligence
+                    === ($card['params']['intelligence'] ?? ''),
+            };
+
+            $html .= html_writer::link(
+                new moodle_url(
+                    subscription_config::admin_users_page(),
+                    $params
+                ),
+                $content,
+                ['class' => $classes . ($active ? ' is-active' : '')]
+            );
+        }
+
+        $html .= html_writer::end_div();
+
+        return $html;
+    }
+
     private static function render_workspace_toolbar(
         UserExplorerResult $result
     ): string {
@@ -201,7 +317,7 @@ final class UserExplorerRenderer {
         );
 
         $out = html_writer::start_div(
-            'crm-user-explorer-workspace-toolbar'
+            'crm-user-explorer-filter-utilities'
         );
 
         /*
@@ -378,22 +494,26 @@ final class UserExplorerRenderer {
 
         $out .= html_writer::tag(
             'button',
-            get_string(
-                'crm_user_export_csv',
-                'local_subscriptions'
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-download',
+                'aria-hidden' => 'true',
+            ])
+            . html_writer::span(
+                get_string(
+                    'crm_user_export_csv',
+                    'local_subscriptions'
+                )
             ),
             [
                 'type' => 'submit',
                 'class' =>
-                    'btn btn-sm btn-outline-secondary',
+                    'btn btn-sm btn-outline-secondary crm-user-utility-button',
             ]
         );
 
         $out .= html_writer::end_tag(
             'form'
         );
-
-        $out .= html_writer::end_div();
 
         /*
         * Save-current-view form.
@@ -450,13 +570,23 @@ final class UserExplorerRenderer {
 
         $out .= html_writer::tag(
             'button',
-            get_string(
-                'crm_user_save_view',
-                'local_subscriptions'
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-bookmark-o',
+                'aria-hidden' => 'true',
+            ])
+            . html_writer::span(
+                get_string(
+                    'crm_user_save_view',
+                    'local_subscriptions'
+                )
             ),
             [
                 'type' => 'submit',
-                'class' => 'btn btn-sm btn-primary',
+                'class' => 'btn btn-sm btn-primary crm-user-utility-button',
+                'title' => get_string(
+                    'crm_user_save_view_help',
+                    'local_subscriptions'
+                ),
             ]
         );
 
@@ -466,6 +596,8 @@ final class UserExplorerRenderer {
             $result,
             $returnurl
         );
+
+        $out .= html_writer::end_div();
 
         return $out;
     }    
@@ -483,13 +615,19 @@ final class UserExplorerRenderer {
 
         $out .= html_writer::tag(
             'summary',
-            get_string(
-                'crm_user_configure_columns',
-                'local_subscriptions'
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-columns',
+                'aria-hidden' => 'true',
+            ])
+            . html_writer::span(
+                get_string(
+                    'crm_user_configure_columns',
+                    'local_subscriptions'
+                )
             ),
             [
                 'class' =>
-                    'btn btn-sm btn-outline-secondary',
+                    'btn btn-sm btn-outline-secondary crm-user-utility-button',
             ]
         );
 
@@ -599,52 +737,51 @@ final class UserExplorerRenderer {
         UserExplorerResult $result
     ): string {
         $criteria = $result->criteria;
+        $filtersactive = $result->active_filter_count() > 0;
 
-        $out = html_writer::start_tag(
+        $panelstatus = $filtersactive
+            ? get_string(
+                'crm_user_filter_panel_active',
+                'local_subscriptions',
+                $result->active_filter_count()
+            )
+            : get_string(
+                'crm_user_filter_panel_hint',
+                'local_subscriptions'
+            );
+
+        $form = html_writer::start_tag(
             'form',
             [
                 'method' => 'get',
                 'action' => new moodle_url(
                     subscription_config::admin_users_page()
                 ),
-                'class' => 'crm-user-explorer-filters',
+                'class' => 'crm-sales-filter-form crm-user-explorer-filters',
             ]
         );
 
-        if (
-            $result->criteria
-                ->trendfilter
-                ->is_active()
-        ) {
-            foreach (
-                $result->criteria
-                    ->trendfilter
-                    ->params()
-                as $name => $value
-            ) {
-                $out .= html_writer::empty_tag(
-                    'input',
-                    [
-                        'type' => 'hidden',
-                        'name' => $name,
-                        'value' => $value,
-                    ]
-                );
+        if ($criteria->trendfilter->is_active()) {
+            foreach ($criteria->trendfilter->params() as $name => $value) {
+                $form .= html_writer::empty_tag('input', [
+                    'type' => 'hidden',
+                    'name' => $name,
+                    'value' => $value,
+                ]);
             }
         }
 
-        $out .= html_writer::start_div(
-            'crm-user-explorer-filter-grid'
+        $form .= html_writer::start_div(
+            'crm-sales-filter-grid crm-user-explorer-filter-grid'
         );
 
-        $out .= self::field(
+        $form .= self::field(
             get_string(
                 'crm_user_explorer_search_label',
                 'local_subscriptions'
             ),
-            html_writer::empty_tag(
-                'input',
-                [
+            html_writer::div(
+                html_writer::empty_tag('input', [
                     'type' => 'search',
                     'name' => 'q',
                     'value' => $criteria->query,
@@ -653,172 +790,118 @@ final class UserExplorerRenderer {
                         'crm_search_user_placeholder',
                         'local_subscriptions'
                     ),
-                ]
+                ])
+                . html_writer::tag('i', '', [
+                    'class' => 'fa fa-search crm-sales-search-icon',
+                    'aria-hidden' => 'true',
+                ]),
+                'crm-sales-search-control'
             ),
             'crm-user-explorer-filter-search'
         );
 
         $countryoptions = [
-            '' => get_string(
-                'crm_user_country_all',
-                'local_subscriptions'
-            ),
+            '' => get_string('crm_user_country_all', 'local_subscriptions'),
         ];
-
         foreach ($result->countries as $country) {
             $countryoptions[$country] = $country;
         }
-
-        $out .= self::field(
-            get_string(
-                'country',
-                'local_subscriptions'
-            ),
+        $form .= self::field(
+            get_string('country', 'local_subscriptions'),
             html_writer::select(
                 $countryoptions,
                 'country',
                 $criteria->country,
                 false,
-                [
-                    'class' => 'custom-select',
-                ]
+                ['class' => 'form-select']
             )
         );
 
         $tagoptions = [
-            '' => get_string(
-                'crm_user_tag_all',
-                'local_subscriptions'
-            ),
+            '' => get_string('crm_user_tag_all', 'local_subscriptions'),
         ];
-
         foreach ($result->tags as $tag) {
             $tagoptions[$tag] =
-                \local_subscriptions\crm\user\UserProfileTag::label(
-                    $tag
-                );
+                \local_subscriptions\crm\user\UserProfileTag::label($tag);
         }
-
-        $out .= self::field(
-            get_string(
-                'crm_user_tags',
-                'local_subscriptions'
-            ),
+        $form .= self::field(
+            get_string('crm_user_tags', 'local_subscriptions'),
             html_writer::select(
                 $tagoptions,
                 'tag',
                 $criteria->tag,
                 false,
-                [
-                    'class' => 'custom-select',
-                ]
+                ['class' => 'form-select']
             )
         );
 
         $accountoptions = [];
-
-        foreach (
-            UserExplorerCriteria::account_statuses()
-            as $status
-        ) {
+        foreach (UserExplorerCriteria::account_statuses() as $status) {
             $accountoptions[$status] =
-                UserExplorerCriteria::account_status_label(
-                    $status
-                );
+                UserExplorerCriteria::account_status_label($status);
         }
-
-        $out .= self::field(
-            get_string(
-                'crm_user_account_status',
-                'local_subscriptions'
-            ),
+        $form .= self::field(
+            get_string('crm_user_account_status', 'local_subscriptions'),
             html_writer::select(
                 $accountoptions,
                 'accountstatus',
                 $criteria->accountstatus,
                 false,
-                [
-                    'class' => 'custom-select',
-                ]
+                ['class' => 'form-select']
             )
         );
 
         $sortoptions = [];
-
         foreach (UserExplorerSort::allowed() as $sort) {
-            $sortoptions[$sort] =
-                UserExplorerSort::label($sort);
+            $sortoptions[$sort] = UserExplorerSort::label($sort);
         }
-
-        $out .= self::field(
-            get_string(
-                'crm_user_sort_label',
-                'local_subscriptions'
-            ),
+        $form .= self::field(
+            get_string('crm_user_sort_label', 'local_subscriptions'),
             html_writer::select(
                 $sortoptions,
                 'sort',
                 $criteria->sort,
                 false,
-                [
-                    'class' => 'custom-select',
-                ]
+                ['class' => 'form-select']
             )
         );
 
-        $out .= self::field(
-            get_string(
-                'crm_user_per_page',
-                'local_subscriptions'
-            ),
-            html_writer::select(
-                [
-                    25 => '25',
-                    50 => '50',
-                    100 => '100',
-                ],
-                'perpage',
-                $criteria->perpage,
-                false,
-                [
-                    'class' => 'custom-select',
-                ]
-            )
-        );
+        $form .= html_writer::end_div();
 
-        $out .= html_writer::end_div();
+        $advancedopen =
+            $criteria->scoremin !== null ||
+            $criteria->scoremax !== null ||
+            $criteria->riskmin !== null ||
+            $criteria->riskmax !== null ||
+            $criteria->hassubscription !== '' ||
+            $criteria->haspurchase !== '' ||
+            $criteria->activity !== '' ||
+            $criteria->hasinbox !== '' ||
+            $criteria->hasinboxunread !== '' ||
+            $criteria->hascustomer_success_plan !== '' ||
+            $criteria->customer_success_plan_blocked !== '' ||
+            $criteria->customer_success_plan_status !== '';
 
-        $out .= html_writer::start_tag(
-            'details',
-            [
-                'class' => 'crm-user-advanced-filters',
-                'open' => (
-                    $criteria->scoremin !== null ||
-                    $criteria->scoremax !== null ||
-                    $criteria->riskmin !== null ||
-                    $criteria->riskmax !== null ||
-                    $criteria->hassubscription !== '' ||
-                    $criteria->haspurchase !== '' ||
-                    $criteria->activity !== '' ||
-                    $criteria->hasinbox !== '' ||
-                    $criteria->hasinboxunread !== '' ||
-                    $criteria->hascustomer_success_plan !== '' ||
-                    $criteria->customer_success_plan_blocked !== '' ||
-                    $criteria->customer_success_plan_status !== ''
-                ) ? 'open' : null,
-            ]
-        );
-
-        $out .= html_writer::tag(
+        $form .= html_writer::start_tag('details', [
+            'class' =>
+                'crm-sales-filter-advanced crm-user-advanced-filters',
+            'open' => $advancedopen ? 'open' : null,
+        ]);
+        $form .= html_writer::tag(
             'summary',
-            get_string(
-                'crm_user_advanced_filters',
-                'local_subscriptions'
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-sliders',
+                'aria-hidden' => 'true',
+            ])
+            . html_writer::span(
+                get_string(
+                    'crm_user_advanced_filters',
+                    'local_subscriptions'
+                )
             )
         );
-
-        $out .= html_writer::start_div(
-            'crm-user-advanced-filter-grid'
+        $form .= html_writer::start_div(
+            'crm-sales-filter-advanced-grid crm-user-advanced-filter-grid'
         );
 
         foreach ([
@@ -839,7 +922,7 @@ final class UserExplorerRenderer {
                 $criteria->riskmax,
             ],
         ] as $name => [$label, $value]) {
-            $out .= self::field(
+            $form .= self::field(
                 $label,
                 html_writer::empty_tag('input', [
                     'type' => 'number',
@@ -853,198 +936,121 @@ final class UserExplorerRenderer {
         }
 
         $presenceoptions = [];
-
-        foreach (
-            UserExplorerCriteria::presence_options()
-            as $presence
-        ) {
+        foreach (UserExplorerCriteria::presence_options() as $presence) {
             $presenceoptions[$presence] =
-                UserExplorerCriteria::presence_label(
-                    $presence
-                );
+                UserExplorerCriteria::presence_label($presence);
         }
 
-        $out .= self::field(
-            get_string(
-                'crm_user_has_subscription',
-                'local_subscriptions'
-            ),
-            html_writer::select(
-                $presenceoptions,
-                'hassubscription',
+        $presencefields = [
+            'hassubscription' => [
+                get_string(
+                    'crm_user_has_subscription',
+                    'local_subscriptions'
+                ),
                 $criteria->hassubscription,
-                false,
-                ['class' => 'custom-select']
-            )
-        );
-
-        $out .= self::field(
-            get_string(
-                'crm_user_has_purchase',
-                'local_subscriptions'
-            ),
-            html_writer::select(
-                $presenceoptions,
-                'haspurchase',
+            ],
+            'haspurchase' => [
+                get_string(
+                    'crm_user_has_purchase',
+                    'local_subscriptions'
+                ),
                 $criteria->haspurchase,
-                false,
-                ['class' => 'custom-select']
-            )
-        );
+            ],
+        ];
 
         if ($result->canviewinbox) {
-            $out .= self::field(
-                get_string(
-                    'crm_user_has_inbox',
-                    'local_subscriptions'
-                ),
-                html_writer::select(
-                    $presenceoptions,
-                    'hasinbox',
+            $presencefields += [
+                'hasinbox' => [
+                    get_string(
+                        'crm_user_has_inbox',
+                        'local_subscriptions'
+                    ),
                     $criteria->hasinbox,
-                    false,
-                    [
-                        'class' =>
-                            'custom-select',
-                    ]
-                )
-            );
+                ],
+                'hasinboxunread' => [
+                    get_string(
+                        'crm_user_has_inbox_unread',
+                        'local_subscriptions'
+                    ),
+                    $criteria->hasinboxunread,
+                ],
+                'hascustomer_success_plan' => [
+                    get_string(
+                        'crm_user_has_customer_success_plan',
+                        'local_subscriptions'
+                    ),
+                    $criteria->hascustomer_success_plan,
+                ],
+                'customer_success_plan_blocked' => [
+                    get_string(
+                        'crm_user_customer_success_plan_blocked',
+                        'local_subscriptions'
+                    ),
+                    $criteria->customer_success_plan_blocked,
+                ],
+            ];
+        }
 
-            $out .= self::field(
-                get_string(
-                    'crm_user_has_inbox_unread',
-                    'local_subscriptions'
-                ),
+        foreach ($presencefields as $name => [$label, $value]) {
+            $form .= self::field(
+                $label,
                 html_writer::select(
                     $presenceoptions,
-                    'hasinboxunread',
-                    $criteria
-                        ->hasinboxunread,
+                    $name,
+                    $value,
                     false,
-                    [
-                        'class' =>
-                            'custom-select',
-                    ]
+                    ['class' => 'form-select']
                 )
             );
+        }
 
-            $out .= self::field(
-                get_string(
-                    'crm_user_has_customer_success_plan',
-                    'local_subscriptions'
-                ),
-                html_writer::select(
-                    array_combine(
-                        UserExplorerCriteria::presence_options(),
-                        array_map(
-                            [
-                                UserExplorerCriteria::class,
-                                'presence_label',
-                            ],
-                            UserExplorerCriteria::presence_options()
-                        )
-                    ),
-                    'hascustomer_success_plan',
-                    $criteria->hascustomer_success_plan,
-                    false,
-                    [
-                        'class' => 'form-control',
-                    ]
-                )
-            );
-
-            $out .= self::field(
-                get_string(
-                    'crm_user_customer_success_plan_blocked',
-                    'local_subscriptions'
-                ),
-                html_writer::select(
-                    array_combine(
-                        UserExplorerCriteria::presence_options(),
-                        array_map(
-                            [
-                                UserExplorerCriteria::class,
-                                'presence_label',
-                            ],
-                            UserExplorerCriteria::presence_options()
-                        )
-                    ),
-                    'customer_success_plan_blocked',
-                    $criteria->customer_success_plan_blocked,
-                    false,
-                    [
-                        'class' => 'form-control',
-                    ]
-                )
-            );
-
-            $out .= self::field(
+        if ($result->canviewinbox) {
+            $form .= self::field(
                 get_string(
                     'crm_user_customer_success_plan_status',
                     'local_subscriptions'
                 ),
                 html_writer::select(
                     [
-                        '' =>
-                            get_string(
-                                'crm_user_customer_success_plan_status_all',
-                                'local_subscriptions'
-                            ),
-
-                        'draft' =>
-                            get_string(
-                                'csplanstatus_draft',
-                                'local_subscriptions'
-                            ),
-
-                        'active' =>
-                            get_string(
-                                'csplanstatus_active',
-                                'local_subscriptions'
-                            ),
-
-                        'paused' =>
-                            get_string(
-                                'csplanstatus_paused',
-                                'local_subscriptions'
-                            ),
-
-                        'completed' =>
-                            get_string(
-                                'csplanstatus_completed',
-                                'local_subscriptions'
-                            ),
-
-                        'cancelled' =>
-                            get_string(
-                                'csplanstatus_cancelled',
-                                'local_subscriptions'
-                            ),
+                        '' => get_string(
+                            'crm_user_customer_success_plan_status_all',
+                            'local_subscriptions'
+                        ),
+                        'draft' => get_string(
+                            'csplanstatus_draft',
+                            'local_subscriptions'
+                        ),
+                        'active' => get_string(
+                            'csplanstatus_active',
+                            'local_subscriptions'
+                        ),
+                        'paused' => get_string(
+                            'csplanstatus_paused',
+                            'local_subscriptions'
+                        ),
+                        'completed' => get_string(
+                            'csplanstatus_completed',
+                            'local_subscriptions'
+                        ),
+                        'cancelled' => get_string(
+                            'csplanstatus_cancelled',
+                            'local_subscriptions'
+                        ),
                     ],
                     'customer_success_plan_status',
                     $criteria->customer_success_plan_status,
                     false,
-                    [
-                        'class' => 'form-control',
-                    ]
+                    ['class' => 'form-select']
                 )
             );
-
         }
-        
+
         $activityoptions = [];
-
-        foreach (
-            UserExplorerCriteria::activity_options()
-            as $activity
-        ) {
+        foreach (UserExplorerCriteria::activity_options() as $activity) {
             $activityoptions[$activity] =
-                UserExplorerCriteria::activity_label(
-                    $activity
-                );
+                UserExplorerCriteria::activity_label($activity);
         }
-
-        $out .= self::field(
+        $form .= self::field(
             get_string(
                 'crm_user_activity_filter',
                 'local_subscriptions'
@@ -1054,43 +1060,94 @@ final class UserExplorerRenderer {
                 'activity',
                 $criteria->activity,
                 false,
-                ['class' => 'custom-select']
+                ['class' => 'form-select']
             )
         );
 
-        $out .= html_writer::end_div();
-        $out .= html_writer::end_tag('details');
-
+        $form .= html_writer::end_div();
+        $form .= html_writer::end_tag('details');
 
         if ($criteria->intelligence !== '') {
-            $out .= html_writer::empty_tag(
-                'input',
-                [
-                    'type' => 'hidden',
-                    'name' => 'intelligence',
-                    'value' => $criteria->intelligence,
-                ]
-            );
+            $form .= html_writer::empty_tag('input', [
+                'type' => 'hidden',
+                'name' => 'intelligence',
+                'value' => $criteria->intelligence,
+            ]);
         }
 
-        $out .= html_writer::div(
-            html_writer::tag(
+        $form .= html_writer::div(
+            html_writer::link(
+                new moodle_url(
+                    subscription_config::admin_users_page()
+                ),
+                get_string('reset'),
+                ['class' => 'btn btn-sm btn-outline-secondary']
+            )
+            . html_writer::tag(
                 'button',
-                get_string(
-                    'crm_user_apply_filters',
-                    'local_subscriptions'
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-filter',
+                    'aria-hidden' => 'true',
+                ])
+                . html_writer::span(
+                    get_string(
+                        'crm_user_apply_filters',
+                        'local_subscriptions'
+                    )
                 ),
                 [
                     'type' => 'submit',
-                    'class' => 'btn btn-primary',
+                    'class' => 'btn btn-sm btn-primary',
                 ]
             ),
-            'crm-user-explorer-filter-actions'
+            'crm-sales-filter-actions crm-user-explorer-filter-actions'
         );
 
-        $out .= html_writer::end_tag('form');
+        $form .= html_writer::end_tag('form');
 
-        return $out;
+        $summary = html_writer::tag(
+            'summary',
+            html_writer::span(
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-filter',
+                    'aria-hidden' => 'true',
+                ])
+                . html_writer::tag(
+                    'strong',
+                    get_string(
+                        'crm_user_search_filters_title',
+                        'local_subscriptions'
+                    )
+                )
+                . html_writer::span(
+                    s($panelstatus),
+                    'crm-sales-filter-panel-status'
+                ),
+                'crm-sales-filter-panel-summary-copy'
+            )
+            . html_writer::tag('i', '', [
+                'class' =>
+                    'fa fa-chevron-down crm-sales-filter-panel-chevron',
+                'aria-hidden' => 'true',
+            ]),
+            ['class' => 'crm-sales-filter-panel-summary']
+        );
+
+        $utilities = self::render_workspace_toolbar($result);
+
+        return html_writer::tag(
+            'details',
+            $summary
+            . html_writer::div(
+                $form . $utilities,
+                'crm-sales-filter-card crm-sales-filter-card-collapsible'
+            ),
+            [
+                'class' =>
+                    'crm-sales-filter-panel crm-user-explorer-filter-panel',
+                'open' => $filtersactive ? 'open' : null,
+            ]
+        );
     }
 
     private static function render_intelligence_pills(
@@ -1140,25 +1197,378 @@ final class UserExplorerRenderer {
         $table = new html_table();
 
         $table->attributes = [
-            'class' => 'generaltable crm-user-explorer-table',
+            'class' =>
+                'generaltable crm-sales-table crm-user-explorer-table',
         ];
 
         $table->head = array_map(
             static fn(string $column): string =>
-                UserExplorerColumn::label($column),
+                self::render_table_header($column, $result->criteria),
             $result->visiblecolumns
+        );
+        $table->head[] = get_string(
+            'crm_user_actions',
+            'local_subscriptions'
         );
 
         foreach ($result->users as $viewmodel) {
-            $table->data[] = self::render_user_row(
+            $row = self::render_user_row(
                 $viewmodel,
                 $result->visiblecolumns
             );
+            $row[] = self::render_row_actions(
+                $viewmodel,
+                $result->canviewinbox
+            );
+            $table->data[] = $row;
+        }
+
+        $toolbar = html_writer::div(
+            html_writer::div(
+                html_writer::tag(
+                    'strong',
+                    get_string(
+                        'crm_user_explorer_found',
+                        'local_subscriptions',
+                        $result->total
+                    ),
+                    ['class' => 'crm-sales-table-count']
+                )
+                . self::render_active_filter_pills($result),
+                'crm-user-explorer-table-meta'
+            )
+            . self::render_perpage_selector($result),
+            'crm-sales-table-toolbar crm-user-explorer-table-toolbar'
+        );
+
+        return html_writer::div(
+            $toolbar
+            . html_writer::div(
+                html_writer::table($table),
+                'crm-sales-table-scroll'
+            ),
+            'crm-sales-table-card crm-user-explorer-table-card'
+        );
+    }
+
+    private static function render_active_filter_pills(
+        UserExplorerResult $result
+    ): string {
+        $criteria = $result->criteria;
+        $pills = [];
+
+        $addpill = static function (
+            string $label,
+            string $value
+        ) use (&$pills): void {
+            $value = trim($value);
+            if ($value === '') {
+                return;
+            }
+
+            $pills[] = html_writer::span(
+                html_writer::span(
+                    s($label),
+                    'crm-user-explorer-result-pill-label'
+                )
+                . html_writer::span(
+                    s($value),
+                    'crm-user-explorer-result-pill-value'
+                ),
+                'crm-user-explorer-result-pill'
+            );
+        };
+
+        if ($criteria->query !== '') {
+            $addpill(
+                get_string(
+                    'crm_user_explorer_search_label',
+                    'local_subscriptions'
+                ),
+                $criteria->query
+            );
+        }
+
+        if ($criteria->country !== '') {
+            $addpill(
+                get_string('country', 'local_subscriptions'),
+                $criteria->country
+            );
+        }
+
+        if ($criteria->tag !== '') {
+            $addpill(
+                get_string('crm_user_tags', 'local_subscriptions'),
+                \local_subscriptions\crm\user\UserProfileTag::label(
+                    $criteria->tag
+                )
+            );
+        }
+
+        if ($criteria->accountstatus !== '') {
+            $addpill(
+                get_string(
+                    'crm_user_account_status',
+                    'local_subscriptions'
+                ),
+                UserExplorerCriteria::account_status_label(
+                    $criteria->accountstatus
+                )
+            );
+        }
+
+        if ($criteria->intelligence !== '') {
+            $addpill(
+                get_string(
+                    'crm_user_filter_type_label',
+                    'local_subscriptions'
+                ),
+                UserExplorerFilter::label($criteria->intelligence)
+            );
+        }
+
+        foreach ([
+            [
+                get_string('crm_user_score_min', 'local_subscriptions'),
+                $criteria->scoremin,
+            ],
+            [
+                get_string('crm_user_score_max', 'local_subscriptions'),
+                $criteria->scoremax,
+            ],
+            [
+                get_string('crm_user_risk_min', 'local_subscriptions'),
+                $criteria->riskmin,
+            ],
+            [
+                get_string('crm_user_risk_max', 'local_subscriptions'),
+                $criteria->riskmax,
+            ],
+        ] as [$label, $value]) {
+            if ($value !== null) {
+                $addpill($label, (string)$value);
+            }
+        }
+
+        foreach ([
+            [
+                get_string(
+                    'crm_user_has_subscription',
+                    'local_subscriptions'
+                ),
+                $criteria->hassubscription,
+            ],
+            [
+                get_string(
+                    'crm_user_has_purchase',
+                    'local_subscriptions'
+                ),
+                $criteria->haspurchase,
+            ],
+            [
+                get_string(
+                    'crm_user_has_inbox',
+                    'local_subscriptions'
+                ),
+                $criteria->hasinbox,
+            ],
+            [
+                get_string(
+                    'crm_user_has_inbox_unread',
+                    'local_subscriptions'
+                ),
+                $criteria->hasinboxunread,
+            ],
+            [
+                get_string(
+                    'crm_user_has_customer_success_plan',
+                    'local_subscriptions'
+                ),
+                $criteria->hascustomer_success_plan,
+            ],
+            [
+                get_string(
+                    'crm_user_customer_success_plan_blocked',
+                    'local_subscriptions'
+                ),
+                $criteria->customer_success_plan_blocked,
+            ],
+        ] as [$label, $value]) {
+            if ($value !== '') {
+                $addpill(
+                    $label,
+                    UserExplorerCriteria::presence_label($value)
+                );
+            }
+        }
+
+        if ($criteria->customer_success_plan_status !== '') {
+            $addpill(
+                get_string(
+                    'crm_user_customer_success_plan_status',
+                    'local_subscriptions'
+                ),
+                get_string(
+                    'csplanstatus_' . $criteria->customer_success_plan_status,
+                    'local_subscriptions'
+                )
+            );
+        }
+
+        if ($criteria->activity !== '') {
+            $addpill(
+                get_string(
+                    'crm_user_activity_filter',
+                    'local_subscriptions'
+                ),
+                UserExplorerCriteria::activity_label($criteria->activity)
+            );
+        }
+
+        if (!$pills) {
+            return '';
         }
 
         return html_writer::div(
-            html_writer::table($table),
-            'table-responsive crm-user-explorer-table-wrapper'
+            html_writer::span(
+                get_string(
+                    'crm_user_explorer_active_filters_short',
+                    'local_subscriptions'
+                ),
+                'crm-user-explorer-result-pills-prefix'
+            )
+            . implode('', $pills),
+            'crm-user-explorer-result-pills'
+        );
+    }
+
+    private static function render_perpage_selector(
+        UserExplorerResult $result
+    ): string {
+        $criteria = $result->criteria;
+        $params = $criteria->url_params(false);
+        unset($params['page'], $params['perpage']);
+
+        $form = html_writer::start_tag(
+            'form',
+            [
+                'method' => 'get',
+                'action' => new moodle_url(
+                    subscription_config::admin_users_page()
+                ),
+                'class' => 'crm-user-explorer-perpage-form',
+            ]
+        );
+
+        foreach ($params as $name => $value) {
+            $form .= html_writer::empty_tag('input', [
+                'type' => 'hidden',
+                'name' => $name,
+                'value' => (string)$value,
+            ]);
+        }
+
+        $form .= html_writer::tag(
+            'label',
+            get_string(
+                'crm_user_per_page',
+                'local_subscriptions'
+            ),
+            [
+                'for' => 'crm-user-explorer-perpage',
+                'class' => 'crm-user-explorer-perpage-label',
+            ]
+        );
+
+        $form .= html_writer::select(
+            [25 => '25', 50 => '50', 100 => '100'],
+            'perpage',
+            $criteria->perpage,
+            false,
+            [
+                'id' => 'crm-user-explorer-perpage',
+                'class' =>
+                    'form-select form-select-sm crm-sales-perpage-select',
+                'onchange' => 'this.form.submit()',
+            ]
+        );
+
+        $form .= html_writer::end_tag('form');
+
+        return html_writer::div(
+            $form,
+            'crm-sales-table-toolbar-actions'
+        );
+    }
+
+    private static function render_table_header(
+        string $column,
+        UserExplorerCriteria $criteria
+    ): string {
+        $pair = match ($column) {
+            UserExplorerColumn::USER => [
+                UserExplorerSort::NAME_ASC,
+                UserExplorerSort::NAME_DESC,
+            ],
+            UserExplorerColumn::SCORE => [
+                UserExplorerSort::SCORE_ASC,
+                UserExplorerSort::SCORE_DESC,
+            ],
+            UserExplorerColumn::RISK => [
+                UserExplorerSort::RISK_ASC,
+                UserExplorerSort::RISK_DESC,
+            ],
+            UserExplorerColumn::SUBSCRIPTIONS => [
+                UserExplorerSort::SUBSCRIPTIONS_ASC,
+                UserExplorerSort::SUBSCRIPTIONS_DESC,
+            ],
+            UserExplorerColumn::PURCHASES => [
+                UserExplorerSort::PURCHASES_ASC,
+                UserExplorerSort::PURCHASES_DESC,
+            ],
+            UserExplorerColumn::LAST_ACCESS => [
+                UserExplorerSort::LAST_ACCESS_ASC,
+                UserExplorerSort::LAST_ACCESS_DESC,
+            ],
+            UserExplorerColumn::REGISTERED => [
+                UserExplorerSort::CREATED_ASC,
+                UserExplorerSort::CREATED_DESC,
+            ],
+            default => null,
+        };
+
+        $label = UserExplorerColumn::label($column);
+        if ($pair === null) {
+            return $label;
+        }
+
+        [$asc, $desc] = $pair;
+        $current = UserExplorerSort::normalize($criteria->sort);
+        $active = $current === $asc || $current === $desc;
+        $next = $current === $asc ? $desc : $asc;
+        $icon = !$active
+            ? 'fa fa-sort'
+            : ($current === $asc ? 'fa fa-sort-up' : 'fa fa-sort-down');
+
+        $params = $criteria->url_params(false);
+        unset($params['page']);
+        $params['sort'] = $next;
+
+        return html_writer::link(
+            new moodle_url(
+                subscription_config::admin_users_page(),
+                $params
+            ),
+            html_writer::span(s($label))
+            . html_writer::tag('i', '', [
+                'class' => $icon . ' crm-user-explorer-sort-icon',
+                'aria-hidden' => 'true',
+            ]),
+            [
+                'class' => 'crm-user-explorer-sort-link'
+                    . ($active ? ' is-active' : ''),
+                'title' => UserExplorerSort::label($next),
+            ]
         );
     }
 
@@ -1274,6 +1684,126 @@ final class UserExplorerRenderer {
         return $cells;
     }
 
+    private static function render_row_actions(
+        UserExplorerUserViewModel $viewmodel,
+        bool $canviewinbox
+    ): string {
+        $user = $viewmodel->user;
+        $viewparams = !empty($user->iscommerceguest)
+            ? ['email' => (string)$user->email]
+            : ['id' => (int)$user->id];
+
+        $viewurl = new moodle_url(
+            subscription_config::admin_user_view_page(),
+            $viewparams
+        );
+
+        $primary = html_writer::link(
+            $viewurl,
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-eye',
+                'aria-hidden' => 'true',
+            ]) . html_writer::span(get_string('view')),
+            [
+                'class' => 'btn btn-sm btn-outline-primary crm-user-explorer-view-button',
+            ]
+        );
+
+        $menuitems = [
+            html_writer::div(
+                get_string('crm_user_menu_client', 'local_subscriptions'),
+                'crm-sales-row-menu-section'
+            ),
+            html_writer::link(
+                $viewurl,
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-user-circle-o',
+                    'aria-hidden' => 'true',
+                ])
+                . html_writer::span(
+                    get_string('crm_user_open_user360', 'local_subscriptions')
+                ),
+                ['class' => 'crm-sales-row-menu-link']
+            ),
+        ];
+
+        if (empty($user->iscommerceguest)) {
+            $menuitems[] = html_writer::link(
+                new moodle_url('/user/profile.php', ['id' => (int)$user->id]),
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-user',
+                    'aria-hidden' => 'true',
+                ])
+                . html_writer::span(
+                    get_string(
+                        'crm_user_open_moodle_profile',
+                        'local_subscriptions'
+                    )
+                ),
+                ['class' => 'crm-sales-row-menu-link']
+            );
+        }
+
+        if ($canviewinbox && !empty($user->email)) {
+            $menuitems[] = html_writer::div(
+                get_string(
+                    'crm_user_menu_communication',
+                    'local_subscriptions'
+                ),
+                'crm-sales-row-menu-section'
+            );
+            $menuitems[] = html_writer::link(
+                new moodle_url(
+                    subscription_config::admin_inbox_page(),
+                    ['q' => (string)$user->email]
+                ),
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-envelope-o',
+                    'aria-hidden' => 'true',
+                ])
+                . html_writer::span(
+                    get_string(
+                        'crm_user_open_inbox',
+                        'local_subscriptions'
+                    )
+                ),
+                ['class' => 'crm-sales-row-menu-link']
+            );
+        }
+
+        $menu = html_writer::tag(
+            'details',
+            html_writer::tag(
+                'summary',
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-ellipsis-h',
+                    'aria-hidden' => 'true',
+                ]),
+                [
+                    'class' => 'btn btn-sm btn-outline-secondary crm-sales-row-menu-toggle',
+                    'aria-label' => get_string(
+                        'crm_user_more_actions',
+                        'local_subscriptions'
+                    ),
+                    'title' => get_string(
+                        'crm_user_more_actions',
+                        'local_subscriptions'
+                    ),
+                ]
+            )
+            . html_writer::div(
+                implode('', $menuitems),
+                'crm-sales-row-menu'
+            ),
+            ['class' => 'crm-sales-row-actions-menu']
+        );
+
+        return html_writer::div(
+            $primary . $menu,
+            'crm-sales-actions crm-user-explorer-actions'
+        );
+    }
+
     private static function render_customer_success_plans(
         UserExplorerUserViewModel $viewmodel
     ): string {
@@ -1338,6 +1868,135 @@ final class UserExplorerRenderer {
 
         return $out;
     }
+
+    private static function field(
+        string $label,
+        string $control,
+        string $classes = ''
+    ): string {
+        return html_writer::div(
+            html_writer::tag(
+                'label',
+                s($label),
+                ['class' => 'form-label']
+            )
+            . $control,
+            trim(
+                'crm-sales-filter-field '
+                . 'crm-user-explorer-filter-field '
+                . $classes
+            )
+        );
+    }
+
+    private static function render_account_status(
+        UserExplorerUserViewModel $viewmodel
+    ): string {
+        $class = !empty($viewmodel->user->suspended)
+            ? 'suspended'
+            : 'active';
+
+        return html_writer::span(
+            s($viewmodel->account_status_label()),
+            'crm-user-account-badge ' . $class
+        );
+    }
+
+
+    private static function render_tags(
+        array $tags
+    ): string {
+        if (!$tags) {
+            return '—';
+        }
+
+        return html_writer::div(
+            implode(
+                '',
+                array_map(
+                    static function(\stdClass $tag): string {
+                        return html_writer::span(
+                            s((string)$tag->label),
+                            'crm-user-tag-badge'
+                        );
+                    },
+                    $tags
+                )
+            ),
+            'crm-user-tag-list'
+        );
+    }
+
+
+    private static function render_score(
+        UserExplorerUserViewModel $viewmodel
+    ): string {
+        $score = (int)$viewmodel->user->globalscore;
+
+        return html_writer::div(
+            html_writer::span(
+                (string)$score,
+                'crm-user-score-value'
+            ) .
+            html_writer::span(
+                s($viewmodel->score_level_label()),
+                'crm-user-score-level'
+            ),
+            'crm-user-score'
+        );
+    }
+
+
+    private static function render_risk(
+        UserExplorerUserViewModel $viewmodel
+    ): string {
+        $risk = (int)$viewmodel->user->riskscore;
+        $class = 'low';
+
+        if ($risk >= 61) {
+            $class = 'high';
+        } else if ($risk >= 31) {
+            $class = 'medium';
+        }
+
+        return html_writer::span(
+            (string)$risk,
+            'crm-user-risk-badge ' . $class
+        );
+    }
+
+
+    private static function render_intelligence(
+        UserExplorerUserViewModel $viewmodel
+    ): string {
+        $items = array_merge(
+            $viewmodel->segments,
+            $viewmodel->opportunities
+        );
+
+        if (!$items) {
+            return '—';
+        }
+
+        $items = array_slice($items, 0, 3);
+
+        return html_writer::div(
+            implode(
+                '',
+                array_map(
+                    static function(\stdClass $item): string {
+                        return html_writer::span(
+                            s((string)$item->label),
+                            'crm-user-intelligence-badge'
+                        );
+                    },
+                    $items
+                )
+            ),
+            'crm-user-intelligence-list'
+        );
+    }
+
 
     private static function render_inbox(
         UserExplorerUserViewModel $viewmodel
@@ -1457,127 +2116,6 @@ final class UserExplorerRenderer {
         );
     }
 
-    private static function render_account_status(
-        UserExplorerUserViewModel $viewmodel
-    ): string {
-        $class = !empty($viewmodel->user->suspended)
-            ? 'suspended'
-            : 'active';
-
-        return html_writer::span(
-            s($viewmodel->account_status_label()),
-            'crm-user-account-badge ' . $class
-        );
-    }
-
-    private static function render_tags(
-        array $tags
-    ): string {
-        if (!$tags) {
-            return '—';
-        }
-
-        return html_writer::div(
-            implode(
-                '',
-                array_map(
-                    static function(\stdClass $tag): string {
-                        return html_writer::span(
-                            s((string)$tag->label),
-                            'crm-user-tag-badge'
-                        );
-                    },
-                    $tags
-                )
-            ),
-            'crm-user-tag-list'
-        );
-    }
-
-    private static function render_score(
-        UserExplorerUserViewModel $viewmodel
-    ): string {
-        $score = (int)$viewmodel->user->globalscore;
-
-        return html_writer::div(
-            html_writer::span(
-                (string)$score,
-                'crm-user-score-value'
-            ) .
-            html_writer::span(
-                s($viewmodel->score_level_label()),
-                'crm-user-score-level'
-            ),
-            'crm-user-score'
-        );
-    }
-
-    private static function render_risk(
-        UserExplorerUserViewModel $viewmodel
-    ): string {
-        $risk = (int)$viewmodel->user->riskscore;
-        $class = 'low';
-
-        if ($risk >= 61) {
-            $class = 'high';
-        } else if ($risk >= 31) {
-            $class = 'medium';
-        }
-
-        return html_writer::span(
-            (string)$risk,
-            'crm-user-risk-badge ' . $class
-        );
-    }
-
-    private static function render_intelligence(
-        UserExplorerUserViewModel $viewmodel
-    ): string {
-        $items = array_merge(
-            $viewmodel->segments,
-            $viewmodel->opportunities
-        );
-
-        if (!$items) {
-            return '—';
-        }
-
-        $items = array_slice($items, 0, 3);
-
-        return html_writer::div(
-            implode(
-                '',
-                array_map(
-                    static function(\stdClass $item): string {
-                        return html_writer::span(
-                            s((string)$item->label),
-                            'crm-user-intelligence-badge'
-                        );
-                    },
-                    $items
-                )
-            ),
-            'crm-user-intelligence-list'
-        );
-    }
-
-    private static function render_pagination(
-        UserExplorerResult $result
-    ): string {
-        global $OUTPUT;
-
-        $url = new moodle_url(
-            subscription_config::admin_users_page(),
-            $result->criteria->url_params(false)
-        );
-
-        return $OUTPUT->paging_bar(
-            $result->total,
-            $result->criteria->page,
-            $result->criteria->perpage,
-            $url
-        );
-    }
 
     private static function render_empty_state(
         UserExplorerResult $result
@@ -1629,26 +2167,28 @@ final class UserExplorerRenderer {
         );
     }
 
-    private static function field(
-        string $label,
-        string $control,
-        string $classes = ''
+
+    private static function render_pagination(
+        UserExplorerResult $result
     ): string {
+        global $OUTPUT;
+
+        $url = new moodle_url(
+            subscription_config::admin_users_page(),
+            $result->criteria->url_params(false)
+        );
+
         return html_writer::div(
-            html_writer::tag(
-                'label',
-                s($label),
-                [
-                    'class' => 'crm-user-explorer-filter-label',
-                ]
-            ) .
-            $control,
-            trim(
-                'crm-user-explorer-filter-field ' .
-                $classes
-            )
+            $OUTPUT->paging_bar(
+                $result->total,
+                $result->criteria->page,
+                $result->criteria->perpage,
+                $url
+            ),
+            'crm-user-explorer-pagination'
         );
     }
+
 
     /**
      * Render the active Dashboard trend drill-down context.

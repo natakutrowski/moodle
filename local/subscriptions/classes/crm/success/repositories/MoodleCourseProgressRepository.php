@@ -135,13 +135,67 @@ final class MoodleCourseProgressRepository {
                     )
             );
 
+        $latestactivity = CustomerSuccessRepositoryProfiler::measure(
+            'moodle_course_progress',
+            $userid,
+            'latest_completed_activity',
+            function () use (
+                $DB,
+                $userid,
+                $insql,
+                $inparams
+            ): array {
+                $sql = "
+                    SELECT
+                        cm.course AS courseid,
+                        cm.id AS coursemoduleid,
+                        cmc.timemodified
+                      FROM {course_modules_completion} cmc
+                      JOIN {course_modules} cm
+                        ON cm.id = cmc.coursemoduleid
+                       AND cm.deletioninprogress = 0
+                     WHERE cmc.userid = :latestuserid
+                       AND cmc.completionstate > :latestincomplete
+                       AND cm.course {$insql}
+                  ORDER BY cm.course ASC,
+                           cmc.timemodified DESC,
+                           cm.id DESC
+                ";
+
+                $rows = $DB->get_records_sql(
+                    $sql,
+                    [
+                        'latestuserid' => $userid,
+                        'latestincomplete' => 0,
+                    ] + $inparams
+                );
+
+                $result = [];
+                foreach ($rows as $row) {
+                    $courseid = (int)$row->courseid;
+                    if (!isset($result[$courseid])) {
+                        $result[$courseid] = (object)[
+                            'coursemoduleid' =>
+                                (int)$row->coursemoduleid,
+
+                            'timemodified' =>
+                                (int)$row->timemodified,
+                        ];
+                    }
+                }
+
+                return $result;
+            }
+        );
+
         return CustomerSuccessRepositoryProfiler::measure(
             'moodle_course_progress',
             $userid,
             'result_normalization',
             function () use (
                 $courseids,
-                $records
+                $records,
+                $latestactivity
             ): array {
                 $result = [];
 
@@ -195,6 +249,20 @@ final class MoodleCourseProgressRepository {
                                 ? (int)$record
                                     ->lastcompletionat
                                 : 0,
+
+                        'lastcoursemoduleid' =>
+                            (int)(
+                                $latestactivity[$courseid]
+                                    ->coursemoduleid
+                                ?? 0
+                            ),
+
+                        'lastactivityat' =>
+                            (int)(
+                                $latestactivity[$courseid]
+                                    ->timemodified
+                                ?? 0
+                            ),
 
                         'coursecompleted' =>
                             $coursecompletedat > 0,

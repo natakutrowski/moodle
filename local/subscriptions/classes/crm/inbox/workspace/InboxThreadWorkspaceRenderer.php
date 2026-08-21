@@ -23,7 +23,8 @@ final class InboxThreadWorkspaceRenderer {
         bool $canmanage,
         bool $canuseai,
         ?array $airesult = null,
-        ?int $userid = null
+        ?int $userid = null,
+        bool $allowremoteimages = false
     ): string {
         global $USER;
 
@@ -34,7 +35,8 @@ final class InboxThreadWorkspaceRenderer {
                 $thread,
                 $canmanage,
                 $canuseai,
-                $airesult
+                $airesult,
+                $allowremoteimages
             );
 
         $preferences =

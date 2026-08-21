@@ -10,21 +10,47 @@ final class commerce_showroom_stabilisation_j13h21_test extends \advanced_testca
     public function test_admin_statuses_are_localised_and_get_does_not_require_sesskey(): void {
         global $CFG;
 
-        $index = file_get_contents($CFG->dirroot . '/local/subscriptions/admin/commerce/showrooms/index.php');
-        $edit = file_get_contents($CFG->dirroot . '/local/subscriptions/admin/commerce/showrooms/edit.php');
+        $index = file_get_contents(
+            $CFG->dirroot
+            . '/local/subscriptions/admin/commerce/showrooms/index.php'
+        );
+        $edit = file_get_contents(
+            $CFG->dirroot
+            . '/local/subscriptions/admin/commerce/showrooms/edit.php'
+        );
         $status = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/cms/CommerceShowroomStatus.php'
+            $CFG->dirroot
+            . '/local/subscriptions/classes/commerce/showroom/cms/'
+            . 'CommerceShowroomStatus.php'
         );
 
         self::assertIsString($index);
         self::assertIsString($edit);
         self::assertIsString($status);
-        self::assertStringContainsString('CommerceShowroomStatus::label', $index);
-        self::assertStringNotContainsString('CommerceShowroomStatus::options()', $edit);
-        self::assertStringContainsString('commerce_showroom_status_workflow_only', $edit);
-        self::assertStringContainsString("\$_SERVER['REQUEST_METHOD'] === 'POST'", $edit);
-        self::assertStringContainsString('require_sesskey();', $edit);
-        self::assertStringNotContainsString('if ($id > 0 && confirm_sesskey())', $edit);
+        self::assertStringContainsString(
+            'CommerceShowroomStatus::label',
+            $index
+        );
+        self::assertStringNotContainsString(
+            'CommerceShowroomStatus::options()',
+            $edit
+        );
+        self::assertStringContainsString(
+            "\$_SERVER['REQUEST_METHOD'] === 'POST'",
+            $edit
+        );
+        self::assertStringContainsString(
+            'require_sesskey();',
+            $edit
+        );
+        self::assertStringContainsString(
+            'CommerceShowroomStatus::label',
+            $edit
+        );
+        self::assertStringNotContainsString(
+            'if ($id > 0 && confirm_sesskey())',
+            $edit
+        );
     }
 
     public function test_live_currency_endpoint_and_offer_anchor_are_hardened(): void {

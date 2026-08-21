@@ -6,9 +6,10 @@ defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use local_subscriptions\crm\workspace\WorkspacePreferenceService;
-use local_subscriptions\crm\workspace\WorkspaceToolbarState;
 use local_subscriptions\crm\workspace\rendering\WorkspaceRenderer;
-use local_subscriptions\crm\workspace\rendering\WorkspaceToolbarRenderer;
+use local_subscriptions\crm\user360\rendering\User360OverviewRenderer;
+use local_subscriptions\crm\user360\rendering\User360SupportOverviewRenderer;
+use local_subscriptions\crm\user360\rendering\User360AdvancedRenderer;
 
 /**
  * Renders the CRM User360 Workspace.
@@ -70,119 +71,12 @@ final class User360WorkspaceRenderer {
             'crm-user360-workspace-summary-zone'
         );
 
-        if (empty($profile->iscommerceguest)) {
-            $out .= html_writer::div(
-                User360PersonalizationRenderer::render(
-                    $definition,
-                    $layout
-                ),
-                'crm-user360-workspace-heading'
-            );
+        $out .= User360SupportOverviewRenderer::render(
+            $profile
+        );
 
-            $out .= WorkspaceToolbarRenderer::render(
-                new WorkspaceToolbarState(
-                    workspacekey:
-                        $definition->key,
-
-                    hiddencount:
-                        $layout->hidden_count(),
-
-                    canreset: true,
-
-                    cansave: true
-                )
-            );
-        }
-
-        $mainzone =
-            WorkspaceRenderer::render_zone(
-                $definition,
-                $layout,
-                User360WorkspaceFactory::ZONE_MAIN,
-                'crm-user360-workspace-main-zone'
-            );
-
-        $sidebarzone =
-            WorkspaceRenderer::render_zone(
-                $definition,
-                $layout,
-                User360WorkspaceFactory::ZONE_SIDEBAR,
-                'crm-user360-workspace-sidebar-zone'
-            );
-
-        $hasmain =
-            self::zone_has_registered_items(
-                $definition,
-                $layout,
-                User360WorkspaceFactory::ZONE_MAIN
-            );
-
-        $hassidebar =
-            self::zone_has_registered_items(
-                $definition,
-                $layout,
-                User360WorkspaceFactory::ZONE_SIDEBAR
-            );
-
-        if ($hasmain || $hassidebar) {
-            $layoutclasses =
-                'crm-user360-workspace-layout';
-
-            if ($hasmain && $hassidebar) {
-                $layoutclasses .=
-                    ' has-main has-sidebar';
-            } else if ($hasmain) {
-                $layoutclasses .=
-                    ' has-main without-sidebar';
-            } else {
-                $layoutclasses .=
-                    ' without-main has-sidebar';
-            }
-
-            $out .= html_writer::start_div(
-                $layoutclasses
-            );
-
-            if ($mainzone !== '') {
-                $out .= html_writer::tag(
-                    'main',
-                    $mainzone,
-                    [
-                        'class' =>
-                            'crm-user360-workspace-main',
-
-                        'aria-label' => get_string(
-                            'user360_workspace_zone_main',
-                            'local_subscriptions'
-                        ),
-                    ]
-                );
-            }
-
-            if ($sidebarzone !== '') {
-                $out .= html_writer::tag(
-                    'aside',
-                    $sidebarzone,
-                    [
-                        'class' =>
-                            'crm-user360-workspace-sidebar',
-
-                        'aria-label' => get_string(
-                            'user360_workspace_zone_sidebar',
-                            'local_subscriptions'
-                        ),
-                    ]
-                );
-            }
-
-            $out .= html_writer::end_div();
-        }
-
-        $out .= WorkspaceRenderer::render_zone(
-            $definition,
-            $layout,
-            User360WorkspaceFactory::ZONE_TIMELINE,
-            'crm-user360-workspace-timeline-zone'
+        $out .= User360AdvancedRenderer::render(
+            $profile
         );
 
         $out .= WorkspaceRenderer::end();

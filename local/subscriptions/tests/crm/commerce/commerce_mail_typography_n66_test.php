@@ -52,7 +52,7 @@ final class commerce_mail_typography_n66_test extends advanced_testcase {
         $version = file_get_contents($root . '/version.php');
 
         self::assertStringContainsString(
-            '$plugin->version = 2026081510;',
+            '$plugin->version = 2026081602;',
             $version
         );
     }

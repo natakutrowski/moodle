@@ -60,6 +60,120 @@ final class LevelUpXpRepository {
     }
 
     /**
+     * Returns Level Up XP scope and current state for supplied courses.
+     *
+     * @param int[] $courseids
+     * @return array<int,\stdClass>
+     */
+    public function get_course_scope_records(
+        int $userid,
+        array $courseids
+    ): array {
+        global $DB;
+
+        if ($userid <= 0) {
+            throw new \InvalidArgumentException(
+                'Level Up XP userid must be greater than zero.'
+            );
+        }
+
+        $courseids = array_values(array_unique(array_filter(
+            array_map('intval', $courseids),
+            static fn(int $courseid): bool => $courseid > SITEID
+        )));
+
+        if ($courseids === []) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($courseids as $courseid) {
+            $result[$courseid] = (object)[
+                'courseid' => $courseid,
+                'available' => false,
+                'enabled' => false,
+                'scope' => 'none',
+                'worldcourseid' => 0,
+                'xp' => 0,
+                'level' => 0,
+                'xpinlevel' => 0,
+                'levelcapacity' => 0,
+                'levelprogresspercentage' => null,
+            ];
+        }
+
+        if (!$this->is_available()) {
+            return $result;
+        }
+
+        $siteenabled = $DB->record_exists(
+            'block_xp_config',
+            ['courseid' => SITEID, 'enabled' => 1]
+        );
+
+        [$insql, $params] = $DB->get_in_or_equal(
+            $courseids,
+            SQL_PARAMS_NAMED,
+            'xpuserscope'
+        );
+
+        $configs = $DB->get_records_select(
+            'block_xp_config',
+            "enabled = :enabled AND courseid {$insql}",
+            ['enabled' => 1] + $params,
+            '',
+            'courseid,enabled'
+        );
+
+        $worldfactory = null;
+        foreach ($courseids as $courseid) {
+            $record = $result[$courseid];
+            $record->available = true;
+
+            $courseenabled = isset($configs[$courseid]);
+            if (!$siteenabled && !$courseenabled) {
+                continue;
+            }
+
+            try {
+                if ($worldfactory === null) {
+                    $worldfactory = \block_xp\di::get(
+                        'course_world_factory'
+                    );
+                }
+
+                $world = $worldfactory->get_world($courseid);
+                $worldid = method_exists($world, 'get_courseid')
+                    ? (int)$world->get_courseid()
+                    : $courseid;
+                $state = $world->get_store()->get_state($userid);
+                $capacity = max(0, (int)$state->get_total_xp_in_level());
+                $xpinlevel = max(0, (int)$state->get_xp_in_level());
+
+                $record->enabled = true;
+                $record->scope = $worldid === SITEID
+                    ? 'site'
+                    : 'course';
+                $record->worldcourseid = $worldid;
+                $record->xp = max(0, (int)$state->get_xp());
+                $record->level = $this->normalize_level_number(
+                    $state->get_level()
+                ) ?? 0;
+                $record->xpinlevel = $xpinlevel;
+                $record->levelcapacity = $capacity;
+                $record->levelprogresspercentage = $capacity > 0
+                    ? round(($xpinlevel / $capacity) * 100, 2)
+                    : null;
+            } catch (\Throwable $exception) {
+                $record->enabled = false;
+                $record->scope = $siteenabled ? 'site' : 'course';
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Returns Level Up statistics for one Moodle user.
      *
      * @return array<string,int|float>

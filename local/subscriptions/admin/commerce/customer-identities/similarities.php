@@ -33,6 +33,23 @@ $minscore = max(
     )
 );
 
+$page = max(
+    0,
+    optional_param(
+        'page',
+        0,
+        PARAM_INT
+    )
+);
+$perpage = optional_param(
+    'perpage',
+    50,
+    PARAM_INT
+);
+if (!in_array($perpage, [25, 50, 100], true)) {
+    $perpage = 50;
+}
+
 $pageurl = new moodle_url(
     '/local/subscriptions/admin/commerce/customer-identities/similarities.php',
     array_filter(
@@ -40,6 +57,8 @@ $pageurl = new moodle_url(
             'q' => $q,
             'status' => $status,
             'minscore' => $minscore,
+            'page' => $page,
+            'perpage' => $perpage,
         ],
         static fn($value): bool => $value !== ''
     )
@@ -62,6 +81,23 @@ $result = (new CommerceCustomerIdentitySimilarityService($DB))->search([
     'minscore' => $minscore,
 ]);
 
+$totalmatches = count($result['matches']);
+$maxpage = $totalmatches > 0
+    ? max(
+        0,
+        (int)ceil($totalmatches / $perpage) - 1
+    )
+    : 0;
+if ($page > $maxpage) {
+    $page = $maxpage;
+}
+
+$displaymatches = array_slice(
+    $result['matches'],
+    $page * $perpage,
+    $perpage
+);
+
 $reasonlabels = [
     CommerceCustomerIdentitySimilarityService::REASON_EMAIL_EXACT =>
         'commerce_identity_similarity_reason_email_exact',
@@ -83,6 +119,15 @@ $reasonlabels = [
         'commerce_identity_similarity_reason_alternate_name',
     CommerceCustomerIdentitySimilarityService::REASON_PHONE_EXACT =>
         'commerce_identity_similarity_reason_phone_exact',
+];
+
+$checklabels = [
+    CommerceCustomerIdentitySimilarityService::CHECK_EMAIL =>
+        'crm_identity_similarity_check_email',
+    CommerceCustomerIdentitySimilarityService::CHECK_NAME =>
+        'crm_identity_similarity_check_name',
+    CommerceCustomerIdentitySimilarityService::CHECK_PHONE =>
+        'crm_identity_similarity_check_phone',
 ];
 
 $renderuser = static function(\stdClass $user): string {
@@ -193,7 +238,15 @@ echo html_writer::start_tag(
         'action' => (new moodle_url(
             '/local/subscriptions/admin/commerce/customer-identities/similarities.php'
         ))->out(false),
-        'class' => 'card card-body mb-4',
+        'class' => 'card card-body mb-4 crm-identity-filter-card',
+    ]
+);
+echo html_writer::empty_tag(
+    'input',
+    [
+        'type' => 'hidden',
+        'name' => 'perpage',
+        'value' => $perpage,
     ]
 );
 echo html_writer::start_div('row g-3');
@@ -297,19 +350,34 @@ echo html_writer::end_div();
 echo html_writer::end_tag('form');
 
 echo html_writer::div(
-    get_string(
-        'commerce_identity_similarity_scan_summary',
-        'local_subscriptions',
-        (object)[
-            'users' => $result['scanned'],
-            'matches' => count($result['matches']),
-        ]
+    html_writer::div(
+        html_writer::tag(
+            'strong',
+            get_string(
+                'crm_identity_similarity_results_title',
+                'local_subscriptions',
+                $totalmatches
+            )
+        )
+        . html_writer::span(
+            get_string(
+                'crm_identity_similarity_scan_detail',
+                'local_subscriptions',
+                $result['scanned']
+            ),
+            'crm-identity-similarity-results-detail'
+        ),
+        'crm-identity-similarity-results-copy'
     ),
-    'small text-muted mb-1'
+    'crm-identity-similarity-results-bar'
 );
+
 echo html_writer::div(
-    get_string('commerce_identity_similarity_score_help', 'local_subscriptions'),
-    'small text-muted mb-3'
+    get_string(
+        'crm_identity_similarity_score_help',
+        'local_subscriptions'
+    ),
+    'crm-identity-similarity-score-help'
 );
 
 if ($result['truncated']) {
@@ -323,7 +391,7 @@ if ($result['truncated']) {
     );
 }
 
-if ($result['matches'] === []) {
+if ($displaymatches === []) {
     echo html_writer::div(
         get_string(
             'commerce_identity_similarity_empty',
@@ -349,7 +417,7 @@ if ($result['matches'] === []) {
 
     $table = new html_table();
     $table->attributes['class'] =
-        'generaltable table table-hover align-middle';
+        'generaltable table table-hover align-middle crm-identity-table';
     $table->head = [
         get_string(
             'commerce_identity_similarity_score',
@@ -369,7 +437,7 @@ if ($result['matches'] === []) {
         ),
     ];
 
-    foreach ($result['matches'] as $match) {
+    foreach ($displaymatches as $match) {
         $scoreclass = $match->score >= 90
             ? 'badge bg-danger'
             : ($match->score >= 75
@@ -377,20 +445,42 @@ if ($result['matches'] === []) {
                 : 'badge bg-info text-dark');
 
         $reasons = [];
-        foreach ($match->reasons as $reason) {
-            $key = $reasonlabels[$reason] ?? null;
-            if ($key !== null) {
-                $weight = (int)($match->signalweights[$reason] ?? 0);
-                $label = get_string($key, 'local_subscriptions');
-                if ($weight > 0 && $match->score < 100) {
-                    $label .= ' +' . $weight;
-                }
-                $reasons[] = html_writer::span(
-                    $label,
-                    'badge bg-light text-dark border me-1 mb-1'
-                );
+
+        foreach ($match->checks as $checkkey => $check) {
+            if (empty($check['available'])) {
+                continue;
             }
+
+            $labelkey = $checklabels[$checkkey] ?? null;
+            if ($labelkey === null) {
+                continue;
+            }
+
+            $reasons[] = html_writer::div(
+                html_writer::span(
+                    get_string(
+                        $labelkey,
+                        'local_subscriptions'
+                    ),
+                    'crm-identity-similarity-check-label'
+                )
+                . html_writer::span(
+                    (int)$check['score'] . '%',
+                    'crm-identity-similarity-check-score'
+                )
+                . html_writer::span(
+                    get_string(
+                        'crm_identity_similarity_check_weight',
+                        'local_subscriptions',
+                        CommerceCustomerIdentitySimilarityService::
+                            check_weight($checkkey)
+                    ),
+                    'crm-identity-similarity-check-weight'
+                ),
+                'crm-identity-similarity-check'
+            );
         }
+
 
         $table->data[] = [
             html_writer::span(
@@ -404,6 +494,35 @@ if ($result['matches'] === []) {
     }
 
     echo html_writer::table($table);
+
+    echo html_writer::start_div(
+        'crm-identity-similarity-footer'
+    );
+
+    if ($totalmatches > $perpage) {
+        $pagingurl = new moodle_url(
+            '/local/subscriptions/admin/commerce/customer-identities/similarities.php',
+            array_filter(
+                [
+                    'q' => $q,
+                    'status' => $status,
+                    'minscore' => $minscore,
+                    'perpage' => $perpage,
+                ],
+                static fn($value): bool =>
+                    $value !== ''
+            )
+        );
+
+        echo $OUTPUT->paging_bar(
+            $totalmatches,
+            $page,
+            $perpage,
+            $pagingurl,
+            'page'
+        );
+    }
+
     echo html_writer::tag(
         'button',
         get_string(
@@ -412,9 +531,13 @@ if ($result['matches'] === []) {
         ),
         [
             'type' => 'submit',
-            'class' => 'btn btn-primary',
+            'class' =>
+                'btn btn-primary '
+                . 'crm-identity-similarity-merge-action',
         ]
     );
+
+    echo html_writer::end_div();
     echo html_writer::end_tag('form');
 }
 

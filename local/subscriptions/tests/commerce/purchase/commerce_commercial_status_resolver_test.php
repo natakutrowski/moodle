@@ -31,4 +31,12 @@ final class commerce_commercial_status_resolver_test extends \advanced_testcase 
             $resolver->resolve('completed', ['refunded'], ['fulfilled'])
         );
     }
+    public function test_fulfilled_purchase_without_child_fulfillment_rows_is_fulfilled(): void {
+        $resolver = new CommerceCommercialStatusResolver();
+        $this->assertSame(
+            CommerceCommercialStatus::FULFILLED,
+            $resolver->resolve('fulfilled', ['paid'], [])
+        );
+    }
+
 }

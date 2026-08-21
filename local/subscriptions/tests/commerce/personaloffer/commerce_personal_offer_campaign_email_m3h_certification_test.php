@@ -30,7 +30,7 @@ final class commerce_personal_offer_campaign_email_m3h_certification_test extend
         $showroomid = $this->create_showroom('m3h-verbs', 'M3H.VERBS');
 
         $paris = new \DateTimeZone('Europe/Paris');
-        $expiresat = (new \DateTimeImmutable('2026-08-14 12:00:00', $paris))->getTimestamp();
+        $expiresat = (new \DateTimeImmutable('tomorrow 12:00:00', $paris))->getTimestamp();
 
         $campaignid = $this->create_campaign($productid, 'm3h-nata-ru', $expiresat);
         $this->configure_email($campaignid, $showroomid);

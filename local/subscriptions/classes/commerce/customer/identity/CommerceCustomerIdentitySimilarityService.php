@@ -33,6 +33,16 @@ final class CommerceCustomerIdentitySimilarityService {
     public const REASON_PHONE_EXACT = 'phone_exact';
     public const REASON_EMAIL_NAME_COMBINATION = 'email_name_combination';
 
+    public const CHECK_EMAIL = 'email';
+    public const CHECK_NAME = 'name';
+    public const CHECK_PHONE = 'phone';
+
+    private const CHECK_WEIGHTS = [
+        self::CHECK_EMAIL => 45,
+        self::CHECK_NAME => 35,
+        self::CHECK_PHONE => 20,
+    ];
+
     public function __construct(private readonly moodle_database $database) {
     }
 
@@ -103,59 +113,264 @@ final class CommerceCustomerIdentitySimilarityService {
         return array_slice($matches, 0, max(1, min(20, $limit)));
     }
 
+    public static function check_weight(
+        string $check
+    ): int {
+        return self::CHECK_WEIGHTS[$check] ?? 0;
+    }
+
     public function compare(\stdClass $first, \stdClass $second): ?CommerceCustomerIdentitySimilarityMatch {
         if ((int)$first->id === (int)$second->id) {
             return null;
         }
+
         $a = $this->profile($first);
         $b = $this->profile($second);
-        $signals = [];
-        if ($a['email'] !== '' && $a['email'] === $b['email']) {
-            $signals[self::REASON_EMAIL_EXACT] = 100;
-        } else {
-            if ($a['emaillocal'] !== '' && $a['emaillocal'] === $b['emaillocal']) {
-                $signals[self::REASON_EMAIL_LOCAL_EXACT] = 38;
-            } elseif (min(strlen($a['emaillocal']), strlen($b['emaillocal'])) >= 4 && $this->ratio($a['emaillocal'], $b['emaillocal']) >= .72) {
-                $signals[self::REASON_EMAIL_LOCAL_CLOSE] = 28;
+
+        $checks = [
+            self::CHECK_EMAIL => $this->email_check($a, $b),
+            self::CHECK_NAME => $this->name_check($a, $b),
+            self::CHECK_PHONE => $this->phone_check($a, $b),
+        ];
+
+        $reasons = [];
+        $signalweights = [];
+        $weightedtotal = 0.0;
+        $availableweight = 0;
+
+        foreach ($checks as $checkkey => $check) {
+            if (!$check['available']) {
+                continue;
             }
-            if ($a['emaildomain'] !== '' && $a['emaildomain'] !== $b['emaildomain'] && $this->domain_is_close($a['emaildomain'], $b['emaildomain'])) {
-                $signals[self::REASON_EMAIL_DOMAIN_CLOSE] = 12;
+
+            $weight = self::CHECK_WEIGHTS[$checkkey];
+            $availableweight += $weight;
+            $weightedtotal += $check['score'] * $weight;
+
+            foreach ($check['reasons'] as $reason) {
+                $reasons[] = $reason;
             }
-            if ($a['fullname'] !== '' && $a['fullname'] === $b['fullname']) {
-                $signals[self::REASON_NAME_EXACT] = 65;
-            } elseif ($a['firstname'] !== '' && $a['lastname'] !== '' && $a['firstname'] === $b['lastname'] && $a['lastname'] === $b['firstname']) {
-                $signals[self::REASON_NAME_REVERSED] = 60;
-            } else {
-                if (min(strlen($a['firstname']), strlen($b['firstname'])) >= 3 && $this->ratio($a['firstname'], $b['firstname']) >= .78) {
-                    $signals[self::REASON_FIRSTNAME_CLOSE] = 18;
-                }
-                if (min(strlen($a['lastname']), strlen($b['lastname'])) >= 3 && $this->ratio($a['lastname'], $b['lastname']) >= .78) {
-                    $signals[self::REASON_LASTNAME_CLOSE] = 24;
-                }
-            }
-            if ($this->alternate_names_intersect($a, $b)) {
-                $signals[self::REASON_ALTERNATE_NAME] = 18;
-            }
-            if (isset($signals[self::REASON_EMAIL_LOCAL_CLOSE]) && ($a['lastname'] !== '' && $a['lastname'] === $b['lastname'])) {
-                $signals[self::REASON_EMAIL_NAME_COMBINATION] = 12;
-            }
-            if ($a['phones'] !== [] && array_intersect($a['phones'], $b['phones']) !== []) {
-                $signals[self::REASON_PHONE_EXACT] = 75;
+
+            // Kept for backward-compatible consumers. The value is now the
+            // nominal weight of the verification family, not additive score
+            // points.
+            foreach ($check['reasons'] as $reason) {
+                $signalweights[$reason] = $weight;
             }
         }
-        if ($signals === []) {
+
+        if ($availableweight === 0 || $reasons === []) {
             return null;
         }
 
-        // Alternate-name metadata can be populated independently from the
-        // primary identity (notably by generators/imports). It is useful as a
-        // supporting signal, but must never create a match on its own.
-        if (array_keys($signals) === [self::REASON_ALTERNATE_NAME]) {
+        // Alternate-name metadata is supporting evidence only.
+        if (
+            array_values(array_unique($reasons))
+                === [self::REASON_ALTERNATE_NAME]
+        ) {
             return null;
         }
 
-        $score = min(100, array_sum($signals));
-        return new CommerceCustomerIdentitySimilarityMatch($first, $second, $score, array_keys($signals), $signals);
+        $score = (int)round(
+            $weightedtotal / $availableweight
+        );
+
+        return new CommerceCustomerIdentitySimilarityMatch(
+            $first,
+            $second,
+            max(0, min(100, $score)),
+            array_values(array_unique($reasons)),
+            $signalweights,
+            $checks
+        );
+    }
+
+    /**
+     * @return array{available:bool,score:int,reasons:string[]}
+     */
+    private function email_check(array $a, array $b): array {
+        if ($a['email'] === '' || $b['email'] === '') {
+            return [
+                'available' => false,
+                'score' => 0,
+                'reasons' => [],
+            ];
+        }
+
+        if ($a['email'] === $b['email']) {
+            return [
+                'available' => true,
+                'score' => 100,
+                'reasons' => [self::REASON_EMAIL_EXACT],
+            ];
+        }
+
+        $localratio = $this->ratio(
+            $a['emaillocal'],
+            $b['emaillocal']
+        );
+        $domainratio = $this->ratio(
+            $a['emaildomain'],
+            $b['emaildomain']
+        );
+
+        // Local part carries most identity information. The provider/domain
+        // still matters, but a gmail/gmal typo must not dominate the score.
+        $score = (int)round(
+            (
+                0.80 * $localratio
+                + 0.20 * $domainratio
+            ) * 100
+        );
+
+        $reasons = [];
+        if (
+            $a['emaillocal'] !== ''
+            && $a['emaillocal'] === $b['emaillocal']
+        ) {
+            $reasons[] = self::REASON_EMAIL_LOCAL_EXACT;
+        } elseif (
+            min(
+                strlen($a['emaillocal']),
+                strlen($b['emaillocal'])
+            ) >= 4
+            && $localratio >= .72
+        ) {
+            $reasons[] = self::REASON_EMAIL_LOCAL_CLOSE;
+        }
+
+        if (
+            $a['emaildomain'] !== ''
+            && $a['emaildomain'] !== $b['emaildomain']
+            && $this->domain_is_close(
+                $a['emaildomain'],
+                $b['emaildomain']
+            )
+        ) {
+            $reasons[] = self::REASON_EMAIL_DOMAIN_CLOSE;
+        }
+
+        return [
+            'available' => true,
+            'score' => max(0, min(100, $score)),
+            'reasons' => $reasons,
+        ];
+    }
+
+    /**
+     * @return array{available:bool,score:int,reasons:string[]}
+     */
+    private function name_check(array $a, array $b): array {
+        $hasfirstname = (
+            $a['firstname'] !== ''
+            && $b['firstname'] !== ''
+        );
+        $haslastname = (
+            $a['lastname'] !== ''
+            && $b['lastname'] !== ''
+        );
+
+        if (!$hasfirstname && !$haslastname) {
+            return [
+                'available' => false,
+                'score' => 0,
+                'reasons' => [],
+            ];
+        }
+
+        if (
+            $a['fullname'] !== ''
+            && $a['fullname'] === $b['fullname']
+        ) {
+            return [
+                'available' => true,
+                'score' => 100,
+                'reasons' => [self::REASON_NAME_EXACT],
+            ];
+        }
+
+        if (
+            $hasfirstname
+            && $haslastname
+            && $a['firstname'] === $b['lastname']
+            && $a['lastname'] === $b['firstname']
+        ) {
+            return [
+                'available' => true,
+                'score' => 95,
+                'reasons' => [self::REASON_NAME_REVERSED],
+            ];
+        }
+
+        $parts = [];
+        $reasons = [];
+
+        if ($hasfirstname) {
+            $ratio = $this->ratio(
+                $a['firstname'],
+                $b['firstname']
+            );
+            $parts[] = $ratio;
+            if ($ratio >= .78) {
+                $reasons[] = self::REASON_FIRSTNAME_CLOSE;
+            }
+        }
+
+        if ($haslastname) {
+            $ratio = $this->ratio(
+                $a['lastname'],
+                $b['lastname']
+            );
+            $parts[] = $ratio;
+            if ($ratio >= .78) {
+                $reasons[] = self::REASON_LASTNAME_CLOSE;
+            }
+        }
+
+        $score = $parts !== []
+            ? (int)round(
+                array_sum($parts)
+                / count($parts)
+                * 100
+            )
+            : 0;
+
+        if ($this->alternate_names_intersect($a, $b)) {
+            $reasons[] = self::REASON_ALTERNATE_NAME;
+            $score = max($score, 85);
+        }
+
+        return [
+            'available' => true,
+            'score' => max(0, min(100, $score)),
+            'reasons' => array_values(array_unique($reasons)),
+        ];
+    }
+
+    /**
+     * @return array{available:bool,score:int,reasons:string[]}
+     */
+    private function phone_check(array $a, array $b): array {
+        if ($a['phones'] === [] || $b['phones'] === []) {
+            return [
+                'available' => false,
+                'score' => 0,
+                'reasons' => [],
+            ];
+        }
+
+        $exact = array_intersect(
+            $a['phones'],
+            $b['phones']
+        ) !== [];
+
+        return [
+            'available' => true,
+            'score' => $exact ? 100 : 0,
+            'reasons' => $exact
+                ? [self::REASON_PHONE_EXACT]
+                : [],
+        ];
     }
 
     private function candidate_pairs(array $profiles): array {

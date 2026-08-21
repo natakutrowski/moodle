@@ -97,7 +97,8 @@ final class commerce_customer_manual_merge_m73_m74_test extends advanced_testcas
         self::assertStringContainsString("'name' => 'q'", $source);
         self::assertStringContainsString("'adduserid'", $source);
         self::assertStringContainsString("'removeuserid'", $source);
-        self::assertStringContainsString('m734-merge-direction', $source);
+        self::assertStringContainsString('commerce-identity-merge-decisions', $source);
+        self::assertStringContainsString("'name' => 'preferredidentityuserid'", $source);
         self::assertStringContainsString("'name' => 'targetuserid'", $source);
         self::assertStringContainsString("'name' => 'confirmmerge'", $source);
         self::assertStringContainsString("'value' => 'execute'", $source);

@@ -26,6 +26,7 @@ final class CommerceCustomerIdentityNavigationRenderer {
     public static function render(string $active): string {
         $items = [
             self::RECONCILIATION => [
+                'icon' => 'fa fa-link',
                 'label' => get_string(
                     'commerce_identity_nav_reconciliation',
                     'local_subscriptions'
@@ -35,6 +36,7 @@ final class CommerceCustomerIdentityNavigationRenderer {
                 ),
             ],
             self::SIMILARITIES => [
+                'icon' => 'fa fa-search',
                 'label' => get_string(
                     'commerce_identity_nav_similarities',
                     'local_subscriptions'
@@ -44,6 +46,7 @@ final class CommerceCustomerIdentityNavigationRenderer {
                 ),
             ],
             self::MERGE => [
+                'icon' => 'fa fa-random',
                 'label' => get_string(
                     'commerce_identity_nav_merge',
                     'local_subscriptions'
@@ -53,10 +56,12 @@ final class CommerceCustomerIdentityNavigationRenderer {
                 ),
             ],
             self::RELATIONSHIPS => [
+                'icon' => 'fa fa-sitemap',
                 'label' => get_string('commerce_identity_nav_relationships', 'local_subscriptions'),
                 'url' => new moodle_url('/local/subscriptions/admin/commerce/customer-identities/relationships.php'),
             ],
             self::PROVISIONING => [
+                'icon' => 'fa fa-user-plus',
                 'label' => get_string(
                     'commerce_identity_nav_provisioning',
                     'local_subscriptions'
@@ -66,6 +71,7 @@ final class CommerceCustomerIdentityNavigationRenderer {
                 ),
             ],
             self::LEGACY_QUALITY => [
+                'icon' => 'fa fa-shield',
                 'label' => get_string(
                     'commerce_identity_nav_legacy_quality',
                     'local_subscriptions'
@@ -86,16 +92,33 @@ final class CommerceCustomerIdentityNavigationRenderer {
             }
             $links[] = html_writer::tag(
                 'li',
-                html_writer::link($item['url'], $item['label'], $attributes),
+                html_writer::link(
+                    $item['url'],
+                    html_writer::tag('i', '', [
+                        'class' => $item['icon'],
+                        'aria-hidden' => 'true',
+                    ])
+                    . html_writer::span(
+                        s($item['label'])
+                    ),
+                    $attributes
+                ),
                 ['class' => 'nav-item']
             );
         }
 
         return html_writer::tag(
             'nav',
-            html_writer::tag('ul', implode('', $links), ['class' => 'nav nav-tabs']),
+            html_writer::tag(
+                'ul',
+                implode('', $links),
+                [
+                    'class' =>
+                        'nav crm-identity-operations-nav-list',
+                ]
+            ),
             [
-                'class' => 'mb-4',
+                'class' => 'crm-identity-operations-nav',
                 'aria-label' => get_string(
                     'commerce_identity_nav_label',
                     'local_subscriptions'

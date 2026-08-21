@@ -4,6 +4,7 @@ namespace local_subscriptions\crm\user360\workspace;
 
 defined('MOODLE_INTERNAL') || die();
 
+use html_writer;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\workspace\WorkspaceDefinition;
 use local_subscriptions\crm\workspace\WorkspaceItemDefinition;
@@ -11,6 +12,12 @@ use local_subscriptions\output\UserProfileRenderer;
 use local_subscriptions\crm\user360\merge\User360MergeHistoryRenderer;
 use local_subscriptions\crm\user360\guest\User360GuestCheckoutRecoveryRenderer;
 use local_subscriptions\crm\user360\identity\User360IdentityGraphRenderer;
+use local_subscriptions\crm\user360\rendering\User360OverviewRenderer;
+use local_subscriptions\crm\user360\rendering\User360SupportOverviewRenderer;
+use local_subscriptions\crm\user360\rendering\User360CommerceAccessRenderer;
+use local_subscriptions\crm\user360\rendering\User360RelationRenderer;
+use local_subscriptions\crm\user360\rendering\User360IdentitiesRenderer;
+use local_subscriptions\crm\user360\rendering\User360TimelineRenderer;
 
 /**
  * Builds the CRM User360 Workspace.
@@ -118,25 +125,11 @@ final class User360WorkspaceFactory {
             $profile
         );
 
-        self::register_timeline_summary(
-            $definition,
-            $profile
-        );
-
-        self::register_quick_actions(
-            $definition,
-            $profile
-        );
 
         $iscommerceguest = !empty($profile?->iscommerceguest);
 
         if (!$iscommerceguest) {
-            self::register_intelligence(
-                $definition,
-                $profile
-            );
-
-            self::register_customer_success(
+            self::register_relation(
                 $definition,
                 $profile
             );
@@ -147,52 +140,10 @@ final class User360WorkspaceFactory {
             $profile
         );
 
-        self::register_identity_graph(
+        self::register_identities(
             $definition,
             $profile
         );
-
-        self::register_guest_checkout_recovery(
-            $definition,
-            $profile
-        );
-
-        if (!$iscommerceguest) {
-            self::register_merge_history(
-                $definition,
-                $profile
-            );
-
-        }
-
-        if (!$iscommerceguest) {
-            self::register_courses(
-                $definition,
-                $profile
-            );
-
-            self::register_notes(
-                $definition,
-                $profile
-            );
-
-            if ($canviewinbox) {
-                self::register_inbox(
-                    $definition,
-                    $profile
-                );
-            }
-
-            self::register_assistant(
-                $definition,
-                $profile
-            );
-
-            self::register_work_items(
-                $definition,
-                $profile
-            );
-        }
 
         self::register_timeline(
             $definition,
@@ -266,10 +217,9 @@ final class User360WorkspaceFactory {
                         return '';
                     }
 
-                    return UserProfileRenderer::
-                        render_hero(
-                            $profile
-                        );
+                    return User360SupportOverviewRenderer::render_hero(
+                        $profile
+                    );
                 }
             )
         );
@@ -318,10 +268,9 @@ final class User360WorkspaceFactory {
                         return '';
                     }
 
-                    return UserProfileRenderer::
-                        render_stats_panel(
-                            $profile
-                        );
+                    return User360SupportOverviewRenderer::render_kpis(
+                        $profile
+                    );
                 }
             )
         );
@@ -380,6 +329,42 @@ final class User360WorkspaceFactory {
     }
 
     /**
+     * Registers the consolidated CRM relationship surface.
+     */
+    private static function register_relation(
+        WorkspaceDefinition $definition,
+        ?\stdClass $profile
+    ): void {
+        $definition->register(
+            new WorkspaceItemDefinition(
+                key: self::ITEM_INTELLIGENCE,
+                label: get_string(
+                    'crm_user360_n113c_title',
+                    'local_subscriptions'
+                ),
+                description: get_string(
+                    'crm_user360_n113c_intro',
+                    'local_subscriptions'
+                ),
+                icon: '🧠',
+                zone: self::ZONE_MAIN,
+                span: 3,
+                type: WorkspaceItemDefinition::TYPE_WIDGET,
+                hideable: true,
+                movable: true,
+                defaultvisible: true,
+                renderer: static function () use ($profile): string {
+                    if ($profile === null) {
+                        return '';
+                    }
+
+                    return User360RelationRenderer::render($profile);
+                }
+            )
+        );
+    }
+
+    /**
      * Registers CRM Intelligence.
      */
     private static function register_intelligence(
@@ -422,10 +407,13 @@ final class User360WorkspaceFactory {
                         return '';
                     }
 
-                    return UserProfileRenderer::
-                        render_intelligence_panel(
+                    return html_writer::div(
+                        UserProfileRenderer::render_intelligence_panel(
                             $profile
-                        );
+                        ),
+                        '',
+                        ['id' => 'user360-relation']
+                    );
                 }
             )
         );
@@ -507,9 +495,9 @@ final class User360WorkspaceFactory {
 
                 icon: '💳',
 
-                zone: self::ZONE_MAIN,
+                zone: self::ZONE_SIDEBAR,
 
-                span: 3,
+                span: 1,
 
                 type:
                     WorkspaceItemDefinition::TYPE_WIDGET,
@@ -527,10 +515,9 @@ final class User360WorkspaceFactory {
                         return '';
                     }
 
-                    return UserProfileRenderer::
-                        render_commercial_panel(
-                            $profile
-                        );
+                    return User360CommerceAccessRenderer::render(
+                        $profile
+                    );
                 }
             )
         );
@@ -608,6 +595,42 @@ final class User360WorkspaceFactory {
     }
 
     /**
+     * Registers the consolidated Identities domain.
+     */
+    private static function register_identities(
+        WorkspaceDefinition $definition,
+        ?\stdClass $profile
+    ): void {
+        $definition->register(
+            new WorkspaceItemDefinition(
+                key: self::ITEM_IDENTITY_GRAPH,
+                label: get_string(
+                    'crm_user360_n113d_identities_title',
+                    'local_subscriptions'
+                ),
+                description: get_string(
+                    'crm_user360_n113d_identities_intro',
+                    'local_subscriptions'
+                ),
+                icon: '🪪',
+                zone: self::ZONE_SIDEBAR,
+                span: 1,
+                type: WorkspaceItemDefinition::TYPE_WIDGET,
+                hideable: true,
+                movable: true,
+                defaultvisible: true,
+                renderer: static function () use ($profile): string {
+                    if ($profile === null) {
+                        return '';
+                    }
+
+                    return User360IdentitiesRenderer::render($profile);
+                }
+            )
+        );
+    }
+
+    /**
      * Registers accessible courses.
      */
     private static function register_identity_graph(
@@ -627,12 +650,32 @@ final class User360WorkspaceFactory {
                 movable: true,
                 defaultvisible: true,
                 renderer: static function () use ($profile): string {
-                    if ($profile === null || empty($profile->user)) { return ''; }
-                    if (!empty($profile->user->id)) {
-                        return User360IdentityGraphRenderer::render((int)$profile->user->id);
+                    if ($profile === null || empty($profile->user)) {
+                        return '';
                     }
-                    $email = trim((string)($profile->user->email ?? ''));
-                    return $email !== '' ? User360IdentityGraphRenderer::render_email($email) : '';
+
+                    if (!empty($profile->user->id)) {
+                        $content = User360IdentityGraphRenderer::render(
+                            (int)$profile->user->id
+                        );
+                    } else {
+                        $email = trim(
+                            (string)($profile->user->email ?? '')
+                        );
+                        $content = $email !== ''
+                            ? User360IdentityGraphRenderer::render_email($email)
+                            : '';
+                    }
+
+                    if ($content === '') {
+                        return '';
+                    }
+
+                    return html_writer::div(
+                        $content,
+                        '',
+                        ['id' => 'user360-identities']
+                    );
                 }
             )
         );
@@ -918,9 +961,9 @@ final class User360WorkspaceFactory {
 
                 icon: '🕒',
 
-                zone: self::ZONE_TIMELINE,
+                zone: self::ZONE_MAIN,
 
-                span: 3,
+                span: 2,
 
                 type:
                     WorkspaceItemDefinition::TYPE_SYSTEM,
@@ -938,10 +981,9 @@ final class User360WorkspaceFactory {
                         return '';
                     }
 
-                    return UserProfileRenderer::
-                        render_timeline_panel(
-                            $profile
-                        );
+                    return User360TimelineRenderer::render(
+                        $profile
+                    );
                 }
             )
         );

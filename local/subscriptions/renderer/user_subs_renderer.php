@@ -29,7 +29,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
             'currency' => get_string('currency', 'local_subscriptions'),
         ];
 
-        $out .= html_writer::start_tag('table', ['class' => 'generaltable import-preview']);
+        $out .= html_writer::start_tag('table', ['class' => 'generaltable import-preview crm-legacy-import-preview-table']);
         $out .= html_writer::start_tag('thead');
         $out .= html_writer::start_tag('tr');
 
@@ -184,7 +184,7 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
         $output = html_writer::start_tag('form', [
             'method' => 'post',
             'enctype' => 'multipart/form-data',
-            'class' => 'csv-upload-form'
+            'class' => 'csv-upload-form crm-legacy-import-upload-form'
         ]);
         
         $output .= html_writer::empty_tag('input', ['type'=>'hidden','name'=>'sesskey','value'=>sesskey()]);
@@ -193,10 +193,22 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
 
         $output .= html_writer::start_tag('label', [
             'for' => 'csvfile',
-            'class' => 'btn btn-outline-primary',
-            'style' => 'cursor: pointer; margin-bottom: 10px; margin-right: 10px; display: inline-block;'
+            'class' => 'btn btn-outline-primary crm-legacy-import-file-picker'
         ]);
-        $output .= '📁 ' . get_string('select_csv_file', 'local_subscriptions');
+        $output .= html_writer::tag(
+            'i',
+            '',
+            [
+                'class' => 'fa fa-folder-open-o',
+                'aria-hidden' => 'true',
+            ]
+        )
+        . html_writer::span(
+            get_string(
+                'select_csv_file',
+                'local_subscriptions'
+            )
+        );
         $output .= html_writer::end_tag('label');
 
         $output .= html_writer::empty_tag('input', [
@@ -205,10 +217,20 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
             'id' => 'csvfile',
             'accept' => '.csv',
             'required' => true,
-            'style' => 'display: none;'
+            'class' => 'crm-legacy-import-file-input'
         ]);
 
-        $output .= html_writer::tag('div', '', ['id' => 'selected-filename', 'class' => 'text-muted']);
+        $output .= html_writer::tag(
+            'div',
+            get_string(
+                'crm_legacy_import_no_file',
+                'local_subscriptions'
+            ),
+            [
+                'id' => 'selected-filename',
+                'class' => 'crm-legacy-import-filename',
+            ]
+        );
         $output .= html_writer::end_div();
 
         $output .= html_writer::tag('button', get_string('submit_csv_file', 'local_subscriptions'), [
@@ -218,9 +240,6 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
             'disabled' => true
         ]);
 
-        $output .= subscription_config::button_add_subscription();
-        $output .= subscription_config::button_manage_subscription();
-
         $output .= html_writer::end_tag('form');
 
         // Script pour afficher le nom du fichier sélectionné
@@ -229,7 +248,11 @@ class local_subscriptions_user_subs_renderer extends plugin_renderer_base {
                 const fileName = e.target.files[0]?.name || '';
                 if (fileName) {
                     const label = document.querySelector("label[for='csvfile']");
-                    label.innerHTML = '📁 ' + fileName;
+                    label.querySelector('span').textContent = fileName;
+                    const filename = document.getElementById('selected-filename');
+                    if (filename) {
+                        filename.textContent = fileName;
+                    }
                 }
                 const previewButton = document.getElementById('preview-button');
                 if (previewButton) {

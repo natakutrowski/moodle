@@ -27,12 +27,21 @@ final class commerce_products_n8172_test extends advanced_testcase {
 
     public function test_builder_header_uses_resolved_name(): void {
         $source = file_get_contents(
-            __DIR__ . '/../../../admin/commerce/products/storefront_builder.php'
+            __DIR__
+            . '/../../../admin/commerce/products/storefront_builder.php'
         );
 
         self::assertIsString($source);
         self::assertStringContainsString(
-            "    \$displayname\n);",
+            'CommerceCatalogProductNameResolver::resolve_native_id(',
+            $source
+        );
+        self::assertStringContainsString(
+            'CommerceProductPageHeaderRenderer::render(',
+            $source
+        );
+        self::assertStringContainsString(
+            ") . ' — ' . \$displayname",
             $source
         );
     }

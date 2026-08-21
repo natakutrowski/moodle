@@ -65,14 +65,73 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-$headeractions = '';
+$headeractions = [];
+
+if (
+    AdminSecurity::can(
+        Capabilities::MANAGE_INBOX
+    )
+) {
+    $headeractions[] = html_writer::tag(
+        'form',
+        html_writer::empty_tag(
+            'input',
+            [
+                'type' => 'hidden',
+                'name' => 'sesskey',
+                'value' => sesskey(),
+            ]
+        )
+        . html_writer::empty_tag(
+            'input',
+            [
+                'type' => 'hidden',
+                'name' => 'returnurl',
+                'value' => $pageurl->out(false),
+            ]
+        )
+        . html_writer::tag(
+            'button',
+            html_writer::tag(
+                'i',
+                '',
+                [
+                    'class' => 'fa fa-refresh',
+                    'aria-hidden' => 'true',
+                ]
+            )
+            . html_writer::span(
+                get_string(
+                    'crm_inbox_refresh',
+                    'local_subscriptions'
+                )
+            ),
+            [
+                'type' => 'submit',
+                'class' =>
+                    'btn btn-sm btn-primary '
+                    . 'crm-inbox-refresh-button',
+            ]
+        ),
+        [
+            'method' => 'post',
+            'action' => (
+                new moodle_url(
+                    subscription_config::
+                        admin_inbox_sync_page()
+                )
+            )->out(false),
+            'class' => 'd-inline-block m-0',
+        ]
+    );
+}
 
 if (
     AdminSecurity::can(
         Capabilities::MANAGE_CONFIGURATION
     )
 ) {
-    $headeractions = html_writer::link(
+    $headeractions[] = html_writer::link(
         new moodle_url(
             subscription_config::
                 admin_inbox_diagnostics_page()
@@ -87,6 +146,11 @@ if (
         ]
     );
 }
+
+$headeractions = html_writer::div(
+    implode('', $headeractions),
+    'crm-inbox-header-actions'
+);
 
 echo CrmPageHeader::render(
     $pagetitle,

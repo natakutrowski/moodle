@@ -57,7 +57,8 @@ final class Dashboard {
         );
 
         $out .= self::render_heading(
-            $layout->to_array()
+            $definition,
+            $layout
         );
 
         $out .= WorkspaceToolbarRenderer::render(
@@ -89,47 +90,55 @@ final class Dashboard {
             true
         );
 
-        $out .= html_writer::start_div(
-            'local-subscriptions-dashboard-grid'
-        );
-
-        $out .= html_writer::start_div(
-            'local-subscriptions-dashboard-main'
-        );
-
-        $out .= self::render_workspace_zone(
+        $out .= self::render_dashboard_section(
             $definition,
             $layout,
-            DashboardWorkspaceFactory::ZONE_MAIN,
-            'crm-dashboard-panels-grid',
+            DashboardWorkspaceFactory::ZONE_FOCUS,
             get_string(
-                'dashboard_workspace_empty_main',
+                'dashboard_n1211_focus_title',
                 'local_subscriptions'
             ),
-            '🧩',
-            false
-        );
-        $out .= html_writer::end_div();
-
-        $out .= html_writer::start_div(
-            'local-subscriptions-dashboard-side'
+            get_string(
+                'dashboard_n1211_focus_description',
+                'local_subscriptions'
+            ),
+            'crm-dashboard-focus-zone'
         );
 
-        $out .= self::render_workspace_zone(
+        $out .= self::render_operations_section(
+            $definition,
+            $layout
+        );
+
+        $out .= self::render_dashboard_section(
             $definition,
             $layout,
-            DashboardWorkspaceFactory::ZONE_SIDE,
-            'crm-dashboard-side-zone',
+            DashboardWorkspaceFactory::ZONE_INSIGHTS,
             get_string(
-                'dashboard_workspace_empty_side',
+                'dashboard_n1211_insights_title',
                 'local_subscriptions'
             ),
-            '📌',
-            true
+            get_string(
+                'dashboard_n1211_insights_description',
+                'local_subscriptions'
+            ),
+            'crm-dashboard-insights-zone'
         );
 
-        $out .= html_writer::end_div();
-        $out .= html_writer::end_div();
+        $out .= self::render_dashboard_section(
+            $definition,
+            $layout,
+            DashboardWorkspaceFactory::ZONE_SECONDARY,
+            get_string(
+                'dashboard_n1211_secondary_title',
+                'local_subscriptions'
+            ),
+            get_string(
+                'dashboard_n1211_secondary_description',
+                'local_subscriptions'
+            ),
+            'crm-dashboard-secondary-zone'
+        );
 
         $out .= WorkspaceRenderer::end();
 
@@ -140,7 +149,8 @@ final class Dashboard {
      * Renders the Dashboard title row and current personalization panel.
      */
     private static function render_heading(
-        array $layout
+        WorkspaceDefinition $definition,
+        WorkspaceLayout $layout
     ): string {
         $out = html_writer::start_div(
             'crm-dashboard-heading-row'
@@ -158,13 +168,139 @@ final class Dashboard {
             ]
         );
 
+        $out .= html_writer::start_div(
+            'crm-dashboard-heading-actions'
+        );
+
+        $out .= WorkspaceRenderer::render_zone(
+            $definition,
+            $layout,
+            DashboardWorkspaceFactory::ZONE_UTILITY,
+            'crm-dashboard-utility-zone'
+        );
+
         $out .= DashboardPersonalizationRenderer::render(
-            $layout
+            $layout->to_array()
         );
 
         $out .= html_writer::end_div();
+        $out .= html_writer::end_div();
 
         return $out;
+    }
+
+    /**
+     * Renders the operational 2/3 + 1/3 workspace:
+     * Inbox on the left, Work and Customer Success stacked on the right.
+     */
+    private static function render_operations_section(
+        WorkspaceDefinition $definition,
+        WorkspaceLayout $layout
+    ): string {
+        $main = WorkspaceRenderer::render_zone(
+            $definition,
+            $layout,
+            DashboardWorkspaceFactory::ZONE_OPERATIONS,
+            'crm-dashboard-operations-main'
+        );
+
+        $side = WorkspaceRenderer::render_zone(
+            $definition,
+            $layout,
+            DashboardWorkspaceFactory::ZONE_OPERATIONS_SIDE,
+            'crm-dashboard-operations-side'
+        );
+
+        if ($main === '' && $side === '') {
+            return '';
+        }
+
+        $header = html_writer::div(
+            html_writer::tag(
+                'h2',
+                s(get_string(
+                    'dashboard_n1211_operations_title',
+                    'local_subscriptions'
+                )),
+                [
+                    'class' =>
+                        'crm-dashboard-section-title',
+                ]
+            )
+            . html_writer::div(
+                s(get_string(
+                    'dashboard_n1211_operations_description',
+                    'local_subscriptions'
+                )),
+                'crm-dashboard-section-description'
+            ),
+            'crm-dashboard-section-heading'
+        );
+
+        $content = html_writer::div(
+            $main . $side,
+            'crm-dashboard-operations-layout'
+        );
+
+        return html_writer::tag(
+            'section',
+            $header . $content,
+            [
+                'class' =>
+                    'crm-dashboard-section ' .
+                    'crm-dashboard-section-operations',
+            ]
+        );
+    }
+
+    /**
+     * Renders one semantic Dashboard section around a Workspace zone.
+     */
+    private static function render_dashboard_section(
+        WorkspaceDefinition $definition,
+        WorkspaceLayout $layout,
+        string $zone,
+        string $title,
+        string $description,
+        string $zoneclass
+    ): string {
+        $content = WorkspaceRenderer::render_zone(
+            $definition,
+            $layout,
+            $zone,
+            'crm-dashboard-panels-grid ' . $zoneclass
+        );
+
+        if ($content === '') {
+            return '';
+        }
+
+        $header = html_writer::div(
+            html_writer::tag(
+                'h2',
+                s($title),
+                [
+                    'class' =>
+                        'crm-dashboard-section-title',
+                ]
+            )
+            . html_writer::div(
+                s($description),
+                'crm-dashboard-section-description'
+            ),
+            'crm-dashboard-section-heading'
+        );
+
+        return html_writer::tag(
+            'section',
+            $header . $content,
+            [
+                'class' =>
+                    'crm-dashboard-section '
+                    . 'crm-dashboard-section-' . $zone,
+                'data-dashboard-section' => $zone,
+            ]
+        );
     }
 
     /**

@@ -9,16 +9,43 @@ final class OpenAiInboxConfiguration {
     private const DEFAULT_ENDPOINT =
         'https://api.openai.com/v1/responses';
 
+    private const DEFAULT_MODEL =
+        'gpt-5.6-luna';
+
     public function __construct(
         private readonly OpenAiApiKeyProvider $keys
     ) {
     }
 
     public function enabled(): bool {
-        return (bool)get_config(
+        global $CFG;
+
+        if (
+            property_exists(
+                $CFG,
+                'local_subscriptions_openai_enabled'
+            )
+        ) {
+            return (bool)
+                $CFG->local_subscriptions_openai_enabled;
+        }
+
+        $stored = get_config(
             'local_subscriptions',
             'inbox_ai_openai_enabled'
         );
+
+        if ($stored !== false) {
+            return (bool)$stored;
+        }
+
+        /*
+         * When credentials are deliberately supplied from config.php and no
+         * Moodle setting has ever been stored, treat the provider as enabled.
+         * This keeps secrets/configuration deployable without requiring a
+         * second hidden database switch.
+         */
+        return $this->keys->has_key();
     }
 
     public function available(): bool {
@@ -29,21 +56,51 @@ final class OpenAiInboxConfiguration {
     }
 
     public function model(): string {
-        return trim(
+        global $CFG;
+
+        $configured = trim(
+            (string)(
+                $CFG->local_subscriptions_openai_model
+                ?? ''
+            )
+        );
+
+        if ($configured !== '') {
+            return $configured;
+        }
+
+        $stored = trim(
             (string)get_config(
                 'local_subscriptions',
                 'inbox_ai_openai_model'
             )
         );
+
+        if ($stored !== '') {
+            return $stored;
+        }
+
+        return self::DEFAULT_MODEL;
     }
 
     public function endpoint(): string {
+        global $CFG;
+
         $endpoint = trim(
-            (string)get_config(
-                'local_subscriptions',
-                'inbox_ai_openai_endpoint'
+            (string)(
+                $CFG->local_subscriptions_openai_endpoint
+                ?? ''
             )
         );
+
+        if ($endpoint === '') {
+            $endpoint = trim(
+                (string)get_config(
+                    'local_subscriptions',
+                    'inbox_ai_openai_endpoint'
+                )
+            );
+        }
 
         if ($endpoint === '') {
             return self::DEFAULT_ENDPOINT;

@@ -81,59 +81,156 @@ final class FallbackInboxAiProvider implements
         InboxAiRequest $request
     ): InboxAiResult {
         $content = \core_text::strtolower(
-            $request->content
+            trim($request->content)
         );
+
+        if ($content === '') {
+            return new InboxAiResult(
+                InboxAiStatus::SUCCESS,
+                $request->capability,
+                $this->key(),
+                null,
+                ['language' => 'unknown'],
+                0.0,
+                [
+                    'No content was available for local language detection.',
+                ],
+                null,
+                time()
+            );
+        }
+
+        /*
+         * Script detection is much more reliable than keywords for Russian
+         * support mail. A normal Cyrillic sentence should never fall back to
+         * UNKNOWN simply because it does not contain a short CRM vocabulary.
+         */
+        $cyrillic = preg_match_all(
+            '/\p{Cyrillic}/u',
+            $content
+        ) ?: 0;
+
+        $letters = preg_match_all(
+            '/\p{L}/u',
+            $content
+        ) ?: 0;
+
+        if (
+            $cyrillic >= 3
+            && (
+                $letters === 0
+                || ($cyrillic / $letters) >= 0.25
+            )
+        ) {
+            return new InboxAiResult(
+                InboxAiStatus::SUCCESS,
+                $request->capability,
+                $this->key(),
+                null,
+                ['language' => 'ru'],
+                0.96,
+                [
+                    'Russian was detected locally from Cyrillic script.',
+                ],
+                null,
+                time()
+            );
+        }
 
         $scores = [
             'fr' => $this->score_terms(
                 $content,
                 [
                     'bonjour',
+                    'bonsoir',
                     'merci',
-                    'paiement',
+                    'je ',
+                    'vous ',
+                    'votre ',
+                    'mon ',
+                    'ma ',
+                    'mes ',
                     'cours',
                     'accès',
-                    'abonnement',
+                    'paiement',
                     'problème',
+                    'commande',
+                    'abonnement',
+                    'pouvez-vous',
+                    'comment',
                 ]
             ),
             'en' => $this->score_terms(
                 $content,
                 [
                     'hello',
+                    'hi ',
                     'thank',
-                    'payment',
+                    'please',
+                    'you ',
+                    'your ',
+                    'my ',
                     'course',
                     'access',
-                    'subscription',
+                    'payment',
                     'problem',
+                    'order',
+                    'subscription',
+                    'can you',
+                    'how ',
                 ]
             ),
             'ru' => $this->score_terms(
                 $content,
                 [
                     'здравствуйте',
+                    'добрый',
                     'спасибо',
-                    'оплата',
+                    'пожалуйста',
                     'курс',
                     'доступ',
-                    'подписка',
-                    'проблема',
+                    'оплата',
+                    'проблем',
+                    'заказ',
+                    'подписк',
+                    'помог',
                 ]
             ),
         ];
+
+        if (
+            preg_match(
+                '/[àâçéèêëîïôùûüÿœæ]/u',
+                $content
+            )
+        ) {
+            $scores['fr'] += 2;
+        }
 
         arsort($scores);
 
         $language = (string)array_key_first(
             $scores
         );
-
         $bestscore = (int)reset($scores);
+        $seconds = array_values($scores);
+        $secondscore = (int)($seconds[1] ?? 0);
 
         if ($bestscore === 0) {
             $language = 'unknown';
         }
+
+        $confidence = $bestscore === 0
+            ? 0.15
+            : min(
+                0.92,
+                0.58
+                + ($bestscore * 0.06)
+                + max(
+                    0,
+                    $bestscore - $secondscore
+                ) * 0.04
+            );
 
         return new InboxAiResult(
             InboxAiStatus::SUCCESS,
@@ -141,9 +238,9 @@ final class FallbackInboxAiProvider implements
             $this->key(),
             null,
             ['language' => $language],
-            $bestscore > 0 ? 0.65 : 0.2,
+            $confidence,
             [
-                'Language was detected using local keyword heuristics.',
+                'Language was detected using local script and vocabulary heuristics.',
             ],
             null,
             time()
@@ -395,10 +492,96 @@ final class FallbackInboxAiProvider implements
             (string)end($messages)
         );
 
-        $latest = shorten_text(
-            $latest,
-            500
+        $sentences = preg_split(
+            '/(?<=[\.\!\?。！？])\s+/u',
+            preg_replace(
+                '/\s+/u',
+                ' ',
+                $latest
+            ) ?? $latest,
+            -1,
+            PREG_SPLIT_NO_EMPTY
+        ) ?: [];
+
+        $sentences = array_values(
+            array_filter(
+                array_map(
+                    static fn(string $sentence): string =>
+                        trim($sentence),
+                    $sentences
+                ),
+                static fn(string $sentence): bool =>
+                    $sentence !== ''
+            )
         );
+
+        $keypoints = array_slice(
+            $sentences,
+            0,
+            4
+        );
+
+        $requestterms = [
+            '?',
+            'помог',
+            'подскаж',
+            'можно',
+            'как ',
+            'почему',
+            'не могу',
+            'please',
+            'can you',
+            'could you',
+            'how ',
+            'why ',
+            'help',
+            'pouvez-vous',
+            'comment',
+            'pourquoi',
+            'aidez',
+            'besoin',
+        ];
+
+        $customerrequests = [];
+        $pendingquestions = [];
+
+        foreach ($sentences as $sentence) {
+            $normalized =
+                \core_text::strtolower($sentence);
+
+            if (
+                str_contains($sentence, '?')
+                || str_contains($sentence, '？')
+            ) {
+                $pendingquestions[] = $sentence;
+            }
+
+            foreach ($requestterms as $term) {
+                if (
+                    str_contains(
+                        $normalized,
+                        $term
+                    )
+                ) {
+                    $customerrequests[] =
+                        $sentence;
+                    break;
+                }
+            }
+        }
+
+        $summaryparts = array_slice(
+            $sentences,
+            0,
+            2
+        );
+
+        $summary = $summaryparts
+            ? implode(' ', $summaryparts)
+            : shorten_text(
+                $latest,
+                700
+            );
 
         return new InboxAiResult(
             InboxAiStatus::PARTIAL,
@@ -406,19 +589,37 @@ final class FallbackInboxAiProvider implements
             $this->key(),
             null,
             [
-                'summary' => $latest,
-                'keypoints' => [],
-                'pendingquestions' => [],
-                'customerrequests' => [],
+                'summary' =>
+                    shorten_text(
+                        $summary,
+                        900
+                    ),
+                'keypoints' =>
+                    array_values(
+                        array_unique($keypoints)
+                    ),
+                'pendingquestions' =>
+                    array_values(
+                        array_unique(
+                            $pendingquestions
+                        )
+                    ),
+                'customerrequests' =>
+                    array_values(
+                        array_unique(
+                            $customerrequests
+                        )
+                    ),
                 'language' =>
                     $request->requestedlanguage,
             ],
-            0.25,
+            0.45,
             [
-                'The local fallback provides only a limited summary.',
+                'The local fallback provides a limited request-oriented analysis.',
             ],
             null,
             time()
         );
     }
+
 }

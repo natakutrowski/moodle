@@ -8,8 +8,14 @@ use local_subscriptions\crm\success\plans\services\CustomerSuccessPlanLifecycleS
 use local_subscriptions\crm\success\plans\repositories\CustomerSuccessPlanReadRepository;
 use local_subscriptions\subscription_config;
 
-AdminSecurity::require(
+global $PAGE, $USER;
+
+$context = AdminSecurity::require(
     Capabilities::MANAGE_USERS
+);
+
+$PAGE->set_context(
+    $context
 );
 
 require_sesskey();
@@ -28,6 +34,18 @@ $stepid = optional_param(
 $action = required_param(
     'action',
     PARAM_ALPHANUMEXT
+);
+
+$PAGE->set_url(
+    new moodle_url(
+        subscription_config::
+            admin_customer_success_plan_action_page(),
+        [
+            'planid' => $planid,
+            'stepid' => $stepid,
+            'action' => $action,
+        ]
+    )
 );
 
 $blockreason = optional_param(

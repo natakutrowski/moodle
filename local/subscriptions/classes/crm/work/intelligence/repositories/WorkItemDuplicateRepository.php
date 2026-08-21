@@ -98,7 +98,7 @@ final class WorkItemDuplicateRepository {
             "SELECT item.*
                FROM {local_subscriptions_work_item} item
                JOIN {local_subscriptions_work_link} link
-                 ON link.workitemid = item.id
+                 ON link.itemid = item.id
               WHERE link.objecttype = :objecttype
                 AND link.objectid = :objectid
                 AND item.status {$statussql}

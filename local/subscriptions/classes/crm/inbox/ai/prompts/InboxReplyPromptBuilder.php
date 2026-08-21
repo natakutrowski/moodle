@@ -7,12 +7,16 @@ defined('MOODLE_INTERNAL') || die();
 final class InboxReplyPromptBuilder {
 
     public const VERSION =
-        'reply-suggestion-v1';
+        'reply-suggestion-v2';
 
     public function constraints(
         string $language,
         string $tone
     ): array {
+        $languagename = self::language_name(
+            $language
+        );
+
         return [
             'outputformat' => 'json',
             'outputlanguage' => $language,
@@ -27,7 +31,10 @@ final class InboxReplyPromptBuilder {
                 'requiresreview' => 'boolean',
             ],
             'instructions' => [
-                'Draft a proposed support reply.',
+                'Draft a proposed support reply in ' . $languagename . '.',
+                'The subject and body MUST be written in ' . $languagename . '.',
+                'Do not answer in the customer language unless it is also ' . $languagename . '.',
+                'Set the language field exactly to "' . $language . '".',
                 'The reply must be reviewed by a human before sending.',
                 'Never claim that a payment succeeded unless CRM context confirms it.',
                 'Never promise access, refund or cancellation unless CRM context confirms that the action has already occurred.',
@@ -46,4 +53,16 @@ final class InboxReplyPromptBuilder {
             ],
         ];
     }
+
+    private static function language_name(
+        string $language
+    ): string {
+        return match ($language) {
+            'fr' => 'French',
+            'ru' => 'Russian',
+            'en' => 'English',
+            default => 'the requested language',
+        };
+    }
+
 }

@@ -45,9 +45,11 @@ final class commerce_products_n812_test extends advanced_testcase {
     public function test_existing_full_editor_is_preserved_as_transitional_builder(): void {
         $root = dirname(__DIR__, 3);
         $source = file_get_contents(
-            $root . '/admin/commerce/products/storefront_builder.php'
+            $root
+            . '/admin/commerce/products/storefront_builder.php'
         );
 
+        self::assertIsString($source);
         self::assertStringContainsString(
             'CommerceStorefrontVisualBuilderService',
             $source
@@ -57,7 +59,7 @@ final class commerce_products_n812_test extends advanced_testcase {
             $source
         );
         self::assertStringContainsString(
-            'commerce_storefront_n812_back_to_hub',
+            'CommerceProductEditorNavigationRenderer::breadcrumb',
             $source
         );
         self::assertStringContainsString(

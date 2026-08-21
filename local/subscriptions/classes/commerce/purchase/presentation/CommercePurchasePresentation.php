@@ -12,16 +12,29 @@ use local_subscriptions\commerce\purchase\status\CommerceCommercialStatus;
 /** Human-facing labels and badges for unified Commerce purchases. */
 final class CommercePurchasePresentation {
     public static function commercial_status_label(string $status): string {
-        return get_string('commerce_purchase_commercial_status_' . self::safe_key($status), 'local_subscriptions');
+        $displaystatus = match ($status) {
+            CommerceCommercialStatus::PAID,
+            CommerceCommercialStatus::TO_FULFILL => CommerceCommercialStatus::PENDING,
+            default => $status,
+        };
+
+        return get_string(
+            'commerce_purchase_commercial_status_' . self::safe_key($displaystatus),
+            'local_subscriptions'
+        );
     }
 
     public static function commercial_status_badge(string $status): string {
         $class = match ($status) {
             CommerceCommercialStatus::FULFILLED => 'success',
-            CommerceCommercialStatus::PAID, CommerceCommercialStatus::TO_FULFILL => 'primary',
             CommerceCommercialStatus::PARTIALLY_FULFILLED => 'warning',
-            CommerceCommercialStatus::PAYMENT_FAILED, CommerceCommercialStatus::CANCELLED => 'danger',
-            CommerceCommercialStatus::REFUNDED, CommerceCommercialStatus::REPLACED => 'secondary',
+            CommerceCommercialStatus::PAYMENT_FAILED,
+            CommerceCommercialStatus::CANCELLED => 'danger',
+            CommerceCommercialStatus::REFUNDED,
+            CommerceCommercialStatus::REPLACED => 'secondary',
+            CommerceCommercialStatus::PAID,
+            CommerceCommercialStatus::TO_FULFILL,
+            CommerceCommercialStatus::PENDING => 'light text-dark',
             default => 'light text-dark',
         };
         return html_writer::span(s(self::commercial_status_label($status)), 'badge bg-' . $class);

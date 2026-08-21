@@ -21,7 +21,8 @@ final class InboxThreadPreviewRenderer {
      * Renders the central reading area.
      */
     public static function render_reading(
-        object $thread
+        object $thread,
+        bool $allowremoteimages = false
     ): string {
         $threadid = (int)$thread->id;
 
@@ -51,7 +52,8 @@ final class InboxThreadPreviewRenderer {
 
         $out .= InboxThreadRenderer::
             render_messages_panel(
-                $thread
+                $thread,
+                $allowremoteimages
             );
 
         $out .= html_writer::end_tag(

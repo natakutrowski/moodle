@@ -48,7 +48,7 @@ final class CrmDailyPrioritiesCard implements DashboardCard {
             );
         }
 
-        foreach ($priorities as $priority) {
+        foreach (array_slice($priorities, 0, 4) as $priority) {
             $key =
                 'crm_intelligence_recommendation_' .
                 clean_param(

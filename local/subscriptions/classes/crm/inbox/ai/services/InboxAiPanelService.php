@@ -88,6 +88,8 @@ final class InboxAiPanelService {
                     $language->successful,
                 'warnings' =>
                     $language->warnings,
+                'provider' =>
+                    $language->provider,
             ],
             'urgency' => [
                 'value' => $urgency->urgency,
@@ -99,6 +101,8 @@ final class InboxAiPanelService {
                     $urgency->successful,
                 'warnings' =>
                     $urgency->warnings,
+                'provider' =>
+                    $urgency->provider,
             ],
             'category' => [
                 'value' => $category->category,
@@ -112,6 +116,8 @@ final class InboxAiPanelService {
                     $category->successful,
                 'warnings' =>
                     $category->warnings,
+                'provider' =>
+                    $category->provider,
             ],
             'summary' => [
                 'text' => $summary->summary,
@@ -127,6 +133,8 @@ final class InboxAiPanelService {
                     $summary->successful,
                 'warnings' =>
                     $summary->warnings,
+                'provider' =>
+                    $summary->provider,
             ],
         ];
 
@@ -139,6 +147,60 @@ final class InboxAiPanelService {
         }
 
         return $result;
+    }
+
+    public function translate(
+        int $threadid,
+        string $targetlanguage,
+        ?int $actorid = null,
+        bool $forcerefresh = false
+    ): array {
+        $message = $this->latest_customer_message(
+            $threadid
+        );
+
+        $content = $message !== null
+            ? $this->message_content($message)
+            : '';
+
+        $messageid = $message !== null
+            ? (int)$message->id
+            : null;
+
+        $translation =
+            $this->factory
+                ->translation()
+                ->translate(
+                    $threadid,
+                    $messageid,
+                    $content,
+                    $targetlanguage,
+                    $actorid,
+                    $forcerefresh
+                );
+
+        return [
+            'type' => 'translation',
+            'generatedat' => time(),
+            'translation' => [
+                'text' =>
+                    $translation->translatedtext,
+                'sourcelanguage' =>
+                    $translation->sourcelanguage,
+                'targetlanguage' =>
+                    $translation->targetlanguage,
+                'confidence' =>
+                    $translation->confidence,
+                'provider' =>
+                    $translation->provider,
+                'successful' =>
+                    $translation->successful,
+                'warnings' =>
+                    $translation->warnings,
+                'error' =>
+                    $translation->error,
+            ],
+        ];
     }
 
     public function suggest_reply(

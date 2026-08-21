@@ -51,9 +51,22 @@ final class commerce_showroom_block_content_runtime_j15b_test extends \advanced_
     }
 
     public function test_editor_has_back_to_index_action(): void {
-        $source = file_get_contents(__DIR__ . '/../../../admin/commerce/showrooms/edit.php');
+        $source = file_get_contents(
+            __DIR__ . '/../../../admin/commerce/showrooms/edit.php'
+        );
+
         $this->assertIsString($source);
-        $this->assertStringContainsString('/admin/commerce/showrooms/index.php', $source);
-        $this->assertStringContainsString('commerce_showroom_back_to_list', $source);
+        $this->assertStringContainsString(
+            '/admin/commerce/showrooms/index.php',
+            $source
+        );
+        $this->assertStringContainsString(
+            'CrmBreadcrumbRenderer::render',
+            $source
+        );
+        $this->assertStringContainsString(
+            'CommerceSectionNavigationRenderer::SHOWROOMS',
+            $source
+        );
     }
 }

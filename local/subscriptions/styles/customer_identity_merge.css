@@ -645,3 +645,148 @@
     font-size: .875rem;
     overflow-wrap: anywhere;
 }
+
+/* N11.9F — decision-focused polish for the merge comparison/identity area. */
+.commerce-identity-merge-comparison {
+    overflow: hidden;
+    margin-bottom: 1rem;
+    border: 1px solid #e4e8ef;
+    border-radius: 14px;
+    background: #fff;
+}
+.commerce-identity-merge-comparison .crm-identity-table {
+    margin: 0;
+    border: 0;
+}
+.commerce-identity-merge-comparison .crm-identity-table > tbody > tr:has(input[name="targetuserid"]:checked) {
+    background: #fff8fb;
+    box-shadow: inset 3px 0 0 #f71878;
+}
+.commerce-identity-merge-comparison .crm-identity-table th {
+    padding-top: .7rem;
+    padding-bottom: .7rem;
+    color: #596579;
+    background: #f8fafc;
+    font-size: .76rem;
+}
+.commerce-identity-merge-comparison .crm-identity-table td {
+    padding-top: .8rem;
+    padding-bottom: .8rem;
+    line-height: 1.45;
+}
+.commerce-identity-merge-comparison .badge {
+    border-radius: 999px;
+    font-size: .68rem;
+}
+
+.commerce-identity-merge-decisions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+.commerce-identity-merge-decision {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid #e3e7ef;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(45, 38, 55, .035);
+}
+.commerce-identity-merge-decision > h4,
+.commerce-identity-merge-decision > h5 {
+    margin: 0 0 .25rem;
+    color: #30203c;
+    font-size: .92rem;
+    font-weight: 800;
+}
+.commerce-identity-merge-decision > .text-muted {
+    margin-bottom: .75rem !important;
+    font-size: .75rem;
+    line-height: 1.45;
+}
+.commerce-identity-merge-choice {
+    position: relative;
+    margin: 0 0 .5rem;
+    padding: .72rem .8rem .72rem 2.35rem;
+    border: 1px solid #e3e7ee;
+    border-radius: 11px;
+    background: #fbfcfe;
+}
+.commerce-identity-merge-choice:has(.form-check-input:checked) {
+    border-color: #f5a7c8;
+    background: #fff5f9;
+    box-shadow: 0 0 0 1px rgba(247, 24, 120, .06);
+}
+.commerce-identity-merge-choice .form-check-input {
+    position: absolute;
+    top: .8rem;
+    left: .85rem;
+    margin: 0;
+}
+.commerce-identity-merge-choice .form-check-label {
+    display: block;
+    color: #344054;
+    font-size: .79rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+.commerce-identity-merge-choice:has(.form-check-input:disabled) {
+    opacity: .62;
+    background: #f6f7f9;
+}
+.commerce-identity-merge-note {
+    padding: .62rem .72rem;
+    border: 1px solid;
+    border-radius: 9px;
+    font-size: .7rem;
+    line-height: 1.4;
+}
+.commerce-identity-merge-note--warning {
+    color: #7b5810;
+    border-color: #f1d48a;
+    background: #fff9e8;
+}
+.commerce-identity-merge-note--info {
+    color: #17627a;
+    border-color: #a9ddea;
+    background: #effbfe;
+}
+.commerce-identity-advanced-merge {
+    padding: .85rem 1rem !important;
+    border-color: #e3e7ef;
+    border-radius: 14px;
+    background: #fbfcfe;
+    box-shadow: none;
+}
+.commerce-identity-advanced-merge__switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-left: 0;
+}
+.commerce-identity-advanced-merge__switch .form-check-input {
+    order: 2;
+    float: none;
+    flex: 0 0 auto;
+    margin: 0;
+}
+.commerce-identity-advanced-merge__switch .form-check-label {
+    order: 1;
+    color: #30203c;
+    font-size: .86rem;
+}
+.commerce-identity-advanced-merge > .text-muted {
+    max-width: 980px;
+    margin: .35rem 0 0 !important;
+    font-size: .73rem;
+    line-height: 1.45;
+}
+.commerce-identity-merge-recalculate {
+    margin-top: -.15rem;
+}
+@media (max-width: 900px) {
+    .commerce-identity-merge-decisions {
+        grid-template-columns: 1fr;
+    }
+}

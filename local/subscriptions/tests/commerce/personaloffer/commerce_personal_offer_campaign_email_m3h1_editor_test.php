@@ -13,10 +13,8 @@ final class commerce_personal_offer_campaign_email_m3h1_editor_test extends \adv
             $CFG->dirroot . '/local/subscriptions/admin/commerce/personal-offers/campaign_email.php'
         );
 
-        $this->assertStringContainsString('editors_get_preferred_editor', $source);
-        $this->assertStringContainsString('->use_editor($fieldid', $source);
-        $this->assertStringContainsString("'maxfiles' => 0", $source);
-        $this->assertStringContainsString("'noclean' => false", $source);
+        $this->assertStringContainsString('CommerceMailBuilderEditorRenderer::rich_editor(', $source);
+        $this->assertStringContainsString('CommerceMailBuilderEditorRenderer::tag_palette(', $source);
         $this->assertStringContainsString("'name' => \$field . 'format_' . \$language", $source);
         $this->assertStringContainsString("'name' => 'activelang'", $source);
         $this->assertStringContainsString("'language' => \$activelanguage", $source);

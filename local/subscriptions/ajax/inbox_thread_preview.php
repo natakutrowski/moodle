@@ -30,6 +30,12 @@ try {
         PARAM_INT
     );
 
+    $loadimages = optional_param(
+        'loadimages',
+        0,
+        PARAM_BOOL
+    );
+
     $service = new InboxReadService(
         new InboxReadRepository(),
         new InboxTeamRepository()
@@ -76,7 +82,8 @@ try {
             'readinghtml' =>
                 InboxThreadPreviewRenderer::
                     render_reading(
-                        $thread
+                        $thread,
+                        (bool)$loadimages
                     ),
 
             'contexthtml' =>

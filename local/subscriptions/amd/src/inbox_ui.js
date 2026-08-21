@@ -34,7 +34,10 @@ define([
             '.crm-inbox-preview-title',
 
         previewLiveRegion:
-            '[data-inbox-preview-live-region]'
+            '[data-inbox-preview-live-region]',
+
+        loadRemoteImages:
+            '[data-inbox-load-images]'
     };
 
     var initialized = false;
@@ -555,7 +558,8 @@ define([
     var loadThreadPreview = function(
         link,
         updateHistory,
-        moveFocus
+        moveFocus,
+        loadImages
     ) {
         var regions = getPreviewRegions();
 
@@ -605,6 +609,13 @@ define([
             'sesskey',
             Config.sesskey
         );
+
+        if (loadImages) {
+            requestUrl.searchParams.set(
+                'loadimages',
+                '1'
+            );
+        }
 
         return window.fetch(
             requestUrl.toString(),
@@ -701,6 +712,80 @@ define([
                     false
                 );
             });
+    };
+
+    /**
+     * Reloads the current preview with remote images explicitly enabled.
+     * This is deliberately a per-message user action because remote images
+     * can contain tracking pixels.
+     *
+     * @param {MouseEvent} event
+     */
+    var handleLoadRemoteImages = function(event) {
+        var button = event.target.closest(
+            SELECTORS.loadRemoteImages
+        );
+
+        if (!button) {
+            return;
+        }
+
+        event.preventDefault();
+
+        var reading = document.querySelector(
+            SELECTORS.readingPanel
+        );
+        var previewContent = reading
+            ? reading.querySelector(
+                '.crm-inbox-preview-reading-content'
+            )
+            : null;
+
+        /*
+         * Full thread.php has no AJAX preview regions. In that context,
+         * reload the current thread with an explicit opt-in query parameter.
+         * The server then passes loadimages through the Workspace factory to
+         * InboxHtmlSanitizer.
+         */
+        if (!previewContent) {
+            var currentUrl = new URL(
+                window.location.href
+            );
+
+            currentUrl.searchParams.set(
+                'loadimages',
+                '1'
+            );
+
+            window.location.href =
+                currentUrl.toString();
+
+            return;
+        }
+
+        var threadId = Number(
+            previewContent.dataset.threadId || 0
+        );
+
+        if (threadId <= 0) {
+            return;
+        }
+
+        var link = document.querySelector(
+            SELECTORS.threadPreviewLink +
+            '[data-thread-id="' + threadId + '"]'
+        );
+
+        if (!link) {
+            return;
+        }
+
+        loadThreadPreview(
+            link,
+            false,
+            false,
+            true
+        );
     };
 
     /**
@@ -864,6 +949,11 @@ define([
             document.addEventListener(
                 'click',
                 handleThreadCardClick
+            );
+
+            document.addEventListener(
+                'click',
+                handleLoadRemoteImages
             );
 
             window.addEventListener(

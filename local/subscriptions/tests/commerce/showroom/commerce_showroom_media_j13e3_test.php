@@ -11,7 +11,7 @@ final class commerce_showroom_media_j13e3_test extends \advanced_testcase {
         global $CFG;
 
         $admin = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront.php'
+            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
         $resolver = file_get_contents(
             $CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomProductResolver.php'

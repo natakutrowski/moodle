@@ -28,12 +28,26 @@ $threadid = required_param(
     PARAM_INT
 );
 
+$allowremoteimages = optional_param(
+    'loadimages',
+    0,
+    PARAM_BOOL
+) === 1;
+
 $service = new InboxReadService(
     new InboxReadRepository(),
     new InboxTeamRepository()
 );
 
 $thread = $service->thread($threadid);
+
+$canmanage = AdminSecurity::can(
+    Capabilities::MANAGE_INBOX
+);
+
+$canuseai = AdminSecurity::can(
+    Capabilities::USE_INBOX_AI
+);
 
 $pageurl = new moodle_url(
     subscription_config::
@@ -132,13 +146,47 @@ echo CrmBackLinkRenderer::render(
     )
 );
 
+$headeractions = '';
+
+if ($canmanage) {
+    $headeractions = html_writer::link(
+        new moodle_url(
+            subscription_config::
+                admin_inbox_reply_page(),
+            [
+                'threadid' => $threadid,
+            ]
+        ),
+        html_writer::tag(
+            'i',
+            '',
+            [
+                'class' => 'fa fa-reply',
+                'aria-hidden' => 'true',
+            ]
+        )
+        . html_writer::span(
+            get_string(
+                'crm_inbox_reply',
+                'local_subscriptions'
+            )
+        ),
+        [
+            'class' =>
+                'btn btn-primary '
+                . 'crm-inbox-thread-header-reply',
+        ]
+    );
+}
+
 echo CrmPageHeader::render(
     $threadtitle,
     get_string(
         'crm_inbox_thread_help_subtitle',
         'local_subscriptions'
     ),
-    HelpContext::INBOX_AI
+    HelpContext::INBOX_AI,
+    $headeractions
 );
 
 $airesult = null;
@@ -171,20 +219,13 @@ if (
     );
 }
 
-$canmanage = AdminSecurity::can(
-    Capabilities::MANAGE_INBOX
-);
-
-$canuseai = AdminSecurity::can(
-    Capabilities::USE_INBOX_AI
-);
-
 echo InboxThreadWorkspaceRenderer::render(
     $thread,
     $canmanage,
     $canuseai,
     $airesult,
-    (int)$USER->id
+    (int)$USER->id,
+    $allowremoteimages
 );
 
 echo CrmWorkspaceRenderer::end();

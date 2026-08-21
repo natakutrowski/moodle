@@ -10,10 +10,10 @@ use local_subscriptions\crm\help\guides\HelpGuideRenderer;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
-use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
+use local_subscriptions\crm\help\HelpInternalNavigationRenderer;
 
 global $PAGE, $OUTPUT, $USER;
 
@@ -31,10 +31,12 @@ $url = new moodle_url(
     ['id' => $guideid]
 );
 
-$pagetitle = get_string(
-    'crm_help_guides_title',
-    'local_subscriptions'
+$state = (new HelpGuideService())->get_state(
+    (int)$USER->id,
+    $guideid
 );
+
+$pagetitle = $state->guide->title;
 
 CrmPageConfigurator::configure(
     $PAGE,
@@ -45,11 +47,6 @@ CrmPageConfigurator::configure(
         'local-subscriptions-help-page',
         'local-subscriptions-help-guide-page',
     ]
-);
-
-$state = (new HelpGuideService())->get_state(
-    (int)$USER->id,
-    $guideid
 );
 
 echo $OUTPUT->header();
@@ -75,36 +72,31 @@ echo CrmBreadcrumbRenderer::render(
                 ),
         ],
         [
-            'label' =>
-                $pagetitle,
-
-            'url' =>
-                null,
+            'label' => get_string(
+                'crm_help_guides_title',
+                'local_subscriptions'
+            ),
+            'url' => new moodle_url(
+                subscription_config::
+                    admin_help_page(),
+                ['section' => 'guides']
+            ),
         ],
-    ]
-);
-
-echo CrmBackLinkRenderer::render(
-    new moodle_url(
-        subscription_config::
-            admin_help_page()
-    ),
-    get_string(
-        'crm_help_home',
-        'local_subscriptions'
-    ),
-    [
-        'crm-help-back-link',
+        [
+            'label' => $pagetitle,
+            'url' => null,
+        ],
     ]
 );
 
 echo CrmPageHeader::render(
     $pagetitle,
-    get_string(
-        'crm_help_guides_description',
-        'local_subscriptions'
-    ),
+    $state->guide->description,
     HelpContext::HELP_CENTER
+);
+
+echo HelpInternalNavigationRenderer::render(
+    'guides'
 );
 
 echo HelpGuideRenderer::render_guide(

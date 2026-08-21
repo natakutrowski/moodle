@@ -46,14 +46,54 @@ final class HelpOnboardingRenderer {
             'crm-onboarding-steps'
         );
 
-        foreach ($state->items as $item) {
+        $items = $state->items;
+
+        if ($compact) {
+            $items = array_values(
+                array_filter(
+                    $items,
+                    static fn(\stdClass $item): bool =>
+                        empty($item->completed)
+                )
+            );
+
+            $items = array_slice(
+                $items,
+                0,
+                4
+            );
+        }
+
+        foreach ($items as $item) {
             $out .= self::render_step(
                 $item,
-                $returnurl
+                $returnurl,
+                $compact
             );
         }
 
         $out .= html_writer::end_div();
+
+        if ($compact) {
+            $out .= html_writer::div(
+                html_writer::link(
+                    new moodle_url(
+                        subscription_config::
+                            admin_help_page()
+                    ),
+                    get_string(
+                        'dashboard_onboarding_open_full_n1211b',
+                        'local_subscriptions'
+                    ),
+                    [
+                        'class' =>
+                            'crm-onboarding-compact-open',
+                    ]
+                ),
+                'crm-onboarding-compact-footer'
+            );
+        }
+
         $out .= html_writer::end_div();
 
         return $out;
@@ -133,7 +173,8 @@ final class HelpOnboardingRenderer {
 
     private static function render_step(
         \stdClass $item,
-        string $returnurl
+        string $returnurl,
+        bool $compact = false
     ): string {
         /** @var HelpOnboardingStep $step */
         $step = $item->step;
@@ -174,10 +215,12 @@ final class HelpOnboardingRenderer {
             ]
         );
 
-        $out .= html_writer::div(
-            s($step->description),
-            'crm-onboarding-step-description'
-        );
+        if (!$compact) {
+            $out .= html_writer::div(
+                s($step->description),
+                'crm-onboarding-step-description'
+            );
+        }
 
         $out .= html_writer::end_div();
 

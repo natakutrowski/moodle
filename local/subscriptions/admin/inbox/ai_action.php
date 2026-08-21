@@ -72,6 +72,20 @@ $quota = new \local_subscriptions\crm\inbox\ai\services\InboxAiQuotaService(
 );
 
 switch ($action) {
+    case 'translate':
+        $quota->assert_can_consume(
+            (int)$USER->id,
+            1
+        );
+
+        $result = $service->translate(
+            $threadid,
+            $language,
+            (int)$USER->id,
+            $force
+        );
+        break;
+
     case 'analyse':
         /*
          * Une analyse complète peut appeler :
@@ -135,12 +149,18 @@ $SESSION->local_subscriptions_inbox_ai[
     $threadid
 ] = $result;
 
+$redirecturl = new moodle_url(
+    subscription_config::
+        admin_inbox_thread_page(),
+    ['id' => $threadid]
+);
+
+$redirecturl->set_anchor(
+    'crm-inbox-ai'
+);
+
 redirect(
-    new moodle_url(
-        subscription_config::
-            admin_inbox_thread_page(),
-        ['id' => $threadid]
-    ),
+    $redirecturl,
     get_string(
         'crm_inbox_ai_analysis_completed',
         'local_subscriptions'

@@ -15,7 +15,7 @@ final class commerce_storefront_rich_content_j81a_test
         $source = file_get_contents(
             $CFG->dirroot
             . '/local/subscriptions/admin/commerce/products/'
-            . 'storefront.php'
+            . 'storefront_builder.php'
         );
 
         $this->assertStringContainsString(

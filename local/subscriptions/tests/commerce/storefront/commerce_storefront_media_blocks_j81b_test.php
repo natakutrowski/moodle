@@ -20,7 +20,7 @@ final class commerce_storefront_media_blocks_j81b_test
         $editor = file_get_contents(
             $CFG->dirroot
             . '/local/subscriptions/admin/commerce/products/'
-            . 'storefront.php'
+            . 'storefront_builder.php'
         );
 
         $this->assertStringContainsString("'h5p'", $schema);

@@ -36,13 +36,191 @@ echo CrmPageHeader::render($title, get_string('commerce_identity_relationships_d
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::IDENTITIES, $context);
 echo CommerceCustomerIdentityNavigationRenderer::render(CommerceCustomerIdentityNavigationRenderer::RELATIONSHIPS);
 
-echo html_writer::start_tag('form', ['method' => 'get', 'class' => 'card card-body mb-4']);
-echo html_writer::tag('label', get_string('commerce_identity_relationships_userid', 'local_subscriptions'), ['for' => 'identity-userid', 'class' => 'form-label']);
-echo html_writer::empty_tag('input', ['id' => 'identity-userid', 'type' => 'number', 'min' => 2, 'name' => 'userid', 'value' => $userid > 1 ? $userid : '', 'class' => 'form-control mb-2']);
-echo html_writer::tag('label', get_string('commerce_identity_relationships_email', 'local_subscriptions'), ['for' => 'identity-email', 'class' => 'form-label']);
-echo html_writer::empty_tag('input', ['id' => 'identity-email', 'type' => 'email', 'name' => 'email', 'value' => $email, 'class' => 'form-control mb-2']);
-echo html_writer::tag('button', get_string('commerce_identity_relationships_inspect', 'local_subscriptions'), ['type' => 'submit', 'class' => 'btn btn-primary align-self-start']);
+echo html_writer::start_tag(
+    'section',
+    [
+        'class' => 'crm-identity-relationship-inspector',
+        'aria-labelledby' =>
+            'crm-identity-relationship-inspector-title',
+    ]
+);
+
+echo html_writer::div(
+    html_writer::span(
+        html_writer::tag(
+            'i',
+            '',
+            [
+                'class' => 'fa fa-sitemap',
+                'aria-hidden' => 'true',
+            ]
+        ),
+        'crm-identity-relationship-inspector-icon'
+    )
+    . html_writer::div(
+        html_writer::tag(
+            'h2',
+            get_string(
+                'crm_identity_relationships_inspector_title',
+                'local_subscriptions'
+            ),
+            [
+                'id' =>
+                    'crm-identity-relationship-inspector-title',
+                'class' =>
+                    'crm-identity-relationship-inspector-title',
+            ]
+        )
+        . html_writer::div(
+            get_string(
+                'crm_identity_relationships_inspector_help',
+                'local_subscriptions'
+            ),
+            'crm-identity-relationship-inspector-help'
+        ),
+        'crm-identity-relationship-inspector-copy'
+    ),
+    'crm-identity-relationship-inspector-header'
+);
+
+echo html_writer::start_tag(
+    'form',
+    [
+        'method' => 'get',
+        'class' =>
+            'crm-identity-relationship-inspector-form',
+    ]
+);
+
+echo html_writer::div(
+    html_writer::tag(
+        'label',
+        get_string(
+            'crm_identity_relationships_moodle_account',
+            'local_subscriptions'
+        ),
+        [
+            'for' => 'identity-userid',
+            'class' => 'form-label',
+        ]
+    )
+    . html_writer::empty_tag(
+        'input',
+        [
+            'id' => 'identity-userid',
+            'type' => 'number',
+            'min' => 2,
+            'name' => 'userid',
+            'value' => $userid > 1 ? $userid : '',
+            'class' => 'form-control',
+            'placeholder' => get_string(
+                'crm_identity_relationships_userid_placeholder',
+                'local_subscriptions'
+            ),
+        ]
+    )
+    . html_writer::div(
+        get_string(
+            'crm_identity_relationships_moodle_account_help',
+            'local_subscriptions'
+        ),
+        'crm-identity-relationship-field-help'
+    ),
+    'crm-identity-relationship-field'
+);
+
+echo html_writer::div(
+    get_string(
+        'crm_identity_relationships_or',
+        'local_subscriptions'
+    ),
+    'crm-identity-relationship-or'
+);
+
+echo html_writer::div(
+    html_writer::tag(
+        'label',
+        get_string(
+            'crm_identity_relationships_external_identity',
+            'local_subscriptions'
+        ),
+        [
+            'for' => 'identity-email',
+            'class' => 'form-label',
+        ]
+    )
+    . html_writer::empty_tag(
+        'input',
+        [
+            'id' => 'identity-email',
+            'type' => 'email',
+            'name' => 'email',
+            'value' => $email,
+            'class' => 'form-control',
+            'placeholder' => get_string(
+                'crm_identity_relationships_email_placeholder',
+                'local_subscriptions'
+            ),
+        ]
+    )
+    . html_writer::div(
+        get_string(
+            'crm_identity_relationships_external_identity_help',
+            'local_subscriptions'
+        ),
+        'crm-identity-relationship-field-help'
+    ),
+    'crm-identity-relationship-field'
+);
+
+echo html_writer::tag(
+    'button',
+    html_writer::tag(
+        'i',
+        '',
+        [
+            'class' => 'fa fa-search',
+            'aria-hidden' => 'true',
+        ]
+    )
+    . html_writer::span(
+        get_string(
+            'commerce_identity_relationships_inspect',
+            'local_subscriptions'
+        )
+    ),
+    [
+        'type' => 'submit',
+        'class' =>
+            'btn btn-primary '
+            . 'crm-identity-relationship-inspect-action',
+    ]
+);
+
 echo html_writer::end_tag('form');
+
+if ($userid <= 1 && $email === '') {
+    echo html_writer::div(
+        html_writer::tag(
+            'i',
+            '',
+            [
+                'class' => 'fa fa-info-circle',
+                'aria-hidden' => 'true',
+            ]
+        )
+        . html_writer::span(
+            get_string(
+                'crm_identity_relationships_empty_help',
+                'local_subscriptions'
+            )
+        ),
+        'crm-identity-relationship-empty'
+    );
+}
+
+echo html_writer::end_tag('section');
+
 
 if ($userid > 1) {
     echo User360IdentityGraphRenderer::render($userid);

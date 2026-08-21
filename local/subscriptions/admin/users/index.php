@@ -56,6 +56,11 @@ $PAGE->requires->js_call_amd(
     'init'
 );
 
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/crm_context_menus',
+    'init'
+);
+
 $result = (
     new UserExplorerService()
 )->explore(

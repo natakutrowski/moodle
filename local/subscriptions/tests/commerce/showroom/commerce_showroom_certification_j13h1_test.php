@@ -29,10 +29,39 @@ final class commerce_showroom_certification_j13h1_test extends \advanced_testcas
 
     public function test_crm_navigation_exposes_showrooms(): void {
         global $CFG;
-        $keys = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/crm/navigation/CrmNavigationKeys.php');
-        $registry = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/crm/navigation/CrmNavigationRegistry.php');
-        self::assertStringContainsString("public const SHOWROOMS = 'showrooms'", (string)$keys);
-        self::assertStringContainsString('CrmNavigationKeys::SHOWROOMS', (string)$registry);
-        self::assertStringContainsString('admin/commerce/showrooms/index.php', (string)$registry);
+
+        $keys = file_get_contents(
+            $CFG->dirroot
+            . '/local/subscriptions/classes/crm/navigation/CrmNavigationKeys.php'
+        );
+        $renderer = file_get_contents(
+            $CFG->dirroot
+            . '/local/subscriptions/classes/crm/navigation/CrmNavigationRenderer.php'
+        );
+        $commerce = file_get_contents(
+            $CFG->dirroot
+            . '/local/subscriptions/classes/crm/commerce/navigation/'
+            . 'CommerceSectionNavigationRegistry.php'
+        );
+
+        self::assertIsString($keys);
+        self::assertIsString($renderer);
+        self::assertIsString($commerce);
+        self::assertStringContainsString(
+            "public const SHOWROOMS = 'showrooms'",
+            $keys
+        );
+        self::assertStringContainsString(
+            'CrmNavigationKeys::SHOWROOMS',
+            $renderer
+        );
+        self::assertStringContainsString(
+            'CrmNavigationKeys::COMMERCE',
+            $renderer
+        );
+        self::assertStringContainsString(
+            '/admin/commerce/showrooms/index.php',
+            $commerce
+        );
     }
 }

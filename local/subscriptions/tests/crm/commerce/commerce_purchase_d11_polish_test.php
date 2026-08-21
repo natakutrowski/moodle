@@ -26,8 +26,32 @@ final class commerce_purchase_d11_polish_test extends advanced_testcase {
     public function test_type_badges_are_human_readable(): void {
         $this->resetAfterTest();
 
-        $this->assertStringContainsString('Subscription', CommercePurchasePresentation::type_badge('subscription'));
-        $this->assertStringContainsString('Digital product', CommercePurchasePresentation::type_badge('digital'));
-        $this->assertStringContainsString('Bundle', CommercePurchasePresentation::type_badge('bundle'));
+        $this->assertStringContainsString(
+            get_string(
+                'commerce_purchase_type_subscription',
+                'local_subscriptions'
+            ),
+            CommercePurchasePresentation::type_badge(
+                'subscription'
+            )
+        );
+        $this->assertStringContainsString(
+            get_string(
+                'commerce_purchase_type_digital',
+                'local_subscriptions'
+            ),
+            CommercePurchasePresentation::type_badge(
+                'digital'
+            )
+        );
+        $this->assertStringContainsString(
+            get_string(
+                'commerce_purchase_type_bundle',
+                'local_subscriptions'
+            ),
+            CommercePurchasePresentation::type_badge(
+                'bundle'
+            )
+        );
     }
 }

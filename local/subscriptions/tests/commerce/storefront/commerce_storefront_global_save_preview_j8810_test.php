@@ -14,7 +14,7 @@ final class commerce_storefront_global_save_preview_j8810_test extends \advanced
         $editor = file_get_contents($root . '/classes/commerce/storefront/admin/CommerceStorefrontPageEditor.php');
         $endpoint = file_get_contents($root . '/admin/commerce/products/storefront_section_save.php');
         $javascript = file_get_contents($root . '/amd/src/storefront_builder_drag_drop.js');
-        $admin = file_get_contents($root . '/admin/commerce/products/storefront.php');
+        $admin = file_get_contents($root . '/admin/commerce/products/storefront_builder.php');
         $files = file_get_contents($root . '/classes/commerce/storefront/content/CommerceStorefrontContentFileService.php');
 
         $this->assertStringContainsString('preserve_durable_section_data', $editor);

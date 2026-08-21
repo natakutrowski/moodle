@@ -39,6 +39,9 @@ final class CommerceCommercialStatusResolver {
             return CommerceCommercialStatus::PENDING;
         }
         if ($fulfillments === []) {
+            if (in_array($purchase, ['fulfilled', 'completed'], true)) {
+                return CommerceCommercialStatus::FULFILLED;
+            }
             return CommerceCommercialStatus::PAID;
         }
 

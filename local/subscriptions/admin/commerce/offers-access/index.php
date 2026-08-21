@@ -207,6 +207,59 @@ foreach ($actions as [$kind, $icon, $heading, $description, $href, $button]) {
     echo html_writer::end_div();
 }
 echo html_writer::end_div();
+
+echo html_writer::div(
+    html_writer::div(
+        html_writer::span(
+            html_writer::tag('i', '', [
+                'class' => 'fa fa-upload',
+                'aria-hidden' => 'true',
+            ]),
+            'crm-offers-access-legacy-tool-icon'
+        )
+        . html_writer::div(
+            html_writer::div(
+                get_string(
+                    'crm_legacy_import_entry_title',
+                    'local_subscriptions'
+                ),
+                'crm-offers-access-legacy-tool-title'
+            )
+            . html_writer::div(
+                get_string(
+                    'crm_legacy_import_entry_help',
+                    'local_subscriptions'
+                ),
+                'crm-offers-access-legacy-tool-help'
+            ),
+            'crm-offers-access-legacy-tool-copy'
+        ),
+        'crm-offers-access-legacy-tool-info'
+    )
+    . html_writer::link(
+        new moodle_url(
+            subscription_config::
+                import_csv_page()
+        ),
+        html_writer::tag('i', '', [
+            'class' => 'fa fa-upload',
+            'aria-hidden' => 'true',
+        ])
+        . html_writer::span(
+            get_string(
+                'crm_legacy_import_entry_action',
+                'local_subscriptions'
+            )
+        ),
+        [
+            'class' =>
+                'btn btn-outline-secondary '
+                . 'crm-offers-access-legacy-tool-action',
+        ]
+    ),
+    'crm-offers-access-legacy-tool'
+);
+
 echo html_writer::div(html_writer::tag('i', '', ['class' => 'fa fa-info-circle me-2', 'aria-hidden' => 'true']) . get_string('commerce_offers_access_beneficiary_hint', 'local_subscriptions'), 'crm-offers-access-hint');
 echo html_writer::end_div();
 

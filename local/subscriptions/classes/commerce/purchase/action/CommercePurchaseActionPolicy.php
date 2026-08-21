@@ -60,11 +60,12 @@ final class CommercePurchaseActionPolicy {
             return false;
         }
 
-        return in_array(
-            $purchase->fulfillmentstatus,
-            ['fulfilled', 'completed', 'succeeded', 'success'],
-            true
-        );
+        return $purchase->commercialstatus === 'fulfilled'
+            || in_array(
+                $purchase->fulfillmentstatus,
+                ['fulfilled', 'completed', 'delivered', 'succeeded', 'success'],
+                true
+            );
     }
 
     public function can_create_personal_offer_summary(CommercePurchaseSummary $purchase): bool {

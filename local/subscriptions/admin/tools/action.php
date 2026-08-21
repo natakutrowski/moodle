@@ -5,13 +5,13 @@ require_once(__DIR__ . '/../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\admin_tools\AdminToolRegistry;
+use local_subscriptions\crm\admin_tools\rendering\AdminToolsSectionNavigationRenderer;
 use local_subscriptions\crm\admin_tools\AdminToolParameterPolicy;
 use local_subscriptions\crm\admin_tools\AdminToolRiskLevels;
 use local_subscriptions\crm\admin_tools\services\AdminToolRunner;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
-use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
@@ -153,19 +153,66 @@ echo CrmBreadcrumbRenderer::render(
     ]
 );
 
-echo CrmBackLinkRenderer::render(
-    $returnurl,
-    get_string(
-        'crm_admin_tools_title',
-        'local_subscriptions'
-    )
-);
 
 echo CrmPageHeader::render(
     $tool->title(),
     $tool->description(),
     HelpContext::ADMIN_TOOLS
 );
+
+
+echo AdminToolsSectionNavigationRenderer::render(
+    AdminToolsSectionNavigationRenderer::TOOLS
+);
+echo html_writer::start_div(
+    'crm-admin-tool-execution-grid'
+);
+
+echo html_writer::start_div(
+    'crm-admin-tool-execution-context'
+);
+
+echo html_writer::div(
+    html_writer::span(
+        s($tool->icon()),
+        'crm-admin-tool-execution-icon',
+        ['aria-hidden' => 'true']
+    )
+    . html_writer::div(
+        html_writer::tag(
+            'h2',
+            s($tool->title()),
+            ['class' => 'crm-admin-tool-execution-title']
+        )
+        . html_writer::tag(
+            'p',
+            s($tool->description()),
+            ['class' => 'crm-admin-tool-execution-description']
+        ),
+        'crm-admin-tool-execution-copy'
+    ),
+    'crm-admin-tool-execution-heading'
+);
+
+echo html_writer::div(
+    get_string(
+        'crm_admin_tool_risk_' .
+            $tool->risk_level(),
+        'local_subscriptions'
+    ),
+    'crm-admin-tool-risk is-' .
+        $tool->risk_level()
+);
+
+echo html_writer::div(
+    get_string(
+        'crm_admin_tool_execution_context_n128a',
+        'local_subscriptions'
+    ),
+    'crm-admin-tool-execution-note'
+);
+
+echo html_writer::end_div();
 
 echo html_writer::start_tag(
     'form',
@@ -186,15 +233,15 @@ echo html_writer::empty_tag(
     ]
 );
 
-echo html_writer::div(
+echo html_writer::tag(
+    'h2',
     get_string(
-        'crm_admin_tool_risk_' .
-            $tool->risk_level(),
+        'crm_admin_tool_execution_settings_n128a',
         'local_subscriptions'
     ),
-    'crm-admin-tool-risk is-' .
-        $tool->risk_level()
+    ['class' => 'crm-admin-tool-form-title']
 );
+
 
 if (
     $parameterpolicy->has_limit(
@@ -375,6 +422,7 @@ echo html_writer::link(
 
 echo html_writer::end_div();
 echo html_writer::end_tag('form');
+echo html_writer::end_div();
 
 echo CrmWorkspaceRenderer::end();
 

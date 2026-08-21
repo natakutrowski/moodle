@@ -472,7 +472,7 @@ if ($executionresult === null && $error === null && $plan !== null) {
     }
 
     $table = new html_table();
-    $table->attributes['class'] = 'generaltable table table-hover align-middle';
+    $table->attributes['class'] = 'generaltable table table-hover align-middle crm-identity-table';
     $table->head = [
         get_string('commerce_identity_merge_keep', 'local_subscriptions'),
         get_string('commerce_identity_merge_account', 'local_subscriptions'),
@@ -569,12 +569,16 @@ if ($executionresult === null && $error === null && $plan !== null) {
         ];
     }
 
-    echo html_writer::table($table);
+    echo html_writer::div(
+        html_writer::table($table),
+        'commerce-identity-merge-comparison'
+    );
 
     if ($preferredidentityuserid <= 0 || !in_array($preferredidentityuserid, $userids, true)) {
         $preferredidentityuserid = $plan->targetuserid;
     }
-    echo html_writer::start_div('card card-body mb-3');
+    echo html_writer::start_div('commerce-identity-merge-decisions mb-3');
+    echo html_writer::start_div('commerce-identity-merge-decision commerce-identity-merge-decision--identity');
     echo html_writer::tag('h4', get_string('commerce_identity_merge_preferred_identity_title', 'local_subscriptions'), ['class' => 'h6']);
     echo html_writer::div(get_string('commerce_identity_merge_preferred_identity_help', 'local_subscriptions'), 'small text-muted mb-2');
     foreach ($plan->profiles as $identityprofile) {
@@ -589,7 +593,7 @@ if ($executionresult === null && $error === null && $plan !== null) {
                 'username' => (string)$identityprofile->user->username,
             ]
         );
-        echo html_writer::start_div('form-check');
+        echo html_writer::start_div('form-check commerce-identity-merge-choice');
         echo html_writer::empty_tag('input', [
             'type' => 'radio', 'class' => 'form-check-input', 'id' => $identityid,
             'name' => 'preferredidentityuserid', 'value' => $identityuserid,
@@ -598,7 +602,8 @@ if ($executionresult === null && $error === null && $plan !== null) {
         echo html_writer::tag('label', s($identitylabel), ['for' => $identityid, 'class' => 'form-check-label']);
         echo html_writer::end_div();
     }
-    echo html_writer::div(get_string('commerce_identity_merge_preferred_identity_safety', 'local_subscriptions'), 'alert alert-warning py-2 small mt-3 mb-0');
+    echo html_writer::div(get_string('commerce_identity_merge_preferred_identity_safety', 'local_subscriptions'), 'commerce-identity-merge-note commerce-identity-merge-note--warning mt-3');
+    echo html_writer::end_div();
 
     // Password ownership is an explicit, separate decision. Only the retained account and the
     // selected preferred-login account can be valid owners; unrelated merge sources are excluded.
@@ -610,7 +615,8 @@ if ($executionresult === null && $error === null && $plan !== null) {
         $preferredpassworduserid = $plan->targetuserid;
     }
 
-    echo html_writer::tag('h5', get_string('commerce_identity_merge_preferred_password_title', 'local_subscriptions'), ['class' => 'h6 mt-4']);
+    echo html_writer::start_div('commerce-identity-merge-decision commerce-identity-merge-decision--password');
+    echo html_writer::tag('h5', get_string('commerce_identity_merge_preferred_password_title', 'local_subscriptions'), ['class' => 'h6']);
     echo html_writer::div(get_string('commerce_identity_merge_preferred_password_help', 'local_subscriptions'), 'small text-muted mb-2');
     foreach ($passwordchoices as $passworduserid) {
         $passwordprofile = null;
@@ -638,7 +644,7 @@ if ($executionresult === null && $error === null && $plan !== null) {
         if (!$canselectpassword) {
             $passwordlabel .= ' — ' . get_string('commerce_identity_merge_preferred_password_unavailable', 'local_subscriptions');
         }
-        echo html_writer::start_div('form-check');
+        echo html_writer::start_div('form-check commerce-identity-merge-choice');
         echo html_writer::empty_tag('input', [
             'type' => 'radio', 'class' => 'form-check-input', 'id' => $passwordid,
             'name' => 'preferredpassworduserid', 'value' => $passworduserid,
@@ -648,11 +654,12 @@ if ($executionresult === null && $error === null && $plan !== null) {
         echo html_writer::tag('label', s($passwordlabel), ['for' => $passwordid, 'class' => 'form-check-label']);
         echo html_writer::end_div();
     }
-    echo html_writer::div(get_string('commerce_identity_merge_preferred_password_safety', 'local_subscriptions'), 'alert alert-info py-2 small mt-3 mb-0');
+    echo html_writer::div(get_string('commerce_identity_merge_preferred_password_safety', 'local_subscriptions'), 'commerce-identity-merge-note commerce-identity-merge-note--info mt-3');
+    echo html_writer::end_div();
     echo html_writer::end_div();
 
     echo html_writer::start_div('card card-body mb-3 commerce-identity-advanced-merge');
-    echo html_writer::start_div('form-check form-switch mb-2');
+    echo html_writer::start_div('form-check form-switch commerce-identity-advanced-merge__switch');
     echo html_writer::empty_tag('input', [
         'type' => 'checkbox', 'class' => 'form-check-input', 'id' => 'advancedmerge',
         'name' => 'advancedmerge', 'value' => '1', 'checked' => $advancedmerge ? 'checked' : null,
@@ -703,7 +710,7 @@ if ($executionresult === null && $error === null && $plan !== null) {
             echo html_writer::div(get_string('commerce_identity_merge_advanced_no_profile_conflicts', 'local_subscriptions'), 'small text-muted');
         } else {
             $atable = new html_table();
-            $atable->attributes['class'] = 'generaltable table table-sm align-middle commerce-identity-advanced-table';
+            $atable->attributes['class'] = 'generaltable table table-sm align-middle commerce-identity-advanced-table crm-identity-table';
             $atable->head = [get_string('commerce_identity_merge_advanced_field', 'local_subscriptions')];
             foreach ($plan->profiles as $index => $profile) {
                 $atable->head[] = get_string('commerce_identity_merge_advanced_account_column', 'local_subscriptions', (object)[
@@ -746,7 +753,7 @@ if ($executionresult === null && $error === null && $plan !== null) {
     echo html_writer::tag(
         'button',
         get_string('commerce_identity_merge_recalculate', 'local_subscriptions'),
-        ['type' => 'submit', 'class' => 'btn btn-outline-primary mb-4']
+        ['type' => 'submit', 'class' => 'btn btn-outline-primary commerce-identity-merge-recalculate mb-4']
     );
     echo html_writer::end_tag('form');
 

@@ -7,6 +7,8 @@ require_once($CFG->libdir . '/clilib.php');
 
 use local_subscriptions\crm\inbox\ai\domain\InboxAiCapability;
 use local_subscriptions\crm\inbox\ai\dto\InboxAiRequest;
+use local_subscriptions\crm\inbox\ai\providers\openai\OpenAiApiKeyProvider;
+use local_subscriptions\crm\inbox\ai\providers\openai\OpenAiInboxConfiguration;
 use local_subscriptions\crm\inbox\ai\services\InboxAiServiceFactory;
 
 [$options, $unrecognized] = cli_get_params(
@@ -45,9 +47,51 @@ HELP;
     exit(0);
 }
 
+$keys =
+    new OpenAiApiKeyProvider();
+
+$configuration =
+    new OpenAiInboxConfiguration(
+        $keys
+    );
+
 $provider =
     InboxAiServiceFactory::openai_provider();
 
+mtrace(
+    'Enabled: ' .
+    ($configuration->enabled()
+        ? 'yes'
+        : 'no')
+);
+mtrace(
+    'API key: ' .
+    ($keys->has_key()
+        ? 'present'
+        : 'missing')
+);
+mtrace(
+    'Project: ' .
+    ($keys->project_id() !== ''
+        ? 'present'
+        : '-')
+);
+mtrace(
+    'Organization: ' .
+    ($keys->organization_id() !== ''
+        ? 'present'
+        : '-')
+);
+mtrace(
+    'Model: ' .
+    ($configuration->model() !== ''
+        ? $configuration->model()
+        : 'missing')
+);
+mtrace(
+    'Endpoint: ' .
+    $configuration->endpoint()
+);
 mtrace(
     'Available: ' .
     ($provider->is_available()
@@ -57,7 +101,9 @@ mtrace(
 
 if (!$provider->is_available()) {
     cli_error(
-        'OpenAI is not fully configured.'
+        'OpenAI is not fully configured. '
+        . 'The provider requires enabled=yes, '
+        . 'an API key and a non-empty model.'
     );
 }
 

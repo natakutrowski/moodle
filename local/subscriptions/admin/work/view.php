@@ -12,6 +12,7 @@ use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\crm\work\rendering\WorkItemRenderer;
+use local_subscriptions\crm\work\rendering\WorkSectionNavigationRenderer;
 use local_subscriptions\crm\work\repositories\WorkItemReadRepository;
 use local_subscriptions\subscription_config;
 
@@ -76,6 +77,10 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
+echo WorkSectionNavigationRenderer::render(
+    WorkSectionNavigationRenderer::ITEMS
+);
+
 echo CrmBreadcrumbRenderer::render(
     [
         [
@@ -94,15 +99,6 @@ echo CrmBreadcrumbRenderer::render(
     ]
 );
 
-echo CrmBackLinkRenderer::render(
-    new moodle_url(
-        subscription_config::admin_work_items_page()
-    ),
-    get_string(
-        'crm_work_back',
-        'local_subscriptions'
-    )
-);
 
 echo CrmPageHeader::render(
     $item->reference,

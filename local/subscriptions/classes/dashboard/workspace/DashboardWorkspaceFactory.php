@@ -23,8 +23,12 @@ final class DashboardWorkspaceFactory {
 
     public const ZONE_ONBOARDING = 'onboarding';
     public const ZONE_HERO = 'hero';
-    public const ZONE_MAIN = 'main';
-    public const ZONE_SIDE = 'side';
+    public const ZONE_UTILITY = 'utility';
+    public const ZONE_FOCUS = 'focus';
+    public const ZONE_OPERATIONS = 'operations';
+    public const ZONE_OPERATIONS_SIDE = 'operations_side';
+    public const ZONE_INSIGHTS = 'insights';
+    public const ZONE_SECONDARY = 'secondary';
 
     public const ITEM_ONBOARDING = 'crm_onboarding';
 
@@ -48,8 +52,12 @@ final class DashboardWorkspaceFactory {
             [
                 self::ZONE_ONBOARDING,
                 self::ZONE_HERO,
-                self::ZONE_MAIN,
-                self::ZONE_SIDE,
+                self::ZONE_UTILITY,
+                self::ZONE_FOCUS,
+                self::ZONE_OPERATIONS,
+                self::ZONE_OPERATIONS_SIDE,
+                self::ZONE_INSIGHTS,
+                self::ZONE_SECONDARY,
             ]
         );
 

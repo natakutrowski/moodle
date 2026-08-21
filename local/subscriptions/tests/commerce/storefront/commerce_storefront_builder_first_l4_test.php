@@ -145,7 +145,7 @@ final class commerce_storefront_builder_first_l4_test extends advanced_testcase 
 
         $admin = (string)file_get_contents(
             $CFG->dirroot
-            . '/local/subscriptions/admin/commerce/products/storefront.php'
+            . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
         $presenter = (string)file_get_contents(
             $CFG->dirroot
@@ -188,7 +188,7 @@ final class commerce_storefront_builder_first_l4_test extends advanced_testcase 
         self::assertStringContainsString('commerce-editorial-hero {{heroclasses}}', $template);
 
         $admin = (string)file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront.php'
+            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
         self::assertStringContainsString('section_hero_layout_', $admin);
         self::assertStringContainsString('section_hero_ratio_', $admin);

@@ -9,11 +9,11 @@ use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
-use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\user\HistoricalUserProfileRenderer;
 use local_subscriptions\crm\user\UserProfileNotFoundException;
 use local_subscriptions\crm\user360\workspace\User360WorkspaceRenderer;
+use local_subscriptions\crm\user360\rendering\User360OverviewRenderer;
 use local_subscriptions\service\HistoricalUserProfileService;
 use local_subscriptions\service\UserProfileService;
 use local_subscriptions\subscription_config;
@@ -162,20 +162,20 @@ if ($historicalprofile !== null) {
         $historicalprofile->userid
     );
 } else {
-    $displayname = trim(fullname($profile->user));
-    if ($displayname === '') {
-        $displayname = (string)($profile->user->email ?? '');
-    }
+    $displayname = User360OverviewRenderer::display_name($profile);
+    $profileemail = trim(
+        (string)($profile->user->email ?? '')
+    );
 
-    $pagetitle =
-        get_string(
-            !empty($profile->iscommerceguest)
-                ? 'crm_commerce_guest_profile'
-                : 'crm_user_profile',
-            'local_subscriptions'
-        ) .
-        ' - ' .
-        $displayname;
+    $pagetitle = $displayname;
+
+    if (
+        $profileemail !== ''
+        && core_text::strtolower($profileemail)
+            !== core_text::strtolower($displayname)
+    ) {
+        $pagetitle .= ' (' . $profileemail . ')';
+    }
 }
 
 CrmPageConfigurator::configure(
@@ -254,19 +254,6 @@ echo CrmBreadcrumbRenderer::render(
     ]
 );
 
-$backurl = new moodle_url(
-    subscription_config::
-        admin_users_page()
-);
-
-echo CrmBackLinkRenderer::render(
-    $backurl,
-    get_string(
-        'back',
-        'core'
-    )
-);
-
 if ($historicalprofile !== null) {
     echo CrmPageHeader::render(
         get_string(
@@ -286,12 +273,16 @@ if ($historicalprofile !== null) {
     );
 } else {
     echo CrmPageHeader::render(
+        $pagetitle,
         !empty($profile->iscommerceguest)
-            ? get_string('crm_commerce_guest_profile', 'local_subscriptions')
-            : get_string('crm_user_profile', 'local_subscriptions'),
-        !empty($profile->iscommerceguest)
-            ? get_string('crm_commerce_guest_profile_description', 'local_subscriptions')
-            : get_string('crm_user_profile_help_description', 'local_subscriptions'),
+            ? get_string(
+                'crm_commerce_guest_profile_description',
+                'local_subscriptions'
+            )
+            : get_string(
+                'crm_user_profile_help_description',
+                'local_subscriptions'
+            ),
         HelpContext::USER_PROFILE
     );
 

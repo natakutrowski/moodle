@@ -39,7 +39,7 @@ final class commerce_storefront_global_layout_j85_test extends \advanced_testcas
 
     public function test_editor_and_public_page_expose_shell_controls(): void {
         global $CFG;
-        $editor = file_get_contents($CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront.php');
+        $editor = file_get_contents($CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront_builder.php');
         $public = file_get_contents($CFG->dirroot . '/local/subscriptions/storefront_product.php');
         $this->assertStringContainsString('storefront_global_zones', $editor);
         $this->assertStringContainsString('storefront_shell_mode', $editor);

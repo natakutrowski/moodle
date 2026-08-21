@@ -532,6 +532,11 @@ class subscription_config {
             'admin/inbox/thread.php';
     }
 
+    public static function admin_inbox_sync_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/sync.php';
+    }
+
     public static function admin_inbox_reply_page(): string {
         return self::plugin_path() .
             'admin/inbox/reply.php';
@@ -609,6 +614,11 @@ class subscription_config {
     public static function admin_customer_success_plan_page(): string {
         return self::plugin_path() .
             'admin/assistant/plan.php';
+    }
+
+    public static function admin_customer_success_plan_create_page(): string {
+        return self::plugin_path() .
+            'admin/assistant/plan_create.php';
     }
 
     public static function admin_customer_success_plan_action_page(): string {

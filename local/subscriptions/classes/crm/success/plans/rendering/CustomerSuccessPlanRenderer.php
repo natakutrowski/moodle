@@ -110,52 +110,71 @@ final class CustomerSuccessPlanRenderer {
                     $plan->priority
                 );
 
-        $badges =
-            html_writer::span(
-                s($status),
-                'badge badge-secondary mr-2'
-            ) .
-            html_writer::span(
-                s($priority),
-                'badge badge-info'
-            );
+        $title =
+            CustomerSuccessPlanPresentation::
+                title(
+                    $plan->objectivekey,
+                    $plan->title
+                );
 
-        return html_writer::div(
-            html_writer::tag(
-                'h3',
-                s(
-                    CustomerSuccessPlanPresentation::
-                        title(
-                            $plan->objectivekey,
-                            $plan->title
-                        )
+        $description =
+            CustomerSuccessPlanPresentation::
+                description(
+                    $plan->description
+                );
+
+        $identity = html_writer::div(
+            html_writer::span(
+                get_string(
+                    'csplanoverviewlabel_n129b',
+                    'local_subscriptions'
                 ),
+                'local-subscriptions-cs-plan__eyebrow'
+            )
+            . html_writer::tag(
+                'h2',
+                s($title),
                 [
                     'class' =>
                         'local-subscriptions-cs-plan__title',
                 ]
-            ) .
-            $badges .
-            (
-                CustomerSuccessPlanPresentation::
-                    description(
-                        $plan->description
-                    ) !== null
+            )
+            . (
+                $description !== null
                     ? html_writer::div(
                         format_text(
-                            CustomerSuccessPlanPresentation::
-                                description(
-                                    $plan->description
-                                ),
+                            $description,
                             FORMAT_PLAIN
                         ),
                         'local-subscriptions-cs-plan__description'
                     )
                     : ''
             ),
+            'local-subscriptions-cs-plan__identity'
+        );
+
+        $badges = html_writer::div(
+            html_writer::span(
+                s($status),
+                'badge '
+                . 'local-subscriptions-cs-plan__badge '
+                . 'local-subscriptions-cs-plan__badge-status'
+            )
+            . html_writer::span(
+                s($priority),
+                'badge '
+                . 'local-subscriptions-cs-plan__badge '
+                . 'local-subscriptions-cs-plan__badge-priority'
+            ),
+            'local-subscriptions-cs-plan__badges'
+        );
+
+        return html_writer::div(
+            $identity . $badges,
             'local-subscriptions-cs-plan__header'
         );
     }
+
 
     private function render_progress(
         CustomerSuccessPlan $plan
@@ -163,46 +182,69 @@ final class CustomerSuccessPlanRenderer {
         $progress =
             $plan->progress_percentage();
 
-        return html_writer::div(
-            html_writer::div(
-                html_writer::div(
-                    '',
-                    'progress-bar',
-                    [
-                        'role' => 'progressbar',
-                        'style' =>
-                            'width: ' . $progress . '%',
-                        'aria-label' =>
-                            get_string(
-                                'csplanprogresslabel',
-                                'local_subscriptions'
-                            ),    
-                        'aria-valuenow' =>
-                            (string)$progress,
-                        'aria-valuemin' => '0',
-                        'aria-valuemax' => '100',
-                    ]
-                ),
-                'progress'
-            ) .
-            html_writer::div(
+        $summary = html_writer::div(
+            html_writer::span(
                 get_string(
-                    'csplanprogressvalue',
-                    'local_subscriptions',
-                    (object)[
-                        'completed' =>
-                            $plan->completed_step_count(),
-                        'total' =>
-                            $plan->step_count(),
-                        'percentage' =>
-                            format_float($progress, 0),
-                    ]
+                    'csplanprogresslabel',
+                    'local_subscriptions'
                 ),
-                'small text-muted mt-1'
+                'local-subscriptions-cs-plan__progress-label'
+            )
+            . html_writer::tag(
+                'strong',
+                format_float($progress, 0) . '%',
+                [
+                    'class' =>
+                        'local-subscriptions-cs-plan__progress-value',
+                ]
             ),
+            'local-subscriptions-cs-plan__progress-summary'
+        );
+
+        $bar = html_writer::div(
+            html_writer::div(
+                '',
+                'progress-bar',
+                [
+                    'role' => 'progressbar',
+                    'style' =>
+                        'width: ' . $progress . '%',
+                    'aria-label' =>
+                        get_string(
+                            'csplanprogresslabel',
+                            'local_subscriptions'
+                        ),
+                    'aria-valuenow' =>
+                        (string)$progress,
+                    'aria-valuemin' => '0',
+                    'aria-valuemax' => '100',
+                ]
+            ),
+            'progress'
+        );
+
+        $detail = html_writer::div(
+            get_string(
+                'csplanprogressvalue',
+                'local_subscriptions',
+                (object)[
+                    'completed' =>
+                        $plan->completed_step_count(),
+                    'total' =>
+                        $plan->step_count(),
+                    'percentage' =>
+                        format_float($progress, 0),
+                ]
+            ),
+            'local-subscriptions-cs-plan__progress-detail'
+        );
+
+        return html_writer::div(
+            $summary . $bar . $detail,
             'local-subscriptions-cs-plan__progress'
         );
     }
+
 
     private function render_step(
         CustomerSuccessPlanStep $step,
@@ -215,25 +257,37 @@ final class CustomerSuccessPlanRenderer {
                 $step->status,
         ];
 
-        $body =
-            html_writer::tag(
-                'h4',
-                s($step->title),
-                [
-                    'class' =>
-                        'local-subscriptions-cs-plan__step-title',
-                ]
-            );
+        $statuslabel =
+            CustomerSuccessPlanPresentation::
+                step_status_label(
+                    $step->status
+                );
 
-        $body .= html_writer::span(
-            s(
-                CustomerSuccessPlanPresentation::
-                    step_status_label(
-                        $step->status
-                    )
+        $heading = html_writer::div(
+            html_writer::div(
+                html_writer::span(
+                    '#' . (int)$step->position,
+                    'local-subscriptions-cs-plan__step-number'
+                )
+                . html_writer::tag(
+                    'h3',
+                    s($step->title),
+                    [
+                        'class' =>
+                            'local-subscriptions-cs-plan__step-title',
+                    ]
+                ),
+                'local-subscriptions-cs-plan__step-heading'
+            )
+            . html_writer::span(
+                s($statuslabel),
+                'badge '
+                . 'local-subscriptions-cs-plan__step-status'
             ),
-            'badge badge-light'
+            'local-subscriptions-cs-plan__step-header'
         );
+
+        $body = $heading;
 
         if ($step->description !== null) {
             $body .= html_writer::div(
@@ -254,7 +308,7 @@ final class CustomerSuccessPlanRenderer {
         if ($blockedreason !== null) {
             $body .= html_writer::div(
                 s($blockedreason),
-                'text-danger small'
+                'local-subscriptions-cs-plan__step-warning'
             );
         }
 
@@ -267,7 +321,7 @@ final class CustomerSuccessPlanRenderer {
                     'local_subscriptions',
                     $step->dependsonstepid
                 ),
-                'small text-muted'
+                'local-subscriptions-cs-plan__step-dependency'
             );
         }
 
@@ -301,6 +355,7 @@ final class CustomerSuccessPlanRenderer {
             ]
         );
     }
+
 
     private function render_plan_actions(
         CustomerSuccessPlan $plan
@@ -359,9 +414,33 @@ final class CustomerSuccessPlanRenderer {
                 );
         }
 
+        if (
+            $plan->status ===
+            CustomerSuccessPlanStatus::CANCELLED
+        ) {
+            $actions[] = html_writer::link(
+                new moodle_url(
+                    subscription_config::
+                        admin_customer_success_plan_create_page(),
+                    [
+                        'userid' =>
+                            $plan->userid,
+                    ]
+                ),
+                get_string(
+                    'csplancreate_new_after_cancel_n129d',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'btn btn-primary mr-2 mb-2',
+                ]
+            );
+        }
+
         return html_writer::div(
             implode('', $actions),
-            'local-subscriptions-cs-plan__actions'
+            'local-subscriptions-cs-plan__actions local-subscriptions-cs-plan__actions-panel'
         );
     }
 

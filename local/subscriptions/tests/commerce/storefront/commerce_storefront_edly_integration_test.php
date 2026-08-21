@@ -38,7 +38,7 @@ final class commerce_storefront_edly_integration_test extends \advanced_testcase
 
         $page = file_get_contents(
             $CFG->dirroot
-                . '/local/subscriptions/admin/commerce/products/storefront.php'
+                . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
 
         $this->assertStringContainsString(
@@ -85,7 +85,7 @@ final class commerce_storefront_edly_integration_test extends \advanced_testcase
 
         $page = file_get_contents(
             $CFG->dirroot
-                . '/local/subscriptions/admin/commerce/products/storefront.php'
+                . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
 
         $this->assertStringContainsString(

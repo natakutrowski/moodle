@@ -188,6 +188,15 @@ final class CrmNavigationRegistry {
                         Capabilities::VIEW_INBOX,
                         'fa-stethoscope'
                     ),
+                    $child(
+                        get_string(
+                            'crm_nav_inbox_ai_diagnostics_n1210a',
+                            'local_subscriptions'
+                        ),
+                        subscription_config::admin_inbox_ai_diagnostics_page(),
+                        Capabilities::MANAGE_CONFIGURATION,
+                        'fa-magic'
+                    ),
                 ]
             ),
 

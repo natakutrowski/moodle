@@ -391,6 +391,14 @@ final class UserExplorerRepository {
             $conditions[] = 'u.suspended = 1';
         }
 
+        if ($criteria->accountstatus ===
+            UserExplorerCriteria::ACCOUNT_NO_MOODLE
+        ) {
+            // This source only contains real Moodle accounts. Commerce-only
+            // identities are supplied by UserExplorerLegacyGuestRepository.
+            $conditions[] = '1 = 0';
+        }
+
         if ($criteria->tag !== '') {
             $joins .= "
                 JOIN {" . self::TAG_TABLE . "} filteredtag

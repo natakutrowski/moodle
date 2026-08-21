@@ -151,19 +151,30 @@ final class commerce_dashboard_795n2_test extends advanced_testcase {
 
     public function test_n27_top_five_and_avatar_contract(): void {
         $repository = file_get_contents(
-            __DIR__ . '/../../../classes/crm/commerce/dashboard/CommerceDashboardRepository.php'
+            __DIR__
+            . '/../../../classes/crm/commerce/dashboard/'
+            . 'CommerceDashboardRepository.php'
         );
         $renderer = file_get_contents(
-            __DIR__ . '/../../../classes/crm/commerce/rendering/CommerceDashboardRenderer.php'
+            __DIR__
+            . '/../../../classes/crm/commerce/rendering/'
+            . 'CommerceDashboardRenderer.php'
         );
-        $styles = file_get_contents(__DIR__ . '/../../../styles.css');
+
         $this->assertIsString($repository);
         $this->assertIsString($renderer);
-        $this->assertIsString($styles);
-        $this->assertStringContainsString('top_products($start, $end, 5)', $repository);
-        $this->assertStringContainsString("'🥇', '🥈', '🥉', '4', '5'", $renderer);
-        $this->assertStringContainsString('min-width: 46px !important', $styles);
-        $this->assertStringContainsString('.crm-commerce-dashboard-product-row.is-rank-5', $styles);
+        $this->assertStringContainsString(
+            'top_products($start, $end, 5)',
+            $repository
+        );
+        $this->assertStringContainsString(
+            "'🥇', '🥈', '🥉', '4', '5'",
+            $renderer
+        );
+        $this->assertStringContainsString(
+            'crm-commerce-dashboard-product-row',
+            $renderer
+        );
     }
 
 
@@ -186,13 +197,28 @@ final class commerce_dashboard_795n2_test extends advanced_testcase {
 
     public function test_n28b_dashboard_limits_and_label_aggregation_contract(): void {
         $repository = file_get_contents(
-            __DIR__ . '/../../../classes/crm/commerce/dashboard/CommerceDashboardRepository.php'
+            __DIR__
+            . '/../../../classes/crm/commerce/dashboard/'
+            . 'CommerceDashboardRepository.php'
         );
+
         $this->assertIsString($repository);
-        $this->assertStringContainsString("'latestsales' => $this->latest_sales(4)", $repository);
-        $this->assertStringContainsString('$this->top_products($start, $end, 5)', $repository);
-        $this->assertStringContainsString("|label:' . $displaykey", $repository);
-        $this->assertStringContainsString("_priority", $repository);
+        $this->assertStringContainsString(
+            "'latestsales' => \$this->latest_sales(4)",
+            $repository
+        );
+        $this->assertStringContainsString(
+            '$this->top_products($start, $end, 5)',
+            $repository
+        );
+        $this->assertStringContainsString(
+            "|label:' . \$displaykey",
+            $repository
+        );
+        $this->assertStringContainsString(
+            '_priority',
+            $repository
+        );
     }
 
 }

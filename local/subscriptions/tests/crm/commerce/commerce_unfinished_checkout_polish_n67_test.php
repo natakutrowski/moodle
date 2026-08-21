@@ -67,7 +67,7 @@ final class commerce_unfinished_checkout_polish_n67_test extends advanced_testca
         $version = file_get_contents($root . '/version.php');
 
         self::assertStringContainsString(
-            '$plugin->version = 2026081510;',
+            '$plugin->version = 2026081602;',
             $version
         );
     }

@@ -15,66 +15,61 @@ final class InboxAiPanelRenderer {
         bool $canuseai,
         bool $canmanageinbox
     ): string {
-        $headingid =
-            'crm-inbox-ai-panel-title-' .
-            $threadid;
+        $headingid = 'crm-inbox-ai-panel-title-' . $threadid;
 
         $out = html_writer::start_tag(
             'section',
             [
-                'class' =>
-                    'crm-inbox-ai-panel card mt-4',
-
-                'aria-labelledby' =>
-                    $headingid,
-            ]
-        );
-
-        $out .= html_writer::start_tag(
-            'header',
-            [
-                'class' =>
-                    'card-header d-flex ' .
-                    'justify-content-between ' .
-                    'align-items-center gap-3',
+                'id' => 'crm-inbox-ai',
+                'class' => 'crm-inbox-ai-panel',
+                'aria-labelledby' => $headingid,
             ]
         );
 
         $out .= html_writer::div(
-            html_writer::tag(
-                'h2',
-                get_string(
-                    'crm_inbox_ai_panel_title',
-                    'local_subscriptions'
-                ),
-                [
-                    'id' => $headingid,
-                    'class' => 'h5 mb-1',
-                ]
-            ) .
             html_writer::div(
+                html_writer::span(
+                    html_writer::tag(
+                        'i',
+                        '',
+                        [
+                            'class' => 'fa fa-magic',
+                            'aria-hidden' => 'true',
+                        ]
+                    ),
+                    'crm-inbox-ai-panel-icon'
+                )
+                . html_writer::div(
+                    html_writer::tag(
+                        'h2',
+                        get_string(
+                            'crm_inbox_ai_panel_title',
+                            'local_subscriptions'
+                        ),
+                        [
+                            'id' => $headingid,
+                            'class' => 'crm-inbox-ai-panel-title',
+                        ]
+                    )
+                    . html_writer::div(
+                        get_string(
+                            'crm_inbox_ai_panel_description_n124',
+                            'local_subscriptions'
+                        ),
+                        'crm-inbox-ai-panel-description'
+                    ),
+                    'crm-inbox-ai-panel-heading-copy'
+                ),
+                'crm-inbox-ai-panel-heading'
+            )
+            . html_writer::span(
                 get_string(
-                    'crm_inbox_ai_panel_description',
+                    'crm_inbox_ai_human_review_badge',
                     'local_subscriptions'
                 ),
-                'small text-muted'
-            )
-        );
-
-        $out .= html_writer::span(
-            get_string(
-                'crm_inbox_ai_human_review_badge',
-                'local_subscriptions'
+                'badge bg-warning text-dark'
             ),
-            'badge bg-warning text-dark'
-        );
-
-        $out .= html_writer::end_tag(
-            'header'
-        );
-
-        $out .= html_writer::start_div(
-            'card-body'
+            'crm-inbox-ai-panel-header'
         );
 
         $out .= html_writer::div(
@@ -94,126 +89,169 @@ final class InboxAiPanelRenderer {
                     'crm_inbox_ai_permission_required',
                     'local_subscriptions'
                 ),
-                'alert alert-light border mb-0'
+                'alert alert-light border m-3'
             );
-
-            $out .= html_writer::end_div();
-
-            $out .= html_writer::end_tag(
-                'section'
-            );
-
+            $out .= html_writer::end_tag('section');
             return $out;
         }
 
-        $out .= self::actions(
-            $threadid,
-            $canmanageinbox
+        $out .= html_writer::div(
+            self::translation_action($threadid)
+            . self::analysis_action($threadid)
+            . (
+                $canmanageinbox
+                    ? self::reply_action($threadid)
+                    : ''
+            ),
+            'crm-inbox-ai-tools'
         );
 
-        if ($result !== null) {
-            $out .= self::result($result);
-        } else {
-            $out .= html_writer::div(
-                get_string(
-                    'crm_inbox_ai_no_analysis',
-                    'local_subscriptions'
-                ),
-                'crm-inbox-ai-empty text-muted mt-3'
-            );
-        }
-
-        $out .= html_writer::end_div();
-
-        $out .= html_writer::end_tag(
-            'section'
+        $out .= html_writer::div(
+            $result !== null
+                ? self::result($result)
+                : self::empty_state(),
+            'crm-inbox-ai-output'
         );
+
+        $out .= html_writer::end_tag('section');
 
         return $out;
     }
 
-    private static function actions(
-        int $threadid,
-        bool $canmanageinbox
+    private static function translation_action(
+        int $threadid
     ): string {
-        $out = html_writer::start_tag(
-            'div',
-            [
-                'class' =>
-                    'crm-inbox-ai-actions ' .
-                    'd-flex flex-wrap gap-2',
-
-                'role' => 'group',
-
-                'aria-label' =>
-                    get_string(
-                        'crm_inbox_ai_actions_label',
-                        'local_subscriptions'
-                    ),
-            ]
-        );
-
-        $out .= self::form(
-            $threadid,
-            'analyse',
+        return self::tool_card(
+            'fa fa-language',
             get_string(
-                'crm_inbox_ai_analyse',
+                'crm_inbox_ai_translate_title',
                 'local_subscriptions'
             ),
-            'btn btn-outline-primary'
+            get_string(
+                'crm_inbox_ai_translate_help',
+                'local_subscriptions'
+            ),
+            self::action_form(
+                $threadid,
+                'translate',
+                get_string(
+                    'crm_inbox_ai_translate_action',
+                    'local_subscriptions'
+                ),
+                true,
+                false
+            )
         );
+    }
 
-        if ($canmanageinbox) {
-            $out .= self::form(
+    private static function analysis_action(
+        int $threadid
+    ): string {
+        return self::tool_card(
+            'fa fa-search',
+            get_string(
+                'crm_inbox_ai_analysis_title_n124',
+                'local_subscriptions'
+            ),
+            get_string(
+                'crm_inbox_ai_analysis_help_n124',
+                'local_subscriptions'
+            ),
+            self::action_form(
+                $threadid,
+                'analyse',
+                get_string(
+                    'crm_inbox_ai_analyse',
+                    'local_subscriptions'
+                ),
+                true,
+                false
+            )
+        );
+    }
+
+    private static function reply_action(
+        int $threadid
+    ): string {
+        return self::tool_card(
+            'fa fa-reply',
+            get_string(
+                'crm_inbox_ai_reply_title_n124',
+                'local_subscriptions'
+            ),
+            get_string(
+                'crm_inbox_ai_reply_help_n124',
+                'local_subscriptions'
+            ),
+            self::action_form(
                 $threadid,
                 'reply',
                 get_string(
                     'crm_inbox_ai_suggest_reply',
                     'local_subscriptions'
                 ),
-                'btn btn-primary',
+                true,
                 true
-            );
-        }
-
-        $out .= html_writer::end_tag(
-            'div'
+            )
         );
-
-        return $out;
     }
 
-    private static function form(
+    private static function tool_card(
+        string $icon,
+        string $title,
+        string $help,
+        string $form
+    ): string {
+        return html_writer::div(
+            html_writer::div(
+                html_writer::tag(
+                    'i',
+                    '',
+                    [
+                        'class' => $icon,
+                        'aria-hidden' => 'true',
+                    ]
+                ),
+                'crm-inbox-ai-tool-icon'
+            )
+            . html_writer::div(
+                html_writer::tag(
+                    'h3',
+                    s($title),
+                    ['class' => 'crm-inbox-ai-tool-title']
+                )
+                . html_writer::div(
+                    s($help),
+                    'crm-inbox-ai-tool-help'
+                )
+                . $form,
+                'crm-inbox-ai-tool-copy'
+            ),
+            'crm-inbox-ai-tool'
+        );
+    }
+
+    private static function action_form(
         int $threadid,
         string $action,
         string $label,
-        string $buttonclass,
-        bool $showoptions = false
+        bool $showlanguage,
+        bool $showtone
     ): string {
         $out = html_writer::start_tag(
             'form',
             [
                 'method' => 'post',
-
                 'action' =>
                     subscription_config::
                         admin_inbox_ai_action_page(),
-
-                'class' =>
-                    'crm-inbox-ai-action-form',
-
+                'class' => 'crm-inbox-ai-action-form',
                 'data-inbox-busy-form' => '1',
-
                 'data-busy-announcement' =>
-                    $action === 'reply'
-                        ? get_string(
-                            'crm_inbox_ai_reply_processing',
-                            'local_subscriptions'
-                        )
-                        : get_string(
-                            'crm_inbox_ai_analysis_processing',
-                            'local_subscriptions'
-                        ),
+                    get_string(
+                        'crm_inbox_ai_processing_n124',
+                        'local_subscriptions'
+                    ),
             ]
         );
 
@@ -232,38 +270,20 @@ final class InboxAiPanelRenderer {
             );
         }
 
-        $languageid =
-            'id_ai_language_' .
-            $threadid;
-
-        $toneid =
-            'id_ai_tone_' .
-            $threadid;
-
-        if ($showoptions) {
-            $out .= html_writer::label(
-                get_string(
-                    'crm_inbox_ai_reply_language',
-                    'local_subscriptions'
-                ),
-                $languageid,
-                false,
-                ['class' => 'visually-hidden']
-            );
-
+        if ($showlanguage) {
             $out .= html_writer::select(
                 [
-                    'fr' => 'FR',
-                    'en' => 'EN',
-                    'ru' => 'RU',
+                    'fr' => 'Français',
+                    'en' => 'English',
+                    'ru' => 'Русский',
                 ],
                 'language',
                 'fr',
                 false,
                 [
-                    'id' => $languageid,
                     'class' =>
-                        'form-select form-select-sm d-inline-block w-auto',
+                        'form-select form-select-sm '
+                        . 'crm-inbox-ai-language',
                     'aria-label' =>
                         get_string(
                             'crm_inbox_ai_reply_language',
@@ -271,17 +291,9 @@ final class InboxAiPanelRenderer {
                         ),
                 ]
             );
+        }
 
-            $out .= html_writer::label(
-                get_string(
-                    'crm_inbox_ai_reply_tone',
-                    'local_subscriptions'
-                ),
-                $toneid,
-                false,
-                ['class' => 'visually-hidden']
-            );
-
+        if ($showtone) {
             $out .= html_writer::select(
                 [
                     'professional' =>
@@ -309,9 +321,9 @@ final class InboxAiPanelRenderer {
                 'professional',
                 false,
                 [
-                    'id' => $toneid,
                     'class' =>
-                        'form-select form-select-sm d-inline-block w-auto',
+                        'form-select form-select-sm '
+                        . 'crm-inbox-ai-tone',
                     'aria-label' =>
                         get_string(
                             'crm_inbox_ai_reply_tone',
@@ -323,29 +335,51 @@ final class InboxAiPanelRenderer {
 
         $out .= html_writer::tag(
             'button',
-            $label,
+            s($label),
             [
                 'type' => 'submit',
-
-                'class' =>
-                    $buttonclass,
-
+                'class' => 'btn btn-primary btn-sm',
                 'data-loading-label' =>
-                    $action === 'reply'
-                        ? get_string(
-                            'crm_inbox_ai_reply_processing_short',
-                            'local_subscriptions'
-                        )
-                        : get_string(
-                            'crm_inbox_ai_analysis_processing_short',
-                            'local_subscriptions'
-                        ),
+                    get_string(
+                        'crm_inbox_ai_processing_short_n124',
+                        'local_subscriptions'
+                    ),
             ]
         );
 
         $out .= html_writer::end_tag('form');
 
         return $out;
+    }
+
+    private static function empty_state(): string {
+        return html_writer::div(
+            html_writer::tag(
+                'i',
+                '',
+                [
+                    'class' => 'fa fa-lightbulb-o',
+                    'aria-hidden' => 'true',
+                ]
+            )
+            . html_writer::div(
+                html_writer::tag(
+                    'strong',
+                    get_string(
+                        'crm_inbox_ai_empty_title_n124',
+                        'local_subscriptions'
+                    )
+                )
+                . html_writer::div(
+                    get_string(
+                        'crm_inbox_ai_empty_help_n124',
+                        'local_subscriptions'
+                    ),
+                    'crm-inbox-ai-empty-help'
+                )
+            ),
+            'crm-inbox-ai-empty'
+        );
     }
 
     private static function result(
@@ -356,34 +390,140 @@ final class InboxAiPanelRenderer {
         ) {
             'analysis' =>
                 self::analysis_result($result),
+            'translation' =>
+                self::translation_result($result),
             'reply' =>
                 self::reply_result($result),
             default =>
-                '',
+                self::empty_state(),
         };
+    }
+
+    private static function translation_result(
+        array $result
+    ): string {
+        $translation = $result['translation'] ?? [];
+        $text = trim(
+            (string)($translation['text'] ?? '')
+        );
+
+        $out = html_writer::start_div(
+            'crm-inbox-ai-result crm-inbox-ai-translation-result'
+        );
+
+        $out .= self::result_heading(
+            'fa fa-language',
+            get_string(
+                'crm_inbox_ai_translation_result_title',
+                'local_subscriptions'
+            )
+        );
+
+        if (
+            empty($translation['successful'])
+            || $text === ''
+        ) {
+            $provider = trim(
+                (string)(
+                    $translation['provider']
+                    ?? ''
+                )
+            );
+            $error = trim(
+                (string)(
+                    $translation['error']
+                    ?? ''
+                )
+            );
+
+            $message = get_string(
+                'crm_inbox_ai_translation_failed',
+                'local_subscriptions'
+            );
+
+            if (
+                $provider === 'none'
+                || str_contains(
+                    \core_text::strtolower($error),
+                    'no available provider'
+                )
+            ) {
+                $message = get_string(
+                    'crm_inbox_ai_translation_provider_missing_n124b',
+                    'local_subscriptions'
+                );
+            } elseif ($error !== '') {
+                $message .= ' ' . s($error);
+            }
+
+            $out .= html_writer::div(
+                $message,
+                'alert alert-warning mb-0'
+            );
+        } else {
+            $source = strtoupper(
+                (string)(
+                    $translation['sourcelanguage']
+                    ?? 'unknown'
+                )
+            );
+            $target = strtoupper(
+                (string)(
+                    $translation['targetlanguage']
+                    ?? ''
+                )
+            );
+
+            $out .= html_writer::div(
+                html_writer::span(
+                    $source,
+                    'crm-inbox-ai-language-pill'
+                )
+                . html_writer::span(
+                    '→',
+                    'crm-inbox-ai-language-arrow'
+                )
+                . html_writer::span(
+                    $target,
+                    'crm-inbox-ai-language-pill'
+                ),
+                'crm-inbox-ai-translation-meta'
+            );
+
+            $out .= html_writer::div(
+                nl2br(s($text)),
+                'crm-inbox-ai-translation-text'
+            );
+        }
+
+        $out .= self::warnings(
+            $translation['warnings'] ?? []
+        );
+
+        $out .= html_writer::end_div();
+
+        return $out;
     }
 
     private static function analysis_result(
         array $result
     ): string {
         $out = html_writer::start_div(
-            'crm-inbox-ai-result mt-4'
+            'crm-inbox-ai-result crm-inbox-ai-analysis-result'
         );
 
-        $out .= self::metric(
+        $out .= self::result_heading(
+            'fa fa-search',
             get_string(
-                'crm_inbox_ai_detected_language',
+                'crm_inbox_ai_analysis_result_title_n124',
                 'local_subscriptions'
-            ),
-            strtoupper(
-                (string)(
-                    $result['language']['value']
-                    ?? 'unknown'
-                )
-            ),
-            (float)(
-                $result['language']['confidence']
-                ?? 0
+            )
+        );
+
+        $language = strtoupper(
+            (string)(
+                $result['language']['value']
+                ?? 'unknown'
             )
         );
 
@@ -392,42 +532,11 @@ final class InboxAiPanelRenderer {
             ?? 'normal'
         );
 
-        $out .= self::metric(
-            get_string(
-                'crm_inbox_ai_urgency',
-                'local_subscriptions'
-            ),
-            get_string(
-                'crm_inbox_ai_urgency_' .
-                    $urgency,
-                'local_subscriptions'
-            ),
-            (float)(
-                $result['urgency']['confidence']
-                ?? 0
-            )
-        );
-
         $category = (string)(
             $result['category']['value']
             ?? 'other'
         );
 
-        $out .= self::metric(
-            get_string(
-                'crm_inbox_ai_category',
-                'local_subscriptions'
-            ),
-            get_string(
-                'crm_inbox_ai_category_' .
-                    $category,
-                'local_subscriptions'
-            ),
-            (float)(
-                $result['category']['confidence']
-                ?? 0
-            )
-        );
 
         $summary = trim(
             (string)(
@@ -436,48 +545,132 @@ final class InboxAiPanelRenderer {
             )
         );
 
+        $left = '';
+
         if ($summary !== '') {
-            $out .= html_writer::tag(
-                'h3',
+            $left .= html_writer::tag(
+                'h4',
                 get_string(
                     'crm_inbox_ai_summary',
                     'local_subscriptions'
                 ),
-                ['class' => 'h6 mt-4']
+                ['class' => 'crm-inbox-ai-section-title']
             );
-
-            $out .= html_writer::div(
+            $left .= html_writer::div(
                 nl2br(s($summary)),
                 'crm-inbox-ai-summary'
             );
         }
 
-        $out .= self::list_section(
-            get_string(
-                'crm_inbox_ai_key_points',
-                'local_subscriptions'
+        $right =
+            self::list_section(
+                get_string(
+                    'crm_inbox_ai_customer_requests',
+                    'local_subscriptions'
+                ),
+                $result['summary']['customerrequests']
+                    ?? []
+            )
+            . self::list_section(
+                get_string(
+                    'crm_inbox_ai_pending_questions',
+                    'local_subscriptions'
+                ),
+                $result['summary']['pendingquestions']
+                    ?? []
+            )
+            . self::list_section(
+                get_string(
+                    'crm_inbox_ai_key_points',
+                    'local_subscriptions'
+                ),
+                $result['summary']['keypoints']
+                    ?? []
+            );
+
+        $out .= html_writer::div(
+            html_writer::div(
+                $left !== ''
+                    ? $left
+                    : html_writer::div(
+                        get_string(
+                            'crm_inbox_ai_analysis_no_summary_n124',
+                            'local_subscriptions'
+                        ),
+                        'text-muted'
+                    ),
+                'crm-inbox-ai-analysis-main'
+            )
+            . html_writer::div(
+                $right !== ''
+                    ? $right
+                    : html_writer::div(
+                        get_string(
+                            'crm_inbox_ai_analysis_no_details_n124',
+                            'local_subscriptions'
+                        ),
+                        'text-muted'
+                    ),
+                'crm-inbox-ai-analysis-details'
             ),
-            $result['summary']['keypoints']
-                ?? []
+            'crm-inbox-ai-analysis-grid'
         );
 
-        $out .= self::list_section(
-            get_string(
-                'crm_inbox_ai_pending_questions',
-                'local_subscriptions'
+        $out .= html_writer::div(
+            html_writer::span(
+                get_string(
+                    'crm_inbox_ai_detected_language',
+                    'local_subscriptions'
+                ) . ': ' . $language,
+                'crm-inbox-ai-analysis-meta-item'
+            )
+            . html_writer::span(
+                get_string(
+                    'crm_inbox_ai_urgency',
+                    'local_subscriptions'
+                ) . ': '
+                . get_string(
+                    'crm_inbox_ai_urgency_' . $urgency,
+                    'local_subscriptions'
+                ),
+                'crm-inbox-ai-analysis-meta-item'
+            )
+            . html_writer::span(
+                get_string(
+                    'crm_inbox_ai_category',
+                    'local_subscriptions'
+                ) . ': '
+                . get_string(
+                    'crm_inbox_ai_category_' . $category,
+                    'local_subscriptions'
+                ),
+                'crm-inbox-ai-analysis-meta-item'
             ),
-            $result['summary']['pendingquestions']
-                ?? []
+            'crm-inbox-ai-analysis-meta'
         );
 
-        $out .= self::list_section(
-            get_string(
-                'crm_inbox_ai_customer_requests',
-                'local_subscriptions'
-            ),
-            $result['summary']['customerrequests']
-                ?? []
-        );
+        $providers = [
+            (string)($result['language']['provider'] ?? ''),
+            (string)($result['urgency']['provider'] ?? ''),
+            (string)($result['category']['provider'] ?? ''),
+            (string)($result['summary']['provider'] ?? ''),
+        ];
+
+        if (
+            array_filter(
+                $providers,
+                static fn(string $provider): bool =>
+                    $provider === 'fallback'
+            ) !== []
+        ) {
+            $out .= html_writer::div(
+                get_string(
+                    'crm_inbox_ai_fallback_notice_n124',
+                    'local_subscriptions'
+                ),
+                'crm-inbox-ai-fallback-notice'
+            );
+        }
 
         $out .= html_writer::end_div();
 
@@ -490,7 +683,15 @@ final class InboxAiPanelRenderer {
         $reply = $result['reply'] ?? [];
 
         $out = html_writer::start_div(
-            'crm-inbox-ai-result mt-4'
+            'crm-inbox-ai-result crm-inbox-ai-reply-result'
+        );
+
+        $out .= self::result_heading(
+            'fa fa-reply',
+            get_string(
+                'crm_inbox_ai_suggested_reply',
+                'local_subscriptions'
+            )
         );
 
         if (empty($reply['generated'])) {
@@ -502,15 +703,6 @@ final class InboxAiPanelRenderer {
                 'alert alert-light border'
             );
         } else {
-            $out .= html_writer::tag(
-                'h3',
-                get_string(
-                    'crm_inbox_ai_suggested_reply',
-                    'local_subscriptions'
-                ),
-                ['class' => 'h6']
-            );
-
             if (!empty($reply['subject'])) {
                 $out .= html_writer::div(
                     html_writer::tag(
@@ -519,9 +711,9 @@ final class InboxAiPanelRenderer {
                             'subject',
                             'core'
                         ) . ': '
-                    ) .
-                    s((string)$reply['subject']),
-                    'mb-3'
+                    )
+                    . s((string)$reply['subject']),
+                    'crm-inbox-ai-reply-subject'
                 );
             }
 
@@ -533,11 +725,6 @@ final class InboxAiPanelRenderer {
                         'form-control crm-inbox-ai-reply-text',
                     'rows' => 10,
                     'readonly' => 'readonly',
-                    'aria-label' =>
-                        get_string(
-                            'crm_inbox_ai_suggested_reply',
-                            'local_subscriptions'
-                        ),
                 ]
             );
 
@@ -546,7 +733,7 @@ final class InboxAiPanelRenderer {
                     'crm_inbox_ai_reply_requires_review',
                     'local_subscriptions'
                 ),
-                'alert alert-warning mt-3 mb-0'
+                'crm-inbox-ai-review-note'
             );
         }
 
@@ -559,32 +746,40 @@ final class InboxAiPanelRenderer {
         return $out;
     }
 
+    private static function result_heading(
+        string $icon,
+        string $title
+    ): string {
+        return html_writer::div(
+            html_writer::tag(
+                'i',
+                '',
+                [
+                    'class' => $icon,
+                    'aria-hidden' => 'true',
+                ]
+            )
+            . html_writer::tag(
+                'h3',
+                s($title),
+                ['class' => 'crm-inbox-ai-result-title']
+            ),
+            'crm-inbox-ai-result-heading'
+        );
+    }
+
     private static function metric(
         string $label,
-        string $value,
-        float $confidence
+        string $value
     ): string {
-        $percentage = (int)round(
-            max(0.0, min(1.0, $confidence)) *
-            100
-        );
-
         return html_writer::div(
             html_writer::div(
                 s($label),
-                'small text-muted'
-            ) .
-            html_writer::div(
+                'crm-inbox-ai-metric-label'
+            )
+            . html_writer::div(
                 s($value),
-                'fw-semibold'
-            ) .
-            html_writer::div(
-                get_string(
-                    'crm_inbox_ai_confidence',
-                    'local_subscriptions',
-                    $percentage
-                ),
-                'small text-muted'
+                'crm-inbox-ai-metric-value'
             ),
             'crm-inbox-ai-metric'
         );
@@ -617,15 +812,18 @@ final class InboxAiPanelRenderer {
             return '';
         }
 
-        return html_writer::tag(
-            'h3',
-            $title,
-            ['class' => 'h6 mt-4']
-        ) .
-        html_writer::tag(
-            'ul',
-            $content,
-            ['class' => 'mb-0']
+        return html_writer::div(
+            html_writer::tag(
+                'h4',
+                s($title),
+                ['class' => 'crm-inbox-ai-section-title']
+            )
+            . html_writer::tag(
+                'ul',
+                $content,
+                ['class' => 'crm-inbox-ai-list']
+            ),
+            'crm-inbox-ai-list-section'
         );
     }
 
@@ -636,16 +834,23 @@ final class InboxAiPanelRenderer {
             return '';
         }
 
-        return html_writer::div(
-            implode(
-                '<br>',
+        $clean = array_values(
+            array_filter(
                 array_map(
                     static fn(mixed $warning): string =>
-                        s((string)$warning),
+                        trim((string)$warning),
                     $warnings
                 )
-            ),
-            'alert alert-warning mt-3'
+            )
+        );
+
+        if (!$clean) {
+            return '';
+        }
+
+        return html_writer::div(
+            s(implode(' · ', $clean)),
+            'crm-inbox-ai-warnings'
         );
     }
 }

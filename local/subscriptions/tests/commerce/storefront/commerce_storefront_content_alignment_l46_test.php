@@ -68,7 +68,7 @@ final class commerce_storefront_content_alignment_l46_test extends \advanced_tes
             $CFG->dirroot . '/local/subscriptions/styles/storefront.css'
         );
         $admin = (string)file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront.php'
+            $CFG->dirroot . '/local/subscriptions/admin/commerce/products/storefront_builder.php'
         );
 
         $this->assertStringContainsString(

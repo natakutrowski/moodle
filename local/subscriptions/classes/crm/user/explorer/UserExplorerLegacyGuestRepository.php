@@ -83,7 +83,10 @@ final class UserExplorerLegacyGuestRepository {
             $criteria->intelligence !== '' ||
             $criteria->country !== '' ||
             $criteria->tag !== '' ||
-            $criteria->accountstatus !== '' ||
+            (
+                $criteria->accountstatus !== UserExplorerCriteria::ACCOUNT_ALL
+                && $criteria->accountstatus !== UserExplorerCriteria::ACCOUNT_NO_MOODLE
+            ) ||
             $criteria->scoremin !== null ||
             $criteria->scoremax !== null ||
             $criteria->riskmin !== null ||

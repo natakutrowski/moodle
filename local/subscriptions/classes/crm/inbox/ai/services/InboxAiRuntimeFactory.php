@@ -30,11 +30,21 @@ final class InboxAiRuntimeFactory {
     public function __construct(
         ?InboxAiOrchestrator $orchestrator = null
     ) {
+        /*
+         * The Inbox AI orchestrator is not a plain autowireable service:
+         * its provider registry must be populated in the correct order
+         * (OpenAI first, local fallback second) and its cache / validation /
+         * minimisation dependencies must use the same production
+         * configuration as the CLI diagnostics.
+         *
+         * Using core\di::get() here let Moodle autowire an empty
+         * InboxAiProviderRegistry because that registry has a valid default
+         * constructor. The CLI therefore saw OpenAI as available while the
+         * Inbox UI had no usable provider.
+         */
         $this->orchestrator =
-            $orchestrator ??
-            \core\di::get(
-                InboxAiOrchestrator::class
-            );
+            $orchestrator
+            ?? InboxAiServiceFactory::orchestrator();
 
         $this->read =
             new InboxReadRepository();

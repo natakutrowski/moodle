@@ -58,7 +58,8 @@ final class InboxThreadWorkspaceFactory {
         ?object $thread = null,
         bool $canmanage = false,
         bool $canuseai = false,
-        ?array $airesult = null
+        ?array $airesult = null,
+        bool $allowremoteimages = false
     ): WorkspaceDefinition {
         $definition = new WorkspaceDefinition(
             self::WORKSPACE_KEY,
@@ -71,7 +72,8 @@ final class InboxThreadWorkspaceFactory {
 
         self::register_messages(
             $definition,
-            $thread
+            $thread,
+            $allowremoteimages
         );
 
         if ($canmanage) {
@@ -138,7 +140,8 @@ final class InboxThreadWorkspaceFactory {
             thread: null,
             canmanage: $canmanage,
             canuseai: $canuseai,
-            airesult: null
+            airesult: null,
+            allowremoteimages: false
         );
     }
 
@@ -147,7 +150,8 @@ final class InboxThreadWorkspaceFactory {
      */
     private static function register_messages(
         WorkspaceDefinition $definition,
-        ?object $thread
+        ?object $thread,
+        bool $allowremoteimages = false
     ): void {
         $definition->register(
             new WorkspaceItemDefinition(
@@ -179,7 +183,8 @@ final class InboxThreadWorkspaceFactory {
                 defaultvisible: true,
 
                 renderer: static function () use (
-                    $thread
+                    $thread,
+                    $allowremoteimages
                 ): string {
                     if ($thread === null) {
                         return '';
@@ -187,7 +192,8 @@ final class InboxThreadWorkspaceFactory {
 
                     return InboxThreadRenderer::
                         render_messages_panel(
-                            $thread
+                            $thread,
+                            $allowremoteimages
                         );
                 }
             )
@@ -429,7 +435,7 @@ final class InboxThreadWorkspaceFactory {
 
                 icon: '✨',
 
-                zone: self::ZONE_CONTEXT,
+                zone: self::ZONE_READING,
 
                 span: 3,
 

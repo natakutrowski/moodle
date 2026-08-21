@@ -6,6 +6,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use local_subscriptions\crm\admin_tools\AdminTool;
+use local_subscriptions\crm\admin_tools\AdminToolKeys;
 use local_subscriptions\crm\admin_tools\AdminToolRegistry;
 use local_subscriptions\crm\admin_tools\repositories\AdminToolActorRepository;
 use local_subscriptions\crm\admin_tools\repositories\AdminToolRunRepository;
@@ -34,23 +35,144 @@ final class AdminToolRenderer {
             );
         }
 
-        $cards = [];
+        $groups = [
+            'messaging' => [
+                'title' =>
+                    get_string(
+                        'crm_admin_tools_group_messaging_n128a',
+                        'local_subscriptions'
+                    ),
+                'description' =>
+                    get_string(
+                        'crm_admin_tools_group_messaging_help_n128a',
+                        'local_subscriptions'
+                    ),
+                'keys' => [
+                    AdminToolKeys::INBOX_SYNC,
+                    AdminToolKeys::INBOX_DIAGNOSTICS,
+                ],
+            ],
+            'automation' => [
+                'title' =>
+                    get_string(
+                        'crm_admin_tools_group_automation_n128a',
+                        'local_subscriptions'
+                    ),
+                'description' =>
+                    get_string(
+                        'crm_admin_tools_group_automation_help_n128a',
+                        'local_subscriptions'
+                    ),
+                'keys' => [
+                    AdminToolKeys::AUTOMATIONS,
+                    AdminToolKeys::INTELLIGENCE_SNAPSHOT,
+                    AdminToolKeys::RECOMMENDATIONS,
+                ],
+            ],
+            'operations' => [
+                'title' =>
+                    get_string(
+                        'crm_admin_tools_group_operations_n128a',
+                        'local_subscriptions'
+                    ),
+                'description' =>
+                    get_string(
+                        'crm_admin_tools_group_operations_help_n128a',
+                        'local_subscriptions'
+                    ),
+                'keys' => [
+                    AdminToolKeys::DIGITAL_RECONCILIATION,
+                    AdminToolKeys::HELP_VALIDATION,
+                ],
+            ],
+        ];
+
+        $bykey = [];
 
         foreach ($tools as $tool) {
-            $cards[] =
-                self::render_tool_card(
+            $bykey[$tool->key()] = $tool;
+        }
+
+        $sections = [];
+
+        foreach ($groups as $key => $group) {
+            $cards = [];
+
+            foreach ($group['keys'] as $toolkey) {
+                if (!isset($bykey[$toolkey])) {
+                    continue;
+                }
+
+                $tool = $bykey[$toolkey];
+
+                $cards[] =
+                    self::render_tool_card(
+                        $tool,
+                        $repository->last_for_tool(
+                            $tool->key()
+                        )
+                    );
+
+                unset($bykey[$toolkey]);
+            }
+
+            if ($cards === []) {
+                continue;
+            }
+
+            $sections[] = html_writer::tag(
+                'section',
+                html_writer::div(
+                    html_writer::tag(
+                        'h2',
+                        s($group['title']),
+                        [
+                            'class' =>
+                                'crm-admin-tools-group-title',
+                        ]
+                    )
+                    . html_writer::div(
+                        s($group['description']),
+                        'crm-admin-tools-group-description'
+                    ),
+                    'crm-admin-tools-group-heading'
+                )
+                . html_writer::div(
+                    implode('', $cards),
+                    'crm-admin-tools-grid'
+                ),
+                [
+                    'class' =>
+                        'crm-admin-tools-group '
+                        . 'crm-admin-tools-group-' . $key,
+                ]
+            );
+        }
+
+        if ($bykey !== []) {
+            $cards = [];
+
+            foreach ($bykey as $tool) {
+                $cards[] = self::render_tool_card(
                     $tool,
                     $repository->last_for_tool(
                         $tool->key()
                     )
                 );
+            }
+
+            $sections[] = html_writer::div(
+                implode('', $cards),
+                'crm-admin-tools-grid'
+            );
         }
 
         return html_writer::div(
-            implode('', $cards),
-            'crm-admin-tools-grid'
+            implode('', $sections),
+            'crm-admin-tools-catalogue'
         );
     }
+
 
     private static function render_tool_card(
         AdminTool $tool,
@@ -257,26 +379,62 @@ final class AdminToolRenderer {
                 ? $tool->title()
                 : (string)$run->toolkey;
 
-            $cells = [
-                userdate((int)$run->timecreated),
-                $tooltitle,
-                $actorname,
-                get_string(
-                    'crm_admin_tool_status_' .
-                        $run->status,
-                    'local_subscriptions'
-                ),
-                $duration,
-            ];
+            $statuslabel = get_string(
+                'crm_admin_tool_status_' .
+                    $run->status,
+                'local_subscriptions'
+            );
 
-            $row = '';
-
-            foreach ($cells as $cell) {
-                $row .= html_writer::tag(
+            $row =
+                html_writer::tag(
                     'td',
-                    s((string)$cell)
+                    html_writer::span(
+                        userdate(
+                            (int)$run->timecreated,
+                            get_string(
+                                'strftimedatetimeshort',
+                                'langconfig'
+                            )
+                        ),
+                        'crm-admin-tool-history-date'
+                    )
+                )
+                . html_writer::tag(
+                    'td',
+                    html_writer::div(
+                        html_writer::span(
+                            s($tool
+                                ? $tool->icon()
+                                : '•'),
+                            'crm-admin-tool-history-icon',
+                            ['aria-hidden' => 'true']
+                        )
+                        . html_writer::span(
+                            s($tooltitle),
+                            'crm-admin-tool-history-tool'
+                        ),
+                        'crm-admin-tool-history-tool-cell'
+                    )
+                )
+                . html_writer::tag(
+                    'td',
+                    s($actorname)
+                )
+                . html_writer::tag(
+                    'td',
+                    html_writer::span(
+                        s($statuslabel),
+                        'crm-admin-tool-history-status '
+                        . 'is-' . s((string)$run->status)
+                    )
+                )
+                . html_writer::tag(
+                    'td',
+                    html_writer::span(
+                        s($duration),
+                        'crm-admin-tool-history-duration'
+                    )
                 );
-            }
 
             $rows .= html_writer::tag(
                 'tr',
@@ -301,7 +459,7 @@ final class AdminToolRenderer {
                 ),
                 [
                     'class' =>
-                        'table table-striped ' .
+                        'table ' .
                         'crm-admin-tool-history-table',
                 ]
             ),
