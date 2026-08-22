@@ -441,25 +441,65 @@ define([], function() {
             '[data-showroom-offer="bundle"], .commerce-showroom-offer.is-featured'
         );
 
-        const scrollToOffers = (updateHistory = true) => {
-            const featured = featuredOffer();
-            if (!featured) {
-                return;
+        /**
+         * Materialise lazy showroom sections before measuring the offers block.
+         *
+         * Below-the-fold sections use content-visibility:auto for initial render
+         * performance. On a first-page-load anchor click their intrinsic placeholder
+         * heights can still differ from the real layout, so measuring the featured
+         * offer immediately can land on the wrong section. Once an offer anchor is
+         * requested, render only the sections before the offers block and wait for
+         * layout to settle before calculating the scroll target.
+         *
+         * @returns {Promise<void>}
+         */
+        const prepareOfferAnchorLayout = () => {
+            const offers = document.getElementById('showroom-offers');
+            const showroom = offers ? offers.closest('.commerce-showroom') : null;
+
+            if (!offers || !showroom) {
+                return Promise.resolve();
             }
 
-            const rect = featured.getBoundingClientRect();
-            const bottomPadding = 24;
-            const targetTop = window.scrollY + rect.bottom - window.innerHeight + bottomPadding;
-            window.scrollTo({
-                top: Math.max(0, targetTop),
-                behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+            let section = showroom.firstElementChild;
+
+            while (section && section !== offers) {
+                if (section.tagName === 'SECTION') {
+                    section.style.contentVisibility = 'visible';
+                    section.style.containIntrinsicSize = 'none';
+                }
+
+                section = section.nextElementSibling;
+            }
+
+            return new Promise((resolve) => {
+                window.requestAnimationFrame(() => {
+                    window.requestAnimationFrame(resolve);
+                });
             });
+        };
 
-            if (updateHistory) {
-                const current = new URL(window.location.href);
-                current.hash = 'showroom-offers';
-                window.history.replaceState(window.history.state, '', current.toString());
-            }
+        const scrollToOffers = (updateHistory = true) => {
+            return prepareOfferAnchorLayout().then(() => {
+                const featured = featuredOffer();
+                if (!featured) {
+                    return;
+                }
+
+                const rect = featured.getBoundingClientRect();
+                const bottomPadding = 24;
+                const targetTop = window.scrollY + rect.bottom - window.innerHeight + bottomPadding;
+                window.scrollTo({
+                    top: Math.max(0, targetTop),
+                    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+                });
+
+                if (updateHistory) {
+                    const current = new URL(window.location.href);
+                    current.hash = 'showroom-offers';
+                    window.history.replaceState(window.history.state, '', current.toString());
+                }
+            });
         };
 
         document.querySelectorAll('a[href="#showroom-offers"], [data-showroom-smart-anchor]').forEach((anchor) => {
