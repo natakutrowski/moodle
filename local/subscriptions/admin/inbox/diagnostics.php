@@ -10,6 +10,7 @@ use local_subscriptions\crm\inbox\connectors\smtp\OvhSmtpConnector;
 use local_subscriptions\crm\inbox\credentials\MoodleConfigInboxCredentialStore;
 use local_subscriptions\crm\inbox\repositories\InboxAccountRepository;
 use local_subscriptions\crm\inbox\repositories\InboxDiagnosticsRepository;
+use local_subscriptions\crm\inbox\repositories\InboxSyncLogRepository;
 use local_subscriptions\crm\inbox\services\InboxDiagnosticsService;
 use local_subscriptions\crm\inbox\rendering\InboxDiagnosticsRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
@@ -17,9 +18,9 @@ use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
-use local_subscriptions\crm\navigation\CrmBackLinkRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\subscription_config;
+use local_subscriptions\crm\inbox\rendering\InboxSectionNavigationRenderer;
 
 $context = AdminSecurity::require(
     Capabilities::MANAGE_CONFIGURATION
@@ -36,7 +37,8 @@ $service = new InboxDiagnosticsService(
         $credentials,
         new ImapMimeParser()
     ),
-    new OvhSmtpConnector($credentials)
+    new OvhSmtpConnector($credentials),
+    new InboxSyncLogRepository()
 );
 
 $result = $service->diagnose();
@@ -99,17 +101,6 @@ echo CrmBreadcrumbRenderer::render(
     ]
 );
 
-echo CrmBackLinkRenderer::render(
-    new moodle_url(
-        subscription_config::
-            admin_inbox_page()
-    ),
-    get_string(
-        'crm_inbox_back',
-        'local_subscriptions'
-    )
-);
-
 echo CrmPageHeader::render(
     get_string(
         'crm_inbox_diagnostics',
@@ -121,6 +112,11 @@ echo CrmPageHeader::render(
     ),
     HelpContext::INBOX_DIAGNOSTICS
 );
+
+echo InboxSectionNavigationRenderer::render(
+    InboxSectionNavigationRenderer::DIAGNOSTICS
+);
+
 
 echo InboxDiagnosticsRenderer::render(
     $result,

@@ -8,12 +8,14 @@ use local_subscriptions\crm\inbox\dto\InboxThreadCriteria;
 use local_subscriptions\crm\inbox\dto\InboxThreadListResult;
 use local_subscriptions\crm\inbox\repositories\InboxReadRepository;
 use local_subscriptions\crm\inbox\repositories\InboxTeamRepository;
+use local_subscriptions\crm\inbox\repositories\InboxAccountRepository;
 
 final class InboxReadService {
 
     public function __construct(
         private readonly InboxReadRepository $repository,
-        private readonly InboxTeamRepository $teams
+        private readonly InboxTeamRepository $teams,
+        private readonly InboxAccountRepository $accounts
     ) {
     }
 
@@ -38,6 +40,28 @@ final class InboxReadService {
             );
         }
 
+        $foldercounts = [];
+
+        foreach (
+            [
+                'inbox',
+                'sent',
+                'drafts',
+                'archive',
+                'trash',
+                'all',
+            ]
+            as $folder
+        ) {
+            $foldercounts[$folder] =
+                $this->repository->count_threads(
+                    $criteria->with_folder(
+                        $folder
+                    ),
+                    $actorid
+                );
+        }
+
         return new InboxThreadListResult(
             $criteria,
             $this->repository->get_threads(
@@ -45,7 +69,9 @@ final class InboxReadService {
                 $actorid
             ),
             $total,
-            $this->teams->get_enabled()
+            $this->teams->get_enabled(),
+            $this->accounts->get_enabled(),
+            $foldercounts
         );
     }
 

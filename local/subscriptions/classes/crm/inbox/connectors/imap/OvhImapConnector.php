@@ -14,6 +14,8 @@ use local_subscriptions\crm\inbox\domain\InboxParticipantType;
 use local_subscriptions\crm\inbox\dto\InboxFolder;
 use local_subscriptions\crm\inbox\dto\InboxMessageData;
 use local_subscriptions\crm\inbox\dto\InboxParticipantData;
+use local_subscriptions\crm\inbox\dto\InboxRemoteMessageState;
+use local_subscriptions\crm\inbox\dto\InboxRemoteStateSnapshot;
 use local_subscriptions\crm\inbox\dto\InboxSyncPage;
 use local_subscriptions\crm\inbox\exception\InboxConnectorException;
 use local_subscriptions\crm\inbox\sync\InboxSyncCursor;
@@ -220,11 +222,28 @@ final class OvhImapConnector implements
             sort($uids, SORT_NUMERIC);
 
             $limit = max(1, min(200, $limit));
-            $selected = array_slice(
-                $uids,
-                0,
-                $limit
-            );
+
+            /*
+             * Commerce 7.95O1.4 — live sync is recent-first.
+             *
+             * A newly connected mailbox must become useful immediately:
+             * do not force the CRM to walk years of history before it can
+             * see mail received today.
+             *
+             * - no cursor yet: bootstrap from the newest available UIDs;
+             * - cursor present: keep the normal forward-only incremental
+             *   behaviour (UID > last imported UID).
+             *
+             * Older messages deliberately remain outside the live cursor.
+             * Historical backfill, when needed, must be an explicit workflow
+             * rather than something the normal cron keeps consuming.
+             */
+            $initialsync = $cursor === null
+                || trim($cursor) === '';
+
+            $selected = $initialsync
+                ? array_slice($uids, -$limit)
+                : array_slice($uids, 0, $limit);
 
             $messages = [];
 
@@ -250,11 +269,307 @@ final class OvhImapConnector implements
             return new InboxSyncPage(
                 $messages,
                 $nextcursor,
-                count($uids) > count($selected)
+                /*
+                 * On bootstrap, older UIDs are intentionally ignored by the
+                 * live synchronisation. Reporting them as "more" would make
+                 * manual sync / cron continue backfilling history forever.
+                 */
+                !$initialsync
+                    && count($uids) > count($selected)
             );
         } finally {
             $this->close($stream);
         }
+    }
+
+    public function inspect_messages(
+        InboxAccount $account,
+        string $folder,
+        array $provideruids
+    ): InboxRemoteStateSnapshot {
+        $stream = $this->open(
+            $account,
+            $folder
+        );
+
+        try {
+            $status = imap_status(
+                $stream,
+                $this->mailbox($account)->folder($folder),
+                SA_UIDVALIDITY
+            );
+
+            if ($status === false) {
+                throw new InboxConnectorException(
+                    $this->errors->message(
+                        'Unable to read IMAP UIDVALIDITY.',
+                        [
+                            'account' => $account->email,
+                            'folder' => $folder,
+                        ]
+                    )
+                );
+            }
+
+            $uidvalidity = (string)$status->uidvalidity;
+            $uids = array_values(
+                array_unique(
+                    array_filter(
+                        array_map(
+                            static fn(mixed $uid): int =>
+                                max(0, (int)$uid),
+                            $provideruids
+                        ),
+                        static fn(int $uid): bool =>
+                            $uid > 0
+                    )
+                )
+            );
+
+            if ($uids === []) {
+                return new InboxRemoteStateSnapshot(
+                    $folder,
+                    $uidvalidity,
+                    []
+                );
+            }
+
+            sort($uids, SORT_NUMERIC);
+            $states = [];
+
+            /*
+             * PHP's imap_search() criteria parser does not support an IMAP
+             * "UID ..." criterion even though the underlying protocol has a
+             * UID SEARCH command. Ask for the lightweight UID inventory once,
+             * then intersect it locally with the CRM-known UIDs.
+             *
+             * This also handles messages that disappeared from the folder
+             * without turning a missing UID into a connector error.
+             */
+            $this->errors->clear();
+
+            $remoteuids = imap_search(
+                $stream,
+                'ALL',
+                SE_UID
+            );
+
+            if ($remoteuids === false) {
+                $errors = $this->errors->collect();
+
+                if ($errors) {
+                    throw new InboxConnectorException(
+                        implode(' ', [
+                            'Unable to inspect IMAP message state.',
+                            '[account=' . $account->email . ',',
+                            'folder=' . $folder . ']',
+                            implode(' | ', $errors),
+                        ])
+                    );
+                }
+
+                $remoteuids = [];
+            }
+
+            $remoteuidset = array_fill_keys(
+                array_map(
+                    'intval',
+                    $remoteuids
+                ),
+                true
+            );
+
+            foreach (array_chunk($uids, 100) as $chunk) {
+                $existinguids = array_values(
+                    array_filter(
+                        $chunk,
+                        static fn(int $uid): bool =>
+                            isset($remoteuidset[$uid])
+                    )
+                );
+
+                if ($existinguids === []) {
+                    continue;
+                }
+
+                $overview = imap_fetch_overview(
+                    $stream,
+                    implode(',', $existinguids),
+                    FT_UID
+                );
+
+                if ($overview === false) {
+                    throw new InboxConnectorException(
+                        $this->errors->message(
+                            'Unable to inspect IMAP message state.',
+                            [
+                                'account' => $account->email,
+                                'folder' => $folder,
+                            ]
+                        )
+                    );
+                }
+
+                foreach ($overview as $item) {
+                    $uid = (int)($item->uid ?? 0);
+
+                    if ($uid <= 0) {
+                        continue;
+                    }
+
+                    $states[] = new InboxRemoteMessageState(
+                        $folder,
+                        $uidvalidity,
+                        (string)$uid,
+                        $this->clean_message_id(
+                            $item->message_id ?? null
+                        ),
+                        self::overview_is_read($item),
+                        (bool)($item->answered ?? false),
+                        (bool)($item->flagged ?? false),
+                        (bool)($item->deleted ?? false),
+                        (bool)($item->draft ?? false)
+                    );
+                }
+            }
+
+            return new InboxRemoteStateSnapshot(
+                $folder,
+                $uidvalidity,
+                $states
+            );
+        } finally {
+            $this->close($stream);
+        }
+    }
+
+    public function locate_message(
+        InboxAccount $account,
+        array $folders,
+        string $providermessageid
+    ): ?InboxRemoteMessageState {
+        $providermessageid = $this->clean_message_id(
+            $providermessageid
+        );
+
+        if ($providermessageid === null) {
+            return null;
+        }
+
+        $searchvalues = [
+            '<' . $providermessageid . '>',
+            $providermessageid,
+        ];
+
+        foreach (
+            array_values(
+                array_unique(
+                    array_filter(
+                        array_map(
+                            static fn(mixed $folder): string =>
+                                trim((string)$folder),
+                            $folders
+                        )
+                    )
+                )
+            ) as $folder
+        ) {
+            $stream = null;
+
+            try {
+                $stream = $this->open(
+                    $account,
+                    $folder
+                );
+
+                $status = imap_status(
+                    $stream,
+                    $this->mailbox($account)->folder($folder),
+                    SA_UIDVALIDITY
+                );
+
+                if ($status === false) {
+                    continue;
+                }
+
+                $uids = false;
+
+                foreach ($searchvalues as $searchvalue) {
+                    $escaped = str_replace(
+                        ['\\', '"'],
+                        ['\\\\', '\"'],
+                        $searchvalue
+                    );
+
+                    $this->errors->clear();
+                    $uids = imap_search(
+                        $stream,
+                        'HEADER Message-ID "' . $escaped . '"',
+                        SE_UID
+                    );
+
+                    if ($uids !== false) {
+                        break;
+                    }
+
+                    $this->errors->clear();
+                }
+
+                if ($uids === false) {
+                    continue;
+                }
+
+                $uids = array_values(
+                    array_unique(
+                        array_map('intval', $uids)
+                    )
+                );
+
+                rsort($uids, SORT_NUMERIC);
+
+                foreach ($uids as $uid) {
+                    if ($uid <= 0) {
+                        continue;
+                    }
+
+                    $overview = imap_fetch_overview(
+                        $stream,
+                        (string)$uid,
+                        FT_UID
+                    );
+
+                    if (!$overview || !isset($overview[0])) {
+                        continue;
+                    }
+
+                    $item = $overview[0];
+
+                    return new InboxRemoteMessageState(
+                        $folder,
+                        (string)$status->uidvalidity,
+                        (string)$uid,
+                        $this->clean_message_id(
+                            $item->message_id ?? null
+                        ),
+                        self::overview_is_read($item),
+                        (bool)($item->answered ?? false),
+                        (bool)($item->flagged ?? false),
+                        (bool)($item->deleted ?? false),
+                        (bool)($item->draft ?? false)
+                    );
+                }
+            } catch (\Throwable $exception) {
+                debugging(
+                    'CRM Inbox Message-ID location probe failed: ' .
+                    $exception->getMessage(),
+                    DEBUG_DEVELOPER
+                );
+            } finally {
+                $this->close($stream);
+            }
+        }
+
+        return null;
     }
 
     public function move_message(
@@ -608,6 +923,11 @@ final class OvhImapConnector implements
             ? InboxMessageStatus::SENT
             : InboxMessageStatus::RECEIVED;
 
+        $isread =
+            $direction === InboxMessageDirection::OUTBOUND
+                ? true
+                : self::overview_is_read($overview);
+
         return new InboxMessageData(
             $folder,
             $uidvalidity,
@@ -625,11 +945,24 @@ final class OvhImapConnector implements
             $references,
             (int)$date,
             null,
-            !(bool)($overview->unseen ?? false),
+            $isread,
             $participants,
             $parsed['attachments'],
             $checksum
         );
+    }
+
+    /**
+     * Returns the IMAP \Seen state exposed by imap_fetch_overview().
+     *
+     * PHP's IMAP overview object exposes `seen`, not `unseen`. The previous
+     * O1 implementation read a non-existent `unseen` property and therefore
+     * defaulted every imported message to "read".
+     */
+    private static function overview_is_read(
+        object $overview
+    ): bool {
+        return (bool)($overview->seen ?? false);
     }
 
     private function participants(

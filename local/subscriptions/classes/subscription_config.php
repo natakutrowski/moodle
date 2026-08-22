@@ -542,9 +542,39 @@ class subscription_config {
             'admin/inbox/reply.php';
     }
 
+    public static function admin_inbox_compose_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/compose.php';
+    }
+
+    public static function admin_inbox_autosave_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/autosave.php';
+    }
+
+    public static function admin_inbox_drafts_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/drafts.php';
+    }
+
+    public static function admin_inbox_templates_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/templates.php';
+    }
+
+    public static function admin_inbox_template_content_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/template_content.php';
+    }
+
     public static function admin_inbox_action_page(): string {
         return self::plugin_path() .
             'admin/inbox/action.php';
+    }
+
+    public static function admin_inbox_bulk_action_page(): string {
+        return self::plugin_path() .
+            'admin/inbox/bulk_action.php';
     }
 
     public static function admin_inbox_diagnostics_page(): string {

@@ -22,6 +22,8 @@ const SELECTORS = {
     open:
         '[data-action="open-workspace-personalization"], ' +
         '[data-action="open-dashboard-personalization"]',
+    openProxy:
+        '[data-action="open-workspace-personalization-proxy"]',
 
     close:
         '[data-action="close-workspace-personalization"], ' +
@@ -73,6 +75,7 @@ const WORKSPACE_EVENTS = {
 
 let toolbarEventsRegistered = false;
 let workspaceOrderEventsRegistered = false;
+let proxyEventsRegistered = false;
 
 /**
  * Dispatches a generic Workspace event.
@@ -876,6 +879,47 @@ const registerWorkspaceOrderEvents = () => {
 };
 
 /**
+ * Registers personalization trigger proxies rendered outside the Workspace
+ * root (for example inside a CRM page header).
+ */
+const registerProxyEvents = () => {
+    if (proxyEventsRegistered) {
+        return;
+    }
+
+    document.addEventListener(
+        'click',
+        (event) => {
+            const proxy =
+                event.target.closest(
+                    SELECTORS.openProxy
+                );
+
+            if (!proxy) {
+                return;
+            }
+
+            const workspaceKey =
+                proxy.dataset.workspace || '';
+
+            const root =
+                findController(
+                    workspaceKey
+                );
+
+            if (!root) {
+                return;
+            }
+
+            event.preventDefault();
+            openPanel(root);
+        }
+    );
+
+    proxyEventsRegistered = true;
+};
+
+/**
  * Initializes all generic Workspace personalization controllers.
  */
 export const init = () => {
@@ -897,4 +941,5 @@ export const init = () => {
 
     registerToolbarEvents();
     registerWorkspaceOrderEvents();
+    registerProxyEvents();
 };

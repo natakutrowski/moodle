@@ -183,6 +183,24 @@ final class CrmNavigationRegistry {
                         'fa-inbox'
                     ),
                     $child(
+                        get_string('crm_inbox_o15_nav_compose', 'local_subscriptions'),
+                        subscription_config::admin_inbox_compose_page(),
+                        Capabilities::MANAGE_INBOX,
+                        'fa-pencil'
+                    ),
+                    $child(
+                        get_string('crm_inbox_o15_nav_drafts', 'local_subscriptions'),
+                        subscription_config::admin_inbox_drafts_page(),
+                        Capabilities::MANAGE_INBOX,
+                        'fa-file-text-o'
+                    ),
+                    $child(
+                        get_string('crm_inbox_o15_nav_templates', 'local_subscriptions'),
+                        subscription_config::admin_inbox_templates_page(),
+                        Capabilities::MANAGE_INBOX,
+                        'fa-bolt'
+                    ),
+                    $child(
                         get_string('crm_nav_diagnostics', 'local_subscriptions'),
                         '/local/subscriptions/admin/inbox/diagnostics.php',
                         Capabilities::VIEW_INBOX,

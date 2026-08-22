@@ -8609,5 +8609,227 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         );
     }
 
+    if ($oldversion < 2026082101) {
+        $table = new xmldb_table(
+            'local_subscriptions_inbox_attachment'
+        );
+
+        $contentid = new xmldb_field(
+            'contentid',
+            XMLDB_TYPE_CHAR,
+            '255',
+            null,
+            null,
+            null,
+            null,
+            'filesize'
+        );
+
+        if (!$dbman->field_exists($table, $contentid)) {
+            $dbman->add_field(
+                $table,
+                $contentid
+            );
+        }
+
+        $isinline = new xmldb_field(
+            'isinline',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'contentid'
+        );
+
+        if (!$dbman->field_exists($table, $isinline)) {
+            $dbman->add_field(
+                $table,
+                $isinline
+            );
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026082101,
+            'local',
+            'subscriptions'
+        );
+    }
+
+    if ($oldversion < 2026082102) {
+        $table = new xmldb_table(
+            'local_subscriptions_inbox_template'
+        );
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE,
+                null
+            );
+
+            $table->add_field(
+                'accountid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'type',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'quickreply'
+            );
+
+            $table->add_field(
+                'name',
+                XMLDB_TYPE_CHAR,
+                '255',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'subject',
+                XMLDB_TYPE_CHAR,
+                '255',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'bodytext',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'bodyhtml',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'enabled',
+                XMLDB_TYPE_INTEGER,
+                '1',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '1'
+            );
+
+            $table->add_field(
+                'sortorder',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_field(
+                'createdby',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null
+            );
+
+            $table->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+
+            $table->add_key(
+                'accountid_fk',
+                XMLDB_KEY_FOREIGN,
+                ['accountid'],
+                'local_subscriptions_inbox_account',
+                ['id']
+            );
+
+            $table->add_key(
+                'createdby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['createdby'],
+                'user',
+                ['id']
+            );
+
+            $table->add_index(
+                'type_enabled_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['type', 'enabled']
+            );
+
+            $table->add_index(
+                'account_type_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['accountid', 'type']
+            );
+
+            $dbman->create_table(
+                $table
+            );
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026082102,
+            'local',
+            'subscriptions'
+        );
+    }
+
     return true;
 }

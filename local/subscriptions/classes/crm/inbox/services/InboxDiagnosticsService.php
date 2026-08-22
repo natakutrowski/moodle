@@ -9,6 +9,7 @@ use local_subscriptions\crm\inbox\contracts\InboxCredentialStoreInterface;
 use local_subscriptions\crm\inbox\contracts\InboxOutboundConnectorInterface;
 use local_subscriptions\crm\inbox\repositories\InboxAccountRepository;
 use local_subscriptions\crm\inbox\repositories\InboxDiagnosticsRepository;
+use local_subscriptions\crm\inbox\repositories\InboxSyncLogRepository;
 use local_subscriptions\crm\inbox\validation\InboxAccountValidator;
 use local_subscriptions\crm\inbox\services\InboxFolderResolver;
 
@@ -25,7 +26,9 @@ final class InboxDiagnosticsService {
         'local_subscriptions_inbox_attachment',
         'local_subscriptions_inbox_tag',
         'local_subscriptions_inbox_thread_tag',
+        'local_subscriptions_inbox_template',
         'local_subscriptions_inbox_sync_log',
+        'local_subscriptions_inbox_remote',
     ];
 
     private readonly InboxAccountValidator $validator;
@@ -36,6 +39,8 @@ final class InboxDiagnosticsService {
         private readonly InboxCredentialStoreInterface $credentials,
         private readonly InboxConnectorInterface $inbound,
         private readonly InboxOutboundConnectorInterface $outbound,
+        private readonly InboxSyncLogRepository $synclogs =
+            new InboxSyncLogRepository(),
         ?InboxAccountValidator $validator = null
     ) {
         $this->validator =
@@ -47,13 +52,14 @@ final class InboxDiagnosticsService {
         ?int $accountid = null
     ): array {
         $checks = [];
+        $folderstatus = [];
 
         $checks[] = $this->check(
             'imap_extension',
             extension_loaded('imap'),
             extension_loaded('imap')
-                ? 'PHP IMAP enabled'
-                : 'PHP IMAP extension missing'
+                ? get_string('crm_inbox_diagnostics_check_imap_extension_ok', 'local_subscriptions')
+                : get_string('crm_inbox_diagnostics_check_imap_extension_missing', 'local_subscriptions')
         );
 
         foreach (self::TABLES as $table) {
@@ -64,22 +70,28 @@ final class InboxDiagnosticsService {
                 'table_' . $table,
                 $exists,
                 $exists
-                    ? $table . ' available'
-                    : $table . ' missing'
+                    ? get_string('crm_inbox_diagnostics_check_table_available', 'local_subscriptions', $table)
+                    : get_string('crm_inbox_diagnostics_check_table_missing', 'local_subscriptions', $table)
             );
         }
 
-        $account = $accountid !== null
-            ? $this->accounts->find($accountid)
-            : $this->accounts->find_by_email(
-                'support@campusfr.fr'
+        if ($accountid !== null) {
+            $account = $this->accounts->find(
+                $accountid
             );
+        } else {
+            $enabledaccounts =
+                $this->accounts->get_enabled();
+
+            $account =
+                $enabledaccounts[0] ?? null;
+        }
 
         if (!$account) {
             $checks[] = $this->check(
                 'account',
                 false,
-                'CRM Inbox account not configured'
+                get_string('crm_inbox_diagnostics_check_account_missing', 'local_subscriptions')
             );
 
             return $this->result($checks, null);
@@ -95,8 +107,8 @@ final class InboxDiagnosticsService {
             'account_enabled',
             $account->enabled,
             $account->enabled
-                ? 'Account enabled'
-                : 'Account disabled'
+                ? get_string('crm_inbox_diagnostics_check_account_enabled', 'local_subscriptions')
+                : get_string('crm_inbox_diagnostics_check_account_disabled', 'local_subscriptions')
         );
 
         $validation = $this->validator->validate(
@@ -132,8 +144,8 @@ final class InboxDiagnosticsService {
             'credentials',
             $credentialsavailable,
             $credentialsavailable
-                ? 'Credentials available'
-                : 'Credentials missing'
+                ? get_string('crm_inbox_diagnostics_check_credentials_available', 'local_subscriptions')
+                : get_string('crm_inbox_diagnostics_check_credentials_missing', 'local_subscriptions')
         );
 
         if (
@@ -150,7 +162,7 @@ final class InboxDiagnosticsService {
                 $checks[] = $this->check(
                     'imap_connection',
                     true,
-                    'IMAP connection successful'
+                    get_string('crm_inbox_diagnostics_check_imap_connection_ok', 'local_subscriptions')
                 );
             } catch (\Throwable $exception) {
                 $checks[] = $this->check(
@@ -161,25 +173,23 @@ final class InboxDiagnosticsService {
             }
 
             try {
-                $folders = $this->inbound
-                    ->list_folders($account);
+                $discovery =
+                    (new InboxFolderDiscoveryService(
+                        $this->inbound,
+                        new InboxFolderResolver(),
+                        $this->accounts
+                    ))->discover(
+                        $account,
+                        true
+                    );
 
-                $resolver = new InboxFolderResolver();
+                $folders = $discovery['folders'];
+                $resolved = $discovery['resolved'];
+                $missing = $discovery['missing'];
 
-                $resolved = $resolver->resolve(
-                    $folders,
-                    is_array(
-                        $account->configuration['folders']
-                        ?? null
-                    )
-                        ? $account->configuration['folders']
-                        : []
-                );
-
-                $missing = $resolver->missing_required(
-                    $folders,
-                    $resolved
-                );
+                $account = $this->accounts->find(
+                    $account->id
+                ) ?? $account;
 
                 $checks[] = $this->check(
                     'imap_folders',
@@ -208,6 +218,70 @@ final class InboxDiagnosticsService {
                             implode(', ', $missing)
                         )
                 );
+
+                $syncfolders =
+                    (new InboxSyncFolderPolicy())
+                        ->folder_types($account);
+
+                $baselineok =
+                    !empty($resolved['inbox'])
+                    && !empty($resolved['sent'])
+                    && in_array('inbox', $syncfolders, true)
+                    && in_array('sent', $syncfolders, true);
+
+                $checks[] = $this->check(
+                    'sync_folder_baseline',
+                    $baselineok,
+                    get_string(
+                        $baselineok
+                            ? 'crm_inbox_o1_sync_baseline_ok'
+                            : 'crm_inbox_o1_sync_baseline_problem',
+                        'local_subscriptions'
+                    )
+                );
+
+                foreach (
+                    ['inbox', 'sent', 'drafts', 'archive', 'trash']
+                    as $type
+                ) {
+                    $folder = trim(
+                        (string)($resolved[$type] ?? '')
+                    );
+
+                    if ($folder === '') {
+                        continue;
+                    }
+
+                    $incremental =
+                        $account->syncstate['folders'][$folder]
+                        ?? [];
+
+                    $reconciliation =
+                        $account->syncstate['reconciliation'][$folder]
+                        ?? [];
+
+                    $folderstatus[] = [
+                        'type' => $type,
+                        'folder' => $folder,
+                        'enabled' => in_array(
+                            $type,
+                            $syncfolders,
+                            true
+                        ),
+                        'incrementalat' =>
+                            (int)($incremental['updatedat'] ?? 0),
+                        'reconciledat' =>
+                            (int)($reconciliation['updatedat'] ?? 0),
+                        'checked' =>
+                            (int)($reconciliation['checked'] ?? 0),
+                        'updated' =>
+                            (int)($reconciliation['updated'] ?? 0),
+                        'moved' =>
+                            (int)($reconciliation['moved'] ?? 0),
+                        'missing' =>
+                            (int)($reconciliation['missing'] ?? 0),
+                    ];
+                }
             } catch (\Throwable $exception) {
                 $checks[] = $this->check(
                     'imap_folders',
@@ -224,7 +298,7 @@ final class InboxDiagnosticsService {
                 $checks[] = $this->check(
                     'smtp_connection',
                     true,
-                    'SMTP connection successful'
+                    get_string('crm_inbox_diagnostics_check_smtp_connection_ok', 'local_subscriptions')
                 );
             } catch (\Throwable $exception) {
                 $checks[] = $this->check(
@@ -263,11 +337,127 @@ final class InboxDiagnosticsService {
                     ->failed_attachment_count(),
         ];
 
+        $now = time();
+        $last24hours = $now - DAYSECS;
+        $staleafter = $now - (30 * MINSECS);
+
+        $operational = [
+            'lastsuccessat' =>
+                $this->repository
+                    ->last_successful_sync_at(
+                        $account->id
+                    ),
+
+            'failed24h' =>
+                $this->synclogs
+                    ->count_status_since(
+                        $account->id,
+                        ['failed'],
+                        $last24hours
+                    ),
+
+            'partial24h' =>
+                $this->synclogs
+                    ->count_status_since(
+                        $account->id,
+                        ['partial'],
+                        $last24hours
+                    ),
+
+            'stalerunning' =>
+                $this->synclogs
+                    ->stale_running_count(
+                        $account->id,
+                        $staleafter
+                    ),
+
+            'duplicateidentities' =>
+                $this->repository
+                    ->duplicate_identity_count(
+                        $account->id
+                    ),
+
+            'orphanremote' =>
+                $this->repository
+                    ->orphan_remote_count(
+                        $account->id
+                    ),
+
+            'orphanattachments' =>
+                $this->repository
+                    ->orphan_attachment_count(
+                        $account->id
+                    ),
+
+            'sentcopyfailures24h' =>
+                $this->repository
+                    ->sent_copy_failure_count(
+                        $account->id,
+                        $last24hours
+                    ),
+
+            'recentlogs' =>
+                $this->synclogs->recent(
+                    $account->id,
+                    12
+                ),
+        ];
+
+        $freshnessok =
+            $operational['lastsuccessat'] > 0
+            && (
+                $now - $operational['lastsuccessat']
+            ) <= (2 * HOURSECS);
+
+        $checks[] = $this->check(
+            'sync_freshness',
+            $freshnessok,
+            get_string(
+                $freshnessok
+                    ? 'crm_inbox_o14_sync_fresh_ok'
+                    : 'crm_inbox_o14_sync_fresh_problem',
+                'local_subscriptions'
+            )
+        );
+
+        $integrityok =
+            $operational['duplicateidentities'] === 0
+            && $operational['orphanremote'] === 0
+            && $operational['orphanattachments'] === 0;
+
+        $checks[] = $this->check(
+            'data_integrity',
+            $integrityok,
+            get_string(
+                $integrityok
+                    ? 'crm_inbox_o14_integrity_ok'
+                    : 'crm_inbox_o14_integrity_problem',
+                'local_subscriptions'
+            )
+        );
+
+        $deliveryok =
+            $operational['sentcopyfailures24h'] === 0;
+
+        $checks[] = $this->check(
+            'sent_copy_health',
+            $deliveryok,
+            get_string(
+                $deliveryok
+                    ? 'crm_inbox_o14_sentcopy_ok'
+                    : 'crm_inbox_o14_sentcopy_problem',
+                'local_subscriptions',
+                $operational['sentcopyfailures24h']
+            )
+        );
+
         return $this->result(
             $checks,
             $account,
             $latestlog,
-            $metrics
+            $metrics,
+            $folderstatus,
+            $operational
         );
     }
 
@@ -287,7 +477,9 @@ final class InboxDiagnosticsService {
         array $checks,
         ?object $account,
         ?object $latestlog = null,
-        array $metrics = []
+        array $metrics = [],
+        array $folderstatus = [],
+        array $operational = []
     ): array {
         $errors = count(array_filter(
             $checks,
@@ -302,6 +494,8 @@ final class InboxDiagnosticsService {
             'account' => $account,
             'latestlog' => $latestlog,
             'metrics' => $metrics,
+            'folderstatus' => $folderstatus,
+            'operational' => $operational,
         ];
     }
 }

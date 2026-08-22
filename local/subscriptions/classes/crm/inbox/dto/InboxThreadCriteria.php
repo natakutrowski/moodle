@@ -37,12 +37,57 @@ final class InboxThreadCriteria {
         'ambiguous',
     ];
 
+    private const ALLOWED_DIRECTIONS = [
+        '',
+        'inbound',
+        'outbound',
+        'draft',
+    ];
+
+    private const ALLOWED_READ_STATES = [
+        '',
+        'unread',
+        'read',
+    ];
+
+    private const ALLOWED_ATTACHMENT_STATES = [
+        '',
+        'with',
+        'without',
+    ];
+
+    private const ALLOWED_PERIODS = [
+        '',
+        'today',
+        '7days',
+        '30days',
+        '90days',
+        'custom',
+    ];
+
+    private const ALLOWED_FOLDERS = [
+        'inbox',
+        'sent',
+        'drafts',
+        'archive',
+        'trash',
+        'all',
+    ];
+
     public function __construct(
         public readonly string $query,
         public readonly string $status,
         public readonly string $priority,
         public readonly string $assignment,
         public readonly string $match,
+        public readonly string $direction,
+        public readonly string $readstate,
+        public readonly string $attachmentstate,
+        public readonly string $period,
+        public readonly string $datefrom,
+        public readonly string $dateto,
+        public readonly int $accountid,
+        public readonly string $folder,
         public readonly bool $unreadonly,
         public readonly int $teamid,
         public readonly int $page,
@@ -75,6 +120,52 @@ final class InboxThreadCriteria {
             PARAM_ALPHANUMEXT
         );
 
+        $direction = optional_param(
+            'direction',
+            '',
+            PARAM_ALPHA
+        );
+
+        $readstate = optional_param(
+            'readstate',
+            '',
+            PARAM_ALPHA
+        );
+
+        $attachmentstate = optional_param(
+            'attachments',
+            '',
+            PARAM_ALPHA
+        );
+
+        $period = optional_param(
+            'period',
+            '',
+            PARAM_ALPHANUMEXT
+        );
+
+        $datefrom = self::normalize_date(
+            optional_param(
+                'datefrom',
+                '',
+                PARAM_RAW_TRIMMED
+            )
+        );
+
+        $dateto = self::normalize_date(
+            optional_param(
+                'dateto',
+                '',
+                PARAM_RAW_TRIMMED
+            )
+        );
+
+        $folder = optional_param(
+            'folder',
+            'inbox',
+            PARAM_ALPHA
+        );
+
         return new self(
             trim(optional_param(
                 'q',
@@ -101,6 +192,38 @@ final class InboxThreadCriteria {
                 self::ALLOWED_MATCHES,
                 true
             ) ? $match : '',
+            in_array(
+                $direction,
+                self::ALLOWED_DIRECTIONS,
+                true
+            ) ? $direction : '',
+            in_array(
+                $readstate,
+                self::ALLOWED_READ_STATES,
+                true
+            ) ? $readstate : '',
+            in_array(
+                $attachmentstate,
+                self::ALLOWED_ATTACHMENT_STATES,
+                true
+            ) ? $attachmentstate : '',
+            in_array(
+                $period,
+                self::ALLOWED_PERIODS,
+                true
+            ) ? $period : '',
+            $datefrom,
+            $dateto,
+            max(0, optional_param(
+                'accountid',
+                0,
+                PARAM_INT
+            )),
+            in_array(
+                $folder,
+                self::ALLOWED_FOLDERS,
+                true
+            ) ? $folder : 'inbox',
             optional_param(
                 'unreadonly',
                 0,
@@ -137,9 +260,51 @@ final class InboxThreadCriteria {
             $this->priority,
             $this->assignment,
             $this->match,
+            $this->direction,
+            $this->readstate,
+            $this->attachmentstate,
+            $this->period,
+            $this->datefrom,
+            $this->dateto,
+            $this->accountid,
+            $this->folder,
             $this->unreadonly,
             $this->teamid,
             max(0, $page),
+            $this->perpage
+        );
+    }
+
+    public function with_folder(
+        string $folder
+    ): self {
+        if (
+            !in_array(
+                $folder,
+                self::ALLOWED_FOLDERS,
+                true
+            )
+        ) {
+            $folder = 'inbox';
+        }
+
+        return new self(
+            $this->query,
+            $this->status,
+            $this->priority,
+            $this->assignment,
+            $this->match,
+            $this->direction,
+            $this->readstate,
+            $this->attachmentstate,
+            $this->period,
+            $this->datefrom,
+            $this->dateto,
+            $this->accountid,
+            $folder,
+            $this->unreadonly,
+            $this->teamid,
+            0,
             $this->perpage
         );
     }
@@ -169,6 +334,50 @@ final class InboxThreadCriteria {
             $params['match'] = $this->match;
         }
 
+        if ($this->direction !== '') {
+            $params['direction'] =
+                $this->direction;
+        }
+
+        if ($this->readstate !== '') {
+            $params['readstate'] =
+                $this->readstate;
+        }
+
+        if ($this->attachmentstate !== '') {
+            $params['attachments'] =
+                $this->attachmentstate;
+        }
+
+        if ($this->period !== '') {
+            $params['period'] =
+                $this->period;
+        }
+
+        if (
+            $this->period === 'custom'
+            && $this->datefrom !== ''
+        ) {
+            $params['datefrom'] = $this->datefrom;
+        }
+
+        if (
+            $this->period === 'custom'
+            && $this->dateto !== ''
+        ) {
+            $params['dateto'] = $this->dateto;
+        }
+
+        if ($this->accountid > 0) {
+            $params['accountid'] =
+                $this->accountid;
+        }
+
+        if ($this->folder !== 'inbox') {
+            $params['folder'] =
+                $this->folder;
+        }
+
         if ($this->unreadonly) {
             $params['unreadonly'] = 1;
         }
@@ -189,9 +398,33 @@ final class InboxThreadCriteria {
     }
 
     public function active_filter_count(): int {
-        return count(
-            $this->url_params(false)
+        $params = $this->url_params(false);
+
+        unset(
+            $params['datefrom'],
+            $params['dateto']
         );
+
+        return count($params);
+    }
+
+    private static function normalize_date(
+        string $date
+    ): string {
+        $date = trim($date);
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return '';
+        }
+
+        [$year, $month, $day] = array_map(
+            'intval',
+            explode('-', $date)
+        );
+
+        return checkdate($month, $day, $year)
+            ? $date
+            : '';
     }
 
     private static function normalize_perpage(

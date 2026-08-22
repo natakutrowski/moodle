@@ -34,11 +34,19 @@ final class InboxSyncRuntimeFactory {
                 new InboxUserMatchRepository()
             );
 
+        $connector = new OvhImapConnector(
+            new MoodleConfigInboxCredentialStore(),
+            new ImapMimeParser()
+        );
+
+        $discovery = new InboxFolderDiscoveryService(
+            $connector,
+            new InboxFolderResolver(),
+            $accounts
+        );
+
         $sync = new InboxSyncService(
-            new OvhImapConnector(
-                new MoodleConfigInboxCredentialStore(),
-                new ImapMimeParser()
-            ),
+            $connector,
             $accounts,
             $contacts,
             new InboxThreadRepository(),
@@ -53,7 +61,8 @@ final class InboxSyncRuntimeFactory {
 
         return new InboxSyncRuntime(
             $accounts,
-            $sync
+            $sync,
+            $discovery
         );
     }
 

@@ -43,6 +43,12 @@ $value = optional_param(
     PARAM_ALPHANUMEXT
 );
 
+$returnurl = optional_param(
+    'returnurl',
+    '',
+    PARAM_LOCALURL
+);
+
 $credentials =
     new MoodleConfigInboxCredentialStore();
 
@@ -84,6 +90,17 @@ switch ($action) {
             $threadid,
             false
         );
+
+        redirect(
+            new moodle_url(
+                subscription_config::
+                    admin_inbox_page()
+            ),
+            get_string(
+                'crm_inbox_marked_unread_o2',
+                'local_subscriptions'
+            )
+        );
         break;
 
     case 'archive':
@@ -100,6 +117,25 @@ switch ($action) {
             ),
             get_string(
                 'crm_inbox_moved_to_trash',
+                'local_subscriptions'
+            )
+        );
+        break;
+
+    case 'restore':
+        $service->restore_to_inbox(
+            $threadid
+        );
+
+        redirect(
+            $returnurl !== ''
+                ? new moodle_url($returnurl)
+                : new moodle_url(
+                    subscription_config::
+                        admin_inbox_page()
+                ),
+            get_string(
+                'crm_inbox_restored_o13',
                 'local_subscriptions'
             )
         );

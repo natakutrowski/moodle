@@ -102,26 +102,36 @@ final class InboxThreadActionService {
             );
         }
 
-        foreach (
-            $this->read
-                ->get_remote_messages_for_thread(
-                    $threadid
-                ) as $message
-        ) {
-            try {
-                $this->connector->mark_as_read(
-                    $account,
-                    (string)$message->folder,
-                    (string)$message->provideruid,
-                    $read
-                );
-            } catch (\Throwable $exception) {
-                debugging(
-                    'CRM Inbox IMAP read state failed: ' .
-                    $exception->getMessage(),
-                    DEBUG_DEVELOPER
-                );
-            }
+        $inbound = array_values(
+            array_filter(
+                $this->read
+                    ->get_remote_messages_for_thread(
+                        $threadid
+                    ),
+                static fn(object $message): bool =>
+                    (string)($message->direction ?? '') ===
+                        'inbound'
+            )
+        );
+
+        /*
+         * Marking a conversation read means every inbound message is \Seen.
+         * Marking it unread mirrors professional mail clients: only the most
+         * recent inbound message is made unseen, not the entire history.
+         */
+        if (!$read && $inbound !== []) {
+            $inbound = [
+                $inbound[array_key_last($inbound)],
+            ];
+        }
+
+        foreach ($inbound as $message) {
+            $this->connector->mark_as_read(
+                $account,
+                (string)$message->folder,
+                (string)$message->provideruid,
+                $read
+            );
         }
 
         $this->actions->mark_read(
@@ -159,6 +169,30 @@ final class InboxThreadActionService {
 
         $this->actions->mark_locally_deleted(
             $threadid
+        );
+    }
+
+    public function restore_to_inbox(
+        int $threadid
+    ): void {
+        $this->move(
+            $threadid,
+            'inbox'
+        );
+
+        $this->actions->set_locally_deleted(
+            $threadid,
+            false
+        );
+
+        $this->actions->set_status(
+            $threadid,
+            InboxThreadStatus::OPEN
+        );
+
+        $this->event_logger()->status_changed(
+            $threadid,
+            InboxThreadStatus::OPEN
         );
     }
 

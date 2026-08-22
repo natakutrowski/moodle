@@ -54,7 +54,8 @@ final class InboxWorkspaceRenderer {
                     'crm-workspace ' .
                     'crm-workspace-inbox ' .
                     'crm-inbox ' .
-                    'local-subscriptions-inbox-workspace',
+                    'local-subscriptions-inbox-workspace ' .
+                    'crm-inbox-o15-workspace',
 
                 'aria-label' => get_string(
                     'crm_inbox_region_label',

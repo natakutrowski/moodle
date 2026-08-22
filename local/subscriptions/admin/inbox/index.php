@@ -9,12 +9,15 @@ use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\inbox\dto\InboxThreadCriteria;
 use local_subscriptions\crm\inbox\workspace\InboxWorkspaceRenderer;
 use local_subscriptions\crm\inbox\repositories\InboxReadRepository;
+use local_subscriptions\crm\inbox\repositories\InboxDraftRepository;
 use local_subscriptions\crm\inbox\repositories\InboxTeamRepository;
+use local_subscriptions\crm\inbox\repositories\InboxAccountRepository;
 use local_subscriptions\crm\inbox\services\InboxReadService;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\subscription_config;
+use local_subscriptions\crm\inbox\rendering\InboxSectionNavigationRenderer;
 
 global $PAGE, $OUTPUT, $USER;
 
@@ -27,7 +30,8 @@ $criteria =
 
 $service = new InboxReadService(
     new InboxReadRepository(),
-    new InboxTeamRepository()
+    new InboxTeamRepository(),
+    new InboxAccountRepository()
 );
 
 $result = $service->search(
@@ -65,92 +69,7 @@ echo CrmWorkspaceRenderer::start(
     $context
 );
 
-$headeractions = [];
-
-if (
-    AdminSecurity::can(
-        Capabilities::MANAGE_INBOX
-    )
-) {
-    $headeractions[] = html_writer::tag(
-        'form',
-        html_writer::empty_tag(
-            'input',
-            [
-                'type' => 'hidden',
-                'name' => 'sesskey',
-                'value' => sesskey(),
-            ]
-        )
-        . html_writer::empty_tag(
-            'input',
-            [
-                'type' => 'hidden',
-                'name' => 'returnurl',
-                'value' => $pageurl->out(false),
-            ]
-        )
-        . html_writer::tag(
-            'button',
-            html_writer::tag(
-                'i',
-                '',
-                [
-                    'class' => 'fa fa-refresh',
-                    'aria-hidden' => 'true',
-                ]
-            )
-            . html_writer::span(
-                get_string(
-                    'crm_inbox_refresh',
-                    'local_subscriptions'
-                )
-            ),
-            [
-                'type' => 'submit',
-                'class' =>
-                    'btn btn-sm btn-primary '
-                    . 'crm-inbox-refresh-button',
-            ]
-        ),
-        [
-            'method' => 'post',
-            'action' => (
-                new moodle_url(
-                    subscription_config::
-                        admin_inbox_sync_page()
-                )
-            )->out(false),
-            'class' => 'd-inline-block m-0',
-        ]
-    );
-}
-
-if (
-    AdminSecurity::can(
-        Capabilities::MANAGE_CONFIGURATION
-    )
-) {
-    $headeractions[] = html_writer::link(
-        new moodle_url(
-            subscription_config::
-                admin_inbox_diagnostics_page()
-        ),
-        get_string(
-            'crm_inbox_diagnostics',
-            'local_subscriptions'
-        ),
-        [
-            'class' =>
-                'btn btn-sm btn-outline-secondary',
-        ]
-    );
-}
-
-$headeractions = html_writer::div(
-    implode('', $headeractions),
-    'crm-inbox-header-actions'
-);
+$headeractions = '';
 
 echo CrmPageHeader::render(
     $pagetitle,
@@ -161,6 +80,13 @@ echo CrmPageHeader::render(
     HelpContext::INBOX,
     $headeractions
 );
+
+echo InboxSectionNavigationRenderer::render(
+    InboxSectionNavigationRenderer::INBOX
+);
+
+
+
 
 echo InboxWorkspaceRenderer::render(
     $result,

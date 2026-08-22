@@ -77,6 +77,15 @@ final class InboxAttachmentRepository {
                     $attachment->mimetype,
                 'filesize' =>
                     max(0, $attachment->filesize),
+                'contentid' =>
+                    $attachment->contentid !== null
+                        ? trim(
+                            $attachment->contentid,
+                            "<> \t\n\r\0\x0B"
+                        )
+                        : null,
+                'isinline' =>
+                    $attachment->inline ? 1 : 0,
                 'contenthash' => null,
                 'fileitemid' => null,
                 'downloadstatus' =>
@@ -93,6 +102,15 @@ final class InboxAttachmentRepository {
     /**
      * @return object[]
      */
+    public function delete(int $attachmentid): void {
+        global $DB;
+
+        $DB->delete_records(
+            self::TABLE,
+            ['id' => $attachmentid]
+        );
+    }
+
     public function get_pending(
         int $limit = 100
     ): array {

@@ -11269,3 +11269,250 @@ $string['commerce_scope_legacy_readonly_notice'] = 'This scope is managed by Nat
 $string['commerce_scope_legacy_readonly_badge'] = 'Read only';
 $string['commerce_scope_open_native_products'] = 'Open associated Native Products:';
 
+// Commerce 7.95O1 — Inbox Premium mailbox reconciliation.
+$string['crm_inbox_o1_sync_baseline_ok'] = 'Professional Inbox + Sent synchronisation is enabled.';
+$string['crm_inbox_o1_sync_baseline_problem'] = 'Synchronisation must cover at least Inbox and Sent.';
+$string['crm_inbox_o1_mailbox_sync_title'] = 'Mailbox synchronisation';
+$string['crm_inbox_o1_mailbox_sync_description'] = 'Remote-folder, incremental-ingestion and IMAP reconciliation status across mail clients.';
+$string['crm_inbox_o1_folder_inbox'] = 'Inbox';
+$string['crm_inbox_o1_folder_sent'] = 'Sent';
+$string['crm_inbox_o1_folder_drafts'] = 'Drafts';
+$string['crm_inbox_o1_folder_archive'] = 'Archive';
+$string['crm_inbox_o1_folder_trash'] = 'Trash';
+$string['crm_inbox_o1_sync_enabled'] = 'Synchronised';
+$string['crm_inbox_o1_sync_disabled'] = 'Not synchronised';
+$string['crm_inbox_o1_incremental'] = 'Ingestion';
+$string['crm_inbox_o1_reconciliation'] = 'Reconciliation';
+$string['crm_inbox_o1_never'] = 'never';
+$string['crm_inbox_o1_reconciliation_counts'] = '{$a->checked} checked · {$a->updated} state update(s) · {$a->moved} move(s) detected · {$a->missing} missing remote location(s)';
+$string['crm_inbox_o1_refresh_reconciliation'] = 'IMAP reconciliation: {$a->checked} checked, {$a->updated} state update(s), {$a->moved} move(s) detected, {$a->missing} missing remote location(s).';
+
+// Commerce 7.95O1.2 — Inbox diagnostics and configurable mailbox account.
+$string['crm_inbox_diagnostics_operational'] = 'CRM Inbox operational';
+$string['crm_inbox_diagnostics_operational_desc'] = 'The mailbox, server connections and required storage are operational.';
+$string['crm_inbox_diagnostics_attention'] = 'CRM Inbox needs attention';
+$string['crm_inbox_diagnostics_attention_desc'] = '{$a} diagnostic issue(s) need attention.';
+$string['crm_inbox_diagnostics_rerun'] = 'Run diagnostics again';
+$string['crm_inbox_diagnostics_open_inbox'] = 'Open Inbox';
+$string['crm_inbox_diagnostics_imap'] = 'IMAP reception';
+$string['crm_inbox_diagnostics_smtp'] = 'SMTP sending';
+$string['crm_inbox_diagnostics_account'] = 'Mailbox account';
+$string['crm_inbox_diagnostics_database'] = 'CRM storage';
+$string['crm_inbox_diagnostics_email_account'] = 'Email account';
+$string['crm_inbox_diagnostics_account_state'] = 'Account state';
+$string['crm_inbox_diagnostics_credentials'] = 'Credentials';
+$string['crm_inbox_diagnostics_folders'] = 'IMAP folders';
+$string['crm_inbox_diagnostics_account_panel'] = 'Configured mailbox';
+$string['crm_inbox_diagnostics_server_panel'] = 'Mail server';
+$string['crm_inbox_diagnostics_ok'] = 'Operational';
+$string['crm_inbox_diagnostics_problem'] = 'Problem';
+$string['crm_inbox_diagnostics_metric_threads'] = 'Threads';
+$string['crm_inbox_diagnostics_metric_messages'] = 'Messages';
+$string['crm_inbox_diagnostics_metric_contacts'] = 'Contacts';
+$string['crm_inbox_diagnostics_metric_unmatched'] = 'Unmatched contacts';
+$string['crm_inbox_diagnostics_metric_ambiguous'] = 'Ambiguous contacts';
+$string['crm_inbox_diagnostics_metric_pending_attachments'] = 'Pending attachments';
+$string['crm_inbox_diagnostics_metric_failed_attachments'] = 'Failed attachments';
+$string['crm_inbox_diagnostics_checks_all_ok'] = '{$a} technical checks passed.';
+$string['crm_inbox_diagnostics_checks_errors'] = '{$a} technical check(s) failed.';
+$string['crm_inbox_diagnostics_technical'] = 'Technical checks';
+
+// Commerce 7.95O2 — professional read/unread management.
+$string['crm_inbox_mark_read_o2'] = 'Mark as read';
+$string['crm_inbox_mark_unread_o2'] = 'Mark as unread';
+$string['crm_inbox_marked_unread_o2'] = 'Conversation marked as unread.';
+$string['crm_inbox_bulk_selection_o2'] = 'Selection actions';
+$string['crm_inbox_bulk_none_selected_o2'] = 'Select at least one conversation.';
+$string['crm_inbox_bulk_marked_read_o2'] = '{$a} conversation(s) marked as read.';
+$string['crm_inbox_bulk_marked_unread_o2'] = '{$a} conversation(s) marked as unread.';
+$string['crm_inbox_select_thread_o2'] = 'Select conversation: {$a}';
+$string['crm_inbox_unread_o2'] = 'Unread';
+
+// Commerce 7.95O3 — CRM Inbox unread navbar badge.
+$string['crm_nav_inbox_unread_badge_o3'] = '{$a} unread incoming message(s)';
+
+// Commerce 7.95O4 — Inbox attachments.
+$string['crm_inbox_attachments_o4'] = 'Attachments';
+$string['crm_inbox_attachments_help_o4'] = 'Up to {$a->count} files · {$a->each} maximum per file · {$a->total} total.';
+$string['crm_inbox_attachments_saved_o4'] = 'Files already attached to this draft';
+$string['crm_inbox_attachment_too_many_o4'] = 'You can attach up to {$a} files.';
+$string['crm_inbox_attachment_total_too_large_o4'] = 'The total attachment size exceeds {$a}.';
+$string['crm_inbox_attachment_too_large_o4'] = 'The file “{$a->filename}” exceeds the {$a->limit} limit.';
+$string['crm_inbox_attachment_upload_failed_o4'] = 'Unable to upload attachment “{$a}”.';
+$string['crm_inbox_attachment_read_failed_o4'] = 'Unable to read an uploaded attachment.';
+
+// Commerce 7.95O4.4 — attachment integrity hardening.
+$string['crm_inbox_attachment_not_ready_o44'] = 'Attachment “{$a}” is not available for sending. Remove it and add it again.';
+
+// Commerce 7.95O5 — inline CID images.
+$string['crm_inbox_inline_image_insert_o5'] = 'Insert image';
+$string['crm_inbox_inline_image_help_o5'] = 'You can also paste an image or drop it directly into the message.';
+$string['crm_inbox_inline_image_type_o5'] = 'The file “{$a}” is not a supported image.';
+
+// Commerce 7.95O6 — premium composer.
+$string['crm_inbox_new_message_o6'] = 'New message';
+$string['crm_inbox_new_message_subtitle_o6'] = 'Compose a complete email from the CRM Inbox.';
+$string['crm_inbox_from_o6'] = 'From';
+$string['crm_inbox_to_o6'] = 'To';
+$string['crm_inbox_reply_all_o6'] = 'Reply all';
+$string['crm_inbox_forward_o6'] = 'Forward';
+$string['crm_inbox_forwarded_message_o6'] = 'Forwarded message';
+$string['crm_inbox_insert_link_o6'] = 'Insert link';
+$string['crm_inbox_message_sent_o6'] = 'Message sent.';
+$string['crm_inbox_invalid_recipient_value_o6'] = 'Email address “{$a}” is invalid.';
+
+// Commerce 7.95O7 — drafts and autosave.
+$string['crm_inbox_autosave_ready_o7'] = 'Autosave is enabled.';
+$string['crm_inbox_autosave_saving_o7'] = 'Saving…';
+$string['crm_inbox_autosave_saved_o7'] = 'Draft saved.';
+$string['crm_inbox_autosave_error_o7'] = 'Autosave failed.';
+$string['crm_inbox_drafts_o7'] = 'Drafts';
+$string['crm_inbox_drafts_count_o7'] = 'Drafts ({$a})';
+$string['crm_inbox_drafts_subtitle_o7'] = 'Find and resume automatically saved new messages.';
+$string['crm_inbox_no_drafts_o7'] = 'No saved drafts.';
+$string['crm_inbox_resume_draft_o7'] = 'Resume';
+$string['crm_inbox_thread_without_subject'] = 'No subject';
+$string['crm_inbox_draft_without_subject_o7'] = 'No subject';
+$string['crm_inbox_draft_not_found_o7'] = 'This draft no longer exists or is no longer available.';
+$string['crm_inbox_back_to_inbox'] = 'Back to Inbox';
+
+// Commerce 7.95O8 — Sent folder / multi-client interoperability.
+$string['crm_inbox_sent_copy_failed_o8'] = 'The message was sent, but its copy could not be saved to the Sent folder.';
+
+// Commerce 7.95O9 — signatures and quick replies.
+$string['crm_inbox_templates_o9'] = 'Signatures and quick replies';
+$string['crm_inbox_templates_subtitle_o9'] = 'Create mailbox-specific signatures and reusable replies to process email faster.';
+$string['crm_inbox_template_type_o9'] = 'Type';
+$string['crm_inbox_template_type_signature_o9'] = 'Signature';
+$string['crm_inbox_template_type_quickreply_o9'] = 'Quick reply';
+$string['crm_inbox_template_name_o9'] = 'Name';
+$string['crm_inbox_template_account_o9'] = 'Mailbox';
+$string['crm_inbox_template_all_accounts_o9'] = 'All mailboxes';
+$string['crm_inbox_template_content_o9'] = 'Content';
+$string['crm_inbox_template_enabled_o9'] = 'Enabled';
+$string['crm_inbox_template_sortorder_o9'] = 'Order';
+$string['crm_inbox_template_saved_o9'] = 'Template saved.';
+$string['crm_inbox_template_not_found_o9'] = 'This Inbox template no longer exists.';
+$string['crm_inbox_template_name_required_o9'] = 'Template name is required.';
+$string['crm_inbox_template_body_required_o9'] = 'Template content is required.';
+$string['crm_inbox_quick_reply_choose_o9'] = 'Insert a quick reply…';
+$string['crm_inbox_manage_templates_o9'] = 'Manage templates';
+
+// Commerce 7.95O9.1 / O10 — templates UX and conversation semantics.
+$string['crm_inbox_template_type_help_o91'] = 'A signature is appended automatically to emails. A quick reply is inserted on demand in the composer.';
+$string['crm_inbox_template_name_help_o91'] = 'Internal name visible only in the CRM.';
+$string['crm_inbox_template_account_help_o91'] = 'Choose a specific mailbox or “All mailboxes” to make this content available everywhere.';
+$string['crm_inbox_template_subject_help_o91'] = 'Optional. Mainly used for new messages created from a quick reply.';
+$string['crm_inbox_template_content_help_o91'] = 'Reusable HTML content. Signatures are added automatically; quick replies are inserted manually.';
+$string['crm_inbox_template_sortorder_help_o91'] = 'Lower values are displayed first.';
+$string['crm_inbox_direction_filter_o10'] = 'Last message';
+$string['crm_inbox_direction_received_o10'] = 'Received';
+$string['crm_inbox_direction_sent_o10'] = 'Sent';
+
+// Commerce 7.95O11 — Premium Inbox search and filters.
+$string['crm_inbox_search_help_o11'] = 'Subject, address, name, message content, recipients or attachment filename…';
+$string['crm_inbox_account_filter_o11'] = 'Mailbox';
+$string['crm_inbox_read_state_o11'] = 'Read state';
+$string['crm_inbox_read_state_unread_o11'] = 'Unread';
+$string['crm_inbox_read_state_read_o11'] = 'Read';
+$string['crm_inbox_attachments_filter_o11'] = 'Attachments';
+$string['crm_inbox_attachments_with_o11'] = 'With attachment';
+$string['crm_inbox_attachments_without_o11'] = 'Without attachment';
+$string['crm_inbox_period_filter_o11'] = 'Period';
+$string['crm_inbox_period_7days_o11'] = 'Last 7 days';
+$string['crm_inbox_period_30days_o11'] = 'Last 30 days';
+$string['crm_inbox_period_90days_o11'] = 'Last 90 days';
+$string['crm_inbox_active_filters_o11'] = '{$a} active filter(s)';
+$string['crm_inbox_clear_filters_o11'] = 'Clear all filters';
+
+// Commerce 7.95O12 — bulk actions and productivity.
+$string['crm_inbox_bulk_choose_action_o12'] = 'Choose an action…';
+$string['crm_inbox_bulk_apply_o12'] = 'Apply';
+$string['crm_inbox_bulk_select_all_o12'] = 'Select all';
+$string['crm_inbox_bulk_selected_count_o12'] = '{$a} selected';
+$string['crm_inbox_bulk_archive_o12'] = 'Archive';
+$string['crm_inbox_bulk_trash_o12'] = 'Move to Trash';
+$string['crm_inbox_bulk_trash_confirm_o12'] = 'Move the selected conversations to Trash?';
+$string['crm_inbox_bulk_status_open_o12'] = 'Status: Open';
+$string['crm_inbox_bulk_status_pending_o12'] = 'Status: Pending';
+$string['crm_inbox_bulk_status_resolved_o12'] = 'Status: Resolved';
+$string['crm_inbox_bulk_status_closed_o12'] = 'Status: Closed';
+$string['crm_inbox_bulk_status_spam_o12'] = 'Status: Spam';
+$string['crm_inbox_bulk_priority_low_o12'] = 'Priority: Low';
+$string['crm_inbox_bulk_priority_normal_o12'] = 'Priority: Normal';
+$string['crm_inbox_bulk_priority_high_o12'] = 'Priority: High';
+$string['crm_inbox_bulk_priority_urgent_o12'] = 'Priority: Urgent';
+$string['crm_inbox_bulk_success_o12'] = '{$a} conversation(s) updated.';
+$string['crm_inbox_bulk_partial_o12'] = '{$a->success} conversation(s) updated; {$a->failed} failed.';
+
+// Commerce 7.95O13 — professional mailbox folders.
+$string['crm_inbox_folder_navigation_o13'] = 'Mail folders';
+$string['crm_inbox_folder_inbox_o13'] = 'Inbox';
+$string['crm_inbox_folder_sent_o13'] = 'Sent';
+$string['crm_inbox_folder_drafts_o13'] = 'Drafts';
+$string['crm_inbox_folder_archive_o13'] = 'Archive';
+$string['crm_inbox_folder_trash_o13'] = 'Trash';
+$string['crm_inbox_folder_all_o13'] = 'All';
+$string['crm_inbox_restore_to_inbox_o13'] = 'Restore to Inbox';
+$string['crm_inbox_restored_o13'] = 'Conversation restored to Inbox.';
+
+// Commerce 7.95O14 — Inbox hardening and observability.
+$string['crm_inbox_o14_operational_title'] = 'Operational health';
+$string['crm_inbox_o14_operational_desc'] = 'Monitoring for synchronisation, local integrity and Sent-copy delivery.';
+$string['crm_inbox_o14_last_success'] = 'Last successful synchronisation:';
+$string['crm_inbox_o14_failed_syncs'] = 'Sync failures · 24h';
+$string['crm_inbox_o14_partial_syncs'] = 'Partial syncs · 24h';
+$string['crm_inbox_o14_stale_runs'] = 'Stale sync runs';
+$string['crm_inbox_o14_duplicate_identities'] = 'Duplicate message identities';
+$string['crm_inbox_o14_orphan_remote'] = 'Orphan IMAP references';
+$string['crm_inbox_o14_sentcopy_failures'] = 'Sent-copy failures · 24h';
+$string['crm_inbox_o14_recent_runs'] = 'Recent synchronisation runs';
+$string['crm_inbox_o14_log_counts'] = '{$a->fetched} fetched · {$a->created} created · {$a->errors} error(s)';
+$string['crm_inbox_o14_sync_fresh_ok'] = 'Inbox synchronisation is recent.';
+$string['crm_inbox_o14_sync_fresh_problem'] = 'No recent successful Inbox synchronisation was detected.';
+$string['crm_inbox_o14_integrity_ok'] = 'No structural Inbox inconsistency detected.';
+$string['crm_inbox_o14_integrity_problem'] = 'Inbox data inconsistencies were detected.';
+$string['crm_inbox_o14_sentcopy_ok'] = 'Sent-folder copies are operational.';
+$string['crm_inbox_o14_sentcopy_problem'] = '{$a} Sent-folder copy/copies failed during the last 24 hours.';
+
+// Commerce 7.95O15 — Inbox global UX refactor.
+$string['crm_inbox_o15_nav_label'] = 'CRM Inbox navigation';
+$string['crm_inbox_o15_nav_inbox'] = 'Inbox';
+$string['crm_inbox_o15_nav_compose'] = 'New message';
+$string['crm_inbox_o15_nav_drafts'] = 'Drafts';
+$string['crm_inbox_o15_nav_templates'] = 'Signatures and quick replies';
+$string['crm_inbox_o15_nav_diagnostics'] = 'Diagnostics';
+
+// Commerce 7.95O16.1 — Inbox index UX polish.
+$string['crm_inbox_o16_1_filters_summary'] = 'Search and filters';
+$string['crm_inbox_o16_1_filters_hint'] = 'Show advanced criteria';
+
+// Commerce 7.95O16.2 — index filters and thread UX.
+$string['crm_inbox_o16_2_apply'] = 'Apply';
+$string['crm_inbox_o16_2_period_apply'] = 'Apply period';
+$string['crm_inbox_o16_2_status_label'] = 'Conversation status';
+$string['crm_inbox_o16_2_status_apply'] = 'Update';
+$string['crm_inbox_o16_2_other_actions'] = 'Other actions';
+
+// Commerce 7.95O16.3 — premium recipients and reply UX.
+$string['crm_inbox_o16_3_recipient_placeholder'] = 'Search for a user or enter an email address…';
+$string['crm_inbox_o16_3_edit_subject'] = 'Edit subject';
+
+$string['crm_inbox_period_custom_o16_3_2'] = 'Custom range';
+$string['crm_inbox_period_from_o16_3_2'] = 'From';
+$string['crm_inbox_period_to_o16_3_2'] = 'To';
+$string['crm_inbox_last_sync_o1634'] = 'Last sync: {$a}';
+
+
+// Commerce 7.95O16.3.6 — Inbox diagnostics UX polish.
+$string['crm_inbox_diagnostics_check_imap_extension_ok'] = 'PHP IMAP extension enabled';
+$string['crm_inbox_diagnostics_check_imap_extension_missing'] = 'PHP IMAP extension missing';
+$string['crm_inbox_diagnostics_check_table_available'] = 'Table {$a} available';
+$string['crm_inbox_diagnostics_check_table_missing'] = 'Table {$a} missing';
+$string['crm_inbox_diagnostics_check_account_missing'] = 'No CRM Inbox account is configured';
+$string['crm_inbox_diagnostics_check_account_enabled'] = 'Account enabled';
+$string['crm_inbox_diagnostics_check_account_disabled'] = 'Account disabled';
+$string['crm_inbox_diagnostics_check_credentials_available'] = 'Credentials available';
+$string['crm_inbox_diagnostics_check_credentials_missing'] = 'Credentials missing';
+$string['crm_inbox_diagnostics_check_imap_connection_ok'] = 'IMAP connection successful';
+$string['crm_inbox_diagnostics_check_smtp_connection_ok'] = 'SMTP connection successful';

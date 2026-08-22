@@ -35,7 +35,8 @@ try {
     $summary = (
         new InboxManualSyncService(
             $runtime->accounts,
-            $runtime->sync
+            $runtime->sync,
+            $runtime->discovery
         )
     )->sync_enabled_accounts();
 
@@ -59,6 +60,21 @@ try {
             'created' => (int)$summary['created'],
             'updated' => (int)$summary['updated'],
             'errors' => (int)$summary['errors'],
+        ]
+    );
+
+    $message .= ' ' . get_string(
+        'crm_inbox_o1_refresh_reconciliation',
+        'local_subscriptions',
+        (object)[
+            'checked' =>
+                (int)$summary['reconciled'],
+            'updated' =>
+                (int)$summary['remoteupdated'],
+            'moved' =>
+                (int)$summary['remotemoved'],
+            'missing' =>
+                (int)$summary['remotemissing'],
         ]
     );
 

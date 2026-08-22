@@ -22,7 +22,11 @@ final class InboxDiagnosticsRenderer {
         $output = html_writer::start_div('crm-inbox-diagnostics-dashboard');
         $output .= self::status_banner($success, $errors, $refreshurl, $inboxurl);
         $output .= self::overview($checks, $result['account'] ?? null);
+        $output .= self::folder_sync($result['folderstatus'] ?? []);
         $output .= self::metrics($result['metrics'] ?? []);
+        $output .= self::operational_health(
+            $result['operational'] ?? []
+        );
         $output .= self::technical_checks($checks, $errors);
         $output .= html_writer::end_div();
 
@@ -165,6 +169,142 @@ final class InboxDiagnosticsRenderer {
         );
     }
 
+    private static function folder_sync(
+        array $folders
+    ): string {
+        if ($folders === []) {
+            return '';
+        }
+
+        $rows = '';
+
+        foreach ($folders as $folder) {
+            $enabled = !empty($folder['enabled']);
+            $incrementalat = (int)($folder['incrementalat'] ?? 0);
+            $reconciledat = (int)($folder['reconciledat'] ?? 0);
+
+            $rows .= html_writer::div(
+                html_writer::div(
+                    html_writer::tag(
+                        'strong',
+                        s(
+                            get_string(
+                                'crm_inbox_o1_folder_' .
+                                    (string)$folder['type'],
+                                'local_subscriptions'
+                            )
+                        )
+                    )
+                    . html_writer::span(
+                        s((string)$folder['folder']),
+                        'crm-inbox-o1-folder-path'
+                    ),
+                    'crm-inbox-o1-folder-name'
+                )
+                . html_writer::span(
+                    get_string(
+                        $enabled
+                            ? 'crm_inbox_o1_sync_enabled'
+                            : 'crm_inbox_o1_sync_disabled',
+                        'local_subscriptions'
+                    ),
+                    'crm-inbox-o1-folder-state ' .
+                        ($enabled ? 'is-enabled' : 'is-disabled')
+                )
+                . html_writer::div(
+                    self::sync_time(
+                        get_string(
+                            'crm_inbox_o1_incremental',
+                            'local_subscriptions'
+                        ),
+                        $incrementalat
+                    )
+                    . self::sync_time(
+                        get_string(
+                            'crm_inbox_o1_reconciliation',
+                            'local_subscriptions'
+                        ),
+                        $reconciledat
+                    ),
+                    'crm-inbox-o1-folder-times'
+                )
+                . html_writer::div(
+                    get_string(
+                        'crm_inbox_o1_reconciliation_counts',
+                        'local_subscriptions',
+                        (object)[
+                            'checked' =>
+                                (int)($folder['checked'] ?? 0),
+                            'updated' =>
+                                (int)($folder['updated'] ?? 0),
+                            'moved' =>
+                                (int)($folder['moved'] ?? 0),
+                            'missing' =>
+                                (int)($folder['missing'] ?? 0),
+                        ]
+                    ),
+                    'crm-inbox-o1-folder-counts'
+                ),
+                'crm-inbox-o1-folder-row'
+            );
+        }
+
+        return html_writer::tag(
+            'section',
+            html_writer::tag(
+                'h2',
+                get_string(
+                    'crm_inbox_o1_mailbox_sync_title',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'crm-inbox-diagnostics-section-title',
+                ]
+            )
+            . html_writer::div(
+                get_string(
+                    'crm_inbox_o1_mailbox_sync_description',
+                    'local_subscriptions'
+                ),
+                'crm-inbox-o1-sync-description'
+            )
+            . html_writer::div(
+                $rows,
+                'crm-inbox-o1-folder-grid'
+            ),
+            [
+                'class' =>
+                    'crm-inbox-o1-mailbox-sync',
+            ]
+        );
+    }
+
+    private static function sync_time(
+        string $label,
+        int $timestamp
+    ): string {
+        $value = $timestamp > 0
+            ? userdate(
+                $timestamp,
+                get_string(
+                    'strftimedatetimeshort',
+                    'langconfig'
+                )
+            )
+            : get_string(
+                'crm_inbox_o1_never',
+                'local_subscriptions'
+            );
+
+        return html_writer::span(
+            html_writer::tag('strong', s($label))
+            . ' '
+            . s($value),
+            'crm-inbox-o1-sync-time'
+        );
+    }
+
     private static function metrics(array $metrics): string {
         if ($metrics === []) {
             return '';
@@ -204,6 +344,234 @@ final class InboxDiagnosticsRenderer {
                 ['class' => 'crm-inbox-diagnostics-section-title']
             ) . html_writer::div($cards, 'crm-inbox-diagnostics-metrics-grid'),
             ['class' => 'crm-inbox-diagnostics-metrics']
+        );
+    }
+
+    private static function operational_health(
+        array $operational
+    ): string {
+        if ($operational === []) {
+            return '';
+        }
+
+        $lastsuccess = (int)(
+            $operational['lastsuccessat']
+            ?? 0
+        );
+
+        $cards = '';
+
+        $definitions = [
+            [
+                'value' =>
+                    (int)($operational['failed24h'] ?? 0),
+                'label' =>
+                    'crm_inbox_o14_failed_syncs',
+                'problem' =>
+                    (int)($operational['failed24h'] ?? 0) > 0,
+            ],
+            [
+                'value' =>
+                    (int)($operational['partial24h'] ?? 0),
+                'label' =>
+                    'crm_inbox_o14_partial_syncs',
+                'problem' =>
+                    (int)($operational['partial24h'] ?? 0) > 0,
+            ],
+            [
+                'value' =>
+                    (int)($operational['stalerunning'] ?? 0),
+                'label' =>
+                    'crm_inbox_o14_stale_runs',
+                'problem' =>
+                    (int)($operational['stalerunning'] ?? 0) > 0,
+            ],
+            [
+                'value' =>
+                    (int)($operational['duplicateidentities'] ?? 0),
+                'label' =>
+                    'crm_inbox_o14_duplicate_identities',
+                'problem' =>
+                    (int)($operational['duplicateidentities'] ?? 0) > 0,
+            ],
+            [
+                'value' =>
+                    (int)($operational['orphanremote'] ?? 0),
+                'label' =>
+                    'crm_inbox_o14_orphan_remote',
+                'problem' =>
+                    (int)($operational['orphanremote'] ?? 0) > 0,
+            ],
+            [
+                'value' =>
+                    (int)($operational['sentcopyfailures24h'] ?? 0),
+                'label' =>
+                    'crm_inbox_o14_sentcopy_failures',
+                'problem' =>
+                    (int)($operational['sentcopyfailures24h'] ?? 0) > 0,
+            ],
+        ];
+
+        foreach ($definitions as $definition) {
+            $cards .= html_writer::div(
+                html_writer::tag(
+                    'strong',
+                    (string)$definition['value']
+                )
+                . html_writer::span(
+                    get_string(
+                        $definition['label'],
+                        'local_subscriptions'
+                    )
+                ),
+                'crm-inbox-o14-health-card '
+                . (
+                    $definition['problem']
+                        ? 'is-problem'
+                        : 'is-ok'
+                )
+            );
+        }
+
+        $freshness = $lastsuccess > 0
+            ? userdate(
+                $lastsuccess,
+                get_string(
+                    'strftimedatetimeshort',
+                    'langconfig'
+                )
+            )
+            : get_string(
+                'crm_inbox_o1_never',
+                'local_subscriptions'
+            );
+
+        $summary = html_writer::div(
+            html_writer::span(
+                get_string(
+                    'crm_inbox_o14_last_success',
+                    'local_subscriptions'
+                ),
+                'crm-inbox-o14-last-label'
+            )
+            . html_writer::tag(
+                'strong',
+                s($freshness)
+            ),
+            'crm-inbox-o14-last-success'
+        );
+
+        $logs = '';
+
+        foreach (
+            array_values(
+                $operational['recentlogs']
+                ?? []
+            )
+            as $log
+        ) {
+            $status = trim(
+                (string)$log->status
+            );
+
+            $logs .= html_writer::div(
+                html_writer::span(
+                    s(
+                        (string)(
+                            $log->folder
+                            ?: $log->synctype
+                        )
+                    ),
+                    'crm-inbox-o14-log-folder'
+                )
+                . html_writer::span(
+                    s($status),
+                    'crm-inbox-o14-log-status '
+                    . 'is-' . clean_param(
+                        $status,
+                        PARAM_ALPHANUMEXT
+                    )
+                )
+                . html_writer::span(
+                    userdate(
+                        (int)$log->startedat,
+                        get_string(
+                            'strftimedatetimeshort',
+                            'langconfig'
+                        )
+                    ),
+                    'crm-inbox-o14-log-date'
+                )
+                . html_writer::span(
+                    get_string(
+                        'crm_inbox_o14_log_counts',
+                        'local_subscriptions',
+                        (object)[
+                            'fetched' =>
+                                (int)$log->fetchedcount,
+                            'created' =>
+                                (int)$log->createdcount,
+                            'errors' =>
+                                (int)$log->errorcount,
+                        ]
+                    ),
+                    'crm-inbox-o14-log-counts'
+                ),
+                'crm-inbox-o14-log-row'
+            );
+        }
+
+        return html_writer::tag(
+            'section',
+            html_writer::tag(
+                'h2',
+                get_string(
+                    'crm_inbox_o14_operational_title',
+                    'local_subscriptions'
+                ),
+                [
+                    'class' =>
+                        'crm-inbox-diagnostics-section-title',
+                ]
+            )
+            . html_writer::div(
+                get_string(
+                    'crm_inbox_o14_operational_desc',
+                    'local_subscriptions'
+                ),
+                'crm-inbox-o14-operational-desc'
+            )
+            . $summary
+            . html_writer::div(
+                $cards,
+                'crm-inbox-o14-health-grid'
+            )
+            . (
+                $logs !== ''
+                    ? html_writer::tag(
+                        'details',
+                        html_writer::tag(
+                            'summary',
+                            get_string(
+                                'crm_inbox_o14_recent_runs',
+                                'local_subscriptions'
+                            )
+                        )
+                        . html_writer::div(
+                            $logs,
+                            'crm-inbox-o14-log-list'
+                        ),
+                        [
+                            'class' =>
+                                'crm-inbox-o14-recent-runs',
+                        ]
+                    )
+                    : ''
+            ),
+            [
+                'class' =>
+                    'crm-inbox-o14-operational',
+            ]
         );
     }
 
