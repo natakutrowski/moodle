@@ -124,6 +124,7 @@ final class InboxSectionNavigationRenderer {
                         'crm-inbox-o15-nav-count',
                         [
                             'aria-hidden' => 'true',
+                            'data-inbox-nav-count' => $key,
                         ]
                     )
                     : ''),

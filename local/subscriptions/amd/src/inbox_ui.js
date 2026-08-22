@@ -21,6 +21,15 @@ define([
         threadPreviewLink:
             '[data-inbox-thread-preview]',
 
+        unreadBadge:
+            '.crm-inbox-unread-badge',
+
+        inboxNavUnreadCount:
+            '[data-inbox-nav-count="inbox"]',
+
+        crmNavigationUnreadBadge:
+            '.crm-app-navigation-badge-inbox',
+
         readingPanel:
             '[data-region="inbox-reading-panel"]',
 
@@ -591,6 +600,90 @@ define([
     };
 
     /**
+     * Reflects the server-side read acknowledgement in the visible Inbox.
+     * Folder counters intentionally stay unchanged because they count threads,
+     * while the Inbox navigation badges below count unread inbound messages.
+     *
+     * @param {Number} threadId
+     * @param {Object} payload
+     */
+    var applyPreviewReadState = function(
+        threadId,
+        payload
+    ) {
+        if (!payload || payload.markedread !== true) {
+            return;
+        }
+
+        var card = document.querySelector(
+            SELECTORS.threadCard +
+            '[data-thread-id="' + Number(threadId) + '"]'
+        );
+
+        if (card) {
+            card.classList.remove(
+                'crm-inbox-thread-card-unread'
+            );
+
+            card.dataset.unreadCount = String(
+                Math.max(
+                    0,
+                    Number(payload.threadunreadcount || 0)
+                )
+            );
+
+            var unreadBadge = card.querySelector(
+                SELECTORS.unreadBadge
+            );
+
+            if (unreadBadge) {
+                unreadBadge.remove();
+            }
+        }
+
+        var unreadCount = Math.max(
+            0,
+            Number(payload.unreadcount || 0)
+        );
+
+        document
+            .querySelectorAll(
+                SELECTORS.inboxNavUnreadCount
+            )
+            .forEach(function(element) {
+                element.textContent =
+                    String(unreadCount);
+            });
+
+        document
+            .querySelectorAll(
+                SELECTORS.crmNavigationUnreadBadge
+            )
+            .forEach(function(element) {
+                if (unreadCount <= 0) {
+                    element.remove();
+                    return;
+                }
+
+                element.textContent =
+                    unreadCount > 99
+                        ? '99+'
+                        : String(unreadCount);
+
+                if (payload.unreadlabel) {
+                    element.setAttribute(
+                        'aria-label',
+                        payload.unreadlabel
+                    );
+                    element.setAttribute(
+                        'title',
+                        payload.unreadlabel
+                    );
+                }
+            });
+    };
+
+    /**
      * Updates the current URL without reloading the Inbox.
      *
      * @param {Number} threadId
@@ -757,6 +850,11 @@ define([
 
                 selectThreadCard(
                     threadId
+                );
+
+                applyPreviewReadState(
+                    threadId,
+                    payload
                 );
 
                 if (updateHistory) {

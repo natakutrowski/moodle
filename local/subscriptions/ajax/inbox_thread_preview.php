@@ -11,6 +11,13 @@ use local_subscriptions\crm\inbox\repositories\InboxReadRepository;
 use local_subscriptions\crm\inbox\repositories\InboxTeamRepository;
 use local_subscriptions\crm\inbox\repositories\InboxAccountRepository;
 use local_subscriptions\crm\inbox\services\InboxReadService;
+use local_subscriptions\crm\inbox\services\InboxThreadActionService;
+use local_subscriptions\crm\inbox\services\InboxUnreadCountService;
+use local_subscriptions\crm\inbox\repositories\InboxThreadActionRepository;
+use local_subscriptions\crm\inbox\repositories\InboxRemoteMessageRepository;
+use local_subscriptions\crm\inbox\connectors\imap\OvhImapConnector;
+use local_subscriptions\crm\inbox\connectors\imap\ImapMimeParser;
+use local_subscriptions\crm\inbox\credentials\MoodleConfigInboxCredentialStore;
 use local_subscriptions\subscription_config;
 
 global $USER;
@@ -50,6 +57,49 @@ try {
     $canmanage = AdminSecurity::can(
         Capabilities::MANAGE_INBOX
     );
+
+    $markedread = false;
+
+    /*
+     * O18: selecting an unread conversation for preview is a genuine read
+     * action, just like opening thread.php. Keep IMAP/Roundcube and the CRM
+     * database converged by reusing the canonical thread action service.
+     */
+    if (
+        $canmanage
+        && (int)($thread->unreadcount ?? 0) > 0
+    ) {
+        try {
+            $actions = new InboxThreadActionService(
+                new InboxReadRepository(),
+                new InboxThreadActionRepository(),
+                new InboxAccountRepository(),
+                new OvhImapConnector(
+                    new MoodleConfigInboxCredentialStore(),
+                    new ImapMimeParser()
+                ),
+                new InboxRemoteMessageRepository()
+            );
+
+            $actions->mark_read(
+                $threadid,
+                true
+            );
+
+            $markedread = true;
+            $thread = $service->thread(
+                $threadid
+            );
+        } catch (\Throwable $exception) {
+            debugging(
+                'CRM Inbox preview read acknowledgement failed: ' .
+                $exception->getMessage(),
+                DEBUG_DEVELOPER
+            );
+        }
+    }
+
+    $unreadcount = (new InboxUnreadCountService())->count();
 
     $threadtitle =
         trim(
@@ -97,6 +147,24 @@ try {
 
             'threadurl' =>
                 $threadurl->out(false),
+
+            'markedread' =>
+                $markedread,
+
+            'threadunreadcount' =>
+                (int)($thread->unreadcount ?? 0),
+
+            'unreadcount' =>
+                $unreadcount,
+
+            'unreadlabel' =>
+                $unreadcount > 0
+                    ? get_string(
+                        'crm_nav_inbox_unread_badge_o3',
+                        'local_subscriptions',
+                        $unreadcount
+                    )
+                    : '',
 
             'announcement' =>
                 get_string(
