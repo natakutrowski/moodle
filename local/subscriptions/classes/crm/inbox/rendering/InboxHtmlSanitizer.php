@@ -34,9 +34,16 @@ final class InboxHtmlSanitizer {
             libxml_use_internal_errors(true);
 
         try {
+            $protectedhtml =
+                self::protect_inline_whitespace(
+                    $cleanhtml
+                );
+
             $loaded = $document->loadHTML(
-                '<?xml encoding="UTF-8">' .
-                $cleanhtml,
+                '<meta charset="UTF-8">'
+                . '<div id="crm-inbox-render-root">'
+                . $protectedhtml
+                . '</div>',
                 LIBXML_HTML_NOIMPLIED |
                 LIBXML_HTML_NODEFDTD
             );
@@ -84,6 +91,23 @@ final class InboxHtmlSanitizer {
                 !preg_match(
                     '#^https?://#i',
                     $source
+                )
+            ) {
+                continue;
+            }
+
+            global $CFG;
+
+            $wwwroot = rtrim(
+                (string)$CFG->wwwroot,
+                '/'
+            );
+
+            if (
+                $wwwroot !== ''
+                && str_starts_with(
+                    $source,
+                    $wwwroot . '/'
                 )
             ) {
                 continue;
@@ -148,25 +172,81 @@ final class InboxHtmlSanitizer {
                 );
                 $notice->appendChild($button);
 
-                $firstnode = $document->firstChild;
+                $root = $document->getElementById(
+                    'crm-inbox-render-root'
+                );
 
-                if ($firstnode instanceof \DOMNode) {
-                    $document->insertBefore(
-                        $notice,
-                        $firstnode
-                    );
-                } else {
-                    $document->appendChild($notice);
+                if ($root instanceof \DOMElement) {
+                    $firstnode = $root->firstChild;
+
+                    if ($firstnode instanceof \DOMNode) {
+                        $root->insertBefore(
+                            $notice,
+                            $firstnode
+                        );
+                    } else {
+                        $root->appendChild($notice);
+                    }
                 }
             }
         }
 
 
-        $result = $document->saveHTML();
+        $root = $document->getElementById(
+            'crm-inbox-render-root'
+        );
 
-        return $result !== false
-            ? $result
-            : $cleanhtml;
+        if (!$root) {
+            return $cleanhtml;
+        }
+
+        $result = '';
+
+        foreach ($root->childNodes as $child) {
+            $fragment = $document->saveHTML(
+                $child
+            );
+
+            if ($fragment !== false) {
+                $result .= $fragment;
+            }
+        }
+
+        return self::restore_inline_whitespace(
+            $result
+        );
+    }
+
+    /**
+     * Protect spaces that sit between two inline tags while Moodle/DOM
+     * sanitisation runs. Some email HTML is aggressively normalised and can
+     * otherwise turn "<strong>A</strong> <em>B</em>" into visually glued
+     * words in the CRM preview even though the received email is correct.
+     */
+    private static function protect_inline_whitespace(
+        string $html
+    ): string {
+        return preg_replace_callback(
+            '~(</(?:strong|b|em|i|u|a|span)>)'
+            . '([ \t]+)'
+            . '(<(?:strong|b|em|i|u|a|span)\b)~i',
+            static function (array $match): string {
+                return $match[1]
+                    . 'CRM_INBOX_INLINE_SPACE'
+                    . $match[3];
+            },
+            $html
+        ) ?? $html;
+    }
+
+    private static function restore_inline_whitespace(
+        string $html
+    ): string {
+        return str_replace(
+            'CRM_INBOX_INLINE_SPACE',
+            ' ',
+            $html
+        );
     }
 
     /**

@@ -706,6 +706,8 @@
                 <FIELD NAME="filename" TYPE="char" LENGTH="255" NOTNULL="true" />
                 <FIELD NAME="mimetype" TYPE="char" LENGTH="255" NOTNULL="false" />
                 <FIELD NAME="filesize" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="contentid" TYPE="char" LENGTH="255" NOTNULL="false" />
+                <FIELD NAME="isinline" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
                 <FIELD NAME="contenthash" TYPE="char" LENGTH="64" NOTNULL="false" />
                 <FIELD NAME="fileitemid" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="downloadstatus" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending" />
@@ -758,6 +760,31 @@
             </KEYS>
             <INDEXES>
                 <INDEX NAME="thread_tag_uix" UNIQUE="true" FIELDS="threadid,tagid" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subscriptions_inbox_template" COMMENT="Reusable CRM Inbox signatures and quick replies">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="accountid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="quickreply" />
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="false" />
+                <FIELD NAME="bodytext" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="bodyhtml" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
+                <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="accountid_fk" TYPE="foreign" FIELDS="accountid" REFTABLE="local_subscriptions_inbox_account" REFFIELDS="id" />
+                <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="type_enabled_idx" UNIQUE="false" FIELDS="type,enabled" />
+                <INDEX NAME="account_type_idx" UNIQUE="false" FIELDS="accountid,type" />
             </INDEXES>
         </TABLE>
         <TABLE NAME="local_subscriptions_inbox_sync_log" COMMENT="CRM Inbox synchronisation execution log">

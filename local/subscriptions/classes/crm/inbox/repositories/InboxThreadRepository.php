@@ -74,6 +74,45 @@ final class InboxThreadRepository {
         return $this->find((int)$id);
     }
 
+    public function create_outbound(
+        int $accountid,
+        ?int $contactid,
+        string $subject,
+        string $folder = 'INBOX'
+    ): object {
+        return $this->create(
+            $accountid,
+            $contactid,
+            'crm-outbound-' . bin2hex(
+                random_bytes(12)
+            ),
+            $subject,
+            $folder,
+            time(),
+            false
+        );
+    }
+
+    public function update_draft_metadata(
+        int $threadid,
+        string $subject,
+        int $draftid,
+        int $modifiedat
+    ): void {
+        global $DB;
+
+        $DB->update_record(
+            self::TABLE,
+            (object)[
+                'id' => $threadid,
+                'subject' => $subject,
+                'lastmessageid' => $draftid,
+                'lastmessageat' => $modifiedat,
+                'timemodified' => time(),
+            ]
+        );
+    }
+
     public function update_after_message(
         int $threadid,
         ?int $contactid,
@@ -135,6 +174,47 @@ final class InboxThreadRepository {
         $DB->update_record(
             self::TABLE,
             $record
+        );
+    }
+
+
+    public function set_folder(
+        int $threadid,
+        string $folder
+    ): void {
+        global $DB;
+
+        $DB->update_record(
+            self::TABLE,
+            (object)[
+                'id' => $threadid,
+                'folder' => $folder,
+                'timemodified' => time(),
+            ]
+        );
+    }
+
+    public function refresh_unread_count(
+        int $threadid
+    ): void {
+        global $DB;
+
+        $unread = (int)$DB->count_records(
+            'local_subscriptions_inbox_message',
+            [
+                'threadid' => $threadid,
+                'direction' => 'inbound',
+                'isread' => 0,
+            ]
+        );
+
+        $DB->update_record(
+            self::TABLE,
+            (object)[
+                'id' => $threadid,
+                'unreadcount' => $unread,
+                'timemodified' => time(),
+            ]
         );
     }
 

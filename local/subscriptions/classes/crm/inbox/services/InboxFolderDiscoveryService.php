@@ -54,6 +54,36 @@ final class InboxFolderDiscoveryService {
             $configuration['imap']['folder'] =
                 $resolved['inbox'] ?? 'INBOX';
 
+            if (!isset($configuration['sync'])) {
+                $configuration['sync'] = [];
+            }
+
+            $syncfolders =
+                $configuration['sync']['folders']
+                ?? [];
+
+            if (!is_array($syncfolders)) {
+                $syncfolders = [];
+            }
+
+            foreach (['inbox', 'sent'] as $requiredtype) {
+                if (
+                    !empty($resolved[$requiredtype])
+                    && !in_array(
+                        $requiredtype,
+                        $syncfolders,
+                        true
+                    )
+                ) {
+                    $syncfolders[] = $requiredtype;
+                }
+            }
+
+            $configuration['sync']['folders'] =
+                array_values(
+                    array_unique($syncfolders)
+                );
+
             $this->accounts->update_configuration(
                 $account->id,
                 $configuration

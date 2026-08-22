@@ -10,7 +10,10 @@ final class InboxManualSyncService {
 
     public function __construct(
         private readonly InboxAccountRepository $accounts,
-        private readonly InboxSyncService $sync
+        private readonly InboxSyncService $sync,
+        private readonly InboxFolderDiscoveryService $discovery,
+        private readonly InboxSyncFolderPolicy $folderpolicy =
+            new InboxSyncFolderPolicy()
     ) {
     }
 
@@ -24,13 +27,26 @@ final class InboxManualSyncService {
             'skipped' => 0,
             'errors' => 0,
             'hasmore' => false,
+            'reconciled' => 0,
+            'remoteupdated' => 0,
+            'remotemoved' => 0,
+            'remotemissing' => 0,
         ];
 
         foreach (
             $this->accounts->get_enabled()
-            as $account
+            as $initialaccount
         ) {
             $summary['accountcount']++;
+
+            $this->discovery->discover(
+                $initialaccount,
+                true
+            );
+
+            $account = $this->accounts->find(
+                $initialaccount->id
+            ) ?? $initialaccount;
 
             $batchsize = max(
                 1,
@@ -46,14 +62,9 @@ final class InboxManualSyncService {
             );
 
             $foldertypes =
-                $account->configuration[
-                    'sync'
-                ]['folders']
-                ?? ['inbox'];
-
-            if (!is_array($foldertypes)) {
-                $foldertypes = ['inbox'];
-            }
+                $this->folderpolicy->folder_types(
+                    $account
+                );
 
             $configuredfolders =
                 $account->configuration[
@@ -121,6 +132,26 @@ final class InboxManualSyncService {
 
                 if ($result->hasmore) {
                     $summary['hasmore'] = true;
+                }
+
+                if ($result->errors === 0) {
+                    $reconciliation =
+                        $this->sync->reconcile_folder(
+                            $account,
+                            $folder
+                        );
+
+                    $summary['reconciled'] +=
+                        $reconciliation->checked;
+
+                    $summary['remoteupdated'] +=
+                        $reconciliation->updated;
+
+                    $summary['remotemoved'] +=
+                        $reconciliation->moved;
+
+                    $summary['remotemissing'] +=
+                        $reconciliation->missing;
                 }
             }
         }

@@ -10,6 +10,7 @@ final class InboxReplyRequest {
      * @param string[] $to
      * @param string[] $cc
      * @param string[] $bcc
+     * @param InboxOutboundAttachmentData[] $attachments
      */
     public function __construct(
         public readonly int $accountid,
@@ -22,7 +23,8 @@ final class InboxReplyRequest {
         public readonly ?string $bodyhtml,
         public readonly ?string $inreplyto,
         public readonly array $references,
-        public readonly int $actorid
+        public readonly int $actorid,
+        public readonly array $attachments = []
     ) {
     }
 }

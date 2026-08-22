@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use context;
 use context_system;
 use html_writer;
+use local_subscriptions\crm\inbox\services\InboxUnreadCountService;
 
 /**
  * Renders the persistent CRM application navigation.
@@ -21,7 +22,9 @@ final class CrmNavigationRenderer {
 
     public function __construct(
         private readonly CrmNavigationRegistry $registry =
-            new CrmNavigationRegistry()
+            new CrmNavigationRegistry(),
+        private readonly InboxUnreadCountService $unreadcount =
+            new InboxUnreadCountService()
     ) {
     }
 
@@ -61,6 +64,9 @@ final class CrmNavigationRenderer {
             return '';
         }
 
+        $inboxunread = $this->unreadcount
+            ->count();
+
         $listitems = [];
 
         foreach ($items as $item) {
@@ -68,7 +74,10 @@ final class CrmNavigationRenderer {
                 $this->render_item(
                     $item,
                     $item->key === $effectiveactivekey,
-                    $context
+                    $context,
+                    $item->key === CrmNavigationKeys::INBOX
+                        ? $inboxunread
+                        : 0
                 );
         }
 
@@ -118,12 +127,14 @@ final class CrmNavigationRenderer {
      * @param CrmNavigationItem $item
      * @param bool $isactive
      * @param context|null $context
+     * @param int $badgecount Optional numeric badge value.
      * @return string
      */
     private function render_item(
         CrmNavigationItem $item,
         bool $isactive,
-        ?context $context = null
+        ?context $context = null,
+        int $badgecount = 0
     ): string {
         $attributes = [
             'class' =>
@@ -156,9 +167,33 @@ final class CrmNavigationRenderer {
             'crm-app-navigation-label'
         );
 
+        $badge = '';
+
+        if ($badgecount > 0) {
+            $displaycount = $badgecount > 99
+                ? '99+'
+                : (string)$badgecount;
+
+            $badgelabel = get_string(
+                'crm_nav_inbox_unread_badge_o3',
+                'local_subscriptions',
+                $badgecount
+            );
+
+            $badge = html_writer::span(
+                s($displaycount),
+                'crm-app-navigation-badge ' .
+                    'crm-app-navigation-badge-inbox',
+                [
+                    'aria-label' => $badgelabel,
+                    'title' => $badgelabel,
+                ]
+            );
+        }
+
         $link = html_writer::link(
             $item->url,
-            $icon . $label,
+            $icon . $label . $badge,
             $attributes
         );
 

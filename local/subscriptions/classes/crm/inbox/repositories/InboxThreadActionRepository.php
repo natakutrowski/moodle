@@ -50,20 +50,62 @@ final class InboxThreadActionRepository {
     ): void {
         global $DB;
 
+        /*
+         * Read/unread is an inbound mailbox concept.
+         * Outbound/Sent messages must never inflate the thread unread count.
+         */
         $DB->set_field(
             self::MESSAGE_TABLE,
             'isread',
-            $read ? 1 : 0,
-            ['threadid' => $threadid]
+            1,
+            [
+                'threadid' => $threadid,
+                'direction' => 'inbound',
+            ]
+        );
+
+        if (!$read) {
+            $latest = $DB->get_record_sql(
+                "
+                    SELECT id
+                      FROM {" . self::MESSAGE_TABLE . "}
+                     WHERE threadid = :threadid
+                       AND direction = :direction
+                  ORDER BY
+                        COALESCE(receivedat, sentat, timecreated) DESC,
+                        id DESC
+                ",
+                [
+                    'threadid' => $threadid,
+                    'direction' => 'inbound',
+                ],
+                IGNORE_MULTIPLE
+            );
+
+            if ($latest) {
+                $DB->set_field(
+                    self::MESSAGE_TABLE,
+                    'isread',
+                    0,
+                    ['id' => (int)$latest->id]
+                );
+            }
+        }
+
+        $unread = (int)$DB->count_records(
+            self::MESSAGE_TABLE,
+            [
+                'threadid' => $threadid,
+                'direction' => 'inbound',
+                'isread' => 0,
+            ]
         );
 
         $DB->update_record(
             self::THREAD_TABLE,
             (object)[
                 'id' => $threadid,
-                'unreadcount' => $read
-                    ? 0
-                    : $this->message_count($threadid),
+                'unreadcount' => $unread,
                 'timemodified' => time(),
             ]
         );
@@ -79,6 +121,23 @@ final class InboxThreadActionRepository {
             (object)[
                 'id' => $threadid,
                 'locallydeleted' => 1,
+                'timemodified' => time(),
+            ]
+        );
+    }
+
+    public function set_locally_deleted(
+        int $threadid,
+        bool $deleted
+    ): void {
+        global $DB;
+
+        $DB->update_record(
+            self::THREAD_TABLE,
+            (object)[
+                'id' => $threadid,
+                'locallydeleted' =>
+                    $deleted ? 1 : 0,
                 'timemodified' => time(),
             ]
         );

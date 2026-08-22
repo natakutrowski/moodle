@@ -26,13 +26,26 @@ final class InboxThreadPreviewRenderer {
     ): string {
         $threadid = (int)$thread->id;
 
-        $threadurl = new moodle_url(
-            subscription_config::
-                admin_inbox_thread_page(),
-            [
-                'id' => $threadid,
-            ]
-        );
+        $isdraft =
+            InboxThreadRenderer::thread_has_draft(
+                $thread
+            );
+
+        $threadurl = $isdraft
+            ? new moodle_url(
+                subscription_config::
+                    admin_inbox_compose_page(),
+                [
+                    'threadid' => $threadid,
+                ]
+            )
+            : new moodle_url(
+                subscription_config::
+                    admin_inbox_thread_page(),
+                [
+                    'id' => $threadid,
+                ]
+            );
 
         $out = html_writer::start_tag(
             'div',
@@ -152,10 +165,17 @@ final class InboxThreadPreviewRenderer {
 
         $out .= html_writer::link(
             $threadurl,
-            get_string(
-                'crm_inbox_preview_open_full',
-                'local_subscriptions'
-            ),
+            InboxThreadRenderer::thread_has_draft(
+                $thread
+            )
+                ? get_string(
+                    'crm_inbox_resume_draft_o7',
+                    'local_subscriptions'
+                )
+                : get_string(
+                    'crm_inbox_preview_open_full',
+                    'local_subscriptions'
+                ),
             [
                 'class' =>
                     'btn btn-sm ' .
@@ -177,21 +197,40 @@ final class InboxThreadPreviewRenderer {
     private static function render_management_link(
         object $thread
     ): string {
-        $threadurl = new moodle_url(
-            subscription_config::
-                admin_inbox_thread_page(),
-            [
-                'id' => (int)$thread->id,
-            ]
-        );
+        $isdraft =
+            InboxThreadRenderer::thread_has_draft(
+                $thread
+            );
+
+        $threadurl = $isdraft
+            ? new moodle_url(
+                subscription_config::
+                    admin_inbox_compose_page(),
+                [
+                    'threadid' =>
+                        (int)$thread->id,
+                ]
+            )
+            : new moodle_url(
+                subscription_config::
+                    admin_inbox_thread_page(),
+                [
+                    'id' => (int)$thread->id,
+                ]
+            );
 
         return html_writer::div(
             html_writer::link(
                 $threadurl,
-                get_string(
-                    'crm_inbox_preview_manage',
-                    'local_subscriptions'
-                ),
+                $isdraft
+                    ? get_string(
+                        'crm_inbox_resume_draft_o7',
+                        'local_subscriptions'
+                    )
+                    : get_string(
+                        'crm_inbox_preview_manage',
+                        'local_subscriptions'
+                    ),
                 [
                     'class' =>
                         'btn btn-primary w-100',

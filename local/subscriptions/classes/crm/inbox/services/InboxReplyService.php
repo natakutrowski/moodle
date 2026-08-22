@@ -11,6 +11,8 @@ use local_subscriptions\crm\inbox\repositories\InboxAccountRepository;
 use local_subscriptions\crm\inbox\repositories\InboxDraftRepository;
 use local_subscriptions\crm\inbox\repositories\InboxReadRepository;
 use local_subscriptions\crm\inbox\repositories\InboxThreadRepository;
+use local_subscriptions\crm\inbox\repositories\InboxParticipantRepository;
+use local_subscriptions\crm\inbox\dto\InboxParticipantData;
 
 final class InboxReplyService {
 
@@ -20,7 +22,10 @@ final class InboxReplyService {
         private readonly InboxDraftRepository $drafts,
         private readonly InboxThreadRepository $threads,
         private readonly InboxOutboundConnectorInterface $connector,
-        private readonly ?InboxAdminEventLogger $events = null
+        private readonly ?InboxAdminEventLogger $events = null,
+        private readonly ?InboxReplyAttachmentService $replyattachments = null,
+        private readonly ?InboxParticipantRepository $participants = null,
+        private readonly ?InboxRecipientService $recipients = null
     ) {
     }
 
@@ -28,7 +33,15 @@ final class InboxReplyService {
         int $threadid,
         string $subject,
         string $body,
-        int $actorid
+        int $actorid,
+        array $uploads = [],
+        array $removeattachmentids = [],
+        string $bodyhtml = '',
+        array $inlineuploads = [],
+        array $inlinecids = [],
+        array $to = [],
+        array $cc = [],
+        array $bcc = []
     ): object {
         $thread = $this->read->get_thread(
             $threadid
@@ -41,21 +54,73 @@ final class InboxReplyService {
             );
         }
 
-        return $this->drafts->save(
+        $htmlservice =
+            new InboxReplyHtmlService();
+
+        $safehtml = $htmlservice->sanitize(
+            $bodyhtml
+        );
+
+        $bodytext = $safehtml !== ''
+            ? $htmlservice->text_version(
+                $safehtml
+            )
+            : trim($body);
+
+        $draft = $this->drafts->save(
             (int)$thread->accountid,
             $threadid,
             clean_param($subject, PARAM_TEXT),
-            trim($body),
-            null,
+            $bodytext,
+            $safehtml !== ''
+                ? $safehtml
+                : null,
             $actorid
         );
+
+        $this->reply_attachment_service()
+            ->apply(
+                (int)$draft->id,
+                $uploads,
+                $removeattachmentids
+            );
+
+        $this->reply_attachment_service()
+            ->apply_inline_images(
+                (int)$draft->id,
+                $safehtml,
+                $inlineuploads,
+                $inlinecids
+            );
+
+        $envelope = $this->recipient_service()
+            ->normalize(
+                $to,
+                $cc,
+                $bcc
+            );
+
+        $this->drafts->save_envelope(
+            (int)$draft->id,
+            $envelope
+        );
+
+        return $draft;
     }
 
     public function send(
         int $threadid,
         string $subject,
         string $body,
-        int $actorid
+        int $actorid,
+        array $uploads = [],
+        array $removeattachmentids = [],
+        string $bodyhtml = '',
+        array $inlineuploads = [],
+        array $inlinecids = [],
+        array $to = [],
+        array $cc = [],
+        array $bcc = []
     ): void {
         $thread = $this->read->get_thread(
             $threadid
@@ -68,14 +133,23 @@ final class InboxReplyService {
             );
         }
 
-        $recipient = trim(
+        $defaultrecipient = trim(
             (string)$thread->contactemail
         );
 
-        if (
-            $recipient === '' ||
-            !validate_email($recipient)
-        ) {
+        if ($to === [] && $defaultrecipient !== '') {
+            $to = [$defaultrecipient];
+        }
+
+        $recipientset =
+            $this->recipient_service()
+                ->normalize(
+                    $to,
+                    $cc,
+                    $bcc
+                );
+
+        if ($recipientset['to'] === []) {
             throw new \moodle_exception(
                 'crm_inbox_invalid_recipient',
                 'local_subscriptions'
@@ -93,14 +167,55 @@ final class InboxReplyService {
             );
         }
 
+        $htmlservice =
+            new InboxReplyHtmlService();
+
+        $safehtml = $htmlservice->sanitize(
+            $bodyhtml
+        );
+
+        $bodytext = $safehtml !== ''
+            ? $htmlservice->text_version(
+                $safehtml
+            )
+            : trim($body);
+
         $draft = $this->drafts->save(
             $account->id,
             $threadid,
             clean_param($subject, PARAM_TEXT),
-            trim($body),
-            null,
+            $bodytext,
+            $safehtml !== ''
+                ? $safehtml
+                : null,
             $actorid
         );
+
+        $this->reply_attachment_service()
+            ->apply(
+                (int)$draft->id,
+                $uploads,
+                $removeattachmentids
+            );
+
+        $this->reply_attachment_service()
+            ->apply_inline_images(
+                (int)$draft->id,
+                $safehtml,
+                $inlineuploads,
+                $inlinecids
+            );
+
+        $this->reply_attachment_service()
+            ->assert_ready_for_send(
+                (int)$draft->id
+            );
+
+        $attachments =
+            $this->reply_attachment_service()
+                ->outbound_attachments(
+                    (int)$draft->id
+                );
 
         $this->drafts->mark_sending(
             (int)$draft->id
@@ -144,17 +259,20 @@ final class InboxReplyService {
         $request = new InboxReplyRequest(
             $account->id,
             $threadid,
-            [$recipient],
-            [],
-            [],
+            $recipientset['to'],
+            $recipientset['cc'],
+            $recipientset['bcc'],
             clean_param($subject, PARAM_TEXT),
-            trim($body),
-            null,
+            $bodytext,
+            $safehtml !== ''
+                ? $safehtml
+                : null,
             $lastremote
                 ? $lastremote->providermessageid
                 : null,
             array_values(array_unique($references)),
-            $actorid
+            $actorid,
+            $attachments
         );
 
         $result = $this->connector->send(
@@ -184,6 +302,18 @@ final class InboxReplyService {
             $result->sentat ?? time()
         );
 
+        $this->drafts->record_sent_copy_result(
+            (int)$draft->id,
+            $result->sentfolder,
+            $result->sentcopyerror
+        );
+
+        $this->persist_outbound_participants(
+            (int)$draft->id,
+            $account->email,
+            $recipientset
+        );
+
         $this->threads->update_after_message(
             $threadid,
             !empty($thread->contactid)
@@ -201,6 +331,53 @@ final class InboxReplyService {
             $threadid,
             (int)$draft->id
         );        
+    }
+
+    private function persist_outbound_participants(
+        int $messageid,
+        string $from,
+        array $recipients
+    ): void {
+        $repository = $this->participants
+            ?? new InboxParticipantRepository();
+
+        $values = [
+            'from' => [$from],
+            'to' => $recipients['to'] ?? [],
+            'cc' => $recipients['cc'] ?? [],
+            'bcc' => $recipients['bcc'] ?? [],
+        ];
+
+        foreach ($values as $type => $emails) {
+            foreach ($emails as $email) {
+                $normalized =
+                    \core_text::strtolower(
+                        trim((string)$email)
+                    );
+
+                $repository->create(
+                    $messageid,
+                    null,
+                    new InboxParticipantData(
+                        $type,
+                        (string)$email,
+                        $normalized
+                    )
+                );
+            }
+        }
+    }
+
+    private function recipient_service():
+        InboxRecipientService {
+        return $this->recipients
+            ?? new InboxRecipientService();
+    }
+
+    private function reply_attachment_service():
+        InboxReplyAttachmentService {
+        return $this->replyattachments
+            ?? new InboxReplyAttachmentService();
     }
 
     private function event_logger():

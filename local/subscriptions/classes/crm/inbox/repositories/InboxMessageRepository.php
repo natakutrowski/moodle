@@ -5,6 +5,7 @@ namespace local_subscriptions\crm\inbox\repositories;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\crm\inbox\dto\InboxMessageData;
+use local_subscriptions\crm\inbox\dto\InboxRemoteMessageState;
 
 final class InboxMessageRepository {
 
@@ -106,6 +107,81 @@ final class InboxMessageRepository {
         );
 
         return $this->find((int)$id);
+    }
+
+
+    public function update_remote_state(
+        int $messageid,
+        InboxRemoteMessageState $state
+    ): bool {
+        global $DB;
+
+        $current = $this->find($messageid);
+
+        if (!$current) {
+            return false;
+        }
+
+        $providerkey = $state->provider_key();
+        $changed =
+            (string)$current->folder !== $state->folder
+            || (string)$current->uidvalidity !== $state->uidvalidity
+            || (string)$current->provideruid !== $state->provideruid
+            || (string)$current->providerkey !== $providerkey
+            || (int)$current->isread !== ($state->isread ? 1 : 0);
+
+        if (!$changed) {
+            return false;
+        }
+
+        $DB->update_record(
+            self::TABLE,
+            (object)[
+                'id' => $messageid,
+                'folder' => $state->folder,
+                'uidvalidity' => $state->uidvalidity,
+                'provideruid' => $state->provideruid,
+                'providerkey' => $providerkey,
+                'isread' => $state->isread ? 1 : 0,
+                'timemodified' => time(),
+            ]
+        );
+
+        return true;
+    }
+
+    public function set_read_state(
+        int $messageid,
+        bool $read
+    ): bool {
+        global $DB;
+
+        $current = $DB->get_field(
+            self::TABLE,
+            'isread',
+            ['id' => $messageid]
+        );
+
+        if ($current === false) {
+            return false;
+        }
+
+        $wanted = $read ? 1 : 0;
+
+        if ((int)$current === $wanted) {
+            return false;
+        }
+
+        $DB->update_record(
+            self::TABLE,
+            (object)[
+                'id' => $messageid,
+                'isread' => $wanted,
+                'timemodified' => time(),
+            ]
+        );
+
+        return true;
     }
 
     public static function provider_key(

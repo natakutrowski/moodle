@@ -9,6 +9,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\inbox\rendering\InboxThreadPreviewRenderer;
 use local_subscriptions\crm\inbox\repositories\InboxReadRepository;
 use local_subscriptions\crm\inbox\repositories\InboxTeamRepository;
+use local_subscriptions\crm\inbox\repositories\InboxAccountRepository;
 use local_subscriptions\crm\inbox\services\InboxReadService;
 use local_subscriptions\subscription_config;
 
@@ -38,7 +39,8 @@ try {
 
     $service = new InboxReadService(
         new InboxReadRepository(),
-        new InboxTeamRepository()
+        new InboxTeamRepository(),
+        new InboxAccountRepository()
     );
 
     $thread = $service->thread(

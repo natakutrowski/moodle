@@ -55,7 +55,8 @@ final class InboxThreadWorkspaceRenderer {
                 'class' =>
                     'crm-workspace ' .
                     'crm-workspace-inbox-thread ' .
-                    'local-subscriptions-inbox-thread-workspace',
+                    'local-subscriptions-inbox-thread-workspace ' .
+                    'crm-inbox-o15-thread-workspace',
 
                 'aria-label' => get_string(
                     'crm_inbox_thread_region_label',

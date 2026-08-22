@@ -27,11 +27,25 @@ final class InboxAccountService {
     public function configure_ovh_support_account(
         bool $enabled = false
     ): InboxAccount {
-        return $this->repository->upsert(
+        return $this->configure_ovh_account(
             'CampusFR Support',
             'support@campusfr.fr',
-            'imap_smtp',
             'support_ovh',
+            $enabled
+        );
+    }
+
+    public function configure_ovh_account(
+        string $name,
+        string $email,
+        string $credentialkey,
+        bool $enabled = false
+    ): InboxAccount {
+        return $this->repository->upsert(
+            $name,
+            $email,
+            'imap_smtp',
+            $credentialkey,
             [
                 'imap' => [
                     'host' => 'ssl0.ovh.net',
@@ -48,9 +62,9 @@ final class InboxAccountService {
                 'folders' => [
                     'inbox' => 'INBOX',
                     'archive' => '',
-                    'trash' => 'INBOX.Trash',
-                    'sent' => 'INBOX.Sent',
-                    'drafts' => 'INBOX.Drafts',
+                    'trash' => '',
+                    'sent' => '',
+                    'drafts' => '',
                 ],
                 'sync' => [
                     'batchsize' => 50,

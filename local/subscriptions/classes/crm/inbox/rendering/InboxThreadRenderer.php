@@ -630,72 +630,197 @@ final class InboxThreadRenderer {
         object $thread
     ): string {
         $threadid = (int)$thread->id;
+        $currentstatus =
+            (string)$thread->status;
 
-        $out = html_writer::start_tag(
-            'div',
+        $statusoptions = [];
+
+        foreach (
             [
-                'class' =>
-                    'crm-inbox-thread-actions ' .
-                    'd-grid gap-2 mt-3',
-
-                'role' => 'group',
-
-                'aria-label' => get_string(
-                    'crm_inbox_thread_actions_label',
-                    'local_subscriptions'
-                ),
+                'open',
+                'pending',
+                'resolved',
+                'closed',
             ]
-        );
-
-        foreach ([
-            'open',
-            'pending',
-            'resolved',
-            'closed',
-        ] as $status) {
-            if (
-                (string)$thread->status ===
-                $status
-            ) {
-                continue;
-            }
-
-            $out .= self::action_form(
-                $threadid,
-                'status',
+            as $status
+        ) {
+            $statusoptions[$status] =
                 get_string(
                     'crm_inbox_status_' . $status,
                     'local_subscriptions'
-                ),
-                'btn btn-sm btn-outline-secondary',
-                $status
-            );
+                );
         }
 
-        $out .= self::action_form(
-            $threadid,
-            'archive',
-            get_string(
-                'crm_inbox_archive',
-                'local_subscriptions'
-            ),
-            'btn btn-sm btn-outline-secondary'
+        $statusform = html_writer::start_tag(
+            'form',
+            [
+                'method' => 'post',
+                'action' =>
+                    subscription_config::
+                        admin_inbox_action_page(),
+                'class' =>
+                    'crm-inbox-thread-status-form',
+                'data-inbox-busy-form' => '1',
+                'data-busy-announcement' =>
+                    get_string(
+                        'crm_inbox_action_processing',
+                        'local_subscriptions'
+                    ),
+            ]
         );
 
-        $out .= self::action_form(
-            $threadid,
-            'trash',
+        foreach (
+            [
+                'sesskey' => sesskey(),
+                'id' => $threadid,
+                'action' => 'status',
+            ]
+            as $name => $fieldvalue
+        ) {
+            $statusform .=
+                html_writer::empty_tag(
+                    'input',
+                    [
+                        'type' => 'hidden',
+                        'name' => $name,
+                        'value' => $fieldvalue,
+                    ]
+                );
+        }
+
+        $statusform .= html_writer::label(
             get_string(
-                'crm_inbox_move_to_trash',
+                'crm_inbox_o16_2_status_label',
                 'local_subscriptions'
             ),
-            'btn btn-sm btn-outline-danger',
-            null,
-            get_string(
-                'crm_inbox_trash_confirm',
-                'local_subscriptions'
-            )
+            'crm-inbox-thread-status-' . $threadid,
+            false,
+            [
+                'class' =>
+                    'crm-inbox-thread-status-label',
+            ]
         );
+
+        $statusform .= html_writer::div(
+            html_writer::select(
+                $statusoptions,
+                'value',
+                $currentstatus,
+                false,
+                [
+                    'id' =>
+                        'crm-inbox-thread-status-'
+                        . $threadid,
+                    'class' =>
+                        'form-select form-select-sm',
+                ]
+            )
+            . html_writer::tag(
+                'button',
+                html_writer::tag(
+                    'i',
+                    '',
+                    [
+                        'class' =>
+                            'fa fa-check me-1',
+                        'aria-hidden' => 'true',
+                    ]
+                )
+                . html_writer::span(
+                    get_string(
+                        'crm_inbox_o16_2_status_apply',
+                        'local_subscriptions'
+                    )
+                ),
+                [
+                    'type' => 'submit',
+                    'class' =>
+                        'btn btn-sm btn-primary',
+                    'data-loading-label' =>
+                        get_string(
+                            'crm_inbox_processing',
+                            'local_subscriptions'
+                        ),
+                ]
+            ),
+            'crm-inbox-thread-status-controls'
+        );
+
+        $statusform .= html_writer::end_tag(
+            'form'
+        );
+
+        $utilities = '';
+
+        if (!empty($thread->locallydeleted)) {
+            $utilities .= self::action_form(
+                $threadid,
+                'restore',
+                html_writer::tag(
+                    'i',
+                    '',
+                    [
+                        'class' =>
+                            'fa fa-undo me-1',
+                        'aria-hidden' => 'true',
+                    ]
+                )
+                . html_writer::span(
+                    get_string(
+                        'crm_inbox_restore_to_inbox_o13',
+                        'local_subscriptions'
+                    )
+                ),
+                'btn btn-sm btn-outline-primary'
+            );
+        } else {
+            $utilities .= self::action_form(
+                $threadid,
+                'archive',
+                html_writer::tag(
+                    'i',
+                    '',
+                    [
+                        'class' =>
+                            'fa fa-archive me-1',
+                        'aria-hidden' => 'true',
+                    ]
+                )
+                . html_writer::span(
+                    get_string(
+                        'crm_inbox_archive',
+                        'local_subscriptions'
+                    )
+                ),
+                'btn btn-sm btn-outline-secondary'
+            );
+
+            $utilities .= self::action_form(
+                $threadid,
+                'trash',
+                html_writer::tag(
+                    'i',
+                    '',
+                    [
+                        'class' =>
+                            'fa fa-trash me-1',
+                        'aria-hidden' => 'true',
+                    ]
+                )
+                . html_writer::span(
+                    get_string(
+                        'crm_inbox_move_to_trash',
+                        'local_subscriptions'
+                    )
+                ),
+                'btn btn-sm btn-outline-danger',
+                null,
+                get_string(
+                    'crm_inbox_trash_confirm',
+                    'local_subscriptions'
+                )
+            );
+        }
 
         if (
             \local_subscriptions\admin\AdminSecurity::can(
@@ -706,9 +831,7 @@ final class InboxThreadRenderer {
             $params = [
                 'source' =>
                     \local_subscriptions\crm\work\domain\WorkItemSource::INBOX,
-
-                'threadid' =>
-                    (int)$thread->id,
+                'threadid' => $threadid,
             ];
 
             if (!empty($thread->matcheduserid)) {
@@ -716,28 +839,65 @@ final class InboxThreadRenderer {
                     (int)$thread->matcheduserid;
             }
 
-            $out .= html_writer::link(
+            $utilities .= html_writer::link(
                 new moodle_url(
                     subscription_config::
                         admin_work_item_create_page(),
                     $params
                 ),
-                get_string(
-                    'crm_work_create_from_thread',
-                    'local_subscriptions'
+                html_writer::tag(
+                    'i',
+                    '',
+                    [
+                        'class' =>
+                            'fa fa-tasks me-1',
+                        'aria-hidden' => 'true',
+                    ]
+                )
+                . html_writer::span(
+                    get_string(
+                        'crm_work_create_from_thread',
+                        'local_subscriptions'
+                    )
                 ),
                 [
                     'class' =>
-                        'btn btn-sm btn-outline-primary',
+                        'btn btn-sm '
+                        . 'btn-outline-primary',
                 ]
             );
         }
 
-        $out .= html_writer::end_tag(
-            'div'
+        return html_writer::div(
+            $statusform
+            . (
+                $utilities !== ''
+                    ? html_writer::div(
+                        html_writer::div(
+                            get_string(
+                                'crm_inbox_o16_2_other_actions',
+                                'local_subscriptions'
+                            ),
+                            'crm-inbox-thread-utility-label'
+                        )
+                        . html_writer::div(
+                            $utilities,
+                            'crm-inbox-thread-utility-actions'
+                        ),
+                        'crm-inbox-thread-utilities'
+                    )
+                    : ''
+            ),
+            'crm-inbox-thread-actions '
+            . 'crm-inbox-thread-actions-o16 mt-3',
+            [
+                'role' => 'group',
+                'aria-label' => get_string(
+                    'crm_inbox_thread_actions_label',
+                    'local_subscriptions'
+                ),
+            ]
         );
-
-        return $out;
     }
 
     /**
@@ -846,6 +1006,49 @@ final class InboxThreadRenderer {
             return '';
         }
 
+        if (self::thread_has_draft($thread)) {
+            $drafturl = strtoupper(
+                trim((string)($thread->folder ?? ''))
+            ) === 'DRAFTS'
+                ? new moodle_url(
+                    subscription_config::admin_inbox_compose_page(),
+                    ['threadid' => (int)$thread->id]
+                )
+                : new moodle_url(
+                    subscription_config::admin_inbox_reply_page(),
+                    [
+                        'threadid' => (int)$thread->id,
+                        'mode' => 'reply',
+                    ]
+                );
+
+            return html_writer::div(
+                html_writer::link(
+                    $drafturl,
+                    html_writer::tag(
+                        'i',
+                        '',
+                        [
+                            'class' =>
+                                'fa fa-pencil me-1',
+                            'aria-hidden' => 'true',
+                        ]
+                    )
+                    . html_writer::span(
+                        get_string(
+                            'crm_inbox_resume_draft_o7',
+                            'local_subscriptions'
+                        )
+                    ),
+                    [
+                        'class' =>
+                            'btn btn-primary',
+                    ]
+                ),
+                'crm-inbox-thread-reply-panel'
+            );
+        }
+
         return html_writer::div(
             html_writer::link(
                 new moodle_url(
@@ -856,9 +1059,20 @@ final class InboxThreadRenderer {
                             (int)$thread->id,
                     ]
                 ),
-                get_string(
-                    'crm_inbox_reply',
-                    'local_subscriptions'
+                html_writer::tag(
+                    'i',
+                    '',
+                    [
+                        'class' =>
+                            'fa fa-reply me-1',
+                        'aria-hidden' => 'true',
+                    ]
+                )
+                . html_writer::span(
+                    get_string(
+                        'crm_inbox_reply',
+                        'local_subscriptions'
+                    )
                 ),
                 [
                     'class' =>
@@ -909,19 +1123,29 @@ final class InboxThreadRenderer {
             ]
         );
 
-        $out .= html_writer::span(
-            get_string(
-                'crm_inbox_direction_' .
-                    $message->direction,
-                'local_subscriptions'
-            ),
-            'badge me-2 ' .
-            (
-                $direction === 'outbound'
-                    ? 'bg-primary'
-                    : 'bg-secondary'
-            )
-        );
+        if ($message->status === 'draft') {
+            $out .= html_writer::span(
+                get_string(
+                    'crm_inbox_message_status_draft',
+                    'local_subscriptions'
+                ),
+                'badge bg-warning text-dark me-2'
+            );
+        } else {
+            $out .= html_writer::span(
+                get_string(
+                    'crm_inbox_direction_' .
+                        $message->direction,
+                    'local_subscriptions'
+                ),
+                'badge me-2 ' .
+                (
+                    $direction === 'outbound'
+                        ? 'bg-primary'
+                        : 'bg-secondary'
+                )
+            );
+        }
 
         $date = self::message_timestamp(
             $message
@@ -935,13 +1159,16 @@ final class InboxThreadRenderer {
             )
         );
 
-        if ($message->status === 'draft') {
+        if (
+            $direction === 'inbound'
+            && empty($message->isread)
+        ) {
             $out .= html_writer::span(
                 get_string(
-                    'crm_inbox_message_status_draft',
+                    'crm_inbox_unread_o2',
                     'local_subscriptions'
                 ),
-                'badge bg-warning text-dark ms-2'
+                'badge crm-inbox-message-unread-badge ms-2'
             );
         }
 
@@ -959,8 +1186,14 @@ final class InboxThreadRenderer {
         ) {
             $sanitizer = new InboxHtmlSanitizer();
 
+            $bodyhtml =
+                self::resolve_inline_images(
+                    (string)$message->bodyhtml,
+                    $message->attachments ?? []
+                );
+
             $safehtml = $sanitizer->sanitize(
-                (string)$message->bodyhtml,
+                $bodyhtml,
                 $allowremoteimages
             );
 
@@ -1012,6 +1245,10 @@ final class InboxThreadRenderer {
                 $message->attachments
                 as $attachment
             ) {
+                if (!empty($attachment->isinline)) {
+                    continue;
+                }
+
                 if (
                     $attachment->downloadstatus === 'stored' &&
                     !empty($attachment->fileitemid)
@@ -1022,7 +1259,25 @@ final class InboxThreadRenderer {
                                 (int)$attachment->fileitemid,
                                 (string)$attachment->filename
                             ),
-                        s((string)$attachment->filename),
+                        html_writer::tag(
+                            'i',
+                            '',
+                            [
+                                'class' =>
+                                    'fa fa-paperclip me-1',
+                                'aria-hidden' => 'true',
+                            ]
+                        )
+                        . html_writer::span(
+                            s((string)$attachment->filename),
+                            'crm-inbox-attachment-name'
+                        )
+                        . html_writer::span(
+                            display_size(
+                                (int)$attachment->filesize
+                            ),
+                            'crm-inbox-attachment-size'
+                        ),
                         [
                             'class' =>
                                 'btn btn-sm btn-outline-secondary ' .
@@ -1078,6 +1333,77 @@ final class InboxThreadRenderer {
         );
 
         return $out;
+    }
+
+    private static function resolve_inline_images(
+        string $html,
+        array $attachments
+    ): string {
+        foreach ($attachments as $attachment) {
+            if (
+                empty($attachment->isinline)
+                || empty($attachment->contentid)
+                || (string)$attachment->downloadstatus !== 'stored'
+                || empty($attachment->fileitemid)
+            ) {
+                continue;
+            }
+
+            $cid = trim(
+                (string)$attachment->contentid,
+                "<> \t\n\r\0\x0B"
+            );
+
+            if ($cid === '') {
+                continue;
+            }
+
+            $url = subscription_config::
+                inbox_attachment_url(
+                    (int)$attachment->fileitemid,
+                    (string)$attachment->filename
+                )->out(false);
+
+            $html = preg_replace(
+                '~(["\'])cid:' .
+                    preg_quote($cid, '~') .
+                    '\\1~i',
+                '"' . s($url) . '"',
+                $html
+            ) ?? $html;
+        }
+
+        return $html;
+    }
+
+    public static function thread_has_draft(
+        object $thread
+    ): bool {
+        if (
+            strtoupper(
+                trim(
+                    (string)($thread->folder ?? '')
+                )
+            ) === 'DRAFTS'
+        ) {
+            return true;
+        }
+
+        foreach (
+            array_values(
+                $thread->messages ?? []
+            )
+            as $message
+        ) {
+            if (
+                (string)($message->status ?? '') ===
+                    'draft'
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static function message_timestamp(

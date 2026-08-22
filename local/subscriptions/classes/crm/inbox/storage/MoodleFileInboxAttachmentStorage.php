@@ -37,15 +37,9 @@ final class MoodleFileInboxAttachmentStorage implements
             $filename = 'attachment';
         }
 
-        $mimetype = clean_param(
-            $mimetype,
-            PARAM_MIMETYPE
+        $mimetype = self::normalize_mimetype(
+            $mimetype
         );
-
-        if ($mimetype === '') {
-            $mimetype =
-                'application/octet-stream';
-        }
 
         $context =
             context_system::instance();
@@ -95,6 +89,26 @@ final class MoodleFileInboxAttachmentStorage implements
                 );
 
         return (int)$file->get_itemid();
+    }
+
+    private static function normalize_mimetype(
+        string $mimetype
+    ): string {
+        $mimetype = strtolower(
+            trim($mimetype)
+        );
+
+        if (
+            $mimetype === ''
+            || !preg_match(
+                '~^[a-z0-9][a-z0-9!#$&^_.+\-]*/[a-z0-9][a-z0-9!#$&^_.+\-]*$~i',
+                $mimetype
+            )
+        ) {
+            return 'application/octet-stream';
+        }
+
+        return $mimetype;
     }
 
     public function delete(

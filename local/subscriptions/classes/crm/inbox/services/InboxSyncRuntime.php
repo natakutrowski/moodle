@@ -10,7 +10,8 @@ final class InboxSyncRuntime {
 
     public function __construct(
         public readonly InboxAccountRepository $accounts,
-        public readonly InboxSyncService $sync
+        public readonly InboxSyncService $sync,
+        public readonly InboxFolderDiscoveryService $discovery
     ) {
     }
 }
