@@ -1308,6 +1308,9 @@ final class InboxRenderer {
                 'data-thread-id' =>
                     $threadid,
 
+                'data-unread-count' =>
+                    (int)($thread->unreadcount ?? 0),
+
                 'data-preview-url' =>
                     $previewurl->out(false),
             ]
