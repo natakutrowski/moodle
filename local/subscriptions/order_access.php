@@ -23,6 +23,55 @@ if (!in_array($version, ['desktop', 'mobile'], true)) {
 }
 $service = CommerceOrderPresentationService::create();
 
+/*
+ * Email delivery links must remain usable after the checkout browser session
+ * has expired. For Native digital grants, reference + grant identify the
+ * persisted access record and the opaque download token remains server-side.
+ * The canonical download resolver still enforces status, validity windows and
+ * download limits before any file is served. Course access and every other
+ * order presentation continue to require the authenticated/guest owner flow.
+ */
+$servedigital = static function(\stdClass $record) use (
+    $DB,
+    $grantreference,
+    $reference,
+    $version
+): void {
+    $resolver = new CommerceNativeDigitalDownloadResolver($DB);
+    $download = $resolver->resolve((string)$record->downloadtoken, time(), $version);
+    $downloadedat = time();
+    $resolver->register_download($download['access'], $downloadedat);
+    $eventdata = [
+        'context' => \context_system::instance(),
+        'objectid' => (int)$record->id,
+        'other' => [
+            'variant' => $version,
+            'grantreference' => $grantreference,
+            'purchasereference' => $reference,
+        ],
+    ];
+    if ($record->beneficiaryuserid !== null) {
+        $eventdata['relateduserid'] = (int)$record->beneficiaryuserid;
+    }
+    digital_file_downloaded::create($eventdata)->trigger();
+    if ($download['storedfile'] instanceof stored_file) {
+        send_stored_file($download['storedfile'], 0, 0, true, ['filename' => $download['filename']]);
+    }
+    send_file($download['filepath'], $download['filename'], 0, 0, false, true, 'application/pdf');
+};
+
+if (!isloggedin() || isguestuser()) {
+    $publicdigital = $DB->get_record('local_subs_commerce_dig_access', [
+        'grantreference' => $grantreference,
+        'purchasereference' => $reference,
+    ], '*', IGNORE_MISSING);
+
+    if ($publicdigital !== false) {
+        $servedigital($publicdigital);
+        exit;
+    }
+}
+
 try {
     if (isloggedin() && !isguestuser()) {
         $order = $service->find_for_user($reference, (int)$USER->id);
@@ -68,27 +117,8 @@ if ($access->type === 'digital_download') {
         'grantreference' => $grantreference,
         'purchasereference' => $reference,
     ], '*', MUST_EXIST);
-    $resolver = new CommerceNativeDigitalDownloadResolver($DB);
-    $download = $resolver->resolve((string)$record->downloadtoken, time(), $version);
-    $downloadedat = time();
-    $resolver->register_download($download['access'], $downloadedat);
-    $eventdata = [
-        'context' => \context_system::instance(),
-        'objectid' => (int)$record->id,
-        'other' => [
-            'variant' => $version,
-            'grantreference' => $grantreference,
-            'purchasereference' => $reference,
-        ],
-    ];
-    if ($record->beneficiaryuserid !== null) {
-        $eventdata['relateduserid'] = (int)$record->beneficiaryuserid;
-    }
-    digital_file_downloaded::create($eventdata)->trigger();
-    if ($download['storedfile'] instanceof stored_file) {
-        send_stored_file($download['storedfile'], 0, 0, true, ['filename' => $download['filename']]);
-    }
-    send_file($download['filepath'], $download['filename'], 0, 0, false, true, 'application/pdf');
+    $servedigital($record);
+    exit;
 }
 
 throw new moodle_exception('commerce_i3_access_unsupported', 'local_subscriptions');
