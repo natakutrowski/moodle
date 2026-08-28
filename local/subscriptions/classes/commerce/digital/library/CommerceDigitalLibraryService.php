@@ -111,6 +111,20 @@ final class CommerceDigitalLibraryService {
             }
         }
 
+        /*
+         * Manual CRM grants deliberately do not fabricate a purchase row. They
+         * therefore cannot be discovered through CommercePurchaseReadRepository.
+         * Project their persisted Native digital-access rows directly into the
+         * owned-resource library. Purchased resources already present above win
+         * through the shared product key, so this remains deduplicated.
+         */
+        foreach ($this->standalone_native_digital_resources($userid, $email) as $resource) {
+            $resources[$resource->key] = $this->prefer_richer_resource(
+                $resources[$resource->key] ?? null,
+                $resource
+            );
+        }
+
         $studentcollection = $this->studentpurchases->get_for_customer($userid, $email);
         $legacypurchases = $studentcollection->get_digital_purchases();
         $productids = array_values(array_unique(array_filter(array_map(
@@ -188,6 +202,96 @@ final class CommerceDigitalLibraryService {
         ): int => strcasecmp($a->title, $b->title));
 
         return new CommerceDigitalLibrary(array_values($resources), $userid, trim($email));
+    }
+
+    /**
+     * Build Native digital resources which exist without a purchase row.
+     *
+     * This is the normal persistence shape for CRM manual grants.
+     *
+     * @return CommerceDigitalResourcePresentation[]
+     */
+    private function standalone_native_digital_resources(int $userid, string $email): array {
+        global $DB;
+
+        $email = trim(\core_text::strtolower($email));
+        $params = ['userid' => $userid, 'email' => $email, 'status' => 'active'];
+        $records = $DB->get_records_select(
+            'local_subs_commerce_dig_access',
+            '(beneficiaryuserid = :userid OR LOWER(beneficiaryemail) = :email) AND status = :status',
+            $params,
+            'timecreated ASC, id ASC'
+        );
+
+        $resources = [];
+        $now = time();
+        foreach ($records as $record) {
+            if ((int)$record->validfrom > $now
+                    || ($record->validuntil !== null && (int)$record->validuntil < $now)
+                    || ($record->maxdownloads !== null && (int)$record->downloadcount >= (int)$record->maxdownloads)
+                    || trim((string)$record->downloadtoken) === '') {
+                continue;
+            }
+
+            $access = (object)[
+                'grantreference' => (string)$record->grantreference,
+                'url' => (new moodle_url('/local/subscriptions/digital_native_download.php', [
+                    'token' => (string)$record->downloadtoken,
+                    'version' => 'desktop',
+                ]))->out(false),
+                'metadata' => [
+                    'productsku' => (string)$record->productsku,
+                    'resourcekey' => (string)$record->resourcekey,
+                ],
+            ];
+            $item = (object)[
+                'label' => '',
+                'metadata' => ['productsku' => (string)$record->productsku],
+            ];
+
+            $context = $this->native_product_context($access, $item);
+            $downloads = $this->downloads_from_native_access(
+                $access,
+                $context['product'],
+                (int)$record->id,
+                (int)$record->downloadcount,
+                $record->lastdownloadat === null ? null : (int)$record->lastdownloadat
+            );
+            if ($downloads === []) {
+                continue;
+            }
+
+            $sku = $context['sku'];
+            $key = $sku !== ''
+                ? 'product:sku:' . strtolower($sku)
+                : 'native:manual:' . (int)$record->id;
+
+            $resources[] = new CommerceDigitalResourcePresentation(
+                $key,
+                $context['title'],
+                'native',
+                $this->public_product_url($sku),
+                null,
+                null,
+                (int)$record->timecreated,
+                $downloads,
+                false,
+                [
+                    'sku' => $sku,
+                    'source' => 'crm_manual_grant',
+                    'grantreference' => (string)$record->grantreference,
+                ],
+                $context['coverurl'],
+                !empty($context['productid'])
+                    ? CommerceCatalogResponsiveImageService::create()->resolve(
+                        (int)$context['productid'],
+                        'resources'
+                    )
+                    : null
+            );
+        }
+
+        return $resources;
     }
 
     /**
