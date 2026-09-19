@@ -55,7 +55,7 @@ final class commerce_trial_cart_j66d_test extends \advanced_testcase {
 
         $this->assertIsString($source);
         $this->assertStringContainsString(
-            "\$action === 'clear' && \$result->has_changed()",
+            "\$action === 'clear' && \$result !== null && \$result->has_changed()",
             $source
         );
         $this->assertStringContainsString(

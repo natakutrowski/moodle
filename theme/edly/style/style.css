@@ -8574,3 +8574,70 @@ body.path-mod-readaloud #mod_readaloud_footernav_cont ol.main-nav > li .nav-link
     filter: none !important;
     opacity: 1 !important;
 }
+
+/* ================================================================
+   CampusFR 7.97 — individual pedagogical calendar lock
+   ================================================================ */
+
+/*
+ * Moodle still owns the availability decision and direct-URL protection.
+ * When the individual CampusFR condition is the reason a section is locked,
+ * its description contains .campusfr-pedagogical-lock. Hide Moodle's verbose
+ * "Not available unless..." wrapper and display the CampusFR lock card only.
+ */
+.course-section .availabilityinfo:has(.campusfr-pedagogical-lock) {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 0;
+    color: transparent;
+}
+
+.campusfr-pedagogical-lock {
+    display: block;
+    width: 100%;
+    margin: 0;
+    font-size: var(--font-size, 17px);
+    color: inherit;
+}
+
+.campusfr-pedagogical-lock__visual {
+    min-height: clamp(180px, 24vw, 320px);
+    background: #25282e;
+}
+
+/*
+ * Use the same protected section-cover endpoint as the existing
+ * completion/date lock UX. A section without a Text & Media cover simply
+ * keeps the elegant dark fallback; a missing image never affects access.
+ */
+.campusfr-pedagogical-lock__visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(--campusfr-lock-cover);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    filter: grayscale(1) saturate(0.18) contrast(0.96) brightness(0.72);
+}
+
+/* Keep the existing veil above the cover and below the liquid-glass content. */
+.campusfr-pedagogical-lock__visual::after {
+    z-index: 1;
+}
+
+.campusfr-pedagogical-lock__visual .campus-section-restricted-cover__message {
+    z-index: 2;
+}
+
+/* Date text is deliberately a little more compact than completion guidance. */
+.campusfr-pedagogical-lock__visual .campus-section-restricted-cover__text {
+    max-width: min(90%, 820px);
+    font-size: clamp(16px, 1.9vw, 25px);
+}
+

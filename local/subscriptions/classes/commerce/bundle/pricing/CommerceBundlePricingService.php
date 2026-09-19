@@ -147,6 +147,43 @@ final class CommerceBundlePricingService {
     }
 
 
+    /**
+     * Report whether every Bundle component has an active price in each currency.
+     *
+     * This is diagnostic only. It never creates or converts a price.
+     *
+     * @param string[] $currencies
+     * @return array<string,array{supported:bool,missingcomponents:string[]}>
+     */
+    public function get_currency_coverage(string $sku, array $currencies): array {
+        $bundle = $this->require_bundle($sku);
+        $preview = $this->preview->build($bundle->get_sku(), true);
+        $coverage = [];
+
+        foreach ($currencies as $rawcurrency) {
+            $currency = strtoupper(trim((string)$rawcurrency));
+            if ($currency === '' || isset($coverage[$currency])) {
+                continue;
+            }
+
+            $missing = [];
+            foreach ($preview->get_items() as $item) {
+                $component = $item->get_product();
+                if ($this->prices->find_active($component->get_sku(), $currency) === null) {
+                    $missing[] = $component->get_sku();
+                }
+            }
+
+            $coverage[$currency] = [
+                'supported' => $missing === [],
+                'missingcomponents' => array_values(array_unique($missing)),
+            ];
+        }
+
+        return $coverage;
+    }
+
+
     /** @return string[] */
     private function get_common_component_currencies(string $sku): array {
         $preview = $this->preview->build($sku, true);

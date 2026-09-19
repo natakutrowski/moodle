@@ -163,11 +163,15 @@ final class commerce_guest_personal_offer_provisional_recovery_hotfix_test exten
         );
 
         $this->assertStringContainsString(
-            "(string)\$personalofferidentity['lastname'],\n                true",
+            "CommerceGuestCheckoutService::create()->identify(",
             $page
         );
         $this->assertStringContainsString(
-            '$personalofferidentity !== null',
+            "'personal_offer_reserved_email'",
+            $page
+        );
+        $this->assertStringContainsString(
+            "source === 'personaloffer'",
             $action
         );
     }

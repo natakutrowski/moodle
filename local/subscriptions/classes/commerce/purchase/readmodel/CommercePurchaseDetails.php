@@ -16,7 +16,9 @@ final class CommercePurchaseDetails {
         public readonly ?int $legacyid,
         public readonly array $metadata,
         public readonly array $grants = [],
-        public readonly array $fulfillmentattempts = []
+        public readonly array $fulfillmentattempts = [],
+        public readonly array $snapshot = [],
+        public readonly array $customer = []
     ) {
     }
 }

@@ -48,8 +48,13 @@ final class CommerceCheckoutPaymentLaunchRecorder {
 
         $paymenturl = $action->get_url();
 
-        if ($paymenturl === null) {
-            throw new \RuntimeException('A hosted Commerce provider launch must contain a payment URL.');
+        if (
+            !$action->is_embedded()
+            && $paymenturl === null
+        ) {
+            throw new \RuntimeException(
+                'A hosted Commerce provider launch must contain a payment URL.'
+            );
         }
 
         $providerreference = $result->get_provider_payment_id();
@@ -70,7 +75,13 @@ final class CommerceCheckoutPaymentLaunchRecorder {
     private function resolve_provider_order_id(
         CommercePaymentResult $result
     ): ?string {
-        if ($result->get_provider_key() !== 'alfa') {
+        if (
+            !in_array(
+                $result->get_provider_key(),
+                ['alfa', 'stripe'],
+                true
+            )
+        ) {
             return null;
         }
 

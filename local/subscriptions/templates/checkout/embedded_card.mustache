@@ -1,0 +1,87 @@
+<div class="payment-provider-transition is-visible"
+     data-payment-splash
+     role="status"
+     aria-live="polite"
+     aria-atomic="true"
+     aria-hidden="false">
+    <div class="payment-provider-transition__glass">
+        <div class="payment-provider-transition__hourglass-wrap">
+            <div class="payment-provider-transition__orbit" aria-hidden="true"></div>
+            <div class="payment-provider-transition__hourglass" aria-hidden="true">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+        </div>
+
+        <h2 class="payment-provider-transition__title"
+            data-payment-splash-title>{{loadingtitle}}</h2>
+
+        <p class="payment-provider-transition__message"
+           data-payment-splash-message>{{loadingmessage}}</p>
+
+        <div class="payment-provider-transition__provider">
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            <span>{{paymentsecurelabel}}</span>
+        </div>
+
+        <div class="payment-provider-transition__security">
+            <span class="payment-provider-transition__security-icon" aria-hidden="true">
+                <i class="fa-solid fa-lock"></i>
+            </span>
+            <span>
+                <strong>{{securitytitle}}</strong>
+                <small>{{securitymessage}}</small>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="commerce-embedded-card">
+    <div class="commerce-embedded-card__panel">
+        <div class="commerce-embedded-card__heading">
+            <span class="commerce-embedded-card__icon" aria-hidden="true">
+                <i class="fa-regular fa-credit-card"></i>
+            </span>
+            <div>
+                <h1 class="h3 mb-1">{{title}}</h1>
+                <p class="text-muted mb-0">{{description}}</p>
+            </div>
+        </div>
+
+        <section class="commerce-embedded-card__express"
+                 data-stripe-express-section
+                 hidden>
+            <div class="commerce-embedded-card__express-label">
+                {{expresslabel}}
+            </div>
+            <div data-stripe-express-element></div>
+            <div class="commerce-embedded-card__separator">
+                <span>{{expressseparator}}</span>
+            </div>
+        </section>
+
+        <form data-stripe-embedded-form>
+            <div class="commerce-embedded-card__element"
+                 data-stripe-payment-element></div>
+
+            <div class="alert alert-danger mt-3 mb-0"
+                 data-stripe-payment-error
+                 role="alert"
+                 hidden></div>
+
+            <button type="submit"
+                    class="btn btn-primary btn-lg w-100 mt-4"
+                    data-stripe-payment-submit>
+                {{submitlabel}}
+            </button>
+        </form>
+
+        <div class="commerce-embedded-card__security">
+            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+            <span>{{securitylabel}}</span>
+        </div>
+    </div>
+</div>
+
+<div hidden
+     data-payment-splash-processing-title="{{processingtitle}}"
+     data-payment-splash-processing-message="{{processingmessage}}"></div>

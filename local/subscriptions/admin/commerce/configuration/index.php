@@ -12,6 +12,7 @@ use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\currency\Currency;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 $pageurl = new moodle_url('/local/subscriptions/admin/commerce/configuration/index.php');
@@ -22,6 +23,12 @@ $config = get_config('local_subscriptions');
 $adminsettingsurl = new moodle_url('/admin/settings.php', ['section' => 'local_subscriptions_settings']);
 $value = static fn(string $name, string $fallback = '—'): string => isset($config->{$name}) && $config->{$name} !== ''
     ? (string)$config->{$name} : $fallback;
+$legalentityvalue = static function(string $name, string $legacy, string $fallback = '—') use ($config): string {
+    if (property_exists($config, $name)) {
+        return trim((string)$config->{$name}) !== '' ? (string)$config->{$name} : $fallback;
+    }
+    return isset($config->{$legacy}) && trim((string)$config->{$legacy}) !== '' ? (string)$config->{$legacy} : $fallback;
+};
 $badge = static fn(string $label, string $class, string $icon = ''): array => [
     'html' => html_writer::span(
         ($icon !== '' ? html_writer::tag('i', '', ['class' => $icon, 'aria-hidden' => 'true']) : '') . s($label),
@@ -69,10 +76,10 @@ $language = static function(string $code): array {
     return ['html' => html_writer::span(($flags[$code] ?? '🌐') . ' ' . strtoupper($code), 'badge rounded-pill text-bg-light border commerce-config-summary-language')];
 };
 $currencyflags = static function(string $csv): array {
-    $flags = ['EUR' => '🇪🇺', 'RUB' => '🇷🇺', 'USD' => '🇺🇸', 'GBP' => '🇬🇧', 'CHF' => '🇨🇭', 'CAD' => '🇨🇦', 'JPY' => '🇯🇵'];
     $items = [];
     foreach (array_filter(array_map('trim', explode(',', strtoupper($csv)))) as $currency) {
-        $items[] = html_writer::span(($flags[$currency] ?? '💱') . ' ' . s($currency), 'badge rounded-pill text-bg-light border');
+        $marker = Currency::visual_marker($currency) ?: '💱';
+        $items[] = html_writer::span($marker . ' ' . s($currency), 'badge rounded-pill text-bg-light border');
     }
     return ['html' => html_writer::span(implode(' ', $items), 'commerce-config-summary-inline-badges')];
 };
@@ -141,9 +148,14 @@ $cards = [
         'title' => get_string('commerce_configuration_legal_title', 'local_subscriptions'),
         'description' => get_string('commerce_configuration_legal_description', 'local_subscriptions'),
         'facts' => [
-            get_string('commerce_configuration_fact_invoice_eur', 'local_subscriptions') => ['html' => html_writer::span('🇪🇺 ', 'me-1') . html_writer::span(s($value('invoice_eur_name')), 'fw-semibold text-break')],
-            get_string('commerce_configuration_fact_invoice_rub', 'local_subscriptions') => ['html' => html_writer::span('🇷🇺 ', 'me-1') . html_writer::span(s($value('invoice_rub_name')), 'fw-semibold text-break')],
-            get_string('commerce_configuration_fact_legal_regions', 'local_subscriptions') => ['html' => html_writer::span('🇷🇺 🇧🇾 + 🌍', 'fw-semibold')],
+            get_string('commerce_configuration_fact_legal_entity_fr', 'local_subscriptions') => ['html' => html_writer::span('🇫🇷 ', 'me-1') . html_writer::span(s($legalentityvalue('legal_entity_fr_name', 'invoice_eur_name')), 'fw-semibold text-break')],
+            get_string('commerce_configuration_fact_legal_entity_ru', 'local_subscriptions') => ['html' => html_writer::span('🇷🇺 ', 'me-1') . html_writer::span(s($legalentityvalue('legal_entity_ru_name', 'invoice_rub_name')), 'fw-semibold text-break')],
+            get_string('commerce_configuration_fact_legal_regions', 'local_subscriptions') => ['html' => html_writer::span('🇷🇺 🇧🇾 → RU · 🌍 / ZZ → FR', 'fw-semibold')],
+            get_string('commerce_configuration_fact_legal_documents', 'local_subscriptions') => ['html' => html_writer::span(
+                'RU/BY ' . s($value('legal_documents_ru_version', '2026-09-v1'))
+                    . ' · ROW ' . s($value('legal_documents_row_version', '2026-09-v1')),
+                'fw-semibold text-break'
+            )],
         ],
     ],
     [

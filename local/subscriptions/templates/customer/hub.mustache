@@ -45,7 +45,18 @@
                     {{#courses}}
                         <a href="{{url}}" class="commerce-customer-hub__course">
                             {{#hasimage}}<img class="commerce-customer-hub__course-cover" src="{{imageurl}}" alt="{{name}}" loading="lazy">{{/hasimage}}{{^hasimage}}<span class="commerce-customer-hub__course-initial" aria-hidden="true"><i class="fa-solid fa-graduation-cap"></i></span>{{/hasimage}}
-                            <span class="commerce-customer-hub__course-copy"><strong>{{name}}</strong><span class="commerce-customer-hub__course-progress" role="progressbar" aria-valuenow="{{progress}}" aria-valuemin="0" aria-valuemax="100"><span style="{{progressstyle}}"></span></span><small>{{progress}}%</small></span>
+                            <span class="commerce-customer-hub__course-copy">
+                                <strong>{{name}}</strong>
+                                {{#haslearningmeta}}
+                                    <span class="commerce-customer-hub__course-learning">
+                                        {{#learningmeta}}
+                                            <span><i class="fa-solid {{icon}}" aria-hidden="true"></i>{{label}}</span>
+                                        {{/learningmeta}}
+                                    </span>
+                                {{/haslearningmeta}}
+                                <span class="commerce-customer-hub__course-progress" role="progressbar" aria-valuenow="{{progress}}" aria-valuemin="0" aria-valuemax="100"><span style="{{progressstyle}}"></span></span>
+                                <small>{{progress}}%</small>
+                            </span>
                             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                         </a>
                     {{/courses}}
@@ -78,6 +89,40 @@
                     {{#hasxprank}}<div><dt>{{#str}}commerce_customer_hub_xp_ranking, local_subscriptions{{/str}}</dt><dd>#{{xprank}}{{#xpparticipants}} / {{xpparticipants}}{{/xpparticipants}}</dd></div>{{/hasxprank}}
                     <div><dt>{{#str}}commerce_customer_hub_last_activity, local_subscriptions{{/str}}</dt><dd>{{lastreward}}</dd></div>
                 </dl>
+                {{#hasteamchallenges}}
+                    <section class="commerce-customer-hub__team-challenges" aria-label="{{#str}}commerce_customer_hub_team_title, local_subscriptions{{/str}}">
+                        <header class="commerce-customer-hub__team-heading">
+                            <div>
+                                <span class="commerce-customer-hub__team-kicker">{{#str}}commerce_customer_hub_team_kicker, local_subscriptions{{/str}}</span>
+                                <h3>{{#str}}commerce_customer_hub_team_title, local_subscriptions{{/str}}</h3>
+                            </div>
+                        </header>
+                        {{#teamchallenges}}
+                            <div class="commerce-customer-hub__team-card">
+                                <div class="commerce-customer-hub__team-summary">
+                                    <div>
+                                        <small>{{promotionname}}</small>
+                                        <strong>{{groupname}}</strong>
+                                    </div>
+                                    <div class="commerce-customer-hub__team-rank">#{{grouprank}}</div>
+                                </div>
+                                <div class="commerce-customer-hub__team-meta">
+                                    <span><strong>{{grouppoints}}</strong> {{#str}}commerce_customer_hub_team_points, local_subscriptions{{/str}}</span>
+                                    <span>{{#str}}commerce_customer_hub_team_my_contribution, local_subscriptions{{/str}} <strong>{{userpoints}}</strong></span>
+                                </div>
+                                <ol class="commerce-customer-hub__team-ranking">
+                                    {{#leaderboard}}
+                                        <li class="{{#ismine}}is-mine{{/ismine}} {{#separated}}is-separated{{/separated}}">
+                                            <span class="commerce-customer-hub__team-position">#{{rank}}</span>
+                                            <span class="commerce-customer-hub__team-name">{{groupname}}{{#ismine}} <small>{{#str}}commerce_customer_hub_team_yours, local_subscriptions{{/str}}</small>{{/ismine}}</span>
+                                            <strong>{{points}}</strong>
+                                        </li>
+                                    {{/leaderboard}}
+                                </ol>
+                            </div>
+                        {{/teamchallenges}}
+                    </section>
+                {{/hasteamchallenges}}
             {{/xpavailable}}
             {{^xpavailable}}
                 <div class="commerce-customer-hub__empty commerce-customer-hub__empty--compact">

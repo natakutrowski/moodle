@@ -19,6 +19,7 @@ use local_subscriptions\commerce\purchase\communication\CommercePurchaseCurrentC
 use local_subscriptions\commerce\pricing\CommercePersistedCommercialPricingPresenter;
 use moodle_database;
 use moodle_url;
+use local_subscriptions\currency\CurrencyFormatter;
 
 /** Builds the serialisable transactional-mail context from one Native purchase. */
 final class CommercePurchaseMailContextFactory {
@@ -145,7 +146,7 @@ final class CommercePurchaseMailContextFactory {
                     continue;
                 }
 
-                $kind = $access->type === 'course_access'
+                $kind = in_array($access->type, ['course_access', 'pedagogical_promotion_join'], true)
                     ? 'course'
                     : ($access->type === 'digital_download' ? 'download' : 'link');
 
@@ -398,6 +399,6 @@ final class CommercePurchaseMailContextFactory {
     }
 
     private function format_money(int $minor, string $currency): string {
-        return format_float($minor / 100, 2) . ' ' . strtoupper(trim($currency));
+        return CurrencyFormatter::format_minor_code($minor, $currency);
     }
 }

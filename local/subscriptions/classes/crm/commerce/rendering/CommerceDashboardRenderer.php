@@ -10,6 +10,7 @@ use html_writer;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
+use local_subscriptions\currency\Currency;
 use local_subscriptions\subscription_config;
 use moodle_url;
 
@@ -478,10 +479,7 @@ final class CommerceDashboardRenderer {
     }
 
     private static function currency_flag(string $currency): string {
-        return match (strtoupper($currency)) {
-            'EUR' => '🇪🇺', 'RUB' => '🇷🇺', 'USD' => '🇺🇸', 'GBP' => '🇬🇧', 'CHF' => '🇨🇭',
-            'CAD' => '🇨🇦', 'AUD' => '🇦🇺', 'CNY' => '🇨🇳', 'JPY' => '🇯🇵', default => '💱',
-        };
+        return Currency::visual_marker($currency) ?: '💱';
     }
 
     private static function panel(string $title, string $content, string $extraclass = '', string $icon = ''): string {

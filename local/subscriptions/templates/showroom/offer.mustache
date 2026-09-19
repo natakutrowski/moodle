@@ -31,13 +31,28 @@
             <p class="commerce-showroom-offer__validity"><span class="commerce-showroom-offer__validity-icon" aria-hidden="true">🔥</span><span>{{promotionendlabel}}</span></p>
             {{/haspromotionend}}
         </div>
+        {{#haspedagogicalcapacity}}
+        <div class="commerce-pedagogical-capacity {{pedagogicalcapacityclass}}" role="status">
+            <i class="fa-solid {{#pedagogicalsoldout}}fa-circle-xmark{{/pedagogicalsoldout}}{{^pedagogicalsoldout}}fa-ticket{{/pedagogicalsoldout}}" aria-hidden="true"></i>
+            <span>{{pedagogicalcapacitylabel}}</span>
+        </div>
+        {{#haspedagogicalsalesclose}}
+        <div class="commerce-pedagogical-sales-deadline">
+            <i class="{{#pedagogicalsalescloseurgent}}fa-solid fa-fire{{/pedagogicalsalescloseurgent}}{{^pedagogicalsalescloseurgent}}fa-regular fa-clock{{/pedagogicalsalescloseurgent}}" aria-hidden="true"></i>
+            <span>{{pedagogicalsalescloselabel}}</span>
+        </div>
+        {{/haspedagogicalsalesclose}}
+        {{/haspedagogicalcapacity}}
         <div class="commerce-showroom-offer__actions">
             {{#canbuy}}
-                <form method="post" action="{{cartaction}}" data-provider-experience data-provider-context="express-candidate" data-currency="{{currency}}" data-product="{{name}}" data-price="{{priceformatted}}" data-showroom-track="offer_buy" data-showroom-track-role="{{role}}">
-                    <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{priceid}}" data-showroom-priceid><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{currency}}" data-showroom-currency-input><input type="hidden" name="returnurl" value="{{returnurl}}"><input type="hidden" name="source" value="showroom"><input type="hidden" name="showroom" value="{{showroomkey}}"><input type="hidden" name="showroomoffer" value="{{role}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                <form method="post" action="{{cartaction}}" data-showroom-track="offer_buy" data-showroom-track-role="{{role}}">
+                    <input type="hidden" name="action" value="buynow"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{priceid}}" data-showroom-priceid><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{currency}}" data-showroom-currency-input><input type="hidden" name="returnurl" value="{{returnurl}}"><input type="hidden" name="source" value="showroom"><input type="hidden" name="showroom" value="{{showroomkey}}"><input type="hidden" name="showroomoffer" value="{{role}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
                     <button class="commerce-showroom-btn commerce-showroom-btn--primary" type="submit">{{buylabel}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
                 </form>
             {{/canbuy}}
+            {{#cannotbuy}}{{^canaccess}}{{#haspedagogicalcapacity}}{{^pedagogicalavailable}}
+                <button class="commerce-showroom-btn commerce-showroom-btn--disabled" type="button" disabled aria-disabled="true">{{pedagogicaldisabledctlabel}}</button>
+            {{/pedagogicalavailable}}{{/haspedagogicalcapacity}}{{/canaccess}}{{/cannotbuy}}
             {{#canaccess}}<a class="commerce-showroom-btn commerce-showroom-btn--success" href="{{ownedactionurl}}">{{ownedactionlabel}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>{{/canaccess}}
             {{#bundleblocked}}<p class="commerce-showroom-offer__bundle-note"><i class="fa-solid fa-circle-info" aria-hidden="true"></i>{{bundleblockedmessage}}</p>{{/bundleblocked}}
             {{^available}}<span class="commerce-showroom-offer__pending">{{priceformatted}}</span>{{/available}}

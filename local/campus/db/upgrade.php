@@ -78,5 +78,28 @@ function xmldb_local_campus_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025110701, 'local', 'campus');
     }
 
+    if ($oldversion < 2026091900) {
+        $dbman = $DB->get_manager();
+        $table = new xmldb_table('local_campus_audio_log');
+
+        // The audio logger predates its XMLDB declaration on long-lived sites.
+        // Keep existing data intact and create the table only where it is absent.
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('v', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, null);
+            $table->add_field('ip', XMLDB_TYPE_CHAR, '45', null, null);
+            $table->add_field('useragent', XMLDB_TYPE_TEXT, null, null, null, null);
+            $table->add_field('referer', XMLDB_TYPE_TEXT, null, null, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026091900, 'local', 'campus');
+    }
+
     return true;
 }

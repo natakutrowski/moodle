@@ -4,12 +4,14 @@ require_once(__DIR__ . '/../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
+
 \local_subscriptions\subscription_config::guard_public_access();
 
 global $SESSION;
 
 $currency = strtoupper(required_param('currency', PARAM_ALPHA));
-if (!in_array($currency, ['EUR', 'RUB'], true)) {
+if (!(new CommerceCurrencyRegistry())->is_enabled($currency)) {
     throw new moodle_exception('commerce_personal_offer_currency_unavailable', 'local_subscriptions');
 }
 

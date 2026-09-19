@@ -37,9 +37,23 @@ final class CommercePromotionValidator {
             $errors['discountvalue'] = 'invalid';
         }
         if ($currency !== '' && !in_array($currency, (new CommerceCurrencyRegistry())->enabled(), true)) {
-            $errors['currency'] = 'invalid';
+            $existingcurrency = $currentid !== null
+                ? $repository->get_by_id($currentid)?->get_currency()
+                : null;
+            if ($existingcurrency !== $currency) {
+                $errors['currency'] = 'invalid';
+            }
         }
-        if ((int)($data['minimumcartminor'] ?? 0) < 0) { $errors['minimumcartminor'] = 'invalid'; }
+        $minimumcartminor = (int)($data['minimumcartminor'] ?? 0);
+        if ($minimumcartminor < 0) {
+            $errors['minimumcartminor'] = 'invalid';
+        }
+        if ($type === CommercePromotion::TYPE_FIXED && $currency === '') {
+            $errors['currency'] = 'required';
+        }
+        if ($minimumcartminor > 0 && $currency === '') {
+            $errors['currency'] = 'required';
+        }
         foreach (['globalusagelimit', 'userusagelimit'] as $field) {
             if (($data[$field] ?? '') !== '' && (int)$data[$field] <= 0) { $errors[$field] = 'invalid'; }
         }

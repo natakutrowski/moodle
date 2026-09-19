@@ -7,6 +7,7 @@ namespace local_subscriptions\commerce\customer\merge;
 defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
+use local_subscriptions\currency\CurrencyFormatter;
 
 /**
  * Renders an explicit, non-destructive preview of the state produced by a merge.
@@ -599,7 +600,7 @@ final class CommerceCustomerMergeFinalStateRenderer {
     }
 
     private static function money(int $minor, string $currency): string {
-        return number_format($minor / 100, 2, '.', ' ') . ' ' . strtoupper($currency);
+        return CurrencyFormatter::format_minor_code($minor, $currency);
     }
 
     private static function decimal_money(float $amount, string $currency): string {

@@ -11,6 +11,7 @@ use local_subscriptions\commerce\customer\readmodel\CommerceCustomerPayment;
 use local_subscriptions\commerce\customer\readmodel\CommerceCustomerPurchase;
 use local_subscriptions\commerce\customer\readmodel\CommerceCustomerSnapshot;
 use local_subscriptions\crm\user\UserProfileTimelineEvent;
+use local_subscriptions\currency\CurrencyFormatter;
 
 /** Builds Native Commerce timeline events from one unified customer snapshot. */
 final class CommerceCustomerTimelineCollector {
@@ -76,7 +77,7 @@ final class CommerceCustomerTimelineCollector {
             get_string('crm_timeline_commerce_payment_' . $state, 'local_subscriptions'),
             get_string('crm_timeline_commerce_payment_description', 'local_subscriptions', (object)[
                 'reference' => $purchase->publicreference,
-                'amount' => format_float($payment->amountminor / 100, 2) . ' ' . $payment->currency,
+                'amount' => CurrencyFormatter::format_minor_code($payment->amountminor, $payment->currency),
                 'provider' => $payment->provider ?: '-',
             ]),
             $state === 'paid' ? '💳' : ($state === 'failed' ? '⚠️' : '🧾'),
@@ -140,7 +141,7 @@ final class CommerceCustomerTimelineCollector {
         return get_string('crm_timeline_commerce_purchase_description', 'local_subscriptions', (object)[
             'reference' => $purchase->publicreference,
             'items' => $labels !== [] ? implode(', ', $labels) : '-',
-            'amount' => format_float($purchase->totalminor / 100, 2) . ' ' . $purchase->currency,
+            'amount' => CurrencyFormatter::format_minor_code($purchase->totalminor, $purchase->currency),
         ]);
     }
 

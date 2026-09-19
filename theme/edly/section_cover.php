@@ -95,7 +95,8 @@ function theme_edly_section_cover_has_future_start_date($node): bool {
 $availability = json_decode((string)$sectionrecord->availability);
 $types = $availability ? theme_edly_section_cover_condition_types($availability) : [];
 $allowedrestriction = $types === ['completion']
-    || ($types === ['date'] && theme_edly_section_cover_has_future_start_date($availability));
+    || ($types === ['date'] && theme_edly_section_cover_has_future_start_date($availability))
+    || in_array('campusfr', $types, true);
 
 if (!$allowedrestriction) {
     throw new moodle_exception('nopermissions', 'error', '', null, 'Unsupported section restriction.');

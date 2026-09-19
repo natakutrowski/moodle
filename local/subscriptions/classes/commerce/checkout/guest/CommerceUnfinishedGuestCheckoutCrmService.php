@@ -276,6 +276,22 @@ final class CommerceUnfinishedGuestCheckoutCrmService {
 
             try {
                 if ($provider === Provider::ALFA) {
+                    $providerorderid = trim((string)($payment->providerorderid ?? ''));
+                    $providerreference = trim((string)($payment->providerreference ?? ''));
+
+                    // A failed provider initialization can legitimately leave a
+                    // Commerce payment attempt without an Alfa order reference.
+                    // Such an attempt is still useful in the unfinished-checkout
+                    // CRM, but it cannot be probed or safely reconciled yet.
+                    //
+                    // Do not call the authoritative reconciliation service here:
+                    // it intentionally rejects missing order ids, and a read-only
+                    // CRM decoration must never make the Sales page unavailable.
+                    if ($providerorderid === '' && $providerreference === '') {
+                        $payment->providerlivestatus = 'not_registered';
+                        continue;
+                    }
+
                     $inspection = AlfaPaymentReconciliationService::create($this->database)
                         ->inspect_payment((int)$payment->id);
                     $payment->providerlivechecked = true;

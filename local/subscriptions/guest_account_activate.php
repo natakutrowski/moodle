@@ -125,15 +125,15 @@ if ($data = $form->get_data()) {
             (string)$data->password
         );
         $SESSION->local_subscriptions_guest_checkout_token = $session->get_token();
-        $returnreference = trim((string)($data->reference ?? $reference));
-        $destination = $returnreference !== ''
-            ? UrlFactory::order_result([
-                'reference' => $returnreference,
-                'result' => 'success',
-                'accountfinalised' => 1,
-            ])
-            : UrlFactory::my_campus();
-        redirect($destination);
+
+        // Account finalisation is an account action, not a payment-result action. The activation
+        // link may still carry the reference of a previous failed/retryable payment attempt. Do not
+        // send the newly authenticated customer back to that stale order result: it would correctly
+        // render the old payment as failed even though the account finalisation itself succeeded.
+        \core\notification::success(
+            get_string('commerce_guest_activation_ready_confirmation', 'local_subscriptions')
+        );
+        redirect(UrlFactory::my_campus());
     } catch (Throwable $exception) {
         throw new moodle_exception('commerce_guest_activation_failed', 'local_subscriptions', '', null, $exception->getMessage());
     }

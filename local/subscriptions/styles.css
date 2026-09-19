@@ -39812,6 +39812,41 @@ body.local-subscriptions-dashboard-page
         );
 }
 
+
+/* Selected conversation: CampusFR pink state, distinct from unread purple. */
+.local-subscriptions-inbox-page
+.crm-inbox-thread-card.is-selected,
+.local-subscriptions-inbox-page
+.crm-inbox-thread-card.is-selected.crm-inbox-thread-card-unread {
+    border-color: #f19abb !important;
+    border-left: 4px solid #e83282 !important;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 235, 244, 1),
+            #fff8fb 28%,
+            #fff 100%
+        ) !important;
+    box-shadow:
+        0 .18rem .65rem rgba(222, 47, 120, .09),
+        inset 0 0 0 1px rgba(232, 50, 130, .04);
+}
+
+.local-subscriptions-inbox-page
+.crm-inbox-thread-card.is-selected:hover,
+.local-subscriptions-inbox-page
+.crm-inbox-thread-card.is-selected.crm-inbox-thread-card-unread:hover {
+    border-color: #e86d9f !important;
+    border-left-color: #d92775 !important;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 226, 239, 1),
+            #fff5f9 30%,
+            #fff 100%
+        ) !important;
+}
+
 @media (max-width: 760px) {
     .local-subscriptions-inbox-page
     .crm-inbox-filter-summary-hint {
@@ -40158,9 +40193,9 @@ body.local-subscriptions-dashboard-page
 .local-subscriptions-inbox-thread-page
 .crm-inbox-thread-status-controls {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: .4rem;
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .38rem;
+    align-items: start;
 }
 
 .local-subscriptions-inbox-thread-page
@@ -40171,29 +40206,67 @@ body.local-subscriptions-dashboard-page
 
 .local-subscriptions-inbox-thread-page
 .crm-inbox-thread-utility-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: .4rem;
-    margin-top: .4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .18rem;
+    margin-top: .35rem;
 }
 
 .local-subscriptions-inbox-thread-page
 .crm-inbox-thread-utility-actions
-.crm-inbox-action-form,
-.local-subscriptions-inbox-thread-page
-.crm-inbox-thread-utility-actions
-.btn {
-    width: 100%;
+.crm-inbox-action-form {
+    display: block !important;
+    width: auto;
+    margin: 0;
 }
 
 .local-subscriptions-inbox-thread-page
-.crm-inbox-thread-utility-actions
-.btn {
+.crm-inbox-thread-action-link {
     display: inline-flex;
-    gap: .25rem;
     align-items: center;
-    justify-content: center;
-    min-height: 2.15rem;
+    justify-content: flex-start;
+    gap: .38rem;
+    width: auto;
+    min-height: 0;
+    padding: .22rem 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #dd2f78;
+    font-size: .76rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.local-subscriptions-inbox-thread-page
+.crm-inbox-thread-action-link:hover,
+.local-subscriptions-inbox-thread-page
+.crm-inbox-thread-action-link:focus {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #b51f5f;
+    text-decoration: underline;
+}
+
+.local-subscriptions-inbox-thread-page
+.crm-inbox-thread-action-link:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+.local-subscriptions-inbox-thread-page
+.crm-inbox-thread-action-danger {
+    color: #d92c56;
+}
+
+.local-subscriptions-inbox-thread-page
+.crm-inbox-thread-status-apply {
+    justify-self: start;
 }
 
 /* Bottom reply remains separated and visually explicit. */
@@ -40609,4 +40682,2022 @@ body.local-subscriptions-dashboard-page
 .crm-inbox-diagnostics-check-summary {
     margin-left: .5rem;
     font-weight: 400;
+}
+
+
+/* Commerce 7.96G2 — payment architecture table polish. */
+.commerce-config-provider-name {
+    white-space: nowrap;
+}
+
+
+/* Commerce 7.96G6 — payment-method icons in architecture matrix. */
+.commerce-payment-method-matrix-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    white-space: nowrap;
+}
+
+.commerce-payment-method-matrix-icon {
+    display: inline-block;
+    width: 28px;
+    height: 18px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.commerce-payment-method-matrix-icon-fallback {
+    width: 28px;
+    text-align: center;
+    font-size: 1.05rem;
+    flex: 0 0 auto;
+}
+
+
+/* Commerce 7.96G8 — harmonised payment provider operations UI. */
+.commerce-provider-ops-logo {
+    display: inline-block;
+    width: 42px;
+    height: 28px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.commerce-provider-ops-logo-fallback {
+    width: 42px;
+    text-align: center;
+    font-size: 1.3rem;
+}
+
+.commerce-provider-ops-card {
+    border-color: rgba(0, 0, 0, .08);
+}
+
+.commerce-provider-ops-card .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.commerce-provider-ops-card .btn {
+    align-self: flex-start;
+}
+
+.commerce-config-provider-hub {
+    background: rgba(255, 255, 255, .72);
+}
+
+
+/* Commerce 7.96G8.2 — compact credentials/webhooks accordion. */
+.commerce-payment-credentials-providers {
+    display: grid;
+    gap: .75rem;
+}
+
+.commerce-payment-credentials-provider,
+.commerce-payment-credentials-environment {
+    border: 1px solid rgba(0, 0, 0, .09);
+    border-radius: .75rem;
+    background: #fff;
+    overflow: hidden;
+}
+
+.commerce-payment-credentials-provider-summary,
+.commerce-payment-credentials-environment-summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.commerce-payment-credentials-provider-summary::-webkit-details-marker,
+.commerce-payment-credentials-environment-summary::-webkit-details-marker {
+    display: none;
+}
+
+.commerce-payment-credentials-provider-summary {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 64px;
+    padding: .9rem 1rem;
+}
+
+.commerce-payment-credentials-provider-summary::after,
+.commerce-payment-credentials-environment-summary::after {
+    content: "⌄";
+    margin-left: auto;
+    color: #6c757d;
+    transition: transform .15s ease;
+}
+
+.commerce-payment-credentials-provider[open]
+    > .commerce-payment-credentials-provider-summary::after,
+.commerce-payment-credentials-environment[open]
+    > .commerce-payment-credentials-environment-summary::after {
+    transform: rotate(180deg);
+}
+
+.commerce-payment-credentials-provider-logo {
+    width: 36px;
+    height: 24px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.commerce-payment-credentials-provider-name {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.commerce-payment-credentials-environments {
+    display: grid;
+    gap: .65rem;
+    padding: 0 1rem 1rem;
+}
+
+.commerce-payment-credentials-environment {
+    background: rgba(248, 249, 250, .72);
+}
+
+.commerce-payment-credentials-environment-summary {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-height: 48px;
+    padding: .7rem .85rem;
+}
+
+.commerce-payment-credentials-fields {
+    padding: .25rem .85rem 1rem;
+    border-top: 1px solid rgba(0, 0, 0, .06);
+}
+
+.commerce-payment-credentials-fields .commerce-config-edit-field {
+    height: 100%;
+    padding-top: .65rem;
+}
+
+@media (max-width: 767.98px) {
+    .commerce-payment-credentials-provider-summary {
+        flex-wrap: wrap;
+    }
+
+    .commerce-payment-credentials-provider-summary .badge {
+        margin-left: 48px;
+    }
+}
+
+
+/* Commerce 7.96G8.4 — reconciliation settings grouped by provider. */
+.commerce-payment-reconciliation-providers {
+    display: grid;
+    gap: .75rem;
+}
+
+.commerce-payment-reconciliation-provider {
+    border: 1px solid rgba(0, 0, 0, .09);
+    border-radius: .75rem;
+    background: #fff;
+    overflow: hidden;
+}
+
+.commerce-payment-reconciliation-provider-summary {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 60px;
+    padding: .85rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+.commerce-payment-reconciliation-provider-summary::-webkit-details-marker {
+    display: none;
+}
+
+.commerce-payment-reconciliation-provider-summary::after {
+    content: "⌄";
+    margin-left: auto;
+    color: #6c757d;
+    transition: transform .15s ease;
+}
+
+.commerce-payment-reconciliation-provider[open]
+    > .commerce-payment-reconciliation-provider-summary::after {
+    transform: rotate(180deg);
+}
+
+.commerce-payment-reconciliation-provider-logo {
+    width: 36px;
+    height: 24px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.commerce-payment-reconciliation-provider-name {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.commerce-payment-reconciliation-fields {
+    padding: .25rem 1rem 1rem;
+    border-top: 1px solid rgba(0, 0, 0, .06);
+    background: rgba(248, 249, 250, .62);
+}
+
+.commerce-payment-reconciliation-fields .commerce-config-edit-field {
+    height: 100%;
+    padding-top: .65rem;
+}
+
+@media (max-width: 767.98px) {
+    .commerce-payment-reconciliation-provider-summary {
+        flex-wrap: wrap;
+    }
+
+    .commerce-payment-reconciliation-provider-summary .badge {
+        margin-left: 48px;
+    }
+}
+
+
+/* H12.9-A5.4 — provisional-account styles loaded with plugin stylesheet. */
+.commerce-provisional-login-notice {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border: 1px solid rgba(246, 31, 130, .24);
+    border-radius: 1rem;
+    background: #fff6fa;
+    box-shadow: 0 .8rem 2.2rem rgba(52, 34, 95, .1);
+}
+.commerce-provisional-login-notice__icon { font-size: 1.8rem; }
+.commerce-provisional-login-notice__copy { min-width: 0; }
+.commerce-provisional-login-notice__copy strong { display: block; color: #34225f; }
+.commerce-provisional-login-notice__copy p { margin: .2rem 0 0; color: #6f6878; line-height: 1.45; }
+@media (max-width: 575.98px) {
+    .commerce-provisional-login-notice { grid-template-columns: auto minmax(0, 1fr); }
+    .commerce-provisional-login-notice .btn { grid-column: 1 / -1; width: 100%; }
+}
+
+
+/* J15H.1I.2 — shared provisional-account dialog. */
+.commerce-account-dialog {
+    width: min(92vw, 34rem);
+    padding: 0;
+    border: 0;
+    border-radius: 1.35rem;
+    background: #fff;
+    color: #2f1f35;
+    box-shadow: 0 1.5rem 5rem rgba(25, 20, 45, .28);
+}
+.commerce-account-dialog::backdrop {
+    background: rgba(22, 17, 38, .62);
+    backdrop-filter: blur(3px);
+}
+.commerce-account-dialog[open] {
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    text-align: center;
+}
+.commerce-account-dialog__icon {
+    margin-bottom: .8rem;
+    font-size: 2.6rem;
+}
+.commerce-account-dialog h2 {
+    margin: 0 0 .75rem;
+    color: #2f1f55;
+    font-weight: 800;
+}
+.commerce-account-dialog p {
+    color: #667085;
+    line-height: 1.6;
+}
+.commerce-account-dialog__benefits {
+    display: grid;
+    gap: .45rem;
+    margin: 1.2rem 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+}
+.commerce-account-dialog__benefits li::before {
+    margin-right: .55rem;
+    color: #168a58;
+    content: "✓";
+    font-weight: 800;
+}
+.commerce-account-dialog__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .45rem;
+}
+
+/* Commerce 7.97 M7.1 — pedagogical promotion admin cockpit. */
+.commerce-ped-admin-metrics {
+    margin-top: .25rem;
+}
+.commerce-ped-admin-metric-card {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    min-height: 5.25rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid #e6e8ee;
+    border-radius: .8rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+}
+.commerce-ped-admin-metric-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.45rem;
+    height: 2.45rem;
+    border-radius: .7rem;
+    background: #f6efff;
+    color: #6c42df;
+    font-size: 1.05rem;
+    flex: 0 0 auto;
+}
+.commerce-ped-admin-metric-value {
+    color: #281f4f;
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.05;
+}
+.commerce-ped-admin-metric-label {
+    margin-top: .2rem;
+    color: #6b7280;
+    font-size: .8rem;
+}
+.commerce-ped-admin-promotions-table td:last-child,
+.commerce-ped-admin-promotions-table th:last-child {
+    text-align: right;
+}
+.commerce-ped-admin-context {
+    margin: 0 0 1.25rem;
+    border: 1px solid #e4e7ec;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(31, 41, 55, .04);
+    overflow: hidden;
+}
+.commerce-ped-admin-context-main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.15rem .8rem;
+}
+.commerce-ped-admin-context-copy {
+    min-width: 0;
+}
+.commerce-ped-admin-context-title {
+    color: #281f4f;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+.commerce-ped-admin-context-key {
+    margin-top: .2rem;
+    color: #7a7f8c;
+    font-size: .77rem;
+    font-family: var(--font-monospace, monospace);
+}
+.commerce-ped-admin-context-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .35rem;
+}
+.commerce-ped-admin-context-meta {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .7rem;
+    padding: 0 1.15rem 1rem;
+}
+.commerce-ped-admin-meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    min-width: 0;
+    padding: .65rem .75rem;
+    border-radius: .65rem;
+    background: #faf9fd;
+}
+.commerce-ped-admin-meta-item > .fa {
+    margin-top: .15rem;
+    color: #7254d6;
+    flex: 0 0 auto;
+}
+.commerce-ped-admin-meta-copy {
+    min-width: 0;
+}
+.commerce-ped-admin-meta-label {
+    color: #848794;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .025em;
+}
+.commerce-ped-admin-meta-value {
+    margin-top: .1rem;
+    color: #30265d;
+    font-size: .82rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+.commerce-ped-admin-tabs {
+    display: flex;
+    gap: .15rem;
+    padding: 0 .7rem;
+    border-top: 1px solid #eceef2;
+    background: #fffafd;
+    overflow-x: auto;
+}
+.commerce-ped-admin-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    position: relative;
+    padding: .78rem .7rem;
+    color: #68647a;
+    font-size: .82rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.commerce-ped-admin-tab:hover {
+    color: #f72585;
+    text-decoration: none;
+}
+.commerce-ped-admin-tab.is-active {
+    color: #30265d;
+}
+.commerce-ped-admin-tab.is-active::after {
+    content: "";
+    position: absolute;
+    left: .7rem;
+    right: .7rem;
+    bottom: 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: #f72585;
+}
+.commerce-ped-admin-tab-count {
+    min-width: 1.35rem;
+    padding: .08rem .38rem;
+    border-radius: 999px;
+    background: #eee9fb;
+    color: #5c47a6;
+    font-size: .68rem;
+    line-height: 1.25;
+    text-align: center;
+}
+@media (max-width: 991.98px) {
+    .commerce-ped-admin-context-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 575.98px) {
+    .commerce-ped-admin-context-main {
+        flex-direction: column;
+    }
+    .commerce-ped-admin-context-badges {
+        justify-content: flex-start;
+    }
+    .commerce-ped-admin-context-meta {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Commerce 7.97 M7.2 — structured pedagogical promotion editor. */
+.commerce-ped-promotion-editor {
+    max-width: 1180px;
+}
+.commerce-ped-promotion-editor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+.commerce-ped-promotion-editor-section {
+    border: 1px solid #e5e7eb;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+    overflow: hidden;
+}
+.commerce-ped-promotion-editor-section:nth-child(3),
+.commerce-ped-promotion-editor-section:nth-child(4) {
+    grid-column: 1 / -1;
+}
+.commerce-ped-promotion-editor-section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: .8rem;
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid #eef0f3;
+    background: #fffafd;
+}
+.commerce-ped-promotion-editor-section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: .7rem;
+    background: #f5efff;
+    color: #6d4bd4;
+    flex: 0 0 auto;
+}
+.commerce-ped-promotion-editor-section-copy {
+    min-width: 0;
+}
+.commerce-ped-promotion-editor-section-title {
+    margin: 0;
+    color: #30265d;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+.commerce-ped-promotion-editor-section-description {
+    margin-top: .22rem;
+    color: #737784;
+    font-size: .8rem;
+    line-height: 1.4;
+}
+.commerce-ped-promotion-editor-section-body {
+    padding: 1rem 1.1rem 1.1rem;
+}
+.commerce-ped-promotion-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .95rem;
+}
+.commerce-ped-promotion-field {
+    min-width: 0;
+}
+.commerce-ped-promotion-field.is-wide {
+    grid-column: 1 / -1;
+}
+.commerce-ped-promotion-field .form-label {
+    margin-bottom: .35rem;
+    color: #30265d;
+    font-size: .82rem;
+    font-weight: 650;
+}
+.commerce-ped-promotion-field .form-text {
+    margin-top: .35rem;
+    color: #7a7f8c;
+    font-size: .74rem;
+    line-height: 1.35;
+}
+.commerce-ped-promotion-publish-card {
+    margin-bottom: .85rem;
+    padding: .85rem .95rem;
+    border: 1px solid #e9e3f7;
+    border-radius: .7rem;
+    background: #faf8ff;
+}
+.commerce-ped-promotion-publish-label {
+    color: #30265d;
+    font-weight: 650;
+}
+.commerce-ped-promotion-publish-help {
+    margin-top: .35rem;
+    padding-left: 2.35rem;
+    color: #747786;
+    font-size: .76rem;
+    line-height: 1.4;
+}
+.commerce-ped-promotion-sales-state {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin: 0 0 .9rem;
+    padding: .62rem .75rem;
+    border-radius: .6rem;
+    font-size: .78rem;
+    font-weight: 600;
+}
+.commerce-ped-promotion-sales-state.is-open {
+    background: #edf9f1;
+    color: #197544;
+}
+.commerce-ped-promotion-sales-state.is-closed {
+    background: #f6f7f9;
+    color: #636977;
+}
+.commerce-ped-promotion-editor-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    margin-top: .85rem;
+    padding: .7rem .8rem;
+    border-left: 3px solid #f72585;
+    border-radius: .45rem;
+    background: #fff7fb;
+    color: #5f6170;
+    font-size: .76rem;
+    line-height: 1.4;
+}
+.commerce-ped-promotion-editor-note > .fa {
+    margin-top: .15rem;
+    color: #f72585;
+    flex: 0 0 auto;
+}
+.commerce-ped-promotion-editor-section.is-compact .commerce-ped-promotion-field {
+    max-width: 24rem;
+}
+.commerce-ped-promotion-editor-actions {
+    position: sticky;
+    bottom: .75rem;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: .8rem .95rem;
+    border: 1px solid #e4e7ec;
+    border-radius: .75rem;
+    background: rgba(255, 255, 255, .97);
+    box-shadow: 0 -4px 18px rgba(31, 41, 55, .07);
+    backdrop-filter: blur(6px);
+}
+.commerce-ped-promotion-editor-actions-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: .45rem;
+    max-width: 42rem;
+    color: #777b88;
+    font-size: .75rem;
+    line-height: 1.35;
+}
+.commerce-ped-promotion-editor-actions-hint > .fa {
+    margin-top: .13rem;
+    color: #7254d6;
+    flex: 0 0 auto;
+}
+.commerce-ped-promotion-editor-actions-buttons {
+    display: flex;
+    gap: .5rem;
+    flex: 0 0 auto;
+}
+@media (max-width: 991.98px) {
+    .commerce-ped-promotion-editor-grid {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-promotion-editor-section:nth-child(3),
+    .commerce-ped-promotion-editor-section:nth-child(4) {
+        grid-column: auto;
+    }
+}
+@media (max-width: 575.98px) {
+    .commerce-ped-promotion-fields-grid {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-promotion-field.is-wide {
+        grid-column: auto;
+    }
+    .commerce-ped-promotion-publish-help {
+        padding-left: 0;
+    }
+    .commerce-ped-promotion-editor-actions {
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .commerce-ped-promotion-editor-actions-buttons {
+        width: 100%;
+    }
+    .commerce-ped-promotion-editor-actions-buttons .btn {
+        flex: 1 1 0;
+    }
+}
+
+/* Commerce 7.97 M7.3 — operational Offers + Calendar UX. */
+.commerce-ped-m73-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem;
+    margin: 0 0 1rem;
+}
+.commerce-ped-m73-metric {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    min-width: 0;
+    padding: .78rem .9rem;
+    border: 1px solid #e6e8ee;
+    border-radius: .72rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+}
+.commerce-ped-m73-metric > .fa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: .6rem;
+    background: #f5efff;
+    color: #6d4bd4;
+    flex: 0 0 auto;
+}
+.commerce-ped-m73-metric-value {
+    overflow: hidden;
+    color: #30265d;
+    font-size: .98rem;
+    font-weight: 750;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.commerce-ped-m73-metric-label {
+    margin-top: .15rem;
+    color: #7a7f8c;
+    font-size: .7rem;
+    line-height: 1.2;
+}
+.commerce-ped-m73-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, .72fr) minmax(0, 1.58fr);
+    gap: 1rem;
+    align-items: start;
+}
+.commerce-ped-m73-side,
+.commerce-ped-m73-main {
+    min-width: 0;
+}
+.commerce-ped-m73-panel {
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+}
+.commerce-ped-m73-panel-header {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .95rem 1rem;
+    border-bottom: 1px solid #eef0f3;
+    background: #fffafd;
+}
+.commerce-ped-m73-panel-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: .65rem;
+    background: #f4edff;
+    color: #6d4bd4;
+    flex: 0 0 auto;
+}
+.commerce-ped-m73-panel-title,
+.commerce-ped-m73-section-title {
+    margin: 0;
+    color: #30265d;
+    font-size: .98rem;
+    font-weight: 750;
+    line-height: 1.25;
+}
+.commerce-ped-m73-panel-description,
+.commerce-ped-m73-section-description {
+    margin-top: .2rem;
+    color: #777b88;
+    font-size: .75rem;
+    line-height: 1.4;
+}
+.commerce-ped-m73-panel-body {
+    padding: 1rem;
+}
+.commerce-ped-m73-form {
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+}
+.commerce-ped-m73-field .form-label {
+    margin-bottom: .35rem;
+    color: #30265d;
+    font-size: .8rem;
+    font-weight: 650;
+}
+.commerce-ped-m73-field .form-text {
+    margin-top: .35rem;
+    color: #7b7f8b;
+    font-size: .71rem;
+    line-height: 1.35;
+}
+.commerce-ped-m73-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .45rem;
+    margin-top: .75rem;
+    padding: .72rem .8rem;
+    border-left: 3px solid #f72585;
+    border-radius: .5rem;
+    background: #fff7fb;
+    color: #676b77;
+    font-size: .72rem;
+    line-height: 1.4;
+}
+.commerce-ped-m73-note > .fa {
+    margin-top: .1rem;
+    color: #f72585;
+    flex: 0 0 auto;
+}
+.commerce-ped-m73-section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: .15rem 0 .7rem;
+}
+.commerce-ped-m73-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.65rem;
+    height: 1.65rem;
+    padding: 0 .45rem;
+    border-radius: 999px;
+    background: #eee9fb;
+    color: #5c47a6;
+    font-size: .72rem;
+    font-weight: 700;
+    flex: 0 0 auto;
+}
+.commerce-ped-m73-empty {
+    padding: .8rem;
+    border: 1px dashed #dcdfe7;
+    border-radius: .65rem;
+    background: #fafbfc;
+    color: #727784;
+    font-size: .76rem;
+    line-height: 1.4;
+}
+.commerce-ped-m73-empty.is-large {
+    padding: 1.25rem;
+    text-align: center;
+}
+.commerce-ped-m73-empty.is-compact {
+    padding: .65rem .72rem;
+}
+
+/* Offers. */
+.commerce-ped-offer-list {
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+}
+.commerce-ped-offer-card {
+    overflow: hidden;
+    border: 1px solid #e4e7ec;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+}
+.commerce-ped-offer-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: .95rem 1rem .8rem;
+}
+.commerce-ped-offer-card-title-wrap {
+    min-width: 0;
+}
+.commerce-ped-offer-card-sku {
+    margin-bottom: .2rem;
+    color: #8a8e99;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+.commerce-ped-offer-card-title {
+    margin: 0;
+    color: #30265d;
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.3;
+}
+.commerce-ped-offer-status {
+    display: inline-flex;
+    align-items: center;
+    padding: .25rem .55rem;
+    border-radius: 999px;
+    font-size: .67rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.commerce-ped-offer-status.is-active {
+    background: #eaf7ee;
+    color: #197544;
+}
+.commerce-ped-offer-status.is-muted {
+    background: #f0f1f4;
+    color: #6d7280;
+}
+.commerce-ped-offer-card-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid #eff0f3;
+    border-bottom: 1px solid #eff0f3;
+    background: #fcfcfd;
+}
+.commerce-ped-offer-card-metric {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    min-width: 0;
+    padding: .7rem .85rem;
+    border-right: 1px solid #eff0f3;
+}
+.commerce-ped-offer-card-metric:last-child {
+    border-right: 0;
+}
+.commerce-ped-offer-card-metric > .fa {
+    color: #7357cc;
+    flex: 0 0 auto;
+}
+.commerce-ped-offer-card-metric-value {
+    color: #30265d;
+    font-size: .9rem;
+    font-weight: 750;
+    line-height: 1.1;
+}
+.commerce-ped-offer-card-metric-label {
+    margin-top: .12rem;
+    color: #858995;
+    font-size: .65rem;
+    line-height: 1.2;
+}
+.commerce-ped-offer-card-body {
+    display: grid;
+    grid-template-columns: minmax(180px, .75fr) minmax(0, 1.45fr);
+    gap: 1rem;
+    padding: 1rem;
+}
+.commerce-ped-offer-setting {
+    min-width: 0;
+}
+.commerce-ped-offer-setting-heading {
+    margin-bottom: .65rem;
+}
+.commerce-ped-offer-setting-title {
+    margin: 0;
+    color: #30265d;
+    font-size: .82rem;
+    font-weight: 700;
+}
+.commerce-ped-offer-setting-description {
+    margin-top: .18rem;
+    color: #7c808c;
+    font-size: .68rem;
+    line-height: 1.35;
+}
+.commerce-ped-offer-capacity-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .45rem;
+    align-items: center;
+}
+.commerce-ped-offer-catalogue-prices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-bottom: .65rem;
+}
+.commerce-ped-offer-catalogue-price {
+    display: inline-flex;
+    align-items: center;
+    padding: .27rem .55rem;
+    border-radius: .45rem;
+    background: #f4f1fb;
+    color: #554678;
+    font-size: .7rem;
+    font-weight: 700;
+}
+.commerce-ped-offer-owner-form {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+}
+.commerce-ped-offer-owner-row {
+    display: grid;
+    grid-template-columns: 3.25rem minmax(90px, 8rem) minmax(0, 1fr);
+    gap: .45rem;
+    align-items: center;
+}
+.commerce-ped-offer-owner-currency {
+    margin: 0;
+    color: #30265d;
+    font-size: .72rem;
+    font-weight: 750;
+}
+.commerce-ped-offer-owner-reference {
+    color: #858995;
+    font-size: .66rem;
+}
+.commerce-ped-offer-owner-help {
+    color: #7a7f8c;
+    font-size: .67rem;
+    line-height: 1.35;
+}
+.commerce-ped-offer-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .72rem 1rem;
+    border-top: 1px solid #eff0f3;
+    background: #fcfcfd;
+}
+.commerce-ped-offer-card-footer-help {
+    color: #848894;
+    font-size: .67rem;
+    line-height: 1.3;
+}
+
+/* Calendar timeline. */
+.commerce-ped-m73-calendar-coverage {
+    margin-top: .75rem;
+    padding: .8rem;
+    border: 1px solid #e6e8ee;
+    border-radius: .72rem;
+    background: #fff;
+}
+.commerce-ped-m73-calendar-coverage-head {
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    color: #30265d;
+    font-size: .74rem;
+}
+.commerce-ped-m73-calendar-coverage-track {
+    overflow: hidden;
+    height: .42rem;
+    margin: .55rem 0 .45rem;
+    border-radius: 999px;
+    background: #eeeaf5;
+}
+.commerce-ped-m73-calendar-coverage-bar {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #7254d6, #f72585);
+}
+.commerce-ped-m73-calendar-coverage-note {
+    color: #7d818d;
+    font-size: .68rem;
+    line-height: 1.35;
+}
+.commerce-ped-calendar-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: .78rem;
+}
+.commerce-ped-calendar-timeline::before {
+    content: "";
+    position: absolute;
+    top: 1.2rem;
+    bottom: 1.2rem;
+    left: 1.08rem;
+    width: 2px;
+    background: #e6e1f1;
+}
+.commerce-ped-calendar-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+    gap: .72rem;
+    align-items: start;
+}
+.commerce-ped-calendar-step {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border: 2px solid #e1daf2;
+    border-radius: 50%;
+    background: #fff;
+    color: #7254d6;
+    font-size: .72rem;
+    font-weight: 750;
+}
+.commerce-ped-calendar-item.is-open .commerce-ped-calendar-step {
+    border-color: #bfe4cc;
+    background: #edf9f1;
+    color: #197544;
+}
+.commerce-ped-calendar-item.is-next .commerce-ped-calendar-step {
+    border-color: #f7aacb;
+    background: #fff2f8;
+    color: #e71973;
+    box-shadow: 0 0 0 4px rgba(247, 37, 133, .07);
+}
+.commerce-ped-calendar-card {
+    overflow: hidden;
+    border: 1px solid #e4e7ec;
+    border-radius: .8rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+}
+.commerce-ped-calendar-item.is-next .commerce-ped-calendar-card {
+    border-color: #f1bfd4;
+    box-shadow: 0 4px 16px rgba(247, 37, 133, .06);
+}
+.commerce-ped-calendar-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .85rem;
+    padding: .85rem .95rem;
+}
+.commerce-ped-calendar-card-title-wrap {
+    min-width: 0;
+}
+.commerce-ped-calendar-card-title {
+    margin: 0;
+    color: #30265d;
+    font-size: .9rem;
+    font-weight: 750;
+    line-height: 1.3;
+}
+.commerce-ped-calendar-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .32rem;
+    margin-top: .42rem;
+}
+.commerce-ped-calendar-state {
+    display: inline-flex;
+    align-items: center;
+    padding: .2rem .46rem;
+    border-radius: 999px;
+    font-size: .63rem;
+    font-weight: 700;
+}
+.commerce-ped-calendar-state.is-open {
+    background: #eaf7ee;
+    color: #197544;
+}
+.commerce-ped-calendar-state.is-future {
+    background: #f0edf8;
+    color: #654da8;
+}
+.commerce-ped-calendar-state.is-next {
+    background: #fff0f7;
+    color: #d91869;
+}
+.commerce-ped-calendar-date {
+    display: inline-flex;
+    align-items: center;
+    gap: .38rem;
+    max-width: 15rem;
+    color: #5f6370;
+    font-size: .71rem;
+    font-weight: 600;
+    text-align: right;
+}
+.commerce-ped-calendar-date > .fa {
+    color: #7254d6;
+}
+.commerce-ped-calendar-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .65rem;
+    padding: .65rem .95rem;
+    border-top: 1px solid #eff0f3;
+    background: #fcfcfd;
+}
+.commerce-ped-calendar-edit-form {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    min-width: 0;
+}
+.commerce-ped-calendar-edit-form .form-control {
+    min-width: 12rem;
+}
+
+@media (max-width: 1199.98px) {
+    .commerce-ped-m73-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .commerce-ped-m73-layout {
+        grid-template-columns: minmax(240px, .82fr) minmax(0, 1.35fr);
+    }
+    .commerce-ped-offer-card-body {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 991.98px) {
+    .commerce-ped-m73-layout {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-m73-side {
+        order: 0;
+    }
+    .commerce-ped-m73-main {
+        order: 1;
+    }
+}
+@media (max-width: 575.98px) {
+    .commerce-ped-m73-metrics {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-offer-card-header,
+    .commerce-ped-calendar-card-header,
+    .commerce-ped-offer-card-footer,
+    .commerce-ped-calendar-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .commerce-ped-offer-card-metrics {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-offer-card-metric {
+        border-right: 0;
+        border-bottom: 1px solid #eff0f3;
+    }
+    .commerce-ped-offer-card-metric:last-child {
+        border-bottom: 0;
+    }
+    .commerce-ped-offer-owner-row {
+        grid-template-columns: 2.8rem minmax(0, 1fr);
+    }
+    .commerce-ped-offer-owner-reference {
+        grid-column: 2;
+    }
+    .commerce-ped-calendar-date {
+        max-width: none;
+        text-align: left;
+    }
+    .commerce-ped-calendar-edit-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .commerce-ped-calendar-edit-form .form-control {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+/* Commerce 7.97 M7.4 — Groups + Participants orchestration UX. */
+.commerce-ped-m74-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem;
+    margin: 0 0 1rem;
+}
+.commerce-ped-m74-metric {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 4.9rem;
+    padding: .85rem .95rem;
+    border: 1px solid #e6e8ee;
+    border-radius: .8rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+}
+.commerce-ped-m74-metric > .fa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: .65rem;
+    background: #f5efff;
+    color: #6d4bd4;
+    flex: 0 0 auto;
+}
+.commerce-ped-m74-metric.is-good > .fa {
+    background: #edf9f1;
+    color: #197544;
+}
+.commerce-ped-m74-metric.is-warning > .fa {
+    background: #fff4e5;
+    color: #a85d05;
+}
+.commerce-ped-m74-metric.is-muted > .fa {
+    background: #f3f4f6;
+    color: #737784;
+}
+.commerce-ped-m74-metric-value {
+    color: #2f2658;
+    font-size: 1.25rem;
+    font-weight: 750;
+    line-height: 1.05;
+}
+.commerce-ped-m74-metric-label {
+    margin-top: .18rem;
+    color: #7a7f8c;
+    font-size: .75rem;
+}
+.commerce-ped-m74-callout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 1rem;
+    padding: .75rem .9rem;
+    border: 1px solid #eadff8;
+    border-radius: .7rem;
+    background: #faf8ff;
+    color: #554b72;
+    font-size: .79rem;
+}
+.commerce-ped-m74-callout.is-warning {
+    border-color: #f2d9b4;
+    background: #fff8ee;
+    color: #7e551a;
+}
+.commerce-ped-m74-callout.is-info {
+    border-color: #dce6f7;
+    background: #f6f9ff;
+    color: #4a5d78;
+}
+.commerce-ped-m74-callout-copy {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    min-width: 0;
+}
+.commerce-ped-m74-callout .fa {
+    flex: 0 0 auto;
+}
+.commerce-ped-m74-layout {
+    display: grid;
+    grid-template-columns: minmax(17rem, 22rem) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+.commerce-ped-m74-side {
+    display: grid;
+    gap: 1rem;
+}
+.commerce-ped-m74-panel {
+    border: 1px solid #e5e7eb;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+    overflow: hidden;
+}
+.commerce-ped-m74-panel-header {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .95rem 1rem;
+    border-bottom: 1px solid #eef0f3;
+    background: #fffafd;
+}
+.commerce-ped-m74-panel-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: .65rem;
+    background: #f5efff;
+    color: #6d4bd4;
+    flex: 0 0 auto;
+}
+.commerce-ped-m74-panel-title {
+    margin: 0;
+    color: #30265d;
+    font-size: .96rem;
+    font-weight: 700;
+}
+.commerce-ped-m74-panel-description {
+    margin-top: .18rem;
+    color: #777b88;
+    font-size: .74rem;
+    line-height: 1.38;
+}
+.commerce-ped-m74-panel-body {
+    padding: 1rem;
+}
+.commerce-ped-m74-toggle {
+    margin-bottom: .9rem;
+    padding: .7rem .75rem;
+    border-radius: .6rem;
+    background: #faf8ff;
+    color: #403762;
+    font-size: .81rem;
+    font-weight: 600;
+}
+.commerce-ped-m74-field {
+    margin-bottom: .85rem;
+}
+.commerce-ped-m74-field .form-label,
+.commerce-ped-m74-group-actions .form-label,
+.commerce-ped-m74-control-form .form-label {
+    margin-bottom: .3rem;
+    color: #403762;
+    font-size: .76rem;
+    font-weight: 650;
+}
+.commerce-ped-m74-field .form-text {
+    color: #858895;
+    font-size: .7rem;
+    line-height: 1.35;
+}
+.commerce-ped-m74-main {
+    min-width: 0;
+}
+.commerce-ped-m74-section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .8rem;
+}
+.commerce-ped-m74-section-title {
+    margin: 0;
+    color: #30265d;
+    font-size: 1rem;
+    font-weight: 700;
+}
+.commerce-ped-m74-section-description {
+    margin-top: .2rem;
+    color: #7b7f8b;
+    font-size: .75rem;
+}
+.commerce-ped-m74-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 .55rem;
+    border-radius: 999px;
+    background: #f0ebfb;
+    color: #6047ad;
+    font-size: .75rem;
+    font-weight: 700;
+}
+.commerce-ped-m74-empty {
+    padding: .8rem .9rem;
+    border: 1px dashed #d9dce4;
+    border-radius: .7rem;
+    background: #fafbfc;
+    color: #777b88;
+    font-size: .78rem;
+    line-height: 1.4;
+}
+.commerce-ped-m74-empty.is-large {
+    padding: 1.4rem;
+    text-align: center;
+}
+.commerce-ped-m74-group-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem;
+}
+.commerce-ped-m74-group-card {
+    border: 1px solid #e4e7ec;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+    overflow: hidden;
+}
+.commerce-ped-m74-group-card.is-inactive {
+    opacity: .72;
+}
+.commerce-ped-m74-group-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .9rem 1rem .75rem;
+}
+.commerce-ped-m74-group-title-wrap {
+    min-width: 0;
+}
+.commerce-ped-m74-group-title {
+    margin: 0;
+    color: #30265d;
+    font-size: .98rem;
+    font-weight: 750;
+    line-height: 1.25;
+}
+.commerce-ped-m74-group-offer {
+    margin-top: .2rem;
+    color: #818592;
+    font-size: .71rem;
+    overflow-wrap: anywhere;
+}
+.commerce-ped-m74-state {
+    display: inline-flex;
+    padding: .2rem .52rem;
+    border-radius: 999px;
+    font-size: .66rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.commerce-ped-m74-state.is-active {
+    background: #eaf8ef;
+    color: #197544;
+}
+.commerce-ped-m74-state.is-inactive {
+    background: #f1f2f4;
+    color: #6e7480;
+}
+.commerce-ped-m74-occupancy {
+    padding: 0 1rem .8rem;
+}
+.commerce-ped-m74-occupancy-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .35rem;
+    color: #5f6470;
+    font-size: .72rem;
+}
+.commerce-ped-m74-occupancy-value {
+    color: #4f3d93;
+    font-weight: 700;
+}
+.commerce-ped-m74-occupancy-value.is-full {
+    color: #b35a12;
+}
+.commerce-ped-m74-occupancy-track {
+    height: .42rem;
+    border-radius: 999px;
+    background: #f0edf6;
+    overflow: hidden;
+}
+.commerce-ped-m74-occupancy-bar {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #8a68e8, #f72585);
+}
+.commerce-ped-m74-occupancy-bar.is-full {
+    background: #e58b32;
+}
+.commerce-ped-m74-group-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+    padding: .75rem 1rem;
+    border-top: 1px solid #f0f1f4;
+    border-bottom: 1px solid #f0f1f4;
+    background: #fcfbfe;
+}
+.commerce-ped-m74-group-meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .45rem;
+    min-width: 0;
+}
+.commerce-ped-m74-group-meta-item > .fa {
+    margin-top: .12rem;
+    color: #7254d6;
+    flex: 0 0 auto;
+}
+.commerce-ped-m74-group-meta-label,
+.commerce-ped-m74-participant-meta-label {
+    color: #9295a0;
+    font-size: .64rem;
+    text-transform: uppercase;
+    letter-spacing: .025em;
+}
+.commerce-ped-m74-group-meta-value,
+.commerce-ped-m74-participant-meta-value {
+    margin-top: .08rem;
+    color: #454153;
+    font-size: .73rem;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+.commerce-ped-m74-group-actions {
+    padding: .85rem 1rem 1rem;
+}
+.commerce-ped-m74-bind-row,
+.commerce-ped-m74-control-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.commerce-ped-m74-bind-row .form-select,
+.commerce-ped-m74-control-row .form-select {
+    min-width: 0;
+}
+.commerce-ped-m74-telegram-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .38rem;
+    margin-top: .65rem;
+    color: #6552a6;
+    font-size: .74rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.commerce-ped-m74-telegram-link:hover {
+    color: #f72585;
+    text-decoration: none;
+}
+.commerce-ped-m74-backfill-form {
+    margin: 0;
+    flex: 0 0 auto;
+}
+.commerce-ped-m74-participant-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .85rem;
+}
+.commerce-ped-m74-search {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.commerce-ped-m74-search-box {
+    position: relative;
+    width: min(34rem, 100%);
+}
+.commerce-ped-m74-search-box > .fa {
+    position: absolute;
+    top: 50%;
+    left: .72rem;
+    transform: translateY(-50%);
+    color: #999ca6;
+    pointer-events: none;
+}
+.commerce-ped-m74-search-box .form-control {
+    padding-left: 2.15rem;
+}
+.commerce-ped-m74-result-count {
+    color: #7d818e;
+    font-size: .74rem;
+    white-space: nowrap;
+}
+.commerce-ped-m74-participant-list {
+    display: grid;
+    gap: .75rem;
+}
+.commerce-ped-m74-participant-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 25rem);
+    gap: 1rem;
+    padding: .95rem 1rem;
+    border: 1px solid #e4e7ec;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, .035);
+}
+.commerce-ped-m74-participant-main {
+    min-width: 0;
+}
+.commerce-ped-m74-participant-identity {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+}
+.commerce-ped-m74-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.55rem;
+    height: 2.55rem;
+    border-radius: 50%;
+    background: #f3eefc;
+    color: #6d4bd4;
+    font-size: 1.15rem;
+    flex: 0 0 auto;
+}
+.commerce-ped-m74-participant-copy {
+    min-width: 0;
+}
+.commerce-ped-m74-participant-name {
+    margin: 0;
+    color: #30265d;
+    font-size: .93rem;
+    font-weight: 750;
+}
+.commerce-ped-m74-participant-email {
+    margin-top: .12rem;
+    color: #838793;
+    font-size: .72rem;
+    overflow-wrap: anywhere;
+}
+.commerce-ped-m74-participant-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-top: .5rem;
+}
+.commerce-ped-m74-participant-badge {
+    display: inline-flex;
+    padding: .18rem .46rem;
+    border-radius: 999px;
+    font-size: .64rem;
+    font-weight: 700;
+}
+.commerce-ped-m74-participant-badge.is-profile {
+    background: #f2edfc;
+    color: #5e45a6;
+}
+.commerce-ped-m74-participant-badge.is-group {
+    background: #eaf8ef;
+    color: #197544;
+}
+.commerce-ped-m74-participant-badge.is-muted {
+    background: #f2f3f5;
+    color: #747984;
+}
+.commerce-ped-m74-participant-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+    margin-top: .8rem;
+}
+.commerce-ped-m74-participant-meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .4rem;
+    min-width: 0;
+}
+.commerce-ped-m74-participant-meta-item > .fa {
+    margin-top: .12rem;
+    color: #7254d6;
+    flex: 0 0 auto;
+}
+.commerce-ped-m74-participant-controls {
+    display: grid;
+    gap: .65rem;
+    align-content: center;
+    padding-left: 1rem;
+    border-left: 1px solid #eef0f3;
+}
+.commerce-ped-m74-control-form {
+    min-width: 0;
+}
+.commerce-ped-m74-control-row .btn {
+    flex: 0 0 auto;
+}
+.commerce-ped-m74-no-group-action {
+    padding: .55rem .65rem;
+    border-radius: .55rem;
+    background: #f7f8fa;
+    color: #858995;
+    font-size: .7rem;
+}
+@media (max-width: 1199.98px) {
+    .commerce-ped-m74-group-grid {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-m74-participant-card {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-m74-participant-controls {
+        padding-left: 0;
+        padding-top: .8rem;
+        border-left: 0;
+        border-top: 1px solid #eef0f3;
+    }
+}
+@media (max-width: 991.98px) {
+    .commerce-ped-m74-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .commerce-ped-m74-layout {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-m74-side {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 767.98px) {
+    .commerce-ped-m74-side {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-m74-participant-toolbar,
+    .commerce-ped-m74-search,
+    .commerce-ped-m74-callout {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .commerce-ped-m74-result-count {
+        white-space: normal;
+    }
+    .commerce-ped-m74-search-box {
+        width: 100%;
+    }
+    .commerce-ped-m74-participant-meta {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 575.98px) {
+    .commerce-ped-m74-metrics {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-m74-group-meta {
+        grid-template-columns: 1fr;
+    }
+    .commerce-ped-m74-bind-row,
+    .commerce-ped-m74-control-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .commerce-ped-m74-bind-row .btn,
+    .commerce-ped-m74-control-row .btn {
+        width: 100%;
+    }
+}
+
+/* M7.4.1 — group editing + admin panel icon alignment. */
+.commerce-ped-m73-panel-icon,
+.commerce-ped-m74-panel-icon {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    font-size: .9rem;
+    line-height: 1;
+    text-align: center;
+}
+.commerce-ped-m73-panel-icon::before,
+.commerce-ped-m74-panel-icon::before {
+    display: block;
+    margin: 0;
+    line-height: 1;
+}
+.commerce-ped-m74-group-meta-item.is-wide {
+    grid-column: 1 / -1;
+}
+.commerce-ped-m74-group-meta-copy {
+    min-width: 0;
+}
+.commerce-ped-m74-telegram-url {
+    display: block;
+    max-width: 100%;
+    color: #5f4aa0;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.commerce-ped-m74-telegram-url:hover {
+    color: #f72585;
+    text-decoration: underline;
+}
+.commerce-ped-m741-group-edit {
+    margin-bottom: .75rem;
+    border: 1px solid #ece8f7;
+    border-radius: .65rem;
+    background: #fbf9ff;
+}
+.commerce-ped-m741-group-edit-summary {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .58rem .7rem;
+    color: #5b4796;
+    font-size: .75rem;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+}
+.commerce-ped-m741-group-edit-summary::-webkit-details-marker {
+    display: none;
+}
+.commerce-ped-m741-group-edit-summary::after {
+    content: "▾";
+    margin-left: auto;
+    color: #8979bb;
+    transition: transform .15s ease;
+}
+.commerce-ped-m741-group-edit[open] .commerce-ped-m741-group-edit-summary::after {
+    transform: rotate(180deg);
+}
+.commerce-ped-m741-group-edit-form {
+    padding: .75rem;
+    border-top: 1px solid #ece8f7;
+}
+.commerce-ped-m741-group-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .1rem .65rem;
+}
+.commerce-ped-m741-group-edit-form .commerce-ped-m74-field {
+    margin-bottom: .65rem;
+}
+@media (max-width: 767.98px) {
+    .commerce-ped-m741-group-edit-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Commerce 7.97 M7.5 — scalable pedagogy admin + navigation polish. */
+.commerce-ped-admin-metric-icon,
+.commerce-ped-promotion-editor-section-icon,
+.commerce-ped-m73-panel-icon,
+.commerce-ped-m74-panel-icon {
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    line-height: 0;
+    text-align: center;
+    vertical-align: middle;
+}
+.commerce-ped-admin-metric-icon::before,
+.commerce-ped-promotion-editor-section-icon::before,
+.commerce-ped-m73-panel-icon::before,
+.commerce-ped-m74-panel-icon::before {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    line-height: 1;
+}
+.commerce-ped-m75-local-nav {
+    margin: -.15rem 0 1rem;
+}
+.commerce-ped-m75-local-nav-list {
+    display: inline-flex;
+    gap: .25rem;
+    padding: .25rem;
+    border: 1px solid #e6e2f0;
+    border-radius: .75rem;
+    background: #faf8ff;
+}
+.commerce-ped-m75-local-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .5rem .75rem;
+    border-radius: .55rem;
+    color: #665d7c;
+    font-size: .78rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+.commerce-ped-m75-local-nav-link:hover {
+    color: #f72585;
+    text-decoration: none;
+}
+.commerce-ped-m75-local-nav-link.is-active {
+    background: #fff;
+    color: #30265d;
+    box-shadow: 0 1px 4px rgba(48, 38, 93, .08);
+}
+.commerce-ped-admin-context-actions {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: .45rem;
+    flex: 0 0 auto;
+}
+.commerce-ped-admin-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    color: #6552a6;
+    font-size: .76rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+.commerce-ped-admin-back-link:hover {
+    color: #f72585;
+    text-decoration: none;
+}
+.commerce-ped-m75-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+.commerce-ped-m75-pagination .pagination {
+    margin-bottom: 0;
+}
+@media (max-width: 575.98px) {
+    .commerce-ped-m75-local-nav-list {
+        display: flex;
+        width: 100%;
+        overflow-x: auto;
+    }
+    .commerce-ped-admin-context-actions {
+        align-items: flex-start;
+        width: 100%;
+    }
 }

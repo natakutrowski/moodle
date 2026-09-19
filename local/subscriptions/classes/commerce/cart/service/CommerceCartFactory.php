@@ -11,10 +11,24 @@ use local_subscriptions\commerce\cart\domain\CommerceCart;
 /** Creates empty carts without coupling the domain to Moodle. */
 final class CommerceCartFactory {
     public function create(int $customerid, string $currency, array $metadata = []): CommerceCart {
+        return $this->create_with_uuid(
+            bin2hex(random_bytes(16)),
+            $customerid,
+            $currency,
+            $metadata
+        );
+    }
+
+    public function create_with_uuid(
+        string $uuid,
+        int $customerid,
+        string $currency,
+        array $metadata = []
+    ): CommerceCart {
         $now = time();
 
         return new CommerceCart(
-            bin2hex(random_bytes(16)),
+            $uuid,
             $customerid,
             $currency,
             [],

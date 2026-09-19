@@ -135,6 +135,27 @@ $technicaldetails = html_writer::tag('summary', get_string('commerce_mail_techni
     );
 echo html_writer::tag('details', $technicaldetails, ['class' => 'mb-3']);
 
+if (trim((string)($record->lasterror ?? '')) !== '') {
+    echo html_writer::div(
+        html_writer::tag(
+            'strong',
+            get_string(
+                'commerce_mail_last_error',
+                'local_subscriptions'
+            )
+        )
+        . html_writer::tag(
+            'pre',
+            s((string)$record->lasterror),
+            [
+                'class' => 'small mb-0 mt-2 text-wrap',
+                'style' => 'white-space:pre-wrap;',
+            ]
+        ),
+        'alert alert-warning py-2 px-3 mb-3'
+    );
+}
+
 if ((string)$record->status === 'sent') {
     $transport = !empty($CFG->smtphosts)
         ? get_string('commerce_mail_delivery_transport_smtp', 'local_subscriptions', s((string)$CFG->smtphosts))

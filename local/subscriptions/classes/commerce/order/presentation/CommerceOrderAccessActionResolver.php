@@ -33,8 +33,12 @@ final class CommerceOrderAccessActionResolver {
         CommercePurchaseGrantSummary $grant,
         ?CommercePurchaseFulfillmentSummary $fulfillment
     ): CommerceOrderAccessPresentation {
-        $status = strtolower($fulfillment?->status ?? $grant->status);
-        $fulfilled = in_array($status, self::COMPLETE_STATUSES, true);
+        $grantstatus = strtolower(trim($grant->status));
+        $revoked = in_array($grantstatus, ['revoked', 'refunded', 'cancelled', 'canceled'], true);
+        $status = $revoked
+            ? $grantstatus
+            : strtolower($fulfillment?->status ?? $grant->status);
+        $fulfilled = !$revoked && in_array($status, self::COMPLETE_STATUSES, true);
         $reason = $fulfilled ? null : $this->reason_from_status($status);
         $available = false;
         $metadata = [
@@ -48,6 +52,14 @@ final class CommerceOrderAccessActionResolver {
             $reason = 'expired';
         } elseif ($grant->type === 'course_access') {
             $courseid = $this->resolve_course_id($grant);
+            $metadata['courseid'] = $courseid;
+            if ($courseid === null || !$this->database->record_exists('course', ['id' => $courseid])) {
+                $reason = 'resource_missing';
+            } else {
+                $available = $fulfilled;
+            }
+        } elseif ($grant->type === 'pedagogical_promotion_join') {
+            $courseid = $this->resolve_promotion_join_course_id($grant);
             $metadata['courseid'] = $courseid;
             if ($courseid === null || !$this->database->record_exists('course', ['id' => $courseid])) {
                 $reason = 'resource_missing';
@@ -98,7 +110,7 @@ final class CommerceOrderAccessActionResolver {
 
         $url = null;
         if ($available) {
-            if ($grant->type === 'course_access') {
+            if (in_array($grant->type, ['course_access', 'pedagogical_promotion_join'], true)) {
                 $courseid = (int)($metadata['courseid'] ?? 0);
                 $url = $courseid > 0
                     ? UrlFactory::course($courseid)->out(false)
@@ -113,7 +125,9 @@ final class CommerceOrderAccessActionResolver {
 
         return new CommerceOrderAccessPresentation(
             $grant->type,
-            $grant->type === 'course_access' ? 'open_course' : ($grant->type === 'digital_download' ? 'download_file' : 'open_access'),
+            in_array($grant->type, ['course_access', 'pedagogical_promotion_join'], true)
+                ? 'open_course'
+                : ($grant->type === 'digital_download' ? 'download_file' : 'open_access'),
             $status,
             $available,
             $url,
@@ -142,10 +156,23 @@ final class CommerceOrderAccessActionResolver {
         return null;
     }
 
+
+    private function resolve_promotion_join_course_id(CommercePurchaseGrantSummary $grant): ?int {
+        $courseid = (int)($grant->configuration['promotion_join_course_id'] ?? 0);
+        if ($courseid > 0) {
+            return $courseid;
+        }
+        if (preg_match('/^promotion:\d+:course:(\d+):product:\d+$/', $grant->resourcekey, $matches) === 1) {
+            return (int)$matches[1];
+        }
+        return null;
+    }
+
     private function reason_from_status(string $status): string {
         return match ($status) {
             'failed', 'error' => 'fulfillment_failed',
             'cancelled', 'canceled' => 'cancelled',
+            'revoked', 'refunded' => 'refunded',
             default => 'pending',
         };
     }

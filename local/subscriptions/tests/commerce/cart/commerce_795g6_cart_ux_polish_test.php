@@ -32,15 +32,22 @@ final class commerce_795g6_cart_ux_polish_test extends \advanced_testcase {
         self::assertStringContainsString('commerce/payment_reassurance', $source);
     }
 
-    public function test_payment_reassurance_prioritises_immediate_access_and_keeps_labels_compact(): void {
+    public function test_payment_reassurance_exposes_current_trust_strip_and_keeps_labels_compact(): void {
         $source = file_get_contents(__DIR__ . '/../../../templates/commerce/payment_reassurance.mustache');
         self::assertIsString($source);
 
-        $accessposition = strpos($source, '{{instantaccesslabel}}');
-        $secureposition = strpos($source, '{{paymentsecurelabel}}');
-        self::assertNotFalse($accessposition);
-        self::assertNotFalse($secureposition);
-        self::assertLessThan($secureposition, $accessposition);
+        foreach ([
+            '{{paymentsecurelabel}}',
+            '{{checkoutsecureencrypted}}',
+            '{{checkoutdataprotected}}',
+            '{{instantaccesslabel}}',
+        ] as $token) {
+            self::assertStringContainsString($token, $source);
+        }
+        self::assertStringContainsString(
+            'commerce-checkout-trust-strip',
+            $source
+        );
 
         $css = file_get_contents(__DIR__ . '/../../../styles/storefront.css');
         self::assertIsString($css);

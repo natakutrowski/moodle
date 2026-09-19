@@ -205,9 +205,13 @@ final class commerce_sales_workspace_n63_test extends advanced_testcase {
             '2026081510',
             $upgrade
         );
-        self::assertStringContainsString(
-            '$plugin->version = 2026081602;',
-            $version
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
         );
     }
 

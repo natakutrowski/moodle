@@ -10107,3 +10107,35 @@
     0%, 72%, 100% { transform: translateX(-110%); }
     84% { transform: translateX(110%); }
 }
+
+.commerce-pedagogical-capacity {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin: .65rem 0;
+    font-weight: 700;
+    font-size: .92rem;
+}
+.commerce-pedagogical-capacity.is-low,
+.commerce-pedagogical-capacity.is-sold-out {
+    font-weight: 800;
+}
+.commerce-pedagogical-capacity.is-sold-out,
+.commerce-pedagogical-capacity.is-closed {
+    opacity: .8;
+}
+
+.commerce-pedagogical-sales-deadline {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin: -.25rem 0 .9rem;
+    font-size: .82rem;
+    font-weight: 600;
+    opacity: .76;
+}
+
+.commerce-showroom-btn--disabled {
+    cursor: not-allowed;
+    opacity: .58;
+}

@@ -2,6 +2,8 @@
 
 namespace local_subscriptions\commerce\payment;
 
+use local_subscriptions\commerce\payment\method\CommercePaymentMethod;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -22,7 +24,8 @@ final class CommercePaymentRequest {
         private readonly ?string $returnurl = null,
         private readonly ?string $cancelurl = null,
         private readonly array $metadata = [],
-        private readonly ?int $createdat = null
+        private readonly ?int $createdat = null,
+        private readonly ?string $preferredpaymentmethod = null
     ) {
         if (trim($reference) === '') {
             throw new \coding_exception(
@@ -109,6 +112,17 @@ final class CommercePaymentRequest {
 
         return $provider !== ''
             ? $provider
+            : null;
+    }
+
+    public function get_preferred_payment_method(): ?string {
+        if ($this->preferredpaymentmethod === null) {
+            return null;
+        }
+
+        $method = trim($this->preferredpaymentmethod);
+        return $method !== ''
+            ? CommercePaymentMethod::normalise($method)
             : null;
     }
 

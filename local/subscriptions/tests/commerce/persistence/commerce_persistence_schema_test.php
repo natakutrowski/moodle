@@ -10,10 +10,22 @@ final class commerce_persistence_schema_test extends \advanced_testcase {
     public function test_native_table_names_are_unique_and_plugin_scoped(): void {
         $tables = CommercePersistenceSchema::table_names();
 
-        $this->assertCount(4, $tables);
-        $this->assertCount(4, array_unique($tables));
+        $this->assertNotEmpty($tables);
+        $this->assertCount(count($tables), array_unique($tables));
         foreach ($tables as $table) {
-            $this->assertStringStartsWith('local_subscriptions_commerce_', $table);
+            $isfullprefix = str_starts_with(
+                $table,
+                'local_subscriptions_commerce_'
+            );
+            $iscompactprefix = str_starts_with(
+                $table,
+                'local_subs_commerce_'
+            );
+
+            $this->assertTrue(
+                $isfullprefix || $iscompactprefix,
+                'Native Commerce table is not scoped to local_subscriptions: ' . $table
+            );
             $this->assertLessThanOrEqual(55, strlen($table));
         }
     }

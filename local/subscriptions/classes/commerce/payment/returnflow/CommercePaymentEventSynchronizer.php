@@ -45,10 +45,46 @@ final class CommercePaymentEventSynchronizer {
 
         $this->assert_provider_identity($attempt, $event);
 
-        // A duplicated webhook must never downgrade or recreate an already paid attempt.
-        if ($attempt->get_status() === CommercePaymentAttemptStatus::PAID
-                && $status === CommercePaymentAttemptStatus::PAID) {
+        $currentstatus = $attempt->get_status();
+
+        // M4.5: provider events can arrive out of order. Once durable success
+        // has been observed, a late failure/expiry callback must never
+        // downgrade that same payment attempt. Conversely, FAILED/CANCELLED
+        // may still become PAID when the provider later confirms settlement.
+        if (
+            in_array($currentstatus, [
+                CommercePaymentAttemptStatus::PAID,
+                CommercePaymentAttemptStatus::COMPLETED,
+                CommercePaymentAttemptStatus::REFUNDED,
+            ], true)
+            && in_array($status, [
+                CommercePaymentAttemptStatus::FAILED,
+                CommercePaymentAttemptStatus::CANCELLED,
+            ], true)
+        ) {
+            $this->log('ignored_terminal_downgrade', $event, $attempt, $status);
+            return true;
+        }
+
+        // A duplicated successful webhook must never recreate a paid attempt.
+        if (
+            in_array($currentstatus, [
+                CommercePaymentAttemptStatus::PAID,
+                CommercePaymentAttemptStatus::COMPLETED,
+            ], true)
+            && $status === CommercePaymentAttemptStatus::PAID
+        ) {
             $this->log('already_paid', $event, $attempt);
+            return true;
+        }
+
+        // A refunded attempt is also terminal: replayed checkout completion
+        // must not resurrect it as PAID.
+        if (
+            $currentstatus === CommercePaymentAttemptStatus::REFUNDED
+            && $status === CommercePaymentAttemptStatus::PAID
+        ) {
+            $this->log('ignored_terminal_replay', $event, $attempt, $status);
             return true;
         }
 
@@ -179,6 +215,13 @@ final class CommercePaymentEventSynchronizer {
         ?CommercePaymentAttempt $attempt = null,
         ?string $status = null
     ): void {
+        // PHPUnit deliberately exercises out-of-order webhook scenarios. Keep
+        // production diagnostics, but do not pollute targeted TU output with
+        // expected lifecycle logs.
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST) {
+            return;
+        }
+
         error_log('[local_subscriptions][commerce_payment_webhook] ' . json_encode([
             'result' => $result,
             'event_type' => $event->type,

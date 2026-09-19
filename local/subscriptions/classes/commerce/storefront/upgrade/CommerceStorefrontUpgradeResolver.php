@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\storefront\readmodel\CommerceStorefrontUpgrade;
 use local_subscriptions\constants\Operation;
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
 use local_subscriptions\domain\SubscriptionAdvisor;
 
 /** Resolves the canonical Legacy plan upgrade attached to a Native Storefront product. */
@@ -61,14 +62,18 @@ final class CommerceStorefrontUpgradeResolver {
             $toplan = $toplanid > 0
                 ? $this->db->get_record('subscription_plan', ['id' => $toplanid], 'name', IGNORE_MISSING)
                 : null;
-            $amountminor = (int)round(((float)($option['amount'] ?? 0.0)) * 100);
+            $optioncurrency = strtoupper((string)($option['currency'] ?? $currency));
+            $amountminor = CommerceCurrencyAmount::from_major_input(
+                (string)($option['amount'] ?? '0'),
+                $optioncurrency
+            )->get_amount_minor();
             if ($amountminor <= 0) {
                 continue;
             }
 
             return new CommerceStorefrontUpgrade(
                 $amountminor,
-                strtoupper((string)($option['currency'] ?? $currency)),
+                $optioncurrency,
                 trim((string)($fromplan->name ?? '')),
                 trim((string)($toplan->name ?? '')),
                 trim((string)($option['summary'] ?? '')),

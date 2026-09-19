@@ -24,6 +24,62 @@ final class commerce_795h61_checkout_recovery_test extends advanced_testcase {
         $this->assertSame(['complete_fulfillment'], $diagnostic->get_actions());
     }
 
+    public function test_fulfilled_native_purchase_is_healthy_without_legacy_fulfillment_rows(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $reference = 'rec-h61-native';
+        $purchaseid = $this->insert_purchase($reference, 'fulfilled');
+        $this->insert_payment($purchaseid, 'paid');
+
+        $now = time();
+        $grantreference = 'grant-rec-h61-native';
+        $DB->insert_record('local_subs_commerce_grant', (object)[
+            'grantreference' => $grantreference,
+            'idempotencykey' => 'grant-key-rec-h61-native',
+            'purchasereference' => $reference,
+            'itemreference' => 'COURSE.TEST',
+            'productsku' => 'COURSE.TEST',
+            'type' => 'pedagogical_promotion_join',
+            'resourcekey' => 'promotion:4:course:17:product:28',
+            'quantity' => 1,
+            'beneficiaryuserid' => 2,
+            'beneficiaryemail' => 'recovery@example.test',
+            'validfrom' => $now,
+            'validuntil' => null,
+            'status' => 'active',
+            'configurationjson' => '{}',
+            'metadatajson' => '{}',
+            'timecreated' => $now,
+            'timemodified' => $now,
+        ]);
+        $DB->insert_record('local_subs_commerce_ful_state', (object)[
+            'grantreference' => $grantreference,
+            'idempotencykey' => 'state-rec-h61-native',
+            'granttype' => 'pedagogical_promotion_join',
+            'handlerclass' => 'test',
+            'status' => 'completed',
+            'attempts' => 1,
+            'lastexecutionreference' => 'exec-rec-h61-native',
+            'lastsource' => 'phpunit',
+            'lastactoruserid' => null,
+            'lastpayloadjson' => '{}',
+            'lastmessage' => 'done',
+            'lasterrorclass' => null,
+            'timecreated' => $now,
+            'timestarted' => $now,
+            'timecompleted' => $now + 1,
+            'timemodified' => $now + 1,
+        ]);
+
+        $diagnostic = CommerceCheckoutRecoveryService::create($DB)
+            ->diagnose($reference);
+
+        $this->assertTrue($diagnostic->is_healthy());
+        $this->assertSame([], $diagnostic->get_issues());
+        $this->assertSame([], $diagnostic->get_actions());
+    }
+
     public function test_unpaid_purchase_is_never_repairable(): void {
         global $DB;
         $this->resetAfterTest(true);

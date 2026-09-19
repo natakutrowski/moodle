@@ -279,6 +279,10 @@ class subscription_config {
         return self::plugin_path() . 'admin/commerce/plans/index.php';
     }
 
+    public static function admin_commerce_education_courses_page(): string {
+        return self::plugin_path() . 'admin/commerce/education/courses.php';
+    }
+
     public static function commerce_plan_view_page(): string {
         return self::plugin_path() . 'admin/commerce/plans/view.php';
     }

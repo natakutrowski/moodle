@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\bundle\pricing\CommerceBundlePricingService;
 use local_subscriptions\commerce\bundle\service\CommerceBundleReadService;
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 
 final class CommerceBundlePricingAuditor {
     public function __construct(
@@ -16,7 +17,8 @@ final class CommerceBundlePricingAuditor {
     ) {
     }
 
-    public function audit(array $currencies = ['EUR', 'RUB']): array {
+    public function audit(?array $currencies = null): array {
+        $currencies ??= (new CommerceCurrencyRegistry())->enabled();
         $report = ['bundles' => 0, 'configured' => 0, 'quotes' => 0, 'errors' => [], 'details' => []];
         foreach ($this->bundles->all() as $bundle) {
             $report['bundles']++;

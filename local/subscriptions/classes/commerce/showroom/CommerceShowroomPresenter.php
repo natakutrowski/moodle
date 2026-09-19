@@ -7,6 +7,8 @@ namespace local_subscriptions\commerce\showroom;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\url\UrlFactory;
+use local_subscriptions\commerce\education\capacity\CommercePedagogicalCapacityPresenter;
+use local_subscriptions\commerce\checkout\flow\CommerceDirectPurchaseSession;
 
 /** Maps a Showroom definition and Commerce offers to Mustache data. */
 final class CommerceShowroomPresenter {
@@ -26,9 +28,29 @@ final class CommerceShowroomPresenter {
             ? 'course'
             : (in_array('course', $ownedroles, true) && !in_array('pdf', $ownedroles, true) ? 'pdf' : 'bundle');
 
+        $capacitypresenter =
+            CommercePedagogicalCapacityPresenter::create();
+
         foreach ($offers as &$offer) {
             $role = (string)($offer['role'] ?? '');
+            $offersku = (string)($offer['sku'] ?? '');
+            $capacity = $capacitypresenter->for_product(
+                $offersku,
+                time(),
+                CommerceDirectPurchaseSession::cart_uuid_for_sku($offersku)
+            );
+            $offer = array_merge($offer, $capacity);
+            if (
+                !empty($offer['haspedagogicalcapacity'])
+                && empty($offer['pedagogicalbuyavailable'])
+            ) {
+                $offer['canbuy'] = false;
+            }
             $offer['cannotbuy'] = empty($offer['canbuy']);
+            $offer['soldoutlabel'] = get_string(
+                'commerce_capacity_sold_out_cta',
+                'local_subscriptions'
+            );
             $offer['ownedlabel'] = get_string('commerce_storefront_owned', 'local_subscriptions');
             $offer['ownedcompactlabel'] = get_string('commerce_showroom_owned_compact', 'local_subscriptions');
             $offer['ispreferred'] = $role === $preferredrole && empty($offer['owned']);

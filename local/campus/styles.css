@@ -2542,3 +2542,38 @@
         object-position: center;
     }
 }
+
+/* 7.97 M6.3 — promotion/access status shared with Mon Campus. */
+.campus-mycourse-card__access--progressive {
+    color: #6842d9;
+}
+.campus-mycourse-card__learning-status {
+    display: grid;
+    gap: .42rem;
+    margin-top: .85rem;
+    padding: .8rem .9rem;
+    border: 1px solid rgba(104, 66, 217, .13);
+    border-radius: .85rem;
+    background: rgba(104, 66, 217, .035);
+    color: #655d70;
+    font-size: .82rem;
+    line-height: 1.42;
+}
+.campus-mycourse-card__learning-status > span {
+    display: flex;
+    align-items: flex-start;
+    gap: .48rem;
+}
+.campus-mycourse-card__learning-status i {
+    width: 1rem;
+    flex: 0 0 1rem;
+    margin-top: .16rem;
+    color: #6842d9;
+    text-align: center;
+}
+@media (max-width: 575.98px) {
+    .campus-mycourse-card__learning-status {
+        padding: .72rem .78rem;
+        font-size: .78rem;
+    }
+}

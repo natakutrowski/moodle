@@ -6,17 +6,21 @@ use local_subscriptions\url\UrlFactory;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCartTransferService;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutSessionRepository;
-use local_subscriptions\support\Region;
+use local_subscriptions\commerce\checkout\guest\CommerceAuthenticatedCartReconciliationService;
 
 \local_subscriptions\subscription_config::guard_public_access();
 require_login();
 
+$from = optional_param('from', '', PARAM_ALPHANUMEXT);
+
+$currencyregistry = new CommerceCurrencyRegistry();
 $currency = strtoupper(optional_param('currency', '', PARAM_ALPHA));
-if (!in_array($currency, ['EUR', 'RUB'], true)) {
-    $currency = in_array(Region::detect_country(), ['RU', 'BY'], true) ? 'RUB' : 'EUR';
+if (!$currencyregistry->is_enabled($currency)) {
+    $currency = $currencyregistry->enabled()[0] ?? 'EUR';
 }
 
 $carturl = UrlFactory::cart(['currency' => $currency]);
@@ -59,12 +63,46 @@ $transferred = CommerceGuestCartTransferService::create()->transfer(
 $metadata = array_replace($guestsession->get_metadata(), [
     'cart_transferred' => $transferred !== null,
     'authenticated_at' => time(),
+    'authenticated_resume_source' =>
+        $from === 'verified_identity_login'
+            ? 'verified_identity_login'
+            : 'guest_checkout_resume',
 ]);
 
 if ($transferred !== null) {
     $metadata['cart_uuid'] = $transferred->get_uuid();
     $metadata['cart_item_count'] = count($transferred->get_items());
 }
+
+// H12.9-A5.7.6: transfer preserves Guest intent, then authenticated
+// reconciliation replays the merged cart through the canonical Cart admission
+// rules. This reuses effective Native + Legacy ownership, bundle and upgrade
+// eligibility instead of inventing a checkout-specific ownership definition.
+$reconciliation =
+    (new CommerceAuthenticatedCartReconciliationService(
+        CommerceCartRuntimeFactory::create()
+    ))->reconcile(
+        (int)$USER->id,
+        $currency,
+        current_language()
+    );
+
+$metadata['authenticated_cart_reconciled_at'] = time();
+$metadata['authenticated_cart_items_before'] =
+    $reconciliation['before'];
+$metadata['authenticated_cart_items_after'] =
+    $reconciliation['after'];
+$metadata['authenticated_cart_items_removed'] =
+    $reconciliation['removed'];
+$metadata['authenticated_cart_removed_skus'] =
+    $reconciliation['removedskus'];
+
+// Once the authenticated cart has been successfully reconciled, the original
+// anonymous snapshot is no longer authoritative. Keeping it would cause the
+// generic GuestCartRecoveryService to merge already-owned items back into the
+// user's cart on the very next checkout request.
+unset($metadata['guest_cart_snapshot']);
+$metadata['guest_cart_snapshot_consumed_at'] = time();
 
 $repository->transition($guestsession, 'active', [
     'metadatajson' => $metadata,
@@ -84,11 +122,35 @@ $checkouturl = new moodle_url('/local/subscriptions/commerce_checkout.php', $che
 
 $snapshot = CommerceCartRuntimeFactory::create()->snapshot((int)$USER->id, $currency, current_language());
 if ($snapshot->get_items() === []) {
+    $message =
+        $reconciliation['removed'] > 0
+            ? get_string(
+                'commerce_guest_cart_all_already_owned',
+                'local_subscriptions'
+            )
+            : get_string(
+                'commerce_cart_empty_text',
+                'local_subscriptions'
+            );
+
     redirect(
         $carturl,
-        get_string('commerce_cart_empty_text', 'local_subscriptions'),
+        $message,
         null,
-        \core\output\notification::NOTIFY_WARNING
+        \core\output\notification::NOTIFY_INFO
+    );
+}
+
+if ($reconciliation['removed'] > 0) {
+    redirect(
+        $checkouturl,
+        get_string(
+            'commerce_guest_cart_owned_items_removed',
+            'local_subscriptions',
+            $reconciliation['removed']
+        ),
+        null,
+        \core\output\notification::NOTIFY_INFO
     );
 }
 

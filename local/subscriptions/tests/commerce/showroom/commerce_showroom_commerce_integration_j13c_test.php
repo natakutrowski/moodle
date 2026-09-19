@@ -10,9 +10,30 @@ use local_subscriptions\commerce\showroom\CommerceShowroomCurrencyResolver;
 use local_subscriptions\commerce\showroom\CommerceShowroomTrackingContext;
 
 final class commerce_showroom_commerce_integration_j13c_test extends \advanced_testcase {
-    public function test_currency_resolver_honours_explicit_and_stored_values(): void {
-        self::assertSame('USD', CommerceShowroomCurrencyResolver::resolve(['EUR', 'USD'], 'usd', 'EUR'));
-        self::assertSame('EUR', CommerceShowroomCurrencyResolver::resolve(['EUR', 'USD'], '', 'eur'));
+    public function test_currency_resolver_honours_explicit_and_stored_enabled_values(): void {
+        $this->resetAfterTest();
+        set_config(
+            'commerce_enabled_currencies',
+            'EUR,USD',
+            'local_subscriptions'
+        );
+
+        self::assertSame(
+            'USD',
+            CommerceShowroomCurrencyResolver::resolve(
+                ['EUR', 'USD'],
+                'usd',
+                'EUR'
+            )
+        );
+        self::assertSame(
+            'EUR',
+            CommerceShowroomCurrencyResolver::resolve(
+                ['EUR', 'USD'],
+                '',
+                'eur'
+            )
+        );
     }
 
     public function test_tracking_metadata_is_canonical(): void {

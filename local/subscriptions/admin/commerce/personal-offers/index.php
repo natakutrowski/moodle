@@ -7,6 +7,8 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\personaloffer\domain\CommercePersonalOffer;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmPresentation;
 use local_subscriptions\commerce\personaloffer\repository\MoodleCommercePersonalOfferRepository;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\currency\CurrencyFormatter;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessNavigationRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessPolishRenderer;
@@ -155,8 +157,14 @@ $pricinglabel = static function(CommercePersonalOffer $offer): string {
     $amounts = $terms->get_data()['pricing']['amounts'] ?? [];
     $parts = [];
     foreach ($amounts as $currency => $minor) {
+        $code = Currency::sanitize((string)$currency);
+        if ($code === '') {
+            continue;
+        }
+        $marker = Currency::visual_marker($code);
         $parts[] = html_writer::div(
-            s((string)$currency) . ' ' . format_float(((int)$minor) / 100, 2),
+            ($marker !== '' ? $marker . ' ' : '')
+                . s(CurrencyFormatter::format_minor_code((int)$minor, $code)),
             'crm-offers-access-condition-price'
         );
     }

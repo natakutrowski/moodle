@@ -7,12 +7,14 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\postpayment\DigitalPostPaymentProcessor;
 use local_subscriptions\commerce\postpayment\SubscriptionPostPaymentProcessor;
 use local_subscriptions\commerce\payment\repository\CommercePaymentRepository;
+use local_subscriptions\commerce\payment\attempt\CommercePaymentAttemptStatus;
 use local_subscriptions\commerce\payment\returnflow\CommercePaymentEventSynchronizer;
 use local_subscriptions\commerce\fulfillment\native\checkout\CommerceNativePaidPurchaseCompleter;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestAccountActivator;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutSessionRepository;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutLifecycleService;
 use local_subscriptions\commerce\persistence\CommercePersistenceSchema;
+use local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationPurchaseLifecycle;
 use local_subscriptions\commerce\runtime\switching\CommerceRuntimeDispatcher;
 use local_subscriptions\digital\digital_payment_service;
 use local_subscriptions\domain\PaymentService;
@@ -27,8 +29,9 @@ final class EventRouter {
     public static function handle(InternalEvent $event): void {
         global $DB;
 
+        $payments = new CommercePaymentRepository($DB);
         $synchronized = (new CommercePaymentEventSynchronizer(
-            new CommercePaymentRepository($DB)
+            $payments
         ))->synchronize($event);
 
         if (self::requires_native_payment_sync($event) && !$synchronized) {
@@ -46,7 +49,40 @@ final class EventRouter {
             return;
         }
 
-        if ($synchronized && in_array($event->type, ['payment_failed', 'checkout_expired'], true)) {
+        if ($synchronized && in_array(
+            $event->type,
+            ['payment_failed', 'checkout_expired'],
+            true
+        )) {
+            $expectedstatus = $event->type === 'checkout_expired'
+                ? CommercePaymentAttemptStatus::CANCELLED
+                : CommercePaymentAttemptStatus::FAILED;
+
+            // M4.5: a late provider failure/expiry can race with a successful
+            // callback. The synchronizer protects the durable payment status;
+            // side effects must obey that same winner. If the Native attempt
+            // did not actually transition to the failure state, do not release
+            // seats, mark guest checkout failed, or dispatch Legacy failure.
+            if (!self::native_attempt_has_status(
+                $event,
+                $payments,
+                $expectedstatus
+            )) {
+                return;
+            }
+
+            if ($event->type === 'checkout_expired') {
+                // Provider checkout expiry is terminal for that attempt. The
+                // active hold may now be released; ordinary payment_failed does
+                // NOT surrender the anchored hold so the customer can retry.
+                CommercePedagogicalSeatReservationPurchaseLifecycle::create(
+                    $DB
+                )->release_for_payment_event(
+                    $event,
+                    time()
+                );
+            }
+
             self::update_guest_checkout_failure($event);
         }
 
@@ -143,6 +179,24 @@ final class EventRouter {
     }
 
 
+
+    private static function native_attempt_has_status(
+        InternalEvent $event,
+        CommercePaymentRepository $payments,
+        string $expectedstatus
+    ): bool {
+        $paymentid = $event->meta['commerce_payment_id'] ?? null;
+        if (is_string($paymentid) && ctype_digit($paymentid)) {
+            $paymentid = (int)$paymentid;
+        }
+        if (!is_int($paymentid) || $paymentid <= 0) {
+            return false;
+        }
+
+        $attempt = $payments->find($paymentid);
+        return $attempt !== null
+            && $attempt->get_status() === $expectedstatus;
+    }
 
     private static function update_guest_checkout_failure(InternalEvent $event): void {
         global $DB;

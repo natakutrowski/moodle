@@ -735,7 +735,8 @@ final class InboxThreadRenderer {
                 [
                     'type' => 'submit',
                     'class' =>
-                        'btn btn-sm btn-primary',
+                        'crm-inbox-thread-action-link '
+                        . 'crm-inbox-thread-status-apply',
                     'data-loading-label' =>
                         get_string(
                             'crm_inbox_processing',
@@ -771,7 +772,7 @@ final class InboxThreadRenderer {
                         'local_subscriptions'
                     )
                 ),
-                'btn btn-sm btn-outline-primary'
+                'crm-inbox-thread-action-link'
             );
         } else {
             $utilities .= self::action_form(
@@ -792,7 +793,7 @@ final class InboxThreadRenderer {
                         'local_subscriptions'
                     )
                 ),
-                'btn btn-sm btn-outline-secondary'
+                'crm-inbox-thread-action-link'
             );
 
             $utilities .= self::action_form(
@@ -813,7 +814,7 @@ final class InboxThreadRenderer {
                         'local_subscriptions'
                     )
                 ),
-                'btn btn-sm btn-outline-danger',
+                'crm-inbox-thread-action-link crm-inbox-thread-action-danger',
                 null,
                 get_string(
                     'crm_inbox_trash_confirm',
@@ -862,8 +863,7 @@ final class InboxThreadRenderer {
                 ),
                 [
                     'class' =>
-                        'btn btn-sm '
-                        . 'btn-outline-primary',
+                        'crm-inbox-thread-action-link',
                 ]
             );
         }

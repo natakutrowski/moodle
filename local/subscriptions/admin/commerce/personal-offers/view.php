@@ -4,6 +4,8 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\subscription_config;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\currency\CurrencyFormatter;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferAdminService;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmPresentation;
 use local_subscriptions\commerce\personaloffer\domain\CommercePersonalOffer;
@@ -229,13 +231,17 @@ $strategylabels = [
 $pricinglabel = $strategylabels[$strategy] ?? $strategy;
 $pricingvalues = [];
 if (isset($pricing['amounts']) && is_array($pricing['amounts'])) {
-    $symbols = ['EUR' => '€', 'RUB' => '₽', 'USD' => '$'];
     foreach ($pricing['amounts'] as $currency => $minor) {
-        $major = ((int)$minor) / 100;
-        $formatted = ((int)$minor % 100 === 0)
-            ? format_float($major, 0)
-            : format_float($major, 2);
-        $pricingvalues[] = $formatted . ' ' . ($symbols[$currency] ?? $currency);
+        $currency = Currency::sanitize((string)$currency);
+        if ($currency === '' || !Currency::is_known($currency)) {
+            continue;
+        }
+        $marker = Currency::visual_marker($currency);
+        $symbol = Currency::symbol($currency);
+        $formatted = CurrencyFormatter::format_minor_code((int)$minor, $currency);
+        $pricingvalues[] = ($marker !== '' ? $marker . ' ' : '')
+            . $formatted
+            . ($symbol !== '' ? ' (' . $symbol . ')' : '');
     }
 } else if (isset($pricing['basispoints'])) {
     $pricingvalues[] = format_float(((int)$pricing['basispoints']) / 100, 2) . ' %';

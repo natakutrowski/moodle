@@ -3,6 +3,9 @@ require_once(__DIR__ . '/../../../../../config.php');
 
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
+use local_subscriptions\currency\CommerceCurrencyLabelFormatter;
+use local_subscriptions\currency\Currency;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferAdminService;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmInput;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmPresentation;
@@ -30,10 +33,20 @@ $title = get_string('commerce_personal_offer_edit', 'local_subscriptions');
 CrmPageConfigurator::configure($PAGE, $context, $url, $title, 'local-subscriptions-commerce-personal-offer-edit');
 $products = $DB->get_records('local_subs_commerce_product', [], 'name ASC', 'id,sku,name,status');
 $campaigns = $DB->get_records('local_subs_commerce_offer_campaign', [], 'name ASC', 'id,campaignkey,name');
-$currencies = ['EUR','RUB'];
 $pricing = $offer->get_terms()->get_data()['pricing'] ?? [];
 $strategy = (string)($pricing['strategy'] ?? CommercePersonalOfferTerms::STRATEGY_FIXED_PRICE);
 $amounts = (array)($pricing['amounts'] ?? []);
+$activecurrencies = array_values(array_unique(array_map(
+    static fn($record): string => strtoupper((string)$record->currency),
+    array_values($DB->get_records_sql(
+        "SELECT DISTINCT currency FROM {local_subs_commerce_prod_price} WHERE active = 1 ORDER BY currency"
+    ))
+)));
+$requestedcurrencies = array_values(array_unique(array_merge($activecurrencies, array_keys($amounts))));
+$currencies = array_values(array_filter(
+    Currency::known_codes(),
+    static fn(string $code): bool => in_array($code, $requestedcurrencies, true)
+));
 $percent = isset($pricing['basispoints']) ? ((int)$pricing['basispoints'] / 100) : 20;
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && confirm_sesskey()) {
@@ -105,10 +118,21 @@ echo html_writer::select([
 
 echo html_writer::start_div('row g-3 mb-3');
 foreach($currencies as $currency){
-    $value=array_key_exists($currency,$amounts)?format_float(((int)$amounts[$currency])/100,2,false):'';
+    $decimals = Currency::minor_unit_exponent($currency);
+    $step = $decimals === 0 ? '1' : '0.' . str_repeat('0', $decimals - 1) . '1';
+    $value = array_key_exists($currency, $amounts)
+        ? CommerceCurrencyAmount::major_input_from_minor((int)$amounts[$currency], $currency)
+        : '';
     echo html_writer::start_div('col-md-6');
-    echo html_writer::tag('label',$currency.($currency==='EUR'?' (€)':' (₽)'),['class'=>'form-label']);
-    echo html_writer::empty_tag('input',['name'=>'amount_'.strtolower($currency),'type'=>'number','step'=>'0.01','min'=>'0','value'=>$value,'class'=>'form-control']);
+    echo html_writer::tag('label', CommerceCurrencyLabelFormatter::format($currency), ['class'=>'form-label']);
+    echo html_writer::empty_tag('input',[
+        'name'=>'amount_'.strtolower($currency),
+        'type'=>'number',
+        'step'=>$step,
+        'min'=>'0',
+        'value'=>$value,
+        'class'=>'form-control'
+    ]);
     echo html_writer::end_div();
 }
 echo html_writer::start_div('col-md-6'); echo html_writer::tag('label',get_string('commerce_personal_offer_percent','local_subscriptions'),['class'=>'form-label']); echo html_writer::empty_tag('input',['name'=>'percent','type'=>'number','min'=>'1','max'=>'100','value'=>$percent,'class'=>'form-control']); echo html_writer::end_div();

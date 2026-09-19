@@ -33,6 +33,15 @@ final class CommercePersonalOfferDestinationResolver {
             'definition' => null,
         ];
 
+        $individual = CommercePersonalOfferIndividualDestinationService::create(
+            $this->db
+        )->resolve_from_metadata(
+            $offer->get_metadata()
+        );
+        if ($individual !== null) {
+            return $individual;
+        }
+
         $campaignkey = trim((string)$offer->get_campaign_key());
         if ($campaignkey === '') {
             return $checkout;

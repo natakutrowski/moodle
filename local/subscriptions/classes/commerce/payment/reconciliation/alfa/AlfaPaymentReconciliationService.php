@@ -85,9 +85,12 @@ final class AlfaPaymentReconciliationService implements AlfaPaymentReconciliatio
         $event->meta['reconciliation_source'] = 'alfa_payment_reconciliation';
         $event->meta['reconciliation_checked_at'] = time();
 
-        $transaction = $this->database->start_delegated_transaction();
+        // Do not wrap the complete post-payment pipeline in one delegated
+        // transaction. The finalizer reaches fulfillment, transactional mail
+        // and invoice generation, which own narrower transaction boundaries.
+        // Keeping an outer transaction here can turn a recoverable inner mail
+        // failure into an invalid commit for the confirmed payment flow.
         $this->finalizer->finalize($event);
-        $transaction->allow_commit();
 
         // Re-read Campus state without a second provider call. The Alfa status
         // used to authorize this execution remains the immutable evidence for
@@ -127,9 +130,33 @@ final class AlfaPaymentReconciliationService implements AlfaPaymentReconciliatio
             && $provider->currency === strtoupper((string)$purchase->currency);
         $approvedmatches = $provider->approvedamountminor === null
             || $provider->approvedamountminor === $attempt->get_amount_minor();
+        $providerrefunded = $provider->is_refunded_state();
+        $expecteddepositedamountminor =
+            $providerrefunded
+                ? max(
+                    0,
+                    $attempt->get_amount_minor()
+                        - (int)($provider->refundedamountminor ?? 0)
+                )
+                : $attempt->get_amount_minor();
+
+        $refundamountmatches = !$providerrefunded
+            || (
+                $provider->refundedamountminor !== null
+                && $provider->refundedamountminor >= 0
+                && $provider->refundedamountminor
+                    <= $attempt->get_amount_minor()
+            );
+
         $depositedmatches = $provider->depositedamountminor === null
-            || $provider->depositedamountminor === $attempt->get_amount_minor();
-        $providerpaid = $provider->is_paid();
+            || $provider->depositedamountminor
+                === $expecteddepositedamountminor;
+
+        // "providerpaid" historically means "financially coherent enough to
+        // trust the provider state". A refunded Alfa payment still satisfies
+        // that requirement when deposited + refunded = original amount.
+        $providerpaid = $provider->is_financially_settled();
+
         $alreadycomplete = in_array($attempt->get_status(), [
                 CommercePaymentAttemptStatus::PAID,
                 CommercePaymentAttemptStatus::COMPLETED,
@@ -152,7 +179,14 @@ final class AlfaPaymentReconciliationService implements AlfaPaymentReconciliatio
         if (!$depositedmatches) {
             $blockers[] = 'deposited_amount_mismatch';
         }
-        if ($providerpaid && $provider->event->type !== 'checkout_completed') {
+        if (!$refundamountmatches) {
+            $blockers[] = 'refund_amount_mismatch';
+        }
+        if (
+            !$alreadycomplete
+            && $providerpaid
+            && $provider->event->type !== 'checkout_completed'
+        ) {
             $blockers[] = 'provider_event_not_completed';
         }
         if (in_array($attempt->get_status(), [
@@ -182,7 +216,10 @@ final class AlfaPaymentReconciliationService implements AlfaPaymentReconciliatio
             $providerpaid,
             !$alreadycomplete && $blockers === [],
             $alreadycomplete,
-            $blockers
+            $blockers,
+            $providerrefunded,
+            $refundamountmatches,
+            $expecteddepositedamountminor
         );
     }
 }

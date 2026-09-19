@@ -17,6 +17,11 @@ use local_subscriptions\commerce\cart\ownership\CommerceBundlePurchaseEligibilit
 use local_subscriptions\commerce\cart\ownership\CommerceNullCartOwnershipGateway;
 use local_subscriptions\commerce\cart\repository\CommerceCartRepository;
 use local_subscriptions\commerce\trial\CommerceTrialCartPricingService;
+use local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationException;
+use local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationService;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinEligibilityService;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinOperation;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinPricingService;
 
 /** Application service owning all mutations of the active cart. */
 final class CommerceCartService {
@@ -31,7 +36,10 @@ final class CommerceCartService {
         ?CommerceCartOwnershipGateway $ownership = null,
         private readonly ?CommerceCartUpgradePricingService $upgrades = null,
         private readonly ?CommerceBundlePurchaseEligibilityService $bundleeligibility = null,
-        private readonly ?CommerceTrialCartPricingService $trialpricing = null
+        private readonly ?CommerceTrialCartPricingService $trialpricing = null,
+        private readonly ?CommercePedagogicalSeatReservationService $seatreservations = null,
+        private readonly ?CommercePedagogicalPromotionJoinEligibilityService $promotionjoineligibility = null,
+        private readonly ?CommercePedagogicalPromotionJoinPricingService $promotionjoinpricing = null
     ) {
         $this->ownership = $ownership ?? new CommerceNullCartOwnershipGateway();
     }
@@ -64,13 +72,212 @@ final class CommerceCartService {
         array $metadata = [],
         ?int $at = null
     ): CommerceCartOperationResult {
-        $cart = $this->open($customerid, $currency);
+        return $this->add_product_to_cart(
+            $this->open($customerid, $currency),
+            $language,
+            $productsku,
+            $priceid,
+            $quantity,
+            $metadata,
+            $at,
+            true,
+            null,
+            true
+        );
+    }
+
+    /**
+     * Prepare one isolated Buy Now line without mutating the customer's cart.
+     */
+    public function prepare_direct_product(
+        int $customerid,
+        string $currency,
+        string $language,
+        string $productsku,
+        int $priceid,
+        int $quantity = 1,
+        array $metadata = [],
+        ?int $at = null,
+        ?string $cartuuid = null,
+        ?int $reservationttl = null,
+        bool $reservepedagogicalseat = true,
+        ?string $promotionjoinexcludedcartuuid = null
+    ): CommerceCartOperationResult {
+        $directcart = $cartuuid !== null
+            ? $this->factory->create_with_uuid(
+                $cartuuid,
+                $customerid,
+                strtoupper(trim($currency)),
+                ['purchase_flow' => 'direct']
+            )
+            : $this->factory->create(
+                $customerid,
+                strtoupper(trim($currency)),
+                ['purchase_flow' => 'direct']
+            );
+
+        return $this->add_product_to_cart(
+            $directcart,
+            $language,
+            $productsku,
+            $priceid,
+            $quantity,
+            $metadata,
+            $at,
+            false,
+            $reservationttl,
+            $reservepedagogicalseat,
+            $promotionjoinexcludedcartuuid
+        );
+    }
+
+    public function direct_snapshot(
+        int $customerid,
+        string $currency,
+        string $language,
+        string $productsku,
+        int $priceid,
+        int $quantity = 1,
+        array $metadata = [],
+        ?int $at = null,
+        ?string $cartuuid = null,
+        ?int $reservationttl = null,
+        bool $reservepedagogicalseat = true,
+        ?string $promotionjoinexcludedcartuuid = null
+    ): CommerceCartSnapshot {
+        $prepared = $this->prepare_direct_product(
+            $customerid,
+            $currency,
+            $language,
+            $productsku,
+            $priceid,
+            $quantity,
+            $metadata,
+            $at,
+            $cartuuid,
+            $reservationttl,
+            $reservepedagogicalseat,
+            $promotionjoinexcludedcartuuid
+        );
+
+        if (!$prepared->has_changed()) {
+            $messages = $prepared->get_messages();
+            $code = $messages !== []
+                ? $messages[0]->get_code()
+                : 'direct_purchase_unavailable';
+
+            throw new \moodle_exception(
+                $code,
+                'local_subscriptions'
+            );
+        }
+
+        return $this->calculator->calculate(
+            $prepared->get_cart(),
+            $language,
+            $at,
+            $promotionjoinexcludedcartuuid
+        );
+    }
+
+    private function add_product_to_cart(
+        CommerceCart $cart,
+        string $language,
+        string $productsku,
+        int $priceid,
+        int $quantity,
+        array $metadata,
+        ?int $at,
+        bool $persist,
+        ?int $reservationttl,
+        bool $reservepedagogicalseat = true,
+        ?string $promotionjoinexcludedcartuuid = null
+    ): CommerceCartOperationResult {
+        $customerid = $cart->get_customer_id();
         $sku = strtoupper(trim($productsku));
 
         $operation = strtolower(trim((string)($metadata['operation'] ?? '')));
         $isupgrade = $operation === 'upgrade';
+        $ispromotionjoin = $operation === CommercePedagogicalPromotionJoinOperation::OPERATION;
+        $promotionjoinpromotionid = null;
 
-        if ($isupgrade) {
+        if ($ispromotionjoin) {
+            if (
+                $quantity !== 1
+                || $customerid <= 0
+                || $this->promotionjoineligibility === null
+                || $this->promotionjoinpricing === null
+            ) {
+                return new CommerceCartOperationResult($cart, false, [
+                    new CommerceCartMessage(
+                        'promotion_join_not_eligible',
+                        CommerceCartMessage::LEVEL_WARNING,
+                        ['productsku' => $sku]
+                    ),
+                ]);
+            }
+
+            $now = $at ?? time();
+            $eligibility = $this->promotionjoineligibility->resolve(
+                $customerid,
+                $sku,
+                $now,
+                $promotionjoinexcludedcartuuid ?? $cart->get_uuid()
+            );
+            $context = $eligibility->get_context();
+            if (!$eligibility->is_eligible() || $context === null) {
+                return new CommerceCartOperationResult($cart, false, [
+                    new CommerceCartMessage(
+                        'promotion_join_not_eligible',
+                        CommerceCartMessage::LEVEL_WARNING,
+                        [
+                            'productsku' => $sku,
+                            'reason' => $eligibility->get_reason() ?? '',
+                        ]
+                    ),
+                ]);
+            }
+
+            $pricing = $this->promotionjoinpricing->resolve(
+                $eligibility,
+                $cart->get_currency()
+            );
+            if (
+                !$pricing->is_purchasable()
+                || $pricing->get_price_id() === null
+                || $pricing->get_amount_minor() === null
+            ) {
+                return new CommerceCartOperationResult($cart, false, [
+                    new CommerceCartMessage(
+                        'promotion_join_price_unavailable',
+                        CommerceCartMessage::LEVEL_WARNING,
+                        [
+                            'productsku' => $sku,
+                            'reason' => $pricing->get_reason() ?? '',
+                        ]
+                    ),
+                ]);
+            }
+
+            // Browser input is only an intent signal. Identity, promotion and
+            // owner price are rebuilt server-side so stale/tampered fields can
+            // never redirect a promotion_join to another cohort or amount.
+            foreach (array_keys($metadata) as $key) {
+                if (str_starts_with((string)$key, 'promotion_join_')) {
+                    unset($metadata[$key]);
+                }
+            }
+            $metadata = array_replace(
+                $metadata,
+                CommercePedagogicalPromotionJoinOperation::metadata($context),
+                [
+                    'promotion_join_price_id' => (int)$pricing->get_price_id(),
+                    'promotion_join_amount_minor' => (int)$pricing->get_amount_minor(),
+                    'promotion_join_currency' => $pricing->get_currency(),
+                ]
+            );
+            $promotionjoinpromotionid = $context->get_promotion_id();
+        } else if ($isupgrade) {
             if ($quantity !== 1 || $customerid <= 0 || $this->upgrades === null) {
                 return new CommerceCartOperationResult($cart, false, [
                     new CommerceCartMessage('upgrade_not_eligible', CommerceCartMessage::LEVEL_WARNING, ['productsku' => $sku]),
@@ -164,13 +371,64 @@ final class CommerceCartService {
         }
 
         $quote->get_quantity_policy()->assert_allowed($targetquantity);
+
+        if ($this->seatreservations !== null && $reservepedagogicalseat) {
+            try {
+                $reservation = $this->seatreservations->reserve(
+                    $sku,
+                    $cart->get_uuid(),
+                    $customerid,
+                    $targetquantity,
+                    $at ?? time(),
+                    $reservationttl
+                        ?? CommercePedagogicalSeatReservationService::DEFAULT_TTL
+                );
+                if (
+                    $ispromotionjoin
+                    && (
+                        $reservation === null
+                        || $reservation->get_promotion_id() !== $promotionjoinpromotionid
+                    )
+                ) {
+                    if ($reservation !== null) {
+                        $this->seatreservations->release_product(
+                            $sku,
+                            $cart->get_uuid(),
+                            $at ?? time()
+                        );
+                    }
+                    return new CommerceCartOperationResult($cart, false, [
+                        new CommerceCartMessage(
+                            'promotion_join_context_changed',
+                            CommerceCartMessage::LEVEL_WARNING,
+                            ['productsku' => $sku]
+                        ),
+                    ]);
+                }
+            } catch (CommercePedagogicalSeatReservationException $e) {
+                return new CommerceCartOperationResult(
+                    $cart,
+                    false,
+                    [
+                        new CommerceCartMessage(
+                            $e->get_code_key(),
+                            CommerceCartMessage::LEVEL_WARNING,
+                            ['productsku' => $sku]
+                        ),
+                    ]
+                );
+            }
+        }
+
         $items = $cart->get_items();
         $replacement = $existing === null
             ? new CommerceCartItem($sku, $priceid, $targetquantity, $metadata)
             : $existing->with_quantity($targetquantity);
         $items = $this->replace_item($items, $replacement);
         $cart = $cart->with_items($items);
-        $this->save($cart);
+        if ($persist) {
+            $this->save($cart);
+        }
 
         $messages = [];
         if ($bundleeligibility !== null && $bundleeligibility->is_partially_owned()) {
@@ -214,6 +472,30 @@ final class CommerceCartService {
             return new CommerceCartOperationResult($cart, false);
         }
 
+        if ($this->seatreservations !== null) {
+            try {
+                $this->seatreservations->reserve(
+                    $existing->get_product_sku(),
+                    $cart->get_uuid(),
+                    $customerid,
+                    $quantity,
+                    $at ?? time()
+                );
+            } catch (CommercePedagogicalSeatReservationException $e) {
+                return new CommerceCartOperationResult(
+                    $cart,
+                    false,
+                    [
+                        new CommerceCartMessage(
+                            $e->get_code_key(),
+                            CommerceCartMessage::LEVEL_WARNING,
+                            ['productsku' => $existing->get_product_sku()]
+                        ),
+                    ]
+                );
+            }
+        }
+
         $cart = $cart->with_items($this->replace_item($cart->get_items(), $existing->with_quantity($quantity)));
         $this->save($cart);
         return new CommerceCartOperationResult($cart, true);
@@ -238,6 +520,13 @@ final class CommerceCartService {
         ));
         $cart = $cart->with_items($items);
         $this->save($cart);
+
+        $this->seatreservations?->release_product(
+            strtoupper(trim($productsku)),
+            $cart->get_uuid(),
+            time()
+        );
+
         return new CommerceCartOperationResult($cart, true);
     }
 
@@ -307,12 +596,108 @@ final class CommerceCartService {
         ]);
     }
 
+    public function renew_seat_reservations(
+        int $customerid,
+        string $currency,
+        ?int $at = null,
+        int $ttl = CommercePedagogicalSeatReservationService::DEFAULT_TTL
+    ): CommerceCartOperationResult {
+        $cart = $this->open($customerid, $currency);
+
+        if ($cart->is_empty() || $this->seatreservations === null) {
+            return new CommerceCartOperationResult($cart, false);
+        }
+
+        $now = $at ?? time();
+        $changed = false;
+
+        foreach ($cart->get_items() as $item) {
+            try {
+                $reservation = $this->seatreservations->renew(
+                    $item->get_product_sku(),
+                    $cart->get_uuid(),
+                    $customerid,
+                    $item->get_quantity(),
+                    $now,
+                    $ttl
+                );
+            } catch (CommercePedagogicalSeatReservationException $e) {
+                return new CommerceCartOperationResult(
+                    $cart,
+                    false,
+                    [
+                        new CommerceCartMessage(
+                            $e->get_code_key(),
+                            CommerceCartMessage::LEVEL_WARNING,
+                            [
+                                'productsku' =>
+                                    $item->get_product_sku(),
+                            ]
+                        ),
+                    ]
+                );
+            }
+
+            if ($reservation !== null) {
+                $metadata = $item->get_metadata();
+                $operation = strtolower(trim((string)($metadata['operation'] ?? '')));
+                if ($operation === CommercePedagogicalPromotionJoinOperation::OPERATION) {
+                    $pinnedpromotionid = (int)($metadata['promotion_join_promotion_id'] ?? 0);
+                    if (
+                        $pinnedpromotionid <= 0
+                        || $reservation->get_promotion_id() !== $pinnedpromotionid
+                    ) {
+                        $this->seatreservations->release_product(
+                            $item->get_product_sku(),
+                            $cart->get_uuid(),
+                            $now
+                        );
+                        return new CommerceCartOperationResult(
+                            $cart,
+                            false,
+                            [
+                                new CommerceCartMessage(
+                                    'promotion_join_context_changed',
+                                    CommerceCartMessage::LEVEL_WARNING,
+                                    ['productsku' => $item->get_product_sku()]
+                                ),
+                            ]
+                        );
+                    }
+                }
+                $changed = true;
+            }
+        }
+
+        return new CommerceCartOperationResult(
+            $cart,
+            $changed,
+            $changed
+                ? [
+                    new CommerceCartMessage(
+                        'pedagogical_seats_reserved',
+                        CommerceCartMessage::LEVEL_NOTICE
+                    ),
+                ]
+                : []
+        );
+    }
+
     public function snapshot(int $customerid, string $currency, string $language, ?int $at = null): CommerceCartSnapshot {
         return $this->calculator->calculate($this->open($customerid, $currency), $language, $at);
     }
 
     public function clear(int $customerid, string $currency): void {
-        $this->repository->delete($this->keys->resolve($customerid, $currency));
+        $key = $this->keys->resolve($customerid, $currency);
+        $cart = $this->repository->find($key);
+        $this->repository->delete($key);
+
+        if ($cart !== null) {
+            $this->seatreservations?->release_cart(
+                $cart->get_uuid(),
+                time()
+            );
+        }
     }
 
     public function clear_cart(int $customerid, string $currency): CommerceCartOperationResult {
@@ -320,8 +705,16 @@ final class CommerceCartService {
         if ($cart->is_empty()) {
             return new CommerceCartOperationResult($cart, false);
         }
+
+        $originaluuid = $cart->get_uuid();
         $cart = $cart->with_items([]);
         $this->save($cart);
+
+        $this->seatreservations?->release_cart(
+            $originaluuid,
+            time()
+        );
+
         return new CommerceCartOperationResult($cart, true);
     }
 

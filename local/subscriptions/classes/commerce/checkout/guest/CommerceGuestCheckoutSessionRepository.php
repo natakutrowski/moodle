@@ -63,6 +63,11 @@ final class CommerceGuestCheckoutSessionRepository {
             'paymentreference' => trim($paymentreference),
             'expiresat' => time() + CommerceGuestCheckoutService::PAYMENT_FAILURE_TTL,
             'metadatajson' => array_replace($session->get_metadata(), [
+                // H12.9-A5.2: all payment methods selected for the same frozen
+                // checkout reuse one Native purchase. If the runtime had to
+                // create a fresh purchase because the cart changed, this also
+                // advances the resume reference to that new authoritative one.
+                'resume_purchase_reference' => trim($purchasereference),
                 'payment_started_at' => time(),
             ]),
         ]);

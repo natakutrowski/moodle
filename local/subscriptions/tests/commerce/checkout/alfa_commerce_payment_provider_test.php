@@ -12,6 +12,8 @@ use local_subscriptions\commerce\payment\provider\alfa\AlfaCommercePaymentProvid
 use local_subscriptions\commerce\payment\provider\alfa\AlfaGatewayRequest;
 use local_subscriptions\commerce\payment\provider\alfa\AlfaGatewayResponse;
 use local_subscriptions\commerce\payment\provider\alfa\AlfaPaymentGateway;
+use local_subscriptions\commerce\payment\provider\alfa\AlfaRefundRequest;
+use local_subscriptions\commerce\payment\provider\alfa\AlfaRefundResponse;
 use local_subscriptions\commerce\payment\provider\alfa\AlfaPaymentProviderConfiguration;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderContext;
 use local_subscriptions\commerce\payment\result\CommercePaymentStatus;
@@ -136,6 +138,57 @@ final class alfa_commerce_payment_provider_test
                 );
             }
 
+            public function prepare_widget(
+
+
+                AlfaGatewayRequest $request
+
+
+            ): AlfaGatewayResponse {
+
+
+                throw new \coding_exception('Not used by this test.');
+
+
+            }
+
+
+
+            public function refund(
+
+
+                AlfaRefundRequest $request
+
+
+            ): AlfaRefundResponse {
+
+
+                throw new \coding_exception('Not used by this test.');
+
+
+            }
+
+
+
+            public function list_refunds(
+
+
+                string $orderid,
+
+
+                string $currency
+
+
+            ): array {
+
+
+                return [];
+
+
+            }
+
+
+
             public function retrieve(
                 string $orderid
             ): AlfaGatewayResponse {
@@ -208,6 +261,57 @@ final class alfa_commerce_payment_provider_test
                         ]
                     );
                 }
+
+                public function prepare_widget(
+
+
+                    AlfaGatewayRequest $request
+
+
+                ): AlfaGatewayResponse {
+
+
+                    throw new \coding_exception('Not used by this test.');
+
+
+                }
+
+
+
+                public function refund(
+
+
+                    AlfaRefundRequest $request
+
+
+                ): AlfaRefundResponse {
+
+
+                    throw new \coding_exception('Not used by this test.');
+
+
+                }
+
+
+
+                public function list_refunds(
+
+
+                    string $orderid,
+
+
+                    string $currency
+
+
+                ): array {
+
+
+                    return [];
+
+
+                }
+
+
 
                 public function retrieve(
                     string $orderid
@@ -353,6 +457,57 @@ public function test_initialize_preserves_bridge_exception():
                     'legacy_payment_currency_mismatch'
                 );
             }
+
+            public function prepare_widget(
+
+
+                AlfaGatewayRequest $request
+
+
+            ): AlfaGatewayResponse {
+
+
+                throw new \coding_exception('Not used by this test.');
+
+
+            }
+
+
+
+            public function refund(
+
+
+                AlfaRefundRequest $request
+
+
+            ): AlfaRefundResponse {
+
+
+                throw new \coding_exception('Not used by this test.');
+
+
+            }
+
+
+
+            public function list_refunds(
+
+
+                string $orderid,
+
+
+                string $currency
+
+
+            ): array {
+
+
+                return [];
+
+
+            }
+
+
 
             public function retrieve(
                 string $orderid

@@ -14,9 +14,7 @@ use local_subscriptions\commerce\payment\repository\CommercePaymentRepository;
 use local_subscriptions\commerce\payment\result\CommercePaymentAction;
 use local_subscriptions\commerce\payment\result\CommercePaymentResult;
 
-/**
- * @covers \local_subscriptions\commerce\checkout\unified\CommerceCheckoutPaymentLaunchRecorder
- */
+#[\PHPUnit\Framework\Attributes\CoversClass(CommerceCheckoutPaymentLaunchRecorder::class)]
 final class commerce_795h44b_provider_launch_recording_test extends advanced_testcase {
     private const PURCHASE_UUID = '1123456789abcdef0123456789abcdef';
 
@@ -63,7 +61,7 @@ final class commerce_795h44b_provider_launch_recording_test extends advanced_tes
 
         $this->assertSame('redirected', $recorded->get_status());
         $this->assertSame('cs_test_h44b_123', $recorded->get_provider_reference());
-        $this->assertNull($recorded->get_provider_order_id());
+        $this->assertSame('cs_test_h44b_123', $recorded->get_provider_order_id());
         $this->assertSame(
             'https://checkout.stripe.test/c/pay/cs_test_h44b_123',
             $recorded->get_payment_url()

@@ -11,16 +11,22 @@ use local_subscriptions\commerce\cart\domain\CommerceCartItem;
 use local_subscriptions\commerce\cart\repository\CommerceCartRepository;
 use local_subscriptions\commerce\cart\repository\CommerceSessionCartRepository;
 use local_subscriptions\commerce\cart\service\CommerceCartSessionKeyResolver;
+use local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationService;
 
 /** Transfers and merges the anonymous session cart into a resolved Moodle account. */
 final class CommerceGuestCartTransferService {
     public function __construct(
         private readonly CommerceCartRepository $repository,
-        private readonly CommerceCartSessionKeyResolver $keys
+        private readonly CommerceCartSessionKeyResolver $keys,
+        private readonly ?CommercePedagogicalSeatReservationService $reservations = null
     ) {}
 
     public static function create(): self {
-        return new self(new CommerceSessionCartRepository(), new CommerceCartSessionKeyResolver());
+        return new self(
+            new CommerceSessionCartRepository(),
+            new CommerceCartSessionKeyResolver(),
+            CommercePedagogicalSeatReservationService::create()
+        );
     }
 
     /**
@@ -28,7 +34,79 @@ final class CommerceGuestCartTransferService {
      */
     public function capture(string $currency): ?array {
         $guest = $this->repository->find($this->keys->resolve(0, $currency));
-        return $guest?->to_array();
+        if ($guest === null || $guest->is_empty()) {
+            return null;
+        }
+        return $guest->to_array();
+    }
+
+    /**
+     * Restore the durable Guest Checkout snapshot to the anonymous session cart
+     * before an explicitly requested identity reset.
+     *
+     * @param array<string,mixed> $durableguestcart
+     */
+    public function restore_anonymous(
+        int $previoususerid,
+        string $currency,
+        array $durableguestcart
+    ): CommerceCart {
+        $currency = strtoupper(trim($currency));
+        $candidate = CommerceCart::from_array($durableguestcart);
+
+        if (
+            $candidate->get_customer_id() !== 0
+            || $candidate->get_currency() !== $currency
+            || $candidate->is_empty()
+        ) {
+            throw new \coding_exception(
+                'The durable Guest Checkout cart cannot be restored as an anonymous cart.'
+            );
+        }
+
+        $guestkey = $this->keys->resolve(0, $currency);
+        $restored = new CommerceCart(
+            $candidate->get_uuid(),
+            0,
+            $currency,
+            $candidate->get_items(),
+            array_replace(
+                $candidate->get_metadata(),
+                ['guest_identity_reset_at' => time()]
+            ),
+            $candidate->get_time_created(),
+            time()
+        );
+
+        $this->repository->save(
+            $guestkey,
+            $restored
+        );
+
+        $persisted =
+            $this->repository->find(
+                $guestkey
+            );
+
+        if (
+            $persisted === null
+            || $persisted->is_empty()
+        ) {
+            throw new \RuntimeException(
+                'Guest Checkout identity reset could not restore the anonymous cart.'
+            );
+        }
+
+        if ($previoususerid > 0) {
+            $this->repository->delete(
+                $this->keys->resolve(
+                    $previoususerid,
+                    $currency
+                )
+            );
+        }
+
+        return $persisted;
     }
 
     /**
@@ -53,7 +131,10 @@ final class CommerceGuestCartTransferService {
             $guest = $candidate;
         }
 
-        if ($guest === null) {
+        if ($guest === null || $guest->is_empty()) {
+            // Direct Purchase keeps its authoritative item outside the session
+            // cart. An empty anonymous cart is therefore a valid no-op here,
+            // not a failed transfer.
             return $existing;
         }
 
@@ -90,7 +171,18 @@ final class CommerceGuestCartTransferService {
             throw new \RuntimeException('The Guest Checkout cart transfer could not be persisted.');
         }
 
-        // Delete the anonymous copy only after the target cart has been verified.
+        // Move pedagogical holds together with the cart identity. This keeps
+        // the original countdown when a provisional/existing user cart UUID
+        // differs from the anonymous cart UUID and closes the last-seat race.
+        $this->reservations?->transfer_cart(
+            $guest->get_uuid(),
+            $persisted->get_uuid(),
+            $userid,
+            time()
+        );
+
+        // Delete the anonymous copy only after the target cart and its seat
+        // reservations have been transferred successfully.
         $this->repository->delete($guestkey);
         return $persisted;
     }

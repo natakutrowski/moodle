@@ -6,12 +6,14 @@ namespace local_subscriptions\commerce\order\invoice;
 
 defined('MOODLE_INTERNAL') || die();
 
-use core_user;
 use local_subscriptions\commerce\order\presentation\CommerceBundleComponentResolver;
 use local_subscriptions\commerce\order\presentation\CommerceOrderPresentation;
 use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
 use local_subscriptions\commerce\pricing\CommercePersistedCommercialPricingPresenter;
+use local_subscriptions\commerce\payment\method\CommercePersistedPaymentMethodResolver;
+use local_subscriptions\commerce\payment\method\CommercePaymentMethodVisual;
 use local_subscriptions\payment\Provider;
+use local_subscriptions\currency\CurrencyFormatter;
 use moodle_database;
 
 /** Generates the canonical customer invoice used by HTTP download and transactional mail. */
@@ -29,18 +31,29 @@ final class CommerceInvoicePdfService {
 
         $context = \context_system::instance();
         $publicreference = (new CommercePublicOrderReference())->from_internal($order->reference, $order->timecreated);
-        $profile = (new CommerceInvoiceProfileResolver())->resolve($order->currency, $order->provider);
-        $sellername = $profile['name'] !== '' ? $profile['name'] : format_string($SITE->fullname, true, ['context' => $context]);
-        $money = static fn(int $minor, string $currency): string => format_float($minor / 100, 2) . ' ' . strtoupper($currency);
-        $customer = $this->customer($order);
-        $customeremail = trim((string)($customer->email ?? '')) ?: $order->customeremail;
-        $customername = trim(fullname($customer));
-        $customerphone = trim((string)($customer->phone1 ?? '')) ?: trim((string)($customer->phone2 ?? ''));
+        $invoice = (new CommerceInvoiceIssuer($this->database))->get_or_issue($order);
+        $profile = $invoice->seller;
+        $sellername = trim((string)($profile['name'] ?? '')) !== ''
+            ? trim((string)$profile['name'])
+            : format_string($SITE->fullname, true, ['context' => $context]);
+        $money = static fn(int $minor, string $currency): string => CurrencyFormatter::format_minor_code($minor, $currency);
+        $customer = $invoice->customer;
+        $customeremail = trim((string)($customer['email'] ?? '')) ?: $order->customeremail;
+        $customername = trim((string)($customer['fullname'] ?? ''));
+        if ($customername === '') {
+            $customername = trim(implode(' ', array_filter([
+                trim((string)($customer['firstname'] ?? '')),
+                trim((string)($customer['lastname'] ?? '')),
+            ])));
+        }
+        $customermetadata = is_array($customer['metadata'] ?? null) ? $customer['metadata'] : [];
+        $customerphone = trim((string)($customermetadata['phone'] ?? ''));
         $countries = get_string_manager()->get_list_of_countries();
+        $customercountry = trim((string)($customer['country'] ?? ''));
         $customeraddress = array_values(array_filter([
-            trim((string)($customer->address ?? '')),
-            trim((string)($customer->city ?? '')),
-            !empty($customer->country) ? ($countries[(string)$customer->country] ?? (string)$customer->country) : '',
+            trim((string)($customermetadata['address'] ?? '')),
+            trim((string)($customermetadata['city'] ?? '')),
+            $customercountry !== '' ? ($countries[$customercountry] ?? $customercountry) : '',
         ], static fn(string $value): bool => $value !== ''));
 
         $pricingpresenter =
@@ -72,13 +85,16 @@ final class CommerceInvoicePdfService {
             (array)($order->metadata['promotion_codes'] ?? [])
         )));
         $provider = strtolower(trim((string)($order->payment?->provider ?? $order->provider ?? '')));
+        $paymentmethodresolver = new CommercePersistedPaymentMethodResolver();
+        $paymentmethod = $order->payment?->paymentmethod;
+        $paymentmethodlabel = $paymentmethodresolver->label($paymentmethod);
         $transactionid = trim((string)($order->payment?->transactionid ?? $order->payment?->providerreference ?? ''));
         $bundleresolver = new CommerceBundleComponentResolver($this->database);
 
         $pdf = new \pdf('P', 'mm', 'A4', true, 'UTF-8');
         $pdf->SetCreator('CampusFR');
         $pdf->SetAuthor($sellername);
-        $pdf->SetTitle(get_string('commerce_i410_invoice_title', 'local_subscriptions', $publicreference));
+        $pdf->SetTitle(get_string('commerce_i410_invoice_title', 'local_subscriptions', $invoice->number));
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
         $pdf->SetMargins(18, 18, 18);
@@ -96,19 +112,23 @@ final class CommerceInvoicePdfService {
         $pdf->Ln(14);
         $pdf->SetFont('freesans', '', 10);
         $pdf->Write(6, $sellername);
-        if ($profile['address'] !== '') { $pdf->Ln(); $pdf->Write(6, $profile['address']); }
-        if ($profile['legal'] !== '') { $pdf->Ln(); $pdf->Write(6, $profile['legal']); }
+        if (($profile['address'] ?? '') !== '') { $pdf->Ln(); $pdf->Write(6, ($profile['address'] ?? '')); }
+        if (($profile['legal'] ?? '') !== '') { $pdf->Ln(); $pdf->Write(6, ($profile['legal'] ?? '')); }
         foreach (['email', 'phone', 'website'] as $field) {
-            if ($profile[$field] !== '') { $pdf->Ln(); $pdf->Write(6, $profile[$field]); }
+            if (trim((string)($profile[$field] ?? '')) !== '') {
+                $pdf->Ln();
+                $pdf->Write(6, (string)$profile[$field]);
+            }
         }
 
         $pdf->Ln(12);
         $pdf->SetFont('freesans', 'B', 11);
-        $pdf->Write(6, get_string('commerce_i410_invoice_reference', 'local_subscriptions') . ': ' . $publicreference);
+        $pdf->Write(6, get_string('commerce_i410_invoice_reference', 'local_subscriptions') . ': ' . $invoice->number
+            . ' · ' . get_string('commerce_invoice_order_reference', 'local_subscriptions') . ': ' . $publicreference);
         $pdf->Ln();
         $pdf->SetFont('freesans', '', 10);
-        $pdf->Write(6, get_string('commerce_invoice_purchase_date', 'local_subscriptions') . ': ' . userdate($order->paidat ?? $order->timecreated));
-        $pdf->Ln(8);
+        $pdf->Write(6, get_string('commerce_invoice_purchase_date', 'local_subscriptions') . ': ' . userdate($invoice->issuedat));
+        $pdf->Ln(11);
         $pdf->SetFont('freesans', 'B', 11);
         $pdf->Write(6, get_string('commerce_i410_invoice_customer', 'local_subscriptions'));
         $pdf->SetFont('freesans', '', 10);
@@ -303,12 +323,37 @@ final class CommerceInvoicePdfService {
             . '</b></td><td width="30%"><b>' . s($money($order->totalminor, $order->currency)) . '</b></td></tr></tbody></table>';
         $pdf->writeHTML($html, true, false, true, false, '');
 
-        if ($provider !== '' || $transactionid !== '') {
+        if ($paymentmethod !== null || $provider !== '' || $transactionid !== '') {
             $pdf->Ln(5);
             $pdf->SetFont('freesans', 'B', 11);
             $pdf->Write(6, get_string('commerce_invoice_payment_information', 'local_subscriptions'));
             $pdf->Ln();
             $pdf->SetFont('freesans', '', 10);
+            if ($paymentmethod !== null) {
+                $pdf->Write(
+                    6,
+                    get_string('commerce_i410_payment_method', 'local_subscriptions') . ': '
+                );
+                $methodiconpath = CommercePaymentMethodVisual::icon_path($paymentmethod);
+                $liney = $pdf->GetY();
+                $contentx = $pdf->GetX() + 2.0;
+                if ($methodiconpath !== null) {
+                    $iconsize = 5.0;
+                    $pdf->ImageSVG(
+                        $methodiconpath,
+                        $contentx,
+                        $liney + ((6.0 - $iconsize) / 2.0),
+                        $iconsize,
+                        $iconsize
+                    );
+                    $pdf->SetXY(
+                        $contentx + $iconsize + 0.8,
+                        $liney
+                    );
+                }
+                $pdf->Write(6, $paymentmethodlabel);
+                $pdf->Ln();
+            }
             if ($provider !== '') {
                 $pdf->Write(6, get_string('commerce_invoice_payment_provider', 'local_subscriptions') . ': ');
                 $iconpath = $pluginroot . '/pix/providers/' . $provider . '.svg';
@@ -328,34 +373,23 @@ final class CommerceInvoicePdfService {
             }
         }
 
-        if ($profile['taxnotice'] !== '') {
+        if (trim((string)($profile['tax_notice'] ?? '')) !== '') {
             $pdf->Ln(5);
             $pdf->SetFont('freesans', '', 9);
-            $pdf->MultiCell(0, 5, $profile['taxnotice']);
+            $pdf->MultiCell(0, 5, (string)$profile['tax_notice'], 0, 'L', false, 1);
         }
         $pdf->Ln(7);
         $pdf->SetFont('freesans', '', 9);
         $pdf->SetX(18);
         $pdf->MultiCell(0, 5, get_string('commerce_invoice_generated_at', 'local_subscriptions', userdate(time())), 0, 'L', false, 1);
-        if ($profile['footer'] !== '') {
+        if (trim((string)($profile['footer'] ?? '')) !== '') {
             $pdf->Ln(2);
             $pdf->SetX(18);
-            $pdf->MultiCell(0, 5, $profile['footer'], 0, 'L', false, 1);
+            $pdf->MultiCell(0, 5, (string)$profile['footer'], 0, 'L', false, 1);
         }
 
-        $filename = 'facture-' . strtolower($publicreference) . '.pdf';
+        $filename = 'facture-' . strtolower($invoice->number) . '.pdf';
         return new CommerceInvoiceDocument($filename, (string)$pdf->Output('', 'S'));
     }
 
-    private function customer(CommerceOrderPresentation $order): \stdClass {
-        if ($order->userid !== null && $order->userid > 0) {
-            $customer = core_user::get_user($order->userid, '*', IGNORE_MISSING);
-            if ($customer !== false && $customer !== null) { return $customer; }
-        }
-        return (object)[
-            'firstname' => '', 'lastname' => '', 'firstnamephonetic' => '', 'lastnamephonetic' => '',
-            'middlename' => '', 'alternatename' => '', 'email' => $order->customeremail,
-            'phone1' => '', 'phone2' => '', 'address' => '', 'city' => '', 'country' => '',
-        ];
-    }
 }

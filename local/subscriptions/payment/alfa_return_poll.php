@@ -39,22 +39,26 @@ try {
         $order = $orders->find_for_user($reference, (int)$USER->id);
     } else {
         $guestsessions = new CommerceGuestCheckoutSessionRepository($DB);
-        $guestsession = $guestsessions->find_by_purchase_reference($reference);
         $token = trim((string)($SESSION->local_subscriptions_guest_checkout_token ?? ''));
+        $guestsession = $token !== ''
+            ? $guestsessions->find_by_token($token)
+            : null;
 
         if (
             $guestsession === null
-            || $token === ''
-            || !hash_equals($guestsession->get_token(), $token)
+            || $guestsession->is_expired()
+            || $guestsession->get_user_id() === null
         ) {
             throw new CommerceOrderPresentationAccessDeniedException(
-                'Guest Checkout session does not own this order.'
+                'Guest Checkout session cannot own this order.'
             );
         }
 
-        $order = $orders->find_for_user(
+        $guestmetadata = $guestsession->get_metadata();
+        $order = $orders->find_for_guest_session(
             $reference,
-            (int)$guestsession->get_user_id()
+            (string)($guestsession->get_purchase_reference() ?? ''),
+            (string)($guestmetadata['resume_purchase_reference'] ?? '')
         );
     }
 

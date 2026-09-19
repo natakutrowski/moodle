@@ -743,10 +743,13 @@ final class CommercePersonalOfferCampaignManager {
         $terms=new CommercePersonalOfferTerms($data['terms']);
         $key='crm-individual:'.hash('sha256',implode('|',[$email,(int)$data['targetproductid'],(int)($data['sourcepurchaseid']??0),microtime(true),random_int(1,PHP_INT_MAX)]));
         $result=$this->offers->issue(new CommercePersonalOfferIssueRequest($key,(int)$data['targetproductid'],$email,$terms,
-            ($data['campaignkey']??'')!==''?(string)$data['campaignkey']:'crm-individual',empty($data['sourcepurchaseid'])?null:(int)$data['sourcepurchaseid'],
+            ($data['campaignkey']??'')!==''?(string)$data['campaignkey']:null,empty($data['sourcepurchaseid'])?null:(int)$data['sourcepurchaseid'],
             empty($data['beneficiaryuserid'])?null:(int)$data['beneficiaryuserid'],$data['validfrom']??null,$data['expiresat']??null,
             array_filter([
                 'campaignsource' => 'crm_individual',
+                'individual_destination' => $data['individualdestination'] ?? 'checkout',
+                'individual_showroom_id' => $data['individualshowroomid'] ?? null,
+                'individual_showroom_key' => $data['individualshowroomkey'] ?? null,
                 'eligibilitymode' => $data['eligibilitymode'] ?? 'standalone',
                 'ownershipsource' => $data['ownershipsource'] ?? null,
                 'ownershipproductid' => $data['ownershipproductid'] ?? null,

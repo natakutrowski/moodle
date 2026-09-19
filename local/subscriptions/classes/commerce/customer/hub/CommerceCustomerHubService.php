@@ -8,6 +8,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\digital\library\CommerceDigitalLibraryService;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
+use local_subscriptions\commerce\education\xp\CommercePedagogicalStudentLeaderboardService;
+use local_subscriptions\commerce\customer\course\CommerceCustomerCourseLearningStatusService;
 use local_subscriptions\crm\success\repositories\EnrolledCourseProvider;
 use local_subscriptions\crm\success\repositories\LevelUpXpRepository;
 use local_subscriptions\url\UrlFactory;
@@ -23,7 +25,8 @@ final class CommerceCustomerHubService {
             new EnrolledCourseProvider(),
             new CommercePurchaseReadRepository($DB),
             CommerceDigitalLibraryService::create(),
-            new LevelUpXpRepository()
+            new LevelUpXpRepository(),
+            CommerceCustomerCourseLearningStatusService::create($DB)
         );
     }
 
@@ -31,7 +34,8 @@ final class CommerceCustomerHubService {
         private readonly EnrolledCourseProvider $courses,
         private readonly CommercePurchaseReadRepository $purchases,
         private readonly CommerceDigitalLibraryService $library,
-        private readonly LevelUpXpRepository $levelxp
+        private readonly LevelUpXpRepository $levelxp,
+        private readonly CommerceCustomerCourseLearningStatusService $learningstatus
     ) {
     }
 
@@ -47,6 +51,7 @@ final class CommerceCustomerHubService {
             $this->library->get_for_customer($userid, $email)->get_resources()
         );
         $xp = $this->xp_summary($userid);
+        $teamchallenges = $this->team_challenges($userid);
 
         $picture = new \user_picture($user);
         // The default Moodle picture size is intended for compact navigation
@@ -75,6 +80,8 @@ final class CommerceCustomerHubService {
             'lastreward' => $xp['lastreward'],
             'xpbadgeurl' => $xp['badgeurl'],
             'hasxpbadge' => $xp['badgeurl'] !== '',
+            'teamchallenges' => $teamchallenges,
+            'hasteamchallenges' => $teamchallenges !== [],
             'mycoursesurl' => UrlFactory::my_courses()->out(false),
             'myresourcesurl' => UrlFactory::my_digital_products()->out(false),
             'mypurchasesurl' => UrlFactory::my_purchases()->out(false),
@@ -88,48 +95,97 @@ final class CommerceCustomerHubService {
     /** @return array<int,array<string,mixed>> */
     private function course_cards(int $userid): array {
         $result = [];
+        $now = time();
         foreach ($this->courses->get_courses($userid) as $course) {
-            $progress = $this->course_progress((int)$course->id, $userid);
+            $courseid = (int)$course->id;
+            try {
+                $status = $this->learningstatus->resolve($userid, $courseid, $now);
+            } catch (\Throwable) {
+                $status = [];
+            }
+            $progress = isset($status['progress']) && $status['progress'] !== null
+                ? (int)round((float)$status['progress'])
+                : 0;
             $imageurl = $this->course_image_url($course);
+            $learningmeta = $this->course_learning_meta($status);
             $result[] = [
-                'id' => (int)$course->id,
+                'id' => $courseid,
                 'name' => format_string((string)$course->fullname),
-                'url' => UrlFactory::course((int)$course->id)->out(false),
+                'url' => UrlFactory::course($courseid)->out(false),
                 'hasimage' => $imageurl !== null,
                 'imageurl' => $imageurl ?? '',
                 'initial' => \core_text::strtoupper(
                     \core_text::substr(trim((string)$course->fullname), 0, 1)
                 ),
-                'progress' => $progress,
-                'progressstyle' => 'width: ' . $progress . '%;',
+                'progress' => max(0, min(100, $progress)),
+                'progressstyle' => 'width: ' . max(0, min(100, $progress)) . '%;',
+                'haslearningmeta' => $learningmeta !== [],
+                'learningmeta' => $learningmeta,
             ];
         }
         return $result;
     }
 
-    private function course_progress(int $courseid, int $userid): int {
-        global $CFG;
-        require_once($CFG->libdir . '/completionlib.php');
-        try {
-            $course = get_course($courseid);
-            $completion = new \completion_info($course);
-            $modinfo = get_fast_modinfo($course, $userid);
-            $done = 0;
-            $total = 0;
-            foreach ($modinfo->get_cms() as $cm) {
-                if (!$cm->uservisible || !$completion->is_enabled($cm)) {
-                    continue;
-                }
-                $total++;
-                $data = $completion->get_data($cm, true, $userid);
-                if ((int)($data->completionstate ?? 0) !== 0) {
-                    $done++;
-                }
-            }
-            return $total > 0 ? (int)round(100 * $done / $total) : 0;
-        } catch (\Throwable) {
-            return 0;
+    /** @return array<int,array{icon:string,label:string}> */
+    private function course_learning_meta(array $status): array {
+        if (empty($status['haspromotion'])) {
+            return [];
         }
+
+        $items = [];
+        $promotionname = trim((string)($status['promotionname'] ?? ''));
+        if ($promotionname !== '') {
+            $items[] = [
+                'icon' => 'fa-user-group',
+                'label' => get_string('commerce_customer_hub_course_promotion', 'local_subscriptions',
+                    format_string($promotionname)),
+            ];
+        }
+
+        $items[] = [
+            'icon' => !empty($status['hasfullaccess']) ? 'fa-unlock' : 'fa-calendar-check',
+            'label' => get_string(
+                !empty($status['hasfullaccess'])
+                    ? 'commerce_customer_hub_course_access_full'
+                    : 'commerce_customer_hub_course_access_progressive',
+                'local_subscriptions'
+            ),
+        ];
+
+        $startsat = isset($status['promotionstartsat']) && $status['promotionstartsat'] !== null
+            ? (int)$status['promotionstartsat']
+            : 0;
+        if ($startsat > 0) {
+            $items[] = [
+                'icon' => 'fa-calendar-day',
+                'label' => get_string('commerce_customer_hub_course_starts', 'local_subscriptions',
+                    userdate($startsat, get_string('strftimedatetimeshort', 'langconfig'))),
+            ];
+        }
+
+        if (!empty($status['hasnextlesson']) && !empty($status['nextunlocksat'])) {
+            $lesson = trim((string)($status['nextsectionname'] ?? ''));
+            if ($lesson === '') {
+                $sectionnumber = (int)($status['nextsectionnumber'] ?? 0);
+                $lesson = get_string('commerce_customer_hub_course_section_fallback', 'local_subscriptions', $sectionnumber);
+            }
+            $a = (object)[
+                'lesson' => format_string($lesson),
+                'date' => userdate((int)$status['nextunlocksat'], get_string('strftimedatetimeshort', 'langconfig')),
+            ];
+            $items[] = [
+                'icon' => 'fa-forward-step',
+                'label' => get_string(
+                    !empty($status['hasfullaccess'])
+                        ? 'commerce_customer_hub_course_next_promo_step'
+                        : 'commerce_customer_hub_course_next_lesson',
+                    'local_subscriptions',
+                    $a
+                ),
+            ];
+        }
+
+        return $items;
     }
 
     /** @return array{available:bool,totalxp:int,highestlevel:int,progress:int,xp30d:int,rank:int,participants:int,lastreward:string,badgeurl:string} */
@@ -160,6 +216,19 @@ final class CommerceCustomerHubService {
                 : get_string('commerce_customer_hub_xp_no_activity', 'local_subscriptions'),
             'badgeurl' => $this->level_badge_url($userid, (int)($statistics['highest_level'] ?? 0)),
         ];
+    }
+
+
+    /** @return array<int,array<string,mixed>> */
+    private function team_challenges(int $userid): array {
+        try {
+            return CommercePedagogicalStudentLeaderboardService::create()
+                ->get_for_user($userid);
+        } catch (\Throwable) {
+            // Mon Campus must stay available even if team scoring is temporarily
+            // unavailable or the pedagogical relation is incomplete.
+            return [];
+        }
     }
 
 

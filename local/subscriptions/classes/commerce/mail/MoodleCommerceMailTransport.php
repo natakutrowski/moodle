@@ -10,6 +10,14 @@ defined('MOODLE_INTERNAL') || die();
 final class MoodleCommerceMailTransport implements CommerceMailTransport {
 
     public function send(CommerceMailMessage $message): void {
+        global $PAGE;
+
+        // Interactive Guest Checkout OTP delivery can run from an AJAX
+        // endpoint before Moodle has assigned a page context. Never read
+        // $PAGE->context here: Moodle's getter itself throws when it is unset.
+        // Setting the system context is safe and idempotent for this transport.
+        $PAGE->set_context(\context_system::instance());
+
         $recipient = $this->moodle_recipient($message->get_recipient());
         $sender = \core_user::get_support_user();
         $attachments = $message->get_attachments();

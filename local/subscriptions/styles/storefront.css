@@ -653,6 +653,13 @@
     max-height: 1.8rem;
     object-fit: contain;
 }
+.commerce-checkout-payment-method__brand-icon {
+    display: block;
+    width: 2.2rem;
+    max-width: 100%;
+    max-height: 1.5rem;
+    object-fit: contain;
+}
 @media (max-width: 991.98px) {
     .commerce-checkout__grid { grid-template-columns: 1fr; }
     .commerce-checkout__payment { position: static; }
@@ -915,12 +922,14 @@ a.commerce-checkout-steps__link:focus-visible {
 .commerce-cart-feedback__backdrop {
     position: absolute;
     inset: 0;
+    z-index: 0;
     background: rgba(20, 24, 35, .58);
     backdrop-filter: blur(3px);
 }
 
 .commerce-cart-feedback__dialog {
     position: relative;
+    z-index: 1;
     width: min(100%, 520px);
     border-radius: 1.25rem;
     overflow: hidden;
@@ -2594,8 +2603,7 @@ a.commerce-checkout-steps__link:focus-visible {
     font-weight: 800;
 }
 
-.commerce-cart-summary__totals
-.commerce-cart-summary__discount + .commerce-cart-summary__discount {
+.commerce-cart-summary__totals .commerce-cart-summary__discount + .commerce-cart-summary__discount {
     margin-top: .2rem;
 }
 
@@ -2889,7 +2897,7 @@ a.commerce-checkout-steps__link:focus-visible {
     margin-top: .6rem;
 }
 
-.commerce-cart-print-item__badges > span:not(.commerce-personal-offer-badge) {
+.commerce-cart-print-item__badges > span:not(.commerce-personal-offer-badge):not(.commerce-storefront-price__badge--promotion) {
     padding: .2rem .45rem;
     border-radius: 999px;
     background: #f72585;
@@ -3016,6 +3024,11 @@ a.commerce-checkout-steps__link:focus-visible {
     .commerce-cart-print-item,
     .commerce-checkout-item {
         break-inside: avoid;
+    }
+
+    .commerce-storefront-price__badge--promotion {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 }
 
@@ -4976,5 +4989,320 @@ border:1px solid var(--commerce-premium-border);border-radius:clamp(1.35rem,2vw,
 
     .commerce-product-bundle-sections {
         margin-top: 1rem;
+    }
+}
+
+/* H4.6 — checkout summary visual hierarchy. */
+.commerce-checkout__summary {
+    align-self: start;
+}
+
+.commerce-checkout__summary .commerce-checkout__line {
+    padding-block: .18rem;
+}
+
+.commerce-checkout__summary .commerce-checkout__grand-total {
+    font-size: 1.05rem;
+}
+
+.commerce-checkout__summary .commerce-checkout__grand-total dd {
+    font-size: 1.08em;
+}
+
+/* H4.7 — responsive summary finishing pass. */
+@media (max-width: 991.98px) {
+    .commerce-checkout__summary {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout__summary .card-body {
+        padding: 1rem !important;
+    }
+
+    .commerce-checkout__summary .commerce-checkout__grand-total {
+        margin-top: .65rem;
+        padding-top: .75rem;
+    }
+}
+
+@media (min-width: 1400px) {
+    .commerce-checkout__summary .card-body {
+        padding-inline: 2rem;
+    }
+}
+
+
+
+/* Commerce 7.96 H13.4.3.1 — Cart / checkout UX harmonisation fix.
+   Keep the desktop composition until the actual mobile breakpoint. */
+.commerce-cart__purchase-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+.commerce-cart__items-column,
+.commerce-cart__summary-column {
+    min-width: 0;
+}
+.commerce-cart-trust-strip {
+    margin-bottom: 0;
+}
+.commerce-cart-trust-strip .commerce-checkout-trust-strip__item {
+    min-width: 0;
+}
+@media (max-width: 767.98px) {
+    .commerce-cart__purchase-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Commerce 7.96 H13.5.1 — mobile monetary-value integrity.
+   Labels may wrap, monetary values never split sign / amount / currency. */
+.commerce-cart-summary__totals > div,
+.commerce-checkout__totals > div {
+    min-width: 0;
+}
+
+.commerce-cart-summary__totals dt,
+.commerce-checkout__totals dt {
+    min-width: 0;
+}
+
+.commerce-cart-summary__totals dd,
+.commerce-checkout__totals dd {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.commerce-pedagogical-capacity {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin: .65rem 0;
+    font-weight: 700;
+    font-size: .92rem;
+}
+.commerce-pedagogical-capacity.is-low,
+.commerce-pedagogical-capacity.is-sold-out {
+    font-weight: 800;
+}
+.commerce-pedagogical-capacity.is-sold-out,
+.commerce-pedagogical-capacity.is-closed {
+    opacity: .8;
+}
+
+.commerce-pedagogical-sales-deadline {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin: -.25rem 0 .9rem;
+    font-size: .82rem;
+    font-weight: 600;
+    opacity: .76;
+}
+
+/* 7.97K5 — temporary pedagogical seat reservation in cart. */
+.commerce-cart-seat-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 1rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid rgba(0, 0, 0, .08);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, .86);
+    box-shadow: 0 .4rem 1.4rem rgba(0, 0, 0, .06);
+}
+.commerce-cart-seat-summary__icon {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    flex: 0 0 2.6rem;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .06);
+}
+.commerce-cart-seat-summary__content {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.commerce-cart-seat-summary__timer {
+    margin-top: .18rem;
+    font-size: .94rem;
+}
+.commerce-cart-seat-summary__timer [data-cart-seat-countdown] {
+    display: inline-block;
+    min-width: 3.4rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+}
+.commerce-cart-seat-summary__expired-help {
+    margin-top: .2rem;
+    font-size: .92rem;
+}
+.commerce-cart-seat-summary__renew {
+    flex: 0 0 auto;
+    margin: 0;
+}
+.commerce-cart-line__seat {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    margin-top: .75rem;
+    padding: .65rem .75rem;
+    border-radius: .75rem;
+    background: rgba(0, 0, 0, .035);
+    font-size: .9rem;
+}
+.commerce-cart-line__seat.is-expired {
+    opacity: .78;
+}
+.commerce-cart-line__seat-help {
+    margin-top: .1rem;
+    font-size: .84rem;
+    opacity: .78;
+}
+.commerce-cart-summary__seat-warning {
+    font-size: .88rem;
+    text-align: center;
+}
+@media (max-width: 575.98px) {
+    .commerce-cart-seat-summary {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    .commerce-cart-seat-summary__renew {
+        width: 100%;
+    }
+    .commerce-cart-seat-summary__renew .btn {
+        width: 100%;
+    }
+}
+
+
+/* 7.97L7.3.2 — compact checkout reservation banner. */
+.commerce-checkout .commerce-cart-seat-summary {
+    margin-bottom: 1.5rem;
+}
+
+/* 7.97L7.3.3 — actual Boutique CTA markup: links must use the same
+   flex centring contract as button elements rendered by Bootstrap/Edly. */
+.commerce-product-card__cart-actions > .btn,
+.commerce-product-card__cart-actions > form > .btn,
+.commerce-storefront__filters .commerce-storefront__reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    line-height: 1.2;
+}
+
+.commerce-storefront__filters .commerce-storefront__reset {
+    align-self: stretch;
+}
+
+
+/* 7.97L7.3.5 — vertically centred empty-cart CTA. */
+.commerce-cart-empty .btn {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+}
+
+
+/* 7.97 M6.2 — one customer access contract from Boutique through Checkout. */
+.commerce-storefront-price--promotion-join {
+    border-color: rgba(var(--bs-primary-rgb), .18);
+    background: rgba(var(--bs-primary-rgb), .035);
+}
+.commerce-storefront-price__badge--owner {
+    background: rgba(25, 135, 84, .10);
+    color: #146c43;
+}
+.commerce-customer-access-promise {
+    background: rgba(var(--bs-primary-rgb), .025);
+}
+.commerce-customer-access-promise__details-title {
+    color: var(--bs-body-color);
+}
+.commerce-cart-line__access .commerce-customer-access-promise,
+.commerce-checkout-item__access .commerce-customer-access-promise {
+    padding: .7rem .8rem !important;
+    background: rgba(15, 23, 42, .025);
+}
+.commerce-cart-line__access .commerce-customer-access-promise__details,
+.commerce-checkout-item__access .commerce-customer-access-promise__details,
+.commerce-cart-line__access .commerce-customer-access-promise__schedule,
+.commerce-checkout-item__access .commerce-customer-access-promise__schedule {
+    margin-top: .55rem !important;
+}
+.commerce-checkout-item__access {
+    max-width: 38rem;
+}
+@media (max-width: 575.98px) {
+    .commerce-checkout-item__access {
+        grid-column: 1 / -1;
+    }
+}
+
+/* 7.97 M6.2.1 — concise access contract across cart/checkout/print. */
+.commerce-customer-access-promise--compact .commerce-customer-access-promise__lead {
+    line-height: 1.45;
+}
+.commerce-customer-access-promise--compact .commerce-customer-access-promise__schedule--compact {
+    border-top: 0 !important;
+    padding-top: 0 !important;
+}
+.commerce-product-card__promotion-join-meta {
+    line-height: 1.4;
+}
+.commerce-cart-print-item__access {
+    margin-top: .65rem;
+}
+.commerce-cart-print-item__access .commerce-customer-access-promise {
+    background: rgba(15, 23, 42, .025);
+}
+.commerce-checkout-item__promotion {
+    display: flex;
+    align-items: flex-start;
+    gap: .4rem;
+    color: var(--bs-secondary-color);
+    font-size: .76rem;
+    line-height: 1.35;
+}
+.commerce-checkout-item__promotion i {
+    flex: 0 0 auto;
+    margin-top: .12rem;
+}
+.commerce-cart-print-item__badges .commerce-storefront-price__badge--promotion,
+.commerce-checkout-item .commerce-storefront-price__badge--promotion {
+    background: #e7334f;
+    color: #fff;
+}
+@media print {
+    .commerce-cart-print-item__access {
+        break-inside: avoid;
+    }
+}
+
+/* 7.97 M6.3 — final M6.2 print consistency polish. */
+.commerce-cart-print-item__badges .commerce-storefront-price__badge--promotion {
+    background: #e7334f !important;
+    color: #fff !important;
+}
+.commerce-cart-print-item__access {
+    margin-top: .9rem;
+}
+@media print {
+    .commerce-cart-print-item__badges .commerce-storefront-price__badge--promotion {
+        background: #e7334f !important;
+        color: #fff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 }

@@ -8831,5 +8831,1694 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         );
     }
 
+
+    if ($oldversion < 2026082301) {
+        $table = new xmldb_table('local_subscriptions_commerce_refund');
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('paymentid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('provider', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+            $table->add_field('providerrefundid', XMLDB_TYPE_CHAR, '255', null, null);
+            $table->add_field('idempotencykey', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+            $table->add_field('status', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+            $table->add_field('currency', XMLDB_TYPE_CHAR, '3', null, XMLDB_NOTNULL);
+            $table->add_field('amountminor', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('reason', XMLDB_TYPE_TEXT, null, null, null);
+            $table->add_field('metadatajson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+            $table->add_field('providerpayload', XMLDB_TYPE_TEXT, null, null, null);
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key(
+                'payment_fk',
+                XMLDB_KEY_FOREIGN,
+                ['paymentid'],
+                'local_subscriptions_commerce_payment',
+                ['id']
+            );
+
+            $table->add_index(
+                'idempotency_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['idempotencykey']
+            );
+            $table->add_index(
+                'payment_status_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['paymentid', 'status']
+            );
+            $table->add_index(
+                'provider_refund_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['provider', 'providerrefundid']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026082301,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026090800) {
+        $sequencetable = new xmldb_table('local_subs_commerce_inv_seq');
+        if (!$dbman->table_exists($sequencetable)) {
+            $sequencetable->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $sequencetable->add_field('entitykey', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+            $sequencetable->add_field('invoiceyear', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL);
+            $sequencetable->add_field('lastsequence', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $sequencetable->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $sequencetable->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $sequencetable->add_index('entity_year_uix', XMLDB_INDEX_UNIQUE, ['entitykey', 'invoiceyear']);
+            $dbman->create_table($sequencetable);
+        }
+
+        $invoicetable = new xmldb_table('local_subs_commerce_invoice');
+        if (!$dbman->table_exists($invoicetable)) {
+            $invoicetable->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $invoicetable->add_field('purchaseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $invoicetable->add_field('entitykey', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+            $invoicetable->add_field('invoicenumber', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+            $invoicetable->add_field('invoiceyear', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL);
+            $invoicetable->add_field('sequence', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $invoicetable->add_field('issuedat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $invoicetable->add_field('sellerjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+            $invoicetable->add_field('customerjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+            $invoicetable->add_field('financialjson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+            $invoicetable->add_field('metadatajson', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+            $invoicetable->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $invoicetable->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $invoicetable->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $invoicetable->add_key(
+                'purchase_fk',
+                XMLDB_KEY_FOREIGN_UNIQUE,
+                ['purchaseid'],
+                'local_subscriptions_commerce_purchase',
+                ['id']
+            );
+            $invoicetable->add_index('invoice_number_uix', XMLDB_INDEX_UNIQUE, ['invoicenumber']);
+            $invoicetable->add_index(
+                'entity_year_sequence_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['entitykey', 'invoiceyear', 'sequence']
+            );
+            $dbman->create_table($invoicetable);
+        }
+
+        upgrade_plugin_savepoint(true, 2026090800, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026090801) {
+        $sequencetable = new xmldb_table(
+            'local_subs_commerce_cn_seq'
+        );
+        if (!$dbman->table_exists($sequencetable)) {
+            $sequencetable->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
+            $sequencetable->add_field(
+                'entitykey',
+                XMLDB_TYPE_CHAR,
+                '64',
+                null,
+                XMLDB_NOTNULL
+            );
+            $sequencetable->add_field(
+                'creditnoteyear',
+                XMLDB_TYPE_INTEGER,
+                '4',
+                null,
+                XMLDB_NOTNULL
+            );
+            $sequencetable->add_field(
+                'lastsequence',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $sequencetable->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $sequencetable->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+            $sequencetable->add_index(
+                'entity_year_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['entitykey', 'creditnoteyear']
+            );
+            $dbman->create_table($sequencetable);
+        }
+
+        $creditnotetable = new xmldb_table(
+            'local_subs_commerce_credit_note'
+        );
+        if (!$dbman->table_exists($creditnotetable)) {
+            $creditnotetable->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
+            $creditnotetable->add_field(
+                'refundid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'invoiceid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'purchaseid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'entitykey',
+                XMLDB_TYPE_CHAR,
+                '64',
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'creditnotenumber',
+                XMLDB_TYPE_CHAR,
+                '64',
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'creditnoteyear',
+                XMLDB_TYPE_INTEGER,
+                '4',
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'sequence',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'issuedat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'sellerjson',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'customerjson',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'financialjson',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'metadatajson',
+                XMLDB_TYPE_TEXT,
+                null,
+                null,
+                XMLDB_NOTNULL
+            );
+            $creditnotetable->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $creditnotetable->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $creditnotetable->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+            $creditnotetable->add_key(
+                'refund_fk',
+                XMLDB_KEY_FOREIGN_UNIQUE,
+                ['refundid'],
+                'local_subscriptions_commerce_refund',
+                ['id']
+            );
+            $creditnotetable->add_key(
+                'invoice_fk',
+                XMLDB_KEY_FOREIGN,
+                ['invoiceid'],
+                'local_subs_commerce_invoice',
+                ['id']
+            );
+            $creditnotetable->add_key(
+                'purchase_fk',
+                XMLDB_KEY_FOREIGN,
+                ['purchaseid'],
+                'local_subscriptions_commerce_purchase',
+                ['id']
+            );
+            $creditnotetable->add_index(
+                'credit_note_number_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['creditnotenumber']
+            );
+            $creditnotetable->add_index(
+                'entity_year_sequence_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['entitykey', 'creditnoteyear', 'sequence']
+            );
+            $creditnotetable->add_index(
+                'purchase_issued_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['purchaseid', 'issuedat']
+            );
+            $dbman->create_table($creditnotetable);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026090801,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026091000) {
+        $table = new xmldb_table(
+            'local_subs_commerce_course_cfg'
+        );
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
+            $table->add_field(
+                'courseid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'accessmode',
+                XMLDB_TYPE_CHAR,
+                '32',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'classic_immediate'
+            );
+            $table->add_field(
+                'modifiedby',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null
+            );
+            $table->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+            $table->add_key(
+                'course_fk',
+                XMLDB_KEY_FOREIGN_UNIQUE,
+                ['courseid'],
+                'course',
+                ['id']
+            );
+            $table->add_key(
+                'modifiedby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['modifiedby'],
+                'user',
+                ['id']
+            );
+            $table->add_index(
+                'accessmode_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['accessmode']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091000,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026091001) {
+        $table = new xmldb_table(
+            'local_subs_commerce_ped_promo'
+        );
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
+            $table->add_field(
+                'promotionkey',
+                XMLDB_TYPE_CHAR,
+                '100',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'name',
+                XMLDB_TYPE_CHAR,
+                '255',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'courseid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'status',
+                XMLDB_TYPE_CHAR,
+                '32',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'draft'
+            );
+            $table->add_field(
+                'published',
+                XMLDB_TYPE_INTEGER,
+                '1',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'salesopensat',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'salesclosesat',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'startsat',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'endsat',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'capacitytotal',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'createdby',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'modifiedby',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+            $table->add_key(
+                'course_fk',
+                XMLDB_KEY_FOREIGN,
+                ['courseid'],
+                'course',
+                ['id']
+            );
+            $table->add_key(
+                'createdby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['createdby'],
+                'user',
+                ['id']
+            );
+            $table->add_key(
+                'modifiedby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['modifiedby'],
+                'user',
+                ['id']
+            );
+
+            $table->add_index(
+                'promotionkey_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['promotionkey']
+            );
+            $table->add_index(
+                'course_status_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['courseid', 'status']
+            );
+            $table->add_index(
+                'sales_window_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'published',
+                    'salesopensat',
+                    'salesclosesat',
+                ]
+            );
+            $table->add_index(
+                'start_status_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['startsat', 'status']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091001,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026091002) {
+        $table = new xmldb_table(
+            'local_subs_commerce_ped_cal'
+        );
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
+            $table->add_field(
+                'promotionid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'itemtype',
+                XMLDB_TYPE_CHAR,
+                '32',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'course_section'
+            );
+            $table->add_field(
+                'itemid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'position',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'unlocksat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'createdby',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'modifiedby',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+            $table->add_key(
+                'promotion_fk',
+                XMLDB_KEY_FOREIGN,
+                ['promotionid'],
+                'local_subs_commerce_ped_promo',
+                ['id']
+            );
+            $table->add_key(
+                'createdby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['createdby'],
+                'user',
+                ['id']
+            );
+            $table->add_key(
+                'modifiedby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['modifiedby'],
+                'user',
+                ['id']
+            );
+
+            $table->add_index(
+                'promotion_item_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['promotionid', 'itemtype', 'itemid']
+            );
+            $table->add_index(
+                'promotion_position_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['promotionid', 'position']
+            );
+            $table->add_index(
+                'promotion_unlock_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['promotionid', 'unlocksat']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091002,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026091003) {
+        $table = new xmldb_table(
+            'local_subs_commerce_ped_access'
+        );
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
+            $table->add_field(
+                'courseid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'userid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'promotionid',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'profile',
+                XMLDB_TYPE_CHAR,
+                '32',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'legacy_full'
+            );
+            $table->add_field(
+                'createdby',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'modifiedby',
+                XMLDB_TYPE_INTEGER,
+                '10'
+            );
+            $table->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+            $table->add_key(
+                'course_fk',
+                XMLDB_KEY_FOREIGN,
+                ['courseid'],
+                'course',
+                ['id']
+            );
+            $table->add_key(
+                'user_fk',
+                XMLDB_KEY_FOREIGN,
+                ['userid'],
+                'user',
+                ['id']
+            );
+            $table->add_key(
+                'promotion_fk',
+                XMLDB_KEY_FOREIGN,
+                ['promotionid'],
+                'local_subs_commerce_ped_promo',
+                ['id']
+            );
+            $table->add_key(
+                'createdby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['createdby'],
+                'user',
+                ['id']
+            );
+            $table->add_key(
+                'modifiedby_fk',
+                XMLDB_KEY_FOREIGN,
+                ['modifiedby'],
+                'user',
+                ['id']
+            );
+
+            $table->add_index(
+                'course_user_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['courseid', 'userid']
+            );
+            $table->add_index(
+                'promotion_profile_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['promotionid', 'profile']
+            );
+            $table->add_index(
+                'user_profile_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['userid', 'profile']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091003,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026091004) {
+        $table = new xmldb_table('local_subs_commerce_ped_gcfg');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('groupsize', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '6');
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('modifiedby', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('promotion_fk', XMLDB_KEY_FOREIGN, ['promotionid'], 'local_subs_commerce_ped_promo', ['id']);
+            $table->add_key('promotion_uq', XMLDB_KEY_UNIQUE, ['promotionid']);
+            $table->add_key('createdby_fk', XMLDB_KEY_FOREIGN, ['createdby'], 'user', ['id']);
+            $table->add_key('modifiedby_fk', XMLDB_KEY_FOREIGN, ['modifiedby'], 'user', ['id']);
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_subs_commerce_ped_group');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('moodlegroupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('displayname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+            $table->add_field('position', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('tutorid', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('supportlang', XMLDB_TYPE_CHAR, '20');
+            $table->add_field('telegramref', XMLDB_TYPE_CHAR, '255');
+            $table->add_field('levelupxp', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('active', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('modifiedby', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('promotion_fk', XMLDB_KEY_FOREIGN, ['promotionid'], 'local_subs_commerce_ped_promo', ['id']);
+            $table->add_key('moodlegroup_fk', XMLDB_KEY_FOREIGN, ['moodlegroupid'], 'groups', ['id']);
+            $table->add_key('tutor_fk', XMLDB_KEY_FOREIGN, ['tutorid'], 'user', ['id']);
+            $table->add_key('createdby_fk', XMLDB_KEY_FOREIGN, ['createdby'], 'user', ['id']);
+            $table->add_key('modifiedby_fk', XMLDB_KEY_FOREIGN, ['modifiedby'], 'user', ['id']);
+            $table->add_index('promotion_moodlegroup_uix', XMLDB_INDEX_UNIQUE, ['promotionid', 'moodlegroupid']);
+            $table->add_index('promotion_position_idx', XMLDB_INDEX_NOTUNIQUE, ['promotionid', 'position']);
+            $table->add_index('promotion_active_idx', XMLDB_INDEX_NOTUNIQUE, ['promotionid', 'active']);
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_subs_commerce_ped_gmem');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('active', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('group_fk', XMLDB_KEY_FOREIGN, ['groupid'], 'local_subs_commerce_ped_group', ['id']);
+            $table->add_key('user_fk', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_key('createdby_fk', XMLDB_KEY_FOREIGN, ['createdby'], 'user', ['id']);
+            $table->add_index('group_user_uix', XMLDB_INDEX_UNIQUE, ['groupid', 'userid']);
+            $table->add_index('user_active_idx', XMLDB_INDEX_NOTUNIQUE, ['userid', 'active']);
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026091004, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026091005) {
+        $table = new xmldb_table('local_subs_commerce_ped_offer');
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('productid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('capacity', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('modifiedby', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('promotion_fk', XMLDB_KEY_FOREIGN, ['promotionid'], 'local_subs_commerce_ped_promo', ['id']);
+            $table->add_key('product_fk', XMLDB_KEY_FOREIGN, ['productid'], 'local_subs_commerce_product', ['id']);
+            $table->add_key('createdby_fk', XMLDB_KEY_FOREIGN, ['createdby'], 'user', ['id']);
+            $table->add_key('modifiedby_fk', XMLDB_KEY_FOREIGN, ['modifiedby'], 'user', ['id']);
+
+            $table->add_index('promotion_product_uix', XMLDB_INDEX_UNIQUE, ['promotionid', 'productid']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026091005, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026091006) {
+        $table = new xmldb_table('local_subs_commerce_ped_join');
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('productid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('purchasereference', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+            $table->add_field('state', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'active');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('promotion_fk', XMLDB_KEY_FOREIGN, ['promotionid'], 'local_subs_commerce_ped_promo', ['id']);
+            $table->add_key('course_fk', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
+            $table->add_key('user_fk', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_key('product_fk', XMLDB_KEY_FOREIGN, ['productid'], 'local_subs_commerce_product', ['id']);
+
+            // No redundant single-column indexes on FK fields: Moodle XMLDB
+            // already indexes foreign keys.
+            $table->add_index('promotion_user_purchase_uix', XMLDB_INDEX_UNIQUE, ['promotionid', 'userid', 'purchasereference']);
+            $table->add_index('promotion_state_idx', XMLDB_INDEX_NOTUNIQUE, ['promotionid', 'state']);
+            $table->add_index('promotion_product_state_idx', XMLDB_INDEX_NOTUNIQUE, ['promotionid', 'productid', 'state']);
+            $table->add_index('purchase_state_idx', XMLDB_INDEX_NOTUNIQUE, ['purchasereference', 'state']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026091006, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026091007) {
+        $table = new xmldb_table(
+            'local_subs_commerce_ped_group'
+        );
+        $field = new xmldb_field(
+            'tutorname',
+            XMLDB_TYPE_CHAR,
+            '255',
+            null,
+            null,
+            null,
+            null,
+            'tutorid'
+        );
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091007,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026091008) {
+        $table = new xmldb_table(
+            'local_subs_commerce_ped_group'
+        );
+
+        $field = new xmldb_field(
+            'productid',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+            null,
+            null,
+            'moodlegroupid'
+        );
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $key = new xmldb_key(
+            'product_fk',
+            XMLDB_KEY_FOREIGN,
+            ['productid'],
+            'local_subs_commerce_product',
+            ['id']
+        );
+
+        if (!$dbman->find_key_name($table, $key)) {
+            $dbman->add_key($table, $key);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091008,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026091009) {
+        $table = new xmldb_table(
+            'local_subs_commerce_ped_resv'
+        );
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field(
+                'id',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                XMLDB_SEQUENCE
+            );
+            $table->add_field(
+                'promotionid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'productid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'cartuuid',
+                XMLDB_TYPE_CHAR,
+                '32',
+                null,
+                XMLDB_NOTNULL
+            );
+            $table->add_field(
+                'customerid',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'quantity',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '1'
+            );
+            $table->add_field(
+                'state',
+                XMLDB_TYPE_CHAR,
+                '16',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'active'
+            );
+            $table->add_field(
+                'expiresat',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'purchasereference',
+                XMLDB_TYPE_CHAR,
+                '255'
+            );
+            $table->add_field(
+                'timecreated',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+            $table->add_field(
+                'timemodified',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                '0'
+            );
+
+            $table->add_key(
+                'primary',
+                XMLDB_KEY_PRIMARY,
+                ['id']
+            );
+            $table->add_key(
+                'promotion_fk',
+                XMLDB_KEY_FOREIGN,
+                ['promotionid'],
+                'local_subs_commerce_ped_promo',
+                ['id']
+            );
+            $table->add_key(
+                'product_fk',
+                XMLDB_KEY_FOREIGN,
+                ['productid'],
+                'local_subs_commerce_product',
+                ['id']
+            );
+
+            $table->add_index(
+                'promotion_product_cart_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['promotionid', 'productid', 'cartuuid']
+            );
+            $table->add_index(
+                'promotion_state_expiry_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['promotionid', 'state', 'expiresat']
+            );
+            $table->add_index(
+                'promotion_product_state_expiry_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                [
+                    'promotionid',
+                    'productid',
+                    'state',
+                    'expiresat',
+                ]
+            );
+            $table->add_index(
+                'cart_state_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['cartuuid', 'state']
+            );
+            $table->add_index(
+                'purchase_state_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['purchasereference', 'state']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091009,
+            'local',
+            'subscriptions'
+        );
+    }
+
+    if ($oldversion < 2026091103) {
+        $table = new xmldb_table('local_subs_commerce_ped_resv');
+
+        $checkoutstartedat = new xmldb_field(
+            'checkoutstartedat',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+            null,
+            null,
+            'expiresat'
+        );
+        if (!$dbman->field_exists($table, $checkoutstartedat)) {
+            $dbman->add_field($table, $checkoutstartedat);
+        }
+
+        $paymentstartedat = new xmldb_field(
+            'paymentstartedat',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            null,
+            null,
+            null,
+            'checkoutstartedat'
+        );
+        if (!$dbman->field_exists($table, $paymentstartedat)) {
+            $dbman->add_field($table, $paymentstartedat);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091103,
+            'local',
+            'subscriptions'
+        );
+    }
+
+    if ($oldversion < 2026091301) {
+        $table = new xmldb_table('local_subs_commerce_ped_jprice');
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('productid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('currency', XMLDB_TYPE_CHAR, '3', null, XMLDB_NOTNULL);
+            $table->add_field('amountminor', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL);
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, null);
+            $table->add_field('modifiedby', XMLDB_TYPE_INTEGER, '10', null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('promotion_fk', XMLDB_KEY_FOREIGN, ['promotionid'], 'local_subs_commerce_ped_promo', ['id']);
+            $table->add_key('product_fk', XMLDB_KEY_FOREIGN, ['productid'], 'local_subs_commerce_product', ['id']);
+            $table->add_key('createdby_fk', XMLDB_KEY_FOREIGN, ['createdby'], 'user', ['id']);
+            $table->add_key('modifiedby_fk', XMLDB_KEY_FOREIGN, ['modifiedby'], 'user', ['id']);
+
+            $table->add_index(
+                'promotion_product_currency_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['promotionid', 'productid', 'currency']
+            );
+            $table->add_index(
+                'product_currency_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['productid', 'currency']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091301,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026091501) {
+        $table = new xmldb_table('local_subs_commerce_ped_xp');
+
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('sourcecomponent', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+            $table->add_field('sourcetype', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+            $table->add_field('sourcekey', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+            $table->add_field('sourcehash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+            $table->add_field('points', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('timeearned', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('promotion_fk', XMLDB_KEY_FOREIGN, ['promotionid'], 'local_subs_commerce_ped_promo', ['id']);
+            $table->add_key('course_fk', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
+            $table->add_key('user_fk', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+
+            $table->add_index(
+                'promotion_user_source_uix',
+                XMLDB_INDEX_UNIQUE,
+                ['promotionid', 'userid', 'sourcehash']
+            );
+            $table->add_index(
+                'promotion_user_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['promotionid', 'userid']
+            );
+            $table->add_index(
+                'promotion_time_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['promotionid', 'timeearned']
+            );
+            $table->add_index(
+                'user_time_idx',
+                XMLDB_INDEX_NOTUNIQUE,
+                ['userid', 'timeearned']
+            );
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091501,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+
+    if ($oldversion < 2026091901) {
+        // M8 final certification: align long-lived upgraded databases with the
+        // canonical install.xml schema. All operations are intentionally
+        // idempotent because some environments may already contain part of the
+        // repaired schema.
+
+        // Historical legacy fields were created with default 0 whereas the
+        // canonical schema intentionally has no database default.
+        $table = new xmldb_table('user_subscription');
+        $field = new xmldb_field(
+            'planid',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            null
+        );
+        if ($dbman->table_exists($table) && $dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        }
+
+        $table = new xmldb_table('subscription_payment_request');
+        $field = new xmldb_field(
+            'creation_date',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            XMLDB_UNSIGNED,
+            XMLDB_NOTNULL,
+            null,
+            null
+        );
+        if ($dbman->table_exists($table) && $dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        }
+
+        $table = new xmldb_table('local_subs_contact_reply');
+        $contactreplyfields = [
+            'timecreated' => new xmldb_index('idx_time', XMLDB_INDEX_NOTUNIQUE, ['timecreated']),
+            'adminid' => new xmldb_index('idx_admin', XMLDB_INDEX_NOTUNIQUE, ['adminid']),
+            'messageid' => new xmldb_index('idx_msgid', XMLDB_INDEX_NOTUNIQUE, ['messageid']),
+        ];
+        foreach ($contactreplyfields as $fieldname => $index) {
+            $field = new xmldb_field(
+                $fieldname,
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null
+            );
+            if (!$dbman->table_exists($table) || !$dbman->field_exists($table, $field)) {
+                continue;
+            }
+
+            // Moodle deliberately refuses to alter an indexed field while the
+            // dependent index exists. Drop only the single-field lookup index,
+            // change the legacy default, then restore the canonical index.
+            // This remains safe on a retry after a partially completed upgrade.
+            if ($dbman->index_exists($table, $index)) {
+                $dbman->drop_index($table, $index);
+            }
+            $dbman->change_field_default($table, $field);
+            if (!$dbman->index_exists($table, $index)) {
+                $dbman->add_index($table, $index);
+            }
+        }
+
+        // Restore indexes implied by canonical foreign keys on databases that
+        // passed the original upgrade steps before those repairs were added.
+        $table = new xmldb_table('subscription_plan');
+        $key = new xmldb_key(
+            'access_scope_fk',
+            XMLDB_KEY_FOREIGN,
+            ['accessscopeid'],
+            'subscription_access_scope',
+            ['id']
+        );
+        if (
+            $dbman->table_exists($table)
+            && $dbman->field_exists($table, new xmldb_field('accessscopeid'))
+            && !$dbman->find_key_name($table, $key)
+        ) {
+            $dbman->add_key($table, $key);
+        }
+
+        $table = new xmldb_table('subscription_payment_request');
+        $key = new xmldb_key(
+            'subscriptionid',
+            XMLDB_KEY_FOREIGN,
+            ['subscriptionid'],
+            'user_subscription',
+            ['id']
+        );
+        if (
+            $dbman->table_exists($table)
+            && $dbman->field_exists($table, new xmldb_field('subscriptionid'))
+            && !$dbman->find_key_name($table, $key)
+        ) {
+            $dbman->add_key($table, $key);
+        }
+
+        // This index has existed on upgraded databases since the original CRM
+        // notes migration; install.xml now records it as part of the canonical
+        // fresh-install schema too.
+        $table = new xmldb_table('local_subscriptions_user_note');
+        $index = new xmldb_index('userid_idx', XMLDB_INDEX_NOTUNIQUE, ['userid']);
+        if ($dbman->table_exists($table) && !$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // The historical creation migrations passed decimal scale as the
+        // unsigned argument, producing DECIMAL(...,0) on upgraded MySQL
+        // databases. Restore the intended precisions from install.xml.
+        $table = new xmldb_table('local_subscriptions_inbox_contact');
+        $field = new xmldb_field(
+            'matchconfidence',
+            XMLDB_TYPE_NUMBER,
+            '5,2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'matchsource'
+        );
+        if ($dbman->table_exists($table) && $dbman->field_exists($table, $field)) {
+            $dbman->change_field_precision($table, $field);
+        }
+
+        $table = new xmldb_table('local_subscriptions_inbox_ai_result');
+        $field = new xmldb_field(
+            'confidence',
+            XMLDB_TYPE_NUMBER,
+            '10,6',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'status'
+        );
+        if ($dbman->table_exists($table) && $dbman->field_exists($table, $field)) {
+            $dbman->change_field_precision($table, $field);
+        }
+
+        // Customer Success plan scheduling fields existed in the canonical
+        // fresh-install schema but never received a forward migration.
+        $table = new xmldb_table('local_subscriptions_cs_plan');
+        $previous = 'status';
+        foreach (['scheduledat', 'scheduledby', 'startedat'] as $fieldname) {
+            $field = new xmldb_field(
+                $fieldname,
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null,
+                $previous
+            );
+            if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+            $previous = $fieldname;
+        }
+
+        // Personal Offer assignment validity snapshot fields likewise existed
+        // only in install.xml on long-lived upgraded databases.
+        $table = new xmldb_table('local_subs_commerce_offer');
+        $fields = [
+            new xmldb_field(
+                'validitymode',
+                XMLDB_TYPE_CHAR,
+                '20',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'legacy',
+                'expiresat'
+            ),
+            new xmldb_field(
+                'validityduration',
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null,
+                'validitymode'
+            ),
+            new xmldb_field(
+                'validitytimezone',
+                XMLDB_TYPE_CHAR,
+                '64',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                'Europe/Paris',
+                'validityduration'
+            ),
+        ];
+        foreach ($fields as $field) {
+            if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        $table = new xmldb_table('local_subs_commerce_offer_campaign_member');
+        $key = new xmldb_key(
+            'existingoffer_fk',
+            XMLDB_KEY_FOREIGN,
+            ['existingofferid'],
+            'local_subs_commerce_offer',
+            ['id']
+        );
+        if (
+            $dbman->table_exists($table)
+            && $dbman->field_exists($table, new xmldb_field('existingofferid'))
+            && !$dbman->find_key_name($table, $key)
+        ) {
+            $dbman->add_key($table, $key);
+        }
+
+        // Showroom scheduling fields are part of the canonical 7.97 schema and
+        // are needed as the database foundation for 7.98.
+        $table = new xmldb_table('local_subs_showroom');
+        $previous = 'status';
+        foreach (['scheduledat', 'scheduledby', 'startedat'] as $fieldname) {
+            $field = new xmldb_field(
+                $fieldname,
+                XMLDB_TYPE_INTEGER,
+                '10',
+                null,
+                null,
+                null,
+                null,
+                $previous
+            );
+            if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+            $previous = $fieldname;
+        }
+
+        $table = new xmldb_table('local_subs_commerce_ped_group');
+        $key = new xmldb_key(
+            'product_fk',
+            XMLDB_KEY_FOREIGN,
+            ['productid'],
+            'local_subs_commerce_product',
+            ['id']
+        );
+        if (
+            $dbman->table_exists($table)
+            && $dbman->field_exists($table, new xmldb_field('productid'))
+            && !$dbman->find_key_name($table, $key)
+        ) {
+            $dbman->add_key($table, $key);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091901,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026091902) {
+        // M8 final certification follow-up: some long-lived MySQL databases
+        // retain the foreign-key metadata but are missing the physical support
+        // index that a fresh XMLDB installation creates for the same key. Add
+        // those indexes explicitly so upgraded and fresh schemas converge.
+        $indexes = [
+            [
+                'table' => 'subscription_plan',
+                'name' => 'access_scope_fk',
+                'fields' => ['accessscopeid'],
+            ],
+            [
+                'table' => 'subscription_payment_request',
+                'name' => 'subscriptionid',
+                'fields' => ['subscriptionid'],
+            ],
+            [
+                'table' => 'local_subs_commerce_offer_campaign_member',
+                'name' => 'existingoffer_fk',
+                'fields' => ['existingofferid'],
+            ],
+            [
+                'table' => 'local_subs_commerce_ped_group',
+                'name' => 'product_fk',
+                'fields' => ['productid'],
+            ],
+        ];
+
+        foreach ($indexes as $definition) {
+            $table = new xmldb_table($definition['table']);
+            $field = new xmldb_field($definition['fields'][0]);
+            $index = new xmldb_index(
+                $definition['name'],
+                XMLDB_INDEX_NOTUNIQUE,
+                $definition['fields']
+            );
+
+            if (
+                $dbman->table_exists($table)
+                && $dbman->field_exists($table, $field)
+                && !$dbman->index_exists($table, $index)
+            ) {
+                $dbman->add_index($table, $index);
+            }
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026091902,
+            'local',
+            'subscriptions'
+        );
+    }
+
     return true;
 }

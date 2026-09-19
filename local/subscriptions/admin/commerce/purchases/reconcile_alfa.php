@@ -7,6 +7,7 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\payment\reconciliation\alfa\AlfaPaymentReconciliationService;
+use local_subscriptions\commerce\payment\reconciliation\CommercePaymentReconciliationPresentation;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
@@ -164,8 +165,29 @@ echo CommerceDesignSystemRenderer::panel(
     $definition([
         [get_string('commerce_purchase_internal_reference', 'local_subscriptions'), html_writer::tag('code', s($inspection->purchasereference))],
         [get_string('commerce_alfa_crm_payment_id', 'local_subscriptions'), '#' . $inspection->paymentid],
-        [get_string('commerce_purchase_payment_status', 'local_subscriptions'), s($inspection->campuspaymentstatus)],
-        [get_string('commerce_purchase_status', 'local_subscriptions'), s($inspection->campuspurchasestatus)],
+        [
+            get_string(
+                'commerce_purchase_payment_status',
+                'local_subscriptions'
+            ),
+            s(
+                CommercePurchasePresentation::technical_status_label(
+                    'payment',
+                    $inspection->campuspaymentstatus
+                )
+            ),
+        ],
+        [
+            get_string(
+                'commerce_purchase_status',
+                'local_subscriptions'
+            ),
+            s(
+                CommercePurchasePresentation::commercial_status_label(
+                    $inspection->campuspurchasestatus
+                )
+            ),
+        ],
         [get_string('commerce_purchase_amount', 'local_subscriptions'), CommercePurchasePresentation::money($inspection->campusamountminor, $inspection->campuscurrency)],
     ])
 );
@@ -176,22 +198,63 @@ echo CommerceDesignSystemRenderer::panel(
     get_string('commerce_alfa_crm_alfa_section', 'local_subscriptions'),
     $definition([
         [get_string('commerce_alfa_crm_order_id', 'local_subscriptions'), html_writer::tag('code', s($inspection->providerorderid))],
-        [get_string('commerce_alfa_crm_order_status', 'local_subscriptions'), s((string)($inspection->provider->orderstatus ?? '—'))],
-        [get_string('commerce_alfa_crm_payment_state', 'local_subscriptions'), s((string)($inspection->provider->paymentstate ?? '—'))],
+        [
+            get_string(
+                'commerce_alfa_crm_order_status',
+                'local_subscriptions'
+            ),
+            s(
+                CommercePaymentReconciliationPresentation::alfa_order_status(
+                    $inspection->provider->orderstatus
+                )
+            ),
+        ],
+        [
+            get_string(
+                'commerce_alfa_crm_payment_state',
+                'local_subscriptions'
+            ),
+            s(
+                CommercePaymentReconciliationPresentation::alfa_payment_state(
+                    $inspection->provider->paymentstate
+                )
+            ),
+        ],
         [get_string('commerce_purchase_amount', 'local_subscriptions'), $inspection->provider->amountminor === null ? '—' : CommercePurchasePresentation::money($inspection->provider->amountminor, $inspection->provider->currency ?? $inspection->campuscurrency)],
         [get_string('commerce_alfa_crm_deposited_amount', 'local_subscriptions'), $inspection->provider->depositedamountminor === null ? '—' : CommercePurchasePresentation::money($inspection->provider->depositedamountminor, $inspection->provider->currency ?? $inspection->campuscurrency)],
+        [get_string('commerce_alfa_crm_refunded_amount', 'local_subscriptions'), $inspection->provider->refundedamountminor === null ? '—' : CommercePurchasePresentation::money($inspection->provider->refundedamountminor, $inspection->provider->currency ?? $inspection->campuscurrency)],
     ])
 );
 echo html_writer::end_div();
 echo html_writer::end_div();
 
 $checks = [
-    [get_string('commerce_alfa_crm_check_provider_paid', 'local_subscriptions'), $inspection->providerpaid],
+    [get_string(
+        $inspection->providerrefunded
+            ? 'commerce_alfa_crm_check_provider_refund_settled'
+            : 'commerce_alfa_crm_check_provider_paid',
+        'local_subscriptions'
+    ), $inspection->providerpaid],
     [get_string('commerce_alfa_crm_check_amount', 'local_subscriptions'), $inspection->amountmatches],
     [get_string('commerce_alfa_crm_check_currency', 'local_subscriptions'), $inspection->currencymatches],
     [get_string('commerce_alfa_crm_check_approved', 'local_subscriptions'), $inspection->approvedamountmatches],
-    [get_string('commerce_alfa_crm_check_deposited', 'local_subscriptions'), $inspection->depositedamountmatches],
+    [get_string(
+        $inspection->providerrefunded
+            ? 'commerce_alfa_crm_check_deposited_after_refund'
+            : 'commerce_alfa_crm_check_deposited',
+        'local_subscriptions'
+    ), $inspection->depositedamountmatches],
 ];
+
+if ($inspection->providerrefunded) {
+    $checks[] = [
+        get_string(
+            'commerce_alfa_crm_check_refund_amount',
+            'local_subscriptions'
+        ),
+        $inspection->refundamountmatches,
+    ];
+}
 $checkhtml = html_writer::start_tag('ul', ['class' => 'list-group list-group-flush']);
 foreach ($checks as [$label, $ok]) {
     $checkhtml .= html_writer::tag(

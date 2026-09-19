@@ -1,0 +1,36 @@
+{{#hasaccesspromise}}
+<div class="commerce-customer-access-promise border rounded-3 p-3" data-access-kind="{{accesspromisekind}}">
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="fa-solid fa-circle-info text-primary" aria-hidden="true"></i>
+        <strong>{{accesspromisetitle}}</strong>
+    </div>
+    <div class="commerce-customer-access-promise__lead small text-muted">{{accesspromiselead}}</div>
+
+    {{#hasaccesspromisedetails}}
+        <div class="commerce-customer-access-promise__details mt-3">
+            <div class="commerce-customer-access-promise__details-title small fw-semibold mb-2">{{accesspromisedetailstitle}}</div>
+            <ul class="list-unstyled small mb-0">
+                {{#accesspromisedetails}}
+                    <li class="d-flex align-items-start gap-2 mt-1">
+                        <i class="fa-solid {{icon}} mt-1 text-muted" aria-hidden="true"></i>
+                        <span>{{label}}</span>
+                    </li>
+                {{/accesspromisedetails}}
+            </ul>
+        </div>
+    {{/hasaccesspromisedetails}}
+
+    {{#hasaccesspromiseitems}}
+        <div class="commerce-customer-access-promise__schedule mt-3 pt-2 border-top">
+            <ul class="list-unstyled small mb-0">
+                {{#accesspromiseitems}}
+                    <li class="d-flex align-items-start gap-2 mt-1">
+                        <i class="fa-solid {{icon}} mt-1 text-muted" aria-hidden="true"></i>
+                        <span>{{label}}</span>
+                    </li>
+                {{/accesspromiseitems}}
+            </ul>
+        </div>
+    {{/hasaccesspromiseitems}}
+</div>
+{{/hasaccesspromise}}

@@ -27,6 +27,25 @@
             {{/hasquickfacts}}
             {{#owned}}
                 <div class="commerce-product-card__owned mb-3" role="status">✓ {{ownedlabel}}</div>
+                {{#promotionjoinpurchasable}}
+                    <div class="commerce-product-card__prices mb-3">
+                        <div class="commerce-storefront-price commerce-storefront-price--standard commerce-storefront-price--promotion-join">
+                            <div class="commerce-storefront-price__heading">
+                                <div class="commerce-storefront-price__label">{{promotionjoinownerpricelabel}}</div>
+                                <span class="commerce-storefront-price__badge commerce-storefront-price__badge--owner">{{promotionjoinownerpricebadge}}</span>
+                            </div>
+                            <div class="commerce-storefront-price__values">
+                                <strong>{{promotionjoinpriceformatted}}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    {{#hasaccesspromisepromotion}}
+                        <div class="commerce-product-card__promotion-join-meta small text-muted mb-2">
+                            <i class="fa-solid fa-user-group me-1" aria-hidden="true"></i>{{accesspromisepromotionlabel}}
+                        </div>
+                    {{/hasaccesspromisepromotion}}
+                    {{> local_subscriptions/storefront/pedagogical_capacity }}
+                {{/promotionjoinpurchasable}}
             {{/owned}}
             <div class="mt-auto position-relative" style="z-index:2">
                 {{^owned}}
@@ -38,6 +57,9 @@
                             {{#trustitems}}<span>✓ <span class="commerce-product-badge__icon" aria-hidden="true">{{icon}}</span>{{label}}</span>{{/trustitems}}
                         </div>
                     {{/hastrustitems}}
+                {{/owned}}
+                {{^owned}}
+                    {{> local_subscriptions/storefront/pedagogical_capacity }}
                 {{/owned}}
                 <div class="commerce-product-card__cart-actions">
                     {{#hasupgrade}}
@@ -56,7 +78,7 @@
                             </form>
                             {{^upgradeincart}}
                                 <form method="post" action="{{cartaction}}" class="flex-grow-1">
-                                    <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1">
+                                    <input type="hidden" name="action" value="buynow"><input type="hidden" name="source" value="storefront">
                                     <input type="hidden" name="operation" value="upgrade">
                                     <input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}">
                                     <input type="hidden" name="sku" value="{{sku}}">
@@ -73,6 +95,7 @@
                     {{#canpurchase}}
                         {{#prices}}
                             {{#canaddtocart}}
+                                {{#incart}}
                                 <form method="post" action="{{cartaction}}" class="flex-grow-1">
                                     <input type="hidden" name="action" value="{{toggleaction}}">
                                     <input type="hidden" name="sku" value="{{sku}}">
@@ -81,11 +104,25 @@
                                     <input type="hidden" name="currency" value="{{cartcurrency}}">
                                     <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
                                     <input type="hidden" name="sesskey" value="{{cartsesskey}}">
-                                    <button type="submit" class="btn {{#incart}}btn-outline-danger{{/incart}}{{^incart}}btn-primary{{/incart}} w-100">{{#incart}}<i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{/incart}}{{^incart}}<i class="fa-solid fa-cart-plus me-2" aria-hidden="true"></i>{{/incart}}{{togglelabel}}</button>
+                                    <button type="submit" class="btn btn-outline-danger w-100"><i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{togglelabel}}</button>
                                 </form>
+                                {{/incart}}
                                 {{^incart}}
-                                    <form method="post" action="{{cartaction}}" data-provider-experience data-provider-context="express-candidate" data-currency="{{cartcurrency}}" data-product="{{name}}" data-price="{{formatted}}" class="flex-grow-1">
-                                        <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1">
+                                    {{#pedagogicalavailable}}
+                                    <form method="post" action="{{cartaction}}" class="flex-grow-1">
+                                        <input type="hidden" name="action" value="{{toggleaction}}">
+                                        <input type="hidden" name="sku" value="{{sku}}">
+                                        <input type="hidden" name="priceid" value="{{id}}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                        <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                        <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                        <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-cart-plus me-2" aria-hidden="true"></i>{{togglelabel}}</button>
+                                    </form>
+                                    {{/pedagogicalavailable}}
+                                    {{#pedagogicalbuyavailable}}
+                                    <form method="post" action="{{cartaction}}" class="flex-grow-1">
+                                        <input type="hidden" name="action" value="buynow"><input type="hidden" name="source" value="storefront">
                                         <input type="hidden" name="sku" value="{{sku}}">
                                         <input type="hidden" name="priceid" value="{{id}}">
                                         <input type="hidden" name="quantity" value="1">
@@ -94,11 +131,34 @@
                                         <input type="hidden" name="sesskey" value="{{cartsesskey}}">
                                         <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{buy_now_label}}</button>
                                     </form>
+                                    {{/pedagogicalbuyavailable}}
+                                    {{^pedagogicalbuyavailable}}
+                                        <button type="button" class="btn btn-secondary w-100" disabled aria-disabled="true">{{pedagogicaldisabledctlabel}}</button>
+                                    {{/pedagogicalbuyavailable}}
                                 {{/incart}}
                             {{/canaddtocart}}
                         {{/prices}}
                     {{/canpurchase}}
                     {{#owned}}
+                        {{#promotionjoinpurchasable}}
+                            {{^promotionjoinincart}}
+                                <form method="post" action="{{cartaction}}" class="flex-grow-1">
+                                    <input type="hidden" name="action" value="buynow">
+                                    <input type="hidden" name="source" value="storefront">
+                                    <input type="hidden" name="operation" value="promotion_join">
+                                    <input type="hidden" name="sku" value="{{sku}}">
+                                    <input type="hidden" name="priceid" value="{{promotionjoincatalogpriceid}}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                    <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                    <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                    <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-user-group me-2" aria-hidden="true"></i>{{promotionjoinactionlabel}}</button>
+                                </form>
+                            {{/promotionjoinincart}}
+                            {{#promotionjoinincart}}
+                                <a href="{{carturl}}" class="btn btn-primary flex-grow-1"><i class="fa-solid fa-cart-shopping me-2" aria-hidden="true"></i>{{cartlabel}}</a>
+                            {{/promotionjoinincart}}
+                        {{/promotionjoinpurchasable}}
                         <a href="{{ownedactionurl}}" class="btn btn-success flex-grow-1">
                             {{#ownediscourse}}<i class="fa-solid fa-graduation-cap me-2" aria-hidden="true"></i>{{/ownediscourse}}
                             {{#ownedisdigital}}<i class="fa-solid fa-file-arrow-down me-2" aria-hidden="true"></i>{{/ownedisdigital}}

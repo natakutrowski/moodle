@@ -6,6 +6,8 @@ namespace local_subscriptions\commerce\showroom;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
+use local_subscriptions\currency\Currency;
 use local_subscriptions\support\Region;
 
 /** Resolves active Commerce currencies consistently for Showroom and checkout actions. */
@@ -19,12 +21,15 @@ final class CommerceShowroomCurrencyResolver {
            ORDER BY UPPER(currency)'
         );
 
+        $registry = new CommerceCurrencyRegistry();
+        $enabled = $registry->enabled();
         $currencies = array_values(array_unique(array_filter(array_map(
-            static fn(mixed $value): string => strtoupper(trim((string)$value)),
+            static fn(mixed $value): string => Currency::sanitize((string)$value),
             $currencies
         ))));
+        $currencies = array_values(array_intersect($enabled, $currencies));
 
-        return $currencies !== [] ? $currencies : ['EUR', 'RUB'];
+        return $currencies !== [] ? $currencies : $enabled;
     }
 
     /** @param string[] $available */
@@ -33,20 +38,23 @@ final class CommerceShowroomCurrencyResolver {
         string $requested = '',
         string $stored = ''
     ): string {
+        $registry = new CommerceCurrencyRegistry();
+        $enabled = $registry->enabled();
         $available = array_values(array_unique(array_filter(array_map(
-            static fn(string $value): string => strtoupper(trim($value)),
+            static fn(string $value): string => Currency::sanitize($value),
             $available
         ))));
+        $available = array_values(array_intersect($enabled, $available));
         if ($available === []) {
-            $available = ['EUR', 'RUB'];
+            $available = $enabled;
         }
 
-        $requested = strtoupper(trim($requested));
+        $requested = Currency::sanitize($requested);
         if ($requested !== '' && in_array($requested, $available, true)) {
             return $requested;
         }
 
-        $stored = strtoupper(trim($stored));
+        $stored = Currency::sanitize($stored);
         if ($stored !== '' && in_array($stored, $available, true)) {
             return $stored;
         }

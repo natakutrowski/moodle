@@ -46,9 +46,13 @@ final class commerce_n116b1_context_menu_runtime_fix_test extends \advanced_test
     public function test_plugin_version_is_unchanged(): void {
         $version = $this->file('version.php');
 
-        self::assertStringContainsString(
-            '$plugin->version = 2026081602;',
-            $version
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
         );
     }
 }

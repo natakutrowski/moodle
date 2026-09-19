@@ -12,6 +12,7 @@ final class commerce_customer_improvements_j10d_test extends \advanced_testcase 
         $this->assertStringContainsString('PUBLIC_PRODUCT_ROUTES', $config);
         $this->assertStringContainsString('public_product_path', $config);
         $this->assertStringContainsString('UrlFactory::my_courses()', $hub);
-        $this->assertStringContainsString('course_progress', $hub);
+        $this->assertStringContainsString('CommerceCustomerCourseLearningStatusService', $hub);
+        $this->assertStringContainsString('progressstyle', $hub);
     }
 }

@@ -14,6 +14,10 @@ use local_subscriptions\commerce\purchase\CommercePurchaseRequestStatus;
 use local_subscriptions\commerce\domain\value\CommercePurchaseId;
 use local_subscriptions\commerce\domain\value\CommercePurchaseReference;
 use local_subscriptions\commerce\pricing\CommerceCommercialPriceResolver;
+use local_subscriptions\commerce\education\lifecycle\CommercePedagogicalSalePolicy;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinEligibilityService;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinOperation;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinPricingService;
 
 /** Freezes a checkout summary into a provider-independent pending purchase request. */
 final class CommerceCheckoutPurchaseBuilder {
@@ -45,8 +49,15 @@ final class CommerceCheckoutPurchaseBuilder {
         $ownedcreditminor = 0;
         $upgradetotalminor = 0;
 
+        $pedagogicalsalepolicy = CommercePedagogicalSalePolicy::create($GLOBALS['DB']);
+
         foreach ($calculateditems as $index => $calculated) {
             $cartitem = $calculated->get_item();
+            $pedagogicalsalepolicy->assert_product_available(
+                $cartitem->get_product_sku(),
+                time(),
+                $summary->get_cart_snapshot()->get_cart()->get_uuid()
+            );
             $quantity = $cartitem->get_quantity();
             $linetotal = $allocations[$index];
             $unitamount = intdiv($linetotal, $quantity);
@@ -55,6 +66,14 @@ final class CommerceCheckoutPurchaseBuilder {
             if ($remainder !== 0) {
                 throw new \RuntimeException('Checkout allocation requires an indivisible per-unit amount.');
             }
+
+            $promotionjoinmetadata = $this->promotion_join_checkout_metadata(
+                $summary,
+                $customer,
+                $calculated,
+                $linetotal
+            );
+
             $pricing = (new CommerceCommercialPriceResolver($GLOBALS['DB']))->resolve(
                 $calculated,
                 $summary->get_currency(),
@@ -78,22 +97,27 @@ final class CommerceCheckoutPurchaseBuilder {
                 $quantity,
                 $unitamount,
                 $summary->get_currency(),
-                array_merge($cartitem->get_metadata(), $pricing->to_metadata(), [
-                    'priceid' => $cartitem->get_price_id(),
-                    'locked_subtotal_minor' =>
-                        $calculated->get_subtotal()->get_amount_minor(),
-                    'locked_total_minor' => $linetotal,
-                    'locked_list_unit_minor' => $pricing->get_initial_unit_minor(),
-                    'locked_promoted_unit_minor' => $pricing->get_promoted_unit_minor(),
-                    'locked_payable_unit_minor' => $unitamount,
-                    'locked_list_total_minor' => $pricing->get_initial_total_minor(),
-                    'locked_product_promotion_minor' => $pricing->get_promotion_total_minor(),
-                    'locked_trial_discount_minor' => $pricing->get_trial_discount_total_minor(),
-                    'locked_total_discount_minor' => $pricing->get_total_reduction_minor(),
-                    'commerceoperation' => strtolower(trim((string)(
-                        $cartitem->get_metadata()['operation'] ?? ''
-                    ))),
-                ])
+                array_merge(
+                    $cartitem->get_metadata(),
+                    $promotionjoinmetadata,
+                    $pricing->to_metadata(),
+                    [
+                        'priceid' => $cartitem->get_price_id(),
+                        'locked_subtotal_minor' =>
+                            $calculated->get_subtotal()->get_amount_minor(),
+                        'locked_total_minor' => $linetotal,
+                        'locked_list_unit_minor' => $pricing->get_initial_unit_minor(),
+                        'locked_promoted_unit_minor' => $pricing->get_promoted_unit_minor(),
+                        'locked_payable_unit_minor' => $unitamount,
+                        'locked_list_total_minor' => $pricing->get_initial_total_minor(),
+                        'locked_product_promotion_minor' => $pricing->get_promotion_total_minor(),
+                        'locked_trial_discount_minor' => $pricing->get_trial_discount_total_minor(),
+                        'locked_total_discount_minor' => $pricing->get_total_reduction_minor(),
+                        'commerceoperation' => strtolower(trim((string)(
+                            $cartitem->get_metadata()['operation'] ?? ''
+                        ))),
+                    ]
+                )
             );
         }
 
@@ -134,6 +158,69 @@ final class CommerceCheckoutPurchaseBuilder {
         );
     }
 
+    /** @return array<string,int|string> */
+    private function promotion_join_checkout_metadata(
+        CommerceCheckoutSummary $summary,
+        CommerceCustomer $customer,
+        object $calculated,
+        int $linetotalminor
+    ): array {
+        $cartitem = $calculated->get_item();
+        $metadata = $cartitem->get_metadata();
+        $operation = strtolower(trim((string)($metadata['operation'] ?? '')));
+        if ($operation !== CommercePedagogicalPromotionJoinOperation::OPERATION) {
+            return [];
+        }
+
+        $cart = $summary->get_cart_snapshot()->get_cart();
+        $userid = $cart->get_customer_id();
+        if (
+            $userid <= 0
+            || (int)($customer->get_user_id() ?? 0) !== $userid
+            || (int)($metadata['promotion_join_user_id'] ?? 0) !== $userid
+            || $cartitem->get_quantity() !== 1
+        ) {
+            throw new \RuntimeException('Promotion join checkout owner identity is no longer valid.');
+        }
+
+        $now = time();
+        $eligibility = CommercePedagogicalPromotionJoinEligibilityService::create($GLOBALS['DB'])->resolve(
+            $userid,
+            $cartitem->get_product_sku(),
+            $now,
+            $cart->get_uuid()
+        );
+        $context = $eligibility->get_context();
+        if (
+            !$eligibility->is_eligible()
+            || $context === null
+            || $context->get_promotion_id() !== (int)($metadata['promotion_join_promotion_id'] ?? 0)
+            || $context->get_course_id() !== (int)($metadata['promotion_join_course_id'] ?? 0)
+            || $context->get_product_id() !== (int)($metadata['promotion_join_product_id'] ?? 0)
+        ) {
+            throw new \RuntimeException('Promotion join checkout cohort is no longer valid.');
+        }
+
+        $pricing = CommercePedagogicalPromotionJoinPricingService::create($GLOBALS['DB'])->resolve(
+            $eligibility,
+            $summary->get_currency()
+        );
+        if (
+            !$pricing->is_purchasable()
+            || $pricing->get_price_id() === null
+            || $pricing->get_amount_minor() === null
+            || (int)$pricing->get_amount_minor() !== $linetotalminor
+        ) {
+            throw new \RuntimeException('Promotion join checkout price is no longer valid.');
+        }
+
+        return [
+            'promotion_join_price_id' => (int)$pricing->get_price_id(),
+            'promotion_join_amount_minor' => (int)$pricing->get_amount_minor(),
+            'promotion_join_currency' => $pricing->get_currency(),
+        ];
+    }
+
     private function allocate_total(array $items, int $target): array {
         $allocations = array_fill(0, count($items), 0);
         $normalindexes = [];
@@ -146,10 +233,12 @@ final class CommerceCheckoutPurchaseBuilder {
             $operation = strtolower(trim((string)($metadata['operation'] ?? '')));
             $isupgrade = $operation === 'upgrade';
             $istrialconversion = $operation === 'trialconversion';
+            $ispromotionjoin = $operation === 'promotion_join';
 
-            if ($isupgrade || $istrialconversion) {
-                // Upgrade and Trial values are already locked final prices in
-                // the calculated cart snapshot. Never apply Trial twice here.
+            if ($isupgrade || $istrialconversion || $ispromotionjoin) {
+                // Upgrade, Trial and promotion_join values are already locked
+                // final prices in the calculated cart snapshot. Never spread
+                // unrelated cart-level promotions onto these special lines.
                 $allocations[$index] = $subtotal;
                 $reserved += $subtotal;
             } else {

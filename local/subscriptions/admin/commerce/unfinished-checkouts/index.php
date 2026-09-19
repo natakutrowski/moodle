@@ -16,6 +16,7 @@ use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\payment\Provider;
+use local_subscriptions\currency\CurrencyFormatter;
 
 $context = AdminSecurity::require(Capabilities::VIEW_PAYMENTS);
 $useridfilter = optional_param('userid', 0, PARAM_INT);
@@ -474,8 +475,10 @@ if ($rows === []) {
                     ['class' => 'crm-unfinished-product-link']
                 );
                 $block .= html_writer::div(
-                    format_float(((int)$candidatepurchase->totalminor) / 100, 2)
-                        . ' ' . s((string)$candidatepurchase->currency),
+                    s(CurrencyFormatter::format_minor_code(
+                        (int)$candidatepurchase->totalminor,
+                        (string)$candidatepurchase->currency
+                    )),
                     'crm-unfinished-secondary fw-semibold'
                 );
 

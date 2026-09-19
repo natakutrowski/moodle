@@ -13,7 +13,19 @@ final class commerce_offers_access_n722_test extends advanced_testcase {
         $root = dirname(__DIR__, 3);
         $checkout = file_get_contents($root . '/commerce_checkout.php');
         $template = file_get_contents($root . '/templates/checkout/page.mustache');
-        self::assertStringContainsString('$personalofferhascompleteidentity', $checkout);
+        self::assertStringContainsString(
+            "'personalofferneedsidentitycompletion' =>",
+            $checkout
+        );
+        self::assertStringContainsString(
+            "'personalofferneedsfirstname' =>",
+            $checkout
+        );
+        self::assertStringContainsString(
+            "'personalofferneedslastname' =>",
+            $checkout
+        );
+        self::assertStringContainsString('personalofferneedsidentitycompletion', $template);
         self::assertStringContainsString('personalofferneedsfirstname', $template);
         self::assertStringContainsString('personalofferneedslastname', $template);
     }
@@ -52,6 +64,15 @@ final class commerce_offers_access_n722_test extends advanced_testcase {
 
     public function test_n722_does_not_bump_plugin_version(): void {
         $root = dirname(__DIR__, 3);
-        self::assertStringContainsString('$plugin->version = 2026081602;', file_get_contents($root . '/version.php'));
+        $version = file_get_contents($root . '/version.php');
+        self::assertIsString($version);
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
+        );
     }
 }

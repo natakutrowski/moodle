@@ -13,6 +13,10 @@ use local_subscriptions\commerce\payment\provider\stripe\LegacyStripePaymentGate
 use local_subscriptions\commerce\payment\provider\stripe\StripeCommercePaymentProvider;
 use local_subscriptions\commerce\payment\provider\stripe\StripePaymentGateway;
 use local_subscriptions\commerce\payment\provider\stripe\StripePaymentProviderConfiguration;
+use local_subscriptions\commerce\payment\provider\paypal\PayPalCommercePaymentProvider;
+use local_subscriptions\commerce\payment\provider\paypal\PayPalGatewayConfiguration;
+use local_subscriptions\commerce\payment\provider\paypal\PayPalPaymentProviderConfiguration;
+use local_subscriptions\commerce\payment\provider\paypal\PayPalRestPaymentGateway;
 
 /**
  * Builds the Commerce payment provider registry.
@@ -68,9 +72,24 @@ final class CommercePaymentProviderRegistryFactory {
                 )
             );
 
+        // F3 enables PayPal routing once Orders v2 browser-return capture is available.
+        $paypalgatewayconfiguration =
+            new PayPalGatewayConfiguration();
+
+        $paypalprovider =
+            new PayPalCommercePaymentProvider(
+                new PayPalRestPaymentGateway(
+                    $paypalgatewayconfiguration
+                ),
+                new PayPalPaymentProviderConfiguration(
+                    true
+                )
+            );
+
         return new CommercePaymentProviderRegistry([
             $stripeprovider,
             $alfaprovider,
+            $paypalprovider,
         ]);
     }
 }

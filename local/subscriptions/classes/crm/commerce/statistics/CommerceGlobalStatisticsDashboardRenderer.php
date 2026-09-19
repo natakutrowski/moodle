@@ -8,6 +8,9 @@ defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use local_subscriptions\commerce\statistics\CommerceStatisticsSeries;
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\currency\CurrencyFormatter;
 
 /** Premium global Commerce analytics renderer. */
 final class CommerceGlobalStatisticsDashboardRenderer {
@@ -47,6 +50,8 @@ final class CommerceGlobalStatisticsDashboardRenderer {
         $html.=html_writer::start_div('m53-revenue-kpis');
         foreach($snapshot['currencies'] as $currency=>$row){
             $current=(int)$row['revenueminor'];$old=$previous!==null?(int)($previous['currencies'][$currency]['revenueminor']??0):null;
+            $refundminor=(int)($row['refundminor']??0);
+            $netrevenue=(int)($row['netrevenueminor']??$current);
             $avg=(int)($row['averageorderminor']??0);$oldavg=$previous!==null?(int)($previous['currencies'][$currency]['averageorderminor']??0):null;
             $html.=html_writer::tag('article',
                 html_writer::div(
@@ -55,6 +60,14 @@ final class CommerceGlobalStatisticsDashboardRenderer {
                     'm53-revenue-head'
                 ).
                 html_writer::div(html_writer::tag('strong',s($money($current,(string)$currency))).($old!==null?self::trend($current,$old):''),'m53-revenue-main').
+                html_writer::div(
+                    html_writer::tag('span',s(get_string('commerce_refund_statistics_refunds','local_subscriptions'))).
+                    html_writer::tag('strong','− '.s($money($refundminor,(string)$currency))).
+                    html_writer::tag('span',s(get_string('commerce_refund_statistics_net','local_subscriptions'))).
+                    html_writer::tag('strong',s($money($netrevenue,(string)$currency)),
+                    ['class'=>'ms-1']),
+                    'm53-revenue-average'
+                ).
                 html_writer::div(
                     html_writer::tag('span',s(get_string('commerce_m53_average_order','local_subscriptions'))).
                     html_writer::tag('strong',s($money($avg,(string)$currency))).
@@ -362,7 +375,7 @@ final class CommerceGlobalStatisticsDashboardRenderer {
         $cards='';
         foreach($series as $currency=>$item){
             $title=get_string('commerce_m53_revenue_evolution','local_subscriptions').' · '.self::currency_label((string)$currency);
-            $instant=array_map(static fn($v)=>(float)$v/100,$item->values());
+            $instant=array_map(static fn($v)=>CommerceCurrencyAmount::major_float_from_minor((int)$v,(string)$currency),$item->values());
             $cumulative=[];$running=0.0;foreach($instant as $v){$running+=$v;$cumulative[]=$running;}
             $select=html_writer::select([
                 'period'=>get_string('commerce_m52_revenue_period','local_subscriptions'),
@@ -603,7 +616,7 @@ final class CommerceGlobalStatisticsDashboardRenderer {
             $point=$points[$i]??[];
             $pointtimestamp=$timestamp($point);
             $datelabel=$pointtimestamp>0?userdate($pointtimestamp,get_string('strftimedate','langconfig')):'';
-            $formatted=$money?self::money_value((int)round($value*100),$currency):format_float($value,0);
+            $formatted=$money?CurrencyFormatter::format((float)$value,$currency):format_float($value,0);
             $tip=$datelabel!==''?$datelabel.' · '.$formatted:$formatted;
             $dots[]=html_writer::tag(
                 'g',
@@ -634,7 +647,7 @@ final class CommerceGlobalStatisticsDashboardRenderer {
     }
 
     private static function money_value(int $minor,string $currency): string {
-        return format_float($minor/100,2).' '.strtoupper($currency);
+        return CurrencyFormatter::format_minor_code($minor,$currency);
     }
 
     private static function axis_money_value(float $major,string $currency): string {
@@ -660,6 +673,6 @@ final class CommerceGlobalStatisticsDashboardRenderer {
     }
 
     private static function flag(string $currency): string {
-        return match(strtoupper($currency)){'EUR'=>'🇪🇺','RUB'=>'🇷🇺',default=>'🌐'};
+        return Currency::visual_marker($currency) ?: '💱';
     }
 }

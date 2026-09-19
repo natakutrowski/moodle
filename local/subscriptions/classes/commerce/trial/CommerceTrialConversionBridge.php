@@ -6,6 +6,7 @@ namespace local_subscriptions\commerce\trial;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\course\storefront\CommerceCourseStorefrontTargetResolver;
 use local_subscriptions\trial_manager;
 
@@ -50,7 +51,7 @@ final class CommerceTrialConversionBridge {
             : null;
         $sku = $product ? strtoupper(trim((string)$product->sku)) : null;
         $params = [];
-        if ($currency !== null && in_array(strtoupper($currency), ['EUR', 'RUB'], true)) {
+        if ($currency !== null && (new CommerceCurrencyRegistry())->is_enabled(strtoupper($currency))) {
             $params['currency'] = strtoupper($currency);
         }
 

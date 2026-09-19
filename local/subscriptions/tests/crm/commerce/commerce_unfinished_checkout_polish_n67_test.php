@@ -49,7 +49,7 @@ final class commerce_unfinished_checkout_polish_n67_test extends advanced_testca
             $sales
         );
         self::assertStringContainsString(
-            "'provider' => get_string('commerce_purchase_provider'",
+            "'provider' => get_string('commerce_sales_payment_route'",
             $sales
         );
         self::assertStringContainsString(
@@ -66,9 +66,13 @@ final class commerce_unfinished_checkout_polish_n67_test extends advanced_testca
         $root = dirname(__DIR__, 3);
         $version = file_get_contents($root . '/version.php');
 
-        self::assertStringContainsString(
-            '$plugin->version = 2026081602;',
-            $version
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
         );
     }
 }

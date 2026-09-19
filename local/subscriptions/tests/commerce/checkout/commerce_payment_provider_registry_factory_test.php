@@ -10,10 +10,15 @@ use local_subscriptions\commerce\payment\provider\alfa\AlfaCommercePaymentProvid
 use local_subscriptions\commerce\payment\provider\alfa\AlfaGatewayRequest;
 use local_subscriptions\commerce\payment\provider\alfa\AlfaGatewayResponse;
 use local_subscriptions\commerce\payment\provider\alfa\AlfaPaymentGateway;
+use local_subscriptions\commerce\payment\provider\alfa\AlfaRefundRequest;
+use local_subscriptions\commerce\payment\provider\alfa\AlfaRefundResponse;
 use local_subscriptions\commerce\payment\provider\stripe\StripeCommercePaymentProvider;
 use local_subscriptions\commerce\payment\provider\stripe\StripeGatewayRequest;
 use local_subscriptions\commerce\payment\provider\stripe\StripeGatewayResponse;
 use local_subscriptions\commerce\payment\provider\stripe\StripePaymentGateway;
+use local_subscriptions\commerce\payment\provider\stripe\StripeRefundRequest;
+use local_subscriptions\commerce\payment\provider\stripe\StripeRefundResponse;
+use local_subscriptions\commerce\payment\provider\paypal\PayPalCommercePaymentProvider;
 
 /**
  * Tests the Commerce provider registry factory.
@@ -40,6 +45,7 @@ final class commerce_payment_provider_registry_factory_test
             [
                 StripeCommercePaymentProvider::KEY,
                 AlfaCommercePaymentProvider::KEY,
+                PayPalCommercePaymentProvider::KEY,
             ],
             $registry->keys()
         );
@@ -55,6 +61,13 @@ final class commerce_payment_provider_registry_factory_test
             AlfaCommercePaymentProvider::class,
             $registry->get(
                 AlfaCommercePaymentProvider::KEY
+            )
+        );
+
+        $this->assertInstanceOf(
+            PayPalCommercePaymentProvider::class,
+            $registry->get(
+                PayPalCommercePaymentProvider::KEY
             )
         );
     }
@@ -164,6 +177,28 @@ final class commerce_payment_provider_registry_factory_test
                     'Not used by this factory test.'
                 );
             }
+        
+            public function create_payment_intent(
+                StripeGatewayRequest $request
+            ): StripeGatewayResponse {
+                throw new \coding_exception('Not used by this test.');
+            }
+
+
+            public function refund(
+                StripeRefundRequest $request
+            ): StripeRefundResponse {
+                throw new \coding_exception('Not used by this test.');
+            }
+
+
+            public function list_refunds(
+                string $providerpaymentid,
+                string $currency
+            ): array {
+                return [];
+            }
+
         };
     }
 
@@ -190,6 +225,57 @@ final class commerce_payment_provider_registry_factory_test
                     'Not used by this factory test.'
                 );
             }
+
+            public function prepare_widget(
+
+
+                AlfaGatewayRequest $request
+
+
+            ): AlfaGatewayResponse {
+
+
+                throw new \coding_exception('Not used by this test.');
+
+
+            }
+
+
+
+            public function refund(
+
+
+                AlfaRefundRequest $request
+
+
+            ): AlfaRefundResponse {
+
+
+                throw new \coding_exception('Not used by this test.');
+
+
+            }
+
+
+
+            public function list_refunds(
+
+
+                string $orderid,
+
+
+                string $currency
+
+
+            ): array {
+
+
+                return [];
+
+
+            }
+
+
 
             public function retrieve(
                 string $orderid

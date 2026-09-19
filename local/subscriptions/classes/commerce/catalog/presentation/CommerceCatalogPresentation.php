@@ -11,6 +11,7 @@ use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogFulfillment;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogPrice;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
 use local_subscriptions\commerce\pricing\CommerceProductPromotionService;
+use local_subscriptions\currency\CurrencyFormatter;
 
 /** Presentation vocabulary shared by the federated catalogue pages. */
 final class CommerceCatalogPresentation {
@@ -44,7 +45,7 @@ final class CommerceCatalogPresentation {
     }
 
     public static function money(CommerceCatalogPrice $price): string {
-        return format_float($price->get_amount_minor() / 100, 2) . ' ' . s($price->get_currency());
+        return CurrencyFormatter::format_minor_code($price->get_amount_minor(), $price->get_currency());
     }
 
     /**
@@ -78,9 +79,10 @@ final class CommerceCatalogPresentation {
 
             $pricehtml = html_writer::tag(
                 'strong',
-                format_float($effectiveamountminor / 100, 2)
-                    . ' '
-                    . s($price->get_currency()),
+                CurrencyFormatter::format_minor_code(
+                    $effectiveamountminor,
+                    $price->get_currency()
+                ),
                 ['class' => 'crm-product-current-price']
             );
 
@@ -88,9 +90,10 @@ final class CommerceCatalogPresentation {
                 $compareminor !== null
                 && $compareminor > $effectiveamountminor
             ) {
-                $compare = format_float($compareminor / 100, 2)
-                    . ' '
-                    . s($price->get_currency());
+                $compare = CurrencyFormatter::format_minor_code(
+                    $compareminor,
+                    $price->get_currency()
+                );
                 $pricehtml .= html_writer::span(
                     $compare,
                     'crm-product-compare-price'

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026081510" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026091901" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
         <TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
             <FIELDS>
@@ -416,6 +416,7 @@
                 <KEY NAME="primary" TYPE="primary" FIELDS="id" />
             </KEYS>
             <INDEXES>
+                <INDEX NAME="userid_idx" UNIQUE="false" FIELDS="userid" />
                 <INDEX NAME="authorid_idx" UNIQUE="false" FIELDS="authorid" />
                 <INDEX NAME="timecreated_idx" UNIQUE="false" FIELDS="timecreated" />
             </INDEXES>
@@ -1352,6 +1353,114 @@
                 <INDEX NAME="status_idx" UNIQUE="false" FIELDS="status" />
                 <INDEX NAME="purchase_status_idx" UNIQUE="false" FIELDS="purchaseid,status" />
                 <INDEX NAME="legacy_request_idx" UNIQUE="false" FIELDS="legacyrequestid" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_inv_seq" COMMENT="Per-legal-entity yearly counters for immutable Commerce invoice numbering">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="entitykey" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="invoiceyear" TYPE="int" LENGTH="4" NOTNULL="true" />
+                <FIELD NAME="lastsequence" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id" /></KEYS>
+            <INDEXES><INDEX NAME="entity_year_uix" UNIQUE="true" FIELDS="entitykey,invoiceyear" /></INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_invoice" COMMENT="Immutable issued Commerce invoices with legal and financial snapshots">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="purchaseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="entitykey" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="invoicenumber" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="invoiceyear" TYPE="int" LENGTH="4" NOTNULL="true" />
+                <FIELD NAME="sequence" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="issuedat" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="sellerjson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="customerjson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="financialjson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="metadatajson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="purchase_fk" TYPE="foreign-unique" FIELDS="purchaseid" REFTABLE="local_subscriptions_commerce_purchase" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="invoice_number_uix" UNIQUE="true" FIELDS="invoicenumber" />
+                <INDEX NAME="entity_year_sequence_uix" UNIQUE="true" FIELDS="entitykey,invoiceyear,sequence" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subscriptions_commerce_refund" COMMENT="Native refund operations belonging to Commerce payment attempts">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="paymentid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Parent Commerce payment attempt" />
+                <FIELD NAME="provider" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="providerrefundid" TYPE="char" LENGTH="255" NOTNULL="false" />
+                <FIELD NAME="idempotencykey" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" />
+                <FIELD NAME="currency" TYPE="char" LENGTH="3" NOTNULL="true" />
+                <FIELD NAME="amountminor" TYPE="int" LENGTH="18" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="reason" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="metadatajson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="providerpayload" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="payment_fk" TYPE="foreign" FIELDS="paymentid" REFTABLE="local_subscriptions_commerce_payment" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="idempotency_uix" UNIQUE="true" FIELDS="idempotencykey" />
+                <INDEX NAME="payment_status_idx" UNIQUE="false" FIELDS="paymentid,status" />
+                <INDEX NAME="provider_refund_idx" UNIQUE="false" FIELDS="provider,providerrefundid" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_cn_seq" COMMENT="Per-legal-entity yearly counters for immutable Commerce credit-note numbering">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="entitykey" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="creditnoteyear" TYPE="int" LENGTH="4" NOTNULL="true" />
+                <FIELD NAME="lastsequence" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="entity_year_uix" UNIQUE="true" FIELDS="entitykey,creditnoteyear" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_credit_note" COMMENT="Immutable Commerce credit notes linked one-to-one to successful refunds">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="refundid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="invoiceid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="purchaseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="entitykey" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="creditnotenumber" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="creditnoteyear" TYPE="int" LENGTH="4" NOTNULL="true" />
+                <FIELD NAME="sequence" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="issuedat" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="sellerjson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="customerjson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="financialjson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="metadatajson" TYPE="text" NOTNULL="true" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="refund_fk" TYPE="foreign-unique" FIELDS="refundid" REFTABLE="local_subscriptions_commerce_refund" REFFIELDS="id" />
+                <KEY NAME="invoice_fk" TYPE="foreign" FIELDS="invoiceid" REFTABLE="local_subs_commerce_invoice" REFFIELDS="id" />
+                <KEY NAME="purchase_fk" TYPE="foreign" FIELDS="purchaseid" REFTABLE="local_subscriptions_commerce_purchase" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="credit_note_number_uix" UNIQUE="true" FIELDS="creditnotenumber" />
+                <INDEX NAME="entity_year_sequence_uix" UNIQUE="true" FIELDS="entitykey,creditnoteyear,sequence" />
+                <INDEX NAME="purchase_issued_idx" UNIQUE="false" FIELDS="purchaseid,issuedat" />
             </INDEXES>
         </TABLE>
         <TABLE NAME="local_subscriptions_commerce_fulfillment" COMMENT="Fulfillment operations belonging to native Commerce purchases">
@@ -2324,5 +2433,317 @@
             </INDEXES>
         </TABLE>
 
+    
+        <TABLE NAME="local_subs_commerce_course_cfg" COMMENT="Per-course pedagogical access mode for Commerce education orchestration">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="accessmode" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="classic_immediate" />
+                <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="course_fk" TYPE="foreign-unique" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" />
+                <KEY NAME="modifiedby_fk" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="accessmode_idx" UNIQUE="false" FIELDS="accessmode" />
+            </INDEXES>
+        </TABLE>
+    
+        <TABLE NAME="local_subs_commerce_ped_promo" COMMENT="Pedagogical promotions controlling scheduled course access">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="promotionkey" TYPE="char" LENGTH="100" NOTNULL="true" />
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="draft" />
+                <FIELD NAME="published" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="salesopensat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="salesclosesat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="startsat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="endsat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="capacitytotal" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="course_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" />
+                <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="modifiedby_fk" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="promotionkey_uix" UNIQUE="true" FIELDS="promotionkey" />
+                <INDEX NAME="course_status_idx" UNIQUE="false" FIELDS="courseid,status" />
+                <INDEX NAME="sales_window_idx" UNIQUE="false" FIELDS="published,salesopensat,salesclosesat" />
+                <INDEX NAME="start_status_idx" UNIQUE="false" FIELDS="startsat,status" />
+            </INDEXES>
+        </TABLE>
+    
+        <TABLE NAME="local_subs_commerce_ped_cal" COMMENT="Explicit pedagogical release calendar items per promotion">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="promotionid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="itemtype" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="course_section" />
+                <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="unlocksat" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="promotion_fk" TYPE="foreign" FIELDS="promotionid" REFTABLE="local_subs_commerce_ped_promo" REFFIELDS="id" />
+                <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="modifiedby_fk" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="promotion_item_uix" UNIQUE="true" FIELDS="promotionid,itemtype,itemid" />
+                <INDEX NAME="promotion_position_idx" UNIQUE="false" FIELDS="promotionid,position" />
+                <INDEX NAME="promotion_unlock_idx" UNIQUE="false" FIELDS="promotionid,unlocksat" />
+            </INDEXES>
+        </TABLE>
+    
+        <TABLE NAME="local_subs_commerce_ped_access" COMMENT="Individual student course access profile and pedagogical promotion relation">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="promotionid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="profile" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="legacy_full" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="course_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" />
+                <KEY NAME="user_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="promotion_fk" TYPE="foreign" FIELDS="promotionid" REFTABLE="local_subs_commerce_ped_promo" REFFIELDS="id" />
+                <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="modifiedby_fk" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="course_user_uix" UNIQUE="true" FIELDS="courseid,userid" />
+                <INDEX NAME="promotion_profile_idx" UNIQUE="false" FIELDS="promotionid,profile" />
+                <INDEX NAME="user_profile_idx" UNIQUE="false" FIELDS="userid,profile" />
+            </INDEXES>
+        </TABLE>
+    
+        <TABLE NAME="local_subs_commerce_ped_gcfg" COMMENT="Optional pedagogical group orchestration settings per promotion">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="promotionid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="groupsize" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="6" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="promotion_fk" TYPE="foreign" FIELDS="promotionid" REFTABLE="local_subs_commerce_ped_promo" REFFIELDS="id" />
+                <KEY NAME="promotion_uq" TYPE="unique" FIELDS="promotionid" />
+                <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="modifiedby_fk" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_ped_group" COMMENT="Promotion-specific pedagogical groups backed by Moodle groups">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="promotionid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="moodlegroupid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="displayname" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="tutorid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="tutorname" TYPE="char" LENGTH="255" NOTNULL="false" />
+                <FIELD NAME="supportlang" TYPE="char" LENGTH="20" NOTNULL="false" />
+                <FIELD NAME="telegramref" TYPE="char" LENGTH="255" NOTNULL="false" />
+                <FIELD NAME="levelupxp" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="promotion_fk" TYPE="foreign" FIELDS="promotionid" REFTABLE="local_subs_commerce_ped_promo" REFFIELDS="id" />
+                <KEY NAME="moodlegroup_fk" TYPE="foreign" FIELDS="moodlegroupid" REFTABLE="groups" REFFIELDS="id" />
+                <KEY NAME="product_fk" TYPE="foreign" FIELDS="productid" REFTABLE="local_subs_commerce_product" REFFIELDS="id" />
+                <KEY NAME="tutor_fk" TYPE="foreign" FIELDS="tutorid" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="modifiedby_fk" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="promotion_moodlegroup_uix" UNIQUE="true" FIELDS="promotionid,moodlegroupid" />
+                <INDEX NAME="promotion_position_idx" UNIQUE="false" FIELDS="promotionid,position" />
+                <INDEX NAME="promotion_active_idx" UNIQUE="false" FIELDS="promotionid,active" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_ped_gmem" COMMENT="Pedagogical group membership orchestration">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="group_fk" TYPE="foreign" FIELDS="groupid" REFTABLE="local_subs_commerce_ped_group" REFFIELDS="id" />
+                <KEY NAME="user_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="group_user_uix" UNIQUE="true" FIELDS="groupid,userid" />
+                <INDEX NAME="user_active_idx" UNIQUE="false" FIELDS="userid,active" />
+            </INDEXES>
+        </TABLE>
+    
+        <TABLE NAME="local_subs_commerce_ped_offer" COMMENT="Native Commerce products linked to pedagogical promotions">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="promotionid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="capacity" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="promotion_fk" TYPE="foreign" FIELDS="promotionid" REFTABLE="local_subs_commerce_ped_promo" REFFIELDS="id" />
+                <KEY NAME="product_fk" TYPE="foreign" FIELDS="productid" REFTABLE="local_subs_commerce_product" REFFIELDS="id" />
+                <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="modifiedby_fk" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="promotion_product_uix" UNIQUE="true" FIELDS="promotionid,productid" />
+            </INDEXES>
+        </TABLE>
+    
+        <TABLE NAME="local_subs_commerce_ped_jprice" COMMENT="Owner-only prices for joining pedagogical promotion offers">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="promotionid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="currency" TYPE="char" LENGTH="3" NOTNULL="true" />
+                <FIELD NAME="amountminor" TYPE="int" LENGTH="18" NOTNULL="true" />
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="promotion_fk" TYPE="foreign" FIELDS="promotionid" REFTABLE="local_subs_commerce_ped_promo" REFFIELDS="id" />
+                <KEY NAME="product_fk" TYPE="foreign" FIELDS="productid" REFTABLE="local_subs_commerce_product" REFFIELDS="id" />
+                <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="modifiedby_fk" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="promotion_product_currency_uix" UNIQUE="true" FIELDS="promotionid,productid,currency" />
+                <INDEX NAME="product_currency_idx" UNIQUE="false" FIELDS="productid,currency" />
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_ped_resv" COMMENT="Temporary Commerce cart holds for pedagogical promotion seats">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="promotionid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="cartuuid" TYPE="char" LENGTH="32" NOTNULL="true" />
+                <FIELD NAME="customerid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="quantity" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" />
+                <FIELD NAME="state" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="active" />
+                <FIELD NAME="expiresat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="checkoutstartedat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="paymentstartedat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="purchasereference" TYPE="char" LENGTH="255" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="promotion_fk" TYPE="foreign" FIELDS="promotionid" REFTABLE="local_subs_commerce_ped_promo" REFFIELDS="id" />
+                <KEY NAME="product_fk" TYPE="foreign" FIELDS="productid" REFTABLE="local_subs_commerce_product" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="promotion_product_cart_uix" UNIQUE="true" FIELDS="promotionid,productid,cartuuid" />
+                <INDEX NAME="promotion_state_expiry_idx" UNIQUE="false" FIELDS="promotionid,state,expiresat" />
+                <INDEX NAME="promotion_product_state_expiry_idx" UNIQUE="false" FIELDS="promotionid,productid,state,expiresat" />
+                <INDEX NAME="cart_state_idx" UNIQUE="false" FIELDS="cartuuid,state" />
+                <INDEX NAME="purchase_state_idx" UNIQUE="false" FIELDS="purchasereference,state" />
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_ped_xp" COMMENT="Promotion-scoped team XP contribution ledger">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="promotionid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="sourcecomponent" TYPE="char" LENGTH="100" NOTNULL="true" />
+                <FIELD NAME="sourcetype" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="sourcekey" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="sourcehash" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="points" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timeearned" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="promotion_fk" TYPE="foreign" FIELDS="promotionid" REFTABLE="local_subs_commerce_ped_promo" REFFIELDS="id" />
+                <KEY NAME="course_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" />
+                <KEY NAME="user_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="promotion_user_source_uix" UNIQUE="true" FIELDS="promotionid,userid,sourcehash" />
+                <INDEX NAME="promotion_user_idx" UNIQUE="false" FIELDS="promotionid,userid" />
+                <INDEX NAME="promotion_time_idx" UNIQUE="false" FIELDS="promotionid,timeearned" />
+                <INDEX NAME="user_time_idx" UNIQUE="false" FIELDS="userid,timeearned" />
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_ped_join" COMMENT="Lifecycle and provenance of pedagogical promotion participation">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="promotionid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="productid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="purchasereference" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="state" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="active" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="promotion_fk" TYPE="foreign" FIELDS="promotionid" REFTABLE="local_subs_commerce_ped_promo" REFFIELDS="id" />
+                <KEY NAME="course_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" />
+                <KEY NAME="user_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" />
+                <KEY NAME="product_fk" TYPE="foreign" FIELDS="productid" REFTABLE="local_subs_commerce_product" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="promotion_user_purchase_uix" UNIQUE="true" FIELDS="promotionid,userid,purchasereference" />
+                <INDEX NAME="promotion_state_idx" UNIQUE="false" FIELDS="promotionid,state" />
+                <INDEX NAME="promotion_product_state_idx" UNIQUE="false" FIELDS="promotionid,productid,state" />
+                <INDEX NAME="purchase_state_idx" UNIQUE="false" FIELDS="purchasereference,state" />
+            </INDEXES>
+        </TABLE>
     </TABLES>
 </XMLDB>

@@ -8,6 +8,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use local_subscriptions\commerce\statistics\CommerceStatisticsSeries;
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
+use local_subscriptions\currency\Currency;
 
 /**
  * Premium renderer for reusable product analytics datasets.
@@ -213,7 +215,10 @@ final class CommerceProductStatisticsDashboardRenderer {
             $labels = $seriesitem->labels();
             $points = $seriesitem->points();
             $periodvalues = array_map(
-                static fn($value): float => ((float)$value) / 100,
+                static fn($value): float => CommerceCurrencyAmount::major_float_from_minor(
+                    (int)$value,
+                    $currency
+                ),
                 $seriesitem->values()
             );
 
@@ -385,7 +390,7 @@ final class CommerceProductStatisticsDashboardRenderer {
                 : (string)($labels[$index] ?? '');
             $tooltip = $date
                 . ' · '
-                . format_float((float)$value, 2)
+                . format_float((float)$value, Currency::minor_unit_exponent($currency))
                 . ' '
                 . $currency;
 
@@ -1073,11 +1078,7 @@ final class CommerceProductStatisticsDashboardRenderer {
     }
 
     private static function currency_flag(string $currency): string {
-        return match (strtoupper($currency)) {
-            'EUR' => '🇪🇺',
-            'RUB' => '🇷🇺',
-            default => '🌐',
-        };
+        return Currency::visual_marker($currency) ?: '💱';
     }
 
     private static function wrap(string $chart, string $title, string $modifier = ''): string {

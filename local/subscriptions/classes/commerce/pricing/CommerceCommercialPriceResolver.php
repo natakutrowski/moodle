@@ -39,6 +39,29 @@ final class CommerceCommercialPriceResolver {
             min(100, (int)($metadata['trialdiscountpercent'] ?? 0))
         );
 
+        // promotion_join is not a discounted second purchase of the course.
+        // The owner tariff is the actual commercial price of accompaniment,
+        // so the canonical breakdown must not invent a catalogue discount.
+        if ($operation === 'promotion_join') {
+            return new CommerceCommercialPriceBreakdown(
+                $currency,
+                $quantity,
+                $finalunit,
+                0,
+                $finalunit,
+                0,
+                $finalunit,
+                0,
+                $finalunit,
+                0,
+                0,
+                $operation,
+                null,
+                null,
+                0
+            );
+        }
+
         $catalogueamount = $finalunit;
         $cataloguelist = $catalogueamount;
         $promotionpercent = 0;

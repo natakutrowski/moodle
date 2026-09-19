@@ -5,6 +5,7 @@ use local_subscriptions\payment\stripe\StripeConfiguration;
 final class Provider {
     public const STRIPE = 'stripe';
     public const ALFA   = 'alfa';
+    public const PAYPAL = 'paypal';
     public const MANUAL = 'manual';
     public const CSV    = 'csv';
     public const DEV    = 'dev';
@@ -13,6 +14,7 @@ final class Provider {
     public const KNOWN = [
         self::STRIPE,
         self::ALFA,
+        self::PAYPAL,
         self::MANUAL,
         self::CSV,
         self::DEV,
@@ -32,6 +34,7 @@ final class Provider {
         return match ($code) {
             self::STRIPE => get_string('provider_stripe', 'local_subscriptions'),
             self::ALFA   => get_string('provider_alfa', 'local_subscriptions'),
+            self::PAYPAL => get_string('provider_paypal', 'local_subscriptions'),
             self::MANUAL => get_string('provider_manual', 'local_subscriptions'),
             self::CSV    => get_string('provider_csv', 'local_subscriptions'),
             self::DEV    => get_string('provider_dev', 'local_subscriptions'),
@@ -46,6 +49,7 @@ final class Provider {
         return match ($code) {
             self::ALFA   => get_config('local_subscriptions', 'alfa_env') ?: 'test',
             self::STRIPE => StripeConfiguration::active_profile(),
+            self::PAYPAL => get_config('local_subscriptions', 'paypal_env') ?: 'sandbox',
             default      => 'n/a',
         };
     }
@@ -58,6 +62,7 @@ final class Provider {
             'live_sas' => get_string('stripe_profile_live_sas', 'local_subscriptions'),
             'live' => get_string('stripe_profile_live_ei', 'local_subscriptions'),
             'test' => get_string('stripe_profile_test', 'local_subscriptions'),
+            'sandbox' => get_string('paypal_env_sandbox', 'local_subscriptions'),
             default => '', // pas de badge
         };
     }
@@ -69,6 +74,7 @@ final class Provider {
         return match ($code) {
             self::ALFA   => 'providers/alfa',
             self::STRIPE => 'providers/stripe',
+            self::PAYPAL => 'providers/paypal',
             default      => null,
         };
     }

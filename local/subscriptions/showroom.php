@@ -7,6 +7,9 @@ require_once(__DIR__ . '/../../config.php');
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\showroom\CommerceShowroomCurrencyResolver;
+use local_subscriptions\commerce\currency\selection\CommerceCurrencySurfaceSelectionService;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\support\Region;
 use local_subscriptions\commerce\showroom\CommerceShowroomPresenter;
 use local_subscriptions\commerce\showroom\CommerceShowroomProductResolver;
 use local_subscriptions\commerce\showroom\CommerceShowroomRegistry;
@@ -18,7 +21,6 @@ use local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockConfiguration
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomExerciseExplorerPresenter;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitionResolver;
 use local_subscriptions\commerce\storefront\seo\CommerceStorefrontSeoHeadRegistry;
-use local_subscriptions\support\Region;
 use local_subscriptions\commerce\order\invoice\CommerceInvoiceProfileResolver;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferShoppingContextService;
 
@@ -62,18 +64,36 @@ if (!$isadminpreview) {
         }
     }
 }
-$storedcurrency = strtoupper((string)(
+$usercurrency = isloggedin() && !isguestuser()
+    ? Currency::sanitize((string)get_user_preferences(
+        'local_subscriptions_storefront_currency',
+        '',
+        (int)$USER->id
+    ))
+    : '';
+$sessioncurrency = Currency::sanitize((string)(
     $SESSION->local_subscriptions_showroom_currency
         ?? $SESSION->local_subscriptions_storefront_currency
         ?? ''
 ));
-$currency = CommerceShowroomCurrencyResolver::resolve(
+
+$currencyselection = (new CommerceCurrencySurfaceSelectionService())->resolve(
     $availablecurrencies,
     $requestedcurrency,
-    $storedcurrency
+    $usercurrency,
+    $sessioncurrency
 );
+$currency = $currencyselection->get_currency();
+
 $SESSION->local_subscriptions_showroom_currency = $currency;
 $SESSION->local_subscriptions_storefront_currency = $currency;
+if (isloggedin() && !isguestuser()) {
+    set_user_preference(
+        'local_subscriptions_storefront_currency',
+        $currency,
+        (int)$USER->id
+    );
+}
 
 $pageurl = $isadminpreview
     ? new moodle_url($adminpreview['pageurl'], ['currency' => $currency])

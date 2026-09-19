@@ -29,16 +29,20 @@ final class CommerceGuestIdentityValidator {
             );
         }
 
-        if ($firstname === '') {
-            throw new \moodle_exception(
-                'commerce_guest_checkout_invalid_firstname',
-                'local_subscriptions'
-            );
-        }
+        $firstnamevalid =
+            $firstname === ''
+            || \core_text::strlen($firstname) >= 2;
+        $lastnamevalid =
+            $lastname === ''
+            || \core_text::strlen($lastname) >= 2;
 
-        if ($lastname === '') {
+        if (
+            !$firstnamevalid
+            || !$lastnamevalid
+            || ($firstname === '' && $lastname === '')
+        ) {
             throw new \moodle_exception(
-                'commerce_guest_checkout_invalid_lastname',
+                'commerce_guest_checkout_invalid_name_identity',
                 'local_subscriptions'
             );
         }

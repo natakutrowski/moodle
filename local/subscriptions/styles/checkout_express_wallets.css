@@ -1,0 +1,1038 @@
+.commerce-checkout-express-wallets {
+    margin-bottom: 1rem;
+}
+
+/* Keep the validated H4.1.8 discovery lifecycle unchanged:
+   Stripe mounts into a visible, measurable container. */
+.commerce-checkout-express-wallets.is-probing {
+    visibility: visible;
+    opacity: 1;
+    min-height: 72px;
+    pointer-events: none;
+}
+
+.commerce-checkout-express-wallets.is-wallet-ready {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.commerce-checkout-express-wallets.is-wallet-unavailable {
+    display: none;
+}
+
+.commerce-checkout-express-wallets__divider {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin: .9rem 0 .2rem;
+    color: #8a8f98;
+    font-size: .78rem;
+    text-transform: lowercase;
+}
+
+.commerce-checkout-express-wallets__divider::before,
+.commerce-checkout-express-wallets__divider::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+    background: rgba(0, 0, 0, .1);
+}
+
+.commerce-checkout-express-wallets__divider > span {
+    flex: 0 0 auto;
+    padding: 0 .15rem;
+}
+
+/* Do not show the separator while Stripe is still probing. */
+.commerce-checkout-express-wallets.is-probing
+    .commerce-checkout-express-wallets__divider {
+    visibility: hidden;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-express-wallets {
+        margin-bottom: .85rem;
+    }
+
+    .commerce-checkout-express-wallets__divider {
+        margin-top: .75rem;
+    }
+}
+
+/* H4.3.3 — compact payment-method choices.
+   Presentation only: no checkout or Stripe lifecycle changes. */
+.commerce-checkout-payment-methods {
+    margin-top: .1rem;
+}
+
+.commerce-checkout-payment-methods > legend {
+    margin-bottom: .65rem;
+    font-size: .9rem;
+}
+
+.commerce-checkout-payment-methods > .d-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .7rem !important;
+}
+
+.commerce-checkout-payment-methods .commerce-checkout-provider {
+    grid-template-columns: auto 2.6rem minmax(0, 1fr);
+    gap: .65rem;
+    min-height: 4.25rem;
+    padding: .7rem .8rem;
+    border-radius: .75rem;
+    background: var(--bs-body-bg, #fff);
+    box-shadow: none;
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease,
+        background-color .15s ease;
+}
+
+.commerce-checkout-payment-methods .commerce-checkout-provider:hover {
+    border-color: rgba(var(--bs-primary-rgb), .45);
+    background: rgba(var(--bs-primary-rgb), .025);
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider:has(input:checked),
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider.is-selected {
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), .035);
+    box-shadow: 0 0 0 .14rem rgba(var(--bs-primary-rgb), .09);
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    min-width: 2.6rem;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brand-icon {
+    width: auto;
+    max-width: 2.35rem;
+    max-height: 1.45rem;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider strong {
+    line-height: 1.2;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider small {
+    display: block;
+    margin-top: .12rem;
+    line-height: 1.25;
+}
+
+.commerce-checkout-payment-methods
+    .form-check-input {
+    margin-top: 0;
+}
+
+.commerce-checkout-other-methods {
+    margin-top: .65rem !important;
+}
+
+.commerce-checkout-other-methods > summary {
+    font-size: .875rem;
+    text-decoration: none;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-methods > .d-grid {
+        grid-template-columns: 1fr;
+        gap: .55rem !important;
+    }
+
+    .commerce-checkout-payment-methods .commerce-checkout-provider {
+        min-height: 3.9rem;
+        padding: .65rem .75rem;
+    }
+}
+
+/* H4.3.4 — payment-column correction.
+   The checkout payment rail is intentionally narrow even on desktop, so
+   provider choices stay stacked. The selected visual follows the radio
+   state only, avoiding two simultaneously highlighted cards. */
+.commerce-checkout-payment-methods > .d-grid {
+    grid-template-columns: 1fr;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider.is-selected:not(:has(input:checked)) {
+    border-color: var(--bs-border-color);
+    background: var(--bs-body-bg, #fff);
+    box-shadow: none;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider:has(input:checked) {
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), .035);
+    box-shadow: 0 0 0 .14rem rgba(var(--bs-primary-rgb), .09);
+}
+
+/* H4.3.5 — compact payment cards + inline reassurance. */
+.commerce-checkout-payment-methods .commerce-checkout-provider {
+    grid-template-columns: auto 2.6rem minmax(0, 1fr) auto;
+}
+
+.commerce-checkout-payment-method__copy {
+    min-width: 0;
+}
+
+.commerce-checkout-payment-method__brands {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .35rem;
+    padding-left: .4rem;
+}
+
+.commerce-checkout-payment-method__brands img {
+    display: block;
+    width: auto;
+    max-width: 2.1rem;
+    max-height: 1rem;
+    object-fit: contain;
+}
+
+.commerce-checkout-trust-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .6rem;
+    margin: -.15rem 0 1.15rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.commerce-checkout-trust-strip__item {
+    display: flex;
+    align-items: flex-start;
+    gap: .4rem;
+    min-width: 0;
+    font-size: .76rem;
+    line-height: 1.25;
+}
+
+.commerce-checkout-trust-strip__item i {
+    flex: 0 0 auto;
+    margin-top: .08rem;
+    color: var(--bs-primary);
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-methods .commerce-checkout-provider {
+        grid-template-columns: auto 2.4rem minmax(0, 1fr) auto;
+    }
+
+    .commerce-checkout-payment-method__brands img {
+        max-width: 1.8rem;
+        max-height: .9rem;
+    }
+
+    .commerce-checkout-trust-strip {
+        grid-template-columns: 1fr;
+        gap: .45rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* H4.3.6 — roomier desktop payment rail + stronger trust strip. */
+@media (min-width: 992px) {
+    .commerce-checkout__grid {
+        grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+        gap: 1.75rem;
+    }
+}
+
+.commerce-checkout-payment-method__brand-icon--card {
+    max-width: 2.15rem;
+    max-height: 1.55rem;
+}
+
+.commerce-checkout-payment-method__brands--paypal img {
+    max-width: 4.6rem;
+    max-height: 1.4rem;
+}
+
+.commerce-checkout-trust-strip {
+    gap: .85rem;
+}
+
+.commerce-checkout-trust-strip__item {
+    align-items: center;
+    gap: .55rem;
+    min-height: 2.5rem;
+    font-size: .78rem;
+    line-height: 1.25;
+}
+
+.commerce-checkout-trust-strip__item i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    margin-top: 0;
+    font-size: 1.05rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-trust-strip__item {
+        min-height: 2.25rem;
+    }
+
+    .commerce-checkout-trust-strip__item i {
+        width: 1.6rem;
+        min-width: 1.6rem;
+        height: 1.6rem;
+        font-size: .95rem;
+    }
+}
+
+/* H4.3.7 — card network logos: Visa + Mastercard + CB.
+   Keep the payment-method icon on the left; network brands live on the right. */
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands {
+    gap: .5rem;
+    min-width: 7.5rem;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands img {
+    width: auto;
+    max-width: 2.65rem;
+    max-height: 1.55rem;
+    object-fit: contain;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands
+    .commerce-checkout-payment-method__network-logo--cb {
+    max-width: 2.8rem;
+    max-height: 1.6rem;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--paypal {
+    min-width: auto;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--paypal img {
+    max-width: 4.6rem;
+    max-height: 1.4rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands {
+        gap: .35rem;
+        min-width: 6.5rem;
+    }
+
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands img {
+        max-width: 2.3rem;
+        max-height: 1.35rem;
+    }
+
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands
+        .commerce-checkout-payment-method__network-logo--cb {
+        max-width: 2.4rem;
+        max-height: 1.4rem;
+    }
+}
+
+/* H4.3.8 — mobile payment-card compaction.
+   Network/wordmark logos are useful on desktop, but on narrow screens they
+   steal too much horizontal space and force the labels into tall columns. */
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands {
+        display: none;
+    }
+
+    .commerce-checkout-payment-methods
+        .commerce-checkout-provider {
+        grid-template-columns: auto 2.6rem minmax(0, 1fr);
+        min-height: 0;
+        padding: .75rem .8rem;
+    }
+
+    .commerce-checkout-payment-methods
+        .commerce-checkout-provider strong {
+        font-size: 1rem;
+        line-height: 1.2;
+    }
+
+    .commerce-checkout-payment-methods
+        .commerce-checkout-provider small {
+        margin-top: .15rem;
+        line-height: 1.3;
+    }
+}
+
+/* H6.2 — Link branding in the alternative-method card. */
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--link {
+    min-width: auto;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--link img {
+    max-width: 4.2rem;
+    max-height: 1.35rem;
+}
+
+/* H7 — harmonised provider wordmarks in payment-method cards. */
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--paypal,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--alfapay,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--sberpay,
+    .commerce-checkout-payment-method__brands--mirpay,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--link,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--klarna {
+    min-width: auto;
+    padding-left: .65rem;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--paypal img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--alfapay img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--sberpay img,
+    .commerce-checkout-payment-method__brands--mirpay img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--link img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--klarna img {
+    width: auto;
+    max-width: 4.6rem;
+    max-height: 1.4rem;
+    object-fit: contain;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--klarna img {
+    max-width: 5rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands--paypal,
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands--alfapay,
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands--sberpay,
+    .commerce-checkout-payment-method__brands--mirpay,
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands--link,
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands--klarna {
+        display: none;
+    }
+}
+
+/* H8 — harmonised payment-method card grid and provider branding. */
+
+/*
+ * All payment cards share the same four visual columns:
+ * radio | provider icon | copy | wordmark.
+ * Fixed columns prevent PayPal / Link / Klarna from shifting horizontally.
+ */
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider {
+    grid-template-columns:
+        1.15rem
+        2.75rem
+        minmax(0, 1fr)
+        5.75rem;
+    column-gap: .75rem;
+    align-items: center;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__icon {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    height: 2.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brand-icon {
+    width: auto;
+    max-width: 2.55rem;
+    max-height: 2rem;
+    object-fit: contain;
+}
+
+/*
+ * Wordmarks use a common visual height rather than a common width:
+ * their aspect ratios differ too much for width-based sizing to look balanced.
+ */
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands {
+    width: 5.75rem;
+    min-width: 5.75rem;
+    height: 2rem;
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--paypal img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--alfapay img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--sberpay img,
+    .commerce-checkout-payment-method__brands--mirpay img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--link img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--klarna img {
+    width: auto;
+    max-width: 5.35rem;
+    height: auto;
+    max-height: 1.45rem;
+    object-fit: contain;
+}
+
+/* Link's compact mark reads slightly smaller at the same raw height. */
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--link img {
+    max-height: 1.5rem;
+}
+
+/* Klarna's wide wordmark needs a touch more width but the same visual height. */
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--klarna img {
+    max-width: 5.5rem;
+    max-height: 1.45rem;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__copy {
+    min-width: 0;
+    align-self: center;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__copy strong,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__copy small {
+    max-width: 100%;
+}
+
+/* Card-network logos keep their dedicated multi-logo treatment. */
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider[data-payment-method="card"]
+    .commerce-checkout-payment-method__brands {
+    width: 7.5rem;
+    min-width: 7.5rem;
+    height: auto;
+}
+
+/* Mobile keeps the compact three-column layout established in H4.3.8. */
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-methods
+        .commerce-checkout-provider {
+        grid-template-columns:
+            1.15rem
+            2.6rem
+            minmax(0, 1fr);
+        column-gap: .65rem;
+    }
+
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__icon {
+        width: 2.6rem;
+        min-width: 2.6rem;
+        height: 2.2rem;
+    }
+
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brand-icon {
+        max-width: 2.35rem;
+        max-height: 1.85rem;
+    }
+
+    .commerce-checkout-payment-methods
+        .commerce-checkout-payment-method__brands {
+        display: none;
+    }
+}
+
+/* H8.1 — strict provider-brand sizing + wider copy column. */
+
+/*
+ * PayPal / Link / Klarna use the same 25px visual height on both sides:
+ * provider icon on the left and provider wordmark on the right.
+ */
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider:not([data-payment-method="card"]) {
+    grid-template-columns:
+        1.15rem
+        2.6rem
+        minmax(0, 1fr)
+        4.85rem;
+    column-gap: .7rem;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider:not([data-payment-method="card"])
+    .commerce-checkout-payment-method__icon {
+    width: 2.6rem;
+    min-width: 2.6rem;
+    height: 25px;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider:not([data-payment-method="card"])
+    .commerce-checkout-payment-method__brand-icon {
+    width: auto;
+    height: 25px;
+    max-width: 2.6rem;
+    max-height: 25px;
+    object-fit: contain;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--paypal,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--alfapay,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--sberpay,
+    .commerce-checkout-payment-method__brands--mirpay,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--link,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--klarna {
+    width: 4.85rem;
+    min-width: 4.85rem;
+    height: 25px;
+    padding-left: 0;
+}
+
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--paypal img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--alfapay img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--sberpay img,
+    .commerce-checkout-payment-method__brands--mirpay img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--link img,
+.commerce-checkout-payment-methods
+    .commerce-checkout-payment-method__brands--klarna img {
+    width: auto;
+    height: 25px;
+    max-width: 4.85rem;
+    max-height: 25px;
+    object-fit: contain;
+}
+
+/* Card keeps its dedicated network-logo layout. */
+.commerce-checkout-payment-methods
+    .commerce-checkout-provider[data-payment-method="card"] {
+    grid-template-columns:
+        1.15rem
+        2.6rem
+        minmax(0, 1fr)
+        7.5rem;
+    column-gap: .7rem;
+}
+
+/* Mobile keeps the compact no-wordmark layout. */
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-methods
+        .commerce-checkout-provider:not([data-payment-method="card"]),
+    .commerce-checkout-payment-methods
+        .commerce-checkout-provider[data-payment-method="card"] {
+        grid-template-columns:
+            1.15rem
+            2.6rem
+            minmax(0, 1fr);
+        column-gap: .65rem;
+    }
+}
+
+
+
+/* H12.2 — direct regional fast-payment actions (Alfa Pay / SBP). */
+.commerce-checkout-fast-payments {
+    display: grid;
+    gap: .8rem;
+}
+
+.commerce-checkout-fast-payments__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .65rem;
+}
+
+.commerce-checkout-fast-payment {
+    width: 100%;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    padding: .55rem .75rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .75rem;
+    background: var(--bs-body-bg, #fff);
+    color: inherit;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease,
+        background-color .15s ease;
+}
+
+.commerce-checkout-fast-payment:hover:not(:disabled) {
+    border-color: var(--primary, var(--bs-primary, #ec4899));
+    background: rgba(var(--bs-primary-rgb), .025);
+    box-shadow: 0 .3rem .8rem rgba(236, 72, 153, .10);
+    transform: translateY(-1px);
+}
+
+.commerce-checkout-fast-payment:focus-visible {
+    outline: 0;
+    border-color: var(--primary, var(--bs-primary, #ec4899));
+    box-shadow: 0 0 0 .2rem rgba(var(--bs-primary-rgb), .14);
+}
+
+.commerce-checkout-fast-payment:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.commerce-checkout-fast-payment__icon {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.commerce-checkout-fast-payment__icon img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.commerce-checkout-fast-payment__label {
+    min-width: 0;
+    font-weight: 650;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+.commerce-checkout-fast-payments__divider {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: .75rem;
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: .8rem;
+}
+
+.commerce-checkout-fast-payments__divider::before,
+.commerce-checkout-fast-payments__divider::after {
+    content: '';
+    height: 1px;
+    background: var(--bs-border-color, #dee2e6);
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-fast-payments__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* H12.5.3 — embedded Alfa Payment Page.
+ *
+ * The Alfa document is cross-origin, therefore CampusFR cannot read its
+ * scrollHeight unless Alfa explicitly exposes a postMessage sizing contract.
+ * Use a deliberately generous responsive height and let the outer checkout
+ * page scroll instead of showing a scrollbar inside the payment frame.
+ */
+.commerce-checkout-alfa-iframe__frame-wrap {
+    width: 100%;
+    height: 860px;
+    overflow: hidden;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .85rem;
+    background: #fff;
+}
+
+.commerce-checkout-alfa-iframe__frame-wrap iframe {
+    display: block;
+    width: 100%;
+    height: 860px;
+    border: 0;
+    overflow: hidden;
+    background: #fff;
+}
+
+.commerce-checkout-alfa-iframe [data-checkout-alfa-iframe-fallback] {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    padding-top: .55rem;
+    padding-bottom: .55rem;
+    line-height: 1.2;
+    white-space: normal;
+}
+
+.commerce-checkout-alfa-iframe__external-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-alfa-iframe__frame-wrap,
+    .commerce-checkout-alfa-iframe__frame-wrap iframe {
+        height: 940px;
+    }
+}
+
+
+/* H12.5.4 — immediate feedback while register.do prepares the Alfa iframe. */
+.commerce-checkout-alfa-iframe__loading {
+    min-height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .9rem;
+    padding: 1.5rem;
+    text-align: left;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .85rem;
+    background: var(--bs-body-bg, #fff);
+}
+.commerce-checkout-alfa-iframe__loading .spinner-border { flex:0 0 auto; width:1.8rem; height:1.8rem; }
+.commerce-checkout-alfa-iframe__loading strong { display:block; margin-bottom:.15rem; }
+
+
+/* H12.7.2 — unified payment action cards. */
+.commerce-checkout-action-cards {
+    display: grid;
+    gap: .7rem;
+}
+
+.commerce-checkout-action-cards--primary {
+    grid-template-columns: 1fr;
+    margin-bottom: .75rem;
+}
+
+.commerce-checkout-action-cards--secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.commerce-checkout-action-card {
+    position: relative;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    background: var(--bs-body-bg, #fff);
+    color: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+
+.commerce-checkout-action-card:hover {
+    border-color: rgba(var(--bs-primary-rgb), .55);
+    background: rgba(var(--bs-primary-rgb), .025);
+}
+
+.commerce-checkout-action-card:focus-visible {
+    outline: 0;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 .17rem rgba(var(--bs-primary-rgb), .12);
+}
+
+.commerce-checkout-action-card.is-selected,
+.commerce-checkout-action-card:has(input[name="paymentmethod"]:checked) {
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), .07);
+    box-shadow: 0 0 0 .14rem rgba(var(--bs-primary-rgb), .1);
+}
+
+.commerce-checkout-action-card--primary {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto 1.15rem;
+    align-items: center;
+    gap: .8rem;
+    width: 100%;
+    min-height: 4.75rem;
+    padding: .78rem .9rem;
+    border-radius: .85rem;
+}
+
+.commerce-checkout-action-card--secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 3.9rem;
+    padding: .7rem .75rem;
+    border-radius: .8rem;
+    text-align: center;
+}
+
+button.commerce-checkout-action-card {
+    font: inherit;
+}
+
+.commerce-checkout-action-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.65rem;
+    height: 2.65rem;
+    flex: 0 0 2.65rem;
+}
+
+.commerce-checkout-action-card__icon img {
+    display: block;
+    width: auto;
+    max-width: 2.55rem;
+    max-height: 2rem;
+    object-fit: contain;
+}
+
+.commerce-checkout-action-card__icon i {
+    font-size: 1.35rem;
+}
+
+.commerce-checkout-action-card__copy {
+    min-width: 0;
+    text-align: left;
+}
+
+.commerce-checkout-action-card__copy strong {
+    display: block;
+    line-height: 1.2;
+}
+
+.commerce-checkout-action-card__copy small {
+    display: block;
+    margin-top: .15rem;
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: .76rem;
+    line-height: 1.25;
+}
+
+.commerce-checkout-action-card__brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.commerce-checkout-action-card__secondary-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    min-width: 0;
+}
+
+.commerce-checkout-action-card__secondary-content .commerce-checkout-action-card__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-basis: 2.25rem;
+}
+
+.commerce-checkout-action-card__secondary-content .commerce-checkout-action-card__icon img {
+    max-width: 2.15rem;
+    max-height: 1.75rem;
+}
+
+.commerce-checkout-action-card__selected-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--bs-primary);
+    font-size: .72rem;
+    opacity: 0;
+    transform: scale(.75);
+    transition: opacity .15s ease, transform .15s ease;
+}
+
+.commerce-checkout-action-card--secondary .commerce-checkout-action-card__selected-mark {
+    position: absolute;
+    top: .45rem;
+    right: .5rem;
+}
+
+.commerce-checkout-action-card.is-selected .commerce-checkout-action-card__selected-mark,
+.commerce-checkout-action-card:has(input[name="paymentmethod"]:checked) .commerce-checkout-action-card__selected-mark {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.commerce-checkout-action-card--primary .commerce-checkout-payment-method__brands {
+    min-width: auto;
+    padding-left: 0;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-action-cards {
+        gap: .55rem;
+    }
+
+    .commerce-checkout-action-card--primary {
+        grid-template-columns: 2.65rem minmax(0, 1fr) auto 1rem;
+        gap: .6rem;
+        min-height: 4.35rem;
+        padding: .7rem .75rem;
+    }
+
+    .commerce-checkout-action-card--primary .commerce-checkout-action-card__copy small {
+        display: none;
+    }
+
+    .commerce-checkout-action-cards--secondary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .commerce-checkout-action-card--secondary {
+        min-height: 3.65rem;
+        padding: .6rem .5rem;
+    }
+}
+
+@media (max-width: 390px) {
+    .commerce-checkout-action-cards--secondary {
+        grid-template-columns: 1fr;
+    }
+}

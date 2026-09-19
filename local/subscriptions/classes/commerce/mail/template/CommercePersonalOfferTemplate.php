@@ -14,6 +14,8 @@ use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferCampaig
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferIndividualMailStudioBridge;
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferMailPricingPresentationService;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailBannerService;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\currency\CurrencyFormatter;
 
 final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
     public function get_type(): string { return CommerceMailType::PERSONAL_OFFER; }
@@ -242,20 +244,21 @@ final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
             return [];
         }
 
-        $symbols = ['EUR' => '€', 'RUB' => '₽', 'USD' => '$', 'GBP' => '£'];
-        $flags = ['EUR' => '🇪🇺', 'RUB' => '🇷🇺', 'USD' => '🇺🇸', 'GBP' => '🇬🇧'];
         $cards = [];
         foreach (($pricing['amounts'] ?? []) as $currency => $minor) {
             if (!is_numeric($minor)) {
                 continue;
             }
-            $code = strtoupper(trim((string)$currency));
-            $amount = format_float(((int)$minor) / 100, 2);
+            $code = Currency::sanitize((string)$currency);
+            if ($code === '') {
+                continue;
+            }
+            $amount = CurrencyFormatter::format_minor_number((int)$minor, $code);
             $cards[] = [
                 'currency' => $code,
-                'flag' => $flags[$code] ?? '',
+                'flag' => Currency::visual_marker($code),
                 'amount' => ($strategy === 'fixed_discount' ? '− ' : '') . $amount,
-                'symbol' => $symbols[$code] ?? $code,
+                'symbol' => Currency::symbol($code) ?: $code,
             ];
         }
         return $cards;
@@ -271,7 +274,9 @@ final class CommercePersonalOfferTemplate extends AbstractCommerceMailTemplate {
         $parts = [];
         foreach (($pricing['amounts'] ?? []) as $currency => $minor) {
             if (!is_numeric($minor)) { continue; }
-            $value = format_float(((int)$minor) / 100, 2) . ' ' . strtoupper((string)$currency);
+            $code = Currency::sanitize((string)$currency);
+            if ($code === '') { continue; }
+            $value = CurrencyFormatter::format_minor_code((int)$minor, $code);
             $parts[] = $strategy === 'fixed_discount' ? '-' . $value : $value;
         }
         return implode(' · ', $parts);

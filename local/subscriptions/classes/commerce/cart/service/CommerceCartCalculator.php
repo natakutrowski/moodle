@@ -16,6 +16,9 @@ use local_subscriptions\commerce\domain\value\CommerceMoney;
 use local_subscriptions\commerce\promotion\service\CommercePromotionEngine;
 use local_subscriptions\commerce\trial\CommerceTrialCartPricingService;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferCheckoutPricingService;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinEligibilityService;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinOperation;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinPricingService;
 
 /** Resolves current prices, quantities and promotion adjustments without mutating the cart. */
 final class CommerceCartCalculator {
@@ -24,11 +27,18 @@ final class CommerceCartCalculator {
         private readonly ?CommercePromotionEngine $promotions = null,
         private readonly ?CommerceCartUpgradePricingService $upgrades = null,
         private readonly ?CommerceTrialCartPricingService $trialpricing = null,
-        private readonly ?CommercePersonalOfferCheckoutPricingService $personaloffers = null
+        private readonly ?CommercePersonalOfferCheckoutPricingService $personaloffers = null,
+        private readonly ?CommercePedagogicalPromotionJoinEligibilityService $promotionjoineligibility = null,
+        private readonly ?CommercePedagogicalPromotionJoinPricingService $promotionjoinpricing = null
     ) {
     }
 
-    public function calculate(CommerceCart $cart, string $language, ?int $at = null): CommerceCartSnapshot {
+    public function calculate(
+        CommerceCart $cart,
+        string $language,
+        ?int $at = null,
+        ?string $promotionjoinexcludedcartuuid = null
+    ): CommerceCartSnapshot {
         $calculatedat = $at ?? time();
         $subtotalminor = 0;
         $items = [];
@@ -53,6 +63,7 @@ final class CommerceCartCalculator {
             $istrialconversion = $operation === 'trialconversion'
                 || (int)($metadata['trialdiscountpercent'] ?? 0) > 0;
             $ispersonaloffer = $operation === 'personaloffer';
+            $ispromotionjoin = $operation === CommercePedagogicalPromotionJoinOperation::OPERATION;
             if ($ispersonaloffer) {
                 if ($this->personaloffers === null || $item->get_quantity() !== 1) {
                     throw new \RuntimeException('Personal Offer checkout pricing is unavailable.');
@@ -68,6 +79,79 @@ final class CommerceCartCalculator {
                     ),
                     $cart->get_currency()
                 );
+            }
+            if ($ispromotionjoin) {
+                $fallbackminor = max(
+                    0,
+                    (int)($metadata['promotion_join_amount_minor'] ?? 0)
+                );
+                $resolved = false;
+                $messagecode = 'promotion_join_not_eligible';
+
+                if (
+                    $this->promotionjoineligibility !== null
+                    && $this->promotionjoinpricing !== null
+                    && $item->get_quantity() === 1
+                    && $cart->get_customer_id() > 0
+                ) {
+                    $eligibility = $this->promotionjoineligibility->resolve(
+                        $cart->get_customer_id(),
+                        $item->get_product_sku(),
+                        $calculatedat,
+                        $promotionjoinexcludedcartuuid ?? $cart->get_uuid()
+                    );
+                    $context = $eligibility->get_context();
+                    $pinnedpromotionid = (int)(
+                        $metadata['promotion_join_promotion_id'] ?? 0
+                    );
+                    $pinneduserid = (int)(
+                        $metadata['promotion_join_user_id'] ?? 0
+                    );
+
+                    if (
+                        $eligibility->is_eligible()
+                        && $context !== null
+                        && $pinnedpromotionid === $context->get_promotion_id()
+                        && $pinneduserid === $cart->get_customer_id()
+                    ) {
+                        $pricing = $this->promotionjoinpricing->resolve(
+                            $eligibility,
+                            $cart->get_currency()
+                        );
+                        if (
+                            $pricing->is_purchasable()
+                            && $pricing->get_amount_minor() !== null
+                        ) {
+                            $unitprice = CommerceMoney::from_minor(
+                                (int)$pricing->get_amount_minor(),
+                                $pricing->get_currency()
+                            );
+                            $resolved = true;
+                        } else {
+                            $messagecode = 'promotion_join_price_unavailable';
+                        }
+                    } else if (
+                        $context !== null
+                        && $pinnedpromotionid > 0
+                        && $pinnedpromotionid !== $context->get_promotion_id()
+                    ) {
+                        $messagecode = 'promotion_join_context_changed';
+                    }
+                }
+
+                if (!$resolved) {
+                    if ($fallbackminor > 0) {
+                        $unitprice = CommerceMoney::from_minor(
+                            $fallbackminor,
+                            $cart->get_currency()
+                        );
+                    }
+                    $messages[] = new CommerceCartMessage(
+                        $messagecode,
+                        CommerceCartMessage::LEVEL_WARNING,
+                        ['productsku' => $item->get_product_sku()]
+                    );
+                }
             }
             if ($isupgrade) {
                 if ($this->upgrades === null || $item->get_quantity() !== 1) {
@@ -149,7 +233,7 @@ final class CommerceCartCalculator {
             // Upgrade prices returned by SubscriptionAdvisor already include
             // the active Trial discount and are final differential prices.
             // They must receive neither Trial nor cart promotion a second time.
-            if (!$isupgrade && !$istrialconversion && !$ispersonaloffer) {
+            if (!$isupgrade && !$istrialconversion && !$ispersonaloffer && !$ispromotionjoin) {
                 $promotionitems[] = [
                     'sku' => $item->get_product_sku(),
                     'type' => $quote->get_product_type(),

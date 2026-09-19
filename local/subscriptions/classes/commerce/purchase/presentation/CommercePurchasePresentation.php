@@ -7,6 +7,7 @@ namespace local_subscriptions\commerce\purchase\presentation;
 defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
+use local_subscriptions\currency\CurrencyFormatter;
 use local_subscriptions\commerce\purchase\status\CommerceCommercialStatus;
 
 /** Human-facing labels and badges for unified Commerce purchases. */
@@ -18,10 +19,18 @@ final class CommercePurchasePresentation {
             default => $status,
         };
 
-        return get_string(
-            'commerce_purchase_commercial_status_' . self::safe_key($displaystatus),
+        $key = 'commerce_purchase_commercial_status_'
+            . self::safe_key($displaystatus);
+
+        return get_string_manager()->string_exists(
+            $key,
             'local_subscriptions'
-        );
+        )
+            ? get_string($key, 'local_subscriptions')
+            : self::technical_status_label(
+                'payment',
+                $displaystatus
+            );
     }
 
     public static function commercial_status_badge(string $status): string {
@@ -138,7 +147,7 @@ final class CommercePurchasePresentation {
     }
 
     public static function money(int $minor, string $currency): string {
-        return format_float($minor / 100, 2) . ' ' . strtoupper($currency);
+        return CurrencyFormatter::format_minor_code($minor, $currency);
     }
 
     private static function safe_key(string $value): string {

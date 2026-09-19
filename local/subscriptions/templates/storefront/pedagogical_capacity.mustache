@@ -1,0 +1,12 @@
+{{#haspedagogicalcapacity}}
+<div class="commerce-pedagogical-capacity {{pedagogicalcapacityclass}}" role="status">
+    <i class="fa-solid {{#pedagogicalsoldout}}fa-circle-xmark{{/pedagogicalsoldout}}{{^pedagogicalsoldout}}fa-ticket{{/pedagogicalsoldout}}" aria-hidden="true"></i>
+    <span>{{pedagogicalcapacitylabel}}</span>
+</div>
+{{#haspedagogicalsalesclose}}
+<div class="commerce-pedagogical-sales-deadline">
+    <i class="{{#pedagogicalsalescloseurgent}}fa-solid fa-fire{{/pedagogicalsalescloseurgent}}{{^pedagogicalsalescloseurgent}}fa-regular fa-clock{{/pedagogicalsalescloseurgent}}" aria-hidden="true"></i>
+    <span>{{pedagogicalsalescloselabel}}</span>
+</div>
+{{/haspedagogicalsalesclose}}
+{{/haspedagogicalcapacity}}

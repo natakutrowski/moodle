@@ -6,7 +6,9 @@ namespace local_subscriptions\commerce\course\storefront;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\catalog\resolution\CommerceLegacyStorefrontProductResolver;
+use local_subscriptions\currency\Currency;
 
 /**
  * Resolves a course/access level to active Native Storefront products.
@@ -93,8 +95,8 @@ final class CommerceCourseStorefrontTargetResolver {
         $params = [
             'sku' => strtoupper(trim((string)$products[0]->sku)),
         ];
-        $currency = strtoupper(trim((string)$currency));
-        if (in_array($currency, ['EUR', 'RUB'], true)) {
+        $currency = Currency::sanitize((string)$currency);
+        if ($currency !== '' && (new CommerceCurrencyRegistry())->is_enabled($currency)) {
             $params['currency'] = $currency;
         }
 

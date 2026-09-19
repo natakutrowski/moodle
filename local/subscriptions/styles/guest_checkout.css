@@ -62,3 +62,1021 @@
         padding: 1.1rem !important;
     }
 }
+
+/* H4.4 — consent + primary payment CTA polish. */
+.commerce-checkout-legal {
+    display: grid;
+    grid-template-columns: 1.15rem minmax(0, 1fr);
+    gap: .65rem;
+    align-items: start;
+    padding: .75rem .85rem;
+    border-radius: .8rem;
+    line-height: 1.4;
+}
+
+.commerce-checkout-legal .form-check-input {
+    float: none;
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: .12rem 0 0;
+}
+
+.commerce-checkout-legal .form-check-label {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.commerce-checkout-submit {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    min-height: 3.25rem;
+    padding: .8rem 3.1rem;
+    border-radius: .8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    box-shadow: 0 .55rem 1.25rem rgba(var(--bs-primary-rgb), .14);
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease,
+        opacity .15s ease;
+}
+
+.commerce-checkout-submit:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 .7rem 1.4rem rgba(var(--bs-primary-rgb), .18);
+}
+
+.commerce-checkout-submit__icon {
+    position: absolute;
+    right: 1rem;
+    font-size: .9rem;
+    opacity: .8;
+}
+
+.commerce-checkout-submit:disabled,
+.commerce-checkout-submit[disabled] {
+    cursor: not-allowed;
+    opacity: .52;
+    box-shadow: none;
+    transform: none;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-legal {
+        gap: .55rem;
+        padding: .7rem .75rem;
+    }
+
+    .commerce-checkout-submit {
+        min-height: 3.05rem;
+        padding: .72rem 2.9rem;
+    }
+
+    .commerce-checkout-submit__icon {
+        right: .9rem;
+        font-size: .85rem;
+    }
+}
+
+/* H4.5 — payment-column hierarchy and vertical rhythm. */
+.commerce-checkout-payment-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.commerce-checkout-payment-heading {
+    margin-bottom: 1rem;
+}
+
+.commerce-checkout-payment-heading h2 {
+    line-height: 1.15;
+}
+
+.commerce-checkout-payment-heading p {
+    max-width: 36rem;
+    line-height: 1.45;
+}
+
+.commerce-checkout-payment-section {
+    margin-top: 1rem;
+}
+
+.commerce-checkout-payment-heading
+    + .commerce-checkout-payment-section {
+    margin-top: 0;
+}
+
+.commerce-checkout-identity {
+    margin-bottom: 0;
+}
+
+.commerce-checkout-express-wallets {
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+.commerce-checkout-payment-methods {
+    margin-top: .9rem;
+}
+
+.commerce-checkout-payment-methods > legend {
+    margin-bottom: .6rem;
+    line-height: 1.2;
+}
+
+.commerce-checkout-trust-strip {
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+.commerce-checkout-legal {
+    margin-top: 1rem;
+}
+
+.commerce-checkout-submit {
+    margin-top: 1rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-heading {
+        margin-bottom: .85rem;
+    }
+
+    .commerce-checkout-payment-heading h2 {
+        font-size: 1.35rem;
+    }
+
+    .commerce-checkout-payment-section,
+    .commerce-checkout-express-wallets {
+        margin-top: .85rem;
+    }
+
+    .commerce-checkout-payment-methods {
+        margin-top: .8rem;
+    }
+
+    .commerce-checkout-trust-strip,
+    .commerce-checkout-legal,
+    .commerce-checkout-submit {
+        margin-top: .9rem;
+    }
+}
+
+/* H4.6 — restore breathing room + harmonize checkout summary. */
+.commerce-checkout-payment-heading {
+    margin-bottom: 1.15rem;
+}
+
+.commerce-checkout-payment-section {
+    margin-top: 1.15rem;
+}
+
+.commerce-checkout-payment-heading
+    + .commerce-checkout-payment-section {
+    margin-top: 0;
+}
+
+.commerce-checkout-express-wallets {
+    margin-top: 1.15rem;
+}
+
+.commerce-checkout-payment-methods {
+    margin-top: 1.05rem;
+}
+
+.commerce-checkout-trust-strip {
+    margin-top: 1.15rem;
+    margin-bottom: .1rem;
+}
+
+.commerce-checkout-legal {
+    margin-top: 1.2rem;
+}
+
+.commerce-checkout-submit {
+    margin-top: 1rem;
+}
+
+.commerce-checkout__summary .card-body {
+    padding-top: 1.75rem;
+    padding-bottom: 1.75rem;
+}
+
+.commerce-checkout__summary h2 {
+    line-height: 1.2;
+}
+
+.commerce-checkout__summary dl {
+    margin-bottom: 0;
+}
+
+.commerce-checkout__summary dt,
+.commerce-checkout__summary dd {
+    line-height: 1.35;
+}
+
+.commerce-checkout__summary .commerce-checkout__grand-total {
+    margin-top: .8rem;
+    padding-top: .85rem;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.commerce-checkout__summary .commerce-checkout__grand-total dt,
+.commerce-checkout__summary .commerce-checkout__grand-total dd {
+    font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-heading {
+        margin-bottom: 1rem;
+    }
+
+    .commerce-checkout-payment-section,
+    .commerce-checkout-express-wallets {
+        margin-top: 1rem;
+    }
+
+    .commerce-checkout-payment-methods {
+        margin-top: .95rem;
+    }
+
+    .commerce-checkout-trust-strip {
+        margin-top: 1.05rem;
+    }
+
+    .commerce-checkout-legal {
+        margin-top: 1.1rem;
+    }
+
+    .commerce-checkout-submit {
+        margin-top: .95rem;
+    }
+}
+
+/* H4.7 — responsive checkout finishing pass. */
+
+/* More breathing room between the provider cards and reassurance strip. */
+.commerce-checkout-payment-methods
+    + .commerce-checkout-trust-strip {
+    margin-top: 1.45rem;
+}
+
+/* Tablet. */
+@media (min-width: 576px) and (max-width: 991.98px) {
+    .commerce-checkout__payment .card-body {
+        padding: 1.5rem !important;
+    }
+
+    .commerce-checkout-payment-heading {
+        margin-bottom: 1rem;
+    }
+
+    .commerce-checkout-express-wallets {
+        margin-top: 1rem;
+    }
+
+    .commerce-checkout-payment-methods
+        + .commerce-checkout-trust-strip {
+        margin-top: 1.3rem;
+    }
+
+    .commerce-checkout-trust-strip {
+        gap: .9rem;
+    }
+
+    .commerce-checkout-legal {
+        margin-top: 1.1rem;
+    }
+}
+
+/* Standard phones. */
+@media (max-width: 575.98px) {
+    .commerce-checkout__payment .card-body {
+        padding: 1rem !important;
+    }
+
+    .commerce-checkout-payment-heading {
+        margin-bottom: .95rem;
+    }
+
+    .commerce-checkout-payment-heading p {
+        font-size: .9rem;
+    }
+
+    .commerce-checkout-identity {
+        padding: .9rem;
+    }
+
+    .commerce-checkout-identity .form-control {
+        min-height: 2.65rem;
+    }
+
+    .commerce-checkout-express-wallets {
+        margin-top: .95rem;
+    }
+
+    .commerce-checkout-payment-methods
+        + .commerce-checkout-trust-strip {
+        margin-top: 1.25rem;
+    }
+
+    .commerce-checkout-trust-strip {
+        gap: .8rem;
+    }
+
+    .commerce-checkout-trust-strip__item {
+        line-height: 1.3;
+    }
+
+    .commerce-checkout-legal {
+        margin-top: 1.05rem;
+    }
+
+    .commerce-checkout-submit {
+        margin-top: .95rem;
+    }
+}
+
+/* Very small phones. */
+@media (max-width: 390px) {
+    .commerce-checkout__payment .card-body {
+        padding: .85rem !important;
+    }
+
+    .commerce-checkout-payment-heading h2 {
+        font-size: 1.25rem;
+    }
+
+    .commerce-checkout-payment-heading p {
+        font-size: .85rem;
+    }
+
+    .commerce-checkout-identity {
+        padding: .8rem;
+    }
+
+    .commerce-checkout-payment-methods
+        .commerce-checkout-provider {
+        padding: .68rem .72rem;
+    }
+
+    .commerce-checkout-trust-strip {
+        gap: .7rem;
+    }
+
+    .commerce-checkout-trust-strip__item {
+        font-size: .76rem;
+    }
+
+    .commerce-checkout-legal {
+        padding: .68rem .72rem;
+    }
+}
+
+/* Wide desktop. */
+@media (min-width: 1400px) {
+    .commerce-checkout-payment-panel {
+        max-width: 44rem;
+        width: 100%;
+        margin-inline: auto;
+    }
+
+    .commerce-checkout-payment-heading p {
+        max-width: 34rem;
+    }
+
+    .commerce-checkout-payment-methods
+        + .commerce-checkout-trust-strip {
+        margin-top: 1.5rem;
+    }
+}
+
+/* 7.96H5 — Stripe card entry embedded directly in the Campus checkout. */
+.commerce-checkout-inline-card {
+    padding: 1rem;
+    border: 1px solid rgba(var(--bs-primary-rgb), .18);
+    border-radius: .85rem;
+    background: rgba(var(--bs-primary-rgb), .018);
+}
+
+.commerce-checkout-inline-card__heading {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    margin-bottom: .85rem;
+}
+
+.commerce-checkout-inline-card__element {
+    min-height: 3rem;
+}
+
+.commerce-checkout-inline-card .alert {
+    border-radius: .65rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-inline-card {
+        padding: .85rem;
+    }
+
+    .commerce-checkout-inline-card__heading {
+        margin-bottom: .75rem;
+    }
+}
+
+/* 7.96H5.1 — embedded card localisation and spacing polish. */
+.commerce-checkout-inline-card
+    + .commerce-checkout-trust-strip {
+    margin-top: 1.35rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-inline-card
+        + .commerce-checkout-trust-strip {
+        margin-top: 1.2rem;
+    }
+}
+
+/* 7.96H10 — Alfa official Payment Widget surface. */
+.commerce-checkout-alfa-widget {
+    padding: 1rem;
+    border: 1px solid rgba(var(--bs-primary-rgb), .18);
+    border-radius: .85rem;
+    background: rgba(var(--bs-primary-rgb), .018);
+}
+
+.commerce-checkout-alfa-widget__heading {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    margin-bottom: .85rem;
+}
+
+.commerce-checkout-alfa-widget
+    + .commerce-checkout-inline-card,
+.commerce-checkout-alfa-widget
+    + .commerce-checkout-trust-strip {
+    margin-top: 1.2rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-alfa-widget {
+        padding: .85rem;
+    }
+}
+
+/* H10.2 — Alfa CTA clarity + payment-method breathing room. */
+.commerce-checkout-payment-methods {
+    margin-top: 1.2rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-payment-methods {
+        margin-top: 1.05rem;
+    }
+}
+
+/* H10.6 — Alfa checkout diagnostics (developer/admin only). */
+.commerce-checkout-alfa-debug {
+    border-top: 1px dashed rgba(0, 0, 0, .18);
+    padding-top: .75rem;
+}
+
+.commerce-checkout-alfa-debug > summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.commerce-checkout-alfa-debug__actions {
+    margin-top: .75rem;
+}
+
+.commerce-checkout-alfa-debug__output {
+    max-height: 28rem;
+    overflow: auto;
+    margin: .75rem 0 0;
+    padding: .75rem;
+    border-radius: .5rem;
+    background: #f6f7f9;
+    font-size: .75rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+
+/* H10.8 — Alfa widget visual integration after live gateway validation. */
+.commerce-checkout-alfa-widget [data-checkout-alfa-widget-mount] {
+    width: 100%;
+}
+
+.commerce-checkout-alfa-widget #alfa-payment__button {
+    width: 100% !important;
+    min-height: 3.25rem !important;
+    padding: .8rem 1.25rem !important;
+    border: 1px solid var(--bs-primary) !important;
+    border-radius: .8rem !important;
+    background: var(--bs-primary) !important;
+    color: #fff !important;
+    font: inherit !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    box-shadow: 0 .55rem 1.25rem rgba(var(--bs-primary-rgb), .14) !important;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease !important;
+}
+
+.commerce-checkout-alfa-widget #alfa-payment__button:hover,
+.commerce-checkout-alfa-widget #alfa-payment__button:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 .7rem 1.4rem rgba(var(--bs-primary-rgb), .18) !important;
+}
+
+.commerce-checkout-alfa-widget #alfa-payment__button:focus-visible {
+    outline: .2rem solid rgba(var(--bs-primary-rgb), .22) !important;
+    outline-offset: .15rem;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-checkout-alfa-widget #alfa-payment__button {
+        min-height: 3.05rem !important;
+        padding: .72rem 1rem !important;
+    }
+}
+
+
+/* H12.5.3 — the complete legal-consent card is an explicit click target.
+   Links inside remain independent interactive controls. */
+.commerce-checkout-legal[data-checkout-legal-card] {
+    cursor: pointer;
+    transition:
+        border-color .15s ease,
+        background-color .15s ease,
+        box-shadow .15s ease;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card]:hover {
+    border-color: rgba(var(--bs-primary-rgb), .42);
+    background: rgba(var(--bs-primary-rgb), .035);
+}
+
+.commerce-checkout-legal[data-checkout-legal-card]:focus-visible {
+    outline: 0;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 .16rem rgba(var(--bs-primary-rgb), .12);
+}
+
+.commerce-checkout-legal[data-checkout-legal-card] a {
+    cursor: pointer;
+}
+
+
+/* H12.7.3 — legal consent is a one-way checkout state. */
+.commerce-checkout-legal[data-checkout-legal-card] {
+    transition:
+        border-color .15s ease,
+        background-color .15s ease,
+        box-shadow .15s ease;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-required {
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), .045);
+    box-shadow: 0 0 0 .16rem rgba(var(--bs-primary-rgb), .11);
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-accepted {
+    border-color: rgba(var(--bs-primary-rgb), .55);
+    background: rgba(var(--bs-primary-rgb), .07);
+    box-shadow: none;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-accepted
+    .form-check-input {
+    cursor: default;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-accepted
+    .form-check-label {
+    cursor: default;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-accepted a {
+    cursor: pointer;
+}
+
+
+/* H12.7.5 — explicit consent feedback and removal of stale generic CTA. */
+.commerce-checkout-submit[hidden],
+.commerce-checkout-terms-feedback[hidden],
+.commerce-checkout-legal__lock[hidden] {
+    display: none !important;
+}
+
+.commerce-checkout-terms-feedback {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    padding: .7rem .85rem;
+    border-radius: .7rem;
+    font-size: .82rem;
+    line-height: 1.35;
+}
+
+.commerce-checkout-terms-feedback .fa-circle-exclamation {
+    margin-top: .12rem;
+    color: var(--bs-primary);
+}
+
+.commerce-checkout-legal[data-checkout-legal-card] {
+    position: relative;
+    padding-right: 2.45rem;
+}
+
+.commerce-checkout-legal__lock {
+    position: absolute;
+    top: 50%;
+    right: .9rem;
+    transform: translateY(-50%);
+    color: var(--bs-primary);
+    font-size: .78rem;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-accepted {
+    cursor: default;
+}
+
+.commerce-checkout-express-wallets {
+    position: relative;
+}
+
+
+
+/* H12.7.5.1 — hard CTA ownership, wallet consent lock and polished legal state. */
+.commerce-checkout-legal[data-checkout-legal-card] {
+    display: grid;
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+    gap: .65rem;
+    align-items: start;
+    position: relative;
+    padding: .78rem 2.6rem .78rem .9rem;
+    cursor: pointer;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card]
+    .commerce-checkout-legal__status-lock {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: .06rem;
+    color: var(--bs-primary);
+    font-size: .86rem;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card]
+    .commerce-checkout-legal__text {
+    line-height: 1.4;
+}
+
+.commerce-checkout-legal__accepted-check {
+    position: absolute;
+    top: .52rem;
+    right: .62rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    color: #fff;
+    font-size: .62rem;
+}
+
+.commerce-checkout-legal__accepted-check[hidden] {
+    display: none !important;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-accepted {
+    cursor: default;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-accepted
+    .commerce-checkout-legal__status-lock {
+    opacity: .9;
+}
+
+
+/* H12.7.5.2 — checkbox before consent; lock after acceptance. */
+.commerce-checkout-legal__status-checkbox {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-top: .08rem;
+    border: 1px solid #cfd4dc;
+    border-radius: .22rem;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card]
+    .commerce-checkout-legal__status-lock {
+    display: none;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-accepted
+    .commerce-checkout-legal__status-checkbox {
+    display: none;
+}
+
+.commerce-checkout-legal[data-checkout-legal-card].is-accepted
+    .commerce-checkout-legal__status-lock {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: .02rem;
+    color: var(--bs-primary);
+    font-size: .86rem;
+}
+
+/* Same discreet validation mark as the selected Action Cards. */
+.commerce-checkout-legal__accepted-check {
+    top: .58rem;
+    right: .68rem;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: transparent;
+    color: var(--bs-primary);
+    font-size: .72rem;
+}
+
+
+/* H12.8.1 — PayPal v6 embedded/popup diagnostics surface. */
+.commerce-checkout-paypal-embedded:not([hidden]) {
+    margin-top: .75rem;
+}
+
+.commerce-checkout-paypal-embedded
+    [data-checkout-paypal-error][hidden] {
+    display: none !important;
+}
+
+
+/* H12.8.2 — PayPal embedded flow polish. */
+.commerce-checkout-paypal-embedded
+    [data-checkout-paypal-error]:not([hidden]) {
+    margin-top: .65rem;
+}
+
+
+/* H12.8.3 — local readiness state for Stripe Express Checkout. */
+.commerce-checkout-express-wallets__loading {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    min-height: 3.15rem;
+    padding: .55rem .75rem;
+    color: var(--bs-secondary-color);
+    font-size: .82rem;
+    text-align: center;
+}
+
+.commerce-checkout-express-wallets.is-probing
+    .commerce-checkout-express-wallets__loading {
+    display: flex;
+}
+
+.commerce-checkout-express-wallets.is-probing
+    [data-checkout-express-wallet-element] {
+    min-height: 0;
+}
+
+.commerce-checkout-express-wallets.is-wallet-ready
+    .commerce-checkout-express-wallets__loading,
+.commerce-checkout-express-wallets.is-wallet-unavailable
+    .commerce-checkout-express-wallets__loading {
+    display: none;
+}
+
+
+
+/* H12.9-A4.1 — PayPal user cancellation is neutral feedback, not an error. */
+.commerce-checkout-paypal-embedded
+    [data-checkout-paypal-error].alert-info:not([hidden]) {
+    border-color: rgba(var(--bs-primary-rgb), .18);
+    background: rgba(var(--bs-primary-rgb), .06);
+    color: var(--bs-body-color);
+}
+
+
+/* H12.9-A4.2 — visible PayPal cancellation feedback outside hidden SDK config. */
+.commerce-checkout-paypal-cancel-feedback {
+    margin: .65rem 0 0;
+    border-color: rgba(var(--bs-primary-rgb), .18);
+    background: rgba(var(--bs-primary-rgb), .06);
+    color: var(--bs-body-color);
+}
+
+
+/* H12.9-A4.3 — cancellation feedback belongs visually to the PayPal action. */
+.commerce-checkout-paypal-cancel-feedback {
+    margin: .4rem 0 .55rem;
+    padding: .55rem .75rem;
+    font-size: .84rem;
+    line-height: 1.35;
+}
+
+
+/* H12.9-A6.1 — breathing room between Guest Checkout identity and payment methods. */
+.commerce-checkout-identity[data-checkout-guest-identity] {
+    margin-bottom: 1rem !important;
+}
+
+
+/* H12.9-A5.7.1 — Guest identity field readiness. */
+.commerce-guest-checkout__input-wrap
+    input[data-identity-name].is-valid
+    + .commerce-guest-checkout__status {
+    color: var(--bs-success);
+}
+
+.commerce-guest-checkout__input-wrap
+    input[data-identity-name].is-invalid
+    + .commerce-guest-checkout__status {
+    color: var(--bs-danger);
+}
+
+
+/* H12.9-A5.7.3 — inline Guest Checkout OTP verification. */
+.commerce-guest-identity-otp {
+    margin-top: 1rem;
+    padding: .9rem 1rem;
+    border: 1px solid rgba(var(--bs-primary-rgb), .14);
+    border-radius: .85rem;
+    background: rgba(var(--bs-primary-rgb), .035);
+}
+
+.commerce-guest-identity-otp__heading {
+    display: flex;
+    gap: .65rem;
+    align-items: flex-start;
+    margin-bottom: .8rem;
+}
+
+.commerce-guest-identity-otp__icon {
+    flex: 0 0 auto;
+    font-size: 1.05rem;
+    line-height: 1.2;
+}
+
+.commerce-guest-identity-otp__code {
+    max-width: 13rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: .34em;
+    text-align: center;
+}
+
+.commerce-guest-identity-otp__actions {
+    margin-top: .45rem;
+}
+
+.commerce-guest-identity-otp__actions .btn-link {
+    font-size: .82rem;
+    text-decoration: underline;
+    text-underline-offset: .14em;
+}
+
+.commerce-guest-identity-otp__status {
+    min-height: 1.25rem;
+    margin-top: .45rem;
+}
+
+.commerce-guest-identity-otp__status[data-state="success"] {
+    color: var(--bs-success);
+}
+
+.commerce-guest-identity-otp__status[data-state="error"] {
+    color: var(--bs-danger);
+}
+
+.commerce-guest-identity-verified {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem .7rem;
+    align-items: center;
+    margin-top: .9rem;
+    padding: .65rem .8rem;
+    border-radius: .75rem;
+    background: rgba(var(--bs-success-rgb), .07);
+    font-size: .86rem;
+}
+
+.commerce-guest-identity-verified__mark {
+    color: var(--bs-success);
+    font-weight: 800;
+}
+
+.commerce-checkout-identity.is-identity-locked
+    .form-control[readonly] {
+    background: var(--bs-tertiary-bg);
+    cursor: default;
+}
+
+.commerce-checkout-identity.is-identity-locked
+    .commerce-guest-checkout__status {
+    color: var(--bs-success);
+}
+
+.commerce-guest-identity-confirm {
+    margin-top: .75rem;
+}
+
+.commerce-guest-identity-confirm .btn {
+    min-height: 2.25rem;
+}
+
+
+/* H12.9-A5.7.4 — verified Guest Identity payment gate. */
+.commerce-guest-payment-gate {
+    display: flex;
+    gap: .55rem;
+    align-items: center;
+    margin: 1rem 0 .75rem;
+    padding: .65rem .8rem;
+    border-radius: .7rem;
+    background: rgba(var(--bs-primary-rgb), .055);
+    color: var(--bs-secondary-color);
+    font-size: .86rem;
+}
+
+.commerce-guest-payment-gate .fa-lock {
+    color: var(--bs-primary);
+}
+
+[data-guest-payment-control].is-guest-payment-locked {
+    opacity: .48;
+}
+
+.commerce-checkout-express-wallets.is-guest-payment-locked {
+    cursor: not-allowed;
+    user-select: none;
+    opacity: .42;
+}
+
+.commerce-checkout-express-wallets.is-guest-payment-locked
+    > * {
+    pointer-events: none;
+}
+
+.commerce-checkout-express-wallets.is-guest-payment-locked
+    * {
+    cursor: not-allowed !important;
+}
+
+.commerce-checkout-providers.is-guest-payment-locked
+    .commerce-checkout-action-card {
+    cursor: not-allowed;
+}
+
+form.is-guest-payment-locked
+    [data-checkout-inline-card],
+form.is-guest-payment-locked
+    [data-checkout-alfa-iframe] {
+    display: none !important;
+}
+
+
+/* H12.9-A5.7.5 — verified existing-account inline login. */
+.commerce-checkout-login-gate__verified-email {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem .65rem;
+    align-items: center;
+    min-height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-tertiary-bg);
+}
+
+.commerce-checkout-login-gate__verified-email > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+}
+
+.commerce-checkout-login-gate__verified-email > small {
+    display: inline-flex;
+    gap: .3rem;
+    align-items: center;
+    color: var(--bs-success);
+}

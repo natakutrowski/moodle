@@ -2,14 +2,17 @@
 namespace local_subscriptions\payment\stripe;
 
 use local_subscriptions\payment\PaymentGatewayInterface;
+use local_subscriptions\payment\RefundGatewayInterface;
+use local_subscriptions\payment\RefundHistoryGatewayInterface;
 use local_subscriptions\payment\PortalGatewayInterface;
-use local_subscriptions\payment\dto\{CheckoutInitResult, InternalEvent, ProviderActionResult, ProviderCapabilities};
+use local_subscriptions\payment\dto\{CheckoutInitResult, InternalEvent, ProviderActionResult, ProviderCapabilities, ProviderRefundResult};
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\payment\Provider;
+use local_subscriptions\commerce\payment\provider\stripe\StripeSupportedCurrencies;
 use local_subscriptions\constants\Operation;
 use stdClass;
 
-final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInterface {
+final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInterface, RefundGatewayInterface, RefundHistoryGatewayInterface {
 
     public function __construct(private readonly ?string $profile = null) {
     }
@@ -49,8 +52,9 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
         }
 
         // (OPTION) Devise autorisée
-        $allowed = ['EUR','USD','GBP','CHF'];
-        if (!in_array(strtoupper($payment_request->currency), $allowed, true)) {
+        if (!StripeSupportedCurrencies::supports(
+            strtoupper((string)$payment_request->currency)
+        )) {
             throw new \moodle_exception('stripe_invalid_currency', 'local_subscriptions', '', $payment_request->currency);
         }
 
@@ -102,6 +106,22 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
             ),
             'client_reference_id' => (string)$payment_request->id,
         ];
+
+        $preferredPaymentMethod = strtolower(
+            trim(
+                (string)(
+                    $options['preferred_payment_method']
+                    ?? ''
+                )
+            )
+        );
+
+        if ($preferredPaymentMethod === 'apple_pay') {
+            // Stripe exposes Apple Pay on the card rail. Hosted Checkout then
+            // renders the wallet only when Stripe + the browser/device allow it.
+            $params['payment_method_types'] = ['card'];
+            $params['metadata']['commerce_payment_method'] = 'apple_pay';
+        }
 
         // Si des URLs sont fournies, on les utilise
         if (!empty($options['success_url'])) { $params['success_url'] = $options['success_url']; }
@@ -275,6 +295,75 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
                 ]);
             }
 
+            case 'payment_intent.succeeded': {
+                $metadata = [];
+                if (!empty($obj->metadata)) {
+                    foreach ($obj->metadata as $key => $value) {
+                        $metadata[(string)$key] = (string)$value;
+                    }
+                }
+
+                return new InternalEvent('checkout_completed', [
+                    'payment_request_id' =>
+                        isset($metadata['payment_request_id'])
+                            ? (int)$metadata['payment_request_id']
+                            : 0,
+                    'currency' =>
+                        strtoupper((string)($obj->currency ?? '')),
+                    'amount_minor' =>
+                        (int)($obj->amount_received ?? $obj->amount ?? 0),
+                    'meta' => array_merge(
+                        $metadata,
+                        [
+                            'provider' => Provider::STRIPE,
+                            'provider_payment_id' =>
+                                (string)$obj->id,
+                            'payment_intent' =>
+                                (string)$obj->id,
+                            'payment_status' => 'paid',
+                            'checkout_status' => 'complete',
+                            'customer_email' =>
+                                $obj->receipt_email ?? null,
+                        ]
+                    ),
+                ]);
+            }
+
+            case 'payment_intent.payment_failed': {
+                $metadata = [];
+                if (!empty($obj->metadata)) {
+                    foreach ($obj->metadata as $key => $value) {
+                        $metadata[(string)$key] = (string)$value;
+                    }
+                }
+
+                return new InternalEvent('payment_failed', [
+                    'payment_request_id' =>
+                        isset($metadata['payment_request_id'])
+                            ? (int)$metadata['payment_request_id']
+                            : 0,
+                    'currency' =>
+                        strtoupper((string)($obj->currency ?? '')),
+                    'amount_minor' =>
+                        (int)($obj->amount ?? 0),
+                    'meta' => array_merge(
+                        $metadata,
+                        [
+                            'provider' => Provider::STRIPE,
+                            'provider_payment_id' =>
+                                (string)$obj->id,
+                            'payment_intent' =>
+                                (string)$obj->id,
+                            'payment_status' => 'failed',
+                            'checkout_status' => 'complete',
+                            'last_payment_error' =>
+                                $obj->last_payment_error->code
+                                ?? null,
+                        ]
+                    ),
+                ]);
+            }
+
             case 'checkout.session.async_payment_failed': {
                 $metadata = [];
                 if (!empty($obj->metadata)) {
@@ -423,6 +512,180 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
     }
 
 
+    public function refund_payment(
+        string $providerpaymentid,
+        int $amountminor,
+        string $currency,
+        array $options = []
+    ): ProviderRefundResult {
+        $providerpaymentid = trim($providerpaymentid);
+        $currency = strtoupper(trim($currency));
+
+        if ($providerpaymentid === '') {
+            throw new \coding_exception('Stripe refund requires a provider payment identifier.');
+        }
+        if ($amountminor <= 0) {
+            throw new \coding_exception('Stripe refund amount must be positive.');
+        }
+        if (!preg_match('/^[A-Z]{3}$/', $currency)) {
+            throw new \coding_exception('Stripe refund currency must use ISO 4217 format.');
+        }
+
+        $this->ensure_sdk();
+        \Stripe\Stripe::setApiKey($this->cfg()['secret_key']);
+
+        $paymentintentid = null;
+        $chargeid = null;
+
+        if (str_starts_with($providerpaymentid, 'cs_')) {
+            $session = \Stripe\Checkout\Session::retrieve(
+                $providerpaymentid,
+                ['expand' => ['payment_intent']]
+            );
+
+            if (is_string($session->payment_intent ?? null)) {
+                $paymentintentid = trim($session->payment_intent);
+            } else if (
+                isset($session->payment_intent)
+                && is_object($session->payment_intent)
+                && isset($session->payment_intent->id)
+            ) {
+                $paymentintentid = trim((string)$session->payment_intent->id);
+            }
+        } else if (str_starts_with($providerpaymentid, 'pi_')) {
+            $paymentintentid = $providerpaymentid;
+        } else if (str_starts_with($providerpaymentid, 'ch_')) {
+            $chargeid = $providerpaymentid;
+        } else {
+            throw new \coding_exception(
+                'Unsupported Stripe payment identifier for refund: ' . $providerpaymentid
+            );
+        }
+
+        if ($paymentintentid === null && $chargeid === null) {
+            throw new \coding_exception(
+                'Stripe checkout session has no refundable PaymentIntent.'
+            );
+        }
+
+        $payload = [
+            'amount' => $amountminor,
+            'metadata' => array_filter([
+                'commerce_payment_reference' =>
+                    trim((string)($options['payment_reference'] ?? '')),
+                'commerce_purchase_reference' =>
+                    trim((string)($options['purchase_reference'] ?? '')),
+                'commerce_refund_reason' =>
+                    trim((string)($options['reason'] ?? '')),
+            ], static fn(mixed $value): bool => $value !== ''),
+        ];
+
+        if ($paymentintentid !== null) {
+            $payload['payment_intent'] = $paymentintentid;
+        } else {
+            $payload['charge'] = $chargeid;
+        }
+
+        $reason = trim((string)($options['reason'] ?? ''));
+        if (in_array(
+            $reason,
+            ['duplicate', 'fraudulent', 'requested_by_customer'],
+            true
+        )) {
+            $payload['reason'] = $reason;
+        }
+
+        $requestoptions = [];
+        $idempotencykey = trim((string)($options['idempotency_key'] ?? ''));
+        if ($idempotencykey !== '') {
+            $requestoptions['idempotency_key'] = $idempotencykey;
+        }
+
+        $refund = \Stripe\Refund::create($payload, $requestoptions);
+
+        $status = match ((string)($refund->status ?? '')) {
+            'succeeded' => 'succeeded',
+            'failed', 'canceled' => 'failed',
+            default => 'pending',
+        };
+
+        return new ProviderRefundResult(
+            (string)$refund->id,
+            $status,
+            strtoupper((string)($refund->currency ?? $currency)),
+            (int)($refund->amount ?? $amountminor),
+            [
+                'payment_intent' => $paymentintentid,
+                'charge' => $chargeid,
+                'stripe_status' => (string)($refund->status ?? ''),
+                'providerpaymentid' => $providerpaymentid,
+            ]
+        );
+    }
+
+    public function list_payment_refunds(
+        string $providerpaymentid,
+        string $currency
+    ): array {
+        $providerpaymentid = trim($providerpaymentid);
+        $currency = strtoupper(trim($currency));
+
+        $this->ensure_sdk();
+        \Stripe\Stripe::setApiKey($this->cfg()['secret_key']);
+
+        $params = ['limit' => 100];
+
+        if (str_starts_with($providerpaymentid, 'cs_')) {
+            $session = \Stripe\Checkout\Session::retrieve(
+                $providerpaymentid,
+                ['expand' => ['payment_intent']]
+            );
+            $paymentintentid = is_string($session->payment_intent ?? null)
+                ? trim($session->payment_intent)
+                : trim((string)($session->payment_intent->id ?? ''));
+
+            if ($paymentintentid === '') {
+                return [];
+            }
+            $params['payment_intent'] = $paymentintentid;
+        } else if (str_starts_with($providerpaymentid, 'pi_')) {
+            $params['payment_intent'] = $providerpaymentid;
+        } else if (str_starts_with($providerpaymentid, 'ch_')) {
+            $params['charge'] = $providerpaymentid;
+        } else {
+            return [];
+        }
+
+        $collection = \Stripe\Refund::all($params);
+        $results = [];
+
+        foreach ($collection->data ?? [] as $refund) {
+            $status = match ((string)($refund->status ?? '')) {
+                'succeeded' => 'succeeded',
+                'failed', 'canceled' => 'failed',
+                default => 'pending',
+            };
+
+            $results[] = new ProviderRefundResult(
+                (string)$refund->id,
+                $status,
+                strtoupper((string)($refund->currency ?? $currency)),
+                (int)($refund->amount ?? 0),
+                [
+                    'stripe_status' => (string)($refund->status ?? ''),
+                    'providerpaymentid' => $providerpaymentid,
+                    'imported' => true,
+                ]
+            );
+        }
+
+        return array_values(array_filter(
+            $results,
+            static fn(ProviderRefundResult $result): bool =>
+                $result->amountminor > 0
+        ));
+    }
+
     public function cancel_subscription(string $provider_subscription_id, array $opts = []): ProviderActionResult {
         $this->ensure_sdk();
         \Stripe\Stripe::setApiKey($this->cfg()['secret_key']);
@@ -468,7 +731,7 @@ final class StripeGateway implements PaymentGatewayInterface, PortalGatewayInter
         $c = new ProviderCapabilities();
         $c->supports_recurring = true;
         $c->supports_portal = true;
-        $c->currencies = ['EUR','USD','GBP','CHF'];
+        $c->currencies = StripeSupportedCurrencies::all();
         return $c;
     }
 

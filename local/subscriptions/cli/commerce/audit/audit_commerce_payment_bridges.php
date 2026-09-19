@@ -209,10 +209,14 @@ if ($registry !== null) {
             );
         }
 
-        if ($capabilities->supports_refunds()) {
+        if (
+            $capabilities->supports_refunds()
+            && !$provider instanceof
+                \local_subscriptions\commerce\payment\refund\CommerceRefundCapablePaymentProvider
+        ) {
             $writeerror(
                 sprintf(
-                    'Provider "%s" incorrectly announces refund support.',
+                    'Provider "%s" announces refund support without the certified Commerce refund contract.',
                     $providerkey
                 )
             );

@@ -17,6 +17,76 @@ final class StripeCheckoutSessionStatusProbe implements StripePaymentStatusProbe
             if (trim((string)$cfg['secret_key']) === '') { continue; }
             try {
                 \Stripe\Stripe::setApiKey($cfg['secret_key']);
+
+                if (str_starts_with($sessionid, 'pi_')) {
+                    $intent = \Stripe\PaymentIntent::retrieve(
+                        $sessionid
+                    );
+
+                    $metadata = [];
+                    if (!empty($intent->metadata)) {
+                        foreach ($intent->metadata as $k => $v) {
+                            $metadata[(string)$k] = (string)$v;
+                        }
+                    }
+
+                    $paid =
+                        strtolower(
+                            (string)($intent->status ?? '')
+                        ) === 'succeeded';
+
+                    $event = new InternalEvent(
+                        $paid
+                            ? 'checkout_completed'
+                            : 'payment_pending',
+                        [
+                            'payment_request_id' =>
+                                isset($metadata['payment_request_id'])
+                                    ? (int)$metadata['payment_request_id']
+                                    : 0,
+                            'currency' =>
+                                strtoupper(
+                                    (string)($intent->currency ?? '')
+                                ),
+                            'amount_minor' =>
+                                (int)(
+                                    $intent->amount_received
+                                    ?? $intent->amount
+                                    ?? 0
+                                ),
+                            'meta' => array_merge(
+                                $metadata,
+                                [
+                                    'provider' => Provider::STRIPE,
+                                    'provider_payment_id' =>
+                                        (string)$intent->id,
+                                    'payment_intent' =>
+                                        (string)$intent->id,
+                                    'payment_status' =>
+                                        $paid ? 'paid' : 'pending',
+                                    'checkout_status' =>
+                                        $paid ? 'complete' : 'open',
+                                    'stripe_profile' => $profile,
+                                ]
+                            ),
+                        ]
+                    );
+
+                    return new StripePaymentProviderStatus(
+                        (string)$intent->id,
+                        $profile,
+                        $paid ? 'complete' : 'open',
+                        $paid ? 'paid' : 'pending',
+                        isset($intent->amount)
+                            ? (int)$intent->amount
+                            : null,
+                        isset($intent->currency)
+                            ? strtoupper((string)$intent->currency)
+                            : null,
+                        $event
+                    );
+                }
+
                 $session = \Stripe\Checkout\Session::retrieve($sessionid);
             } catch (\Stripe\Exception\InvalidRequestException $e) {
                 $last = $e; continue;

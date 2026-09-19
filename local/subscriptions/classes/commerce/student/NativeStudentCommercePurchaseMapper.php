@@ -6,6 +6,7 @@ namespace local_subscriptions\commerce\student;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
 use local_subscriptions\commerce\persistence\CommercePurchasePersistenceSnapshot;
 
 /** Maps native Commerce snapshots to the stable student-page view model. */
@@ -39,7 +40,10 @@ final class NativeStudentCommercePurchaseMapper {
             'end_date' => $enddate,
             'creation_date' => $purchase->timecreated,
             'last_update' => $purchase->timemodified,
-            'pricepaid' => ((int)$purchase->totalminor) / 100,
+            'pricepaid' => CommerceCurrencyAmount::major_float_from_minor(
+                (int)$purchase->totalminor,
+                (string)$purchase->currency
+            ),
             'currency' => (string)$purchase->currency,
             'payment_provider' => $payment?->provider,
             'transactionid' => $payment?->transactionid,
@@ -83,7 +87,10 @@ final class NativeStudentCommercePurchaseMapper {
             'email' => $purchase->customeremail ?? ($customer['email'] ?? null),
             'firstname' => $customer['firstname'] ?? ($metadata['firstname'] ?? null),
             'lastname' => $customer['lastname'] ?? ($metadata['lastname'] ?? null),
-            'price' => ((int)$purchase->totalminor) / 100,
+            'price' => CommerceCurrencyAmount::major_float_from_minor(
+                (int)$purchase->totalminor,
+                (string)$purchase->currency
+            ),
             'currency' => (string)$purchase->currency,
             'payment_provider' => $payment?->provider,
             'transactionid' => $payment?->transactionid,

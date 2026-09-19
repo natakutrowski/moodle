@@ -4,14 +4,18 @@ require_once(__DIR__ . '/../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferCheckoutService;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferIdentityConflictException;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferIdentityConflictPresenter;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferDestinationResolver;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferSessionService;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferCurrencySelectionService;
+use local_subscriptions\commerce\currency\market\CommerceMarketCountryResolver;
+use local_subscriptions\commerce\currency\market\CommerceMarketCurrencyRecommendationService;
+use local_subscriptions\currency\Currency;
 use local_subscriptions\commerce\showroom\CommerceShowroomUrl;
-use local_subscriptions\support\Region;
 use local_subscriptions\url\UrlFactory;
 
 \local_subscriptions\subscription_config::guard_public_access();
@@ -19,7 +23,7 @@ use local_subscriptions\url\UrlFactory;
 global $USER, $SESSION;
 
 $token = trim((string)required_param('token', PARAM_RAW_TRIMMED));
-$requestedcurrency = strtoupper(optional_param('currency', '', PARAM_ALPHA));
+$requestedcurrency = Currency::sanitize(optional_param('currency', '', PARAM_ALPHA));
 $requesteddestination = strtolower(optional_param('destination', '', PARAM_ALPHA));
 if (!in_array($requesteddestination, ['', 'checkout'], true)) {
     throw new invalid_parameter_exception('Unsupported Personal Offer destination override.');
@@ -28,13 +32,50 @@ $requestedanchor = strtolower(optional_param('anchor', '', PARAM_ALPHANUMEXT));
 if (!in_array($requestedanchor, ['', 'showroom-offers'], true)) {
     throw new invalid_parameter_exception('Unsupported Personal Offer return anchor.');
 }
-$fallbackcurrency = in_array(Region::detect_country(), ['RU', 'BY'], true) ? 'RUB' : 'EUR';
+$currencyregistry = new CommerceCurrencyRegistry();
 
 try {
     $personaloffers = CommercePersonalOfferCheckoutService::create();
-    $currency = in_array($requestedcurrency, ['EUR', 'RUB'], true)
-        ? $requestedcurrency
-        : $personaloffers->choose_currency($token, $fallbackcurrency);
+
+    $marketcountry =
+        (
+            new CommerceMarketCountryResolver()
+        )->resolve();
+    $marketdefault =
+        (
+            new CommerceMarketCurrencyRecommendationService()
+        )->recommend(
+            $marketcountry
+        )->get_currency();
+
+    $usercurrency =
+        isloggedin()
+        && !isguestuser()
+            ? Currency::sanitize(
+                (string)get_user_preferences(
+                    'local_subscriptions_storefront_currency',
+                    '',
+                    (int)$USER->id
+                )
+            )
+            : '';
+    $sessioncurrency =
+        Currency::sanitize(
+            (string)(
+                $SESSION->local_subscriptions_storefront_currency
+                ?? ''
+            )
+        );
+
+    $currency =
+        CommercePersonalOfferCurrencySelectionService::create()
+            ->resolve(
+                $token,
+                $requestedcurrency,
+                $usercurrency,
+                $sessioncurrency,
+                $marketdefault
+            );
     $userid = isloggedin() && !isguestuser() ? (int)$USER->id : null;
     $email = $userid !== null ? (string)$USER->email : null;
     // Validate the signed offer and authoritative currency before resolving any destination.
@@ -181,6 +222,17 @@ try {
         );
     }
 
+    $errorcode =
+        $exception instanceof \moodle_exception
+            ? (string)$exception->errorcode
+            : $exception::class;
+    error_log(
+        '[local_subscriptions][personal_offer_entry]['
+        . $errorcode
+        . '] '
+        . $exception->getMessage()
+    );
+
     $PAGE->set_context(context_system::instance());
     $PAGE->set_url(new moodle_url('/local/subscriptions/offer.php'));
     $PAGE->set_pagelayout('standard');
@@ -193,9 +245,15 @@ try {
             : get_string('commerce_personal_offer_checkout_temporary_error', 'local_subscriptions'),
         \core\output\notification::NOTIFY_ERROR
     );
-    if (!$knownunavailable && debugging('', DEBUG_DEVELOPER)) {
+    if (debugging('', DEBUG_DEVELOPER)) {
         echo html_writer::div(
-            s(get_class($exception) . ': ' . $exception->getMessage()),
+            s(
+                $errorcode
+                . ' — '
+                . get_class($exception)
+                . ': '
+                . $exception->getMessage()
+            ),
             'alert alert-warning small'
         );
     }

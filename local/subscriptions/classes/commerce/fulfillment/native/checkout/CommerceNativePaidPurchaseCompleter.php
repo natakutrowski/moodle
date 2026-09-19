@@ -6,6 +6,7 @@ namespace local_subscriptions\commerce\fulfillment\native\checkout;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core\lock\lock_config;
 use local_subscriptions\commerce\catalog\persistence\CommerceCatalogHydrator;
 use local_subscriptions\commerce\bundle\expansion\CommerceBundleExpansionService;
 use local_subscriptions\commerce\catalog\repository\CommerceProductComponentRepository;
@@ -22,7 +23,9 @@ use local_subscriptions\commerce\fulfillment\native\CommerceNativeFulfillmentCon
 use local_subscriptions\commerce\fulfillment\native\CommerceNativeFulfillmentHandlerRegistry;
 use local_subscriptions\commerce\fulfillment\native\batch\CommerceNativePurchaseFulfillmentOrchestrator;
 use local_subscriptions\commerce\fulfillment\native\course\CommerceCourseAccessFulfillmentHandler;
+use local_subscriptions\commerce\fulfillment\native\course\CommerceCourseAccessGrant;
 use local_subscriptions\commerce\fulfillment\native\digital\CommerceDigitalDownloadFulfillmentHandler;
+use local_subscriptions\commerce\fulfillment\native\education\CommercePedagogicalPromotionJoinFulfillmentHandler;
 use local_subscriptions\commerce\fulfillment\native\persistence\CommercePersistentNativeFulfillmentExecutor;
 use local_subscriptions\commerce\fulfillment\native\persistence\MoodleCommerceNativeFulfillmentPersistenceRepository;
 use local_subscriptions\commerce\payment\attempt\CommercePaymentAttempt;
@@ -31,6 +34,8 @@ use local_subscriptions\commerce\persistence\CommercePersistenceSchema;
 use local_subscriptions\commerce\mail\service\CommerceTransactionalPurchaseMailService;
 use local_subscriptions\commerce\trial\CommerceTrialConversionCompletionService;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferFactory;
+use local_subscriptions\commerce\education\purchase\CommercePedagogicalPurchaseOrchestrator;
+use local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationPurchaseLifecycle;
 use local_subscriptions\payment\dto\InternalEvent;
 
 /** Completes one paid Native checkout purchase and dispatches its entitlement grants. */
@@ -57,6 +62,34 @@ final class CommerceNativePaidPurchaseCompleter {
             '*',
             MUST_EXIST
         );
+
+        // M4.8.1: serialise all post-payment completion for one purchase. Native
+        // grant fulfillment is itself idempotent, but the pedagogical bridge runs
+        // after it. Without this lock a second return/webhook can observe the
+        // Moodle enrolment just created by the first worker and misclassify a
+        // fresh promotion customer as historical full-access.
+        $factory = lock_config::get_lock_factory(
+            'local_subscriptions_commerce_paid_purchase'
+        );
+        $lock = $factory->get_lock(
+            'purchase:' . (int)$purchase->id,
+            10
+        );
+        if ($lock === false) {
+            throw new \RuntimeException(
+                'Unable to acquire paid Commerce purchase completion lock.'
+            );
+        }
+
+        try {
+            // Another callback may have completed the purchase while this one
+            // waited. Always make decisions from the durable current row.
+            $purchase = $this->db->get_record(
+                CommercePersistenceSchema::TABLE_PURCHASE,
+                ['id' => (int)$purchase->id],
+                '*',
+                MUST_EXIST
+            );
 
         $transactionalmail = $this->transactionalmail
             ?? CommerceTransactionalPurchaseMailService::create();
@@ -97,6 +130,13 @@ final class CommerceNativePaidPurchaseCompleter {
             );
         }
 
+        // M3.6: snapshot Moodle course access before Native fulfillment mutates
+        // enrolments. A historical/manual full-access student who deliberately
+        // joins a pedagogical promotion must never be downgraded to progressive
+        // access simply because the promotion purchase also carries course_access.
+        $preexistingfullcourseaccess =
+            $this->snapshot_preexisting_full_course_access($grants, time());
+
         $this->update_purchase_status(
             (int)$purchase->id,
             CommercePurchaseStatus::FULFILLMENT_PENDING
@@ -110,6 +150,7 @@ final class CommerceNativePaidPurchaseCompleter {
         $registry = new CommerceNativeFulfillmentHandlerRegistry([
             new CommerceCourseAccessFulfillmentHandler(),
             new CommerceDigitalDownloadFulfillmentHandler(),
+            new CommercePedagogicalPromotionJoinFulfillmentHandler(),
         ]);
         $orchestrator = new CommerceNativePurchaseFulfillmentOrchestrator(
             $repository,
@@ -143,6 +184,29 @@ final class CommerceNativePaidPurchaseCompleter {
                 'Native Commerce fulfillment did not complete successfully.'
             );
         }
+
+        // K7: re-acquire/extend the paid cart's pedagogical holds immediately
+        // before participation is created. The same cart UUID is then used by
+        // the final sale-policy check and reservation consumption.
+        $pedagogicalnow = time();
+        $reservationlifecycle =
+            CommercePedagogicalSeatReservationPurchaseLifecycle::create(
+                $this->db
+            );
+        $cartuuid = $reservationlifecycle->prepare_paid_purchase(
+            $purchase,
+            $grants,
+            $pedagogicalnow
+        );
+
+        // 7.97G/K7: only a successfully fulfilled course grant may create
+        // pedagogical participation. Classic courses remain untouched.
+        CommercePedagogicalPurchaseOrchestrator::create($this->db)->apply(
+            $grants,
+            $pedagogicalnow,
+            $cartuuid,
+            $preexistingfullcourseaccess
+        );
 
         // Consume the Legacy Trial only after every Native grant has completed.
         // A failed or pending payment therefore keeps the Trial offer available.
@@ -180,6 +244,79 @@ final class CommerceNativePaidPurchaseCompleter {
         $transactionalmail->deliver_fulfilled_access(
             (string)$purchase->reference
         );
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
+     * Capture active Moodle course access before Native fulfillment runs.
+     *
+     * @param CommerceEntitlementGrant[] $grants
+     * @return array<string, bool> Keys are "userid:courseid".
+     */
+    private function snapshot_preexisting_full_course_access(
+        array $grants,
+        int $now
+    ): array {
+        $snapshot = [];
+
+        foreach ($grants as $grant) {
+            if (
+                !$grant instanceof CommerceEntitlementGrant
+                || $grant->get_type() !== CommerceCourseAccessFulfillmentHandler::GRANT_TYPE
+            ) {
+                continue;
+            }
+
+            $userid = $grant->get_beneficiary_user_id();
+            if ($userid === null || $userid <= 0) {
+                continue;
+            }
+
+            $courseid = CommerceCourseAccessGrant::from_grant($grant)->get_course_id();
+            if ($this->has_active_course_enrolment($userid, $courseid, $now)) {
+                $snapshot[$userid . ':' . $courseid] = true;
+            }
+        }
+
+        return $snapshot;
+    }
+
+    private function has_active_course_enrolment(
+        int $userid,
+        int $courseid,
+        int $now
+    ): bool {
+        $sql = "SELECT 1
+                  FROM {user_enrolments} ue
+                  JOIN {enrol} e ON e.id = ue.enrolid
+                  JOIN {context} ctx
+                    ON ctx.contextlevel = :coursecontext
+                   AND ctx.instanceid = e.courseid
+                  JOIN {role_assignments} ra
+                    ON ra.contextid = ctx.id
+                   AND ra.userid = ue.userid
+                  JOIN {role} r
+                    ON r.id = ra.roleid
+                   AND r.shortname = :studentrole
+                 WHERE ue.userid = :userid
+                   AND e.courseid = :courseid
+                   AND ue.status = :useractive
+                   AND e.status = :instanceenabled
+                   AND (ue.timestart = 0 OR ue.timestart <= :now1)
+                   AND (ue.timeend = 0 OR ue.timeend >= :now2)";
+
+        return $this->db->record_exists_sql($sql, [
+            'userid' => $userid,
+            'courseid' => $courseid,
+            'coursecontext' => CONTEXT_COURSE,
+            'studentrole' => 'student',
+            'useractive' => ENROL_USER_ACTIVE,
+            'instanceenabled' => ENROL_INSTANCE_ENABLED,
+            'now1' => $now,
+            'now2' => $now,
+        ]);
     }
 
     private function resolve_attempt(InternalEvent $event): ?CommercePaymentAttempt {
@@ -245,6 +382,25 @@ final class CommerceNativePaidPurchaseCompleter {
     }
 
     private function update_purchase_status(int $purchaseid, string $status): void {
+        // Return reconciliation and provider webhooks may execute concurrently.
+        // A stale worker must never regress a purchase that another worker has
+        // already completed successfully back to fulfillment_pending.
+        if ($status === CommercePurchaseStatus::FULFILLMENT_PENDING) {
+            $current = (string)$this->db->get_field(
+                CommercePersistenceSchema::TABLE_PURCHASE,
+                'status',
+                ['id' => $purchaseid],
+                MUST_EXIST
+            );
+
+            if (in_array($current, [
+                CommercePurchaseStatus::FULFILLED,
+                CommercePurchaseStatus::COMPLETED,
+            ], true)) {
+                return;
+            }
+        }
+
         $this->db->update_record(CommercePersistenceSchema::TABLE_PURCHASE, (object)[
             'id' => $purchaseid,
             'status' => $status,

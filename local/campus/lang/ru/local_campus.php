@@ -354,3 +354,12 @@ $string['mobilecoverdeleted'] = 'Мобильная обложка удален�
 $string['mobilecoverdelete'] = 'Удалить мобильную обложку';
 $string['mobilecovernone'] = 'Отдельная мобильная обложка не задана. Будет использовано основное изображение Moodle.';
 $string['mobilecoverpreviewalt'] = 'Предпросмотр мобильной обложки курса {$a}';
+
+// 7.97 M6.3 — учебный статус курса.
+$string['mycourses_learning_promotion'] = 'Поток: {$a}';
+$string['mycourses_learning_access_full'] = 'Полный доступ к курсу';
+$string['mycourses_learning_access_progressive'] = 'Постепенный доступ по расписанию';
+$string['mycourses_learning_start'] = 'Начало потока: {$a}';
+$string['mycourses_learning_next_lesson'] = 'Следующий урок: {$a->lesson} · {$a->date}';
+$string['mycourses_learning_next_promo_step'] = 'Следующий этап потока: {$a->lesson} · {$a->date}';
+$string['mycourses_learning_section_fallback'] = 'Раздел {$a}';

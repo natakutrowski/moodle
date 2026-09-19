@@ -66,8 +66,15 @@
             {{/hastotalreductions}}
             <div class="commerce-cart-summary__grand-total"><dt>{{totallabel}}</dt><dd>{{totalformatted}}</dd></div>
         </dl>
-        {{#checkoutdisabled}}<button class="btn btn-primary btn-lg w-100" type="button" disabled>{{checkoutlabel}}</button>{{/checkoutdisabled}}
-        {{^checkoutdisabled}}<a class="btn btn-primary btn-lg w-100" href="{{checkouturl}}">{{checkoutlabel}}</a>{{/checkoutdisabled}}
+        {{#checkoutdisabled}}
+            <button class="btn btn-primary btn-lg w-100" type="button" disabled aria-disabled="true">{{checkoutlabel}}</button>
+            {{#checkoutdisabledreason}}
+                <p class="commerce-cart-summary__seat-warning mt-2 mb-0">
+                    <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>{{checkoutdisabledreason}}
+                </p>
+            {{/checkoutdisabledreason}}
+        {{/checkoutdisabled}}
+        {{^checkoutdisabled}}<a class="btn btn-primary btn-lg w-100" href="{{checkouturl}}" data-cart-seat-checkout>{{checkoutlabel}}</a>{{/checkoutdisabled}}
         {{> local_subscriptions/commerce/payment_reassurance}}
     </div>
 </aside>

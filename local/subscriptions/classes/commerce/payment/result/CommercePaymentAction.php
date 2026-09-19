@@ -13,11 +13,14 @@ final class CommercePaymentAction {
 
     public const TYPE_FORM_POST = 'form_post';
 
+    public const TYPE_EMBEDDED = 'embedded';
+
     public const TYPE_NONE = 'none';
 
     private const VALID_TYPES = [
         self::TYPE_REDIRECT,
         self::TYPE_FORM_POST,
+        self::TYPE_EMBEDDED,
         self::TYPE_NONE,
     ];
 
@@ -86,6 +89,18 @@ final class CommercePaymentAction {
         );
     }
 
+    public static function embedded(
+        array $parameters,
+        array $metadata = []
+    ): self {
+        return new self(
+            self::TYPE_EMBEDDED,
+            null,
+            $parameters,
+            $metadata
+        );
+    }
+
     public static function none(): self {
         return new self(
             self::TYPE_NONE
@@ -126,6 +141,11 @@ final class CommercePaymentAction {
     public function is_form_post(): bool {
         return $this->get_type()
             === self::TYPE_FORM_POST;
+    }
+
+    public function is_embedded(): bool {
+        return $this->get_type()
+            === self::TYPE_EMBEDDED;
     }
 
     public function is_none(): bool {

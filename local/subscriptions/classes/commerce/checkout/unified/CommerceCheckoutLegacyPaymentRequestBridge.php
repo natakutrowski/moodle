@@ -10,6 +10,7 @@ use local_subscriptions\commerce\payment\CommercePaymentRequest;
 use local_subscriptions\commerce\payment\legacy\LegacyPaymentRequestContext;
 use local_subscriptions\constants\Operation;
 use local_subscriptions\constants\Status;
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
 
 /**
  * Persists the temporary Legacy transaction mirror required by current gateways.
@@ -28,8 +29,25 @@ final class CommerceCheckoutLegacyPaymentRequestBridge {
             return $request;
         }
 
-        $token = hash('sha256', 'commerce-checkout:' . $request->get_reference());
-        $record = $this->db->get_record(self::TABLE, ['retry_token' => $token], '*', IGNORE_MISSING);
+        $metadata = $request->get_metadata();
+        $commercepaymentid = (int)($metadata['commerce_payment_id'] ?? 0);
+
+        // H12.9-A5.3: one Native purchase may legitimately have several payment
+        // attempts (for example PayPal cancelled, then Stripe). The Legacy
+        // transaction mirror is provider/attempt-specific, so its retry token
+        // must be keyed by the persisted Native payment attempt rather than by
+        // purchase reference alone.
+        $tokenkey = $commercepaymentid > 0
+            ? 'commerce-payment:' . $commercepaymentid
+            : 'commerce-checkout:' . $request->get_reference();
+        $token = hash('sha256', $tokenkey);
+
+        $record = $this->db->get_record(
+            self::TABLE,
+            ['retry_token' => $token],
+            '*',
+            IGNORE_MISSING
+        );
 
         if (!$record) {
             $record = $this->build_record($request, $token);
@@ -46,13 +64,17 @@ final class CommerceCheckoutLegacyPaymentRequestBridge {
             'legacy_language' => $this->resolve_language($request),
             'legacy_mode' => 'payment',
             'commerce_purchase_reference' => $request->get_reference(),
+            'commerce_payment_id' => $commercepaymentid,
             'commerce_transaction_mirror' => true,
         ]);
     }
 
     private function build_record(CommercePaymentRequest $request, string $token): \stdClass {
         $customer = $request->get_customer();
-        $major = $request->get_amount_minor() / 100;
+        $major = CommerceCurrencyAmount::major_float_from_minor(
+            $request->get_amount_minor(),
+            $request->get_currency()
+        );
         $metadata = $request->get_metadata();
         $listminor = max(
             $request->get_amount_minor(),
@@ -100,11 +122,17 @@ final class CommerceCheckoutLegacyPaymentRequestBridge {
             'login_token_expires' => null,
             'operation' => Operation::PURCHASE_NEW,
             'reference_subscription_id' => null,
-            'locked_list_price' => $listminor / 100,
+            'locked_list_price' => CommerceCurrencyAmount::major_float_from_minor(
+                $listminor,
+                $request->get_currency()
+            ),
             'locked_discount_percent' => $listminor > 0
                 ? (int)round(($discountminor * 100) / $listminor)
                 : 0,
-            'locked_discount_amount' => $discountminor / 100,
+            'locked_discount_amount' => CommerceCurrencyAmount::major_float_from_minor(
+                $discountminor,
+                $request->get_currency()
+            ),
             'locked_discount_reason' => $this->promotion_reason($metadata),
             'locked_final_price' => $major,
             'locked_at' => $now,
@@ -134,7 +162,8 @@ final class CommerceCheckoutLegacyPaymentRequestBridge {
             $request->get_return_url(),
             $request->get_cancel_url(),
             array_merge($request->get_metadata(), $extra),
-            $request->get_created_at()
+            $request->get_created_at(),
+            $request->get_preferred_payment_method()
         );
     }
 

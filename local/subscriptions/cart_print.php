@@ -4,20 +4,20 @@ require_once(__DIR__ . '/../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\cart\presentation\CommerceCartPresenter;
 use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
-use local_subscriptions\support\Region;
+use local_subscriptions\commerce\checkout\guest\CommerceGuestCartCustomerResolver;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
+$currencyregistry = new CommerceCurrencyRegistry();
 $currency = strtoupper(optional_param('currency', '', PARAM_ALPHA));
-if (!in_array($currency, ['EUR', 'RUB'], true)) {
-    $currency = in_array(Region::detect_country(), ['RU', 'BY'], true)
-        ? 'RUB'
-        : 'EUR';
+if (!$currencyregistry->is_enabled($currency)) {
+    $currency = $currencyregistry->enabled()[0] ?? 'EUR';
 }
 $return = optional_param('return', 'cart', PARAM_ALPHA);
-$customerid = isloggedin() && !isguestuser() ? (int)$USER->id : 0;
+$customerid = CommerceGuestCartCustomerResolver::create()->resolve($currency);
 
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/subscriptions/cart_print.php', [

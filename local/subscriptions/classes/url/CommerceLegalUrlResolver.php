@@ -6,7 +6,7 @@ namespace local_subscriptions\url;
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\support\Region;
+use local_subscriptions\commerce\legal\document\CommerceLegalDocumentResolver;
 
 /** Resolves stable public legal URLs to the configured regional documents. */
 final class CommerceLegalUrlResolver {
@@ -19,10 +19,10 @@ final class CommerceLegalUrlResolver {
             throw new \coding_exception('Unknown legal route: ' . $route);
         }
 
-        $urls = Region::policyUrls();
+        $documents = (new CommerceLegalDocumentResolver())->resolve(null, current_language());
         $target = $route === self::PRIVACY
-            ? trim((string)($urls['policy'] ?? ''))
-            : trim((string)($urls['terms'] ?? ''));
+            ? $documents->get_privacy_url()
+            : $documents->get_terms_url();
 
         if ($target === '') {
             throw new \moodle_exception(

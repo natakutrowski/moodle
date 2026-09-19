@@ -13,6 +13,7 @@ use local_subscriptions\commerce\order\presentation\CommerceOrderExperienceResol
 use local_subscriptions\commerce\order\presentation\CommerceLegacyOrderAccessResolver;
 use local_subscriptions\commerce\order\presentation\CommerceOrderPresentationAccessDeniedException;
 use local_subscriptions\commerce\order\presentation\CommerceOrderPresentationService;
+use local_subscriptions\commerce\order\document\CommerceOrderDocumentHistoryRepository;
 use local_subscriptions\commerce\catalog\persistence\CommerceCatalogHydrator;
 use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductTranslationRepository;
@@ -20,8 +21,11 @@ use local_subscriptions\commerce\personaloffer\repository\MoodleCommercePersonal
 use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
 use local_subscriptions\commerce\tracking\CommerceTrackedActionUrl;
 use local_subscriptions\commerce\pricing\CommercePersistedCommercialPricingPresenter;
+use local_subscriptions\commerce\payment\method\CommercePersistedPaymentMethodResolver;
+use local_subscriptions\commerce\payment\method\CommercePaymentMethodVisual;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
+use local_subscriptions\currency\CurrencyFormatter;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -92,7 +96,7 @@ $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/order_print.css
 $PAGE->requires->js_call_amd('local_subscriptions/guest_checkout_security', 'init');
 
 $formatmoney = static fn(int $minor, string $currency): string =>
-    format_float($minor / 100, 2) . ' ' . strtoupper($currency);
+    CurrencyFormatter::format_minor_code($minor, $currency);
 $statusresolver = new CommerceCustomerStatusResolver();
 $bundleresolver = new CommerceBundleComponentResolver($DB);
 $detailsrecord = (new \local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository($DB))->find_by_reference($reference);
@@ -120,6 +124,41 @@ $printdestination = new moodle_url('/local/subscriptions/order_details.php', [
 ]);
 $supporturl = CommerceTrackedActionUrl::build($reference, 'order_contact_support', 'order_details', $supportdestination)->out(false);
 $invoiceurl = CommerceTrackedActionUrl::build($reference, 'order_download_invoice', 'order_details', $invoicedestination)->out(false);
+$documenthistoryrepository = new CommerceOrderDocumentHistoryRepository($DB);
+$issuedinvoice = $documenthistoryrepository->invoice_for_purchase($order->purchaseid);
+$creditnotes = $documenthistoryrepository->credit_notes_for_purchase($order->purchaseid);
+$documenthistory = [];
+$documenthistory[] = [
+    'type' => get_string('commerce_document_invoice', 'local_subscriptions'),
+    'number' => $issuedinvoice['number'] ?? get_string('commerce_document_invoice_not_issued', 'local_subscriptions'),
+    'issuedat' => $issuedinvoice === null
+        ? ''
+        : userdate((int)$issuedinvoice['issuedat'], get_string('strftimedatetimeshort', 'langconfig')),
+    'amount' => $formatmoney($order->totalminor, $order->currency),
+    'url' => $invoiceurl,
+    'buttonlabel' => get_string('commerce_i410_download_invoice', 'local_subscriptions'),
+    'iscreditnote' => false,
+];
+foreach ($creditnotes as $creditnote) {
+    $documenthistory[] = [
+        'type' => get_string('commerce_document_credit_note', 'local_subscriptions'),
+        'number' => $creditnote->number,
+        'issuedat' => userdate(
+            $creditnote->issuedat,
+            get_string('strftimedatetimeshort', 'langconfig')
+        ),
+        'amount' => $formatmoney(
+            (int)($creditnote->financial['refund_minor'] ?? 0),
+            (string)($creditnote->financial['currency'] ?? $order->currency)
+        ),
+        'url' => (new moodle_url('/local/subscriptions/order_credit_note.php', [
+            'reference' => $reference,
+            'creditnoteid' => $creditnote->id,
+        ]))->out(false),
+        'buttonlabel' => get_string('commerce_document_download_credit_note', 'local_subscriptions'),
+        'iscreditnote' => true,
+    ];
+}
 $printurl = CommerceTrackedActionUrl::build($reference, 'order_print', 'order_details', $printdestination)->out(false);
 
 $cataloghydrator = new CommerceCatalogHydrator();
@@ -155,7 +194,7 @@ $resolveaccesslabel = static function($access) use ($DB, $catalogproducts, $prod
         }
     }
 
-    if ($access->type === 'course_access') {
+    if (in_array($access->type, ['course_access', 'pedagogical_promotion_join'], true)) {
         $courseid = (int)($access->metadata['courseid'] ?? 0);
         if ($courseid > 0) {
             $course = $DB->get_record(
@@ -226,6 +265,14 @@ $provider = $providerkey === ''
 $providerhtml = $isadmin
     ? Provider::label_with_icon_env($providerkey)
     : Provider::label_with_icon($providerkey);
+$paymentmethodresolver = new CommercePersistedPaymentMethodResolver();
+$paymentmethod = $order->payment?->paymentmethod;
+$paymentmethodlabel = $paymentmethodresolver->label($paymentmethod);
+$paymentmethodhtml = CommercePaymentMethodVisual::label_with_icon(
+    $paymentmethod,
+    $paymentmethodlabel,
+    20
+);
 $payment = $order->payment;
 $pricingpresenter =
     new CommercePersistedCommercialPricingPresenter();
@@ -320,6 +367,9 @@ $paymentcontext = [
     'statusclass' => $paymentstatus['class'],
     'provider' => $provider,
     'providerhtml' => $providerhtml,
+    'paymentmethod' => $paymentmethodlabel,
+    'paymentmethodhtml' => $paymentmethodhtml,
+    'haspaymentmethod' => $paymentmethod !== null,
     'amount' => $formatmoney($payment?->amountminor ?? $order->totalminor, $payment?->currency ?? $order->currency),
     'paidat' => ($payment?->paidat ?? $order->paidat) === null
         ? get_string('commerce_i410_not_available', 'local_subscriptions')
@@ -360,6 +410,8 @@ $templatecontext = [
     'autoopen' => '0',
     'supporturl' => $supporturl,
     'invoiceurl' => $invoiceurl,
+    'documents' => $documenthistory,
+    'hasdocuments' => $documenthistory !== [],
     'printurl' => $printurl,
     'supportemail' => s($supportemail),
     'isadmin' => $isadmin,
@@ -499,7 +551,8 @@ foreach ($order->items as $index => $item) {
         $hasdesktop = $access->type === 'digital_download' && !empty($access->metadata['hasdesktop']);
         $hasmobile = $access->type === 'digital_download' && !empty($access->metadata['hasmobile']);
         $baseurl = $access->url;
-        $action = $access->type === 'course_access' ? 'order_open_course' : 'order_download_file';
+        $iscourseaccess = in_array($access->type, ['course_access', 'pedagogical_promotion_join'], true);
+        $action = $iscourseaccess ? 'order_open_course' : 'order_download_file';
         $trackedbaseurl = $baseurl === null ? null : CommerceTrackedActionUrl::build(
             $reference,
             $action,
@@ -509,8 +562,8 @@ foreach ($order->items as $index => $item) {
         $failedaccess = in_array(strtolower((string)$access->status), ['failed', 'error'], true)
             || in_array(strtolower((string)$order->fulfillmentstatus), ['failed', 'error'], true);
         $itemcontext['accesses'][] = [
-            'iscourse' => $access->type === 'course_access',
-            'requiresaccountfinalisation' => $requiresaccountfinalisation && $access->type === 'course_access',
+            'iscourse' => $iscourseaccess,
+            'requiresaccountfinalisation' => $requiresaccountfinalisation && $iscourseaccess,
             'isdigital' => $access->type === 'digital_download',
             'available' => $access->available,
             'hasurl' => $access->available && $baseurl !== null,

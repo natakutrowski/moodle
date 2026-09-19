@@ -54,6 +54,7 @@ final class CommerceGuestCartRecoveryService {
                     'provisional',
                     'active',
                     'payment_pending',
+                    'payment_failed',
                 ], true)) {
             return null;
         }

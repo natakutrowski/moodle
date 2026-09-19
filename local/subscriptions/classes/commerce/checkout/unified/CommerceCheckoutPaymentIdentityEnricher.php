@@ -45,7 +45,8 @@ final class CommerceCheckoutPaymentIdentityEnricher {
             $this->append_identity($request->get_return_url(), $identity),
             $this->append_identity($request->get_cancel_url(), $identity),
             array_merge($request->get_metadata(), $identity),
-            $request->get_created_at()
+            $request->get_created_at(),
+            $request->get_preferred_payment_method()
         );
     }
 

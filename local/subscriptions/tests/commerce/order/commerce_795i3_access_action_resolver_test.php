@@ -8,8 +8,9 @@ use advanced_testcase;
 use local_subscriptions\commerce\order\presentation\CommerceOrderAccessActionResolver;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseFulfillmentSummary;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseGrantSummary;
+use PHPUnit\Framework\Attributes\CoversClass;
 
-/** @covers \local_subscriptions\commerce\order\presentation\CommerceOrderAccessActionResolver */
+#[CoversClass(CommerceOrderAccessActionResolver::class)]
 final class commerce_795i3_access_action_resolver_test extends advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
@@ -31,6 +32,27 @@ final class commerce_795i3_access_action_resolver_test extends advanced_testcase
         $this->assertStringNotContainsString('/course/view.php', (string)$access->url);
         $this->assertStringNotContainsString('/local/subscriptions/order_access.php', (string)$access->url);
         $this->assertSame((int)$course->id, $access->metadata['courseid']);
+    }
+
+    public function test_completed_promotion_join_exposes_existing_course_as_available(): void {
+        global $DB;
+        $course = $this->getDataGenerator()->create_course();
+        $grant = $this->grant(
+            'pedagogical_promotion_join',
+            'promotion:4:course:' . $course->id . ':product:28',
+            ['promotion_join_course_id' => (int)$course->id]
+        );
+
+        $access = (new CommerceOrderAccessActionResolver($DB, time()))->resolve(
+            'cmp_join_test',
+            $grant,
+            $this->completed_fulfillment($grant->reference)
+        );
+
+        $this->assertTrue($access->available);
+        $this->assertSame('open_course', $access->label);
+        $this->assertSame((int)$course->id, $access->metadata['courseid']);
+        $this->assertStringContainsString('/courses/' . $course->id, (string)$access->url);
     }
 
     public function test_digital_action_never_exposes_download_token(): void {

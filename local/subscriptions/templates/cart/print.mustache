@@ -25,7 +25,7 @@
                     <h2>{{name}}</h2>
                     <p>× {{quantity}}</p>
 
-                    <div class="commerce-cart-print-item__badges">
+                    <div class="commerce-cart-print-item__badges mb-3">
                         {{#ispersonaloffer}}
                             <span class="commerce-personal-offer-badge commerce-personal-offer-badge--print">
                                 <i class="fa-solid fa-star commerce-personal-offer-badge__star commerce-personal-offer-badge__star--left" aria-hidden="true"></i>
@@ -34,10 +34,17 @@
                             </span>
                         {{/ispersonaloffer}}
                         {{#cartpriceisupgrade}}<span>{{cartpriceupgradebadge}}</span>{{/cartpriceisupgrade}}
+                        {{#cartpriceispromotionjoin}}<span class="commerce-storefront-price__badge commerce-storefront-price__badge--promotion" style="background:#e7334f;color:#fff;">{{promotionjoinbadge}}</span>{{/cartpriceispromotionjoin}}
                         {{#cartpriceistrial}}<span>{{cartpricetrialbadge}}</span>{{/cartpriceistrial}}
                         {{#cartpricehastrialbadge}}<span>{{cartpricetrialdiscountbadge}}</span>{{/cartpricehastrialbadge}}
                         {{#cartpricehaspromotionbadge}}<span>{{cartpricepromotionbadge}}</span>{{/cartpricehaspromotionbadge}}
                     </div>
+
+                    {{#hasaccesspromise}}
+                        <div class="commerce-cart-print-item__access">
+                            {{> local_subscriptions/customer/access_promise_compact }}
+                        </div>
+                    {{/hasaccesspromise}}
 
                     {{#hascommercialupgradepricing}}
                         <dl class="commerce-cart-print-item__breakdown">

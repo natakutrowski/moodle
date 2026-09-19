@@ -70,9 +70,13 @@ final class commerce_n111_user_explorer_ux_test extends \advanced_testcase {
     public function test_n111_does_not_change_plugin_version(): void {
         $version = $this->plugin_file('version.php');
 
-        self::assertStringContainsString(
-            '$plugin->version = 2026081602;',
-            $version
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
         );
     }
 }

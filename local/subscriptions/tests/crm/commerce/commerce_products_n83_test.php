@@ -16,11 +16,7 @@ final class commerce_products_n83_test extends advanced_testcase {
         );
 
         self::assertStringContainsString(
-            "'EUR' => '🇪🇺'",
-            $source
-        );
-        self::assertStringContainsString(
-            "'RUB' => '🇷🇺'",
+            'Currency::visual_marker($pricecurrency)',
             $source
         );
         self::assertStringContainsString(

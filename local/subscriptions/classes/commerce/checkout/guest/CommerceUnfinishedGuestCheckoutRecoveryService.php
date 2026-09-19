@@ -32,7 +32,7 @@ final class CommerceUnfinishedGuestCheckoutRecoveryService {
         return new self($DB, new CommerceGuestCheckoutSessionRepository($DB));
     }
 
-    public function find_source_session(int $userid): ?CommerceGuestCheckoutSession {
+    public function find_source_session(int $userid, ?int $excludeid = null): ?CommerceGuestCheckoutSession {
         if (!$this->is_unactivated_provisional_user($userid)) {
             return null;
         }
@@ -46,6 +46,11 @@ final class CommerceUnfinishedGuestCheckoutRecoveryService {
         $candidates = [];
         foreach ($records as $record) {
             $session = new CommerceGuestCheckoutSession($record);
+
+            if ($excludeid !== null && $session->get_id() === $excludeid) {
+                continue;
+            }
+
             $metadata = $session->get_metadata();
 
             if (($metadata['account_origin'] ?? '') !== 'guest_checkout') {

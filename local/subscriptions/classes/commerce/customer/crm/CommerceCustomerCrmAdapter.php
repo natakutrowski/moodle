@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\customer\readmodel\CommerceCustomerPurchase;
 use local_subscriptions\commerce\customer\readmodel\CommerceCustomerSnapshot;
 use local_subscriptions\crm\user\UserProfileStats;
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
 
 /**
  * Adapts the unified Commerce snapshot to stable CRM/User360 presentations.
@@ -95,7 +96,7 @@ final class CommerceCustomerCrmAdapter {
             'status' => $purchase->status,
             'currency' => $purchase->currency,
             'totalminor' => $purchase->totalminor,
-            'total' => $purchase->totalminor / 100,
+            'total' => CommerceCurrencyAmount::major_float_from_minor($purchase->totalminor, $purchase->currency),
             'timecreated' => $purchase->timecreated,
             'timemodified' => $purchase->timemodified,
             'labels' => $labels,

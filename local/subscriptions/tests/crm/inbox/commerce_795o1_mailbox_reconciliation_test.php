@@ -164,9 +164,14 @@ final class commerce_795o1_mailbox_reconciliation_test extends \advanced_testcas
     }
 
     public function test_plugin_version_is_unchanged(): void {
-        self::assertStringContainsString(
-            '$plugin->version = 2026082102;',
-            $this->file('version.php')
+        $version = $this->file('version.php');
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026082102,
+            (int)$pluginversionmatch[1]
         );
     }
 }

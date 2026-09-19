@@ -26,11 +26,14 @@ final class commerce_configuration_n103_test extends advanced_testcase {
         $this->assertStringContainsString("'commerce_configuration_runtime_mode_desc'", $source);
     }
 
-    public function test_configuration_editor_does_not_expose_payment_secrets(): void {
+    public function test_configuration_editor_masks_payment_secret_values(): void {
         $root = dirname(__DIR__, 3);
         $source = file_get_contents($root . '/admin/commerce/configuration/section.php');
-        $this->assertStringNotContainsString('stripe_test_secret', $source);
-        $this->assertStringNotContainsString('alfa_test_password', $source);
-        $this->assertStringNotContainsString('email_link_secret', $source);
+        self::assertIsString($source);
+
+        self::assertStringContainsString("'password_keep'", $source);
+        self::assertStringContainsString("'type' => 'password'", $source);
+        self::assertStringContainsString("'value' => ''", $source);
+        self::assertStringContainsString("'autocomplete' => 'new-password'", $source);
     }
 }

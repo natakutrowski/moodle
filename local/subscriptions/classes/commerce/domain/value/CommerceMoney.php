@@ -2,6 +2,8 @@
 
 namespace local_subscriptions\commerce\domain\value;
 
+use local_subscriptions\currency\Currency;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -84,6 +86,17 @@ final class CommerceMoney {
      * @param int $minorunitexponent Number of decimal minor-unit digits.
      * @return self
      */
+    public static function from_major_for_currency(
+        int|string $amountmajor,
+        string $currency
+    ): self {
+        return self::from_major(
+            $amountmajor,
+            $currency,
+            Currency::minor_unit_exponent($currency)
+        );
+    }
+
     public static function from_major(
         int|string $amountmajor,
         string $currency,
@@ -171,6 +184,12 @@ final class CommerceMoney {
      * @param int $minorunitexponent Number of decimal minor-unit digits.
      * @return string
      */
+    public function get_amount_major_for_currency(): string {
+        return $this->get_amount_major(
+            Currency::minor_unit_exponent($this->get_currency())
+        );
+    }
+
     public function get_amount_major(
         int $minorunitexponent = 2
     ): string {

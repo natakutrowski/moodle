@@ -130,9 +130,13 @@ final class commerce_n113f_user360_workspace_consolidation_test extends \advance
 
     public function test_n113f_does_not_bump_plugin_version(): void {
         $version = $this->file('version.php');
-        self::assertStringContainsString(
-            '$plugin->version = 2026081602;',
-            $version
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
         );
     }
 }

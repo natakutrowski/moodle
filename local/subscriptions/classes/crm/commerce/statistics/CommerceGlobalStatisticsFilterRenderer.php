@@ -19,7 +19,8 @@ final class CommerceGlobalStatisticsFilterRenderer {
         string $until,
         string $currency,
         string $provider,
-        moodle_url $exporturl
+        moodle_url $exporturl,
+        array $currencyoptions = []
     ): string {
         $html=html_writer::start_tag('form',[
             'method'=>'get','action'=>$action->out(false),'class'=>'m53-stat-toolbar'
@@ -38,11 +39,10 @@ final class CommerceGlobalStatisticsFilterRenderer {
             html_writer::empty_tag('input',['type'=>'date','name'=>'until','value'=>$until,'class'=>'form-control']));
         $html.=html_writer::end_div();
 
+        $currencyoptions = ['' => get_string('commerce_statistics_all_currencies', 'local_subscriptions')]
+            + $currencyoptions;
         $html.=self::field('currency',get_string('commerce_statistics_currency','local_subscriptions'),
-            html_writer::select([
-                ''=>get_string('commerce_statistics_all_currencies','local_subscriptions'),
-                'EUR'=>'🇪🇺 EUR','RUB'=>'🇷🇺 RUB',
-            ],'currency',$currency,false,['class'=>'form-select']));
+            html_writer::select($currencyoptions,'currency',$currency,false,['class'=>'form-select']));
         $html.=self::field('provider',get_string('commerce_statistics_provider','local_subscriptions'),
             html_writer::select([
                 ''=>get_string('commerce_statistics_all_providers','local_subscriptions'),

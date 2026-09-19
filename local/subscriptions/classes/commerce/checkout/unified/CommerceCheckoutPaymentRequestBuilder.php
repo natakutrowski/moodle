@@ -39,8 +39,14 @@ final class CommerceCheckoutPaymentRequestBuilder {
             $purchase->get_preferred_provider(),
             $purchase->get_return_url(),
             $purchase->get_cancel_url(),
-            array_merge($purchase->get_metadata(), ['purchase_reference' => $purchase->get_reference()]),
-            time()
+            array_merge(
+                $purchase->get_metadata(),
+                ['purchase_reference' => $purchase->get_reference()]
+            ),
+            time(),
+            trim((string)$purchase->get_metadata_value('payment_method', '')) !== ''
+                ? (string)$purchase->get_metadata_value('payment_method')
+                : null
         );
     }
 }

@@ -14,15 +14,10 @@ final class StripePaymentProviderConfiguration {
      */
     public function __construct(
         private readonly bool $enabled,
-        private readonly array $currencies = [
-            'EUR',
-            'USD',
-            'GBP',
-            'CHF',
-        ],
+        private readonly ?array $currencies = null,
         private readonly int $priority = 100
     ) {
-        if ($currencies === []) {
+        if ($currencies !== null && $currencies === []) {
             throw new \coding_exception(
                 'Stripe must support at least one currency.'
             );
@@ -44,6 +39,7 @@ final class StripePaymentProviderConfiguration {
                     static fn(string $currency): string =>
                         strtoupper(trim($currency)),
                     $this->currencies
+                        ?? StripeSupportedCurrencies::all()
                 )
             )
         );

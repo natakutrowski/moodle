@@ -17,6 +17,7 @@ use local_subscriptions\commerce\mail\template\CommercePersonalOfferTemplate;
 use local_subscriptions\commerce\mail\template\CommerceTrialWelcomeTemplate;
 use local_subscriptions\commerce\mail\template\CommerceMarketingCampaignTemplate;
 use local_subscriptions\commerce\mail\template\CommerceSalesFollowupTemplate;
+use local_subscriptions\commerce\mail\template\CommerceGuestIdentityOtpTemplate;
 
 /**
  * Composition root for the transactional mail queue.
@@ -36,6 +37,7 @@ final class CommerceMailRuntime {
             new CommerceTrialWelcomeTemplate(),
             new CommerceMarketingCampaignTemplate(),
             new CommerceSalesFollowupTemplate(),
+            new CommerceGuestIdentityOtpTemplate(),
         ]);
     }
 

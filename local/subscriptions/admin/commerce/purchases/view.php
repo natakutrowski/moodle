@@ -12,7 +12,16 @@ use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadReposito
 use local_subscriptions\commerce\purchase\communication\CommercePurchaseCurrentCustomerResolver;
 use local_subscriptions\commerce\mail\sales\CommerceSalesFollowupService;
 use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
+use local_subscriptions\commerce\order\document\CommerceOrderDocumentHistoryRepository;
 use local_subscriptions\commerce\pricing\CommercePersistedCommercialPricingPresenter;
+use local_subscriptions\commerce\payment\refund\CommercePaymentRefundRepository;
+use local_subscriptions\commerce\payment\refund\CommerceRefundReasonPresenter;
+use local_subscriptions\commerce\payment\method\CommercePersistedPaymentMethodResolver;
+use local_subscriptions\commerce\payment\method\CommercePaymentMethodVisual;
+use local_subscriptions\commerce\payment\refund\CommercePaymentRefundService;
+use local_subscriptions\commerce\purchase\revocation\CommercePurchaseRightsRevocationService;
+use local_subscriptions\commerce\payment\refund\CommerceRefundHistoryCapablePaymentProvider;
+use local_subscriptions\commerce\runtime\CommerceRuntimeFactory;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
@@ -32,9 +41,30 @@ $summary = $purchase->summary;
 $actionpolicy = new CommercePurchaseActionPolicy();
 $adminclosureservice = new CommercePurchaseAdminClosureService($DB);
 $salesfollowupservice = CommerceSalesFollowupService::create($DB);
+$refundrepository = new CommercePaymentRefundRepository($DB);
+$paymentproviderregistry =
+    CommerceRuntimeFactory::create()->payment_providers();
+$refundservice =
+    new CommercePaymentRefundService($paymentproviderregistry);
+$rightsrevocationservice = CommercePurchaseRightsRevocationService::create($DB);
+$revocablerights = $rightsrevocationservice->preview($summary->reference);
+$paymentmethodresolver = new CommercePersistedPaymentMethodResolver();
+$documenthistoryrepository = new CommerceOrderDocumentHistoryRepository($DB);
+$refundhistoryproviders = [];
+foreach ($paymentproviderregistry->all() as $paymentprovider) {
+    if (
+        $paymentprovider
+            instanceof CommerceRefundHistoryCapablePaymentProvider
+        && $paymentprovider->is_available()
+    ) {
+        $refundhistoryproviders[$paymentprovider->get_key()] = true;
+    }
+}
 $currentcustomer = CommercePurchaseCurrentCustomerResolver::create()->resolve($purchase);
 $currentemail = trim((string)$currentcustomer->email);
 $historicalemail = trim((string)$summary->customer->email);
+$stripereconciled = optional_param('stripe_reconciled', 0, PARAM_BOOL);
+$paypalreconciled = optional_param('paypal_reconciled', 0, PARAM_BOOL);
 $alfareconciled = optional_param('alfa_reconciled', 0, PARAM_BOOL);
 $publicreference = $summary->publicreference !== ''
     ? $summary->publicreference
@@ -82,6 +112,36 @@ if ($summary->adminclosed) {
     );
 }
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::PURCHASES);
+$refundcreated = optional_param('refund_created', 0, PARAM_INT);
+$rightsrevoked = optional_param('rights_revoked', 0, PARAM_BOOL);
+$rightsrevokefailed = optional_param('rights_revoke_failed', 0, PARAM_BOOL);
+if ($refundcreated > 0) {
+    echo html_writer::div(
+        s(get_string(
+            'commerce_refund_created_notice',
+            'local_subscriptions'
+        )),
+        'alert alert-success mt-3'
+    );
+}
+if ($rightsrevoked) {
+    echo html_writer::div(
+        s(get_string(
+            'commerce_rights_revoked_notice',
+            'local_subscriptions'
+        )),
+        'alert alert-warning mt-3'
+    );
+}
+if ($rightsrevokefailed) {
+    echo html_writer::div(
+        s(get_string(
+            'commerce_rights_revoke_failed_notice',
+            'local_subscriptions'
+        )),
+        'alert alert-warning mt-3'
+    );
+}
 if ($alfareconciled) {
     echo html_writer::div(
         s(get_string('commerce_alfa_crm_success', 'local_subscriptions')),
@@ -195,6 +255,18 @@ if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)
         ]
     );
 }
+if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)
+        && $revocablerights !== []) {
+    $quickactions .= html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/purchases/revoke_rights.php',
+            ['id' => $id]
+        ),
+        get_string('commerce_rights_revoke_action', 'local_subscriptions'),
+        ['class' => 'btn btn-outline-danger']
+    );
+}
+
 if ($currentcustomer->userid !== null || $currentemail !== '') {
     $user360params = $currentcustomer->userid !== null
         ? ['id' => $currentcustomer->userid]
@@ -281,6 +353,199 @@ echo CommerceDesignSystemRenderer::panel(
     $quickactions,
     'mt-3'
 );
+
+$issuedinvoice = $documenthistoryrepository->invoice_for_purchase($summary->id);
+$creditnotes = $documenthistoryrepository->credit_notes_for_purchase($summary->id);
+$documenttable = new html_table();
+$documenttable->attributes['class'] = 'generaltable table align-middle mb-0';
+$documenttable->head = [
+    get_string('commerce_document_type', 'local_subscriptions'),
+    get_string('commerce_document_number', 'local_subscriptions'),
+    get_string('date'),
+    get_string('commerce_purchase_amount', 'local_subscriptions'),
+    get_string('actions'),
+];
+$documenttable->data[] = [
+    s(get_string('commerce_document_invoice', 'local_subscriptions')),
+    $issuedinvoice === null
+        ? html_writer::span(
+            s(get_string('commerce_document_invoice_not_issued', 'local_subscriptions')),
+            'text-muted'
+        )
+        : html_writer::tag('code', s((string)$issuedinvoice['number'])),
+    $issuedinvoice === null
+        ? '—'
+        : s(userdate(
+            (int)$issuedinvoice['issuedat'],
+            get_string('strftimedatetimeshort', 'langconfig')
+        )),
+    CommercePurchasePresentation::money($summary->totalminor, $summary->currency),
+    html_writer::link(
+        new moodle_url('/local/subscriptions/order_invoice.php', [
+            'reference' => $summary->reference,
+        ]),
+        get_string('commerce_i410_download_invoice', 'local_subscriptions'),
+        [
+            'class' => 'btn btn-sm btn-outline-primary',
+            'target' => '_blank',
+            'rel' => 'noopener noreferrer',
+        ]
+    ),
+];
+
+foreach ($creditnotes as $creditnote) {
+    $documenttable->data[] = [
+        s(get_string('commerce_document_credit_note', 'local_subscriptions')),
+        html_writer::tag('code', s($creditnote->number)),
+        s(userdate(
+            $creditnote->issuedat,
+            get_string('strftimedatetimeshort', 'langconfig')
+        )),
+        CommercePurchasePresentation::money(
+            (int)($creditnote->financial['refund_minor'] ?? 0),
+            (string)($creditnote->financial['currency'] ?? $summary->currency)
+        ),
+        html_writer::link(
+            new moodle_url('/local/subscriptions/order_credit_note.php', [
+                'reference' => $summary->reference,
+                'creditnoteid' => $creditnote->id,
+            ]),
+            get_string('commerce_document_download_credit_note', 'local_subscriptions'),
+            [
+                'class' => 'btn btn-sm btn-outline-primary',
+                'target' => '_blank',
+                'rel' => 'noopener noreferrer',
+            ]
+        ),
+    ];
+}
+
+echo CommerceDesignSystemRenderer::panel(
+    get_string('commerce_documents_title', 'local_subscriptions'),
+    html_writer::table($documenttable),
+    'mt-3'
+);
+
+$legalsnapshotmetadata = is_array($purchase->snapshot['metadata'] ?? null)
+    ? $purchase->snapshot['metadata']
+    : [];
+$legalsnapshot = is_array($legalsnapshotmetadata['legal_entity_snapshot'] ?? null)
+    ? $legalsnapshotmetadata['legal_entity_snapshot']
+    : [];
+
+$sellerrows = [];
+$sellersnapshothelp = '';
+
+if ($legalsnapshot !== []) {
+    $sellerrows = [
+        [
+            get_string('commerce_purchase_legal_entity', 'local_subscriptions'),
+            html_writer::tag(
+                'strong',
+                s((string)($legalsnapshot['name'] ?? '—'))
+            )
+            . ' '
+            . html_writer::tag(
+                'code',
+                s((string)($legalsnapshot['legal_entity_key'] ?? '—'))
+            ),
+        ],
+        [
+            get_string('commerce_purchase_market_country', 'local_subscriptions'),
+            html_writer::tag(
+                'code',
+                s((string)($legalsnapshot['market_country'] ?? 'ZZ'))
+            ),
+        ],
+        [
+            get_string('commerce_purchase_registered_country', 'local_subscriptions'),
+            html_writer::tag(
+                'code',
+                s((string)($legalsnapshot['registered_country'] ?? '—'))
+            ),
+        ],
+        [
+            get_string('commerce_purchase_merchant_resolution_rule', 'local_subscriptions'),
+            html_writer::tag(
+                'code',
+                s((string)($legalsnapshot['resolution_rule'] ?? '—'))
+            ),
+        ],
+        [
+            get_string('commerce_purchase_seller_snapshot_date', 'local_subscriptions'),
+            !empty($legalsnapshot['resolved_at'])
+                ? s(userdate(
+                    (int)$legalsnapshot['resolved_at'],
+                    get_string('strftimedatetimeshort', 'langconfig')
+                ))
+                : '—',
+        ],
+    ];
+    $sellersnapshothelp = get_string(
+        'commerce_purchase_seller_snapshot_help',
+        'local_subscriptions'
+    );
+} elseif ($issuedinvoice !== null && is_array($issuedinvoice['seller'] ?? null)) {
+    $invoiceseller = $issuedinvoice['seller'];
+    $sellerrows = [
+        [
+            get_string('commerce_purchase_legal_entity', 'local_subscriptions'),
+            html_writer::tag(
+                'strong',
+                s((string)($invoiceseller['name'] ?? '—'))
+            )
+            . ' '
+            . html_writer::tag(
+                'code',
+                s((string)($issuedinvoice['entitykey'] ?? '—'))
+            ),
+        ],
+        [
+            get_string('commerce_purchase_registered_country', 'local_subscriptions'),
+            html_writer::tag(
+                'code',
+                s((string)($invoiceseller['registered_country'] ?? '—'))
+            ),
+        ],
+        [
+            get_string('commerce_purchase_seller_snapshot_source', 'local_subscriptions'),
+            s(get_string(
+                'commerce_purchase_seller_snapshot_source_invoice',
+                'local_subscriptions'
+            )),
+        ],
+    ];
+    $sellersnapshothelp = get_string(
+        'commerce_purchase_seller_snapshot_invoice_help',
+        'local_subscriptions'
+    );
+} else {
+    $sellerrows = [[
+        get_string('commerce_purchase_seller_snapshot_status', 'local_subscriptions'),
+        html_writer::span(
+            s(get_string(
+                'commerce_purchase_seller_snapshot_unavailable',
+                'local_subscriptions'
+            )),
+            'text-muted'
+        ),
+    ]];
+    $sellersnapshothelp = get_string(
+        'commerce_purchase_seller_snapshot_unavailable_help',
+        'local_subscriptions'
+    );
+}
+
+echo CommerceDesignSystemRenderer::panel(
+    get_string('commerce_purchase_seller_snapshot_title', 'local_subscriptions'),
+    $definition($sellerrows)
+        . html_writer::div(
+            $sellersnapshothelp,
+            'small text-muted mt-2'
+        ),
+    'mt-3 mb-3'
+);
+
 echo CommerceDesignSystemRenderer::metrics([
     ['label' => get_string('commerce_purchase_amount', 'local_subscriptions'), 'value' => CommercePurchasePresentation::money($summary->totalminor, $summary->currency)],
     ['label' => get_string('commerce_purchase_commercial_status', 'local_subscriptions'), 'value' => CommercePurchasePresentation::commercial_status_label($summary->commercialstatus)],
@@ -293,6 +558,30 @@ $statusdimensions = CommercePurchasePresentation::status_dimensions(
     $summary->paymentstatus,
     $summary->fulfillmentstatus
 );
+if ($stripereconciled) {
+    echo html_writer::div(
+        s(
+            get_string(
+                'commerce_stripe_crm_success',
+                'local_subscriptions'
+            )
+        ),
+        'alert alert-success mt-3'
+    );
+}
+
+if ($paypalreconciled) {
+    echo html_writer::div(
+        s(
+            get_string(
+                'commerce_paypal_crm_success',
+                'local_subscriptions'
+            )
+        ),
+        'alert alert-success mt-3'
+    );
+}
+
 echo CommerceDesignSystemRenderer::panel(
     get_string('commerce_purchase_status_overview', 'local_subscriptions'),
     $definition(array_map(
@@ -324,6 +613,99 @@ if ($summary->provider === Provider::ALFA) {
     );
 }
 
+if ($summary->provider === Provider::STRIPE) {
+    $pendingstripe = !in_array(
+        $summary->paymentstatus,
+        ['paid', 'completed', 'succeeded'],
+        true
+    )
+        || $summary->commercialstatus !== 'fulfilled';
+
+    $stripecontent = html_writer::div(
+        s(
+            get_string(
+                $pendingstripe
+                    ? 'commerce_stripe_crm_purchase_pending_help'
+                    : 'commerce_stripe_crm_purchase_complete_help',
+                'local_subscriptions'
+            )
+        ),
+        'text-muted mb-3'
+    );
+
+    $stripecontent .= html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/purchases/reconcile_stripe.php',
+            ['id' => $id]
+        ),
+        get_string(
+            'commerce_stripe_crm_verify',
+            'local_subscriptions'
+        ),
+        [
+            'class' => $pendingstripe
+                ? 'btn btn-primary'
+                : 'btn btn-outline-primary',
+        ]
+    );
+
+    echo CommerceDesignSystemRenderer::panel(
+        get_string(
+            'commerce_stripe_crm_purchase_panel',
+            'local_subscriptions'
+        ),
+        $stripecontent,
+        'mt-4'
+    );
+}
+
+
+if ($summary->provider === Provider::PAYPAL) {
+    $pendingpaypal = !in_array(
+        $summary->paymentstatus,
+        ['paid', 'completed', 'succeeded'],
+        true
+    )
+        || $summary->commercialstatus !== 'fulfilled';
+
+    $paypalcontent = html_writer::div(
+        s(
+            get_string(
+                $pendingpaypal
+                    ? 'commerce_paypal_crm_purchase_pending_help'
+                    : 'commerce_paypal_crm_purchase_complete_help',
+                'local_subscriptions'
+            )
+        ),
+        'text-muted mb-3'
+    );
+
+    $paypalcontent .= html_writer::link(
+        new moodle_url(
+            '/local/subscriptions/admin/commerce/purchases/reconcile_paypal.php',
+            ['id' => $id]
+        ),
+        get_string(
+            'commerce_paypal_crm_verify',
+            'local_subscriptions'
+        ),
+        [
+            'class' => $pendingpaypal
+                ? 'btn btn-primary'
+                : 'btn btn-outline-primary',
+        ]
+    );
+
+    echo CommerceDesignSystemRenderer::panel(
+        get_string(
+            'commerce_paypal_crm_purchase_panel',
+            'local_subscriptions'
+        ),
+        $paypalcontent,
+        'mt-4'
+    );
+}
+
 echo html_writer::start_div('row g-4 mt-1');
 echo html_writer::start_div('col-lg-6');
 echo CommerceDesignSystemRenderer::panel(get_string('commerce_purchase_summary_section', 'local_subscriptions'), $definition([
@@ -338,6 +720,14 @@ echo CommerceDesignSystemRenderer::panel(get_string('commerce_purchase_summary_s
     [get_string('date'), s(userdate($summary->timecreated, get_string('strftimedatetimeshort', 'langconfig')))],
     [get_string('commerce_purchase_type', 'local_subscriptions'), CommercePurchasePresentation::type_badge($summary->type)],
     [get_string('commerce_purchase_status', 'local_subscriptions'), CommercePurchasePresentation::commercial_status_badge($summary->commercialstatus)],
+    [
+        get_string('commerce_i410_payment_method', 'local_subscriptions'),
+        CommercePaymentMethodVisual::label_with_icon(
+            $summary->paymentmethod,
+            $paymentmethodresolver->label($summary->paymentmethod),
+            20
+        ),
+    ],
     [get_string('commerce_purchase_provider', 'local_subscriptions'), $summary->provider === null ? '—' : Provider::label_with_icon($summary->provider)],
 ]));
 echo html_writer::end_div();
@@ -633,44 +1023,302 @@ if ($orderpricing['haspricing'] || $promotioncodes !== []) {
 $paymenttable = new html_table();
 $paymenttable->head = [
     get_string('commerce_purchase_status', 'local_subscriptions'),
+    get_string('commerce_i410_payment_method', 'local_subscriptions'),
     get_string('commerce_purchase_provider', 'local_subscriptions'),
     get_string('commerce_purchase_amount', 'local_subscriptions'),
+    get_string('commerce_refund_refunded_column', 'local_subscriptions'),
     get_string('commerce_purchase_provider_reference', 'local_subscriptions'),
     get_string('date'),
     get_string('commerce_purchase_payment_request', 'local_subscriptions'),
+    get_string('commerce_purchase_actions_section', 'local_subscriptions'),
 ];
 $paymenttable->attributes['class'] = 'generaltable table align-middle';
+
+$refundhistory = '';
+
 foreach ($purchase->payments as $payment) {
-    $providerhtml = $payment->provider === null ? '—' : Provider::label_with_icon($payment->provider);
+    $providerhtml = $payment->provider === null
+        ? '—'
+        : Provider::label_with_icon($payment->provider);
+
     $requesthtml = get_string(
         'commerce_purchase_native_payment_attempt',
         'local_subscriptions'
     );
+
     if ($payment->paymentrequest !== null) {
         $request = $payment->paymentrequest;
         $requesthtml = html_writer::link(
             '#commerce-payment-request-' . $request->family . '-' . $request->id,
-            get_string('commerce_purchase_payment_request_open', 'local_subscriptions', $request->id),
+            get_string(
+                'commerce_purchase_payment_request_open',
+                'local_subscriptions',
+                $request->id
+            ),
             ['class' => 'small fw-semibold']
         );
     }
 
+    $paymentrefunds = $payment->id !== null
+        ? $refundrepository->find_for_payment($payment->id)
+        : [];
+
+    $remainingminor = $payment->id !== null
+        ? $refundrepository->refundable_amount_minor(
+            $payment->id,
+            $payment->amountminor
+        )
+        : 0;
+
+    $refundedminor = max(
+        0,
+        $payment->amountminor - $remainingminor
+    );
+
+    $paymentactions = '—';
+    $paymentispaid = in_array(
+        $payment->status,
+        ['paid', 'completed', 'succeeded'],
+        true
+    );
+
+    if (
+        $payment->id !== null
+        && $payment->provider !== null
+        && $paymentispaid
+        && $remainingminor > 0
+        && has_capability(
+            Capabilities::MANAGE_SUBSCRIPTIONS,
+            $context
+        )
+        && $refundservice->is_supported($payment->provider)
+    ) {
+        $paymentactions = html_writer::link(
+            new moodle_url(
+                '/local/subscriptions/admin/commerce/purchases/refund.php',
+                [
+                    'id' => $id,
+                    'paymentid' => $payment->id,
+                ]
+            ),
+            get_string(
+                'commerce_refund_action',
+                'local_subscriptions'
+            ),
+            ['class' => 'btn btn-sm btn-outline-danger']
+        );
+    }
+
+    if (
+        $payment->id !== null
+        && $payment->provider !== null
+        && isset(
+            $refundhistoryproviders[
+                strtolower((string)$payment->provider)
+            ]
+        )
+        && has_capability(
+            Capabilities::MANAGE_SUBSCRIPTIONS,
+            $context
+        )
+    ) {
+        $syncrefundurl = new moodle_url(
+            '/local/subscriptions/admin/commerce/purchases/sync_refunds.php',
+            [
+                'id' => $id,
+                'paymentid' => $payment->id,
+                'sesskey' => sesskey(),
+            ]
+        );
+
+        $synclink = html_writer::link(
+            $syncrefundurl,
+            get_string(
+                'commerce_refund_sync_action',
+                'local_subscriptions'
+            ),
+            ['class' => 'btn btn-sm btn-outline-secondary ms-1']
+        );
+
+        $paymentactions = $paymentactions === '—'
+            ? $synclink
+            : $paymentactions . $synclink;
+    }
+
     $paymenttable->data[] = [
-        CommercePurchasePresentation::technical_status_badge('payment', $payment->status),
+        CommercePurchasePresentation::technical_status_badge(
+            'payment',
+            $payment->status
+        ),
+        CommercePaymentMethodVisual::label_with_icon(
+            $payment->paymentmethod,
+            $paymentmethodresolver->label($payment->paymentmethod),
+            20
+        ),
         $providerhtml,
-        CommercePurchasePresentation::money($payment->amountminor, $payment->currency),
-        html_writer::tag('code', s($payment->transactionid ?? $payment->providerreference ?? '—'), ['class' => 'small']),
+        CommercePurchasePresentation::money(
+            $payment->amountminor,
+            $payment->currency
+        ),
+        $refundedminor > 0
+            ? CommercePurchasePresentation::money(
+                $refundedminor,
+                $payment->currency
+            )
+            : '—',
+        html_writer::tag(
+            'code',
+            s(
+                $payment->transactionid
+                ?? $payment->providerreference
+                ?? '—'
+            ),
+            ['class' => 'small']
+        ),
         $payment->paidat === null
             ? '—'
-            : s(userdate($payment->paidat, get_string('strftimedatetimeshort', 'langconfig'))),
+            : s(userdate(
+                $payment->paidat,
+                get_string(
+                    'strftimedatetimeshort',
+                    'langconfig'
+                )
+            )),
         $requesthtml,
+        $paymentactions,
     ];
+
+    if ($paymentrefunds !== []) {
+        $refundtable = new html_table();
+        $refundtable->attributes['class'] =
+            'table table-sm align-middle mb-0';
+        $refundtable->head = [
+            get_string('date'),
+            get_string(
+                'commerce_purchase_status',
+                'local_subscriptions'
+            ),
+            get_string(
+                'commerce_refund_amount',
+                'local_subscriptions'
+            ),
+            get_string(
+                'commerce_refund_reason',
+                'local_subscriptions'
+            ),
+            get_string(
+                'commerce_refund_provider_reference',
+                'local_subscriptions'
+            ),
+        ];
+
+        foreach ($paymentrefunds as $refund) {
+            $refundtable->data[] = [
+                s(userdate(
+                    $refund->get_time_created(),
+                    get_string(
+                        'strftimedatetimeshort',
+                        'langconfig'
+                    )
+                )),
+                html_writer::span(
+                    get_string(
+                        'commerce_refund_status_'
+                        . $refund->get_status(),
+                        'local_subscriptions'
+                    ),
+                    'badge rounded-pill '
+                        . (
+                            $refund->get_status() === 'succeeded'
+                                ? 'text-bg-success'
+                                : (
+                                    $refund->get_status() === 'failed'
+                                        ? 'text-bg-danger'
+                                        : 'text-bg-warning'
+                                )
+                        )
+                ),
+                CommercePurchasePresentation::money(
+                    $refund->get_amount_minor(),
+                    $refund->get_currency()
+                ),
+                s(
+                    (new CommerceRefundReasonPresenter())->label(
+                        $refund->get_reason()
+                    ) ?: get_string(
+                        'commerce_refund_reason_unspecified',
+                        'local_subscriptions'
+                    )
+                ),
+                html_writer::tag(
+                    'code',
+                    s(
+                        $refund->get_provider_refund_id()
+                        ?? '—'
+                    ),
+                    ['class' => 'small']
+                ),
+            ];
+        }
+
+        $refundhistory .= html_writer::tag(
+            'details',
+            html_writer::tag(
+                'summary',
+                get_string(
+                    'commerce_refund_history_payment',
+                    'local_subscriptions',
+                    (object)[
+                        'provider' => Provider::get(
+                            (string)$payment->provider
+                        ),
+                        'amount' =>
+                            CommercePurchasePresentation::money(
+                                $refundedminor,
+                                $payment->currency
+                            ),
+                    ]
+                ),
+                ['class' => 'fw-semibold']
+            )
+            . html_writer::div(
+                html_writer::table($refundtable),
+                'mt-3'
+            ),
+            ['class' => 'card card-body mb-3']
+        );
+    }
 }
+
+$paymentcontent = $purchase->payments === []
+    ? html_writer::tag(
+        'p',
+        get_string(
+            'commerce_purchase_no_payments',
+            'local_subscriptions'
+        ),
+        ['class' => 'text-muted mb-0']
+    )
+    : html_writer::table($paymenttable);
+
+if ($refundhistory !== '') {
+    $paymentcontent .= html_writer::tag(
+        'h3',
+        get_string(
+            'commerce_refund_history_title',
+            'local_subscriptions'
+        ),
+        ['class' => 'h6 mt-4 mb-3']
+    );
+    $paymentcontent .= $refundhistory;
+}
+
 echo CommerceDesignSystemRenderer::panel(
-    get_string('commerce_purchase_payments_section', 'local_subscriptions'),
-    $purchase->payments === []
-        ? html_writer::tag('p', get_string('commerce_purchase_no_payments', 'local_subscriptions'), ['class' => 'text-muted mb-0'])
-        : html_writer::table($paymenttable),
+    get_string(
+        'commerce_purchase_payments_section',
+        'local_subscriptions'
+    ),
+    $paymentcontent,
     'mt-4'
 );
 

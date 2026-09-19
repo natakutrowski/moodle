@@ -27,7 +27,9 @@ final class CommerceOrderPresentation {
         public readonly array $timeline,
         public readonly array $actions = [],
         public readonly array $metadata = [],
-        public readonly ?CommerceOrderPaymentPresentation $payment = null
+        public readonly ?CommerceOrderPaymentPresentation $payment = null,
+        public readonly array $purchaseSnapshot = [],
+        public readonly array $customerSnapshot = []
     ) {
     }
 

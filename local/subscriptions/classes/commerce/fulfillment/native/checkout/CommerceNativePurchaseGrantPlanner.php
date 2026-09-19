@@ -15,6 +15,8 @@ use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
 use local_subscriptions\commerce\catalog\service\CommerceEffectiveEntitlementResolver;
 use local_subscriptions\commerce\entitlement\domain\CommerceEntitlementGrant;
 use local_subscriptions\commerce\entitlement\domain\CommerceEntitlementGrantPlan;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinGrant;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinOperation;
 
 /** Builds the deterministic Native Grant plan for one persisted purchase. */
 final class CommerceNativePurchaseGrantPlanner {
@@ -37,6 +39,24 @@ final class CommerceNativePurchaseGrantPlanner {
 
         foreach ($items as $item) {
             $purchasedsku = $this->resolve_product_sku($item, $prices);
+            $itemmetadata = $this->extract_item_metadata($item);
+
+            if (
+                strtolower(trim((string)($itemmetadata['operation'] ?? '')))
+                    === CommercePedagogicalPromotionJoinOperation::OPERATION
+            ) {
+                $position++;
+                $grants[] = $this->promotion_join_grant(
+                    $purchase,
+                    $item,
+                    $purchasedsku,
+                    $itemmetadata,
+                    $position,
+                    $now
+                );
+                continue;
+            }
+
             $expandeditems = $expander->expand($purchasedsku, max(1, (int)$item->quantity))->get_items();
 
             foreach ($expandeditems as $expandeditem) {
@@ -48,7 +68,6 @@ final class CommerceNativePurchaseGrantPlanner {
                     );
                 }
 
-                $itemmetadata = $this->extract_item_metadata($item);
                 foreach ($definitions as $definition) {
                     $position++;
                     $duration = $definition->get_duration_seconds();
@@ -86,6 +105,87 @@ final class CommerceNativePurchaseGrantPlanner {
         }
 
         return new CommerceEntitlementGrantPlan((string)$purchase->reference, $grants, $now);
+    }
+
+    /** @param array<string,mixed> $metadata */
+    private function promotion_join_grant(
+        \stdClass $purchase,
+        \stdClass $item,
+        string $purchasedsku,
+        array $metadata,
+        int $position,
+        int $now
+    ): CommerceEntitlementGrant {
+        $userid = !empty($purchase->userid) ? (int)$purchase->userid : 0;
+        $promotionid = (int)($metadata['promotion_join_promotion_id'] ?? 0);
+        $courseid = (int)($metadata['promotion_join_course_id'] ?? 0);
+        $productid = (int)($metadata['promotion_join_product_id'] ?? 0);
+        $canonicaluserid = (int)($metadata['promotion_join_user_id'] ?? 0);
+        $canonicalsku = strtoupper(trim((string)($metadata['promotion_join_product_sku'] ?? '')));
+        $ownershipsource = trim((string)($metadata['promotion_join_ownership_source'] ?? ''));
+        $joinpriceid = (int)($metadata['promotion_join_price_id'] ?? 0);
+        $joinamountminor = (int)($metadata['promotion_join_amount_minor'] ?? 0);
+        $joincurrency = strtoupper(trim((string)($metadata['promotion_join_currency'] ?? '')));
+
+        if ((int)$item->quantity !== 1) {
+            throw new \RuntimeException('Promotion join purchase quantity must be exactly one.');
+        }
+        if ($userid <= 0 || $canonicaluserid !== $userid) {
+            throw new \RuntimeException('Promotion join purchase beneficiary no longer matches its owner.');
+        }
+        if (
+            $promotionid <= 0
+            || $courseid <= 0
+            || $productid <= 0
+            || $canonicalsku === ''
+            || $canonicalsku !== $purchasedsku
+            || $ownershipsource === ''
+            || $joinpriceid <= 0
+            || $joinamountminor <= 0
+            || preg_match('/^[A-Z]{3}$/', $joincurrency) !== 1
+        ) {
+            throw new \RuntimeException('Promotion join purchase lost its canonical pedagogical context.');
+        }
+
+        $configuration = [
+            'commerceoperation' => CommercePedagogicalPromotionJoinOperation::OPERATION,
+            'promotion_join_user_id' => $canonicaluserid,
+            'promotion_join_promotion_id' => $promotionid,
+            'promotion_join_course_id' => $courseid,
+            'promotion_join_product_id' => $productid,
+            'promotion_join_product_sku' => $canonicalsku,
+            'promotion_join_ownership_source' => $ownershipsource,
+        ];
+
+        $grantmetadata = [
+            'source' => CommercePedagogicalPromotionJoinOperation::OPERATION,
+            'priceid' => $this->extract_price_id($item),
+            'purchasedsku' => $purchasedsku,
+            'expandedsku' => $purchasedsku,
+            'operation' => CommercePedagogicalPromotionJoinOperation::OPERATION,
+            'promotion_join_price_id' => $joinpriceid,
+            'promotion_join_amount_minor' => $joinamountminor,
+            'promotion_join_currency' => $joincurrency,
+        ];
+
+        return new CommerceEntitlementGrant(
+            'ent-' . substr(hash(
+                'sha256',
+                $purchase->reference . '|' . $item->id . '|' . $purchasedsku . '|' . $position
+            ), 0, 32),
+            (string)$purchase->reference,
+            (string)$item->itemreference,
+            $purchasedsku,
+            CommercePedagogicalPromotionJoinGrant::GRANT_TYPE,
+            CommercePedagogicalPromotionJoinGrant::resource_key($promotionid, $courseid, $productid),
+            1,
+            $userid,
+            (string)$purchase->customeremail,
+            $now,
+            null,
+            $configuration,
+            $grantmetadata
+        );
     }
 
     private function resolve_product_sku(\stdClass $item, CommerceProductPriceRepository $prices): string {

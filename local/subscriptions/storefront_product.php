@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\storefront\page\CommerceStorefrontPagePresenter;
 use local_subscriptions\commerce\cart\presentation\CommerceCartPresenter;
 use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
+use local_subscriptions\commerce\checkout\guest\CommerceGuestCartCustomerResolver;
 use local_subscriptions\commerce\storefront\recommendation\CommerceStorefrontRecommendationResolver;
 use local_subscriptions\commerce\storefront\recommendation\CommerceStorefrontRecommendationService;
 use local_subscriptions\commerce\storefront\page\CommerceStorefrontPageResolver;
@@ -15,20 +16,24 @@ use local_subscriptions\commerce\storefront\page\CommerceStorefrontLayoutContrac
 use local_subscriptions\commerce\storefront\seo\CommerceStorefrontSeoPresenter;
 use local_subscriptions\commerce\storefront\seo\CommerceStorefrontSeoHeadRegistry;
 use local_subscriptions\commerce\storefront\repository\CommerceStorefrontRepository;
+use local_subscriptions\commerce\storefront\ownership\CommerceStorefrontOwnershipResolver;
 use local_subscriptions\commerce\trial\CommerceTrialConversionBridge;
 use local_subscriptions\commerce\trial\CommerceTrialCartPricingService;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
 use local_subscriptions\commerce\pricing\CommerceStorefrontCommercialPricingPresenter;
 use local_subscriptions\commerce\digital\library\CommerceDigitalLibraryService;
-use local_subscriptions\support\Region;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\commerce\showroom\CommerceShowroomProductLinkService;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferShoppingContextService;
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
+use local_subscriptions\currency\Currency;
+
+use local_subscriptions\commerce\currency\selection\CommerceCurrencySurfaceSelectionService;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
 $sku = required_param('sku', PARAM_RAW_TRIMMED);
-$requestedcurrency = strtoupper(optional_param('currency', '', PARAM_ALPHA));
+$requestedcurrency = Currency::sanitize(optional_param('currency', '', PARAM_ALPHA));
 
 $availablecurrencies = $DB->get_fieldset_sql(
     "SELECT DISTINCT UPPER(pp.currency)
@@ -39,50 +44,39 @@ $availablecurrencies = $DB->get_fieldset_sql(
    ORDER BY UPPER(pp.currency)",
     ['sku' => strtoupper(trim($sku))]
 );
+$currencyregistry = new CommerceCurrencyRegistry();
+$enabledcurrencies = $currencyregistry->enabled();
 $availablecurrencies = array_values(array_unique(array_filter(array_map(
-    static fn(mixed $value): string => strtoupper(trim((string)$value)),
+    static fn(mixed $value): string => Currency::sanitize((string)$value),
     $availablecurrencies
 ))));
+$availablecurrencies = array_values(array_intersect($enabledcurrencies, $availablecurrencies));
 if ($availablecurrencies === []) {
-    $availablecurrencies = ['EUR', 'RUB'];
+    $availablecurrencies = $enabledcurrencies;
 }
 $personaloffercurrencies = CommercePersonalOfferShoppingContextService::create($DB)->available_currencies($sku);
 if ($personaloffercurrencies !== null && $personaloffercurrencies !== []) {
     $availablecurrencies = array_values(array_intersect($availablecurrencies, $personaloffercurrencies));
 }
 
-$storedcurrency = isloggedin() && !isguestuser()
-    ? strtoupper((string)get_user_preferences(
+$usercurrency = isloggedin() && !isguestuser()
+    ? Currency::sanitize((string)get_user_preferences(
         'local_subscriptions_storefront_currency',
         '',
         (int)$USER->id
     ))
     : '';
-if ($storedcurrency === '') {
-    $storedcurrency = strtoupper((string)(
-        $SESSION->local_subscriptions_storefront_currency ?? ''
-    ));
-}
+$sessioncurrency = Currency::sanitize((string)(
+    $SESSION->local_subscriptions_storefront_currency ?? ''
+));
 
-if (
-    $requestedcurrency !== ''
-    && in_array($requestedcurrency, $availablecurrencies, true)
-) {
-    $currency = $requestedcurrency;
-} else if (
-    $storedcurrency !== ''
-    && in_array($storedcurrency, $availablecurrencies, true)
-) {
-    $currency = $storedcurrency;
-} else {
-    $country = strtoupper(Region::detect_country());
-    $geocandidate = in_array($country, ['RU', 'BY'], true) ? 'RUB' : 'EUR';
-    $currency = in_array($geocandidate, $availablecurrencies, true)
-        ? $geocandidate
-        : (in_array('EUR', $availablecurrencies, true)
-            ? 'EUR'
-            : $availablecurrencies[0]);
-}
+$currencyselection = (new CommerceCurrencySurfaceSelectionService())->resolve(
+    $availablecurrencies,
+    $requestedcurrency,
+    $usercurrency,
+    $sessioncurrency
+);
+$currency = $currencyselection->get_currency();
 
 $SESSION->local_subscriptions_storefront_currency = $currency;
 if (isloggedin() && !isguestuser()) {
@@ -210,7 +204,22 @@ $data['currencies'] = array_map(
 // Kept for backwards-compatible template/data consumers. New templates use
 // showbacklink because the contextual return target can now be Shop or Showroom.
 $data['showbacktoshop'] = $from === 'shop';
-$customerid = isloggedin() && !isguestuser() ? (int)$USER->id : 0;
+$customerid = CommerceGuestCartCustomerResolver::create()->resolve($currency);
+$isguestcustomer = $customerid > 0 && (!isloggedin() || isguestuser());
+if (
+    $isguestcustomer
+    && (new CommerceStorefrontOwnershipResolver($DB))->owns($customerid, (string)$data['sku'])
+) {
+    $data['owned'] = true;
+    $data['canpurchase'] = false;
+    $data['hasupgrade'] = false;
+    $data['guestowned'] = true;
+    $data['ownedactionlabel'] = get_string(
+        'commerce_storefront_guest_owned_login',
+        'local_subscriptions'
+    );
+    $data['ownedactionurl'] = (new moodle_url('/login/index.php'))->out(false);
+}
 $cartdata = CommerceCartPresenter::present(
     CommerceCartRuntimeFactory::create()->snapshot($customerid, $currency, current_language())
 );
@@ -234,6 +243,15 @@ if (!empty($data['upgradepriceid'])) {
     $data['upgradetogglelabel'] = $data['upgradeincart']
         ? get_string('commerce_cart_remove_from_cart', 'local_subscriptions')
         : $data['upgradeactionlabel'];
+}
+if (!empty($data['promotionjoincatalogpriceid'])) {
+    $promotionjoinkey = strtoupper((string)$data['sku']) . ':'
+        . (int)$data['promotionjoincatalogpriceid'];
+    $data['promotionjoinincart'] = isset($cartkeys[$promotionjoinkey]);
+    $data['promotionjointoggleaction'] = $data['promotionjoinincart'] ? 'remove' : 'add';
+    $data['promotionjointogglelabel'] = $data['promotionjoinincart']
+        ? get_string('commerce_cart_remove_from_cart', 'local_subscriptions')
+        : $data['promotionjoinaddlabel'];
 }
 $data['buy_now_label'] = get_string('commerce_cart_buy_now', 'local_subscriptions');
 $data['standardpricelabel'] = get_string(
@@ -265,7 +283,20 @@ if ($cartnotice !== '') {
     $stringkey = 'commerce_cart_message_' . $cartnotice;
     if (get_string_manager()->string_exists($stringkey, 'local_subscriptions')) {
         $message = get_string($stringkey, 'local_subscriptions');
-        if ($cartnotice === 'error' || $cartnotice === 'bundle_all_owned') {
+        if ($cartnotice === 'already_owned' && $isguestcustomer) {
+            $message = get_string(
+                'commerce_cart_message_already_owned_guest',
+                'local_subscriptions'
+            );
+        }
+        if (in_array($cartnotice, [
+            'error',
+            'bundle_all_owned',
+            'already_owned',
+            'promotion_join_not_eligible',
+            'promotion_join_price_unavailable',
+            'promotion_join_context_changed',
+        ], true)) {
             \core\notification::warning($message);
         }
     }

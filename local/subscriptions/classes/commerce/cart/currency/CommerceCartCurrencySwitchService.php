@@ -16,6 +16,7 @@ use local_subscriptions\commerce\catalog\persistence\CommerceCatalogHydrator;
 use local_subscriptions\commerce\catalog\repository\CommerceProductPriceRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductTranslationRepository;
+use local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationService;
 
 /** Rebuilds a session cart with authoritative prices from another currency. */
 final class CommerceCartCurrencySwitchService {
@@ -31,7 +32,8 @@ final class CommerceCartCurrencySwitchService {
             new CommerceCartFactory(),
             new CommerceProductPriceRepository($DB, $hydrator, $products),
             $products,
-            new CommerceProductTranslationRepository($DB, $hydrator, $products)
+            new CommerceProductTranslationRepository($DB, $hydrator, $products),
+            CommercePedagogicalSeatReservationService::create($DB)
         );
     }
 
@@ -41,7 +43,8 @@ final class CommerceCartCurrencySwitchService {
         private readonly CommerceCartFactory $factory,
         private readonly CommerceProductPriceRepository $prices,
         private readonly CommerceProductRepository $products,
-        private readonly CommerceProductTranslationRepository $translations
+        private readonly CommerceProductTranslationRepository $translations,
+        private readonly CommercePedagogicalSeatReservationService $reservations
     ) {
     }
 
@@ -86,6 +89,28 @@ final class CommerceCartCurrencySwitchService {
         $target = $this->factory->create($customerid, $targetcurrency, $metadata)->with_items($items);
         $targetkey = $this->keys->resolve($customerid, $targetcurrency);
         $this->repository->save($targetkey, $target);
+
+        // Keep pedagogical holds bound to the cart identity that survives the
+        // currency switch. This is a rebind, never a release/re-reserve cycle:
+        // the original expiry and phase anchors are preserved.
+        $now = time();
+        $this->reservations->transfer_cart(
+            $source->get_uuid(),
+            $target->get_uuid(),
+            $customerid,
+            $now
+        );
+
+        // Items that cannot be represented in the target currency are removed
+        // from the target cart, so their pedagogical holds must not survive the
+        // switch either. Releasing after the atomic rebind avoids a seat gap.
+        foreach ($removed as $removeditem) {
+            $this->reservations->release_product(
+                $removeditem['sku'],
+                $target->get_uuid(),
+                $now
+            );
+        }
 
         $runtime = CommerceCartRuntimeFactory::create();
         $snapshot = $runtime->snapshot($customerid, $targetcurrency, $language);
@@ -146,7 +171,24 @@ final class CommerceCartCurrencySwitchService {
 
     private function currency_safe_metadata(array $metadata): array {
         foreach (array_keys($metadata) as $key) {
-            if (str_contains(strtolower((string)$key), 'amountminor')) {
+            $normalised = strtolower((string)$key);
+            if (
+                str_contains($normalised, 'amountminor')
+                || str_contains($normalised, 'amount_minor')
+            ) {
+                unset($metadata[$key]);
+                continue;
+            }
+
+            // promotion_join owner prices are currency-scoped. The cohort and
+            // owner identity remain pinned across a cart currency switch, but
+            // the old price-row/currency evidence must never survive into the
+            // rebuilt target-currency line. Runtime calculation resolves the
+            // target owner price authoritatively.
+            if (in_array($normalised, [
+                'promotion_join_price_id',
+                'promotion_join_currency',
+            ], true)) {
                 unset($metadata[$key]);
             }
         }

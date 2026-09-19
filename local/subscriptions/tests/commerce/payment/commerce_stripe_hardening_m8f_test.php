@@ -60,5 +60,6 @@ final class m8f_engine implements StripePaymentReconciliationEngineInterface {
     public int $reconcilecalls=0;
     public function __construct(private readonly StripePaymentReconciliationInspection $before,private readonly StripePaymentReconciliationInspection $after){}
     public function inspect_payment(int $paymentid): StripePaymentReconciliationInspection{return $this->before;}
+    public function inspect_purchase_reference(string $reference): StripePaymentReconciliationInspection{return $this->before;}
     public function reconcile_payment(int $paymentid): StripePaymentReconciliationInspection{$this->reconcilecalls++;return $this->after;}
 }

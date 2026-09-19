@@ -170,7 +170,8 @@
                 <div class="commerce-order-panel__heading"><i class="fa-solid fa-credit-card" aria-hidden="true"></i><h2>{{#str}}commerce_i45_payment_information, local_subscriptions{{/str}}</h2></div>
                 <dl class="commerce-order-summary">
                     <div><dt>{{#str}}commerce_i45_payment_status, local_subscriptions{{/str}}</dt><dd><span class="commerce-order-payment-badge commerce-order-payment-badge--{{statusclass}}">{{status}}</span></dd></div>
-                    <div><dt>{{#str}}commerce_i410_payment_method, local_subscriptions{{/str}}</dt><dd class="commerce-order-provider">{{{providerhtml}}}</dd></div>
+                    <div><dt>{{#str}}commerce_i410_payment_method, local_subscriptions{{/str}}</dt><dd>{{{paymentmethodhtml}}}</dd></div>
+                    <div><dt>{{#str}}commerce_purchase_provider, local_subscriptions{{/str}}</dt><dd class="commerce-order-provider">{{{providerhtml}}}</dd></div>
                     <div><dt>{{#str}}commerce_i410_amount_paid, local_subscriptions{{/str}}</dt><dd>{{amount}}</dd></div>
                     <div><dt>{{#str}}commerce_i45_paid_at, local_subscriptions{{/str}}</dt><dd>{{paidat}}</dd></div>
                     {{#promotion.haspromotion}}
@@ -188,11 +189,26 @@
             </section>{{/payment}}
 
             <section class="commerce-order-panel commerce-order-panel--invoice">
-                <div class="commerce-order-panel__heading"><i class="fa-solid fa-file-invoice"></i><h2>{{#str}}commerce_i410_invoice, local_subscriptions{{/str}}</h2></div>
+                <div class="commerce-order-panel__heading"><i class="fa-solid fa-file-invoice"></i><h2>{{#str}}commerce_documents_title, local_subscriptions{{/str}}</h2></div>
                 <div class="commerce-order-panel__body">
-                    <p>{{#str}}commerce_i410_invoice_description, local_subscriptions{{/str}}</p>
+                    <p>{{#str}}commerce_documents_description, local_subscriptions{{/str}}</p>
                     <div class="d-grid gap-2">
-                        <a class="btn btn-outline-primary w-100" href="{{invoiceurl}}"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i>{{#str}}commerce_i410_download_invoice, local_subscriptions{{/str}}</a>
+                        {{#documents}}
+                            <div class="border rounded p-3">
+                                <div class="d-flex justify-content-between gap-3 align-items-start">
+                                    <div>
+                                        <strong>{{type}}</strong>
+                                        <div class="small text-muted">{{number}}</div>
+                                        {{#issuedat}}<div class="small text-muted">{{issuedat}}</div>{{/issuedat}}
+                                        <div class="small">{{amount}}</div>
+                                    </div>
+                                    <a class="btn btn-sm btn-outline-primary" href="{{url}}">
+                                        <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                                        {{buttonlabel}}
+                                    </a>
+                                </div>
+                            </div>
+                        {{/documents}}
                         <a class="btn btn-outline-secondary w-100 commerce-order-details__print" href="{{printurl}}"><i class="fa-solid fa-print" aria-hidden="true"></i>{{#str}}commerce_order_print, local_subscriptions{{/str}}</a>
                     </div>
                 </div>

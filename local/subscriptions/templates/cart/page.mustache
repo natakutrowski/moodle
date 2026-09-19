@@ -52,8 +52,42 @@
         </div>
     {{/currencyreport.visible}}
     {{#hasitems}}
-        <div class="row g-4 align-items-start">
-            <div class="col-lg-8">
+        {{#haspedagogicalitems}}
+            <div class="commerce-cart-seat-summary {{#seatreservationsvalid}}is-active{{/seatreservationsvalid}}{{#seatreservationsexpired}}is-expired{{/seatreservationsexpired}}"
+                 role="status"
+                 data-cart-seat-summary
+                 data-expires-at="{{seatreservationexpiresat}}">
+                <div class="commerce-cart-seat-summary__icon" aria-hidden="true">
+                    <i class="fa-solid {{#seatreservationsvalid}}fa-ticket{{/seatreservationsvalid}}{{#seatreservationsexpired}}fa-clock-rotate-left{{/seatreservationsexpired}}"></i>
+                </div>
+                <div class="commerce-cart-seat-summary__content">
+                    <strong>{{seatreservationsummarylabel}}</strong>
+                    {{#seatreservationsvalid}}
+                        <div class="commerce-cart-seat-summary__timer">
+                            {{seatreservationcountdownlabel}}
+                            <span data-cart-seat-countdown>--:--</span>
+                        </div>
+                    {{/seatreservationsvalid}}
+                    {{#seatreservationsexpired}}
+                        <div class="commerce-cart-seat-summary__expired-help">{{checkoutdisabledreason}}</div>
+                    {{/seatreservationsexpired}}
+                </div>
+                {{#seatreservationsexpired}}
+                    <form method="post" action="{{renewseatsaction}}" class="commerce-cart-seat-summary__renew">
+                        <input type="hidden" name="action" value="renewseats">
+                        <input type="hidden" name="currency" value="{{currency}}">
+                        <input type="hidden" name="returnurl" value="{{returnurl}}">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fa-solid fa-rotate me-2" aria-hidden="true"></i>{{seatreservationrenewlabel}}
+                        </button>
+                    </form>
+                {{/seatreservationsexpired}}
+            </div>
+        {{/haspedagogicalitems}}
+
+        <div class="commerce-cart__purchase-grid">
+            <div class="commerce-cart__items-column">
                 <div class="commerce-cart-lines d-grid gap-3">
                     {{#items}}
                         <article class="commerce-cart-line commerce-cart-line__compact card border-0 shadow-sm">
@@ -74,6 +108,16 @@
                                         {{/hastype}}
                                         <h2 class="h5 mb-2">{{name}}</h2>
                                         {{> local_subscriptions/cart/price }}
+                                        <div class="commerce-cart-line__access mt-3">{{> local_subscriptions/customer/access_promise_compact }}</div>
+                                        {{#hasseatreservation}}
+                                            <div class="commerce-cart-line__seat {{#seatreservationactive}}is-active{{/seatreservationactive}}{{#seatreservationexpired}}is-expired{{/seatreservationexpired}}">
+                                                <i class="fa-solid {{#seatreservationactive}}fa-circle-check{{/seatreservationactive}}{{#seatreservationexpired}}fa-circle-exclamation{{/seatreservationexpired}}" aria-hidden="true"></i>
+                                                <div>
+                                                    <strong>{{seatreservationlabel}}</strong>
+                                                    <div class="commerce-cart-line__seat-help">{{seatreservationtimelabel}}</div>
+                                                </div>
+                                            </div>
+                                        {{/hasseatreservation}}
                                     </div>
                                 </div>
 
@@ -130,7 +174,7 @@
                     {{/items}}
                 </div>
             </div>
-            <div class="col-lg-4">{{> local_subscriptions/cart/summary}}</div>
+            <div class="commerce-cart__summary-column">{{> local_subscriptions/cart/summary}}</div>
         </div>
     {{/hasitems}}
 

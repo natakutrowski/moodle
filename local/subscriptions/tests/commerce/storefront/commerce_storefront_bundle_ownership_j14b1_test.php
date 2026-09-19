@@ -12,6 +12,7 @@ final class commerce_storefront_bundle_ownership_j14b1_test extends \advanced_te
         global $CFG;
         $source = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/storefront/ownership/CommerceStorefrontOwnershipResolver.php');
         $this->assertStringContainsString('owns_bundle_components', $source);
-        $this->assertStringContainsString("return 'bundle_components'", $source);
+        $this->assertStringContainsString("? 'bundle_components'", $source);
+        $this->assertStringContainsString("if (!\$this->owns(\$userid, (string)\$childsku))", $source);
     }
 }

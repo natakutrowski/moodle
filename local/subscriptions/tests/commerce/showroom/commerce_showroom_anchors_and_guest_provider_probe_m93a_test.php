@@ -6,74 +6,68 @@ namespace local_subscriptions;
 
 defined('MOODLE_INTERNAL') || die();
 
-use advanced_testcase;
+final class commerce_showroom_anchors_and_guest_provider_probe_m93a_test extends \advanced_testcase {
 
-final class commerce_showroom_anchors_and_guest_provider_probe_m93a_test extends advanced_testcase {
     public function test_showroom_exposes_stable_block_anchors(): void {
         global $CFG;
+
         $template = file_get_contents(
             $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
         );
+        self::assertIsString($template);
 
         foreach ([
-            'showroom-top',
-            'showroom-problem',
-            'showroom-problem-interactive',
-            'showroom-learning-method',
-            'showroom-video',
-            'showroom-highlights',
-            'showroom-ascent',
-            'showroom-stage-method',
-            'showroom-exercises',
-            'showroom-offers',
-            'showroom-comparison',
-            'showroom-memory-method',
-            'showroom-trust',
-            'showroom-testimonials',
-            'showroom-bonus',
-            'showroom-faq',
-            'showroom-support',
-            'showroom-verbs-cards',
-            'showroom-final',
+            'showroom-top', 'showroom-problem', 'showroom-problem-interactive',
+            'showroom-learning-method', 'showroom-video', 'showroom-highlights',
+            'showroom-ascent', 'showroom-stage-method', 'showroom-exercises',
+            'showroom-offers', 'showroom-comparison', 'showroom-memory-method',
+            'showroom-trust', 'showroom-testimonials', 'showroom-bonus',
+            'showroom-faq', 'showroom-support', 'showroom-verbs-cards', 'showroom-final',
         ] as $anchor) {
             self::assertStringContainsString('id="' . $anchor . '"', $template, $anchor);
         }
     }
 
-    public function test_unfinished_checkout_crm_has_read_only_provider_probe_display(): void {
+
+    public function test_unfinished_checkout_crm_uses_read_only_provider_inspections(): void {
         global $CFG;
 
         $service = file_get_contents(
-            $CFG->dirroot
-            . '/local/subscriptions/classes/commerce/checkout/guest/'
-            . 'CommerceUnfinishedGuestCheckoutCrmService.php'
+            $CFG->dirroot . '/local/subscriptions/classes/commerce/checkout/guest/CommerceUnfinishedGuestCheckoutCrmService.php'
         );
-        $page = file_get_contents(
-            $CFG->dirroot
-            . '/local/subscriptions/admin/commerce/unfinished-checkouts/index.php'
-        );
-
         self::assertIsString($service);
+        global $CFG;
+
+        $page = file_get_contents(
+            $CFG->dirroot . '/local/subscriptions/admin/commerce/unfinished-checkouts/index.php'
+        );
         self::assertIsString($page);
-        self::assertStringContainsString(
-            '->inspect_payment((int)$payment->id)',
-            $service
-        );
-        self::assertStringNotContainsString(
-            '->reconcile_payment((int)$payment->id)',
-            $service
-        );
-        self::assertStringContainsString(
-            'providerlivechecked',
-            $page
-        );
-        self::assertStringContainsString(
-            'providerlivestatus',
-            $page
-        );
-        self::assertStringContainsString(
-            'provider_paid_pending',
-            $page
-        );
+
+        self::assertStringContainsString('->inspect_payment((int)$payment->id)', $service);
+        self::assertStringContainsString('$payment->providerlivestatus = \'not_registered\';', $service);
+        self::assertStringNotContainsString('->reconcile_payment((int)$payment->id)', substr($service, strpos($service, 'private function decorate_provider_statuses')));
+        self::assertStringContainsString('providerlivechecked', $page);
+        self::assertStringContainsString('providerlivestatus', $page);
+        self::assertStringContainsString('provider_paid_pending', $page);
     }
+
+
+    public function test_unfinished_alfa_attempt_without_order_reference_is_not_probed(): void {
+        global $CFG;
+
+        $service = file_get_contents(
+            $CFG->dirroot . '/local/subscriptions/classes/commerce/checkout/guest/CommerceUnfinishedGuestCheckoutCrmService.php'
+        );
+        self::assertIsString($service);
+
+        $guard = strpos($service, '$providerorderid === \'\' && $providerreference === \'\'');
+        $probe = strpos($service, '->inspect_payment((int)$payment->id)', $guard === false ? 0 : $guard);
+        self::assertNotFalse($guard);
+        self::assertNotFalse($probe);
+        self::assertLessThan($probe, $guard);
+        $between = substr($service, $guard, $probe - $guard);
+        self::assertStringContainsString('$payment->providerlivestatus = \'not_registered\';', $between);
+        self::assertStringContainsString('continue;', $between);
+    }
+
 }

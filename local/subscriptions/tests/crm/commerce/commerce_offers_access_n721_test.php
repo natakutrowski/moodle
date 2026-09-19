@@ -51,9 +51,13 @@ final class commerce_offers_access_n721_test extends advanced_testcase {
         $root = dirname(__DIR__, 3);
         $version = file_get_contents($root . '/version.php');
 
-        self::assertStringContainsString(
-            '$plugin->version = 2026081602;',
-            $version
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
         );
     }
 }

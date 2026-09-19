@@ -85,7 +85,11 @@ final class CommerceCheckoutRecoveryService {
             $actions[] = 'complete_fulfillment';
         }
 
-        if ($fulfilled && $fulfillmentrows === []) {
+        if (
+            $fulfilled
+            && $fulfillmentrows === []
+            && !$this->has_completed_native_fulfillment((string)$purchase->reference)
+        ) {
             $issues[] = 'fulfilled_purchase_without_fulfillment_records';
         }
 
@@ -156,6 +160,54 @@ final class CommerceCheckoutRecoveryService {
             $execution['result']['executed_actions'] ?? [],
             (bool)$execution['replayed']
         );
+    }
+
+
+    private function has_completed_native_fulfillment(string $purchasereference): bool {
+        $grantrecords = array_values($this->db->get_records(
+            'local_subs_commerce_grant',
+            ['purchasereference' => trim($purchasereference)],
+            'id ASC',
+            'grantreference'
+        ));
+        if ($grantrecords === []) {
+            return false;
+        }
+
+        $grantreferences = array_map(
+            static fn(\stdClass $grant): string => (string)$grant->grantreference,
+            $grantrecords
+        );
+        [$insql, $params] = $this->db->get_in_or_equal(
+            $grantreferences,
+            SQL_PARAMS_NAMED,
+            'nativegrant'
+        );
+        $states = $this->db->get_records_select(
+            'local_subs_commerce_ful_state',
+            "grantreference {$insql}",
+            $params,
+            '',
+            'grantreference,status'
+        );
+
+        $statusbygrant = [];
+        foreach ($states as $state) {
+            $statusbygrant[(string)$state->grantreference] = strtolower(trim((string)$state->status));
+        }
+
+        foreach ($grantreferences as $grantreference) {
+            if (!in_array($statusbygrant[$grantreference] ?? '', [
+                'completed',
+                'fulfilled',
+                'delivered',
+                'success',
+            ], true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function resolve_purchase(string $identifier, string $kind): ?\stdClass {

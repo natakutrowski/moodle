@@ -4,12 +4,18 @@ namespace local_subscriptions\commerce\payment\provider\stripe;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\checkout\execution\CommerceCheckoutExecutionMode;
 use local_subscriptions\commerce\payment\CommercePaymentRequest;
+use local_subscriptions\commerce\payment\method\CommercePaymentMethod;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProvider;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderCapabilities;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderContext;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderException;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderValidationResult;
+use local_subscriptions\commerce\payment\refund\CommercePaymentRefundRequest;
+use local_subscriptions\commerce\payment\refund\CommercePaymentRefundResult;
+use local_subscriptions\commerce\payment\refund\CommerceRefundCapablePaymentProvider;
+use local_subscriptions\commerce\payment\refund\CommerceRefundHistoryCapablePaymentProvider;
 use local_subscriptions\commerce\payment\result\CommercePaymentAction;
 use local_subscriptions\commerce\payment\result\CommercePaymentResult;
 use local_subscriptions\commerce\payment\result\CommercePaymentStatus;
@@ -18,7 +24,7 @@ use local_subscriptions\commerce\payment\result\CommercePaymentStatus;
  * Commerce adapter for the existing Stripe payment integration.
  */
 final class StripeCommercePaymentProvider
-    implements CommercePaymentProvider {
+    implements CommercePaymentProvider, CommerceRefundCapablePaymentProvider, CommerceRefundHistoryCapablePaymentProvider {
 
     public const KEY = 'stripe';
 
@@ -55,9 +61,8 @@ final class StripeCommercePaymentProvider
             // Synchronous payment retrieval is not exposed yet.
             false,
 
-            // Stripe supports refunds, but the Commerce refund flow
-            // is not implemented in this phase.
-            false,
+            // Certified through CommerceRefundCapablePaymentProvider.
+            true,
 
             // Commerce may aggregate several lines into one Stripe item.
             true,
@@ -74,6 +79,13 @@ final class StripeCommercePaymentProvider
 
                 'bridge' =>
                     'legacy',
+            ],
+            [
+                CommercePaymentMethod::CARD,
+                CommercePaymentMethod::APPLE_PAY,
+                CommercePaymentMethod::GOOGLE_PAY,
+                CommercePaymentMethod::LINK,
+                CommercePaymentMethod::KLARNA,
             ]
         );
     }
@@ -85,11 +97,15 @@ final class StripeCommercePaymentProvider
             return false;
         }
 
-        return $this
-            ->get_capabilities()
-            ->supports_currency(
-                $request->get_currency()
-            );
+        $capabilities = $this->get_capabilities();
+
+        if (!$capabilities->supports_currency($request->get_currency())) {
+            return false;
+        }
+
+        $method = $request->get_preferred_payment_method();
+        return $method === null
+            || $capabilities->supports_payment_method($method);
     }
 
     public function validate(
@@ -170,13 +186,39 @@ final class StripeCommercePaymentProvider
         }
 
         try {
-            $response =
-                $this->gateway->create_checkout_session(
-                    $this->build_gateway_request(
-                        $request,
-                        $context
-                    )
+            $gatewayrequest =
+                $this->build_gateway_request(
+                    $request,
+                    $context
                 );
+
+            $executionmode = trim(
+                (string)$request->get_metadata_value(
+                    'payment_execution_mode',
+                    ''
+                )
+            );
+
+            $response =
+                $executionmode
+                    === CommerceCheckoutExecutionMode::CAMPUS_EMBEDDED
+                && in_array(
+                    $request->get_preferred_payment_method(),
+                    [
+                        CommercePaymentMethod::CARD,
+                        CommercePaymentMethod::APPLE_PAY,
+                        CommercePaymentMethod::GOOGLE_PAY,
+                        CommercePaymentMethod::LINK,
+                        CommercePaymentMethod::KLARNA,
+                    ],
+                    true
+                )
+                    ? $this->gateway->create_payment_intent(
+                        $gatewayrequest
+                    )
+                    : $this->gateway->create_checkout_session(
+                        $gatewayrequest
+                    );
         } catch (
             CommercePaymentProviderException $exception
         ) {
@@ -290,6 +332,86 @@ final class StripeCommercePaymentProvider
         );
     }
 
+    public function refund(
+        CommercePaymentRefundRequest $request,
+        CommercePaymentProviderContext $context
+    ): CommercePaymentRefundResult {
+        if (!$this->is_available()) {
+            throw new CommercePaymentProviderException(
+                'Stripe is not available for Commerce refund.',
+                self::KEY,
+                'stripe_refund_provider_unavailable'
+            );
+        }
+
+        $response = $this->gateway->refund(
+            new StripeRefundRequest(
+                $request->get_payment_reference(),
+                $request->get_provider_payment_id(),
+                $request->get_currency(),
+                $request->get_amount_minor(),
+                $request->get_reason(),
+                array_merge(
+                    $request->get_metadata(),
+                    ['idempotency_key' => $context->get_idempotency_key()]
+                )
+            )
+        );
+
+        $status = match ($response->get_status()) {
+            'succeeded' => CommercePaymentRefundResult::STATUS_SUCCEEDED,
+            'failed' => CommercePaymentRefundResult::STATUS_FAILED,
+            default => CommercePaymentRefundResult::STATUS_PENDING,
+        };
+
+        return new CommercePaymentRefundResult(
+            self::KEY,
+            $response->get_refund_id(),
+            $status,
+            $response->get_currency(),
+            $response->get_amount_minor(),
+            array_merge(
+                $response->get_metadata(),
+                [
+                    'paymentreference' => $request->get_payment_reference(),
+                    'providerpaymentid' => $request->get_provider_payment_id(),
+                ]
+            )
+        );
+    }
+
+    public function list_refunds(
+        string $providerpaymentid,
+        string $currency,
+        CommercePaymentProviderContext $context
+    ): array {
+        return array_map(
+            static function(StripeRefundResponse $response): CommercePaymentRefundResult {
+                $status = match ($response->get_status()) {
+                    'succeeded' => CommercePaymentRefundResult::STATUS_SUCCEEDED,
+                    'failed' => CommercePaymentRefundResult::STATUS_FAILED,
+                    default => CommercePaymentRefundResult::STATUS_PENDING,
+                };
+
+                return new CommercePaymentRefundResult(
+                    self::KEY,
+                    $response->get_refund_id(),
+                    $status,
+                    $response->get_currency(),
+                    $response->get_amount_minor(),
+                    array_merge(
+                        $response->get_metadata(),
+                        ['historical_import' => true]
+                    )
+                );
+            },
+            $this->gateway->list_refunds(
+                $providerpaymentid,
+                $currency
+            )
+        );
+    }
+
     private function build_gateway_request(
         CommercePaymentRequest $request,
         CommercePaymentProviderContext $context
@@ -357,6 +479,9 @@ final class StripeCommercePaymentProvider
                     $context->is_live()
                         ? 'live'
                         : 'test',
+
+                'commerce_payment_method' =>
+                    $request->get_preferred_payment_method(),
             ]
         );
 
@@ -388,6 +513,65 @@ final class StripeCommercePaymentProvider
             $status ===
                 CommercePaymentStatus::REQUIRES_ACTION
         ) {
+            $embedded =
+                !empty(
+                    $response->get_metadata()['embedded']
+                    ?? false
+                );
+
+            if ($embedded) {
+                $responsemetadata =
+                    $response->get_metadata();
+
+                foreach (
+                    [
+                        'client_secret',
+                        'publishable_key',
+                        'return_url',
+                    ]
+                    as $required
+                ) {
+                    if (
+                        trim(
+                            (string)(
+                                $responsemetadata[$required]
+                                ?? ''
+                            )
+                        ) === ''
+                    ) {
+                        throw new CommercePaymentProviderException(
+                            'Stripe embedded payment data is incomplete.',
+                            self::KEY,
+                            'stripe_embedded_action_incomplete',
+                            ['missing' => $required]
+                        );
+                    }
+                }
+
+                return CommercePaymentResult::requires_action(
+                    $requestreference,
+                    self::KEY,
+                    $response->get_payment_id(),
+                    CommercePaymentAction::embedded(
+                        [
+                            'client_secret' =>
+                                $responsemetadata['client_secret'],
+                            'publishable_key' =>
+                                $responsemetadata['publishable_key'],
+                            'return_url' =>
+                                $responsemetadata['return_url'],
+                            'payment_intent' =>
+                                $response->get_payment_id(),
+                        ],
+                        [
+                            'method' => 'card',
+                            'provider' => self::KEY,
+                        ]
+                    ),
+                    $metadata
+                );
+            }
+
             $checkouturl =
                 $response->get_checkout_url();
 

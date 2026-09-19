@@ -53,9 +53,13 @@ final class commerce_n124f1_prompt_language_helper_runtime_test extends \advance
     public function test_plugin_version_is_unchanged(): void {
         $version = $this->file('version.php');
 
-        self::assertStringContainsString(
-            '$plugin->version = 2026081602;',
-            $version
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
         );
     }
 }

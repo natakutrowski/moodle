@@ -11,6 +11,7 @@ use local_subscriptions\commerce\promotion\domain\CommercePromotion;
 use local_subscriptions\commerce\promotion\repository\MoodleCommercePromotionRepository;
 use local_subscriptions\commerce\promotion\service\CommercePromotionValidator;
 use local_subscriptions\commerce\promotion\eligibility\CommercePromotionEligibilityRuleSet;
+use local_subscriptions\commerce\domain\value\CommerceMoney;
 use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessNavigationRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
@@ -19,6 +20,8 @@ use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\currency\CurrencyFormatter;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 $id = optional_param('id', 0, PARAM_INT);
@@ -35,19 +38,8 @@ $title = get_string($id ? 'commerce_promotion_edit' : 'commerce_promotion_add', 
 CrmPageConfigurator::configure($PAGE, $context, $pageurl, $title, 'local-subscriptions-commerce-promotion-edit-page');
 
 $currencyregistry = new CommerceCurrencyRegistry();
-$currencyflags = [
-    'EUR' => '🇪🇺',
-    'RUB' => '🇷🇺',
-    'USD' => '🇺🇸',
-    'GBP' => '🇬🇧',
-    'CHF' => '🇨🇭',
-    'CAD' => '🇨🇦',
-    'JPY' => '🇯🇵',
-];
-$currencyoptions = ['' => '🌍 ' . get_string('commerce_promotion_all_currencies', 'local_subscriptions')];
-foreach ($currencyregistry->options() as $currencycode => $currencylabel) {
-    $currencyoptions[$currencycode] = ($currencyflags[$currencycode] ?? '💱') . ' ' . $currencylabel;
-}
+$currencyoptions = ['' => '🌍 ' . get_string('commerce_promotion_all_currencies', 'local_subscriptions')]
+    + $currencyregistry->options_including([$promotion?->get_currency() ?? '']);
 $catalog = new CommerceCatalogReadRepository($DB);
 $productoptions = [];
 $typeoptions = [];
@@ -72,11 +64,27 @@ $displayvalue = static function(?CommercePromotion $promotion): string {
     if ($promotion === null) {
         return '10';
     }
+    if ($promotion->get_discount_type() === CommercePromotion::TYPE_PERCENTAGE) {
+        return format_float($promotion->get_discount_value() / 100, 2, true, true);
+    }
+    $currency = (string)($promotion->get_currency() ?? '');
+    if ($currency !== '' && Currency::is_known($currency)) {
+        return CommerceMoney::from_minor($promotion->get_discount_value(), $currency)
+            ->get_amount_major_for_currency();
+    }
     return format_float($promotion->get_discount_value() / 100, 2, true, true);
 };
-$displayminimum = static fn(?CommercePromotion $promotion): string => $promotion === null
-    ? '0'
-    : format_float($promotion->get_minimum_cart_minor() / 100, 2, true, true);
+$displayminimum = static function(?CommercePromotion $promotion): string {
+    if ($promotion === null || $promotion->get_minimum_cart_minor() === 0) {
+        return '0';
+    }
+    $currency = (string)($promotion->get_currency() ?? '');
+    if ($currency !== '' && Currency::is_known($currency)) {
+        return CommerceMoney::from_minor($promotion->get_minimum_cart_minor(), $currency)
+            ->get_amount_major_for_currency();
+    }
+    return format_float($promotion->get_minimum_cart_minor() / 100, 2, true, true);
+};
 
 $existingrules = CommercePromotionEligibilityRuleSet::from_metadata($promotion?->get_metadata() ?? []);
 
@@ -120,8 +128,8 @@ $data = [
 ];
 $errors = [];
 
-$normalisedecimal = static function(string $value): float {
-    return (float)str_replace(',', '.', trim($value));
+$normalisedecimal = static function(string $value): string {
+    return str_replace(',', '.', trim($value));
 };
 
 if (data_submitted() && confirm_sesskey()) {
@@ -153,9 +161,40 @@ if (data_submitted() && confirm_sesskey()) {
 
     $discountvalue = $normalisedecimal((string)$data['discountvalue']);
     $minimumcart = $normalisedecimal((string)$data['minimumcart']);
+    $selectedcurrency = Currency::sanitize((string)$data['currency']);
     $validationdata = $data;
-    $validationdata['discountvalue'] = (int)round($discountvalue * 100);
-    $validationdata['minimumcartminor'] = (int)round($minimumcart * 100);
+    $validationdata['discountvalue'] = 0;
+    $validationdata['minimumcartminor'] = 0;
+
+    if ((string)$data['discounttype'] === CommercePromotion::TYPE_PERCENTAGE) {
+        $validationdata['discountvalue'] = is_numeric($discountvalue)
+            ? (int)round(((float)$discountvalue) * 100)
+            : 0;
+    } else if ($selectedcurrency !== '') {
+        try {
+            $validationdata['discountvalue'] = CommerceMoney::from_major_for_currency(
+                $discountvalue,
+                $selectedcurrency
+            )->get_amount_minor();
+        } catch (coding_exception) {
+            $errors['discountvalue'] = 'invalid';
+        }
+    }
+
+    if ($minimumcart !== '' && $minimumcart !== '0' && $minimumcart !== '0.0' && $minimumcart !== '0.00') {
+        if ($selectedcurrency === '') {
+            $errors['currency'] = 'required';
+        } else {
+            try {
+                $validationdata['minimumcartminor'] = CommerceMoney::from_major_for_currency(
+                    $minimumcart,
+                    $selectedcurrency
+                )->get_amount_minor();
+            } catch (coding_exception) {
+                $errors['minimumcart'] = 'invalid';
+            }
+        }
+    }
     $validationdata['startsat'] = $parsedatetime((string)$data['startsat']);
     $validationdata['endsat'] = $parsedatetime((string)$data['endsat']);
     if ($data['startsat'] !== '' && $validationdata['startsat'] === null) {
@@ -167,10 +206,10 @@ if (data_submitted() && confirm_sesskey()) {
 
     $validator = new CommercePromotionValidator();
     $errors = array_replace($errors, $validator->validate($validationdata, $repository, $id ?: null));
-    if ($discountvalue <= 0) {
+    if (!is_numeric($discountvalue) || (float)$discountvalue <= 0) {
         $errors['discountvalue'] = 'invalid';
     }
-    if ($minimumcart < 0) {
+    if (!is_numeric($minimumcart) || (float)$minimumcart < 0) {
         $errors['minimumcart'] = 'invalid';
     }
 
@@ -371,9 +410,9 @@ echo $selectfield('discounttype', get_string('commerce_promotion_type', 'local_s
     CommercePromotion::TYPE_PERCENTAGE => get_string('commerce_promotion_percentage', 'local_subscriptions'),
     CommercePromotion::TYPE_FIXED => get_string('commerce_promotion_fixed', 'local_subscriptions'),
 ], (string)$data['discounttype'], $errors);
-echo $field('discountvalue', get_string('commerce_promotion_value_display', 'local_subscriptions'), get_string('commerce_promotion_value_display_help', 'local_subscriptions'), $data, $errors, 'number', '0.01');
+echo $field('discountvalue', get_string('commerce_promotion_value_display', 'local_subscriptions'), get_string('commerce_promotion_value_display_help', 'local_subscriptions'), $data, $errors, 'number', 'any');
 echo $selectfield('currency', get_string('currency'), get_string('commerce_promotion_currency_help', 'local_subscriptions'), $currencyoptions, (string)$data['currency'], $errors);
-echo $field('minimumcart', get_string('commerce_promotion_minimum_display', 'local_subscriptions'), get_string('commerce_promotion_minimum_help', 'local_subscriptions'), $data, $errors, 'number', '0.01');
+echo $field('minimumcart', get_string('commerce_promotion_minimum_display', 'local_subscriptions'), get_string('commerce_promotion_minimum_help', 'local_subscriptions'), $data, $errors, 'number', 'any');
 echo $field('priority', get_string('commerce_promotion_priority', 'local_subscriptions'), get_string('commerce_promotion_priority_help', 'local_subscriptions'), $data, $errors, 'number', '1');
 echo $field('globalusagelimit', get_string('commerce_promotion_global_limit', 'local_subscriptions'), get_string('commerce_promotion_global_limit_help', 'local_subscriptions'), $data, $errors, 'number', '1');
 echo $field('userusagelimit', get_string('commerce_promotion_user_limit', 'local_subscriptions'), get_string('commerce_promotion_user_limit_help', 'local_subscriptions'), $data, $errors, 'number', '1');

@@ -35,6 +35,7 @@ use block_xp\local\ruletype\consume_content;
 use block_xp\local\ruletype\produce_content;
 use block_xp\local\ruletype\ruletype;
 use block_xp\local\ruletype\ruletype_with_limit;
+use block_xp\local\ruletype\limit_spec;
 use block_xp\local\strategy\action_collection_strategy;
 use block_xp\local\world;
 use block_xp\local\xp\state_store_with_reason;
@@ -143,8 +144,22 @@ class world_action_collection_strategy implements action_collection_strategy {
                     $reason->set_rule_id($rule->get_id());
                 }
 
-                // Check the reason limit.
-                if ($this->is_reason_limit_reached($targetuserid, $rule, $reason)) {
+                // Check the reason limit. When a positive reward is suppressed because
+                // the same rule/reason already reached its repeat limit, notify block
+                // integrations. This does not alter Level Up XP; it only exposes the
+                // suppression provenance to consumers such as CampusFR team scoring.
+                $reachedlimit = $this->get_reached_reason_limit($targetuserid, $rule, $reason);
+                if ($reachedlimit) {
+                    $points = $rule->get_points();
+                    if ($points > 0) {
+                        $this->notify_points_suppressed_by_reason_limit(
+                            $targetuserid,
+                            $points,
+                            $rule->get_id(),
+                            $reason,
+                            $reachedlimit
+                        );
+                    }
                     break;
                 }
 
@@ -218,8 +233,20 @@ class world_action_collection_strategy implements action_collection_strategy {
      * @return bool
      */
     protected function is_reason_limit_reached(int $userid, instance $rule, reason $reason): bool {
+        return $this->get_reached_reason_limit($userid, $rule, $reason) !== null;
+    }
+
+    /**
+     * Get the reason limit which prevented a positive reward.
+     *
+     * @param int $userid The user ID.
+     * @param instance $rule The rule.
+     * @param reason $reason The reason.
+     * @return limit_spec|null
+     */
+    protected function get_reached_reason_limit(int $userid, instance $rule, reason $reason): ?limit_spec {
         if (!$this->logger instanceof reason_limit_indicator) {
-            return false;
+            return null;
         }
 
         // We only apply limits for rules with points.
@@ -229,11 +256,48 @@ class world_action_collection_strategy implements action_collection_strategy {
                 continue;
             }
             if ($this->logger->is_rule_reason_limit_reached($userid, $rule->get_id(), $reason, $limit)) {
-                return true;
+                return $limit;
             }
         }
 
-        return false;
+        return null;
+    }
+
+    /**
+     * Notify block integrations that a positive reward was suppressed by a repeat limit.
+     *
+     * @param int $userid User id.
+     * @param int $points Configured positive points.
+     * @param int $ruleid Rule id.
+     * @param reason $reason Reward reason.
+     * @param limit_spec $limit Reached limit.
+     * @return void
+     */
+    protected function notify_points_suppressed_by_reason_limit(
+        int $userid,
+        int $points,
+        int $ruleid,
+        reason $reason,
+        limit_spec $limit
+    ): void {
+        $hooks = get_plugin_list_with_function('block', 'xp_points_suppressed_by_reason_limit');
+        foreach ($hooks as $plugin => $fullfunctionname) {
+            try {
+                component_callback($plugin, 'xp_points_suppressed_by_reason_limit', [
+                    $this->world->get_context(),
+                    $userid,
+                    $points,
+                    $ruleid,
+                    $reason,
+                    $limit,
+                ]);
+            } catch (\Throwable $e) {
+                debugging(
+                    "Error while calling $plugin's xp_points_suppressed_by_reason_limit callback: " . $e->getMessage(),
+                    DEBUG_DEVELOPER
+                );
+            }
+        }
     }
 
     /**

@@ -15,6 +15,10 @@ interface AlfaPaymentGateway {
         AlfaGatewayRequest $request
     ): AlfaGatewayResponse;
 
+    public function prepare_widget(
+        AlfaGatewayRequest $request
+    ): AlfaGatewayResponse;
+
     public function retrieve(
         string $orderid
     ): AlfaGatewayResponse;
@@ -22,4 +26,16 @@ interface AlfaPaymentGateway {
     public function cancel(
         string $orderid
     ): AlfaGatewayResponse;
+
+    public function refund(
+        AlfaRefundRequest $request
+    ): AlfaRefundResponse;
+
+    /**
+     * @return AlfaRefundResponse[]
+     */
+    public function list_refunds(
+        string $orderid,
+        string $currency
+    ): array;
 }

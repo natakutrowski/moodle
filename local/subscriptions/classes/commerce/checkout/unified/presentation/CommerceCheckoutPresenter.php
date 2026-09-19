@@ -41,7 +41,13 @@ final class CommerceCheckoutPresenter {
                 'description' => get_string('commerce_checkout_provider_' . $key . '_desc', 'local_subscriptions'),
                 'available' => $available,
                 'selected' => $available && $key === $selectedprovider,
-                'iconurl' => (new \moodle_url('/local/subscriptions/pix/email/' . $key . '.png'))->out(false),
+                'iconurl' => (
+                    new \moodle_url(
+                        '/local/subscriptions/pix/providers/'
+                        . $key
+                        . '.svg'
+                    )
+                )->out(false),
             ];
         }
 

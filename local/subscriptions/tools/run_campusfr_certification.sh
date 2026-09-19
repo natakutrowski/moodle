@@ -78,16 +78,16 @@ run_step \
     sudo -u www-data php admin/cli/purge_caches.php
 
 run_step \
+    "PHPUnit theme/edly" \
+    vendor/bin/phpunit --testsuite theme_edly_testsuite --colors=never
+
+run_step \
     "PHPUnit local/campus" \
     vendor/bin/phpunit --testsuite local_campus_testsuite --colors=never
 
 run_step \
     "PHPUnit local/subscriptions" \
     vendor/bin/phpunit --testsuite local_subscriptions_testsuite --colors=never
-
-run_step \
-    "PHPUnit theme/edly" \
-    vendor/bin/phpunit --testsuite theme_edly_testsuite --colors=never
 
 {
     echo

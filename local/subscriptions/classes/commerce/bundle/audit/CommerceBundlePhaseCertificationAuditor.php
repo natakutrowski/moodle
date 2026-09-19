@@ -7,6 +7,7 @@ namespace local_subscriptions\commerce\bundle\audit;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 
 /** Final certification of the complete 7.94E Commerce Products and Bundles phase. */
 final class CommerceBundlePhaseCertificationAuditor {
@@ -47,7 +48,7 @@ final class CommerceBundlePhaseCertificationAuditor {
                 }
             }
 
-            foreach (['EUR', 'RUB'] as $currency) {
+            foreach ((new CommerceCurrencyRegistry())->enabled() as $currency) {
                 try {
                     $this->factory->bundle_pricing_service()->quote($product->get_sku(), $currency);
                     $pricedquotes++;

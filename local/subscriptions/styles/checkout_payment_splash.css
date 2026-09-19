@@ -1,0 +1,63 @@
+.commerce-payment-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 10060;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(247,247,252,.96);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, visibility .18s ease;
+}
+
+.commerce-payment-splash.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.commerce-payment-splash__glass {
+    width: min(100%, 34rem);
+    padding: 2rem;
+    border: 1px solid rgba(255,255,255,.9);
+    border-radius: 1.5rem;
+    background: rgba(255,255,255,.82);
+    box-shadow: 0 1.5rem 4rem rgba(41,39,85,.12);
+    text-align: center;
+    backdrop-filter: blur(18px);
+}
+
+.commerce-payment-splash__spinner {
+    display: grid;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin: 0 auto 1rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #f1edff;
+    font-size: 2rem;
+    animation: commerce-payment-splash-pulse 1.4s ease-in-out infinite;
+}
+
+.commerce-payment-splash__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.commerce-payment-splash__message {
+    margin: .5rem 0 0;
+    color: #6c757d;
+}
+
+@keyframes commerce-payment-splash-pulse {
+    50% { transform: scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .commerce-payment-splash__spinner {
+        animation: none;
+    }
+}

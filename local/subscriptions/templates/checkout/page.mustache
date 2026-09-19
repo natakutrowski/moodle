@@ -1,48 +1,39 @@
 
-<div class="payment-provider-transition"
-     data-payment-provider-transition
-     data-alfa-label="{{providertransitionalfa}}"
-     data-default-label="{{providertransitiondefault}}"
-     role="status"
-     aria-live="polite"
-     aria-atomic="true"
-     aria-hidden="true">
-    <div class="payment-provider-transition__glass">
-        <div class="payment-provider-transition__hourglass-wrap">
-            <div class="payment-provider-transition__orbit" aria-hidden="true"></div>
-            <div class="payment-provider-transition__hourglass" aria-hidden="true">
-                <i class="fa-solid fa-hourglass-half"></i>
-            </div>
-        </div>
-        <h2 class="payment-provider-transition__title">{{providertransitiontitle}}</h2>
-        <p class="payment-provider-transition__message">{{providertransitionmessage}}</p>
-        <div class="payment-provider-transition__provider">
-            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-            <span data-transition-provider>{{providertransitiondefault}}</span>
-        </div>
-        <div class="payment-provider-transition__security">
-            <span class="payment-provider-transition__security-icon" aria-hidden="true">
-                <i class="fa-solid fa-lock"></i>
-            </span>
-            <span>
-                <strong>{{providertransitionsecuritytitle}}</strong>
-                <small>{{providertransitionsecuritymessage}}</small>
-            </span>
-        </div>
-    </div>
-</div>
-
 <div class="commerce-checkout container py-4 py-lg-5">
-    <div class="commerce-checkout__header mb-4 mb-lg-5">
-        <h1 class="display-5 fw-bold mb-2">{{title}}</h1>
-        <p class="lead text-muted mb-0">{{subtitle}}</p>
+    {{> local_subscriptions/checkout/steps}}
+
+    <div class="commerce-checkout__header mb-4">
+        <h1 class="display-5 fw-bold mb-0">{{title}}</h1>
     </div>
 
     {{#issues}}
         <div class="alert alert-warning" role="alert">{{message}}</div>
     {{/issues}}
 
-    {{> local_subscriptions/checkout/steps}}
+    {{#haspedagogicalitems}}
+        <div class="commerce-cart-seat-summary {{#seatreservationsvalid}}is-active{{/seatreservationsvalid}}{{#seatreservationsexpired}}is-expired{{/seatreservationsexpired}}"
+             role="status"
+             data-cart-seat-summary
+             data-expires-at="{{seatreservationexpiresat}}">
+            <div class="commerce-cart-seat-summary__icon" aria-hidden="true">
+                <i class="fa-solid {{#seatreservationsvalid}}fa-ticket{{/seatreservationsvalid}}{{#seatreservationsexpired}}fa-clock-rotate-left{{/seatreservationsexpired}}"></i>
+            </div>
+            <div class="commerce-cart-seat-summary__content">
+                {{#seatreservationsvalid}}
+                    <strong>{{checkoutseatreservedlabel}}</strong>
+                    <div class="commerce-cart-seat-summary__timer">
+                        {{seatreservationcountdownlabel}}
+                        <span data-cart-seat-countdown>--:--</span>
+                    </div>
+                    <div class="commerce-cart-seat-summary__expired-help">{{checkoutseatreservedhelp}}</div>
+                {{/seatreservationsvalid}}
+                {{#seatreservationsexpired}}
+                    <strong>{{checkoutseatexpiredlabel}}</strong>
+                    <div class="commerce-cart-seat-summary__expired-help">{{checkoutseatexpiredhelp}}</div>
+                {{/seatreservationsexpired}}
+            </div>
+        </div>
+    {{/haspedagogicalitems}}
 
     <div class="commerce-checkout__grid">
         <section class="commerce-checkout__summary card border-0 shadow-sm" aria-labelledby="commerce-checkout-summary-title">
@@ -89,6 +80,15 @@
                                 {{#hastype}}<div class="small text-muted">{{typelabel}}</div>{{/hastype}}
                                 <h3 class="h6 mb-1">{{name}}</h3>
                                 <div class="small text-muted">× {{quantity}}</div>
+                                {{#ispromotionjoin}}
+                                    <div class="mt-2"><span class="commerce-storefront-price__badge commerce-storefront-price__badge--promotion">{{promotionjoinbadge}}</span></div>
+                                {{/ispromotionjoin}}
+                                {{#hasaccesspromisepromotion}}
+                                    <div class="commerce-checkout-item__promotion mt-2">
+                                        <i class="fa-solid fa-user-group" aria-hidden="true"></i>
+                                        <span>{{accesspromisepromotionlabel}}</span>
+                                    </div>
+                                {{/hasaccesspromisepromotion}}
                             </div>
                             <div class="commerce-checkout-item__price">
                                 {{#ispersonaloffer}}
@@ -148,9 +148,10 @@
         </section>
 
         <aside class="commerce-checkout__payment card border-0 shadow-sm" aria-labelledby="commerce-checkout-payment-title">
-            <div class="card-body p-4 p-lg-5">
-                <h2 id="commerce-checkout-payment-title" class="h3 mb-2">{{paymenttitle}}</h2>
-                <p class="text-muted mb-4">{{paymentdescription}}</p>
+            <div class="card-body p-4 p-lg-5 commerce-checkout-payment-panel">
+                <div class="commerce-checkout-payment-heading">
+                    <h2 id="commerce-checkout-payment-title" class="h3 mb-0">{{paymenttitle}}</h2>
+                </div>
 
                 {{#recoveringunfinishedguest}}
                     <div class="alert alert-info border-0 commerce-checkout-unfinished-recovery mb-4" role="status">
@@ -189,17 +190,39 @@
                         </div>
 
                         {{#hasembeddedlogin}}
-                            <form method="post" action="{{embeddedloginactionurl}}" class="commerce-checkout-login-gate__form mt-3" autocomplete="on">
+                            <form method="post"
+                                  action="{{embeddedloginactionurl}}"
+                                  class="commerce-checkout-login-gate__form mt-3"
+                                  data-existing-account-inline-login
+                                  data-login-url="{{embeddedloginajaxurl}}"
+                                  data-sesskey="{{sesskey}}"
+                                  data-login-invalid="{{embeddedlogininvalid}}"
+                                  data-login-working="{{embeddedloginworking}}"
+                                  data-login-error="{{embeddedloginerror}}"
+                                  autocomplete="on">
                                 <input type="hidden" name="logintoken" value="{{embeddedloginlogintoken}}">
                                 <input type="hidden" name="username" value="{{embeddedloginusername}}">
                                 <div class="mb-3">
                                     <label class="form-label">{{#str}}email{{/str}}</label>
-                                    <div class="form-control bg-light" aria-readonly="true">{{embeddedloginemail}}</div>
+                                    <div class="commerce-checkout-login-gate__verified-email"
+                                         data-existing-account-verified-email
+                                         aria-readonly="true">
+                                        <span>{{embeddedloginemail}}</span>
+                                        <small>
+                                            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                                            {{embeddedloginverifiedlabel}}
+                                        </small>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label" for="commerce-checkout-existing-password">{{embeddedloginpasswordlabel}}</label>
-                                    <input class="form-control" id="commerce-checkout-existing-password" type="password" name="password" required autocomplete="current-password">
+                                    <input class="form-control" id="commerce-checkout-existing-password" type="password" name="password" required aria-required="true" autocomplete="current-password">
                                 </div>
+                                <div class="commerce-checkout-login-gate__feedback small mb-3"
+                                     data-existing-account-login-feedback
+                                     role="status"
+                                     aria-live="polite"
+                                     hidden></div>
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary">{{embeddedloginsubmitlabel}}</button>
                                     {{^ispersonaloffer}}<a class="btn btn-link" href="{{otheremailurl}}">{{otheremaillabel}}</a>{{/ispersonaloffer}}
@@ -218,7 +241,15 @@
                 {{/existingaccount}}
 
                 {{^existingaccount}}
-                <form method="post" action="{{actionurl}}" data-provider-experience data-provider-context="standard" data-product="{{title}}" data-price="{{totalformatted}}" {{#showguestidentity}}data-guest-checkout-form novalidate{{/showguestidentity}}>
+                <form method="post" action="{{actionurl}}"
+                      data-checkout-payment-form
+                      {{#personalofferneedsidentitycompletion}}data-personal-offer-identity-completion
+                      data-personal-offer-confirm-url="{{personalofferidentityconfirmurl}}"{{/personalofferneedsidentitycompletion}}
+                      data-hosted-splash-methods="{{hostedsplashmethodsjson}}"
+                      data-product="{{title}}"
+                      data-price="{{totalformatted}}"
+                      data-guest-payment-locked="{{#guestpaymentlocked}}1{{/guestpaymentlocked}}{{^guestpaymentlocked}}0{{/guestpaymentlocked}}"
+                      {{#showguestidentity}}data-guest-checkout-form novalidate{{/showguestidentity}}>
                     <input type="hidden" name="currency" value="{{currency}}">
                     <input type="hidden" name="flow" value="{{flow}}">
                     <input type="hidden" name="source" value="{{source}}">
@@ -238,69 +269,505 @@
                         {{#personalofferneedsfirstname}}
                             <div class="mb-3">
                                 <label class="form-label" for="personal-offer-firstname">{{#str}}firstname{{/str}}</label>
-                                <input class="form-control" id="personal-offer-firstname" type="text" name="firstname" required maxlength="100" autocomplete="given-name">
+                                <input class="form-control" id="personal-offer-firstname" type="text" name="firstname" required aria-required="true" maxlength="100" autocomplete="given-name">
                             </div>
                         {{/personalofferneedsfirstname}}
                         {{#personalofferneedslastname}}
                             <div class="mb-3">
                                 <label class="form-label" for="personal-offer-lastname">{{#str}}lastname{{/str}}</label>
-                                <input class="form-control" id="personal-offer-lastname" type="text" name="lastname" required maxlength="100" autocomplete="family-name">
+                                <input class="form-control" id="personal-offer-lastname" type="text" name="lastname" required aria-required="true" maxlength="100" autocomplete="family-name">
                             </div>
                         {{/personalofferneedslastname}}
+                        {{#personalofferneedsidentitycompletion}}
+                            <div data-personal-offer-identity-completion-wrap>
+                            <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-outline-primary btn-sm" type="button" data-personal-offer-identity-confirm>
+                                    {{guestidentityconfirm}}
+                                </button>
+                                <div class="small" data-personal-offer-identity-feedback role="status" aria-live="polite"></div>
+                            </div>
+                            </div>
+                        {{/personalofferneedsidentitycompletion}}
                     {{/ispersonaloffer}}
 
                     {{#showguestidentity}}
-                        <section class="commerce-checkout-identity mb-4" aria-labelledby="commerce-checkout-identity-title">
+                        <section class="commerce-checkout-identity commerce-checkout-payment-section mb-0"
+                                 aria-labelledby="commerce-checkout-identity-title"
+                                 data-checkout-guest-identity
+                                 data-otp-start-url="{{guestotpstarturl}}"
+                                 data-otp-verify-url="{{guestotpverifyurl}}"
+                                 data-personal-offer-bearer-proof="{{#personalofferbearerproof}}1{{/personalofferbearerproof}}{{^personalofferbearerproof}}0{{/personalofferbearerproof}}"
+                                 data-personal-offer-confirm-url="{{personalofferidentityconfirmurl}}"
+                                 data-otp-reset-url="{{otheremailurl}}"
+                                 data-otp-sending="{{guestotpsending}}"
+                                 data-otp-sent="{{guestotpsent}}"
+                                 data-otp-checking="{{guestotpchecking}}"
+                                 data-otp-invalid="{{guestotpinvalid}}"
+                                 data-otp-expired="{{guestotpexpired}}"
+                                 data-otp-limited="{{guestotplimited}}"
+                                 data-otp-error="{{guestotperror}}"
+                                 data-otp-verified="{{guestotpverified}}">
                             <h3 id="commerce-checkout-identity-title" class="h5 mb-2">{{guestidentitytitle}}</h3>
                             <p class="small text-muted mb-3">{{guestidentitydescription}}</p>
                             <div class="mb-3">
                                 <label class="form-label" for="guest-email">Email</label>
                                 <div class="commerce-guest-checkout__input-wrap">
-                                    <input class="form-control" id="guest-email" type="email" name="email" value="{{email}}" required aria-required="true" maxlength="100" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="guest-email-feedback" aria-invalid="false">
+                                    <input class="form-control" id="guest-email" type="email" name="email" value="{{email}}" required aria-required="true" maxlength="100" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="guest-email-feedback" aria-invalid="false"{{#guestemailreadonly}} readonly aria-readonly="true"{{/guestemailreadonly}}>
                                     <span class="commerce-guest-checkout__status" aria-hidden="true"></span>
                                 </div>
                                 <div id="guest-email-feedback" class="commerce-guest-checkout__feedback" aria-live="polite" data-valid-label="{{emailvalidlabel}}" data-invalid-label="{{emailinvalidlabel}}"></div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label" for="guest-firstname">{{#str}}firstname{{/str}}</label>
-                                <input class="form-control" id="guest-firstname" data-required-name type="text" name="firstname" value="{{firstname}}" required aria-required="true" maxlength="100" autocomplete="given-name">
+                                <div class="commerce-guest-checkout__input-wrap">
+                                    <input class="form-control"
+                                           id="guest-firstname"
+                                           data-identity-name
+                                           type="text"
+                                           name="firstname"
+                                           value="{{firstname}}"
+                                           maxlength="100"
+                                           autocomplete="given-name"{{#guestfirstnamereadonly}}
+                                           readonly aria-readonly="true"{{/guestfirstnamereadonly}}>
+                                    <span class="commerce-guest-checkout__status"
+                                          data-identity-name-status
+                                          aria-hidden="true"></span>
+                                </div>
                             </div>
                             <div>
                                 <label class="form-label" for="guest-lastname">{{#str}}lastname{{/str}}</label>
-                                <input class="form-control" id="guest-lastname" data-required-name type="text" name="lastname" value="{{lastname}}" required aria-required="true" maxlength="100" autocomplete="family-name">
+                                <div class="commerce-guest-checkout__input-wrap">
+                                    <input class="form-control"
+                                           id="guest-lastname"
+                                           data-identity-name
+                                           type="text"
+                                           name="lastname"
+                                           value="{{lastname}}"
+                                           maxlength="100"
+                                           autocomplete="family-name"{{#guestlastnamereadonly}}
+                                           readonly aria-readonly="true"{{/guestlastnamereadonly}}>
+                                    <span class="commerce-guest-checkout__status"
+                                          data-identity-name-status
+                                          aria-hidden="true"></span>
+                                </div>
+                            </div>
+
+                            <div class="commerce-guest-identity-confirm"
+                                 data-guest-identity-confirm-wrap>
+                                <button class="btn btn-outline-primary btn-sm"
+                                        type="button"
+                                        data-guest-identity-confirm>
+                                    {{guestidentityconfirm}}
+                                </button>
+                            </div>
+
+                            {{^personalofferbearerproof}}
+                            <div class="commerce-guest-identity-otp"
+                                 data-guest-identity-otp
+                                 hidden>
+                                <div class="commerce-guest-identity-otp__heading">
+                                    <span class="commerce-guest-identity-otp__icon"
+                                          aria-hidden="true">✉</span>
+                                    <div>
+                                        <strong>{{guestotptitle}}</strong>
+                                        <p class="mb-0 small text-muted">{{guestotpmessage}}</p>
+                                    </div>
+                                </div>
+                                <label class="visually-hidden"
+                                       for="guest-identity-otp-code">{{guestotptitle}}</label>
+                                <input class="form-control commerce-guest-identity-otp__code"
+                                       id="guest-identity-otp-code"
+                                       data-guest-identity-otp-code
+                                       type="text"
+                                       inputmode="numeric"
+                                       autocomplete="one-time-code"
+                                       maxlength="6"
+                                       pattern="[0-9]{6}"
+                                       aria-describedby="guest-identity-otp-status">
+                                <div class="commerce-guest-identity-otp__actions">
+                                    <button class="btn btn-link p-0"
+                                            type="button"
+                                            data-guest-identity-otp-resend data-resend-label="{{guestotpresend}}">
+                                        {{guestotpresend}}
+                                    </button>
+                                </div>
+                                <div id="guest-identity-otp-status"
+                                     class="commerce-guest-identity-otp__status small"
+                                     data-guest-identity-otp-status
+                                     role="status"
+                                     aria-live="polite"></div>
+                            </div>
+                            {{/personalofferbearerproof}}
+
+                            <div class="commerce-guest-identity-verified"
+                                 data-guest-identity-verified
+                                 hidden>
+                                <span class="commerce-guest-identity-verified__mark"
+                                      aria-hidden="true">✓</span>
+                                <span>{{guestotpverified}}</span>
+                                {{#guestallowidentityreset}}
+                                <a href="{{otheremailurl}}"
+                                   data-guest-identity-reset>{{guestotpotheremail}}</a>
+                                {{/guestallowidentityreset}}
                             </div>
                         </section>
                     {{/showguestidentity}}
-
-                    <fieldset class="commerce-checkout-providers mb-4" {{#existingaccount}}disabled{{/existingaccount}}>
-                        <legend class="form-label fw-semibold">{{providerlabel}}</legend>
-                        <div class="d-grid gap-2">
-                            {{#providers}}
-                                {{#available}}
-                                    <label class="commerce-checkout-provider{{#selected}} is-selected{{/selected}}">
-                                        <input class="form-check-input" type="radio" name="provider" value="{{key}}" {{#selected}}checked{{/selected}}>
-                                        <img src="{{iconurl}}" alt="" class="commerce-checkout-provider__icon">
-                                        <span>
-                                            <strong class="d-block">{{label}}</strong>
-                                            <small class="text-muted">{{description}}</small>
-                                        </span>
-                                    </label>
-                                {{/available}}
-                            {{/providers}}
+                    {{#guestpaymentlocked}}
+                        <div class="commerce-guest-payment-gate"
+                             data-guest-payment-gate-message
+                             role="status">
+                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                            <span>{{guestpaymentgatehint}}</span>
                         </div>
+                    {{/guestpaymentlocked}}
+{{#hasexpresswalletcandidate}}
+                        <section class="commerce-checkout-express-wallets is-probing{{#guestpaymentlocked}} is-guest-payment-locked{{/guestpaymentlocked}}"
+                                 data-checkout-express-wallet-section
+                                 data-guest-payment-control
+                                 aria-disabled="{{#guestpaymentlocked}}true{{/guestpaymentlocked}}{{^guestpaymentlocked}}false{{/guestpaymentlocked}}"
+                                 data-wallet-state="probing"
+                                 data-campus-wallet-methods="{{expresswalletmethodsjson}}">
+                            <div class="commerce-checkout-express-wallets__loading"
+                                 data-checkout-express-wallet-loading
+                                 role="status"
+                                 aria-live="polite">
+                                <span class="spinner-border spinner-border-sm"
+                                      aria-hidden="true"></span>
+                                <span>{{expresswalletprobing}}</span>
+                            </div>
+                            <div data-checkout-express-wallet-element></div>
+                            <div class="alert alert-danger small mt-2 mb-0"
+                                 data-checkout-express-wallet-error
+                                 role="alert"
+                                 hidden></div>
+                            <div class="commerce-checkout-express-wallets__divider">
+                                <span>{{checkoutor}}</span>
+                            </div>
+                        </section>
+                    {{/hasexpresswalletcandidate}}
+
+                    <fieldset class="commerce-checkout-providers commerce-checkout-payment-methods commerce-checkout-payment-section mb-0{{#guestpaymentlocked}} is-guest-payment-locked{{/guestpaymentlocked}}"
+                              data-guest-payment-control
+                              aria-disabled="{{#guestpaymentlocked}}true{{/guestpaymentlocked}}{{^guestpaymentlocked}}false{{/guestpaymentlocked}}"
+                              {{#guestpaymentlocked}}disabled{{/guestpaymentlocked}}>
+                        <legend class="form-label fw-semibold">{{paymentmethodlabel}}</legend>
+
+                        {{#hasmethods}}
+                            {{#haspaymentpolicyadvice}}
+                                <div class="alert alert-info py-2 mb-3" role="status">
+                                    {{paymentpolicyadvice}}
+                                </div>
+                            {{/haspaymentpolicyadvice}}
+
+                            {{#hasprimaryactioncards}}
+                            <div class="commerce-checkout-action-cards commerce-checkout-action-cards--primary" data-payment-action-cards="primary">
+                                {{#primaryactioncards}}
+                                    <label class="commerce-checkout-action-card commerce-checkout-action-card--primary{{#selected}} is-selected{{/selected}}"
+                                           data-payment-method="{{key}}"
+                                           data-payment-action-card="{{key}}"
+                                           role="button"
+                                           tabindex="0"
+                                           aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">
+                                        <input class="visually-hidden" type="radio" name="paymentmethod" value="{{key}}" {{#selected}}checked{{/selected}}>
+                                        <span class="commerce-checkout-action-card__icon" aria-hidden="true">
+                                            {{#hasiconurl}}<img src="{{iconurl}}" alt="">{{/hasiconurl}}
+                                            {{^hasiconurl}}<i class="{{iconclass}}"></i>{{/hasiconurl}}
+                                        </span>
+                                        <span class="commerce-checkout-action-card__copy">
+                                            <strong>{{label}}</strong>
+                                            <small>{{description}}</small>
+                                        </span>
+                                        <span class="commerce-checkout-action-card__brand">
+                                            {{#iscard}}
+                                                <span class="commerce-checkout-payment-method__brands" aria-label="Visa, Mastercard, {{cardnetworkthirdlabel}}">
+                                                    <img src="{{visaiconurl}}" alt="Visa">
+                                                    <img src="{{mastercardiconurl}}" alt="Mastercard">
+                                                    <img src="{{cardnetworkthirdiconurl}}" alt="{{cardnetworkthirdlabel}}" class="commerce-checkout-payment-method__network-logo--cb">
+                                                </span>
+                                            {{/iscard}}
+                                            {{#ispaypal}}
+                                                <span class="commerce-checkout-payment-method__brands commerce-checkout-payment-method__brands--paypal">
+                                                    <img src="{{paypallogourl}}" alt="PayPal">
+                                                </span>
+                                            {{/ispaypal}}
+                                        </span>
+                                        <span class="commerce-checkout-action-card__selected-mark" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                                    </label>
+                                {{/primaryactioncards}}
+                            </div>
+                            {{/hasprimaryactioncards}}
+
+                            {{#hassecondaryactioncards}}
+                            <div class="commerce-checkout-action-cards commerce-checkout-action-cards--secondary" data-payment-action-cards="secondary">
+                                {{#secondaryactioncards}}
+                                    {{#isquickaction}}
+                                        <input class="visually-hidden"
+                                               type="radio"
+                                               name="paymentmethod"
+                                               value="{{key}}"
+                                               data-quick-payment-radio="{{key}}"
+                                               {{#selected}}checked{{/selected}}>
+                                        <button type="button"
+                                                class="commerce-checkout-action-card commerce-checkout-action-card--secondary{{#selected}} is-selected{{/selected}}"
+                                                data-payment-method="{{key}}"
+                                                data-payment-action-card="{{key}}"
+                                                data-quick-payment-action="{{key}}"
+                                                aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}"
+                                                {{#launchdisabled}}disabled{{/launchdisabled}}>
+                                            <span class="commerce-checkout-action-card__secondary-content">
+                                                <span class="commerce-checkout-action-card__icon" aria-hidden="true">
+                                                    {{#hasiconurl}}<img src="{{iconurl}}" alt="">{{/hasiconurl}}
+                                                    {{^hasiconurl}}<i class="{{iconclass}}"></i>{{/hasiconurl}}
+                                                </span>
+                                                <strong>{{label}}</strong>
+                                            </span>
+                                            <span class="commerce-checkout-action-card__selected-mark" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                                        </button>
+                                    {{/isquickaction}}
+                                    {{^isquickaction}}
+                                        <label class="commerce-checkout-action-card commerce-checkout-action-card--secondary{{#selected}} is-selected{{/selected}}"
+                                               data-payment-method="{{key}}"
+                                               data-payment-action-card="{{key}}"
+                                               role="button"
+                                               tabindex="0"
+                                               aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">
+                                            <input class="visually-hidden" type="radio" name="paymentmethod" value="{{key}}" {{#selected}}checked{{/selected}}>
+                                            <span class="commerce-checkout-action-card__secondary-content">
+                                                <span class="commerce-checkout-action-card__icon" aria-hidden="true">
+                                                    {{#hasiconurl}}<img src="{{iconurl}}" alt="">{{/hasiconurl}}
+                                                    {{^hasiconurl}}<i class="{{iconclass}}"></i>{{/hasiconurl}}
+                                                </span>
+                                                <strong>{{label}}</strong>
+                                            </span>
+                                            <span class="commerce-checkout-action-card__selected-mark" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                                        </label>
+                                    {{/isquickaction}}
+                                {{/secondaryactioncards}}
+                            </div>
+                            {{/hassecondaryactioncards}}
+                        {{/hasmethods}}
+
+                        {{^hasmethods}}
+                            <div class="alert alert-warning mb-0">{{launchhint}}</div>
+                        {{/hasmethods}}
                     </fieldset>
 
-                    <div class="commerce-checkout-legal form-check mb-4">
-                        <input class="form-check-input" type="checkbox" id="commerce-checkout-accept-terms" name="accept_terms" value="1" required aria-required="true" data-checkout-terms>
-                        <label class="form-check-label small" for="commerce-checkout-accept-terms">{{{legalacceptlabel}}}</label>
+                    {{#haspaypalcandidate}}
+                    <div class="commerce-checkout-paypal-embedded"
+                         data-checkout-paypal-embedded
+                         data-guest-payment-control
+                         data-sdk-url="{{paypalsdkurl}}"
+                         data-client-id="{{paypalclientid}}"
+                         data-currency="{{paypalcurrency}}"
+                         data-locale="{{paypallocale}}"
+                         data-action-url="{{paypalactionurl}}"
+                         data-prepare-error="{{paypalprepareerror}}"
+                         data-popup-error="{{paypalpopuperror}}"
+                         data-cancelled-message="{{paypalcancelled}}"
+                         hidden>
+                        <div class="alert alert-danger small mb-0"
+                             data-checkout-paypal-error
+                             role="alert"
+                             aria-live="polite"
+                             hidden></div>
+                    </div>
+                    {{/haspaypalcandidate}}
+
+                    {{#hasalfawidgetcandidate}}
+                    {{#alfaiframeenabled}}
+                    <section class="commerce-checkout-alfa-iframe commerce-checkout-payment-section"
+                             data-checkout-alfa-iframe
+                             data-guest-payment-control
+                             hidden>
+                        <div class="commerce-checkout-alfa-iframe__loading"
+                             data-checkout-alfa-iframe-loading
+                             hidden>
+                            <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+                            <div>
+                                <strong>{{alfaiframepreparingtitle}}</strong>
+                                <div class="small text-muted">{{alfaiframepreparingmessage}}</div>
+                            </div>
+                        </div>
+                        <div class="commerce-checkout-alfa-widget__heading">
+                            <strong>{{alfaiframetitle}}</strong>
+                            <span class="small text-muted">{{alfaiframedescription}}</span>
+                        </div>
+                        <div class="commerce-checkout-alfa-iframe__frame-wrap">
+                            <iframe data-checkout-alfa-iframe-frame
+                                    src="about:blank"
+                                    title="{{alfaiframetitle}}"
+                                    loading="eager"
+                                    scrolling="no"
+                                    allow="payment *"
+                                    referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                        </div>
+                        <a data-checkout-alfa-iframe-fallback
+                           class="btn btn-outline-secondary w-100 mt-3"
+                           href="#"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           hidden>
+                            <span>{{alfaiframefallbacklabel}}</span>
+                            <span class="commerce-checkout-alfa-iframe__external-icon"
+                                  aria-hidden="true">↗</span>
+                        </a>
+                    </section>
+                    {{/alfaiframeenabled}}
+                    {{/hasalfawidgetcandidate}}
+
+                    {{#hasalfawidgetcandidate}}
+                    <script id="alfa-payment-script"
+                            src="{{alfawidgetscripturl}}"></script>
+                    <section class="commerce-checkout-alfa-widget commerce-checkout-payment-section"
+                             data-checkout-alfa-widget
+                             data-action-url="{{alfawidgetactionurl}}"
+                             data-prepare-error="{{alfawidgetprepareerror}}"
+                             data-open-label="{{alfawidgetopenlabel}}"
+                             data-ready-label="{{alfawidgetreadylabel}}"
+                             data-default-label="{{alfawidgetdefaultlabel}}"
+                             data-card-label="{{alfawidgetcardlabel}}"
+                             data-checkout-language="{{alfawidgetcheckoutlanguage}}"
+                             data-debug="{{alfawidgetdebug}}"
+                             data-server-diagnostics="{{alfawidgetserverdiagnosticsjson}}"
+                             hidden>
+                        <div class="commerce-checkout-alfa-widget__heading">
+                            <strong>{{alfawidgettitle}}</strong>
+                            <span class="small text-muted">{{alfawidgetdescription}}</span>
+                        </div>
+                        <div data-checkout-alfa-widget-mount></div>
+                        <div class="alert alert-danger small mt-3 mb-0"
+                             role="alert"
+                             aria-live="polite"
+                             data-checkout-alfa-widget-error
+                             hidden></div>
+                    </section>
+                    {{/hasalfawidgetcandidate}}
+
+                    {{#hassbpcandidate}}
+                    <section class="commerce-checkout-sbp commerce-checkout-payment-section"
+                             data-checkout-alfa-sbp
+                             data-action-url="{{sbpactionurl}}"
+                             data-checkout-language="{{sbpcheckoutlanguage}}"
+                             data-prepare-error="{{sbpprepareerror}}"
+                             data-open-bank-label="{{sbpopenbanklabel}}"
+                             data-verify-label="{{sbpverifylabel}}"
+                             data-default-label="{{sbpdefaultlabel}}"
+                             hidden>
+                        <div class="commerce-checkout-alfa-iframe__loading"
+                             data-checkout-alfa-sbp-loading
+                             hidden>
+                            <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+                            <div>
+                                <strong>{{sbppreparingtitle}}</strong>
+                                <div class="small text-muted">{{sbppreparingmessage}}</div>
+                            </div>
+                        </div>
+                        <div class="text-center" data-checkout-alfa-sbp-content>
+                            <strong class="d-block mb-1">{{sbptitle}}</strong>
+                            <span class="small text-muted d-block mb-3">{{sbpdescription}}</span>
+                            <img data-checkout-alfa-sbp-qr
+                                 src=""
+                                 alt="SBP QR"
+                                 class="img-fluid mx-auto mb-3"
+                                 style="max-width: 320px;"
+                                 hidden>
+                            <div class="d-grid gap-2">
+                                <a data-checkout-alfa-sbp-open
+                                   class="btn btn-primary"
+                                   href="#"
+                                   hidden>{{sbpopenbanklabel}}</a>
+                                <a data-checkout-alfa-sbp-verify
+                                   class="btn btn-outline-secondary"
+                                   href="#"
+                                   hidden>{{sbpverifylabel}}</a>
+                            </div>
+                            <div class="alert alert-danger small mt-3 mb-0"
+                                 role="alert"
+                                 aria-live="polite"
+                                 data-checkout-alfa-sbp-error
+                                 hidden></div>
+                        </div>
+                    </section>
+                    {{/hassbpcandidate}}
+
+                    <section class="commerce-checkout-inline-card commerce-checkout-payment-section"
+                             data-checkout-inline-card
+                             data-open-label="{{cardinlineopenlabel}}"
+                             data-confirm-label="{{cardinlineconfirmlabel}}"
+                             data-prepare-error="{{cardinlineprepareerror}}"
+                             data-confirm-error="{{cardinlineconfirmerror}}"
+                             hidden>
+                        <div class="commerce-checkout-inline-card__heading">
+                            <strong>{{cardinlinetitle}}</strong>
+                            <span class="small text-muted">{{cardinlinedescription}}</span>
+                        </div>
+                        <div class="commerce-checkout-inline-card__element"
+                             data-checkout-inline-card-element></div>
+                        <div class="alert alert-danger small mt-3 mb-0"
+                             role="alert"
+                             aria-live="polite"
+                             data-checkout-inline-card-error
+                             hidden></div>
+                    </section>
+
+                    <div class="commerce-checkout-trust-strip commerce-checkout-payment-section" aria-label="{{paymentsecurelabel}}">
+                        <span class="commerce-checkout-trust-strip__item">
+                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                            <span>{{checkoutsecureencrypted}}</span>
+                        </span>
+                        <span class="commerce-checkout-trust-strip__item">
+                            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                            <span>{{checkoutdataprotected}}</span>
+                        </span>
+                        <span class="commerce-checkout-trust-strip__item">
+                            <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                            <span>{{instantaccesslabel}}</span>
+                        </span>
                     </div>
 
-                    <button class="btn btn-primary btn-lg w-100" type="submit" data-guest-checkout-submit data-checkout-submit {{#launchdisabled}}disabled{{/launchdisabled}}>{{paylabel}}</button>
+                    <div class="commerce-checkout-legal form-check commerce-checkout-payment-section mb-0"
+                         data-checkout-legal-card
+                         role="checkbox"
+                         aria-checked="false"
+                         tabindex="0">
+                        <input class="form-check-input visually-hidden"
+                               type="checkbox"
+                               id="commerce-checkout-accept-terms"
+                               name="accept_terms"
+                               value="1"
+                               required
+                               aria-required="true"
+                               data-checkout-terms>
+                        <span class="commerce-checkout-legal__status-checkbox" aria-hidden="true"></span>
+                        <span class="commerce-checkout-legal__status-lock" aria-hidden="true">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <label class="form-check-label small commerce-checkout-legal__text"
+                               for="commerce-checkout-accept-terms">{{{legalacceptlabel}}}</label>
+                        <span class="commerce-checkout-legal__accepted-check"
+                              data-checkout-legal-check
+                              aria-hidden="true"
+                              hidden>
+                            <i class="fa-solid fa-check"></i>
+                        </span>
+                    </div>
+                    <div class="commerce-checkout-terms-feedback alert alert-light"
+                         data-checkout-terms-feedback
+                         role="status"
+                         aria-live="polite"
+                         hidden>
+                        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                        <span>{{termsrequiredlabel}}</span>
+                    </div>
+
+                    <button class="btn btn-primary btn-lg w-100 commerce-checkout-submit" type="submit" data-guest-checkout-submit data-checkout-submit data-processing-label="{{processingpaymentlabel}}" {{#launchdisabled}}disabled{{/launchdisabled}}>
+                        <span data-checkout-submit-label>{{paylabel}}</span>
+                        <i class="fa-solid fa-lock commerce-checkout-submit__icon" aria-hidden="true"></i>
+                    </button>
                     {{#launchdisabled}}<p class="small text-muted text-center mt-2 mb-0">{{launchhint}}</p>{{/launchdisabled}}
                 </form>
                 {{/existingaccount}}
 
-                {{> local_subscriptions/commerce/payment_reassurance}}
                 <a href="{{backurl}}" class="btn btn-link w-100 mt-3">← {{backlabel}}</a>
             </div>
         </aside>
@@ -325,10 +792,48 @@
     }
 {{/js}}
 
-{{> local_subscriptions/checkout/provider_experience}}
 
-{{#js}}
-require(['local_subscriptions/provider_experience'], function(ProviderExperience) {
-    ProviderExperience.init();
-});
-{{/js}}
+
+<div class="payment-provider-transition"
+     data-checkout-payment-splash
+     data-checkout-wallet-splash
+     role="status"
+     aria-live="polite"
+     aria-atomic="true"
+     aria-hidden="true">
+    <div class="payment-provider-transition__glass">
+        <div class="payment-provider-transition__hourglass-wrap">
+            <div class="payment-provider-transition__orbit" aria-hidden="true"></div>
+            <div class="payment-provider-transition__hourglass" aria-hidden="true">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+        </div>
+        <h2 class="payment-provider-transition__title"
+            data-payment-splash-title
+            data-default-title="{{processingpaymentlabel}}"
+            data-processing-title="{{paymentprocessinglabel}}"
+            data-validated-title="{{paymentvalidatedlabel}}">
+            {{processingpaymentlabel}}
+        </h2>
+        <p class="payment-provider-transition__message"
+           data-payment-splash-message
+           data-default-message="{{providertransitionmessage}}"
+           data-processing-message="{{paymentprocessingmessage}}"
+           data-validated-message="{{paymentvalidatedmessage}}">
+            {{providertransitionmessage}}
+        </p>
+        <div class="payment-provider-transition__provider">
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            <span>{{paymentsecurelabel}}</span>
+        </div>
+        <div class="payment-provider-transition__security">
+            <span class="payment-provider-transition__security-icon" aria-hidden="true">
+                <i class="fa-solid fa-lock"></i>
+            </span>
+            <span>
+                <strong>{{providertransitionsecuritytitle}}</strong>
+                <small>{{providertransitionsecuritymessage}}</small>
+            </span>
+        </div>
+    </div>
+</div>

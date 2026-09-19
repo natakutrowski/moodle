@@ -30,7 +30,8 @@ final class CommercePurchaseSummary {
         public readonly bool $adminclosed = false,
         public readonly int $adminclosedat = 0,
         public readonly int $adminclosedby = 0,
-        public readonly string $adminclosereason = ''
+        public readonly string $adminclosereason = '',
+        public readonly ?string $paymentmethod = null
     ) {
     }
 }

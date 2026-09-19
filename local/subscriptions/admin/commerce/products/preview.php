@@ -10,6 +10,8 @@ use local_subscriptions\commerce\catalog\presentation\CommerceCatalogProductName
 use local_subscriptions\commerce\catalog\rendering\CommerceProductEditorNavigationRenderer;
 use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
 use local_subscriptions\commerce\pricing\CommerceProductPromotionService;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\currency\CurrencyFormatter;
 use local_subscriptions\commerce\presentation\CommercePresentationContext;
 use local_subscriptions\commerce\catalog\presentation\CommerceProductPresentation;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
@@ -72,9 +74,7 @@ $formatmoney = static function(
     int $minor,
     string $currency
 ): string {
-    return format_float($minor / 100, 2)
-        . ' '
-        . s($currency);
+    return CurrencyFormatter::format_minor_code($minor, $currency);
 };
 
 $formatduration = static function($entitlement): string {
@@ -91,15 +91,7 @@ $formatduration = static function($entitlement): string {
 };
 
 $currencyflag = static function(string $currency): string {
-    return match (strtoupper($currency)) {
-        'EUR' => '🇪🇺',
-        'RUB' => '🇷🇺',
-        'USD' => '🇺🇸',
-        'GBP' => '🇬🇧',
-        'CAD' => '🇨🇦',
-        'CHF' => '🇨🇭',
-        default => '🌐',
-    };
+    return Currency::visual_marker($currency) ?: '💱';
 };
 
 echo $OUTPUT->header();

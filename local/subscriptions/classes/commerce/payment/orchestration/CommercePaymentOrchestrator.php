@@ -113,18 +113,24 @@ final class CommercePaymentOrchestrator {
             $this->duration_ms(
                 $startedat
             ),
-            [
-                'idempotencykey' =>
-                    $context
-                        ->get_idempotency_key(),
+            array_merge(
+                [
+                    'idempotencykey' =>
+                        $context
+                            ->get_idempotency_key(),
 
-                'live' =>
-                    $context->is_live(),
+                    'live' =>
+                        $context->is_live(),
 
-                'providerpriority' =>
-                    $provider
-                        ->get_priority(),
-            ]
+                    'providerpriority' =>
+                        $provider
+                            ->get_priority(),
+                ],
+                CommercePaymentProvenance::from_request(
+                    $request,
+                    $provider->get_key()
+                )->to_array()
+            )
         );
     }
 
@@ -156,23 +162,29 @@ final class CommercePaymentOrchestrator {
             $this->duration_ms(
                 $startedat
             ),
-            [
-                'idempotencykey' =>
-                    $context
-                        ->get_idempotency_key(),
+            array_merge(
+                [
+                    'idempotencykey' =>
+                        $context
+                            ->get_idempotency_key(),
 
-                'live' =>
-                    $context->is_live(),
+                    'live' =>
+                        $context->is_live(),
 
-                'providerpriority' =>
-                    $provider
-                        ->get_priority(),
+                    'providerpriority' =>
+                        $provider
+                            ->get_priority(),
 
-                'supported' =>
-                    $provider->supports(
-                        $request
-                    ),
-            ]
+                    'supported' =>
+                        $provider->supports(
+                            $request
+                        ),
+                ],
+                CommercePaymentProvenance::from_request(
+                    $request,
+                    $provider->get_key()
+                )->to_array()
+            )
         );
     }
 
@@ -206,6 +218,15 @@ final class CommercePaymentOrchestrator {
                 [
                     'currency' =>
                         $request->get_currency(),
+
+                    'paymentmethod' =>
+                        $request->get_preferred_payment_method(),
+
+                    'country' =>
+                        strtoupper(trim((string)$request->get_metadata_value(
+                            'payment_country',
+                            'ZZ'
+                        ))),
 
                     'amountminor' =>
                         $request->get_amount_minor(),

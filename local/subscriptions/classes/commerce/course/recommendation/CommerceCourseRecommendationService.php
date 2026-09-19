@@ -17,6 +17,7 @@ use local_subscriptions\commerce\course\recommendation\CommerceCourseResourceKey
 use local_subscriptions\commerce\trial\CommerceTrialCartPricingService;
 use local_subscriptions\commerce\trial\CommerceTrialProductEligibilityService;
 use local_subscriptions\trial_manager;
+use local_subscriptions\currency\CurrencyFormatter;
 
 /** Selects public course and bundle products relevant to a learner. */
 final class CommerceCourseRecommendationService {
@@ -499,6 +500,6 @@ final class CommerceCourseRecommendationService {
     }
 
     private function format_money(int $minor, string $currency): string {
-        return format_float($minor / 100, 2) . ' ' . strtoupper($currency);
+        return CurrencyFormatter::format_minor_code($minor, $currency);
     }
 }

@@ -7,6 +7,7 @@ namespace local_subscriptions\commerce\storefront\ownership;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\persistence\CommercePersistenceSchema;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinGrant;
 
 /** Resolves effective ownership across Native and transitional Legacy sources. */
 final class CommerceStorefrontOwnershipResolver {
@@ -26,9 +27,6 @@ final class CommerceStorefrontOwnershipResolver {
         if ($this->owns_native_grant($userid, $sku)) {
             return 'native_entitlement';
         }
-        if ($this->owns_native_purchase($userid, $sku)) {
-            return 'native_purchase';
-        }
 
         $product = $this->db->get_record(
             'local_subs_commerce_product',
@@ -40,8 +38,14 @@ final class CommerceStorefrontOwnershipResolver {
         }
 
         $type = strtolower((string)$product->type);
-        if ($type === 'bundle' && $this->owns_bundle_components($userid, (int)$product->id)) {
-            return 'bundle_components';
+        if ($type === 'bundle') {
+            return $this->owns_bundle_components($userid, (int)$product->id)
+                ? 'bundle_components'
+                : 'none';
+        }
+
+        if ($this->owns_native_purchase($userid, $sku)) {
+            return 'native_purchase';
         }
         if (in_array($type, ['digital', 'digital_download'], true)) {
             return $this->owns_legacy_digital_product($userid, (int)$product->id)
@@ -80,12 +84,31 @@ final class CommerceStorefrontOwnershipResolver {
     }
 
     private function owns_native_purchase(int $userid, string $sku): bool {
+        $now = time();
         $sql = 'SELECT 1
                   FROM {' . CommercePersistenceSchema::TABLE_PURCHASE . '} p
                   JOIN {' . CommercePersistenceSchema::TABLE_ITEM . '} i ON i.purchaseid = p.id
                  WHERE p.userid = :userid
                    AND i.itemreference = :sku
-                   AND p.status IN (:completed, :paid, :succeeded)';
+                   AND p.status IN (:completed, :paid, :succeeded)
+                   AND (
+                        NOT EXISTS (
+                            SELECT 1
+                              FROM {local_subs_commerce_grant} g0
+                             WHERE g0.purchasereference = p.reference
+                               AND g0.itemreference = i.itemreference
+                        )
+                        OR EXISTS (
+                            SELECT 1
+                              FROM {local_subs_commerce_grant} g
+                             WHERE g.purchasereference = p.reference
+                               AND g.itemreference = i.itemreference
+                               AND g.type <> :promotionjointype
+                               AND g.status IN (:active, :granted, :grantcompleted)
+                               AND g.validfrom <= :now
+                               AND (g.validuntil IS NULL OR g.validuntil = 0 OR g.validuntil >= :now2)
+                        )
+                   )';
 
         return $this->db->record_exists_sql($sql, [
             'userid' => $userid,
@@ -93,6 +116,12 @@ final class CommerceStorefrontOwnershipResolver {
             'completed' => 'completed',
             'paid' => 'paid',
             'succeeded' => 'succeeded',
+            'promotionjointype' => CommercePedagogicalPromotionJoinGrant::GRANT_TYPE,
+            'active' => 'active',
+            'granted' => 'granted',
+            'grantcompleted' => 'completed',
+            'now' => $now,
+            'now2' => $now,
         ]);
     }
 
@@ -102,6 +131,7 @@ final class CommerceStorefrontOwnershipResolver {
                   FROM {local_subs_commerce_grant}
                  WHERE beneficiaryuserid = :userid
                    AND productsku = :sku
+                   AND type <> :promotionjointype
                    AND status IN (:active, :granted, :completed)
                    AND validfrom <= :now
                    AND (validuntil IS NULL OR validuntil = 0 OR validuntil >= :now2)';
@@ -109,6 +139,7 @@ final class CommerceStorefrontOwnershipResolver {
         return $this->db->record_exists_sql($sql, [
             'userid' => $userid,
             'sku' => $sku,
+            'promotionjointype' => CommercePedagogicalPromotionJoinGrant::GRANT_TYPE,
             'active' => 'active',
             'granted' => 'granted',
             'completed' => 'completed',

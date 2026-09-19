@@ -315,11 +315,6 @@ define([], function() {
                 price.textContent = data.priceformatted || '';
             }
 
-            const purchaseForm = offer.querySelector('[data-provider-experience]');
-            if (purchaseForm) {
-                purchaseForm.dataset.price = data.priceformatted || '';
-                purchaseForm.dataset.currency = data.currency || '';
-            }
             if (compare) {
                 compare.textContent = data.compareformatted || '';
                 compare.hidden = !data.hascompareprice;

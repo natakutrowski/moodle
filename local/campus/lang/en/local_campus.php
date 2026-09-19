@@ -387,3 +387,12 @@ $string['mobilecoverdeleted'] = 'The mobile cover has been deleted.';
 $string['mobilecoverdelete'] = 'Delete mobile cover';
 $string['mobilecovernone'] = 'No dedicated mobile cover. The main Moodle image will be used as fallback.';
 $string['mobilecoverpreviewalt'] = 'Mobile cover preview for course {$a}';
+
+// 7.97 M6.3 — course learning status.
+$string['mycourses_learning_promotion'] = 'Cohort: {$a}';
+$string['mycourses_learning_access_full'] = 'Full course access';
+$string['mycourses_learning_access_progressive'] = 'Progressive access following the schedule';
+$string['mycourses_learning_start'] = 'Cohort starts: {$a}';
+$string['mycourses_learning_next_lesson'] = 'Next lesson: {$a->lesson} · {$a->date}';
+$string['mycourses_learning_next_promo_step'] = 'Next cohort milestone: {$a->lesson} · {$a->date}';
+$string['mycourses_learning_section_fallback'] = 'Section {$a}';

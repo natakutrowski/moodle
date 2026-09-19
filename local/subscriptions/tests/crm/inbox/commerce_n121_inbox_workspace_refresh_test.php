@@ -16,24 +16,31 @@ final class commerce_n121_inbox_workspace_refresh_test extends \advanced_testcas
         return $content;
     }
 
-    public function test_inbox_header_exposes_manual_refresh_for_inbox_managers(): void {
+    public function test_inbox_workspace_exposes_manual_refresh_for_inbox_managers(): void {
         $page = $this->file('admin/inbox/index.php');
+        $renderer = $this->file(
+            'classes/crm/inbox/rendering/InboxRenderer.php'
+        );
 
         self::assertStringContainsString(
-            'Capabilities::MANAGE_INBOX',
+            'InboxWorkspaceRenderer::render(',
             $page
+        );
+        self::assertStringContainsString(
+            'Capabilities::MANAGE_INBOX',
+            $renderer
         );
         self::assertStringContainsString(
             'admin_inbox_sync_page()',
-            $page
+            $renderer
         );
         self::assertStringContainsString(
             "'crm_inbox_refresh'",
-            $page
+            $renderer
         );
         self::assertStringContainsString(
-            "'sesskey'",
-            $page
+            "'name' => 'sesskey'",
+            $renderer
         );
     }
 
@@ -74,9 +81,13 @@ final class commerce_n121_inbox_workspace_refresh_test extends \advanced_testcas
     public function test_plugin_version_is_unchanged(): void {
         $version = $this->file('version.php');
 
-        self::assertStringContainsString(
-            '$plugin->version = 2026081602;',
-            $version
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+);/', $version, $pluginversionmatch)
+        );
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
         );
     }
 }

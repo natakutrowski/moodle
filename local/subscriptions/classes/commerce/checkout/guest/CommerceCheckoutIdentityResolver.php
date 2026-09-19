@@ -38,7 +38,7 @@ final class CommerceCheckoutIdentityResolver {
         if ($session->get_status() === 'existing_account') {
             throw new \moodle_exception('commerce_guest_checkout_login_required', 'local_subscriptions');
         }
-        if (!in_array($session->get_status(), ['provisional', 'payment_pending'], true) || $session->get_user_id() === null) {
+        if (!in_array($session->get_status(), ['provisional', 'payment_pending', 'payment_failed'], true) || $session->get_user_id() === null) {
             throw new \moodle_exception('commerce_guest_checkout_identity_required', 'local_subscriptions');
         }
 

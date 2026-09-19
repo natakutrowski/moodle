@@ -15,7 +15,10 @@ final class CommercePurchasePaymentSummary {
         public readonly string $currency,
         public readonly int $amountminor,
         public readonly ?int $paidat,
-        public readonly ?CommercePurchasePaymentRequestSummary $paymentrequest = null
+        public readonly ?CommercePurchasePaymentRequestSummary $paymentrequest = null,
+        public readonly ?int $id = null,
+        public readonly ?string $paymentmethod = null,
+        public readonly array $metadata = []
     ) {
     }
 }

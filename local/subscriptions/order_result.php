@@ -6,6 +6,7 @@ require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/classes/commerce/tracking/CommerceTrackedActionUrl.php');
 
 use local_subscriptions\commerce\checkout\flow\CommercePurchaseFlow;
+use local_subscriptions\commerce\checkout\flow\CommercePurchaseOrigin;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutSessionRepository;
 use local_subscriptions\commerce\cart\lifecycle\CommerceCartLifecycleService;
 use local_subscriptions\commerce\catalog\visual\CommerceProductVisualAuditService;
@@ -18,6 +19,7 @@ use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
 use local_subscriptions\commerce\storefront\repository\CommerceStorefrontRepository;
 use local_subscriptions\commerce\tracking\CommerceTrackedActionUrl;
 use local_subscriptions\url\UrlFactory;
+use local_subscriptions\currency\CurrencyFormatter;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -42,12 +44,31 @@ try {
         $order = $service->find_for_user($reference, (int)$USER->id);
     } else {
         $guestsessions = new CommerceGuestCheckoutSessionRepository($DB);
-        $guestsession = $guestsessions->find_by_purchase_reference($reference);
         $token = trim((string)($SESSION->local_subscriptions_guest_checkout_token ?? ''));
-        if ($guestsession === null || $token === '' || !hash_equals($guestsession->get_token(), $token)) {
-            throw new CommerceOrderPresentationAccessDeniedException('Guest Checkout session does not own this order.');
+        $guestsession = $token !== ''
+            ? $guestsessions->find_by_token($token)
+            : null;
+
+        if (
+            $guestsession === null
+            || $guestsession->is_expired()
+            || $guestsession->get_user_id() === null
+        ) {
+            throw new CommerceOrderPresentationAccessDeniedException(
+                'Guest Checkout session cannot own this order.'
+            );
         }
-        $order = $service->find_for_user($reference, (int)$guestsession->get_user_id());
+
+        // H12.9-A5: ownership is token + provisional userid based, not tied to
+        // the session's latest purchasereference. Switching payment methods can
+        // legitimately create/attach a newer payment attempt before an older
+        // owned purchase returns from its provider.
+        $guestmetadata = $guestsession->get_metadata();
+        $order = $service->find_for_guest_session(
+            $reference,
+            (string)($guestsession->get_purchase_reference() ?? ''),
+            (string)($guestmetadata['resume_purchase_reference'] ?? '')
+        );
     }
 } catch (CommerceOrderPresentationAccessDeniedException $exception) {
     throw new moodle_exception('commerce_public_access_denied', 'local_subscriptions');
@@ -58,7 +79,6 @@ if ($order === null) {
 }
 
 $state = (new CommercePostPaymentStateResolver())->resolve($order, $result);
-
 // A successful payment converts exactly the cart that was frozen into this purchase.
 // The UUID check deliberately leaves any newer cart untouched.
 if ($order->is_paid()) {
@@ -93,11 +113,53 @@ $PAGE->set_title(get_string('commerce_i2_title_' . $state->code, 'local_subscrip
 $PAGE->set_heading(format_string($SITE->fullname));
 
 $formatmoney = static function(int $minor, string $currency): string {
-    return format_float($minor / 100, 2) . ' ' . strtoupper($currency);
+    return CurrencyFormatter::format_minor_code($minor, $currency);
 };
 
-$retryurl = new moodle_url('/local/subscriptions/cart.php', ['currency' => strtolower($order->currency)]);
-$carturl = new moodle_url('/local/subscriptions/cart.php', ['currency' => strtolower($order->currency)]);
+$carturl = new moodle_url(
+    '/local/subscriptions/cart.php',
+    ['currency' => strtolower($order->currency)]
+);
+
+$purchaseflow = CommercePurchaseFlow::normalise(
+    (string)(
+        $order->metadata['purchase_flow']
+        ?? CommercePurchaseFlow::CART
+    )
+);
+$checkoutsource = CommercePurchaseOrigin::normalise(
+    (string)($order->metadata['checkout_source'] ?? '')
+);
+$originreturn = trim(
+    (string)(
+        $order->metadata['origin_return']
+        ?? $order->metadata['checkout_cancel_url']
+        ?? ''
+    )
+);
+
+$directoriginurl =
+    CommercePurchaseFlow::is_direct($purchaseflow)
+    && $originreturn !== ''
+        ? new moodle_url($originreturn)
+        : null;
+
+$retryurl =
+    $directoriginurl
+    ?? $carturl;
+
+$retrylabel =
+    $directoriginurl !== null
+        ? get_string(
+            CommercePurchaseOrigin::result_back_string(
+                $checkoutsource
+            ),
+            'local_subscriptions'
+        )
+        : get_string(
+            'commerce_i2_retry',
+            'local_subscriptions'
+        );
 $mycampusurl = UrlFactory::my_campus();
 $myordersurl = UrlFactory::my_purchases();
 $mycoursesurl = UrlFactory::my_courses();
@@ -112,7 +174,12 @@ if (isset($guestsession) && $guestsession !== null) {
     $guestmetadata = $guestsession->get_metadata();
     $isprovisionalguest = ($guestmetadata['account_origin'] ?? '') === 'guest_checkout';
     $passwordisset = !empty($guestmetadata['password_set_at']);
-    if ($isprovisionalguest && !$passwordisset) {
+    if (
+        $isprovisionalguest
+        && !$passwordisset
+        && $order->is_paid()
+        && $state->code === 'success'
+    ) {
         $requiresaccountfinalisation = true;
         $accountactivationurl = new moodle_url('/local/subscriptions/guest_account_activation_start.php', [
             'reference' => $reference,
@@ -166,7 +233,6 @@ $confirmationstate = match ($state->code) {
 };
 $confirmationcurrent = $confirmationstate !== 'is-complete';
 
-$purchaseflow = CommercePurchaseFlow::normalise((string)($order->metadata['purchase_flow'] ?? CommercePurchaseFlow::CART));
 $steps = CommercePurchaseFlow::result_steps(
     $purchaseflow,
     $confirmationstate,
@@ -204,6 +270,13 @@ $PAGE->requires->css(
 $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/provisional_account.css'));
 $PAGE->requires->js_call_amd('local_subscriptions/guest_checkout_security', 'init');
 
+if ($state->code === 'processing' && $order->is_paid()) {
+    $PAGE->requires->js_call_amd(
+        'local_subscriptions/order_fulfillment_poll',
+        'init'
+    );
+}
+
 echo $OUTPUT->header();
 
 if ($showpaymentconfirmationsplash) {
@@ -215,7 +288,9 @@ if ($showpaymentconfirmationsplash) {
     $failureurl = UrlFactory::order_result([
         'reference' => $reference,
         'result' => 'failure',
-        'code' => 'alfa_reconciliation',
+        'code' => $confirmationprovider === 'stripe'
+            ? 'stripe_reconciliation'
+            : 'alfa_reconciliation',
         'lang' => $lang,
     ]);
 
@@ -337,9 +412,83 @@ echo html_writer::start_div('commerce-order-hero commerce-order-hero--' . $state
 echo html_writer::div($icons[$state->code] ?? '•', 'commerce-order-hero__icon', ['aria-hidden' => 'true']);
 echo html_writer::start_div('commerce-order-hero__content');
 echo html_writer::tag('h1', get_string('commerce_i2_title_' . $state->code, 'local_subscriptions'), ['class' => 'commerce-order-hero__title']);
-echo html_writer::tag('p', get_string('commerce_i2_message_' . $state->code, 'local_subscriptions'), ['class' => 'commerce-order-hero__message']);
+if ($state->code === 'processing' && $order->is_paid()) {
+    echo html_writer::start_div('commerce-order-hero__message commerce-order-hero__message--processing');
+    echo html_writer::tag(
+        'span',
+        html_writer::tag(
+            'span',
+            '',
+            [
+                'class' => 'spinner-border spinner-border-sm',
+                'aria-hidden' => 'true',
+            ]
+        ),
+        [
+            'class' => 'commerce-order-hero__processing-spinner',
+            'aria-hidden' => 'true',
+        ]
+    );
+    echo html_writer::tag(
+        'span',
+        get_string(
+            'commerce_fulfillment_processing_message',
+            'local_subscriptions'
+        ),
+        [
+            'class' => 'commerce-order-hero__processing-text',
+        ]
+    );
+    echo html_writer::end_div();
+} else {
+    echo html_writer::tag(
+        'p',
+        get_string(
+            'commerce_i2_message_' . $state->code,
+            'local_subscriptions'
+        ),
+        [
+            'class' => 'commerce-order-hero__message',
+        ]
+    );
+}
+if ($state->code === 'processing' && $order->is_paid()) {
+    echo html_writer::start_div(
+        'commerce-order-fulfillment-watch',
+        [
+            'data-order-fulfillment-watch' => '1',
+            'data-endpoint' => (new moodle_url(
+                '/local/subscriptions/payment/fulfillment_status.php'
+            ))->out(false),
+            'data-reference' => $reference,
+            'data-sesskey' => sesskey(),
+            'data-fast-attempts' => '8',
+            'data-fast-interval' => '2000',
+            'data-background-interval' => '5000',
+            'data-timeout-ms' => '90000',            'role' => 'status',
+            'aria-live' => 'polite',
+        ]
+    );
+
+    echo html_writer::tag(
+        'button',
+        get_string(
+            'commerce_fulfillment_refresh_now',
+            'local_subscriptions'
+        ),
+        [
+            'type' => 'button',
+            'class' => 'btn btn-link commerce-order-fulfillment-watch__refresh',
+            'data-order-fulfillment-refresh' => '1',
+        ]
+    );
+
+    echo html_writer::end_div();
+}
 echo html_writer::end_div();
 echo html_writer::end_div();
+
+
 
 if ($accountfinalised) {
     echo html_writer::start_div('commerce-order-account-ready');
@@ -367,7 +516,7 @@ $renderaccessactions = static function(array $accesses) use ($reference, $order,
     $accessactions = '';
     foreach ($accesses as $access) {
         if ($access->available && $access->url !== null && $state->showaccesses) {
-            if ($access->type === 'course_access') {
+            if (in_array($access->type, ['course_access', 'pedagogical_promotion_join'], true)) {
                 $trackedurl = CommerceTrackedActionUrl::build(
                     $reference,
                     'order_open_course',
@@ -600,14 +749,20 @@ echo html_writer::start_div('d-flex flex-wrap gap-2 mt-4 commerce-order-secondar
 if ($state->canretry) {
     echo html_writer::link(
         $retryurl,
-        get_string('commerce_i2_retry', 'local_subscriptions'),
+        $retrylabel,
         ['class' => 'btn btn-primary']
     );
-    echo html_writer::link(
-        $carturl,
-        get_string('commerce_i2_back_cart', 'local_subscriptions'),
-        ['class' => 'btn btn-outline-secondary']
-    );
+
+    if ($directoriginurl === null) {
+        echo html_writer::link(
+            $carturl,
+            get_string(
+                'commerce_i2_back_cart',
+                'local_subscriptions'
+            ),
+            ['class' => 'btn btn-outline-secondary']
+        );
+    }
 }
 echo html_writer::link(
     $vieworderurl,

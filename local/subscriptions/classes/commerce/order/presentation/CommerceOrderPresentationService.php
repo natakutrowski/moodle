@@ -53,6 +53,40 @@ final class CommerceOrderPresentationService {
         return $this->present($details);
     }
 
+    /**
+     * Resolve an order already bound to the caller's validated Guest Checkout
+     * session. The browser token/session validation is performed by the public
+     * endpoint before this method is called; this method additionally requires
+     * the requested purchase reference to be one of the durable references
+     * stored on that same session.
+     */
+    public function find_for_guest_session(
+        string $reference,
+        string $sessionpurchasereference,
+        string $resumepurchasereference
+    ): ?CommerceOrderPresentation {
+        $reference = trim($reference);
+        $sessionpurchasereference = trim($sessionpurchasereference);
+        $resumepurchasereference = trim($resumepurchasereference);
+
+        if (
+            $reference === ''
+            || (
+                !hash_equals($reference, $sessionpurchasereference)
+                && !hash_equals($reference, $resumepurchasereference)
+            )
+        ) {
+            throw new CommerceOrderPresentationAccessDeniedException(
+                'The requested Native order is not bound to this Guest Checkout session.'
+            );
+        }
+
+        $details = $this->purchases->find_by_reference($reference);
+        return $details === null
+            ? null
+            : $this->present($details);
+    }
+
     public function present(CommercePurchaseDetails $details): CommerceOrderPresentation {
         $summary = $details->summary;
         $payment = $this->select_payment($details->payments);
@@ -152,8 +186,11 @@ final class CommerceOrderPresentationService {
                 $payment->paidat,
                 $payment->paymentrequest?->status,
                 $payment->paymentrequest?->createdat,
-                $payment->paymentrequest?->expiresat
-            )
+                $payment->paymentrequest?->expiresat,
+                $payment->paymentmethod
+            ),
+            $details->snapshot,
+            $details->customer
         );
     }
 

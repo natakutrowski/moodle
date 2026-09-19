@@ -398,7 +398,9 @@ final class CurrentPresentationRenderer {
                     $presentation = CommerceOrderPresentationService::create()->present($nativeorder);
                     foreach ($presentation->items as $nativeitem) {
                         foreach ($nativeitem->accesses as $access) {
-                            if ($access->type === 'course_access' && $access->available && $access->url !== null) {
+                            if (in_array($access->type, ['course_access', 'pedagogical_promotion_join'], true)
+                                && $access->available
+                                && $access->url !== null) {
                                 $btns[] = html_writer::link(
                                     $access->url,
                                     html_writer::tag('i', '', ['class' => 'fa-solid fa-graduation-cap', 'aria-hidden' => 'true'])

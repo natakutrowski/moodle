@@ -44,14 +44,14 @@ final class Region {
         return self::is_ru_or_by($cc) ? 'RUB' : 'EUR';
     }
 
-    /** Renvoie les URLs policy/terms selon RU/BY vs “rest of world” (+ fallbacks) */
+    /** Compatibility facade backed by the Commerce legal-document resolver. */
     public static function policyUrls(): array {
-        global $CFG;
-        $cc = self::detect_country();
-        $isru = self::is_ru_or_by($cc);
-        $policy = get_config('local_subscriptions', $isru ? 'policy_url_ru' : 'policy_url_row') ?: ($CFG->wwwroot.'/privacy');
-        $terms  = get_config('local_subscriptions', $isru ? 'terms_url_ru'  : 'terms_url_row')  ?: ($CFG->wwwroot.'/terms');
-        $offer  = get_config('local_subscriptions', $isru ? 'offer_url_ru'  : 'offer_url_row')  ?: ($CFG->wwwroot.'/offer');
-        return ['policy' => $policy, 'terms' => $terms, 'offer' => $offer];
+        $documents = (new \local_subscriptions\commerce\legal\document\CommerceLegalDocumentResolver())
+            ->resolve(null, current_language());
+        return [
+            'policy' => $documents->get_privacy_url(),
+            'terms' => $documents->get_terms_url(),
+            'offer' => $documents->get_offer_url(),
+        ];
     }
 }

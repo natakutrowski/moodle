@@ -21,7 +21,7 @@
 .commerce-customer-hub__course { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.85rem; padding:.85rem; border-radius:.9rem; background:#fafafd; color:inherit; text-decoration:none; }
 .commerce-customer-hub__course:hover { background:#f4f0ff; color:inherit; }
 .commerce-customer-hub__course-initial { width:2.7rem; height:2.7rem; display:grid; place-items:center; border-radius:.75rem; background:#fff; color:#6842d9; font-weight:800; box-shadow:0 3px 12px rgba(38,41,61,.08); }
-.commerce-customer-hub__course span:nth-child(2) { display:flex; flex-direction:column; min-width:0; }
+.commerce-customer-hub__course > span:nth-child(2) { display:flex; flex-direction:column; min-width:0; }
 .commerce-customer-hub__course strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .commerce-customer-hub__course small { color:#7a808d; }
 .commerce-customer-hub__xp-level { display:flex; justify-content:space-between; align-items:end; padding:.75rem 0; }
@@ -107,4 +107,56 @@
 .commerce-customer-hub__shortcut--boutique small,
 .commerce-customer-hub__shortcut--support small {
     line-height: 1.25;
+}
+
+/* M5.3 — promotion team challenge, derived from the CampusFR promotion XP ledger. */
+.commerce-customer-hub__team-challenges { margin-top:1.15rem; padding-top:1.1rem; border-top:1px solid #eceef3; }
+.commerce-customer-hub__team-heading { margin-bottom:.7rem; }
+.commerce-customer-hub__team-heading h3 { margin:.1rem 0 0; font-size:1rem; }
+.commerce-customer-hub__team-kicker { color:#6842d9; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
+.commerce-customer-hub__team-card { padding:.85rem; border-radius:.9rem; background:#faf8ff; border:1px solid #ece7ff; }
+.commerce-customer-hub__team-card + .commerce-customer-hub__team-card { margin-top:.75rem; }
+.commerce-customer-hub__team-summary { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+.commerce-customer-hub__team-summary > div:first-child { display:flex; flex-direction:column; min-width:0; }
+.commerce-customer-hub__team-summary small { color:#7a718f; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.commerce-customer-hub__team-summary strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.commerce-customer-hub__team-rank { min-width:2.5rem; height:2.5rem; display:grid; place-items:center; border-radius:50%; background:#6842d9; color:#fff; font-weight:800; }
+.commerce-customer-hub__team-meta { display:flex; justify-content:space-between; gap:.75rem; flex-wrap:wrap; margin:.7rem 0; font-size:.82rem; color:#6e667c; }
+.commerce-customer-hub__team-ranking { list-style:none; margin:0; padding:0; display:grid; gap:.3rem; }
+.commerce-customer-hub__team-ranking li { display:grid; grid-template-columns:2.2rem minmax(0,1fr) auto; align-items:center; gap:.45rem; padding:.42rem .5rem; border-radius:.55rem; font-size:.84rem; }
+.commerce-customer-hub__team-ranking li.is-mine { background:#eee8ff; color:#4d2bb8; }
+.commerce-customer-hub__team-ranking li.is-separated { margin-top:.35rem; border-top:1px dashed #cfc4f6; padding-top:.65rem; }
+.commerce-customer-hub__team-position { font-variant-numeric:tabular-nums; color:#817a8f; }
+.commerce-customer-hub__team-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.commerce-customer-hub__team-name small { color:inherit; font-weight:700; }
+
+/* 7.97 M6.3 — course availability and promotion status in Mon Campus. */
+.commerce-customer-hub__course-learning {
+    display: grid;
+    gap: .18rem;
+    margin-top: .28rem;
+    color: #6f6878;
+    font-size: .75rem;
+    line-height: 1.32;
+}
+.commerce-customer-hub__course-learning > span {
+    display: flex;
+    align-items: flex-start;
+    gap: .38rem;
+    min-width: 0;
+}
+.commerce-customer-hub__course-learning i {
+    width: .9rem;
+    flex: 0 0 .9rem;
+    margin-top: .12rem;
+    color: #6842d9;
+    text-align: center;
+}
+.commerce-customer-hub__course-learning + .commerce-customer-hub__course-progress {
+    margin-top: .55rem;
+}
+@media (max-width: 575.98px) {
+    .commerce-customer-hub__course-learning {
+        font-size: .72rem;
+    }
 }

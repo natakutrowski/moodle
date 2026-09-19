@@ -38,6 +38,52 @@ final class commerce_entitlement_persistence_test extends advanced_testcase {
         $this->assertSame(1, $DB->count_records('local_subs_commerce_grant'));
     }
 
+    public function test_replanned_grant_with_shifted_validity_anchor_is_idempotent(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+
+        $mapper = new CommerceEntitlementGrantRecordMapper();
+        $repository = new CommerceEntitlementGrantRepository($DB, $mapper);
+        $persister = new CommerceEntitlementGrantPersister($DB, $repository);
+        $first = $this->grant();
+
+        $persister->persist(new CommerceEntitlementGrantPlan(
+            'purchase-1',
+            [$first],
+            1_700_000_000
+        ));
+
+        $replayed = new CommerceEntitlementGrant(
+            $first->get_reference(),
+            $first->get_purchase_reference(),
+            $first->get_item_reference(),
+            $first->get_product_sku(),
+            $first->get_type(),
+            $first->get_resource_key(),
+            $first->get_quantity(),
+            $first->get_beneficiary_user_id(),
+            $first->get_beneficiary_email(),
+            $first->get_valid_from() + 15,
+            $first->get_valid_until() === null
+                ? null
+                : $first->get_valid_until() + 15,
+            $first->get_configuration(),
+            $first->get_metadata()
+        );
+
+        $result = $persister->persist(new CommerceEntitlementGrantPlan(
+            'purchase-1',
+            [$replayed],
+            1_700_000_015
+        ));
+
+        $this->assertSame(0, $result->get_created());
+        $this->assertSame(1, $result->get_identical());
+        $this->assertSame(0, $result->get_conflicts());
+        $this->assertSame(1, $DB->count_records('local_subs_commerce_grant'));
+    }
+
     public function test_same_idempotency_key_with_different_payload_is_rejected(): void {
         global $DB;
 

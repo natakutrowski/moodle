@@ -234,6 +234,17 @@ $tasks[] = [
 
 
 $tasks[] = [
+    'classname' => '\local_subscriptions\task\reconcile_paypal_payments_task',
+    'blocking' => 0,
+    'minute' => '*/5',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];
+
+
+$tasks[] = [
     'classname' => '\local_subscriptions\task\cleanup_abandoned_guest_checkouts_task',
     'blocking' => 0,
     'minute' => 'R',
@@ -265,3 +276,13 @@ $tasks[] = [
 ];
 
 $tasks[] = ['classname' => '\\local_subscriptions\\task\\process_personal_offer_scheduled_campaigns_task', 'blocking'=>0, 'minute'=>'*', 'hour'=>'*', 'day'=>'*', 'month'=>'*', 'dayofweek'=>'*'];
+
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\finalise_progressive_pedagogical_access_task',
+    'blocking' => 0,
+    'minute' => '*/5',
+    'hour' => '*',
+    'day' => '*',
+    'month' => '*',
+    'dayofweek' => '*',
+];

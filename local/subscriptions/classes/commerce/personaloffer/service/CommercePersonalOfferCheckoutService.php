@@ -6,6 +6,7 @@ namespace local_subscriptions\commerce\personaloffer\service;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
 use local_subscriptions\commerce\catalog\persistence\CommerceCatalogHydrator;
 use local_subscriptions\commerce\catalog\repository\CommerceProductPriceRepository;
@@ -247,9 +248,10 @@ final class CommercePersonalOfferCheckoutService {
         }
 
         $available = [];
+        $currencyregistry = new CommerceCurrencyRegistry();
         foreach ($prices->find_by_product_sku($product->get_sku(), true) as $price) {
             $currency = strtoupper($price->get_currency());
-            if (!in_array($currency, ['EUR', 'RUB'], true) || isset($available[$currency])) {
+            if (!$currencyregistry->is_enabled($currency) || isset($available[$currency])) {
                 continue;
             }
             try {

@@ -118,7 +118,7 @@ final class commerce_course_recommendation_service_test extends \advanced_testca
 
         $this->assertCount(1, $items);
         $this->assertTrue($items[0]->upgrade);
-        $this->assertSame('49.00 EUR', $items[0]->upgradepriceformatted);
+        $this->assertSame("49.00\u{00A0}EUR", $items[0]->upgradepriceformatted);
         $this->assertSame('A2 Grammar', $items[0]->upgradefromlabel);
         $this->assertSame('A2 Full', $items[0]->upgradetolabel);
     }

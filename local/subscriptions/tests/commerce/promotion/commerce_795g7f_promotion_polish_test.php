@@ -41,11 +41,18 @@ final class commerce_795g7f_promotion_polish_test extends \advanced_testcase {
 
     public function test_promotion_editor_uses_business_friendly_controls(): void {
         $source = file_get_contents(__DIR__ . '/../../../admin/commerce/promotions/edit.php');
-        $this->assertStringContainsString('CommerceCurrencyRegistry', $source);
-        $this->assertStringContainsString('multiple', $source);
-        $this->assertStringContainsString("'__all__'", $source);
-        $this->assertStringContainsString('$discountvalue * 100', $source);
-        $this->assertStringContainsString('commerce_promotion_back_to_list', $source);
+        self::assertStringContainsString('CommerceCurrencyRegistry', $source);
+        self::assertStringContainsString('options_including(', $source);
+        self::assertStringContainsString('multiple', $source);
+        self::assertStringContainsString("'__all__'", $source);
+        self::assertStringContainsString(
+            '(int)round(((float)$discountvalue) * 100)',
+            $source
+        );
+        self::assertStringContainsString(
+            'commerce_promotion_back_to_list',
+            $source
+        );
     }
 
     public function test_cart_lines_have_compact_spacing_contract(): void {

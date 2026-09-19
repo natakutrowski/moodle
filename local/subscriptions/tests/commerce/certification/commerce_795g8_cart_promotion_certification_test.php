@@ -41,7 +41,7 @@ final class commerce_795g8_cart_promotion_certification_test extends \advanced_t
         $this->assertMethodSignature(
             CommerceCartCalculator::class,
             'calculate',
-            ['cart', 'language', 'at'],
+            ['cart', 'language', 'at', 'promotionjoinexcludedcartuuid'],
             2
         );
         $this->assertMethodSignature(

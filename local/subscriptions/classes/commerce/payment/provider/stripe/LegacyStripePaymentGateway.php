@@ -9,7 +9,10 @@ use local_subscriptions\commerce\payment\legacy\LegacyPaymentRequestContext;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderException;
 use local_subscriptions\payment\PaymentGatewayFactory;
 use local_subscriptions\payment\PaymentGatewayInterface;
+use local_subscriptions\payment\RefundGatewayInterface;
+use local_subscriptions\payment\RefundHistoryGatewayInterface;
 use local_subscriptions\payment\Provider;
+use local_subscriptions\payment\stripe\StripeConfiguration;
 use local_subscriptions\payment\dto\CheckoutInitResult;
 
 /**
@@ -112,6 +115,244 @@ final class LegacyStripePaymentGateway
         );
     }
 
+    public function create_payment_intent(
+        StripeGatewayRequest $request
+    ): StripeGatewayResponse {
+        $context =
+            LegacyPaymentRequestContext::from_metadata(
+                $request->get_metadata(),
+                Provider::STRIPE
+            );
+
+        $legacyrequest =
+            $this->requestadapter->load_and_validate(
+                $context,
+                $request->get_amount_minor(),
+                $request->get_currency(),
+                $request->get_customer_email(),
+                $this->resolve_user_id(
+                    $request->get_metadata()
+                )
+            );
+
+        if ($context->get_mode() !== 'payment') {
+            // Recurring legacy flows continue through Checkout Session for H2.
+            return $this->create_checkout_session(
+                $request
+            );
+        }
+
+        $this->ensure_stripe_sdk();
+        $configuration = StripeConfiguration::get();
+
+        if (trim((string)$configuration['secret_key']) === '') {
+            throw new CommercePaymentProviderException(
+                'Stripe secret key is missing for embedded payment.',
+                Provider::STRIPE,
+                'stripe_embedded_secret_missing'
+            );
+        }
+
+        \Stripe\Stripe::setApiKey(
+            $configuration['secret_key']
+        );
+
+        $requestedembeddedmethods =
+            $request->get_metadata()[
+                'embedded_payment_methods'
+            ]
+            ?? [];
+
+        $selectedpaymentmethod =
+            trim(
+                strtolower(
+                    (string)(
+                        $request->get_metadata()[
+                            'payment_method'
+                        ]
+                        ?? 'card'
+                    )
+                )
+            ) ?: 'card';
+
+        // H12.9-A6.5.1: Express Checkout Elements is initialized in deferred
+        // Intent mode with the complete authorized Stripe method pool. Stripe
+        // requires the PaymentIntent created at confirmation time to expose
+        // exactly that same pool. Restricting the Intent to the method selected
+        // by the customer (for example ['card'] for Apple Pay) makes
+        // confirmPayment() fail before the card is even presented to the bank.
+        $paymentmethodtypes = [];
+
+        foreach ($requestedembeddedmethods as $embeddedmethod) {
+            $embeddedmethod =
+                strtolower(
+                    trim((string)$embeddedmethod)
+                );
+
+            if (
+                in_array(
+                    $embeddedmethod,
+                    [
+                        'card',
+                        'apple_pay',
+                        'google_pay',
+                    ],
+                    true
+                )
+            ) {
+                $paymentmethodtypes[] = 'card';
+                continue;
+            }
+
+            if ($embeddedmethod === 'link') {
+                // Link is exposed together with the card rail.
+                $paymentmethodtypes[] = 'card';
+                $paymentmethodtypes[] = 'link';
+                continue;
+            }
+
+            if ($embeddedmethod === 'klarna') {
+                $paymentmethodtypes[] = 'klarna';
+            }
+        }
+
+        $paymentmethodtypes =
+            array_values(
+                array_unique(
+                    $paymentmethodtypes
+                )
+            );
+
+        // Defensive fallback for older/non-Express callers that do not yet
+        // provide embedded_payment_methods.
+        if ($paymentmethodtypes === []) {
+            $paymentmethodtypes =
+                match ($selectedpaymentmethod) {
+                    'link' => ['card', 'link'],
+                    'klarna' => ['klarna'],
+                    default => ['card'],
+                };
+        }
+
+        $metadata = array_merge(
+            $this->build_stripe_metadata(
+                $request,
+                $context
+            ),
+            [
+                'payment_request_id' =>
+                    (string)$context->get_payment_request_id(),
+                'stripe_profile' =>
+                    $configuration['profile'],
+                'commerce_payment_method' =>
+                    trim(
+                        (string)(
+                            $request->get_metadata()[
+                                'payment_method'
+                            ]
+                            ?? 'card'
+                        )
+                    ) ?: 'card',
+                'commerce_execution_mode' =>
+                    'campus_embedded',
+            ]
+        );
+
+        try {
+            $intent = \Stripe\PaymentIntent::create(
+                [
+                    'amount' =>
+                        $request->get_amount_minor(),
+                    'currency' =>
+                        strtolower(
+                            $request->get_currency()
+                        ),
+                    'payment_method_types' =>
+                        $paymentmethodtypes,
+                    'receipt_email' =>
+                        $request->get_customer_email(),
+                    'description' =>
+                        $this->build_product_name(
+                            $request
+                        ),
+                    'metadata' =>
+                        $metadata,
+                ],
+                [
+                    'idempotency_key' =>
+                        $request->get_idempotency_key(),
+                ]
+            );
+        } catch (\Throwable $exception) {
+            throw new CommercePaymentProviderException(
+                'Stripe embedded PaymentIntent creation failed.',
+                Provider::STRIPE,
+                'stripe_embedded_intent_creation_failed',
+                [
+                    'commerce_reference' =>
+                        $request->get_reference(),
+                ],
+                $exception
+            );
+        }
+
+        $clientsecret = trim(
+            (string)($intent->client_secret ?? '')
+        );
+
+        if ($clientsecret === '') {
+            throw new CommercePaymentProviderException(
+                'Stripe PaymentIntent returned no client secret.',
+                Provider::STRIPE,
+                'stripe_embedded_client_secret_missing'
+            );
+        }
+
+        return new StripeGatewayResponse(
+            (string)$intent->id,
+            StripeGatewayResponse::STATUS_OPEN,
+            null,
+            null,
+            null,
+            array_merge(
+                $metadata,
+                [
+                    'embedded' => true,
+                    'client_secret' =>
+                        $clientsecret,
+                    'publishable_key' =>
+                        (string)$configuration[
+                            'publishable_key'
+                        ],
+                    'return_url' =>
+                        $request->get_success_url(),
+                    'payment_intent' =>
+                        (string)$intent->id,
+                ]
+            )
+        );
+    }
+
+    private function ensure_stripe_sdk(): void {
+        global $CFG;
+
+        if (class_exists(\Stripe\PaymentIntent::class)) {
+            return;
+        }
+
+        $autoload =
+            $CFG->dirroot
+            . '/local/subscriptions/vendor/autoload.php';
+
+        if (!is_file($autoload)) {
+            throw new \RuntimeException(
+                'Stripe SDK autoload not found.'
+            );
+        }
+
+        require_once $autoload;
+    }
+
     public function retrieve(
         string $paymentid
     ): StripeGatewayResponse {
@@ -137,6 +378,85 @@ final class LegacyStripePaymentGateway
                 'providerpaymentid' =>
                     trim($paymentid),
             ]
+        );
+    }
+
+    public function refund(
+        StripeRefundRequest $request
+    ): StripeRefundResponse {
+        if (!$this->legacygateway instanceof RefundGatewayInterface) {
+            throw new CommercePaymentProviderException(
+                'Stripe refund is not exposed by the configured Legacy gateway.',
+                Provider::STRIPE,
+                'legacy_stripe_refund_not_supported',
+                ['providerpaymentid' => $request->get_provider_payment_id()]
+            );
+        }
+
+        try {
+            $metadata = $request->get_metadata();
+            $result = $this->legacygateway->refund_payment(
+                $request->get_provider_payment_id(),
+                $request->get_amount_minor(),
+                $request->get_currency(),
+                [
+                    'payment_reference' => $request->get_payment_reference(),
+                    'purchase_reference' =>
+                        trim((string)($metadata['purchase_reference'] ?? '')),
+                    'reason' => $request->get_reason(),
+                    'idempotency_key' =>
+                        trim((string)($metadata['idempotency_key'] ?? '')),
+                ]
+            );
+        } catch (CommercePaymentProviderException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            throw new CommercePaymentProviderException(
+                'The Legacy Stripe gateway failed to refund the payment.',
+                Provider::STRIPE,
+                'legacy_stripe_refund_failed',
+                [
+                    'providerpaymentid' => $request->get_provider_payment_id(),
+                    'paymentreference' => $request->get_payment_reference(),
+                    'currency' => $request->get_currency(),
+                    'amountminor' => $request->get_amount_minor(),
+                ],
+                $exception
+            );
+        }
+
+        return new StripeRefundResponse(
+            $result->providerrefundid,
+            $result->status,
+            $result->currency,
+            $result->amountminor,
+            $result->metadata
+        );
+    }
+
+    public function list_refunds(
+        string $providerpaymentid,
+        string $currency
+    ): array {
+        if (!$this->legacygateway instanceof RefundHistoryGatewayInterface) {
+            return [];
+        }
+
+        $results = $this->legacygateway->list_payment_refunds(
+            $providerpaymentid,
+            $currency
+        );
+
+        return array_map(
+            static fn($result): StripeRefundResponse =>
+                new StripeRefundResponse(
+                    $result->providerrefundid,
+                    $result->status,
+                    $result->currency,
+                    $result->amountminor,
+                    $result->metadata
+                ),
+            $results
         );
     }
 
@@ -222,6 +542,14 @@ final class LegacyStripePaymentGateway
              */
             'idempotency_key' =>
                 $request->get_idempotency_key(),
+
+            'preferred_payment_method' =>
+                trim(
+                    (string)(
+                        $metadata['commerce_payment_method']
+                        ?? ''
+                    )
+                ),
         ];
 
         if ($mode === 'subscription') {

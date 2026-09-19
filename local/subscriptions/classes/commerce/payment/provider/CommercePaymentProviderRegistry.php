@@ -98,6 +98,116 @@ final class CommercePaymentProviderRegistry {
     }
 
     /**
+     * Providers currently available and compatible with the request.
+     *
+     * The request may carry a preferred payment method. This does not expose
+     * the PSP to the customer; it is used to resolve which PSP can provide
+     * the requested method.
+     *
+     * @return CommercePaymentProvider[]
+     */
+    public function candidates(
+        CommercePaymentRequest $request
+    ): array {
+        $candidates = array_values(
+            array_filter(
+                $this->providers,
+                static fn(
+                    CommercePaymentProvider $provider
+                ): bool =>
+                    $provider->is_available()
+                    && $provider->supports($request)
+            )
+        );
+
+        usort(
+            $candidates,
+            static fn(
+                CommercePaymentProvider $left,
+                CommercePaymentProvider $right
+            ): int =>
+                $right->get_priority()
+                <=> $left->get_priority()
+        );
+
+        return $candidates;
+    }
+
+    /**
+     * Providers that can fulfil a customer-facing method in a currency.
+     *
+     * @return CommercePaymentProvider[]
+     */
+    public function providers_for_method(
+        string $currency,
+        string $method
+    ): array {
+        $currency = strtoupper(trim($currency));
+        $method = strtolower(trim($method));
+
+        $providers = array_values(
+            array_filter(
+                $this->providers,
+                static fn(
+                    CommercePaymentProvider $provider
+                ): bool =>
+                    $provider->is_available()
+                    && $provider
+                        ->get_capabilities()
+                        ->supports_currency($currency)
+                    && $provider
+                        ->get_capabilities()
+                        ->supports_payment_method($method)
+            )
+        );
+
+        usort(
+            $providers,
+            static fn(
+                CommercePaymentProvider $left,
+                CommercePaymentProvider $right
+            ): int =>
+                $right->get_priority()
+                <=> $left->get_priority()
+        );
+
+        return $providers;
+    }
+
+    /**
+     * Customer-facing payment methods available for this request.
+     *
+     * @return string[]
+     */
+    public function available_payment_methods(
+        CommercePaymentRequest $request
+    ): array {
+        $methods = [];
+
+        foreach ($this->providers as $provider) {
+            if (
+                !$provider->is_available()
+                || !$provider
+                    ->get_capabilities()
+                    ->supports_currency($request->get_currency())
+            ) {
+                continue;
+            }
+
+            foreach (
+                $provider
+                    ->get_capabilities()
+                    ->get_payment_methods()
+                as $method
+            ) {
+                $methods[$method] = true;
+            }
+        }
+
+        return array_keys($methods);
+    }
+
+    /**
      * @return CommercePaymentProvider[]
      */
     public function all(): array {

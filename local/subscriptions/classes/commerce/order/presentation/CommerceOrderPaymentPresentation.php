@@ -18,7 +18,8 @@ final class CommerceOrderPaymentPresentation {
         public readonly ?int $paidat,
         public readonly ?string $requeststatus = null,
         public readonly ?int $requestedat = null,
-        public readonly ?int $expiresat = null
+        public readonly ?int $expiresat = null,
+        public readonly ?string $paymentmethod = null
     ) {
     }
 }

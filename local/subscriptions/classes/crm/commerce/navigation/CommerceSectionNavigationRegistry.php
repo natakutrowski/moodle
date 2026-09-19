@@ -17,6 +17,7 @@ final class CommerceSectionNavigationRegistry {
     public const OVERVIEW = 'overview';
     public const PRODUCTS = 'products';
     public const SHOWROOMS = 'showrooms';
+    public const EDUCATION = 'education';
     public const PURCHASES = 'purchases';
     /** @deprecated Compatibility key retained for old callers. */
     public const SUBSCRIPTIONS = self::PURCHASES;
@@ -91,6 +92,14 @@ final class CommerceSectionNavigationRegistry {
                 40
             ),
             new CommerceSectionNavigationItem(
+                self::EDUCATION,
+                get_string('crm_commerce_nav_education', 'local_subscriptions'),
+                'fa-graduation-cap',
+                new moodle_url('/local/subscriptions/admin/commerce/education/promotions.php'),
+                Capabilities::MANAGE_CONFIGURATION,
+                45
+            ),
+            new CommerceSectionNavigationItem(
                 self::OFFERS_ACCESS,
                 get_string('crm_commerce_nav_offers_access', 'local_subscriptions'),
                 'fa-gift',
@@ -130,6 +139,7 @@ final class CommerceSectionNavigationRegistry {
             self::OVERVIEW,
             self::PRODUCTS,
             self::SHOWROOMS,
+            self::EDUCATION,
             self::PURCHASES,
             self::DIGITAL_PRODUCTS,
             self::MAIL,

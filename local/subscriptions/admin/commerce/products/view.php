@@ -16,6 +16,7 @@ use local_subscriptions\commerce\catalog\validation\CommerceCatalogValidator;
 use local_subscriptions\commerce\catalog\validation\CommerceCatalogActivationValidator;
 use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogReadRepository;
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\statistics\CommerceStatisticsFilter;
 use local_subscriptions\commerce\statistics\CommerceStatisticsPeriod;
 use local_subscriptions\commerce\statistics\CommerceStatisticsRepository;
@@ -32,6 +33,9 @@ use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\currency\CurrencyFormatter;
+use local_subscriptions\currency\CommerceCurrencyLabelFormatter;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 $catalogkey = optional_param('catalogkey', '', PARAM_RAW_TRIMMED);
@@ -160,12 +164,8 @@ $languageflags = [
 ];
 $pricecurrencies = [];
 foreach ($product->get_prices() as $price) {
-    $pricecurrency = strtoupper($price->get_currency());
-    $pricecurrencies[$pricecurrency] = match ($pricecurrency) {
-        'EUR' => '🇪🇺',
-        'RUB' => '🇷🇺',
-        default => '🌐',
-    };
+    $pricecurrency = Currency::sanitize($price->get_currency());
+    $pricecurrencies[$pricecurrency] = Currency::visual_marker($pricecurrency) ?: '💱';
 }
 $translationflags = [];
 foreach ($details->get_translations() as $translation) {
@@ -286,7 +286,7 @@ if ($product->get_prices() !== []) {
     $pricehtml = '';
     foreach ($product->get_prices() as $price) {
         $pricecurrency = strtoupper($price->get_currency());
-        $priceflag = $pricecurrencies[$pricecurrency] ?? '🌐';
+        $priceflag = $pricecurrencies[$pricecurrency] ?? '💱';
         $pricehtml .= html_writer::div(
             html_writer::span(
                 $priceflag,
@@ -703,7 +703,14 @@ $productreferences = array_values(array_unique($productreferences));
 $m51repository = new CommerceProductStatisticsDashboardRepository($DB);
 $allstats = $m51repository->snapshot($statisticsperiod, $productreferences, $product->get_sku(), null);
 $availablecurrencies = array_combine(array_keys($allstats['currencies']), array_keys($allstats['currencies'])) ?: [];
-if ($statisticscurrency !== '' && !isset($availablecurrencies[$statisticscurrency])) { $statisticscurrency = ''; }
+$statisticscurrencyregistry = new CommerceCurrencyRegistry();
+$statisticsallowedcurrencies = array_values(array_unique(array_merge(
+    $statisticscurrencyregistry->enabled(),
+    array_keys($availablecurrencies)
+)));
+if ($statisticscurrency !== '' && !in_array($statisticscurrency, $statisticsallowedcurrencies, true)) {
+    $statisticscurrency = '';
+}
 $dashboard = $m51repository->snapshot(
     $statisticsperiod,
     $productreferences,
@@ -733,13 +740,17 @@ if ($previousperiod !== null) {
 
 $revenueseries = $m51repository->revenue_series($statisticsperiod, $productreferences, $statisticscurrency !== '' ? $statisticscurrency : null);
 $deliveryseries = $m51repository->delivery_series($statisticsperiod, $productreferences, $product->get_sku(), $statisticscurrency !== '' ? $statisticscurrency : null);
-$formatmoney = static function(int $minor, string $currency): string { $major=$minor/100; if(class_exists('NumberFormatter')){$f=new \NumberFormatter(current_language(),\NumberFormatter::CURRENCY);$v=$f->formatCurrency($major,$currency);if($v!==false)return$v;}return format_float($major,2).' '.$currency; };
+$formatmoney = static fn(int $minor, string $currency): string => CurrencyFormatter::format_minor_code($minor, $currency);
 
 echo html_writer::start_div('m51-statistics-shell mb-4');
 echo html_writer::div(html_writer::tag('h3', get_string('commerce_m51_title','local_subscriptions'), ['class'=>'h4 mb-1']) . html_writer::div(get_string('commerce_m51_subtitle','local_subscriptions'),'text-muted'), 'mb-3');
 $filterurl = CommerceCatalogLinkGenerator::view_url($product);
 echo html_writer::start_tag('form',['method'=>'get','action'=>$filterurl->out_omit_querystring(),'class'=>'m51-stat-toolbar']);foreach($filterurl->params() as $name=>$value){echo html_writer::empty_tag('input',['type'=>'hidden','name'=>$name,'value'=>$value]);}
-$currencyoptions=[''=>get_string('commerce_statistics_all_currencies','local_subscriptions')]+$availablecurrencies;
+$statisticscurrencycodes = $statisticsallowedcurrencies;
+$currencyoptions = ['' => get_string('commerce_statistics_all_currencies', 'local_subscriptions')];
+foreach ($statisticscurrencycodes as $code) {
+    $currencyoptions[$code] = CommerceCurrencyLabelFormatter::format($code);
+}
 echo html_writer::div(html_writer::tag('label',get_string('currency'),['for'=>'statscurrency','class'=>'form-label']).html_writer::select($currencyoptions,'statscurrency',$statisticscurrency,false,['id'=>'statscurrency','class'=>'form-select']),'form-group');
 echo html_writer::div(html_writer::tag('label',get_string('commerce_statistics_period_label','local_subscriptions'),['for'=>'statsperiod','class'=>'form-label']).html_writer::select($statisticsperiodoptions,'statsperiod',$statisticsperiodkey,false,['id'=>'statsperiod','class'=>'form-select']),'form-group');
 $customstyle=$statisticsperiodkey==='custom'?'':'style="display:none"';

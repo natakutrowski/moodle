@@ -8,6 +8,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use local_subscriptions\commerce\statistics\CommerceStatisticsSeries;
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
+use local_subscriptions\currency\Currency;
 
 /** Renders accessible Moodle core charts with textual fallbacks. */
 final class CommerceStatisticsChartRenderer {
@@ -84,7 +86,9 @@ final class CommerceStatisticsChartRenderer {
         $chart = new \core\chart_line();
         $chart->set_title($title);
         $chart->set_labels($series->labels());
-        $values = $money ? array_map(static fn($v) => ((float)$v) / 100, $series->values()) : $series->values();
+        $values = $money && $currency !== null
+            ? array_map(static fn($v) => CommerceCurrencyAmount::major_float_from_minor((int)$v, $currency), $series->values())
+            : $series->values();
         $chart->add_series(new \core\chart_series($currency ?? $title, $values));
         return self::wrap($output->render($chart), $title, self::table($series->labels(), $values, $currency, $title));
     }
@@ -93,7 +97,9 @@ final class CommerceStatisticsChartRenderer {
         $chart = new \core\chart_bar();
         $chart->set_title($title);
         $chart->set_labels($series->labels());
-        $values = $money ? array_map(static fn($v) => ((float)$v) / 100, $series->values()) : $series->values();
+        $values = $money && $currency !== null
+            ? array_map(static fn($v) => CommerceCurrencyAmount::major_float_from_minor((int)$v, $currency), $series->values())
+            : $series->values();
         $chart->add_series(new \core\chart_series($currency ?? $title, $values));
         return self::wrap($output->render($chart), $title, self::table($series->labels(), $values, $currency, $title));
     }
@@ -104,7 +110,10 @@ final class CommerceStatisticsChartRenderer {
         $chart->set_title($title);
         $chart->set_horizontal(true);
         $labels = array_map(static fn($row) => format_string($row['label']), $rows);
-        $values = array_map(static fn($row) => $row['revenue_minor'] / 100, $rows);
+        $values = array_map(
+            static fn($row) => CommerceCurrencyAmount::major_float_from_minor((int)$row['revenue_minor'], $currency),
+            $rows
+        );
         $chart->set_labels($labels);
         $chart->add_series(new \core\chart_series($currency, $values));
         return self::wrap($output->render($chart), $title, self::table($labels, $values, $currency, $title));
@@ -128,7 +137,10 @@ final class CommerceStatisticsChartRenderer {
     private static function table(array $labels, array $values, ?string $currency, string $caption): string {
         $rows = '';
         foreach ($labels as $i => $label) {
-            $value = format_float((float)($values[$i] ?? 0), $currency ? 2 : 0) . ($currency ? ' ' . $currency : '');
+            $value = format_float(
+                (float)($values[$i] ?? 0),
+                $currency ? Currency::minor_unit_exponent($currency) : 0
+            ) . ($currency ? ' ' . $currency : '');
             $rows .= html_writer::tag('tr', html_writer::tag('th', s((string)$label), ['scope' => 'row']) . html_writer::tag('td', s($value)));
         }
                 $head = html_writer::tag(

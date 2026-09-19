@@ -28,9 +28,22 @@ final class commerce_795o16_3_5_regression_guard_test extends \advanced_testcase
 
         $this->assertStringContainsString('.crm-breadcrumb-item:not(:last-child)::after', $styles);
         $this->assertStringContainsString('transform: rotate(45deg);', $styles);
-        $this->assertStringContainsString('.crm-inbox-filter-details-summary::after', $styles);
-        $this->assertStringNotContainsString('content: "›";', $styles);
-        $this->assertStringNotContainsString('content: "⌄";', $styles);
+        $this->assertStringContainsString(
+            '.crm-inbox-filter-details-summary::after',
+            $styles
+        );
+        $this->assertStringContainsString(
+            'content: "";',
+            $styles
+        );
+        $this->assertStringContainsString(
+            '.crm-inbox-filter-details[open]',
+            $styles
+        );
+        $this->assertStringContainsString(
+            'transform: rotate(180deg);',
+            $styles
+        );
     }
 
     public function test_internal_navigation_exposes_inbox_and_draft_counters(): void {

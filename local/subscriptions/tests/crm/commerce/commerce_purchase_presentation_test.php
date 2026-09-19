@@ -16,6 +16,12 @@ final class commerce_purchase_presentation_test extends advanced_testcase {
     }
 
     public function test_money_keeps_currency_isolated(): void {
-        $this->assertSame('123.45 EUR', CommercePurchasePresentation::money(12345, 'eur'));
+        self::assertSame(
+            "123.45\u{00A0}EUR",
+            CommercePurchasePresentation::money(
+                12345,
+                'eur'
+            )
+        );
     }
 }

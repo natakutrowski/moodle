@@ -1,11 +1,13 @@
 <?php
 namespace local_subscriptions\commerce\personaloffer\admin;
 defined('MOODLE_INTERNAL') || die();
+use local_subscriptions\commerce\domain\value\CommerceMoney;
 use local_subscriptions\commerce\personaloffer\domain\CommercePersonalOfferTerms;
+use local_subscriptions\currency\Currency;
 final class CommercePersonalOfferCrmInput {
     public static function terms(string $strategy,string $amounts,int $percent): CommercePersonalOfferTerms {
         if ($strategy===CommercePersonalOfferTerms::STRATEGY_PERCENTAGE_DISCOUNT) return CommercePersonalOfferTerms::percentage_discount($percent*100);
-        $out=[]; foreach(array_filter(array_map('trim',explode(',',$amounts))) as $part){[$cur,$value]=array_pad(explode(':',$part,2),2,null); if(!$cur||$value===null||!ctype_digit($value))throw new \coding_exception('Amounts must use EUR:3000,RUB:299000 format.');$out[strtoupper($cur)]=(int)$value;}
+        $out=[]; foreach(array_filter(array_map('trim',explode(',',$amounts))) as $part){[$cur,$value]=array_pad(explode(':',$part,2),2,null); if(!$cur||$value===null||!ctype_digit($value))throw new \coding_exception('Amounts must use ISO:MINOR format.');$currency=Currency::sanitize($cur);if($currency===''||!Currency::is_known($currency))throw new \coding_exception('Unknown Commerce currency.');$out[$currency]=(int)$value;}
         return $strategy===CommercePersonalOfferTerms::STRATEGY_FIXED_DISCOUNT?CommercePersonalOfferTerms::fixed_discount($out):CommercePersonalOfferTerms::fixed_price($out);
     }
     public static function amounts_from_major(array $values): string {
@@ -14,10 +16,16 @@ final class CommercePersonalOfferCrmInput {
             $value = trim((string)$value);
             if ($value === '') { continue; }
             $normalized = str_replace(',', '.', $value);
-            if (!is_numeric($normalized) || (float)$normalized < 0) {
-                throw new \coding_exception('Invalid monetary amount.');
+            $currency = Currency::sanitize((string)$currency);
+            if ($currency === '' || !Currency::is_known($currency)) {
+                throw new \coding_exception('Unknown Commerce currency.');
             }
-            $parts[] = strtoupper((string)$currency) . ':' . (string)(int)round(((float)$normalized) * 100);
+            try {
+                $minor = CommerceMoney::from_major_for_currency($normalized, $currency)->get_amount_minor();
+            } catch (\coding_exception $exception) {
+                throw new \coding_exception('Invalid monetary amount.', $exception);
+            }
+            $parts[] = $currency . ':' . $minor;
         }
         return implode(',', $parts);
     }

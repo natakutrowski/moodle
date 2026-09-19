@@ -6,6 +6,7 @@ namespace local_subscriptions\commerce\checkout\express;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\checkout\flow\CommercePurchaseFlow;
 use local_subscriptions\commerce\checkout\guest\CommerceCheckoutIdentityResolver;
 use local_subscriptions\commerce\checkout\unified\CommerceCheckoutContext;
@@ -13,7 +14,7 @@ use local_subscriptions\commerce\checkout\unified\CommerceCheckoutLaunchResult;
 use local_subscriptions\commerce\checkout\unified\CommerceCheckoutRuntimeFactory;
 use local_subscriptions\commerce\purchase\CommerceCustomer;
 use local_subscriptions\commerce\runtime\CommerceRuntimeFactory;
-use local_subscriptions\support\Region;
+use local_subscriptions\commerce\legal\document\CommerceLegalDocumentResolver;
 use local_subscriptions\url\UrlFactory;
 
 /**
@@ -27,14 +28,14 @@ final class CommerceCheckoutExpressService {
     private const PREF_LEGAL_FINGERPRINT = 'local_subscriptions_checkout_legal_fingerprint';
     private const PREF_LEGAL_ACCEPTED_AT = 'local_subscriptions_checkout_legal_accepted_at';
 
-    /** Records acceptance of the currently configured legal documents. */
-    public function record_legal_acceptance(int $userid): void {
-        if ($userid <= 0) {
-            return;
+    /** Records acceptance of the currently resolved legal documents. */
+    public function record_legal_acceptance(int $userid, ?int $acceptedat = null): int {
+        $acceptedat ??= time();
+        if ($userid > 0) {
+            set_user_preference(self::PREF_LEGAL_FINGERPRINT, $this->legal_fingerprint(), $userid);
+            set_user_preference(self::PREF_LEGAL_ACCEPTED_AT, (string)$acceptedat, $userid);
         }
-
-        set_user_preference(self::PREF_LEGAL_FINGERPRINT, $this->legal_fingerprint(), $userid);
-        set_user_preference(self::PREF_LEGAL_ACCEPTED_AT, (string)time(), $userid);
+        return $acceptedat;
     }
 
     /** Whether the user has accepted the exact legal document configuration. */
@@ -130,7 +131,10 @@ final class CommerceCheckoutExpressService {
         }
 
         $currency = strtoupper(trim($currency));
-        if (!in_array($currency, ['EUR', 'RUB'], true)) {
+        if (!(new CommerceCurrencyRegistry())->is_enabled($currency)) {
+            return 'unsupported_currency';
+        }
+        if (!$this->has_available_provider_for_currency($currency)) {
             return 'unsupported_currency';
         }
 
@@ -168,6 +172,8 @@ final class CommerceCheckoutExpressService {
         $returnurl = (new \moodle_url('/local/subscriptions/payment/return.php'))->out(false);
         $cancelurl = UrlFactory::cart(['currency' => $currency])->out(false);
 
+        $acceptedat = (int)get_user_preferences(self::PREF_LEGAL_ACCEPTED_AT, '0', $userid);
+
         return new CommerceCheckoutContext(
             $userid,
             $currency,
@@ -181,33 +187,48 @@ final class CommerceCheckoutExpressService {
                 'checkout_phase' => 'J14C',
                 'checkout_mode' => 'express',
                 'purchase_flow' => CommercePurchaseFlow::DIRECT,
+                'legal_acceptance' => [
+                    'accepted' => true,
+                    'accepted_at' => $acceptedat > 0 ? $acceptedat : time(),
+                    'source' => 'express_preaccepted',
+                ],
             ], $metadata)
         );
     }
 
     private function select_provider(string $currency): string {
-        $providers = CommerceRuntimeFactory::create()->payment_providers()->all();
-        $available = [];
-        foreach ($providers as $provider) {
-            if ($provider->is_available()) {
-                $available[] = $provider->get_key();
+        $currency = strtoupper(trim($currency));
+        $available = array_values(array_filter(
+            CommerceRuntimeFactory::create()->payment_providers()->all(),
+            static fn($provider): bool => $provider->is_available()
+                && $provider->get_capabilities()->supports_currency($currency)
+        ));
+
+        usort(
+            $available,
+            static fn($left, $right): int => $right->get_priority() <=> $left->get_priority()
+        );
+
+        if ($available !== []) {
+            return $available[0]->get_key();
+        }
+
+        throw new \runtime_exception('No payment provider is available for express checkout currency ' . $currency . '.');
+    }
+
+    private function has_available_provider_for_currency(string $currency): bool {
+        $currency = strtoupper(trim($currency));
+        foreach (CommerceRuntimeFactory::create()->payment_providers()->all() as $provider) {
+            if ($provider->is_available() && $provider->get_capabilities()->supports_currency($currency)) {
+                return true;
             }
         }
-
-        $preferred = strtoupper($currency) === 'RUB' ? 'alfa' : 'stripe';
-        if (in_array($preferred, $available, true)) {
-            return $preferred;
-        }
-        if ($available !== []) {
-            return (string)reset($available);
-        }
-
-        throw new \runtime_exception('No payment provider is available for express checkout.');
+        return false;
     }
 
     private function legal_fingerprint(): string {
-        $urls = Region::policyUrls();
-        ksort($urls);
-        return hash('sha256', json_encode($urls, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        return (new CommerceLegalDocumentResolver())
+            ->resolve(null, current_language())
+            ->get_fingerprint();
     }
 }

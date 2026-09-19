@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . '/../../../../../config.php');
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmInput;
@@ -16,6 +17,8 @@ use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessWorkflowRende
 use local_subscriptions\crm\commerce\rendering\CommerceOffersAccessConfigurationRenderer;
 use local_subscriptions\crm\commerce\rendering\CommercePersonalOfferConditionsRenderer;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignValidityService;
+use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferIndividualDestinationService;
+use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignEmailService;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
@@ -49,11 +52,14 @@ $currencies = array_values(array_unique(array_map(
     static fn($r): string => strtoupper((string)$r->currency),
     array_values($DB->get_records_sql("SELECT DISTINCT currency FROM {local_subs_commerce_prod_price} WHERE active = 1 ORDER BY currency"))
 )));
-if ($currencies === []) { $currencies = ['EUR', 'RUB']; }
+if ($currencies === []) { $currencies = (new CommerceCurrencyRegistry())->enabled(); }
 
 $campaigns = $DB->get_records('local_subs_commerce_offer_campaign', [], 'name ASC', 'id,campaignkey,name');
 $mailstudiobridge = CommercePersonalOfferIndividualMailStudioBridge::create($DB);
 $mailtemplateoptions = $mailstudiobridge->template_options();
+$individualdestinations = CommercePersonalOfferIndividualDestinationService::create($DB);
+$individualshowrooms = $individualdestinations->published_showrooms();
+
 
 $productdisplaylabel = static function(\stdClass $product) use ($DB): string {
     return CommercePersonalOfferCrmPresentation::business_product_label(
@@ -188,16 +194,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && confirm_sesskey()) {
             ? $mailstudiobridge->snapshot($mailtemplateid)
             : [];
 
+        $targetproductid = required_param('targetproductid', PARAM_INT);
+        $individualdestination = optional_param(
+            'individualdestination',
+            CommercePersonalOfferCampaignEmailService::DESTINATION_CHECKOUT,
+            PARAM_ALPHA
+        );
+        $individualshowroomid = optional_param('individualshowroomid', 0, PARAM_INT);
+        $validatedindividualdestination = $individualdestinations->validate(
+            $individualdestination,
+            $individualshowroomid > 0 ? $individualshowroomid : null,
+            $targetproductid
+        );
+
         $res = CommercePersonalOfferCampaignManager::create($DB)->issue_individual([
             'email' => $email,
             'beneficiaryuserid' => $u ? (int)$u->id : null,
             'sourcepurchaseid' => $sourcepurchaseid,
-            'targetproductid' => required_param('targetproductid', PARAM_INT),
+            'targetproductid' => $targetproductid,
+            'individualdestination' => $validatedindividualdestination['destination'],
+            'individualshowroomid' => $validatedindividualdestination['showroomid'],
+            'individualshowroomkey' => $validatedindividualdestination['showroomkey'],
             'eligibilitymode' => $sourcemode === 'purchase' ? 'source_purchase' : ($sourcemode === 'product' ? 'product_ownership' : 'standalone'),
             'ownershipsource' => $ownershipsource ?? null,
             'ownershipproductid' => $ownershipproductid ?? null,
             'ownershipproductsku' => $ownershipproductsku ?? null,
-            'campaignkey' => $campaignkey !== '' ? $campaignkey : 'crm-individual',
+            'campaignkey' => $campaignkey !== '' ? $campaignkey : null,
             'terms' => $terms->get_data(),
             'validfrom' => $validfrom,
             'expiresat' => $expiresat,
@@ -357,6 +379,54 @@ echo html_writer::select($productopts, 'targetproductid', '', false, ['id' => 't
 echo html_writer::div(get_string('commerce_personal_offer_target_help', 'local_subscriptions'), 'form-text');
 echo html_writer::end_div();
 
+echo html_writer::start_div('mb-4');
+echo html_writer::tag(
+    'label',
+    get_string('commerce_personal_offer_campaign_email_destination', 'local_subscriptions'),
+    ['for' => 'individualdestination', 'class' => 'form-label fw-semibold']
+);
+echo html_writer::select([
+    CommercePersonalOfferCampaignEmailService::DESTINATION_CHECKOUT =>
+        get_string('commerce_personal_offer_campaign_email_destination_checkout', 'local_subscriptions'),
+    CommercePersonalOfferCampaignEmailService::DESTINATION_SHOWROOM =>
+        get_string('commerce_personal_offer_campaign_email_destination_showroom', 'local_subscriptions'),
+], 'individualdestination', CommercePersonalOfferCampaignEmailService::DESTINATION_CHECKOUT, false, [
+    'id' => 'individualdestination',
+    'class' => 'form-select mb-2',
+]);
+
+echo html_writer::tag(
+    'label',
+    get_string('commerce_personal_offer_campaign_email_showroom', 'local_subscriptions'),
+    ['for' => 'individualshowroomid', 'class' => 'form-label']
+);
+echo html_writer::start_tag('select', [
+    'id' => 'individualshowroomid',
+    'name' => 'individualshowroomid',
+    'class' => 'form-select',
+]);
+echo html_writer::tag(
+    'option',
+    get_string('commerce_personal_offer_campaign_email_showroom_choose', 'local_subscriptions'),
+    ['value' => '0']
+);
+foreach ($individualshowrooms as $showroomid => $showroom) {
+    echo html_writer::tag(
+        'option',
+        (string)$showroom['name'],
+        [
+            'value' => (string)$showroomid,
+            'data-product-ids' => implode(',', array_map('strval', $showroom['productids'])),
+        ]
+    );
+}
+echo html_writer::end_tag('select');
+echo html_writer::div(
+    get_string('commerce_personal_offer_campaign_email_showroom_help', 'local_subscriptions'),
+    'form-text'
+);
+echo html_writer::end_div();
+
 echo CommercePersonalOfferConditionsRenderer::pricing($currencies);
 
 ob_start();
@@ -489,6 +559,8 @@ $PAGE->requires->js_init_code(<<<JS
     var email = document.getElementById('offer-email');
     var product = document.getElementById('targetproductid');
     var strategy = document.getElementById('strategy');
+    var individualDestination = document.getElementById('individualdestination');
+    var individualShowroom = document.getElementById('individualshowroomid');
     var validFrom = document.getElementById('validfrom');
     var expiresAt = document.getElementById('expiresat');
     var noExpiration = document.getElementById('noexpiration');
@@ -498,6 +570,33 @@ $PAGE->requires->js_init_code(<<<JS
     var durationValue = document.getElementById('validitydurationvalue');
     var durationUnit = document.getElementById('validitydurationunit');
     var validityTimezone = document.getElementById('validitytimezone');
+
+    function syncIndividualDestination() {
+        if (!individualDestination || !individualShowroom || !product) return;
+        var showroomMode = individualDestination.value === 'showroom';
+        var productId = String(product.value || '');
+
+        Array.prototype.forEach.call(individualShowroom.options, function(option) {
+            if (!option.value || option.value === '0') {
+                option.hidden = false;
+                option.disabled = false;
+                return;
+            }
+            var ids = String(option.dataset.productIds || '').split(',');
+            var compatible = ids.indexOf(productId) !== -1;
+            option.hidden = !compatible;
+            option.disabled = !compatible;
+            if (!compatible && option.selected) {
+                individualShowroom.value = '0';
+            }
+        });
+
+        individualShowroom.disabled = !showroomMode;
+        individualShowroom.required = showroomMode;
+        if (!showroomMode) {
+            individualShowroom.value = '0';
+        }
+    }
 
     function syncValidityMode() {
         var duration = validityMode && validityMode.value === 'duration';
@@ -528,6 +627,7 @@ $PAGE->requires->js_init_code(<<<JS
             'n73-individual-summary-pricing',
             optionText(strategy)
         );
+        syncIndividualDestination();
 
         var validity = '';
         var duration = validityMode && validityMode.value === 'duration';
@@ -548,6 +648,14 @@ $PAGE->requires->js_init_code(<<<JS
         }
         setSummary('n73-individual-summary-validity', validity);
     }
+
+    [individualDestination, product].forEach(function(field) {
+        if (!field) return;
+        field.addEventListener('change', function() {
+            syncIndividualDestination();
+            refresh();
+        });
+    });
 
     [validityMode, noExpiration].forEach(function(field) {
         if (!field) return;

@@ -24,6 +24,33 @@ final class StripePaymentReconciliationService implements StripePaymentReconcili
         if ($attempt===null) throw new \moodle_exception('commerce_stripe_reconciliation_payment_not_found','local_subscriptions');
         return $this->inspect_attempt($attempt);
     }
+    public function inspect_purchase_reference(
+        string $reference
+    ): StripePaymentReconciliationInspection {
+        $reference = trim($reference);
+
+        $purchase = $this->database->get_record(
+            CommercePersistenceSchema::TABLE_PURCHASE,
+            ['reference' => $reference],
+            '*',
+            MUST_EXIST
+        );
+
+        $attempts = $this->payments->find_for_purchase(
+            (string)$purchase->purchaseuuid
+        );
+
+        foreach ($attempts as $attempt) {
+            if ($attempt->get_provider() === Provider::STRIPE) {
+                return $this->inspect_attempt($attempt);
+            }
+        }
+
+        throw new \moodle_exception(
+            'commerce_stripe_reconciliation_attempt_not_found',
+            'local_subscriptions'
+        );
+    }
     public function reconcile_payment(int $paymentid): StripePaymentReconciliationInspection {
         $i=$this->inspect_payment($paymentid);
         if ($i->alreadycomplete) return $i;
@@ -35,9 +62,12 @@ final class StripePaymentReconciliationService implements StripePaymentReconcili
         $e->meta['commerce_reference']=$i->purchasereference;
         $e->meta['reconciliation_source']='stripe_payment_reconciliation';
         $e->meta['reconciliation_checked_at']=time();
-        $tx=$this->database->start_delegated_transaction();
+        // Do not wrap the complete post-payment pipeline in one delegated
+        // transaction. The finalizer may render transactional mail and issue an
+        // invoice, both of which own narrower database transaction boundaries.
+        // A giant outer transaction can therefore poison the payment recovery
+        // flow when an inner operation rolls back (for example invoice mail).
         $this->finalizer->finalize($e);
-        $tx->allow_commit();
         $after=$this->payments->find($paymentid);
         if ($after===null) throw new \RuntimeException('Stripe payment disappeared after reconciliation.');
         return $this->inspect_attempt($after,$i->provider);
@@ -58,9 +88,27 @@ final class StripePaymentReconciliationService implements StripePaymentReconcili
         if (!$paid) $blockers[]='provider_not_paid';
         if (!$amount) $blockers[]='amount_mismatch';
         if (!$currency) $blockers[]='currency_mismatch';
-        if ($paid && $p->event->type!=='checkout_completed') $blockers[]='provider_event_not_completed';
-        if (in_array($a->get_status(),[CommercePaymentAttemptStatus::REFUNDED,CommercePaymentAttemptStatus::CANCELLED,CommercePaymentAttemptStatus::FAILED,CommercePaymentAttemptStatus::ERROR],true)) {
-            $blockers[]='campus_payment_terminal_'.$a->get_status();
+        if (!$complete && $paid && $p->event->type!=='checkout_completed') {
+            $blockers[]='provider_event_not_completed';
+        }
+        $localstatus=$a->get_status();
+        // A durable provider success may legitimately arrive after a local
+        // FAILED/CANCELLED/ERROR state (retry, asynchronous confirmation, or
+        // out-of-order callback). M4.5 explicitly allows those states to
+        // converge to PAID, so return reconciliation must not classify them as
+        // unsafe once Stripe itself proves the charge is paid. REFUNDED stays
+        // terminal and can never be resurrected.
+        if ($localstatus===CommercePaymentAttemptStatus::REFUNDED) {
+            $blockers[]='campus_payment_terminal_'.$localstatus;
+        } else if (
+            !$paid
+            && in_array($localstatus,[
+                CommercePaymentAttemptStatus::CANCELLED,
+                CommercePaymentAttemptStatus::FAILED,
+                CommercePaymentAttemptStatus::ERROR,
+            ],true)
+        ) {
+            $blockers[]='campus_payment_terminal_'.$localstatus;
         }
         return new StripePaymentReconciliationInspection(
             $paymentid,(int)$purchase->id,(string)$purchase->reference,(string)$purchase->purchaseuuid,

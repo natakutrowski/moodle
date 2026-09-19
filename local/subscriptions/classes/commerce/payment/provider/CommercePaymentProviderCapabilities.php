@@ -2,6 +2,8 @@
 
 namespace local_subscriptions\commerce\payment\provider;
 
+use local_subscriptions\commerce\payment\method\CommercePaymentMethod;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -19,7 +21,8 @@ final class CommercePaymentProviderCapabilities {
         private readonly bool $supportsretrieval,
         private readonly bool $supportsrefunds = false,
         private readonly bool $supportsmultiplelines = true,
-        private readonly array $metadata = []
+        private readonly array $metadata = [],
+        private readonly array $paymentmethods = [CommercePaymentMethod::CARD]
     ) {
         if ($currencies === []) {
             throw new \coding_exception(
@@ -39,6 +42,21 @@ final class CommercePaymentProviderCapabilities {
                     'A Commerce provider currency must use ISO 4217 format.'
                 );
             }
+        }
+
+        if ($paymentmethods === []) {
+            throw new \coding_exception(
+                'A Commerce payment provider must expose at least one payment method.'
+            );
+        }
+
+        foreach ($paymentmethods as $method) {
+            if (!is_string($method)) {
+                throw new \coding_exception(
+                    'A Commerce payment method key must be a string.'
+                );
+            }
+            CommercePaymentMethod::normalise($method);
         }
     }
 
@@ -85,6 +103,29 @@ final class CommercePaymentProviderCapabilities {
 
     public function supports_multiple_lines(): bool {
         return $this->supportsmultiplelines;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function get_payment_methods(): array {
+        return array_values(
+            array_unique(
+                array_map(
+                    static fn(string $method): string =>
+                        CommercePaymentMethod::normalise($method),
+                    $this->paymentmethods
+                )
+            )
+        );
+    }
+
+    public function supports_payment_method(string $method): bool {
+        return in_array(
+            CommercePaymentMethod::normalise($method),
+            $this->get_payment_methods(),
+            true
+        );
     }
 
     public function get_metadata(): array {

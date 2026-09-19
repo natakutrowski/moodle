@@ -11,6 +11,7 @@ use local_subscriptions\commerce\catalog\cover\CommerceProductCoverService;
 use local_subscriptions\commerce\catalog\presentation\CommerceCatalogProductNameResolver;
 use local_subscriptions\commerce\catalog\rendering\CommerceProductEditorNavigationRenderer;
 use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
+use local_subscriptions\currency\CurrencyFormatter;
 use local_subscriptions\commerce\catalog\visual\CommerceProductVisualAuditService;
 use local_subscriptions\commerce\catalog\visual\CommerceProductVisualFormat;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
@@ -211,10 +212,10 @@ foreach ($editor->get_prices() as $candidateprice) {
     if (!$candidateprice->is_active()) {
         continue;
     }
-    $sampleprice = format_float(
-        $candidateprice->get_amount_minor() / 100,
-        2
-    ) . ' ' . $candidateprice->get_currency();
+    $sampleprice = CurrencyFormatter::format_minor_code(
+        $candidateprice->get_amount_minor(),
+        $candidateprice->get_currency()
+    );
     break;
 }
 

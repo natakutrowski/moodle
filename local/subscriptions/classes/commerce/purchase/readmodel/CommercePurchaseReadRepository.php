@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\persistence\CommercePersistenceSchema;
 use local_subscriptions\commerce\purchase\status\CommerceCommercialStatusResolver;
 use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
+use local_subscriptions\commerce\payment\method\CommercePersistedPaymentMethodResolver;
 use core_text;
 use moodle_database;
 
@@ -401,14 +402,26 @@ final class CommercePurchaseReadRepository {
                 $this->load_legacy_payment_request(
                     $payment->legacyrequestid === null ? null : (int)$payment->legacyrequestid,
                     $purchase->legacyfamily === null ? null : (string)$purchase->legacyfamily
-                )
+                ),
+                (int)$payment->id,
+                (new CommercePersistedPaymentMethodResolver())->resolve(
+                    $payment->provider === null ? null : (string)$payment->provider,
+                    array_replace(
+                        $this->decode_json((string)$purchase->metadatajson),
+                        $this->decode_json((string)($payment->metadatajson ?? ''))
+                    ),
+                    $this->decode_json((string)($payment->providerpayload ?? ''))
+                ),
+                $this->decode_json((string)($payment->metadatajson ?? ''))
             ), $payments),
             $fulfillments,
             $purchase->legacyfamily === null ? null : (string)$purchase->legacyfamily,
             $purchase->legacyid === null ? null : (int)$purchase->legacyid,
             $this->decode_json((string)$purchase->metadatajson),
             $nativefulfillment['grants'],
-            $nativefulfillment['attempts']
+            $nativefulfillment['attempts'],
+            $this->decode_json((string)$purchase->snapshotjson),
+            $this->decode_json((string)$purchase->customerjson)
         );
     }
 
@@ -650,7 +663,17 @@ final class CommercePurchaseReadRepository {
             $adminstate !== null,
             $adminstate !== null ? (int)$adminstate->closedat : 0,
             $adminstate !== null ? (int)$adminstate->closedby : 0,
-            $adminstate !== null ? (string)($adminstate->reason ?? '') : ''
+            $adminstate !== null ? (string)($adminstate->reason ?? '') : '',
+            $lastpayment === null
+                ? null
+                : (new CommercePersistedPaymentMethodResolver())->resolve(
+                    $lastpayment->provider === null ? null : (string)$lastpayment->provider,
+                    array_replace(
+                        $this->decode_json((string)$purchase->metadatajson),
+                        $this->decode_json((string)($lastpayment->metadatajson ?? ''))
+                    ),
+                    $this->decode_json((string)($lastpayment->providerpayload ?? ''))
+                )
         );
     }
 

@@ -13,7 +13,7 @@ final class commerce_commercial_pricing_j67b3_test
     public function test_upgrade_is_not_promoted_twice(): void {
         global $CFG;
         $source = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/cart/service/CommerceCartCalculator.php');
-        $this->assertStringContainsString('if (!$isupgrade && !$istrialconversion && !$ispersonaloffer)', $source);
+        $this->assertStringContainsString('if (!$isupgrade && !$istrialconversion && !$ispersonaloffer && !$ispromotionjoin)', $source);
         $this->assertStringContainsString('$promotionitems[]', $source);
         $this->assertStringContainsString('active promoted target price minus the owned source', $source);
     }

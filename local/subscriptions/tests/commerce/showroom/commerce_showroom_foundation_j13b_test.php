@@ -34,9 +34,18 @@ final class commerce_showroom_foundation_j13b_test extends \advanced_testcase {
         $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/offer.mustache');
         self::assertStringContainsString('method="post"', $template);
         self::assertStringContainsString('name="source" value="showroom"', $template);
-        self::assertStringContainsString('CommerceShowroomTrackingContext::metadata', $action);
-        self::assertStringContainsString("'showroom' => \$showroom", $action);
-
+        self::assertStringContainsString(
+            'CommerceShowroomTrackingContext::metadata($showroom, $showroomoffer)',
+            $action
+        );
+        self::assertStringContainsString(
+            "optional_param('showroom'",
+            $action
+        );
+        self::assertStringContainsString(
+            "optional_param('showroomoffer'",
+            $action
+        );
 
     }
 }

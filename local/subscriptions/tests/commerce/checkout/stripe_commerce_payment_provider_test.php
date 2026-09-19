@@ -13,6 +13,8 @@ use local_subscriptions\commerce\payment\provider\stripe\StripeCommercePaymentPr
 use local_subscriptions\commerce\payment\provider\stripe\StripeGatewayRequest;
 use local_subscriptions\commerce\payment\provider\stripe\StripeGatewayResponse;
 use local_subscriptions\commerce\payment\provider\stripe\StripePaymentGateway;
+use local_subscriptions\commerce\payment\provider\stripe\StripeRefundRequest;
+use local_subscriptions\commerce\payment\provider\stripe\StripeRefundResponse;
 use local_subscriptions\commerce\payment\provider\stripe\StripePaymentProviderConfiguration;
 use local_subscriptions\commerce\payment\result\CommercePaymentStatus;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderException;
@@ -176,6 +178,28 @@ final class stripe_commerce_payment_provider_test
                     ]
                 );
             }
+        
+            public function create_payment_intent(
+                StripeGatewayRequest $request
+            ): StripeGatewayResponse {
+                throw new \coding_exception('Not used by this test.');
+            }
+
+
+            public function refund(
+                StripeRefundRequest $request
+            ): StripeRefundResponse {
+                throw new \coding_exception('Not used by this test.');
+            }
+
+
+            public function list_refunds(
+                string $providerpaymentid,
+                string $currency
+            ): array {
+                return [];
+            }
+
         };
     }
 
@@ -231,7 +255,29 @@ final class stripe_commerce_payment_provider_test
                         'Not used by this test.'
                     );
                 }
-            };
+            
+            public function create_payment_intent(
+                StripeGatewayRequest $request
+            ): StripeGatewayResponse {
+                throw new \coding_exception('Not used by this test.');
+            }
+
+
+            public function refund(
+                StripeRefundRequest $request
+            ): StripeRefundResponse {
+                throw new \coding_exception('Not used by this test.');
+            }
+
+
+            public function list_refunds(
+                string $providerpaymentid,
+                string $currency
+            ): array {
+                return [];
+            }
+
+        };
 
         $provider =
             new StripeCommercePaymentProvider(
@@ -368,6 +414,28 @@ public function test_initialize_preserves_bridge_exception():
                     'Not used by this test.'
                 );
             }
+        
+            public function create_payment_intent(
+                StripeGatewayRequest $request
+            ): StripeGatewayResponse {
+                throw new \coding_exception('Not used by this test.');
+            }
+
+
+            public function refund(
+                StripeRefundRequest $request
+            ): StripeRefundResponse {
+                throw new \coding_exception('Not used by this test.');
+            }
+
+
+            public function list_refunds(
+                string $providerpaymentid,
+                string $currency
+            ): array {
+                return [];
+            }
+
         };
 
     $provider =

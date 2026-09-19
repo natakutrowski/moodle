@@ -25,18 +25,38 @@ final class commerce_products_n871_test extends advanced_testcase {
         );
     }
 
-    public function test_n87_keeps_schema_version_independent_from_plugin_version(): void {
+    public function test_n87_schema_and_plugin_versions_preserve_historical_milestones(): void {
         $root = dirname(__DIR__, 3);
         $version = file_get_contents($root . '/version.php');
         $install = file_get_contents($root . '/db/install.xml');
 
-        self::assertStringContainsString(
-            '$plugin->version = 2026081602;',
-            $version
+        self::assertIsString($version);
+        self::assertIsString($install);
+
+        self::assertSame(
+            1,
+            preg_match(
+                '/\$plugin->version\s*=\s*(\d+);/',
+                $version,
+                $pluginversionmatch
+            )
         );
-        self::assertStringContainsString(
-            'VERSION="2026081510"',
-            $install
+        self::assertGreaterThanOrEqual(
+            2026081602,
+            (int)$pluginversionmatch[1]
+        );
+
+        self::assertSame(
+            1,
+            preg_match(
+                '/<XMLDB[^>]+VERSION="(\d+)"/',
+                $install,
+                $schemaversionmatch
+            )
+        );
+        self::assertGreaterThanOrEqual(
+            2026081510,
+            (int)$schemaversionmatch[1]
         );
     }
 

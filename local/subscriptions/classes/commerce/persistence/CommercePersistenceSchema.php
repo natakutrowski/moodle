@@ -15,6 +15,11 @@ final class CommercePersistenceSchema {
     public const TABLE_PURCHASE = 'local_subscriptions_commerce_purchase';
     public const TABLE_ITEM = 'local_subscriptions_commerce_purchase_item';
     public const TABLE_PAYMENT = 'local_subscriptions_commerce_payment';
+    public const TABLE_REFUND = 'local_subscriptions_commerce_refund';
+    public const TABLE_INVOICE = 'local_subs_commerce_invoice';
+    public const TABLE_INVOICE_SEQUENCE = 'local_subs_commerce_inv_seq';
+    public const TABLE_CREDIT_NOTE = 'local_subs_commerce_credit_note';
+    public const TABLE_CREDIT_NOTE_SEQUENCE = 'local_subs_commerce_cn_seq';
     public const TABLE_FULFILLMENT = 'local_subscriptions_commerce_fulfillment';
 
     public const SNAPSHOT_VERSION = 1;
@@ -41,6 +46,11 @@ final class CommercePersistenceSchema {
             self::TABLE_PURCHASE,
             self::TABLE_ITEM,
             self::TABLE_PAYMENT,
+            self::TABLE_REFUND,
+            self::TABLE_INVOICE,
+            self::TABLE_INVOICE_SEQUENCE,
+            self::TABLE_CREDIT_NOTE,
+            self::TABLE_CREDIT_NOTE_SEQUENCE,
             self::TABLE_FULFILLMENT,
         ];
     }

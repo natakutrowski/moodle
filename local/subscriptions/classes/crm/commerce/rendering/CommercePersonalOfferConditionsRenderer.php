@@ -7,6 +7,8 @@ namespace local_subscriptions\crm\commerce\rendering;
 defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
+use local_subscriptions\currency\CommerceCurrencyLabelFormatter;
+use local_subscriptions\currency\Currency;
 use local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignValidityService;
 use local_subscriptions\commerce\personaloffer\domain\CommercePersonalOfferTerms;
 
@@ -44,24 +46,27 @@ final class CommercePersonalOfferConditionsRenderer {
 
         $html .= html_writer::start_div('row g-3 mb-4');
         foreach ($currencies as $currency) {
-            $code = strtoupper((string)$currency);
-            $symbol = match ($code) {
-                'EUR' => ' (€)',
-                'RUB' => ' (₽)',
-                'USD' => ' ($)',
-                'GBP' => ' (£)',
-                'CAD' => ' (C$)',
-                default => '',
-            };
+            $code = Currency::sanitize((string)$currency);
+            if ($code === '' || !Currency::is_known($code)) {
+                continue;
+            }
+
+            $decimals = Currency::minor_unit_exponent($code);
+            $step = $decimals === 0
+                ? '1'
+                : '0.' . str_repeat('0', $decimals - 1) . '1';
             $placeholder = match ($code) {
                 'EUR' => '30.00',
                 'RUB' => '2990.00',
-                default => '0.00',
+                default => $decimals === 0
+                    ? '0'
+                    : '0.' . str_repeat('0', $decimals),
             };
+
             $html .= html_writer::start_div('col-12 col-md-4');
             $html .= html_writer::tag(
                 'label',
-                $code . $symbol,
+                CommerceCurrencyLabelFormatter::format($code),
                 [
                     'for' => 'amount-' . strtolower($code),
                     'class' => 'form-label',
@@ -72,7 +77,7 @@ final class CommercePersonalOfferConditionsRenderer {
                 'name' => 'amount_' . strtolower($code),
                 'type' => 'number',
                 'min' => '0',
-                'step' => '0.01',
+                'step' => $step,
                 'class' => 'form-control crm-offers-access-currency-input',
                 'placeholder' => $placeholder,
             ]);

@@ -40,8 +40,9 @@ final class commerce_personal_offer_mail_premium_test extends advanced_testcase 
         $this->assertStringContainsString('personaloffer.prices', $template);
         $this->assertStringContainsString('#d5aa45', $template);
         $this->assertStringContainsString('pricing_cards', $service);
-        $this->assertStringContainsString("'EUR' => '€'", $service);
-        $this->assertStringContainsString("'RUB' => '₽'", $service);
+        $this->assertStringContainsString('Currency::visual_marker($code)', $service);
+        $this->assertStringContainsString('Currency::symbol($code)', $service);
+        $this->assertStringContainsString('CurrencyFormatter::format_minor_number', $service);
     }
 
     public function test_shared_mail_shell_has_premium_card_and_cta(): void {

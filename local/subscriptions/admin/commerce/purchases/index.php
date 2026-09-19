@@ -7,8 +7,13 @@ require_once(__DIR__ . '/../../../../../config.php');
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\catalog\navigation\CommerceCatalogLinkGenerator;
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogReadRepository;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseActionPolicy;
+use local_subscriptions\commerce\payment\refund\CommercePaymentRefundService;
+use local_subscriptions\commerce\payment\method\CommercePersistedPaymentMethodResolver;
+use local_subscriptions\commerce\payment\method\CommercePaymentMethodVisual;
+use local_subscriptions\commerce\runtime\CommerceRuntimeFactory;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseAdminClosureService;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseActionServiceFactory;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
@@ -25,6 +30,7 @@ use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 use local_subscriptions\payment\Provider;
+use local_subscriptions\currency\CurrencyFormatter;
 
 $context = AdminSecurity::require(Capabilities::VIEW_PAYMENTS);
 $pageurl = new moodle_url('/local/subscriptions/admin/commerce/purchases/index.php');
@@ -115,6 +121,7 @@ $filter = new CommercePurchaseListFilter(
     $adminstate
 );
 $repository = new CommercePurchaseReadRepository($DB);
+$paymentmethodresolver = new CommercePersistedPaymentMethodResolver();
 $result = $repository->search($filter, $page, $perpage);
 $kpis = (new CommerceSalesDashboardRepository($repository))->snapshot($filter);
 
@@ -149,7 +156,9 @@ $provideroptions = ['' => get_string('all')];
 foreach (Provider::KNOWN as $providercode) {
     $provideroptions[$providercode] = Provider::get($providercode);
 }
-$currencyoptions = ['' => get_string('all'), 'EUR' => 'EUR', 'RUB' => 'RUB', 'USD' => 'USD'];
+$currencyoptions = ['' => get_string('all')] + (new CommerceCurrencyRegistry())->options_including(
+    array_keys($kpis['revenue'] ?? [])
+);
 $offeroriginoptions = [
     '' => get_string('all'),
     'personaloffer' => get_string('commerce_sales_origin_personal_offer', 'local_subscriptions'),
@@ -195,7 +204,7 @@ $columnlabels = [
     'customer' => get_string('commerce_purchase_customer', 'local_subscriptions'),
     'type' => get_string('commerce_sales_product_type', 'local_subscriptions'),
     'products' => get_string('commerce_purchase_products', 'local_subscriptions'),
-    'provider' => get_string('commerce_purchase_provider', 'local_subscriptions'),
+    'provider' => get_string('commerce_sales_payment_route', 'local_subscriptions'),
     'amount' => get_string('commerce_purchase_amount', 'local_subscriptions'),
     'payment' => get_string('commerce_purchase_payment_status', 'local_subscriptions'),
     'fulfillment' => get_string('commerce_purchase_fulfillment_status', 'local_subscriptions'),
@@ -637,7 +646,7 @@ foreach ($kpis['revenue'] as $code => $minor) {
     $revenuehtml .= html_writer::div(
         html_writer::span(s($code), 'crm-sales-kpi-currency')
         . html_writer::span(
-            s(format_float(((int)$minor) / 100, 2)),
+            s(CurrencyFormatter::format_minor_code((int)$minor, (string)$code)),
             'crm-sales-kpi-money'
         ),
         'crm-sales-kpi-money-row'
@@ -814,6 +823,60 @@ if ($result->purchases === []) {
     $catalogrepository = new CommerceCatalogReadRepository($DB);
 $salesfollowupservice = CommerceSalesFollowupService::create($DB);
 
+    $refundpaymentids = [];
+    $refundproviders = [];
+    $paymentproviderregistry =
+        CommerceRuntimeFactory::create()->payment_providers();
+    $refundservice =
+        new CommercePaymentRefundService($paymentproviderregistry);
+
+    foreach ($paymentproviderregistry->all() as $paymentprovider) {
+        if ($refundservice->is_supported($paymentprovider->get_key())) {
+            $refundproviders[] = $paymentprovider->get_key();
+        }
+    }
+
+    $visiblepurchaseids = array_map(
+        static fn($purchase): int => (int)$purchase->id,
+        $result->purchases
+    );
+
+    if ($visiblepurchaseids !== []) {
+        [$purchaseinsql, $purchaseparams] = $DB->get_in_or_equal(
+            $visiblepurchaseids,
+            SQL_PARAMS_NAMED,
+            'refundpurchase'
+        );
+
+        if ($refundproviders !== []) {
+            [$providerinsql, $providerparams] =
+                $DB->get_in_or_equal(
+                    $refundproviders,
+                    SQL_PARAMS_NAMED,
+                    'refundprovider'
+                );
+            $refundparams = $purchaseparams + $providerparams;
+
+            $sql = "SELECT pay.id,pay.purchaseid,pay.provider,pay.status,pay.amountminor,
+                           COALESCE(SUM(CASE WHEN r.status IN ('pending','succeeded')
+                                             THEN r.amountminor ELSE 0 END),0) refundedminor
+                      FROM {local_subscriptions_commerce_payment} pay
+                 LEFT JOIN {local_subscriptions_commerce_refund} r ON r.paymentid=pay.id
+                     WHERE pay.purchaseid {$purchaseinsql}
+                       AND pay.provider {$providerinsql}
+                       AND pay.status IN ('paid','succeeded','completed','captured')
+                  GROUP BY pay.id,pay.purchaseid,pay.provider,pay.status,pay.amountminor
+                    HAVING refundedminor < pay.amountminor
+                  ORDER BY pay.id DESC";
+
+            foreach ($DB->get_records_sql($sql, $refundparams) as $row) {
+                $purchasekey = (int)$row->purchaseid;
+                $refundpaymentids[$purchasekey] ??= (int)$row->id;
+            }
+        }
+    }
+
+
     $personalofferids = [];
     $visibleofferuuids = array_values(array_unique(array_filter(array_map(
         static fn($purchase): string => $purchase->haspersonaloffer
@@ -963,6 +1026,7 @@ $salesfollowupservice = CommerceSalesFollowupService::create($DB);
         }
 
         $providerhtml = '—';
+        $providername = '';
         if ($purchase->provider !== null && $purchase->provider !== '') {
             $providername = Provider::get($purchase->provider);
             $providerurl = Provider::icon_url($purchase->provider);
@@ -990,6 +1054,22 @@ $salesfollowupservice = CommerceSalesFollowupService::create($DB);
                     ]
                 );
             }
+        }
+        $paymentmethodlabel = $paymentmethodresolver->label(
+            $purchase->paymentmethod
+        );
+        $paymentmethodicon = CommercePaymentMethodVisual::icon_html(
+            $purchase->paymentmethod,
+            $paymentmethodlabel,
+            22,
+            'crm-sales-payment-method-icon'
+        );
+        $paymentroutehtml = $paymentmethodicon;
+        if ($providerhtml !== '—') {
+            $paymentroutehtml .= $providerhtml;
+        }
+        if ($paymentroutehtml === '') {
+            $paymentroutehtml = '—';
         }
         $paymenthtml = html_writer::div(
             CommercePurchasePresentation::technical_status_badge(
@@ -1027,7 +1107,8 @@ $salesfollowupservice = CommerceSalesFollowupService::create($DB);
             $closedwithoutfulfillment,
             $salesfollowupservice,
             $adminclosureservice,
-            $pageurl
+            $pageurl,
+            $refundpaymentids
         ): string {
             $primary = html_writer::link(
                 $viewurl,
@@ -1200,6 +1281,38 @@ $salesfollowupservice = CommerceSalesFollowupService::create($DB);
                 );
             }
 
+            if (
+                has_capability(
+                    Capabilities::MANAGE_SUBSCRIPTIONS,
+                    $context
+                )
+                && isset($refundpaymentids[(int)$purchase->id])
+            ) {
+                $sections['order'][] = html_writer::link(
+                    new moodle_url(
+                        '/local/subscriptions/admin/commerce/purchases/refund.php',
+                        [
+                            'id' => (int)$purchase->id,
+                            'paymentid' =>
+                                $refundpaymentids[(int)$purchase->id],
+                        ]
+                    ),
+                    html_writer::tag('i', '', [
+                        'class' => 'fa fa-rotate-left',
+                        'aria-hidden' => 'true',
+                    ]) . html_writer::span(
+                        get_string(
+                            'commerce_refund_action',
+                            'local_subscriptions'
+                        )
+                    ),
+                    [
+                        'class' =>
+                            'crm-sales-row-menu-link is-danger',
+                    ]
+                );
+            }
+
             $sections['order'][] = html_writer::link(
                 new moodle_url(
                     '/local/subscriptions/order_details.php',
@@ -1271,6 +1384,54 @@ $salesfollowupservice = CommerceSalesFollowupService::create($DB);
                     ]) . html_writer::span(
                         get_string(
                             'commerce_alfa_crm_verify_short',
+                            'local_subscriptions'
+                        )
+                    ),
+                    ['class' => 'crm-sales-row-menu-link']
+                );
+            }
+
+            if ($purchase->provider === Provider::STRIPE
+                    && !in_array(
+                        $purchase->paymentstatus,
+                        ['paid', 'completed', 'succeeded'],
+                        true
+                    )) {
+                $sections['order'][] = html_writer::link(
+                    new moodle_url(
+                        '/local/subscriptions/admin/commerce/purchases/reconcile_stripe.php',
+                        ['id' => $purchase->id]
+                    ),
+                    html_writer::tag('i', '', [
+                        'class' => 'fa fa-refresh',
+                        'aria-hidden' => 'true',
+                    ]) . html_writer::span(
+                        get_string(
+                            'commerce_stripe_crm_verify_short',
+                            'local_subscriptions'
+                        )
+                    ),
+                    ['class' => 'crm-sales-row-menu-link']
+                );
+            }
+
+            if ($purchase->provider === Provider::PAYPAL
+                    && !in_array(
+                        $purchase->paymentstatus,
+                        ['paid', 'completed', 'succeeded'],
+                        true
+                    )) {
+                $sections['order'][] = html_writer::link(
+                    new moodle_url(
+                        '/local/subscriptions/admin/commerce/purchases/reconcile_paypal.php',
+                        ['id' => $purchase->id]
+                    ),
+                    html_writer::tag('i', '', [
+                        'class' => 'fa fa-refresh',
+                        'aria-hidden' => 'true',
+                    ]) . html_writer::span(
+                        get_string(
+                            'commerce_paypal_crm_verify_short',
                             'local_subscriptions'
                         )
                     ),
@@ -1515,8 +1676,8 @@ $salesfollowupservice = CommerceSalesFollowupService::create($DB);
                     : ''),
             'products' => $products,
             'provider' => html_writer::div(
-                $providerhtml,
-                'crm-sales-provider-cell'
+                $paymentroutehtml,
+                'crm-sales-provider-cell d-flex align-items-center gap-2'
             ),
             'amount' => html_writer::span(
                 s(CommercePurchasePresentation::money(

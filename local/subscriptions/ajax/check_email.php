@@ -1,20 +1,17 @@
 <?php
 // local/subscriptions/ajax/check_email.php
 define('AJAX_SCRIPT', true);
-define('NO_MOODLE_COOKIES', true);
 
 require_once(__DIR__ . '/../../../config.php');
 
 header('Content-Type: application/json; charset=utf-8');
 
-$email = required_param('email', PARAM_RAW_TRIMMED);
-$exists = false;
+$email = optional_param('email', '', PARAM_RAW_TRIMMED);
 
-if ($email !== '') {
-    $exists = $DB->record_exists('user', [
-        'email'   => \core_text::strtolower($email),
-        'deleted' => 0
-    ]);
-}
-
-echo json_encode(['exists' => (bool)$exists]);
+// A5.7.1: this legacy endpoint must never disclose whether an account exists.
+// A5.7.2 will replace email ownership resolution with an OTP challenge whose
+// public response is deliberately uniform.
+echo json_encode([
+    'ok' => true,
+    'accepted' => $email !== '',
+]);

@@ -28,11 +28,15 @@ final class commerce_storefront_harmonisation_j67b9_test
             $source
         );
         $this->assertStringContainsString(
-            '$customerid > 0 ? 1 : 0',
+            '$customerid > 0 && !$isguestcustomer ? 1 : 0',
             $source
         );
         $this->assertStringContainsString(
             "empty(\$card['owned'])",
+            $source
+        );
+        $this->assertStringContainsString(
+            "!empty(\$card['promotionjoinpurchasable'])",
             $source
         );
 

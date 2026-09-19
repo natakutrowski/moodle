@@ -70,6 +70,7 @@ final class CommerceEntitlementGrantRecordMapper {
     public function payload_hash(CommerceEntitlementGrant $grant): string {
         $payload = $grant->to_array();
         unset($payload['reference']);
+        $payload = $this->normalise_idempotency_payload($payload);
 
         return hash('sha256', $this->encode_json($payload));
     }
@@ -94,7 +95,34 @@ final class CommerceEntitlementGrantRecordMapper {
             'metadata' => $this->decode_json((string)$record->metadatajson),
         ];
 
+        $payload = $this->normalise_idempotency_payload($payload);
+
         return hash('sha256', $this->encode_json($payload));
+    }
+
+    /**
+     * Ignore the wall-clock start instant when comparing a replayed plan.
+     *
+     * Native grants are planned at fulfillment time. A provider webhook and a
+     * browser reconciliation may therefore rebuild the same immutable purchase
+     * a few seconds apart. The persisted grant owns the original validity
+     * anchor; replay idempotency compares the duration instead of a freshly
+     * generated absolute timestamp. A changed finite duration still conflicts.
+     *
+     * @param array<string,mixed> $payload
+     * @return array<string,mixed>
+     */
+    private function normalise_idempotency_payload(array $payload): array {
+        $validfrom = (int)($payload['validfrom'] ?? 0);
+        $validuntil = $payload['validuntil'] ?? null;
+
+        $payload['validityduration'] = $validuntil === null
+            ? null
+            : max(0, (int)$validuntil - $validfrom);
+
+        unset($payload['validfrom'], $payload['validuntil']);
+
+        return $payload;
     }
 
     private function encode_json(array $value): string {

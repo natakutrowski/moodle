@@ -6,48 +6,57 @@ namespace local_subscriptions;
 
 defined('MOODLE_INTERNAL') || die();
 
-use advanced_testcase;
+final class commerce_guest_checkout_inline_login_test extends \advanced_testcase {
 
-final class commerce_guest_checkout_inline_login_test extends advanced_testcase {
-    public function test_existing_account_login_is_rendered_inside_checkout(): void {
-        $root = dirname(__DIR__, 3);
-        $checkout = (string)file_get_contents($root . '/commerce_checkout.php');
-        $template = (string)file_get_contents($root . '/templates/checkout/page.mustache');
+    public function test_existing_account_login_is_rendered_inside_checkout_after_verified_identity(): void {
+        global $CFG;
 
-        $this->assertStringContainsString('get_login_token()', $checkout);
-        $this->assertStringContainsString('$SESSION->wantsurl', $checkout);
-        $this->assertStringContainsString('hasembeddedlogin', $checkout);
-        $this->assertStringContainsString('commerce-checkout-login-gate', $template);
-        $this->assertStringContainsString('name="logintoken"', $template);
-        $this->assertStringContainsString('name="username"', $template);
-        $this->assertStringContainsString('name="password"', $template);
-        $this->assertStringContainsString('{{^existingaccount}}', $template);
+        $checkout = file_get_contents(
+            $CFG->dirroot . '/local/subscriptions/commerce_checkout.php'
+        );
+        self::assertIsString($checkout);
+        global $CFG;
+
+        $template = file_get_contents(
+            $CFG->dirroot . '/local/subscriptions/templates/checkout/page.mustache'
+        );
+        self::assertIsString($template);
+
+        self::assertStringContainsString('get_login_token()', $checkout);
+        self::assertStringContainsString('$SESSION->wantsurl', $checkout);
+        self::assertStringContainsString('$guestverificationstate?->is_locked() === true', $checkout);
+        self::assertStringContainsString('commerce-checkout-login-gate', $template);
+        self::assertStringContainsString('name="password"', $template);
     }
 
-    public function test_personal_offer_identity_is_resolved_before_payment(): void {
-        $root = dirname(__DIR__, 3);
-        $checkout = (string)file_get_contents($root . '/commerce_checkout.php');
 
-        $this->assertStringContainsString(
-            'Personal Offer identity is already authoritative',
-            $checkout
+    public function test_personal_offer_signed_link_can_resolve_reserved_identity_without_generic_otp(): void {
+        global $CFG;
+
+        $checkout = file_get_contents(
+            $CFG->dirroot . '/local/subscriptions/commerce_checkout.php'
         );
-        $this->assertStringContainsString(
-            'CommerceGuestCheckoutService::create()->identify',
-            $checkout
-        );
+        self::assertIsString($checkout);
+
+        self::assertStringContainsString('personal_offer_reserved_email', $checkout);
+        self::assertStringContainsString("'identity_proof' => 'personal_offer_signed_link'", $checkout);
+        self::assertStringContainsString('CommerceGuestCheckoutService::create()->identify(', $checkout);
+        self::assertStringContainsString('$showguestidentity = false;', $checkout);
     }
 
-    public function test_print_css_hides_theme_chrome_and_does_not_restyle_nested_offer_badge(): void {
-        $root = dirname(__DIR__, 3);
-        $css = (string)file_get_contents($root . '/styles/storefront.css');
 
-        $this->assertStringContainsString(
-            '.commerce-cart-print-item__badges > span:not(.commerce-personal-offer-badge)',
-            $css
+    public function test_print_css_hides_theme_chrome_and_preserves_offer_badge(): void {
+        global $CFG;
+
+        $css = file_get_contents(
+            $CFG->dirroot . '/local/subscriptions/styles/storefront.css'
         );
-        $this->assertStringContainsString('.navbar-area', $css);
-        $this->assertStringContainsString('.sticky-header', $css);
-        $this->assertStringContainsString('body > header', $css);
+        self::assertIsString($css);
+
+        self::assertStringContainsString('.commerce-cart-print-item__badges > span:not(.commerce-personal-offer-badge)', $css);
+        self::assertStringContainsString('.navbar-area', $css);
+        self::assertStringContainsString('.sticky-header', $css);
+        self::assertStringContainsString('body > header', $css);
     }
+
 }

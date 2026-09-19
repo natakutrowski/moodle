@@ -11,6 +11,7 @@ use local_subscriptions\commerce\statistics\CommerceStatisticsComparison;
 use local_subscriptions\commerce\statistics\CommerceStatisticsMetric;
 use local_subscriptions\commerce\statistics\CommerceStatisticsSnapshot;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
+use local_subscriptions\currency\CurrencyFormatter;
 
 /** Accessible presentation layer for Native Commerce statistics. */
 final class CommerceStatisticsPageRenderer {
@@ -136,19 +137,8 @@ final class CommerceStatisticsPageRenderer {
     }
 
     private static function format_value(string $key, int|float $value, string $currency): string {
-        if (str_ends_with($key, '_minor')) {
-            $major = ((float)$value) / 100;
-            if (class_exists('NumberFormatter')) {
-                $formatter = new \NumberFormatter(current_language(), \NumberFormatter::CURRENCY);
-                $formatted = $formatter->formatCurrency($major, $currency);
-                if ($formatted !== false) {
-                    return $formatted;
-                }
-            }
-            return format_float($major, 2) . ' ' . $currency;
-        }
-        if ($key === 'average_order_minor') {
-            return format_float((float)$value / 100, 2) . ' ' . $currency;
+        if (str_ends_with($key, '_minor') || $key === 'average_order_minor') {
+            return CurrencyFormatter::format_minor_code((int)round((float)$value), $currency);
         }
         return format_float((float)$value, 0);
     }

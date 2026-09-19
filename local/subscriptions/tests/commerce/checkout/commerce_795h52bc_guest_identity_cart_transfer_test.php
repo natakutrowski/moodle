@@ -87,4 +87,49 @@ final class commerce_795h52bc_guest_identity_cart_transfer_test extends \advance
         $this->assertStringContainsString('CommerceGuestCheckoutService::create()', $page);
         $this->assertStringContainsString("'Aa#' . bin2hex(random_bytes(24))", $provisioner);
     }
+    public function test_guest_transfer_wires_pedagogical_reservation_continuity(): void {
+        global $CFG;
+
+        $source = file_get_contents(
+            $CFG->dirroot
+            . '/local/subscriptions/classes/commerce/checkout/guest/'
+            . 'CommerceGuestCartTransferService.php'
+        );
+        $reservationservice = file_get_contents(
+            $CFG->dirroot
+            . '/local/subscriptions/classes/commerce/education/reservation/'
+            . 'CommercePedagogicalSeatReservationService.php'
+        );
+
+        self::assertStringContainsString(
+            'CommercePedagogicalSeatReservationService::create()',
+            $source
+        );
+        self::assertStringContainsString(
+            '$this->reservations?->transfer_cart(',
+            $source
+        );
+        self::assertStringContainsString(
+            '$guest->get_uuid()',
+            $source
+        );
+        self::assertStringContainsString(
+            '$persisted->get_uuid()',
+            $source
+        );
+        self::assertStringContainsString(
+            'public function transfer_cart(',
+            $reservationservice
+        );
+        self::assertStringContainsString(
+            '$expiresat = $targetactive',
+            $reservationservice
+        );
+        self::assertStringNotContainsString(
+            'reserve(
+                        $productsku',
+            $reservationservice
+        );
+    }
+
 }

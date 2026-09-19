@@ -300,6 +300,54 @@ final class CommerceMailQueueRepository {
         ]);
     }
 
+    /**
+     * Cancel queued messages matching a mail type and idempotency-key prefix.
+     *
+     * This is used by interactive OTP flows where an old delayed message must
+     * never be delivered after a newer challenge has replaced it.
+     */
+    public function cancel_queued_by_prefix(
+        string $mailtype,
+        string $prefix,
+        string $reason,
+        ?int $now = null
+    ): int {
+        global $DB;
+
+        $now ??= time();
+        $mailtype = CommerceMailType::normalise($mailtype);
+        $prefix = trim($prefix);
+
+        if ($prefix === '') {
+            throw new \coding_exception(
+                'Commerce mail cancellation prefix cannot be empty.'
+            );
+        }
+
+        $records = $DB->get_records_select(
+            self::TABLE,
+            'mailtype = :mailtype'
+                . ' AND status = :status'
+                . ' AND idempotencykey LIKE :prefix',
+            [
+                'mailtype' => $mailtype,
+                'status' => CommerceMailStatus::QUEUED,
+                'prefix' => $prefix . '%',
+            ],
+            'id ASC'
+        );
+
+        foreach ($records as $record) {
+            $this->mark_cancelled(
+                (int)$record->id,
+                $reason,
+                $now
+            );
+        }
+
+        return count($records);
+    }
+
     public function mark_cancelled(int $id, string $reason, ?int $now = null): void {
         global $DB;
         $now ??= time();

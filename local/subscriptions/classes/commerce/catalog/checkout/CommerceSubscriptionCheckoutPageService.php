@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\catalog\repository\CommerceLegacyProductMapRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductPriceRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
 use local_subscriptions\constants\Operation;
 use local_subscriptions\constants\Status;
 use local_subscriptions\domain\SubscriptionAdvisor;
@@ -66,7 +67,8 @@ final class CommerceSubscriptionCheckoutPageService {
             (int)$plan->accessscopeid
         );
 
-        [$usedcurrency, $baseprice, $requestedavailable] = $this->resolve_native_price($planid, $currency);
+        [$usedcurrency, $basepriceminor, $requestedavailable] = $this->resolve_native_price($planid, $currency);
+        $baseprice = CommerceCurrencyAmount::major_float_from_minor($basepriceminor, $usedcurrency);
 
         require_once(__DIR__ . '/../../../trial_manager.php');
         $discountopen = $userid > 0
@@ -78,9 +80,13 @@ final class CommerceSubscriptionCheckoutPageService {
             ? (int)\local_subscriptions\trial_manager::discount_window_deadline($userid)
             : 0;
         $applydiscount = $discountopen && $discountpercent > 0;
-        $finalpurchaseprice = $applydiscount
-            ? round($baseprice * (100 - $discountpercent) / 100, 2)
-            : $baseprice;
+        $finalpurchasepriceminor = $applydiscount
+            ? (int)round(($basepriceminor * (100 - $discountpercent)) / 100)
+            : $basepriceminor;
+        $finalpurchaseprice = CommerceCurrencyAmount::major_float_from_minor(
+            $finalpurchasepriceminor,
+            $usedcurrency
+        );
 
         if ($effectiveuserid <= 0 || $options === []) {
             $options = [[
@@ -139,7 +145,7 @@ final class CommerceSubscriptionCheckoutPageService {
         return [$subscription, $plan ?: null];
     }
 
-    /** @return array{0:string,1:float,2:bool} */
+    /** @return array{0:string,1:int,2:bool} */
     private function resolve_native_price(int $planid, string $requestedcurrency): array {
         $productid = $this->legacymap->find_product_id('subscription_plan', $planid);
         if ($productid === null) {
@@ -172,7 +178,7 @@ final class CommerceSubscriptionCheckoutPageService {
 
         return [
             $selected->get_currency(),
-            round($selected->get_amount_minor() / 100, 2),
+            $selected->get_amount_minor(),
             $requestedavailable,
         ];
     }

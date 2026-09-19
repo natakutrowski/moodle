@@ -16,6 +16,7 @@ final class CommerceSectionNavigationRenderer {
     public const OVERVIEW = CommerceSectionNavigationRegistry::OVERVIEW;
     public const PRODUCTS = CommerceSectionNavigationRegistry::PRODUCTS;
     public const SHOWROOMS = CommerceSectionNavigationRegistry::SHOWROOMS;
+    public const EDUCATION = CommerceSectionNavigationRegistry::EDUCATION;
     public const PURCHASES = CommerceSectionNavigationRegistry::PURCHASES;
     public const SUBSCRIPTIONS = CommerceSectionNavigationRegistry::SUBSCRIPTIONS;
     public const DIGITAL_PURCHASES = CommerceSectionNavigationRegistry::DIGITAL_PURCHASES;

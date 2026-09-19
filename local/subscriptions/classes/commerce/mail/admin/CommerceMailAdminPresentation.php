@@ -95,6 +95,7 @@ final class CommerceMailAdminPresentation {
             CommerceMailType::TRIAL_WELCOME => 'text-bg-info',
             CommerceMailType::MARKETING_CAMPAIGN => 'text-bg-primary',
             CommerceMailType::SALES_FOLLOWUP => 'text-bg-warning',
+            CommerceMailType::GUEST_IDENTITY_OTP => 'text-bg-info',
             default => 'text-bg-light',
         };
     }

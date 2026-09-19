@@ -80,8 +80,15 @@ final class commerce_personal_offer_campaign_email_m3h_certification_test extend
         $this->assertStringNotContainsString('5490', $content);
         $this->assertStringContainsString('{{offer_end}}', $content);
         $this->assertStringContainsString('₽', $html);
-        $this->assertMatchesRegularExpression('/2\s*990/u', strip_tags($html));
-        $this->assertMatchesRegularExpression('/5\s*490/u', strip_tags($html));
+        $plainhtml = strip_tags($html);
+        $this->assertMatchesRegularExpression(
+            '/2(?:[\\s,\\x{00A0}]*)990/u',
+            $plainhtml
+        );
+        $this->assertMatchesRegularExpression(
+            '/5(?:[\\s,\\x{00A0}]*)490/u',
+            $plainhtml
+        );
 
         // New fixed-datetime validity must preserve the precise local deadline.
         $this->assertStringNotContainsString('{{offer_end}}', $html);

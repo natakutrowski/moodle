@@ -16,19 +16,36 @@ final class CommercePostPaymentStateResolver {
         $browserresult = strtolower(trim($browserresult));
         $paymentstatus = strtolower(trim($order->paymentstatus));
 
-        if ($browserresult === 'cancel' || in_array($paymentstatus, self::CANCELLED, true)) {
-            return new CommercePostPaymentState('cancelled', 'warning', true, false);
-        }
-        if ($browserresult === 'failure' || in_array($paymentstatus, self::FAILED, true)) {
-            return new CommercePostPaymentState('failed', 'danger', true, false);
-        }
+        // The durable payment state is authoritative. A provider/browser return can
+        // legitimately be stale after a retry succeeds on the same purchase, so a
+        // historical ?result=failure/cancel must never downgrade an already paid order.
         if ($order->is_paid()) {
             if ($order->has_available_accesses()) {
                 return new CommercePostPaymentState('success', 'success', false, true);
             }
             return new CommercePostPaymentState('processing', 'info', false, false);
         }
-        if (in_array($paymentstatus, self::PENDING, true) || $browserresult === 'success') {
+        // A provider/browser success return is stronger than a stale local
+        // FAILED/CANCELLED snapshot from an earlier attempt. Do not flash a
+        // false failure while the provider reconciliation/webhook catches up.
+        // This state never exposes access: it only enables the confirmation
+        // polling surface until durable PAID/COMPLETED is observed.
+        if ($browserresult === 'success') {
+            return new CommercePostPaymentState('pending', 'info', false, false);
+        }
+        if ($browserresult === 'cancel') {
+            return new CommercePostPaymentState('cancelled', 'warning', true, false);
+        }
+        if ($browserresult === 'failure') {
+            return new CommercePostPaymentState('failed', 'danger', true, false);
+        }
+        if (in_array($paymentstatus, self::CANCELLED, true)) {
+            return new CommercePostPaymentState('cancelled', 'warning', true, false);
+        }
+        if (in_array($paymentstatus, self::FAILED, true)) {
+            return new CommercePostPaymentState('failed', 'danger', true, false);
+        }
+        if (in_array($paymentstatus, self::PENDING, true)) {
             return new CommercePostPaymentState('pending', 'info', false, false);
         }
         return new CommercePostPaymentState('unknown', 'warning', true, false);

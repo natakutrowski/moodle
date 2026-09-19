@@ -120,6 +120,7 @@ final class MyCoursesPage implements \templatable, \renderable {
         $mobileimageurl = $this->mobilecovers->resolve($courseid);
         $progress = $this->progress_context($item);
         $access = $this->access_context($item);
+        $learning = $this->learning_context($item);
 
         return [
             'courseid' => $courseid,
@@ -138,6 +139,7 @@ final class MyCoursesPage implements \templatable, \renderable {
             'hasaccesslabel' => $access['haslabel'],
             'accesslabel' => $access['label'],
             'accessstate' => $access['state'],
+            'learning' => $learning,
             'progress' => $progress,
             'ctlabel' => $this->cta_label($item),
         ];
@@ -212,6 +214,15 @@ final class MyCoursesPage implements \templatable, \renderable {
 
     /** @return array{trial:bool,haslabel:bool,label:string,state:string} */
     private function access_context(MyCoursePresentation $item): array {
+        if (!empty($item->learningstatus['isprogressive'])) {
+            return [
+                'trial' => false,
+                'haslabel' => true,
+                'label' => get_string('mycourses_learning_access_progressive', 'local_campus'),
+                'state' => 'progressive',
+            ];
+        }
+
         $origin = $this->effective_origin($item);
         $period = $item->commerceaccess->period;
         $now = time();
@@ -243,6 +254,71 @@ final class MyCoursesPage implements \templatable, \renderable {
             'haslabel' => $label !== '',
             'label' => $label,
             'state' => $state,
+        ];
+    }
+
+    /** @return array<string,mixed> */
+    private function learning_context(MyCoursePresentation $item): array {
+        $status = $item->learningstatus;
+        if (empty($status['haspromotion'])) {
+            return ['hasdetails' => false, 'items' => []];
+        }
+
+        $items = [];
+        $promotionname = trim((string)($status['promotionname'] ?? ''));
+        if ($promotionname !== '') {
+            $items[] = [
+                'icon' => 'fa-user-group',
+                'label' => get_string('mycourses_learning_promotion', 'local_campus', format_string($promotionname)),
+            ];
+        }
+
+        $items[] = [
+            'icon' => !empty($status['hasfullaccess']) ? 'fa-unlock' : 'fa-calendar-check',
+            'label' => get_string(
+                !empty($status['hasfullaccess'])
+                    ? 'mycourses_learning_access_full'
+                    : 'mycourses_learning_access_progressive',
+                'local_campus'
+            ),
+        ];
+
+        $startsat = isset($status['promotionstartsat']) && $status['promotionstartsat'] !== null
+            ? (int)$status['promotionstartsat']
+            : 0;
+        if ($startsat > 0) {
+            $items[] = [
+                'icon' => 'fa-calendar-day',
+                'label' => get_string('mycourses_learning_start', 'local_campus',
+                    userdate($startsat, get_string('strftimedatetimeshort', 'langconfig'))),
+            ];
+        }
+
+        if (!empty($status['hasnextlesson']) && !empty($status['nextunlocksat'])) {
+            $lesson = trim((string)($status['nextsectionname'] ?? ''));
+            if ($lesson === '') {
+                $lesson = get_string('mycourses_learning_section_fallback', 'local_campus',
+                    (int)($status['nextsectionnumber'] ?? 0));
+            }
+            $a = (object)[
+                'lesson' => format_string($lesson),
+                'date' => userdate((int)$status['nextunlocksat'], get_string('strftimedatetimeshort', 'langconfig')),
+            ];
+            $items[] = [
+                'icon' => 'fa-forward-step',
+                'label' => get_string(
+                    !empty($status['hasfullaccess'])
+                        ? 'mycourses_learning_next_promo_step'
+                        : 'mycourses_learning_next_lesson',
+                    'local_campus',
+                    $a
+                ),
+            ];
+        }
+
+        return [
+            'hasdetails' => $items !== [],
+            'items' => $items,
         ];
     }
 

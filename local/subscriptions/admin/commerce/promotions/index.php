@@ -15,6 +15,7 @@ use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\currency\CurrencyFormatter;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 $repository = new MoodleCommercePromotionRepository();
@@ -54,7 +55,10 @@ $formatvalue = static function(CommercePromotion $promotion): string {
     if ($promotion->get_discount_type() === CommercePromotion::TYPE_PERCENTAGE) {
         return format_float($promotion->get_discount_value() / 100, 2) . ' %';
     }
-    return format_float($promotion->get_discount_value() / 100, 2) . ' ' . ($promotion->get_currency() ?? '');
+    return CurrencyFormatter::format_minor_code(
+        $promotion->get_discount_value(),
+        (string)($promotion->get_currency() ?? '')
+    );
 };
 $validity = static function(CommercePromotion $promotion): array {
     $now = time();

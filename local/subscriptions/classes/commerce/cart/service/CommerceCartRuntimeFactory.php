@@ -24,6 +24,9 @@ use local_subscriptions\commerce\promotion\service\CommercePromotionEngine;
 use local_subscriptions\commerce\promotion\eligibility\CommercePromotionCustomerEligibilityEvaluator;
 use local_subscriptions\commerce\trial\CommerceTrialCartPricingService;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferCheckoutPricingService;
+use local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationService;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinEligibilityService;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinPricingService;
 
 /** Builds the production G2-G3 session-cart service graph. */
 final class CommerceCartRuntimeFactory {
@@ -72,13 +75,18 @@ final class CommerceCartRuntimeFactory {
                 ),
                 $upgradepricing,
                 $trialpricing,
-                CommercePersonalOfferCheckoutPricingService::create($DB)
+                CommercePersonalOfferCheckoutPricingService::create($DB),
+                CommercePedagogicalPromotionJoinEligibilityService::create($DB),
+                CommercePedagogicalPromotionJoinPricingService::create($DB)
             ),
             $catalog,
             $ownership,
             $upgradepricing,
             $bundleeligibility,
-            $trialpricing
+            $trialpricing,
+            CommercePedagogicalSeatReservationService::create($DB),
+            CommercePedagogicalPromotionJoinEligibilityService::create($DB),
+            CommercePedagogicalPromotionJoinPricingService::create($DB)
         );
     }
 }

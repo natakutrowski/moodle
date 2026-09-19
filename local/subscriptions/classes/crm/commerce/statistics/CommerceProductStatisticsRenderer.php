@@ -11,6 +11,7 @@ use html_writer;
 use local_subscriptions\commerce\catalog\navigation\CommerceCatalogLinkGenerator;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogReadRepository;
 use local_subscriptions\commerce\statistics\CommerceProductStatisticsRow;
+use local_subscriptions\currency\CurrencyFormatter;
 
 /** Renders currency-safe product performance tables. */
 final class CommerceProductStatisticsRenderer {
@@ -101,14 +102,6 @@ final class CommerceProductStatisticsRenderer {
     }
 
     private static function money(int $minor, string $currency): string {
-        $major = $minor / 100;
-        if (class_exists('NumberFormatter')) {
-            $formatter = new \NumberFormatter(current_language(), \NumberFormatter::CURRENCY);
-            $formatted = $formatter->formatCurrency($major, $currency);
-            if ($formatted !== false) {
-                return $formatted;
-            }
-        }
-        return format_float($major, 2) . ' ' . $currency;
+        return CurrencyFormatter::format_minor_code($minor, $currency);
     }
 }

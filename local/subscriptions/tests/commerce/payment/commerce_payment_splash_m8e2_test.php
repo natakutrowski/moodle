@@ -9,7 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 use advanced_testcase;
 
 final class commerce_payment_splash_m8e2_test extends advanced_testcase {
-    public function test_checkout_loads_outbound_transition_assets(): void {
+    public function test_checkout_loads_current_payment_transition_assets(): void {
         global $CFG;
 
         $source = (string)file_get_contents(
@@ -21,12 +21,12 @@ final class commerce_payment_splash_m8e2_test extends advanced_testcase {
             $source
         );
         self::assertStringContainsString(
-            'local_subscriptions/payment_provider_transition',
+            "'local_subscriptions/checkout_submission_state'",
             $source
         );
     }
 
-    public function test_checkout_template_has_transition_bound_to_provider_form(): void {
+    public function test_checkout_template_exposes_shared_payment_splash_surface(): void {
         global $CFG;
 
         $source = (string)file_get_contents(
@@ -34,15 +34,15 @@ final class commerce_payment_splash_m8e2_test extends advanced_testcase {
         );
 
         self::assertStringContainsString(
-            'data-payment-provider-transition',
+            'payment-provider-transition',
             $source
         );
         self::assertStringContainsString(
-            'data-provider-experience',
+            'data-checkout-payment-splash',
             $source
         );
         self::assertStringContainsString(
-            'data-transition-provider',
+            'data-checkout-wallet-splash',
             $source
         );
     }

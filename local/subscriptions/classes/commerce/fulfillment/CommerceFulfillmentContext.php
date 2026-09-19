@@ -4,6 +4,8 @@ namespace local_subscriptions\commerce\fulfillment;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
+
 /**
  * Immutable payment confirmation context used by post-payment fulfillment.
  */
@@ -92,7 +94,10 @@ final class CommerceFulfillmentContext {
     }
 
     public function get_amount_major(): float {
-        return round($this->amountminor / 100, 2);
+        return CommerceCurrencyAmount::major_float_from_minor(
+            $this->amountminor,
+            $this->currency
+        );
     }
 
     public function get_currency(): string {

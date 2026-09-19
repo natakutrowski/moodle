@@ -17,7 +17,8 @@ final class MyCoursePresentation {
         public readonly ?int $totalactivities,
         public readonly bool $completed,
         public readonly bool $trial,
-        public readonly CommerceCourseAccessPresentation $commerceaccess
+        public readonly CommerceCourseAccessPresentation $commerceaccess,
+        public readonly array $learningstatus = []
     ) {
         if (empty($course->id) || (int)$course->id <= 0) {
             throw new \coding_exception('A My courses presentation requires a valid course record.');

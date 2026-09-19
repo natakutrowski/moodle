@@ -564,6 +564,18 @@ if ($hassiteconfig) {
             get_string('alfa_token_test', 'local_subscriptions'),
             '', ''
         ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_test_refund_username',
+            get_string('alfa_refund_username_test', 'local_subscriptions'),
+            get_string('alfa_refund_credentials_desc', 'local_subscriptions'),
+            '', PARAM_RAW_TRIMMED
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_test_refund_password',
+            get_string('alfa_refund_password_test', 'local_subscriptions'),
+            get_string('alfa_refund_credentials_desc', 'local_subscriptions'),
+            ''
+        ));
         $settings->add(new admin_setting_configpasswordunmask(
             'local_subscriptions/alfa_test_webhook_secret',
             get_string('alfa_webhook_secret_test', 'local_subscriptions'),
@@ -590,6 +602,18 @@ if ($hassiteconfig) {
             'local_subscriptions/alfa_live_token',
             get_string('alfa_token_live', 'local_subscriptions'),
             '', ''
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/alfa_live_refund_username',
+            get_string('alfa_refund_username_live', 'local_subscriptions'),
+            get_string('alfa_refund_credentials_desc', 'local_subscriptions'),
+            '', PARAM_RAW_TRIMMED
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/alfa_live_refund_password',
+            get_string('alfa_refund_password_live', 'local_subscriptions'),
+            get_string('alfa_refund_credentials_desc', 'local_subscriptions'),
+            ''
         ));
         $settings->add(new admin_setting_configpasswordunmask(
             'local_subscriptions/alfa_live_webhook_secret',
@@ -629,6 +653,60 @@ if ($hassiteconfig) {
             get_string('settings:alfa_reconciliation_batch_size_desc', 'local_subscriptions'),
             20,
             PARAM_INT
+        ));
+
+        // === PayPal =============================================================
+        // F1 stores environments/credentials only. Checkout routing is enabled
+        // later, after the Orders v2 flow is certified.
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_paypal_hdr',
+            get_string('paypal_settings_header', 'local_subscriptions'),
+            get_string('paypal_settings_header_desc', 'local_subscriptions')
+        ));
+
+        $settings->add(new admin_setting_configselect(
+            'local_subscriptions/paypal_env',
+            get_string('env_mode', 'local_subscriptions'),
+            get_string('paypal_env_desc', 'local_subscriptions'),
+            'sandbox',
+            [
+                'sandbox' => get_string('paypal_env_sandbox', 'local_subscriptions'),
+                'live' => get_string('paypal_env_live', 'local_subscriptions'),
+            ]
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/paypal_sandbox_client_id',
+            get_string('paypal_client_id_sandbox', 'local_subscriptions'),
+            '', '', PARAM_RAW_TRIMMED
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/paypal_sandbox_client_secret',
+            get_string('paypal_client_secret_sandbox', 'local_subscriptions'),
+            '', ''
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/paypal_sandbox_webhook_id',
+            get_string('paypal_webhook_id_sandbox', 'local_subscriptions'),
+            get_string('paypal_webhook_id_desc', 'local_subscriptions'),
+            '', PARAM_RAW_TRIMMED
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/paypal_live_client_id',
+            get_string('paypal_client_id_live', 'local_subscriptions'),
+            '', '', PARAM_RAW_TRIMMED
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_subscriptions/paypal_live_client_secret',
+            get_string('paypal_client_secret_live', 'local_subscriptions'),
+            '', ''
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/paypal_live_webhook_id',
+            get_string('paypal_webhook_id_live', 'local_subscriptions'),
+            get_string('paypal_webhook_id_desc', 'local_subscriptions'),
+            '', PARAM_RAW_TRIMMED
         ));
 
         // === Misc. =============================================================

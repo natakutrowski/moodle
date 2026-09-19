@@ -16,32 +16,106 @@
                     </form>
                     {{^upgradeincart}}
                         <form method="post" action="{{cartaction}}">
-                            <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1"><input type="hidden" name="operation" value="upgrade"><input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{upgradepriceid}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                            <input type="hidden" name="action" value="buynow"><input type="hidden" name="source" value="product"><input type="hidden" name="operation" value="upgrade"><input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{upgradepriceid}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
                             <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{buy_now_label}}</button>
                         </form>
                     {{/upgradeincart}}
                 </div>
             {{/canaddupgradetocart}}
         {{/hasupgrade}}
+        {{#owned}}
+            {{#promotionjoinpurchasable}}
+                <div class="commerce-product-card__prices">
+                    <div class="commerce-storefront-price commerce-storefront-price--standard commerce-storefront-price--promotion-join">
+                        <div class="commerce-storefront-price__heading">
+                            <div class="commerce-storefront-price__label">{{promotionjoinownerpricelabel}}</div>
+                            <span class="commerce-storefront-price__badge commerce-storefront-price__badge--owner">{{promotionjoinownerpricebadge}}</span>
+                        </div>
+                        <div class="commerce-storefront-price__values">
+                            <strong>{{promotionjoinpriceformatted}}</strong>
+                        </div>
+                        <p class="commerce-storefront-price__explanation">{{promotionjoinownerpricehelp}}</p>
+                    </div>
+                </div>
+            {{/promotionjoinpurchasable}}
+        {{/owned}}
+        <div class="mb-3">{{> local_subscriptions/customer/access_promise }}</div>
+        {{^owned}}
+            {{> local_subscriptions/storefront/pedagogical_capacity }}
+        {{/owned}}
         {{#canpurchase}}
             {{#prices}}
                 {{#canaddtocart}}
                     <div class="d-grid gap-2">
+                        {{#incart}}
                         <form method="post" action="{{cartaction}}">
                             <input type="hidden" name="action" value="{{toggleaction}}"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{id}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
-                            <button type="submit" class="btn {{#incart}}btn-outline-danger{{/incart}}{{^incart}}btn-primary{{/incart}} btn-lg w-100">{{#incart}}<i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{/incart}}{{^incart}}<i class="fa-solid fa-cart-plus me-2" aria-hidden="true"></i>{{/incart}}{{togglelabel}}</button>
+                            <button type="submit" class="btn btn-outline-danger btn-lg w-100"><i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{togglelabel}}</button>
                         </form>
+                        {{/incart}}
                         {{^incart}}
-                            <form method="post" action="{{cartaction}}" data-provider-experience data-provider-context="express-candidate" data-currency="{{cartcurrency}}" data-product="{{name}}" data-price="{{formatted}}">
-                                <input type="hidden" name="action" value="buynow"><input type="hidden" name="express" value="1"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{id}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                            {{#pedagogicalavailable}}
+                            <form method="post" action="{{cartaction}}">
+                                <input type="hidden" name="action" value="{{toggleaction}}"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{id}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                <button type="submit" class="btn btn-primary btn-lg w-100"><i class="fa-solid fa-cart-plus me-2" aria-hidden="true"></i>{{togglelabel}}</button>
+                            </form>
+                            {{/pedagogicalavailable}}
+                            {{#pedagogicalbuyavailable}}
+                            <form method="post" action="{{cartaction}}">
+                                <input type="hidden" name="action" value="buynow"><input type="hidden" name="source" value="product"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{id}}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{cartcurrency}}"><input type="hidden" name="returnurl" value="{{cartreturnurl}}"><input type="hidden" name="sesskey" value="{{cartsesskey}}">
                                 <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{buy_now_label}}</button>
                             </form>
+                            {{/pedagogicalbuyavailable}}
+                            {{^pedagogicalbuyavailable}}
+                                <button type="button" class="btn btn-secondary btn-lg w-100" disabled aria-disabled="true">{{pedagogicaldisabledctlabel}}</button>
+                            {{/pedagogicalbuyavailable}}
                         {{/incart}}
                     </div>
                 {{/canaddtocart}}
             {{/prices}}
         {{/canpurchase}}
         {{#owned}}
+            {{#promotionjoinpurchasable}}
+                <div class="commerce-product-promotion-join d-grid gap-2 mb-3">
+                        {{#promotionjoinincart}}
+                            <form method="post" action="{{cartaction}}">
+                                <input type="hidden" name="action" value="remove">
+                                <input type="hidden" name="sku" value="{{sku}}">
+                                <input type="hidden" name="priceid" value="{{promotionjoincatalogpriceid}}">
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                <button type="submit" class="btn btn-outline-danger w-100"><i class="fa-solid fa-trash-can me-2" aria-hidden="true"></i>{{promotionjointogglelabel}}</button>
+                            </form>
+                        {{/promotionjoinincart}}
+                        {{^promotionjoinincart}}
+                            <form method="post" action="{{cartaction}}">
+                                <input type="hidden" name="action" value="add">
+                                <input type="hidden" name="operation" value="promotion_join">
+                                <input type="hidden" name="sku" value="{{sku}}">
+                                <input type="hidden" name="priceid" value="{{promotionjoincatalogpriceid}}">
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-user-group me-2" aria-hidden="true"></i>{{promotionjoinaddlabel}}</button>
+                            </form>
+                            <form method="post" action="{{cartaction}}">
+                                <input type="hidden" name="action" value="buynow">
+                                <input type="hidden" name="source" value="product">
+                                <input type="hidden" name="operation" value="promotion_join">
+                                <input type="hidden" name="sku" value="{{sku}}">
+                                <input type="hidden" name="priceid" value="{{promotionjoincatalogpriceid}}">
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="currency" value="{{cartcurrency}}">
+                                <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
+                                <input type="hidden" name="sesskey" value="{{cartsesskey}}">
+                                <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>{{promotionjoinbuylabel}}</button>
+                            </form>
+                        {{/promotionjoinincart}}
+                </div>
+            {{/promotionjoinpurchasable}}
             {{^ownedisdigital}}
                 <a href="{{ownedactionurl}}" class="commerce-product-owned-primary btn btn-success btn-lg">
                     {{#ownediscourse}}<i class="fa-solid fa-graduation-cap me-2" aria-hidden="true"></i>{{/ownediscourse}}
@@ -74,10 +148,4 @@
     </div>
 </aside>
 
-{{> local_subscriptions/checkout/provider_experience}}
 
-{{#js}}
-require(['local_subscriptions/provider_experience'], function(ProviderExperience) {
-    ProviderExperience.init();
-});
-{{/js}}

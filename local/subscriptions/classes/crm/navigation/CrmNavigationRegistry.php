@@ -142,6 +142,12 @@ final class CrmNavigationRegistry {
                         'fa-picture-o'
                     ),
                     $child(
+                        get_string('crm_commerce_nav_education', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/education/promotions.php',
+                        Capabilities::MANAGE_CONFIGURATION,
+                        'fa-graduation-cap'
+                    ),
+                    $child(
                         get_string('crm_commerce_nav_offers_access', 'local_subscriptions'),
                         '/local/subscriptions/admin/commerce/offers-access/index.php',
                         Capabilities::VIEW_PAYMENTS,

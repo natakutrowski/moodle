@@ -6,6 +6,7 @@ namespace local_subscriptions\commerce\personaloffer\mail;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\catalog\persistence\CommerceCatalogHydrator;
 use local_subscriptions\commerce\catalog\repository\CommerceProductPriceRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
@@ -30,9 +31,10 @@ final class CommercePersonalOfferMailPricingPresentationService {
         if ($product === null) { return null; }
 
         $catalogue = [];
+        $currencyregistry = new CommerceCurrencyRegistry();
         foreach ($prices->find_by_product_sku($product->get_sku(), true) as $price) {
             $currency = strtoupper($price->get_currency());
-            if (!in_array($currency, ['EUR', 'RUB'], true)) { continue; }
+            if (!$currencyregistry->is_enabled($currency)) { continue; }
             // Match CommercePersonalOfferCheckoutService::prepare(): a provider-neutral
             // catalogue price wins; otherwise keep the first active candidate.
             if (!isset($catalogue[$currency]) || $price->get_provider() === null) {
@@ -58,9 +60,15 @@ final class CommercePersonalOfferMailPricingPresentationService {
             if (isset($available[$purchasecurrency])) { $currency = $purchasecurrency; }
         }
         if ($currency === '') {
-            $base = strtolower(explode('_', str_replace('-', '_', trim($language)), 2)[0]);
-            $preferred = $base === 'ru' ? 'RUB' : 'EUR';
-            $currency = isset($available[$preferred]) ? $preferred : (string)array_key_first($available);
+            $language = strtolower(trim($language));
+            $language = explode('_', str_replace('-', '_', $language))[0];
+            $languagepreferred = $language === 'ru' ? 'RUB' : 'EUR';
+            if (isset($available[$languagepreferred])) {
+                $currency = $languagepreferred;
+            }
+        }
+        if ($currency === '') {
+            $currency = (string)array_key_first($available);
         }
 
         return CommercePersonalOfferPricingPresentationBuilder::build($available, $currency);

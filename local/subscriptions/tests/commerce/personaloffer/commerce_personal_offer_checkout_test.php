@@ -101,7 +101,14 @@ final class commerce_personal_offer_checkout_test extends advanced_testcase {
         $this->assertStringContainsString('get_beneficiary_identity', $checkout);
         $this->assertStringContainsString('personalofferreservedfor', $checkout);
         $this->assertStringContainsString('personalofferhasmultiplecurrencies', $checkout);
-        $this->assertStringContainsString('Identity attached to a Personal Offer is authoritative server-side', $action);
+        $this->assertStringContainsString(
+            'CommercePersonalOfferCheckoutService::create($DB)->assert_checkout_identity(',
+            $action
+        );
+        $this->assertStringContainsString(
+            'get_beneficiary_identity($cartoffer)',
+            $action
+        );
         $this->assertStringContainsString('{{personalofferbadge}}', $template);
         $this->assertStringContainsString('commerce-showroom-currency-card', $template);
         $this->assertStringContainsString('commerce-personal-offer-badge', $template);

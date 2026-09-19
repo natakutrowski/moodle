@@ -6,6 +6,9 @@ use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\statistics\CommerceGlobalStatisticsDashboardRepository;
 use local_subscriptions\commerce\statistics\CommerceStatisticsPeriodResolver;
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\currency\CurrencyFormatter;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\commerce\statistics\CommerceGlobalStatisticsDashboardRenderer;
@@ -27,7 +30,7 @@ $until=optional_param('until','',PARAM_RAW_TRIMMED);
 $currency=strtoupper(optional_param('currency','',PARAM_ALPHA));
 $provider=strtolower(optional_param('provider','',PARAM_ALPHANUMEXT));
 if(!array_key_exists($periodkey,CommerceStatisticsPeriodResolver::options()))$periodkey='30';
-if(!in_array($currency,['','EUR','RUB'],true))$currency='';
+if($currency !== '' && !Currency::is_known($currency))$currency='';
 if(!in_array($provider,['','stripe','alfa'],true))$provider='';
 
 $period=CommerceStatisticsPeriodResolver::resolve($periodkey,$from,$until);
@@ -39,6 +42,11 @@ $revenue=$repo->revenue_series($period,$currency!==''?$currency:null,$provider!=
 $orders=$repo->paid_order_series($period,$currency!==''?$currency:null,$provider!==''?$provider:null);
 $products=$repo->top_products($period,$currency!==''?$currency:null,$provider!==''?$provider:null);
 $productpayments=$repo->product_payment_breakdown($period,$currency!==''?$currency:null,$provider!==''?$provider:null);
+$currencyregistry = new CommerceCurrencyRegistry();
+$currencyoptions = $currencyregistry->options_including(array_values(array_unique(array_merge(
+    array_keys($snapshot['currencies']),
+    $currency !== '' ? [$currency] : []
+))));
 
 $pageparams=array_filter(['period'=>$periodkey,'from'=>$from,'until'=>$until,'currency'=>$currency,'provider'=>$provider],static fn($v)=>$v!=='');
 $pageurl=new moodle_url('/local/subscriptions/admin/commerce/statistics/index.php',$pageparams);
@@ -51,13 +59,7 @@ $PAGE->requires->css('/local/subscriptions/styles/commerce_global_statistics.css
 $PAGE->requires->css('/local/subscriptions/styles/commerce_statistics_breakdowns.css');
 
 $formatmoney=static function(int $minor,string $code): string{
-    $major=$minor/100;
-    if(class_exists('NumberFormatter')){
-        $formatter=new NumberFormatter(current_language(),NumberFormatter::CURRENCY);
-        $result=$formatter->formatCurrency($major,$code);
-        if($result!==false)return$result;
-    }
-    return format_float($major,2).' '.$code;
+    return CurrencyFormatter::format_minor_code($minor, $code);
 };
 
 $comparison=null;
@@ -81,7 +83,7 @@ echo CrmPageHeader::render($pagetitle,get_string('commerce_statistics_descriptio
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::STATISTICS);
 
 echo html_writer::start_div('m53-statistics-shell');
-echo CommerceGlobalStatisticsFilterRenderer::render($baseurl,$periodkey,$from,$until,$currency,$provider,$exporturl);
+echo CommerceGlobalStatisticsFilterRenderer::render($baseurl,$periodkey,$from,$until,$currency,$provider,$exporturl,$currencyoptions);
 echo CommerceGlobalStatisticsDashboardRenderer::comparison_note($comparison);
 echo CommerceGlobalStatisticsDashboardRenderer::kpis($snapshot,$previous,$formatmoney);
 echo CommerceGlobalStatisticsDashboardRenderer::funnel_and_breakdowns($snapshot,$formatmoney);

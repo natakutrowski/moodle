@@ -6,6 +6,9 @@ namespace local_subscriptions\commerce\storefront\readmodel;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinEligibility;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinPricing;
+
 /** Immutable product projection consumed by the public boutique. */
 final class CommerceStorefrontProduct {
     /**
@@ -33,7 +36,9 @@ final class CommerceStorefrontProduct {
         private readonly bool $owned = false,
         private readonly ?CommerceStorefrontUpgrade $upgrade = null,
         private readonly array $covers = [],
-        private readonly ?int $id = null
+        private readonly ?int $id = null,
+        private readonly ?CommercePedagogicalPromotionJoinEligibility $promotionjoin = null,
+        private readonly array $promotionjoinpricing = []
     ) {
     }
 
@@ -76,6 +81,9 @@ final class CommerceStorefrontProduct {
     public function get_quick_facts(): array { return $this->quickfacts; }
     public function is_owned(): bool { return $this->owned; }
     public function get_upgrade(): ?CommerceStorefrontUpgrade { return $this->upgrade; }
+    public function get_promotion_join(): ?CommercePedagogicalPromotionJoinEligibility { return $this->promotionjoin; }
+    /** @return CommercePedagogicalPromotionJoinPricing[] */
+    public function get_promotion_join_pricing(): array { return $this->promotionjoinpricing; }
 
     /** @return array<string, mixed> */
     public function to_array(): array {
@@ -104,6 +112,11 @@ final class CommerceStorefrontProduct {
             'quickfacts' => $this->quickfacts,
             'owned' => $this->owned,
             'upgrade' => $this->upgrade?->to_array(),
+            'promotionjoin' => $this->promotionjoin?->to_array(),
+            'promotionjoinpricing' => array_map(
+                static fn(CommercePedagogicalPromotionJoinPricing $pricing): array => $pricing->to_array(),
+                $this->promotionjoinpricing
+            ),
         ];
     }
 }

@@ -32,7 +32,10 @@ final class CommerceCheckoutRuntimeFactory {
             ),
             new CommerceCheckoutLegacyPaymentRequestBridge($GLOBALS['DB']),
             new CommerceCheckoutPaymentLaunchRecorder($payments),
-            new CommerceCheckoutPaymentIdentityEnricher()
+            new CommerceCheckoutPaymentIdentityEnricher(),
+            CommerceCheckoutSeatReservationCoordinator::create(
+                $GLOBALS['DB']
+            )
         );
     }
 }

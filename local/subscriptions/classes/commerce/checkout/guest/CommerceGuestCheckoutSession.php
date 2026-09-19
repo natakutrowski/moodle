@@ -22,7 +22,14 @@ final class CommerceGuestCheckoutSession {
     public function get_purchase_reference(): ?string { return $this->normalise($this->record->purchasereference ?? null); }
     public function get_payment_reference(): ?string { return $this->normalise($this->record->paymentreference ?? null); }
     public function get_expires_at(): int { return (int) $this->record->expiresat; }
-    public function is_expired(?int $now = null): bool { return $this->get_expires_at() <= ($now ?? time()); }
+    public function is_expired(?int $now = null): bool {
+        $expiresat = $this->get_expires_at();
+
+        // H12.9-A5.6: expiresat=0 is the durable/non-expiring sentinel used
+        // when a Guest Checkout account becomes active after payment.
+        return $expiresat > 0
+            && $expiresat <= ($now ?? time());
+    }
     public function get_metadata(): array {
         $decoded = json_decode((string) $this->record->metadatajson, true);
         return is_array($decoded) ? $decoded : [];

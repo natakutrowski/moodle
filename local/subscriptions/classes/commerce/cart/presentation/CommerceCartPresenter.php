@@ -14,6 +14,8 @@ use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentat
 use local_subscriptions\commerce\storefront\presentation\CommerceStorefrontUrlResolver;
 use local_subscriptions\commerce\storefront\repository\CommerceStorefrontRepository;
 use local_subscriptions\commerce\pricing\CommerceCommercialPriceResolver;
+use local_subscriptions\commerce\customer\access\CommerceCustomerAccessPromisePresenter;
+use local_subscriptions\commerce\customer\access\CommerceCustomerAccessPromiseService;
 
 /** Maps a calculated cart snapshot to public-safe Mustache data. */
 final class CommerceCartPresenter {
@@ -23,6 +25,8 @@ final class CommerceCartPresenter {
         $language = $language !== null && trim($language) !== '' ? $language : current_language();
         $currency = $snapshot->get_cart()->get_currency();
         $storefront = CommerceStorefrontRepository::create($DB);
+        $accesspromises = CommerceCustomerAccessPromiseService::create($DB);
+        $accesspresenter = new CommerceCustomerAccessPromisePresenter();
         $items = [];
         $quantitytotal = 0;
         $listtotalminor = 0;
@@ -46,12 +50,28 @@ final class CommerceCartPresenter {
             $isupgrade = $operation === 'upgrade';
             $istrialconversion = $operation === 'trialconversion';
             $ispersonaloffer = $operation === 'personaloffer';
+            $ispromotionjoin = $operation === 'promotion_join';
             $trialdiscountpercent = max(
                 0,
                 min(100, (int)($metadata['trialdiscountpercent'] ?? 0))
             );
 
-            $commercialpricing = $isupgrade
+            $producttype = $product?->get_type()
+                ?? strtolower(trim((string)(
+                    $metadata['producttype'] ?? $metadata['itemtype'] ?? 'unknown'
+                )));
+            $accesspromiseview = $accesspresenter->present(
+                $accesspromises->resolve_cart_item(
+                    $item->get_product_sku(),
+                    $producttype,
+                    $operation,
+                    $metadata,
+                    $ispromotionjoin || ($product?->is_owned() ?? false),
+                    time()
+                )
+            );
+
+            $commercialpricing = ($isupgrade || $ispromotionjoin)
                 ? (new CommerceCommercialPriceResolver($DB))->resolve(
                     $calculated,
                     $currency,
@@ -84,18 +104,21 @@ final class CommerceCartPresenter {
                 }
             }
 
-            $hascataloguepromotion = $catalogueprice !== null
+            $hascataloguepromotion = !$ispromotionjoin
+                && $catalogueprice !== null
                 && $catalogueprice->has_active_promotion()
                 && $catalogueprice->get_compare_amount_minor() !== null;
 
             $hasproductpromotion = $istrialconversion
                 && $hascataloguepromotion;
 
-            $cataloguelistminor = $hascataloguepromotion
-                ? (int)$catalogueprice->get_compare_amount_minor()
-                : ($istrialconversion && $trialpromotedminor > 0
-                    ? $trialpromotedminor
-                    : $calculated->get_unit_price()->get_amount_minor());
+            $cataloguelistminor = $ispromotionjoin
+                ? $calculated->get_unit_price()->get_amount_minor()
+                : ($hascataloguepromotion
+                    ? (int)$catalogueprice->get_compare_amount_minor()
+                    : ($istrialconversion && $trialpromotedminor > 0
+                        ? $trialpromotedminor
+                        : $calculated->get_unit_price()->get_amount_minor()));
 
             $cataloguepromotedminor = $hascataloguepromotion
                 ? $catalogueprice->get_amount_minor()
@@ -159,7 +182,7 @@ final class CommerceCartPresenter {
                 );
             }
 
-            $items[] = [
+            $items[] = array_merge([
                 // Technical identifiers are retained for POST actions only and are never rendered as customer content.
                 'productsku' => $item->get_product_sku(),
                 'priceid' => $item->get_price_id(),
@@ -173,6 +196,10 @@ final class CommerceCartPresenter {
                 'hastype' => $product !== null,
                 'istrialconversion' => $istrialconversion,
                 'ispersonaloffer' => $ispersonaloffer,
+                'ispromotionjoin' => $ispromotionjoin,
+                'promotionjoinbadge' => $ispromotionjoin
+                    ? get_string('commerce_promotion_join_badge', 'local_subscriptions')
+                    : '',
                 'personalofferbadge' => $ispersonaloffer
                     ? get_string('commerce_personal_offer_checkout_badge', 'local_subscriptions')
                     : '',
@@ -250,7 +277,7 @@ final class CommerceCartPresenter {
                 ),
                 'isupgrade' => $isupgrade,
                 'hascommercialupgradepricing' =>
-                    $commercialpricing !== null,
+                    $isupgrade && $commercialpricing !== null,
                 'commercialdetailslabel' => get_string(
                     'commerce_pricing_details',
                     'local_subscriptions'
@@ -338,38 +365,46 @@ final class CommerceCartPresenter {
                     && trim((string)($metadata['upgradefromlabel'] ?? '')) !== ''
                     && trim((string)($metadata['upgradetolabel'] ?? '')) !== '',
                 'cartpriceisupgrade' => $isupgrade,
-                'cartpriceistrial' => !$isupgrade && $istrialconversion,
+                'cartpriceispromotionjoin' => $ispromotionjoin,
+                'cartpriceistrial' => !$isupgrade && !$ispromotionjoin && $istrialconversion,
                 'cartpricehaspromotion' =>
                     !$isupgrade
+                    && !$ispromotionjoin
                     && !$istrialconversion
                     && $hascataloguepromotion,
                 'cartpriceisstandard' =>
                     !$isupgrade
+                    && !$ispromotionjoin
                     && !$istrialconversion
                     && !$hascataloguepromotion,
-                'cartpricelabel' => $isupgrade
+                'cartpricelabel' => $ispromotionjoin
                     ? get_string(
-                        'commerce_storefront_price_upgrade',
+                        'commerce_storefront_price_promotion_join',
                         'local_subscriptions'
                     )
-                    : (
-                        $istrialconversion
-                            ? get_string(
-                                'commerce_storefront_price_discovery',
-                                'local_subscriptions'
-                            )
-                            : (
-                                $hascataloguepromotion
-                                    ? get_string(
-                                        'commerce_storefront_price_promotional',
-                                        'local_subscriptions'
-                                    )
-                                    : get_string(
-                                        'commerce_storefront_price_standard',
-                                        'local_subscriptions'
-                                    )
-                            )
-                    ),
+                    : ($isupgrade
+                        ? get_string(
+                            'commerce_storefront_price_upgrade',
+                            'local_subscriptions'
+                        )
+                        : (
+                            $istrialconversion
+                                ? get_string(
+                                    'commerce_storefront_price_discovery',
+                                    'local_subscriptions'
+                                )
+                                : (
+                                    $hascataloguepromotion
+                                        ? get_string(
+                                            'commerce_storefront_price_promotional',
+                                            'local_subscriptions'
+                                        )
+                                        : get_string(
+                                            'commerce_storefront_price_standard',
+                                            'local_subscriptions'
+                                        )
+                                )
+                        )),
                 'cartpricefinalformatted' => $cartpricefinalformatted,
                 'cartpricecompareformatted' =>
                     $cartpricecompareformatted,
@@ -462,7 +497,7 @@ final class CommerceCartPresenter {
                     $calculated->get_subtotal()->get_amount_minor(),
                     $currency
                 ),
-            ];
+            ], $accesspromiseview);
         }
 
         $totals = $snapshot->get_totals();

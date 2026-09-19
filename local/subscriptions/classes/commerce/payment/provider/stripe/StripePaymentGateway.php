@@ -15,6 +15,10 @@ interface StripePaymentGateway {
         StripeGatewayRequest $request
     ): StripeGatewayResponse;
 
+    public function create_payment_intent(
+        StripeGatewayRequest $request
+    ): StripeGatewayResponse;
+
     public function retrieve(
         string $paymentid
     ): StripeGatewayResponse;
@@ -22,4 +26,16 @@ interface StripePaymentGateway {
     public function cancel(
         string $paymentid
     ): StripeGatewayResponse;
+
+    public function refund(
+        StripeRefundRequest $request
+    ): StripeRefundResponse;
+
+    /**
+     * @return StripeRefundResponse[]
+     */
+    public function list_refunds(
+        string $providerpaymentid,
+        string $currency
+    ): array;
 }

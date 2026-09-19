@@ -5,8 +5,13 @@ require_once(__DIR__ . '/../../config.php');
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\cart\presentation\CommerceCartPresenter;
+use local_subscriptions\commerce\cart\presentation\CommerceCartSeatReservationPresenter;
 use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
-use local_subscriptions\support\Region;
+use local_subscriptions\commerce\checkout\guest\CommerceGuestCartCustomerResolver;
+use local_subscriptions\commerce\showroom\CommerceShowroomCurrencyResolver;
+use local_subscriptions\commerce\currency\selection\CommerceCurrencySurfaceSelectionService;
+use local_subscriptions\commerce\currency\selection\CommerceCurrencyJourneyStateResolver;
+use local_subscriptions\currency\Currency;
 use local_subscriptions\url\UrlFactory;
 
 \local_subscriptions\subscription_config::guard_public_access();
@@ -17,14 +22,78 @@ $PAGE->set_url($pageurl);
 $PAGE->set_pagelayout('standard');
 $PAGE->add_body_class('commerce-chromeless-page');
 
-$currency = strtoupper(optional_param('currency', '', PARAM_ALPHA));
-if (!in_array($currency, ['EUR', 'RUB'], true)) {
-    $currency = in_array(Region::detect_country(), ['RU', 'BY'], true) ? 'RUB' : 'EUR';
-}
-$availablecurrencies = \local_subscriptions\commerce\showroom\CommerceShowroomCurrencyResolver::active_currencies($DB);
+$requestedcurrency =
+    Currency::sanitize(
+        optional_param(
+            'currency',
+            '',
+            PARAM_ALPHA
+        )
+    );
+$availablecurrencies =
+    CommerceShowroomCurrencyResolver::active_currencies(
+        $DB
+    );
 
-$customerid = isloggedin() && !isguestuser() ? (int)$USER->id : 0;
-if ($customerid > 0) {
+$usercurrency =
+    isloggedin()
+    && !isguestuser()
+        ? Currency::sanitize(
+            (string)get_user_preferences(
+                'local_subscriptions_storefront_currency',
+                '',
+                (int)$USER->id
+            )
+        )
+        : '';
+$sessioncurrency =
+    Currency::sanitize(
+        (string)(
+            $SESSION->local_subscriptions_storefront_currency
+            ?? ''
+        )
+    );
+
+$journeystate =
+    CommerceCurrencyJourneyStateResolver::create();
+$activecartcurrency =
+    $journeystate->active_cart_currency(
+        $availablecurrencies
+    );
+$activeguestcurrency =
+    $journeystate
+        ->active_guest_checkout_currency();
+
+$currencyselection =
+    (
+        new CommerceCurrencySurfaceSelectionService()
+    )->resolve(
+        $availablecurrencies,
+        $requestedcurrency,
+        $usercurrency,
+        $sessioncurrency,
+        'EUR',
+        $activecartcurrency,
+        $activeguestcurrency
+    );
+$currency =
+    $currencyselection->get_currency();
+
+$SESSION->local_subscriptions_storefront_currency =
+    $currency;
+if (
+    isloggedin()
+    && !isguestuser()
+) {
+    set_user_preference(
+        'local_subscriptions_storefront_currency',
+        $currency,
+        (int)$USER->id
+    );
+}
+
+$customerid = CommerceGuestCartCustomerResolver::create()->resolve($currency);
+if (isloggedin() && !isguestuser() && $customerid > 0) {
     $guesttoken = (string)($SESSION->local_subscriptions_guest_checkout_token ?? '');
     if ($guesttoken !== '') {
         $guestsessions = new \local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutSessionRepository($DB);
@@ -57,15 +126,35 @@ if ($customerid > 0) {
         }
     }
 }
-$snapshot = CommerceCartRuntimeFactory::create()->snapshot($customerid, $currency, current_language());
-$data = CommerceCartPresenter::present($snapshot, current_language());
+$snapshot = CommerceCartRuntimeFactory::create()->snapshot(
+    $customerid,
+    $currency,
+    current_language()
+);
+$data = CommerceCartPresenter::present(
+    $snapshot,
+    current_language()
+);
+$data = CommerceCartSeatReservationPresenter::create($DB)->decorate(
+    $data,
+    $snapshot->get_cart()->get_uuid(),
+    time()
+);
 
 $pageurl->param('currency', $currency);
 $PAGE->set_url($pageurl);
 $PAGE->set_title(get_string('commerce_cart_title', 'local_subscriptions'));
 $PAGE->set_heading(get_string('commerce_cart_title', 'local_subscriptions'));
 $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/storefront.css'));
-
+$PAGE->requires->css(
+    new moodle_url(
+        '/local/subscriptions/styles/checkout_express_wallets.css'
+    )
+);
+$PAGE->requires->js_call_amd(
+    'local_subscriptions/cart_seat_reservation',
+    'init'
+);
 
 $steps = [
     [
@@ -148,7 +237,20 @@ $data += [
         'currency' => $currency,
         'flow' => \local_subscriptions\commerce\checkout\flow\CommercePurchaseFlow::CART,
     ]))->out(false),
-    'checkoutdisabled' => !$data['hasitems'],
+    'checkoutdisabled' =>
+        !$data['hasitems']
+        || empty($data['seatreservationsvalid']),
+    'checkoutdisabledreason' =>
+        !empty($data['hasitems'])
+        && empty($data['seatreservationsvalid'])
+            ? get_string(
+                'commerce_cart_checkout_seat_expired',
+                'local_subscriptions'
+            )
+            : '',
+    'renewseatsaction' =>
+        (new moodle_url('/local/subscriptions/cart_action.php'))
+            ->out(false),
     'removeaction' => (new moodle_url('/local/subscriptions/cart_action.php'))->out(false),
     'returnurl' => $pageurl->out(false),
     'sesskey' => sesskey(),
@@ -177,10 +279,14 @@ $data += [
     'viewproductlabel' => get_string('commerce_cart_view_product', 'local_subscriptions'),
     'paymentsecurelabel' => get_string('commerce_cart_payment_secure', 'local_subscriptions'),
     'instantaccesslabel' => get_string('commerce_cart_instant_access', 'local_subscriptions'),
-    'stripeiconurl' => (new moodle_url('/local/subscriptions/pix/email/stripe.png'))->out(false),
-    'alfaiconurl' => (new moodle_url('/local/subscriptions/pix/email/alfa.png'))->out(false),
-    'visaiconurl' => (new moodle_url('/local/subscriptions/pix/email/visa.png'))->out(false),
-    'mastercardiconurl' => (new moodle_url('/local/subscriptions/pix/email/mastercard.png'))->out(false),
+    'checkoutsecureencrypted' => get_string(
+        'commerce_checkout_secure_encrypted',
+        'local_subscriptions'
+    ),
+    'checkoutdataprotected' => get_string(
+        'commerce_checkout_data_protected',
+        'local_subscriptions'
+    ),
     'removelabel' => get_string('commerce_cart_remove', 'local_subscriptions'),
     'updatelabel' => get_string('commerce_cart_update', 'local_subscriptions'),
     'promocodelabel' => get_string('commerce_cart_promo_code', 'local_subscriptions'),

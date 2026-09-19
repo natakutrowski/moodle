@@ -42,7 +42,11 @@ final class CommerceCheckoutValidator {
 
         // A rejected promotion is informational at checkout time: the rejected
         // adjustment is not included in totals, so the undiscounted cart remains valid.
-        if ($level === 'warning' && str_starts_with($code, 'promotion_')) {
+        if (
+            $level === 'warning'
+            && str_starts_with($code, 'promotion_')
+            && !str_starts_with($code, 'promotion_join_')
+        ) {
             return false;
         }
 

@@ -1,10 +1,16 @@
-<div class="commerce-cart-price{{#cartpriceisupgrade}} commerce-cart-price--upgrade{{/cartpriceisupgrade}}{{#cartpriceistrial}} commerce-cart-price--trial{{/cartpriceistrial}}{{#cartpricehaspromotion}} commerce-cart-price--promotion{{/cartpricehaspromotion}}{{#cartpriceisstandard}} commerce-cart-price--standard{{/cartpriceisstandard}}">
+<div class="commerce-cart-price{{#cartpriceisupgrade}} commerce-cart-price--upgrade{{/cartpriceisupgrade}}{{#cartpriceispromotionjoin}} commerce-cart-price--promotion-join{{/cartpriceispromotionjoin}}{{#cartpriceistrial}} commerce-cart-price--trial{{/cartpriceistrial}}{{#cartpricehaspromotion}} commerce-cart-price--promotion{{/cartpricehaspromotion}}{{#cartpriceisstandard}} commerce-cart-price--standard{{/cartpriceisstandard}}">
     <div class="commerce-cart-price__badges">
         {{#cartpriceisupgrade}}
             <span class="commerce-storefront-price__badge commerce-storefront-price__badge--upgrade">
                 {{cartpriceupgradebadge}}
             </span>
         {{/cartpriceisupgrade}}
+
+        {{#cartpriceispromotionjoin}}
+            <span class="commerce-storefront-price__badge commerce-storefront-price__badge--promotion">
+                {{promotionjoinbadge}}
+            </span>
+        {{/cartpriceispromotionjoin}}
 
         {{#cartpriceistrial}}
             <span class="commerce-storefront-price__badge commerce-storefront-price__badge--trial">

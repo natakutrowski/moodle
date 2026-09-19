@@ -17,6 +17,9 @@ use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\currency\Currency;
+use local_subscriptions\currency\CurrencyFormatter;
+use local_subscriptions\currency\CommerceCurrencyLabelFormatter;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 $id = required_param('id', PARAM_INT);
@@ -44,20 +47,12 @@ $typeoptions = [
 ];
 $rules = CommercePromotionEligibilityRuleSet::from_metadata($promotion->get_metadata());
 
-$currencyflags = [
-    'EUR' => '🇪🇺',
-    'RUB' => '🇷🇺',
-    'USD' => '🇺🇸',
-    'GBP' => '🇬🇧',
-    'CHF' => '🇨🇭',
-    'CAD' => '🇨🇦',
-    'JPY' => '🇯🇵',
-];
-$currencydisplay = static function(?string $currency) use ($currencyflags): string {
+$currencydisplay = static function(?string $currency): string {
     if ($currency === null || $currency === '') {
         return html_writer::span('🌍 ' . get_string('commerce_promotion_all_currencies', 'local_subscriptions'), 'badge rounded-pill bg-light text-dark border');
     }
-    return html_writer::span(($currencyflags[$currency] ?? '💱') . ' ' . s($currency), 'badge rounded-pill bg-light text-dark border');
+    $marker = Currency::visual_marker($currency) ?: '💱';
+    return html_writer::span(s(CommerceCurrencyLabelFormatter::format($currency)), 'badge rounded-pill bg-light text-dark border');
 };
 $unlimited = static function(): string {
     return html_writer::span('∞', 'commerce-promotion-infinity-icon', [
@@ -70,7 +65,10 @@ $formatvalue = static function(CommercePromotion $promotion): string {
     if ($promotion->get_discount_type() === CommercePromotion::TYPE_PERCENTAGE) {
         return format_float($promotion->get_discount_value() / 100, 2) . ' %';
     }
-    return format_float($promotion->get_discount_value() / 100, 2) . ' ' . ($promotion->get_currency() ?? '');
+    return CurrencyFormatter::format_minor_code(
+        $promotion->get_discount_value(),
+        (string)($promotion->get_currency() ?? '')
+    );
 };
 $listlabels = static function(array $ids, array $labels): string {
     if ($ids === []) {
@@ -142,7 +140,9 @@ $limits = new html_table();
 $limits->attributes['class'] = 'table mb-0 commerce-promotion-detail-table';
 $limits->data = [
     [get_string('currency'), $currencydisplay($promotion->get_currency())],
-    [get_string('commerce_promotion_minimum_display', 'local_subscriptions'), format_float($promotion->get_minimum_cart_minor() / 100, 2)],
+    [get_string('commerce_promotion_minimum_display', 'local_subscriptions'), $promotion->get_currency() === null
+        ? (string)$promotion->get_minimum_cart_minor()
+        : CurrencyFormatter::format_minor_code($promotion->get_minimum_cart_minor(), $promotion->get_currency())],
     [get_string('commerce_promotion_global_limit', 'local_subscriptions'), $promotion->get_global_usage_limit() ?? $unlimited()],
     [get_string('commerce_promotion_user_limit', 'local_subscriptions'), $promotion->get_user_usage_limit() ?? $unlimited()],
     [get_string('commerce_promotion_stackable', 'local_subscriptions'), $promotion->is_stackable() ? get_string('yes') : get_string('no')],

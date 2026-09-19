@@ -6,6 +6,8 @@ namespace local_subscriptions\commerce\statistics;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\currency\Currency;
+
 /**
  * Commercially authoritative global Commerce dashboard datasets.
  *
@@ -25,6 +27,32 @@ final class CommerceGlobalStatisticsDashboardRepository {
         $provider = $this->normalise_provider($provider);
 
         $paid = $this->paid_metrics($period, $currency, $provider);
+        $refunds = $this->refund_metrics($period, $currency, $provider);
+
+        foreach ($refunds as $code => $refundrow) {
+            $paid[$code] ??= [
+                'paidorders' => 0,
+                'paidcustomers' => 0,
+                'soldquantity' => 0,
+                'revenueminor' => 0,
+            ];
+            $paid[$code]['refundminor'] =
+                (int)$refundrow['refundminor'];
+            $paid[$code]['refundoperations'] =
+                (int)$refundrow['refundoperations'];
+        }
+
+        foreach ($paid as &$paidrow) {
+            $paidrow['refundminor'] =
+                (int)($paidrow['refundminor'] ?? 0);
+            $paidrow['refundoperations'] =
+                (int)($paidrow['refundoperations'] ?? 0);
+            $paidrow['netrevenueminor'] =
+                (int)$paidrow['revenueminor']
+                - $paidrow['refundminor'];
+        }
+        unset($paidrow);
+
         $health = $this->payment_health($period, $currency, $provider);
         $manual = $this->manual_grants($period);
         $providers = $this->provider_breakdown($period, $currency, $provider);
@@ -49,6 +77,8 @@ final class CommerceGlobalStatisticsDashboardRepository {
             'failed' => 0,
             'cancelled' => 0,
             'refunded' => 0,
+            'refundoperations' => array_sum(array_column($refunds, 'refundoperations')),
+            'refundminor' => array_sum(array_column($refunds, 'refundminor')),
             'pendingfulfillments' => $this->pending_fulfillments($period, $currency),
         ];
 
@@ -78,6 +108,7 @@ final class CommerceGlobalStatisticsDashboardRepository {
             'providers' => $providers,
             'acquisitions' => $acquisitions,
             'manual' => $manual,
+            'refunds' => $refunds,
         ];
     }
 
@@ -441,6 +472,49 @@ final class CommerceGlobalStatisticsDashboardRepository {
         return $out;
     }
 
+    private function refund_metrics(
+        CommerceStatisticsPeriod $period,
+        ?string $currency,
+        ?string $provider
+    ): array {
+        $params = [
+            'start' => $period->start(),
+            'end' => $period->end(),
+        ];
+        $where = [
+            'r.timecreated >= :start',
+            'r.timecreated < :end',
+            "r.status = 'succeeded'",
+        ];
+
+        if ($currency !== null) {
+            $where[] = 'r.currency = :refundcurrency';
+            $params['refundcurrency'] = $currency;
+        }
+
+        if ($provider !== null) {
+            $where[] = 'r.provider = :refundprovider';
+            $params['refundprovider'] = $provider;
+        }
+
+        $sql = "SELECT MIN(r.id) recordid,r.currency,
+                       COUNT(r.id) refundoperations,
+                       COALESCE(SUM(r.amountminor),0) refundminor
+                  FROM {local_subscriptions_commerce_refund} r
+                 WHERE " . implode(' AND ', $where) . "
+              GROUP BY r.currency";
+
+        $out = [];
+        foreach ($this->db->get_records_sql($sql, $params) as $row) {
+            $out[strtoupper((string)$row->currency)] = [
+                'refundoperations' => (int)$row->refundoperations,
+                'refundminor' => (int)$row->refundminor,
+            ];
+        }
+
+        return $out;
+    }
+
     private function payment_health(
         CommerceStatisticsPeriod $period,
         ?string $currency,
@@ -630,8 +704,8 @@ final class CommerceGlobalStatisticsDashboardRepository {
     }
 
     private function normalise_currency(?string $currency): ?string {
-        $currency = strtoupper(trim((string)$currency));
-        return in_array($currency,['EUR','RUB'],true)?$currency:null;
+        $currency = Currency::sanitize($currency);
+        return $currency !== '' && Currency::is_known($currency) ? $currency : null;
     }
 
     private function normalise_provider(?string $provider): ?string {

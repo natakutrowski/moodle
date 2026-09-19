@@ -25,7 +25,21 @@ final class CommerceGuestAccountActivator {
         global $CFG;
 
         $session = $this->sessions->find_by_purchase_reference($purchasereference);
-        if ($session === null || !in_array($session->get_status(), ['payment_pending', 'paid_pending_activation'], true)) {
+        if ($session === null) {
+            return null;
+        }
+
+        // L7.3.10: the Guest Checkout session status is not an account-activation
+        // state. Cart/result reconciliation may already have moved the durable
+        // checkout row to active while the provisional Moodle user is still
+        // suspended/unconfirmed. A successful payment must therefore reconcile
+        // the account from its own durable metadata/user state, not only from
+        // payment_pending / paid_pending_activation.
+        if (!in_array(
+            $session->get_status(),
+            ['payment_pending', 'paid_pending_activation', 'payment_failed', 'active'],
+            true
+        )) {
             return $session;
         }
 
@@ -39,23 +53,41 @@ final class CommerceGuestAccountActivator {
         $isprovisional = ($metadata['account_origin'] ?? '') === 'guest_checkout';
 
         if ($isprovisional) {
-            require_once($CFG->dirroot . '/user/lib.php');
-            $user->suspended = 0;
-            $user->confirmed = 1;
-            user_update_user($user, false, false);
-            set_user_preference('auth_forcepasswordchange', 1, $userid);
-            $this->send_activation_email($user, $session);
-            $session = $this->sessions->require_by_reference($session->get_reference());
-            $metadata = $session->get_metadata();
+            $passwordisset = !empty($metadata['password_set_at']);
+            $accountstate = (string)($metadata['account_state'] ?? '');
+            $userneedsactivation = (int)$user->suspended !== 0 || (int)$user->confirmed !== 1;
+            $stateneedsactivation = !in_array($accountstate, ['active', 'ready'], true);
+
+            if ($userneedsactivation || $stateneedsactivation) {
+                require_once($CFG->dirroot . '/user/lib.php');
+                $user->suspended = 0;
+                $user->confirmed = 1;
+                user_update_user($user, false, false);
+
+                // A normal freshly-paid provisional account still needs to let
+                // the customer choose a password. If a previous activation
+                // attempt already stored that password but failed before login,
+                // repair the Moodle account without forcing another reset/email.
+                if (!$passwordisset) {
+                    set_user_preference('auth_forcepasswordchange', 1, $userid);
+                    $this->send_activation_email($user, $session);
+                    $session = $this->sessions->require_by_reference($session->get_reference());
+                    $metadata = $session->get_metadata();
+                }
+            }
+
+            $metadata = array_replace($metadata, [
+                'account_state' => $passwordisset ? 'ready' : 'active',
+                'activated_at' => (int)($metadata['activated_at'] ?? 0) > 0
+                    ? (int)$metadata['activated_at']
+                    : time(),
+                'activation_requires_password_reset' => !$passwordisset,
+            ]);
         }
 
         return $this->sessions->transition($session, 'active', [
             'expiresat' => 0,
-            'metadatajson' => array_replace($metadata, [
-                'account_state' => 'active',
-                'activated_at' => time(),
-                'activation_requires_password_reset' => $isprovisional,
-            ]),
+            'metadatajson' => $metadata,
         ]);
     }
     private function send_activation_email(\stdClass $user, CommerceGuestCheckoutSession $session): void {

@@ -7,6 +7,7 @@ namespace local_subscriptions\commerce\storefront\admin;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\catalog\domain\CommerceProduct;
+use local_subscriptions\commerce\currency\CommerceCurrencyAmount;
 use local_subscriptions\commerce\storefront\merchandising\CommerceStorefrontMerchandisingResolver;
 use local_subscriptions\commerce\storefront\experience\CommerceStorefrontExperienceResolver;
 
@@ -93,10 +94,10 @@ final class CommerceStorefrontPageEditor {
             'featured' => $merchandising->is_featured(),
             'displayorder' => $merchandising->get_display_order(),
             'badges' => $merchandising->get_badges(),
-            'promotion_eur_compare' => $this->minor_to_major($promotioneur['compareamountminor'] ?? null),
+            'promotion_eur_compare' => $this->minor_to_major($promotioneur['compareamountminor'] ?? null, 'EUR'),
             'promotion_eur_start' => $this->datetime_value($promotioneur['start'] ?? null),
             'promotion_eur_end' => $this->datetime_value($promotioneur['end'] ?? null),
-            'promotion_rub_compare' => $this->minor_to_major($promotionrub['compareamountminor'] ?? null),
+            'promotion_rub_compare' => $this->minor_to_major($promotionrub['compareamountminor'] ?? null, 'RUB'),
             'promotion_rub_start' => $this->datetime_value($promotionrub['start'] ?? null),
             'promotion_rub_end' => $this->datetime_value($promotionrub['end'] ?? null),
             'group' => $experience->get_group(),
@@ -695,7 +696,11 @@ final class CommerceStorefrontPageEditor {
         if ($major === '' || !is_numeric(str_replace(',', '.', $major))) {
             return null;
         }
-        $minor = (int)round((float)str_replace(',', '.', $major) * 100);
+        try {
+            $minor = CommerceCurrencyAmount::from_major_input($major, $currency)->get_amount_minor();
+        } catch (\Throwable) {
+            return null;
+        }
         if ($minor <= 0) {
             return null;
         }
@@ -757,8 +762,8 @@ final class CommerceStorefrontPageEditor {
         ));
     }
 
-    private function minor_to_major(?int $minor): string {
-        return $minor === null ? '' : number_format($minor / 100, 2, '.', '');
+    private function minor_to_major(?int $minor, string $currency): string {
+        return $minor === null ? '' : CommerceCurrencyAmount::major_input_from_minor($minor, $currency);
     }
 
     private function datetime_value(?int $timestamp): string {

@@ -5891,7 +5891,7 @@ $string['commerce_status_configuration'] = 'Конфигурация';
 $string['settings:commerce_catalog_heading'] = 'Каталог Commerce';
 $string['settings:commerce_catalog_heading_desc'] = 'Общие настройки каталога.';
 $string['settings:commerce_enabled_currencies'] = 'Доступные валюты';
-$string['settings:commerce_enabled_currencies_desc'] = 'ISO-коды через запятую. Поддерживаются EUR, RUB, USD, GBP, CHF, CAD и JPY.';
+$string['settings:commerce_enabled_currencies_desc'] = 'ISO-коды через запятую. Активируются только валюты из реестра Commerce; для товаров каталога цены могут быть заданы лишь для части из них.';
 
 $string['commerce_price_deleted'] = 'Тариф удалён.';
 $string['commerce_price_currency_duplicate'] = 'Для этой валюты уже существует тариф. Для одного товара допускается только один коммерческий тариф в каждой валюте.';
@@ -6217,6 +6217,8 @@ $string['commerce_cart_total'] = 'Итого';
 $string['commerce_cart_remove'] = 'Удалить';
 $string['commerce_cart_update'] = 'Обновить';
 $string['commerce_cart_message_already_owned'] = 'Вы уже приобрели этот продукт.';
+$string['commerce_cart_message_already_owned_guest'] = 'Этот продукт уже приобретён на этот адрес. Войдите в аккаунт CampusFR, чтобы получить к нему доступ.';
+$string['commerce_storefront_guest_owned_login'] = 'Войти для доступа';
 $string['commerce_cart_message_already_in_cart'] = 'Этот продукт уже находится в вашей корзине.';
 $string['commerce_cart_message_item_not_found'] = 'Не удалось найти эту позицию в корзине.';
 $string['commerce_cart_message_add_success'] = 'Продукт добавлен в корзину.';
@@ -6230,7 +6232,7 @@ $string['commerce_cart_message_error'] = 'Не удалось обновить �
 $string['commerce_cart_total_ttc'] = 'Итого с НДС';
 $string['commerce_cart_view_product'] = 'Открыть страницу товара';
 $string['commerce_cart_payment_secure'] = 'Безопасная оплата';
-$string['commerce_cart_instant_access'] = 'Мгновенный доступ после оплаты';
+$string['commerce_cart_instant_access'] = 'Доступ по указанным условиям';
 
 // 7.95G7C-G7D — Промокоды корзины.
 $string['commerce_cart_promo_code'] = 'Промокод';
@@ -6317,6 +6319,7 @@ $string['commerce_checkout_order_summary'] = 'Состав заказа';
 $string['commerce_checkout_payment_title'] = 'Оплата';
 $string['commerce_checkout_payment_description'] = 'Выберите платёжную систему, доступную для вашей валюты.';
 $string['commerce_checkout_provider_label'] = 'Способ оплаты';
+$string['commerce_checkout_no_provider_for_currency'] = 'Для валюты {$a} сейчас нет доступного способа оплаты. Вы можете вернуться в корзину и выбрать другую валюту.';
 $string['commerce_checkout_provider_stripe'] = 'Stripe';
 $string['commerce_checkout_provider_stripe_desc'] = 'Безопасная оплата банковской картой.';
 $string['commerce_checkout_provider_alfa'] = 'Альфа-Банк';
@@ -6544,7 +6547,7 @@ $string['commerce_invoice_discount'] = 'Скидка';
 $string['commerce_invoice_promotion_code'] = 'Промокод';
 $string['commerce_invoice_total_paid'] = 'Оплачено';
 $string['commerce_invoice_payment_information'] = 'Информация об оплате';
-$string['commerce_invoice_payment_provider'] = 'Способ оплаты';
+$string['commerce_invoice_payment_provider'] = 'Платёжный провайдер';
 $string['commerce_invoice_transaction_id'] = 'Идентификатор транзакции';
 $string['commerce_invoice_generated_at'] = 'Счёт сформирован {$a}';
 
@@ -6891,8 +6894,8 @@ $string['commerce_pricing_you_save'] = 'Ваша выгода';
 $string['commerce_invoice_owned_credit'] = 'Зачёт ранее купленного товара';
 $string['commerce_invoice_other_discount'] = 'Другие скидки';
 $string['commerce_invoice_item_paid_price'] = 'Оплаченная цена товара';
-$string['commerce_storefront_hide_owned'] = 'Скрыть уже купленные товары';
-$string['commerce_storefront_hide_owned_help'] = 'Отключите фильтр, чтобы увидеть весь каталог.';
+$string['commerce_storefront_hide_owned'] = 'Скрыть купленные товары без новых предложений';
+$string['commerce_storefront_hide_owned_help'] = 'Уже купленный товар остаётся видимым, если можно присоединиться к новой группе или сопровождению.';
 $string['commerce_storefront_price_standard'] = 'Цена';
 $string['commerce_storefront_price_promotional'] = 'Цена со скидкой';
 $string['commerce_storefront_price_trial'] = 'Ваша пробная цена';
@@ -7159,6 +7162,11 @@ $string['commerce_customer_hub_xp_ranking'] = 'Место в рейтинге';
 $string['commerce_customer_hub_last_activity'] = 'Последняя активность';
 $string['commerce_customer_hub_xp_no_activity'] = 'Недавней активности нет';
 $string['commerce_customer_hub_xp_unavailable'] = 'Прогресс LevelXP появится здесь, когда станет доступен.';
+$string['commerce_customer_hub_team_kicker'] = 'Челлендж потока';
+$string['commerce_customer_hub_team_title'] = 'Рейтинг команд';
+$string['commerce_customer_hub_team_points'] = 'очк.';
+$string['commerce_customer_hub_team_my_contribution'] = 'Твой вклад:';
+$string['commerce_customer_hub_team_yours'] = 'твоя команда';
 
 // J10A.1 — Navigation du parcours étudiant.
 $string['commerce_customer_hub_shop'] = 'Магазин';
@@ -7515,32 +7523,12 @@ $string['commerce_checkout_terms_required'] = 'Перед продолжение
 $string['commerce_smart_terms'] = 'Условия использования';
 $string['commerce_smart_privacy'] = 'Политика конфиденциальности';
 
-$string['commerce_provider_experience_title'] = 'Подтвердите оплату';
-$string['commerce_provider_experience_message'] = 'Сейчас вы будете перенаправлены на защищённую платёжную страницу.';
-$string['commerce_provider_experience_continue'] = 'Продолжить';
-$string['commerce_provider_experience_cancel'] = 'Отмена';
-$string['commerce_provider_experience_other_method'] = 'Выбрать другой способ оплаты';
-$string['commerce_provider_experience_stripe_title'] = 'Перейти к безопасной оплате';
-$string['commerce_provider_experience_stripe_message'] = 'Проверьте покупку ещё раз перед переходом на Stripe.';
-$string['commerce_provider_experience_stripe_advice'] = 'Безопасная оплата: после платежа вы автоматически вернётесь на CampusFR.';
-$string['commerce_provider_experience_stripe_continue'] = 'Перейти к Stripe';
-$string['commerce_provider_experience_alfa_title'] = 'Перед переходом в Alfa';
-$string['commerce_provider_experience_alfa_message'] = 'При активном VPN страница Alfa может работать нестабильно.';
-$string['commerce_provider_experience_alfa_advice'] = 'Перед продолжением отключите VPN, чтобы избежать проблем с загрузкой страницы Альфа-Банка.';
-$string['commerce_provider_experience_alfa_continue'] = 'Перейти в Alfa';
 
-$string['commerce_provider_experience_stay'] = 'Остаться на CampusFR';
-$string['commerce_provider_experience_alfa_standard_secondary'] = 'Закрыть и выбрать другой способ оплаты';$string['commerce_cart_currency_switch'] = 'Валюта корзины';
+$string['commerce_cart_currency_switch'] = 'Валюта корзины';
 $string['commerce_cart_currency_switch_help'] = 'Цены и скидки будут пересчитаны';
 $string['commerce_cart_currency_switched'] = 'Корзина пересчитана в валюте {$a}.';
 $string['commerce_cart_currency_removed_items'] = 'Недоступны в этой валюте и удалены из корзины: {$a}.';
 $string['commerce_cart_currency_promotion_removed'] = 'Промокод удалён, поскольку он не действует в выбранной валюте.';
-$string['commerce_provider_experience_alfa_other_currency'] = 'Оплатить в другой валюте';
-$string['commerce_provider_currency_title'] = 'Выберите другую валюту';
-$string['commerce_provider_currency_message'] = 'Корзина будет пересчитана с учётом цен, акций и условий для выбранной валюты. Недоступные товары могут быть удалены.';
-$string['commerce_provider_currency_submit'] = 'Пересчитать корзину';
-$string['commerce_provider_currency_empty'] = 'Другие валюты сейчас недоступны.';
-$string['commerce_provider_currency_error'] = 'Не удалось загрузить доступные валюты. Закройте окно и попробуйте ещё раз.';
 
 $string['commerce_cart_currency_removed_item_fallback'] = 'Один товар';
 
@@ -8912,7 +8900,7 @@ $string['stripe_reconciliation_min_age'] = 'Минимальный возрас�
 $string['stripe_reconciliation_max_age'] = 'Максимальный возраст проверяемых платежей Stripe (сек.)';
 $string['commerce_stripe_reconciliation_payment_not_found'] = 'Платёж Stripe не найден.';
 $string['commerce_stripe_reconciliation_not_safe'] = 'Невозможно безопасно выполнить сверку Stripe: {$a}';
-$string['commerce_stripe_reconciliation_wrong_provider'] = 'Этот платёж не относится к Stripe.';
+$string['commerce_stripe_reconciliation_wrong_provider'] = 'Эта продажа не использует Stripe.';
 $string['commerce_stripe_reconciliation_missing_session'] = 'В платеже отсутствует Stripe Checkout Session.';
 
 $string['commerce_guest_unfinished_recovery_title'] = 'Мы нашли вашу незавершённую оплату';
@@ -11591,3 +11579,1056 @@ $string['crm_inbox_diagnostics_check_credentials_available'] = 'Учетные �
 $string['crm_inbox_diagnostics_check_credentials_missing'] = 'Учетные данные отсутствуют';
 $string['crm_inbox_diagnostics_check_imap_connection_ok'] = 'Соединение IMAP установлено';
 $string['crm_inbox_diagnostics_check_smtp_connection_ok'] = 'Соединение SMTP установлено';
+
+// Commerce 7.96B — centralized currency names.
+$string['commerce_currency_name_eur'] = 'Евро';
+$string['commerce_currency_name_rub'] = 'Российский рубль';
+$string['commerce_currency_name_byn'] = 'Белорусский рубль';
+$string['commerce_currency_name_usd'] = 'Доллар США';
+$string['commerce_currency_name_cad'] = 'Канадский доллар';
+$string['commerce_currency_name_mxn'] = 'Мексиканское песо';
+$string['commerce_currency_name_brl'] = 'Бразильский реал';
+$string['commerce_currency_name_cop'] = 'Колумбийское песо';
+$string['commerce_currency_name_clp'] = 'Чилийское песо';
+$string['commerce_currency_name_ars'] = 'Аргентинское песо';
+$string['commerce_currency_name_gbp'] = 'Фунт стерлингов';
+$string['commerce_currency_name_chf'] = 'Швейцарский франк';
+$string['commerce_currency_name_pln'] = 'Польский злотый';
+$string['commerce_currency_name_sek'] = 'Шведская крона';
+$string['commerce_currency_name_nok'] = 'Норвежская крона';
+$string['commerce_currency_name_dkk'] = 'Датская крона';
+$string['commerce_currency_name_czk'] = 'Чешская крона';
+$string['commerce_currency_name_huf'] = 'Венгерский форинт';
+$string['commerce_currency_name_ron'] = 'Румынский лей';
+$string['commerce_currency_name_jpy'] = 'Японская иена';
+$string['commerce_currency_name_krw'] = 'Южнокорейская вона';
+$string['commerce_currency_name_cny'] = 'Китайский юань';
+$string['commerce_currency_name_hkd'] = 'Гонконгский доллар';
+$string['commerce_currency_name_sgd'] = 'Сингапурский доллар';
+$string['commerce_currency_name_inr'] = 'Индийская рупия';
+$string['commerce_currency_name_aud'] = 'Австралийский доллар';
+$string['commerce_currency_name_nzd'] = 'Новозеландский доллар';
+$string['commerce_currency_name_aed'] = 'Дирхам ОАЭ';
+$string['commerce_currency_name_sar'] = 'Саудовский риял';
+$string['commerce_currency_name_zar'] = 'Южноафриканский рэнд';
+$string['commerce_currency_name_mad'] = 'Марокканский дирхам';
+$string['commerce_currency_name_xof'] = 'Западноафриканский франк КФА';
+$string['commerce_currency_name_xaf'] = 'Центральноафриканский франк КФА';
+$string['commerce_currency_name_tnd'] = 'Тунисский динар';
+$string['commerce_fx_title'] = 'Валюты и курсы обмена';
+$string['commerce_fx_description'] = 'Управление валютами Commerce, административными курсами и подсказками международных цен.';
+$string['commerce_fx_configuration_note'] = 'Курсы и подсказки международных цен настраиваются в инструменте «Валюты и FX».';
+$string['commerce_fx_open_tool'] = 'Открыть «Валюты и FX»';
+$string['commerce_fx_non_authoritative_notice'] = 'Курсы FX используются только как административная подсказка. Они никогда автоматически не меняют сумму checkout: опубликованные цены каталога остаются основными, пока администратор явно не сохранит новый тариф.';
+$string['commerce_fx_rate_book_title'] = 'Таблица курсов';
+$string['commerce_fx_rate_book_help'] = 'Заполняйте только валюты, для которых действительно нужны цены. Пустая валюта остаётся поддерживаемой Commerce, но без FX-подсказки.';
+$string['commerce_fx_base_currency'] = 'Базовая валюта';
+$string['commerce_fx_source'] = 'Источник курса';
+$string['commerce_fx_rate'] = 'Курс';
+$string['commerce_fx_last_update'] = 'Последнее обновление';
+$string['commerce_fx_rate_definition'] = 'Определение курса: 1 {$a} = КУРС единиц целевой валюты.';
+$string['commerce_fx_suggestion_title'] = 'Калькулятор рекомендуемой цены';
+$string['commerce_fx_suggestion_help'] = 'Конвертирует базовую цену по сохранённому курсу и при необходимости применяет коммерческое округление. Результат является только подсказкой.';
+$string['commerce_fx_need_two_currencies'] = 'Для расчёта FX-подсказок включите минимум две валюты.';
+$string['commerce_fx_source_price'] = 'Базовая цена ({$a})';
+$string['commerce_fx_target_currency'] = 'Целевая валюта';
+$string['commerce_fx_rounding'] = 'Коммерческое округление';
+$string['commerce_fx_rounding_native'] = 'Точность валюты';
+$string['commerce_fx_rounding_whole'] = 'До ближайшего целого';
+$string['commerce_fx_rounding_90'] = 'Окончание .90';
+$string['commerce_fx_calculate'] = 'Рассчитать';
+$string['commerce_fx_suggestion_result'] = 'Рекомендуемая цена';
+$string['commerce_fx_suggestion_rate_used'] = 'Использован курс: 1 {$a->base} = {$a->rate} {$a->target}.';
+
+$string['commerce_fx_refresh_title'] = 'Бесплатное обновление курсов';
+$string['commerce_fx_refresh_help'] = 'По запросу администратора получает доступные бесплатные справочные курсы. Cron не используется, и ни один курс не сохраняется без вашего подтверждения.';
+$string['commerce_fx_refresh_button'] = 'Обновить из ЕЦБ';
+$string['commerce_fx_refresh_source_ecb'] = 'Автоматический источник D2: Европейский центральный банк (ЕЦБ), бесплатно и без API-ключа. Валюты, которые ЕЦБ не публикует, остаются в ручном управлении.';
+$string['commerce_fx_refresh_preview_title'] = 'Предпросмотр перед применением';
+$string['commerce_fx_current_rate'] = 'Сохранённый курс';
+$string['commerce_fx_proposed_rate'] = 'Предложенный курс';
+$string['commerce_fx_variation'] = 'Изменение';
+$string['commerce_fx_refresh_unavailable'] = 'Для следующих валют нет курса ЕЦБ: {$a}. Существующие значения сохраняются и могут управляться вручную.';
+$string['commerce_fx_refresh_reference_date'] = 'Источник: {$a->source} · дата курса: {$a->date}.';
+$string['commerce_fx_apply_refresh'] = 'Применить эти курсы';
+$string['commerce_fx_discard_refresh'] = 'Отменить';
+$string['commerce_fx_refresh_ready'] = 'Бесплатные курсы получены. Проверьте их перед применением.';
+$string['commerce_fx_refresh_failed'] = 'Не удалось получить курсы: {$a}';
+$string['commerce_fx_refresh_missing'] = 'Нет предпросмотра курсов для применения.';
+$string['commerce_fx_refresh_applied'] = 'Предложенные курсы применены. Цены каталога не изменялись.';
+$string['commerce_fx_refresh_discarded'] = 'Предпросмотр курсов отменён.';
+$string['commerce_fx_configuration_card_summary'] = 'Базовая валюта: {$a->base} · сохранено курсов: {$a->count} · последнее обновление: {$a->updated}';
+$string['commerce_fx_never_updated'] = 'никогда';
+
+$string['commerce_select_all'] = 'Выбрать все';
+$string['commerce_deselect_all'] = 'Снять все';
+$string['commerce_fx_back_to_localisation'] = 'Назад к локализации';
+$string['commerce_fx_refresh_title_d3'] = 'Обновить курсы валют';
+$string['commerce_fx_refresh_help_d3'] = 'Выберите валюты для обновления. CampusFR сначала обращается к бесплатным источникам и ничего не сохраняет без вашего подтверждения.';
+$string['commerce_fx_refresh_source_chain'] = 'Бесплатный порядок: ЕЦБ → Frankfurter. OpenAI предлагается только после этого, отдельно и исключительно по явному действию администратора.';
+$string['commerce_fx_refresh_choose_currencies'] = 'Валюты для обновления';
+$string['commerce_fx_refresh_free_button'] = 'Обновить выбранные валюты';
+$string['commerce_fx_refresh_still_unavailable'] = 'Бесплатные источники не дали курс для: {$a}. Можно отдельно запустить поиск OpenAI или оставить ручной ввод.';
+$string['commerce_fx_openai_refresh_button'] = 'Найти оставшиеся курсы через OpenAI';
+$string['commerce_fx_openai_refresh_warning'] = 'Явное действие: используется уже настроенный аккаунт OpenAI и веб-поиск. OpenAI никогда не вызывается автоматически.';
+$string['commerce_fx_openai_unavailable'] = 'OpenAI недоступен в текущей конфигурации. Оставшиеся валюты управляются вручную.';
+$string['commerce_fx_openai_nothing_to_refresh'] = 'Нет неразрешённых валют для поиска через OpenAI.';
+$string['commerce_fx_openai_refresh_ready'] = 'Поиск OpenAI завершён. Проверьте предложенные курсы перед применением.';
+$string['commerce_fx_openai_refresh_failed'] = 'Поиск курса через OpenAI завершился ошибкой: {$a}';
+$string['commerce_fx_refresh_selection_required'] = 'Выберите хотя бы одну валюту для обновления.';
+
+$string['commerce_fx_refresh_free_button_all'] = 'Обновить доступные курсы';
+$string['commerce_fx_apply_column'] = 'Применить';
+$string['commerce_fx_apply_selection_required'] = 'Выберите хотя бы один курс для применения.';
+
+$string['commerce_product_fx_assistant_title'] = 'Помощник международных цен';
+$string['commerce_product_fx_assistant_help'] = 'Создаёт предложения для включённых валют, в которых у товара ещё нет цены. Существующие цены никогда не заменяются, и ничего не сохраняется без подтверждения.';
+$string['commerce_product_fx_missing_base_price'] = 'Сначала добавьте цену в базовой валюте FX: {$a}.';
+$string['commerce_product_fx_base_price_summary'] = 'Используемая базовая цена: {$a->amount} {$a->currency}.';
+$string['commerce_product_fx_rounding'] = 'Правило округления';
+$string['commerce_product_fx_generate_preview'] = 'Создать предпросмотр';
+$string['commerce_product_fx_preview_title'] = 'Предлагаемые цены перед созданием';
+$string['commerce_product_fx_raw_suggestion'] = 'Исходная конвертация';
+$string['commerce_product_fx_price_to_create'] = 'Цена для создания';
+$string['commerce_product_fx_activate_new'] = 'Сразу активировать новые цены для продажи';
+$string['commerce_product_fx_create_selected'] = 'Создать выбранные цены';
+$string['commerce_product_fx_missing_rates'] = 'Нет сохранённого курса FX для: {$a}. Эти валюты пропущены.';
+$string['commerce_product_fx_nothing_to_generate'] = 'Новых цен для предложения нет: все доступные валюты уже настроены или для них нет курса FX.';
+$string['commerce_product_fx_preview_failed'] = 'Не удалось создать предложения: {$a}';
+$string['commerce_product_fx_preview_missing'] = 'Предпросмотр цен больше недоступен. Создайте его заново.';
+$string['commerce_product_fx_invalid_amount'] = 'Предлагаемая сумма для {$a} некорректна.';
+$string['commerce_product_fx_apply_none'] = 'Новая цена не была создана.';
+$string['commerce_product_fx_apply_success'] = 'Создано новых международных цен: {$a}.';
+
+$string['commerce_fx_rounding_none'] = 'Стандартная точность валюты';
+$string['commerce_fx_rounding_ending90'] = 'Коммерческое окончание .90';
+
+$string['commerce_bundle_fx_title'] = 'Международные цены Bundle';
+$string['commerce_bundle_fx_fixed_help'] = 'Для Bundle с фиксированной ценой можно создать недостающие цены из цены в базовой валюте FX. Уже настроенные цены никогда не заменяются автоматически.';
+$string['commerce_bundle_fx_calculated_help'] = 'При этой стратегии цена Bundle рассчитывается по его продуктам. Валюта доступна только тогда, когда у каждого компонента есть активная цена в этой валюте.';
+$string['commerce_bundle_fx_fixed_only'] = 'Прямое создание FX-цен доступно только для стратегии фиксированной цены.';
+$string['commerce_bundle_fx_missing_base_price'] = 'Сначала добавьте фиксированную цену Bundle в базовой валюте FX: {$a}.';
+$string['commerce_bundle_fx_base_summary'] = 'Базовая цена Bundle: {$a->amount} {$a->currency}.';
+$string['commerce_bundle_fx_generate'] = 'Создать предложения цен Bundle';
+$string['commerce_bundle_fx_preview_title'] = 'Предлагаемые цены Bundle перед созданием';
+$string['commerce_bundle_fx_missing_rates'] = 'Нет сохранённого курса FX для: {$a}. Эти валюты пропущены.';
+$string['commerce_bundle_fx_nothing'] = 'Новых цен Bundle для предложения нет: все доступные валюты уже настроены или для них нет курса FX.';
+$string['commerce_bundle_fx_create_selected'] = 'Создать выбранные цены Bundle';
+$string['commerce_bundle_fx_preview_failed'] = 'Не удалось создать предложения цен Bundle: {$a}';
+$string['commerce_bundle_fx_preview_missing'] = 'Предпросмотр FX Bundle больше недоступен. Создайте его заново.';
+$string['commerce_bundle_fx_invalid_amount'] = 'Предлагаемая сумма Bundle для {$a} некорректна.';
+$string['commerce_bundle_fx_apply_none'] = 'Новая цена Bundle не была создана.';
+$string['commerce_bundle_fx_apply_success'] = 'Создано новых международных цен Bundle: {$a}.';
+$string['commerce_bundle_fx_coverage_status'] = 'Покрытие';
+$string['commerce_bundle_fx_missing_components'] = 'Компоненты без цены';
+$string['commerce_bundle_fx_coverage_ready'] = 'Готово';
+$string['commerce_bundle_fx_coverage_incomplete'] = 'Неполно';
+
+$string['commerce_fx_bulk_title'] = 'Массовое создание международных цен';
+$string['commerce_fx_bulk_help'] = 'За одну операцию подготовьте недостающие цены в выбранной валюте для обычных товаров. Bundle исключены и управляются на своей странице Тарификация. Существующие цены никогда не заменяются.';
+$string['commerce_fx_bulk_open'] = 'Создать цены каталога';
+$string['commerce_fx_bulk_open_help'] = 'Массово создать недостающие цены по сохранённым курсам FX.';
+$string['commerce_fx_bulk_back'] = 'Назад к валютам и FX';
+$string['commerce_fx_bulk_base_summary'] = 'Текущая базовая валюта: {$a}.';
+$string['commerce_fx_bulk_no_targets'] = 'Ни для одной включённой целевой валюты сейчас нет курса FX.';
+$string['commerce_fx_bulk_target'] = 'Целевая валюта';
+$string['commerce_fx_bulk_generate'] = 'Подготовить предложения';
+$string['commerce_fx_bulk_preview_title'] = 'Предпросмотр цен для создания в {$a}';
+$string['commerce_fx_bulk_reference_price'] = 'Базовая цена';
+$string['commerce_fx_bulk_empty'] = 'Для этой валюты нечего создавать: у подходящих товаров уже есть целевая цена или нет активной цены в базовой валюте.';
+$string['commerce_fx_bulk_activate'] = 'Сразу активировать новые цены для продажи';
+$string['commerce_fx_bulk_create'] = 'Создать выбранные цены';
+$string['commerce_fx_bulk_preview_failed'] = 'Не удалось подготовить цены: {$a}';
+$string['commerce_fx_bulk_preview_missing'] = 'Предпросмотр больше недоступен. Создайте его заново.';
+$string['commerce_fx_bulk_invalid_amount'] = 'Предлагаемая сумма для товара {$a} некорректна.';
+$string['commerce_fx_bulk_apply_none'] = 'Новая цена не была создана.';
+$string['commerce_fx_bulk_apply_success'] = 'Создано цен: {$a->created}. Пропущено строк: {$a->skipped}.';
+
+$string['commerce_fx_reference_date'] = 'Дата курса';
+$string['commerce_fx_diagnostics_title'] = 'Диагностика валют и FX';
+$string['commerce_fx_diagnostics_help'] = 'Проверка международной валютной конфигурации только для чтения перед завершением этапа 7.96D.';
+$string['commerce_fx_diagnostics_ready'] = 'Конфигурация готова';
+$string['commerce_fx_diagnostics_attention'] = 'Нужно проверить';
+$string['commerce_fx_diagnostics_base'] = 'Базовая валюта';
+$string['commerce_fx_diagnostics_enabled'] = 'Включённые валюты';
+$string['commerce_fx_diagnostics_rates'] = 'Сохранённые курсы';
+$string['commerce_fx_diagnostics_active_products'] = 'Активные товары';
+$string['commerce_fx_diagnostics_automatic'] = 'Автоматическое обновление';
+$string['commerce_fx_diagnostics_manual_only'] = 'Отключено — только действие администратора';
+$string['commerce_fx_diagnostics_sources'] = 'Сохранённые источники: {$a}';
+$string['commerce_fx_diagnostics_missing_rates'] = 'Для включённых валют нет курса FX: {$a}. Их по-прежнему можно использовать с ценами, введёнными вручную.';
+$string['commerce_fx_diagnostics_stale_rates'] = 'Курсы не обновлялись более {$a->days} дней: {$a->currencies}. Это только информация: автоматическое обновление не запускается.';
+$string['commerce_fx_diagnostics_missing_base_prices'] = 'У {$a->count} активных товаров нет активной цены в базовой валюте: {$a->products}. Для них нельзя создать FX-предложение из этой базовой цены.';
+
+$string['commerce_checkout_payment_method_label'] = 'Способ оплаты';
+$string['commerce_checkout_other_payment_methods'] = 'Показать другие способы оплаты';
+$string['commerce_checkout_payment_method_recommended'] = 'Рекомендуется';
+$string['commerce_checkout_no_payment_method_for_currency'] = 'Для {$a} сейчас нет стандартного доступного способа оплаты. Можно выбрать другую валюту или вернуться позже.';
+$string['commerce_checkout_payment_method_unavailable'] = 'Выбранный способ оплаты недоступен для этого заказа: {$a}.';
+$string['commerce_payment_method_card'] = 'Банковская карта';
+$string['commerce_payment_method_card_desc'] = 'Безопасная оплата банковской картой.';
+$string['commerce_payment_method_apple_pay'] = 'Apple Pay';
+$string['commerce_payment_method_apple_pay_desc'] = 'Быстрая оплата картами, сохранёнными в Apple Pay.';
+$string['commerce_payment_method_google_pay'] = 'Google Pay';
+$string['commerce_payment_method_google_pay_desc'] = 'Быстрая оплата картами, сохранёнными в Google Pay.';
+$string['commerce_payment_method_paypal'] = 'PayPal';
+$string['commerce_payment_method_paypal_desc'] = 'Оплата через ваш аккаунт PayPal.';
+$string['commerce_payment_policy_regional_card_recommended'] = 'Для оплаты из России или Беларуси сейчас рекомендуется банковская карта. Если для вашей ситуации доступны другие совместимые способы, их можно открыть и выбрать ниже.';
+
+$string['commerce_payment_architecture_title'] = 'Архитектура платежей';
+$string['commerce_payment_architecture_card_help'] = 'Проверить реально доступные провайдеры, способы оплаты, валюты и capabilities.';
+$string['commerce_payment_architecture_open'] = 'Открыть диагностику платежей';
+$string['commerce_payment_architecture_back'] = 'Назад к платежам';
+$string['commerce_payment_architecture_help'] = 'Режим только для чтения: Payment Provider × Payment Method × Currency. Никакой способ оплаты здесь не активируется.';
+$string['commerce_payment_architecture_providers'] = 'Провайдеры и capabilities';
+$string['commerce_payment_architecture_provider'] = 'Провайдер';
+$string['commerce_payment_architecture_available'] = 'Доступен';
+$string['commerce_payment_architecture_methods'] = 'Способы';
+$string['commerce_payment_architecture_currencies'] = 'Валюты';
+$string['commerce_payment_architecture_capabilities'] = 'Capabilities';
+$string['commerce_payment_architecture_matrix'] = 'Матрица валюта × способ оплаты';
+$string['commerce_payment_architecture_matrix_help'] = 'В каждой ячейке показаны провайдеры, которые реально могут предоставить этот способ для валюты.';
+$string['commerce_payment_architecture_note'] = 'Пустая ячейка означает, что ни один текущий провайдер не объявляет такую комбинацию. Политика checkout не может сделать доступной комбинацию, которой нет в этой матрице.';
+
+$string['commerce_payment_capability_redirect'] = 'Переход к оплате';
+$string['commerce_payment_capability_retrieval'] = 'Проверка статуса';
+$string['commerce_payment_capability_cancellation'] = 'Отмена';
+$string['commerce_payment_capability_refund'] = 'Возврат';
+$string['commerce_payment_capability_refund_uncertified'] = 'Возврат не сертифицирован';
+$string['commerce_payment_capability_none'] = 'Рабочие capabilities не заявлены';
+$string['commerce_payment_refund_readiness_title'] = 'Готовность возвратов';
+$string['commerce_payment_refund_readiness_help'] = 'Возврат доступен в Commerce только если провайдер одновременно заявляет capability и реализует сертифицированный контракт возврата. Возможности сделать возврат в кабинете PSP недостаточно.';
+$string['commerce_payment_refund_capability_column'] = 'Заявленная capability';
+$string['commerce_payment_refund_contract_column'] = 'Контракт Commerce';
+$string['commerce_payment_refund_certified_column'] = 'Доступно в Commerce';
+$string['commerce_payment_refund_certified_yes'] = 'Сертифицировано';
+$string['commerce_payment_refund_certified_no'] = 'Недоступно';
+
+$string['commerce_refund_action'] = 'Вернуть';
+$string['commerce_refund_page_title'] = 'Возврат платежа';
+$string['commerce_refund_page_help'] = 'Оформите полный или частичный возврат из Commerce. Возврат отправляется провайдеру и сохраняется в истории Commerce.';
+$string['commerce_refund_summary_title'] = 'Платёж для возврата';
+$string['commerce_refund_form_title'] = 'Новый возврат';
+$string['commerce_refund_payment_amount'] = 'Сумма платежа';
+$string['commerce_refund_already_refunded'] = 'Уже возвращено / зарезервировано';
+$string['commerce_refund_remaining'] = 'Доступно для возврата';
+$string['commerce_refund_amount'] = 'Сумма возврата';
+$string['commerce_refund_amount_help'] = 'Максимально доступно: {$a}. Для частичного возврата укажите меньшую сумму.';
+$string['commerce_refund_reason'] = 'Причина';
+$string['commerce_refund_reason_customer'] = 'Запрос клиента';
+$string['commerce_refund_reason_duplicate'] = 'Двойной платёж';
+$string['commerce_refund_reason_fraudulent'] = 'Мошеннический платёж';
+$string['commerce_refund_reason_other'] = 'Другая причина';
+$string['commerce_refund_confirmation'] = 'Я подтверждаю, что этот возврат нужно отправить платёжному провайдеру.';
+$string['commerce_refund_confirmation_required'] = 'Необходимо явно подтвердить возврат.';
+$string['commerce_refund_submit'] = 'Выполнить возврат';
+$string['commerce_refund_success'] = 'Возврат {$a} успешно отправлен.';
+$string['commerce_refund_failed'] = 'Ошибка возврата: {$a}';
+$string['commerce_refund_invalid_amount'] = 'Некорректная сумма возврата.';
+$string['commerce_refund_payment_not_found'] = 'Этот платёж не относится к данной покупке или больше не существует.';
+$string['commerce_refund_provider_not_supported'] = 'Возвраты через Commerce не сертифицированы для {$a}.';
+$string['commerce_refund_nothing_remaining'] = 'Для этого платежа больше нет суммы, доступной к возврату.';
+$string['commerce_refund_created_notice'] = 'Возврат сохранён в Commerce.';
+$string['commerce_refund_refunded_column'] = 'Возвращено';
+$string['commerce_refund_provider_reference'] = 'Номер возврата';
+$string['commerce_refund_history_title'] = 'История возвратов';
+$string['commerce_refund_history_payment'] = '{$a->provider} — возвращено/зарезервировано {$a->amount}';
+$string['commerce_refund_status_pending'] = 'Ожидает';
+$string['commerce_refund_status_succeeded'] = 'Возвращено';
+$string['commerce_refund_status_failed'] = 'Ошибка';
+$string['commerce_refund_reason_unspecified'] = 'Не указана';
+
+$string['commerce_refund_sync_action'] = 'Синхронизировать возвраты';
+$string['commerce_refund_sync_success'] = 'Синхронизация завершена: импортировано возвратов Stripe — {$a}.';
+$string['commerce_refund_sync_failed'] = 'Ошибка синхронизации возвратов: {$a}';
+$string['commerce_refund_statistics_refunds'] = 'Возвраты за период';
+$string['commerce_refund_statistics_net'] = 'Чистая выручка';
+
+$string['commerce_payment_architecture_certification_title'] = 'Сертификация платёжной архитектуры';
+$string['commerce_payment_architecture_certification_help'] = 'Общая структурная проверка провайдеров, валют, способов оплаты, приоритетов и контрактов возврата. Эту же проверку можно использовать для каждого нового провайдера.';
+$string['commerce_payment_architecture_certified'] = 'Архитектура сертифицирована';
+$string['commerce_payment_architecture_not_certified'] = 'Ошибка сертификации';
+$string['commerce_payment_architecture_no_errors'] = 'Блокирующих структурных несоответствий не обнаружено.';
+$string['commerce_payment_architecture_errors'] = 'Блокирующие ошибки';
+$string['commerce_payment_architecture_warnings'] = 'Нужно проверить';
+$string['commerce_payment_refund_history_column'] = 'Историческая синхронизация';
+
+$string['commerce_payment_architecture_warning_currency_without_provider'] = 'Активированные валюты без доступного платёжного провайдера: {$a}.';
+
+$string['alfa_refund_credentials_missing'] = 'Для возврата через Alfa требуются API-логин магазина и пароль. Настройте userName/password Alfa для активной среды.';
+
+$string['alfa_refund_username_test'] = 'Отдельный логин Alfa для возвратов — TEST';
+$string['alfa_refund_password_test'] = 'Отдельный пароль Alfa для возвратов — TEST';
+$string['alfa_refund_username_live'] = 'Отдельный логин Alfa для возвратов — LIVE';
+$string['alfa_refund_password_live'] = 'Отдельный пароль Alfa для возвратов — LIVE';
+$string['alfa_refund_credentials_desc'] = 'Необязательно. Укажите API/r-login/i-login с правом возврата. Если поля пустые, Commerce использует стандартные учётные данные Alfa.';
+$string['alfa_refund_access_denied'] = 'Alfa запретил возврат для API-логина «{$a}». Проверьте, что это тот же логин, с которым успешно работает тест API, и что у него есть право на возврат.';
+
+$string['commerce_alfa_crm_refunded_amount'] = 'Сумма возврата';
+$string['commerce_alfa_crm_check_provider_refund_settled'] = 'Alfa подтверждает корректное состояние оплаченного и затем возвращённого платежа';
+$string['commerce_alfa_crm_check_deposited_after_refund'] = 'Чистая зачисленная сумма соответствует исходной сумме за вычетом возвратов';
+$string['commerce_alfa_crm_check_refund_amount'] = 'Сумма возврата согласуется с исходным платежом';
+$string['commerce_alfa_reconciliation_blocker_refund_amount_mismatch'] = 'Сумма возврата по данным Alfa не соответствует исходной сумме платежа.';
+
+$string['commerce_reconciliation_alfa_order_status_0'] = 'Зарегистрирован, не оплачен';
+$string['commerce_reconciliation_alfa_order_status_1'] = 'Предавторизован';
+$string['commerce_reconciliation_alfa_order_status_2'] = 'Оплачен';
+$string['commerce_reconciliation_alfa_order_status_3'] = 'Авторизация отменена';
+$string['commerce_reconciliation_alfa_order_status_4'] = 'Возвращён';
+$string['commerce_reconciliation_alfa_order_status_5'] = 'Аутентификация выполняется';
+$string['commerce_reconciliation_alfa_order_status_6'] = 'Платёж отклонён';
+$string['commerce_reconciliation_alfa_status_deposited'] = 'Зачислен';
+$string['commerce_reconciliation_alfa_status_refunded'] = 'Возвращён';
+$string['commerce_reconciliation_alfa_status_partially_refunded'] = 'Частично возвращён';
+$string['commerce_reconciliation_alfa_status_approved'] = 'Одобрен';
+$string['commerce_reconciliation_alfa_status_declined'] = 'Отклонён';
+$string['commerce_reconciliation_alfa_status_pending'] = 'Ожидает';
+$string['commerce_reconciliation_stripe_checkout_status_complete'] = 'Завершён';
+$string['commerce_reconciliation_stripe_checkout_status_open'] = 'Открыт';
+$string['commerce_reconciliation_stripe_checkout_status_expired'] = 'Истёк';
+$string['commerce_reconciliation_stripe_payment_status_paid'] = 'Оплачен';
+$string['commerce_reconciliation_stripe_payment_status_unpaid'] = 'Не оплачен';
+$string['commerce_reconciliation_stripe_payment_status_no_payment_required'] = 'Оплата не требуется';
+$string['commerce_stripe_crm_title'] = 'Сверка платежа Stripe';
+$string['commerce_stripe_crm_description'] = 'Проверьте реальный статус Stripe перед автоматическим восстановлением платежа, доступов и писем CampusFR.';
+$string['commerce_stripe_crm_live_warning'] = 'Данные Stripe на этой странице проверяются напрямую в Stripe. Открытие страницы не изменяет данные CampusFR.';
+$string['commerce_stripe_crm_provider_error'] = 'Не удалось проверить Stripe: {$a}';
+$string['commerce_stripe_crm_state_complete'] = 'Платёж уже полностью обработан';
+$string['commerce_stripe_crm_state_complete_help'] = 'CampusFR и Stripe согласованы. Дополнительная сверка не требуется.';
+$string['commerce_stripe_crm_state_reconcilable'] = 'Stripe подтвердил платёж — доступна сверка';
+$string['commerce_stripe_crm_state_reconcilable_help'] = 'Stripe подтверждает платёж, все проверки пройдены. Commerce может безопасно восстановить обычный процесс обработки.';
+$string['commerce_stripe_crm_state_blocked'] = 'Сверка небезопасна';
+$string['commerce_stripe_crm_state_blocked_help'] = 'Один или несколько параметров Stripe не совпадают с CampusFR. Автоматическое исправление не предлагается.';
+$string['commerce_stripe_crm_campus_section'] = 'Состояние CampusFR';
+$string['commerce_stripe_crm_stripe_section'] = 'Состояние Stripe в реальном времени';
+$string['commerce_stripe_crm_payment_id'] = 'Попытка оплаты';
+$string['commerce_stripe_crm_session_id'] = 'Сессия Stripe';
+$string['commerce_stripe_crm_profile'] = 'Среда Stripe';
+$string['commerce_stripe_crm_checkout_status'] = 'Статус checkout Stripe';
+$string['commerce_stripe_crm_payment_state'] = 'Состояние платежа Stripe';
+$string['commerce_stripe_crm_check_provider_paid'] = 'Stripe подтверждает зачисление платежа';
+$string['commerce_stripe_crm_check_amount'] = 'Сумма Stripe соответствует CampusFR';
+$string['commerce_stripe_crm_check_currency'] = 'Валюта Stripe соответствует CampusFR';
+$string['commerce_stripe_crm_check_ok'] = 'Соответствует';
+$string['commerce_stripe_crm_check_failed'] = 'Проверить';
+$string['commerce_stripe_crm_checks_section'] = 'Проверки безопасности';
+$string['commerce_stripe_crm_blockers'] = 'Сверку нельзя выполнить по следующим причинам:';
+$string['commerce_stripe_crm_refresh'] = 'Проверить Stripe ещё раз';
+$string['commerce_stripe_crm_execute'] = 'Выполнить сверку';
+$string['commerce_stripe_crm_execute_confirm'] = 'Подтвердить сверку платежа на основании проверенного в реальном времени статуса Stripe?';
+$string['commerce_stripe_crm_success'] = 'Платёж Stripe успешно синхронизирован.';
+$string['commerce_stripe_crm_purchase_panel'] = 'Сверка Stripe';
+$string['commerce_stripe_crm_purchase_pending_help'] = 'Платёж или выдача доступа не завершены. Можно проверить статус напрямую в Stripe.';
+$string['commerce_stripe_crm_purchase_complete_help'] = 'Платёж уже обработан, но вы можете в любой момент проверить согласованность CampusFR и Stripe.';
+$string['commerce_stripe_crm_verify'] = 'Проверить в Stripe';
+$string['commerce_stripe_reconciliation_attempt_not_found'] = 'Для этой продажи не найдена попытка платежа Stripe.';
+$string['commerce_stripe_reconciliation_blocker_provider_not_paid'] = 'Stripe пока не подтверждает зачисление платежа.';
+$string['commerce_stripe_reconciliation_blocker_amount_mismatch'] = 'Сумма Stripe не соответствует ожидаемой.';
+$string['commerce_stripe_reconciliation_blocker_currency_mismatch'] = 'Валюта Stripe не соответствует ожидаемой.';
+$string['commerce_stripe_reconciliation_blocker_provider_event_not_completed'] = 'Статус Stripe не соответствует завершённому платежу.';
+
+$string['commerce_stripe_crm_verify_short'] = 'Проверить в Stripe';
+
+$string['provider_paypal'] = 'PayPal';
+$string['paypal_settings_header'] = 'PayPal';
+$string['paypal_settings_header_desc'] = 'Подготовка интеграции PayPal REST / Orders v2. В 7.96F1 эти настройки ещё не включают PayPal в checkout.';
+$string['paypal_env_desc'] = 'Среда PayPal, которую Commerce будет использовать после активации интеграции.';
+$string['paypal_env_sandbox'] = 'Sandbox';
+$string['paypal_env_live'] = 'Live';
+$string['paypal_client_id_sandbox'] = 'Client ID PayPal — Sandbox';
+$string['paypal_client_secret_sandbox'] = 'Client Secret PayPal — Sandbox';
+$string['paypal_webhook_id_sandbox'] = 'Webhook ID PayPal — Sandbox';
+$string['paypal_client_id_live'] = 'Client ID PayPal — Live';
+$string['paypal_client_secret_live'] = 'Client Secret PayPal — Live';
+$string['paypal_webhook_id_live'] = 'Webhook ID PayPal — Live';
+$string['paypal_webhook_id_desc'] = 'Идентификатор REST webhook PayPal, связанный с приложением этой среды. F4 использует его для проверки каждой серверной нотификации перед обработкой.';
+$string['commerce_checkout_provider_paypal'] = 'PayPal';
+$string['commerce_checkout_provider_paypal_desc'] = 'Безопасная оплата через ваш аккаунт PayPal.';
+
+
+$string['paypal_refund_history_note'] = 'Возвраты PayPal выполняются по Capture ID транзакции. Внешние возвраты синхронизируются через webhook и также могут быть пересчитаны по состоянию capture.';
+
+$string['commerce_reconciliation_paypal_order_status_created'] = 'Создан';
+$string['commerce_reconciliation_paypal_order_status_saved'] = 'Сохранён';
+$string['commerce_reconciliation_paypal_order_status_approved'] = 'Одобрен';
+$string['commerce_reconciliation_paypal_order_status_completed'] = 'Завершён';
+$string['commerce_reconciliation_paypal_order_status_voided'] = 'Аннулирован';
+$string['commerce_reconciliation_paypal_order_status_payer_action_required'] = 'Требуется действие плательщика';
+$string['commerce_reconciliation_paypal_capture_status_completed'] = 'Зачислен';
+$string['commerce_reconciliation_paypal_capture_status_partially_refunded'] = 'Частично возвращён';
+$string['commerce_reconciliation_paypal_capture_status_refunded'] = 'Возвращён';
+$string['commerce_reconciliation_paypal_capture_status_pending'] = 'В ожидании';
+$string['commerce_reconciliation_paypal_capture_status_declined'] = 'Отклонён';
+$string['commerce_paypal_crm_title'] = 'Сверка платежа PayPal';
+$string['commerce_paypal_crm_description'] = 'Проверьте реальное состояние Order, capture и возвратов PayPal перед автоматическим восстановлением продажи CampusFR.';
+$string['commerce_paypal_crm_live_warning'] = 'Данные PayPal на этой странице проверяются напрямую в PayPal. Открытие страницы не изменяет данные CampusFR.';
+$string['commerce_paypal_crm_provider_error'] = 'Не удалось проверить PayPal: {$a}';
+$string['commerce_paypal_crm_state_complete'] = 'Платёж уже полностью обработан';
+$string['commerce_paypal_crm_state_complete_help'] = 'CampusFR и PayPal согласованы по платежу. Суммы возвратов также сравниваются отдельно.';
+$string['commerce_paypal_crm_state_reconcilable'] = 'PayPal подтвердил платёж — доступна сверка';
+$string['commerce_paypal_crm_state_reconcilable_help'] = 'PayPal подтверждает завершённый capture, и все проверки соответствуют CampusFR. Обработку Commerce можно безопасно восстановить.';
+$string['commerce_paypal_crm_state_blocked'] = 'Автоматическая сверка небезопасна';
+$string['commerce_paypal_crm_state_blocked_help'] = 'Один или несколько параметров PayPal требуют проверки. Автоматическое исправление не предлагается.';
+$string['commerce_paypal_crm_campus_section'] = 'Состояние CampusFR';
+$string['commerce_paypal_crm_paypal_section'] = 'Состояние PayPal в реальном времени';
+$string['commerce_paypal_crm_payment_id'] = 'Попытка оплаты';
+$string['commerce_paypal_crm_order_id'] = 'PayPal Order ID';
+$string['commerce_paypal_crm_capture_id'] = 'PayPal Capture ID';
+$string['commerce_paypal_crm_environment'] = 'Среда PayPal';
+$string['commerce_paypal_crm_order_status'] = 'Статус PayPal Order';
+$string['commerce_paypal_crm_capture_status'] = 'Состояние PayPal capture';
+$string['commerce_paypal_crm_refunded_campus'] = 'Возвращено по данным CampusFR';
+$string['commerce_paypal_crm_refunded_paypal'] = 'Возвращено по данным PayPal';
+$string['commerce_paypal_crm_net_amount'] = 'Чистая сумма после возвратов';
+$string['commerce_paypal_crm_check_provider_paid'] = 'PayPal подтверждает согласованное финансовое состояние';
+$string['commerce_paypal_crm_check_amount'] = 'Сумма PayPal соответствует CampusFR';
+$string['commerce_paypal_crm_check_currency'] = 'Валюта PayPal соответствует CampusFR';
+$string['commerce_paypal_crm_check_refunds'] = 'Сумма возвратов PayPal соответствует CampusFR';
+$string['commerce_paypal_crm_check_ok'] = 'Соответствует';
+$string['commerce_paypal_crm_check_failed'] = 'Проверить';
+$string['commerce_paypal_crm_checks_section'] = 'Проверки безопасности';
+$string['commerce_paypal_crm_blockers'] = 'Автоматическую сверку нельзя выполнить по следующим причинам:';
+$string['commerce_paypal_crm_refund_sync_hint'] = 'Платёж согласован, но суммы возвратов PayPal и CampusFR отличаются. Сначала используйте «Синхронизировать возвраты» в карточке продажи.';
+$string['commerce_paypal_crm_refresh'] = 'Проверить PayPal ещё раз';
+$string['commerce_paypal_crm_execute'] = 'Выполнить сверку';
+$string['commerce_paypal_crm_execute_confirm'] = 'Подтвердить сверку платежа на основании проверенного в реальном времени состояния PayPal?';
+$string['commerce_paypal_crm_success'] = 'Платёж PayPal успешно синхронизирован.';
+$string['commerce_paypal_crm_purchase_panel'] = 'Сверка PayPal';
+$string['commerce_paypal_crm_purchase_pending_help'] = 'Платёж или выдача доступа не завершены. Можно проверить Order и capture напрямую в PayPal.';
+$string['commerce_paypal_crm_purchase_complete_help'] = 'Платёж уже обработан. Можно в любой момент проверить согласованность платежа и возвратов между CampusFR и PayPal.';
+$string['commerce_paypal_crm_verify'] = 'Проверить в PayPal';
+$string['commerce_paypal_crm_verify_short'] = 'Проверить в PayPal';
+$string['commerce_paypal_reconciliation_wrong_provider'] = 'Эта продажа не использует PayPal.';
+$string['commerce_paypal_reconciliation_payment_not_found'] = 'Платёж PayPal не найден.';
+$string['commerce_paypal_reconciliation_attempt_not_found'] = 'Для этой продажи не найдена попытка платежа PayPal.';
+$string['commerce_paypal_reconciliation_missing_order'] = 'У попытки PayPal нет доступного Order ID.';
+$string['commerce_paypal_reconciliation_not_safe'] = 'Сверку PayPal нельзя выполнить безопасно: {$a}';
+$string['commerce_paypal_reconciliation_blocker_provider_not_paid'] = 'PayPal не подтверждает согласованное финансовое состояние.';
+$string['commerce_paypal_reconciliation_blocker_amount_mismatch'] = 'Сумма PayPal не соответствует ожидаемой.';
+$string['commerce_paypal_reconciliation_blocker_currency_mismatch'] = 'Валюта PayPal не соответствует ожидаемой.';
+$string['commerce_paypal_reconciliation_blocker_provider_already_refunded'] = 'PayPal уже сообщает о частичном или полном возврате. Незавершённую продажу CampusFR нельзя автоматически завершать в таком состоянии.';
+$string['commerce_paypal_reconciliation_blocker_capture_not_completed'] = 'PayPal не подтверждает завершённый capture, который можно безопасно использовать для восстановления платежа.';
+
+$string['commerce_paypal_ops_title'] = 'Операционное состояние PayPal';
+$string['commerce_paypal_ops_description'] = 'Проверьте активную среду PayPal, credentials, webhook и OAuth-соединение без создания платежа.';
+$string['commerce_paypal_ops_state_title'] = 'Активная конфигурация';
+$string['commerce_paypal_ops_environment'] = 'Среда';
+$string['commerce_paypal_ops_credentials'] = 'API credentials';
+$string['commerce_paypal_ops_webhook'] = 'Webhook ID';
+$string['commerce_paypal_ops_oauth'] = 'OAuth-соединение';
+$string['commerce_paypal_ops_configured'] = 'Настроено';
+$string['commerce_paypal_ops_missing'] = 'Отсутствует';
+$string['commerce_paypal_ops_reachable'] = 'Доступно';
+$string['commerce_paypal_ops_unreachable'] = 'Ошибка';
+$string['commerce_paypal_ops_not_checked'] = 'Не проверено';
+$string['commerce_paypal_ops_oauth_error'] = 'Не удалось подключиться к PayPal: {$a}';
+$string['commerce_paypal_ops_webhook_endpoint'] = 'Webhook endpoint CampusFR';
+$string['commerce_paypal_ops_webhook_help'] = 'Укажите этот URL в приложении PayPal для активной среды, затем сохраните созданный Webhook ID в CampusFR.';
+$string['commerce_paypal_ops_test_connection'] = 'Проверить соединение PayPal';
+$string['commerce_paypal_ops_open_settings'] = 'Открыть настройки PayPal';
+$string['commerce_paypal_ops_open_architecture'] = 'Архитектура платежей';
+$string['commerce_paypal_ops_open'] = 'Операционное состояние PayPal';
+$string['commerce_paypal_ops_check'] = 'Проверка';
+$string['commerce_paypal_ops_status'] = 'Статус';
+
+$string['commerce_paypal_ops_certification_hint'] = 'Сертификация 7.96F объединяет проверку архитектуры, возможностей, возвратов, webhook и операционного состояния PayPal. Удалённая проверка выполняется только на чтение.';
+
+$string['commerce_payment_method_link'] = 'Link';
+$string['commerce_payment_method_link_desc'] = 'Быстрая оплата через Link.';
+$string['commerce_payment_method_klarna'] = 'Klarna';
+$string['commerce_payment_method_klarna_desc'] = 'Гибкая оплата через Klarna.';
+$string['commerce_payment_architecture_market_dependent'] = 'Доступность зависит от рынка клиента.';
+$string['commerce_payment_architecture_market_note'] = '* Способ оплаты зависит от рынка: матрица показывает совместимость по валюте, но реальная доступность также зависит от страны клиента. Klarna дополнительно применяет собственные лимиты суммы и правила одобрения.';
+
+$string['commerce_configuration_group_payment_presentation'] = 'Показ клиенту';
+$string['commerce_payment_presentation_providers'] = 'Разрешённые провайдеры';
+$string['commerce_payment_presentation_providers_desc'] = 'Выберите провайдеров, которых Commerce может использовать и показывать в клиентском checkout. Отключённый провайдер остаётся настроенным и сохраняет историю, но исключается из клиентского маршрутизации.';
+$string['commerce_payment_presentation_methods'] = 'Разрешённые способы оплаты';
+$string['commerce_payment_presentation_methods_desc'] = 'Выберите способы оплаты, которые движок может предложить клиенту. Затем автоматически учитываются техническая поддержка, валюта, рынок и доступность провайдера.';
+$string['commerce_payment_architecture_admin_allowed'] = 'Разрешено администратором';
+$string['commerce_payment_architecture_admin_disabled'] = 'Отключено администратором';
+
+
+$string['commerce_provider_ops_title'] = 'Операционное состояние — {$a}';
+$string['commerce_provider_ops_description'] = 'Единая операционная страница провайдера {$a}. Секретные ключи здесь никогда не отображаются.';
+$string['commerce_provider_ops_state_title'] = 'Состояние провайдера';
+$string['commerce_provider_ops_environment'] = 'Активная среда / профиль';
+$string['commerce_provider_ops_credentials'] = 'Credentials';
+$string['commerce_provider_ops_webhook'] = 'Webhook / уведомления';
+$string['commerce_provider_ops_refunds'] = 'Возвраты';
+$string['commerce_provider_ops_customer_allowed'] = 'Разрешён для клиентов';
+$string['commerce_provider_ops_configured'] = 'Настроено';
+$string['commerce_provider_ops_missing'] = 'Нужно настроить';
+$string['commerce_provider_ops_ready'] = 'Готов';
+$string['commerce_provider_ops_incomplete'] = 'Конфигурация неполная';
+$string['commerce_provider_ops_open'] = 'Открыть';
+$string['commerce_provider_ops_check'] = 'Проверка';
+$string['commerce_provider_ops_status'] = 'Статус';
+$string['commerce_provider_ops_back_payments'] = 'Настройки платежей';
+$string['commerce_provider_ops_edit_configuration'] = 'Изменить конфигурацию';
+$string['commerce_provider_ops_open_architecture'] = 'Архитектура платежей';
+$string['commerce_provider_ops_test_connection'] = 'Проверить соединение';
+$string['commerce_provider_ops_remote_ok'] = 'Удалённое соединение PayPal успешно.';
+$string['commerce_provider_ops_remote_failed'] = 'Не удалось подключиться к PayPal: {$a}';
+$string['commerce_provider_ops_credentials_hint'] = 'На этом этапе секреты остаются в исторических настройках плагина. CRM-хаб становится общей точкой входа; полную миграцию credentials в этот интерфейс можно выполнить отдельно.';
+$string['commerce_provider_ops_hub_title'] = 'Платёжные провайдеры';
+$string['commerce_provider_ops_hub_desc'] = 'Управляйте Stripe, AlfaBank и PayPal из одной точки. Карточки отдельно показывают техническую настройку, разрешение для клиентов и операционное состояние.';
+$string['commerce_provider_ops_open_hub'] = 'Настройки провайдеров';
+
+$string['commerce_configuration_paypal_environment'] = 'Среда PayPal';
+$string['commerce_configuration_group_payment_credentials'] = 'Credentials и webhooks';
+$string['commerce_provider_ops_secret_hub_desc'] = 'Техническая конфигурация провайдера. Существующие секреты повторно не отображаются: оставьте секретное поле пустым, чтобы сохранить текущее значение.';
+$string['commerce_provider_ops_remote_ok_generic'] = 'Удалённое соединение {$a} успешно.';
+$string['commerce_provider_ops_remote_failed_generic'] = 'Не удалось подключиться к {$a->provider}: {$a->error}';
+
+$string['commerce_payment_credentials_accordion_help'] = 'Данные доступа сгруппированы по провайдеру и среде. Открывайте только нужный блок; пустое секретное поле сохраняет текущее значение.';
+$string['commerce_payment_credentials_ready_count'] = 'Готово сред: {$a->ready}/{$a->total}';
+
+// Commerce 7.96G8.3 — PayPal automatic reconciliation.
+$string['task_reconcile_paypal_payments'] = 'Сверка платежей PayPal';
+$string['paypal_reconciliation_cron_enabled'] = 'Включить автоматическую сверку PayPal';
+$string['paypal_reconciliation_cron_enabled_desc'] = 'Периодически проверяет ожидающие платежи PayPal и завершает только те, которые подтверждены PayPal и совпадают по сумме и валюте.';
+$string['paypal_reconciliation_batch_size'] = 'Размер пакета сверки PayPal';
+$string['paypal_reconciliation_batch_size_desc'] = 'Максимальное количество ожидающих платежей PayPal, проверяемых за один запуск задачи.';
+$string['paypal_reconciliation_min_age'] = 'Минимальный возраст для сверки PayPal (секунды)';
+$string['paypal_reconciliation_min_age_desc'] = 'Минимальный возраст ожидающего платежа PayPal перед автоматической проверкой.';
+$string['paypal_reconciliation_max_age'] = 'Максимальный возраст для сверки PayPal (секунды)';
+$string['paypal_reconciliation_max_age_desc'] = 'Максимальный возраст ожидающего платежа PayPal, учитываемого автоматической сверкой.';
+
+$string['commerce_payment_reconciliation_accordion_help'] = 'Настройки автоматической сверки сгруппированы по провайдеру. Статус показывает, включена ли автоматическая задача сверки для этого провайдера.';
+$string['commerce_payment_reconciliation_enabled'] = 'Автоматическая сверка включена';
+$string['commerce_payment_reconciliation_disabled'] = 'Автоматическая сверка выключена';
+
+$string['commerce_checkout_processing_payment'] = 'Подготовка оплаты…';
+
+$string['commerce_embedded_card_title'] = 'Оплата картой';
+$string['commerce_embedded_card_description'] = 'Введите данные карты, не покидая CampusFR.';
+$string['commerce_embedded_card_submit'] = 'Оплатить';
+$string['commerce_embedded_card_security'] = 'Зашифрованная и безопасная оплата.';
+$string['commerce_payment_splash_preparing_title'] = 'Подготовка оплаты…';
+$string['commerce_payment_splash_preparing_message'] = 'Несколько секунд — мы готовим защищённую страницу оплаты.';
+$string['commerce_payment_splash_processing_title'] = 'Подтверждение оплаты…';
+$string['commerce_payment_splash_processing_message'] = 'Платёж подтверждается. Не закрывайте эту страницу.';
+$string['commerce_embedded_express_title'] = 'Быстрая оплата';
+$string['commerce_embedded_express_separator'] = 'или оплатите картой';
+
+$string['commerce_embedded_secure_payment_label'] = 'Безопасная оплата CampusFR';
+
+$string['commerce_checkout_express_wallet_title'] = 'Быстрая оплата';
+$string['commerce_checkout_express_wallet_separator'] = 'или выберите другой способ оплаты';
+$string['commerce_checkout_express_wallet_help'] = 'Apple Pay и Google Pay отображаются только тогда, когда они доступны на этом устройстве.';
+
+$string['commerce_checkout_express_wallet_probing'] = 'Проверяем доступные способы быстрой оплаты…';
+$string['commerce_checkout_or'] = 'или';
+$string['commerce_checkout_secure_encrypted'] = 'Безопасная зашифрованная оплата';
+$string['commerce_checkout_data_protected'] = 'Данные защищены и конфиденциальны';
+$string['commerce_checkout_card_inline_title'] = 'Данные карты';
+$string['commerce_checkout_card_inline_description'] = 'Введите данные карты в защищённой форме ниже.';
+$string['commerce_checkout_card_inline_error_label'] = 'Ошибка оплаты картой';
+$string['commerce_checkout_card_open'] = 'Продолжить с картой';
+$string['commerce_checkout_card_confirm'] = 'Оплатить';
+$string['commerce_checkout_card_prepare_error'] = 'Не удалось подготовить форму карты. Попробуйте ещё раз.';
+$string['commerce_checkout_card_confirm_error'] = 'Не удалось подтвердить оплату картой. Попробуйте ещё раз.';
+$string['alfa_widget_enabled'] = 'Платёжный виджет Альфа-Банка';
+$string['alfa_widget_enabled_desc'] = 'Использует официальный виджет Альфа-Банка для оплаты картой в RUB, если настроен открытый токен среды. Иначе сохраняется текущий переход на страницу банка.';
+$string['alfa_widget_token_test'] = 'Открытый токен виджета Альфа — Тест';
+$string['alfa_widget_token_live'] = 'Открытый токен виджета Альфа — Продакшен';
+$string['alfa_widget_token_desc'] = 'Открытый токен, созданный в кабинете Альфа-Банка для платёжного виджета. Он отличается от API-токена.';
+$string['commerce_checkout_alfa_widget_title'] = 'Безопасная оплата';
+$string['commerce_checkout_alfa_widget_description'] = 'Защищённая форма оплаты открывается прямо из CampusFR.';
+$string['commerce_checkout_alfa_widget_prepare_error'] = 'Не удалось подготовить форму оплаты. Попробуйте ещё раз.';
+$string['commerce_checkout_alfa_widget_ready'] = 'Оплата готова';
+$string['commerce_checkout_alfa_widget_open'] = 'Продолжить оплату';
+$string['commerce_checkout_alfa_widget_card_cta'] = 'Оплатить картой';
+$string['commerce_checkout_alfa_widget_debug_title'] = 'Диагностика оплаты';
+$string['commerce_checkout_alfa_widget_debug_copy'] = 'Копировать диагностику';
+
+$string['commerce_payment_method_alfa_pay'] = 'Alfa Pay';
+$string['commerce_payment_method_alfa_pay_desc'] = 'Быстрая оплата через Alfa Pay для поддерживаемых платежей в RUB.';
+
+$string['commerce_payment_method_sbp'] = 'СБП';
+$string['commerce_payment_method_sbp_desc'] = 'Быстрая оплата через Систему быстрых платежей (СБП).';
+$string['commerce_payment_method_sberpay'] = 'SberPay';
+$string['commerce_payment_method_sberpay_desc'] = 'Быстрая оплата через SberPay для поддерживаемых платежей в RUB.';
+
+$string['commerce_checkout_sbp_title'] = 'Оплата через СБП';
+$string['commerce_checkout_sbp_description'] = 'Отсканируйте QR-код в приложении банка или откройте банк на этом устройстве.';
+$string['commerce_checkout_sbp_open_bank'] = 'Открыть приложение банка';
+$string['commerce_checkout_sbp_verify'] = 'Я оплатил(а) — проверить платёж';
+$string['commerce_checkout_sbp_prepare_error'] = 'Не удалось подготовить оплату через СБП. Попробуйте ещё раз.';
+$string['commerce_payment_method_mir_pay'] = 'Mir Pay';
+$string['commerce_payment_method_mir_pay_desc'] = 'Быстрая оплата через Mir Pay для поддерживаемых платежей в RUB.';
+
+$string['alfa_iframe_enabled'] = 'Встроенная платежная форма Alfa (прототип)';
+$string['alfa_iframe_enabled_desc'] = 'Встраивает платежную страницу Альфа-Банка непосредственно в checkout через iframe. По умолчанию отключено; официальный виджет остается резервным вариантом.';
+$string['commerce_checkout_alfa_iframe_title'] = 'Безопасная оплата';
+$string['commerce_checkout_alfa_iframe_description'] = 'Завершите оплату непосредственно в этой защищенной платежной форме.';
+$string['commerce_checkout_alfa_iframe_fallback'] = 'Открыть безопасную оплату в новом окне';
+
+$string['commerce_checkout_alfa_iframe_preparing_title'] = 'Подготовка безопасной оплаты…';
+$string['commerce_checkout_alfa_iframe_preparing_message'] = 'Подключаем защищенную платежную страницу. Это займет всего несколько секунд.';
+$string['commerce_payment_splash_finalizing_title'] = 'Оплата подтверждена';
+$string['commerce_payment_splash_finalizing_message'] = 'Завершаем предоставление доступа…';
+
+$string['commerce_checkout_sbp_preparing_title'] = 'Подготовка СБП…';
+$string['commerce_checkout_sbp_preparing_message'] = 'Формируем безопасную оплату. Это займет всего несколько секунд.';
+
+$string['commerce_checkout_paypal_prepare_error'] = 'Не удалось подготовить оплату PayPal. Попробуйте ещё раз.';
+$string['commerce_checkout_paypal_popup_error'] = 'Не удалось открыть PayPal здесь. По возможности будет использована стандартная защищённая страница оплаты.';
+$string['commerce_checkout_paypal_cancelled'] = 'Оплата через PayPal отменена. Платёж не был выполнен. Вы можете снова попробовать PayPal или выбрать другой способ оплаты.';
+
+$string['commerce_checkout_payment_validated'] = 'Оплата подтверждена';
+$string['commerce_checkout_payment_validated_message'] = 'Платёж подтверждён. Мы завершаем оформление вашего заказа…';
+
+$string['commerce_fulfillment_watch_message'] = 'Оплата подтверждена. Мы завершаем подготовку доступа, и эта страница обновится автоматически.';
+$string['commerce_fulfillment_refresh_now'] = 'Обновить сейчас';
+
+$string['commerce_fulfillment_processing_message'] = 'Оплата подтверждена. CampusFR завершает подготовку доступа; эта страница обновится автоматически.';
+
+$string['commerce_checkout_payment_processing'] = 'Обработка платежа';
+$string['commerce_checkout_payment_processing_message'] = 'Ваш платёж проходит безопасную проверку. Пожалуйста, подождите несколько секунд…';
+
+$string['commerce_guest_checkout_invalid_name_identity'] = 'Укажите хотя бы имя или фамилию длиной не менее 2 символов.';
+
+$string['commerce_guest_identity_otp_mail_subject'] = 'Ваш код подтверждения CampusFR';
+$string['commerce_guest_identity_otp_mail_preheader'] = '6-значный код для безопасного продолжения покупки.';
+$string['commerce_guest_identity_otp_mail_greeting'] = 'Здравствуйте!';
+$string['commerce_guest_identity_otp_mail_greeting_name'] = 'Здравствуйте, {$a}!';
+$string['commerce_guest_identity_otp_mail_intro'] = 'Введите этот код в CampusFR, чтобы подтвердить адрес электронной почты и продолжить покупку.';
+$string['commerce_guest_identity_otp_mail_expiry'] = 'Код действителен в течение {$a} минут.';
+$string['commerce_guest_identity_otp_mail_ignore'] = 'Если вы не запрашивали этот код, просто проигнорируйте это письмо.';
+
+$string['commerce_guest_identity_otp_title'] = 'Подтвердите адрес электронной почты';
+$string['commerce_guest_identity_otp_message'] = 'Введите 6-значный код, который мы только что отправили вам.';
+$string['commerce_guest_identity_otp_sending'] = 'Отправляем код…';
+$string['commerce_guest_identity_otp_sent'] = 'Код отправлен. Проверьте почту.';
+$string['commerce_guest_identity_otp_checking'] = 'Проверяем код…';
+$string['commerce_guest_identity_otp_invalid'] = 'Неверный код. Попробуйте ещё раз.';
+$string['commerce_guest_identity_otp_expired'] = 'Срок действия кода истёк. Запросите новый.';
+$string['commerce_guest_identity_otp_limited'] = 'Слишком много попыток. Подождите перед повторной попыткой.';
+$string['commerce_guest_identity_otp_error'] = 'Сейчас не удалось подтвердить адрес. Попробуйте ещё раз.';
+$string['commerce_guest_identity_otp_resend'] = 'Отправить код ещё раз';
+$string['commerce_guest_identity_otp_verified'] = 'Адрес электронной почты подтверждён';
+
+$string['commerce_mail_type_guest_identity_otp'] = 'Код подтверждения email';
+
+$string['commerce_guest_identity_confirm'] = 'Подтвердить данные';
+
+$string['commerce_guest_payment_gate_hint'] = 'Подтвердите адрес электронной почты, чтобы выбрать способ оплаты.';
+$string['commerce_guest_payment_gate_required'] = 'Подтвердите адрес электронной почты перед оплатой.';
+
+$string['commerce_checkout_existing_account_verified_email'] = 'Адрес подтверждён';
+
+$string['commerce_guest_cart_owned_items_removed'] = 'После входа корзина обновлена: уже приобретённые товары удалены ({$a}).';
+$string['commerce_guest_cart_all_already_owned'] = 'У вас уже есть товары из этой корзины. Оплата не требуется.';
+
+$string['commerce_checkout_existing_account_login_invalid'] = 'Неверный пароль. Попробуйте ещё раз.';
+$string['commerce_checkout_existing_account_login_working'] = 'Вход…';
+$string['commerce_checkout_existing_account_login_error'] = 'Не удалось войти. Попробуйте ещё раз.';
+
+$string['commerce_personal_offer_guest_details_gate_hint'] = 'Заполните ваши данные, чтобы выбрать способ оплаты.';
+
+$string['commerce_checkout_back_storefront'] = 'Вернуться в магазин';
+
+$string['commerce_checkout_back_product'] = 'Вернуться к товару';
+
+$string['commerce_checkout_back_showroom'] = 'Вернуться в шоурум';
+$string['commerce_configuration_group_legal_entity_fr'] = 'Юридическое лицо — Франция';
+$string['commerce_configuration_group_legal_entity_ru'] = 'Юридическое лицо — Россия';
+$string['commerce_legal_entity_registration'] = 'Регистрационные данные';
+$string['commerce_legal_entity_registration_desc'] = 'Регистрационный номер или сведения о регистрации юридического лица. Поле можно оставить пустым до получения окончательных юридических данных.';
+$string['commerce_legal_entity_tax_identifier'] = 'Налоговый идентификатор';
+$string['commerce_legal_entity_tax_identifier_desc'] = 'ИНН, номер НДС или иной применимый налоговый идентификатор. Поле можно оставить пустым до юридической/налоговой проверки.';
+$string['commerce_configuration_fact_legal_entity_fr'] = 'Юрлицо Франции';
+$string['commerce_configuration_fact_legal_entity_ru'] = 'Юрлицо России';
+
+$string['commerce_legal_documents_version'] = 'Версия юридических документов';
+$string['commerce_legal_documents_version_desc'] = 'Стабильный идентификатор версии комплекта юридических документов. Меняйте его при изменении текста документов, даже если URL остаются прежними.';
+
+$string['commerce_invoice_order_reference'] = 'Номер заказа';
+
+$string['commerce_payment_method_unknown'] = 'Не указано';
+
+$string['commerce_sales_payment_route'] = 'Оплата';
+
+$string['commerce_documents_title'] = 'Документы';
+$string['commerce_documents_description'] = 'Здесь находятся счёт и все корректировочные документы по этому заказу.';
+$string['commerce_document_type'] = 'Тип';
+$string['commerce_document_number'] = 'Номер';
+$string['commerce_document_invoice'] = 'Счёт';
+$string['commerce_document_credit_note'] = 'Корректировочный документ';
+$string['commerce_document_invoice_not_issued'] = 'Номер будет присвоен при первом скачивании';
+$string['commerce_document_download_credit_note'] = 'Скачать корректировочный документ';
+$string['commerce_credit_note'] = 'Корректировочный документ';
+$string['commerce_credit_note_pdf_title'] = 'Корректировочный документ {$a}';
+$string['commerce_credit_note_number'] = 'Номер документа';
+$string['commerce_credit_note_original_invoice'] = 'Исходный счёт';
+$string['commerce_credit_note_issue_date'] = 'Дата выдачи';
+$string['commerce_credit_note_refund_amount'] = 'Сумма возврата';
+$string['commerce_credit_note_refund_information'] = 'Информация о возврате';
+$string['commerce_credit_note_reason'] = 'Причина';
+$string['commerce_credit_note_provider_refund_id'] = 'Идентификатор возврата';
+$string['commerce_credit_note_not_found'] = 'Корректировочный документ не найден.';
+
+$string['commerce_refund_reason_requested_by_customer'] = 'По запросу клиента';
+$string['commerce_credit_note_original_purchase'] = 'Исходная покупка';
+$string['commerce_credit_note_original_purchase_total'] = 'Сумма исходной покупки';
+$string['commerce_credit_note_original_purchase_fallback'] = 'Исходный заказ';
+
+$string['commerce_configuration_fact_legal_documents'] = 'Версии юридических документов';
+$string['commerce_configuration_legal_v1_scope_title'] = 'Юридическая маршрутизация V1';
+$string['commerce_configuration_legal_v1_scope_desc'] = 'Продажи в RU и BY оформляются российским юрлицом. Все остальные рынки, включая fallback ZZ, обслуживаются французским юрлицом. Валюта и платёжный провайдер не определяют продавца.';
+$string['commerce_configuration_legal_v1_snapshot_desc'] = 'Продавец и юридическое согласие фиксируются в заказе. Счета и кредит-ноты используют эти исторические данные. Детальная налоговая модель намеренно отложена в V1.';
+$string['commerce_purchase_seller_snapshot_title'] = 'Исторический продавец';
+$string['commerce_purchase_legal_entity'] = 'Юридическое лицо';
+$string['commerce_purchase_market_country'] = 'Страна рынка';
+$string['commerce_purchase_registered_country'] = 'Страна регистрации';
+$string['commerce_purchase_merchant_resolution_rule'] = 'Правило маршрутизации';
+$string['commerce_purchase_seller_snapshot_date'] = 'Продавец определён';
+$string['commerce_purchase_seller_snapshot_help'] = 'Это snapshot, сохранённый при создании заказа. Он не пересчитывается из текущей конфигурации.';
+
+$string['commerce_purchase_seller_snapshot_source'] = 'Источник';
+$string['commerce_purchase_seller_snapshot_source_invoice'] = 'Выставленный счёт';
+$string['commerce_purchase_seller_snapshot_invoice_help'] = 'В этом заказе нет сохранённого snapshot продавца. Поэтому продавец показан из уже выставленного счёта, который является здесь неизменяемым историческим источником.';
+$string['commerce_purchase_seller_snapshot_status'] = 'Статус';
+$string['commerce_purchase_seller_snapshot_unavailable'] = 'Snapshot продавца недоступен';
+$string['commerce_purchase_seller_snapshot_unavailable_help'] = 'В этом заказе нет сохранённого snapshot продавца, и неизменяемый счёт ещё не выставлен. Нельзя надёжно определять продавца по валюте или платёжному провайдеру.';
+
+$string['commerce_configuration_legal_legacy_title'] = 'Совместимость со старыми счетами';
+$string['commerce_configuration_legal_legacy_desc'] = 'Старые профили счетов EUR/RUB сохраняются только как fallback для чтения исторических заказов. Изменения на этой странице относятся только к активным юридическим лицам и не перезаписывают старые значения.';
+
+
+// 7.97B — pedagogical course access modes.
+$string['crm_commerce_nav_education'] = 'Обучение';
+$string['commerce_education_courses_title'] = 'Режимы доступа к курсам';
+$string['commerce_education_courses_description'] = 'Выберите для каждого курса Moodle обычный пожизненный доступ сразу или доступ по учебному потоку.';
+$string['commerce_education_access_mode'] = 'Режим доступа';
+$string['commerce_education_access_mode_classic'] = 'Классический — полный доступ сразу и навсегда';
+$string['commerce_education_access_mode_promotion'] = 'Поток — постепенное открытие';
+$string['commerce_education_course_mode_saved'] = 'Режим доступа к курсу сохранён.';
+$string['commerce_education_no_courses'] = 'Нет доступных курсов Moodle.';
+
+
+// 7.97C — pedagogical promotions.
+$string['commerce_education_promotions_title'] = 'Учебные потоки';
+$string['commerce_education_promotions_description'] = 'Создавайте учебные потоки, привязанные к курсу Moodle. Коммерческие скидки по-прежнему управляются отдельно в разделе Promotions.';
+$string['commerce_education_promotions_empty'] = 'Учебных потоков пока нет.';
+$string['commerce_education_promotion'] = 'Учебный поток';
+$string['commerce_education_promotion_create'] = 'Создать поток';
+$string['commerce_education_promotion_edit'] = 'Изменить поток';
+$string['commerce_education_promotion_saved'] = 'Учебный поток сохранён.';
+$string['commerce_education_promotion_form_description'] = 'Настройте курс, статус, окно продаж и общую вместимость.';
+$string['commerce_education_promotion_key'] = 'Технический ключ';
+$string['commerce_education_promotion_name'] = 'Название';
+$string['commerce_education_promotion_published'] = 'Опубликован / доступен к продаже, когда позволяют статус и окно продаж';
+$string['commerce_education_sales_window'] = 'Окно продаж';
+$string['commerce_education_sales_opens_at'] = 'Открытие продаж';
+$string['commerce_education_sales_closes_at'] = 'Закрытие продаж';
+$string['commerce_education_starts_at'] = 'Старт обучения';
+$string['commerce_education_ends_at'] = 'Окончание обучения';
+$string['commerce_education_capacity'] = 'Общая вместимость';
+$string['commerce_education_capacity_help'] = 'Оставьте пустым для неограниченной вместимости.';
+$string['commerce_education_capacity_unlimited'] = 'Без ограничений';
+$string['commerce_education_promotion_status_draft'] = 'Черновик';
+$string['commerce_education_promotion_status_scheduled'] = 'Запланирован';
+$string['commerce_education_promotion_status_open'] = 'Открыт';
+$string['commerce_education_promotion_status_full'] = 'Заполнен';
+$string['commerce_education_promotion_status_started'] = 'Начат';
+$string['commerce_education_promotion_status_finished'] = 'Завершён';
+$string['commerce_education_promotion_status_archived'] = 'Архив';
+
+
+// 7.97D — pedagogical release calendar.
+$string['commerce_education_calendar'] = 'Расписание';
+$string['commerce_education_calendar_title'] = 'Расписание — {$a}';
+$string['commerce_education_calendar_description'] = 'Задайте отдельную дату открытия для каждого учебного элемента. Движок не предполагает фиксированный недельный ритм.';
+$string['commerce_education_calendar_add_item'] = 'Добавить этап открытия';
+$string['commerce_education_calendar_item'] = 'Раздел курса';
+$string['commerce_education_calendar_position'] = 'Порядок';
+$string['commerce_education_calendar_unlocks_at'] = 'Дата открытия';
+$string['commerce_education_calendar_current'] = 'Настроенные открытия';
+$string['commerce_education_calendar_empty'] = 'Этапы открытия пока не настроены.';
+$string['commerce_education_calendar_item_saved'] = 'Этап расписания сохранён.';
+$string['commerce_education_calendar_section_fallback'] = 'Раздел {$a}';
+
+
+// 7.97F — optional pedagogical groups.
+$string['commerce_education_groups'] = 'Группы';
+$string['commerce_education_groups_title'] = 'Группы — {$a}';
+$string['commerce_education_groups_description'] = 'Необязательные группы конкретного набора. Видимые названия CampusFR можно использовать повторно, а технические группы Moodle остаются отдельными для каждого набора.';
+$string['commerce_education_groups_settings'] = 'Настройки групп';
+$string['commerce_education_groups_enabled'] = 'Включить автоматическое распределение по группам';
+$string['commerce_education_group_size'] = 'Максимальное число учеников в группе';
+$string['commerce_education_group_create'] = 'Создать группу';
+$string['commerce_education_group_visible_name'] = 'Видимое название группы';
+$string['commerce_education_group_tutor_userid'] = 'ID пользователя преподавателя';
+$string['commerce_education_group_support_language'] = 'Язык сопровождения';
+$string['commerce_education_group_telegram'] = 'Telegram';
+$string['commerce_education_group_levelup_xp'] = 'XP LevelUp';
+$string['commerce_education_groups_current'] = 'Группы набора';
+$string['commerce_education_groups_empty'] = 'Педагогические группы пока не созданы.';
+$string['commerce_education_group_members'] = 'Ученики';
+
+
+// 7.97G — Commerce to pedagogical promotion bridge.
+$string['commerce_education_offers'] = 'Предложения';
+$string['commerce_education_offers_title'] = 'Предложения — {$a}';
+$string['commerce_education_offers_description'] = 'Свяжите продукты/формулы Native Commerce, покупка которых добавляет ученика в этот учебный набор. Валюта и платёжный провайдер не определяют учебную логику.';
+$string['commerce_education_offer_link'] = 'Связать предложение Commerce';
+$string['commerce_education_offer_product'] = 'Продукт / формула Commerce';
+$string['commerce_education_offer_capacity'] = 'Лимит предложения (необязательно)';
+$string['commerce_education_offer_owner_pricing'] = 'Цена для владельца курса';
+$string['commerce_education_offer_owner_pricing_help'] = 'Цена для ученика, который уже владеет курсом и присоединяется к этому набору. Оставьте поле пустым, чтобы отключить покупку сопровождения в этой валюте.';
+$string['commerce_education_offer_owner_price_catalogue'] = 'Цена курса: {$a}';
+$string['commerce_education_offer_owner_price_no_currency'] = 'Для этого продукта не настроена ни одна активная валюта.';
+$string['commerce_education_offer_owner_price_invalid'] = 'Цена для владельца курса в {$a} должна быть строго больше нуля.';
+$string['commerce_education_offers_current'] = 'Связанные предложения';
+$string['commerce_education_offers_empty'] = 'С этим набором пока не связано ни одного предложения Commerce.';
+
+
+// 7.97H — participants and explicit admin operations.
+$string['commerce_education_participants'] = 'Участники';
+$string['commerce_education_participants_title'] = 'Участники — {$a}';
+$string['commerce_education_participants_description'] = 'Просмотр учеников этого набора и явные административные изменения доступа или группы. Этот экран не создаёт права Commerce и не записывает пользователя на курс Moodle.';
+$string['commerce_education_participants_empty'] = 'К этому набору пока не привязан ни один участник.';
+$string['commerce_education_participant_profile'] = 'Профиль доступа';
+$string['commerce_education_participant_since'] = 'Добавлен';
+$string['commerce_education_participant_group_full'] = 'Эта группа уже заполнена. Выберите другую группу.';
+$string['commerce_education_profile_promotion_progressive'] = 'Постепенный доступ';
+$string['commerce_education_profile_lifetime_full'] = 'Полный пожизненный доступ';
+$string['commerce_education_group_tutor_name'] = 'Имя тьютора';
+$string['commerce_education_group_tutor_name_help'] = 'Необязательно. Тьютор может не быть пользователем Moodle.';
+$string['commerce_education_group_support_language_none'] = 'Нет';
+$string['commerce_education_group_support_language_fr'] = 'Французский';
+$string['commerce_education_group_support_language_ru'] = 'Русский';
+$string['commerce_education_group_support_language_en'] = 'Английский';
+$string['commerce_education_group_telegram_link'] = 'Ссылка на группу Telegram';
+$string['commerce_education_group_telegram_open'] = 'Открыть Telegram';
+$string['commerce_education_calendar_updated'] = 'Дата разблокировки обновлена.';
+$string['commerce_education_group_offer'] = 'Оффер / тариф';
+$string['commerce_education_group_offer_help'] = 'Ученик назначается только в группы, связанные с купленным тарифом.';
+$string['commerce_cart_message_pedagogical_sales_closed'] = 'Регистрация на этот поток пока закрыта.';
+$string['commerce_cart_message_pedagogical_promotion_full'] = 'На этот поток мест больше нет.';
+$string['commerce_cart_message_pedagogical_offer_full'] = 'В этом тарифе мест больше нет.';
+$string['commerce_cart_message_pedagogical_group_full'] = 'В группах, соответствующих этому тарифу, больше нет мест.';
+$string['commerce_cart_message_pedagogical_customer_hold_exists'] = 'У тебя уже есть активная бронь на эту группу в другой корзине.';
+$string['commerce_capacity_places_left'] = 'Осталось мест: {$a}';
+$string['commerce_capacity_one_left'] = 'Осталось только одно место!';
+$string['commerce_capacity_sold_out'] = 'Мест больше нет';
+$string['commerce_capacity_sales_closed'] = 'Регистрация сейчас закрыта';
+$string['commerce_capacity_sales_closed_cta'] = 'Регистрация закрыта';
+$string['commerce_capacity_sales_close_at'] = 'Регистрация до: {$a}';
+$string['commerce_capacity_available'] = 'Есть свободные места';
+$string['commerce_capacity_sold_out_cta'] = 'Мест нет';
+$string['commerce_cart_seat_reserved'] = 'Твоё место зарезервировано';
+$string['commerce_cart_seat_reserved_until'] = 'Резерв действует до {$a}';
+$string['commerce_cart_seat_expired'] = 'Срок резерва места истёк';
+$string['commerce_cart_seat_expired_help'] = 'Зарезервируй место снова, чтобы продолжить.';
+$string['commerce_cart_seats_reserved_summary'] = 'Твои места временно зарезервированы';
+$string['commerce_cart_seats_expired_summary'] = 'Срок одного или нескольких резервов истёк';
+$string['commerce_cart_seat_countdown'] = 'Осталось времени:';
+$string['commerce_cart_seat_renew'] = 'Зарезервировать снова';
+$string['commerce_cart_checkout_seat_expired'] = 'Место больше не зарезервировано. Зарезервируй его снова перед оплатой.';
+$string['commerce_cart_message_pedagogical_seats_reserved'] = 'Места снова зарезервированы.';
+$string['task_finalise_progressive_pedagogical_access'] = 'Завершение прогрессивного педагогического доступа';
+
+$string['commerce_checkout_seat_reserved'] = 'Твоё место зарезервировано, пока ты завершаешь оплату.';
+$string['commerce_checkout_seat_reserved_help'] = 'Пока идёт отсчёт, можно попробовать другую карту или способ оплаты.';
+$string['commerce_checkout_seat_expired'] = 'Срок бронирования истёк.';
+$string['commerce_checkout_seat_expired_help'] = 'Вернись в корзину и забронируй место заново перед оплатой.';
+
+$string['commerce_promotion_join_action'] = 'Присоединиться к потоку';
+$string['commerce_promotion_join_action_price'] = 'Присоединиться к потоку — {$a}';
+$string['commerce_promotion_join_add_to_cart'] = 'Добавить сопровождение в корзину';
+$string['commerce_promotion_join_buy_now'] = 'Присоединиться сейчас';
+$string['commerce_promotion_join_badge'] = 'Сопровождение в потоке';
+$string['commerce_storefront_price_promotion_join'] = 'Тариф для владельца курса';
+$string['commerce_cart_message_promotion_join_not_eligible'] = 'Этот поток больше недоступен для данного аккаунта.';
+$string['commerce_cart_message_promotion_join_price_unavailable'] = 'Цена для владельца курса больше недоступна в этой валюте.';
+$string['commerce_cart_message_promotion_join_context_changed'] = 'Доступный поток изменился. Обновите страницу перед продолжением.';
+
+$string['commerce_promotion_join_payment_pending_fulfillment'] = 'Путь подключения к сопровождению готов до этапа оформления заказа. На этом этапе DEV оплата намеренно отключена до включения отдельного fulfillment.';
+
+// M4.6.2 — финансовый возврат и отдельный отзыв прав.
+$string['commerce_refund_revoke_rights'] = 'Также отозвать права и преимущества, связанные с этой покупкой';
+$string['commerce_refund_revoke_rights_help'] = 'Это отдельное действие от возврата денег и по умолчанию выключено. Отзываются только права, полученные из этой покупки; права из других источников сохраняются.';
+$string['commerce_rights_revoke_action'] = 'Отозвать права';
+$string['commerce_rights_revoke_page_title'] = 'Отозвать права по покупке';
+$string['commerce_rights_revoke_page_help'] = 'Явно отзовите права, полученные из этой покупки, без финансового возврата.';
+$string['commerce_rights_revoke_summary_title'] = 'Какие права будут затронуты';
+$string['commerce_rights_revoke_warning'] = 'Отзываются только grants этой покупки. Права, которые по-прежнему подтверждаются другой покупкой, другим grant или существовавшей ранее записью Moodle, сохраняются.';
+$string['commerce_rights_revoke_reason'] = 'Причина отзыва';
+$string['commerce_rights_revoke_confirmation'] = 'Я подтверждаю отзыв перечисленных выше прав и преимуществ.';
+$string['commerce_rights_confirmation_required'] = 'Необходимо явно подтвердить отзыв прав.';
+$string['commerce_rights_revoke_submit'] = 'Отозвать права';
+$string['commerce_rights_revoke_form_title'] = 'Подтверждение отзыва';
+$string['commerce_rights_revoke_success'] = 'Отозвано прав: {$a}.';
+$string['commerce_rights_revoked_notice'] = 'Права, связанные с этой покупкой, были явно отозваны администратором.';
+$string['commerce_rights_nothing_to_revoke'] = 'В этой покупке больше нет активных прав для отзыва.';
+$string['commerce_refund_success_rights_failed'] = 'Возврат {$a} успешно отправлен, но отзыв прав завершился ошибкой. Возврат остаётся действительным; повторите только действие «Отозвать права».';
+$string['commerce_rights_revoke_failed_notice'] = 'Финансовый возврат выполнен, но отзыв прав не завершился. Эти операции независимы, поэтому можно повторить только отзыв прав.';
+
+// 7.97 M6.1 — единое описание доступа клиента на Commerce-страницах.
+$string['commerce_m61_access_title'] = 'Ваш доступ';
+$string['commerce_m61_access_lead_immediate_course'] = 'Пространство курса и весь его контент доступны после оплаты.';
+$string['commerce_m61_access_lead_owned_course'] = 'Этот курс уже ваш, полный доступ сохраняется.';
+$string['commerce_m61_access_lead_promotion_course'] = 'Пространство курса доступно после оплаты. Ваше участие привязано к этой группе обучения.';
+$string['commerce_m61_access_lead_promotion_progressive'] = 'Пространство курса доступно после оплаты. Уроки открываются постепенно по календарю потока.';
+$string['commerce_m61_access_lead_owner_promotion_join'] = 'Полный доступ к курсу сохраняется. Эта покупка добавляет новую группу обучения и сопровождение, не изменяя ваш прогресс.';
+$string['commerce_m61_access_lead_owner_promotion_join_acquired'] = 'Вы уже присоединились к этой учебной группе, и сопровождение активно. Полный доступ к курсу, прогресс и личные XP сохраняются.';
+$string['commerce_m61_access_lead_immediate_digital'] = 'Этот цифровой материал появляется в вашем пространстве сразу после оплаты.';
+$string['commerce_m61_access_lead_owned_digital'] = 'Этот цифровой материал уже ваш.';
+$string['commerce_m61_access_lead_bundle'] = 'В набор входит несколько материалов. После оплаты для каждого из них сохраняются собственные правила доступа.';
+$string['commerce_m61_access_lead_immediate_generic'] = 'Покупка становится доступна после подтверждения оплаты.';
+$string['commerce_m61_access_lead_owned_generic'] = 'Этот продукт уже ваш.';
+$string['commerce_m61_access_promotion'] = 'Поток: {$a}';
+$string['commerce_m61_access_starts'] = 'Начало потока: {$a}';
+$string['commerce_m61_access_first_unlock'] = 'Первое открытие контента: {$a}';
+
+// 7.97 M6.2 — shared customer access contract.
+$string['commerce_m62_access_details_title'] = 'Что это означает';
+$string['commerce_m62_access_owner_course'] = 'Курс: уже приобретён; полный доступ сохраняется.';
+$string['commerce_m62_access_owner_offer'] = 'Новая покупка: добавляются новая учебная группа и сопровождение без повторной покупки курса.';
+$string['commerce_m62_access_owner_progress'] = 'Прогресс и личные XP: сохраняются.';
+$string['commerce_m62_access_course_included'] = 'Курс: входит в эту покупку.';
+$string['commerce_m62_access_progressive'] = 'Контент: уроки открываются постепенно по календарю учебной группы.';
+$string['commerce_m62_access_promotion_included'] = 'Учебная группа: участие и сопровождение привязаны к этой группе.';
+$string['commerce_m62_access_course_complete'] = 'Курс: весь контент становится доступен после подтверждения оплаты.';
+$string['commerce_m62_access_digital'] = 'Цифровой материал: доступен после подтверждения оплаты.';
+$string['commerce_m62_access_digital_owned'] = 'Цифровой материал: уже приобретён и остаётся доступным.';
+$string['commerce_m62_access_bundle'] = 'Пакет: каждый включённый материал сохраняет собственные условия доступа.';
+$string['commerce_m62_access_upgrade'] = 'Смена предложения: покупка меняет коммерческое предложение, не удаляя существующий прогресс.';
+$string['commerce_m62_access_generic'] = 'Доступ: активируется согласно условиям, указанным для этого продукта.';
+$string['commerce_m62_owner_price_label'] = 'Цена для владельца курса';
+$string['commerce_m62_owner_price_badge'] = 'Курс уже приобретён';
+$string['commerce_m62_owner_price_help'] = 'Эта цена относится только к новой учебной группе и сопровождению. Уже приобретённый курс повторно не оплачивается.';
+$string['commerce_m62_checkout_access_truth'] = 'Условия доступа подробно указаны в составе заказа выше.';
+$string['commerce_m61_access_lead_upgrade'] = 'Существующий прогресс сохраняется, а покупка переводит вас на новое предложение.';
+
+// 7.97 M6.3 — информация об обучении после покупки в «Моём Campus».
+$string['commerce_customer_hub_course_promotion'] = 'Поток: {$a}';
+$string['commerce_customer_hub_course_access_full'] = 'Полный доступ к курсу';
+$string['commerce_customer_hub_course_access_progressive'] = 'Постепенный доступ по расписанию';
+$string['commerce_customer_hub_course_starts'] = 'Начало потока: {$a}';
+$string['commerce_customer_hub_course_next_lesson'] = 'Следующий урок: {$a->lesson} · {$a->date}';
+$string['commerce_customer_hub_course_next_promo_step'] = 'Следующий этап потока: {$a->lesson} · {$a->date}';
+$string['commerce_customer_hub_course_section_fallback'] = 'Раздел {$a}';
+
+// Commerce 7.97 M7.1 — pedagogical admin cockpit.
+$string['commerce_education_admin_overview'] = 'Обзор';
+$string['commerce_education_admin_navigation'] = 'Навигация по учебному потоку';
+$string['commerce_education_admin_published'] = 'Опубликовано';
+$string['commerce_education_admin_unpublished'] = 'Не опубликовано';
+$string['commerce_education_admin_sales_open'] = 'Продажи открыты';
+$string['commerce_education_admin_sales_closed'] = 'Продажи закрыты';
+$string['commerce_education_admin_manage'] = 'Управлять';
+$string['commerce_education_admin_metric_promotions'] = 'Потоки';
+$string['commerce_education_admin_metric_sales_open'] = 'Продажи открыты';
+$string['commerce_education_admin_metric_started'] = 'Начались';
+$string['commerce_education_admin_metric_participants'] = 'Активные участники';
+$string['commerce_education_admin_participant_count'] = 'Активных участников: {$a}';
+
+// Commerce 7.97 M7.2 — редактор учебного потока.
+$string['commerce_education_m72_identity_title'] = 'Основные данные потока';
+$string['commerce_education_m72_identity_description'] = 'Укажите отображаемое название, технический ключ и связанный курс.';
+$string['commerce_education_m72_name_help'] = 'Понятное команде название, которое используется в административных разделах.';
+$string['commerce_education_m72_key_help'] = 'Стабильный технический идентификатор: только строчные буквы, цифры, дефисы и подчёркивания.';
+$string['commerce_education_m72_course_help'] = 'Можно выбрать только курсы, настроенные в режиме учебных потоков.';
+$string['commerce_education_m72_cycle_title'] = 'Учебный цикл';
+$string['commerce_education_m72_cycle_description'] = 'Управляйте состоянием потока и его учебными датами.';
+$string['commerce_education_m72_status_help'] = 'Статус описывает жизненный цикл. Продажи дополнительно зависят от публикации и отдельного окна продаж.';
+$string['commerce_education_m72_datetime_optional_help'] = 'Необязательно. Оставьте пустым, если эта дата не используется.';
+$string['commerce_education_m72_sales_title'] = 'Продажи';
+$string['commerce_education_m72_sales_description'] = 'Укажите возможность публикации и период, когда разрешены новые регистрации.';
+$string['commerce_education_m72_published_help'] = 'Публикация разрешает продажу, но сама по себе не открывает регистрацию: также проверяются статус и окно продаж.';
+$string['commerce_education_m72_sales_effective_open'] = 'Сейчас регистрации фактически открыты.';
+$string['commerce_education_m72_sales_effective_closed'] = 'Сейчас регистрации фактически закрыты.';
+$string['commerce_education_m72_sales_open_help'] = 'Необязательно. До этой даты поток нельзя приобрести.';
+$string['commerce_education_m72_sales_close_help'] = 'Необязательно. После этой даты новые коммерческие регистрации не принимаются.';
+$string['commerce_education_m72_sales_rule_help'] = 'Фактическая доступность = поток опубликован + подходящий статус + текущая дата входит в окно продаж.';
+$string['commerce_education_m72_capacity_title'] = 'Вместимость';
+$string['commerce_education_m72_capacity_description'] = 'Задайте общий лимит участников этого потока.';
+$string['commerce_education_m72_save_hint'] = 'Предложения, календарь, группы и участники настраиваются затем через вкладки потока.';
+
+// Commerce 7.97 M7.3 — управление предложениями и календарём.
+$string['commerce_education_m73_offers_description'] = 'Управляйте коммерческими предложениями этой группы, их вместимостью и ценой для учеников, которые уже владеют курсом.';
+$string['commerce_education_m73_offers_metric_linked'] = 'Подключённые предложения';
+$string['commerce_education_m73_offers_metric_participants'] = 'Активные участники';
+$string['commerce_education_m73_offers_metric_owner_prices'] = 'Настроенные цены владельца';
+$string['commerce_education_m73_offers_add_title'] = 'Добавить предложение Commerce';
+$string['commerce_education_m73_offers_add_help'] = 'Свяжите активный продукт с этой группой. Уже связанные продукты больше не показываются в списке.';
+$string['commerce_education_m73_offers_all_linked'] = 'Все доступные активные продукты Commerce уже связаны с этой группой.';
+$string['commerce_education_m73_unlimited'] = 'Без ограничения';
+$string['commerce_education_m73_offer_capacity_help'] = 'Оставьте пустым, чтобы не задавать отдельный лимит для предложения. Общая вместимость группы по-прежнему имеет приоритет.';
+$string['commerce_education_m73_offers_link_button'] = 'Связать предложение';
+$string['commerce_education_m73_offers_note'] = 'Каталожные цены по-прежнему настраиваются в Commerce. Здесь задаются только педагогическая вместимость и, при необходимости, цена входа в группу для ученика, который уже владеет курсом.';
+$string['commerce_education_m73_offers_current_help'] = 'Каждая карточка показывает фактическую заполненность, каталожную цену и дополнительную цену для владельца курса.';
+$string['commerce_education_m73_offer_participants'] = 'Участники';
+$string['commerce_education_m73_offer_remaining'] = 'Осталось мест';
+$string['commerce_education_m73_offer_capacity_title'] = 'Вместимость предложения';
+$string['commerce_education_m73_offer_capacity_description'] = 'Лимит для этой формулы. Оставьте поле пустым для отсутствия отдельного лимита.';
+$string['commerce_education_m73_offer_pricing_title'] = 'Цены';
+$string['commerce_education_m73_offer_pricing_description'] = 'Каталожная цена показана для справки. Цена владельца необязательна и применяется только к ученикам, которые уже владеют курсом.';
+$string['commerce_education_m73_offer_unlink'] = 'Отвязать предложение';
+$string['commerce_education_m73_offer_unlink_help'] = 'При отвязке также удаляются цены владельца, настроенные для этого предложения.';
+$string['commerce_education_m73_calendar_description'] = 'Просматривайте реальный ритм открытия материалов, ближайшее открытие и меняйте каждый этап прямо на временной шкале.';
+$string['commerce_education_m73_calendar_metric_scheduled'] = 'Запланировано разделов';
+$string['commerce_education_m73_calendar_metric_open'] = 'Уже открыто';
+$string['commerce_education_m73_calendar_metric_future'] = 'Впереди';
+$string['commerce_education_m73_calendar_metric_next'] = 'Следующее открытие';
+$string['commerce_education_m73_calendar_no_next'] = 'Календарь полностью открыт';
+$string['commerce_education_m73_calendar_add_help'] = 'Добавьте ещё не запланированный раздел и выберите точную дату его открытия.';
+$string['commerce_education_m73_calendar_all_scheduled'] = 'Все разделы курса уже присутствуют в этом календаре.';
+$string['commerce_education_m73_calendar_add_button'] = 'Добавить в календарь';
+$string['commerce_education_m73_calendar_coverage'] = 'Покрытие курса';
+$string['commerce_education_m73_calendar_coverage_value'] = '{$a->scheduled} / {$a->total} разделов';
+$string['commerce_education_m73_calendar_unscheduled'] = 'Ещё не запланировано разделов курса: {$a}.';
+$string['commerce_education_m73_calendar_complete'] = 'Все разделы курса запланированы.';
+$string['commerce_education_m73_calendar_current_help'] = 'Шкала показывает уже доступные материалы, будущие открытия и ближайший ожидаемый этап.';
+$string['commerce_education_m73_calendar_open'] = 'Открыто';
+$string['commerce_education_m73_calendar_future'] = 'Впереди';
+$string['commerce_education_m73_calendar_next'] = 'Следующее открытие';
+$string['commerce_education_m73_calendar_change_date'] = 'Изменить дату открытия';
+
+// Commerce 7.97 M7.4 — группы и участники.
+$string['commerce_education_m74_groups_description'] = 'Управляйте распределением, вместимостью и сопровождением групп этой промоакции. XP группы рассчитываются автоматически по вкладу участников.';
+$string['commerce_education_m74_participants_description'] = 'Управляйте участниками промоакции: профилем доступа, купленным предложением, текущей группой и вкладом XP.';
+$string['commerce_education_m74_metric_assignment'] = 'Автораспределение';
+$string['commerce_education_m74_metric_groups'] = 'Активные группы';
+$string['commerce_education_m74_metric_seats'] = 'Занятые места';
+$string['commerce_education_m74_metric_unassigned'] = 'Без группы';
+$string['commerce_education_m74_metric_participants'] = 'Участники';
+$string['commerce_education_m74_metric_progressive'] = 'Постепенный доступ';
+$string['commerce_education_m74_metric_full_access'] = 'Полный доступ';
+$string['commerce_education_m74_enabled'] = 'Включено';
+$string['commerce_education_m74_disabled'] = 'Выключено';
+$string['commerce_education_m74_groups_disabled_warning'] = 'Группы созданы, но автораспределение выключено. Новые участники не будут автоматически добавляться в группу.';
+$string['commerce_education_m74_unassigned_warning'] = 'Активных участников без группы: {$a}.';
+$string['commerce_education_m74_backfill_button'] = 'Распределить участников без группы';
+$string['commerce_education_m74_backfill_requires_enabled'] = 'Сначала включите автоматическое распределение по группам.';
+$string['commerce_education_m74_backfill_result'] = 'Распределение завершено: назначено {$a->assigned}, осталось без группы {$a->pending}.';
+$string['commerce_education_m74_settings_help'] = 'Задайте размер группы и включите или выключите автоматическое распределение новых покупок.';
+$string['commerce_education_m74_group_size_help'] = 'Эта вместимость применяется к каждой активной группе промоакции.';
+$string['commerce_education_m74_create_help'] = 'Создайте учебную группу, связанную с предложением. Техническое имя группы Moodle остаётся отдельным для каждой промоакции.';
+$string['commerce_education_m74_no_offers_for_groups'] = 'Сначала добавьте предложение в промоакцию.';
+$string['commerce_education_m74_create_group_button'] = 'Создать группу';
+$string['commerce_education_m74_groups_current_help'] = 'Просматривайте заполненность, сопровождение и реальный XP каждой группы. Ручное редактирование XP здесь недоступно.';
+$string['commerce_education_m74_group_active'] = 'Активна';
+$string['commerce_education_m74_group_inactive'] = 'Неактивна';
+$string['commerce_education_m74_group_score'] = 'XP промоакции';
+$string['commerce_education_m74_group_rank'] = 'Место';
+$string['commerce_education_m74_offer_unbound'] = 'Предложение не привязано';
+$string['commerce_education_m74_participants_groups_disabled'] = 'Автораспределение выключено. Участника всё равно можно вручную переместить в совместимую группу.';
+$string['commerce_education_m74_search_placeholder'] = 'Поиск по имени, e-mail, группе или предложению…';
+$string['commerce_education_m74_clear_search'] = 'Очистить';
+$string['commerce_education_m74_participant_count'] = 'Показано {$a->shown} из {$a->total} участника(ов)';
+$string['commerce_education_m74_no_search_results'] = 'Участники по этому запросу не найдены.';
+$string['commerce_education_m74_no_group'] = 'Без группы';
+$string['commerce_education_m74_participant_xp'] = 'Вклад XP промоакции';
+$string['commerce_education_m74_group_full_short'] = 'группа заполнена';
+$string['commerce_education_m74_move_button'] = 'Переместить';
+$string['commerce_education_m74_no_compatible_group'] = 'Нет группы, совместимой с купленным предложением.';
+
+// Commerce 7.97 M7.5 — scalable pedagogy admin navigation.
+$string['commerce_education_m75_navigation'] = 'Навигация по обучению';
+$string['commerce_education_m75_back_to_promotions'] = 'Вернуться к потокам';

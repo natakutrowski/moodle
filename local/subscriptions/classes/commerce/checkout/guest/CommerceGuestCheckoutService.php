@@ -96,6 +96,91 @@ final class CommerceGuestCheckoutService {
         ]);
     }
 
+    /**
+     * L8.2 — align a Guest Checkout session with an isolated Direct Purchase
+     * currency switch without materialising or transferring the normal cart.
+     *
+     * @param array{
+     *   currency:string,
+     *   sku:string,
+     *   priceid:int,
+     *   quantity:int,
+     *   metadata:array,
+     *   cartuuid:?string,
+     *   storedat?:int
+     * } $directpurchase
+     */
+    public function switch_direct_purchase_currency(
+        CommerceGuestCheckoutSession $session,
+        string $currency,
+        array $directpurchase
+    ): CommerceGuestCheckoutSession {
+        $currency = strtoupper(trim($currency));
+        $allowedstatuses = [
+            'identity_pending',
+            'existing_account',
+            'provisional',
+            'payment_failed',
+        ];
+
+        if (!preg_match('/^[A-Z]{3}$/', $currency)) {
+            throw new \coding_exception(
+                'Guest Checkout currency must use ISO 4217 format.'
+            );
+        }
+        if (
+            $session->is_expired()
+            || !in_array($session->get_status(), $allowedstatuses, true)
+        ) {
+            throw new \coding_exception(
+                'This Guest Checkout session cannot switch Direct Purchase currency.'
+            );
+        }
+
+        $directcurrency = strtoupper(trim((string)($directpurchase['currency'] ?? '')));
+        $cartuuid = strtolower(trim((string)($directpurchase['cartuuid'] ?? '')));
+        if (
+            $directcurrency !== $currency
+            || trim((string)($directpurchase['sku'] ?? '')) === ''
+            || (int)($directpurchase['priceid'] ?? 0) <= 0
+            || (int)($directpurchase['quantity'] ?? 0) <= 0
+            || !preg_match('/^[a-f0-9]{32}$/', $cartuuid)
+        ) {
+            throw new \coding_exception(
+                'Invalid Direct Purchase Guest Checkout currency payload.'
+            );
+        }
+
+        $metadata = $session->get_metadata();
+        $metadata['direct_purchase'] = $directpurchase;
+        $metadata['currency_switched_from'] = $session->get_currency();
+        $metadata['currency_switched_at'] = time();
+
+        // A purchase/payment attempt is immutable in its original currency.
+        // Explicitly switching currency abandons only the Guest-session resume
+        // pointers; the old Native purchase/payment remains in the audit ledger.
+        unset(
+            $metadata['resume_purchase_reference'],
+            $metadata['payment_started_at'],
+            $metadata['payment_failure_reason'],
+            $metadata['payment_failed_at']
+        );
+
+        $status = $session->get_status();
+        if ($status === 'payment_failed') {
+            $status = $session->get_user_id() !== null
+                ? 'provisional'
+                : 'identity_pending';
+        }
+
+        return $this->sessions->transition($session, $status, [
+            'currency' => $currency,
+            'purchasereference' => null,
+            'paymentreference' => null,
+            'metadatajson' => $metadata,
+        ]);
+    }
+
     public function identify(
         CommerceGuestCheckoutSession $session,
         string $email,

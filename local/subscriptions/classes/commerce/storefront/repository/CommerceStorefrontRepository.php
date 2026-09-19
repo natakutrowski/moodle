@@ -25,6 +25,9 @@ use local_subscriptions\commerce\storefront\readmodel\CommerceStorefrontListResu
 use local_subscriptions\commerce\storefront\readmodel\CommerceStorefrontPrice;
 use local_subscriptions\commerce\storefront\readmodel\CommerceStorefrontProduct;
 use local_subscriptions\commerce\storefront\upgrade\CommerceStorefrontUpgradeResolver;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinEligibilityService;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinPricingService;
+use local_subscriptions\commerce\storefront\cart\CommerceStorefrontPromotionJoinCartContextResolver;
 
 /** Native-first read boundary for the future public boutique. */
 final class CommerceStorefrontRepository {
@@ -144,6 +147,22 @@ final class CommerceStorefrontRepository {
         $owned = isloggedin() && !isguestuser()
             ? (new CommerceStorefrontOwnershipResolver($this->db))->owns((int)$USER->id, $summary->get_sku())
             : false;
+        $promotionjoinexcludedcartuuid = $owned
+            ? CommerceStorefrontPromotionJoinCartContextResolver::create()
+                ->excluded_cart_uuid(
+                    (int)$USER->id,
+                    $currency,
+                    $summary->get_sku()
+                )
+            : null;
+        $promotionjoin = $owned
+            ? CommercePedagogicalPromotionJoinEligibilityService::create($this->db)->resolve(
+                (int)$USER->id,
+                $summary->get_sku(),
+                time(),
+                $promotionjoinexcludedcartuuid
+            )
+            : null;
         $upgrade = null;
         if (!$owned && isloggedin() && !isguestuser() && $summary->get_id() !== null) {
             $upgradecurrency = strtoupper(trim((string)$currency));
@@ -206,6 +225,17 @@ final class CommerceStorefrontRepository {
                 strcmp($left->get_currency(), $right->get_currency())
         );
 
+        $promotionjoinpricing = [];
+        if ($promotionjoin !== null && $promotionjoin->get_context() !== null) {
+            $pricingservice = CommercePedagogicalPromotionJoinPricingService::create($this->db);
+            foreach ($prices as $price) {
+                $promotionjoinpricing[] = $pricingservice->resolve(
+                    $promotionjoin,
+                    $price->get_currency()
+                );
+            }
+        }
+
         $name = trim((string)($translation['name'] ?? $summary->get_name()));
         $shortdescription = trim((string)($translation['shortdescription'] ?? ''));
         $description = trim((string)($translation['description'] ?? $summary->get_description()));
@@ -234,7 +264,9 @@ final class CommerceStorefrontRepository {
             $owned,
             $upgrade,
             $this->cover_urls($details),
-            $summary->get_id()
+            $summary->get_id(),
+            $promotionjoin,
+            $promotionjoinpricing
         );
     }
 

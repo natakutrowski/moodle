@@ -26,7 +26,10 @@ final class AlfaPaymentReconciliationInspection {
         public readonly bool $providerpaid,
         public readonly bool $reconcilable,
         public readonly bool $alreadycomplete,
-        public readonly array $blockers
+        public readonly array $blockers,
+        public readonly bool $providerrefunded = false,
+        public readonly bool $refundamountmatches = true,
+        public readonly int $expecteddepositedamountminor = 0
     ) {
     }
 }

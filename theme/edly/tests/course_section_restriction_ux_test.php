@@ -48,4 +48,20 @@ final class course_section_restriction_ux_test extends \advanced_testcase {
         $this->assertStringContainsString('background: transparent !important', $css);
         $this->assertStringContainsString('position: absolute', $css);
     }
+
+    public function test_pedagogical_calendar_lock_reuses_liquid_glass_visual(): void {
+        global $CFG;
+
+        $css = file_get_contents($CFG->dirroot . '/theme/edly/style/style.css');
+        $endpoint = file_get_contents($CFG->dirroot . '/theme/edly/section_cover.php');
+
+        $this->assertStringContainsString('.campusfr-pedagogical-lock', $css);
+        $this->assertStringContainsString('--campusfr-lock-cover', $css);
+        $this->assertStringContainsString(
+            "in_array('campusfr', \$types, true)",
+            $endpoint
+        );
+    }
+
+
 }

@@ -19,7 +19,7 @@ final class commerce_showroom_layouts_j15f_test extends \advanced_testcase {
 
     public function test_currency_formatter_uses_flags_and_parentheses(): void {
         $formatter = file_get_contents(__DIR__ . '/../../../classes/currency/CommerceCurrencyLabelFormatter.php');
-        self::assertStringContainsString("'EUR' => '🇪🇺'", $formatter);
+        self::assertStringContainsString('Currency::visual_marker($code)', $formatter);
         self::assertStringContainsString("\$code . ' (' . \$symbol . ')'", $formatter);
     }
 }

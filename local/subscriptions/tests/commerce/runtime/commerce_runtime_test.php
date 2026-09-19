@@ -17,6 +17,7 @@ use local_subscriptions\commerce\payment\CommercePaymentRequestFactory;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderRegistry;
 use local_subscriptions\commerce\payment\provider\alfa\AlfaCommercePaymentProvider;
 use local_subscriptions\commerce\payment\provider\stripe\StripeCommercePaymentProvider;
+use local_subscriptions\commerce\payment\provider\paypal\PayPalCommercePaymentProvider;
 use local_subscriptions\commerce\payment\legacy\LegacyCommercePaymentRequestFactory;
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentOrchestrator;
 use local_subscriptions\commerce\payment\orchestration\CommercePaymentProviderContextFactory;
@@ -176,6 +177,7 @@ final class commerce_runtime_test extends advanced_testcase {
             [
                 StripeCommercePaymentProvider::KEY,
                 AlfaCommercePaymentProvider::KEY,
+                PayPalCommercePaymentProvider::KEY,
             ],
             $registry->keys()
         );

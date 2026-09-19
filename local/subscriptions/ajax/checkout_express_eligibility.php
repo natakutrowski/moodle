@@ -19,7 +19,7 @@ try {
     $sku = optional_param('sku', '', PARAM_RAW_TRIMMED);
     $priceid = optional_param('priceid', 0, PARAM_INT);
     $quantity = optional_param('quantity', 1, PARAM_INT);
-    $operation = strtolower(optional_param('operation', '', PARAM_ALPHA));
+    $operation = strtolower(optional_param('operation', '', PARAM_ALPHANUMEXT));
 
     $service = new CommerceCheckoutExpressService();
     $reason = $sku !== ''

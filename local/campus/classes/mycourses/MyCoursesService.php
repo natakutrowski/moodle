@@ -7,6 +7,7 @@ namespace local_campus\mycourses;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\course\library\CommerceCourseAccessEnrichmentService;
+use local_subscriptions\commerce\customer\course\CommerceCustomerCourseLearningStatusService;
 
 /** Builds the My courses read model from real Moodle enrolments. */
 final class MyCoursesService {
@@ -31,10 +32,39 @@ final class MyCoursesService {
             array_map('intval', array_keys($courses))
         );
 
+        $learning = CommerceCustomerCourseLearningStatusService::create($this->db);
+        $now = time();
         $items = [];
         foreach ($courses as $course) {
             $courseid = (int)$course->id;
-            [$progress, $done, $total, $completed] = $this->calculate_progress($course, (int)$USER->id);
+            try {
+                $status = $learning->resolve((int)$USER->id, $courseid, $now);
+            } catch (\Throwable) {
+                $status = [];
+            }
+
+            $progress = isset($status['progress']) && $status['progress'] !== null
+                ? (float)$status['progress']
+                : null;
+            $done = isset($status['completedactivities']) && $status['completedactivities'] !== null
+                ? (int)$status['completedactivities']
+                : null;
+            $total = isset($status['totalactivities']) && $status['totalactivities'] !== null
+                ? (int)$status['totalactivities']
+                : null;
+            $completed = !empty($status['completed']);
+
+            // Legacy fallback: courses without completion tracking used a mere
+            // course_viewed event as a proxy for completion. That cannot be used
+            // for progressive promotions: opening the first released lesson must
+            // never make the whole course look 100% complete.
+            if ($progress === null && empty($status['isprogressive'])
+                    && function_exists('local_campus_user_has_visited_course')
+                    && local_campus_user_has_visited_course((int)$USER->id, $courseid)) {
+                $progress = 100.0;
+                $completed = true;
+            }
+
             $items[] = new MyCoursePresentation(
                 $course,
                 $progress,
@@ -42,7 +72,8 @@ final class MyCoursesService {
                 $total,
                 $completed,
                 isset($trialcourses[$courseid]),
-                $commerce->get($courseid)
+                $commerce->get($courseid),
+                $status
             );
         }
 
@@ -71,37 +102,5 @@ final class MyCoursesService {
         return $result;
     }
 
-    /** @return array{0:?float,1:?int,2:?int,3:bool} */
-    private function calculate_progress(\stdClass $course, int $userid): array {
-        global $CFG;
 
-        $fullcourse = get_course((int)$course->id);
-        $completion = new \completion_info($fullcourse);
-        $modinfo = get_fast_modinfo($fullcourse, $userid);
-        $done = 0;
-        $total = 0;
-
-        foreach ($modinfo->get_cms() as $cm) {
-            if (!$cm->uservisible || !$completion->is_enabled($cm)) {
-                continue;
-            }
-            $total++;
-            $data = $completion->get_data($cm, true, $userid);
-            if ((int)($data->completionstate ?? 0) !== 0) {
-                $done++;
-            }
-        }
-
-        if ($total > 0) {
-            $progress = max(0.0, min(100.0, 100.0 * ($done / $total)));
-            return [$progress, $done, $total, $done >= $total];
-        }
-
-        if (function_exists('local_campus_user_has_visited_course')
-                && local_campus_user_has_visited_course($userid, (int)$course->id)) {
-            return [100.0, null, null, true];
-        }
-
-        return [null, null, null, false];
-    }
 }

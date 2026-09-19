@@ -8,8 +8,12 @@ use local_subscriptions\commerce\payment\legacy\LegacyPaymentRequestAdapter;
 use local_subscriptions\commerce\payment\legacy\LegacyPaymentRequestContext;
 use local_subscriptions\commerce\payment\provider\CommercePaymentProviderException;
 use local_subscriptions\constants\Operation;
+use local_subscriptions\constants\Status;
 use local_subscriptions\payment\PaymentGatewayFactory;
 use local_subscriptions\payment\PaymentGatewayInterface;
+use local_subscriptions\payment\alfa\AlfaFastPaymentGatewayInterface;
+use local_subscriptions\payment\RefundGatewayInterface;
+use local_subscriptions\payment\RefundHistoryGatewayInterface;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\payment\dto\CheckoutInitResult;
 
@@ -27,7 +31,7 @@ use local_subscriptions\payment\dto\CheckoutInitResult;
  * This bridge only validates and translates Commerce data.
  */
 final class LegacyAlfaPaymentGateway
-    implements AlfaPaymentGateway {
+    implements AlfaPaymentGateway, AlfaPayPaymentGateway, AlfaSbpPaymentGateway {
 
     private PaymentGatewayInterface $legacygateway;
 
@@ -158,6 +162,340 @@ final class LegacyAlfaPaymentGateway
         );
     }
 
+    public function is_alfa_pay_configured(): bool {
+        if (!$this->legacygateway instanceof AlfaFastPaymentGatewayInterface) {
+            return false;
+        }
+
+        $environment = Provider::env(Provider::ALFA) === 'live'
+            ? 'live'
+            : 'test';
+
+        $username = trim(
+            (string)get_config(
+                'local_subscriptions',
+                'alfa_' . $environment . '_username'
+            )
+        );
+        $password = trim(
+            (string)get_config(
+                'local_subscriptions',
+                'alfa_' . $environment . '_password'
+            )
+        );
+
+        return $username !== '' && $password !== '';
+    }
+
+    public function is_sbp_configured(): bool {
+        if (!$this->legacygateway instanceof AlfaFastPaymentGatewayInterface) {
+            return false;
+        }
+
+        $environment = Provider::env(Provider::ALFA) === 'live'
+            ? 'live'
+            : 'test';
+
+        // The existing refund_* settings are the dedicated Alfa -api account
+        // used by refund.do and fast-payment APIs (Alfa Pay / SBP).
+        $username = trim(
+            (string)get_config(
+                'local_subscriptions',
+                'alfa_' . $environment . '_refund_username'
+            )
+        );
+        $password = trim(
+            (string)get_config(
+                'local_subscriptions',
+                'alfa_' . $environment . '_refund_password'
+            )
+        );
+
+        return $username !== '' && $password !== '';
+    }
+
+    public function register_sbp(
+        AlfaGatewayRequest $request
+    ): AlfaGatewayResponse {
+        if (!$this->legacygateway instanceof AlfaFastPaymentGatewayInterface) {
+            throw new CommercePaymentProviderException(
+                'The configured Alfa gateway does not expose SBP.',
+                Provider::ALFA,
+                'alfa_sbp_gateway_not_supported'
+            );
+        }
+
+        $context = LegacyPaymentRequestContext::from_metadata(
+            $request->get_metadata(),
+            Provider::ALFA
+        );
+
+        $legacyrequest = $this->requestadapter->load_and_validate(
+            $context,
+            $request->get_amount_minor(),
+            $request->get_currency(),
+            $request->get_customer_email(),
+            $this->resolve_user_id($request->get_metadata())
+        );
+
+        $options = $this->build_legacy_options(
+            $request,
+            $context,
+            $legacyrequest
+        );
+        $options['description'] = $request->get_description();
+        $options['ip'] = getremoteaddr();
+        $options['sbp_qr_size'] = 360;
+
+        try {
+            $result = $this->legacygateway->create_sbp_session(
+                $legacyrequest,
+                $options
+            );
+        } catch (CommercePaymentProviderException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            throw new CommercePaymentProviderException(
+                'The SBP payment could not be initialized.',
+                Provider::ALFA,
+                'alfa_sbp_initialization_failed',
+                [
+                    'commerce_reference' =>
+                        $this->resolve_commerce_reference($request),
+                ],
+                $exception
+            );
+        }
+
+        $renderedqr = trim((string)($result->renderedqr ?? ''));
+        $renderedqrdatauri = '';
+        if ($renderedqr !== '') {
+            $renderedqrdatauri = str_starts_with($renderedqr, 'data:image/')
+                ? $renderedqr
+                : 'data:image/png;base64,'
+                    . preg_replace('/\s+/', '', $renderedqr);
+        }
+
+        return new AlfaGatewayResponse(
+            $result->orderid,
+            AlfaGatewayResponse::STATUS_REGISTERED,
+            null,
+            null,
+            null,
+            [
+                'embedded' => true,
+                'embedded_type' => 'alfa_sbp',
+                'sbp_qr_id' => $result->qrid,
+                'sbp_qr_status' => $result->qrstatus,
+                'sbp_payload' => $result->payload,
+                'sbp_rendered_qr' => $renderedqrdatauri,
+                'return_url' => $request->get_return_url(),
+                'fail_url' => $request->get_fail_url(),
+                'commerce_reference' =>
+                    $this->resolve_commerce_reference($request),
+                'commerce_payment_id' =>
+                    $this->required_native_identity(
+                        $request->get_metadata(),
+                        'commerce_payment_id'
+                    ),
+                'commerce_purchase_uuid' =>
+                    $this->required_native_identity(
+                        $request->get_metadata(),
+                        'commerce_purchase_uuid'
+                    ),
+            ]
+        );
+    }
+
+    public function register_alfa_pay(
+        AlfaGatewayRequest $request
+    ): AlfaGatewayResponse {
+        if (!$this->legacygateway instanceof AlfaFastPaymentGatewayInterface) {
+            throw new CommercePaymentProviderException(
+                'The configured Alfa gateway does not expose Alfa Pay.',
+                Provider::ALFA,
+                'alfa_pay_gateway_not_supported'
+            );
+        }
+
+        $context =
+            LegacyPaymentRequestContext::from_metadata(
+                $request->get_metadata(),
+                Provider::ALFA
+            );
+
+        $legacyrequest =
+            $this->requestadapter->load_and_validate(
+                $context,
+                $request->get_amount_minor(),
+                $request->get_currency(),
+                $request->get_customer_email(),
+                $this->resolve_user_id(
+                    $request->get_metadata()
+                )
+            );
+
+        $options = $this->build_legacy_options(
+            $request,
+            $context,
+            $legacyrequest
+        );
+        $options['description'] = $request->get_description();
+        $options['ip'] = getremoteaddr();
+
+        try {
+            $result =
+                $this->legacygateway
+                    ->create_alfapay_session(
+                        $legacyrequest,
+                        $options
+                    );
+        } catch (CommercePaymentProviderException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            throw new CommercePaymentProviderException(
+                'The Alfa Pay payment could not be initialized.',
+                Provider::ALFA,
+                'alfa_pay_initialization_failed',
+                [
+                    'commerce_reference' =>
+                        $this->resolve_commerce_reference(
+                            $request
+                        ),
+                ],
+                $exception
+            );
+        }
+
+        return $this->map_checkout_result(
+            $request,
+            $result
+        );
+    }
+
+    public function prepare_widget(
+        AlfaGatewayRequest $request
+    ): AlfaGatewayResponse {
+        global $DB;
+
+        if (!AlfaWidgetConfiguration::is_available()) {
+            throw new CommercePaymentProviderException(
+                'The Alfa Payment Widget is not configured.',
+                Provider::ALFA,
+                'alfa_widget_not_configured'
+            );
+        }
+
+        $context =
+            LegacyPaymentRequestContext::from_metadata(
+                $request->get_metadata(),
+                Provider::ALFA
+            );
+
+        $legacyrequest =
+            $this->requestadapter->load_and_validate(
+                $context,
+                $request->get_amount_minor(),
+                $request->get_currency(),
+                $request->get_customer_email(),
+                $this->resolve_user_id(
+                    $request->get_metadata()
+                )
+            );
+
+        $paymentrequesttable =
+            $context->get_payment_request_table();
+
+        $attempt =
+            (int)($legacyrequest->attempts ?? 0)
+            + 1;
+
+        $DB->update_record(
+            $paymentrequesttable,
+            (object)[
+                'id' => (int)$legacyrequest->id,
+                'attempts' => $attempt,
+                'last_attempt' => time(),
+                'payment_provider' => Provider::ALFA,
+                'status' => Status::PENDING,
+            ]
+        );
+
+        $prefix =
+            $context->get_order_number_prefix()
+            ?: 'sub';
+
+        $ordernumber =
+            $prefix
+            . '-'
+            . (int)$legacyrequest->id
+            . '-'
+            . $attempt;
+
+        $language =
+            strtolower(
+                trim(
+                    (string)(
+                        $request->get_metadata()['language']
+                        ?? 'ru'
+                    )
+                )
+            );
+
+        // Alfa's current Payment Widget is validated with RU and EN.
+        // Keep Russian for Russian checkout locales and use English as the
+        // safe fallback for every other CampusFR locale, including French.
+        $language =
+            str_starts_with($language, 'ru')
+                ? 'ru'
+                : 'en';
+
+        return new AlfaGatewayResponse(
+            $ordernumber,
+            AlfaGatewayResponse::STATUS_REGISTERED,
+            null,
+            null,
+            null,
+            [
+                'embedded' => true,
+                'embedded_type' => 'alfa_widget',
+                'alfa_order_number' => $ordernumber,
+                'widget_token' =>
+                    AlfaWidgetConfiguration::token(),
+                'widget_script_url' =>
+                    AlfaWidgetConfiguration::script_url(),
+                'widget_gateway' =>
+                    AlfaWidgetConfiguration::gateway(),
+                'widget_amount_minor' =>
+                    $request->get_amount_minor(),
+                'widget_amount_format' => 'kopeyki',
+                'widget_version' => '1.0',
+                'widget_stages' => '1',
+                'widget_language' => $language,
+                'widget_description' =>
+                    $request->get_description(),
+                'return_url' =>
+                    $request->get_return_url(),
+                'fail_url' =>
+                    $request->get_fail_url(),
+                'commerce_reference' =>
+                    $this->resolve_commerce_reference(
+                        $request
+                    ),
+                'commerce_payment_id' =>
+                    $this->required_native_identity(
+                        $request->get_metadata(),
+                        'commerce_payment_id'
+                    ),
+                'commerce_purchase_uuid' =>
+                    $this->required_native_identity(
+                        $request->get_metadata(),
+                        'commerce_purchase_uuid'
+                    ),
+            ]
+        );
+    }
+
     public function retrieve(
         string $orderid
     ): AlfaGatewayResponse {
@@ -183,6 +521,80 @@ final class LegacyAlfaPaymentGateway
                 'providerpaymentid' =>
                     trim($orderid),
             ]
+        );
+    }
+
+    public function refund(
+        AlfaRefundRequest $request
+    ): AlfaRefundResponse {
+        if (!$this->legacygateway instanceof RefundGatewayInterface) {
+            throw new CommercePaymentProviderException(
+                'Alfa refund is not exposed by the configured Legacy gateway.',
+                Provider::ALFA,
+                'legacy_alfa_refund_not_supported',
+                ['providerpaymentid' => $request->get_provider_payment_id()]
+            );
+        }
+
+        try {
+            $metadata = $request->get_metadata();
+            $result = $this->legacygateway->refund_payment(
+                $request->get_provider_payment_id(),
+                $request->get_amount_minor(),
+                $request->get_currency(),
+                [
+                    'payment_reference' => $request->get_payment_reference(),
+                    'purchase_reference' =>
+                        trim((string)($metadata['purchase_reference'] ?? '')),
+                    'reason' => $request->get_reason(),
+                    'idempotency_key' =>
+                        trim((string)($metadata['idempotency_key'] ?? '')),
+                ]
+            );
+        } catch (CommercePaymentProviderException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            throw new CommercePaymentProviderException(
+                'The Legacy Alfa gateway failed to refund the payment.',
+                Provider::ALFA,
+                'legacy_alfa_refund_failed',
+                [
+                    'providerpaymentid' => $request->get_provider_payment_id(),
+                    'paymentreference' => $request->get_payment_reference(),
+                    'currency' => $request->get_currency(),
+                    'amountminor' => $request->get_amount_minor(),
+                ],
+                $exception
+            );
+        }
+
+        return new AlfaRefundResponse(
+            $result->providerrefundid,
+            $result->status,
+            $result->currency,
+            $result->amountminor,
+            $result->metadata
+        );
+    }
+
+    public function list_refunds(
+        string $orderid,
+        string $currency
+    ): array {
+        if (!$this->legacygateway instanceof RefundHistoryGatewayInterface) {
+            return [];
+        }
+
+        return array_map(
+            static fn($result): AlfaRefundResponse =>
+                new AlfaRefundResponse(
+                    $result->providerrefundid,
+                    $result->status,
+                    $result->currency,
+                    $result->amountminor,
+                    $result->metadata
+                ),
+            $this->legacygateway->list_payment_refunds($orderid, $currency)
         );
     }
 
@@ -412,6 +824,18 @@ final class LegacyAlfaPaymentGateway
 
                 'alfa_order_id' =>
                     $orderid,
+
+                'alfa_iframe_requested' =>
+                    !empty(
+                        $request->get_metadata()['alfa_iframe_requested']
+                        ?? false
+                    ),
+
+                'return_url' =>
+                    $request->get_return_url(),
+
+                'fail_url' =>
+                    $request->get_fail_url(),
             ]
         );
     }

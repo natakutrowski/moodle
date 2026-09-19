@@ -81,13 +81,13 @@ final class currency_test extends advanced_testcase {
         );
     }
 
-    public function test_unknown_valid_currency_uses_iso_code(): void {
-        $this->assertSame(
-            'PLN',
+    public function test_known_non_ambiguous_currency_uses_its_symbol(): void {
+        self::assertSame(
+            'zł',
             Currency::display_symbol('PLN')
         );
 
-        $this->assertSame(
+        self::assertSame(
             2,
             Currency::decimals('PLN')
         );

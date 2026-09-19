@@ -133,8 +133,18 @@ final class commerce_promotions_n107_test extends \advanced_testcase {
         $this->assertStringContainsString('fa fa-ellipsis-h', $index);
         $this->assertStringContainsString("'class' => 'btn btn-sm btn-primary'", $index);
 
-        $this->assertStringContainsString("'EUR' => '🇪🇺'", $edit);
-        $this->assertStringContainsString("'EUR' => '🇪🇺'", $view);
+        self::assertStringContainsString(
+            'CommerceCurrencyRegistry',
+            $edit
+        );
+        self::assertStringContainsString(
+            'options_including(',
+            $edit
+        );
+        self::assertStringContainsString(
+            'Currency::visual_marker',
+            $view
+        );
         $this->assertStringContainsString('commerce-promotion-infinity-icon', $view);
         $this->assertStringContainsString("\$string['commerce_promotion_productskus'] = 'Produits éligibles';", $fr);
         $this->assertStringNotContainsString('SKU éligibles (un par ligne)', $fr);

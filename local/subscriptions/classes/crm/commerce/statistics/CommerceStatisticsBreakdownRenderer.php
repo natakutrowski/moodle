@@ -7,6 +7,7 @@ namespace local_subscriptions\crm\commerce\statistics;
 defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
+use local_subscriptions\currency\Currency;
 
 /**
  * Shared compact breakdowns used by both global and product Commerce statistics.
@@ -142,10 +143,6 @@ final class CommerceStatisticsBreakdownRenderer {
     }
 
     private static function currency_flag(string $currency): string {
-        return match (strtoupper($currency)) {
-            'EUR' => '🇪🇺',
-            'RUB' => '🇷🇺',
-            default => '🌐',
-        };
+        return Currency::visual_marker($currency) ?: '💱';
     }
 }

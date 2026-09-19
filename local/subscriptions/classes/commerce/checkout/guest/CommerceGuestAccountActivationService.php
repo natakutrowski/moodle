@@ -70,6 +70,17 @@ final class CommerceGuestAccountActivationService {
             'deleted' => 0,
         ], '*', MUST_EXIST);
 
+        // L7.3.10: never mutate credentials for a provisional account which
+        // has not actually been activated by a successful payment yet. This
+        // prevents a partial "password set but user still suspended" state.
+        if (
+            !in_array((string)($metadata['account_state'] ?? ''), ['active', 'ready'], true)
+            || (int)$user->confirmed !== 1
+            || (int)$user->suspended !== 0
+        ) {
+            throw new \moodle_exception('invalidkey');
+        }
+
         return ['user' => $user, 'session' => $session];
     }
 

@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . '/../../../../../config.php');
 
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmInput;
@@ -51,7 +52,7 @@ $currencies = array_values(array_unique(array_map(
     static fn($r): string => strtoupper((string)$r->currency),
     array_values($DB->get_records_sql("SELECT DISTINCT currency FROM {local_subs_commerce_prod_price} WHERE active = 1 ORDER BY currency"))
 )));
-if ($currencies === []) { $currencies = ['EUR', 'RUB']; }
+if ($currencies === []) { $currencies = (new CommerceCurrencyRegistry())->enabled(); }
 $emailrecords = $DB->get_records_sql(
     "SELECT DISTINCT LOWER(email) AS email
        FROM {user}

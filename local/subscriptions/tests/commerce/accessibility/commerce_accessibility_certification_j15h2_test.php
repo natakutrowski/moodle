@@ -16,17 +16,9 @@ final class commerce_accessibility_certification_j15h2_test extends \advanced_te
         $guestdialog = file_get_contents(
             $CFG->dirroot . '/local/subscriptions/templates/commerce/guest_account_dialog.mustache'
         );
-        $providerdialogs = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/checkout/provider_experience.mustache'
-        );
-
         $this->assertStringContainsString('aria-modal="true"', $guestdialog);
         $this->assertStringContainsString('aria-describedby="commerce-account-dialog-description"', $guestdialog);
         $this->assertStringContainsString('data-account-primary', $guestdialog);
-
-        $this->assertStringContainsString('aria-labelledby="commerce-provider-experience-title"', $providerdialogs);
-        $this->assertStringContainsString('aria-describedby="commerce-provider-experience-message"', $providerdialogs);
-        $this->assertStringContainsString('aria-labelledby="commerce-provider-currency-title"', $providerdialogs);
     }
 
     public function test_showroom_has_localised_skip_link_and_semantic_statistics(): void {

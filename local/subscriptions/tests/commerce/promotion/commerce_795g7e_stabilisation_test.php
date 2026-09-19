@@ -19,11 +19,28 @@ final class commerce_795g7e_stabilisation_test extends \advanced_testcase {
         $this->assertStringNotContainsString('$snapshotmessages', $source);
     }
 
-    public function test_payment_icons_are_centered(): void {
-        $template = file_get_contents(__DIR__ . '/../../../templates/commerce/payment_reassurance.mustache');
-        $css = file_get_contents(__DIR__ . '/../../../styles/storefront.css');
-        $this->assertStringContainsString('justify-content-center', $template);
-        $this->assertStringContainsString('justify-content: center', $css);
+    public function test_payment_reassurance_uses_shared_cart_trust_strip(): void {
+        $template = file_get_contents(
+            __DIR__ . '/../../../templates/commerce/payment_reassurance.mustache'
+        );
+        $css = file_get_contents(
+            __DIR__ . '/../../../styles/storefront.css'
+        );
+        self::assertIsString($template);
+        self::assertIsString($css);
+
+        self::assertStringContainsString(
+            'commerce-checkout-trust-strip commerce-cart-trust-strip',
+            $template
+        );
+        self::assertStringContainsString(
+            'commerce-checkout-trust-strip__item',
+            $template
+        );
+        self::assertStringContainsString(
+            '.commerce-cart-trust-strip',
+            $css
+        );
     }
 
     public function test_admin_promotion_entrypoints_exist(): void {

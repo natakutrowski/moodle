@@ -18,6 +18,10 @@ use local_subscriptions\commerce\domain\value\CommercePurchaseSnapshot;
 use local_subscriptions\commerce\persistence\CommercePurchasePersistenceMapper;
 use local_subscriptions\commerce\persistence\CommercePurchasePersistenceSnapshot;
 use local_subscriptions\commerce\payment\attempt\CommercePaymentAttempt;
+use local_subscriptions\commerce\legal\entity\CommerceLegalEntitySnapshot;
+use local_subscriptions\commerce\legal\document\CommerceLegalConsentSnapshot;
+use local_subscriptions\commerce\legal\document\CommerceLegalDocumentResolver;
+use local_subscriptions\commerce\legal\merchant\CommerceMerchantMarketResolver;
 use local_subscriptions\commerce\payment\repository\CommercePaymentRepository;
 use local_subscriptions\commerce\persistence\sql\CommercePurchaseSqlRepository;
 use local_subscriptions\commerce\purchase\CommercePurchaseRequest;
@@ -27,7 +31,9 @@ final class CommerceCheckoutPurchasePersister {
     public function __construct(
         private readonly CommercePurchaseSqlRepository $repository,
         private readonly CommercePurchasePersistenceMapper $mapper = new CommercePurchasePersistenceMapper(),
-        private readonly ?CommercePaymentRepository $payments = null
+        private readonly ?CommercePaymentRepository $payments = null,
+        private readonly ?CommerceMerchantMarketResolver $merchantresolver = null,
+        private readonly ?CommerceLegalDocumentResolver $legaldocumentresolver = null
     ) {}
 
     public function persist(CommercePurchaseRequest $request): int {
@@ -162,6 +168,7 @@ final class CommerceCheckoutPurchasePersister {
             [
                 'request_reference' => $request->get_reference(),
                 'source' => 'unified_checkout',
+                'payment_method' => trim((string)$request->get_metadata_value('payment_method', '')),
             ]
         );
     }
@@ -200,6 +207,38 @@ final class CommerceCheckoutPurchasePersister {
 
         $firstitem = $request->get_items()[0]->get_item();
         $now = time();
+        $merchantresolver = $this->merchantresolver ?? new CommerceMerchantMarketResolver();
+        $merchantresolution = $merchantresolver->resolve(
+            $request->get_currency(),
+            $request->get_preferred_provider() ?? '',
+            array_merge($request->get_metadata(), ['source' => 'unified_checkout'])
+        );
+        $legalentitysnapshot = CommerceLegalEntitySnapshot::from_resolution_result(
+            $merchantresolution,
+            $now,
+            $request->get_currency(),
+            $request->get_preferred_provider() ?? ''
+        );
+        $terms = [];
+        $acceptance = $request->get_metadata_value('legal_acceptance', []);
+        if (is_array($acceptance) && !empty($acceptance['accepted'])) {
+            $acceptedat = (int)($acceptance['accepted_at'] ?? 0);
+            if ($acceptedat <= 0) {
+                throw new \coding_exception('Accepted Commerce legal terms require an acceptance timestamp.');
+            }
+            $documents = ($this->legaldocumentresolver ?? new CommerceLegalDocumentResolver())->resolve(
+                $merchantresolution->get_market_country(),
+                (string)($customer->get_metadata()['language'] ?? current_language())
+            );
+            if ($documents->get_legal_entity_key() !== $merchantresolution->get_entity_key()) {
+                throw new \coding_exception('Commerce legal documents must match the resolved seller.');
+            }
+            $terms['legal_consent'] = (new CommerceLegalConsentSnapshot(
+                $documents,
+                $acceptedat,
+                (string)($acceptance['source'] ?? 'checkout_checkbox')
+            ))->to_array();
+        }
 
         return new NativePurchase(
             $this->resolve_purchase_type($items),
@@ -224,8 +263,10 @@ final class CommerceCheckoutPurchasePersister {
                     'total_amount_minor' => $request->get_total_amount_minor(),
                 ],
                 [],
-                [],
-                $request->get_metadata()
+                $terms,
+                array_merge($request->get_metadata(), [
+                    'legal_entity_snapshot' => $legalentitysnapshot->to_array(),
+                ])
             ),
             CommercePurchaseStatus::PAYMENT_PENDING,
             $this->payments === null ? [new CommercePayment(

@@ -24,7 +24,8 @@ final class hook_callbacks {
             return;
         }
 
-        $page->requires->css(new \moodle_url('/local/subscriptions/styles/provisional_account.css'));
+        // CSS for this notice is part of the plugin-level stylesheet.
+        // before_footer is too late to register a new stylesheet with Moodle.
         $page->requires->js_call_amd('local_subscriptions/provisional_account_notice', 'init');
 
         $html = \html_writer::start_div('commerce-provisional-login-notice', [

@@ -21,6 +21,7 @@ use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
+use local_subscriptions\currency\Currency;
 use local_subscriptions\subscription_config;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
@@ -1002,12 +1003,8 @@ if ($pagedrows === []) {
             (function() use ($product): string {
                 $prices = [];
                 foreach ($product->get_prices() as $price) {
-                    $currency = strtoupper($price->get_currency());
-                    $flag = match ($currency) {
-                        'EUR' => '🇪🇺',
-                        'RUB' => '🇷🇺',
-                        default => '🌐',
-                    };
+                    $currency = Currency::sanitize($price->get_currency());
+                    $flag = Currency::visual_marker($currency) ?: '💱';
                     $prices[] = html_writer::div(
                         html_writer::span(
                             $flag,

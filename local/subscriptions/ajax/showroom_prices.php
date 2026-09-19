@@ -7,6 +7,7 @@ require_once(__DIR__ . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\showroom\CommerceShowroomCurrencyResolver;
+use local_subscriptions\commerce\currency\selection\CommerceCurrencyAvailabilityService;
 use local_subscriptions\commerce\showroom\CommerceShowroomProductResolver;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitionResolver;
 use local_subscriptions\commerce\order\invoice\CommerceInvoiceProfileResolver;
@@ -22,7 +23,9 @@ try {
     $showroomkey = required_param('showroom', PARAM_ALPHANUMEXT);
     $currency = strtoupper(required_param('currency', PARAM_ALPHA));
     $definition = (new CommerceShowroomPublishedDefinitionResolver($DB))->require($showroomkey);
-    $available = CommerceShowroomCurrencyResolver::active_currencies($DB);
+    $available = (new CommerceCurrencyAvailabilityService())->enabled_from(
+        CommerceShowroomCurrencyResolver::active_currencies($DB)
+    );
     if (!in_array($currency, $available, true)) {
         throw new invalid_parameter_exception('Unsupported currency.');
     }
@@ -63,6 +66,13 @@ try {
 
     $SESSION->local_subscriptions_showroom_currency = $currency;
     $SESSION->local_subscriptions_storefront_currency = $currency;
+    if (isloggedin() && !isguestuser()) {
+        set_user_preference(
+            'local_subscriptions_storefront_currency',
+            $currency,
+            (int)$USER->id
+        );
+    }
 
     $invoiceprofile = (new CommerceInvoiceProfileResolver())->resolve($currency, null);
     $legalprofile = [];

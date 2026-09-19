@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\catalog\cover\CommerceProductCoverContext;
 use local_subscriptions\commerce\catalog\cover\CommerceProductCoverService;
+use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\catalog\persistence\CommerceCatalogHydrator;
 use local_subscriptions\commerce\catalog\repository\CommerceProductPriceRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
@@ -172,9 +173,10 @@ final class CommercePersonalOfferCampaignMailPreviewService {
         $products = new CommerceProductRepository($this->db, $hydrator);
         $prices = new CommerceProductPriceRepository($this->db, $hydrator, $products);
         $catalogue = [];
+        $currencyregistry = new CommerceCurrencyRegistry();
         foreach ($prices->find_by_product_sku($sku, true) as $price) {
             $currency = strtoupper($price->get_currency());
-            if (!in_array($currency, ['EUR', 'RUB'], true)) { continue; }
+            if (!$currencyregistry->is_enabled($currency)) { continue; }
             if (!isset($catalogue[$currency]) || $price->get_provider() === null) { $catalogue[$currency] = $price; }
         }
         $available = [];
@@ -188,8 +190,15 @@ final class CommercePersonalOfferCampaignMailPreviewService {
         if ($available === []) {
             throw new \coding_exception('Campaign email preview requires an authoritative compatible catalogue price.');
         }
-        $preferred = $language === 'ru' ? 'RUB' : 'EUR';
-        return CommercePersonalOfferPricingPresentationBuilder::build($available, $preferred);
+        $preferredcurrency = $language === 'ru' ? 'RUB' : 'EUR';
+        if (!isset($available[$preferredcurrency])) {
+            $preferredcurrency = (string)array_key_first($available);
+        }
+
+        return CommercePersonalOfferPricingPresentationBuilder::build(
+            $available,
+            $preferredcurrency
+        );
     }
 
     private function product_name(int $productid, string $fallback, string $language): string {

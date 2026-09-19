@@ -30,7 +30,7 @@ final class commerce_storefront_customer_state_matrix_l73_test extends advanced_
         );
         self::assertStringNotContainsString('require_login();', $source);
         self::assertStringContainsString(
-            "isloggedin() && !isguestuser() ? (int)\$USER->id : 0",
+            'CommerceGuestCartCustomerResolver::create()->resolve($currency)',
             $source
         );
     }

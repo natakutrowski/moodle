@@ -27,6 +27,82 @@ final class CommerceGuestAccountProvisioner {
         $firstname = $identity['firstname'];
         $lastname = $identity['lastname'];
 
+        $resetprovisionaluserid =
+            (int)(
+                $session->get_metadata()['identity_reset_provisional_userid']
+                ?? 0
+            );
+
+        if ($resetprovisionaluserid > 0) {
+            $owned = $this->database->get_record(
+                'user',
+                [
+                    'id' => $resetprovisionaluserid,
+                    'deleted' => 0,
+                    'mnethostid' => (int)$CFG->mnet_localhost_id,
+                ],
+                'id,username,email,confirmed,suspended',
+                IGNORE_MISSING
+            );
+
+            $expectedusername =
+                'checkout_'
+                . substr(
+                    hash(
+                        'sha256',
+                        $session->get_reference()
+                    ),
+                    0,
+                    24
+                );
+
+            if (
+                $owned !== false
+                && (string)$owned->username === $expectedusername
+                && (int)$owned->confirmed === 0
+                && (int)$owned->suspended === 1
+            ) {
+                require_once(
+                    $CFG->dirroot . '/user/lib.php'
+                );
+
+                $owned->email = $email;
+                $owned->firstname = trim($firstname);
+                $owned->lastname = trim($lastname);
+                user_update_user(
+                    $owned,
+                    false,
+                    false
+                );
+
+                $metadata =
+                    $session->get_metadata();
+                unset(
+                    $metadata['identity_reset_provisional_userid']
+                );
+                $metadata = array_replace(
+                    $metadata,
+                    [
+                        'identity_resolution' =>
+                            'same_checkout_provisional_reuse',
+                        'account_origin' => 'guest_checkout',
+                        'account_state' => 'provisional',
+                        'provisional_user_reused_at' => time(),
+                    ]
+                );
+
+                return $this->sessions->update_identity(
+                    $session,
+                    $resetprovisionaluserid,
+                    $email,
+                    $firstname,
+                    $lastname,
+                    'provisional',
+                    $metadata
+                );
+            }
+        }
+
         $emailcondition = $this->database->sql_equal('email', ':email', false);
         $existingaccounts = $this->database->get_records_sql(
             "SELECT id, email
@@ -52,13 +128,49 @@ final class CommerceGuestAccountProvisioner {
         if ($existing !== false) {
             $existinguserid = (int)$existing->id;
 
+            // L7.3.8: OTP verification is an AJAX boundary and a duplicate
+            // request can still hold the pre-provisioning session object while
+            // the first request has already provisioned this very Guest
+            // Checkout row. Refresh the authoritative row before classifying
+            // the freshly-created checkout_* user as a real existing account.
+            $current = $this->sessions->require_by_id($session->get_id());
+            $currentmetadata = $current->get_metadata();
+            $currentemail = \core_text::strtolower(
+                trim((string)($current->get_email() ?? ''))
+            );
+
+            if (
+                $current->get_user_id() === $existinguserid
+                && $current->get_status() === 'provisional'
+                && $currentemail === $email
+                && ($currentmetadata['account_origin'] ?? '') === 'guest_checkout'
+                && ($currentmetadata['account_state'] ?? '') === 'provisional'
+                && empty($currentmetadata['password_set_at'])
+            ) {
+                return $this->sessions->update_identity(
+                    $current,
+                    $existinguserid,
+                    $email,
+                    $firstname,
+                    $lastname,
+                    'provisional',
+                    [
+                        'identity_resolution' => 'same_checkout_provisional_resume',
+                        'same_checkout_provisional_resumed_at' => time(),
+                    ]
+                );
+            }
+
             // M9: a checkout_* account with Guest Checkout provenance and
             // no customer-defined password is not an "existing account" in the
             // authentication sense. Resume that exact provisional userid.
             $resumable = (new CommerceUnfinishedGuestCheckoutRecoveryService(
                 $this->database,
                 $this->sessions
-            ))->find_source_session($existinguserid);
+            ))->find_source_session(
+                $existinguserid,
+                $session->get_id()
+            );
 
             if ($resumable !== null) {
                 $metadata = [
