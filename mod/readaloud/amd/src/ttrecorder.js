@@ -43,6 +43,7 @@ define(['jquery', 'core/log', 'core/notification','core/ajax', 'mod_readaloud/tt
             is_streaming: false,
             using_msspeech: false,
             savemedia: false,
+            transcribemedia: false,
             uploader: null,
             strings: {},
 
@@ -79,7 +80,11 @@ define(['jquery', 'core/log', 'core/notification','core/ajax', 'mod_readaloud/tt
                     uconfig.transcode = that.transcode ? 1 : 0;
                     uconfig.cloudpoodllurl = that.cloudpoodllurl;
                     uconfig.transcoder = "default";
-                    uconfig.transcribe = 0;
+                    // Whether the cloud also transcribes the saved audio. The read step turns this on as a
+                    // safety net: if streaming recognition fails, the attempt can still be graded from the
+                    // server side transcript. Everywhere else it stays off, because the transcript is already
+                    // in hand and a second transcription is only a cost.
+                    uconfig.transcribe = that.transcribemedia ? 1 : 0;
                     uconfig.subtitle = 0;
                     uconfig.language = that.lang;
                     uconfig.transcribevocab = "none";
@@ -98,6 +103,7 @@ define(['jquery', 'core/log', 'core/notification','core/ajax', 'mod_readaloud/tt
                 var handle_timer_update = function () {
                     var displaytime = that.timer.fetch_display_time();
                     that.controls.timerstatus.html(displaytime);
+                    that.update_timer_display();
                     log.debug('timer_seconds: ' + that.timer.seconds);
                     log.debug('displaytime: ' + displaytime);
                     if (that.timer.seconds == 0 && that.timer.initseconds > 0) {
@@ -191,8 +197,18 @@ define(['jquery', 'core/log', 'core/notification','core/ajax', 'mod_readaloud/tt
                     that.update_audio(newaudio);
                 };
 
-                //If browser rec (Chrome Speech Rec) 
-                if (browserRec.will_work_ok() && !this.stt_guided && !this.forcestreaming && !this.using_msspeech) {
+                //Android chrome runs speech rec on the platform recognizer, which owns the microphone while it
+                //is running. We can not record the audio at the same time, so anything that needs the audio
+                //saved (free speaking) takes the streaming/upload route, as it does on firefox.
+                var is_android = navigator.userAgent.indexOf("Android") > -1;
+                var androidblocked = is_android && this.savemedia;
+                if (androidblocked) {
+                    log.debug("not using browser rec: android chrome can not record audio while it is running");
+                }
+
+                //If browser rec (Chrome Speech Rec)
+                if (browserRec.will_work_ok() && !this.stt_guided && !this.forcestreaming && !this.using_msspeech
+                    && !androidblocked) {
                     //Init browserrec
                     log.debug("using browser rec");
                     this.browserrec = browserRec.clone();
@@ -229,8 +245,8 @@ define(['jquery', 'core/log', 'core/notification','core/ajax', 'mod_readaloud/tt
                     that.audiohelper.onError = on_error;
                     that.audiohelper.onStop = on_stopped;
                     that.audiohelper.onStream = on_gotstream;
-                    that.audiohelper.onfinalspeechcapture = function (speechtext) {
-                        that.gotRecognition(speechtext);
+                    that.audiohelper.onfinalspeechcapture = function (speechtext, wordresults) {
+                        that.gotRecognition(speechtext, wordresults);
                         that.update_audio('isRecording', false);
                         that.update_audio('isRecognizing', false);
                     };
@@ -263,6 +279,35 @@ define(['jquery', 'core/log', 'core/notification','core/ajax', 'mod_readaloud/tt
                 this.timer.init(this.maxtime, handle_timer_update);
                 // Init the timer readout
                 handle_timer_update();
+            },
+
+            /*
+            * Update the countdown readout and bar. Driven by the recorder's own timer, which is the one that
+            * actually stops the recording, so the bar cannot drift away from the limit being enforced. With no
+            * time limit the timer counts up instead, and we show elapsed time with no bar to fill.
+             */
+            update_timer_display: function () {
+                if (this.controls.timerdisplay.length === 0 && this.controls.timerprogress.length === 0) {
+                    return;
+                }
+
+                var seconds = this.timer.seconds;
+                var limit = this.timer.initseconds;
+
+                this.controls.timerdisplay.html(this.timer.fetch_short_display_time(seconds));
+
+                if (limit > 0) {
+                    var elapsed = limit - seconds;
+                    var percent = Math.min(100, Math.max(0, (elapsed / limit) * 100));
+                    this.controls.timerprogressbar.css('width', percent + '%');
+                    this.controls.timerprogress.attr('aria-valuenow', elapsed);
+                    // Warn them when the reading is nearly out of time.
+                    if (seconds <= 10) {
+                        this.controls.timerprogress.addClass('ra_timer_warning');
+                    } else {
+                        this.controls.timerprogress.removeClass('ra_timer_warning');
+                    }
+                }
             },
 
             can_stream: function () {
@@ -327,9 +372,15 @@ define(['jquery', 'core/log', 'core/notification','core/ajax', 'mod_readaloud/tt
                 this.appid = this.controls.recorderbutton.data('appid');
                 this.owner = this.controls.recorderbutton.data('owner');
                 this.transcode = this.controls.recorderbutton.data('transcode') === 1;
+                this.transcribemedia = this.controls.recorderbutton.data('transcribemedia') === 1;
                 this.expiredays = this.controls.recorderbutton.data('expiredays');
                 this.mediatype = this.controls.recorderbutton.data('mediatype');
                 this.cloudpoodllurl = this.controls.recorderbutton.data('cloudpoodllurl');
+                // Countdown display. Only the read step renders these at the moment, so everywhere else
+                // these are empty sets and the updates below quietly do nothing.
+                this.controls.timerdisplay = $('.timerdisplay_' + this.uniqueid);
+                this.controls.timerprogress = $('.timerprogress_' + this.uniqueid);
+                this.controls.timerprogressbar = this.controls.timerprogress.find('.progress-bar');
                 this.controls.icon_mic = this.controls.recorderbutton.find('.ra_recbutton_mic');
                 this.controls.icon_stop = this.controls.recorderbutton.find('.ra_recbutton_stop');
                 this.controls.icon_waiting = this.controls.recorderbutton.find('.ra_recbutton_waiting');
@@ -494,12 +545,15 @@ define(['jquery', 'core/log', 'core/notification','core/ajax', 'mod_readaloud/tt
                 this.callback(message);
             },
 
-            gotRecognition: function (transcript) {
+            gotRecognition: function (transcript, wordresults) {
                 log.debug('transcript:' + transcript);
                 if (transcript.trim() == '') { return; }
                 var message = {};
                 message.type = 'speech';
                 message.capturedspeech = transcript;
+                //word level timings, when the recogniser gave us any. Browser rec and the upload
+                //transcriber do not, so consumers must treat this as optional.
+                message.speechresults = wordresults ? wordresults : false;
                 this.callback(message);
             },
 

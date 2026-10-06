@@ -33,6 +33,12 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class utils {
+    /**
+     * A cached streaming speech token is only handed out if it has at least this many seconds left. A token about
+     * to expire would make the page refresh it almost at once, and again when the refresh hands back the same
+     * cached token, and each refresh costs the recording audio.
+     */
+    const STREAMING_TOKEN_MINLIFE = 2 * MINSECS;
 
     // Get the Cloud Poodll Server URL
     public static function get_cloud_poodll_server() {
@@ -222,41 +228,47 @@ class utils {
         }
     }
 
-    public static function can_streaming_transcribe($instance) {
+    /**
+     * Can this activity's language be transcribed by the streaming recogniser?
+     *
+     * Which engine we get is decided by fetch_streaming_token(): Azure when the site has its own
+     * Azure key, otherwise AssemblyAI. The two have very different language coverage, so the answer
+     * depends on which one this site will actually use.
+     *
+     * Callers should fall back to the upload (iframe) recorder when this returns false. Sending an
+     * unsupported language to the streaming recogniser does not error, it just returns nothing
+     * useful, which would score the reading as silence.
+     *
+     * @param object $instance The activity instance.
+     * @param string|null $tokentype The engine we will actually use, from a fetched token. Pass it
+     *                               whenever a token is already in hand, because a configured Azure
+     *                               key that does not work falls back to AssemblyAI, and guessing
+     *                               from config alone would then allow a language AssemblyAI cannot
+     *                               handle. Null means guess from config.
+     * @return bool True if the instance language can be streamed.
+     */
+    public static function can_streaming_transcribe($instance, $tokentype = null) {
 
-        $ret = false;
-
-        // The instance languages
-        switch($instance->ttslanguage){
-            case constants::M_LANG_ENAU:
-            case constants::M_LANG_ENGB:
-            case constants::M_LANG_ENUS:
-            case constants::M_LANG_ESUS:
-            case constants::M_LANG_FRFR:
-            case constants::M_LANG_FRCA:
-                $ret = true;
-                break;
-            default:
-                $ret = false;
+        if ($tokentype === null) {
+            // No token in hand, so guess from config. fetch_streaming_token() prefers Azure when a
+            // key is set. This is only good enough for a cheap pre-check; confirm against the real
+            // token type before committing to the streaming recorder.
+            $conf = get_config(constants::M_COMPONENT);
+            $tokentype = (!empty($conf->azureapikey) && !empty($conf->azureapiregion)) ? 'azure' : 'assemblyai';
         }
 
-        // The supported regions
-        if($ret) {
-            switch ($instance->region) {
-                case "useast1":
-                case "useast2":
-                case "uswest2":
-                case "sydney":
-                case "dublin":
-                case "ottawa":
-                    $ret = true;
-                    break;
-                default:
-                    $ret = false;
-            }
+        // Azure speech covers a wide range of locales, and an admin who configured a key has opted
+        // into using it, so let the instance language through.
+        if ($tokentype === 'azure') {
+            return true;
         }
 
-        return $ret;
+        // Otherwise it is AssemblyAI universal streaming. ttstreamer picks the english model for
+        // en-*, and the multilingual model for everything else. The multilingual model covers
+        // Spanish, French, German, Italian and Portuguese, and nothing beyond that. An unsupported
+        // language does not error, it just returns nothing, which would be graded as silence.
+        $shortlang = self::fetch_short_lang($instance->ttslanguage);
+        return in_array($shortlang, ['en', 'es', 'fr', 'de', 'it', 'pt']);
     }
 
     // we might use AWS Transcribe if its strict or no hash(why)
@@ -1527,7 +1539,7 @@ class utils {
         $now = time();
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
         $tokenobject = $cache->get('azuretoken'. '_' . $apiregion);
-        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now + self::STREAMING_TOKEN_MINLIFE) {
             // For js we set the valid number of seconds.
             $tokenobject->validseconds = $tokenobject->validuntil - $now;
             return $tokenobject;
@@ -1635,7 +1647,7 @@ class utils {
 
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
         $tokenobject = $cache->get('msspeechtoken' . '_' . $msregion);
-        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now + self::STREAMING_TOKEN_MINLIFE) {
             // For js we set the valid number of seconds
             $tokenobject->validseconds = $tokenobject->validuntil - $now;
             return $tokenobject;
@@ -2027,33 +2039,81 @@ class utils {
         return $currentattempt;
     }
 
-    // streaming results are not the same format as non streaming, we massage the streaming to look like a non streaming
-    // to our code that will go on to process it.
+    /**
+     * Massage word level results from the streaming recogniser into the same json shape that the
+     * non streaming (upload) transcriber returns, so that the rest of the grading pipeline
+     * (fetch_audio_points_json, fetch_duration_from_transcript_json, fetch_diff) needs no special case.
+     *
+     * The client sends a flat, ordered array of timed words, each: {content, start_time, end_time, confidence}.
+     * Times are in seconds, relative to the start of the recording.
+     *
+     * An empty word list is a valid result, not an error: it means the recogniser heard nothing, which is
+     * what happens when a student submits silence. We still return a transcript structure so the attempt is
+     * graded as a zero and the student gets a report, which is how the upload transcriber path behaves for
+     * the same reading. Returning false here instead would leave the attempt with no transcript forever.
+     *
+     * Accepts either shape the client may send:
+     *   - a flat array of timed words, from the streaming recogniser
+     *   - {"text": "...", "words": [...]}, where words may be empty
+     * The second shape exists because browser speech recognition and the upload transcriber return
+     * text with no word timings at all. Their text still has to reach the diff, or the reading would
+     * be scored as silence.
+     *
+     * @param string $streamingresults json from the client, in either shape above.
+     * @return string|false json in upload transcriber shape, or false if the input was unusable.
+     */
     public static function parse_streaming_results($streamingresults) {
-        $results = json_decode($streamingresults);
-        $alltranscript = '';
-        $allitems = [];
-        foreach($results as $result){
-            foreach($result as $completion) {
-                foreach ($completion->Alternatives as $alternative) {
-                    $alltranscript .= $alternative->Transcript . ' ';
-                    foreach ($alternative->Items as $item) {
-                        $processeditem = new \stdClass();
-                        $processeditem->alternatives = [['content' => $item->Content, 'confidence' => "1.0000"]];
-                        $processeditem->end_time = "" . round($item->EndTime, 3);
-                        $processeditem->start_time = "" . round($item->StartTime, 3);
-                        $processeditem->type = $item->Type;
-                        $allitems[] = $processeditem;
-                    }
-                }
-            }
+
+        if (!self::is_json($streamingresults)) {
+            return false;
         }
+        $decoded = json_decode($streamingresults);
+
+        $plaintext = '';
+        if (is_array($decoded)) {
+            // Flat array of timed words.
+            $words = $decoded;
+        } else if (is_object($decoded)) {
+            $words = isset($decoded->words) && is_array($decoded->words) ? $decoded->words : [];
+            $plaintext = isset($decoded->text) ? trim($decoded->text) : '';
+        } else {
+            return false;
+        }
+
+        $transcriptbits = [];
+        $allitems = [];
+        foreach ($words as $word) {
+            if (!isset($word->content)) {
+                continue;
+            }
+            $content = trim($word->content);
+            if ($content === '') {
+                continue;
+            }
+            $transcriptbits[] = $content;
+
+            $processeditem = new \stdClass();
+            // Confidence is a string in the upload transcriber output, so match that.
+            $confidence = isset($word->confidence) ? (float) $word->confidence : 1;
+            $processeditem->alternatives = [['content' => $content, 'confidence' => sprintf('%.4f', $confidence)]];
+            $processeditem->start_time = '' . round(isset($word->start_time) ? (float) $word->start_time : 0, 3);
+            $processeditem->end_time = '' . round(isset($word->end_time) ? (float) $word->end_time : 0, 3);
+            // The streaming recogniser only hands back spoken words, never punctuation items.
+            $processeditem->type = 'pronunciation';
+            $allitems[] = $processeditem;
+        }
+
+        // With no timed words, fall back to whatever plain text the recogniser gave us. There are then
+        // no items, so there are no audio positions, and spot check is hidden for this attempt and
+        // the session time comes from the recorded length instead of the transcript.
+        $transcript = empty($transcriptbits) ? $plaintext : implode(' ', $transcriptbits);
+
         $ret = new \stdClass();
         $ret->jobName = "streaming";
         $ret->accountId = "streaming";
         $ret->results = [];
         $ret->status = 'COMPLETED';
-        $ret->results['transcripts'] = [['transcript' => $alltranscript]];
+        $ret->results['transcripts'] = [['transcript' => $transcript]];
         $ret->results['items'] = $allitems;
 
         return json_encode($ret);
@@ -2754,6 +2814,12 @@ class utils {
         foreach(constants::STEPS as $stepname => $value){
             $mform->setDefault($stepname, in_array($value, $stepdefaults));
         }
+
+        // Optional prep steps: listen, practice and shadow do not need to be completed to unlock read/quiz.
+        $mform->addElement('advcheckbox', 'optionalprepsteps', get_string('optionalprepsteps', constants::M_COMPONENT),
+                get_string('optionalprepsteps_details', constants::M_COMPONENT));
+        $mform->setDefault('optionalprepsteps', 0);
+        $mform->addHelpButton('optionalprepsteps', 'optionalprepsteps', constants::M_COMPONENT);
 
         // Attempts
         $attemptoptions = [0 => get_string('unlimited', constants::M_COMPONENT),
@@ -3840,16 +3906,25 @@ class utils {
 
     }
 
+    // Is a specific activity step optional (always open, and not required to open later steps)?
+    public static function is_step_optional($step, $moduleinstance) {
+        $prepsteps = [constants::STEP_LISTEN, constants::STEP_PRACTICE, constants::STEP_SHADOW];
+        return !empty($moduleinstance->optionalprepsteps) && in_array($step, $prepsteps);
+    }
+
     // Is a specific attempt step open (or not opened yet)
     public static function is_step_open($step, $moduleinstance, $attempt) {
+        if (self::is_step_optional($step, $moduleinstance)) {
+            return true;
+        }
         $prevstepcomplete = true;
         foreach (constants::STEPS as $stepname => $onestep) {
             // If it's the current step, then we are done and the value of prev step is what we want.
             if ($onestep == $step) {
                 break;
             }
-            // If the step is enabled, then it is the current prev_step candidate, check its completion.
-            if (self::is_step_enabled($onestep, $moduleinstance)) {
+            // If the step is enabled and required, then it is the current prev_step candidate, check its completion.
+            if (self::is_step_enabled($onestep, $moduleinstance) && !self::is_step_optional($onestep, $moduleinstance)) {
                 $prevstepcomplete = $attempt && self::is_step_complete($onestep, $attempt);
             }
         }
@@ -3879,7 +3954,7 @@ class utils {
         $now = time();
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
         $tokenobject = $cache->get($tokentype . 'token' . '_' . $poodllregion);
-        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now + self::STREAMING_TOKEN_MINLIFE) {
             // For js we set the valid number of seconds
             $tokenobject->validseconds = $tokenobject->validuntil - $now;
             return $tokenobject;

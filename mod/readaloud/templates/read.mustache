@@ -24,7 +24,10 @@
     * backurl - URL to return to home/menu
     * passagepictureurl - URL to passage picture (optional)
     * modeinstructions - Custom activity instructions (from welcome field)
-    * recorder - Recorder component with all configuration
+    * readstreaming - True when the in page recorder is a candidate. Both recorders are then rendered
+                      and read.js picks one, because browser capability is only knowable client side.
+    * readrecorder - In page recorder configuration, present when readstreaming is true
+    * recorder - Iframe recorder component with all configuration
     * passagesegments - Array of passage text segments
 
     Example context (json):
@@ -73,9 +76,25 @@
 
             {{> mod_readaloud/passagecontainer}}
 
-            {{#recorder}}
-            <div class="{{M_RECORDING_CONTAINER}}">
+            {{#readstreaming}}
+            {{! In page recorder. Transcribes as the student reads, so results are immediate. read.js
+                decides at runtime whether this or the iframe below is usable, because whether the
+                browser has speech recognition is only knowable in the browser. }}
+            <div class="{{M_RECORDING_CONTAINER}} mod_readaloud_inpagerecorder">
                 <div id="{{M_RECORDER_CONTAINER}}" class="{{M_RECORDER_CONTAINER}} d-flex justify-content-center align-items-center">
+                    {{#readrecorder}}
+                        {{> mod_readaloud/ttrecorder}}
+                    {{/readrecorder}}
+                </div>
+            </div>
+            {{/readstreaming}}
+
+            {{! Cloud Poodll iframe recorder. Audio is uploaded and transcribed server side, with no
+                duration limit. Hidden to start with when the in page recorder is also on the page;
+                read.js reveals whichever one it settles on. }}
+            {{#recorder}}
+            <div class="{{M_RECORDING_CONTAINER}} mod_readaloud_iframerecorder {{#readstreaming}}d-none{{/readstreaming}}">
+                <div id="{{M_RECORDER_CONTAINER}}_iframe" class="{{M_RECORDER_CONTAINER}} d-flex justify-content-center align-items-center">
                     <div id="{{M_RECORDERID}}"
                         data-id="{{M_RECORDERID}}"
                         data-parent="{{wwwroot}}"
