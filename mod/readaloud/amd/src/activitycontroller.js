@@ -302,8 +302,17 @@ define([
 				};
 
 				readreporthelper.update_filename(eventdata.mediaurl);
+				// An in page attempt was already graded before we got here, so there is nothing to wait
+				// for. The iframe path still needs time for the audio to reach the cloud and be
+				// transcribed. read.streaming is what read.js actually settled on, which is not known
+				// until it has probed the browser.
+				var firstwait = read.streaming ? 1 : 15;
 				// Commence a loop checking for results
-				readreporthelper.start_check_for_results();
+				readreporthelper.start_check_for_results(firstwait);
+				// Play the local recording while the cloud copy is still uploading and transcoding.
+				if (eventdata.bloburl) {
+					readreporthelper.show_local_audio(eventdata.bloburl);
+				}
 				// Send user to the  read report immediately though it will be a dummy
 				dd.dodummyreadreportlayout();
 				// Set flag in read report data so if user comes in off menu,
@@ -805,6 +814,13 @@ define([
 			var m = this;
 			modelaudiokaraoke.modeling = false;
 			m.renderMode("practice", null, true);
+			// If practice is optional, just visiting it counts as completing it.
+			if (
+				m.activitydata.optionalprepsteps &&
+				m.activitydata.stepscomplete.step_practice !== true
+			) {
+				m.update_activity_step(m.activitydata.steps.step_practice);
+			}
 		},
 
 		// Read mode (read / shadow).
