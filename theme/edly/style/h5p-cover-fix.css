@@ -1,0 +1,11 @@
+/*
+ * CampusFR - H5P cover image aspect ratio.
+ *
+ * Prevent WebKit / CSS Grid from vertically stretching
+ * cover images on some mobile devices.
+ */
+
+.h5p-theme-cover-page img.h5p-theme-cover-img {
+    height: auto !important;
+    object-fit: contain !important;
+}
