@@ -12834,3 +12834,16 @@ $string['crm_team_super_admin'] = 'Главный администратор Moo
 $string['crm_team_super_admin_help'] = 'Полный доступ к CRM и правам без назначения ролей CRM.';
 $string['crm_team_view_profile'] = 'Открыть профиль';
 $string['crm_cr5_status_refunded'] = 'Возвращён';
+
+// Pedagogical promotion welcome details attached to the Native purchase-access email.
+$string['commerce_mail_ped_subject'] = 'Вы записаны в группу CampusFR!';
+$string['commerce_mail_ped_heading'] = 'Добро пожаловать в вашу группу!';
+$string['commerce_mail_ped_title'] = 'Ваша учебная группа';
+$string['commerce_mail_ped_group'] = 'Группа';
+$string['commerce_mail_ped_tutor'] = 'Преподаватель';
+$string['commerce_mail_ped_language'] = 'Язык сопровождения';
+$string['commerce_mail_ped_telegram'] = 'Перейти в группу Telegram';
+$string['commerce_mail_ped_existing_owner'] = 'Курс у вас уже есть: эта покупка касается занятий с преподавателем. Полный доступ ко всем урокам сохраняется.';
+$string['commerce_mail_ped_lang_fr'] = 'Французский';
+$string['commerce_mail_ped_lang_ru'] = 'Русский';
+$string['commerce_mail_ped_lang_en'] = 'Английский';

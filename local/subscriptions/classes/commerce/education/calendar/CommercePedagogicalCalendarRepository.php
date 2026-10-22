@@ -60,7 +60,7 @@ final class CommercePedagogicalCalendarRepository {
             $section = $this->db->get_record(
                 'course_sections',
                 ['id' => $item->get_item_id()],
-                'id,course',
+                'id,course,section,component',
                 IGNORE_MISSING
             );
 
@@ -71,6 +71,14 @@ final class CommercePedagogicalCalendarRepository {
             ) {
                 throw new \coding_exception(
                     'Calendar course section must belong to the promotion course.'
+                );
+            }
+            // Only major sections get independent unlock dates. Delegated
+            // subsections inherit their parent section's date.
+            if ((int)$section->section === 0 ||
+                    (string)($section->component ?? '') === 'mod_subsection') {
+                throw new \coding_exception(
+                    'Only major course sections may have pedagogical calendar entries.'
                 );
             }
         }

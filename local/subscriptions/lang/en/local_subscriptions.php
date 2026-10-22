@@ -12759,3 +12759,16 @@ $string['crm_team_super_admin'] = 'Moodle site administrator';
 $string['crm_team_super_admin_help'] = 'Full access to CRM and permissions, without assigning CRM roles.';
 $string['crm_team_view_profile'] = 'View profile';
 $string['crm_cr5_status_refunded'] = 'Refunded';
+
+// Pedagogical promotion welcome details attached to the Native purchase-access email.
+$string['commerce_mail_ped_subject'] = 'Your CampusFR cohort enrollment is confirmed';
+$string['commerce_mail_ped_heading'] = 'Welcome to your cohort!';
+$string['commerce_mail_ped_title'] = 'Your cohort and group';
+$string['commerce_mail_ped_group'] = 'Group';
+$string['commerce_mail_ped_tutor'] = 'Tutor';
+$string['commerce_mail_ped_language'] = 'Support language';
+$string['commerce_mail_ped_telegram'] = 'Join the Telegram group';
+$string['commerce_mail_ped_existing_owner'] = 'You already own the course: this purchase is for tutor support. Your full access to every lesson remains unchanged.';
+$string['commerce_mail_ped_lang_fr'] = 'French';
+$string['commerce_mail_ped_lang_ru'] = 'Russian';
+$string['commerce_mail_ped_lang_en'] = 'English';

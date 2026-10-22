@@ -12594,3 +12594,16 @@ $string['crm_team_super_admin'] = 'Super administrateur Moodle';
 $string['crm_team_super_admin_help'] = 'Accès complet au CRM et à ses permissions, sans attribution de rôle CRM.';
 $string['crm_team_view_profile'] = 'Voir le profil';
 $string['crm_cr5_status_refunded'] = 'Remboursé';
+
+// Pedagogical promotion welcome details attached to the Native purchase-access email.
+$string['commerce_mail_ped_subject'] = 'Votre inscription à la promotion CampusFR est confirmée';
+$string['commerce_mail_ped_heading'] = 'Bienvenue dans votre promotion !';
+$string['commerce_mail_ped_title'] = 'Votre promotion et votre groupe';
+$string['commerce_mail_ped_group'] = 'Groupe';
+$string['commerce_mail_ped_tutor'] = 'Tuteur';
+$string['commerce_mail_ped_language'] = 'Langue d’accompagnement';
+$string['commerce_mail_ped_telegram'] = 'Rejoindre le groupe Telegram';
+$string['commerce_mail_ped_existing_owner'] = 'Vous possédez déjà le cours : votre achat concerne l’accompagnement pédagogique. Vous conservez l’accès complet à toutes les leçons.';
+$string['commerce_mail_ped_lang_fr'] = 'Français';
+$string['commerce_mail_ped_lang_ru'] = 'Russe';
+$string['commerce_mail_ped_lang_en'] = 'Anglais';

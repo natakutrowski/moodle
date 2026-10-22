@@ -9,6 +9,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\education\admin\CommercePedagogicalPromotionAdminRenderer;
 use local_subscriptions\commerce\education\calendar\CommercePedagogicalCalendarItem;
 use local_subscriptions\commerce\education\calendar\CommercePedagogicalCalendarRepository;
+use local_subscriptions\commerce\education\calendar\CommercePedagogicalSectionHierarchy;
 use local_subscriptions\commerce\education\access\CommercePedagogicalAvailabilitySynchronizer;
 use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotionRepository;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
@@ -114,6 +115,13 @@ if (data_submitted() && optional_param('save', 0, PARAM_BOOL)) {
     require_sesskey();
 
     $sectionid = required_param('sectionid', PARAM_INT);
+    $selectedsection = $DB->get_record('course_sections',
+        ['id' => $sectionid, 'course' => (int)$course->id],
+        'id,section,component', MUST_EXIST);
+    if ((int)$selectedsection->section === 0 ||
+            (string)($selectedsection->component ?? '') === 'mod_subsection') {
+        throw new \coding_exception('Only major course sections can be scheduled.');
+    }
     $unlockraw = trim(required_param('unlocksat', PARAM_RAW_TRIMMED));
     $unlocksat = strtotime($unlockraw);
     if ($unlocksat === false) {
@@ -156,7 +164,7 @@ $sections = $DB->get_records(
     'course_sections',
     ['course' => (int)$course->id],
     'section ASC',
-    'id,course,section,name,visible'
+    'id,course,section,name,visible,component'
 );
 $scheduled = $repository->for_promotion($promotionid);
 $calendarperpage = 10;
@@ -177,6 +185,11 @@ $sectionoptions = [];
 $totalcoursesections = 0;
 foreach ($sections as $section) {
     if ((int)$section->section === 0) {
+        continue;
+    }
+    // Delegated subsections are automatically unlocked by their parent.
+    // Do not offer them as separately scheduled lessons in the CRM.
+    if ((string)($section->component ?? '') === 'mod_subsection') {
         continue;
     }
     $totalcoursesections++;
@@ -212,7 +225,12 @@ foreach ($scheduled as $item) {
         }
     }
 }
-$unscheduledcount = max(0, $totalcoursesections - count($scheduled));
+$scheduledmajorcount = count(array_filter(
+    $scheduled,
+    static fn(CommercePedagogicalCalendarItem $item): bool =>
+        isset($sectionnames[$item->get_item_id()])
+));
+$unscheduledcount = max(0, $totalcoursesections - $scheduledmajorcount);
 
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
@@ -346,7 +364,7 @@ echo html_writer::span(
 );
 echo html_writer::end_div();
 $coverage = $totalcoursesections > 0
-    ? min(100, (int)round((count($scheduled) / $totalcoursesections) * 100))
+    ? min(100, (int)round(($scheduledmajorcount / $totalcoursesections) * 100))
     : 0;
 echo html_writer::div(
     html_writer::div('', 'commerce-ped-m73-calendar-coverage-bar', ['style' => 'width: ' . $coverage . '%']),

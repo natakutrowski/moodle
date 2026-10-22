@@ -7,6 +7,7 @@ namespace local_subscriptions\commerce\mail\context;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\mail\CommerceMailContext;
+use local_subscriptions\commerce\education\purchase\CommercePedagogicalPurchaseMailContext;
 use local_subscriptions\commerce\mail\CommerceMailRecipient;
 use local_subscriptions\commerce\catalog\cover\CommerceProductCoverContext;
 use local_subscriptions\commerce\catalog\cover\CommerceProductCoverService;
@@ -51,6 +52,8 @@ final class CommercePurchaseMailContextFactory {
         $language = (new CommercePurchaseMailLanguageResolver($this->database))->resolve($customer->userid, $details);
 
         $contextvalues = $this->context_from_order($order, $name, $language);
+        $contextvalues['pedagogical'] = CommercePedagogicalPurchaseMailContext::create($this->database)
+            ->for_purchase($order->reference, (int)($customer->userid ?? $order->userid ?? 0), $order->items);
         $contextvalues = $this->with_legacy_digital_access(
             $contextvalues,
             $details,

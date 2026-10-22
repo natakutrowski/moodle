@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\education\calendar\CommercePedagogicalCalendarItem;
 use local_subscriptions\commerce\education\calendar\CommercePedagogicalCalendarResolver;
+use local_subscriptions\commerce\education\calendar\CommercePedagogicalSectionHierarchy;
 use local_subscriptions\commerce\education\lifecycle\CommercePedagogicalParticipationRepository;
 
 /**
@@ -148,6 +149,12 @@ final class CommerceStudentCourseAccessResolver {
                 )
             )
         );
+
+        // The calendar schedules only major course sections. A delegated
+        // Moodle subsection becomes accessible with its parent, not through a
+        // separate date manually entered by an administrator.
+        $unlockedsectionids = CommercePedagogicalSectionHierarchy::create($this->db)
+            ->with_unlocked_subsections($courseid, $unlockedsectionids);
 
         return new CommerceStudentCourseAccessDecision(
             CommerceStudentAccessProfile::PROMOTION_PROGRESSIVE,

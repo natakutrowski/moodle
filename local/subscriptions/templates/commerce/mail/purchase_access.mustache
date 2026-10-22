@@ -8,5 +8,21 @@
 {{/hasitems}}
 {{^hasitems}}<p>{{#str}}commerce_mail_no_item_details, local_subscriptions{{/str}}</p>{{/hasitems}}
 
+{{#haspedagogical}}
+<div style="margin:22px 0;padding:18px;border:1px solid #f8c4dc;border-radius:12px;background:#fff5fa;">
+  <h2 style="margin:0 0 12px;font-size:19px;color:#b71560;">{{pedagogical_title}}</h2>
+  {{#pedagogicalentries}}
+  <div style="margin:0 0 14px;">
+    <p style="margin:0 0 8px;"><strong>{{promotionname}}</strong></p>
+    {{#hasgroup}}<p style="margin:4px 0;"><strong>{{pedagogical_group_label}} :</strong> {{groupname}}</p>{{/hasgroup}}
+    {{#hastutor}}<p style="margin:4px 0;"><strong>{{pedagogical_tutor_label}} :</strong> {{tutorname}}</p>{{/hastutor}}
+    {{#hassupportlang}}<p style="margin:4px 0;"><strong>{{pedagogical_lang_label}} :</strong> {{supportlang}}</p>{{/hassupportlang}}
+    {{#telegramurl}}<p style="margin:10px 0;"><a href="{{telegramurl}}" style="color:#b71560;font-weight:bold;">{{pedagogical_telegram_label}}</a></p>{{/telegramurl}}
+  </div>
+  {{/pedagogicalentries}}
+  {{#pedagogicalalreadyowned}}<p style="margin:10px 0 0;">{{pedagogical_owned_message}}</p>{{/pedagogicalalreadyowned}}
+</div>
+{{/haspedagogical}}
+
 {{#has_editorial_outro}}<div style="margin-top:20px;">{{{editorial_outro}}}</div>{{/has_editorial_outro}}
 {{#has_editorial_signature}}<div style="margin-top:18px;">{{{editorial_signature}}}</div>{{/has_editorial_signature}}
