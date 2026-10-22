@@ -10,6 +10,8 @@ use local_subscriptions\commerce\mail\CommerceMailType;
 use local_subscriptions\commerce\mail\CommerceMailRequest;
 
 final class CommercePurchaseAccessTemplate extends AbstractCommerceMailTemplate {
+    private const A1_TELEGRAM_CHANNEL_URL = 'https://t.me/+vSK_36VTpQ82NmEy';
+
     public function get_type(): string { return CommerceMailType::PURCHASE_ACCESS; }
     protected function subject_key(): string { return 'commerce_mail_purchase_access_subject'; }
     protected function template_name(): string { return 'purchase_access'; }
@@ -28,6 +30,8 @@ final class CommercePurchaseAccessTemplate extends AbstractCommerceMailTemplate 
             'pedagogical_lang_label' => get_string('commerce_mail_ped_language', 'local_subscriptions'),
             'pedagogical_telegram_label' => get_string('commerce_mail_ped_telegram', 'local_subscriptions'),
             'pedagogical_owned_message' => get_string('commerce_mail_ped_existing_owner', 'local_subscriptions'),
+            'pedagogical_a1_channel_invite' => get_string('commerce_mail_ped_a1_channel_invite', 'local_subscriptions'),
+            'pedagogical_a1_channel_url' => self::A1_TELEGRAM_CHANNEL_URL,
         ];
         $langnames = [
             'fr' => get_string('commerce_mail_ped_lang_fr', 'local_subscriptions'),
@@ -44,6 +48,7 @@ final class CommercePurchaseAccessTemplate extends AbstractCommerceMailTemplate 
             'haspedagogical' => true,
             'pedagogicalentries' => $entries,
             'pedagogicalalreadyowned' => !empty($pedagogy['alreadyowned']),
+            'haspedagogicala1channel' => !empty($pedagogy['hasa1course']),
         ];
     }
 

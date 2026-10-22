@@ -21,6 +21,12 @@
   </div>
   {{/pedagogicalentries}}
   {{#pedagogicalalreadyowned}}<p style="margin:10px 0 0;">{{pedagogical_owned_message}}</p>{{/pedagogicalalreadyowned}}
+  {{#haspedagogicala1channel}}
+  <div style="margin:16px 0 0;padding-top:14px;border-top:1px solid #f8c4dc;">
+    <p style="margin:0 0 8px;">{{pedagogical_a1_channel_invite}}</p>
+    <p style="margin:0;"><a href="{{pedagogical_a1_channel_url}}" style="color:#b71560;font-weight:bold;overflow-wrap:anywhere;">{{pedagogical_a1_channel_url}}</a></p>
+  </div>
+  {{/haspedagogicala1channel}}
 </div>
 {{/haspedagogical}}
 

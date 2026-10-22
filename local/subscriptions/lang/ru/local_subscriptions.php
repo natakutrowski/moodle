@@ -12847,3 +12847,4 @@ $string['commerce_mail_ped_existing_owner'] = 'Курс у вас уже ест�
 $string['commerce_mail_ped_lang_fr'] = 'Французский';
 $string['commerce_mail_ped_lang_ru'] = 'Русский';
 $string['commerce_mail_ped_lang_en'] = 'Английский';
+$string['commerce_mail_ped_a1_channel_invite'] = 'Присоединяйтесь к каналу курса в телеграм, чтобы вовремя узнавать новости своего потока, получать задания и участвовать в битве кланов';

@@ -12772,3 +12772,4 @@ $string['commerce_mail_ped_existing_owner'] = 'You already own the course: this 
 $string['commerce_mail_ped_lang_fr'] = 'French';
 $string['commerce_mail_ped_lang_ru'] = 'Russian';
 $string['commerce_mail_ped_lang_en'] = 'English';
+$string['commerce_mail_ped_a1_channel_invite'] = 'Join the course Telegram channel to stay up to date with news about your cohort, receive assignments, and take part in the clan battles.';

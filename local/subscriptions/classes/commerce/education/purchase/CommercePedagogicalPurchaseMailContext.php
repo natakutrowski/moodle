@@ -26,10 +26,10 @@ final class CommercePedagogicalPurchaseMailContext {
 
     /**
      * @param array<int,object> $purchaseitems Native order presentation items.
-     * @return array{hasentries:bool,alreadyowned:bool,entries:array<int,array<string,mixed>>}
+     * @return array{hasentries:bool,alreadyowned:bool,hasa1course:bool,entries:array<int,array<string,mixed>>}
      */
     public function for_purchase(string $reference, int $userid, array $purchaseitems): array {
-        $result = ['hasentries' => false, 'alreadyowned' => false, 'entries' => []];
+        $result = ['hasentries' => false, 'alreadyowned' => false, 'hasa1course' => false, 'entries' => []];
         $reference = trim($reference);
         if ($reference === '' || $userid <= 0) {
             return $result;
@@ -66,6 +66,12 @@ final class CommercePedagogicalPurchaseMailContext {
                 continue;
             }
 
+            // Identify the purchased course, not the current public sale window.
+            // Other language levels must not receive the A1 Telegram invitation.
+            if (self::is_a1_course($this->db, (int)$promotion->courseid)) {
+                $result['hasa1course'] = true;
+            }
+
             $group = $groups->group_for_user((int)$promotion->id, $userid);
             if ($group !== null && $group->get_product_id() !== (int)$participation->productid) {
                 // Do not leak a group from a different commercial offer.
@@ -98,6 +104,19 @@ final class CommercePedagogicalPurchaseMailContext {
             $result['alreadyowned'] = false;
         }
         return $result;
+    }
+
+    /**
+     * A1 is a course level, not a product SKU: the same course can be sold under
+     * different products and cohorts. Support both Latin A1 and Cyrillic А1.
+     */
+    private static function is_a1_course(\moodle_database $db, int $courseid): bool {
+        $course = $db->get_record('course', ['id' => $courseid], 'id,fullname,shortname', IGNORE_MISSING);
+        if (!$course) {
+            return false;
+        }
+        $names = trim((string)$course->fullname . ' ' . (string)$course->shortname);
+        return preg_match('/(?<![\p{L}\p{N}])[AaАа]1(?![\p{L}\p{N}])/u', $names) === 1;
     }
 
     /** Never render user-entered URLs to unknown domains in transactional mail. */
