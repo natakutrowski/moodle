@@ -108,9 +108,41 @@ if ($slug !== '') {
     //
     // Category product URLs (/digital/..., etc.) are never intercepted.
     if ($category === '') {
-        $showroomkey = (
-            new CommerceShowroomSlugService($DB)
-        )->find_published_showroom_key($slug);
+        $showroomslugservice = new CommerceShowroomSlugService($DB);
+
+        // 7.98E.7.3 — optional short Showroom aliases (for example /a1)
+        // are convenience routes only. They never render content directly:
+        // redirect temporarily to the canonical slug matching the requested or
+        // current Moodle language, while preserving marketing/query parameters.
+        $requestedlanguage = optional_param('lang', '', PARAM_LANG);
+        $aliasresolution = $showroomslugservice->resolve_published_short_alias(
+            $slug,
+            $requestedlanguage !== '' ? $requestedlanguage : current_language()
+        );
+        if ($aliasresolution !== null) {
+            $queryparams = $_GET;
+            unset(
+                $queryparams['route'],
+                $queryparams['slug'],
+                $queryparams['category'],
+                $queryparams['showroomkey']
+            );
+
+            $target = new moodle_url(
+                '/' . $aliasresolution['slug'],
+                $queryparams
+            );
+
+            // Language-aware redirects must not become permanently cached by
+            // browsers/proxies because the same alias may resolve differently
+            // for another visitor language.
+            header('Cache-Control: private, no-store, max-age=0');
+            header('Location: ' . $target->out(false), true, 302);
+            exit;
+        }
+
+        $showroomkey = $showroomslugservice
+            ->find_published_showroom_key($slug);
 
         if ($showroomkey !== null) {
             $_GET['showroomkey'] = $showroomkey;

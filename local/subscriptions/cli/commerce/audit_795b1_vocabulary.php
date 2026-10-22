@@ -17,7 +17,7 @@ use local_subscriptions\commerce\presentation\CommerceVocabulary;
 $families = [
     'product_type' => [
         'method' => 'product_type',
-        'values' => ['course_access', 'digital_download', 'bundle', 'service'],
+        'values' => ['course_access', 'digital_download', 'bundle', 'service', 'donation'],
     ],
     'product_status' => [
         'method' => 'product_status',

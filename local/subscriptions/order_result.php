@@ -6,6 +6,7 @@ require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/classes/commerce/tracking/CommerceTrackedActionUrl.php');
 
 use local_subscriptions\commerce\checkout\flow\CommercePurchaseFlow;
+use local_subscriptions\commerce\checkout\flow\CommerceDirectPurchaseSession;
 use local_subscriptions\commerce\checkout\flow\CommercePurchaseOrigin;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutSessionRepository;
 use local_subscriptions\commerce\cart\lifecycle\CommerceCartLifecycleService;
@@ -15,6 +16,7 @@ use local_subscriptions\commerce\order\presentation\CommerceBundleComponentResol
 use local_subscriptions\commerce\order\presentation\CommerceOrderPresentationAccessDeniedException;
 use local_subscriptions\commerce\order\presentation\CommerceOrderPresentationService;
 use local_subscriptions\commerce\order\presentation\CommercePostPaymentStateResolver;
+use local_subscriptions\commerce\purchase\policy\CommercePurchaseEntitlementExpectationPolicy;
 use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
 use local_subscriptions\commerce\storefront\repository\CommerceStorefrontRepository;
 use local_subscriptions\commerce\tracking\CommerceTrackedActionUrl;
@@ -78,7 +80,9 @@ if ($order === null) {
     throw new moodle_exception('commerce_i2_order_not_found', 'local_subscriptions');
 }
 
-$state = (new CommercePostPaymentStateResolver())->resolve($order, $result);
+$expectations = new CommercePurchaseEntitlementExpectationPolicy();
+$isdonationonly = $expectations->order_is_donation_only($order);
+$state = (new CommercePostPaymentStateResolver($expectations))->resolve($order, $result);
 // A successful payment converts exactly the cart that was frozen into this purchase.
 // The UUID check deliberately leaves any newer cart untouched.
 if ($order->is_paid()) {
@@ -109,7 +113,10 @@ $pageurl = UrlFactory::order_result(['reference' => $reference, 'result' => $res
 $PAGE->set_url($pageurl);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('commerce_i2_title_' . $state->code, 'local_subscriptions'));
+$pagetitlekey = $isdonationonly && $order->is_paid()
+    ? ($state->code === 'success' ? 'commerce_donation_result_title' : 'commerce_donation_result_processing_title')
+    : 'commerce_i2_title_' . $state->code;
+$PAGE->set_title(get_string($pagetitlekey, 'local_subscriptions'));
 $PAGE->set_heading(format_string($SITE->fullname));
 
 $formatmoney = static function(int $minor, string $currency): string {
@@ -127,6 +134,15 @@ $purchaseflow = CommercePurchaseFlow::normalise(
         ?? CommercePurchaseFlow::CART
     )
 );
+// C5.14.4: a paid Direct Purchase must no longer be offered as resumable.
+// The UUID guard keeps a newer Buy Now safe if an older provider return arrives
+// afterwards in another browser tab.
+if ($order->is_paid() && CommercePurchaseFlow::is_direct($purchaseflow)) {
+    CommerceDirectPurchaseSession::clear_if_cart_uuid(
+        (string)($order->metadata['cart_uuid'] ?? '')
+    );
+}
+
 $checkoutsource = CommercePurchaseOrigin::normalise(
     (string)($order->metadata['checkout_source'] ?? '')
 );
@@ -411,7 +427,10 @@ if ($guestaccountnotice !== null && isset($guestsession) && $guestsession !== nu
 echo html_writer::start_div('commerce-order-hero commerce-order-hero--' . $state->tone);
 echo html_writer::div($icons[$state->code] ?? '•', 'commerce-order-hero__icon', ['aria-hidden' => 'true']);
 echo html_writer::start_div('commerce-order-hero__content');
-echo html_writer::tag('h1', get_string('commerce_i2_title_' . $state->code, 'local_subscriptions'), ['class' => 'commerce-order-hero__title']);
+$herotitlekey = $isdonationonly && $order->is_paid()
+    ? ($state->code === 'success' ? 'commerce_donation_result_title' : 'commerce_donation_result_processing_title')
+    : 'commerce_i2_title_' . $state->code;
+echo html_writer::tag('h1', get_string($herotitlekey, 'local_subscriptions'), ['class' => 'commerce-order-hero__title']);
 if ($state->code === 'processing' && $order->is_paid()) {
     echo html_writer::start_div('commerce-order-hero__message commerce-order-hero__message--processing');
     echo html_writer::tag(
@@ -432,7 +451,9 @@ if ($state->code === 'processing' && $order->is_paid()) {
     echo html_writer::tag(
         'span',
         get_string(
-            'commerce_fulfillment_processing_message',
+            $isdonationonly
+                ? 'commerce_donation_result_processing_message'
+                : 'commerce_fulfillment_processing_message',
             'local_subscriptions'
         ),
         [
@@ -444,7 +465,9 @@ if ($state->code === 'processing' && $order->is_paid()) {
     echo html_writer::tag(
         'p',
         get_string(
-            'commerce_i2_message_' . $state->code,
+            $isdonationonly && $state->code === 'success'
+                ? 'commerce_donation_result_message'
+                : 'commerce_i2_message_' . $state->code,
             'local_subscriptions'
         ),
         [
@@ -615,12 +638,14 @@ foreach ($order->items as $item) {
             $order->currency,
             true
         );
-    $itemtype = $itemproduct?->get_type() ?? match (strtolower($item->type)) {
-        'subscription', 'course', 'course_access' => 'course_access',
-        'digital', 'digital_download' => 'digital_download',
-        'bundle' => 'bundle',
-        default => 'unknown',
-    };
+    $persistedcataloguetype = strtolower(trim((string)($item->metadata['catalogue_type'] ?? '')));
+    $itemtype = $itemproduct?->get_type()
+        ?? ($persistedcataloguetype !== '' ? $persistedcataloguetype : match (strtolower($item->type)) {
+            'subscription', 'course', 'course_access' => 'course_access',
+            'digital', 'digital_download' => 'digital_download',
+            'bundle' => 'bundle',
+            default => 'unknown',
+        });
     $itemcoverurl = $itemproduct?->get_cover_url('checkout');
     $itemplaceholdericon = CommerceProductVisualAuditService::placeholder_icon(
         $itemtype
@@ -803,93 +828,98 @@ if ($guestaccountnotice !== null) {
     echo html_writer::end_div();
 }
 if (!$requiresaccountfinalisation) {
-echo html_writer::start_div('card border-0 shadow-sm commerce-order-card');
-echo html_writer::start_div('card-body p-4');
-echo html_writer::tag('h2', get_string('commerce_i2_next_title', 'local_subscriptions'), ['class' => 'h5']);
-echo html_writer::start_tag(
-    'ul',
-    ['class' => 'list-unstyled mb-0 commerce-order-next']
-);
-echo html_writer::tag(
-    'li',
-    html_writer::link(
-        $mycampusurl,
-        html_writer::tag('i', '', [
-            'class' => 'fa-solid fa-house',
-            'aria-hidden' => 'true',
-        ]) . html_writer::span(
-            get_string(
-                'commerce_order_result_access_contents',
-                'local_subscriptions'
+    echo html_writer::start_div('card border-0 shadow-sm commerce-order-card');
+    echo html_writer::start_div('card-body p-4');
+    echo html_writer::tag(
+        'h2',
+        get_string(
+            $isdonationonly ? 'commerce_donation_result_next_title' : 'commerce_i2_next_title',
+            'local_subscriptions'
+        ),
+        ['class' => 'h5']
+    );
+    if ($isdonationonly) {
+        echo html_writer::tag(
+            'p',
+            get_string('commerce_donation_result_next_message', 'local_subscriptions'),
+            ['class' => 'text-muted']
+        );
+    }
+    echo html_writer::start_tag(
+        'ul',
+        ['class' => 'list-unstyled mb-0 commerce-order-next']
+    );
+    if ($isdonationonly) {
+        echo html_writer::tag(
+            'li',
+            html_writer::link(
+                $vieworderurl,
+                html_writer::tag('i', '', [
+                    'class' => 'fa-solid fa-receipt',
+                    'aria-hidden' => 'true',
+                ]) . html_writer::span(get_string('commerce_view_order', 'local_subscriptions'))
+            ),
+            ['class' => 'commerce-order-next__primary']
+        );
+    } else {
+        echo html_writer::tag(
+            'li',
+            html_writer::link(
+                $mycampusurl,
+                html_writer::tag('i', '', [
+                    'class' => 'fa-solid fa-house',
+                    'aria-hidden' => 'true',
+                ]) . html_writer::span(
+                    get_string('commerce_order_result_access_contents', 'local_subscriptions')
+                )
+            ),
+            ['class' => 'commerce-order-next__primary']
+        );
+        echo html_writer::tag(
+            'li',
+            html_writer::link(
+                $mycoursesurl,
+                html_writer::tag('i', '', [
+                    'class' => 'fa-solid fa-graduation-cap',
+                    'aria-hidden' => 'true',
+                ]) . html_writer::span(get_string('commerce_i2_my_courses', 'local_subscriptions'))
             )
-        )
-    ),
-    ['class' => 'commerce-order-next__primary']
-);
-echo html_writer::tag(
-    'li',
-    html_writer::link(
-        $mycoursesurl,
-        html_writer::tag('i', '', [
-            'class' => 'fa-solid fa-graduation-cap',
-            'aria-hidden' => 'true',
-        ]) . html_writer::span(
-            get_string(
-                'commerce_i2_my_courses',
-                'local_subscriptions'
+        );
+        echo html_writer::tag(
+            'li',
+            html_writer::link(
+                $resourcesurl,
+                html_writer::tag('i', '', [
+                    'class' => 'fa-solid fa-file-arrow-down',
+                    'aria-hidden' => 'true',
+                ]) . html_writer::span(get_string('commerce_i2_my_resources', 'local_subscriptions'))
             )
+        );
+    }
+    echo html_writer::tag(
+        'li',
+        html_writer::link(
+            $myordersurl,
+            html_writer::tag('i', '', [
+                'class' => 'fa-solid fa-bag-shopping',
+                'aria-hidden' => 'true',
+            ]) . html_writer::span(get_string('commerce_i2_my_orders', 'local_subscriptions'))
         )
-    )
-);
-echo html_writer::tag(
-    'li',
-    html_writer::link(
-        $resourcesurl,
-        html_writer::tag('i', '', [
-            'class' => 'fa-solid fa-file-arrow-down',
-            'aria-hidden' => 'true',
-        ]) . html_writer::span(
-            get_string(
-                'commerce_i2_my_resources',
-                'local_subscriptions'
-            )
-        )
-    )
-);
-echo html_writer::tag(
-    'li',
-    html_writer::link(
-        $myordersurl,
-        html_writer::tag('i', '', [
-            'class' => 'fa-solid fa-bag-shopping',
-            'aria-hidden' => 'true',
-        ]) . html_writer::span(
-            get_string(
-                'commerce_i2_my_orders',
-                'local_subscriptions'
-            )
-        )
-    )
-);
-echo html_writer::tag(
-    'li',
-    html_writer::link(
-        $storefronturl,
-        html_writer::tag('i', '', [
-            'class' => 'fa-solid fa-store',
-            'aria-hidden' => 'true',
-        ]) . html_writer::span(
-            get_string(
-                'commerce_order_result_discover_store',
-                'local_subscriptions'
-            )
-        )
-    ),
-    ['class' => 'commerce-order-next__store']
-);
-echo html_writer::end_tag('ul');
-echo html_writer::end_div();
-echo html_writer::end_div();
+    );
+    echo html_writer::tag(
+        'li',
+        html_writer::link(
+            $storefronturl,
+            html_writer::tag('i', '', [
+                'class' => 'fa-solid fa-store',
+                'aria-hidden' => 'true',
+            ]) . html_writer::span(get_string('commerce_order_result_discover_store', 'local_subscriptions'))
+        ),
+        ['class' => 'commerce-order-next__store']
+    );
+    echo html_writer::end_tag('ul');
+    echo html_writer::end_div();
+    echo html_writer::end_div();
 }
 echo html_writer::end_div();
 echo html_writer::end_div();

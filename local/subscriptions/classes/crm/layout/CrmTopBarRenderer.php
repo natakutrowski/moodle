@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use context;
 use context_system;
 use html_writer;
+use local_subscriptions\admin\CrmRoleTemplates;
 use local_subscriptions\subscription_config;
 use local_subscriptions\url\UrlFactory;
 use moodle_url;
@@ -15,6 +16,71 @@ use moodle_url;
  * Renders the shared CRM top bar.
  */
 final class CrmTopBarRenderer {
+
+    /** Short labels used exclusively for the compact CRM header. */
+    private const CRM_ROLE_SHORT_LABELS = [
+        'campus_crm_operations' => 'Operations',
+        'campus_crm_support' => 'Support',
+        'campus_crm_commerce' => 'Commerce',
+        'campus_crm_finance' => 'Finance',
+        'campus_crm_content' => 'Content',
+        'campus_crm_technical' => 'Technical',
+    ];
+
+    /**
+     * Current user's CRM system roles, without course-level roles.
+     *
+     * All labels are informational only; Moodle capabilities continue to
+     * control every action. The full labels reflect live Moodle role names.
+     *
+     * @param int $userid Moodle user ID.
+     * @return array{compact: string, full: string}
+     */
+    public static function crm_role_labels(int $userid): array {
+        if (is_siteadmin($userid)) {
+            return [
+                'compact' => 'Super Admin',
+                'full' => get_string('crm_team_super_admin', 'local_subscriptions'),
+            ];
+        }
+
+        $knownroles = CrmRoleTemplates::definitions();
+        $assigned = [];
+        foreach (get_user_roles(context_system::instance(), $userid, false) as $role) {
+            $shortname = (string)$role->shortname;
+            if (!array_key_exists($shortname, $knownroles)) {
+                continue;
+            }
+            $name = trim((string)$role->name);
+            $assigned[$shortname] = $name !== ''
+                ? $name
+                : $knownroles[$shortname]['name'];
+        }
+
+        // Stable order, independent of Moodle role sorting.
+        $compactlabels = [];
+        $fulllabels = [];
+        foreach (self::CRM_ROLE_SHORT_LABELS as $shortname => $label) {
+            if (!isset($assigned[$shortname])) {
+                continue;
+            }
+            $compactlabels[] = $label;
+            $fulllabels[] = $assigned[$shortname];
+        }
+        if (!$compactlabels) {
+            return ['compact' => '', 'full' => ''];
+        }
+
+        $compact = implode(' · ', array_slice($compactlabels, 0, 2));
+        if (count($compactlabels) > 2) {
+            $compact .= ' +' . (count($compactlabels) - 2);
+        }
+
+        return [
+            'compact' => $compact,
+            'full' => implode(' · ', $fulllabels),
+        ];
+    }
 
     /**
      * Renders the CRM top bar.
@@ -456,6 +522,7 @@ final class CrmTopBarRenderer {
         $sitecontext = \context_course::instance(SITEID);
         $roleswitched = is_role_switched(SITEID);
         $currentrolename = '';
+        $crmroles = self::crm_role_labels((int)$USER->id);
 
         if ($roleswitched) {
             $roleid = (int)($USER->access['rsw'][$sitecontext->path] ?? 0);
@@ -483,6 +550,20 @@ final class CrmTopBarRenderer {
             $summaryidentity .= html_writer::span(
                 s($currentrolename),
                 'crm-app-topbar-user-role'
+            );
+        }
+
+        if ($crmroles['compact'] !== '') {
+            // Reuse the existing topbar role line; only make it quieter.
+            // Bootstrap hides this secondary label on narrow screens.
+            $summaryidentity .= html_writer::span(
+                s($crmroles['compact']),
+                'crm-app-topbar-user-role d-none d-sm-block',
+                [
+                    'title' => $crmroles['full'],
+                    'style' => 'color:#64748b;font-size:.69rem;' .
+                        'font-weight:500;line-height:1.15;',
+                ]
             );
         }
 
@@ -529,7 +610,8 @@ final class CrmTopBarRenderer {
         $out .= $this->render_user_menu_header(
             $picture,
             $fullname,
-            $currentrolename
+            $currentrolename,
+            $crmroles['full']
         );
 
         $out .= html_writer::start_tag(
@@ -681,12 +763,14 @@ final class CrmTopBarRenderer {
      * @param string $picture Rendered user picture.
      * @param string $fullname User full name.
      * @param string $currentrolename Current switched role name, if any.
+     * @param string $crmroles Full names of CRM system roles.
      * @return string
      */
     private function render_user_menu_header(
         string $picture,
         string $fullname,
-        string $currentrolename = ''
+        string $currentrolename = '',
+        string $crmroles = ''
     ): string {
         $profileurl = new moodle_url(
             subscription_config::
@@ -711,6 +795,17 @@ final class CrmTopBarRenderer {
             $content .= html_writer::div(
                 s($currentrolename),
                 'crm-app-topbar-menu-current-role'
+            );
+        }
+
+        if ($crmroles !== '') {
+            $content .= html_writer::div(
+                s($crmroles),
+                'crm-app-topbar-menu-current-role',
+                [
+                    'style' => 'color:#64748b;font-size:.72rem;' .
+                        'font-weight:500;overflow-wrap:anywhere;',
+                ]
             );
         }
 

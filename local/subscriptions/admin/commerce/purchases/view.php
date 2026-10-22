@@ -8,6 +8,7 @@ use local_subscriptions\commerce\purchase\action\CommercePurchaseActionPolicy;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseAdminClosureService;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseActionServiceFactory;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
+use local_subscriptions\commerce\purchase\policy\CommercePurchaseEntitlementExpectationPolicy;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
 use local_subscriptions\commerce\purchase\communication\CommercePurchaseCurrentCustomerResolver;
 use local_subscriptions\commerce\mail\sales\CommerceSalesFollowupService;
@@ -38,7 +39,9 @@ $repository = new CommercePurchaseReadRepository($DB);
 $purchase = $repository->find_by_id($id);
 if ($purchase === null) { throw new moodle_exception('commerce_purchase_not_found', 'local_subscriptions'); }
 $summary = $purchase->summary;
-$actionpolicy = new CommercePurchaseActionPolicy();
+$expectations = new CommercePurchaseEntitlementExpectationPolicy();
+$fulfillmentapplicable = $expectations->details_requires_fulfillment($purchase);
+$actionpolicy = new CommercePurchaseActionPolicy($expectations);
 $adminclosureservice = new CommercePurchaseAdminClosureService($DB);
 $salesfollowupservice = CommerceSalesFollowupService::create($DB);
 $refundrepository = new CommercePaymentRefundRepository($DB);
@@ -48,6 +51,16 @@ $refundservice =
     new CommercePaymentRefundService($paymentproviderregistry);
 $rightsrevocationservice = CommercePurchaseRightsRevocationService::create($DB);
 $revocablerights = $rightsrevocationservice->preview($summary->reference);
+$allpurchasegrantsrevoked = $purchase->grants !== [];
+if ($allpurchasegrantsrevoked) {
+    foreach ($purchase->grants as $grant) {
+        if (strtolower(trim((string)$grant->status)) !== 'revoked') {
+            $allpurchasegrantsrevoked = false;
+            break;
+        }
+    }
+}
+$accessstatusoverride = $allpurchasegrantsrevoked ? 'revoked' : null;
 $paymentmethodresolver = new CommercePersistedPaymentMethodResolver();
 $documenthistoryrepository = new CommerceOrderDocumentHistoryRepository($DB);
 $refundhistoryproviders = [];
@@ -226,7 +239,7 @@ if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)
 }
 
 if (has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, $context)
-        && $actionpolicy->can_resend_access_summary($summary)) {
+        && $actionpolicy->can_resend_access_details($purchase)) {
     $resendaccessurl = new moodle_url(
         '/local/subscriptions/admin/commerce/purchases/resend_access.php',
         [
@@ -556,7 +569,9 @@ $statusdimensions = CommercePurchasePresentation::status_dimensions(
     $summary->totalminor,
     $summary->commercialstatus,
     $summary->paymentstatus,
-    $summary->fulfillmentstatus
+    $summary->fulfillmentstatus,
+    $fulfillmentapplicable,
+    $accessstatusoverride
 );
 if ($stripereconciled) {
     echo html_writer::div(
@@ -907,7 +922,7 @@ foreach ($purchase->items as $item) {
     $itemtable->data[] = [
         $producthtml,
         CommercePurchasePresentation::type_badge(
-            (string)$item->itemtype
+            (string)($metadata['catalogue_type'] ?? $item->itemtype)
         ),
         (int)$item->quantity,
         CommercePurchasePresentation::money(
@@ -1027,6 +1042,7 @@ $paymenttable->head = [
     get_string('commerce_purchase_provider', 'local_subscriptions'),
     get_string('commerce_purchase_amount', 'local_subscriptions'),
     get_string('commerce_refund_refunded_column', 'local_subscriptions'),
+    get_string('commerce_refund_net_retained_column', 'local_subscriptions'),
     get_string('commerce_purchase_provider_reference', 'local_subscriptions'),
     get_string('date'),
     get_string('commerce_purchase_payment_request', 'local_subscriptions'),
@@ -1070,10 +1086,14 @@ foreach ($purchase->payments as $payment) {
         )
         : 0;
 
-    $refundedminor = max(
-        0,
-        $payment->amountminor - $remainingminor
-    );
+    $refundedminor = $payment->id !== null
+        ? min(
+            $payment->amountminor,
+            $refundrepository->successful_refunded_amount_minor(
+                $payment->id
+            )
+        )
+        : 0;
 
     $paymentactions = '—';
     $paymentispaid = in_array(
@@ -1081,6 +1101,9 @@ foreach ($purchase->payments as $payment) {
         ['paid', 'completed', 'succeeded'],
         true
     );
+    $netretainedminor = $paymentispaid
+        ? max(0, $payment->amountminor - $refundedminor)
+        : null;
 
     if (
         $payment->id !== null
@@ -1166,6 +1189,12 @@ foreach ($purchase->payments as $payment) {
                 $payment->currency
             )
             : '—',
+        $netretainedminor === null
+            ? '—'
+            : CommercePurchasePresentation::money(
+                $netretainedminor,
+                $payment->currency
+            ),
         html_writer::tag(
             'code',
             s(
@@ -1530,6 +1559,7 @@ if ($isclosedwithoutdelivery) {
     );
 }
 
+if (has_capability(Capabilities::MANAGE_PURCHASE_NOTES, $context)) {
 $noteform = html_writer::start_tag('form', [
     'method' => 'post',
     'action' => (new moodle_url('/local/subscriptions/admin/commerce/purchases/add_note.php'))->out(false),
@@ -1555,6 +1585,7 @@ $noteform .= html_writer::tag('button', s(get_string('commerce_purchase_add_note
 ]);
 $noteform .= html_writer::end_tag('form');
 $actionhtml .= $noteform;
+}
 $actionhtml .= html_writer::tag('p', s(get_string('commerce_purchase_destructive_actions_deferred', 'local_subscriptions')), [
     'class' => 'small text-muted mt-3 mb-0',
 ]);

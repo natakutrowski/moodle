@@ -4,6 +4,7 @@ require_once(__DIR__ . '/../../../../../config.php');
 
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\commerce\purchase\action\CommercePurchaseActionPolicy;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseCommunicationActionService;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
 
@@ -30,6 +31,13 @@ if (!$confirm) {
 $purchase = (new CommercePurchaseReadRepository($DB))->find_by_id($id);
 if ($purchase === null) {
     throw new moodle_exception('commerce_purchase_not_found', 'local_subscriptions');
+}
+
+if (!(new CommercePurchaseActionPolicy())->can_resend_access_details($purchase)) {
+    throw new moodle_exception(
+        'commerce_purchase_resend_access_unavailable',
+        'local_subscriptions'
+    );
 }
 
 try {

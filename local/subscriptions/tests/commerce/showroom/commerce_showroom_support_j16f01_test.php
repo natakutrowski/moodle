@@ -21,7 +21,7 @@ final class commerce_showroom_support_j16f01_test extends \advanced_testcase {
 
     public function test_support_template_uses_primary_support_and_optional_channels(): void {
         global $CFG;
-        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache');
         self::assertStringContainsString('{{#issupport}}', $template);
         self::assertStringContainsString('commerce-showroom-support__actions', $template);
         self::assertStringContainsString('{{supporturl}}', $template);

@@ -17,11 +17,21 @@ final class CommerceShowroomRuntimeBlockSet {
     private const TYPES = [
         'hero',
         'stats',
+        'anchor_nav',
+        'adventure_overview',
+        'community_clan',
+        'tutor_chat',
+        'curriculum_tabs',
+        'journey_map',
+        'preparation_flow',
         'problem',
         'problem_interactive',
         'learning_method',
         'video',
         'content_highlights',
+        'audience_profiles',
+        'heart_puzzle',
+        'before_after',
         'ascent',
         'stage_method',
         'exercise_explorer',
@@ -33,6 +43,7 @@ final class CommerceShowroomRuntimeBlockSet {
         'bonus',
         'faq',
         'support',
+        'faq_contact',
         'verbs_cards',
         'final_cta',
         'html',
@@ -45,11 +56,21 @@ final class CommerceShowroomRuntimeBlockSet {
 
     private const FLOW_TYPES = [
         'hero',
+        'anchor_nav',
+        'adventure_overview',
+        'community_clan',
+        'tutor_chat',
+        'curriculum_tabs',
+        'journey_map',
+        'preparation_flow',
         'problem',
         'problem_interactive',
         'learning_method',
         'video',
         'content_highlights',
+        'audience_profiles',
+        'heart_puzzle',
+        'before_after',
         'ascent',
         'stage_method',
         'exercise_explorer',
@@ -61,6 +82,7 @@ final class CommerceShowroomRuntimeBlockSet {
         'bonus',
         'faq',
         'support',
+        'faq_contact',
         'verbs_cards',
         'final_cta',
     ];
@@ -211,6 +233,16 @@ final class CommerceShowroomRuntimeBlockSet {
         array &$configs,
         array &$sequence
     ): void {
+        // Legacy aliases are only for historical rows that actually enable one
+        // of the pre-J16G.2 block types. Modern CMS showrooms may legitimately
+        // start with only Hero/Stats; those must not resurrect Verbs sections.
+        $haslegacy = !empty($enabled['journey'])
+            || !empty($enabled['method'])
+            || !empty($enabled['cta']);
+        if (!$haslegacy) {
+            return;
+        }
+
         $hasnormalised = !empty($enabled['problem'])
             || !empty($enabled['learning_method'])
             || !empty($enabled['content_highlights'])
@@ -245,7 +277,7 @@ final class CommerceShowroomRuntimeBlockSet {
         $enabled['ascent'] = $journeyenabled;
         $configs['ascent'] = self::only_fields(
             $journey,
-            ['sectionwidth', 'sectionbackground', 'sectionbackgroundcolor', 'sectionbackgroundimageurl', 'sectionbackgroundopacity', 'sectionbackgroundblur', 'sectionspacing', 'sectionanimation']
+            ['sectionwidth', 'sectionbackground', 'sectiontextcolor', 'sectionbackgroundcolor', 'sectionbackgroundimageurl', 'sectionbackgroundopacity', 'sectionbackgroundblur', 'sectionspacing', 'sectionanimation']
         );
 
         // These two sections were historically unconditional in the template.

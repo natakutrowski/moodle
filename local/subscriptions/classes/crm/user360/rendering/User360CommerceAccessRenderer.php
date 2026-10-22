@@ -30,10 +30,12 @@ final class User360CommerceAccessRenderer {
     public static function render(\stdClass $profile): string {
         $orders = self::orders($profile->commercepurchases ?? []);
         $legacy = self::legacy_subscriptions($profile->subscriptions ?? []);
+        $trial = self::trial_lifecycle($profile->trialstate ?? null);
 
         return html_writer::tag(
             'section',
-            self::section(
+            $trial
+            . self::section(
                 'fa fa-shopping-bag',
                 get_string(
                     'crm_user360_n116a_orders_title',
@@ -67,6 +69,76 @@ final class User360CommerceAccessRenderer {
                     'local_subscriptions'
                 ),
             ]
+        );
+    }
+
+    /** @param array<string, mixed>|null $state */
+    private static function trial_lifecycle(?array $state): string {
+        if ($state === null || ($state['state'] ?? 'none') === 'none') {
+            return '';
+        }
+
+        $labels = [
+            'active' => 'crm_trial_state_active',
+            'expired' => 'crm_trial_state_expired',
+            'converted' => 'crm_trial_state_converted',
+            'legacy_historical' => 'crm_trial_state_legacy_historical',
+        ];
+        $phasekeys = [
+            'registration_open' => 'trial_admin_phase_registration_open',
+            'conversion_only' => 'trial_admin_phase_conversion_only',
+            'legacy_closed' => 'trial_admin_phase_legacy_closed',
+        ];
+
+        $rows = [];
+        $rows[] = html_writer::div(
+            html_writer::tag('strong', get_string('crm_trial_lifecycle_status', 'local_subscriptions'))
+            . ' ' . s(get_string($labels[(string)$state['state']] ?? 'crm_trial_state_expired', 'local_subscriptions')),
+            'mb-2'
+        );
+
+        $phase = (string)($state['transition_phase'] ?? '');
+        if ($phase !== '') {
+            $rows[] = html_writer::div(
+                html_writer::tag('strong', get_string('crm_trial_lifecycle_phase', 'local_subscriptions'))
+                . ' ' . s(get_string($phasekeys[$phase] ?? 'trial_admin_phase_legacy_closed', 'local_subscriptions')),
+                'small text-muted mb-1'
+            );
+        }
+
+        $date = 0;
+        $datekey = '';
+        if (!empty($state['converted']) && !empty($state['conversion_at'])) {
+            $date = (int)$state['conversion_at'];
+            $datekey = 'crm_trial_lifecycle_converted_at';
+        } else if (!empty($state['end_at'])) {
+            $date = (int)$state['end_at'];
+            $datekey = 'crm_trial_lifecycle_end_at';
+        } else if (!empty($state['campus_expires_at'])) {
+            $date = (int)$state['campus_expires_at'];
+            $datekey = 'crm_trial_lifecycle_end_at';
+        }
+        if ($date > 0 && $datekey !== '') {
+            $rows[] = html_writer::div(
+                html_writer::tag('strong', get_string($datekey, 'local_subscriptions'))
+                . ' ' . s(AdminFormatter::datetime($date)),
+                'small text-muted mb-1'
+            );
+        }
+
+        if (!empty($state['historical_only'])) {
+            $rows[] = html_writer::div(
+                get_string('crm_trial_lifecycle_historical_help', 'local_subscriptions'),
+                'small text-muted mt-2'
+            );
+        }
+
+        return self::section(
+            'fa fa-hourglass-half',
+            get_string('crm_trial_lifecycle_title', 'local_subscriptions'),
+            get_string('crm_trial_lifecycle_help', 'local_subscriptions'),
+            implode('', $rows),
+            'trial-lifecycle'
         );
     }
 

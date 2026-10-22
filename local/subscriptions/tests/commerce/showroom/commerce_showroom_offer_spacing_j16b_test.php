@@ -9,7 +9,7 @@ final class commerce_showroom_offer_spacing_j16b_test extends \advanced_testcase
         $root = dirname(__DIR__, 3);
         $registry = file_get_contents($root . '/classes/commerce/showroom/cms/CommerceShowroomBlockEditorRegistry.php');
         $presenter = file_get_contents($root . '/classes/commerce/showroom/cms/CommerceShowroomBlockConfigurationPresenter.php');
-        $template = file_get_contents($root . '/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . '/templates/showroom/default.mustache');
         $css = file_get_contents($root . '/styles/showroom.css');
 
         self::assertStringContainsString("self::select('cardstopspacing'", $registry);

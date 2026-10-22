@@ -20,7 +20,7 @@ final class commerce_showroom_hero_j16n1_test extends \advanced_testcase {
         $defaults = file_get_contents(
             $root . 'classes/commerce/showroom/cms/CommerceShowroomBlockDefaultsCatalog.php'
         );
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
         $css = file_get_contents($root . 'styles/showroom.css');
         $js = file_get_contents($root . 'amd/src/showroom.js');
 

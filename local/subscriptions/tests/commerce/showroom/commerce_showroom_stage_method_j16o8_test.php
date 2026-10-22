@@ -57,7 +57,7 @@ final class commerce_showroom_stage_method_j16o8_test extends \advanced_testcase
 
         $css = file_get_contents($CFG->dirroot . '/local/subscriptions/styles/showroom.css');
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
 
         self::assertStringContainsString(

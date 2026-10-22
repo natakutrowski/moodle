@@ -7,7 +7,7 @@ namespace local_subscriptions\commerce\trial;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\subscription_manager;
-use local_subscriptions\trial_manager;
+use local_subscriptions\trial\TrialLegacyConversionEligibilityService;
 
 /**
  * Determines whether a Native product belongs to the Legacy Trial course scope.
@@ -29,8 +29,7 @@ final class CommerceTrialProductEligibilityService {
         if (
             $userid <= 0 ||
             trim($productsku) === '' ||
-            trial_manager::user_has_active_trial($userid) === null ||
-            !trial_manager::is_discount_window_open($userid)
+            !(new TrialLegacyConversionEligibilityService($this->db))->is_eligible($userid)
         ) {
             return false;
         }

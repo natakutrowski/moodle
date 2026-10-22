@@ -18,6 +18,23 @@ final class CommerceShowroomProductLinkOptions {
     private CommerceProductRepository $products;
     private \moodle_database $database;
 
+    /** Historical role/type contracts preserved for the Verbs Showroom. */
+    private const LEGACY_ROLE_TYPES = [
+        'course' => CommerceProductType::COURSE_ACCESS,
+        'pdf' => CommerceProductType::DIGITAL_DOWNLOAD,
+        'bundle' => CommerceProductType::BUNDLE,
+    ];
+
+    /** Additional strict A1 roles introduced in 7.98E.7.2. */
+    private const STRICT_ROLE_TYPES = [
+        'course' => CommerceProductType::COURSE_ACCESS,
+        'course_fr' => CommerceProductType::COURSE_ACCESS,
+        'course_ru' => CommerceProductType::COURSE_ACCESS,
+        'pdf' => CommerceProductType::DIGITAL_DOWNLOAD,
+        'bundle' => CommerceProductType::BUNDLE,
+    ];
+
+
     public function __construct(\moodle_database $db) {
         $this->database = $db;
         $this->products = new CommerceProductRepository(
@@ -27,23 +44,83 @@ final class CommerceShowroomProductLinkOptions {
     }
 
     /**
+     * Compatibility helper for the historical three-role configuration.
+     *
      * @return array<string,array<string,string>>
      */
     public function grouped_options(array $current = []): array {
-        return [
-            'course' => $this->options_for_type(
-                CommerceProductType::COURSE_ACCESS,
-                (string)($current['course'] ?? '')
-            ),
-            'pdf' => $this->options_for_type(
-                CommerceProductType::DIGITAL_DOWNLOAD,
-                (string)($current['pdf'] ?? '')
-            ),
-            'bundle' => $this->options_for_type(
-                CommerceProductType::BUNDLE,
-                (string)($current['bundle'] ?? '')
-            ),
-        ];
+        $result = [];
+        foreach (self::LEGACY_ROLE_TYPES as $role => $type) {
+            $result[$role] = $this->options_for_type(
+                $type,
+                (string)($current[$role] ?? '')
+            );
+        }
+        return $result;
+    }
+
+    /** @return array<string,string> */
+    public function options_for_role(string $role, string $current = ''): array {
+        $role = CommerceShowroomProductConfig::normalise_role($role);
+        if ($role === null) {
+            throw new \invalid_parameter_exception('Invalid Showroom product role.');
+        }
+
+        if (isset(self::STRICT_ROLE_TYPES[$role])) {
+            return $this->options_for_type(self::STRICT_ROLE_TYPES[$role], $current);
+        }
+
+        return $this->all_options($current);
+    }
+
+    /** @return array<string,string> */
+    public function all_options(string $current = ''): array {
+        $options = [];
+        foreach ($this->products->find_all() as $product) {
+            $suffix = $product->is_active()
+                ? ''
+                : ' · ' . $product->get_status();
+            $label = CommerceCatalogProductNameResolver::resolve_native_id(
+                $this->database,
+                (int)$product->get_id(),
+                $product->get_name()
+            );
+            $options[$product->get_sku()] = '[' . $product->get_type() . '] ' . $label . $suffix;
+        }
+
+        $current = strtoupper(trim($current));
+        if ($current !== '' && !isset($options[$current])) {
+            $options[$current] = $current . ' — association actuelle (hors catalogue Native)';
+        }
+
+        return $options;
+    }
+
+    /**
+     * Validate a role/SKU relationship while preserving the stricter legacy
+     * type contracts for course/pdf/bundle.
+     */
+    public function normalise_role_sku(string $role, string $sku): string {
+        $role = CommerceShowroomProductConfig::normalise_role($role);
+        if ($role === null) {
+            throw new \invalid_parameter_exception('Invalid Showroom product role.');
+        }
+
+        if (isset(self::STRICT_ROLE_TYPES[$role])) {
+            return $this->normalise_sku($sku, self::STRICT_ROLE_TYPES[$role]);
+        }
+
+        $sku = strtoupper(trim($sku));
+        if ($sku === '') {
+            return '';
+        }
+
+        $product = $this->products->find_by_sku($sku);
+        if ($product === null) {
+            throw new \invalid_parameter_exception('Unknown linked Commerce product: ' . $sku);
+        }
+
+        return $product->get_sku();
     }
 
     /**

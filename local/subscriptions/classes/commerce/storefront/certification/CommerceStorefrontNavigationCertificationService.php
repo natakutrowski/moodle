@@ -106,17 +106,17 @@ final class CommerceStorefrontNavigationCertificationService {
             $root . 'templates/storefront/product_commerce_panel.mustache'
         );
         $checks[] = $this->check(
-            str_contains(
-                $returnresolver,
-                'CommerceProductDiscoveryUrlResolver::is_published_showroom($showroomkey)'
-            )
+            str_contains($returnresolver, 'CommerceShowroomPublishedDefinitionResolver')
+                && str_contains($returnresolver, '->require($showroomkey)')
+                && str_contains($returnresolver, 'CommerceShowroomUrl::make(')
+                && str_contains($returnresolver, 'catch (\moodle_exception $exception)')
                 && str_contains($returnresolver, "if (\$from === 'shop')")
                 && !str_contains($returnresolver, 'redirect(')
                 && str_contains($productpage, "\$data['showbacklink']")
                 && str_contains($sectiontemplate, '{{#navigationparams}}')
                 && str_contains($paneltemplate, '{{#showbacklink}}'),
             'Contextual return navigation',
-            'Storefront returns safely to Shop or a published origin Showroom and preserves origin through currency changes.'
+            'Storefront returns safely to Shop or any published CMS Showroom and preserves origin through currency changes.'
         );
 
         $recommendationresolver = $this->read(

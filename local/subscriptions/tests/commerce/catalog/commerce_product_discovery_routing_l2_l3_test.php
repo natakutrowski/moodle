@@ -92,6 +92,32 @@ final class commerce_product_discovery_routing_l2_l3_test extends advanced_testc
         self::assertFalse($disabled['hasshowroom']);
     }
 
+    public function test_generic_cms_showroom_can_be_used_as_discovery_destination(): void {
+        $this->resetAfterTest(true);
+        $this->create_generic_showroom('articles-alf-test', 'articles-test-fr');
+
+        $metadata = [
+            'showroom' => [
+                'key' => 'articles-alf-test',
+                'discoverymode' => 'showroom',
+                'showstorefrontcta' => false,
+            ],
+        ];
+        $url = CommerceProductDiscoveryUrlResolver::resolve(
+            'COURSE_ACCESS.ARTICLES_TEST',
+            'course_access',
+            $metadata,
+            [],
+            null,
+            'fr'
+        );
+
+        self::assertStringContainsString('/articles-test-fr', $url->out(false));
+        self::assertTrue(
+            CommerceProductDiscoveryUrlResolver::is_published_showroom('articles-alf-test')
+        );
+    }
+
     public function test_owned_customer_product_page_explicitly_bypasses_showroom_discovery(): void {
         global $DB;
 
@@ -178,7 +204,7 @@ final class commerce_product_discovery_routing_l2_l3_test extends advanced_testc
         global $DB;
 
         $now = time();
-        $DB->insert_record('local_subs_showroom', (object)[
+        $showroomid = (int)$DB->insert_record('local_subs_showroom', (object)[
             'showroomkey' => self::SHOWROOM,
             'status' => $status,
             'name' => 'Third-group verbs',
@@ -190,6 +216,46 @@ final class commerce_product_discovery_routing_l2_l3_test extends advanced_testc
             'descriptionkey' => 'commerce_showroom_third_group_verbs_description',
             'productsjson' => '{}',
             'settingsjson' => '{}',
+            'timecreated' => $now,
+            'timemodified' => $now,
+            'usermodified' => null,
+        ]);
+        $this->insert_enabled_block($showroomid, $now);
+    }
+
+    private function create_generic_showroom(string $key, string $slugfr): void {
+        global $DB;
+
+        $now = time();
+        $showroomid = (int)$DB->insert_record('local_subs_showroom', (object)[
+            'showroomkey' => $key,
+            'status' => 'published',
+            'name' => 'Generic CMS showroom',
+            'template' => 'local_subscriptions/showroom/default',
+            'slugfr' => $slugfr,
+            'slugen' => 'articles-test-en',
+            'slugru' => 'articles-test-ru',
+            'titlekey' => '',
+            'descriptionkey' => '',
+            'productsjson' => '{}',
+            'settingsjson' => '{}',
+            'timecreated' => $now,
+            'timemodified' => $now,
+            'usermodified' => null,
+        ]);
+        $this->insert_enabled_block($showroomid, $now);
+    }
+
+    private function insert_enabled_block(int $showroomid, int $now): void {
+        global $DB;
+
+        $DB->insert_record('local_subs_showroom_block', (object)[
+            'showroomid' => $showroomid,
+            'blockkey' => 'hero',
+            'blocktype' => 'hero',
+            'sortorder' => 10,
+            'enabled' => 1,
+            'configjson' => '{}',
             'timecreated' => $now,
             'timemodified' => $now,
             'usermodified' => null,

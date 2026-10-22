@@ -442,6 +442,7 @@ function local_subscriptions_pluginfile(
         \local_subscriptions\commerce\storefront\content\CommerceStorefrontContentFileService::FILEAREA,
         \local_subscriptions\commerce\mail\template\studio\CommerceMailHeaderImageService::FILEAREA,
         \local_subscriptions\commerce\mail\library\CommerceMailLibraryHeaderImageService::FILEAREA,
+        \local_subscriptions\commerce\mail\library\CommerceMailLibraryAlfDonationFooterImageService::FILEAREA,
         \local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferMailImageService::FILEAREA,
         \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailBannerService::FILEAREA,
         \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailFooterImageService::FILEAREA,
@@ -488,6 +489,7 @@ function local_subscriptions_pluginfile(
     if (in_array($filearea, [
         \local_subscriptions\commerce\mail\template\studio\CommerceMailHeaderImageService::FILEAREA,
         \local_subscriptions\commerce\mail\library\CommerceMailLibraryHeaderImageService::FILEAREA,
+        \local_subscriptions\commerce\mail\library\CommerceMailLibraryAlfDonationFooterImageService::FILEAREA,
     ], true)) {
         if (count($args) < 2) {
             return false;

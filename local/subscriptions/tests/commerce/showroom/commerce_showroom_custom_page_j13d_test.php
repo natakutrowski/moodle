@@ -26,7 +26,7 @@ final class commerce_showroom_custom_page_j13d_test extends \advanced_testcase {
         $template = file_get_contents(
             $CFG->dirroot
                 . '/local/subscriptions/templates/showroom/'
-                . 'third_group_verbs.mustache'
+                . 'default.mustache'
         );
         $css = file_get_contents(
             $CFG->dirroot . '/local/subscriptions/styles/showroom.css'
@@ -44,10 +44,11 @@ final class commerce_showroom_custom_page_j13d_test extends \advanced_testcase {
 
     public function test_bundle_is_presented_as_featured_offer(): void {
         global $CFG;
-        $presenter = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomPresenter.php');
+        $profile = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomThirdGroupVerbsPresentationProfile.php');
         $configuration = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/cms/CommerceShowroomBlockConfigurationPresenter.php');
-        self::assertStringContainsString("\$offer['isfeatured'] = \$role === 'bundle'", $presenter);
-        self::assertStringContainsString("\$featuredrole = \$this->text(\$config, 'featuredrole', 'bundle')", $configuration);
+        self::assertStringContainsString("\$offer['isfeatured'] = \$role === 'bundle'", $profile);
+        self::assertStringContainsString("\$defaultfeatured = in_array('bundle', \$available, true)", $configuration);
+        self::assertStringContainsString("\$role . 'featuredlabel'", $configuration);
 
 
     }

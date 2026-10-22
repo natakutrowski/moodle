@@ -136,4 +136,14 @@ $capabilities = [
         ],
     ],
 
+    'local/subscriptions:manage_purchase_notes' => [
+        'captype' => 'write', 'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => ['manager' => CAP_ALLOW],
+    ],
+    'local/subscriptions:manage_crm_roles' => [
+        'riskbitmask' => RISK_CONFIG | RISK_PERSONAL,
+        'captype' => 'write', 'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+
 ];

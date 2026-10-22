@@ -68,6 +68,64 @@ final class CurrencyFormatter {
         return $currency === '' ? $number : $number . "\u{00A0}" . $currency;
     }
 
+    /**
+     * Format a minor-unit amount using an explicit customer language.
+     *
+     * Transactional emails are rendered outside the browser/session locale and
+     * must not depend on the language packs installed for the PHPUnit process.
+     */
+    public static function format_minor_for_language(
+        int $amountminor,
+        string $currency,
+        string $language
+    ): string {
+        $currency = Currency::sanitize($currency);
+        $number = self::format_minor_number_for_language($amountminor, $currency, $language);
+        $symbol = Currency::display_symbol($currency);
+
+        if ($currency === '' || $symbol === '') {
+            return $number;
+        }
+
+        return Currency::symbol_position($currency) === 'before'
+            ? $symbol . "\u{00A0}" . $number
+            : $number . "\u{00A0}" . $symbol;
+    }
+
+    /** Format a minor-unit amount with its ISO code for an explicit language. */
+    public static function format_minor_code_for_language(
+        int $amountminor,
+        string $currency,
+        string $language
+    ): string {
+        $currency = Currency::sanitize($currency);
+        $number = self::format_minor_number_for_language($amountminor, $currency, $language);
+        return $currency === '' ? $number : $number . "\u{00A0}" . $currency;
+    }
+
+    /** Format only the numeric major-unit part for an explicit language. */
+    public static function format_minor_number_for_language(
+        int $amountminor,
+        string $currency,
+        string $language
+    ): string {
+        $language = self::base_language($language);
+        if (!in_array($language, ['fr', 'en', 'ru'], true)) {
+            return self::format_minor_number($amountminor, $currency);
+        }
+
+        $exponent = Currency::minor_unit_exponent($currency);
+        $major = self::minor_to_major_string($amountminor, $exponent);
+        $decimalseparator = $language === 'en' ? '.' : ',';
+        $thousandsseparator = $language === 'en' ? ',' : "\u{00A0}";
+        return self::format_decimal_string_with_separators(
+            $major,
+            $exponent,
+            $decimalseparator,
+            $thousandsseparator
+        );
+    }
+
     /** Format only the numeric major-unit part of an integer minor-unit amount. */
     public static function format_minor_number(int $amountminor, string $currency): string {
         $exponent = Currency::minor_unit_exponent($currency);
@@ -96,6 +154,25 @@ final class CurrencyFormatter {
             return $formattedwhole;
         }
         return $formattedwhole . get_string('decsep', 'langconfig') . str_pad($fraction, $decimals, '0');
+    }
+
+    private static function format_decimal_string_with_separators(
+        string $amount,
+        int $decimals,
+        string $decimalseparator,
+        string $thousandsseparator
+    ): string {
+        [$whole, $fraction] = array_pad(explode('.', $amount, 2), 2, '');
+        $formattedwhole = number_format((int)$whole, 0, '.', $thousandsseparator);
+        if ($decimals === 0) {
+            return $formattedwhole;
+        }
+        return $formattedwhole . $decimalseparator . str_pad($fraction, $decimals, '0');
+    }
+
+    private static function base_language(string $language): string {
+        $language = strtolower(trim(str_replace('-', '_', $language)));
+        return explode('_', $language)[0] ?: 'fr';
     }
 
     /** Convert HTML-style langconfig separators into their actual text character. */

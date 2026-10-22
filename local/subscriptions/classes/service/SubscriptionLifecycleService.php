@@ -8,6 +8,7 @@ use local_subscriptions\constants\Status;
 use local_subscriptions\commerce\mail\legacy\CommerceLegacyAutomaticMailPolicy;
 use local_subscriptions\mailer;
 use local_subscriptions\subscription_manager;
+use local_subscriptions\trial\TrialAccessRevocationService;
 
 final class SubscriptionLifecycleService {
 
@@ -102,8 +103,19 @@ final class SubscriptionLifecycleService {
         return true;
     }
 
-    public function expire(int $subscriptionid, int $now): bool {
+    /**
+     * Expire a subscription.
+     *
+     * For Trial subscriptions, $trialaccessresult receives the exact access
+     * revocation metrics produced by TrialAccessRevocationService. Existing
+     * callers can ignore this optional output parameter.
+     *
+     * @param array{courses:int,roles_removed:int,enrolments_suspended:int,courses_preserved:int}|null $trialaccessresult
+     */
+    public function expire(int $subscriptionid, int $now, ?array &$trialaccessresult = null): bool {
         global $DB;
+
+        $trialaccessresult = null;
 
         $subscription = $DB->get_record(
             'user_subscription',
@@ -130,10 +142,21 @@ final class SubscriptionLifecycleService {
             throw new \RuntimeException('Expiration plan is missing.');
         }
 
-        subscription_manager::suspend_user_in_plan_courses(
-            (int) $subscription->userid,
-            (int) $subscription->planid,
-        );
+        if (!empty($plan->is_trial)) {
+            // 7.98D4 — Trial and paid access may share the same manual enrolment.
+            // Revoke only the Trial role and suspend the enrolment when no stronger
+            // access path still exists for that course.
+            $trialaccessresult = TrialAccessRevocationService::create()->revoke_user_from_plan(
+                (int) $subscription->userid,
+                (int) $subscription->planid,
+                $now,
+            );
+        } else {
+            subscription_manager::suspend_user_in_plan_courses(
+                (int) $subscription->userid,
+                (int) $subscription->planid,
+            );
+        }
 
         $updated = $DB->set_field_select(
             'user_subscription',

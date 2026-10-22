@@ -28,6 +28,7 @@ final class CommerceSectionNavigationRenderer {
     public const PERSONAL_OFFERS = CommerceSectionNavigationRegistry::PERSONAL_OFFERS;
     public const GRANTS = CommerceSectionNavigationRegistry::GRANTS;
     public const STATISTICS = CommerceSectionNavigationRegistry::STATISTICS;
+    public const TRIAL = CommerceSectionNavigationRegistry::TRIAL;
     public const CONFIGURATION = CommerceSectionNavigationRegistry::CONFIGURATION;
 
     public static function render(string $activekey, ?context $context = null): string {

@@ -9,8 +9,11 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\mail\admin\CommerceMailSectionNavigationRenderer;
 use local_subscriptions\commerce\mail\builder\CommerceMailBuilder;
 use local_subscriptions\commerce\mail\builder\CommerceMailBuilderEditorRenderer;
+use local_subscriptions\commerce\mail\CommerceMailType;
 use local_subscriptions\commerce\mail\library\CommerceMailLibrary;
+use local_subscriptions\commerce\mail\library\CommerceMailLibraryAlfDonationFooterImageService;
 use local_subscriptions\commerce\mail\library\CommerceMailLibraryRepository;
+use local_subscriptions\commerce\mail\transactional\CommerceTransactionalMailStudioBridge;
 use local_subscriptions\commerce\personaloffer\mail\CommercePersonalOfferCampaignMailVariableResolver;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
@@ -25,6 +28,14 @@ $id = optional_param('id', 0, PARAM_INT);
 $repository = new CommerceMailLibraryRepository($DB);
 $record = $id > 0 ? $repository->get($id) : null;
 $contents = $record ? $repository->contents((int)$record->id) : [];
+$isalfdonationreceipttemplate = $record !== null
+    && (string)$record->runtimekey === CommerceTransactionalMailStudioBridge::runtime_key(
+        CommerceMailType::PURCHASE_RECEIPT
+    );
+$alfdonationfooterimages = new CommerceMailLibraryAlfDonationFooterImageService();
+$alfdonationfooterimageurl = $isalfdonationreceipttemplate
+    ? $alfdonationfooterimages->url((int)$record->id)
+    : '';
 $listurl = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/index.php');
 $pageurl = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/library_edit.php', $id > 0 ? ['id' => $id] : []);
 $requestedlanguage = optional_param('lang', 'fr', PARAM_ALPHA);
@@ -86,6 +97,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'runtimekey' => $record->runtimekey ?? null,
         'metadata' => $metadata,
     ], $translations, (int)$USER->id, $record ? (int)$record->id : null);
+
+    if ($isalfdonationreceipttemplate) {
+        if (optional_param('remove_alf_donation_footer_image', 0, PARAM_BOOL)) {
+            $alfdonationfooterimages->delete((int)$saved->id);
+        }
+        $upload = $_FILES['alf_donation_footer_image'] ?? null;
+        if (is_array($upload)
+                && (int)($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+            $alfdonationfooterimages->save_uploaded_file((int)$saved->id, $upload);
+        }
+    }
+
     redirect(
         new moodle_url('/local/subscriptions/admin/commerce/mail/templates/library_edit.php', ['id' => (int)$saved->id]),
         get_string('changessaved'), null, \core\output\notification::NOTIFY_SUCCESS
@@ -110,7 +133,12 @@ foreach (CommerceMailLibrary::statuses() as $item) {
     $statusoptions[$item] = get_string('commerce_mail_library_status_' . $item, 'local_subscriptions');
 }
 
-$form = html_writer::start_tag('form', ['method' => 'post', 'action' => $pageurl->out(false), 'class' => 'commerce-mail-library-edit-form']);
+$form = html_writer::start_tag('form', [
+    'method' => 'post',
+    'action' => $pageurl->out(false),
+    'class' => 'commerce-mail-library-edit-form',
+    'enctype' => 'multipart/form-data',
+]);
 $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 $form .= html_writer::div(
     html_writer::div(
@@ -360,6 +388,73 @@ foreach (CommerceMailLibrary::LANGUAGES as $language) {
     $form .= html_writer::end_div();
 }
 $form .= html_writer::end_div();
+
+if ($isalfdonationreceipttemplate) {
+    $imagepreview = $alfdonationfooterimageurl !== ''
+        ? html_writer::div(
+            html_writer::empty_tag('img', [
+                'src' => $alfdonationfooterimageurl,
+                'alt' => 'Alf',
+                'style' => 'display:block;max-width:360px;width:100%;height:auto;border-radius:16px;',
+            ])
+            . html_writer::div(
+                get_string('commerce_mail_alf_donation_footer_current', 'local_subscriptions'),
+                'small text-muted mt-2'
+            ),
+            'mb-3'
+        )
+        : '';
+
+    $removecontrol = $alfdonationfooterimageurl !== ''
+        ? html_writer::div(
+            html_writer::empty_tag('input', [
+                'id' => 'remove-alf-donation-footer-image',
+                'type' => 'checkbox',
+                'name' => 'remove_alf_donation_footer_image',
+                'value' => '1',
+                'class' => 'form-check-input me-2',
+            ])
+            . html_writer::tag(
+                'label',
+                get_string('commerce_mail_alf_donation_footer_remove', 'local_subscriptions'),
+                ['for' => 'remove-alf-donation-footer-image', 'class' => 'form-check-label']
+            ),
+            'form-check mt-3'
+        )
+        : '';
+
+    $form .= html_writer::div(
+        html_writer::tag(
+            'h3',
+            get_string('commerce_mail_alf_donation_footer_title', 'local_subscriptions'),
+            ['class' => 'h5 mb-2']
+        )
+        . html_writer::tag(
+            'p',
+            get_string('commerce_mail_alf_donation_footer_help', 'local_subscriptions'),
+            ['class' => 'text-muted mb-3']
+        )
+        . $imagepreview
+        . html_writer::tag(
+            'label',
+            get_string('commerce_mail_alf_donation_footer_file', 'local_subscriptions'),
+            ['for' => 'alf-donation-footer-image', 'class' => 'form-label']
+        )
+        . html_writer::empty_tag('input', [
+            'id' => 'alf-donation-footer-image',
+            'type' => 'file',
+            'name' => 'alf_donation_footer_image',
+            'accept' => 'image/jpeg,image/png,image/webp',
+            'class' => 'form-control',
+        ])
+        . html_writer::div(
+            get_string('commerce_mail_alf_donation_footer_file_help', 'local_subscriptions'),
+            'form-text'
+        )
+        . $removecontrol,
+        'card card-body mt-4 commerce-mail-alf-donation-footer-image'
+    );
+}
 
 CommerceMailBuilderEditorRenderer::require_copy_behaviour($PAGE);
 

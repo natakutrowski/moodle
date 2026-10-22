@@ -41,7 +41,7 @@ final class commerce_performance_certification_j15h3_test extends \advanced_test
         global $CFG;
 
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
         $styles = file_get_contents(
             $CFG->dirroot . '/local/subscriptions/styles/showroom.css'

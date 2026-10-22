@@ -10,8 +10,9 @@ use local_subscriptions\commerce\catalog\presentation\CommerceCatalogProductName
 use local_subscriptions\commerce\catalog\presentation\CommerceProductDiscoveryUrlResolver;
 use local_subscriptions\commerce\catalog\rendering\CommerceProductEditorNavigationRenderer;
 use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
-use local_subscriptions\commerce\showroom\CommerceShowroomRegistry;
 use local_subscriptions\commerce\storefront\admin\CommerceStorefrontDistributionService;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomCmsRepository;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitionResolver;
 use local_subscriptions\commerce\storefront\admin\CommerceStorefrontPageEditor;
 use local_subscriptions\commerce\storefront\experience\CommerceStorefrontExperienceResolver;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
@@ -258,12 +259,30 @@ $showroomoptions = [
         'local_subscriptions'
     ),
 ];
-foreach (CommerceShowroomRegistry::definitions() as $key => $definition) {
-    $showroomoptions[$key] = get_string(
-        $definition->get_title_key(),
-        'local_subscriptions'
-    );
+$showroomrepository = new CommerceShowroomCmsRepository($DB);
+$showroomresolver = new CommerceShowroomPublishedDefinitionResolver($DB);
+foreach ($showroomrepository->all() as $candidate) {
+    if ((string)$candidate->status !== 'published') {
+        continue;
+    }
+
+    $key = strtolower(trim((string)$candidate->showroomkey));
+    if ($key === '') {
+        continue;
+    }
+
+    try {
+        // Keep the selector aligned with the public resolver: only genuinely
+        // public Showrooms with at least one enabled block are selectable.
+        $showroomresolver->require($key);
+    } catch (\moodle_exception $exception) {
+        continue;
+    }
+
+    $label = trim((string)$candidate->name);
+    $showroomoptions[$key] = $label !== '' ? $label : $key;
 }
+asort($showroomoptions, SORT_NATURAL | SORT_FLAG_CASE);
 
 $productoptions = [];
 foreach ($manager->list_products(null, 'active') as $summary) {

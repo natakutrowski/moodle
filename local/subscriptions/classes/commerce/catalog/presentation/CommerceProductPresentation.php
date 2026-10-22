@@ -32,6 +32,7 @@ final class CommerceProductPresentation {
             'digital_download' => 'crm-commerce-badge-digital',
             'bundle' => 'crm-commerce-badge-bundle',
             'service' => 'crm-commerce-badge-service',
+            'donation' => 'crm-commerce-badge-donation',
             default => 'crm-commerce-badge-neutral',
         };
 

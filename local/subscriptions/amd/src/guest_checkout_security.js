@@ -528,6 +528,13 @@ const initialiseIdentityForm = () => {
 
                 if (otp instanceof HTMLElement) {
                     otp.hidden = false;
+                    otp.classList.remove(
+                        'is-delivery-failed'
+                    );
+                }
+
+                if (otpCode instanceof HTMLInputElement) {
+                    otpCode.disabled = false;
                 }
 
                 setOtpStatus(
@@ -555,7 +562,28 @@ const initialiseIdentityForm = () => {
             }
 
             if (payload.code === 'delivery_failed') {
+                // No code exists after a transport failure. Keep the identity
+                // editable/retryable, make the failure explicit and prevent
+                // the empty OTP input from suggesting that a code was sent.
+                lastIssuedSignature = '';
                 setResendCountdown(0);
+
+                if (otp instanceof HTMLElement) {
+                    otp.classList.add(
+                        'is-delivery-failed'
+                    );
+                }
+
+                if (otpCode instanceof HTMLInputElement) {
+                    otpCode.value = '';
+                    otpCode.disabled = true;
+                }
+
+                setOtpStatus(
+                    copy('otpDeliveryFailed'),
+                    'error'
+                );
+                return;
             }
 
             setOtpStatus(

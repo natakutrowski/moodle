@@ -11,7 +11,7 @@ final class commerce_showroom_exercise_mobile_presenter_j16c4_test extends \adva
         global $CFG;
 
         $source = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomPresenter.php'
+            $CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomThirdGroupVerbsPresentationProfile.php'
         );
 
         self::assertIsString($source);

@@ -29,6 +29,7 @@ final class CommerceProductTypeRegistry {
             new DigitalDownloadProductType(),
             new BundleProductType(),
             new ServiceProductType(),
+            new DonationProductType(),
         ]);
     }
 

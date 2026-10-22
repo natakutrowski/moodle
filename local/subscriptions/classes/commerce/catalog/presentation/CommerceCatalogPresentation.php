@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 use html_writer;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogFulfillment;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogPrice;
+use local_subscriptions\commerce\catalog\domain\CommerceProductType;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
 use local_subscriptions\commerce\pricing\CommerceProductPromotionService;
 use local_subscriptions\currency\CurrencyFormatter;
@@ -38,7 +39,7 @@ final class CommerceCatalogPresentation {
             'technical' => ['valid' => 'text-bg-success', 'incomplete' => 'text-bg-warning', 'error' => 'text-bg-danger'],
             'origin' => ['native' => 'text-bg-primary', 'legacy_plan' => 'text-bg-secondary', 'legacy_digital' => 'text-bg-secondary'],
             'lifecycle' => ['active' => 'text-bg-success', 'inactive' => 'text-bg-secondary', 'archived' => 'text-bg-dark'],
-            'type' => ['course_access' => 'text-bg-primary', 'digital_download' => 'text-bg-info', 'bundle' => 'text-bg-success', 'service' => 'text-bg-warning'],
+            'type' => ['course_access' => 'text-bg-primary', 'digital_download' => 'text-bg-info', 'bundle' => 'text-bg-success', 'service' => 'text-bg-warning', 'donation' => 'text-bg-danger'],
         ];
         $class = $classes[$dimension][$value] ?? 'text-bg-secondary';
         return html_writer::span(self::label($dimension, $value), 'badge rounded-pill ' . $class);
@@ -54,7 +55,8 @@ final class CommerceCatalogPresentation {
      */
     public static function prices(
         array $prices,
-        array $productmetadata = []
+        array $productmetadata = [],
+        ?string $producttype = null
     ): string {
         if ($prices === []) {
             return html_writer::span(get_string('none'), 'text-muted');
@@ -64,11 +66,13 @@ final class CommerceCatalogPresentation {
         $items = [];
 
         foreach ($prices as $price) {
-            $promotion = $promotionresolver->resolve(
-                $productmetadata,
-                $price->get_currency(),
-                $price->get_amount_minor()
-            );
+            $promotion = CommerceProductType::normalise((string)$producttype) === CommerceProductType::DONATION
+                ? []
+                : $promotionresolver->resolve(
+                    $productmetadata,
+                    $price->get_currency(),
+                    $price->get_amount_minor()
+                );
             $effectiveamountminor = (int)(
                 $promotion['amountminor']
                 ?? $price->get_amount_minor()

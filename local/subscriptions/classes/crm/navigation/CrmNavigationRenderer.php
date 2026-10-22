@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 use context;
 use context_system;
 use html_writer;
+use local_subscriptions\admin\Capabilities;
 use local_subscriptions\crm\inbox\services\InboxUnreadCountService;
 
 /**
@@ -64,8 +65,9 @@ final class CrmNavigationRenderer {
             return '';
         }
 
-        $inboxunread = $this->unreadcount
-            ->count();
+        $inboxunread = has_capability(Capabilities::VIEW_INBOX, $context)
+            ? $this->unreadcount->count()
+            : 0;
 
         $listitems = [];
 

@@ -9,7 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 final class commerce_showroom_certification_j13h1_test extends \advanced_testcase {
     public function test_showroom_hero_is_clean_and_currency_is_near_offers(): void {
         global $CFG;
-        $source = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache');
+        $source = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache');
         self::assertIsString($source);
         self::assertStringNotContainsString('commerce-showroom-hero__topline', $source);
         self::assertStringNotContainsString('{{shoplabel}}', $source);

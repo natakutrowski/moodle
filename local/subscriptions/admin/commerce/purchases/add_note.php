@@ -7,7 +7,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseActionServiceFactory;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
 
-$context = AdminSecurity::require(Capabilities::VIEW_PAYMENTS);
+$context = AdminSecurity::require(Capabilities::MANAGE_PURCHASE_NOTES);
 require_sesskey();
 $id = required_param('id', PARAM_INT);
 $note = required_param('note', PARAM_RAW_TRIMMED);

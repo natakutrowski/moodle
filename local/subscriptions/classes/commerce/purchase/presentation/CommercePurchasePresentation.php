@@ -78,20 +78,27 @@ final class CommercePurchasePresentation {
         int $totalminor,
         string $commercialstatus,
         string $paymentstatus,
-        string $fulfillmentstatus
+        string $fulfillmentstatus,
+        bool $fulfillmentapplicable = true,
+        ?string $accessstatusoverride = null
     ): array {
         $paymentvalue = $totalminor === 0
             ? get_string('commerce_purchase_payment_not_required', 'local_subscriptions')
             : self::technical_status_label('payment', $paymentstatus);
 
         $deliverystatus = $fulfillmentstatus === 'none' ? 'not_started' : $fulfillmentstatus;
-        $accessstatus = match (strtolower(trim($fulfillmentstatus))) {
+        $derivedaccessstatus = match (strtolower(trim($fulfillmentstatus))) {
             'completed', 'fulfilled', 'active', 'succeeded', 'success' => 'active',
             'failed', 'error', 'cancelled', 'canceled' => 'blocked',
             default => 'pending',
         };
+        $accessstatus = trim((string)$accessstatusoverride) !== ''
+            ? self::safe_key((string)$accessstatusoverride)
+            : $derivedaccessstatus;
+        $notapplicable = get_string('commerce_purchase_status_not_applicable', 'local_subscriptions');
 
-        $ordervalue = $totalminor === 0 && $commercialstatus === CommerceCommercialStatus::PAID
+        $ordervalue = (!$fulfillmentapplicable && $commercialstatus === CommerceCommercialStatus::FULFILLED)
+            || ($totalminor === 0 && $commercialstatus === CommerceCommercialStatus::PAID)
             ? get_string('commerce_purchase_order_status_completed', 'local_subscriptions')
             : self::commercial_status_label($commercialstatus);
 
@@ -106,11 +113,15 @@ final class CommercePurchasePresentation {
             ],
             [
                 'label' => get_string('commerce_purchase_dimension_delivery', 'local_subscriptions'),
-                'value' => s(self::technical_status_label('fulfillment', $deliverystatus)),
+                'value' => s($fulfillmentapplicable
+                    ? self::technical_status_label('fulfillment', $deliverystatus)
+                    : $notapplicable),
             ],
             [
                 'label' => get_string('commerce_purchase_dimension_access', 'local_subscriptions'),
-                'value' => s(get_string('commerce_purchase_access_status_' . $accessstatus, 'local_subscriptions')),
+                'value' => s($fulfillmentapplicable
+                    ? get_string('commerce_purchase_access_status_' . $accessstatus, 'local_subscriptions')
+                    : $notapplicable),
             ],
         ];
     }
@@ -137,6 +148,7 @@ final class CommercePurchasePresentation {
             'subscription' => 'primary',
             'digital' => 'info text-dark',
             'bundle' => 'warning text-dark',
+            'donation' => 'danger',
             default => 'secondary',
         };
 

@@ -10520,5 +10520,143 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         );
     }
 
+    if ($oldversion < 2026100701) {
+        // 7.98E.1 — create the hidden A1 Showroom editorial foundation.
+        // This is intentionally idempotent and does not publish a public route.
+        // A0 is part of A1 itself: no separate product or entitlement is created.
+        $showroomtable = new xmldb_table('local_subs_showroom');
+        $blocktable = new xmldb_table('local_subs_showroom_block');
+        if ($dbman->table_exists($showroomtable) && $dbman->table_exists($blocktable)) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create($DB)
+                ->ensure(null);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026100701,
+            'local',
+            'subscriptions'
+        );
+    }
+
+
+    if ($oldversion < 2026100801) {
+        // 7.98E.2 — extend the existing A1 draft with the reusable Builder
+        // skeleton. Missing blocks are inserted disabled; editorial content is
+        // never overwritten and the showroom remains unpublished.
+        $showroomtable = new xmldb_table('local_subs_showroom');
+        $blocktable = new xmldb_table('local_subs_showroom_block');
+        if ($dbman->table_exists($showroomtable) && $dbman->table_exists($blocktable)) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create($DB)
+                ->ensure_builder_structure(null);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026100801,
+            'local',
+            'subscriptions'
+        );
+    }
+
+    if ($oldversion < 2026100802) {
+        // 7.98E.3 — seed the approved Russian A1 marketing copy (PPT slides 1–8).
+        // The service only fills empty draft blocks and never overwrites Builder edits.
+        if (class_exists('\local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService')) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create()
+                ->apply_editorial_seed_v1(null);
+        }
+
+        upgrade_plugin_savepoint(true, 2026100802, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026100803) {
+        // 7.98E.4 — seed the approved A1 programme (PPT slide 9) and journey map
+        // (slide 10). Existing Builder edits are preserved; the grammar syllabus
+        // remains empty because it is not present in the supplied source.
+        if (class_exists('\local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService')) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create()
+                ->apply_program_map_seed_v1(null);
+        }
+
+        upgrade_plugin_savepoint(true, 2026100803, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026100804) {
+        // 7.98E.5 — seed the included A0 preparation story (PPT slide 11) and
+        // the single dynamic A1 commercial offer (slide 12). A0 remains part
+        // of A1; no product, entitlement, amount or currency is created here.
+        if (class_exists('\local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService')) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create()
+                ->apply_preparation_offer_seed_v1(null);
+        }
+
+        upgrade_plugin_savepoint(true, 2026100804, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026100805) {
+        // 7.98E.6 — complete the review-ready A1 editorial baseline: FAQ and
+        // final CTA are enabled, Testimonials is prepared but stays disabled
+        // until real quotes are supplied, and missing layout defaults are added.
+        if (class_exists('\local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService')) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create()
+                ->apply_review_ready_seed_v1(null);
+        }
+
+        upgrade_plugin_savepoint(true, 2026100805, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026100806) {
+        // 7.98E.7 — prepare FR/EN copy, SEO metadata and draft public slugs.
+        // This does not publish the showroom and never overwrites existing
+        // translations, SEO values or slugs entered manually in the Builder.
+        if (class_exists('\local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService')) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create()
+                ->apply_multilingual_seo_seed_v1(null);
+        }
+
+        upgrade_plugin_savepoint(true, 2026100806, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026100807) {
+        // 7.98E.7.1 — normalise the multilingual curriculum schema. The A1
+        // grammar syllabus is intentionally not authored yet, but the FR/EN
+        // translation objects must still expose grammar="" for stable Builder
+        // and runtime consumers. Existing non-empty/manual values are preserved.
+        if (class_exists('\local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService')) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create()
+                ->apply_multilingual_seo_seed_v1(null);
+        }
+
+        upgrade_plugin_savepoint(true, 2026100807, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026100901) {
+        // 7.98E.7.2 — replace the temporary single A1 product binding with the
+        // two explicit Native products created for French/Russian support.
+        // Promotions are optional at this stage: the Showroom can already sell
+        // both products and will pick up promotion_join/capacity later when
+        // Pedagogy links are configured.
+        if (class_exists('\local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService')) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create()
+                ->apply_dual_offer_product_binding_v1(null);
+        }
+
+        upgrade_plugin_savepoint(true, 2026100901, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026100902) {
+        // 7.98E.7.3 — add a generic short Showroom alias and seed /a1 for the
+        // A1 Showroom. Canonical FR/EN/RU slugs remain language-specific for
+        // SEO/hreflang. The Showroom stays unpublished.
+        if (class_exists('\local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService')) {
+            \local_subscriptions\commerce\showroom\a1\CommerceA1ShowroomFoundationService::create()
+                ->apply_short_alias_v1(null);
+        }
+
+        upgrade_plugin_savepoint(true, 2026100902, 'local', 'subscriptions');
+    }
+
     return true;
 }

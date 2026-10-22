@@ -1,0 +1,81 @@
+<section id="showroom-journey-map" class="commerce-showroom-a1-block commerce-showroom-journey-map {{journeymaplayoutclass}}" style="--showroom-section-custom-background: {{journeymaplayoutbackgroundcolor}};">
+    {{#hasjourneymaplayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{journeymaplayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{journeymaplayoutbackgroundblur}}px;"><img src="{{journeymaplayoutbackgroundimageurl}}" alt="" loading="lazy"></span>{{/hasjourneymaplayoutbackgroundimage}}
+    <div class="commerce-showroom-container">
+        <header class="commerce-showroom-a1-heading">
+            <p>{{journeymapeyebrow}}</p>
+            <h2>{{journeymaptitle}} {{#journeymaptitleaccent}}<span>{{journeymaptitleaccent}}</span>{{/journeymaptitleaccent}}</h2>
+            <p>{{journeymaptext}}</p>
+        </header>
+        {{#journeymapinteractive}}
+        {{#hasjourneymapgeopoints}}
+        <div class="commerce-geo-map" data-showroom-geo-map>
+            <div class="commerce-geo-map__viewport">
+                <div class="commerce-geo-map__scroller" tabindex="0" aria-label="{{journeymaptitle}}">
+                    <div class="commerce-geo-map__canvas" role="group" aria-label="{{journeymaptitle}}">
+                        <img class="commerce-geo-map__background" src="{{journeymapbackground}}" alt="" loading="lazy" width="1476" height="1066">
+                        {{#journeymaplabels}}
+                            <span class="commerce-geo-map__label commerce-geo-map__label--{{key}}" aria-hidden="true" style="--geo-label-x:{{x}}%;--geo-label-y:{{y}}%;--geo-label-rotate:{{rotation}}deg;">{{text}}</span>
+                        {{/journeymaplabels}}
+                        {{#journeymapgeopoints}}
+                            <button class="commerce-geo-map__point" type="button"
+                                style="--geo-x:{{x}}%;--geo-y:{{y}}%;{{#hasdx}}--geo-dx:{{dx}}px;{{/hasdx}}{{#hasdy}}--geo-dy:{{dy}}px;{{/hasdy}}"
+                                data-geo-point data-number="{{number}}" data-place="{{place}}"
+                                data-caption="{{caption}}" data-photo="{{imageurl}}"
+                                data-latitude="{{latitude}}" data-longitude="{{longitude}}"
+                                aria-label="{{number}} — {{place}}: {{caption}}" aria-pressed="false">
+                                <span class="commerce-geo-map__exact" aria-hidden="true"></span>
+                                <span class="commerce-geo-map__connector" aria-hidden="true"></span>
+                                <span class="commerce-geo-map__bubble" aria-hidden="true">{{number}}</span>
+                            </button>
+                        {{/journeymapgeopoints}}
+                    </div>
+                </div>
+                <div class="commerce-geo-map__counter" aria-hidden="true">
+                    <strong>{{journeymapcounttitle}}</strong><span>{{journeymapcountsubtitle}}</span>
+                </div>
+                <div class="commerce-geo-map__hint" aria-hidden="true">{{journeymaphint}}</div>
+                <aside class="commerce-geo-map__detail" data-geo-detail hidden aria-live="polite">
+                    <img data-geo-photo alt="" loading="lazy">
+                    <div class="commerce-geo-map__detail-copy">
+                        <strong><span data-geo-adventure>{{journeymapadventurelabel}}</span> <span data-geo-number></span></strong>
+                        <h3 data-geo-place></h3>
+                        <p data-geo-caption></p>
+                    </div>
+                    <button class="commerce-geo-map__close" type="button" data-geo-close aria-label="{{journeymapcloselabel}}">×</button>
+                </aside>
+            </div>
+            <p class="commerce-geo-map__mobile-hint">{{journeymapswipehint}}</p>
+        </div>
+        {{/hasjourneymapgeopoints}}
+        {{/journeymapinteractive}}
+        {{^journeymapinteractive}}
+        {{#hasjourneymapimage}}
+            <figure class="commerce-showroom-journey-map__figure"><img src="{{journeymapimageurl}}" alt="" loading="lazy"></figure>
+        {{/hasjourneymapimage}}
+        {{#hasjourneymapstops}}
+            <ol class="commerce-showroom-journey-map__route" aria-label="{{journeymaptitle}}">
+                {{#journeymapstops}}
+                    <li>
+                        <span class="commerce-showroom-journey-map__pin" aria-hidden="true"></span>
+                        <span class="commerce-showroom-journey-map__stop-copy">
+                            <strong>{{place}}</strong>
+                            {{#hasregion}}<small>{{region}}</small>{{/hasregion}}
+                        </span>
+                        {{#hasarrow}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i>{{/hasarrow}}
+                    </li>
+                {{/journeymapstops}}
+            </ol>
+        {{/hasjourneymapstops}}
+        <div class="commerce-showroom-a1-cards commerce-showroom-a1-cards--4">
+            {{#journeymapitems}}
+                <article>
+                    <span><i class="{{icon}}" aria-hidden="true"></i></span>
+                    <h3>{{title}}</h3>
+                    <p>{{text}}</p>
+                </article>
+            {{/journeymapitems}}
+        </div>
+        {{#hasjourneymapnote}}<p class="commerce-showroom-a1-note">{{journeymapnote}}</p>{{/hasjourneymapnote}}
+        {{/journeymapinteractive}}
+    </div>
+</section>

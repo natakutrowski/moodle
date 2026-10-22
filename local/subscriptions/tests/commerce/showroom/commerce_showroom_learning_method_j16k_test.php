@@ -21,7 +21,7 @@ final class commerce_showroom_learning_method_j16k_test extends \advanced_testca
             $root . 'classes/commerce/showroom/cms/CommerceShowroomBlockDefaultsCatalog.php'
         );
         $template = file_get_contents(
-            $root . 'templates/showroom/third_group_verbs.mustache'
+            $root . 'templates/showroom/default.mustache'
         );
         $css = file_get_contents($root . 'styles/showroom.css');
 

@@ -34,7 +34,7 @@ final class WorkSectionNavigationRenderer {
                     subscription_config::
                         admin_work_items_page()
                 ),
-                'visible' => true,
+                'visible' => AdminSecurity::can(Capabilities::VIEW_WORK_ITEMS),
             ],
             [
                 'key' => self::CREATE,

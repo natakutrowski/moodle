@@ -1,0 +1,12 @@
+<section id="showroom-adventure" class="commerce-showroom-a1-block commerce-showroom-adventure-overview {{adventureoverviewlayoutclass}}" style="--showroom-section-custom-background: {{adventureoverviewlayoutbackgroundcolor}};">
+    {{#hasadventureoverviewlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{adventureoverviewlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{adventureoverviewlayoutbackgroundblur}}px;"><img src="{{adventureoverviewlayoutbackgroundimageurl}}" alt="" loading="lazy"></span>{{/hasadventureoverviewlayoutbackgroundimage}}
+    <div class="commerce-showroom-container">
+        <header class="commerce-showroom-a1-heading">{{#adventureeyebrow}}<p class="commerce-showroom-adventure-overview__badge"><i class="fa-solid fa-route" aria-hidden="true"></i><span>{{adventureeyebrow}}</span></p>{{/adventureeyebrow}}<h2>{{adventuretitle}} {{#adventuretitleaccent}}<span>{{adventuretitleaccent}}</span>{{/adventuretitleaccent}}</h2><div>{{adventuretext}}</div></header>
+        <div class="commerce-showroom-adventure-overview__layout">
+            <div class="commerce-showroom-adventure-overview__items commerce-showroom-adventure-overview__items--left">{{#adventureleftitems}}<article><span><i class="{{icon}}" aria-hidden="true"></i></span><div><h3>{{title}}</h3><p>{{text}}</p></div></article>{{/adventureleftitems}}</div>
+            <figure class="commerce-showroom-adventure-overview__visual">{{#hasadventurecenterimage}}<img src="{{adventurecenterimageurl}}" alt="" loading="lazy">{{/hasadventurecenterimage}}{{#adventurecenterlabel}}<figcaption>{{adventurecenterlabel}}</figcaption>{{/adventurecenterlabel}}</figure>
+            <div class="commerce-showroom-adventure-overview__items commerce-showroom-adventure-overview__items--right">{{#adventurerightitems}}<article><span><i class="{{icon}}" aria-hidden="true"></i></span><div><h3>{{title}}</h3><p>{{text}}</p></div></article>{{/adventurerightitems}}</div>
+        </div>
+        {{#hasadventurenote}}<p class="commerce-showroom-a1-note">{{adventurenote}}</p>{{/hasadventurenote}}
+    </div>
+</section>

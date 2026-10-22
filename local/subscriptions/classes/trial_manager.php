@@ -22,7 +22,7 @@ class trial_manager {
     /** Réglages d’essai (jours, % réduction, fenêtre). */
     public static function get_trial_settings(): array {
         return [
-            'days'       => (int)(get_config('local_subscriptions','trial_duration_days') ?? 7),
+            'days'       => \local_subscriptions\trial\TrialDurationPolicy::create()->configured_days(),
             'disc_pct'   => (int)(get_config('local_subscriptions','trial_discount_percent') ?? 15),
             'disc_hours' => (int)(get_config('local_subscriptions','trial_discount_hours') ?? 72),
         ];
@@ -37,8 +37,17 @@ class trial_manager {
      * @return int|null ID de la souscription créée
      * @throws \moodle_exception si plan d’essai absent
      */
-    public static function start_trial(int $userid): ?int {
+    public static function start_trial(int $userid, bool $legacyrecovery = false): ?int {
         global $DB;
+
+        // 7.98D2 — Date A is enforced at the Native Trial boundary as well as
+        // in the Legacy Campus endpoint. Only an explicitly identified
+        // pre-existing Legacy Trial may repair a missing Native subscription.
+        $transitionpolicy = \local_subscriptions\trial\TrialLegacyTransitionPolicy::create();
+        if (!$transitionpolicy->registrations_are_open() &&
+                (!$legacyrecovery || !$transitionpolicy->conversion_window_is_open())) {
+            throw new \moodle_exception('trial_registration_closed', 'local_subscriptions');
+        }
 
         $planid = self::get_trial_planid();
         if (!$planid) {
@@ -49,11 +58,7 @@ class trial_manager {
         $cfg = self::get_trial_settings();
 
         $start = $now;
-        if ($cfg['days'] == 0) {
-            $end   = $now + 100 * 365.25 * DAYSECS;
-        } else {
-            $end   = $now + max(1, $cfg['days']) * DAYSECS;
-        }
+        $end = \local_subscriptions\trial\TrialDurationPolicy::create()->end_at($start);
         
 
         // Devise par défaut : première devise du plan, sinon 'EUR'.

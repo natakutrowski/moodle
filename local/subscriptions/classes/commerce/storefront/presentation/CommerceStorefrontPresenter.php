@@ -31,6 +31,7 @@ final class CommerceStorefrontPresenter {
                     'id' => $price->get_id(),
                     'canaddtocart' => $price->get_id() !== null,
                     'currency' => $price->get_currency(),
+                    'amountminor' => $price->get_amount_minor(),
                     'formatted' => CommercePurchasePresentation::money(
                         $price->get_amount_minor(),
                         $price->get_currency()
@@ -457,6 +458,7 @@ final class CommerceStorefrontPresenter {
             'subscription', 'course_access' => get_string('commerce_product_type_course_access', 'local_subscriptions'),
             'digital', 'digital_download' => get_string('commerce_product_type_digital_download', 'local_subscriptions'),
             'bundle' => get_string('commerce_product_type_bundle', 'local_subscriptions'),
+            'donation' => get_string('commerce_product_type_donation', 'local_subscriptions'),
             default => ucfirst(str_replace('_', ' ', $type)),
         };
     }

@@ -23,14 +23,14 @@ final class commerce_showroom_comparison_content_j16d1_test extends \advanced_te
         global $CFG;
 
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
         self::assertIsString($template);
         self::assertStringContainsString('commerce-showroom-comparison__badge', $template);
         self::assertStringContainsString('fa-solid fa-compass', $template);
-        self::assertStringContainsString('{{#pdf.hastext}}', $template);
-        self::assertStringContainsString('{{#bundle.hastext}}', $template);
-        self::assertStringContainsString('{{#course.hastext}}', $template);
+        self::assertStringContainsString('{{#cells}}', $template);
+        self::assertStringContainsString('{{#value.hastext}}', $template);
+        self::assertStringContainsString('{{value.text}}', $template);
     }
 
     public function test_presenter_parses_status_and_text_cells(): void {

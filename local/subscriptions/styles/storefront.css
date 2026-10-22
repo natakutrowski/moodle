@@ -5306,3 +5306,104 @@ border:1px solid var(--commerce-premium-border);border-radius:clamp(1.35rem,2vw,
         print-color-adjust: exact;
     }
 }
+
+/* 7.98B.4.3 — reusable Donation amount intent on Boutique / Storefront. */
+.commerce-storefront-donation {
+    display: grid;
+    gap: .75rem;
+    margin: 0 0 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(246, 31, 130, .22);
+    border-radius: 1rem;
+    background: rgba(255, 247, 251, .82);
+}
+
+.commerce-storefront-donation__label {
+    color: #6b4a5a;
+    font-size: .85rem;
+    font-weight: 800;
+}
+
+.commerce-storefront-donation__stepper {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+    align-items: center;
+    gap: .65rem;
+}
+
+.commerce-storefront-donation__step,
+.commerce-storefront-donation__presets button {
+    min-height: 2.5rem;
+    border: 1px solid rgba(246, 31, 130, .26);
+    border-radius: .75rem;
+    background: #fff;
+    color: #38235d;
+    font-weight: 800;
+}
+
+.commerce-storefront-donation__step:hover,
+.commerce-storefront-donation__step:focus-visible,
+.commerce-storefront-donation__presets button:hover,
+.commerce-storefront-donation__presets button:focus-visible,
+.commerce-storefront-donation__presets button.is-active {
+    border-color: #f61f82;
+    color: #d8116c;
+    background: #fff4f8;
+}
+
+.commerce-storefront-donation__total {
+    min-width: 0;
+    color: #38235d;
+    font-size: clamp(1.05rem, 2.5vw, 1.4rem);
+    line-height: 1.15;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.commerce-storefront-donation__presets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+}
+
+.commerce-storefront-donation__presets button {
+    min-width: 0;
+    padding: .45rem .55rem;
+    font-size: .82rem;
+    overflow-wrap: anywhere;
+}
+
+.commerce-storefront-donation__custom {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(7rem, .85fr);
+    align-items: center;
+    gap: .75rem;
+    margin: 0;
+    color: #8d8195;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+.commerce-storefront-donation__custom input {
+    width: 100%;
+    min-width: 0;
+    padding: .5rem .65rem;
+    border: 1px solid rgba(52, 34, 95, .15);
+    border-radius: .7rem;
+    color: #38235d;
+    background: #fff;
+    font-weight: 800;
+    text-align: right;
+}
+
+@media (max-width: 575.98px) {
+    .commerce-storefront-donation__custom {
+        grid-template-columns: 1fr;
+        gap: .35rem;
+    }
+}
+
+/* 7.98B.4.4 — Boutique breathing room between price and Donation intent. */
+.commerce-product-card .commerce-storefront-donation {
+    margin-top: .5rem;
+}

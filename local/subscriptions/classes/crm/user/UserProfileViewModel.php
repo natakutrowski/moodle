@@ -27,7 +27,8 @@ final class UserProfileViewModel {
         public readonly ?array $commercesnapshot = null,
         public readonly bool $iscommerceguest = false,
         public readonly array $learningprogress = [],
-        public readonly array $digitalresources = []
+        public readonly array $digitalresources = [],
+        public readonly ?array $trialstate = null
     ) {
     }
 
@@ -56,6 +57,7 @@ final class UserProfileViewModel {
             'iscommerceguest' => $this->iscommerceguest,
             'learningprogress' => $this->learningprogress,
             'digitalresources' => $this->digitalresources,
+            'trialstate' => $this->trialstate,
         ];
     }
 }

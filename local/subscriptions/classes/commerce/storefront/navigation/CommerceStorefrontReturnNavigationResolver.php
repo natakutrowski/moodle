@@ -6,9 +6,8 @@ namespace local_subscriptions\commerce\storefront\navigation;
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\commerce\catalog\presentation\CommerceProductDiscoveryUrlResolver;
-use local_subscriptions\commerce\showroom\CommerceShowroomRegistry;
 use local_subscriptions\commerce\showroom\CommerceShowroomUrl;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitionResolver;
 use local_subscriptions\url\UrlFactory;
 
 /**
@@ -41,12 +40,16 @@ final class CommerceStorefrontReturnNavigationResolver {
         $showroomoffer = strtolower(trim($showroomoffer));
         $currency = strtoupper(trim($currency));
 
-        if (
-            $source === 'showroom'
-            && $showroomkey !== ''
-            && CommerceProductDiscoveryUrlResolver::is_published_showroom($showroomkey)
-        ) {
-            $definition = CommerceShowroomRegistry::get($showroomkey);
+        if ($source === 'showroom' && $showroomkey !== '') {
+            global $DB;
+
+            try {
+                $definition = (new CommerceShowroomPublishedDefinitionResolver($DB))
+                    ->require($showroomkey);
+            } catch (\moodle_exception $exception) {
+                $definition = null;
+            }
+
             if ($definition !== null) {
                 $params = [
                     ['name' => 'source', 'value' => 'showroom'],

@@ -90,7 +90,7 @@ final class commerce_functional_certification_j15h5_test extends advanced_testca
     }
 
     public function test_accessibility_and_performance_contracts_are_retained(): void {
-        $showroom = $this->read_plugin_file('templates/showroom/third_group_verbs.mustache');
+        $showroom = $this->read_plugin_file('templates/showroom/default.mustache');
         $styles = $this->read_plugin_file('styles/showroom.css');
 
         $this->assertStringContainsString('prefers-reduced-motion', $styles);

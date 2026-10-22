@@ -289,6 +289,8 @@ if ($historicalprofile !== null) {
     echo User360WorkspaceRenderer::render(
         $profile
     );
+
+
 }
 
 echo CrmWorkspaceRenderer::end();

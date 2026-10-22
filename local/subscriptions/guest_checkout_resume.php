@@ -11,6 +11,8 @@ use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCartTransferService;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutSessionRepository;
 use local_subscriptions\commerce\checkout\guest\CommerceAuthenticatedCartReconciliationService;
+use local_subscriptions\commerce\checkout\flow\CommercePurchaseFlow;
+use local_subscriptions\commerce\checkout\flow\CommerceDirectPurchaseSession;
 
 \local_subscriptions\subscription_config::guard_public_access();
 require_login();
@@ -54,13 +56,74 @@ if ($guestsession->get_status() !== 'existing_account'
     );
 }
 
-$durablecart = $guestsession->get_metadata()['guest_cart_snapshot'] ?? null;
+$metadata = $guestsession->get_metadata();
+$purchaseflow = CommercePurchaseFlow::normalise(
+    (string)($metadata['purchase_flow'] ?? CommercePurchaseFlow::CART)
+);
+$isdirectpurchase = CommercePurchaseFlow::is_direct($purchaseflow);
+
+// C5.14.3: Moodle regenerates the authenticated session during the
+// existing-account login. The transient Buy Now payload therefore has to be
+// restored from the durable Guest Checkout metadata before returning to the
+// checkout. A normal cart must never become the authority for a Direct
+// Purchase resume.
+if ($isdirectpurchase) {
+    $directpurchase = $metadata['direct_purchase'] ?? null;
+    if (!is_array($directpurchase)) {
+        throw new \moodle_exception(
+            'commerce_cart_message_item_not_found',
+            'local_subscriptions'
+        );
+    }
+
+    $directcurrency = strtoupper(trim((string)($directpurchase['currency'] ?? '')));
+    $directsku = strtoupper(trim((string)($directpurchase['sku'] ?? '')));
+    $directpriceid = (int)($directpurchase['priceid'] ?? 0);
+    $directquantity = (int)($directpurchase['quantity'] ?? 0);
+    $directcartuuid = trim((string)($directpurchase['cartuuid'] ?? ''));
+
+    if (
+        $directcurrency !== $currency
+        || $directsku === ''
+        || $directpriceid <= 0
+        || $directquantity <= 0
+        || (
+            $directcartuuid !== ''
+            && !preg_match('/^[a-f0-9]{32}$/', strtolower($directcartuuid))
+        )
+    ) {
+        throw new \moodle_exception(
+            'commerce_cart_message_item_not_found',
+            'local_subscriptions'
+        );
+    }
+
+    CommerceDirectPurchaseSession::store(
+        $currency,
+        $directsku,
+        $directpriceid,
+        $directquantity,
+        (array)($directpurchase['metadata'] ?? []),
+        $directcartuuid !== '' ? strtolower($directcartuuid) : null
+    );
+
+    if (CommerceDirectPurchaseSession::current($currency) === null) {
+        throw new \coding_exception(
+            'Direct Purchase could not be restored after Guest authentication.'
+        );
+    }
+
+    $metadata['direct_purchase_restored_at'] = time();
+    $metadata['direct_purchase_restored_for_userid'] = (int)$USER->id;
+}
+
+$durablecart = $metadata['guest_cart_snapshot'] ?? null;
 $transferred = CommerceGuestCartTransferService::create()->transfer(
     (int)$USER->id,
     $currency,
     is_array($durablecart) ? $durablecart : null
 );
-$metadata = array_replace($guestsession->get_metadata(), [
+$metadata = array_replace($metadata, [
     'cart_transferred' => $transferred !== null,
     'authenticated_at' => time(),
     'authenticated_resume_source' =>
@@ -110,7 +173,7 @@ $repository->transition($guestsession, 'active', [
 
 $checkoutparams = [
     'currency' => $currency,
-    'flow' => (string)($metadata['purchase_flow'] ?? 'cart'),
+    'flow' => $purchaseflow,
 ];
 foreach (['checkout_source' => 'source', 'showroom' => 'showroom', 'showroom_offer' => 'showroomoffer', 'origin_return' => 'originreturn'] as $metakey => $paramkey) {
     $value = trim((string)($metadata[$metakey] ?? ''));
@@ -119,6 +182,13 @@ foreach (['checkout_source' => 'source', 'showroom' => 'showroom', 'showroom_off
     }
 }
 $checkouturl = new moodle_url('/local/subscriptions/commerce_checkout.php', $checkoutparams);
+
+// A Direct Purchase is intentionally isolated from the normal cart. Its
+// restored Buy Now payload is sufficient to resume checkout even when the
+// authenticated cart is empty (the normal and expected case).
+if ($isdirectpurchase) {
+    redirect($checkouturl);
+}
 
 $snapshot = CommerceCartRuntimeFactory::create()->snapshot((int)$USER->id, $currency, current_language());
 if ($snapshot->get_items() === []) {

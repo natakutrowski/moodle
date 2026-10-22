@@ -21,6 +21,9 @@ use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutService;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCheckoutSessionRepository;
 use local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationService;
 use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinOperation;
+use local_subscriptions\commerce\donation\CommerceDonationAmountPolicy;
+use local_subscriptions\commerce\donation\CommerceDonationCompanionCartService;
+use local_subscriptions\commerce\donation\CommerceDonationIntentSession;
 
 \local_subscriptions\subscription_config::guard_public_access();
 require_sesskey();
@@ -38,6 +41,10 @@ $currency = $currencyregistry->require_enabled(
 $sku = optional_param('sku', '', PARAM_RAW_TRIMMED);
 $priceid = optional_param('priceid', 0, PARAM_INT);
 $quantity = optional_param('quantity', 1, PARAM_INT);
+$donationunits = optional_param('donationunits', 0, PARAM_INT);
+$donationsku = optional_param('donationsku', '', PARAM_RAW_TRIMMED);
+$donationpriceid = optional_param('donationpriceid', 0, PARAM_INT);
+$donationshowroomoffer = strtolower(optional_param('donationshowroomoffer', '', PARAM_ALPHANUMEXT));
 $promotioncode = optional_param('promotioncode', '', PARAM_RAW_TRIMMED);
 $targetcurrency = Currency::sanitize(optional_param('targetcurrency', '', PARAM_ALPHA));
 $operation = strtolower(optional_param('operation', '', PARAM_ALPHANUMEXT));
@@ -51,6 +58,7 @@ $service = CommerceCartRuntimeFactory::create();
 $cartcustomerresolver = CommerceGuestCartCustomerResolver::create();
 $notice = 'unchanged';
 $redirecttocheckout = false;
+$mixedredirecttocheckout = false;
 $result = null;
 
 $syncguestdirectcurrency = static function(
@@ -101,6 +109,13 @@ $syncguestdirectcurrency = static function(
 try {
     if ($action === 'add' || $action === 'buynow') {
         $metadata = [];
+        $hasdonationcompanion = trim($donationsku) !== '' || $donationpriceid > 0;
+        if ($hasdonationcompanion && (trim($donationsku) === '' || $donationpriceid <= 0 || $donationunits <= 0)) {
+            throw new moodle_exception('invalidparameter');
+        }
+        if (!$hasdonationcompanion && $donationunits > 0) {
+            $metadata[CommerceDonationAmountPolicy::METADATA_UNITS] = $donationunits;
+        }
         if ($operation === 'upgrade') {
             $metadata = ['operation' => 'upgrade', 'targetplanid' => $targetplanid];
         } else if ($operation === CommercePedagogicalPromotionJoinOperation::OPERATION) {
@@ -141,7 +156,7 @@ try {
                 $source = 'personaloffer';
             }
         }
-        if ($action === 'buynow') {
+        if ($action === 'buynow' && !$hasdonationcompanion) {
             $existingdirect = $operation === 'upgrade'
                 ? null
                 : CommerceDirectPurchaseSession::current_any_currency();
@@ -151,12 +166,21 @@ try {
                 : strtolower(trim((string)(
                     $existingdirect['metadata']['operation'] ?? ''
                 )));
+            $requesteddonationunits = $donationunits > 0 ? $donationunits : null;
+            $existingdonationunits = $existingdirect === null
+                ? null
+                : (isset($existingdirect['metadata'][CommerceDonationAmountPolicy::METADATA_UNITS])
+                    ? (int)$existingdirect['metadata'][CommerceDonationAmountPolicy::METADATA_UNITS]
+                    : null);
+            $donationintentmatches = $requesteddonationunits === null
+                || $existingdonationunits === $requesteddonationunits;
             $sameproduct =
                 $existingdirect !== null
                 && $existingdirect['sku'] === $normalizedsku
                 && $existingdirect['quantity'] === $quantity
                 && $existingdirect['cartuuid'] !== null
-                && $existingoperation === $operation;
+                && $existingoperation === $operation
+                && $donationintentmatches;
 
             $sourcecustomerid = $customerid;
             $sourceholdusable = false;
@@ -288,7 +312,37 @@ try {
                 }
             }
         } else {
-            if ($operation === CommercePedagogicalPromotionJoinOperation::OPERATION) {
+            if ($hasdonationcompanion) {
+                if ($operation !== '' || strtoupper(trim($sku)) === strtoupper(trim($donationsku))) {
+                    throw new moodle_exception('invalidparameter');
+                }
+                $donationmetadata = [
+                    CommerceDonationAmountPolicy::METADATA_UNITS => $donationunits,
+                ];
+                if ($source === 'showroom') {
+                    $donationmetadata = array_replace(
+                        $donationmetadata,
+                        CommerceShowroomTrackingContext::metadata(
+                            $showroom,
+                            $donationshowroomoffer
+                        )
+                    );
+                }
+                $result = (new CommerceDonationCompanionCartService($service))->add_pair(
+                    $customerid,
+                    $currency,
+                    current_language(),
+                    $sku,
+                    $priceid,
+                    $donationsku,
+                    $donationpriceid,
+                    $donationunits,
+                    $metadata,
+                    $donationmetadata
+                );
+                $mixedredirecttocheckout = $action === 'buynow'
+                    && $result->has_changed();
+            } else if ($operation === CommercePedagogicalPromotionJoinOperation::OPERATION) {
                 $result = (new CommerceDirectPromotionJoinCartTransferService(
                     $service,
                     CommercePedagogicalSeatReservationService::create($DB)
@@ -316,9 +370,23 @@ try {
 
         $redirecttocheckout = $redirecttocheckout || (
             $action === 'buynow'
+            && !$hasdonationcompanion
             && $result !== null
             && $result->has_changed()
         );
+
+        if (
+            $donationunits > 0
+            && (
+                $hasdonationcompanion
+                || array_key_exists(CommerceDonationAmountPolicy::METADATA_UNITS, $metadata)
+            )
+        ) {
+            (new CommerceDonationIntentSession())->remember(
+                $hasdonationcompanion ? $donationsku : $sku,
+                $donationunits
+            );
+        }
     } else if ($action === 'remove') {
         $result = $service->remove_product($customerid, $currency, $sku, $priceid);
     } else if ($action === 'update') {
@@ -496,6 +564,14 @@ try {
         );
     }
 
+    if ($mixedredirecttocheckout && $result !== null) {
+        $cartcustomerresolver->synchronize(
+            $customerid,
+            $currency,
+            $result->get_cart()
+        );
+    }
+
     if ($action !== 'buynow' && $result !== null) {
         $cartcustomerresolver->synchronize(
             $customerid,
@@ -523,6 +599,26 @@ try {
     }
 } catch (Throwable $exception) {
     $notice = 'error';
+}
+
+if ($mixedredirecttocheckout) {
+    $checkoutparams = [
+        'currency' => $currency,
+        'flow' => \local_subscriptions\commerce\checkout\flow\CommercePurchaseFlow::CART,
+    ];
+    if ($source !== '') {
+        $checkoutparams['source'] = $source;
+    }
+    if ($showroom !== '') {
+        $checkoutparams['showroom'] = $showroom;
+    }
+    if ($showroomoffer !== '') {
+        $checkoutparams['showroomoffer'] = $showroomoffer;
+    }
+    if ($returnurl !== '') {
+        $checkoutparams['originreturn'] = $returnurl;
+    }
+    redirect(new moodle_url('/local/subscriptions/commerce_checkout.php', $checkoutparams));
 }
 
 if ($redirecttocheckout) {

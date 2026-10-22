@@ -33,6 +33,7 @@ final class CommerceSectionNavigationRegistry {
     /** @deprecated N7.1 compatibility key retained for old callers/tests. */
     public const GRANTS = 'grants';
     public const STATISTICS = 'statistics';
+    public const TRIAL = 'trial';
     public const CONFIGURATION = 'configuration';
 
     /**
@@ -64,7 +65,7 @@ final class CommerceSectionNavigationRegistry {
                 get_string('crm_commerce_nav_overview', 'local_subscriptions'),
                 'fa-home',
                 new moodle_url(subscription_config::admin_commerce_page()),
-                Capabilities::VIEW_DASHBOARD,
+                Capabilities::VIEW_PAYMENTS,
                 10
             ),
             new CommerceSectionNavigationItem(
@@ -88,7 +89,7 @@ final class CommerceSectionNavigationRegistry {
                 get_string('crm_commerce_nav_showrooms', 'local_subscriptions'),
                 'fa-window-maximize',
                 new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'),
-                Capabilities::MANAGE_CONFIGURATION,
+                Capabilities::MANAGE_SHOWROOMS,
                 40
             ),
             new CommerceSectionNavigationItem(
@@ -124,6 +125,14 @@ final class CommerceSectionNavigationRegistry {
                 80
             ),
             new CommerceSectionNavigationItem(
+                self::TRIAL,
+                get_string('trial_admin_status_nav', 'local_subscriptions'),
+                'fa-clock-o',
+                new moodle_url(subscription_config::trial_transition_status_page()),
+                Capabilities::MANAGE_SUBSCRIPTIONS,
+                90
+            ),
+            new CommerceSectionNavigationItem(
                 self::CONFIGURATION,
                 get_string('crm_commerce_nav_configuration', 'local_subscriptions'),
                 'fa-cog',
@@ -149,6 +158,7 @@ final class CommerceSectionNavigationRegistry {
             self::PERSONAL_OFFERS,
             self::GRANTS,
             self::STATISTICS,
+            self::TRIAL,
             self::CONFIGURATION,
         ], true);
     }

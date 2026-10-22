@@ -10,7 +10,7 @@ final class commerce_showroom_final_cta_j16p7_test extends \advanced_testcase {
     public function test_mobile_final_cta_supersedes_dynamic_sticky_with_inline_flow(): void {
         global $CFG;
         $root = $CFG->dirroot . '/local/subscriptions/';
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
         $js = file_get_contents($root . 'amd/src/showroom.js');
         $css = file_get_contents($root . 'styles/showroom.css');
 

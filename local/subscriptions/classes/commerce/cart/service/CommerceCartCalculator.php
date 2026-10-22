@@ -19,6 +19,8 @@ use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferChec
 use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinEligibilityService;
 use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinOperation;
 use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinPricingService;
+use local_subscriptions\commerce\catalog\domain\CommerceProductType;
+use local_subscriptions\commerce\donation\CommerceDonationAmountPolicy;
 
 /** Resolves current prices, quantities and promotion adjustments without mutating the cart. */
 final class CommerceCartCalculator {
@@ -58,6 +60,16 @@ final class CommerceCartCalculator {
             $metadata = $item->get_metadata();
             $unitprice = $quote->get_unit_price();
             $displayname = $quote->get_display_name();
+            if ($quote->get_product_type() === CommerceProductType::DONATION) {
+                if ($item->get_quantity() !== 1) {
+                    throw new \RuntimeException('Donation cart lines must keep Commerce quantity equal to one.');
+                }
+                $donationpolicy = new CommerceDonationAmountPolicy();
+                $unitprice = $donationpolicy->amount(
+                    $unitprice,
+                    $donationpolicy->units_from_metadata($item->get_metadata())
+                );
+            }
             $operation = strtolower(trim((string)($metadata['operation'] ?? '')));
             $isupgrade = $operation === 'upgrade';
             $istrialconversion = $operation === 'trialconversion'
@@ -233,7 +245,13 @@ final class CommerceCartCalculator {
             // Upgrade prices returned by SubscriptionAdvisor already include
             // the active Trial discount and are final differential prices.
             // They must receive neither Trial nor cart promotion a second time.
-            if (!$isupgrade && !$istrialconversion && !$ispersonaloffer && !$ispromotionjoin) {
+            if (
+                !$isupgrade
+                && !$istrialconversion
+                && !$ispersonaloffer
+                && !$ispromotionjoin
+                && $quote->get_product_type() !== CommerceProductType::DONATION
+            ) {
                 $promotionitems[] = [
                     'sku' => $item->get_product_sku(),
                     'type' => $quote->get_product_type(),

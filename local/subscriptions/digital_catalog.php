@@ -13,6 +13,7 @@ use local_subscriptions\commerce\storefront\presentation\CommerceStorefrontPrese
 use local_subscriptions\commerce\cart\presentation\CommerceCartPresenter;
 use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCartCustomerResolver;
+use local_subscriptions\commerce\checkout\flow\CommerceDirectPurchaseResumePresenter;
 use local_subscriptions\commerce\storefront\readmodel\CommerceStorefrontListFilter;
 use local_subscriptions\commerce\storefront\repository\CommerceStorefrontRepository;
 use local_subscriptions\commerce\storefront\ownership\CommerceStorefrontOwnershipResolver;
@@ -23,6 +24,7 @@ use local_subscriptions\commerce\currency\selection\CommerceCurrencySurfaceSelec
 use local_subscriptions\currency\Currency;
 use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\currency\selection\CommerceCurrencyAvailabilityService;
+use local_subscriptions\commerce\donation\CommerceDonationStorefrontPresenter;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -83,7 +85,7 @@ $hideowned = optional_param(
     PARAM_BOOL
 );
 
-if (!in_array($type, ['', 'course_access', 'digital_download', 'bundle'], true)) {
+if (!in_array($type, ['', 'course_access', 'digital_download', 'bundle', 'donation'], true)) {
     $type = '';
 }
 
@@ -101,6 +103,7 @@ $PAGE->add_body_class('commerce-chromeless-page');
 $PAGE->set_title(get_string('commerce_storefront_title', 'local_subscriptions'));
 $PAGE->set_heading(get_string('commerce_storefront_title', 'local_subscriptions'));
 $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/storefront.css'));
+$PAGE->requires->js_call_amd('local_subscriptions/storefront_donation', 'init');
 
 $filter = new CommerceStorefrontListFilter(
     current_language(),
@@ -132,7 +135,9 @@ $cartaction = (new moodle_url('/local/subscriptions/cart_action.php'))->out(fals
 $ownershipresolver = $customerid > 0
     ? new CommerceStorefrontOwnershipResolver($DB)
     : null;
+$donationpresenter = new CommerceDonationStorefrontPresenter();
 foreach ($cards as &$card) {
+    $card = $donationpresenter->decorate($card, $currency, $cartsnapshot);
     if (
         $isguestcustomer
         && $ownershipresolver !== null
@@ -270,10 +275,9 @@ foreach ($cards as &$card) {
     $card['cartreturnurl'] = $pageurl->out(false);
     $card['cartcurrency'] = $currency;
     $card['cartsesskey'] = sesskey();
-    $card['buy_now_label'] = get_string(
-        'commerce_cart_buy_now',
-        'local_subscriptions'
-    );
+    $card['buy_now_label'] = !empty($card['isdonation'])
+        ? get_string('commerce_donation_contribute', 'local_subscriptions')
+        : get_string('commerce_cart_buy_now', 'local_subscriptions');
     $card['standardpricelabel'] = get_string(
         'commerce_storefront_price_standard',
         'local_subscriptions'
@@ -314,11 +318,23 @@ foreach ($cards as &$card) {
 
     foreach ($card['prices'] as &$price) {
         $key = strtoupper((string)$card['sku']) . ':' . (int)$price['id'];
-        $price['incart'] = isset($cartkeys[$key]);
-        $price['toggleaction'] = $price['incart'] ? 'remove' : 'add';
-        $price['togglelabel'] = $price['incart']
-            ? get_string('commerce_cart_remove_from_cart', 'local_subscriptions')
-            : get_string('commerce_cart_add', 'local_subscriptions');
+        $actualincart = isset($cartkeys[$key]);
+        if (!empty($card['isdonation'])) {
+            // Donation remains editable on Boutique/Storefront. Re-submitting
+            // replaces the frozen cart line amount; the cart itself stays read-only.
+            $price['incart'] = false;
+            $price['toggleaction'] = 'add';
+            $price['togglelabel'] = $actualincart
+                ? get_string('commerce_donation_update_cart', 'local_subscriptions')
+                : get_string('commerce_cart_add', 'local_subscriptions');
+            $price['donationincart'] = $actualincart;
+        } else {
+            $price['incart'] = $actualincart;
+            $price['toggleaction'] = $price['incart'] ? 'remove' : 'add';
+            $price['togglelabel'] = $price['incart']
+                ? get_string('commerce_cart_remove_from_cart', 'local_subscriptions')
+                : get_string('commerce_cart_add', 'local_subscriptions');
+        }
     }
     unset($price);
     if (!empty($card['upgradepriceid'])) {
@@ -400,6 +416,7 @@ $contextdata = [
         ['value' => 'course_access', 'label' => get_string('commerce_purchase_type_subscription', 'local_subscriptions'), 'selected' => $type === 'course_access'],
         ['value' => 'digital_download', 'label' => get_string('commerce_product_type_digital_download', 'local_subscriptions'), 'selected' => $type === 'digital_download'],
         ['value' => 'bundle', 'label' => get_string('commerce_product_type_bundle', 'local_subscriptions'), 'selected' => $type === 'bundle'],
+        ['value' => 'donation', 'label' => get_string('commerce_product_type_donation', 'local_subscriptions'), 'selected' => $type === 'donation'],
     ],
     'typelabel' => get_string(
         'commerce_storefront_filter_type',
@@ -430,6 +447,11 @@ $contextdata = [
     'cartlinecount' => $cartdata['linecount'],
     'carttotalformatted' => $cartdata['totalformatted'],
 ];
+
+$contextdata = array_replace(
+    $contextdata,
+    CommerceDirectPurchaseResumePresenter::present()
+);
 
 $params = array_filter([
     'q' => $query,

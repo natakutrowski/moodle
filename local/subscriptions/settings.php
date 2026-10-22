@@ -93,6 +93,14 @@ if ($hassiteconfig) {
 		'moodle/site:config'
 	));
 	
+
+    $ADMIN->add('subscriptions_category', new admin_externalpage(
+        'local_subscriptions_trial_transition_status',
+        get_string('trial_admin_status_nav', 'local_subscriptions'),
+        new moodle_url(subscription_config::trial_transition_status_page()),
+        'moodle/site:config'
+    ));
+
 	$ADMIN->add('subscriptions_category', new admin_externalpage(
 		'local_subscriptions_import_csv',
 		get_string('import_subscriptions_csv', 'local_subscriptions'),
@@ -936,6 +944,30 @@ if ($hassiteconfig) {
             get_string('settings_trial_discount_hours', 'local_subscriptions'),
             get_string('settings_trial_discount_hours_desc', 'local_subscriptions'),
             72, PARAM_INT));
+
+
+        // --- 7.98D — progressive Legacy Trial shutdown calendar ---
+        $settings->add(new admin_setting_heading(
+            'ls_trial_transition_heading',
+            get_string('settings_trial_transition_section', 'local_subscriptions'),
+            get_string('settings_trial_transition_section_desc', 'local_subscriptions')
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/trial_registration_close_at',
+            get_string('settings_trial_registration_close_at', 'local_subscriptions'),
+            get_string('settings_trial_registration_close_at_desc', 'local_subscriptions'),
+            '',
+            PARAM_RAW_TRIMMED
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_subscriptions/trial_legacy_expire_at',
+            get_string('settings_trial_legacy_expire_at', 'local_subscriptions'),
+            get_string('settings_trial_legacy_expire_at_desc', 'local_subscriptions'),
+            '',
+            PARAM_RAW_TRIMMED
+        ));
 
         $settings->add(new admin_setting_heading(
             'local_subscriptions_commerce_migration_heading',

@@ -120,11 +120,23 @@ final class commerce_storefront_navigation_consistency_test extends advanced_tes
         );
 
         self::assertStringContainsString(
-            "if (\n            \$source === 'showroom'",
+            "if (\$source === 'showroom' && \$showroomkey !== '')",
             $source
         );
         self::assertStringContainsString(
-            'CommerceProductDiscoveryUrlResolver::is_published_showroom($showroomkey)',
+            'CommerceShowroomPublishedDefinitionResolver',
+            $source
+        );
+        self::assertStringContainsString(
+            '->require($showroomkey)',
+            $source
+        );
+        self::assertStringContainsString(
+            'CommerceShowroomUrl::make(',
+            $source
+        );
+        self::assertStringContainsString(
+            'catch (\moodle_exception $exception)',
             $source
         );
         self::assertStringContainsString(

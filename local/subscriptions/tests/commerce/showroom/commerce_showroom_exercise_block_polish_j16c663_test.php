@@ -11,7 +11,7 @@ final class commerce_showroom_exercise_block_polish_j16c663_test extends \advanc
         global $CFG;
 
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
         self::assertIsString($template);
         self::assertStringContainsString(
@@ -32,7 +32,7 @@ final class commerce_showroom_exercise_block_polish_j16c663_test extends \advanc
 
         self::assertStringContainsString("'white' => 'Blanc'", $registry);
         self::assertStringContainsString(
-            "['default', 'white', 'light', 'soft', 'campuspink', 'dark', 'gradient', 'custom', 'image']",
+            "['default', 'white', 'light', 'soft', 'campuspink', 'dark', 'dark2', 'gradient', 'custom', 'image']",
             $presenter
         );
         self::assertStringContainsString("'white'\n        );", $presenter);

@@ -588,7 +588,7 @@ final class commerce_797l82_direct_purchase_currency_switch_test extends advance
             $CFG->dirroot . '/local/subscriptions/classes/commerce/storefront/presentation/CommerceStorefrontPresenter.php'
         );
         $showroom = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomPresenter.php'
+            $CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomOfferStatePresenter.php'
         );
         $card = file_get_contents(
             $CFG->dirroot . '/local/subscriptions/templates/storefront/product_card.mustache'
@@ -605,8 +605,9 @@ final class commerce_797l82_direct_purchase_currency_switch_test extends advance
             '->excluded_cart_uuid(',
             $storefront
         );
-        self::assertStringContainsString(
-            'CommerceDirectPurchaseSession::cart_uuid_for_sku($offersku)',
+        // Equivalent PHP formatting may wrap the call over several lines.
+        self::assertMatchesRegularExpression(
+            '/CommerceDirectPurchaseSession::cart_uuid_for_sku\s*\(\s*\$offersku\s*\)/',
             $showroom
         );
         self::assertStringContainsString(

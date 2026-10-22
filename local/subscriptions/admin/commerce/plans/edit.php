@@ -14,11 +14,20 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
 $id = optional_param('id', 0, PARAM_INT);
+$accessscopeid = optional_param('accessscopeid', 0, PARAM_INT);
+if (!$id && $accessscopeid) {
+    $DB->get_record('subscription_access_scope', ['id' => $accessscopeid], 'id', MUST_EXIST);
+}
 $record = $id ? $DB->get_record('subscription_plan', ['id' => $id], '*', MUST_EXIST) : null;
-$pageurl = new moodle_url('/local/subscriptions/admin/commerce/plans/edit.php', $id ? ['id' => $id] : []);
+$pageparams = $id ? ['id' => $id] : ($accessscopeid ? ['accessscopeid' => $accessscopeid] : []);
+$pageurl = new moodle_url('/local/subscriptions/admin/commerce/plans/edit.php', $pageparams);
 $title = $id ? get_string('commerce_plan_edit', 'local_subscriptions') : get_string('commerce_plan_add', 'local_subscriptions');
 CrmPageConfigurator::configure($PAGE, $context, $pageurl, $title, 'local-subscriptions-commerce-plan-edit-page');
-$form = new plan_form($pageurl, $record ? (array)$record : []);
+$formdata = $record ? (array)$record : [];
+if (!$record && $accessscopeid) {
+    $formdata['accessscopeid'] = $accessscopeid;
+}
+$form = new plan_form($pageurl, $formdata);
 if ($record) {
     $form->set_data($record);
 }

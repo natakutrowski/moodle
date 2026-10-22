@@ -17,6 +17,8 @@ final class CommerceShowroomBlockStructureMigrator {
         'learning_method',
         'video',
         'content_highlights',
+        'heart_puzzle',
+        'before_after',
         'ascent',
         'stage_method',
         'exercise_explorer',
@@ -276,6 +278,7 @@ final class CommerceShowroomBlockStructureMigrator {
         return [
             'sectionwidth',
             'sectionbackground',
+            'sectiontextcolor',
             'sectionbackgroundcolor',
             'sectionbackgroundimageurl',
             'sectionbackgroundopacity',

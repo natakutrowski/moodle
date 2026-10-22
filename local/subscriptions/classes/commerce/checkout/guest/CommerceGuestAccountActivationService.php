@@ -27,13 +27,38 @@ final class CommerceGuestAccountActivationService {
             throw new \coding_exception('Only provisional Guest Checkout accounts can use this activation flow.');
         }
 
-        delete_user_key(self::KEY_SCRIPT, $userid);
-        $validuntil = time() + self::KEY_TTL;
-        $key = create_user_key(self::KEY_SCRIPT, $userid, $session->get_id(), null, $validuntil);
+        $now = time();
+        $existingkey = $this->find_reusable_key($userid, $session->get_id(), $now);
 
-        $metadata['activation_link_issued_at'] = time();
+        if ($existingkey !== null) {
+            $key = $existingkey['key'];
+            $validuntil = $existingkey['validuntil'];
+        } else {
+            // C5.14.1: do not delete a key which may just have been issued by a
+            // concurrent successful-payment callback. Multiple concurrently
+            // created keys are harmless (all are removed on completion), while
+            // deleting the first key would invalidate the URL already queued in
+            // the customer's activation email.
+            $validuntil = $now + self::KEY_TTL;
+            $key = create_user_key(
+                self::KEY_SCRIPT,
+                $userid,
+                $session->get_id(),
+                null,
+                $validuntil
+            );
+        }
+
+        // Refresh before writing metadata so an activation-link request cannot
+        // overwrite a newer account_state/password_set_at written by another
+        // request.
+        $freshsession = $this->sessions->require_by_id($session->get_id());
+        $metadata = $freshsession->get_metadata();
+        if (empty($metadata['activation_link_issued_at'])) {
+            $metadata['activation_link_issued_at'] = $now;
+        }
         $metadata['activation_link_expires_at'] = $validuntil;
-        $this->sessions->transition($session, $session->get_status(), [
+        $this->sessions->transition($freshsession, $freshsession->get_status(), [
             'metadatajson' => $metadata,
         ]);
 
@@ -46,6 +71,43 @@ final class CommerceGuestAccountActivationService {
         $activationurl->set_anchor('activation');
 
         return $activationurl;
+    }
+
+    /**
+     * Reuses an unexpired key for the same Guest Checkout session.
+     *
+     * @return array{key:string,validuntil:int}|null
+     */
+    private function find_reusable_key(int $userid, int $sessionid, int $now): ?array {
+        $records = $this->database->get_records_select(
+            'user_private_key',
+            'script = :script AND userid = :userid AND instance = :instance'
+                . ' AND validuntil > :now',
+            [
+                'script' => self::KEY_SCRIPT,
+                'userid' => $userid,
+                'instance' => $sessionid,
+                'now' => $now,
+            ],
+            'id ASC',
+            'id,value,validuntil',
+            0,
+            1
+        );
+
+        if ($records === []) {
+            return null;
+        }
+
+        $record = reset($records);
+        if ($record === false || trim((string)$record->value) === '') {
+            return null;
+        }
+
+        return [
+            'key' => (string)$record->value,
+            'validuntil' => (int)$record->validuntil,
+        ];
     }
 
     /** @return array{user:\stdClass,session:CommerceGuestCheckoutSession} */

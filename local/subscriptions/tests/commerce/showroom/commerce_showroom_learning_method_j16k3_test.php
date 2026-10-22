@@ -12,7 +12,7 @@ final class commerce_showroom_learning_method_j16k3_test extends \advanced_testc
 
         $root = $CFG->dirroot . '/local/subscriptions/';
         $template = file_get_contents(
-            $root . 'templates/showroom/third_group_verbs.mustache'
+            $root . 'templates/showroom/default.mustache'
         );
         $css = file_get_contents($root . 'styles/showroom.css');
 

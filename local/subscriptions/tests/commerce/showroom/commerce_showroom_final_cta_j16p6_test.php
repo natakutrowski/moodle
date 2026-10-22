@@ -16,7 +16,7 @@ final class commerce_showroom_final_cta_j16p6_test extends \advanced_testcase {
         $presenter = file_get_contents(
             $root . 'classes/commerce/showroom/cms/CommerceShowroomBlockConfigurationPresenter.php'
         );
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
         $ajax = file_get_contents($root . 'ajax/showroom_prices.php');
         $js = file_get_contents($root . 'amd/src/showroom.js');
         $css = file_get_contents($root . 'styles/showroom.css');

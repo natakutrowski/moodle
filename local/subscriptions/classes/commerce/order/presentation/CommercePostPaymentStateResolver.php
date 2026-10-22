@@ -6,11 +6,19 @@ namespace local_subscriptions\commerce\order\presentation;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\purchase\policy\CommercePurchaseEntitlementExpectationPolicy;
+
 /** Resolves browser-return and durable Native states into one customer-facing state. */
 final class CommercePostPaymentStateResolver {
     private const FAILED = ['failed', 'declined', 'error', 'expired'];
     private const CANCELLED = ['cancelled', 'canceled'];
     private const PENDING = ['created', 'pending', 'redirected', 'processing', 'initiated', 'unknown'];
+    private const COMPLETE_ORDER_STATUSES = ['fulfilled', 'completed', 'success', 'succeeded'];
+
+    public function __construct(
+        private readonly ?CommercePurchaseEntitlementExpectationPolicy $expectations = null
+    ) {
+    }
 
     public function resolve(CommerceOrderPresentation $order, string $browserresult = ''): CommercePostPaymentState {
         $browserresult = strtolower(trim($browserresult));
@@ -23,6 +31,14 @@ final class CommercePostPaymentStateResolver {
             if ($order->has_available_accesses()) {
                 return new CommercePostPaymentState('success', 'success', false, true);
             }
+
+            $expectations = $this->expectations
+                ?? new CommercePurchaseEntitlementExpectationPolicy();
+            if (!$expectations->order_requires_fulfillment($order)
+                    && in_array(strtolower(trim($order->status)), self::COMPLETE_ORDER_STATUSES, true)) {
+                return new CommercePostPaymentState('success', 'success', false, false);
+            }
+
             return new CommercePostPaymentState('processing', 'info', false, false);
         }
         // A provider/browser success return is stronger than a stale local

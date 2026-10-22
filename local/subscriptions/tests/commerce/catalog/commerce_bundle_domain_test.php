@@ -27,7 +27,7 @@ final class commerce_bundle_domain_test extends advanced_testcase {
         $registry = CommerceProductTypeRegistry::create_default();
         $bundle = $registry->get(CommerceProductType::BUNDLE);
 
-        $this->assertCount(4, $registry->all());
+        $this->assertCount(5, $registry->all());
         $this->assertTrue($bundle->get_capabilities()->is_composable());
         $this->assertTrue($bundle->get_capabilities()->is_expandable());
         $this->assertFalse($bundle->get_capabilities()->supports_entitlements());

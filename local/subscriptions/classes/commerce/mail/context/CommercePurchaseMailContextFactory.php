@@ -204,7 +204,7 @@ final class CommercePurchaseMailContextFactory {
 
             $itemsku = trim((string)($item->metadata['sku'] ?? $item->metadata['productsku'] ?? $item->reference));
             $items[] = [
-                'type' => $this->normalise_item_type($item->type),
+                'type' => $this->normalise_item_type($item->type, $item->metadata),
                 'title' => $this->translated_item_name($item->label, $item->metadata, $language),
                 'productsku' => $itemsku,
                 'coverurl' => $this->product_cover_by_sku(
@@ -213,15 +213,25 @@ final class CommercePurchaseMailContextFactory {
                 ),
                 'description' => (string)($item->metadata['description'] ?? ''),
                 'quantity' => $item->quantity,
-                'grossformatted' => $this->format_money($item->grossminor, $item->currency),
-                'discountformatted' => $this->format_money($item->discountminor, $item->currency),
-                'totalformatted' => $this->format_money($item->netminor, $item->currency),
+                'grossformatted' => $this->format_money($item->grossminor, $item->currency, $language),
+                'discountformatted' => $this->format_money($item->discountminor, $item->currency, $language),
+                'totalformatted' => $this->format_money($item->netminor, $item->currency, $language),
                 'grossminor' => $item->grossminor,
                 'discountminor' => $item->discountminor,
                 'netminor' => $item->netminor,
                 'producturl' => $this->product_url($item->metadata),
                 'accesses' => $accesses,
             ];
+        }
+
+        $donationminor = 0;
+        foreach ($order->items as $orderitem) {
+            $metadata = is_array($orderitem->metadata ?? null)
+                ? $orderitem->metadata
+                : [];
+            if ($this->normalise_item_type((string)$orderitem->type, $metadata) === 'donation') {
+                $donationminor += max(0, (int)$orderitem->netminor);
+            }
         }
 
         $pricingpresenter = new CommercePersistedCommercialPricingPresenter();
@@ -272,23 +282,26 @@ final class CommercePurchaseMailContextFactory {
             'customer' => ['fullname' => $customername],
             'purchase' => [
                 'reference' => (new CommercePublicOrderReference())->from_internal($order->reference, $order->timecreated),
-                'grossformatted' => $this->format_money((int)$orderpricing['initialminor'], $order->currency),
-                'discountformatted' => $this->format_money((int)$orderpricing['totalreductionminor'], $order->currency),
+                'grossformatted' => $this->format_money((int)$orderpricing['initialminor'], $order->currency, $language),
+                'discountformatted' => $this->format_money((int)$orderpricing['totalreductionminor'], $order->currency, $language),
                 'hasdiscount' => (bool)$orderpricing['haspricing'],
                 'hasproductpromotion' => (bool)$orderpricing['haspromotion'],
-                'productpromotionformatted' => $this->format_money((int)$orderpricing['promotionminor'], $order->currency),
+                'productpromotionformatted' => $this->format_money((int)$orderpricing['promotionminor'], $order->currency, $language),
                 'hastrialdiscount' => (bool)$orderpricing['hastrial'],
-                'trialdiscountformatted' => $this->format_money((int)$orderpricing['trialminor'], $order->currency),
+                'trialdiscountformatted' => $this->format_money((int)$orderpricing['trialminor'], $order->currency, $language),
                 'hasownedcredit' => (bool)$orderpricing['hascredit'],
-                'ownedcreditformatted' => $this->format_money((int)$orderpricing['creditminor'], $order->currency),
+                'ownedcreditformatted' => $this->format_money((int)$orderpricing['creditminor'], $order->currency, $language),
                 'haspromocode' => $promocodeminor > 0,
-                'promocodeformatted' => $this->format_money($promocodeminor, $order->currency),
+                'promocodeformatted' => $this->format_money($promocodeminor, $order->currency, $language),
                 'promotioncodes' => implode(', ', $promotioncodes),
                 'haspersonaloffer' => $personalofferminor > 0,
-                'personalofferformatted' => $this->format_money($personalofferminor, $order->currency),
+                'personalofferformatted' => $this->format_money($personalofferminor, $order->currency, $language),
                 'hasotherdiscount' => $otherdiscountminor > 0,
-                'otherdiscountformatted' => $this->format_money($otherdiscountminor, $order->currency),
-                'totalformatted' => $this->format_money($order->totalminor, $order->currency),
+                'otherdiscountformatted' => $this->format_money($otherdiscountminor, $order->currency, $language),
+                'totalformatted' => $this->format_money($order->totalminor, $order->currency, $language),
+                'donationformatted' => $donationminor > 0
+                    ? $this->format_donation_money($donationminor, $order->currency, $language)
+                    : '',
             ],
             'items' => $items,
             'payment' => $payment === null ? [] : [
@@ -296,7 +309,7 @@ final class CommercePurchaseMailContextFactory {
                 'providerlabel' => ucfirst((string)$payment->provider),
                 'transactionreference' => (string)($payment->transactionid ?? $payment->providerreference ?? ''),
                 'status' => strtolower(trim((string)$payment->status)),
-                'amountformatted' => $this->format_money($payment->amountminor, $payment->currency),
+                'amountformatted' => $this->format_money($payment->amountminor, $payment->currency, $language),
             ],
             'links' => [
                 'order' => (new moodle_url('/local/subscriptions/order_details.php', ['reference' => $order->reference]))->out(false),
@@ -375,7 +388,13 @@ final class CommercePurchaseMailContextFactory {
         return CommerceProductDisplayText::title((string)($record->name ?? ''));
     }
 
-    private function normalise_item_type(string $type): string {
+    /** @param array<string,mixed> $metadata */
+    private function normalise_item_type(string $type, array $metadata = []): string {
+        $cataloguetype = strtolower(trim((string)($metadata['catalogue_type'] ?? '')));
+        if ($cataloguetype === 'donation') {
+            return 'donation';
+        }
+
         $type = strtolower(trim($type));
         return match (true) {
             str_contains($type, 'course'), str_contains($type, 'subscription') => 'course',
@@ -398,7 +417,11 @@ final class CommercePurchaseMailContextFactory {
         return $sku === '' ? '' : (new moodle_url('/boutique', ['sku' => $sku]))->out(false);
     }
 
-    private function format_money(int $minor, string $currency): string {
-        return CurrencyFormatter::format_minor_code($minor, $currency);
+    private function format_money(int $minor, string $currency, string $language): string {
+        return CurrencyFormatter::format_minor_code_for_language($minor, $currency, $language);
+    }
+
+    private function format_donation_money(int $minor, string $currency, string $language): string {
+        return CurrencyFormatter::format_minor_for_language($minor, $currency, $language);
     }
 }

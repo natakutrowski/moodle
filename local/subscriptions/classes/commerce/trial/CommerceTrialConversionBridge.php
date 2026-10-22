@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\commerce\course\storefront\CommerceCourseStorefrontTargetResolver;
+use local_subscriptions\trial\TrialLegacyConversionEligibilityService;
 use local_subscriptions\trial_manager;
 
 /**
@@ -34,14 +35,14 @@ final class CommerceTrialConversionBridge {
             return null;
         }
 
-        $trial = trial_manager::user_has_active_trial($userid);
-        if ($trial === null || !trial_manager::is_discount_window_open($userid)) {
+        $eligibility = new TrialLegacyConversionEligibilityService($this->db);
+        if (!$eligibility->is_eligible($userid)) {
             return null;
         }
 
         $settings = trial_manager::get_trial_settings();
         $discountpercent = max(0, min(100, (int)$settings['disc_pct']));
-        $expiresat = trial_manager::discount_window_deadline($userid);
+        $expiresat = $eligibility->deadline($userid);
         if ($discountpercent <= 0 || $expiresat <= time()) {
             return null;
         }

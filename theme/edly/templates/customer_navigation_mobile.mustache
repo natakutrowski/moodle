@@ -10,7 +10,7 @@
                 </a>
             </li>
         {{/customernavigation.items}}
-        {{#customernavigation.isadmin}}
+        {{#customernavigation.hascrmaccess}}
             <li>
                 <details class="campus-customer-nav-mobile__admin-menu">
                     <summary class="campus-customer-nav-mobile__item">
@@ -29,6 +29,8 @@
                     </div>
                 </details>
             </li>
+        {{/customernavigation.hascrmaccess}}
+        {{#customernavigation.isadmin}}
             <li>
                 <details class="campus-customer-nav-mobile__admin-menu">
                     <summary class="campus-customer-nav-mobile__item">

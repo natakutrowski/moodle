@@ -1,0 +1,24 @@
+<section id="showroom-preparation" class="commerce-showroom-a1-block commerce-showroom-preparation-flow {{preparationflowlayoutclass}} {{preparationflowvariantclass}}" style="--showroom-section-custom-background: {{preparationflowlayoutbackgroundcolor}};">
+    {{#haspreparationflowlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{preparationflowlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{preparationflowlayoutbackgroundblur}}px;"><img src="{{preparationflowlayoutbackgroundimageurl}}" alt="" loading="lazy"></span>{{/haspreparationflowlayoutbackgroundimage}}
+    <div class="commerce-showroom-container">
+        {{#preparationislovablea0}}{{#haspreparationannotation}}<p class="commerce-showroom-preparation-flow__annotation">{{preparationannotation}}</p>{{/haspreparationannotation}}{{/preparationislovablea0}}
+        <header class="commerce-showroom-a1-heading">
+            {{#preparationislovablea0}}<p class="commerce-showroom-preparation-flow__badge"><i class="fa-solid fa-shoe-prints" aria-hidden="true"></i><span>{{preparationeyebrow}}</span></p>{{/preparationislovablea0}}
+            {{^preparationislovablea0}}<p>{{preparationeyebrow}}</p>{{/preparationislovablea0}}
+            <h2>{{preparationtitle}}{{#preparationtitleaccent}} <span>{{preparationtitleaccent}}</span>{{/preparationtitleaccent}}{{#haspreparationtitlesuffix}} {{preparationtitlesuffix}}{{/haspreparationtitlesuffix}}</h2>
+            <p>{{preparationtext}}</p>
+        </header>
+        <div class="commerce-showroom-preparation-flow__steps">
+            {{#preparationitems}}
+                <article>
+                    <span><i class="{{icon}}" aria-hidden="true"></i></span>
+                    <h3>{{title}}</h3>
+                    {{#text}}<p>{{text}}</p>{{/text}}
+                </article>
+                {{#hasarrow}}<i class="fa-solid fa-arrow-right commerce-showroom-preparation-flow__arrow" aria-hidden="true"></i>{{/hasarrow}}
+            {{/preparationitems}}
+        </div>
+        {{#haspreparationimage}}<figure class="commerce-showroom-preparation-flow__image"><img src="{{preparationimageurl}}" alt="" loading="lazy"></figure>{{/haspreparationimage}}
+        {{#haspreparationnote}}<p class="commerce-showroom-a1-note">{{preparationnote}}</p>{{/haspreparationnote}}
+    </div>
+</section>

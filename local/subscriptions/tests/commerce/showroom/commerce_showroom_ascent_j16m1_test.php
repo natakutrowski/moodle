@@ -19,7 +19,7 @@ final class commerce_showroom_ascent_j16m1_test extends \advanced_testcase {
         self::assertContains('gradientstart', $names);
         self::assertContains('gradientend', $names);
 
-        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache');
         $css = file_get_contents($CFG->dirroot . '/local/subscriptions/styles/showroom.css');
         self::assertStringContainsString('{{#isascent}}', $template);
         self::assertStringContainsString('commerce-showroom-ascent--premium', $template);

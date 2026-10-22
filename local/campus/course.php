@@ -14,7 +14,9 @@ $checktrial = optional_param('checktrial', 0, PARAM_BOOL); // 1 => auto-check tr
 $isguest = (!isloggedin() || isguestuser());
 
 $istrial = function_exists('local_campus_is_trial_user') && local_campus_is_trial_user();
-$isrestricted = $isguest || $istrial;   // ← invité OU compte d’essai
+$trialregistrationsopen = local_campus_trial_registrations_are_open();
+$islegacyconversion = false;
+$isrestricted = $isguest || $istrial;
 
 
 // URL de la page d’abonnement (ajuste le chemin si besoin)
@@ -39,10 +41,10 @@ function local_campus_cf(string $shortname, int $courseid): ?string {
 /**
  * Rend le bloc de CTA selon le statut invité/connecté.
  */
-function local_campus_ctas_html(bool $guestlike, int $trialid, string $realurl, string $subscribeurl): string {
+function local_campus_ctas_html(bool $guestlike, bool $istrial, bool $trialregistrationsopen, int $trialid, string $realurl, string $subscribeurl): string {
     $out = '<div class="course-ctas">';
     if ($guestlike) {
-        if ($trialid > 0) {
+        if ($trialid > 0 && ($trialregistrationsopen || $istrial)) {
             $out .= '<a class="btn-outline-main cta" href="#" data-campus-trial-redirect="'.(int)$trialid.'">'.
                         get_string('view_trial', 'local_campus').
                     '</a>';
@@ -86,6 +88,12 @@ if ($realid > 0 && $realid !== $candidate) {
 $course = $DB->get_record('course', ['id' => $displayid], '*', MUST_EXIST);
 $context = context_course::instance($displayid);
 
+if (!$isguest && !$istrial && function_exists('local_campus_trial_conversion_offer')) {
+    $courseconversionoffer = local_campus_trial_conversion_offer((int)$USER->id, $displayid);
+    $islegacyconversion = $courseconversionoffer !== null && $courseconversionoffer->targets_product();
+    $isrestricted = $isrestricted || $islegacyconversion;
+}
+
 // 2) Page Moodle
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/campus/course.php', [
@@ -121,6 +129,9 @@ $summary = format_text($course->summary, $course->summaryformat, [
 // 5) URLs boutons
 $trialurl = $trialid > 0 ? (new moodle_url('/course/view.php', ['id' => $trialid]))->out(false) : null;
 $realurl  = (new moodle_url('/course/view.php', ['id' => $displayid]))->out(false);
+if (!$isguest && ($istrial || $islegacyconversion)) {
+    $subscribeurl = local_campus_trial_conversion_url((int)$USER->id, $displayid);
+}
 
 // 6) Layout
 $layout = in_array($layout, [1,2,3], true) ? $layout : 1;
@@ -151,7 +162,7 @@ echo $campus_trial_modal;
         <div class="course-summary">
           <?= $summary ?>
         </div>
-        <?= local_campus_ctas_html($isrestricted, $trialid, $realurl, $subscribeurl) ?>
+        <?= local_campus_ctas_html($isrestricted, $istrial, $trialregistrationsopen, $trialid, $realurl, $subscribeurl) ?>
       </div>
 
     <?php elseif ($layout === 2): ?>
@@ -167,7 +178,7 @@ echo $campus_trial_modal;
           <div class="split-summary">
             <?= $summary ?>
           </div>
-          <?= local_campus_ctas_html($isrestricted, $trialid, $realurl, $subscribeurl) ?>
+          <?= local_campus_ctas_html($isrestricted, $istrial, $trialregistrationsopen, $trialid, $realurl, $subscribeurl) ?>
         </div>
       </div>
 
@@ -182,7 +193,7 @@ echo $campus_trial_modal;
           <div class="card-summary">
             <?= $summary ?>
           </div>
-          <?= local_campus_ctas_html($isrestricted, $trialid, $realurl, $subscribeurl) ?>
+          <?= local_campus_ctas_html($isrestricted, $istrial, $trialregistrationsopen, $trialid, $realurl, $subscribeurl) ?>
         </div>
       </div>
     <?php endif; ?>

@@ -8,6 +8,9 @@
     --purchase-bundle: #d99a00;
     --purchase-bundle-soft: #fff8db;
     --purchase-bundle-border: #f5d66f;
+    --purchase-donation: #e83e8c;
+    --purchase-donation-soft: #fff0f6;
+    --purchase-donation-border: #f3b6d2;
 }
 
 .local-subscriptions-my-purchases .my-purchase-card__header {
@@ -74,6 +77,23 @@
     border-color: var(--purchase-digital);
     background: var(--purchase-digital);
     color: #fff;
+}
+
+
+.local-subscriptions-my-purchases .my-purchases-section--donations .my-purchases-section__icon,
+.local-subscriptions-my-purchases .my-purchase-card--donation .my-purchase-card__icon {
+    background: var(--purchase-donation-soft);
+    color: var(--purchase-donation);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--donation::before {
+    background: var(--purchase-donation);
+}
+
+.local-subscriptions-my-purchases .my-purchase-card--donation .my-purchase-card__actions .btn:not(.btn-outline-secondary) {
+    border-color: var(--purchase-donation-border);
+    background: var(--purchase-donation-soft);
+    color: var(--purchase-donation);
 }
 
 .local-subscriptions-my-purchases .my-purchases-section--bundles .my-purchases-section__icon,
@@ -156,4 +176,22 @@
     justify-content: center;
     flex: 0 0 auto;
     line-height: 1;
+}
+/* 7.98C C6.3E.1 — keep historical paid state and expose refunds separately. */
+.local-subscriptions-my-purchases .my-purchase-card__status-stack {
+    display: inline-flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .4rem;
+}
+.local-subscriptions-my-purchases .my-purchase-card__status--refunded {
+    background: #ffe4f0;
+    color: #a8165c;
+}
+@media (max-width: 575.98px) {
+    .local-subscriptions-my-purchases .my-purchase-card__status-stack {
+        justify-content: flex-start;
+    }
 }

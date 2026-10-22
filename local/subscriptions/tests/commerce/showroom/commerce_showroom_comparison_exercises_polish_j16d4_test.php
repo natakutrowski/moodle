@@ -10,7 +10,7 @@ defined('MOODLE_INTERNAL') || die();
 final class commerce_showroom_comparison_exercises_polish_j16d4_test extends \advanced_testcase {
     public function test_current_comparison_contract_is_present(): void {
         global $CFG;
-        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache');
         $css = file_get_contents($CFG->dirroot . '/local/subscriptions/styles/showroom.css');
         self::assertIsString($template);
         self::assertIsString($css);

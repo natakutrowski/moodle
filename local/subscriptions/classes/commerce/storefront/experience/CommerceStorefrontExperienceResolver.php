@@ -64,12 +64,17 @@ final class CommerceStorefrontExperienceResolver {
             'subscription', 'course_access' => 'courses',
             'digital', 'digital_download' => 'resources',
             'bundle' => 'bundles',
+            'donation' => 'resources',
             default => 'resources',
         };
     }
 
     /** @return string[] */
     private function default_trust(string $type): array {
+        if ($type === 'donation') {
+            return ['secure_payment', 'support'];
+        }
+
         $items = ['secure_payment', 'immediate_access', 'support'];
         if (in_array($type, ['course_access', 'digital_download', 'bundle'], true)) {
             $items[] = 'lifetime_access';

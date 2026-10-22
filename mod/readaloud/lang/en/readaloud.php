@@ -1176,3 +1176,5 @@ $string['thirty_days'] = '30 Days';
 $string['threehundredsixtyfive_days'] = '365 Days';
 $string['video'] = 'Video';
 $string['miscelleneous'] = "Miscelleneous";
+
+$string['readaloud:managequestions'] = 'Manage Read Aloud questions';

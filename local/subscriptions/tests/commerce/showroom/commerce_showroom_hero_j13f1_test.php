@@ -12,7 +12,7 @@ final class commerce_showroom_hero_j13f1_test extends \advanced_testcase {
         global $CFG;
 
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
 
         self::assertIsString($template);
@@ -31,7 +31,7 @@ final class commerce_showroom_hero_j13f1_test extends \advanced_testcase {
         $source = file_get_contents(
             $CFG->dirroot
                 . '/local/subscriptions/classes/commerce/showroom/'
-                . 'CommerceShowroomPresenter.php'
+                . 'CommerceShowroomThirdGroupVerbsPresentationProfile.php'
         );
 
         self::assertIsString($source);

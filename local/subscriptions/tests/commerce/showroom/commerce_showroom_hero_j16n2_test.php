@@ -21,7 +21,7 @@ final class commerce_showroom_hero_j16n2_test extends \advanced_testcase {
             $registry
         );
         self::assertStringContainsString(
-            "'4 chiffres sous le Hero (une ligne : valeur|libellé|icône)'",
+            "'Jusqu’à 5 chiffres (valeur|libellé|icône) — tokens dynamiques acceptés'",
             $registry
         );
         self::assertStringContainsString(

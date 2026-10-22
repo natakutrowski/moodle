@@ -50,6 +50,11 @@ try {
             'available' => !empty($offer['available']),
             'bundleblocked' => !empty($offer['bundleblocked']),
             'bundleblockedmessage' => (string)($offer['bundleblockedmessage'] ?? ''),
+            'amountminor' => isset($offer['amountminor']) ? (int)$offer['amountminor'] : 0,
+            'isdonation' => !empty($offer['isdonation']),
+            'donationcompanionpriceid' => (int)($offer['donationcompanionpriceid'] ?? 0),
+            'donationcompanionamountminor' => (int)($offer['donationcompanionamountminor'] ?? 0),
+            'donationcompanioncurrency' => (string)($offer['donationcompanioncurrency'] ?? $currency),
         ];
     }
 

@@ -1,0 +1,31 @@
+<section id="showroom-tutor" class="commerce-showroom-a1-block commerce-showroom-tutor-chat {{tutorchatlayoutclass}}" style="--showroom-section-custom-background: {{tutorchatlayoutbackgroundcolor}};">
+    {{#hastutorchatlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{tutorchatlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{tutorchatlayoutbackgroundblur}}px;"><img src="{{tutorchatlayoutbackgroundimageurl}}" alt="" loading="lazy"></span>{{/hastutorchatlayoutbackgroundimage}}
+    <div class="commerce-showroom-container commerce-showroom-tutor-chat__grid">
+        <div class="commerce-showroom-tutor-chat__copy">
+            {{#tutoreyebrow}}<p class="commerce-showroom-tutor-chat__badge"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>{{tutoreyebrow}}</span></p>{{/tutoreyebrow}}
+            <h2>{{tutortitle}} {{#tutortitleaccent}}<span>{{tutortitleaccent}}</span>{{/tutortitleaccent}}</h2>
+            <p>{{tutortext}}</p>
+            <div class="commerce-showroom-a1-cards commerce-showroom-a1-cards--2">{{#tutorfeatures}}<article><span><i class="{{icon}}" aria-hidden="true"></i></span><h3>{{title}}</h3><p>{{text}}</p></article>{{/tutorfeatures}}</div>
+            {{#hastutorbutton}}<div class="commerce-showroom-a1-actions"><a class="commerce-showroom-btn commerce-showroom-btn--primary" href="{{tutorbuttontarget}}">{{tutorbuttonlabel}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></div>{{/hastutorbutton}}
+        </div>
+        <div class="commerce-showroom-tutor-chat__media-stack">
+            <div class="commerce-showroom-tutor-chat__hero-card">
+                {{#hastutorimage}}<img class="commerce-showroom-tutor-chat__hero-image" src="{{tutorimageurl}}" alt="" loading="lazy">{{/hastutorimage}}
+                {{^hastutorimage}}<div class="commerce-showroom-tutor-chat__hero-placeholder" aria-hidden="true"><i class="fa-regular fa-image"></i></div>{{/hastutorimage}}
+            </div>
+            <div class="commerce-showroom-tutor-chat__conversation">
+                {{#hastutorconversationtitle}}<div class="commerce-showroom-tutor-chat__conversation-header">
+                    {{#hastutorimage}}<img class="commerce-showroom-tutor-chat__avatar" src="{{tutorimageurl}}" alt="" loading="lazy">{{/hastutorimage}}
+                    {{^hastutorimage}}<span class="commerce-showroom-tutor-chat__avatar commerce-showroom-tutor-chat__avatar--placeholder"><i class="fa-solid fa-user"></i></span>{{/hastutorimage}}
+                    <strong>{{tutorconversationtitle}}</strong>
+                </div>{{/hastutorconversationtitle}}
+                {{#tutormessages}}<div class="commerce-showroom-tutor-chat__message commerce-showroom-tutor-chat__message--{{side}}">
+                    {{#hasauthor}}<strong>{{author}}</strong>{{/hasauthor}}
+                    <p>{{text}}</p>
+                    {{#hastime}}<span class="commerce-showroom-tutor-chat__time">{{time}}</span>{{/hastime}}
+                </div>{{/tutormessages}}
+            </div>
+            {{#hastutorsidenote}}<p class="commerce-showroom-tutor-chat__sidenote">{{tutorsidenote}}</p>{{/hastutorsidenote}}
+        </div>
+    </div>
+</section>

@@ -9,7 +9,7 @@ final class commerce_showroom_comparison_mobile_j16d3_test extends \advanced_tes
     public function test_mobile_comparison_uses_dynamic_offer_names_prices_and_cta(): void {
         global $CFG;
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
 
         self::assertStringContainsString('{{mobilelabel}}', $template);

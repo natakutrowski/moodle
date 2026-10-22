@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\mail\admin\CommerceMailAdminPresentation;
 use local_subscriptions\commerce\mail\CommerceMailType;
 use local_subscriptions\commerce\mail\library\CommerceMailLibrary;
+use local_subscriptions\commerce\mail\library\CommerceMailLibraryAlfDonationFooterImageService;
 use local_subscriptions\commerce\mail\library\CommerceMailLibraryRepository;
 use local_subscriptions\commerce\mail\library\CommerceMailLibraryHeaderImageService;
 use local_subscriptions\commerce\mail\template\studio\CommerceMailTemplateDefaults;
@@ -148,6 +149,9 @@ final class CommerceTransactionalMailStudioBridge {
         $headerimageurl = !empty($document['headerimage'])
             ? CommerceMailLibraryHeaderImageService::url((int)$content->id)
             : '';
+        $alfdonationfooterimageurl = $mailtype === CommerceMailType::PURCHASE_RECEIPT
+            ? (new CommerceMailLibraryAlfDonationFooterImageService())->url((int)$template->id)
+            : '';
 
         return [
             'subject' => (string)$content->subject,
@@ -158,6 +162,7 @@ final class CommerceTransactionalMailStudioBridge {
             'signaturehtml' => (string)($document['signaturehtml'] ?? ''),
             'headerimage' => $headerimageurl !== '',
             'headerimageurl' => $headerimageurl,
+            'alfdonationfooterimageurl' => $alfdonationfooterimageurl,
             'templateid' => 0,
             'mailstudiotemplateid' => (int)$template->id,
         ];

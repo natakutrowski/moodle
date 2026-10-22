@@ -1,0 +1,18 @@
+/* CampusFR 7.98E.8.4.2 — A1 review typography overrides.
+ * Kept separate from showroom.css so this review fix can be applied safely
+ * on top of parallel CR changes without replacing the main stylesheet.
+ */
+
+/* Lovable reference: use Caveat for handwritten postcard notes. */
+.commerce-showroom[data-showroom="a1-course"] #showroom-adventure .commerce-showroom-adventure-overview__visual figcaption,
+.commerce-showroom[data-showroom="a1-course"] #showroom-audience-profiles .commerce-showroom-audience-note {
+    font-family: "Caveat", cursive !important;
+    font-style: normal;
+}
+
+/* Preserve the explicit line break stored in the advanced JSON:
+ * Bienvenue\nà tous !♡
+ */
+.commerce-showroom[data-showroom="a1-course"] #showroom-audience-profiles .commerce-showroom-audience-note {
+    white-space: pre-line;
+}

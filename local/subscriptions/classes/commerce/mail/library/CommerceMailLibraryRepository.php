@@ -214,6 +214,12 @@ final class CommerceMailLibraryRepository {
                 (int)$content->id
             );
         }
+        $fs->delete_area_files(
+            $contextid,
+            'local_subscriptions',
+            CommerceMailLibraryAlfDonationFooterImageService::FILEAREA,
+            $id
+        );
 
         $this->db->delete_records(self::CONTENT_TABLE, ['templateid' => $id]);
         $this->db->delete_records(self::TABLE, ['id' => $id]);

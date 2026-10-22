@@ -125,8 +125,31 @@ if ($isadminpreview) {
         . '<meta name="robots" content="noindex,nofollow,noarchive">';
 }
 
+// 7.98E.8.4.3 — A1 handwritten notes use the Caveat webfont used by the Lovable reference.
+// Load it only for the A1 showroom (including admin preview) so other showrooms keep their
+// existing font payload unchanged. The CSS itself keeps a cursive fallback if Google Fonts
+// is unavailable for any reason.
+if ($definition->get_key() === 'a1-course') {
+    $seoheadhtml .= "\n" . html_writer::empty_tag('link', [
+        'rel' => 'preconnect',
+        'href' => 'https://fonts.googleapis.com',
+    ]);
+    $seoheadhtml .= "\n" . html_writer::empty_tag('link', [
+        'rel' => 'preconnect',
+        'href' => 'https://fonts.gstatic.com',
+        'crossorigin' => 'anonymous',
+    ]);
+    $seoheadhtml .= "\n" . html_writer::empty_tag('link', [
+        'rel' => 'stylesheet',
+        'href' => 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap',
+    ]);
+}
+
 $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/showroom.css'));
 $PAGE->requires->js_call_amd('local_subscriptions/showroom', 'init');
+if ($definition->get_key() === 'a1-course') {
+    $PAGE->requires->js_call_amd('local_subscriptions/anchor_nav_sticky', 'init');
+}
 
 $data = (new CommerceShowroomPresenter())->present($definition, $offers, $currency);
 $runtimeblocks = $isadminpreview
@@ -198,10 +221,19 @@ if (!empty($data['hasherobackground']) && trim((string)($data['herobackgroundurl
         'fetchpriority' => 'high',
     ];
 } else {
-    foreach ((array)($data['offers'] ?? []) as $offer) {
-        if ((string)($offer['role'] ?? '') !== 'bundle' || empty($offer['hascover'])) {
-            continue;
-        }
+    $coveroffers = array_values(array_filter(
+        (array)($data['offers'] ?? []),
+        static fn(array $offer): bool => !empty($offer['hascover'])
+            && trim((string)($offer['coverurl'] ?? '')) !== ''
+    ));
+    usort(
+        $coveroffers,
+        static fn(array $left, array $right): int => ((int)!empty($right['isfeatured']))
+            <=> ((int)!empty($left['isfeatured']))
+    );
+
+    $offer = $coveroffers[0] ?? null;
+    if (is_array($offer)) {
         $preloadattributes = [
             'rel' => 'preload',
             'as' => 'image',
@@ -212,7 +244,6 @@ if (!empty($data['hasherobackground']) && trim((string)($data['herobackgroundurl
             $preloadattributes['imagesrcset'] = (string)$offer['coversrcset'];
             $preloadattributes['imagesizes'] = '(max-width: 767px) calc(100vw - 48px), (max-width: 1199px) 42vw, 360px';
         }
-        break;
     }
 }
 if ($preloadattributes !== null) {

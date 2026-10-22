@@ -65,7 +65,8 @@ final class CommerceCatalogPurchaseItemFactory {
             CommerceProductType::COURSE_ACCESS => CommerceItem::TYPE_SUBSCRIPTION,
             CommerceProductType::DIGITAL_DOWNLOAD => CommerceItem::TYPE_DIGITAL,
             CommerceProductType::BUNDLE => CommerceItem::TYPE_BUNDLE,
-            CommerceProductType::SERVICE => CommerceItem::TYPE_SERVICE,
+            CommerceProductType::SERVICE,
+            CommerceProductType::DONATION => CommerceItem::TYPE_SERVICE,
             default => throw new \coding_exception(
                 'Unsupported Native catalogue product type for purchase preparation: ' . $producttype
             ),

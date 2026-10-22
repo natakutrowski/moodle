@@ -13,11 +13,15 @@ use html_writer;
 use local_subscriptions\url\CommerceCustomerPublicUrlResolver;
 use local_subscriptions\commerce\student\StudentCommercePurchaseFactory;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
+use local_subscriptions\commerce\purchase\policy\CommercePurchaseEntitlementExpectationPolicy;
+use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation as PurchasePresentation;
 use local_subscriptions\commerce\catalog\resolution\CommerceLegacyStorefrontProductResolver;
 use local_subscriptions\commerce\order\presentation\CommerceBundleComponentResolver;
+use local_subscriptions\commerce\order\presentation\CommerceCustomerRefundPresentation;
 use local_subscriptions\commerce\order\presentation\CommerceOrderExperienceResolver;
 use local_subscriptions\commerce\order\presentation\CommerceOrderPresentationService;
 use local_subscriptions\commerce\order\reference\CommercePublicOrderReference;
+use local_subscriptions\commerce\payment\refund\CommercePaymentRefundRepository;
 use local_subscriptions\constants\Status;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\output\my_purchases\components\PurchaseActions;
@@ -106,10 +110,32 @@ final class CurrentPresentationRenderer {
         $nativeordersbyreference = [];
         $nativeordersbylegacy = [];
         $bundleorders = [];
+        $donationorders = [];
         $usednativeorders = [];
+        $entitlementexpectations = new CommercePurchaseEntitlementExpectationPolicy();
         $experienceresolver = new CommerceOrderExperienceResolver();
         $bundlecomponentresolver = new CommerceBundleComponentResolver($DB);
         $legacyproductresolver = new CommerceLegacyStorefrontProductResolver($DB);
+        $refundrepository = new CommercePaymentRefundRepository($DB);
+        $refundsbyreference = [];
+
+        $renderrefundbadge = static function(array $refund): string {
+            if (empty($refund['hasrefund'])) {
+                return '';
+            }
+
+            $label = get_string(
+                !empty($refund['isfull'])
+                    ? 'commerce_vocabulary_payment_status_client_refunded'
+                    : 'commerce_vocabulary_payment_status_client_partially_refunded',
+                'local_subscriptions'
+            );
+
+            return html_writer::span(
+                $label,
+                'crm-commerce-status-badge my-purchase-card__status my-purchase-card__status--refunded'
+            );
+        };
 
         $resolveNativeProductSku = static function(?object $nativeorder, array $granttypes = []): string {
             if ($nativeorder === null) {
@@ -140,12 +166,18 @@ final class CurrentPresentationRenderer {
         foreach ($nativeorders as $nativeorderdetails) {
             $reference = $nativeorderdetails->summary->reference;
             $nativeordersbyreference[$reference] = $nativeorderdetails;
+            $refundsbyreference[$reference] = CommerceCustomerRefundPresentation::resolve(
+                $nativeorderdetails,
+                $refundrepository
+            );
             if ($nativeorderdetails->legacyfamily !== null && $nativeorderdetails->legacyid !== null) {
                 $nativeordersbylegacy[$nativeorderdetails->legacyfamily . ':' . $nativeorderdetails->legacyid] = $nativeorderdetails;
             }
 
             $presentation = CommerceOrderPresentationService::create()->present($nativeorderdetails);
-            if ($experienceresolver->resolve($presentation)['isbundle']) {
+            if ($entitlementexpectations->details_is_donation_only($nativeorderdetails)) {
+                $donationorders[] = $presentation;
+            } else if ($experienceresolver->resolve($presentation)['isbundle']) {
                 $bundleorders[] = $presentation;
             }
         }
@@ -217,7 +249,8 @@ final class CurrentPresentationRenderer {
         });
         usort($digitalpurchases, static fn($a, $b): int => (int)($b->payment_date ?? $b->creation_date ?? 0) <=> (int)($a->payment_date ?? $a->creation_date ?? 0));
         usort($bundleorders, static fn($a, $b): int => $b->timecreated <=> $a->timecreated);
-        $totalpurchases = count($subs) + count($digitalpurchases) + count($bundleorders);
+        usort($donationorders, static fn($a, $b): int => $b->timecreated <=> $a->timecreated);
+        $totalpurchases = count($subs) + count($digitalpurchases) + count($bundleorders) + count($donationorders);
 
         $pagetitle = $isadminview
             ? get_string('user_purchases_title', 'local_subscriptions', fullname($targetuser))
@@ -301,9 +334,15 @@ final class CurrentPresentationRenderer {
 
                 $cardclasses = 'card shadow-sm mb-3' . ($isactive ? '' : ' my-purchase-card--inactive');
 
-                $head = html_writer::start_div('d-flex align-items-center justify-content-between');
+                $head = html_writer::start_div('d-flex align-items-center justify-content-between gap-2');
                 $head .= html_writer::tag('span', format_string($planname), ['class' => 'h5 m-0']);
-                $head .= SubsPresenter::render_status_badge($sub->status);
+                $statusbadges = SubsPresenter::render_status_badge($sub->status);
+                if ($nativeorder !== null) {
+                    $statusbadges .= $renderrefundbadge(
+                        $refundsbyreference[$nativeorder->summary->reference] ?? []
+                    );
+                }
+                $head .= html_writer::div($statusbadges, 'my-purchase-card__status-stack');
                 $head .= html_writer::end_div();
 
                 $list = html_writer::start_tag('ul', ['class' => 'list-unstyled mb-2 small']);
@@ -760,9 +799,23 @@ final class CurrentPresentationRenderer {
 
                 $modalid = 'digitalPurchaseModal' . $purchase->id;
 
-                $head = html_writer::start_div('d-flex align-items-center justify-content-between');
+                $nativeorder = $matchnativeorder(
+                    'digital',
+                    (int)($purchase->id ?? 0),
+                    trim((string)($purchase->commerce_reference ?? '')),
+                    (int)($purchase->payment_date ?? $purchase->creation_date ?? 0),
+                    (int)round(((float)($purchase->price ?? 0)) * 100)
+                );
+
+                $head = html_writer::start_div('d-flex align-items-center justify-content-between gap-2');
                 $head .= html_writer::tag('span', $productname, ['class' => 'h5 m-0']);
-                $head .= SubsPresenter::render_status_badge($purchase->status);
+                $statusbadges = SubsPresenter::render_status_badge($purchase->status);
+                if ($nativeorder !== null) {
+                    $statusbadges .= $renderrefundbadge(
+                        $refundsbyreference[$nativeorder->summary->reference] ?? []
+                    );
+                }
+                $head .= html_writer::div($statusbadges, 'my-purchase-card__status-stack');
                 $head .= html_writer::end_div();
 
                 $list = html_writer::start_tag('ul', ['class' => 'list-unstyled mb-2 small']);
@@ -780,14 +833,6 @@ final class CurrentPresentationRenderer {
                 $list .= html_writer::end_tag('ul');
 
                 $btns = [];
-
-                $nativeorder = $matchnativeorder(
-                    'digital',
-                    (int)($purchase->id ?? 0),
-                    trim((string)($purchase->commerce_reference ?? '')),
-                    (int)($purchase->payment_date ?? $purchase->creation_date ?? 0),
-                    (int)round(((float)($purchase->price ?? 0)) * 100)
-                );
 
                 $nativeproductsku = $resolveNativeProductSku(
                     $nativeorder,
@@ -943,6 +988,77 @@ final class CurrentPresentationRenderer {
         }
         echo html_writer::end_div();
 
+        if ($donationorders !== []) {
+            echo html_writer::start_div('my-purchases-section my-purchases-section--donations');
+            echo html_writer::start_div('my-purchases-section__heading');
+            echo html_writer::div(
+                html_writer::tag('i', '', ['class' => 'fa-solid fa-heart', 'aria-hidden' => 'true']),
+                'my-purchases-section__icon'
+            );
+            echo html_writer::tag('h3', get_string('commerce_donation_purchases_title', 'local_subscriptions'), [
+                'class' => 'my-purchases-section__title',
+            ]);
+            echo html_writer::tag('span', (string)count($donationorders), ['class' => 'my-purchases-section__count']);
+            echo html_writer::end_div();
+            echo html_writer::start_div('my-purchases-grid');
+
+            foreach ($donationorders as $donationorder) {
+                $firstitem = $donationorder->items[0] ?? null;
+                $title = $firstitem === null || trim((string)$firstitem->label) === ''
+                    ? get_string('commerce_donation_default_name', 'local_subscriptions')
+                    : (string)$firstitem->label;
+                $ispaid = $donationorder->is_paid();
+                $statusclass = $ispaid ? 'crm-commerce-status-active' : 'crm-commerce-status-warning';
+                $statuslabel = get_string(
+                    $ispaid ? 'commerce_donation_confirmed_badge' : 'commerce_donation_pending_badge',
+                    'local_subscriptions'
+                );
+                $head = html_writer::start_div('my-purchase-card__title-row');
+                $head .= html_writer::tag('span', format_string($title), ['class' => 'h5 m-0 my-purchase-card__title']);
+                $statusbadges = html_writer::span(
+                    $statuslabel,
+                    'crm-commerce-status-badge ' . $statusclass . ' my-purchase-card__status'
+                );
+                $statusbadges .= $renderrefundbadge(
+                    $refundsbyreference[$donationorder->reference] ?? []
+                );
+                $head .= html_writer::div($statusbadges, 'my-purchase-card__status-stack');
+                $head .= html_writer::end_div();
+
+                $list = html_writer::start_tag('ul', ['class' => 'list-unstyled mb-2 small']);
+                $list .= html_writer::tag(
+                    'li',
+                    html_writer::tag('span', get_string('purchase_date', 'local_subscriptions') . ': ', ['class' => 'text-muted'])
+                        . userdate($donationorder->timecreated)
+                );
+                $list .= html_writer::tag(
+                    'li',
+                    html_writer::tag('span', get_string('commerce_donation_amount_label', 'local_subscriptions') . ': ', ['class' => 'text-muted'])
+                        . PurchasePresentation::money($donationorder->totalminor, $donationorder->currency)
+                );
+                $list .= html_writer::end_tag('ul');
+
+                $btns = [html_writer::link(
+                    UrlFactory::order_details(['reference' => $donationorder->reference]),
+                    get_string('details', 'local_subscriptions'),
+                    ['class' => 'btn btn-outline-secondary btn-sm']
+                )];
+                $card = new PurchaseCard(
+                    $head,
+                    $list,
+                    new PurchaseActions($btns, 'my-purchase-card__actions'),
+                    'card shadow-sm mb-3 my-purchase-card',
+                    'my-purchase-card__header',
+                    'donation',
+                    'fa-solid fa-heart'
+                );
+                echo $purchaseslist->render_item($card);
+            }
+
+            echo html_writer::end_div();
+            echo html_writer::end_div();
+        }
+
         if ($bundleorders !== []) {
             echo html_writer::start_div('my-purchases-section my-purchases-section--bundles');
             echo html_writer::start_div('my-purchases-section__heading');
@@ -975,7 +1091,14 @@ final class CurrentPresentationRenderer {
                 if ($title === '') { $title = get_string('commerce_i49_bundle_default_name', 'local_subscriptions'); }
                 $head = html_writer::start_div('my-purchase-card__title-row');
                 $head .= html_writer::tag('span', format_string($title), ['class' => 'h5 m-0 my-purchase-card__title']);
-                $head .= html_writer::span(get_string('commerce_i411_paid_badge', 'local_subscriptions'), 'crm-commerce-status-badge crm-commerce-status-active my-purchase-card__status');
+                $statusbadges = html_writer::span(
+                    get_string('commerce_i411_paid_badge', 'local_subscriptions'),
+                    'crm-commerce-status-badge crm-commerce-status-active my-purchase-card__status'
+                );
+                $statusbadges .= $renderrefundbadge(
+                    $refundsbyreference[$bundleorder->reference] ?? []
+                );
+                $head .= html_writer::div($statusbadges, 'my-purchase-card__status-stack');
                 $head .= html_writer::end_div();
 
                 $list = html_writer::start_tag('ul', ['class' => 'list-unstyled mb-2 small my-purchase-bundle-items']);

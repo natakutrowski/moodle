@@ -82,7 +82,7 @@ final class CommerceWorkspaceRenderer {
                         user_subscriptions_page()
                 ),
                 'capability' =>
-                    Capabilities::MANAGE_SUBSCRIPTIONS,
+                    Capabilities::VIEW_PAYMENTS,
             ],
 
             [
@@ -154,7 +154,7 @@ final class CommerceWorkspaceRenderer {
                         digital_purchases_admin_page()
                 ),
                 'capability' =>
-                    Capabilities::VIEW_DIGITAL,
+                    Capabilities::VIEW_PAYMENTS,
             ],
 
             [
@@ -197,7 +197,7 @@ final class CommerceWorkspaceRenderer {
                         digital_sales_stats_admin_page()
                 ),
                 'capability' =>
-                    Capabilities::VIEW_STATISTICS,
+                    Capabilities::VIEW_DIGITAL,
             ],
         ];
     }

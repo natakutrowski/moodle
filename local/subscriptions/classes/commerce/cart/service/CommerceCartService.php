@@ -22,6 +22,8 @@ use local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatRe
 use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinEligibilityService;
 use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinOperation;
 use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinPricingService;
+use local_subscriptions\commerce\catalog\domain\CommerceProductType;
+use local_subscriptions\commerce\donation\CommerceDonationAmountPolicy;
 
 /** Application service owning all mutations of the active cart. */
 final class CommerceCartService {
@@ -360,11 +362,41 @@ final class CommerceCartService {
         }
 
         $quote = $this->require_catalog()->quote($sku, $priceid, $cart->get_currency(), $language, $at);
+        $isdonation = $quote->get_product_type() === CommerceProductType::DONATION;
+        if ($isdonation) {
+            if ($quantity !== 1) {
+                return new CommerceCartOperationResult($cart, false, [
+                    new CommerceCartMessage(
+                        'donation_amount_invalid',
+                        CommerceCartMessage::LEVEL_WARNING,
+                        ['productsku' => $sku]
+                    ),
+                ]);
+            }
+            try {
+                $donationpolicy = new CommerceDonationAmountPolicy();
+                $metadata = $donationpolicy->canonical_metadata(
+                    $metadata,
+                    $metadata[CommerceDonationAmountPolicy::METADATA_UNITS] ?? 1
+                );
+            } catch (\Throwable) {
+                return new CommerceCartOperationResult($cart, false, [
+                    new CommerceCartMessage(
+                        'donation_amount_invalid',
+                        CommerceCartMessage::LEVEL_WARNING,
+                        ['productsku' => $sku]
+                    ),
+                ]);
+            }
+        }
+
         $key = $quote->get_product_sku() . ':' . $quote->get_price_id();
         $existing = $cart->get_item($key);
-        $targetquantity = $existing === null ? $quantity : $existing->get_quantity() + $quantity;
+        $targetquantity = $isdonation
+            ? 1
+            : ($existing === null ? $quantity : $existing->get_quantity() + $quantity);
 
-        if ($existing !== null && !$quote->get_quantity_policy()->allows($targetquantity)) {
+        if ($existing !== null && !$isdonation && !$quote->get_quantity_policy()->allows($targetquantity)) {
             return new CommerceCartOperationResult($cart, false, [
                 new CommerceCartMessage('already_in_cart', CommerceCartMessage::LEVEL_NOTICE, ['productsku' => $sku]),
             ]);
@@ -421,7 +453,7 @@ final class CommerceCartService {
         }
 
         $items = $cart->get_items();
-        $replacement = $existing === null
+        $replacement = ($existing === null || $isdonation)
             ? new CommerceCartItem($sku, $priceid, $targetquantity, $metadata)
             : $existing->with_quantity($targetquantity);
         $items = $this->replace_item($items, $replacement);

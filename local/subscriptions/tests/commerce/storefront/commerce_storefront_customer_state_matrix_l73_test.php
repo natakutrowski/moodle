@@ -110,7 +110,7 @@ final class commerce_storefront_customer_state_matrix_l73_test extends advanced_
         );
 
         self::assertMatchesRegularExpression(
-            '~\{\{\^owned\}\}\s*\{\{>\s*local_subscriptions/storefront/product_price\s*\}\}\s*\{\{/owned\}\}~',
+            '~\{\{\^owned\}\}\s*\{\{>\s*local_subscriptions/storefront/product_price\s*\}\}\s*\{\{>\s*local_subscriptions/storefront/donation_amount_selector\s*\}\}\s*\{\{/owned\}\}~',
             $panel
         );
         self::assertMatchesRegularExpression(

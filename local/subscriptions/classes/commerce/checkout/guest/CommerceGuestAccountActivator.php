@@ -134,7 +134,11 @@ final class CommerceGuestAccountActivator {
             ]),
             clean_param((string)($user->lang ?? current_language()), PARAM_LANG),
             CommerceMailIdempotencyKey::normalise(
-                'guest-account-activation:' . $session->get_id() . ':' . hash('sha256', $activationurl->out(false))
+                // C5.14.1: one durable activation-mail intent per Guest Checkout
+                // session. The activation URL itself must not participate in
+                // the idempotency key: concurrent payment callbacks can issue
+                // the same activation intent at the same time.
+                'guest-account-activation:' . $session->get_id()
             ),
             $purchaseid
         );

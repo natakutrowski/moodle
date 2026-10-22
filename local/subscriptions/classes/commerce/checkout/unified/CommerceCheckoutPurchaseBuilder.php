@@ -6,6 +6,7 @@ namespace local_subscriptions\commerce\checkout\unified;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\catalog\domain\CommerceProductType;
 use local_subscriptions\commerce\domain\CommerceItem;
 use local_subscriptions\commerce\purchase\CommerceCustomer;
 use local_subscriptions\commerce\purchase\CommercePurchaseRequest;
@@ -92,7 +93,10 @@ final class CommerceCheckoutPurchaseBuilder {
                     $cartitem->get_product_sku(),
                     $calculated->get_name(),
                     null,
-                    ['priceid' => $cartitem->get_price_id()]
+                    [
+                        'priceid' => $cartitem->get_price_id(),
+                        'catalogue_type' => $calculated->get_product_type(),
+                    ]
                 ),
                 $quantity,
                 $unitamount,
@@ -103,6 +107,7 @@ final class CommerceCheckoutPurchaseBuilder {
                     $pricing->to_metadata(),
                     [
                         'priceid' => $cartitem->get_price_id(),
+                        'catalogue_type' => $calculated->get_product_type(),
                         'locked_subtotal_minor' =>
                             $calculated->get_subtotal()->get_amount_minor(),
                         'locked_total_minor' => $linetotal,
@@ -234,11 +239,12 @@ final class CommerceCheckoutPurchaseBuilder {
             $isupgrade = $operation === 'upgrade';
             $istrialconversion = $operation === 'trialconversion';
             $ispromotionjoin = $operation === 'promotion_join';
+            $isdonation = $item->get_product_type() === CommerceProductType::DONATION;
 
-            if ($isupgrade || $istrialconversion || $ispromotionjoin) {
-                // Upgrade, Trial and promotion_join values are already locked
-                // final prices in the calculated cart snapshot. Never spread
-                // unrelated cart-level promotions onto these special lines.
+            if ($isupgrade || $istrialconversion || $ispromotionjoin || $isdonation) {
+                // Upgrade, Trial, promotion_join and Donation values are already
+                // locked final prices in the calculated cart snapshot. Never
+                // spread unrelated cart-level promotions onto these lines.
                 $allocations[$index] = $subtotal;
                 $reserved += $subtotal;
             } else {
@@ -275,7 +281,7 @@ final class CommerceCheckoutPurchaseBuilder {
             'course_access' => CommerceItem::TYPE_SUBSCRIPTION,
             'digital_download' => CommerceItem::TYPE_DIGITAL,
             'bundle' => CommerceItem::TYPE_BUNDLE,
-            'service' => CommerceItem::TYPE_SERVICE,
+            'service', 'donation' => CommerceItem::TYPE_SERVICE,
             default => throw new \RuntimeException('Unsupported checkout product type: ' . $type),
         };
     }

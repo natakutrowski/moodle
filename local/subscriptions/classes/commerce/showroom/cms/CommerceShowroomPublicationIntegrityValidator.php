@@ -27,6 +27,7 @@ final class CommerceShowroomPublicationIntegrityValidator {
             (string)$showroom->template
         );
 
+        $products = [];
         foreach (['productsjson', 'settingsjson'] as $field) {
             $decoded = json_decode(
                 (string)$showroom->{$field},
@@ -36,6 +37,11 @@ final class CommerceShowroomPublicationIntegrityValidator {
             );
             if (!is_array($decoded)) {
                 $this->fail('invalid ' . $field);
+            }
+            if ($field === 'productsjson') {
+                $products = CommerceShowroomProductConfig::from_json(
+                    (string)$showroom->productsjson
+                );
             }
         }
 
@@ -77,6 +83,9 @@ final class CommerceShowroomPublicationIntegrityValidator {
                 $blockkey,
                 $config
             );
+            if ($blocktype === 'offers') {
+                $this->validate_offer_products($blockkey, $products);
+            }
             $this->validate_internal_media_urls(
                 $blockid,
                 $blockkey,
@@ -98,6 +107,7 @@ final class CommerceShowroomPublicationIntegrityValidator {
         array $config
     ): void {
         $schema = CommerceShowroomBlockEditorRegistry::schema($blocktype);
+        $presentation = trim((string)($config['presentation'] ?? ''));
 
         foreach ((array)($schema['fields'] ?? []) as $field) {
             if (empty($field['required'])) {
@@ -109,17 +119,59 @@ final class CommerceShowroomPublicationIntegrityValidator {
                 continue;
             }
 
-            $value = $config[$name] ?? null;
-            if (is_string($value)) {
-                $value = trim($value);
+            // The four-column PPT variant is intentionally non-interactive.
+            // Its content lives in col1..col4, so the legacy interactive
+            // choices/correct-answer/consequences fields are irrelevant and
+            // must not block publication.
+            if (
+                $blocktype === 'problem_interactive'
+                && $presentation === 'four_columns_ppt'
+                && in_array($name, ['choices', 'correctanswer', 'consequences'], true)
+            ) {
+                continue;
             }
 
-            if ($value === null || $value === '' || $value === []) {
-                $this->fail(
-                    'required field "' . $name
-                    . '" is empty in block "' . $blockkey . '"'
-                );
+            $this->validate_required_value($blockkey, $name, $config[$name] ?? null);
+        }
+
+        // Keep publication fail-closed for the custom four-column variant:
+        // require the three content collections that actually feed its UI.
+        if ($blocktype === 'problem_interactive' && $presentation === 'four_columns_ppt') {
+            foreach (['col1items', 'col3items', 'col4items'] as $name) {
+                $this->validate_required_value($blockkey, $name, $config[$name] ?? null);
             }
+        }
+    }
+
+    /**
+     * The Offers block gets its products from showroom.productsjson.
+     * The historical block-level `skus` textarea is compatibility-only and
+     * must not gate publication anymore.
+     *
+     * @param array<string,string> $products
+     */
+    private function validate_offer_products(string $blockkey, array $products): void {
+        if ($products === []) {
+            $this->fail(
+                'no product is configured for offers block "' . $blockkey . '"'
+            );
+        }
+    }
+
+    private function validate_required_value(
+        string $blockkey,
+        string $name,
+        mixed $value
+    ): void {
+        if (is_string($value)) {
+            $value = trim($value);
+        }
+
+        if ($value === null || $value === '' || $value === []) {
+            $this->fail(
+                'required field "' . $name
+                . '" is empty in block "' . $blockkey . '"'
+            );
         }
     }
 

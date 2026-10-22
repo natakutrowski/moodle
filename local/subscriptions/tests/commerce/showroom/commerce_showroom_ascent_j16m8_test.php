@@ -31,7 +31,7 @@ final class commerce_showroom_ascent_j16m8_test extends \advanced_testcase {
     public function test_ascent_template_and_css_keep_fallbacks_and_viewport_switches(): void {
         global $CFG;
         $root = $CFG->dirroot . '/local/subscriptions/';
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
         $css = file_get_contents($root . 'styles/showroom.css');
 
         self::assertStringContainsString('{{#hasascentbackground}}', $template);

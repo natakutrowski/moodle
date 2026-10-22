@@ -1,0 +1,8 @@
+<nav class="commerce-showroom-anchor-nav {{anchornavclass}} {{anchornavlayoutclass}}" data-showroom-anchor-nav {{#anchornavafterhero}}data-showroom-after-hero-nav="1"{{/anchornavafterhero}} aria-label="Navigation de la page" style="--showroom-section-custom-background: {{anchornavlayoutbackgroundcolor}};">
+    <div class="commerce-showroom-container commerce-showroom-anchor-nav__inner">
+        <div class="commerce-showroom-anchor-nav__links">
+            {{#anchornavitems}}<a href="{{target}}" data-showroom-section-anchor>{{label}}</a>{{/anchornavitems}}
+        </div>
+        {{#hasanchornavcta}}<a href="{{anchornavctatarget}}" class="commerce-showroom-btn commerce-showroom-btn--primary commerce-showroom-anchor-nav__cta">{{anchornavctalabel}}</a>{{/hasanchornavcta}}
+    </div>
+</nav>

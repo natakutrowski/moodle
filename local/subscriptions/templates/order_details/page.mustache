@@ -39,6 +39,11 @@
         <div class="commerce-order-status commerce-order-status--{{paymentstatusclass}}">
             <span>{{#str}}commerce_i43_payment_status, local_subscriptions{{/str}}</span><strong>{{paymentstatus}}</strong>
         </div>
+        {{#hasrefund}}
+            <div class="commerce-order-status commerce-order-status--{{refundstatusclass}}">
+                <span>{{#str}}commerce_customer_refund_label, local_subscriptions{{/str}}</span><strong>{{refundstatus}}</strong>
+            </div>
+        {{/hasrefund}}
         {{#hasaccessstatus}}
             <div class="commerce-order-status commerce-order-status--{{accessstatusclass}}">
                 <span>{{#str}}commerce_i410_product_access, local_subscriptions{{/str}}</span><strong>{{accessstatus}}</strong>
@@ -68,7 +73,7 @@
                 <div class="commerce-order-panel__heading"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i><h2>{{#str}}commerce_i43_items, local_subscriptions{{/str}}</h2></div>
                 {{#hasitems}}<div class="commerce-order-items">
                     {{#items}}
-                        <article class="commerce-order-item-detail {{#iscourse}}commerce-order-item-detail--course{{/iscourse}}{{#isdigital}}commerce-order-item-detail--digital{{/isdigital}}{{#isbundleitem}} commerce-order-item-detail--bundle{{/isbundleitem}}">
+                        <article class="commerce-order-item-detail {{#iscourse}}commerce-order-item-detail--course{{/iscourse}}{{#isdigital}}commerce-order-item-detail--digital{{/isdigital}}{{#isbundleitem}} commerce-order-item-detail--bundle{{/isbundleitem}}{{#isdonation}} commerce-order-item-detail--donation{{/isdonation}}">
                             <div class="commerce-order-item-detail__main">
                                 <div>
                                     <div class="commerce-order-item-detail__type">{{typelabel}}</div>
@@ -134,7 +139,7 @@
                                                     {{#hasmobile}}<a class="btn btn-outline-primary" href="{{mobileurl}}"><i class="fa-solid fa-mobile-screen-button"></i>{{#str}}digital_download_mobile, local_subscriptions{{/str}}</a>{{/hasmobile}}
                                                 {{/isdigital}}
                                             {{/available}}
-                                            {{^available}}<span class="commerce-order-access commerce-order-access--{{accessstateclass}}" role="status"><i class="fa-solid fa-clock" aria-hidden="true"></i>{{pendinglabel}}</span>{{/available}}
+                                            {{^available}}<span class="commerce-order-access commerce-order-access--{{accessstateclass}}" role="status"><i class="fa-solid {{accessstateicon}}" aria-hidden="true"></i>{{pendinglabel}}</span>{{/available}}
                                         </div>
                                     </div>
                                 {{/accesses}}
@@ -170,6 +175,10 @@
                 <div class="commerce-order-panel__heading"><i class="fa-solid fa-credit-card" aria-hidden="true"></i><h2>{{#str}}commerce_i45_payment_information, local_subscriptions{{/str}}</h2></div>
                 <dl class="commerce-order-summary">
                     <div><dt>{{#str}}commerce_i45_payment_status, local_subscriptions{{/str}}</dt><dd><span class="commerce-order-payment-badge commerce-order-payment-badge--{{statusclass}}">{{status}}</span></dd></div>
+                    {{#hasrefund}}
+                        <div><dt>{{#str}}commerce_customer_refund_label, local_subscriptions{{/str}}</dt><dd><span class="commerce-order-payment-badge commerce-order-payment-badge--refund">{{refundstatus}}</span></dd></div>
+                        <div><dt>{{#str}}commerce_customer_refund_amount, local_subscriptions{{/str}}</dt><dd class="commerce-order-summary__refund">{{refundamount}}</dd></div>
+                    {{/hasrefund}}
                     <div><dt>{{#str}}commerce_i410_payment_method, local_subscriptions{{/str}}</dt><dd>{{{paymentmethodhtml}}}</dd></div>
                     <div><dt>{{#str}}commerce_purchase_provider, local_subscriptions{{/str}}</dt><dd class="commerce-order-provider">{{{providerhtml}}}</dd></div>
                     <div><dt>{{#str}}commerce_i410_amount_paid, local_subscriptions{{/str}}</dt><dd>{{amount}}</dd></div>

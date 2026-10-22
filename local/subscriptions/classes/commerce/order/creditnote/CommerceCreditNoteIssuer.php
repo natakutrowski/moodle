@@ -239,6 +239,10 @@ final class CommerceCreditNoteIssuer {
                             'gross_minor' => $item->grossminor,
                             'discount_minor' => $item->discountminor,
                             'net_minor' => $item->netminor,
+                            'catalogue_type' => strtolower(trim((string)($item->metadata['catalogue_type'] ?? ''))),
+                            'donation_units' => isset($item->metadata['donation_units'])
+                                ? (int)$item->metadata['donation_units']
+                                : null,
                         ],
                         $order->items
                     ),

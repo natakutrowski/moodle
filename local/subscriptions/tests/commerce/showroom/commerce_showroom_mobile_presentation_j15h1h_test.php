@@ -10,7 +10,7 @@ final class commerce_showroom_mobile_presentation_j15h1h_test extends \advanced_
         $root = dirname(__DIR__, 3);
         $registry = file_get_contents($root . '/classes/commerce/showroom/cms/CommerceShowroomBlockEditorRegistry.php');
         $presenter = file_get_contents($root . '/classes/commerce/showroom/cms/CommerceShowroomBlockConfigurationPresenter.php');
-        $template = file_get_contents($root . '/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . '/templates/showroom/default.mustache');
         $css = file_get_contents($root . '/styles/showroom.css');
 
         self::assertStringContainsString("'mobilepresentation'", $registry);
@@ -19,6 +19,8 @@ final class commerce_showroom_mobile_presentation_j15h1h_test extends \advanced_
         self::assertStringContainsString('commerce-showroom-offers__swipe-hint', $template);
         self::assertStringContainsString('.commerce-showroom-offers--mobile-stack', $css);
         self::assertStringContainsString('.commerce-showroom-offers--mobile-slider', $css);
-        self::assertStringContainsString('.commerce-showroom-offer--bundle { order: 1 !important; }', $css);
+        self::assertStringNotContainsString('.commerce-showroom-offer--bundle { order:', $css);
+        self::assertStringNotContainsString('.commerce-showroom-offer--course { order:', $css);
+        self::assertStringNotContainsString('.commerce-showroom-offer--pdf { order:', $css);
     }
 }

@@ -28,6 +28,84 @@ final class CommerceMailTemplateDefaults {
         ];
     }
 
+    /**
+     * Built-in editorial variants for the two Alf purchase-receipt journeys.
+     *
+     * These variants deliberately use an explicit language map instead of
+     * get_string(): transactional rendering must remain deterministic even
+     * when a PHPUnit/runtime process has only the English core language pack.
+     *
+     * @return array<string,string>
+     */
+    public static function get_alf_purchase_receipt(string $variant, string $language): array {
+        $language = strtolower(trim(str_replace('-', '_', $language)));
+        $language = explode('_', $language)[0] ?: 'fr';
+        $language = in_array($language, ['fr', 'en', 'ru'], true) ? $language : 'fr';
+
+        $all = [
+            'fr' => [
+                'donation' => [
+                    'subject' => 'Merci du fond du cœur ❤️ — votre soutien à Alf est confirmé',
+                    'preheader' => 'Votre contribution de {donation_amount} a bien été reçue.',
+                    'heading' => 'Merci du fond du cœur ❤️',
+                    'introhtml' => '<p>Bonjour {firstname},</p><p>Votre contribution de <strong>{donation_amount}</strong> a bien été reçue.</p><p>Vous avez choisi d’aider Alf sans acheter le cours, simplement parce que vous aviez envie de participer à son opération. Ce geste compte énormément pour nous — et surtout pour lui.</p>',
+                    'outrohtml' => '<p>Chaque contribution nous rapproche un peu plus de l’opération d’Alf. Merci de faire partie de cette aventure avec nous.</p><p>Votre facture est jointe à cet e-mail au format PDF et votre commande reste disponible à tout moment dans votre espace CampusFR.</p>',
+                    'signaturehtml' => '<p>Avec toute notre gratitude ❤️<br><strong>Nata, Alf et l’équipe CampusFR</strong></p>',
+                ],
+                'course_donation' => [
+                    'subject' => 'Merci ❤️ Votre cours est confirmé — et vous aidez Alf encore davantage',
+                    'preheader' => 'Votre mini-cours est confirmé et votre contribution de {donation_amount} soutient l’opération d’Alf.',
+                    'heading' => 'Vous apprenez… et vous nous aidez vraiment ❤️',
+                    'introhtml' => '<p>Bonjour {firstname},</p><p>Votre achat est confirmé. Vous avez choisi le <strong>mini-cours complet sur les articles</strong>, avec une contribution supplémentaire de <strong>{donation_amount}</strong> pour l’opération d’Alf.</p><p>Vous recevrez exactement le même cours et tous les mêmes contenus que dans la formule Cours seul. La différence, c’est ce geste supplémentaire que vous avez choisi de faire pour Alf — et nous voulions vous en remercier personnellement.</p>',
+                    'outrohtml' => '<p>Votre accès au cours est activé séparément dans votre espace CampusFR. Vous pouvez maintenant commencer l’enquête et reconstruire, pièce après pièce, le Cœur de Paris.</p><p>Et pendant que vous apprenez, votre contribution nous aide très concrètement à avancer vers l’opération d’Alf.</p><p>Votre facture est jointe à cet e-mail au format PDF et votre commande reste disponible à tout moment dans votre espace CampusFR.</p>',
+                    'signaturehtml' => '<p>Merci du fond du cœur ❤️<br><strong>Nata, Alf et l’équipe CampusFR</strong></p>',
+                ],
+            ],
+            'en' => [
+                'donation' => [
+                    'subject' => 'Thank you from the heart ❤️ — your support for Alf is confirmed',
+                    'preheader' => 'Your contribution of {donation_amount} has been received.',
+                    'heading' => 'Thank you from the heart ❤️',
+                    'introhtml' => '<p>Hello {firstname},</p><p>We have received your contribution of <strong>{donation_amount}</strong>.</p><p>You chose to help Alf without purchasing the course, simply because you wanted to support his operation. This gesture means a great deal to us — and especially to him.</p>',
+                    'outrohtml' => '<p>Every contribution brings us a little closer to Alf’s operation. Thank you for being part of this adventure with us.</p><p>Your invoice is attached to this email as a PDF, and your order remains available at any time from your CampusFR account.</p>',
+                    'signaturehtml' => '<p>With all our gratitude ❤️<br><strong>Nata, Alf and the CampusFR team</strong></p>',
+                ],
+                'course_donation' => [
+                    'subject' => 'Thank you ❤️ Your course is confirmed — and you are helping Alf even more',
+                    'preheader' => 'Your mini-course is confirmed and your contribution of {donation_amount} supports Alf’s operation.',
+                    'heading' => 'You learn… and you truly help us ❤️',
+                    'introhtml' => '<p>Hello {firstname},</p><p>Your purchase is confirmed. You chose the <strong>complete mini-course on French articles</strong>, together with an additional contribution of <strong>{donation_amount}</strong> towards Alf’s operation.</p><p>You receive exactly the same complete course and the same content as with the Course-only option. The difference is the extra gesture you chose to make for Alf — and we wanted to thank you personally for it.</p>',
+                    'outrohtml' => '<p>Your course access is activated separately in your CampusFR account. You can now begin the investigation and rebuild the Heart of Paris, piece by piece.</p><p>And while you learn, your contribution is helping us move very concretely towards Alf’s operation.</p><p>Your invoice is attached to this email as a PDF, and your order remains available at any time from your CampusFR account.</p>',
+                    'signaturehtml' => '<p>Thank you from the heart ❤️<br><strong>Nata, Alf and the CampusFR team</strong></p>',
+                ],
+            ],
+            'ru' => [
+                'donation' => [
+                    'subject' => 'Спасибо от всего сердца ❤️ — ваша помощь Альфу подтверждена',
+                    'preheader' => 'Мы получили ваш вклад {donation_amount}.',
+                    'heading' => 'Спасибо от всего сердца ❤️',
+                    'introhtml' => '<p>Здравствуйте, {firstname}!</p><p>Мы получили ваш вклад <strong>{donation_amount}</strong>.</p><p>Вы решили помочь Альфу, не покупая курс, — просто потому, что захотели поддержать его операцию. Для нас этот жест значит очень много. И прежде всего — для него.</p>',
+                    'outrohtml' => '<p>Каждый вклад ещё немного приближает Альфа к операции. Спасибо, что вы проходите эту часть пути вместе с нами.</p><p>Счёт в формате PDF прикреплён к этому письму, а информация о заказе всегда доступна в вашем аккаунте CampusFR.</p>',
+                    'signaturehtml' => '<p>С огромной благодарностью ❤️<br><strong>Ната, Альф и команда CampusFR</strong></p>',
+                ],
+                'course_donation' => [
+                    'subject' => 'Спасибо ❤️ Ваш курс подтверждён — и вы помогаете Альфу ещё больше',
+                    'preheader' => 'Ваш мини-курс подтверждён, а вклад {donation_amount} помогает собрать средства на операцию Альфа.',
+                    'heading' => 'Вы учитесь… и действительно помогаете нам ❤️',
+                    'introhtml' => '<p>Здравствуйте, {firstname}!</p><p>Ваша покупка подтверждена. Вы выбрали <strong>полный мини-курс по артиклям</strong> и дополнительный вклад <strong>{donation_amount}</strong> на операцию Альфа.</p><p>Вы получаете точно такой же полный курс и все те же материалы, что и в формуле «Курс отдельно». Разница только в дополнительной поддержке, которую вы решили оказать Альфу, — и мы хотим лично поблагодарить вас за этот выбор.</p>',
+                    'outrohtml' => '<p>Доступ к курсу активируется отдельно в вашем пространстве CampusFR. Теперь можно начинать расследование и шаг за шагом собирать Сердце Парижа.</p><p>А пока вы учитесь, ваш вклад очень конкретно помогает нам приблизиться к операции Альфа.</p><p>Счёт в формате PDF прикреплён к этому письму, а информация о заказе всегда доступна в вашем аккаунте CampusFR.</p>',
+                    'signaturehtml' => '<p>Спасибо от всего сердца ❤️<br><strong>Ната, Альф и команда CampusFR</strong></p>',
+                ],
+            ],
+        ];
+
+        if (!isset($all[$language][$variant])) {
+            throw new \coding_exception('Unsupported Alf purchase receipt variant: ' . $variant . ':' . $language);
+        }
+
+        return $all[$language][$variant];
+    }
+
     /** @return array<string,array<string,array<string,mixed>>> */
     private static function all(): array {
         return [

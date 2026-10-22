@@ -14,7 +14,7 @@ final class commerce_showroom_ascent_j16m5_test extends \advanced_testcase {
         $registry = file_get_contents(
             $root . 'classes/commerce/showroom/cms/CommerceShowroomBlockEditorRegistry.php'
         );
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
         $css = file_get_contents($root . 'styles/showroom.css');
         $showroomjs = file_get_contents($root . 'amd/src/showroom.js');
         $builderjs = file_get_contents($root . 'js/showroom_builder.js');

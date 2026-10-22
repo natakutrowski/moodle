@@ -33,7 +33,7 @@ final class commerce_showroom_interactive_problem_j16h7_test extends \advanced_t
         global $CFG;
 
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
         $css = file_get_contents(
             $CFG->dirroot . '/local/subscriptions/styles/showroom.css'
@@ -61,7 +61,7 @@ final class commerce_showroom_interactive_problem_j16h7_test extends \advanced_t
         global $CFG;
 
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
 
         self::assertStringContainsString(

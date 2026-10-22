@@ -18,7 +18,7 @@ final class commerce_showroom_interactive_problem_j16h9_test extends \advanced_t
             $root . '/classes/commerce/showroom/cms/CommerceShowroomBlockConfigurationPresenter.php'
         );
         $template = file_get_contents(
-            $root . '/templates/showroom/third_group_verbs.mustache'
+            $root . '/templates/showroom/default.mustache'
         );
         $css = file_get_contents($root . '/styles/showroom.css');
 

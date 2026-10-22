@@ -42701,3 +42701,34 @@ body.local-subscriptions-dashboard-page
         width: 100%;
     }
 }
+
+/* CR.5 UX4 — readable full-width course names and two-level progress layout. */
+.crm-user360-n114b-course-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .38rem;
+    min-width: 0;
+}
+.crm-user360-n114b-course-identity,
+.crm-user360-n114b-course-name { min-width: 0; max-width: 100%; }
+.crm-user360-n114b-course-title {
+    font-size: .82rem;
+    font-weight: 650;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+}
+.crm-cr5-course-details {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: .55rem;
+    padding-left: 2.1rem;
+    min-width: 0;
+}
+.crm-cr5-course-details .crm-user360-n114b-progress { min-width: 0; }
+.crm-cr5-course-details .crm-user360-n114b-course-access { padding-left: 0; }
+@media (max-width: 575px) {
+    .crm-cr5-course-details { grid-template-columns: minmax(0, 1fr); }
+}

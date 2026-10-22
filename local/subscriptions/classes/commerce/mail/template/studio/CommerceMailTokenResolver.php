@@ -26,6 +26,7 @@ final class CommerceMailTokenResolver {
             'username' => $username,
             'order_reference' => (string)($presentation['reference'] ?? ''),
             'order_total' => (string)($presentation['totalformatted'] ?? ''),
+            'donation_amount' => (string)($presentation['donationformatted'] ?? ''),
             'order_url' => (string)($links['order'] ?? ''),
             'my_purchases_url' => (string)($links['purchases'] ?? ''),
             'my_courses_url' => (string)($links['courses'] ?? ''),

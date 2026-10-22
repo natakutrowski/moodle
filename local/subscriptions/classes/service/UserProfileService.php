@@ -23,6 +23,7 @@ use local_subscriptions\crm\user\UserProfileTimelineBuilder;
 use local_subscriptions\crm\user\UserProfileViewModel;
 use local_subscriptions\crm\user\inbox\UserInboxRepository;
 use local_subscriptions\crm\user\inbox\UserInboxService;
+use local_subscriptions\trial\TrialLegacyUserStateService;
 
 final class UserProfileService {
 
@@ -95,6 +96,8 @@ final class UserProfileService {
             $digitalpayments
         );
 
+        $trialstate = TrialLegacyUserStateService::create()->describe((int)$user->id);
+
         $timelinebuilder = new UserProfileTimelineBuilder();
         $timelinepage = $timelinebuilder->build_page_for_user(
             $user,
@@ -143,7 +146,8 @@ final class UserProfileService {
             $snapshot->to_array(),
             false,
             $learningprogress,
-            $digitalresources
+            $digitalresources,
+            $trialstate
         );
     }
 

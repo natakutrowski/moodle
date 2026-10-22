@@ -287,8 +287,10 @@ final class CommerceDashboardRenderer {
         $rows = [];
         foreach ($sales as $sale) {
             $purchaseurl = new moodle_url('/local/subscriptions/admin/commerce/purchases/view.php', ['id' => (int)$sale['id']]);
-            $profileurl = !empty($sale['userid']) ? new moodle_url('/local/subscriptions/admin/users/view.php', ['id' => (int)$sale['userid']]) : null;
-            $producturl = !empty($sale['productsku']) ? new moodle_url('/local/subscriptions/admin/commerce/products/edit.php', ['sku' => (string)$sale['productsku']]) : null;
+            $profileurl = AdminSecurity::can(Capabilities::VIEW_USERS) && !empty($sale['userid'])
+                ? new moodle_url('/local/subscriptions/admin/users/view.php', ['id' => (int)$sale['userid']]) : null;
+            $producturl = AdminSecurity::can(Capabilities::MANAGE_CONFIGURATION) && !empty($sale['productsku'])
+                ? new moodle_url('/local/subscriptions/admin/commerce/products/edit.php', ['sku' => (string)$sale['productsku']]) : null;
             if (!empty($sale['user']) && is_object($sale['user'])) {
                 $avatar = html_writer::div($OUTPUT->user_picture($sale['user'], ['size' => 42, 'link' => false]), 'crm-commerce-dashboard-sale-avatar');
             } else {
@@ -312,7 +314,7 @@ final class CommerceDashboardRenderer {
     private static function quick_actions(): string {
         $actions = [
             ['fa-cube', 'commerce_dashboard_action_create_product', '/local/subscriptions/admin/commerce/products/edit.php', Capabilities::MANAGE_CONFIGURATION],
-            ['fa-tag', 'commerce_dashboard_action_create_offer', '/local/subscriptions/admin/commerce/personal-offers/create.php', Capabilities::VIEW_PAYMENTS],
+            ['fa-tag', 'commerce_dashboard_action_create_offer', '/local/subscriptions/admin/commerce/personal-offers/create.php', Capabilities::MANAGE_CRM_ADMIN_TOOLS],
             ['fa-envelope', 'commerce_dashboard_action_mail', '/local/subscriptions/admin/commerce/mail/index.php', Capabilities::VIEW_PAYMENTS],
             ['fa-upload', 'commerce_dashboard_action_import', subscription_config::import_csv_page(), Capabilities::MANAGE_SUBSCRIPTIONS],
             ['fa-hourglass-half', 'commerce_dashboard_action_unfinished', '/local/subscriptions/admin/commerce/unfinished-checkouts/index.php', Capabilities::VIEW_PAYMENTS],
@@ -342,7 +344,8 @@ final class CommerceDashboardRenderer {
         if (($n = (int)($status['failed'] ?? 0)) > 0) {
             $alerts[] = self::alert('fa-times-circle', get_string('commerce_dashboard_alert_failed_orders', 'local_subscriptions', $n), new moodle_url('/local/subscriptions/admin/commerce/purchases/index.php'), 'danger');
         }
-        if (($n = (int)($data['grantproblems'] ?? 0)) > 0) {
+        if (AdminSecurity::can(Capabilities::MANAGE_SUBSCRIPTIONS) &&
+                ($n = (int)($data['grantproblems'] ?? 0)) > 0) {
             $alerts[] = self::alert('fa-key', get_string('commerce_dashboard_alert_grants', 'local_subscriptions', $n), new moodle_url('/local/subscriptions/admin/commerce/grants/index.php'), 'danger');
         }
         if (($n = (int)($data['mailpending'] ?? 0)) > 0) {
@@ -372,7 +375,7 @@ final class CommerceDashboardRenderer {
         $rows = [];
         foreach ($products as $index => $product) {
             $label = s((string)$product['label']);
-            if (!empty($product['reference'])) {
+            if (AdminSecurity::can(Capabilities::MANAGE_CONFIGURATION) && !empty($product['reference'])) {
                 $label = html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/products/edit.php', ['sku' => (string)$product['reference']]), $label);
             }
             $rankclass = $index < 5 ? ' is-rank-' . ($index + 1) : '';
@@ -383,7 +386,9 @@ final class CommerceDashboardRenderer {
         }
         $html = self::currency_selector($currency, $currencies, $period, 'crm-commerce-dashboard-panel-currency')
             . ($rows === [] ? html_writer::div(get_string('commerce_dashboard_no_sales_data', 'local_subscriptions'), 'crm-commerce-dashboard-empty') : implode('', $rows));
-        $html .= html_writer::div(html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/statistics/index.php'), get_string('commerce_dashboard_view_statistics', 'local_subscriptions') . ' →'), 'crm-commerce-dashboard-panel-footer');
+        if (AdminSecurity::can(Capabilities::VIEW_STATISTICS)) {
+            $html .= html_writer::div(html_writer::link(new moodle_url('/local/subscriptions/admin/commerce/statistics/index.php'), get_string('commerce_dashboard_view_statistics', 'local_subscriptions') . ' →'), 'crm-commerce-dashboard-panel-footer');
+        }
         return self::panel(get_string('commerce_dashboard_top_products_period', 'local_subscriptions'), $html, '', 'fa-trophy');
     }
 
@@ -433,24 +438,34 @@ final class CommerceDashboardRenderer {
                 . html_writer::div(implode('', $showroomcards), 'crm-commerce-dashboard-showroom-summary-grid'),
                 'crm-commerce-dashboard-summary-section'
             )
-            . html_writer::div(
-                html_writer::link(
-                    new moodle_url('/local/subscriptions/admin/commerce/products/index.php'),
-                    get_string('commerce_dashboard_manage_catalog', 'local_subscriptions') . ' →'
-                )
-                . html_writer::span(' · ', 'text-muted mx-1')
-                . html_writer::link(
-                    new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'),
-                    get_string('commerce_dashboard_manage_showrooms', 'local_subscriptions') . ' →'
-                ),
-                'crm-commerce-dashboard-panel-footer'
-            );
+            . self::product_showroom_footer();
 
         return self::panel(
             get_string('commerce_dashboard_product_showroom_summary', 'local_subscriptions'),
             $html,
             'crm-commerce-dashboard-product-summary-panel',
             'fa-th-large'
+        );
+    }
+
+    /** Only render destination links that the current user can actually open. */
+    private static function product_showroom_footer(): string {
+        $links = [];
+        if (AdminSecurity::can(Capabilities::MANAGE_CONFIGURATION)) {
+            $links[] = html_writer::link(
+                new moodle_url('/local/subscriptions/admin/commerce/products/index.php'),
+                get_string('commerce_dashboard_manage_catalog', 'local_subscriptions') . ' →'
+            );
+        }
+        if (AdminSecurity::can(Capabilities::MANAGE_SHOWROOMS)) {
+            $links[] = html_writer::link(
+                new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'),
+                get_string('commerce_dashboard_manage_showrooms', 'local_subscriptions') . ' →'
+            );
+        }
+        return $links === [] ? '' : html_writer::div(
+            implode(html_writer::span(' · ', 'text-muted mx-1'), $links),
+            'crm-commerce-dashboard-panel-footer'
         );
     }
 

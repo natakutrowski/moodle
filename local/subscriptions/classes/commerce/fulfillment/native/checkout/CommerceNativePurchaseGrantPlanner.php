@@ -32,6 +32,7 @@ final class CommerceNativePurchaseGrantPlanner {
         $expander = new CommerceBundleExpansionService($products, $components);
         $persisted = new CommerceProductEntitlementRepository($this->db, $hydrator, $products);
         $effective = new CommerceEffectiveEntitlementResolver($this->db, $products, $persisted);
+        $grantexpectations = new CommerceNativeGrantExpectationPolicy($this->db);
 
         $grants = [];
         $position = 0;
@@ -60,7 +61,16 @@ final class CommerceNativePurchaseGrantPlanner {
             $expandeditems = $expander->expand($purchasedsku, max(1, (int)$item->quantity))->get_items();
 
             foreach ($expandeditems as $expandeditem) {
-                $sku = $expandeditem->get_product()->get_sku();
+                $expandedproduct = $expandeditem->get_product();
+                $sku = $expandedproduct->get_sku();
+
+                // Grantless product types are a domain invariant, not merely
+                // a fallback for missing definitions. Ignore any accidental
+                // entitlement configuration instead of granting access.
+                if (!$grantexpectations->product_requires_grants($expandedproduct)) {
+                    continue;
+                }
+
                 $definitions = $effective->resolve_by_product_sku($sku);
                 if ($definitions === []) {
                     throw new \RuntimeException(

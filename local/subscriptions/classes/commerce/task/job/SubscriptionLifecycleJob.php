@@ -9,6 +9,7 @@ use local_subscriptions\commerce\task\dto\TaskExecutionResult;
 use local_subscriptions\commerce\task\repository\SubscriptionLifecycleRepository;
 use local_subscriptions\commerce\task\support\TaskLock;
 use local_subscriptions\service\SubscriptionLifecycleService;
+use local_subscriptions\trial\TrialLegacyExpiryService;
 
 final class SubscriptionLifecycleJob implements CommerceTaskJob {
 
@@ -59,6 +60,21 @@ final class SubscriptionLifecycleJob implements CommerceTaskJob {
                 } catch (\Throwable $exception) {
                     $result->add_error($subscriptionid, $exception);
                 }
+            }
+
+            // 7.98D4 — Date B is a global ceiling for Legacy Trial access.
+            // This runs inside the already-hourly lifecycle task, so no new
+            // scheduled-task registration or environment-specific cron setup is needed.
+            try {
+                $legacy = TrialLegacyExpiryService::create()->expire_due($now);
+                if (!empty($legacy['due'])) {
+                    $result->increment('legacy_trial_subscriptions_expired', (int)$legacy['subscriptions_expired']);
+                    $result->increment('legacy_trial_roles_removed', (int)$legacy['trial_roles_removed']);
+                    $result->increment('legacy_trial_enrolments_suspended', (int)$legacy['enrolments_suspended']);
+                    $result->increment('legacy_trial_courses_preserved', (int)$legacy['courses_preserved']);
+                }
+            } catch (\Throwable $exception) {
+                $result->add_error('legacy_trial_date_b', $exception);
             }
 
             return $result->finish();

@@ -10,7 +10,7 @@ defined('MOODLE_INTERNAL') || die();
 final class commerce_showroom_journey_j13f2_test extends \advanced_testcase {
     public function test_showroom_template_renders_normalised_ordered_blocks(): void {
         global $CFG;
-        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache');
         self::assertIsString($template);
         self::assertStringContainsString('{{#showroomorderedblocks}}', $template);
         foreach (['isproblem', 'islearningmethod', 'isascent', 'isexerciseexplorer', 'isoffers', 'isfaq', 'issupport', 'isfinalcta'] as $guard) {

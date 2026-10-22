@@ -1016,7 +1016,7 @@ if ($pagedrows === []) {
                             ]
                         )
                         . html_writer::span(
-                            CommerceCatalogPresentation::prices([$price], $product->get_metadata()),
+                            CommerceCatalogPresentation::prices([$price], $product->get_metadata(), $product->get_type()),
                             'crm-product-price-value'
                         ),
                         'crm-product-price-line'

@@ -393,3 +393,10 @@ $string['mycourses_learning_start'] = 'Début de la promotion : {$a}';
 $string['mycourses_learning_next_lesson'] = 'Prochaine leçon : {$a->lesson} · {$a->date}';
 $string['mycourses_learning_next_promo_step'] = 'Prochaine étape de la promotion : {$a->lesson} · {$a->date}';
 $string['mycourses_learning_section_fallback'] = 'Section {$a}';
+
+// 7.98D2 — fermeture des nouvelles inscriptions Trial.
+$string['trial_registration_closed_html'] = 'Les nouvelles inscriptions à l’essai gratuit sont désormais fermées. Si vous aviez déjà un compte d’essai, <a href="{$a->login}">connectez-vous</a> pour continuer. Sinon, vous pouvez découvrir les cours disponibles.';
+$string['trial_registration_closed_msg'] = 'Les nouvelles inscriptions à l’essai gratuit sont désormais fermées.';
+
+$string['trial_native_authority_heading'] = 'Trial géré par Commerce Native';
+$string['trial_native_authority_desc'] = 'Depuis 7.98D, la durée, l’identité Trial et l’expiration des accès sont gérées par local_subscriptions. Les anciens réglages Campus de durée, suspension et suppression de compte sont ignorés et ne sont plus proposés ici.';

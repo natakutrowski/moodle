@@ -1,0 +1,27 @@
+{{#isdonation}}
+<div class="commerce-storefront-donation"
+     data-storefront-donation
+     data-donation-sku="{{sku}}"
+     data-donation-unit-minor="{{donationunitminor}}"
+     data-donation-currency="{{donationcurrency}}"
+     data-donation-currency-digits="{{donationcurrencydigits}}"
+     data-donation-max-units="{{donationmaxunits}}"
+     data-donation-default-units="{{donationdefaultunits}}"
+     data-donation-intent-endpoint="{{donationintentendpoint}}">
+    <div class="commerce-storefront-donation__label">{{#str}}commerce_donation_choose_amount, local_subscriptions{{/str}}</div>
+    <div class="commerce-storefront-donation__stepper">
+        <button type="button" class="commerce-storefront-donation__step" data-donation-step="-1" aria-label="{{#str}}commerce_donation_decrease, local_subscriptions{{/str}}">−</button>
+        <strong class="commerce-storefront-donation__total" data-donation-total>{{donationamountformatted}}</strong>
+        <button type="button" class="commerce-storefront-donation__step" data-donation-step="1" aria-label="{{#str}}commerce_donation_increase, local_subscriptions{{/str}}">+</button>
+    </div>
+    <div class="commerce-storefront-donation__presets" aria-label="{{#str}}commerce_donation_presets, local_subscriptions{{/str}}">
+        {{#donationpresets}}
+            <button type="button" data-donation-preset="{{units}}"{{#formatted}} aria-label="{{formatted}}"{{/formatted}}>{{formatted}}</button>
+        {{/donationpresets}}
+    </div>
+    <label class="commerce-storefront-donation__custom">
+        <span>{{#str}}commerce_donation_custom_units, local_subscriptions{{/str}}</span>
+        <input type="number" inputmode="decimal" value="{{donationamountinputvalue}}" data-donation-amount-input>
+    </label>
+</div>
+{{/isdonation}}

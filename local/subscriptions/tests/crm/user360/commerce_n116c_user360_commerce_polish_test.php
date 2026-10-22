@@ -33,8 +33,13 @@ final class commerce_n116c_user360_commerce_polish_test extends \advanced_testca
             'crm_user360_n116c_access_expired',
             $renderer
         );
+        // CR.5 moved the course identity above progress and access details.
         self::assertStringContainsString(
-            "'crm-user360-n114b-course-row'",
+            'crm-user360-n114b-course-row crm-cr5-ux5-course-row d-flex flex-column',
+            $renderer
+        );
+        self::assertStringContainsString(
+            'crm-cr5-course-details d-flex flex-wrap',
             $renderer
         );
         self::assertStringContainsString(

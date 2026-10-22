@@ -203,6 +203,11 @@ if ($category === '' || $category === CommerceMailLibrary::CATEGORY_TRANSACTIONA
                 'mailtype' => $mailtype,
             ]);
         $firstedit = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/edit.php', ['mailtype' => $mailtype, 'language' => 'fr']);
+        $previewurl = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/preview.php', [
+            'mailtype' => $mailtype,
+            'language' => 'fr',
+            'scenario' => 'standard',
+        ]);
         $runtimeedit = $runtimetemplate
             ? new moodle_url('/local/subscriptions/admin/commerce/mail/templates/library_edit.php', ['id' => (int)$runtimetemplate->id])
             : null;
@@ -250,6 +255,14 @@ if ($category === '' || $category === CommerceMailLibrary::CATEGORY_TRANSACTIONA
                         ['class' => 'btn btn-sm btn-outline-secondary']
                     )
                     : '')
+                . html_writer::link(
+                    $previewurl,
+                    html_writer::tag('i', '', [
+                        'class' => 'fa fa-eye me-1',
+                        'aria-hidden' => 'true',
+                    ]) . get_string('commerce_mail_action_preview', 'local_subscriptions'),
+                    ['class' => 'btn btn-sm btn-outline-secondary']
+                )
                 . html_writer::link(
                     $exporturl,
                     get_string('commerce_mail_library_export', 'local_subscriptions'),

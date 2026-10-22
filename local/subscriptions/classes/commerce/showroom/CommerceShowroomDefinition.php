@@ -65,6 +65,13 @@ final class CommerceShowroomDefinition {
         return !array_key_exists('detailsenabled', $config) || !empty($config['detailsenabled']);
     }
 
+    public function get_offer_donation_mode(string $role): string {
+        $config = $this->get_offer_config($role);
+        return \local_subscriptions\commerce\showroom\cms\CommerceShowroomOfferConfig::normalise_donation_mode(
+            (string)($config['donationmode'] ?? \local_subscriptions\commerce\showroom\cms\CommerceShowroomOfferConfig::DONATION_MODE_OPTIONAL)
+        );
+    }
+
     public function get_social_image(): string {
         return trim($this->socialimage);
     }

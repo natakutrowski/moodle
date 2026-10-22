@@ -123,10 +123,16 @@ final class CommerceShowroomPackageService {
         // Security: imports are never public until explicitly reviewed/published.
         $showroom['status'] = CommerceShowroomStatus::DRAFT;
 
-        // Imported copies cannot collide with public routes.
+        // Imported copies cannot collide with public routes. Canonical
+        // slugs and the optional short alias are cleared together; editors can
+        // assign fresh routes before the imported draft is published.
         foreach (['slugfr', 'slugen', 'slugru'] as $slugfield) {
             $showroom[$slugfield] = '';
         }
+        $showroom['settingsjson'] = CommerceShowroomAliasConfig::merge_into_settings_json(
+            (string)($showroom['settingsjson'] ?? '{}'),
+            ''
+        );
 
         $showroomid = $this->repository->save($showroom, $userid);
         $blockmap = [];

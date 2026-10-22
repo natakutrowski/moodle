@@ -340,6 +340,10 @@ class subscription_config {
         return self::plugin_path() . 'admin/subscriptions/add.php';
     }
 
+    public static function trial_transition_status_page(): string {
+        return self::plugin_path() . 'admin/trial/index.php';
+    }
+
     public static function user_subscription_edit_page(): string {
         return self::plugin_path() . 'admin/subscriptions/edit.php';
     }

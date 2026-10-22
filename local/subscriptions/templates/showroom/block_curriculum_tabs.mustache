@@ -1,0 +1,18 @@
+<section id="showroom-program" class="commerce-showroom-a1-block commerce-showroom-curriculum {{curriculumtabslayoutclass}}" data-showroom-tabs data-default-tab="{{curriculumdefaulttab}}" style="--showroom-section-custom-background: {{curriculumtabslayoutbackgroundcolor}};">
+    {{#hascurriculumtabslayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{curriculumtabslayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{curriculumtabslayoutbackgroundblur}}px;"><img src="{{curriculumtabslayoutbackgroundimageurl}}" alt="" loading="lazy"></span>{{/hascurriculumtabslayoutbackgroundimage}}
+    <div class="commerce-showroom-container">
+        <header class="commerce-showroom-a1-heading">
+            {{#curriculumeyebrow}}
+                <p class="commerce-showroom-curriculum__badge">
+                    <i class="{{curriculumbadgeicon}}" aria-hidden="true"></i>
+                    <span>{{curriculumeyebrow}}</span>
+                </p>
+            {{/curriculumeyebrow}}
+            <h2>{{curriculumtitle}} {{#curriculumtitleaccent}}<span>{{curriculumtitleaccent}}</span>{{/curriculumtitleaccent}}</h2>
+            <p>{{curriculumtext}}</p>
+        </header>
+        <div class="commerce-showroom-curriculum__tabs" role="tablist"><button type="button" role="tab" id="showroom-curriculum-tab-topics" aria-controls="showroom-curriculum-panel-topics" data-showroom-tab-target="topics" aria-selected="{{#curriculumtopicsactive}}true{{/curriculumtopicsactive}}{{^curriculumtopicsactive}}false{{/curriculumtopicsactive}}" {{^curriculumtopicsactive}}tabindex="-1"{{/curriculumtopicsactive}}>{{curriculumtab1label}}</button>{{#hascurriculumgrammar}}<button type="button" role="tab" id="showroom-curriculum-tab-grammar" aria-controls="showroom-curriculum-panel-grammar" data-showroom-tab-target="grammar" aria-selected="{{#curriculumgrammaractive}}true{{/curriculumgrammaractive}}{{^curriculumgrammaractive}}false{{/curriculumgrammaractive}}" {{^curriculumgrammaractive}}tabindex="-1"{{/curriculumgrammaractive}}>{{curriculumtab2label}}</button>{{/hascurriculumgrammar}}</div>
+        <div class="commerce-showroom-curriculum__panel" id="showroom-curriculum-panel-topics" role="tabpanel" aria-labelledby="showroom-curriculum-tab-topics" data-showroom-tab-panel="topics" {{^curriculumtopicsactive}}hidden{{/curriculumtopicsactive}}>{{#curriculumtopicsgroups}}{{> local_subscriptions/showroom/curriculum_group }}{{/curriculumtopicsgroups}}</div>
+        {{#hascurriculumgrammar}}<div class="commerce-showroom-curriculum__panel" id="showroom-curriculum-panel-grammar" role="tabpanel" aria-labelledby="showroom-curriculum-tab-grammar" data-showroom-tab-panel="grammar" {{^curriculumgrammaractive}}hidden{{/curriculumgrammaractive}}>{{#curriculumgrammargroups}}{{> local_subscriptions/showroom/curriculum_group }}{{/curriculumgrammargroups}}</div>{{/hascurriculumgrammar}}
+    </div>
+</section>

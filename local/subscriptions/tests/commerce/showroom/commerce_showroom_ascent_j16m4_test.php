@@ -13,7 +13,7 @@ final class commerce_showroom_ascent_j16m4_test extends \advanced_testcase {
         $root = $CFG->dirroot . '/local/subscriptions/';
         $css = file_get_contents($root . 'styles/showroom.css');
         $js = file_get_contents($root . 'amd/src/showroom.js');
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
 
         self::assertStringNotContainsString('/* J16M1 — premium 30-stage ascent. */', $css);
         self::assertStringNotContainsString('/* J16M2 — ascent polish:', $css);

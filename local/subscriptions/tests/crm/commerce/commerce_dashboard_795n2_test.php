@@ -82,6 +82,7 @@ final class commerce_dashboard_795n2_test extends advanced_testcase {
             CommerceSectionNavigationRegistry::OFFERS_ACCESS,
             CommerceSectionNavigationRegistry::MAIL,
             CommerceSectionNavigationRegistry::STATISTICS,
+            CommerceSectionNavigationRegistry::TRIAL,
             CommerceSectionNavigationRegistry::CONFIGURATION,
         ], $keys);
         $this->assertNotContains(CommerceSectionNavigationRegistry::IDENTITIES, $keys);

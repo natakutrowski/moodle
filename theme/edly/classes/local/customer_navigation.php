@@ -48,6 +48,9 @@ final class customer_navigation {
         $campusurl = self::url('my_campus', '/local/subscriptions/mon_campus.php');
         $systemcontext = \context_system::instance();
         $isadmin = has_capability('moodle/site:config', $systemcontext);
+        // CRM navigation is based on its own capabilities, not Moodle site administration.
+        $crmitems = self::crm_admin_items($systemcontext, $isadmin);
+        $hascrmaccess = !empty($crmitems);
         $sitecontext = \context_course::instance(SITEID);
         $roleswitched = is_role_switched(SITEID);
         $canswitchrole = $roleswitched || ($isadmin
@@ -97,10 +100,11 @@ final class customer_navigation {
             'languagelabel' => get_string('language'),
             'currentlanguageflag' => self::language_flag(current_language()),
             'isadmin' => $isadmin,
+            'hascrmaccess' => $hascrmaccess,
             'editmodelabel' => get_string('editmode'),
-            'crmurl' => (new \moodle_url('/crm'))->out(false),
+            'crmurl' => $hascrmaccess ? $crmitems[0]['url'] : (new \moodle_url('/crm'))->out(false),
             'crmlabel' => get_string('customernavigation_crm', 'theme_edly'),
-            'crmitems' => $isadmin ? self::crm_admin_items($systemcontext) : [],
+            'crmitems' => $crmitems,
             'adminurl' => (new \moodle_url('/admin/search.php'))->out(false),
             'adminlabel' => get_string('customernavigation_moodleadmin', 'theme_edly'),
             'adminitems' => $isadmin ? self::moodle_admin_items() : [],
@@ -167,14 +171,11 @@ final class customer_navigation {
      *
      * @return array<int, array<string, string>>
      */
-    private static function crm_admin_items(\context $context): array {
+    private static function crm_admin_items(\context $context, bool $isadmin): array {
         $registryclass = '\\local_subscriptions\\crm\\navigation\\CrmNavigationRegistry';
         if (!class_exists($registryclass)) {
-            return [self::admin_menu_item(
-                get_string('customernavigation_crm', 'theme_edly'),
-                (new \moodle_url('/crm'))->out(false),
-                'fa-solid fa-gauge-high'
-            )];
+            // Non-admin users must never receive an unfiltered CRM link.
+            return $isadmin ? [self::crm_fallback_item()] : [];
         }
 
         try {
@@ -193,15 +194,21 @@ final class customer_navigation {
                     $icon
                 );
             }
-            return $items;
+            // Preserve the admin shortcut if the plugin is temporarily incomplete.
+            return $items ?: ($isadmin ? [self::crm_fallback_item()] : []);
         } catch (\Throwable) {
-            // Keep the admin topbar usable while local_subscriptions is upgrading.
-            return [self::admin_menu_item(
-                get_string('customernavigation_crm', 'theme_edly'),
-                (new \moodle_url('/crm'))->out(false),
-                'fa-solid fa-gauge-high'
-            )];
+            // Do not expose an unfiltered CRM link to a non-administrator.
+            return $isadmin ? [self::crm_fallback_item()] : [];
         }
+    }
+
+    /** @return array<string, string> */
+    private static function crm_fallback_item(): array {
+        return self::admin_menu_item(
+            get_string('customernavigation_crm', 'theme_edly'),
+            (new \moodle_url('/crm'))->out(false),
+            'fa-solid fa-gauge-high'
+        );
     }
 
     /** @return array<int, array<string, string>> */

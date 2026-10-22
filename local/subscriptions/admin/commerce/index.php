@@ -31,7 +31,7 @@ if ($period === 'custom') {
 }
 
 $context = AdminSecurity::require(
-    Capabilities::VIEW_DASHBOARD
+    Capabilities::VIEW_PAYMENTS
 );
 
 $pageurl = new moodle_url(

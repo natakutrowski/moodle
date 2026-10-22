@@ -11,6 +11,7 @@ use local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockMediaManager;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomExerciseCatalog;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomExercisePreviewMediaManager;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomExercisePreviewZipImporter;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomProductConfig;
 
 require_login();
 require_sesskey();
@@ -32,9 +33,13 @@ $showroom = $repository->get($showroomid);
 if ($showroom === null) {
     throw new moodle_exception('invalidrecord');
 }
+$offerroles = CommerceShowroomProductConfig::roles((string)$showroom->productsjson);
 
 try {
-    $result = ['ok' => true, 'schemas' => CommerceShowroomBlockEditorRegistry::schemas()];
+    $result = [
+        'ok' => true,
+        'schemas' => CommerceShowroomBlockEditorRegistry::schemas($offerroles),
+    ];
     switch ($action) {
         case 'add':
             $blocktype = required_param('blocktype', PARAM_ALPHANUMEXT);
@@ -73,7 +78,8 @@ try {
                 ? $decodedconfig
                 : CommerceShowroomBlockEditorRegistry::normalise(
                     (string)$existing->blocktype,
-                    $decodedconfig
+                    $decodedconfig,
+                    $offerroles
                 );
 
             $repository->save_block($showroomid, [
@@ -165,7 +171,8 @@ try {
                 || (int)$block->showroomid !== $showroomid
                 || !CommerceShowroomBlockEditorRegistry::is_media_field(
                     (string)$block->blocktype,
-                    $field
+                    $field,
+                    $offerroles
                 )
             ) {
                 throw new invalid_parameter_exception(
@@ -215,7 +222,8 @@ try {
                 || (int)$block->showroomid !== $showroomid
                 || !CommerceShowroomBlockEditorRegistry::is_media_field(
                     (string)$block->blocktype,
-                    $field
+                    $field,
+                    $offerroles
                 )
             ) {
                 throw new invalid_parameter_exception(

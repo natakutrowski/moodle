@@ -25,6 +25,8 @@ use local_subscriptions\commerce\catalog\presentation\CommerceProductDisplayName
 use local_subscriptions\commerce\grant\CommerceManualProductGrantService;
 use local_subscriptions\commerce\mail\service\CommerceGrantAccessMailService;
 use local_subscriptions\commerce\mail\service\CommerceGrantMailStudioSelection;
+use local_subscriptions\trial\TrialLegacyTransitionPolicy;
+use local_subscriptions\trial\TrialManualCreationGuard;
 
 function local_subscriptions_generate_unique_username_from_email(string $email): string {
     global $DB;
@@ -50,6 +52,9 @@ function local_subscriptions_generate_unique_username_from_email(string $email):
 global $DB, $PAGE, $OUTPUT, $CFG;
 
 $context = AdminSecurity::require(Capabilities::MANAGE_SUBSCRIPTIONS);
+$trialtransitionpolicy = TrialLegacyTransitionPolicy::create();
+$trialmanualguard = TrialManualCreationGuard::create();
+$trialregistrationsopen = $trialtransitionpolicy->registrations_are_open();
 
 $preselecteduserid = optional_param('userid', 0, PARAM_INT);
 $grantworkspace = optional_param('workspace', '', PARAM_ALPHA) === 'grants';
@@ -103,6 +108,9 @@ if ($preselecteduserid > 0) {
 
 $plans = [];
 foreach ($DB->get_records('subscription_plan', null, 'name ASC') as $plan) {
+    if (!$trialregistrationsopen && !empty($plan->is_trial)) {
+        continue;
+    }
     $translation = subscription_manager::get_translated_plan_name($plan->id, current_language());
     $label = $translation ?: format_string($plan->name);
 
@@ -147,6 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($grantmode === 'legacy') {
         $planid = required_param('plan', PARAM_INT);
+        $trialmanualguard->assert_plan_allowed($planid);
         $price = required_param('price', PARAM_FLOAT);
         $currency = strtoupper(required_param('currency', PARAM_ALPHA));
         $pricecurrency = number_format($price, 2, '.', '') . '|' . $currency;
@@ -430,6 +439,13 @@ if ($grantworkspace) {
         CommerceOffersAccessWorkflowRenderer::CONFIGURATION,
         'grant',
         'one'
+    );
+}
+
+if (!$trialregistrationsopen && !$grantworkspace) {
+    echo html_writer::div(
+        get_string('trial_admin_manual_creation_closed_notice', 'local_subscriptions'),
+        'alert alert-info'
     );
 }
 

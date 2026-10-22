@@ -1,0 +1,1843 @@
+<main class="commerce-showroom {{#showexpeditiontheme}}commerce-showroom--expedition{{/showexpeditiontheme}}{{^showexpeditiontheme}}commerce-showroom--generic{{/showexpeditiontheme}}" data-showroom="{{showroomkey}}" data-showroom-production-ready>
+    <a class="commerce-showroom-skip-link" href="#showroom-main-content">{{#str}}commerce_a11y_skip_to_content, local_subscriptions{{/str}}</a>
+    <span id="showroom-main-content" tabindex="-1"></span>
+        {{#showroomorderedblocks}}
+{{#ishero}}
+    <section class="commerce-showroom-hero {{herolayoutclass}} commerce-showroom-hero--{{herovariant}} commerce-showroom-media--{{heromediaposition}} {{#hasherobackground}}has-cms-background{{/hasherobackground}}" id="showroom-top" data-hero-status="{{herostatus}}" style="--showroom-section-custom-background: {{herolayoutbackgroundcolor}}; --showroom-hero-bg-opacity: {{herolayoutbackgroundopacity}}%; --showroom-hero-bg-blur: {{herolayoutbackgroundblur}}px; {{#hasherobackground}}--showroom-hero-background: url('{{herobackgroundurl}}');{{/hasherobackground}}">
+        {{#hasherolayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{herolayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{herolayoutbackgroundblur}}px;"><img src="{{herolayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasherolayoutbackgroundimage}}
+        {{#showexpeditiontheme}}
+        <div class="commerce-showroom-hero__sky" aria-hidden="true"></div>
+        <div class="commerce-showroom-hero__cloud commerce-showroom-hero__cloud--one" aria-hidden="true"></div>
+        <div class="commerce-showroom-hero__cloud commerce-showroom-hero__cloud--two" aria-hidden="true"></div>
+        <div class="commerce-showroom-hero__light" aria-hidden="true"></div>
+        <div class="commerce-showroom-hero__mountain commerce-showroom-hero__mountain--back" aria-hidden="true"></div>
+        <div class="commerce-showroom-hero__mountain commerce-showroom-hero__mountain--front" aria-hidden="true"></div>
+        {{/showexpeditiontheme}}
+        <div class="commerce-showroom-container commerce-showroom-hero__inner">
+            {{#showexpeditiontheme}}
+            <div class="commerce-showroom-hero__expedition commerce-showroom-hero__expedition--top" data-showroom-reveal>
+                <span><i class="{{expeditionicon}}" aria-hidden="true"></i>{{heroexpeditionlabel}}</span>
+                <span>{{herostagelabel}}</span>
+            </div>
+            {{/showexpeditiontheme}}
+            {{#heroislavendera1}}
+            <div class="commerce-showroom-hero__a1-badges" aria-label="{{eyebrow}}">
+                <span class="commerce-showroom-hero__a1-badge commerce-showroom-hero__a1-badge--primary">{{heroexpeditionlabel}}</span>
+                <span class="commerce-showroom-hero__a1-badge commerce-showroom-hero__a1-badge--journey"><i class="fa-solid fa-sailboat" aria-hidden="true"></i>{{herostagelabel}}</span>
+            </div>
+            {{/heroislavendera1}}
+            <div class="commerce-showroom-hero__grid">
+                <div class="commerce-showroom-hero__copy" data-showroom-reveal>
+                    <h1>
+                        <span>{{title}}</span>
+                        {{#hasherotitleaccent}}<span class="commerce-showroom-hero__title-accent">{{herotitleaccent}}</span>{{/hasherotitleaccent}}{{#hasherotitlesuffix}} <span class="commerce-showroom-hero__title-suffix">{{herotitlesuffix}}</span>{{/hasherotitlesuffix}}
+                    </h1>
+                    <div class="commerce-showroom-hero__lead">
+                        {{#herodescriptionlines}}<p>{{text}}</p>{{/herodescriptionlines}}
+                    </div>
+                    <div class="commerce-showroom-hero__actions">
+                        <a href="{{heroactionurl}}" class="commerce-showroom-btn commerce-showroom-btn--primary commerce-showroom-btn--hero" data-showroom-hero-action data-showroom-track="hero_cta">{{herocta}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                        {{#showblockvideo}}
+                        {{#showherosecondarycta}}
+                            {{#videomodal}}
+                            <button type="button" class="commerce-showroom-btn commerce-showroom-btn--glass" data-showroom-video-open data-showroom-track="video_open"><i class="fa-solid fa-circle-play" aria-hidden="true"></i>{{herosecondarycta}}</button>
+                            {{/videomodal}}
+                            {{^videomodal}}
+                            <a href="#showroom-video" class="commerce-showroom-btn commerce-showroom-btn--glass" data-showroom-track="video_anchor"><i class="fa-solid fa-circle-play" aria-hidden="true"></i>{{herosecondarycta}}</a>
+                            {{/videomodal}}
+                        {{/showherosecondarycta}}
+                        {{/showblockvideo}}
+                    </div>
+                    {{#heroislavendera1}}{{#hasherostartlabel}}
+                        <p class="commerce-showroom-hero__a1-start"><i class="fa-regular fa-calendar" aria-hidden="true"></i>{{herostartlabel}}</p>
+                    {{/hasherostartlabel}}{{/heroislavendera1}}
+                </div>
+                <div class="commerce-showroom-hero__visual {{#hasherodesktopimage}}has-a1-tablet{{/hasherodesktopimage}}" role="img" aria-label="{{#str}}commerce_a11y_showroom_devices, local_subscriptions{{/str}}" data-showroom-reveal>
+                    <div class="commerce-showroom-orbit commerce-showroom-orbit--one" aria-hidden="true"></div>
+                    <div class="commerce-showroom-orbit commerce-showroom-orbit--two" aria-hidden="true"></div>
+                    <div class="commerce-showroom-device commerce-showroom-device--desktop {{#hasherodesktopimage}}has-cms-image{{/hasherodesktopimage}}">
+                        <div class="commerce-showroom-device__bar"><span></span><span></span><span></span></div>
+                        <div class="commerce-showroom-device__screen">
+                            {{#hasherodesktopimage}}
+                            <img class="commerce-showroom-device__cms-image commerce-showroom-device__cms-image--desktop"
+                                 src="{{herodesktopimageurl}}"
+                                 alt=""
+                                 loading="eager"
+                                 decoding="async">
+                            {{/hasherodesktopimage}}
+                            {{^hasherodesktopimage}}
+                            <span class="commerce-showroom-device__stage">{{herodevicestage}}</span>
+                            <div class="commerce-showroom-device__mountains"></div>
+                            <div class="commerce-showroom-device__progress"><span></span></div>
+                            <div class="commerce-showroom-device__quiz"><span></span><span></span><span></span></div>
+                            {{/hasherodesktopimage}}
+                        </div>
+                    </div>
+                    <div class="commerce-showroom-device commerce-showroom-device--mobile commerce-showroom-device--mobile-spaced {{#hasheromobileimage}}has-cms-image{{/hasheromobileimage}}">
+                        <div class="commerce-showroom-device__notch"></div>
+                        {{#hasheromobileimage}}
+                        <img class="commerce-showroom-device__cms-image commerce-showroom-device__cms-image--mobile"
+                             src="{{heromobileimageurl}}"
+                             alt=""
+                             loading="eager"
+                             decoding="async">
+                        {{/hasheromobileimage}}
+                        {{^hasheromobileimage}}
+                        <i class="{{heromobileicon}}" aria-hidden="true"></i><strong>{{heromobilevalue}}</strong><span>{{heromobilelabel}}</span>
+                        {{/hasheromobileimage}}
+                    </div>
+                    {{#showherogustave}}
+                    <div class="commerce-showroom-gustave" aria-hidden="true">
+                        <span class="commerce-showroom-gustave__head"><i class="fa-solid fa-horse-head" aria-hidden="true"></i></span>
+                        <span class="commerce-showroom-gustave__pack"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i></span>
+                    </div>
+                    {{/showherogustave}}
+                </div>
+            </div>
+            {{#showblockstats}}
+            {{#heroislavendera1}}
+            <div class="commerce-showroom-hero__a1-stats" role="list" aria-label="{{#str}}commerce_a11y_key_figures, local_subscriptions{{/str}}">
+                {{#heroa1statitems}}
+                <article class="commerce-showroom-hero__a1-stat" role="listitem">
+                    <span class="commerce-showroom-hero__a1-stat-icon" aria-hidden="true"><i class="{{icon}}"></i></span>
+                    <span class="commerce-showroom-hero__a1-stat-copy"><strong>{{value}}</strong><small>{{label}}</small></span>
+                </article>
+                {{/heroa1statitems}}
+            </div>
+            {{/heroislavendera1}}
+            {{^heroislavendera1}}
+            <div class="commerce-showroom-hero__stats commerce-showroom-hero__stats--{{statslayout}} {{#hasherostat5}}commerce-showroom-hero__stats--five{{/hasherostat5}}" role="list" aria-label="{{#str}}commerce_a11y_key_figures, local_subscriptions{{/str}}">
+                <div role="listitem"><strong {{#statsanimate}}data-showroom-counter data-counter-value="{{herostat1value}}"{{/statsanimate}}>{{herostat1value}}</strong><span>{{herostat1label}}</span></div>
+                <div role="listitem"><strong {{#statsanimate}}data-showroom-counter data-counter-value="{{herostat2value}}"{{/statsanimate}}>{{herostat2value}}</strong><span>{{herostat2label}}</span></div>
+                <div role="listitem"><strong {{#statsanimate}}data-showroom-counter data-counter-value="{{herostat3value}}"{{/statsanimate}}>{{herostat3value}}</strong><span>{{herostat3label}}</span></div>
+                <div role="listitem"><strong {{#statsanimate}}data-showroom-counter data-counter-value="{{herostat4value}}"{{/statsanimate}}>{{herostat4value}}</strong><span>{{herostat4label}}</span></div>
+                {{#hasherostat5}}<div role="listitem"><strong {{#statsanimate}}data-showroom-counter data-counter-value="{{herostat5value}}"{{/statsanimate}}>{{herostat5value}}</strong><span>{{herostat5label}}</span></div>{{/hasherostat5}}
+            </div>
+            {{/heroislavendera1}}
+            {{/showblockstats}}
+        </div>
+    </section>
+    {{/ishero}}
+
+    {{#isanchornav}}{{> local_subscriptions/showroom/block_anchor_nav }}{{/isanchornav}}
+    {{#isadventureoverview}}{{> local_subscriptions/showroom/block_adventure_overview }}{{/isadventureoverview}}
+    {{#iscommunityclan}}{{> local_subscriptions/showroom/block_community_clan }}{{/iscommunityclan}}
+    {{#istutorchat}}{{> local_subscriptions/showroom/block_tutor_chat }}{{/istutorchat}}
+    {{#iscurriculumtabs}}{{> local_subscriptions/showroom/block_curriculum_tabs }}{{/iscurriculumtabs}}
+    {{#isjourneymap}}{{> local_subscriptions/showroom/block_journey_map }}{{/isjourneymap}}
+    {{#ispreparationflow}}{{> local_subscriptions/showroom/block_preparation_flow }}{{/ispreparationflow}}
+
+    {{#isproblem}}
+    <section id="showroom-problem" class="commerce-showroom-section commerce-showroom-section--soft commerce-showroom-problem {{problemlayoutclass}}" style="--showroom-section-custom-background: {{problemlayoutbackgroundcolor}};">
+        {{#hasproblemlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{problemlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{problemlayoutbackgroundblur}}px;"><img src="{{problemlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasproblemlayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <div class="commerce-showroom-problem__heading">
+                <p class="commerce-showroom-problem__badge">
+                    <i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i>
+                    {{problemeyebrow}}
+                </p>
+                <h2>
+                    {{problemtitle}}
+                    {{#problemtitleaccent}}<span>{{problemtitleaccent}}</span>{{/problemtitleaccent}}
+                </h2>
+                <p>
+                    {{#problemdescriptionlines}}<span>{{text}}</span>{{/problemdescriptionlines}}
+                </p>
+            </div>
+
+            <div class="commerce-showroom-problem-grid">
+                {{#problems}}
+                    <article class="commerce-showroom-mini-card commerce-showroom-problem-card">
+                        <span class="commerce-showroom-icon commerce-showroom-problem-card__icon">
+                            <i class="{{icon}}" aria-hidden="true"></i>
+                        </span>
+                        <h3>{{title}}</h3>
+                        <p>{{text}}</p>
+                    </article>
+                {{/problems}}
+            </div>
+
+            {{#hasproblemsolution}}
+            <div class="commerce-showroom-problem__solution">
+                <span class="commerce-showroom-problem__solution-icon">
+                    <i class="fa-solid fa-check" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <strong>
+                        {{problemsolutiontitle}}{{#problemsolutiontitleaccent}} <span class="commerce-showroom-problem__solution-accent">{{problemsolutiontitleaccent}}</span>{{/problemsolutiontitleaccent}}
+                    </strong>
+					<p>
+					    {{problemsolutiontext}}
+					    {{#problemsolutiontextaccent}} <span class="commerce-showroom-problem__solution-accent">{{problemsolutiontextaccent}}</span>{{/problemsolutiontextaccent}}
+					    {{problemsolutiontextmiddle}}
+					    {{#problemsolutiontextaccent2}} <span class="commerce-showroom-problem__solution-accent">{{problemsolutiontextaccent2}}</span>{{/problemsolutiontextaccent2}}
+					</p>
+                </div>
+            </div>
+            {{/hasproblemsolution}}
+        </div>
+    </section>
+    {{/isproblem}}
+
+
+    {{#isprobleminteractive}}
+    <section id="showroom-problem-interactive" class="commerce-showroom-section commerce-showroom-interactive-problem {{interactiveproblemvariantclass}} {{probleminteractivelayoutclass}}" data-showroom-interactive-problem data-problem-presentation="{{interactiveproblempresentation}}" data-correct-answer="{{interactiveproblemcorrectanswer}}" style="--showroom-section-custom-background: {{probleminteractivelayoutbackgroundcolor}};">
+        {{#hasprobleminteractivelayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{probleminteractivelayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{probleminteractivelayoutbackgroundblur}}px;"><img src="{{probleminteractivelayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasprobleminteractivelayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <div class="commerce-showroom-interactive-problem__heading">
+                <p class="commerce-showroom-interactive-problem__badge"><i class="fa-solid fa-circle-question" aria-hidden="true"></i>{{interactiveproblemeyebrow}}</p>
+                <h2>{{interactiveproblemtitle}} <span>{{interactiveproblemtitleaccent}}</span></h2>
+                <p>{{interactiveproblemtext}}</p>
+            </div>
+
+            {{#interactiveproblemisfourcolumnsppt}}
+            <div class="commerce-showroom-interactive-problem__ppt-stage">
+                <div class="commerce-showroom-interactive-problem__ppt-column commerce-showroom-interactive-problem__ppt-column--choices">
+                    <h3>{{interactiveproblemcol1title}}</h3>
+                    <div class="commerce-showroom-interactive-problem__ppt-choice-list">
+                        {{#interactiveproblemcol1items}}
+                        <div class="commerce-showroom-interactive-problem__ppt-choice">
+                            <span aria-hidden="true">?</span>
+                            <strong>{{text}}</strong>
+                        </div>
+                        {{/interactiveproblemcol1items}}
+                    </div>
+                    {{#interactiveproblemcol1footer}}
+                    <p class="commerce-showroom-interactive-problem__ppt-footer">
+                        <i class="fa-solid fa-hand-pointer" aria-hidden="true"></i>
+                        <span>{{interactiveproblemcol1footer}}</span>
+                    </p>
+                    {{/interactiveproblemcol1footer}}
+                </div>
+
+                <div class="commerce-showroom-interactive-problem__ppt-column commerce-showroom-interactive-problem__ppt-column--question">
+                    <h3>{{interactiveproblemcol2title}}</h3>
+                    <div class="commerce-showroom-interactive-problem__ppt-question-stage">
+                        <svg class="commerce-showroom-interactive-problem__ppt-arrows" viewBox="0 0 320 260" aria-hidden="true" focusable="false">
+                            <path d="M 5 55 C 35 55, 55 85, 88 103"></path>
+                            <polyline points="78,96 88,103 77,106"></polyline>
+                            <path d="M 5 205 C 35 205, 55 170, 88 153"></path>
+                            <polyline points="77,151 88,153 80,161"></polyline>
+                            <path d="M 232 88 C 265 74, 286 58, 315 52"></path>
+                            <polyline points="305,48 315,52 307,59"></polyline>
+                            <path d="M 232 130 C 265 130, 287 130, 315 130"></path>
+                            <polyline points="305,125 315,130 305,135"></polyline>
+                            <path d="M 228 170 C 262 185, 286 205, 315 212"></path>
+                            <polyline points="307,204 315,212 304,214"></polyline>
+                        </svg>
+                        <div class="commerce-showroom-interactive-problem__ppt-target" aria-hidden="true">
+                            <span>{{interactiveproblemcol2centertext}}</span>
+                        </div>
+                    </div>
+                    {{#interactiveproblemcol2subtext}}
+                    <div class="commerce-showroom-interactive-problem__ppt-note">{{interactiveproblemcol2subtext}}</div>
+                    {{/interactiveproblemcol2subtext}}
+                </div>
+
+                <div class="commerce-showroom-interactive-problem__ppt-column commerce-showroom-interactive-problem__ppt-column--examples">
+                    <h3>{{interactiveproblemcol3title}}</h3>
+                    <div class="commerce-showroom-interactive-problem__ppt-example-list">
+                        {{#interactiveproblemcol3items}}
+                        <div class="commerce-showroom-interactive-problem__ppt-example">{{text}}</div>
+                        {{/interactiveproblemcol3items}}
+                    </div>
+                </div>
+
+                <div class="commerce-showroom-interactive-problem__ppt-column commerce-showroom-interactive-problem__ppt-column--meaning">
+                    <h3>{{interactiveproblemcol4title}}</h3>
+                    <div class="commerce-showroom-interactive-problem__ppt-meaning-list">
+                        {{#interactiveproblemcol4items}}
+                        <div class="commerce-showroom-interactive-problem__ppt-meaning-item">
+                            <span class="commerce-showroom-interactive-problem__ppt-meaning-icon" aria-hidden="true"><i class="{{icon}}"></i></span>
+                            <div>
+                                <strong>{{title}}</strong>
+                                <p>{{text}}</p>
+                            </div>
+                        </div>
+                        {{/interactiveproblemcol4items}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="commerce-showroom-interactive-problem__ppt-solution">
+                <span class="commerce-showroom-interactive-problem__ppt-solution-icon" aria-hidden="true"><i class="fa-solid fa-compass"></i></span>
+                <div>
+                    <strong>
+                        {{interactiveproblemsolutiontitle}}
+                        {{#interactiveproblemsolutiontitleaccent}} <span>{{interactiveproblemsolutiontitleaccent}}</span>{{/interactiveproblemsolutiontitleaccent}}
+                    </strong>
+                    <p>
+                        {{interactiveproblemsolutiontext}}
+                        {{#interactiveproblemsolutiontextaccent}} <span>{{interactiveproblemsolutiontextaccent}}</span>{{/interactiveproblemsolutiontextaccent}}
+                    </p>
+                </div>
+            </div>
+            {{/interactiveproblemisfourcolumnsppt}}
+
+            {{^interactiveproblemisfourcolumnsppt}}
+            <div class="commerce-showroom-interactive-problem__stage">
+                <svg class="commerce-showroom-interactive-problem__arrows"
+                     data-interactive-problem-arrows
+                     aria-hidden="true"
+                     focusable="false"></svg>
+
+                <div class="commerce-showroom-interactive-problem__choices">
+                    <h3>{{interactiveproblemchoiceslabel}}</h3>
+                    <div class="commerce-showroom-interactive-problem__choice-list">
+                    {{#interactiveproblemchoices}}
+                        <button type="button" class="commerce-showroom-interactive-problem__choice" draggable="true" data-problem-choice data-value="{{text}}" aria-label="{{text}}">
+                            <span class="commerce-showroom-interactive-problem__choice-status" aria-hidden="true">?</span>
+                            <strong>{{text}}</strong>
+                            <span class="commerce-showroom-interactive-problem__drag-handle" aria-hidden="true">
+                                <i></i><i></i><i></i><i></i><i></i><i></i>
+                            </span>
+                        </button>
+                    {{/interactiveproblemchoices}}
+                        <div class="commerce-showroom-interactive-problem__choice commerce-showroom-interactive-problem__choice--passive"
+                             aria-hidden="true">
+                            <span class="commerce-showroom-interactive-problem__choice-status">?</span>
+                            <strong>...</strong>
+                        </div>
+                    </div>
+                    {{#interactiveproblemdraghint}}
+                    <p class="commerce-showroom-interactive-problem__drag-hint commerce-showroom-interactive-problem__drag-hint--desktop">
+                        <i class="fa-solid fa-hand-pointer" aria-hidden="true"></i>
+                        <span>{{interactiveproblemdraghint}}</span>
+                    </p>
+                    {{/interactiveproblemdraghint}}
+                    {{#interactiveproblemtaphint}}
+                    <p class="commerce-showroom-interactive-problem__drag-hint commerce-showroom-interactive-problem__drag-hint--mobile">
+                        <i class="fa-solid fa-hand-pointer" aria-hidden="true"></i>
+                        <span>{{interactiveproblemtaphint}}</span>
+                    </p>
+                    {{/interactiveproblemtaphint}}
+                </div>
+                <div class="commerce-showroom-interactive-problem__target-column">
+                    <h3>{{interactiveproblemtargetlabel}}</h3>
+                    <button type="button" class="commerce-showroom-interactive-problem__target" data-interactive-problem-target data-problem-target aria-live="polite">
+                        <span class="commerce-showroom-interactive-problem__target-icon" data-problem-target-icon>?</span>
+                    </button>
+                    <strong class="commerce-showroom-interactive-problem__selected" data-problem-selected></strong>
+                    <span class="commerce-showroom-interactive-problem__feedback" data-problem-feedback></span>
+                    <div class="commerce-showroom-interactive-problem__mobile-arrow" aria-hidden="true">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="commerce-showroom-interactive-problem__consequences" data-interactive-problem-consequences>
+                    {{#interactiveproblemconsequences}}
+                    <div class="commerce-showroom-interactive-problem__consequence">
+                        <span class="commerce-showroom-interactive-problem__consequence-icon"
+                              data-interactive-problem-cross
+                              aria-hidden="true">×</span>
+                        <p>{{text}}</p>
+                    </div>
+                    {{/interactiveproblemconsequences}}
+                </div>
+            </div>
+            <div class="commerce-showroom-interactive-problem__solution">
+                <span class="commerce-showroom-interactive-problem__solution-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+                <div>
+                    <strong>
+                        {{interactiveproblemsolutiontitle}}
+                        {{#interactiveproblemsolutiontitleaccent}}<span class="commerce-showroom-interactive-problem__solution-accent">{{interactiveproblemsolutiontitleaccent}}</span>{{/interactiveproblemsolutiontitleaccent}}.
+                    </strong>
+                    <p>
+                        {{interactiveproblemsolutiontext}}
+                        {{#interactiveproblemsolutiontextaccent}}<span class="commerce-showroom-interactive-problem__solution-accent">{{interactiveproblemsolutiontextaccent}}</span>{{/interactiveproblemsolutiontextaccent}}.
+                    </p>
+                </div>
+            </div>
+            <span class="d-none" data-problem-success>{{interactiveproblemsuccessfeedback}}</span>
+            <span class="d-none" data-problem-error>{{interactiveproblemerrorfeedback}}</span>
+            {{/interactiveproblemisfourcolumnsppt}}
+        </div>
+    </section>
+    {{/isprobleminteractive}}
+
+    {{#islearningmethod}}
+    <section id="showroom-learning-method" class="commerce-showroom-section commerce-showroom-driving-method {{learningmethodlayoutclass}}" style="--showroom-section-custom-background: {{learningmethodlayoutbackgroundcolor}};">
+        {{#haslearningmethodlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{learningmethodlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{learningmethodlayoutbackgroundblur}}px;"><img src="{{learningmethodlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/haslearningmethodlayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <header class="commerce-showroom-driving-method__heading">
+                <p class="commerce-showroom-driving-method__badge">
+                    <span class="commerce-showroom-driving-method__badge-wheel" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <span>{{methodeyebrow}}</span>
+                </p>
+                <h2>{{methodtitle}}</h2>
+                <div class="commerce-showroom-driving-method__subtitle">
+                    <p>{{methodsubtitle}}</p>
+                    <p class="commerce-showroom-driving-method__subtitle-accent">{{methodsubtitleaccent}}</p>
+                </div>
+                <div class="commerce-showroom-driving-method__intro">
+                    {{#methodintrolines}}<p>{{text}}</p>{{/methodintrolines}}
+                </div>
+            </header>
+
+            <div class="commerce-showroom-driving-method__stages">
+                <svg class="commerce-showroom-driving-method__route" viewBox="-90 0 1380 170" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                    <path d="M-58 100 C70 42,245 145,395 88 S650 40,805 100 S1080 150,1270 72"></path>
+                    <circle cx="-58" cy="100" r="5"></circle>
+                    <circle cx="395" cy="88" r="5"></circle>
+                    <circle cx="805" cy="100" r="5"></circle>
+                    <path class="commerce-showroom-driving-method__route-flag" d="M1270 20 L1270 72 M1270 22 L1308 32 L1270 46"></path>
+                </svg>
+
+                <article class="commerce-showroom-driving-method__stage">
+                    <div class="commerce-showroom-driving-method__stage-head"><span class="commerce-showroom-driving-method__number">01</span><h3>{{methodstage1title}}</h3></div>
+                    <div class="commerce-showroom-driving-method__wheel-scene">
+                        <div class="commerce-showroom-driving-method__wheel" aria-hidden="true">
+                            <span class="commerce-showroom-driving-method__wheel-rim"></span>
+                            <span class="commerce-showroom-driving-method__wheel-hub"></span>
+                            <span class="commerce-showroom-driving-method__wheel-spoke commerce-showroom-driving-method__wheel-spoke--left"></span>
+                            <span class="commerce-showroom-driving-method__wheel-spoke commerce-showroom-driving-method__wheel-spoke--right"></span>
+                            <span class="commerce-showroom-driving-method__wheel-spoke commerce-showroom-driving-method__wheel-spoke--bottom"></span>
+                        </div>
+                        <div class="commerce-showroom-driving-method__thoughts">
+                            {{#methodstage1items}}<span class="commerce-showroom-driving-method__thought">{{text}}</span>{{/methodstage1items}}
+                        </div>
+                    </div>
+                    <p class="commerce-showroom-driving-method__stage-footer">{{methodstage1footer}}</p>
+                </article>
+
+                <article class="commerce-showroom-driving-method__stage">
+                    <div class="commerce-showroom-driving-method__stage-head"><span class="commerce-showroom-driving-method__number">02</span><h3>{{methodstage2title}}</h3></div>
+                    <div class="commerce-showroom-driving-method__rows">
+                        {{#methodstage2items}}<div class="commerce-showroom-driving-method__row"><span><i class="{{icon}}" aria-hidden="true"></i></span><p>{{text}}</p></div>{{/methodstage2items}}
+                    </div>
+                    <p class="commerce-showroom-driving-method__stage-footer">{{methodstage2footer}}</p>
+                </article>
+
+                <article class="commerce-showroom-driving-method__stage">
+                    <div class="commerce-showroom-driving-method__stage-head"><span class="commerce-showroom-driving-method__number">03</span><h3>{{methodstage3title}}</h3></div>
+                    <div class="commerce-showroom-driving-method__rows">
+                        {{#methodstage3items}}<div class="commerce-showroom-driving-method__row"><span><i class="fa-solid fa-check" aria-hidden="true"></i></span><p>{{text}}</p></div>{{/methodstage3items}}
+                    </div>
+                    <p class="commerce-showroom-driving-method__stage-footer commerce-showroom-driving-method__stage-footer--accent">{{methodstage3footer}}</p>
+                </article>
+            </div>
+
+            <section class="commerce-showroom-driving-method__summary">
+                <h3>{{methodsummarytitle}}</h3>
+                <div class="commerce-showroom-driving-method__summary-flow">
+                    {{#methodsummaryitems}}
+                    <div class="commerce-showroom-driving-method__summary-step">
+                        <span class="commerce-showroom-driving-method__summary-icon"><i class="{{icon}}" aria-hidden="true"></i></span>
+                        <p>{{text}}</p>
+                    </div>
+                    {{#hasarrow}}<span class="commerce-showroom-driving-method__summary-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>{{/hasarrow}}
+                    {{/methodsummaryitems}}
+                </div>
+            </section>
+        </div>
+    </section>
+    {{/islearningmethod}}
+
+    {{#isvideo}}
+    <section class="commerce-showroom-video {{videovariantclass}} {{videolayoutclass}}" id="showroom-video" style="--showroom-section-custom-background: {{videolayoutbackgroundcolor}};">
+        {{#hasvideolayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{videolayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{videolayoutbackgroundblur}}px;"><img src="{{videolayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasvideolayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            {{#videoisa1showcase}}
+            <div class="commerce-showroom-video-a1__heading">
+                {{#hasvideoeyebrow}}<p class="commerce-showroom-video-a1__badge"><i class="{{videobadgeicon}}" aria-hidden="true"></i><span>{{videoeyebrow}}</span></p>{{/hasvideoeyebrow}}
+                <h2>{{videotitle}}{{#hasvideotitleaccent}} <span>{{videotitleaccent}}</span>{{/hasvideotitleaccent}}</h2>
+                <p>{{videodescription}}</p>
+            </div>
+            <div class="commerce-showroom-video-a1__layout">
+                <div class="commerce-showroom-video-a1__media">
+                    {{#hasvideourl}}
+                        {{#videomodal}}
+                        <button type="button" class="commerce-showroom-video__frame commerce-showroom-video-a1__frame" data-showroom-video-open aria-haspopup="dialog" data-video-url="{{videourl}}">
+                            <span class="commerce-showroom-video__poster" aria-hidden="true" {{#hasvideoposter}}style="background-image:url('{{videoposterurl}}')"{{/hasvideoposter}}></span>
+                            <span class="commerce-showroom-video__placeholder">
+                                <span class="commerce-showroom-video__play"><i class="fa-solid fa-play" aria-hidden="true"></i></span>
+                                <strong>{{videoplaylabel}}</strong>
+                            </span>
+                        </button>
+                        {{/videomodal}}
+                        {{^videomodal}}
+                        <div class="commerce-showroom-video__inline commerce-showroom-video-a1__frame" data-showroom-inline-video>
+                            <video
+                                class="commerce-showroom-video__player"
+                                controls
+                                playsinline
+                                preload="metadata"
+                                data-showroom-inline-video-element
+                                {{#hasvideoposter}}poster="{{videoposterurl}}" data-has-poster="1"{{/hasvideoposter}}
+                                {{^hasvideoposter}}data-first-frame-fallback="1"{{/hasvideoposter}}
+                            >
+                                <source src="{{videourl}}">
+                            </video>
+                            <button
+                                type="button"
+                                class="commerce-showroom-video__overlay-control"
+                                data-showroom-inline-video-control
+                                data-state="play"
+                                data-play-label="{{videoplaylabel}}"
+                                data-replay-label="{{videoreplaylabel}}"
+                                aria-label="{{videoplaylabel}}"
+                            >
+                                <span class="commerce-showroom-video__overlay-icon commerce-showroom-video__overlay-icon--play" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
+                                <span class="commerce-showroom-video__overlay-icon commerce-showroom-video__overlay-icon--replay" aria-hidden="true"><i class="fa-solid fa-rotate-right"></i></span>
+                                <span class="sr-only" data-showroom-inline-video-control-label>{{videoplaylabel}}</span>
+                            </button>
+                        </div>
+                        {{/videomodal}}
+                    {{/hasvideourl}}
+                    {{^hasvideourl}}
+                    <div class="commerce-showroom-video__frame commerce-showroom-video__frame--empty commerce-showroom-video-a1__frame commerce-showroom-video-a1__frame--empty" role="status" aria-live="polite">
+                        <span class="commerce-showroom-video__poster" aria-hidden="true" {{#hasvideoposter}}style="background-image:url('{{videoposterurl}}')"{{/hasvideoposter}}></span>
+                        <span class="commerce-showroom-video__placeholder">
+                            <span class="commerce-showroom-video__play"><i class="fa-solid fa-play" aria-hidden="true"></i></span>
+                            <strong>{{videoplaceholder}}</strong>
+                        </span>
+                    </div>
+                    {{/hasvideourl}}
+                    {{#hasvideoposterlabel}}<p class="commerce-showroom-video-a1__poster-label">{{videoposterlabel}}</p>{{/hasvideoposterlabel}}
+                </div>
+                <aside class="commerce-showroom-video-a1__checklist">
+                    {{#videochecklisttitle}}<h3>{{videochecklisttitle}}</h3>{{/videochecklisttitle}}
+                    {{#hasvideochecklist}}
+                    <ul>
+                        {{#videochecklistitems}}<li><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>{{text}}</span></li>{{/videochecklistitems}}
+                    </ul>
+                    {{/hasvideochecklist}}
+                    {{#hasvideonote}}<p class="commerce-showroom-video-a1__note">{{videonote}}</p>{{/hasvideonote}}
+                </aside>
+            </div>
+            {{/videoisa1showcase}}
+
+            {{^videoisa1showcase}}
+            {{#videoisinvestigation}}
+            <div class="commerce-showroom-video-investigation__heading">
+                {{#hasvideoeyebrow}}<p class="commerce-showroom-video-investigation__badge"><i class="fa-solid fa-gears" aria-hidden="true"></i>{{videoeyebrow}}</p>{{/hasvideoeyebrow}}
+                <h2>{{videotitle}}{{#hasvideotitleaccent}} <span>{{videotitleaccent}}</span>{{/hasvideotitleaccent}}</h2>
+                <p class="commerce-showroom-video-investigation__description">{{videodescription}}</p>
+                {{#hasvideotextaccent}}<p class="commerce-showroom-video-investigation__description-accent">{{videotextaccent}}</p>{{/hasvideotextaccent}}
+                {{#hasvideonote}}<p class="commerce-showroom-video-investigation__note">{{videonote}} <span aria-hidden="true">♡</span></p>{{/hasvideonote}}
+            </div>
+            {{#hasvideosteps}}
+            <div class="commerce-showroom-video-investigation__steps">
+                {{#videosteps}}
+                <article class="commerce-showroom-video-investigation__step">
+                    <span class="commerce-showroom-video-investigation__step-icon"><i class="{{icon}}" aria-hidden="true"></i></span>
+                    <div>
+                        <p class="commerce-showroom-video-investigation__step-title"><strong>{{number}}</strong> {{title}}</p>
+                        <p class="commerce-showroom-video-investigation__step-text">{{text}}</p>
+                    </div>
+                    {{#hasarrow}}<span class="commerce-showroom-video-investigation__step-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right-long"></i></span>{{/hasarrow}}
+                </article>
+                {{/videosteps}}
+            </div>
+            {{/hasvideosteps}}
+            {{/videoisinvestigation}}
+            {{^videoisinvestigation}}
+            <div class="commerce-showroom-section__heading commerce-showroom-section__heading--center">
+                <h2>{{videotitle}}</h2>
+                <p>{{videodescription}}</p>
+            </div>
+            {{/videoisinvestigation}}
+            {{#hasvideourl}}
+                {{#videomodal}}
+                <button type="button" class="commerce-showroom-video__frame" data-showroom-video-open aria-haspopup="dialog" data-video-url="{{videourl}}">
+                    <span class="commerce-showroom-video__poster" aria-hidden="true" {{#hasvideoposter}}style="background-image:url('{{videoposterurl}}')"{{/hasvideoposter}}></span>
+                    <span class="commerce-showroom-video__placeholder">
+                        <span class="commerce-showroom-video__play"><i class="fa-solid fa-play" aria-hidden="true"></i></span>
+                        <strong>{{videoplaylabel}}</strong>
+                    </span>
+                </button>
+                {{/videomodal}}
+                {{^videomodal}}
+                <div class="commerce-showroom-video__inline" data-showroom-inline-video>
+                    <video
+                        class="commerce-showroom-video__player"
+                        controls
+                        playsinline
+                        preload="metadata"
+                        data-showroom-inline-video-element
+                        {{#hasvideoposter}}poster="{{videoposterurl}}" data-has-poster="1"{{/hasvideoposter}}
+                        {{^hasvideoposter}}data-first-frame-fallback="1"{{/hasvideoposter}}
+                    >
+                        <source src="{{videourl}}">
+                    </video>
+                    <button
+                        type="button"
+                        class="commerce-showroom-video__overlay-control"
+                        data-showroom-inline-video-control
+                        data-state="play"
+                        data-play-label="{{videoplaylabel}}"
+                        data-replay-label="{{videoreplaylabel}}"
+                        aria-label="{{videoplaylabel}}"
+                    >
+                        <span class="commerce-showroom-video__overlay-icon commerce-showroom-video__overlay-icon--play" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
+                        <span class="commerce-showroom-video__overlay-icon commerce-showroom-video__overlay-icon--replay" aria-hidden="true"><i class="fa-solid fa-rotate-right"></i></span>
+                        <span class="sr-only" data-showroom-inline-video-control-label>{{videoplaylabel}}</span>
+                    </button>
+                </div>
+                {{/videomodal}}
+            {{/hasvideourl}}
+            {{^hasvideourl}}
+            <div class="commerce-showroom-video__frame commerce-showroom-video__frame--empty" role="status" aria-live="polite">
+                <span class="commerce-showroom-video__poster" aria-hidden="true" {{#hasvideoposter}}style="background-image:url('{{videoposterurl}}')"{{/hasvideoposter}}></span>
+                <span class="commerce-showroom-video__placeholder">
+                    <span class="commerce-showroom-video__play"><i class="fa-solid fa-play" aria-hidden="true"></i></span>
+                    <strong>{{videoplaceholder}}</strong>
+                </span>
+            </div>
+            {{/hasvideourl}}
+            {{/videoisa1showcase}}
+        </div>
+    </section>
+    {{/isvideo}}
+
+    {{#iscontenthighlights}}
+    <section id="showroom-highlights" class="commerce-showroom-section commerce-showroom-section--mountains {{contenthighlightvariantclass}} {{contenthighlightslayoutclass}}" style="--showroom-section-custom-background: {{contenthighlightslayoutbackgroundcolor}};">
+        {{#hascontenthighlightslayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{contenthighlightslayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{contenthighlightslayoutbackgroundblur}}px;"><img src="{{contenthighlightslayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hascontenthighlightslayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            {{#hascontentsidenote}}<p class="commerce-showroom-content-highlights__sidenote">{{contentsidenote}}</p>{{/hascontentsidenote}}
+            <div class="commerce-showroom-section__heading commerce-showroom-section__heading--center commerce-showroom-content-highlights__heading">
+                {{#contenthighlightisarticlemeaning}}
+                <p class="commerce-showroom-content-highlights__badge"><i class="fa-solid fa-circle-question" aria-hidden="true"></i>{{contenteyebrow}}</p>
+                {{/contenthighlightisarticlemeaning}}
+                {{#contenthighlightisaudienceprofiles}}
+                <p class="commerce-showroom-content-highlights__badge"><i class="fa-solid fa-users" aria-hidden="true"></i>{{contenteyebrow}}</p>
+                {{/contenthighlightisaudienceprofiles}}
+                {{#contenthighlightisstandard}}
+                {{#hascontentbadgeicon}}<p class="commerce-showroom-content-highlights__badge commerce-showroom-content-highlights__badge--standard"><i class="{{contentbadgeicon}}" aria-hidden="true"></i><span>{{contenteyebrow}}</span></p>{{/hascontentbadgeicon}}
+                {{^hascontentbadgeicon}}<p class="commerce-showroom-eyebrow">{{contenteyebrow}}</p>{{/hascontentbadgeicon}}
+                {{/contenthighlightisstandard}}
+                <h2>{{contenttitle}}{{#contenttitleaccent}} <span class="commerce-showroom-content-highlights__title-accent">{{contenttitleaccent}}</span>{{/contenttitleaccent}}</h2>
+                <p>{{contentdescription}}</p>
+            </div>
+
+            {{#contenthighlightisarticlemeaning}}
+            <div class="commerce-showroom-content-highlights__learning-grid">
+                {{#contentlearningcards}}
+                <article class="commerce-showroom-content-highlights__learning-card">
+                    <h3><span>{{article}}</span> {{noun}}</h3>
+                    <p class="commerce-showroom-content-highlights__learning-meaning">{{meaning}}</p>
+                    {{#hasimage}}
+                    <div class="commerce-showroom-content-highlights__learning-media">
+                        <img src="{{imageurl}}" alt="" loading="lazy" decoding="async">
+                    </div>
+                    {{/hasimage}}
+                    <div class="commerce-showroom-content-highlights__learning-example">{{exampleprefix}}{{#hasexamplehighlight}}<span class="commerce-showroom-content-highlights__learning-example-accent">{{examplehighlight}}</span>{{/hasexamplehighlight}}{{examplesuffix}}{{^hasexamplehighlight}}{{example}}{{/hasexamplehighlight}}</div>
+                    <p class="commerce-showroom-content-highlights__learning-translation">{{translation}}</p>
+                </article>
+                {{/contentlearningcards}}
+
+                <aside class="commerce-showroom-content-highlights__learning-side">
+                    <span class="commerce-showroom-content-highlights__learning-side-icon" aria-hidden="true"><i class="fa-regular fa-lightbulb"></i></span>
+                    <h3>{{contentsidetitle}}</h3>
+                    {{#contentsideintro}}<p class="commerce-showroom-content-highlights__learning-side-intro">{{contentsideintro}}</p>{{/contentsideintro}}
+                    <div class="commerce-showroom-content-highlights__learning-side-items">
+                        {{#contentsideitems}}
+                        <div class="commerce-showroom-content-highlights__learning-side-item">
+                            <span aria-hidden="true"><i class="{{icon}}"></i></span>
+                            <p>{{text}}</p>
+                        </div>
+                        {{/contentsideitems}}
+                    </div>
+                    {{#contentsidefooter}}
+                    <p class="commerce-showroom-content-highlights__learning-side-footer">
+                        {{contentsidefooter}}{{#contentsidefooteraccent}} <strong>{{contentsidefooteraccent}}</strong>{{/contentsidefooteraccent}}
+                    </p>
+                    {{/contentsidefooter}}
+                </aside>
+            </div>
+
+            {{#hascontentsummary}}
+            <div class="commerce-showroom-content-highlights__learning-summary">
+                <span class="commerce-showroom-content-highlights__learning-summary-icon" aria-hidden="true"><i class="fa-solid fa-compass"></i></span>
+                <p>{{contentsummarytext}}{{#contentsummaryaccent}} <strong>{{contentsummaryaccent}}</strong>{{/contentsummaryaccent}}</p>
+            </div>
+            {{/hascontentsummary}}
+            {{/contenthighlightisarticlemeaning}}
+
+            {{^contenthighlightisarticlemeaning}}
+            <div class="commerce-showroom-stats-grid commerce-showroom-content-highlights--columns-{{contenthighlightcolumns}}">
+                {{#contentstats}}
+                    <article class="commerce-showroom-stat {{#hasimage}}commerce-showroom-stat--media{{/hasimage}}">
+                        {{#hasimage}}
+                        <div class="commerce-showroom-stat__media">
+                            <img src="{{imageurl}}" alt="" loading="lazy" decoding="async">
+                        </div>
+                        {{/hasimage}}
+                        {{^hasimage}}<span class="commerce-showroom-icon"><i class="{{icon}}" aria-hidden="true"></i></span>{{/hasimage}}
+                        <h3>{{title}}</h3>
+                        <p>{{text}}</p>
+                        {{#hasexample}}<p class="commerce-showroom-content-highlights__example">{{example}}</p>{{/hasexample}}
+                    </article>
+                {{/contentstats}}
+            </div>
+            {{/contenthighlightisarticlemeaning}}
+        </div>
+    </section>
+    {{/iscontenthighlights}}
+
+    {{#isaudienceprofiles}}
+    <section id="showroom-audience-profiles" class="commerce-showroom-section commerce-showroom-section--mountains commerce-showroom-content-highlights--audience_profiles {{audienceprofileslayoutclass}}" style="--showroom-section-custom-background: {{audienceprofileslayoutbackgroundcolor}};">
+        {{#hasaudienceprofileslayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{audienceprofileslayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{audienceprofileslayoutbackgroundblur}}px;"><img src="{{audienceprofileslayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasaudienceprofileslayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            {{#hasaudiencesidenote}}<p class="commerce-showroom-audience-note">{{audiencesidenote}}</p>{{/hasaudiencesidenote}}
+            <div class="commerce-showroom-section__heading commerce-showroom-section__heading--center commerce-showroom-content-highlights__heading">
+                {{#audienceeyebrow}}<p class="commerce-showroom-content-highlights__badge commerce-showroom-audience-profiles__badge"><i class="{{audiencebadgeicon}}" aria-hidden="true"></i><span>{{audienceeyebrow}}</span></p>{{/audienceeyebrow}}
+                <h2>{{audiencetitle}}{{#audiencetitleaccent}} <span class="commerce-showroom-content-highlights__title-accent">{{audiencetitleaccent}}</span>{{/audiencetitleaccent}}{{#audiencetitlesuffix}} {{audiencetitlesuffix}}{{/audiencetitlesuffix}}</h2>
+                {{#audiencedescription}}<p>{{audiencedescription}}</p>{{/audiencedescription}}
+            </div>
+
+            <div class="commerce-showroom-stats-grid commerce-showroom-content-highlights--columns-4">
+                {{#audiencestats}}
+                <article class="commerce-showroom-stat {{#hasimage}}commerce-showroom-stat--media{{/hasimage}}">
+                    {{#hasimage}}
+                    <div class="commerce-showroom-stat__media">
+                        <img src="{{imageurl}}" alt="" loading="lazy" decoding="async">
+                    </div>
+                    {{/hasimage}}
+                    {{^hasimage}}<span class="commerce-showroom-icon"><i class="{{icon}}" aria-hidden="true"></i></span>{{/hasimage}}
+                    <h3>{{title}}</h3>
+                    <p>{{text}}</p>
+                </article>
+                {{/audiencestats}}
+            </div>
+        </div>
+    </section>
+    {{/isaudienceprofiles}}
+
+    {{#isheartpuzzle}}
+    <section id="showroom-heart-puzzle" class="commerce-showroom-heart-puzzle {{heartpuzzlelayoutclass}}" style="--showroom-section-custom-background: {{heartpuzzlelayoutbackgroundcolor}};">
+        {{#hasheartpuzzlelayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{heartpuzzlelayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{heartpuzzlelayoutbackgroundblur}}px;"><img src="{{heartpuzzlelayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasheartpuzzlelayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <header class="commerce-showroom-heart-puzzle__heading">
+                {{#heartpuzzleeyebrow}}<p class="commerce-showroom-heart-puzzle__badge"><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i>{{heartpuzzleeyebrow}}</p>{{/heartpuzzleeyebrow}}
+                <h2>{{heartpuzzletitle}}{{#heartpuzzletitleaccent}} <span>{{heartpuzzletitleaccent}}</span>{{/heartpuzzletitleaccent}}</h2>
+                {{#heartpuzzletext}}<p>{{heartpuzzletext}}</p>{{/heartpuzzletext}}
+            </header>
+
+            <div class="commerce-showroom-heart-puzzle__stage">
+                <div class="commerce-showroom-heart-puzzle__cards" role="list">
+                    {{#heartpuzzlepieces}}
+                    <article class="commerce-showroom-heart-puzzle__card {{cardclass}}" role="listitem" data-heart-piece="{{slot}}">
+                        <svg class="commerce-showroom-heart-puzzle__card-arrow {{arrowclass}}" viewBox="0 0 110 52" aria-hidden="true" focusable="false">
+                            <path d="M4 36 C34 10 70 10 101 29"></path>
+                            <polyline points="91,21 101,29 91,35"></polyline>
+                        </svg>
+                        <span class="commerce-showroom-heart-puzzle__card-icon"><i class="{{icon}}" aria-hidden="true"></i></span>
+                        <div>
+                            <span class="commerce-showroom-heart-puzzle__number">{{number}}</span>
+                            <h3>{{title}}</h3>
+                            <p>{{text}}</p>
+                            {{#hasexample}}<strong class="commerce-showroom-heart-puzzle__example">{{example}}</strong>{{/hasexample}}
+                        </div>
+                    </article>
+                    {{/heartpuzzlepieces}}
+                </div>
+
+                <div class="commerce-showroom-heart-puzzle__heart" aria-label="{{heartpuzzlecenterlabel}}">
+                    <svg viewBox="0 0 420 380" aria-hidden="true" focusable="false">
+                        <g class="commerce-showroom-heart-puzzle__segments">
+                            <path
+                                d="M210 76
+                                   C194 47 164 24 122 24
+                                   C53 24 5 84 28 159
+                                   C67 167 102 170 130 170
+                                   C130 147 165 147 165 170
+                                   L210 170
+                                   L210 145
+                                   C232 145 232 112 210 112
+                                   Z"
+                                class="commerce-showroom-heart-puzzle__segment commerce-showroom-heart-puzzle__segment--1"
+                                data-heart-segment="1"/>
+                            <path
+                                d="M210 76
+                                   C226 47 256 24 298 24
+                                   C367 24 415 84 392 159
+                                   C353 167 318 170 290 170
+                                   C290 193 255 193 255 170
+                                   L210 170
+                                   L210 145
+                                   C232 145 232 112 210 112
+                                   Z"
+                                class="commerce-showroom-heart-puzzle__segment commerce-showroom-heart-puzzle__segment--2"
+                                data-heart-segment="2"/>
+                            <path
+                                d="M392 159
+                                   C380 205 342 239 305 270
+                                   L275 268
+                                   C275 244 240 244 240 268
+                                   L210 268
+                                   L210 170
+                                   L255 170
+                                   C255 193 290 193 290 170
+                                   C318 170 353 167 392 159
+                                   Z"
+                                class="commerce-showroom-heart-puzzle__segment commerce-showroom-heart-puzzle__segment--3"
+                                data-heart-segment="3"/>
+                            <path
+                                d="M115 270
+                                   L145 268
+                                   C145 292 180 292 180 268
+                                   L210 268
+                                   L240 268
+                                   C240 244 275 244 275 268
+                                   L305 270
+                                   C270 300 230 338 210 360
+                                   C190 338 150 300 115 270
+                                   Z"
+                                class="commerce-showroom-heart-puzzle__segment commerce-showroom-heart-puzzle__segment--4"
+                                data-heart-segment="4"/>
+                            <path
+                                d="M28 159
+                                   C40 205 78 239 115 270
+                                   L145 268
+                                   C145 292 180 292 180 268
+                                   L210 268
+                                   L210 170
+                                   L165 170
+                                   C165 147 130 147 130 170
+                                   C102 170 67 167 28 159
+                                   Z"
+                                class="commerce-showroom-heart-puzzle__segment commerce-showroom-heart-puzzle__segment--5"
+                                data-heart-segment="5"/>
+                        </g>
+                        <path d="M210 360C180 322 54 246 28 159C5 84 53 24 122 24C164 24 194 47 210 76C226 47 256 24 298 24C367 24 415 84 392 159C366 246 240 322 210 360Z" class="commerce-showroom-heart-puzzle__outline"/>
+                        <text x="115" y="111" class="commerce-showroom-heart-puzzle__svg-number">{{heartpuzzlepiece1number}}</text>
+                        <text x="305" y="111" class="commerce-showroom-heart-puzzle__svg-number">{{heartpuzzlepiece2number}}</text>
+                        <text x="310" y="220" class="commerce-showroom-heart-puzzle__svg-number">{{heartpuzzlepiece3number}}</text>
+                        <text x="210" y="315" class="commerce-showroom-heart-puzzle__svg-number">{{heartpuzzlepiece4number}}</text>
+                        <text x="110" y="220" class="commerce-showroom-heart-puzzle__svg-number">{{heartpuzzlepiece5number}}</text>
+                    </svg>
+                    <div class="commerce-showroom-heart-puzzle__center">
+                        {{#hasheartpuzzlecenterimage}}<img src="{{heartpuzzlecenterimageurl}}" alt="" loading="lazy" decoding="async">{{/hasheartpuzzlecenterimage}}
+                        {{^hasheartpuzzlecenterimage}}<i class="fa-solid fa-heart" aria-hidden="true"></i>{{/hasheartpuzzlecenterimage}}
+                        {{#heartpuzzlecenterlabel}}<span>{{heartpuzzlecenterlabel}}</span>{{/heartpuzzlecenterlabel}}
+                    </div>
+                </div>
+            </div>
+
+            {{#hasheartpuzzlefooter}}
+            <div class="commerce-showroom-heart-puzzle__footer">
+                <span class="commerce-showroom-heart-puzzle__footer-icon"><i class="fa-solid fa-compass" aria-hidden="true"></i></span>
+                <div>
+                    {{#heartpuzzlefootertitle}}<strong>{{heartpuzzlefootertitle}}</strong>{{/heartpuzzlefootertitle}}
+                    {{#heartpuzzlefootertext}}<p>{{heartpuzzlefootertext}}{{#heartpuzzlefooteraccent}} <span>{{heartpuzzlefooteraccent}}</span>{{/heartpuzzlefooteraccent}}</p>{{/heartpuzzlefootertext}}
+                </div>
+            </div>
+            {{/hasheartpuzzlefooter}}
+        </div>
+    </section>
+    {{/isheartpuzzle}}
+
+    {{#isbeforeafter}}
+    <section id="showroom-before-after" class="commerce-showroom-before-after {{beforeafterpresentationclass}} {{beforeafterlayoutclass}}" style="--showroom-section-custom-background: {{beforeafterlayoutbackgroundcolor}};">
+        {{#hasbeforeafterlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{beforeafterlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{beforeafterlayoutbackgroundblur}}px;"><img src="{{beforeafterlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasbeforeafterlayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <header class="commerce-showroom-before-after__heading">
+                {{#beforeaftereyebrow}}<p class="commerce-showroom-before-after__badge"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>{{beforeaftereyebrow}}</p>{{/beforeaftereyebrow}}
+                <h2>{{beforeaftertitle}}{{#beforeaftertitleaccent}} <span>{{beforeaftertitleaccent}}</span>{{/beforeaftertitleaccent}}</h2>
+                {{#beforeaftertext}}<p>{{beforeaftertext}}</p>{{/beforeaftertext}}
+            </header>
+
+            <div class="commerce-showroom-before-after__grid {{#hasbeforeafterimage}}has-image{{/hasbeforeafterimage}}">
+                <article class="commerce-showroom-before-after__panel commerce-showroom-before-after__panel--before">
+                    <div class="commerce-showroom-before-after__panel-head">
+                        <span>{{beforelabel}}</span>
+                        {{#beforetitle}}<h3>{{beforetitle}}</h3>{{/beforetitle}}
+                    </div>
+                    <div class="commerce-showroom-before-after__items">
+                        {{#beforeitems}}
+                        <div class="commerce-showroom-before-after__item">
+                            <span><i class="{{icon}}" aria-hidden="true"></i></span>
+                            <div><strong>{{title}}</strong><p>{{text}}</p></div>
+                        </div>
+                        {{/beforeitems}}
+                    </div>
+                    {{#hasbeforenote}}<p class="commerce-showroom-before-after__handnote commerce-showroom-before-after__handnote--before">{{beforenote}} <span aria-hidden="true">♡</span></p>{{/hasbeforenote}}
+                </article>
+
+                {{#hasbeforeafterimage}}
+                <figure class="commerce-showroom-before-after__media">
+                    <img src="{{beforeafterimageurl}}" alt="" loading="lazy" decoding="async">
+                    {{#hasbeforeaftermedianote}}<figcaption class="commerce-showroom-before-after__handnote commerce-showroom-before-after__handnote--media">{{beforeaftermedianote}} <span aria-hidden="true">♡</span></figcaption>{{/hasbeforeaftermedianote}}
+                </figure>
+                {{/hasbeforeafterimage}}
+
+                {{#beforeafterisarticleoutcome}}
+                <div class="commerce-showroom-before-after__after-stack">
+                {{/beforeafterisarticleoutcome}}
+                <article class="commerce-showroom-before-after__panel commerce-showroom-before-after__panel--after">
+                    <div class="commerce-showroom-before-after__panel-head">
+                        <span>{{afterlabel}}</span>
+                        {{#aftertitle}}<h3>{{aftertitle}}</h3>{{/aftertitle}}
+                    </div>
+                    <div class="commerce-showroom-before-after__items">
+                        {{#afteritems}}
+                        <div class="commerce-showroom-before-after__item">
+                            <span><i class="{{icon}}" aria-hidden="true"></i></span>
+                            <div><strong>{{title}}</strong><p>{{text}}</p></div>
+                        </div>
+                        {{/afteritems}}
+                    </div>
+                </article>
+                {{#hasbeforeaftersummary}}
+                <div class="commerce-showroom-before-after__summary">
+                    {{#beforeafterisarticleoutcome}}<span class="commerce-showroom-before-after__summary-icon" aria-hidden="true"><i class="fa-solid fa-compass"></i></span>{{/beforeafterisarticleoutcome}}
+                    <div class="commerce-showroom-before-after__summary-copy">
+                        {{#beforeaftersummarytitle}}<strong>{{beforeaftersummarytitle}}</strong>{{/beforeaftersummarytitle}}
+                        {{#beforeaftersummarytext}}<p>{{beforeaftersummarytext}}{{#beforeaftersummaryaccent}} <span>{{beforeaftersummaryaccent}}</span>{{/beforeaftersummaryaccent}}</p>{{/beforeaftersummarytext}}
+                    </div>
+                </div>
+                {{/hasbeforeaftersummary}}
+                {{#beforeafterisarticleoutcome}}
+                </div>
+                {{/beforeafterisarticleoutcome}}
+            </div>
+
+            {{^beforeafterisarticleoutcome}}
+            {{#hasbeforeaftersummary}}
+            <div class="commerce-showroom-before-after__summary">
+                {{#beforeaftersummarytitle}}<strong>{{beforeaftersummarytitle}}</strong>{{/beforeaftersummarytitle}}
+                {{#beforeaftersummarytext}}<p>{{beforeaftersummarytext}}{{#beforeaftersummaryaccent}} <span>{{beforeaftersummaryaccent}}</span>{{/beforeaftersummaryaccent}}</p>{{/beforeaftersummarytext}}
+            </div>
+            {{/hasbeforeaftersummary}}
+            {{/beforeafterisarticleoutcome}}
+        </div>
+    </section>
+    {{/isbeforeafter}}
+
+    {{#isascent}}
+    <section class="commerce-showroom-ascent commerce-showroom-ascent--premium {{ascentlayoutclass}} {{#ascentbackgrounddesktop}}has-background-desktop{{/ascentbackgrounddesktop}} {{#ascentbackgroundmobile}}has-background-mobile{{/ascentbackgroundmobile}}"
+             id="showroom-ascent"
+             data-showroom-ascent
+             style="--showroom-ascent-gradient-start: {{ascentgradientstart}}; --showroom-ascent-gradient-end: {{ascentgradientend}}; --showroom-ascent-bg-opacity: {{ascentbackgroundopacity}}%; --showroom-ascent-bg-blur: {{ascentbackgroundblur}}px; --showroom-section-custom-background: {{ascentlayoutbackgroundcolor}};">
+        {{#hasascentlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{ascentlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{ascentlayoutbackgroundblur}}px;"><img src="{{ascentlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasascentlayoutbackgroundimage}}
+        {{#hasascentbackground}}
+        <div class="commerce-showroom-ascent__background" aria-hidden="true">
+            <img src="{{ascentbackgroundurl}}" alt="" loading="lazy" decoding="async">
+        </div>
+        {{/hasascentbackground}}
+        <div class="commerce-showroom-ascent__mountains" aria-hidden="true">
+            <svg viewBox="0 0 1600 460" preserveAspectRatio="none" focusable="false">
+                <defs>
+                    <linearGradient id="showroom-ascent-mountain-back" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0" stop-color="#f8ddea" stop-opacity=".3"/>
+                        <stop offset="1" stop-color="#f4edf7" stop-opacity=".7"/>
+                    </linearGradient>
+                    <linearGradient id="showroom-ascent-mountain-front" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0" stop-color="#efd6e4" stop-opacity=".58"/>
+                        <stop offset="1" stop-color="#f9f4f8" stop-opacity=".92"/>
+                    </linearGradient>
+                </defs>
+                <path d="M0 454 L88 400 L168 428 L260 338 L336 406 L438 272 L520 386 L638 214 L720 366 L846 154 L928 350 L1050 108 L1140 328 L1260 72 L1346 294 L1448 36 L1518 204 L1600 0 L1600 460 L0 460 Z"
+                      fill="url(#showroom-ascent-mountain-back)"/>
+                <path d="M0 460 L112 424 L204 448 L318 378 L410 436 L530 330 L624 426 L756 290 L852 414 L990 246 L1082 400 L1218 202 L1314 382 L1430 154 L1518 354 L1600 74 L1600 460 L0 460 Z"
+                      fill="url(#showroom-ascent-mountain-front)"/>
+            </svg>
+        </div>
+
+        <div class="commerce-showroom-container">
+            <header class="commerce-showroom-ascent__heading">
+                <p class="commerce-showroom-ascent__badge">
+                    <i class="fa-solid fa-mountain-sun" aria-hidden="true"></i>
+                    <span>{{ascenteyebrow}}</span>
+                </p>
+                <h2>{{ascenttitle}}</h2>
+                <p>{{ascentdescription}}</p>
+            </header>
+
+            <div class="commerce-showroom-ascent__journey">
+                <svg class="commerce-showroom-ascent__profile"
+                     viewBox="0 0 1000 190"
+                     preserveAspectRatio="none"
+                     aria-hidden="true"
+                     focusable="false">
+                    <defs>
+                        <linearGradient id="showroom-ascent-route-gradient" x1="0" x2="1" y1="0" y2="0">
+                            <stop offset="0" class="commerce-showroom-ascent__gradient-start"/>
+                            <stop offset=".5" class="commerce-showroom-ascent__gradient-mid"/>
+                            <stop offset="1" class="commerce-showroom-ascent__gradient-end"/>
+                        </linearGradient>
+                    </defs>
+                    <path class="commerce-showroom-ascent__profile-base"
+                          d="M100 152 L170 142 L230 146 L300 120 L365 126 L430 102 L500 108 L565 84 L630 90 L700 62 L765 67 L835 40 L900 20"/>
+                    <path class="commerce-showroom-ascent__profile-progress"
+                          d="M100 152 L170 142 L230 146 L300 120 L365 126 L430 102 L500 108 L565 84 L630 90 L700 62 L765 67 L835 40 L900 20"/>
+                </svg>
+
+                <div class="commerce-showroom-ascent__markers" aria-hidden="true">
+                    <div class="commerce-showroom-ascent__marker commerce-showroom-ascent__marker--1">
+                        <small>1 035 m</small><span><i class="fa-solid fa-campground"></i></span>
+                    </div>
+                    <div class="commerce-showroom-ascent__marker commerce-showroom-ascent__marker--2">
+                        <small>1 900 m</small><span><i class="fa-solid fa-tree"></i></span>
+                    </div>
+                    <div class="commerce-showroom-ascent__marker commerce-showroom-ascent__marker--3">
+                        <small>2 650 m</small><span><i class="fa-solid fa-mountain"></i></span>
+                    </div>
+                    <div class="commerce-showroom-ascent__marker commerce-showroom-ascent__marker--4">
+                        <small>3 400 m</small><span><i class="fa-solid fa-snowflake"></i></span>
+                    </div>
+                    <div class="commerce-showroom-ascent__marker commerce-showroom-ascent__marker--5">
+                        <small>4 808 m</small><span><i class="fa-solid fa-flag"></i></span>
+                    </div>
+                </div>
+
+                <div class="commerce-showroom-ascent__cards">
+                    {{#ascentcards}}
+                    <article class="commerce-showroom-ascent-card {{#summit}}commerce-showroom-ascent-card--summit{{/summit}}"
+                             data-showroom-reveal>
+                        <span class="commerce-showroom-ascent-card__number">{{number}}</span>
+                        <div class="commerce-showroom-ascent-card__visual {{#hasimage}}has-image{{/hasimage}}" aria-hidden="true">
+                            {{#hasimage}}
+                            <img src="{{imageurl}}" alt="" loading="lazy" decoding="async">
+                            {{/hasimage}}
+                            {{^hasimage}}
+                            <i class="{{icon}}"></i>
+                            {{/hasimage}}
+                        </div>
+                        <h3>{{title}}</h3>
+                        <div class="commerce-showroom-ascent-card__copy">
+                            {{#textlines}}<p>{{text}}</p>{{/textlines}}
+                        </div>
+                    </article>
+                    {{/ascentcards}}
+                </div>
+            </div>
+
+            <div class="commerce-showroom-ascent__summary">
+                {{#ascentsummaryitems}}
+                <div class="commerce-showroom-ascent__summary-item">
+                    <span><i class="{{icon}}" aria-hidden="true"></i></span>
+                    <div>
+                        <strong>{{title}}</strong>
+                        <small>{{text}}</small>
+                    </div>
+                </div>
+                {{/ascentsummaryitems}}
+            </div>
+        </div>
+    </section>
+    {{/isascent}}
+
+    {{#isstagemethod}}
+    <section
+        id="showroom-stage-method"
+        class="commerce-showroom-section commerce-showroom-stage-method {{stagemethodlayoutclass}} {{#hasjourneybackground}}has-background{{/hasjourneybackground}}"
+        style="--journey-bg-opacity: {{journeybackgroundopacity}}%; --journey-bg-blur: {{journeybackgroundblur}}px; --showroom-section-custom-background: {{stagemethodlayoutbackgroundcolor}};">
+        {{#hasstagemethodlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{stagemethodlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{stagemethodlayoutbackgroundblur}}px;"><img src="{{stagemethodlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasstagemethodlayoutbackgroundimage}}
+        {{#hasjourneybackground}}
+        <div class="commerce-showroom-stage-method__background" aria-hidden="true">
+            <img src="{{journeybackgroundurl}}" alt="" loading="lazy" decoding="async">
+        </div>
+        {{/hasjourneybackground}}
+
+        <div class="commerce-showroom-container">
+            <div class="commerce-showroom-section__heading commerce-showroom-stage-method__heading">
+                <p class="commerce-showroom-ascent__badge commerce-showroom-stage-method__badge">
+                    <i class="fa-solid fa-route" aria-hidden="true"></i>
+                    <span>{{journeyeyebrow}}</span>
+                </p>
+
+                <h2>
+                    {{journeytitle}}{{#hasjourneytitlehighlight}} <span class="commerce-showroom-stage-method__title-highlight">{{journeytitlehighlight}}</span>{{/hasjourneytitlehighlight}}
+                </h2>
+
+                <p>{{journeydescription}}</p>
+            </div>
+
+            <div class="commerce-showroom-journey">
+                {{#journeysteps}}
+                <article class="commerce-showroom-journey__step {{#isreststop}}commerce-showroom-journey__step--rest{{/isreststop}}" data-showroom-reveal>
+                    <span class="commerce-showroom-journey__line"></span>
+                    <span class="commerce-showroom-journey__marker">{{number}}</span>
+
+                    <div class="commerce-showroom-journey__copy">
+                        <h3>{{title}}</h3>
+                        <p>{{text}}</p>
+                    </div>
+
+                    {{#isreststop}}
+                    <span class="commerce-showroom-journey__rest-icon" aria-hidden="true">
+                        <i class="fa-solid fa-mug-hot"></i>
+                    </span>
+                    {{/isreststop}}
+                </article>
+                {{/journeysteps}}
+            </div>
+        </div>
+
+        {{#hasjourneybackground}}
+        <div class="commerce-showroom-stage-method__mobile-goat" aria-hidden="true">
+            <img src="{{journeybackgroundurl}}" alt="" loading="lazy" decoding="async">
+        </div>
+        {{/hasjourneybackground}}
+    </section>
+    {{/isstagemethod}}
+
+    {{#isexerciseexplorer}}
+    <section id="showroom-exercises" class="commerce-showroom-section commerce-showroom-section--soft {{exerciseexplorerlayoutclass}}" style="--showroom-section-custom-background: {{exerciseexplorerlayoutbackgroundcolor}};">
+        {{#hasexerciseexplorerlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{exerciseexplorerlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{exerciseexplorerlayoutbackgroundblur}}px;"><img src="{{exerciseexplorerlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasexerciseexplorerlayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <div class="commerce-showroom-section__heading commerce-showroom-section__heading--center commerce-showroom-exercises__heading">
+                <p class="commerce-showroom-exercises__badge">
+                    <i class="fa-solid fa-dumbbell" aria-hidden="true"></i>
+                    <span>{{exerciseeyebrow}}</span>
+                </p>
+                <h2>{{exercisetitle}}</h2>
+                <p class="commerce-showroom-exercises__description">{{exercisedescription}}</p>
+            </div>
+            <div class="commerce-showroom-explorer" data-showroom-exercise-explorer>
+                <div class="commerce-showroom-explorer__left">
+                    <div class="commerce-showroom-exercises-grid" role="tablist" aria-label="{{exercisearialabel}}">
+                    {{#exercises}}
+                        <button
+                            type="button"
+                            class="commerce-showroom-exercise {{#active}}is-active{{/active}}"
+                            role="tab"
+                            aria-selected="{{#active}}true{{/active}}{{^active}}false{{/active}}"
+                            aria-controls="showroom-exercise-preview"
+                            data-showroom-exercise
+                            data-exercise-key="{{key}}"
+                            data-preview-url="{{previewurl}}"
+                            data-preview-alt="{{previewalt}}"
+                            data-exercise-title="{{title}}"
+                            data-exercise-text="{{text}}"
+                            data-exercise-icon="{{icon}}"
+                            data-exercise-position="{{position}}"
+                            data-has-preview="{{#haspreview}}1{{/haspreview}}{{^haspreview}}0{{/haspreview}}">
+                            <span class="commerce-showroom-icon"><i class="{{icon}}" aria-hidden="true"></i></span>
+                            <span><strong>{{title}}</strong><small>{{text}}</small></span>
+                        </button>
+                    {{/exercises}}
+                    </div>
+
+                    <p class="commerce-showroom-exercises__desktop-hint">
+                        <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+                        <span>{{exercisedesktophint}}</span>
+                    </p>
+                </div>
+
+                {{#showexercisepreview}}
+                <div class="commerce-showroom-explorer__right">
+                    <aside class="commerce-showroom-exercise-preview" id="showroom-exercise-preview" role="tabpanel" aria-live="polite">
+                    <div class="commerce-showroom-exercise-preview__screen">
+                        <div class="commerce-showroom-exercise-preview__toolbar">
+                            <span></span><span></span><span></span>
+                            <strong>{{exercisepreviewlabel}}</strong>
+                        </div>
+                        <div class="commerce-showroom-exercise-preview__body" data-showroom-exercise-preview-body>
+                            <img
+                                class="commerce-showroom-exercise-preview__image"
+                                data-showroom-exercise-preview-image
+                                src="{{exerciseinitialpreviewurl}}"
+                                alt="{{exerciseinitialpreviewalt}}"
+                                decoding="async"
+                                {{^exerciseinitialhaspreview}}hidden{{/exerciseinitialhaspreview}}>
+                            <div
+                                class="commerce-showroom-exercise-preview__empty"
+                                data-showroom-exercise-preview-empty
+                                {{#exerciseinitialhaspreview}}hidden{{/exerciseinitialhaspreview}}>
+                                <i class="fa-regular fa-image" aria-hidden="true"></i>
+                                <span>{{exercisepreviewunavailable}}</span>
+                            </div>
+                            <div
+                                class="commerce-showroom-exercise-preview__loading"
+                                data-showroom-exercise-preview-loading
+                                hidden
+                                aria-hidden="true">
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <div class="commerce-showroom-exercise-navigation" data-showroom-exercise-navigation>
+                    <div class="commerce-showroom-exercise-navigation__hint">
+                        <span class="commerce-showroom-exercise-navigation__hand" aria-hidden="true">
+                            <i class="fa-regular fa-hand-pointer"></i>
+                            <i class="fa-solid fa-arrows-left-right commerce-showroom-exercise-navigation__arrows"></i>
+                        </span>
+                        <span>{{exercisenavigationhint}}</span>
+                    </div>
+                    <div class="commerce-showroom-exercise-navigation__controls" aria-label="{{exercisenavigationlabel}}">
+                        <button
+                            type="button"
+                            class="commerce-showroom-exercise-navigation__arrow"
+                            data-showroom-exercise-desktop-prev
+                            aria-label="{{exercisemobileprevious}}">
+                            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                        </button>
+
+                        <div class="commerce-showroom-exercise-navigation__dots">
+                            {{#exercises}}
+                                <button
+                                    type="button"
+                                    class="commerce-showroom-exercise-navigation__dot {{#active}}is-active{{/active}}"
+                                    data-showroom-exercise-dot
+                                    data-exercise-key="{{key}}"
+                                    aria-label="{{position}}. {{title}}"
+                                    aria-pressed="{{#active}}true{{/active}}{{^active}}false{{/active}}">
+                                    <span></span>
+                                </button>
+                            {{/exercises}}
+                        </div>
+
+                        <button
+                            type="button"
+                            class="commerce-showroom-exercise-navigation__arrow"
+                            data-showroom-exercise-desktop-next
+                            aria-label="{{exercisemobilenext}}">
+                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="commerce-showroom-exercise-navigation__counter">
+                        <span data-showroom-exercise-desktop-current>1</span>
+                        <span aria-hidden="true"> / </span>
+                        <span>{{exercisecount}}</span>
+                    </div>
+                </div>
+
+                    <div class="commerce-showroom-exercise-mobile-meta" data-showroom-exercise-mobile-meta>
+                        <span class="commerce-showroom-icon commerce-showroom-exercise-mobile-meta__icon">
+                            <i class="{{exerciseinitialicon}}" data-showroom-exercise-mobile-icon aria-hidden="true"></i>
+                        </span>
+                        <span class="commerce-showroom-exercise-mobile-meta__copy">
+                            <strong data-showroom-exercise-mobile-title>{{exerciseinitialtitle}}</strong>
+                            <small data-showroom-exercise-mobile-text>{{exerciseinitialtext}}</small>
+                        </span>
+                    </div>
+                </div>
+                {{/showexercisepreview}}
+            </div>
+        </div>
+    </section>
+    {{/isexerciseexplorer}}
+
+    {{#isoffers}}
+    <section class="commerce-showroom-offers {{offerspresentationclass}} {{offerslayoutclass}} commerce-showroom-offers--{{offerscardvariant}} commerce-showroom-offers--columns-{{offerscolumns}} {{offersmobilepresentationclass}} {{offerscardstopspacingclass}}" id="showroom-offers" aria-labelledby="showroom-offers-heading" style="--showroom-section-custom-background: {{offerslayoutbackgroundcolor}};">
+        {{#hasofferslayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{offerslayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{offerslayoutbackgroundblur}}px;"><img src="{{offerslayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasofferslayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <div class="commerce-showroom-offers__header" data-showroom-currency-toolbar data-endpoint="{{currencyendpoint}}" data-showroom-key="{{showroomkey}}" data-error-message="{{currencyerrormessage}}">
+                <div class="commerce-showroom-section__heading commerce-showroom-offers__heading">
+                    <p class="commerce-showroom-offers__badge">
+                        <i class="{{offersbadgeicon}}" aria-hidden="true"></i>
+                        <span>{{offersbadge}}</span>
+                    </p>
+                    <h2 id="showroom-offers-heading">
+                        <span>{{offerstitleprefix}}</span>
+                        {{#hasofferstitlehighlight}}<span class="commerce-showroom-offers__title-highlight">{{offerstitlehighlight}}</span>{{/hasofferstitlehighlight}}{{#hasoffertitlesuffix}}<span class="commerce-showroom-offers__title-suffix">{{offertitlesuffix}}</span>{{/hasoffertitlesuffix}}
+                    </h2>
+                    <p>{{offersdescription}}</p>
+                </div>
+                <div class="commerce-showroom-offers__toolbar commerce-showroom-currency-card">
+                    <span class="commerce-showroom-currency-card__icon" aria-hidden="true"><i class="fa-solid fa-coins"></i></span>
+                    <span class="commerce-showroom-currency-card__copy">
+                        <strong>{{currencylabel}}</strong>
+                    </span>
+                    <label class="visually-hidden" for="showroom-offers-currency">{{currencylabel}}</label>
+                    <select id="showroom-offers-currency" data-showroom-currency-ajax>
+                        {{#currencies}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/currencies}}
+                    </select>
+                    <span class="commerce-showroom-offers__currency-status" data-showroom-currency-status aria-live="polite"></span>
+                </div>
+            </div>
+            {{#offersmobileslider}}
+                <div class="commerce-showroom-offers__swipe-hint" aria-hidden="true">
+                    <i class="fa-solid fa-hand-pointer" aria-hidden="true"></i>
+                    <span>{{offersmobilesliderhint}}</span>
+                    <i class="fa-solid fa-arrow-right-long" aria-hidden="true"></i>
+                </div>
+            {{/offersmobileslider}}
+            <div class="commerce-showroom-offers__grid">
+                {{#offers}}{{> local_subscriptions/showroom/offer }}{{/offers}}
+            </div>
+            {{#hasoffersfooter}}
+            <div class="commerce-showroom-offers__alf-footer">
+                <span class="commerce-showroom-offers__alf-footer-icon" aria-hidden="true"><i class="fa-solid fa-paw"></i></span>
+                <p>{{offersfootertext}}{{#offersfooteraccent}} <strong>{{offersfooteraccent}}</strong>{{/offersfooteraccent}}</p>
+                <span class="commerce-showroom-offers__alf-footer-icon commerce-showroom-offers__alf-footer-icon--end" aria-hidden="true"><i class="fa-solid fa-heart"></i></span>
+            </div>
+            {{/hasoffersfooter}}
+        </div>
+    </section>
+    {{/isoffers}}
+
+    {{#iscomparison}}
+    <section class="commerce-showroom-comparison {{comparisonlayoutclass}}" id="showroom-comparison" aria-labelledby="showroom-comparison-title" data-showroom-comparison style="--showroom-section-custom-background: {{comparisonlayoutbackgroundcolor}};">
+        {{#hascomparisonlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{comparisonlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{comparisonlayoutbackgroundblur}}px;"><img src="{{comparisonlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hascomparisonlayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <div class="commerce-showroom-section__heading commerce-showroom-section__heading--center commerce-showroom-comparison__heading">
+                <p class="commerce-showroom-comparison__badge">
+                    <i class="fa-solid fa-compass" aria-hidden="true"></i>
+                    <span>{{comparisoneyebrow}}</span>
+                </p>
+                <h2 id="showroom-comparison-title">{{comparisontitle}}</h2>
+                <p>{{comparisondescription}}</p>
+            </div>
+            <div class="commerce-showroom-comparison__scroller" tabindex="0" aria-label="{{comparisontitle}}">
+                <div class="commerce-showroom-comparison__table" role="table" style="--showroom-comparison-columns: {{comparisoncolumncount}};">
+                    <div class="commerce-showroom-comparison__row commerce-showroom-comparison__row--head" role="row">
+                        <div class="commerce-showroom-comparison__feature" role="columnheader" aria-label="{{comparisonfeaturelabel}}"></div>
+                        {{#comparisonoffers}}
+                            <button type="button" class="commerce-showroom-comparison__offer {{#featured}}is-featured{{/featured}}" role="columnheader" data-showroom-comparison-offer="{{role}}">
+                                {{#featured}}<span class="commerce-showroom-comparison__recommended">{{comparisonrecommendedlabel}}</span>{{/featured}}
+                                <strong>{{name}}</strong>
+                                {{#available}}<small data-showroom-comparison-price="{{role}}">{{priceformatted}}</small>{{/available}}
+                            </button>
+                        {{/comparisonoffers}}
+                    </div>
+                    {{#comparisonrows}}
+                        <div class="commerce-showroom-comparison__row" role="row">
+                            <div class="commerce-showroom-comparison__feature" role="rowheader">{{label}}</div>
+                            {{#cells}}
+                            <div class="commerce-showroom-comparison__cell {{#featured}}commerce-showroom-comparison__cell--featured{{/featured}}" role="cell" data-comparison-role="{{role}}">
+                                {{#value.included}}<i class="fa-solid fa-circle-check" aria-hidden="true"></i><span class="visually-hidden">{{comparisonincludedlabel}}</span>{{/value.included}}
+                                {{#value.notincluded}}<i class="fa-solid fa-minus" aria-hidden="true"></i><span class="visually-hidden">{{comparisonnotincludedlabel}}</span>{{/value.notincluded}}
+                                {{#value.hastext}}<span class="commerce-showroom-comparison__value">{{value.text}}</span>{{/value.hastext}}
+                            </div>
+                            {{/cells}}
+                        </div>
+                    {{/comparisonrows}}
+                </div>
+            </div>
+            <div class="commerce-showroom-comparison__cta">
+                <a href="#showroom-offers" data-showroom-smart-anchor class="commerce-showroom-btn commerce-showroom-btn--{{finalstyle}}">{{finalcta}}<i class="fa-solid fa-arrow-up" aria-hidden="true"></i></a>
+            </div>
+        </div>
+
+            <div class="commerce-showroom-comparison-mobile" data-showroom-comparison-mobile>
+                <div class="commerce-showroom-comparison-mobile__tabs">
+                    {{#comparisonmobileoffers}}<button type="button" class="commerce-showroom-comparison-mobile__tab {{#featured}}is-featured{{/featured}}" data-comparison-tab="{{mobileindex}}"><span>{{mobilelabel}}</span>{{#available}}<small>{{mobileprice}}</small>{{/available}}</button>{{/comparisonmobileoffers}}
+                </div>
+                <div class="commerce-showroom-comparison-mobile__viewport">
+                    <span class="commerce-showroom-comparison-mobile__recommended"
+                          data-comparison-mobile-recommended
+                          hidden>{{comparisonrecommendedlabel}}</span>
+                    <div class="commerce-showroom-comparison-mobile__criteria">
+                        <div class="commerce-showroom-comparison-mobile__head" aria-label="{{comparisonfeaturelabel}}"></div>
+                        {{#comparisonrows}}<div class="commerce-showroom-comparison-mobile__criterion">{{label}}</div>{{/comparisonrows}}
+                    </div>
+                    <div class="commerce-showroom-comparison-mobile__rail" data-comparison-rail>
+                        {{#comparisonmobileoffers}}
+                        <div class="commerce-showroom-comparison-mobile__offer {{#featured}}is-featured{{/featured}}" data-comparison-slide="{{mobileindex}}">
+                            <div class="commerce-showroom-comparison-mobile__head">
+                                <strong>{{mobilelabel}}</strong>
+                                {{#available}}<small>{{mobileprice}}</small>{{/available}}
+                            </div>
+                            {{#mobilerows}}<div class="commerce-showroom-comparison-mobile__value">{{#value.included}}<i class="fa-solid fa-circle-check" aria-hidden="true"></i>{{/value.included}}{{#value.notincluded}}<i class="fa-solid fa-minus" aria-hidden="true"></i>{{/value.notincluded}}{{#value.hastext}}<span>{{value.text}}</span>{{/value.hastext}}</div>{{/mobilerows}}
+                        </div>
+                        {{/comparisonmobileoffers}}
+                    </div>
+                </div>
+                <div class="commerce-showroom-comparison-mobile__navigation">
+                    <button type="button" data-comparison-prev aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div class="commerce-showroom-comparison-mobile__dots">{{#comparisonmobileoffers}}<button type="button" data-comparison-dot="{{mobileindex}}" aria-label="{{title}}"></button>{{/comparisonmobileoffers}}</div>
+                    <span data-comparison-counter>{{#comparisonmobilecount}}1 / {{comparisonmobilecount}}{{/comparisonmobilecount}}</span>
+                    <button type="button" data-comparison-next aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <p class="commerce-showroom-comparison-mobile__hint"><i class="fa-solid fa-hand-pointer"></i><span>← {{comparisonswipehint}} →</span></p>
+                <div class="commerce-showroom-comparison-mobile__cta">
+                    <a href="#showroom-offers" data-showroom-smart-anchor class="commerce-showroom-btn commerce-showroom-btn--{{finalstyle}}">{{finalcta}}<i class="fa-solid fa-arrow-up" aria-hidden="true"></i></a>
+                </div>
+            </div>
+</section>
+    {{/iscomparison}}
+
+    {{#ismemorymethod}}
+    <section id="showroom-memory-method" class="commerce-showroom-why {{memorymethodlayoutclass}}" aria-labelledby="showroom-why-title" style="--showroom-section-custom-background: {{memorymethodlayoutbackgroundcolor}};">
+        {{#hasmemorymethodlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{memorymethodlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{memorymethodlayoutbackgroundblur}}px;"><img src="{{memorymethodlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasmemorymethodlayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <div class="commerce-showroom-section__heading commerce-showroom-section__heading--center">
+                <p class="commerce-showroom-eyebrow">{{whyeyebrow}}</p>
+                <h2 id="showroom-why-title">{{whytitle}}</h2>
+                <p>{{whydescription}}</p>
+            </div>
+            <div class="commerce-showroom-why__flow">
+                {{#whyitems}}
+                    <article class="commerce-showroom-why__item" data-showroom-reveal>
+                        <span class="commerce-showroom-icon"><i class="{{icon}}" aria-hidden="true"></i></span>
+                        <h3>{{title}}</h3>
+                        <p>{{text}}</p>
+                    </article>
+                {{/whyitems}}
+            </div>
+        </div>
+    </section>
+    {{/ismemorymethod}}
+
+    {{#istrust}}
+    <section id="showroom-trust" class="commerce-showroom-trust {{trustlayoutclass}}" aria-label="{{whytitle}}" style="--showroom-section-custom-background: {{trustlayoutbackgroundcolor}};">
+        {{#hastrustlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{trustlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{trustlayoutbackgroundblur}}px;"><img src="{{trustlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hastrustlayoutbackgroundimage}}
+        <div class="commerce-showroom-container commerce-showroom-trust__grid">
+            {{#trustitems}}
+                <article class="commerce-showroom-trust__item">
+                    <span><i class="{{icon}}" aria-hidden="true"></i></span>
+                    <div><strong>{{title}}</strong><small>{{text}}</small></div>
+                </article>
+            {{/trustitems}}
+        </div>
+    </section>
+    {{/istrust}}
+
+    {{#istestimonials}}
+    {{#hastestimonials}}
+        <section id="showroom-testimonials" class="commerce-showroom-testimonials {{testimonialslayoutclass}}" style="--showroom-section-custom-background: {{testimonialslayoutbackgroundcolor}};">
+            {{#hastestimonialslayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{testimonialslayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{testimonialslayoutbackgroundblur}}px;"><img src="{{testimonialslayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hastestimonialslayoutbackgroundimage}}
+            <div class="commerce-showroom-container">
+                <div class="commerce-showroom-section__heading commerce-showroom-section__heading--center">
+                    <p class="commerce-showroom-eyebrow">{{testimonialseyebrow}}</p>
+                    <h2>{{testimonialstitle}}</h2>
+                </div>
+                <div class="commerce-showroom-testimonials__grid">
+                    {{#testimonials}}
+                        <blockquote><p>{{quote}}</p><footer>{{author}}</footer></blockquote>
+                    {{/testimonials}}
+                </div>
+            </div>
+        </section>
+    {{/hastestimonials}}
+    {{/istestimonials}}
+
+    {{#isbonus}}
+    <section id="showroom-bonus" class="commerce-showroom-bonus {{bonuslayoutclass}}" style="--showroom-section-custom-background: {{bonuslayoutbackgroundcolor}};">
+        {{#hasbonuslayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{bonuslayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{bonuslayoutbackgroundblur}}px;"><img src="{{bonuslayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasbonuslayoutbackgroundimage}}
+        <div class="commerce-showroom-container commerce-showroom-bonus__inner">
+            <div class="commerce-showroom-bonus__visual"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
+            <div><p class="commerce-showroom-eyebrow">{{bonuseyebrow}}</p><h2>{{bonusheading}}</h2><p>{{bonustext}}</p><a class="commerce-showroom-btn commerce-showroom-btn--ghost" href="{{bonusactionurl}}">{{bonuscta}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></div>
+        </div>
+    </section>
+    {{/isbonus}}
+
+    {{#isfaq}}
+    <section id="showroom-faq" class="commerce-showroom-section commerce-showroom-faq {{faqpresentationclass}} {{faqlayoutclass}}" style="--showroom-section-custom-background: {{faqlayoutbackgroundcolor}};">
+        {{#hasfaqlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{faqlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{faqlayoutbackgroundblur}}px;"><img src="{{faqlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasfaqlayoutbackgroundimage}}
+        <div class="commerce-showroom-container commerce-showroom-container--narrow">
+            <div class="commerce-showroom-section__heading commerce-showroom-section__heading--center commerce-showroom-faq__heading">
+                <p class="commerce-showroom-faq__badge">
+                    {{#faqistravela1}}<i class="fa-solid fa-suitcase-rolling" aria-hidden="true"></i>{{/faqistravela1}}
+                    {{^faqistravela1}}<i class="fa-solid fa-circle-question" aria-hidden="true"></i>{{/faqistravela1}}
+                    <span>{{faqeyebrow}}</span>
+                </p>
+                <h2>{{faqheading}}{{#faqtitleaccent}} <span class="commerce-showroom-faq__title-accent">{{faqtitleaccent}}</span>{{/faqtitleaccent}}{{#hasfaqtitlesuffix}}{{faqtitlesuffix}}{{/hasfaqtitlesuffix}}</h2>
+                {{#faqdescription}}<p>{{faqdescription}}</p>{{/faqdescription}}
+            </div>
+            <div class="commerce-showroom-faq__list" data-showroom-faq-list {{#faqsingleopen}}data-single-open="1"{{/faqsingleopen}}>
+                {{#faqs}}
+                    <details class="commerce-showroom-faq__item" data-showroom-faq>
+                        <summary aria-controls="{{id}}">
+                            {{#faqisarticlecourse}}<span class="commerce-showroom-faq__item-icon" aria-hidden="true"><i class="{{icon}}"></i></span>{{/faqisarticlecourse}}
+                            {{#faqistravela1}}<span class="commerce-showroom-faq__item-icon" aria-hidden="true"><i class="{{icon}}"></i></span>{{/faqistravela1}}
+                            <span class="commerce-showroom-faq__question">{{question}}</span>
+                            <i class="fa-solid fa-plus commerce-showroom-faq__toggle" aria-hidden="true"></i>
+                        </summary>
+                        <div class="commerce-showroom-faq__answer" id="{{id}}">
+                            {{#faqistravela1}}{{#answerparagraphs}}<p>{{text}}</p>{{/answerparagraphs}}{{/faqistravela1}}
+                            {{^faqistravela1}}<p>{{answer}}</p>{{/faqistravela1}}
+                        </div>
+                    </details>
+                {{/faqs}}
+            </div>
+            {{#faqistravela1}}
+            {{#hasfaqsupport}}
+            <aside class="commerce-showroom-faq__travel-contact">
+                <span class="commerce-showroom-faq__travel-contact-icon" aria-hidden="true"><i class="fa-regular fa-comments"></i></span>
+                <div class="commerce-showroom-faq__travel-contact-copy">
+                    {{#faqsupporttitle}}<h3>{{faqsupporttitle}}</h3>{{/faqsupporttitle}}
+                    {{#faqsupporttext}}<p>{{faqsupporttext}}</p>{{/faqsupporttext}}
+                </div>
+                {{#hasfaqsupportbutton}}<a class="commerce-showroom-button commerce-showroom-button--primary commerce-showroom-faq__travel-contact-button" href="{{faqsupportbuttontarget}}">{{faqsupportbuttonlabel}} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>{{/hasfaqsupportbutton}}
+            </aside>
+            {{/hasfaqsupport}}
+            {{/faqistravela1}}
+            {{#faqisarticlecourse}}
+            {{#hasfaqsupport}}
+            <aside class="commerce-showroom-faq__support">
+                {{#hasfaqsupportleftimage}}<img class="commerce-showroom-faq__support-image commerce-showroom-faq__support-image--left" src="{{faqsupportleftimageurl}}" alt="" loading="lazy" decoding="async">{{/hasfaqsupportleftimage}}
+                <div class="commerce-showroom-faq__support-copy">
+                    <span class="commerce-showroom-faq__support-icon" aria-hidden="true"><i class="fa-solid fa-headset"></i></span>
+                    <div>
+                        {{#faqsupporttitle}}<h3>{{faqsupporttitle}}</h3>{{/faqsupporttitle}}
+                        {{#faqsupporttext}}<p>{{faqsupporttext}}</p>{{/faqsupporttext}}
+                        {{#hasfaqsupportbutton}}<a class="commerce-showroom-button commerce-showroom-button--primary commerce-showroom-faq__support-button" href="{{faqsupportbuttontarget}}">{{faqsupportbuttonlabel}} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>{{/hasfaqsupportbutton}}
+                    </div>
+                </div>
+                {{#hasfaqsupportrightimage}}<img class="commerce-showroom-faq__support-image commerce-showroom-faq__support-image--right" src="{{faqsupportrightimageurl}}" alt="" loading="lazy" decoding="async">{{/hasfaqsupportrightimage}}
+            </aside>
+            {{/hasfaqsupport}}
+            {{#hasfaqfooternote}}<p class="commerce-showroom-faq__footer-note">{{faqfooternote}} <span aria-hidden="true">♡</span></p>{{/hasfaqfooternote}}
+            {{/faqisarticlecourse}}
+        </div>
+    </section>
+    {{/isfaq}}
+
+    {{#isfaqcontact}}
+    <section id="showroom-faq-contact" class="commerce-showroom-support commerce-showroom-support--faq-contact {{faqcontactlayoutclass}}" style="--showroom-section-custom-background: {{faqcontactlayoutbackgroundcolor}};">
+        <div class="commerce-showroom-container commerce-showroom-container--narrow">
+            <div class="commerce-showroom-support__card">
+                <div class="commerce-showroom-support__copy">
+                    <h2>{{faqcontacttitle}}</h2>
+                    <p>{{faqcontacttext}}</p>
+                </div>
+                <div class="commerce-showroom-support__actions">
+                    {{#hasfaqcontactbutton}}
+                    <a href="{{faqcontactbuttonurl}}" target="_blank" rel="noopener noreferrer" data-showroom-track="support" class="commerce-showroom-btn commerce-showroom-btn--primary">
+                        <i class="fa-solid fa-headset" aria-hidden="true"></i>
+                        <span>{{faqcontactbuttonlabel}}</span>
+                    </a>
+                    {{/hasfaqcontactbutton}}
+                    <div class="commerce-showroom-support__channels">
+                        {{#hasfaqcontacttelegram}}
+                        <a href="{{faqcontacttelegramurl}}" target="_blank" rel="noopener noreferrer" class="commerce-showroom-support__channel" aria-label="Telegram">
+                            <span class="commerce-showroom-support__channel-icon"><i class="fa-brands fa-telegram" aria-hidden="true"></i></span>
+                            <span class="commerce-showroom-support__channel-label">Telegram</span>
+                        </a>
+                        {{/hasfaqcontacttelegram}}
+                        {{#hasfaqcontactwhatsapp}}
+                        <a href="{{faqcontactwhatsappurl}}" target="_blank" rel="noopener noreferrer" class="commerce-showroom-support__channel" aria-label="WhatsApp">
+                            <span class="commerce-showroom-support__channel-icon"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></span>
+                            <span class="commerce-showroom-support__channel-label">WhatsApp</span>
+                        </a>
+                        {{/hasfaqcontactwhatsapp}}
+                        {{#hasfaqcontactemail}}
+                        <a href="{{supportemailurl}}" class="commerce-showroom-support__channel commerce-showroom-support__channel--email" aria-label="{{supportemail}}">
+                            <span class="commerce-showroom-support__channel-icon"><i class="fa-solid fa-envelope" aria-hidden="true"></i></span>
+                            <span class="commerce-showroom-support__channel-label">{{supportemail}}</span>
+                        </a>
+                        {{/hasfaqcontactemail}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {{/isfaqcontact}}
+
+    {{#issupport}}
+    <section id="showroom-support" class="commerce-showroom-support {{supportlayoutclass}} {{#issupportteacherstyle}}commerce-showroom-support--teacher{{/issupportteacherstyle}}" style="--showroom-section-custom-background: {{supportlayoutbackgroundcolor}};">
+        {{#hassupportlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{supportlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{supportlayoutbackgroundblur}}px;"><img src="{{supportlayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hassupportlayoutbackgroundimage}}
+        {{#issupportteacherstyle}}
+        <div class="commerce-showroom-container">
+            {{#hassupportnote}}<p class="commerce-showroom-support-teacher__note">{{supportnote}}</p>{{/hassupportnote}}
+            <div class="commerce-showroom-support-teacher__heading">
+                {{#supporteyebrow}}<p class="commerce-showroom-support-teacher__badge"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>{{supporteyebrow}}</span></p>{{/supporteyebrow}}
+                <h2>{{supporttitle}} {{#hassupporttitleaccent}}<span>{{supporttitleaccent}}</span>{{/hassupporttitleaccent}}</h2>
+                <p>{{supporttext}}</p>
+            </div>
+            <div class="commerce-showroom-support-teacher__layout">
+                <div class="commerce-showroom-support-teacher__cards commerce-showroom-support-teacher__cards--left">
+                    {{#supportleftitems}}<article class="commerce-showroom-support-teacher__card"><span><i class="{{icon}}" aria-hidden="true"></i></span><h3>{{title}}</h3><p>{{text}}</p></article>{{/supportleftitems}}
+                </div>
+                <div class="commerce-showroom-support-teacher__conversation">
+                    <div class="commerce-showroom-support-teacher__conversation-icon"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i></div>
+                    {{#hassupportconversationtitle}}<h3>{{supportconversationtitle}}</h3>{{/hassupportconversationtitle}}
+                    <div class="commerce-showroom-support-teacher__messages">
+                        {{#supportmessages}}<div class="commerce-showroom-support-teacher__message commerce-showroom-support-teacher__message--{{side}}">{{#hasauthor}}<strong>{{author}}</strong>{{/hasauthor}}<p>{{text}}</p>{{#hastime}}<span class="commerce-showroom-support-teacher__time">{{time}}</span>{{/hastime}}</div>{{/supportmessages}}
+                    </div>
+                    {{#hassupportsidenote}}<p class="commerce-showroom-support-teacher__sidenote">{{supportsidenote}}</p>{{/hassupportsidenote}}
+                </div>
+                <div class="commerce-showroom-support-teacher__cards commerce-showroom-support-teacher__cards--right">
+                    {{#supportrightitems}}<article class="commerce-showroom-support-teacher__card"><span><i class="{{icon}}" aria-hidden="true"></i></span><h3>{{title}}</h3><p>{{text}}</p></article>{{/supportrightitems}}
+                </div>
+            </div>
+        </div>
+        {{/issupportteacherstyle}}
+        {{^issupportteacherstyle}}
+        <div class="commerce-showroom-container commerce-showroom-container--narrow">
+            <div class="commerce-showroom-support__card">
+                <div class="commerce-showroom-support__copy">
+                    <h2>{{supporttitle}}</h2>
+                    <p>{{supporttext}}</p>
+                </div>
+
+                <div class="commerce-showroom-support__actions">
+                    <a href="{{supporturl}}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       data-showroom-track="support"
+                       class="commerce-showroom-btn commerce-showroom-btn--primary">
+                        <i class="fa-solid fa-headset" aria-hidden="true"></i>
+                        <span>{{supportcta}}</span>
+                    </a>
+
+                    <div class="commerce-showroom-support__channels">
+                        {{#hassupporttelegram}}
+                        <a href="{{supporttelegramurl}}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="commerce-showroom-support__channel"
+                           aria-label="Telegram">
+                            <span class="commerce-showroom-support__channel-icon">
+                                <i class="fa-brands fa-telegram" aria-hidden="true"></i>
+                            </span>
+                            <span class="commerce-showroom-support__channel-label">Telegram</span>
+                        </a>
+                        {{/hassupporttelegram}}
+
+                        {{#hassupportwhatsapp}}
+                        <a href="{{supportwhatsappurl}}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="commerce-showroom-support__channel"
+                           aria-label="WhatsApp">
+                            <span class="commerce-showroom-support__channel-icon">
+                                <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+                            </span>
+                            <span class="commerce-showroom-support__channel-label">WhatsApp</span>
+                        </a>
+                        {{/hassupportwhatsapp}}
+
+                        <a href="{{supportemailurl}}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="commerce-showroom-support__channel commerce-showroom-support__channel--email"
+                           aria-label="{{supportemail}}">
+                            <span class="commerce-showroom-support__channel-icon">
+                                <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                            </span>
+                            <span class="commerce-showroom-support__channel-label">{{supportemail}}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/issupportteacherstyle}}
+    </section>
+    {{/issupport}}
+
+    {{#isverbscards}}
+    <section id="showroom-verbs-cards" class="commerce-showroom-section commerce-showroom-verbs-cards {{verbscardslayoutclass}}" style="--showroom-section-custom-background: {{verbscardslayoutbackgroundcolor}};">
+        {{#hasverbscardslayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{verbscardslayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{verbscardslayoutbackgroundblur}}px;"><img src="{{verbscardslayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasverbscardslayoutbackgroundimage}}
+        <div class="commerce-showroom-container">
+            <div class="commerce-showroom-verbs-cards__panel">
+                <div class="commerce-showroom-verbs-cards__media">
+                    {{#hasverbscardsimage}}
+                    <img src="{{verbscardsimageurl}}" alt="" loading="lazy" decoding="async">
+                    {{/hasverbscardsimage}}
+                </div>
+
+                <div class="commerce-showroom-verbs-cards__content">
+                    <p class="commerce-showroom-eyebrow commerce-showroom-verbs-cards__badge">
+                        <i class="fa-regular fa-star" aria-hidden="true"></i>
+                        <span>{{verbscardseyebrow}}</span>
+                    </p>
+
+                    <h2>
+                        {{verbscardstitle}}{{#hasverbscardstitleaccent}} <span>{{verbscardstitleaccent}}</span>{{/hasverbscardstitleaccent}}
+                    </h2>
+
+                    <p class="commerce-showroom-verbs-cards__text">{{verbscardstext}}</p>
+
+                    <div class="commerce-showroom-verbs-cards__features">
+                        {{#verbscardsitems}}
+                        <article class="commerce-showroom-verbs-cards__feature">
+                            <span class="commerce-showroom-verbs-cards__feature-icon">
+                                <i class="{{icon}}" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <strong>{{title}}</strong>
+                                <p>{{text}}</p>
+                            </div>
+                        </article>
+                        {{/verbscardsitems}}
+                    </div>
+
+                    <a href="{{verbscardsbuttontarget}}"
+                        class="commerce-showroom-btn commerce-showroom-btn--primary commerce-showroom-verbs-cards__cta"
+                        data-showroom-track="verbs_cards_cta">
+                        {{verbscardsbuttonlabel}}
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    {{/isverbscards}}
+
+    {{#isfinalcta}}
+    <section
+        id="showroom-final" class="commerce-showroom-final {{finalctalayoutclass}} {{finalpresentationclass}} {{#hasfinalbackground}}has-cms-background{{/hasfinalbackground}}"
+        style="--showroom-final-bg-opacity: {{finalbackgroundopacity}}%; --showroom-final-bg-blur: {{finalbackgroundblur}}px; --showroom-section-custom-background: {{finalctalayoutbackgroundcolor}};">
+        {{#hasfinalctalayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{finalctalayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{finalctalayoutbackgroundblur}}px;"><img src="{{finalctalayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasfinalctalayoutbackgroundimage}}
+        {{#hasfinalbackground}}
+        <div class="commerce-showroom-final__background" aria-hidden="true">
+            <img src="{{finalbackgroundurl}}" alt="" loading="lazy" decoding="async">
+        </div>
+        {{/hasfinalbackground}}
+
+        <div class="commerce-showroom-container commerce-showroom-final__inner" data-showroom-final-cta>
+            <div class="commerce-showroom-final__content">
+                {{#showfinalbadge}}
+                <p class="commerce-showroom-eyebrow commerce-showroom-final__badge">
+                    <i class="{{finalbadgeicon}}" aria-hidden="true"></i>
+                    <span>{{finaleyebrow}}</span>
+                </p>
+                {{/showfinalbadge}}
+                {{#hasfinalhandnote}}
+                <p class="commerce-showroom-final__handnote">{{finalhandnote}} <span>♡</span></p>
+                {{/hasfinalhandnote}}
+                <h2 class="{{finaltitlesizeclass}}">{{finaltitle}}{{#hasfinaltitleaccent}} <span>{{finaltitleaccent}}</span>{{/hasfinaltitleaccent}}</h2>
+                {{#showfinaltext}}
+                <p class="commerce-showroom-final__subtitle">
+                    <span aria-hidden="true"></span>
+                    <strong>{{finaltext}}</strong>
+                    <span aria-hidden="true"></span>
+                </p>
+                {{/showfinaltext}}
+                <a href="{{finalactionurl}}" data-showroom-track="final_cta" class="commerce-showroom-btn commerce-showroom-btn--{{finalstyle}}">{{finalcta}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                {{#hasfinalsecondarycta}}
+                <a href="{{finalsecondarytarget}}" class="commerce-showroom-final__secondary-link">{{finalsecondarylabel}}</a>
+                {{/hasfinalsecondarycta}}
+                {{#hasfinalperks}}
+                <div class="commerce-showroom-final__perks" aria-label="Highlights">
+                    {{#finalperks}}
+                    <span class="commerce-showroom-final__perk"><i class="{{icon}}" aria-hidden="true"></i><strong>{{title}}</strong></span>
+                    {{/finalperks}}
+                </div>
+                {{/hasfinalperks}}
+            </div>
+
+            {{#showexpeditiontheme}}
+            {{^isfinalctaarticle}}
+            <aside class="commerce-showroom-expedition-card commerce-showroom-final__expedition" aria-label="{{expeditionlabel}}">
+                <span class="commerce-showroom-expedition-card__icon"><i class="{{expeditionicon}}" aria-hidden="true"></i></span>
+                <div><strong>{{expeditionlabel}}</strong><span>{{expeditionstage}}</span><small>{{expeditionaltitude}}</small></div>
+            </aside>
+            {{/isfinalctaarticle}}
+            {{/showexpeditiontheme}}
+
+            <div class="commerce-showroom-final__inline-mobile-cta" data-showroom-final-inline-mobile-cta>
+                <label class="commerce-showroom-sticky-currency" aria-label="{{currencylabel}}">
+                    <select data-showroom-currency-ajax>
+                        {{#currencies}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/currencies}}
+                    </select>
+                </label>
+                <a href="#showroom-offers" data-showroom-smart-anchor>
+                    {{herocta}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+
+        <footer class="commerce-showroom-final__legal" data-showroom-final-legal>
+            <div class="commerce-showroom-container commerce-showroom-final__legal-inner">
+                <div class="commerce-showroom-final__company">
+                    {{#finallegalshowname}}
+                    <strong class="commerce-showroom-final__company-name"
+                        data-showroom-legal-field="name" {{^hasfinallegalname}}hidden{{/hasfinallegalname}}>{{finallegalname}}</strong>
+                    {{/finallegalshowname}}
+
+                    {{#finallegalshowaddress}}
+                    <span class="commerce-showroom-final__company-detail"
+                        data-showroom-legal-field="address" {{^hasfinallegaladdress}}hidden{{/hasfinallegaladdress}}>{{finallegaladdress}}</span>
+                    {{/finallegalshowaddress}}
+
+                    {{#finallegalshowlegal}}
+                    <span class="commerce-showroom-final__company-detail"
+                        data-showroom-legal-field="legal" {{^hasfinallegallegal}}hidden{{/hasfinallegallegal}}>{{finallegallegal}}</span>
+                    {{/finallegalshowlegal}}
+
+                    {{#finallegalshowemail}}
+                    <span class="commerce-showroom-final__company-detail"
+                        data-showroom-legal-field="email" {{^hasfinallegalemail}}hidden{{/hasfinallegalemail}}>{{finallegalemail}}</span>
+                    {{/finallegalshowemail}}
+
+                    {{#finallegalshowphone}}
+                    <span class="commerce-showroom-final__company-detail"
+                        data-showroom-legal-field="phone" {{^hasfinallegalphone}}hidden{{/hasfinallegalphone}}>{{finallegalphone}}</span>
+                    {{/finallegalshowphone}}
+
+                    {{#finallegalshowwebsite}}
+                    <span class="commerce-showroom-final__company-detail"
+                        data-showroom-legal-field="website" {{^hasfinallegalwebsite}}hidden{{/hasfinallegalwebsite}}>{{finallegalwebsite}}</span>
+                    {{/finallegalshowwebsite}}
+
+                    {{#finallegalshowtaxnotice}}
+                    <small class="commerce-showroom-final__company-note"
+                        data-showroom-legal-field="taxnotice" {{^hasfinallegaltaxnotice}}hidden{{/hasfinallegaltaxnotice}}>{{finallegaltaxnotice}}</small>
+                    {{/finallegalshowtaxnotice}}
+
+                    {{#finallegalshowfooter}}
+                    <small class="commerce-showroom-final__company-note"
+                        data-showroom-legal-field="footer" {{^hasfinallegalfooter}}hidden{{/hasfinallegalfooter}}>{{finallegalfooter}}</small>
+                    {{/finallegalshowfooter}}
+                </div>
+                <nav class="commerce-showroom-final__legal-links" aria-label="{{finallegalnavlabel}}">
+                    {{#finallegalshowprivacy}}
+                    <a href="{{finallegalprivacyurl}}" target="_blank" rel="noopener noreferrer">{{finallegalprivacylabel}}</a>
+                    {{/finallegalshowprivacy}}
+                    {{#finallegalshowterms}}
+                    <a href="{{finallegaltermsurl}}" target="_blank" rel="noopener noreferrer">{{finallegaltermslabel}}</a>
+                    {{/finallegalshowterms}}
+                    {{#finallegalshowoffer}}
+                    <a href="{{finallegalofferurl}}" target="_blank" rel="noopener noreferrer">{{finallegalofferlabel}}</a>
+                    {{/finallegalshowoffer}}
+                </nav>
+            </div>
+        </footer>
+    </section>
+    {{/isfinalcta}}
+    {{/showroomorderedblocks}}
+
+    {{#showblockoffers}}
+    {{#showblockfinalcta}}
+    <aside class="commerce-showroom-desktop-sticky" data-showroom-desktop-sticky hidden>
+        <div class="commerce-showroom-desktop-sticky__layout">
+            {{#showexpeditiontheme}}
+            <div class="commerce-showroom-desktop-sticky__expedition-glass"
+                data-showroom-desktop-expedition hidden aria-hidden="true">
+                <span class="commerce-showroom-desktop-sticky__expedition-icon">
+                    <i class="{{expeditionicon}}" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <strong>{{expeditionlabel}}</strong>
+                    <span>{{expeditionstage}}</span>
+                    <small>{{expeditionaltitude}}</small>
+                </div>
+            </div>
+            {{/showexpeditiontheme}}
+
+            <div class="commerce-showroom-desktop-sticky__inner">
+                <div>
+                    <small>{{desktopstickylabel}}</small>
+                    <strong data-showroom-featured-price>{{#hasdesktopstickyprice}}{{desktopstickyprice}}{{/hasdesktopstickyprice}}</strong>
+                </div>
+                <label class="commerce-showroom-sticky-currency" aria-label="{{currencylabel}}">
+                    <select data-showroom-currency-ajax>
+                        {{#currencies}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/currencies}}
+                    </select>
+                </label>
+                <a href="{{desktopstickyurl}}" class="commerce-showroom-btn commerce-showroom-btn--primary">{{desktopstickycta}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+        </div>
+    </aside>
+    {{/showblockfinalcta}}
+    {{/showblockoffers}}
+
+    {{#showblockoffers}}
+    {{#showblockfinalcta}}
+    <div class="commerce-showroom-sticky-cta" data-showroom-sticky-cta>
+        <label class="commerce-showroom-sticky-currency" aria-label="{{currencylabel}}">
+            <select data-showroom-currency-ajax>
+                {{#currencies}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/currencies}}
+            </select>
+        </label>
+        <a href="#showroom-offers" data-showroom-smart-anchor>{{herocta}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </div>
+    {{/showblockfinalcta}}
+    {{/showblockoffers}}
+
+    {{#showblockvideo}}
+    {{#hasvideourl}}
+    {{#videomodal}}
+    <dialog class="commerce-showroom-video-dialog" data-showroom-video-dialog aria-labelledby="showroom-video-dialog-title">
+        <div class="commerce-showroom-video-dialog__panel">
+            <button type="button" class="commerce-showroom-video-dialog__close" data-showroom-video-close aria-label="{{videomodalclose}}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            <div class="commerce-showroom-video-dialog__stage">
+                <h2 id="showroom-video-dialog-title" class="sr-only">{{videotitle}}</h2>
+                <video class="commerce-showroom-video-dialog__player" controls preload="none" {{#hasvideoposter}}poster="{{videoposterurl}}"{{/hasvideoposter}}>
+                    <source src="{{videourl}}">
+                </video>
+            </div>
+        </div>
+    </dialog>
+    {{/videomodal}}
+    {{/hasvideourl}}
+    {{/showblockvideo}}
+</main>

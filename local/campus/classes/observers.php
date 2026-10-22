@@ -17,12 +17,6 @@ class observers {
             return;
         }
 
-        // Exclure les comptes "essai" (comme avant)
-        $sysctx = \context_system::instance();
-        if (self::has_system_role_shortname($userid, 'triallimited', $sysctx->id)) {
-            return;
-        }
-
         // 1) Préférence "Accueil = Mes cours" pour les connexions futures
         if ((int)get_user_preferences('defaulthomepage', -1, $userid) !== HOMEPAGE_MYCOURSES) {
             set_user_preference('defaulthomepage', HOMEPAGE_MYCOURSES, $userid);
@@ -45,26 +39,6 @@ class observers {
     }
 
 
-    private static function has_system_role_shortname(int $userid, string $shortname, int $contextid): bool {
-        global $DB;
-
-        // Récupère l'id du rôle par shortname (mise en cache statique)
-        static $rolecache = [];
-        if (!array_key_exists($shortname, $rolecache)) {
-            $rolecache[$shortname] = (int)$DB->get_field('role', 'id', ['shortname' => $shortname], IGNORE_MISSING);
-        }
-        $roleid = $rolecache[$shortname];
-        if (!$roleid) {
-            return false;
-        }
-
-        // Vérifie l’assignation du rôle AU CONTEXTE SYSTÈME
-        return $DB->record_exists('role_assignments', [
-            'userid'    => $userid,
-            'contextid' => $contextid,
-            'roleid'    => $roleid,
-        ]);
-    }
 
     public static function user_login_failed(\core\event\user_login_failed $event): void {
         global $DB, $SESSION, $CFG;

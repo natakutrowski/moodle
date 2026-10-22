@@ -218,6 +218,23 @@ function local_campus_get_cookie(): ?array {
     return local_campus_parse_cookie($_COOKIE['campus_trial']);
 }
 
+/**
+ * 7.98D2 — indique si de nouvelles inscriptions Trial sont encore autorisées.
+ *
+ * La policy vit dans local_subscriptions afin que la date A soit une autorité
+ * unique pour tous les points d'entrée. En cas de déploiement partiel ancien,
+ * on reste volontairement fail-open côté UI; le garde serveur de
+ * trial_manager::start_trial() reste l'autorité finale.
+ */
+function local_campus_trial_registrations_are_open(?int $at = null): bool {
+    if (!class_exists('\local_subscriptions\trial\TrialLegacyTransitionPolicy')) {
+        return true;
+    }
+
+    return \local_subscriptions\trial\TrialLegacyTransitionPolicy::create()
+        ->registrations_are_open($at);
+}
+
 /** Récupère la liste des cours d’essai (config) */
 function local_campus_trial_course_ids(): array {
     global $DB;
@@ -230,11 +247,13 @@ function local_campus_trial_course_ids(): array {
 }
 
 function local_campus_is_trial_user(): bool {
-    global $USER, $DB;
-    if (!isloggedin() || isguestuser()) return false;
-    $r = $DB->get_record('role', ['shortname'=>'triallimited'], 'id', IGNORE_MISSING);
-    if (!$r) return false;
-    return user_has_role_assignment($USER->id, $r->id, \context_system::instance()->id);
+    global $USER;
+
+    if (!isloggedin() || isguestuser()) {
+        return false;
+    }
+
+    return local_campus_is_trial_user_byid((int)$USER->id);
 }
 
 /** Enlève des nodes de navigation quand l’utilisateur est en essai. */
@@ -306,8 +325,8 @@ function local_campus_extend_settings_navigation(\settings_navigation $settingsn
 /**
  * Moodle 5.x : $tree est un core_user\output\myprofile\tree qui n'expose pas d'API stable pour retirer des nœuds.
  * Ce callback est laissé volontairement neutre. Le “cadenassage” des comptes d’essai
- * se fait via les capacités (rôle système triallimited en Interdire) et via
- * local_campus_extend_navigation()/local_campus_extend_settings_navigation().
+ * repose désormais sur la souscription Trial Native et le rôle cours trialstudent,
+ * avec local_campus_extend_navigation()/local_campus_extend_settings_navigation().
  *
  * @param object $tree          Instance de core_user\output\myprofile\tree (Moodle 5.x)
  * @param stdClass $user
@@ -420,22 +439,31 @@ function local_campus_resume_url(stdClass $course, int $userid): string {
 
 function local_campus_is_trial_user_byid(int $userid): bool {
     global $DB;
-    $sysctx = context_system::instance();
 
-    // Récupère l'id du rôle 'triallimited'
-    static $trialroleid = null;
-    if ($trialroleid === null) {
-        $trialroleid = (int)$DB->get_field('role', 'id', ['shortname' => 'triallimited'], IGNORE_MISSING);
-    }
-    if (!$trialroleid) {
+    if ($userid <= 0) {
         return false;
     }
 
-    // L'utilisateur a-t-il ce rôle AU CONTEXTE SYSTÈME ?
+    // 7.98D5: Trial identity is Native-only. The obsolete system role
+    // triallimited is intentionally ignored even if it still exists in Moodle.
+    if (class_exists('\local_subscriptions\trial_manager') &&
+            \local_subscriptions\trial_manager::user_has_active_trial($userid)) {
+        return true;
+    }
+
+    $trialstudentid = (int)$DB->get_field(
+        'role',
+        'id',
+        ['shortname' => 'trialstudent'],
+        IGNORE_MISSING
+    );
+    if ($trialstudentid <= 0) {
+        return false;
+    }
+
     return $DB->record_exists('role_assignments', [
-        'userid'    => $userid,
-        'contextid' => $sysctx->id,
-        'roleid'    => $trialroleid,
+        'userid' => $userid,
+        'roleid' => $trialstudentid,
     ]);
 }
 
@@ -466,7 +494,10 @@ function local_campus_trial_conversion_offer(
         }
     }
 
-    return null;
+    // 7.98D3: an expired member of the pre-closure Trial cohort can still
+    // have a valid conversion window without any remaining Trial course role.
+    // In that case, keep a generic Native Storefront conversion destination.
+    return $bridge->resolve_for_user($userid);
 }
 
 function local_campus_trial_conversion_url(
@@ -489,23 +520,6 @@ function local_campus_render_trial_discount_banner(?bool $showcta = null): void 
 
     require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
 
-    $trial = \local_subscriptions\trial_manager::user_has_active_trial((int)$USER->id);
-    if (!$trial) {
-        return;
-    }
-    if (!\local_subscriptions\trial_manager::user_has_trial_access_remaining(
-        (int)$USER->id
-    )) {
-        return;
-    }
-    if (!\local_subscriptions\trial_manager::is_discount_window_open((int)$USER->id)) {
-        return;
-    }
-
-    $discPct   = (int)(get_config('local_subscriptions','trial_discount_percent') ?? 15);
-    //$dt = new DateTime('2026-04-26 00:00:00', new DateTimeZone('Europe/Paris'));
-    //$deadline  = (int)$dt->getTimestamp();
-    $deadline  = (int)\local_subscriptions\trial_manager::discount_window_deadline((int)$USER->id);
     $courseid = isset($COURSE->id) && (int)$COURSE->id > 1
         ? (int)$COURSE->id
         : null;
@@ -513,10 +527,17 @@ function local_campus_render_trial_discount_banner(?bool $showcta = null): void 
         (int)$USER->id,
         $courseid
     );
-    $subscribe = $trialoffer !== null
-        ? $trialoffer->get_url()->out(false)
-        : (new moodle_url('/boutique'))->out(false);
-    $ctastring = $courseid !== null && $trialoffer !== null && $trialoffer->targets_product()
+    if ($trialoffer === null) {
+        return;
+    }
+
+    // 7.98D3: conversion eligibility is intentionally independent from free
+    // Trial access. Date A -> Date B may therefore keep this banner available
+    // after the individual Trial enrolment has expired.
+    $discPct = $trialoffer->get_discount_percent();
+    $deadline = $trialoffer->get_expires_at();
+    $subscribe = $trialoffer->get_url()->out(false);
+    $ctastring = $courseid !== null && $trialoffer->targets_product()
         ? 'trial_discount_banner_cta_current_course'
         : 'trial_discount_banner_cta';
 
@@ -695,7 +716,7 @@ function local_campus_inject_trial_ui(\moodle_page $PAGE): void {
         'trial_btn_continue','trial_btn_subscribe','trial_expired_msg',
         'trial_firstname','trial_lastname','trial_email',
         'trial_already_subscribed_html', 'trial_expired_html',
-        'trial_password_mismatch'
+        'trial_registration_closed_html', 'trial_password_mismatch'
     ], 'local_campus');
 
     // Pour le libellé "Login" utilisé côté JS
@@ -781,7 +802,10 @@ function local_campus_inject_trial_ui(\moodle_page $PAGE): void {
 </div>';
 
     // Charger le module AMD qui gère la popup
-    $PAGE->requires->js_call_amd('local_campus/trial_popup', 'init');
+    $PAGE->requires->js_call_amd('local_campus/trial_popup', 'init', [[
+        'registrationsOpen' => local_campus_trial_registrations_are_open(),
+        'subscribeUrl' => (new moodle_url('/boutique'))->out(false),
+    ]]);
 }
 
 

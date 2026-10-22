@@ -61,10 +61,9 @@ echo CrmBreadcrumbRenderer::render(
                 ),
 
             'url' =>
-                new moodle_url(
-                    subscription_config::
-                        admin_work_items_page()
-                ),
+                AdminSecurity::can(Capabilities::VIEW_WORK_ITEMS)
+                    ? new moodle_url(subscription_config::admin_work_items_page())
+                    : null,
         ],
         [
             'label' =>

@@ -60,6 +60,10 @@ final class CommerceCustomerAccessPromiseService {
             return $this->base('bundle');
         }
 
+        if ($producttype === 'donation') {
+            return $this->base('donation');
+        }
+
         if (in_array($producttype, ['digital', 'digital_download'], true)) {
             return $this->base($owned ? 'owned_digital' : 'immediate_digital');
         }

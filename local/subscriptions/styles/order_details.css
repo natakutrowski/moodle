@@ -180,6 +180,7 @@
 .commerce-order-panel__body p { margin:0 0 1rem; color:var(--order-muted); line-height:1.55; }
 .commerce-order-item-detail { border-radius:.75rem; }
 .commerce-order-item-detail--bundle { border-left:4px solid #d97706; }
+.commerce-order-item-detail--donation { border-left:4px solid #f61f82; }
 .commerce-order-item-detail__calculation { margin-top:.55rem; color:var(--order-muted); font-size:.86rem; }
 .commerce-order-item-detail__discount { margin-top:.35rem; color:#157347; font-size:.84rem; font-weight:700; }
 .commerce-order-item-detail__accesses .btn,
@@ -379,4 +380,25 @@
     align-items: center;
     justify-content: center;
     gap: .55rem;
+}
+
+/* 7.98C C6.3E.1 — customer refund and revoked-access clarity. */
+.commerce-order-status--refund {
+    border-color: #f3b7d2;
+    background: #fff1f7;
+}
+.commerce-order-status--refund strong {
+    color: #a8165c;
+}
+.commerce-order-payment-badge--refund {
+    background: #ffe4f0;
+    color: #a8165c;
+}
+.commerce-order-summary__refund {
+    color: #a8165c;
+    font-weight: 850 !important;
+}
+.commerce-order-access--revoked {
+    background: #fff1f7;
+    color: #a8165c;
 }

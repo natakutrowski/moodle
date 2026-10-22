@@ -1078,3 +1078,5 @@ $string['resultsnotready'] = 'Votre lecture n’a pas pu être évaluée. Veuill
 $string['streamingread'] = 'Étapes STT en temps réel';
 $string['streamingread_details'] = 'Avec Open STT, ce réglage détermine quelles étapes utilisent la transcription en temps réel. Pour ces étapes, la transcription est diffusée au fur et à mesure que l’étudiant parle, ce qui permet d’afficher les résultats immédiatement. Les autres étapes utilisent l’ancien système asynchrone, qui téléverse l’enregistrement puis le transcrit.';
 $string['timeremaining'] = 'Temps restant';
+
+$string['readaloud:managequestions'] = 'Gérer les questions de lecture à voix haute';

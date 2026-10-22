@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/../../../../../config.php');
 
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomAliasConfig;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockTypeRegistry;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomCmsRepository;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockEditorRegistry;
@@ -15,9 +16,9 @@ use local_subscriptions\commerce\showroom\cms\CommerceShowroomRenderTemplateRegi
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomSeoConfig;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomSocialImageService;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomProductLinkOptions;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomProductConfig;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomOfferConfig;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomStatus;
-use local_subscriptions\commerce\catalog\domain\CommerceProductType;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
@@ -87,31 +88,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
         }
         $settingsjson = CommerceShowroomSeoConfig::merge_into_settings_json($settingsjson, $seovalues);
+        $settingsjson = CommerceShowroomAliasConfig::merge_into_settings_json(
+            $settingsjson,
+            optional_param('shortalias', '', PARAM_ALPHANUMEXT)
+        );
     }
+    $productsjson = (string)($record->productsjson ?? '{}');
     if ($showroomsection === 'information') {
+        $submittedroles = optional_param_array('productrole', [], PARAM_RAW_TRIMMED);
+        $submittedskus = optional_param_array('productsku', [], PARAM_RAW_TRIMMED);
+        $products = [];
         $offerconfig = [];
-        foreach (CommerceShowroomOfferConfig::ROLES as $role) {
+
+        foreach ($submittedroles as $index => $rawrole) {
+            $role = CommerceShowroomProductConfig::normalise_role((string)$rawrole);
+            if ($role === null) {
+                throw new invalid_parameter_exception('Invalid Showroom product role.');
+            }
+            if (array_key_exists($role, $products)) {
+                throw new invalid_parameter_exception('Duplicate Showroom product role: ' . $role);
+            }
+
+            $sku = (string)($submittedskus[$index] ?? '');
+            $products[$role] = $productlinkoptions->normalise_role_sku($role, $sku);
             $offerconfig[$role] = [
                 'detailsenabled' => optional_param('offerdetails_' . $role, 0, PARAM_BOOL) === 1,
+                'donationmode' => CommerceShowroomOfferConfig::normalise_donation_mode(
+                    optional_param(
+                        'offerdonationmode_' . $role,
+                        CommerceShowroomOfferConfig::DONATION_MODE_OPTIONAL,
+                        PARAM_ALPHANUMEXT
+                    )
+                ),
             ];
         }
-        $settingsjson = CommerceShowroomOfferConfig::merge_into_settings_json($settingsjson, $offerconfig);
-    }
 
-    $productsjson = json_encode([
-        'course' => $productlinkoptions->normalise_sku(
-            optional_param('linkedcourse', '', PARAM_RAW_TRIMMED),
-            CommerceProductType::COURSE_ACCESS
-        ),
-        'pdf' => $productlinkoptions->normalise_sku(
-            optional_param('linkedpdf', '', PARAM_RAW_TRIMMED),
-            CommerceProductType::DIGITAL_DOWNLOAD
-        ),
-        'bundle' => $productlinkoptions->normalise_sku(
-            optional_param('linkedbundle', '', PARAM_RAW_TRIMMED),
-            CommerceProductType::BUNDLE
-        ),
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        $productsjson = CommerceShowroomProductConfig::to_json($products);
+        $settingsjson = CommerceShowroomOfferConfig::merge_into_settings_json(
+            $settingsjson,
+            $offerconfig
+        );
+    }
 
     $savedid = $repository->save([
         'id' => $id,
@@ -159,12 +176,27 @@ $defaults = $record ?: (object)[
 $currentseo = CommerceShowroomSeoConfig::from_settings_json(
     (string)$defaults->settingsjson
 );
+$currentshortalias = CommerceShowroomAliasConfig::from_settings_json((string)$defaults->settingsjson);
 $socialimageservice = new CommerceShowroomSocialImageService($context);
 $currentsocialimageurl = $id > 0 ? $socialimageservice->get_url($id) : null;
 
 $currentproducts = json_decode((string)$defaults->productsjson, true);
 $currentproducts = is_array($currentproducts) ? $currentproducts : [];
-$productoptions = $productlinkoptions->grouped_options($currentproducts);
+$currentproducts = array_filter(
+    $currentproducts,
+    static fn(mixed $sku, mixed $role): bool =>
+        CommerceShowroomProductConfig::normalise_role((string)$role) !== null
+        && (is_string($sku) || is_numeric($sku)),
+    ARRAY_FILTER_USE_BOTH
+);
+$productoptions = [];
+foreach ($currentproducts as $role => $sku) {
+    $productoptions[(string)$role] = $productlinkoptions->options_for_role(
+        (string)$role,
+        (string)$sku
+    );
+}
+$allproductoptions = $productlinkoptions->all_options();
 $currentofferconfig = CommerceShowroomOfferConfig::from_settings_json((string)$defaults->settingsjson);
 
 $blocks = $id > 0 ? $repository->blocks($id) : [];
@@ -196,7 +228,7 @@ if ($id > 0 && $showroomsection === 'builder') {
         'endpoint' => (new moodle_url('/local/subscriptions/admin/commerce/showrooms/ajax.php'))->out(false),
         'showroomid' => $id,
         'sesskey' => sesskey(),
-        'schemas' => CommerceShowroomBlockEditorRegistry::schemas(),
+        'schemas' => CommerceShowroomBlockEditorRegistry::schemas(array_keys($currentproducts)),
         'languages' => [
             ['code' => 'fr', 'label' => 'Français'],
             ['code' => 'en', 'label' => 'English'],
@@ -714,6 +746,88 @@ echo html_writer::end_div();
 echo html_writer::end_tag('section');
 
 echo html_writer::start_tag('section', [
+    'class' => 'commerce-showroom-seo-image-card',
+]);
+echo html_writer::start_div('commerce-showroom-seo-image-card__header');
+echo html_writer::div(
+    html_writer::tag('i', '', [
+        'class' => 'fa-solid fa-link',
+        'aria-hidden' => 'true',
+    ]),
+    'commerce-showroom-information-card__icon'
+);
+echo html_writer::div(
+    html_writer::tag(
+        'h4',
+        get_string('commerce_showroom_short_alias_title', 'local_subscriptions'),
+        ['class' => 'h6 mb-1']
+    )
+    . html_writer::tag(
+        'p',
+        get_string('commerce_showroom_short_alias_help', 'local_subscriptions'),
+        ['class' => 'text-muted mb-0']
+    )
+);
+echo html_writer::end_div();
+
+echo html_writer::start_div('commerce-showroom-seo-image-card__body');
+echo html_writer::start_div('commerce-showroom-seo-image-card__controls w-100');
+echo html_writer::tag(
+    'label',
+    get_string('commerce_showroom_short_alias_label', 'local_subscriptions'),
+    ['for' => 'shortalias', 'class' => 'form-label']
+);
+echo html_writer::start_div('input-group');
+echo html_writer::span('/', 'input-group-text');
+echo html_writer::empty_tag('input', [
+    'id' => 'shortalias',
+    'name' => 'shortalias',
+    'value' => $currentshortalias,
+    'class' => 'form-control',
+    'placeholder' => 'a1',
+]);
+if ($currentshortalias !== '' && (string)$defaults->status === CommerceShowroomStatus::PUBLISHED) {
+    echo html_writer::link(
+        (new moodle_url('/' . $currentshortalias))->out(false),
+        html_writer::tag('i', '', [
+            'class' => 'fa-solid fa-arrow-up-right-from-square',
+            'aria-hidden' => 'true',
+        ]),
+        [
+            'class' => 'btn btn-outline-secondary',
+            'target' => '_blank',
+            'rel' => 'noopener',
+            'title' => get_string('commerce_showroom_n932_open_public_page', 'local_subscriptions'),
+        ]
+    );
+}
+echo html_writer::end_div();
+echo html_writer::tag(
+    'div',
+    get_string('commerce_showroom_short_alias_redirect_help', 'local_subscriptions'),
+    ['class' => 'form-text']
+);
+
+$aliasdestinations = [];
+foreach ($seolanguages as $language => $languageconfig) {
+    $slugfield = 'slug' . $language;
+    $slugvalue = trim((string)$defaults->{$slugfield});
+    if ($slugvalue === '') {
+        continue;
+    }
+    $aliasdestinations[] = $languageconfig['flag'] . ' /' . ltrim($slugvalue, '/');
+}
+if ($aliasdestinations !== []) {
+    echo html_writer::div(
+        s(implode(' · ', $aliasdestinations)),
+        'small text-muted mt-2'
+    );
+}
+echo html_writer::end_div();
+echo html_writer::end_div();
+echo html_writer::end_tag('section');
+
+echo html_writer::start_tag('section', [
     'class' => 'commerce-showroom-seo-locales',
     'data-region' => 'showroom-seo-locales',
 ]);
@@ -1147,39 +1261,45 @@ JS);
 }
 
 if ($showroomsection === 'information') {
-$productfields = [
-    'linkedcourse' => [
-        'label' => get_string(
-            'commerce_showroom_config_product_course',
-            'local_subscriptions'
-        ),
-        'key' => 'course',
+$legacyproductlabels = [
+    'course' => [
+        'label' => get_string('commerce_showroom_config_product_course', 'local_subscriptions'),
         'icon' => 'fa-graduation-cap',
     ],
-    'linkedpdf' => [
-        'label' => get_string(
-            'commerce_showroom_config_product_pdf',
-            'local_subscriptions'
-        ),
-        'key' => 'pdf',
+    'course_fr' => [
+        'label' => 'Cours A1 + accompagnement français',
+        'icon' => 'fa-language',
+    ],
+    'course_ru' => [
+        'label' => 'Cours A1 + accompagnement russe',
+        'icon' => 'fa-language',
+    ],
+    'pdf' => [
+        'label' => get_string('commerce_showroom_config_product_pdf', 'local_subscriptions'),
         'icon' => 'fa-file-pdf',
     ],
-    'linkedbundle' => [
-        'label' => get_string(
-            'commerce_showroom_config_product_bundle',
-            'local_subscriptions'
-        ),
-        'key' => 'bundle',
+    'bundle' => [
+        'label' => get_string('commerce_showroom_config_product_bundle', 'local_subscriptions'),
         'icon' => 'fa-box-open',
     ],
 ];
 
+$rolelabel = static function(string $role) use ($legacyproductlabels): string {
+    if (isset($legacyproductlabels[$role])) {
+        return (string)$legacyproductlabels[$role]['label'];
+    }
+    return ucfirst(str_replace(['_', '-'], ' ', $role));
+};
+
+$roleicon = static function(string $role) use ($legacyproductlabels): string {
+    return (string)($legacyproductlabels[$role]['icon'] ?? 'fa-tag');
+};
+
 echo html_writer::start_tag('section', [
     'class' => 'commerce-showroom-information-card',
+    'data-region' => 'showroom-products',
 ]);
-echo html_writer::start_div(
-    'commerce-showroom-information-card__header'
-);
+echo html_writer::start_div('commerce-showroom-information-card__header');
 echo html_writer::div(
     html_writer::tag('i', '', [
         'class' => 'fa-solid fa-link',
@@ -1190,54 +1310,51 @@ echo html_writer::div(
 echo html_writer::div(
     html_writer::tag(
         'h3',
-        get_string(
-            'commerce_showroom_config_products',
-            'local_subscriptions'
-        ),
+        get_string('commerce_showroom_config_products', 'local_subscriptions'),
         ['class' => 'h5 mb-1']
     )
     . html_writer::tag(
         'p',
-        get_string(
-            'commerce_showroom_n931_products_help',
-            'local_subscriptions'
-        ),
+        get_string('commerce_showroom_n931_products_help', 'local_subscriptions'),
         ['class' => 'text-muted mb-0']
     )
 );
 echo html_writer::end_div();
 
 echo html_writer::start_div(
-    'commerce-showroom-information-products'
+    'commerce-showroom-information-products',
+    ['data-role' => 'product-list']
 );
 
-foreach ($productfields as $name => $definition) {
-    $key = $definition['key'];
-    $selected = (string)($currentproducts[$key] ?? '');
-    $selectedlabel = $selected !== ''
-        && isset($productoptions[$key][$selected])
-            ? (string)$productoptions[$key][$selected]
-            : get_string(
-                'commerce_showroom_config_product_none',
-                'local_subscriptions'
-            );
+foreach ($currentproducts as $role => $selected) {
+    $role = (string)$role;
+    $selected = (string)$selected;
+    $options = $productoptions[$role] ?? $productlinkoptions->options_for_role($role, $selected);
+    $selectedlabel = $selected !== '' && isset($options[$selected])
+        ? (string)$options[$selected]
+        : get_string('commerce_showroom_config_product_none', 'local_subscriptions');
+    $checkboxid = 'offerdetails_' . $role;
 
     echo html_writer::start_div(
-        'commerce-showroom-information-product'
+        'commerce-showroom-information-product',
+        ['data-product-role' => $role]
     );
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'productrole[]',
+        'value' => $role,
+    ]);
     echo html_writer::div(
         html_writer::tag('i', '', [
-            'class' => 'fa-solid ' . $definition['icon'],
+            'class' => 'fa-solid ' . $roleicon($role),
             'aria-hidden' => 'true',
         ]),
         'commerce-showroom-information-product__icon'
     );
 
-    echo html_writer::start_div(
-        'commerce-showroom-information-product__main'
-    );
+    echo html_writer::start_div('commerce-showroom-information-product__main');
     echo html_writer::span(
-        $definition['label'],
+        $rolelabel($role) . ' · ' . $role,
         'commerce-showroom-information-product__type'
     );
     echo html_writer::tag(
@@ -1245,33 +1362,41 @@ foreach ($productfields as $name => $definition) {
         s($selectedlabel),
         ['class' => 'commerce-showroom-information-product__name']
     );
-
-    echo html_writer::start_div(
-        'commerce-showroom-information-product__details'
-    );
+    echo html_writer::start_div('commerce-showroom-information-product__details');
     echo html_writer::start_div('form-check form-switch');
     echo html_writer::empty_tag('input', [
         'type' => 'checkbox',
         'class' => 'form-check-input',
-        'id' => 'offerdetails_' . $key,
-        'name' => 'offerdetails_' . $key,
+        'id' => $checkboxid,
+        'name' => 'offerdetails_' . $role,
         'value' => '1',
-        'checked' => !empty(
-            $currentofferconfig[$key]['detailsenabled']
-        ) ? 'checked' : null,
+        'checked' => !empty($currentofferconfig[$role]['detailsenabled']) ? 'checked' : null,
     ]);
     echo html_writer::tag(
         'label',
-        get_string(
-            'commerce_showroom_config_offer_details_enabled',
-            'local_subscriptions'
-        ),
-        [
-            'for' => 'offerdetails_' . $key,
-            'class' => 'form-check-label',
-        ]
+        get_string('commerce_showroom_config_offer_details_enabled', 'local_subscriptions'),
+        ['for' => $checkboxid, 'class' => 'form-check-label']
     );
     echo html_writer::end_div();
+    echo html_writer::div(
+        html_writer::tag(
+            'label',
+            get_string('commerce_showroom_config_offer_donation_mode', 'local_subscriptions'),
+            ['for' => 'offerdonationmode_' . $role, 'class' => 'form-label mb-1']
+        )
+        . html_writer::select(
+            [
+                CommerceShowroomOfferConfig::DONATION_MODE_NONE => get_string('commerce_showroom_config_offer_donation_none', 'local_subscriptions'),
+                CommerceShowroomOfferConfig::DONATION_MODE_OPTIONAL => get_string('commerce_showroom_config_offer_donation_optional', 'local_subscriptions'),
+                CommerceShowroomOfferConfig::DONATION_MODE_REQUIRED => get_string('commerce_showroom_config_offer_donation_required', 'local_subscriptions'),
+            ],
+            'offerdonationmode_' . $role,
+            (string)($currentofferconfig[$role]['donationmode'] ?? CommerceShowroomOfferConfig::DONATION_MODE_OPTIONAL),
+            false,
+            ['id' => 'offerdonationmode_' . $role, 'class' => 'form-select form-select-sm']
+        ),
+        'mt-2'
+    );
     echo html_writer::end_div();
     echo html_writer::end_div();
 
@@ -1281,36 +1406,153 @@ foreach ($productfields as $name => $definition) {
     echo html_writer::tag(
         'summary',
         '<i class="fa-solid fa-pen" aria-hidden="true"></i> '
-            . get_string(
-                'commerce_showroom_n931_change_product',
-                'local_subscriptions'
-            ),
+            . get_string('commerce_showroom_n931_change_product', 'local_subscriptions'),
         ['class' => 'btn btn-sm btn-outline-secondary']
     );
     echo html_writer::div(
         html_writer::select(
-            $productoptions[$key],
-            $name,
+            $options,
+            'productsku[]',
             $selected,
-            [
-                '' => get_string(
-                    'commerce_showroom_config_product_none',
-                    'local_subscriptions'
-                ),
-            ],
-            [
-                'id' => $name,
-                'class' => 'form-select',
-            ]
+            ['' => get_string('commerce_showroom_config_product_none', 'local_subscriptions')],
+            ['class' => 'form-select']
         ),
         'commerce-showroom-information-product__selector'
     );
     echo html_writer::end_tag('details');
-
     echo html_writer::end_div();
 }
+
 echo html_writer::end_div();
+
+echo html_writer::tag(
+    'button',
+    '<i class="fa-solid fa-plus" aria-hidden="true"></i> ' . get_string(
+        'commerce_showroom_config_product_add_role',
+        'local_subscriptions'
+    ),
+    [
+        'type' => 'button',
+        'class' => 'btn btn-sm btn-outline-primary mt-3',
+        'data-action' => 'add-product-role',
+    ]
+);
+
+$newselect = html_writer::select(
+    $allproductoptions,
+    'productsku[]',
+    '',
+    ['' => get_string('commerce_showroom_config_product_none', 'local_subscriptions')],
+    ['class' => 'form-select', 'data-role' => 'product-sku']
+);
+$template = html_writer::start_div(
+    'commerce-showroom-information-product',
+    ['data-role' => 'product-row']
+);
+$template .= html_writer::div(
+    html_writer::tag('i', '', ['class' => 'fa-solid fa-tag', 'aria-hidden' => 'true']),
+    'commerce-showroom-information-product__icon'
+);
+$template .= html_writer::start_div('commerce-showroom-information-product__main');
+$template .= html_writer::tag(
+    'label',
+    get_string('commerce_showroom_config_product_role', 'local_subscriptions'),
+    ['class' => 'commerce-showroom-information-product__type form-label']
+);
+$template .= html_writer::empty_tag('input', [
+    'type' => 'text',
+    'name' => 'productrole[]',
+    'class' => 'form-control font-monospace',
+    'placeholder' => get_string(
+        'commerce_showroom_config_product_role_placeholder',
+        'local_subscriptions'
+    ),
+    'pattern' => '[a-z][a-z0-9_-]{0,63}',
+    'required' => true,
+    'data-role' => 'product-role',
+]);
+$template .= html_writer::div($newselect, 'mt-2');
+$template .= html_writer::start_div('form-check form-switch mt-2');
+$template .= html_writer::empty_tag('input', [
+    'type' => 'checkbox',
+    'class' => 'form-check-input',
+    'value' => '1',
+    'data-role' => 'offer-details',
+]);
+$template .= html_writer::tag(
+    'label',
+    get_string('commerce_showroom_config_offer_details_enabled', 'local_subscriptions'),
+    ['class' => 'form-check-label', 'data-role' => 'offer-details-label']
+);
+$template .= html_writer::end_div();
+$template .= html_writer::div(
+    html_writer::tag(
+        'label',
+        get_string('commerce_showroom_config_offer_donation_mode', 'local_subscriptions'),
+        ['class' => 'form-label mb-1', 'data-role' => 'offer-donation-mode-label']
+    )
+    . html_writer::select(
+        [
+            CommerceShowroomOfferConfig::DONATION_MODE_NONE => get_string('commerce_showroom_config_offer_donation_none', 'local_subscriptions'),
+            CommerceShowroomOfferConfig::DONATION_MODE_OPTIONAL => get_string('commerce_showroom_config_offer_donation_optional', 'local_subscriptions'),
+            CommerceShowroomOfferConfig::DONATION_MODE_REQUIRED => get_string('commerce_showroom_config_offer_donation_required', 'local_subscriptions'),
+        ],
+        '',
+        CommerceShowroomOfferConfig::DONATION_MODE_OPTIONAL,
+        false,
+        ['class' => 'form-select form-select-sm', 'data-role' => 'offer-donation-mode']
+    ),
+    'mt-2'
+);
+$template .= html_writer::end_div();
+$template .= html_writer::end_div();
+
+echo html_writer::tag('template', $template, ['data-role' => 'product-template']);
 echo html_writer::end_tag('section');
+
+$PAGE->requires->js_init_code(<<<'JS'
+(function() {
+    var root = document.querySelector('[data-region="showroom-products"]');
+    if (!root) {
+        return;
+    }
+    var list = root.querySelector('[data-role="product-list"]');
+    var template = root.querySelector('[data-role="product-template"]');
+    var add = root.querySelector('[data-action="add-product-role"]');
+    if (!list || !template || !add) {
+        return;
+    }
+
+    var sequence = 0;
+    add.addEventListener('click', function() {
+        sequence += 1;
+        var fragment = template.content.cloneNode(true);
+        var row = fragment.querySelector('[data-role="product-row"]');
+        var role = fragment.querySelector('[data-role="product-role"]');
+        var details = fragment.querySelector('[data-role="offer-details"]');
+        var label = fragment.querySelector('[data-role="offer-details-label"]');
+        var donationMode = fragment.querySelector('[data-role="offer-donation-mode"]');
+        var donationModeLabel = fragment.querySelector('[data-role="offer-donation-mode-label"]');
+
+        function syncRole() {
+            var value = String(role.value || '').trim().toLowerCase();
+            var valid = /^[a-z][a-z0-9_-]{0,63}$/.test(value);
+            var suffix = valid ? value : ('new_' + sequence);
+            details.name = 'offerdetails_' + suffix;
+            details.id = 'offerdetails_' + suffix;
+            label.htmlFor = details.id;
+            donationMode.name = 'offerdonationmode_' + suffix;
+            donationMode.id = 'offerdonationmode_' + suffix;
+            donationModeLabel.htmlFor = donationMode.id;
+        }
+
+        role.addEventListener('input', syncRole);
+        syncRole();
+        list.append(fragment);
+        role.focus();
+    });
+})();
+JS);
 
 echo html_writer::start_tag('details', [
     'class' => 'commerce-showroom-information-advanced',
@@ -1380,9 +1622,6 @@ if ($showroomsection === 'seo') {
     foreach (['showroomkey', 'name', 'template', 'productsjson', 'settingsjson'] as $field) {
         $value = $field === 'productsjson' ? (string)$defaults->productsjson : (string)($defaults->{$field} ?? '');
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $field, 'value' => $value]);
-    }
-    foreach (['linkedcourse' => 'course', 'linkedpdf' => 'pdf', 'linkedbundle' => 'bundle'] as $field => $key) {
-        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $field, 'value' => (string)($currentproducts[$key] ?? '')]);
     }
 }
 
@@ -1911,6 +2150,26 @@ if ($id > 0 && $showroomsection === 'builder') {
                     ),
                 ],
             ],
+            'sectiontextcolor' => [
+                'label' => get_string(
+                    'commerce_showroom_n95_textcolor',
+                    'local_subscriptions'
+                ),
+                'values' => [
+                    'auto' => get_string(
+                        'commerce_showroom_n95_textcolor_auto',
+                        'local_subscriptions'
+                    ),
+                    'brand' => get_string(
+                        'commerce_showroom_n95_textcolor_brand',
+                        'local_subscriptions'
+                    ),
+                    'white' => get_string(
+                        'commerce_showroom_n95_textcolor_white',
+                        'local_subscriptions'
+                    ),
+                ],
+            ],
             'sectionbackground' => [
                 'label' => get_string(
                     'commerce_showroom_n95_background',
@@ -1939,6 +2198,10 @@ if ($id > 0 && $showroomsection === 'builder') {
                     ),
                     'dark' => get_string(
                         'commerce_showroom_n95_background_dark',
+                        'local_subscriptions'
+                    ),
+                    'dark2' => get_string(
+                        'commerce_showroom_n95_background_dark2',
                         'local_subscriptions'
                     ),
                     'gradient' => get_string(

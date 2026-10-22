@@ -38,6 +38,7 @@ final class CommerceMailPurchasePresentation {
         private readonly bool $hasotherdiscount,
         private readonly string $otherdiscountformatted,
         private readonly string $totalformatted,
+        private readonly string $donationformatted,
         private readonly array $items,
         private readonly array $payment,
         private readonly array $links
@@ -71,6 +72,7 @@ final class CommerceMailPurchasePresentation {
             !empty($purchase['hasotherdiscount']),
             self::first_string($purchase, ['otherdiscountformatted']),
             self::first_string($purchase, ['totalformatted', 'total']),
+            self::first_string($purchase, ['donationformatted']),
             $items,
             self::normalise_payment($payment),
             self::normalise_links($links, $purchase)
@@ -81,6 +83,37 @@ final class CommerceMailPurchasePresentation {
      * @return array<string,mixed>
      */
     public function export(): array {
+        $hasdonation = false;
+        $hasonlydonations = $this->items !== [];
+        $hascourse = false;
+        $hasalfdonation = false;
+        $fallbackdonationformatted = '';
+
+        foreach ($this->items as $item) {
+            $isdonation = !empty($item['isdonation']);
+            if ($isdonation) {
+                $hasdonation = true;
+                $sku = strtoupper(trim((string)($item['productsku'] ?? '')));
+                if ($sku === 'DONATION.ALF' || str_starts_with($sku, 'DONATION.ALF.')) {
+                    $hasalfdonation = true;
+                }
+                if ($fallbackdonationformatted === '') {
+                    $fallbackdonationformatted = trim((string)($item['totalformatted'] ?? ''));
+                }
+            } else {
+                $hasonlydonations = false;
+            }
+
+            if (!empty($item['iscourse'])) {
+                $hascourse = true;
+            }
+        }
+
+        $donationformatted = $this->donationformatted !== ''
+            ? $this->donationformatted
+            : $fallbackdonationformatted;
+        $hascourseanddonation = $hascourse && $hasdonation;
+
         return [
             'customername' => $this->customername,
             'hascustomername' => $this->customername !== '',
@@ -108,6 +141,14 @@ final class CommerceMailPurchasePresentation {
             'hastotal' => $this->totalformatted !== '',
             'items' => $this->items,
             'hasitems' => $this->items !== [],
+            'hasdonation' => $hasdonation,
+            'hasonlydonations' => $hasonlydonations,
+            'hascourseanddonation' => $hascourseanddonation,
+            'hasalfdonation' => $hasalfdonation,
+            'hasalfdonationonly' => $hasalfdonation && $hasonlydonations,
+            'hasalfcourseanddonation' => $hasalfdonation && $hascourseanddonation,
+            'donationformatted' => $donationformatted,
+            'hasdonationformatted' => $donationformatted !== '',
             'payment' => $this->payment,
             'haspayment' => !empty($this->payment['hasdetails']),
             'links' => $this->links,
@@ -131,7 +172,7 @@ final class CommerceMailPurchasePresentation {
             }
 
             $type = strtolower(trim((string)($item['type'] ?? $item['producttype'] ?? 'product')));
-            if (!in_array($type, ['course', 'digital', 'bundle', 'service', 'product'], true)) {
+            if (!in_array($type, ['course', 'digital', 'bundle', 'service', 'donation', 'product'], true)) {
                 $type = 'product';
             }
 
@@ -164,6 +205,7 @@ final class CommerceMailPurchasePresentation {
                 'isdigital' => $type === 'digital',
                 'isbundle' => $type === 'bundle',
                 'isservice' => $type === 'service',
+                'isdonation' => $type === 'donation',
                 'title' => $title,
                 'productsku' => trim((string)($item['productsku'] ?? '')),
                 'coverurl' => self::safe_url($item['coverurl'] ?? ''),

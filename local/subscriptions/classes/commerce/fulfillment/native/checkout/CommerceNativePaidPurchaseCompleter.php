@@ -100,13 +100,6 @@ final class CommerceNativePaidPurchaseCompleter {
             (string)$purchase->reference
         );
 
-        if ((string)$purchase->status === CommercePurchaseStatus::FULFILLED) {
-            $transactionalmail->deliver_fulfilled_access(
-                (string)$purchase->reference
-            );
-            return;
-        }
-
         $items = array_values($this->db->get_records(
             CommercePersistenceSchema::TABLE_ITEM,
             ['purchaseid' => (int)$purchase->id],
@@ -119,15 +112,34 @@ final class CommerceNativePaidPurchaseCompleter {
             );
         }
 
+        $grantexpectations = new CommerceNativeGrantExpectationPolicy($this->db);
+
+        if ((string)$purchase->status === CommercePurchaseStatus::FULFILLED) {
+            if (!$grantexpectations->allows_empty_grant_plan($items)) {
+                $transactionalmail->deliver_fulfilled_access(
+                    (string)$purchase->reference
+                );
+            }
+            return;
+        }
+
         $grantplan = (new CommerceNativePurchaseGrantPlanner($this->db))->plan(
             $purchase,
             $items
         );
         $grants = $grantplan->get_grants();
         if ($grants === []) {
-            throw new \RuntimeException(
-                'The paid Native Commerce purchase produced no entitlement grants.'
+            if (!$grantexpectations->allows_empty_grant_plan($items)) {
+                throw new \RuntimeException(
+                    'The paid Native Commerce purchase produced no entitlement grants.'
+                );
+            }
+
+            $this->update_purchase_status(
+                (int)$purchase->id,
+                CommercePurchaseStatus::FULFILLED
             );
+            return;
         }
 
         // M3.6: snapshot Moodle course access before Native fulfillment mutates

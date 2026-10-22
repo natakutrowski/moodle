@@ -105,15 +105,9 @@ try {
 
     $email = core_text::strtolower($email);
     $now   = time();
-    $days  = (int)get_config('local_campus','trialdays'); // -1=jamais, 0=immédiat, >0 = jours
-    if ($days < 0) { $days = 7; } // fallback
-    if ($days == 0) { 
-        $expires = $now + (100 * 365.25 * DAYSECS);
-    } else {
-        $expires = $now + ($days * DAYSECS);
-    }
 
     $trial = $DB->get_record('local_campus_trial', ['email'=>$email]);
+    $registrationsopen = local_campus_trial_registrations_are_open($now);
 
 
     // --- Si l'email a déjà une souscription ACTIVE non-essai -> proposer la connexion ---
@@ -159,6 +153,25 @@ try {
        1) ESSAI ACTIF (RECONNEXION)
        =========================== */
     if ($trial && (int)$trial->expiresat >= $now) {
+        // Après Date A, ce endpoint ne sert plus de formulaire de reconnexion.
+        // Un Trial existant continue via le login Moodle normal; seule une
+        // session déjà authentifiée sur le bon compte peut atteindre la voie
+        // de réparation Legacy ci-dessous.
+        if (!$registrationsopen &&
+                (!isloggedin() || isguestuser() ||
+                    empty($trial->userid) || (int)$trial->userid !== (int)$USER->id)) {
+            $loginurl = (new moodle_url('/login/index.php', [
+                'returnurl' => (new moodle_url('/local/campus/mycourses.php'))->out(false),
+            ]))->out(false);
+            echo json_encode([
+                'status' => 'registration_closed',
+                'message' => get_string('trial_registration_closed_msg', 'local_campus'),
+                'subscribe' => (new moodle_url('/boutique'))->out(false),
+                'login' => $loginurl,
+            ]);
+            exit;
+        }
+
         $realemail = $email;
 
         // 1) On essaie d'abord de retrouver l'utilisateur lié au trial,
@@ -206,13 +219,25 @@ try {
 
         // 2) Garantir l'essai via trial_manager (idempotent)
         require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
-        if (!\local_subscriptions\trial_manager::user_has_active_trial((int)$user->id)) {
-            \local_subscriptions\trial_manager::start_trial((int)$user->id);
+        $nativetrial = \local_subscriptions\trial_manager::user_has_active_trial((int)$user->id);
+        if (!$nativetrial) {
+            \local_subscriptions\trial_manager::start_trial((int)$user->id, true);
+            $nativetrial = \local_subscriptions\trial_manager::user_has_active_trial((int)$user->id);
         }
 
-        // 3) Mettre à jour la ligne local_campus_trial pour lier au bon user
+        // 3) Synchroniser le miroir Campus depuis la souscription Native.
+        // 7.98D5: local_subscriptions est l'unique autorité de durée.
+        $trialchanged = false;
         if ((int)$trial->userid !== (int)$user->id) {
-            $DB->set_field('local_campus_trial', 'userid', $user->id, ['id' => $trial->id]);
+            $trial->userid = (int)$user->id;
+            $trialchanged = true;
+        }
+        if ($nativetrial && (int)$trial->expiresat !== (int)$nativetrial->end_date) {
+            $trial->expiresat = (int)$nativetrial->end_date;
+            $trialchanged = true;
+        }
+        if ($trialchanged) {
+            $DB->update_record('local_campus_trial', $trial);
         }
 
         // 4) Login + cookie + redirect vers Mes cours d'essai
@@ -245,6 +270,19 @@ try {
     /* ============================
        3) PREMIÈRE FOIS (AUCUNE LIGNE TRIAL)
        ============================ */
+    if (!$registrationsopen) {
+        $loginurl = (new moodle_url('/login/index.php', [
+            'returnurl' => (new moodle_url('/local/campus/mycourses.php'))->out(false),
+        ]))->out(false);
+        echo json_encode([
+            'status' => 'registration_closed',
+            'message' => get_string('trial_registration_closed_msg', 'local_campus'),
+            'subscribe' => (new moodle_url('/boutique'))->out(false),
+            'login' => $loginurl,
+        ]);
+        exit;
+    }
+
     $realemail = $email;
 
     // a) Crée (ou convertit) un user manual sur l'email réel
@@ -285,9 +323,17 @@ try {
         );
     }
 
-    // b) Démarre l'essai via trial_manager (inscriptions auto)
+    // b) Démarre l'essai via trial_manager (inscriptions auto).
+    // La souscription Native fournit aussi l'échéance exacte au miroir Campus.
     require_once($CFG->dirroot.'/local/subscriptions/classes/trial_manager.php');
-    \local_subscriptions\trial_manager::start_trial((int)$user->id);
+    $trialsubid = \local_subscriptions\trial_manager::start_trial((int)$user->id);
+    $trialsub = $trialsubid
+        ? $DB->get_record('user_subscription', ['id' => $trialsubid], 'id,end_date', MUST_EXIST)
+        : \local_subscriptions\trial_manager::user_has_active_trial((int)$user->id);
+    if (!$trialsub) {
+        throw new \moodle_exception('missing_trial_plan', 'local_subscriptions');
+    }
+    $expires = (int)$trialsub->end_date;
 
     // c) Insère (ou met à jour) la ligne d’essai locale + cookie (UX)
     $trialid = 0;

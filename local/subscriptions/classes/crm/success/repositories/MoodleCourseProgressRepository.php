@@ -145,11 +145,13 @@ final class MoodleCourseProgressRepository {
                 $insql,
                 $inparams
             ): array {
+                // The first SELECT field must be unique for Moodle get_records_sql().
+                // Every completion is keyed by its own ID, then we keep the latest per course.
                 $sql = "
-                    SELECT
-                        cm.course AS courseid,
-                        cm.id AS coursemoduleid,
-                        cmc.timemodified
+                    SELECT cmc.id AS completionid,
+                           cm.course AS courseid,
+                           cm.id AS coursemoduleid,
+                           cmc.timemodified
                       FROM {course_modules_completion} cmc
                       JOIN {course_modules} cm
                         ON cm.id = cmc.coursemoduleid
@@ -175,11 +177,8 @@ final class MoodleCourseProgressRepository {
                     $courseid = (int)$row->courseid;
                     if (!isset($result[$courseid])) {
                         $result[$courseid] = (object)[
-                            'coursemoduleid' =>
-                                (int)$row->coursemoduleid,
-
-                            'timemodified' =>
-                                (int)$row->timemodified,
+                            'coursemoduleid' => (int)$row->coursemoduleid,
+                            'timemodified' => (int)$row->timemodified,
                         ];
                     }
                 }

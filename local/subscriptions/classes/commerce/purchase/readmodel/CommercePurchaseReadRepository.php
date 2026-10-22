@@ -651,6 +651,7 @@ final class CommercePurchaseReadRepository {
                     'label' => (string)$item->label,
                     'reference' => (string)$item->itemreference,
                     'sku' => (string)($metadata['catalogue_sku'] ?? $item->itemreference),
+                    'catalogue_type' => strtolower(trim((string)($metadata['catalogue_type'] ?? ''))),
                 ];
             }, $items),
             (new CommercePublicOrderReference())->from_internal(
@@ -865,6 +866,27 @@ final class CommercePurchaseReadRepository {
         $persistedtype = strtolower(trim($persistedtype));
         if ($persistedtype !== 'checkout') {
             return $persistedtype;
+        }
+
+        // Native checkout persists a low-level item family (for example Donation
+        // uses `service`) while the immutable catalogue type is kept in metadata.
+        // Prefer that business type when every item agrees, then fall back to the
+        // historical low-level item type for old purchases without this metadata.
+        $cataloguetypes = [];
+        foreach ($items as $item) {
+            $metadata = $this->decode_json((string)($item->metadatajson ?? ''));
+            $cataloguetype = strtolower(trim((string)($metadata['catalogue_type'] ?? '')));
+            if ($cataloguetype !== '') {
+                $cataloguetypes[] = $cataloguetype;
+            }
+        }
+        $cataloguetypecount = count($cataloguetypes);
+        $cataloguetypes = array_values(array_unique($cataloguetypes));
+        if ($cataloguetypecount === count($items) && count($cataloguetypes) === 1 && $items !== []) {
+            return $cataloguetypes[0];
+        }
+        if ($cataloguetypecount === count($items) && count($cataloguetypes) > 1) {
+            return 'bundle';
         }
 
         $itemtypes = array_values(array_unique(array_filter(array_map(

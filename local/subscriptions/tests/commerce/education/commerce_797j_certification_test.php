@@ -482,10 +482,12 @@ final class commerce_797j_certification_test extends advanced_testcase {
         }
 
         $version = file_get_contents($root . '/version.php');
-        self::assertMatchesRegularExpression(
-            '/\\$plugin->version\\s*=\\s*2026091902\\s*;/',
-            $version
+        // 7.97J established the minimum version, not a perpetual exact value.
+        self::assertSame(
+            1,
+            preg_match('/\$plugin->version\s*=\s*(\d+)\s*;/', $version, $matches)
         );
+        self::assertGreaterThanOrEqual(2026091902, (int)$matches[1]);
 
         $promotiondomain = file_get_contents(
             $root . '/classes/commerce/education/promotion/CommercePedagogicalPromotion.php'

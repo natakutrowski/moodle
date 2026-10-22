@@ -342,7 +342,7 @@ final class User360SupportOverviewRenderer {
                     . $latestactivity,
                     'crm-user360-n114b-progress-copy'
                 ),
-                'crm-user360-n114b-progress'
+                'crm-user360-n114b-progress flex-grow-1'
             );
 
             $accessend = (int)($course->accessend ?? 0);
@@ -374,7 +374,7 @@ final class User360SupportOverviewRenderer {
                     s($accesslabel),
                     'crm-user360-n116c-access-label ' . $accessclass
                 ),
-                'crm-user360-n114b-course-access'
+                'crm-user360-n114b-course-access flex-shrink-0'
             );
 
             $body .= html_writer::div(
@@ -392,17 +392,28 @@ final class User360SupportOverviewRenderer {
                                 '/course/view.php',
                                 ['id' => (int)$course->courseid]
                             ),
-                            s((string)($course->fullname ?: $course->shortname)),
-                            ['class' => 'crm-user360-n114b-course-title']
+                            format_string((string)($course->fullname ?: $course->shortname), true,
+                                ['context' => \context_course::instance((int)$course->courseid)]),
+                            [
+                                'class' => 'crm-user360-n114b-course-title text-break',
+                                // Prevent an old cached nowrap declaration from truncating long course names.
+                                'style' => 'white-space: normal; overflow: visible; overflow-wrap: anywhere;',
+                            ]
                         ),
-                        'crm-user360-n114b-course-name'
+                        'crm-user360-n114b-course-name flex-grow-1 text-break'
                     ),
-                    'crm-user360-n114b-course-identity'
+                    'crm-user360-n114b-course-identity w-100'
                 )
-                . $progress
-                . $access,
-                'crm-user360-n114b-course-row'
-                    . ($isexpired ? ' is-expired' : '')
+                . html_writer::div(
+                    $progress . $access,
+                    'crm-cr5-course-details d-flex flex-wrap align-items-start w-100',
+                    // Inline layout avoids dependence on a newly compiled 7.98 stylesheet.
+                    ['style' => 'display:flex; flex-wrap:wrap; align-items:flex-start; gap:.55rem .8rem; width:100%; min-width:0; padding-left:2.1rem;']
+                ),
+                // Bootstrap's d-flex is !important and overrides the pre-CR grid rule.
+                'crm-user360-n114b-course-row crm-cr5-ux5-course-row d-flex flex-column align-items-stretch'
+                    . ($isexpired ? ' is-expired' : ''),
+                ['style' => 'display:flex; flex-direction:column; align-items:stretch; gap:.4rem; min-width:0;']
             );
         }
 
@@ -893,6 +904,20 @@ final class User360SupportOverviewRenderer {
             }
         }
 
+        // CR.5 UX5: the visible quick-action card is rendered here, not by UserProfileRenderer.
+        // Include a read-only path for self/site-admin targets; mutations stay forbidden there.
+        $systemcontext = \context_system::instance();
+        if (empty($profile->iscommerceguest) && !empty($user->id)
+                && has_capability(Capabilities::MANAGE_CRM_ROLES, $systemcontext)
+                && has_capability('moodle/role:assign', $systemcontext)) {
+            $items[] = self::action_tile(
+                new \moodle_url('/local/subscriptions/admin/users/crm_roles.php',
+                    ['id' => (int)$user->id]),
+                'fa fa-shield',
+                get_string('crm_roles_title', 'local_subscriptions')
+            );
+        }
+
         if (empty($profile->iscommerceguest) && !empty($user->id)) {
             $items[] = self::action_tile(
                 new \moodle_url('/user/profile.php', ['id' => (int)$user->id]),
@@ -1352,9 +1377,9 @@ final class User360SupportOverviewRenderer {
     private static function purchase_status_class(string $status): string {
         $status = strtolower(trim($status));
         return match ($status) {
-            'paid', 'completed', 'delivered', 'fulfilled' => 'is-success',
-            'failed', 'cancelled', 'canceled' => 'is-danger',
-            'pending' => 'is-warning',
+            'paid', 'payment_succeeded', 'succeeded', 'completed', 'delivered', 'fulfilled' => 'is-success',
+            'failed', 'payment_failed', 'cancelled', 'canceled', 'refunded' => 'is-danger',
+            'pending', 'payment_pending', 'awaiting_payment', 'processing' => 'is-warning',
             default => 'is-neutral',
         };
     }
@@ -1362,11 +1387,12 @@ final class User360SupportOverviewRenderer {
     private static function purchase_status(string $status): string {
         $status = strtolower(trim($status));
         return match ($status) {
-            'paid', 'completed', 'delivered', 'fulfilled' =>
+            'paid', 'payment_succeeded', 'succeeded', 'completed', 'delivered', 'fulfilled' =>
                 get_string('crm_user360_n114_status_paid', 'local_subscriptions'),
-            'failed', 'cancelled', 'canceled' =>
+            'failed', 'payment_failed', 'cancelled', 'canceled' =>
                 get_string('crm_user360_n114_status_failed', 'local_subscriptions'),
-            'pending' =>
+            'refunded' => get_string('crm_cr5_status_refunded', 'local_subscriptions'),
+            'pending', 'payment_pending', 'awaiting_payment', 'processing' =>
                 get_string('crm_user360_n114_status_pending', 'local_subscriptions'),
             default => $status !== '' ? $status : '—',
         };

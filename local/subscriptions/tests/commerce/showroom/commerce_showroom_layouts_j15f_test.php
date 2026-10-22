@@ -9,7 +9,7 @@ final class commerce_showroom_layouts_j15f_test extends \advanced_testcase {
     public function test_layout_controls_are_shared_and_rendered(): void {
         $registry = file_get_contents(__DIR__ . '/../../../classes/commerce/showroom/cms/CommerceShowroomBlockEditorRegistry.php');
         $presenter = file_get_contents(__DIR__ . '/../../../classes/commerce/showroom/cms/CommerceShowroomBlockConfigurationPresenter.php');
-        $template = file_get_contents(__DIR__ . '/../../../templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents(__DIR__ . '/../../../templates/showroom/default.mustache');
         self::assertStringContainsString("'sectionwidth'", $registry);
         self::assertStringContainsString("'sectionbackground'", $registry);
         self::assertStringContainsString('apply_layout', $presenter);

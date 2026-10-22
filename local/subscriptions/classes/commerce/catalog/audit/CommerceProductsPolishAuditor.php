@@ -34,7 +34,7 @@ final class CommerceProductsPolishAuditor {
     }
 
     private function check_types(array &$errors): bool {
-        foreach (['course_access', 'digital_download', 'bundle', 'service'] as $type) {
+        foreach (['course_access', 'digital_download', 'bundle', 'service', 'donation'] as $type) {
             if (CommerceProductPresentation::type_label($type) === $type) {
                 $errors[] = 'Technical product type exposed: ' . $type;
             }

@@ -10,7 +10,7 @@ final class commerce_showroom_hero_j16n3_test extends \advanced_testcase {
     public function test_hero_polish_removes_auxiliary_copy_and_keeps_final_heading_contract(): void {
         global $CFG;
         $root = $CFG->dirroot . '/local/subscriptions/';
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
         $defaults = file_get_contents(
             $root . 'classes/commerce/showroom/cms/CommerceShowroomBlockDefaultsCatalog.php'
         );

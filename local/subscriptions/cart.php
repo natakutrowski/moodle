@@ -8,6 +8,7 @@ use local_subscriptions\commerce\cart\presentation\CommerceCartPresenter;
 use local_subscriptions\commerce\cart\presentation\CommerceCartSeatReservationPresenter;
 use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCartCustomerResolver;
+use local_subscriptions\commerce\checkout\flow\CommerceDirectPurchaseResumePresenter;
 use local_subscriptions\commerce\showroom\CommerceShowroomCurrencyResolver;
 use local_subscriptions\commerce\currency\selection\CommerceCurrencySurfaceSelectionService;
 use local_subscriptions\commerce\currency\selection\CommerceCurrencyJourneyStateResolver;
@@ -140,6 +141,8 @@ $data = CommerceCartSeatReservationPresenter::create($DB)->decorate(
     $snapshot->get_cart()->get_uuid(),
     time()
 );
+
+$data = array_replace($data, CommerceDirectPurchaseResumePresenter::present());
 
 $pageurl->param('currency', $currency);
 $PAGE->set_url($pageurl);

@@ -1,4 +1,4 @@
-<article class="commerce-showroom-offer commerce-showroom-offer--{{role}} {{#isfeatured}}is-featured{{/isfeatured}} {{#ispreferred}}is-preferred{{/ispreferred}} {{#owned}}is-owned{{/owned}} {{#bundleblocked}}is-bundle-blocked{{/bundleblocked}}" data-showroom-offer="{{role}}" data-showroom-offer-sku="{{sku}}" tabindex="0">
+<article class="commerce-showroom-offer commerce-showroom-offer--{{role}} {{#isfeatured}}is-featured{{/isfeatured}} {{#ispreferred}}is-preferred{{/ispreferred}} {{#owned}}is-owned{{/owned}} {{#bundleblocked}}is-bundle-blocked{{/bundleblocked}}" data-showroom-offer="{{role}}" data-showroom-offer-sku="{{sku}}" data-showroom-base-amount-minor="{{amountminor}}" tabindex="0">
     {{#isfeatured}}<span class="commerce-showroom-offer__featured">{{featuredlabel}}</span>{{/isfeatured}}
     {{#owned}}<span class="commerce-showroom-offer__owned-badge"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>{{ownedcompactlabel}}</span>{{/owned}}
     <div class="commerce-showroom-offer__visual" data-showroom-product-visual>
@@ -10,8 +10,46 @@
         <p class="commerce-showroom-offer__role">{{rolelabel}}</p>
         <h3 class="commerce-showroom-offer__title" data-showroom-fit-lines="1" data-showroom-fit-min="14">{{name}}</h3>
         {{#hassubtitle}}<p class="commerce-showroom-offer__subtitle" data-showroom-fit-lines="2" data-showroom-fit-min="13">{{subtitle}}</p>{{/hassubtitle}}
-        {{#hasdescription}}<div class="commerce-showroom-offer__description" data-showroom-fit-lines="2" data-showroom-fit-min="12.5">{{{shortdescription}}}</div>{{/hasdescription}}
-        {{#hasfeatures}}<ul class="commerce-showroom-offer__features">{{#features}}<li><i class="fa-solid fa-circle-check" aria-hidden="true"></i>{{text}}</li>{{/features}}</ul>{{/hasfeatures}}
+        {{#hasdescription}}<div class="commerce-showroom-offer__description" {{^isalfSupportOffer}}data-showroom-fit-lines="2" data-showroom-fit-min="12.5"{{/isalfSupportOffer}}>{{{shortdescription}}}</div>{{/hasdescription}}
+        {{#hasfeatures}}{{^suppressfeatures}}<ul class="commerce-showroom-offer__features">{{#features}}<li><i class="fa-solid fa-circle-check" aria-hidden="true"></i>{{text}}</li>{{/features}}</ul>{{/suppressfeatures}}{{/hasfeatures}}
+        {{#isdonation}}
+        <div class="commerce-showroom-donation" data-showroom-donation data-donation-unit-minor="{{amountminor}}" data-donation-currency="{{currency}}" data-donation-max-units="{{donationmaxunits}}" data-donation-default-units="{{donationdefaultunits}}">
+            <p class="commerce-showroom-donation__label commerce-showroom-donation__label--with-icon"><i class="fa-solid fa-heart" aria-hidden="true"></i> {{#str}}commerce_donation_choose_amount, local_subscriptions{{/str}}</p>
+            <div class="commerce-showroom-donation__controls" data-donation-control-panel>
+                <div class="commerce-showroom-donation__stepper">
+                    <button type="button" data-donation-step="-1" aria-label="{{#str}}commerce_donation_decrease, local_subscriptions{{/str}}">−</button>
+                    <strong data-donation-total></strong>
+                    <button type="button" data-donation-step="1" aria-label="{{#str}}commerce_donation_increase, local_subscriptions{{/str}}">+</button>
+                </div>
+                <div class="commerce-showroom-donation__presets" aria-label="{{#str}}commerce_donation_presets, local_subscriptions{{/str}}">
+                    {{#donationpresets}}<button type="button" data-donation-preset="{{units}}">×{{units}}</button>{{/donationpresets}}
+                </div>
+            </div>
+        </div>
+        {{/isdonation}}
+        {{#hasdonationcompanion}}
+        <div class="commerce-showroom-donation commerce-showroom-donation--companion {{#donationcompanionrequired}}is-required{{/donationcompanionrequired}}" data-showroom-donation data-donation-companion-mode="{{#donationcompanionrequired}}required{{/donationcompanionrequired}}{{#donationcompanionoptional}}optional{{/donationcompanionoptional}}" data-donation-unit-minor="{{donationcompanionamountminor}}" data-donation-currency="{{donationcompanioncurrency}}" data-donation-max-units="{{donationmaxunits}}" data-donation-default-units="{{donationdefaultunits}}">
+            {{#donationcompanionoptional}}
+            <label class="commerce-showroom-donation__toggle">
+                <input type="checkbox" data-donation-companion-toggle>
+                <span>{{#str}}commerce_donation_add_companion, local_subscriptions{{/str}}</span>
+            </label>
+            {{/donationcompanionoptional}}
+            {{#donationcompanionrequired}}
+            <p class="commerce-showroom-donation__label commerce-showroom-donation__label--required"><i class="fa-solid fa-heart" aria-hidden="true"></i> {{#str}}commerce_donation_companion_included, local_subscriptions{{/str}}</p>
+            {{/donationcompanionrequired}}
+            <div class="commerce-showroom-donation__controls" data-donation-control-panel data-donation-companion-panel {{#donationcompanionoptional}}hidden{{/donationcompanionoptional}}>
+                <div class="commerce-showroom-donation__stepper">
+                    <button type="button" data-donation-step="-1" aria-label="{{#str}}commerce_donation_decrease, local_subscriptions{{/str}}">−</button>
+                    <strong data-donation-total></strong>
+                    <button type="button" data-donation-step="1" aria-label="{{#str}}commerce_donation_increase, local_subscriptions{{/str}}">+</button>
+                </div>
+                <div class="commerce-showroom-donation__presets">
+                    {{#donationpresets}}<button type="button" data-donation-preset="{{units}}">×{{units}}</button>{{/donationpresets}}
+                </div>
+            </div>
+        </div>
+        {{/hasdonationcompanion}}
         <div class="commerce-showroom-offer__pricing">
             <div class="commerce-showroom-offer__pricing-promotion {{^haspromotion}}is-empty{{/haspromotion}}" aria-hidden="{{^haspromotion}}true{{/haspromotion}}{{#haspromotion}}false{{/haspromotion}}">
                 {{#hascompareprice}}<del data-showroom-compare-price>{{compareformatted}}</del>{{/hascompareprice}}
@@ -31,6 +69,17 @@
             <p class="commerce-showroom-offer__validity"><span class="commerce-showroom-offer__validity-icon" aria-hidden="true">🔥</span><span>{{promotionendlabel}}</span></p>
             {{/haspromotionend}}
         </div>
+        {{#owned}}{{#haspromotionjoincontext}}
+        <div class="commerce-showroom-offer__owner-join" data-showroom-promotion-join {{^promotionjoinpurchasable}}hidden{{/promotionjoinpurchasable}}>
+            <div class="commerce-showroom-offer__owner-join-heading">
+                <span>{{promotionjoinownerpricelabel}}</span>
+                <span class="commerce-showroom-offer__owner-join-badge">{{promotionjoinownerpricebadge}}</span>
+            </div>
+            <strong class="commerce-showroom-offer__owner-join-price" data-showroom-owner-price>{{promotionjoinpriceformatted}}</strong>
+            <p class="commerce-showroom-offer__owner-join-help">{{promotionjoinownerpricehelp}}</p>
+            {{#hasaccesspromisepromotion}}<p class="commerce-showroom-offer__owner-join-promotion"><i class="fa-solid fa-user-group" aria-hidden="true"></i>{{accesspromisepromotionlabel}}</p>{{/hasaccesspromisepromotion}}
+        </div>
+        {{/haspromotionjoincontext}}{{/owned}}
         {{#haspedagogicalcapacity}}
         <div class="commerce-pedagogical-capacity {{pedagogicalcapacityclass}}" role="status">
             <i class="fa-solid {{#pedagogicalsoldout}}fa-circle-xmark{{/pedagogicalsoldout}}{{^pedagogicalsoldout}}fa-ticket{{/pedagogicalsoldout}}" aria-hidden="true"></i>
@@ -45,14 +94,33 @@
         {{/haspedagogicalcapacity}}
         <div class="commerce-showroom-offer__actions">
             {{#canbuy}}
-                <form method="post" action="{{cartaction}}" data-showroom-track="offer_buy" data-showroom-track-role="{{role}}">
-                    <input type="hidden" name="action" value="buynow"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{priceid}}" data-showroom-priceid><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{currency}}" data-showroom-currency-input><input type="hidden" name="returnurl" value="{{returnurl}}"><input type="hidden" name="source" value="showroom"><input type="hidden" name="showroom" value="{{showroomkey}}"><input type="hidden" name="showroomoffer" value="{{role}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                <form method="post" action="{{cartaction}}" data-showroom-standard-buy data-showroom-track="offer_buy" data-showroom-track-role="{{role}}">
+                    <input type="hidden" name="action" value="buynow"><input type="hidden" name="sku" value="{{sku}}"><input type="hidden" name="priceid" value="{{priceid}}" data-showroom-priceid><input type="hidden" name="quantity" value="1"><input type="hidden" name="currency" value="{{currency}}" data-showroom-currency-input><input type="hidden" name="returnurl" value="{{returnurl}}"><input type="hidden" name="source" value="showroom"><input type="hidden" name="showroom" value="{{showroomkey}}"><input type="hidden" name="showroomoffer" value="{{role}}"><input type="hidden" name="sesskey" value="{{sesskey}}">{{#isdonation}}<input type="hidden" name="donationunits" value="{{donationdefaultunits}}" data-donation-units-hidden>{{/isdonation}}{{#hasdonationcompanion}}<input type="hidden" name="donationsku" value="{{donationcompanionsku}}" data-donation-companion-field {{#donationcompanionoptional}}disabled{{/donationcompanionoptional}}><input type="hidden" name="donationpriceid" value="{{donationcompanionpriceid}}" data-donation-companion-priceid data-donation-companion-field {{#donationcompanionoptional}}disabled{{/donationcompanionoptional}}><input type="hidden" name="donationunits" value="{{donationdefaultunits}}" data-donation-units-hidden data-donation-companion-field {{#donationcompanionoptional}}disabled{{/donationcompanionoptional}}><input type="hidden" name="donationshowroomoffer" value="{{donationcompanionrole}}" data-donation-companion-field {{#donationcompanionoptional}}disabled{{/donationcompanionoptional}}>{{/hasdonationcompanion}}
                     <button class="commerce-showroom-btn commerce-showroom-btn--primary" type="submit">{{buylabel}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
                 </form>
             {{/canbuy}}
             {{#cannotbuy}}{{^canaccess}}{{#haspedagogicalcapacity}}{{^pedagogicalavailable}}
                 <button class="commerce-showroom-btn commerce-showroom-btn--disabled" type="button" disabled aria-disabled="true">{{pedagogicaldisabledctlabel}}</button>
             {{/pedagogicalavailable}}{{/haspedagogicalcapacity}}{{/canaccess}}{{/cannotbuy}}
+            {{#owned}}{{#haspromotionjoincontext}}
+            <div class="commerce-showroom-offer__promotion-join-actions" data-showroom-promotion-join-actions {{^promotionjoinpurchasable}}hidden{{/promotionjoinpurchasable}}>
+                <form method="post" action="{{cartaction}}" data-showroom-promotion-join-form {{#promotionjoinincart}}hidden{{/promotionjoinincart}} data-showroom-track="promotion_join" data-showroom-track-role="{{role}}">
+                    <input type="hidden" name="action" value="buynow">
+                    <input type="hidden" name="source" value="showroom">
+                    <input type="hidden" name="operation" value="promotion_join">
+                    <input type="hidden" name="sku" value="{{sku}}">
+                    <input type="hidden" name="priceid" value="{{promotionjoincatalogpriceid}}" data-showroom-promotion-join-priceid>
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="currency" value="{{currency}}" data-showroom-promotion-join-currency>
+                    <input type="hidden" name="returnurl" value="{{returnurl}}">
+                    <input type="hidden" name="showroom" value="{{showroomkey}}">
+                    <input type="hidden" name="showroomoffer" value="{{role}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <button class="commerce-showroom-btn commerce-showroom-btn--primary" type="submit" data-showroom-promotion-join-button><i class="fa-solid fa-user-group" aria-hidden="true"></i><span data-showroom-promotion-join-button-label>{{promotionjoinactionpricelabel}}</span></button>
+                </form>
+                <a class="commerce-showroom-btn commerce-showroom-btn--primary" href="{{carturl}}" data-showroom-promotion-join-cart {{^promotionjoinincart}}hidden{{/promotionjoinincart}}><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>{{cartlabel}}</a>
+            </div>
+            {{/haspromotionjoincontext}}{{/owned}}
             {{#canaccess}}<a class="commerce-showroom-btn commerce-showroom-btn--success" href="{{ownedactionurl}}">{{ownedactionlabel}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>{{/canaccess}}
             {{#bundleblocked}}<p class="commerce-showroom-offer__bundle-note"><i class="fa-solid fa-circle-info" aria-hidden="true"></i>{{bundleblockedmessage}}</p>{{/bundleblocked}}
             {{^available}}<span class="commerce-showroom-offer__pending">{{priceformatted}}</span>{{/available}}

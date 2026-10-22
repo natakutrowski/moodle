@@ -124,7 +124,10 @@ define([], function() {
     };
 
     const bindCounters = () => {
-        const counters = Array.from(document.querySelectorAll(SELECTOR_COUNTER));
+        const counters = Array.from(document.querySelectorAll(SELECTOR_COUNTER)).filter((counter) => {
+            const raw = counter.dataset.counterValue || counter.textContent || '';
+            return /[0-9]/.test(raw);
+        });
         if (!counters.length) {
             return;
         }
@@ -270,6 +273,156 @@ define([], function() {
         window.addEventListener('resize', requestUpdate);
     };
 
+    const donationCurrencyFormatter = (currency) => new Intl.NumberFormat(
+        document.documentElement.lang || 'fr-FR',
+        {style: 'currency', currency: currency || 'EUR'}
+    );
+
+    const donationCurrencyDigits = (currency) => donationCurrencyFormatter(currency)
+        .resolvedOptions().maximumFractionDigits;
+
+    /**
+     * Keep Donation amounts aligned with the rest of Commerce: locale-aware
+     * numeric formatting followed by the explicit ISO 4217 currency code.
+     * The server remains authoritative; this is presentation only.
+     */
+    const formatDonationMinor = (minor, currency) => {
+        const code = String(currency || 'EUR').toUpperCase();
+        const digits = donationCurrencyDigits(code);
+        const divisor = Math.pow(10, digits);
+        const numericMinor = Number(minor || 0);
+        const number = new Intl.NumberFormat(
+            document.documentElement.lang || 'fr-FR',
+            {
+                style: 'decimal',
+                minimumFractionDigits: digits,
+                maximumFractionDigits: digits,
+                useGrouping: true,
+            }
+        ).format(numericMinor / divisor);
+        return `${number}\u00a0${code}`;
+    };
+
+    const refreshDonationControl = (root) => {
+        if (!root) {
+            return;
+        }
+        const amountInput = root.querySelector('[data-donation-amount-input]');
+        const total = root.querySelector('[data-donation-total]');
+        if (!total) {
+            return;
+        }
+        const max = Math.max(1, Number.parseInt(root.dataset.donationMaxUnits || '1', 10));
+        const defaultUnits = Math.max(1, Number.parseInt(root.dataset.donationDefaultUnits || '1', 10));
+        let units = Number.parseInt(root.dataset.donationUnits || String(defaultUnits), 10);
+        if (!Number.isFinite(units)) {
+            units = defaultUnits;
+        }
+        units = Math.max(1, Math.min(max, units));
+        root.dataset.donationUnits = String(units);
+        const offer = root.closest('[data-showroom-offer]');
+        if (offer) {
+            offer.querySelectorAll('[data-donation-units-hidden]').forEach((hidden) => {
+                hidden.value = String(units);
+            });
+        }
+        const unitMinor = Number.parseInt(root.dataset.donationUnitMinor || '0', 10);
+        const currency = root.dataset.donationCurrency || 'EUR';
+        const digits = donationCurrencyDigits(currency);
+        const divisor = Math.pow(10, digits);
+        const unitMajor = unitMinor / divisor;
+        const totalMinor = unitMinor * units;
+        total.textContent = formatDonationMinor(totalMinor, currency);
+        if (amountInput && unitMajor > 0) {
+            amountInput.min = String(unitMajor);
+            amountInput.max = String(unitMajor * max);
+            amountInput.step = String(unitMajor);
+            const selectedMajor = unitMajor * units;
+            amountInput.value = Number.isInteger(selectedMajor)
+                ? String(selectedMajor)
+                : selectedMajor.toFixed(digits);
+        }
+        root.querySelectorAll('[data-donation-preset]').forEach((button) => {
+            const preset = Number.parseInt(button.dataset.donationPreset || '0', 10);
+            button.textContent = formatDonationMinor(unitMinor * preset, currency);
+            button.classList.toggle('is-active', preset === units);
+        });
+        if (offer) {
+            const price = offer.querySelector('[data-showroom-price]');
+            if (!root.classList.contains('commerce-showroom-donation--companion')) {
+                if (price) {
+                    price.textContent = formatDonationMinor(totalMinor, currency);
+                }
+            } else if (price) {
+                const toggle = root.querySelector('[data-donation-companion-toggle]');
+                const required = root.dataset.donationCompanionMode === 'required';
+                const enabled = required || Boolean(toggle && toggle.checked);
+                const baseMinor = Number.parseInt(offer.dataset.showroomBaseAmountMinor || '0', 10);
+                price.textContent = formatDonationMinor(baseMinor + (enabled ? totalMinor : 0), currency);
+            }
+        }
+    };
+
+    const bindDonationControls = () => {
+        document.querySelectorAll('[data-showroom-donation]').forEach((root) => {
+            if (root.dataset.showroomDonationBound === '1') {
+                refreshDonationControl(root);
+                return;
+            }
+            root.dataset.showroomDonationBound = '1';
+            const amountInput = root.querySelector('[data-donation-amount-input]');
+            const toggle = root.querySelector('[data-donation-companion-toggle]');
+            const panel = root.querySelector('[data-donation-companion-panel]');
+            const companionFields = Array.from(root.closest('.commerce-showroom-offer')?.querySelectorAll(
+                '[data-donation-companion-field]'
+            ) || []);
+
+            if (toggle) {
+                const syncToggle = () => {
+                    const enabled = toggle.checked;
+                    if (panel) {
+                        panel.hidden = !enabled;
+                    }
+                    companionFields.forEach((field) => {
+                        field.disabled = !enabled;
+                    });
+                    refreshDonationControl(root);
+                };
+                toggle.addEventListener('change', syncToggle);
+                syncToggle();
+            }
+
+            root.querySelectorAll('[data-donation-step]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const current = Number.parseInt(root.dataset.donationUnits || root.dataset.donationDefaultUnits || '1', 10);
+                    const delta = Number.parseInt(button.dataset.donationStep || '0', 10);
+                    root.dataset.donationUnits = String(current + delta);
+                    refreshDonationControl(root);
+                });
+            });
+            root.querySelectorAll('[data-donation-preset]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    root.dataset.donationUnits = button.dataset.donationPreset || '1';
+                    refreshDonationControl(root);
+                });
+            });
+            if (amountInput) {
+                amountInput.addEventListener('change', () => {
+                    const currency = root.dataset.donationCurrency || 'EUR';
+                    const digits = donationCurrencyDigits(currency);
+                    const unitMinor = Number.parseInt(root.dataset.donationUnitMinor || '0', 10);
+                    const unitMajor = unitMinor / Math.pow(10, digits);
+                    const requested = Number.parseFloat(amountInput.value || '0');
+                    if (unitMajor > 0 && Number.isFinite(requested)) {
+                        root.dataset.donationUnits = String(Math.max(1, Math.round(requested / unitMajor)));
+                    }
+                    refreshDonationControl(root);
+                });
+            }
+            refreshDonationControl(root);
+        });
+    };
+
     const bindCurrency = () => {
         const selectors = Array.from(document.querySelectorAll(SELECTOR_CURRENCY));
         const toolbar = document.querySelector('[data-showroom-currency-toolbar]');
@@ -308,12 +461,13 @@ define([], function() {
             const discount = offer.querySelector('[data-showroom-discount]');
             const priceid = offer.querySelector('[data-showroom-priceid]');
             const currencyInput = offer.querySelector('[data-showroom-currency-input]');
-            const buyButton = offer.querySelector('form button[type="submit"]');
+            const buyButton = offer.querySelector('[data-showroom-standard-buy] button[type="submit"]');
             const bundleNote = offer.querySelector('.commerce-showroom-offer__bundle-note');
 
             if (price) {
                 price.textContent = data.priceformatted || '';
             }
+            offer.dataset.showroomBaseAmountMinor = String(Number(data.amountminor || 0));
 
             if (compare) {
                 compare.textContent = data.compareformatted || '';
@@ -329,10 +483,69 @@ define([], function() {
             if (currencyInput) {
                 currencyInput.value = data.currency || '';
             }
+            const donationRoot = offer.querySelector('[data-showroom-donation]');
+            if (donationRoot) {
+                const unitMinor = data.isdonation
+                    ? Number(data.amountminor || 0)
+                    : Number(data.donationcompanionamountminor || 0);
+                donationRoot.dataset.donationUnitMinor = String(unitMinor);
+                donationRoot.dataset.donationCurrency = data.isdonation
+                    ? (data.currency || '')
+                    : (data.donationcompanioncurrency || data.currency || '');
+                const companionPrice = offer.querySelector('[data-donation-companion-priceid]');
+                if (companionPrice && data.donationcompanionpriceid) {
+                    companionPrice.value = String(data.donationcompanionpriceid);
+                }
+                refreshDonationControl(donationRoot);
+            }
             if (buyButton) {
                 const enabled = Boolean(data.canbuy) && Number(data.priceid || 0) > 0;
                 buyButton.disabled = !enabled;
                 buyButton.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+            }
+            const promotionJoin = offer.querySelector('[data-showroom-promotion-join]');
+            const promotionJoinActions = offer.querySelector('[data-showroom-promotion-join-actions]');
+            const promotionJoinPrice = offer.querySelector('[data-showroom-owner-price]');
+            const promotionJoinForm = offer.querySelector('[data-showroom-promotion-join-form]');
+            const promotionJoinPriceId = offer.querySelector('[data-showroom-promotion-join-priceid]');
+            const promotionJoinCurrency = offer.querySelector('[data-showroom-promotion-join-currency]');
+            const promotionJoinButton = offer.querySelector('[data-showroom-promotion-join-button]');
+            const promotionJoinButtonLabel = offer.querySelector('[data-showroom-promotion-join-button-label]');
+            const promotionJoinCart = offer.querySelector('[data-showroom-promotion-join-cart]');
+            const promotionJoinPurchasable = Boolean(data.promotionjoinpurchasable)
+                && Number(data.promotionjoincatalogpriceid || 0) > 0;
+            const promotionJoinInCart = promotionJoinPurchasable && Boolean(data.promotionjoinincart);
+
+            if (promotionJoin) {
+                promotionJoin.hidden = !promotionJoinPurchasable;
+            }
+            if (promotionJoinActions) {
+                promotionJoinActions.hidden = !promotionJoinPurchasable;
+            }
+            if (promotionJoinPrice) {
+                promotionJoinPrice.textContent = data.promotionjoinpriceformatted || '';
+            }
+            if (promotionJoinPriceId) {
+                promotionJoinPriceId.value = String(data.promotionjoincatalogpriceid || 0);
+            }
+            if (promotionJoinCurrency) {
+                promotionJoinCurrency.value = data.currency || '';
+            }
+            if (promotionJoinForm) {
+                promotionJoinForm.hidden = !promotionJoinPurchasable || promotionJoinInCart;
+            }
+            if (promotionJoinButtonLabel) {
+                promotionJoinButtonLabel.textContent = data.promotionjoinactionpricelabel || '';
+            }
+            if (promotionJoinButton) {
+                promotionJoinButton.disabled = !promotionJoinPurchasable || promotionJoinInCart;
+                promotionJoinButton.setAttribute(
+                    'aria-disabled',
+                    promotionJoinPurchasable && !promotionJoinInCart ? 'false' : 'true'
+                );
+            }
+            if (promotionJoinCart) {
+                promotionJoinCart.hidden = !promotionJoinInCart;
             }
             offer.classList.toggle('is-bundle-blocked', Boolean(data.bundleblocked));
             if (bundleNote) {
@@ -386,10 +599,12 @@ define([], function() {
                 }
 
                 Object.entries(payload.offers || {}).forEach(([role, data]) => updateOffer(role, data));
-                const bundle = payload.offers ? payload.offers.bundle : null;
+                const featuredCard = document.querySelector('.commerce-showroom-offer.is-featured');
+                const featuredRole = featuredCard ? featuredCard.dataset.showroomOffer : '';
+                const featuredOffer = featuredRole && payload.offers ? payload.offers[featuredRole] : null;
                 document.querySelectorAll('[data-showroom-featured-price]').forEach((featured) => {
-                    if (bundle) {
-                        featured.textContent = bundle.priceformatted || '';
+                    if (featuredOffer) {
+                        featured.textContent = featuredOffer.priceformatted || '';
                     }
                 });
 
@@ -433,7 +648,7 @@ define([], function() {
 
     const bindSmartOfferAnchors = () => {
         const featuredOffer = () => document.querySelector(
-            '[data-showroom-offer="bundle"], .commerce-showroom-offer.is-featured'
+            '.commerce-showroom-offer.is-featured, [data-showroom-offer]'
         );
 
         /**
@@ -1102,6 +1317,7 @@ define([], function() {
 
     const bindInteractiveProblem = () => {
         document.querySelectorAll('[data-showroom-interactive-problem]').forEach((root) => {
+            if (root.dataset.problemPresentation === 'static_ppt' || root.dataset.problemPresentation === 'four_columns_ppt') return;
             if (root.dataset.interactiveProblemReady === '1') return;
             root.dataset.interactiveProblemReady = '1';
             const target = root.querySelector('[data-problem-target]');
@@ -1154,9 +1370,74 @@ define([], function() {
         });
     };
 
+
+    const bindCurriculumTabs = () => {
+        document.querySelectorAll('[data-showroom-tabs]').forEach((root) => {
+            if (root.dataset.showroomTabsBound === '1') {
+                return;
+            }
+            root.dataset.showroomTabsBound = '1';
+            const buttons = Array.from(root.querySelectorAll('[data-showroom-tab-target]'));
+            const panels = Array.from(root.querySelectorAll('[data-showroom-tab-panel]'));
+            const activate = (target, focus = false) => {
+                buttons.forEach((button) => {
+                    const active = button.dataset.showroomTabTarget === target;
+                    button.setAttribute('aria-selected', active ? 'true' : 'false');
+                    button.tabIndex = active ? 0 : -1;
+                    if (active && focus) {
+                        button.focus();
+                    }
+                });
+                panels.forEach((panel) => {
+                    panel.hidden = panel.dataset.showroomTabPanel !== target;
+                });
+                emitTrackingEvent('curriculum_tab', {tab: target});
+            };
+            buttons.forEach((button, index) => {
+                button.addEventListener('click', () => activate(button.dataset.showroomTabTarget || 'topics'));
+                button.addEventListener('keydown', (event) => {
+                    if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+                        return;
+                    }
+                    event.preventDefault();
+                    const delta = event.key === 'ArrowRight' ? 1 : -1;
+                    const next = (index + delta + buttons.length) % buttons.length;
+                    activate(buttons[next].dataset.showroomTabTarget || 'topics', true);
+                });
+            });
+            activate(root.dataset.defaultTab || buttons[0]?.dataset.showroomTabTarget || 'topics');
+        });
+    };
+
+    const bindSectionAnchors = () => {
+        document.querySelectorAll('[data-showroom-section-anchor]').forEach((anchor) => {
+            if (anchor.dataset.showroomSectionAnchorBound === '1') {
+                return;
+            }
+            anchor.dataset.showroomSectionAnchorBound = '1';
+            anchor.addEventListener('click', (event) => {
+                const href = anchor.getAttribute('href') || '';
+                if (!href.startsWith('#') || href === '#showroom-offers') {
+                    return;
+                }
+                const target = document.querySelector(href);
+                if (!target) {
+                    return;
+                }
+                event.preventDefault();
+                target.scrollIntoView({behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start'});
+                window.history.replaceState(window.history.state, '', href);
+                emitTrackingEvent('section_anchor', {href});
+            });
+        });
+    };
+
     const init = () => {
         bindTracking();
+        bindSectionAnchors();
+        bindCurriculumTabs();
         fitOfferEditorialText();
+        bindDonationControls();
         bindCurrency();
         bindSmartOfferAnchors();
         bindFaqs();
@@ -1174,6 +1455,11 @@ define([], function() {
         bindHeroParallax();
         bindCounters();
         bindAscentScrollProgress();
+        if (document.querySelector('[data-showroom-geo-map]')) {
+            require(['local_subscriptions/journey_map'], function(map) {
+                map.init();
+            });
+        }
     };
 
     return {init};

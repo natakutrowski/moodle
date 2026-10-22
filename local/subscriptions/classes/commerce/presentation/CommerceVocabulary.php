@@ -15,6 +15,7 @@ final class CommerceVocabulary {
         'digital_download' => CommercePresentationLabel::INTENT_INFO,
         'bundle' => CommercePresentationLabel::INTENT_SUCCESS,
         'service' => CommercePresentationLabel::INTENT_INFO,
+        'donation' => CommercePresentationLabel::INTENT_SUCCESS,
     ];
 
     private const PRODUCT_STATUS_INTENTS = [

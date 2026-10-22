@@ -6,8 +6,9 @@ namespace local_subscriptions\commerce\catalog\presentation;
 
 defined('MOODLE_INTERNAL') || die();
 
-use local_subscriptions\commerce\showroom\CommerceShowroomRegistry;
 use local_subscriptions\commerce\showroom\CommerceShowroomUrl;
+use local_subscriptions\commerce\showroom\CommerceShowroomDefinition;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitionResolver;
 use local_subscriptions\url\CommerceProductSlugService;
 use local_subscriptions\url\UrlFactory;
 
@@ -42,9 +43,8 @@ final class CommerceProductDiscoveryUrlResolver {
             $mode === self::MODE_SHOWROOM
             && $showroomkey !== ''
             && $showroomkey !== $currentshowroom
-            && self::is_published_showroom($showroomkey)
         ) {
-            $definition = CommerceShowroomRegistry::get($showroomkey);
+            $definition = self::published_showroom_definition($showroomkey);
             if ($definition !== null) {
                 return CommerceShowroomUrl::make(
                     $definition,
@@ -119,17 +119,25 @@ final class CommerceProductDiscoveryUrlResolver {
     }
 
     public static function is_published_showroom(string $key): bool {
+        return self::published_showroom_definition($key) !== null;
+    }
+
+    private static function published_showroom_definition(
+        string $key
+    ): ?CommerceShowroomDefinition {
         global $DB;
 
         $key = strtolower(trim($key));
-        if ($key === '' || CommerceShowroomRegistry::get($key) === null) {
-            return false;
+        if ($key === '') {
+            return null;
         }
 
-        return $DB->record_exists('local_subs_showroom', [
-            'showroomkey' => $key,
-            'status' => 'published',
-        ]);
+        try {
+            return (new CommerceShowroomPublishedDefinitionResolver($DB))
+                ->require($key);
+        } catch (\moodle_exception $exception) {
+            return null;
+        }
     }
 
     /** @param array<string,mixed> $metadata */

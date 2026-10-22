@@ -14,7 +14,7 @@ use local_subscriptions\url\UrlFactory;
  * @covers \local_subscriptions\commerce\storefront\navigation\CommerceStorefrontReturnNavigationResolver
  */
 final class commerce_storefront_return_navigation_l73b_test extends advanced_testcase {
-    private const SHOWROOM = 'third-group-verbs';
+    private const SHOWROOM = 'return-nav-dynamic';
 
     public function test_shop_origin_returns_to_shop(): void {
         $result = (new CommerceStorefrontReturnNavigationResolver())->resolve(
@@ -42,18 +42,29 @@ final class commerce_storefront_return_navigation_l73b_test extends advanced_tes
 
         $this->resetAfterTest(true);
         $now = time();
-        $DB->insert_record('local_subs_showroom', (object)[
+        $showroomid = $DB->insert_record('local_subs_showroom', (object)[
             'showroomkey' => self::SHOWROOM,
             'status' => 'published',
-            'name' => 'Third-group verbs',
-            'template' => 'local_subscriptions/showroom/third_group_verbs',
-            'slugfr' => 'verbes-3e-groupe',
-            'slugen' => 'third-group-verbs',
-            'slugru' => 'glagoly-tretey-gruppy',
-            'titlekey' => 'commerce_showroom_third_group_verbs_title',
-            'descriptionkey' => 'commerce_showroom_third_group_verbs_description',
+            'name' => 'Dynamic return showroom',
+            'template' => 'local_subscriptions/showroom/default',
+            'slugfr' => 'retour-showroom-dynamique',
+            'slugen' => 'dynamic-return-showroom',
+            'slugru' => 'dynamic-return-showroom-ru',
+            'titlekey' => '',
+            'descriptionkey' => '',
             'productsjson' => '{}',
             'settingsjson' => '{}',
+            'timecreated' => $now,
+            'timemodified' => $now,
+            'usermodified' => null,
+        ]);
+        $DB->insert_record('local_subs_showroom_block', (object)[
+            'showroomid' => $showroomid,
+            'blockkey' => 'hero',
+            'blocktype' => 'hero',
+            'sortorder' => 10,
+            'enabled' => 1,
+            'configjson' => '{}',
             'timecreated' => $now,
             'timemodified' => $now,
             'usermodified' => null,
@@ -69,7 +80,7 @@ final class commerce_storefront_return_navigation_l73b_test extends advanced_tes
         );
 
         self::assertTrue($result['show']);
-        self::assertStringContainsString('/third-group-verbs', $result['url']);
+        self::assertStringContainsString('/dynamic-return-showroom', $result['url']);
         self::assertStringContainsString('currency=RUB', $result['url']);
         self::assertContains(
             ['name' => 'showroom', 'value' => self::SHOWROOM],

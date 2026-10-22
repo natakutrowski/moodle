@@ -11,7 +11,7 @@ final class commerce_showroom_stage_method_j16o2_test extends \advanced_testcase
         global $CFG;
 
         $root = $CFG->dirroot . '/local/subscriptions/';
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
         $css = file_get_contents($root . 'styles/showroom.css');
 
         self::assertStringContainsString(

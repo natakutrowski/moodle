@@ -11,7 +11,7 @@ final class commerce_showroom_reassurance_j13f4_test extends \advanced_testcase 
         global $CFG;
         $root = $CFG->dirroot . '/local/subscriptions';
         $presenter = file_get_contents($root . '/classes/commerce/showroom/CommerceShowroomPresenter.php');
-        $template = file_get_contents($root . '/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . '/templates/showroom/default.mustache');
         $javascript = file_get_contents($root . '/amd/src/showroom.js');
         self::assertIsString($presenter);
         self::assertIsString($template);
@@ -28,9 +28,9 @@ final class commerce_showroom_reassurance_j13f4_test extends \advanced_testcase 
 
     public function test_testimonials_are_not_fabricated(): void {
         global $CFG;
-        $presenter = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomPresenter.php');
-        self::assertIsString($presenter);
-        self::assertStringContainsString("'testimonials' => []", $presenter);
-        self::assertStringContainsString("'hastestimonials' => false", $presenter);
+        $profile = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomThirdGroupVerbsPresentationProfile.php');
+        self::assertIsString($profile);
+        self::assertStringContainsString("'testimonials' => []", $profile);
+        self::assertStringContainsString("'hastestimonials' => false", $profile);
     }
 }

@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace local_subscriptions;
 
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockEditorRegistry;
+
 /** Contract checks for J16A.1 Bundle editorial hierarchy. */
 final class commerce_showroom_bundle_editorial_j16a1_test extends \advanced_testcase {
     public function test_bundle_badge_is_configurable(): void {
-        $registry = file_get_contents(__DIR__ . '/../../../classes/commerce/showroom/cms/CommerceShowroomBlockEditorRegistry.php');
+        $schema = CommerceShowroomBlockEditorRegistry::schema(
+            'offers',
+            ['pdf', 'bundle', 'course']
+        );
+        $names = array_column($schema['fields'], 'name');
         $presenter = file_get_contents(__DIR__ . '/../../../classes/commerce/showroom/cms/CommerceShowroomBlockConfigurationPresenter.php');
 
-        self::assertStringContainsString("'bundlefeaturedlabel'", $registry);
-        self::assertStringContainsString("'bundlefeaturedlabel'", $presenter);
+        self::assertContains('bundlefeaturedlabel', $names);
+        self::assertStringContainsString("\$role . 'featuredlabel'", $presenter);
         self::assertStringContainsString("\$offer['featuredlabel'] = \$featuredlabel", $presenter);
     }
 

@@ -166,6 +166,30 @@ final class CommerceDirectPurchaseSession {
         return $current['cartuuid'];
     }
 
+    /**
+     * Clears the current Direct Purchase only when it still represents the
+     * supplied frozen cart. This prevents an old payment return from removing
+     * a newer Buy Now started in another tab.
+     */
+    public static function clear_if_cart_uuid(string $cartuuid): bool {
+        $cartuuid = strtolower(trim($cartuuid));
+        if (!preg_match('/^[a-f0-9]{32}$/', $cartuuid)) {
+            return false;
+        }
+
+        $current = self::current_any_currency();
+        if (
+            $current === null
+            || $current['cartuuid'] === null
+            || $current['cartuuid'] !== $cartuuid
+        ) {
+            return false;
+        }
+
+        self::clear();
+        return true;
+    }
+
     public static function clear(): void {
         global $SESSION;
         unset($SESSION->{self::SESSION_KEY});

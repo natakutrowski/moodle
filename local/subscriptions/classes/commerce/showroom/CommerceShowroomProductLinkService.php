@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace local_subscriptions\commerce\showroom;
 
 use local_subscriptions\commerce\catalog\presentation\CommerceProductDiscoveryUrlResolver;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitionResolver;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -15,12 +16,20 @@ final class CommerceShowroomProductLinkService {
         $configuration = is_array($metadata['showroom'] ?? null)
             ? $metadata['showroom']
             : [];
+        global $DB;
+
         $key = strtolower(trim((string)($configuration['key'] ?? '')));
-        $definition = $key !== '' ? CommerceShowroomRegistry::get($key) : null;
         if (
-            $definition === null
+            $key === ''
             || !CommerceProductDiscoveryUrlResolver::storefront_presentation_enabled($metadata)
         ) {
+            return ['hasshowroom' => false];
+        }
+
+        try {
+            $definition = (new CommerceShowroomPublishedDefinitionResolver($DB))
+                ->require($key);
+        } catch (\moodle_exception $exception) {
             return ['hasshowroom' => false];
         }
 

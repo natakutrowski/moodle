@@ -595,6 +595,10 @@ final class CommerceCartPresenter {
                 'commerce_product_type_bundle',
                 'local_subscriptions'
             ),
+            'donation' => get_string(
+                'commerce_product_type_donation',
+                'local_subscriptions'
+            ),
             default => ucfirst(str_replace('_', ' ', $type)),
         };
     }

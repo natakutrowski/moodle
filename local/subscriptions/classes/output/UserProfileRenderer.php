@@ -52,6 +52,10 @@ final class UserProfileRenderer {
             $stats
         );
 
+        if (!empty($profile->trialstate) && ($profile->trialstate['state'] ?? 'none') !== 'none') {
+            $badges .= ' ' . self::trial_state_badge($profile->trialstate);
+        }
+
         if (
             !empty($profile->inbox) &&
             !empty($profile->inbox->available)
@@ -658,6 +662,21 @@ final class UserProfileRenderer {
 
         [$key, $class] = $map[$status] ?? $map['unknown'];
 
+        return html_writer::span(
+            get_string($key, 'local_subscriptions'),
+            'badge bg-' . $class
+        );
+    }
+
+    /** @param array<string, mixed> $state */
+    private static function trial_state_badge(array $state): string {
+        $map = [
+            'active' => ['crm_trial_state_active', 'info'],
+            'expired' => ['crm_trial_state_expired', 'secondary'],
+            'converted' => ['crm_trial_state_converted', 'success'],
+            'legacy_historical' => ['crm_trial_state_legacy_historical', 'light text-dark border'],
+        ];
+        [$key, $class] = $map[(string)($state['state'] ?? '')] ?? ['crm_trial_state_expired', 'secondary'];
         return html_writer::span(
             get_string($key, 'local_subscriptions'),
             'badge bg-' . $class
@@ -1402,6 +1421,21 @@ final class UserProfileRenderer {
                 new moodle_url($action->url),
                 s($action->label),
                 ['class' => $classes]
+            );
+        }
+
+        // CR.5: manage CRM roles with the rest of the profile quick actions.
+        $systemcontext = \context_system::instance();
+        if (empty($profile->iscommerceguest) && !empty($user->id) &&
+                has_capability(Capabilities::MANAGE_CRM_ROLES, $systemcontext) &&
+                has_capability('moodle/role:assign', $systemcontext) &&
+                !is_siteadmin((int)$user->id) && (int)$user->id !== (int)$GLOBALS['USER']->id) {
+            $items[] = html_writer::link(
+                new moodle_url('/local/subscriptions/admin/users/crm_roles.php',
+                    ['id' => (int)$user->id]),
+                html_writer::tag('i', '', ['class' => 'fa fa-shield mr-1', 'aria-hidden' => 'true']) .
+                    get_string('crm_roles_title', 'local_subscriptions'),
+                ['class' => 'btn btn-outline-primary mr-1 mb-1']
             );
         }
 

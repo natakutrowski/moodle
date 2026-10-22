@@ -35,17 +35,40 @@ final class CrmNavigationRegistry {
         $context = $context
             ?? context_system::instance();
 
-        $items = array_filter(
-            $this->all_items(),
-            static function (
-                CrmNavigationItem $item
-            ) use ($context): bool {
-                return has_capability(
-                    $item->capability,
-                    $context
+        $items = [];
+        foreach ($this->all_items() as $item) {
+            if ($item->key === CrmNavigationKeys::TEAM &&
+                    !has_capability('moodle/role:assign', $context)) {
+                continue;
+            }
+
+            // A section may be accessible through a child even when its landing page is not.
+            // For example, Content can manage Showrooms without viewing Commerce payments.
+            $canopenlanding = has_capability($item->capability, $context);
+            $firstavailablechild = null;
+            foreach ($item->children as $child) {
+                if (has_capability($child['capability'], $context)) {
+                    $firstavailablechild = $child;
+                    break;
+                }
+            }
+            if (!$canopenlanding && $firstavailablechild === null) {
+                continue;
+            }
+            if (!$canopenlanding) {
+                // Do not display a clickable parent pointing to an inaccessible page.
+                $item = new CrmNavigationItem(
+                    key: $item->key,
+                    label: $item->label,
+                    icon: $item->icon,
+                    url: $firstavailablechild['url'],
+                    capability: $firstavailablechild['capability'],
+                    position: $item->position,
+                    children: $item->children
                 );
             }
-        );
+            $items[] = $item;
+        }
 
         usort(
             $items,
@@ -114,13 +137,13 @@ final class CrmNavigationRegistry {
                 label: get_string('crm_nav_commerce', 'local_subscriptions'),
                 icon: 'fa-shopping-cart',
                 url: new moodle_url(subscription_config::admin_commerce_page()),
-                capability: Capabilities::VIEW_DASHBOARD,
+                capability: Capabilities::VIEW_PAYMENTS,
                 position: 20,
                 children: [
                     $child(
                         get_string('crm_commerce_nav_overview', 'local_subscriptions'),
                         subscription_config::admin_commerce_page(),
-                        Capabilities::VIEW_DASHBOARD,
+                        Capabilities::VIEW_PAYMENTS,
                         'fa-dashboard'
                     ),
                     $child(
@@ -138,7 +161,7 @@ final class CrmNavigationRegistry {
                     $child(
                         get_string('crm_nav_showrooms', 'local_subscriptions'),
                         '/local/subscriptions/admin/commerce/showrooms/index.php',
-                        'local/subscriptions:manage_showrooms',
+                        Capabilities::MANAGE_SHOWROOMS,
                         'fa-picture-o'
                     ),
                     $child(
@@ -164,6 +187,12 @@ final class CrmNavigationRegistry {
                         '/local/subscriptions/admin/commerce/statistics/index.php',
                         Capabilities::VIEW_STATISTICS,
                         'fa-bar-chart'
+                    ),
+                    $child(
+                        get_string('trial_admin_status_nav', 'local_subscriptions'),
+                        subscription_config::trial_transition_status_page(),
+                        Capabilities::MANAGE_SUBSCRIPTIONS,
+                        'fa-clock-o'
                     ),
                     $child(
                         get_string('crm_commerce_nav_configuration', 'local_subscriptions'),
@@ -209,7 +238,7 @@ final class CrmNavigationRegistry {
                     $child(
                         get_string('crm_nav_diagnostics', 'local_subscriptions'),
                         '/local/subscriptions/admin/inbox/diagnostics.php',
-                        Capabilities::VIEW_INBOX,
+                        Capabilities::MANAGE_CONFIGURATION,
                         'fa-stethoscope'
                     ),
                     $child(
@@ -241,7 +270,7 @@ final class CrmNavigationRegistry {
                     $child(
                         get_string('crm_nav_work_teams', 'local_subscriptions'),
                         subscription_config::admin_work_teams_page(),
-                        Capabilities::VIEW_WORK_ITEMS,
+                        Capabilities::MANAGE_WORK_CONFIGURATION,
                         'fa-users'
                     ),
                 ]
@@ -256,6 +285,21 @@ final class CrmNavigationRegistry {
                 position: 50
             ),
 
+
+            new CrmNavigationItem(
+                key: CrmNavigationKeys::TEAM,
+                label: get_string('crm_team_nav', 'local_subscriptions'),
+                icon: 'fa-shield',
+                url: new moodle_url('/local/subscriptions/admin/team/index.php'),
+                capability: Capabilities::MANAGE_CRM_ROLES,
+                position: 65,
+                children: [
+                    $child(get_string('crm_team_members', 'local_subscriptions'),
+                        '/local/subscriptions/admin/team/index.php', Capabilities::MANAGE_CRM_ROLES, 'fa-users'),
+                    $child(get_string('crm_team_permissions', 'local_subscriptions'),
+                        '/local/subscriptions/admin/team/roles.php', Capabilities::MANAGE_CRM_ROLES, 'fa-key'),
+                ]
+            ),
 
             new CrmNavigationItem(
                 key: CrmNavigationKeys::TOOLS,
@@ -297,7 +341,7 @@ final class CrmNavigationRegistry {
                     $child(
                         get_string('crm_nav_diagnostics', 'local_subscriptions'),
                         subscription_config::admin_help_diagnostics_page(),
-                        Capabilities::VIEW_DASHBOARD,
+                        Capabilities::MANAGE_CONFIGURATION,
                         'fa-stethoscope'
                     ),
                 ]

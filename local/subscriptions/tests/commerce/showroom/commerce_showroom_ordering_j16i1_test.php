@@ -26,9 +26,9 @@ final class commerce_showroom_ordering_j16i1_test extends \advanced_testcase {
             ]);
         }
         $runtime = CommerceShowroomRuntimeBlockSet::load($DB, 'ordering-current-contract');
-        self::assertSame(['hero', 'stage_method', 'exercise_explorer', 'offers', 'faq', 'support'], $runtime->sequence());
+        self::assertSame(['hero', 'offers', 'faq', 'support'], $runtime->sequence());
         $data = $runtime->to_template_data();
-        self::assertSame('hero,stage_method,exercise_explorer,offers,faq,support', $data['showroomblocksequence']);
-        self::assertCount(6, $data['showroomorderedblocks']);
+        self::assertSame('hero,offers,faq,support', $data['showroomblocksequence']);
+        self::assertCount(4, $data['showroomorderedblocks']);
     }
 }

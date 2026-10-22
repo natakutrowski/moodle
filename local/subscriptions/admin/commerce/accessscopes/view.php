@@ -4,6 +4,7 @@ require_once(__DIR__ . '/../../../../../config.php');
 
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
+use local_subscriptions\commerce\catalog\accessscope\CommerceAccessScopePlanAttachmentService;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
@@ -25,6 +26,9 @@ CrmPageConfigurator::configure($PAGE, $context, $pageurl, $title, 'local-subscri
 $courseids = array_filter(array_map('intval', explode(',', (string)$scope->course_ids)));
 $courses = $courseids ? $DB->get_records_list('course', 'id', $courseids, 'fullname ASC', 'id,fullname') : [];
 $plans = $DB->get_records('subscription_plan', ['accessscopeid' => $id], 'name ASC');
+$attachableplans = $plans === []
+    ? (new CommerceAccessScopePlanAttachmentService($DB))->list_attachable($id)
+    : [];
 
 $editurl = new moodle_url(subscription_config::commerce_access_scope_edit_page(), ['id' => $id]);
 $actions = html_writer::link(
@@ -107,7 +111,64 @@ if ($plans) {
         );
     }
 } else {
-    echo html_writer::div(get_string('commerce_scope_view_no_plans', 'local_subscriptions'), 'text-muted');
+    echo html_writer::div(get_string('commerce_scope_view_no_plans', 'local_subscriptions'), 'text-muted mb-2');
+
+    $createurl = new moodle_url(subscription_config::commerce_plan_edit_page(), ['accessscopeid' => $id]);
+    echo html_writer::start_div('commerce-scope-plan-empty-actions border rounded p-3 bg-light');
+    echo html_writer::div(
+        html_writer::tag('strong', get_string('commerce_scope_plan_actions_title', 'local_subscriptions')) .
+        html_writer::tag('p', get_string('commerce_scope_plan_actions_help', 'local_subscriptions'), ['class' => 'text-muted small mb-3']),
+        'mb-2'
+    );
+    echo html_writer::link(
+        $createurl,
+        html_writer::tag('i', '', ['class' => 'fa fa-plus me-1', 'aria-hidden' => 'true']) .
+            get_string('commerce_scope_create_plan', 'local_subscriptions'),
+        ['class' => 'btn btn-primary mb-3']
+    );
+
+    if ($attachableplans) {
+        $options = [];
+        foreach ($attachableplans as $attachableplan) {
+            $options[(int)$attachableplan->id] = format_string($attachableplan->name);
+        }
+        echo html_writer::start_tag('form', [
+            'method' => 'post',
+            'action' => new moodle_url('/local/subscriptions/admin/commerce/accessscopes/attach_plan.php'),
+            'class' => 'commerce-scope-plan-attach-form',
+        ]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'scopeid', 'value' => $id]);
+        echo html_writer::tag('label', get_string('commerce_scope_attach_plan', 'local_subscriptions'), [
+            'for' => 'commerce-scope-attach-plan-' . $id,
+            'class' => 'form-label fw-semibold',
+        ]);
+        echo html_writer::start_div('d-flex flex-column flex-lg-row gap-2');
+        echo html_writer::select(
+            $options,
+            'planid',
+            '',
+            ['' => get_string('choosedots')],
+            ['id' => 'commerce-scope-attach-plan-' . $id, 'class' => 'form-select flex-grow-1']
+        );
+        echo html_writer::tag(
+            'button',
+            html_writer::tag('i', '', ['class' => 'fa fa-link me-1', 'aria-hidden' => 'true']) .
+                get_string('commerce_scope_attach_plan_action', 'local_subscriptions'),
+            ['type' => 'submit', 'class' => 'btn btn-outline-primary']
+        );
+        echo html_writer::end_div();
+        echo html_writer::tag('p', get_string('commerce_scope_attach_plan_help', 'local_subscriptions'), [
+            'class' => 'small text-muted mb-0 mt-2',
+        ]);
+        echo html_writer::end_tag('form');
+    } else {
+        echo html_writer::div(
+            get_string('commerce_scope_attach_plan_none', 'local_subscriptions'),
+            'small text-muted'
+        );
+    }
+    echo html_writer::end_div();
 }
 echo html_writer::end_div();
 echo html_writer::end_div();

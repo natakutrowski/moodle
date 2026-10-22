@@ -1300,3 +1300,55 @@
         grid-template-columns: 1fr;
     }
 }
+
+
+/* 7.98C.3.1 — keep block contextual menus above neighbouring Builder cards. */
+.commerce-showroom-builder__list,
+.commerce-showroom-block {
+    overflow: visible;
+}
+
+.commerce-showroom-block {
+    position: relative;
+}
+
+.commerce-showroom-block__more[open] {
+    z-index: 220;
+}
+
+.commerce-showroom-block:has(.commerce-showroom-block__more[open]) {
+    z-index: 210;
+}
+
+.commerce-showroom-block__more-panel {
+    z-index: 230;
+}
+
+
+/* 7.98C.4.4 — Builder polish: disabled cards must not trap contextual menus
+ * inside an opacity stacking context. Dim the card contents instead. */
+.commerce-showroom-block.is-disabled {
+    opacity: 1;
+}
+
+.commerce-showroom-block.is-disabled > .commerce-showroom-block__move,
+.commerce-showroom-block.is-disabled > .commerce-showroom-block__identity,
+.commerce-showroom-block.is-disabled > .commerce-showroom-block__expanded-info,
+.commerce-showroom-block.is-disabled > .commerce-showroom-block__actions > :not(.commerce-showroom-block__more) {
+    opacity: .7;
+}
+
+.commerce-showroom-block.is-disabled .commerce-showroom-block__more > summary {
+    opacity: 1;
+}
+
+.commerce-showroom-block.is-disabled:has(.commerce-showroom-block__more[open]),
+.commerce-showroom-block:has(.commerce-showroom-block__more[open]) {
+    z-index: 1000;
+}
+
+.commerce-showroom-block__more[open],
+.commerce-showroom-block__more[open] .commerce-showroom-block__more-panel {
+    z-index: 1010;
+    opacity: 1;
+}

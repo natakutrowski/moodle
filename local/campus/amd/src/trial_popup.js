@@ -12,7 +12,11 @@ define(['core/config'], function(config) {
         }
     }
 
-    function init() {
+    function init(options) {
+        options = options || {};
+        var registrationsOpen = options.registrationsOpen !== false;
+        var subscribeUrl = options.subscribeUrl || (config.wwwroot + '/boutique');
+
         onReady(function() {
             var modalEl   = document.getElementById('campusTrialModal');
             if (!modalEl) {
@@ -41,6 +45,38 @@ define(['core/config'], function(config) {
                 }
             } catch (e) {
                 bsModal = null;
+            }
+
+            function showRegistrationClosed(redirectid, payload) {
+                var data = payload || {};
+                var subHref = data.subscribe || subscribeUrl;
+                var loginHref = data.login || (config.wwwroot + '/login/index.php');
+
+                if (redirEl) {
+                    redirEl.value = redirectid || '';
+                }
+                if (expiredEl) {
+                    expiredEl.classList.remove('d-none', 'alert-danger');
+                    expiredEl.classList.add('alert-warning');
+                    expiredEl.innerHTML = M.util.get_string(
+                        'trial_registration_closed_html',
+                        'local_campus',
+                        {login: loginHref}
+                    );
+                }
+                if (formWrap) {
+                    formWrap.classList.add('d-none');
+                }
+                if (btnSub) {
+                    btnSub.textContent = M.util.get_string('trial_btn_subscribe', 'local_campus');
+                    btnSub.href = subHref;
+                    btnSub.classList.remove('d-none');
+                }
+                if (btnCont) {
+                    btnCont.disabled = true;
+                    btnCont.classList.add('d-none');
+                }
+                showModal();
             }
 
             function showModal() {
@@ -194,6 +230,10 @@ define(['core/config'], function(config) {
 
             // ---- API globale pour ouvrir la modale ----
             window.campusTrialOpen = function(redirectid) {
+                if (!registrationsOpen) {
+                    showRegistrationClosed(redirectid, {});
+                    return;
+                }
                 if (redirEl) {
                     redirEl.value = redirectid || '';
                 }
@@ -234,6 +274,11 @@ define(['core/config'], function(config) {
                     if (j.status === 'ok') {
                         var target = j.redirect || (config.wwwroot + '/local/campus/mycourses.php');
                         window.location.href = target;
+                        return;
+                    }
+
+                    if (j.status === 'registration_closed') {
+                        showRegistrationClosed(redirectid, j);
                         return;
                     }
 
@@ -333,6 +378,11 @@ define(['core/config'], function(config) {
                         if (j.status === 'ok') {
                             var target = j.redirect || (config.wwwroot + '/local/campus/mycourses.php');
                             window.location.href = target;
+                            return;
+                        }
+
+                        if (j.status === 'registration_closed') {
+                            showRegistrationClosed(redirEl ? redirEl.value : '', j);
                             return;
                         }
 

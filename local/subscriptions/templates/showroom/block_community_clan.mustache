@@ -1,0 +1,19 @@
+<section id="showroom-community" class="commerce-showroom-a1-block commerce-showroom-community-clan {{communityclanlayoutclass}}" style="--showroom-section-custom-background: {{communityclanlayoutbackgroundcolor}};">
+    {{#hascommunityclanlayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{communityclanlayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{communityclanlayoutbackgroundblur}}px;"><img src="{{communityclanlayoutbackgroundimageurl}}" alt="" loading="lazy"></span>{{/hascommunityclanlayoutbackgroundimage}}
+    <div class="commerce-showroom-container">
+        <div class="commerce-showroom-community-clan__hero">
+            <div class="commerce-showroom-community-clan__copy">
+                {{#claneyebrow}}<p class="commerce-showroom-community-clan__badge"><i class="{{clanbadgeicon}}" aria-hidden="true"></i><span>{{claneyebrow}}</span></p>{{/claneyebrow}}
+                <h2>{{clantitle}} {{#clantitleaccent}}<span>{{clantitleaccent}}</span>{{/clantitleaccent}}</h2>
+                <p>{{clantext}}</p>
+            </div>
+            <figure class="commerce-showroom-community-clan__visual">
+                {{#hasclanimage}}<img src="{{clanimageurl}}" alt="" loading="lazy">{{/hasclanimage}}
+                {{^hasclanimage}}<div class="commerce-showroom-community-clan__placeholder" aria-hidden="true"><i class="fa-regular fa-image"></i></div>{{/hasclanimage}}
+                {{#hasclanimagenote}}<figcaption>{{clanimagenote}}</figcaption>{{/hasclanimagenote}}
+            </figure>
+        </div>
+        <div class="commerce-showroom-a1-cards commerce-showroom-a1-cards--4">{{#clanitems}}<article><span><i class="{{icon}}" aria-hidden="true"></i></span><h3>{{title}}</h3><p>{{text}}</p></article>{{/clanitems}}</div>
+        {{#hasclanbutton}}<div class="commerce-showroom-a1-actions"><a class="commerce-showroom-btn commerce-showroom-btn--primary" href="{{clanbuttontarget}}">{{clanbuttonlabel}}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></div>{{/hasclanbutton}}
+    </div>
+</section>

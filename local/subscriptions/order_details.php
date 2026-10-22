@@ -8,12 +8,14 @@ require_once(__DIR__ . '/classes/commerce/tracking/CommerceTrackedActionUrl.php'
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\checkout\guest\CommerceProvisionalGuestAccountContext;
 use local_subscriptions\commerce\order\presentation\CommerceBundleComponentResolver;
+use local_subscriptions\commerce\order\presentation\CommerceCustomerRefundPresentation;
 use local_subscriptions\commerce\order\presentation\CommerceCustomerStatusResolver;
 use local_subscriptions\commerce\order\presentation\CommerceOrderExperienceResolver;
 use local_subscriptions\commerce\order\presentation\CommerceLegacyOrderAccessResolver;
 use local_subscriptions\commerce\order\presentation\CommerceOrderPresentationAccessDeniedException;
 use local_subscriptions\commerce\order\presentation\CommerceOrderPresentationService;
 use local_subscriptions\commerce\order\document\CommerceOrderDocumentHistoryRepository;
+use local_subscriptions\commerce\payment\refund\CommercePaymentRefundRepository;
 use local_subscriptions\commerce\catalog\persistence\CommerceCatalogHydrator;
 use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductTranslationRepository;
@@ -113,6 +115,43 @@ $experience = (new CommerceOrderExperienceResolver())->resolve($order);
 $orderstatus = $statusresolver->resolve_order($order->status);
 $paymentstatus = $statusresolver->resolve_payment($order->paymentstatus);
 $accessstatus = $statusresolver->resolve_access($order->fulfillmentstatus);
+
+$refundpresentation = $detailsrecord === null
+    ? CommerceCustomerRefundPresentation::from_amounts($order->totalminor, 0)
+    : CommerceCustomerRefundPresentation::resolve(
+        $detailsrecord,
+        new CommercePaymentRefundRepository($DB)
+    );
+$refundstatuslabel = $refundpresentation['hasrefund']
+    ? get_string(
+        $refundpresentation['isfull']
+            ? 'commerce_vocabulary_payment_status_client_refunded'
+            : 'commerce_vocabulary_payment_status_client_partially_refunded',
+        'local_subscriptions'
+    )
+    : '';
+
+$grantstatuses = $detailsrecord === null
+    ? []
+    : array_values(array_filter(array_map(
+        static fn($grant): string => strtolower(trim((string)($grant->status ?? ''))),
+        $detailsrecord->grants
+    )));
+$allgrantsrevoked = $grantstatuses !== []
+    && count(array_filter(
+        $grantstatuses,
+        static fn(string $status): bool => in_array(
+            $status,
+            ['revoked', 'refunded', 'cancelled', 'canceled'],
+            true
+        )
+    )) === count($grantstatuses);
+if ($allgrantsrevoked) {
+    $accessstatus = [
+        'label' => get_string('commerce_customer_access_revoked', 'local_subscriptions'),
+        'class' => 'refund',
+    ];
+}
 
 $supportemail = (string)(get_config('local_subscriptions', 'support_email') ?: 'support@campusfr.fr');
 $supportdestination = UrlFactory::support_for_order($reference);
@@ -376,6 +415,11 @@ $paymentcontext = [
         : userdate((int)($payment?->paidat ?? $order->paidat)),
     'providerreference' => $payment?->providerreference === null ? '—' : s($payment->providerreference),
     'transactionid' => $payment?->transactionid === null ? '—' : s($payment->transactionid),
+    'hasrefund' => $refundpresentation['hasrefund'],
+    'refundstatus' => $refundstatuslabel,
+    'refundamount' => $formatmoney($refundpresentation['refundedminor'], $order->currency),
+    'isfullyrefunded' => $refundpresentation['isfull'],
+    'ispartiallyrefunded' => $refundpresentation['ispartial'],
 ];
 
 $templatecontext = [
@@ -389,6 +433,12 @@ $templatecontext = [
     'hasaccessstatus' => $accessstatus !== null,
     'accessstatus' => $accessstatus['label'] ?? '',
     'accessstatusclass' => $accessstatus['class'] ?? 'neutral',
+    'hasrefund' => $refundpresentation['hasrefund'],
+    'refundstatus' => $refundstatuslabel,
+    'refundstatusclass' => 'refund',
+    'refundamount' => $formatmoney($refundpresentation['refundedminor'], $order->currency),
+    'isfullyrefunded' => $refundpresentation['isfull'],
+    'ispartiallyrefunded' => $refundpresentation['ispartial'],
     'backurl' => $requiresaccountfinalisation
         ? (new moodle_url(
             '/local/subscriptions/order_result.php',
@@ -441,6 +491,7 @@ foreach ($order->items as $index => $item) {
     $type = strtolower($item->type);
     $isbundleitem = $type === 'bundle';
     $itemmetadata = is_array($item->metadata ?? null) ? $item->metadata : [];
+    $isdonation = strtolower(trim((string)($itemmetadata['catalogue_type'] ?? ''))) === 'donation';
     $itemispersonaloffer = strtolower(trim((string)($itemmetadata['operation'] ?? ''))) === 'personaloffer';
 
     $itemcontext = [
@@ -451,7 +502,10 @@ foreach ($order->items as $index => $item) {
         'iscourse' => in_array($type, ['course_access', 'subscription', 'course'], true),
         'isdigital' => in_array($type, ['digital_download', 'digital'], true),
         'isbundleitem' => $isbundleitem,
-        'typelabel' => get_string(match (true) {
+        'isdonation' => $isdonation,
+        'typelabel' => $isdonation
+            ? get_string('commerce_product_type_donation', 'local_subscriptions')
+            : get_string(match (true) {
             $isbundleitem => 'commerce_i410_type_bundle',
             in_array($type, ['course_access', 'subscription', 'course'], true) => 'commerce_i410_type_course',
             in_array($type, ['digital_download', 'digital'], true) => 'commerce_i410_type_digital',
@@ -559,7 +613,13 @@ foreach ($order->items as $index => $item) {
             'order_details',
             $baseurl
         )->out(false);
-        $failedaccess = in_array(strtolower((string)$access->status), ['failed', 'error'], true)
+        $normalisedaccessstatus = strtolower(trim((string)$access->status));
+        $revokedaccess = in_array(
+            $normalisedaccessstatus,
+            ['revoked', 'refunded', 'cancelled', 'canceled'],
+            true
+        );
+        $failedaccess = in_array($normalisedaccessstatus, ['failed', 'error'], true)
             || in_array(strtolower((string)$order->fulfillmentstatus), ['failed', 'error'], true);
         $itemcontext['accesses'][] = [
             'iscourse' => $iscourseaccess,
@@ -572,8 +632,14 @@ foreach ($order->items as $index => $item) {
             'mobileurl' => $baseurl === null ? null : CommerceTrackedActionUrl::build($reference, 'order_download_file', 'order_details', new moodle_url($baseurl, ['version' => 'mobile']))->out(false),
             'hasdesktop' => $hasdesktop || ($access->type === 'digital_download' && !$hasmobile),
             'hasmobile' => $hasmobile,
-            'pendinglabel' => get_string($failedaccess ? 'commerce_access_temporarily_unavailable' : 'commerce_access_preparing', 'local_subscriptions'),
-            'accessstateclass' => $failedaccess ? 'failed' : 'preparing',
+            'pendinglabel' => get_string(
+                $revokedaccess
+                    ? 'commerce_customer_access_revoked'
+                    : ($failedaccess ? 'commerce_access_temporarily_unavailable' : 'commerce_access_preparing'),
+                'local_subscriptions'
+            ),
+            'accessstateclass' => $revokedaccess ? 'revoked' : ($failedaccess ? 'failed' : 'preparing'),
+            'accessstateicon' => $revokedaccess ? 'fa-ban' : ($failedaccess ? 'fa-triangle-exclamation' : 'fa-clock'),
             'resourcelabel' => $resolveaccesslabel($access),
             'hasresourcelabel' => $resolveaccesslabel($access) !== '',
         ];
@@ -586,6 +652,8 @@ foreach ($order->items as $index => $item) {
                 'isdigital' => $legacyaction['type'] === 'digital_download',
                 'hasurl' => !empty($legacyaction['url']),
                 'pendinglabel' => get_string('commerce_order_access_preparing', 'local_subscriptions'),
+                'accessstateclass' => 'preparing',
+                'accessstateicon' => 'fa-clock',
                 'hasresourcelabel' => trim((string)($legacyaction['resourcelabel'] ?? '')) !== '',
             ];
         }

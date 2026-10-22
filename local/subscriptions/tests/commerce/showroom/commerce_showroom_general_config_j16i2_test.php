@@ -76,9 +76,9 @@ final class commerce_showroom_general_config_j16i2_test extends \advanced_testca
             $CFG->dirroot . '/local/subscriptions/admin/commerce/showrooms/edit.php'
         );
 
-        $this->assertStringContainsString("'linkedcourse'", $editor);
-        $this->assertStringContainsString("'linkedpdf'", $editor);
-        $this->assertStringContainsString("'linkedbundle'", $editor);
+        $this->assertStringContainsString("'productrole[]'", $editor);
+        $this->assertStringContainsString("'productsku[]'", $editor);
+        $this->assertStringContainsString("'data-action' => 'add-product-role'", $editor);
         $this->assertStringNotContainsString(
             "'productsjson' => 'Produits liés (JSON)'",
             $editor

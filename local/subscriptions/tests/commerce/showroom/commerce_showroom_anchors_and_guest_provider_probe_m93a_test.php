@@ -12,7 +12,7 @@ final class commerce_showroom_anchors_and_guest_provider_probe_m93a_test extends
         global $CFG;
 
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
         self::assertIsString($template);
 

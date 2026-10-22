@@ -16,12 +16,14 @@ final class CommerceProductType {
     public const DIGITAL_DOWNLOAD = 'digital_download';
     public const BUNDLE = 'bundle';
     public const SERVICE = 'service';
+    public const DONATION = 'donation';
 
     private const KNOWN_TYPES = [
         self::COURSE_ACCESS,
         self::DIGITAL_DOWNLOAD,
         self::BUNDLE,
         self::SERVICE,
+        self::DONATION,
     ];
 
     private function __construct() {

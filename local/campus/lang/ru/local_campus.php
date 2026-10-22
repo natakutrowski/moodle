@@ -363,3 +363,10 @@ $string['mycourses_learning_start'] = 'Начало потока: {$a}';
 $string['mycourses_learning_next_lesson'] = 'Следующий урок: {$a->lesson} · {$a->date}';
 $string['mycourses_learning_next_promo_step'] = 'Следующий этап потока: {$a->lesson} · {$a->date}';
 $string['mycourses_learning_section_fallback'] = 'Раздел {$a}';
+
+// 7.98D2 — fermeture des nouvelles inscriptions Trial.
+$string['trial_registration_closed_html'] = 'Новые регистрации на бесплатный пробный доступ закрыты. Если у вас уже был пробный аккаунт, <a href="{$a->login}">войдите</a>, чтобы продолжить. В остальных случаях вы можете выбрать доступный курс.';
+$string['trial_registration_closed_msg'] = 'Новые регистрации на бесплатный пробный доступ закрыты.';
+
+$string['trial_native_authority_heading'] = 'Trial управляется Native Commerce';
+$string['trial_native_authority_desc'] = 'Начиная с 7.98D длительность Trial, идентификация Trial и завершение доступа управляются local_subscriptions. Старые настройки Campus для длительности, блокировки и удаления аккаунта больше не используются и не показываются здесь.';

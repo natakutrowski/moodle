@@ -1,5 +1,5 @@
 <div class="{{#featured}}col-12{{/featured}}{{^featured}}col-12 col-lg-6{{/featured}} d-flex">
-    <article class="commerce-product-card card border-0 shadow-sm w-100 overflow-hidden{{#featured}} commerce-product-card--featured{{/featured}}">
+    <article class="commerce-product-card card border-0 shadow-sm w-100 overflow-hidden{{#featured}} commerce-product-card--featured{{/featured}}"{{#isdonation}} data-storefront-donation-scope{{/isdonation}}>
         {{#featured}}
             <div class="commerce-product-card__featured-label">{{featuredlabel}}</div>
         {{/featured}}
@@ -50,6 +50,7 @@
             <div class="mt-auto position-relative" style="z-index:2">
                 {{^owned}}
                     {{> local_subscriptions/storefront/product_price }}
+                    {{> local_subscriptions/storefront/donation_amount_selector }}
                 {{/owned}}
                 {{^owned}}
                     {{#hastrustitems}}
@@ -70,7 +71,7 @@
                                 {{^upgradeincart}}<input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}">{{/upgradeincart}}
                                 <input type="hidden" name="sku" value="{{sku}}">
                                 <input type="hidden" name="priceid" value="{{upgradepriceid}}">
-                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="quantity" value="1">{{#isdonation}}<input type="hidden" name="donationunits" value="{{donationdefaultunits}}" data-storefront-donation-units>{{/isdonation}}
                                 <input type="hidden" name="currency" value="{{cartcurrency}}">
                                 <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
                                 <input type="hidden" name="sesskey" value="{{cartsesskey}}">
@@ -83,7 +84,7 @@
                                     <input type="hidden" name="targetplanid" value="{{upgradetargetplanid}}">
                                     <input type="hidden" name="sku" value="{{sku}}">
                                     <input type="hidden" name="priceid" value="{{upgradepriceid}}">
-                                    <input type="hidden" name="quantity" value="1">
+                                    <input type="hidden" name="quantity" value="1">{{#isdonation}}<input type="hidden" name="donationunits" value="{{donationdefaultunits}}" data-storefront-donation-units>{{/isdonation}}
                                     <input type="hidden" name="currency" value="{{cartcurrency}}">
                                     <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
                                     <input type="hidden" name="sesskey" value="{{cartsesskey}}">
@@ -100,7 +101,7 @@
                                     <input type="hidden" name="action" value="{{toggleaction}}">
                                     <input type="hidden" name="sku" value="{{sku}}">
                                     <input type="hidden" name="priceid" value="{{id}}">
-                                    <input type="hidden" name="quantity" value="1">
+                                    <input type="hidden" name="quantity" value="1">{{#isdonation}}<input type="hidden" name="donationunits" value="{{donationdefaultunits}}" data-storefront-donation-units>{{/isdonation}}
                                     <input type="hidden" name="currency" value="{{cartcurrency}}">
                                     <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
                                     <input type="hidden" name="sesskey" value="{{cartsesskey}}">
@@ -113,7 +114,7 @@
                                         <input type="hidden" name="action" value="{{toggleaction}}">
                                         <input type="hidden" name="sku" value="{{sku}}">
                                         <input type="hidden" name="priceid" value="{{id}}">
-                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="quantity" value="1">{{#isdonation}}<input type="hidden" name="donationunits" value="{{donationdefaultunits}}" data-storefront-donation-units>{{/isdonation}}
                                         <input type="hidden" name="currency" value="{{cartcurrency}}">
                                         <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
                                         <input type="hidden" name="sesskey" value="{{cartsesskey}}">
@@ -125,7 +126,7 @@
                                         <input type="hidden" name="action" value="buynow"><input type="hidden" name="source" value="storefront">
                                         <input type="hidden" name="sku" value="{{sku}}">
                                         <input type="hidden" name="priceid" value="{{id}}">
-                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="quantity" value="1">{{#isdonation}}<input type="hidden" name="donationunits" value="{{donationdefaultunits}}" data-storefront-donation-units>{{/isdonation}}
                                         <input type="hidden" name="currency" value="{{cartcurrency}}">
                                         <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
                                         <input type="hidden" name="sesskey" value="{{cartsesskey}}">
@@ -148,7 +149,7 @@
                                     <input type="hidden" name="operation" value="promotion_join">
                                     <input type="hidden" name="sku" value="{{sku}}">
                                     <input type="hidden" name="priceid" value="{{promotionjoincatalogpriceid}}">
-                                    <input type="hidden" name="quantity" value="1">
+                                    <input type="hidden" name="quantity" value="1">{{#isdonation}}<input type="hidden" name="donationunits" value="{{donationdefaultunits}}" data-storefront-donation-units>{{/isdonation}}
                                     <input type="hidden" name="currency" value="{{cartcurrency}}">
                                     <input type="hidden" name="returnurl" value="{{cartreturnurl}}">
                                     <input type="hidden" name="sesskey" value="{{cartsesskey}}">

@@ -25,7 +25,9 @@ final class InboxSectionNavigationRenderer {
     public static function render(string $active): string {
         global $USER;
 
-        $unreadcount = (new InboxUnreadCountService())->count();
+        $unreadcount = AdminSecurity::can(Capabilities::VIEW_INBOX)
+            ? (new InboxUnreadCountService())->count()
+            : 0;
         $draftcount = AdminSecurity::can(Capabilities::MANAGE_INBOX)
             ? (new InboxDraftRepository())->count_compose_drafts((int)$USER->id)
             : 0;
@@ -37,7 +39,7 @@ final class InboxSectionNavigationRenderer {
                 'url' => new moodle_url(
                     subscription_config::admin_inbox_page()
                 ),
-                'visible' => true,
+                'visible' => AdminSecurity::can(Capabilities::VIEW_INBOX),
                 'count' => $unreadcount,
             ],
             self::COMPOSE => [

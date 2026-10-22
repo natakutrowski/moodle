@@ -1,0 +1,24 @@
+{
+  "sectionbackground": "campuspink",
+  "sectionspacing": "normal",
+  "telegramurl": "https://t.me/natakutrowski",
+  "whatsappurl": "https://wa.me/33759647925?text=Bonjour%20CampusFR",
+  "buttonurl": "https://t.me/natakutrowski",
+  "translations": {
+    "ru": {
+      "title": "Остались вопросы перед путешествием?",
+      "text": "Не хочется начинать путешествие с багажом вопросов? 😄 Напиши нам!\nГюстав и команда CampusFR помогут разобраться с покупкой, доступом и любыми вопросами по курсу.",
+      "buttonlabel": "Написать нам"
+    },
+    "fr": {
+      "title": "Encore des questions avant le voyage ?",
+      "text": "Tu ne veux pas commencer le voyage avec une valise pleine de questions ? 😄 Écris-nous !\nGustave et l’équipe CampusFR t’aideront pour l’achat, l’accès et toutes tes questions sur le cours.",
+      "buttonlabel": "Nous écrire"
+    },
+    "en": {
+      "title": "Still have questions before the journey?",
+      "text": "Don’t want to start your journey with a suitcase full of questions? 😄 Write to us!\nGustave and the CampusFR team will help with purchasing, access, and any questions about the course.",
+      "buttonlabel": "Contact us"
+    }
+  }
+}

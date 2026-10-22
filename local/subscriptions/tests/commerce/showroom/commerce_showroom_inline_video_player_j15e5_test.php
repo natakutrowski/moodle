@@ -19,7 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 final class commerce_showroom_inline_video_player_j15e5_test extends \advanced_testcase {
     public function test_inline_video_markup_contains_accessible_states_and_fallback(): void {
         global $CFG;
-        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache');
         self::assertStringContainsString('preload="metadata"', $template);
         self::assertStringContainsString('data-showroom-inline-video-control', $template);
         self::assertStringContainsString('data-replay-label', $template);

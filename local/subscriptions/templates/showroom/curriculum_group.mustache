@@ -1,0 +1,15 @@
+<article class="commerce-showroom-curriculum__group">
+    <header>
+        <span><i class="{{icon}}" aria-hidden="true"></i></span>
+        <h3>{{title}}</h3>
+    </header>
+    <div>
+        {{#items}}
+            <p class="{{^hasnumber}}commerce-showroom-curriculum__item--check{{/hasnumber}}">
+                {{#hasnumber}}<strong>{{number}}</strong>{{/hasnumber}}
+                {{^hasnumber}}<strong class="commerce-showroom-curriculum__check" aria-hidden="true"><i class="fa-solid fa-check"></i></strong>{{/hasnumber}}
+                <span>{{title}}</span>
+            </p>
+        {{/items}}
+    </div>
+</article>

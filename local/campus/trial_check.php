@@ -19,8 +19,33 @@ try {
         throw new moodle_exception('invalidcourseid');
     }
 
+    $registrationsopen = local_campus_trial_registrations_are_open();
+
+    // Après Date A, un Trial existant déjà connecté conserve son accès même
+    // sans cookie Legacy. La souscription Native est l'autorité privilégiée.
+    if (!$registrationsopen && isloggedin() && !isguestuser()) {
+        if (class_exists('\local_subscriptions\trial_manager') &&
+                \local_subscriptions\trial_manager::user_has_active_trial((int)$USER->id)) {
+            $url = (new moodle_url('/course/view.php', ['id' => $redirectid]))->out(false);
+            echo json_encode(['status' => 'ok', 'redirect' => $url]);
+            exit;
+        }
+    }
+
     $c = local_campus_get_cookie();
     if (!$c || $c['expiresat'] < time()) {
+        if (!$registrationsopen) {
+            local_campus_clear_cookie();
+            $loginurl = (new moodle_url('/login/index.php', [
+                'returnurl' => (new moodle_url('/course/view.php', ['id' => $redirectid]))->out(false),
+            ]))->out(false);
+            echo json_encode([
+                'status' => 'registration_closed',
+                'subscribe' => (new moodle_url('/boutique'))->out(false),
+                'login' => $loginurl,
+            ]);
+            exit;
+        }
         echo json_encode(['status'=>'needs_form']); exit;
     }
 
@@ -41,7 +66,21 @@ try {
         echo json_encode(['status'=>'ok','redirect'=>$url]); exit;
     }
 
-    // Sinon, pas d'auto-login -> on demande le formulaire
+    // Sinon, après Date A on ne ré-ouvre jamais le formulaire d'inscription.
+    // Un utilisateur Trial existant peut toujours se connecter normalement.
+    if (!$registrationsopen) {
+        $loginurl = (new moodle_url('/login/index.php', [
+            'returnurl' => (new moodle_url('/course/view.php', ['id' => $redirectid]))->out(false),
+        ]))->out(false);
+        echo json_encode([
+            'status' => 'registration_closed',
+            'subscribe' => (new moodle_url('/boutique'))->out(false),
+            'login' => $loginurl,
+        ]);
+        exit;
+    }
+
+    // Sinon, pas d'auto-login -> on demande le formulaire.
     echo json_encode(['status'=>'needs_form']); exit;
 
 } catch (Throwable $e) {

@@ -22,7 +22,7 @@ final class commerce_showroom_faq_content_badge_j16e1_test extends \advanced_tes
         global $CFG;
 
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
 
         self::assertIsString($template);

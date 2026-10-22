@@ -15,7 +15,9 @@ final class CommerceCustomerAccessPromisePresenter {
         $kind = (string)($promise['kind'] ?? 'immediate_generic');
         $items = [];
 
-        $title = get_string('commerce_m61_access_title', 'local_subscriptions');
+        $title = $kind === 'donation'
+            ? get_string('commerce_donation_promise_title', 'local_subscriptions')
+            : get_string('commerce_m61_access_title', 'local_subscriptions');
         $lead = get_string(
             'commerce_m61_access_lead_' . $kind,
             'local_subscriptions'
@@ -118,6 +120,7 @@ final class CommerceCustomerAccessPromisePresenter {
             'bundle' => [
                 ['fa-box-open', 'commerce_m62_access_bundle'],
             ],
+            'donation' => [],
             'upgrade' => [
                 ['fa-arrow-up-right-dots', 'commerce_m62_access_upgrade'],
                 ['fa-chart-line', 'commerce_m62_access_owner_progress'],

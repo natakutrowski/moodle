@@ -7,6 +7,7 @@ namespace local_subscriptions\commerce\pricing;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\storefront\repository\CommerceStorefrontRepository;
+use local_subscriptions\commerce\catalog\domain\CommerceProductType;
 
 /** Builds the canonical commercial price chain for a calculated cart line. */
 final class CommerceCommercialPriceResolver {
@@ -38,6 +39,30 @@ final class CommerceCommercialPriceResolver {
             0,
             min(100, (int)($metadata['trialdiscountpercent'] ?? 0))
         );
+
+        // A Donation catalogue price is only the contribution unit. The customer-selected
+        // amount is the actual commercial price, not an uplift/discount against that unit.
+        // Freeze the selected amount as both initial and final so downstream accounting
+        // invariants stay exact and no promotion/credit can be inferred from the difference.
+        if ($calculated->get_product_type() === CommerceProductType::DONATION) {
+            return new CommerceCommercialPriceBreakdown(
+                $currency,
+                $quantity,
+                $finalunit,
+                0,
+                $finalunit,
+                0,
+                $finalunit,
+                0,
+                $finalunit,
+                0,
+                0,
+                'donation',
+                null,
+                null,
+                0
+            );
+        }
 
         // promotion_join is not a discounted second purchase of the course.
         // The owner tariff is the actual commercial price of accompaniment,

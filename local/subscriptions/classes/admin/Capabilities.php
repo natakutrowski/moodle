@@ -5,6 +5,9 @@ namespace local_subscriptions\admin;
 defined('MOODLE_INTERNAL') || die();
 
 final class Capabilities {
+    public const MANAGE_SHOWROOMS = 'local/subscriptions:manage_showrooms';
+    public const MANAGE_PURCHASE_NOTES = 'local/subscriptions:manage_purchase_notes';
+    public const MANAGE_CRM_ROLES = 'local/subscriptions:manage_crm_roles';
     public const VIEW_DASHBOARD = 'local/subscriptions:view_dashboard';
     public const VIEW_USERS = 'local/subscriptions:view_users';
     public const MANAGE_USERS = 'local/subscriptions:manage_users';

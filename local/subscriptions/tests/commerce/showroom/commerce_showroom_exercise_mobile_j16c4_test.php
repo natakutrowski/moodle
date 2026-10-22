@@ -10,7 +10,7 @@ defined('MOODLE_INTERNAL') || die();
 final class commerce_showroom_exercise_mobile_j16c4_test extends \advanced_testcase {
     public function test_template_exposes_single_responsive_exercise_explorer(): void {
         global $CFG;
-        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache');
         self::assertIsString($template);
         self::assertStringContainsString('{{#isexerciseexplorer}}', $template);
         self::assertStringContainsString('data-showroom-exercise-preview-body', $template);

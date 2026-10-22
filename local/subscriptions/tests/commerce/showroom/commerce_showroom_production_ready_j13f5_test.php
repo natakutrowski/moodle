@@ -16,7 +16,7 @@ final class commerce_showroom_production_ready_j13f5_test extends \advanced_test
         );
         $controller = file_get_contents($root . '/showroom.php');
         $template = file_get_contents(
-            $root . '/templates/showroom/third_group_verbs.mustache'
+            $root . '/templates/showroom/default.mustache'
         );
         $javascript = file_get_contents($root . '/amd/src/showroom.js');
         $css = file_get_contents($root . '/styles/showroom.css');

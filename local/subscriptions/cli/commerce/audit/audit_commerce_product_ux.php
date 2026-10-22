@@ -15,7 +15,7 @@ foreach ($steps as $step) {
         $errors[] = 'Number embedded in step label: ' . $label;
     }
 }
-foreach (['course_access', 'digital_download', 'bundle', 'service'] as $type) {
+foreach (['course_access', 'digital_download', 'bundle', 'service', 'donation'] as $type) {
     if (CommerceProductPresentation::type_label($type) === $type) {
         $errors[] = 'Technical type exposed: ' . $type;
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace local_subscriptions\commerce\showroom;
 
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomOfferConfig;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\catalog\assets\CommerceCatalogMediaManager;
@@ -13,6 +14,12 @@ use local_subscriptions\commerce\storefront\readmodel\CommerceStorefrontPrice;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\commerce\personaloffer\service\CommercePersonalOfferShoppingContextService;
+use local_subscriptions\commerce\catalog\domain\CommerceProductType;
+use local_subscriptions\commerce\donation\CommerceDonationAmountPolicy;
+use local_subscriptions\commerce\donation\CommerceDonationIntentSession;
+use local_subscriptions\commerce\cart\repository\CommerceSessionCartRepository;
+use local_subscriptions\commerce\cart\service\CommerceCartSessionKeyResolver;
+use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinOperation;
 
 /** Resolves products attached to a Showroom while keeping incomplete catalogues non-fatal. */
 final class CommerceShowroomProductResolver {
@@ -59,7 +66,8 @@ final class CommerceShowroomProductResolver {
         }
         $offers = $this->apply_bundle_merchandising_price($offers, $currency);
         $offers = $this->apply_bundle_ownership_rules($offers);
-        return $this->apply_personal_offer_pricing($definition, $offers, $currency);
+        $offers = $this->apply_personal_offer_pricing($definition, $offers, $currency);
+        return $this->apply_donation_merchandising($definition, $offers);
     }
 
     /** @return array<string,mixed> */
@@ -76,16 +84,17 @@ final class CommerceShowroomProductResolver {
             $product = null;
         }
 
+        $rolelabel = $this->role_label($role);
         $base = [
             'role' => $role,
-            'rolelabel' => get_string('commerce_showroom_offer_' . $role, 'local_subscriptions'),
+            'rolelabel' => $rolelabel,
             'showroomkey' => $definition->get_key(),
             'sku' => $sku,
             'available' => false,
             'owned' => false,
             'canbuy' => false,
             'canaccess' => false,
-            'name' => get_string('commerce_showroom_offer_' . $role, 'local_subscriptions'),
+            'name' => $rolelabel,
             'shortdescription' => get_string('commerce_showroom_offer_pending', 'local_subscriptions'),
             'hascover' => false,
             'coverurl' => '',
@@ -121,6 +130,58 @@ final class CommerceShowroomProductResolver {
             'buylabel' => get_string('commerce_showroom_buy_now', 'local_subscriptions'),
             'detailslabel' => get_string('commerce_showroom_view_details', 'local_subscriptions'),
             'showdetails' => $definition->is_offer_details_enabled($role),
+            'cataloguetype' => '',
+            'isdonation' => false,
+            'donationmaxunits' => 0,
+            'donationdefaultunits' => 0,
+            'donationpresets' => [],
+            'hasdonationcompanion' => false,
+            'donationcompanionoptional' => false,
+            'donationcompanionrequired' => false,
+            // Existing owners can buy the pedagogical accompaniment without
+            // repurchasing the course. These fields mirror the authoritative
+            // Storefront promotion_join contract.
+            'haspromotionjoincontext' => false,
+            'promotionjoineligible' => false,
+            'promotionjoinreason' => null,
+            'promotionjoinoperation' => CommercePedagogicalPromotionJoinOperation::OPERATION,
+            'promotionjoinpromotionid' => null,
+            'promotionjoinpromotionkey' => '',
+            'promotionjoinpromotionname' => '',
+            'promotionjoincourseid' => null,
+            'promotionjoinownershipsource' => null,
+            'promotionjoinremaining' => null,
+            'promotionjoinpurchasable' => false,
+            'promotionjoinpriceformatted' => '',
+            'promotionjoinpriceid' => null,
+            'promotionjoincatalogpriceid' => null,
+            'promotionjoinactionlabel' => get_string(
+                'commerce_promotion_join_action',
+                'local_subscriptions'
+            ),
+            'promotionjoinactionpricelabel' => get_string(
+                'commerce_promotion_join_action',
+                'local_subscriptions'
+            ),
+            'promotionjoinownerpricelabel' => get_string(
+                'commerce_m62_owner_price_label',
+                'local_subscriptions'
+            ),
+            'promotionjoinownerpricebadge' => get_string(
+                'commerce_m62_owner_price_badge',
+                'local_subscriptions'
+            ),
+            'promotionjoinownerpricehelp' => get_string(
+                'commerce_m62_owner_price_help',
+                'local_subscriptions'
+            ),
+            'promotionjoinincart' => false,
+            'carturl' => UrlFactory::cart(['currency' => $currency])->out(false),
+            'cartlabel' => get_string('commerce_cart_title', 'local_subscriptions'),
+            'hasaccesspromise' => false,
+            'accesspromisekind' => '',
+            'accesspromisepromotionlabel' => '',
+            'hasaccesspromisepromotion' => false,
         ];
 
         if ($product === null) {
@@ -197,13 +258,146 @@ final class CommerceShowroomProductResolver {
             ),
             'ownedactionurl' => (string)($card['ownedactionurl'] ?? ''),
             'ownedactionlabel' => (string)($card['ownedactionlabel'] ?? $base['ownedactionlabel']),
+            'cataloguetype' => $product->get_type(),
+            'isdonation' => $product->get_type() === CommerceProductType::DONATION,
             'componentskus' => array_values(array_filter(array_map(
                 static fn(array $component): string => strtoupper(trim((string)($component['sku'] ?? ''))),
                 $product->get_components()
             ))),
+            'haspromotionjoincontext' => !empty($card['haspromotionjoincontext']),
+            'promotionjoineligible' => !empty($card['promotionjoineligible']),
+            'promotionjoinreason' => $card['promotionjoinreason'] ?? null,
+            'promotionjoinoperation' => (string)(
+                $card['promotionjoinoperation']
+                    ?? CommercePedagogicalPromotionJoinOperation::OPERATION
+            ),
+            'promotionjoinpromotionid' => $card['promotionjoinpromotionid'] ?? null,
+            'promotionjoinpromotionkey' => (string)($card['promotionjoinpromotionkey'] ?? ''),
+            'promotionjoinpromotionname' => (string)($card['promotionjoinpromotionname'] ?? ''),
+            'promotionjoincourseid' => $card['promotionjoincourseid'] ?? null,
+            'promotionjoinownershipsource' => $card['promotionjoinownershipsource'] ?? null,
+            'promotionjoinremaining' => $card['promotionjoinremaining'] ?? null,
+            'promotionjoinpurchasable' => !empty($card['promotionjoinpurchasable']),
+            'promotionjoinpriceformatted' => (string)($card['promotionjoinpriceformatted'] ?? ''),
+            'promotionjoinpriceid' => $card['promotionjoinpriceid'] ?? null,
+            'promotionjoincatalogpriceid' => $card['promotionjoincatalogpriceid'] ?? null,
+            'promotionjoinactionlabel' => (string)(
+                $card['promotionjoinactionlabel']
+                    ?? $base['promotionjoinactionlabel']
+            ),
+            'promotionjoinactionpricelabel' => (string)(
+                $card['promotionjoinactionpricelabel']
+                    ?? $base['promotionjoinactionpricelabel']
+            ),
+            'promotionjoinownerpricelabel' => (string)(
+                $card['promotionjoinownerpricelabel']
+                    ?? $base['promotionjoinownerpricelabel']
+            ),
+            'promotionjoinownerpricebadge' => (string)(
+                $card['promotionjoinownerpricebadge']
+                    ?? $base['promotionjoinownerpricebadge']
+            ),
+            'promotionjoinownerpricehelp' => (string)(
+                $card['promotionjoinownerpricehelp']
+                    ?? $base['promotionjoinownerpricehelp']
+            ),
+            'promotionjoinincart' => $this->promotion_join_in_cart(
+                $sku,
+                $currency
+            ),
+            'hasaccesspromise' => !empty($card['hasaccesspromise']),
+            'accesspromisekind' => (string)($card['accesspromisekind'] ?? ''),
+            'accesspromisepromotionlabel' => (string)($card['accesspromisepromotionlabel'] ?? ''),
+            'hasaccesspromisepromotion' => !empty($card['hasaccesspromisepromotion']),
         ]);
     }
 
+
+
+
+    /**
+     * Adds generic Donation controls without knowing any product/showroom key.
+     *
+     * A Donation offer gets its own free-amount selector. When the same
+     * Showroom also contains a normal purchasable offer, that offer receives an
+     * optional Donation companion configuration so "course + contribution" can
+     * be submitted as two independent Commerce lines.
+     *
+     * @param array<int,array<string,mixed>> $offers
+     * @return array<int,array<string,mixed>>
+     */
+    private function apply_donation_merchandising(CommerceShowroomDefinition $definition, array $offers): array {
+        $policy = new CommerceDonationAmountPolicy();
+        $intent = new CommerceDonationIntentSession($policy);
+        $maxunits = $policy->max_units();
+        $presets = $policy->preset_units();
+
+        $donation = null;
+        foreach ($offers as &$offer) {
+            if (empty($offer['isdonation'])) {
+                continue;
+            }
+            $offer['donationmaxunits'] = $maxunits;
+            $offer['donationdefaultunits'] = $intent->resolve((string)$offer['sku']);
+            $offer['donationpresets'] = array_map(
+                static fn(int $units): array => ['units' => $units],
+                $presets
+            );
+            $offer['buylabel'] = get_string('commerce_donation_contribute', 'local_subscriptions');
+            if (!empty($offer['available']) && !empty($offer['priceid'])) {
+                $donation = $offer;
+            }
+        }
+        unset($offer);
+
+        if ($donation === null) {
+            return $offers;
+        }
+
+        foreach ($offers as &$offer) {
+            if (!empty($offer['isdonation']) || empty($offer['canbuy'])) {
+                continue;
+            }
+            $mode = $definition->get_offer_donation_mode((string)$offer['role']);
+            if ($mode === CommerceShowroomOfferConfig::DONATION_MODE_NONE) {
+                continue;
+            }
+            $offer['hasdonationcompanion'] = true;
+            $offer['donationcompanionoptional'] = $mode === CommerceShowroomOfferConfig::DONATION_MODE_OPTIONAL;
+            $offer['donationcompanionrequired'] = $mode === CommerceShowroomOfferConfig::DONATION_MODE_REQUIRED;
+            $offer['donationcompanionsku'] = (string)$donation['sku'];
+            $offer['donationcompanionpriceid'] = (int)$donation['priceid'];
+            $offer['donationcompanionrole'] = (string)$donation['role'];
+            $offer['donationcompanionamountminor'] = (int)($donation['amountminor'] ?? 0);
+            $offer['donationcompanioncurrency'] = (string)$donation['currency'];
+            $offer['donationmaxunits'] = $maxunits;
+            $offer['donationdefaultunits'] = $intent->resolve((string)$donation['sku']);
+            $offer['donationpresets'] = array_map(
+                static fn(int $units): array => ['units' => $units],
+                $presets
+            );
+        }
+        unset($offer);
+        return $offers;
+    }
+
+    /**
+     * Human-readable fallback for arbitrary Showroom product roles.
+     *
+     * Legacy roles keep their translated labels. New CMS-defined roles must
+     * not require a PHP language string merely to pass through the generic
+     * Showroom engine; the Builder can still override rolelabel editorially.
+     */
+    private function role_label(string $role): string {
+        $role = strtolower(trim($role));
+        return match ($role) {
+            'course', 'pdf', 'bundle' => get_string(
+                'commerce_showroom_offer_' . $role,
+                'local_subscriptions'
+            ),
+            default => ucwords(str_replace(['_', '-'], ' ', $role)),
+        };
+    }
 
     /**
      * Compact deadline used only on showroom cards; the storefront keeps its full wording.
@@ -369,6 +563,45 @@ final class CommerceShowroomProductResolver {
             'showroomoffer' => $role,
         ]);
         return $target->out(false);
+    }
+
+    private function promotion_join_in_cart(string $sku, string $currency): bool {
+        global $USER;
+
+        if (!isloggedin() || isguestuser()) {
+            return false;
+        }
+
+        $currency = strtoupper(trim($currency));
+        if (!preg_match('/^[A-Z]{3}$/', $currency)) {
+            return false;
+        }
+
+        $cart = (new CommerceSessionCartRepository())->find(
+            (new CommerceCartSessionKeyResolver())->resolve(
+                (int)$USER->id,
+                $currency
+            )
+        );
+        if ($cart === null) {
+            return false;
+        }
+
+        $sku = strtoupper(trim($sku));
+        foreach ($cart->get_items() as $item) {
+            if ($item->get_product_sku() !== $sku) {
+                continue;
+            }
+            if (
+                strtolower(trim((string)(
+                    $item->get_metadata()['operation'] ?? ''
+                ))) === CommercePedagogicalPromotionJoinOperation::OPERATION
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** @param array<int,CommerceStorefrontPrice> $prices */

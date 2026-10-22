@@ -104,6 +104,7 @@ final class CommerceMailBuilder {
             'username',
             'order_reference',
             'order_total',
+            'donation_amount',
             'order_url',
             'my_purchases_url',
             'my_courses_url',

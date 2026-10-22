@@ -8,6 +8,7 @@ use local_subscriptions\commerce\storefront\page\CommerceStorefrontPagePresenter
 use local_subscriptions\commerce\cart\presentation\CommerceCartPresenter;
 use local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory;
 use local_subscriptions\commerce\checkout\guest\CommerceGuestCartCustomerResolver;
+use local_subscriptions\commerce\checkout\flow\CommerceDirectPurchaseResumePresenter;
 use local_subscriptions\commerce\storefront\recommendation\CommerceStorefrontRecommendationResolver;
 use local_subscriptions\commerce\storefront\recommendation\CommerceStorefrontRecommendationService;
 use local_subscriptions\commerce\storefront\page\CommerceStorefrontPageResolver;
@@ -29,6 +30,7 @@ use local_subscriptions\commerce\catalog\currency\CommerceCurrencyRegistry;
 use local_subscriptions\currency\Currency;
 
 use local_subscriptions\commerce\currency\selection\CommerceCurrencySurfaceSelectionService;
+use local_subscriptions\commerce\donation\CommerceDonationStorefrontPresenter;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -153,6 +155,7 @@ $PAGE->requires->css(
     new moodle_url('/local/subscriptions/styles/storefront.css')
 );
 $PAGE->requires->js_call_amd('local_subscriptions/storefront_premium', 'init');
+$PAGE->requires->js_call_amd('local_subscriptions/storefront_donation', 'init');
 
 $data = (new CommerceStorefrontPagePresenter())->present(
     $product,
@@ -220,8 +223,16 @@ if (
     );
     $data['ownedactionurl'] = (new moodle_url('/login/index.php'))->out(false);
 }
-$cartdata = CommerceCartPresenter::present(
-    CommerceCartRuntimeFactory::create()->snapshot($customerid, $currency, current_language())
+$cartsnapshot = CommerceCartRuntimeFactory::create()->snapshot(
+    $customerid,
+    $currency,
+    current_language()
+);
+$cartdata = CommerceCartPresenter::present($cartsnapshot);
+$data = (new CommerceDonationStorefrontPresenter())->decorate(
+    $data,
+    $currency,
+    $cartsnapshot
 );
 $cartkeys = [];
 foreach ($cartdata['items'] as $cartitem) {
@@ -229,11 +240,21 @@ foreach ($cartdata['items'] as $cartitem) {
 }
 foreach ($data['prices'] as &$price) {
     $key = strtoupper((string)$data['sku']) . ':' . (int)$price['id'];
-    $price['incart'] = isset($cartkeys[$key]);
-    $price['toggleaction'] = $price['incart'] ? 'remove' : 'add';
-    $price['togglelabel'] = $price['incart']
-        ? get_string('commerce_cart_remove_from_cart', 'local_subscriptions')
-        : get_string('commerce_cart_add', 'local_subscriptions');
+    $actualincart = isset($cartkeys[$key]);
+    if (!empty($data['isdonation'])) {
+        $price['incart'] = false;
+        $price['toggleaction'] = 'add';
+        $price['togglelabel'] = $actualincart
+            ? get_string('commerce_donation_update_cart', 'local_subscriptions')
+            : get_string('commerce_cart_add', 'local_subscriptions');
+        $price['donationincart'] = $actualincart;
+    } else {
+        $price['incart'] = $actualincart;
+        $price['toggleaction'] = $price['incart'] ? 'remove' : 'add';
+        $price['togglelabel'] = $price['incart']
+            ? get_string('commerce_cart_remove_from_cart', 'local_subscriptions')
+            : get_string('commerce_cart_add', 'local_subscriptions');
+    }
 }
 unset($price);
 if (!empty($data['upgradepriceid'])) {
@@ -253,7 +274,9 @@ if (!empty($data['promotionjoincatalogpriceid'])) {
         ? get_string('commerce_cart_remove_from_cart', 'local_subscriptions')
         : $data['promotionjoinaddlabel'];
 }
-$data['buy_now_label'] = get_string('commerce_cart_buy_now', 'local_subscriptions');
+$data['buy_now_label'] = !empty($data['isdonation'])
+    ? get_string('commerce_donation_contribute', 'local_subscriptions')
+    : get_string('commerce_cart_buy_now', 'local_subscriptions');
 $data['standardpricelabel'] = get_string(
     'commerce_storefront_price_standard',
     'local_subscriptions'
@@ -278,6 +301,10 @@ $data['carturl'] = (UrlFactory::cart(['currency' => $currency]))->out(false);
 $data['cartlabel'] = get_string('commerce_cart_view', 'local_subscriptions');
 $data['cartlinecount'] = $cartdata['linecount'];
 $data['carttotalformatted'] = $cartdata['totalformatted'];
+$data = array_replace(
+    $data,
+    CommerceDirectPurchaseResumePresenter::present()
+);
 $cartnotice = optional_param('cartnotice', '', PARAM_ALPHANUMEXT);
 if ($cartnotice !== '') {
     $stringkey = 'commerce_cart_message_' . $cartnotice;

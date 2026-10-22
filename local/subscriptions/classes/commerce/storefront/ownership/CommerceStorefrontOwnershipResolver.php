@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\persistence\CommercePersistenceSchema;
 use local_subscriptions\commerce\education\promotionjoin\CommercePedagogicalPromotionJoinGrant;
+use local_subscriptions\commerce\catalog\domain\CommerceProductType;
 
 /** Resolves effective ownership across Native and transitional Legacy sources. */
 final class CommerceStorefrontOwnershipResolver {
@@ -24,15 +25,22 @@ final class CommerceStorefrontOwnershipResolver {
             return 'none';
         }
 
-        if ($this->owns_native_grant($userid, $sku)) {
-            return 'native_entitlement';
-        }
-
         $product = $this->db->get_record(
             'local_subs_commerce_product',
             ['sku' => $sku],
             'id,type'
         );
+
+        // A contribution is intentionally repeatable. Even an accidental or
+        // historical grant must never turn it into an owned product.
+        if ($product && strtolower((string)$product->type) === CommerceProductType::DONATION) {
+            return 'none';
+        }
+
+        if ($this->owns_native_grant($userid, $sku)) {
+            return 'native_entitlement';
+        }
+
         if (!$product) {
             return 'none';
         }

@@ -22,7 +22,7 @@ final class commerce_showroom_stabilisation_j13h22_test extends \advanced_testca
     public function test_offer_runtime_supports_partial_bundle_ownership_and_live_comparison_prices(): void {
         global $CFG;
         $resolver = file_get_contents($CFG->dirroot . '/local/subscriptions/classes/commerce/showroom/CommerceShowroomProductResolver.php');
-        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache');
         $javascript = file_get_contents($CFG->dirroot . '/local/subscriptions/amd/src/showroom.js');
         self::assertStringContainsString('apply_bundle_ownership_rules', $resolver);
         self::assertStringContainsString('data-showroom-comparison-price', $template);

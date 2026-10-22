@@ -152,7 +152,7 @@ final class commerce_796h1361_h13_final_certification_test extends \advanced_tes
 
         $start = strpos(
             $action,
-            "if (\$action === 'buynow')"
+            "if (\$action === 'add' || \$action === 'buynow')"
         );
         $end = strpos(
             $action,
@@ -169,6 +169,10 @@ final class commerce_796h1361_h13_final_certification_test extends \advanced_tes
             $end - $start
         );
 
+        self::assertStringContainsString(
+            "if (\$action === 'buynow' && !\$hasdonationcompanion)",
+            $block
+        );
         self::assertStringContainsString(
             'prepare_direct_product(',
             $block

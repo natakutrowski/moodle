@@ -396,3 +396,10 @@ $string['mycourses_learning_start'] = 'Cohort starts: {$a}';
 $string['mycourses_learning_next_lesson'] = 'Next lesson: {$a->lesson} · {$a->date}';
 $string['mycourses_learning_next_promo_step'] = 'Next cohort milestone: {$a->lesson} · {$a->date}';
 $string['mycourses_learning_section_fallback'] = 'Section {$a}';
+
+// 7.98D2 — fermeture des nouvelles inscriptions Trial.
+$string['trial_registration_closed_html'] = 'New free-trial registrations are now closed. If you already had a trial account, <a href="{$a->login}">sign in</a> to continue. Otherwise, you can browse the available courses.';
+$string['trial_registration_closed_msg'] = 'New free-trial registrations are now closed.';
+
+$string['trial_native_authority_heading'] = 'Trial managed by Native Commerce';
+$string['trial_native_authority_desc'] = 'Since 7.98D, Trial duration, Trial identity and access expiry are managed by local_subscriptions. The former Campus duration, account suspension and account deletion settings are ignored and are no longer exposed here.';

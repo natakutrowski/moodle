@@ -59,7 +59,7 @@ final class commerce_showroom_stabilisation_j13h21_test extends \advanced_testca
         $endpoint = file_get_contents($CFG->dirroot . '/local/subscriptions/ajax/showroom_prices.php');
         $javascript = file_get_contents($CFG->dirroot . '/local/subscriptions/amd/src/showroom.js');
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
 
         self::assertIsString($endpoint);

@@ -7,6 +7,8 @@ namespace local_subscriptions\crm\help;
 defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
+use local_subscriptions\admin\AdminSecurity;
+use local_subscriptions\admin\Capabilities;
 use local_subscriptions\subscription_config;
 use moodle_url;
 
@@ -71,6 +73,10 @@ final class HelpInternalNavigationRenderer {
         $content = '';
 
         foreach ($items as $item) {
+            if ($item['key'] === 'diagnostics' &&
+                    !AdminSecurity::can(Capabilities::MANAGE_CONFIGURATION)) {
+                continue;
+            }
             $attributes = [
                 'class' =>
                     'crm-help-internal-nav__link',

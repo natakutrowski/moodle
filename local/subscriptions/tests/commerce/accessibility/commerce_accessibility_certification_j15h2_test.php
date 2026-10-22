@@ -25,7 +25,7 @@ final class commerce_accessibility_certification_j15h2_test extends \advanced_te
         global $CFG;
 
         $template = file_get_contents(
-            $CFG->dirroot . '/local/subscriptions/templates/showroom/third_group_verbs.mustache'
+            $CFG->dirroot . '/local/subscriptions/templates/showroom/default.mustache'
         );
 
         $this->assertStringContainsString('commerce_a11y_skip_to_content', $template);

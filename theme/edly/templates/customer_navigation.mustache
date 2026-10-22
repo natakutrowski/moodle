@@ -6,6 +6,8 @@
             <span class="campus-customer-nav__edit-label">{{customernavigation.editmodelabel}}</span>
             <span class="campus-customer-nav__edit-switch">{{{ output.edit_switch }}}</span>
         </div>
+    {{/customernavigation.isadmin}}
+    {{#customernavigation.hascrmaccess}}
         <details class="campus-customer-nav__admin-menu">
             <summary class="campus-customer-nav__admin-link" aria-label="{{customernavigation.crmlabel}}">
                 <i class="fa-solid fa-users-gear" aria-hidden="true"></i>
@@ -22,6 +24,8 @@
                 {{/customernavigation.crmitems}}
             </nav>
         </details>
+    {{/customernavigation.hascrmaccess}}
+    {{#customernavigation.isadmin}}
         <details class="campus-customer-nav__admin-menu">
             <summary class="campus-customer-nav__admin-link" aria-label="{{customernavigation.adminlabel}}">
                 <i class="fa-solid fa-gear" aria-hidden="true"></i>

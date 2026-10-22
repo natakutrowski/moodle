@@ -1331,6 +1331,7 @@ $data += [
     'guestotpexpired' => get_string('commerce_guest_identity_otp_expired', 'local_subscriptions'),
     'guestotplimited' => get_string('commerce_guest_identity_otp_limited', 'local_subscriptions'),
     'guestotperror' => get_string('commerce_guest_identity_otp_error', 'local_subscriptions'),
+    'guestotpdeliveryfailed' => get_string('commerce_guest_identity_otp_delivery_failed', 'local_subscriptions'),
     'guestotpresend' => get_string('commerce_guest_identity_otp_resend', 'local_subscriptions'),
     'guestotpverified' => get_string('commerce_guest_identity_otp_verified', 'local_subscriptions'),
     'guestotpotheremail' => get_string('commerce_guest_checkout_other_email', 'local_subscriptions'),

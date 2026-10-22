@@ -28,21 +28,13 @@ if ($h = new admin_settingpage('local_campus', get_string('pluginname', 'local_c
         $options
     ));
 
-
-    // 2) Durée en jours
-    $h->add(new admin_setting_configtext(
-        'local_campus/trialdays',
-        get_string('set_trialdays', 'local_campus'),
-        '', 7, PARAM_INT
+    // 7.98D5 — Trial duration, role identity and account lifecycle are Native.
+    $h->add(new admin_setting_heading(
+        'local_campus_trial_native_notice',
+        get_string('trial_native_authority_heading', 'local_campus'),
+        get_string('trial_native_authority_desc', 'local_campus')
     ));
 
-    // 3) Rôle pour les comptes d’essai
-    $h->add(new admin_setting_configtext(
-        'local_campus/trialrole',
-        get_string('set_trialrole', 'local_campus'),
-        get_string('set_trialrole_desc', 'local_campus'),
-        'trialstudent', PARAM_ALPHANUMEXT
-    ));
 
     // 4) Préfixes pour comptes “fantômes”
     $h->add(new admin_setting_configtext(
@@ -72,25 +64,6 @@ if ($h = new admin_settingpage('local_campus', get_string('pluginname', 'local_c
         2,            // valeur par défaut = 2 jours
         PARAM_INT
     ));
-
-    // Jours après expiration (J + N) pour SUSPENDRE le compte
-    $h->add(new admin_setting_configtext(
-        'local_campus/trial_suspend_after_days',
-        get_string('set_trial_suspend_after_days', 'local_campus'),
-        get_string('set_trial_suspend_after_days_desc', 'local_campus'),
-        30, // valeur par défaut : J+30
-        PARAM_INT
-    ));
-
-    // Jours après expiration (J + N) pour SUPPRIMER le compte
-    $h->add(new admin_setting_configtext(
-        'local_campus/trial_delete_after_days',
-        get_string('set_trial_delete_after_days', 'local_campus'),
-        get_string('set_trial_delete_after_days_desc', 'local_campus'),
-        90, // valeur par défaut : J+90
-        PARAM_INT
-    ));
-
 
     // Style du catalogue (1 ou 2).
     $h->add(new admin_setting_configselect(

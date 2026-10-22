@@ -268,6 +268,7 @@ final class CommerceProductVisualAuditService {
             'digital_download' => 'fa-solid fa-file-arrow-down',
             'bundle' => 'fa-solid fa-boxes-stacked',
             'service' => 'fa-solid fa-handshake',
+            'donation' => 'fa-solid fa-heart',
             default => 'fa-solid fa-box',
         };
     }

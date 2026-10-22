@@ -664,11 +664,18 @@ $string['settings_trial_section'] = 'Пробный период 7 дней';
 $string['settings_trial_planid'] = 'План пробного периода (ID)';
 $string['settings_trial_planid_desc'] = 'ID плана с флагом « is_trial ».';
 $string['settings_trial_duration_days'] = 'Длительность пробного периода (дни)';
-$string['settings_trial_duration_days_desc'] = 'Количество дней бесплатного доступа.';
+$string['settings_trial_duration_days_desc'] = 'Основная длительность Native Trial в днях. Значение 0 сохраняет исторический режим без практического срока окончания; старый local_campus/trialdays игнорируется.';
 $string['settings_trial_discount_percent'] = 'Скидка (%) в течение окна';
 $string['settings_trial_discount_percent_desc'] = 'Для учёта и применения, не зависящего от платёжного провайдера.';
 $string['settings_trial_discount_hours'] = 'Окно скидки (часы)';
 $string['settings_trial_discount_hours_desc'] = 'Например, 72 часа после начала пробного периода.';
+
+$string['settings_trial_transition_section'] = 'Календарь завершения Legacy Trial';
+$string['settings_trial_transition_section_desc'] = 'Контрольные даты для постепенного завершения Legacy Trial. Используется часовой пояс сайта Moodle и формат ГГГГ-ММ-ДД ЧЧ:ММ. Пустые значения сохраняют прежнее открытое поведение.';
+$string['settings_trial_registration_close_at'] = 'Закрыть новые регистрации Trial';
+$string['settings_trial_registration_close_at_desc'] = 'С этой точной даты и времени новые регистрации Trial должны быть закрыты. Существующие пользователи Trial остаются в переходном окне. Формат: ГГГГ-ММ-ДД ЧЧ:ММ.';
+$string['settings_trial_legacy_expire_at'] = 'Завершить неконвертированные Legacy Trial';
+$string['settings_trial_legacy_expire_at_desc'] = 'Глобальный конец переходного окна Legacy Trial. В эту дату оставшиеся неконвертированные Trial-доступы и специальные права конверсии будут отключены на этапе завершения. Дата должна быть позже даты закрытия регистраций. Формат: ГГГГ-ММ-ДД ЧЧ:ММ.';
 $string['missing_trial_plan'] = 'План пробного периода не настроен (trial_plan_id).';
 
 
@@ -5377,6 +5384,7 @@ $string['commerce_product_type_course_access'] = 'Доступ к курсу';
 $string['commerce_product_type_digital_download'] = 'Цифровой продукт';
 $string['commerce_product_type_bundle'] = 'Пакет / Bundle';
 $string['commerce_product_type_service'] = 'Услуга';
+$string['commerce_product_type_donation'] = 'Взнос';
 $string['commerce_product_status_draft'] = 'Черновик';
 $string['commerce_product_status_active'] = 'Активен';
 $string['commerce_product_status_inactive'] = 'Неактивен';
@@ -5444,10 +5452,12 @@ $string['commerce_vocabulary_product_type_client_course_access'] = 'Курс';
 $string['commerce_vocabulary_product_type_client_digital_download'] = 'Цифровой материал';
 $string['commerce_vocabulary_product_type_client_bundle'] = 'Набор';
 $string['commerce_vocabulary_product_type_client_service'] = 'Услуга';
+$string['commerce_vocabulary_product_type_client_donation'] = 'Взнос';
 $string['commerce_vocabulary_product_type_crm_course_access'] = 'Доступ к курсу';
 $string['commerce_vocabulary_product_type_crm_digital_download'] = 'Цифровой продукт';
 $string['commerce_vocabulary_product_type_crm_bundle'] = 'Пакет';
 $string['commerce_vocabulary_product_type_crm_service'] = 'Услуга';
+$string['commerce_vocabulary_product_type_crm_donation'] = 'Взнос';
 $string['commerce_vocabulary_product_type_unknown'] = 'Другой продукт';
 $string['commerce_vocabulary_product_status_client_active'] = 'Доступно';
 $string['commerce_vocabulary_product_status_client_draft'] = 'Скоро';
@@ -5793,6 +5803,7 @@ $string['commerce_catalog_type_course_access'] = 'Доступ к курсу';
 $string['commerce_catalog_type_digital_download'] = 'Цифровой продукт';
 $string['commerce_catalog_type_bundle'] = 'Комплект';
 $string['commerce_catalog_type_service'] = 'Услуга';
+$string['commerce_catalog_type_donation'] = 'Взнос';
 $string['commerce_catalog_fulfillment_course'] = 'Доступ к курсу «{$a}»';
 $string['commerce_catalog_fulfillment_download'] = 'Цифровая загрузка';
 $string['commerce_catalog_fulfillment_course_enrolment'] = 'Запись на курс';
@@ -5958,6 +5969,7 @@ $string['commerce_purchase_fulfillment_status_not_started'] = 'Не начато
 $string['commerce_purchase_access_status_active'] = 'Активен';
 $string['commerce_purchase_access_status_pending'] = 'Ожидает';
 $string['commerce_purchase_access_status_blocked'] = 'Заблокирован';
+$string['commerce_purchase_access_status_revoked'] = 'Отозван';
 
 $string['commerce_purchase_order_status_completed'] = 'Завершён';
 
@@ -6380,6 +6392,20 @@ $string['commerce_guest_checkout_invalid_lastname'] = 'Введите фамил
 $string['commerce_guest_checkout_duplicate_email_accounts'] = 'Этот адрес электронной почты используется в нескольких аккаунтах. Сначала войдите в свой аккаунт.';
 $string['commerce_guest_checkout_session_expired'] = 'Сессия оформления заказа истекла. Корзина сохранена: начните оформление ещё раз.';
 $string['commerce_guest_checkout_account_mismatch'] = 'Выполнен вход в аккаунт, который не соответствует адресу из оформления заказа. Войдите в нужный аккаунт.';
+$string['commerce_purchase_status_not_applicable'] = 'Не применяется';
+$string['commerce_purchase_type_donation'] = 'Взнос';
+$string['commerce_donation_result_title'] = 'Спасибо за ваш вклад ❤️';
+$string['commerce_donation_result_processing_title'] = 'Оплата подтверждена';
+$string['commerce_donation_result_processing_message'] = 'Оплата подтверждена. CampusFR завершает регистрацию вашего взноса; страница обновится автоматически.';
+$string['commerce_donation_result_message'] = 'Оплата подтверждена, и ваш взнос зарегистрирован. Спасибо за поддержку ❤️';
+$string['commerce_donation_result_next_title'] = 'Ваш взнос';
+$string['commerce_donation_result_next_message'] = 'Для этого заказа не требуется доступ к материалам. Подробности можно найти в разделе «Мои покупки».';
+$string['commerce_donation_purchases_title'] = 'Ваши взносы';
+$string['commerce_donation_default_name'] = 'Взнос CampusFR';
+$string['commerce_donation_confirmed_badge'] = 'Подтверждён';
+$string['commerce_donation_pending_badge'] = 'Ожидает подтверждения';
+$string['commerce_donation_amount_label'] = 'Взнос';
+
 $string['commerce_i2_order_not_found'] = 'Заказ не найден.';
 $string['commerce_i2_title_success'] = 'Покупка подтверждена!';
 $string['commerce_i2_message_success'] = 'Оплата подтверждена, и доступ к материалам уже открыт.';
@@ -7130,6 +7156,7 @@ $string['commerce_purchase_receipt_queued'] = 'Квитанция добавле
 $string['commerce_purchase_receipt_resend_failed'] = 'Не удалось повторно отправить квитанцию. Проверьте журнал писем.';
 $string['commerce_purchase_resend_access'] = 'Повторно отправить доступы';
 $string['commerce_purchase_resend_access_confirm'] = 'Письмо с доступами будет заново сформировано транзакционным почтовым движком Commerce и отправлено на текущий адрес {$a}. Продолжить?';
+$string['commerce_purchase_resend_access_unavailable'] = 'Письмо с доступами нельзя отправить повторно: все права, связанные с этой покупкой, были отозваны.';
 $string['commerce_purchase_access_resent_to'] = 'Письмо с доступами успешно повторно отправлено на {$a}.';
 $string['commerce_purchase_access_queued_to'] = 'Письмо с доступами для {$a} добавлено в очередь и будет отправлено повторно автоматически.';
 $string['commerce_purchase_access_resend_failed'] = 'Не удалось повторно отправить письмо с доступами. Проверьте журнал писем.';
@@ -7983,6 +8010,9 @@ $string['commerce_showroom_config_product_course'] = 'Курс / Тренажё�
 $string['commerce_showroom_config_product_pdf'] = 'Цифровой продукт / Карточки';
 $string['commerce_showroom_config_product_bundle'] = 'Комплект';
 $string['commerce_showroom_config_product_none'] = '— Без продукта —';
+$string['commerce_showroom_config_product_add_role'] = 'Добавить роль продукта';
+$string['commerce_showroom_config_product_role'] = 'Роль продукта';
+$string['commerce_showroom_config_product_role_placeholder'] = 'например donation';
 $string['commerce_showroom_config_advanced'] = 'Расширенные настройки';
 $string['commerce_showroom_config_titlekey_legacy'] = 'Языковой ключ заголовка (legacy)';
 $string['commerce_showroom_config_descriptionkey_legacy'] = 'Языковой ключ описания (legacy)';
@@ -10371,6 +10401,10 @@ $string['commerce_showroom_n95_width'] = 'Ширина';
 $string['commerce_showroom_n95_width_contained'] = 'По центру';
 $string['commerce_showroom_n95_width_wide'] = 'Широкая';
 $string['commerce_showroom_n95_width_full'] = 'На всю ширину';
+$string['commerce_showroom_n95_textcolor'] = 'Цвет текста';
+$string['commerce_showroom_n95_textcolor_auto'] = 'Автоматически по фону';
+$string['commerce_showroom_n95_textcolor_brand'] = 'Синий / фиолетовый / серый';
+$string['commerce_showroom_n95_textcolor_white'] = 'Белый';
 $string['commerce_showroom_n95_background'] = 'Фон';
 $string['commerce_showroom_n95_background_default'] = 'По умолчанию';
 $string['commerce_showroom_n95_background_white'] = 'Белый';
@@ -10378,6 +10412,7 @@ $string['commerce_showroom_n95_background_light'] = 'Светлый';
 $string['commerce_showroom_n95_background_soft'] = 'Мягкий';
 $string['commerce_showroom_n95_background_pink'] = 'Розовый CampusFR';
 $string['commerce_showroom_n95_background_dark'] = 'Тёмный';
+$string['commerce_showroom_n95_background_dark2'] = 'Тёмный 2';
 $string['commerce_showroom_n95_background_gradient'] = 'Градиент';
 $string['commerce_showroom_n95_background_custom'] = 'Свой';
 $string['commerce_showroom_n95_background_image'] = 'Изображение';
@@ -11830,6 +11865,7 @@ $string['commerce_refund_provider_not_supported'] = 'Возвраты через
 $string['commerce_refund_nothing_remaining'] = 'Для этого платежа больше нет суммы, доступной к возврату.';
 $string['commerce_refund_created_notice'] = 'Возврат сохранён в Commerce.';
 $string['commerce_refund_refunded_column'] = 'Возвращено';
+$string['commerce_refund_net_retained_column'] = 'Сохранено';
 $string['commerce_refund_provider_reference'] = 'Номер возврата';
 $string['commerce_refund_history_title'] = 'История возвратов';
 $string['commerce_refund_history_payment'] = '{$a->provider} — возвращено/зарезервировано {$a->amount}';
@@ -11838,7 +11874,7 @@ $string['commerce_refund_status_succeeded'] = 'Возвращено';
 $string['commerce_refund_status_failed'] = 'Ошибка';
 $string['commerce_refund_reason_unspecified'] = 'Не указана';
 
-$string['commerce_refund_sync_action'] = 'Синхронизировать возвраты';
+$string['commerce_refund_sync_action'] = 'Синхронизировать';
 $string['commerce_refund_sync_success'] = 'Синхронизация завершена: импортировано возвратов Stripe — {$a}.';
 $string['commerce_refund_sync_failed'] = 'Ошибка синхронизации возвратов: {$a}';
 $string['commerce_refund_statistics_refunds'] = 'Возвраты за период';
@@ -11988,7 +12024,7 @@ $string['commerce_paypal_crm_check_ok'] = 'Соответствует';
 $string['commerce_paypal_crm_check_failed'] = 'Проверить';
 $string['commerce_paypal_crm_checks_section'] = 'Проверки безопасности';
 $string['commerce_paypal_crm_blockers'] = 'Автоматическую сверку нельзя выполнить по следующим причинам:';
-$string['commerce_paypal_crm_refund_sync_hint'] = 'Платёж согласован, но суммы возвратов PayPal и CampusFR отличаются. Сначала используйте «Синхронизировать возвраты» в карточке продажи.';
+$string['commerce_paypal_crm_refund_sync_hint'] = 'Платёж согласован, но суммы возвратов PayPal и CampusFR отличаются. Сначала используйте «Синхронизировать» в карточке продажи.';
 $string['commerce_paypal_crm_refresh'] = 'Проверить PayPal ещё раз';
 $string['commerce_paypal_crm_execute'] = 'Выполнить сверку';
 $string['commerce_paypal_crm_execute_confirm'] = 'Подтвердить сверку платежа на основании проверенного в реальном времени состояния PayPal?';
@@ -12207,6 +12243,7 @@ $string['commerce_guest_identity_otp_invalid'] = 'Неверный код. По�
 $string['commerce_guest_identity_otp_expired'] = 'Срок действия кода истёк. Запросите новый.';
 $string['commerce_guest_identity_otp_limited'] = 'Слишком много попыток. Подождите перед повторной попыткой.';
 $string['commerce_guest_identity_otp_error'] = 'Сейчас не удалось подтвердить адрес. Попробуйте ещё раз.';
+$string['commerce_guest_identity_otp_delivery_failed'] = 'Не удалось отправить письмо с кодом. Проверьте адрес и попробуйте ещё раз: код не был создан.';
 $string['commerce_guest_identity_otp_resend'] = 'Отправить код ещё раз';
 $string['commerce_guest_identity_otp_verified'] = 'Адрес электронной почты подтверждён';
 
@@ -12479,7 +12516,9 @@ $string['commerce_m61_access_lead_owner_promotion_join_acquired'] = 'Вы уже
 $string['commerce_m61_access_lead_immediate_digital'] = 'Этот цифровой материал появляется в вашем пространстве сразу после оплаты.';
 $string['commerce_m61_access_lead_owned_digital'] = 'Этот цифровой материал уже ваш.';
 $string['commerce_m61_access_lead_bundle'] = 'В набор входит несколько материалов. После оплаты для каждого из них сохраняются собственные правила доступа.';
+$string['commerce_donation_promise_title'] = 'Ваш взнос';
 $string['commerce_m61_access_lead_immediate_generic'] = 'Покупка становится доступна после подтверждения оплаты.';
+$string['commerce_m61_access_lead_donation'] = 'Ваш взнос регистрируется сразу после подтверждения оплаты. Он не предоставляет доступ к учебным материалам.';
 $string['commerce_m61_access_lead_owned_generic'] = 'Этот продукт уже ваш.';
 $string['commerce_m61_access_promotion'] = 'Поток: {$a}';
 $string['commerce_m61_access_starts'] = 'Начало потока: {$a}';
@@ -12632,3 +12671,166 @@ $string['commerce_education_m74_no_compatible_group'] = 'Нет группы, с
 // Commerce 7.97 M7.5 — scalable pedagogy admin navigation.
 $string['commerce_education_m75_navigation'] = 'Навигация по обучению';
 $string['commerce_education_m75_back_to_promotions'] = 'Вернуться к потокам';
+
+$string['commerce_showroom_generic_title'] = 'Витрина CampusFR';
+$string['commerce_showroom_generic_description'] = 'Откройте для себя это предложение CampusFR.';
+
+$string['donation_amount_invalid'] = 'Некорректная сумма взноса.';
+
+$string['commerce_donation_contribute'] = 'Поддержать';
+$string['commerce_donation_choose_amount'] = 'Выберите сумму поддержки';
+$string['commerce_donation_decrease'] = 'Уменьшить сумму поддержки';
+$string['commerce_donation_increase'] = 'Увеличить сумму поддержки';
+$string['commerce_donation_presets'] = 'Предлагаемые суммы поддержки';
+$string['commerce_donation_custom_units'] = 'Другая сумма';
+$string['commerce_donation_add_companion'] = 'Добавить поддержку';
+$string['commerce_donation_companion_included'] = 'Вклад включён';
+$string['commerce_showroom_config_offer_donation_mode'] = 'Дополнительный вклад';
+$string['commerce_showroom_config_offer_donation_none'] = 'Нет';
+$string['commerce_showroom_config_offer_donation_optional'] = 'По желанию';
+$string['commerce_showroom_config_offer_donation_required'] = 'Обязательный';
+
+$string['commerce_donation_update_cart'] = 'Обновить корзину';
+$string['commerce_scope_plan_actions_title'] = 'Что сделать дальше?';
+$string['commerce_scope_plan_actions_help'] = 'Этот периметр доступа пока не используется ни одним коммерческим планом.';
+$string['commerce_scope_create_plan'] = 'Создать план с этим периметром';
+$string['commerce_scope_attach_plan'] = 'Привязать существующий план';
+$string['commerce_scope_attach_plan_action'] = 'Привязать';
+$string['commerce_scope_attach_plan_help'] = 'Показываются только неактивные планы без истории подписок и без связи с Native-продуктом, чтобы случайно не изменить уже проданные права доступа.';
+$string['commerce_scope_attach_plan_none'] = 'Нет существующих планов, которые можно безопасно привязать к этому периметру.';
+$string['commerce_scope_plan_attached'] = 'План привязан к этому периметру доступа.';
+$string['commerce_scope_plan_attach_unsafe'] = 'Этот план нельзя привязать напрямую: он активен, имеет историю подписок или уже связан с Native-продуктом.';
+
+// 7.98C5.0 — специальные подтверждения Articles / Alf.
+$string['commerce_mail_alf_donation_receipt_subject'] = 'Спасибо от всего сердца ❤️ — ваша помощь Альфу подтверждена';
+$string['commerce_mail_alf_donation_receipt_preheader'] = 'Мы получили ваш вклад {donation_amount}.';
+$string['commerce_mail_alf_donation_receipt_heading'] = 'Спасибо от всего сердца ❤️';
+$string['commerce_mail_alf_donation_receipt_introhtml'] = '<p>Здравствуйте, {firstname}!</p><p>Мы получили ваш вклад <strong>{donation_amount}</strong>.</p><p>Вы решили помочь Альфу, не покупая курс, — просто потому, что захотели поддержать его операцию. Для нас этот жест значит очень много. И прежде всего — для него.</p>';
+$string['commerce_mail_alf_donation_receipt_outrohtml'] = '<p>Каждый вклад ещё немного приближает Альфа к операции. Спасибо, что вы проходите эту часть пути вместе с нами.</p><p>Счёт в формате PDF прикреплён к этому письму, а информация о заказе всегда доступна в вашем аккаунте CampusFR.</p>';
+$string['commerce_mail_alf_donation_receipt_signaturehtml'] = '<p>С огромной благодарностью ❤️<br><strong>Ната, Альф и команда CampusFR</strong></p>';
+$string['commerce_mail_alf_course_donation_receipt_subject'] = 'Спасибо ❤️ Ваш курс подтверждён — и вы помогаете Альфу ещё больше';
+$string['commerce_mail_alf_course_donation_receipt_preheader'] = 'Ваш мини-курс подтверждён, а вклад {donation_amount} помогает собрать средства на операцию Альфа.';
+$string['commerce_mail_alf_course_donation_receipt_heading'] = 'Вы учитесь… и действительно помогаете нам ❤️';
+$string['commerce_mail_alf_course_donation_receipt_introhtml'] = '<p>Здравствуйте, {firstname}!</p><p>Ваша покупка подтверждена. Вы выбрали <strong>полный мини-курс по артиклям</strong> и дополнительный вклад <strong>{donation_amount}</strong> на операцию Альфа.</p><p>Вы получаете точно такой же полный курс и все те же материалы, что и в формуле «Курс отдельно». Разница только в дополнительной поддержке, которую вы решили оказать Альфу, — и мы хотим лично поблагодарить вас за этот выбор.</p>';
+$string['commerce_mail_alf_course_donation_receipt_outrohtml'] = '<p>Доступ к курсу активируется отдельно в вашем пространстве CampusFR. Теперь можно начинать расследование и шаг за шагом собирать Сердце Парижа.</p><p>А пока вы учитесь, ваш вклад очень конкретно помогает нам приблизиться к операции Альфа.</p><p>Счёт в формате PDF прикреплён к этому письму, а информация о заказе всегда доступна в вашем аккаунте CampusFR.</p>';
+$string['commerce_mail_alf_course_donation_receipt_signaturehtml'] = '<p>Спасибо от всего сердца ❤️<br><strong>Ната, Альф и команда CampusFR</strong></p>';
+$string['commerce_mail_preview_scenario'] = 'Сценарий предпросмотра';
+$string['commerce_mail_preview_scenario_standard'] = 'Обычная покупка';
+$string['commerce_mail_preview_scenario_alf_course_donation'] = 'Курс + помощь Альфу';
+$string['commerce_mail_preview_scenario_alf_donation'] = 'Только помощь Альфу';
+
+// 7.98C.5.14.2 — Alf donation-only receipt footer photo.
+$string['commerce_mail_alf_donation_footer_title'] = 'Фото в конце — только пожертвование Альфу';
+$string['commerce_mail_alf_donation_footer_help'] = 'Это фото добавляется в самый конец письма только для пожертвования DONATION.ALF. В письмах «Только курс» и «Курс + пожертвование» оно не показывается.';
+$string['commerce_mail_alf_donation_footer_file'] = 'Фото Альфа';
+$string['commerce_mail_alf_donation_footer_file_help'] = 'JPEG, PNG или WebP, максимум 8 МБ. Одно фото используется для версий FR, EN и RU.';
+$string['commerce_mail_alf_donation_footer_current'] = 'Фото, которое сейчас используется в письме только с пожертвованием.';
+$string['commerce_mail_alf_donation_footer_remove'] = 'Удалить текущее фото';
+$string['commerce_mail_alf_donation_footer_upload_error'] = 'Не удалось сохранить фото Альфа.';
+$string['commerce_mail_alf_donation_footer_too_large'] = 'Размер фото Альфа превышает 8 МБ.';
+$string['commerce_mail_alf_donation_footer_invalid_type'] = 'Фото Альфа должно быть в формате JPEG, PNG или WebP.';
+
+// 7.98C.5.14.4 — resumable Buy Now checkout.
+$string['commerce_direct_purchase_resume_title'] = 'У вас есть незавершённая быстрая покупка';
+$string['commerce_direct_purchase_resume_text'] = 'Покупка «Купить сейчас» хранится отдельно от корзины. Вы можете вернуться к оплате с того же места.';
+$string['commerce_direct_purchase_resume_action'] = 'Вернуться к оплате';
+
+// 7.98C C6.3E.1 — понятный статус возврата / отзыва доступа.
+$string['commerce_customer_refund_label'] = 'Возврат';
+$string['commerce_customer_refund_amount'] = 'Сумма возврата';
+$string['commerce_customer_access_revoked'] = 'Доступ отозван';
+
+// 7.98D2 — garde Native des nouvelles inscriptions Trial.
+$string['trial_registration_closed'] = 'Новые регистрации на бесплатный пробный доступ закрыты.';
+
+// 7.98D6 — Наблюдаемость Trial в Admin / CRM.
+$string['trial_admin_status_nav'] = 'Состояние Legacy Trial';
+$string['trial_admin_status_title'] = 'Состояние Legacy Trial';
+$string['trial_admin_status_description'] = 'Операционная страница только для чтения: календарь завершения Trial, текущее runtime-состояние и Legacy-история.';
+$string['trial_admin_status_intro'] = 'Даты задаются отдельно для каждого окружения. Эта страница не изменяет доступ и не мигрирует исторические записи.';
+$string['trial_admin_open_settings'] = 'Открыть настройки Trial';
+$string['trial_admin_phase_registration_open'] = 'Регистрации Trial открыты';
+$string['trial_admin_phase_conversion_only'] = 'Только окно конверсии';
+$string['trial_admin_phase_legacy_closed'] = 'Legacy Trial завершён';
+$string['trial_admin_not_configured'] = 'Не настроено';
+$string['trial_admin_date_a'] = 'Дата A — закрытие регистраций';
+$string['trial_admin_date_b'] = 'Дата B — завершение Legacy';
+$string['trial_admin_health_ok'] = 'Состояние нормальное';
+$string['trial_admin_health_attention'] = 'Требуется внимание';
+$string['trial_admin_metric_native_active'] = 'Активные Native Trial';
+$string['trial_admin_metric_trialstudent'] = 'Назначения trialstudent';
+$string['trial_admin_metric_historical_only'] = 'Только исторические Legacy-пользователи';
+$string['trial_admin_metric_converted_users'] = 'Сконвертированные Trial-пользователи';
+$string['trial_admin_diagnostics_title'] = 'Диагностика';
+$string['trial_admin_diag_none'] = 'Блокирующих проблем перехода Trial не обнаружено.';
+$string['trial_admin_diag_active_gap'] = '{$a} активных Campus Trial без Native Trial subscription.';
+$string['trial_admin_diag_triallimited'] = 'Обнаружено остаточных назначений роли triallimited: {$a}.';
+$string['trial_admin_diag_active_past_end'] = '{$a} Native Trial subscription остаются активными после даты окончания.';
+$string['trial_admin_creation_closed'] = 'Создание новых Trial закрыто календарём перехода.';
+$string['trial_admin_manual_creation_closed_notice'] = 'Создание новых Trial закрыто. Trial-планы скрыты из ручного создания Legacy subscription; существующая Trial-история остаётся доступной в CRM.';
+$string['crm_trial_state_active'] = 'Trial активен';
+$string['crm_trial_state_expired'] = 'Trial истёк';
+$string['crm_trial_state_converted'] = 'Trial сконвертирован';
+$string['crm_trial_state_legacy_historical'] = 'История Legacy Trial';
+$string['crm_trial_lifecycle_title'] = 'Жизненный цикл Trial';
+$string['crm_trial_lifecycle_help'] = 'Операционный и исторический статус Trial для этого клиента. Панель доступна только для чтения.';
+$string['crm_trial_lifecycle_status'] = 'Статус:';
+$string['crm_trial_lifecycle_phase'] = 'Глобальная фаза:';
+$string['crm_trial_lifecycle_end_at'] = 'Окончание Trial:';
+$string['crm_trial_lifecycle_converted_at'] = 'Дата конверсии:';
+$string['crm_trial_lifecycle_historical_help'] = 'Только историческая запись Campus Trial. Native Trial subscription и доступ не создаются заново.';
+$string['trial_admin_diag_trialstudent_residual'] = 'После даты B осталось назначений trialstudent: {$a}.';
+$string['trial_admin_diag_native_active_after_b'] = 'После даты B остаются активными Native Trial subscription: {$a}.';
+$string['trial_admin_diag_campus_active_after_b'] = 'После даты B остаются фактически активными записи Campus Trial: {$a}.';
+
+// 7.98E.1 — редакционная основа витрины A1.
+$string['commerce_showroom_a1_title'] = 'Курс A1 CampusFR';
+$string['commerce_showroom_a1_description'] = 'Французский с нуля — путешествие по Провансу, Лазурному берегу и Корсике.';
+$string['commerce_showroom_short_alias_title'] = 'Короткий URL шоурума';
+$string['commerce_showroom_short_alias_label'] = 'Публичный алиас';
+$string['commerce_showroom_short_alias_help'] = 'Добавьте короткий запоминающийся адрес, который автоматически перенаправит посетителя на канонический URL его языка.';
+$string['commerce_showroom_short_alias_redirect_help'] = 'Временное перенаправление (302): параметры кампаний сохраняются, а FR/EN/RU URL остаются каноническими индексируемыми адресами.';
+
+$string['subscriptions:manage_purchase_notes'] = 'Добавлять внутренние заметки к покупкам';
+$string['subscriptions:manage_crm_roles'] = 'Управлять назначением ролей CRM CampusFR';
+
+$string['crm_roles_title'] = 'Роли CRM';
+$string['crm_roles_add'] = 'Добавить роль';
+$string['crm_roles_remove'] = 'Убрать роль';
+$string['crm_roles_back'] = 'Вернуться к профилю';
+$string['crm_roles_saved'] = 'Назначение ролей обновлено';
+$string['crm_roles_description'] = 'Назначение системных ролей CRM CampusFR. Зачисления на курсы и роли Student не изменяются.';
+
+// CRM Rights CR.5 — Team and access.
+$string['crm_team_nav'] = 'Команда и доступы';
+$string['crm_team_members'] = 'Участники команды';
+$string['crm_team_permissions'] = 'Роли и права';
+$string['crm_team_search'] = 'Найти существующий аккаунт Moodle';
+$string['crm_team_search_button'] = 'Поиск';
+$string['crm_team_no_members'] = 'Участников CRM пока нет.';
+$string['crm_team_add_member'] = 'Управление ролями';
+$string['crm_team_role_count'] = 'Участников';
+$string['crm_team_permissions_note'] = 'Здесь показаны шаблонные права. Фактические права также зависят от других ролей Moodle.';
+$string['crm_team_course_roles'] = 'Роли курсов (только просмотр)';
+$string['crm_team_no_courses'] = 'Нет ролей уровня курса.';
+$string['crm_team_current'] = 'Текущие системные роли CRM';
+$string['crm_team_confirm_remove'] = 'Подтвердите удаление роли CRM';
+$string['crm_team_back'] = 'К команде';
+$string['crm_team_user_search_empty'] = 'Подходящие аккаунты не найдены.';
+$string['crm_team_history'] = 'Изменения ролей доступны в журнале событий Moodle.';
+
+// CR.5 UX follow-up.
+$string['crm_roles_bulk_hint'] = 'Выберите роли и сохраните изменения.';
+$string['crm_team_course_roles_editable'] = 'Роли на уровне курсов';
+$string['crm_team_manage_course_roles'] = 'Управление участниками и ролями';
+$string['crm_team_find_any'] = 'Поиск по всем пользователям Moodle';
+$string['crm_team_manage_member'] = 'Управление доступом';
+$string['crm_team_edit_permissions'] = 'Изменить права';
+$string['crm_team_role_edit_warning'] = 'Отображаются текущие права Moodle. Не запускайте CR.3 --apply после настройки: изменения будут перезаписаны.';
+
+$string['crm_team_course_role_managed'] = 'Роль назначена через запись на курс Moodle: измените её в управлении записями.';
+
+$string['crm_team_super_admin'] = 'Главный администратор Moodle';
+$string['crm_team_super_admin_help'] = 'Полный доступ к CRM и правам без назначения ролей CRM.';
+$string['crm_team_view_profile'] = 'Открыть профиль';
+$string['crm_cr5_status_refunded'] = 'Возвращён';

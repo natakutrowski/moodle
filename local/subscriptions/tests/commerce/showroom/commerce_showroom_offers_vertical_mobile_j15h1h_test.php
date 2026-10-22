@@ -20,9 +20,9 @@ final class commerce_showroom_offers_vertical_mobile_j15h1h_test extends \advanc
     public function test_mobile_offers_are_stacked_without_horizontal_slider(): void {
         global $CFG;
         $css = file_get_contents($CFG->dirroot . '/local/subscriptions/styles/showroom.css');
-        self::assertStringContainsString('.commerce-showroom-offer--bundle { order: 1 !important; }', $css);
-        self::assertStringContainsString('.commerce-showroom-offer--course { order: 2 !important; }', $css);
-        self::assertStringContainsString('.commerce-showroom-offer--pdf { order: 3 !important; }', $css);
+        self::assertStringNotContainsString('.commerce-showroom-offer--bundle { order:', $css);
+        self::assertStringNotContainsString('.commerce-showroom-offer--course { order:', $css);
+        self::assertStringNotContainsString('.commerce-showroom-offer--pdf { order:', $css);
         self::assertStringContainsString('commerce-showroom-offers--mobile-stack', $css);
 
     }

@@ -152,7 +152,7 @@ final class CommerceShowroomSeoService {
 
     /** @param array<int,array<string,mixed>> $offers */
     private function preferred_image(array $offers): string {
-        foreach (['bundle', 'course', 'pdf'] as $preferredrole) {
+        foreach (['bundle', 'course_fr', 'course_ru', 'course', 'pdf'] as $preferredrole) {
             foreach ($offers as $offer) {
                 if (
                     (string)($offer['role'] ?? '') === $preferredrole &&

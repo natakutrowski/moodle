@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\catalog\cover\CommerceProductCoverContext;
 use local_subscriptions\commerce\catalog\cover\CommerceProductCoverService;
+use local_subscriptions\commerce\catalog\domain\CommerceProductType;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogProductDetails;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogProductSummary;
 use local_subscriptions\commerce\catalog\readmodel\CommerceCatalogReadRepository;
@@ -200,11 +201,13 @@ final class CommerceStorefrontRepository {
             if ($selectedcurrency !== '' && $price->get_currency() !== $selectedcurrency) {
                 continue;
             }
-            $promotion = $promotionresolver->resolve(
-                $metadata,
-                $price->get_currency(),
-                $price->get_amount_minor()
-            );
+            $promotion = $summary->get_type() === CommerceProductType::DONATION
+                ? []
+                : $promotionresolver->resolve(
+                    $metadata,
+                    $price->get_currency(),
+                    $price->get_amount_minor()
+                );
             $prices[] = new CommerceStorefrontPrice(
                 $price->get_currency(),
                 $promotion['amountminor'] ?? $price->get_amount_minor(),

@@ -16,9 +16,6 @@ use local_subscriptions\commerce\showroom\CommerceShowroomDefinition;
  * previewable/publishable without adding PHP registry entries.
  */
 final class CommerceShowroomCmsDefinitionFactory {
-    /** @var string[] */
-    private const PRODUCT_ROLES = ['course', 'pdf', 'bundle'];
-
     public function create(
         \stdClass $record,
         ?CommerceShowroomDefinition $fallback = null
@@ -138,29 +135,9 @@ final class CommerceShowroomCmsDefinitionFactory {
         string $productsjson,
         array $fallback
     ): array {
-        $decoded = json_decode($productsjson, true);
-        if (!is_array($decoded)) {
-            return $fallback;
-        }
-
-        $resolved = $fallback;
-        foreach (self::PRODUCT_ROLES as $role) {
-            if (!array_key_exists($role, $decoded)) {
-                continue;
-            }
-
-            $sku = strtoupper(trim((string)$decoded[$role]));
-            if ($sku === '') {
-                unset($resolved[$role]);
-                continue;
-            }
-
-            $resolved[$role] = clean_param(
-                $sku,
-                PARAM_RAW_TRIMMED
-            );
-        }
-
-        return $resolved;
+        return CommerceShowroomProductConfig::from_json(
+            $productsjson,
+            $fallback
+        );
     }
 }

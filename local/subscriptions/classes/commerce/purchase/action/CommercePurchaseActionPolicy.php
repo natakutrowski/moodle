@@ -6,13 +6,27 @@ namespace local_subscriptions\commerce\purchase\action;
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_subscriptions\commerce\purchase\policy\CommercePurchaseEntitlementExpectationPolicy;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseDetails;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseSummary;
 
 /** Central safety policy for CRM purchase actions. */
 final class CommercePurchaseActionPolicy {
+    public function __construct(
+        private readonly ?CommercePurchaseEntitlementExpectationPolicy $expectations = null
+    ) {
+    }
+
+    private function expectations(): CommercePurchaseEntitlementExpectationPolicy {
+        return $this->expectations ?? new CommercePurchaseEntitlementExpectationPolicy();
+    }
+
     public function can_retry_fulfillment(CommercePurchaseDetails $purchase): bool {
         if ($purchase->summary->source !== 'native' || $purchase->legacyfamily !== null) {
+            return false;
+        }
+
+        if (!$this->expectations()->details_requires_fulfillment($purchase)) {
             return false;
         }
 
@@ -29,6 +43,10 @@ final class CommercePurchaseActionPolicy {
 
     public function can_retry_summary(CommercePurchaseSummary $purchase): bool {
         if ($purchase->source !== 'native') {
+            return false;
+        }
+
+        if (!$this->expectations()->summary_requires_fulfillment($purchase)) {
             return false;
         }
 
@@ -60,12 +78,38 @@ final class CommercePurchaseActionPolicy {
             return false;
         }
 
+        if (!$this->expectations()->summary_requires_fulfillment($purchase)) {
+            return false;
+        }
+
         return $purchase->commercialstatus === 'fulfilled'
             || in_array(
                 $purchase->fulfillmentstatus,
                 ['fulfilled', 'completed', 'delivered', 'succeeded', 'success'],
                 true
             );
+    }
+
+    public function can_resend_access_details(CommercePurchaseDetails $purchase): bool {
+        if (!$this->can_resend_access_summary($purchase->summary)) {
+            return false;
+        }
+
+        // Preserve historic behaviour when no native grant is exposed in the
+        // read model (for example legacy-compatible access deliveries). When
+        // grants are present, however, an explicitly revoked purchase must
+        // never offer or execute an access-email resend.
+        if ($purchase->grants === []) {
+            return true;
+        }
+
+        foreach ($purchase->grants as $grant) {
+            if (strtolower(trim((string)$grant->status)) !== 'revoked') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function can_create_personal_offer_summary(CommercePurchaseSummary $purchase): bool {

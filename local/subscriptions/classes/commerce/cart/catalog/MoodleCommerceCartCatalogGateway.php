@@ -13,6 +13,7 @@ use local_subscriptions\commerce\catalog\repository\CommerceProductRepository;
 use local_subscriptions\commerce\catalog\repository\CommerceProductTranslationRepository;
 use local_subscriptions\commerce\pricing\CommerceProductPromotionService;
 use local_subscriptions\commerce\domain\value\CommerceMoney;
+use local_subscriptions\commerce\catalog\domain\CommerceProductType;
 
 /** Native catalogue adapter used by the session cart runtime. */
 final class MoodleCommerceCartCatalogGateway implements CommerceCartCatalogGateway {
@@ -52,12 +53,14 @@ final class MoodleCommerceCartCatalogGateway implements CommerceCartCatalogGatew
 
         $translation = $this->translations->find($product->get_sku(), $language);
 
-        $promotion = (new CommerceProductPromotionService())->resolve(
-            $product->get_metadata(),
-            $price->get_currency(),
-            $price->get_amount_minor(),
-            $at ?? time()
-        );
+        $promotion = $product->get_type() === CommerceProductType::DONATION
+            ? []
+            : (new CommerceProductPromotionService())->resolve(
+                $product->get_metadata(),
+                $price->get_currency(),
+                $price->get_amount_minor(),
+                $at ?? time()
+            );
         $money = CommerceMoney::from_minor(
             $promotion['amountminor'] ?? $price->get_amount_minor(),
             $price->get_currency()

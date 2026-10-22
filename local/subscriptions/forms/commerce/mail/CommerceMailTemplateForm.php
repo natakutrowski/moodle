@@ -58,7 +58,7 @@ final class CommerceMailTemplateForm extends moodleform {
         $mform->hideIf('headerimage_filemanager', 'headerimage', 'notchecked');
         $mform->addElement('static', 'headerimagenote', '', get_string('commerce_mail_template_headerimage_note', 'local_subscriptions'));
 
-        $tokens = ['{firstname}', '{fullname}', '{order_reference}', '{order_total}', '{order_url}',
+        $tokens = ['{firstname}', '{fullname}', '{order_reference}', '{order_total}', '{donation_amount}', '{order_url}',
             '{my_purchases_url}', '{my_courses_url}', '{digital_library_url}', '{support_email}',
             '{offer_url}', '{offer_product}', '{offer_expiry}', '{offer_price}', '{campaign_name}'];
         $mform->addElement('static', 'tokens', get_string('commerce_mail_template_tokens', 'local_subscriptions'),

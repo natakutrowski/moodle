@@ -10,7 +10,7 @@ final class commerce_showroom_final_cta_j16p3_test extends \advanced_testcase {
     public function test_split_sticky_legal_footer_and_mobile_background_contract(): void {
         global $CFG;
         $root = $CFG->dirroot . '/local/subscriptions/';
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
         $css = file_get_contents($root . 'styles/showroom.css');
         $js = file_get_contents($root . 'amd/src/showroom.js');
         $page = file_get_contents($root . 'showroom.php');

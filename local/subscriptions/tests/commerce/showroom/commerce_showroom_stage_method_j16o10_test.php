@@ -10,7 +10,7 @@ final class commerce_showroom_stage_method_j16o10_test extends \advanced_testcas
     public function test_route_crop_and_mobile_split_contract(): void {
         global $CFG;
         $root = $CFG->dirroot . '/local/subscriptions/';
-        $template = file_get_contents($root . 'templates/showroom/third_group_verbs.mustache');
+        $template = file_get_contents($root . 'templates/showroom/default.mustache');
         $css = file_get_contents($root . 'styles/showroom.css');
 
         self::assertStringContainsString('commerce-showroom-stage-method__mobile-goat', $template);

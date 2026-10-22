@@ -11,6 +11,15 @@ final class CommerceShowroomPageTemplateRegistry {
     /** @return array<string,array<string,mixed>> */
     public static function definitions(): array {
         return [
+            'a1_course' => [
+                'label' => 'Cours A1 — voyage CampusFR',
+                'blocks' => [
+                    'hero', 'stats', 'anchor_nav', 'audience_profiles',
+                    'adventure_overview', 'content_highlights', 'community_clan',
+                    'tutor_chat', 'video', 'curriculum_tabs', 'journey_map',
+                    'preparation_flow', 'offers', 'testimonials', 'faq', 'final_cta',
+                ],
+            ],
             'launch' => [
                 'label' => 'Landing de lancement',
                 'blocks' => ['hero', 'stats', 'problem', 'problem_interactive', 'learning_method', 'video', 'content_highlights', 'ascent', 'stage_method', 'exercise_explorer', 'offers', 'comparison', 'memory_method', 'trust', 'bonus', 'faq', 'support', 'final_cta'],

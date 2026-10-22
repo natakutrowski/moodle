@@ -342,6 +342,10 @@ abstract class AbstractCommerceMailTemplate implements CommerceMailTemplate {
                 'commerce_product_type_service',
                 'local_subscriptions'
             ),
+            'receipt_donation_type_label' => get_string(
+                'commerce_product_type_donation',
+                'local_subscriptions'
+            ),
             'welcome_login_email_label' => get_string(
                 'commerce_mail_welcome_login_email',
                 'local_subscriptions'

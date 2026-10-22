@@ -29,6 +29,14 @@ $previewview = CommerceMailPreviewRenderer::normalise_view(
 $previewfont = CommerceMailPreviewRenderer::normalise_font(
     optional_param('font', CommerceMailPreviewRenderer::FONT_BRAND, PARAM_ALPHA)
 );
+$previewscenarios = ['standard', 'alf_course_donation', 'alf_donation'];
+$previewscenario = optional_param('scenario', 'standard', PARAM_ALPHANUMEXT);
+if (!in_array($previewscenario, $previewscenarios, true)) {
+    $previewscenario = 'standard';
+}
+if ($mailtype !== CommerceMailType::PURCHASE_RECEIPT) {
+    $previewscenario = 'standard';
+}
 if (!in_array($mailtype, CommerceMailType::all(), true) || !in_array($language, ['fr', 'en', 'ru'], true)) {
     throw new moodle_exception('invalidparameter');
 }
@@ -37,6 +45,7 @@ $url = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/previe
     'mailtype' => $mailtype,
     'language' => $language,
     'font' => $previewfont,
+    'scenario' => $previewscenario,
 ]);
 $title = get_string('commerce_mail_template_preview_title', 'local_subscriptions', (object)[
     'type' => CommerceMailAdminPresentation::type_label($mailtype),
@@ -45,43 +54,104 @@ $title = get_string('commerce_mail_template_preview_title', 'local_subscriptions
 CrmPageConfigurator::configure($PAGE, $context, $url, $title, 'local-subscriptions-commerce-mail-template-preview-page');
 $PAGE->requires->css('/local/subscriptions/styles/commerce_mail_admin.css');
 
+$previewtitles = [
+    'fr' => [
+        'course' => 'Mini-cours — Les articles français',
+        'donation' => 'Soutien à l’opération d’Alf',
+    ],
+    'en' => [
+        'course' => 'Mini-course — French articles',
+        'donation' => 'Support for Alf’s operation',
+    ],
+    'ru' => [
+        'course' => 'Мини-курс — Французские артикли',
+        'donation' => 'Помощь на операцию Альфа',
+    ],
+];
+$previewpurchase = [
+    'reference' => 'CFR-2026-000123',
+    'totalformatted' => '129,00 €',
+];
+$previewitems = [
+    [
+        'type' => 'course',
+        'title' => 'Cours de français A1',
+        'productsku' => 'COURSE_ACCESS.A1',
+        'totalformatted' => '79,00 €',
+        'producturl' => 'https://www.campusfr.fr/example/course',
+        'accesses' => [[
+            'kind' => 'course',
+            'label' => 'Accéder au cours',
+            'url' => 'https://www.campusfr.fr/example/access/course',
+        ]],
+    ],
+    [
+        'type' => 'digital',
+        'title' => 'Guide des verbes français',
+        'productsku' => 'DIGITAL.GUIDE.VERBES',
+        'totalformatted' => '50,00 €',
+        'accesses' => [[
+            'kind' => 'download',
+            'label' => 'Version classique',
+            'url' => 'https://www.campusfr.fr/example/access/download',
+            'filename' => 'guide-verbes.pdf',
+            'filetype' => 'PDF',
+            'filesize' => '4,8 Mo',
+        ]],
+    ],
+];
+
+if ($previewscenario === 'alf_donation') {
+    $previewpurchase = [
+        'reference' => 'CFR-2026-ALF-DON',
+        'totalformatted' => '10,00 €',
+        'donationformatted' => '10,00 €',
+    ];
+    $previewitems = [[
+        'type' => 'donation',
+        'title' => $previewtitles[$language]['donation'],
+        'productsku' => 'DONATION.ALF',
+        'totalformatted' => '10,00 €',
+    ]];
+} elseif ($previewscenario === 'alf_course_donation') {
+    $previewpurchase = [
+        'reference' => 'CFR-2026-ALF-COURSE-DON',
+        'totalformatted' => '35,00 €',
+        'donationformatted' => '10,00 €',
+    ];
+    $previewitems = [
+        [
+            'type' => 'course',
+            'title' => $previewtitles[$language]['course'],
+            'productsku' => 'COURSE_ACCESS.ARTICLES',
+            'totalformatted' => '25,00 €',
+            'accesses' => [[
+                'kind' => 'course',
+                'label' => '',
+                'url' => 'https://www.campusfr.fr/example/access/articles',
+            ]],
+        ],
+        [
+            'type' => 'donation',
+            'title' => $previewtitles[$language]['donation'],
+            'productsku' => 'DONATION.ALF',
+            'totalformatted' => '10,00 €',
+        ],
+    ];
+}
+
 $request = new CommerceMailRequest(
     $mailtype,
     new CommerceMailRecipient('nata@example.test', 'Nata CampusFR'),
     new CommerceMailContext([
         'customer' => ['firstname' => 'Nata', 'fullname' => 'Nata CampusFR'],
-        'purchase' => ['reference' => 'CFR-2026-000123', 'totalformatted' => '129,00 €'],
-        'items' => [
-            [
-                'type' => 'course',
-                'title' => 'Cours de français A1',
-                'totalformatted' => '79,00 €',
-                'producturl' => 'https://www.campusfr.fr/example/course',
-                'accesses' => [[
-                    'kind' => 'course',
-                    'label' => 'Accéder au cours',
-                    'url' => 'https://www.campusfr.fr/example/access/course',
-                ]],
-            ],
-            [
-                'type' => 'digital',
-                'title' => 'Guide des verbes français',
-                'totalformatted' => '50,00 €',
-                'accesses' => [[
-                    'kind' => 'download',
-                    'label' => 'Version classique',
-                    'url' => 'https://www.campusfr.fr/example/access/download',
-                    'filename' => 'guide-verbes.pdf',
-                    'filetype' => 'PDF',
-                    'filesize' => '4,8 Mo',
-                ]],
-            ],
-        ],
+        'purchase' => $previewpurchase,
+        'items' => $previewitems,
         'payment' => [
             'providerlabel' => 'Stripe',
             'transactionreference' => 'pi_example_123',
             'statuslabel' => 'Payé',
-            'amountformatted' => '129,00 €',
+            'amountformatted' => (string)$previewpurchase['totalformatted'],
         ],
         'links' => [
             'order' => 'https://www.campusfr.fr/example/order',
@@ -182,6 +252,11 @@ $languageform .= html_writer::empty_tag('input', [
     'name' => 'font',
     'value' => $previewfont,
 ]);
+$languageform .= html_writer::empty_tag('input', [
+    'type' => 'hidden',
+    'name' => 'scenario',
+    'value' => $previewscenario,
+]);
 $languageform .= html_writer::label(
     get_string('language'),
     'commerce-mail-preview-language-select',
@@ -201,6 +276,53 @@ $languageform .= html_writer::select(
 );
 $languageform .= html_writer::end_tag('form');
 
+$scenarioform = '';
+if ($mailtype === CommerceMailType::PURCHASE_RECEIPT) {
+    $scenariooptions = [
+        'standard' => get_string('commerce_mail_preview_scenario_standard', 'local_subscriptions'),
+        'alf_course_donation' => get_string(
+            'commerce_mail_preview_scenario_alf_course_donation',
+            'local_subscriptions'
+        ),
+        'alf_donation' => get_string('commerce_mail_preview_scenario_alf_donation', 'local_subscriptions'),
+    ];
+    $scenarioform = html_writer::start_tag('form', [
+        'method' => 'get',
+        'action' => (new moodle_url('/local/subscriptions/admin/commerce/mail/templates/preview.php'))->out(false),
+        'class' => 'commerce-mail-preview-language',
+    ]);
+    foreach ([
+        'mailtype' => $mailtype,
+        'language' => $language,
+        'view' => $previewview,
+        'font' => $previewfont,
+    ] as $name => $value) {
+        $scenarioform .= html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => $name,
+            'value' => $value,
+        ]);
+    }
+    $scenarioform .= html_writer::label(
+        get_string('commerce_mail_preview_scenario', 'local_subscriptions'),
+        'commerce-mail-preview-scenario-select',
+        false,
+        ['class' => 'commerce-mail-preview-language__label']
+    );
+    $scenarioform .= html_writer::select(
+        $scenariooptions,
+        'scenario',
+        $previewscenario,
+        false,
+        [
+            'id' => 'commerce-mail-preview-scenario-select',
+            'class' => 'form-select form-select-sm commerce-mail-preview-language__select',
+            'onchange' => 'this.form.submit();',
+        ]
+    );
+    $scenarioform .= html_writer::end_tag('form');
+}
+
 $toolbar = html_writer::div(
     $previewnavigation,
     'commerce-mail-preview-toolbar__navigation'
@@ -215,6 +337,12 @@ $toolbar .= html_writer::div(
     $languageform,
     'commerce-mail-preview-toolbar__language'
 );
+if ($scenarioform !== '') {
+    $toolbar .= html_writer::div(
+        $scenarioform,
+        'commerce-mail-preview-toolbar__language'
+    );
+}
 
 echo html_writer::div($toolbar, 'commerce-mail-preview-toolbar');
 

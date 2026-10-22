@@ -16,7 +16,7 @@ final class commerce_796h13323_buy_now_isolation_provider_cleanup_test extends \
 
         $start = strpos(
             $source,
-            "if (\$action === 'buynow')"
+            "if (\$action === 'add' || \$action === 'buynow')"
         );
         self::assertNotFalse($start);
 
@@ -33,6 +33,10 @@ final class commerce_796h13323_buy_now_isolation_provider_cleanup_test extends \
             $end - $start
         );
 
+        self::assertStringContainsString(
+            "if (\$action === 'buynow' && !\$hasdonationcompanion)",
+            $block
+        );
         self::assertStringContainsString(
             'prepare_direct_product(',
             $block
