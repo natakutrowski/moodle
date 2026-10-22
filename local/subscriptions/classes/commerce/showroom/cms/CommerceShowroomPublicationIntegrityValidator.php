@@ -131,7 +131,23 @@ final class CommerceShowroomPublicationIntegrityValidator {
                 continue;
             }
 
-            $this->validate_required_value($blockkey, $name, $config[$name] ?? null);
+            // These A1 variants render from their dedicated collections, not
+            // from the legacy standard block-level `items` textarea.
+            if (
+                $name === 'items'
+                && (
+                    ($blocktype === 'journey_map' && $presentation === 'interactive_a1')
+                    || ($blocktype === 'faq' && $presentation === 'a1_travel')
+                )
+            ) {
+                continue;
+            }
+
+            $this->validate_required_value(
+                $blockkey,
+                $name,
+                self::required_field_value($config, $field)
+            );
         }
 
         // Keep publication fail-closed for the custom four-column variant:
@@ -141,6 +157,86 @@ final class CommerceShowroomPublicationIntegrityValidator {
                 $this->validate_required_value($blockkey, $name, $config[$name] ?? null);
             }
         }
+
+        if ($blocktype === 'journey_map' && $presentation === 'interactive_a1') {
+            // The interactive map is data-driven; legacy legend `items` is
+            // intentionally absent, but positions and captions must exist.
+            foreach (['captions', 'geopoints'] as $name) {
+                $this->validate_required_value(
+                    $blockkey,
+                    $name,
+                    self::required_field_value($config, [
+                        'name' => $name,
+                        'translatable' => $name === 'captions',
+                    ])
+                );
+            }
+        }
+
+        if ($blocktype === 'faq' && $presentation === 'a1_travel') {
+            // The A1 FAQ uses structured question/answer entries instead of
+            // the historical pipe-separated `items` format.
+            $entriesjson = self::required_field_value($config, [
+                'name' => 'entriesjson',
+                'translatable' => true,
+            ]);
+            $this->validate_required_value($blockkey, 'entriesjson', $entriesjson);
+            $entries = json_decode((string)$entriesjson, true);
+            if (!is_array($entries) || !array_is_list($entries)) {
+                $this->fail('invalid entriesjson in block "' . $blockkey . '"');
+            }
+            $hasvalidentry = false;
+            foreach ($entries as $entry) {
+                if (
+                    is_array($entry)
+                    && trim((string)($entry['question'] ?? '')) !== ''
+                    && trim((string)($entry['answer'] ?? '')) !== ''
+                ) {
+                    $hasvalidentry = true;
+                    break;
+                }
+            }
+            if (!$hasvalidentry) {
+                $this->fail('no valid entriesjson entry in block "' . $blockkey . '"');
+            }
+        }
+    }
+
+    /**
+     * Returns a translated value when a portable import stores editorial
+     * content only under `translations`, without the legacy FR root copy.
+     * A required field stays required: the value must exist in at least one
+     * actual locale or at the root.
+     *
+     * @param array<string,mixed> $config
+     * @param array<string,mixed> $field
+     */
+    private static function required_field_value(array $config, array $field): mixed {
+        $name = (string)($field['name'] ?? '');
+        $value = $config[$name] ?? null;
+        if (empty($field['translatable']) || !self::missing_required_value($value)) {
+            return $value;
+        }
+
+        $translations = $config['translations'] ?? null;
+        if (!is_array($translations)) {
+            return $value;
+        }
+        foreach (['fr', 'en', 'ru'] as $language) {
+            $translated = is_array($translations[$language] ?? null)
+                ? ($translations[$language][$name] ?? null)
+                : null;
+            if (!self::missing_required_value($translated)) {
+                return $translated;
+            }
+        }
+        return $value;
+    }
+
+    private static function missing_required_value(mixed $value): bool {
+        return $value === null
+            || $value === []
+            || (is_string($value) && trim($value) === '');
     }
 
     /**
