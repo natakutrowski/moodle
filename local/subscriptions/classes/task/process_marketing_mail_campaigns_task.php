@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use core\task\scheduled_task;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignRepository;
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingCourseCampaignGate;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingOptoutService;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignContentPolicy;
 use local_subscriptions\commerce\mail\CommerceMailContext;
@@ -37,8 +38,17 @@ final class process_marketing_mail_campaigns_task extends scheduled_task {
 
         foreach ($repository->due($now, 10) as $campaign) {
             if ((string)($campaign->audiencesource ?? 'manual') === 'course') {
-                mtrace('[Marketing Mail] UNSAFE course campaign blocked: ' . (int)$campaign->id);
-                continue;
+                if (!CommerceMarketingCourseCampaignGate::enabled()) {
+                    mtrace('[Marketing Mail] course campaign release switch OFF: ' . (int)$campaign->id);
+                    continue;
+                }
+                // Check that no one lost eligibility since the operator confirmed the audience.
+                // An unsafe snapshot is paused rather than partly sent.
+                if (!CommerceMarketingCourseCampaignGate::snapshot_is_current($DB, $repository, $campaign)) {
+                    $repository->mark_paused((int)$campaign->id, time());
+                    mtrace('[Marketing Mail] course campaign paused: stale recipients ' . (int)$campaign->id);
+                    continue;
+                }
             }
             $queued = 0;
             $contents = $repository->contents((int)$campaign->id);

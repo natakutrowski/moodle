@@ -10693,5 +10693,35 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102802, 'local', 'subscriptions');
     }
 
+
+    if ($oldversion < 2026102901) {
+        // CampusFR Performance: optimise recent XP activity statistics
+        // for Commerce / Mon Campus without changing XP reward logic.
+        $table = new xmldb_table('block_xp_logs');
+
+        if (!$dbman->table_exists($table)) {
+            throw new \RuntimeException(
+                'CampusFR XP index: block_xp_logs table is missing'
+            );
+        }
+
+        $index = new xmldb_index(
+            'campusfrusertimeid',
+            XMLDB_INDEX_NOTUNIQUE,
+            ['userid', 'timerecorded', 'id']
+        );
+
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(
+            true,
+            2026102901,
+            'local',
+            'subscriptions'
+        );
+    }
+
     return true;
 }

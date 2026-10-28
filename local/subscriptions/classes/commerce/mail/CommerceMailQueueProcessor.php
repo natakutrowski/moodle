@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace local_subscriptions\commerce\mail;
 
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingCourseCampaignGate;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -78,6 +80,11 @@ final class CommerceMailQueueProcessor {
             // A pause or cancellation may occur AFTER the worker selects a batch.
             // Check again before claiming and immediately before SMTP dispatch.
             if ((string)$record->mailtype === CommerceMailType::MARKETING_CAMPAIGN) {
+                if (!CommerceMarketingCourseCampaignGate::enabled() &&
+                        $this->repository->marketing_campaign_source((int)$record->id) === 'course') {
+                    $result['skipped']++;
+                    continue;
+                }
                 $campaignstatus = $this->repository->marketing_campaign_status((int)$record->id);
                 if ($campaignstatus !== 'queued') {
                     if ($campaignstatus === 'cancelled') {
@@ -104,6 +111,13 @@ final class CommerceMailQueueProcessor {
 
             $result['processed']++;
             if ((string)$record->mailtype === CommerceMailType::MARKETING_CAMPAIGN) {
+                if (!CommerceMarketingCourseCampaignGate::enabled() &&
+                        $this->repository->marketing_campaign_source((int)$record->id) === 'course') {
+                    $this->repository->mark_retry((int)$record->id,
+                        'course_campaign_release_switch_disabled', $now + 60, $now);
+                    $result['skipped']++;
+                    continue;
+                }
                 $campaignstatus = $this->repository->marketing_campaign_status((int)$record->id);
                 if ($campaignstatus !== 'queued') {
                     if ($campaignstatus === 'cancelled') {

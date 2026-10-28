@@ -256,4 +256,97 @@ final class commerce_marketing_course_audience_stage1_test extends \advanced_tes
         self::assertSame(1, $report['summary']['eligible']);
     }
 
+    public function test_mixed_trial_filter_is_configurable_but_trial_only_is_always_excluded(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $mixed = $this->getDataGenerator()->create_user();
+        $trialonly = $this->getDataGenerator()->create_user();
+        if (!$DB->record_exists('role', ['shortname' => 'trialstudent'])) {
+            create_role('trialstudent', 'trialstudent', 'Test trial role');
+        }
+        $roleid = (int)$DB->get_field('role', 'id', ['shortname' => 'trialstudent']);
+        $this->getDataGenerator()->enrol_user($mixed->id, $course->id, 'student');
+        $this->add_verified_purchase((int)$course->id, $mixed);
+        role_assign($roleid, $mixed->id, \context_course::instance($course->id)->id);
+        $this->getDataGenerator()->enrol_user($trialonly->id, $course->id, 'trialstudent');
+        $service = new CommerceMarketingCourseAudienceService($DB);
+        $default = $service->preview((int)$course->id);
+        self::assertContains('conflicting_trial_role', $this->find($default, (int)$mixed->id)['reasons']);
+        $relaxed = $service->preview((int)$course->id, [], null, ['exclude_trial_role' => false]);
+        self::assertTrue($this->find($relaxed, (int)$mixed->id)['eligible']);
+        self::assertFalse($this->find($relaxed, (int)$trialonly->id)['eligible']);
+    }
+
+    public function test_promotion_filter_is_configurable_but_verified_purchase_is_mandatory(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $customer = $this->getDataGenerator()->create_user();
+        $unproven = $this->getDataGenerator()->create_user();
+        foreach ([$customer, $unproven] as $user) {
+            $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
+        }
+        $this->add_verified_purchase((int)$course->id, $customer);
+        $DB->insert_record('local_subs_commerce_ped_access', (object)[
+            'courseid' => $course->id, 'userid' => $customer->id,
+            'promotionid' => null, 'profile' => 'promotion_progressive',
+            'timecreated' => time(), 'timemodified' => time(),
+        ]);
+        $service = new CommerceMarketingCourseAudienceService($DB);
+        $default = $service->preview((int)$course->id);
+        self::assertContains('promotion_course_access', $this->find($default, (int)$customer->id)['reasons']);
+        $relaxed = $service->preview((int)$course->id, [], null, ['exclude_promotion_access' => false]);
+        self::assertTrue($this->find($relaxed, (int)$customer->id)['eligible']);
+        self::assertContains('no_verified_course_purchase', $this->find($relaxed, (int)$unproven->id)['reasons']);
+    }
+
+    public function test_grammar_secondary_role_can_be_excluded_explicitly(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $buyer = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($buyer->id, $course->id, 'student');
+        $this->add_verified_purchase((int)$course->id, $buyer);
+        if (!$DB->record_exists('role', ['shortname' => 'grammarstudent'])) {
+            create_role('grammarstudent', 'grammarstudent', 'Grammar test role');
+        }
+        $roleid = (int)$DB->get_field('role', 'id', ['shortname' => 'grammarstudent']);
+        role_assign($roleid, $buyer->id, \context_course::instance($course->id)->id);
+        $service = new CommerceMarketingCourseAudienceService($DB);
+        self::assertTrue($this->find($service->preview((int)$course->id), (int)$buyer->id)['eligible']);
+        $filtered = $service->preview((int)$course->id, [], null, ['exclude_grammar_role' => true]);
+        self::assertContains('conflicting_grammar_role', $this->find($filtered, (int)$buyer->id)['reasons']);
+    }
+
+    public function test_accompaniment_filter_can_be_disabled_without_weakening_purchase_check(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $buyer = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($buyer->id, $course->id, 'student');
+        $this->add_verified_purchase((int)$course->id, $buyer);
+        $now = time();
+        $promotionid = $DB->insert_record('local_subs_commerce_ped_promo', (object)[
+            'promotionkey' => 'e7-promo-' . random_string(8),
+            'name' => 'E7', 'courseid' => $course->id,
+            'status' => 'draft', 'published' => 0,
+            'timecreated' => $now, 'timemodified' => $now,
+        ]);
+        $productid = $DB->insert_record('local_subs_commerce_product', (object)[
+            'sku' => 'E7-SUPPORT-' . random_string(6), 'type' => 'course_access',
+            'status' => 'active', 'name' => 'Tutoring',
+            'timecreated' => $now, 'timemodified' => $now,
+        ]);
+        $DB->insert_record('local_subs_commerce_ped_join', (object)[
+            'promotionid' => $promotionid, 'courseid' => $course->id, 'userid' => $buyer->id,
+            'productid' => $productid, 'purchasereference' => 'e7-test-' . random_string(8),
+            'state' => 'refunded', 'timecreated' => $now, 'timemodified' => $now,
+        ]);
+        $service = new CommerceMarketingCourseAudienceService($DB);
+        self::assertContains('pedagogical_participation_history',
+            $this->find($service->preview((int)$course->id), (int)$buyer->id)['reasons']);
+        $relaxed = $service->preview((int)$course->id, [], null, ['exclude_accompaniment' => false]);
+        self::assertTrue($this->find($relaxed, (int)$buyer->id)['eligible']);
+    }
 }

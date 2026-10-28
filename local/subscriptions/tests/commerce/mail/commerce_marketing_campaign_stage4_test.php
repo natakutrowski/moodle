@@ -108,7 +108,7 @@ final class commerce_marketing_campaign_stage4_test extends \advanced_testcase {
         ob_start();
         (new process_marketing_mail_campaigns_task())->execute();
         $blockedoutput = ob_get_clean();
-        self::assertStringContainsString('UNSAFE course campaign blocked', $blockedoutput);
+        self::assertStringContainsString('course campaign release switch OFF', $blockedoutput);
         self::assertSame(0, $DB->count_records('local_subs_commerce_mail',
             ['mailtype' => CommerceMailType::MARKETING_CAMPAIGN]));
     }

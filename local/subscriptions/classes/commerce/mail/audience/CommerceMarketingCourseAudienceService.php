@@ -15,6 +15,24 @@ defined('MOODLE_INTERNAL') || die();
  * stage. Do not pass these results directly to the mail queue.
  */
 final class CommerceMarketingCourseAudienceService {
+    /** Optional filters only. Validated purchase, active enrolment, opt-out and admin checks are mandatory. */
+    public const DEFAULT_FILTERS = [
+        'exclude_trial_role' => true,
+        'exclude_grammar_role' => false,
+        'exclude_promotion_access' => true,
+        'exclude_accompaniment' => true,
+    ];
+
+    /** @param array<string, mixed> $filters @return array<string, bool> */
+    public static function normalise_filters(array $filters): array {
+        $result = self::DEFAULT_FILTERS;
+        foreach ($result as $key => $default) {
+            if (array_key_exists($key, $filters)) {
+                $result[$key] = in_array($filters[$key], [true, 1, '1'], true);
+            }
+        }
+        return $result;
+    }
     public function __construct(private readonly \moodle_database $db) {
     }
 
@@ -30,8 +48,10 @@ final class CommerceMarketingCourseAudienceService {
     public function preview(
         int $courseid,
         array $additionalsupportskus = [],
-        ?int $now = null
+        ?int $now = null,
+        array $filters = []
     ): array {
+        $filters = self::normalise_filters($filters);
         if ($courseid <= SITEID) {
             throw new \invalid_parameter_exception('A valid Moodle course ID is required.');
         }
@@ -99,8 +119,13 @@ final class CommerceMarketingCourseAudienceService {
             if ((int)$user->fullrole !== 1) {
                 $reasons[] = (int)$user->trialrole === 1 ? 'trial_only' : 'not_full_student';
             }
-            if ((int)$user->fullrole === 1 && (int)$user->trialrole === 1) {
+            if ($filters['exclude_trial_role'] && (int)$user->fullrole === 1
+                    && (int)$user->trialrole === 1) {
                 $reasons[] = 'conflicting_trial_role';
+            }
+            if ($filters['exclude_grammar_role'] && (int)$user->fullrole === 1
+                    && (int)$user->grammarrole === 1) {
+                $reasons[] = 'conflicting_grammar_role';
             }
             if (!$this->has_current_enrolment($courseid, $userid, $now)) {
                 $reasons[] = 'no_active_enrolment';
@@ -115,22 +140,24 @@ final class CommerceMarketingCourseAudienceService {
             $access = $this->db->get_record('local_subs_commerce_ped_access', [
                 'courseid' => $courseid, 'userid' => $userid,
             ], 'promotionid,profile', IGNORE_MISSING);
-            if ($access && ($access->promotionid !== null
+            if ($filters['exclude_promotion_access'] && $access && ($access->promotionid !== null
                     || (string)$access->profile === 'promotion_progressive')) {
                 $reasons[] = 'promotion_course_access';
             }
             // Any historical participation (including refunded/cancelled) is
             // excluded conservatively until the commercial policy is approved.
-            if ($this->db->record_exists('local_subs_commerce_ped_join', [
-                'courseid' => $courseid, 'userid' => $userid,
-            ])) {
-                $reasons[] = 'pedagogical_participation_history';
-            }
-            if ($this->has_promotion_join_grant($courseid, $userid)) {
-                $reasons[] = 'promotion_join_grant';
-            }
-            if ($supportskus !== [] && $this->has_support_purchase($userid, $email, $supportskus)) {
-                $reasons[] = 'support_purchase_history';
+            if ($filters['exclude_accompaniment']) {
+                if ($this->db->record_exists('local_subs_commerce_ped_join', [
+                    'courseid' => $courseid, 'userid' => $userid,
+                ])) {
+                    $reasons[] = 'pedagogical_participation_history';
+                }
+                if ($this->has_promotion_join_grant($courseid, $userid)) {
+                    $reasons[] = 'promotion_join_grant';
+                }
+                if ($supportskus !== [] && $this->has_support_purchase($userid, $email, $supportskus)) {
+                    $reasons[] = 'support_purchase_history';
+                }
             }
 
             $eligible = $reasons === [];
@@ -154,6 +181,7 @@ final class CommerceMarketingCourseAudienceService {
             'course' => (string)$course->shortname,
             'checkedat' => $now,
             'supportskus' => $supportskus,
+            'filters' => $filters,
             'summary' => $summary,
             'rows' => $rows,
         ];
@@ -167,6 +195,16 @@ final class CommerceMarketingCourseAudienceService {
                   JOIN {local_subs_commerce_product} product ON product.id = offer.productid
                  WHERE promo.courseid = :courseid';
         $skus = $this->db->get_fieldset_sql($sql, ['courseid' => $courseid]);
+        // The two A1 support products are historical catalog SKUs (including an inactive one).
+        // They must remain detectable without making an operator type product references.
+        if ($courseid === 13) {
+            $historical = $this->db->get_fieldset_sql(
+                'SELECT sku FROM {local_subs_commerce_product}
+                  WHERE sku IN (:supportfr, :supportru)',
+                ['supportfr' => 'A1-FR-SUPPORT', 'supportru' => 'A1-RU-SUPPORT']
+            );
+            $skus = array_merge($skus, $historical);
+        }
         foreach ($additional as $sku) {
             if (!is_string($sku)) {
                 throw new \invalid_parameter_exception('Support SKU must be a string.');

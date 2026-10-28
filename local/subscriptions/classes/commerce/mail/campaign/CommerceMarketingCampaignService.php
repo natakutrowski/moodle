@@ -8,6 +8,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\mail\builder\CommerceMailBuilder;
 use local_subscriptions\commerce\mail\audience\CommerceMarketingCampaignAudienceResolver;
+use local_subscriptions\commerce\mail\audience\CommerceMarketingCourseAudienceService;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingOptoutService;
 use local_subscriptions\commerce\mail\library\CommerceMailLibrary;
 use local_subscriptions\commerce\mail\library\CommerceMailLibraryRepository;
@@ -81,13 +82,17 @@ final class CommerceMarketingCampaignService {
             $excludedids = CommerceMarketingCampaignAudienceResolver::parse_excluded_ids(
                 (string)($data['audienceexcludedids'] ?? '')
             );
+            $filters = CommerceMarketingCourseAudienceService::normalise_filters(
+                (array)($data['audiencefilters'] ?? [])
+            );
             $preview = CommerceMarketingCampaignAudienceResolver::create($this->db)
-                ->preview_course($courseid, $supportskus, $excludedids);
+                ->preview_course($courseid, $supportskus, $excludedids, $filters);
             $recipients = $preview['recipients'];
             $audienceconfig = json_encode([
                 'courseid' => $courseid,
                 'supportskus' => $supportskus,
                 'excludedids' => $excludedids,
+                'filters' => $filters,
                 'checkedat' => time(),
                 'eligible' => count($recipients),
             ], JSON_THROW_ON_ERROR);
@@ -147,15 +152,26 @@ final class CommerceMarketingCampaignService {
         return $campaignid;
     }
 
-    public function schedule(int $campaignid, int $scheduledat, int $userid): void {
+    public function schedule(int $campaignid, int $scheduledat, int $userid, bool $legalreviewed = false): void {
         $campaign = $this->repository->get($campaignid);
         if ((string)$campaign->status !== 'draft') {
             throw new \coding_exception('Only draft marketing campaigns can be scheduled.');
         }
-        // Course segments stay draft-only until purchase provenance and the marketing legal basis
-        // are verified during the final acceptance step. Never unlock them via the UI alone.
-        if ((string)($campaign->audiencesource ?? 'manual') === 'course') {
-            throw new \coding_exception('Course-segment campaigns require purchase and marketing authorisation validation before scheduling.');
+        $coursecampaign = (string)($campaign->audiencesource ?? 'manual') === 'course';
+        if ($coursecampaign) {
+            if (!CommerceMarketingCourseCampaignGate::enabled()) {
+                throw new \invalid_parameter_exception(get_string(
+                    'commerce_campaign_e8_disabled', 'local_subscriptions'));
+            }
+            if (!$legalreviewed) {
+                throw new \invalid_parameter_exception(get_string(
+                    'commerce_campaign_e8_legal_required', 'local_subscriptions'));
+            }
+            if (!CommerceMarketingCourseCampaignGate::snapshot_is_current(
+                    $this->db, $this->repository, $campaign)) {
+                throw new \invalid_parameter_exception(get_string(
+                    'commerce_campaign_e8_stale_audience', 'local_subscriptions'));
+            }
         }
         if ($this->repository->recipient_count($campaignid) <= 0) {
             throw new \coding_exception('Marketing campaign has no recipients.');
@@ -174,13 +190,25 @@ final class CommerceMarketingCampaignService {
             ));
         }
 
-        $this->repository->update_campaign((object)[
+        // Record the operator's explicit review, not a machine-issued consent claim.
+        // Keep the audit data with the frozen audience (no DB schema migration).
+        $record = (object)[
             'id' => $campaignid,
             'status' => 'scheduled',
             'scheduledat' => max(time(), $scheduledat),
             'timemodified' => time(),
             'usermodified' => $userid,
-        ]);
+        ];
+        if ($coursecampaign) {
+            $config = json_decode((string)$campaign->audienceconfig, true);
+            $config['marketingreview'] = [
+                'by' => $userid,
+                'at' => time(),
+                'confirmed' => true,
+            ];
+            $record->audienceconfig = json_encode($config, JSON_THROW_ON_ERROR);
+        }
+        $this->repository->update_campaign($record);
     }
 
     public function pause(int $campaignid): void {

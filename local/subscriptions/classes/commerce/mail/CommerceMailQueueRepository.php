@@ -129,6 +129,18 @@ final class CommerceMailQueueRepository {
      * @return \stdClass[]
      */
     /** Return 'missing' if the mail does not belong to a frozen campaign recipient. */
+    /** Source of the campaign owning an outbox message; never inferred from client JSON. */
+    public function marketing_campaign_source(int $mailid): string {
+        global $DB;
+        $source = $DB->get_field_sql(
+            'SELECT c.audiencesource FROM {local_subs_mail_campaign} c '
+            . ' JOIN {local_subs_mail_campaign_recipient} r ON r.campaignid = c.id '
+            . ' WHERE r.mailid = :mailid',
+            ['mailid' => $mailid]
+        );
+        return $source === false ? 'missing' : (string)$source;
+    }
+
     public function marketing_campaign_status(int $mailid): string {
         global $DB;
         $status = $DB->get_field_sql(

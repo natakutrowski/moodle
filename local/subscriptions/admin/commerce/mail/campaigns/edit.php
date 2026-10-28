@@ -10,7 +10,9 @@ use local_subscriptions\commerce\mail\admin\CommerceMailHealthRenderer;
 use local_subscriptions\commerce\mail\admin\CommerceMailSectionNavigationRenderer;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignRepository;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignService;
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingCourseCampaignGate;
 use local_subscriptions\commerce\mail\audience\CommerceMarketingCampaignAudienceResolver;
+use local_subscriptions\commerce\mail\audience\CommerceMarketingCourseAudienceService;
 use local_subscriptions\commerce\mail\certification\CommerceMailEngineCertificationService;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
@@ -26,6 +28,7 @@ $service = CommerceMarketingCampaignService::create($DB);
 $repository = new CommerceMarketingCampaignRepository($DB);
 $campaign = $id > 0 ? $repository->get($id) : null;
 $editable = $campaign === null || (string)$campaign->status === 'draft';
+$courseenabled = CommerceMarketingCourseCampaignGate::enabled();
 
 $pageurl = new moodle_url(
     '/local/subscriptions/admin/commerce/mail/campaigns/edit.php',
@@ -60,6 +63,8 @@ $source = $campaign ? (string)($campaign->audiencesource ?? 'manual') : 'manual'
 $courseid = (int)($config['courseid'] ?? 0);
 $skus = implode(',', $config['supportskus'] ?? []);
 $excludedids = implode(',', $config['excludedids'] ?? []);
+$selectedexcludedids = array_map('intval', $config['excludedids'] ?? []);
+$filters = CommerceMarketingCourseAudienceService::normalise_filters((array)($config['filters'] ?? []));
 $namevalue = $campaign ? (string)$campaign->name : '';
 $templatevalue = $campaign ? (int)$campaign->templateid : 0;
 $ctavalue = $campaign ? (string)$campaign->ctaurl : '';
@@ -76,8 +81,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $audience = optional_param('audience', '', PARAM_RAW);
     $courseid = optional_param('audiencecourseid', 0, PARAM_INT);
     $skus = optional_param('audienceskus', '', PARAM_RAW_TRIMMED);
-    $excludedids = optional_param('audienceexcludedids', '', PARAM_RAW_TRIMMED);
+    $selectedexcludedids = array_values(array_unique(array_map('intval',
+        optional_param_array('audienceexcludedusers', [], PARAM_INT)
+    )));
+    $selectedexcludedids = array_values(array_filter($selectedexcludedids,
+        static fn(int $userid): bool => $userid > 0
+    ));
+    $excludedids = implode(',', $selectedexcludedids);
+    $filters = CommerceMarketingCourseAudienceService::normalise_filters([
+        'exclude_trial_role' => optional_param('exclude_trial_role', 1, PARAM_BOOL),
+        'exclude_grammar_role' => optional_param('exclude_grammar_role', 0, PARAM_BOOL),
+        'exclude_promotion_access' => optional_param('exclude_promotion_access', 1, PARAM_BOOL),
+        'exclude_accompaniment' => optional_param('exclude_accompaniment', 1, PARAM_BOOL),
+    ]);
     try {
+        if (count($selectedexcludedids) > 500) {
+            throw new \invalid_parameter_exception('Too many manually excluded accounts.');
+        }
         if (in_array($mode, ['pause', 'resume', 'cancel', 'test'], true)) {
             if (!$campaign || $id <= 0) {
                 throw new \invalid_parameter_exception('A saved campaign is required.');
@@ -109,17 +129,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $previewreport = CommerceMarketingCampaignAudienceResolver::create($DB)->preview_course(
                     $courseid,
                     CommerceMarketingCampaignAudienceResolver::parse_skus($skus),
-                    CommerceMarketingCampaignAudienceResolver::parse_excluded_ids($excludedids)
+                    CommerceMarketingCampaignAudienceResolver::parse_excluded_ids($excludedids),
+                    $filters
                 );
             } else {
                 $previewreport = $service->preview_manual($audience);
             }
         } else if (in_array($mode, ['save', 'schedule'], true)) {
-            // Course-derived snapshots are available only as drafts until stage 4.
-            // This is checked on the server, not merely by disabling the button.
-            if ($mode === 'schedule' && ($source === 'course'
-                    || ($campaign && (string)($campaign->audiencesource ?? 'manual') === 'course'))) {
-                throw new \coding_exception(get_string('commerce_campaign_stage3_no_schedule', 'local_subscriptions'));
+            // A server-side feature switch and legal sign-off both apply to course segments.
+            $coursemode = $source === 'course' ||
+                ($campaign && (string)($campaign->audiencesource ?? 'manual') === 'course');
+            if ($mode === 'schedule' && $coursemode && !$courseenabled) {
+                throw new \invalid_parameter_exception(
+                    get_string('commerce_campaign_e8_disabled', 'local_subscriptions'));
+            }
+            if ($mode === 'schedule' && $coursemode &&
+                    !optional_param('confirm_course_legal', 0, PARAM_BOOL)) {
+                throw new \invalid_parameter_exception(
+                    get_string('commerce_campaign_e8_legal_required', 'local_subscriptions'));
             }
             if ($mode === 'schedule' && !optional_param('confirm_schedule', 0, PARAM_BOOL)) {
                 throw new \invalid_parameter_exception(
@@ -134,6 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'audiencecourseid' => $courseid,
                 'audienceskus' => $skus,
                 'audienceexcludedids' => $excludedids,
+                'audiencefilters' => $filters,
             ], (int)$USER->id, $id > 0 ? $id : null);
 
             if ($mode === 'schedule') {
@@ -143,7 +171,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$date) {
                     throw new \invalid_parameter_exception('Invalid campaign schedule.');
                 }
-                $service->schedule($campaignid, $date->getTimestamp(), (int)$USER->id);
+                $service->schedule($campaignid, $date->getTimestamp(), (int)$USER->id,
+                    $coursemode && optional_param('confirm_course_legal', 0, PARAM_BOOL));
             }
 
             redirect(
@@ -171,6 +200,35 @@ foreach ($DB->get_records_select('course', 'id > :siteid', ['siteid' => SITEID],
     $courseoptions[(int)$courseoption->id] = format_string($courseoption->fullname) . ' (#' . $courseoption->id . ')';
 }
 
+// Offer a human-readable picker for course participants instead of raw Moodle IDs.
+$internalcandidates = [];
+if ($courseid > SITEID && $DB->record_exists('course', ['id' => $courseid])) {
+    $coursecontext = \context_course::instance($courseid);
+    $candidateusers = $DB->get_records_sql(
+        "SELECT DISTINCT u.id, u.firstname, u.lastname, u.email
+           FROM {role_assignments} ra
+           JOIN {user} u ON u.id = ra.userid
+           JOIN {role} r ON r.id = ra.roleid
+          WHERE ra.contextid = :contextid
+            AND r.shortname IN ('student', 'trialstudent', 'grammarstudent')
+          ORDER BY u.lastname ASC, u.firstname ASC, u.id ASC",
+        ['contextid' => $coursecontext->id], 0, 500
+    );
+    foreach ($candidateusers as $candidateuser) {
+        $internalcandidates[(int)$candidateuser->id] = $candidateuser;
+    }
+    // Preserve already selected accounts even if they are no longer participants.
+    foreach ($selectedexcludedids as $selectedid) {
+        if (!isset($internalcandidates[$selectedid])) {
+            $candidateuser = $DB->get_record('user', ['id' => $selectedid],
+                'id,firstname,lastname,email', IGNORE_MISSING);
+            if ($candidateuser) {
+                $internalcandidates[$selectedid] = $candidateuser;
+            }
+        }
+    }
+}
+
 $scheduledvalue = $campaign && !empty($campaign->scheduledat)
     ? userdate((int)$campaign->scheduledat, '%Y-%m-%dT%H:%M')
     : userdate(time() + HOURSECS, '%Y-%m-%dT%H:%M');
@@ -179,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $scheduledvalue = optional_param('scheduledat', $scheduledvalue, PARAM_RAW_TRIMMED);
 }
 
-$PAGE->requires->js_init_code(<<<'JS'
+$campaignjs = <<<'JS'
 (function() {
     const source = document.getElementById('marketing-campaign-source');
     const course = document.getElementById('marketing-campaign-course-fields');
@@ -189,25 +247,63 @@ $PAGE->requires->js_init_code(<<<'JS'
     const confirmationWrap = document.getElementById('marketing-campaign-confirmation-wrap');
     const courseHint = document.getElementById('marketing-campaign-course-lock-hint');
     const manualHint = document.getElementById('marketing-campaign-manual-confirm-hint');
+    const search = document.getElementById('marketing-campaign-user-search');
+    const userChoices = document.querySelectorAll('[data-marketing-candidate]');
+    const userCounter = document.getElementById('marketing-campaign-internal-count');
+    const courseSelect = document.getElementById('marketing-campaign-course');
+    const previewButton = document.getElementById('marketing-campaign-preview-button');
+    const updateUserCount = () => {
+        if (!userCounter) { return; }
+        const count = document.querySelectorAll('input[name="audienceexcludedusers[]"]:checked').length;
+        userCounter.textContent = String(count);
+    };
+    if (search) {
+        search.addEventListener('input', () => {
+            const term = search.value.trim().toLocaleLowerCase();
+            userChoices.forEach(item => {
+                item.classList.toggle('d-none', !!term && !item.textContent.toLocaleLowerCase().includes(term));
+            });
+        });
+    }
+    userChoices.forEach(item => item.addEventListener('change', updateUserCount));
+    updateUserCount();
+    if (courseSelect && previewButton) {
+        courseSelect.addEventListener('change', () => {
+            // Reload the candidate picker when the course changes, preserving the form's values.
+            const form = courseSelect.closest('form');
+            if (form && typeof form.requestSubmit === 'function') {
+                form.requestSubmit(previewButton);
+            }
+        });
+    }
     if (!source || !course || !manual) { return; }
     const update = () => {
         const courseMode = source.value === 'course';
         course.classList.toggle('d-none', !courseMode);
         manual.classList.toggle('d-none', courseMode);
+        const courseEnabled = __COURSE_MARKETING_ENABLED__;
+        const legal = document.getElementById('marketing-confirm-course-legal');
+        const legalWrap = document.getElementById('marketing-course-legal-wrap');
         if (schedule) {
-            schedule.disabled = courseMode || !confirmation || !confirmation.checked;
+            schedule.disabled = !confirmation || !confirmation.checked ||
+                (courseMode && (!courseEnabled || !legal || !legal.checked));
         }
-        if (confirmationWrap) { confirmationWrap.classList.toggle('d-none', courseMode); }
-        if (courseHint) { courseHint.classList.toggle('d-none', !courseMode); }
+        if (confirmationWrap) { confirmationWrap.classList.remove('d-none'); }
+        if (legalWrap) { legalWrap.classList.toggle('d-none', !courseMode || !courseEnabled); }
+        if (courseHint) { courseHint.classList.toggle('d-none', !courseMode || courseEnabled); }
         if (manualHint) {
-            manualHint.classList.toggle('d-none', courseMode || (confirmation && confirmation.checked));
+            manualHint.classList.toggle('d-none', !!(confirmation && confirmation.checked));
         }
     };
     source.addEventListener('change', update);
     if (confirmation) { confirmation.addEventListener('change', update); }
+    const legalConfirmation = document.getElementById('marketing-confirm-course-legal');
+    if (legalConfirmation) { legalConfirmation.addEventListener('change', update); }
     update();
 })();
-JS);
+JS;
+$PAGE->requires->js_init_code(str_replace('__COURSE_MARKETING_ENABLED__',
+    $courseenabled ? 'true' : 'false', $campaignjs));
 
 $healthreport = (new CommerceMailEngineCertificationService($DB))->certify();
 
@@ -381,33 +477,71 @@ echo html_writer::div(
             'disabled' => !$editable ? 'disabled' : null,
         ]), 'commerce-mail-campaign-field mb-3'
 );
+// Legacy SKU exclusions are preserved invisibly; new support offers come from the catalog.
+echo html_writer::empty_tag('input', [
+    'type' => 'hidden', 'name' => 'audienceskus', 'value' => $skus,
+]);
+echo html_writer::tag('h4', get_string('commerce_campaign_e7_optional_title', 'local_subscriptions'),
+    ['class' => 'h6 fw-semibold mt-3']);
+echo html_writer::div(get_string('commerce_campaign_e7_required_help', 'local_subscriptions'),
+    'alert alert-light border mb-3');
+foreach ([
+    'exclude_trial_role' => 'commerce_campaign_e7_exclude_trial',
+    'exclude_grammar_role' => 'commerce_campaign_e7_exclude_grammar',
+    'exclude_promotion_access' => 'commerce_campaign_e7_exclude_promotion',
+    'exclude_accompaniment' => 'commerce_campaign_e7_exclude_accompaniment',
+] as $key => $labelkey) {
+    echo html_writer::div(
+        html_writer::empty_tag('input', [
+            'type' => 'hidden', 'name' => $key, 'value' => '0',
+        ]) . html_writer::checkbox($key, '1', $filters[$key],
+            get_string($labelkey, 'local_subscriptions'),
+            ['id' => 'marketing-filter-' . $key, 'class' => 'me-2',
+             'disabled' => !$editable ? 'disabled' : null]),
+        'form-check mb-2'
+    );
+}
+echo html_writer::div(get_string('commerce_campaign_e7_trial_help', 'local_subscriptions'),
+    'form-text mb-3');
+echo html_writer::div(get_string('commerce_campaign_e7_uncheck_help', 'local_subscriptions'),
+    'form-text mb-3');
+echo html_writer::tag('h4', get_string('commerce_campaign_e7_internals', 'local_subscriptions'),
+    ['class' => 'h6 fw-semibold mt-3']);
+echo html_writer::div(get_string('commerce_campaign_e7_internals_help', 'local_subscriptions'),
+    'form-text mb-2');
+echo html_writer::empty_tag('input', [
+    'type' => 'search', 'id' => 'marketing-campaign-user-search', 'class' => 'form-control mb-2',
+    'placeholder' => get_string('commerce_campaign_e7_search', 'local_subscriptions'),
+    'disabled' => !$editable ? 'disabled' : null,
+]);
+echo html_writer::start_div('border rounded p-2 mb-2', [
+    'style' => 'max-height:220px;overflow-y:auto',
+]);
+if (!$internalcandidates) {
+    echo html_writer::div(get_string('commerce_campaign_e7_choose_course', 'local_subscriptions'),
+        'text-muted small p-2');
+}
+foreach ($internalcandidates as $candidateuser) {
+    $candidateid = (int)$candidateuser->id;
+    $candidatefullname = trim((string)$candidateuser->firstname . ' ' . (string)$candidateuser->lastname);
+    $labeltext = ($candidatefullname ?: '#' . $candidateid) . ' · ' . (string)$candidateuser->email;
+    echo html_writer::div(
+        html_writer::checkbox('audienceexcludedusers[]', (string)$candidateid,
+            in_array($candidateid, $selectedexcludedids, true), s($labeltext),
+            ['id' => 'marketing-excluded-' . $candidateid, 'class' => 'me-2',
+             'disabled' => !$editable ? 'disabled' : null]),
+        'small px-2 py-1', ['data-marketing-candidate' => '1']
+    );
+}
+echo html_writer::end_div();
 echo html_writer::div(
-    html_writer::tag('label', get_string('commerce_campaign_stage3_skus', 'local_subscriptions'), [
-        'for' => 'marketing-campaign-skus', 'class' => 'form-label',
-    ])
-    . html_writer::empty_tag('input', [
-        'type' => 'text', 'id' => 'marketing-campaign-skus',
-        'name' => 'audienceskus', 'value' => $skus, 'class' => 'form-control',
-        'placeholder' => get_string('commerce_campaign_stage4_skus_example', 'local_subscriptions'),
-        'disabled' => !$editable ? 'disabled' : null,
-    ])
-    . html_writer::div(get_string('commerce_campaign_stage3_skus_help', 'local_subscriptions'),
-        'form-text'), 'commerce-mail-campaign-field mb-3'
+    get_string('commerce_campaign_e7_selected', 'local_subscriptions') . ' '
+        . html_writer::tag('strong', (string)count($selectedexcludedids),
+            ['id' => 'marketing-campaign-internal-count']),
+    'form-text mb-2'
 );
-echo html_writer::div(
-    html_writer::tag('label', get_string('commerce_campaign_stage3_excludedids', 'local_subscriptions'), [
-        'for' => 'marketing-campaign-excludedids', 'class' => 'form-label',
-    ])
-    . html_writer::empty_tag('input', [
-        'type' => 'text', 'id' => 'marketing-campaign-excludedids',
-        'name' => 'audienceexcludedids', 'value' => $excludedids, 'class' => 'form-control',
-        'placeholder' => get_string('commerce_campaign_stage4_ids_example', 'local_subscriptions'),
-        'disabled' => !$editable ? 'disabled' : null,
-    ])
-    . html_writer::div(get_string('commerce_campaign_stage3_excludedids_help', 'local_subscriptions'),
-        'form-text'), 'commerce-mail-campaign-field'
-);
-echo html_writer::div(get_string('commerce_campaign_stage3_warning', 'local_subscriptions'),
+echo html_writer::div(get_string($courseenabled
+    ? 'commerce_campaign_e8_ready_warning' : 'commerce_campaign_e8_disabled_warning', 'local_subscriptions'),
     'alert alert-warning mt-3 mb-0');
 echo html_writer::end_div();
 
@@ -436,6 +570,7 @@ if ($editable) {
         html_writer::tag('button', get_string('commerce_campaign_stage3_preview', 'local_subscriptions'), [
             'type' => 'submit', 'name' => 'mode', 'value' => 'preview',
             'formnovalidate' => 'formnovalidate', 'class' => 'btn btn-outline-primary',
+            'id' => 'marketing-campaign-preview-button',
         ]), 'commerce-mail-campaign-actions mb-3'
     );
 }
@@ -509,17 +644,24 @@ if ($editable) {
         html_writer::checkbox('confirm_schedule', '1', false,
             get_string('commerce_campaign_stage4_confirmation', 'local_subscriptions'),
             ['id' => 'marketing-confirm-schedule', 'class' => 'me-2']),
-        'mt-3 mb-2' . ($source === 'course' ? ' d-none' : ''),
+        'mt-3 mb-2',
         ['id' => 'marketing-campaign-confirmation-wrap']
     );
     echo html_writer::div(
-        get_string('commerce_campaign_stage3_no_schedule', 'local_subscriptions'),
-        'form-text text-warning mt-2' . ($source === 'course' ? '' : ' d-none'),
+        html_writer::checkbox('confirm_course_legal', '1', false,
+            get_string('commerce_campaign_e8_legal_confirmation', 'local_subscriptions'),
+            ['id' => 'marketing-confirm-course-legal', 'class' => 'me-2']),
+        'mt-2 mb-2' . ($source === 'course' && $courseenabled ? '' : ' d-none'),
+        ['id' => 'marketing-course-legal-wrap']
+    );
+    echo html_writer::div(
+        get_string('commerce_campaign_e8_disabled', 'local_subscriptions'),
+        'form-text text-warning mt-2' . ($source === 'course' && !$courseenabled ? '' : ' d-none'),
         ['id' => 'marketing-campaign-course-lock-hint']
     );
     echo html_writer::div(
         get_string('commerce_campaign_stage4_confirmation_required', 'local_subscriptions'),
-        'form-text mt-2' . ($source === 'course' ? ' d-none' : ''),
+        'form-text mt-2',
         ['id' => 'marketing-campaign-manual-confirm-hint']
     );
 }

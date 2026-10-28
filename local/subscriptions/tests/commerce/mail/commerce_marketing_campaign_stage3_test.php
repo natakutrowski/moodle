@@ -105,6 +105,7 @@ final class commerce_marketing_campaign_stage3_test extends \advanced_testcase {
             'audiencecourseid' => (int)$course->id,
             'audienceskus' => 'A1-FR-SUPPORT,A1-RU-SUPPORT',
             'audienceexcludedids' => '',
+            'audiencefilters' => ['exclude_trial_role' => false],
             'audience' => 'spoof@example.test;Spoof;Name;fr',
         ], (int)$author->id);
         $repo = new CommerceMarketingCampaignRepository($DB);
@@ -114,10 +115,12 @@ final class commerce_marketing_campaign_stage3_test extends \advanced_testcase {
         self::assertSame('course', (string)$record->audiencesource);
         $config = json_decode((string)$record->audienceconfig, true);
         self::assertSame((int)$course->id, $config['courseid']);
+        self::assertFalse($config['filters']['exclude_trial_role']);
+        self::assertTrue($config['filters']['exclude_accompaniment']);
         try {
             $service->schedule($campaignid, time(), (int)$author->id);
             self::fail('Stage 3 course campaigns must remain draft-only.');
-        } catch (\coding_exception $exception) {
+        } catch (\invalid_parameter_exception $exception) {
             self::assertSame('draft', (string)$repo->get($campaignid)->status);
         }
     }
@@ -143,7 +146,7 @@ final class commerce_marketing_campaign_stage3_test extends \advanced_testcase {
         self::assertStringContainsString('require_sesskey()', $editor);
         self::assertStringContainsString("\$mode === 'preview'", $editor);
         self::assertStringContainsString('CommerceMarketingCampaignAudienceResolver', $editor);
-        self::assertStringContainsString('commerce_campaign_stage3_no_schedule', $editor);
+        self::assertStringContainsString('commerce_campaign_e8_disabled', $editor);
         self::assertStringNotContainsString('process_marketing_mail_campaigns_task', $editor);
     }
 }

@@ -74,8 +74,9 @@ final class CommerceMarketingCampaignAudienceResolver {
      * @param int[] $excludedids
      * @return array{courseid:int,course:string,summary:array<string,int>,rows:array<int,array<string,mixed>>,recipients:array<int,array<string,mixed>>}
      */
-    public function preview_course(int $courseid, array $supportskus, array $excludedids = []): array {
-        $report = $this->courses->preview($courseid, $supportskus);
+    public function preview_course(int $courseid, array $supportskus, array $excludedids = [],
+            array $filters = []): array {
+        $report = $this->courses->preview($courseid, $supportskus, null, $filters);
         $excluded = array_fill_keys($excludedids, true);
         $summary = ['candidates' => 0, 'eligible' => 0, 'excluded' => 0];
         $rows = [];
@@ -116,6 +117,8 @@ final class CommerceMarketingCampaignAudienceResolver {
         return [
             'courseid' => $courseid,
             'course' => $report['course'],
+            'supportskus' => $report['supportskus'],
+            'filters' => $report['filters'],
             'summary' => $summary,
             'rows' => $rows,
             'recipients' => $recipients,
