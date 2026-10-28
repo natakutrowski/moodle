@@ -23,3 +23,7 @@ $string['geminilivemodel_details'] = 'Модель Gemini Live, использу
 $string['gradingfailed'] = 'ИИ не смог оценить этот диалог, поэтому выставлена оценка 0. Расшифровка разговора сохранена.';
 $string['additem'] = 'Аудиочат'; // CampusFR translated label.
 $string['pluginname'] = 'Аудиочат'; // CampusFR translated label.
+
+$string['campusfr_feedbackuserlang'] = 'CampusFR: использовать язык интерфейса Moodle ученика для обратной связи AudioChat';
+
+$string['campusfr_feedbackuserlang_desc'] = 'Если включено, обратная связь AudioChat формируется на текущем языке интерфейса Moodle ученика, если он не выбрал родной язык в настройках MiniLesson. Если выключено, используется родной язык, заданный в упражнении и активности MiniLesson. По умолчанию выключено.';

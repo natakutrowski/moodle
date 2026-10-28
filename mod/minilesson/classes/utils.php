@@ -1187,7 +1187,10 @@ class utils {
                 // the WC language is 2 char but Poodll AI expects a locale code
                 $wclanguage = self::lang_to_locale($userprefdeflanguage);
                 // if we did get a locale code lets use that.
-                if ($wclanguage !== $userprefdeflanguage && $wclanguage !== $feedbacklanguage) {
+                // CampusFR: locales such as ru-RU are already normalized; they still override.
+                // Accept only recognized language codes to avoid injecting malformed prompts.
+                $nativelanguages = self::get_nativelang_options();
+                if (isset($nativelanguages[$wclanguage]) && $wclanguage !== $feedbacklanguage) {
                     $feedbacklanguage = $wclanguage;
                 }
             }

@@ -116,9 +116,16 @@ class grade_chat extends external_api {
             return $failure;
         }
 
+        $feedbacklanguage = $itemtype->fetch_student_native_language();
+        $feedbackname = utils::get_lang_english_name($feedbacklanguage);
+        // CampusFR: keep the target language for assessing spoken French, but make the
+        // language of the written learner-facing feedback explicit for the grading model.
+        $criteria .= "\n\nMandatory: write the learner-facing feedback and grade explanation in " .
+            $feedbackname . " (" . $feedbacklanguage . "). " .
+            "French quotations from the transcript may remain in French.";
         $instructions = [
             'criteria' => $criteria,
-            'feedbacklanguage' => $itemtype->fetch_student_native_language(),
+            'feedbacklanguage' => $feedbacklanguage,
             'targetlanguage' => $moduleinstance->ttslanguage,
         ];
         $cpparams = [

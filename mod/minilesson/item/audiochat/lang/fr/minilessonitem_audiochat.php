@@ -18,3 +18,7 @@ $string['audiochat_silenceduration_details'] = 'Durée pendant laquelle l\'appre
 $string['geminilivemodel'] = 'Modèle Gemini Live';
 $string['geminilivemodel_details'] = 'Le modèle Gemini Live utilisé lorsque le fournisseur est Gemini. Gemini 3.8 Live est la valeur par défaut actuelle de Google pour la voix à faible latence. La préversion 3.1 est l\'ancien modèle et Google recommande de l\'abandonner. Cela s\'applique aux fournisseurs Gemini et Cloud Poodll, pas à OpenAI.';
 $string['gradingfailed'] = 'L\'IA n\'a pas pu noter ce chat, il obtient donc 0. La transcription a été enregistrée.';
+
+$string['campusfr_feedbackuserlang'] = 'CampusFR : utiliser la langue de l’interface Moodle de l’apprenant pour le feedback AudioChat';
+
+$string['campusfr_feedbackuserlang_desc'] = 'Si activé, le feedback AudioChat utilise la langue active de l’interface Moodle de l’apprenant, sauf si celui-ci a choisi une langue maternelle dans ses préférences MiniLesson. Si désactivé, les paramètres de langue maternelle de l’exercice et de l’activité s’appliquent. Désactivé par défaut.';

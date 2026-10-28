@@ -42,7 +42,7 @@ class itemtype extends item {
     }
 
     /** Default image avatar */
-    public const DEFAULT_AVATAR = 'cutepoodll_small.png';
+    public const DEFAULT_AVATAR = 'gustave.png';
 
     public const INSTRUCTIONS = 'customtext6';
 
@@ -237,6 +237,13 @@ class itemtype extends item {
             (string) $this->itemrecord->{self::FEEDBACKINSTRUCTIONS},
             $testitem->audiochatnativelanguage
         );
+        if (trim($testitem->audiochatgradeinstructions) !== '') {
+            $feedbackname = utils::get_lang_english_name($testitem->audiochatnativelanguage);
+            $testitem->audiochatgradeinstructions .= "
+
+Mandatory: write the learner-facing feedback in " .
+                $feedbackname . " (" . $testitem->audiochatnativelanguage . ").";
+        }
 
         // Set the Auto turn detection to on or off.
         $testitem->audiochat_autoresponse = $this->itemrecord->{self::AUTORESPONSE} ? true : false;
@@ -277,6 +284,11 @@ class itemtype extends item {
         $imgaudioavatar = $this->itemrecord->{self::AUDIOAVATAR} ?
             $this->itemrecord->{self::AUDIOAVATAR} :
             self::DEFAULT_AVATAR;
+        // CampusFR: map previously saved Poodll-default dog avatars to Gustave.
+        // Respect all explicitly chosen alternative avatars.
+        if ($imgaudioavatar === 'cutepoodll_small.png' || $imgaudioavatar === 'cutepoodll_small') {
+            $imgaudioavatar = self::DEFAULT_AVATAR;
+        }
         $testitem->avatarimage = $output->image_url(
             pathinfo($imgaudioavatar, PATHINFO_FILENAME),
             self::get_component()
@@ -444,8 +456,8 @@ class itemtype extends item {
                 ],
             ],
             'audioavatar' => [
-                'description' => 'The avatar image shown for the AI: "' . self::DEFAULT_AVATAR . '" (the default '
-                    . 'poodle) or one of the presets "audiochatavatar1.jpg", "audiochatavatar2.jpg", '
+                'description' => 'The avatar image shown for the AI: "' . self::DEFAULT_AVATAR . '" (the CampusFR default '
+                    . 'Gustave) or one of the presets "audiochatavatar1.jpg", "audiochatavatar2.jpg", '
                     . '"audiochatavatar3.png" .. "audiochatavatar12.png".',
                 'example' => self::DEFAULT_AVATAR,
             ],
@@ -711,6 +723,16 @@ class itemtype extends item {
             $userprefnativelanguage = get_user_preferences(constants::NATIVELANG_PREF);
             if (!empty($userprefnativelanguage)) {
                 return $userprefnativelanguage;
+            }
+        }
+        // CampusFR opt-in: for multinational courses use each learner's active Moodle UI language.
+        // Native-language preference, when explicitly set, always takes precedence.
+        if (get_config(constants::M_COMPONENT, 'audiochatfeedbackprofilelanguage')) {
+            $uilanguage = strtolower(str_replace('_', '-', (string) current_language()));
+            $shortcode = explode('-', $uilanguage)[0];
+            $shortlangs = utils::get_shortlang_options();
+            if (isset($shortlangs[$shortcode])) {
+                return $shortlangs[$shortcode];
             }
         }
         return $this->fetch_item_native_language();

@@ -71,6 +71,15 @@ $settings->add(
     )
 );
 
+// CampusFR: optionally derive feedback language from the learner's current Moodle UI language.
+// A native-language preference chosen by the learner takes priority over this fallback.
+$settings->add(new admin_setting_configcheckbox(
+    constants::M_COMPONENT . '/audiochatfeedbackprofilelanguage',
+    get_string('campusfr_feedbackuserlang', 'minilessonitem_audiochat'),
+    get_string('campusfr_feedbackuserlang_desc', 'minilessonitem_audiochat'),
+    0
+));
+
 // Audio Chat Prompts.
 $maxprompts = constants::MAX_AI_PROMPTS;
 for ($i = 0; $i < $maxprompts; $i++) {
