@@ -12829,3 +12829,65 @@ $string['commerce_promo_usage_ambiguous'] = 'Multiple discounts: code-specific a
 $string['commerce_promo_usage_delete_guard'] = 'This code is linked to existing orders and cannot be deleted. Disable it to preserve the sales and commission history.';
 $string['commerce_promo_usage_failed'] = 'Failed';
 $string['commerce_promo_usage_cancelled'] = 'Cancelled';
+
+// Mail Studio V1 E3: guided campaign audience and draft-only course segments.
+$string['commerce_campaign_stage3_audience_title'] = 'Campaign recipients';
+$string['commerce_campaign_stage3_source'] = 'Audience source';
+$string['commerce_campaign_stage3_manual'] = 'Manual email list (existing mode)';
+$string['commerce_campaign_stage3_course'] = 'Course owners without tutoring';
+$string['commerce_campaign_stage3_courseid'] = 'Course';
+$string['commerce_campaign_stage3_skus'] = 'Support product SKUs to exclude';
+$string['commerce_campaign_stage3_skus_help'] = 'Comma-separated SKUs. Linked support offers are discovered automatically; add historical SKUs such as A1-FR-SUPPORT,A1-RU-SUPPORT.';
+$string['commerce_campaign_stage3_excludedids'] = 'Internal user IDs to exclude';
+$string['commerce_campaign_stage3_excludedids_help'] = 'Comma-separated Moodle user IDs (test accounts, team members). No name or email-domain guessing.';
+
+$string['commerce_campaign_stage3_preview'] = 'Preview recipients (no mail sent)';
+$string['commerce_campaign_stage3_preview_title'] = 'Audience preview (read-only)';
+$string['commerce_campaign_stage3_counts'] = '{$a->candidates} candidates · {$a->eligible} eligible · {$a->excluded} excluded';
+$string['commerce_campaign_stage3_eligible'] = 'Eligible (pending validation)';
+$string['commerce_campaign_stage3_first50'] = 'Only the first 50 results are shown. The full audience is frozen when saving the draft.';
+
+$string['commerce_campaign_stage3_reason_site_administrator'] = 'Site administrator';
+$string['commerce_campaign_stage3_reason_no_active_enrolment'] = 'No active enrolment';
+$string['commerce_campaign_stage3_reason_promotion_course_access'] = 'Promotion-linked course access';
+$string['commerce_campaign_stage3_reason_pedagogical_participation_history'] = 'Tutoring participation history';
+$string['commerce_campaign_stage3_reason_support_purchase_history'] = 'Tutoring purchase';
+$string['commerce_campaign_stage3_reason_trial_only'] = 'Trial only';
+$string['commerce_campaign_stage3_reason_not_full_student'] = 'No full student role';
+$string['commerce_campaign_stage3_reason_conflicting_trial_role'] = 'Conflicting full and Trial roles';
+$string['commerce_campaign_stage3_reason_internal_exclusion'] = 'Explicit internal exclusion';
+$string['commerce_campaign_stage3_reason_marketing_optout'] = 'Marketing opt-out';
+$string['commerce_campaign_stage3_reason_ambiguous_email'] = 'Shared email address';
+$string['commerce_campaign_stage3_reason_invalid_email'] = 'Invalid email';
+$string['commerce_campaign_stage3_reason_inactive_account'] = 'Inactive account';
+$string['commerce_campaign_stage3_reason_email_stopped'] = 'Moodle email blocked';
+$string['commerce_campaign_stage3_reason_promotion_join_grant'] = 'Tutoring participation grant';
+
+$string['commerce_campaign_stage4_no_templates'] = 'No Marketing template is available. Create one in a new tab, then reload this page.';
+$string['commerce_campaign_stage4_create_template'] = 'Create Marketing template';
+$string['commerce_campaign_stage4_template_help'] = 'The template opens in a new tab; this form remains open.';
+$string['commerce_campaign_stage4_skus_example'] = 'Example: A1-FR-SUPPORT,A1-RU-SUPPORT';
+$string['commerce_campaign_stage4_ids_example'] = 'Example: 23,96,99 (not applied until entered)';
+$string['commerce_campaign_stage4_confirmation'] = 'I confirm I verified the audience, content and permission to contact these recipients.';
+$string['commerce_campaign_stage4_confirmation_required'] = 'Confirm your review of recipients and content before scheduling.';
+$string['commerce_campaign_stage4_controls'] = 'Campaign controls';
+$string['commerce_campaign_stage4_send_test'] = 'Send a test to my email';
+$string['commerce_campaign_stage4_test_info'] = 'Uses the saved draft and sends ONLY to {$a}. Save changes before testing. The actual unsubscribe link is replaced with a note.';
+$string['commerce_campaign_stage4_test_success'] = 'Test email sent to {$a}.';
+$string['commerce_campaign_stage4_pause'] = 'Pause';
+$string['commerce_campaign_stage4_resume'] = 'Resume';
+$string['commerce_campaign_stage4_cancel'] = 'Cancel campaign';
+$string['commerce_campaign_stage4_cancel_confirm'] = 'Permanently cancel this campaign and all pending emails? Sent emails cannot be recalled.';
+$string['commerce_campaign_stage4_paused'] = 'Campaign paused; unsent messages remain pending.';
+$string['commerce_campaign_stage4_resumed'] = 'Campaign resumed.';
+$string['commerce_campaign_stage4_cancelled'] = 'Campaign cancelled; pending emails have been cancelled.';
+$string['commerce_campaign_stage4_delivery_details'] = 'Recipient delivery details';
+$string['commerce_campaign_stage4_delivery_summary'] = '{$a->total} recipients · {$a->pending} pending · {$a->sent} sent · {$a->failed} failed · {$a->cancelled} cancelled';
+$string['commerce_campaign_stage4_first100'] = 'Showing the first 100 rows; totals include all recipients.';
+$string['commerce_marketing_campaign_status_paused'] = 'Paused';
+$string['commerce_campaign_stage3_warning'] = 'Caution: this audience shows course access, not verified purchase provenance or marketing permissions. Course-derived campaigns remain drafts pending final acceptance. Tests are sent to the operator only.';
+$string['commerce_campaign_stage3_no_schedule'] = 'Course-derived campaigns cannot be scheduled before purchase and marketing permissions are verified.';
+
+$string['commerce_marketing_campaign_languages_missing'] = 'Some recipient languages have no compatible translation: {$a}. Add the missing translations (or update recipient languages), save and then schedule the campaign.';
+$string['commerce_marketing_campaign_preview_unavailable'] = 'Preview unavailable: no translation is compatible with language \'{$a}\'. Do not send this message. Cancel it and recreate the campaign with matching languages.';
+$string['commerce_marketing_campaign_preview_no_subject'] = 'Preview unavailable';

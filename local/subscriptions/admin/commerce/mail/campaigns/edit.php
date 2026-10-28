@@ -10,6 +10,7 @@ use local_subscriptions\commerce\mail\admin\CommerceMailHealthRenderer;
 use local_subscriptions\commerce\mail\admin\CommerceMailSectionNavigationRenderer;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignRepository;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignService;
+use local_subscriptions\commerce\mail\audience\CommerceMarketingCampaignAudienceResolver;
 use local_subscriptions\commerce\mail\certification\CommerceMailEngineCertificationService;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
@@ -43,45 +44,9 @@ CrmPageConfigurator::configure(
 );
 $PAGE->requires->css('/local/subscriptions/styles/commerce_mail_admin.css');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    require_sesskey();
-    $mode = optional_param('mode', 'save', PARAM_ALPHA);
-    try {
-        $campaignid = $service->save([
-            'name' => required_param('name', PARAM_TEXT),
-            'templateid' => required_param('templateid', PARAM_INT),
-            'ctaurl' => optional_param('ctaurl', '', PARAM_URL),
-            'audience' => required_param('audience', PARAM_RAW),
-        ], (int)$USER->id, $id > 0 ? $id : null);
-
-        if ($mode === 'schedule') {
-            $rawschedule = required_param('scheduledat', PARAM_RAW_TRIMMED);
-            $timezone = \core_date::get_user_timezone_object();
-            $date = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $rawschedule, $timezone);
-            if (!$date) {
-                throw new \invalid_parameter_exception('Invalid campaign schedule.');
-            }
-            $service->schedule($campaignid, $date->getTimestamp(), (int)$USER->id);
-        }
-
-        redirect(
-            new moodle_url('/local/subscriptions/admin/commerce/mail/campaigns/edit.php', ['id' => $campaignid]),
-            get_string(
-                $mode === 'schedule'
-                    ? 'commerce_marketing_campaign_scheduled'
-                    : 'commerce_marketing_campaign_saved',
-                'local_subscriptions'
-            ),
-            null,
-            \core\output\notification::NOTIFY_SUCCESS
-        );
-    } catch (\Throwable $exception) {
-        \core\notification::error($exception->getMessage());
-    }
-}
-
 $templates = $service->template_options();
 $recipients = $campaign ? $repository->recipients((int)$campaign->id) : [];
+$config = $campaign ? (json_decode((string)($campaign->audienceconfig ?? ''), true) ?: []) : [];
 $audience = implode("\n", array_map(
     static fn(\stdClass $recipient): string => implode(';', [
         (string)$recipient->email,
@@ -91,9 +56,158 @@ $audience = implode("\n", array_map(
     ]),
     $recipients
 ));
+$source = $campaign ? (string)($campaign->audiencesource ?? 'manual') : 'manual';
+$courseid = (int)($config['courseid'] ?? 0);
+$skus = implode(',', $config['supportskus'] ?? []);
+$excludedids = implode(',', $config['excludedids'] ?? []);
+$namevalue = $campaign ? (string)$campaign->name : '';
+$templatevalue = $campaign ? (int)$campaign->templateid : 0;
+$ctavalue = $campaign ? (string)$campaign->ctaurl : '';
+$previewreport = null;
+$testlanguage = 'fr';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_sesskey();
+    $mode = optional_param('mode', 'preview', PARAM_ALPHA);
+    $source = optional_param('audiencesource', 'manual', PARAM_ALPHA);
+    $namevalue = optional_param('name', '', PARAM_TEXT);
+    $templatevalue = optional_param('templateid', 0, PARAM_INT);
+    $ctavalue = optional_param('ctaurl', '', PARAM_URL);
+    $audience = optional_param('audience', '', PARAM_RAW);
+    $courseid = optional_param('audiencecourseid', 0, PARAM_INT);
+    $skus = optional_param('audienceskus', '', PARAM_RAW_TRIMMED);
+    $excludedids = optional_param('audienceexcludedids', '', PARAM_RAW_TRIMMED);
+    try {
+        if (in_array($mode, ['pause', 'resume', 'cancel', 'test'], true)) {
+            if (!$campaign || $id <= 0) {
+                throw new \invalid_parameter_exception('A saved campaign is required.');
+            }
+            if ($mode === 'test') {
+                $testlanguage = optional_param('testlanguage', 'fr', PARAM_ALPHA);
+                $service->send_test($id, (int)$USER->id, $testlanguage);
+                $message = get_string('commerce_campaign_stage4_test_success', 'local_subscriptions', $USER->email);
+            } else if ($mode === 'pause') {
+                $service->pause($id);
+                $message = get_string('commerce_campaign_stage4_paused', 'local_subscriptions');
+            } else if ($mode === 'resume') {
+                $service->resume($id);
+                $message = get_string('commerce_campaign_stage4_resumed', 'local_subscriptions');
+            } else {
+                $service->cancel($id);
+                $message = get_string('commerce_campaign_stage4_cancelled', 'local_subscriptions');
+            }
+            redirect($pageurl, $message, null, \core\output\notification::NOTIFY_SUCCESS);
+        }
+        if (!$editable) {
+            throw new \coding_exception('This campaign is locked.');
+        }
+        if (!in_array($source, ['manual', 'course'], true)) {
+            throw new \invalid_parameter_exception('Invalid campaign audience source.');
+        }
+        if ($mode === 'preview') {
+            if ($source === 'course') {
+                $previewreport = CommerceMarketingCampaignAudienceResolver::create($DB)->preview_course(
+                    $courseid,
+                    CommerceMarketingCampaignAudienceResolver::parse_skus($skus),
+                    CommerceMarketingCampaignAudienceResolver::parse_excluded_ids($excludedids)
+                );
+            } else {
+                $previewreport = $service->preview_manual($audience);
+            }
+        } else if (in_array($mode, ['save', 'schedule'], true)) {
+            // Course-derived snapshots are available only as drafts until stage 4.
+            // This is checked on the server, not merely by disabling the button.
+            if ($mode === 'schedule' && ($source === 'course'
+                    || ($campaign && (string)($campaign->audiencesource ?? 'manual') === 'course'))) {
+                throw new \coding_exception(get_string('commerce_campaign_stage3_no_schedule', 'local_subscriptions'));
+            }
+            if ($mode === 'schedule' && !optional_param('confirm_schedule', 0, PARAM_BOOL)) {
+                throw new \invalid_parameter_exception(
+                    get_string('commerce_campaign_stage4_confirmation_required', 'local_subscriptions'));
+            }
+            $campaignid = $service->save([
+                'name' => $namevalue,
+                'templateid' => $templatevalue,
+                'ctaurl' => $ctavalue,
+                'audience' => $audience,
+                'audiencesource' => $source,
+                'audiencecourseid' => $courseid,
+                'audienceskus' => $skus,
+                'audienceexcludedids' => $excludedids,
+            ], (int)$USER->id, $id > 0 ? $id : null);
+
+            if ($mode === 'schedule') {
+                $rawschedule = required_param('scheduledat', PARAM_RAW_TRIMMED);
+                $timezone = \core_date::get_user_timezone_object();
+                $date = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $rawschedule, $timezone);
+                if (!$date) {
+                    throw new \invalid_parameter_exception('Invalid campaign schedule.');
+                }
+                $service->schedule($campaignid, $date->getTimestamp(), (int)$USER->id);
+            }
+
+            redirect(
+                new moodle_url('/local/subscriptions/admin/commerce/mail/campaigns/edit.php', ['id' => $campaignid]),
+                get_string(
+                    $mode === 'schedule'
+                        ? 'commerce_marketing_campaign_scheduled'
+                        : 'commerce_marketing_campaign_saved',
+                    'local_subscriptions'
+                ),
+                null,
+                \core\output\notification::NOTIFY_SUCCESS
+            );
+        } else {
+            throw new \invalid_parameter_exception('Unsupported campaign action.');
+        }
+    } catch (\Throwable $exception) {
+        \core\notification::error($exception->getMessage());
+    }
+}
+
+$courseoptions = [];
+foreach ($DB->get_records_select('course', 'id > :siteid', ['siteid' => SITEID],
+    'fullname ASC', 'id,fullname,shortname', 0, 200) as $courseoption) {
+    $courseoptions[(int)$courseoption->id] = format_string($courseoption->fullname) . ' (#' . $courseoption->id . ')';
+}
+
 $scheduledvalue = $campaign && !empty($campaign->scheduledat)
     ? userdate((int)$campaign->scheduledat, '%Y-%m-%dT%H:%M')
     : userdate(time() + HOURSECS, '%Y-%m-%dT%H:%M');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $scheduledvalue = optional_param('scheduledat', $scheduledvalue, PARAM_RAW_TRIMMED);
+}
+
+$PAGE->requires->js_init_code(<<<'JS'
+(function() {
+    const source = document.getElementById('marketing-campaign-source');
+    const course = document.getElementById('marketing-campaign-course-fields');
+    const manual = document.getElementById('marketing-campaign-manual-fields');
+    const schedule = document.getElementById('marketing-campaign-schedule-button');
+    const confirmation = document.getElementById('marketing-confirm-schedule');
+    const confirmationWrap = document.getElementById('marketing-campaign-confirmation-wrap');
+    const courseHint = document.getElementById('marketing-campaign-course-lock-hint');
+    const manualHint = document.getElementById('marketing-campaign-manual-confirm-hint');
+    if (!source || !course || !manual) { return; }
+    const update = () => {
+        const courseMode = source.value === 'course';
+        course.classList.toggle('d-none', !courseMode);
+        manual.classList.toggle('d-none', courseMode);
+        if (schedule) {
+            schedule.disabled = courseMode || !confirmation || !confirmation.checked;
+        }
+        if (confirmationWrap) { confirmationWrap.classList.toggle('d-none', courseMode); }
+        if (courseHint) { courseHint.classList.toggle('d-none', !courseMode); }
+        if (manualHint) {
+            manualHint.classList.toggle('d-none', courseMode || (confirmation && confirmation.checked));
+        }
+    };
+    source.addEventListener('change', update);
+    if (confirmation) { confirmation.addEventListener('change', update); }
+    update();
+})();
+JS);
 
 $healthreport = (new CommerceMailEngineCertificationService($DB))->certify();
 
@@ -144,6 +258,28 @@ if (!$editable) {
     );
 }
 
+if (!$templates) {
+    echo html_writer::div(
+        get_string('commerce_campaign_stage4_no_templates', 'local_subscriptions') . ' ' .
+        html_writer::link(
+            new moodle_url('/local/subscriptions/admin/commerce/mail/templates/library_edit.php',
+                ['category' => 'marketing']),
+            get_string('commerce_campaign_stage4_create_template', 'local_subscriptions'),
+            ['target' => '_blank', 'rel' => 'noopener noreferrer', 'class' => 'btn btn-sm btn-outline-primary']
+        ), 'alert alert-info'
+    );
+} else {
+    echo html_writer::div(
+        html_writer::link(
+            new moodle_url('/local/subscriptions/admin/commerce/mail/templates/library_edit.php',
+                ['category' => 'marketing']),
+            get_string('commerce_campaign_stage4_create_template', 'local_subscriptions'),
+            ['target' => '_blank', 'rel' => 'noopener noreferrer']
+        ) . ' · ' . get_string('commerce_campaign_stage4_template_help', 'local_subscriptions'),
+        'form-text mb-3'
+    );
+}
+
 echo html_writer::start_tag('form', [
     'method' => 'post',
     'action' => $pageurl->out(false),
@@ -158,7 +294,7 @@ echo html_writer::div(
     ])
     . html_writer::empty_tag('input', [
         'type' => 'text', 'id' => 'marketing-campaign-name', 'name' => 'name',
-        'value' => $campaign ? (string)$campaign->name : '',
+        'value' => $namevalue,
         'class' => 'form-control', 'required' => 'required',
         'disabled' => !$editable ? 'disabled' : null,
     ]),
@@ -171,7 +307,7 @@ echo html_writer::div(
     . html_writer::select(
         $templates,
         'templateid',
-        $campaign ? (int)$campaign->templateid : 0,
+        $templatevalue,
         ['' => get_string('choose')],
         [
             'id' => 'marketing-campaign-template',
@@ -188,7 +324,7 @@ echo html_writer::div(
     ])
     . html_writer::empty_tag('input', [
         'type' => 'url', 'id' => 'marketing-campaign-cta', 'name' => 'ctaurl',
-        'value' => $campaign ? (string)$campaign->ctaurl : '',
+        'value' => $ctavalue,
         'class' => 'form-control',
         'placeholder' => 'https://www.campusfr.fr/…',
         'disabled' => !$editable ? 'disabled' : null,
@@ -213,8 +349,71 @@ echo html_writer::div(
 );
 echo html_writer::end_div();
 
+// Stage 3: guided audience selector. Selection and preview never queue mail.
+echo html_writer::tag('h3', get_string('commerce_campaign_stage3_audience_title', 'local_subscriptions'),
+    ['class' => 'h5 mt-4']);
 echo html_writer::div(
-    html_writer::tag('label', get_string('commerce_marketing_campaign_audience', 'local_subscriptions'), [
+    html_writer::tag('label', get_string('commerce_campaign_stage3_source', 'local_subscriptions'), [
+        'for' => 'marketing-campaign-source', 'class' => 'form-label',
+    ])
+    . html_writer::select([
+        'manual' => get_string('commerce_campaign_stage3_manual', 'local_subscriptions'),
+        'course' => get_string('commerce_campaign_stage3_course', 'local_subscriptions'),
+    ], 'audiencesource', $source, false, [
+        'id' => 'marketing-campaign-source', 'class' => 'form-select',
+        'disabled' => (!$editable || $campaign !== null) ? 'disabled' : null,
+    ])
+    . ($campaign ? html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'audiencesource', 'value' => $source,
+    ]) : ''), 'commerce-mail-campaign-field mb-3'
+);
+
+echo html_writer::start_div('commerce-mail-campaign-course-options card card-body mb-3', [
+    'id' => 'marketing-campaign-course-fields',
+]);
+echo html_writer::div(
+    html_writer::tag('label', get_string('commerce_campaign_stage3_courseid', 'local_subscriptions'), [
+        'for' => 'marketing-campaign-course', 'class' => 'form-label',
+    ])
+    . html_writer::select($courseoptions, 'audiencecourseid', $courseid,
+        ['0' => get_string('choose')], [
+            'id' => 'marketing-campaign-course', 'class' => 'form-select',
+            'disabled' => !$editable ? 'disabled' : null,
+        ]), 'commerce-mail-campaign-field mb-3'
+);
+echo html_writer::div(
+    html_writer::tag('label', get_string('commerce_campaign_stage3_skus', 'local_subscriptions'), [
+        'for' => 'marketing-campaign-skus', 'class' => 'form-label',
+    ])
+    . html_writer::empty_tag('input', [
+        'type' => 'text', 'id' => 'marketing-campaign-skus',
+        'name' => 'audienceskus', 'value' => $skus, 'class' => 'form-control',
+        'placeholder' => get_string('commerce_campaign_stage4_skus_example', 'local_subscriptions'),
+        'disabled' => !$editable ? 'disabled' : null,
+    ])
+    . html_writer::div(get_string('commerce_campaign_stage3_skus_help', 'local_subscriptions'),
+        'form-text'), 'commerce-mail-campaign-field mb-3'
+);
+echo html_writer::div(
+    html_writer::tag('label', get_string('commerce_campaign_stage3_excludedids', 'local_subscriptions'), [
+        'for' => 'marketing-campaign-excludedids', 'class' => 'form-label',
+    ])
+    . html_writer::empty_tag('input', [
+        'type' => 'text', 'id' => 'marketing-campaign-excludedids',
+        'name' => 'audienceexcludedids', 'value' => $excludedids, 'class' => 'form-control',
+        'placeholder' => get_string('commerce_campaign_stage4_ids_example', 'local_subscriptions'),
+        'disabled' => !$editable ? 'disabled' : null,
+    ])
+    . html_writer::div(get_string('commerce_campaign_stage3_excludedids_help', 'local_subscriptions'),
+        'form-text'), 'commerce-mail-campaign-field'
+);
+echo html_writer::div(get_string('commerce_campaign_stage3_warning', 'local_subscriptions'),
+    'alert alert-warning mt-3 mb-0');
+echo html_writer::end_div();
+
+echo html_writer::start_div('', ['id' => 'marketing-campaign-manual-fields']);
+echo html_writer::div(
+    html_writer::tag('label', get_string('commerce_marketing_campaign_audience' , 'local_subscriptions'), [
         'for' => 'marketing-campaign-audience', 'class' => 'form-label fw-semibold',
     ])
     . html_writer::tag('textarea', s($audience), [
@@ -222,7 +421,6 @@ echo html_writer::div(
         'name' => 'audience',
         'rows' => 10,
         'class' => 'form-control font-monospace',
-        'required' => 'required',
         'disabled' => !$editable ? 'disabled' : null,
     ])
     . html_writer::div(
@@ -231,6 +429,64 @@ echo html_writer::div(
     ),
     'commerce-mail-campaign-audience'
 );
+echo html_writer::end_div();
+
+if ($editable) {
+    echo html_writer::div(
+        html_writer::tag('button', get_string('commerce_campaign_stage3_preview', 'local_subscriptions'), [
+            'type' => 'submit', 'name' => 'mode', 'value' => 'preview',
+            'formnovalidate' => 'formnovalidate', 'class' => 'btn btn-outline-primary',
+        ]), 'commerce-mail-campaign-actions mb-3'
+    );
+}
+
+// Only show previews after an explicit POST; lists are escaped and capped.
+if ($previewreport !== null) {
+    $summary = $previewreport['summary'];
+    echo html_writer::start_div('commerce-mail-campaign-preview card card-body mb-3');
+    echo html_writer::tag('h3', get_string('commerce_campaign_stage3_preview_title', 'local_subscriptions'),
+        ['class' => 'h5']);
+    echo html_writer::div(get_string('commerce_campaign_stage3_counts', 'local_subscriptions',
+        (object)[
+            'candidates' => $summary['candidates'],
+            'eligible' => $summary['eligible'],
+            'excluded' => $summary['excluded'],
+        ]), 'alert alert-info');
+    echo html_writer::start_tag('div', ['class' => 'table-responsive']);
+    echo html_writer::start_tag('table', ['class' => 'table table-striped table-sm']);
+    echo html_writer::tag('thead', html_writer::tag('tr',
+        html_writer::tag('th', 'ID')
+        . html_writer::tag('th', get_string('email'))
+        . html_writer::tag('th', get_string('fullname'))
+        . html_writer::tag('th', get_string('status'))
+    ));
+    echo html_writer::start_tag('tbody');
+    foreach (array_slice($previewreport['rows'], 0, 50) as $row) {
+        $id = (int)($row['userid'] ?? 0);
+        $fullname = trim((string)($row['firstname'] ?? '') . ' ' . (string)($row['lastname'] ?? ''));
+        $reasons = (array)($row['reasons'] ?? []);
+        $status = !empty($row['eligible'])
+            ? get_string('commerce_campaign_stage3_eligible', 'local_subscriptions')
+            : implode(', ', array_map(static function(string $reason): string {
+                $key = 'commerce_campaign_stage3_reason_' . $reason;
+                return get_string_manager()->string_exists($key, 'local_subscriptions')
+                    ? get_string($key, 'local_subscriptions') : $reason;
+            }, $reasons));
+        echo html_writer::tag('tr',
+            html_writer::tag('td', $id ? (string)$id : '—')
+            . html_writer::tag('td', s((string)$row['email']))
+            . html_writer::tag('td', s($fullname))
+            . html_writer::tag('td', s($status))
+        );
+    }
+    echo html_writer::end_tag('tbody');
+    echo html_writer::end_tag('table');
+    echo html_writer::end_tag('div');
+    if (count($previewreport['rows']) > 50) {
+        echo html_writer::div(get_string('commerce_campaign_stage3_first50', 'local_subscriptions'), 'form-text');
+    }
+    echo html_writer::end_div();
+}
 
 if ($editable) {
     echo html_writer::div(
@@ -243,12 +499,114 @@ if ($editable) {
             'button',
             html_writer::tag('i', '', ['class' => 'fa fa-clock-o me-1', 'aria-hidden' => 'true'])
                 . get_string('commerce_marketing_campaign_schedule_button', 'local_subscriptions'),
-            ['type' => 'submit', 'name' => 'mode', 'value' => 'schedule', 'class' => 'btn btn-primary']
+            ['type' => 'submit', 'name' => 'mode', 'value' => 'schedule',
+                'id' => 'marketing-campaign-schedule-button', 'class' => 'btn btn-primary',
+                'disabled' => 'disabled']
         ),
         'commerce-mail-campaign-actions'
     );
+    echo html_writer::div(
+        html_writer::checkbox('confirm_schedule', '1', false,
+            get_string('commerce_campaign_stage4_confirmation', 'local_subscriptions'),
+            ['id' => 'marketing-confirm-schedule', 'class' => 'me-2']),
+        'mt-3 mb-2' . ($source === 'course' ? ' d-none' : ''),
+        ['id' => 'marketing-campaign-confirmation-wrap']
+    );
+    echo html_writer::div(
+        get_string('commerce_campaign_stage3_no_schedule', 'local_subscriptions'),
+        'form-text text-warning mt-2' . ($source === 'course' ? '' : ' d-none'),
+        ['id' => 'marketing-campaign-course-lock-hint']
+    );
+    echo html_writer::div(
+        get_string('commerce_campaign_stage4_confirmation_required', 'local_subscriptions'),
+        'form-text mt-2' . ($source === 'course' ? ' d-none' : ''),
+        ['id' => 'marketing-campaign-manual-confirm-hint']
+    );
 }
 echo html_writer::end_tag('form');
+
+// Explicit controls for a saved campaign. Test does not mutate the recipient snapshot.
+if ($campaign) {
+    $status = (string)$campaign->status;
+    $actions = [];
+    if ($status === 'draft') {
+        $actions['test'] = get_string('commerce_campaign_stage4_send_test', 'local_subscriptions');
+    }
+    if (in_array($status, ['scheduled', 'queued'], true)) {
+        $actions['pause'] = get_string('commerce_campaign_stage4_pause', 'local_subscriptions');
+    }
+    if ($status === 'paused') {
+        $actions['resume'] = get_string('commerce_campaign_stage4_resume', 'local_subscriptions');
+    }
+    if (in_array($status, ['draft', 'scheduled', 'queued', 'paused'], true)) {
+        $actions['cancel'] = get_string('commerce_campaign_stage4_cancel', 'local_subscriptions');
+    }
+    if ($actions) {
+        echo html_writer::start_tag('form', [
+            'method' => 'post', 'action' => $pageurl->out(false),
+            'class' => 'card card-body mt-3',
+        ]);
+        echo html_writer::empty_tag('input', [
+            'type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey(),
+        ]);
+        echo html_writer::tag('h3', get_string('commerce_campaign_stage4_controls', 'local_subscriptions'),
+            ['class' => 'h5']);
+        if ($status === 'draft') {
+            echo html_writer::div(
+                get_string('commerce_campaign_stage4_test_info', 'local_subscriptions', s($USER->email)),
+                'form-text mb-2'
+            );
+            echo html_writer::select([
+                'fr' => 'FR', 'ru' => 'RU', 'en' => 'EN',
+            ], 'testlanguage', 'fr', false, ['class' => 'form-select mb-2', 'style' => 'max-width:150px']);
+        }
+        foreach ($actions as $action => $label) {
+            $danger = $action === 'cancel';
+            echo html_writer::tag('button', s($label), [
+                'type' => 'submit', 'name' => 'mode', 'value' => $action,
+                'class' => 'btn btn-sm me-2 mb-2 ' . ($danger ? 'btn-outline-danger' : 'btn-outline-primary'),
+                'onclick' => $danger
+                    ? 'return confirm(' . json_encode(get_string('commerce_campaign_stage4_cancel_confirm',
+                        'local_subscriptions')) . ');' : null,
+            ]);
+        }
+        echo html_writer::end_tag('form');
+    }
+    $stats = $repository->statistics((int)$campaign->id);
+    echo html_writer::tag('h3', get_string('commerce_campaign_stage4_delivery_details', 'local_subscriptions'),
+        ['class' => 'h5 mt-4']);
+    echo html_writer::div(get_string('commerce_campaign_stage4_delivery_summary', 'local_subscriptions',
+        (object)[
+            'total' => $stats['total'], 'sent' => $stats['sent'],
+            'pending' => $stats['queued'], 'failed' => $stats['failed'],
+            'cancelled' => $stats['cancelled'],
+        ]), 'alert alert-info');
+    echo html_writer::start_tag('div', ['class' => 'table-responsive']);
+    echo html_writer::start_tag('table', ['class' => 'table table-striped table-sm']);
+    echo html_writer::tag('thead', html_writer::tag('tr',
+        html_writer::tag('th', get_string('email'))
+        . html_writer::tag('th', get_string('status'))
+        . html_writer::tag('th', get_string('date'))
+        . html_writer::tag('th', get_string('error'))
+    ));
+    echo html_writer::start_tag('tbody');
+    foreach ($repository->recipient_details((int)$campaign->id, 100) as $detail) {
+        echo html_writer::tag('tr',
+            html_writer::tag('td', s((string)$detail->email))
+            . html_writer::tag('td', s((string)$detail->deliverystatus))
+            . html_writer::tag('td', !empty($detail->timesent)
+                ? userdate((int)$detail->timesent, get_string('strftimedatetimeshort', 'langconfig')) : '—')
+            . html_writer::tag('td', s((string)($detail->lasterror ?? '')))
+        );
+    }
+    echo html_writer::end_tag('tbody');
+    echo html_writer::end_tag('table');
+    echo html_writer::end_tag('div');
+    if ($stats['total'] > 100) {
+        echo html_writer::div(get_string('commerce_campaign_stage4_first100', 'local_subscriptions'),
+            'form-text');
+    }
+}
 
 echo CrmWorkspaceRenderer::end();
 echo $OUTPUT->footer();

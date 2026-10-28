@@ -10658,5 +10658,40 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026100902, 'local', 'subscriptions');
     }
 
+    if ($oldversion < 2026102801) {
+        // Mail Studio V1 E2 — central marketing opt-out list, no historical mail changes.
+        $table = new xmldb_table('local_subs_mail_optout');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('email', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+            $table->add_field('source', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, 'unsubscribe_link');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_index('email_uix', XMLDB_INDEX_UNIQUE, ['email']);
+            $dbman->create_table($table);
+        }
+        if (!get_config('local_subscriptions', 'commerce_mail_optout_hmac_secret')) {
+            set_config('commerce_mail_optout_hmac_secret', bin2hex(random_bytes(32)), 'local_subscriptions');
+        }
+        upgrade_plugin_savepoint(true, 2026102801, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026102802) {
+        // Mail Studio V1 E3 — persist the source/config of frozen campaign audiences.
+        // Existing manual campaigns keep their current recipients and workflow.
+        $table = new xmldb_table('local_subs_mail_campaign');
+        $field = new xmldb_field('audiencesource', XMLDB_TYPE_CHAR, '16', null,
+            XMLDB_NOTNULL, null, 'manual', 'templateid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('audienceconfig', XMLDB_TYPE_TEXT, null, null,
+            null, null, null, 'audiencesource');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026102802, 'local', 'subscriptions');
+    }
+
     return true;
 }

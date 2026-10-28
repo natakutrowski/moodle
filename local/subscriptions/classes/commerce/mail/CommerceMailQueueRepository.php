@@ -123,6 +123,42 @@ final class CommerceMailQueueRepository {
         ));
     }
 
+    /**
+     * Due marketing emails, but ONLY for campaigns that are actively queued.
+     * Paused and cancelled campaigns remain in the outbox without being claimed.
+     * @return \stdClass[]
+     */
+    /** Return 'missing' if the mail does not belong to a frozen campaign recipient. */
+    public function marketing_campaign_status(int $mailid): string {
+        global $DB;
+        $status = $DB->get_field_sql(
+            'SELECT c.status FROM {local_subs_mail_campaign} c '
+            . ' JOIN {local_subs_mail_campaign_recipient} r ON r.campaignid = c.id '
+            . ' WHERE r.mailid = :mailid',
+            ['mailid' => $mailid]
+        );
+        return $status === false ? 'missing' : (string)$status;
+    }
+
+    public function get_due_active_marketing(int $limit, int $now): array {
+        global $DB;
+        if ($limit <= 0) { return []; }
+        return array_values($DB->get_records_sql(
+            'SELECT m.* FROM {local_subs_commerce_mail} m '
+            . ' JOIN {local_subs_mail_campaign_recipient} r ON r.mailid = m.id '
+            . ' JOIN {local_subs_mail_campaign} c ON c.id = r.campaignid '
+            . ' WHERE m.mailtype = :type AND m.status = :status '
+            . ' AND m.nextruntime <= :now AND c.status = :campaignstatus '
+            . ' ORDER BY m.nextruntime ASC, m.id ASC',
+            [
+                'type' => CommerceMailType::MARKETING_CAMPAIGN,
+                'status' => CommerceMailStatus::QUEUED,
+                'campaignstatus' => 'queued',
+                'now' => $now,
+            ], 0, $limit
+        ));
+    }
+
     public function count_audit_sent_since(int $since): int {
         global $DB;
         return (int)$DB->count_records_select(

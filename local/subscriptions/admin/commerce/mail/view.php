@@ -8,6 +8,8 @@ use local_subscriptions\commerce\mail\admin\CommerceMailAdminPresentation;
 use local_subscriptions\commerce\mail\admin\CommerceMailAdminService;
 use local_subscriptions\commerce\mail\admin\CommerceMailSectionNavigationRenderer;
 use local_subscriptions\commerce\mail\admin\CommerceMailPreviewRenderer;
+use local_subscriptions\commerce\mail\CommerceMailTerminalCancellationException;
+use local_subscriptions\commerce\mail\CommerceMailType;
 use local_subscriptions\crm\layout\CrmPageConfigurator;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
@@ -47,7 +49,19 @@ if ($record === null) {
     throw new moodle_exception('invalidrecord');
 }
 
-$preview = $service->preview($id);
+$previewerror = null;
+try {
+    $preview = $service->preview($id);
+} catch (CommerceMailTerminalCancellationException $exception) {
+    if ((string)$record->mailtype !== CommerceMailType::MARKETING_CAMPAIGN
+            || $exception->get_reason() !== 'marketing_language_unavailable') {
+        throw $exception;
+    }
+    $previewerror = get_string('commerce_marketing_campaign_preview_unavailable', 'local_subscriptions',
+        (string)$record->language);
+    $preview = ['subject' => get_string('commerce_marketing_campaign_preview_no_subject', 'local_subscriptions'),
+        'html' => '', 'text' => ''];
+}
 $typebadge = html_writer::span(
     s(CommerceMailAdminPresentation::type_label((string)$record->mailtype)),
     'badge rounded-pill ' . CommerceMailAdminPresentation::type_badge_class((string)$record->mailtype)
@@ -65,7 +79,7 @@ $metadata = implode(' · ', [
 ]);
 
 $resendbutton = '';
-if ((string)$record->status === 'sent') {
+if ((string)$record->status === 'sent' && $previewerror === null) {
     $resendbutton = html_writer::link(
         new moodle_url('/local/subscriptions/admin/commerce/mail/action.php', [
             'id' => $id,
@@ -118,6 +132,9 @@ echo CrmPageHeader::render(
     get_string('commerce_mail_preview_description', 'local_subscriptions'),
     HelpContext::COMMERCE
 );
+if ($previewerror !== null) {
+    echo html_writer::div(s($previewerror), 'alert alert-warning');
+}
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::MAIL);
 echo CommerceMailSectionNavigationRenderer::render(CommerceMailSectionNavigationRenderer::JOURNAL);
 
@@ -183,7 +200,7 @@ $fontnavigation = in_array(
     ? CommerceMailPreviewRenderer::render_font_navigation($url, $previewfont)
     : '';
 $sendnowbutton = '';
-if ((string)$record->status === 'queued') {
+if ((string)$record->status === 'queued' && $previewerror === null) {
     $sendnowbutton = html_writer::link(
         new moodle_url('/local/subscriptions/admin/commerce/mail/action.php', [
             'id' => $id, 'action' => 'sendnow', 'sesskey' => sesskey(),
@@ -214,12 +231,14 @@ if ($toolbaractions !== '') {
 
 echo html_writer::div($toolbar, 'commerce-mail-preview-toolbar');
 
-echo CommerceMailPreviewRenderer::render(
-    $preview['html'],
-    $preview['text'],
-    $previewview,
-    $previewfont
-);
+if ($previewerror === null) {
+    echo CommerceMailPreviewRenderer::render(
+        $preview['html'],
+        $preview['text'],
+        $previewview,
+        $previewfont
+    );
+}
 
 if ($secondaryaction !== '') {
     echo html_writer::div($secondaryaction, 'mt-3');

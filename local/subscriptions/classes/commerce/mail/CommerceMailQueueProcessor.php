@@ -27,13 +27,20 @@ final class CommerceMailQueueProcessor {
         ?int $now = null,
         ?array $includedtypes = null,
         array $excludedtypes = [],
-        ?bool $auditcopy = null
+        ?bool $auditcopy = null,
+        bool $activemarketingonly = false
     ): array {
         $now ??= time();
-        return $this->process_records(
-            $this->repository->get_due($limit, $now, $includedtypes, $excludedtypes, $auditcopy),
-            $now
-        );
+        if ($activemarketingonly) {
+            if ($includedtypes !== [CommerceMailType::MARKETING_CAMPAIGN]
+                    || $excludedtypes !== [] || $auditcopy !== false) {
+                throw new \coding_exception('Active marketing selection requires the dedicated marketing worker.');
+            }
+            $records = $this->repository->get_due_active_marketing($limit, $now);
+        } else {
+            $records = $this->repository->get_due($limit, $now, $includedtypes, $excludedtypes, $auditcopy);
+        }
+        return $this->process_records($records, $now);
     }
 
     /**
@@ -68,6 +75,21 @@ final class CommerceMailQueueProcessor {
         $result = ['processed' => 0, 'sent' => 0, 'retried' => 0, 'failed' => 0, 'cancelled' => 0, 'skipped' => 0];
 
         foreach ($records as $record) {
+            // A pause or cancellation may occur AFTER the worker selects a batch.
+            // Check again before claiming and immediately before SMTP dispatch.
+            if ((string)$record->mailtype === CommerceMailType::MARKETING_CAMPAIGN) {
+                $campaignstatus = $this->repository->marketing_campaign_status((int)$record->id);
+                if ($campaignstatus !== 'queued') {
+                    if ($campaignstatus === 'cancelled') {
+                        $this->repository->mark_cancelled((int)$record->id,
+                            'campaign_cancelled', $now);
+                        $result['cancelled']++;
+                    } else {
+                        $result['skipped']++;
+                    }
+                    continue;
+                }
+            }
             if (!$this->templates->has((string)$record->mailtype)) {
                 $result['skipped']++;
                 continue;
@@ -81,6 +103,22 @@ final class CommerceMailQueueProcessor {
             }
 
             $result['processed']++;
+            if ((string)$record->mailtype === CommerceMailType::MARKETING_CAMPAIGN) {
+                $campaignstatus = $this->repository->marketing_campaign_status((int)$record->id);
+                if ($campaignstatus !== 'queued') {
+                    if ($campaignstatus === 'cancelled') {
+                        $this->repository->mark_cancelled((int)$record->id,
+                            'campaign_cancelled', $now);
+                        $result['cancelled']++;
+                    } else {
+                        // Preserve the message for a later resume, without sending it.
+                        $this->repository->mark_retry((int)$record->id,
+                            'campaign_paused_or_not_active', $now + 60, $now);
+                        $result['skipped']++;
+                    }
+                    continue;
+                }
+            }
             $record = $this->repository->find_by_id((int)$record->id);
             if ($record === null) {
                 $result['failed']++;

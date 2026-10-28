@@ -12664,3 +12664,65 @@ $string['commerce_promo_usage_ambiguous'] = 'Plusieurs réductions : montant par
 $string['commerce_promo_usage_delete_guard'] = 'Ce code est associé à des commandes existantes. Il ne peut pas être supprimé : désactive-le pour conserver l’historique des ventes et des commissions.';
 $string['commerce_promo_usage_failed'] = 'Échouée';
 $string['commerce_promo_usage_cancelled'] = 'Annulée';
+
+// Mail Studio V1 E3: guided campaign audience and draft-only course segments.
+$string['commerce_campaign_stage3_audience_title'] = 'Destinataires de la campagne';
+$string['commerce_campaign_stage3_source'] = 'Source des destinataires';
+$string['commerce_campaign_stage3_manual'] = 'Liste manuelle (mode existant)';
+$string['commerce_campaign_stage3_course'] = 'Détenteurs d’un cours, sans accompagnement';
+$string['commerce_campaign_stage3_courseid'] = 'Cours concerné';
+$string['commerce_campaign_stage3_skus'] = 'Références SKU d’accompagnement à exclure';
+$string['commerce_campaign_stage3_skus_help'] = 'SKU séparés par des virgules. Les offres liées à ce cours sont détectées automatiquement ; ajouter ici les références historiques, par exemple A1-FR-SUPPORT,A1-RU-SUPPORT.';
+$string['commerce_campaign_stage3_excludedids'] = 'Identifiants des comptes internes à exclure';
+$string['commerce_campaign_stage3_excludedids_help'] = 'Liste d’identifiants utilisateur séparés par des virgules (comptes de test, collaborateurs…). Aucun filtrage automatique sur le nom ni le domaine email.';
+
+$string['commerce_campaign_stage3_preview'] = 'Prévisualiser les destinataires (aucun envoi)';
+$string['commerce_campaign_stage3_preview_title'] = 'Aperçu de l’audience (lecture seule)';
+$string['commerce_campaign_stage3_counts'] = '{$a->candidates} candidats · {$a->eligible} éligibles · {$a->excluded} exclus';
+$string['commerce_campaign_stage3_eligible'] = 'Éligible (sous réserve de validation)';
+$string['commerce_campaign_stage3_first50'] = 'Seuls les 50 premiers résultats sont affichés. La liste complète reste figée à l’enregistrement du brouillon.';
+
+$string['commerce_campaign_stage3_reason_site_administrator'] = 'Administrateur du site';
+$string['commerce_campaign_stage3_reason_no_active_enrolment'] = 'Inscription inactive ou expirée';
+$string['commerce_campaign_stage3_reason_promotion_course_access'] = 'Accès lié à une promotion pédagogique';
+$string['commerce_campaign_stage3_reason_pedagogical_participation_history'] = 'Historique de participation accompagnée';
+$string['commerce_campaign_stage3_reason_support_purchase_history'] = 'Achat d’accompagnement';
+$string['commerce_campaign_stage3_reason_trial_only'] = 'Accès Trial uniquement';
+$string['commerce_campaign_stage3_reason_not_full_student'] = 'Pas de rôle étudiant complet';
+$string['commerce_campaign_stage3_reason_conflicting_trial_role'] = 'Rôles Trial et complet en conflit';
+$string['commerce_campaign_stage3_reason_internal_exclusion'] = 'Exclusion interne explicite';
+$string['commerce_campaign_stage3_reason_marketing_optout'] = 'Opposition aux emails marketing';
+$string['commerce_campaign_stage3_reason_ambiguous_email'] = 'Adresse utilisée par plusieurs comptes';
+$string['commerce_campaign_stage3_reason_invalid_email'] = 'Adresse email invalide';
+$string['commerce_campaign_stage3_reason_inactive_account'] = 'Compte inactif';
+$string['commerce_campaign_stage3_reason_email_stopped'] = 'Emails Moodle bloqués';
+$string['commerce_campaign_stage3_reason_promotion_join_grant'] = 'Droit de participation accompagnée';
+
+$string['commerce_campaign_stage4_no_templates'] = 'Aucun modèle Marketing disponible. Créez-en un dans un nouvel onglet, puis rechargez cette page.';
+$string['commerce_campaign_stage4_create_template'] = 'Créer un modèle Marketing';
+$string['commerce_campaign_stage4_template_help'] = 'Le modèle s’ouvre dans un nouvel onglet ; les champs de cette campagne restent sur cette page.';
+$string['commerce_campaign_stage4_skus_example'] = 'Exemple : A1-FR-SUPPORT,A1-RU-SUPPORT';
+$string['commerce_campaign_stage4_ids_example'] = 'Exemple : 23,96,99 (non appliqué tant que non saisi)';
+$string['commerce_campaign_stage4_confirmation'] = 'Je confirme avoir vérifié l’audience, le contenu et le droit de contacter ces destinataires.';
+$string['commerce_campaign_stage4_confirmation_required'] = 'Confirmez la validation des destinataires et du contenu avant de programmer.';
+$string['commerce_campaign_stage4_controls'] = 'Actions sur la campagne';
+$string['commerce_campaign_stage4_send_test'] = 'Envoyer un test à mon adresse';
+$string['commerce_campaign_stage4_test_info'] = 'Le test utilise le brouillon enregistré et sera envoyé UNIQUEMENT à {$a}. Enregistrez les modifications avant de tester. Le vrai lien de désabonnement est remplacé par une note.';
+$string['commerce_campaign_stage4_test_success'] = 'Email de test envoyé à {$a}.';
+$string['commerce_campaign_stage4_pause'] = 'Mettre en pause';
+$string['commerce_campaign_stage4_resume'] = 'Reprendre';
+$string['commerce_campaign_stage4_cancel'] = 'Annuler la campagne';
+$string['commerce_campaign_stage4_cancel_confirm'] = 'Annuler définitivement cette campagne et les emails encore en file ? Les emails déjà envoyés ne peuvent pas être rappelés.';
+$string['commerce_campaign_stage4_paused'] = 'Campagne mise en pause ; les emails non traités restent en attente.';
+$string['commerce_campaign_stage4_resumed'] = 'Campagne reprise.';
+$string['commerce_campaign_stage4_cancelled'] = 'Campagne annulée ; les emails non traités ont été annulés.';
+$string['commerce_campaign_stage4_delivery_details'] = 'Suivi des destinataires';
+$string['commerce_campaign_stage4_delivery_summary'] = '{$a->total} destinataires · {$a->pending} en attente · {$a->sent} envoyés · {$a->failed} échecs · {$a->cancelled} annulés';
+$string['commerce_campaign_stage4_first100'] = 'Les 100 premières lignes sont affichées ; les totaux incluent tous les destinataires.';
+$string['commerce_marketing_campaign_status_paused'] = 'En pause';
+$string['commerce_campaign_stage3_warning'] = 'Mode prudent : cette audience indique les accès Moodle A1, pas nécessairement les achats prouvés ni la base légale marketing. Les campagnes issues des cours restent en brouillon jusqu’à la recette finale. Les emails de test ne ciblent que l’opérateur.';
+$string['commerce_campaign_stage3_no_schedule'] = 'La programmation de segments de cours est désactivée tant que l’achat et la base légale marketing ne sont pas vérifiés.';
+
+$string['commerce_marketing_campaign_languages_missing'] = 'Certaines langues des destinataires ne disposent d’aucune traduction compatible : {$a}. Ajoutez les traductions manquantes (ou adaptez les langues de la liste), puis réenregistrez la campagne avant de la programmer.';
+$string['commerce_marketing_campaign_preview_unavailable'] = 'Aperçu indisponible : aucune traduction compatible avec la langue « {$a} ». Ce message ne doit pas être envoyé. Annulez-le et recréez la campagne avec les bonnes langues.';
+$string['commerce_marketing_campaign_preview_no_subject'] = 'Aperçu indisponible';

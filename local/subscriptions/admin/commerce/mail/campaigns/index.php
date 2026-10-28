@@ -39,6 +39,7 @@ $statusbadge = static function(string $status): string {
     $tone = match ($status) {
         'draft' => 'is-muted',
         'scheduled' => 'is-warning',
+        'paused' => 'is-warning',
         'queued' => 'is-info',
         'completed' => 'is-success',
         'cancelled' => 'is-danger',

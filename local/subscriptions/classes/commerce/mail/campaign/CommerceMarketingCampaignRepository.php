@@ -68,7 +68,7 @@ final class CommerceMarketingCampaignRepository {
            GROUP BY COALESCE(m.status, r.status)',
             ['campaignid' => $campaignid]
         );
-        $result = ['total' => 0, 'queued' => 0, 'sent' => 0, 'failed' => 0];
+        $result = ['total' => 0, 'queued' => 0, 'sent' => 0, 'failed' => 0, 'cancelled' => 0];
         foreach ($rows as $row) {
             $count = (int)$row->total;
             $status = strtolower((string)$row->status);
@@ -77,8 +77,10 @@ final class CommerceMarketingCampaignRepository {
                 $result['queued'] += $count;
             } else if ($status === 'sent') {
                 $result['sent'] += $count;
-            } else if (in_array($status, ['failed', 'cancelled'], true)) {
+            } else if ($status === 'failed') {
                 $result['failed'] += $count;
+            } else if ($status === 'cancelled') {
+                $result['cancelled'] += $count;
             }
         }
         return $result;
@@ -132,6 +134,14 @@ final class CommerceMarketingCampaignRepository {
         ]);
     }
 
+    public function mark_recipient_suppressed(int $recipientid, int $now): void {
+        $this->db->update_record(self::RECIPIENT, (object)[
+            'id' => $recipientid,
+            'status' => 'cancelled',
+            'timemodified' => $now,
+        ]);
+    }
+
     public function mark_queued(int $campaignid, int $now): void {
         $this->db->update_record(self::CAMPAIGN, (object)[
             'id' => $campaignid,
@@ -139,6 +149,61 @@ final class CommerceMarketingCampaignRepository {
             'queuedat' => $now,
             'timemodified' => $now,
         ]);
+    }
+
+    /**
+     * Inspect frozen recipients with their actual outbox delivery statuses.
+     * @return \stdClass[]
+     */
+    public function recipient_details(int $campaignid, int $limit = 100): array {
+        return array_values($this->db->get_records_sql(
+            'SELECT r.id, r.email, r.firstname, r.lastname, r.language, r.mailid, '
+            . ' COALESCE(m.status, r.status) AS deliverystatus, m.timesent, m.lasterror '
+            . ' FROM {' . self::RECIPIENT . '} r '
+            . ' LEFT JOIN {local_subs_commerce_mail} m ON m.id = r.mailid '
+            . ' WHERE r.campaignid = :campaignid ORDER BY r.id ASC',
+            ['campaignid' => $campaignid], 0, max(1, $limit)
+        ));
+    }
+
+    public function mark_paused(int $campaignid, int $now): void {
+        $this->db->update_record(self::CAMPAIGN, (object)[
+            'id' => $campaignid, 'status' => 'paused', 'timemodified' => $now,
+        ]);
+    }
+
+    public function mark_resumed(int $campaignid, bool $alreadyqueued, int $scheduledat, int $now): void {
+        $record = (object)[
+            'id' => $campaignid,
+            'status' => $alreadyqueued ? 'queued' : 'scheduled',
+            'timemodified' => $now,
+        ];
+        if (!$alreadyqueued) {
+            // A scheduled future delivery keeps its original date after a pause.
+            $record->scheduledat = max($now, $scheduledat);
+        }
+        $this->db->update_record(self::CAMPAIGN, $record);
+    }
+
+    /** Cancel queued outbox rows, preserving sent/processing/failed history. */
+    public function cancel_pending(int $campaignid, int $now): int {
+        $outbox = new \local_subscriptions\commerce\mail\CommerceMailQueueRepository();
+        $cancelled = 0;
+        foreach ($this->recipients($campaignid) as $recipient) {
+            if (empty($recipient->mailid)) {
+                if (!in_array((string)$recipient->status, ['sent', 'cancelled'], true)) {
+                    $this->mark_recipient_suppressed((int)$recipient->id, $now);
+                }
+                continue;
+            }
+            $mail = $outbox->find_by_id((int)$recipient->mailid);
+            if ($mail && (string)$mail->status === 'queued') {
+                $outbox->mark_cancelled((int)$mail->id, 'campaign_cancelled', $now);
+                $this->mark_recipient_suppressed((int)$recipient->id, $now);
+                $cancelled++;
+            }
+        }
+        return $cancelled;
     }
 
     public function mark_cancelled(int $campaignid, int $now): void {

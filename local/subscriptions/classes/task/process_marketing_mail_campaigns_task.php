@@ -8,6 +8,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use core\task\scheduled_task;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignRepository;
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingOptoutService;
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignContentPolicy;
 use local_subscriptions\commerce\mail\CommerceMailContext;
 use local_subscriptions\commerce\mail\CommerceMailIdempotencyKey;
 use local_subscriptions\commerce\mail\CommerceMailRecipient;
@@ -31,11 +33,34 @@ final class process_marketing_mail_campaigns_task extends scheduled_task {
         $now = time();
         $repository = new CommerceMarketingCampaignRepository($DB);
         $queue = CommerceMailRuntime::queue_service();
+        $optouts = CommerceMarketingOptoutService::create($DB);
 
         foreach ($repository->due($now, 10) as $campaign) {
+            if ((string)($campaign->audiencesource ?? 'manual') === 'course') {
+                mtrace('[Marketing Mail] UNSAFE course campaign blocked: ' . (int)$campaign->id);
+                continue;
+            }
             $queued = 0;
+            $contents = $repository->contents((int)$campaign->id);
             foreach ($repository->recipients((int)$campaign->id) as $recipient) {
-                if (!empty($recipient->mailid)) {
+                // Operators can pause or cancel a campaign while this cron is running.
+                // Re-check state before queuing every recipient.
+                if ((string)$repository->get((int)$campaign->id)->status !== 'scheduled') {
+                    break;
+                }
+                if (!empty($recipient->mailid) || (string)$recipient->status === 'cancelled') {
+                    continue;
+                }
+                if ($optouts->is_suppressed((string)$recipient->email)) {
+                    $repository->mark_recipient_suppressed((int)$recipient->id, $now);
+                    continue;
+                }
+                if (CommerceMarketingCampaignContentPolicy::select(
+                    $contents, (string)$recipient->language
+                ) === null) {
+                    $repository->mark_recipient_suppressed((int)$recipient->id, $now);
+                    mtrace(sprintf('[Marketing Mail] campaign=%d recipient=%d cancelled: incompatible language %s',
+                        (int)$campaign->id, (int)$recipient->id, (string)$recipient->language));
                     continue;
                 }
                 $fullname = trim((string)$recipient->firstname . ' ' . (string)$recipient->lastname);
@@ -65,7 +90,12 @@ final class process_marketing_mail_campaigns_task extends scheduled_task {
                 $queued++;
             }
 
-            $repository->mark_queued((int)$campaign->id, $now);
+            $current = $repository->get((int)$campaign->id);
+            if ((string)$current->status === 'scheduled') {
+                $repository->mark_queued((int)$campaign->id, $now);
+            } else if ((string)$current->status === 'cancelled') {
+                $repository->cancel_pending((int)$campaign->id, $now);
+            }
             mtrace(sprintf(
                 '[Marketing Mail] campaign=%d queued=%d',
                 (int)$campaign->id,

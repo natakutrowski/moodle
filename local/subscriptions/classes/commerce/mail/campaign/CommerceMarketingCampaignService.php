@@ -7,6 +7,8 @@ namespace local_subscriptions\commerce\mail\campaign;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\mail\builder\CommerceMailBuilder;
+use local_subscriptions\commerce\mail\audience\CommerceMarketingCampaignAudienceResolver;
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingOptoutService;
 use local_subscriptions\commerce\mail\library\CommerceMailLibrary;
 use local_subscriptions\commerce\mail\library\CommerceMailLibraryRepository;
 
@@ -56,7 +58,42 @@ final class CommerceMarketingCampaignService {
             throw new \invalid_parameter_exception('Campaign name is required.');
         }
 
-        $recipients = $this->parse_recipients((string)($data['audience'] ?? ''));
+        $source = (string)($data['audiencesource'] ?? 'manual');
+        if (!in_array($source, ['manual', 'course'], true)) {
+            throw new \invalid_parameter_exception('Invalid marketing audience source.');
+        }
+        // An existing course-sourced draft must not be converted into a manual list
+        // to bypass the server-side scheduling lock.
+        if ($campaignid !== null) {
+            $existing = $this->repository->get($campaignid);
+            if ((string)($existing->audiencesource ?? 'manual') !== $source) {
+                throw new \invalid_parameter_exception(
+                    'Audience source cannot be changed on a saved campaign. Create a new draft.'
+                );
+            }
+        }
+        $audienceconfig = null;
+        if ($source === 'course') {
+            $courseid = (int)($data['audiencecourseid'] ?? 0);
+            $supportskus = CommerceMarketingCampaignAudienceResolver::parse_skus(
+                (string)($data['audienceskus'] ?? '')
+            );
+            $excludedids = CommerceMarketingCampaignAudienceResolver::parse_excluded_ids(
+                (string)($data['audienceexcludedids'] ?? '')
+            );
+            $preview = CommerceMarketingCampaignAudienceResolver::create($this->db)
+                ->preview_course($courseid, $supportskus, $excludedids);
+            $recipients = $preview['recipients'];
+            $audienceconfig = json_encode([
+                'courseid' => $courseid,
+                'supportskus' => $supportskus,
+                'excludedids' => $excludedids,
+                'checkedat' => time(),
+                'eligible' => count($recipients),
+            ], JSON_THROW_ON_ERROR);
+        } else {
+            $recipients = $this->preview_manual((string)($data['audience'] ?? ''))['recipients'];
+        }
         if ($recipients === []) {
             throw new \invalid_parameter_exception('At least one valid recipient is required.');
         }
@@ -83,6 +120,8 @@ final class CommerceMarketingCampaignService {
             'name' => $name,
             'status' => 'draft',
             'templateid' => $templateid,
+            'audiencesource' => $source,
+            'audienceconfig' => $audienceconfig,
             'ctaurl' => trim((string)($data['ctaurl'] ?? '')) ?: null,
             'scheduledat' => null,
             'queuedat' => null,
@@ -113,11 +152,26 @@ final class CommerceMarketingCampaignService {
         if ((string)$campaign->status !== 'draft') {
             throw new \coding_exception('Only draft marketing campaigns can be scheduled.');
         }
+        // Course segments stay draft-only until purchase provenance and the marketing legal basis
+        // are verified during the final acceptance step. Never unlock them via the UI alone.
+        if ((string)($campaign->audiencesource ?? 'manual') === 'course') {
+            throw new \coding_exception('Course-segment campaigns require purchase and marketing authorisation validation before scheduling.');
+        }
         if ($this->repository->recipient_count($campaignid) <= 0) {
             throw new \coding_exception('Marketing campaign has no recipients.');
         }
-        if ($this->repository->contents($campaignid) === []) {
+        $contents = $this->repository->contents($campaignid);
+        if ($contents === []) {
             throw new \coding_exception('Marketing campaign has no frozen content.');
+        }
+        $missing = CommerceMarketingCampaignContentPolicy::missing_languages(
+            $contents, $this->repository->recipients($campaignid)
+        );
+        if ($missing !== []) {
+            throw new \invalid_parameter_exception(get_string(
+                'commerce_marketing_campaign_languages_missing', 'local_subscriptions',
+                CommerceMarketingCampaignContentPolicy::format_missing($missing)
+            ));
         }
 
         $this->repository->update_campaign((object)[
@@ -129,12 +183,72 @@ final class CommerceMarketingCampaignService {
         ]);
     }
 
+    public function pause(int $campaignid): void {
+        $campaign = $this->repository->get($campaignid);
+        if (!in_array((string)$campaign->status, ['scheduled', 'queued'], true)) {
+            throw new \coding_exception('Only scheduled or queued campaigns can be paused.');
+        }
+        $this->repository->mark_paused($campaignid, time());
+    }
+
+    public function resume(int $campaignid): void {
+        $campaign = $this->repository->get($campaignid);
+        if ((string)$campaign->status !== 'paused') {
+            throw new \coding_exception('Only paused campaigns can be resumed.');
+        }
+        $this->repository->mark_resumed($campaignid, !empty($campaign->queuedat),
+            (int)($campaign->scheduledat ?? 0), time());
+    }
+
     public function cancel(int $campaignid): void {
         $campaign = $this->repository->get($campaignid);
-        if (!in_array((string)$campaign->status, ['draft', 'scheduled'], true)) {
+        if (!in_array((string)$campaign->status, ['draft', 'scheduled', 'queued', 'paused'], true)) {
             throw new \coding_exception('Campaign can no longer be cancelled.');
         }
-        $this->repository->mark_cancelled($campaignid, time());
+        // Change the campaign state FIRST, so the worker stops choosing queued records.
+        // Already-processing SMTP sends cannot be recalled.
+        $now = time();
+        $this->repository->mark_cancelled($campaignid, $now);
+        $this->repository->cancel_pending($campaignid, $now);
+    }
+
+    /** Sends exactly one test to the logged-in operator (never to the campaign audience). */
+    public function send_test(int $campaignid, int $userid, string $language): void {
+        $campaign = $this->repository->get($campaignid);
+        if ((string)$campaign->status !== 'draft') {
+            throw new \coding_exception('Test messages are available only for saved draft campaigns.');
+        }
+        $operator = $this->db->get_record('user', [
+            'id' => $userid, 'deleted' => 0, 'suspended' => 0,
+        ], '*', MUST_EXIST);
+        (new CommerceMarketingCampaignTestMailer($this->db, $this->repository))
+            ->send($campaignid, $operator, $language);
+    }
+
+    /**
+     * Preview manually entered recipients with the same marketing opt-outs used at save time.
+     * @return array{summary:array<string,int>,rows:array<int,array<string,mixed>>,recipients:array<int,array<string,mixed>>}
+     */
+    public function preview_manual(string $raw): array {
+        $parsed = $this->parse_recipients($raw);
+        $optouts = CommerceMarketingOptoutService::create($this->db);
+        $rows = [];
+        $recipients = [];
+        $summary = ['candidates' => count($parsed), 'eligible' => 0, 'excluded' => 0];
+        foreach ($parsed as $recipient) {
+            $suppressed = $optouts->is_suppressed((string)$recipient['email']);
+            $row = $recipient;
+            $row['eligible'] = !$suppressed;
+            $row['reasons'] = $suppressed ? ['marketing_optout'] : [];
+            $rows[] = $row;
+            $summary[$suppressed ? 'excluded' : 'eligible']++;
+            if ($suppressed) {
+                $summary['reason_marketing_optout'] = ($summary['reason_marketing_optout'] ?? 0) + 1;
+            } else {
+                $recipients[] = $recipient;
+            }
+        }
+        return ['summary' => $summary, 'rows' => $rows, 'recipients' => $recipients];
     }
 
     /** @return array<int,array{email:string,firstname:string,lastname:string,language:string,userid:?int}> */

@@ -12904,3 +12904,65 @@ $string['commerce_promo_usage_ambiguous'] = 'Несколько скидок: н
 $string['commerce_promo_usage_delete_guard'] = 'Этот код связан с существующими заказами и не может быть удалён. Отключи его, чтобы сохранить историю продаж и комиссий.';
 $string['commerce_promo_usage_failed'] = 'Ошибка оплаты';
 $string['commerce_promo_usage_cancelled'] = 'Отменён';
+
+// Mail Studio V1 E3: guided campaign audience and draft-only course segments.
+$string['commerce_campaign_stage3_audience_title'] = 'Получатели кампании';
+$string['commerce_campaign_stage3_source'] = 'Источник аудитории';
+$string['commerce_campaign_stage3_manual'] = 'Список адресов вручную (существующий режим)';
+$string['commerce_campaign_stage3_course'] = 'Владельцы курса без сопровождения';
+$string['commerce_campaign_stage3_courseid'] = 'Курс';
+$string['commerce_campaign_stage3_skus'] = 'SKU продуктов с сопровождением для исключения';
+$string['commerce_campaign_stage3_skus_help'] = 'SKU через запятую. Привязанные предложения определяются автоматически; добавь исторические SKU, например A1-FR-SUPPORT,A1-RU-SUPPORT.';
+$string['commerce_campaign_stage3_excludedids'] = 'ID внутренних аккаунтов для исключения';
+$string['commerce_campaign_stage3_excludedids_help'] = 'ID пользователей Moodle через запятую (тестовые аккаунты, сотрудники). Автоматическая фильтрация по имени или домену не применяется.';
+
+$string['commerce_campaign_stage3_preview'] = 'Предпросмотр получателей (без отправки)';
+$string['commerce_campaign_stage3_preview_title'] = 'Предпросмотр аудитории (только чтение)';
+$string['commerce_campaign_stage3_counts'] = 'Кандидатов: {$a->candidates} · Подходят: {$a->eligible} · Исключены: {$a->excluded}';
+$string['commerce_campaign_stage3_eligible'] = 'Подходит (требуется проверка)';
+$string['commerce_campaign_stage3_first50'] = 'Показаны первые 50 строк. Полный список сохраняется при записи черновика.';
+
+$string['commerce_campaign_stage3_reason_site_administrator'] = 'Администратор';
+$string['commerce_campaign_stage3_reason_no_active_enrolment'] = 'Нет активной записи на курс';
+$string['commerce_campaign_stage3_reason_promotion_course_access'] = 'Доступ через учебный поток';
+$string['commerce_campaign_stage3_reason_pedagogical_participation_history'] = 'История сопровождения';
+$string['commerce_campaign_stage3_reason_support_purchase_history'] = 'Покупка сопровождения';
+$string['commerce_campaign_stage3_reason_trial_only'] = 'Только Trial';
+$string['commerce_campaign_stage3_reason_not_full_student'] = 'Нет полного доступа студента';
+$string['commerce_campaign_stage3_reason_conflicting_trial_role'] = 'Конфликт ролей Trial и полного доступа';
+$string['commerce_campaign_stage3_reason_internal_exclusion'] = 'Исключён вручную (внутренний аккаунт)';
+$string['commerce_campaign_stage3_reason_marketing_optout'] = 'Отписка от маркетинга';
+$string['commerce_campaign_stage3_reason_ambiguous_email'] = 'Email у нескольких аккаунтов';
+$string['commerce_campaign_stage3_reason_invalid_email'] = 'Некорректный email';
+$string['commerce_campaign_stage3_reason_inactive_account'] = 'Неактивный аккаунт';
+$string['commerce_campaign_stage3_reason_email_stopped'] = 'Moodle блокирует письма';
+$string['commerce_campaign_stage3_reason_promotion_join_grant'] = 'Право на сопровождение';
+
+$string['commerce_campaign_stage4_no_templates'] = 'Нет шаблонов Marketing. Создайте шаблон в новой вкладке и обновите страницу.';
+$string['commerce_campaign_stage4_create_template'] = 'Создать шаблон Marketing';
+$string['commerce_campaign_stage4_template_help'] = 'Шаблон откроется в новой вкладке, а эта форма останется открытой.';
+$string['commerce_campaign_stage4_skus_example'] = 'Пример: A1-FR-SUPPORT,A1-RU-SUPPORT';
+$string['commerce_campaign_stage4_ids_example'] = 'Пример: 23,96,99 (не применяется, пока не введено)';
+$string['commerce_campaign_stage4_confirmation'] = 'Подтверждаю проверку получателей, текста и законности отправки.';
+$string['commerce_campaign_stage4_confirmation_required'] = 'Подтвердите проверку списка и содержания перед планированием.';
+$string['commerce_campaign_stage4_controls'] = 'Управление рассылкой';
+$string['commerce_campaign_stage4_send_test'] = 'Отправить тест себе';
+$string['commerce_campaign_stage4_test_info'] = 'Тест отправляется ТОЛЬКО на {$a} и использует сохранённый черновик. Сохраните изменения перед тестом. Вместо настоящей ссылки отписки будет пояснение.';
+$string['commerce_campaign_stage4_test_success'] = 'Тест отправлен на {$a}.';
+$string['commerce_campaign_stage4_pause'] = 'Приостановить';
+$string['commerce_campaign_stage4_resume'] = 'Возобновить';
+$string['commerce_campaign_stage4_cancel'] = 'Отменить рассылку';
+$string['commerce_campaign_stage4_cancel_confirm'] = 'Отменить эту рассылку и письма в очереди? Уже отправленные письма нельзя отозвать.';
+$string['commerce_campaign_stage4_paused'] = 'Рассылка приостановлена; неотправленные письма ожидают.';
+$string['commerce_campaign_stage4_resumed'] = 'Рассылка возобновлена.';
+$string['commerce_campaign_stage4_cancelled'] = 'Рассылка отменена; ожидающие письма отменены.';
+$string['commerce_campaign_stage4_delivery_details'] = 'Статус отправки по адресатам';
+$string['commerce_campaign_stage4_delivery_summary'] = '{$a->total} получателей · {$a->pending} ожидают · {$a->sent} отправлено · {$a->failed} ошибок · {$a->cancelled} отменено';
+$string['commerce_campaign_stage4_first100'] = 'Показаны первые 100 строк; итоги учитывают всех получателей.';
+$string['commerce_marketing_campaign_status_paused'] = 'Приостановлена';
+$string['commerce_campaign_stage3_warning'] = 'Осторожно: выборка показывает доступ к курсу, но не подтверждает покупки и разрешение на маркетинговые письма. Рассылки по курсам остаются черновиками до итоговой проверки. Тесты отправляются только оператору.';
+$string['commerce_campaign_stage3_no_schedule'] = 'Рассылки по курсам нельзя планировать до проверки покупки и правовых оснований.';
+
+$string['commerce_marketing_campaign_languages_missing'] = 'Для некоторых языков получателей нет подходящего перевода: {$a}. Добавьте переводы или измените языки адресатов, затем сохраните кампанию перед планированием.';
+$string['commerce_marketing_campaign_preview_unavailable'] = 'Предпросмотр недоступен: нет перевода для языка «{$a}». Не отправляйте это письмо. Отмените его и создайте кампанию с правильными языками.';
+$string['commerce_marketing_campaign_preview_no_subject'] = 'Предпросмотр недоступен';

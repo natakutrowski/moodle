@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026091901" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026102802" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
         <TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
             <FIELDS>
@@ -2367,12 +2367,29 @@
             </INDEXES>
         </TABLE>
     
+        <TABLE NAME="local_subs_mail_optout" COMMENT="Global email-based suppression list for Mail Studio marketing campaigns.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="source" TYPE="char" LENGTH="40" NOTNULL="true" DEFAULT="unsubscribe_link"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="email_uix" UNIQUE="true" FIELDS="email"/>
+            </INDEXES>
+        </TABLE>
+
         <TABLE NAME="local_subs_mail_campaign" COMMENT="Generic Mail Studio marketing campaigns.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
                 <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
                 <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="draft"/>
                 <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="audiencesource" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="manual"/>
+                <FIELD NAME="audienceconfig" TYPE="text" NOTNULL="false"/>
                 <FIELD NAME="ctaurl" TYPE="text" NOTNULL="false"/>
                 <FIELD NAME="scheduledat" TYPE="int" LENGTH="10" NOTNULL="false"/>
                 <FIELD NAME="queuedat" TYPE="int" LENGTH="10" NOTNULL="false"/>

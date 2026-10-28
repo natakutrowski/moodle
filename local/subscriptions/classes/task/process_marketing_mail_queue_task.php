@@ -27,9 +27,8 @@ final class process_marketing_mail_queue_task extends scheduled_task {
         $batch = max(1, min(500, (int)(
             get_config('local_subscriptions', 'commerce_mail_marketing_batch_size') ?: 50
         )));
-        $hourly = max(0, min(5000, (int)(
-            get_config('local_subscriptions', 'commerce_mail_marketing_hourly_limit') ?: 250
-        )));
+        $hourlyconfig = get_config('local_subscriptions', 'commerce_mail_marketing_hourly_limit');
+        $hourly = max(0, min(5000, (int)($hourlyconfig === false ? 250 : $hourlyconfig)));
         $globalhourly = max(0, min(10000, (int)(
             get_config('local_subscriptions', 'commerce_mail_global_hourly_limit') ?: 0
         )));
@@ -60,7 +59,8 @@ final class process_marketing_mail_queue_task extends scheduled_task {
             $now,
             [CommerceMailType::MARKETING_CAMPAIGN],
             [],
-            false
+            false,
+            true // Only process marketing outbox rows belonging to active campaigns.
         );
         mtrace(sprintf(
             '[Marketing Mail] limit=%d processed=%d sent=%d retried=%d failed=%d',
